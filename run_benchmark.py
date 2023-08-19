@@ -5,6 +5,7 @@ import os
 import multiprocessing
 import matplotlib.pyplot as plt
 import shutil
+import json
 
 PROGS_DIR = Path("./bpf_progs")
 EXECUTABLES = ["./bpftime-ubpf", "./bpftime-llvm", "<NATIVE>"]
@@ -81,18 +82,29 @@ def main():
             print(
                 f"TEST <{item['name']}> JIT {item['jit_usage']/10**6}ms EXEC {item['exec_usage']/10**6}ms RET {item['result']}"
             )
-    images_out = Path("output-image")
+        print("-----------------")
+    images_out = Path("output")
     shutil.rmtree(images_out, ignore_errors=True)
     os.mkdir(images_out)
+    with open(images_out / "data.json", "w") as f:
+        json.dump({"executables": EXECUTABLES, "results": test_results}, f)
     for test_line in zip(*test_results):
         jit_values = [x["jit_usage"] for x in test_line]
         exec_values = [x["exec_usage"] for x in test_line]
         name = test_line[0]["name"]
 
         plt.figure()
+        plt.bar(EXECUTABLES, jit_values, 0.35, label="Compilation", color="orange")
+        plt.ylabel("Time (nanoseconds)")
+        plt.title(f'Time usage on compiling "{name}"')
+        plt.legend()
+        plt.savefig(images_out / f"{name}.compilation.png")
+        plt.clf()
+
+        plt.figure()
         plt.bar(EXECUTABLES, exec_values, 0.35, label="Execution", color="orange")
         plt.ylabel("Time (nanoseconds)")
-        plt.title(f'Time usage on example "{name}"')
+        plt.title(f'Time usage on executing "{name}"')
         plt.legend()
         plt.savefig(images_out / f"{name}.execution.png")
         plt.clf()
@@ -112,7 +124,7 @@ def main():
         plt.legend()
         plt.savefig(images_out / f"{name}.png")
         plt.clf()
-    print("Visualized images are in output-images")
+    print("Visualized images and data json are in output")
 
 
 if __name__ == "__main__":
