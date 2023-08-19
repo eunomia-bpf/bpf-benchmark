@@ -99,7 +99,7 @@ def main():
         plt.title(f'Time usage on compiling "{name}"')
         plt.legend()
         plt.savefig(images_out / f"{name}.compilation.png")
-        plt.clf()
+        plt.close()
 
         plt.figure()
         plt.bar(EXECUTABLES, exec_values, 0.35, label="Execution", color="orange")
@@ -107,7 +107,7 @@ def main():
         plt.title(f'Time usage on executing "{name}"')
         plt.legend()
         plt.savefig(images_out / f"{name}.execution.png")
-        plt.clf()
+        plt.close()
 
         plt.figure()
         plt.bar(EXECUTABLES, jit_values, 0.35, label="Compilation", color="blue")
@@ -123,7 +123,7 @@ def main():
         plt.title(f'Time usage on example "{name}"')
         plt.legend()
         plt.savefig(images_out / f"{name}.png")
-        plt.clf()
+        plt.close()
     print("Visualized images and data json are in output")
 
 
