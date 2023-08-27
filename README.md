@@ -1,6 +1,6 @@
 # BPF-Benchmark
 
-BPF-Benchmark is a simple toolkit designed to assess the performance of different userspace eBPF (Berkeley Packet Filter) runtimes.
+BPF-Benchmark is a simple testsuit designed to assess the performance of different userspace eBPF (Berkeley Packet Filter) runtimes.
 
 ## Usage
 
