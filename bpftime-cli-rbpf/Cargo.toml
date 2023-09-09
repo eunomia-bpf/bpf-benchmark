@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 anyhow = "1.0.75"
-rbpf = "0.2.0"
+rbpf = { git = "https://github.com/qmonnet/rbpf", rev = "4812c52" }
