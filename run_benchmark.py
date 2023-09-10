@@ -8,7 +8,14 @@ import shutil
 import json
 
 PROGS_DIR = Path("./bpf_progs")
-EXECUTABLES = ["./bpftime-ubpf", "./bpftime-llvm", "./bpftime-rbpf", "<NATIVE>"]
+EXECUTABLES = [
+    "./bpftime-ubpf",
+    "./bpftime-llvm",
+    "./bpftime-rbpf",
+    "./bpftime-rbpf-vm",
+    "./bpftime-ubpf-vm",
+    "<NATIVE>",
+]
 
 
 class RunResult(TypedDict):

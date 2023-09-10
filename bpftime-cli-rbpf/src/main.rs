@@ -22,14 +22,21 @@ fn main() -> anyhow::Result<()> {
     let mut vm =
         rbpf::EbpfVmRaw::new(Some(&prog_bytes)).with_context(|| anyhow!("Failed to create vm"))?;
     let compile_start = std::time::Instant::now();
-
-    vm.jit_compile()
-        .with_context(|| anyhow!("Failed to run jit"))?;
+    if cfg!(feature = "use_jit") {
+        vm.jit_compile()
+            .with_context(|| anyhow!("Failed to run jit"))?;
+    }
     let compile_usage = compile_start.elapsed().as_nanos();
 
     let execute_start = std::time::Instant::now();
-    let ret = unsafe { vm.execute_program_jit(&mut mem_bytes) }
-        .with_context(|| anyhow!("Failed to run ebpf program"))?;
+    let ret = if cfg!(feature = "use_jit") {
+        unsafe { vm.execute_program_jit(&mut mem_bytes) }
+            .with_context(|| anyhow!("Failed to run ebpf program"))?
+    } else {
+        vm.execute_program(&mut mem_bytes)
+            .with_context(|| anyhow!("Failed to run ebpf program"))?
+    };
+
     let execute_usage = execute_start.elapsed().as_nanos();
     println!("{} {} {}", compile_usage, execute_usage, ret);
     Ok(())
