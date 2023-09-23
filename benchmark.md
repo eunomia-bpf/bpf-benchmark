@@ -1,13 +1,18 @@
 # 测试结果
+
 ## 测试环境
+
 - Linux mnfe-pve 6.2.16-12-pve #1 SMP PREEMPT_DYNAMIC PMX 6.2.16-12 (2023-09-04T13:21Z) x86_64 GNU/Linux
 - Intel Xeon E5-2697 v2 (48) @ 3.500GH
 - Debian GNU/Linux 12 (bookworm)
+
 ## 所使用的运行时
-- bpftime-llvm，bpftime中所包含的基于LLVM JIT的ebpf运行时
+
+- bpftime-llvm，bpftime 中所包含的基于 LLVM JIT 的 ebpf 运行时
 - bpftime-ubpf，基于ubpf的支持JIT的ebpf运行时
 - bpftime-rbpf，基于rbpf的支持JIT的ebpf运行时
 - native程序
+
 ## 测试内容
 
 ### log2_int
@@ -19,10 +24,12 @@
 在这个测试中，LLVM JIT、ubpf、native效率接近，且都比ubpf要快。
 
 ### memcpy
+
 - 实现朴素的内存拷贝，在eBPF内存中从一处拷贝1MB的内存到另一处，用以测试运行时的内存读写性能。
 ![结果](example-output/memcpy.execution.png)
 
 ### prime
+
 - 一个简单的暴力知数筛法，统计1到$10^4$之间的素数个数，用以测试运行时的条件分支和复杂运算（除法）性能。
 ![img](example-output/prime.execution.png)
 

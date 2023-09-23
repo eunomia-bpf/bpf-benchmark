@@ -1,6 +1,8 @@
-#include <sys/cdefs.h>
+#include <stddef.h>
 #define u32 unsigned int
 #define u64 unsigned long long
+
+#define __always_inline __inline __attribute__ ((__always_inline__))
 
 u64 __always_inline log2(u32 v) {
   u32 shift, r;
