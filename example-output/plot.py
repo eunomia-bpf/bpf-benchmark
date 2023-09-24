@@ -116,7 +116,7 @@ for exe, exe_results in zip(executables, results):
             plot_data[test["name"]] = {}
         plot_data[test["name"]][exe] = test["exec_usage"]
 
-selected_runtimes = ['./bpftime-ubpf', './bpftime-rbpf', './bpftime-llvm']
+selected_runtimes = ['./bpftime-ubpf', './bpftime-rbpf', './bpftime-llvm', "<NATIVE>"]
 
 # Determine the number of rows and columns for subplots
 num_tests = len(plot_data)

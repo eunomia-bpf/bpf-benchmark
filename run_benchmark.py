@@ -90,9 +90,7 @@ def main():
                 f"TEST <{item['name']}> JIT {item['jit_usage']/10**6}ms EXEC {item['exec_usage']/10**6}ms RET {item['result']}"
             )
         print("-----------------")
-    images_out = Path("output")
-    shutil.rmtree(images_out, ignore_errors=True)
-    os.mkdir(images_out)
+    images_out = Path("example-output")
     with open(images_out / "data.json", "w") as f:
         json.dump({"executables": EXECUTABLES, "results": test_results}, f)
     for test_line in zip(*test_results):
