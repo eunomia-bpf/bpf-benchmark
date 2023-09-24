@@ -59,3 +59,90 @@ plt.legend()
 plt.grid(True, which="both", ls="--", c="0.65")
 plt.tight_layout()
 plt.savefig("jit_usage_bar_plot.png")
+# Given data
+data_str = ""  # Place your JSON data between the triple quotes
+with open("data.json", "r") as f:
+    data_str = f.read()
+data = json.loads(data_str)
+
+# Data Preparation
+executables = data["executables"]
+results = data["results"]
+
+# Prepare the plot data
+plot_data = {}
+for exe, exe_results in zip(executables, results):
+    for test in exe_results:
+        if test["name"] not in plot_data:
+            plot_data[test["name"]] = {}
+        plot_data[test["name"]][exe] = test["exec_usage"]
+
+selected_runtimes = ['./bpftime-ubpf', './bpftime-rbpf', './bpftime-llvm']
+
+# Plot Execution Usage
+bar_width = 0.25
+indices = np.arange(len(selected_runtimes))
+
+for test_name, runtimes_data in plot_data.items():
+    plt.figure(figsize=(10, 7))
+    
+    values = [runtimes_data.get(exe, 0) for exe in selected_runtimes]
+    plt.bar(indices, values, width=bar_width)
+    
+    plt.title(f"Execution Times for {test_name}")
+    plt.xlabel("Runtimes")
+    plt.ylabel("Execution Time")
+    plt.xticks(indices, selected_runtimes, rotation=45)
+    plt.grid(True, which="both", ls="--", c="0.65")
+    plt.tight_layout()
+    plt.savefig(f"execution_times_for_{test_name}.png")
+    plt.close()
+
+# Given data
+data_str = ""  # Place your JSON data between the triple quotes
+with open("data.json", "r") as f:
+    data_str = f.read()
+data = json.loads(data_str)
+
+# Data Preparation
+executables = data["executables"]
+results = data["results"]
+
+# Prepare the plot data
+plot_data = {}
+for exe, exe_results in zip(executables, results):
+    for test in exe_results:
+        if test["name"] not in plot_data:
+            plot_data[test["name"]] = {}
+        plot_data[test["name"]][exe] = test["exec_usage"]
+
+selected_runtimes = ['./bpftime-ubpf', './bpftime-rbpf', './bpftime-llvm']
+
+# Determine the number of rows and columns for subplots
+num_tests = len(plot_data)
+num_rows = (num_tests + 1) // 2
+num_cols = 2 if num_tests > 1 else 1
+
+fig, axes = plt.subplots(num_rows, num_cols, figsize=(20, 5 * num_rows))
+if num_tests == 1:
+    axes = np.array([axes])
+
+# Plot Execution Usage
+bar_width = 0.25
+indices = np.arange(len(selected_runtimes))
+
+for ax, (test_name, runtimes_data) in zip(axes.ravel(), plot_data.items()):
+    
+    values = [runtimes_data.get(exe, 0) for exe in selected_runtimes]
+    ax.bar(indices, values, width=bar_width)
+    
+    ax.set_title(f"Execution Times for {test_name}")
+    ax.set_xlabel("Runtimes")
+    ax.set_ylabel("Execution Time")
+    ax.set_xticks(indices)
+    ax.set_xticklabels(selected_runtimes, rotation=45)
+    ax.grid(True, which="both", ls="--", c="0.65")
+
+plt.tight_layout()
+plt.savefig("merged_execution_times.png")
+plt.show()

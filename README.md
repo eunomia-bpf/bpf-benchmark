@@ -10,7 +10,13 @@ We have compared the performance of the following eBPF runtimes and native:
 
 The results of the benchmarking process are included in this repository. See this README for details:
 
-![execution_usage_bar_plot](example-output/execution_usage_bar_plot.png)
+1. execution results for all in x86_64, using log scale
+
+    ![execution_usage_bar_plot](example-output/execution_usage_bar_plot.png)
+
+2. execution results for each test with JIT
+
+    ![execution](example-output/merged_execution_times.png)
 
 Across all tests, the LLVM JIT for [bpftime](https://github.com/eunomia-bpf/bpftime) consistently showcased superior performance. Both demonstrated high efficiency in integer computations (as seen in `log2_int`), complex mathematical operations (as observed in `prime`), and memory operations (evident in `memcpy` and `strcmp`). While they lead in performance across the board, each runtime exhibits unique strengths and weaknesses. These insights can be invaluable for users when choosing the most appropriate runtime for their specific use-cases.
 

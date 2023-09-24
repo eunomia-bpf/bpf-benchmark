@@ -103,6 +103,7 @@ def main():
         plt.figure()
         plt.bar(EXECUTABLES, jit_values, 0.35, label="Compilation", color="orange")
         plt.ylabel("Time (nanoseconds)")
+        plt.xticks(rotation=45)
         plt.title(f'Time usage on compiling "{name}"')
         plt.legend()
         plt.savefig(images_out / f"{name}.compilation.png")
@@ -126,6 +127,7 @@ def main():
             label="Execution",
             color="orange",
         )
+        plt.xticks(rotation=45)
         plt.ylabel("Time (nanoseconds)")
         plt.title(f'Time usage on example "{name}"')
         plt.legend()

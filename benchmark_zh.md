@@ -49,4 +49,4 @@
 - 简单实现的复杂条件跳转，用以测试运行时的复杂switch跳转和内存访问性能。程序会从内存中读取数值并使用switch进行跳转。
 ![img](example-output/switch.execution.png)
 
-- 可以看到，llvm jit效率优于ubpf。但native效率远优于LLVM JIT。可能与native下可以生成跳转表有关。rbpf效率最低。
+- 可以看到，llvm jit效率优于 ubpf。但native效率远优于LLVM JIT。可能与native下可以生成跳转表有关。rbpf效率最低。
