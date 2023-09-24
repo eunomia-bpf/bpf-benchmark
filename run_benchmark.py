@@ -47,16 +47,48 @@ def run_single(
 
 
 def run_multiple_wrapper(cfg: RunArgs):
-    ret = {"exec_usage": 0, "jit_usage": 0, "result": [], "name": cfg["name"]}
-    for _ in range(5):
+    ret = {
+        "exec_usage": 0,
+        "jit_usage": 0,
+        "result": [],
+        "name": cfg["name"],
+        "metrics": {
+            "distribution": {},
+            "avg": 0,
+            "median": 0,
+            "max": None,
+            "min": None
+        }
+    }
+    
+    for _ in range(50):
         r = run_single(**cfg)
         ret["exec_usage"] += r["exec_usage"]
         ret["jit_usage"] += r["jit_usage"]
         ret["result"].append(r["result"])
-    ret["exec_usage"] /= 5
-    ret["jit_usage"] /= 5
+        
+        # Update distribution
+        ret["metrics"]["distribution"][r["result"]] = ret["metrics"]["distribution"].get(r["result"], 0) + 1
+        
+        # Update max and min
+        if ret["metrics"]["max"] is None or r["result"] > ret["metrics"]["max"]:
+            ret["metrics"]["max"] = r["result"]
+        if ret["metrics"]["min"] is None or r["result"] < ret["metrics"]["min"]:
+            ret["metrics"]["min"] = r["result"]
+    
+    ret["exec_usage"] /= 50
+    ret["jit_usage"] /= 50
+    
+    # Calculate average and median
+    ret["metrics"]["avg"] = sum(ret["result"]) / len(ret["result"])
+    sorted_results = sorted(ret["result"])
+    mid_idx = len(sorted_results) // 2
+    if len(sorted_results) % 2 == 0:
+        ret["metrics"]["median"] = (sorted_results[mid_idx - 1] + sorted_results[mid_idx]) / 2
+    else:
+        ret["metrics"]["median"] = sorted_results[mid_idx]
+    
     return ret
-
 
 def main():
     all_tests = []

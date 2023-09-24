@@ -97,7 +97,6 @@ for test_name, runtimes_data in plot_data.items():
     plt.tight_layout()
     plt.savefig(f"execution_times_for_{test_name}.png")
     plt.close()
-
 # Given data
 data_str = ""  # Place your JSON data between the triple quotes
 with open("data.json", "r") as f:
@@ -130,18 +129,28 @@ if num_tests == 1:
 # Plot Execution Usage
 bar_width = 0.25
 indices = np.arange(len(selected_runtimes))
+colors = plt.cm.viridis(np.linspace(0, 1, len(selected_runtimes)))
 
 for ax, (test_name, runtimes_data) in zip(axes.ravel(), plot_data.items()):
     
     values = [runtimes_data.get(exe, 0) for exe in selected_runtimes]
-    ax.bar(indices, values, width=bar_width)
+    bars = ax.bar(indices, values, width=bar_width, color=colors)
     
-    ax.set_title(f"Execution Times for {test_name}")
-    ax.set_xlabel("Runtimes")
-    ax.set_ylabel("Execution Time")
+    ax.set_title(f"Execution Times for {test_name}", fontsize=16)
+    ax.set_xlabel("Runtimes", fontsize=14)
+    ax.set_ylabel("Execution Time", fontsize=14)
     ax.set_xticks(indices)
-    ax.set_xticklabels(selected_runtimes, rotation=45)
+    ax.set_xticklabels(selected_runtimes, rotation=45, fontsize=12)
     ax.grid(True, which="both", ls="--", c="0.65")
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['bottom'].set_color('#DDDDDD')
+    ax.spines['left'].set_color('#DDDDDD')
+    ax.tick_params(bottom=False, left=False)
+    ax.set_axisbelow(True)
+    
+    # Add legends (assuming you have more data for distribution)
+    # ax.legend(bars, ["Runtime 1", "Runtime 2", ...], fontsize=12)
 
 plt.tight_layout()
 plt.savefig("merged_execution_times.png")
