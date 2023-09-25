@@ -1,4 +1,4 @@
-unsigned long bpf_main(int *mem) {
+unsigned long long bpf_main(int *mem) {
   int hash = 0;
   for (int i = 1; i <= mem[0]; i++) {
     int val = 0;
