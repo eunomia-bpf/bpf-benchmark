@@ -41,7 +41,7 @@ def run_single(
         if memory:
             command_line.append(memory)
     elif runtime == "<WASM>":
-        command_line = ["./wasm-wasmtime", bpf_prog.replace(".bpf.bin", ".wasm")]
+        command_line = ["./wasm-wasmtime-runtime", bpf_prog.replace(".bpf.bin", ".wasm")]
         if memory:
             command_line.append(memory)
     else:
