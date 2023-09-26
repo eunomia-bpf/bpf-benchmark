@@ -66,7 +66,7 @@ def run_multiple_wrapper(cfg: RunArgs):
         },
     }
 
-    for _ in range(50):
+    for _ in range(10):
         r = run_single(**cfg)
         ret["exec_usage"] += r["exec_usage"]
         ret["jit_usage"] += r["jit_usage"]

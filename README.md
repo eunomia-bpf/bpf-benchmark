@@ -2,7 +2,7 @@
 
 bpf-benchmark is a simple test suite designed to benchmark the performance of eBPF runtimes in userspace, and the results of the benchmarking process. The test suite is designed to be easily extensible, allowing users to add their own tests to the suite.
 
-We have compared the performance of the following eBPF runtimes and native:
+We have compared the performance of the following eBPF runtimes and `native`, `wasmtime`:
 
 - [bpftime](https://github.com/eunomia-bpf/bpftime): a new eBPF runtime with interpreter and JIT support based on LLVM
 - [ubpf](https://github.com/iovisor/ubpf): an eBPF runtime in C with JIT support in x86 and amr64
