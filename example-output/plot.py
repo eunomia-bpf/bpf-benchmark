@@ -25,7 +25,7 @@ num_runtimes = len(executables)
 
 # Plot Execution Usage
 plt.figure(figsize=(15, 10))
-bar_width = 0.10
+bar_width = 0.20
 total_width = num_runtimes * bar_width
 indices = np.arange(len(plot_data))
 
@@ -125,7 +125,7 @@ num_cols = num_tests
 fig, axes = plt.subplots(num_rows, num_cols, figsize=(20, 6))
 if num_tests == 1:
     axes = np.array([axes])
-bar_width = 0.20 # 适当减小条形宽度以增加空间
+bar_width = 0.8 # 适当减小条形宽度以增加空间
 indices = np.arange(len(selected_runtimes))
 colors = plt.cm.tab10(np.linspace(0, 1, len(selected_runtimes))) # 使用tab10颜色图提供更好的颜色对比
 
