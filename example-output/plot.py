@@ -77,7 +77,7 @@ for exe, exe_results in zip(executables, results):
             plot_data[test["name"]] = {}
         plot_data[test["name"]][exe] = test["exec_usage"]
 
-selected_runtimes = ['./bpftime-ubpf', './bpftime-rbpf', './bpftime-llvm']
+selected_runtimes = ['ubpf-jit', 'rbpf-jit', 'llvm-jit']
 
 # Plot Execution Usage
 bar_width = 0.25
@@ -114,44 +114,69 @@ for exe, exe_results in zip(executables, results):
         if test["name"] not in plot_data:
             plot_data[test["name"]] = {}
         plot_data[test["name"]][exe] = test["exec_usage"]
+selected_runtimes = ['ubpf-jit', 'rbpf-jit', 'llvm-jit', '<WASM>', "<NATIVE>"]
 
-selected_runtimes = ['./bpftime-ubpf', './bpftime-rbpf', './bpftime-llvm', '<WASM>', "<NATIVE>"]
-
-# Determine the number of rows and columns for subplots
+# 确定子图的行和列数
 num_tests = len(plot_data)
-num_rows = (num_tests + 1) // 2
-num_cols = 2 if num_tests > 1 else 1
+num_rows = 1
+num_cols = num_tests
 
-fig, axes = plt.subplots(num_rows, num_cols, figsize=(20, 5 * num_rows))
+# 设置更大的图表尺寸以提高可读性
+fig, axes = plt.subplots(num_rows, num_cols, figsize=(20, 6))
 if num_tests == 1:
     axes = np.array([axes])
-
-# Plot Execution Usage
-bar_width = 0.25
+bar_width = 0.20 # 适当减小条形宽度以增加空间
 indices = np.arange(len(selected_runtimes))
-colors = plt.cm.viridis(np.linspace(0, 1, len(selected_runtimes)))
+colors = plt.cm.tab10(np.linspace(0, 1, len(selected_runtimes))) # 使用tab10颜色图提供更好的颜色对比
+
+i = 0
 
 for ax, (test_name, runtimes_data) in zip(axes.ravel(), plot_data.items()):
-    
+
     values = [runtimes_data.get(exe, 0) for exe in selected_runtimes]
+
+    # 更新显示名称
+    display_names = [exe.replace('llvm-jit', 'llvm jit') for exe in selected_runtimes]
+
     bars = ax.bar(indices, values, width=bar_width, color=colors)
-    
-    ax.set_title(f"Execution Times for {test_name}", fontsize=16)
-    ax.set_xlabel("Runtimes", fontsize=14)
-    ax.set_ylabel("Execution Time", fontsize=14)
-    ax.set_xticks(indices)
-    ax.set_xticklabels(selected_runtimes, rotation=45, fontsize=12)
-    ax.grid(True, which="both", ls="--", c="0.65")
+     # 只在第一个子图上添加Y轴标签和网格线
+    if i == 0:
+        ax.set_ylabel("Execution Time(ns)", fontsize=18)
+        ax.grid(True, which="both", ls="--", c="0.8")
+        i = 1
+    else:
+        ax.grid(False)  # 其他子图不显示网格线
+        
+
+    # 添加数据标签
+    # for bar in bars:
+    #     height = bar.get_height()
+    #     ax.annotate(f'{height:.0f}',
+    #                 xy=(bar.get_x() + bar.get_width() / 2, height),
+    #                 xytext=(0, 3),  # 3点偏移
+    #                 textcoords="offset points",
+    #                 ha='center', va='bottom')
+
+    ax.set_title(f"{test_name.replace('_', ' ').title()}", fontsize=18)
+    # ax.set_xticks(indices)
+    # ax.set_xticklabels(display_names, rotation=45, fontsize=14)
+    # ax.grid(True, which="both", ls="--", c="0.8") # 更轻的网格线
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    ax.spines['bottom'].set_color('#DDDDDD')
     ax.spines['left'].set_color('#DDDDDD')
-    ax.tick_params(bottom=False, left=False)
+    ax.spines['bottom'].set_color('#DDDDDD')
+    # ax.tick_params(bottom=False, left=False)
     ax.set_axisbelow(True)
-    
-    # Add legends (assuming you have more data for distribution)
-    # ax.legend(bars, ["Runtime 1", "Runtime 2", ...], fontsize=12)
+    # ax.set_ylabel("Execution Time", fontsize=16)
 
-plt.tight_layout()
-plt.savefig("merged_execution_times.png")
+# 自动调整子图间距，确保标签和标题不会重叠
+plt.tight_layout(pad=3.0)
+
+# 可以选择将图例放在图表下方
+handles = [plt.Rectangle((0,0),1,1, color=colors[i]) for i in range(len(selected_runtimes))]
+labels = [name.replace('llvm-jit', 'llvm jit') for name in selected_runtimes]
+plt.legend(handles, labels, bbox_to_anchor=(0.5, -0.03), loc='upper right',
+           ncol=len(selected_runtimes), frameon=False, fontsize=18)
+
+plt.savefig("optimized_execution_times.png")
 plt.show()

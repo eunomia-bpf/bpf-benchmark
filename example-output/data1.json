@@ -1,10 +1,10 @@
 {
     "executables": [
-        "./bpftime-ubpf",
-        "./bpftime-llvm",
-        "./bpftime-rbpf",
-        "./bpftime-rbpf-vm",
-        "./bpftime-ubpf-vm",
+        "ubpf-jit",
+        "llvm-jit",
+        "rbpf-jit",
+        "rbpf-jit-vm",
+        "ubpf-jit-vm",
         "<NATIVE>"
     ],
     "results": [
@@ -19,7 +19,7 @@
                     0,
                     0
                 ],
-                "name": "strcmp_full"
+                "name": "strcmp match"
             },
             {
                 "exec_usage": 7563.8,
@@ -31,7 +31,7 @@
                     4,
                     4
                 ],
-                "name": "log2_int"
+                "name": "log2"
             },
             {
                 "exec_usage": 3452016.4,
@@ -55,7 +55,7 @@
                     12345678,
                     12345678
                 ],
-                "name": "simple"
+                "name": "return directly"
             },
             {
                 "exec_usage": 705317.6,
@@ -91,7 +91,7 @@
                     18446744073709551508,
                     18446744073709551508
                 ],
-                "name": "strcmp_fail"
+                "name": "strcmp_mismatch"
             },
             {
                 "exec_usage": 179.6,
@@ -103,7 +103,7 @@
                     9833440827789222417,
                     9833440827789222417
                 ],
-                "name": "memory_a_plus_b"
+                "name": "memory a + b"
             }
         ],
         [
@@ -117,7 +117,7 @@
                     0,
                     0
                 ],
-                "name": "strcmp_full"
+                "name": "strcmp match"
             },
             {
                 "exec_usage": 12140.2,
@@ -129,7 +129,7 @@
                     4,
                     4
                 ],
-                "name": "log2_int"
+                "name": "log2"
             },
             {
                 "exec_usage": 1469107.0,
@@ -153,7 +153,7 @@
                     12345678,
                     12345678
                 ],
-                "name": "simple"
+                "name": "return directly"
             },
             {
                 "exec_usage": 1314797.4,
@@ -189,7 +189,7 @@
                     18446744073709551508,
                     18446744073709551508
                 ],
-                "name": "strcmp_fail"
+                "name": "strcmp_mismatch"
             },
             {
                 "exec_usage": 250.0,
@@ -201,7 +201,7 @@
                     9833440827789222417,
                     9833440827789222417
                 ],
-                "name": "memory_a_plus_b"
+                "name": "memory a + b"
             }
         ],
         [
@@ -215,7 +215,7 @@
                     0,
                     0
                 ],
-                "name": "strcmp_full"
+                "name": "strcmp match"
             },
             {
                 "exec_usage": 20256.2,
@@ -227,7 +227,7 @@
                     4,
                     4
                 ],
-                "name": "log2_int"
+                "name": "log2"
             },
             {
                 "exec_usage": 4112433.0,
@@ -251,7 +251,7 @@
                     12345678,
                     12345678
                 ],
-                "name": "simple"
+                "name": "return directly"
             },
             {
                 "exec_usage": 1771094.4,
@@ -287,7 +287,7 @@
                     18446744073709551508,
                     18446744073709551508
                 ],
-                "name": "strcmp_fail"
+                "name": "strcmp_mismatch"
             },
             {
                 "exec_usage": 594.8,
@@ -299,7 +299,7 @@
                     9833440827789222417,
                     9833440827789222417
                 ],
-                "name": "memory_a_plus_b"
+                "name": "memory a + b"
             }
         ],
         [
@@ -313,7 +313,7 @@
                     0,
                     0
                 ],
-                "name": "strcmp_full"
+                "name": "strcmp match"
             },
             {
                 "exec_usage": 567544.6,
@@ -325,7 +325,7 @@
                     4,
                     4
                 ],
-                "name": "log2_int"
+                "name": "log2"
             },
             {
                 "exec_usage": 42109188.6,
@@ -349,7 +349,7 @@
                     12345678,
                     12345678
                 ],
-                "name": "simple"
+                "name": "return directly"
             },
             {
                 "exec_usage": 159100690.8,
@@ -385,7 +385,7 @@
                     18446744073709551508,
                     18446744073709551508
                 ],
-                "name": "strcmp_fail"
+                "name": "strcmp_mismatch"
             },
             {
                 "exec_usage": 2373.8,
@@ -397,7 +397,7 @@
                     9833440827789222417,
                     9833440827789222417
                 ],
-                "name": "memory_a_plus_b"
+                "name": "memory a + b"
             }
         ],
         [
@@ -411,7 +411,7 @@
                     0,
                     0
                 ],
-                "name": "strcmp_full"
+                "name": "strcmp match"
             },
             {
                 "exec_usage": 1497567.6,
@@ -423,7 +423,7 @@
                     4,
                     4
                 ],
-                "name": "log2_int"
+                "name": "log2"
             },
             {
                 "exec_usage": 98747634.2,
@@ -447,7 +447,7 @@
                     12345678,
                     12345678
                 ],
-                "name": "simple"
+                "name": "return directly"
             },
             {
                 "exec_usage": 348193871.8,
@@ -483,7 +483,7 @@
                     18446744073709551508,
                     18446744073709551508
                 ],
-                "name": "strcmp_fail"
+                "name": "strcmp_mismatch"
             },
             {
                 "exec_usage": 1868.2,
@@ -495,7 +495,7 @@
                     9833440827789222417,
                     9833440827789222417
                 ],
-                "name": "memory_a_plus_b"
+                "name": "memory a + b"
             }
         ],
         [
@@ -509,7 +509,7 @@
                     0,
                     0
                 ],
-                "name": "strcmp_full"
+                "name": "strcmp match"
             },
             {
                 "exec_usage": 6381.4,
@@ -521,7 +521,7 @@
                     4,
                     4
                 ],
-                "name": "log2_int"
+                "name": "log2"
             },
             {
                 "exec_usage": 1046032.8,
@@ -545,7 +545,7 @@
                     12345678,
                     12345678
                 ],
-                "name": "simple"
+                "name": "return directly"
             },
             {
                 "exec_usage": 120411.0,
@@ -581,7 +581,7 @@
                     18446744073709551508,
                     18446744073709551508
                 ],
-                "name": "strcmp_fail"
+                "name": "strcmp_mismatch"
             },
             {
                 "exec_usage": 161.2,
@@ -593,7 +593,7 @@
                     9833440827789222417,
                     9833440827789222417
                 ],
-                "name": "memory_a_plus_b"
+                "name": "memory a + b"
             }
         ]
     ]
