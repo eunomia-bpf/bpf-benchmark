@@ -178,5 +178,5 @@ labels = [name.replace('llvm-jit', 'llvm jit') for name in selected_runtimes]
 plt.legend(handles, labels, bbox_to_anchor=(0.5, -0.03), loc='upper right',
            ncol=len(selected_runtimes), frameon=False, fontsize=18)
 
-plt.savefig("optimized_execution_times.png")
+plt.savefig("jit_execution_times.png")
 plt.show()
