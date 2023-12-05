@@ -15,11 +15,11 @@
 
 ## 测试内容
 
-### log2_int
+### log2
 
 - 对8192个64位整数计算以2为底的对数。主要用于测试运行时的整数计算性能。此算法在一些bcc提供的例子中用到。
 
-![结果](example-output/log2_int.execution.png)
+![结果](example-output/log2.execution.png)
 
 在这个测试中，LLVM JIT、ubpf、native效率接近，且都比ubpf要快。
 
@@ -39,8 +39,8 @@
 
 - 简单实现的strcmp，分别对应中途比较失败和两个字符串完全匹配的情况。用以测试运行时的内存读取和条件分支的性能。
 
-![img](example-output/strcmp_fail.execution.png)
-![img](example-output/strcmp_full.execution.png)
+![img](example-output/strcmp_mismatch.execution.png)
+![img](example-output/strcmp match.execution.png)
 
 - 可以看到，LLVM JIT、native、ubpf效率接近，且远快于rbpf。
 

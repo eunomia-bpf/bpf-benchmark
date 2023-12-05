@@ -1,6 +1,6 @@
 # bpf-benchmark: Userspace eBPF Runtime Benchmarking Test Suite and Results
 
-bpf-benchmark is a simple test suite designed to benchmark the performance of eBPF runtimes in userspace, and the results of the benchmarking process. The test suite is designed to be easily extensible, allowing users to add their own tests to the suite.
+bpf-benchmark is a return directly test suite designed to benchmark the performance of eBPF runtimes in userspace, and the results of the benchmarking process. The test suite is designed to be easily extensible, allowing users to add their own tests to the suite.
 
 We have compared the performance of the following eBPF runtimes and `native`, `wasmtime`:
 
@@ -16,9 +16,9 @@ The results of the benchmarking process are included in this repository. See thi
 
 2. execution results for each test with JIT
 
-    ![execution](example-output/merged_execution_times.png)
+    ![execution](example-output/jit_execution_times.png)
 
-Across all tests, the LLVM JIT for [bpftime](https://github.com/eunomia-bpf/bpftime) consistently showcased superior performance. Both demonstrated high efficiency in integer computations (as seen in `log2_int`), complex mathematical operations (as observed in `prime`), and memory operations (evident in `memcpy` and `strcmp`). While they lead in performance across the board, each runtime exhibits unique strengths and weaknesses. These insights can be invaluable for users when choosing the most appropriate runtime for their specific use-cases.
+Across all tests, the LLVM JIT for [bpftime](https://github.com/eunomia-bpf/bpftime) consistently showcased superior performance. Both demonstrated high efficiency in integer computations (as seen in `log2`), complex mathematical operations (as observed in `prime`), and memory operations (evident in `memcpy` and `strcmp`). While they lead in performance across the board, each runtime exhibits unique strengths and weaknesses. These insights can be invaluable for users when choosing the most appropriate runtime for their specific use-cases.
 
 For more details, please refer to [Summary](#summary).
 
@@ -44,13 +44,13 @@ To include a new test within BPF-Benchmark, adhere to these guidelines:
 
 BPF-Benchmark currently incorporates the following BPF code test cases:
 
-- `log2_int.bpf.c`
+- `log2.bpf.c`
 - `memcpy.bpf.c`
 - `native_wrapper.c`
 - `prime.bpf.c`
-- `simple.bpf.c`
-- `strcmp_fail.bpf.c`
-- `strcmp_full.bpf.c`
+- `return directly.bpf.c`
+- `strcmp_mismatch.bpf.c`
+- `strcmp match.bpf.c`
 - `switch.bpf.c`
 
 Select and execute the tests ending with the `.bpf` extension.
@@ -88,11 +88,11 @@ For the raw data of tests, please refer to: [example-output/data.json](example-o
 
 ## Test Details
 
-### log2_int
+### log2
 
 - Calculated the logarithm to the base 2 for 8,192 64-bit integers. This primarily tests the integer computation performance of the runtime. This algorithm is used in some examples provided by bcc.
 
-![Results](example-output/log2_int.execution.png)
+![Results](example-output/log2.execution.png)
 
 In this test, the efficiencies of LLVM JIT, ubpf, and native are close, with both being faster than ubpf.
 
@@ -104,7 +104,7 @@ In this test, the efficiencies of LLVM JIT, ubpf, and native are close, with bot
 
 ### prime
 
-- A simple brute force prime number sieve, counting the number of prime numbers between 1 and \(10^4\). This tests the runtime's conditional branching and complex operations (division) performance.
+- A return directly brute force prime number sieve, counting the number of prime numbers between 1 and \(10^4\). This tests the runtime's conditional branching and complex operations (division) performance.
 
 ![Results](example-output/prime.execution.png)
 
@@ -112,10 +112,10 @@ In this test, the speed of LLVM JIT and native are comparable, both significantl
 
 ### strcmp_{fail, full}
 
-- A simple implementation of strcmp, representing scenarios where the comparison fails midway and where the two strings are an exact match. This tests the runtime's memory read and conditional branching performance.
+- A return directly implementation of strcmp, representing scenarios where the comparison fails midway and where the two strings are an exact match. This tests the runtime's memory read and conditional branching performance.
 
-![Results](example-output/strcmp_fail.execution.png)
-![Results](example-output/strcmp_full.execution.png)
+![Results](example-output/strcmp_mismatch.execution.png)
+![Results](example-output/strcmp match.execution.png)
 
 As can be observed, the efficiencies of LLVM JIT, native, and ubpf are close, and all are significantly faster than rbpf.
 
@@ -131,8 +131,8 @@ From the results, it's evident that the efficiency of llvm jit is superior to ub
 
 The benchmark tests were designed to evaluate different eBPF runtimes against native programs across a variety of computational challenges.
 
-1. **Performance Leaders**: Across all tests, the LLVM JIT and native runtimes consistently showcased superior performance. Both demonstrated high efficiency in integer computations (as seen in `log2_int`), complex mathematical operations (as observed in `prime`), and memory operations (evident in `memcpy` and `strcmp`).
-2. **Close Competitors**: The ubpf runtime, while not as efficient as LLVM JIT or native, often came close, especially in tests like `log2_int` and `strcmp`. This suggests that for certain use-cases, ubpf could be a viable alternative.
+1. **Performance Leaders**: Across all tests, the LLVM JIT and native runtimes consistently showcased superior performance. Both demonstrated high efficiency in integer computations (as seen in `log2`), complex mathematical operations (as observed in `prime`), and memory operations (evident in `memcpy` and `strcmp`).
+2. **Close Competitors**: The ubpf runtime, while not as efficient as LLVM JIT or native, often came close, especially in tests like `log2` and `strcmp`. This suggests that for certain use-cases, ubpf could be a viable alternative.
 3. **Room for Improvement**: rbpf, unfortunately, lagged behind in most tests, showing the need for optimizations and improvements. Its performance was notably lower in tests like `strcmp`, `prime`, and `switch`.
 4. **Complex Operations Insight**: The `prime` test revealed that when dealing with complex operations like divisions and conditional branching, both LLVM JIT and native runtimes are significantly more efficient than ubpf and rbpf.
 5. **Memory Access & Branching**: The tests `strcmp` and `switch` highlighted the strengths of LLVM JIT, native, and ubpf in memory access and conditional branching. rbpf's performance in these areas, however, was found wanting.
