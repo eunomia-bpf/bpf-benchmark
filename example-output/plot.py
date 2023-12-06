@@ -131,10 +131,15 @@ colors = plt.cm.tab10(np.linspace(0, 1, len(selected_runtimes))) # 使用tab10�
 
 i = 0
 
+sum_llvm_jit = 0
+sum_native = 0
+
 for ax, (test_name, runtimes_data) in zip(axes.ravel(), plot_data.items()):
 
     values = [runtimes_data.get(exe, 0) for exe in selected_runtimes]
-
+    print(values)
+    sum_llvm_jit += values[2]
+    sum_native += values[4]
     # 更新显示名称
     display_names = [exe.replace('llvm-jit', 'llvm jit') for exe in selected_runtimes]
 
@@ -172,6 +177,9 @@ for ax, (test_name, runtimes_data) in zip(axes.ravel(), plot_data.items()):
 # 自动调整子图间距，确保标签和标题不会重叠
 plt.tight_layout(pad=3.0)
 
+print(sum_llvm_jit)
+print(sum_native)
+print(sum_llvm_jit / sum_native)
 # 可以选择将图例放在图表下方
 handles = [plt.Rectangle((0,0),1,1, color=colors[i]) for i in range(len(selected_runtimes))]
 labels = [name.replace('llvm-jit', 'llvm jit') for name in selected_runtimes]
