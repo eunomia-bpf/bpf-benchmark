@@ -9,11 +9,11 @@ import json
 
 PROGS_DIR = Path("./bpf_progs")
 EXECUTABLES = [
-    "ubpf-jit",
-    "llvm-jit",
-    "rbpf-jit",
-    "rbpf-jit-vm",
-    "ubpf-jit-vm",
+    "./ubpf-jit",
+    "./llvm-jit",
+    "./rbpf-jit",
+    "./rbpf-jit-vm",
+    "./ubpf-jit-vm",
     "<NATIVE>",
     "<WASM>",
 ]
