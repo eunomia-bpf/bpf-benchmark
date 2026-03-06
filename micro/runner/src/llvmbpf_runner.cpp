@@ -236,6 +236,15 @@ sample_result run_llvmbpf(const cli_options &options)
         fail("llvmbpf compile failed: " + vm.get_error_message());
     }
 
+    const auto compiled_code = vm.get_compiled_code();
+    if (!compiled_code.has_value()) {
+        fail("llvmbpf native code inspection failed: " + vm.get_error_message());
+    }
+    if (options.dump_jit) {
+        const auto dump_path = std::filesystem::path(benchmark_name_for_program(options.program) + ".llvmbpf.bin");
+        write_binary_file(dump_path, compiled_code->data, compiled_code->size);
+    }
+
     uint64_t retval = 0;
     uint64_t result = 0;
     active_map_state = &map_state;
@@ -279,6 +288,12 @@ sample_result run_llvmbpf(const cli_options &options)
     sample.exec_ns = elapsed_ns(exec_start, exec_end) / options.repeat;
     sample.result = options.io_mode == "map" ? read_result_value(map_state) : result;
     sample.retval = static_cast<uint32_t>(retval);
+    sample.native_code_size = compiled_code->size;
+    sample.bpf_insn_count = image.code.size() / sizeof(ebpf_inst);
+    sample.code_size = {
+        .bpf_bytecode_bytes = image.code.size(),
+        .native_code_bytes = compiled_code->size,
+    };
     sample.phases_ns = {
         {"program_image_ns", elapsed_ns(program_image_start, program_image_end)},
         {"memory_prepare_ns", elapsed_ns(memory_prepare_start, memory_prepare_end)},

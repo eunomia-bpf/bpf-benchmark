@@ -30,6 +30,7 @@ struct cli_options {
     uint32_t repeat = 1;
     uint32_t input_size = 0;
     bool perf_counters = false;
+    bool dump_jit = false;
 };
 
 struct timing_phase {
@@ -57,11 +58,21 @@ struct perf_counter_capture {
     std::vector<named_counter> counters;
 };
 
+struct code_size_summary {
+    uint64_t bpf_bytecode_bytes = 0;
+    uint64_t native_code_bytes = 0;
+};
+
 struct sample_result {
     uint64_t compile_ns = 0;
     uint64_t exec_ns = 0;
     uint64_t result = 0;
     uint32_t retval = 0;
+    std::optional<uint64_t> jited_prog_len;
+    std::optional<uint64_t> xlated_prog_len;
+    std::optional<uint64_t> native_code_size;
+    std::optional<uint64_t> bpf_insn_count;
+    code_size_summary code_size;
     std::vector<timing_phase> phases_ns;
     perf_counter_capture perf_counters;
 };
@@ -69,6 +80,8 @@ struct sample_result {
 [[noreturn]] void fail(const std::string &message);
 cli_options parse_args(int argc, char **argv);
 std::vector<uint8_t> read_binary_file(const std::filesystem::path &path);
+void write_binary_file(const std::filesystem::path &path, const uint8_t *data, size_t size);
+std::string benchmark_name_for_program(const std::filesystem::path &program);
 std::vector<uint8_t> materialize_memory(const std::optional<std::filesystem::path> &memory, uint32_t size_hint);
 program_image load_program_image(const std::filesystem::path &path);
 sample_result run_llvmbpf(const cli_options &options);

@@ -2,13 +2,17 @@
 
 #include <bpf/bpf.h>
 #include <bpf/libbpf.h>
+#include <linux/bpf.h>
 
 #include <algorithm>
+#include <cerrno>
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
 #include <memory>
 #include <string>
+#include <sys/syscall.h>
+#include <unistd.h>
 #include <vector>
 
 namespace {
@@ -34,6 +38,48 @@ std::string libbpf_error_string(int error_code)
     char buffer[256];
     libbpf_strerror(error_code, buffer, sizeof(buffer));
     return std::string(buffer);
+}
+
+template <typename T>
+__u64 ptr_to_u64(T *ptr)
+{
+    return static_cast<__u64>(reinterpret_cast<uintptr_t>(ptr));
+}
+
+bpf_prog_info load_prog_info(int program_fd)
+{
+    bpf_prog_info info = {};
+    union bpf_attr attr = {};
+    attr.info.bpf_fd = program_fd;
+    attr.info.info_len = sizeof(info);
+    attr.info.info = ptr_to_u64(&info);
+    if (syscall(__NR_bpf, BPF_OBJ_GET_INFO_BY_FD, &attr, sizeof(attr)) != 0) {
+        fail("BPF_OBJ_GET_INFO_BY_FD failed: " + std::string(strerror(errno)));
+    }
+    return info;
+}
+
+std::vector<uint8_t> load_jited_program(int program_fd, uint32_t jited_prog_len)
+{
+    if (jited_prog_len == 0) {
+        fail("kernel reported an empty JIT image");
+    }
+
+    std::vector<uint8_t> jited_program(jited_prog_len);
+    bpf_prog_info info = {};
+    info.jited_prog_len = jited_prog_len;
+    info.jited_prog_insns = ptr_to_u64(jited_program.data());
+
+    union bpf_attr attr = {};
+    attr.info.bpf_fd = program_fd;
+    attr.info.info_len = sizeof(info);
+    attr.info.info = ptr_to_u64(&info);
+    if (syscall(__NR_bpf, BPF_OBJ_GET_INFO_BY_FD, &attr, sizeof(attr)) != 0) {
+        fail("BPF_OBJ_GET_INFO_BY_FD (JIT dump) failed: " + std::string(strerror(errno)));
+    }
+
+    jited_program.resize(info.jited_prog_len);
+    return jited_program;
 }
 
 std::vector<uint8_t> build_packet_input(const std::vector<uint8_t> &input_bytes)
@@ -95,6 +141,13 @@ sample_result run_kernel(const cli_options &options)
     const int program_fd = bpf_program__fd(program);
     if (program_fd < 0) {
         fail("unable to obtain program fd");
+    }
+
+    const auto program_info = load_prog_info(program_fd);
+    if (options.dump_jit) {
+        const auto jited_program = load_jited_program(program_fd, program_info.jited_prog_len);
+        const auto dump_path = std::filesystem::path(benchmark_name_for_program(options.program) + ".kernel.bin");
+        write_binary_file(dump_path, jited_program.data(), jited_program.size());
     }
 
     std::chrono::steady_clock::time_point exec_input_prepare_start {};
@@ -198,6 +251,12 @@ sample_result run_kernel(const cli_options &options)
     sample.exec_ns = test_opts.duration;
     sample.result = result;
     sample.retval = test_opts.retval;
+    sample.jited_prog_len = program_info.jited_prog_len;
+    sample.xlated_prog_len = program_info.xlated_prog_len;
+    sample.code_size = {
+        .bpf_bytecode_bytes = program_info.xlated_prog_len,
+        .native_code_bytes = program_info.jited_prog_len,
+    };
     sample.phases_ns = {
         {"memory_prepare_ns", elapsed_ns(memory_prepare_start, memory_prepare_end)},
         {"object_open_ns", elapsed_ns(object_open_start, object_open_end)},

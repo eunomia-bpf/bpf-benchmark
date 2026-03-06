@@ -63,6 +63,31 @@ std::vector<uint8_t> read_binary_file(const std::filesystem::path &path)
     return buffer;
 }
 
+void write_binary_file(const std::filesystem::path &path, const uint8_t *data, size_t size)
+{
+    std::ofstream stream(path, std::ios::binary | std::ios::trunc);
+    if (!stream.is_open()) {
+        fail("unable to open file for writing: " + path.string());
+    }
+    if (size != 0 && !stream.write(reinterpret_cast<const char *>(data), static_cast<std::streamsize>(size))) {
+        fail("unable to write file: " + path.string());
+    }
+}
+
+std::string benchmark_name_for_program(const std::filesystem::path &program)
+{
+    std::string name = program.filename().string();
+    if (name.ends_with(".bpf.o")) {
+        name.resize(name.size() - std::string(".bpf.o").size());
+        return name;
+    }
+    if (name.ends_with(".o")) {
+        name.resize(name.size() - std::string(".o").size());
+        return name;
+    }
+    return program.stem().string();
+}
+
 std::vector<uint8_t> materialize_memory(const std::optional<std::filesystem::path> &memory, uint32_t size_hint)
 {
     if (!memory.has_value()) {
@@ -81,7 +106,7 @@ cli_options parse_args(int argc, char **argv)
     if (argc < 3) {
         fail(
             "usage: micro_exec <run-llvmbpf|run-kernel> --program <path> [--memory <path>] "
-            "[--io-mode map|staged|packet] [--repeat N] [--input-size N]");
+            "[--io-mode map|staged|packet] [--repeat N] [--input-size N] [--dump-jit]");
     }
 
     cli_options options;
@@ -113,6 +138,10 @@ cli_options parse_args(int argc, char **argv)
             options.perf_counters = true;
             continue;
         }
+        if (current == "--dump-jit") {
+            options.dump_jit = true;
+            continue;
+        }
         fail("unknown or incomplete argument: " + std::string(current));
     }
 
@@ -130,12 +159,37 @@ cli_options parse_args(int argc, char **argv)
 
 void print_json(const sample_result &sample)
 {
+    const double inflation_ratio = sample.code_size.bpf_bytecode_bytes == 0
+        ? 0.0
+        : static_cast<double>(sample.code_size.native_code_bytes) /
+              static_cast<double>(sample.code_size.bpf_bytecode_bytes);
+
     std::cout
         << "{"
         << "\"compile_ns\":" << sample.compile_ns << ","
         << "\"exec_ns\":" << sample.exec_ns << ","
         << "\"result\":" << sample.result << ","
-        << "\"retval\":" << sample.retval << ","
+        << "\"retval\":" << sample.retval;
+
+    if (sample.jited_prog_len.has_value()) {
+        std::cout << ",\"jited_prog_len\":" << *sample.jited_prog_len;
+    }
+    if (sample.xlated_prog_len.has_value()) {
+        std::cout << ",\"xlated_prog_len\":" << *sample.xlated_prog_len;
+    }
+    if (sample.native_code_size.has_value()) {
+        std::cout << ",\"native_code_size\":" << *sample.native_code_size;
+    }
+    if (sample.bpf_insn_count.has_value()) {
+        std::cout << ",\"bpf_insn_count\":" << *sample.bpf_insn_count;
+    }
+
+    std::cout
+        << ",\"code_size\":{"
+        << "\"bpf_bytecode_bytes\":" << sample.code_size.bpf_bytecode_bytes << ","
+        << "\"native_code_bytes\":" << sample.code_size.native_code_bytes << ","
+        << "\"inflation_ratio\":" << inflation_ratio
+        << "},"
         << "\"phases_ns\":{";
 
     for (size_t index = 0; index < sample.phases_ns.size(); ++index) {
