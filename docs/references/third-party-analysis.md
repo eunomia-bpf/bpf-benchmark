@@ -106,3 +106,22 @@ ansible-playbook -v -i hosts.ini -e nb_runs=100 -e nb_measures=10 playbook.yaml
 | Tests | 60+ | 34 depths | ~10 | 70+ | 8 programs x 7 runtimes |
 | Kernel module | No | No | Yes (bbbench) | No | No |
 | Unique | Cross-platform | Multi-kernel | Cycle-precise | Comprehensive | Runtime comparison |
+
+---
+
+## Design Decisions Borrowed into `micro/`
+
+`micro/` 的设计直接吸收了这三个项目的经验：
+
+**从 bpf_performance 吸收**：
+- 声明式 `config/*.yaml` 描述 benchmark / runtime / build 元数据，不在 runner 里硬编码
+- 输入生成和执行解耦（preparation phase），方便扩展 map/helper 实验
+
+**从 tail-call-bench 吸收**：
+- 直接用 `libbpf` + `BPF_PROG_TEST_RUN` 的受控内核执行，不走真实网卡路径
+- 每个样本重新 load 一次，显式记录 load/JIT/verifier 时间
+
+**从 bpf-bench 吸收**：
+- benchmark 范围小而尖，结果先 JSON 机器可读，再谈图表
+
+最终形成混合方案：结构借鉴 bpf_performance，执行路径借鉴 tail-call-bench，输出形式借鉴 bpf-bench，依赖收口改成正式 submodule，程序产物统一为单一 `.bpf.o` 避免维护两套 wrapper。

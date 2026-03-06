@@ -235,14 +235,58 @@ clang 编译 → ELF 解析 → CO-RE 重定位 → BTF 处理 → Verifier → 
 
 内核有 **31 种 BPF_PROG_TYPE**，benchmark 覆盖不到 1/3：
 
-**完全无 benchmark 的高价值程序类型**：
-- **XDP** — 网络最核心用途，零吞吐量 benchmark
-- **SCHED_CLS (TC)** — 网络策略核心
-- **LSM** — 安全场景核心（BeeBox/MOAT/BPFGuard 都用了 LSM hook，BPFGuard 报告仅 2.16% 开销，但无标准化 benchmark）
-- **STRUCT_OPS** — sched_ext/TCP CC 核心
-- **CGROUP_*（6 种）** — 容器场景核心
-- **SOCK_OPS** — 连接级优化核心
-- **NETFILTER** — 新 prog type
+| 程序类型 | 有 Benchmark? | 说明 |
+|----------|:---:|------|
+| KPROBE / TRACING (fentry/fexit/fmod_ret) | ✅ | bench_trigger 覆盖充分 |
+| RAW_TRACEPOINT / TRACEPOINT | ✅ | bench_trigger |
+| XDP | ❌ | **无吞吐量 benchmark** |
+| SCHED_CLS (TC) | ❌ | **完全空白** |
+| SCHED_ACT | ❌ | 完全空白 |
+| LSM | ❌ | **完全空白** — BPFGuard 报告仅 2.16% 开销，但无标准化 benchmark |
+| STRUCT_OPS | ❌ | **完全空白** — sched_ext/TCP CC 核心 |
+| CGROUP_SKB / SOCK / SOCKOPT / SYSCTL / DEVICE | ❌ | **完全空白** — 容器场景核心 |
+| SOCK_OPS | ❌ | 完全空白 |
+| SK_LOOKUP | ❌ | 完全空白 |
+| FLOW_DISSECTOR | ❌ | 完全空白 |
+| LWT_IN / OUT / XMIT / SEG6LOCAL | ❌ | 完全空白 |
+| NETFILTER | ❌ | 完全空白（新 prog type） |
+| PERF_EVENT | ❌ | 完全空白 |
+| SOCKET_FILTER | ❌ | 完全空白 |
+| SK_MSG / SK_SKB | 部分 | bench_sockmap 只测 redirect |
+| EXT (freplace) | ❌ | 完全空白 |
+
+### 缺口 6b：Map 类型覆盖
+
+内核有 **30+ 种 BPF_MAP_TYPE**，仍有大量遗漏：
+
+| Map 类型 | 有 Benchmark? | 说明 |
+|----------|:---:|------|
+| HASH / PERCPU_HASH / LRU_HASH / LRU_PERCPU_HASH | ✅ | |
+| ARRAY / PERCPU_ARRAY | ✅ | MS bpf_performance |
+| BLOOM_FILTER | ✅ | |
+| LPM_TRIE | ✅ | |
+| RINGBUF | ✅ | |
+| PROG_ARRAY (tail call) | ✅ | |
+| HASH_OF_MAPS / ARRAY_OF_MAPS | ✅ | MS bpf_performance |
+| STACK_TRACE | ❌ | bpf-bench 有 WIP 但未完成 |
+| QUEUE / STACK (FIFO/LIFO) | ❌ | **完全空白** |
+| CPUMAP | ❌ | XDP redirect 核心，**无 benchmark** |
+| DEVMAP / DEVMAP_HASH | ❌ | XDP redirect 核心，**无 benchmark** |
+| XSKMAP | ❌ | AF_XDP 核心，**无 benchmark** |
+| SOCKMAP / SOCKHASH | 部分 | bench_sockmap 只测 redirect |
+| SK_STORAGE / TASK_STORAGE / INODE_STORAGE / CGRP_STORAGE | 部分 | local_storage bench 覆盖部分 |
+| USER_RINGBUF | ❌ | 用户态到内核的反向 ringbuf |
+| ARENA | ❌ | **新特性，完全空白** |
+| STRUCT_OPS | ❌ | 完全空白 |
+| PERF_EVENT_ARRAY | ❌ | 完全空白 |
+
+### 缺口 6c：跨版本性能回归
+
+只有 tail-call-bench 做了多内核版本对比，MS bpf_performance 有 Grafana 但无公开持续追踪数据。缺乏：持续性能追踪（每个内核版本自动跑 benchmark）、回归检测与告警、跨架构对比（x86 vs ARM64 vs RISC-V）、Spectre/Meltdown 缓解影响的系统化评估。
+
+### 缺口 6d：方法论碎片化
+
+各项目各自为政，指标不统一，结果不可比：输出格式不统一（ops/sec / CSV / JSON / text+PNG）、指标定义不一致（ns/op vs M ops/sec vs CPU cycles）、可复现性差（大部分未记录 CPU 频率锁定等条件）、缺少统一运行器和对比框架。
 
 ### 缺口 7：用户态 eBPF 运行时（只测了纯计算）
 

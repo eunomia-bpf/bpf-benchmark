@@ -99,3 +99,21 @@ Programs define a `bench_*()` function taking `(const u8 *data, u32 len, u64 *ou
 - llvmbpf allocates packet buffers in low 32-bit address space (MAP_32BIT) for XDP context compatibility
 - llvmbpf does not support BPF-to-BPF internal subprogram calls (ELF loader limitation)
 - `--perf-counters` uses `perf_event_open`; kernel counters include kernel-mode, llvmbpf counters are user-mode only
+
+## Using Codex CLI as Subagent
+
+OpenAI Codex CLI is available on this machine (default model: `gpt-5.4`). Use it as a subagent for code writing tasks.
+
+### Usage
+```bash
+# Non-interactive execution — no sandbox, no prompts
+codex exec --dangerously-bypass-approvals-and-sandbox "your prompt here"
+
+# With a specific working directory
+codex exec --dangerously-bypass-approvals-and-sandbox -C /path/to/dir "your prompt here"
+
+# Pipe prompt from stdin
+echo "implement feature X" | codex exec --dangerously-bypass-approvals-and-sandbox -
+```
+
+When delegating coding tasks, use `codex exec --dangerously-bypass-approvals-and-sandbox` so it can read/write files and run commands without interruption.

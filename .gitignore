@@ -3,3 +3,8 @@ venv
 .vscode
 dump*
 wasm-wasmtime.exe
+__pycache__/
+*.pyc
+*.kernel.bin
+*.llvmbpf.bin
+third-party/
