@@ -5,6 +5,39 @@
 
 ---
 
+## 零、Research Questions (RQ)
+
+本阶段的实证研究回答以下 5 个 research questions：
+
+**RQ1: 内核 JIT 与 LLVM JIT 的性能差距有多大？**
+- 在 1,500+ 个真实 BPF 程序上系统量化 kernel JIT vs llvmbpf (-O3) 的执行时间、代码尺寸、IPC 差异
+- 分层量化：纯计算（Layer 1）、因素隔离（Layer 2）、真实程序（Layer 3）
+- 期望结果：代码尺寸差 15-40%，执行时间差 10-50%（依程序类型而异）
+
+**RQ2: 差距的根因是什么？各因素贡献多大？**
+- 将总差距分解为：基础代码质量(F1)、helper 调用(F2)、map 访问(F3)、Spectre 缓解(F4)、寄存器分配(F5)、分支布局(F6)、verifier 约束(F7)
+- Layer 2 的 7 组因素隔离实验，每组定量回答 "该因素贡献了差距的 X%"
+- 期望结果：F2(helper) + F4(Spectre) 是主要贡献因素（合计 > 50%）
+
+**RQ3: 哪类 BPF 程序从优化中受益最大？**
+- 验证假设 H1（网络策略 > 计算密集）和 H4（top-5 helper 占 80%+ 调用）
+- 在 Layer 3 按程序类别（networking/tracing/security/scheduling）分组对比
+- 期望结果：helper-heavy + map-heavy 的网络策略程序受益最大 → 直接指导 UEOS 策略选择器设计
+
+**RQ4: Spectre 缓解与编译质量是否存在非线性交互？**
+- 验证假设 H2：LLVM 内联 helper 后消除间接跳转 → retpoline 开销一并消失
+- 2×2 factorial 实验：{kernel JIT, llvmbpf} × {mitigations=on, off}
+- 期望结果：交互效应 > 0，即 "优化同时免费消除了部分安全开销"
+
+**RQ5: 多程序场景下的优化空间如何变化？**
+- 验证 H5（联合优化超线性收益）和 H7（多程序超线性退化）
+- 同一 hook 挂 1-64 个程序，测量独立优化 vs 联合优化
+- 期望结果：N>8 后退化超线性，联合优化在 N≥4 时收益超线性
+
+这 5 个 RQ 覆盖了完整的"测量→归因→分类→发现→扩展"链条。RQ1-RQ2 是基础量化，RQ3 驱动策略选择，RQ4-RQ5 是反直觉发现（论文亮点）。
+
+---
+
 ## 一、总体设计
 
 ### 1.1 设计原则
@@ -220,28 +253,108 @@
 }
 ```
 
-### 3.3 测量环境标准化
+### 3.3 测量环境 — 单机约束
 
-所有实验必须满足：
+**硬件**：唯一可用机器，所有 Layer 1-4 测量均在此机器完成。
+
+```
+Machine:  Intel Core Ultra 9 285K (Arrow Lake-S)
+Cores:    24 cores (P-core × 8 + E-core × 16), no HyperThreading
+Freq:     800MHz - 5.8GHz, 当前 governor: powersave
+Cache:    L1d 768K, L1i 1.3M, L2 40M, L3 36M
+RAM:      128GB DDR5, 单 NUMA node
+Kernel:   6.15.11-061511-generic (PREEMPT_DYNAMIC)
+OS:       Ubuntu 24.04.3 LTS
+Spectre:  Enhanced IBRS + IBPB conditional (mitigations ON by default)
+BPF:      CONFIG_BPF_JIT=y, CONFIG_BPF_SYSCALL=y, BTF enabled
+          unprivileged_bpf_disabled=2 (需要 sudo)
+```
+
+**已安装工具链**：
+- clang: 15, 17, 18, 20 (多版本可用于 BCF 式变体生成)
+- llvm-dev: 14, 15, 17, 18, 20
+- libelf-dev, libzstd-dev (llvmbpf 依赖已满足)
+- bpftool: /usr/local/sbin/bpftool
+- Docker + qemu-aarch64-static (可做 ARM cross-arch 测量)
+
+**需要安装/修复**：
+```bash
+# perf 与当前内核版本不匹配，需从源码编译或降级内核
+# 当前可用: /usr/lib/linux-tools/6.14.0-37-generic/perf (可临时用)
+sudo ln -sf /usr/lib/linux-tools/6.14.0-37-generic/perf /usr/local/bin/perf
+# 或者从 6.15 源码编译 perf
+```
+
+**单机约束的影响**：
+
+| 原设计 | 单机适配 | 影响 |
+|--------|---------|------|
+| Spectre on/off 需要重启 | 用 GRUB 菜单切换 `mitigations=off` 重启 | 增加 ~10 min/次 |
+| Cilium pod-to-pod 需要两台机器 | 用 **veth pair + network namespace** 模拟 | 延迟/吞吐数据仅反映单机 |
+| Katran LB 需要流量生成器 | 用 **pktgen** (内核模块) 或 **netns + veth** 自环 | 单机 pps 足以对比 |
+| 多核扩展性测量 | 24 cores 足够 (taskset -c 0-N) | 无影响 |
+| ARM 测量 | Docker + qemu-aarch64-static 或 LLVM cross-compile | 性能数据不真实，但代码质量(指令数)可靠 |
+
+**测量稳定性脚本**：
 
 ```bash
-# CPU 频率锁定（禁止 frequency scaling）
+#!/bin/bash
+# setup_bench_env.sh — 单机 benchmark 环境准备
+
+# 1. CPU 频率锁定
 echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
 
-# 禁用 turbo boost
+# 2. 禁用 turbo boost (Arrow Lake)
 echo 1 | sudo tee /sys/devices/system/cpu/intel_pstate/no_turbo
 
-# NUMA 绑定
-taskset -c 0 numactl --membind=0 ./benchmark
+# 3. 绑定到 P-core (cpu 0-7 通常是 P-core)
+# 验证: lscpu -e 查看 CORE 列
+BENCH_CPUS="0"  # 默认绑定单个 P-core
 
-# 禁用 ASLR（减少 icache 变异）
+# 4. 禁用 ASLR
 echo 0 | sudo tee /proc/sys/kernel/randomize_va_space
 
-# 记录环境信息
-uname -a > env.txt
-cat /proc/cpuinfo | head -30 >> env.txt
-cat /proc/version >> env.txt
-dmesg | grep -i spectre >> env.txt
+# 5. 关闭不必要的后台服务
+sudo systemctl stop cron atd
+
+# 6. 记录环境
+{
+  echo "=== Machine ==="
+  uname -a
+  echo "=== CPU ==="
+  lscpu | head -25
+  echo "=== Governor ==="
+  cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+  echo "=== Turbo ==="
+  cat /sys/devices/system/cpu/intel_pstate/no_turbo
+  echo "=== Spectre ==="
+  cat /sys/devices/system/cpu/vulnerabilities/spectre_v2
+  echo "=== Kernel ==="
+  cat /proc/version
+  echo "=== BPF ==="
+  bpftool version
+} > bench_env.txt
+
+echo "Environment ready. Pinned to CPU $BENCH_CPUS"
+echo "Run benchmarks with: taskset -c $BENCH_CPUS ./benchmark"
+```
+
+**ARM 测量方案（可选扩展）**：
+
+```bash
+# 方案 1: Docker + qemu-aarch64 用户态模拟
+# 优点: 零额外硬件。可测量代码质量（指令数/代码尺寸），不可测量真实性能
+docker run --platform linux/arm64 -v $(pwd):/work ubuntu:24.04 bash -c \
+    "apt update && apt install -y clang llvm && cd /work && ..."
+
+# 方案 2: LLVM cross-compile 只看生成代码质量
+# llvmbpf 支持多 target，可生成 ARM64 native code 分析代码质量
+# 不执行，只统计指令数/代码尺寸/寄存器溢出等静态指标
+clang --target=bpf -c prog.bpf.c -o prog.bpf.o
+./llvmbpf_bench_runner prog.bpf.o --target aarch64 --emit-asm --no-exec
+
+# 方案 3: 论文中说明 "ARM 代码质量分析基于 cross-compile 静态指标"
+# 这足以支持 "UEOS 对 ARM 同样有效" 的论点
 ```
 
 **重复次数**：
@@ -426,10 +539,20 @@ unsigned long long bpf_main(void *ctx) {
 **用例**：选择 helper 调用密集的程序（每个 helper call 在 kernel JIT 中都是 indirect call → retpoline）
 
 ```bash
-# 内核侧控制 Spectre 缓解
-# Boot with: mitigations=off 或 nospectre_v2
-# 对比 default boot
+# 内核侧控制 Spectre 缓解（需要重启，单机约束）
+# 当前状态: Enhanced IBRS + IBPB conditional
+
+# 方案: 修改 GRUB 菜单，两次启动
+# 1. 默认启动 (mitigations=auto) → 运行全部 benchmark → 保存结果
+# 2. 重启 with: GRUB_CMDLINE_LINUX="mitigations=off"
+sudo sed -i 's/GRUB_CMDLINE_LINUX=""/GRUB_CMDLINE_LINUX="mitigations=off"/' /etc/default/grub
+sudo update-grub && sudo reboot
+# 3. 运行相同 benchmark → 保存结果
+# 4. 恢复默认启动
+
 cat /sys/devices/system/cpu/vulnerabilities/spectre_v2
+# 当前: Mitigation: Enhanced / Automatic IBRS; IBPB: conditional
+# mitigations=off: Vulnerable
 ```
 
 ### 5.6 Benchmark 组 F5：寄存器分配
@@ -633,58 +756,77 @@ for prog in all_programs:
 
 在真实应用场景中测量优化的端到端影响。这层回答 "用户能感受到多少改进？"
 
-### 7.2 场景 1：Cilium 网络策略（XDP/TC）
+### 7.2 场景 1：Cilium 网络策略（XDP/TC）— 单机 netns
 
-**设置**：
-- 2 台机器（或 2 个 netns），通过 veth pair 连接
-- Cilium CNI 部署，配置 L3/L4 网络策略
+**设置（单机）**：
+- 2 个 network namespace，通过 veth pair 连接
+- 用 Cilium 的 BPF 程序手动挂载（不需要完整 Cilium 部署）
 - BPF 程序挂载在 TC ingress/egress
+
+```bash
+# 创建 netns + veth pair
+sudo ip netns add ns1
+sudo ip netns add ns2
+sudo ip link add veth1 type veth peer name veth2
+sudo ip link set veth1 netns ns1
+sudo ip link set veth2 netns ns2
+sudo ip netns exec ns1 ip addr add 10.0.0.1/24 dev veth1
+sudo ip netns exec ns2 ip addr add 10.0.0.2/24 dev veth2
+sudo ip netns exec ns1 ip link set veth1 up
+sudo ip netns exec ns2 ip link set veth2 up
+
+# 挂载 Cilium BPF 程序到 TC
+sudo ip netns exec ns1 tc qdisc add dev veth1 clsact
+sudo ip netns exec ns1 tc filter add dev veth1 ingress bpf da obj cilium_bpf_lxc.o sec from-container
+```
 
 **工作负载**：
 - `iperf3` 吞吐量测试（TCP, UDP）
-- `wrk` HTTP 请求延迟测试（P50/P99/P999）
-- `netperf` TCP_RR 延迟测试
+- `netperf` TCP_RR 延迟测试（P50/P99）
 
 **测量**：
-- Baseline: 默认 Cilium（kernel JIT）
-- Optimized: 替换 TC BPF 程序为 llvmbpf -O3 编译版本
-- 指标: 吞吐量 (Gbps/Mpps), 延迟 (P50/P99 μs), CPU 利用率
+- Baseline: 原始 BPF 程序（kernel JIT）
+- Optimized: 替换为 llvmbpf -O3 编译版本
+- 指标: 吞吐量 (Gbps), 延迟 (P50/P99 μs), CPU 利用率
 
 ```bash
-# Cilium 端到端测量
-# 1. 部署 Cilium + 配置策略
-cilium install --version 1.16
+# 吞吐量测量
+sudo ip netns exec ns2 iperf3 -s &
+sudo ip netns exec ns1 iperf3 -c 10.0.0.2 -t 60 -J > baseline.json
 
-# 2. 提取 BPF 程序字节码
-bpftool prog list | grep cilium
-bpftool prog dump xlated id <ID> > cilium_prog.bpf
-
-# 3. 用 llvmbpf 重编译
-./llvmbpf_bench_runner cilium_prog.bpf --opt-level 3 --aot-output cilium_opt.o
-
-# 4. 替换（需要 bpf_prog_replace 或重新加载）
-# 方案 A: 修改 Cilium 加载逻辑使用预编译 native code
-# 方案 B: 用 bpftool prog replace
-
-# 5. 测量
-iperf3 -c <peer> -t 60 -J > baseline.json   # before
-iperf3 -c <peer> -t 60 -J > optimized.json  # after
+# 替换优化后的 BPF 程序
+sudo ip netns exec ns1 tc filter replace dev veth1 ingress bpf da obj cilium_opt.o sec from-container
+sudo ip netns exec ns1 iperf3 -c 10.0.0.2 -t 60 -J > optimized.json
 ```
 
-### 7.3 场景 2：XDP 负载均衡（Katran）
+### 7.3 场景 2：XDP 负载均衡（Katran）— 单机 pktgen
 
-**设置**：
-- Katran XDP L4 负载均衡器
-- 流量生成器（pktgen 或 DPDK TRex）
+**设置（单机）**：
+- Katran XDP L4 负载均衡器挂载在 veth 上
+- 使用内核 pktgen 模块生成流量（零额外硬件）
 
-**工作负载**：
-- 64 字节 UDP 包（最大 pps 测试）
-- HTTP 短连接（真实 LB 场景）
+```bash
+# 方案: veth pair + pktgen
+sudo ip link add xdp0 type veth peer name pktgen0
+sudo ip link set xdp0 up && sudo ip link set pktgen0 up
+# 挂载 Katran XDP 程序到 xdp0
+sudo ip link set dev xdp0 xdp obj katran_balancer.o sec xdp
+
+# 用 pktgen 从 pktgen0 发包
+sudo modprobe pktgen
+echo "add_device pktgen0" > /proc/net/pktgen/kpktgend_0
+echo "pkt_size 64" > /proc/net/pktgen/pktgen0
+echo "count 10000000" > /proc/net/pktgen/pktgen0
+echo "dst 10.0.0.1" > /proc/net/pktgen/pktgen0
+echo "start" > /proc/net/pktgen/pgctrl
+```
+
+**工作负载**：64 字节 UDP 包（最大 pps 测试）
 
 **测量**：
-- pps (packets per second) on single core
-- 多核扩展曲线 (1/2/4/8 cores)
-- 尾延迟 (P99)
+- pps on single P-core (`taskset -c 0`)
+- 多核扩展曲线 (1/2/4/8 P-cores)
+- 替换前后的 pps 差异
 
 ### 7.4 场景 3：Tetragon 安全监控（LSM）
 
@@ -883,9 +1025,13 @@ done
 | kernel JIT vs llvmbpf 差距太小（< 10%） | 论文价值降低 | 聚焦 helper-heavy 程序（差距应更大）；强调 PGO 的增量收益 |
 | BPF_PROG_TEST_RUN 不支持某些 prog type | 无法测量部分程序 | 对 XDP/TC 可用；tracing 类改用实际 hook 触发测量 |
 | 用户态 mock map 与内核 map 性能不一致 | F3 数据不可靠 | 用 kernel bench 数据校准 mock map overhead |
-| BCF 数据集无法获取 | 数据集规模缩小 | 自建数据集（从 Cilium/bcc/selftests 编译） |
-| Spectre 实验需要重启内核 | 实验周期长 | 使用两台机器或 VM，分别配置 mitigations=on/off |
+| BCF 数据集无法获取 | 数据集规模缩小 | 自建数据集（从 Cilium/bcc/selftests 编译，本机有 clang 15/17/18/20） |
+| Spectre 实验需要重启（单机） | 每次切换 ~10min | 批量运行：默认启动跑完全部 → 重启 mitigations=off 跑完全部 → 只需重启 2 次 |
+| 网络 benchmark 无法双机（单机） | 吞吐量受 veth overhead 影响 | 用 netns+veth，论文说明 "单机 veth 测量，绝对值可能偏保守但相对差异可靠" |
+| perf 与内核版本不匹配 | 无硬件计数器 | 用 6.14 的 perf 临时替代，或从 6.15 源码编译 perf |
+| ARM 无真实硬件 | 无真实性能数据 | 用 LLVM cross-compile 做代码质量静态分析（指令数/溢出数），论文中标注 |
 | llvmbpf pass 消融需要修改代码 | 开发周期 | 先用 -O0/-O1/-O2/-O3 粗粒度对比，再逐步细化 |
+| Arrow Lake P-core vs E-core 异构 | 性能数据不一致 | 所有 benchmark 绑定 P-core (cpu 0-7)，用 `taskset` 固定 |
 
 ---
 
