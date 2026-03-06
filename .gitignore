@@ -2,9 +2,11 @@ output*
 venv
 .vscode
 dump*
+!micro/dump_all_jit.sh
 wasm-wasmtime.exe
 __pycache__/
 *.pyc
 *.kernel.bin
 *.llvmbpf.bin
+micro/jit-dumps/
 third-party/
