@@ -32,9 +32,13 @@ bpf-benchmark/
 │   ├── bpf_performance/      # Microsoft: cross-platform BPF helper perf (60+ tests)
 │   ├── tail-call-bench/      # Tail call chain cost measurement (0-33 depth)
 │   └── bpf-bench/            # Hash function & hashmap perf (cycle-precise)
-├── docs/                     # Analysis documents
-│   ├── linux-bench-framework-analysis.md   # Linux kernel bench framework & BPF infra
-│   └── third-party-analysis.md             # Third-party project analysis
+├── docs/                     # Research & design documents
+│   ├── ebpf-research-landscape.md          # Research landscape & UEOS unified direction
+│   ├── benchmark-framework-design.md       # Benchmark framework detailed design (Layer 1-4)
+│   └── references/                         # Background analysis documents
+│       ├── linux-bench-framework-analysis.md
+│       ├── third-party-analysis.md
+│       └── ebpf-benchmark-gap-analysis.md
 └── README.md                 # This file
 ```
 
