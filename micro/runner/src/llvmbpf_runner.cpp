@@ -225,6 +225,11 @@ uint64_t helper_bpf_map_update_elem(
     return 0;
 }
 
+static uint64_t helper_noop(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t)
+{
+    return 0;
+}
+
 class lowmem_buffer {
 public:
     explicit lowmem_buffer(size_t size)
@@ -359,6 +364,9 @@ sample_result run_llvmbpf(const cli_options &options)
     const auto load_code_end = clock_type::now();
     vm.register_external_function(1, "bpf_map_lookup_elem", (void *)helper_bpf_map_lookup_elem);
     vm.register_external_function(2, "bpf_map_update_elem", (void *)helper_bpf_map_update_elem);
+    for (int id = 3; id <= 220; id++) {
+        vm.register_external_function(id, "bpf_helper_" + std::to_string(id), (void *)helper_noop);
+    }
 
     const auto compile_start = clock_type::now();
     auto compiled = vm.compile();

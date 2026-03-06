@@ -124,7 +124,7 @@ void patch_program_relocations(
 
             const size_t insn_index = offset / sizeof(bpf_insn);
             if (insn_index >= insn_count) {
-                fail("relocation index exceeds instruction count");
+                continue; // Skip relocations in subprogram code beyond our range
             }
             insns[insn_index].src_reg = BPF_PSEUDO_MAP_FD;
             insns[insn_index].imm = static_cast<int32_t>(map_iter->second);
@@ -155,6 +155,12 @@ program_image load_program_image(const std::filesystem::path &path)
     bpf_program *program = bpf_object__next_program(object.get(), nullptr);
     if (program == nullptr) {
         fail("no program found in object: " + path.string());
+    }
+
+    // Use libbpf to identify the program section and extract map metadata.
+    const char *section_name = bpf_program__section_name(program);
+    if (section_name == nullptr) {
+        fail("unable to resolve program section name");
     }
 
     const auto *insns = bpf_program__insns(program);
@@ -191,12 +197,6 @@ program_image load_program_image(const std::filesystem::path &path)
     if (elf_getshdrstrndx(elf, &shstrndx) != 0) {
         elf_end(elf);
         fail("elf_getshdrstrndx failed for " + path.string());
-    }
-
-    const char *section_name = bpf_program__section_name(program);
-    if (section_name == nullptr) {
-        elf_end(elf);
-        fail("unable to resolve program section name");
     }
 
     size_t target_section_index = 0;

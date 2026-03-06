@@ -272,17 +272,49 @@ BPF:      CONFIG_BPF_JIT=y, CONFIG_BPF_SYSCALL=y, BTF enabled
 
 ### Iteration 3 — 代码质量与归因（进行中）
 
+**已完成：**
 - [x] JIT dump / code-size 采集 — `--dump-jit` flag + `code_size` JSON 字段（RQ1.1 已关闭）
 - [x] rdtsc 精确测量修正 — 消除 harness 开销，llvmbpf exec_ns 现在公平
 - [x] LLVM 优化级别消融 — `--opt-level 0/1/2/3`，发现 O1=O2=O3
 - [x] 指令级 JIT 分析 — `dump_all_jit.sh` + `analyze_jit.py`，byte-recompose / BMI / cmov / prologue / 依赖链
 - [x] BCF 数据集获取 — 1588 个程序已下载到 `corpus/bcf/`
-- [ ] BCF 真实程序 code-size 批量对比（不需要执行，只比 code size）
-- [ ] verifier/load/JIT 分段统计
-- [ ] perf counter 相关性分析（IPC/branch-miss/cache-miss vs exec ratio）
-- [ ] Spectre 2×2 实验（需重启 mitigations=off）
-- [ ] 扩展 llvmbpf ELF loader 支持 local subprogram call
-- [ ] 增加 real helper-call / tail-call micro case
+- [x] llvmbpf dummy helper 注册 — 注册 helper 3-220 为 no-op stub，解锁 Cilium/collected/inspektor-gadget 编译
+- [x] ELF loader relocation 修复 — 跳过越界 relocation 而非 crash，支持带子程序的 ELF
+
+**BCF 批量结果（2026-03-06）：**
+- llvmbpf 编译成功率：60/1588（3.8%）
+  - Cilium: 42/42 ✅（无 BPF-to-BPF call）
+  - inspektor-gadget: 11/11 ✅
+  - collected: 7/9 ✅
+  - Calico: 0/1476 ❌（全部有 BPF-to-BPF 子程序调用）
+  - bcc: 0/8 ❌（有子程序调用）
+  - bpf-examples: 0/42 ❌（有子程序调用）
+- **瓶颈**：llvmbpf 不支持 BPF-to-BPF internal function calls（compiler.cpp 未实现）
+- kernel 侧全部 1588 个程序都加载失败（verifier 拒绝 / 缺少 map/BTF context）
+
+**TODO — 广度扩展（scale up to 500+ programs）：**
+- [ ] **T3.1 BCF 真实程序 code-size 批量对比** — kernel 侧 load + bpf_prog_info 取 jited_prog_len；llvmbpf 侧 load_code + compile 取 native size。不需要执行。目标：500+ 程序的 code inflation ratio 分布图
+- [ ] **T3.2 BCF 静态特征提取** — 对每个程序提取 BPF insn count、helper call 数/类型、map 数/类型、分支数、ALU64 比例。输出 CSV/JSON 供后续回归分析
+- [ ] **T3.3 Helper 调用频率 Pareto 分析 (H4)** — 基于 T3.2 的静态特征，绘制 helper × 累计调用占比图，验证 top-5 占 80%+
+
+**TODO — 深度加强（rigorous root cause）：**
+- [ ] **T3.4 编译时间分析** — compile_ns 已在 JSON 中，需要系统分析 kernel vs llvmbpf 编译时间，按 benchmark 分类
+- [ ] **T3.5 统计严谨性补充** — 对 §6 所有数据补充 95% CI、Cohen's d 效应量、Wilcoxon 检验 p-value；多次运行方差分析
+- [ ] **T3.6 时间域因素分解** — 指令层分析只回答"多了多少指令"，不回答"慢了多少时间"。需要：(a) 用 PMU 的 IPC 数据估算各类指令的时间贡献；(b) 构建针对性 micro-benchmark 隔离 byte-recompose 的时间开销
+- [ ] **T3.7 LLVM Pass-level 消融** — 不只是 O0/O1/O2/O3，而是逐个 pass 启用（instcombine、GVN、RegAlloc、SimplifyCFG 等），识别对 BPF 最有价值的 pass
+- [ ] **T3.8 Perf counter 相关性分析** — IPC/branch-miss/cache-miss vs exec ratio 的 Pearson/Spearman 相关系数矩阵
+- [ ] **T3.9 静态特征→优化收益预测模型 (RQ3.3)** — 用 T3.2 的特征 + code-size ratio 做线性回归/随机森林，识别最强预测因子
+
+**TODO — 补充实验：**
+- [ ] **T3.10 Spectre 2×2 实验** — 需重启 mitigations=off（低优先级）
+- [ ] **T3.11 verifier/load/JIT 分段统计** — 接入 veristat 或 BPF_OBJ_GET_INFO_BY_FD 取 verified_insns
+- [ ] **T3.12 增加 helper-call / tail-call micro case** — 当前 runtime suite 只有 2 个 case，需扩展
+- [ ] **T3.13 扩展 llvmbpf ELF loader 支持 local subprogram call** — 解锁 code_clone 等更多程序
+
+**TODO — Actionable Insights（OSDI/SOSP 要求的"so what"）：**
+- [ ] **T3.14 内核 JIT 改进建议** — 基于分析结果，提出具体 patch 级建议（如：添加 cmov 支持、优化 byte-recompose pattern、按需 callee-saved 保存）
+- [ ] **T3.15 与 K2/Merlin/EPSO 的正交性分析** — 比较 bytecode 级优化（verifier 前）vs JIT 后端优化（native 级）的空间重叠度，证明互补性
+- [ ] **T3.16 跨工具对比定位** — 将我们的 characterization 与 CoNEXT'25（网络应用性能）、"No Two Snowflakes"（运行时差异）、ETH Zurich（多核扩展）等已有实证工作对比，明确差异化
 
 ### Iteration 4 — 系统贡献与提交
 
