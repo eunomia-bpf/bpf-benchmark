@@ -5,6 +5,39 @@
 #include <stdexcept>
 #include <string_view>
 
+namespace {
+
+std::string json_escape(std::string_view input)
+{
+    std::string output;
+    output.reserve(input.size());
+    for (const char ch : input) {
+        switch (ch) {
+        case '\\':
+            output += "\\\\";
+            break;
+        case '"':
+            output += "\\\"";
+            break;
+        case '\n':
+            output += "\\n";
+            break;
+        case '\r':
+            output += "\\r";
+            break;
+        case '\t':
+            output += "\\t";
+            break;
+        default:
+            output += ch;
+            break;
+        }
+    }
+    return output;
+}
+
+} // namespace
+
 [[noreturn]] void fail(const std::string &message)
 {
     throw std::runtime_error(message);
@@ -70,6 +103,10 @@ cli_options parse_args(int argc, char **argv)
             options.input_size = static_cast<uint32_t>(std::stoul(argv[++index]));
             continue;
         }
+        if (current == "--perf-counters") {
+            options.perf_counters = true;
+            continue;
+        }
         fail("unknown or incomplete argument: " + std::string(current));
     }
 
@@ -89,6 +126,37 @@ void print_json(const sample_result &sample)
         << "\"compile_ns\":" << sample.compile_ns << ","
         << "\"exec_ns\":" << sample.exec_ns << ","
         << "\"result\":" << sample.result << ","
-        << "\"retval\":" << sample.retval
+        << "\"retval\":" << sample.retval << ","
+        << "\"phases_ns\":{";
+
+    for (size_t index = 0; index < sample.phases_ns.size(); ++index) {
+        if (index != 0) {
+            std::cout << ",";
+        }
+        const auto &phase = sample.phases_ns[index];
+        std::cout << "\"" << phase.name << "\":" << phase.ns;
+    }
+
+    std::cout
+        << "},"
+        << "\"perf_counters\":{";
+
+    for (size_t index = 0; index < sample.perf_counters.counters.size(); ++index) {
+        if (index != 0) {
+            std::cout << ",";
+        }
+        const auto &counter = sample.perf_counters.counters[index];
+        std::cout << "\"" << json_escape(counter.name) << "\":" << counter.value;
+    }
+
+    std::cout
+        << "},"
+        << "\"perf_counters_meta\":{"
+        << "\"requested\":" << (sample.perf_counters.requested ? "true" : "false") << ","
+        << "\"collected\":" << (sample.perf_counters.collected ? "true" : "false") << ","
+        << "\"include_kernel\":" << (sample.perf_counters.include_kernel ? "true" : "false") << ","
+        << "\"scope\":\"" << json_escape(sample.perf_counters.scope) << "\","
+        << "\"error\":\"" << json_escape(sample.perf_counters.error) << "\""
+        << "}"
         << "}\n";
 }

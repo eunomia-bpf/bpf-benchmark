@@ -43,6 +43,7 @@ add_executable(micro_exec
     src/kernel_runner.cpp
     src/llvmbpf_runner.cpp
     src/main.cpp
+    src/perf_counters.cpp
 )
 
 target_include_directories(micro_exec

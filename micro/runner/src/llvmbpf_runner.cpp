@@ -124,14 +124,24 @@ uint64_t read_result_value(const userspace_map_state &state)
 
 sample_result run_llvmbpf(const cli_options &options)
 {
+    const auto program_image_start = clock_type::now();
     const auto image = load_program_image(options.program);
+    const auto program_image_end = clock_type::now();
+
+    const auto memory_prepare_start = clock_type::now();
     auto input_bytes = materialize_memory(options.memory, options.input_size);
+    const auto memory_prepare_end = clock_type::now();
+
+    const auto map_prepare_start = clock_type::now();
     auto map_state = initialize_map_state(image, input_bytes);
+    const auto map_prepare_end = clock_type::now();
 
     bpftime::llvmbpf_vm vm;
+    const auto load_code_start = clock_type::now();
     if (vm.load_code(image.code.data(), image.code.size()) < 0) {
         fail("llvmbpf load_code failed: " + vm.get_error_message());
     }
+    const auto load_code_end = clock_type::now();
     vm.register_external_function(1, "bpf_map_lookup_elem", (void *)helper_bpf_map_lookup_elem);
     vm.register_external_function(2, "bpf_map_update_elem", (void *)helper_bpf_map_update_elem);
 
@@ -145,20 +155,33 @@ sample_result run_llvmbpf(const cli_options &options)
     uint64_t retval = 0;
     uint8_t dummy_ctx[8] = {};
     active_map_state = &map_state;
-    const auto exec_start = clock_type::now();
-    for (uint32_t index = 0; index < options.repeat; ++index) {
-        if (vm.exec(dummy_ctx, sizeof(dummy_ctx), retval) < 0) {
-            active_map_state = nullptr;
-            fail("llvmbpf exec failed: " + vm.get_error_message());
-        }
-    }
-    const auto exec_end = clock_type::now();
+    clock_type::time_point exec_start {};
+    clock_type::time_point exec_end {};
+    auto perf_counters = measure_perf_counters(
+        {.enabled = options.perf_counters, .include_kernel = false, .scope = "exec_window"},
+        [&]() {
+            exec_start = clock_type::now();
+            for (uint32_t index = 0; index < options.repeat; ++index) {
+                if (vm.exec(dummy_ctx, sizeof(dummy_ctx), retval) < 0) {
+                    fail("llvmbpf exec failed: " + vm.get_error_message());
+                }
+            }
+            exec_end = clock_type::now();
+        });
     active_map_state = nullptr;
 
     sample_result sample;
-    sample.compile_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(compile_end - compile_start).count();
-    sample.exec_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(exec_end - exec_start).count() / options.repeat;
+    sample.compile_ns = elapsed_ns(compile_start, compile_end);
+    sample.exec_ns = elapsed_ns(exec_start, exec_end) / options.repeat;
     sample.result = read_result_value(map_state);
     sample.retval = static_cast<uint32_t>(retval);
+    sample.phases_ns = {
+        {"program_image_ns", elapsed_ns(program_image_start, program_image_end)},
+        {"memory_prepare_ns", elapsed_ns(memory_prepare_start, memory_prepare_end)},
+        {"map_prepare_ns", elapsed_ns(map_prepare_start, map_prepare_end)},
+        {"vm_load_code_ns", elapsed_ns(load_code_start, load_code_end)},
+        {"jit_compile_ns", sample.compile_ns},
+    };
+    sample.perf_counters = std::move(perf_counters);
     return sample;
 }

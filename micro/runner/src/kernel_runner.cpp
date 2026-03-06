@@ -40,7 +40,9 @@ sample_result run_kernel(const cli_options &options)
 {
     libbpf_set_print(libbpf_log);
 
+    const auto memory_prepare_start = std::chrono::steady_clock::now();
     auto input_bytes = materialize_memory(options.memory, options.input_size);
+    const auto memory_prepare_end = std::chrono::steady_clock::now();
     if (options.input_size != 0 && input_bytes.size() > options.input_size) {
         fail("input larger than kernel input map size");
     }
@@ -48,7 +50,7 @@ sample_result run_kernel(const cli_options &options)
         input_bytes.resize(options.input_size, 0);
     }
 
-    const auto compile_start = std::chrono::steady_clock::now();
+    const auto object_open_start = std::chrono::steady_clock::now();
     bpf_object_open_opts open_opts = {};
     open_opts.sz = sizeof(open_opts);
     bpf_object *raw_object = bpf_object__open_file(options.program.c_str(), &open_opts);
@@ -56,13 +58,15 @@ sample_result run_kernel(const cli_options &options)
     if (open_error != 0) {
         fail("bpf_object__open_file failed: " + libbpf_error_string(open_error));
     }
+    const auto object_open_end = std::chrono::steady_clock::now();
     bpf_object_ptr object(raw_object);
 
+    const auto object_load_start = std::chrono::steady_clock::now();
     const int load_error = bpf_object__load(object.get());
     if (load_error != 0) {
         fail("bpf_object__load failed: " + libbpf_error_string(-load_error));
     }
-    const auto compile_end = std::chrono::steady_clock::now();
+    const auto object_load_end = std::chrono::steady_clock::now();
 
     bpf_program *program = bpf_object__next_program(object.get(), nullptr);
     if (program == nullptr) {
@@ -88,12 +92,14 @@ sample_result run_kernel(const cli_options &options)
 
     const uint32_t key = 0;
     uint64_t zero = 0;
+    const auto map_prepare_start = std::chrono::steady_clock::now();
     if (bpf_map_update_elem(input_fd, &key, input_bytes.data(), BPF_ANY) != 0) {
         fail("bpf_map_update_elem(input_map) failed: " + std::string(strerror(errno)));
     }
     if (bpf_map_update_elem(result_fd, &key, &zero, BPF_ANY) != 0) {
         fail("bpf_map_update_elem(result_map) failed: " + std::string(strerror(errno)));
     }
+    const auto map_prepare_end = std::chrono::steady_clock::now();
 
     std::vector<uint8_t> packet(64, 0);
     std::vector<uint8_t> packet_out(packet.size(), 0);
@@ -105,20 +111,40 @@ sample_result run_kernel(const cli_options &options)
     test_opts.data_out = packet_out.data();
     test_opts.data_size_out = packet_out.size();
 
-    const int run_error = bpf_prog_test_run_opts(program_fd, &test_opts);
+    std::chrono::steady_clock::time_point run_wall_start {};
+    std::chrono::steady_clock::time_point run_wall_end {};
+    int run_error = 0;
+    auto perf_counters = measure_perf_counters(
+        {.enabled = options.perf_counters, .include_kernel = true, .scope = "exec_window"},
+        [&]() {
+            run_wall_start = std::chrono::steady_clock::now();
+            run_error = bpf_prog_test_run_opts(program_fd, &test_opts);
+            run_wall_end = std::chrono::steady_clock::now();
+        });
     if (run_error != 0) {
         fail("bpf_prog_test_run_opts failed: " + std::string(strerror(errno)));
     }
 
     uint64_t result = 0;
+    const auto result_read_start = std::chrono::steady_clock::now();
     if (bpf_map_lookup_elem(result_fd, &key, &result) != 0) {
         fail("bpf_map_lookup_elem(result_map) failed: " + std::string(strerror(errno)));
     }
+    const auto result_read_end = std::chrono::steady_clock::now();
 
     sample_result sample;
-    sample.compile_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(compile_end - compile_start).count();
+    sample.compile_ns = elapsed_ns(object_open_start, object_open_end) + elapsed_ns(object_load_start, object_load_end);
     sample.exec_ns = test_opts.duration;
     sample.result = result;
     sample.retval = test_opts.retval;
+    sample.phases_ns = {
+        {"memory_prepare_ns", elapsed_ns(memory_prepare_start, memory_prepare_end)},
+        {"object_open_ns", elapsed_ns(object_open_start, object_open_end)},
+        {"object_load_ns", elapsed_ns(object_load_start, object_load_end)},
+        {"map_prepare_ns", elapsed_ns(map_prepare_start, map_prepare_end)},
+        {"prog_run_wall_ns", elapsed_ns(run_wall_start, run_wall_end)},
+        {"result_read_ns", elapsed_ns(result_read_start, result_read_end)},
+    };
+    sample.perf_counters = std::move(perf_counters);
     return sample;
 }

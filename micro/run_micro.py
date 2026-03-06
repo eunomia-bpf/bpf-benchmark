@@ -28,6 +28,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output", help="Override JSON output path.")
     parser.add_argument("--cpu", help="Pin child processes to a specific CPU via taskset.")
     parser.add_argument(
+        "--perf-counters",
+        action="store_true",
+        help="Collect exec-window perf_event counters when available.",
+    )
+    parser.add_argument(
         "--regenerate-inputs",
         action="store_true",
         help="Force regeneration of generated inputs.",
@@ -159,7 +164,98 @@ def parse_helper_output(stdout: str) -> dict[str, int]:
     return json.loads(payload[-1])
 
 
-def resolve_helper_command(suite: SuiteSpec, runtime, benchmark, memory_file: Path | None, repeat: int) -> list[str]:
+def summarize_phase_timings(samples: list[dict[str, object]]) -> dict[str, dict[str, float | int | None]]:
+    buckets: dict[str, list[int]] = {}
+    for sample in samples:
+        for name, value in sample.get("phases_ns", {}).items():
+            buckets.setdefault(str(name), []).append(int(value))
+    return {name: ns_summary(values) for name, values in buckets.items()}
+
+
+def summarize_named_counters(samples: list[dict[str, object]], field_name: str) -> dict[str, dict[str, float | int | None]]:
+    buckets: dict[str, list[int]] = {}
+    for sample in samples:
+        for name, value in sample.get(field_name, {}).items():
+            buckets.setdefault(str(name), []).append(int(value))
+    return {name: ns_summary(values) for name, values in buckets.items()}
+
+
+def summarize_perf_counter_meta(samples: list[dict[str, object]]) -> dict[str, object]:
+    metas = [sample.get("perf_counters_meta", {}) for sample in samples]
+    hardware_counter_names = (
+        "cycles",
+        "instructions",
+        "branches",
+        "branch_misses",
+        "cache_references",
+        "cache_misses",
+    )
+    software_counter_names = (
+        "task_clock_ns",
+        "context_switches",
+        "cpu_migrations",
+        "page_faults",
+    )
+    collected_samples = sum(1 for meta in metas if meta.get("collected"))
+    errors = Counter(str(meta.get("error", "")) for meta in metas if meta.get("error"))
+    include_kernel = next((meta.get("include_kernel") for meta in metas if meta.get("collected")), None)
+    scope = next((meta.get("scope") for meta in metas if meta.get("scope")), "exec_window")
+    hardware_counters_observed = any(
+        any(int(sample.get("perf_counters", {}).get(name, 0)) > 0 for name in hardware_counter_names)
+        for sample in samples
+    )
+    software_counters_observed = any(
+        any(int(sample.get("perf_counters", {}).get(name, 0)) > 0 for name in software_counter_names)
+        for sample in samples
+    )
+    return {
+        "requested": any(bool(meta.get("requested")) for meta in metas),
+        "collected_samples": collected_samples,
+        "include_kernel": include_kernel,
+        "scope": scope,
+        "hardware_counters_observed": hardware_counters_observed,
+        "software_counters_observed": software_counters_observed,
+        "errors": dict(errors),
+    }
+
+
+def derive_perf_metrics(counter_summary: dict[str, dict[str, float | int | None]]) -> dict[str, float]:
+    derived: dict[str, float] = {}
+
+    def median_of(name: str) -> float | None:
+        summary = counter_summary.get(name)
+        if not summary:
+            return None
+        value = summary.get("median")
+        if value is None:
+            return None
+        return float(value)
+
+    cycles = median_of("cycles")
+    instructions = median_of("instructions")
+    branches = median_of("branches")
+    branch_misses = median_of("branch_misses")
+    cache_refs = median_of("cache_references")
+    cache_misses = median_of("cache_misses")
+
+    if cycles not in (None, 0.0) and instructions is not None:
+        derived["ipc_median"] = instructions / cycles
+    if branches not in (None, 0.0) and branch_misses is not None:
+        derived["branch_miss_rate_median"] = branch_misses / branches
+    if cache_refs not in (None, 0.0) and cache_misses is not None:
+        derived["cache_miss_rate_median"] = cache_misses / cache_refs
+
+    return derived
+
+
+def resolve_helper_command(
+    suite: SuiteSpec,
+    runtime,
+    benchmark,
+    memory_file: Path | None,
+    repeat: int,
+    perf_counters: bool,
+) -> list[str]:
     binary = str(suite.build.runner_binary)
     if runtime.mode == "llvmbpf":
         command = [
@@ -172,6 +268,9 @@ def resolve_helper_command(suite: SuiteSpec, runtime, benchmark, memory_file: Pa
         ]
         if memory_file is not None:
             command.extend(["--memory", str(memory_file)])
+        if perf_counters:
+            command.append("--perf-counters")
+            return ["sudo", "-n", *command]
         return command
 
     if runtime.mode == "kernel":
@@ -187,6 +286,8 @@ def resolve_helper_command(suite: SuiteSpec, runtime, benchmark, memory_file: Pa
         ]
         if memory_file is not None:
             command.extend(["--memory", str(memory_file)])
+        if perf_counters:
+            command.append("--perf-counters")
         if runtime.require_sudo:
             return ["sudo", "-n", *command]
         return command
@@ -205,8 +306,8 @@ def main() -> int:
     benchmarks = select_benchmarks(args.benches, suite)
     runtimes = select_runtimes(args.runtimes, suite)
 
-    iterations = args.iterations or suite.defaults.iterations
-    warmups = args.warmups or suite.defaults.warmups
+    iterations = args.iterations if args.iterations is not None else suite.defaults.iterations
+    warmups = args.warmups if args.warmups is not None else suite.defaults.warmups
     output_path = Path(args.output).resolve() if args.output else suite.defaults.output
 
     ensure_artifacts_built(suite, args.build_bpftool)
@@ -232,7 +333,8 @@ def main() -> int:
         "defaults": {
             "iterations": iterations,
             "warmups": warmups,
-            "repeat": args.repeat or suite.defaults.repeat,
+            "repeat": args.repeat if args.repeat is not None else suite.defaults.repeat,
+            "perf_counters": args.perf_counters,
         },
         "benchmarks": [],
     }
@@ -251,8 +353,15 @@ def main() -> int:
 
         print(f"[bench] {benchmark.name}")
         for runtime in runtimes:
-            repeat = args.repeat or runtime.default_repeat
-            command = resolve_helper_command(suite, runtime, benchmark, memory_file, repeat)
+            repeat = args.repeat if args.repeat is not None else runtime.default_repeat
+            command = resolve_helper_command(
+                suite,
+                runtime,
+                benchmark,
+                memory_file,
+                repeat,
+                args.perf_counters,
+            )
 
             for _ in range(warmups):
                 parse_helper_output(run_command(command, args.cpu).stdout)
@@ -270,6 +379,7 @@ def main() -> int:
             compile_values = [sample["compile_ns"] for sample in samples]
             exec_values = [sample["exec_ns"] for sample in samples]
             result_values = [sample["result"] for sample in samples]
+            perf_counter_summary = summarize_named_counters(samples, "perf_counters")
 
             run_record = {
                 "runtime": runtime.name,
@@ -282,6 +392,10 @@ def main() -> int:
                 "samples": samples,
                 "compile_ns": ns_summary(compile_values),
                 "exec_ns": ns_summary(exec_values),
+                "phases_ns": summarize_phase_timings(samples),
+                "perf_counters": perf_counter_summary,
+                "perf_counters_meta": summarize_perf_counter_meta(samples),
+                "derived_metrics": derive_perf_metrics(perf_counter_summary),
                 "result_distribution": dict(Counter(str(value) for value in result_values)),
             }
             benchmark_record["runs"].append(run_record)

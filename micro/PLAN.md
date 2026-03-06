@@ -2,17 +2,21 @@
 
 ## 目标
 
-先把 `micro/` 落成一个可以直接比较 `kernel eBPF` 和 `llvmbpf` 的微基准层，不等 macro 数据集全部就绪。当前阶段只做一件事：
+先把 `micro/` 落成一个可直接比较 `kernel eBPF` 和 `llvmbpf` 的微基准层，不等 macro 数据集全部就绪。
 
-- 为每个 benchmark 维护一份单独的 `*.bpf.c` 源文件
-- 用单一 `programs/*.bpf.o` 产物保证两侧加载完全一致
-- 用声明式 suite + 统一 runner 采集 load/JIT 时间、执行时间和结果校验
+## 当前设计
 
-这样可以先把“可对照的纯计算基线”跑通，再往设计文档里的 F2-F7 因素隔离实验扩展。
+- 每个 benchmark 维护一份单独的 `programs/*.bpf.c`，避免 runtime wrapper 分叉。
+- `programs/common.h` 承担公共 helper 和 map-backed wrapper，benchmark 私有逻辑留在各自源文件里。
+- 两条 runtime 都加载同一个 `programs/*.bpf.o`，保证比较的是同一份 ELF，而不是两套实现。
+- `config/suite.yaml` 负责实验描述；`run_micro.py` 负责 orchestration；`micro_exec` 负责 runtime 细节。
+- `llvmbpf` 通过 ELF loader 读取同一个 `.bpf.o`，并在 userspace 模拟 `input_map/result_map`。
+- `kernel` 通过 `libbpf` + `BPF_PROG_TEST_RUN` 直接加载和执行同一个 `.bpf.o`。
+- 当前结果 JSON 已记录 `compile_ns` / `exec_ns`、phase breakdown，以及可选的 `perf_event_open` 执行窗口计数器。
 
-## 当前范围
+这样可以先把“同程序、双 runtime”的纯计算基线跑通，再扩展到设计文档里的因素隔离实验。
 
-### 已纳入
+## 当前纳入
 
 - `llvmbpf` runtime（vendored `vendor/llvmbpf`）
 - `kernel` runtime（vendored `vendor/libbpf` + `BPF_PROG_TEST_RUN`）
@@ -25,49 +29,12 @@
 - 单一 `programs/*.bpf.o` 产物供两个 runtime 共用
 - 第三方方案吸收说明（见 `THIRD_PARTY_NOTES.md`）
 
-### 暂不阻塞当前目录创建
+## 暂不纳入
 
-- `bpftool prog profile` / `perf_event_open` 硬件计数器
+- `bpftool prog profile`
 - pass ablation
 - Spectre on/off 双启动实验
 - Macro benchmark 数据集批跑
-
-## 目录约定
-
-```text
-micro/
-├── PLAN.md
-├── README.md
-├── THIRD_PARTY_NOTES.md
-├── Makefile
-├── benchmark_catalog.py
-├── config/
-│   └── suite.yaml
-├── input_generators.py
-├── run_micro.py
-├── runner/
-│   ├── CMakeLists.txt
-│   ├── include/
-│   └── src/
-├── generated-inputs/
-├── programs/
-│   ├── Makefile
-│   ├── common.h
-│   ├── *.bpf.c
-│   └── *.bpf.o           # single build artifact used by both runtimes
-├── build/
-└── results/
-```
-
-## 当前执行方式
-
-- `run_micro.py` 读取 `config/suite.yaml`
-- `Makefile` 统一构建 `libbpf`、`llvmbpf` helper、single-program object 和 vendored `bpftool`
-- `micro_exec` 负责实际执行：
-  - `run-llvmbpf`
-  - `run-kernel`
-- 两条 runtime 都加载同一个 `programs/*.bpf.o`
-- Python runner 只负责 orchestration，不再负责 runtime 细节
 
 ## 完成标准
 
@@ -81,6 +48,6 @@ micro/
 ## 下一步
 
 - 把 F2 helper / F3 map / F6 branch layout 做成独立实验组
-- 接 `perf stat` 或 `perf_event_open` 收 IPC / branch-miss / cache-miss
+- 扩展 `perf_event_open` 采集面到 compile/load 阶段
 - 接 `bpftool prog dump jited` / `bpftool prog profile`
 - 增加 verifier/JIT/load 分段统计

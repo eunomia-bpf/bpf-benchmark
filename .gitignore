@@ -3,9 +3,3 @@ venv
 .vscode
 dump*
 wasm-wasmtime.exe
-micro/__pycache__/
-micro/generated-inputs/
-micro/results/
-micro/build/
-micro/programs/*.bpf.o
-micro/programs/*.bpf.bin
