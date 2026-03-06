@@ -1,0 +1,311 @@
+suite_name: micro_pure_jit
+
+paths:
+  program_dir: micro/programs
+
+toolchains:
+  llvmbpf:
+    root: vendor/llvmbpf
+  libbpf:
+    root: vendor/libbpf
+  bpftool:
+    root: vendor/bpftool
+
+build:
+  commands:
+    micro_exec: [make, -C, micro, micro_exec]
+    programs: [make, -C, micro, programs]
+    bpftool: [make, -C, micro, vendor_bpftool]
+  runner_binary: micro/build/runner/micro_exec
+  bpftool_binary: micro/build/vendor/bpftool/bpftool
+
+defaults:
+  iterations: 10
+  warmups: 2
+  repeat: 200
+  runtimes: [llvmbpf, kernel]
+  output: micro/results/pure_jit.latest.json
+
+benchmark_defaults:
+  io_mode: staged
+
+analysis:
+  baseline_benchmark: simple
+
+runtimes:
+  - name: llvmbpf
+    label: llvmbpf LLVM JIT
+    mode: llvmbpf
+    repeat: 200
+    aliases: [llvm]
+
+  - name: kernel
+    label: kernel eBPF
+    mode: kernel
+    repeat: 200
+    sudo: true
+
+benchmarks:
+  - name: simple
+    description: Return-only baseline
+    category: baseline
+    family: baseline
+    level: tiny
+    hypothesis: Captures the staged harness floor for baseline subtraction
+    base_name: simple
+    kernel_input_size: 64
+    input_generator: simple
+    expected_result: 12345678
+    tags: [baseline, pure-jit]
+
+  - name: memory_pair_sum
+    description: Fixed-size two-word memory baseline
+    category: baseline
+    family: baseline
+    level: small
+    hypothesis: Minimal fixed-width load pair with almost no control-flow
+    base_name: memory_pair_sum
+    kernel_input_size: 16
+    input_generator: memory_pair_sum
+    expected_result: 2459565876494606865
+    tags: [memory, baseline, pure-jit]
+
+  - name: bitcount
+    description: Kernighan popcount over generated u64 input
+    category: alu-mix
+    family: popcount
+    level: medium
+    hypothesis: Favors stronger scalar optimization and loop code generation
+    base_name: bitcount
+    kernel_input_size: 2056
+    input_generator: bitcount
+    expected_result: 3035568289764064166
+    tags: [bitops, pure-jit]
+
+  - name: log2_fold
+    description: Fold log2 over generated u64 input
+    category: alu-mix
+    family: log2-fold
+    level: medium
+    hypothesis: Mixes compares and bit tests with modest control-flow
+    base_name: log2_fold
+    kernel_input_size: 1032
+    input_generator: log2_fold
+    expected_result: 9
+    tags: [bitops, branch, pure-jit]
+
+  - name: dep_chain_short
+    description: Short serialized dependency chain over generated u64 input
+    category: dependency-ilp
+    family: dep-chain
+    level: short
+    hypothesis: Long scalar dependencies reduce ILP and stress single-chain scheduling
+    base_name: dep_chain_short
+    kernel_input_size: 520
+    input_generator: dep_chain_short
+    expected_result: 10694056033381314190
+    tags: [compute, dep-chain, pure-jit]
+
+  - name: dep_chain_long
+    description: Long serialized dependency chain over generated u64 input
+    category: dependency-ilp
+    family: dep-chain
+    level: long
+    hypothesis: Scaling dependency depth should amplify backend scheduling differences
+    base_name: dep_chain_long
+    kernel_input_size: 2056
+    input_generator: dep_chain_long
+    expected_result: 11607914882895964593
+    tags: [compute, dep-chain, pure-jit]
+
+  - name: binary_search
+    description: Repeated search over sorted data
+    category: control-flow
+    family: search
+    level: medium
+    hypothesis: Branch-heavy search should reward stronger branch-oriented code generation
+    base_name: binary_search
+    kernel_input_size: 392
+    input_generator: binary_search
+    expected_result: 126
+    tags: [branch, search, pure-jit]
+
+  - name: branch_layout
+    description: Hot/cold branch skew for layout experiments
+    category: control-flow
+    family: branch-skew
+    level: hot-cold
+    hypothesis: Skewed branches should expose layout and prediction quality differences
+    base_name: branch_layout
+    kernel_input_size: 4104
+    input_generator: branch_layout
+    expected_result: 83277648
+    tags: [branch, layout, pure-jit]
+
+  - name: switch_dispatch
+    description: Dense switch dispatch over generated 6-bit values
+    category: control-flow
+    family: switch-dispatch
+    level: dense-64
+    hypothesis: Dense dispatch should reflect jump-table or compare-ladder lowering quality
+    base_name: switch_dispatch
+    kernel_input_size: 516
+    input_generator: switch_dispatch
+    expected_result: 16
+    tags: [branch, dispatch, pure-jit]
+
+  - name: checksum
+    description: Internet checksum style reduction
+    category: memory-local
+    family: reduction
+    level: medium
+    hypothesis: Sequential 16-bit reductions should emphasize scalar memory throughput
+    base_name: checksum
+    kernel_input_size: 1032
+    input_generator: checksum
+    expected_result: 0
+    tags: [alu, memory, pure-jit]
+
+  - name: packet_parse
+    description: Packet header parsing with bounds checks
+    category: memory-local
+    family: parser
+    level: fixed-l3l4
+    hypothesis: Structured parsing with field extraction may favor kernel's packet-oriented JIT path
+    base_name: packet_parse
+    kernel_input_size: 4104
+    input_generator: packet_parse
+    expected_result: 1952576
+    tags: [memory, parse, bounds, pure-jit]
+
+  - name: bounds_ladder
+    description: Record parsing with dense layered bounds checks
+    category: memory-local
+    family: bounds-density
+    level: high
+    hypothesis: Dense bounds checks should stress compare-heavy code generation more than raw memory bandwidth
+    base_name: bounds_ladder
+    kernel_input_size: 1032
+    input_generator: bounds_ladder
+    expected_result: 8686050057216939920
+    tags: [bounds, verifier-like, pure-jit]
+
+  - name: stride_load_4
+    description: Sequential-stride load pattern with stride 4 over a ring buffer
+    category: memory-local
+    family: stride-load
+    level: stride-4
+    hypothesis: Mild stride should stay cache-friendly while exposing address-generation cost
+    base_name: stride_load_4
+    kernel_input_size: 1032
+    input_generator: stride_load_4
+    expected_result: 1982929226459564480
+    tags: [memory, stride, pure-jit]
+
+  - name: stride_load_16
+    description: Wider-stride load pattern with stride 16 over a ring buffer
+    category: memory-local
+    family: stride-load
+    level: stride-16
+    hypothesis: Wider stride should amplify addressing and prefetch sensitivity
+    base_name: stride_load_16
+    kernel_input_size: 1032
+    input_generator: stride_load_16
+    expected_result: 17112594108265627168
+    tags: [memory, stride, pure-jit]
+
+  - name: spill_pressure
+    description: Multi-accumulator arithmetic intended to stress register allocation
+    category: dependency-ilp
+    family: spill-pressure
+    level: medium
+    hypothesis: Register pressure should expose spill/fill quality and register allocator limits
+    base_name: spill_pressure
+    kernel_input_size: 520
+    input_generator: spill_pressure
+    expected_result: 11535549244468459597
+    tags: [compute, reg-pressure, pure-jit]
+
+  - name: multi_acc_4
+    description: Four-lane accumulator kernel with cross-lane mixing
+    category: dependency-ilp
+    family: multi-acc
+    level: 4-lane
+    hypothesis: More independent accumulators should reward ILP-friendly code generation
+    base_name: multi_acc_4
+    kernel_input_size: 1032
+    input_generator: multi_acc_4
+    expected_result: 1366287837132792961
+    tags: [compute, ilp, pure-jit]
+
+  - name: multi_acc_8
+    description: Eight-lane accumulator kernel with cross-lane mixing
+    category: dependency-ilp
+    family: multi-acc
+    level: 8-lane
+    hypothesis: Higher lane count should trade ILP gains against register pressure
+    base_name: multi_acc_8
+    kernel_input_size: 1032
+    input_generator: multi_acc_8
+    expected_result: 6524869553103642107
+    tags: [compute, ilp, pure-jit]
+
+  - name: fibonacci_iter
+    description: Loop-heavy Fibonacci-style recurrence with bounded iteration count
+    category: loop-shape
+    family: recurrence
+    level: long
+    hypothesis: Scalar recurrence loops should narrow the gap by limiting exploitable ILP
+    base_name: fibonacci_iter
+    kernel_input_size: 16
+    input_generator: fibonacci_iter
+    expected_result: 3918857671957494287
+    tags: [compute, loop, pure-jit]
+
+  - name: fixed_loop_small
+    description: Short fixed-trip-count recurrence loop
+    category: loop-shape
+    family: fixed-loop
+    level: small
+    hypothesis: Short fixed loops should keep loop overhead visible relative to the loop body
+    base_name: fixed_loop_small
+    kernel_input_size: 16
+    input_generator: fixed_loop_small
+    expected_result: 14532921533732223337
+    tags: [compute, loop, pure-jit]
+
+  - name: fixed_loop_large
+    description: Long fixed-trip-count recurrence loop
+    category: loop-shape
+    family: fixed-loop
+    level: large
+    hypothesis: Larger trip counts should amortize setup overhead and highlight steady-state loop code quality
+    base_name: fixed_loop_large
+    kernel_input_size: 16
+    input_generator: fixed_loop_large
+    expected_result: 8801144986419677599
+    tags: [compute, loop, pure-jit]
+
+  - name: code_clone_2
+    description: Two-clone repeated scalar block inside the steady-state loop
+    category: call-size
+    family: code-clone
+    level: clone-2
+    hypothesis: Modest cloned straight-line code should slightly favor backends with stronger instruction scheduling
+    base_name: code_clone_2
+    kernel_input_size: 1032
+    input_generator: code_clone_2
+    expected_result: 8165017386613414132
+    tags: [compute, code-size, pure-jit]
+
+  - name: code_clone_8
+    description: Eight-clone repeated scalar block inside the steady-state loop
+    category: call-size
+    family: code-clone
+    level: clone-8
+    hypothesis: Larger cloned bodies should magnify code-size and straight-line scheduling differences
+    base_name: code_clone_8
+    kernel_input_size: 1032
+    input_generator: code_clone_8
+    expected_result: 2193237160901360836
+    tags: [compute, code-size, pure-jit]

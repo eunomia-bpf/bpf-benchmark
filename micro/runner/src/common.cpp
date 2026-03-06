@@ -79,7 +79,9 @@ std::vector<uint8_t> materialize_memory(const std::optional<std::filesystem::pat
 cli_options parse_args(int argc, char **argv)
 {
     if (argc < 3) {
-        fail("usage: micro_exec <run-llvmbpf|run-kernel> --program <path> [--memory <path>] [--repeat N] [--input-size N]");
+        fail(
+            "usage: micro_exec <run-llvmbpf|run-kernel> --program <path> [--memory <path>] "
+            "[--io-mode map|staged|packet] [--repeat N] [--input-size N]");
     }
 
     cli_options options;
@@ -93,6 +95,10 @@ cli_options parse_args(int argc, char **argv)
         }
         if (current == "--memory" && index + 1 < argc) {
             options.memory = std::filesystem::path(argv[++index]);
+            continue;
+        }
+        if (current == "--io-mode" && index + 1 < argc) {
+            options.io_mode = argv[++index];
             continue;
         }
         if (current == "--repeat" && index + 1 < argc) {
@@ -112,6 +118,9 @@ cli_options parse_args(int argc, char **argv)
 
     if (options.program.empty()) {
         fail("--program is required");
+    }
+    if (options.io_mode != "map" && options.io_mode != "staged" && options.io_mode != "packet") {
+        fail("--io-mode must be one of map, staged, or packet");
     }
     if (options.repeat == 0) {
         fail("--repeat must be >= 1");

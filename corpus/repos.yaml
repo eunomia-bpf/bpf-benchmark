@@ -1,0 +1,54 @@
+repos:
+  - name: xdp-examples
+    url: https://github.com/xdp-project/bpf-examples.git
+    branch: main
+    harvest_globs:
+      - "**/*.bpf.c"
+      - "**/*_kern.c"
+      - "**/*_bpf.c"
+
+  - name: bcc
+    url: https://github.com/iovisor/bcc.git
+    branch: master
+    sparse_paths:
+      - libbpf-tools
+    harvest_globs:
+      - libbpf-tools/*.bpf.c
+
+  - name: katran
+    url: https://github.com/facebookincubator/katran.git
+    branch: main
+    sparse_paths:
+      - katran/lib
+    harvest_globs:
+      - katran/lib/**/*.bpf.c
+
+  - name: tetragon
+    url: https://github.com/cilium/tetragon.git
+    branch: main
+    sparse_paths:
+      - bpf
+    harvest_globs:
+      - bpf/**/*.c
+    exclude_globs:
+      - bpf/test/**/*.c
+      - bpf/tests/**/*.c
+      - bpf/windows/**/*.c
+
+  - name: cilium
+    url: https://github.com/cilium/cilium.git
+    branch: main
+    sparse_paths:
+      - bpf
+    harvest_globs:
+      - bpf/**/*.c
+    exclude_globs:
+      - bpf/tests/**/*.c
+
+  - name: libbpf-bootstrap
+    url: https://github.com/libbpf/libbpf-bootstrap.git
+    branch: master
+    sparse_paths:
+      - examples/c
+    harvest_globs:
+      - examples/c/*.bpf.c

@@ -51,4 +51,4 @@ static __always_inline int bench_bitcount(const u8 *data, u32 len, u64 *out)
     return 0;
 }
 
-DEFINE_MAP_BACKED_XDP_BENCH(bitcount_xdp, bench_bitcount, bitcount_input_value, BITCOUNT_INPUT_SIZE)
+DEFINE_STAGED_INPUT_XDP_BENCH(bitcount_xdp, bench_bitcount, bitcount_input_value, BITCOUNT_INPUT_SIZE)

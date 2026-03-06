@@ -2,8 +2,11 @@
 
 #include <llvmbpf.hpp>
 
+#include <algorithm>
 #include <chrono>
 #include <cstring>
+#include <memory>
+#include <sys/mman.h>
 #include <unordered_map>
 
 namespace {
@@ -13,6 +16,15 @@ using clock_type = std::chrono::steady_clock;
 struct userspace_array_map {
     map_spec spec;
     std::vector<uint8_t> storage;
+};
+
+struct xdp_md_ctx {
+    uint32_t data = 0;
+    uint32_t data_end = 0;
+    uint32_t data_meta = 0;
+    uint32_t ingress_ifindex = 0;
+    uint32_t rx_queue_index = 0;
+    uint32_t egress_ifindex = 0;
 };
 
 struct userspace_map_state {
@@ -85,6 +97,69 @@ uint64_t helper_bpf_map_update_elem(
     return 0;
 }
 
+class lowmem_buffer {
+public:
+    explicit lowmem_buffer(size_t size)
+        : size_(size)
+    {
+        int flags = MAP_PRIVATE | MAP_ANONYMOUS;
+#ifdef MAP_32BIT
+        flags |= MAP_32BIT;
+#endif
+        void *mapping = mmap(nullptr, size_, PROT_READ | PROT_WRITE, flags, -1, 0);
+        if (mapping == MAP_FAILED) {
+            fail("mmap failed while preparing llvmbpf packet buffer");
+        }
+        data_ = static_cast<uint8_t *>(mapping);
+
+        const auto address = reinterpret_cast<uintptr_t>(data_);
+        if (address > UINT32_MAX || (size_ != 0 && address + size_ - 1 > UINT32_MAX)) {
+            munmap(data_, size_);
+            fail("llvmbpf packet buffer address exceeds 32-bit xdp_md range");
+        }
+    }
+
+    ~lowmem_buffer()
+    {
+        if (data_ != nullptr) {
+            munmap(data_, size_);
+        }
+    }
+
+    lowmem_buffer(const lowmem_buffer &) = delete;
+    lowmem_buffer &operator=(const lowmem_buffer &) = delete;
+
+    uint8_t *data() { return data_; }
+    const uint8_t *data() const { return data_; }
+    size_t size() const { return size_; }
+
+private:
+    uint8_t *data_ = nullptr;
+    size_t size_ = 0;
+};
+
+std::vector<uint8_t> build_packet_input(const std::vector<uint8_t> &input_bytes)
+{
+    std::vector<uint8_t> packet(input_bytes.size() + sizeof(uint64_t), 0);
+    std::copy(input_bytes.begin(), input_bytes.end(), packet.begin() + sizeof(uint64_t));
+    return packet;
+}
+
+uint64_t read_u64_result(const uint8_t *data, size_t length)
+{
+    if (length < sizeof(uint64_t)) {
+        fail("result buffer shorter than 8 bytes");
+    }
+    uint64_t result = 0;
+    std::memcpy(&result, data, sizeof(result));
+    return result;
+}
+
+std::vector<uint8_t> build_result_packet()
+{
+    return std::vector<uint8_t>(64, 0);
+}
+
 userspace_map_state initialize_map_state(const program_image &image, const std::vector<uint8_t> &input_bytes)
 {
     userspace_map_state state;
@@ -132,9 +207,18 @@ sample_result run_llvmbpf(const cli_options &options)
     auto input_bytes = materialize_memory(options.memory, options.input_size);
     const auto memory_prepare_end = clock_type::now();
 
-    const auto map_prepare_start = clock_type::now();
-    auto map_state = initialize_map_state(image, input_bytes);
-    const auto map_prepare_end = clock_type::now();
+    const auto exec_input_prepare_start = clock_type::now();
+    auto map_state = userspace_map_state {};
+    auto packet_input = std::vector<uint8_t> {};
+    if (options.io_mode == "map") {
+        map_state = initialize_map_state(image, input_bytes);
+    } else if (options.io_mode == "staged") {
+        map_state = initialize_map_state(image, input_bytes);
+        packet_input = build_result_packet();
+    } else {
+        packet_input = build_packet_input(input_bytes);
+    }
+    const auto exec_input_prepare_end = clock_type::now();
 
     bpftime::llvmbpf_vm vm;
     const auto load_code_start = clock_type::now();
@@ -153,7 +237,7 @@ sample_result run_llvmbpf(const cli_options &options)
     }
 
     uint64_t retval = 0;
-    uint8_t dummy_ctx[8] = {};
+    uint64_t result = 0;
     active_map_state = &map_state;
     clock_type::time_point exec_start {};
     clock_type::time_point exec_end {};
@@ -161,10 +245,30 @@ sample_result run_llvmbpf(const cli_options &options)
         {.enabled = options.perf_counters, .include_kernel = false, .scope = "exec_window"},
         [&]() {
             exec_start = clock_type::now();
-            for (uint32_t index = 0; index < options.repeat; ++index) {
-                if (vm.exec(dummy_ctx, sizeof(dummy_ctx), retval) < 0) {
-                    fail("llvmbpf exec failed: " + vm.get_error_message());
+            if (options.io_mode == "map") {
+                uint8_t dummy_ctx[8] = {};
+                for (uint32_t index = 0; index < options.repeat; ++index) {
+                    if (vm.exec(dummy_ctx, sizeof(dummy_ctx), retval) < 0) {
+                        fail("llvmbpf exec failed: " + vm.get_error_message());
+                    }
                 }
+            } else {
+                lowmem_buffer packet_buffer(packet_input.size());
+                std::memcpy(packet_buffer.data(), packet_input.data(), packet_input.size());
+
+                xdp_md_ctx ctx = {};
+                const auto packet_address = reinterpret_cast<uintptr_t>(packet_buffer.data());
+                ctx.data = static_cast<uint32_t>(packet_address);
+                ctx.data_end = static_cast<uint32_t>(packet_address + packet_input.size());
+
+                for (uint32_t index = 0; index < options.repeat; ++index) {
+                    if (vm.exec(&ctx, sizeof(ctx), retval) < 0) {
+                        fail("llvmbpf exec failed: " + vm.get_error_message());
+                    }
+                }
+                result = read_u64_result(
+                    packet_buffer.data(),
+                    packet_buffer.size());
             }
             exec_end = clock_type::now();
         });
@@ -173,12 +277,14 @@ sample_result run_llvmbpf(const cli_options &options)
     sample_result sample;
     sample.compile_ns = elapsed_ns(compile_start, compile_end);
     sample.exec_ns = elapsed_ns(exec_start, exec_end) / options.repeat;
-    sample.result = read_result_value(map_state);
+    sample.result = options.io_mode == "map" ? read_result_value(map_state) : result;
     sample.retval = static_cast<uint32_t>(retval);
     sample.phases_ns = {
         {"program_image_ns", elapsed_ns(program_image_start, program_image_end)},
         {"memory_prepare_ns", elapsed_ns(memory_prepare_start, memory_prepare_end)},
-        {"map_prepare_ns", elapsed_ns(map_prepare_start, map_prepare_end)},
+        {options.io_mode == "packet" ? "packet_prepare_ns"
+                                     : (options.io_mode == "staged" ? "input_stage_ns" : "map_prepare_ns"),
+         elapsed_ns(exec_input_prepare_start, exec_input_prepare_end)},
         {"vm_load_code_ns", elapsed_ns(load_code_start, load_code_end)},
         {"jit_compile_ns", sample.compile_ns},
     };

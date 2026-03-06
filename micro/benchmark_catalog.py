@@ -6,9 +6,10 @@ from pathlib import Path
 import yaml
 
 
-ROOT_DIR = Path(__file__).resolve().parent
-REPO_ROOT = ROOT_DIR.parent
-CONFIG_PATH = ROOT_DIR / "config" / "suite.yaml"
+MICRO_ROOT = Path(__file__).resolve().parent
+REPO_ROOT = MICRO_ROOT.parent
+ROOT_DIR = REPO_ROOT
+CONFIG_PATH = REPO_ROOT / "config" / "micro_pure_jit.yaml"
 
 
 @dataclass(frozen=True)
@@ -34,6 +35,11 @@ class DefaultsSpec:
 
 
 @dataclass(frozen=True)
+class AnalysisSpec:
+    baseline_benchmark: str | None = None
+
+
+@dataclass(frozen=True)
 class RuntimeSpec:
     name: str
     label: str
@@ -50,7 +56,11 @@ class BenchmarkSpec:
     category: str
     base_name: str
     program_dir: Path
+    io_mode: str
     kernel_input_size: int
+    family: str | None = None
+    level: str | None = None
+    hypothesis: str | None = None
     input_generator: str | None = None
     tags: tuple[str, ...] = ()
     expected_result: int | None = None
@@ -66,6 +76,7 @@ class SuiteSpec:
     toolchains: dict[str, ToolchainSpec]
     build: BuildSpec
     defaults: DefaultsSpec
+    analysis: AnalysisSpec
     runtimes: dict[str, RuntimeSpec]
     runtime_aliases: dict[str, str]
     benchmarks: dict[str, BenchmarkSpec]
@@ -87,6 +98,8 @@ def load_suite(path: Path = CONFIG_PATH) -> SuiteSpec:
     root_dir = manifest_path.parent.parent
 
     data = yaml.safe_load(manifest_path.read_text())
+    benchmark_defaults = data.get("benchmark_defaults", {})
+    default_io_mode = str(benchmark_defaults.get("io_mode", "map"))
 
     paths = data["paths"]
     program_dir = _resolve_path(paths["program_dir"], root_dir)
@@ -111,6 +124,9 @@ def load_suite(path: Path = CONFIG_PATH) -> SuiteSpec:
         runtimes=tuple(defaults_data["runtimes"]),
         output=_resolve_path(defaults_data["output"], root_dir),
     )
+    analysis = AnalysisSpec(
+        baseline_benchmark=data.get("analysis", {}).get("baseline_benchmark"),
+    )
 
     runtimes: dict[str, RuntimeSpec] = {}
     runtime_aliases: dict[str, str] = {}
@@ -134,7 +150,11 @@ def load_suite(path: Path = CONFIG_PATH) -> SuiteSpec:
             category=benchmark_data["category"],
             base_name=benchmark_data["base_name"],
             program_dir=program_dir,
+            io_mode=str(benchmark_data.get("io_mode", default_io_mode)),
             kernel_input_size=int(benchmark_data["kernel_input_size"]),
+            family=benchmark_data.get("family"),
+            level=benchmark_data.get("level"),
+            hypothesis=benchmark_data.get("hypothesis"),
             input_generator=benchmark_data.get("input_generator"),
             tags=tuple(benchmark_data.get("tags", ())),
             expected_result=benchmark_data.get("expected_result"),
@@ -147,6 +167,7 @@ def load_suite(path: Path = CONFIG_PATH) -> SuiteSpec:
         toolchains=toolchains,
         build=build,
         defaults=defaults,
+        analysis=analysis,
         runtimes=runtimes,
         runtime_aliases=runtime_aliases,
         benchmarks=benchmarks,

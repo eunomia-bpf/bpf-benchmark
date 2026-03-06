@@ -13,6 +13,10 @@
 #define __always_inline __inline __attribute__((__always_inline__))
 #endif
 
+#ifndef __noinline
+#define __noinline __attribute__((__noinline__))
+#endif
+
 #define MICRO_UNBOUNDED_LEN 0xFFFFFFFFU
 
 static __always_inline int micro_has_bytes(u32 len, u32 offset, u32 size)
@@ -51,14 +55,67 @@ static __always_inline u16 micro_read_u16_be(const u8 *data, u32 offset)
     return (u16)(((u16)data[offset] << 8) | data[offset + 1]);
 }
 
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, __u64);
-} result_map SEC(".maps");
+static __always_inline void micro_write_u64_le(u8 *data, u64 value)
+{
+    for (u32 i = 0; i < 8; i++) {
+        data[i] = (u8)(value >> (i * 8));
+    }
+}
+
+#define DEFINE_PACKET_BACKED_XDP_BENCH(PROG_NAME, BENCH_FN)                      \
+    SEC("xdp") int PROG_NAME(struct xdp_md *ctx)                                 \
+    {                                                                            \
+        u8 *data = (u8 *)(long)ctx->data;                                        \
+        u8 *data_end = (u8 *)(long)ctx->data_end;                                \
+        u8 *payload;                                                             \
+        u64 result = 0;                                                          \
+        u32 payload_len;                                                         \
+        if (data > data_end) {                                                   \
+            return XDP_ABORTED;                                                  \
+        }                                                                        \
+        payload = data + 8U;                                                     \
+        if (payload > data_end) {                                                \
+            return XDP_ABORTED;                                                  \
+        }                                                                        \
+        payload_len = (u32)(data_end - payload);                                 \
+        if (BENCH_FN(payload, payload_len, &result) < 0) {                       \
+            return XDP_ABORTED;                                                  \
+        }                                                                        \
+        micro_write_u64_le(data, result);                                        \
+        return XDP_PASS;                                                         \
+    }                                                                            \
+    char LICENSE[] SEC("license") = "GPL";
+
+#define DEFINE_STAGED_INPUT_XDP_BENCH(PROG_NAME, BENCH_FN, INPUT_TYPE, INPUT_SIZE) \
+    SEC("xdp") int PROG_NAME(struct xdp_md *ctx)                                  \
+    {                                                                             \
+        struct INPUT_TYPE *input;                                                 \
+        u8 *data = (u8 *)(long)ctx->data;                                         \
+        u8 *data_end = (u8 *)(long)ctx->data_end;                                 \
+        u64 result = 0;                                                           \
+        __u32 key = 0;                                                            \
+        if (data > data_end || data + 8U > data_end) {                            \
+            return XDP_ABORTED;                                                   \
+        }                                                                         \
+        input = bpf_map_lookup_elem(&input_map, &key);                            \
+        if (!input) {                                                             \
+            return XDP_ABORTED;                                                   \
+        }                                                                         \
+        if (BENCH_FN(input->data, INPUT_SIZE, &result) < 0) {                     \
+            return XDP_ABORTED;                                                   \
+        }                                                                         \
+        micro_write_u64_le(data, result);                                         \
+        return XDP_PASS;                                                          \
+    }                                                                             \
+    char LICENSE[] SEC("license") = "GPL";
 
 #define DEFINE_MAP_BACKED_XDP_BENCH(PROG_NAME, BENCH_FN, INPUT_TYPE, INPUT_SIZE) \
+    struct {                                                                   \
+        __uint(type, BPF_MAP_TYPE_ARRAY);                                      \
+        __uint(max_entries, 1);                                                \
+        __type(key, __u32);                                                    \
+        __type(value, __u64);                                                  \
+    } result_map SEC(".maps");                                                 \
     SEC("xdp") int PROG_NAME(struct xdp_md *ctx)                               \
     {                                                                          \
         struct INPUT_TYPE *input;                                              \

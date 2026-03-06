@@ -55,7 +55,7 @@ static __always_inline int bench_packet_parse(const u8 *data, u32 len, u64 *out)
     return 0;
 }
 
-DEFINE_MAP_BACKED_XDP_BENCH(
+DEFINE_STAGED_INPUT_XDP_BENCH(
     packet_parse_xdp,
     bench_packet_parse,
     packet_parse_input_value,

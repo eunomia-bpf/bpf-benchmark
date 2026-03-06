@@ -4,8 +4,8 @@ from __future__ import annotations
 import argparse
 import json
 import math
-import os
 import platform
+import random
 import statistics
 import subprocess
 import sys
@@ -27,6 +27,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--repeat", type=int, help="Repeat count inside each helper sample.")
     parser.add_argument("--output", help="Override JSON output path.")
     parser.add_argument("--cpu", help="Pin child processes to a specific CPU via taskset.")
+    parser.add_argument(
+        "--shuffle-seed",
+        type=int,
+        help="Shuffle benchmark order with a reproducible seed.",
+    )
     parser.add_argument(
         "--perf-counters",
         action="store_true",
@@ -99,12 +104,22 @@ def run_command(command: list[str], cpu: str | None) -> subprocess.CompletedProc
     return completed
 
 
+def run_host_command(command: list[str]) -> subprocess.CompletedProcess[str]:
+    completed = subprocess.run(command, capture_output=True, text=True)
+    if completed.returncode != 0:
+        details = completed.stderr.strip() or completed.stdout.strip()
+        raise RuntimeError(f"command failed ({completed.returncode}): {' '.join(command)}\n{details}")
+    return completed
+
+
 def list_suite(suite: SuiteSpec) -> None:
     print("Benchmarks")
     print("----------")
     for benchmark in suite.benchmarks.values():
         tags = ",".join(benchmark.tags)
-        print(f"{benchmark.name:16} {benchmark.category:24} {tags}")
+        family = benchmark.family or "-"
+        level = benchmark.level or "-"
+        print(f"{benchmark.name:20} {benchmark.category:18} {benchmark.io_mode:8} {family:16} {level:8} {tags}")
 
     print()
     print("Runtimes")
@@ -263,6 +278,8 @@ def resolve_helper_command(
             "run-llvmbpf",
             "--program",
             str(benchmark.program_object),
+            "--io-mode",
+            benchmark.io_mode,
             "--repeat",
             str(repeat),
         ]
@@ -279,6 +296,8 @@ def resolve_helper_command(
             "run-kernel",
             "--program",
             str(benchmark.program_object),
+            "--io-mode",
+            benchmark.io_mode,
             "--repeat",
             str(repeat),
             "--input-size",
@@ -295,6 +314,66 @@ def resolve_helper_command(
     raise RuntimeError(f"unsupported runtime mode: {runtime.mode}")
 
 
+def attach_baseline_adjustments(results: dict[str, object], baseline_benchmark: str | None) -> None:
+    if not baseline_benchmark:
+        return
+
+    benchmarks = results.get("benchmarks", [])
+    baseline_record = next((record for record in benchmarks if record.get("name") == baseline_benchmark), None)
+    if baseline_record is None:
+        return
+
+    runtime_baselines: dict[str, float] = {}
+    for run in baseline_record.get("runs", []):
+        median = run.get("exec_ns", {}).get("median")
+        if median is not None:
+            runtime_baselines[str(run["runtime"])] = float(median)
+
+    for benchmark in benchmarks:
+        for run in benchmark.get("runs", []):
+            baseline_exec = runtime_baselines.get(str(run["runtime"]))
+            median_exec = run.get("exec_ns", {}).get("median")
+            adjusted = None
+            ratio = None
+            if baseline_exec is not None and median_exec is not None:
+                adjusted = max(float(median_exec) - baseline_exec, 0.0)
+                if baseline_exec != 0:
+                    ratio = float(median_exec) / baseline_exec
+            run["baseline_adjustment"] = {
+                "baseline_benchmark": baseline_benchmark,
+                "baseline_exec_ns": baseline_exec,
+                "median_minus_baseline_ns": adjusted,
+                "median_over_baseline_ratio": ratio,
+            }
+
+    for benchmark in benchmarks:
+        runtime_runs = {
+            str(run["runtime"]): run
+            for run in benchmark.get("runs", [])
+        }
+        llvm = runtime_runs.get("llvmbpf")
+        kernel = runtime_runs.get("kernel")
+        if llvm is None or kernel is None:
+            continue
+
+        llvm_exec = llvm.get("exec_ns", {}).get("median")
+        kernel_exec = kernel.get("exec_ns", {}).get("median")
+        llvm_adjusted = llvm.get("baseline_adjustment", {}).get("median_minus_baseline_ns")
+        kernel_adjusted = kernel.get("baseline_adjustment", {}).get("median_minus_baseline_ns")
+
+        raw_ratio = None
+        adjusted_ratio = None
+        if llvm_exec not in (None, 0) and kernel_exec not in (None, 0):
+            raw_ratio = float(llvm_exec) / float(kernel_exec)
+        if llvm_adjusted not in (None, 0) and kernel_adjusted not in (None, 0):
+            adjusted_ratio = float(llvm_adjusted) / float(kernel_adjusted)
+
+        benchmark["runtime_comparison"] = {
+            "llvmbpf_over_kernel_exec_ratio": raw_ratio,
+            "llvmbpf_over_kernel_adjusted_exec_ratio": adjusted_ratio,
+        }
+
+
 def main() -> int:
     args = parse_args()
     suite = load_suite(Path(args.suite))
@@ -305,6 +384,8 @@ def main() -> int:
 
     benchmarks = select_benchmarks(args.benches, suite)
     runtimes = select_runtimes(args.runtimes, suite)
+    if args.shuffle_seed is not None:
+        random.Random(args.shuffle_seed).shuffle(benchmarks)
 
     iterations = args.iterations if args.iterations is not None else suite.defaults.iterations
     warmups = args.warmups if args.warmups is not None else suite.defaults.warmups
@@ -335,6 +416,7 @@ def main() -> int:
             "warmups": warmups,
             "repeat": args.repeat if args.repeat is not None else suite.defaults.repeat,
             "perf_counters": args.perf_counters,
+            "shuffle_seed": args.shuffle_seed,
         },
         "benchmarks": [],
     }
@@ -345,6 +427,10 @@ def main() -> int:
             "name": benchmark.name,
             "description": benchmark.description,
             "category": benchmark.category,
+            "family": benchmark.family,
+            "level": benchmark.level,
+            "hypothesis": benchmark.hypothesis,
+            "io_mode": benchmark.io_mode,
             "tags": list(benchmark.tags),
             "expected_result": benchmark.expected_result,
             "input": str(memory_file) if memory_file else None,
@@ -408,6 +494,8 @@ def main() -> int:
             )
 
         results["benchmarks"].append(benchmark_record)
+
+    attach_baseline_adjustments(results, suite.analysis.baseline_benchmark)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(results, indent=2))

@@ -63,7 +63,7 @@ static __always_inline int bench_binary_search(const u8 *data, u32 len, u64 *out
     return 0;
 }
 
-DEFINE_MAP_BACKED_XDP_BENCH(
+DEFINE_STAGED_INPUT_XDP_BENCH(
     binary_search_xdp,
     bench_binary_search,
     binary_search_input_value,

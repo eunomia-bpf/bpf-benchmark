@@ -1,0 +1,6 @@
+macro_suite: macro_corpus
+
+corpus:
+  manifest: corpus/repos.yaml
+  local_repos: corpus/repos
+  inventory: corpus/inventory.json

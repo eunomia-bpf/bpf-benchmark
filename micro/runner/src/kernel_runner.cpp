@@ -3,11 +3,13 @@
 #include <bpf/bpf.h>
 #include <bpf/libbpf.h>
 
+#include <algorithm>
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace {
 
@@ -32,6 +34,23 @@ std::string libbpf_error_string(int error_code)
     char buffer[256];
     libbpf_strerror(error_code, buffer, sizeof(buffer));
     return std::string(buffer);
+}
+
+std::vector<uint8_t> build_packet_input(const std::vector<uint8_t> &input_bytes)
+{
+    std::vector<uint8_t> packet(input_bytes.size() + sizeof(uint64_t), 0);
+    std::copy(input_bytes.begin(), input_bytes.end(), packet.begin() + sizeof(uint64_t));
+    return packet;
+}
+
+uint64_t read_u64_result(const uint8_t *data, size_t length)
+{
+    if (length < sizeof(uint64_t)) {
+        fail("result buffer shorter than 8 bytes");
+    }
+    uint64_t result = 0;
+    std::memcpy(&result, data, sizeof(result));
+    return result;
 }
 
 } // namespace
@@ -78,31 +97,68 @@ sample_result run_kernel(const cli_options &options)
         fail("unable to obtain program fd");
     }
 
-    bpf_map *input_map = bpf_object__find_map_by_name(object.get(), "input_map");
-    bpf_map *result_map = bpf_object__find_map_by_name(object.get(), "result_map");
-    if (input_map == nullptr || result_map == nullptr) {
-        fail("required maps input_map/result_map not found");
+    std::chrono::steady_clock::time_point exec_input_prepare_start {};
+    std::chrono::steady_clock::time_point exec_input_prepare_end {};
+    std::chrono::steady_clock::time_point result_read_start {};
+    std::chrono::steady_clock::time_point result_read_end {};
+
+    std::vector<uint8_t> packet;
+    std::vector<uint8_t> packet_out;
+    uint64_t result = 0;
+    int result_fd = -1;
+    uint32_t key = 0;
+
+    if (options.io_mode == "map") {
+        bpf_map *input_map = bpf_object__find_map_by_name(object.get(), "input_map");
+        bpf_map *result_map = bpf_object__find_map_by_name(object.get(), "result_map");
+        if (input_map == nullptr || result_map == nullptr) {
+            fail("required maps input_map/result_map not found");
+        }
+
+        const int input_fd = bpf_map__fd(input_map);
+        result_fd = bpf_map__fd(result_map);
+        if (input_fd < 0 || result_fd < 0) {
+            fail("unable to obtain map fd");
+        }
+
+        uint64_t zero = 0;
+        exec_input_prepare_start = std::chrono::steady_clock::now();
+        if (bpf_map_update_elem(input_fd, &key, input_bytes.data(), BPF_ANY) != 0) {
+            fail("bpf_map_update_elem(input_map) failed: " + std::string(strerror(errno)));
+        }
+        if (bpf_map_update_elem(result_fd, &key, &zero, BPF_ANY) != 0) {
+            fail("bpf_map_update_elem(result_map) failed: " + std::string(strerror(errno)));
+        }
+        exec_input_prepare_end = std::chrono::steady_clock::now();
+
+        packet.assign(64, 0);
+        packet_out.assign(packet.size(), 0);
+    } else if (options.io_mode == "staged") {
+        bpf_map *input_map = bpf_object__find_map_by_name(object.get(), "input_map");
+        if (input_map == nullptr) {
+            fail("required map input_map not found");
+        }
+
+        const int input_fd = bpf_map__fd(input_map);
+        if (input_fd < 0) {
+            fail("unable to obtain input_map fd");
+        }
+
+        exec_input_prepare_start = std::chrono::steady_clock::now();
+        if (bpf_map_update_elem(input_fd, &key, input_bytes.data(), BPF_ANY) != 0) {
+            fail("bpf_map_update_elem(input_map) failed: " + std::string(strerror(errno)));
+        }
+        exec_input_prepare_end = std::chrono::steady_clock::now();
+
+        packet.assign(64, 0);
+        packet_out.assign(packet.size(), 0);
+    } else {
+        exec_input_prepare_start = std::chrono::steady_clock::now();
+        packet = build_packet_input(input_bytes);
+        packet_out.assign(packet.size(), 0);
+        exec_input_prepare_end = std::chrono::steady_clock::now();
     }
 
-    const int input_fd = bpf_map__fd(input_map);
-    const int result_fd = bpf_map__fd(result_map);
-    if (input_fd < 0 || result_fd < 0) {
-        fail("unable to obtain map fd");
-    }
-
-    const uint32_t key = 0;
-    uint64_t zero = 0;
-    const auto map_prepare_start = std::chrono::steady_clock::now();
-    if (bpf_map_update_elem(input_fd, &key, input_bytes.data(), BPF_ANY) != 0) {
-        fail("bpf_map_update_elem(input_map) failed: " + std::string(strerror(errno)));
-    }
-    if (bpf_map_update_elem(result_fd, &key, &zero, BPF_ANY) != 0) {
-        fail("bpf_map_update_elem(result_map) failed: " + std::string(strerror(errno)));
-    }
-    const auto map_prepare_end = std::chrono::steady_clock::now();
-
-    std::vector<uint8_t> packet(64, 0);
-    std::vector<uint8_t> packet_out(packet.size(), 0);
     bpf_test_run_opts test_opts = {};
     test_opts.sz = sizeof(test_opts);
     test_opts.repeat = options.repeat;
@@ -125,12 +181,17 @@ sample_result run_kernel(const cli_options &options)
         fail("bpf_prog_test_run_opts failed: " + std::string(strerror(errno)));
     }
 
-    uint64_t result = 0;
-    const auto result_read_start = std::chrono::steady_clock::now();
-    if (bpf_map_lookup_elem(result_fd, &key, &result) != 0) {
-        fail("bpf_map_lookup_elem(result_map) failed: " + std::string(strerror(errno)));
+    if (options.io_mode == "packet" || options.io_mode == "staged") {
+        result_read_start = std::chrono::steady_clock::now();
+        result = read_u64_result(packet_out.data(), packet_out.size());
+        result_read_end = std::chrono::steady_clock::now();
+    } else {
+        result_read_start = std::chrono::steady_clock::now();
+        if (bpf_map_lookup_elem(result_fd, &key, &result) != 0) {
+            fail("bpf_map_lookup_elem(result_map) failed: " + std::string(strerror(errno)));
+        }
+        result_read_end = std::chrono::steady_clock::now();
     }
-    const auto result_read_end = std::chrono::steady_clock::now();
 
     sample_result sample;
     sample.compile_ns = elapsed_ns(object_open_start, object_open_end) + elapsed_ns(object_load_start, object_load_end);
@@ -141,9 +202,12 @@ sample_result run_kernel(const cli_options &options)
         {"memory_prepare_ns", elapsed_ns(memory_prepare_start, memory_prepare_end)},
         {"object_open_ns", elapsed_ns(object_open_start, object_open_end)},
         {"object_load_ns", elapsed_ns(object_load_start, object_load_end)},
-        {"map_prepare_ns", elapsed_ns(map_prepare_start, map_prepare_end)},
+        {options.io_mode == "packet" ? "packet_prepare_ns"
+                                     : (options.io_mode == "staged" ? "input_stage_ns" : "map_prepare_ns"),
+         elapsed_ns(exec_input_prepare_start, exec_input_prepare_end)},
         {"prog_run_wall_ns", elapsed_ns(run_wall_start, run_wall_end)},
-        {"result_read_ns", elapsed_ns(result_read_start, result_read_end)},
+        {(options.io_mode == "packet" || options.io_mode == "staged") ? "result_extract_ns" : "result_read_ns",
+         elapsed_ns(result_read_start, result_read_end)},
     };
     sample.perf_counters = std::move(perf_counters);
     return sample;

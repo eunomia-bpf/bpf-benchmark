@@ -45,7 +45,7 @@ static __always_inline int bench_branch_layout(const u8 *data, u32 len, u64 *out
     return 0;
 }
 
-DEFINE_MAP_BACKED_XDP_BENCH(
+DEFINE_STAGED_INPUT_XDP_BENCH(
     branch_layout_xdp,
     bench_branch_layout,
     branch_layout_input_value,

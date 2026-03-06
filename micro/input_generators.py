@@ -116,6 +116,212 @@ def generate_branch_layout(output: Path) -> dict[str, int]:
     return {"count": count, "hot_threshold": hot_threshold}
 
 
+def generate_map_lookup_churn(output: Path) -> dict[str, int]:
+    rounds = 128
+    stride = 7
+    seed = 0x2468ACE1
+    word_count = 64
+    state = 0x0123_4567_89AB_CDEF
+
+    blob = bytearray(struct.pack("<III", rounds, stride, seed))
+    for index in range(word_count):
+        state = _lcg(state)
+        value = state ^ ((index + 1) * 0xD134_2543_DE82_EF95) ^ seed
+        blob.extend(struct.pack("<Q", value & MASK64))
+
+    output.write_bytes(blob)
+    return {"rounds": rounds, "stride": stride, "word_count": word_count}
+
+
+def generate_map_roundtrip(output: Path) -> dict[str, int]:
+    rounds = 64
+    mix = 0x31415926
+    seed = 0x0BAD_F00D_CAFE_BEEF
+
+    blob = bytearray(struct.pack("<IIQ", rounds, mix, seed))
+    output.write_bytes(blob)
+    return {"rounds": rounds, "mix": mix}
+
+
+def generate_spill_pressure(output: Path) -> dict[str, int]:
+    count = 64
+    seed = 0x1020_3040
+    state = 0x0F0E_0D0C_0B0A_0908
+
+    blob = bytearray(struct.pack("<II", count, seed))
+    for index in range(count):
+        state = _lcg(state)
+        value = state ^ ((index + 11) * 0x9E37_79B9_7F4A_7C15)
+        blob.extend(struct.pack("<Q", value & MASK64))
+
+    output.write_bytes(blob)
+    return {"count": count, "seed": seed}
+
+
+def generate_bounds_ladder(output: Path) -> dict[str, int]:
+    record_count = 32
+    record_size = 32
+    state = 0x55AA_55AA_1234_9876
+
+    blob = bytearray(struct.pack("<II", record_count, record_size))
+    for index in range(record_count):
+        state = _lcg(state)
+        tag = (state ^ index) & 0xFFFFFFFF
+        state = _lcg(state)
+        left = state & MASK64
+        state = _lcg(state)
+        span = ((state >> 16) ^ (index * 13)) & 0xFFFFFFFF
+        state = _lcg(state)
+        right = state & MASK64
+        state = _lcg(state)
+        tail = (state ^ (index * 0xA5A5_A5A5_A5A5_A5A5)) & MASK64
+        blob.extend(struct.pack("<I", tag))
+        blob.extend(struct.pack("<Q", left))
+        blob.extend(struct.pack("<I", span))
+        blob.extend(struct.pack("<Q", right))
+        blob.extend(struct.pack("<Q", tail))
+
+    output.write_bytes(blob)
+    return {"record_count": record_count, "record_size": record_size}
+
+
+def generate_memory_pair_sum(output: Path) -> dict[str, int]:
+    left = 0x1234_5678_9ABC_DEF0
+    right = 0x0FED_CBA9_8765_4321
+    output.write_bytes(struct.pack("<QQ", left, right))
+    return {"left": left, "right": right}
+
+
+def generate_log2_fold(output: Path) -> dict[str, int]:
+    count = 128
+    seed = 0xABCD_1234
+    state = 0x9988_7766_5544_3322
+
+    blob = bytearray(struct.pack("<II", count, seed))
+    for index in range(count):
+        state = _lcg(state)
+        value = (state | 1) ^ ((index + 3) * 0x9E37_79B9_7F4A_7C15)
+        blob.extend(struct.pack("<Q", value & MASK64))
+
+    output.write_bytes(blob)
+    return {"count": count, "seed": seed}
+
+
+def generate_switch_dispatch(output: Path) -> dict[str, int]:
+    count = 128
+    state = 0x1020_3040_5060_7080
+
+    blob = bytearray(struct.pack("<I", count))
+    for index in range(count):
+        state = _lcg(state)
+        value = ((state >> 32) ^ index) & 0x3F
+        blob.extend(struct.pack("<I", value))
+
+    output.write_bytes(blob)
+    return {"count": count}
+
+
+def generate_fibonacci_iter(output: Path) -> dict[str, int]:
+    rounds = 1024
+    mix = 0x13579BDF
+    seed = 0x1122_3344_5566_7788
+
+    output.write_bytes(struct.pack("<IIQ", rounds, mix, seed))
+    return {"rounds": rounds, "mix": mix}
+
+
+def _generate_dep_chain(output: Path, count: int, seed: int, salt: int) -> dict[str, int]:
+    state = salt & MASK64
+    blob = bytearray(struct.pack("<II", count, seed))
+    for index in range(count):
+        state = _lcg(state)
+        value = state ^ ((index + 1) * 0x9E37_79B9_7F4A_7C15) ^ seed
+        blob.extend(struct.pack("<Q", value & MASK64))
+    output.write_bytes(blob)
+    return {"count": count, "seed": seed}
+
+
+def generate_dep_chain_short(output: Path) -> dict[str, int]:
+    return _generate_dep_chain(output, count=64, seed=0x13572468, salt=0xDEAD_BEEF_CAFE_0123)
+
+
+def generate_dep_chain_long(output: Path) -> dict[str, int]:
+    return _generate_dep_chain(output, count=256, seed=0x24681357, salt=0x0123_4567_89AB_CDEF)
+
+
+def _generate_multi_acc(output: Path, count: int, seed: int, salt: int) -> dict[str, int]:
+    state = salt & MASK64
+    blob = bytearray(struct.pack("<II", count, seed))
+    for index in range(count):
+        state = _lcg(state)
+        value = state ^ ((index + 5) * 0xD134_2543_DE82_EF95)
+        blob.extend(struct.pack("<Q", value & MASK64))
+    output.write_bytes(blob)
+    return {"count": count, "seed": seed}
+
+
+def generate_multi_acc_4(output: Path) -> dict[str, int]:
+    return _generate_multi_acc(output, count=128, seed=0x31415926, salt=0x1111_2222_3333_4444)
+
+
+def generate_multi_acc_8(output: Path) -> dict[str, int]:
+    return _generate_multi_acc(output, count=128, seed=0x27182818, salt=0x5555_6666_7777_8888)
+
+
+def generate_fixed_loop_small(output: Path) -> dict[str, int]:
+    rounds = 64
+    mix = 0x89ABCDEF
+    seed = 0x0F1E_2D3C_4B5A_6978
+    output.write_bytes(struct.pack("<IIQ", rounds, mix, seed))
+    return {"rounds": rounds, "mix": mix}
+
+
+def generate_fixed_loop_large(output: Path) -> dict[str, int]:
+    rounds = 1024
+    mix = 0x10203040
+    seed = 0x8877_6655_4433_2211
+    output.write_bytes(struct.pack("<IIQ", rounds, mix, seed))
+    return {"rounds": rounds, "mix": mix}
+
+
+def _generate_stride_load(output: Path, count: int, stride: int, salt: int) -> dict[str, int]:
+    state = salt & MASK64
+    blob = bytearray(struct.pack("<II", count, stride))
+    for index in range(count):
+        state = _lcg(state)
+        value = state ^ ((index + 7) * 0xA076_1D64_78BD_642F)
+        blob.extend(struct.pack("<Q", value & MASK64))
+    output.write_bytes(blob)
+    return {"count": count, "stride": stride}
+
+
+def generate_stride_load_4(output: Path) -> dict[str, int]:
+    return _generate_stride_load(output, count=128, stride=4, salt=0xAAAA_BBBB_CCCC_DDDD)
+
+
+def generate_stride_load_16(output: Path) -> dict[str, int]:
+    return _generate_stride_load(output, count=128, stride=16, salt=0x1357_9BDF_2468_ACE0)
+
+
+def _generate_code_clone(output: Path, count: int, seed: int, salt: int) -> dict[str, int]:
+    state = salt & MASK64
+    blob = bytearray(struct.pack("<II", count, seed))
+    for index in range(count):
+        state = _lcg(state)
+        value = state ^ ((index + 13) * 0x94D049BB133111EB) ^ (seed << (index & 3))
+        blob.extend(struct.pack("<Q", value & MASK64))
+    output.write_bytes(blob)
+    return {"count": count, "seed": seed}
+
+
+def generate_code_clone_2(output: Path) -> dict[str, int]:
+    return _generate_code_clone(output, count=128, seed=0x10293847, salt=0xCAFEBABE10293847)
+
+
+def generate_code_clone_8(output: Path) -> dict[str, int]:
+    return _generate_code_clone(output, count=128, seed=0x56473829, salt=0x0BADF00D56473829)
+
+
 GENERATORS = {
     "simple": generate_simple,
     "bitcount": generate_bitcount,
@@ -123,6 +329,24 @@ GENERATORS = {
     "checksum": generate_checksum,
     "packet_parse": generate_packet_parse,
     "branch_layout": generate_branch_layout,
+    "map_lookup_churn": generate_map_lookup_churn,
+    "map_roundtrip": generate_map_roundtrip,
+    "spill_pressure": generate_spill_pressure,
+    "bounds_ladder": generate_bounds_ladder,
+    "memory_pair_sum": generate_memory_pair_sum,
+    "log2_fold": generate_log2_fold,
+    "switch_dispatch": generate_switch_dispatch,
+    "fibonacci_iter": generate_fibonacci_iter,
+    "dep_chain_short": generate_dep_chain_short,
+    "dep_chain_long": generate_dep_chain_long,
+    "multi_acc_4": generate_multi_acc_4,
+    "multi_acc_8": generate_multi_acc_8,
+    "fixed_loop_small": generate_fixed_loop_small,
+    "fixed_loop_large": generate_fixed_loop_large,
+    "stride_load_4": generate_stride_load_4,
+    "stride_load_16": generate_stride_load_16,
+    "code_clone_2": generate_code_clone_2,
+    "code_clone_8": generate_code_clone_8,
 }
 
 

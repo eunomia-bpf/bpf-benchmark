@@ -1,0 +1,62 @@
+suite_name: micro_runtime
+
+paths:
+  program_dir: micro/programs
+
+toolchains:
+  llvmbpf:
+    root: vendor/llvmbpf
+  libbpf:
+    root: vendor/libbpf
+  bpftool:
+    root: vendor/bpftool
+
+build:
+  commands:
+    micro_exec: [make, -C, micro, micro_exec]
+    programs: [make, -C, micro, programs]
+    bpftool: [make, -C, micro, vendor_bpftool]
+  runner_binary: micro/build/runner/micro_exec
+  bpftool_binary: micro/build/vendor/bpftool/bpftool
+
+defaults:
+  iterations: 10
+  warmups: 2
+  repeat: 200
+  runtimes: [llvmbpf, kernel]
+  output: micro/results/runtime.latest.json
+
+benchmark_defaults:
+  io_mode: map
+
+runtimes:
+  - name: llvmbpf
+    label: llvmbpf LLVM JIT
+    mode: llvmbpf
+    repeat: 200
+    aliases: [llvm]
+
+  - name: kernel
+    label: kernel eBPF
+    mode: kernel
+    repeat: 200
+    sudo: true
+
+benchmarks:
+  - name: map_lookup_churn
+    description: Repeated input_map lookups over a fixed array payload
+    category: map-runtime
+    base_name: map_lookup_churn
+    kernel_input_size: 524
+    input_generator: map_lookup_churn
+    expected_result: 16823189766144203766
+    tags: [map, helper-like, runtime]
+
+  - name: map_roundtrip
+    description: Repeated lookup/update roundtrips through an auxiliary array map
+    category: map-runtime
+    base_name: map_roundtrip
+    kernel_input_size: 16
+    input_generator: map_roundtrip
+    expected_result: 8595127842395553320
+    tags: [map, helper-like, runtime]

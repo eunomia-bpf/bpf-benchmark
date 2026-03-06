@@ -1,8 +1,8 @@
-CFLAGS := -Wall -Wextra -O2 -g -target bpf -I/usr/include/x86_64-linux-gnu
+CFLAGS := -Wall -Wextra -O2 -g -target bpf -I/usr/include/x86_64-linux-gnu -MMD -MP
 
 BPF_SRCS := $(wildcard *.bpf.c)
 BPF_OBJS := $(patsubst %.bpf.c,%.bpf.o,$(BPF_SRCS))
-BPF_BINS := $(patsubst %.bpf.c,%.bpf.bin,$(BPF_SRCS))
+BPF_DEPS := $(patsubst %.bpf.c,%.bpf.d,$(BPF_SRCS))
 
 .PHONY: all clean
 
@@ -12,4 +12,6 @@ all: $(BPF_OBJS)
 	clang $(CFLAGS) -c -o $@ $<
 
 clean:
-	rm -f $(BPF_OBJS) $(BPF_BINS)
+	rm -f *.bpf.o *.bpf.d *.bpf.bin
+
+-include $(BPF_DEPS)

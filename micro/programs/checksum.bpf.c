@@ -46,4 +46,4 @@ static __always_inline int bench_checksum(const u8 *data, u32 len, u64 *out)
     return 0;
 }
 
-DEFINE_MAP_BACKED_XDP_BENCH(checksum_xdp, bench_checksum, checksum_input_value, CHECKSUM_INPUT_SIZE)
+DEFINE_STAGED_INPUT_XDP_BENCH(checksum_xdp, bench_checksum, checksum_input_value, CHECKSUM_INPUT_SIZE)

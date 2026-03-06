@@ -26,6 +26,7 @@ struct cli_options {
     std::string command;
     std::filesystem::path program;
     std::optional<std::filesystem::path> memory;
+    std::string io_mode = "map";
     uint32_t repeat = 1;
     uint32_t input_size = 0;
     bool perf_counters = false;
