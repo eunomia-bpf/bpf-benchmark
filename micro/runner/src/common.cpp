@@ -106,7 +106,8 @@ cli_options parse_args(int argc, char **argv)
     if (argc < 3) {
         fail(
             "usage: micro_exec <run-llvmbpf|run-kernel> --program <path> [--memory <path>] "
-            "[--io-mode map|staged|packet] [--repeat N] [--input-size N] [--dump-jit]");
+            "[--io-mode map|staged|packet] [--repeat N] [--input-size N] "
+            "[--opt-level 0|1|2|3] [--dump-jit]");
     }
 
     cli_options options;
@@ -132,6 +133,14 @@ cli_options parse_args(int argc, char **argv)
         }
         if (current == "--input-size" && index + 1 < argc) {
             options.input_size = static_cast<uint32_t>(std::stoul(argv[++index]));
+            continue;
+        }
+        if (current == "--opt-level" && index + 1 < argc) {
+            const int opt_level = std::stoi(argv[++index]);
+            if (opt_level < 0 || opt_level > 3) {
+                fail("--opt-level must be between 0 and 3");
+            }
+            options.opt_level = opt_level;
             continue;
         }
         if (current == "--perf-counters") {
@@ -168,6 +177,10 @@ void print_json(const sample_result &sample)
         << "{"
         << "\"compile_ns\":" << sample.compile_ns << ","
         << "\"exec_ns\":" << sample.exec_ns;
+
+    if (sample.opt_level.has_value()) {
+        std::cout << ",\"opt_level\":" << *sample.opt_level;
+    }
 
     if (sample.wall_exec_ns.has_value()) {
         std::cout << ",\"wall_exec_ns\":" << *sample.wall_exec_ns;

@@ -29,6 +29,7 @@ struct cli_options {
     std::string io_mode = "map";
     uint32_t repeat = 1;
     uint32_t input_size = 0;
+    int opt_level = 3;
     bool perf_counters = false;
     bool dump_jit = false;
 };
@@ -66,6 +67,7 @@ struct code_size_summary {
 struct sample_result {
     uint64_t compile_ns = 0;
     uint64_t exec_ns = 0;
+    std::optional<int> opt_level;
     std::optional<uint64_t> wall_exec_ns;
     std::optional<uint64_t> exec_cycles;
     std::optional<uint64_t> tsc_freq_hz;

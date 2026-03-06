@@ -349,6 +349,9 @@ sample_result run_llvmbpf(const cli_options &options)
     const auto exec_input_prepare_end = clock_type::now();
 
     bpftime::llvmbpf_vm vm;
+    if (vm.set_optimization_level(options.opt_level) < 0) {
+        fail("llvmbpf set_optimization_level failed: " + vm.get_error_message());
+    }
     const auto load_code_start = clock_type::now();
     if (vm.load_code(image.code.data(), image.code.size()) < 0) {
         fail("llvmbpf load_code failed: " + vm.get_error_message());
@@ -422,6 +425,7 @@ sample_result run_llvmbpf(const cli_options &options)
     sample.exec_ns = static_cast<uint64_t>(std::llround(
         (static_cast<long double>(total_exec_cycles) * 1000000000.0L) /
         (static_cast<long double>(tsc_freq_hz) * static_cast<long double>(options.repeat))));
+    sample.opt_level = options.opt_level;
     sample.wall_exec_ns = elapsed_ns(exec_start, exec_end) / options.repeat;
     sample.exec_cycles = static_cast<uint64_t>(std::llround(
         static_cast<long double>(total_exec_cycles) / static_cast<long double>(options.repeat)));
