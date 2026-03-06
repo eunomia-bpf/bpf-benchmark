@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+generated-inputs/*.mem
+results/*.json
+build/
+programs/*.bpf.o
+programs/*.bpf.bin
