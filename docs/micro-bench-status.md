@@ -143,82 +143,114 @@ BPF:      CONFIG_BPF_JIT=y, CONFIG_BPF_SYSCALL=y, BTF enabled
 - `--perf-counters` kernel 计数包含 kernel 态，llvmbpf 只看 user 态
 - 短执行窗口或受限 PMU 下硬件计数器可能为 0
 
-## 6. 初步结果
+## 6. 结果
 
-### 6.1 micro_pure_jit (22 case)
+> 以下数据基于 rdtsc 精确测量修正后的结果（2026-03-06）。
+> 旧版 baseline-adjusted 数据已废弃，llvmbpf 改用 per-iteration rdtsc 测量纯 vm.exec() 时间。
+
+### 6.1 micro_pure_jit 执行时间 (22 case)
 
 **Suite-Level**
 
-| 指标 | 值 | 95% CI |
-|------|---:|---:|
-| Raw exec llvmbpf/kernel geomean | 1.06x | [0.80x, 1.46x] |
-| Baseline-adjusted geomean | 0.68x | [0.54x, 0.84x] |
-| Adjusted wins (llvmbpf/kernel/tie) | 14/4/3 | — |
+| 指标 | 值 |
+|------|---:|
+| Exec time llvmbpf/kernel geomean | 0.794x |
+| Wins (llvmbpf/kernel/tie) | 13/8/1 |
 
-**Category-Level（baseline-adjusted）**
+**Benchmark-Level（按 exec ratio 排序）**
 
-| Category | Benchmarks | Adjusted gmean | 95% CI | Wins (l/k/t) |
-|----------|---:|---:|---:|---|
-| alu-mix | 2 | 0.52x | [0.50x, 0.54x] | 2/0/0 |
-| baseline | 1 | 0.33x | [0.33x, 0.33x] | 1/0/0 |
-| call-size | 2 | 1.06x | [0.99x, 1.15x] | 0/1/1 |
-| control-flow | 3 | 0.32x | [0.20x, 0.50x] | 3/0/0 |
-| dependency-ilp | 5 | 1.00x | [0.94x, 1.07x] | 2/1/2 |
-| loop-shape | 3 | 1.01x | [0.92x, 1.17x] | 2/1/0 |
-| memory-local | 5 | 0.62x | [0.46x, 0.91x] | 4/1/0 |
-
-**Benchmark-Level（按 adjusted ratio 排序）**
-
-| Benchmark | Category | llvmbpf exec | kernel exec | Adjusted ratio | 95% CI |
+| Benchmark | Category | llvmbpf ns | kernel ns | Exec ratio | Code ratio |
 |-----------|----------|---:|---:|---:|---:|
-| `branch_layout` | control-flow | 167 ns | 608 ns | 0.20x | [0.17x, 0.26x] |
-| `binary_search` | control-flow | 224 ns | 546 ns | 0.33x | [0.28x, 0.41x] |
-| `memory_pair_sum` | baseline | 48 ns | 8 ns | 0.33x | [0.17x, 5.00x] |
-| `stride_load_16` | memory-local | 119 ns | 172 ns | 0.43x | [0.28x, 0.54x] |
-| `bounds_ladder` | memory-local | 109 ns | 138 ns | 0.47x | [0.23x, 0.65x] |
-| `stride_load_4` | memory-local | 120 ns | 158 ns | 0.48x | [0.46x, 0.61x] |
-| `log2_fold` | alu-mix | 254 ns | 423 ns | 0.50x | [0.39x, 0.77x] |
-| `switch_dispatch` | control-flow | 244 ns | 401 ns | 0.50x | [0.45x, 0.74x] |
-| `bitcount` | alu-mix | 1.886 us | 3.382 us | 0.54x | [0.51x, 0.58x] |
-| `checksum` | memory-local | 9.130 us | 12.140 us | 0.75x | [0.74x, 0.75x] |
-| `dep_chain_short` | dependency-ilp | 133 ns | 99 ns | 0.92x | [0.56x, 1.46x] |
-| `fibonacci_iter` | loop-shape | 619 ns | 629 ns | 0.92x | [0.86x, 1.01x] |
-| `multi_acc_8` | dependency-ilp | 323 ns | 304 ns | 0.92x | [0.82x, 1.04x] |
-| `fixed_loop_large` | loop-shape | 1.036 us | 1.040 us | 0.96x | [0.87x, 1.04x] |
-| `code_clone_2` | call-size | 310 ns | 272 ns | 0.99x | [0.48x, 1.14x] |
-| `dep_chain_long` | dependency-ilp | 390 ns | 352 ns | 0.99x | [0.74x, 1.12x] |
-| `spill_pressure` | dependency-ilp | 272 ns | 228 ns | 1.01x | [0.87x, 1.22x] |
-| `multi_acc_4` | dependency-ilp | 253 ns | 186 ns | 1.15x | [0.59x, 1.41x] |
-| `code_clone_8` | call-size | 1.232 us | 1.038 us | 1.15x | [1.06x, 1.21x] |
-| `fixed_loop_small` | loop-shape | 118 ns | 67 ns | 1.17x | [1.04x, 2.69x] |
-| `packet_parse` | memory-local | 123 ns | 68 ns | 1.22x | [0.57x, 2.71x] |
+| `stride_load_4` | memory-local | 119 | 486 | 0.24x | 0.33x |
+| `branch_layout` | control-flow | 157 | 532 | 0.30x | 0.35x |
+| `binary_search` | control-flow | 210 | 653 | 0.32x | 0.45x |
+| `switch_dispatch` | control-flow | 284 | 640 | 0.44x | 0.80x |
+| `stride_load_16` | memory-local | 100 | 206 | 0.49x | 0.33x |
+| `log2_fold` | alu-mix | 335 | 581 | 0.58x | 0.66x |
+| `bounds_ladder` | memory-local | 86 | 143 | 0.60x | 0.39x |
+| `checksum` | memory-local | 10823 | 12385 | 0.87x | 0.42x |
+| `fibonacci_iter` | loop-shape | 607 | 954 | 0.64x | 0.40x |
+| `code_clone_2` | call-size | 378 | 594 | 0.64x | 0.49x |
+| `dep_chain_long` | dependency-ilp | 411 | 595 | 0.69x | 0.41x |
+| `simple` | baseline | 19 | 25 | 0.76x | 0.62x |
+| `spill_pressure` | dependency-ilp | 253 | 317 | 0.80x | 0.76x |
+| `multi_acc_8` | dependency-ilp | 423 | 410 | 1.03x | 0.76x |
+| `multi_acc_4` | dependency-ilp | 276 | 256 | 1.08x | 0.65x |
+| `fixed_loop_small` | loop-shape | 97 | 85 | 1.14x | 0.36x |
+| `fixed_loop_large` | loop-shape | 1572 | 1215 | 1.29x | 0.43x |
+| `bitcount` | alu-mix | 4673 | 3465 | 1.35x | 0.45x |
+| `packet_parse` | memory-local | 95 | 69 | 1.38x | 0.50x |
+| `dep_chain_short` | dependency-ilp | 188 | 108 | 1.74x | 0.41x |
+| `code_clone_8` | call-size | 2325 | 1124 | 2.07x | 0.54x |
+| `memory_pair_sum` | baseline | 20 | 9 | 2.22x | 0.24x |
 
-**Perf-Counter Signal**
+注：`memory_pair_sum` 和 `simple` 的 kernel exec < 50ns，低于 `ktime_get_ns` 分辨率，数值不可靠。
 
-| Runtime | Median IPC | Branch miss rate | Cache miss rate |
-|---------|---:|---:|---:|
-| kernel | 0.37 | 0.60% | 7.68% |
-| llvmbpf | 3.89 | 0.47% | 15.00% |
+### 6.2 代码质量对比（code-size + 指令分析）
 
-### 6.2 micro_runtime (2 case)
+**Code Size**
 
-| 指标 | 值 | 95% CI |
-|------|---:|---:|
-| Raw exec llvmbpf/kernel geomean | 0.85x | [0.58x, 1.24x] |
+| 指标 | 值 |
+|------|---:|
+| llvmbpf/kernel native code size geomean | 0.47x |
+| llvmbpf 全面更小 | 22/22 benchmarks |
+
+**指令级分析**（完整报告见 `micro/jit-dumps/report.md`）
+
+| 维度 | llvmbpf/kernel ratio | 说明 |
+|------|---:|------|
+| 总指令数 | 0.44x | LLVM 生成不到一半的指令 |
+| Prologue 指令 | 0.40x | kernel 固定保存 rbp+rbx+r13-r15，LLVM 按需保存 |
+| Spill 指令 | 0.85x | 寄存器溢出差距不如预期大 |
+| 分支指令 | 0.76x | kernel 1:1 翻译 BPF 分支，LLVM 做布局优化 |
+| cmov 指令 | 31 vs 0 | LLVM 用条件移动替代分支（`switch_dispatch` 28 个 cmov） |
+
+**Kernel 额外指令来源分解**
+
+| 来源 | 占总增量比例 | 说明 |
+|------|---:|------|
+| Byte-load-recompose | 50.7% | kernel 用 `movzbq + shl + or` 逐字节重组 32/64 位值（verifier 安全要求） |
+| 分支指令 | 19.9% | 1:1 翻译 BPF 分支，不做布局优化 |
+| Prologue/epilogue | 18.5% | 固定 callee-saved 寄存器保存 |
+
+### 6.3 LLVM 优化级别消融
+
+| 优化级别 | Code size (avg) | 说明 |
+|---------|---:|------|
+| -O0 | 1057 B | 无优化 baseline |
+| -O1 | 307 B | **所有主要优化在此完成**（0.29x of O0） |
+| -O2 | 307 B | 与 O1 完全相同 |
+| -O3 | 307 B | 与 O1 完全相同 |
+
+**关键发现**：对 BPF 程序这种短小代码，O1→O3 零增量。基础优化（DCE、常量传播、寄存器分配）就够了，高级优化（loop unroll、vectorization）无用。
+
+### 6.4 核心矛盾："代码更小但执行更慢"
+
+8/22 个 benchmark 中 llvmbpf 代码更小但执行更慢。根因分析（详见 `micro/jit-dumps/report.md` Root Cause Analysis）：
+
+| Benchmark | Exec ratio | Code ratio | 根因 |
+|-----------|---:|---:|------|
+| `bitcount` | 1.35x | 0.45x | kernel 热循环更短的依赖链（14 vs 6），LLVM 的 BMI 指令减少了指令数但没缩短关键路径 |
+| `code_clone_8` | 2.07x | 0.54x | kernel 依赖链 59 vs LLVM 45，但 kernel 用 `rorx` 合成旋转更高效 |
+| `fixed_loop_large` | 1.29x | 0.43x | kernel 逐字节加载在此场景下不影响关键路径，LLVM 省掉的指令不在热路径上 |
+| `dep_chain_short` | 1.74x | 0.41x | verifier-safe 的 byte-load ladder 延长关键路径 |
+
+**论文洞察**：代码大小 ≠ 性能。LLVM 的指令消除优化主要减少非关键路径指令，但 kernel JIT 的 1:1 翻译在某些数据流模式下偶然产生了更短的依赖链。
+
+### 6.5 测量方法论修正
+
+| 问题 | 旧方法 | 修正后 |
+|------|--------|--------|
+| llvmbpf exec_ns | `steady_clock` 包裹 `vm.exec()`，含 ~2μs harness 开销 | per-iteration `rdtsc/rdtscp` 仅测 vm.exec() 调用 |
+| 旧的 baseline-adjusted ratio | 减去 `simple` baseline，统计上脆弱 | 废弃，改用 rdtsc 直接测量 |
+| IPC 对比 | kernel 0.37 vs llvmbpf 3.89，perf counter 窗口不等价 | 已知限制，perf counter 对比需谨慎解读 |
+
+### 6.6 micro_runtime (2 case)
 
 | Benchmark | llvmbpf exec | kernel exec | Ratio |
 |-----------|---:|---:|---:|
 | `map_lookup_churn` | 324 ns | 260 ns | 1.24x |
 | `map_roundtrip` | 323 ns | 553 ns | 0.58x |
-
-### 6.3 初步观察
-
-1. **llvmbpf 在 control-flow 和 alu-mix 类别优势显著**（0.32x-0.52x），LLVM 的分支布局优化和位操作优化起了关键作用
-2. **dependency-ilp 和 loop-shape 接近平手**（~1.0x），说明纯标量依赖链和简单循环两侧 JIT 差距不大
-3. **kernel 在部分场景仍有优势**：`packet_parse`（1.22x）可能受益于 kernel 的 packet-oriented JIT 路径，`fixed_loop_small`（1.17x）可能体现 llvmbpf 的 harness 固定开销在短任务上更明显
-4. **IPC 差距巨大**（3.89 vs 0.37）：kernel 的 `BPF_PROG_TEST_RUN` 测量路径包含更多内核态开销，不完全等价于纯 BPF 执行
-5. **llvmbpf compile 时间通常慢于 kernel load/JIT**：执行层面的赢面不自动转化为加载路径的赢面
-6. **runtime suite 仅 2 case**，结论还不够稳固
 
 ## 7. 迭代计划与进度
 
@@ -238,32 +270,43 @@ BPF:      CONFIG_BPF_JIT=y, CONFIG_BPF_SYSCALL=y, BTF enabled
 - [x] Bootstrap/gmean-oriented 摘要生成
 - [x] 第一波真实语料库拉取
 
-### Iteration 3 — 代码质量与归因（当前）
+### Iteration 3 — 代码质量与归因（进行中）
 
-- [ ] JIT dump / code-size 采集（关闭 RQ1.1）
-- [ ] verifier/load/JIT 分段统计（将 compile_ns 拆分为 verifier、JIT、ELF parse 三段）
-- [ ] 扩展 llvmbpf ELF loader 支持 local subprogram call → 解锁 `call-chain` family
-- [ ] 增加 real helper-call micro case（超越 map lookup/update）
-- [ ] 增加 tail-call 和 multi-program micro case
-- [ ] 评估完全无 helper 的 pure-jit ABI 是否可行
+- [x] JIT dump / code-size 采集 — `--dump-jit` flag + `code_size` JSON 字段（RQ1.1 已关闭）
+- [x] rdtsc 精确测量修正 — 消除 harness 开销，llvmbpf exec_ns 现在公平
+- [x] LLVM 优化级别消融 — `--opt-level 0/1/2/3`，发现 O1=O2=O3
+- [x] 指令级 JIT 分析 — `dump_all_jit.sh` + `analyze_jit.py`，byte-recompose / BMI / cmov / prologue / 依赖链
+- [x] BCF 数据集获取 — 1588 个程序已下载到 `corpus/bcf/`
+- [ ] BCF 真实程序 code-size 批量对比（不需要执行，只比 code size）
+- [ ] verifier/load/JIT 分段统计
+- [ ] perf counter 相关性分析（IPC/branch-miss/cache-miss vs exec ratio）
+- [ ] Spectre 2×2 实验（需重启 mitigations=off）
+- [ ] 扩展 llvmbpf ELF loader 支持 local subprogram call
+- [ ] 增加 real helper-call / tail-call micro case
 
-### Iteration 4 — 完善与提交
+### Iteration 4 — 系统贡献与提交
 
+- [ ] Helper inlining (S3) 实现 — UEOS 核心差异化
+- [ ] 等价性验证 V1（BPF_PROG_TEST_RUN 差分测试）
+- [ ] 端到端 Cilium/Katran 评估
 - [ ] 多程序实验（RQ5）
-- [ ] 端到端应用场景
 - [ ] 图表生成脚本
-- [ ] 收紧论文为 OSDI/SOSP 格式
+- [ ] 论文写作
 
 ## 8. 数据采集方法总结
 
 | 维度 | kernel 侧工具 | llvmbpf 侧工具 |
 |------|-------------|---------------|
-| 执行时间 | BPF_PROG_TEST_RUN duration | steady_clock + repeat 均摊 |
+| 执行时间 | BPF_PROG_TEST_RUN duration (内核内部 ktime) | per-iteration rdtsc/rdtscp (纯 vm.exec) |
+| Wall exec 时间 | prog_run_wall_ns (steady_clock) | wall_exec_ns (steady_clock, 含 harness) |
 | 编译/加载时间 | bpf_object__open + bpf_object__load | llvmbpf load_code + compile |
 | 硬件计数器 | perf_event_open (include_kernel=true) | perf_event_open (user only) |
-| 代码尺寸 | bpftool prog dump jited（待接入） | llvm-objdump（待接入） |
+| 代码尺寸 | bpf_prog_info.jited_prog_len / xlated_prog_len | get_compiled_code().size / insn_count × 8 |
+| JIT 代码 dump | `--dump-jit` → .kernel.bin | `--dump-jit` → .llvmbpf.bin |
+| 指令分析 | `objdump -D -b binary -m i386:x86-64` | 同左 |
 | Verifier 统计 | veristat（待接入） | N/A |
 | Phase 分段 | object_open / object_load / prog_run_wall / result_read | program_image / memory_prepare / input_stage / vm_load_code / jit_compile |
+| 优化级别 | N/A (kernel JIT 无选项) | `--opt-level 0/1/2/3` |
 
 ## 9. 添加新 benchmark 的流程
 
