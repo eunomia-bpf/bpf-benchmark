@@ -66,6 +66,9 @@ struct code_size_summary {
 struct sample_result {
     uint64_t compile_ns = 0;
     uint64_t exec_ns = 0;
+    std::optional<uint64_t> wall_exec_ns;
+    std::optional<uint64_t> exec_cycles;
+    std::optional<uint64_t> tsc_freq_hz;
     uint64_t result = 0;
     uint32_t retval = 0;
     std::optional<uint64_t> jited_prog_len;

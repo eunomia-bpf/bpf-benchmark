@@ -167,8 +167,20 @@ void print_json(const sample_result &sample)
     std::cout
         << "{"
         << "\"compile_ns\":" << sample.compile_ns << ","
-        << "\"exec_ns\":" << sample.exec_ns << ","
-        << "\"result\":" << sample.result << ","
+        << "\"exec_ns\":" << sample.exec_ns;
+
+    if (sample.wall_exec_ns.has_value()) {
+        std::cout << ",\"wall_exec_ns\":" << *sample.wall_exec_ns;
+    }
+    if (sample.exec_cycles.has_value()) {
+        std::cout << ",\"exec_cycles\":" << *sample.exec_cycles;
+    }
+    if (sample.tsc_freq_hz.has_value()) {
+        std::cout << ",\"tsc_freq_hz\":" << *sample.tsc_freq_hz;
+    }
+
+    std::cout
+        << ",\"result\":" << sample.result << ","
         << "\"retval\":" << sample.retval;
 
     if (sample.jited_prog_len.has_value()) {

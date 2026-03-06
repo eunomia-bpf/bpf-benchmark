@@ -4,14 +4,142 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <cstring>
+#include <fstream>
 #include <memory>
+#include <thread>
 #include <sys/mman.h>
 #include <unordered_map>
 
 namespace {
 
 using clock_type = std::chrono::steady_clock;
+
+#if defined(__x86_64__) || defined(__i386__)
+constexpr bool kHasTscMeasurement = true;
+
+static inline uint64_t rdtsc_start()
+{
+    unsigned int lo, hi;
+    asm volatile("lfence; rdtsc" : "=a"(lo), "=d"(hi));
+    return (static_cast<uint64_t>(hi) << 32) | lo;
+}
+
+static inline uint64_t rdtsc_end()
+{
+    unsigned int lo, hi;
+    asm volatile("rdtscp" : "=a"(lo), "=d"(hi) :: "ecx");
+    asm volatile("lfence");
+    return (static_cast<uint64_t>(hi) << 32) | lo;
+}
+#else
+constexpr bool kHasTscMeasurement = false;
+
+static inline uint64_t rdtsc_start()
+{
+    return 0;
+}
+
+static inline uint64_t rdtsc_end()
+{
+    return 0;
+}
+#endif
+
+std::optional<uint64_t> read_nominal_tsc_freq_hz()
+{
+    std::ifstream cpuinfo("/proc/cpuinfo");
+    if (!cpuinfo.is_open()) {
+        return std::nullopt;
+    }
+
+    std::string line;
+    while (std::getline(cpuinfo, line)) {
+        if (!line.starts_with("model name")) {
+            continue;
+        }
+
+        const auto at_pos = line.rfind('@');
+        if (at_pos == std::string::npos) {
+            continue;
+        }
+
+        const auto value_start = line.find_first_of("0123456789", at_pos);
+        if (value_start == std::string::npos) {
+            continue;
+        }
+
+        const auto value_end = line.find_first_not_of("0123456789.", value_start);
+        if (value_end == std::string::npos) {
+            continue;
+        }
+
+        const auto unit_start = line.find_first_not_of(" \t", value_end);
+        if (unit_start == std::string::npos) {
+            continue;
+        }
+
+        const auto unit_end = line.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", unit_start);
+        const auto unit = line.substr(
+            unit_start,
+            unit_end == std::string::npos ? std::string::npos : unit_end - unit_start);
+
+        long double multiplier = 0.0L;
+        if (unit == "GHz") {
+            multiplier = 1000000000.0L;
+        } else if (unit == "MHz") {
+            multiplier = 1000000.0L;
+        } else if (unit == "KHz") {
+            multiplier = 1000.0L;
+        } else {
+            continue;
+        }
+
+        try {
+            const auto value = std::stold(line.substr(value_start, value_end - value_start));
+            return static_cast<uint64_t>(std::llround(value * multiplier));
+        } catch (const std::exception &) {
+            continue;
+        }
+    }
+
+    return std::nullopt;
+}
+
+uint64_t calibrate_tsc_freq_hz()
+{
+    constexpr auto calibration_window = std::chrono::milliseconds(20);
+
+    const auto wall_start = clock_type::now();
+    const auto tsc_start = rdtsc_start();
+    std::this_thread::sleep_for(calibration_window);
+    const auto tsc_end = rdtsc_end();
+    const auto wall_end = clock_type::now();
+
+    const uint64_t wall_ns = elapsed_ns(wall_start, wall_end);
+    if (wall_ns == 0 || tsc_end <= tsc_start) {
+        fail("unable to calibrate TSC frequency");
+    }
+
+    const long double freq_hz =
+        (static_cast<long double>(tsc_end - tsc_start) * 1000000000.0L) /
+        static_cast<long double>(wall_ns);
+    return static_cast<uint64_t>(std::llround(freq_hz));
+}
+
+uint64_t detect_tsc_freq_hz()
+{
+    if constexpr (!kHasTscMeasurement) {
+        fail("rdtsc timing requires x86/x86_64");
+    }
+
+    if (const auto nominal = read_nominal_tsc_freq_hz(); nominal.has_value()) {
+        return *nominal;
+    }
+
+    return calibrate_tsc_freq_hz();
+}
 
 struct userspace_array_map {
     map_spec spec;
@@ -247,6 +375,8 @@ sample_result run_llvmbpf(const cli_options &options)
 
     uint64_t retval = 0;
     uint64_t result = 0;
+    uint64_t total_exec_cycles = 0;
+    const uint64_t tsc_freq_hz = detect_tsc_freq_hz();
     active_map_state = &map_state;
     clock_type::time_point exec_start {};
     clock_type::time_point exec_end {};
@@ -257,9 +387,11 @@ sample_result run_llvmbpf(const cli_options &options)
             if (options.io_mode == "map") {
                 uint8_t dummy_ctx[8] = {};
                 for (uint32_t index = 0; index < options.repeat; ++index) {
+                    const uint64_t cycle_start = rdtsc_start();
                     if (vm.exec(dummy_ctx, sizeof(dummy_ctx), retval) < 0) {
                         fail("llvmbpf exec failed: " + vm.get_error_message());
                     }
+                    total_exec_cycles += rdtsc_end() - cycle_start;
                 }
             } else {
                 lowmem_buffer packet_buffer(packet_input.size());
@@ -271,9 +403,11 @@ sample_result run_llvmbpf(const cli_options &options)
                 ctx.data_end = static_cast<uint32_t>(packet_address + packet_input.size());
 
                 for (uint32_t index = 0; index < options.repeat; ++index) {
+                    const uint64_t cycle_start = rdtsc_start();
                     if (vm.exec(&ctx, sizeof(ctx), retval) < 0) {
                         fail("llvmbpf exec failed: " + vm.get_error_message());
                     }
+                    total_exec_cycles += rdtsc_end() - cycle_start;
                 }
                 result = read_u64_result(
                     packet_buffer.data(),
@@ -285,7 +419,13 @@ sample_result run_llvmbpf(const cli_options &options)
 
     sample_result sample;
     sample.compile_ns = elapsed_ns(compile_start, compile_end);
-    sample.exec_ns = elapsed_ns(exec_start, exec_end) / options.repeat;
+    sample.exec_ns = static_cast<uint64_t>(std::llround(
+        (static_cast<long double>(total_exec_cycles) * 1000000000.0L) /
+        (static_cast<long double>(tsc_freq_hz) * static_cast<long double>(options.repeat))));
+    sample.wall_exec_ns = elapsed_ns(exec_start, exec_end) / options.repeat;
+    sample.exec_cycles = static_cast<uint64_t>(std::llround(
+        static_cast<long double>(total_exec_cycles) / static_cast<long double>(options.repeat)));
+    sample.tsc_freq_hz = tsc_freq_hz;
     sample.result = options.io_mode == "map" ? read_result_value(map_state) : result;
     sample.retval = static_cast<uint32_t>(retval);
     sample.native_code_size = compiled_code->size;
