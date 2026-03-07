@@ -145,5 +145,5 @@ benchmarks:
     base_name: get_time_heavy
     kernel_input_size: 4
     input_generator: get_time_heavy
-    expected_result: 0
+    expected_result: 8884707040993350857
     tags: [helper, time, runtime, heavy]

@@ -32,4 +32,7 @@ static __always_inline int bench_fibonacci_iter_packet(const u8 *data, u32 len, 
     return 0;
 }
 
-DEFINE_PACKET_BACKED_XDP_BENCH(fibonacci_iter_packet_xdp, bench_fibonacci_iter_packet)
+DEFINE_FIXED_PACKET_BACKED_XDP_BENCH(
+    fibonacci_iter_packet_xdp,
+    bench_fibonacci_iter_packet,
+    FIBONACCI_ITER_INPUT_SIZE)

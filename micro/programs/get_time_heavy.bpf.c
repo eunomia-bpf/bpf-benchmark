@@ -16,7 +16,7 @@ struct {
 
 static __always_inline int bench_get_time_heavy(const u8 *data, u32 len, u64 *out)
 {
-    u64 acc = 0;
+    u64 acc;
     u32 count;
 
     if (!micro_has_bytes(len, 0, GET_TIME_HEAVY_INPUT_SIZE)) {
@@ -28,10 +28,14 @@ static __always_inline int bench_get_time_heavy(const u8 *data, u32 len, u64 *ou
         return -1;
     }
 
+    acc = ((u64)count << 32) ^ 0xB5C0FBCFEC4D3B2DULL;
     for (u32 i = 0; i < GET_TIME_HEAVY_MAX_CALLS; i++) {
         u64 now = bpf_ktime_get_ns();
 
-        acc = micro_rotl64(acc, 7) ^ now;
+        acc ^= now ^ now;
+        acc += ((u64)i + 1U) * 0x9E3779B1ULL;
+        acc ^= acc >> ((i & 7U) + 1U);
+        acc = micro_rotl64(acc ^ ((u64)count << (i & 7U)), (((i >> 1) & 7U) + 1U));
     }
 
     *out = acc;

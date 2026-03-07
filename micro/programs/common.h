@@ -95,6 +95,33 @@ static __always_inline u64 micro_rotl64(u64 value, u32 shift)
     }                                                                            \
     char LICENSE[] SEC("license") = "GPL";
 
+#define DEFINE_FIXED_PACKET_BACKED_XDP_BENCH(PROG_NAME, BENCH_FN, INPUT_SIZE)    \
+    SEC("xdp") int PROG_NAME(struct xdp_md *ctx)                                 \
+    {                                                                            \
+        u8 *data = (u8 *)(long)ctx->data;                                        \
+        u8 *data_end = (u8 *)(long)ctx->data_end;                                \
+        u8 *payload;                                                             \
+        u8 *payload_end;                                                         \
+        u64 result = 0;                                                          \
+        if (data > data_end) {                                                   \
+            return XDP_ABORTED;                                                  \
+        }                                                                        \
+        payload = data + 8U;                                                     \
+        if (payload > data_end) {                                                \
+            return XDP_ABORTED;                                                  \
+        }                                                                        \
+        payload_end = payload + (INPUT_SIZE);                                    \
+        if (payload_end > data_end) {                                            \
+            return XDP_ABORTED;                                                  \
+        }                                                                        \
+        if (BENCH_FN(payload, INPUT_SIZE, &result) < 0) {                        \
+            return XDP_ABORTED;                                                  \
+        }                                                                        \
+        micro_write_u64_le(data, result);                                        \
+        return XDP_PASS;                                                         \
+    }                                                                            \
+    char LICENSE[] SEC("license") = "GPL";
+
 #define DEFINE_STAGED_INPUT_XDP_BENCH(PROG_NAME, BENCH_FN, INPUT_TYPE, INPUT_SIZE) \
     SEC("xdp") int PROG_NAME(struct xdp_md *ctx)                                  \
     {                                                                             \
