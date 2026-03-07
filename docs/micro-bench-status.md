@@ -365,22 +365,22 @@ authoritative `31`-case run 中，`10/31` 个 benchmark 出现 llvmbpf 代码更
 | `code_clone_2` | 1.260x | 0.492x | Yes |
 | `code_clone_8` | 1.878x | 0.542x | Yes |
 
-其中 `7/10` 个 case 在 BH-corrected paired Wilcoxon 下显著，说明“代码更小但执行更慢”不再只是 pilot 中的零星异常，而是 authoritative run 中可重复观察到的 workload-dependent 现象。
+其中 `7/10` 个 case 在 BH-corrected paired Wilcoxon 下显著。但 `3` 个 case（`simple`、`simple_packet`、`memory_pair_sum`）的 kernel exec 均低于本平台 ~100ns 的 `ktime_get_ns()` 分辨率，属于**计时量化噪声**（measurement artifact），应从实质性 paradox 分析中排除。排除后剩余 `7` 个 real paradox case，其中 `5` 个显著。
 
 **论文洞察**：代码大小 ≠ 性能。authoritative 数据表明 llvmbpf 的 native code-size 优势是普遍的（`31/31` 更小），但执行时间收益仍取决于具体数据流、循环形态和 runtime 机制，不能仅用代码尺寸预测。
 
 **因果分类（详见 `micro/results/paradox_analysis.md`）**
 
-The 10 paradox cases decompose into 4 categories:
+10 个 paradox case 分为 4 类；其中 sub-resolution 为 measurement artifact，实质性 paradox 为 7 个：
 
-| 类别 | 数量 | Benchmarks | 机制 |
-|------|--:|------------|------|
-| sub-resolution | 3 | simple, simple_packet, memory_pair_sum | kernel exec < 100ns，ktime 量化噪声主导 |
-| tight-loop | 3 | bitcount, fixed_loop_large, log2_fold | 循环承载依赖链决定运行时间，LLVM 消除的主要是非关键路径指令 |
-| code-clone | 2 | code_clone_8, code_clone_2 | 克隆的直行数学体在循环内，kernel 的直接翻译与 LLVM 优化同等高效 |
-| branch-heavy | 2 | branch_dense, bounds_check_heavy | 控制流密度主导性能，分支布局比静态代码尺寸更重要 |
+| 类别 | 数量 | 性质 | Benchmarks | 机制 |
+|------|--:|------|------------|------|
+| sub-resolution | 3 | measurement artifact | simple, simple_packet, memory_pair_sum | kernel exec < 100ns，`ktime_get_ns()` 量化噪声主导，应排除 |
+| tight-loop | 3 | real paradox | bitcount, fixed_loop_large, log2_fold | 循环承载依赖链决定运行时间，LLVM 消除的主要是非关键路径指令 |
+| code-clone | 2 | real paradox | code_clone_8, code_clone_2 | 克隆的直行数学体在循环内，kernel 的直接翻译与 LLVM 优化同等高效 |
+| branch-heavy | 2 | real paradox | branch_dense, bounds_check_heavy | 每次循环迭代 7-8 个条件分支，分支预测器压力（而非代码尺寸）主导关键路径 |
 
-**核心洞察**：LLVM 的指令消除主要减少非关键路径指令。在这 `10` 个 case 中，运行时间由计时噪声、循环依赖链、直行数学或密集控制流决定，代码更小不等于关键路径更短。
+**核心洞察**：排除 3 个 sub-resolution measurement artifact 后，`7/7` 个 real paradox case 均为真实的”更小但更慢”现象。LLVM 的指令消除主要减少非关键路径指令；在这些 case 中，运行时间由循环依赖链、克隆直行数学或密集控制流决定，代码更小不等于关键路径更短。
 
 ### 6.5 测量方法论修正
 
@@ -421,6 +421,41 @@ The 10 paradox cases decompose into 4 categories:
 | `get_time_heavy` | 1.038x | Yes |
 
 **结论**：runtime suite 中 llvmbpf 在 `6/9` 个 case 上更快，优势主要集中在 map-heavy 和 `probe_read` workload；kernel 仅在 `map_lookup_churn` 与 `get_time_heavy` 上显著更快，`helper_call_1` 虽 ratio `> 1.0` 但未达显著。
+
+### 6.7 Feature-Space Representativeness
+
+> 分析脚本：`micro/analyze_representativeness.py`
+> 报告：`micro/results/representativeness_report.md`
+> 真实语料：`corpus/results/bytecode_features.json`（`1588` 个程序）
+> 统计口径：当前 representativeness report 纳入 `29` 个 pure-jit benchmark 与 `5` 个 runtime benchmark，合计 `34` 个 benchmark，覆盖 `10` 个 category
+
+这里的 framing 必须明确：这些 micro-benchmark 的设计目标是**因果隔离**特定 JIT 机制（如分支布局、寄存器分配、memory access pattern、helper/map runtime path），而**不是**在统计意义上代表全部真实 BPF 程序。representativeness 分析的作用，是把这种 external-validity gap 定量化、公开化，让读者能够诚实判断“机制级结论能外推到什么范围”；与之互补的外部效度证据，则来自前文真实程序 code-size 外部验证（当前 paired 结果为 `105` 个 instances / `27` 个 unique programs）。
+
+**关键静态特征范围（combined suite vs. 真实语料）**
+
+| 特征 | 真实语料中位数 | 真实语料 p90 | Combined max |
+|------|--------------:|------------:|-------------:|
+| Total insns | 10977 | 22899 | 1596 |
+| Branch insns | 1135 | 1458 | 196 |
+| Memory ops | 5203 | 11437 | 253 |
+| Helper calls | 289 | 847 | 101 |
+| BPF-to-BPF calls | 0 | 0 | 0 |
+
+**覆盖率摘要（combined suite）**
+
+| 指标 | 覆盖率 |
+|------|------:|
+| 落在指令数范围内的 corpus 程序 | 3.7% |
+| 落在 helper-call 范围内的 corpus 程序 | 4.4% |
+| 落在 BPF-to-BPF call 范围内的 corpus 程序 | 96.7% |
+| 落在 5D feature box 内的 corpus 程序 | 0.8% |
+
+**剩余缺口**
+
+- **程序规模仍是主缺口**：combined suite 的最大程序仅到 `1596` 条 BPF insns，而真实语料中位数已达 `10977`、p90 为 `22899`；分支与内存操作维度也有同向压缩（例如 Branch max `196` vs corpus median `1135`，Memory ops max `253` vs corpus median `5203`）。
+- **helper-heavy workload 覆盖仍弱**：suite 的静态 helper 调用上限为 `101`，低于真实语料的中位数 `289` 与 p90 `847`，因此仅靠 helper 这一维也只覆盖 `4.4%` 的 corpus。
+- **子程序结构存在结构性空白**：从静态 `bpf2bpf_call_count` 维度看，range coverage 高达 `96.7%`，但这并不代表“多函数程序”被覆盖；报告同时显示 `97.2%` 的真实程序包含多个函数，而当前 suite 中这一比例为 `0%`，根因是 llvmbpf 仍缺少 local-call loader 支持。
+- **多维联合代表性极低**：只有 `0.8%` 的真实程序落在 combined 5D feature box 内，因此论文必须把 micro-benchmark 结论明确定位为“机制级因果证据”，并继续依赖真实程序 code-size 外部验证与 macro-corpus 分析提供外部效度。
 
 ## 7. 迭代计划与进度
 

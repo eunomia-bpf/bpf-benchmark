@@ -120,7 +120,7 @@
 2. 把 31 个 benchmark 标注在分布上，证明覆盖了关键区域
 3. 已完成跨 `4` 个 repo 的扫描；当前来自 `cilium` 与 `libbpf-bootstrap` 的 `105` 个 paired real-program code-size 实例已验证微基准结论的外部效度
 
-**Remaining**: 仍需把 feature-space 覆盖从 `0.8%` 往上推；真实程序 execution-time 子集不再视为 engineering TODO，因为 `BPF_PROG_TEST_RUN` 对 real programs 存在结构性限制（tracepoint/kprobe/perf_event 不支持 test_run，TC 缺少 classifier/act context，fentry/fexit 在 dummy input 下 `exec_ns=0`）。论文中的验证策略应明确为：`105` 个 paired real programs 做 code-size 外部验证，execution-time 则由 `40` 个 handcrafted microbenchmarks（`31` staged-codegen + `9` runtime）承担。
+**Remaining**: `micro/results/representativeness_report.md` 已把缺口量化得比较清楚：combined suite 的 5D feature-box 覆盖只有 `0.8%`；主缺口首先是**程序规模**，suite max 仅 `1596` 条 BPF insns，而真实语料中位数已到 `10977`；其次是**子程序结构**，`97.2%` 的 corpus 程序包含多个函数，而当前 suite 仍是 `0%`。论文里应明确承认：这些 micro-benchmark 的目标是机制隔离，不是语料代表性；外部效度层由 `105` 个 paired instances（`27` 个 unique programs）的真实程序 code-size 验证承担，而不是要求 real-program execution-time 去填补 `BPF_PROG_TEST_RUN` 的结构性边界。
 
 ### 1.4 小差距（锦上添花）
 
