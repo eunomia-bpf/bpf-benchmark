@@ -369,6 +369,19 @@ authoritative `31`-case run 中，`10/31` 个 benchmark 出现 llvmbpf 代码更
 
 **论文洞察**：代码大小 ≠ 性能。authoritative 数据表明 llvmbpf 的 native code-size 优势是普遍的（`31/31` 更小），但执行时间收益仍取决于具体数据流、循环形态和 runtime 机制，不能仅用代码尺寸预测。
 
+**因果分类（详见 `micro/results/paradox_analysis.md`）**
+
+The 10 paradox cases decompose into 4 categories:
+
+| 类别 | 数量 | Benchmarks | 机制 |
+|------|--:|------------|------|
+| sub-resolution | 3 | simple, simple_packet, memory_pair_sum | kernel exec < 100ns，ktime 量化噪声主导 |
+| tight-loop | 3 | bitcount, fixed_loop_large, log2_fold | 循环承载依赖链决定运行时间，LLVM 消除的主要是非关键路径指令 |
+| code-clone | 2 | code_clone_8, code_clone_2 | 克隆的直行数学体在循环内，kernel 的直接翻译与 LLVM 优化同等高效 |
+| branch-heavy | 2 | branch_dense, bounds_check_heavy | 控制流密度主导性能，分支布局比静态代码尺寸更重要 |
+
+**核心洞察**：LLVM 的指令消除主要减少非关键路径指令。在这 `10` 个 case 中，运行时间由计时噪声、循环依赖链、直行数学或密集控制流决定，代码更小不等于关键路径更短。
+
 ### 6.5 测量方法论修正
 
 | 维度 | 现行 authoritative 方法 |
