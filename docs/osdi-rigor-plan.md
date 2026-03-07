@@ -54,6 +54,8 @@
 
 **剩余差距**：默认 `exec_ns` 仍是 kernel=`ktime` / llvmbpf=`rdtsc`。论文需要明确主指标选择，并同步给出 `wall_exec_ns` 的对齐视角。
 
+**Status (resolved)**: Suite renamed from `micro_pure_jit` to `micro_staged_codegen` to accurately reflect the staged-input measurement model.
+
 #### G2. 硬件计数器数据缺失（已部分修复）
 
 **问题**：22 个 benchmark 中只有 4 个（bitcount, binary_search, switch_dispatch, checksum）有非零 perf 计数器数据。llvmbpf 全部为 0。

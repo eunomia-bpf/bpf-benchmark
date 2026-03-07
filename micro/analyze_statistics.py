@@ -7,7 +7,7 @@ import math
 from pathlib import Path
 
 import numpy as np
-from scipy.stats import mannwhitneyu
+from scipy.stats import mannwhitneyu, wilcoxon
 
 
 ROOT_DIR = Path(__file__).resolve().parent
@@ -221,6 +221,11 @@ def build_runtime_rows(
             code_size_ratio = code_size_lhs / code_size_rhs
 
         mann_whitney = mannwhitneyu(lhs_exec, rhs_exec, alternative="two-sided")
+        if len(lhs_exec) == len(rhs_exec) and len(lhs_exec) >= 6:
+            wilcoxon_result = wilcoxon(lhs_exec, rhs_exec, alternative="two-sided")
+            paired_pvalue = float(wilcoxon_result.pvalue)
+        else:
+            paired_pvalue = math.nan
         comparison_rows.append(
             {
                 "benchmark": benchmark_name,
@@ -231,6 +236,7 @@ def build_runtime_rows(
                 "exec_ratio_ci_high": ratio_high,
                 "cohen_d": cohen_d(lhs_exec, rhs_exec),
                 "mann_whitney_pvalue": float(mann_whitney.pvalue),
+                "wilcoxon_paired_pvalue": paired_pvalue,
                 "significant": bool(mann_whitney.pvalue < 0.05),
                 "code_size_ratio": code_size_ratio,
                 "code_size_llvmbpf": code_size_lhs,
@@ -438,8 +444,8 @@ def render_markdown(
             "",
             "## Cross-runtime Comparison",
             "",
-            f"| Benchmark | {metric} Ratio (L/K) | 95% CI | Cohen's d | Mann-Whitney U p-value | BH adjusted p-value | Significant (raw) | Significant (BH) | Code-size Ratio (L/K) |",
-            "| --- | ---: | --- | ---: | ---: | ---: | --- | --- | ---: |",
+            f"| Benchmark | {metric} Ratio (L/K) | 95% CI | Cohen's d | Mann-Whitney U p-value | Paired p | BH adjusted p-value | Significant (raw) | Significant (BH) | Code-size Ratio (L/K) |",
+            "| --- | ---: | --- | ---: | ---: | ---: | ---: | --- | --- | ---: |",
         ]
     )
 
@@ -457,6 +463,7 @@ def render_markdown(
             f"{format_ci(row['exec_ratio_ci_low'], row['exec_ratio_ci_high'], precision=3)} | "
             f"{format_ratio(row['cohen_d'])} | "
             f"{format_pvalue(row['mann_whitney_pvalue'])} | "
+            f"{format_pvalue(row['wilcoxon_paired_pvalue'])} | "
             f"{format_pvalue(row['adjusted_pvalue'])} | "
             f"{'Yes' if row['significant'] else 'No'} | "
             f"{'Yes' if row['significant_bh'] else 'No'} | "

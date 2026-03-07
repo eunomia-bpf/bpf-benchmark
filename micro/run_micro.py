@@ -132,6 +132,30 @@ def read_optional_file(path: str) -> str:
         return "unknown"
 
 
+def validate_environment(host: dict[str, object], args: argparse.Namespace) -> None:
+    governor = str(host.get("cpu_governor", "unknown"))
+    if governor != "performance":
+        print(
+            f"[WARN] CPU governor is '{governor}', not 'performance'. "
+            "Results may have frequency scaling noise."
+        )
+
+    no_turbo = str(host.get("turbo_state", "unknown"))
+    if no_turbo == "0":
+        print("[WARN] Turbo boost is enabled. Consider disabling for stable measurements.")
+
+    perf_event_paranoid = str(host.get("perf_event_paranoid", "unknown"))
+    try:
+        perf_event_paranoid_value = int(perf_event_paranoid)
+    except ValueError:
+        perf_event_paranoid_value = None
+    if perf_event_paranoid_value is not None and perf_event_paranoid_value > 1:
+        print(f"[WARN] perf_event_paranoid={perf_event_paranoid}. Some perf counters may not be available.")
+
+    if args.cpu is None:
+        print("[WARN] No CPU affinity set. Consider using --cpu for isolated measurements.")
+
+
 def list_suite(suite: SuiteSpec) -> None:
     print("Benchmarks")
     print("----------")
@@ -428,7 +452,6 @@ def main() -> int:
     if args.shuffle_seed is not None:
         random.Random(args.shuffle_seed).shuffle(benchmarks)
     runtime_order_seed = args.shuffle_seed if args.shuffle_seed is not None else DEFAULT_RUNTIME_ORDER_SEED
-    runtime_order_rng = random.Random(runtime_order_seed)
 
     iterations = args.iterations if args.iterations is not None else suite.defaults.iterations
     warmups = args.warmups if args.warmups is not None else suite.defaults.warmups
@@ -473,6 +496,8 @@ def main() -> int:
         "benchmarks": [],
     }
 
+    validate_environment(results["host"], args)
+
     for benchmark in benchmarks:
         memory_file = resolve_memory_file(benchmark, args.regenerate_inputs)
         benchmark_record = {
@@ -513,11 +538,17 @@ def main() -> int:
                 "samples": [],
             }
 
-        for _ in range(iterations):
-            iteration_runtimes = list(runtimes)
-            runtime_order_rng.shuffle(iteration_runtimes)
-            iteration_runtime_orders.append([runtime.name for runtime in iteration_runtimes])
-            for runtime in iteration_runtimes:
+        for iteration_idx in range(iterations):
+            # Counterbalance: alternate runtime order across iterations
+            if len(runtimes) == 2:
+                ordered = list(runtimes) if iteration_idx % 2 == 0 else list(reversed(runtimes))
+            else:
+                # For >2 runtimes, use seeded shuffle
+                rng = random.Random(runtime_order_seed + iteration_idx)
+                ordered = list(runtimes)
+                rng.shuffle(ordered)
+            iteration_runtime_orders.append([runtime.name for runtime in ordered])
+            for runtime in ordered:
                 sample_entry = runtime_samples[runtime.name]
                 sample = parse_helper_output(run_command(sample_entry["command"], args.cpu).stdout)
                 if benchmark.expected_result is not None and sample["result"] != benchmark.expected_result:
