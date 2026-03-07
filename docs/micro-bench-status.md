@@ -554,10 +554,10 @@ authoritative `31`-case run 中，`10/31` 个 benchmark 出现 llvmbpf 代码更
 - [x] **T3.4 编译时间分析** — authoritative 31-case run geomean L/K = 3.394x。5/31 llvmbpf 更快，26/31 kernel 更快（其中 `branch_dense` 近似持平）。详见 §6.1e
 - [x] **T3.5 统计严谨性补充** — authoritative 31-case run，30 iterations × 1000 repeats，bootstrap CI + paired Wilcoxon + BH correction。详见 §6.1b
 **注**：PMU 相关任务保留为 supplementary material。当前只有 `18` 个 benchmark 有 kernel 侧 PMU 数据，且仅 `3` 个 benchmark 有双 runtime IPC；短执行窗口与 PMU 调度粒度不匹配使其不适合作为主因果证据。
-- [ ] **T3.6 时间域因素分解** — 指令层分析只回答"多了多少指令"，不回答"慢了多少时间"。正文主归因应以针对性 micro-benchmark 和指令模式分析为主；若补做 PMU，只作为 supplementary IPC 估算参考。
+- [x] **T3.6 时间域因素分解** — 4 个 byte-recompose 因果隔离 benchmark 已完成 authoritative run：geomean 0.660x，load_byte_recompose=0.447x 量化了 byte-recompose 的时间代价（详见 micro/results/causal_isolation_analysis.md）。PMU 时间分解仍为 supplementary。
 - [ ] **T3.7 LLVM Pass-level 消融** — 不只是 O0/O1/O2/O3，而是逐个 pass 启用（instcombine、GVN、RegAlloc、SimplifyCFG 等），识别对 BPF 最有价值的 pass
 - [ ] **T3.8 Perf counter 相关性分析** — supplementary only：IPC/branch-miss/cache-miss vs exec ratio 的 Pearson/Spearman 相关系数矩阵
-- [ ] **T3.9 静态特征→优化收益预测模型 (RQ3.3)** — 用 T3.2 的特征 + code-size ratio 做线性回归/随机森林，识别最强预测因子
+- [x] **T3.9 静态特征→优化收益预测模型 (RQ3.3)** — `micro/analyze_performance_deep.py` 已完成：3-feature linear model R²=0.070，静态特征对 exec ratio 的预测力极弱。详见 micro/results/performance_deep_analysis.md
 
 **TODO — 补充实验：**
 - [ ] **T3.10 Spectre 2×2 实验** — 需重启 mitigations=off（低优先级）
@@ -569,6 +569,37 @@ authoritative `31`-case run 中，`10/31` 个 benchmark 出现 llvmbpf 代码更
 - [ ] **T3.14 内核 JIT 改进建议** — 基于分析结果，提出具体 patch 级建议（如：添加 cmov 支持、优化 byte-recompose pattern、按需 callee-saved 保存）
 - [ ] **T3.15 与 K2/Merlin/EPSO 的正交性分析** — 比较 bytecode 级优化（verifier 前）vs JIT 后端优化（native 级）的空间重叠度，证明互补性
 - [ ] **T3.16 跨工具对比定位** — 将我们的 characterization 与 CoNEXT'25（网络应用性能）、"No Two Snowflakes"（运行时差异）、ETH Zurich（多核扩展）等已有实证工作对比，明确差异化
+
+### Phase 4 — 下一阶段优先级 TODO（2026-03-08 onwards）
+
+按 impact/effort 排序，最高优先级在前。
+
+#### P0: 解决 sub-resolution 真实程序 exec-time（当前最大瓶颈）
+
+当前 98 个真实程序 exec-time 实例**全部** sub-resolution（kernel exec < 100ns），因为 dummy 全零包触发 TC 程序的快速退出路径。这是从 7.5→8.0 的关键瓶颈。
+
+- [ ] **T4.1 构造合法网络包输入** — 为 Cilium TC 程序构造包含合法 Ethernet + IPv4/IPv6 + TCP/UDP header 的测试包（≥54 字节），使程序走完整处理路径而非快速退出。可参考 Cilium 测试代码中的包构造方式。
+- [ ] **T4.2 重跑 exec-time validation（above-resolution）** — 使用 T4.1 的真实包重跑 `corpus/run_real_world_exec_time.py`，目标是让 kernel exec_ns > 100ns，获得第一批定量可信的真实程序性能数据。
+- [ ] **T4.3 exec-time 结果分析与文档更新** — 对 above-resolution 结果做 paired comparison，更新 stage-log 和 micro-bench-status。
+
+#### P1: 论文 Actionable Insight（"so what" 贡献）
+
+- [ ] **T4.4 Kernel JIT 改进建议文档** — 基于量化数据撰写具体改进建议：(a) byte-recompose 优化（已量化：消除可获 2.24x 加速），(b) cmov 支持（kernel cmov=0, LLVM=31），(c) per-function callee-saved 寄存器保存。
+- [ ] **T4.5 Kernel JIT patch prototype** — 选择一个最简单的改进点（如 cmov lowering 或 per-function callee-saved），提交 kernel patch proof-of-concept。
+- [ ] **T4.6 与 K2/Merlin/EPSO 正交性分析** — 对比 bytecode 级优化（verifier 前）vs JIT 后端优化（native 级），论证互补性（= T3.15）。
+
+#### P2: 扩大外部效度
+
+- [ ] **T4.7 完整 BCF 1588 程序 code-size 扫描** — 当前只扫了 4 repo / 949 程序。loader 已修好，可扫全部 BCF corpus。kernel 侧瓶颈是 verifier context。
+- [ ] **T4.8 micro suite 增加 local-call benchmark family** — 现在 loader 支持多函数 ELF，可以写含 BPF-to-BPF call 的 micro benchmark，填补 representativeness 的子程序结构空白。
+- [ ] **T4.9 第二平台验证** — 在 ARM64 或不同 x86 微架构上重跑 reduced suite（需要硬件）。
+
+#### P3: 补充分析（锦上添花）
+
+- [ ] **T4.10 LLVM Pass-level 消融** — 逐 pass 启用（instcombine、GVN、RegAlloc、SimplifyCFG），识别对 BPF 最有价值的 2-3 个 pass（= T3.7）。
+- [ ] **T4.11 stage-log abstract 更新** — 反映 162 paired / 36 unique / byte-recompose 0.447x 等新结果。
+- [ ] **T4.12 论文图表生成** — 为核心数据生成 publication-quality 图表（exec ratio 分布图、code-size scatter、category heatmap、causal isolation bar chart）。
+- [ ] **T4.13 Spectre 2×2 实验** — mitigations on/off 交叉实验（需 reboot，低优先级）（= T3.10）。
 
 ### Iteration 4 — 系统贡献与提交
 
