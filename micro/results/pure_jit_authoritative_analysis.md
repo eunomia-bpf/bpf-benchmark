@@ -83,9 +83,9 @@
 
 | Benchmark | exec_ns Ratio (L/K) | 95% CI | Cohen's d | Paired Wilcoxon p | MWU p | Significant | Code-size Ratio (L/K) | Notes |
 | --- | ---: | --- | ---: | ---: | ---: | --- | ---: | --- |
-| simple | 1.526 | [1.257, 1.880] | 1.087 | 0.0002 | 0.0017 | Yes | 0.622 (102/164) |  |
-| simple_packet | 1.321 | [1.061, 1.672] | 0.608 | 0.0784 | 0.0160 | No | 0.490 (47/96) |  |
-| memory_pair_sum | 1.251 | [1.012, 1.590] | 0.533 | 0.0363 | 0.3771 | Yes | 0.238 (92/386) |  |
+| simple | 1.526 | [1.257, 1.880] | 1.087 | 0.0002 | 0.0017 | Yes | 0.622 (102/164) | kernel exec < 100ns: below ktime resolution |
+| simple_packet | 1.321 | [1.061, 1.672] | 0.608 | 0.0784 | 0.0160 | No | 0.490 (47/96) | kernel exec < 100ns: below ktime resolution |
+| memory_pair_sum | 1.251 | [1.012, 1.590] | 0.533 | 0.0363 | 0.3771 | Yes | 0.238 (92/386) | kernel exec < 100ns: below ktime resolution |
 | bitcount | 1.556 | [1.505, 1.613] | 7.863 | 3.72e-06 | 3.01e-11 | Yes | 0.446 (268/601) |  |
 | log2_fold | 1.006 | [0.963, 1.051] | 0.065 | 0.8036 | 0.6516 | No | 0.659 (420/637) |  |
 | dep_chain_short | 0.861 | [0.780, 0.957] | -0.691 | 0.0412 | 0.2692 | Yes | 0.413 (201/487) |  |
@@ -124,6 +124,8 @@
 | Geometric mean exec_ns ratio 95% CI | [0.834, 0.865] |
 | Benchmarks with valid paired Wilcoxon input | 31 / 31 |
 | Statistically significant benchmarks (BH-adjusted paired Wilcoxon p < 0.05) | 25 / 31 |
+| Benchmarks with kernel exec < 100ns (below ktime resolution) | 3 / 31 |
+| Statistically significant benchmarks excluding sub-resolution kernels (BH-adjusted paired Wilcoxon p < 0.05) | 23 / 28 |
 
 ## Compile Time Analysis
 

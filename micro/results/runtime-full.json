@@ -1,0 +1,2120 @@
+{
+  "suite": "micro_runtime",
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/config/micro_runtime.yaml",
+  "generated_at": "2026-03-06T08:03:37.775663+00:00",
+  "host": {
+    "hostname": "lab",
+    "platform": "Linux-6.15.11-061511-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "cpu_affinity": "0"
+  },
+  "toolchains": {
+    "llvmbpf": {
+      "root": "/home/yunwei37/workspace/bpf-benchmark/vendor/llvmbpf"
+    },
+    "libbpf": {
+      "root": "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf"
+    },
+    "bpftool": {
+      "root": "/home/yunwei37/workspace/bpf-benchmark/vendor/bpftool"
+    }
+  },
+  "build": {
+    "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec",
+    "bpftool_binary": "/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/bpftool/bpftool"
+  },
+  "defaults": {
+    "iterations": 10,
+    "warmups": 2,
+    "repeat": 200,
+    "perf_counters": true
+  },
+  "benchmarks": [
+    {
+      "name": "map_lookup_churn",
+      "description": "Repeated input_map lookups over a fixed array payload",
+      "category": "map-runtime",
+      "tags": [
+        "map",
+        "helper-like",
+        "runtime"
+      ],
+      "expected_result": 16823189766144203766,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/map_lookup_churn.mem",
+      "runs": [
+        {
+          "runtime": "llvmbpf",
+          "label": "llvmbpf LLVM JIT",
+          "mode": "llvmbpf",
+          "repeat": 200,
+          "artifacts": {
+            "program_object": "/home/yunwei37/workspace/bpf-benchmark/micro/programs/map_lookup_churn.bpf.o"
+          },
+          "samples": [
+            {
+              "compile_ns": 5802456,
+              "exec_ns": 324,
+              "result": 16823189766144203766,
+              "retval": 2,
+              "phases_ns": {
+                "program_image_ns": 66118,
+                "memory_prepare_ns": 18448,
+                "map_prepare_ns": 1187,
+                "vm_load_code_ns": 106,
+                "jit_compile_ns": 5802456
+              },
+              "perf_counters": {
+                "cycles": 351797,
+                "instructions": 1575049,
+                "branches": 341576,
+                "branch_misses": 237,
+                "cache_references": 166,
+                "cache_misses": 65,
+                "task_clock_ns": 69418,
+                "context_switches": 0,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": false,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 5855698,
+              "exec_ns": 325,
+              "result": 16823189766144203766,
+              "retval": 2,
+              "phases_ns": {
+                "program_image_ns": 67679,
+                "memory_prepare_ns": 18720,
+                "map_prepare_ns": 1200,
+                "vm_load_code_ns": 139,
+                "jit_compile_ns": 5855698
+              },
+              "perf_counters": {
+                "cycles": 352984,
+                "instructions": 1575049,
+                "branches": 341576,
+                "branch_misses": 242,
+                "cache_references": 167,
+                "cache_misses": 100,
+                "task_clock_ns": 69342,
+                "context_switches": 0,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": false,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 5760154,
+              "exec_ns": 324,
+              "result": 16823189766144203766,
+              "retval": 2,
+              "phases_ns": {
+                "program_image_ns": 65068,
+                "memory_prepare_ns": 18345,
+                "map_prepare_ns": 1256,
+                "vm_load_code_ns": 181,
+                "jit_compile_ns": 5760154
+              },
+              "perf_counters": {
+                "cycles": 351831,
+                "instructions": 1575049,
+                "branches": 341576,
+                "branch_misses": 242,
+                "cache_references": 164,
+                "cache_misses": 39,
+                "task_clock_ns": 69169,
+                "context_switches": 0,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": false,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 5460368,
+              "exec_ns": 334,
+              "result": 16823189766144203766,
+              "retval": 2,
+              "phases_ns": {
+                "program_image_ns": 62645,
+                "memory_prepare_ns": 15136,
+                "map_prepare_ns": 1025,
+                "vm_load_code_ns": 193,
+                "jit_compile_ns": 5460368
+              },
+              "perf_counters": {
+                "cycles": 352746,
+                "instructions": 1575050,
+                "branches": 341577,
+                "branch_misses": 249,
+                "cache_references": 166,
+                "cache_misses": 26,
+                "task_clock_ns": 71152,
+                "context_switches": 0,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": false,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 5535515,
+              "exec_ns": 323,
+              "result": 16823189766144203766,
+              "retval": 2,
+              "phases_ns": {
+                "program_image_ns": 60257,
+                "memory_prepare_ns": 14877,
+                "map_prepare_ns": 1085,
+                "vm_load_code_ns": 139,
+                "jit_compile_ns": 5535515
+              },
+              "perf_counters": {
+                "cycles": 351448,
+                "instructions": 1575049,
+                "branches": 341576,
+                "branch_misses": 235,
+                "cache_references": 189,
+                "cache_misses": 33,
+                "task_clock_ns": 69099,
+                "context_switches": 0,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": false,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 5608559,
+              "exec_ns": 324,
+              "result": 16823189766144203766,
+              "retval": 2,
+              "phases_ns": {
+                "program_image_ns": 64613,
+                "memory_prepare_ns": 16810,
+                "map_prepare_ns": 1086,
+                "vm_load_code_ns": 333,
+                "jit_compile_ns": 5608559
+              },
+              "perf_counters": {
+                "cycles": 351520,
+                "instructions": 1575049,
+                "branches": 341576,
+                "branch_misses": 243,
+                "cache_references": 154,
+                "cache_misses": 30,
+                "task_clock_ns": 69044,
+                "context_switches": 0,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": false,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 5597292,
+              "exec_ns": 322,
+              "result": 16823189766144203766,
+              "retval": 2,
+              "phases_ns": {
+                "program_image_ns": 63157,
+                "memory_prepare_ns": 15639,
+                "map_prepare_ns": 1168,
+                "vm_load_code_ns": 124,
+                "jit_compile_ns": 5597292
+              },
+              "perf_counters": {
+                "cycles": 349655,
+                "instructions": 1575049,
+                "branches": 341576,
+                "branch_misses": 239,
+                "cache_references": 180,
+                "cache_misses": 26,
+                "task_clock_ns": 68795,
+                "context_switches": 0,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": false,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 5672294,
+              "exec_ns": 322,
+              "result": 16823189766144203766,
+              "retval": 2,
+              "phases_ns": {
+                "program_image_ns": 61490,
+                "memory_prepare_ns": 17195,
+                "map_prepare_ns": 1260,
+                "vm_load_code_ns": 86,
+                "jit_compile_ns": 5672294
+              },
+              "perf_counters": {
+                "cycles": 349723,
+                "instructions": 1575049,
+                "branches": 341576,
+                "branch_misses": 250,
+                "cache_references": 170,
+                "cache_misses": 26,
+                "task_clock_ns": 68791,
+                "context_switches": 0,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": false,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 5682357,
+              "exec_ns": 323,
+              "result": 16823189766144203766,
+              "retval": 2,
+              "phases_ns": {
+                "program_image_ns": 64713,
+                "memory_prepare_ns": 16179,
+                "map_prepare_ns": 1108,
+                "vm_load_code_ns": 178,
+                "jit_compile_ns": 5682357
+              },
+              "perf_counters": {
+                "cycles": 350706,
+                "instructions": 1575049,
+                "branches": 341576,
+                "branch_misses": 240,
+                "cache_references": 144,
+                "cache_misses": 35,
+                "task_clock_ns": 68978,
+                "context_switches": 0,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": false,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 5631083,
+              "exec_ns": 324,
+              "result": 16823189766144203766,
+              "retval": 2,
+              "phases_ns": {
+                "program_image_ns": 64472,
+                "memory_prepare_ns": 16416,
+                "map_prepare_ns": 1110,
+                "vm_load_code_ns": 135,
+                "jit_compile_ns": 5631083
+              },
+              "perf_counters": {
+                "cycles": 351804,
+                "instructions": 1575049,
+                "branches": 341576,
+                "branch_misses": 253,
+                "cache_references": 159,
+                "cache_misses": 26,
+                "task_clock_ns": 69223,
+                "context_switches": 0,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": false,
+                "scope": "exec_window",
+                "error": ""
+              }
+            }
+          ],
+          "compile_ns": {
+            "count": 10,
+            "mean": 5660577.6,
+            "median": 5651688.5,
+            "min": 5460368,
+            "max": 5855698,
+            "p95": 5855698,
+            "stdev": 121121.6091401989
+          },
+          "exec_ns": {
+            "count": 10,
+            "mean": 324.5,
+            "median": 324.0,
+            "min": 322,
+            "max": 334,
+            "p95": 334,
+            "stdev": 3.4721111093332766
+          },
+          "phases_ns": {
+            "program_image_ns": {
+              "count": 10,
+              "mean": 64021.2,
+              "median": 64542.5,
+              "min": 60257,
+              "max": 67679,
+              "p95": 67679,
+              "stdev": 2188.8819977330895
+            },
+            "memory_prepare_ns": {
+              "count": 10,
+              "mean": 16776.5,
+              "median": 16613.0,
+              "min": 14877,
+              "max": 18720,
+              "p95": 18720,
+              "stdev": 1385.9523200071976
+            },
+            "map_prepare_ns": {
+              "count": 10,
+              "mean": 1148.5,
+              "median": 1139.0,
+              "min": 1025,
+              "max": 1260,
+              "p95": 1260,
+              "stdev": 78.04307927178567
+            },
+            "vm_load_code_ns": {
+              "count": 10,
+              "mean": 161.4,
+              "median": 139.0,
+              "min": 86,
+              "max": 333,
+              "p95": 333,
+              "stdev": 69.08802758478168
+            },
+            "jit_compile_ns": {
+              "count": 10,
+              "mean": 5660577.6,
+              "median": 5651688.5,
+              "min": 5460368,
+              "max": 5855698,
+              "p95": 5855698,
+              "stdev": 121121.6091401989
+            }
+          },
+          "perf_counters": {
+            "cycles": {
+              "count": 10,
+              "mean": 351421.4,
+              "median": 351658.5,
+              "min": 349655,
+              "max": 352984,
+              "p95": 352984,
+              "stdev": 1114.4740862347985
+            },
+            "instructions": {
+              "count": 10,
+              "mean": 1575049.1,
+              "median": 1575049.0,
+              "min": 1575049,
+              "max": 1575050,
+              "p95": 1575050,
+              "stdev": 0.31622776601683794
+            },
+            "branches": {
+              "count": 10,
+              "mean": 341576.1,
+              "median": 341576.0,
+              "min": 341576,
+              "max": 341577,
+              "p95": 341577,
+              "stdev": 0.31622776601683794
+            },
+            "branch_misses": {
+              "count": 10,
+              "mean": 243,
+              "median": 242.0,
+              "min": 235,
+              "max": 253,
+              "p95": 253,
+              "stdev": 5.887840577551898
+            },
+            "cache_references": {
+              "count": 10,
+              "mean": 165.9,
+              "median": 166.0,
+              "min": 144,
+              "max": 189,
+              "p95": 189,
+              "stdev": 12.573782247199926
+            },
+            "cache_misses": {
+              "count": 10,
+              "mean": 40.6,
+              "median": 31.5,
+              "min": 26,
+              "max": 100,
+              "p95": 100,
+              "stdev": 23.991665219404844
+            },
+            "task_clock_ns": {
+              "count": 10,
+              "mean": 69301.1,
+              "median": 69134.0,
+              "min": 68791,
+              "max": 71152,
+              "p95": 71152,
+              "stdev": 682.5114488254228
+            },
+            "context_switches": {
+              "count": 10,
+              "mean": 0,
+              "median": 0.0,
+              "min": 0,
+              "max": 0,
+              "p95": 0,
+              "stdev": 0.0
+            },
+            "cpu_migrations": {
+              "count": 10,
+              "mean": 0,
+              "median": 0.0,
+              "min": 0,
+              "max": 0,
+              "p95": 0,
+              "stdev": 0.0
+            },
+            "page_faults": {
+              "count": 10,
+              "mean": 0,
+              "median": 0.0,
+              "min": 0,
+              "max": 0,
+              "p95": 0,
+              "stdev": 0.0
+            }
+          },
+          "perf_counters_meta": {
+            "requested": true,
+            "collected_samples": 10,
+            "include_kernel": false,
+            "scope": "exec_window",
+            "hardware_counters_observed": true,
+            "software_counters_observed": true,
+            "errors": {}
+          },
+          "derived_metrics": {
+            "ipc_median": 4.478916335023894,
+            "branch_miss_rate_median": 0.0007084806895098016,
+            "cache_miss_rate_median": 0.1897590361445783
+          },
+          "result_distribution": {
+            "16823189766144203766": 10
+          }
+        },
+        {
+          "runtime": "kernel",
+          "label": "kernel eBPF",
+          "mode": "kernel",
+          "repeat": 200,
+          "artifacts": {
+            "program_object": "/home/yunwei37/workspace/bpf-benchmark/micro/programs/map_lookup_churn.bpf.o"
+          },
+          "samples": [
+            {
+              "compile_ns": 775138,
+              "exec_ns": 223,
+              "result": 16823189766144203766,
+              "retval": 2,
+              "phases_ns": {
+                "memory_prepare_ns": 19949,
+                "object_open_ns": 59393,
+                "object_load_ns": 715745,
+                "map_prepare_ns": 2172,
+                "prog_run_wall_ns": 33739605,
+                "result_read_ns": 2755
+              },
+              "perf_counters": {
+                "cycles": 6305505,
+                "instructions": 2114431,
+                "branches": 272269,
+                "branch_misses": 1015,
+                "cache_references": 6873,
+                "cache_misses": 777,
+                "task_clock_ns": 1217012,
+                "context_switches": 2,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": true,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 783810,
+              "exec_ns": 239,
+              "result": 16823189766144203766,
+              "retval": 2,
+              "phases_ns": {
+                "memory_prepare_ns": 21575,
+                "object_open_ns": 62189,
+                "object_load_ns": 721621,
+                "map_prepare_ns": 2384,
+                "prog_run_wall_ns": 34936308,
+                "result_read_ns": 2219
+              },
+              "perf_counters": {
+                "cycles": 5344545,
+                "instructions": 2036688,
+                "branches": 253081,
+                "branch_misses": 1045,
+                "cache_references": 7316,
+                "cache_misses": 758,
+                "task_clock_ns": 1058302,
+                "context_switches": 2,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": true,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 754138,
+              "exec_ns": 320,
+              "result": 16823189766144203766,
+              "retval": 2,
+              "phases_ns": {
+                "memory_prepare_ns": 19576,
+                "object_open_ns": 56888,
+                "object_load_ns": 697250,
+                "map_prepare_ns": 2349,
+                "prog_run_wall_ns": 32129402,
+                "result_read_ns": 2051
+              },
+              "perf_counters": {
+                "cycles": 6347278,
+                "instructions": 2117148,
+                "branches": 272941,
+                "branch_misses": 1127,
+                "cache_references": 7839,
+                "cache_misses": 685,
+                "task_clock_ns": 1288748,
+                "context_switches": 2,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": true,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 732475,
+              "exec_ns": 308,
+              "result": 16823189766144203766,
+              "retval": 2,
+              "phases_ns": {
+                "memory_prepare_ns": 19197,
+                "object_open_ns": 65238,
+                "object_load_ns": 667237,
+                "map_prepare_ns": 2443,
+                "prog_run_wall_ns": 34743730,
+                "result_read_ns": 2274
+              },
+              "perf_counters": {
+                "cycles": 5161706,
+                "instructions": 2019189,
+                "branches": 249096,
+                "branch_misses": 984,
+                "cache_references": 6925,
+                "cache_misses": 652,
+                "task_clock_ns": 1048389,
+                "context_switches": 2,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": true,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 763569,
+              "exec_ns": 227,
+              "result": 16823189766144203766,
+              "retval": 2,
+              "phases_ns": {
+                "memory_prepare_ns": 20375,
+                "object_open_ns": 61803,
+                "object_load_ns": 701766,
+                "map_prepare_ns": 2387,
+                "prog_run_wall_ns": 35585577,
+                "result_read_ns": 2661
+              },
+              "perf_counters": {
+                "cycles": 6609402,
+                "instructions": 2135939,
+                "branches": 277749,
+                "branch_misses": 1051,
+                "cache_references": 6621,
+                "cache_misses": 1004,
+                "task_clock_ns": 1293163,
+                "context_switches": 2,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": true,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 747014,
+              "exec_ns": 241,
+              "result": 16823189766144203766,
+              "retval": 2,
+              "phases_ns": {
+                "memory_prepare_ns": 20536,
+                "object_open_ns": 60923,
+                "object_load_ns": 686091,
+                "map_prepare_ns": 2639,
+                "prog_run_wall_ns": 33538900,
+                "result_read_ns": 2248
+              },
+              "perf_counters": {
+                "cycles": 5952208,
+                "instructions": 2086869,
+                "branches": 265223,
+                "branch_misses": 1113,
+                "cache_references": 7503,
+                "cache_misses": 824,
+                "task_clock_ns": 1182199,
+                "context_switches": 2,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": true,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 792540,
+              "exec_ns": 228,
+              "result": 16823189766144203766,
+              "retval": 2,
+              "phases_ns": {
+                "memory_prepare_ns": 20554,
+                "object_open_ns": 59189,
+                "object_load_ns": 733351,
+                "map_prepare_ns": 2479,
+                "prog_run_wall_ns": 35347620,
+                "result_read_ns": 2560
+              },
+              "perf_counters": {
+                "cycles": 5420075,
+                "instructions": 2058203,
+                "branches": 256773,
+                "branch_misses": 1321,
+                "cache_references": 8531,
+                "cache_misses": 1017,
+                "task_clock_ns": 1049523,
+                "context_switches": 2,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": true,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 780808,
+              "exec_ns": 349,
+              "result": 16823189766144203766,
+              "retval": 2,
+              "phases_ns": {
+                "memory_prepare_ns": 20468,
+                "object_open_ns": 61721,
+                "object_load_ns": 719087,
+                "map_prepare_ns": 2339,
+                "prog_run_wall_ns": 45586924,
+                "result_read_ns": 2400
+              },
+              "perf_counters": {
+                "cycles": 4747456,
+                "instructions": 1993869,
+                "branches": 241857,
+                "branch_misses": 1165,
+                "cache_references": 7972,
+                "cache_misses": 1250,
+                "task_clock_ns": 1005506,
+                "context_switches": 2,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": true,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 738473,
+              "exec_ns": 695,
+              "result": 16823189766144203766,
+              "retval": 2,
+              "phases_ns": {
+                "memory_prepare_ns": 21312,
+                "object_open_ns": 68107,
+                "object_load_ns": 670366,
+                "map_prepare_ns": 2310,
+                "prog_run_wall_ns": 38191797,
+                "result_read_ns": 2140
+              },
+              "perf_counters": {
+                "cycles": 6253350,
+                "instructions": 2120152,
+                "branches": 272739,
+                "branch_misses": 1141,
+                "cache_references": 8338,
+                "cache_misses": 841,
+                "task_clock_ns": 1314686,
+                "context_switches": 2,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": true,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 761355,
+              "exec_ns": 280,
+              "result": 16823189766144203766,
+              "retval": 2,
+              "phases_ns": {
+                "memory_prepare_ns": 19977,
+                "object_open_ns": 57112,
+                "object_load_ns": 704243,
+                "map_prepare_ns": 2129,
+                "prog_run_wall_ns": 39245995,
+                "result_read_ns": 1746
+              },
+              "perf_counters": {
+                "cycles": 5769492,
+                "instructions": 2079824,
+                "branches": 263031,
+                "branch_misses": 1088,
+                "cache_references": 7952,
+                "cache_misses": 634,
+                "task_clock_ns": 1173751,
+                "context_switches": 2,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": true,
+                "scope": "exec_window",
+                "error": ""
+              }
+            }
+          ],
+          "compile_ns": {
+            "count": 10,
+            "mean": 762932,
+            "median": 762462.0,
+            "min": 732475,
+            "max": 792540,
+            "p95": 792540,
+            "stdev": 20112.30620512946
+          },
+          "exec_ns": {
+            "count": 10,
+            "mean": 311,
+            "median": 260.5,
+            "min": 223,
+            "max": 695,
+            "p95": 695,
+            "stdev": 142.096993478242
+          },
+          "phases_ns": {
+            "memory_prepare_ns": {
+              "count": 10,
+              "mean": 20351.9,
+              "median": 20421.5,
+              "min": 19197,
+              "max": 21575,
+              "p95": 21575,
+              "stdev": 726.1166802472818
+            },
+            "object_open_ns": {
+              "count": 10,
+              "mean": 61256.3,
+              "median": 61322.0,
+              "min": 56888,
+              "max": 68107,
+              "p95": 68107,
+              "stdev": 3468.6653549231937
+            },
+            "object_load_ns": {
+              "count": 10,
+              "mean": 701675.7,
+              "median": 703004.5,
+              "min": 667237,
+              "max": 733351,
+              "p95": 733351,
+              "stdev": 21953.558157822365
+            },
+            "map_prepare_ns": {
+              "count": 10,
+              "mean": 2363.1,
+              "median": 2366.5,
+              "min": 2129,
+              "max": 2639,
+              "p95": 2639,
+              "stdev": 146.00871359081432
+            },
+            "prog_run_wall_ns": {
+              "count": 10,
+              "mean": 36304585.8,
+              "median": 35141964.0,
+              "min": 32129402,
+              "max": 45586924,
+              "p95": 45586924,
+              "stdev": 3884109.693926948
+            },
+            "result_read_ns": {
+              "count": 10,
+              "mean": 2305.4,
+              "median": 2261.0,
+              "min": 1746,
+              "max": 2755,
+              "p95": 2755,
+              "stdev": 301.68276200155833
+            }
+          },
+          "perf_counters": {
+            "cycles": {
+              "count": 10,
+              "mean": 5791101.7,
+              "median": 5860850.0,
+              "min": 4747456,
+              "max": 6609402,
+              "p95": 6609402,
+              "stdev": 606086.0697343333
+            },
+            "instructions": {
+              "count": 10,
+              "mean": 2076231.2,
+              "median": 2083346.5,
+              "min": 1993869,
+              "max": 2135939,
+              "p95": 2135939,
+              "stdev": 47934.63550340656
+            },
+            "branches": {
+              "count": 10,
+              "mean": 262475.9,
+              "median": 264127.0,
+              "min": 241857,
+              "max": 277749,
+              "p95": 277749,
+              "stdev": 11910.894177180822
+            },
+            "branch_misses": {
+              "count": 10,
+              "mean": 1105,
+              "median": 1100.5,
+              "min": 984,
+              "max": 1321,
+              "p95": 1321,
+              "stdev": 95.2458806341659
+            },
+            "cache_references": {
+              "count": 10,
+              "mean": 7587,
+              "median": 7671.0,
+              "min": 6621,
+              "max": 8531,
+              "p95": 8531,
+              "stdev": 646.5106340966095
+            },
+            "cache_misses": {
+              "count": 10,
+              "mean": 844.2,
+              "median": 800.5,
+              "min": 634,
+              "max": 1250,
+              "p95": 1250,
+              "stdev": 194.05142502840724
+            },
+            "task_clock_ns": {
+              "count": 10,
+              "mean": 1163127.9,
+              "median": 1177975.0,
+              "min": 1005506,
+              "max": 1314686,
+              "p95": 1314686,
+              "stdev": 115923.1876530988
+            },
+            "context_switches": {
+              "count": 10,
+              "mean": 2,
+              "median": 2.0,
+              "min": 2,
+              "max": 2,
+              "p95": 2,
+              "stdev": 0.0
+            },
+            "cpu_migrations": {
+              "count": 10,
+              "mean": 0,
+              "median": 0.0,
+              "min": 0,
+              "max": 0,
+              "p95": 0,
+              "stdev": 0.0
+            },
+            "page_faults": {
+              "count": 10,
+              "mean": 0,
+              "median": 0.0,
+              "min": 0,
+              "max": 0,
+              "p95": 0,
+              "stdev": 0.0
+            }
+          },
+          "perf_counters_meta": {
+            "requested": true,
+            "collected_samples": 10,
+            "include_kernel": true,
+            "scope": "exec_window",
+            "hardware_counters_observed": true,
+            "software_counters_observed": true,
+            "errors": {}
+          },
+          "derived_metrics": {
+            "ipc_median": 0.3554683194417192,
+            "branch_miss_rate_median": 0.004166556239990611,
+            "cache_miss_rate_median": 0.10435406074827272
+          },
+          "result_distribution": {
+            "16823189766144203766": 10
+          }
+        }
+      ]
+    },
+    {
+      "name": "map_roundtrip",
+      "description": "Repeated lookup/update roundtrips through an auxiliary array map",
+      "category": "map-runtime",
+      "tags": [
+        "map",
+        "helper-like",
+        "runtime"
+      ],
+      "expected_result": 8595127842395553320,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/map_roundtrip.mem",
+      "runs": [
+        {
+          "runtime": "llvmbpf",
+          "label": "llvmbpf LLVM JIT",
+          "mode": "llvmbpf",
+          "repeat": 200,
+          "artifacts": {
+            "program_object": "/home/yunwei37/workspace/bpf-benchmark/micro/programs/map_roundtrip.bpf.o"
+          },
+          "samples": [
+            {
+              "compile_ns": 5657492,
+              "exec_ns": 322,
+              "result": 8595127842395553320,
+              "retval": 2,
+              "phases_ns": {
+                "program_image_ns": 67468,
+                "memory_prepare_ns": 17428,
+                "map_prepare_ns": 1229,
+                "vm_load_code_ns": 104,
+                "jit_compile_ns": 5657492
+              },
+              "perf_counters": {
+                "cycles": 350137,
+                "instructions": 1664049,
+                "branches": 431176,
+                "branch_misses": 245,
+                "cache_references": 130,
+                "cache_misses": 27,
+                "task_clock_ns": 69078,
+                "context_switches": 0,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": false,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 5468016,
+              "exec_ns": 322,
+              "result": 8595127842395553320,
+              "retval": 2,
+              "phases_ns": {
+                "program_image_ns": 68022,
+                "memory_prepare_ns": 15665,
+                "map_prepare_ns": 1139,
+                "vm_load_code_ns": 215,
+                "jit_compile_ns": 5468016
+              },
+              "perf_counters": {
+                "cycles": 350165,
+                "instructions": 1664049,
+                "branches": 431176,
+                "branch_misses": 249,
+                "cache_references": 166,
+                "cache_misses": 20,
+                "task_clock_ns": 69023,
+                "context_switches": 0,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": false,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 5632153,
+              "exec_ns": 323,
+              "result": 8595127842395553320,
+              "retval": 2,
+              "phases_ns": {
+                "program_image_ns": 65087,
+                "memory_prepare_ns": 15523,
+                "map_prepare_ns": 1046,
+                "vm_load_code_ns": 238,
+                "jit_compile_ns": 5632153
+              },
+              "perf_counters": {
+                "cycles": 350449,
+                "instructions": 1664049,
+                "branches": 431176,
+                "branch_misses": 247,
+                "cache_references": 175,
+                "cache_misses": 46,
+                "task_clock_ns": 68958,
+                "context_switches": 0,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": false,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 5717874,
+              "exec_ns": 324,
+              "result": 8595127842395553320,
+              "retval": 2,
+              "phases_ns": {
+                "program_image_ns": 65942,
+                "memory_prepare_ns": 17414,
+                "map_prepare_ns": 1384,
+                "vm_load_code_ns": 146,
+                "jit_compile_ns": 5717874
+              },
+              "perf_counters": {
+                "cycles": 352316,
+                "instructions": 1664049,
+                "branches": 431176,
+                "branch_misses": 249,
+                "cache_references": 232,
+                "cache_misses": 92,
+                "task_clock_ns": 69286,
+                "context_switches": 0,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": false,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 5575606,
+              "exec_ns": 323,
+              "result": 8595127842395553320,
+              "retval": 2,
+              "phases_ns": {
+                "program_image_ns": 65677,
+                "memory_prepare_ns": 17013,
+                "map_prepare_ns": 1106,
+                "vm_load_code_ns": 171,
+                "jit_compile_ns": 5575606
+              },
+              "perf_counters": {
+                "cycles": 350406,
+                "instructions": 1664049,
+                "branches": 431176,
+                "branch_misses": 254,
+                "cache_references": 144,
+                "cache_misses": 21,
+                "task_clock_ns": 68994,
+                "context_switches": 0,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": false,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 5538325,
+              "exec_ns": 324,
+              "result": 8595127842395553320,
+              "retval": 2,
+              "phases_ns": {
+                "program_image_ns": 62960,
+                "memory_prepare_ns": 15750,
+                "map_prepare_ns": 1017,
+                "vm_load_code_ns": 170,
+                "jit_compile_ns": 5538325
+              },
+              "perf_counters": {
+                "cycles": 351804,
+                "instructions": 1664049,
+                "branches": 431176,
+                "branch_misses": 250,
+                "cache_references": 148,
+                "cache_misses": 16,
+                "task_clock_ns": 69375,
+                "context_switches": 0,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": false,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 5574721,
+              "exec_ns": 323,
+              "result": 8595127842395553320,
+              "retval": 2,
+              "phases_ns": {
+                "program_image_ns": 63141,
+                "memory_prepare_ns": 15014,
+                "map_prepare_ns": 940,
+                "vm_load_code_ns": 194,
+                "jit_compile_ns": 5574721
+              },
+              "perf_counters": {
+                "cycles": 352962,
+                "instructions": 1664049,
+                "branches": 431176,
+                "branch_misses": 242,
+                "cache_references": 455,
+                "cache_misses": 33,
+                "task_clock_ns": 69544,
+                "context_switches": 0,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": false,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 5421516,
+              "exec_ns": 326,
+              "result": 8595127842395553320,
+              "retval": 2,
+              "phases_ns": {
+                "program_image_ns": 63755,
+                "memory_prepare_ns": 14643,
+                "map_prepare_ns": 900,
+                "vm_load_code_ns": 202,
+                "jit_compile_ns": 5421516
+              },
+              "perf_counters": {
+                "cycles": 353794,
+                "instructions": 1664049,
+                "branches": 431176,
+                "branch_misses": 243,
+                "cache_references": 162,
+                "cache_misses": 23,
+                "task_clock_ns": 69528,
+                "context_switches": 0,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": false,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 5532258,
+              "exec_ns": 323,
+              "result": 8595127842395553320,
+              "retval": 2,
+              "phases_ns": {
+                "program_image_ns": 64082,
+                "memory_prepare_ns": 16038,
+                "map_prepare_ns": 1261,
+                "vm_load_code_ns": 186,
+                "jit_compile_ns": 5532258
+              },
+              "perf_counters": {
+                "cycles": 350128,
+                "instructions": 1664049,
+                "branches": 431176,
+                "branch_misses": 250,
+                "cache_references": 141,
+                "cache_misses": 28,
+                "task_clock_ns": 68782,
+                "context_switches": 0,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": false,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 5574268,
+              "exec_ns": 338,
+              "result": 8595127842395553320,
+              "retval": 2,
+              "phases_ns": {
+                "program_image_ns": 64661,
+                "memory_prepare_ns": 13919,
+                "map_prepare_ns": 1000,
+                "vm_load_code_ns": 182,
+                "jit_compile_ns": 5574268
+              },
+              "perf_counters": {
+                "cycles": 351208,
+                "instructions": 1664050,
+                "branches": 431177,
+                "branch_misses": 249,
+                "cache_references": 145,
+                "cache_misses": 32,
+                "task_clock_ns": 72068,
+                "context_switches": 0,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": false,
+                "scope": "exec_window",
+                "error": ""
+              }
+            }
+          ],
+          "compile_ns": {
+            "count": 10,
+            "mean": 5569222.9,
+            "median": 5574494.5,
+            "min": 5421516,
+            "max": 5717874,
+            "p95": 5717874,
+            "stdev": 87131.0992489032
+          },
+          "exec_ns": {
+            "count": 10,
+            "mean": 324.8,
+            "median": 323.0,
+            "min": 322,
+            "max": 338,
+            "p95": 338,
+            "stdev": 4.779586221049312
+          },
+          "phases_ns": {
+            "program_image_ns": {
+              "count": 10,
+              "mean": 65079.5,
+              "median": 64874.0,
+              "min": 62960,
+              "max": 68022,
+              "p95": 68022,
+              "stdev": 1720.4236719805708
+            },
+            "memory_prepare_ns": {
+              "count": 10,
+              "mean": 15840.7,
+              "median": 15707.5,
+              "min": 13919,
+              "max": 17428,
+              "p95": 17428,
+              "stdev": 1171.8403427467792
+            },
+            "map_prepare_ns": {
+              "count": 10,
+              "mean": 1102.2,
+              "median": 1076.0,
+              "min": 900,
+              "max": 1384,
+              "p95": 1384,
+              "stdev": 152.80037812635004
+            },
+            "vm_load_code_ns": {
+              "count": 10,
+              "mean": 180.8,
+              "median": 184.0,
+              "min": 104,
+              "max": 238,
+              "p95": 238,
+              "stdev": 37.14177043587329
+            },
+            "jit_compile_ns": {
+              "count": 10,
+              "mean": 5569222.9,
+              "median": 5574494.5,
+              "min": 5421516,
+              "max": 5717874,
+              "p95": 5717874,
+              "stdev": 87131.0992489032
+            }
+          },
+          "perf_counters": {
+            "cycles": {
+              "count": 10,
+              "mean": 351336.9,
+              "median": 350828.5,
+              "min": 350128,
+              "max": 353794,
+              "p95": 353794,
+              "stdev": 1325.0247335217725
+            },
+            "instructions": {
+              "count": 10,
+              "mean": 1664049.1,
+              "median": 1664049.0,
+              "min": 1664049,
+              "max": 1664050,
+              "p95": 1664050,
+              "stdev": 0.31622776601683794
+            },
+            "branches": {
+              "count": 10,
+              "mean": 431176.1,
+              "median": 431176.0,
+              "min": 431176,
+              "max": 431177,
+              "p95": 431177,
+              "stdev": 0.31622776601683794
+            },
+            "branch_misses": {
+              "count": 10,
+              "mean": 247.8,
+              "median": 249.0,
+              "min": 242,
+              "max": 254,
+              "p95": 254,
+              "stdev": 3.6147844564602556
+            },
+            "cache_references": {
+              "count": 10,
+              "mean": 189.8,
+              "median": 155.0,
+              "min": 130,
+              "max": 455,
+              "p95": 455,
+              "stdev": 97.45631499976456
+            },
+            "cache_misses": {
+              "count": 10,
+              "mean": 33.8,
+              "median": 27.5,
+              "min": 16,
+              "max": 92,
+              "p95": 92,
+              "stdev": 22.129919415427914
+            },
+            "task_clock_ns": {
+              "count": 10,
+              "mean": 69463.6,
+              "median": 69182.0,
+              "min": 68782,
+              "max": 72068,
+              "p95": 72068,
+              "stdev": 949.6462733273081
+            },
+            "context_switches": {
+              "count": 10,
+              "mean": 0,
+              "median": 0.0,
+              "min": 0,
+              "max": 0,
+              "p95": 0,
+              "stdev": 0.0
+            },
+            "cpu_migrations": {
+              "count": 10,
+              "mean": 0,
+              "median": 0.0,
+              "min": 0,
+              "max": 0,
+              "p95": 0,
+              "stdev": 0.0
+            },
+            "page_faults": {
+              "count": 10,
+              "mean": 0,
+              "median": 0.0,
+              "min": 0,
+              "max": 0,
+              "p95": 0,
+              "stdev": 0.0
+            }
+          },
+          "perf_counters_meta": {
+            "requested": true,
+            "collected_samples": 10,
+            "include_kernel": false,
+            "scope": "exec_window",
+            "hardware_counters_observed": true,
+            "software_counters_observed": true,
+            "errors": {}
+          },
+          "derived_metrics": {
+            "ipc_median": 4.743197887286808,
+            "branch_miss_rate_median": 0.000577490398352413,
+            "cache_miss_rate_median": 0.1774193548387097
+          },
+          "result_distribution": {
+            "8595127842395553320": 10
+          }
+        },
+        {
+          "runtime": "kernel",
+          "label": "kernel eBPF",
+          "mode": "kernel",
+          "repeat": 200,
+          "artifacts": {
+            "program_object": "/home/yunwei37/workspace/bpf-benchmark/micro/programs/map_roundtrip.bpf.o"
+          },
+          "samples": [
+            {
+              "compile_ns": 461401,
+              "exec_ns": 554,
+              "result": 8595127842395553320,
+              "retval": 2,
+              "phases_ns": {
+                "memory_prepare_ns": 18861,
+                "object_open_ns": 59242,
+                "object_load_ns": 402159,
+                "map_prepare_ns": 1968,
+                "prog_run_wall_ns": 48131537,
+                "result_read_ns": 2933
+              },
+              "perf_counters": {
+                "cycles": 3248321,
+                "instructions": 2332127,
+                "branches": 396466,
+                "branch_misses": 1070,
+                "cache_references": 7170,
+                "cache_misses": 1674,
+                "task_clock_ns": 658535,
+                "context_switches": 2,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": true,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 491812,
+              "exec_ns": 545,
+              "result": 8595127842395553320,
+              "retval": 2,
+              "phases_ns": {
+                "memory_prepare_ns": 21275,
+                "object_open_ns": 65701,
+                "object_load_ns": 426111,
+                "map_prepare_ns": 2376,
+                "prog_run_wall_ns": 44572552,
+                "result_read_ns": 3076
+              },
+              "perf_counters": {
+                "cycles": 1734807,
+                "instructions": 2213083,
+                "branches": 367111,
+                "branch_misses": 976,
+                "cache_references": 7024,
+                "cache_misses": 1176,
+                "task_clock_ns": 376116,
+                "context_switches": 2,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": true,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 467933,
+              "exec_ns": 552,
+              "result": 8595127842395553320,
+              "retval": 2,
+              "phases_ns": {
+                "memory_prepare_ns": 19774,
+                "object_open_ns": 62681,
+                "object_load_ns": 405252,
+                "map_prepare_ns": 2315,
+                "prog_run_wall_ns": 30383309,
+                "result_read_ns": 2527
+              },
+              "perf_counters": {
+                "cycles": 5801512,
+                "instructions": 2543094,
+                "branches": 448280,
+                "branch_misses": 1372,
+                "cache_references": 8701,
+                "cache_misses": 1023,
+                "task_clock_ns": 1120215,
+                "context_switches": 2,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": true,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 469793,
+              "exec_ns": 576,
+              "result": 8595127842395553320,
+              "retval": 2,
+              "phases_ns": {
+                "memory_prepare_ns": 21643,
+                "object_open_ns": 61463,
+                "object_load_ns": 408330,
+                "map_prepare_ns": 6808,
+                "prog_run_wall_ns": 33649463,
+                "result_read_ns": 2024
+              },
+              "perf_counters": {
+                "cycles": 6783250,
+                "instructions": 2615410,
+                "branches": 466891,
+                "branch_misses": 1116,
+                "cache_references": 7781,
+                "cache_misses": 914,
+                "task_clock_ns": 1288733,
+                "context_switches": 2,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": true,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 527277,
+              "exec_ns": 552,
+              "result": 8595127842395553320,
+              "retval": 2,
+              "phases_ns": {
+                "memory_prepare_ns": 20305,
+                "object_open_ns": 67894,
+                "object_load_ns": 459383,
+                "map_prepare_ns": 2375,
+                "prog_run_wall_ns": 29325944,
+                "result_read_ns": 1682
+              },
+              "perf_counters": {
+                "cycles": 5719936,
+                "instructions": 2531909,
+                "branches": 446066,
+                "branch_misses": 1240,
+                "cache_references": 6265,
+                "cache_misses": 481,
+                "task_clock_ns": 1065159,
+                "context_switches": 2,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": true,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 461145,
+              "exec_ns": 552,
+              "result": 8595127842395553320,
+              "retval": 2,
+              "phases_ns": {
+                "memory_prepare_ns": 19021,
+                "object_open_ns": 59509,
+                "object_load_ns": 401636,
+                "map_prepare_ns": 1818,
+                "prog_run_wall_ns": 34786235,
+                "result_read_ns": 2179
+              },
+              "perf_counters": {
+                "cycles": 8296628,
+                "instructions": 2736442,
+                "branches": 496831,
+                "branch_misses": 1055,
+                "cache_references": 7667,
+                "cache_misses": 530,
+                "task_clock_ns": 1613646,
+                "context_switches": 2,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": true,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 509996,
+              "exec_ns": 547,
+              "result": 8595127842395553320,
+              "retval": 2,
+              "phases_ns": {
+                "memory_prepare_ns": 19680,
+                "object_open_ns": 58355,
+                "object_load_ns": 451641,
+                "map_prepare_ns": 1968,
+                "prog_run_wall_ns": 26989825,
+                "result_read_ns": 2238
+              },
+              "perf_counters": {
+                "cycles": 6462105,
+                "instructions": 2604086,
+                "branches": 462825,
+                "branch_misses": 1407,
+                "cache_references": 8121,
+                "cache_misses": 736,
+                "task_clock_ns": 1241266,
+                "context_switches": 2,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": true,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 484640,
+              "exec_ns": 599,
+              "result": 8595127842395553320,
+              "retval": 2,
+              "phases_ns": {
+                "memory_prepare_ns": 20886,
+                "object_open_ns": 62842,
+                "object_load_ns": 421798,
+                "map_prepare_ns": 2382,
+                "prog_run_wall_ns": 26363394,
+                "result_read_ns": 1818
+              },
+              "perf_counters": {
+                "cycles": 3580697,
+                "instructions": 2359531,
+                "branches": 403487,
+                "branch_misses": 981,
+                "cache_references": 7136,
+                "cache_misses": 631,
+                "task_clock_ns": 735959,
+                "context_switches": 2,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": true,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 471866,
+              "exec_ns": 654,
+              "result": 8595127842395553320,
+              "retval": 2,
+              "phases_ns": {
+                "memory_prepare_ns": 19456,
+                "object_open_ns": 60954,
+                "object_load_ns": 410912,
+                "map_prepare_ns": 2304,
+                "prog_run_wall_ns": 35020818,
+                "result_read_ns": 1835
+              },
+              "perf_counters": {
+                "cycles": 6404569,
+                "instructions": 2590636,
+                "branches": 460159,
+                "branch_misses": 1100,
+                "cache_references": 7440,
+                "cache_misses": 585,
+                "task_clock_ns": 1249419,
+                "context_switches": 2,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": true,
+                "scope": "exec_window",
+                "error": ""
+              }
+            },
+            {
+              "compile_ns": 474285,
+              "exec_ns": 562,
+              "result": 8595127842395553320,
+              "retval": 2,
+              "phases_ns": {
+                "memory_prepare_ns": 18685,
+                "object_open_ns": 60106,
+                "object_load_ns": 414179,
+                "map_prepare_ns": 2431,
+                "prog_run_wall_ns": 29978141,
+                "result_read_ns": 1947
+              },
+              "perf_counters": {
+                "cycles": 6619289,
+                "instructions": 2599870,
+                "branches": 463196,
+                "branch_misses": 1054,
+                "cache_references": 7409,
+                "cache_misses": 636,
+                "task_clock_ns": 1281554,
+                "context_switches": 2,
+                "cpu_migrations": 0,
+                "page_faults": 0
+              },
+              "perf_counters_meta": {
+                "requested": true,
+                "collected": true,
+                "include_kernel": true,
+                "scope": "exec_window",
+                "error": ""
+              }
+            }
+          ],
+          "compile_ns": {
+            "count": 10,
+            "mean": 482014.8,
+            "median": 473075.5,
+            "min": 461145,
+            "max": 527277,
+            "p95": 527277,
+            "stdev": 21871.81302143113
+          },
+          "exec_ns": {
+            "count": 10,
+            "mean": 569.3,
+            "median": 553.0,
+            "min": 545,
+            "max": 654,
+            "p95": 654,
+            "stdev": 33.95110863841971
+          },
+          "phases_ns": {
+            "memory_prepare_ns": {
+              "count": 10,
+              "mean": 19958.6,
+              "median": 19727.0,
+              "min": 18685,
+              "max": 21643,
+              "p95": 21643,
+              "stdev": 1033.8898716336603
+            },
+            "object_open_ns": {
+              "count": 10,
+              "mean": 61874.7,
+              "median": 61208.5,
+              "min": 58355,
+              "max": 67894,
+              "p95": 67894,
+              "stdev": 3009.6096479997755
+            },
+            "object_load_ns": {
+              "count": 10,
+              "mean": 420140.1,
+              "median": 412545.5,
+              "min": 401636,
+              "max": 459383,
+              "p95": 459383,
+              "stdev": 20325.846656959267
+            },
+            "map_prepare_ns": {
+              "count": 10,
+              "mean": 2674.5,
+              "median": 2345.0,
+              "min": 1818,
+              "max": 6808,
+              "p95": 6808,
+              "stdev": 1468.4784453455368
+            },
+            "prog_run_wall_ns": {
+              "count": 10,
+              "mean": 33920121.8,
+              "median": 32016386.0,
+              "min": 26363394,
+              "max": 48131537,
+              "p95": 48131537,
+              "stdev": 7240023.076895371
+            },
+            "result_read_ns": {
+              "count": 10,
+              "mean": 2225.9,
+              "median": 2101.5,
+              "min": 1682,
+              "max": 3076,
+              "p95": 3076,
+              "stdev": 477.170933733395
+            }
+          },
+          "perf_counters": {
+            "cycles": {
+              "count": 10,
+              "mean": 5465111.4,
+              "median": 6103040.5,
+              "min": 1734807,
+              "max": 8296628,
+              "p95": 8296628,
+              "stdev": 1986681.418944959
+            },
+            "instructions": {
+              "count": 10,
+              "mean": 2512618.8,
+              "median": 2566865.0,
+              "min": 2213083,
+              "max": 2736442,
+              "p95": 2736442,
+              "stdev": 159779.10766555183
+            },
+            "branches": {
+              "count": 10,
+              "mean": 441131.2,
+              "median": 454219.5,
+              "min": 367111,
+              "max": 496831,
+              "p95": 496831,
+              "stdev": 39513.82603539621
+            },
+            "branch_misses": {
+              "count": 10,
+              "mean": 1137.1,
+              "median": 1085.0,
+              "min": 976,
+              "max": 1407,
+              "p95": 1407,
+              "stdev": 152.35298924974637
+            },
+            "cache_references": {
+              "count": 10,
+              "mean": 7471.4,
+              "median": 7424.5,
+              "min": 6265,
+              "max": 8701,
+              "p95": 8701,
+              "stdev": 660.958092468804
+            },
+            "cache_misses": {
+              "count": 10,
+              "mean": 838.6,
+              "median": 686.0,
+              "min": 481,
+              "max": 1674,
+              "p95": 1674,
+              "stdev": 370.21261158660946
+            },
+            "task_clock_ns": {
+              "count": 10,
+              "mean": 1063060.2,
+              "median": 1180740.5,
+              "min": 376116,
+              "max": 1613646,
+              "p95": 1613646,
+              "stdev": 367287.1459870178
+            },
+            "context_switches": {
+              "count": 10,
+              "mean": 2,
+              "median": 2.0,
+              "min": 2,
+              "max": 2,
+              "p95": 2,
+              "stdev": 0.0
+            },
+            "cpu_migrations": {
+              "count": 10,
+              "mean": 0,
+              "median": 0.0,
+              "min": 0,
+              "max": 0,
+              "p95": 0,
+              "stdev": 0.0
+            },
+            "page_faults": {
+              "count": 10,
+              "mean": 0,
+              "median": 0.0,
+              "min": 0,
+              "max": 0,
+              "p95": 0,
+              "stdev": 0.0
+            }
+          },
+          "perf_counters_meta": {
+            "requested": true,
+            "collected_samples": 10,
+            "include_kernel": true,
+            "scope": "exec_window",
+            "hardware_counters_observed": true,
+            "software_counters_observed": true,
+            "errors": {}
+          },
+          "derived_metrics": {
+            "ipc_median": 0.4205879020465291,
+            "branch_miss_rate_median": 0.002388712946053615,
+            "cache_miss_rate_median": 0.09239679439692909
+          },
+          "result_distribution": {
+            "8595127842395553320": 10
+          }
+        }
+      ]
+    }
+  ]
+}

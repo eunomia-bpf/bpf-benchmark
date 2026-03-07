@@ -2,7 +2,7 @@
 
 > 本文档是 micro benchmark 层的统一参考，合并了原来分散在多个文件中的实验计划、进度追踪、RQ 定义和结果分析。
 
-> 更新说明（2026-03-07）：`config/micro_pure_jit.yaml` 当前包含 `29` 个 pure-jit / staged-codegen case，另有 `2` 个 packet-backed 对照 benchmark；`config/micro_runtime.yaml` 当前包含 `9` 个 runtime case。第 4 节覆盖表与第 7 节进度已按此状态同步，并新增可复现的 representativeness 分析脚本 `micro/analyze_representativeness.py` 与真实程序 code-size 外部验证脚本 `corpus/run_real_world_code_size.py`。第 `6.1`、`6.1b`、`6.1e` 节现已切换为 authoritative pure-JIT run（`30` iterations × `1000` repeats，iteration 级 runtime 随机交错 / counterbalanced），覆盖 `31` 个 benchmark；执行时间 geomean 为 `0.849x`，BH-corrected paired Wilcoxon 显著 `25/31`，编译时间 geomean 为 `3.394x`。第 `6.2`–`6.4` 节代码质量分析保持不变。
+> 更新说明（2026-03-07）：`config/micro_pure_jit.yaml` 当前包含 `29` 个 pure-jit / staged-codegen case，另有 `2` 个 packet-backed 对照 benchmark；`config/micro_runtime.yaml` 当前包含 `9` 个 runtime case。第 4 节覆盖表与第 7 节进度已按此状态同步，并新增可复现的 representativeness 分析脚本 `micro/analyze_representativeness.py` 与真实程序 code-size 外部验证脚本 `corpus/run_real_world_code_size.py`。第 `6.1`、`6.1b`、`6.1e` 节现已切换为 authoritative pure-JIT run（`30` iterations × `1000` repeats，iteration 级 runtime 随机交错 / counterbalanced），覆盖 `31` 个 benchmark；执行时间 geomean 为 `0.849x`，BH-corrected paired Wilcoxon 显著 `25/31`，编译时间 geomean 为 `3.394x`。第 `6.2`、`6.4`、`6.5` 节已按同一 `31`-case authoritative 数据同步；第 `6.6` 节已切换为 authoritative runtime run（`9` case，执行时间 geomean `0.829x`，BH-corrected paired Wilcoxon 显著 `7/9`）。
 > Note: benchmarks use staged input via `bpf_map_lookup_elem`; this measures JIT codegen quality under realistic input staging, not helper-free isolation.
 
 ---
@@ -230,7 +230,7 @@ BPF:      CONFIG_BPF_JIT=y, CONFIG_BPF_SYSCALL=y, BTF enabled
 
 ### 6.1b 统计严谨性分析（authoritative 31-case run）
 
-> 本节以 `micro/results/pure_jit_authoritative_analysis.md` 为准，替代旧的 `22`-case pilot。
+> 本节以 `micro/results/pure_jit_authoritative_analysis.md` 为准，并以 §`6.1` 的 authoritative `31`-case 主结果为正文依据；旧的 `22`-case pilot 已被 authoritative `31`-case run 取代，仅保留为历史记录。
 > Primary test: matched `iteration_index` paired Wilcoxon signed-rank + Benjamini-Hochberg correction；Bootstrap `10000` 次（seed `0`）用于 geomean 95% CI；Mann-Whitney U 仅作补充参考。
 
 | 指标 | 值 |
@@ -307,8 +307,8 @@ kernel_runner 现在同时输出：
 
 | 指标 | 值 |
 |------|---:|
-| llvmbpf/kernel native code size geomean | 0.47x |
-| llvmbpf 全面更小 | 22/22 benchmarks |
+| llvmbpf/kernel native code size geomean | 0.496x |
+| llvmbpf 全面更小 | 31/31 benchmarks |
 
 **指令级分析**（完整报告见 `micro/jit-dumps/report.md`）
 
@@ -341,31 +341,63 @@ kernel_runner 现在同时输出：
 
 ### 6.4 核心矛盾："代码更小但执行更慢"
 
-8/22 个 benchmark 中 llvmbpf 代码更小但执行更慢。根因分析（详见 `micro/jit-dumps/report.md` Root Cause Analysis）：
+authoritative `31`-case run 中，`10/31` 个 benchmark 出现 llvmbpf 代码更小但执行更慢（即 exec ratio `> 1.0` 且 code ratio `< 1.0`）：
 
-| Benchmark | Exec ratio | Code ratio | 根因 |
-|-----------|---:|---:|------|
-| `bitcount` | 1.35x | 0.45x | kernel 热循环更短的依赖链（14 vs 6），LLVM 的 BMI 指令减少了指令数但没缩短关键路径 |
-| `code_clone_8` | 2.07x | 0.54x | kernel 依赖链 59 vs LLVM 45，但 kernel 用 `rorx` 合成旋转更高效 |
-| `fixed_loop_large` | 1.29x | 0.43x | kernel 逐字节加载在此场景下不影响关键路径，LLVM 省掉的指令不在热路径上 |
-| `dep_chain_short` | 1.74x | 0.41x | verifier-safe 的 byte-load ladder 延长关键路径 |
+| Benchmark | Exec ratio | Code ratio | 显著性 |
+|-----------|-----------:|-----------:|--------|
+| `simple` | 1.526x | 0.622x | Yes |
+| `simple_packet` | 1.321x | 0.490x | No |
+| `memory_pair_sum` | 1.251x | 0.238x | Yes |
+| `bitcount` | 1.556x | 0.446x | Yes |
+| `log2_fold` | 1.006x | 0.659x | No |
+| `branch_dense` | 1.409x | 0.732x | Yes |
+| `bounds_check_heavy` | 1.119x | 0.807x | No |
+| `fixed_loop_large` | 1.193x | 0.425x | Yes |
+| `code_clone_2` | 1.260x | 0.492x | Yes |
+| `code_clone_8` | 1.878x | 0.542x | Yes |
 
-**论文洞察**：代码大小 ≠ 性能。LLVM 的指令消除优化主要减少非关键路径指令，但 kernel JIT 的 1:1 翻译在某些数据流模式下偶然产生了更短的依赖链。
+其中 `7/10` 个 case 在 BH-corrected paired Wilcoxon 下显著，说明“代码更小但执行更慢”不再只是 pilot 中的零星异常，而是 authoritative run 中可重复观察到的 workload-dependent 现象。
+
+**论文洞察**：代码大小 ≠ 性能。authoritative 数据表明 llvmbpf 的 native code-size 优势是普遍的（`31/31` 更小），但执行时间收益仍取决于具体数据流、循环形态和 runtime 机制，不能仅用代码尺寸预测。
 
 ### 6.5 测量方法论修正
 
-| 问题 | 旧方法 | 修正后 |
-|------|--------|--------|
-| llvmbpf exec_ns | `steady_clock` 包裹 `vm.exec()`，含 ~2μs harness 开销 | per-iteration `rdtsc/rdtscp` 仅测 vm.exec() 调用 |
-| 旧的 baseline-adjusted ratio | 减去 `simple` baseline，统计上脆弱 | 废弃，改用 rdtsc 直接测量 |
-| IPC 对比 | kernel 0.37 vs llvmbpf 3.89，perf counter 窗口不等价 | 已知限制，perf counter 对比需谨慎解读 |
+| 维度 | 现行 authoritative 方法 |
+|------|------------------------|
+| 采样设计 | `30` iterations × `1000` repeats；同一 benchmark 内按 iteration 随机交错 / counterbalanced 执行 `llvmbpf` 与 `kernel` |
+| 配对原则 | 以 `iteration_index` 做 matched pairs，避免 runtime 执行顺序和时间漂移混入跨-runtime 差异 |
+| 主检验 | paired Wilcoxon signed-rank；跨 benchmark 用 Benjamini-Hochberg 做多重比较校正 |
+| 区间估计 | Bootstrap `10000` 次（seed `0`）计算 geomean 95% CI |
+| 次检验 | Mann-Whitney U 仅作补充参考，不再作为主结论依据 |
+| 计时来源 | llvmbpf 用 per-iteration `rdtsc/rdtscp` 仅包围 `vm.exec()`；kernel 用 `exec_ns` (`ktime`) 作为纯 BPF 执行时间 |
+| 已废弃方法 | 旧的 baseline-adjusted ratio 已移除；正文统一使用 authoritative raw exec ratio |
+
+**备注**：perf counter 仍受 kernel/user 计数窗口不完全等价的限制，适合作为辅助诊断，不作为主显著性结论依据。
 
 ### 6.6 micro_runtime (9 case)
 
-| Benchmark | llvmbpf exec | kernel exec | Ratio |
-|-----------|---:|---:|---:|
-| `map_lookup_churn` | 324 ns | 260 ns | 1.24x |
-| `map_roundtrip` | 323 ns | 553 ns | 0.58x |
+> authoritative run：`30` iterations × `1000` repeats；Primary test 为 matched `iteration_index` paired Wilcoxon + BH correction。完整分析见 `micro/results/runtime_authoritative_analysis.md`
+
+| 指标 | 值 |
+|------|---:|
+| Exec time llvmbpf/kernel geomean | 0.829x |
+| 95% CI | [0.801, 0.859] |
+| Significant benchmarks (BH-corrected paired Wilcoxon p < 0.05) | 7 / 9 |
+| Wins (llvmbpf/kernel/tie) | 6/3/0 |
+
+| Benchmark | Exec ratio | 显著性 |
+|-----------|-----------:|--------|
+| `map_lookup_churn` | 1.307x | Yes |
+| `map_roundtrip` | 0.726x | Yes |
+| `hash_map_lookup` | 0.681x | Yes |
+| `percpu_map_update` | 0.490x | Yes |
+| `helper_call_1` | 1.047x | No |
+| `helper_call_10` | 0.990x | No |
+| `helper_call_100` | 0.962x | Yes |
+| `probe_read_heavy` | 0.566x | Yes |
+| `get_time_heavy` | 1.038x | Yes |
+
+**结论**：runtime suite 中 llvmbpf 在 `6/9` 个 case 上更快，优势主要集中在 map-heavy 和 `probe_read` workload；kernel 仅在 `map_lookup_churn` 与 `get_time_heavy` 上显著更快，`helper_call_1` 虽 ratio `> 1.0` 但未达显著。
 
 ## 7. 迭代计划与进度
 

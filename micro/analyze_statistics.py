@@ -17,6 +17,8 @@ BOOTSTRAP_ITERATIONS = 10_000
 DEFAULT_SEED = 0
 RUNTIME_ORDER = ("llvmbpf", "kernel")
 METRIC_CHOICES = ("exec_ns", "wall_exec_ns")
+KERNEL_EXEC_SUBRESOLUTION_NS = 100.0
+KERNEL_EXEC_SUBRESOLUTION_NOTE = "kernel exec < 100ns: below ktime resolution"
 
 
 def parse_args() -> argparse.Namespace:
@@ -168,6 +170,28 @@ def geometric_mean(values: list[float]) -> float:
     return float(math.exp(sum(math.log(value) for value in values) / len(values)))
 
 
+def benjamini_hochberg_adjusted_pvalues(pvalues: list[float]) -> list[float]:
+    adjusted_pvalues = [math.nan] * len(pvalues)
+    ranked_pvalues = [
+        (index, pvalue)
+        for index, pvalue in enumerate(pvalues)
+        if math.isfinite(pvalue)
+    ]
+    if not ranked_pvalues:
+        return adjusted_pvalues
+
+    ranked_pvalues.sort(key=lambda item: item[1])
+    total = len(ranked_pvalues)
+    previous_adjusted = 1.0
+
+    for rank, (index, pvalue) in reversed(list(enumerate(ranked_pvalues, start=1))):
+        adjusted = min(previous_adjusted, (pvalue * total) / rank, 1.0)
+        adjusted_pvalues[index] = adjusted
+        previous_adjusted = adjusted
+
+    return adjusted_pvalues
+
+
 def format_float(value: float | None, precision: int = 2) -> str:
     if value is None or not math.isfinite(value):
         return "n/a"
@@ -250,6 +274,16 @@ def build_runtime_rows(
         ratio_low, ratio_high = percentile_interval(ratio_distribution)
         lhs_mean = float(np.mean(lhs_exec))
         rhs_mean = float(np.mean(rhs_exec))
+        if metric == "exec_ns":
+            kernel_exec_mean_ns = rhs_mean
+        else:
+            try:
+                kernel_exec_mean_ns = float(np.mean(extract_exec_samples(rhs_run, "exec_ns")))
+            except ValueError:
+                kernel_exec_mean_ns = math.nan
+        kernel_exec_below_resolution = (
+            math.isfinite(kernel_exec_mean_ns) and kernel_exec_mean_ns < KERNEL_EXEC_SUBRESOLUTION_NS
+        )
         code_size_lhs = extract_native_code_bytes(lhs_run)
         code_size_rhs = extract_native_code_bytes(rhs_run)
         code_size_ratio = None
@@ -283,7 +317,6 @@ def build_runtime_rows(
                 f"(missing in llvmbpf={len(rhs_iteration_indexes - lhs_iteration_indexes)}, "
                 f"missing in kernel={len(lhs_iteration_indexes - rhs_iteration_indexes)})"
             )
-
         if pairing_notes or not paired_exec_samples:
             paired_pvalue = math.nan
         else:
@@ -299,6 +332,9 @@ def build_runtime_rows(
                     paired_pvalue = math.nan
             else:
                 paired_pvalue = float(wilcoxon_result.pvalue)
+        notes = pairing_notes.copy()
+        if kernel_exec_below_resolution:
+            notes.append(KERNEL_EXEC_SUBRESOLUTION_NOTE)
         comparison_rows.append(
             {
                 "benchmark": benchmark_name,
@@ -313,7 +349,10 @@ def build_runtime_rows(
                 "cohen_d": cohen_d(lhs_exec, rhs_exec),
                 "mann_whitney_pvalue": float(mann_whitney.pvalue),
                 "wilcoxon_paired_pvalue": paired_pvalue,
+                "kernel_exec_mean_ns": kernel_exec_mean_ns,
+                "kernel_exec_below_resolution": kernel_exec_below_resolution,
                 "pairing_note": "; ".join(pairing_notes) if pairing_notes else None,
+                "notes": "; ".join(notes) if notes else None,
                 "significant": False,
                 "code_size_ratio": code_size_ratio,
                 "code_size_llvmbpf": code_size_lhs,
@@ -331,26 +370,10 @@ def apply_benjamini_hochberg_correction(comparison_rows: list[dict[str, object]]
         row["significant"] = False
         row["significant_bh"] = False
 
-    ranked_rows = [
-        (index, float(row["wilcoxon_paired_pvalue"]))
-        for index, row in enumerate(comparison_rows)
-        if math.isfinite(float(row["wilcoxon_paired_pvalue"]))
-    ]
-    if not ranked_rows:
-        return
-
-    ranked_rows.sort(key=lambda item: item[1])
-    total = len(ranked_rows)
-    previous_adjusted = 1.0
-    adjusted_by_index: dict[int, float] = {}
-
-    for rank, (index, pvalue) in reversed(list(enumerate(ranked_rows, start=1))):
-        adjusted = min(previous_adjusted, (pvalue * total) / rank, 1.0)
-        adjusted_by_index[index] = adjusted
-        previous_adjusted = adjusted
-
-    for index, row in enumerate(comparison_rows):
-        adjusted_pvalue = adjusted_by_index.get(index, math.nan)
+    adjusted_pvalues = benjamini_hochberg_adjusted_pvalues(
+        [float(row["wilcoxon_paired_pvalue"]) for row in comparison_rows]
+    )
+    for row, adjusted_pvalue in zip(comparison_rows, adjusted_pvalues):
         row["adjusted_pvalue"] = adjusted_pvalue
         row["paired_wilcoxon_pvalue_bh"] = adjusted_pvalue
         row["significant"] = bool(adjusted_pvalue < alpha)
@@ -379,6 +402,12 @@ def build_suite_summary(
             suite_distribution = np.exp(np.mean(np.log(ratio_matrix[:, valid_columns]), axis=0))
             geomean_ci_low, geomean_ci_high = percentile_interval(suite_distribution)
 
+    subresolution_rows = [row for row in comparison_rows if row.get("kernel_exec_below_resolution")]
+    non_subresolution_rows = [row for row in comparison_rows if not row.get("kernel_exec_below_resolution")]
+    non_subresolution_adjusted_pvalues = benjamini_hochberg_adjusted_pvalues(
+        [float(row["wilcoxon_paired_pvalue"]) for row in non_subresolution_rows]
+    )
+
     return {
         "metric": metric,
         "benchmark_count": len(comparison_rows),
@@ -388,8 +417,13 @@ def build_suite_summary(
         "paired_test_available_count": sum(
             1 for row in comparison_rows if math.isfinite(float(row.get("paired_wilcoxon_pvalue_bh", math.nan)))
         ),
+        "subresolution_benchmark_count": len(subresolution_rows),
+        "non_subresolution_benchmark_count": len(non_subresolution_rows),
         "significant_count": sum(1 for row in comparison_rows if row["significant"]),
         "significant_bh_count": sum(1 for row in comparison_rows if row.get("significant_bh")),
+        "non_subresolution_significant_count": sum(
+            1 for adjusted_pvalue in non_subresolution_adjusted_pvalues if math.isfinite(adjusted_pvalue) and adjusted_pvalue < 0.05
+        ),
     }
 
 
@@ -552,7 +586,7 @@ def render_markdown(
             f"{format_pvalue(row['mann_whitney_pvalue'])} | "
             f"{'Yes' if row['significant'] else 'No'} | "
             f"{code_size_ratio} | "
-            f"{row.get('pairing_note') or ''} |"
+            f"{row.get('notes') or ''} |"
         )
 
     lines.extend(
@@ -575,6 +609,17 @@ def render_markdown(
             (
                 "| Statistically significant benchmarks (BH-adjusted paired Wilcoxon p < 0.05) | "
                 f"{suite_summary['significant_count']} / {suite_summary['benchmark_count']} |"
+            ),
+            (
+                f"| Benchmarks with kernel exec < {format_int(KERNEL_EXEC_SUBRESOLUTION_NS)}ns "
+                "(below ktime resolution) | "
+                f"{suite_summary['subresolution_benchmark_count']} / {suite_summary['benchmark_count']} |"
+            ),
+            (
+                "| Statistically significant benchmarks excluding sub-resolution kernels "
+                "(BH-adjusted paired Wilcoxon p < 0.05) | "
+                f"{suite_summary['non_subresolution_significant_count']} / "
+                f"{suite_summary['non_subresolution_benchmark_count']} |"
             ),
             "",
         ]

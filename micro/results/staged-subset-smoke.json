@@ -1,0 +1,525 @@
+{
+  "suite": "micro_pure_jit",
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/config/micro_pure_jit.yaml",
+  "generated_at": "2026-03-06T07:46:42.702697+00:00",
+  "host": {
+    "hostname": "lab",
+    "platform": "Linux-6.15.11-061511-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "cpu_affinity": null
+  },
+  "toolchains": {
+    "llvmbpf": {
+      "root": "/home/yunwei37/workspace/bpf-benchmark/vendor/llvmbpf"
+    },
+    "libbpf": {
+      "root": "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf"
+    },
+    "bpftool": {
+      "root": "/home/yunwei37/workspace/bpf-benchmark/vendor/bpftool"
+    }
+  },
+  "build": {
+    "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec",
+    "bpftool_binary": "/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/bpftool/bpftool"
+  },
+  "defaults": {
+    "iterations": 1,
+    "warmups": 0,
+    "repeat": 10,
+    "perf_counters": false
+  },
+  "benchmarks": [
+    {
+      "name": "simple",
+      "description": "Return-only baseline",
+      "category": "baseline",
+      "tags": [
+        "baseline",
+        "pure-jit"
+      ],
+      "expected_result": 12345678,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/simple.mem",
+      "runs": [
+        {
+          "runtime": "llvmbpf",
+          "label": "llvmbpf LLVM JIT",
+          "mode": "llvmbpf",
+          "repeat": 10,
+          "artifacts": {
+            "program_object": "/home/yunwei37/workspace/bpf-benchmark/micro/programs/simple.bpf.o"
+          },
+          "samples": [
+            {
+              "compile_ns": 4703183,
+              "exec_ns": 1440,
+              "result": 12345678,
+              "retval": 2,
+              "phases_ns": {
+                "program_image_ns": 92900,
+                "memory_prepare_ns": 23488,
+                "input_stage_ns": 1833,
+                "vm_load_code_ns": 279,
+                "jit_compile_ns": 4703183
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": false,
+                "scope": "exec_window",
+                "error": ""
+              }
+            }
+          ],
+          "compile_ns": {
+            "count": 1,
+            "mean": 4703183,
+            "median": 4703183,
+            "min": 4703183,
+            "max": 4703183,
+            "p95": 4703183,
+            "stdev": 0
+          },
+          "exec_ns": {
+            "count": 1,
+            "mean": 1440,
+            "median": 1440,
+            "min": 1440,
+            "max": 1440,
+            "p95": 1440,
+            "stdev": 0
+          },
+          "phases_ns": {
+            "program_image_ns": {
+              "count": 1,
+              "mean": 92900,
+              "median": 92900,
+              "min": 92900,
+              "max": 92900,
+              "p95": 92900,
+              "stdev": 0
+            },
+            "memory_prepare_ns": {
+              "count": 1,
+              "mean": 23488,
+              "median": 23488,
+              "min": 23488,
+              "max": 23488,
+              "p95": 23488,
+              "stdev": 0
+            },
+            "input_stage_ns": {
+              "count": 1,
+              "mean": 1833,
+              "median": 1833,
+              "min": 1833,
+              "max": 1833,
+              "p95": 1833,
+              "stdev": 0
+            },
+            "vm_load_code_ns": {
+              "count": 1,
+              "mean": 279,
+              "median": 279,
+              "min": 279,
+              "max": 279,
+              "p95": 279,
+              "stdev": 0
+            },
+            "jit_compile_ns": {
+              "count": 1,
+              "mean": 4703183,
+              "median": 4703183,
+              "min": 4703183,
+              "max": 4703183,
+              "p95": 4703183,
+              "stdev": 0
+            }
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected_samples": 0,
+            "include_kernel": null,
+            "scope": "exec_window",
+            "hardware_counters_observed": false,
+            "software_counters_observed": false,
+            "errors": {}
+          },
+          "derived_metrics": {},
+          "result_distribution": {
+            "12345678": 1
+          }
+        },
+        {
+          "runtime": "kernel",
+          "label": "kernel eBPF",
+          "mode": "kernel",
+          "repeat": 10,
+          "artifacts": {
+            "program_object": "/home/yunwei37/workspace/bpf-benchmark/micro/programs/simple.bpf.o"
+          },
+          "samples": [
+            {
+              "compile_ns": 349186,
+              "exec_ns": 84,
+              "result": 12345678,
+              "retval": 2,
+              "phases_ns": {
+                "memory_prepare_ns": 40151,
+                "object_open_ns": 79655,
+                "object_load_ns": 269531,
+                "input_stage_ns": 2643,
+                "prog_run_wall_ns": 24896025,
+                "result_extract_ns": 54
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": true,
+                "scope": "exec_window",
+                "error": ""
+              }
+            }
+          ],
+          "compile_ns": {
+            "count": 1,
+            "mean": 349186,
+            "median": 349186,
+            "min": 349186,
+            "max": 349186,
+            "p95": 349186,
+            "stdev": 0
+          },
+          "exec_ns": {
+            "count": 1,
+            "mean": 84,
+            "median": 84,
+            "min": 84,
+            "max": 84,
+            "p95": 84,
+            "stdev": 0
+          },
+          "phases_ns": {
+            "memory_prepare_ns": {
+              "count": 1,
+              "mean": 40151,
+              "median": 40151,
+              "min": 40151,
+              "max": 40151,
+              "p95": 40151,
+              "stdev": 0
+            },
+            "object_open_ns": {
+              "count": 1,
+              "mean": 79655,
+              "median": 79655,
+              "min": 79655,
+              "max": 79655,
+              "p95": 79655,
+              "stdev": 0
+            },
+            "object_load_ns": {
+              "count": 1,
+              "mean": 269531,
+              "median": 269531,
+              "min": 269531,
+              "max": 269531,
+              "p95": 269531,
+              "stdev": 0
+            },
+            "input_stage_ns": {
+              "count": 1,
+              "mean": 2643,
+              "median": 2643,
+              "min": 2643,
+              "max": 2643,
+              "p95": 2643,
+              "stdev": 0
+            },
+            "prog_run_wall_ns": {
+              "count": 1,
+              "mean": 24896025,
+              "median": 24896025,
+              "min": 24896025,
+              "max": 24896025,
+              "p95": 24896025,
+              "stdev": 0
+            },
+            "result_extract_ns": {
+              "count": 1,
+              "mean": 54,
+              "median": 54,
+              "min": 54,
+              "max": 54,
+              "p95": 54,
+              "stdev": 0
+            }
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected_samples": 0,
+            "include_kernel": null,
+            "scope": "exec_window",
+            "hardware_counters_observed": false,
+            "software_counters_observed": false,
+            "errors": {}
+          },
+          "derived_metrics": {},
+          "result_distribution": {
+            "12345678": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "memory_pair_sum",
+      "description": "Fixed-size two-word memory baseline",
+      "category": "baseline",
+      "tags": [
+        "memory",
+        "baseline",
+        "pure-jit"
+      ],
+      "expected_result": 2459565876494606865,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/memory_pair_sum.mem",
+      "runs": [
+        {
+          "runtime": "llvmbpf",
+          "label": "llvmbpf LLVM JIT",
+          "mode": "llvmbpf",
+          "repeat": 10,
+          "artifacts": {
+            "program_object": "/home/yunwei37/workspace/bpf-benchmark/micro/programs/memory_pair_sum.bpf.o"
+          },
+          "samples": [
+            {
+              "compile_ns": 5735650,
+              "exec_ns": 1804,
+              "result": 2459565876494606865,
+              "retval": 2,
+              "phases_ns": {
+                "program_image_ns": 1157209,
+                "memory_prepare_ns": 167152,
+                "input_stage_ns": 1571,
+                "vm_load_code_ns": 242,
+                "jit_compile_ns": 5735650
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": false,
+                "scope": "exec_window",
+                "error": ""
+              }
+            }
+          ],
+          "compile_ns": {
+            "count": 1,
+            "mean": 5735650,
+            "median": 5735650,
+            "min": 5735650,
+            "max": 5735650,
+            "p95": 5735650,
+            "stdev": 0
+          },
+          "exec_ns": {
+            "count": 1,
+            "mean": 1804,
+            "median": 1804,
+            "min": 1804,
+            "max": 1804,
+            "p95": 1804,
+            "stdev": 0
+          },
+          "phases_ns": {
+            "program_image_ns": {
+              "count": 1,
+              "mean": 1157209,
+              "median": 1157209,
+              "min": 1157209,
+              "max": 1157209,
+              "p95": 1157209,
+              "stdev": 0
+            },
+            "memory_prepare_ns": {
+              "count": 1,
+              "mean": 167152,
+              "median": 167152,
+              "min": 167152,
+              "max": 167152,
+              "p95": 167152,
+              "stdev": 0
+            },
+            "input_stage_ns": {
+              "count": 1,
+              "mean": 1571,
+              "median": 1571,
+              "min": 1571,
+              "max": 1571,
+              "p95": 1571,
+              "stdev": 0
+            },
+            "vm_load_code_ns": {
+              "count": 1,
+              "mean": 242,
+              "median": 242,
+              "min": 242,
+              "max": 242,
+              "p95": 242,
+              "stdev": 0
+            },
+            "jit_compile_ns": {
+              "count": 1,
+              "mean": 5735650,
+              "median": 5735650,
+              "min": 5735650,
+              "max": 5735650,
+              "p95": 5735650,
+              "stdev": 0
+            }
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected_samples": 0,
+            "include_kernel": null,
+            "scope": "exec_window",
+            "hardware_counters_observed": false,
+            "software_counters_observed": false,
+            "errors": {}
+          },
+          "derived_metrics": {},
+          "result_distribution": {
+            "2459565876494606865": 1
+          }
+        },
+        {
+          "runtime": "kernel",
+          "label": "kernel eBPF",
+          "mode": "kernel",
+          "repeat": 10,
+          "artifacts": {
+            "program_object": "/home/yunwei37/workspace/bpf-benchmark/micro/programs/memory_pair_sum.bpf.o"
+          },
+          "samples": [
+            {
+              "compile_ns": 374392,
+              "exec_ns": 25,
+              "result": 2459565876494606865,
+              "retval": 2,
+              "phases_ns": {
+                "memory_prepare_ns": 34634,
+                "object_open_ns": 80238,
+                "object_load_ns": 294154,
+                "input_stage_ns": 2958,
+                "prog_run_wall_ns": 20061717,
+                "result_extract_ns": 15
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": true,
+                "scope": "exec_window",
+                "error": ""
+              }
+            }
+          ],
+          "compile_ns": {
+            "count": 1,
+            "mean": 374392,
+            "median": 374392,
+            "min": 374392,
+            "max": 374392,
+            "p95": 374392,
+            "stdev": 0
+          },
+          "exec_ns": {
+            "count": 1,
+            "mean": 25,
+            "median": 25,
+            "min": 25,
+            "max": 25,
+            "p95": 25,
+            "stdev": 0
+          },
+          "phases_ns": {
+            "memory_prepare_ns": {
+              "count": 1,
+              "mean": 34634,
+              "median": 34634,
+              "min": 34634,
+              "max": 34634,
+              "p95": 34634,
+              "stdev": 0
+            },
+            "object_open_ns": {
+              "count": 1,
+              "mean": 80238,
+              "median": 80238,
+              "min": 80238,
+              "max": 80238,
+              "p95": 80238,
+              "stdev": 0
+            },
+            "object_load_ns": {
+              "count": 1,
+              "mean": 294154,
+              "median": 294154,
+              "min": 294154,
+              "max": 294154,
+              "p95": 294154,
+              "stdev": 0
+            },
+            "input_stage_ns": {
+              "count": 1,
+              "mean": 2958,
+              "median": 2958,
+              "min": 2958,
+              "max": 2958,
+              "p95": 2958,
+              "stdev": 0
+            },
+            "prog_run_wall_ns": {
+              "count": 1,
+              "mean": 20061717,
+              "median": 20061717,
+              "min": 20061717,
+              "max": 20061717,
+              "p95": 20061717,
+              "stdev": 0
+            },
+            "result_extract_ns": {
+              "count": 1,
+              "mean": 15,
+              "median": 15,
+              "min": 15,
+              "max": 15,
+              "p95": 15,
+              "stdev": 0
+            }
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected_samples": 0,
+            "include_kernel": null,
+            "scope": "exec_window",
+            "hardware_counters_observed": false,
+            "software_counters_observed": false,
+            "errors": {}
+          },
+          "derived_metrics": {},
+          "result_distribution": {
+            "2459565876494606865": 1
+          }
+        }
+      ]
+    }
+  ]
+}
