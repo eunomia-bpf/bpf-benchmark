@@ -1,5 +1,7 @@
 # Closing the Gap? A Characterization of eBPF Execution Across Kernel JIT and Userspace LLVM JIT
 
+> Update note (March 7, 2026): benchmark coverage has since expanded to `29` `micro_pure_jit` cases and `5` `micro_runtime` cases. The narrative below still references the pre-expansion 22-case pilot where stated; coverage updates and representativeness numbers are tracked in `micro/results/representativeness_report.md`, and the first real-world code-size validation slice is tracked in `corpus/results/real_world_code_size.md`.
+
 ## Abstract
 
 eBPF is now used across networking, tracing, security, scheduling, and storage. Yet the community still lacks a unified characterization of how the same eBPF program behaves across the Linux kernel JIT and emerging userspace LLVM-based runtimes. This paper presents a measurement framework and empirical study that compare `kernel eBPF` and `llvmbpf` along execution latency, compilation cost, phase breakdown, and microarchitectural behavior. We further study how helper usage, map access, branch structure, and verifier-friendly programming patterns shape the gap between the two execution environments. Our framework combines controlled micro-benchmarks with a growing corpus of real-world eBPF programs and emits machine-readable artifacts for reproducible analysis.
@@ -43,9 +45,9 @@ This repository is evolving into that pipeline.
 
 ### 3.3 Planned extensions
 
-- JIT dump and code-size collection
+- JIT dump collection and richer code-size attribution
 - verifier/load/JIT segmented statistics
-- real-world corpus ingestion
+- real-world corpus execution benchmarking beyond the current first code-size slice
 
 ## 4. Workload Design
 
@@ -87,8 +89,8 @@ This repository is evolving into that pipeline.
 ### 5.2 Current limitations
 
 - hardware counters are best-effort and can be zero on short windows or restricted PMU setups
-- code-size, JIT dump, and verifier breakdown are not yet collected
-- real-world corpus ingestion is only at the first-wave stage
+- JIT dump and verifier/load segmented breakdown are not yet collected end-to-end
+- real-world corpus execution benchmarking is still at the first-wave stage; current support is stronger for compile-only code-size inspection than for runnable workload subsets
 
 ### 5.3 Preliminary pilot observations
 
@@ -96,6 +98,7 @@ This repository is evolving into that pipeline.
 - `llvmbpf` is strongest on `control-flow` and much of `memory-local`; `dependency-ilp`, `loop-shape`, and the new `code-clone` family are near parity or slightly kernel-leading.
 - `llvmbpf` compile time is still typically slower than kernel load/JIT time on this host, which means execution-only wins do not automatically translate to load-path wins.
 - The first-wave real-world corpus currently inventories 124 candidate program sources across `xdp-examples`, `bcc`, `katran`, `tetragon`, `cilium`, and `libbpf-bootstrap`.
+- The first external-validity code-size slice over `libbpf-bootstrap` covers `15` source files and `24` real programs; `21` programs complete on both runtimes, and the native code-size geomean is `0.575x` (`llvmbpf/kernel`), which is directionally consistent with the micro-level “LLVM emits smaller code” story but still too small a corpus for a strong distributional claim.
 
 ## 6. Artifact Status
 

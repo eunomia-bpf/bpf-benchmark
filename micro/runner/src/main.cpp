@@ -7,6 +7,10 @@ int main(int argc, char **argv)
 {
     try {
         const auto options = parse_args(argc, argv);
+        if (options.command == "list-programs") {
+            print_program_inventory(list_programs(options.program));
+            return 0;
+        }
         if (options.command == "run-llvmbpf") {
             print_json(run_llvmbpf(options));
             return 0;

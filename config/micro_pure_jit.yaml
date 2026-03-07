@@ -320,7 +320,7 @@ benchmarks:
     hypothesis: Removes staged input helper overhead to isolate the packet-fed recurrence loop shape
     base_name: fibonacci_iter_packet
     io_mode: packet
-    kernel_input_size: 16
+    kernel_input_size: 24
     input_generator: fibonacci_iter_packet
     expected_result: 3918857671957494287
     tags: [compute, loop, packet-backed, helper-free]

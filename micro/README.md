@@ -118,17 +118,27 @@ python3 micro/summarize_rq.py \
   --output docs/preliminary-characterization-summary.md
 ```
 
+生成 micro suite 相对 BCF 语料库的 representativeness 报告：
+
+```bash
+python3 micro/analyze_representativeness.py \
+  --output micro/results/representativeness_report.md
+```
+
 ## 当前覆盖
 
-- `micro_pure_jit`: 22 个 case
+- `micro_pure_jit`: 29 个 case
 - `baseline`: `simple`, `memory_pair_sum`
-- `alu-mix`: `bitcount`, `log2_fold`
-- `control-flow`: `binary_search`, `branch_layout`, `switch_dispatch`
-- `memory-local`: `checksum`, `packet_parse`, `bounds_ladder`, `stride_load_4`, `stride_load_16`
+- `alu-mix`: `bitcount`, `log2_fold`, `mixed_alu_mem`
+- `control-flow`: `binary_search`, `branch_layout`, `switch_dispatch`, `branch_dense`
+- `memory-local`: `checksum`, `packet_parse`, `bounds_ladder`, `bounds_check_heavy`, `stride_load_4`, `stride_load_16`
 - `dependency-ilp`: `dep_chain_short`, `dep_chain_long`, `spill_pressure`, `multi_acc_4`, `multi_acc_8`
-- `loop-shape`: `fibonacci_iter`, `fixed_loop_small`, `fixed_loop_large`
+- `loop-shape`: `fibonacci_iter`, `fixed_loop_small`, `fixed_loop_large`, `nested_loop_2`, `nested_loop_3`
 - `call-size`: `code_clone_2`, `code_clone_8`
-- `micro_runtime`: `map_lookup_churn`, `map_roundtrip`
+- `program-scale`: `large_mixed_500`, `large_mixed_1000`
+- `micro_runtime`: 5 个 case
+- `map-runtime`: `map_lookup_churn`, `map_roundtrip`
+- `helper-runtime`: `helper_call_1`, `helper_call_10`, `helper_call_100`
 
 每个 `benchmark × runtime` 组合会记录：
 

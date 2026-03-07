@@ -62,6 +62,15 @@ static __always_inline void micro_write_u64_le(u8 *data, u64 value)
     }
 }
 
+static __always_inline u64 micro_rotl64(u64 value, u32 shift)
+{
+    shift &= 63U;
+    if (shift == 0) {
+        return value;
+    }
+    return (value << shift) | (value >> (64U - shift));
+}
+
 #define DEFINE_PACKET_BACKED_XDP_BENCH(PROG_NAME, BENCH_FN)                      \
     SEC("xdp") int PROG_NAME(struct xdp_md *ctx)                                 \
     {                                                                            \

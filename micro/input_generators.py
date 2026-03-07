@@ -275,6 +275,7 @@ def generate_fibonacci_iter(output: Path) -> dict[str, int]:
 
 
 def generate_fibonacci_iter_packet(output: Path) -> dict[str, int]:
+    # Same as fibonacci_iter; runner prepends 8-byte result header for packet mode
     return generate_fibonacci_iter(output)
 
 
