@@ -236,6 +236,29 @@ def generate_memory_pair_sum(output: Path) -> dict[str, int]:
     return {"left": left, "right": right}
 
 
+def _generate_load_width_blob(output: Path) -> dict[str, int]:
+    count = 256
+    bytes_per_iter = 4
+    state = 0x0DEC_0DED_C001_D00D
+
+    blob = bytearray(struct.pack("<II", count, bytes_per_iter))
+    for index in range(count):
+        state = _lcg(state)
+        value = ((state >> 24) ^ ((index + 1) * 0x9E37_79B9)) & 0xFFFFFFFF
+        blob.extend(struct.pack("<I", value))
+
+    output.write_bytes(blob)
+    return {"count": count, "bytes_per_iter": bytes_per_iter}
+
+
+def generate_load_word32(output: Path) -> dict[str, int]:
+    return _generate_load_width_blob(output)
+
+
+def generate_load_byte(output: Path) -> dict[str, int]:
+    return _generate_load_width_blob(output)
+
+
 def generate_log2_fold(output: Path) -> dict[str, int]:
     count = 128
     seed = 0xABCD_1234
@@ -508,6 +531,25 @@ def generate_helper_call_100(output: Path) -> dict[str, int]:
     return _generate_helper_call(output, seed=0x7654_3210, mix=0xA1B2_C3D4)
 
 
+def _generate_load_isolation(output: Path, count: int, seed: int) -> dict[str, int]:
+    """Generate data for byte-recompose causal isolation pair."""
+    state = seed
+    blob = bytearray(struct.pack("<II", count, 0))  # count + padding
+    for _ in range(count):
+        state = _lcg(state)
+        blob.extend(struct.pack("<Q", state & MASK64))
+    output.write_bytes(blob)
+    return {"count": count, "seed": seed}
+
+
+def generate_load_byte_recompose(output: Path) -> dict[str, int]:
+    return _generate_load_isolation(output, count=128, seed=0xBEEF_CAFE_1234_5678)
+
+
+def generate_load_native_u64(output: Path) -> dict[str, int]:
+    return _generate_load_isolation(output, count=128, seed=0xBEEF_CAFE_1234_5678)
+
+
 GENERATORS = {
     "simple": generate_simple,
     "simple_packet": generate_simple_packet,
@@ -525,6 +567,8 @@ GENERATORS = {
     "spill_pressure": generate_spill_pressure,
     "bounds_ladder": generate_bounds_ladder,
     "memory_pair_sum": generate_memory_pair_sum,
+    "load_word32": generate_load_word32,
+    "load_byte": generate_load_byte,
     "log2_fold": generate_log2_fold,
     "switch_dispatch": generate_switch_dispatch,
     "fibonacci_iter": generate_fibonacci_iter,
@@ -549,6 +593,8 @@ GENERATORS = {
     "helper_call_1": generate_helper_call_1,
     "helper_call_10": generate_helper_call_10,
     "helper_call_100": generate_helper_call_100,
+    "load_byte_recompose": generate_load_byte_recompose,
+    "load_native_u64": generate_load_native_u64,
 }
 
 

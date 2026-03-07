@@ -192,6 +192,54 @@ benchmarks:
     expected_result: 0
     tags: [alu, memory, pure-jit]
 
+  - name: load_word32
+    description: Direct 32-bit loads over staged input words
+    category: memory-local
+    family: load-width
+    level: word32
+    hypothesis: Direct u32 loads should surface kernel byte-recompose lowering overhead relative to llvmbpf
+    base_name: load_word32
+    kernel_input_size: 1032
+    input_generator: load_word32
+    expected_result: 548570475964
+    tags: [memory, load-width, byte-recompose, pure-jit]
+
+  - name: load_byte
+    description: Same staged input walked as individual byte loads
+    category: memory-local
+    family: load-width
+    level: byte
+    hypothesis: Byte-at-a-time control should avoid kernel byte-recompose while preserving the same staged input footprint
+    base_name: load_byte
+    kernel_input_size: 1032
+    input_generator: load_byte
+    expected_result: 133744
+    tags: [memory, load-width, control, pure-jit]
+
+  - name: load_byte_recompose
+    description: Recompose 128 staged u64 values from individual byte loads
+    category: memory-local
+    family: causal-isolation
+    level: byte-recompose
+    hypothesis: Kernel byte-load lowering should add measurable exec cost versus equivalent native u64 loads
+    base_name: load_byte_recompose
+    kernel_input_size: 1032
+    input_generator: load_byte_recompose
+    expected_result: 1253018829653002637
+    tags: [memory, byte-recompose, causal-isolation, pure-jit]
+
+  - name: load_native_u64
+    description: Read the same 128 staged u64 values via native aligned u64 loads
+    category: memory-local
+    family: causal-isolation
+    level: native-u64
+    hypothesis: Native u64 loads provide the control path for isolating kernel byte-recompose overhead
+    base_name: load_native_u64
+    kernel_input_size: 1032
+    input_generator: load_native_u64
+    expected_result: 1253018829653002637
+    tags: [memory, control, causal-isolation, pure-jit]
+
   - name: packet_parse
     description: Packet header parsing with bounds checks
     category: memory-local

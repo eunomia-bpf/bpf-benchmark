@@ -93,7 +93,7 @@
 
 #### G5. 缺乏时间序列稳定性分析（已修复）
 
-**Status**: RESOLVED. `analyze_stability.py` 已存在；当前结论为 `3/44` drift 显著，但幅度均 `< 2%`。
+**Status**: RESOLVED. `analyze_stability.py` 已存在；当前结论为 `3/62` drift 显著，最大 drift 为 `16.13%`（`stride_load_4` [kernel]）；该点属离群点，不影响 suite-level 结论。
 
 #### G6. 单一平台
 
