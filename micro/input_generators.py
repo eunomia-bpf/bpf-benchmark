@@ -302,6 +302,16 @@ def generate_fibonacci_iter_packet(output: Path) -> dict[str, int]:
     return generate_fibonacci_iter(output)
 
 
+def generate_bpf_call_chain(output: Path) -> dict[str, int]:
+    state = 0x1234_5678_9ABC_DEF0
+    blob = bytearray()
+    for _ in range(8):  # 8 u64 values = 64 bytes
+        state = _lcg(state)
+        blob.extend(struct.pack("<Q", state & MASK64))
+    output.write_bytes(blob)
+    return {"bytes": 64}
+
+
 def _generate_dep_chain(output: Path, count: int, seed: int, salt: int) -> dict[str, int]:
     state = salt & MASK64
     blob = bytearray(struct.pack("<II", count, seed))
@@ -573,6 +583,7 @@ GENERATORS = {
     "switch_dispatch": generate_switch_dispatch,
     "fibonacci_iter": generate_fibonacci_iter,
     "fibonacci_iter_packet": generate_fibonacci_iter_packet,
+    "bpf_call_chain": generate_bpf_call_chain,
     "dep_chain_short": generate_dep_chain_short,
     "dep_chain_long": generate_dep_chain_long,
     "multi_acc_4": generate_multi_acc_4,

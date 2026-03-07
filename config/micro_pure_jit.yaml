@@ -468,3 +468,15 @@ benchmarks:
     input_generator: large_mixed_1000
     expected_result: 4283793436325605125
     tags: [compute, memory, code-size, pure-jit]
+
+  - name: bpf_call_chain
+    description: Chain of 3 __noinline BPF-to-BPF subprogram calls per loop iteration
+    category: call-overhead
+    family: bpf-local-call
+    level: chain-3
+    hypothesis: Subprogram call overhead should differ between kernel callee-saved convention and LLVM direct calls
+    base_name: bpf_call_chain
+    kernel_input_size: 64
+    input_generator: bpf_call_chain
+    expected_result: 17813494880153753973
+    tags: [call, bpf-to-bpf, local-call, pure-jit]
