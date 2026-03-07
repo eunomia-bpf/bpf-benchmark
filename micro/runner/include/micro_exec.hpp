@@ -35,6 +35,7 @@ struct cli_options {
     std::optional<std::filesystem::path> memory;
     std::optional<std::string> program_name;
     std::string io_mode = "map";
+    bool raw_packet = false;
     uint32_t repeat = 1;
     uint32_t input_size = 0;
     int opt_level = 3;

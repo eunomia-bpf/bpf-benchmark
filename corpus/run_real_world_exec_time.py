@@ -6,6 +6,7 @@ import json
 import math
 import platform
 import statistics
+import struct
 import subprocess
 import time
 from collections import Counter
@@ -119,7 +120,60 @@ def geomean(values: list[float]) -> float | None:
     return math.exp(sum(math.log(value) for value in positives) / len(positives))
 
 
-def build_command(runtime: str, runner: Path, object_path: Path, program_name: str, repeat: int) -> list[str]:
+def generate_valid_packet() -> bytes:
+    """Generate a minimal valid Ethernet + IPv4 + TCP packet."""
+    dst_mac = b"\x00\x00\x00\x00\x00\x00"
+    src_mac = b"\x00\x00\x00\x00\x00\x00"
+    ethertype = struct.pack("!H", 0x0800)
+    eth_header = dst_mac + src_mac + ethertype
+
+    version_ihl = 0x45
+    tos = 0
+    total_length = 40
+    identification = 0
+    flags_fragment = 0
+    ttl = 64
+    protocol = 6
+    src_ip = struct.pack("!I", 0x0A000001)
+    dst_ip = struct.pack("!I", 0x0A000002)
+    ip_header_no_checksum = (
+        struct.pack("!BBHHHBBH", version_ihl, tos, total_length, identification, flags_fragment, ttl, protocol, 0)
+        + src_ip
+        + dst_ip
+    )
+
+    words = struct.unpack("!10H", ip_header_no_checksum)
+    checksum_sum = sum(words)
+    checksum_sum = (checksum_sum >> 16) + (checksum_sum & 0xFFFF)
+    checksum_sum += checksum_sum >> 16
+    checksum = ~checksum_sum & 0xFFFF
+    ip_header = (
+        struct.pack(
+            "!BBHHHBBH", version_ihl, tos, total_length, identification, flags_fragment, ttl, protocol, checksum
+        )
+        + src_ip
+        + dst_ip
+    )
+
+    src_port = 12345
+    dst_port = 80
+    seq = 0
+    ack = 0
+    data_offset_flags = 0x5002
+    window = 65535
+    tcp_checksum = 0
+    urgent = 0
+    tcp_header = (
+        struct.pack("!HHIIHHH", src_port, dst_port, seq, ack, data_offset_flags, window, tcp_checksum)
+        + struct.pack("!H", urgent)
+    )
+
+    return eth_header + ip_header + tcp_header
+
+
+def build_command(
+    runtime: str, runner: Path, object_path: Path, program_name: str, repeat: int, packet_file: Path | None = None
+) -> list[str]:
     command = [
         str(runner),
         "run-llvmbpf" if runtime == "llvmbpf" else "run-kernel",
@@ -131,9 +185,12 @@ def build_command(runtime: str, runner: Path, object_path: Path, program_name: s
         str(repeat),
         "--io-mode",
         "packet",
-        "--input-size",
-        "64",
+        "--raw-packet",
     ]
+    if packet_file is not None:
+        command.extend(["--memory", str(packet_file)])
+    else:
+        command.extend(["--input-size", "64"])
     return ["sudo", "-n", *command] if runtime == "kernel" else command
 
 
@@ -175,8 +232,9 @@ def run_runtime(
     repeat: int,
     iterations: int,
     timeout_seconds: int,
+    packet_file: Path | None = None,
 ) -> dict[str, Any]:
-    command = build_command(runtime, runner, object_path, program_name, repeat)
+    command = build_command(runtime, runner, object_path, program_name, repeat, packet_file=packet_file)
     exec_samples: list[int] = []
     timing_source: str | None = None
 
@@ -365,7 +423,7 @@ def render_report(payload: dict[str, Any]) -> str:
             "## Notes",
             "",
             "- Inputs come from the subset of programs that already compiled successfully on both runtimes in `real_world_code_size.json`.",
-            "- Each median is computed across separate `micro_exec` invocations; each invocation uses packet mode with `--repeat 1000` and no input file.",
+            f"- Each median is computed across separate `micro_exec` invocations; each invocation uses packet mode with a generated valid raw packet input from `{payload['packet_input']}`.",
             "- Kernel runs are attempted first; if `run-kernel` fails, the program is recorded as unsupported for exec-time comparison and llvmbpf is marked `skipped`.",
             "- `--program-name` uses the libbpf program name stored in the code-size results; section names are reported alongside the measurements.",
         ]
@@ -380,6 +438,9 @@ def main() -> int:
     report_path = Path(args.report).resolve()
     runner_path = Path(args.runner).resolve()
     ensure_runner_binary(runner_path)
+    packet_file = output_path.parent / "valid_packet.bin"
+    packet_file.parent.mkdir(parents=True, exist_ok=True)
+    packet_file.write_bytes(generate_valid_packet())
 
     code_size_payload = json.loads(input_path.read_text())
     paired_programs = load_paired_programs(code_size_payload, args.max_programs)
@@ -388,12 +449,21 @@ def main() -> int:
     for program in paired_programs:
         object_path = Path(program["object_path"])
         kernel_run = run_runtime(
-            "kernel", runner_path, object_path, program["program_name"], args.repeat, args.iterations, args.timeout_seconds
+            "kernel",
+            runner_path,
+            object_path,
+            program["program_name"],
+            args.repeat,
+            args.iterations,
+            args.timeout_seconds,
+            packet_file=packet_file,
         )
         llvmbpf_run = (
             {
                 "runtime": "llvmbpf",
-                "command": build_command("llvmbpf", runner_path, object_path, program["program_name"], args.repeat),
+                "command": build_command(
+                    "llvmbpf", runner_path, object_path, program["program_name"], args.repeat, packet_file=packet_file
+                ),
                 "status": "skipped",
                 "repeat": args.repeat,
                 "iterations_requested": args.iterations,
@@ -414,6 +484,7 @@ def main() -> int:
                 args.repeat,
                 args.iterations,
                 args.timeout_seconds,
+                packet_file=packet_file,
             )
         )
         program_records.append({**program, "runs": [kernel_run, llvmbpf_run]})
@@ -426,6 +497,7 @@ def main() -> int:
         "repeat": args.repeat,
         "iterations": args.iterations,
         "io_mode": "packet",
+        "packet_input": str(packet_file),
         "host": {"platform": platform.platform(), "python": platform.python_version()},
         "programs": program_records,
     }

@@ -390,7 +390,11 @@ sample_result run_kernel(const cli_options &options)
         packet_out.assign(packet.size(), 0);
     } else {
         exec_input_prepare_start = std::chrono::steady_clock::now();
-        packet = build_packet_input(input_bytes);
+        if (options.raw_packet) {
+            packet = input_bytes;
+        } else {
+            packet = build_packet_input(input_bytes);
+        }
         packet_out.assign(packet.size(), 0);
         exec_input_prepare_end = std::chrono::steady_clock::now();
     }

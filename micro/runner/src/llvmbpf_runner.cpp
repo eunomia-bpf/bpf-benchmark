@@ -426,7 +426,11 @@ sample_result run_llvmbpf(const cli_options &options)
         map_state = initialize_map_state(image, input_bytes);
         packet_input = build_result_packet();
     } else {
-        packet_input = build_packet_input(input_bytes);
+        if (options.raw_packet) {
+            packet_input = input_bytes;
+        } else {
+            packet_input = build_packet_input(input_bytes);
+        }
     }
     const auto exec_input_prepare_end = clock_type::now();
 

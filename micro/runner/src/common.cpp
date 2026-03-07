@@ -107,7 +107,7 @@ cli_options parse_args(int argc, char **argv)
         fail(
             "usage: micro_exec <run-llvmbpf|run-kernel|list-programs> --program <path> [--program-name <name>] "
             "[--memory <path>] "
-            "[--io-mode map|staged|packet] [--repeat N] [--input-size N] "
+            "[--io-mode map|staged|packet] [--raw-packet] [--repeat N] [--input-size N] "
             "[--opt-level 0|1|2|3] [--perf-counters] [--perf-scope full_repeat_raw|full_repeat_avg] "
             "[--dump-jit] [--compile-only]");
     }
@@ -131,6 +131,10 @@ cli_options parse_args(int argc, char **argv)
         }
         if (current == "--io-mode" && index + 1 < argc) {
             options.io_mode = argv[++index];
+            continue;
+        }
+        if (current == "--raw-packet") {
+            options.raw_packet = true;
             continue;
         }
         if (current == "--repeat" && index + 1 < argc) {
