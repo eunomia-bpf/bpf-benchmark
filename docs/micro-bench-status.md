@@ -446,7 +446,7 @@ authoritative `31`-case run 中，`10/31` 个 benchmark 出现 llvmbpf 代码更
 > 分析脚本：`micro/analyze_representativeness.py`
 > 报告：`micro/results/representativeness_report.md`
 > 真实语料：`corpus/results/bytecode_features.json`（`1588` 个程序）
-> 统计口径：当前 representativeness report 纳入 `35` 个 pure-jit benchmark 与 `9` 个 runtime benchmark，合计 `44` 个 benchmark，覆盖 `10` 个 category
+> 统计口径：当前 representativeness report 纳入 `35` 个 pure-jit benchmark 与 `9` 个 runtime benchmark，合计 `44` 个 benchmark，覆盖 `10` 个 category。其中 `31` 个 pure-jit benchmark 有 authoritative 结果（§6.1），另外 `4` 个（`load_byte`、`load_byte_recompose`、`load_word32`、`load_native_u64`）是后续添加的 byte-recompose 因果隔离 benchmark，尚无 authoritative 结果但已纳入 feature-space 覆盖分析
 
 这里的 framing 必须明确：这些 micro-benchmark 的设计目标是**因果隔离**特定 JIT 机制（如分支布局、寄存器分配、memory access pattern、helper/map runtime path），而**不是**在统计意义上代表全部真实 BPF 程序。representativeness 分析的作用，是把这种 external-validity gap 定量化、公开化，让读者能够诚实判断“机制级结论能外推到什么范围”；与之互补的外部效度证据，则来自前文真实程序 code-size 外部验证（当前 paired 结果为 `105` 个 instances / `27` 个 unique programs）。
 
