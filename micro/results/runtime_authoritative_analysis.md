@@ -1,4 +1,4 @@
-# Pure JIT Rigorous Statistical Analysis
+# Runtime Rigorous Statistical Analysis
 
 - Input JSON: `/home/yunwei37/workspace/bpf-benchmark/micro/results/runtime_authoritative.json`
 - Suite manifest: `/home/yunwei37/workspace/bpf-benchmark/config/micro_runtime.yaml`

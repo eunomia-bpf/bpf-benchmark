@@ -179,9 +179,10 @@ BPF:      CONFIG_BPF_JIT=y, CONFIG_BPF_SYSCALL=y, BTF enabled
 
 - 真实程序 execution-time 对比受 `BPF_PROG_TEST_RUN` 结构性限制：tracepoint/kprobe/perf_event 程序在 execution 模式下返回 `ENOTSUPP` (`524`)，TC 程序返回 `EINVAL`（缺少 classifier/act context），fentry/fexit 虽可执行但在 dummy input 下即使 `1000` repeats 也常见 `exec_ns=0`。因此本文将其视为方法边界而非待修复工程缺口：真实程序只做 code-size 外部验证，execution-time 结论仅基于 `40` 个 handcrafted microbenchmarks。
 - 单一平台：仅在 x86-64 Intel Arrow Lake-S 上测试，未覆盖 ARM64；BPF JIT 在 ARM64 上的后端代码可能不同，结论外推需谨慎。
-- `exec_ns` 计时来源不对等：kernel 使用 `ktime_get_ns`，llvmbpf 使用 `rdtsc`；两者都测纯 BPF 执行时间，但时钟源不同，因此需结合 `timing_source` 解读，并与 `wall_exec_ns` 区分。
+- `exec_ns` 计时来源不对等：kernel 使用 `ktime_get_ns`（~100ns 分辨率，可能受 NTP 调整影响），llvmbpf 使用 `rdtsc`（亚纳秒分辨率，受 TSC 频率校准影响）。两者都测纯 BPF 执行时间，但 ktime 的量化粒度意味着 kernel 侧对 <100ns 程序的计时本质上是噪声（已在 paradox 分析中将 3 个 sub-resolution case 标记为 measurement artifact）。对于 >100ns 的程序，两种时钟源在绝对精度上的差异相对于观测到的 exec ratio 范围（0.29x–1.88x）可忽略。论文中应标注 `timing_source` 并讨论此不对等。
 - PMU 范围不等价：kernel perf counters 包含 kernel-mode 事件，llvmbpf 只看 user-mode；当前 PMU 结果仅作定性补充证据，不进入主论证链。
 - 外部验证集中度：`105` 个 paired instances 含大量 clang 版本重复，按 unique program name 去重后仅 `27` 个 unique programs，且仅来自 `2` 个 repo（`cilium` 与 `libbpf-bootstrap`）。
+- CPU 频率控制：authoritative run 使用 `--strict-env`（taskset 绑核 + `performance` governor），但未显式禁用 turbo boost 或 SMT。Intel Arrow Lake-S 的 turbo boost 可能引入跨 iteration 的频率抖动；drift 分析显示 `3/62` pair 有显著漂移（最大 16.13%），表明频率变化的影响有限但非零。
 
 ## 6. 结果
 
@@ -270,8 +271,8 @@ BPF:      CONFIG_BPF_JIT=y, CONFIG_BPF_SYSCALL=y, BTF enabled
 **H4 结论**：Top-5 helper 占总调用的 81.56%，假设验证通过。对 runtime 优化的启示：优先实现 trace_printk 的高效内联路径（49% 调用量），其次是 map_lookup/update（19.5%）。
 
 **程序特征分布（1588 个程序）：**
-- BPF-to-BPF 子程序调用：92.9% 的程序包含（Calico 主导）
-- 平均 BPF insn 数：~3,200（中位数 ~1,800）
+- 多函数 ELF section（`has_subprograms`）：97.2% 的程序含有多个函数符号（Calico 主导），但仅 3.3% 含有显式 BPF-to-BPF call 指令（`bpf2bpf_call_count > 0`）
+- 平均 BPF insn 数：中位数 ~10,977，p90 ~22,899
 - Helper 种类：共 45 种不同 helper ID
 
 ### 6.1d 时间序列稳定性分析
@@ -427,7 +428,7 @@ authoritative `31`-case run 中，`10/31` 个 benchmark 出现 llvmbpf 代码更
 > 分析脚本：`micro/analyze_representativeness.py`
 > 报告：`micro/results/representativeness_report.md`
 > 真实语料：`corpus/results/bytecode_features.json`（`1588` 个程序）
-> 统计口径：当前 representativeness report 纳入 `29` 个 pure-jit benchmark 与 `5` 个 runtime benchmark，合计 `34` 个 benchmark，覆盖 `10` 个 category
+> 统计口径：当前 representativeness report 纳入 `35` 个 pure-jit benchmark 与 `9` 个 runtime benchmark，合计 `44` 个 benchmark，覆盖 `10` 个 category
 
 这里的 framing 必须明确：这些 micro-benchmark 的设计目标是**因果隔离**特定 JIT 机制（如分支布局、寄存器分配、memory access pattern、helper/map runtime path），而**不是**在统计意义上代表全部真实 BPF 程序。representativeness 分析的作用，是把这种 external-validity gap 定量化、公开化，让读者能够诚实判断“机制级结论能外推到什么范围”；与之互补的外部效度证据，则来自前文真实程序 code-size 外部验证（当前 paired 结果为 `105` 个 instances / `27` 个 unique programs）。
 
