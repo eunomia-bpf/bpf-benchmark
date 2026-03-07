@@ -18,6 +18,10 @@ def generate_simple(output: Path) -> dict[str, int]:
     return {"bytes": 64}
 
 
+def generate_simple_packet(output: Path) -> dict[str, int]:
+    return generate_simple(output)
+
+
 def generate_bitcount(output: Path) -> dict[str, int]:
     count = 256
     seed = 0x00C0FFEE
@@ -143,6 +147,46 @@ def generate_map_roundtrip(output: Path) -> dict[str, int]:
     return {"rounds": rounds, "mix": mix}
 
 
+def generate_hash_map_lookup(output: Path) -> dict[str, int]:
+    key_count = 64
+    blob = bytearray()
+
+    for index in range(key_count):
+        key = ((index + 1) * 2654435761) & 0xFFFFFFFF
+        blob.extend(struct.pack("<I", key))
+
+    output.write_bytes(blob)
+    return {"key_count": key_count}
+
+
+def generate_percpu_map_update(output: Path) -> dict[str, int]:
+    pair_count = 32
+    state = 0x1357_2468_9ABC_DEF0
+    blob = bytearray()
+
+    for index in range(pair_count):
+        state = _lcg(state)
+        value = state ^ ((index + 1) * 0xA076_1D64_78BD_642F)
+        blob.extend(struct.pack("<IQ", index, value & MASK64))
+
+    output.write_bytes(blob)
+    return {"pair_count": pair_count}
+
+
+def generate_probe_read_heavy(output: Path) -> dict[str, int]:
+    address = 0
+    count = 64
+
+    output.write_bytes(struct.pack("<QII", address, count, 0))
+    return {"count": count}
+
+
+def generate_get_time_heavy(output: Path) -> dict[str, int]:
+    count = 128
+    output.write_bytes(struct.pack("<I", count))
+    return {"count": count}
+
+
 def generate_spill_pressure(output: Path) -> dict[str, int]:
     count = 64
     seed = 0x1020_3040
@@ -228,6 +272,10 @@ def generate_fibonacci_iter(output: Path) -> dict[str, int]:
 
     output.write_bytes(struct.pack("<IIQ", rounds, mix, seed))
     return {"rounds": rounds, "mix": mix}
+
+
+def generate_fibonacci_iter_packet(output: Path) -> dict[str, int]:
+    return generate_fibonacci_iter(output)
 
 
 def _generate_dep_chain(output: Path, count: int, seed: int, salt: int) -> dict[str, int]:
@@ -322,8 +370,146 @@ def generate_code_clone_8(output: Path) -> dict[str, int]:
     return _generate_code_clone(output, count=128, seed=0x56473829, salt=0x0BADF00D56473829)
 
 
+def _generate_large_mixed(output: Path, count: int, seed: int, salt: int) -> dict[str, int]:
+    state = salt & MASK64
+    blob = bytearray(struct.pack("<II", count, seed))
+    for index in range(count):
+        state = _lcg(state)
+        value = state ^ ((index + 1) * 0xD134_2543_DE82_EF95) ^ seed
+        blob.extend(struct.pack("<Q", value & MASK64))
+    output.write_bytes(blob)
+    return {"count": count, "seed": seed}
+
+
+def generate_large_mixed_500(output: Path) -> dict[str, int]:
+    return _generate_large_mixed(output, count=32, seed=0x13572468, salt=0x1111_3333_5555_7777)
+
+
+def generate_large_mixed_1000(output: Path) -> dict[str, int]:
+    return _generate_large_mixed(output, count=32, seed=0x24681357, salt=0x8888_6666_4444_2222)
+
+
+def _generate_nested_loop_values(output: Path, header: bytes, count: int, salt: int) -> None:
+    state = salt & MASK64
+    blob = bytearray(header)
+    for index in range(count):
+        state = _lcg(state)
+        value = state ^ ((index + 9) * 0xA076_1D64_78BD_642F)
+        blob.extend(struct.pack("<Q", value & MASK64))
+    output.write_bytes(blob)
+
+
+def generate_nested_loop_2(output: Path) -> dict[str, int]:
+    outer = 16
+    inner = 16
+    seed = 0x0123_4567_89AB_CDEF
+    _generate_nested_loop_values(
+        output,
+        struct.pack("<IIQ", outer, inner, seed),
+        count=outer * inner,
+        salt=0x2222_4444_6666_8888,
+    )
+    return {"outer": outer, "inner": inner}
+
+
+def generate_nested_loop_3(output: Path) -> dict[str, int]:
+    outer = 8
+    middle = 8
+    inner = 4
+    seed = 0x89AB_CDEF
+    _generate_nested_loop_values(
+        output,
+        struct.pack("<IIII", outer, middle, inner, seed),
+        count=outer * middle * inner,
+        salt=0x9999_AAAA_BBBB_CCCC,
+    )
+    return {"outer": outer, "middle": middle, "inner": inner}
+
+
+def generate_mixed_alu_mem(output: Path) -> dict[str, int]:
+    count = 128
+    seed = 0x5566_7788
+    state = 0x3141_5926_5358_9793
+
+    blob = bytearray(struct.pack("<II", count, seed))
+    for index in range(count):
+        state = _lcg(state)
+        value = state ^ ((index + 21) * 0x94D0_49BB_1331_11EB)
+        blob.extend(struct.pack("<Q", value & MASK64))
+
+    output.write_bytes(blob)
+    return {"count": count, "seed": seed}
+
+
+def generate_branch_dense(output: Path) -> dict[str, int]:
+    count = 128
+    hot_threshold = 480
+    state = 0x1357_9BDF_2468_ACE0
+
+    blob = bytearray(struct.pack("<II", count, hot_threshold))
+    for index in range(count):
+        state = _lcg(state)
+        if index % 5 == 0:
+            value = hot_threshold + ((state >> 12) & 0x7FF)
+        else:
+            value = ((state >> 20) ^ (index * 73)) & 0x3FF
+        blob.extend(struct.pack("<I", value))
+
+    output.write_bytes(blob)
+    return {"count": count, "hot_threshold": hot_threshold}
+
+
+def generate_bounds_check_heavy(output: Path) -> dict[str, int]:
+    record_count = 32
+    record_size = 32
+    state = 0x0F0F_1E1E_2D2D_3C3C
+
+    blob = bytearray(struct.pack("<II", record_count, record_size))
+    for index in range(record_count):
+        state = _lcg(state)
+        span0 = 4 + (state & 7)
+        state = _lcg(state)
+        off1 = state & 7
+        state = _lcg(state)
+        off2 = state & 7
+        state = _lcg(state)
+        selector = state & 0x1F
+        record = bytearray(record_size)
+        record[0] = span0 & 0xFF
+        record[1] = off1 & 0xFF
+        record[2] = off2 & 0xFF
+        record[3] = selector & 0xFF
+        for offset in range(4, record_size, 8):
+            state = _lcg(state)
+            value = state ^ ((index + offset) * 0x9E37_79B9_7F4A_7C15)
+            width = min(8, record_size - offset)
+            record[offset : offset + width] = struct.pack("<Q", value & MASK64)[:width]
+        blob.extend(record)
+
+    output.write_bytes(blob)
+    return {"record_count": record_count, "record_size": record_size}
+
+
+def _generate_helper_call(output: Path, seed: int, mix: int) -> dict[str, int]:
+    output.write_bytes(struct.pack("<II", seed, mix))
+    return {"seed": seed, "mix": mix}
+
+
+def generate_helper_call_1(output: Path) -> dict[str, int]:
+    return _generate_helper_call(output, seed=0x1020_3040, mix=0x5566_7788)
+
+
+def generate_helper_call_10(output: Path) -> dict[str, int]:
+    return _generate_helper_call(output, seed=0x90AB_CDEF, mix=0x1122_3344)
+
+
+def generate_helper_call_100(output: Path) -> dict[str, int]:
+    return _generate_helper_call(output, seed=0x7654_3210, mix=0xA1B2_C3D4)
+
+
 GENERATORS = {
     "simple": generate_simple,
+    "simple_packet": generate_simple_packet,
     "bitcount": generate_bitcount,
     "binary_search": generate_binary_search,
     "checksum": generate_checksum,
@@ -331,12 +517,17 @@ GENERATORS = {
     "branch_layout": generate_branch_layout,
     "map_lookup_churn": generate_map_lookup_churn,
     "map_roundtrip": generate_map_roundtrip,
+    "hash_map_lookup": generate_hash_map_lookup,
+    "percpu_map_update": generate_percpu_map_update,
+    "probe_read_heavy": generate_probe_read_heavy,
+    "get_time_heavy": generate_get_time_heavy,
     "spill_pressure": generate_spill_pressure,
     "bounds_ladder": generate_bounds_ladder,
     "memory_pair_sum": generate_memory_pair_sum,
     "log2_fold": generate_log2_fold,
     "switch_dispatch": generate_switch_dispatch,
     "fibonacci_iter": generate_fibonacci_iter,
+    "fibonacci_iter_packet": generate_fibonacci_iter_packet,
     "dep_chain_short": generate_dep_chain_short,
     "dep_chain_long": generate_dep_chain_long,
     "multi_acc_4": generate_multi_acc_4,
@@ -347,6 +538,16 @@ GENERATORS = {
     "stride_load_16": generate_stride_load_16,
     "code_clone_2": generate_code_clone_2,
     "code_clone_8": generate_code_clone_8,
+    "large_mixed_500": generate_large_mixed_500,
+    "large_mixed_1000": generate_large_mixed_1000,
+    "nested_loop_2": generate_nested_loop_2,
+    "nested_loop_3": generate_nested_loop_3,
+    "mixed_alu_mem": generate_mixed_alu_mem,
+    "branch_dense": generate_branch_dense,
+    "bounds_check_heavy": generate_bounds_check_heavy,
+    "helper_call_1": generate_helper_call_1,
+    "helper_call_10": generate_helper_call_10,
+    "helper_call_100": generate_helper_call_100,
 }
 
 

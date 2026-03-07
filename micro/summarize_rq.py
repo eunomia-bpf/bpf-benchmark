@@ -263,7 +263,7 @@ def summarize_results(results: dict[str, object], bootstrap_iterations: int, boo
     lines.append(
         f"| Raw exec `llvmbpf/kernel` geometric mean | {format_ratio_value(raw_gmean)} | {format_ci(raw_ci)} |"
     )
-    if suite_name == "micro_pure_jit":
+    if suite_name in ("micro_pure_jit", "micro_staged_codegen"):
         adjusted_gmean = geometric_mean(adjusted_ratios)
         adjusted_ci = bootstrap_geometric_mean_ci(adjusted_ratios, bootstrap_iterations, bootstrap_seed + 1)
         lines.append(
@@ -274,7 +274,7 @@ def summarize_results(results: dict[str, object], bootstrap_iterations: int, boo
     lines.append(
         f"| Raw wins (`llvmbpf / kernel / tie`) | `{raw_wins[0]} / {raw_wins[1]} / {raw_wins[2]}` | n/a |"
     )
-    if suite_name == "micro_pure_jit":
+    if suite_name in ("micro_pure_jit", "micro_staged_codegen"):
         adjusted_wins = win_counts(adjusted_ratios)
         lines.append(
             f"| Adjusted wins (`llvmbpf / kernel / tie`) | `{adjusted_wins[0]} / {adjusted_wins[1]} / {adjusted_wins[2]}` | n/a |"
@@ -283,7 +283,7 @@ def summarize_results(results: dict[str, object], bootstrap_iterations: int, boo
     lines.append("")
     lines.append("## Benchmark-Level Comparison")
     lines.append("")
-    if suite_name == "micro_pure_jit":
+    if suite_name in ("micro_pure_jit", "micro_staged_codegen"):
         lines.append(
             "The adjusted ratio subtracts each runtime's own `simple` median from the benchmark median before forming "
             "the `llvmbpf/kernel` ratio. This is the primary pure-jit view."
@@ -337,7 +337,7 @@ def summarize_results(results: dict[str, object], bootstrap_iterations: int, boo
                 f"{format_ns(llvm_exec)} | {format_ns(kernel_exec)} | {format_ratio(llvm_exec, kernel_exec)} |"
             )
 
-    if suite_name == "micro_pure_jit":
+    if suite_name in ("micro_pure_jit", "micro_staged_codegen"):
         for grouping_key, heading in (("category", "Category-Level"), ("family", "Family-Level")):
             grouped: dict[str, list[float]] = {}
             for benchmark in benchmarks:

@@ -16,12 +16,19 @@ DEFAULT_OUTPUT = ROOT_DIR / "results" / "pure_jit_rigorous_analysis.md"
 BOOTSTRAP_ITERATIONS = 10_000
 DEFAULT_SEED = 0
 RUNTIME_ORDER = ("llvmbpf", "kernel")
+METRIC_CHOICES = ("exec_ns", "wall_exec_ns")
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Analyze statistical properties of pure-JIT microbenchmark results.")
     parser.add_argument("input", nargs="?", default=str(DEFAULT_INPUT), help="Input benchmark JSON.")
     parser.add_argument("--output", default=str(DEFAULT_OUTPUT), help="Markdown report output path.")
+    parser.add_argument(
+        "--metric",
+        default="exec_ns",
+        choices=METRIC_CHOICES,
+        help="Execution metric to analyze: exec_ns (default) or wall_exec_ns.",
+    )
     parser.add_argument(
         "--bootstrap-iterations",
         type=int,
@@ -36,10 +43,10 @@ def load_results(path: Path) -> dict[str, object]:
     return json.loads(path.read_text())
 
 
-def extract_exec_samples(run: dict[str, object]) -> np.ndarray:
-    values = [float(sample["exec_ns"]) for sample in run.get("samples", []) if sample.get("exec_ns") is not None]
+def extract_exec_samples(run: dict[str, object], metric: str) -> np.ndarray:
+    values = [float(sample[metric]) for sample in run.get("samples", []) if sample.get(metric) is not None]
     if not values:
-        raise ValueError(f"run {run.get('runtime', '<unknown>')} has no exec_ns samples")
+        raise ValueError(f"run {run.get('runtime', '<unknown>')} has no {metric} samples")
     return np.asarray(values, dtype=np.float64)
 
 
@@ -157,10 +164,11 @@ def format_int(value: int | float | None) -> str:
     return f"{int(round(float(value))):,}"
 
 
-def build_runtime_table_rows(
+def build_runtime_rows(
     results: dict[str, object],
     iterations: int,
     rng: np.random.Generator,
+    metric: str,
 ) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
     runtime_rows: list[dict[str, object]] = []
     comparison_rows: list[dict[str, object]] = []
@@ -175,7 +183,7 @@ def build_runtime_table_rows(
             run = runs_by_runtime.get(runtime)
             if run is None:
                 continue
-            exec_samples = extract_exec_samples(run)
+            exec_samples = extract_exec_samples(run, metric)
             mean_value = float(np.mean(exec_samples))
             mean_ci_low, mean_ci_high = bootstrap_mean_ci(exec_samples, iterations, rng)
             stdev_value = sample_stdev(exec_samples)
@@ -200,8 +208,8 @@ def build_runtime_table_rows(
         if lhs_run is None or rhs_run is None:
             continue
 
-        lhs_exec = extract_exec_samples(lhs_run)
-        rhs_exec = extract_exec_samples(rhs_run)
+        lhs_exec = extract_exec_samples(lhs_run, metric)
+        rhs_exec = extract_exec_samples(rhs_run, metric)
         ratio_distribution = bootstrap_ratio_distribution(lhs_exec, rhs_exec, iterations, rng)
         ratio_low, ratio_high = percentile_interval(ratio_distribution)
         lhs_mean = float(np.mean(lhs_exec))
@@ -233,10 +241,40 @@ def build_runtime_table_rows(
     return runtime_rows, comparison_rows
 
 
+def apply_benjamini_hochberg_correction(comparison_rows: list[dict[str, object]], alpha: float = 0.05) -> None:
+    for row in comparison_rows:
+        row["adjusted_pvalue"] = math.nan
+        row["significant_bh"] = False
+
+    ranked_rows = [
+        (index, float(row["mann_whitney_pvalue"]))
+        for index, row in enumerate(comparison_rows)
+        if math.isfinite(float(row["mann_whitney_pvalue"]))
+    ]
+    if not ranked_rows:
+        return
+
+    ranked_rows.sort(key=lambda item: item[1])
+    total = len(ranked_rows)
+    previous_adjusted = 1.0
+    adjusted_by_index: dict[int, float] = {}
+
+    for rank, (index, pvalue) in reversed(list(enumerate(ranked_rows, start=1))):
+        adjusted = min(previous_adjusted, (pvalue * total) / rank, 1.0)
+        adjusted_by_index[index] = adjusted
+        previous_adjusted = adjusted
+
+    for index, row in enumerate(comparison_rows):
+        adjusted_pvalue = adjusted_by_index.get(index, math.nan)
+        row["adjusted_pvalue"] = adjusted_pvalue
+        row["significant_bh"] = bool(adjusted_pvalue < alpha)
+
+
 def build_suite_summary(
     comparison_rows: list[dict[str, object]],
     iterations: int,
     rng: np.random.Generator,
+    metric: str,
 ) -> dict[str, object]:
     ratios = [float(row["exec_ratio"]) for row in comparison_rows if math.isfinite(float(row["exec_ratio"]))]
     suite_bootstrap: list[np.ndarray] = []
@@ -255,12 +293,46 @@ def build_suite_summary(
             geomean_ci_low, geomean_ci_high = percentile_interval(suite_distribution)
 
     return {
+        "metric": metric,
         "benchmark_count": len(comparison_rows),
         "geometric_mean_ratio": geometric_mean(ratios),
         "geometric_mean_ci_low": geomean_ci_low,
         "geometric_mean_ci_high": geomean_ci_high,
         "significant_count": sum(1 for row in comparison_rows if row["significant"]),
+        "significant_bh_count": sum(1 for row in comparison_rows if row.get("significant_bh")),
     }
+
+
+def describe_metric_timing(results: dict[str, object], metric: str) -> str:
+    runtime_sources: dict[str, set[str]] = {}
+    for benchmark in results.get("benchmarks", []):
+        for run in benchmark.get("runs", []):
+            runtime = str(run.get("runtime", "<unknown>"))
+            source = str(run.get("timing_source", "unknown"))
+            runtime_sources.setdefault(runtime, set()).add(source)
+
+    if metric == "exec_ns":
+        if not runtime_sources:
+            return "`exec_ns` from each sample's `exec_ns` field; timing source unavailable."
+        source_list = ", ".join(
+            f"{runtime}={','.join(sorted(sources))}"
+            for runtime, sources in sorted(runtime_sources.items())
+        )
+        return f"`exec_ns` from each sample's `exec_ns` field; `timing_source` by runtime: {source_list}."
+
+    if not runtime_sources:
+        return (
+            "`wall_exec_ns` from each sample's `wall_exec_ns` field; this is the runtime-reported wall-time "
+            "estimate per repeat when available."
+        )
+    source_list = ", ".join(
+        f"{runtime} exec_ns timing={','.join(sorted(sources))}"
+        for runtime, sources in sorted(runtime_sources.items())
+    )
+    return (
+        "`wall_exec_ns` from each sample's `wall_exec_ns` field; this is the runtime-reported wall-time "
+        f"estimate per repeat when available. Paired `exec_ns` timing sources: {source_list}."
+    )
 
 
 def build_compile_time_rows(
@@ -324,7 +396,9 @@ def render_markdown(
     compile_time_summary: dict[str, object],
     iterations: int,
     seed: int,
+    metric: str,
 ) -> str:
+    metric_timing_note = describe_metric_timing(results, metric)
     lines = [
         "# Pure JIT Rigorous Statistical Analysis",
         "",
@@ -333,12 +407,14 @@ def render_markdown(
         f"- Generated at: `{results.get('generated_at', 'unknown')}`",
         f"- Bootstrap iterations: `{iterations}`",
         f"- Bootstrap seed: `{seed}`",
-        "- Exec ratio is defined as `mean(exec_ns_llvmbpf) / mean(exec_ns_kernel)`.",
+        f"- Selected execution metric: `{metric}`.",
+        f"- Metric timing source: {metric_timing_note}",
+        f"- Exec ratio is defined as `mean({metric}_llvmbpf) / mean({metric}_kernel)`.",
         "- Ratio interpretation: values below `1.0` favor `llvmbpf`; values above `1.0` favor `kernel`.",
         "",
         "## Benchmark x Runtime Statistics",
         "",
-        "| Benchmark | Runtime | N | Mean exec_ns | 95% CI (mean) | Median exec_ns | Stdev exec_ns | CV | Min exec_ns | Max exec_ns |",
+        f"| Benchmark | Runtime | N | Mean {metric} | 95% CI (mean) | Median {metric} | Stdev {metric} | CV | Min {metric} | Max {metric} |",
         "| --- | --- | ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: |",
     ]
 
@@ -362,8 +438,8 @@ def render_markdown(
             "",
             "## Cross-runtime Comparison",
             "",
-            "| Benchmark | Exec Ratio (L/K) | 95% CI | Cohen's d | Mann-Whitney U p-value | Significant (p < 0.05) | Code-size Ratio (L/K) |",
-            "| --- | ---: | --- | ---: | ---: | --- | ---: |",
+            f"| Benchmark | {metric} Ratio (L/K) | 95% CI | Cohen's d | Mann-Whitney U p-value | BH adjusted p-value | Significant (raw) | Significant (BH) | Code-size Ratio (L/K) |",
+            "| --- | ---: | --- | ---: | ---: | ---: | --- | --- | ---: |",
         ]
     )
 
@@ -381,7 +457,9 @@ def render_markdown(
             f"{format_ci(row['exec_ratio_ci_low'], row['exec_ratio_ci_high'], precision=3)} | "
             f"{format_ratio(row['cohen_d'])} | "
             f"{format_pvalue(row['mann_whitney_pvalue'])} | "
+            f"{format_pvalue(row['adjusted_pvalue'])} | "
             f"{'Yes' if row['significant'] else 'No'} | "
+            f"{'Yes' if row['significant_bh'] else 'No'} | "
             f"{code_size_ratio} |"
         )
 
@@ -393,14 +471,18 @@ def render_markdown(
             "| Metric | Value |",
             "| --- | --- |",
             f"| Benchmarks compared | {suite_summary['benchmark_count']} |",
-            f"| Geometric mean exec ratio (L/K) | {format_ratio(suite_summary['geometric_mean_ratio'])} |",
+            f"| Geometric mean {suite_summary['metric']} ratio (L/K) | {format_ratio(suite_summary['geometric_mean_ratio'])} |",
             (
-                "| Geometric mean exec ratio 95% CI | "
+                f"| Geometric mean {suite_summary['metric']} ratio 95% CI | "
                 f"{format_ci(suite_summary['geometric_mean_ci_low'], suite_summary['geometric_mean_ci_high'], precision=3)} |"
             ),
             (
-                "| Statistically significant benchmarks (p < 0.05) | "
+                "| Statistically significant benchmarks (raw p < 0.05) | "
                 f"{suite_summary['significant_count']} / {suite_summary['benchmark_count']} |"
+            ),
+            (
+                "| Statistically significant benchmarks (BH-adjusted p < 0.05) | "
+                f"{suite_summary['significant_bh_count']} / {suite_summary['benchmark_count']} |"
             ),
             "",
         ]
@@ -445,8 +527,9 @@ def main() -> int:
     output_path = Path(args.output).resolve()
     results = load_results(input_path)
     rng = np.random.default_rng(args.seed)
-    runtime_rows, comparison_rows = build_runtime_table_rows(results, args.bootstrap_iterations, rng)
-    suite_summary = build_suite_summary(comparison_rows, args.bootstrap_iterations, rng)
+    runtime_rows, comparison_rows = build_runtime_rows(results, args.bootstrap_iterations, rng, args.metric)
+    apply_benjamini_hochberg_correction(comparison_rows)
+    suite_summary = build_suite_summary(comparison_rows, args.bootstrap_iterations, rng, args.metric)
     compile_time_rows, compile_time_summary = build_compile_time_rows(results, args.bootstrap_iterations, rng)
     report = render_markdown(
         input_path,
@@ -458,6 +541,7 @@ def main() -> int:
         compile_time_summary,
         args.bootstrap_iterations,
         args.seed,
+        args.metric,
     )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(report)

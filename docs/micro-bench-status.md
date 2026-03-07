@@ -2,6 +2,8 @@
 
 > 本文档是 micro benchmark 层的统一参考，合并了原来分散在多个文件中的实验计划、进度追踪、RQ 定义和结果分析。
 
+> 更新说明（2026-03-07）：suite 覆盖已扩展到 `31` 个 `micro_staged_codegen` case（`29` staged + `2` packet-backed）和 `9` 个 `micro_runtime` case，并新增可复现的 representativeness 分析脚本 `micro/analyze_representativeness.py` 与真实程序 code-size 外部验证脚本 `corpus/run_real_world_code_size.py`。本文件第 6 节中的执行时间/统计结果仍对应扩展前的 `22`/`2` case pilot，重新批跑后再统一更新。
+
 ---
 
 ## 1. 目标
@@ -46,21 +48,21 @@
 ## 3. 三层架构
 
 ```
-config/micro_pure_jit.yaml   ──→  纯 JIT codegen/exec 微基准  (22 case)
-config/micro_runtime.yaml    ──→  map/helper runtime 机制基准  (2 case)
-config/macro_corpus.yaml     ──→  真实程序语料库批跑入口       (WIP)
+config/micro_pure_jit.yaml   ──→  pure-JIT / staged-codegen 微基准   (31 case = 29 staged + 2 packet)
+config/micro_runtime.yaml    ──→  map/helper runtime 机制基准        (9 case)
+config/macro_corpus.yaml     ──→  真实程序语料库入口 + 外部验证层   (first slice)
 ```
 
 ### 设计要点
 
 - 每个 benchmark 维护一份 `programs/*.bpf.c`，两条 runtime 加载同一个 `.bpf.o`
 - `programs/common.h` 提供三种 XDP wrapper 宏：
-  - `DEFINE_STAGED_INPUT_XDP_BENCH` — pure-jit suite：`input_map` staging 输入，packet header 回收结果
+  - `DEFINE_STAGED_INPUT_XDP_BENCH` — staged-codegen suite：`input_map` staging 输入，packet header 回收结果
   - `DEFINE_MAP_BACKED_XDP_BENCH` — runtime suite：`input_map` + `result_map` 全程 map 路径
   - `DEFINE_PACKET_BACKED_XDP_BENCH` — packet IO（保留）
-- `run_micro.py` 读取 YAML → 生成输入 → 调度 `micro_exec` → 聚合 JSON → baseline-adjusted ratio + bootstrap CI
+- `run_micro.py` 读取 YAML → 生成输入 → 调度 `micro_exec` → 聚合 JSON → raw ratio + `io_mode`-aware baseline adjustment + bootstrap CI
 - `micro_exec` C++ runner：`run-llvmbpf`（ELF→bytecode→LLVM JIT→userspace exec，map 在用户态模拟）和 `run-kernel`（libbpf→BPF_PROG_TEST_RUN）
-- 结果 JSON 包含 `compile_ns`、`exec_ns`、`phases_ns`、`perf_counters`、`derived_metrics`
+- 结果 JSON 包含 `compile_ns`、`exec_ns`、`timing_source`、`wall_exec_ns`、`phases_ns`、`perf_counters`、`derived_metrics`
 
 ### 当前纳入
 
@@ -68,11 +70,11 @@ config/macro_corpus.yaml     ──→  真实程序语料库批跑入口       
 - kernel runtime（vendor/libbpf + BPF_PROG_TEST_RUN）
 - vendored bpftool（可选）
 - 声明式 config/*.yaml
-- 共享输入生成器（确定性 LCG，23 个生成器）
+- 共享输入生成器（确定性 LCG，40 个生成器）
 - Family 元数据：category / family / level / hypothesis
-- Phase timing + perf_event_open 执行窗口计数器
+- Phase timing + perf_event_open full-repeat 计数器
 - Baseline-adjusted ratio + bootstrap CI + geometric mean
-- Shuffle-seed 随机化执行顺序
+- Benchmark shuffle + per-iteration runtime 随机交错执行
 
 ### 暂不纳入
 
@@ -84,23 +86,25 @@ config/macro_corpus.yaml     ──→  真实程序语料库批跑入口       
 
 ## 4. 当前覆盖
 
-### micro_pure_jit (22 case)
+### micro_staged_codegen (31 case = 29 staged + 2 packet-backed)
 
 | Category | Family | Benchmarks |
 |----------|--------|------------|
-| baseline | baseline | `simple`（harness floor），`memory_pair_sum` |
-| alu-mix | popcount, log2-fold | `bitcount`, `log2_fold` |
-| control-flow | search, branch-skew, switch-dispatch | `binary_search`, `branch_layout`, `switch_dispatch` |
-| memory-local | reduction, parser, bounds-density, stride-load | `checksum`, `packet_parse`, `bounds_ladder`, `stride_load_4`, `stride_load_16` |
+| baseline | baseline | `simple`（staged baseline）, `simple_packet`（packet-backed）, `memory_pair_sum` |
+| alu-mix | popcount, log2-fold, mixed-alu-mem | `bitcount`, `log2_fold`, `mixed_alu_mem` |
+| control-flow | search, branch-skew, switch-dispatch, branch-density | `binary_search`, `branch_layout`, `switch_dispatch`, `branch_dense` |
+| memory-local | reduction, parser, bounds-density, bounds-style, stride-load | `checksum`, `packet_parse`, `bounds_ladder`, `bounds_check_heavy`, `stride_load_4`, `stride_load_16` |
 | dependency-ilp | dep-chain, spill-pressure, multi-acc | `dep_chain_short`, `dep_chain_long`, `spill_pressure`, `multi_acc_4`, `multi_acc_8` |
-| loop-shape | recurrence, fixed-loop | `fibonacci_iter`, `fixed_loop_small`, `fixed_loop_large` |
+| loop-shape | recurrence, fixed-loop, nested-loop | `fibonacci_iter`, `fibonacci_iter_packet`（packet-backed）, `fixed_loop_small`, `fixed_loop_large`, `nested_loop_2`, `nested_loop_3` |
 | call-size | code-clone | `code_clone_2`, `code_clone_8` |
+| program-scale | large-mixed | `large_mixed_500`, `large_mixed_1000` |
 
-### micro_runtime (2 case)
+### micro_runtime (9 case)
 
 | Category | Benchmarks |
 |----------|------------|
-| map-runtime | `map_lookup_churn`, `map_roundtrip` |
+| map-runtime | `map_lookup_churn`, `map_roundtrip`, `hash_map_lookup`, `percpu_map_update` |
+| helper-runtime | `helper_call_1`, `helper_call_10`, `helper_call_100`, `probe_read_heavy`, `get_time_heavy` |
 
 ### 真实语料库（corpus）
 
@@ -114,6 +118,17 @@ config/macro_corpus.yaml     ──→  真实程序语料库批跑入口       
 | libbpf-bootstrap | 15 |
 | xdp-examples | 13 |
 | katran | 2 |
+
+### 真实程序 code-size 外部验证（第一波）
+
+- 脚本：`corpus/run_real_world_code_size.py`
+- 报告：`corpus/results/real_world_code_size.md`
+- 当前支持：`libbpf-bootstrap`
+- 当前结果：`15` 个源文件全部可编译，枚举出 `24` 个真实 program，其中 `21` 个在 `llvmbpf` 和 `kernel` 上都完成了 compile-only inspect
+- 代码尺寸结论：`llvmbpf/kernel` native code-size geomean 为 `0.575x`
+- 当前失败分解：
+  - kernel `lsm_bpf` 被 verifier 拒绝，原因是返回值范围不满足 LSM hook 约束
+  - llvmbpf 的两个 `usdt` program 编译失败，错误为非法跳转目标，说明当前 userspace loader / JIT 对该类对象仍有兼容性缺口
 
 ## 5. 测量环境
 
@@ -131,8 +146,9 @@ BPF:      CONFIG_BPF_JIT=y, CONFIG_BPF_SYSCALL=y, BTF enabled
 测量策略：
 - 不做人为稳定化（不锁频、不禁 turbo），通过足够重复 + 统计分析处理噪声
 - 默认参数：iterations=10, warmups=2, repeat=200
-- 可选 `--perf-counters` 采集执行窗口硬件计数器
-- 可选 `--shuffle-seed` 随机化执行顺序
+- benchmark 级顺序可用 `--shuffle-seed` 打乱；同一 benchmark 内的 runtime 顺序按 iteration 随机交错执行
+- 可选 `--perf-counters` 采集 full-repeat 计数器，`--perf-scope` 支持 `full_repeat_raw` 和 `full_repeat_avg`
+- 结果 JSON 自动记录环境元数据：`git_sha`、`kernel_version`、`kernel_cmdline`、`cpu_governor`、`turbo_state`、`perf_event_paranoid`
 - 摘要层输出 geometric mean + bootstrap 95% CI（5000 iterations）
 
 ### 约束
@@ -141,6 +157,7 @@ BPF:      CONFIG_BPF_JIT=y, CONFIG_BPF_SYSCALL=y, BTF enabled
 - llvmbpf 通过 `MAP_32BIT` 分配低地址 packet buffer，供 XDP context 的 u32 指针使用
 - llvmbpf ELF loader 不支持 BPF-to-BPF local subprogram call
 - `--perf-counters` kernel 计数包含 kernel 态，llvmbpf 只看 user 态
+- `full_repeat_raw` 输出整段 repeat 的原始计数，`full_repeat_avg` 输出除以 repeat 后的 per-repeat 平均值
 - 短执行窗口或受限 PMU 下硬件计数器可能为 0
 
 ## 6. 结果
@@ -377,6 +394,13 @@ kernel_runner 现在同时输出：
 - [x] BCF 数据集获取 — 1588 个程序已下载到 `corpus/bcf/`
 - [x] llvmbpf dummy helper 注册 — 注册 helper 3-220 为 no-op stub，解锁 Cilium/collected/inspektor-gadget 编译
 - [x] ELF loader relocation 修复 — 跳过越界 relocation 而非 crash，支持带子程序的 ELF
+- [x] suite rename — `config/micro_pure_jit.yaml` 的 `suite_name` 现为 `micro_staged_codegen`
+- [x] packet-backed baselines — 新增 `simple_packet` 与 `fibonacci_iter_packet`
+- [x] runtime order randomization — 同一 benchmark 内按 iteration 随机交错 `llvmbpf/kernel` 顺序并记录 `iteration_runtime_orders`
+- [x] timing metadata — 结果 JSON 新增 `timing_source`、`wall_exec_ns`、`exec_cycles`、`tsc_freq_hz`
+- [x] environment metadata — 结果 JSON `host` 块记录 git SHA、kernel cmdline、governor 等环境信息
+- [x] perf scope modes — `--perf-scope full_repeat_raw|full_repeat_avg`
+- [x] baseline subtraction fix — `baseline_adjustment` 仅在 `io_mode` 匹配时应用，避免 mixed-`io_mode` case 误扣基线
 
 **BCF 批量结果（2026-03-06）：**
 - llvmbpf 编译成功率：60/1588（3.8%）
@@ -396,7 +420,7 @@ kernel_runner 现在同时输出：
 
 **TODO — 深度加强（rigorous root cause）：**
 - [x] **T3.4 编译时间分析** — geomean L/K = 3.62x。5/22 llvmbpf 更快（大程序），17/22 kernel 更快（小程序）。详见 §6.1e
-- [x] **T3.5 统计严谨性补充** — 30 iterations × 1000 repeats，bootstrap CI + Cohen's d + Mann-Whitney U。16/22 显著。详见 §6.1b
+- [x] **T3.5 统计严谨性补充** — 30 iterations × 1000 repeats，bootstrap CI + Cohen's d + Mann-Whitney U + BH correction。详见 §6.1b
 - [ ] **T3.6 时间域因素分解** — 指令层分析只回答"多了多少指令"，不回答"慢了多少时间"。需要：(a) 用 PMU 的 IPC 数据估算各类指令的时间贡献；(b) 构建针对性 micro-benchmark 隔离 byte-recompose 的时间开销
 - [ ] **T3.7 LLVM Pass-level 消融** — 不只是 O0/O1/O2/O3，而是逐个 pass 启用（instcombine、GVN、RegAlloc、SimplifyCFG 等），识别对 BPF 最有价值的 pass
 - [ ] **T3.8 Perf counter 相关性分析** — IPC/branch-miss/cache-miss vs exec ratio 的 Pearson/Spearman 相关系数矩阵
@@ -405,7 +429,7 @@ kernel_runner 现在同时输出：
 **TODO — 补充实验：**
 - [ ] **T3.10 Spectre 2×2 实验** — 需重启 mitigations=off（低优先级）
 - [ ] **T3.11 verifier/load/JIT 分段统计** — 接入 veristat 或 BPF_OBJ_GET_INFO_BY_FD 取 verified_insns
-- [ ] **T3.12 增加 helper-call / tail-call micro case** — 当前 runtime suite 只有 2 个 case，需扩展
+- [ ] **T3.12 增加 helper-call / tail-call micro case** — 当前 runtime suite 已扩展到 9 个 case；tail-call family 仍待补
 - [ ] **T3.13 扩展 llvmbpf ELF loader 支持 local subprogram call** — 解锁 code_clone 等更多程序
 
 **TODO — Actionable Insights（OSDI/SOSP 要求的"so what"）：**
@@ -426,15 +450,16 @@ kernel_runner 现在同时输出：
 
 | 维度 | kernel 侧工具 | llvmbpf 侧工具 |
 |------|-------------|---------------|
-| 执行时间 | BPF_PROG_TEST_RUN duration (内核内部 ktime) | per-iteration rdtsc/rdtscp (纯 vm.exec) |
-| Wall exec 时间 | prog_run_wall_ns (steady_clock) | wall_exec_ns (steady_clock, 含 harness) |
+| 执行时间 | `exec_ns` + `timing_source=ktime` | `exec_ns` + `timing_source=rdtsc` |
+| Wall exec 时间 | `wall_exec_ns` + `exec_cycles` + `tsc_freq_hz`（BPF_PROG_TEST_RUN 外层 rdtsc） | `wall_exec_ns` + `exec_cycles` + `tsc_freq_hz`（repeat 级 wall time） |
 | 编译/加载时间 | bpf_object__open + bpf_object__load | llvmbpf load_code + compile |
-| 硬件计数器 | perf_event_open (include_kernel=true) | perf_event_open (user only) |
+| 硬件计数器 | perf_event_open (include_kernel=true), `--perf-scope full_repeat_raw|full_repeat_avg` | perf_event_open (user only), `--perf-scope full_repeat_raw|full_repeat_avg` |
 | 代码尺寸 | bpf_prog_info.jited_prog_len / xlated_prog_len | get_compiled_code().size / insn_count × 8 |
 | JIT 代码 dump | `--dump-jit` → .kernel.bin | `--dump-jit` → .llvmbpf.bin |
 | 指令分析 | `objdump -D -b binary -m i386:x86-64` | 同左 |
 | Verifier 统计 | veristat（待接入） | N/A |
 | Phase 分段 | object_open / object_load / prog_run_wall / result_read | program_image / memory_prepare / input_stage / vm_load_code / jit_compile |
+| 环境元数据 | `host.git_sha` / `kernel_cmdline` / `cpu_governor` / `turbo_state` / `perf_event_paranoid` | 同一结果 JSON `host` 块 |
 | 优化级别 | N/A (kernel JIT 无选项) | `--opt-level 0/1/2/3` |
 
 ## 9. 添加新 benchmark 的流程

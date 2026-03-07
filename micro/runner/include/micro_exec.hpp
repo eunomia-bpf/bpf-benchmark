@@ -12,6 +12,7 @@
 struct map_spec {
     uint32_t id = 0;
     std::string name;
+    uint32_t type = 0;
     uint32_t key_size = 0;
     uint32_t value_size = 0;
     uint32_t max_entries = 0;
@@ -22,16 +23,25 @@ struct program_image {
     std::vector<map_spec> maps;
 };
 
+struct program_descriptor {
+    std::string name;
+    std::string section_name;
+    uint64_t insn_count = 0;
+};
+
 struct cli_options {
     std::string command;
     std::filesystem::path program;
     std::optional<std::filesystem::path> memory;
+    std::optional<std::string> program_name;
     std::string io_mode = "map";
     uint32_t repeat = 1;
     uint32_t input_size = 0;
     int opt_level = 3;
     bool perf_counters = false;
+    std::string perf_scope = "full_repeat_raw";
     bool dump_jit = false;
+    bool compile_only = false;
 };
 
 struct timing_phase {
@@ -47,14 +57,14 @@ struct named_counter {
 struct perf_counter_options {
     bool enabled = false;
     bool include_kernel = false;
-    std::string scope = "exec_window";
+    std::string scope = "full_repeat_raw";
 };
 
 struct perf_counter_capture {
     bool requested = false;
     bool collected = false;
     bool include_kernel = false;
-    std::string scope = "exec_window";
+    std::string scope = "full_repeat_raw";
     std::string error;
     std::vector<named_counter> counters;
 };
@@ -67,6 +77,7 @@ struct code_size_summary {
 struct sample_result {
     uint64_t compile_ns = 0;
     uint64_t exec_ns = 0;
+    std::string timing_source = "unknown";
     std::optional<int> opt_level;
     std::optional<uint64_t> wall_exec_ns;
     std::optional<uint64_t> exec_cycles;
@@ -88,10 +99,14 @@ std::vector<uint8_t> read_binary_file(const std::filesystem::path &path);
 void write_binary_file(const std::filesystem::path &path, const uint8_t *data, size_t size);
 std::string benchmark_name_for_program(const std::filesystem::path &program);
 std::vector<uint8_t> materialize_memory(const std::optional<std::filesystem::path> &memory, uint32_t size_hint);
-program_image load_program_image(const std::filesystem::path &path);
+std::vector<program_descriptor> list_programs(const std::filesystem::path &path);
+program_image load_program_image(
+    const std::filesystem::path &path,
+    const std::optional<std::string> &program_name = std::nullopt);
 sample_result run_llvmbpf(const cli_options &options);
 sample_result run_kernel(const cli_options &options);
 void print_json(const sample_result &sample);
+void print_program_inventory(const std::vector<program_descriptor> &programs);
 perf_counter_capture measure_perf_counters(
     const perf_counter_options &options,
     const std::function<void()> &callback);

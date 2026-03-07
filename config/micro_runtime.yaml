@@ -60,3 +60,90 @@ benchmarks:
     input_generator: map_roundtrip
     expected_result: 8595127842395553320
     tags: [map, helper-like, runtime]
+
+  - name: hash_map_lookup
+    description: Repeated hash-map lookups over a generated key set
+    category: map-runtime
+    family: map-type
+    level: hash-lookup
+    hypothesis: Hash buckets should expose lookup overhead beyond the array-backed baseline
+    base_name: hash_map_lookup
+    kernel_input_size: 256
+    input_generator: hash_map_lookup
+    expected_result: 7775477884810034816
+    tags: [map, hash, runtime]
+
+  - name: percpu_map_update
+    description: Repeated percpu-array updates over generated key-value pairs
+    category: map-runtime
+    family: map-type
+    level: percpu-update
+    hypothesis: Per-CPU updates should capture current-CPU slot selection plus helper update cost
+    base_name: percpu_map_update
+    kernel_input_size: 384
+    input_generator: percpu_map_update
+    expected_result: 3988441624616824239
+    tags: [map, percpu, update, runtime]
+
+  - name: helper_call_1
+    description: Single helper invocation in a staged-input runtime path
+    category: helper-runtime
+    family: helper-call
+    level: 1-call
+    hypothesis: A single helper isolates the floor cost of helper dispatch and ABI setup
+    base_name: helper_call_1
+    io_mode: staged
+    kernel_input_size: 8
+    input_generator: helper_call_1
+    expected_result: 4459393083604634357
+    tags: [helper, runtime]
+
+  - name: helper_call_10
+    description: Ten helper invocations in a staged-input runtime path
+    category: helper-runtime
+    family: helper-call
+    level: 10-call
+    hypothesis: Repeated helpers should expose how runtime helper dispatch scales beyond the floor case
+    base_name: helper_call_10
+    io_mode: staged
+    kernel_input_size: 8
+    input_generator: helper_call_10
+    expected_result: 5518579749858947671
+    tags: [helper, runtime]
+
+  - name: helper_call_100
+    description: One hundred helper invocations in a staged-input runtime path
+    category: helper-runtime
+    family: helper-call
+    level: 100-call
+    hypothesis: Helper-heavy programs should reveal runtime behavior closer to the BCF corpus tail
+    base_name: helper_call_100
+    io_mode: staged
+    kernel_input_size: 8
+    input_generator: helper_call_100
+    expected_result: 7259145250545877131
+    tags: [helper, runtime, heavy]
+
+  - name: probe_read_heavy
+    description: Repeated bpf_probe_read_kernel calls against a staged map-backed source
+    category: helper-runtime
+    family: probe-read
+    level: 64-read
+    hypothesis: Probe-read-heavy loops should amplify helper dispatch plus kernel-memory copy cost
+    base_name: probe_read_heavy
+    kernel_input_size: 16
+    input_generator: probe_read_heavy
+    expected_result: 10222729562012172352
+    tags: [helper, memory, runtime, heavy]
+
+  - name: get_time_heavy
+    description: Tight fixed-loop bpf_ktime_get_ns helper traffic
+    category: helper-runtime
+    family: time-helper
+    level: 128-call
+    hypothesis: Dense ktime helper traffic isolates repeated helper dispatch in a fixed loop
+    base_name: get_time_heavy
+    kernel_input_size: 4
+    input_generator: get_time_heavy
+    expected_result: 0
+    tags: [helper, time, runtime, heavy]

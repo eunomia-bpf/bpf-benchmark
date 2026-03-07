@@ -1,4 +1,5 @@
-suite_name: micro_pure_jit
+# Staged-input codegen benchmarks: input pre-staged in BPF array map, result returned via XDP packet.
+suite_name: micro_staged_codegen
 
 paths:
   program_dir: micro/programs
@@ -57,6 +58,19 @@ benchmarks:
     input_generator: simple
     expected_result: 12345678
     tags: [baseline, pure-jit]
+
+  - name: simple_packet
+    description: Packet-backed return-only baseline
+    category: baseline
+    family: baseline
+    level: tiny
+    hypothesis: Removes staged input helper overhead to expose the packet-backed harness floor
+    base_name: simple_packet
+    io_mode: packet
+    kernel_input_size: 64
+    input_generator: simple_packet
+    expected_result: 12345678
+    tags: [baseline, packet-backed, helper-free]
 
   - name: memory_pair_sum
     description: Fixed-size two-word memory baseline
@@ -154,6 +168,18 @@ benchmarks:
     expected_result: 16
     tags: [branch, dispatch, pure-jit]
 
+  - name: branch_dense
+    description: High-density conditional branch mesh over generated u32 inputs
+    category: control-flow
+    family: branch-density
+    level: dense
+    hypothesis: Many short conditional paths should magnify branch lowering and layout quality
+    base_name: branch_dense
+    kernel_input_size: 520
+    input_generator: branch_dense
+    expected_result: 15654347328787340782
+    tags: [branch, dense, pure-jit]
+
   - name: checksum
     description: Internet checksum style reduction
     category: memory-local
@@ -190,6 +216,18 @@ benchmarks:
     expected_result: 8686050057216939920
     tags: [bounds, verifier-like, pure-jit]
 
+  - name: bounds_check_heavy
+    description: Record parser with repeated dependent bounds checks
+    category: memory-local
+    family: bounds-style
+    level: very-high
+    hypothesis: Dense verifier-style guards should expose compare chains and critical-path inflation
+    base_name: bounds_check_heavy
+    kernel_input_size: 1032
+    input_generator: bounds_check_heavy
+    expected_result: 13381490383825386298
+    tags: [bounds, verifier-like, pure-jit]
+
   - name: stride_load_4
     description: Sequential-stride load pattern with stride 4 over a ring buffer
     category: memory-local
@@ -213,6 +251,18 @@ benchmarks:
     input_generator: stride_load_16
     expected_result: 17112594108265627168
     tags: [memory, stride, pure-jit]
+
+  - name: mixed_alu_mem
+    description: Interleaved ALU and irregular memory operations over a shared ring
+    category: alu-mix
+    family: mixed-alu-mem
+    level: interleaved
+    hypothesis: Alternating compute and memory should separate scalar scheduling gains from pure load bandwidth
+    base_name: mixed_alu_mem
+    kernel_input_size: 1032
+    input_generator: mixed_alu_mem
+    expected_result: 5008154085265630854
+    tags: [alu, memory, mixed, pure-jit]
 
   - name: spill_pressure
     description: Multi-accumulator arithmetic intended to stress register allocation
@@ -262,6 +312,19 @@ benchmarks:
     expected_result: 3918857671957494287
     tags: [compute, loop, pure-jit]
 
+  - name: fibonacci_iter_packet
+    description: Packet-backed Fibonacci-style recurrence with bounded iteration count
+    category: loop-shape
+    family: recurrence
+    level: long
+    hypothesis: Removes staged input helper overhead to isolate the packet-fed recurrence loop shape
+    base_name: fibonacci_iter_packet
+    io_mode: packet
+    kernel_input_size: 16
+    input_generator: fibonacci_iter_packet
+    expected_result: 3918857671957494287
+    tags: [compute, loop, packet-backed, helper-free]
+
   - name: fixed_loop_small
     description: Short fixed-trip-count recurrence loop
     category: loop-shape
@@ -286,6 +349,30 @@ benchmarks:
     expected_result: 8801144986419677599
     tags: [compute, loop, pure-jit]
 
+  - name: nested_loop_2
+    description: Two-level bounded nested loop over a generated value grid
+    category: loop-shape
+    family: nested-loop
+    level: 2-level
+    hypothesis: Two-level loop nests should expose loop-carried dependence handling beyond flat recurrences
+    base_name: nested_loop_2
+    kernel_input_size: 2064
+    input_generator: nested_loop_2
+    expected_result: 2067381267021326054
+    tags: [compute, loop, nested, pure-jit]
+
+  - name: nested_loop_3
+    description: Three-level bounded nested loop over a generated value grid
+    category: loop-shape
+    family: nested-loop
+    level: 3-level
+    hypothesis: Deeper loop nesting should stress induction-variable handling and loop-exit code quality
+    base_name: nested_loop_3
+    kernel_input_size: 2064
+    input_generator: nested_loop_3
+    expected_result: 1123355393214246525
+    tags: [compute, loop, nested, pure-jit]
+
   - name: code_clone_2
     description: Two-clone repeated scalar block inside the steady-state loop
     category: call-size
@@ -309,3 +396,27 @@ benchmarks:
     input_generator: code_clone_8
     expected_result: 2193237160901360836
     tags: [compute, code-size, pure-jit]
+
+  - name: large_mixed_500
+    description: Large mixed straight-line body targeting roughly 500 BPF instructions
+    category: program-scale
+    family: large-mixed
+    level: approx-500
+    hypothesis: Larger hot bodies should begin to surface I-cache and allocator scalability effects
+    base_name: large_mixed_500
+    kernel_input_size: 264
+    input_generator: large_mixed_500
+    expected_result: 12101143943798384681
+    tags: [compute, memory, code-size, pure-jit]
+
+  - name: large_mixed_1000
+    description: Very large mixed straight-line body targeting roughly 1000 BPF instructions
+    category: program-scale
+    family: large-mixed
+    level: approx-1000
+    hypothesis: Very large bodies should amplify backend scalability differences hidden by tiny kernels
+    base_name: large_mixed_1000
+    kernel_input_size: 264
+    input_generator: large_mixed_1000
+    expected_result: 4283793436325605125
+    tags: [compute, memory, code-size, pure-jit]

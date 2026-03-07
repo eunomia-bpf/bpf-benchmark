@@ -17,6 +17,9 @@ from benchmark_catalog import CONFIG_PATH, ROOT_DIR, SuiteSpec, load_suite
 from input_generators import materialize_input
 
 
+DEFAULT_RUNTIME_ORDER_SEED = 0
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run declarative micro benchmark suites.")
     parser.add_argument("--suite", default=str(CONFIG_PATH), help="Path to suite YAML.")
@@ -35,7 +38,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--perf-counters",
         action="store_true",
-        help="Collect exec-window perf_event counters when available.",
+        help="Collect perf_event counters across the full repeated run when available.",
+    )
+    parser.add_argument(
+        "--perf-scope",
+        default="full_repeat_raw",
+        choices=["full_repeat_raw", "full_repeat_avg"],
+        help="PMU scope: full_repeat_raw (default, raw totals) or full_repeat_avg (cumulative counters divided by repeat).",
     )
     parser.add_argument(
         "--regenerate-inputs",
@@ -112,6 +121,17 @@ def run_host_command(command: list[str]) -> subprocess.CompletedProcess[str]:
     return completed
 
 
+def read_required_file(path: str) -> str:
+    return Path(path).read_text().strip()
+
+
+def read_optional_file(path: str) -> str:
+    try:
+        return Path(path).read_text().strip()
+    except OSError:
+        return "unknown"
+
+
 def list_suite(suite: SuiteSpec) -> None:
     print("Benchmarks")
     print("----------")
@@ -172,7 +192,7 @@ def resolve_memory_file(benchmark, regenerate_inputs: bool) -> Path | None:
     return path
 
 
-def parse_helper_output(stdout: str) -> dict[str, int]:
+def parse_helper_output(stdout: str) -> dict[str, object]:
     payload = stdout.strip().splitlines()
     if not payload:
         raise RuntimeError("helper produced no output")
@@ -195,6 +215,17 @@ def summarize_named_counters(samples: list[dict[str, object]], field_name: str) 
     return {name: ns_summary(values) for name, values in buckets.items()}
 
 
+def summarize_optional_ns(samples: list[dict[str, object]], field_name: str) -> dict[str, float | int | None] | None:
+    values = [
+        int(value)
+        for sample in samples
+        if (value := sample.get(field_name)) is not None
+    ]
+    if not values:
+        return None
+    return ns_summary(values)
+
+
 def summarize_perf_counter_meta(samples: list[dict[str, object]]) -> dict[str, object]:
     metas = [sample.get("perf_counters_meta", {}) for sample in samples]
     hardware_counter_names = (
@@ -214,7 +245,7 @@ def summarize_perf_counter_meta(samples: list[dict[str, object]]) -> dict[str, o
     collected_samples = sum(1 for meta in metas if meta.get("collected"))
     errors = Counter(str(meta.get("error", "")) for meta in metas if meta.get("error"))
     include_kernel = next((meta.get("include_kernel") for meta in metas if meta.get("collected")), None)
-    scope = next((meta.get("scope") for meta in metas if meta.get("scope")), "exec_window")
+    scope = next((meta.get("scope") for meta in metas if meta.get("scope")), "full_repeat_raw")
     hardware_counters_observed = any(
         any(int(sample.get("perf_counters", {}).get(name, 0)) > 0 for name in hardware_counter_names)
         for sample in samples
@@ -270,6 +301,7 @@ def resolve_helper_command(
     memory_file: Path | None,
     repeat: int,
     perf_counters: bool,
+    perf_scope: str = "full_repeat_raw",
 ) -> list[str]:
     binary = str(suite.build.runner_binary)
     if runtime.mode == "llvmbpf":
@@ -286,7 +318,7 @@ def resolve_helper_command(
         if memory_file is not None:
             command.extend(["--memory", str(memory_file)])
         if perf_counters:
-            command.append("--perf-counters")
+            command.extend(["--perf-counters", "--perf-scope", perf_scope])
             return ["sudo", "-n", *command]
         return command
 
@@ -306,7 +338,7 @@ def resolve_helper_command(
         if memory_file is not None:
             command.extend(["--memory", str(memory_file)])
         if perf_counters:
-            command.append("--perf-counters")
+            command.extend(["--perf-counters", "--perf-scope", perf_scope])
         if runtime.require_sudo:
             return ["sudo", "-n", *command]
         return command
@@ -323,6 +355,7 @@ def attach_baseline_adjustments(results: dict[str, object], baseline_benchmark: 
     if baseline_record is None:
         return
 
+    baseline_io_mode = baseline_record.get("io_mode")
     runtime_baselines: dict[str, float] = {}
     for run in baseline_record.get("runs", []):
         median = run.get("exec_ns", {}).get("median")
@@ -330,8 +363,10 @@ def attach_baseline_adjustments(results: dict[str, object], baseline_benchmark: 
             runtime_baselines[str(run["runtime"])] = float(median)
 
     for benchmark in benchmarks:
+        benchmark_io_mode = benchmark.get("io_mode")
+        baseline_applies = benchmark_io_mode == baseline_io_mode
         for run in benchmark.get("runs", []):
-            baseline_exec = runtime_baselines.get(str(run["runtime"]))
+            baseline_exec = runtime_baselines.get(str(run["runtime"])) if baseline_applies else None
             median_exec = run.get("exec_ns", {}).get("median")
             adjusted = None
             ratio = None
@@ -341,10 +376,16 @@ def attach_baseline_adjustments(results: dict[str, object], baseline_benchmark: 
                     ratio = float(median_exec) / baseline_exec
             run["baseline_adjustment"] = {
                 "baseline_benchmark": baseline_benchmark,
+                "baseline_io_mode": baseline_io_mode,
+                "applied": baseline_applies,
                 "baseline_exec_ns": baseline_exec,
                 "median_minus_baseline_ns": adjusted,
                 "median_over_baseline_ratio": ratio,
             }
+            if not baseline_applies:
+                run["baseline_adjustment"]["reason"] = (
+                    f"skipped: benchmark io_mode {benchmark_io_mode} does not match baseline io_mode {baseline_io_mode}"
+                )
 
     for benchmark in benchmarks:
         runtime_runs = {
@@ -386,6 +427,8 @@ def main() -> int:
     runtimes = select_runtimes(args.runtimes, suite)
     if args.shuffle_seed is not None:
         random.Random(args.shuffle_seed).shuffle(benchmarks)
+    runtime_order_seed = args.shuffle_seed if args.shuffle_seed is not None else DEFAULT_RUNTIME_ORDER_SEED
+    runtime_order_rng = random.Random(runtime_order_seed)
 
     iterations = args.iterations if args.iterations is not None else suite.defaults.iterations
     warmups = args.warmups if args.warmups is not None else suite.defaults.warmups
@@ -394,7 +437,7 @@ def main() -> int:
     ensure_artifacts_built(suite, args.build_bpftool)
 
     results = {
-        "suite": suite.manifest_path.stem,
+        "suite": suite.suite_name,
         "manifest": str(suite.manifest_path),
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "host": {
@@ -402,6 +445,12 @@ def main() -> int:
             "platform": platform.platform(),
             "python": sys.version.split()[0],
             "cpu_affinity": args.cpu,
+            "git_sha": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT_DIR).decode().strip(),
+            "kernel_version": platform.release(),
+            "kernel_cmdline": read_required_file("/proc/cmdline"),
+            "cpu_governor": read_optional_file("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"),
+            "turbo_state": read_optional_file("/sys/devices/system/cpu/intel_pstate/no_turbo"),
+            "perf_event_paranoid": read_optional_file("/proc/sys/kernel/perf_event_paranoid"),
         },
         "toolchains": {
             name: {"root": str(toolchain.root)}
@@ -416,8 +465,11 @@ def main() -> int:
             "warmups": warmups,
             "repeat": args.repeat if args.repeat is not None else suite.defaults.repeat,
             "perf_counters": args.perf_counters,
+            "perf_scope": args.perf_scope,
             "shuffle_seed": args.shuffle_seed,
+            "runtime_order_seed": runtime_order_seed,
         },
+        "iteration_runtime_orders": {},
         "benchmarks": [],
     }
 
@@ -438,6 +490,8 @@ def main() -> int:
         }
 
         print(f"[bench] {benchmark.name}")
+        runtime_samples = {}
+        iteration_runtime_orders: list[list[str]] = []
         for runtime in runtimes:
             repeat = args.repeat if args.repeat is not None else runtime.default_repeat
             command = resolve_helper_command(
@@ -447,25 +501,43 @@ def main() -> int:
                 memory_file,
                 repeat,
                 args.perf_counters,
+                args.perf_scope,
             )
 
             for _ in range(warmups):
                 parse_helper_output(run_command(command, args.cpu).stdout)
 
-            samples = []
-            for _ in range(iterations):
-                sample = parse_helper_output(run_command(command, args.cpu).stdout)
+            runtime_samples[runtime.name] = {
+                "repeat": repeat,
+                "command": command,
+                "samples": [],
+            }
+
+        for _ in range(iterations):
+            iteration_runtimes = list(runtimes)
+            runtime_order_rng.shuffle(iteration_runtimes)
+            iteration_runtime_orders.append([runtime.name for runtime in iteration_runtimes])
+            for runtime in iteration_runtimes:
+                sample_entry = runtime_samples[runtime.name]
+                sample = parse_helper_output(run_command(sample_entry["command"], args.cpu).stdout)
                 if benchmark.expected_result is not None and sample["result"] != benchmark.expected_result:
                     raise RuntimeError(
                         f"{benchmark.name}/{runtime.name} result mismatch: "
                         f"{sample['result']} != {benchmark.expected_result}"
                     )
-                samples.append(sample)
+                sample_entry["samples"].append(sample)
 
+        results["iteration_runtime_orders"][benchmark.name] = iteration_runtime_orders
+        for runtime in runtimes:
+            sample_entry = runtime_samples[runtime.name]
+            samples = sample_entry["samples"]
+            repeat = sample_entry["repeat"]
             compile_values = [sample["compile_ns"] for sample in samples]
             exec_values = [sample["exec_ns"] for sample in samples]
             result_values = [sample["result"] for sample in samples]
             perf_counter_summary = summarize_named_counters(samples, "perf_counters")
+            wall_exec_summary = summarize_optional_ns(samples, "wall_exec_ns")
+            timing_source = str(samples[0].get("timing_source", "unknown")) if samples else "unknown"
 
             run_record = {
                 "runtime": runtime.name,
@@ -478,12 +550,15 @@ def main() -> int:
                 "samples": samples,
                 "compile_ns": ns_summary(compile_values),
                 "exec_ns": ns_summary(exec_values),
+                "timing_source": timing_source,
                 "phases_ns": summarize_phase_timings(samples),
                 "perf_counters": perf_counter_summary,
                 "perf_counters_meta": summarize_perf_counter_meta(samples),
                 "derived_metrics": derive_perf_metrics(perf_counter_summary),
                 "result_distribution": dict(Counter(str(value) for value in result_values)),
             }
+            if wall_exec_summary is not None:
+                run_record["wall_exec_ns"] = wall_exec_summary
             benchmark_record["runs"].append(run_record)
 
             print(

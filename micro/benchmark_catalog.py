@@ -72,6 +72,7 @@ class BenchmarkSpec:
 
 @dataclass(frozen=True)
 class SuiteSpec:
+    suite_name: str
     manifest_path: Path
     toolchains: dict[str, ToolchainSpec]
     build: BuildSpec
@@ -163,6 +164,7 @@ def load_suite(path: Path = CONFIG_PATH) -> SuiteSpec:
     }
 
     return SuiteSpec(
+        suite_name=str(data.get("suite_name", manifest_path.stem)),
         manifest_path=manifest_path,
         toolchains=toolchains,
         build=build,

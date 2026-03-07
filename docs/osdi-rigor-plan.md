@@ -1,6 +1,23 @@
 # Pure JIT Micro-Benchmark: OSDI 级别严谨性差距分析与行动计划
 
 > 本文分析当前 22-case 纯 JIT 微基准的实验设计，识别与 OSDI/SOSP 要求的差距，并给出优先级排序的行动方案。
+> 更新说明（2026-03-07）：suite 覆盖现已扩展到 `31` 个 staged-codegen / pure-JIT case 与 `9` 个 runtime case，并新增第一波真实程序 code-size 外部验证：`corpus/results/real_world_code_size.md` 当前覆盖 `libbpf-bootstrap` 的 `15` 个源文件、`24` 个真实 program、`21` 个双 runtime 成功配对。本文的问题分级和优先级仍然有效，但覆盖相关段落需要结合 `micro/results/representativeness_report.md` 与 `corpus/results/real_world_code_size.md` 一起阅读。
+
+## 0. 相关论文是怎么做的
+
+强评测论文几乎都不会只依赖手写 micro benchmark。它们通常把“机制归因”和“外部有效性”拆成不同证据层。
+
+- `BCF / Prove It to the Kernel`：用大规模真实对象集做主评测，覆盖多编译器、多优化级别、多程序来源，并报告 load/acceptance 的成功率与失败分解。核心特点是“真实语料 + 明确 baseline + 大样本统计”。
+- `Demystifying Performance of eBPF Network Applications`：同时做受控 micro 和真实网络应用评测，硬件环境控制得很严，明确关掉 SMT / turbo 等噪声源，再把 hook overhead 和端到端吞吐/延迟放在一起解释。
+- `Understanding Performance of eBPF-based Applications`：把 CPU isolation、资源隔离、扩展性实验放到主设计里，不只看单程序单核，而是看程序数、map 数、核心数增长时会怎样退化。
+- `Evaluation of Tail Call Costs`：同时使用 `BPF_PROG_TEST_RUN` 型受控 micro 和更接近生产流量的 benchmark，并做大量重复实验，明确讨论两种环境的稳定性和方差差异。
+
+从这些论文提炼出来的共同点是：
+
+1. `Micro` 用来隔离因果，不拿来单独证明“真实世界通常怎样”。
+2. `Corpus` 用来证明外部有效性，至少要有几十到上百个真实程序或对象。
+3. `End-to-end` workload 用来证明结论在真实系统交互里仍成立。
+4. `Failure breakdown / inclusion criteria / platform control` 要写清楚，否则审稿人会默认结果挑样本了。
 
 ## 1. 当前状态评估
 
@@ -13,50 +30,49 @@
 | 效应量 | 16/22 显著 (p < 0.05)，|d| > 0.8 为大效应 | 已覆盖 | 无 |
 | 确定性输入 | LCG 固定种子生成器 | 可复现 | 无 |
 | 代码大小 | 22/22 有 native code bytes | 完备 | 无 |
+| 编译时间 | `analyze_statistics.py` 已输出 compile-time section | 应报告 | 无 |
+| 稳定性分析 | drift / ACF / 时间序列图已完成 | 需要稳定性证据 | 无 |
+| 计时元数据 | `timing_source` + `wall_exec_ns` + `--metric` 已接入 | 可追溯 | 无 |
+| 顺序偏置控制 | benchmark shuffle + per-iteration runtime randomization | 需要顺序控制 | 无 |
 | 开源脚本 | analyze_statistics.py 全自动 | 可复现 | 无 |
 
-### 1.2 严重差距（必须修复）
+- `run_micro.py` 现已在每个 iteration 内随机打乱 `llvmbpf/kernel` 顺序，并把 `runtime_order_seed` / `iteration_runtime_orders` 写入结果 JSON。
+- `baseline_adjustment` 现按 `io_mode` 匹配应用，mixed-`io_mode` case 不再误用 staged `simple` baseline。
 
-#### G1. 测量方法不对等
+### 1.2 关键差距（含部分已修复项）
+
+#### G1. 测量方法不对等（已部分修复）
 
 **问题**：kernel 用 `ktime_get_ns`（内核时钟，~ns 分辨率但含调度噪声），llvmbpf 用 `rdtsc`（用户态 TSC，无调度噪声）。
 
 **证据**：kernel CV 中位数 0.152 vs llvmbpf 0.031（5x 方差差异）。6 个不显著 benchmark 中 4 个因 kernel 方差过高。
 
-**OSDI 审稿人会问**："你的两个 runtime 用不同的时钟源，如何保证测量公平性？"
+**当前状态（2026-03-07）**：
+- kernel 侧已新增 `wall_exec_ns` / `exec_cycles` / `tsc_freq_hz`
+- 每个 run 都记录 `timing_source`
+- `analyze_statistics.py` 已支持 `--metric exec_ns|wall_exec_ns`
 
-**修复方案（优先级 P0）**：
-1. **方案 A — kernel 侧也用 rdtsc**：修改 `kernel_runner.cpp`，在 `bpf_prog_test_run_opts` 前后插入 `rdtsc/rdtscp`，记为 `wall_exec_ns`，作为主要对比指标
-2. **方案 B — 增大 repeat 取中位数**：`repeat=10000`，然后报 median 而非 mean，减小离群值影响
-3. **方案 C — 隔离 CPU**：`isolcpus=` + `taskset` 绑核，减少调度噪声
+**剩余差距**：默认 `exec_ns` 仍是 kernel=`ktime` / llvmbpf=`rdtsc`。论文需要明确主指标选择，并同步给出 `wall_exec_ns` 的对齐视角。
 
-**推荐**：A+C 组合。B 作为补充。
-
-#### G2. 硬件计数器数据缺失
+#### G2. 硬件计数器数据缺失（已部分修复）
 
 **问题**：22 个 benchmark 中只有 4 个（bitcount, binary_search, switch_dispatch, checksum）有非零 perf 计数器数据。llvmbpf 全部为 0。
 
 **原因**：执行窗口太短（< 1μs），`perf_event_open` 的 PMU 调度周期（~1ms）内来不及采样。
 
-**OSDI 审稿人会问**："你声称 llvmbpf 代码质量更好，但没有 IPC、分支预测、cache 命中率数据支撑？"
+**当前状态（2026-03-07）**：
+- runner 已支持 `full_repeat_avg` 模式
+- `run_micro.py` 与 `micro_exec` 已支持 `--perf-scope full_repeat_raw|full_repeat_avg`
 
-**修复方案（P0）**：
-1. **方案 A — 累积计数器**：不要每个 iteration 重置计数器，而是在 N=1000 次 repeat 结束后读取一次，得到累积值 / N = 平均值。这需要修改 `micro_exec` 的计数器采集逻辑
-2. **方案 B — 长程序聚焦**：对 exec_ns > 1000ns 的 benchmark（bitcount, checksum, fixed_loop_large, code_clone_8, fibonacci_iter, dep_chain_long）做 PMU 深度分析，这些已经有数据
-3. **方案 C — 构建专门的 PMU 微基准**：循环 10K 次调用同一个 BPF 程序，在循环外采集 PMU
+**剩余差距**：需要用新 scope 重跑 PMU，并把 IPC / branch-miss / cache-miss 关联分析补进主文。
 
-**推荐**：A 为最优方案（最小改动，最完整数据）。
+#### G3. 编译时间未报告（已修复）
 
-#### G3. 编译时间未报告
-
-**问题**：数据中有 `compile_ns` 但从未分析。OSDI 论文必须报告 JIT 编译开销。
-
-**现有数据显示**：
+**当前状态（2026-03-07）**：
 - llvmbpf 编译时间 4-14 ms（LLVM -O3 代价）
 - kernel 编译时间 0.3-72 ms（简单程序快、复杂程序如 bitcount 72ms）
 - 比率范围：0.1x（bitcount: llvmbpf 更快）到 16x（simple: llvmbpf 更慢）
-
-**修复方案（P1）**：在 analyze_statistics.py 中添加 compile_ns 分析，输出到统计报告。
+- `analyze_statistics.py` 已输出 compile-time section
 
 ### 1.3 中等差距（显著提升论文质量）
 
@@ -72,16 +88,11 @@
    - `extra_time = extra_insns / IPC_observed`
    - 按指令类型分解：prologue, byte-recompose, branches, other
 
-#### G5. 缺乏时间序列稳定性分析
+#### G5. 缺乏时间序列稳定性分析（已修复）
 
-**问题**：30 个 iteration 是否稳定？是否有 warm-up 效应、drift、周期性？
-
-**OSDI 审稿人会问**："你怎么知道系统在测量期间是稳定的？"
-
-**修复方案（P2）**：
-1. 绘制 exec_ns vs iteration_index 的时间序列图（22 个 benchmark × 2 runtime）
-2. 对前 10 和后 10 iterations 做 Wilcoxon 检验，验证无 drift
-3. 计算自相关系数 ACF(1)，验证独立性
+**当前状态（2026-03-07）**：
+- 时间序列图、drift 检验、ACF 分析已完成
+- 结论：3/44 pair 有显著 drift，但幅度均 < 2%，不影响结论
 
 #### G6. 单一平台
 
@@ -104,6 +115,11 @@
 2. 把 22 个 benchmark 标注在分布上，证明覆盖了关键区域
 3. 用 60 个可编译的真实程序做 code-size 对比，验证微基准结论的外部效度
 
+**当前进展（2026-03-07）**：
+- 第 1 步已完成第一版：现有 `micro/results/representativeness_report.md`（基于 earlier 29+5 run）显示 combined suite 仅覆盖 `0.8%` 的 BCF 5D feature box；按当前 31+9 inventory，结论方向不变：micro 仍不能单独承担外部有效性。
+- 第 3 步已完成第一波：`corpus/run_real_world_code_size.py` 当前在 `libbpf-bootstrap` 上得到 `15` 个源文件、`24` 个真实 program、`21` 个双 runtime 成功配对，`llvmbpf/kernel` native code-size geomean 为 `0.575x`。
+- 还没完成的部分是把第一波扩成跨 repo 的 `60+` program，并补上可运行真实程序的 execution-time 子集。
+
 ### 1.4 小差距（锦上添花）
 
 #### G8. LLVM Pass 消融粒度不够
@@ -122,23 +138,23 @@
 
 ### Phase 1 — 测量基础设施修复（P0，阻塞论文）
 
-| ID | Action | 预计工作量 | 依赖 |
-|----|--------|-----------|------|
-| A1 | kernel_runner.cpp: 添加 rdtsc 围栏测量 | 2h | 无 |
-| A2 | micro_exec: PMU 累积模式（整个 repeat 循环读一次） | 4h | 无 |
-| A3 | isolcpus + taskset 绑核脚本 | 1h | 无 |
-| A4 | 重跑 30-iter suite with A1+A2+A3 | 1h (自动) | A1-A3 |
+| ID | Action | 状态 | 预计工作量 | 依赖 |
+|----|--------|------|-----------|------|
+| A1 | kernel_runner.cpp: 添加 rdtsc 围栏测量 | 已完成 | 2h | 无 |
+| A2 | micro_exec: PMU 累积模式（整个 repeat 循环读一次） | 已完成 | 4h | 无 |
+| A3 | isolcpus + taskset 绑核脚本 | 未完成 | 1h | 无 |
+| A4 | 重跑 30-iter suite with A1+A2+A3 | 未完成 | 1h (自动) | A1-A3 |
 
 ### Phase 2 — 分析补全（P1，显著提升）
 
-| ID | Action | 预计工作量 | 依赖 |
-|----|--------|-----------|------|
-| B1 | analyze_statistics.py: 添加 compile_ns 分析 | 1h | 无 |
-| B2 | 时间序列稳定性图 + Wilcoxon drift 检验 | 2h | A4 数据 |
-| B3 | PMU 相关矩阵（IPC vs ratio, branch_miss vs ratio） | 2h | A4 数据 |
-| B4 | 代表性论证：BCF 特征空间 + benchmark 覆盖可视化 | 3h | 已有数据 |
-| B5 | 因果时间分解：byte-recompose 等模式的时间贡献 | 4h | A4 数据 |
-| B6 | 60 个真实程序 code-size 批量对比 | 2h | 已有数据 |
+| ID | Action | 状态 | 预计工作量 | 依赖 |
+|----|--------|------|-----------|------|
+| B1 | analyze_statistics.py: 添加 compile_ns 分析 | 已完成 | 1h | 无 |
+| B2 | 时间序列稳定性图 + Wilcoxon drift 检验 | 已完成 | 2h | A4 数据 |
+| B3 | PMU 相关矩阵（IPC vs ratio, branch_miss vs ratio） | 未完成 | 2h | A4 数据 |
+| B4 | 代表性论证：BCF 特征空间 + benchmark 覆盖可视化 | 部分完成 | 3h | 已有数据 |
+| B5 | 因果时间分解：byte-recompose 等模式的时间贡献 | 未完成 | 4h | A4 数据 |
+| B6 | 60+ 个真实程序 code-size 批量对比 | 部分完成 | 2h | 第一波已完成：`libbpf-bootstrap` 15 源 / 24 program / 21 paired |
 
 ### Phase 3 — 锦上添花（P2-P3）
 
@@ -153,7 +169,7 @@
 
 ```
 1. 测量可信吗？
-   → 两侧统一 rdtsc，绑核隔离噪声，30 iterations 无 drift，CV < 0.1（已验证）
+   → kernel 已新增 `wall_exec_ns` rdtsc 对齐视角，`timing_source` 已显式记录，30 iterations 无明显 drift
 
 2. 差距有多大？
    → Exec geomean 0.82x [0.80, 0.85]，16/22 显著，Cohen's d 多为大效应
@@ -165,7 +181,8 @@
 
 4. 对谁有用？
    → BCF 1588 个程序特征分布证明微基准覆盖了主要特征区域
-   → 60 个真实程序 code-size 批量验证（外部效度）
+   → 第一波真实程序 code-size 验证已在 `libbpf-bootstrap` 上得到 `24` 个 program、`21` 个成功配对，geomean `0.575x`
+   → 下一步扩到跨 repo 的 60+ program execution/code-size 验证（外部效度）
    → 具体 patch 建议（cmov 支持、按需 callee-saved、byte-recompose 优化）
 
 5. 编译代价多大？
@@ -175,18 +192,17 @@
 
 ## 4. 最高优先级的代码修改清单
 
-### 4.1 kernel_runner.cpp — 添加 rdtsc 测量
+### 4.1 kernel_runner.cpp — rdtsc 测量已完成
 
-在 `BPF_PROG_TEST_RUN` 前后添加 `__rdtsc()` / `__rdtscp()` 围栏，输出 `exec_cycles` 和 `tsc_freq_hz`，与 llvmbpf 侧对齐。
+已在 `BPF_PROG_TEST_RUN` 前后添加 `__rdtsc()` / `__rdtscp()` 围栏，输出 `wall_exec_ns`、`exec_cycles` 和 `tsc_freq_hz`。
 
-### 4.2 micro_exec PMU 累积模式
+### 4.2 micro_exec PMU 累积模式已完成
 
-修改 perf counter 采集逻辑：
-- 当前：每个 repeat 迭代前 reset → 读取 → 只取最后一次
-- 改为：repeat 循环开始前 reset → 循环结束后读取 → 除以 repeat 数得平均值
-- 添加 `--perf-mode cumulative|per-iter` 参数
+当前已支持：
+- `--perf-scope full_repeat_raw`：输出整段 repeat 的原始计数
+- `--perf-scope full_repeat_avg`：输出 full-repeat 计数除以 repeat 后的平均值
 
-### 4.3 绑核脚本
+### 4.3 绑核脚本（仍待补）
 
 ```bash
 #!/bin/bash
@@ -198,7 +214,7 @@ sudo taskset -c 4 python3 micro/run_micro.py "$@"
 
 论文中需明确声明的限制：
 
-1. **测量域不等价**：即使统一用 rdtsc，kernel 侧包含 syscall 进出开销（~100ns），llvmbpf 是纯 function call。应声明这是 "end-to-end execution including dispatch" vs "pure function call"。
+1. **测量域不等价**：即使新增了 `wall_exec_ns` 对齐指标，默认 `exec_ns` 仍是 kernel=`ktime` / llvmbpf=`rdtsc`；而 `wall_exec_ns` 又会把 kernel syscall dispatch 带进来。应明确区分这两种视角。
 
 2. **PMU 范围不等价**：kernel perf counters 包含 kernel-mode 事件（context switch, page fault），llvmbpf 只看 user-mode。应用 `exclude_kernel=1` 限制 kernel 侧只看 user-mode，或声明局限。
 

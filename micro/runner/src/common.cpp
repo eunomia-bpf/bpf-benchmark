@@ -105,9 +105,11 @@ cli_options parse_args(int argc, char **argv)
 {
     if (argc < 3) {
         fail(
-            "usage: micro_exec <run-llvmbpf|run-kernel> --program <path> [--memory <path>] "
+            "usage: micro_exec <run-llvmbpf|run-kernel|list-programs> --program <path> [--program-name <name>] "
+            "[--memory <path>] "
             "[--io-mode map|staged|packet] [--repeat N] [--input-size N] "
-            "[--opt-level 0|1|2|3] [--dump-jit]");
+            "[--opt-level 0|1|2|3] [--perf-counters] [--perf-scope full_repeat_raw|full_repeat_avg] "
+            "[--dump-jit] [--compile-only]");
     }
 
     cli_options options;
@@ -121,6 +123,10 @@ cli_options parse_args(int argc, char **argv)
         }
         if (current == "--memory" && index + 1 < argc) {
             options.memory = std::filesystem::path(argv[++index]);
+            continue;
+        }
+        if (current == "--program-name" && index + 1 < argc) {
+            options.program_name = std::string(argv[++index]);
             continue;
         }
         if (current == "--io-mode" && index + 1 < argc) {
@@ -147,8 +153,16 @@ cli_options parse_args(int argc, char **argv)
             options.perf_counters = true;
             continue;
         }
+        if (current == "--perf-scope" && index + 1 < argc) {
+            options.perf_scope = std::string(argv[++index]);
+            continue;
+        }
         if (current == "--dump-jit") {
             options.dump_jit = true;
+            continue;
+        }
+        if (current == "--compile-only") {
+            options.compile_only = true;
             continue;
         }
         fail("unknown or incomplete argument: " + std::string(current));
@@ -157,11 +171,16 @@ cli_options parse_args(int argc, char **argv)
     if (options.program.empty()) {
         fail("--program is required");
     }
-    if (options.io_mode != "map" && options.io_mode != "staged" && options.io_mode != "packet") {
-        fail("--io-mode must be one of map, staged, or packet");
+    if (options.perf_scope != "full_repeat_raw" && options.perf_scope != "full_repeat_avg") {
+        fail("--perf-scope must be one of full_repeat_raw or full_repeat_avg");
     }
-    if (options.repeat == 0) {
-        fail("--repeat must be >= 1");
+    if (options.command != "list-programs") {
+        if (options.io_mode != "map" && options.io_mode != "staged" && options.io_mode != "packet") {
+            fail("--io-mode must be one of map, staged, or packet");
+        }
+        if (!options.compile_only && options.repeat == 0) {
+            fail("--repeat must be >= 1");
+        }
     }
     return options;
 }
@@ -176,7 +195,8 @@ void print_json(const sample_result &sample)
     std::cout
         << "{"
         << "\"compile_ns\":" << sample.compile_ns << ","
-        << "\"exec_ns\":" << sample.exec_ns;
+        << "\"exec_ns\":" << sample.exec_ns << ","
+        << "\"timing_source\":\"" << json_escape(sample.timing_source) << "\"";
 
     if (sample.opt_level.has_value()) {
         std::cout << ",\"opt_level\":" << *sample.opt_level;
@@ -247,4 +267,22 @@ void print_json(const sample_result &sample)
         << "\"error\":\"" << json_escape(sample.perf_counters.error) << "\""
         << "}"
         << "}\n";
+}
+
+void print_program_inventory(const std::vector<program_descriptor> &programs)
+{
+    std::cout << "[";
+    for (size_t index = 0; index < programs.size(); ++index) {
+        if (index != 0) {
+            std::cout << ",";
+        }
+        const auto &program = programs[index];
+        std::cout
+            << "{"
+            << "\"name\":\"" << json_escape(program.name) << "\","
+            << "\"section_name\":\"" << json_escape(program.section_name) << "\","
+            << "\"insn_count\":" << program.insn_count
+            << "}";
+    }
+    std::cout << "]\n";
 }

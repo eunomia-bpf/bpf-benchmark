@@ -52,6 +52,27 @@ std::string libbpf_error_string(int error_code)
     return std::string(buffer);
 }
 
+bpf_program *find_program(bpf_object *object, const std::optional<std::string> &program_name)
+{
+    bpf_program *program = nullptr;
+    if (!program_name.has_value()) {
+        program = bpf_object__next_program(object, nullptr);
+        if (program == nullptr) {
+            fail("no program found in object");
+        }
+        return program;
+    }
+
+    while ((program = bpf_object__next_program(object, program)) != nullptr) {
+        const char *current_name = bpf_program__name(program);
+        if (current_name != nullptr && *program_name == current_name) {
+            return program;
+        }
+    }
+
+    fail("unable to find program named '" + *program_name + "'");
+}
+
 void patch_program_relocations(
     Elf *elf,
     size_t target_section_index,
@@ -137,7 +158,7 @@ void patch_program_relocations(
 
 } // namespace
 
-program_image load_program_image(const std::filesystem::path &path)
+std::vector<program_descriptor> list_programs(const std::filesystem::path &path)
 {
     if (elf_version(EV_CURRENT) == EV_NONE) {
         fail("libelf initialization failed");
@@ -152,10 +173,41 @@ program_image load_program_image(const std::filesystem::path &path)
     }
     bpf_object_ptr object(raw_object);
 
-    bpf_program *program = bpf_object__next_program(object.get(), nullptr);
-    if (program == nullptr) {
+    std::vector<program_descriptor> programs;
+    bpf_program *program = nullptr;
+    while ((program = bpf_object__next_program(object.get(), program)) != nullptr) {
+        const char *program_name = bpf_program__name(program);
+        const char *section_name = bpf_program__section_name(program);
+        programs.push_back(
+            {
+                .name = program_name == nullptr ? "" : program_name,
+                .section_name = section_name == nullptr ? "" : section_name,
+                .insn_count = bpf_program__insn_cnt(program),
+            });
+    }
+
+    if (programs.empty()) {
         fail("no program found in object: " + path.string());
     }
+    return programs;
+}
+
+program_image load_program_image(const std::filesystem::path &path, const std::optional<std::string> &program_name)
+{
+    if (elf_version(EV_CURRENT) == EV_NONE) {
+        fail("libelf initialization failed");
+    }
+
+    bpf_object_open_opts open_opts = {};
+    open_opts.sz = sizeof(open_opts);
+    bpf_object *raw_object = bpf_object__open_file(path.c_str(), &open_opts);
+    const int open_error = libbpf_get_error(raw_object);
+    if (open_error != 0) {
+        fail("bpf_object__open_file failed: " + libbpf_error_string(open_error));
+    }
+    bpf_object_ptr object(raw_object);
+
+    bpf_program *program = find_program(object.get(), program_name);
 
     // Use libbpf to identify the program section and extract map metadata.
     const char *section_name = bpf_program__section_name(program);
@@ -180,6 +232,7 @@ program_image load_program_image(const std::filesystem::path &path)
         map_spec spec;
         spec.id = next_map_id++;
         spec.name = bpf_map__name(map);
+        spec.type = bpf_map__type(map);
         spec.key_size = bpf_map__key_size(map);
         spec.value_size = bpf_map__value_size(map);
         spec.max_entries = bpf_map__max_entries(map);

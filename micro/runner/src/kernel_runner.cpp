@@ -171,6 +171,43 @@ std::string libbpf_error_string(int error_code)
     return std::string(buffer);
 }
 
+bpf_program *find_program(bpf_object *object, const std::optional<std::string> &program_name)
+{
+    bpf_program *program = nullptr;
+    if (!program_name.has_value()) {
+        program = bpf_object__next_program(object, nullptr);
+        if (program == nullptr) {
+            fail("no program found in object");
+        }
+        return program;
+    }
+
+    while ((program = bpf_object__next_program(object, program)) != nullptr) {
+        const char *current_name = bpf_program__name(program);
+        if (current_name != nullptr && *program_name == current_name) {
+            return program;
+        }
+    }
+
+    fail("unable to find program named '" + *program_name + "'");
+}
+
+void configure_autoload(bpf_object *object, const std::optional<std::string> &program_name)
+{
+    if (!program_name.has_value()) {
+        return;
+    }
+
+    bpf_program *program = nullptr;
+    while ((program = bpf_object__next_program(object, program)) != nullptr) {
+        const char *current_name = bpf_program__name(program);
+        const bool autoload = current_name != nullptr && *program_name == current_name;
+        if (bpf_program__set_autoload(program, autoload) != 0) {
+            fail("unable to configure program autoload");
+        }
+    }
+}
+
 template <typename T>
 __u64 ptr_to_u64(T *ptr)
 {
@@ -256,6 +293,7 @@ sample_result run_kernel(const cli_options &options)
     }
     const auto object_open_end = std::chrono::steady_clock::now();
     bpf_object_ptr object(raw_object);
+    configure_autoload(object.get(), options.program_name);
 
     const auto object_load_start = std::chrono::steady_clock::now();
     const int load_error = bpf_object__load(object.get());
@@ -264,10 +302,7 @@ sample_result run_kernel(const cli_options &options)
     }
     const auto object_load_end = std::chrono::steady_clock::now();
 
-    bpf_program *program = bpf_object__next_program(object.get(), nullptr);
-    if (program == nullptr) {
-        fail("no program found in object");
-    }
+    bpf_program *program = find_program(object.get(), options.program_name);
 
     const int program_fd = bpf_program__fd(program);
     if (program_fd < 0) {
@@ -279,6 +314,23 @@ sample_result run_kernel(const cli_options &options)
         const auto jited_program = load_jited_program(program_fd, program_info.jited_prog_len);
         const auto dump_path = std::filesystem::path(benchmark_name_for_program(options.program) + ".kernel.bin");
         write_binary_file(dump_path, jited_program.data(), jited_program.size());
+    }
+
+    sample_result sample;
+    sample.compile_ns = elapsed_ns(object_open_start, object_open_end) + elapsed_ns(object_load_start, object_load_end);
+    sample.jited_prog_len = program_info.jited_prog_len;
+    sample.xlated_prog_len = program_info.xlated_prog_len;
+    sample.code_size = {
+        .bpf_bytecode_bytes = program_info.xlated_prog_len,
+        .native_code_bytes = program_info.jited_prog_len,
+    };
+    if (options.compile_only) {
+        sample.phases_ns = {
+            {"memory_prepare_ns", elapsed_ns(memory_prepare_start, memory_prepare_end)},
+            {"object_open_ns", elapsed_ns(object_open_start, object_open_end)},
+            {"object_load_ns", elapsed_ns(object_load_start, object_load_end)},
+        };
+        return sample;
     }
 
     std::chrono::steady_clock::time_point exec_input_prepare_start {};
@@ -358,8 +410,13 @@ sample_result run_kernel(const cli_options &options)
     uint64_t tsc_before = 0;
     uint64_t tsc_after = 0;
     int run_error = 0;
+    const perf_counter_options perf_options = {
+        .enabled = options.perf_counters,
+        .include_kernel = true,
+        .scope = options.perf_scope,
+    };
     auto perf_counters = measure_perf_counters(
-        {.enabled = options.perf_counters, .include_kernel = true, .scope = "exec_window"},
+        perf_options,
         [&]() {
             run_wall_start = std::chrono::steady_clock::now();
             tsc_before = rdtsc_start();
@@ -367,6 +424,12 @@ sample_result run_kernel(const cli_options &options)
             tsc_after = rdtsc_end();
             run_wall_end = std::chrono::steady_clock::now();
         });
+    if (options.perf_scope == "full_repeat_avg") {
+        const uint32_t repeat = options.repeat > 0 ? options.repeat : 1;
+        for (auto &counter : perf_counters.counters) {
+            counter.value /= repeat;
+        }
+    }
     if (run_error != 0) {
         fail("bpf_prog_test_run_opts failed: " + std::string(strerror(errno)));
     }
@@ -383,8 +446,6 @@ sample_result run_kernel(const cli_options &options)
         result_read_end = std::chrono::steady_clock::now();
     }
 
-    sample_result sample;
-    sample.compile_ns = elapsed_ns(object_open_start, object_open_end) + elapsed_ns(object_load_start, object_load_end);
     sample.exec_ns = test_opts.duration;
     if (kHasTscMeasurement && tsc_freq_hz > 0 && tsc_after > tsc_before) {
         const uint64_t total_cycles = tsc_after - tsc_before;
@@ -396,14 +457,9 @@ sample_result run_kernel(const cli_options &options)
             (static_cast<long double>(total_cycles) * 1000000000.0L) /
             (static_cast<long double>(tsc_freq_hz) * static_cast<long double>(repeat))));
     }
+    sample.timing_source = "ktime";
     sample.result = result;
     sample.retval = test_opts.retval;
-    sample.jited_prog_len = program_info.jited_prog_len;
-    sample.xlated_prog_len = program_info.xlated_prog_len;
-    sample.code_size = {
-        .bpf_bytecode_bytes = program_info.xlated_prog_len,
-        .native_code_bytes = program_info.jited_prog_len,
-    };
     sample.phases_ns = {
         {"memory_prepare_ns", elapsed_ns(memory_prepare_start, memory_prepare_end)},
         {"object_open_ns", elapsed_ns(object_open_start, object_open_end)},
