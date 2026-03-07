@@ -276,16 +276,16 @@ BPF:      CONFIG_BPF_JIT=y, CONFIG_BPF_SYSCALL=y, BTF enabled
 
 ### 6.1d 时间序列稳定性分析
 
-> 数据来源：`micro/results/pure_jit_authoritative.json`，分析脚本：`micro/analyze_stability.py`（主数据源已更新；下表稳定性结果来自较早批次分析，结论不变）
-> 当前数据集覆盖 62 个 benchmark × runtime 对（31 benchmarks × 2 runtimes），时间序列图见 `micro/results/stability/`
+> 数据来源：`micro/results/pure_jit_authoritative.json`，分析脚本：`micro/analyze_stability.py`
+> 覆盖 62 个 benchmark × runtime 对（31 benchmarks × 2 runtimes），时间序列图见 `micro/results/stability/`
 
 | 指标 | 值 |
 |------|---:|
-| 有显著 drift 的 pair (p < 0.05) | 3 / 44（分析于较早 22-case 批次，44 对） |
-| 强自相关的 pair (\|ACF(1)\| > 0.3) | 2 / 44（分析于较早 22-case 批次，44 对） |
-| 最大 drift 幅度 | 1.92% (fibonacci_iter llvmbpf) |
+| 有显著 drift 的 pair (p < 0.05) | 3 / 62 |
+| 强自相关的 pair (\|ACF(1)\| > 0.3) | 3 / 62 |
+| 最大 drift 幅度 | 16.13% (stride_load_4 kernel) |
 
-**结论**：测量系统在 30 iterations 运行期间保持高度稳定。3 个有 drift 的 pair 幅度均 < 2%，不影响结论。
+**结论**：测量系统在 30 iterations 运行期间保持高度稳定。3 个有 drift 的 pair 中最大为 `stride_load_4` kernel（16.13%），其余两个分别为 `mixed_alu_mem` kernel（-4.46%）和 `fixed_loop_large` llvmbpf（3.12%），不改变 suite 级结论。
 
 ### 6.1e 编译时间分析
 
