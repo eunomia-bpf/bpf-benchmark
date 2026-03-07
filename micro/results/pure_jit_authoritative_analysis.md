@@ -119,6 +119,7 @@
 
 `wall_exec_ns` is not suitable for cross-runtime comparison because kernel `wall_exec_ns` includes `BPF_PROG_TEST_RUN` syscall dispatch overhead (~200us), while llvmbpf `wall_exec_ns` is pure function-call latency. `exec_ns` remains the primary comparison metric because both runtimes measure pure BPF execution time, despite using different clocks (kernel=`ktime`, llvmbpf=`rdtsc`).
 
+Note: significance labels use BH-adjusted paired Wilcoxon p-values, while ratio CIs use unadjusted bootstrap intervals; a benchmark can be significant with a CI crossing 1.0 (or vice versa), which is expected rather than contradictory.
 
 ## Suite Summary
 

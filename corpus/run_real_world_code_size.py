@@ -24,14 +24,55 @@ DEFAULT_REPORT = ROOT / "results" / "real_world_code_size.md"
 DEFAULT_RUNNER = REPO_ROOT / "micro" / "build" / "runner" / "micro_exec"
 DEFAULT_BUILD_ROOT = ROOT / "build" / "real_world_code_size"
 DEFAULT_TIMEOUT_SECONDS = 60
-SUPPORTED_REPOS = ("libbpf-bootstrap",)
+SUPPORTED_REPOS = (
+    "libbpf-bootstrap",
+    "bcf-cilium",
+    "bcf-inspektor-gadget",
+    "bcf-collected",
+    "bcf-bcc",
+    "bcf-bpf-examples",
+    "bcf-calico",
+)
+DEFAULT_REPOS = (
+    "libbpf-bootstrap",
+    "bcf-cilium",
+    "bcf-inspektor-gadget",
+    "bcf-collected",
+)
+BCF_PROFILE_DIRS = {
+    "bcf-cilium": ROOT / "bcf" / "cilium",
+    "bcf-inspektor-gadget": ROOT / "bcf" / "inspektor-gadget",
+    "bcf-collected": ROOT / "bcf" / "collected",
+    "bcf-bcc": ROOT / "bcf" / "bcc",
+    "bcf-bpf-examples": ROOT / "bcf" / "bpf-examples",
+    "bcf-calico": ROOT / "bcf" / "calico",
+}
 
 
 @dataclass(frozen=True)
 class RepoBuildProfile:
     name: str
+    display_name: str
     repo_dir: Path
     source_root: Path
+
+
+@dataclass(frozen=True)
+class ObjectScanProfile:
+    name: str
+    display_name: str
+    object_root: Path
+
+
+@dataclass(frozen=True)
+class ArtifactWorkItem:
+    repo_name: str
+    display_name: str
+    relative_path: str
+    artifact_kind: str
+    source_path: Path | None = None
+    object_path: Path | None = None
+    build_profile: RepoBuildProfile | None = None
 
 
 def parse_args() -> argparse.Namespace:
@@ -50,7 +91,7 @@ def parse_args() -> argparse.Namespace:
         action="append",
         dest="repos",
         choices=list(SUPPORTED_REPOS),
-        help="Restrict the run to a subset of supported repos. Defaults to all supported repos found in inventory.",
+        help="Restrict the run to a subset of supported corpora/artifact groups. Defaults to the curated set.",
     )
     parser.add_argument(
         "--runtime",
@@ -59,7 +100,7 @@ def parse_args() -> argparse.Namespace:
         choices=["llvmbpf", "kernel"],
         help="Restrict the inspect phase to a subset of runtimes. Defaults to both.",
     )
-    parser.add_argument("--max-sources", type=int, help="Limit the number of source files processed per run.")
+    parser.add_argument("--max-sources", type=int, help="Limit the number of input artifacts processed per run.")
     parser.add_argument(
         "--timeout-seconds",
         type=int,
@@ -155,7 +196,7 @@ def ensure_runner_binary(path: Path) -> None:
 
 
 def supported_repos_from_inventory(inventory: dict[str, Any], requested: list[str] | None) -> list[RepoBuildProfile]:
-    requested_set = set(requested or SUPPORTED_REPOS)
+    requested_set = set(requested or DEFAULT_REPOS)
     profiles: list[RepoBuildProfile] = []
     for repo in inventory["repos"]:
         repo_name = str(repo["name"])
@@ -168,10 +209,29 @@ def supported_repos_from_inventory(inventory: dict[str, Any], requested: list[st
             profiles.append(
                 RepoBuildProfile(
                     name=repo_name,
+                    display_name=repo_name,
                     repo_dir=repo_dir,
                     source_root=repo_dir / "examples" / "c",
                 )
             )
+    return profiles
+
+
+def supported_object_profiles(requested: list[str] | None) -> list[ObjectScanProfile]:
+    requested_set = set(requested or DEFAULT_REPOS)
+    profiles: list[ObjectScanProfile] = []
+    for repo_name, object_root in BCF_PROFILE_DIRS.items():
+        if repo_name not in requested_set:
+            continue
+        if not object_root.is_dir():
+            continue
+        profiles.append(
+            ObjectScanProfile(
+                name=repo_name,
+                display_name=f"bcf/{object_root.name}",
+                object_root=object_root.resolve(),
+            )
+        )
     return profiles
 
 
@@ -372,6 +432,24 @@ def compile_source(
     }
 
 
+def use_prebuilt_object(object_path: Path) -> dict[str, Any]:
+    return {
+        "status": "ok",
+        "stage": "prebuilt_object",
+        "object_path": str(object_path),
+        "temp_object_path": None,
+        "vmlinux_header": None,
+        "compile_command": None,
+        "object_finalize_command": None,
+        "compile_stdout": "",
+        "compile_stderr": "",
+        "compile_wall_time_ns": 0,
+        "finalize_stdout": "",
+        "finalize_stderr": "",
+        "finalize_wall_time_ns": 0,
+    }
+
+
 def list_object_programs(runner: Path, object_path: Path, timeout_seconds: int) -> dict[str, Any]:
     command = [
         str(runner),
@@ -437,17 +515,49 @@ def load_repo_sources(
     inventory: dict[str, Any],
     profiles: list[RepoBuildProfile],
     max_sources: int | None,
-) -> list[tuple[RepoBuildProfile, Path, str]]:
+) -> list[ArtifactWorkItem]:
     files_by_repo = {str(repo["name"]): list(repo["files"]) for repo in inventory["repos"]}
-    selected: list[tuple[RepoBuildProfile, Path, str]] = []
+    selected: list[ArtifactWorkItem] = []
     for profile in profiles:
         relative_files = files_by_repo.get(profile.name, [])
         for relative_path in relative_files:
             if not relative_path.endswith(".bpf.c"):
                 continue
             source_path = profile.repo_dir / relative_path
-            selected.append((profile, source_path.resolve(), relative_path))
-    selected.sort(key=lambda item: (item[0].name, item[2]))
+            selected.append(
+                ArtifactWorkItem(
+                    repo_name=profile.name,
+                    display_name=profile.display_name,
+                    relative_path=relative_path,
+                    artifact_kind="source",
+                    source_path=source_path.resolve(),
+                    build_profile=profile,
+                )
+            )
+    selected.sort(key=lambda item: (item.repo_name, item.relative_path))
+    if max_sources is not None:
+        return selected[:max_sources]
+    return selected
+
+
+def load_prebuilt_objects(
+    profiles: list[ObjectScanProfile],
+    max_sources: int | None,
+) -> list[ArtifactWorkItem]:
+    selected: list[ArtifactWorkItem] = []
+    for profile in profiles:
+        object_paths = [path for path in profile.object_root.rglob("*") if path.is_file() and path.name.endswith(".o")]
+        for object_path in sorted(object_paths):
+            selected.append(
+                ArtifactWorkItem(
+                    repo_name=profile.name,
+                    display_name=profile.display_name,
+                    relative_path=str(object_path.relative_to(profile.object_root)),
+                    artifact_kind="prebuilt_object",
+                    object_path=object_path.resolve(),
+                )
+            )
+    selected.sort(key=lambda item: (item.repo_name, item.relative_path))
     if max_sources is not None:
         return selected[:max_sources]
     return selected
@@ -539,17 +649,17 @@ def render_report(
         "# Real-World Code-Size Validation",
         "",
         f"- Generated at: `{payload['generated_at']}`",
-        f"- Inventory: `{payload['inventory']}`",
+        f"- Inventory: `{payload['inventory']}`" if payload["inventory"] else "- Inventory: `not used`",
         f"- Runner: `{payload['runner_binary']}`",
-        f"- Repos: {', '.join(f'`{repo}`' for repo in payload['filters']['repos'])}",
+        f"- Corpora: {', '.join(f'`{repo}`' for repo in payload['filters']['repos'])}",
         f"- Runtimes: {', '.join(f'`{runtime}`' for runtime in runtimes)}",
         "",
         "## Summary",
         "",
         "| Metric | Value |",
         "| --- | ---: |",
-        f"| Source files considered | {summary['source_files']['total']} |",
-        f"| Source builds succeeded | {summary['source_files']['build_ok']} |",
+        f"| Input artifacts considered | {summary['source_files']['total']} |",
+        f"| Artifact prepare/build succeeded | {summary['source_files']['build_ok']} |",
         f"| Program inventories succeeded | {summary['source_files']['program_inventory_ok']} |",
         f"| Programs discovered | {summary['programs']['discovered']} |",
         f"| Programs with both runtimes ok | {summary['programs']['paired_across_runtimes']} |",
@@ -642,7 +752,7 @@ def render_report(
                 "",
                 "## Program-Level Results",
                 "",
-                "| Repo | Source | Program | Section | BPF insns | llvmbpf native B | kernel native B | L/K ratio |",
+                "| Repo | Artifact | Program | Section | BPF insns | llvmbpf native B | kernel native B | L/K ratio |",
                 "| --- | --- | --- | --- | ---: | ---: | ---: | ---: |",
             ]
         )
@@ -657,9 +767,10 @@ def render_report(
             "",
             "## Notes",
             "",
-            "- Each row is a single program selected from a real `.bpf.o`, not a handcrafted micro benchmark.",
+            "- Each row is a single program selected from either a source-built or prebuilt real BPF object, not a handcrafted micro benchmark.",
             "- `micro_exec list-programs` enumerates every libbpf-visible program in the object, and both runtimes are invoked with `--program-name` so multi-program objects are measured per program.",
-            "- This report is still a first external-validity slice: it currently supports `libbpf-bootstrap` only, because the other harvested repos need extra build adapters or section/prog-type normalization.",
+            "- `libbpf-bootstrap` inputs are compiled from source; the integrated BCF inputs are scanned directly from prebuilt objects under `corpus/bcf/`.",
+            "- The curated default set keeps the run focused on corpora that are already loadable by the current tooling: `libbpf-bootstrap`, `bcf/cilium`, `bcf/inspektor-gadget`, and `bcf/collected`.",
         ]
     )
     return "\n".join(lines) + "\n"
@@ -674,41 +785,69 @@ def main() -> int:
     build_root = Path(args.build_root).resolve()
     build_root.mkdir(parents=True, exist_ok=True)
 
-    inventory = load_inventory(inventory_path)
-    profiles = supported_repos_from_inventory(inventory, args.repos)
-    if not profiles:
-        raise SystemExit("no supported repos selected from inventory")
+    selected_repo_names = set(args.repos or DEFAULT_REPOS)
+    inventory: dict[str, Any] = {"repos": []}
+    source_profiles: list[RepoBuildProfile] = []
+    if any(repo_name == "libbpf-bootstrap" for repo_name in selected_repo_names):
+        inventory = load_inventory(inventory_path)
+        source_profiles = supported_repos_from_inventory(inventory, args.repos)
+    object_profiles = supported_object_profiles(args.repos)
+    all_profiles: list[RepoBuildProfile | ObjectScanProfile] = [*source_profiles, *object_profiles]
+    if not all_profiles:
+        raise SystemExit("no supported corpora selected from inventory or local BCF objects")
 
     ensure_runner_binary(runner_path)
-    bpftool_binary = shutil.which(args.bpftool)
-    if bpftool_binary is None:
-        raise SystemExit(f"bpftool not found: {args.bpftool}")
-    clang_binary = shutil.which(args.clang)
-    if clang_binary is None:
-        raise SystemExit(f"clang not found: {args.clang}")
+    bpftool_binary: str | None = None
+    clang_binary: str | None = None
+    sys_include_flags: list[str] = []
+    if source_profiles:
+        bpftool_binary = shutil.which(args.bpftool)
+        if bpftool_binary is None:
+            raise SystemExit(f"bpftool not found: {args.bpftool}")
+        clang_binary = shutil.which(args.clang)
+        if clang_binary is None:
+            raise SystemExit(f"clang not found: {args.clang}")
 
-    sys_include_flags = clang_sys_include_flags(clang_binary)
-    ensure_vmlinux_header(bpftool_binary, build_root / "libbpf-bootstrap" / "vmlinux.h")
+        sys_include_flags = clang_sys_include_flags(clang_binary)
+        for profile in source_profiles:
+            ensure_vmlinux_header(bpftool_binary, build_root / profile.name / "vmlinux.h")
 
     runtimes = args.runtimes or ["llvmbpf", "kernel"]
-    selected_sources = load_repo_sources(inventory, profiles, args.max_sources)
+    selected_sources = load_repo_sources(inventory, source_profiles, max_sources=None)
+    selected_objects = load_prebuilt_objects(object_profiles, max_sources=None)
+    selected_artifacts = [*selected_sources, *selected_objects]
+    selected_artifacts.sort(key=lambda item: (item.repo_name, item.relative_path))
+    if args.max_sources is not None:
+        selected_artifacts = selected_artifacts[: args.max_sources]
+    if not selected_artifacts:
+        raise SystemExit("no input artifacts matched the selected corpora")
+
     source_records: list[dict[str, Any]] = []
 
-    for index, (profile, source_path, relative_path) in enumerate(selected_sources, start=1):
-        print(f"[{index:02}/{len(selected_sources):02}] {profile.name}/{relative_path}")
-        build_outcome = compile_source(
-            profile=profile,
-            source_path=source_path,
-            build_root=build_root,
-            clang=clang_binary,
-            bpftool=bpftool_binary,
-            sys_include_flags=sys_include_flags,
-            timeout_seconds=args.timeout_seconds,
-        )
+    for index, artifact in enumerate(selected_artifacts, start=1):
+        print(f"[{index:02}/{len(selected_artifacts):02}] {artifact.display_name}/{artifact.relative_path}")
+        if artifact.artifact_kind == "source":
+            if artifact.build_profile is None or artifact.source_path is None or clang_binary is None:
+                raise SystemExit(f"incomplete source build configuration for {artifact.relative_path}")
+            build_outcome = compile_source(
+                profile=artifact.build_profile,
+                source_path=artifact.source_path,
+                build_root=build_root,
+                clang=clang_binary,
+                bpftool=bpftool_binary,
+                sys_include_flags=sys_include_flags,
+                timeout_seconds=args.timeout_seconds,
+            )
+        else:
+            if artifact.object_path is None:
+                raise SystemExit(f"missing prebuilt object path for {artifact.relative_path}")
+            build_outcome = use_prebuilt_object(artifact.object_path)
         source_record: dict[str, Any] = {
-            "repo": profile.name,
-            "relative_path": relative_path,
-            "source_path": str(source_path),
+            "repo": artifact.display_name,
+            "selection": artifact.repo_name,
+            "artifact_kind": artifact.artifact_kind,
+            "relative_path": artifact.relative_path,
+            "source_path": str(artifact.source_path) if artifact.source_path is not None else None,
             "build": build_outcome,
             "program_inventory": {
                 "status": "skipped",
@@ -766,7 +905,7 @@ def main() -> int:
     payload = {
         "dataset": "real_world_code_size",
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "inventory": str(inventory_path),
+        "inventory": str(inventory_path) if source_profiles else None,
         "runner_binary": str(runner_path),
         "build_root": str(build_root),
         "host": {
@@ -781,12 +920,14 @@ def main() -> int:
             "clang_sys_include_flags": sys_include_flags,
         },
         "filters": {
-            "repos": [profile.name for profile in profiles],
+            "repos": [profile.display_name for profile in all_profiles],
+            "repo_keys": [profile.name for profile in all_profiles],
             "runtimes": runtimes,
             "max_sources": args.max_sources,
             "timeout_seconds": args.timeout_seconds,
         },
         "sources": source_records,
+        "artifacts": source_records,
     }
     payload["summary"] = compute_summary(source_records, runtimes)
 

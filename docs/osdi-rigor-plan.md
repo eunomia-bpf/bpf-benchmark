@@ -61,13 +61,13 @@
 
 #### G2. 硬件计数器数据缺失（已部分修复）
 
-**问题**：31 个 benchmark 中只有 4 个（bitcount, binary_search, switch_dispatch, checksum）有非零 perf 计数器数据。llvmbpf 全部为 0。
+**问题**：当前 `micro/results/pmu_analysis_rigorous.md` 报告了 18 个 benchmark 行；其中 llvmbpf 只有 3 个 benchmark（`switch_dispatch`、`multi_acc_4`、`multi_acc_8`）有非 `n/a` 的 IPC，相关性分析样本量仅 `n=3`，不足以支持强结论。
 
 **原因**：执行窗口太短（< 1μs），`perf_event_open` 的 PMU 调度周期（~1ms）内来不及采样。
 
-**Status**: PARTIALLY RESOLVED. cumulative PMU 基础设施已具备，`run_micro.py` 与 `micro_exec` 已支持 `--perf-scope full_repeat_raw|full_repeat_avg`；但 authoritative run 仍是在未启用 `--perf-counters` 的条件下完成。
+**Status**: PARTIALLY RESOLVED — demoted to supplementary. cumulative PMU 基础设施已具备，`run_micro.py` 与 `micro_exec` 已支持 `--perf-scope full_repeat_raw|full_repeat_avg`；但当前 `micro/results/pmu_analysis_rigorous.md` 只有 `18` 个 kernel-side benchmark，且仅 `3` 个 benchmark 具备 dual-runtime IPC。短执行窗口与 PMU 调度粒度不匹配是结构性限制，因此 PMU 更适合作为定性 supplementary evidence，而非主因果证据。
 
-**Remaining**: 需要按新 scope 重跑 PMU，并把 IPC / branch-miss / cache-miss 关联分析补进主文。
+**Remaining**: 保留 PMU 数据与分析脚本作为 supplementary material；正文中的因果归因以 code-size ratio、指令模式分析和“代码更小但执行更慢”悖论分析为主。若后续补做 IPC / branch-miss / cache-miss 关联分析，也只应作为补充诊断，不进入主论证链。
 
 #### G3. 编译时间未报告（已修复）
 
@@ -85,7 +85,7 @@
 
 **修复方案（P1）**：
 1. **微基准隔离法**：构建一对 benchmark，一个有大量 byte-recompose pattern，一个没有，差值即为该模式的时间贡献
-2. **PMU 相关分析**：用 G2 修复后的 IPC 数据，结合指令数差异，估算时间分解：
+2. **补充 PMU 相关分析（supplementary only）**：若后续能拿到更多可用 IPC 数据，可结合指令数差异做定性时间分解，但不作为主因果证据：
    - `extra_time = extra_insns / IPC_observed`
    - 按指令类型分解：prologue, byte-recompose, branches, other
 
@@ -107,7 +107,7 @@
 
 #### G7. 代表性论证不足
 
-**Status**: PARTIALLY RESOLVED. suite 已扩展到 `31+9` benchmarks，`micro/results/representativeness_report.md` 已存在，且第一波 `libbpf-bootstrap` 外部验证已得到 `21` 个双 runtime 成功配对；但 feature-box 覆盖仍只有 `0.8%`。
+**Status**: PARTIALLY RESOLVED. suite 已扩展到 `31+9` benchmarks，`micro/results/representativeness_report.md` 已存在，且多源外部验证已覆盖 `4` 个 repo（`libbpf-bootstrap` + `3` 个 BCF repo），得到 `105` 个双 runtime 成功配对，code-size geomean 为 `0.573x`；但 feature-box 覆盖仍只有 `0.8%`。
 
 **问题**：31 个 benchmark 是手写的，审稿人会质疑代表性。
 
@@ -116,9 +116,9 @@
 **修复方案（P1）**：
 1. 用 BCF 静态特征数据（1588 个程序）画真实程序的指令/helper/分支分布
 2. 把 31 个 benchmark 标注在分布上，证明覆盖了关键区域
-3. 用 60 个可编译的真实程序做 code-size 对比，验证微基准结论的外部效度
+3. 已完成跨 `4` 个 repo 的 `105` 个 paired 真实程序 code-size 对比，验证微基准结论的外部效度
 
-**Remaining**: 仍需把 feature-space 覆盖从 `0.8%` 往上推，并把第一波验证扩成跨 repo 的 `60+` program 与 execution-time 子集。
+**Remaining**: 仍需把 feature-space 覆盖从 `0.8%` 往上推，并在当前 `4` repo / `105` paired 的基础上补 execution-time 子集。
 
 ### 1.4 小差距（锦上添花）
 
@@ -177,7 +177,7 @@
 3. 为什么有差距？
    → 代码大小 `0.496x`（LLVM 指令消除 + 寄存器分配 + 分支优化）
    → 但 `10/31` 更小更慢（关键路径不缩短，byte-recompose 占 `50.7%` extra insns）
-   → PMU 证据：IPC 差异、branch miss 率差异（可量化）
+   → 补充 PMU 证据：当前仅 `3` 个 dual-runtime IPC benchmark，可作定性参考，不作为主因果证据
 
 4. 对谁有用？
    → BCF 1588 个程序特征分布证明微基准覆盖了主要特征区域
