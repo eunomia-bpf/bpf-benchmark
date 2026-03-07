@@ -1,0 +1,411 @@
+{
+  "helpers": [
+    {
+      "count": 391790,
+      "cumulative_percentage": 49.14939765988702,
+      "helper_id": 6,
+      "helper_name": "trace_printk",
+      "percentage": 49.14939765988702
+    },
+    {
+      "count": 107498,
+      "cumulative_percentage": 62.634841263967104,
+      "helper_id": 1,
+      "helper_name": "map_lookup_elem",
+      "percentage": 13.48544360408008
+    },
+    {
+      "count": 76608,
+      "cumulative_percentage": 72.24518623430485,
+      "helper_id": 39,
+      "helper_name": "helper_39",
+      "percentage": 9.610344970337744
+    },
+    {
+      "count": 47522,
+      "cumulative_percentage": 78.20674134187051,
+      "helper_id": 2,
+      "helper_name": "map_update_elem",
+      "percentage": 5.961555107565663
+    },
+    {
+      "count": 26610,
+      "cumulative_percentage": 81.54492116200271,
+      "helper_id": 11,
+      "helper_name": "helper_11",
+      "percentage": 3.338179820132198
+    },
+    {
+      "count": 22772,
+      "cumulative_percentage": 84.40163032637889,
+      "helper_id": 5,
+      "helper_name": "ktime_get_ns",
+      "percentage": 2.8567091643761895
+    },
+    {
+      "count": 22307,
+      "cumulative_percentage": 87.2000060215194,
+      "helper_id": 26,
+      "helper_name": "skb_load_bytes",
+      "percentage": 2.7983756951405083
+    },
+    {
+      "count": 21751,
+      "cumulative_percentage": 89.92863245021897,
+      "helper_id": 28,
+      "helper_name": "get_smp_processor_id",
+      "percentage": 2.728626428699565
+    },
+    {
+      "count": 16414,
+      "cumulative_percentage": 91.98774119007804,
+      "helper_id": 23,
+      "helper_name": "helper_23",
+      "percentage": 2.0591087398590715
+    },
+    {
+      "count": 14610,
+      "cumulative_percentage": 93.82054115896685,
+      "helper_id": 9,
+      "helper_name": "helper_9",
+      "percentage": 1.8327999688888164
+    },
+    {
+      "count": 12501,
+      "cumulative_percentage": 95.38877061899966,
+      "helper_id": 12,
+      "helper_name": "tail_call",
+      "percentage": 1.5682294600327922
+    },
+    {
+      "count": 7538,
+      "cumulative_percentage": 96.33440006222237,
+      "helper_id": 10,
+      "helper_name": "helper_10",
+      "percentage": 0.9456294432227171
+    },
+    {
+      "count": 5632,
+      "cumulative_percentage": 97.04092500573927,
+      "helper_id": 3,
+      "helper_name": "map_delete_elem",
+      "percentage": 0.7065249435168934
+    },
+    {
+      "count": 4222,
+      "cumulative_percentage": 97.57056781673505,
+      "helper_id": 50,
+      "helper_name": "helper_50",
+      "percentage": 0.5296428109957962
+    },
+    {
+      "count": 3880,
+      "cumulative_percentage": 98.05730730197043,
+      "helper_id": 7,
+      "helper_name": "get_prandom_u32",
+      "percentage": 0.48673948523535987
+    },
+    {
+      "count": 3823,
+      "cumulative_percentage": 98.53689623291237,
+      "helper_id": 69,
+      "helper_name": "helper_69",
+      "percentage": 0.4795889309419538
+    },
+    {
+      "count": 1854,
+      "cumulative_percentage": 98.76947741992947,
+      "helper_id": 46,
+      "helper_name": "probe_read_user",
+      "percentage": 0.2325811870171024
+    },
+    {
+      "count": 1726,
+      "cumulative_percentage": 98.98600122186664,
+      "helper_id": 155,
+      "helper_name": "helper_155",
+      "percentage": 0.21652380193717297
+    },
+    {
+      "count": 1604,
+      "cumulative_percentage": 99.1872203286495,
+      "helper_id": 38,
+      "helper_name": "helper_38",
+      "percentage": 0.20121910678286528
+    },
+    {
+      "count": 1536,
+      "cumulative_percentage": 99.37990894960866,
+      "helper_id": 177,
+      "helper_name": "helper_177",
+      "percentage": 0.1926886209591528
+    },
+    {
+      "count": 1515,
+      "cumulative_percentage": 99.56996315582815,
+      "helper_id": 152,
+      "helper_name": "helper_152",
+      "percentage": 0.19005420621947686
+    },
+    {
+      "count": 1262,
+      "cumulative_percentage": 99.72827893685057,
+      "helper_id": 25,
+      "helper_name": "perf_event_output",
+      "percentage": 0.1583157810224289
+    },
+    {
+      "count": 464,
+      "cumulative_percentage": 99.78648695776532,
+      "helper_id": 43,
+      "helper_name": "helper_43",
+      "percentage": 0.05820802091474407
+    },
+    {
+      "count": 288,
+      "cumulative_percentage": 99.82261607419515,
+      "helper_id": 21,
+      "helper_name": "helper_21",
+      "percentage": 0.036129116429841145
+    },
+    {
+      "count": 264,
+      "cumulative_percentage": 99.85573443092251,
+      "helper_id": 86,
+      "helper_name": "helper_86",
+      "percentage": 0.03311835672735438
+    },
+    {
+      "count": 240,
+      "cumulative_percentage": 99.88584202794738,
+      "helper_id": 124,
+      "helper_name": "helper_124",
+      "percentage": 0.03010759702486762
+    },
+    {
+      "count": 144,
+      "cumulative_percentage": 99.9039065861623,
+      "helper_id": 99,
+      "helper_name": "helper_99",
+      "percentage": 0.018064558214920572
+    },
+    {
+      "count": 120,
+      "cumulative_percentage": 99.91896038467473,
+      "helper_id": 32,
+      "helper_name": "helper_32",
+      "percentage": 0.01505379851243381
+    },
+    {
+      "count": 96,
+      "cumulative_percentage": 99.93100342348468,
+      "helper_id": 85,
+      "helper_name": "helper_85",
+      "percentage": 0.01204303880994705
+    },
+    {
+      "count": 90,
+      "cumulative_percentage": 99.94229377236901,
+      "helper_id": 31,
+      "helper_name": "helper_31",
+      "percentage": 0.011290348884325358
+    },
+    {
+      "count": 87,
+      "cumulative_percentage": 99.95320777629053,
+      "helper_id": 113,
+      "helper_name": "probe_read_kernel_str",
+      "percentage": 0.010914003921514513
+    },
+    {
+      "count": 66,
+      "cumulative_percentage": 99.96148736547235,
+      "helper_id": 87,
+      "helper_name": "helper_87",
+      "percentage": 0.008279589181838595
+    },
+    {
+      "count": 66,
+      "cumulative_percentage": 99.96976695465419,
+      "helper_id": 88,
+      "helper_name": "helper_88",
+      "percentage": 0.008279589181838595
+    },
+    {
+      "count": 48,
+      "cumulative_percentage": 99.97578847405917,
+      "helper_id": 34,
+      "helper_name": "helper_34",
+      "percentage": 0.006021519404973525
+    },
+    {
+      "count": 41,
+      "cumulative_percentage": 99.98093185521758,
+      "helper_id": 164,
+      "helper_name": "ktime_get_boot_ns",
+      "percentage": 0.005143381158414885
+    },
+    {
+      "count": 29,
+      "cumulative_percentage": 99.98456985652476,
+      "helper_id": 35,
+      "helper_name": "get_current_cgroup_id",
+      "percentage": 0.0036380013071715045
+    },
+    {
+      "count": 16,
+      "cumulative_percentage": 99.98657702965976,
+      "helper_id": 20,
+      "helper_name": "helper_20",
+      "percentage": 0.0020071731349911746
+    },
+    {
+      "count": 13,
+      "cumulative_percentage": 99.98820785783192,
+      "helper_id": 4,
+      "helper_name": "probe_read",
+      "percentage": 0.0016308281721803296
+    },
+    {
+      "count": 12,
+      "cumulative_percentage": 99.98971323768318,
+      "helper_id": 44,
+      "helper_name": "helper_44",
+      "percentage": 0.0015053798512433812
+    },
+    {
+      "count": 11,
+      "cumulative_percentage": 99.99109316921347,
+      "helper_id": 16,
+      "helper_name": "get_current_comm",
+      "percentage": 0.0013799315303064325
+    },
+    {
+      "count": 10,
+      "cumulative_percentage": 99.99234765242284,
+      "helper_id": 14,
+      "helper_name": "get_current_pid_tgid",
+      "percentage": 0.0012544832093694842
+    },
+    {
+      "count": 9,
+      "cumulative_percentage": 99.99347668731127,
+      "helper_id": 8,
+      "helper_name": "helper_8",
+      "percentage": 0.0011290348884325358
+    },
+    {
+      "count": 9,
+      "cumulative_percentage": 99.99460572219971,
+      "helper_id": 173,
+      "helper_name": "helper_173",
+      "percentage": 0.0011290348884325358
+    },
+    {
+      "count": 8,
+      "cumulative_percentage": 99.99560930876721,
+      "helper_id": 13,
+      "helper_name": "helper_13",
+      "percentage": 0.0010035865674955873
+    },
+    {
+      "count": 6,
+      "cumulative_percentage": 99.99636199869283,
+      "helper_id": 54,
+      "helper_name": "helper_54",
+      "percentage": 0.0007526899256216906
+    },
+    {
+      "count": 6,
+      "cumulative_percentage": 99.99711468861845,
+      "helper_id": 65,
+      "helper_name": "helper_65",
+      "percentage": 0.0007526899256216906
+    },
+    {
+      "count": 5,
+      "cumulative_percentage": 99.99774193022314,
+      "helper_id": 67,
+      "helper_name": "helper_67",
+      "percentage": 0.0006272416046847421
+    },
+    {
+      "count": 4,
+      "cumulative_percentage": 99.99824372350689,
+      "helper_id": 107,
+      "helper_name": "helper_107",
+      "percentage": 0.0005017932837477937
+    },
+    {
+      "count": 3,
+      "cumulative_percentage": 99.99862006846969,
+      "helper_id": 45,
+      "helper_name": "probe_read_kernel",
+      "percentage": 0.0003763449628108453
+    },
+    {
+      "count": 2,
+      "cumulative_percentage": 99.99887096511156,
+      "helper_id": 49,
+      "helper_name": "helper_49",
+      "percentage": 0.0002508966418738968
+    },
+    {
+      "count": 2,
+      "cumulative_percentage": 99.99912186175344,
+      "helper_id": 59,
+      "helper_name": "helper_59",
+      "percentage": 0.0002508966418738968
+    },
+    {
+      "count": 1,
+      "cumulative_percentage": 99.99924731007438,
+      "helper_id": 130,
+      "helper_name": "helper_130",
+      "percentage": 0.0001254483209369484
+    },
+    {
+      "count": 1,
+      "cumulative_percentage": 99.99937275839531,
+      "helper_id": 137,
+      "helper_name": "helper_137",
+      "percentage": 0.0001254483209369484
+    },
+    {
+      "count": 1,
+      "cumulative_percentage": 99.99949820671625,
+      "helper_id": 181,
+      "helper_name": "helper_181",
+      "percentage": 0.0001254483209369484
+    },
+    {
+      "count": 1,
+      "cumulative_percentage": 99.99962365503718,
+      "helper_id": 204,
+      "helper_name": "helper_204",
+      "percentage": 0.0001254483209369484
+    },
+    {
+      "count": 1,
+      "cumulative_percentage": 99.99974910335813,
+      "helper_id": 205,
+      "helper_name": "helper_205",
+      "percentage": 0.0001254483209369484
+    },
+    {
+      "count": 1,
+      "cumulative_percentage": 99.99987455167906,
+      "helper_id": 206,
+      "helper_name": "helper_206",
+      "percentage": 0.0001254483209369484
+    },
+    {
+      "count": 1,
+      "cumulative_percentage": 100.0,
+      "helper_id": 207,
+      "helper_name": "helper_207",
+      "percentage": 0.0001254483209369484
+    }
+  ],
+  "total_helper_calls": 797141
+}

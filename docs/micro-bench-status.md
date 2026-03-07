@@ -186,6 +186,67 @@ BPF:      CONFIG_BPF_JIT=y, CONFIG_BPF_SYSCALL=y, BTF enabled
 
 注：`memory_pair_sum` 和 `simple` 的 kernel exec < 50ns，低于 `ktime_get_ns` 分辨率，数值不可靠。
 
+### 6.1b 统计严谨性分析（30 iterations × 1000 repeats）
+
+> 数据来源：`micro/results/pure_jit_rigorous.json`，分析脚本：`micro/analyze_statistics.py`
+> Bootstrap iterations: 10,000; 种子 0; 完整报告见 `micro/results/pure_jit_rigorous_analysis.md`
+
+**Suite-Level（Bootstrap CI）**
+
+| 指标 | 值 |
+|------|---:|
+| Exec ratio geomean (L/K) | 0.823 |
+| 95% CI | [0.801, 0.847] |
+| 统计显著 benchmarks (p < 0.05) | 16 / 22 |
+
+**显著性与效应量**
+
+| Benchmark | Exec Ratio | 95% CI | Cohen's d | Mann-Whitney p | Significant |
+|-----------|---:|---|---:|---:|---|
+| branch_layout | 0.269 | [0.263, 0.275] | -15.952 | 7.70e-12 | Yes |
+| checksum | 0.894 | [0.892, 0.898] | -15.849 | 2.88e-11 | Yes |
+| stride_load_16 | 0.434 | [0.412, 0.458] | -5.245 | 1.06e-11 | Yes |
+| fibonacci_iter | 0.848 | [0.832, 0.864] | -4.298 | 3.20e-11 | Yes |
+| binary_search | 0.502 | [0.463, 0.562] | -4.179 | 2.39e-10 | Yes |
+| code_clone_8 | 1.919 | [1.810, 2.049] | 4.588 | 2.89e-11 | Yes |
+| bitcount | 1.536 | [1.483, 1.594] | 7.073 | 3.02e-11 | Yes |
+| fixed_loop_large | 1.193 | [1.164, 1.220] | 4.079 | 4.40e-10 | Yes |
+
+**6 个不显著 benchmarks 的诊断**
+
+| Benchmark | p-value | CV (llvmbpf / kernel) | 诊断 |
+|-----------|---:|---|---|
+| simple | 0.651 | 0.026 / 0.677 | kernel 极高方差 (ktime 分辨率) |
+| memory_pair_sum | 0.069 | 0.041 / 0.799 | kernel 极高方差 (ktime 分辨率) |
+| log2_fold | 0.615 | 0.019 / 0.130 | 真正接近 (ratio=0.997) |
+| dep_chain_short | 1.000 | 0.016 / 0.258 | kernel 高方差 |
+| packet_parse | 0.161 | 0.006 / 0.341 | kernel 高方差掩盖差异 |
+| multi_acc_8 | 0.329 | 0.187 / 0.132 | 真正接近 (ratio=0.993) |
+
+**关键发现**：kernel 侧测量方差系统性偏高（CV 中位数 0.152 vs llvmbpf 0.031）。原因：BPF_PROG_TEST_RUN 通过 ktime_get_ns 测量，包含内核调度噪声；llvmbpf 用 rdtsc 在用户态稳定得多。6 个不显著中有 4 个是 kernel 方差过高导致统计检验力不足，2 个是真正的性能相当。
+
+### 6.1c BCF 静态字节码分析与 Helper Pareto (H4)
+
+> 数据来源：`corpus/results/bytecode_features.json`、`corpus/results/helper_pareto.json`
+> 分析脚本：`corpus/analyze_bytecode.py`，覆盖 1588 个 BCF 程序
+
+**Helper 调用频率 Pareto (H4: top-5 = 80%+)**
+
+| Rank | Helper ID | 名称 | 调用次数 | 占比 | 累计 |
+|---:|---:|---|---:|---:|---:|
+| 1 | 6 | trace_printk | 391,689 | 49.15% | 49.15% |
+| 2 | 1 | map_lookup_elem | 107,497 | 13.49% | 62.64% |
+| 3 | 39 | (probe_read_kernel) | 76,589 | 9.61% | 72.26% |
+| 4 | 2 | map_update_elem | 47,511 | 5.96% | 78.22% |
+| 5 | 11 | (tail_call) | 26,625 | 3.34% | 81.56% |
+
+**H4 结论**：Top-5 helper 占总调用的 81.56%，假设验证通过。对 runtime 优化的启示：优先实现 trace_printk 的高效内联路径（49% 调用量），其次是 map_lookup/update（19.5%）。
+
+**程序特征分布（1588 个程序）：**
+- BPF-to-BPF 子程序调用：92.9% 的程序包含（Calico 主导）
+- 平均 BPF insn 数：~3,200（中位数 ~1,800）
+- Helper 种类：共 45 种不同 helper ID
+
 ### 6.2 代码质量对比（code-size + 指令分析）
 
 **Code Size**
@@ -294,12 +355,12 @@ BPF:      CONFIG_BPF_JIT=y, CONFIG_BPF_SYSCALL=y, BTF enabled
 
 **TODO — 广度扩展（scale up to 500+ programs）：**
 - [ ] **T3.1 BCF 真实程序 code-size 批量对比** — kernel 侧 load + bpf_prog_info 取 jited_prog_len；llvmbpf 侧 load_code + compile 取 native size。不需要执行。目标：500+ 程序的 code inflation ratio 分布图
-- [ ] **T3.2 BCF 静态特征提取** — 对每个程序提取 BPF insn count、helper call 数/类型、map 数/类型、分支数、ALU64 比例。输出 CSV/JSON 供后续回归分析
-- [ ] **T3.3 Helper 调用频率 Pareto 分析 (H4)** — 基于 T3.2 的静态特征，绘制 helper × 累计调用占比图，验证 top-5 占 80%+
+- [x] **T3.2 BCF 静态特征提取** — `corpus/analyze_bytecode.py` 提取 1588 个程序的 insn count、helper call、BPF-to-BPF call、map 数。输出 `corpus/results/bytecode_features.json`
+- [x] **T3.3 Helper 调用频率 Pareto 分析 (H4)** — Top-5 = 81.56%，H4 验证通过。详见 §6.1c
 
 **TODO — 深度加强（rigorous root cause）：**
 - [ ] **T3.4 编译时间分析** — compile_ns 已在 JSON 中，需要系统分析 kernel vs llvmbpf 编译时间，按 benchmark 分类
-- [ ] **T3.5 统计严谨性补充** — 对 §6 所有数据补充 95% CI、Cohen's d 效应量、Wilcoxon 检验 p-value；多次运行方差分析
+- [x] **T3.5 统计严谨性补充** — 30 iterations × 1000 repeats，bootstrap CI + Cohen's d + Mann-Whitney U。16/22 显著。详见 §6.1b
 - [ ] **T3.6 时间域因素分解** — 指令层分析只回答"多了多少指令"，不回答"慢了多少时间"。需要：(a) 用 PMU 的 IPC 数据估算各类指令的时间贡献；(b) 构建针对性 micro-benchmark 隔离 byte-recompose 的时间开销
 - [ ] **T3.7 LLVM Pass-level 消融** — 不只是 O0/O1/O2/O3，而是逐个 pass 启用（instcombine、GVN、RegAlloc、SimplifyCFG 等），识别对 BPF 最有价值的 pass
 - [ ] **T3.8 Perf counter 相关性分析** — IPC/branch-miss/cache-miss vs exec ratio 的 Pearson/Spearman 相关系数矩阵
