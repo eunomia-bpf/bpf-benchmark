@@ -2,7 +2,7 @@
 
 > 本文档是 micro benchmark 层的统一参考，合并了原来分散在多个文件中的实验计划、进度追踪、RQ 定义和结果分析。
 
-> 更新说明（2026-03-07）：`config/micro_pure_jit.yaml` 当前包含 `29` 个 pure-jit / staged-codegen case，另有 `2` 个 packet-backed 对照 benchmark；`config/micro_runtime.yaml` 当前包含 `9` 个 runtime case。第 4 节覆盖表与第 7 节进度已按此状态同步，并新增可复现的 representativeness 分析脚本 `micro/analyze_representativeness.py` 与真实程序 code-size 外部验证脚本 `corpus/run_real_world_code_size.py`。本文件第 6 节中的执行时间/统计结果仍对应扩展前的 `22`/`2` case pilot，重新批跑后再统一更新。
+> 更新说明（2026-03-07）：`config/micro_pure_jit.yaml` 当前包含 `29` 个 pure-jit / staged-codegen case，另有 `2` 个 packet-backed 对照 benchmark；`config/micro_runtime.yaml` 当前包含 `9` 个 runtime case。第 4 节覆盖表与第 7 节进度已按此状态同步，并新增可复现的 representativeness 分析脚本 `micro/analyze_representativeness.py` 与真实程序 code-size 外部验证脚本 `corpus/run_real_world_code_size.py`。第 `6.1`、`6.1b`、`6.1e` 节现已切换为 authoritative pure-JIT run（`30` iterations × `1000` repeats，iteration 级 runtime 随机交错 / counterbalanced），覆盖 `31` 个 benchmark；执行时间 geomean 为 `0.849x`，BH-corrected paired Wilcoxon 显著 `25/31`，编译时间 geomean 为 `3.394x`。第 `6.2`–`6.4` 节代码质量分析保持不变。
 > Note: benchmarks use staged input via `bpf_map_lookup_elem`; this measures JIT codegen quality under realistic input staging, not helper-free isolation.
 
 ---
@@ -176,85 +176,72 @@ BPF:      CONFIG_BPF_JIT=y, CONFIG_BPF_SYSCALL=y, BTF enabled
 
 ## 6. 结果
 
-> 以下数据基于 rdtsc 精确测量修正后的结果（2026-03-06）。
+> 以下 pure-JIT 主结果（§`6.1` / §`6.1b` / §`6.1e`）已切换为 authoritative 分析结果（`micro/results/pure_jit_authoritative_analysis.md`，生成于 `2026-03-07`）。
 > 旧版 baseline-adjusted 数据已废弃，llvmbpf 改用 per-iteration rdtsc 测量纯 vm.exec() 时间。
 
-### 6.1 micro_staged_codegen 执行时间 (22 case)
+### 6.1 micro_staged_codegen 执行时间 (31 case)
+
+> authoritative run：`30` iterations × `1000` repeats，iteration 内 runtime 顺序随机交错（counterbalanced）；完整分析见 `micro/results/pure_jit_authoritative_analysis.md`
 
 **Suite-Level**
 
 | 指标 | 值 |
 |------|---:|
-| Exec time llvmbpf/kernel geomean | 0.794x |
-| Wins (llvmbpf/kernel/tie) | 13/8/1 |
+| Exec time llvmbpf/kernel geomean | 0.849x |
+| 95% CI | [0.834, 0.865] |
+| Significant benchmarks (BH-corrected paired Wilcoxon p < 0.05) | 25 / 31 |
+| Wins (llvmbpf/kernel/tie) | 21/10/0 |
 
 **Benchmark-Level（按 exec ratio 排序）**
 
-| Benchmark | Category | llvmbpf ns | kernel ns | Exec ratio | Code ratio |
-|-----------|----------|---:|---:|---:|---:|
-| `stride_load_4` | memory-local | 119 | 486 | 0.24x | 0.33x |
-| `branch_layout` | control-flow | 157 | 532 | 0.30x | 0.35x |
-| `binary_search` | control-flow | 210 | 653 | 0.32x | 0.45x |
-| `switch_dispatch` | control-flow | 284 | 640 | 0.44x | 0.80x |
-| `stride_load_16` | memory-local | 100 | 206 | 0.49x | 0.33x |
-| `log2_fold` | alu-mix | 335 | 581 | 0.58x | 0.66x |
-| `bounds_ladder` | memory-local | 86 | 143 | 0.60x | 0.39x |
-| `checksum` | memory-local | 10823 | 12385 | 0.87x | 0.42x |
-| `fibonacci_iter` | loop-shape | 607 | 954 | 0.64x | 0.40x |
-| `code_clone_2` | call-size | 378 | 594 | 0.64x | 0.49x |
-| `dep_chain_long` | dependency-ilp | 411 | 595 | 0.69x | 0.41x |
-| `simple` | baseline | 19 | 25 | 0.76x | 0.62x |
-| `spill_pressure` | dependency-ilp | 253 | 317 | 0.80x | 0.76x |
-| `multi_acc_8` | dependency-ilp | 423 | 410 | 1.03x | 0.76x |
-| `multi_acc_4` | dependency-ilp | 276 | 256 | 1.08x | 0.65x |
-| `fixed_loop_small` | loop-shape | 97 | 85 | 1.14x | 0.36x |
-| `fixed_loop_large` | loop-shape | 1572 | 1215 | 1.29x | 0.43x |
-| `bitcount` | alu-mix | 4673 | 3465 | 1.35x | 0.45x |
-| `packet_parse` | memory-local | 95 | 69 | 1.38x | 0.50x |
-| `dep_chain_short` | dependency-ilp | 188 | 108 | 1.74x | 0.41x |
-| `code_clone_8` | call-size | 2325 | 1124 | 2.07x | 0.54x |
-| `memory_pair_sum` | baseline | 20 | 9 | 2.22x | 0.24x |
+| Benchmark | Category | llvmbpf ns (mean) | kernel ns (mean) | Exec ratio | Code ratio |
+|-----------|----------|------------------:|----------------:|-----------:|-----------:|
+| `branch_layout` | control-flow | 162.03 | 560.50 | 0.289x | 0.354x |
+| `nested_loop_3` | loop-shape | 277.27 | 684.13 | 0.405x | 0.884x |
+| `stride_load_16` | memory-local | 104.20 | 246.40 | 0.423x | 0.332x |
+| `stride_load_4` | memory-local | 106.53 | 241.20 | 0.442x | 0.332x |
+| `bounds_ladder` | memory-local | 90.60 | 189.07 | 0.479x | 0.394x |
+| `binary_search` | control-flow | 212.77 | 442.17 | 0.481x | 0.449x |
+| `large_mixed_500` | program-scale | 354.67 | 511.97 | 0.693x | 0.464x |
+| `mixed_alu_mem` | alu-mix | 512.47 | 695.60 | 0.737x | 0.817x |
+| `large_mixed_1000` | program-scale | 743.67 | 1,001.60 | 0.742x | 0.419x |
+| `fixed_loop_small` | loop-shape | 103.53 | 136.43 | 0.759x | 0.359x |
+| `switch_dispatch` | control-flow | 211.67 | 268.33 | 0.789x | 0.800x |
+| `fibonacci_iter` | loop-shape | 577.03 | 718.97 | 0.803x | 0.395x |
+| `fibonacci_iter_packet` | loop-shape | 599.27 | 732.20 | 0.818x | 0.343x |
+| `nested_loop_2` | loop-shape | 440.57 | 535.27 | 0.823x | 0.501x |
+| `dep_chain_short` | dependency-ilp | 126.83 | 147.23 | 0.861x | 0.413x |
+| `spill_pressure` | dependency-ilp | 255.57 | 293.50 | 0.871x | 0.759x |
+| `checksum` | memory-local | 10,829.10 | 12,031.43 | 0.900x | 0.418x |
+| `multi_acc_4` | dependency-ilp | 273.00 | 286.93 | 0.951x | 0.646x |
+| `multi_acc_8` | dependency-ilp | 435.83 | 458.47 | 0.951x | 0.756x |
+| `dep_chain_long` | dependency-ilp | 419.40 | 434.90 | 0.964x | 0.414x |
+| `packet_parse` | memory-local | 98.93 | 102.63 | 0.964x | 0.496x |
+| `log2_fold` | alu-mix | 312.30 | 310.50 | 1.006x | 0.659x |
+| `bounds_check_heavy` | memory-local | 283.13 | 253.10 | 1.119x | 0.807x |
+| `fixed_loop_large` | loop-shape | 1,492.97 | 1,251.10 | 1.193x | 0.425x |
+| `memory_pair_sum` | baseline | 19.10 | 15.27 | 1.251x | 0.238x |
+| `code_clone_2` | call-size | 409.43 | 324.83 | 1.260x | 0.492x |
+| `simple_packet` | baseline | 17.70 | 13.40 | 1.321x | 0.490x |
+| `branch_dense` | control-flow | 628.17 | 445.90 | 1.409x | 0.732x |
+| `simple` | baseline | 20.90 | 13.70 | 1.526x | 0.622x |
+| `bitcount` | alu-mix | 4,646.57 | 2,985.33 | 1.556x | 0.446x |
+| `code_clone_8` | call-size | 2,266.93 | 1,206.97 | 1.878x | 0.542x |
 
-注：`memory_pair_sum` 和 `simple` 的 kernel exec < 50ns，低于 `ktime_get_ns` 分辨率，数值不可靠。
+### 6.1b 统计严谨性分析（authoritative 31-case run）
 
-### 6.1b 统计严谨性分析（30 iterations × 1000 repeats）
-
-> 数据来源：`micro/results/pure_jit_rigorous.json`，分析脚本：`micro/analyze_statistics.py`
-> Bootstrap iterations: 10,000; 种子 0; 完整报告见 `micro/results/pure_jit_rigorous_analysis.md`
-
-**Suite-Level（Bootstrap CI）**
+> 本节以 `micro/results/pure_jit_authoritative_analysis.md` 为准，替代旧的 `22`-case pilot。
+> Primary test: matched `iteration_index` paired Wilcoxon signed-rank + Benjamini-Hochberg correction；Bootstrap `10000` 次（seed `0`）用于 geomean 95% CI；Mann-Whitney U 仅作补充参考。
 
 | 指标 | 值 |
 |------|---:|
-| Exec ratio geomean (L/K) | 0.823 |
-| 95% CI | [0.801, 0.847] |
-| 统计显著 benchmarks (p < 0.05) | 16 / 22 |
+| Benchmarks with valid paired Wilcoxon input | 31 / 31 |
+| Exec ratio geomean (L/K) | 0.849x |
+| 95% CI | [0.834, 0.865] |
+| 统计显著 benchmarks (BH-adjusted paired Wilcoxon p < 0.05) | 25 / 31 |
+| 不显著 benchmarks | `simple_packet`, `log2_fold`, `dep_chain_long`, `packet_parse`, `bounds_check_heavy`, `multi_acc_4` |
 
-**显著性与效应量**
-
-| Benchmark | Exec Ratio | 95% CI | Cohen's d | Mann-Whitney p | Significant |
-|-----------|---:|---|---:|---:|---|
-| branch_layout | 0.269 | [0.263, 0.275] | -15.952 | 7.70e-12 | Yes |
-| checksum | 0.894 | [0.892, 0.898] | -15.849 | 2.88e-11 | Yes |
-| stride_load_16 | 0.434 | [0.412, 0.458] | -5.245 | 1.06e-11 | Yes |
-| fibonacci_iter | 0.848 | [0.832, 0.864] | -4.298 | 3.20e-11 | Yes |
-| binary_search | 0.502 | [0.463, 0.562] | -4.179 | 2.39e-10 | Yes |
-| code_clone_8 | 1.919 | [1.810, 2.049] | 4.588 | 2.89e-11 | Yes |
-| bitcount | 1.536 | [1.483, 1.594] | 7.073 | 3.02e-11 | Yes |
-| fixed_loop_large | 1.193 | [1.164, 1.220] | 4.079 | 4.40e-10 | Yes |
-
-**6 个不显著 benchmarks 的诊断**
-
-| Benchmark | p-value | CV (llvmbpf / kernel) | 诊断 |
-|-----------|---:|---|---|
-| simple | 0.651 | 0.026 / 0.677 | kernel 极高方差 (ktime 分辨率) |
-| memory_pair_sum | 0.069 | 0.041 / 0.799 | kernel 极高方差 (ktime 分辨率) |
-| log2_fold | 0.615 | 0.019 / 0.130 | 真正接近 (ratio=0.997) |
-| dep_chain_short | 1.000 | 0.016 / 0.258 | kernel 高方差 |
-| packet_parse | 0.161 | 0.006 / 0.341 | kernel 高方差掩盖差异 |
-| multi_acc_8 | 0.329 | 0.187 / 0.132 | 真正接近 (ratio=0.993) |
-
-**关键发现**：kernel 侧测量方差系统性偏高（CV 中位数 0.152 vs llvmbpf 0.031）。原因：BPF_PROG_TEST_RUN 通过 ktime_get_ns 测量，包含内核调度噪声；llvmbpf 用 rdtsc 在用户态稳定得多。6 个不显著中有 4 个是 kernel 方差过高导致统计检验力不足，2 个是真正的性能相当。
+**结论**：authoritative 数据确认整体结论不变：llvmbpf 在多数 benchmark 上执行更快，但仍有少数 case 接近持平或受短时窗口噪声影响而未达显著。旧 `22`-case pilot 仅保留为历史记录，不再作为正文结论依据。
 
 ### 6.1c BCF 静态字节码分析与 Helper Pareto (H4)
 
@@ -293,15 +280,15 @@ BPF:      CONFIG_BPF_JIT=y, CONFIG_BPF_SYSCALL=y, BTF enabled
 
 ### 6.1e 编译时间分析
 
-> 数据来源：`micro/results/pure_jit_rigorous_analysis.md` (Compile Time Analysis section)
+> 数据来源：`micro/results/pure_jit_authoritative_analysis.md` (Compile Time Analysis section)
 
 | 指标 | 值 |
 |------|---:|
-| llvmbpf/kernel compile time geomean | 3.62x |
-| llvmbpf 更快的 benchmark | 5/22 (bitcount, binary_search, branch_layout, switch_dispatch, checksum) |
-| llvmbpf 更慢的 benchmark | 17/22 |
+| llvmbpf/kernel compile time geomean | 3.394x |
+| llvmbpf 更快的 benchmark | 5/31 (`bitcount`, `binary_search`, `branch_layout`, `switch_dispatch`, `checksum`) |
+| llvmbpf 更慢的 benchmark | 26/31（其中 `branch_dense` 近似持平，ratio=`1.004x`） |
 
-**模式**：对于小程序 (< 200 BPF insns)，llvmbpf LLVM -O3 开销主导，编译慢 8-16x。对于大/复杂程序（bitcount 134 insns 但循环展开重），kernel verifier + JIT 反而更慢。编译时间差异对 networking fast-path 不重要（一次性开销），但对频繁加载场景（如 Cilium live reload）有影响。
+**模式**：对于小程序 (< 200 BPF insns)，llvmbpf LLVM -O3 开销主导，编译常见慢 `8`-`16x`。对于部分大/复杂程序（如 `bitcount`、`binary_search`、`branch_layout`、`switch_dispatch`、`checksum`），kernel verifier + JIT 反而更慢。编译时间差异对 networking fast-path 不重要（一次性开销），但对频繁加载场景（如 Cilium live reload）有影响。
 
 ### 6.1f kernel 侧 rdtsc 测量（测量方法对齐）
 
@@ -433,8 +420,8 @@ kernel_runner 现在同时输出：
 - [x] **T3.3 Helper 调用频率 Pareto 分析 (H4)** — Top-5 = 81.56%，H4 验证通过。详见 §6.1c
 
 **TODO — 深度加强（rigorous root cause）：**
-- [x] **T3.4 编译时间分析** — geomean L/K = 3.62x。5/22 llvmbpf 更快（大程序），17/22 kernel 更快（小程序）。详见 §6.1e
-- [x] **T3.5 统计严谨性补充** — 30 iterations × 1000 repeats，bootstrap CI + Cohen's d + Mann-Whitney U + BH correction。详见 §6.1b
+- [x] **T3.4 编译时间分析** — authoritative 31-case run geomean L/K = 3.394x。5/31 llvmbpf 更快，26/31 kernel 更快（其中 `branch_dense` 近似持平）。详见 §6.1e
+- [x] **T3.5 统计严谨性补充** — authoritative 31-case run，30 iterations × 1000 repeats，bootstrap CI + paired Wilcoxon + BH correction。详见 §6.1b
 - [ ] **T3.6 时间域因素分解** — 指令层分析只回答"多了多少指令"，不回答"慢了多少时间"。需要：(a) 用 PMU 的 IPC 数据估算各类指令的时间贡献；(b) 构建针对性 micro-benchmark 隔离 byte-recompose 的时间开销
 - [ ] **T3.7 LLVM Pass-level 消融** — 不只是 O0/O1/O2/O3，而是逐个 pass 启用（instcombine、GVN、RegAlloc、SimplifyCFG 等），识别对 BPF 最有价值的 pass
 - [ ] **T3.8 Perf counter 相关性分析** — IPC/branch-miss/cache-miss vs exec ratio 的 Pearson/Spearman 相关系数矩阵
