@@ -77,7 +77,9 @@
 
 #### G4. 因果归因不足
 
-**Status**: OPEN. 目前还没有 time-domain decomposition。
+**Status**: PARTIALLY RESOLVED — qualitative categorization complete.
+
+`micro/results/paradox_analysis.md` 已将 `10/31` 个 paradox case 分为 `4` 类因果解释（sub-resolution / tight-loop / code-clone / branch-heavy），定性回答了 "为什么更小但更慢"；但 time-domain decomposition 仍未完成，尚需定量实验隔离各机制的时间贡献。
 
 **问题**：知道"代码更小但更慢"，但不能量化每种指令模式对执行时间的贡献。
 
@@ -153,7 +155,7 @@
 | B2 | 时间序列稳定性图 + Wilcoxon drift 检验 | 已完成 | 2h | A4 数据 |
 | B3 | PMU 相关矩阵（IPC vs ratio, branch_miss vs ratio） | 未完成 | 2h | A4 数据 |
 | B4 | 代表性论证：BCF 特征空间 + benchmark 覆盖可视化 | 部分完成 | 3h | 已有数据 |
-| B5 | 因果时间分解：byte-recompose 等模式的时间贡献 | 未完成 | 4h | A4 数据 |
+| B5 | 因果时间分解：byte-recompose 等模式的时间贡献（paradox analysis 已完成 `10/31` case 的 `4` 类定性分类，见 `micro/results/paradox_analysis.md`） | 部分完成 | 4h | A4 数据 |
 | B6 | 60+ 个真实程序 code-size 批量对比 | 部分完成 | 2h | 多源 slice 已完成：扫描 `4` 个 repo / `77` artifacts / `949` discovered，当前 paired 为 `105` instances / `27` unique programs（来自 `cilium` + `libbpf-bootstrap`） |
 
 ### Phase 3 — 锦上添花（P2-P3）
@@ -178,9 +180,10 @@
    → 代码大小 `0.496x`（LLVM 指令消除 + 寄存器分配 + 分支优化）
    → 但 `10/31` 更小更慢（关键路径不缩短，byte-recompose 占 `50.7%` extra insns）
    → 补充 PMU 证据：当前仅 `3` 个 dual-runtime IPC benchmark，可作定性参考，不作为主因果证据
+   → paradox 因果分类：`10/31` 更小更慢的 case 分为 `4` 类（sub-resolution / tight-loop / code-clone / branch-heavy），见 `micro/results/paradox_analysis.md`
 
 4. 对谁有用？
-   → BCF 1588 个程序特征分布证明微基准覆盖了主要特征区域
+   → BCF 1588 个程序特征分布表明微基准覆盖了部分关键特征区域（feature-box 覆盖率仅 `0.8%`，仍需扩展）
    → 多源真实程序 code-size 验证已扫描 `4` 个 repo；当前在 `cilium` + `libbpf-bootstrap` 上得到 `105` 个 paired instances（`27` 个 unique programs），geomean `0.573x`
    → 下一步扩到跨 repo 的 60+ program execution/code-size 验证（外部效度）
    → 具体 patch 建议（cmov 支持、按需 callee-saved、byte-recompose 优化）
