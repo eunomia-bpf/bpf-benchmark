@@ -77,16 +77,16 @@
 
 #### G4. 因果归因不足
 
-**Status**: PARTIALLY RESOLVED — qualitative categorization complete.
+**Status**: PARTIALLY RESOLVED — qualitative categorization complete + quantitative byte-recompose time decomposition (4 causal benchmarks, geomean 0.660x, 4/4 significant)
 
-`micro/results/paradox_analysis.md` 已将 `10/31` 个 paradox case 分为 `4` 类因果解释（sub-resolution / tight-loop / code-clone / branch-heavy），定性回答了 "为什么更小但更慢"；但 time-domain decomposition 仍未完成，尚需定量实验隔离各机制的时间贡献。
+`micro/results/paradox_analysis.md` 已将 `10/31` 个 paradox case 分为 `4` 类因果解释（sub-resolution / tight-loop / code-clone / branch-heavy），定性回答了 "为什么更小但更慢"；`micro/results/causal_isolation_analysis.md` 现已补充 `4` 个 causal benchmarks，定量给出 byte-recompose 的时间代价：`load_byte_recompose` 为 `0.447x`，而非 recompose 的 baseline memory operations（`load_word32` `0.779x`、`load_native_u64` `0.776x`）约为 `0.78x`。这解决了 byte-recompose 机制的 time-domain decomposition，但其他机制的时间分解仍未完成。
 
 **问题**：知道"代码更小但更慢"，但不能量化每种指令模式对执行时间的贡献。
 
 **OSDI 审稿人会问**："byte-recompose 占了 50.7% 的额外指令，但占了多少额外时间？"
 
 **修复方案（P1）**：
-1. **微基准隔离法**：构建一对 benchmark，一个有大量 byte-recompose pattern，一个没有，差值即为该模式的时间贡献
+1. **微基准隔离法**：已完成 byte-recompose 隔离，`4` 个 causal benchmarks 的 exec geomean 为 `0.660x`，且 `4/4` 显著；后续若需要更完整的因果分解，可继续扩展到 branch / prologue 等模式
 2. **补充 PMU 相关分析（supplementary only）**：若后续能拿到更多可用 IPC 数据，可结合指令数差异做定性时间分解，但不作为主因果证据：
    - `extra_time = extra_insns / IPC_observed`
    - 按指令类型分解：prologue, byte-recompose, branches, other

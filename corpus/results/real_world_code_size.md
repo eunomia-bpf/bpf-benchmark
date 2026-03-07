@@ -1,6 +1,6 @@
 # Real-World Code-Size Validation
 
-- Generated at: `2026-03-07T04:45:16.213675+00:00`
+- Generated at: `2026-03-07T23:08:42.939988+00:00`
 - Inventory: `/home/yunwei37/workspace/bpf-benchmark/corpus/inventory.json`
 - Runner: `/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec`
 - Corpora: `libbpf-bootstrap`, `bcf/cilium`, `bcf/inspektor-gadget`, `bcf/collected`
@@ -14,40 +14,21 @@
 | Artifact prepare/build succeeded | 77 |
 | Program inventories succeeded | 77 |
 | Programs discovered | 949 |
-| Programs with both runtimes ok | 105 |
-| Geomean native code-size ratio (llvmbpf/kernel) | 0.573x |
+| Programs with both runtimes ok | 162 |
+| Geomean native code-size ratio (llvmbpf/kernel) | 0.618x |
 
 ## Runtime Status
 
 | Runtime | ok | error | timeout |
 | --- | ---: | ---: | ---: |
-| llvmbpf | 890 | 59 | 0 |
+| llvmbpf | 948 | 1 | 0 |
 | kernel | 162 | 787 | 0 |
 
 ## llvmbpf Failures
 
 | Error summary | Count |
 | --- | ---: |
-| llvmbpf compile failed: Ext func not found: _bpf_helper_ext_0000 | 27 |
-| llvmbpf compile failed: Instruction at pc=81 is going to jump to an illegal position 88 | 4 |
-| llvmbpf compile failed: Instruction at pc=1 is going to jump to an illegal position 1 | 2 |
-| llvmbpf compile failed: Instruction at pc=100 is going to jump to an illegal position 107 | 2 |
-| llvmbpf compile failed: Instruction at pc=191 is going to jump to an illegal position 203 | 2 |
-| llvmbpf compile failed: Instruction at pc=253 is going to jump to an illegal position 268 | 2 |
-| llvmbpf compile failed: Instruction at pc=276 is going to jump to an illegal position 291 | 2 |
-| llvmbpf compile failed: Instruction at pc=315 is going to jump to an illegal position 321 | 2 |
-| llvmbpf compile failed: Instruction at pc=4 is going to jump to an illegal position 4 | 2 |
-| llvmbpf compile failed: Instruction at pc=489 is going to jump to an illegal position 495 | 2 |
-| llvmbpf compile failed: Instruction at pc=556 is going to jump to an illegal position 559 | 2 |
-| llvmbpf compile failed: Loaded LDDW at pc=224 which requires an extra pseudo instruction, but the next instruction is not a legal one | 2 |
 | llvmbpf compile failed: Instruction at pc=125 is going to jump to an illegal position 125 | 1 |
-| llvmbpf compile failed: Instruction at pc=142 is going to jump to an illegal position 154 | 1 |
-| llvmbpf compile failed: Instruction at pc=202 is going to jump to an illegal position 214 | 1 |
-| llvmbpf compile failed: Instruction at pc=669 is going to jump to an illegal position 675 | 1 |
-| llvmbpf compile failed: Loaded LDDW at pc=314 which requires an extra pseudo instruction, but the next instruction is not a legal one | 1 |
-| llvmbpf compile failed: Loaded LDDW at pc=325 which requires an extra pseudo instruction, but the next instruction is not a legal one | 1 |
-| llvmbpf compile failed: Loaded LDDW at pc=419 which requires an extra pseudo instruction, but the next instruction is not a legal one | 1 |
-| llvmbpf compile failed: Loaded LDDW at pc=518 which requires an extra pseudo instruction, but the next instruction is not a legal one | 1 |
 
 ## kernel Failures
 
@@ -141,26 +122,48 @@
 | bcf/cilium | `clang-19_-O1_bpf_lxc.o` | `cil_from_container` | `tc` | 110 | 287 | 709 | 0.405x |
 | bcf/cilium | `clang-20_-O1_bpf_lxc.o` | `cil_from_container` | `tc` | 110 | 287 | 709 | 0.405x |
 | bcf/cilium | `clang-21_-O1_bpf_lxc.o` | `cil_from_container` | `tc` | 110 | 287 | 709 | 0.405x |
+| bcf/cilium | `clang-14_-O1_bpf_lxc.o` | `cil_to_container` | `tc` | 272 | 638 | 1551 | 0.411x |
+| bcf/cilium | `clang-15_-O1_bpf_lxc.o` | `cil_to_container` | `tc` | 272 | 638 | 1551 | 0.411x |
+| bcf/cilium | `clang-16_-O1_bpf_lxc.o` | `cil_to_container` | `tc` | 270 | 658 | 1547 | 0.425x |
+| bcf/cilium | `clang-17_-O1_bpf_lxc.o` | `cil_to_container` | `tc` | 270 | 658 | 1547 | 0.425x |
+| bcf/cilium | `clang-18_-O1_bpf_lxc.o` | `cil_to_container` | `tc` | 264 | 653 | 1533 | 0.426x |
+| bcf/cilium | `clang-19_-O1_bpf_lxc.o` | `cil_to_container` | `tc` | 264 | 653 | 1533 | 0.426x |
+| bcf/cilium | `clang-20_-O1_bpf_lxc.o` | `cil_to_container` | `tc` | 264 | 653 | 1533 | 0.426x |
+| bcf/cilium | `clang-21_-O1_bpf_lxc.o` | `cil_to_container` | `tc` | 264 | 653 | 1533 | 0.426x |
 | libbpf-bootstrap | `examples/c/minimal.bpf.c` | `handle_tp` | `tp/syscalls/sys_enter_write` | 13 | 30 | 67 | 0.448x |
-| bcf/cilium | `clang-14_-O1_bpf_lxc.o` | `handle_policy_egress` | `tc` | 89 | 256 | 548 | 0.467x |
-| bcf/cilium | `clang-15_-O1_bpf_lxc.o` | `handle_policy_egress` | `tc` | 89 | 256 | 548 | 0.467x |
-| bcf/cilium | `clang-16_-O1_bpf_lxc.o` | `handle_policy_egress` | `tc` | 89 | 256 | 548 | 0.467x |
-| bcf/cilium | `clang-17_-O1_bpf_lxc.o` | `handle_policy_egress` | `tc` | 89 | 256 | 548 | 0.467x |
 | libbpf-bootstrap | `examples/c/bootstrap_legacy.bpf.c` | `handle_exec` | `tp/sched/sched_process_exec` | 81 | 212 | 452 | 0.469x |
-| bcf/cilium | `clang-16_-O1_bpf_overlay.o` | `cil_to_overlay` | `tc` | 206 | 594 | 1212 | 0.490x |
-| bcf/cilium | `clang-17_-O1_bpf_overlay.o` | `cil_to_overlay` | `tc` | 206 | 594 | 1212 | 0.490x |
-| bcf/cilium | `clang-18_-O1_bpf_overlay.o` | `cil_to_overlay` | `tc` | 206 | 594 | 1212 | 0.490x |
-| bcf/cilium | `clang-19_-O1_bpf_overlay.o` | `cil_to_overlay` | `tc` | 206 | 594 | 1212 | 0.490x |
-| bcf/cilium | `clang-20_-O1_bpf_overlay.o` | `cil_to_overlay` | `tc` | 206 | 594 | 1212 | 0.490x |
-| bcf/cilium | `clang-21_-O1_bpf_overlay.o` | `cil_to_overlay` | `tc` | 206 | 594 | 1212 | 0.490x |
+| bcf/cilium | `clang-14_-O1_bpf_overlay.o` | `cil_to_overlay` | `tc` | 211 | 606 | 1226 | 0.494x |
 | bcf/cilium | `clang-14_-O1_bpf_overlay.o` | `cil_from_overlay` | `tc` | 206 | 599 | 1207 | 0.496x |
 | bcf/cilium | `clang-15_-O1_bpf_overlay.o` | `cil_from_overlay` | `tc` | 206 | 599 | 1207 | 0.496x |
 | bcf/cilium | `clang-16_-O1_bpf_overlay.o` | `cil_from_overlay` | `tc` | 206 | 599 | 1207 | 0.496x |
 | bcf/cilium | `clang-17_-O1_bpf_overlay.o` | `cil_from_overlay` | `tc` | 206 | 599 | 1207 | 0.496x |
+| bcf/cilium | `clang-15_-O1_bpf_overlay.o` | `cil_to_overlay` | `tc` | 209 | 611 | 1218 | 0.502x |
 | bcf/cilium | `clang-18_-O1_bpf_overlay.o` | `cil_from_overlay` | `tc` | 206 | 606 | 1207 | 0.502x |
 | bcf/cilium | `clang-19_-O1_bpf_overlay.o` | `cil_from_overlay` | `tc` | 206 | 606 | 1207 | 0.502x |
 | bcf/cilium | `clang-20_-O1_bpf_overlay.o` | `cil_from_overlay` | `tc` | 206 | 606 | 1207 | 0.502x |
 | bcf/cilium | `clang-21_-O1_bpf_overlay.o` | `cil_from_overlay` | `tc` | 206 | 606 | 1207 | 0.502x |
+| bcf/cilium | `clang-14_-O1_bpf_lxc.o` | `handle_policy_egress` | `tc` | 89 | 276 | 548 | 0.504x |
+| bcf/cilium | `clang-15_-O1_bpf_lxc.o` | `handle_policy_egress` | `tc` | 89 | 276 | 548 | 0.504x |
+| bcf/cilium | `clang-16_-O1_bpf_lxc.o` | `handle_policy_egress` | `tc` | 89 | 276 | 548 | 0.504x |
+| bcf/cilium | `clang-17_-O1_bpf_lxc.o` | `handle_policy_egress` | `tc` | 89 | 276 | 548 | 0.504x |
+| bcf/cilium | `clang-18_-O1_bpf_lxc.o` | `handle_policy_egress` | `tc` | 89 | 276 | 548 | 0.504x |
+| bcf/cilium | `clang-19_-O1_bpf_lxc.o` | `handle_policy_egress` | `tc` | 89 | 276 | 548 | 0.504x |
+| bcf/cilium | `clang-20_-O1_bpf_lxc.o` | `handle_policy_egress` | `tc` | 89 | 276 | 548 | 0.504x |
+| bcf/cilium | `clang-21_-O1_bpf_lxc.o` | `handle_policy_egress` | `tc` | 89 | 276 | 548 | 0.504x |
+| bcf/cilium | `clang-16_-O1_bpf_overlay.o` | `cil_to_overlay` | `tc` | 206 | 611 | 1212 | 0.504x |
+| bcf/cilium | `clang-17_-O1_bpf_overlay.o` | `cil_to_overlay` | `tc` | 206 | 611 | 1212 | 0.504x |
+| bcf/cilium | `clang-18_-O1_bpf_overlay.o` | `cil_to_overlay` | `tc` | 206 | 611 | 1212 | 0.504x |
+| bcf/cilium | `clang-19_-O1_bpf_overlay.o` | `cil_to_overlay` | `tc` | 206 | 611 | 1212 | 0.504x |
+| bcf/cilium | `clang-20_-O1_bpf_overlay.o` | `cil_to_overlay` | `tc` | 206 | 611 | 1212 | 0.504x |
+| bcf/cilium | `clang-21_-O1_bpf_overlay.o` | `cil_to_overlay` | `tc` | 206 | 611 | 1212 | 0.504x |
+| bcf/cilium | `clang-14_-O1_bpf_lxc.o` | `handle_policy` | `tc` | 88 | 276 | 545 | 0.506x |
+| bcf/cilium | `clang-15_-O1_bpf_lxc.o` | `handle_policy` | `tc` | 88 | 276 | 545 | 0.506x |
+| bcf/cilium | `clang-16_-O1_bpf_lxc.o` | `handle_policy` | `tc` | 88 | 276 | 545 | 0.506x |
+| bcf/cilium | `clang-17_-O1_bpf_lxc.o` | `handle_policy` | `tc` | 88 | 276 | 545 | 0.506x |
+| bcf/cilium | `clang-18_-O1_bpf_lxc.o` | `handle_policy` | `tc` | 88 | 276 | 545 | 0.506x |
+| bcf/cilium | `clang-19_-O1_bpf_lxc.o` | `handle_policy` | `tc` | 88 | 276 | 545 | 0.506x |
+| bcf/cilium | `clang-20_-O1_bpf_lxc.o` | `handle_policy` | `tc` | 88 | 276 | 545 | 0.506x |
+| bcf/cilium | `clang-21_-O1_bpf_lxc.o` | `handle_policy` | `tc` | 88 | 276 | 545 | 0.506x |
 | bcf/cilium | `clang-20_-O1_bpf_host.o` | `cil_from_netdev` | `tc` | 1127 | 3090 | 5788 | 0.534x |
 | bcf/cilium | `clang-21_-O1_bpf_host.o` | `cil_from_netdev` | `tc` | 1127 | 3090 | 5788 | 0.534x |
 | libbpf-bootstrap | `examples/c/fentry.bpf.c` | `do_unlinkat_exit` | `fexit/do_unlinkat` | 13 | 55 | 102 | 0.539x |
@@ -176,9 +179,17 @@
 | libbpf-bootstrap | `examples/c/uprobe.bpf.c` | `uretprobe_add` | `uretprobe` | 7 | 24 | 41 | 0.585x |
 | libbpf-bootstrap | `examples/c/uprobe.bpf.c` | `uretprobe_sub` | `uretprobe//proc/self/exe:uprobed_sub` | 7 | 24 | 41 | 0.585x |
 | libbpf-bootstrap | `examples/c/uprobe.bpf.c` | `uprobe_sub` | `uprobe//proc/self/exe:uprobed_sub` | 8 | 28 | 45 | 0.622x |
+| bcf/cilium | `clang-20_-O1_bpf_host.o` | `cil_from_host` | `tc` | 1016 | 3298 | 5067 | 0.651x |
+| bcf/cilium | `clang-21_-O1_bpf_host.o` | `cil_from_host` | `tc` | 1016 | 3298 | 5067 | 0.651x |
+| bcf/cilium | `clang-14_-O1_bpf_host.o` | `cil_from_host` | `tc` | 996 | 3329 | 5096 | 0.653x |
+| bcf/cilium | `clang-15_-O1_bpf_host.o` | `cil_from_host` | `tc` | 996 | 3329 | 5096 | 0.653x |
+| bcf/cilium | `clang-17_-O1_bpf_host.o` | `cil_from_host` | `tc` | 998 | 3296 | 5036 | 0.654x |
 | libbpf-bootstrap | `examples/c/task_iter.bpf.c` | `get_tasks` | `iter/task` | 45 | 159 | 239 | 0.665x |
 | libbpf-bootstrap | `examples/c/kprobe.bpf.c` | `do_unlinkat_exit` | `kretprobe/do_unlinkat` | 11 | 39 | 58 | 0.672x |
 | libbpf-bootstrap | `examples/c/ksyscall.bpf.c` | `entry_probe` | `ksyscall/kill` | 57 | 155 | 230 | 0.674x |
+| bcf/cilium | `clang-16_-O1_bpf_host.o` | `cil_from_host` | `tc` | 995 | 3459 | 5098 | 0.679x |
+| bcf/cilium | `clang-18_-O1_bpf_host.o` | `cil_from_host` | `tc` | 1008 | 3506 | 5055 | 0.694x |
+| bcf/cilium | `clang-19_-O1_bpf_host.o` | `cil_from_host` | `tc` | 1008 | 3506 | 5055 | 0.694x |
 | libbpf-bootstrap | `examples/c/tc.bpf.c` | `tc_ingress` | `tc` | 18 | 73 | 100 | 0.730x |
 | bcf/cilium | `clang-14_-O1_bpf_sock.o` | `cil_sock6_recvmsg` | `cgroup/recvmsg6` | 576 | 2287 | 2846 | 0.804x |
 | bcf/cilium | `clang-14_-O1_bpf_sock.o` | `cil_sock4_recvmsg` | `cgroup/recvmsg4` | 225 | 943 | 1145 | 0.824x |
@@ -208,10 +219,14 @@
 | bcf/cilium | `clang-20_-O1_bpf_sock.o` | `cil_sock4_post_bind` | `cgroup/post_bind4` | 96 | 404 | 475 | 0.851x |
 | bcf/cilium | `clang-21_-O1_bpf_sock.o` | `cil_sock4_post_bind` | `cgroup/post_bind4` | 96 | 404 | 475 | 0.851x |
 | bcf/cilium | `clang-15_-O1_bpf_sock.o` | `cil_sock6_post_bind` | `cgroup/post_bind6` | 209 | 864 | 1010 | 0.855x |
+| bcf/cilium | `clang-15_-O1_bpf_host.o` | `cil_to_host` | `tc` | 804 | 3368 | 3935 | 0.856x |
 | bcf/cilium | `clang-16_-O1_bpf_sock.o` | `cil_sock4_post_bind` | `cgroup/post_bind4` | 94 | 404 | 471 | 0.858x |
 | bcf/cilium | `clang-16_-O1_bpf_sock.o` | `cil_sock6_post_bind` | `cgroup/post_bind6` | 205 | 864 | 1001 | 0.863x |
 | bcf/cilium | `clang-17_-O1_bpf_sock.o` | `cil_sock6_post_bind` | `cgroup/post_bind6` | 212 | 880 | 1019 | 0.864x |
+| bcf/cilium | `clang-16_-O1_bpf_host.o` | `cil_to_host` | `tc` | 791 | 3368 | 3887 | 0.866x |
+| bcf/cilium | `clang-17_-O1_bpf_host.o` | `cil_to_host` | `tc` | 792 | 3368 | 3886 | 0.867x |
 | libbpf-bootstrap | `examples/c/profile.bpf.c` | `profile` | `perf_event` | 45 | 198 | 227 | 0.872x |
+| libbpf-bootstrap | `examples/c/usdt.bpf.c` | `usdt_manual_attach` | `usdt` | 26 | 570 | 653 | 0.873x |
 | bcf/cilium | `clang-18_-O1_bpf_sock.o` | `cil_sock6_post_bind` | `cgroup/post_bind6` | 210 | 887 | 1016 | 0.873x |
 | bcf/cilium | `clang-19_-O1_bpf_sock.o` | `cil_sock6_post_bind` | `cgroup/post_bind6` | 210 | 887 | 1016 | 0.873x |
 | bcf/cilium | `clang-20_-O1_bpf_sock.o` | `cil_sock6_post_bind` | `cgroup/post_bind6` | 210 | 887 | 1016 | 0.873x |
@@ -225,7 +240,30 @@
 | bcf/cilium | `clang-20_-O1_bpf_sock.o` | `cil_sock6_sendmsg` | `cgroup/sendmsg6` | 1182 | 5113 | 5639 | 0.907x |
 | bcf/cilium | `clang-21_-O1_bpf_sock.o` | `cil_sock6_sendmsg` | `cgroup/sendmsg6` | 1182 | 5113 | 5639 | 0.907x |
 | libbpf-bootstrap | `examples/c/sockfilter.bpf.c` | `socket_handler` | `socket` | 72 | 336 | 363 | 0.926x |
+| bcf/collected | `ksnoop.bpf.o` | `kprobe_return` | `kretprobe/foo` | 4 | 2359 | 2517 | 0.937x |
+| bcf/cilium | `clang-17_-O1_bpf_host.o` | `cil_to_netdev` | `tc` | 3680 | 17766 | 18231 | 0.974x |
+| bcf/cilium | `clang-19_-O1_bpf_host.o` | `cil_to_host` | `tc` | 795 | 3771 | 3868 | 0.975x |
+| bcf/cilium | `clang-20_-O1_bpf_host.o` | `cil_to_host` | `tc` | 795 | 3771 | 3868 | 0.975x |
+| bcf/cilium | `clang-21_-O1_bpf_host.o` | `cil_to_host` | `tc` | 795 | 3771 | 3868 | 0.975x |
+| bcf/cilium | `clang-18_-O1_bpf_host.o` | `cil_to_host` | `tc` | 795 | 3771 | 3864 | 0.976x |
+| bcf/cilium | `clang-14_-O1_bpf_host.o` | `cil_to_host` | `tc` | 804 | 3820 | 3911 | 0.977x |
+| bcf/cilium | `clang-19_-O1_bpf_host.o` | `cil_to_netdev` | `tc` | 3620 | 17687 | 18005 | 0.982x |
+| bcf/cilium | `clang-20_-O1_bpf_host.o` | `cil_to_netdev` | `tc` | 3638 | 17751 | 17990 | 0.987x |
+| bcf/cilium | `clang-21_-O1_bpf_host.o` | `cil_to_netdev` | `tc` | 3638 | 17751 | 17990 | 0.987x |
+| bcf/cilium | `clang-18_-O1_bpf_host.o` | `cil_to_netdev` | `tc` | 3620 | 17813 | 18015 | 0.989x |
+| bcf/cilium | `clang-15_-O1_bpf_host.o` | `cil_to_netdev` | `tc` | 3701 | 18018 | 18182 | 0.991x |
+| bcf/cilium | `clang-16_-O1_bpf_host.o` | `cil_to_netdev` | `tc` | 3643 | 17934 | 17964 | 0.998x |
+| bcf/cilium | `clang-14_-O1_bpf_host.o` | `cil_to_netdev` | `tc` | 3704 | 18335 | 18130 | 1.011x |
+| bcf/cilium | `clang-15_-O1_bpf_host.o` | `handle_lxc_traffic` | `tc` | 2380 | 11760 | 11621 | 1.012x |
+| bcf/cilium | `clang-14_-O1_bpf_host.o` | `handle_lxc_traffic` | `tc` | 2369 | 11807 | 11511 | 1.026x |
 | libbpf-bootstrap | `examples/c/minimal_legacy.bpf.c` | `handle_tp` | `tp/syscalls/sys_enter_write` | 33 | 185 | 178 | 1.039x |
+| bcf/cilium | `clang-17_-O1_bpf_host.o` | `handle_lxc_traffic` | `tc` | 2373 | 12167 | 11609 | 1.048x |
+| bcf/cilium | `clang-16_-O1_bpf_host.o` | `handle_lxc_traffic` | `tc` | 2356 | 12339 | 11527 | 1.070x |
+| libbpf-bootstrap | `examples/c/usdt.bpf.c` | `usdt_auto_attach` | `usdt/libc.so.6:libc:setjmp` | 33 | 734 | 683 | 1.075x |
+| bcf/cilium | `clang-18_-O1_bpf_host.o` | `handle_lxc_traffic` | `tc` | 2379 | 12568 | 11668 | 1.077x |
+| bcf/cilium | `clang-20_-O1_bpf_host.o` | `handle_lxc_traffic` | `tc` | 2384 | 12637 | 11673 | 1.083x |
+| bcf/cilium | `clang-21_-O1_bpf_host.o` | `handle_lxc_traffic` | `tc` | 2384 | 12637 | 11673 | 1.083x |
+| bcf/cilium | `clang-19_-O1_bpf_host.o` | `handle_lxc_traffic` | `tc` | 2379 | 12613 | 11645 | 1.083x |
 
 ## Notes
 
