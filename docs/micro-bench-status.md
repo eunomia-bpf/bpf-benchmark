@@ -178,6 +178,10 @@ BPF:      CONFIG_BPF_JIT=y, CONFIG_BPF_SYSCALL=y, BTF enabled
 ### 5.1 Threats to Validity
 
 - 真实程序 execution-time 对比受 `BPF_PROG_TEST_RUN` 结构性限制：tracepoint/kprobe/perf_event 程序在 execution 模式下返回 `ENOTSUPP` (`524`)，TC 程序返回 `EINVAL`（缺少 classifier/act context），fentry/fexit 虽可执行但在 dummy input 下即使 `1000` repeats 也常见 `exec_ns=0`。因此本文将其视为方法边界而非待修复工程缺口：真实程序只做 code-size 外部验证，execution-time 结论仅基于 `40` 个 handcrafted microbenchmarks。
+- 单一平台：仅在 x86-64 Intel Arrow Lake-S 上测试，未覆盖 ARM64；BPF JIT 在 ARM64 上的后端代码可能不同，结论外推需谨慎。
+- `exec_ns` 计时来源不对等：kernel 使用 `ktime_get_ns`，llvmbpf 使用 `rdtsc`；两者都测纯 BPF 执行时间，但时钟源不同，因此需结合 `timing_source` 解读，并与 `wall_exec_ns` 区分。
+- PMU 范围不等价：kernel perf counters 包含 kernel-mode 事件，llvmbpf 只看 user-mode；当前 PMU 结果仅作定性补充证据，不进入主论证链。
+- 外部验证集中度：`105` 个 paired instances 含大量 clang 版本重复，按 unique program name 去重后仅 `27` 个 unique programs，且仅来自 `2` 个 repo（`cilium` 与 `libbpf-bootstrap`）。
 
 ## 6. 结果
 
@@ -277,8 +281,8 @@ BPF:      CONFIG_BPF_JIT=y, CONFIG_BPF_SYSCALL=y, BTF enabled
 
 | 指标 | 值 |
 |------|---:|
-| 有显著 drift 的 pair (p < 0.05) | 3 / 44 |
-| 强自相关的 pair (\|ACF(1)\| > 0.3) | 2 / 44 |
+| 有显著 drift 的 pair (p < 0.05) | 3 / 44（分析于较早 22-case 批次，44 对） |
+| 强自相关的 pair (\|ACF(1)\| > 0.3) | 2 / 44（分析于较早 22-case 批次，44 对） |
 | 最大 drift 幅度 | 1.92% (fibonacci_iter llvmbpf) |
 
 **结论**：测量系统在 30 iterations 运行期间保持高度稳定。3 个有 drift 的 pair 幅度均 < 2%，不影响结论。
@@ -441,7 +445,7 @@ authoritative `31`-case run 中，`10/31` 个 benchmark 出现 llvmbpf 代码更
 - [x] perf scope modes — `--perf-scope full_repeat_raw|full_repeat_avg`
 - [x] baseline subtraction fix — `baseline_adjustment` 仅在 `io_mode` 匹配时应用，避免 mixed-`io_mode` case 误扣基线
 
-**BCF 批量结果（2026-03-06）：**
+**BCF 批量结果（2026-03-06 early batch）：**
 - llvmbpf 编译成功率：60/1588（3.8%）
   - Cilium: 42/42 ✅（无 BPF-to-BPF call）
   - inspektor-gadget: 11/11 ✅
