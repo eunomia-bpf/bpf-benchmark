@@ -39,6 +39,16 @@
 - `run_micro.py` 现已在每个 iteration 内随机打乱 `llvmbpf/kernel` 顺序，并把 `runtime_order_seed` / `iteration_runtime_orders` 写入结果 JSON。
 - `baseline_adjustment` 现按 `io_mode` 匹配应用，mixed-`io_mode` case 不再误用 staged `simple` baseline。
 
+#### 本 session 已完成项（2026-03-07）
+
+- Interleaved counterbalanced sampling 已接入 authoritative pipeline。
+- Paired Wilcoxon 已作为 primary test；当前 `25/31` 在 BH 校正后仍显著。
+- `--strict-env` enforcement 已接入运行入口。
+- sub-resolution flagging 已加入结果与文档同步流程。
+- `31+9` authoritative results 已落盘并用于当前结论。
+- environment metadata 已随 run 一起记录。
+- BH FDR correction 已纳入主分析流程。
+
 ### 1.2 关键差距（含部分已修复项）
 
 #### G1. 测量方法不对等（已部分修复）
@@ -47,14 +57,9 @@
 
 **证据**：kernel CV 中位数 0.152 vs llvmbpf 0.031（5x 方差差异）。6 个不显著 benchmark 中 4 个因 kernel 方差过高。
 
-**当前状态（2026-03-07）**：
-- kernel 侧已新增 `wall_exec_ns` / `exec_cycles` / `tsc_freq_hz`
-- 每个 run 都记录 `timing_source`
-- `analyze_statistics.py` 已支持 `--metric exec_ns|wall_exec_ns`
+**Status**: PARTIALLY RESOLVED. kernel 侧已加入 `rdtsc`，`timing_source` 字段会记录计时来源，`wall_exec_ns` 可用于 matched-domain comparison；但当前主分析仍以 `exec_ns` 为主，因此仍是 mixed-domain 视角。
 
-**剩余差距**：默认 `exec_ns` 仍是 kernel=`ktime` / llvmbpf=`rdtsc`。论文需要明确主指标选择，并同步给出 `wall_exec_ns` 的对齐视角。
-
-**Status (resolved)**: Suite renamed from `micro_pure_jit` to `micro_staged_codegen` to accurately reflect the staged-input measurement model.
+**Remaining**: dual-metric analysis 正在补入。
 
 #### G2. 硬件计数器数据缺失（已部分修复）
 
@@ -62,23 +67,19 @@
 
 **原因**：执行窗口太短（< 1μs），`perf_event_open` 的 PMU 调度周期（~1ms）内来不及采样。
 
-**当前状态（2026-03-07）**：
-- runner 已支持 `full_repeat_avg` 模式
-- `run_micro.py` 与 `micro_exec` 已支持 `--perf-scope full_repeat_raw|full_repeat_avg`
+**Status**: PARTIALLY RESOLVED. cumulative PMU 基础设施已具备，`run_micro.py` 与 `micro_exec` 已支持 `--perf-scope full_repeat_raw|full_repeat_avg`；但 authoritative run 仍是在未启用 `--perf-counters` 的条件下完成。
 
-**剩余差距**：需要用新 scope 重跑 PMU，并把 IPC / branch-miss / cache-miss 关联分析补进主文。
+**Remaining**: 需要按新 scope 重跑 PMU，并把 IPC / branch-miss / cache-miss 关联分析补进主文。
 
 #### G3. 编译时间未报告（已修复）
 
-**当前状态（2026-03-07）**：
-- llvmbpf 编译时间 4-14 ms（LLVM -O3 代价）
-- kernel 编译时间 0.3-72 ms（简单程序快、复杂程序如 bitcount 72ms）
-- 比率范围：0.1x（bitcount: llvmbpf 更快）到 16x（simple: llvmbpf 更慢）
-- `analyze_statistics.py` 已输出 compile-time section
+**Status**: RESOLVED. authoritative analysis 已报告 compile time geomean `L/K = 3.394x`。
 
 ### 1.3 中等差距（显著提升论文质量）
 
 #### G4. 因果归因不足
+
+**Status**: OPEN. 目前还没有 time-domain decomposition。
 
 **问题**：知道"代码更小但更慢"，但不能量化每种指令模式对执行时间的贡献。
 
@@ -92,11 +93,11 @@
 
 #### G5. 缺乏时间序列稳定性分析（已修复）
 
-**当前状态（2026-03-07）**：
-- 时间序列图、drift 检验、ACF 分析已完成
-- 结论：3/44 pair 有显著 drift，但幅度均 < 2%，不影响结论
+**Status**: RESOLVED. `analyze_stability.py` 已存在；当前结论为 `3/44` drift 显著，但幅度均 `< 2%`。
 
 #### G6. 单一平台
+
+**Status**: OPEN. 当前仍只覆盖 x86-64。
 
 **问题**：只在 Intel Arrow Lake-S 上测试。
 
@@ -108,6 +109,8 @@
 
 #### G7. 代表性论证不足
 
+**Status**: PARTIALLY RESOLVED. suite 已扩展到 `31+9` benchmarks，`micro/results/representativeness_report.md` 已存在，且第一波 `libbpf-bootstrap` 外部验证已得到 `21` 个双 runtime 成功配对；但 feature-box 覆盖仍只有 `0.8%`。
+
 **问题**：22 个 benchmark 是手写的，审稿人会质疑代表性。
 
 **OSDI 审稿人会问**："你的 22 个微基准覆盖了真实 BPF 程序的哪些特征空间？"
@@ -117,10 +120,7 @@
 2. 把 22 个 benchmark 标注在分布上，证明覆盖了关键区域
 3. 用 60 个可编译的真实程序做 code-size 对比，验证微基准结论的外部效度
 
-**当前进展（2026-03-07）**：
-- 第 1 步已完成第一版：现有 `micro/results/representativeness_report.md`（基于 earlier 29+5 run）显示 combined suite 仅覆盖 `0.8%` 的 BCF 5D feature box；按当前 31+9 inventory，结论方向不变：micro 仍不能单独承担外部有效性。
-- 第 3 步已完成第一波：`corpus/run_real_world_code_size.py` 当前在 `libbpf-bootstrap` 上得到 `15` 个源文件、`24` 个真实 program、`21` 个双 runtime 成功配对，`llvmbpf/kernel` native code-size geomean 为 `0.575x`。
-- 还没完成的部分是把第一波扩成跨 repo 的 `60+` program，并补上可运行真实程序的 execution-time 子集。
+**Remaining**: 仍需把 feature-space 覆盖从 `0.8%` 往上推，并把第一波验证扩成跨 repo 的 `60+` program 与 execution-time 子集。
 
 ### 1.4 小差距（锦上添花）
 

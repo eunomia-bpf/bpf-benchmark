@@ -241,7 +241,10 @@ def build_runtime_rows(
             run = runs_by_runtime.get(runtime)
             if run is None:
                 continue
-            exec_samples = extract_exec_samples(run, metric)
+            try:
+                exec_samples = extract_exec_samples(run, metric)
+            except ValueError:
+                continue
             mean_value = float(np.mean(exec_samples))
             mean_ci_low, mean_ci_high = bootstrap_mean_ci(exec_samples, iterations, rng)
             stdev_value = sample_stdev(exec_samples)
@@ -266,10 +269,13 @@ def build_runtime_rows(
         if lhs_run is None or rhs_run is None:
             continue
 
-        lhs_exec_samples = extract_exec_samples_with_iteration(lhs_run, metric)
-        rhs_exec_samples = extract_exec_samples_with_iteration(rhs_run, metric)
-        lhs_exec = extract_exec_samples(lhs_run, metric)
-        rhs_exec = extract_exec_samples(rhs_run, metric)
+        try:
+            lhs_exec_samples = extract_exec_samples_with_iteration(lhs_run, metric)
+            rhs_exec_samples = extract_exec_samples_with_iteration(rhs_run, metric)
+            lhs_exec = extract_exec_samples(lhs_run, metric)
+            rhs_exec = extract_exec_samples(rhs_run, metric)
+        except ValueError:
+            continue
         ratio_distribution = bootstrap_ratio_distribution(lhs_exec, rhs_exec, iterations, rng)
         ratio_low, ratio_high = percentile_interval(ratio_distribution)
         lhs_mean = float(np.mean(lhs_exec))
@@ -533,7 +539,7 @@ def render_markdown(
         f"- Bootstrap seed: `{seed}`",
         f"- Selected execution metric: `{metric}`.",
         f"- Metric timing source: {metric_timing_note}",
-        f"- Exec ratio is defined as `mean({metric}_llvmbpf) / mean({metric}_kernel)`.",
+        f"- Primary ratio is defined as `mean({metric}_llvmbpf) / mean({metric}_kernel)`.",
         "- Ratio interpretation: values below `1.0` favor `llvmbpf`; values above `1.0` favor `kernel`.",
         "- Primary significance test: paired Wilcoxon signed-rank on matched `iteration_index` values with Benjamini-Hochberg correction.",
         "- Secondary significance test: raw Mann-Whitney U p-values are reported as supplementary context.",
@@ -580,13 +586,31 @@ def render_markdown(
             "| "
             f"{row['benchmark']} | "
             f"{format_ratio(row['exec_ratio'])} | "
-            f"{format_ci(row['exec_ratio_ci_low'], row['exec_ratio_ci_high'], precision=3)} | "
-            f"{format_ratio(row['cohen_d'])} | "
-            f"{format_pvalue(row['adjusted_pvalue'])} | "
-            f"{format_pvalue(row['mann_whitney_pvalue'])} | "
-            f"{'Yes' if row['significant'] else 'No'} | "
-            f"{code_size_ratio} | "
-            f"{row.get('notes') or ''} |"
+            + f"{format_ci(row['exec_ratio_ci_low'], row['exec_ratio_ci_high'], precision=3)} | "
+            + f"{format_ratio(row['cohen_d'])} | "
+            + f"{format_pvalue(row['adjusted_pvalue'])} | "
+            + f"{format_pvalue(row['mann_whitney_pvalue'])} | "
+            + f"{'Yes' if row['significant'] else 'No'} | "
+            + f"{code_size_ratio} | "
+            + f"{row.get('notes') or ''} |"
+        )
+
+    if metric == "exec_ns":
+        lines.extend(
+            [
+                "",
+                "## Metric Scope Note",
+                "",
+                (
+                    "`wall_exec_ns` is not suitable for cross-runtime comparison because kernel "
+                    "`wall_exec_ns` includes `BPF_PROG_TEST_RUN` syscall dispatch overhead "
+                    "(~200us), while llvmbpf `wall_exec_ns` is pure function-call latency. "
+                    "`exec_ns` remains the primary comparison metric because both runtimes measure "
+                    "pure BPF execution time, despite using different clocks "
+                    "(kernel=`ktime`, llvmbpf=`rdtsc`)."
+                ),
+                "",
+            ]
         )
 
     lines.extend(

@@ -7,7 +7,7 @@
 - Bootstrap seed: `0`
 - Selected execution metric: `exec_ns`.
 - Metric timing source: `exec_ns` from each sample's `exec_ns` field; `timing_source` by runtime: kernel=ktime, llvmbpf=rdtsc.
-- Exec ratio is defined as `mean(exec_ns_llvmbpf) / mean(exec_ns_kernel)`.
+- Primary ratio is defined as `mean(exec_ns_llvmbpf) / mean(exec_ns_kernel)`.
 - Ratio interpretation: values below `1.0` favor `llvmbpf`; values above `1.0` favor `kernel`.
 - Primary significance test: paired Wilcoxon signed-rank on matched `iteration_index` values with Benjamini-Hochberg correction.
 - Secondary significance test: raw Mann-Whitney U p-values are reported as supplementary context.
@@ -114,6 +114,11 @@
 | code_clone_8 | 1.878 | [1.780, 1.946] | 8.692 | 3.72e-06 | 2.99e-11 | Yes | 0.542 (422/778) |  |
 | large_mixed_500 | 0.693 | [0.671, 0.715] | -5.735 | 3.72e-06 | 2.77e-11 | Yes | 0.464 (1,022/2,201) |  |
 | large_mixed_1000 | 0.742 | [0.727, 0.760] | -7.237 | 3.72e-06 | 2.83e-11 | Yes | 0.419 (1,662/3,966) |  |
+
+## Metric Scope Note
+
+`wall_exec_ns` is not suitable for cross-runtime comparison because kernel `wall_exec_ns` includes `BPF_PROG_TEST_RUN` syscall dispatch overhead (~200us), while llvmbpf `wall_exec_ns` is pure function-call latency. `exec_ns` remains the primary comparison metric because both runtimes measure pure BPF execution time, despite using different clocks (kernel=`ktime`, llvmbpf=`rdtsc`).
+
 
 ## Suite Summary
 

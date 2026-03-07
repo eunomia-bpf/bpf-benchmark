@@ -7,7 +7,7 @@
 - Bootstrap seed: `0`
 - Selected execution metric: `exec_ns`.
 - Metric timing source: `exec_ns` from each sample's `exec_ns` field; `timing_source` by runtime: kernel=ktime, llvmbpf=rdtsc.
-- Exec ratio is defined as `mean(exec_ns_llvmbpf) / mean(exec_ns_kernel)`.
+- Primary ratio is defined as `mean(exec_ns_llvmbpf) / mean(exec_ns_kernel)`.
 - Ratio interpretation: values below `1.0` favor `llvmbpf`; values above `1.0` favor `kernel`.
 - Primary significance test: paired Wilcoxon signed-rank on matched `iteration_index` values with Benjamini-Hochberg correction.
 - Secondary significance test: raw Mann-Whitney U p-values are reported as supplementary context.
@@ -43,11 +43,16 @@
 | map_roundtrip | 0.726 | [0.695, 0.753] | -3.530 | 3.42e-06 | 2.89e-11 | Yes | 0.609 (308/506) |  |
 | hash_map_lookup | 0.681 | [0.647, 0.715] | -3.385 | 3.42e-06 | 2.94e-11 | Yes | 0.871 (472/542) |  |
 | percpu_map_update | 0.490 | [0.466, 0.516] | -6.738 | 3.42e-06 | 2.77e-11 | Yes | 0.654 (274/419) |  |
-| helper_call_1 | 1.047 | [0.857, 1.312] | 0.109 | 0.8367 | 0.0429 | No | 0.649 (237/365) |  |
+| helper_call_1 | 1.047 | [0.857, 1.312] | 0.109 | 0.8367 | 0.0429 | No | 0.649 (237/365) | kernel exec < 100ns: below ktime resolution |
 | helper_call_10 | 0.990 | [0.909, 1.080] | -0.060 | 0.8367 | 0.8816 | No | 0.907 (790/871) |  |
 | helper_call_100 | 0.962 | [0.818, 1.144] | -0.117 | 0.0201 | 7.92e-06 | Yes | 0.970 (5,666/5,839) |  |
 | probe_read_heavy | 0.566 | [0.523, 0.629] | -3.542 | 3.42e-06 | 4.15e-10 | Yes | 0.654 (297/454) |  |
 | get_time_heavy | 1.038 | [1.029, 1.048] | 2.041 | 3.69e-06 | 3.94e-10 | Yes | 0.804 (258/321) |  |
+
+## Metric Scope Note
+
+`wall_exec_ns` is not suitable for cross-runtime comparison because kernel `wall_exec_ns` includes `BPF_PROG_TEST_RUN` syscall dispatch overhead (~200us), while llvmbpf `wall_exec_ns` is pure function-call latency. `exec_ns` remains the primary comparison metric because both runtimes measure pure BPF execution time, despite using different clocks (kernel=`ktime`, llvmbpf=`rdtsc`).
+
 
 ## Suite Summary
 
@@ -58,6 +63,8 @@
 | Geometric mean exec_ns ratio 95% CI | [0.801, 0.859] |
 | Benchmarks with valid paired Wilcoxon input | 9 / 9 |
 | Statistically significant benchmarks (BH-adjusted paired Wilcoxon p < 0.05) | 7 / 9 |
+| Benchmarks with kernel exec < 100ns (below ktime resolution) | 1 / 9 |
+| Statistically significant benchmarks excluding sub-resolution kernels (BH-adjusted paired Wilcoxon p < 0.05) | 7 / 8 |
 
 ## Compile Time Analysis
 
