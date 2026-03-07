@@ -1,6 +1,7 @@
 # eBPF Micro Benchmark：实验计划、进度与分析
 
 > 本文档是 micro benchmark 层的统一参考，合并了原来分散在多个文件中的实验计划、进度追踪、RQ 定义和结果分析。
+> 详细的阶段性报告（含机器码分析细节）见 `docs/stage-log-2026-03-07.md`。
 
 > 更新说明（2026-03-07）：`config/micro_pure_jit.yaml` 当前包含 `29` 个 pure-jit / staged-codegen case，另有 `2` 个 packet-backed 对照 benchmark；`config/micro_runtime.yaml` 当前包含 `9` 个 runtime case。第 4 节覆盖表与第 7 节进度已按此状态同步，并新增可复现的 representativeness 分析脚本 `micro/analyze_representativeness.py` 与真实程序 code-size 外部验证脚本 `corpus/run_real_world_code_size.py`。第 `6.1`、`6.1b`、`6.1e` 节现已切换为 authoritative pure-JIT run（`30` iterations × `1000` repeats，iteration 级 runtime 随机交错 / counterbalanced），覆盖 `31` 个 benchmark；执行时间 geomean 为 `0.849x`，BH-corrected paired Wilcoxon 显著 `25/31`，编译时间 geomean 为 `3.394x`。第 `6.2`、`6.4`、`6.5` 节已按同一 `31`-case authoritative 数据同步；第 `6.6` 节已切换为 authoritative runtime run（`9` case，执行时间 geomean `0.829x`，BH-corrected paired Wilcoxon 显著 `7/9`）。
 > Note: benchmarks use staged input via `bpf_map_lookup_elem`; this measures JIT codegen quality under realistic input staging, not helper-free isolation.
@@ -474,7 +475,21 @@ authoritative `31`-case run 中，`10/31` 个 benchmark 出现 llvmbpf 代码更
 - **程序规模仍是主缺口**：combined suite 的最大程序仅到 `1596` 条 BPF insns，而真实语料中位数已达 `10977`、p90 为 `22899`；分支与内存操作维度也有同向压缩（例如 Branch max `196` vs corpus median `1135`，Memory ops max `253` vs corpus median `5203`）。
 - **helper-heavy workload 覆盖仍弱**：suite 的静态 helper 调用上限为 `101`，低于真实语料的中位数 `289` 与 p90 `847`，因此仅靠 helper 这一维也只覆盖 `4.4%` 的 corpus。
 - **子程序结构存在结构性空白**：从静态 `bpf2bpf_call_count` 维度看，range coverage 高达 `96.7%`，但这并不代表“多函数程序”被覆盖；报告同时显示 `97.2%` 的真实程序包含多个函数，而当前 suite 中这一比例为 `0%`，根因是 llvmbpf 仍缺少 local-call loader 支持。
-- **多维联合代表性极低**：只有 `0.8%` 的真实程序落在 combined 5D feature box 内，因此论文必须把 micro-benchmark 结论明确定位为“机制级因果证据”，并继续依赖真实程序 code-size 外部验证与 macro-corpus 分析提供外部效度。
+- **多维联合代表性极低**：只有 `0.8%` 的真实程序落在 combined 5D feature box 内，因此论文必须把 micro-benchmark 结论明确定位为”机制级因果证据”，并继续依赖真实程序 code-size 外部验证与 macro-corpus 分析提供外部效度。
+
+### 6.8 Executive Summary (2026-03-07)
+
+> Full details with machine code analysis: `docs/stage-log-2026-03-07.md`.
+
+**Execution time**: llvmbpf is **0.849x** (pure-JIT, 31 benchmarks) and **0.829x** (runtime, 9 benchmarks) vs kernel, with 25/31 and 7/9 results statistically significant (BH-corrected paired Wilcoxon). llvmbpf wins 21/31 benchmarks; kernel wins 10/31.
+
+**Code quality**: llvmbpf generates **0.496x** native code (31/31 smaller). JIT dump analysis across 22 benchmarks shows kernel's extra instructions come from: byte-load-recompose (50.7% of surplus), branch 1:1 translation (19.9%), and fixed callee-saved prologue (18.5%). LLVM uniquely uses `cmov` (31 total, kernel = 0) and BMI bit-manipulation instructions.
+
+**Paradox (“smaller but slower”)**: 7 real cases after excluding 3 sub-resolution artifacts. Root causes: loop-carried dependency chains (3), cloned straight-line math (2), branch-predictor pressure from 7–8 conditionals/iteration (2). Core insight: LLVM eliminates non-critical-path instructions; critical path is determined by data dependencies and branch density, not code size.
+
+**External validation**: 105 paired real programs (27 unique) from 4 repos — code-size geomean **0.573x**. Exec-time: 44/105 TC programs ran (8 unique), geomean **0.894x**, but all sub-resolution (dummy-packet fast-exit). Feature-space coverage: **0.8%** of 1588-program BCF corpus.
+
+**Publication readiness**: 7.5/10. Strong micro-benchmark rigor and causal analysis; weak external validity (0.8% coverage, 27 unique programs, no above-resolution exec-time). Top gap: llvmbpf multi-function ELF loader would unlock 97% of corpus.
 
 ## 7. 迭代计划与进度
 
