@@ -1,7 +1,7 @@
 # Pure JIT Micro-Benchmark: OSDI 级别严谨性差距分析与行动计划
 
 > 本文分析当前 31-case 纯 JIT 微基准的实验设计，识别与 OSDI/SOSP 要求的差距，并给出优先级排序的行动方案。
-> 更新说明（2026-03-07）：suite 覆盖现已扩展到 `31` 个 staged-codegen / pure-JIT case 与 `9` 个 runtime case，并新增第一波真实程序 code-size 外部验证：`corpus/results/real_world_code_size.md` 当前覆盖 `libbpf-bootstrap` 的 `15` 个源文件、`24` 个真实 program、`21` 个双 runtime 成功配对。本文的问题分级和优先级仍然有效，但覆盖相关段落需要结合 `micro/results/representativeness_report.md` 与 `corpus/results/real_world_code_size.md` 一起阅读。
+> 更新说明（2026-03-07）：suite 覆盖现已扩展到 `31` 个 staged-codegen / pure-JIT case 与 `9` 个 runtime case，并新增多源真实程序 code-size 外部验证：`corpus/results/real_world_code_size.md` 当前已扫描 `4` 个 repo、纳入 `77` 个 artifacts、枚举 `949` 个真实 program；其中当前双 runtime 成功配对的是来自 `cilium` 与 `libbpf-bootstrap` 的 `105` 个 paired instances（按 unique program name 去重后为 `27` 个 unique programs），code-size geomean 为 `0.573x`。本文的问题分级和优先级仍然有效，但覆盖相关段落需要结合 `micro/results/representativeness_report.md` 与 `corpus/results/real_world_code_size.md` 一起阅读。
 
 ## 0. 相关论文是怎么做的
 
@@ -107,7 +107,7 @@
 
 #### G7. 代表性论证不足
 
-**Status**: PARTIALLY RESOLVED. suite 已扩展到 `31+9` benchmarks，`micro/results/representativeness_report.md` 已存在，且多源外部验证已覆盖 `4` 个 repo（`libbpf-bootstrap` + `3` 个 BCF repo），得到 `105` 个双 runtime 成功配对，code-size geomean 为 `0.573x`；但 feature-box 覆盖仍只有 `0.8%`。
+**Status**: PARTIALLY RESOLVED. suite 已扩展到 `31+9` benchmarks，`micro/results/representativeness_report.md` 已存在；多源外部验证已扫描 `4` 个 repo（`libbpf-bootstrap` + `3` 个 BCF repo）、纳入 `77` 个 artifacts 并枚举 `949` 个真实 program，其中当前双 runtime 成功配对的是来自 `cilium` 与 `libbpf-bootstrap` 的 `105` 个 paired instances（`27` 个 unique programs），code-size geomean 为 `0.573x`；但 feature-box 覆盖仍只有 `0.8%`。
 
 **问题**：31 个 benchmark 是手写的，审稿人会质疑代表性。
 
@@ -116,9 +116,9 @@
 **修复方案（P1）**：
 1. 用 BCF 静态特征数据（1588 个程序）画真实程序的指令/helper/分支分布
 2. 把 31 个 benchmark 标注在分布上，证明覆盖了关键区域
-3. 已完成跨 `4` 个 repo 的 `105` 个 paired 真实程序 code-size 对比，验证微基准结论的外部效度
+3. 已完成跨 `4` 个 repo 的扫描；当前来自 `cilium` 与 `libbpf-bootstrap` 的 `105` 个 paired real-program code-size 实例已验证微基准结论的外部效度
 
-**Remaining**: 仍需把 feature-space 覆盖从 `0.8%` 往上推，并在当前 `4` repo / `105` paired 的基础上补 execution-time 子集。
+**Remaining**: 仍需把 feature-space 覆盖从 `0.8%` 往上推，并在当前 `4` repo 扫描 / `105` paired instances（paired 结果目前仅来自 `2` 个 repo）的基础上补 execution-time 子集。
 
 ### 1.4 小差距（锦上添花）
 
@@ -154,7 +154,7 @@
 | B3 | PMU 相关矩阵（IPC vs ratio, branch_miss vs ratio） | 未完成 | 2h | A4 数据 |
 | B4 | 代表性论证：BCF 特征空间 + benchmark 覆盖可视化 | 部分完成 | 3h | 已有数据 |
 | B5 | 因果时间分解：byte-recompose 等模式的时间贡献 | 未完成 | 4h | A4 数据 |
-| B6 | 60+ 个真实程序 code-size 批量对比 | 部分完成 | 2h | 第一波已完成：`libbpf-bootstrap` 15 源 / 24 program / 21 paired |
+| B6 | 60+ 个真实程序 code-size 批量对比 | 部分完成 | 2h | 多源 slice 已完成：扫描 `4` 个 repo / `77` artifacts / `949` discovered，当前 paired 为 `105` instances / `27` unique programs（来自 `cilium` + `libbpf-bootstrap`） |
 
 ### Phase 3 — 锦上添花（P2-P3）
 
@@ -181,7 +181,7 @@
 
 4. 对谁有用？
    → BCF 1588 个程序特征分布证明微基准覆盖了主要特征区域
-   → 第一波真实程序 code-size 验证已在 `libbpf-bootstrap` 上得到 `24` 个 program、`21` 个成功配对，geomean `0.575x`
+   → 多源真实程序 code-size 验证已扫描 `4` 个 repo；当前在 `cilium` + `libbpf-bootstrap` 上得到 `105` 个 paired instances（`27` 个 unique programs），geomean `0.573x`
    → 下一步扩到跨 repo 的 60+ program execution/code-size 验证（外部效度）
    → 具体 patch 建议（cmov 支持、按需 callee-saved、byte-recompose 优化）
 
