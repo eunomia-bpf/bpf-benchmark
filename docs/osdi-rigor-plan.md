@@ -1,6 +1,6 @@
 # Pure JIT Micro-Benchmark: OSDI 级别严谨性差距分析与行动计划
 
-> 本文分析当前 22-case 纯 JIT 微基准的实验设计，识别与 OSDI/SOSP 要求的差距，并给出优先级排序的行动方案。
+> 本文分析当前 31-case 纯 JIT 微基准的实验设计，识别与 OSDI/SOSP 要求的差距，并给出优先级排序的行动方案。
 > 更新说明（2026-03-07）：suite 覆盖现已扩展到 `31` 个 staged-codegen / pure-JIT case 与 `9` 个 runtime case，并新增第一波真实程序 code-size 外部验证：`corpus/results/real_world_code_size.md` 当前覆盖 `libbpf-bootstrap` 的 `15` 个源文件、`24` 个真实 program、`21` 个双 runtime 成功配对。本文的问题分级和优先级仍然有效，但覆盖相关段落需要结合 `micro/results/representativeness_report.md` 与 `corpus/results/real_world_code_size.md` 一起阅读。
 
 ## 0. 相关论文是怎么做的
@@ -26,10 +26,10 @@
 | 维度 | 现状 | OSDI 要求 | 差距 |
 |------|------|-----------|------|
 | 样本量 | 30 iterations × 1000 repeats | 充分 | 无 |
-| 统计检验 | Bootstrap CI + Cohen's d + Mann-Whitney U | 标准方法 | 无 |
-| 效应量 | 16/22 显著 (p < 0.05)，|d| > 0.8 为大效应 | 已覆盖 | 无 |
+| 统计检验 | Bootstrap CI + Cohen's d + paired Wilcoxon（BH 校正；Mann-Whitney U 仅补充） | 标准方法 | 无 |
+| 效应量 | 25/31 显著（BH-corrected paired Wilcoxon p < 0.05），|d| > 0.8 为大效应 | 已覆盖 | 无 |
 | 确定性输入 | LCG 固定种子生成器 | 可复现 | 无 |
-| 代码大小 | 22/22 有 native code bytes | 完备 | 无 |
+| 代码大小 | 31/31 有 native code bytes | 完备 | 无 |
 | 编译时间 | `analyze_statistics.py` 已输出 compile-time section | 应报告 | 无 |
 | 稳定性分析 | drift / ACF / 时间序列图已完成 | 需要稳定性证据 | 无 |
 | 计时元数据 | `timing_source` + `wall_exec_ns` + `--metric` 已接入 | 可追溯 | 无 |
@@ -51,19 +51,17 @@
 
 ### 1.2 关键差距（含部分已修复项）
 
-#### G1. 测量方法不对等（已部分修复）
+#### G1. 测量方法不对等（主比较口径已澄清）
 
-**问题**：kernel 用 `ktime_get_ns`（内核时钟，~ns 分辨率但含调度噪声），llvmbpf 用 `rdtsc`（用户态 TSC，无调度噪声）。
+**问题**：kernel `exec_ns` 用 `ktime_get_ns`，llvmbpf `exec_ns` 用 `rdtsc`；而 `wall_exec_ns` 不适合跨 runtime 比较，因为 kernel 侧包含 `BPF_PROG_TEST_RUN` syscall dispatch 开销。
 
-**证据**：kernel CV 中位数 0.152 vs llvmbpf 0.031（5x 方差差异）。6 个不显著 benchmark 中 4 个因 kernel 方差过高。
+**证据**：authoritative `31`-case run 已显式记录 `timing_source`，并把 kernel 外层 rdtsc 保留为 `wall_exec_ns` / `exec_cycles` 元数据；但主结论统一基于 `exec_ns`。
 
-**Status**: PARTIALLY RESOLVED. kernel 侧已加入 `rdtsc`，`timing_source` 字段会记录计时来源，`wall_exec_ns` 可用于 matched-domain comparison；但当前主分析仍以 `exec_ns` 为主，因此仍是 mixed-domain 视角。
-
-**Remaining**: dual-metric analysis 正在补入。
+**Status**: RESOLVED FOR PRIMARY ANALYSIS. `wall_exec_ns` 不适合 cross-runtime comparison；当前主分析使用 `exec_ns` 作为纯 BPF 执行时间指标，虽然 timing source 不同（kernel=`ktime`, llvmbpf=`rdtsc`），但比较对象是一致的。kernel 侧新增的 rdtsc 结果保留为 wall-clock / dispatch cost 参考与可追溯元数据。
 
 #### G2. 硬件计数器数据缺失（已部分修复）
 
-**问题**：22 个 benchmark 中只有 4 个（bitcount, binary_search, switch_dispatch, checksum）有非零 perf 计数器数据。llvmbpf 全部为 0。
+**问题**：31 个 benchmark 中只有 4 个（bitcount, binary_search, switch_dispatch, checksum）有非零 perf 计数器数据。llvmbpf 全部为 0。
 
 **原因**：执行窗口太短（< 1μs），`perf_event_open` 的 PMU 调度周期（~1ms）内来不及采样。
 
@@ -111,13 +109,13 @@
 
 **Status**: PARTIALLY RESOLVED. suite 已扩展到 `31+9` benchmarks，`micro/results/representativeness_report.md` 已存在，且第一波 `libbpf-bootstrap` 外部验证已得到 `21` 个双 runtime 成功配对；但 feature-box 覆盖仍只有 `0.8%`。
 
-**问题**：22 个 benchmark 是手写的，审稿人会质疑代表性。
+**问题**：31 个 benchmark 是手写的，审稿人会质疑代表性。
 
-**OSDI 审稿人会问**："你的 22 个微基准覆盖了真实 BPF 程序的哪些特征空间？"
+**OSDI 审稿人会问**："你的 31 个微基准覆盖了真实 BPF 程序的哪些特征空间？"
 
 **修复方案（P1）**：
 1. 用 BCF 静态特征数据（1588 个程序）画真实程序的指令/helper/分支分布
-2. 把 22 个 benchmark 标注在分布上，证明覆盖了关键区域
+2. 把 31 个 benchmark 标注在分布上，证明覆盖了关键区域
 3. 用 60 个可编译的真实程序做 code-size 对比，验证微基准结论的外部效度
 
 **Remaining**: 仍需把 feature-space 覆盖从 `0.8%` 往上推，并把第一波验证扩成跨 repo 的 `60+` program 与 execution-time 子集。
@@ -144,8 +142,8 @@
 |----|--------|------|-----------|------|
 | A1 | kernel_runner.cpp: 添加 rdtsc 围栏测量 | 已完成 | 2h | 无 |
 | A2 | micro_exec: PMU 累积模式（整个 repeat 循环读一次） | 已完成 | 4h | 无 |
-| A3 | isolcpus + taskset 绑核脚本 | 未完成 | 1h | 无 |
-| A4 | 重跑 30-iter suite with A1+A2+A3 | 未完成 | 1h (自动) | A1-A3 |
+| A3 | isolcpus + taskset 绑核脚本 | 已完成 | 1h | 无 |
+| A4 | 重跑 30-iter suite with A1+A2+A3 | 已完成 | 1h (自动) | A1-A3 |
 
 ### Phase 2 — 分析补全（P1，显著提升）
 
@@ -171,14 +169,14 @@
 
 ```
 1. 测量可信吗？
-   → kernel 已新增 `wall_exec_ns` rdtsc 对齐视角，`timing_source` 已显式记录，30 iterations 无明显 drift
+   → `exec_ns` 是主比较指标（两侧都测纯 BPF 执行时间），`timing_source` 已显式记录；`wall_exec_ns` 仅作 syscall / dispatch 参考，30 iterations 无明显 drift
 
 2. 差距有多大？
-   → Exec geomean 0.82x [0.80, 0.85]，16/22 显著，Cohen's d 多为大效应
+   → Exec geomean `0.849x [0.834, 0.865]`，`25/31` 在 BH-corrected paired Wilcoxon 下显著，Cohen's d 多为大效应
 
 3. 为什么有差距？
-   → 代码大小 0.47x（LLVM 指令消除 + 寄存器分配 + 分支优化）
-   → 但 8/22 更小更慢（关键路径不缩短，byte-recompose 占 50% extra insns）
+   → 代码大小 `0.496x`（LLVM 指令消除 + 寄存器分配 + 分支优化）
+   → 但 `10/31` 更小更慢（关键路径不缩短，byte-recompose 占 `50.7%` extra insns）
    → PMU 证据：IPC 差异、branch miss 率差异（可量化）
 
 4. 对谁有用？
@@ -204,7 +202,7 @@
 - `--perf-scope full_repeat_raw`：输出整段 repeat 的原始计数
 - `--perf-scope full_repeat_avg`：输出 full-repeat 计数除以 repeat 后的平均值
 
-### 4.3 绑核脚本（仍待补）
+### 4.3 绑核脚本（已完成）
 
 ```bash
 #!/bin/bash
@@ -216,7 +214,7 @@ sudo taskset -c 4 python3 micro/run_micro.py "$@"
 
 论文中需明确声明的限制：
 
-1. **测量域不等价**：即使新增了 `wall_exec_ns` 对齐指标，默认 `exec_ns` 仍是 kernel=`ktime` / llvmbpf=`rdtsc`；而 `wall_exec_ns` 又会把 kernel syscall dispatch 带进来。应明确区分这两种视角。
+1. **主指标与 wall-time 视角需区分**：`exec_ns` 是跨 runtime 的主比较指标，因为两侧都在测纯 BPF 执行时间；`wall_exec_ns` 不适合跨 runtime 比较，因为 kernel 侧会把 `BPF_PROG_TEST_RUN` syscall dispatch 开销带进来。论文中应明确区分主指标与 wall-clock 参考。
 
 2. **PMU 范围不等价**：kernel perf counters 包含 kernel-mode 事件（context switch, page fault），llvmbpf 只看 user-mode。应用 `exclude_kernel=1` 限制 kernel 侧只看 user-mode，或声明局限。
 
