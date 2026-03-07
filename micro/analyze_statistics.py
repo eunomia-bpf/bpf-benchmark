@@ -43,11 +43,45 @@ def load_results(path: Path) -> dict[str, object]:
     return json.loads(path.read_text())
 
 
-def extract_exec_samples(run: dict[str, object], metric: str) -> np.ndarray:
-    values = [float(sample[metric]) for sample in run.get("samples", []) if sample.get(metric) is not None]
+def extract_exec_samples_with_iteration(run: dict[str, object], metric: str) -> list[dict[str, float | int]]:
+    values: list[dict[str, float | int]] = []
+    for fallback_index, sample in enumerate(run.get("samples", [])):
+        metric_value = sample.get(metric)
+        if metric_value is None:
+            continue
+        raw_iteration_index = sample.get("iteration_index", fallback_index)
+        try:
+            iteration_index = int(raw_iteration_index)
+        except (TypeError, ValueError):
+            iteration_index = fallback_index
+        values.append(
+            {
+                "iteration_index": iteration_index,
+                "value": float(metric_value),
+            }
+        )
     if not values:
         raise ValueError(f"run {run.get('runtime', '<unknown>')} has no {metric} samples")
+    values.sort(key=lambda sample: int(sample["iteration_index"]))
+    return values
+
+
+def extract_exec_samples(run: dict[str, object], metric: str) -> np.ndarray:
+    values = [float(sample["value"]) for sample in extract_exec_samples_with_iteration(run, metric)]
     return np.asarray(values, dtype=np.float64)
+
+
+def index_exec_samples_by_iteration(
+    exec_samples: list[dict[str, float | int]],
+) -> tuple[dict[int, float], list[int]]:
+    indexed_samples: dict[int, float] = {}
+    duplicate_iteration_indexes: list[int] = []
+    for sample in exec_samples:
+        iteration_index = int(sample["iteration_index"])
+        if iteration_index in indexed_samples:
+            duplicate_iteration_indexes.append(iteration_index)
+        indexed_samples[iteration_index] = float(sample["value"])
+    return indexed_samples, duplicate_iteration_indexes
 
 
 def extract_compile_samples(run: dict[str, object]) -> np.ndarray | None:
@@ -208,6 +242,8 @@ def build_runtime_rows(
         if lhs_run is None or rhs_run is None:
             continue
 
+        lhs_exec_samples = extract_exec_samples_with_iteration(lhs_run, metric)
+        rhs_exec_samples = extract_exec_samples_with_iteration(rhs_run, metric)
         lhs_exec = extract_exec_samples(lhs_run, metric)
         rhs_exec = extract_exec_samples(rhs_run, metric)
         ratio_distribution = bootstrap_ratio_distribution(lhs_exec, rhs_exec, iterations, rng)
@@ -221,23 +257,64 @@ def build_runtime_rows(
             code_size_ratio = code_size_lhs / code_size_rhs
 
         mann_whitney = mannwhitneyu(lhs_exec, rhs_exec, alternative="two-sided")
-        if len(lhs_exec) == len(rhs_exec) and len(lhs_exec) >= 6:
-            wilcoxon_result = wilcoxon(lhs_exec, rhs_exec, alternative="two-sided")
-            paired_pvalue = float(wilcoxon_result.pvalue)
-        else:
+        lhs_exec_by_iteration, lhs_duplicate_iterations = index_exec_samples_by_iteration(lhs_exec_samples)
+        rhs_exec_by_iteration, rhs_duplicate_iterations = index_exec_samples_by_iteration(rhs_exec_samples)
+        lhs_iteration_indexes = set(lhs_exec_by_iteration)
+        rhs_iteration_indexes = set(rhs_exec_by_iteration)
+        paired_iteration_indexes = sorted(lhs_iteration_indexes & rhs_iteration_indexes)
+        paired_exec_samples = [
+            {
+                "iteration_index": iteration_index,
+                "llvmbpf": lhs_exec_by_iteration[iteration_index],
+                "kernel": rhs_exec_by_iteration[iteration_index],
+            }
+            for iteration_index in paired_iteration_indexes
+        ]
+        pairing_notes: list[str] = []
+        if len(lhs_exec) != len(rhs_exec):
+            pairing_notes.append(f"sample count mismatch: llvmbpf={len(lhs_exec)}, kernel={len(rhs_exec)}")
+        if lhs_duplicate_iterations:
+            pairing_notes.append("duplicate llvmbpf iteration_index values")
+        if rhs_duplicate_iterations:
+            pairing_notes.append("duplicate kernel iteration_index values")
+        if lhs_iteration_indexes != rhs_iteration_indexes:
+            pairing_notes.append(
+                "iteration_index mismatch "
+                f"(missing in llvmbpf={len(rhs_iteration_indexes - lhs_iteration_indexes)}, "
+                f"missing in kernel={len(lhs_iteration_indexes - rhs_iteration_indexes)})"
+            )
+
+        if pairing_notes or not paired_exec_samples:
             paired_pvalue = math.nan
+        else:
+            paired_lhs_exec = np.asarray([sample["llvmbpf"] for sample in paired_exec_samples], dtype=np.float64)
+            paired_rhs_exec = np.asarray([sample["kernel"] for sample in paired_exec_samples], dtype=np.float64)
+            try:
+                wilcoxon_result = wilcoxon(paired_lhs_exec, paired_rhs_exec, alternative="two-sided")
+            except ValueError as exc:
+                if np.allclose(paired_lhs_exec, paired_rhs_exec):
+                    paired_pvalue = 1.0
+                else:
+                    pairing_notes.append(f"paired Wilcoxon unavailable: {exc}")
+                    paired_pvalue = math.nan
+            else:
+                paired_pvalue = float(wilcoxon_result.pvalue)
         comparison_rows.append(
             {
                 "benchmark": benchmark_name,
                 "lhs_exec": lhs_exec,
                 "rhs_exec": rhs_exec,
+                "lhs_exec_samples": lhs_exec_samples,
+                "rhs_exec_samples": rhs_exec_samples,
+                "paired_exec_samples": paired_exec_samples,
                 "exec_ratio": lhs_mean / rhs_mean if rhs_mean != 0 else math.nan,
                 "exec_ratio_ci_low": ratio_low,
                 "exec_ratio_ci_high": ratio_high,
                 "cohen_d": cohen_d(lhs_exec, rhs_exec),
                 "mann_whitney_pvalue": float(mann_whitney.pvalue),
                 "wilcoxon_paired_pvalue": paired_pvalue,
-                "significant": bool(mann_whitney.pvalue < 0.05),
+                "pairing_note": "; ".join(pairing_notes) if pairing_notes else None,
+                "significant": False,
                 "code_size_ratio": code_size_ratio,
                 "code_size_llvmbpf": code_size_lhs,
                 "code_size_kernel": code_size_rhs,
@@ -250,12 +327,14 @@ def build_runtime_rows(
 def apply_benjamini_hochberg_correction(comparison_rows: list[dict[str, object]], alpha: float = 0.05) -> None:
     for row in comparison_rows:
         row["adjusted_pvalue"] = math.nan
+        row["paired_wilcoxon_pvalue_bh"] = math.nan
+        row["significant"] = False
         row["significant_bh"] = False
 
     ranked_rows = [
-        (index, float(row["mann_whitney_pvalue"]))
+        (index, float(row["wilcoxon_paired_pvalue"]))
         for index, row in enumerate(comparison_rows)
-        if math.isfinite(float(row["mann_whitney_pvalue"]))
+        if math.isfinite(float(row["wilcoxon_paired_pvalue"]))
     ]
     if not ranked_rows:
         return
@@ -273,7 +352,9 @@ def apply_benjamini_hochberg_correction(comparison_rows: list[dict[str, object]]
     for index, row in enumerate(comparison_rows):
         adjusted_pvalue = adjusted_by_index.get(index, math.nan)
         row["adjusted_pvalue"] = adjusted_pvalue
-        row["significant_bh"] = bool(adjusted_pvalue < alpha)
+        row["paired_wilcoxon_pvalue_bh"] = adjusted_pvalue
+        row["significant"] = bool(adjusted_pvalue < alpha)
+        row["significant_bh"] = row["significant"]
 
 
 def build_suite_summary(
@@ -304,6 +385,9 @@ def build_suite_summary(
         "geometric_mean_ratio": geometric_mean(ratios),
         "geometric_mean_ci_low": geomean_ci_low,
         "geometric_mean_ci_high": geomean_ci_high,
+        "paired_test_available_count": sum(
+            1 for row in comparison_rows if math.isfinite(float(row.get("paired_wilcoxon_pvalue_bh", math.nan)))
+        ),
         "significant_count": sum(1 for row in comparison_rows if row["significant"]),
         "significant_bh_count": sum(1 for row in comparison_rows if row.get("significant_bh")),
     }
@@ -417,6 +501,8 @@ def render_markdown(
         f"- Metric timing source: {metric_timing_note}",
         f"- Exec ratio is defined as `mean({metric}_llvmbpf) / mean({metric}_kernel)`.",
         "- Ratio interpretation: values below `1.0` favor `llvmbpf`; values above `1.0` favor `kernel`.",
+        "- Primary significance test: paired Wilcoxon signed-rank on matched `iteration_index` values with Benjamini-Hochberg correction.",
+        "- Secondary significance test: raw Mann-Whitney U p-values are reported as supplementary context.",
         "",
         "## Benchmark x Runtime Statistics",
         "",
@@ -444,8 +530,8 @@ def render_markdown(
             "",
             "## Cross-runtime Comparison",
             "",
-            f"| Benchmark | {metric} Ratio (L/K) | 95% CI | Cohen's d | Mann-Whitney U p-value | Paired p | BH adjusted p-value | Significant (raw) | Significant (BH) | Code-size Ratio (L/K) |",
-            "| --- | ---: | --- | ---: | ---: | ---: | ---: | --- | --- | ---: |",
+            f"| Benchmark | {metric} Ratio (L/K) | 95% CI | Cohen's d | Paired Wilcoxon p | MWU p | Significant | Code-size Ratio (L/K) | Notes |",
+            "| --- | ---: | --- | ---: | ---: | ---: | --- | ---: | --- |",
         ]
     )
 
@@ -462,12 +548,11 @@ def render_markdown(
             f"{format_ratio(row['exec_ratio'])} | "
             f"{format_ci(row['exec_ratio_ci_low'], row['exec_ratio_ci_high'], precision=3)} | "
             f"{format_ratio(row['cohen_d'])} | "
-            f"{format_pvalue(row['mann_whitney_pvalue'])} | "
-            f"{format_pvalue(row['wilcoxon_paired_pvalue'])} | "
             f"{format_pvalue(row['adjusted_pvalue'])} | "
+            f"{format_pvalue(row['mann_whitney_pvalue'])} | "
             f"{'Yes' if row['significant'] else 'No'} | "
-            f"{'Yes' if row['significant_bh'] else 'No'} | "
-            f"{code_size_ratio} |"
+            f"{code_size_ratio} | "
+            f"{row.get('pairing_note') or ''} |"
         )
 
     lines.extend(
@@ -484,12 +569,12 @@ def render_markdown(
                 f"{format_ci(suite_summary['geometric_mean_ci_low'], suite_summary['geometric_mean_ci_high'], precision=3)} |"
             ),
             (
-                "| Statistically significant benchmarks (raw p < 0.05) | "
-                f"{suite_summary['significant_count']} / {suite_summary['benchmark_count']} |"
+                "| Benchmarks with valid paired Wilcoxon input | "
+                f"{suite_summary['paired_test_available_count']} / {suite_summary['benchmark_count']} |"
             ),
             (
-                "| Statistically significant benchmarks (BH-adjusted p < 0.05) | "
-                f"{suite_summary['significant_bh_count']} / {suite_summary['benchmark_count']} |"
+                "| Statistically significant benchmarks (BH-adjusted paired Wilcoxon p < 0.05) | "
+                f"{suite_summary['significant_count']} / {suite_summary['benchmark_count']} |"
             ),
             "",
         ]

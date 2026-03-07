@@ -31,6 +31,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output", help="Override JSON output path.")
     parser.add_argument("--cpu", help="Pin child processes to a specific CPU via taskset.")
     parser.add_argument(
+        "--strict-env",
+        action="store_true",
+        help="Fail if environment is not publication-grade",
+    )
+    parser.add_argument(
         "--shuffle-seed",
         type=int,
         help="Shuffle benchmark order with a reproducible seed.",
@@ -132,17 +137,27 @@ def read_optional_file(path: str) -> str:
         return "unknown"
 
 
-def validate_environment(host: dict[str, object], args: argparse.Namespace) -> None:
+def validate_environment(host: dict[str, object], args: argparse.Namespace, strict_env: bool) -> None:
+    strict_failures: list[str] = []
+
+    def report_publication_issue(message: str) -> None:
+        if strict_env:
+            strict_failures.append(message)
+            return
+        print(f"[WARN] {message}")
+
     governor = str(host.get("cpu_governor", "unknown"))
     if governor != "performance":
-        print(
-            f"[WARN] CPU governor is '{governor}', not 'performance'. "
+        report_publication_issue(
+            f"CPU governor is '{governor}', not 'performance'. "
             "Results may have frequency scaling noise."
         )
 
     no_turbo = str(host.get("turbo_state", "unknown"))
-    if no_turbo == "0":
-        print("[WARN] Turbo boost is enabled. Consider disabling for stable measurements.")
+    if no_turbo != "1":
+        report_publication_issue(
+            "Turbo boost is enabled. Consider disabling for stable measurements."
+        )
 
     perf_event_paranoid = str(host.get("perf_event_paranoid", "unknown"))
     try:
@@ -153,7 +168,27 @@ def validate_environment(host: dict[str, object], args: argparse.Namespace) -> N
         print(f"[WARN] perf_event_paranoid={perf_event_paranoid}. Some perf counters may not be available.")
 
     if args.cpu is None:
-        print("[WARN] No CPU affinity set. Consider using --cpu for isolated measurements.")
+        report_publication_issue(
+            "No CPU affinity set. Consider using --cpu for isolated measurements."
+        )
+
+    try:
+        sudo_available = subprocess.run(
+            ["sudo", "-n", "true"],
+            capture_output=True,
+            text=True,
+        ).returncode == 0
+    except OSError:
+        sudo_available = False
+    if not sudo_available:
+        report_publication_issue(
+            "sudo -n is not available. Passwordless sudo is required for publication-grade runs."
+        )
+
+    if strict_failures:
+        for failure in strict_failures:
+            print(f"[ERROR] {failure}", file=sys.stderr)
+        sys.exit(1)
 
 
 def list_suite(suite: SuiteSpec) -> None:
@@ -496,7 +531,7 @@ def main() -> int:
         "benchmarks": [],
     }
 
-    validate_environment(results["host"], args)
+    validate_environment(results["host"], args, args.strict_env)
 
     for benchmark in benchmarks:
         memory_file = resolve_memory_file(benchmark, args.regenerate_inputs)
@@ -539,7 +574,7 @@ def main() -> int:
             }
 
         for iteration_idx in range(iterations):
-            # Counterbalance: alternate runtime order across iterations
+            # Counterbalanced order: alternate runtime order across iterations
             if len(runtimes) == 2:
                 ordered = list(runtimes) if iteration_idx % 2 == 0 else list(reversed(runtimes))
             else:
@@ -551,6 +586,7 @@ def main() -> int:
             for runtime in ordered:
                 sample_entry = runtime_samples[runtime.name]
                 sample = parse_helper_output(run_command(sample_entry["command"], args.cpu).stdout)
+                sample["iteration_index"] = iteration_idx
                 if benchmark.expected_result is not None and sample["result"] != benchmark.expected_result:
                     raise RuntimeError(
                         f"{benchmark.name}/{runtime.name} result mismatch: "
