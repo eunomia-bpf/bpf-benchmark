@@ -118,7 +118,7 @@
 2. 把 31 个 benchmark 标注在分布上，证明覆盖了关键区域
 3. 已完成跨 `4` 个 repo 的扫描；当前来自 `cilium` 与 `libbpf-bootstrap` 的 `105` 个 paired real-program code-size 实例已验证微基准结论的外部效度
 
-**Remaining**: 仍需把 feature-space 覆盖从 `0.8%` 往上推，并在当前 `4` repo 扫描 / `105` paired instances（paired 结果目前仅来自 `2` 个 repo）的基础上补 execution-time 子集。
+**Remaining**: 仍需把 feature-space 覆盖从 `0.8%` 往上推；真实程序 execution-time 子集不再视为 engineering TODO，因为 `BPF_PROG_TEST_RUN` 对 real programs 存在结构性限制（tracepoint/kprobe/perf_event 不支持 test_run，TC 缺少 classifier/act context，fentry/fexit 在 dummy input 下 `exec_ns=0`）。论文中的验证策略应明确为：`105` 个 paired real programs 做 code-size 外部验证，execution-time 则由 `40` 个 handcrafted microbenchmarks（`31` staged-codegen + `9` runtime）承担。
 
 ### 1.4 小差距（锦上添花）
 

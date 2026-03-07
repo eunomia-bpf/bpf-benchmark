@@ -175,6 +175,10 @@ BPF:      CONFIG_BPF_JIT=y, CONFIG_BPF_SYSCALL=y, BTF enabled
 - `full_repeat_raw` 输出整段 repeat 的原始计数，`full_repeat_avg` 输出除以 repeat 后的 per-repeat 平均值
 - 短执行窗口或受限 PMU 下硬件计数器可能为 0
 
+### 5.1 Threats to Validity
+
+- 真实程序 execution-time 对比受 `BPF_PROG_TEST_RUN` 结构性限制：tracepoint/kprobe/perf_event 程序在 execution 模式下返回 `ENOTSUPP` (`524`)，TC 程序返回 `EINVAL`（缺少 classifier/act context），fentry/fexit 虽可执行但在 dummy input 下即使 `1000` repeats 也常见 `exec_ns=0`。因此本文将其视为方法边界而非待修复工程缺口：真实程序只做 code-size 外部验证，execution-time 结论仅基于 `40` 个 handcrafted microbenchmarks。
+
 ## 6. 结果
 
 > 以下 pure-JIT 主结果（§`6.1` / §`6.1b` / §`6.1e`）已切换为 authoritative 分析结果（`micro/results/pure_jit_authoritative_analysis.md`，生成于 `2026-03-07`）。
