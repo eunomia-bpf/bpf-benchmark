@@ -43,6 +43,13 @@ def extract_exec_samples(run: dict[str, object]) -> np.ndarray:
     return np.asarray(values, dtype=np.float64)
 
 
+def extract_compile_samples(run: dict[str, object]) -> np.ndarray | None:
+    values = [float(sample["compile_ns"]) for sample in run.get("samples", []) if sample.get("compile_ns") is not None]
+    if not values:
+        return None
+    return np.asarray(values, dtype=np.float64)
+
+
 def extract_native_code_bytes(run: dict[str, object]) -> float | None:
     values: list[float] = []
     for sample in run.get("samples", []):
@@ -256,12 +263,65 @@ def build_suite_summary(
     }
 
 
+def build_compile_time_rows(
+    results: dict[str, object],
+    iterations: int,
+    rng: np.random.Generator,
+) -> tuple[list[dict[str, object]], dict[str, object]]:
+    """Build per-benchmark compile time stats and suite-level geomean."""
+    rows: list[dict[str, object]] = []
+
+    for benchmark in results.get("benchmarks", []):
+        benchmark_name = benchmark["name"]
+        runs_by_runtime: dict[str, dict[str, object]] = {
+            run["runtime"]: run for run in benchmark.get("runs", [])
+        }
+
+        lhs_run = runs_by_runtime.get("llvmbpf")
+        rhs_run = runs_by_runtime.get("kernel")
+        if lhs_run is None or rhs_run is None:
+            continue
+
+        lhs_compile = extract_compile_samples(lhs_run)
+        rhs_compile = extract_compile_samples(rhs_run)
+        if lhs_compile is None or rhs_compile is None:
+            continue
+
+        lhs_mean = float(np.mean(lhs_compile))
+        rhs_mean = float(np.mean(rhs_compile))
+        lhs_ci_low, lhs_ci_high = bootstrap_mean_ci(lhs_compile, iterations, rng)
+        rhs_ci_low, rhs_ci_high = bootstrap_mean_ci(rhs_compile, iterations, rng)
+        ratio = lhs_mean / rhs_mean if rhs_mean != 0 else math.nan
+
+        rows.append(
+            {
+                "benchmark": benchmark_name,
+                "llvmbpf_mean": lhs_mean,
+                "llvmbpf_ci_low": lhs_ci_low,
+                "llvmbpf_ci_high": lhs_ci_high,
+                "kernel_mean": rhs_mean,
+                "kernel_ci_low": rhs_ci_low,
+                "kernel_ci_high": rhs_ci_high,
+                "ratio": ratio,
+            }
+        )
+
+    ratios = [float(row["ratio"]) for row in rows if math.isfinite(float(row["ratio"]))]
+    summary = {
+        "benchmark_count": len(rows),
+        "geometric_mean_ratio": geometric_mean(ratios),
+    }
+    return rows, summary
+
+
 def render_markdown(
     input_path: Path,
     results: dict[str, object],
     runtime_rows: list[dict[str, object]],
     comparison_rows: list[dict[str, object]],
     suite_summary: dict[str, object],
+    compile_time_rows: list[dict[str, object]],
+    compile_time_summary: dict[str, object],
     iterations: int,
     seed: int,
 ) -> str:
@@ -346,6 +406,36 @@ def render_markdown(
         ]
     )
 
+    if compile_time_rows:
+        lines.extend(
+            [
+                "## Compile Time Analysis",
+                "",
+                "| Benchmark | llvmbpf compile_ns (mean) | llvmbpf 95% CI | kernel compile_ns (mean) | kernel 95% CI | Ratio (L/K) |",
+                "| --- | ---: | --- | ---: | --- | ---: |",
+            ]
+        )
+
+        for row in compile_time_rows:
+            lines.append(
+                "| "
+                f"{row['benchmark']} | "
+                f"{format_float(row['llvmbpf_mean'])} | "
+                f"{format_ci(row['llvmbpf_ci_low'], row['llvmbpf_ci_high'])} | "
+                f"{format_float(row['kernel_mean'])} | "
+                f"{format_ci(row['kernel_ci_low'], row['kernel_ci_high'])} | "
+                f"{format_ratio(row['ratio'])} |"
+            )
+
+        lines.extend(
+            [
+                "",
+                f"**Suite geometric mean compile-time ratio (L/K):** {format_ratio(compile_time_summary['geometric_mean_ratio'])}",
+                f"  (over {compile_time_summary['benchmark_count']} benchmarks)",
+                "",
+            ]
+        )
+
     return "\n".join(lines)
 
 
@@ -357,12 +447,15 @@ def main() -> int:
     rng = np.random.default_rng(args.seed)
     runtime_rows, comparison_rows = build_runtime_table_rows(results, args.bootstrap_iterations, rng)
     suite_summary = build_suite_summary(comparison_rows, args.bootstrap_iterations, rng)
+    compile_time_rows, compile_time_summary = build_compile_time_rows(results, args.bootstrap_iterations, rng)
     report = render_markdown(
         input_path,
         results,
         runtime_rows,
         comparison_rows,
         suite_summary,
+        compile_time_rows,
+        compile_time_summary,
         args.bootstrap_iterations,
         args.seed,
     )

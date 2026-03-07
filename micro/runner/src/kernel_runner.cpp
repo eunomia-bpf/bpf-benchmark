@@ -6,16 +6,147 @@
 
 #include <algorithm>
 #include <cerrno>
+#include <chrono>
+#include <cmath>
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
+#include <fstream>
 #include <memory>
 #include <string>
 #include <sys/syscall.h>
+#include <thread>
 #include <unistd.h>
 #include <vector>
 
 namespace {
+
+using clock_type = std::chrono::steady_clock;
+
+#if defined(__x86_64__) || defined(__i386__)
+constexpr bool kHasTscMeasurement = true;
+
+static inline uint64_t rdtsc_start()
+{
+    unsigned int lo, hi;
+    asm volatile("lfence; rdtsc" : "=a"(lo), "=d"(hi));
+    return (static_cast<uint64_t>(hi) << 32) | lo;
+}
+
+static inline uint64_t rdtsc_end()
+{
+    unsigned int lo, hi;
+    asm volatile("rdtscp" : "=a"(lo), "=d"(hi) :: "ecx");
+    asm volatile("lfence");
+    return (static_cast<uint64_t>(hi) << 32) | lo;
+}
+#else
+constexpr bool kHasTscMeasurement = false;
+
+static inline uint64_t rdtsc_start()
+{
+    return 0;
+}
+
+static inline uint64_t rdtsc_end()
+{
+    return 0;
+}
+#endif
+
+std::optional<uint64_t> read_nominal_tsc_freq_hz()
+{
+    std::ifstream cpuinfo("/proc/cpuinfo");
+    if (!cpuinfo.is_open()) {
+        return std::nullopt;
+    }
+
+    std::string line;
+    while (std::getline(cpuinfo, line)) {
+        if (!line.starts_with("model name")) {
+            continue;
+        }
+
+        const auto at_pos = line.rfind('@');
+        if (at_pos == std::string::npos) {
+            continue;
+        }
+
+        const auto value_start = line.find_first_of("0123456789", at_pos);
+        if (value_start == std::string::npos) {
+            continue;
+        }
+
+        const auto value_end = line.find_first_not_of("0123456789.", value_start);
+        if (value_end == std::string::npos) {
+            continue;
+        }
+
+        const auto unit_start = line.find_first_not_of(" \t", value_end);
+        if (unit_start == std::string::npos) {
+            continue;
+        }
+
+        const auto unit_end = line.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", unit_start);
+        const auto unit = line.substr(
+            unit_start,
+            unit_end == std::string::npos ? std::string::npos : unit_end - unit_start);
+
+        long double multiplier = 0.0L;
+        if (unit == "GHz") {
+            multiplier = 1000000000.0L;
+        } else if (unit == "MHz") {
+            multiplier = 1000000.0L;
+        } else if (unit == "KHz") {
+            multiplier = 1000.0L;
+        } else {
+            continue;
+        }
+
+        try {
+            const auto value = std::stold(line.substr(value_start, value_end - value_start));
+            return static_cast<uint64_t>(std::llround(value * multiplier));
+        } catch (const std::exception &) {
+            continue;
+        }
+    }
+
+    return std::nullopt;
+}
+
+uint64_t calibrate_tsc_freq_hz()
+{
+    constexpr auto calibration_window = std::chrono::milliseconds(20);
+
+    const auto wall_start = clock_type::now();
+    const auto tsc_start = rdtsc_start();
+    std::this_thread::sleep_for(calibration_window);
+    const auto tsc_end = rdtsc_end();
+    const auto wall_end = clock_type::now();
+
+    const uint64_t wall_ns = elapsed_ns(wall_start, wall_end);
+    if (wall_ns == 0 || tsc_end <= tsc_start) {
+        fail("unable to calibrate TSC frequency");
+    }
+
+    const long double freq_hz =
+        (static_cast<long double>(tsc_end - tsc_start) * 1000000000.0L) /
+        static_cast<long double>(wall_ns);
+    return static_cast<uint64_t>(std::llround(freq_hz));
+}
+
+uint64_t detect_tsc_freq_hz()
+{
+    if constexpr (!kHasTscMeasurement) {
+        fail("rdtsc timing requires x86/x86_64");
+    }
+
+    if (const auto nominal = read_nominal_tsc_freq_hz(); nominal.has_value()) {
+        return *nominal;
+    }
+
+    return calibrate_tsc_freq_hz();
+}
 
 struct object_deleter {
     void operator()(bpf_object *obj) const
@@ -220,14 +351,20 @@ sample_result run_kernel(const cli_options &options)
     test_opts.data_out = packet_out.data();
     test_opts.data_size_out = packet_out.size();
 
+    const uint64_t tsc_freq_hz = kHasTscMeasurement ? detect_tsc_freq_hz() : 0;
+
     std::chrono::steady_clock::time_point run_wall_start {};
     std::chrono::steady_clock::time_point run_wall_end {};
+    uint64_t tsc_before = 0;
+    uint64_t tsc_after = 0;
     int run_error = 0;
     auto perf_counters = measure_perf_counters(
         {.enabled = options.perf_counters, .include_kernel = true, .scope = "exec_window"},
         [&]() {
             run_wall_start = std::chrono::steady_clock::now();
+            tsc_before = rdtsc_start();
             run_error = bpf_prog_test_run_opts(program_fd, &test_opts);
+            tsc_after = rdtsc_end();
             run_wall_end = std::chrono::steady_clock::now();
         });
     if (run_error != 0) {
@@ -249,6 +386,16 @@ sample_result run_kernel(const cli_options &options)
     sample_result sample;
     sample.compile_ns = elapsed_ns(object_open_start, object_open_end) + elapsed_ns(object_load_start, object_load_end);
     sample.exec_ns = test_opts.duration;
+    if (kHasTscMeasurement && tsc_freq_hz > 0 && tsc_after > tsc_before) {
+        const uint64_t total_cycles = tsc_after - tsc_before;
+        const uint32_t repeat = options.repeat > 0 ? options.repeat : 1;
+        sample.exec_cycles = static_cast<uint64_t>(std::llround(
+            static_cast<long double>(total_cycles) / static_cast<long double>(repeat)));
+        sample.tsc_freq_hz = tsc_freq_hz;
+        sample.wall_exec_ns = static_cast<uint64_t>(std::llround(
+            (static_cast<long double>(total_cycles) * 1000000000.0L) /
+            (static_cast<long double>(tsc_freq_hz) * static_cast<long double>(repeat))));
+    }
     sample.result = result;
     sample.retval = test_opts.retval;
     sample.jited_prog_len = program_info.jited_prog_len;

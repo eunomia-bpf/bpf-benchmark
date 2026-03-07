@@ -247,6 +247,42 @@ BPF:      CONFIG_BPF_JIT=y, CONFIG_BPF_SYSCALL=y, BTF enabled
 - 平均 BPF insn 数：~3,200（中位数 ~1,800）
 - Helper 种类：共 45 种不同 helper ID
 
+### 6.1d 时间序列稳定性分析
+
+> 数据来源：`micro/results/pure_jit_rigorous.json`，分析脚本：`micro/analyze_stability.py`
+> 覆盖 44 个 benchmark × runtime 对，时间序列图见 `micro/results/stability/`
+
+| 指标 | 值 |
+|------|---:|
+| 有显著 drift 的 pair (p < 0.05) | 3 / 44 |
+| 强自相关的 pair (\|ACF(1)\| > 0.3) | 2 / 44 |
+| 最大 drift 幅度 | 1.92% (fibonacci_iter llvmbpf) |
+
+**结论**：测量系统在 30 iterations 运行期间保持高度稳定。3 个有 drift 的 pair 幅度均 < 2%，不影响结论。
+
+### 6.1e 编译时间分析
+
+> 数据来源：`micro/results/pure_jit_rigorous_analysis.md` (Compile Time Analysis section)
+
+| 指标 | 值 |
+|------|---:|
+| llvmbpf/kernel compile time geomean | 3.62x |
+| llvmbpf 更快的 benchmark | 5/22 (bitcount, binary_search, branch_layout, switch_dispatch, checksum) |
+| llvmbpf 更慢的 benchmark | 17/22 |
+
+**模式**：对于小程序 (< 200 BPF insns)，llvmbpf LLVM -O3 开销主导，编译慢 8-16x。对于大/复杂程序（bitcount 134 insns 但循环展开重），kernel verifier + JIT 反而更慢。编译时间差异对 networking fast-path 不重要（一次性开销），但对频繁加载场景（如 Cilium live reload）有影响。
+
+### 6.1f kernel 侧 rdtsc 测量（测量方法对齐）
+
+> 修改：`micro/runner/src/kernel_runner.cpp` 添加 rdtsc/rdtscp 围栏计时
+
+kernel_runner 现在同时输出：
+- `exec_ns`：kernel 内部 `ktime_get_ns` 测量的纯 BPF 执行时间（不含 syscall）
+- `wall_exec_ns`：用户态 rdtsc 测量的 wall-clock 时间（包含 BPF_PROG_TEST_RUN syscall dispatch 开销）
+- `exec_cycles`：rdtsc 原始 cycle 数
+
+对 `simple` benchmark (repeat=100) 的验证：kernel `exec_ns=25ns` vs `wall_exec_ns=193μs`，差距 ~7700x，主要是 syscall dispatch 开销。论文中应使用 `exec_ns`（kernel 内部计时）作为 kernel 性能指标，`wall_exec_ns` 作为端到端 dispatch cost 的参考。
+
 ### 6.2 代码质量对比（code-size + 指令分析）
 
 **Code Size**
@@ -359,7 +395,7 @@ BPF:      CONFIG_BPF_JIT=y, CONFIG_BPF_SYSCALL=y, BTF enabled
 - [x] **T3.3 Helper 调用频率 Pareto 分析 (H4)** — Top-5 = 81.56%，H4 验证通过。详见 §6.1c
 
 **TODO — 深度加强（rigorous root cause）：**
-- [ ] **T3.4 编译时间分析** — compile_ns 已在 JSON 中，需要系统分析 kernel vs llvmbpf 编译时间，按 benchmark 分类
+- [x] **T3.4 编译时间分析** — geomean L/K = 3.62x。5/22 llvmbpf 更快（大程序），17/22 kernel 更快（小程序）。详见 §6.1e
 - [x] **T3.5 统计严谨性补充** — 30 iterations × 1000 repeats，bootstrap CI + Cohen's d + Mann-Whitney U。16/22 显著。详见 §6.1b
 - [ ] **T3.6 时间域因素分解** — 指令层分析只回答"多了多少指令"，不回答"慢了多少时间"。需要：(a) 用 PMU 的 IPC 数据估算各类指令的时间贡献；(b) 构建针对性 micro-benchmark 隔离 byte-recompose 的时间开销
 - [ ] **T3.7 LLVM Pass-level 消融** — 不只是 O0/O1/O2/O3，而是逐个 pass 启用（instcombine、GVN、RegAlloc、SimplifyCFG 等），识别对 BPF 最有价值的 pass
