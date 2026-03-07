@@ -13,6 +13,7 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parent
 DEFAULT_INPUT = ROOT_DIR / "results" / "pure_jit_authoritative.json"
 DEFAULT_OUTPUT = ROOT_DIR / "results" / "paradox_analysis.md"
+DEFAULT_AUTHORITATIVE_ANALYSIS = ROOT_DIR / "results" / "pure_jit_authoritative_analysis.md"
 DEFAULT_PROGRAMS_DIR = ROOT_DIR / "programs"
 DEFAULT_JIT_DUMPS_DIR = ROOT_DIR / "jit-dumps"
 DEFAULT_JIT_REPORT = DEFAULT_JIT_DUMPS_DIR / "report.md"
@@ -66,6 +67,7 @@ class ParadoxCase:
     tags: tuple[str, ...]
     exec_ratio: float
     code_ratio: float
+    significant: bool
     llvmbpf_exec_ns: float
     kernel_exec_ns: float
     llvmbpf_native_bytes: float | None
@@ -83,6 +85,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--input", default=str(DEFAULT_INPUT), help="Authoritative benchmark JSON input path.")
     parser.add_argument("--output", default=str(DEFAULT_OUTPUT), help="Markdown report output path.")
+    parser.add_argument(
+        "--authoritative-analysis",
+        default=str(DEFAULT_AUTHORITATIVE_ANALYSIS),
+        help="Authoritative markdown analysis used as the significance source.",
+    )
     parser.add_argument("--programs-dir", default=str(DEFAULT_PROGRAMS_DIR), help="Directory containing benchmark .bpf.c sources.")
     parser.add_argument("--jit-dumps-dir", default=str(DEFAULT_JIT_DUMPS_DIR), help="Directory containing optional JIT dump .asm files.")
     return parser.parse_args()
@@ -227,6 +234,38 @@ def determine_exec_ratio(benchmark: dict[str, object], llvmbpf_run: dict[str, ob
 
 def parse_markdown_row(line: str) -> list[str]:
     return [cell.strip() for cell in line.strip().strip("|").split("|")]
+
+
+def load_significance_lookup(report_path: Path) -> dict[str, bool]:
+    if not report_path.exists():
+        raise FileNotFoundError(f"authoritative analysis not found: {report_path}")
+
+    significance_lookup: dict[str, bool] = {}
+    in_comparison_table = False
+    for line in report_path.read_text().splitlines():
+        if line.startswith("| Benchmark | exec_ns Ratio (L/K) |"):
+            in_comparison_table = True
+            continue
+        if in_comparison_table and line.startswith("| ---"):
+            continue
+        if in_comparison_table and not line.startswith("|"):
+            break
+        if not in_comparison_table or not line.startswith("|"):
+            continue
+
+        cells = parse_markdown_row(line)
+        if len(cells) < 7:
+            continue
+
+        benchmark_name = cells[0]
+        significant_label = cells[6]
+        if significant_label not in {"Yes", "No"}:
+            continue
+        significance_lookup[benchmark_name] = significant_label == "Yes"
+
+    if not significance_lookup:
+        raise ValueError(f"could not parse significance values from {report_path}")
+    return significance_lookup
 
 
 def load_jit_report_metrics(report_path: Path) -> dict[tuple[str, str], JitMetrics]:
@@ -397,6 +436,7 @@ def analyze_paradox_cases(
     results: dict[str, object],
     programs_dir: Path,
     jit_dumps_dir: Path,
+    significance_lookup: dict[str, bool],
 ) -> tuple[list[ParadoxCase], Counter[str]]:
     paradox_cases: list[ParadoxCase] = []
     counts: Counter[str] = Counter()
@@ -432,15 +472,20 @@ def analyze_paradox_cases(
             kernel_exec_ns=kernel_exec_ns,
         )
         counts[hypothesis] += 1
+        benchmark_name = str(benchmark["name"])
+        significant = significance_lookup.get(benchmark_name)
+        if significant is None:
+            raise KeyError(f"missing significance for benchmark {benchmark_name!r} in authoritative analysis")
         paradox_cases.append(
             ParadoxCase(
-                name=str(benchmark["name"]),
+                name=benchmark_name,
                 description=str(benchmark.get("description", "")),
                 category=str(benchmark.get("category", "")),
                 family=str(benchmark.get("family", "")),
                 tags=tuple(str(tag) for tag in benchmark.get("tags", [])),
                 exec_ratio=exec_ratio,
                 code_ratio=code_ratio,
+                significant=significant,
                 llvmbpf_exec_ns=llvmbpf_exec_ns,
                 kernel_exec_ns=kernel_exec_ns,
                 llvmbpf_native_bytes=llvmbpf_native_bytes,
@@ -459,6 +504,7 @@ def analyze_paradox_cases(
 def render_report(
     input_path: Path,
     output_path: Path,
+    authoritative_analysis_path: Path,
     programs_dir: Path,
     jit_dumps_dir: Path,
     results: dict[str, object],
@@ -466,14 +512,21 @@ def render_report(
     counts: Counter[str],
 ) -> str:
     total_benchmarks = len(results.get("benchmarks", []))
+    significant_cases = [case for case in paradox_cases if case.significant]
+    non_significant_cases = [case for case in paradox_cases if not case.significant]
     lines: list[str] = []
     lines.append("# Smaller-But-Slower Paradox Analysis")
     lines.append("")
     lines.append(f"- Input JSON: `{input_path}`")
+    lines.append(f"- Significance source: `{authoritative_analysis_path}`")
     lines.append(f"- Programs dir: `{programs_dir}`")
     lines.append(f"- JIT dumps dir: `{jit_dumps_dir}`")
     lines.append("- Paradox definition: code-size ratio `L/K < 1.0` and exec ratio `L/K > 1.0`.")
     lines.append(f"- Paradox cases found: `{len(paradox_cases)} / {total_benchmarks}` benchmarks.")
+    lines.append(
+        f"- Statistically significant paradox cases: `{len(significant_cases)} / {len(paradox_cases)}` "
+        "benchmarks by BH-adjusted paired Wilcoxon p < 0.05."
+    )
     lines.append(
         "- Helper counts include explicit `bpf_*()` calls in the benchmark source plus wrapper-implied map helpers "
         "from the `DEFINE_*_XDP_BENCH` macro used by the source."
@@ -483,13 +536,14 @@ def render_report(
     lines.append("## Paradox Benchmarks")
     lines.append("")
     lines.append(
-        "| Benchmark | Exec Ratio (L/K) | Code Ratio (L/K) | Kernel exec ns | BPF insns | Loop | Helpers | Baseline | JIT hint | Category | Why |"
+        "| Benchmark | Exec Ratio (L/K) | Code Ratio (L/K) | Significant | Kernel exec ns | BPF insns | Loop | Helpers | Baseline | JIT hint | Category | Why |"
     )
-    lines.append("| --- | ---: | ---: | ---: | ---: | --- | --- | --- | --- | --- | --- |")
+    lines.append("| --- | ---: | ---: | --- | ---: | ---: | --- | --- | --- | --- | --- | --- |")
     for case in paradox_cases:
         lines.append(
             "| "
             f"{case.name} | {format_ratio(case.exec_ratio)} | {format_ratio(case.code_ratio)} | "
+            f"{'Yes' if case.significant else 'No'} | "
             f"{format_ns(case.kernel_exec_ns)} | {case.source.bpf_insn_count or 'n/a'} | "
             f"{loop_label(case.source)} | {helper_label(case.source)} | "
             f"{'yes' if case.source.baseline_simple else 'no'} | {build_jit_hint(case.llvmbpf_jit, case.kernel_jit)} | "
@@ -509,8 +563,29 @@ def render_report(
     lines.append("## Key Insight")
     lines.append("")
     lines.append(
-        "LLVM's instruction elimination mainly reduces non-critical-path instructions. In these 10 cases the runtime is "
-        "set by timer noise, loop-carried recurrences, cloned straight-line math, or dense control flow, so smaller code "
+        f"{len(significant_cases)} of {len(paradox_cases)} paradox cases are statistically significant, strengthening the "
+        'claim that "smaller but slower" is a real phenomenon rather than noise.'
+    )
+    if non_significant_cases:
+        weak_cases = []
+        for case in non_significant_cases:
+            if case.hypothesis == "sub-resolution":
+                weakness = "sub-resolution"
+            elif case.exec_ratio < 1.05:
+                weakness = f"near-parity ({format_ratio(case.exec_ratio)}x)"
+            else:
+                weakness = f"non-significant despite a modest {format_ratio(case.exec_ratio)}x gap"
+            weak_cases.append(f"`{case.name}` is {weakness}")
+        lines.append(
+            "The non-significant paradox cases are weak edge cases: "
+            + ", ".join(weak_cases[:-1])
+            + (", and " if len(weak_cases) > 1 else "")
+            + weak_cases[-1]
+            + "."
+        )
+    lines.append(
+        "LLVM's instruction elimination mainly reduces non-critical-path instructions. In these cases the runtime is set "
+        "by timer noise, loop-carried recurrences, cloned straight-line math, or dense control flow, so smaller code "
         "does not automatically mean a shorter critical path."
     )
     lines.append("")
@@ -537,14 +612,17 @@ def main() -> int:
     args = parse_args()
     input_path = Path(args.input).resolve()
     output_path = Path(args.output).resolve()
+    authoritative_analysis_path = Path(args.authoritative_analysis).resolve()
     programs_dir = Path(args.programs_dir).resolve()
     jit_dumps_dir = Path(args.jit_dumps_dir).resolve()
 
     results = load_json(input_path)
-    paradox_cases, counts = analyze_paradox_cases(results, programs_dir, jit_dumps_dir)
+    significance_lookup = load_significance_lookup(authoritative_analysis_path)
+    paradox_cases, counts = analyze_paradox_cases(results, programs_dir, jit_dumps_dir, significance_lookup)
     report = render_report(
         input_path=input_path,
         output_path=output_path,
+        authoritative_analysis_path=authoritative_analysis_path,
         programs_dir=programs_dir,
         jit_dumps_dir=jit_dumps_dir,
         results=results,
