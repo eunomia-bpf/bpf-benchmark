@@ -22,7 +22,9 @@ ROOT = Path(__file__).resolve().parent
 RUNNER = ROOT / "build" / "runner" / "micro_exec"
 DEFAULT_OUTPUT = ROOT / "results" / "pass_ablation.json"
 DEFAULT_REPORT = ROOT / "results" / "pass_ablation.md"
+DEFAULT_AUTHORITATIVE_SOURCE = ROOT / "results" / "pure_jit_authoritative.json"
 DEFAULT_ITERATIONS = 5
+DEFAULT_WARMUPS = 0
 DEFAULT_REPEAT = 200
 
 CANDIDATE_PASSES = [
@@ -67,7 +69,17 @@ def parse_args() -> argparse.Namespace:
         dest="passes",
         help="LLVM pass name to disable. May be specified multiple times. Defaults to the curated candidate list.",
     )
+    parser.add_argument(
+        "--benchmarks-from",
+        help="Load benchmark names from an existing micro benchmark JSON payload's benchmarks[].name list.",
+    )
+    parser.add_argument(
+        "--authoritative-benchmarks",
+        action="store_true",
+        help=f"Shortcut for --benchmarks-from {DEFAULT_AUTHORITATIVE_SOURCE}.",
+    )
     parser.add_argument("--iterations", type=int, default=DEFAULT_ITERATIONS, help="Measured iterations per configuration.")
+    parser.add_argument("--warmups", type=int, default=DEFAULT_WARMUPS, help="Warmup runs per configuration.")
     parser.add_argument("--repeat", type=int, default=DEFAULT_REPEAT, help="Repeat count inside each helper sample.")
     parser.add_argument("--output", default=str(DEFAULT_OUTPUT), help="Path to the JSON output payload.")
     parser.add_argument("--report", default=str(DEFAULT_REPORT), help="Path to the Markdown summary report.")
@@ -200,6 +212,32 @@ def select_passes(requested: list[str] | None) -> list[str]:
     return deduped
 
 
+def load_benchmark_names_from_results(path: Path) -> list[str]:
+    try:
+        payload = json.loads(path.read_text())
+    except OSError as error:
+        raise SystemExit(f"failed to read benchmark source: {path}: {error}") from error
+    except json.JSONDecodeError as error:
+        raise SystemExit(f"invalid benchmark source JSON: {path}: {error}") from error
+
+    records = payload.get("benchmarks")
+    if not isinstance(records, list):
+        raise SystemExit(f"benchmark source missing benchmarks[] list: {path}")
+
+    names: list[str] = []
+    for index, record in enumerate(records):
+        if not isinstance(record, dict):
+            raise SystemExit(f"benchmark source has non-object benchmarks[{index}] in {path}")
+        name = record.get("name")
+        if not isinstance(name, str) or not name:
+            raise SystemExit(f"benchmark source missing benchmarks[{index}].name in {path}")
+        names.append(name)
+
+    if not names:
+        raise SystemExit(f"benchmark source has no benchmark names: {path}")
+    return names
+
+
 def resolve_memory_file(benchmark: BenchmarkSpec, regenerate_inputs: bool) -> Path | None:
     if benchmark.input_generator is None:
         return None
@@ -292,6 +330,7 @@ def run_configuration(
     runner: Path,
     repeat: int,
     iterations: int,
+    warmups: int,
     memory_file: Path | None,
     disabled_pass: str | None,
     expected_result: int | None,
@@ -308,6 +347,13 @@ def run_configuration(
     )
     samples: list[dict[str, Any]] = []
     try:
+        for warmup_index in range(warmups):
+            warmup_sample = run_command(command, cpu)
+            if expected_result is not None and warmup_sample.get("result") != expected_result:
+                raise RuntimeError(
+                    f"warmup result mismatch on iteration {warmup_index}: "
+                    f"{warmup_sample.get('result')} != {expected_result}"
+                )
         for iteration_index in range(iterations):
             sample = run_command(command, cpu)
             sample["iteration_index"] = iteration_index
@@ -338,6 +384,7 @@ def run_configuration(
         {
             "disabled_passes": [] if disabled_pass is None else [disabled_pass],
             "command": command,
+            "warmups_requested": warmups,
             "iterations_requested": iterations,
             "iterations_completed": len(samples),
         }
@@ -398,6 +445,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
         f"- Candidate passes: `{', '.join(passes)}`",
         f"- Runtime: `llvmbpf` only",
         f"- Iterations per configuration: `{payload['parameters']['iterations']}`",
+        f"- Warmups per configuration: `{payload['parameters']['warmups']}`",
         f"- Repeat per sample: `{payload['parameters']['repeat']}`",
         "",
         "## Benchmark Summary",
@@ -506,8 +554,17 @@ def render_markdown(payload: dict[str, Any]) -> str:
 
 def main() -> int:
     args = parse_args()
+    if args.authoritative_benchmarks and args.benchmarks_from:
+        raise SystemExit("choose either --benchmarks-from or --authoritative-benchmarks, not both")
+
     suite = load_suite(Path(args.suite))
-    selected_benchmarks = select_benchmarks(args.benches, suite)
+    requested_benchmarks = args.benches
+    if args.authoritative_benchmarks:
+        requested_benchmarks = load_benchmark_names_from_results(DEFAULT_AUTHORITATIVE_SOURCE)
+    elif args.benchmarks_from:
+        requested_benchmarks = load_benchmark_names_from_results(Path(args.benchmarks_from))
+
+    selected_benchmarks = select_benchmarks(requested_benchmarks, suite)
     selected_passes = select_passes(args.passes)
     output_path = Path(args.output).resolve()
     report_path = Path(args.report).resolve()
@@ -541,6 +598,7 @@ def main() -> int:
         "parameters": {
             "runtime": "llvmbpf",
             "iterations": args.iterations,
+            "warmups": args.warmups,
             "repeat": args.repeat,
             "benchmarks": [benchmark.name for benchmark in selected_benchmarks],
             "passes": selected_passes,
@@ -576,6 +634,7 @@ def main() -> int:
                 runner=runner,
                 repeat=args.repeat,
                 iterations=args.iterations,
+                warmups=args.warmups,
                 memory_file=memory_file,
                 disabled_pass=disabled_pass,
                 expected_result=benchmark.expected_result,
