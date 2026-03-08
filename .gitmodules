@@ -7,3 +7,6 @@
 [submodule "vendor/libbpf"]
 	path = vendor/libbpf
 	url = https://github.com/libbpf/libbpf.git
+[submodule "vendor/linux"]
+	path = vendor/linux
+	url = https://github.com/torvalds/linux.git
