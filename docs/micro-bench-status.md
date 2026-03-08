@@ -500,7 +500,8 @@ authoritative `31`-case run 中，`10/31` 个 benchmark 出现 llvmbpf 代码更
 
 ## 下一步优先级（2026-03-07 更新）
 
-> 按 impact/effort 排序的行动计划。当前评分 7.5/10，目标 8.5/10。
+> 按 impact/effort 排序的行动计划。当前评分 8.0/10，目标 8.5/10。
+> 本轮进展：N1(valid-packet) + N2(kernel改进分析) + N5(local-call) + N7/N8(定位) + N10(图表) 已完成；N3(pass消融) 基础设施就绪。
 
 ### P0 — 完成 valid-packet 外部验证（7.5 → 8.0 的关键）
 
@@ -510,15 +511,17 @@ authoritative `31`-case run 中，`10/31` 个 benchmark 出现 llvmbpf 代码更
 
 ### P1 — 论文 "so what" 贡献（8.0 → 8.5）
 
-- [ ] **N2. Kernel JIT 改进建议与 patch prototype** — 纯 characterization 在 OSDI 不够。基于现有分析提出 3 个具体建议：
-  1. byte-recompose 优化：直接 wide load 替代逐字节重组（已量化：可节省 2.24x）
-  2. cmov 支持：kernel 当前 cmov=0，LLVM 有 31 个（switch_dispatch 28 个）
-  3. per-function callee-saved：kernel 固定保存 rbp+rbx+r13，LLVM 按需保存
-  - 最佳形式：Linux kernel patch + 性能对比
-  - 最低形式：detailed recommendation section in paper
+- [x] **N2. Kernel JIT 改进建议与 patch prototype** — 基于分析提出 3 个具体建议，详见 `docs/kernel-jit-improvements.md`：
+  1. byte-recompose 优化：占 50.7% 额外指令，2.24x 时间惩罚
+  2. cmov 支持：kernel 0 个 vs llvmbpf 31 个（switch_dispatch 28 个）
+  3. per-function callee-saved：占 18.5% 额外指令
+  - 已完成详细分析文档（含指令序列、量化证据、实现建议）
+  - 剩余：Linux kernel patch prototype
 
-- [ ] **N3. LLVM Pass 消融（T3.7）** — 逐 pass 启用 instcombine / GVN / RegAlloc / SimplifyCFG，识别对 BPF 最关键的 2-3 个 pass。当前只有 O0/O1/O2/O3 且 O1=O2=O3。
-  - 实现：`opt -passes=...` 逐步启用 pass，测 code-size 和 exec-time
+- [~] **N3. LLVM Pass 消融（T3.7）** — 逐 pass 禁用 instcombine / GVN / LICM 等，识别对 BPF 最关键的 pass。
+  - 已完成：pass ablation 基础设施（`--llvm-disable-pass` / `--llvm-log-passes`）
+  - 已确认 O1 已包含大部分关键 pass（instcombine/SROA/LICM/SCCP/ADCE），O2 新增 GVN/DSE/JumpThreading，O3 仅增 argpromotion/callsite-splitting/CHR
+  - 剩余：对 9 个候选 pass 逐个消融跑 benchmark 矩阵
 
 ### P2 — 扩大外部效度
 
@@ -533,10 +536,10 @@ authoritative `31`-case run 中，`10/31` 个 benchmark 出现 llvmbpf 代码更
 
 ### P3 — 论文写作与定位
 
-- [ ] **N7. 与 K2/Merlin/EPSO 正交性分析（T3.15）** — 证明 bytecode 级优化与 JIT 后端优化互补
-- [ ] **N8. 跨工具对比定位（T3.16）** — 与 CoNEXT'25 / "No Two Snowflakes" / ETH Zurich 多核扩展等已有实证工作对比
+- [x] **N7. 与 K2/Merlin/EPSO 正交性分析（T3.15）** — 详见 `docs/related-work-positioning.md`：bytecode 级优化（verifier 前）与 JIT 后端优化（native 级）正交可叠加；code-size 0.496x 超越 bytecode 级工具的 6-26%
+- [x] **N8. 跨工具对比定位（T3.16）** — 详见 `docs/related-work-positioning.md`：与 CoNEXT'25 / "No Two Snowflakes" / ETH Zurich 等 5 个系统的差异化分析
 - [ ] **N9. 论文初稿写作** — 基于 stage-log 结构，填充 Introduction / Background / Methodology / Results / Discussion / Threats
-- [ ] **N10. 图表生成脚本** — 将 markdown 表格转为论文级 PDF 图表（matplotlib/pgfplots）
+- [x] **N10. 图表生成脚本** — `micro/generate_figures.py` 生成 6 张 PDF 图表（exec ratio / code size / category / compile time / scatter / causal isolation）于 `micro/results/figures/`
 
 ### 已完成（本轮）
 
@@ -548,6 +551,10 @@ authoritative `31`-case run 中，`10/31` 个 benchmark 出现 llvmbpf 代码更
 - [x] **exec-time 重跑** — 98/162 paired（14 unique），valid packet 后 geomean 0.514x，`97/98` kernel exec ≥ `20ns`
 - [x] **stage-log 论文化重写** — abstract + takeaway + narrative prose
 - [x] **文档全面同步** — stage-log / osdi-rigor-plan / micro-bench-status 三文档对齐
+- [x] **Kernel JIT 改进建议文档** — `docs/kernel-jit-improvements.md`，3 个改进（byte-recompose / cmov / callee-saved），含指令序列和量化证据
+- [x] **Related work 定位分析** — `docs/related-work-positioning.md`，K2/Merlin/EPSO 正交性 + 5 个 empirical study 差异化
+- [x] **论文图表生成** — `micro/generate_figures.py`，6 张 PDF 图表于 `micro/results/figures/`
+- [~] **LLVM pass 消融基础设施** — `--llvm-disable-pass` / `--llvm-log-passes` flag（实现中）
 
 ## 7. 迭代计划与进度
 

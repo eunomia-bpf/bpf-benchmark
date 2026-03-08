@@ -108,7 +108,8 @@ cli_options parse_args(int argc, char **argv)
             "usage: micro_exec <run-llvmbpf|run-kernel|list-programs> --program <path> [--program-name <name>] "
             "[--memory <path>] "
             "[--io-mode map|staged|packet] [--raw-packet] [--repeat N] [--input-size N] "
-            "[--opt-level 0|1|2|3] [--perf-counters] [--perf-scope full_repeat_raw|full_repeat_avg] "
+            "[--opt-level 0|1|2|3] [--llvm-disable-pass <name>] [--llvm-log-passes] "
+            "[--perf-counters] [--perf-scope full_repeat_raw|full_repeat_avg] "
             "[--dump-jit] [--compile-only]");
     }
 
@@ -151,6 +152,14 @@ cli_options parse_args(int argc, char **argv)
                 fail("--opt-level must be between 0 and 3");
             }
             options.opt_level = opt_level;
+            continue;
+        }
+        if (current == "--llvm-disable-pass" && index + 1 < argc) {
+            options.disabled_passes.emplace_back(argv[++index]);
+            continue;
+        }
+        if (current == "--llvm-log-passes") {
+            options.log_passes = true;
             continue;
         }
         if (current == "--perf-counters") {
@@ -205,6 +214,14 @@ void print_json(const sample_result &sample)
     if (sample.opt_level.has_value()) {
         std::cout << ",\"opt_level\":" << *sample.opt_level;
     }
+    std::cout << ",\"disabled_passes\":[";
+    for (size_t index = 0; index < sample.disabled_passes.size(); ++index) {
+        if (index != 0) {
+            std::cout << ",";
+        }
+        std::cout << "\"" << json_escape(sample.disabled_passes[index]) << "\"";
+    }
+    std::cout << "]";
 
     if (sample.wall_exec_ns.has_value()) {
         std::cout << ",\"wall_exec_ns\":" << *sample.wall_exec_ns;

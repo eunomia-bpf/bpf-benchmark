@@ -438,6 +438,13 @@ sample_result run_llvmbpf(const cli_options &options)
     if (vm.set_optimization_level(options.opt_level) < 0) {
         fail("llvmbpf set_optimization_level failed: " + vm.get_error_message());
     }
+    if (!options.disabled_passes.empty() &&
+        vm.set_disabled_passes(options.disabled_passes) < 0) {
+        fail("llvmbpf set_disabled_passes failed: " + vm.get_error_message());
+    }
+    if (options.log_passes && vm.set_log_passes(true) < 0) {
+        fail("llvmbpf set_log_passes failed: " + vm.get_error_message());
+    }
     const auto load_code_start = clock_type::now();
     if (vm.load_code(image.code.data(), image.code.size()) < 0) {
         fail("llvmbpf load_code failed: " + vm.get_error_message());
@@ -475,6 +482,7 @@ sample_result run_llvmbpf(const cli_options &options)
     sample.opt_level = options.opt_level;
     sample.native_code_size = compiled_code->size;
     sample.bpf_insn_count = image.code.size() / sizeof(ebpf_inst);
+    sample.disabled_passes = options.disabled_passes;
     sample.code_size = {
         .bpf_bytecode_bytes = image.code.size(),
         .native_code_bytes = compiled_code->size,

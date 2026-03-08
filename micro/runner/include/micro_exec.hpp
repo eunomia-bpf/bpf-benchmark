@@ -39,6 +39,8 @@ struct cli_options {
     uint32_t repeat = 1;
     uint32_t input_size = 0;
     int opt_level = 3;
+    std::vector<std::string> disabled_passes;
+    bool log_passes = false;
     bool perf_counters = false;
     std::string perf_scope = "full_repeat_raw";
     bool dump_jit = false;
@@ -90,6 +92,7 @@ struct sample_result {
     std::optional<uint64_t> native_code_size;
     std::optional<uint64_t> bpf_insn_count;
     code_size_summary code_size;
+    std::vector<std::string> disabled_passes;
     std::vector<timing_phase> phases_ns;
     perf_counter_capture perf_counters;
 };
