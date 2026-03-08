@@ -4,12 +4,13 @@
 
 v5r2 narrows the design to the version we can realistically build and defend:
 
-- privileged userspace supplies **bounded, arch-specific JIT directives** for one exact pre-verifier BPF image;
-- the kernel owns **legality only**: digest binding, verifier-remap, retained-fact checks, exact template validation, and fail-closed fallback;
+- privileged userspace supplies **bounded, arch-neutral JIT directives** for one exact pre-verifier BPF image;
+- the kernel owns **legality only**: digest binding, verifier-remap, retained-fact checks, shared template validation, CPU gating, logging, and fail-closed fallback;
 - userspace owns **profitability only**: candidate discovery, CPU/workload policy, and directive generation;
-- the prototype is **x86-64 only** and implements **two directives only**: `wide_load` and `cmov_select`.
+- the directive substrate is **arch-neutral**, while per-architecture code is limited to native emitters;
+- the prototype implementation is **x86-64 only** and implements **two directives only**: `wide_load` and `cmov_select`.
 
-This is not a generic optimization language. It is a reusable transport/remap/validation substrate for a small family of backend decisions that bytecode-level optimizers cannot express.
+This is not a generic optimization language. It is a reusable transport/remap/validation substrate for a small family of backend decisions, some of which still belong as kernel peepholes and some of which genuinely need userspace policy.
 
 ## 2. What Changed From v5
 
@@ -41,7 +42,7 @@ v5r2 explicitly does **not** claim:
 - stable portable directive artifacts;
 - compatibility with every existing JIT hardening path in v1.
 
-Every new directive kind still needs a new validator, emitter, selftests, and sometimes new retained facts. The reusable part is the envelope around those consumers.
+Every new directive kind still needs a small kind-specific validator, one emitter per supported architecture, selftests, and sometimes new retained facts. The reusable part is the envelope around those consumers: blob format, transport, remap, CPU gating, shared precondition checks, fail-closed behavior, and logging.
 
 ## 4. Why This Is Not “Just Add Peepholes”
 
@@ -66,7 +67,25 @@ The kernel JIT should not accumulate heuristics such as:
 
 Those are profitability policies. They change with new CPUs, new measurements, and new workloads. Userspace can update them without kernel patches; the kernel cannot do that cleanly.
 
-### 4.1 Mandatory Baseline
+### 4.1 Directive-By-Directive Answer
+
+The honest answer is not “every directive belongs in userspace.” Some are better as kernel peepholes. The framework is valuable because it provides one shared substrate for the subset that really needs userspace profitability policy while still letting us measure kernel-only alternatives directly.
+
+| Directive | Scope | µarch dependency | Better as | Why |
+| --- | --- | --- | --- | --- |
+| `wide_load` | prototype scope | weak | mostly a kernel peephole | legality is local, workload sensitivity is low, and a fixed x86 rule may be good enough. It stays in v1 because it exercises the full transport/remap/retained-fact path and provides the mandatory baseline-recovery case. |
+| `cmov_select` | prototype scope | strong | userspace directive | the same legal diamond can prefer `cmov` or a branch depending on CPU family and workload predictability. This is the clearest case where fixed in-kernel heuristics are the wrong abstraction boundary. |
+| `wide_store` | future work | weak | mostly a kernel peephole | like `wide_load`, the transform is highly local and mostly legality-driven. It is worth tracking as a directive candidate because it can reuse the same substrate, not because it independently justifies a new UAPI. |
+| `rotate_fusion` | future work | medium | mixed, leaning kernel peephole | it is a local rewrite with some feature dependence (`BMI`/`BMI2`, flag behavior), but that likely fits a small in-kernel table unless characterization shows real cross-CPU policy divergence. |
+| `lea_fusion` | future work | weak | kernel peephole | this is classic backend combine logic with little workload policy content. If implemented, it should probably start life as a normal JIT peephole. |
+| `branch_hint` | future work | strong | userspace directive | block layout and fall-through decisions depend on hotness, predictability, and front-end behavior. The kernel should not own benchmark-specific layout policy tables. |
+
+The framework’s value is therefore twofold:
+
+- it gives us one shared legality/fail-closed path for all local backend directives; and
+- it keeps the door open for the small subset, led by `cmov_select` and potentially `branch_hint`, that truly needs userspace policy.
+
+### 4.2 Mandatory Baseline
 
 v5r2 therefore requires a direct-kernel comparison in the evaluation:
 
@@ -163,8 +182,11 @@ v1 does not require a new kernel feedback API. The workload profile can come fro
 
 ### 6.2 Explicitly Out Of Scope
 
+- `wide_store`;
 - `diamond_layout`;
+- `branch_hint`;
 - `rotate_fusion`;
+- `lea_fusion`;
 - arbitrary native code injection;
 - target-independent replacement IR;
 - packet / ctx / `PROBE_MEM` wide loads;
@@ -188,7 +210,8 @@ finalized pre-verifier BPF image
        - preserves orig_idx through rewrites
        - records retained mem facts for covered sites
   -> post-verifier remap
-  -> x86 JIT validates exact templates and either adopts or rejects each directive
+  -> shared validator checks exact templates and produces a lowering plan
+  -> x86 emitter adopts or rejects each directive
   -> rejected directives fall back to stock emission
 ```
 
@@ -257,7 +280,7 @@ v1 assumes one homogeneous execution domain.
 
 ## 9. Blob Format
 
-The blob stays compact and binary. v1 only defines two kinds.
+The blob stays compact and binary. The header and common record layout are arch-neutral; only the final emitter is architecture-specific. v1 still defines only two directive kinds.
 
 ### 9.1 Blob Header
 
@@ -266,6 +289,7 @@ The blob stays compact and binary. v1 only defines two kinds.
 
 enum bpf_jit_arch {
 	BPF_JIT_ARCH_X86_64 = 1,
+	BPF_JIT_ARCH_ARM64  = 2, /* future emitter */
 };
 
 struct bpf_jit_cpu_contract {
@@ -300,8 +324,9 @@ struct bpf_jit_adv_blob_hdr {
 
 ```c
 enum bpf_jit_dir_kind {
-	BPF_JIT_X86_WIDE_LOAD   = 1,
-	BPF_JIT_X86_CMOV_SELECT = 2,
+	BPF_JIT_DIR_WIDE_LOAD   = 1,
+	BPF_JIT_DIR_CMOV_SELECT = 2,
+	/* future: WIDE_STORE, ROTATE_FUSION, LEA_FUSION, BRANCH_HINT */
 };
 
 enum bpf_jit_precond_bits {
@@ -343,7 +368,7 @@ enum bpf_jit_mem_class {
 	BPF_JIT_MEM_MAP_VALUE = 2,
 };
 
-struct bpf_jit_x86_wide_load {
+struct bpf_jit_dir_wide_load {
 	__u8 width;          /* 4 or 8 */
 	__u8 mem_class;
 	__u8 dst_reg;
@@ -369,7 +394,7 @@ struct bpf_jit_value_ref {
 	__s32 imm;
 };
 
-struct bpf_jit_x86_cmov_select {
+struct bpf_jit_dir_cmov_select {
 	__u8 cc;
 	__u8 width;    /* 32 or 64 */
 	__u8 dst_reg;
@@ -439,6 +464,8 @@ Recording rule:
 
 No full verifier-state snapshot is retained.
 
+The same fact shape is intentionally enough for future `wide_store` validation as well. v1 still consumes it only for `wide_load`.
+
 ### 10.4 Post-Verifier Remap
 
 After verification:
@@ -472,19 +499,63 @@ Rule:
 
 This is a deliberate prototype limitation. Supporting directives on the blinded path is future work.
 
-## 11. x86 JIT Consumption
+## 11. Shared Validation And Arch-Specific Emission
 
-The current x86 JIT is a linear emitter built around `do_jit()` and `addrs[]`. v5r2 keeps that model.
+The current x86 JIT is a linear emitter built around `do_jit()` and `addrs[]`. v5r2 keeps that model for the prototype, but the directive consumer is split cleanly so that blob handling, remap, validation, fail-closed behavior, and logging are shared across architectures.
+
+### 11.1 Arch-Neutral / Arch-Specific Split
+
+| Layer | Responsibilities |
+| --- | --- |
+| Arch-neutral core | blob format, `BPF_PROG_LOAD` transport, digest binding, `orig_idx` remap, retained verifier facts, CPU gating, shared precondition checks, kind-specific validator logic, fail-closed fallback, and rejection logging |
+| Arch-specific layer | emitter functions only: translate one already-validated directive plan into native instructions for that JIT |
 
 For accepted directives:
 
-- the JIT emits one fused native sequence at the directive start;
+- the shared validator produces one small arch-neutral lowering plan at the directive start;
+- the selected architecture emitter produces one fused native sequence from that plan;
 - covered BPF instructions share one native entry address in `addrs[]`;
 - this is legal because v1 requires `BPF_JIT_PC_NO_INTERIOR_TARGET`.
 
-No block reordering is introduced. This is why `cmov_select` is feasible and `diamond_layout` is not in scope.
+No block reordering is introduced in v1. This is why `cmov_select` is feasible today and `branch_hint` remains future work.
 
-### 11.1 `wide_load` Validator
+### 11.2 Parameterized Directive Template
+
+Instead of a fully ad-hoc validator per directive, the kernel should use one shared template descriptor plus a small kind-specific `validate()` and one emitter per supported architecture.
+
+```c
+struct bpf_jit_dir_template {
+	enum bpf_jit_dir_kind kind;
+	bool requires_aligned_access;
+	bool requires_no_side_effects;
+	bool requires_single_entry_exit;
+	u8 min_insn_count;
+	u8 max_insn_count;
+	bool (*validate)(const struct bpf_prog *prog,
+			 const struct bpf_jit_dir_rec *rec,
+			 const struct bpf_jit_site *site,
+			 struct bpf_jit_plan *plan);
+};
+```
+
+Common helper logic enforces the shared preconditions before the kind-specific validator runs. The validator itself is still exact, but it only checks the remaining directive-specific shape and fills an arch-neutral `bpf_jit_plan`. Each architecture then registers only the matching `emit(plan)` hook for the kinds it supports. The intended incremental cost of a new directive is therefore small and localized:
+
+- ~50-100 LOC of shared kind-specific validation on the common path;
+- one similarly small emitter function per implemented architecture;
+- no new blob, remap, CPU-gating, fail-closed, or logging machinery.
+
+### 11.3 Same Directive, Different Native Instructions
+
+The same directive payload and validator result should map to different native instructions without changing the legality contract.
+
+| Directive | Shared validator proves | x86 emitter | arm64 emitter |
+| --- | --- | --- | --- |
+| `wide_load` | byte ladder from one base + constant offsets, nonfaulting, aligned enough, one liveout | `movl` / `movq` | `ldr wN` / `ldr xN` |
+| `cmov_select` | one-entry/one-exit diamond, pure destination assignment, compare opcode/width match | `cmp` + `cmovcc` | `cmp` + `csel` |
+
+For `cmov_select`, the shared validator decides only that the BPF region is a legal select. The x86 emitter lowers that plan to `cmovcc`; a future arm64 emitter lowers the same plan to `csel` after materializing immediates into registers when needed. Profitability policy still lives in userspace in both cases.
+
+### 11.4 `wide_load` Validator
 
 Accepted shape:
 
@@ -509,7 +580,8 @@ Kernel checks:
 
 Emitter:
 
-- replace the byte ladder with one `movl` or `movq` from the same base object and constant offset;
+- x86 prototype: replace the byte ladder with one `movl` or `movq` from the same base object and constant offset;
+- future arm64 emitter: replace it with one `ldr wN` or `ldr xN` from the same base object and constant offset;
 - preserve destination register semantics exactly.
 
 Rejected in v1:
@@ -517,7 +589,7 @@ Rejected in v1:
 - packet, ctx, arena, and `PROBE_MEM` accesses;
 - any case that would need new extable behavior.
 
-### 11.2 `cmov_select` Validator
+### 11.5 `cmov_select` Validator
 
 Accepted shape:
 
@@ -542,9 +614,8 @@ Because the arms are restricted to pure destination assignment, “all other liv
 
 Emitter:
 
-- emit `cmp`;
-- materialize the false value in `dst`;
-- emit `cmovcc` of the true value into `dst`.
+- x86 prototype: emit `cmp`, materialize the false value in `dst`, then emit `cmovcc` of the true value into `dst`;
+- future arm64 emitter: emit `cmp`, materialize both arm values in registers if needed, then emit `csel` into `dst`.
 
 ## 12. Automated Userspace Advisor
 
@@ -556,6 +627,8 @@ The advisor runs on the finalized pre-verifier image and finds:
 
 - `wide_load` candidates via byte-load/shift/OR pattern matching;
 - `cmov_select` candidates via CFG pattern matching for one-diamond selects.
+
+The same discovery framework can later grow `wide_store`, `rotate_fusion`, `lea_fusion`, and `branch_hint` without changing the blob transport or remap path. v1 still emits only the first two kinds.
 
 ### 12.2 Site Features
 
@@ -623,7 +696,7 @@ v1 keeps the interface narrow by rule:
 
 - only two directive kinds exist;
 - payloads are declarative, not procedural;
-- each kind maps to one kernel-owned validator and emitter;
+- each kind maps to one shared kernel validator shape and one emitter per supported architecture;
 - new kinds require separate proof obligations, selftests, and review.
 
 There is no free-form replacement encoding, no arbitrary block scheduler, and no “native patch” mode.
@@ -706,6 +779,24 @@ Workloads:
 - byte-recompose-heavy microbenchmarks;
 - select-heavy benchmarks such as `switch_dispatch` and `binary_search`.
 
+### 14.6 Arm64 Analysis Track
+
+Even though the first implementation is x86-only, the evaluation plan should include an arm64 analysis track to show that the directive model is not accidentally x86-specific.
+
+Arm64 analysis looks like:
+
+- run the same userspace candidate discovery on the finalized pre-verifier BPF image;
+- dump the stock arm64 JIT output for those programs;
+- count how many sites the shared validator would accept for `wide_load`, `cmov_select`, and future `wide_store` / `branch_hint`;
+- compare current arm64 lowering against the native idioms that the same directive would request:
+  - `wide_load` -> `ldr wN` / `ldr xN`
+  - `wide_store` -> `str wN` / `str xN`
+  - `cmov_select` -> `csel`
+  - `branch_hint` -> alternate fall-through / block layout
+- report candidate counts, hypothetical accepted directives, code-size deltas from JIT dumps, and instruction-count deltas where the dump analysis is clear enough to estimate them.
+
+`rotate_fusion` and `lea_fusion` stay lower priority on arm64 because their native idioms differ and need separate characterization first. The arm64 track is therefore analysis-only in v1, but it should still demonstrate that the blob format, remap path, validator logic, and userspace policy interface carry across architectures.
+
 ## 15. Implementation Plan
 
 ### 15.1 Kernel Work
@@ -714,19 +805,23 @@ Core files for the prototype:
 
 - `include/uapi/linux/bpf.h`: add `jit_directives_fd` and flags;
 - `kernel/bpf/syscall.c`: parse blob, check digest, check CPU contract, enforce capability gate;
+- `kernel/bpf/`: shared directive template, common precondition checks, remap finalization, and rejection logging;
 - `include/linux/bpf_verifier.h`: add compact retained `bpf_jit_mem_fact` storage;
 - `kernel/bpf/verifier.c`: preserve `orig_idx`, record retained facts, compute remap, finalize directives;
-- `arch/x86/net/bpf_jit_comp.c`: directive dispatch, validators, and emitters;
+- `arch/x86/net/bpf_jit_comp.c`: x86 emitter hooks for `wide_load` and `cmov_select`;
+- future `arch/arm64/net/bpf_jit_comp.c`: arm64 emitter hooks for the same directive kinds;
 - selftests under `tools/testing/selftests/bpf/`.
 
 ### 15.2 Milestones
 
 1. Transport and parser only.
 2. `orig_idx` propagation plus remap finalization.
-3. Retained memory facts in `check_mem_access()`.
-4. `wide_load`.
-5. `cmov_select`.
-6. Automated generator and evaluation baselines.
+3. Shared directive template plus common precondition checks.
+4. Retained memory facts in `check_mem_access()`.
+5. `wide_load`.
+6. `cmov_select`.
+7. Automated generator and x86 evaluation baselines.
+8. arm64 JIT dump analysis and future-emitter design validation.
 
 ## 16. Related-Work Positioning
 
