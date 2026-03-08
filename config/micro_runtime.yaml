@@ -147,3 +147,15 @@ benchmarks:
     input_generator: get_time_heavy
     expected_result: 8884707040993350857
     tags: [helper, time, runtime, heavy]
+
+  - name: atomic_counter_xadd
+    description: Atomically increment array-map counters and fold prior plus final values
+    category: map-runtime
+    family: atomic-op
+    level: xadd
+    hypothesis: Atomic map-value updates should expose lock-xadd lowering and runtime map-value access overhead
+    base_name: atomic_counter_xadd
+    kernel_input_size: 264
+    input_generator: atomic_counter_xadd
+    expected_result: 12907746159561469530
+    tags: [map, atomic, runtime]

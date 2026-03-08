@@ -79,6 +79,17 @@ def _write_be16(packet: bytearray, offset: int, value: int) -> None:
     packet[offset + 1] = value & 0xFF
 
 
+def _write_be32(packet: bytearray, offset: int, value: int) -> None:
+    packet[offset] = (value >> 24) & 0xFF
+    packet[offset + 1] = (value >> 16) & 0xFF
+    packet[offset + 2] = (value >> 8) & 0xFF
+    packet[offset + 3] = value & 0xFF
+
+
+def _memcmp_prefix_pattern_byte(index: int) -> int:
+    return (((index * 29) ^ (index << 2) ^ 0xA5) + 0x11) & 0xFF
+
+
 def generate_packet_parse(output: Path) -> dict[str, int]:
     packet_count = 64
     packet_size = 64
@@ -560,6 +571,256 @@ def generate_load_native_u64(output: Path) -> dict[str, int]:
     return _generate_load_isolation(output, count=128, seed=0xBEEF_CAFE_1234_5678)
 
 
+def generate_memcmp_prefix_64(output: Path) -> dict[str, int]:
+    scenario_count = 3
+    pattern = bytearray(_memcmp_prefix_pattern_byte(index) for index in range(64))
+
+    early_mismatch = bytearray(pattern)
+    early_mismatch[0] ^= 0xFF
+
+    late_mismatch = bytearray(pattern)
+    late_mismatch[63] ^= 0x3C
+
+    full_match = bytearray(pattern)
+
+    blob = bytearray(struct.pack("<I", scenario_count))
+    blob.extend(early_mismatch)
+    blob.extend(late_mismatch)
+    blob.extend(full_match)
+    output.write_bytes(blob)
+    return {"scenario_count": scenario_count, "bytes_per_candidate": 64}
+
+
+def generate_packet_parse_vlans_tcpopts(output: Path) -> dict[str, int]:
+    packet = bytearray(74)
+
+    packet[0:6] = bytes([0x00, 0x11, 0x22, 0x33, 0x44, 0x55])
+    packet[6:12] = bytes([0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB])
+    _write_be16(packet, 12, 0x8100)
+    _write_be16(packet, 14, 0x0064)
+    _write_be16(packet, 16, 0x88A8)
+    _write_be16(packet, 18, 0x00C8)
+    _write_be16(packet, 20, 0x0800)
+
+    ip = 22
+    packet[ip] = 0x45
+    packet[ip + 1] = 0x00
+    _write_be16(packet, ip + 2, 52)
+    _write_be16(packet, ip + 4, 0x1234)
+    _write_be16(packet, ip + 6, 0x4000)
+    packet[ip + 8] = 64
+    packet[ip + 9] = 6
+    _write_be16(packet, ip + 10, 0)
+    packet[ip + 12 : ip + 16] = bytes([192, 168, 1, 10])
+    packet[ip + 16 : ip + 20] = bytes([10, 1, 2, 3])
+
+    tcp = ip + 20
+    _write_be16(packet, tcp, 12345)
+    _write_be16(packet, tcp + 2, 443)
+    _write_be32(packet, tcp + 4, 0x11223344)
+    _write_be32(packet, tcp + 8, 0x55667788)
+    packet[tcp + 12] = 0x80
+    packet[tcp + 13] = 0x18
+    _write_be16(packet, tcp + 14, 0x4000)
+    _write_be16(packet, tcp + 16, 0)
+    _write_be16(packet, tcp + 18, 0)
+    packet[tcp + 20 : tcp + 32] = bytes([2, 4, 0x05, 0xB4, 1, 3, 3, 7, 4, 2, 1, 0])
+
+    output.write_bytes(packet)
+    return {"packet_len": len(packet), "vlan_count": 2, "tcp_header_len": 32}
+
+
+def generate_local_call_fanout(output: Path) -> dict[str, int]:
+    record_count = 16
+    record_size = 24
+    state = 0x0123_4567_89AB_CDEF
+
+    blob = bytearray(struct.pack("<II", record_count, record_size))
+    for index in range(record_count):
+        selector = index % 4
+        state = _lcg(state)
+        tag = ((state >> 24) ^ (index * 17)) & 0xFFFFFFFF
+        state = _lcg(state)
+        left = (state ^ ((index + 1) * 0x9E37_79B9_7F4A_7C15)) & MASK64
+        state = _lcg(state)
+        right = (state ^ ((index + 7) * 0xD134_2543_DE82_EF95)) & MASK64
+        blob.extend(struct.pack("<IIQQ", selector, tag, left, right))
+
+    output.write_bytes(blob)
+    return {"record_count": record_count, "record_size": record_size}
+
+
+def generate_packet_rss_hash(output: Path) -> dict[str, int]:
+    packet = bytearray(54)
+
+    packet[0:6] = bytes([0x10, 0x11, 0x12, 0x13, 0x14, 0x15])
+    packet[6:12] = bytes([0x20, 0x21, 0x22, 0x23, 0x24, 0x25])
+    _write_be16(packet, 12, 0x0800)
+
+    ip = 14
+    packet[ip] = 0x45
+    packet[ip + 1] = 0x00
+    _write_be16(packet, ip + 2, 40)
+    _write_be16(packet, ip + 4, 0xBEEF)
+    _write_be16(packet, ip + 6, 0x0000)
+    packet[ip + 8] = 32
+    packet[ip + 9] = 6
+    _write_be16(packet, ip + 10, 0)
+    packet[ip + 12 : ip + 16] = bytes([172, 16, 1, 9])
+    packet[ip + 16 : ip + 20] = bytes([203, 0, 113, 7])
+
+    tcp = ip + 20
+    _write_be16(packet, tcp, 1234)
+    _write_be16(packet, tcp + 2, 8080)
+    _write_be32(packet, tcp + 4, 0x01020304)
+    _write_be32(packet, tcp + 8, 0x05060708)
+    packet[tcp + 12] = 0x50
+    packet[tcp + 13] = 0x12
+    _write_be16(packet, tcp + 14, 0x2000)
+    _write_be16(packet, tcp + 16, 0)
+    _write_be16(packet, tcp + 18, 0)
+
+    output.write_bytes(packet)
+    return {"packet_len": len(packet), "protocol": 6}
+
+
+def generate_atomic_counter_xadd(output: Path) -> dict[str, int]:
+    op_count = 32
+    seed = 0x1357_9BDF
+    blob = bytearray(struct.pack("<II", op_count, seed))
+
+    for index in range(op_count):
+        slot = (index * 5 + 1) % 4
+        delta = ((index * 11) % 17) + 1
+        blob.extend(struct.pack("<II", slot, delta))
+
+    output.write_bytes(blob)
+    return {"op_count": op_count, "slot_count": 4}
+
+
+def generate_imm64_storm(output: Path) -> dict[str, int]:
+    state = 0x0123_4567_89AB_CDEF
+    words: list[int] = []
+
+    for index in range(4):
+        state = _lcg(state ^ ((index + 1) * 0x9E37_79B9_7F4A_7C15))
+        words.append((state ^ ((index + 1) * 0xD134_2543_DE82_EF95)) & MASK64)
+
+    output.write_bytes(struct.pack("<QQQQ", *words))
+    return {"words": len(words), "bytes": len(words) * 8}
+
+
+def generate_alu32_64_pingpong(output: Path) -> dict[str, int]:
+    count = 64
+    seed = 0x3141_5926
+    state = 0xCAFE_BABE_1029_3847
+
+    blob = bytearray(struct.pack("<II", count, seed))
+    for index in range(count):
+        state = _lcg(state ^ ((index + 1) * 0xA076_1D64_78BD_642F))
+        value = (state ^ ((index + 1) * 0x9E37_79B9_7F4A_7C15) ^ ((seed + index) << 32)) & MASK64
+        blob.extend(struct.pack("<Q", value))
+
+    output.write_bytes(blob)
+    return {"count": count, "seed": seed}
+
+
+def generate_branch_fanout_32(output: Path) -> dict[str, int]:
+    tags = [
+        0,
+        2,
+        3,
+        5,
+        7,
+        9,
+        11,
+        12,
+        14,
+        17,
+        19,
+        21,
+        24,
+        25,
+        26,
+        28,
+        31,
+        33,
+        35,
+        37,
+        38,
+        40,
+        42,
+        45,
+        47,
+        49,
+        52,
+        54,
+        56,
+        59,
+        61,
+        63,
+    ]
+    count = 128
+    blob = bytearray(struct.pack("<I", count))
+    for index in range(count):
+        tag = tags[(index * 9 + 5) % len(tags)]
+        value = (((index + 1) * 0x1F12_3BB5) ^ (index * 0x9E37_79B9)) & 0xFFFFFFFF
+        value = (value & ~63) | tag
+        blob.extend(struct.pack("<I", value))
+
+    output.write_bytes(blob)
+    return {"count": count, "fanout": len(tags)}
+
+
+def generate_deep_guard_tree_8(output: Path) -> dict[str, int]:
+    record_count = 32
+    record_size = 16
+    state = 0x0F1E_2D3C_4B5A_6978
+
+    blob = bytearray(struct.pack("<I", record_count))
+    for index in range(record_count):
+        state = _lcg(state ^ ((index + 1) * 0xD134_2543_DE82_EF95))
+        payload = (state ^ ((index + 1) * 0xA076_1D64_78BD_642F)) & MASK64
+        leaf = index % 9
+
+        if leaf == 0:
+            fields = (0x10, 0x00, 0x40, 0x80, 0x08, 0x00, 0x33, 0x00)
+        elif leaf == 1:
+            fields = (0x31, 0x02, 0x40, 0x80, 0x08, 0x00, 0x33, 0x00)
+        elif leaf == 2:
+            fields = (0x32, 0x01, 0x90, 0x80, 0x08, 0x00, 0x33, 0x00)
+        elif leaf == 3:
+            fields = (0x33, 0x01, 0x40, index & 0xFF, 0x08, 0x10, 0x33, 0x00)
+        elif leaf == 4:
+            fields = (0x40, 0x01, 0x40, 0x80, 0x90, 0x10, 0x33, 0x00)
+        elif leaf == 5:
+            fields = (0x34, 0x01, 0x40, 0x80, 0x08, 0x08, 0x33, 0x00)
+        elif leaf == 6:
+            fields = (0x35, 0x01, 0x40, 0x80, 0x08, 0x10, 0xAA, 0x00)
+        elif leaf == 7:
+            fields = (0x36, 0x01, 0x40, 0x80, 0x08, 0x10, 0x44, 0x01)
+        else:
+            fields = (0x37, 0x01, 0x40, 0x80, 0x08, 0x10, 0x55, 0x02)
+
+        blob.extend(bytes(fields))
+        blob.extend(struct.pack("<Q", payload))
+
+    output.write_bytes(blob)
+    return {"record_count": record_count, "record_size": record_size}
+
+
+def generate_mega_basic_block_2048(output: Path) -> dict[str, int]:
+    state = 0x1357_2468_ACE0_BDF1
+    words: list[int] = []
+
+    for index in range(8):
+        state = _lcg(state ^ ((index + 1) * 0x9E37_79B9_7F4A_7C15))
+        words.append((state ^ ((index + 1) * 0xA076_1D64_78BD_642F)) & MASK64)
+
+    output.write_bytes(struct.pack("<QQQQQQQQ", *words))
+    return {"words": len(words), "bytes": len(words) * 8}
+
+
 GENERATORS = {
     "simple": generate_simple,
     "simple_packet": generate_simple_packet,
@@ -606,6 +867,16 @@ GENERATORS = {
     "helper_call_100": generate_helper_call_100,
     "load_byte_recompose": generate_load_byte_recompose,
     "load_native_u64": generate_load_native_u64,
+    "memcmp_prefix_64": generate_memcmp_prefix_64,
+    "packet_parse_vlans_tcpopts": generate_packet_parse_vlans_tcpopts,
+    "local_call_fanout": generate_local_call_fanout,
+    "packet_rss_hash": generate_packet_rss_hash,
+    "atomic_counter_xadd": generate_atomic_counter_xadd,
+    "imm64_storm": generate_imm64_storm,
+    "alu32_64_pingpong": generate_alu32_64_pingpong,
+    "branch_fanout_32": generate_branch_fanout_32,
+    "deep_guard_tree_8": generate_deep_guard_tree_8,
+    "mega_basic_block_2048": generate_mega_basic_block_2048,
 }
 
 

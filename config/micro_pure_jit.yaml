@@ -480,3 +480,113 @@ benchmarks:
     input_generator: bpf_call_chain
     expected_result: 17813494880153753973
     tags: [call, bpf-to-bpf, local-call, pure-jit]
+
+  - name: memcmp_prefix_64
+    description: Compare three 64-byte candidates against a fixed prefix pattern
+    category: memory-local
+    family: byte-compare
+    level: prefix-64
+    hypothesis: Early-exit byte comparisons should expose byte-load lowering and branch short-circuit behavior
+    base_name: memcmp_prefix_64
+    kernel_input_size: 196
+    input_generator: memcmp_prefix_64
+    expected_result: 9377358970524074984
+    tags: [memory, compare, branch, pure-jit]
+
+  - name: packet_parse_vlans_tcpopts
+    description: Packet-backed Ethernet plus VLAN plus IPv4 plus TCP parser with options walk
+    category: memory-local
+    family: parser
+    level: variable-vlan-tcpopts
+    hypothesis: Variable cursor advancement and repeated bounds checks should magnify packet-parse codegen differences
+    base_name: packet_parse_vlans_tcpopts
+    io_mode: packet
+    kernel_input_size: 74
+    input_generator: packet_parse_vlans_tcpopts
+    expected_result: 7124500222221
+    tags: [packet, parse, bounds, variable-offsets, pure-jit]
+
+  - name: local_call_fanout
+    description: Dispatch among four __noinline local subprograms with different pressure profiles
+    category: call-overhead
+    family: bpf-local-call
+    level: fanout-4
+    hypothesis: Fan-out local calls should stress call-site layout, prologue diversity, and join-point register allocation
+    base_name: local_call_fanout
+    kernel_input_size: 392
+    input_generator: local_call_fanout
+    expected_result: 1171593469689687806
+    tags: [call, bpf-to-bpf, local-call, reg-pressure, pure-jit]
+
+  - name: packet_rss_hash
+    description: Parse an IPv4 TCP 5-tuple and compute a Jenkins-style flow hash
+    category: alu-mix
+    family: packet-hash
+    level: flow-5tuple
+    hypothesis: Endian conversion plus field extraction and rotates should be more workload-realistic than standalone checksum math
+    base_name: packet_rss_hash
+    io_mode: packet
+    kernel_input_size: 54
+    input_generator: packet_rss_hash
+    expected_result: 11016707074064960918
+    tags: [packet, hash, endian, pure-jit]
+
+  - name: imm64_storm
+    description: Straight-line reduction with many distinct 64-bit immediates
+    category: program-scale
+    family: immediate-stress
+    level: imm64-64
+    hypothesis: Dense literal materialization should surface backend differences hidden by data-driven kernels
+    base_name: imm64_storm
+    kernel_input_size: 32
+    input_generator: imm64_storm
+    expected_result: 1225801557240067915
+    tags: [compute, immediates, code-size, pure-jit]
+
+  - name: alu32_64_pingpong
+    description: Alternate u32 and u64 arithmetic on the same live values
+    category: alu-mix
+    family: mixed-width
+    level: pingpong
+    hypothesis: Mixed-width arithmetic should stress zero-extension correctness and 32-bit lowering quality
+    base_name: alu32_64_pingpong
+    kernel_input_size: 520
+    input_generator: alu32_64_pingpong
+    expected_result: 17903474919538923236
+    tags: [alu, mixed-width, pure-jit]
+
+  - name: branch_fanout_32
+    description: Thirty-two-way sparse branch fanout with nontrivial per-arm work
+    category: control-flow
+    family: branch-fanout
+    level: sparse-32
+    hypothesis: Wide sparse fanout should stress branch layout and compare-ladder lowering beyond dense switch dispatch
+    base_name: branch_fanout_32
+    kernel_input_size: 516
+    input_generator: branch_fanout_32
+    expected_result: 9589146199917278581
+    tags: [branch, fanout, pure-jit]
+
+  - name: deep_guard_tree_8
+    description: Eight-level nested guard tree over staged record fields
+    category: control-flow
+    family: deep-guards
+    level: depth-8
+    hypothesis: Deeply nested conditionals should magnify branch inversion, hot-path asymmetry, and join pressure
+    base_name: deep_guard_tree_8
+    kernel_input_size: 516
+    input_generator: deep_guard_tree_8
+    expected_result: 5333736376993440184
+    tags: [branch, nested, guards, pure-jit]
+
+  - name: mega_basic_block_2048
+    description: Single very large acyclic straight-line block with many live temporaries
+    category: program-scale
+    family: mega-block
+    level: approx-2048
+    hypothesis: A huge basic block should directly stress scheduling and register allocation scalability
+    base_name: mega_basic_block_2048
+    kernel_input_size: 64
+    input_generator: mega_basic_block_2048
+    expected_result: 11992325257241416031
+    tags: [compute, code-size, straight-line, pure-jit]

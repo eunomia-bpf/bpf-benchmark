@@ -1,12 +1,59 @@
 #include "common.h"
 
-static __always_inline int bench_packet_parse_vlans_tcpopts(const u8 *data, u32 len, u64 *out)
+static __always_inline int
+micro_parse_tcp_options(const u8 *options_cursor, const u8 *options_end, const u8 *data_end, u64 *out)
 {
-    if (!micro_has_bytes(len, 0, 14U)) {
+    if (options_cursor + 12U > options_end || options_cursor + 12U > data_end) {
         return -1;
     }
 
-    u32 cursor = 14U;
+    const u8 *options = options_cursor;
+    u64 option_acc = 0;
+
+    if (options[0] != 2U || options[1] < 4U) {
+        return -1;
+    }
+    option_acc += (u64)options[0];
+    option_acc += micro_read_u16_be(options, 2U);
+    option_acc ^= (u64)options[2U] << 16U;
+    option_acc ^= (u64)options[3U] << 24U;
+
+    if (options[4] != 1U) {
+        return -1;
+    }
+    option_acc += (u64)options[4U] << 8U;
+
+    if (options[5] != 3U || options[6] < 3U) {
+        return -1;
+    }
+    option_acc += (u64)options[5U] << 16U;
+    option_acc ^= (u64)options[7U] << 32U;
+    option_acc ^= (u64)options[7U] << 16U;
+
+    if (options[8] != 4U || options[9] < 2U) {
+        return -1;
+    }
+    option_acc += (u64)options[8U] << 24U;
+    option_acc += 0x40000000ULL;
+
+    if (options[10] != 1U) {
+        return -1;
+    }
+    option_acc += (u64)options[10U] << 32U;
+
+    option_acc += (u64)options[11U] << 40U;
+    *out = option_acc;
+    return 0;
+}
+
+static __always_inline int
+bench_packet_parse_vlans_tcpopts(const u8 *data, const u8 *data_end, u64 *out)
+{
+    if (data + 14U > data_end) {
+        return -1;
+    }
+
+    const u8 *cursor = data + 14U;
     u16 ethertype = micro_read_u16_be(data, 12U);
     u16 vlan0 = 0;
     u16 vlan1 = 0;
@@ -16,15 +63,15 @@ static __always_inline int bench_packet_parse_vlans_tcpopts(const u8 *data, u32 
         if (ethertype != 0x8100U && ethertype != 0x88A8U) {
             break;
         }
-        if (!micro_has_bytes(len, cursor, 4U)) {
+        if (cursor + 4U > data_end) {
             return -1;
         }
         if (vlan_count == 0U) {
-            vlan0 = micro_read_u16_be(data, cursor);
+            vlan0 = micro_read_u16_be(cursor, 0U);
         } else {
-            vlan1 = micro_read_u16_be(data, cursor);
+            vlan1 = micro_read_u16_be(cursor, 0U);
         }
-        ethertype = micro_read_u16_be(data, cursor + 2U);
+        ethertype = micro_read_u16_be(cursor, 2U);
         vlan_count++;
         cursor += 4U;
     }
@@ -32,11 +79,13 @@ static __always_inline int bench_packet_parse_vlans_tcpopts(const u8 *data, u32 
     if (ethertype != 0x0800U) {
         return -1;
     }
-    if (!micro_has_bytes(len, cursor, 20U)) {
+
+    const u8 *ip = cursor;
+    if (ip + 20U > data_end) {
         return -1;
     }
 
-    u8 ver_ihl = data[cursor];
+    u8 ver_ihl = ip[0];
     u8 version = ver_ihl >> 4;
     u8 ihl_words = ver_ihl & 0x0FU;
     if (version != 4U || ihl_words < 5U) {
@@ -44,79 +93,38 @@ static __always_inline int bench_packet_parse_vlans_tcpopts(const u8 *data, u32 
     }
 
     u32 ip_header_len = (u32)ihl_words * 4U;
-    if (!micro_has_bytes(len, cursor, ip_header_len)) {
+    if (ip + ip_header_len > data_end) {
         return -1;
     }
 
-    u16 total_len = micro_read_u16_be(data, cursor + 2U);
-    u8 protocol = data[cursor + 9U];
-    u32 src_ip = micro_read_u32_be(data, cursor + 12U);
-    u32 dst_ip = micro_read_u32_be(data, cursor + 16U);
+    u16 total_len = micro_read_u16_be(ip, 2U);
+    u8 protocol = ip[9U];
+    u32 src_ip = micro_read_u32_be(ip, 12U);
+    u32 dst_ip = micro_read_u32_be(ip, 16U);
     if (protocol != 6U) {
         return -1;
     }
 
-    u32 tcp = cursor + ip_header_len;
-    if (!micro_has_bytes(len, tcp, 20U)) {
+    const u8 *tcp = ip + ip_header_len;
+    if (tcp + 20U > data_end) {
         return -1;
     }
 
-    u16 src_port = micro_read_u16_be(data, tcp);
-    u16 dst_port = micro_read_u16_be(data, tcp + 2U);
-    u8 data_offset_words = data[tcp + 12U] >> 4;
+    u16 src_port = micro_read_u16_be(tcp, 0U);
+    u16 dst_port = micro_read_u16_be(tcp, 2U);
+    u8 data_offset_words = tcp[12U] >> 4;
     if (data_offset_words < 5U) {
         return -1;
     }
 
     u32 tcp_header_len = (u32)data_offset_words * 4U;
-    if (!micro_has_bytes(len, tcp, tcp_header_len)) {
+    if (tcp + tcp_header_len > data_end) {
         return -1;
     }
 
-    u32 options_cursor = tcp + 20U;
-    u32 options_end = tcp + tcp_header_len;
     u64 option_acc = 0;
-    for (u32 step = 0; step < 10U && options_cursor < options_end; step++) {
-        if (!micro_has_bytes(len, options_cursor, 1U)) {
-            return -1;
-        }
-
-        u32 option_start = options_cursor;
-        u8 kind = data[options_cursor];
-        option_acc += (u64)kind << ((step & 7U) * 8U);
-        options_cursor++;
-
-        if (kind == 0U) {
-            break;
-        }
-        if (kind == 1U) {
-            continue;
-        }
-        if (!micro_has_bytes(len, options_cursor, 1U)) {
-            return -1;
-        }
-
-        u8 option_len = data[options_cursor];
-        if (option_len < 2U) {
-            return -1;
-        }
-        if (!micro_has_bytes(len, option_start, option_len)) {
-            return -1;
-        }
-
-        if (kind == 2U && option_len >= 4U) {
-            option_acc += micro_read_u16_be(data, options_cursor + 1U);
-        } else if (kind == 3U && option_len >= 3U) {
-            option_acc ^= (u64)data[options_cursor + 1U] << 32U;
-        } else if (kind == 4U && option_len >= 2U) {
-            option_acc += 0x40000000ULL;
-        }
-
-        for (u32 byte = 2U; byte < option_len; byte++) {
-            option_acc ^= (u64)data[option_start + byte] << ((byte & 7U) * 8U);
-        }
-
-        options_cursor = option_start + option_len;
+    if (micro_parse_tcp_options(tcp + 20U, tcp + tcp_header_len, data_end, &option_acc) < 0) {
+        return -1;
     }
 
     u64 acc = total_len;
@@ -134,4 +142,28 @@ static __always_inline int bench_packet_parse_vlans_tcpopts(const u8 *data, u32 
     return 0;
 }
 
-DEFINE_PACKET_BACKED_XDP_BENCH(packet_parse_vlans_tcpopts_xdp, bench_packet_parse_vlans_tcpopts)
+SEC("xdp") int packet_parse_vlans_tcpopts_xdp(struct xdp_md *ctx)
+{
+    u8 *data = (u8 *)(long)ctx->data;
+    u8 *data_end = (u8 *)(long)ctx->data_end;
+    u8 *payload;
+    u64 result = 0;
+
+    if (data > data_end) {
+        return XDP_ABORTED;
+    }
+
+    payload = data + 8U;
+    if (payload > data_end) {
+        return XDP_ABORTED;
+    }
+
+    if (bench_packet_parse_vlans_tcpopts(payload, data_end, &result) < 0) {
+        return XDP_ABORTED;
+    }
+
+    micro_write_u64_le(data, result);
+    return XDP_PASS;
+}
+
+char LICENSE[] SEC("license") = "GPL";
