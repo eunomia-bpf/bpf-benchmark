@@ -135,9 +135,108 @@ v4 试图用 target-independent IR 做抽象，但这是错误的层次：
 - **v5 更精确**：优化决策直接绑定到硬件特征
 - **v5 从一开始就有 userspace**：不是 kernel-only first
 
-### 4.5 当前状态
+### 4.5 当前状态（2026-03-08）
 
-**需要重新设计**。v5 方向已确定，但具体的 directive 格式、kernel 接口、安全模型需要从头设计。
+**v5r2 设计已通过 review，可以开始实现。**
+
+设计迭代历史：
+- v4: target-independent IR + lift→compare→emit → ❌ 太重
+- v5: microarch-aware directives → review 5-7/10，微架构故事太弱
+- **v5r2**: 聚焦 wide_load + cmov_select，legality/profitability 分离 → review 7-9/10，**implementation-ready**
+
+核心文档：
+- 设计：`docs/tmp/bpf-jit-advisor-v5r2.md`
+- Review：`docs/tmp/bpf-jit-advisor-v5r2-review.md`
+
+**最大风险**：如果 `cmov_select` 无法展示 µarch-dependent 的优势（同一程序在不同 CPU/workload 下需要不同决策），reviewer 会说"直接加 peephole 就行"。
+
+**决策门**：实现 `cmov_select` 后，如果无法 beat fixed kernel heuristics，退回 kernel-local JIT optimization 方向。
+
+### 4.6 设计约束补充（2026-03-08 讨论）
+
+#### A. Directive 可扩展性：减少 kernel 改动
+
+**问题**：当前设计每加一种 directive 都需要修改 kernel（新 validator + emitter）。
+
+**目标**：尽可能让框架通用，使新增 directive 的 kernel 改动量最小化。
+
+**方案：参数化 validator 模板**
+
+```c
+struct jit_directive_template {
+    u8 kind;
+    // 通用前置条件（多种 directive 共享）
+    bool requires_aligned_access;
+    bool requires_no_side_effects;
+    bool requires_single_entry_exit;
+    u8 min_insn_count, max_insn_count;
+    // kind-specific（小函数，~50 LOC per directive）
+    bool (*validate)(struct bpf_insn *insns, int count, ...);
+    int (*emit)(struct jit_ctx *ctx, ...);
+};
+```
+
+共性检查（对齐、无副作用、单入单出）共享实现，每种 directive 只需 ~50-100 LOC 的 validate + emit 函数。完全不改 kernel 做新 directive 不可能（那就回到了 v4 的 IR 等价问题），但可以把增量降到很小。
+
+| 层次 | 加新 directive 是否需要改 | 说明 |
+|------|:-:|------|
+| Transport / blob 格式 | ❌ | 通用，directive kind 是数字 ID |
+| Remap / orig_idx | ❌ | 通用 |
+| CPU gating | ❌ | 通用 feature 检查 |
+| Fail-closed + logging | ❌ | 通用 |
+| **Validator** | **✅ 小改** | 50-100 LOC，使用共享模板 |
+| **Emitter** | **✅ 小改** | 50-100 LOC，arch-specific |
+
+#### B. Directive 覆盖面：需要更多测试发现更多优化原语
+
+当前只深入分析了 byte-recompose 和 cmov（2 种），但 characterization 已提示更多候选：
+
+| 潜在 directive | 来源 | 预计影响 | µarch-dependent? |
+|---------------|------|---------|:-:|
+| `wide_load` | 50.7% surplus | 高 | 弱 |
+| `cmov_select` | 19.9% surplus | 中 | **强** |
+| `wide_store` | byte-store composition | 中 | 弱 |
+| `rotate_fusion` | rorx/rol/blsr | 低-中 | 中（BMI2） |
+| `lea_fusion` | add/scale/offset → lea | 低 | 弱 |
+| `branch_hint` | 分支布局 | 中 | **强** |
+
+**行动**：对 40 个 benchmark（含新增 10 个）做全面 JIT dump 对比分析，发现更多 directive 候选。同时对 arm64 做初步 JIT dump 分析。
+
+#### C. 跨架构设计
+
+框架必须是 **arch-neutral** 的，即使初始原型只在 x86 上实现。
+
+```
+┌─────────────────────────────┐
+│  Arch-neutral (共享)         │
+│  - Directive blob 格式       │
+│  - BPF_PROG_LOAD transport  │
+│  - orig_idx remap           │
+│  - CPU gating 机制           │
+│  - Retained verifier facts  │
+│  - Fail-closed 框架         │
+└──────────┬──────────────────┘
+           │
+    ┌──────┴──────┐
+    │             │
+┌───┴───┐   ┌────┴────┐
+│ x86   │   │ arm64   │
+│ emit  │   │ emit    │
+│ wide: │   │ wide:   │
+│  mov  │   │  ldr    │
+│ cmov: │   │ cmov:   │
+│ cmovcc│   │  csel   │
+└───────┘   └─────────┘
+```
+
+同一个 directive（如 `cmov_select`）：validator 逻辑相同（检查 diamond 结构），emitter 不同（x86 cmovcc / arm64 csel）。
+
+**论文价值**：正因为 profitability 决策在 userspace，跨架构时只需换 policy database。如果把决策硬编码在 kernel JIT 里，每个 arch 都要独立维护启发式规则。
+
+**初步计划**：
+- x86：完整实现 + 评估
+- arm64：JIT dump 分析 + code-size 对比（GitHub Actions ARM runner），框架设计展示跨架构能力
+- arm64 完整实现作为 future work（但设计文档必须说明 arm64 emitter 的映射）
 
 ---
 
