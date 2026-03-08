@@ -1,0 +1,563 @@
+{
+  "suite": "pure_jit_new_benchmarks",
+  "source_manifest": "/home/yunwei37/workspace/bpf-benchmark/config/micro_pure_jit.yaml",
+  "corrected_manifest": "/home/yunwei37/workspace/bpf-benchmark/tmp/micro_pure_jit.validation.yaml",
+  "generated_at": "2026-03-08T07:11:30.397416+00:00",
+  "parameters": {
+    "iterations": 3,
+    "warmups": 1,
+    "repeat": 200
+  },
+  "manifest_note": "Temporary corrected manifest selects the first matching benchmark entry to avoid duplicate-name overrides with expected_result=0.",
+  "benchmarks": [
+    {
+      "name": "memcmp_prefix_64",
+      "passed_both_runtimes": true,
+      "lk_ratio": 0.8620689655172413,
+      "runtimes": {
+        "llvmbpf": {
+          "status": "ok",
+          "returncode": 0,
+          "command": [
+            "python3",
+            "micro/run_micro.py",
+            "--suite",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/micro_pure_jit.validation.yaml",
+            "--bench",
+            "memcmp_prefix_64",
+            "--runtime",
+            "llvmbpf",
+            "--iterations",
+            "3",
+            "--warmups",
+            "1",
+            "--repeat",
+            "200",
+            "--output",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/memcmp_prefix_64.llvmbpf.json"
+          ],
+          "output_path": "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/memcmp_prefix_64.llvmbpf.json",
+          "exec_ns_median": 75,
+          "compile_ns_median": 10412101,
+          "code_size": 483,
+          "timing_source": "rdtsc",
+          "result_distribution": {
+            "9377358970524074984": 3
+          },
+          "raw_output_path": "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/memcmp_prefix_64.llvmbpf.json"
+        },
+        "kernel": {
+          "status": "ok",
+          "returncode": 0,
+          "command": [
+            "python3",
+            "micro/run_micro.py",
+            "--suite",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/micro_pure_jit.validation.yaml",
+            "--bench",
+            "memcmp_prefix_64",
+            "--runtime",
+            "kernel",
+            "--iterations",
+            "3",
+            "--warmups",
+            "1",
+            "--repeat",
+            "200",
+            "--output",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/memcmp_prefix_64.kernel.json"
+          ],
+          "output_path": "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/memcmp_prefix_64.kernel.json",
+          "exec_ns_median": 87,
+          "compile_ns_median": 893575,
+          "code_size": 650,
+          "timing_source": "ktime",
+          "result_distribution": {
+            "9377358970524074984": 3
+          },
+          "raw_output_path": "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/memcmp_prefix_64.kernel.json"
+        }
+      }
+    },
+    {
+      "name": "packet_parse_vlans_tcpopts",
+      "passed_both_runtimes": false,
+      "lk_ratio": null,
+      "runtimes": {
+        "llvmbpf": {
+          "status": "ok",
+          "returncode": 0,
+          "command": [
+            "python3",
+            "micro/run_micro.py",
+            "--suite",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/micro_pure_jit.validation.yaml",
+            "--bench",
+            "packet_parse_vlans_tcpopts",
+            "--runtime",
+            "llvmbpf",
+            "--iterations",
+            "3",
+            "--warmups",
+            "1",
+            "--repeat",
+            "200",
+            "--output",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/packet_parse_vlans_tcpopts.llvmbpf.json"
+          ],
+          "output_path": "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/packet_parse_vlans_tcpopts.llvmbpf.json",
+          "exec_ns_median": 17,
+          "compile_ns_median": 18272654,
+          "code_size": 1004,
+          "timing_source": "rdtsc",
+          "result_distribution": {
+            "7124500222221": 3
+          },
+          "raw_output_path": "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/packet_parse_vlans_tcpopts.llvmbpf.json"
+        },
+        "kernel": {
+          "status": "failed",
+          "returncode": 1,
+          "command": [
+            "python3",
+            "micro/run_micro.py",
+            "--suite",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/micro_pure_jit.validation.yaml",
+            "--bench",
+            "packet_parse_vlans_tcpopts",
+            "--runtime",
+            "kernel",
+            "--iterations",
+            "3",
+            "--warmups",
+            "1",
+            "--repeat",
+            "200",
+            "--output",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/packet_parse_vlans_tcpopts.kernel.json"
+          ],
+          "output_path": "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/packet_parse_vlans_tcpopts.kernel.json",
+          "error": "RuntimeError: command failed (1): sudo -n /home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec run-kernel --program /home/yunwei37/workspace/bpf-benchmark/micro/programs/packet_parse_vlans_tcpopts.bpf.o --io-mode packet --repeat 200 --input-size 74 --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_parse_vlans_tcpopts.mem",
+          "raw_error": "make: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmkdir -p /home/yunwei37/workspace/bpf-benchmark/micro/build/runner\ncmake -S /home/yunwei37/workspace/bpf-benchmark/micro/runner -B /home/yunwei37/workspace/bpf-benchmark/micro/build/runner \\\n\t-DCMAKE_BUILD_TYPE=Release \\\n\t-DMICRO_REPO_ROOT=/home/yunwei37/workspace/bpf-benchmark \\\n\t-DMICRO_LIBBPF_PREFIX=/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/libbpf/prefix \\\n\t-DMICRO_LIBBPF_LIBRARY=/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/libbpf/obj/libbpf.a\n-- Checking LLVM_VERSION_MAJOR macro value...\n-- LLVM_VERSION_MAJOR is: 20\n--  Adding spdlog seperately..\n-- Build spdlog: 1.15.2\n-- Build type: Release\n-- LLVM_LIBS=LLVMAArch64CodeGen;LLVMAArch64AsmParser;LLVMAArch64Desc;LLVMAArch64Disassembler;LLVMAArch64Info;LLVMAArch64Utils;LLVMAMDGPUCodeGen;LLVMAMDGPUAsmParser;LLVMAMDGPUDesc;LLVMAMDGPUDisassembler;LLVMAMDGPUInfo;LLVMAMDGPUUtils;LLVMARMCodeGen;LLVMARMAsmParser;LLVMARMDesc;LLVMARMDisassembler;LLVMARMInfo;LLVMARMUtils;LLVMAVRCodeGen;LLVMAVRAsmParser;LLVMAVRDesc;LLVMAVRDisassembler;LLVMAVRInfo;LLVMBPFCodeGen;LLVMBPFAsmParser;LLVMBPFDesc;LLVMBPFDisassembler;LLVMBPFInfo;LLVMHexagonCodeGen;LLVMHexagonAsmParser;LLVMHexagonDesc;LLVMHexagonDisassembler;LLVMHexagonInfo;LLVMLanaiCodeGen;LLVMLanaiAsmParser;LLVMLanaiDesc;LLVMLanaiDisassembler;LLVMLanaiInfo;LLVMLoongArchCodeGen;LLVMLoongArchAsmParser;LLVMLoongArchDesc;LLVMLoongArchDisassembler;LLVMLoongArchInfo;LLVMMipsCodeGen;LLVMMipsAsmParser;LLVMMipsDesc;LLVMMipsDisassembler;LLVMMipsInfo;LLVMMSP430CodeGen;LLVMMSP430AsmParser;LLVMMSP430Desc;LLVMMSP430Disassembler;LLVMMSP430Info;LLVMNVPTXCodeGen;LLVMNVPTXDesc;LLVMNVPTXInfo;LLVMPowerPCCodeGen;LLVMPowerPCAsmParser;LLVMPowerPCDesc;LLVMPowerPCDisassembler;LLVMPowerPCInfo;LLVMRISCVCodeGen;LLVMRISCVAsmParser;LLVMRISCVDesc;LLVMRISCVDisassembler;LLVMRISCVInfo;LLVMSparcCodeGen;LLVMSparcAsmParser;LLVMSparcDesc;LLVMSparcDisassembler;LLVMSparcInfo;LLVMSPIRVCodeGen;LLVMSPIRVDesc;LLVMSPIRVInfo;LLVMSystemZCodeGen;LLVMSystemZAsmParser;LLVMSystemZDesc;LLVMSystemZDisassembler;LLVMSystemZInfo;LLVMVECodeGen;LLVMVEAsmParser;LLVMVEDesc;LLVMVEDisassembler;LLVMVEInfo;LLVMWebAssemblyCodeGen;LLVMWebAssemblyAsmParser;LLVMWebAssemblyDesc;LLVMWebAssemblyDisassembler;LLVMWebAssemblyInfo;LLVMWebAssemblyUtils;LLVMX86CodeGen;LLVMX86AsmParser;LLVMX86Desc;LLVMX86Disassembler;LLVMX86Info;LLVMXCoreCodeGen;LLVMXCoreDesc;LLVMXCoreDisassembler;LLVMXCoreInfo;LLVMM68kCodeGen;LLVMM68kAsmParser;LLVMM68kDesc;LLVMM68kDisassembler;LLVMM68kInfo;LLVMXtensaCodeGen;LLVMXtensaAsmParser;LLVMXtensaDesc;LLVMXtensaDisassembler;LLVMXtensaInfo;LLVMCore;LLVMSupport;LLVMTarget;LLVMAnalysis;LLVMipo;LLVMTransformUtils;LLVMBitReader;LLVMAsmParser;LLVMLinker;LLVMMC;LLVMMCParser;LLVMMCDisassembler;LLVMObject;LLVMExecutionEngine;LLVMRuntimeDyld;LLVMOrcJIT;LLVMMCJIT;LLVMX86CodeGen;LLVMX86Desc;LLVMX86Info;LLVMX86AsmParser;LLVMNVPTXCodeGen;LLVMNVPTXDesc;LLVMNVPTXInfo;LLVMAArch64CodeGen;LLVMAArch64Desc;LLVMAArch64Info;LLVMAArch64AsmParser\n-- Configuring done (0.2s)\n-- Generating done (0.0s)\n-- Build files have been written to: /home/yunwei37/workspace/bpf-benchmark/micro/build/runner\ncmake --build /home/yunwei37/workspace/bpf-benchmark/micro/build/runner --target micro_exec -j\ngmake[1]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[2]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[3]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[ 40%] Built target spdlog\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[ 65%] Built target llvmbpf_vm\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[100%] Built target micro_exec\ngmake[3]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[2]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[1]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\nmake: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmake: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmake -C /home/yunwei37/workspace/bpf-benchmark/micro/programs\nmake[1]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/programs'\nmake[1]: Nothing to be done for 'all'.\nmake[1]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/programs'\nmake: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro'\n[build] micro_exec: make -C micro micro_exec\n[build] programs: make -C micro programs\n[WARN] CPU governor is 'powersave', not 'performance'. Results may have frequency scaling noise.\n[WARN] Turbo boost is enabled. Consider disabling for stable measurements.\n[WARN] perf_event_paranoid=2. Some perf counters may not be available.\n[WARN] No CPU affinity set. Consider using --cpu for isolated measurements.\n[bench] packet_parse_vlans_tcpopts\n\nTraceback (most recent call last):\n  File \"/home/yunwei37/workspace/bpf-benchmark/micro/run_micro.py\", line 649, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/home/yunwei37/workspace/bpf-benchmark/micro/run_micro.py\", line 568, in main\n    parse_helper_output(run_command(command, args.cpu).stdout)\n                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/yunwei37/workspace/bpf-benchmark/micro/run_micro.py\", line 117, in run_command\n    raise RuntimeError(f\"command failed ({completed.returncode}): {' '.join(full_command)}\\n{details}\")\nRuntimeError: command failed (1): sudo -n /home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec run-kernel --program /home/yunwei37/workspace/bpf-benchmark/micro/programs/packet_parse_vlans_tcpopts.bpf.o --io-mode packet --repeat 200 --input-size 74 --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_parse_vlans_tcpopts.mem\nlibbpf: loading object from /home/yunwei37/workspace/bpf-benchmark/micro/programs/packet_parse_vlans_tcpopts.bpf.o\nlibbpf: elf: section(3) xdp, size 3448, link 0, flags 6, type=1\nlibbpf: sec 'xdp': found program 'packet_parse_vlans_tcpopts_xdp' at insn offset 0 (0 bytes), code size 431 insns (3448 bytes)\nlibbpf: elf: section(4) license, size 4, link 0, flags 3, type=1\nlibbpf: license of /home/yunwei37/workspace/bpf-benchmark/micro/programs/packet_parse_vlans_tcpopts.bpf.o is GPL\nlibbpf: elf: section(15) .BTF, size 2507, link 0, flags 0, type=1\nlibbpf: elf: section(17) .BTF.ext, size 2192, link 0, flags 0, type=1\nlibbpf: elf: section(25) .symtab, size 792, link 1, flags 0, type=2\nlibbpf: looking for externs among 33 symbols...\nlibbpf: collected 0 externs total\nlibbpf: object 'packet_parse_vl': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: prog 'packet_parse_vlans_tcpopts_xdp': BPF program load failed: -EACCES\nlibbpf: prog 'packet_parse_vlans_tcpopts_xdp': -- BEGIN PROG LOAD LOG --\n0: R1=ctx() R10=fp0\n; DEFINE_PACKET_BACKED_XDP_BENCH(packet_parse_vlans_tcpopts_xdp, bench_packet_parse_vlans_tcpopts) @ packet_parse_vlans_tcpopts.bpf.c:137\n0: (b7) r0 = 0                        ; R0_w=0\n1: (61) r3 = *(u32 *)(r1 +4)          ; R1=ctx() R3_w=pkt_end()\n2: (61) r1 = *(u32 *)(r1 +0)          ; R1_w=pkt(r=0)\n3: (2d) if r1 > r3 goto pc+426        ; R1_w=pkt(r=0) R3_w=pkt_end()\n4: (bf) r8 = r1                       ; R1_w=pkt(r=0) R8_w=pkt(r=0)\n5: (07) r8 += 8                       ; R8_w=pkt(off=8,r=0)\n6: (2d) if r8 > r3 goto pc+423        ; R3_w=pkt_end() R8_w=pkt(off=8,r=8)\n7: (1f) r3 -= r8                      ; R3_w=scalar() R8_w=pkt(off=8,r=8)\n8: (bf) r2 = r3                       ; R2_w=scalar(id=1) R3_w=scalar(id=1)\n9: (67) r2 <<= 32                     ; R2_w=scalar(smax=0x7fffffff00000000,umax=0xffffffff00000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xffffffff00000000))\n10: (77) r2 >>= 32                    ; R2_w=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n11: (b7) r4 = 14                      ; R4_w=14\n12: (b7) r7 = 14                      ; R7=14\n; if (len == MICRO_UNBOUNDED_LEN) { @ common.h:24\n13: (2d) if r4 > r2 goto pc+416       ; R2=scalar(smin=umin=umin32=14,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R4=14\n; return (u16)(((u16)data[offset] << 8) | data[offset + 1]); @ common.h:55\n14: (71) r5 = *(u8 *)(r1 +21)\ninvalid access to packet, off=21 size=1, R1(id=0,off=21,r=8)\nR1 offset is outside of the packet\nprocessed 15 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 1\n-- END PROG LOAD LOG --\nlibbpf: prog 'packet_parse_vlans_tcpopts_xdp': failed to load: -EACCES\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/micro/programs/packet_parse_vlans_tcpopts.bpf.o'\nbpf_object__load failed: Permission denied"
+        }
+      }
+    },
+    {
+      "name": "local_call_fanout",
+      "passed_both_runtimes": true,
+      "lk_ratio": 1.7373737373737375,
+      "runtimes": {
+        "llvmbpf": {
+          "status": "ok",
+          "returncode": 0,
+          "command": [
+            "python3",
+            "micro/run_micro.py",
+            "--suite",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/micro_pure_jit.validation.yaml",
+            "--bench",
+            "local_call_fanout",
+            "--runtime",
+            "llvmbpf",
+            "--iterations",
+            "3",
+            "--warmups",
+            "1",
+            "--repeat",
+            "200",
+            "--output",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/local_call_fanout.llvmbpf.json"
+          ],
+          "output_path": "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/local_call_fanout.llvmbpf.json",
+          "exec_ns_median": 172,
+          "compile_ns_median": 18608661,
+          "code_size": 815,
+          "timing_source": "rdtsc",
+          "result_distribution": {
+            "1171593469689687806": 3
+          },
+          "raw_output_path": "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/local_call_fanout.llvmbpf.json"
+        },
+        "kernel": {
+          "status": "ok",
+          "returncode": 0,
+          "command": [
+            "python3",
+            "micro/run_micro.py",
+            "--suite",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/micro_pure_jit.validation.yaml",
+            "--bench",
+            "local_call_fanout",
+            "--runtime",
+            "kernel",
+            "--iterations",
+            "3",
+            "--warmups",
+            "1",
+            "--repeat",
+            "200",
+            "--output",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/local_call_fanout.kernel.json"
+          ],
+          "output_path": "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/local_call_fanout.kernel.json",
+          "exec_ns_median": 99,
+          "compile_ns_median": 1636191,
+          "code_size": 2222,
+          "timing_source": "ktime",
+          "result_distribution": {
+            "1171593469689687806": 3
+          },
+          "raw_output_path": "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/local_call_fanout.kernel.json"
+        }
+      }
+    },
+    {
+      "name": "packet_rss_hash",
+      "passed_both_runtimes": false,
+      "lk_ratio": null,
+      "runtimes": {
+        "llvmbpf": {
+          "status": "ok",
+          "returncode": 0,
+          "command": [
+            "python3",
+            "micro/run_micro.py",
+            "--suite",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/micro_pure_jit.validation.yaml",
+            "--bench",
+            "packet_rss_hash",
+            "--runtime",
+            "llvmbpf",
+            "--iterations",
+            "3",
+            "--warmups",
+            "1",
+            "--repeat",
+            "200",
+            "--output",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/packet_rss_hash.llvmbpf.json"
+          ],
+          "output_path": "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/packet_rss_hash.llvmbpf.json",
+          "exec_ns_median": 43,
+          "compile_ns_median": 12379223,
+          "code_size": 653,
+          "timing_source": "rdtsc",
+          "result_distribution": {
+            "11016707074064960918": 3
+          },
+          "raw_output_path": "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/packet_rss_hash.llvmbpf.json"
+        },
+        "kernel": {
+          "status": "failed",
+          "returncode": 1,
+          "command": [
+            "python3",
+            "micro/run_micro.py",
+            "--suite",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/micro_pure_jit.validation.yaml",
+            "--bench",
+            "packet_rss_hash",
+            "--runtime",
+            "kernel",
+            "--iterations",
+            "3",
+            "--warmups",
+            "1",
+            "--repeat",
+            "200",
+            "--output",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/packet_rss_hash.kernel.json"
+          ],
+          "output_path": "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/packet_rss_hash.kernel.json",
+          "error": "RuntimeError: command failed (1): sudo -n /home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec run-kernel --program /home/yunwei37/workspace/bpf-benchmark/micro/programs/packet_rss_hash.bpf.o --io-mode packet --repeat 200 --input-size 54 --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_rss_hash.mem",
+          "raw_error": "make: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmkdir -p /home/yunwei37/workspace/bpf-benchmark/micro/build/runner\ncmake -S /home/yunwei37/workspace/bpf-benchmark/micro/runner -B /home/yunwei37/workspace/bpf-benchmark/micro/build/runner \\\n\t-DCMAKE_BUILD_TYPE=Release \\\n\t-DMICRO_REPO_ROOT=/home/yunwei37/workspace/bpf-benchmark \\\n\t-DMICRO_LIBBPF_PREFIX=/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/libbpf/prefix \\\n\t-DMICRO_LIBBPF_LIBRARY=/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/libbpf/obj/libbpf.a\n-- Checking LLVM_VERSION_MAJOR macro value...\n-- LLVM_VERSION_MAJOR is: 20\n--  Adding spdlog seperately..\n-- Build spdlog: 1.15.2\n-- Build type: Release\n-- LLVM_LIBS=LLVMAArch64CodeGen;LLVMAArch64AsmParser;LLVMAArch64Desc;LLVMAArch64Disassembler;LLVMAArch64Info;LLVMAArch64Utils;LLVMAMDGPUCodeGen;LLVMAMDGPUAsmParser;LLVMAMDGPUDesc;LLVMAMDGPUDisassembler;LLVMAMDGPUInfo;LLVMAMDGPUUtils;LLVMARMCodeGen;LLVMARMAsmParser;LLVMARMDesc;LLVMARMDisassembler;LLVMARMInfo;LLVMARMUtils;LLVMAVRCodeGen;LLVMAVRAsmParser;LLVMAVRDesc;LLVMAVRDisassembler;LLVMAVRInfo;LLVMBPFCodeGen;LLVMBPFAsmParser;LLVMBPFDesc;LLVMBPFDisassembler;LLVMBPFInfo;LLVMHexagonCodeGen;LLVMHexagonAsmParser;LLVMHexagonDesc;LLVMHexagonDisassembler;LLVMHexagonInfo;LLVMLanaiCodeGen;LLVMLanaiAsmParser;LLVMLanaiDesc;LLVMLanaiDisassembler;LLVMLanaiInfo;LLVMLoongArchCodeGen;LLVMLoongArchAsmParser;LLVMLoongArchDesc;LLVMLoongArchDisassembler;LLVMLoongArchInfo;LLVMMipsCodeGen;LLVMMipsAsmParser;LLVMMipsDesc;LLVMMipsDisassembler;LLVMMipsInfo;LLVMMSP430CodeGen;LLVMMSP430AsmParser;LLVMMSP430Desc;LLVMMSP430Disassembler;LLVMMSP430Info;LLVMNVPTXCodeGen;LLVMNVPTXDesc;LLVMNVPTXInfo;LLVMPowerPCCodeGen;LLVMPowerPCAsmParser;LLVMPowerPCDesc;LLVMPowerPCDisassembler;LLVMPowerPCInfo;LLVMRISCVCodeGen;LLVMRISCVAsmParser;LLVMRISCVDesc;LLVMRISCVDisassembler;LLVMRISCVInfo;LLVMSparcCodeGen;LLVMSparcAsmParser;LLVMSparcDesc;LLVMSparcDisassembler;LLVMSparcInfo;LLVMSPIRVCodeGen;LLVMSPIRVDesc;LLVMSPIRVInfo;LLVMSystemZCodeGen;LLVMSystemZAsmParser;LLVMSystemZDesc;LLVMSystemZDisassembler;LLVMSystemZInfo;LLVMVECodeGen;LLVMVEAsmParser;LLVMVEDesc;LLVMVEDisassembler;LLVMVEInfo;LLVMWebAssemblyCodeGen;LLVMWebAssemblyAsmParser;LLVMWebAssemblyDesc;LLVMWebAssemblyDisassembler;LLVMWebAssemblyInfo;LLVMWebAssemblyUtils;LLVMX86CodeGen;LLVMX86AsmParser;LLVMX86Desc;LLVMX86Disassembler;LLVMX86Info;LLVMXCoreCodeGen;LLVMXCoreDesc;LLVMXCoreDisassembler;LLVMXCoreInfo;LLVMM68kCodeGen;LLVMM68kAsmParser;LLVMM68kDesc;LLVMM68kDisassembler;LLVMM68kInfo;LLVMXtensaCodeGen;LLVMXtensaAsmParser;LLVMXtensaDesc;LLVMXtensaDisassembler;LLVMXtensaInfo;LLVMCore;LLVMSupport;LLVMTarget;LLVMAnalysis;LLVMipo;LLVMTransformUtils;LLVMBitReader;LLVMAsmParser;LLVMLinker;LLVMMC;LLVMMCParser;LLVMMCDisassembler;LLVMObject;LLVMExecutionEngine;LLVMRuntimeDyld;LLVMOrcJIT;LLVMMCJIT;LLVMX86CodeGen;LLVMX86Desc;LLVMX86Info;LLVMX86AsmParser;LLVMNVPTXCodeGen;LLVMNVPTXDesc;LLVMNVPTXInfo;LLVMAArch64CodeGen;LLVMAArch64Desc;LLVMAArch64Info;LLVMAArch64AsmParser\n-- Configuring done (0.1s)\n-- Generating done (0.0s)\n-- Build files have been written to: /home/yunwei37/workspace/bpf-benchmark/micro/build/runner\ncmake --build /home/yunwei37/workspace/bpf-benchmark/micro/build/runner --target micro_exec -j\ngmake[1]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[2]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[3]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[ 40%] Built target spdlog\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[ 65%] Built target llvmbpf_vm\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[100%] Built target micro_exec\ngmake[3]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[2]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[1]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\nmake: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmake: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmake -C /home/yunwei37/workspace/bpf-benchmark/micro/programs\nmake[1]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/programs'\nmake[1]: Nothing to be done for 'all'.\nmake[1]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/programs'\nmake: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro'\n[build] micro_exec: make -C micro micro_exec\n[build] programs: make -C micro programs\n[WARN] CPU governor is 'powersave', not 'performance'. Results may have frequency scaling noise.\n[WARN] Turbo boost is enabled. Consider disabling for stable measurements.\n[WARN] perf_event_paranoid=2. Some perf counters may not be available.\n[WARN] No CPU affinity set. Consider using --cpu for isolated measurements.\n[bench] packet_rss_hash\n\nTraceback (most recent call last):\n  File \"/home/yunwei37/workspace/bpf-benchmark/micro/run_micro.py\", line 649, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/home/yunwei37/workspace/bpf-benchmark/micro/run_micro.py\", line 568, in main\n    parse_helper_output(run_command(command, args.cpu).stdout)\n                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/yunwei37/workspace/bpf-benchmark/micro/run_micro.py\", line 117, in run_command\n    raise RuntimeError(f\"command failed ({completed.returncode}): {' '.join(full_command)}\\n{details}\")\nRuntimeError: command failed (1): sudo -n /home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec run-kernel --program /home/yunwei37/workspace/bpf-benchmark/micro/programs/packet_rss_hash.bpf.o --io-mode packet --repeat 200 --input-size 54 --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_rss_hash.mem\nlibbpf: loading object from /home/yunwei37/workspace/bpf-benchmark/micro/programs/packet_rss_hash.bpf.o\nlibbpf: elf: section(3) xdp, size 2520, link 0, flags 6, type=1\nlibbpf: sec 'xdp': found program 'packet_rss_hash_xdp' at insn offset 0 (0 bytes), code size 315 insns (2520 bytes)\nlibbpf: elf: section(4) license, size 4, link 0, flags 3, type=1\nlibbpf: license of /home/yunwei37/workspace/bpf-benchmark/micro/programs/packet_rss_hash.bpf.o is GPL\nlibbpf: elf: section(15) .BTF, size 1752, link 0, flags 0, type=1\nlibbpf: elf: section(17) .BTF.ext, size 1760, link 0, flags 0, type=1\nlibbpf: elf: section(25) .symtab, size 480, link 1, flags 0, type=2\nlibbpf: looking for externs among 20 symbols...\nlibbpf: collected 0 externs total\nlibbpf: object 'packet_rss_hash': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: prog 'packet_rss_hash_xdp': BPF program load failed: -EACCES\nlibbpf: prog 'packet_rss_hash_xdp': -- BEGIN PROG LOAD LOG --\n0: R1=ctx() R10=fp0\n; DEFINE_PACKET_BACKED_XDP_BENCH(packet_rss_hash_xdp, bench_packet_rss_hash) @ packet_rss_hash.bpf.c:103\n0: (b7) r0 = 0                        ; R0_w=0\n1: (61) r4 = *(u32 *)(r1 +4)          ; R1=ctx() R4_w=pkt_end()\n2: (61) r1 = *(u32 *)(r1 +0)          ; R1_w=pkt(r=0)\n3: (2d) if r1 > r4 goto pc+310        ; R1_w=pkt(r=0) R4_w=pkt_end()\n4: (bf) r5 = r1                       ; R1_w=pkt(r=0) R5_w=pkt(r=0)\n5: (07) r5 += 8                       ; R5_w=pkt(off=8,r=0)\n6: (2d) if r5 > r4 goto pc+307        ; R4_w=pkt_end() R5_w=pkt(off=8,r=8)\n7: (1f) r4 -= r5                      ; R4_w=scalar() R5_w=pkt(off=8,r=8)\n8: (bf) r2 = r4                       ; R2_w=scalar(id=1) R4_w=scalar(id=1)\n9: (67) r2 <<= 32                     ; R2_w=scalar(smax=0x7fffffff00000000,umax=0xffffffff00000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xffffffff00000000))\n10: (77) r2 >>= 32                    ; R2_w=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n11: (18) r3 = 0xffffffff              ; R3=0xffffffff\n; if (len == MICRO_UNBOUNDED_LEN) { @ common.h:24\n13: (1d) if r2 == r3 goto pc+294      ; R2=scalar(smin=0,smax=umax=umax32=0xfffffffe,var_off=(0x0; 0xffffffff)) R3=0xffffffff\n14: (b7) r3 = 14                      ; R3_w=14\n; if (!micro_has_bytes(len, 0, 14U)) { @ packet_rss_hash.bpf.c:45\n15: (2d) if r3 > r2 goto pc+298       ; R2=scalar(smin=umin=umin32=14,smax=umax=umax32=0xfffffffe,var_off=(0x0; 0xffffffff)) R3_w=14\n16: (bf) r2 = r4                      ; R2_w=scalar(id=1) R4=scalar(id=1)\n17: (07) r2 += -14                    ; R2_w=scalar()\n18: (67) r2 <<= 32                    ; R2_w=scalar(smax=0x7fffffff00000000,umax=0xffffffff00000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xffffffff00000000))\n19: (77) r2 >>= 32                    ; R2_w=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n20: (b7) r3 = 20                      ; R3=20\n; if (micro_read_u16_be(data, 12U) != 0x0800U) { @ packet_rss_hash.bpf.c:49\n21: (2d) if r3 > r2 goto pc+292       ; R2=scalar(smin=umin=umin32=20,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R3=20\n22: (71) r2 = *(u8 *)(r1 +21)\ninvalid access to packet, off=21 size=1, R1(id=0,off=21,r=8)\nR1 offset is outside of the packet\nprocessed 22 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 2\n-- END PROG LOAD LOG --\nlibbpf: prog 'packet_rss_hash_xdp': failed to load: -EACCES\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/micro/programs/packet_rss_hash.bpf.o'\nbpf_object__load failed: Permission denied"
+        }
+      }
+    },
+    {
+      "name": "imm64_storm",
+      "passed_both_runtimes": false,
+      "lk_ratio": null,
+      "runtimes": {
+        "llvmbpf": {
+          "status": "failed",
+          "returncode": 1,
+          "command": [
+            "python3",
+            "micro/run_micro.py",
+            "--suite",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/micro_pure_jit.validation.yaml",
+            "--bench",
+            "imm64_storm",
+            "--runtime",
+            "llvmbpf",
+            "--iterations",
+            "3",
+            "--warmups",
+            "1",
+            "--repeat",
+            "200",
+            "--output",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/imm64_storm.llvmbpf.json"
+          ],
+          "output_path": "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/imm64_storm.llvmbpf.json",
+          "error": "RuntimeError: imm64_storm/llvmbpf result mismatch: 3017400743644887605 != 9190566551964362354",
+          "raw_error": "make: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmkdir -p /home/yunwei37/workspace/bpf-benchmark/micro/build/runner\ncmake -S /home/yunwei37/workspace/bpf-benchmark/micro/runner -B /home/yunwei37/workspace/bpf-benchmark/micro/build/runner \\\n\t-DCMAKE_BUILD_TYPE=Release \\\n\t-DMICRO_REPO_ROOT=/home/yunwei37/workspace/bpf-benchmark \\\n\t-DMICRO_LIBBPF_PREFIX=/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/libbpf/prefix \\\n\t-DMICRO_LIBBPF_LIBRARY=/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/libbpf/obj/libbpf.a\n-- Checking LLVM_VERSION_MAJOR macro value...\n-- LLVM_VERSION_MAJOR is: 20\n--  Adding spdlog seperately..\n-- Build spdlog: 1.15.2\n-- Build type: Release\n-- LLVM_LIBS=LLVMAArch64CodeGen;LLVMAArch64AsmParser;LLVMAArch64Desc;LLVMAArch64Disassembler;LLVMAArch64Info;LLVMAArch64Utils;LLVMAMDGPUCodeGen;LLVMAMDGPUAsmParser;LLVMAMDGPUDesc;LLVMAMDGPUDisassembler;LLVMAMDGPUInfo;LLVMAMDGPUUtils;LLVMARMCodeGen;LLVMARMAsmParser;LLVMARMDesc;LLVMARMDisassembler;LLVMARMInfo;LLVMARMUtils;LLVMAVRCodeGen;LLVMAVRAsmParser;LLVMAVRDesc;LLVMAVRDisassembler;LLVMAVRInfo;LLVMBPFCodeGen;LLVMBPFAsmParser;LLVMBPFDesc;LLVMBPFDisassembler;LLVMBPFInfo;LLVMHexagonCodeGen;LLVMHexagonAsmParser;LLVMHexagonDesc;LLVMHexagonDisassembler;LLVMHexagonInfo;LLVMLanaiCodeGen;LLVMLanaiAsmParser;LLVMLanaiDesc;LLVMLanaiDisassembler;LLVMLanaiInfo;LLVMLoongArchCodeGen;LLVMLoongArchAsmParser;LLVMLoongArchDesc;LLVMLoongArchDisassembler;LLVMLoongArchInfo;LLVMMipsCodeGen;LLVMMipsAsmParser;LLVMMipsDesc;LLVMMipsDisassembler;LLVMMipsInfo;LLVMMSP430CodeGen;LLVMMSP430AsmParser;LLVMMSP430Desc;LLVMMSP430Disassembler;LLVMMSP430Info;LLVMNVPTXCodeGen;LLVMNVPTXDesc;LLVMNVPTXInfo;LLVMPowerPCCodeGen;LLVMPowerPCAsmParser;LLVMPowerPCDesc;LLVMPowerPCDisassembler;LLVMPowerPCInfo;LLVMRISCVCodeGen;LLVMRISCVAsmParser;LLVMRISCVDesc;LLVMRISCVDisassembler;LLVMRISCVInfo;LLVMSparcCodeGen;LLVMSparcAsmParser;LLVMSparcDesc;LLVMSparcDisassembler;LLVMSparcInfo;LLVMSPIRVCodeGen;LLVMSPIRVDesc;LLVMSPIRVInfo;LLVMSystemZCodeGen;LLVMSystemZAsmParser;LLVMSystemZDesc;LLVMSystemZDisassembler;LLVMSystemZInfo;LLVMVECodeGen;LLVMVEAsmParser;LLVMVEDesc;LLVMVEDisassembler;LLVMVEInfo;LLVMWebAssemblyCodeGen;LLVMWebAssemblyAsmParser;LLVMWebAssemblyDesc;LLVMWebAssemblyDisassembler;LLVMWebAssemblyInfo;LLVMWebAssemblyUtils;LLVMX86CodeGen;LLVMX86AsmParser;LLVMX86Desc;LLVMX86Disassembler;LLVMX86Info;LLVMXCoreCodeGen;LLVMXCoreDesc;LLVMXCoreDisassembler;LLVMXCoreInfo;LLVMM68kCodeGen;LLVMM68kAsmParser;LLVMM68kDesc;LLVMM68kDisassembler;LLVMM68kInfo;LLVMXtensaCodeGen;LLVMXtensaAsmParser;LLVMXtensaDesc;LLVMXtensaDisassembler;LLVMXtensaInfo;LLVMCore;LLVMSupport;LLVMTarget;LLVMAnalysis;LLVMipo;LLVMTransformUtils;LLVMBitReader;LLVMAsmParser;LLVMLinker;LLVMMC;LLVMMCParser;LLVMMCDisassembler;LLVMObject;LLVMExecutionEngine;LLVMRuntimeDyld;LLVMOrcJIT;LLVMMCJIT;LLVMX86CodeGen;LLVMX86Desc;LLVMX86Info;LLVMX86AsmParser;LLVMNVPTXCodeGen;LLVMNVPTXDesc;LLVMNVPTXInfo;LLVMAArch64CodeGen;LLVMAArch64Desc;LLVMAArch64Info;LLVMAArch64AsmParser\n-- Configuring done (0.1s)\n-- Generating done (0.0s)\n-- Build files have been written to: /home/yunwei37/workspace/bpf-benchmark/micro/build/runner\ncmake --build /home/yunwei37/workspace/bpf-benchmark/micro/build/runner --target micro_exec -j\ngmake[1]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[2]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[3]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[ 40%] Built target spdlog\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[ 65%] Built target llvmbpf_vm\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[100%] Built target micro_exec\ngmake[3]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[2]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[1]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\nmake: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmake: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmake -C /home/yunwei37/workspace/bpf-benchmark/micro/programs\nmake[1]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/programs'\nmake[1]: Nothing to be done for 'all'.\nmake[1]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/programs'\nmake: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro'\n[build] micro_exec: make -C micro micro_exec\n[build] programs: make -C micro programs\n[WARN] CPU governor is 'powersave', not 'performance'. Results may have frequency scaling noise.\n[WARN] Turbo boost is enabled. Consider disabling for stable measurements.\n[WARN] perf_event_paranoid=2. Some perf counters may not be available.\n[WARN] No CPU affinity set. Consider using --cpu for isolated measurements.\n[bench] imm64_storm\n\nTraceback (most recent call last):\n  File \"/home/yunwei37/workspace/bpf-benchmark/micro/run_micro.py\", line 649, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/home/yunwei37/workspace/bpf-benchmark/micro/run_micro.py\", line 591, in main\n    raise RuntimeError(\nRuntimeError: imm64_storm/llvmbpf result mismatch: 3017400743644887605 != 9190566551964362354"
+        },
+        "kernel": {
+          "status": "failed",
+          "returncode": 1,
+          "command": [
+            "python3",
+            "micro/run_micro.py",
+            "--suite",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/micro_pure_jit.validation.yaml",
+            "--bench",
+            "imm64_storm",
+            "--runtime",
+            "kernel",
+            "--iterations",
+            "3",
+            "--warmups",
+            "1",
+            "--repeat",
+            "200",
+            "--output",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/imm64_storm.kernel.json"
+          ],
+          "output_path": "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/imm64_storm.kernel.json",
+          "error": "RuntimeError: imm64_storm/kernel result mismatch: 3017400743644887605 != 9190566551964362354",
+          "raw_error": "make: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmkdir -p /home/yunwei37/workspace/bpf-benchmark/micro/build/runner\ncmake -S /home/yunwei37/workspace/bpf-benchmark/micro/runner -B /home/yunwei37/workspace/bpf-benchmark/micro/build/runner \\\n\t-DCMAKE_BUILD_TYPE=Release \\\n\t-DMICRO_REPO_ROOT=/home/yunwei37/workspace/bpf-benchmark \\\n\t-DMICRO_LIBBPF_PREFIX=/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/libbpf/prefix \\\n\t-DMICRO_LIBBPF_LIBRARY=/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/libbpf/obj/libbpf.a\n-- Checking LLVM_VERSION_MAJOR macro value...\n-- LLVM_VERSION_MAJOR is: 20\n--  Adding spdlog seperately..\n-- Build spdlog: 1.15.2\n-- Build type: Release\n-- LLVM_LIBS=LLVMAArch64CodeGen;LLVMAArch64AsmParser;LLVMAArch64Desc;LLVMAArch64Disassembler;LLVMAArch64Info;LLVMAArch64Utils;LLVMAMDGPUCodeGen;LLVMAMDGPUAsmParser;LLVMAMDGPUDesc;LLVMAMDGPUDisassembler;LLVMAMDGPUInfo;LLVMAMDGPUUtils;LLVMARMCodeGen;LLVMARMAsmParser;LLVMARMDesc;LLVMARMDisassembler;LLVMARMInfo;LLVMARMUtils;LLVMAVRCodeGen;LLVMAVRAsmParser;LLVMAVRDesc;LLVMAVRDisassembler;LLVMAVRInfo;LLVMBPFCodeGen;LLVMBPFAsmParser;LLVMBPFDesc;LLVMBPFDisassembler;LLVMBPFInfo;LLVMHexagonCodeGen;LLVMHexagonAsmParser;LLVMHexagonDesc;LLVMHexagonDisassembler;LLVMHexagonInfo;LLVMLanaiCodeGen;LLVMLanaiAsmParser;LLVMLanaiDesc;LLVMLanaiDisassembler;LLVMLanaiInfo;LLVMLoongArchCodeGen;LLVMLoongArchAsmParser;LLVMLoongArchDesc;LLVMLoongArchDisassembler;LLVMLoongArchInfo;LLVMMipsCodeGen;LLVMMipsAsmParser;LLVMMipsDesc;LLVMMipsDisassembler;LLVMMipsInfo;LLVMMSP430CodeGen;LLVMMSP430AsmParser;LLVMMSP430Desc;LLVMMSP430Disassembler;LLVMMSP430Info;LLVMNVPTXCodeGen;LLVMNVPTXDesc;LLVMNVPTXInfo;LLVMPowerPCCodeGen;LLVMPowerPCAsmParser;LLVMPowerPCDesc;LLVMPowerPCDisassembler;LLVMPowerPCInfo;LLVMRISCVCodeGen;LLVMRISCVAsmParser;LLVMRISCVDesc;LLVMRISCVDisassembler;LLVMRISCVInfo;LLVMSparcCodeGen;LLVMSparcAsmParser;LLVMSparcDesc;LLVMSparcDisassembler;LLVMSparcInfo;LLVMSPIRVCodeGen;LLVMSPIRVDesc;LLVMSPIRVInfo;LLVMSystemZCodeGen;LLVMSystemZAsmParser;LLVMSystemZDesc;LLVMSystemZDisassembler;LLVMSystemZInfo;LLVMVECodeGen;LLVMVEAsmParser;LLVMVEDesc;LLVMVEDisassembler;LLVMVEInfo;LLVMWebAssemblyCodeGen;LLVMWebAssemblyAsmParser;LLVMWebAssemblyDesc;LLVMWebAssemblyDisassembler;LLVMWebAssemblyInfo;LLVMWebAssemblyUtils;LLVMX86CodeGen;LLVMX86AsmParser;LLVMX86Desc;LLVMX86Disassembler;LLVMX86Info;LLVMXCoreCodeGen;LLVMXCoreDesc;LLVMXCoreDisassembler;LLVMXCoreInfo;LLVMM68kCodeGen;LLVMM68kAsmParser;LLVMM68kDesc;LLVMM68kDisassembler;LLVMM68kInfo;LLVMXtensaCodeGen;LLVMXtensaAsmParser;LLVMXtensaDesc;LLVMXtensaDisassembler;LLVMXtensaInfo;LLVMCore;LLVMSupport;LLVMTarget;LLVMAnalysis;LLVMipo;LLVMTransformUtils;LLVMBitReader;LLVMAsmParser;LLVMLinker;LLVMMC;LLVMMCParser;LLVMMCDisassembler;LLVMObject;LLVMExecutionEngine;LLVMRuntimeDyld;LLVMOrcJIT;LLVMMCJIT;LLVMX86CodeGen;LLVMX86Desc;LLVMX86Info;LLVMX86AsmParser;LLVMNVPTXCodeGen;LLVMNVPTXDesc;LLVMNVPTXInfo;LLVMAArch64CodeGen;LLVMAArch64Desc;LLVMAArch64Info;LLVMAArch64AsmParser\n-- Configuring done (0.1s)\n-- Generating done (0.0s)\n-- Build files have been written to: /home/yunwei37/workspace/bpf-benchmark/micro/build/runner\ncmake --build /home/yunwei37/workspace/bpf-benchmark/micro/build/runner --target micro_exec -j\ngmake[1]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[2]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[3]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[ 40%] Built target spdlog\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[ 65%] Built target llvmbpf_vm\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[100%] Built target micro_exec\ngmake[3]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[2]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[1]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\nmake: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmake: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmake -C /home/yunwei37/workspace/bpf-benchmark/micro/programs\nmake[1]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/programs'\nmake[1]: Nothing to be done for 'all'.\nmake[1]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/programs'\nmake: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro'\n[build] micro_exec: make -C micro micro_exec\n[build] programs: make -C micro programs\n[WARN] CPU governor is 'powersave', not 'performance'. Results may have frequency scaling noise.\n[WARN] Turbo boost is enabled. Consider disabling for stable measurements.\n[WARN] perf_event_paranoid=2. Some perf counters may not be available.\n[WARN] No CPU affinity set. Consider using --cpu for isolated measurements.\n[bench] imm64_storm\n\nTraceback (most recent call last):\n  File \"/home/yunwei37/workspace/bpf-benchmark/micro/run_micro.py\", line 649, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/home/yunwei37/workspace/bpf-benchmark/micro/run_micro.py\", line 591, in main\n    raise RuntimeError(\nRuntimeError: imm64_storm/kernel result mismatch: 3017400743644887605 != 9190566551964362354"
+        }
+      }
+    },
+    {
+      "name": "alu32_64_pingpong",
+      "passed_both_runtimes": false,
+      "lk_ratio": null,
+      "runtimes": {
+        "llvmbpf": {
+          "status": "failed",
+          "returncode": 1,
+          "command": [
+            "python3",
+            "micro/run_micro.py",
+            "--suite",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/micro_pure_jit.validation.yaml",
+            "--bench",
+            "alu32_64_pingpong",
+            "--runtime",
+            "llvmbpf",
+            "--iterations",
+            "3",
+            "--warmups",
+            "1",
+            "--repeat",
+            "200",
+            "--output",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/alu32_64_pingpong.llvmbpf.json"
+          ],
+          "output_path": "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/alu32_64_pingpong.llvmbpf.json",
+          "error": "RuntimeError: alu32_64_pingpong/llvmbpf result mismatch: 9369298489151876707 != 6174013046034006403",
+          "raw_error": "make: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmkdir -p /home/yunwei37/workspace/bpf-benchmark/micro/build/runner\ncmake -S /home/yunwei37/workspace/bpf-benchmark/micro/runner -B /home/yunwei37/workspace/bpf-benchmark/micro/build/runner \\\n\t-DCMAKE_BUILD_TYPE=Release \\\n\t-DMICRO_REPO_ROOT=/home/yunwei37/workspace/bpf-benchmark \\\n\t-DMICRO_LIBBPF_PREFIX=/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/libbpf/prefix \\\n\t-DMICRO_LIBBPF_LIBRARY=/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/libbpf/obj/libbpf.a\n-- Checking LLVM_VERSION_MAJOR macro value...\n-- LLVM_VERSION_MAJOR is: 20\n--  Adding spdlog seperately..\n-- Build spdlog: 1.15.2\n-- Build type: Release\n-- LLVM_LIBS=LLVMAArch64CodeGen;LLVMAArch64AsmParser;LLVMAArch64Desc;LLVMAArch64Disassembler;LLVMAArch64Info;LLVMAArch64Utils;LLVMAMDGPUCodeGen;LLVMAMDGPUAsmParser;LLVMAMDGPUDesc;LLVMAMDGPUDisassembler;LLVMAMDGPUInfo;LLVMAMDGPUUtils;LLVMARMCodeGen;LLVMARMAsmParser;LLVMARMDesc;LLVMARMDisassembler;LLVMARMInfo;LLVMARMUtils;LLVMAVRCodeGen;LLVMAVRAsmParser;LLVMAVRDesc;LLVMAVRDisassembler;LLVMAVRInfo;LLVMBPFCodeGen;LLVMBPFAsmParser;LLVMBPFDesc;LLVMBPFDisassembler;LLVMBPFInfo;LLVMHexagonCodeGen;LLVMHexagonAsmParser;LLVMHexagonDesc;LLVMHexagonDisassembler;LLVMHexagonInfo;LLVMLanaiCodeGen;LLVMLanaiAsmParser;LLVMLanaiDesc;LLVMLanaiDisassembler;LLVMLanaiInfo;LLVMLoongArchCodeGen;LLVMLoongArchAsmParser;LLVMLoongArchDesc;LLVMLoongArchDisassembler;LLVMLoongArchInfo;LLVMMipsCodeGen;LLVMMipsAsmParser;LLVMMipsDesc;LLVMMipsDisassembler;LLVMMipsInfo;LLVMMSP430CodeGen;LLVMMSP430AsmParser;LLVMMSP430Desc;LLVMMSP430Disassembler;LLVMMSP430Info;LLVMNVPTXCodeGen;LLVMNVPTXDesc;LLVMNVPTXInfo;LLVMPowerPCCodeGen;LLVMPowerPCAsmParser;LLVMPowerPCDesc;LLVMPowerPCDisassembler;LLVMPowerPCInfo;LLVMRISCVCodeGen;LLVMRISCVAsmParser;LLVMRISCVDesc;LLVMRISCVDisassembler;LLVMRISCVInfo;LLVMSparcCodeGen;LLVMSparcAsmParser;LLVMSparcDesc;LLVMSparcDisassembler;LLVMSparcInfo;LLVMSPIRVCodeGen;LLVMSPIRVDesc;LLVMSPIRVInfo;LLVMSystemZCodeGen;LLVMSystemZAsmParser;LLVMSystemZDesc;LLVMSystemZDisassembler;LLVMSystemZInfo;LLVMVECodeGen;LLVMVEAsmParser;LLVMVEDesc;LLVMVEDisassembler;LLVMVEInfo;LLVMWebAssemblyCodeGen;LLVMWebAssemblyAsmParser;LLVMWebAssemblyDesc;LLVMWebAssemblyDisassembler;LLVMWebAssemblyInfo;LLVMWebAssemblyUtils;LLVMX86CodeGen;LLVMX86AsmParser;LLVMX86Desc;LLVMX86Disassembler;LLVMX86Info;LLVMXCoreCodeGen;LLVMXCoreDesc;LLVMXCoreDisassembler;LLVMXCoreInfo;LLVMM68kCodeGen;LLVMM68kAsmParser;LLVMM68kDesc;LLVMM68kDisassembler;LLVMM68kInfo;LLVMXtensaCodeGen;LLVMXtensaAsmParser;LLVMXtensaDesc;LLVMXtensaDisassembler;LLVMXtensaInfo;LLVMCore;LLVMSupport;LLVMTarget;LLVMAnalysis;LLVMipo;LLVMTransformUtils;LLVMBitReader;LLVMAsmParser;LLVMLinker;LLVMMC;LLVMMCParser;LLVMMCDisassembler;LLVMObject;LLVMExecutionEngine;LLVMRuntimeDyld;LLVMOrcJIT;LLVMMCJIT;LLVMX86CodeGen;LLVMX86Desc;LLVMX86Info;LLVMX86AsmParser;LLVMNVPTXCodeGen;LLVMNVPTXDesc;LLVMNVPTXInfo;LLVMAArch64CodeGen;LLVMAArch64Desc;LLVMAArch64Info;LLVMAArch64AsmParser\n-- Configuring done (0.1s)\n-- Generating done (0.0s)\n-- Build files have been written to: /home/yunwei37/workspace/bpf-benchmark/micro/build/runner\ncmake --build /home/yunwei37/workspace/bpf-benchmark/micro/build/runner --target micro_exec -j\ngmake[1]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[2]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[3]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[ 40%] Built target spdlog\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[ 65%] Built target llvmbpf_vm\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[100%] Built target micro_exec\ngmake[3]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[2]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[1]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\nmake: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmake: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmake -C /home/yunwei37/workspace/bpf-benchmark/micro/programs\nmake[1]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/programs'\nmake[1]: Nothing to be done for 'all'.\nmake[1]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/programs'\nmake: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro'\n[build] micro_exec: make -C micro micro_exec\n[build] programs: make -C micro programs\n[WARN] CPU governor is 'powersave', not 'performance'. Results may have frequency scaling noise.\n[WARN] Turbo boost is enabled. Consider disabling for stable measurements.\n[WARN] perf_event_paranoid=2. Some perf counters may not be available.\n[WARN] No CPU affinity set. Consider using --cpu for isolated measurements.\n[bench] alu32_64_pingpong\n\nTraceback (most recent call last):\n  File \"/home/yunwei37/workspace/bpf-benchmark/micro/run_micro.py\", line 649, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/home/yunwei37/workspace/bpf-benchmark/micro/run_micro.py\", line 591, in main\n    raise RuntimeError(\nRuntimeError: alu32_64_pingpong/llvmbpf result mismatch: 9369298489151876707 != 6174013046034006403"
+        },
+        "kernel": {
+          "status": "failed",
+          "returncode": 1,
+          "command": [
+            "python3",
+            "micro/run_micro.py",
+            "--suite",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/micro_pure_jit.validation.yaml",
+            "--bench",
+            "alu32_64_pingpong",
+            "--runtime",
+            "kernel",
+            "--iterations",
+            "3",
+            "--warmups",
+            "1",
+            "--repeat",
+            "200",
+            "--output",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/alu32_64_pingpong.kernel.json"
+          ],
+          "output_path": "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/alu32_64_pingpong.kernel.json",
+          "error": "RuntimeError: alu32_64_pingpong/kernel result mismatch: 9369298489151876707 != 6174013046034006403",
+          "raw_error": "make: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmkdir -p /home/yunwei37/workspace/bpf-benchmark/micro/build/runner\ncmake -S /home/yunwei37/workspace/bpf-benchmark/micro/runner -B /home/yunwei37/workspace/bpf-benchmark/micro/build/runner \\\n\t-DCMAKE_BUILD_TYPE=Release \\\n\t-DMICRO_REPO_ROOT=/home/yunwei37/workspace/bpf-benchmark \\\n\t-DMICRO_LIBBPF_PREFIX=/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/libbpf/prefix \\\n\t-DMICRO_LIBBPF_LIBRARY=/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/libbpf/obj/libbpf.a\n-- Checking LLVM_VERSION_MAJOR macro value...\n-- LLVM_VERSION_MAJOR is: 20\n--  Adding spdlog seperately..\n-- Build spdlog: 1.15.2\n-- Build type: Release\n-- LLVM_LIBS=LLVMAArch64CodeGen;LLVMAArch64AsmParser;LLVMAArch64Desc;LLVMAArch64Disassembler;LLVMAArch64Info;LLVMAArch64Utils;LLVMAMDGPUCodeGen;LLVMAMDGPUAsmParser;LLVMAMDGPUDesc;LLVMAMDGPUDisassembler;LLVMAMDGPUInfo;LLVMAMDGPUUtils;LLVMARMCodeGen;LLVMARMAsmParser;LLVMARMDesc;LLVMARMDisassembler;LLVMARMInfo;LLVMARMUtils;LLVMAVRCodeGen;LLVMAVRAsmParser;LLVMAVRDesc;LLVMAVRDisassembler;LLVMAVRInfo;LLVMBPFCodeGen;LLVMBPFAsmParser;LLVMBPFDesc;LLVMBPFDisassembler;LLVMBPFInfo;LLVMHexagonCodeGen;LLVMHexagonAsmParser;LLVMHexagonDesc;LLVMHexagonDisassembler;LLVMHexagonInfo;LLVMLanaiCodeGen;LLVMLanaiAsmParser;LLVMLanaiDesc;LLVMLanaiDisassembler;LLVMLanaiInfo;LLVMLoongArchCodeGen;LLVMLoongArchAsmParser;LLVMLoongArchDesc;LLVMLoongArchDisassembler;LLVMLoongArchInfo;LLVMMipsCodeGen;LLVMMipsAsmParser;LLVMMipsDesc;LLVMMipsDisassembler;LLVMMipsInfo;LLVMMSP430CodeGen;LLVMMSP430AsmParser;LLVMMSP430Desc;LLVMMSP430Disassembler;LLVMMSP430Info;LLVMNVPTXCodeGen;LLVMNVPTXDesc;LLVMNVPTXInfo;LLVMPowerPCCodeGen;LLVMPowerPCAsmParser;LLVMPowerPCDesc;LLVMPowerPCDisassembler;LLVMPowerPCInfo;LLVMRISCVCodeGen;LLVMRISCVAsmParser;LLVMRISCVDesc;LLVMRISCVDisassembler;LLVMRISCVInfo;LLVMSparcCodeGen;LLVMSparcAsmParser;LLVMSparcDesc;LLVMSparcDisassembler;LLVMSparcInfo;LLVMSPIRVCodeGen;LLVMSPIRVDesc;LLVMSPIRVInfo;LLVMSystemZCodeGen;LLVMSystemZAsmParser;LLVMSystemZDesc;LLVMSystemZDisassembler;LLVMSystemZInfo;LLVMVECodeGen;LLVMVEAsmParser;LLVMVEDesc;LLVMVEDisassembler;LLVMVEInfo;LLVMWebAssemblyCodeGen;LLVMWebAssemblyAsmParser;LLVMWebAssemblyDesc;LLVMWebAssemblyDisassembler;LLVMWebAssemblyInfo;LLVMWebAssemblyUtils;LLVMX86CodeGen;LLVMX86AsmParser;LLVMX86Desc;LLVMX86Disassembler;LLVMX86Info;LLVMXCoreCodeGen;LLVMXCoreDesc;LLVMXCoreDisassembler;LLVMXCoreInfo;LLVMM68kCodeGen;LLVMM68kAsmParser;LLVMM68kDesc;LLVMM68kDisassembler;LLVMM68kInfo;LLVMXtensaCodeGen;LLVMXtensaAsmParser;LLVMXtensaDesc;LLVMXtensaDisassembler;LLVMXtensaInfo;LLVMCore;LLVMSupport;LLVMTarget;LLVMAnalysis;LLVMipo;LLVMTransformUtils;LLVMBitReader;LLVMAsmParser;LLVMLinker;LLVMMC;LLVMMCParser;LLVMMCDisassembler;LLVMObject;LLVMExecutionEngine;LLVMRuntimeDyld;LLVMOrcJIT;LLVMMCJIT;LLVMX86CodeGen;LLVMX86Desc;LLVMX86Info;LLVMX86AsmParser;LLVMNVPTXCodeGen;LLVMNVPTXDesc;LLVMNVPTXInfo;LLVMAArch64CodeGen;LLVMAArch64Desc;LLVMAArch64Info;LLVMAArch64AsmParser\n-- Configuring done (0.1s)\n-- Generating done (0.0s)\n-- Build files have been written to: /home/yunwei37/workspace/bpf-benchmark/micro/build/runner\ncmake --build /home/yunwei37/workspace/bpf-benchmark/micro/build/runner --target micro_exec -j\ngmake[1]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[2]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[3]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[ 40%] Built target spdlog\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[ 65%] Built target llvmbpf_vm\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[100%] Built target micro_exec\ngmake[3]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[2]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[1]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\nmake: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmake: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmake -C /home/yunwei37/workspace/bpf-benchmark/micro/programs\nmake[1]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/programs'\nmake[1]: Nothing to be done for 'all'.\nmake[1]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/programs'\nmake: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro'\n[build] micro_exec: make -C micro micro_exec\n[build] programs: make -C micro programs\n[WARN] CPU governor is 'powersave', not 'performance'. Results may have frequency scaling noise.\n[WARN] Turbo boost is enabled. Consider disabling for stable measurements.\n[WARN] perf_event_paranoid=2. Some perf counters may not be available.\n[WARN] No CPU affinity set. Consider using --cpu for isolated measurements.\n[bench] alu32_64_pingpong\n\nTraceback (most recent call last):\n  File \"/home/yunwei37/workspace/bpf-benchmark/micro/run_micro.py\", line 649, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/home/yunwei37/workspace/bpf-benchmark/micro/run_micro.py\", line 591, in main\n    raise RuntimeError(\nRuntimeError: alu32_64_pingpong/kernel result mismatch: 9369298489151876707 != 6174013046034006403"
+        }
+      }
+    },
+    {
+      "name": "branch_fanout_32",
+      "passed_both_runtimes": false,
+      "lk_ratio": null,
+      "runtimes": {
+        "llvmbpf": {
+          "status": "failed",
+          "returncode": 1,
+          "command": [
+            "python3",
+            "micro/run_micro.py",
+            "--suite",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/micro_pure_jit.validation.yaml",
+            "--bench",
+            "branch_fanout_32",
+            "--runtime",
+            "llvmbpf",
+            "--iterations",
+            "3",
+            "--warmups",
+            "1",
+            "--repeat",
+            "200",
+            "--output",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/branch_fanout_32.llvmbpf.json"
+          ],
+          "output_path": "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/branch_fanout_32.llvmbpf.json",
+          "error": "RuntimeError: branch_fanout_32/llvmbpf result mismatch: 0 != 11447288678069767778",
+          "raw_error": "make: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmkdir -p /home/yunwei37/workspace/bpf-benchmark/micro/build/runner\ncmake -S /home/yunwei37/workspace/bpf-benchmark/micro/runner -B /home/yunwei37/workspace/bpf-benchmark/micro/build/runner \\\n\t-DCMAKE_BUILD_TYPE=Release \\\n\t-DMICRO_REPO_ROOT=/home/yunwei37/workspace/bpf-benchmark \\\n\t-DMICRO_LIBBPF_PREFIX=/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/libbpf/prefix \\\n\t-DMICRO_LIBBPF_LIBRARY=/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/libbpf/obj/libbpf.a\n-- Checking LLVM_VERSION_MAJOR macro value...\n-- LLVM_VERSION_MAJOR is: 20\n--  Adding spdlog seperately..\n-- Build spdlog: 1.15.2\n-- Build type: Release\n-- LLVM_LIBS=LLVMAArch64CodeGen;LLVMAArch64AsmParser;LLVMAArch64Desc;LLVMAArch64Disassembler;LLVMAArch64Info;LLVMAArch64Utils;LLVMAMDGPUCodeGen;LLVMAMDGPUAsmParser;LLVMAMDGPUDesc;LLVMAMDGPUDisassembler;LLVMAMDGPUInfo;LLVMAMDGPUUtils;LLVMARMCodeGen;LLVMARMAsmParser;LLVMARMDesc;LLVMARMDisassembler;LLVMARMInfo;LLVMARMUtils;LLVMAVRCodeGen;LLVMAVRAsmParser;LLVMAVRDesc;LLVMAVRDisassembler;LLVMAVRInfo;LLVMBPFCodeGen;LLVMBPFAsmParser;LLVMBPFDesc;LLVMBPFDisassembler;LLVMBPFInfo;LLVMHexagonCodeGen;LLVMHexagonAsmParser;LLVMHexagonDesc;LLVMHexagonDisassembler;LLVMHexagonInfo;LLVMLanaiCodeGen;LLVMLanaiAsmParser;LLVMLanaiDesc;LLVMLanaiDisassembler;LLVMLanaiInfo;LLVMLoongArchCodeGen;LLVMLoongArchAsmParser;LLVMLoongArchDesc;LLVMLoongArchDisassembler;LLVMLoongArchInfo;LLVMMipsCodeGen;LLVMMipsAsmParser;LLVMMipsDesc;LLVMMipsDisassembler;LLVMMipsInfo;LLVMMSP430CodeGen;LLVMMSP430AsmParser;LLVMMSP430Desc;LLVMMSP430Disassembler;LLVMMSP430Info;LLVMNVPTXCodeGen;LLVMNVPTXDesc;LLVMNVPTXInfo;LLVMPowerPCCodeGen;LLVMPowerPCAsmParser;LLVMPowerPCDesc;LLVMPowerPCDisassembler;LLVMPowerPCInfo;LLVMRISCVCodeGen;LLVMRISCVAsmParser;LLVMRISCVDesc;LLVMRISCVDisassembler;LLVMRISCVInfo;LLVMSparcCodeGen;LLVMSparcAsmParser;LLVMSparcDesc;LLVMSparcDisassembler;LLVMSparcInfo;LLVMSPIRVCodeGen;LLVMSPIRVDesc;LLVMSPIRVInfo;LLVMSystemZCodeGen;LLVMSystemZAsmParser;LLVMSystemZDesc;LLVMSystemZDisassembler;LLVMSystemZInfo;LLVMVECodeGen;LLVMVEAsmParser;LLVMVEDesc;LLVMVEDisassembler;LLVMVEInfo;LLVMWebAssemblyCodeGen;LLVMWebAssemblyAsmParser;LLVMWebAssemblyDesc;LLVMWebAssemblyDisassembler;LLVMWebAssemblyInfo;LLVMWebAssemblyUtils;LLVMX86CodeGen;LLVMX86AsmParser;LLVMX86Desc;LLVMX86Disassembler;LLVMX86Info;LLVMXCoreCodeGen;LLVMXCoreDesc;LLVMXCoreDisassembler;LLVMXCoreInfo;LLVMM68kCodeGen;LLVMM68kAsmParser;LLVMM68kDesc;LLVMM68kDisassembler;LLVMM68kInfo;LLVMXtensaCodeGen;LLVMXtensaAsmParser;LLVMXtensaDesc;LLVMXtensaDisassembler;LLVMXtensaInfo;LLVMCore;LLVMSupport;LLVMTarget;LLVMAnalysis;LLVMipo;LLVMTransformUtils;LLVMBitReader;LLVMAsmParser;LLVMLinker;LLVMMC;LLVMMCParser;LLVMMCDisassembler;LLVMObject;LLVMExecutionEngine;LLVMRuntimeDyld;LLVMOrcJIT;LLVMMCJIT;LLVMX86CodeGen;LLVMX86Desc;LLVMX86Info;LLVMX86AsmParser;LLVMNVPTXCodeGen;LLVMNVPTXDesc;LLVMNVPTXInfo;LLVMAArch64CodeGen;LLVMAArch64Desc;LLVMAArch64Info;LLVMAArch64AsmParser\n-- Configuring done (0.1s)\n-- Generating done (0.0s)\n-- Build files have been written to: /home/yunwei37/workspace/bpf-benchmark/micro/build/runner\ncmake --build /home/yunwei37/workspace/bpf-benchmark/micro/build/runner --target micro_exec -j\ngmake[1]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[2]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[3]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[ 40%] Built target spdlog\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[ 65%] Built target llvmbpf_vm\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[100%] Built target micro_exec\ngmake[3]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[2]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[1]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\nmake: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmake: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmake -C /home/yunwei37/workspace/bpf-benchmark/micro/programs\nmake[1]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/programs'\nmake[1]: Nothing to be done for 'all'.\nmake[1]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/programs'\nmake: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro'\n[build] micro_exec: make -C micro micro_exec\n[build] programs: make -C micro programs\n[WARN] CPU governor is 'powersave', not 'performance'. Results may have frequency scaling noise.\n[WARN] Turbo boost is enabled. Consider disabling for stable measurements.\n[WARN] perf_event_paranoid=2. Some perf counters may not be available.\n[WARN] No CPU affinity set. Consider using --cpu for isolated measurements.\n[bench] branch_fanout_32\n\nTraceback (most recent call last):\n  File \"/home/yunwei37/workspace/bpf-benchmark/micro/run_micro.py\", line 649, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/home/yunwei37/workspace/bpf-benchmark/micro/run_micro.py\", line 591, in main\n    raise RuntimeError(\nRuntimeError: branch_fanout_32/llvmbpf result mismatch: 0 != 11447288678069767778"
+        },
+        "kernel": {
+          "status": "failed",
+          "returncode": 1,
+          "command": [
+            "python3",
+            "micro/run_micro.py",
+            "--suite",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/micro_pure_jit.validation.yaml",
+            "--bench",
+            "branch_fanout_32",
+            "--runtime",
+            "kernel",
+            "--iterations",
+            "3",
+            "--warmups",
+            "1",
+            "--repeat",
+            "200",
+            "--output",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/branch_fanout_32.kernel.json"
+          ],
+          "output_path": "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/branch_fanout_32.kernel.json",
+          "error": "RuntimeError: branch_fanout_32/kernel result mismatch: 0 != 11447288678069767778",
+          "raw_error": "make: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmkdir -p /home/yunwei37/workspace/bpf-benchmark/micro/build/runner\ncmake -S /home/yunwei37/workspace/bpf-benchmark/micro/runner -B /home/yunwei37/workspace/bpf-benchmark/micro/build/runner \\\n\t-DCMAKE_BUILD_TYPE=Release \\\n\t-DMICRO_REPO_ROOT=/home/yunwei37/workspace/bpf-benchmark \\\n\t-DMICRO_LIBBPF_PREFIX=/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/libbpf/prefix \\\n\t-DMICRO_LIBBPF_LIBRARY=/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/libbpf/obj/libbpf.a\n-- Checking LLVM_VERSION_MAJOR macro value...\n-- LLVM_VERSION_MAJOR is: 20\n--  Adding spdlog seperately..\n-- Build spdlog: 1.15.2\n-- Build type: Release\n-- LLVM_LIBS=LLVMAArch64CodeGen;LLVMAArch64AsmParser;LLVMAArch64Desc;LLVMAArch64Disassembler;LLVMAArch64Info;LLVMAArch64Utils;LLVMAMDGPUCodeGen;LLVMAMDGPUAsmParser;LLVMAMDGPUDesc;LLVMAMDGPUDisassembler;LLVMAMDGPUInfo;LLVMAMDGPUUtils;LLVMARMCodeGen;LLVMARMAsmParser;LLVMARMDesc;LLVMARMDisassembler;LLVMARMInfo;LLVMARMUtils;LLVMAVRCodeGen;LLVMAVRAsmParser;LLVMAVRDesc;LLVMAVRDisassembler;LLVMAVRInfo;LLVMBPFCodeGen;LLVMBPFAsmParser;LLVMBPFDesc;LLVMBPFDisassembler;LLVMBPFInfo;LLVMHexagonCodeGen;LLVMHexagonAsmParser;LLVMHexagonDesc;LLVMHexagonDisassembler;LLVMHexagonInfo;LLVMLanaiCodeGen;LLVMLanaiAsmParser;LLVMLanaiDesc;LLVMLanaiDisassembler;LLVMLanaiInfo;LLVMLoongArchCodeGen;LLVMLoongArchAsmParser;LLVMLoongArchDesc;LLVMLoongArchDisassembler;LLVMLoongArchInfo;LLVMMipsCodeGen;LLVMMipsAsmParser;LLVMMipsDesc;LLVMMipsDisassembler;LLVMMipsInfo;LLVMMSP430CodeGen;LLVMMSP430AsmParser;LLVMMSP430Desc;LLVMMSP430Disassembler;LLVMMSP430Info;LLVMNVPTXCodeGen;LLVMNVPTXDesc;LLVMNVPTXInfo;LLVMPowerPCCodeGen;LLVMPowerPCAsmParser;LLVMPowerPCDesc;LLVMPowerPCDisassembler;LLVMPowerPCInfo;LLVMRISCVCodeGen;LLVMRISCVAsmParser;LLVMRISCVDesc;LLVMRISCVDisassembler;LLVMRISCVInfo;LLVMSparcCodeGen;LLVMSparcAsmParser;LLVMSparcDesc;LLVMSparcDisassembler;LLVMSparcInfo;LLVMSPIRVCodeGen;LLVMSPIRVDesc;LLVMSPIRVInfo;LLVMSystemZCodeGen;LLVMSystemZAsmParser;LLVMSystemZDesc;LLVMSystemZDisassembler;LLVMSystemZInfo;LLVMVECodeGen;LLVMVEAsmParser;LLVMVEDesc;LLVMVEDisassembler;LLVMVEInfo;LLVMWebAssemblyCodeGen;LLVMWebAssemblyAsmParser;LLVMWebAssemblyDesc;LLVMWebAssemblyDisassembler;LLVMWebAssemblyInfo;LLVMWebAssemblyUtils;LLVMX86CodeGen;LLVMX86AsmParser;LLVMX86Desc;LLVMX86Disassembler;LLVMX86Info;LLVMXCoreCodeGen;LLVMXCoreDesc;LLVMXCoreDisassembler;LLVMXCoreInfo;LLVMM68kCodeGen;LLVMM68kAsmParser;LLVMM68kDesc;LLVMM68kDisassembler;LLVMM68kInfo;LLVMXtensaCodeGen;LLVMXtensaAsmParser;LLVMXtensaDesc;LLVMXtensaDisassembler;LLVMXtensaInfo;LLVMCore;LLVMSupport;LLVMTarget;LLVMAnalysis;LLVMipo;LLVMTransformUtils;LLVMBitReader;LLVMAsmParser;LLVMLinker;LLVMMC;LLVMMCParser;LLVMMCDisassembler;LLVMObject;LLVMExecutionEngine;LLVMRuntimeDyld;LLVMOrcJIT;LLVMMCJIT;LLVMX86CodeGen;LLVMX86Desc;LLVMX86Info;LLVMX86AsmParser;LLVMNVPTXCodeGen;LLVMNVPTXDesc;LLVMNVPTXInfo;LLVMAArch64CodeGen;LLVMAArch64Desc;LLVMAArch64Info;LLVMAArch64AsmParser\n-- Configuring done (0.1s)\n-- Generating done (0.0s)\n-- Build files have been written to: /home/yunwei37/workspace/bpf-benchmark/micro/build/runner\ncmake --build /home/yunwei37/workspace/bpf-benchmark/micro/build/runner --target micro_exec -j\ngmake[1]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[2]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[3]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[ 40%] Built target spdlog\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[ 65%] Built target llvmbpf_vm\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[100%] Built target micro_exec\ngmake[3]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[2]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[1]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\nmake: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmake: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmake -C /home/yunwei37/workspace/bpf-benchmark/micro/programs\nmake[1]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/programs'\nmake[1]: Nothing to be done for 'all'.\nmake[1]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/programs'\nmake: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro'\n[build] micro_exec: make -C micro micro_exec\n[build] programs: make -C micro programs\n[WARN] CPU governor is 'powersave', not 'performance'. Results may have frequency scaling noise.\n[WARN] Turbo boost is enabled. Consider disabling for stable measurements.\n[WARN] perf_event_paranoid=2. Some perf counters may not be available.\n[WARN] No CPU affinity set. Consider using --cpu for isolated measurements.\n[bench] branch_fanout_32\n\nTraceback (most recent call last):\n  File \"/home/yunwei37/workspace/bpf-benchmark/micro/run_micro.py\", line 649, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/home/yunwei37/workspace/bpf-benchmark/micro/run_micro.py\", line 591, in main\n    raise RuntimeError(\nRuntimeError: branch_fanout_32/kernel result mismatch: 0 != 11447288678069767778"
+        }
+      }
+    },
+    {
+      "name": "deep_guard_tree_8",
+      "passed_both_runtimes": false,
+      "lk_ratio": null,
+      "runtimes": {
+        "llvmbpf": {
+          "status": "failed",
+          "returncode": 1,
+          "command": [
+            "python3",
+            "micro/run_micro.py",
+            "--suite",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/micro_pure_jit.validation.yaml",
+            "--bench",
+            "deep_guard_tree_8",
+            "--runtime",
+            "llvmbpf",
+            "--iterations",
+            "3",
+            "--warmups",
+            "1",
+            "--repeat",
+            "200",
+            "--output",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/deep_guard_tree_8.llvmbpf.json"
+          ],
+          "output_path": "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/deep_guard_tree_8.llvmbpf.json",
+          "error": "RuntimeError: deep_guard_tree_8/llvmbpf result mismatch: 0 != 14503205652076661908",
+          "raw_error": "make: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmkdir -p /home/yunwei37/workspace/bpf-benchmark/micro/build/runner\ncmake -S /home/yunwei37/workspace/bpf-benchmark/micro/runner -B /home/yunwei37/workspace/bpf-benchmark/micro/build/runner \\\n\t-DCMAKE_BUILD_TYPE=Release \\\n\t-DMICRO_REPO_ROOT=/home/yunwei37/workspace/bpf-benchmark \\\n\t-DMICRO_LIBBPF_PREFIX=/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/libbpf/prefix \\\n\t-DMICRO_LIBBPF_LIBRARY=/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/libbpf/obj/libbpf.a\n-- Checking LLVM_VERSION_MAJOR macro value...\n-- LLVM_VERSION_MAJOR is: 20\n--  Adding spdlog seperately..\n-- Build spdlog: 1.15.2\n-- Build type: Release\n-- LLVM_LIBS=LLVMAArch64CodeGen;LLVMAArch64AsmParser;LLVMAArch64Desc;LLVMAArch64Disassembler;LLVMAArch64Info;LLVMAArch64Utils;LLVMAMDGPUCodeGen;LLVMAMDGPUAsmParser;LLVMAMDGPUDesc;LLVMAMDGPUDisassembler;LLVMAMDGPUInfo;LLVMAMDGPUUtils;LLVMARMCodeGen;LLVMARMAsmParser;LLVMARMDesc;LLVMARMDisassembler;LLVMARMInfo;LLVMARMUtils;LLVMAVRCodeGen;LLVMAVRAsmParser;LLVMAVRDesc;LLVMAVRDisassembler;LLVMAVRInfo;LLVMBPFCodeGen;LLVMBPFAsmParser;LLVMBPFDesc;LLVMBPFDisassembler;LLVMBPFInfo;LLVMHexagonCodeGen;LLVMHexagonAsmParser;LLVMHexagonDesc;LLVMHexagonDisassembler;LLVMHexagonInfo;LLVMLanaiCodeGen;LLVMLanaiAsmParser;LLVMLanaiDesc;LLVMLanaiDisassembler;LLVMLanaiInfo;LLVMLoongArchCodeGen;LLVMLoongArchAsmParser;LLVMLoongArchDesc;LLVMLoongArchDisassembler;LLVMLoongArchInfo;LLVMMipsCodeGen;LLVMMipsAsmParser;LLVMMipsDesc;LLVMMipsDisassembler;LLVMMipsInfo;LLVMMSP430CodeGen;LLVMMSP430AsmParser;LLVMMSP430Desc;LLVMMSP430Disassembler;LLVMMSP430Info;LLVMNVPTXCodeGen;LLVMNVPTXDesc;LLVMNVPTXInfo;LLVMPowerPCCodeGen;LLVMPowerPCAsmParser;LLVMPowerPCDesc;LLVMPowerPCDisassembler;LLVMPowerPCInfo;LLVMRISCVCodeGen;LLVMRISCVAsmParser;LLVMRISCVDesc;LLVMRISCVDisassembler;LLVMRISCVInfo;LLVMSparcCodeGen;LLVMSparcAsmParser;LLVMSparcDesc;LLVMSparcDisassembler;LLVMSparcInfo;LLVMSPIRVCodeGen;LLVMSPIRVDesc;LLVMSPIRVInfo;LLVMSystemZCodeGen;LLVMSystemZAsmParser;LLVMSystemZDesc;LLVMSystemZDisassembler;LLVMSystemZInfo;LLVMVECodeGen;LLVMVEAsmParser;LLVMVEDesc;LLVMVEDisassembler;LLVMVEInfo;LLVMWebAssemblyCodeGen;LLVMWebAssemblyAsmParser;LLVMWebAssemblyDesc;LLVMWebAssemblyDisassembler;LLVMWebAssemblyInfo;LLVMWebAssemblyUtils;LLVMX86CodeGen;LLVMX86AsmParser;LLVMX86Desc;LLVMX86Disassembler;LLVMX86Info;LLVMXCoreCodeGen;LLVMXCoreDesc;LLVMXCoreDisassembler;LLVMXCoreInfo;LLVMM68kCodeGen;LLVMM68kAsmParser;LLVMM68kDesc;LLVMM68kDisassembler;LLVMM68kInfo;LLVMXtensaCodeGen;LLVMXtensaAsmParser;LLVMXtensaDesc;LLVMXtensaDisassembler;LLVMXtensaInfo;LLVMCore;LLVMSupport;LLVMTarget;LLVMAnalysis;LLVMipo;LLVMTransformUtils;LLVMBitReader;LLVMAsmParser;LLVMLinker;LLVMMC;LLVMMCParser;LLVMMCDisassembler;LLVMObject;LLVMExecutionEngine;LLVMRuntimeDyld;LLVMOrcJIT;LLVMMCJIT;LLVMX86CodeGen;LLVMX86Desc;LLVMX86Info;LLVMX86AsmParser;LLVMNVPTXCodeGen;LLVMNVPTXDesc;LLVMNVPTXInfo;LLVMAArch64CodeGen;LLVMAArch64Desc;LLVMAArch64Info;LLVMAArch64AsmParser\n-- Configuring done (0.1s)\n-- Generating done (0.0s)\n-- Build files have been written to: /home/yunwei37/workspace/bpf-benchmark/micro/build/runner\ncmake --build /home/yunwei37/workspace/bpf-benchmark/micro/build/runner --target micro_exec -j\ngmake[1]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[2]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[3]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[ 40%] Built target spdlog\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[ 65%] Built target llvmbpf_vm\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[100%] Built target micro_exec\ngmake[3]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[2]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[1]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\nmake: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmake: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmake -C /home/yunwei37/workspace/bpf-benchmark/micro/programs\nmake[1]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/programs'\nmake[1]: Nothing to be done for 'all'.\nmake[1]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/programs'\nmake: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro'\n[build] micro_exec: make -C micro micro_exec\n[build] programs: make -C micro programs\n[WARN] CPU governor is 'powersave', not 'performance'. Results may have frequency scaling noise.\n[WARN] Turbo boost is enabled. Consider disabling for stable measurements.\n[WARN] perf_event_paranoid=2. Some perf counters may not be available.\n[WARN] No CPU affinity set. Consider using --cpu for isolated measurements.\n[bench] deep_guard_tree_8\n\nTraceback (most recent call last):\n  File \"/home/yunwei37/workspace/bpf-benchmark/micro/run_micro.py\", line 649, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/home/yunwei37/workspace/bpf-benchmark/micro/run_micro.py\", line 591, in main\n    raise RuntimeError(\nRuntimeError: deep_guard_tree_8/llvmbpf result mismatch: 0 != 14503205652076661908"
+        },
+        "kernel": {
+          "status": "failed",
+          "returncode": 1,
+          "command": [
+            "python3",
+            "micro/run_micro.py",
+            "--suite",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/micro_pure_jit.validation.yaml",
+            "--bench",
+            "deep_guard_tree_8",
+            "--runtime",
+            "kernel",
+            "--iterations",
+            "3",
+            "--warmups",
+            "1",
+            "--repeat",
+            "200",
+            "--output",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/deep_guard_tree_8.kernel.json"
+          ],
+          "output_path": "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/deep_guard_tree_8.kernel.json",
+          "error": "RuntimeError: deep_guard_tree_8/kernel result mismatch: 0 != 14503205652076661908",
+          "raw_error": "make: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmkdir -p /home/yunwei37/workspace/bpf-benchmark/micro/build/runner\ncmake -S /home/yunwei37/workspace/bpf-benchmark/micro/runner -B /home/yunwei37/workspace/bpf-benchmark/micro/build/runner \\\n\t-DCMAKE_BUILD_TYPE=Release \\\n\t-DMICRO_REPO_ROOT=/home/yunwei37/workspace/bpf-benchmark \\\n\t-DMICRO_LIBBPF_PREFIX=/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/libbpf/prefix \\\n\t-DMICRO_LIBBPF_LIBRARY=/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/libbpf/obj/libbpf.a\n-- Checking LLVM_VERSION_MAJOR macro value...\n-- LLVM_VERSION_MAJOR is: 20\n--  Adding spdlog seperately..\n-- Build spdlog: 1.15.2\n-- Build type: Release\n-- LLVM_LIBS=LLVMAArch64CodeGen;LLVMAArch64AsmParser;LLVMAArch64Desc;LLVMAArch64Disassembler;LLVMAArch64Info;LLVMAArch64Utils;LLVMAMDGPUCodeGen;LLVMAMDGPUAsmParser;LLVMAMDGPUDesc;LLVMAMDGPUDisassembler;LLVMAMDGPUInfo;LLVMAMDGPUUtils;LLVMARMCodeGen;LLVMARMAsmParser;LLVMARMDesc;LLVMARMDisassembler;LLVMARMInfo;LLVMARMUtils;LLVMAVRCodeGen;LLVMAVRAsmParser;LLVMAVRDesc;LLVMAVRDisassembler;LLVMAVRInfo;LLVMBPFCodeGen;LLVMBPFAsmParser;LLVMBPFDesc;LLVMBPFDisassembler;LLVMBPFInfo;LLVMHexagonCodeGen;LLVMHexagonAsmParser;LLVMHexagonDesc;LLVMHexagonDisassembler;LLVMHexagonInfo;LLVMLanaiCodeGen;LLVMLanaiAsmParser;LLVMLanaiDesc;LLVMLanaiDisassembler;LLVMLanaiInfo;LLVMLoongArchCodeGen;LLVMLoongArchAsmParser;LLVMLoongArchDesc;LLVMLoongArchDisassembler;LLVMLoongArchInfo;LLVMMipsCodeGen;LLVMMipsAsmParser;LLVMMipsDesc;LLVMMipsDisassembler;LLVMMipsInfo;LLVMMSP430CodeGen;LLVMMSP430AsmParser;LLVMMSP430Desc;LLVMMSP430Disassembler;LLVMMSP430Info;LLVMNVPTXCodeGen;LLVMNVPTXDesc;LLVMNVPTXInfo;LLVMPowerPCCodeGen;LLVMPowerPCAsmParser;LLVMPowerPCDesc;LLVMPowerPCDisassembler;LLVMPowerPCInfo;LLVMRISCVCodeGen;LLVMRISCVAsmParser;LLVMRISCVDesc;LLVMRISCVDisassembler;LLVMRISCVInfo;LLVMSparcCodeGen;LLVMSparcAsmParser;LLVMSparcDesc;LLVMSparcDisassembler;LLVMSparcInfo;LLVMSPIRVCodeGen;LLVMSPIRVDesc;LLVMSPIRVInfo;LLVMSystemZCodeGen;LLVMSystemZAsmParser;LLVMSystemZDesc;LLVMSystemZDisassembler;LLVMSystemZInfo;LLVMVECodeGen;LLVMVEAsmParser;LLVMVEDesc;LLVMVEDisassembler;LLVMVEInfo;LLVMWebAssemblyCodeGen;LLVMWebAssemblyAsmParser;LLVMWebAssemblyDesc;LLVMWebAssemblyDisassembler;LLVMWebAssemblyInfo;LLVMWebAssemblyUtils;LLVMX86CodeGen;LLVMX86AsmParser;LLVMX86Desc;LLVMX86Disassembler;LLVMX86Info;LLVMXCoreCodeGen;LLVMXCoreDesc;LLVMXCoreDisassembler;LLVMXCoreInfo;LLVMM68kCodeGen;LLVMM68kAsmParser;LLVMM68kDesc;LLVMM68kDisassembler;LLVMM68kInfo;LLVMXtensaCodeGen;LLVMXtensaAsmParser;LLVMXtensaDesc;LLVMXtensaDisassembler;LLVMXtensaInfo;LLVMCore;LLVMSupport;LLVMTarget;LLVMAnalysis;LLVMipo;LLVMTransformUtils;LLVMBitReader;LLVMAsmParser;LLVMLinker;LLVMMC;LLVMMCParser;LLVMMCDisassembler;LLVMObject;LLVMExecutionEngine;LLVMRuntimeDyld;LLVMOrcJIT;LLVMMCJIT;LLVMX86CodeGen;LLVMX86Desc;LLVMX86Info;LLVMX86AsmParser;LLVMNVPTXCodeGen;LLVMNVPTXDesc;LLVMNVPTXInfo;LLVMAArch64CodeGen;LLVMAArch64Desc;LLVMAArch64Info;LLVMAArch64AsmParser\n-- Configuring done (0.1s)\n-- Generating done (0.0s)\n-- Build files have been written to: /home/yunwei37/workspace/bpf-benchmark/micro/build/runner\ncmake --build /home/yunwei37/workspace/bpf-benchmark/micro/build/runner --target micro_exec -j\ngmake[1]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[2]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[3]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[ 40%] Built target spdlog\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[ 65%] Built target llvmbpf_vm\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[100%] Built target micro_exec\ngmake[3]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[2]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[1]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\nmake: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmake: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmake -C /home/yunwei37/workspace/bpf-benchmark/micro/programs\nmake[1]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/programs'\nmake[1]: Nothing to be done for 'all'.\nmake[1]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/programs'\nmake: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro'\n[build] micro_exec: make -C micro micro_exec\n[build] programs: make -C micro programs\n[WARN] CPU governor is 'powersave', not 'performance'. Results may have frequency scaling noise.\n[WARN] Turbo boost is enabled. Consider disabling for stable measurements.\n[WARN] perf_event_paranoid=2. Some perf counters may not be available.\n[WARN] No CPU affinity set. Consider using --cpu for isolated measurements.\n[bench] deep_guard_tree_8\n\nTraceback (most recent call last):\n  File \"/home/yunwei37/workspace/bpf-benchmark/micro/run_micro.py\", line 649, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/home/yunwei37/workspace/bpf-benchmark/micro/run_micro.py\", line 591, in main\n    raise RuntimeError(\nRuntimeError: deep_guard_tree_8/kernel result mismatch: 0 != 14503205652076661908"
+        }
+      }
+    },
+    {
+      "name": "mega_basic_block_2048",
+      "passed_both_runtimes": false,
+      "lk_ratio": null,
+      "runtimes": {
+        "llvmbpf": {
+          "status": "failed",
+          "returncode": 1,
+          "command": [
+            "python3",
+            "micro/run_micro.py",
+            "--suite",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/micro_pure_jit.validation.yaml",
+            "--bench",
+            "mega_basic_block_2048",
+            "--runtime",
+            "llvmbpf",
+            "--iterations",
+            "3",
+            "--warmups",
+            "1",
+            "--repeat",
+            "200",
+            "--output",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/mega_basic_block_2048.llvmbpf.json"
+          ],
+          "output_path": "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/mega_basic_block_2048.llvmbpf.json",
+          "error": "RuntimeError: mega_basic_block_2048/llvmbpf result mismatch: 2115305415565152290 != 2041000298484100591",
+          "raw_error": "make: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmkdir -p /home/yunwei37/workspace/bpf-benchmark/micro/build/runner\ncmake -S /home/yunwei37/workspace/bpf-benchmark/micro/runner -B /home/yunwei37/workspace/bpf-benchmark/micro/build/runner \\\n\t-DCMAKE_BUILD_TYPE=Release \\\n\t-DMICRO_REPO_ROOT=/home/yunwei37/workspace/bpf-benchmark \\\n\t-DMICRO_LIBBPF_PREFIX=/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/libbpf/prefix \\\n\t-DMICRO_LIBBPF_LIBRARY=/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/libbpf/obj/libbpf.a\n-- Checking LLVM_VERSION_MAJOR macro value...\n-- LLVM_VERSION_MAJOR is: 20\n--  Adding spdlog seperately..\n-- Build spdlog: 1.15.2\n-- Build type: Release\n-- LLVM_LIBS=LLVMAArch64CodeGen;LLVMAArch64AsmParser;LLVMAArch64Desc;LLVMAArch64Disassembler;LLVMAArch64Info;LLVMAArch64Utils;LLVMAMDGPUCodeGen;LLVMAMDGPUAsmParser;LLVMAMDGPUDesc;LLVMAMDGPUDisassembler;LLVMAMDGPUInfo;LLVMAMDGPUUtils;LLVMARMCodeGen;LLVMARMAsmParser;LLVMARMDesc;LLVMARMDisassembler;LLVMARMInfo;LLVMARMUtils;LLVMAVRCodeGen;LLVMAVRAsmParser;LLVMAVRDesc;LLVMAVRDisassembler;LLVMAVRInfo;LLVMBPFCodeGen;LLVMBPFAsmParser;LLVMBPFDesc;LLVMBPFDisassembler;LLVMBPFInfo;LLVMHexagonCodeGen;LLVMHexagonAsmParser;LLVMHexagonDesc;LLVMHexagonDisassembler;LLVMHexagonInfo;LLVMLanaiCodeGen;LLVMLanaiAsmParser;LLVMLanaiDesc;LLVMLanaiDisassembler;LLVMLanaiInfo;LLVMLoongArchCodeGen;LLVMLoongArchAsmParser;LLVMLoongArchDesc;LLVMLoongArchDisassembler;LLVMLoongArchInfo;LLVMMipsCodeGen;LLVMMipsAsmParser;LLVMMipsDesc;LLVMMipsDisassembler;LLVMMipsInfo;LLVMMSP430CodeGen;LLVMMSP430AsmParser;LLVMMSP430Desc;LLVMMSP430Disassembler;LLVMMSP430Info;LLVMNVPTXCodeGen;LLVMNVPTXDesc;LLVMNVPTXInfo;LLVMPowerPCCodeGen;LLVMPowerPCAsmParser;LLVMPowerPCDesc;LLVMPowerPCDisassembler;LLVMPowerPCInfo;LLVMRISCVCodeGen;LLVMRISCVAsmParser;LLVMRISCVDesc;LLVMRISCVDisassembler;LLVMRISCVInfo;LLVMSparcCodeGen;LLVMSparcAsmParser;LLVMSparcDesc;LLVMSparcDisassembler;LLVMSparcInfo;LLVMSPIRVCodeGen;LLVMSPIRVDesc;LLVMSPIRVInfo;LLVMSystemZCodeGen;LLVMSystemZAsmParser;LLVMSystemZDesc;LLVMSystemZDisassembler;LLVMSystemZInfo;LLVMVECodeGen;LLVMVEAsmParser;LLVMVEDesc;LLVMVEDisassembler;LLVMVEInfo;LLVMWebAssemblyCodeGen;LLVMWebAssemblyAsmParser;LLVMWebAssemblyDesc;LLVMWebAssemblyDisassembler;LLVMWebAssemblyInfo;LLVMWebAssemblyUtils;LLVMX86CodeGen;LLVMX86AsmParser;LLVMX86Desc;LLVMX86Disassembler;LLVMX86Info;LLVMXCoreCodeGen;LLVMXCoreDesc;LLVMXCoreDisassembler;LLVMXCoreInfo;LLVMM68kCodeGen;LLVMM68kAsmParser;LLVMM68kDesc;LLVMM68kDisassembler;LLVMM68kInfo;LLVMXtensaCodeGen;LLVMXtensaAsmParser;LLVMXtensaDesc;LLVMXtensaDisassembler;LLVMXtensaInfo;LLVMCore;LLVMSupport;LLVMTarget;LLVMAnalysis;LLVMipo;LLVMTransformUtils;LLVMBitReader;LLVMAsmParser;LLVMLinker;LLVMMC;LLVMMCParser;LLVMMCDisassembler;LLVMObject;LLVMExecutionEngine;LLVMRuntimeDyld;LLVMOrcJIT;LLVMMCJIT;LLVMX86CodeGen;LLVMX86Desc;LLVMX86Info;LLVMX86AsmParser;LLVMNVPTXCodeGen;LLVMNVPTXDesc;LLVMNVPTXInfo;LLVMAArch64CodeGen;LLVMAArch64Desc;LLVMAArch64Info;LLVMAArch64AsmParser\n-- Configuring done (0.1s)\n-- Generating done (0.0s)\n-- Build files have been written to: /home/yunwei37/workspace/bpf-benchmark/micro/build/runner\ncmake --build /home/yunwei37/workspace/bpf-benchmark/micro/build/runner --target micro_exec -j\ngmake[1]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[2]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[3]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[ 40%] Built target spdlog\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[ 65%] Built target llvmbpf_vm\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[100%] Built target micro_exec\ngmake[3]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[2]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[1]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\nmake: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmake: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmake -C /home/yunwei37/workspace/bpf-benchmark/micro/programs\nmake[1]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/programs'\nmake[1]: Nothing to be done for 'all'.\nmake[1]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/programs'\nmake: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro'\n[build] micro_exec: make -C micro micro_exec\n[build] programs: make -C micro programs\n[WARN] CPU governor is 'powersave', not 'performance'. Results may have frequency scaling noise.\n[WARN] Turbo boost is enabled. Consider disabling for stable measurements.\n[WARN] perf_event_paranoid=2. Some perf counters may not be available.\n[WARN] No CPU affinity set. Consider using --cpu for isolated measurements.\n[bench] mega_basic_block_2048\n\nTraceback (most recent call last):\n  File \"/home/yunwei37/workspace/bpf-benchmark/micro/run_micro.py\", line 649, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/home/yunwei37/workspace/bpf-benchmark/micro/run_micro.py\", line 591, in main\n    raise RuntimeError(\nRuntimeError: mega_basic_block_2048/llvmbpf result mismatch: 2115305415565152290 != 2041000298484100591"
+        },
+        "kernel": {
+          "status": "failed",
+          "returncode": 1,
+          "command": [
+            "python3",
+            "micro/run_micro.py",
+            "--suite",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/micro_pure_jit.validation.yaml",
+            "--bench",
+            "mega_basic_block_2048",
+            "--runtime",
+            "kernel",
+            "--iterations",
+            "3",
+            "--warmups",
+            "1",
+            "--repeat",
+            "200",
+            "--output",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/mega_basic_block_2048.kernel.json"
+          ],
+          "output_path": "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/mega_basic_block_2048.kernel.json",
+          "error": "RuntimeError: command failed (1): sudo -n /home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec run-kernel --program /home/yunwei37/workspace/bpf-benchmark/micro/programs/mega_basic_block_2048.bpf.o --io-mode staged --repeat 200 --input-size 64 --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/mega_basic_block_2048.mem",
+          "raw_error": "make: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmkdir -p /home/yunwei37/workspace/bpf-benchmark/micro/build/runner\ncmake -S /home/yunwei37/workspace/bpf-benchmark/micro/runner -B /home/yunwei37/workspace/bpf-benchmark/micro/build/runner \\\n\t-DCMAKE_BUILD_TYPE=Release \\\n\t-DMICRO_REPO_ROOT=/home/yunwei37/workspace/bpf-benchmark \\\n\t-DMICRO_LIBBPF_PREFIX=/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/libbpf/prefix \\\n\t-DMICRO_LIBBPF_LIBRARY=/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/libbpf/obj/libbpf.a\n-- Checking LLVM_VERSION_MAJOR macro value...\n-- LLVM_VERSION_MAJOR is: 20\n--  Adding spdlog seperately..\n-- Build spdlog: 1.15.2\n-- Build type: Release\n-- LLVM_LIBS=LLVMAArch64CodeGen;LLVMAArch64AsmParser;LLVMAArch64Desc;LLVMAArch64Disassembler;LLVMAArch64Info;LLVMAArch64Utils;LLVMAMDGPUCodeGen;LLVMAMDGPUAsmParser;LLVMAMDGPUDesc;LLVMAMDGPUDisassembler;LLVMAMDGPUInfo;LLVMAMDGPUUtils;LLVMARMCodeGen;LLVMARMAsmParser;LLVMARMDesc;LLVMARMDisassembler;LLVMARMInfo;LLVMARMUtils;LLVMAVRCodeGen;LLVMAVRAsmParser;LLVMAVRDesc;LLVMAVRDisassembler;LLVMAVRInfo;LLVMBPFCodeGen;LLVMBPFAsmParser;LLVMBPFDesc;LLVMBPFDisassembler;LLVMBPFInfo;LLVMHexagonCodeGen;LLVMHexagonAsmParser;LLVMHexagonDesc;LLVMHexagonDisassembler;LLVMHexagonInfo;LLVMLanaiCodeGen;LLVMLanaiAsmParser;LLVMLanaiDesc;LLVMLanaiDisassembler;LLVMLanaiInfo;LLVMLoongArchCodeGen;LLVMLoongArchAsmParser;LLVMLoongArchDesc;LLVMLoongArchDisassembler;LLVMLoongArchInfo;LLVMMipsCodeGen;LLVMMipsAsmParser;LLVMMipsDesc;LLVMMipsDisassembler;LLVMMipsInfo;LLVMMSP430CodeGen;LLVMMSP430AsmParser;LLVMMSP430Desc;LLVMMSP430Disassembler;LLVMMSP430Info;LLVMNVPTXCodeGen;LLVMNVPTXDesc;LLVMNVPTXInfo;LLVMPowerPCCodeGen;LLVMPowerPCAsmParser;LLVMPowerPCDesc;LLVMPowerPCDisassembler;LLVMPowerPCInfo;LLVMRISCVCodeGen;LLVMRISCVAsmParser;LLVMRISCVDesc;LLVMRISCVDisassembler;LLVMRISCVInfo;LLVMSparcCodeGen;LLVMSparcAsmParser;LLVMSparcDesc;LLVMSparcDisassembler;LLVMSparcInfo;LLVMSPIRVCodeGen;LLVMSPIRVDesc;LLVMSPIRVInfo;LLVMSystemZCodeGen;LLVMSystemZAsmParser;LLVMSystemZDesc;LLVMSystemZDisassembler;LLVMSystemZInfo;LLVMVECodeGen;LLVMVEAsmParser;LLVMVEDesc;LLVMVEDisassembler;LLVMVEInfo;LLVMWebAssemblyCodeGen;LLVMWebAssemblyAsmParser;LLVMWebAssemblyDesc;LLVMWebAssemblyDisassembler;LLVMWebAssemblyInfo;LLVMWebAssemblyUtils;LLVMX86CodeGen;LLVMX86AsmParser;LLVMX86Desc;LLVMX86Disassembler;LLVMX86Info;LLVMXCoreCodeGen;LLVMXCoreDesc;LLVMXCoreDisassembler;LLVMXCoreInfo;LLVMM68kCodeGen;LLVMM68kAsmParser;LLVMM68kDesc;LLVMM68kDisassembler;LLVMM68kInfo;LLVMXtensaCodeGen;LLVMXtensaAsmParser;LLVMXtensaDesc;LLVMXtensaDisassembler;LLVMXtensaInfo;LLVMCore;LLVMSupport;LLVMTarget;LLVMAnalysis;LLVMipo;LLVMTransformUtils;LLVMBitReader;LLVMAsmParser;LLVMLinker;LLVMMC;LLVMMCParser;LLVMMCDisassembler;LLVMObject;LLVMExecutionEngine;LLVMRuntimeDyld;LLVMOrcJIT;LLVMMCJIT;LLVMX86CodeGen;LLVMX86Desc;LLVMX86Info;LLVMX86AsmParser;LLVMNVPTXCodeGen;LLVMNVPTXDesc;LLVMNVPTXInfo;LLVMAArch64CodeGen;LLVMAArch64Desc;LLVMAArch64Info;LLVMAArch64AsmParser\n-- Configuring done (0.1s)\n-- Generating done (0.0s)\n-- Build files have been written to: /home/yunwei37/workspace/bpf-benchmark/micro/build/runner\ncmake --build /home/yunwei37/workspace/bpf-benchmark/micro/build/runner --target micro_exec -j\ngmake[1]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[2]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[3]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[ 40%] Built target spdlog\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[ 65%] Built target llvmbpf_vm\ngmake[4]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[4]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\n[100%] Built target micro_exec\ngmake[3]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[2]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\ngmake[1]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/build/runner'\nmake: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmake: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro'\nmake -C /home/yunwei37/workspace/bpf-benchmark/micro/programs\nmake[1]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/micro/programs'\nmake[1]: Nothing to be done for 'all'.\nmake[1]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro/programs'\nmake: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/micro'\n[build] micro_exec: make -C micro micro_exec\n[build] programs: make -C micro programs\n[WARN] CPU governor is 'powersave', not 'performance'. Results may have frequency scaling noise.\n[WARN] Turbo boost is enabled. Consider disabling for stable measurements.\n[WARN] perf_event_paranoid=2. Some perf counters may not be available.\n[WARN] No CPU affinity set. Consider using --cpu for isolated measurements.\n[bench] mega_basic_block_2048\n\nTraceback (most recent call last):\n  File \"/home/yunwei37/workspace/bpf-benchmark/micro/run_micro.py\", line 649, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/home/yunwei37/workspace/bpf-benchmark/micro/run_micro.py\", line 568, in main\n    parse_helper_output(run_command(command, args.cpu).stdout)\n                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/yunwei37/workspace/bpf-benchmark/micro/run_micro.py\", line 117, in run_command\n    raise RuntimeError(f\"command failed ({completed.returncode}): {' '.join(full_command)}\\n{details}\")\nRuntimeError: command failed (1): sudo -n /home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec run-kernel --program /home/yunwei37/workspace/bpf-benchmark/micro/programs/mega_basic_block_2048.bpf.o --io-mode staged --repeat 200 --input-size 64 --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/mega_basic_block_2048.mem\ninput larger than kernel input map size"
+        }
+      }
+    }
+  ]
+}

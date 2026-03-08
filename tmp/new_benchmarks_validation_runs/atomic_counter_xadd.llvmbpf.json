@@ -1,0 +1,282 @@
+{
+  "suite": "micro_runtime",
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/tmp/micro_runtime.validation.yaml",
+  "generated_at": "2026-03-08T07:11:43.934328+00:00",
+  "host": {
+    "hostname": "lab",
+    "platform": "Linux-6.15.11-061511-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "cpu_affinity": null,
+    "git_sha": "bf2731121369683bba381710d9b75a2d94018e86",
+    "kernel_version": "6.15.11-061511-generic",
+    "kernel_cmdline": "BOOT_IMAGE=/boot/vmlinuz-6.15.11-061511-generic root=UUID=85355174-a2ad-4e84-bf78-53fac30b89fb ro panic=10 panic_on_oops=1 softlockup_panic=1 hung_task_panic=1 splash quiet iommu=pt vt.handoff=7",
+    "cpu_governor": "powersave",
+    "turbo_state": "0",
+    "perf_event_paranoid": "2"
+  },
+  "toolchains": {
+    "llvmbpf": {
+      "root": "/home/yunwei37/workspace/bpf-benchmark/vendor/llvmbpf"
+    },
+    "libbpf": {
+      "root": "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf"
+    },
+    "bpftool": {
+      "root": "/home/yunwei37/workspace/bpf-benchmark/vendor/bpftool"
+    }
+  },
+  "build": {
+    "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec",
+    "bpftool_binary": "/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/bpftool/bpftool"
+  },
+  "defaults": {
+    "iterations": 3,
+    "warmups": 1,
+    "repeat": 200,
+    "perf_counters": false,
+    "perf_scope": "full_repeat_raw",
+    "shuffle_seed": null,
+    "runtime_order_seed": 0
+  },
+  "iteration_runtime_orders": {
+    "atomic_counter_xadd": [
+      [
+        "llvmbpf"
+      ],
+      [
+        "llvmbpf"
+      ],
+      [
+        "llvmbpf"
+      ]
+    ]
+  },
+  "benchmarks": [
+    {
+      "name": "atomic_counter_xadd",
+      "description": "Atomically increment array-map counters and fold prior plus final values",
+      "category": "map-runtime",
+      "family": "atomic-op",
+      "level": "xadd",
+      "hypothesis": "Atomic map-value updates should expose lock-xadd lowering and runtime map-value access overhead",
+      "io_mode": "map",
+      "tags": [
+        "map",
+        "atomic",
+        "runtime"
+      ],
+      "expected_result": 12907746159561469530,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/atomic_counter_xadd.mem",
+      "runs": [
+        {
+          "runtime": "llvmbpf",
+          "label": "llvmbpf LLVM JIT",
+          "mode": "llvmbpf",
+          "repeat": 200,
+          "artifacts": {
+            "program_object": "/home/yunwei37/workspace/bpf-benchmark/micro/programs/atomic_counter_xadd.bpf.o"
+          },
+          "samples": [
+            {
+              "compile_ns": 9146472,
+              "exec_ns": 431,
+              "timing_source": "rdtsc",
+              "no_cmov": false,
+              "opt_level": 3,
+              "disabled_passes": [],
+              "wall_exec_ns": 462,
+              "exec_cycles": 1589,
+              "tsc_freq_hz": 3686110183,
+              "result": 12907746159561469530,
+              "retval": 2,
+              "native_code_size": 475,
+              "bpf_insn_count": 149,
+              "code_size": {
+                "bpf_bytecode_bytes": 1192,
+                "native_code_bytes": 475,
+                "inflation_ratio": 0.39849
+              },
+              "phases_ns": {
+                "program_image_ns": 110108,
+                "memory_prepare_ns": 28160,
+                "map_prepare_ns": 1892,
+                "vm_load_code_ns": 6083,
+                "jit_compile_ns": 9146472
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": false,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "iteration_index": 0
+            },
+            {
+              "compile_ns": 8617221,
+              "exec_ns": 190,
+              "timing_source": "rdtsc",
+              "no_cmov": false,
+              "opt_level": 3,
+              "disabled_passes": [],
+              "wall_exec_ns": 203,
+              "exec_cycles": 699,
+              "tsc_freq_hz": 3686117719,
+              "result": 12907746159561469530,
+              "retval": 2,
+              "native_code_size": 475,
+              "bpf_insn_count": 149,
+              "code_size": {
+                "bpf_bytecode_bytes": 1192,
+                "native_code_bytes": 475,
+                "inflation_ratio": 0.39849
+              },
+              "phases_ns": {
+                "program_image_ns": 106339,
+                "memory_prepare_ns": 27607,
+                "map_prepare_ns": 1608,
+                "vm_load_code_ns": 6695,
+                "jit_compile_ns": 8617221
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": false,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "iteration_index": 1
+            },
+            {
+              "compile_ns": 9102880,
+              "exec_ns": 191,
+              "timing_source": "rdtsc",
+              "no_cmov": false,
+              "opt_level": 3,
+              "disabled_passes": [],
+              "wall_exec_ns": 206,
+              "exec_cycles": 705,
+              "tsc_freq_hz": 3686297156,
+              "result": 12907746159561469530,
+              "retval": 2,
+              "native_code_size": 475,
+              "bpf_insn_count": 149,
+              "code_size": {
+                "bpf_bytecode_bytes": 1192,
+                "native_code_bytes": 475,
+                "inflation_ratio": 0.39849
+              },
+              "phases_ns": {
+                "program_image_ns": 105197,
+                "memory_prepare_ns": 27535,
+                "map_prepare_ns": 1723,
+                "vm_load_code_ns": 5400,
+                "jit_compile_ns": 9102880
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": false,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "iteration_index": 2
+            }
+          ],
+          "compile_ns": {
+            "count": 3,
+            "mean": 8955524.333333334,
+            "median": 9102880,
+            "min": 8617221,
+            "max": 9146472,
+            "p95": 9146472,
+            "stdev": 293788.91167696123
+          },
+          "exec_ns": {
+            "count": 3,
+            "mean": 270.6666666666667,
+            "median": 191,
+            "min": 190,
+            "max": 431,
+            "p95": 431,
+            "stdev": 138.8536399714942
+          },
+          "timing_source": "rdtsc",
+          "phases_ns": {
+            "program_image_ns": {
+              "count": 3,
+              "mean": 107214.66666666667,
+              "median": 106339,
+              "min": 105197,
+              "max": 110108,
+              "p95": 110108,
+              "stdev": 2569.936639945299
+            },
+            "memory_prepare_ns": {
+              "count": 3,
+              "mean": 27767.333333333332,
+              "median": 27607,
+              "min": 27535,
+              "max": 28160,
+              "p95": 28160,
+              "stdev": 341.9595492647242
+            },
+            "map_prepare_ns": {
+              "count": 3,
+              "mean": 1741,
+              "median": 1723,
+              "min": 1608,
+              "max": 1892,
+              "p95": 1892,
+              "stdev": 142.85307137055193
+            },
+            "vm_load_code_ns": {
+              "count": 3,
+              "mean": 6059.333333333333,
+              "median": 6083,
+              "min": 5400,
+              "max": 6695,
+              "p95": 6695,
+              "stdev": 647.8243074579198
+            },
+            "jit_compile_ns": {
+              "count": 3,
+              "mean": 8955524.333333334,
+              "median": 9102880,
+              "min": 8617221,
+              "max": 9146472,
+              "p95": 9146472,
+              "stdev": 293788.91167696123
+            }
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected_samples": 0,
+            "include_kernel": null,
+            "scope": "full_repeat_raw",
+            "hardware_counters_observed": false,
+            "software_counters_observed": false,
+            "errors": {}
+          },
+          "derived_metrics": {},
+          "result_distribution": {
+            "12907746159561469530": 3
+          },
+          "wall_exec_ns": {
+            "count": 3,
+            "mean": 290.3333333333333,
+            "median": 206,
+            "min": 203,
+            "max": 462,
+            "p95": 462,
+            "stdev": 148.67526133601828
+          }
+        }
+      ]
+    }
+  ]
+}

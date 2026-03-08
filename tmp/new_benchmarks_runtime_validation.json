@@ -1,0 +1,83 @@
+{
+  "suite": "runtime_new_benchmarks",
+  "source_manifest": "/home/yunwei37/workspace/bpf-benchmark/config/micro_runtime.yaml",
+  "corrected_manifest": "/home/yunwei37/workspace/bpf-benchmark/tmp/micro_runtime.validation.yaml",
+  "generated_at": "2026-03-08T07:11:43.533395+00:00",
+  "parameters": {
+    "iterations": 3,
+    "warmups": 1,
+    "repeat": 200
+  },
+  "manifest_note": "Temporary corrected manifest selects the first matching benchmark entry to avoid duplicate-name overrides with expected_result=0.",
+  "benchmarks": [
+    {
+      "name": "atomic_counter_xadd",
+      "passed_both_runtimes": true,
+      "lk_ratio": 1.0052631578947369,
+      "runtimes": {
+        "llvmbpf": {
+          "status": "ok",
+          "returncode": 0,
+          "command": [
+            "python3",
+            "micro/run_micro.py",
+            "--suite",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/micro_runtime.validation.yaml",
+            "--bench",
+            "atomic_counter_xadd",
+            "--runtime",
+            "llvmbpf",
+            "--iterations",
+            "3",
+            "--warmups",
+            "1",
+            "--repeat",
+            "200",
+            "--output",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/atomic_counter_xadd.llvmbpf.json"
+          ],
+          "output_path": "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/atomic_counter_xadd.llvmbpf.json",
+          "exec_ns_median": 191,
+          "compile_ns_median": 9102880,
+          "code_size": 475,
+          "timing_source": "rdtsc",
+          "result_distribution": {
+            "12907746159561469530": 3
+          },
+          "raw_output_path": "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/atomic_counter_xadd.llvmbpf.json"
+        },
+        "kernel": {
+          "status": "ok",
+          "returncode": 0,
+          "command": [
+            "python3",
+            "micro/run_micro.py",
+            "--suite",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/micro_runtime.validation.yaml",
+            "--bench",
+            "atomic_counter_xadd",
+            "--runtime",
+            "kernel",
+            "--iterations",
+            "3",
+            "--warmups",
+            "1",
+            "--repeat",
+            "200",
+            "--output",
+            "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/atomic_counter_xadd.kernel.json"
+          ],
+          "output_path": "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/atomic_counter_xadd.kernel.json",
+          "exec_ns_median": 190,
+          "compile_ns_median": 784394,
+          "code_size": 678,
+          "timing_source": "ktime",
+          "result_distribution": {
+            "12907746159561469530": 3
+          },
+          "raw_output_path": "/home/yunwei37/workspace/bpf-benchmark/tmp/new_benchmarks_validation_runs/atomic_counter_xadd.kernel.json"
+        }
+      }
+    }
+  ]
+}
