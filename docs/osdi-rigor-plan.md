@@ -128,9 +128,11 @@
 
 #### G8. LLVM Pass 消融粒度不够
 
-当前只有 O0/O1/O2/O3，没有逐 pass 消融。
+**Status**: IN PROGRESS. 基础设施已完成（`--llvm-disable-pass` / `--llvm-log-passes`），首轮消融实验运行中。
 
-**修复方案（P3）**：用 `opt -passes=...` 逐步启用 pass，识别对 BPF 最关键的 2-3 个 pass。
+已确认 LLVM 18.1.3 pass pipeline 结构：O1 已包含 instcombine/SROA/LICM/SCCP/ADCE；O2 新增 GVN/DSE/JumpThreading/SLPVectorizer；O3 仅增 argpromotion/callsite-splitting/CHR。这解释了为什么 O1=O2=O3（BPF 程序太小，O2/O3 新增 pass 无作用目标）。
+
+**修复方案**：对 9 个候选 pass 逐个消融跑 11 个 benchmark，量化每个 pass 对 code-size 和 exec-time 的贡献。
 
 #### G9. Spectre 2×2 实验
 
@@ -165,9 +167,9 @@
 | ID | Action | 预计工作量 | 依赖 |
 |----|--------|-----------|------|
 | C1 | ARM 交叉验证 | 4h+ | 硬件 |
-| C2 | LLVM pass-level 消融 | 4h | 无 |
-| C3 | Spectre 2×2 | 2h | reboot |
-| C4 | Kernel JIT 改进建议 + patch 原型 | 8h | B5 |
+| C2 | LLVM pass-level 消融 | 进行中 | 无 | `--llvm-disable-pass` 已实现，9-pass × 11-bench 矩阵运行中 |
+| C3 | Spectre 2×2 | 未完成 | reboot |
+| C4 | Kernel JIT 改进建议 + patch 原型 | 分析完成 | B5 | `docs/kernel-jit-improvements.md`：3 个改进（byte-recompose / cmov / callee-saved） |
 
 ## 3. 核心论证链（修复后应能回答）
 
