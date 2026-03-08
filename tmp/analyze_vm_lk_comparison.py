@@ -251,7 +251,7 @@ def main() -> int:
     lines.append(f"- llvmbpf source host/kernel: `{llvmbpf['host']['platform']}`")
     lines.append(f"- Host authoritative kernel: `{host['host']['kernel_version']}`")
     lines.append(
-        "- Metric: median `exec_ns`; `L/K` means `llvmbpf_exec_ns / kernel_exec_ns`, so smaller values mean the kernel is faster relative to llvmbpf."
+        "- Metric: median `exec_ns`; `L/K` means `llvmbpf_exec_ns / kernel_exec_ns`, so larger values mean the kernel is faster relative to llvmbpf."
     )
     lines.append("")
     lines.append("## Summary")
@@ -262,7 +262,7 @@ def main() -> int:
     lines.append(f"- VM 7.0-rc2 geomean L/K on host-overlap subset: `{format_ratio(vm_geomean_overlap)}`")
     lines.append(f"- Host authoritative geomean L/K on the same subset: `{format_ratio(host_geomean_overlap)}`")
     lines.append(
-        f"- Geomean VM/Host L/K shift on overlap subset: `{format_ratio(ratio_shift_geomean)}`"
+        f"- Geomean VM/Host L/K shift on overlap subset: `{format_ratio(ratio_shift_geomean)}`; values above `1.0x` mean 7.0-rc2 is faster relative to llvmbpf than the host baseline."
     )
     lines.append(
         f"- Geomean parity-gap change (`VM gap / host gap`): `{format_ratio(gap_change_geomean)}`"

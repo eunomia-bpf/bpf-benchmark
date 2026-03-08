@@ -55,6 +55,12 @@ static __always_inline u16 micro_read_u16_be(const u8 *data, u32 offset)
     return (u16)(((u16)data[offset] << 8) | data[offset + 1]);
 }
 
+static __always_inline u32 micro_read_u32_be(const u8 *data, u32 offset)
+{
+    return ((u32)data[offset] << 24) | ((u32)data[offset + 1] << 16) |
+           ((u32)data[offset + 2] << 8) | (u32)data[offset + 3];
+}
+
 static __always_inline void micro_write_u64_le(u8 *data, u64 value)
 {
     for (u32 i = 0; i < 8; i++) {
@@ -69,6 +75,15 @@ static __always_inline u64 micro_rotl64(u64 value, u32 shift)
         return value;
     }
     return (value << shift) | (value >> (64U - shift));
+}
+
+static __always_inline u32 micro_rotl32(u32 value, u32 shift)
+{
+    shift &= 31U;
+    if (shift == 0) {
+        return value;
+    }
+    return (value << shift) | (value >> (32U - shift));
 }
 
 #define DEFINE_PACKET_BACKED_XDP_BENCH(PROG_NAME, BENCH_FN)                      \
