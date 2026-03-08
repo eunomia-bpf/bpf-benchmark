@@ -111,6 +111,16 @@ std::optional<uint64_t> read_nominal_tsc_freq_hz()
     return std::nullopt;
 }
 
+template <typename VM>
+int configure_no_cmov(VM &vm, bool enabled)
+{
+    if constexpr (requires(VM &candidate, bool value) { candidate.set_no_cmov(value); }) {
+        return vm.set_no_cmov(enabled);
+    }
+
+    return enabled ? -1 : 0;
+}
+
 uint64_t calibrate_tsc_freq_hz()
 {
     constexpr auto calibration_window = std::chrono::milliseconds(20);
@@ -438,7 +448,10 @@ sample_result run_llvmbpf(const cli_options &options)
     if (vm.set_optimization_level(options.opt_level) < 0) {
         fail("llvmbpf set_optimization_level failed: " + vm.get_error_message());
     }
-    if (vm.set_no_cmov(options.no_cmov) < 0) {
+    if (configure_no_cmov(vm, options.no_cmov) < 0) {
+        if (options.no_cmov) {
+            fail("llvmbpf build does not support --no-cmov");
+        }
         fail("llvmbpf set_no_cmov failed: " + vm.get_error_message());
     }
     if (!options.disabled_passes.empty() &&

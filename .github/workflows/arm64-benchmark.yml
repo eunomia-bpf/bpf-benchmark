@@ -1,0 +1,121 @@
+name: ARM64 Benchmark
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - micro/**
+      - .github/**
+
+permissions:
+  contents: write
+
+jobs:
+  benchmark:
+    if: github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip ci]')
+    runs-on: ubuntu-24.04-arm64
+    env:
+      RESULT_PREFIX: arm64
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+          submodules: recursive
+
+      - name: Update submodules
+        run: git submodule update --init --recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang llvm cmake pkg-config libelf-dev zlib1g-dev libzstd-dev python3-yaml
+
+      - name: Build benchmark suite
+        run: make -C micro
+
+      - name: Run pure JIT characterization with both runtimes
+        id: pure_jit_full
+        continue-on-error: true
+        run: |
+          mkdir -p micro/results
+          python3 micro/run_micro.py \
+            --runtime llvmbpf \
+            --runtime kernel \
+            --iterations 5 \
+            --warmups 1 \
+            --repeat 200 \
+            --suite config/micro_pure_jit.yaml \
+            --output "micro/results/${RESULT_PREFIX}_pure_jit.json"
+
+      - name: Fallback pure JIT characterization to llvmbpf-only
+        if: always()
+        continue-on-error: true
+        run: |
+          if [ -s "micro/results/${RESULT_PREFIX}_pure_jit.json" ]; then
+            echo "Combined pure JIT run produced output; skipping fallback."
+            exit 0
+          fi
+          python3 micro/run_micro.py \
+            --runtime llvmbpf \
+            --iterations 5 \
+            --warmups 1 \
+            --repeat 200 \
+            --suite config/micro_pure_jit.yaml \
+            --output "micro/results/${RESULT_PREFIX}_pure_jit.json"
+
+      - name: Run runtime suite with both runtimes
+        id: runtime_full
+        continue-on-error: true
+        run: |
+          python3 micro/run_micro.py \
+            --runtime llvmbpf \
+            --runtime kernel \
+            --iterations 5 \
+            --warmups 1 \
+            --repeat 200 \
+            --suite config/micro_runtime.yaml \
+            --output "micro/results/${RESULT_PREFIX}_runtime.json"
+
+      - name: Fallback runtime suite to llvmbpf-only
+        if: always()
+        continue-on-error: true
+        run: |
+          if [ -s "micro/results/${RESULT_PREFIX}_runtime.json" ]; then
+            echo "Combined runtime suite run produced output; skipping fallback."
+            exit 0
+          fi
+          python3 micro/run_micro.py \
+            --runtime llvmbpf \
+            --iterations 5 \
+            --warmups 1 \
+            --repeat 200 \
+            --suite config/micro_runtime.yaml \
+            --output "micro/results/${RESULT_PREFIX}_runtime.json"
+
+      - name: Upload benchmark artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: arm64-benchmark-results
+          path: micro/results/arm64_*.json
+          if-no-files-found: warn
+
+      - name: Commit and push benchmark results
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add micro/results/
+          git commit -m "CI: ARM64 benchmark results [skip ci]" || true
+          for attempt in 1 2 3; do
+            git pull --rebase origin main || true
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            sleep $((attempt * 5))
+          done
+          exit 1
