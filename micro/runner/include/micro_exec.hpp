@@ -39,6 +39,7 @@ struct cli_options {
     uint32_t repeat = 1;
     uint32_t input_size = 0;
     int opt_level = 3;
+    bool no_cmov = false;
     std::vector<std::string> disabled_passes;
     bool log_passes = false;
     bool perf_counters = false;
@@ -82,6 +83,7 @@ struct sample_result {
     uint64_t exec_ns = 0;
     std::string timing_source = "unknown";
     std::optional<int> opt_level;
+    bool no_cmov = false;
     std::optional<uint64_t> wall_exec_ns;
     std::optional<uint64_t> exec_cycles;
     std::optional<uint64_t> tsc_freq_hz;

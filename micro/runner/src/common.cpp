@@ -108,7 +108,7 @@ cli_options parse_args(int argc, char **argv)
             "usage: micro_exec <run-llvmbpf|run-kernel|list-programs> --program <path> [--program-name <name>] "
             "[--memory <path>] "
             "[--io-mode map|staged|packet] [--raw-packet] [--repeat N] [--input-size N] "
-            "[--opt-level 0|1|2|3] [--llvm-disable-pass <name>] [--llvm-log-passes] "
+            "[--opt-level 0|1|2|3] [--no-cmov] [--llvm-disable-pass <name>] [--llvm-log-passes] "
             "[--perf-counters] [--perf-scope full_repeat_raw|full_repeat_avg] "
             "[--dump-jit] [--compile-only]");
     }
@@ -118,7 +118,7 @@ cli_options parse_args(int argc, char **argv)
 
     for (int index = 2; index < argc; ++index) {
         const std::string_view current = argv[index];
-        if (current == "--program" && index + 1 < argc) {
+        if ((current == "--program" || current == "--bpf-object") && index + 1 < argc) {
             options.program = argv[++index];
             continue;
         }
@@ -152,6 +152,10 @@ cli_options parse_args(int argc, char **argv)
                 fail("--opt-level must be between 0 and 3");
             }
             options.opt_level = opt_level;
+            continue;
+        }
+        if (current == "--no-cmov") {
+            options.no_cmov = true;
             continue;
         }
         if (current == "--llvm-disable-pass" && index + 1 < argc) {
@@ -209,7 +213,8 @@ void print_json(const sample_result &sample)
         << "{"
         << "\"compile_ns\":" << sample.compile_ns << ","
         << "\"exec_ns\":" << sample.exec_ns << ","
-        << "\"timing_source\":\"" << json_escape(sample.timing_source) << "\"";
+        << "\"timing_source\":\"" << json_escape(sample.timing_source) << "\""
+        << ",\"no_cmov\":" << (sample.no_cmov ? "true" : "false");
 
     if (sample.opt_level.has_value()) {
         std::cout << ",\"opt_level\":" << *sample.opt_level;

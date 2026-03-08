@@ -438,6 +438,9 @@ sample_result run_llvmbpf(const cli_options &options)
     if (vm.set_optimization_level(options.opt_level) < 0) {
         fail("llvmbpf set_optimization_level failed: " + vm.get_error_message());
     }
+    if (vm.set_no_cmov(options.no_cmov) < 0) {
+        fail("llvmbpf set_no_cmov failed: " + vm.get_error_message());
+    }
     if (!options.disabled_passes.empty() &&
         vm.set_disabled_passes(options.disabled_passes) < 0) {
         fail("llvmbpf set_disabled_passes failed: " + vm.get_error_message());
@@ -480,6 +483,7 @@ sample_result run_llvmbpf(const cli_options &options)
     sample_result sample;
     sample.compile_ns = elapsed_ns(compile_start, compile_end);
     sample.opt_level = options.opt_level;
+    sample.no_cmov = options.no_cmov;
     sample.native_code_size = compiled_code->size;
     sample.bpf_insn_count = image.code.size() / sizeof(ebpf_inst);
     sample.disabled_passes = options.disabled_passes;

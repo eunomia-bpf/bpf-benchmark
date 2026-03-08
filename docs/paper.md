@@ -537,7 +537,7 @@ The most visible case is `switch_dispatch`: LLVM emits **28 cmov** and achieves 
 
 ### 10.3 Per-Function Callee-Saved Register Optimization
 
-**Problem.** The kernel JIT unconditionally saves at least `rbp`, `rbx`, and `r13` regardless of actual usage. This accounts for **18.5%** of measured extra instructions.
+**Problem.** On kernel 6.15, the JIT unconditionally saves at least `rbp`, `rbx`, and `r13` regardless of actual usage. This accounts for **18.5%** of measured extra instructions.
 
 | Benchmark | Kernel saves | LLVM saves |
 |-----------|-------------|-----------|
@@ -545,17 +545,19 @@ The most visible case is `switch_dispatch`: LLVM emits **28 cmov** and achieves 
 | `fibonacci_iter` | rbp, rbx, r13 (7 insns) | rbx (4 insns) |
 | `spill_pressure` | rbp, rbx, r13, r14, r15 (11 insns) | rbp, r15, r14, r13, r12, rbx (14 insns) |
 
-LLVM is not "always saving fewer" — it saves **adaptively**. In register-heavy kernels it may save more, but in trivial kernels it saves much less. The kernel JIT lacks this adaptive behavior.
+LLVM is not "always saving fewer" — it saves **adaptively**. In register-heavy kernels it may save more, but in trivial kernels it saves much less.
 
-**Proposed fix.** Compute the physical callee-saved set used by the function before prologue emission; save only registers that are actually clobbered. Estimated effort: **40–100 LOC**. This has upstream precedent — the kernel's `callee_regs_used` tracking already exists in adjacent JIT work.
+**Upstream status: ALREADY IMPLEMENTED in kernel v7.0-rc2.** The kernel now has `detect_reg_usage()` (lines 1504–1519 of `bpf_jit_comp.c`) which scans BPF instructions to determine which callee-saved registers (BPF_REG_6–9 → x86 rbx, r13, r14, r15) are actually used, and `push_callee_regs()` (lines 355–391) conditionally saves only those registers. Exception-boundary functions still save all registers for safety. This validates our analysis — the kernel team independently identified and fixed this gap. Our VM benchmarks on 7.0-rc2 show a geomean kernel exec-time improvement of 0.881x relative to 6.15, partially attributable to this optimization.
 
-### 10.4 Implementation Priority
+### 10.4 Implementation Priority and Upstream Status
 
-If the goal is fastest path to measurable improvement, the recommended order is:
+| Optimization | Impact | Status (as of v7.0-rc2) |
+|-------------|--------|------------------------|
+| Byte-load recompose | 50.7% of surplus, 2.24x penalty | **Not implemented** — highest-priority remaining gap |
+| cmov support | 31 vs 0 cmov, 19.9% branch surplus | **Not implemented** — requires BPF ISA-level pattern recognition |
+| Per-function callee-saved | 18.5% of surplus | **Implemented** in v7.0-rc2 via `detect_reg_usage()` |
 
-1. **Byte-load recompose first**: largest measured payoff (50.7% of surplus, 2.24x penalty) and strongest causal evidence.
-2. **Per-function callee-saved second**: easiest patch, low risk, established upstream vocabulary.
-3. **cmov support third**: highest analysis overhead because BPF ISA does not encode it directly.
+The callee-saved optimization's adoption in v7.0-rc2 validates our analysis methodology: the kernel team independently identified and fixed this gap. The remaining two optimizations — byte-load recomposition and conditional-move support — remain open and account for ~71% of the measured instruction surplus.
 
 ## 11. Related Work
 

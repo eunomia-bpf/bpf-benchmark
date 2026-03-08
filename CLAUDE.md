@@ -104,6 +104,11 @@ Programs define a `bench_*()` function taking `(const u8 *data, u32 len, u64 *ou
 
 OpenAI Codex CLI is available on this machine (default model: `gpt-5.4`). Use it as a subagent for code writing tasks.
 
+### Division of Labor (IMPORTANT)
+- **Codex handles**: ALL code implementation, benchmark runs, data analysis, analysis scripts, experiments, research
+- **Claude Code handles**: scheduling/dispatching codex tasks, document writing, TODO/memory updates, architectural decisions, reviewing codex output
+- **Claude Code must NEVER**: write analysis code directly, run benchmarks directly, or manually analyze data — always delegate to codex
+
 ### Usage
 ```bash
 # Non-interactive execution — no sandbox, no prompts

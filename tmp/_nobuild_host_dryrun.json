@@ -1,0 +1,211 @@
+{
+  "suite": "micro_staged_codegen",
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/config/micro_pure_jit.yaml",
+  "generated_at": "2026-03-08T06:48:39.088392+00:00",
+  "host": {
+    "hostname": "lab",
+    "platform": "Linux-6.15.11-061511-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "cpu_affinity": null,
+    "git_sha": "b8e551a627f79a49341af01f2322ac64e8a2a8e2",
+    "kernel_version": "6.15.11-061511-generic",
+    "kernel_cmdline": "BOOT_IMAGE=/boot/vmlinuz-6.15.11-061511-generic root=UUID=85355174-a2ad-4e84-bf78-53fac30b89fb ro panic=10 panic_on_oops=1 softlockup_panic=1 hung_task_panic=1 splash quiet iommu=pt vt.handoff=7",
+    "cpu_governor": "powersave",
+    "turbo_state": "0",
+    "perf_event_paranoid": "2"
+  },
+  "toolchains": {
+    "llvmbpf": {
+      "root": "/home/yunwei37/workspace/bpf-benchmark/vendor/llvmbpf"
+    },
+    "libbpf": {
+      "root": "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf"
+    },
+    "bpftool": {
+      "root": "/home/yunwei37/workspace/bpf-benchmark/vendor/bpftool"
+    }
+  },
+  "build": {
+    "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec",
+    "bpftool_binary": "/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/bpftool/bpftool"
+  },
+  "defaults": {
+    "iterations": 1,
+    "warmups": 0,
+    "repeat": 10,
+    "perf_counters": false,
+    "perf_scope": "full_repeat_raw",
+    "shuffle_seed": null,
+    "runtime_order_seed": 0
+  },
+  "iteration_runtime_orders": {
+    "simple": [
+      [
+        "llvmbpf"
+      ]
+    ]
+  },
+  "benchmarks": [
+    {
+      "name": "simple",
+      "description": "Return-only baseline",
+      "category": "baseline",
+      "family": "baseline",
+      "level": "tiny",
+      "hypothesis": "Captures the staged harness floor for baseline subtraction",
+      "io_mode": "staged",
+      "tags": [
+        "baseline",
+        "pure-jit"
+      ],
+      "expected_result": 12345678,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/simple.mem",
+      "runs": [
+        {
+          "runtime": "llvmbpf",
+          "label": "llvmbpf LLVM JIT",
+          "mode": "llvmbpf",
+          "repeat": 10,
+          "artifacts": {
+            "program_object": "/home/yunwei37/workspace/bpf-benchmark/micro/programs/simple.bpf.o"
+          },
+          "samples": [
+            {
+              "compile_ns": 4809522,
+              "exec_ns": 135,
+              "timing_source": "rdtsc",
+              "no_cmov": false,
+              "opt_level": 3,
+              "disabled_passes": [],
+              "wall_exec_ns": 4162,
+              "exec_cycles": 498,
+              "tsc_freq_hz": 3686088357,
+              "result": 12345678,
+              "retval": 2,
+              "native_code_size": 102,
+              "bpf_insn_count": 29,
+              "code_size": {
+                "bpf_bytecode_bytes": 232,
+                "native_code_bytes": 102,
+                "inflation_ratio": 0.439655
+              },
+              "phases_ns": {
+                "program_image_ns": 95271,
+                "memory_prepare_ns": 30288,
+                "input_stage_ns": 2152,
+                "vm_load_code_ns": 213,
+                "jit_compile_ns": 4809522
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": false,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "iteration_index": 0
+            }
+          ],
+          "compile_ns": {
+            "count": 1,
+            "mean": 4809522,
+            "median": 4809522,
+            "min": 4809522,
+            "max": 4809522,
+            "p95": 4809522,
+            "stdev": 0
+          },
+          "exec_ns": {
+            "count": 1,
+            "mean": 135,
+            "median": 135,
+            "min": 135,
+            "max": 135,
+            "p95": 135,
+            "stdev": 0
+          },
+          "timing_source": "rdtsc",
+          "phases_ns": {
+            "program_image_ns": {
+              "count": 1,
+              "mean": 95271,
+              "median": 95271,
+              "min": 95271,
+              "max": 95271,
+              "p95": 95271,
+              "stdev": 0
+            },
+            "memory_prepare_ns": {
+              "count": 1,
+              "mean": 30288,
+              "median": 30288,
+              "min": 30288,
+              "max": 30288,
+              "p95": 30288,
+              "stdev": 0
+            },
+            "input_stage_ns": {
+              "count": 1,
+              "mean": 2152,
+              "median": 2152,
+              "min": 2152,
+              "max": 2152,
+              "p95": 2152,
+              "stdev": 0
+            },
+            "vm_load_code_ns": {
+              "count": 1,
+              "mean": 213,
+              "median": 213,
+              "min": 213,
+              "max": 213,
+              "p95": 213,
+              "stdev": 0
+            },
+            "jit_compile_ns": {
+              "count": 1,
+              "mean": 4809522,
+              "median": 4809522,
+              "min": 4809522,
+              "max": 4809522,
+              "p95": 4809522,
+              "stdev": 0
+            }
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected_samples": 0,
+            "include_kernel": null,
+            "scope": "full_repeat_raw",
+            "hardware_counters_observed": false,
+            "software_counters_observed": false,
+            "errors": {}
+          },
+          "derived_metrics": {},
+          "result_distribution": {
+            "12345678": 1
+          },
+          "wall_exec_ns": {
+            "count": 1,
+            "mean": 4162,
+            "median": 4162,
+            "min": 4162,
+            "max": 4162,
+            "p95": 4162,
+            "stdev": 0
+          },
+          "baseline_adjustment": {
+            "baseline_benchmark": "simple",
+            "baseline_io_mode": "staged",
+            "applied": true,
+            "baseline_exec_ns": 135.0,
+            "median_minus_baseline_ns": 0.0,
+            "median_over_baseline_ratio": 1.0
+          }
+        }
+      ]
+    }
+  ]
+}
