@@ -26,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang llvm cmake pkg-config libelf-dev zlib1g-dev libzstd-dev python3-yaml
+          sudo apt-get install -y clang llvm cmake pkg-config libbpf-dev libelf-dev zlib1g-dev libzstd-dev python3-yaml
 
       - name: Build benchmark suite
         run: make -C micro
