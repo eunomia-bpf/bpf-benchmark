@@ -11,4 +11,18 @@ __pycache__/
 micro/jit-dumps/
 third-party/
 corpus/build/
+corpus/bcf/
+corpus/repos/
+corpus/inventory.json
+corpus/results/
 reference/papers/*.pdf
+
+# BPF build artifacts
+*.bpf.o
+*.bpf.d
+
+# C++ build directory
+micro/build/
+
+# Generated benchmark inputs
+micro/generated-inputs/

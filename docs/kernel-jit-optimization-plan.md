@@ -89,7 +89,7 @@
 ## 4. 系统设计方向：微架构感知的 Userspace-Guided JIT 优化
 
 > ⚠️ 以下为新设计方向（v5），取代 v4 的 target-independent region IR 方案。
-> v4 设计及 review 历史保留在 `docs/bpf-jit-advisor-design.md` 和 `docs/tmp/bpf-jit-advisor-review-r{1,2,3,4}.md`。
+> v4 设计及 review 历史保留在 `docs/tmp/bpf-jit-advisor-design-v4.md` 和 `docs/tmp/bpf-jit-advisor-review-r{1,2,3,4}.md`。
 
 ### 4.1 核心思路
 
@@ -308,29 +308,42 @@ Note: `simple` 低于 ktime 分辨率，数据仅作参考。完整数据见 `mi
 
 ## 7. TODO（按优先级排序）
 
-### 🔴 P0 — 当前 sprint：v5 设计
+### ✅ 已完成
 
-| # | 任务 | 负责 | 说明 |
-|---|------|------|------|
-| 1 | **v5 架构设计文档** | codex 设计 + codex review | 微架构感知 directive 框架：接口、安全模型、directive 格式 |
-| 2 | **Directive 类型清单** | codex | 基于 characterization 数据定义初始 directive set |
-| 3 | **消融补全** | codex | byte-recompose / callee-saved / BMI 消融数据 |
+| # | 任务 | 状态 | 说明 |
+|---|------|:---:|------|
+| 1 | v5 架构设计文档 | ✅ | v5r2 implementation-ready，见 `docs/tmp/bpf-jit-advisor-v5r2.md` |
+| 2 | Directive 类型清单 | ✅ | 6 种 directive（wide_load, cmov_select, wide_store, rotate_fusion, lea_fusion, branch_hint） |
+| 3 | Review 通过 | ✅ | 3 轮 review，最终 7-9/10，见 `docs/tmp/bpf-jit-advisor-v5r2-review-r2.md` |
+| 4 | CI 工作流 | ✅ | GitHub Actions ARM64 + x86 benchmark（手动触发），自动 commit 结果 |
 
-### 🟡 P1 — 原型实现
-
-| # | 任务 | 说明 |
-|---|------|------|
-| 4 | Kernel directive 接口 prototype | 最小 kernel 改动，允许 userspace 附加 directives |
-| 5 | 手动 directive 工具 | 命令行工具，人工为 BPF 程序生成 directives |
-| 6 | VM 验证 | 31+ benchmark before/after，定量展示 directive 效果 |
-
-### 🟢 P2 — 自动化 + 跨架构
+### 🔴 P0 — 当前 sprint：原型实现
 
 | # | 任务 | 说明 |
 |---|------|------|
-| 7 | llvmbpf 自动 directive 生成 | 基于 LLVM 优化结果自动产出 directives |
-| 8 | arm64 directive 消费 | 跨架构验证 |
-| 9 | 端到端评估 | 真实程序 directive 效果 |
+| 5 | **Transport + blob parser** | directive 传输格式 + kernel 解析 |
+| 6 | **orig_idx 传播 + remap** | verifier 后指令映射 |
+| 7 | **Retained mem facts** | verifier 保留的内存对齐/大小事实 |
+| 8 | **wide_load 实现** | 第一个 directive：byte-load 合并为 wide load |
+| 9 | **kernel-fixed-cmov baseline** | 内核固定 cmov 策略作为 baseline |
+| 10 | **cmov_select 实现** | 微架构感知 cmov 决策（novelty case） |
+| 11 | **消融补全** | byte-recompose / callee-saved / BMI 消融数据 |
+
+### 🟡 P1 — 自动化 + 评估
+
+| # | 任务 | 说明 |
+|---|------|------|
+| 12 | 自动 directive 生成器 | llvmbpf 分析 → 自动产出 directives |
+| 13 | Policy 实验 | 同一程序在不同 CPU/workload 下的 policy 差异 |
+| 14 | VM 验证 | 31+ benchmark before/after，定量展示 directive 效果 |
+
+### 🟢 P2 — 跨架构
+
+| # | 任务 | 说明 |
+|---|------|------|
+| 15 | arm64 JIT dump 分析 | GitHub Actions ARM runner 拿到 arm64 数据 |
+| 16 | arm64 directive 消费 | arm64 emitter（csel 等） |
+| 17 | 端到端评估 | 真实程序 directive 效果 |
 
 ---
 
@@ -363,8 +376,11 @@ Baseline:  host 6.15.11 authoritative + VM 7.0-rc2 unmodified
 
 | 文档 | 内容 |
 |------|------|
-| `docs/bpf-jit-advisor-design.md` | BPF-JIT Advisor v4 详细设计 |
-| `docs/tmp/bpf-jit-advisor-review-r4.md` | 最新 review（IR freeze 是 blocker） |
+| `docs/tmp/bpf-jit-advisor-v5r2.md` | **BPF-JIT Advisor v5r2 设计（implementation-ready）** |
+| `docs/tmp/bpf-jit-advisor-v5r2-review-r2.md` | v5r2 最终 review（7-9/10） |
+| `docs/tmp/bpf-jit-advisor-v5r2-review.md` | v5r2 第二轮 review |
+| `docs/tmp/bpf-jit-advisor-design-v4.md` | BPF-JIT Advisor v4 设计（已废弃） |
+| `docs/tmp/bpf-jit-advisor-review-r4.md` | v4 review（IR freeze 是 blocker） |
 | `docs/tmp/vm_vs_host_detailed_analysis.md` | VM 7.0-rc2 vs Host 6.15 详细对比 |
 | `docs/tmp/additional_jit_optimizations.md` | Tier 2 JIT 优化机会分析 |
 | `docs/tmp/benchmark_coverage_analysis.md` | Benchmark 覆盖度缺口分析 |
@@ -372,3 +388,5 @@ Baseline:  host 6.15.11 authoritative + VM 7.0-rc2 unmodified
 | `docs/tmp/microarch_experiments.md` | 微架构实验结果 |
 | `micro/results/vm_vs_host_comparison.md` | VM vs Host 简要对比 |
 | `micro/results/new_benchmarks_authoritative_summary.md` | 10 个新 benchmark 结果 |
+| `.github/workflows/arm64-benchmark.yml` | ARM64 CI benchmark（手动触发） |
+| `.github/workflows/x86-benchmark.yml` | x86 CI benchmark（手动触发） |
