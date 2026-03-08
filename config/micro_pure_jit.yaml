@@ -590,3 +590,64 @@ benchmarks:
     input_generator: mega_basic_block_2048
     expected_result: 11992325257241416031
     tags: [compute, code-size, straight-line, pure-jit]
+
+  - name: packet_redundant_bounds
+    description: Packet-backed record parser with one wide dominating window plus many redundant sub-checks
+    category: memory-local
+    family: bounds-density
+    level: redundant-window
+    hypothesis: Dominating range checks should create a clean target for redundant bounds-check elimination
+    base_name: packet_redundant_bounds
+    io_mode: packet
+    kernel_input_size: 776
+    input_generator: packet_redundant_bounds
+    expected_result: 1610777047308888911
+    tags: [packet, bounds, redundant-checks, pure-jit]
+
+  - name: const_fold_chain
+    description: ALU32-to-ALU64 constant cascade with repeated truncation and immediate updates
+    category: program-scale
+    family: const-fold
+    level: chained-immediates
+    hypothesis: Cross-instruction constant folding should shrink constant-heavy ALU32 and ALU64 cascades
+    base_name: const_fold_chain
+    kernel_input_size: 520
+    input_generator: const_fold_chain
+    expected_result: 6007672884718983195
+    tags: [compute, constants, mixed-width, pure-jit]
+
+  - name: map_lookup_repeat
+    description: Repeated identical array-map lookups inside a hot staged-input loop
+    category: map-pattern
+    family: lookup-cache
+    level: repeated-hot-key
+    hypothesis: Repeated same-key lookups should expose whether a future backend can reuse helper results safely
+    base_name: map_lookup_repeat
+    kernel_input_size: 72
+    input_generator: map_lookup_repeat
+    expected_result: 10032338643832991529
+    tags: [map, helper, lookup-cache, pure-jit]
+
+  - name: struct_field_cluster
+    description: Dense fixed-offset field extraction from a staged array of naturally aligned records
+    category: memory-local
+    family: field-access
+    level: clustered-records
+    hypothesis: Many same-base fixed-offset loads should reward base-plus-offset fusion and grouped field lowering
+    base_name: struct_field_cluster
+    kernel_input_size: 1032
+    input_generator: struct_field_cluster
+    expected_result: 9354240374969449171
+    tags: [memory, fields, fixed-offsets, pure-jit]
+
+  - name: smallmul_strength_reduce
+    description: Hot loop dominated by multiply-by-small-constant arithmetic and index scaling
+    category: alu-mix
+    family: strength-reduce
+    level: smallmul
+    hypothesis: Small constant multiplies should isolate LEA-style fusion and strength-reduction opportunities
+    base_name: smallmul_strength_reduce
+    kernel_input_size: 1032
+    input_generator: smallmul_strength_reduce
+    expected_result: 4880578162264678397
+    tags: [alu, strength-reduce, lea-like, pure-jit]

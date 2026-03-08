@@ -1,47 +1,122 @@
 # Kernel eBPF JIT 优化：计划与进度
 
-> 本文档是 kernel JIT 优化工作的单一 hub，记录设计方向、实验进度与 TODO。
-> Characterization 论文见 `docs/paper-comparison.md`（独立论文）。本文档支撑第二篇论文的系统贡献。
+> 本文档是 kernel JIT 优化论文的单一 hub，记录设计方向、论文策略、实验进度与 TODO。
+> Characterization 论文见 `docs/paper-comparison.md`（独立论文，最终将与本文合并）。
+>
+> 最新设计文档：**`docs/tmp/bpf-jit-advisor-v6.md`**
 >
 > 上次更新：2026-03-08
 
 ---
 
-## 1. 论文定位
+## 1. 论文定位与策略
 
-**第二篇论文核心问题**：characterization 已量化了 kernel JIT 与 LLVM -O3 的差距，下一步是**如何安全、可扩展地缩小这个差距**。
+### 1.1 核心论题
 
-**论文故事线**：
-1. Characterization 揭示差距主要来自 backend lowering，不是 bytecode 层面
-2. Bytecode 优化器（K2/Merlin/EPSO）无法触及 byte-recompose、cmov、branch layout 等 backend 决策
-3. 我们提出**微架构感知的 userspace-guided JIT 优化框架**：允许特权用户态进程基于目标微架构特征来指导 kernel JIT 的 backend 决策
-4. 实现框架 + 典型优化并展示 before/after 数据
+> eBPF JIT 的 backend 优化应该分为稳定的 **kernel legality plane** 和可更新的 **userspace backend policy plane**。Kernel 验证并安全采纳有界的 backend directives；特权 userspace 根据 CPU profile、workload profile、程序特征和 fleet policy 决定请求哪些 directives。
 
-### 1.1 设计方向决策记录（2026-03-08）
+贡献不是任何一个 peephole 优化，而是 **mechanism/policy 分离、fail-closed legality 基础设施、以及 profitable backend 决策随程序/workload/硬件变化的证据**。
+
+### 1.2 两篇论文策略
+
+| 论文 | 状态 | 说明 |
+|------|:---:|------|
+| **Paper 1: Characterization** | 数据就绪 | `paper-comparison.md`，量化 kernel JIT vs LLVM -O3 差距 |
+| **Paper 2: Optimization** | 设计就绪，待实现 | 本文档，userspace-guided backend optimization |
+| **最终合并** | 计划中 | 两篇最终合并为一个完整故事，但**现在先拆开**，确保每个方面独立达到顶会水准 |
+
+**合并后的故事线**：
+1. Characterization 揭示差距来自 backend lowering（不是 bytecode）
+2. Bytecode 优化器（K2/Merlin/EPSO）无法触及这些 backend 决策
+3. 部分 backend 决策的 legality 稳定但 profitability 依赖部署环境
+4. 设计 mechanism/policy 分离的框架
+5. 实现 + 评估
+
+### 1.3 OSDI/SOSP Novelty 分析
+
+**真正 novel 的部分**：
+1. **Mechanism/policy 分离** — kernel 管 legality，userspace 管 profitability
+2. **Fail-closed backend policy substrate** — digest binding、verifier remap、retained facts、exact validators、CPU gating
+3. **部署控制权** — 优化 owner 是 Cilium/Katran 等特权 loader，不是 kernel maintainer
+4. **Policy-sensitive 的证据** — 同一个合法站点在不同 CPU/workload 下需要不同 lowering
+
+**增量的部分**（有用但不足以单独撑论文）：
+- 各个 peephole 优化本身
+- Validator template 作为代码组织手段
+- Arch-specific emitter
+
+**OSDI/SOSP Go 条件**（全部满足才提交）：
+1. 与 characterization 深度整合或合并
+2. 原型实现多个 directive，展示框架的泛化能力
+3. 评估包含真实多函数程序和至少一个端到端部署
+4. Fixed kernel baseline 不能在所有场景下达到同等收益
+
+### 1.4 "Why Userspace" — 5 个独立理由
+
+不只是微架构差异：
+
+| 理由 | 说明 |
+|------|------|
+| **可更新性** | userspace policy DB 可以每周更新，kernel heuristic 只能等升级 |
+| **程序级组合** | 局部有利的变换可能全局有害（I-cache cliff），userspace 做全局预算 |
+| **Workload 适应** | 分支可预测性取决于运行时数据分布，不是 ISA 特性 |
+| **Fleet A/B testing** | 5% 机器先上新 policy，看效果再推广，无需改 kernel |
+| **所有权** | service owner 已经拥有 BPF 性能调优（Cilium/Katran），kernel maintainer 不应维护每个 service 的 heuristic |
+
+### 1.5 设计方向决策记录
 
 | 决策 | 结论 | 原因 |
 |------|------|------|
 | **不做简单 peephole patches** | ❌ 不考虑 | 目标是论文（系统贡献），不是发 kernel patch |
-| **不做 kernel-only first** | ❌ 不采纳 R4 建议 | 一开始就要考虑 userspace，不能只在 kernel 内部做 |
-| **不用 lift→compare→emit** | ❌ 放弃 v4 的 re-lift 设计 | 太重，且不是正确的抽象层次 |
-| **userspace 调整必须微架构相关** | ✅ 核心设计约束 | 优化决策本质上依赖目标硬件特征（cmov 可用性、cache 行为、分支预测等） |
-| **先手动、后自动** | ✅ 分阶段 | 先允许特权进程手动调整 bytecode/JIT hints，后考虑 llvmbpf 自动闭环 |
-| **kernel 改动最小化** | ✅ | 只开放接口让 userspace 影响 JIT，不在 kernel 里做复杂分析 |
+| **不做 kernel-only first** | ❌ 不采纳 R4 建议 | 一开始就要考虑 userspace |
+| **不用 lift→compare→emit** | ❌ 放弃 v4 设计 | 太重，且不是正确的抽象层次 |
+| **userspace policy 不只是微架构** | ✅ v6 扩展 | 可更新性、组合、workload 适应、fleet 管理、所有权 |
+| **kernel 改动最小化** | ✅ | 参数化 validator 模板，每个 directive ~50-100 LOC |
+| **最终合并两篇论文** | ✅ 计划中 | 但现在先拆开确保各自质量 |
 
 **与 existing work 的关键差异**：
 
-| 系统 | 优化层 | 能解决 byte-recompose? | 能解决 cmov? |
+| 系统 | 优化层 | 能解决 backend 差距? | 部署可控? |
 |------|--------|:---:|:---:|
 | K2 (SIGCOMM'21) | BPF bytecode | ❌ | ❌ |
 | Merlin (ASPLOS'24) | LLVM IR + BPF | ❌ | ❌ |
 | EPSO (ASE'25) | BPF bytecode | ❌ | ❌ |
 | **Ours** | **Backend lowering** | **✅** | **✅** |
 
+### 1.6 核心设计思路
+
+1. **Kernel 开放最小接口**，允许特权用户态进程对已验证的 BPF 程序附加**微架构相关的 JIT directives**
+2. 这些 directives 本质上是**与目标硬件绑定的后端优化决策**（wide load、cmov、branch layout 等）
+3. **Userspace 做分析决策**（手动工具、llvmbpf 自动化、或 profiler）
+4. **Kernel JIT 只做验证 + 采纳/拒绝**，fail-safe（拒绝时 fallback 到正常 emission）
+
+### 1.7 为什么是微架构相关的 directives（v4 vs v5）
+
+v4 试图用 target-independent IR 做抽象，但这是错误的层次：
+
+| 维度 | Target-independent IR (v4) | 微架构相关 directives (v5+) |
+|------|---------------------------|--------------------------|
+| 抽象层次 | 语义等价变换 | 后端决策指令 |
+| kernel 复杂度 | 需要 lifter + canonicalizer + comparator | 只需验证前置条件 + 采纳/拒绝 |
+| 安全模型 | 语义等价证明（难） | 前置条件检查（简单） |
+| 可扩展性 | 每种优化需新 IR op | 每种优化需新 directive type（~50-100 LOC） |
+| 微架构适配 | 不能 — target-independent | 天然支持 — 由 userspace 决定 |
+
+关键洞察：**优化决策本身就是微架构相关的**。cmov 在某些微架构上比 branch 快，在其他上不一定。Wide load 的收益取决于 cache line 行为。Branch layout 依赖分支预测器设计。
+
+### 1.8 分阶段计划
+
+| 阶段 | 内容 | Kernel 改动 | Userspace |
+|------|------|-----------|-----------|
+| **Phase 1** | 允许特权进程对已验证 BPF 程序附加 directives | 最小：新增 directive 接口 + 验证逻辑 | 手动工具 / 脚本 |
+| **Phase 2** | 基于 llvmbpf 分析自动生成 directives | 不变 | llvmbpf 分析 + directive 生成 |
+| **Phase 3** | 跨架构（x86 + arm64） | 每个 arch 实现 directive consumer | 同一分析，不同 directives |
+
 ---
 
 ## 2. Characterization 证据摘要
 
-来自 `paper-comparison.md` 的关键数据，作为本文档的输入：
+来自 `paper-comparison.md` 的关键数据，作为设计输入：
 
 | 证据 | 数值 | 来源 |
 |------|------|------|
@@ -52,32 +127,57 @@
 | cmov 差距 | 31 vs 0 | JIT dump |
 | Prologue/epilogue 占比 | 18.5% of surplus | JIT dump |
 | Pass ablation | 仅 InstCombinePass + SimplifyCFGPass 有效 | pass ablation |
+| branch_layout 输入敏感性 | predictable 0.225x vs random 0.326x，差 44.6% | 微架构实验 |
+| Real-program code-size | 0.618x geomean (36 unique) | corpus 分析 |
+| Real-program exec-time | 0.514x geomean (14 unique) | raw-packet 实验 |
 
 ---
 
-## 3. 优化目标（按优先级）
+## 3. 优化目标与 Kernel 状态
 
-### Tier 1：论文已识别的 3 个优化
+### 3.1 Tier 1：论文已识别的 3 个主要优化
 
 | # | 优化 | 影响 | v7.0-rc2 状态 | 行动 |
 |---|------|------|:---:|------|
-| 1 | **Byte-load recomposition** | 50.7% surplus, 2.24x penalty | ❌ 未实现 | **最高优先级，需实现** |
-| 2 | **cmov support** | 19.9% branch surplus, 31 vs 0 cmov | ❌ 未实现 | 中优先级 |
-| 3 | **Callee-saved register opt** | 18.5% surplus | ✅ 已实现 | ~~验证了我们的分析~~ |
+| 1 | **Byte-load recomposition** | 50.7% surplus, 2.24x penalty | ❌ 未实现 | **最高优先级，wide_load directive** |
+| 2 | **cmov support** | 19.9% branch surplus, 31 vs 0 cmov | ❌ 未实现 | cmov_select directive |
+| 3 | **Callee-saved register opt** | 18.5% surplus | ✅ 已实现 | 验证了我们的分析 |
 
-### Tier 2：新发现的优化机会
+### 3.2 Tier 2：新发现的优化机会
 
-详见 `docs/tmp/additional_jit_optimizations.md`。
+详见 `docs/tmp/directive-discovery-analysis.md`（含真实 workload 证据）和 `docs/tmp/additional_jit_optimizations.md`。
 
-| 优化 | 当前 kernel | LLVM 做法 | 复杂度 |
-|------|------------|----------|--------|
-| Byte-store composition | 每个 store 独立发射 | 合并多个 byte stores 为 1 个 mov | 80-140 LOC |
-| Rotate/bit-twiddle | 无 rotate 识别 | `rorx`/`rol`/`blsr` | 120-220 LOC |
-| `lea` arithmetic fusion | 严格 two-address ALU | `lea` 做 add/scale/offset | 100-180 LOC |
-| Branch layout | 严格 BPF block 顺序 | fall-through 重排 | 200-350 LOC |
-| Zero-displacement elision | off=0 也发射 disp8 | 更短编码 | 20-40 LOC |
+**v1 候选（按 real-workload 收益/风险排序）**：
 
-### Tier 3：不推荐
+| # | Directive | 触发模式 | 证据 | 框架适配度 |
+|---|-----------|----------|------|:---:|
+| 1 | `bitfield_extract` | `(src >> c) & mask`，packet header field extraction | packet_parse_vlans_tcpopts, packet_rss_hash, Cilium tc | 直线段 ✅ |
+| 2 | `rotate_fusion` | hash/checksum rotate idioms | packet_rss_hash, checksum, bitcount | 直线段 ✅ |
+| 3 | `lea_fusion` | small-const multiply + add | smallmul_strength_reduce, local_call_fanout, parser indexing | 直线段 ✅ |
+| 4 | `bounds_window` | 冗余 bounds check 消除 | bounds_ladder, packet_redundant_bounds, Cilium tc parsers | 单钻石 + retained facts |
+| 5 | `packet_ctx_wide_load` | packet/ctx 连续字段提取 | packet_parse, nat64_kern, bpf_overlay | 需 mem-class 扩展 |
+| 6 | `wide_store` | 相邻 byte stores 合并 | ksnoop stack zeroing, bpf_overlay | 直线段 ✅ |
+
+**Future（需框架扩展）**：
+
+| Directive | 原因 | 备注 |
+|-----------|------|------|
+| `map_lookup_cache` | 重复同 key 查找，需 helper-effect 建模 | corpus 99.8% objects 含 map_lookup |
+| `subprog_inline` | 需跨过程 validator + 代码预算 | corpus 97.2% objects 多函数 |
+
+**明确排除 v1**：const_fold_region, post_verifier_dce, tail_call_specialize（需 mini-compiler 或跨程序语义）
+
+**新 benchmark smoke 结果**（directive-discovery 创建）：
+
+| Benchmark | llvmbpf | kernel | code size L/B vs K/B |
+|-----------|--------:|-------:|:----:|
+| packet_redundant_bounds | 71 ns | 115 ns | 273 / 717 |
+| const_fold_chain | 211 ns | 891 ns | 408 / 602 |
+| map_lookup_repeat | 1.744 µs | 678 ns | 591 / 872 |
+| struct_field_cluster | 98 ns | 76 ns | 339 / 439 |
+| smallmul_strength_reduce | 393 ns | 349 ns | 413 / 586 |
+
+### 3.3 Tier 3：不推荐
 
 - 完整常量传播/DCE — 等于重写为编译器后端
 - 指令调度 — 现代 OoO CPU 已处理
@@ -86,125 +186,72 @@
 
 ---
 
-## 4. 系统设计方向：微架构感知的 Userspace-Guided JIT 优化
+## 4. Directive 分类体系（v6）
 
-> ⚠️ 以下为新设计方向（v5），取代 v4 的 target-independent region IR 方案。
-> v4 设计及 review 历史保留在 `docs/tmp/bpf-jit-advisor-design-v4.md` 和 `docs/tmp/bpf-jit-advisor-review-r{1,2,3,4}.md`。
+### 4.1 Policy-sensitive 家族（需要 userspace policy，撑论文 novelty）
 
-### 4.1 核心思路
+| Directive | Why userspace policy | 已有证据 | 状态 |
+|-----------|---------------------|----------|:---:|
+| **`cmov_select`** | 依赖分支可预测性、依赖链深度、CPU 家族；同一合法站点需要不同 lowering | no-cmov ablation: switch_dispatch +26%, binary_search +12%; 31 vs 0 cmov | **v1 prototype** |
+| **`branch_reorder`** | 依赖 workload 热度、输入分布、code-size budget、前端行为 | branch_layout: predictable vs random 差 44.6% | **应加入 v1** |
+| **`subprog_inline`** | 依赖热度、code-size budget、I-cache 压力、多函数结构 | corpus 97.2% multi-function，local_call_fanout ~0.72x | future，但极有说服力 |
 
-**不做 kernel-only peephole（那只是 patch），也不做 target-independent IR lift（太重且抽象层次错误）。**
+### 4.2 Substrate 家族（主要是 kernel peephole，但复用框架基础设施）
 
-正确的设计是：
+| Directive | 诚实评估 | 状态 |
+|-----------|----------|:---:|
+| `wide_load` | 高价值 baseline recovery + substrate exercise；profitability 弱依赖 policy | **v1 prototype** |
+| `wide_store` | code size 改善，workload 敏感性低 | v1 候选 |
+| `rotate_fusion` | 局部 idiom 识别，BMI2 feature 依赖 | **v1 候选**（packet_rss_hash 等证据） |
+| `lea_fusion` | 经典 backend combine，有 smallmul 和 parser indexing 证据 | **v1 候选** |
+| `bitfield_extract` | packet header field extraction，Cilium tc 高频 | **v1 候选** |
+| `bounds_window` | 冗余 bounds check，需 retained entry facts | v1 stretch goal |
+| `packet_ctx_wide_load` | wide_load 的 packet/ctx 扩展 | post-v1 扩展 |
 
-1. **Kernel 开放最小接口**，允许特权用户态进程对已验证的 BPF 程序附加**微架构相关的 JIT 指令**（directives）
-2. 这些 directives 本质上是**与目标硬件绑定的后端优化决策**，例如：
-   - "这组连续 byte load + shift + or 可以合并为 wide load"（依赖：对齐、little-endian）
-   - "这个 branch diamond 可以用 cmov"（依赖：目标 CPU 的 cmov 性能特征）
-   - "这段基本块应该按此顺序排列"（依赖：分支预测器行为）
-3. **Userspace 做分析决策**（可以是手动工具、llvmbpf 自动化、或其他 profiler）
-4. **Kernel JIT 只做验证 + 采纳/拒绝**，fail-safe（拒绝时 fallback 到正常 emission）
+### 4.3 不应做的方向
 
-### 4.2 为什么必须是微架构相关的
+| 方向 | 原因 |
+|------|------|
+| 寄存器分配 hints | 太底层，跨 JIT 版本不稳定 |
+| 指令调度 hints | 难验证，收益证据不足 |
+| 任意 native code 注入 | 破坏安全故事 |
+| Target-independent replacement IR | 回到 v4 问题 |
 
-v4 试图用 target-independent IR 做抽象，但这是错误的层次：
+---
 
-| 维度 | Target-independent IR (v4) | 微架构相关 directives (v5) |
-|------|---------------------------|--------------------------|
-| 抽象层次 | 语义等价变换 | 后端决策指令 |
-| kernel 复杂度 | 需要 lifter + canonicalizer + comparator | 只需验证前置条件 + 采纳/拒绝 |
-| 安全模型 | 语义等价证明（难） | 前置条件检查（简单） |
-| 可扩展性 | 每种优化需新 IR op | 每种优化需新 directive type |
-| 微架构适配 | 不能 — target-independent | 天然支持 — 由 userspace 决定 |
+## 5. 系统架构
 
-关键洞察：**优化决策本身就是微架构相关的**。cmov 在某些微架构上比 branch 快，在其他上不一定。Wide load 的收益取决于 cache line 行为。Branch layout 依赖分支预测器设计。把这些决策抽象为 target-independent IR 是在丢掉最关键的信息。
+### 5.1 Control Plane vs Data Plane
 
-### 4.3 分阶段计划
-
-| 阶段 | 内容 | Kernel 改动 | Userspace |
-|------|------|-----------|-----------|
-| **Phase 1** | 允许特权进程对已验证 BPF 程序附加 directives | 最小：新增 directive 接口 + 验证逻辑 | 手动工具 / 脚本 |
-| **Phase 2** | 基于 llvmbpf 分析自动生成 directives | 不变 | llvmbpf 分析 + directive 生成 |
-| **Phase 3** | 跨架构（x86 + arm64） | 每个 arch 实现 directive consumer | 同一分析，不同 directives |
-
-### 4.4 与 v4 的关键区别
-
-- **v4**：userspace 提供 target-independent replacement IR → kernel re-lift + compare + lower
-- **v5**：userspace 提供 microarch-specific directives → kernel 验证前置条件 + 采纳/拒绝
-- **v5 更简单**：不需要 kernel 里的 IR lifter/canonicalizer
-- **v5 更精确**：优化决策直接绑定到硬件特征
-- **v5 从一开始就有 userspace**：不是 kernel-only first
-
-### 4.5 当前状态（2026-03-08）
-
-**v5r2 设计已通过 review，可以开始实现。**
-
-设计迭代历史：
-- v4: target-independent IR + lift→compare→emit → ❌ 太重
-- v5: microarch-aware directives → review 5-7/10，微架构故事太弱
-- **v5r2**: 聚焦 wide_load + cmov_select，legality/profitability 分离 → review 7-9/10，**implementation-ready**
-
-核心文档：
-- 设计：`docs/tmp/bpf-jit-advisor-v5r2.md`
-- Review：`docs/tmp/bpf-jit-advisor-v5r2-review.md`
-
-**最大风险**：如果 `cmov_select` 无法展示 µarch-dependent 的优势（同一程序在不同 CPU/workload 下需要不同决策），reviewer 会说"直接加 peephole 就行"。
-
-**决策门**：实现 `cmov_select` 后，如果无法 beat fixed kernel heuristics，退回 kernel-local JIT optimization 方向。
-
-### 4.6 设计约束补充（2026-03-08 讨论）
-
-#### A. Directive 可扩展性：减少 kernel 改动
-
-**问题**：当前设计每加一种 directive 都需要修改 kernel（新 validator + emitter）。
-
-**目标**：尽可能让框架通用，使新增 directive 的 kernel 改动量最小化。
-
-**方案：参数化 validator 模板**
-
-```c
-struct jit_directive_template {
-    u8 kind;
-    // 通用前置条件（多种 directive 共享）
-    bool requires_aligned_access;
-    bool requires_no_side_effects;
-    bool requires_single_entry_exit;
-    u8 min_insn_count, max_insn_count;
-    // kind-specific（小函数，~50 LOC per directive）
-    bool (*validate)(struct bpf_insn *insns, int count, ...);
-    int (*emit)(struct jit_ctx *ctx, ...);
-};
+```
+┌───────────────────────────────────────────┐
+│  Userspace Backend Policy Plane           │
+│  ┌─────────────────────────────────────┐  │
+│  │ Candidate discovery (pattern match) │  │
+│  │ Site feature extraction             │  │
+│  │ CPU + workload policy DB            │  │
+│  │ Fleet policy / A/B rollout          │  │
+│  │ Code-size budget management         │  │
+│  │ Directive blob generation           │  │
+│  └─────────────────────────────────────┘  │
+└──────────────────┬────────────────────────┘
+                   │ BPF_PROG_LOAD(jit_directives_fd)
+┌──────────────────▼────────────────────────┐
+│  Kernel Legality Plane                    │
+│  ┌─────────────────────────────────────┐  │
+│  │ Digest binding + CPU contract       │  │
+│  │ Verifier (preserves orig_idx)       │  │
+│  │ Retained mem facts                  │  │
+│  │ Post-verifier remap                 │  │
+│  │ Shared precondition checks          │  │
+│  │ Kind-specific validators            │  │
+│  │ Arch-specific emitters              │  │
+│  │ Fail-closed fallback + logging      │  │
+│  └─────────────────────────────────────┘  │
+└───────────────────────────────────────────┘
 ```
 
-共性检查（对齐、无副作用、单入单出）共享实现，每种 directive 只需 ~50-100 LOC 的 validate + emit 函数。完全不改 kernel 做新 directive 不可能（那就回到了 v4 的 IR 等价问题），但可以把增量降到很小。
-
-| 层次 | 加新 directive 是否需要改 | 说明 |
-|------|:-:|------|
-| Transport / blob 格式 | ❌ | 通用，directive kind 是数字 ID |
-| Remap / orig_idx | ❌ | 通用 |
-| CPU gating | ❌ | 通用 feature 检查 |
-| Fail-closed + logging | ❌ | 通用 |
-| **Validator** | **✅ 小改** | 50-100 LOC，使用共享模板 |
-| **Emitter** | **✅ 小改** | 50-100 LOC，arch-specific |
-
-#### B. Directive 覆盖面：需要更多测试发现更多优化原语
-
-当前只深入分析了 byte-recompose 和 cmov（2 种），但 characterization 已提示更多候选：
-
-| 潜在 directive | 来源 | 预计影响 | µarch-dependent? |
-|---------------|------|---------|:-:|
-| `wide_load` | 50.7% surplus | 高 | 弱 |
-| `cmov_select` | 19.9% surplus | 中 | **强** |
-| `wide_store` | byte-store composition | 中 | 弱 |
-| `rotate_fusion` | rorx/rol/blsr | 低-中 | 中（BMI2） |
-| `lea_fusion` | add/scale/offset → lea | 低 | 弱 |
-| `branch_hint` | 分支布局 | 中 | **强** |
-
-**行动**：对 40 个 benchmark（含新增 10 个）做全面 JIT dump 对比分析，发现更多 directive 候选。同时对 arm64 做初步 JIT dump 分析。
-
-#### C. 跨架构设计
-
-框架必须是 **arch-neutral** 的，即使初始原型只在 x86 上实现。
+### 5.2 Arch-neutral / Arch-specific 分离
 
 ```
 ┌─────────────────────────────┐
@@ -212,9 +259,10 @@ struct jit_directive_template {
 │  - Directive blob 格式       │
 │  - BPF_PROG_LOAD transport  │
 │  - orig_idx remap           │
-│  - CPU gating 机制           │
+│  - CPU gating               │
 │  - Retained verifier facts  │
-│  - Fail-closed 框架         │
+│  - Fail-closed + logging    │
+│  - Kind-specific validators │
 └──────────┬──────────────────┘
            │
     ┌──────┴──────┐
@@ -226,39 +274,89 @@ struct jit_directive_template {
 │  mov  │   │  ldr    │
 │ cmov: │   │ cmov:   │
 │ cmovcc│   │  csel   │
+│ hfall:│   │ hfall:  │
+│ jcc   │   │ b.cond  │
 └───────┘   └─────────┘
 ```
 
-同一个 directive（如 `cmov_select`）：validator 逻辑相同（检查 diamond 结构），emitter 不同（x86 cmovcc / arm64 csel）。
+### 5.3 参数化 Validator 模板
 
-**论文价值**：正因为 profitability 决策在 userspace，跨架构时只需换 policy database。如果把决策硬编码在 kernel JIT 里，每个 arch 都要独立维护启发式规则。
+```c
+struct bpf_jit_dir_template {
+    enum bpf_jit_dir_kind kind;
+    bool requires_aligned_access;
+    bool requires_no_side_effects;
+    bool requires_single_entry_exit;
+    u8 min_insn_count, max_insn_count;
+    bool (*validate)(const struct bpf_prog *prog,
+                     const struct bpf_jit_dir_rec *rec,
+                     const struct bpf_jit_site *site,
+                     struct bpf_jit_plan *plan);
+};
+```
 
-**初步计划**：
-- x86：完整实现 + 评估
-- arm64：JIT dump 分析 + code-size 对比（GitHub Actions ARM runner），框架设计展示跨架构能力
-- arm64 完整实现作为 future work（但设计文档必须说明 arm64 emitter 的映射）
+| 层次 | 加新 directive 是否需要改 | 说明 |
+|------|:-:|------|
+| Transport / blob 格式 | ❌ | 通用 |
+| Remap / orig_idx | ❌ | 通用 |
+| CPU gating | ❌ | 通用 |
+| Fail-closed + logging | ❌ | 通用 |
+| **Validator** | **✅ 小改** | ~50-100 LOC |
+| **Emitter** | **✅ 小改** | ~50-100 LOC per arch |
+
+### 5.4 Mandatory Falsification Condition
+
+> 如果 fixed kernel policies 在所有测试硬件和 workload 上恢复相同收益，正确结论是"用 kernel peepholes"，而不是"发布 userspace-guided interface"。
 
 ---
 
-## 5. 消融实验证据
+## 6. 评估计划
 
-> 这些实验为设计提供定量输入，不直接产出系统贡献。
+### 6.1 Required Baselines
 
-### 5.1 已完成
+1. Stock kernel JIT
+2. `kernel-wide-load` peephole
+3. `kernel-fixed-cmov` peephole（固定策略）
+4. `kernel-fixed-layout`（固定 branch layout 策略）
+5. `advisor-static`（CPU DB only）
+6. `advisor-profiled`（CPU DB + workload profile）
+7. llvmbpf 作为上界参考
+
+### 6.2 Required Questions
+
+1. Userspace policy 是否真的在不同硬件/workload/程序间产生差异？
+2. 这些差异是否 outperform fixed kernel heuristics？
+3. Legality substrate 在真实程序上的 directive 接受率？
+4. 系统是否泛化到多个 directive 家族？
+5. Operators 能否在类似 production 的部署中安全管理 policy？
+
+### 6.3 Required Workloads
+
+**Mechanism isolation microbenchmarks**：load_byte_recompose, binary_search, switch_dispatch, branch_layout
+
+**Policy-sensitivity benchmarks**：packet_rss_hash (~0.47x), local_call_fanout (~0.72x), branch_fanout_32, mega_basic_block_2048
+
+**Real programs**：162 paired instances (36 unique)，per-program candidate counts + acceptance rates
+
+**End-to-end deployment**：至少一个（Cilium datapath / Katran XDP / 其他 production-like）
+
+### 6.4 Required Hardware Diversity
+
+1. 一个 modern wide OoO x86 core
+2. 一个 smaller-core / Atom-like x86
+3. 理想情况一个 arm64 系统
+
+---
+
+## 7. 消融实验证据
+
+### 7.1 已完成
 
 | 消融实验 | 方法 | 结果 |
 |----------|------|------|
-| 禁用 cmov | LLVM subtarget `-cmov` | switch_dispatch +26%，binary_search +12%；部分 benchmark 反而变快 |
+| 禁用 cmov | LLVM subtarget `-cmov` | switch_dispatch +26%，binary_search +12%；部分反而变快 |
 
-### 5.2 待做
-
-| 消融实验 | 方法 | 状态 |
-|----------|------|:---:|
-| 模拟 byte-recompose | 在 llvmbpf 中 wide load → byte-load 序列 | ❌ |
-| 强制 fixed callee-saved | 总是保存 rbp+rbx+r13 | ❌ |
-| 禁用 rotate/blsr | 禁用 BMI/BMI2 features | ❌ |
-
-### 5.3 cmov 消融详细数据
+**cmov 消融详细数据**：
 
 | Benchmark | Normal | No-cmov | Delta |
 |-----------|-------:|--------:|------:|
@@ -267,87 +365,163 @@ struct jit_directive_template {
 | bounds_ladder | 83 ns | 68 ns | -18.1% |
 | large_mixed_500 | 415 ns | 316 ns | -23.9% |
 
-结论：cmov 的收益**依赖于微架构和 workload**——这正是为什么优化决策必须是微架构相关的。
+结论：cmov 收益**依赖于微架构和 workload**。
+
+### 7.2 待做
+
+| 消融实验 | 方法 | 状态 |
+|----------|------|:---:|
+| 模拟 byte-recompose | llvmbpf 中 wide load → byte-load 序列 | ❌ |
+| 强制 fixed callee-saved | 总是保存 rbp+rbx+r13 | ❌ |
+| 禁用 rotate/blsr | 禁用 BMI/BMI2 features | ❌ |
 
 ---
 
-## 6. 已完成实验
+## 8. 已完成实验
 
 | 实验 | 日期 | 结果 |
 |------|------|------|
-| VM 环境搭建 | 03-07 | QEMU/KVM + virtme-ng，kernel 7.0-rc2 可启动 |
-| VM baseline（kernel only） | 03-07 | 31 benchmark，7.0-rc2 vs host 6.15: geomean **0.881x**（7.0-rc2 更快） |
-| Kernel 7.0-rc2 JIT 源码分析 | 03-08 | callee-saved opt ✅ 已实现 (`detect_reg_usage`)；byte-recompose ❌；cmov ❌（仅 1 处 BPF_ZEXT edge case） |
-| no-cmov 消融（路径 B） | 03-08 | switch_dispatch +26%，binary_search +12%；混合结果 |
-| 10 个新 benchmark | 03-08 | authoritative 数据，geomean 0.835x（8/10 llvmbpf wins） |
-| 微架构实验 | 03-08 | 频率扫描（3 benchmarks material）、输入分布、PMU 双 runtime |
+| VM 环境搭建 | 03-07 | QEMU/KVM + virtme-ng，kernel 7.0-rc2 |
+| VM baseline（kernel only） | 03-07 | geomean **0.881x**（7.0-rc2 更快） |
+| Kernel 7.0-rc2 JIT 源码分析 | 03-08 | callee-saved ✅；byte-recompose ❌；cmov ❌ |
+| no-cmov 消融 | 03-08 | 混合结果，见上 |
+| 10 个新 benchmark | 03-08 | geomean 0.835x（8/10 llvmbpf wins） |
+| 微架构实验 | 03-08 | 频率扫描、输入分布、PMU |
+| GitHub Actions CI | 03-08 | ARM64 + x86 workflow 设置完成 |
+| v6 设计完善 | 03-08 | OSDI/SOSP novelty 分析，directive 分类体系 |
 
-### 6.1 VM vs Host 关键发现
+### 8.1 VM vs Host 关键发现
 
 7.0-rc2 kernel JIT 比 6.15 快约 12%（geomean 0.881x），部分归因于 callee-saved 优化。
+完整数据见 `micro/results/vm_vs_host_comparison.md`。
 
-| Benchmark | Host 6.15 | VM 7.0-rc2 | 7.0-rc2 / 6.15 |
-|-----------|----------:|----------:|:---:|
-| simple | 14 ns | 7 ns | 0.50x |
-| binary_search | 442 ns | 380 ns | 0.86x |
-| large_mixed_500 | 512 ns | 409 ns | 0.80x |
+### 8.2 微架构实验摘要
 
-Note: `simple` 低于 ktime 分辨率，数据仅作参考。完整数据见 `micro/results/vm_vs_host_comparison.md`。
-
-### 6.2 微架构实验摘要
-
-完整数据：`tmp/microarch_experiments.md`
-
-**CPU 频率敏感性**：`binary_search`（31.7%）、`load_byte_recompose`（33.2%）、`switch_dispatch`（17.3%）的 L/K ratio 随频率有 material 变化。llvmbpf 在高频率下相对优势增大。
-
-**输入分布**：`branch_layout` 对输入分布敏感（predictable 0.225x vs random 0.326x）。
-
-**PMU**：llvmbpf IPC 普遍高于 kernel（binary_search 6.86 vs 2.41），与更紧凑的指令流一致。
+- **CPU 频率敏感性**：binary_search（31.7%）、load_byte_recompose（33.2%）、switch_dispatch（17.3%）
+- **输入分布**：branch_layout predictable 0.225x vs random 0.326x
+- **PMU**：llvmbpf IPC 普遍高于 kernel（binary_search 6.86 vs 2.41）
 
 ---
 
-## 7. TODO（按优先级排序）
+## 9. TODO（按优先级排序）
 
 ### ✅ 已完成
 
+| # | 任务 | 说明 |
+|---|------|------|
+| 1 | v4 → v5 → v5r2 → v6 设计迭代 | 4 轮设计 + 3 轮 review |
+| 2 | Directive 分类体系 | 3 个 policy-sensitive + 4 个 substrate |
+| 3 | OSDI/SOSP novelty 分析 | 5 个 why-userspace 理由，go/no-go 条件 |
+| 4 | CI 工作流 | GitHub Actions ARM64 + x86（手动触发，修复中） |
+| 5 | `bpf_jit_comp.c` 详细分析 | 1474 行分析文档，见 `docs/tmp/bpf-jit-comp-analysis.md` |
+| 6 | JIT pass 实现细节 | x86 编码级别分析，见 `docs/tmp/jit-pass-implementation-detail.md` |
+| 7 | v6 design review | 机制 gap 分析，见 `docs/tmp/bpf-jit-advisor-v6-review.md` |
+
+### ⚠️ 关键设计决策（待定）
+
+**JIT-level vs Verifier-level 实现方案**
+
+分析发现当前 JIT 线性发射模型（`do_jit()` + `addrs[]`）只能做局部 peephole collapse。这有一个根本矛盾：局部 peephole 不需要 userspace 框架（kernel 直接加就行）。
+
+**分析结论：Hybrid 方向（Path B 主导 + JIT-level 辅助）**
+
+`docs/tmp/verifier-rewrite-approach.md` 分析完成（54KB，1468 行），结论明确：
+
+| 路径 | 思路 | 优势 | 劣势 | **评估结论** |
+|------|------|------|------|:---:|
+| **A: JIT-level** | directive 指导 JIT emission | 实现清晰，wide_load/cmov_select 可行 | 只能做局部 peephole | **单独不够** |
+| **B: Verifier-level** | directive 指导 verifier 做 BPF 指令重写 | 跨架构，支持非局部变换，verifier 已有 CFG/类型 | 安全关键路径，需新基础设施 | **方向正确** |
+| **✅ Hybrid** | 结构性变换在 verifier，encoding 在 JIT | 两层各做擅长的事 | 实现分两层 | **推荐方案** |
+
+**Hybrid 分层**：
+
+| 层 | 负责 | 具体 directives |
+|----|------|----------------|
+| **Verifier rewrite** | 结构性 BPF 程序变换（跨架构） | `byte_load_recompose`、`branch_reorder`、future `subprog_inline` |
+| **JIT lowering** | target-specific 编码选择 | `cmovcc/csel` lowering、`lea` fusion、`rotate/BMI2`、encoding choices |
+| **Hybrid** | verifier 识别 + JIT lowering | `cmov_select`（verifier 识别 diamond → 内部 select 抽象 → JIT 选择 cmovcc/csel/branch） |
+
+**关键发现**（verifier-rewrite 分析）：
+1. verifier 已有 **31 个 `bpf_patch_insn_data()` 调用点**，已经是 BPF late-lowering pass
+2. `optimize_bpf_loop()` 已经是非局部结构性变换的先例
+3. `branch_reorder` 是 Path B 最强 case——BPF 层面的 CFG permutation，JIT 无法做
+4. Pipeline placement：**after `do_check()`, before `convert_ctx_accesses()`**
+5. 需要新基础设施：block-permutation helper、optional `BPF_SELECT` 内部 opcode、better provenance
+
+**OSDI/SOSP readiness**（`docs/tmp/osdi-readiness-review.md`）：
+- 当前评分：**4/10**
+- 最大问题：framing 强于实际 prototype；kernel-fixed baselines 未测试；缺端到端部署
+- 到 8/10 需要：settle path、实现多 directive、run kernel-fixed baselines、一个真实部署评估
+- `wide_load` 单独看来像 kernel peephole；`branch_reorder` 在 verifier 层才有 novelty
+
+### 🔴 P0 — 当前 sprint：设计定型 + 开始实现
+
 | # | 任务 | 状态 | 说明 |
 |---|------|:---:|------|
-| 1 | v5 架构设计文档 | ✅ | v5r2 implementation-ready，见 `docs/tmp/bpf-jit-advisor-v5r2.md` |
-| 2 | Directive 类型清单 | ✅ | 6 种 directive（wide_load, cmov_select, wide_store, rotate_fusion, lea_fusion, branch_hint） |
-| 3 | Review 通过 | ✅ | 3 轮 review，最终 7-9/10，见 `docs/tmp/bpf-jit-advisor-v5r2-review-r2.md` |
-| 4 | CI 工作流 | ✅ | GitHub Actions ARM64 + x86 benchmark（手动触发），自动 commit 结果 |
+| 8 | **Verifier-rewrite 方案分析** | ✅ 完成 | Hybrid 推荐：verifier 做结构变换，JIT 做 encoding。见 `docs/tmp/verifier-rewrite-approach.md` |
+| 9 | **新 directive 发现 + test cases** | ✅ 完成 | 5 个新 benchmark + 11 候选排名，见 `docs/tmp/directive-discovery-analysis.md` |
+| 10 | **Interface 层详细设计** | ✅ 完成 | syscall/blob/CPU contract/安全/部署全覆盖，见 `docs/tmp/interface-design-detail.md` |
+| 11 | **确定 JIT-level vs Verifier-level** | ✅ **Hybrid** | 分析结论：verifier 做结构变换 + JIT 做 encoding |
+| 12 | **v7 设计文档** | ❌ 待写 | 综合 Hybrid 方案 + reviews 写最终设计 |
+| 13 | **CI 修复** | ✅ 完成 | commit `2e008ac` 加了 libbpf-dev，x86 CI 重触发 |
+| 14-r | **Interface review** | ✅ 完成 | 6/10，主要问题：假设简化的 kernel pipeline、scope 与 v6 不一致、缺 multi-subprog。见 `docs/tmp/interface-design-review.md` |
+| 15-r | **Cross-doc review** | ✅ 完成 | 每个 directive 的 blob/JIT/证据交叉验证 + Hybrid 分层建议。见 `docs/tmp/cross-document-review.md` |
+| 16-r | **OSDI readiness review** | ✅ 完成 | 4/10，见 `docs/tmp/osdi-readiness-review.md` |
 
-### 🔴 P0 — 当前 sprint：原型实现
+### 🟡 P1 — 原型实现（Critical Path from cross-doc review）
+
+| # | 任务 | 说明 | 层 |
+|---|------|------|:---:|
+| 14 | **orig_idx 传播修复** | 字段已存在，需修复 `adjust_insn_aux_data()` 传播。**所有 remap 的前置条件** | kernel |
+| 15 | **Transport + blob parser + fail-closed** | interface-design-detail.md 设计可复用（transport skeleton 在 Hybrid 下存活） | kernel |
+| 16 | **Remap / validation 准备阶段** | post-rewrite remap + stage-aware matcher | kernel |
+| 17 | **wide_load (= byte_load_recompose)** | 第一个 directive。**JIT-level v1 或 verifier-level 均可** | JIT 或 verifier |
+| 18 | **narrow cmov_select** | 冻结 pure-assignment contract（不含 v6 expression-arm） | hybrid |
+| 19 | **广度 directive × 1-2** | `wide_store` 最安全；`lea_fusion` / `rotate_fusion` 也可 | JIT |
+| 20 | **第一个 verifier-rewrite directive** | `branch_reorder`（一钻石 BPF block permutation）或 `bounds_window` | verifier |
+| 21 | **kernel-fixed baselines** | fixed-cmov + fixed-layout 作为对比。**OSDI 必须** | eval |
+| 22 | **消融补全** | byte-recompose / callee-saved / BMI | eval |
+
+**Cross-doc review 关键发现**：
+- constant blinding 在 Path B 下冲突大幅减小（verifier 先 rewrite BPF，blinding 跑在已 rewrite 的程序上）
+- interface 需要增加 **stage 维度**（`VERIFIER_REWRITE` vs `JIT_LOWERING`）和 stage-aware telemetry
+- v6 的 cmov_select 表达式 arm 不等于 v5r2 的 pure-assignment arm——必须冻结 narrow contract
+- `struct_field_cluster` 和 `smallmul_strength_reduce` smoke 数据中 kernel 更快——只是 pattern 证据，不是 backend gap 证据
+
+### 🟢 P2 — 自动化 + 评估 + 合并
 
 | # | 任务 | 说明 |
 |---|------|------|
-| 5 | **Transport + blob parser** | directive 传输格式 + kernel 解析 |
-| 6 | **orig_idx 传播 + remap** | verifier 后指令映射 |
-| 7 | **Retained mem facts** | verifier 保留的内存对齐/大小事实 |
-| 8 | **wide_load 实现** | 第一个 directive：byte-load 合并为 wide load |
-| 9 | **kernel-fixed-cmov baseline** | 内核固定 cmov 策略作为 baseline |
-| 10 | **cmov_select 实现** | 微架构感知 cmov 决策（novelty case） |
-| 11 | **消融补全** | byte-recompose / callee-saved / BMI 消融数据 |
-
-### 🟡 P1 — 自动化 + 评估
-
-| # | 任务 | 说明 |
-|---|------|------|
-| 12 | 自动 directive 生成器 | llvmbpf 分析 → 自动产出 directives |
-| 13 | Policy 实验 | 同一程序在不同 CPU/workload 下的 policy 差异 |
-| 14 | VM 验证 | 31+ benchmark before/after，定量展示 directive 效果 |
-
-### 🟢 P2 — 跨架构
-
-| # | 任务 | 说明 |
-|---|------|------|
-| 15 | arm64 JIT dump 分析 | GitHub Actions ARM runner 拿到 arm64 数据 |
-| 16 | arm64 directive 消费 | arm64 emitter（csel 等） |
-| 17 | 端到端评估 | 真实程序 directive 效果 |
+| 22 | 自动 directive 生成器 | llvmbpf 分析 → 自动产出 directives |
+| 23 | Policy 实验 | 同一程序在不同 CPU/workload 下的 policy 差异 |
+| 24 | 真实程序评估 | 36 unique real-program directive census |
+| 25 | 端到端部署评估 | Cilium/Katran 级别的 deployment evidence |
+| 26 | arm64 分析 | CI 数据 + JIT dump + acceptance census |
+| 27 | 两篇论文合并 | characterization + optimization 完整故事 |
 
 ---
 
-## 8. VM 实验矩阵
+## 10. 设计迭代历史
+
+| 版本 | 核心思路 | 结果 | 文档 |
+|------|----------|------|------|
+| v4 | Target-independent IR + lift→compare→emit | ❌ 太重，IR freeze 是 blocker | `docs/tmp/bpf-jit-advisor-design-v4.md` |
+| v5 | Microarch-aware directives | review 5-7/10，µarch 故事太弱 | `docs/tmp/bpf-jit-advisor-v5.md` |
+| v5r2 | 聚焦 wide_load + cmov_select，legality/profitability 分离 | review 7-9/10，JIT-level mechanism ready | `docs/tmp/bpf-jit-advisor-v5r2.md` |
+| v6 | Backend policy plane framing，expanded directive taxonomy | review 发现 JIT 线性模型限制 | `docs/tmp/bpf-jit-advisor-v6.md` |
+| **v7** | **Hybrid：verifier structural rewrite + JIT target-specific lowering** | **设计定型，待写文档** | **待写，综合 verifier-rewrite + interface-design + reviews** |
+
+### 10.1 关键发现（v6 review + JIT 分析后）
+
+1. **`orig_idx` 已存在**于 `insn_aux_data` 中，只需修复 rewrite expansion 传播
+2. **x86 JIT 不是两 pass**——是 convergence loop + final image pass，directive 必须跨 pass 确定性一致
+3. **线性 `do_jit()` + `addrs[]` 只能做局部 peephole**——wide_load/cmov_select 可行，branch_reorder/subprog_inline 不行
+4. **Constant blinding 是独立的第二次重写**——v1 必须显式处理（当前设计直接 drop directive set）
+5. **Path B（verifier-level rewrite）可能更有前景**——verifier 已有 CFG 和 `bpf_patch_insn_data()`，重写后 JIT 照常线性发射，自动跨架构
+
+---
+
+## 11. VM 实验矩阵
 
 | 配置 | Kernel | 状态 | 结果 |
 |------|--------|:---:|------|
@@ -356,11 +530,12 @@ Note: `simple` 低于 ktime 分辨率，数据仅作参考。完整数据见 `mi
 | baseline-vm (L/K) | 7.0-rc2 llvmbpf + kernel | ✅ | L/K ~0.850x |
 | **opt1-vm** | **7.0-rc2 + byte-recompose** | ❌ | 待实现 |
 | opt2-vm | 7.0-rc2 + cmov | ❌ | 待实现 |
-| opt1+2-vm | 7.0-rc2 + byte-recompose + cmov | ❌ | 待实现 |
+| opt3-vm | 7.0-rc2 + branch_reorder | ❌ | 待实现 |
+| opt1+2+3-vm | 7.0-rc2 + all directives | ❌ | 待实现 |
 
 ---
 
-## 9. 开发环境
+## 12. 开发环境
 
 ```
 VM:        QEMU/KVM + virtme-ng
@@ -368,25 +543,31 @@ Kernel:    vendor/linux (v7.0-rc2) as submodule
 JIT file:  arch/x86/net/bpf_jit_comp.c
 Benchmark: micro/run_micro.py + micro_exec via BPF_PROG_TEST_RUN
 Baseline:  host 6.15.11 authoritative + VM 7.0-rc2 unmodified
+CI:        GitHub Actions ARM64 + x86 (manual trigger)
 ```
 
 ---
 
-## 10. 参考文档
+## 13. 参考文档
 
 | 文档 | 内容 |
 |------|------|
-| `docs/tmp/bpf-jit-advisor-v5r2.md` | **BPF-JIT Advisor v5r2 设计（implementation-ready）** |
+| **`docs/tmp/bpf-jit-advisor-v6.md`** | **当前最新设计（v6，OSDI/SOSP framing）** |
+| **`docs/tmp/interface-design-detail.md`** | **接口详细设计：syscall、blob 格式、CPU contract、安全分析、部署场景** |
+| **`docs/tmp/directive-discovery-analysis.md`** | **Directive 发现分析：11 候选排名、5 新 benchmark、真实 workload 证据** |
+| **`docs/tmp/verifier-rewrite-approach.md`** | **Path B 分析：verifier rewrite 方案、31 处 patch 清单、Hybrid 推荐** |
+| **`docs/tmp/osdi-readiness-review.md`** | **OSDI/SOSP 准备度评估：4/10，关键 gaps 和 "why not just" 回答** |
+| **`docs/tmp/interface-design-review.md`** | **Interface review：6/10，pipeline 简化、scope 不一致、缺 multi-subprog** |
+| **`docs/tmp/cross-document-review.md`** | **跨文档交叉验证：每个 directive 的 blob/JIT/证据兼容性 + Hybrid 实现建议** |
+| `docs/tmp/bpf-jit-comp-analysis.md` | JIT 源码详细分析（1474 行） |
+| `docs/tmp/jit-pass-implementation-detail.md` | JIT pass x86 编码级别实现细节 |
+| `docs/tmp/bpf-jit-advisor-v6-review.md` | v6 review（发现 JIT 线性模型限制） |
+| `docs/tmp/bpf-jit-advisor-v5r2.md` | v5r2 设计（implementation-ready 机制细节） |
 | `docs/tmp/bpf-jit-advisor-v5r2-review-r2.md` | v5r2 最终 review（7-9/10） |
-| `docs/tmp/bpf-jit-advisor-v5r2-review.md` | v5r2 第二轮 review |
-| `docs/tmp/bpf-jit-advisor-design-v4.md` | BPF-JIT Advisor v4 设计（已废弃） |
-| `docs/tmp/bpf-jit-advisor-review-r4.md` | v4 review（IR freeze 是 blocker） |
-| `docs/tmp/vm_vs_host_detailed_analysis.md` | VM 7.0-rc2 vs Host 6.15 详细对比 |
-| `docs/tmp/additional_jit_optimizations.md` | Tier 2 JIT 优化机会分析 |
-| `docs/tmp/benchmark_coverage_analysis.md` | Benchmark 覆盖度缺口分析 |
-| `docs/tmp/bpf_roundtrip_feasibility.md` | BPF→IR→BPF round-trip 可行性研究 |
+| `docs/tmp/bpf-jit-advisor-design-v4.md` | v4 设计（已废弃） |
+| `docs/tmp/vm_vs_host_detailed_analysis.md` | VM 7.0-rc2 vs Host 6.15 |
+| `docs/tmp/additional_jit_optimizations.md` | Tier 2 优化机会（初期分析） |
 | `docs/tmp/microarch_experiments.md` | 微架构实验结果 |
 | `micro/results/vm_vs_host_comparison.md` | VM vs Host 简要对比 |
-| `micro/results/new_benchmarks_authoritative_summary.md` | 10 个新 benchmark 结果 |
-| `.github/workflows/arm64-benchmark.yml` | ARM64 CI benchmark（手动触发） |
-| `.github/workflows/x86-benchmark.yml` | x86 CI benchmark（手动触发） |
+| `.github/workflows/arm64-benchmark.yml` | ARM64 CI（手动触发） |
+| `.github/workflows/x86-benchmark.yml` | x86 CI（手动触发） |

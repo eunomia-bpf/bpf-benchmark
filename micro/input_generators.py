@@ -566,6 +566,49 @@ def generate_bounds_check_heavy(output: Path) -> dict[str, int]:
     return {"record_count": record_count, "record_size": record_size}
 
 
+def generate_packet_redundant_bounds(output: Path) -> dict[str, int]:
+    record_count = 32
+    record_size = 24
+    state = 0x1020_3040_5060_7080
+
+    blob = bytearray(struct.pack("<II", record_count, record_size))
+    for index in range(record_count):
+        record = bytearray(record_size)
+        state = _lcg(state)
+        record[0] = (state ^ index) & 0x03
+        state = _lcg(state)
+        record[1] = ((state >> 16) ^ (index * 13)) & 0xFF
+        record[2] = ((state >> 24) ^ index) & 0xFF
+        record[3] = ((state >> 32) ^ (index * 7)) & 0xFF
+        for offset in (4, 8, 12, 16):
+            state = _lcg(state)
+            value = ((state >> 20) ^ ((index + offset) * 0x9E37_79B9)) & 0xFFFFFFFF
+            record[offset : offset + 4] = struct.pack("<I", value)
+        state = _lcg(state)
+        record[20:22] = struct.pack("<H", ((state >> 17) ^ (index * 23)) & 0xFFFF)
+        state = _lcg(state)
+        record[22:24] = struct.pack("<H", ((state >> 9) ^ (index * 41)) & 0xFFFF)
+        blob.extend(record)
+
+    output.write_bytes(blob)
+    return {"record_count": record_count, "record_size": record_size}
+
+
+def generate_const_fold_chain(output: Path) -> dict[str, int]:
+    count = 128
+    seed = 0x3141_5926
+    state = 0x8899_AABB_CCDD_EEFF
+
+    blob = bytearray(struct.pack("<II", count, seed))
+    for index in range(count):
+        state = _lcg(state ^ ((index + 1) * 0xA076_1D64_78BD_642F))
+        value = ((state >> 24) ^ ((index + 3) * 0x9E37_79B9) ^ seed) & 0xFFFFFFFF
+        blob.extend(struct.pack("<I", value))
+
+    output.write_bytes(blob)
+    return {"count": count, "seed": seed}
+
+
 def _generate_helper_call(output: Path, seed: int, mix: int) -> dict[str, int]:
     output.write_bytes(struct.pack("<II", seed, mix))
     return {"seed": seed, "mix": mix}
@@ -600,6 +643,21 @@ def generate_load_byte_recompose(output: Path) -> dict[str, int]:
 
 def generate_load_native_u64(output: Path) -> dict[str, int]:
     return _generate_load_isolation(output, count=128, seed=0xBEEF_CAFE_1234_5678)
+
+
+def generate_map_lookup_repeat(output: Path) -> dict[str, int]:
+    rounds = 256
+    slots = 8
+    state = 0x0BAD_F00D_CAFE_BEEF
+
+    blob = bytearray(struct.pack("<II", rounds, slots))
+    for index in range(slots):
+        state = _lcg(state ^ ((index + 1) * 0xD134_2543_DE82_EF95))
+        value = (state ^ ((index + 1) * 0x9E37_79B9_7F4A_7C15)) & MASK64
+        blob.extend(struct.pack("<Q", value))
+
+    output.write_bytes(blob)
+    return {"rounds": rounds, "slots": slots}
 
 
 def generate_memcmp_prefix_64(output: Path) -> dict[str, int]:
@@ -750,6 +808,48 @@ def generate_alu32_64_pingpong(output: Path) -> dict[str, int]:
     for index in range(count):
         state = _lcg(state ^ ((index + 1) * 0xA076_1D64_78BD_642F))
         value = (state ^ ((index + 1) * 0x9E37_79B9_7F4A_7C15) ^ ((seed + index) << 32)) & MASK64
+        blob.extend(struct.pack("<Q", value))
+
+    output.write_bytes(blob)
+    return {"count": count, "seed": seed}
+
+
+def generate_struct_field_cluster(output: Path) -> dict[str, int]:
+    record_count = 32
+    record_size = 32
+    state = 0x2468_ACE1_1357_9BDF
+
+    blob = bytearray(struct.pack("<II", record_count, record_size))
+    for index in range(record_count):
+        state = _lcg(state)
+        tag = ((state >> 24) ^ (index * 19)) & 0xFFFFFFFF
+        state = _lcg(state)
+        flags = ((state >> 20) ^ (index * 7)) & 0xFFFF
+        state = _lcg(state)
+        length = 64 + (((state >> 18) ^ (index * 5)) & 0x1FF)
+        state = _lcg(state)
+        src = (state ^ ((index + 1) * 0x9E37_79B9_7F4A_7C15)) & MASK64
+        state = _lcg(state)
+        dst = (state ^ ((index + 11) * 0xD134_2543_DE82_EF95)) & MASK64
+        state = _lcg(state)
+        sport = 10000 + (((state >> 16) ^ (index * 17)) & 0xFFFF)
+        state = _lcg(state)
+        dport = 20000 + (((state >> 24) ^ (index * 29)) & 0xFFFF)
+        blob.extend(struct.pack("<IHHQQII", tag, flags, length, src, dst, sport, dport))
+
+    output.write_bytes(blob)
+    return {"record_count": record_count, "record_size": record_size}
+
+
+def generate_smallmul_strength_reduce(output: Path) -> dict[str, int]:
+    count = 128
+    seed = 0x89AB_CDEF
+    state = 0x55AA_33CC_77EE_11DD
+
+    blob = bytearray(struct.pack("<II", count, seed))
+    for index in range(count):
+        state = _lcg(state ^ ((index + 5) * 0xA076_1D64_78BD_642F))
+        value = (state ^ ((index + 1) * 0x94D0_49BB_1331_11EB) ^ seed) & MASK64
         blob.extend(struct.pack("<Q", value))
 
     output.write_bytes(blob)
@@ -926,16 +1026,21 @@ GENERATORS = {
     "mixed_alu_mem": generate_mixed_alu_mem,
     "branch_dense": generate_branch_dense,
     "bounds_check_heavy": generate_bounds_check_heavy,
+    "packet_redundant_bounds": generate_packet_redundant_bounds,
+    "const_fold_chain": generate_const_fold_chain,
     "helper_call_1": generate_helper_call_1,
     "helper_call_10": generate_helper_call_10,
     "helper_call_100": generate_helper_call_100,
     "load_byte_recompose": generate_load_byte_recompose,
     "load_native_u64": generate_load_native_u64,
+    "map_lookup_repeat": generate_map_lookup_repeat,
     "memcmp_prefix_64": generate_memcmp_prefix_64,
     "packet_parse_vlans_tcpopts": generate_packet_parse_vlans_tcpopts,
     "local_call_fanout": generate_local_call_fanout,
     "packet_rss_hash": generate_packet_rss_hash,
     "atomic_counter_xadd": generate_atomic_counter_xadd,
+    "struct_field_cluster": generate_struct_field_cluster,
+    "smallmul_strength_reduce": generate_smallmul_strength_reduce,
     "imm64_storm": generate_imm64_storm,
     "alu32_64_pingpong": generate_alu32_64_pingpong,
     "branch_fanout_32": generate_branch_fanout_32,
