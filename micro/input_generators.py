@@ -131,6 +131,37 @@ def generate_branch_layout(output: Path) -> dict[str, int]:
     return {"count": count, "hot_threshold": hot_threshold}
 
 
+def generate_branch_layout_predictable(output: Path) -> dict[str, int]:
+    count = 512
+    hot_threshold = 900
+
+    blob = bytearray(struct.pack("<II", count, hot_threshold))
+    for index in range(count):
+        value = ((index * 37) + 11) % hot_threshold
+        blob.extend(struct.pack("<Q", value))
+
+    output.write_bytes(blob)
+    return {"count": count, "hot_threshold": hot_threshold, "distribution": "predictable"}
+
+
+def generate_branch_layout_random(output: Path) -> dict[str, int]:
+    count = 512
+    hot_threshold = 900
+    state = 0x1234_5678_9ABC_DEF0
+
+    blob = bytearray(struct.pack("<II", count, hot_threshold))
+    for index in range(count):
+        state = _lcg(state ^ ((index + 1) * 0x9E37_79B9_7F4A_7C15))
+        if state & 1:
+            value = state % hot_threshold
+        else:
+            value = hot_threshold + ((state >> 16) % 2048)
+        blob.extend(struct.pack("<Q", value))
+
+    output.write_bytes(blob)
+    return {"count": count, "hot_threshold": hot_threshold, "distribution": "random"}
+
+
 def generate_map_lookup_churn(output: Path) -> dict[str, int]:
     rounds = 128
     stride = 7
@@ -726,40 +757,7 @@ def generate_alu32_64_pingpong(output: Path) -> dict[str, int]:
 
 
 def generate_branch_fanout_32(output: Path) -> dict[str, int]:
-    tags = [
-        0,
-        2,
-        3,
-        5,
-        7,
-        9,
-        11,
-        12,
-        14,
-        17,
-        19,
-        21,
-        24,
-        25,
-        26,
-        28,
-        31,
-        33,
-        35,
-        37,
-        38,
-        40,
-        42,
-        45,
-        47,
-        49,
-        52,
-        54,
-        56,
-        59,
-        61,
-        63,
-    ]
+    tags = BRANCH_FANOUT_32_TAGS
     count = 128
     blob = bytearray(struct.pack("<I", count))
     for index in range(count):
@@ -770,6 +768,70 @@ def generate_branch_fanout_32(output: Path) -> dict[str, int]:
 
     output.write_bytes(blob)
     return {"count": count, "fanout": len(tags)}
+
+
+BRANCH_FANOUT_32_TAGS = [
+    0,
+    2,
+    3,
+    5,
+    7,
+    9,
+    11,
+    12,
+    14,
+    17,
+    19,
+    21,
+    24,
+    25,
+    26,
+    28,
+    31,
+    33,
+    35,
+    37,
+    38,
+    40,
+    42,
+    45,
+    47,
+    49,
+    52,
+    54,
+    56,
+    59,
+    61,
+    63,
+]
+
+
+def generate_branch_fanout_32_predictable(output: Path) -> dict[str, int]:
+    count = 128
+    tag = BRANCH_FANOUT_32_TAGS[16]
+    blob = bytearray(struct.pack("<I", count))
+    for index in range(count):
+        value = (((index + 1) * 0x1F12_3BB5) ^ (index * 0x9E37_79B9)) & 0xFFFFFFFF
+        value = (value & ~63) | tag
+        blob.extend(struct.pack("<I", value))
+
+    output.write_bytes(blob)
+    return {"count": count, "fanout": 1, "distribution": "predictable"}
+
+
+def generate_branch_fanout_32_random(output: Path) -> dict[str, int]:
+    count = 128
+    state = 0x0BAD_F00D_CAFE_BEEF
+    blob = bytearray(struct.pack("<I", count))
+    for index in range(count):
+        state = _lcg(state ^ ((index + 3) * 0xA076_1D64_78BD_642F))
+        tag = BRANCH_FANOUT_32_TAGS[state % len(BRANCH_FANOUT_32_TAGS)]
+        value = (((index + 1) * 0x1F12_3BB5) ^ (index * 0x9E37_79B9) ^ (state >> 7)) & 0xFFFFFFFF
+        value = (value & ~63) | tag
+        blob.extend(struct.pack("<I", value))
+
+    output.write_bytes(blob)
+    return {"count": count, "fanout": len(BRANCH_FANOUT_32_TAGS), "distribution": "random"}
 
 
 def generate_deep_guard_tree_8(output: Path) -> dict[str, int]:
@@ -829,6 +891,8 @@ GENERATORS = {
     "checksum": generate_checksum,
     "packet_parse": generate_packet_parse,
     "branch_layout": generate_branch_layout,
+    "branch_layout_predictable": generate_branch_layout_predictable,
+    "branch_layout_random": generate_branch_layout_random,
     "map_lookup_churn": generate_map_lookup_churn,
     "map_roundtrip": generate_map_roundtrip,
     "hash_map_lookup": generate_hash_map_lookup,
@@ -875,6 +939,8 @@ GENERATORS = {
     "imm64_storm": generate_imm64_storm,
     "alu32_64_pingpong": generate_alu32_64_pingpong,
     "branch_fanout_32": generate_branch_fanout_32,
+    "branch_fanout_32_predictable": generate_branch_fanout_32_predictable,
+    "branch_fanout_32_random": generate_branch_fanout_32_random,
     "deep_guard_tree_8": generate_deep_guard_tree_8,
     "mega_basic_block_2048": generate_mega_basic_block_2048,
 }
