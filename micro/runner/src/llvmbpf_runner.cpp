@@ -12,6 +12,7 @@
 #include <memory>
 #include <thread>
 #include <sys/mman.h>
+#include <unistd.h>
 #include <unordered_map>
 
 namespace {
@@ -21,6 +22,12 @@ using clock_type = std::chrono::steady_clock;
 constexpr uint32_t kMapTypeHash = 1;
 constexpr uint32_t kMapTypeArray = 2;
 constexpr uint32_t kMapTypePercpuArray = 6;
+constexpr uintptr_t kLow32SearchStart = 0x10000000ULL;
+constexpr uintptr_t kLow32SearchEnd = 0x100000000ULL;
+
+#ifndef MAP_FIXED_NOREPLACE
+#define MAP_FIXED_NOREPLACE 0x100000
+#endif
 
 #if defined(__x86_64__) || defined(__i386__)
 constexpr bool kHasTscMeasurement = true;
@@ -61,6 +68,79 @@ uint64_t monotonic_now_ns()
     }
 
     return (static_cast<uint64_t>(ts.tv_sec) * 1000000000ULL) + static_cast<uint64_t>(ts.tv_nsec);
+}
+
+size_t page_size()
+{
+    const long value = sysconf(_SC_PAGESIZE);
+    return value > 0 ? static_cast<size_t>(value) : 4096U;
+}
+
+size_t align_up(size_t value, size_t alignment)
+{
+    if (alignment == 0 || value == 0) {
+        return value;
+    }
+    return ((value + alignment - 1) / alignment) * alignment;
+}
+
+bool fits_xdp_md_range(uintptr_t address, size_t size)
+{
+    if (address > UINT32_MAX) {
+        return false;
+    }
+    if (size == 0) {
+        return true;
+    }
+    return size - 1 <= (static_cast<size_t>(UINT32_MAX) - static_cast<size_t>(address));
+}
+
+void *map_low_u32_region(size_t size)
+{
+    const size_t mapping_size = std::max<size_t>(size, 1);
+    const size_t step = std::max<size_t>(align_up(mapping_size, page_size()), 64U << 20);
+    constexpr int prot = PROT_READ | PROT_WRITE;
+    constexpr int base_flags = MAP_PRIVATE | MAP_ANONYMOUS;
+
+#if defined(MAP_32BIT) && MAP_32BIT != 0
+    if (void *mapping = mmap(nullptr, mapping_size, prot, base_flags | MAP_32BIT, -1, 0);
+        mapping != MAP_FAILED) {
+        if (fits_xdp_md_range(reinterpret_cast<uintptr_t>(mapping), size)) {
+            return mapping;
+        }
+        munmap(mapping, mapping_size);
+    }
+#endif
+
+#if UINTPTR_MAX > UINT32_MAX
+    const size_t page = page_size();
+    for (uintptr_t hint = align_up(kLow32SearchStart, page); hint + mapping_size <= kLow32SearchEnd; hint += step) {
+        void *mapping = mmap(
+            reinterpret_cast<void *>(hint),
+            mapping_size,
+            prot,
+            base_flags | MAP_FIXED_NOREPLACE,
+            -1,
+            0);
+        if (mapping == MAP_FAILED) {
+            continue;
+        }
+        if (fits_xdp_md_range(reinterpret_cast<uintptr_t>(mapping), size)) {
+            return mapping;
+        }
+        munmap(mapping, mapping_size);
+    }
+#endif
+
+    if (void *mapping = mmap(nullptr, mapping_size, prot, base_flags, -1, 0);
+        mapping != MAP_FAILED) {
+        if (fits_xdp_md_range(reinterpret_cast<uintptr_t>(mapping), size)) {
+            return mapping;
+        }
+        munmap(mapping, mapping_size);
+    }
+
+    fail("unable to allocate llvmbpf packet buffer below 4 GiB for xdp_md");
 }
 
 std::optional<uint64_t> read_nominal_tsc_freq_hz()
@@ -328,27 +408,14 @@ public:
     explicit lowmem_buffer(size_t size)
         : size_(size)
     {
-        int flags = MAP_PRIVATE | MAP_ANONYMOUS;
-#ifdef MAP_32BIT
-        flags |= MAP_32BIT;
-#endif
-        void *mapping = mmap(nullptr, size_, PROT_READ | PROT_WRITE, flags, -1, 0);
-        if (mapping == MAP_FAILED) {
-            fail("mmap failed while preparing llvmbpf packet buffer");
-        }
-        data_ = static_cast<uint8_t *>(mapping);
-
-        const auto address = reinterpret_cast<uintptr_t>(data_);
-        if (address > UINT32_MAX || (size_ != 0 && address + size_ - 1 > UINT32_MAX)) {
-            munmap(data_, size_);
-            fail("llvmbpf packet buffer address exceeds 32-bit xdp_md range");
-        }
+        mapping_size_ = std::max<size_t>(size_, 1);
+        data_ = static_cast<uint8_t *>(map_low_u32_region(size_));
     }
 
     ~lowmem_buffer()
     {
         if (data_ != nullptr) {
-            munmap(data_, size_);
+            munmap(data_, mapping_size_);
         }
     }
 
@@ -362,6 +429,7 @@ public:
 private:
     uint8_t *data_ = nullptr;
     size_t size_ = 0;
+    size_t mapping_size_ = 0;
 };
 
 std::vector<uint8_t> build_packet_input(const std::vector<uint8_t> &input_bytes)
