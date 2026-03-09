@@ -21,6 +21,10 @@ struct map_spec {
 struct program_image {
     std::vector<uint8_t> code;
     std::vector<map_spec> maps;
+    std::string program_name;
+    std::string license;
+    uint32_t prog_type = 0;
+    uint32_t expected_attach_type = 0;
 };
 
 struct program_descriptor {
@@ -33,6 +37,7 @@ struct cli_options {
     std::string command;
     std::filesystem::path program;
     std::optional<std::filesystem::path> memory;
+    std::optional<std::filesystem::path> directive_blob;
     std::optional<std::string> program_name;
     std::string io_mode = "map";
     bool raw_packet = false;

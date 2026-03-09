@@ -26,3 +26,9 @@ micro/build/
 
 # Generated benchmark inputs
 micro/generated-inputs/
+
+# Directive blobs
+*.directive.bin
+
+# Temporary files
+/tmp/

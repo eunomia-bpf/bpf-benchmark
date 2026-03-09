@@ -12,12 +12,14 @@ BPFTOOL_BIN := $(BPFTOOL_BUILD_DIR)bpftool
 
 RUNNER_BUILD_DIR := $(BUILD_DIR)/runner
 RUNNER_BIN := $(RUNNER_BUILD_DIR)/micro_exec
+TOOLS_BUILD_DIR := $(BUILD_DIR)/tools
+DIRECTIVE_HINT_BIN := $(TOOLS_BUILD_DIR)/directive_hint
 
-.PHONY: all deps programs micro_exec vendor_libbpf vendor_bpftool clean
+.PHONY: all deps programs micro_exec directive_hint vendor_libbpf vendor_bpftool clean
 
 all: programs micro_exec
 
-deps: vendor_libbpf micro_exec vendor_bpftool
+deps: vendor_libbpf micro_exec directive_hint vendor_bpftool
 
 programs:
 	$(MAKE) -C $(ROOT_DIR)/programs
@@ -42,6 +44,14 @@ micro_exec: vendor_libbpf
 		-DMICRO_LIBBPF_PREFIX=$(LIBBPF_PREFIX) \
 		-DMICRO_LIBBPF_LIBRARY=$(LIBBPF_A)
 	cmake --build $(RUNNER_BUILD_DIR) --target micro_exec -j
+
+directive_hint: vendor_libbpf
+	mkdir -p $(TOOLS_BUILD_DIR)
+	$(CC) -O2 -g -Wall -Wextra -std=c11 \
+		-I$(LIBBPF_PREFIX)/include \
+		-o $(DIRECTIVE_HINT_BIN) \
+		$(ROOT_DIR)/tools/directive_hint.c \
+		$(LIBBPF_A) -lelf -lz
 
 vendor_bpftool:
 	mkdir -p $(BPFTOOL_BUILD_DIR)

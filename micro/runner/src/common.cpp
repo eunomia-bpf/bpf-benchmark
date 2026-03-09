@@ -106,7 +106,7 @@ cli_options parse_args(int argc, char **argv)
     if (argc < 3) {
         fail(
             "usage: micro_exec <run-llvmbpf|run-kernel|list-programs> --program <path> [--program-name <name>] "
-            "[--memory <path>] "
+            "[--memory <path>] [--directive-blob <path>] "
             "[--io-mode map|staged|packet] [--raw-packet] [--repeat N] [--input-size N] "
             "[--opt-level 0|1|2|3] [--no-cmov] [--llvm-disable-pass <name>] [--llvm-log-passes] "
             "[--perf-counters] [--perf-scope full_repeat_raw|full_repeat_avg] "
@@ -124,6 +124,10 @@ cli_options parse_args(int argc, char **argv)
         }
         if (current == "--memory" && index + 1 < argc) {
             options.memory = std::filesystem::path(argv[++index]);
+            continue;
+        }
+        if (current == "--directive-blob" && index + 1 < argc) {
+            options.directive_blob = std::filesystem::path(argv[++index]);
             continue;
         }
         if (current == "--program-name" && index + 1 < argc) {
@@ -190,6 +194,9 @@ cli_options parse_args(int argc, char **argv)
     }
     if (options.perf_scope != "full_repeat_raw" && options.perf_scope != "full_repeat_avg") {
         fail("--perf-scope must be one of full_repeat_raw or full_repeat_avg");
+    }
+    if (options.directive_blob.has_value() && options.command != "run-kernel") {
+        fail("--directive-blob is only valid with run-kernel");
     }
     if (options.command != "list-programs") {
         if (options.io_mode != "map" && options.io_mode != "staged" && options.io_mode != "packet") {

@@ -10,6 +10,7 @@
 #include <cstring>
 #include <memory>
 #include <optional>
+#include <string_view>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -161,6 +162,32 @@ Elf_Scn *get_section_or_fail(Elf *elf, size_t section_index, const char *context
         fail(std::string("unable to resolve ELF section while ") + context);
     }
     return section;
+}
+
+std::string read_string_section_or_fail(Elf *elf, size_t shstrndx, std::string_view section_name)
+{
+    Elf_Scn *section = nullptr;
+    while ((section = elf_nextscn(elf, section)) != nullptr) {
+        const auto shdr = get_section_header_or_fail(section, "searching named ELF section");
+        const char *name = elf_strptr(elf, shstrndx, shdr.sh_name);
+        if (name == nullptr || std::string_view(name) != section_name) {
+            continue;
+        }
+
+        Elf_Data *data = elf_getdata(section, nullptr);
+        if (data == nullptr || data->d_buf == nullptr) {
+            fail("unable to read ELF section '" + std::string(section_name) + "'");
+        }
+
+        size_t size = data->d_size;
+        const auto *bytes = static_cast<const char *>(data->d_buf);
+        while (size > 0 && bytes[size - 1] == '\0') {
+            --size;
+        }
+        return std::string(bytes, size);
+    }
+
+    fail("unable to find ELF section '" + std::string(section_name) + "'");
 }
 
 bool is_executable_section(Elf *elf, size_t section_index)
@@ -585,19 +612,32 @@ program_image load_program_image(const std::filesystem::path &path, const std::o
         fail("unable to resolve program section name");
     }
 
+    program_image image;
+    image.program_name = selected_program_name;
+    image.prog_type = static_cast<uint32_t>(bpf_program__type(program));
+    image.expected_attach_type = static_cast<uint32_t>(bpf_program__expected_attach_type(program));
+
+    if (image.prog_type == 0) {
+        enum bpf_prog_type inferred_prog_type = BPF_PROG_TYPE_UNSPEC;
+        enum bpf_attach_type inferred_attach_type = static_cast<enum bpf_attach_type>(image.expected_attach_type);
+        if (libbpf_prog_type_by_name(section_name, &inferred_prog_type, &inferred_attach_type) == 0) {
+            image.prog_type = static_cast<uint32_t>(inferred_prog_type);
+            image.expected_attach_type = static_cast<uint32_t>(inferred_attach_type);
+        }
+    }
+
     const auto *insns = bpf_program__insns(program);
     const size_t insn_count = bpf_program__insn_cnt(program);
     if (insns == nullptr || insn_count == 0) {
         fail("program contains no instructions: " + path.string());
     }
 
-    program_image image;
     image.code.resize(insn_count * sizeof(bpf_insn));
     std::memcpy(image.code.data(), insns, image.code.size());
 
     std::unordered_map<std::string, uint32_t> map_ids;
     const bpf_map *map = nullptr;
-    uint32_t next_map_id = 1;
+    uint32_t next_map_id = 0;
     while ((map = bpf_object__next_map(object.get(), map)) != nullptr) {
         map_spec spec;
         spec.id = next_map_id++;
@@ -621,6 +661,8 @@ program_image load_program_image(const std::filesystem::path &path, const std::o
         elf_end(elf);
         fail("elf_getshdrstrndx failed for " + path.string());
     }
+
+    image.license = read_string_section_or_fail(elf, shstrndx, "license");
 
     size_t target_section_index = 0;
     Elf_Scn *section = nullptr;

@@ -464,13 +464,19 @@ struct bpf_jit_dir_template {
 | 11 | **确定 JIT-level vs Verifier-level** | ✅ **Hybrid** | 分析结论：verifier 做结构变换 + JIT 做 encoding |
 | 12 | **v7 设计文档** | ✅ 完成 | 3245 行，见 `docs/tmp/bpf-jit-advisor-v7.md` |
 | 12-r | **v7 review** | ✅ 完成 | **7.5/10**（v6 was 5.5）。4 must-fix：cmov blinding remap、branch_reorder metadata、bounds_window fact、struct size。见 `docs/tmp/bpf-jit-advisor-v7-review.md` |
-| 13 | **CI 修复** | ✅ x86 通过 | commit `2e008ac` 加了 libbpf-dev；ARM64 queued（等 runner） |
+| 13 | **CI 修复** | ✅ 完成 | x86: `2e008ac` libbpf-dev；ARM64: `1c17332` timing fallback + `d2bd851` packet mapping + `d8edc80` shallow submodule + kernel fallback |
 | 23 | **Pure-JIT benchmark 审计** | ✅ 完成 | 49/50 OK，仅 `map_lookup_repeat` 需修。见 `docs/tmp/pure-jit-benchmark-audit.md` |
-| 24 | **修复 benchmark + 新增 cmov_select** | 🔄 进行中 | `map_lookup_repeat` 移到 runtime suite + 新增 `cmov_select.bpf.c` |
-| 25 | **修复后重跑 benchmark** | ❌ 待修复完成 | host + VM 两环境都跑，对比修复前后结果 |
-| 25-a | **结果分析** | ❌ 待重跑完成 | 分析修复后数据，更新 authoritative results |
-| 26 | **ARM64 CI 修复 + 监控** | 🔄 进行中 | codex 后台修复并监控直到通过 |
-| 26-a | **ARM64 结果分析** | ❌ 待 CI 通过 | ARM64 数据分析 + 跨架构对比 |
+| 24 | **修复 benchmark + 新增 cmov_select** | ✅ 完成 | `map_lookup_repeat` 移到 runtime；新增 `cmov_select.bpf.c`（L/K=0.181x） |
+| 25 | **Host 重跑** | ✅ 完成 | 50 pure-jit + 11 runtime，见 `micro/results/pure_jit_with_cmov.json`。geomean L/K=0.797x |
+| 25-v | **VM 重跑 (7.0-rc2)** | ✅ 完成 | kernel VM/host=1.003x (parity)。见 `docs/tmp/vm-rerun-analysis.md` |
+| 25-a | **综合结果分析** | ✅ 完成 | 见 `docs/tmp/combined-results-analysis.md`。**未 review** |
+| 25-r | **重跑结果 review** | ✅ 完成 | 数据正确；因果语言需弱化（VM≠kernel版本结论），map_lookup_repeat 3ns 差异是噪声，需严格重跑。见 `docs/tmp/rerun-results-review.md` |
+| 26 | **ARM64 CI 全流程** | ✅ 完成 | 3 轮修复，最终 llvmbpf+kernel 都在 ARM64 成功。run `22835784942` |
+| 26-a | **ARM64 跨架构分析** | ✅ 完成 | ARM64 pure-jit L/K=0.656x（vs x86 0.797x）。见 `docs/tmp/arm64-cross-arch-analysis.md`。**未 review** |
+| 26-r | **ARM64 分析 review** | ✅ 完成 | 数据正确；因果语言需弱化（runtime≠backend quality），需同 SHA 重跑+disassembly 证据。见 `docs/tmp/arm64-analysis-review.md` |
+| 27 | **Kernel POC 分支** | ✅ 完成 | 216 行新增，wide_load directive，verifier rewrite，fail-closed。见 `docs/tmp/poc-implementation-summary.md` |
+| 27-v | **POC 端到端验证** | ✅ 完成 | load_byte_recompose: 288→130.5ns (**0.453x, 2.21x 加速**)，JIT 422→296B。userspace hint→directive blob→verifier rewrite 闭环。见 `docs/tmp/poc-validation-report.md` |
+| 12-f | **v7 must-fix** | ✅ 完成 | cmov blinding→fail-closed, branch_reorder metadata 补全, bounds_window 缩窄, struct 56B |
 | 14-r | **Interface review** | ✅ 完成 | 6/10，主要问题：假设简化的 kernel pipeline、scope 与 v6 不一致、缺 multi-subprog。见 `docs/tmp/interface-design-review.md` |
 | 15-r | **Cross-doc review** | ✅ 完成 | 每个 directive 的 blob/JIT/证据交叉验证 + Hybrid 分层建议。见 `docs/tmp/cross-document-review.md` |
 | 16-r | **OSDI readiness review** | ✅ 完成 | 4/10，见 `docs/tmp/osdi-readiness-review.md` |

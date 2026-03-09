@@ -11,13 +11,52 @@
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
+#include <fcntl.h>
 #include <fstream>
 #include <memory>
 #include <string>
 #include <sys/syscall.h>
 #include <thread>
+#include <unordered_map>
 #include <unistd.h>
+#include <utility>
 #include <vector>
+
+#ifndef MFD_CLOEXEC
+#define MFD_CLOEXEC 0x0001U
+#endif
+
+#ifndef MFD_ALLOW_SEALING
+#define MFD_ALLOW_SEALING 0x0002U
+#endif
+
+#ifndef F_LINUX_SPECIFIC_BASE
+#define F_LINUX_SPECIFIC_BASE 1024
+#endif
+
+#ifndef F_ADD_SEALS
+#define F_ADD_SEALS (F_LINUX_SPECIFIC_BASE + 9)
+#endif
+
+#ifndef F_SEAL_SEAL
+#define F_SEAL_SEAL 0x0001
+#endif
+
+#ifndef F_SEAL_SHRINK
+#define F_SEAL_SHRINK 0x0002
+#endif
+
+#ifndef F_SEAL_GROW
+#define F_SEAL_GROW 0x0004
+#endif
+
+#ifndef F_SEAL_WRITE
+#define F_SEAL_WRITE 0x0008
+#endif
+
+#ifndef BPF_F_JIT_DIRECTIVES_FD
+#define BPF_F_JIT_DIRECTIVES_FD (1U << 20)
+#endif
 
 namespace {
 
@@ -159,6 +198,94 @@ struct object_deleter {
 
 using bpf_object_ptr = std::unique_ptr<bpf_object, object_deleter>;
 
+class scoped_fd {
+  public:
+    scoped_fd() = default;
+
+    explicit scoped_fd(int fd) : fd_(fd) {}
+
+    scoped_fd(const scoped_fd &) = delete;
+    scoped_fd &operator=(const scoped_fd &) = delete;
+
+    scoped_fd(scoped_fd &&other) noexcept : fd_(std::exchange(other.fd_, -1)) {}
+
+    scoped_fd &operator=(scoped_fd &&other) noexcept
+    {
+        if (this != &other) {
+            reset();
+            fd_ = std::exchange(other.fd_, -1);
+        }
+        return *this;
+    }
+
+    ~scoped_fd()
+    {
+        reset();
+    }
+
+    int get() const
+    {
+        return fd_;
+    }
+
+    void reset(int fd = -1)
+    {
+        if (fd_ >= 0) {
+            close(fd_);
+        }
+        fd_ = fd;
+    }
+
+    int release()
+    {
+        return std::exchange(fd_, -1);
+    }
+
+  private:
+    int fd_ = -1;
+};
+
+// The vendored libbpf UAPI header in micro's build doesn't expose the
+// jit_directives tail fields yet, so issue BPF_PROG_LOAD with a local layout.
+struct prog_load_attr_with_directives {
+    __u32 prog_type;
+    __u32 insn_cnt;
+    __aligned_u64 insns;
+    __aligned_u64 license;
+    __u32 log_level;
+    __u32 log_size;
+    __aligned_u64 log_buf;
+    __u32 kern_version;
+    __u32 prog_flags;
+    char prog_name[BPF_OBJ_NAME_LEN];
+    __u32 prog_ifindex;
+    __u32 expected_attach_type;
+    __u32 prog_btf_fd;
+    __u32 func_info_rec_size;
+    __aligned_u64 func_info;
+    __u32 func_info_cnt;
+    __u32 line_info_rec_size;
+    __aligned_u64 line_info;
+    __u32 line_info_cnt;
+    __u32 attach_btf_id;
+    union {
+        __u32 attach_prog_fd;
+        __u32 attach_btf_obj_fd;
+    };
+    __u32 core_relo_cnt;
+    __aligned_u64 fd_array;
+    __aligned_u64 core_relos;
+    __u32 core_relo_rec_size;
+    __u32 log_true_size;
+    __s32 prog_token_fd;
+    __u32 fd_array_cnt;
+    __aligned_u64 signature;
+    __u32 signature_size;
+    __s32 keyring_id;
+    __s32 jit_directives_fd;
+    __u32 jit_directives_flags;
+};
+
 int libbpf_log(enum libbpf_print_level, const char *fmt, va_list args)
 {
     return vfprintf(stderr, fmt, args);
@@ -267,6 +394,194 @@ uint64_t read_u64_result(const uint8_t *data, size_t length)
     return result;
 }
 
+int sys_memfd_create(const char *name, unsigned int flags)
+{
+    return static_cast<int>(syscall(__NR_memfd_create, name, flags));
+}
+
+void write_full_or_fail(int fd, const uint8_t *data, size_t size)
+{
+    size_t written = 0;
+    while (written < size) {
+        const ssize_t rc = write(fd, data + written, size - written);
+        if (rc < 0) {
+            if (errno == EINTR) {
+                continue;
+            }
+            fail("unable to write directive memfd: " + std::string(strerror(errno)));
+        }
+        written += static_cast<size_t>(rc);
+    }
+}
+
+std::string trim_log_buffer(const std::vector<char> &buffer)
+{
+    size_t length = 0;
+    while (length < buffer.size() && buffer[length] != '\0') {
+        ++length;
+    }
+    while (length > 0 && (buffer[length - 1] == '\n' || buffer[length - 1] == '\r')) {
+        --length;
+    }
+    return std::string(buffer.data(), length);
+}
+
+scoped_fd build_sealed_directive_memfd(const std::filesystem::path &path)
+{
+    const auto blob = read_binary_file(path);
+
+    scoped_fd memfd(sys_memfd_create("bpf-jit-directives", MFD_CLOEXEC | MFD_ALLOW_SEALING));
+    if (memfd.get() < 0) {
+        fail("memfd_create failed for directive blob: " + std::string(strerror(errno)));
+    }
+
+    if (!blob.empty()) {
+        write_full_or_fail(memfd.get(), blob.data(), blob.size());
+    }
+
+    const int seals = F_SEAL_WRITE | F_SEAL_GROW | F_SEAL_SHRINK;
+    if (fcntl(memfd.get(), F_ADD_SEALS, seals) != 0) {
+        fail("unable to seal directive memfd: " + std::string(strerror(errno)));
+    }
+
+    return memfd;
+}
+
+std::unordered_map<uint32_t, int> create_kernel_maps(bpf_object *object, const program_image &image)
+{
+    std::unordered_map<uint32_t, int> map_fds;
+    map_fds.reserve(image.maps.size());
+
+    for (const auto &spec : image.maps) {
+        bpf_map_create_opts create_opts = {};
+        create_opts.sz = sizeof(create_opts);
+        scoped_fd created_map(bpf_map_create(
+            static_cast<enum bpf_map_type>(spec.type),
+            spec.name.c_str(),
+            spec.key_size,
+            spec.value_size,
+            spec.max_entries,
+            &create_opts));
+        if (created_map.get() < 0) {
+            fail("bpf_map_create(" + spec.name + ") failed: " + libbpf_error_string(-created_map.get()));
+        }
+
+        bpf_map *object_map = bpf_object__find_map_by_name(object, spec.name.c_str());
+        if (object_map == nullptr) {
+            fail("unable to find opened object map named '" + spec.name + "'");
+        }
+
+        const int reuse_error = bpf_map__reuse_fd(object_map, created_map.get());
+        if (reuse_error != 0) {
+            fail("bpf_map__reuse_fd(" + spec.name + ") failed: " + libbpf_error_string(-reuse_error));
+        }
+
+        const int object_map_fd = bpf_map__fd(object_map);
+        if (object_map_fd < 0) {
+            fail("unable to obtain reused map fd for '" + spec.name + "'");
+        }
+
+        map_fds.emplace(spec.id, object_map_fd);
+    }
+
+    return map_fds;
+}
+
+void relocate_map_fds(program_image &image, const std::unordered_map<uint32_t, int> &map_fds)
+{
+    if (image.code.size() % sizeof(bpf_insn) != 0) {
+        fail("program image does not contain aligned BPF instructions");
+    }
+
+    auto *insns = reinterpret_cast<bpf_insn *>(image.code.data());
+    const size_t insn_count = image.code.size() / sizeof(bpf_insn);
+    constexpr uint8_t kLdImm64 = BPF_LD | BPF_DW | BPF_IMM;
+
+    for (size_t index = 0; index < insn_count; ++index) {
+        auto &insn = insns[index];
+        if (insn.code != kLdImm64 || insn.src_reg != BPF_PSEUDO_MAP_FD) {
+            continue;
+        }
+
+        const auto map_iter = map_fds.find(static_cast<uint32_t>(insn.imm));
+        if (map_iter == map_fds.end()) {
+            fail("unable to resolve relocated map fd for synthetic map id " + std::to_string(insn.imm));
+        }
+
+        insn.imm = map_iter->second;
+    }
+}
+
+int manual_bpf_prog_load(program_image &image, int directive_memfd)
+{
+    if (image.prog_type == 0) {
+        fail("unable to determine program type for manual BPF_PROG_LOAD");
+    }
+    if (image.license.empty()) {
+        fail("unable to determine program license for manual BPF_PROG_LOAD");
+    }
+    if (image.code.size() % sizeof(bpf_insn) != 0) {
+        fail("program image does not contain aligned BPF instructions");
+    }
+    if (directive_memfd < 0) {
+        fail("directive memfd is invalid");
+    }
+
+    prog_load_attr_with_directives attr = {};
+    attr.prog_type = image.prog_type;
+    attr.expected_attach_type = image.expected_attach_type;
+    attr.insn_cnt = static_cast<__u32>(image.code.size() / sizeof(bpf_insn));
+    attr.insns = ptr_to_u64(reinterpret_cast<bpf_insn *>(image.code.data()));
+    attr.license = ptr_to_u64(image.license.c_str());
+    attr.prog_flags = BPF_F_JIT_DIRECTIVES_FD;
+    attr.jit_directives_fd = directive_memfd;
+    attr.jit_directives_flags = 0;
+    attr.log_level = 1;
+
+    std::vector<char> verifier_log(1U << 20, '\0');
+    attr.log_size = static_cast<__u32>(verifier_log.size());
+    attr.log_buf = ptr_to_u64(verifier_log.data());
+
+    if (!image.program_name.empty()) {
+        std::snprintf(attr.prog_name, sizeof(attr.prog_name), "%s", image.program_name.c_str());
+    }
+
+    int last_errno = 0;
+    constexpr int max_attempts = 5;
+    for (int attempt = 0; attempt < max_attempts; ++attempt) {
+        std::fill(verifier_log.begin(), verifier_log.end(), '\0');
+        const int fd = static_cast<int>(syscall(__NR_bpf, BPF_PROG_LOAD, &attr, sizeof(attr)));
+        if (fd >= 0) {
+            return fd;
+        }
+
+        last_errno = errno;
+        if (last_errno != EAGAIN) {
+            break;
+        }
+    }
+
+    std::string message = "manual BPF_PROG_LOAD failed: " + std::string(strerror(last_errno));
+    if (last_errno == E2BIG) {
+        message += " (kernel may not support jit_directives_fd on BPF_PROG_LOAD)";
+    }
+    const auto verifier_text = trim_log_buffer(verifier_log);
+    if (!verifier_text.empty()) {
+        message += "\n" + verifier_text;
+    }
+    fail(message);
+}
+
+int load_program_with_directives(bpf_object *object, const cli_options &options)
+{
+    auto image = load_program_image(options.program, options.program_name);
+    const auto map_fds = create_kernel_maps(object, image);
+    relocate_map_fds(image, map_fds);
+
+    scoped_fd directive_memfd(build_sealed_directive_memfd(*options.directive_blob));
+    return manual_bpf_prog_load(image, directive_memfd.get());
+}
+
 } // namespace
 
 sample_result run_kernel(const cli_options &options)
@@ -295,19 +610,25 @@ sample_result run_kernel(const cli_options &options)
     bpf_object_ptr object(raw_object);
     configure_autoload(object.get(), options.program_name);
 
+    scoped_fd manual_program_fd;
+    int program_fd = -1;
     const auto object_load_start = std::chrono::steady_clock::now();
-    const int load_error = bpf_object__load(object.get());
-    if (load_error != 0) {
-        fail("bpf_object__load failed: " + libbpf_error_string(-load_error));
+    if (options.directive_blob.has_value()) {
+        program_fd = load_program_with_directives(object.get(), options);
+        manual_program_fd.reset(program_fd);
+    } else {
+        const int load_error = bpf_object__load(object.get());
+        if (load_error != 0) {
+            fail("bpf_object__load failed: " + libbpf_error_string(-load_error));
+        }
+
+        bpf_program *program = find_program(object.get(), options.program_name);
+        program_fd = bpf_program__fd(program);
+        if (program_fd < 0) {
+            fail("unable to obtain program fd");
+        }
     }
     const auto object_load_end = std::chrono::steady_clock::now();
-
-    bpf_program *program = find_program(object.get(), options.program_name);
-
-    const int program_fd = bpf_program__fd(program);
-    if (program_fd < 0) {
-        fail("unable to obtain program fd");
-    }
 
     const auto program_info = load_prog_info(program_fd);
     if (options.dump_jit) {
