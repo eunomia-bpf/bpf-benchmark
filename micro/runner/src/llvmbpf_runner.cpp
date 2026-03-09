@@ -3,9 +3,11 @@
 #include <llvmbpf.hpp>
 
 #include <algorithm>
+#include <cerrno>
 #include <chrono>
 #include <cmath>
 #include <cstring>
+#include <ctime>
 #include <fstream>
 #include <memory>
 #include <thread>
@@ -50,6 +52,16 @@ static inline uint64_t rdtsc_end()
     return 0;
 }
 #endif
+
+uint64_t monotonic_now_ns()
+{
+    timespec ts {};
+    if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0) {
+        fail("clock_gettime(CLOCK_MONOTONIC) failed: " + std::string(strerror(errno)));
+    }
+
+    return (static_cast<uint64_t>(ts.tv_sec) * 1000000000ULL) + static_cast<uint64_t>(ts.tv_nsec);
+}
 
 std::optional<uint64_t> read_nominal_tsc_freq_hz()
 {
@@ -142,10 +154,10 @@ uint64_t calibrate_tsc_freq_hz()
     return static_cast<uint64_t>(std::llround(freq_hz));
 }
 
-uint64_t detect_tsc_freq_hz()
+std::optional<uint64_t> detect_tsc_freq_hz()
 {
     if constexpr (!kHasTscMeasurement) {
-        fail("rdtsc timing requires x86/x86_64");
+        return std::nullopt;
     }
 
     if (const auto nominal = read_nominal_tsc_freq_hz(); nominal.has_value()) {
@@ -520,7 +532,9 @@ sample_result run_llvmbpf(const cli_options &options)
     uint64_t retval = 0;
     uint64_t result = 0;
     uint64_t total_exec_cycles = 0;
-    const uint64_t tsc_freq_hz = detect_tsc_freq_hz();
+    uint64_t total_exec_ns = 0;
+    const auto tsc_freq_hz = detect_tsc_freq_hz();
+    const uint32_t repeat = options.repeat > 0 ? options.repeat : 1;
     active_map_state = &map_state;
     clock_type::time_point exec_start {};
     clock_type::time_point exec_end {};
@@ -530,21 +544,29 @@ sample_result run_llvmbpf(const cli_options &options)
         .scope = options.perf_scope,
     };
     const auto run_map_repeat = [&](uint8_t *ctx, size_t ctx_size) {
-        for (uint32_t index = 0; index < options.repeat; ++index) {
-            const uint64_t cycle_start = rdtsc_start();
+        for (uint32_t index = 0; index < repeat; ++index) {
+            const uint64_t measure_start = tsc_freq_hz.has_value() ? rdtsc_start() : monotonic_now_ns();
             if (vm.exec(ctx, ctx_size, retval) < 0) {
                 fail("llvmbpf exec failed: " + vm.get_error_message());
             }
-            total_exec_cycles += rdtsc_end() - cycle_start;
+            if (tsc_freq_hz.has_value()) {
+                total_exec_cycles += rdtsc_end() - measure_start;
+            } else {
+                total_exec_ns += monotonic_now_ns() - measure_start;
+            }
         }
     };
     const auto run_packet_repeat = [&](xdp_md_ctx &ctx) {
-        for (uint32_t index = 0; index < options.repeat; ++index) {
-            const uint64_t cycle_start = rdtsc_start();
+        for (uint32_t index = 0; index < repeat; ++index) {
+            const uint64_t measure_start = tsc_freq_hz.has_value() ? rdtsc_start() : monotonic_now_ns();
             if (vm.exec(&ctx, sizeof(ctx), retval) < 0) {
                 fail("llvmbpf exec failed: " + vm.get_error_message());
             }
-            total_exec_cycles += rdtsc_end() - cycle_start;
+            if (tsc_freq_hz.has_value()) {
+                total_exec_cycles += rdtsc_end() - measure_start;
+            } else {
+                total_exec_ns += monotonic_now_ns() - measure_start;
+            }
         }
     };
 
@@ -574,7 +596,6 @@ sample_result run_llvmbpf(const cli_options &options)
         }
         exec_end = clock_type::now();
 
-        const uint32_t repeat = options.repeat > 0 ? options.repeat : 1;
         for (auto &counter : perf_counters.counters) {
             counter.value /= repeat;
         }
@@ -605,14 +626,20 @@ sample_result run_llvmbpf(const cli_options &options)
     }
     active_map_state = nullptr;
 
-    sample.exec_ns = static_cast<uint64_t>(std::llround(
-        (static_cast<long double>(total_exec_cycles) * 1000000000.0L) /
-        (static_cast<long double>(tsc_freq_hz) * static_cast<long double>(options.repeat))));
-    sample.wall_exec_ns = elapsed_ns(exec_start, exec_end) / options.repeat;
-    sample.exec_cycles = static_cast<uint64_t>(std::llround(
-        static_cast<long double>(total_exec_cycles) / static_cast<long double>(options.repeat)));
-    sample.tsc_freq_hz = tsc_freq_hz;
-    sample.timing_source = "rdtsc";
+    if (tsc_freq_hz.has_value()) {
+        sample.exec_ns = static_cast<uint64_t>(std::llround(
+            (static_cast<long double>(total_exec_cycles) * 1000000000.0L) /
+            (static_cast<long double>(*tsc_freq_hz) * static_cast<long double>(repeat))));
+        sample.exec_cycles = static_cast<uint64_t>(std::llround(
+            static_cast<long double>(total_exec_cycles) / static_cast<long double>(repeat)));
+        sample.tsc_freq_hz = *tsc_freq_hz;
+        sample.timing_source = "rdtsc";
+    } else {
+        sample.exec_ns = static_cast<uint64_t>(std::llround(
+            static_cast<long double>(total_exec_ns) / static_cast<long double>(repeat)));
+        sample.timing_source = "clock_monotonic";
+    }
+    sample.wall_exec_ns = elapsed_ns(exec_start, exec_end) / repeat;
     sample.result = options.io_mode == "map" ? read_result_value(map_state) : result;
     sample.retval = static_cast<uint32_t>(retval);
     sample.phases_ns = {
