@@ -22,7 +22,21 @@ struct {
     __type(value, struct cmov_select_input_value);
 } input_map SEC(".maps");
 
-/* Keep the diamond narrow so backends can focus on the select itself. */
+/*
+ * Keep the actual select in a dedicated subprog so the BPF body at the
+ * directive site is just register-to-register choice, not extra load work.
+ */
+static __noinline u64 cmov_select_pick(u64 lhs, u64 rhs, u64 on_true, u64 on_false)
+{
+    u64 selected = on_true;
+
+    if (lhs <= rhs) {
+        selected = on_false;
+    }
+
+    return selected;
+}
+
 #define CMOV_SELECT_STEP(INDEX, ROT)                                            \
     do {                                                                        \
         u32 index = (INDEX);                                                    \
@@ -30,12 +44,7 @@ struct {
         u64 b = micro_read_u64_le(data, CMOV_SELECT_B_OFFSET + index * 8U);     \
         u64 x = micro_read_u64_le(data, CMOV_SELECT_X_OFFSET + index * 8U);     \
         u64 y = micro_read_u64_le(data, CMOV_SELECT_Y_OFFSET + index * 8U);     \
-        u64 selected;                                                           \
-        if (a > b) {                                                            \
-            selected = x;                                                       \
-        } else {                                                                \
-            selected = y;                                                       \
-        }                                                                       \
+        u64 selected = cmov_select_pick(a, b, x, y);                            \
         acc += selected ^ (0x9E3779B97F4A7C15ULL + index);                      \
         acc = micro_rotl64(acc, (ROT));                                         \
         acc ^= selected >> (index & 7U);                                        \

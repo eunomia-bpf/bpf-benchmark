@@ -40,6 +40,7 @@ struct cli_options {
     std::optional<std::filesystem::path> directive_blob;
     std::optional<std::string> program_name;
     std::string io_mode = "map";
+    bool manual_load = false;
     bool raw_packet = false;
     uint32_t repeat = 1;
     uint32_t input_size = 0;

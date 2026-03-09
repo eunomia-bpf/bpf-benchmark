@@ -107,6 +107,7 @@ cli_options parse_args(int argc, char **argv)
         fail(
             "usage: micro_exec <run-llvmbpf|run-kernel|list-programs> --program <path> [--program-name <name>] "
             "[--memory <path>] [--directive-blob <path>] "
+            "[--manual-load] "
             "[--io-mode map|staged|packet] [--raw-packet] [--repeat N] [--input-size N] "
             "[--opt-level 0|1|2|3] [--no-cmov] [--llvm-disable-pass <name>] [--llvm-log-passes] "
             "[--perf-counters] [--perf-scope full_repeat_raw|full_repeat_avg] "
@@ -136,6 +137,10 @@ cli_options parse_args(int argc, char **argv)
         }
         if (current == "--io-mode" && index + 1 < argc) {
             options.io_mode = argv[++index];
+            continue;
+        }
+        if (current == "--manual-load") {
+            options.manual_load = true;
             continue;
         }
         if (current == "--raw-packet") {
@@ -197,6 +202,9 @@ cli_options parse_args(int argc, char **argv)
     }
     if (options.directive_blob.has_value() && options.command != "run-kernel") {
         fail("--directive-blob is only valid with run-kernel");
+    }
+    if (options.manual_load && options.command != "run-kernel") {
+        fail("--manual-load is only valid with run-kernel");
     }
     if (options.command != "list-programs") {
         if (options.io_mode != "map" && options.io_mode != "staged" && options.io_mode != "packet") {

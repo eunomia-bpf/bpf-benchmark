@@ -17,7 +17,7 @@ DIRECTIVE_HINT_BIN := $(TOOLS_BUILD_DIR)/directive_hint
 
 .PHONY: all deps programs micro_exec directive_hint vendor_libbpf vendor_bpftool clean
 
-all: programs micro_exec
+all: programs micro_exec directive_hint
 
 deps: vendor_libbpf micro_exec directive_hint vendor_bpftool
 
@@ -47,10 +47,13 @@ micro_exec: vendor_libbpf
 
 directive_hint: vendor_libbpf
 	mkdir -p $(TOOLS_BUILD_DIR)
-	$(CC) -O2 -g -Wall -Wextra -std=c11 \
+	$(CXX) -O2 -g -Wall -Wextra -std=c++20 \
 		-I$(LIBBPF_PREFIX)/include \
+		-I$(ROOT_DIR)/runner/include \
 		-o $(DIRECTIVE_HINT_BIN) \
 		$(ROOT_DIR)/tools/directive_hint.c \
+		$(ROOT_DIR)/runner/src/common.cpp \
+		$(ROOT_DIR)/runner/src/elf_program_loader.cpp \
 		$(LIBBPF_A) -lelf -lz
 
 vendor_bpftool:

@@ -523,9 +523,6 @@ int manual_bpf_prog_load(program_image &image, int directive_memfd)
     if (image.code.size() % sizeof(bpf_insn) != 0) {
         fail("program image does not contain aligned BPF instructions");
     }
-    if (directive_memfd < 0) {
-        fail("directive memfd is invalid");
-    }
 
     prog_load_attr_with_directives attr = {};
     attr.prog_type = image.prog_type;
@@ -533,32 +530,44 @@ int manual_bpf_prog_load(program_image &image, int directive_memfd)
     attr.insn_cnt = static_cast<__u32>(image.code.size() / sizeof(bpf_insn));
     attr.insns = ptr_to_u64(reinterpret_cast<bpf_insn *>(image.code.data()));
     attr.license = ptr_to_u64(image.license.c_str());
-    attr.prog_flags = BPF_F_JIT_DIRECTIVES_FD;
-    attr.jit_directives_fd = directive_memfd;
-    attr.jit_directives_flags = 0;
-    attr.log_level = 1;
+    if (directive_memfd >= 0) {
+        attr.prog_flags |= BPF_F_JIT_DIRECTIVES_FD;
+        attr.jit_directives_fd = directive_memfd;
+        attr.jit_directives_flags = 0;
+    }
 
     std::vector<char> verifier_log(1U << 20, '\0');
-    attr.log_size = static_cast<__u32>(verifier_log.size());
-    attr.log_buf = ptr_to_u64(verifier_log.data());
-
     if (!image.program_name.empty()) {
         std::snprintf(attr.prog_name, sizeof(attr.prog_name), "%s", image.program_name.c_str());
     }
 
     int last_errno = 0;
     constexpr int max_attempts = 5;
-    for (int attempt = 0; attempt < max_attempts; ++attempt) {
-        std::fill(verifier_log.begin(), verifier_log.end(), '\0');
-        const int fd = static_cast<int>(syscall(__NR_bpf, BPF_PROG_LOAD, &attr, sizeof(attr)));
-        if (fd >= 0) {
-            return fd;
+    bool with_log = true;
+    while (true) {
+        attr.log_level = with_log ? 1 : 0;
+        attr.log_size = with_log ? static_cast<__u32>(verifier_log.size()) : 0;
+        attr.log_buf = with_log ? ptr_to_u64(verifier_log.data()) : 0;
+
+        for (int attempt = 0; attempt < max_attempts; ++attempt) {
+            std::fill(verifier_log.begin(), verifier_log.end(), '\0');
+            const int fd =
+                static_cast<int>(syscall(__NR_bpf, BPF_PROG_LOAD, &attr, sizeof(attr)));
+            if (fd >= 0) {
+                return fd;
+            }
+
+            last_errno = errno;
+            if (last_errno != EAGAIN) {
+                break;
+            }
         }
 
-        last_errno = errno;
-        if (last_errno != EAGAIN) {
-            break;
+        if (last_errno == ENOSPC && with_log) {
+            with_log = false;
+            continue;
         }
+        break;
     }
 
     std::string message = "manual BPF_PROG_LOAD failed: " + std::string(strerror(last_errno));
@@ -572,13 +581,16 @@ int manual_bpf_prog_load(program_image &image, int directive_memfd)
     fail(message);
 }
 
-int load_program_with_directives(bpf_object *object, const cli_options &options)
+int manual_load_program(bpf_object *object, const cli_options &options)
 {
     auto image = load_program_image(options.program, options.program_name);
     const auto map_fds = create_kernel_maps(object, image);
     relocate_map_fds(image, map_fds);
 
-    scoped_fd directive_memfd(build_sealed_directive_memfd(*options.directive_blob));
+    scoped_fd directive_memfd;
+    if (options.directive_blob.has_value()) {
+        directive_memfd = build_sealed_directive_memfd(*options.directive_blob);
+    }
     return manual_bpf_prog_load(image, directive_memfd.get());
 }
 
@@ -613,8 +625,8 @@ sample_result run_kernel(const cli_options &options)
     scoped_fd manual_program_fd;
     int program_fd = -1;
     const auto object_load_start = std::chrono::steady_clock::now();
-    if (options.directive_blob.has_value()) {
-        program_fd = load_program_with_directives(object.get(), options);
+    if (options.directive_blob.has_value() || options.manual_load) {
+        program_fd = manual_load_program(object.get(), options);
         manual_program_fd.reset(program_fd);
     } else {
         const int load_error = bpf_object__load(object.get());

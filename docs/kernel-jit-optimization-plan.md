@@ -5,7 +5,7 @@
 >
 > 最新设计文档：**`docs/tmp/bpf-jit-advisor-v7.md`**（Hybrid 架构，3245 行）
 >
-> 上次更新：2026-03-08
+> 上次更新：2026-03-09
 
 ---
 
@@ -474,32 +474,41 @@ struct bpf_jit_dir_template {
 | 26 | **ARM64 CI 全流程** | ✅ 完成 | 3 轮修复，最终 llvmbpf+kernel 都在 ARM64 成功。run `22835784942` |
 | 26-a | **ARM64 跨架构分析** | ✅ 完成 | ARM64 pure-jit L/K=0.656x（vs x86 0.797x）。见 `docs/tmp/arm64-cross-arch-analysis.md`。**未 review** |
 | 26-r | **ARM64 分析 review** | ✅ 完成 | 数据正确；因果语言需弱化（runtime≠backend quality），需同 SHA 重跑+disassembly 证据。见 `docs/tmp/arm64-analysis-review.md` |
-| 27 | **Kernel POC 分支** | ✅ 完成 | 216 行新增，wide_load directive，verifier rewrite，fail-closed。见 `docs/tmp/poc-implementation-summary.md` |
-| 27-v | **POC 端到端验证** | ✅ 完成 | load_byte_recompose: 288→130.5ns (**0.453x, 2.21x 加速**)，JIT 422→296B。userspace hint→directive blob→verifier rewrite 闭环。见 `docs/tmp/poc-validation-report.md` |
+| 27 | **Kernel POC v1 分支** | ⚠️ **方向错误** | wide_load 是 BPF bytecode rewrite，不是 JIT backend 优化。userspace 也能做同样的事。见 `docs/tmp/poc-design-review.md` |
+| 27-v | **POC v1 端到端验证** | ⚠️ **方向错误** | 2.21x 加速数字可信，但证明的不是 JIT directive，而是 BPF 指令级变换。xlated_prog_len 变了说明是 BPF rewrite |
+| 27-fix | **POC v1 根本问题分析** | ✅ 完成 | v1 的 wide_load 本质是 verifier-side BPF 指令重写，K2/Merlin 等 bytecode 优化器也能做。与论文 "backend JIT 优化" thesis 矛盾。见 `docs/tmp/poc-design-review.md` |
+| 28 | **POC v2：真正的 JIT-level directive** | 🔄 进行中 | `cmov_select` JIT lowering：BPF 不变，只改 native code emission（cmovcc vs jcc+mov）。分支 `jit-directive-poc-v2`。关键不变量：xlated_prog_len 不变，jited_prog_len 变小 |
 | 12-f | **v7 must-fix** | ✅ 完成 | cmov blinding→fail-closed, branch_reorder metadata 补全, bounds_window 缩窄, struct 56B |
 | 14-r | **Interface review** | ✅ 完成 | 6/10，主要问题：假设简化的 kernel pipeline、scope 与 v6 不一致、缺 multi-subprog。见 `docs/tmp/interface-design-review.md` |
 | 15-r | **Cross-doc review** | ✅ 完成 | 每个 directive 的 blob/JIT/证据交叉验证 + Hybrid 分层建议。见 `docs/tmp/cross-document-review.md` |
 | 16-r | **OSDI readiness review** | ✅ 完成 | 4/10，见 `docs/tmp/osdi-readiness-review.md` |
 
-### 🟡 P1 — 原型实现（Critical Path from cross-doc review）
+### 🟡 P1 — 原型实现（修正后的 Critical Path）
 
-| # | 任务 | 说明 | 层 |
-|---|------|------|:---:|
-| 14 | **orig_idx 传播修复** | 字段已存在，需修复 `adjust_insn_aux_data()` 传播。**所有 remap 的前置条件** | kernel |
-| 15 | **Transport + blob parser + fail-closed** | interface-design-detail.md 设计可复用（transport skeleton 在 Hybrid 下存活） | kernel |
-| 16 | **Remap / validation 准备阶段** | post-rewrite remap + stage-aware matcher | kernel |
-| 17 | **wide_load (= byte_load_recompose)** | 第一个 directive。**JIT-level v1 或 verifier-level 均可** | JIT 或 verifier |
-| 18 | **narrow cmov_select** | 冻结 pure-assignment contract（不含 v6 expression-arm） | hybrid |
-| 19 | **广度 directive × 1-2** | `wide_store` 最安全；`lea_fusion` / `rotate_fusion` 也可 | JIT |
-| 20 | **第一个 verifier-rewrite directive** | `branch_reorder`（一钻石 BPF block permutation）或 `bounds_window` | verifier |
-| 21 | **kernel-fixed baselines** | fixed-cmov + fixed-layout 作为对比。**OSDI 必须** | eval |
-| 22 | **消融补全** | byte-recompose / callee-saved / BMI | eval |
+> **2026-03-09 重大修正**：POC v1 的 `wide_load` 是 BPF bytecode 级别的变换（verifier rewrite），
+> 用户态优化器也能做。这不是 JIT backend 优化，与论文 thesis 矛盾。
+> P1 路径已重构：以 **真正的 JIT-level directive** 为核心。
+>
+> **正确 directive 的判断标准**：用户态能不能做同样的事？如果能 → 错误的层。
+> - ❌ `wide_load` verifier rewrite：改写 BPF 指令 → 用户态也能做
+> - ✅ `cmov_select` JIT lowering：选择 cmovcc vs jcc+mov → 只有 JIT 能做
+> - ✅ `lea_fusion`：选择 lea vs mov+shl+add → 只有 x86 JIT 能做
+> - ✅ `rotate_fusion`：选择 rorx/BMI2 → 只有 JIT 知道 CPU features
 
-**Cross-doc review 关键发现**：
-- constant blinding 在 Path B 下冲突大幅减小（verifier 先 rewrite BPF，blinding 跑在已 rewrite 的程序上）
-- interface 需要增加 **stage 维度**（`VERIFIER_REWRITE` vs `JIT_LOWERING`）和 stage-aware telemetry
-- v6 的 cmov_select 表达式 arm 不等于 v5r2 的 pure-assignment arm——必须冻结 narrow contract
-- `struct_field_cluster` 和 `smallmul_strength_reduce` smoke 数据中 kernel 更快——只是 pattern 证据，不是 backend gap 证据
+| # | 任务 | 说明 | 层 | 状态 |
+|---|------|------|:---:|:---:|
+| 28 | **POC v2: cmov_select JIT lowering** | 第一个真正的 JIT directive。BPF 不变，JIT 发射 cmovcc 替代 jcc+mov+jmp+mov。**关键不变量：xlated_prog_len 不变** | JIT | 🔄 |
+| 15 | **Transport + blob parser + fail-closed** | 复用 v1 transport skeleton，但加真正的错误返回 | kernel | ❌ |
+| 29 | **第二个 JIT directive** | `lea_fusion` 或 `rotate_fusion`（纯 JIT-level，证明框架泛化） | JIT | ❌ |
+| 17-fix | **wide_load 重新定位** | 如果保留，应明确标注为 "bytecode-level optimization"，不是 JIT directive；或改成真正的 JIT-level wide load emission | 定位 | ❌ |
+| 20 | **branch_reorder** | verifier-level structural rewrite（这个确实需要 kernel 参与，用户态无法安全做 CFG permutation） | verifier | ❌ |
+| 21 | **kernel-fixed baselines** | fixed-cmov + fixed-layout 作为对比。**OSDI 必须** | eval | ❌ |
+| 22 | **消融补全** | cmov ablation 已有，补 byte-recompose / callee-saved / BMI | eval | ❌ |
+
+**POC v1 → v2 关键教训**：
+- v1 的 `wide_load` verifier rewrite 把 BPF 指令改了 → `xlated_prog_len` 变了 → 说明是 bytecode 变换，不是 JIT 优化
+- v2 的 `cmov_select` JIT lowering 不改 BPF 指令 → `xlated_prog_len` 必须不变 → 只有 `jited_prog_len` 变
+- 这是论文 thesis 的**试金石**：如果 `xlated_prog_len` 变了，说明优化在错误的层
 
 ### 🟢 P2 — 自动化 + 评估 + 合并
 
@@ -541,10 +550,11 @@ struct bpf_jit_dir_template {
 | baseline-host | 6.15.11 | ✅ | authoritative 31-case 数据 |
 | baseline-vm (kernel only) | 7.0-rc2 | ✅ | geomean 0.881x vs host |
 | baseline-vm (L/K) | 7.0-rc2 llvmbpf + kernel | ✅ | L/K ~0.850x |
-| **opt1-vm** | **7.0-rc2 + byte-recompose** | ❌ | 待实现 |
-| opt2-vm | 7.0-rc2 + cmov | ❌ | 待实现 |
-| opt3-vm | 7.0-rc2 + branch_reorder | ❌ | 待实现 |
-| opt1+2+3-vm | 7.0-rc2 + all directives | ❌ | 待实现 |
+| ~~opt1-vm~~ | ~~7.0-rc2 + byte-recompose verifier rewrite~~ | ⚠️ **方向错误** | v1 POC 证明了 2.21x，但这是 BPF 层优化，不是 JIT directive |
+| **opt-cmov-vm** | **7.0-rc2 + cmov_select JIT lowering** | 🔄 | **POC v2：真正的 JIT directive** |
+| opt-lea-vm | 7.0-rc2 + lea_fusion JIT lowering | ❌ | 待实现 |
+| opt3-vm | 7.0-rc2 + branch_reorder | ❌ | 待实现（verifier-level，合理） |
+| opt-all-vm | 7.0-rc2 + all directives | ❌ | 待实现 |
 
 ---
 
@@ -565,6 +575,8 @@ CI:        GitHub Actions ARM64 + x86 (manual trigger)
 
 | 文档 | 内容 |
 |------|------|
+| **`docs/tmp/poc-design-review.md`** | **POC v1 全面评审：为什么 wide_load verifier rewrite 是错误方向** |
+| **`docs/tmp/poc-v2-implementation-summary.md`** | **POC v2 实现说明：cmov_select 真正的 JIT-level directive** |
 | **`docs/tmp/bpf-jit-advisor-v7.md`** | **当前最新设计（v7 Hybrid，verifier rewrite + JIT lowering）** |
 | `docs/tmp/bpf-jit-advisor-v6.md` | v6 设计（已被 v7 取代） |
 | **`docs/tmp/interface-design-detail.md`** | **接口详细设计：syscall、blob 格式、CPU contract、安全分析、部署场景** |
