@@ -105,9 +105,17 @@ Programs define a `bench_*()` function taking `(const u8 *data, u32 len, u64 *ou
 OpenAI Codex CLI is available on this machine (default model: `gpt-5.4`). Use it as a subagent for code writing tasks.
 
 ### Division of Labor (IMPORTANT)
-- **Codex handles**: ALL code implementation, benchmark runs, data analysis, analysis scripts, experiments, research
-- **Claude Code handles**: scheduling/dispatching codex tasks, document writing, TODO/memory updates, architectural decisions, reviewing codex output
+- **Codex handles**: ALL code implementation, benchmark runs, data analysis, analysis scripts, experiments, research, code review, CI fixes
+- **Claude Code handles**: scheduling/dispatching codex tasks, document writing (non-tmp), TODO/memory updates, architectural decisions, reviewing codex output
 - **Claude Code must NEVER**: write analysis code directly, run benchmarks directly, or manually analyze data — always delegate to codex
+
+### Workflow Rules
+- **Codex output goes to `docs/tmp/`** — codex writes analysis/review/design docs into `docs/tmp/`
+- **Claude maintains non-tmp docs** — Claude directly edits `CLAUDE.md`, `docs/kernel-jit-optimization-plan.md`, and other non-tmp documents
+- **Codex runs in background** — use `run_in_background: true` for all codex tasks; Claude dispatches and moves on
+- **Review cycle** — when codex produces a new document, dispatch another codex to review it; iterate until quality is sufficient
+- **CI monitoring** — dispatch codex to fix CI issues, push fixes, and monitor until CI passes (long-running background task)
+- **Never ask for confirmation** — just keep going, do all work, iterate multiple rounds autonomously
 
 ### Usage
 ```bash
@@ -122,3 +130,8 @@ echo "implement feature X" | codex exec --dangerously-bypass-approvals-and-sandb
 ```
 
 When delegating coding tasks, use `codex exec --dangerously-bypass-approvals-and-sandbox` so it can read/write files and run commands without interruption.
+
+### Benchmark Program Design Rules
+- **Pure-JIT benchmarks** (`micro_pure_jit.yaml`): Must test ONLY JIT code generation quality. No map lookups, no helper calls — pure computation only. Use `DEFINE_STAGED_INPUT_XDP_BENCH` with `input_map` for input staging only.
+- **Runtime benchmarks** (`micro_runtime.yaml`): Test map/helper runtime mechanisms. Map lookups and helper calls are expected here.
+- If a pure-JIT benchmark uses maps or helpers in its hot path, it is measuring runtime overhead, not JIT quality — this is a bug that must be fixed.

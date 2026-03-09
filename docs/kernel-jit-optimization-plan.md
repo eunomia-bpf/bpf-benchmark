@@ -3,7 +3,7 @@
 > 本文档是 kernel JIT 优化论文的单一 hub，记录设计方向、论文策略、实验进度与 TODO。
 > Characterization 论文见 `docs/paper-comparison.md`（独立论文，最终将与本文合并）。
 >
-> 最新设计文档：**`docs/tmp/bpf-jit-advisor-v6.md`**
+> 最新设计文档：**`docs/tmp/bpf-jit-advisor-v7.md`**（Hybrid 架构，3245 行）
 >
 > 上次更新：2026-03-08
 
@@ -462,8 +462,15 @@ struct bpf_jit_dir_template {
 | 9 | **新 directive 发现 + test cases** | ✅ 完成 | 5 个新 benchmark + 11 候选排名，见 `docs/tmp/directive-discovery-analysis.md` |
 | 10 | **Interface 层详细设计** | ✅ 完成 | syscall/blob/CPU contract/安全/部署全覆盖，见 `docs/tmp/interface-design-detail.md` |
 | 11 | **确定 JIT-level vs Verifier-level** | ✅ **Hybrid** | 分析结论：verifier 做结构变换 + JIT 做 encoding |
-| 12 | **v7 设计文档** | ❌ 待写 | 综合 Hybrid 方案 + reviews 写最终设计 |
-| 13 | **CI 修复** | ✅ 完成 | commit `2e008ac` 加了 libbpf-dev，x86 CI 重触发 |
+| 12 | **v7 设计文档** | ✅ 完成 | 3245 行，见 `docs/tmp/bpf-jit-advisor-v7.md` |
+| 12-r | **v7 review** | ✅ 完成 | **7.5/10**（v6 was 5.5）。4 must-fix：cmov blinding remap、branch_reorder metadata、bounds_window fact、struct size。见 `docs/tmp/bpf-jit-advisor-v7-review.md` |
+| 13 | **CI 修复** | ✅ x86 通过 | commit `2e008ac` 加了 libbpf-dev；ARM64 queued（等 runner） |
+| 23 | **Pure-JIT benchmark 审计** | ✅ 完成 | 49/50 OK，仅 `map_lookup_repeat` 需修。见 `docs/tmp/pure-jit-benchmark-audit.md` |
+| 24 | **修复 benchmark + 新增 cmov_select** | 🔄 进行中 | `map_lookup_repeat` 移到 runtime suite + 新增 `cmov_select.bpf.c` |
+| 25 | **修复后重跑 benchmark** | ❌ 待修复完成 | host + VM 两环境都跑，对比修复前后结果 |
+| 25-a | **结果分析** | ❌ 待重跑完成 | 分析修复后数据，更新 authoritative results |
+| 26 | **ARM64 CI 修复 + 监控** | 🔄 进行中 | codex 后台修复并监控直到通过 |
+| 26-a | **ARM64 结果分析** | ❌ 待 CI 通过 | ARM64 数据分析 + 跨架构对比 |
 | 14-r | **Interface review** | ✅ 完成 | 6/10，主要问题：假设简化的 kernel pipeline、scope 与 v6 不一致、缺 multi-subprog。见 `docs/tmp/interface-design-review.md` |
 | 15-r | **Cross-doc review** | ✅ 完成 | 每个 directive 的 blob/JIT/证据交叉验证 + Hybrid 分层建议。见 `docs/tmp/cross-document-review.md` |
 | 16-r | **OSDI readiness review** | ✅ 完成 | 4/10，见 `docs/tmp/osdi-readiness-review.md` |
@@ -552,7 +559,8 @@ CI:        GitHub Actions ARM64 + x86 (manual trigger)
 
 | 文档 | 内容 |
 |------|------|
-| **`docs/tmp/bpf-jit-advisor-v6.md`** | **当前最新设计（v6，OSDI/SOSP framing）** |
+| **`docs/tmp/bpf-jit-advisor-v7.md`** | **当前最新设计（v7 Hybrid，verifier rewrite + JIT lowering）** |
+| `docs/tmp/bpf-jit-advisor-v6.md` | v6 设计（已被 v7 取代） |
 | **`docs/tmp/interface-design-detail.md`** | **接口详细设计：syscall、blob 格式、CPU contract、安全分析、部署场景** |
 | **`docs/tmp/directive-discovery-analysis.md`** | **Directive 发现分析：11 候选排名、5 新 benchmark、真实 workload 证据** |
 | **`docs/tmp/verifier-rewrite-approach.md`** | **Path B 分析：verifier rewrite 方案、31 处 patch 清单、Hybrid 推荐** |

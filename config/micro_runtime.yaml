@@ -61,6 +61,19 @@ benchmarks:
     expected_result: 8595127842395553320
     tags: [map, helper-like, runtime]
 
+  - name: map_lookup_repeat
+    description: Repeated identical array-map lookups inside a hot map-backed loop
+    category: map-runtime
+    family: lookup-cache
+    level: repeated-hot-key
+    hypothesis: Repeated same-key lookups should isolate lookup-helper traffic in a cache-friendly access pattern
+    base_name: map_lookup_repeat
+    io_mode: map
+    kernel_input_size: 72
+    input_generator: map_lookup_repeat
+    expected_result: 10032338643832991529
+    tags: [map, helper, lookup-cache, runtime]
+
   - name: hash_map_lookup
     description: Repeated hash-map lookups over a generated key set
     category: map-runtime

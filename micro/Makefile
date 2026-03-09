@@ -54,4 +54,12 @@ clean:
 	rm -f $(ROOT_DIR)/generated-inputs/*.mem
 	rm -f $(ROOT_DIR)/results/*.json
 	rm -rf $(ROOT_DIR)/__pycache__
-	rm -rf $(BUILD_DIR)
+	@if [ -d "$(BUILD_DIR)" ]; then \
+		rm -rf "$(LIBBPF_BUILD_DIR)" "$(BPFTOOL_BUILD_DIR)" "$(RUNNER_BUILD_DIR)"; \
+		for entry in "$(BUILD_DIR)"/*; do \
+			[ -e "$$entry" ] || continue; \
+			rm -rf "$$entry" 2>/dev/null || \
+				printf 'Skipping undeletable build artifact: %s\n' "$$entry"; \
+		done; \
+		rmdir "$(BUILD_DIR)" 2>/dev/null || true; \
+	fi

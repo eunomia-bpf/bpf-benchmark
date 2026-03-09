@@ -90,7 +90,7 @@ bench_map_lookup_repeat(const u8 *data, u32 len, u64 *out)
     return 0;
 }
 
-DEFINE_STAGED_INPUT_XDP_BENCH(
+DEFINE_MAP_BACKED_XDP_BENCH(
     map_lookup_repeat_xdp,
     bench_map_lookup_repeat,
     map_lookup_repeat_input_value,

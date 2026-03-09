@@ -660,6 +660,53 @@ def generate_map_lookup_repeat(output: Path) -> dict[str, int]:
     return {"rounds": rounds, "slots": slots}
 
 
+def generate_cmov_select(output: Path) -> dict[str, int]:
+    groups = 32
+    lanes = 4
+    count = groups * lanes
+    compare_mask = (1 << 63) - 1
+    state = 0x1234_5678_9ABC_DEF0
+
+    compare_lhs: list[int] = []
+    compare_rhs: list[int] = []
+    select_true: list[int] = []
+    select_false: list[int] = []
+
+    for index in range(count):
+        state = _lcg(state ^ ((index + 1) * 0x9E37_79B9_7F4A_7C15))
+        raw_lhs = state & compare_mask
+        state = _lcg(state ^ ((index + 1) * 0xD134_2543_DE82_EF95))
+        raw_rhs = state & compare_mask
+
+        hi = raw_lhs if raw_lhs >= raw_rhs else raw_rhs
+        lo = raw_rhs if raw_lhs >= raw_rhs else raw_lhs
+        if hi == lo:
+            if hi < compare_mask:
+                hi += 1
+            elif lo > 0:
+                lo -= 1
+
+        if index & 1:
+            compare_lhs.append(hi)
+            compare_rhs.append(lo)
+        else:
+            compare_lhs.append(lo)
+            compare_rhs.append(hi)
+
+        state = _lcg(state ^ ((index + 1) * 0xA076_1D64_78BD_642F))
+        select_true.append((state ^ ((index + 5) * 0xE703_7ED1_A0B4_28DB)) & MASK64)
+        state = _lcg(state ^ ((index + 1) * 0x8EBC_6AF0_9C88_C6E3))
+        select_false.append((state ^ ((index + 9) * 0x5899_65CC_7537_4CC3)) & MASK64)
+
+    blob = bytearray(struct.pack("<II", count, groups))
+    for values in (compare_lhs, compare_rhs, select_true, select_false):
+        for value in values:
+            blob.extend(struct.pack("<Q", value))
+
+    output.write_bytes(blob)
+    return {"count": count, "groups": groups, "lanes": lanes}
+
+
 def generate_memcmp_prefix_64(output: Path) -> dict[str, int]:
     scenario_count = 3
     pattern = bytearray(_memcmp_prefix_pattern_byte(index) for index in range(64))
@@ -1034,6 +1081,7 @@ GENERATORS = {
     "load_byte_recompose": generate_load_byte_recompose,
     "load_native_u64": generate_load_native_u64,
     "map_lookup_repeat": generate_map_lookup_repeat,
+    "cmov_select": generate_cmov_select,
     "memcmp_prefix_64": generate_memcmp_prefix_64,
     "packet_parse_vlans_tcpopts": generate_packet_parse_vlans_tcpopts,
     "local_call_fanout": generate_local_call_fanout,
