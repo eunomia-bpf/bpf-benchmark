@@ -19,10 +19,14 @@ jobs:
         with:
           fetch-depth: 0
           ref: main
-          submodules: recursive
 
-      - name: Update submodules
-        run: git submodule update --init --recursive
+      - name: Update required submodules
+        run: |
+          git submodule sync -- vendor/llvmbpf vendor/libbpf vendor/bpftool
+          git submodule update --init --depth 1 \
+            vendor/llvmbpf \
+            vendor/libbpf \
+            vendor/bpftool
 
       - name: Install dependencies
         run: |
@@ -46,7 +50,7 @@ jobs:
             --suite config/micro_pure_jit.yaml \
             --output "micro/results/${RESULT_PREFIX}_pure_jit.json"
 
-      - name: Fallback pure JIT characterization to llvmbpf-only
+      - name: Fallback pure JIT characterization to kernel-only
         if: always()
         continue-on-error: true
         run: |
@@ -55,7 +59,7 @@ jobs:
             exit 0
           fi
           python3 micro/run_micro.py \
-            --runtime llvmbpf \
+            --runtime kernel \
             --iterations 5 \
             --warmups 1 \
             --repeat 200 \
@@ -75,7 +79,7 @@ jobs:
             --suite config/micro_runtime.yaml \
             --output "micro/results/${RESULT_PREFIX}_runtime.json"
 
-      - name: Fallback runtime suite to llvmbpf-only
+      - name: Fallback runtime suite to kernel-only
         if: always()
         continue-on-error: true
         run: |
@@ -84,7 +88,7 @@ jobs:
             exit 0
           fi
           python3 micro/run_micro.py \
-            --runtime llvmbpf \
+            --runtime kernel \
             --iterations 5 \
             --warmups 1 \
             --repeat 200 \
