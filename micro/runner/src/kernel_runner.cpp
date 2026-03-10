@@ -668,7 +668,46 @@ sample_result run_kernel(const cli_options &options)
     std::chrono::steady_clock::time_point recompile_start {};
     std::chrono::steady_clock::time_point recompile_end {};
     if (options.policy_blob.has_value()) {
-        auto policy_memfd = build_sealed_directive_memfd(*options.policy_blob);
+        /*
+         * Patch the policy blob's prog_tag and insn_cnt fields to match
+         * the kernel's view of the loaded program. The blob builder uses
+         * an approximation; here we use the actual values from the kernel.
+         */
+        auto pre_info = load_prog_info(program_fd);
+        auto policy_data = read_binary_file(*options.policy_blob);
+
+        /* Policy blob header layout:
+         * [0..3]   magic (4 bytes)
+         * [4..5]   version (2 bytes)
+         * [6..7]   hdr_len (2 bytes)
+         * [8..11]  total_len (4 bytes)
+         * [12..15] rule_cnt (4 bytes)
+         * [16..19] insn_cnt (4 bytes)
+         * [20..27] prog_tag (8 bytes)
+         * [28..29] arch_id (2 bytes)
+         * [30..31] flags (2 bytes)
+         */
+        if (policy_data.size() >= 32) {
+            /* Patch insn_cnt */
+            uint32_t xlated_insn_cnt = pre_info.xlated_prog_len / 8;
+            std::memcpy(policy_data.data() + 16, &xlated_insn_cnt, sizeof(xlated_insn_cnt));
+            /* Patch prog_tag */
+            std::memcpy(policy_data.data() + 20, pre_info.tag, 8);
+        }
+
+        /* Build a sealed memfd from the patched data */
+        scoped_fd patched_memfd(sys_memfd_create("bpf-jit-policy", MFD_CLOEXEC | MFD_ALLOW_SEALING));
+        if (patched_memfd.get() < 0) {
+            fail("memfd_create failed for policy blob: " + std::string(strerror(errno)));
+        }
+        if (!policy_data.empty()) {
+            write_full_or_fail(patched_memfd.get(), policy_data.data(), policy_data.size());
+        }
+        const int seals = F_SEAL_WRITE | F_SEAL_GROW | F_SEAL_SHRINK;
+        if (fcntl(patched_memfd.get(), F_ADD_SEALS, seals) != 0) {
+            fail("unable to seal policy memfd: " + std::string(strerror(errno)));
+        }
+
         recompile_start = std::chrono::steady_clock::now();
 
         /*
@@ -684,7 +723,7 @@ sample_result run_kernel(const cli_options &options)
             __u32 flags;
         } __attribute__((aligned(8))) recompile_attr = {};
         recompile_attr.prog_fd = static_cast<__u32>(program_fd);
-        recompile_attr.policy_fd = policy_memfd.get();
+        recompile_attr.policy_fd = patched_memfd.get();
         recompile_attr.flags = 0;
 
         /* Pad to sizeof(union bpf_attr) */

@@ -154,7 +154,7 @@ def load_bpf_insns_from_elf(elf_path, program_name=None):
         sh_size = struct.unpack_from('<Q', elf_data, sec_off + 32)[0]
 
         name = get_section_name(sh_name)
-        if sh_type == 1 and name in target_sections:  # SHT_PROGBITS
+        if sh_type == 1 and sh_size > 0 and name in target_sections:  # SHT_PROGBITS
             section_data = elf_data[sh_offset:sh_offset + sh_size]
             insns = []
             for i in range(0, len(section_data), 8):
@@ -340,9 +340,33 @@ def find_wide_mem_sites(insns):
 
 
 def compute_prog_tag(insn_data):
-    """Compute BPF prog_tag (first 8 bytes of SHA1 of instruction data)."""
-    sha1 = hashlib.sha1(insn_data).digest()
-    return sha1[:8]
+    """Compute BPF prog_tag approximation.
+
+    NOTE: The kernel computes prog_tag as SHA-256 of the xlated program
+    with map FD imm values zeroed. This function provides a placeholder.
+    For actual use, the runner patches the tag at load time using
+    BPF_OBJ_GET_INFO_BY_FD to get the real prog_tag.
+    """
+    # Zero out map FD references (BPF_LD | BPF_IMM | BPF_DW with PSEUDO_MAP_FD)
+    data = bytearray(insn_data)
+    i = 0
+    while i < len(data):
+        if i + 8 > len(data):
+            break
+        code = data[i]
+        regs = data[i + 1]
+        src_reg = (regs >> 4) & 0x0f
+        # BPF_LD | BPF_IMM | BPF_DW = 0x18, PSEUDO_MAP_FD = 1, PSEUDO_MAP_VALUE = 2
+        if code == 0x18 and src_reg in (1, 2):
+            # Zero imm of this and next instruction
+            data[i + 4:i + 8] = b'\x00\x00\x00\x00'
+            if i + 16 <= len(data):
+                data[i + 12:i + 16] = b'\x00\x00\x00\x00'
+            i += 16
+            continue
+        i += 8
+    sha = hashlib.sha256(bytes(data)).digest()
+    return sha[:8]
 
 
 def build_policy_blob(insns, insn_data, rules, arch_id=BPF_JIT_ARCH_X86_64):
