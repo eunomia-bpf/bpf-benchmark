@@ -107,7 +107,7 @@ cli_options parse_args(int argc, char **argv)
         fail(
             "usage: micro_exec <run-llvmbpf|run-kernel|list-programs> --program <path> [--program-name <name>] "
             "[--memory <path>] [--directive-blob <path>] [--policy-blob <path>] "
-            "[--manual-load] "
+            "[--manual-load] [--recompile-cmov] "
             "[--io-mode map|staged|packet] [--raw-packet] [--repeat N] [--input-size N] "
             "[--opt-level 0|1|2|3] [--no-cmov] [--llvm-disable-pass <name>] [--llvm-log-passes] "
             "[--perf-counters] [--perf-scope full_repeat_raw|full_repeat_avg] "
@@ -133,6 +133,10 @@ cli_options parse_args(int argc, char **argv)
         }
         if (current == "--policy-blob" && index + 1 < argc) {
             options.policy_blob = std::filesystem::path(argv[++index]);
+            continue;
+        }
+        if (current == "--recompile-cmov") {
+            options.recompile_cmov = true;
             continue;
         }
         if (current == "--program-name" && index + 1 < argc) {
@@ -212,6 +216,9 @@ cli_options parse_args(int argc, char **argv)
     }
     if (options.manual_load && options.command != "run-kernel") {
         fail("--manual-load is only valid with run-kernel");
+    }
+    if (options.recompile_cmov && options.command != "run-kernel") {
+        fail("--recompile-cmov is only valid with run-kernel");
     }
     if (options.command != "list-programs") {
         if (options.io_mode != "map" && options.io_mode != "staged" && options.io_mode != "packet") {

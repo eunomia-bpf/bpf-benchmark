@@ -399,6 +399,189 @@ std::vector<uint8_t> load_jited_program(int program_fd, uint32_t jited_prog_len)
     return jited_program;
 }
 
+/* ================================================================
+ * v4: load xlated BPF bytecode from kernel
+ * ================================================================ */
+
+std::vector<uint8_t> load_xlated_program(int program_fd, uint32_t xlated_prog_len)
+{
+    if (xlated_prog_len == 0) {
+        fail("kernel reported an empty xlated program");
+    }
+
+    std::vector<uint8_t> xlated(xlated_prog_len);
+    bpf_prog_info info = {};
+    info.xlated_prog_len = xlated_prog_len;
+    info.xlated_prog_insns = ptr_to_u64(xlated.data());
+
+    union bpf_attr attr = {};
+    attr.info.bpf_fd = program_fd;
+    attr.info.info_len = sizeof(info);
+    attr.info.info = ptr_to_u64(&info);
+    if (syscall(__NR_bpf, BPF_OBJ_GET_INFO_BY_FD, &attr, sizeof(attr)) != 0) {
+        fail("BPF_OBJ_GET_INFO_BY_FD (xlated dump) failed: " + std::string(strerror(errno)));
+    }
+
+    xlated.resize(info.xlated_prog_len);
+    return xlated;
+}
+
+/* ================================================================
+ * v4: scan xlated bytecode for cmov-select patterns and build policy blob
+ * ================================================================ */
+
+struct bpf_insn_raw {
+    uint8_t code;
+    uint8_t regs;
+    int16_t off;
+    int32_t imm;
+};
+
+static bool is_cond_jump_raw(const bpf_insn_raw &insn)
+{
+    uint8_t cls = insn.code & 0x07;
+    if (cls != 0x05 /* BPF_JMP */ && cls != 0x06 /* BPF_JMP32 */)
+        return false;
+    uint8_t op = insn.code & 0xf0;
+    switch (op) {
+    case 0x10: case 0x20: case 0x30: case 0x50: case 0x60:
+    case 0x70: case 0xa0: case 0xb0: case 0xc0: case 0xd0:
+        return true;
+    default:
+        return false;
+    }
+}
+
+static bool is_simple_mov_raw(const bpf_insn_raw &insn)
+{
+    uint8_t cls = insn.code & 0x07;
+    if (cls != 0x04 /* BPF_ALU */ && cls != 0x07 /* BPF_ALU64 */)
+        return false;
+    if ((insn.code & 0xf0) != 0xb0 /* BPF_MOV */)
+        return false;
+    if (insn.off != 0)
+        return false;
+    uint8_t src = insn.code & 0x08;
+    if (src == 0x08 /* BPF_X */)
+        return insn.imm == 0;
+    else
+        return (insn.regs >> 4) == 0;
+}
+
+struct policy_rule {
+    uint32_t site_start;
+    uint16_t site_len;
+    uint16_t rule_kind;
+    uint16_t native_choice;
+    uint16_t priority;
+};
+
+static std::vector<policy_rule> find_cmov_select_sites_xlated(
+    const uint8_t *xlated_data, uint32_t xlated_len)
+{
+    std::vector<policy_rule> rules;
+    uint32_t insn_cnt = xlated_len / 8;
+    if (insn_cnt < 3)
+        return rules;
+
+    /* Parse all instructions */
+    std::vector<bpf_insn_raw> insns(insn_cnt);
+    for (uint32_t i = 0; i < insn_cnt; i++) {
+        std::memcpy(&insns[i], xlated_data + i * 8, sizeof(bpf_insn_raw));
+    }
+
+    uint32_t idx = 0;
+    while (idx < insn_cnt) {
+        /* Diamond: jcc+2, mov, ja+1, mov */
+        if (idx + 3 < insn_cnt &&
+            is_cond_jump_raw(insns[idx]) && insns[idx].off == 2 &&
+            is_simple_mov_raw(insns[idx + 1]) &&
+            is_simple_mov_raw(insns[idx + 3]) &&
+            insns[idx + 2].code == (0x05 | 0x00) /* BPF_JMP | BPF_JA */ &&
+            insns[idx + 2].off == 1 &&
+            (insns[idx + 1].regs & 0x0f) == (insns[idx + 3].regs & 0x0f))
+        {
+            rules.push_back({idx, 4, BPF_JIT_RK_COND_SELECT, BPF_JIT_SEL_CMOVCC, 0});
+            idx += 4;
+            continue;
+        }
+
+        /* Compact: mov, jcc+1, mov */
+        if (idx > 0 && idx + 1 < insn_cnt &&
+            is_simple_mov_raw(insns[idx - 1]) &&
+            is_cond_jump_raw(insns[idx]) && insns[idx].off == 1 &&
+            is_simple_mov_raw(insns[idx + 1]) &&
+            (insns[idx - 1].regs & 0x0f) == (insns[idx + 1].regs & 0x0f))
+        {
+            rules.push_back({idx - 1, 3, BPF_JIT_RK_COND_SELECT, BPF_JIT_SEL_CMOVCC, 0});
+            idx += 2;
+            continue;
+        }
+
+        idx++;
+    }
+    return rules;
+}
+
+static std::vector<uint8_t> build_policy_blob_from_xlated(
+    int program_fd,
+    const bpf_prog_info &info,
+    const std::vector<policy_rule> &rules)
+{
+    uint32_t insn_cnt = info.xlated_prog_len / 8;
+    uint32_t rule_cnt = static_cast<uint32_t>(rules.size());
+
+    /* Header: 32 bytes */
+    struct __attribute__((packed)) {
+        uint32_t magic;
+        uint16_t version;
+        uint16_t hdr_len;
+        uint32_t total_len;
+        uint32_t rule_cnt;
+        uint32_t insn_cnt;
+        uint8_t  prog_tag[8];
+        uint16_t arch_id;
+        uint16_t flags;
+    } hdr = {};
+
+    hdr.magic = BPF_JIT_POLICY_MAGIC;
+    hdr.version = BPF_JIT_POLICY_VERSION;
+    hdr.hdr_len = 32;
+    hdr.rule_cnt = rule_cnt;
+    hdr.insn_cnt = insn_cnt;
+    std::memcpy(hdr.prog_tag, info.tag, 8);
+    hdr.arch_id = BPF_JIT_ARCH_X86_64;
+    hdr.flags = 0;
+
+    /* Each rule: 16 bytes */
+    struct __attribute__((packed)) {
+        uint32_t site_start;
+        uint16_t site_len;
+        uint16_t rule_kind;
+        uint16_t native_choice;
+        uint16_t priority;
+        uint32_t reserved;
+    } rule_entry = {};
+
+    uint32_t total_len = 32 + rule_cnt * 16;
+    hdr.total_len = total_len;
+
+    std::vector<uint8_t> blob(total_len, 0);
+    std::memcpy(blob.data(), &hdr, 32);
+
+    for (uint32_t i = 0; i < rule_cnt; i++) {
+        rule_entry.site_start = rules[i].site_start;
+        rule_entry.site_len = rules[i].site_len;
+        rule_entry.rule_kind = rules[i].rule_kind;
+        rule_entry.native_choice = rules[i].native_choice;
+        rule_entry.priority = rules[i].priority;
+        rule_entry.reserved = 0;
+        std::memcpy(blob.data() + 32 + i * 16, &rule_entry, 16);
+    }
+
+    return blob;
+}
+
 std::vector<uint8_t> build_packet_input(const std::vector<uint8_t> &input_bytes)
 {
     std::vector<uint8_t> packet(input_bytes.size() + sizeof(uint64_t), 0);
@@ -667,77 +850,80 @@ sample_result run_kernel(const cli_options &options)
     /* v4 post-load re-JIT: apply policy blob via BPF_PROG_JIT_RECOMPILE */
     std::chrono::steady_clock::time_point recompile_start {};
     std::chrono::steady_clock::time_point recompile_end {};
-    if (options.policy_blob.has_value()) {
-        /*
-         * Patch the policy blob's prog_tag and insn_cnt fields to match
-         * the kernel's view of the loaded program. The blob builder uses
-         * an approximation; here we use the actual values from the kernel.
-         */
+    if (options.recompile_cmov || options.policy_blob.has_value()) {
         auto pre_info = load_prog_info(program_fd);
-        auto policy_data = read_binary_file(*options.policy_blob);
 
-        /* Policy blob header layout:
-         * [0..3]   magic (4 bytes)
-         * [4..5]   version (2 bytes)
-         * [6..7]   hdr_len (2 bytes)
-         * [8..11]  total_len (4 bytes)
-         * [12..15] rule_cnt (4 bytes)
-         * [16..19] insn_cnt (4 bytes)
-         * [20..27] prog_tag (8 bytes)
-         * [28..29] arch_id (2 bytes)
-         * [30..31] flags (2 bytes)
-         */
-        if (policy_data.size() >= 32) {
-            /* Patch insn_cnt */
-            uint32_t xlated_insn_cnt = pre_info.xlated_prog_len / 8;
-            std::memcpy(policy_data.data() + 16, &xlated_insn_cnt, sizeof(xlated_insn_cnt));
-            /* Patch prog_tag */
-            std::memcpy(policy_data.data() + 20, pre_info.tag, 8);
+        std::vector<uint8_t> policy_data;
+
+        if (options.recompile_cmov) {
+            /*
+             * Auto-scan the xlated BPF program for cmov-select patterns
+             * and build the policy blob from post-verifier bytecode.
+             */
+            auto xlated = load_xlated_program(program_fd, pre_info.xlated_prog_len);
+            auto rules = find_cmov_select_sites_xlated(xlated.data(),
+                                                       static_cast<uint32_t>(xlated.size()));
+            if (rules.empty()) {
+                fprintf(stderr, "recompile-cmov: no cmov-select sites found in xlated program (%u insns)\n",
+                        pre_info.xlated_prog_len / 8);
+            } else {
+                fprintf(stderr, "recompile-cmov: found %zu cmov-select sites in xlated program (%u insns)\n",
+                        rules.size(), pre_info.xlated_prog_len / 8);
+                policy_data = build_policy_blob_from_xlated(program_fd, pre_info, rules);
+            }
+        } else {
+            /*
+             * Use explicit policy blob file, patching prog_tag and insn_cnt
+             * to match the kernel's view.
+             */
+            policy_data = read_binary_file(*options.policy_blob);
+            if (policy_data.size() >= 32) {
+                uint32_t xlated_insn_cnt = pre_info.xlated_prog_len / 8;
+                std::memcpy(policy_data.data() + 16, &xlated_insn_cnt, sizeof(xlated_insn_cnt));
+                std::memcpy(policy_data.data() + 20, pre_info.tag, 8);
+            }
         }
 
-        /* Build a sealed memfd from the patched data */
-        scoped_fd patched_memfd(sys_memfd_create("bpf-jit-policy", MFD_CLOEXEC | MFD_ALLOW_SEALING));
-        if (patched_memfd.get() < 0) {
-            fail("memfd_create failed for policy blob: " + std::string(strerror(errno)));
-        }
         if (!policy_data.empty()) {
+            /* Build a sealed memfd from the policy data */
+            scoped_fd patched_memfd(sys_memfd_create("bpf-jit-policy", MFD_CLOEXEC | MFD_ALLOW_SEALING));
+            if (patched_memfd.get() < 0) {
+                fail("memfd_create failed for policy blob: " + std::string(strerror(errno)));
+            }
             write_full_or_fail(patched_memfd.get(), policy_data.data(), policy_data.size());
-        }
-        const int seals = F_SEAL_WRITE | F_SEAL_GROW | F_SEAL_SHRINK;
-        if (fcntl(patched_memfd.get(), F_ADD_SEALS, seals) != 0) {
-            fail("unable to seal policy memfd: " + std::string(strerror(errno)));
-        }
+            const int seals = F_SEAL_WRITE | F_SEAL_GROW | F_SEAL_SHRINK;
+            if (fcntl(patched_memfd.get(), F_ADD_SEALS, seals) != 0) {
+                fail("unable to seal policy memfd: " + std::string(strerror(errno)));
+            }
 
-        recompile_start = std::chrono::steady_clock::now();
+            recompile_start = std::chrono::steady_clock::now();
 
-        /*
-         * BPF_PROG_JIT_RECOMPILE syscall.
-         * The host bpf.h doesn't have this member, so use a raw
-         * struct aligned to match union bpf_attr layout.
-         * The jit_recompile sub-struct is a union member starting
-         * at offset 0 in bpf_attr (like all sub-structs).
-         */
-        struct {
-            __u32 prog_fd;
-            __s32 policy_fd;
-            __u32 flags;
-        } __attribute__((aligned(8))) recompile_attr = {};
-        recompile_attr.prog_fd = static_cast<__u32>(program_fd);
-        recompile_attr.policy_fd = patched_memfd.get();
-        recompile_attr.flags = 0;
+            /*
+             * BPF_PROG_JIT_RECOMPILE syscall.
+             * Use raw struct since host bpf.h doesn't have jit_recompile member.
+             */
+            struct {
+                __u32 prog_fd;
+                __s32 policy_fd;
+                __u32 flags;
+            } __attribute__((aligned(8))) recompile_attr = {};
+            recompile_attr.prog_fd = static_cast<__u32>(program_fd);
+            recompile_attr.policy_fd = patched_memfd.get();
+            recompile_attr.flags = 0;
 
-        /* Pad to sizeof(union bpf_attr) */
-        alignas(8) char attr_buf[256] = {};
-        static_assert(sizeof(recompile_attr) <= sizeof(attr_buf));
-        std::memcpy(attr_buf, &recompile_attr, sizeof(recompile_attr));
+            /* Pad to sizeof(union bpf_attr) */
+            alignas(8) char attr_buf[256] = {};
+            static_assert(sizeof(recompile_attr) <= sizeof(attr_buf));
+            std::memcpy(attr_buf, &recompile_attr, sizeof(recompile_attr));
 
-        const int rc = static_cast<int>(syscall(__NR_bpf, BPF_PROG_JIT_RECOMPILE,
-                                                attr_buf, sizeof(attr_buf)));
-        recompile_end = std::chrono::steady_clock::now();
-        if (rc != 0) {
-            fprintf(stderr, "BPF_PROG_JIT_RECOMPILE failed: %s (errno=%d)\n",
-                    strerror(errno), errno);
-            /* Non-fatal: continue with stock JIT */
+            const int rc = static_cast<int>(syscall(__NR_bpf, BPF_PROG_JIT_RECOMPILE,
+                                                    attr_buf, sizeof(attr_buf)));
+            recompile_end = std::chrono::steady_clock::now();
+            if (rc != 0) {
+                fprintf(stderr, "BPF_PROG_JIT_RECOMPILE failed: %s (errno=%d)\n",
+                        strerror(errno), errno);
+                /* Non-fatal: continue with stock JIT */
+            }
         }
     }
 

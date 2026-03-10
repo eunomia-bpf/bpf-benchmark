@@ -140,12 +140,14 @@ def load_bpf_insns_from_elf(elf_path, program_name=None):
         end = shstrtab.index(b'\x00', name_offset)
         return shstrtab[name_offset:end].decode('ascii')
 
-    # Find the program section
+    # Find the program section (respect priority order of target_sections)
     target_sections = ['xdp', '.text']
     if program_name:
         target_sections = [f'xdp/{program_name}', f'xdp_{program_name}',
                           program_name, 'xdp', '.text']
 
+    # Build a map of section name -> (offset, size) for all PROGBITS sections
+    section_map = {}
     for sec_idx in range(e_shnum):
         sec_off = e_shoff + sec_idx * e_shentsize
         sh_name = struct.unpack_from('<I', elf_data, sec_off)[0]
@@ -154,7 +156,13 @@ def load_bpf_insns_from_elf(elf_path, program_name=None):
         sh_size = struct.unpack_from('<Q', elf_data, sec_off + 32)[0]
 
         name = get_section_name(sh_name)
-        if sh_type == 1 and sh_size > 0 and name in target_sections:  # SHT_PROGBITS
+        if sh_type == 1 and sh_size > 0:  # SHT_PROGBITS
+            section_map[name] = (sh_offset, sh_size)
+
+    # Try target sections in priority order
+    for target in target_sections:
+        if target in section_map:
+            sh_offset, sh_size = section_map[target]
             section_data = elf_data[sh_offset:sh_offset + sh_size]
             insns = []
             for i in range(0, len(section_data), 8):

@@ -39,6 +39,7 @@ struct cli_options {
     std::optional<std::filesystem::path> memory;
     std::optional<std::filesystem::path> directive_blob;
     std::optional<std::filesystem::path> policy_blob;    // v4 recompile policy
+    bool recompile_cmov = false;                        // v4 auto-scan xlated for cmov
     std::optional<std::string> program_name;
     std::string io_mode = "map";
     bool manual_load = false;
