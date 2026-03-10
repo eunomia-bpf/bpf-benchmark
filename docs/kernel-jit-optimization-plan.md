@@ -1,11 +1,14 @@
 # Kernel eBPF JIT 优化：计划与进度
 
 > 本文档是 kernel JIT 优化论文的单一 hub，记录设计方向、论文策略、实验进度与 TODO。
+> **编辑规则：任何 TODO/实验/文档引用条目被取代时，必须至少保留一行并标注状态（如"归入 #32"），不得直接删除。**
 > Characterization 论文见 `docs/paper-comparison.md`（独立论文，最终将与本文合并）。
 >
-> 最新设计文档：**`docs/tmp/bpf-jit-advisor-v7.md`**（Hybrid 架构，3245 行）
+> 最新设计文档：**`docs/tmp/jit-pass-framework-v5-design.md`**（v5 声明式 Pattern + Canonical Lowering）
+> v4 设计文档：`docs/tmp/jit-pass-framework-v4-design.md`（v5 的前身，保留作参考）
+> v3 设计文档：`docs/tmp/jit-pass-framework-v3-design.md`（已被 v4 取代为主方向，保留作参考）
 >
-> 上次更新：2026-03-09
+> 上次更新：2026-03-10（v4 Round 3 完成，ALL 4 directive families active，ROTATE -28%，combined -37%）
 
 ---
 
@@ -15,7 +18,11 @@
 
 > eBPF JIT 的 backend 优化应该分为稳定的 **kernel legality plane** 和可更新的 **userspace backend policy plane**。Kernel 验证并安全采纳有界的 backend directives；特权 userspace 根据 CPU profile、workload profile、程序特征和 fleet policy 决定请求哪些 directives。
 
-贡献不是任何一个 peephole 优化，而是 **mechanism/policy 分离、fail-closed legality 基础设施、以及 profitable backend 决策随程序/workload/硬件变化的证据**。
+贡献不是任何一个 peephole 优化，而是 **可扩展的 JIT pass 框架**：用户态定义 transformation rules，内核安全地解释执行。本质上是给 kernel BPF JIT 加一个可外部控制的 instruction selection / peephole optimization 框架。
+
+> **v3 核心洞察**：论文的贡献层次应该是**框架**，不是个别 directive。
+> POC v2 证明了单个 JIT-level directive 的可行性（cmov_select）；
+> v3 要证明这个机制可以**泛化为通用的可扩展框架**——用户态无需改内核代码就能定义新的优化 rule。
 
 ### 1.2 两篇论文策略
 
@@ -106,11 +113,76 @@ v4 试图用 target-independent IR 做抽象，但这是错误的层次：
 
 ### 1.8 分阶段计划
 
-| 阶段 | 内容 | Kernel 改动 | Userspace |
-|------|------|-----------|-----------|
-| **Phase 1** | 允许特权进程对已验证 BPF 程序附加 directives | 最小：新增 directive 接口 + 验证逻辑 | 手动工具 / 脚本 |
-| **Phase 2** | 基于 llvmbpf 分析自动生成 directives | 不变 | llvmbpf 分析 + directive 生成 |
-| **Phase 3** | 跨架构（x86 + arm64） | 每个 arch 实现 directive consumer | 同一分析，不同 directives |
+| 阶段 | 内容 | Kernel 改动 | Userspace | 状态 |
+|------|------|-----------|-----------|:---:|
+| **Phase 1 (POC v2)** | 单个硬编码 JIT directive (cmov_select) | 新增 directive 接口 + 验证逻辑 + x86 emitter | 手动工具 | ✅ |
+| **Phase 2 (v3→v4)** | **Post-load re-JIT + 机器码级 policy** | `BPF_PROG_JIT_RECOMPILE` + 通用 dispatch | auto-scan xlated + policy blob builder | 🔄 |
+| **Phase 3** | 跨架构 + 自动化 + 端到端部署 | arm64 target backend | llvmbpf 自动 rule 生成 + PGO | ❌ |
+
+#### v3→v4 设计演化
+
+v3 设计了复杂的 5 层基础设施（family/plan/alt table/dispatcher/arbitration），但 POC 阶段过度工程化。v4 回到第一性原理：
+
+| 创新 | v3 | v4 |
+|------|----|----|
+| 控制粒度 | userspace 选 kernel 预注册的 alt | **userspace 直接指定 native instruction** |
+| 传输时机 | 绑定在 BPF_PROG_LOAD | **独立 BPF_PROG_JIT_RECOMPILE** |
+| 可迭代性 | 需重新加载程序 | **运行中程序可反复 re-JIT** |
+| Runtime PGO | 不支持 | **load → profile → apply → re-JIT → measure → iterate** |
+
+### 1.9 v3 可扩展 JIT Pass 框架（核心方向）
+
+> **这是论文的真正贡献**。POC v2 的单个 cmov_select 只是 proof of concept。
+
+#### 1.9.1 问题：当前 POC v2 不可扩展
+
+| 能力 | POC v2 | v3 可扩展框架 |
+|------|--------|-------------|
+| directive 种类 | 1 个（cmov） | N 个，用户态可定义 |
+| 添加新 directive | 改内核代码（~300行/directive） | 用户态提交 rule |
+| pattern 语言 | 硬编码 C 函数 | 声明式 DSL / peephole pattern |
+| native emission | 硬编码 EMIT 宏 | instruction selection 抽象 |
+| 跨架构 | 只有 x86 | target-independent rules + target lowering |
+| safety 机制 | 手工 audit | 自动 rule 验证 |
+
+#### 1.9.2 v3 需要的四个核心组件
+
+1. **Pattern/Rewrite 中间表示**
+   - 用户态描述"看到 X 形状的 BPF 指令序列，native lowering 换成 Y"
+   - 类似 LLVM TableGen 的 peephole DSL，但更受限（安全性）
+   - 内核能解释执行这个 rule
+
+2. **Safety Verifier for Rules**
+   - 内核必须证明用户态给的 rewrite rule 不会破坏语义正确性
+   - 可能的方法：从预定义模板实例化、声明式 constraint checking、equivalence proof
+
+3. **JIT Backend 抽象层**
+   - 当前 `do_jit()` 是一个大 switch-case，没有 instruction selection 抽象
+   - 需要在关键位置插入 "instruction selection point"，让 rule 决定走哪个 lowering 分支
+   - 或者：两阶段 JIT（先选策略，再发射）
+
+4. **跨架构 Target Description**
+   - Target-independent pattern（BPF 指令序列匹配）
+   - Target-specific lowering（x86: cmovcc, arm64: csel）
+   - 统一的 rule 格式，per-target emission backends
+
+#### 1.9.3 核心难点
+
+这本质上是在**给 kernel BPF JIT 加一个 compiler backend 的 instruction selection 框架**。Linux 内核 BPF JIT 当前的设计哲学是：一个大的 `do_jit()` switch-case，每条 BPF 指令对应一段硬编码的 native emission。它没有 IR、没有 instruction selection pass、没有 peephole optimizer。
+
+关键问题：**在保持内核安全性的前提下，用户态可以控制 JIT emission 的最大边界在哪里？**
+
+#### 1.9.4 与 existing work 的关键差异（更新）
+
+| 系统 | 优化层 | 可扩展? | 能解决 backend 差距? | 部署可控? |
+|------|--------|:---:|:---:|:---:|
+| K2 (SIGCOMM'21) | BPF bytecode | ❌ | ❌ | ❌ |
+| Merlin (ASPLOS'24) | LLVM IR + BPF | ❌ | ❌ | ❌ |
+| EPSO (ASE'25) | BPF bytecode | ❌ | ❌ | ❌ |
+| GCC/LLVM JIT | native backend | ✅ (passes) | ✅ | ❌ (kernel-internal) |
+| **Ours (v3)** | **BPF JIT backend** | **✅ (user-defined rules)** | **✅** | **✅** |
+
+详细设计见 `docs/tmp/jit-pass-framework-v3-design.md`。
 
 ---
 
@@ -235,7 +307,8 @@ v4 试图用 target-independent IR 做抽象，但这是错误的层次：
 │  │ Directive blob generation           │  │
 │  └─────────────────────────────────────┘  │
 └──────────────────┬────────────────────────┘
-                   │ BPF_PROG_LOAD(jit_directives_fd)
+                   │ BPF_PROG_JIT_RECOMPILE(prog_fd, policy_fd)
+                   │ (v4: 独立于 BPF_PROG_LOAD，支持 post-load re-JIT)
 ┌──────────────────▼────────────────────────┐
 │  Kernel Legality Plane                    │
 │  ┌─────────────────────────────────────┐  │
@@ -389,13 +462,79 @@ struct bpf_jit_dir_template {
 | 微架构实验 | 03-08 | 频率扫描、输入分布、PMU |
 | GitHub Actions CI | 03-08 | ARM64 + x86 workflow 设置完成 |
 | v6 设计完善 | 03-08 | OSDI/SOSP novelty 分析，directive 分类体系 |
+| v3 框架设计 + 3 轮 review | 03-09 | 8/10，JIT-only invariant 确立。见 `docs/tmp/jit-pass-framework-v3-design.md` |
+| v4 框架设计 | 03-09 | Post-load re-JIT + 机器码级 policy。见 `docs/tmp/jit-pass-framework-v4-design.md` |
+| **v4 POC 实现（2 rule）** | 03-09 | 1788 LOC kernel + 3 commits userspace。`jit-directive-v4` branch。2 directives (COND_SELECT + WIDE_MEM) |
+| **v4 VM 验证（2 rule）** | 03-09 | 43 benchmarks tested。xlated 不变量全部满足。log2_fold: 6 sites, +28% 变慢 → **policy-sensitivity 直接验证** |
+| **v4 gap analysis** | 03-09 | 13 gaps, 7 需立刻修。最关键：correctness bug + 只有 2 directives + 无 cpu feature gating |
+| **v4 correctness fix** | 03-09 | 3 个 bug 修复：interior edge check + flag-clobber + subprog boundary。见 `docs/tmp/v4-bug-diagnosis.md` |
+| **v4 扩展（4 rule）** | 03-09 | 新增 ROTATE (rorx/ror) + ADDR_CALC (LEA fusion) + cpu_features_required + per-rule logging。~850 LOC kernel 总计 |
+| **v4 实现 review** | 03-09 | 🔄 sonnet 对比 plan+v4 设计文档审查中。输出 `docs/tmp/v4-implementation-review.md` |
+| **v4 新 directive VM 测试** | 03-09 | 🔄 sonnet 测试 4 个 directive 在 VM 端到端验证中。输出 `micro/results/v4_new_directives_test.json` |
+| **论文 LaTeX 初稿** | 03-09 | 🔄 sonnet 创建 ACM sigconf 模板 + characterization + system design 初稿。输出 `docs/paper/paper.tex` |
+| **Round 1 修复 + 重测** | 03-09 | R1/R3/R5/R6/R7 五项修复。LEA/CMOV 无回归。**ROTATE 和 WIDE_MEM 仍 0 覆盖**（clang pattern mismatch）。见 `docs/tmp/v4-round1-test-results.md` |
+| **Round 2 scanner 修复 + VM 测试** | 03-10 | WIDE_MEM 突破（0→11 sites，-13%/-14% exec）。ROTATE 仍 0（micro_rotl64 shift mask 问题）。见 `docs/tmp/v4-round2-test-results.md` |
+| **v5 声明式 Pattern 框架设计** | 03-10 | ~950 行设计文档。pattern 描述移到 userspace blob，kernel 通用 matcher + canonical lowering。见 `docs/tmp/jit-pass-framework-v5-design.md` |
+| **Round 2 scanner 修复** | 03-09 | ROTATE 6-insn masked pattern + WIDE_MEM high-byte-first + rotate64_hash benchmark。见 `docs/tmp/v4-round2-implementation.md`。VM 测试 🔄 |
+| **Round 3: ROTATE 突破** | 03-10 | **ALL 4 families active**。ROTATE 0→126 sites（115+11），-28.4% exec，-32.3% code。combined -36.6%。见 `docs/tmp/v4-round3-test-results.md` |
 
 ### 8.1 VM vs Host 关键发现
 
 7.0-rc2 kernel JIT 比 6.15 快约 12%（geomean 0.881x），部分归因于 callee-saved 优化。
 完整数据见 `micro/results/vm_vs_host_comparison.md`。
 
-### 8.2 微架构实验摘要
+### 8.2 v4 新 Directive VM 测试（2026-03-09）
+
+> 完整数据见 `micro/results/v4_new_directives_test.json`
+
+| Directive | 覆盖率 | 结果 | 说明 |
+|-----------|--------|------|------|
+| **ADDR_CALC (LEA)** | 4 程序，5 sites | ✅ **stride_load_16 -12%，multi_acc_4 -7%** | jited -6B/-5B，真实加速 |
+| **COND_SELECT (cmov)** | 1 程序，6 sites | ⚠️ log2_fold +34% 变慢 | 可预测分支 → cmov 反而更慢，验证 policy-sensitivity |
+| **ROTATE** | **0 覆盖** | ❌ 无 sites | clang 编译 rotate 为 AND+RSH+SHL+OR（带 mask），scanner 不识别 |
+| **WIDE_MEM** | **0 覆盖** | ❌ 无 sites | clang 把 byte-load 循环优化掉，不产生 sequential ladder |
+
+**关键结论**：
+- ADDR_CALC 是唯一展示真实加速的 directive（-12%），且正确性 100%
+- ROTATE 和 WIDE_MEM 的 scanner pattern 需要适配真实 clang 编译输出
+- 核心不变量全部满足：xlated_prog_len 在所有 case 下不变
+
+### 8.2b v4 Round 2 VM 测试（2026-03-10）
+
+> 完整数据见 `docs/tmp/v4-round2-test-results.md`
+
+| Directive | 覆盖率 | 性能 | 代码大小 | 说明 |
+|-----------|--------|------|---------|------|
+| **WIDE_MEM** | **3 程序，11 sites** | ✅ **load_byte_recompose -13%，stride_load_4 -14%** | -12B/-24B/-96B | **Round 1→Round 2 突破：0→11 sites** |
+| **ADDR_CALC (LEA)** | 3 程序，3 sites | ✅ stride_load_16 -64%，multi_acc_4 -3% | -6B/-5B | 无回归，stride_load_16 大幅加速 |
+| **COND_SELECT (cmov)** | 1 程序，6 sites | ⚠️ log2_fold +9.3% 变慢 | +34B | 预期行为（policy-sensitivity） |
+| **ROTATE** | **仍 0 覆盖** | ❌ 无 sites | — | micro_rotl64 的 `shift&=63` 产生额外 BPF insn，需进一步调试 |
+
+**Round 2 关键进展**：
+- WIDE_MEM scanner 修复成功：high-byte-first 2-byte pattern 匹配 load_byte_recompose 和 stride_load_4
+- 现有 3/4 directives 有真实覆盖（CMOV + LEA + WIDE_MEM），仅 ROTATE 待修
+- xlated_prog_len 不变量全部满足
+
+### 8.2c v4 Round 3 VM 测试（2026-03-10）
+
+> 完整数据见 `docs/tmp/v4-round3-test-results.md`
+
+**ROTATE 突破**：内核 validator+emitter 扩展支持 commuted 4-insn、5-insn two-copy、5-insn masked 三种 clang 实际输出模式。
+
+| Directive | 覆盖率 | 性能 | 代码大小 | 说明 |
+|-----------|--------|------|---------|------|
+| **ROTATE** | **2 程序，126 sites** | ✅ **rotate64_hash -28.4%，packet_rss_hash -10.5%** | -1150B/-156B | **Round 2→Round 3 突破：0→126 sites** |
+| **ROTATE+WIDE_MEM** | rotate64_hash 115+8 | ✅ **-36.6% combined** | -1246B (-35%) | 多 directive 组合验证 |
+| **WIDE_MEM** | 3 程序，11 sites | ✅ 无回归 | 无回归 | Round 2 结果保持 |
+| **ADDR_CALC (LEA)** | stride_load_16 | ✅ 无回归 | 无回归 | 保持 |
+
+**Round 3 关键里程碑**：
+- **ALL 4 directive families 现在都有非零覆盖**（CMOV 受 subprog boundary 限制，但机制已验证）
+- rotate64_hash combined optimization -36.6% 展示了框架的 **composability**
+- xlated_prog_len 不变量全部满足
+- 所有 correctness 检查通过
+
+### 8.3 微架构实验摘要
 
 - **CPU 频率敏感性**：binary_search（31.7%）、load_byte_recompose（33.2%）、switch_dispatch（17.3%）
 - **输入分布**：branch_layout predictable 0.225x vs random 0.326x
@@ -483,32 +622,144 @@ struct bpf_jit_dir_template {
 | 15-r | **Cross-doc review** | ✅ 完成 | 每个 directive 的 blob/JIT/证据交叉验证 + Hybrid 分层建议。见 `docs/tmp/cross-document-review.md` |
 | 16-r | **OSDI readiness review** | ✅ 完成 | 4/10，见 `docs/tmp/osdi-readiness-review.md` |
 
-### 🟡 P1 — 原型实现（修正后的 Critical Path）
+### 🟡 P1 — v4 Post-load Re-JIT 框架实现
 
-> **2026-03-09 重大修正**：POC v1 的 `wide_load` 是 BPF bytecode 级别的变换（verifier rewrite），
-> 用户态优化器也能做。这不是 JIT backend 优化，与论文 thesis 矛盾。
-> P1 路径已重构：以 **真正的 JIT-level directive** 为核心。
+> **2026-03-09 方向演化**：v3 设计（8/10 review）确认了可扩展框架方向。
+> v4 进一步简化：(1) 机器码级 instruction selection 是 userspace policy (2) 从 BPF_PROG_LOAD 分离出 BPF_PROG_JIT_RECOMPILE。
 >
-> **正确 directive 的判断标准**：用户态能不能做同样的事？如果能 → 错误的层。
-> - ❌ `wide_load` verifier rewrite：改写 BPF 指令 → 用户态也能做
-> - ✅ `cmov_select` JIT lowering：选择 cmovcc vs jcc+mov → 只有 JIT 能做
-> - ✅ `lea_fusion`：选择 lea vs mov+shl+add → 只有 x86 JIT 能做
-> - ✅ `rotate_fusion`：选择 rorx/BMI2 → 只有 JIT 知道 CPU features
+> **v4 POC 已实现**：4 个 directive (COND_SELECT + WIDE_MEM + ROTATE + ADDR_CALC)，BPF_PROG_JIT_RECOMPILE syscall 工作，VM 验证通过。
+> **关键发现**：log2_fold cmov recompile **+28% 变慢**，直接验证 policy-sensitivity thesis。
+>
+> **已修复**：correctness bug（interior edge check + flag-clobber fix + subprog boundary）。
+> **已补齐**：ROTATE (rorx/ror, BMI2 gating) + ADDR_CALC (LEA fusion) + cpu_features_required + per-rule logging。
+> **待验证**：VM 测试新 directive 正确性和性能（sonnet agent 进行中）。
 
-| # | 任务 | 说明 | 层 | 状态 |
-|---|------|------|:---:|:---:|
-| 28 | **POC v2: cmov_select JIT lowering** | 第一个真正的 JIT directive。BPF 不变，JIT 发射 cmovcc 替代 jcc+mov+jmp+mov。**关键不变量：xlated_prog_len 不变** | JIT | 🔄 |
-| 15 | **Transport + blob parser + fail-closed** | 复用 v1 transport skeleton，但加真正的错误返回 | kernel | ❌ |
-| 29 | **第二个 JIT directive** | `lea_fusion` 或 `rotate_fusion`（纯 JIT-level，证明框架泛化） | JIT | ❌ |
-| 17-fix | **wide_load 重新定位** | 如果保留，应明确标注为 "bytecode-level optimization"，不是 JIT directive；或改成真正的 JIT-level wide load emission | 定位 | ❌ |
-| 20 | **branch_reorder** | verifier-level structural rewrite（这个确实需要 kernel 参与，用户态无法安全做 CFG permutation） | verifier | ❌ |
-| 21 | **kernel-fixed baselines** | fixed-cmov + fixed-layout 作为对比。**OSDI 必须** | eval | ❌ |
-| 22 | **消融补全** | cmov ablation 已有，补 byte-recompose / callee-saved / BMI | eval | ❌ |
+| # | 任务 | 说明 | 状态 |
+|---|------|------|:---:|
+| 15 | **Transport + blob parser + fail-closed** | 复用 v1 skeleton，POC v2 中实现了基础版本 | ✅ |
+| 28 | **POC v2: cmov_select JIT lowering** | ✅ 设计不变量证明成功（xlated 不变，jited 变）。已提交 `dd81852` | ✅ |
+| 28-r | **POC v2 设计一致性审查** | ✅ 实现忠实于狭义目标。已知 bug：diamond+BPF_X 未 lower。见 `docs/tmp/poc-v2-design-conformance-review.md` | ✅ |
+| 17-fix | **wide_load 重新定位** | v3 框架下作为 rule 之一；不再是独立 verifier rewrite | 归入 #35 |
+| 29 | **第二个 JIT directive** | 原计划 `lea_fusion`/`rotate_fusion`，现归入 v4 rule 体系 | 归入 #35 |
+| 20 | **branch_reorder** | verifier-level CFG permutation，v4 scope 外（xlated 不变限制） | scope 外 |
+| 30 | **v3 框架设计** | 可扩展 JIT pass 框架详细设计。见 `docs/tmp/jit-pass-framework-v3-design.md`。已被 v4 取代 | 已被 v4 取代 |
+| 30-v4 | **v4 框架设计** | Post-load re-JIT + 机器码级 policy。见 `docs/tmp/jit-pass-framework-v4-design.md` | ✅ |
+| 35 | **v4 POC 实现** | BPF_PROG_JIT_RECOMPILE + 通用 dispatcher + 4 directives。branch `jit-directive-v4`，~850 LOC kernel | ✅ 框架 + 4 rule |
+| 35-bug | **v4 correctness bug** | ✅ 已修复：interior edge check + flag-clobber (emit_mov_imm32_noflags) + subprog boundary。见 `docs/tmp/v4-bug-diagnosis.md` | ✅ 已修复 |
+| 35-gap | **v4 实现差距分析** | 13 个 gap 中已修 10 个。见下方详细列表 | ✅ 大部分修复 |
+| 35-r | **v4 实现 review** | sonnet 对比 plan+设计文档全面审查。见 `docs/tmp/v4-implementation-review.md`。评分 6/10，10 个 gap (R1-R10) | ✅ |
+| 35-vm | **v4 新 directive VM 测试** | 4 个 directive 在 VM 中端到端测试。见 `micro/results/v4_new_directives_test.json`。LEA 唯一有覆盖 | ✅ |
+| 35-r1 | **Round 1 修复 + 重测** | R1/R3/R5/R6/R7 修复。无回归。ROTATE/WIDE_MEM 仍 0 覆盖（scanner pattern mismatch）。见 `docs/tmp/v4-round1-test-results.md` | ✅ |
+| 35-r2 | **Round 2: Scanner pattern 适配** | WIDE_MEM 突破（0→11 sites，-13%/-14%）。ROTATE 仍 0（shift mask 问题）。见 `docs/tmp/v4-round2-test-results.md` | ⚠️ WIDE ✅ ROT ❌ |
+| 35-r3 | **Round 3: ROTATE 修复** | ✅ ROTATE 突破：0→126 sites（rotate64_hash 115, packet_rss_hash 11）。-28.4% exec，-32.3% code。ALL 4 directive families now active。见 `docs/tmp/v4-round3-test-results.md` | ✅ |
+| 36 | **v4 补充 directive: ROTATE** | rorx vs ror，BMI2 gating。validator + emitter + userspace scanner 已实现 | ✅ 已实现 |
+| 37 | **v4 补充 directive: ADDR_CALC** | lea vs mov+shl+add。validator + emitter + userspace scanner 已实现 | ✅ 已实现 |
+| 38 | **v4 补充 directive: ZERO_EXTEND** | movzx vs xor+mov，非常普遍 | ❌ 未开始 |
+| 39 | **v4 policy A/B 对比** | ✅ log2_fold 6 sites：baseline 764ns vs cmov 824ns (+7.9%)。可预测分支 cmov 变慢，验证 policy-sensitivity | ✅ |
+| 40 | **v4 cpu_features_required** | UAPI `bpf_jit_rewrite_rule.cpu_features_required` + kernel `boot_cpu_has()` 检查 | ✅ 已实现 |
+| 41 | **v4 per-rule logging** | `pr_debug` 报告每条 rule 的 accept/reject | ✅ 已实现 |
+| 31 | **v3 rule 解释器** | 已被 v4 简化设计取代 | 已被 v4 取代 |
+| 32 | **v3 5+ rules** | 归入 v4 #36-38 | 归入 v4 |
+| 33 | **v3 x86 target backend** | v4 已实现通用 dispatcher | 归入 #35 |
+| 34 | **v3 arm64 target backend** | 跨架构验证 | ❌ |
+| 21 | **kernel-fixed baselines** | fixed-cmov + fixed-layout 作为对比。**OSDI 必须** | ❌ |
+| 22 | **消融补全** | cmov ablation 已有，补 byte-recompose / callee-saved / BMI | ❌ |
 
-**POC v1 → v2 关键教训**：
-- v1 的 `wide_load` verifier rewrite 把 BPF 指令改了 → `xlated_prog_len` 变了 → 说明是 bytecode 变换，不是 JIT 优化
-- v2 的 `cmov_select` JIT lowering 不改 BPF 指令 → `xlated_prog_len` 必须不变 → 只有 `jited_prog_len` 变
-- 这是论文 thesis 的**试金石**：如果 `xlated_prog_len` 变了，说明优化在错误的层
+#### v4 实现差距摘要（初始 Gap Review 2026-03-09，已大部分修复）
+
+| 优先级 | 差距 | 说明 | 状态 |
+|--------|------|------|:---:|
+| **Critical** | 只有 2/4+ rule kind | 需至少 ROTATE + ADDR_CALC 证明 general | ✅ 已有 4 个 |
+| **Critical** | Correctness bug | cmov emitter 产生错误结果 | ✅ 已修复 |
+| **Critical** | 无 CPU feature gating | UAPI 缺 cpu_features_required 字段 | ✅ 已实现 |
+| **Major** | BPF_JIT_SEL_BRANCH 未测 | ✅ log2_fold A/B: baseline(branch) 764ns vs cmov 824ns (+7.9%)，验证 policy-sensitivity | ✅ |
+| **Major** | 无 payload 字段 | kernel 靠 re-parse insn，不可扩展 | ❌ |
+| **Major** | 无 logging | 用户态不知道 rule 接受/拒绝 | ⚠️ 仅 pr_debug |
+| **Major** | 无 iterative policy 对比 | 只能一次性 apply，不能 A → B → iterate | ❌ |
+
+#### v4 implementation review 差距（2026-03-09，评分 6/10）
+
+> 完整审查见 `docs/tmp/v4-implementation-review.md`
+
+| # | 优先级 | 差距 | 说明 | 状态 |
+|---|--------|------|------|:---:|
+| R1 | **Critical** | Layer-2 side-effect check 缺失 | rule site 内可能包含 BPF_CALL/store/atomic，应在所有 validator 前统一检查 | ✅ R1 修复 |
+| R2 | **Critical** | Re-JIT 非原子 | `bpf_int_jit_compile()` 直接调用，无 RCU 保护。POC+test_run 下可接受，production 不安全 | ⚠️ POC OK |
+| R3 | **Critical** | ROTATE scanner 不生成 RORX | 总是 BPF_JIT_ROT_ROR，BMI2 gating 从未被测试。论文 CPU feature demo 无效 | ✅ R1+R2 修复 |
+| R4 | **Critical** | jit_recompile attr 缺 log_level/log_buf/log_size | 用户态无法观察 rule accept/reject。Policy 迭代故事缺关键 feedback | ❌ |
+| R5 | **Major** | Policy leak on OOM | re-JIT 失败后 policy 留在 prog->aux->jit_policy 上未释放 | ✅ R1 修复 |
+| R6 | **Major** | WIDE_MEM/ADDR_CALC scanner 未限制 main subprog | cmov scanner 有限制，其他没有。fail-closed 安全但不一致 | ✅ R1 修复 |
+| R7 | **Major** | WIDE_MEM validator 允许 width 3/5/6/7 | emitter 拒绝但 validator 通过，浪费验证。应 validator 直接拒绝 | ✅ R1 修复 |
+| R8 | **Minor** | LEA emitter dead add_3mod call | 计算后被覆盖，无害但混乱 | ❌ |
+| R9 | **Minor** | ARM64 native_choice 枚举未预留 | 设计文档有 CSEL/EXTR 等，UAPI 中缺 | ❌ |
+| R10 | **Minor** | rule_kind 编号与设计文档不一致 | WIDE_MEM=2 vs 设计 ADDR_CALC=2。内部一致但与文档矛盾 | ⚠️ 需同步 |
+
+### 🔴 P0.5 — v5 声明式 Pattern + Canonical Lowering 设计
+
+> **核心洞察**：当前 v4 的 rule_kind 是 closed enum，每种新优化需改 kernel。但大多数"新优化"只是同一 canonical form 的新 BPF pattern（如 4-insn vs 6-insn rotate，low-first vs high-first byte ladder）。
+>
+> **v5 方向**：把 BPF pattern 描述移到 userspace policy blob，kernel 只保留通用 pattern matcher + canonical form lowering。
+> - 新 BPF pattern → 只改 userspace（不需要 kernel release cycle）
+> - 新 canonical form → 改 kernel emitter（~50 LOC/arch，rare）
+> - 安全模型：pattern matching = read-only（安全），native emission = kernel 控制
+> - 类比：IDS signature update 不需要改 engine；LLVM SelectionDAG pattern → canonical → target lowering
+>
+> **v4 POC 继续迭代**：v5 设计与 v4 POC 并行。v4 必须先做到有真实性能优化证据，v5 是设计层面的升级。
+
+| # | 任务 | 状态 |
+|---|------|:---:|
+| 42 | **v5 声明式 pattern 框架设计文档** | ✅ ~950 行。见 `docs/tmp/jit-pass-framework-v5-design.md` |
+| 42-r | **v5 设计 review** | ✅ **7.5/10**。5 must-fix：DIFF_CONST 缺失、8B wide 超限、类型混淆、ja dst_reg、MAX_BINDINGS。见 `docs/tmp/jit-pass-framework-v5-review.md` |
+| 42-fix | **v5 must-fix 修复** | ✅ 5 项全部修复：DIFF_CONST、MAX_PATTERN_LEN 24、类型检查、expected_dst/src_reg、MAX_BINDINGS 12 |
+
+### 🟠 P1.5 — v4 迭代改进路线（基于 review）
+
+> **原则**：每轮改进由 opus 实现 → sonnet 测试/review → 迭代直到收敛。
+
+#### Round 1：安全 + 正确性（opus）
+| 任务 | 说明 |
+|------|------|
+| R1 fix | 在所有 validator 前加 layer-2 统一检查：扫描 site 内 BPF_CALL/BPF_ST/BPF_ATOMIC → reject |
+| R3 fix | ROTATE scanner 生成 RORX 规则（cpu_features_required=BPF_JIT_X86_BMI2），加 `--rotate-rorx` flag 或自动检测 |
+| R5 fix | re-JIT OOM 时清理 policy |
+| R7 fix | WIDE_MEM validator 只接受 width ∈ {2,4,8} |
+| R6 fix | 所有 scanner 统一限制 main subprog |
+
+#### Round 2：Policy 迭代能力（opus）
+| 任务 | 说明 |
+|------|------|
+| R4 fix | jit_recompile attr 加 log_level/log_buf/log_size，kernel 写 rule accept/reject 到 log_buf |
+| A/B test | 加 `--policy-branch` flag：对 cmov sites 生成 BPF_JIT_SEL_BRANCH 规则，对比 cmov vs branch |
+| Iterative | 实现 re-JIT → 测量 → 修改 policy → 再 re-JIT 的完整 PGO 流程演示 |
+
+#### Round 3：论文数据收集（sonnet）
+| 任务 | 说明 |
+|------|------|
+| A/B benchmark | 对每个 cmov site 分别测 cmov 和 branch policy，证明 policy-sensitivity |
+| RORX benchmark | 在有 BMI2 的 CPU 上测 rorx vs ror，证明 CPU feature sensitivity |
+| Wide load benchmark | 测有 byte-load ladder 的程序（load_byte_recompose 等） |
+| Extensibility metric | 统计添加每个新 rule kind 的代码量，证明框架可扩展 |
+
+#### Round 4：kernel-fixed baseline 对照（OSDI go/no-go）
+| 任务 | 说明 |
+|------|------|
+| fixed-cmov kernel | 在 kernel 中硬编码 cmov peephole（不需要框架），测性能 |
+| fixed-wide kernel | 在 kernel 中硬编码 wide_load peephole，测性能 |
+| 对比分析 | fixed kernel heuristic vs framework policy，找到 framework 独有价值的 case |
+
+**正确 directive 的判断标准**（POC v1 教训）：用户态能不能做同样的事？如果能 → 错误的层。
+- ❌ `wide_load` verifier rewrite：改写 BPF 指令 → 用户态也能做
+- ✅ `cmov_select` JIT lowering：选择 cmovcc vs jcc+mov → 只有 JIT 能做
+- ✅ `lea_fusion`：选择 lea vs mov+shl+add → 只有 x86 JIT 能做
+- ✅ `rotate_fusion`：选择 rorx/BMI2 → 只有 JIT 知道 CPU features
+- ✅ v3 framework：用户态定义 rule，但 rule 控制的是 **native emission 选择**，不是 BPF rewrite
+
+**POC v1 → v2 → v3 演化路径**：
+- v1 `wide_load` verifier rewrite：❌ 错误方向（BPF bytecode 变换，用户态也能做）
+- v2 `cmov_select` JIT lowering：✅ 正确方向（native code 变，BPF 不变），但硬编码、不可扩展
+- **v3 extensible framework**：✅ 论文目标（用户态定义 rule，内核安全执行，可扩展）
+
+**试金石**：如果 `xlated_prog_len` 变了，说明优化在错误的层。v3 的所有 rule 都必须满足此不变量。
 
 ### 🟢 P2 — 自动化 + 评估 + 合并
 
@@ -531,7 +782,10 @@ struct bpf_jit_dir_template {
 | v5 | Microarch-aware directives | review 5-7/10，µarch 故事太弱 | `docs/tmp/bpf-jit-advisor-v5.md` |
 | v5r2 | 聚焦 wide_load + cmov_select，legality/profitability 分离 | review 7-9/10，JIT-level mechanism ready | `docs/tmp/bpf-jit-advisor-v5r2.md` |
 | v6 | Backend policy plane framing，expanded directive taxonomy | review 发现 JIT 线性模型限制 | `docs/tmp/bpf-jit-advisor-v6.md` |
-| **v7** | **Hybrid：verifier structural rewrite + JIT target-specific lowering** | **设计定型，待写文档** | **待写，综合 verifier-rewrite + interface-design + reviews** |
+| **v7** | **Hybrid：verifier structural rewrite + JIT target-specific lowering** | **设计定型，被 v3/v4 取代为实现路径** | **待写，综合 verifier-rewrite + interface-design + reviews** |
+| **v3** | **可扩展 JIT pass 框架**（5 层基础设施：family/plan/alt table/dispatcher/arbitration） | review **8/10**，设计完善但 POC 阶段过重 | `docs/tmp/jit-pass-framework-v3-design.md` |
+| **v4** | **Post-load re-JIT + 机器码级 policy**（BPF_PROG_JIT_RECOMPILE + 直接指定 native instruction） | **POC 已实现**，4 directives，Round 2 scanner 修复中 | `docs/tmp/jit-pass-framework-v4-design.md` |
+| **v5** | **声明式 Pattern + Canonical Lowering**（pattern 描述在 userspace blob，kernel 通用 matcher + 固定 canonical lowering） | ✅ 设计完成 | `docs/tmp/jit-pass-framework-v5-design.md` |
 
 ### 10.1 关键发现（v6 review + JIT 分析后）
 
@@ -551,10 +805,17 @@ struct bpf_jit_dir_template {
 | baseline-vm (kernel only) | 7.0-rc2 | ✅ | geomean 0.881x vs host |
 | baseline-vm (L/K) | 7.0-rc2 llvmbpf + kernel | ✅ | L/K ~0.850x |
 | ~~opt1-vm~~ | ~~7.0-rc2 + byte-recompose verifier rewrite~~ | ⚠️ **方向错误** | v1 POC 证明了 2.21x，但这是 BPF 层优化，不是 JIT directive |
-| **opt-cmov-vm** | **7.0-rc2 + cmov_select JIT lowering** | 🔄 | **POC v2：真正的 JIT directive** |
-| opt-lea-vm | 7.0-rc2 + lea_fusion JIT lowering | ❌ | 待实现 |
-| opt3-vm | 7.0-rc2 + branch_reorder | ❌ | 待实现（verifier-level，合理） |
-| opt-all-vm | 7.0-rc2 + all directives | ❌ | 待实现 |
+| **opt-cmov-vm** | **7.0-rc2 + cmov_select JIT lowering** | ✅ | xlated 7480→7480，jited 4168→4167，exec +13.2%（可预测分支下 cmov 更慢，验证 policy-sensitivity） |
+| opt-lea-vm | 7.0-rc2 + lea_fusion JIT lowering | 归入 v3 | 作为 v3 rule 之一实现 |
+| opt3-vm | 7.0-rc2 + branch_reorder | 归入 v3 | 作为 v3 rule 之一实现 |
+| opt-all-vm | 7.0-rc2 + all directives | 归入 v3 | 由 opt-v3-vm 统一覆盖 |
+| **opt-v4-vm** | **7.0-rc2 + v4 re-JIT 框架 (COND_SELECT)** | ✅ | log2_fold: 6 sites, 648→664B, **+28% 变慢**（验证 policy-sensitivity）；cmov_select: 1 site, 4168B 不变。correctness bug ✅已修 |
+| **opt-v4-vm-wide** | **7.0-rc2 + v4 re-JIT (WIDE_MEM)** | ⚠️ | **0 覆盖**：clang 不产生 sequential byte ladder。Scanner pattern 需适配 |
+| **opt-v4-vm-rotate** | **7.0-rc2 + v4 re-JIT (ROTATE)** | ⚠️ | **0 覆盖**：clang 编译 rotate 为带 mask 变体。Scanner pattern 需适配 |
+| **opt-v4-vm-lea** | **7.0-rc2 + v4 re-JIT (ADDR_CALC)** | ✅ | **4 程序 5 sites。stride_load_16 -12%，multi_acc_4 -7%** |
+| **opt-v4-vm-all** | **7.0-rc2 + v4 re-JIT (4 rules)** | ✅ | 正确性 100%。只有 LEA + cmov 有实际覆盖。见 `micro/results/v4_new_directives_test.json` |
+| opt-v3-vm | 7.0-rc2 + v3 可扩展框架 | 已被 v4 取代 | v4 POC 已实现框架核心功能 |
+| opt-arm64-vm | v4 framework on arm64 | ❌ | 跨架构验证 |
 
 ---
 
@@ -575,9 +836,15 @@ CI:        GitHub Actions ARM64 + x86 (manual trigger)
 
 | 文档 | 内容 |
 |------|------|
+| **`docs/tmp/jit-pass-framework-v5-design.md`** | **v5 声明式 Pattern + Canonical Lowering 设计（v4 的架构升级，pattern 在 userspace，canonical lowering 在 kernel）** |
+| **`docs/tmp/jit-pass-framework-v4-design.md`** | **v4 Post-load re-JIT + 机器码级 policy 框架设计（v5 的前身，保留作参考）** |
+| **`docs/tmp/jit-pass-framework-v3-design.md`** | **v3 可扩展 JIT pass 框架设计（已被 v4 取代，保留作参考）** |
+| **`docs/tmp/jit-pass-framework-v3-review-r2.md`** | **v3 review（7.5/10 → 修订后 8/10）** |
+| **`docs/tmp/jit-pass-framework-v3-final-verdict.md`** | **v3 最终评审（8/10，3 个 API 合约细节）** |
+| **`docs/tmp/poc-v2-design-conformance-review.md`** | **POC v2 设计一致性审查（codex review）** |
 | **`docs/tmp/poc-design-review.md`** | **POC v1 全面评审：为什么 wide_load verifier rewrite 是错误方向** |
 | **`docs/tmp/poc-v2-implementation-summary.md`** | **POC v2 实现说明：cmov_select 真正的 JIT-level directive** |
-| **`docs/tmp/bpf-jit-advisor-v7.md`** | **当前最新设计（v7 Hybrid，verifier rewrite + JIT lowering）** |
+| **`docs/tmp/bpf-jit-advisor-v7.md`** | **v7 Hybrid 设计（被 v3 框架取代为主方向）** |
 | `docs/tmp/bpf-jit-advisor-v6.md` | v6 设计（已被 v7 取代） |
 | **`docs/tmp/interface-design-detail.md`** | **接口详细设计：syscall、blob 格式、CPU contract、安全分析、部署场景** |
 | **`docs/tmp/directive-discovery-analysis.md`** | **Directive 发现分析：11 候选排名、5 新 benchmark、真实 workload 证据** |
@@ -597,3 +864,16 @@ CI:        GitHub Actions ARM64 + x86 (manual trigger)
 | `micro/results/vm_vs_host_comparison.md` | VM vs Host 简要对比 |
 | `.github/workflows/arm64-benchmark.yml` | ARM64 CI（手动触发） |
 | `.github/workflows/x86-benchmark.yml` | x86 CI（手动触发） |
+| **`docs/tmp/v4-bug-diagnosis.md`** | **v4 correctness bug 诊断：flag-clobber + subprog boundary，修复过程记录** |
+| **`docs/tmp/v4-implementation-review.md`** | **v4 实现 vs 设计文档全面审查（sonnet review，🔄进行中）** |
+| **`micro/results/v4_recompile_comprehensive.json`** | **v4 VM 测试结果（2 rule：COND_SELECT + WIDE_MEM）** |
+| **`micro/results/v4_new_directives_test.json`** | **v4 VM 测试结果（4 rule：+ ROTATE + ADDR_CALC）** |
+| **`docs/tmp/v4-round1-test-results.md`** | **Round 1 修复后重测：LEA 无回归，ROTATE/WIDE_MEM 0 覆盖根因分析** |
+| **`docs/tmp/v4-round2-implementation.md`** | **Round 2 实现：ROTATE 6-insn scanner + WIDE_MEM high-first scanner + rotate64_hash benchmark** |
+| **`docs/tmp/v4-round2-test-results.md`** | **Round 2 VM 测试：WIDE_MEM 突破（11 sites，-13%），ROTATE 仍 0 覆盖** |
+| **`docs/tmp/v4-round3-test-results.md`** | **Round 3 VM 测试：ROTATE 突破（126 sites），ALL 4 families active，combined -36.6%** |
+| **`docs/tmp/rotate-scanner-debug.md`** | **ROTATE scanner 调试：clang 实际输出分析（commuted/two-copy/interleaved patterns）** |
+| **`docs/tmp/rotate-recompile-debug.md`** | **ROTATE recompile 调试：kernel -EINVAL 根因分析** |
+| **`docs/tmp/jit-pass-framework-v5-design.md`** | **v5 声明式 Pattern + Canonical Lowering 框架设计（~950 行）** |
+| **`docs/tmp/jit-pass-framework-v5-review.md`** | **v5 设计 review（7.5/10）：5 must-fix 项** |
+| **`docs/paper/paper.tex`** | **ACM sigconf 论文初稿：characterization + system design（🔄进行中）** |

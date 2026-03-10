@@ -1,0 +1,1 @@
+/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec run-kernel --program /home/yunwei37/workspace/bpf-benchmark/micro/programs/rotate64_hash.bpf.o --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/rotate64_hash.mem --input-size 64 --io-mode staged --repeat 5 --recompile-rotate-rorx

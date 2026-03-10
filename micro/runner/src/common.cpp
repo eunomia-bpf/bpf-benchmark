@@ -107,7 +107,7 @@ cli_options parse_args(int argc, char **argv)
         fail(
             "usage: micro_exec <run-llvmbpf|run-kernel|list-programs> --program <path> [--program-name <name>] "
             "[--memory <path>] [--directive-blob <path>] [--policy-blob <path>] "
-            "[--manual-load] [--recompile-cmov] "
+            "[--manual-load] [--recompile-cmov] [--recompile-wide|--recompile-wide-mem] [--recompile-rotate] [--recompile-rotate-rorx] [--recompile-lea] [--recompile-all] "
             "[--io-mode map|staged|packet] [--raw-packet] [--repeat N] [--input-size N] "
             "[--opt-level 0|1|2|3] [--no-cmov] [--llvm-disable-pass <name>] [--llvm-log-passes] "
             "[--perf-counters] [--perf-scope full_repeat_raw|full_repeat_avg] "
@@ -137,6 +137,26 @@ cli_options parse_args(int argc, char **argv)
         }
         if (current == "--recompile-cmov") {
             options.recompile_cmov = true;
+            continue;
+        }
+        if (current == "--recompile-wide" || current == "--recompile-wide-mem") {
+            options.recompile_wide = true;
+            continue;
+        }
+        if (current == "--recompile-rotate") {
+            options.recompile_rotate = true;
+            continue;
+        }
+        if (current == "--recompile-rotate-rorx") {
+            options.recompile_rotate_rorx = true;
+            continue;
+        }
+        if (current == "--recompile-lea") {
+            options.recompile_lea = true;
+            continue;
+        }
+        if (current == "--recompile-all") {
+            options.recompile_all = true;
             continue;
         }
         if (current == "--program-name" && index + 1 < argc) {
@@ -219,6 +239,21 @@ cli_options parse_args(int argc, char **argv)
     }
     if (options.recompile_cmov && options.command != "run-kernel") {
         fail("--recompile-cmov is only valid with run-kernel");
+    }
+    if (options.recompile_wide && options.command != "run-kernel") {
+        fail("--recompile-wide is only valid with run-kernel");
+    }
+    if (options.recompile_rotate && options.command != "run-kernel") {
+        fail("--recompile-rotate is only valid with run-kernel");
+    }
+    if (options.recompile_lea && options.command != "run-kernel") {
+        fail("--recompile-lea is only valid with run-kernel");
+    }
+    if (options.recompile_rotate_rorx && options.command != "run-kernel") {
+        fail("--recompile-rotate-rorx is only valid with run-kernel");
+    }
+    if (options.recompile_all && options.command != "run-kernel") {
+        fail("--recompile-all is only valid with run-kernel");
     }
     if (options.command != "list-programs") {
         if (options.io_mode != "map" && options.io_mode != "staged" && options.io_mode != "packet") {

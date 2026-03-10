@@ -1,0 +1,1 @@
+vng --run vendor/linux/arch/x86/boot/bzImage --exec "micro/build/runner/micro_exec run-kernel --program micro/programs/stride_load_4.bpf.o --memory micro/generated-inputs/stride_load_4.mem --input-size 64 --io-mode staged --repeat 5" 2>&1

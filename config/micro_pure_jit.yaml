@@ -603,6 +603,18 @@ benchmarks:
     expected_result: 11992325257241416031
     tags: [compute, code-size, straight-line, pure-jit]
 
+  - name: rotate64_hash
+    description: SipHash-like hash using 64-bit rotations for ROTATE directive coverage
+    category: alu-mix
+    family: rotate-hash
+    level: siphash-64
+    hypothesis: Dense 64-bit rotations should exercise the 4-insn rotate JIT directive pattern
+    base_name: rotate64_hash
+    kernel_input_size: 64
+    input_generator: rotate64_hash
+    expected_result: 2666935177028490406
+    tags: [compute, rotate, hash, pure-jit]
+
   - name: packet_redundant_bounds
     description: Packet-backed record parser with one wide dominating window plus many redundant sub-checks
     category: memory-local

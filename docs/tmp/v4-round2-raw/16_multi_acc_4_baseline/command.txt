@@ -1,0 +1,1 @@
+/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec run-kernel --program /home/yunwei37/workspace/bpf-benchmark/micro/programs/multi_acc_4.bpf.o --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/multi_acc_4.mem --input-size 1032 --io-mode staged --repeat 5

@@ -116,6 +116,8 @@ OpenAI Codex CLI is available on this machine (default model: `gpt-5.4`). Use it
 - **Review cycle** — when codex produces a new document, dispatch another codex to review it; iterate until quality is sufficient
 - **CI monitoring** — dispatch codex to fix CI issues, push fixes, and monitor until CI passes (long-running background task)
 - **Never ask for confirmation** — just keep going, do all work, iterate multiple rounds autonomously
+- **ALWAYS include `docs/kernel-jit-optimization-plan.md` as context** — every codex prompt MUST reference this doc as the single source of truth for JIT optimization design
+- **NEVER delete old entries in tracking docs** — when tasks/experiments/docs are superseded, keep at least one line with status (e.g. "归入 #32", "已被 v3 取代"). This applies to TODO tables, VM experiment matrix, reference doc lists in `docs/kernel-jit-optimization-plan.md`
 
 ### Usage
 ```bash

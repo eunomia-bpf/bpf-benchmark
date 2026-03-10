@@ -1030,6 +1030,18 @@ def generate_mega_basic_block_2048(output: Path) -> dict[str, int]:
     return {"words": len(words), "bytes": len(words) * 8}
 
 
+def generate_rotate64_hash(output: Path) -> dict[str, int]:
+    state = 0x1234_5678_9ABC_DEF0
+    words: list[int] = []
+
+    for index in range(8):
+        state = _lcg(state ^ ((index + 1) * 0x9E37_79B9_7F4A_7C15))
+        words.append((state ^ ((index + 1) * 0xD134_2543_DE82_EF95)) & MASK64)
+
+    output.write_bytes(struct.pack("<QQQQQQQQ", *words))
+    return {"words": len(words), "bytes": len(words) * 8}
+
+
 GENERATORS = {
     "simple": generate_simple,
     "simple_packet": generate_simple_packet,
@@ -1096,6 +1108,7 @@ GENERATORS = {
     "branch_fanout_32_random": generate_branch_fanout_32_random,
     "deep_guard_tree_8": generate_deep_guard_tree_8,
     "mega_basic_block_2048": generate_mega_basic_block_2048,
+    "rotate64_hash": generate_rotate64_hash,
 }
 
 

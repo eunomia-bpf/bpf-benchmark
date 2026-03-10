@@ -1,0 +1,23 @@
+libbpf: loading object from /home/yunwei37/workspace/bpf-benchmark/micro/programs/stride_load_16.bpf.o
+libbpf: elf: section(3) xdp, size 872, link 0, flags 6, type=1
+libbpf: sec 'xdp': found program 'stride_load_16_xdp' at insn offset 0 (0 bytes), code size 109 insns (872 bytes)
+libbpf: elf: section(4) .relxdp, size 16, link 26, flags 40, type=9
+libbpf: elf: section(5) .maps, size 32, link 0, flags 3, type=1
+libbpf: elf: section(6) license, size 4, link 0, flags 3, type=1
+libbpf: license of /home/yunwei37/workspace/bpf-benchmark/micro/programs/stride_load_16.bpf.o is GPL
+libbpf: elf: section(16) .BTF, size 1556, link 0, flags 0, type=1
+libbpf: elf: section(18) .BTF.ext, size 1056, link 0, flags 0, type=1
+libbpf: elf: section(26) .symtab, size 408, link 1, flags 0, type=2
+libbpf: looking for externs among 17 symbols...
+libbpf: collected 0 externs total
+libbpf: map 'input_map': at sec_idx 5, offset 0.
+libbpf: map 'input_map': found type = 2.
+libbpf: map 'input_map': found key [8], sz = 4.
+libbpf: map 'input_map': found value [11], sz = 1032.
+libbpf: map 'input_map': found max_entries = 1.
+libbpf: sec '.relxdp': collecting relocation for section(3) 'xdp'
+libbpf: sec '.relxdp': relo #0: insn #10 against 'input_map'
+libbpf: prog 'stride_load_16_xdp': found map 0 (input_map, sec 5, off 0) for insn #10
+libbpf: object 'stride_load_16': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...
+libbpf: map 'input_map': created successfully, fd=8
+recompile-lea: found 1 addr_calc sites in xlated program (115 insns)

@@ -1,0 +1,23 @@
+libbpf: loading object from /home/yunwei37/workspace/bpf-benchmark/micro/programs/rotate64_hash.bpf.o
+libbpf: elf: section(3) xdp, size 7936, link 0, flags 6, type=1
+libbpf: sec 'xdp': found program 'rotate64_hash_xdp' at insn offset 0 (0 bytes), code size 992 insns (7936 bytes)
+libbpf: elf: section(4) .relxdp, size 16, link 27, flags 40, type=9
+libbpf: elf: section(5) .maps, size 32, link 0, flags 3, type=1
+libbpf: elf: section(6) license, size 4, link 0, flags 3, type=1
+libbpf: license of /home/yunwei37/workspace/bpf-benchmark/micro/programs/rotate64_hash.bpf.o is GPL
+libbpf: elf: section(17) .BTF, size 1457, link 0, flags 0, type=1
+libbpf: elf: section(19) .BTF.ext, size 6656, link 0, flags 0, type=1
+libbpf: elf: section(27) .symtab, size 384, link 1, flags 0, type=2
+libbpf: looking for externs among 16 symbols...
+libbpf: collected 0 externs total
+libbpf: map 'input_map': at sec_idx 5, offset 0.
+libbpf: map 'input_map': found type = 2.
+libbpf: map 'input_map': found key [8], sz = 4.
+libbpf: map 'input_map': found value [11], sz = 64.
+libbpf: map 'input_map': found max_entries = 1.
+libbpf: sec '.relxdp': collecting relocation for section(3) 'xdp'
+libbpf: sec '.relxdp': relo #0: insn #10 against 'input_map'
+libbpf: prog 'rotate64_hash_xdp': found map 0 (input_map, sec 5, off 0) for insn #10
+libbpf: object 'rotate64_hash': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...
+libbpf: map 'input_map': created successfully, fd=8
+recompile-rotate: found 115 rotate sites in xlated program (998 insns)

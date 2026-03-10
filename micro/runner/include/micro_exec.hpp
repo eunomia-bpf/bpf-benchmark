@@ -40,6 +40,11 @@ struct cli_options {
     std::optional<std::filesystem::path> directive_blob;
     std::optional<std::filesystem::path> policy_blob;    // v4 recompile policy
     bool recompile_cmov = false;                        // v4 auto-scan xlated for cmov
+    bool recompile_wide = false;                        // v4 auto-scan xlated for wide_load
+    bool recompile_rotate = false;                      // v4 auto-scan xlated for rotate
+    bool recompile_rotate_rorx = false;                 // v4 rotate with RORX (BMI2)
+    bool recompile_lea = false;                         // v4 auto-scan xlated for lea fusion
+    bool recompile_all = false;                         // v4 auto-scan for all pattern types
     std::optional<std::string> program_name;
     std::string io_mode = "map";
     bool manual_load = false;
