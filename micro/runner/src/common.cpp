@@ -106,7 +106,7 @@ cli_options parse_args(int argc, char **argv)
     if (argc < 3) {
         fail(
             "usage: micro_exec <run-llvmbpf|run-kernel|list-programs> --program <path> [--program-name <name>] "
-            "[--memory <path>] [--directive-blob <path>] "
+            "[--memory <path>] [--directive-blob <path>] [--policy-blob <path>] "
             "[--manual-load] "
             "[--io-mode map|staged|packet] [--raw-packet] [--repeat N] [--input-size N] "
             "[--opt-level 0|1|2|3] [--no-cmov] [--llvm-disable-pass <name>] [--llvm-log-passes] "
@@ -129,6 +129,10 @@ cli_options parse_args(int argc, char **argv)
         }
         if (current == "--directive-blob" && index + 1 < argc) {
             options.directive_blob = std::filesystem::path(argv[++index]);
+            continue;
+        }
+        if (current == "--policy-blob" && index + 1 < argc) {
+            options.policy_blob = std::filesystem::path(argv[++index]);
             continue;
         }
         if (current == "--program-name" && index + 1 < argc) {
@@ -202,6 +206,9 @@ cli_options parse_args(int argc, char **argv)
     }
     if (options.directive_blob.has_value() && options.command != "run-kernel") {
         fail("--directive-blob is only valid with run-kernel");
+    }
+    if (options.policy_blob.has_value() && options.command != "run-kernel") {
+        fail("--policy-blob is only valid with run-kernel");
     }
     if (options.manual_load && options.command != "run-kernel") {
         fail("--manual-load is only valid with run-kernel");

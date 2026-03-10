@@ -58,6 +58,28 @@
 #define BPF_F_JIT_DIRECTIVES_FD (1U << 20)
 #endif
 
+/* v4 JIT recompile syscall subcommand (enum bpf_cmd value 39) */
+#ifndef BPF_PROG_JIT_RECOMPILE
+#define BPF_PROG_JIT_RECOMPILE 39
+#endif
+
+/* v4 policy blob format constants */
+#define BPF_JIT_POLICY_MAGIC    0x4A495450U  /* "JITP" */
+#define BPF_JIT_POLICY_VERSION  1
+#define BPF_JIT_ARCH_X86_64     1
+
+/* v4 rule kinds */
+#define BPF_JIT_RK_COND_SELECT  1
+#define BPF_JIT_RK_WIDE_MEM     2
+
+/* COND_SELECT native choices */
+#define BPF_JIT_SEL_CMOVCC      1
+#define BPF_JIT_SEL_BRANCH      2
+
+/* WIDE_MEM native choices */
+#define BPF_JIT_WMEM_WIDE_LOAD  1
+#define BPF_JIT_WMEM_BYTE_LOADS 2
+
 namespace {
 
 using clock_type = std::chrono::steady_clock;
@@ -642,6 +664,44 @@ sample_result run_kernel(const cli_options &options)
     }
     const auto object_load_end = std::chrono::steady_clock::now();
 
+    /* v4 post-load re-JIT: apply policy blob via BPF_PROG_JIT_RECOMPILE */
+    std::chrono::steady_clock::time_point recompile_start {};
+    std::chrono::steady_clock::time_point recompile_end {};
+    if (options.policy_blob.has_value()) {
+        auto policy_memfd = build_sealed_directive_memfd(*options.policy_blob);
+        recompile_start = std::chrono::steady_clock::now();
+
+        /*
+         * BPF_PROG_JIT_RECOMPILE syscall.
+         * The host bpf.h doesn't have this member, so use a raw
+         * struct aligned to match union bpf_attr layout.
+         * The jit_recompile sub-struct is a union member starting
+         * at offset 0 in bpf_attr (like all sub-structs).
+         */
+        struct {
+            __u32 prog_fd;
+            __s32 policy_fd;
+            __u32 flags;
+        } __attribute__((aligned(8))) recompile_attr = {};
+        recompile_attr.prog_fd = static_cast<__u32>(program_fd);
+        recompile_attr.policy_fd = policy_memfd.get();
+        recompile_attr.flags = 0;
+
+        /* Pad to sizeof(union bpf_attr) */
+        alignas(8) char attr_buf[256] = {};
+        static_assert(sizeof(recompile_attr) <= sizeof(attr_buf));
+        std::memcpy(attr_buf, &recompile_attr, sizeof(recompile_attr));
+
+        const int rc = static_cast<int>(syscall(__NR_bpf, BPF_PROG_JIT_RECOMPILE,
+                                                attr_buf, sizeof(attr_buf)));
+        recompile_end = std::chrono::steady_clock::now();
+        if (rc != 0) {
+            fprintf(stderr, "BPF_PROG_JIT_RECOMPILE failed: %s (errno=%d)\n",
+                    strerror(errno), errno);
+            /* Non-fatal: continue with stock JIT */
+        }
+    }
+
     const auto program_info = load_prog_info(program_fd);
     if (options.dump_jit) {
         const auto jited_program = load_jited_program(program_fd, program_info.jited_prog_len);
@@ -650,7 +710,9 @@ sample_result run_kernel(const cli_options &options)
     }
 
     sample_result sample;
-    sample.compile_ns = elapsed_ns(object_open_start, object_open_end) + elapsed_ns(object_load_start, object_load_end);
+    sample.compile_ns = elapsed_ns(object_open_start, object_open_end) +
+                        elapsed_ns(object_load_start, object_load_end) +
+                        elapsed_ns(recompile_start, recompile_end);
     sample.jited_prog_len = program_info.jited_prog_len;
     sample.xlated_prog_len = program_info.xlated_prog_len;
     sample.code_size = {

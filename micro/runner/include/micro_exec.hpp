@@ -38,6 +38,7 @@ struct cli_options {
     std::filesystem::path program;
     std::optional<std::filesystem::path> memory;
     std::optional<std::filesystem::path> directive_blob;
+    std::optional<std::filesystem::path> policy_blob;    // v4 recompile policy
     std::optional<std::string> program_name;
     std::string io_mode = "map";
     bool manual_load = false;
