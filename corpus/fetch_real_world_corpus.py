@@ -20,6 +20,10 @@ def run(command: list[str], cwd: Path | None = None) -> None:
         raise SystemExit(completed.returncode)
 
 
+def capture(command: list[str], cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(command, cwd=cwd, text=True, capture_output=True)
+
+
 def load_corpus_config(path: Path) -> dict[str, Path]:
     data = yaml.safe_load(path.read_text())
     corpus = data["corpus"]
@@ -60,8 +64,16 @@ def ensure_repo(spec: dict[str, object], local_repos: Path) -> Path:
         )
     else:
         run(["git", "fetch", "--depth", "1", "origin", branch], cwd=repo_dir)
-        run(["git", "checkout", branch], cwd=repo_dir)
-        run(["git", "pull", "--ff-only", "--depth", "1", "origin", branch], cwd=repo_dir)
+        status = capture(["git", "status", "--porcelain"], cwd=repo_dir)
+        if status.returncode != 0:
+            raise SystemExit(status.returncode)
+        if status.stdout.strip():
+            run(["git", "checkout", branch], cwd=repo_dir)
+            run(["git", "pull", "--ff-only", "--depth", "1", "origin", branch], cwd=repo_dir)
+        else:
+            # Generated corpus clones are safe to realign when clean, which also
+            # handles force-pushed shallow branches that can't be fast-forwarded.
+            run(["git", "checkout", "-B", branch, f"origin/{branch}"], cwd=repo_dir)
 
     if sparse_paths:
         run(["git", "sparse-checkout", "set", *sparse_paths], cwd=repo_dir)

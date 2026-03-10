@@ -106,12 +106,12 @@ cli_options parse_args(int argc, char **argv)
     if (argc < 3) {
         fail(
             "usage: micro_exec <run-llvmbpf|run-kernel|list-programs> --program <path> [--program-name <name>] "
-            "[--memory <path>] [--directive-blob <path>] [--policy-blob <path>] "
-            "[--manual-load] [--recompile-cmov] [--recompile-wide|--recompile-wide-mem] [--recompile-rotate] [--recompile-rotate-rorx] [--recompile-lea] [--recompile-all] "
-            "[--io-mode map|staged|packet] [--raw-packet] [--repeat N] [--input-size N] "
+            "[--memory|--input <path>] [--btf-custom-path <path>] [--directive-blob <path>] [--policy-blob <path>] "
+            "[--manual-load] [--recompile-cmov] [--recompile-wide|--recompile-wide-mem] [--recompile-rotate] [--recompile-rotate-rorx] [--recompile-lea] [--recompile-all] [--recompile-v5] "
+            "[--io-mode map|staged|packet|context] [--raw-packet] [--repeat N] [--input-size|--kernel-input-size N] "
             "[--opt-level 0|1|2|3] [--no-cmov] [--llvm-disable-pass <name>] [--llvm-log-passes] "
             "[--perf-counters] [--perf-scope full_repeat_raw|full_repeat_avg] "
-            "[--dump-jit] [--compile-only]");
+            "[--dump-jit] [--dump-xlated <path>] [--compile-only]");
     }
 
     cli_options options;
@@ -123,8 +123,12 @@ cli_options parse_args(int argc, char **argv)
             options.program = argv[++index];
             continue;
         }
-        if (current == "--memory" && index + 1 < argc) {
+        if ((current == "--memory" || current == "--input") && index + 1 < argc) {
             options.memory = std::filesystem::path(argv[++index]);
+            continue;
+        }
+        if (current == "--btf-custom-path" && index + 1 < argc) {
+            options.btf_custom_path = std::filesystem::path(argv[++index]);
             continue;
         }
         if (current == "--directive-blob" && index + 1 < argc) {
@@ -159,6 +163,10 @@ cli_options parse_args(int argc, char **argv)
             options.recompile_all = true;
             continue;
         }
+        if (current == "--recompile-v5") {
+            options.recompile_v5 = true;
+            continue;
+        }
         if (current == "--program-name" && index + 1 < argc) {
             options.program_name = std::string(argv[++index]);
             continue;
@@ -179,7 +187,8 @@ cli_options parse_args(int argc, char **argv)
             options.repeat = static_cast<uint32_t>(std::stoul(argv[++index]));
             continue;
         }
-        if (current == "--input-size" && index + 1 < argc) {
+        if ((current == "--input-size" || current == "--kernel-input-size") &&
+            index + 1 < argc) {
             options.input_size = static_cast<uint32_t>(std::stoul(argv[++index]));
             continue;
         }
@@ -213,6 +222,10 @@ cli_options parse_args(int argc, char **argv)
         }
         if (current == "--dump-jit") {
             options.dump_jit = true;
+            continue;
+        }
+        if (current == "--dump-xlated" && index + 1 < argc) {
+            options.dump_xlated = std::filesystem::path(argv[++index]);
             continue;
         }
         if (current == "--compile-only") {
@@ -255,9 +268,21 @@ cli_options parse_args(int argc, char **argv)
     if (options.recompile_all && options.command != "run-kernel") {
         fail("--recompile-all is only valid with run-kernel");
     }
+    if (options.recompile_v5 && options.command != "run-kernel") {
+        fail("--recompile-v5 is only valid with run-kernel");
+    }
+    if (options.recompile_v5 &&
+        !(options.recompile_cmov || options.recompile_rotate ||
+          options.recompile_rotate_rorx || options.recompile_wide ||
+          options.recompile_lea || options.recompile_all)) {
+        fail("--recompile-v5 requires at least one recompile family or --recompile-all");
+    }
     if (options.command != "list-programs") {
-        if (options.io_mode != "map" && options.io_mode != "staged" && options.io_mode != "packet") {
-            fail("--io-mode must be one of map, staged, or packet");
+        if (options.io_mode != "map" &&
+            options.io_mode != "staged" &&
+            options.io_mode != "packet" &&
+            options.io_mode != "context") {
+            fail("--io-mode must be one of map, staged, packet, or context");
         }
         if (!options.compile_only && options.repeat == 0) {
             fail("--repeat must be >= 1");
@@ -272,6 +297,11 @@ void print_json(const sample_result &sample)
         ? 0.0
         : static_cast<double>(sample.code_size.native_code_bytes) /
               static_cast<double>(sample.code_size.bpf_bytecode_bytes);
+    const uint64_t total_directive_sites =
+        sample.directive_scan.cmov_sites +
+        sample.directive_scan.wide_sites +
+        sample.directive_scan.rotate_sites +
+        sample.directive_scan.lea_sites;
 
     std::cout
         << "{"
@@ -355,6 +385,23 @@ void print_json(const sample_result &sample)
         << "\"include_kernel\":" << (sample.perf_counters.include_kernel ? "true" : "false") << ","
         << "\"scope\":\"" << json_escape(sample.perf_counters.scope) << "\","
         << "\"error\":\"" << json_escape(sample.perf_counters.error) << "\""
+        << "},"
+        << "\"directive_scan\":{"
+        << "\"performed\":" << (sample.directive_scan.performed ? "true" : "false") << ","
+        << "\"cmov_sites\":" << sample.directive_scan.cmov_sites << ","
+        << "\"wide_sites\":" << sample.directive_scan.wide_sites << ","
+        << "\"rotate_sites\":" << sample.directive_scan.rotate_sites << ","
+        << "\"lea_sites\":" << sample.directive_scan.lea_sites << ","
+        << "\"total_sites\":" << total_directive_sites
+        << "},"
+        << "\"recompile\":{"
+        << "\"requested\":" << (sample.recompile.requested ? "true" : "false") << ","
+        << "\"mode\":\"" << json_escape(sample.recompile.mode) << "\","
+        << "\"policy_generated\":" << (sample.recompile.policy_generated ? "true" : "false") << ","
+        << "\"policy_bytes\":" << sample.recompile.policy_bytes << ","
+        << "\"syscall_attempted\":" << (sample.recompile.syscall_attempted ? "true" : "false") << ","
+        << "\"applied\":" << (sample.recompile.applied ? "true" : "false") << ","
+        << "\"error\":\"" << json_escape(sample.recompile.error) << "\""
         << "}"
         << "}\n";
 }

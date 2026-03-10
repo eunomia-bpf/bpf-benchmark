@@ -6,6 +6,43 @@ repos:
       - "**/*.bpf.c"
       - "**/*_kern.c"
       - "**/*_bpf.c"
+    compile_include_dirs:
+      - .
+      - headers
+      - include
+      - lib
+
+  - name: xdp-tools
+    url: https://github.com/xdp-project/xdp-tools.git
+    branch: main
+    harvest_globs:
+      - "**/*.bpf.c"
+      - "**/*_kern.c"
+      - "**/*_bpf.c"
+    compile_include_dirs:
+      - .
+      - headers
+      - lib
+      - lib/libxdp
+      - lib/common
+      - xdp-loader
+      - xdp-filter
+      - xdp-dump
+
+  - name: xdp-tutorial
+    url: https://github.com/xdp-project/xdp-tutorial.git
+    branch: main
+    harvest_globs:
+      - "**/*.bpf.c"
+      - "**/*_kern.c"
+      - "**/*_bpf.c"
+    compile_include_dirs:
+      - .
+      - common
+      - headers
+      - packet-solutions
+      - tracing01-xdp-simple
+      - advanced01-xdp-tc-interact
 
   - name: bcc
     url: https://github.com/iovisor/bcc.git
@@ -14,6 +51,10 @@ repos:
       - libbpf-tools
     harvest_globs:
       - libbpf-tools/*.bpf.c
+    compile_include_dirs:
+      - .
+      - libbpf-tools
+      - libbpf-tools/compat
 
   - name: katran
     url: https://github.com/facebookincubator/katran.git
@@ -22,6 +63,12 @@ repos:
       - katran/lib
     harvest_globs:
       - katran/lib/**/*.bpf.c
+    compile_include_dirs:
+      - .
+      - katran/lib
+      - katran/lib/bpf
+      - katran/lib/linux_includes
+      - katran/lib/linux_includes/uapi
 
   - name: tetragon
     url: https://github.com/cilium/tetragon.git
@@ -34,6 +81,12 @@ repos:
       - bpf/test/**/*.c
       - bpf/tests/**/*.c
       - bpf/windows/**/*.c
+    compile_include_dirs:
+      - .
+      - bpf
+      - bpf/lib
+      - bpf/process
+      - bpf/cgroup
 
   - name: cilium
     url: https://github.com/cilium/cilium.git
@@ -44,6 +97,11 @@ repos:
       - bpf/**/*.c
     exclude_globs:
       - bpf/tests/**/*.c
+    compile_include_dirs:
+      - .
+      - bpf
+      - bpf/include
+      - bpf/lib
 
   - name: libbpf-bootstrap
     url: https://github.com/libbpf/libbpf-bootstrap.git
@@ -52,3 +110,30 @@ repos:
       - examples/c
     harvest_globs:
       - examples/c/*.bpf.c
+    compile_include_dirs:
+      - .
+      - examples/c
+
+  - name: linux-selftests
+    url: https://github.com/torvalds/linux.git
+    branch: master
+    sparse_paths:
+      - tools/testing/selftests/bpf
+      - tools/lib
+      - tools/include
+      - include
+      - arch/x86/include
+    harvest_globs:
+      - tools/testing/selftests/bpf/progs/*.c
+    compile_include_dirs:
+      - .
+      - tools/testing/selftests/bpf
+      - tools/testing/selftests/bpf/progs
+      - tools/lib
+      - tools/lib/bpf
+      - tools/include
+      - tools/include/uapi
+      - include
+      - include/uapi
+      - arch/x86/include
+      - arch/x86/include/uapi

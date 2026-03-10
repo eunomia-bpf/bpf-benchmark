@@ -450,6 +450,27 @@ struct bpf_jit_dir_template {
 
 ---
 
+## 7.5 Kernel 分支清单（`vendor/linux`）
+
+| 分支名 | 基于 | 用途 | 状态 |
+|--------|------|------|:---:|
+| `master` | upstream 7.0-rc2 | 原始 upstream kernel，stock JIT baseline | 基准 |
+| `jit-directive-poc` | master | POC v1：wide_load verifier-level rewrite（**方向错误**，已弃用） | ⚠️ 弃用 |
+| `jit-directive-poc-v2` | master | POC v2：cmov_select JIT-level directive，证明 xlated 不变量 | ✅ 验证完成 |
+| `jit-directive-v4` | master | **v4 框架主分支**：BPF_PROG_JIT_RECOMPILE + 4 directives (CMOV/WIDE/ROTATE/LEA) + policy blob | ✅ 主力开发 |
+| `jit-fixed-baselines` | jit-directive-v4 | **Kernel-fixed baselines**：无条件 heuristic 对照实验。CONFIG_BPF_JIT_FIXED_{ROTATE,WIDE_MEM,LEA,CMOV} 四个开关 | 🔄 测试中 |
+
+> **Worktree 布局**（2026-03-10 起）：
+> - `vendor/linux` — 当前工作目录（可切换分支）
+> - `vendor/linux-framework` — `jit-directive-v4` worktree（框架主分支，永驻）
+> - `vendor/linux-baseline` — `master` worktree（stock upstream 7.0-rc2，永驻）
+>
+> **使用方式**：在对应 worktree 目录下 `make -j$(nproc) bzImage`，然后 `vng --run <worktree>/arch/x86/boot/bzImage --exec "..."`。
+> 不再需要频繁 `git checkout` 切换，framework 和 baseline 可并行编译测试。
+> **v4 policy 优先级**：在 `jit-fixed-baselines` 上，如果 v4 policy 附加到 prog，v4 规则优先于 fixed heuristic。
+
+---
+
 ## 8. 已完成实验
 
 | 实验 | 日期 | 结果 |
@@ -533,6 +554,28 @@ struct bpf_jit_dir_template {
 - rotate64_hash combined optimization -36.6% 展示了框架的 **composability**
 - xlated_prog_len 不变量全部满足
 - 所有 correctness 检查通过
+
+### 8.2d Kernel-Fixed Baselines 测试（2026-03-10）
+
+> 完整数据见 `docs/tmp/kernel-fixed-baselines-test-results.md`
+> Kernel commit: `1572a4ddb` on `jit-fixed-baselines` branch
+
+**CONFIG**: `CONFIG_BPF_JIT_FIXED_{ROTATE,WIDE_MEM,LEA,CMOV}` 全部启用（fixed-all）vs 全部禁用（stock）
+
+| Program | Stock exec_ns | Fixed-all exec_ns | Delta | jited Delta | 说明 |
+|---------|------:|------:|------:|------:|------|
+| rotate64_hash | 143 | 119 | **-16.8%** | -1178B | ROTATE 匹配 v4 |
+| packet_rss_hash | 67 | 57 | **-14.9%** | -151B | ROTATE 匹配 v4 |
+| load_byte_recompose | 409 | 356 | **-13.0%** | -12B | WIDE_MEM 匹配 v4 |
+| stride_load_4 | 444 | 413 | **-7.0%** | -30B | WIDE_MEM 匹配 |
+| stride_load_16 | 437 | 499 | **+14.2%** | -30B | ⚠️ LEA 回归 |
+| **log2_fold** | **258** | **331** | **+28.3%** | -2B | **🔴 固定 CMOV 伤害可预测分支** |
+
+**Go/no-go 结论**：
+- **PASSED** — 无条件 fixed CMOV 明确伤害 log2_fold（+28.3%），证明 fixed kernel heuristic 不能替代 policy-controlled framework
+- ROTATE/WIDE_MEM 基本匹配 v4 框架结果（固定 heuristic 和 framework 效果相当 → 这些是 substrate 优化）
+- LEA fixed-all 回归表明组合干扰（fixed-all ≠ 各 directive 独立结果之和）
+- xlated_prog_len 不变量 6/6 满足，正确性 12/12 通过
 
 ### 8.3 微架构实验摘要
 
@@ -662,8 +705,52 @@ struct bpf_jit_dir_template {
 | 32 | **v3 5+ rules** | 归入 v4 #36-38 | 归入 v4 |
 | 33 | **v3 x86 target backend** | v4 已实现通用 dispatcher | 归入 #35 |
 | 34 | **v3 arm64 target backend** | 跨架构验证 | ❌ |
-| 21 | **kernel-fixed baselines** | fixed-cmov + fixed-layout 作为对比。**OSDI 必须** | ❌ |
+| 43 | **Scanner framework 独立化** | 从 kernel_runner.cpp 提取为顶级 `scanner/` 目录，独立 C++ 库/CLI | ✅ 完成 |
+| 46 | **cmov_select subprog scan 修复** | ✅ scanner 扫全程（0→1 site）。kernel 改为 subprog-local 验证。⚠️ 正确性 bug：cmov_select recompile 改变 result。见 `docs/tmp/cmov-subprog-fix-results.md` | ⚠️ scanner ✅ emitter bug |
+| 47 | **Per-directive 隔离测试** | ✅ 4 个隔离 CONFIG 各自测试。CMOV-only 只改 log2_fold（+19.7%），code size 可加但 exec time 不可加。见 `docs/tmp/kernel-fixed-baselines-per-directive.md` | ✅ |
+| 44 | **Kernel-fixed baselines 设计** | ✅ 设计完成。ROTATE/WIDE/LEA 固定 heuristic 能匹配框架；CMOV 是 go/no-go（policy-sensitive）。~80 LOC 实现。见 `docs/tmp/kernel-fixed-baselines-design.md` | ✅ 设计完成 |
+| 45 | **Policy decision layer 设计** | workload-aware 策略选择（不是硬编码 scanner），论文 story 核心。见 `docs/tmp/policy-decision-layer-design.md` | ✅ 设计完成 |
+| 21 | **kernel-fixed baselines** | ✅ fixed-all 测试完成。log2_fold +28.3% 回归 → go/no-go PASSED。fixed-all ≠ framework-smart。见 `docs/tmp/kernel-fixed-baselines-test-results.md` | ✅ 初测完成 |
+| 48 | **v5 minimal declarative pattern POC** | ✅ 通用 pattern matcher + canonical lowering。rotate64_hash v5=v4（115 sites, jited 2409）。load_byte_recompose v5=v4（1 site, jited 410）。新 pattern 只需改 userspace data。见 `docs/tmp/v5-minimal-poc-results.md` | ✅ |
+| 55 | **v5 迭代改进** | ✅ CMOV 上 v5（6 sites，+76% policy-sensitive）。v5 代码移入 scanner/。overflow-safe bounds。kernel-owned CPU legality。--recompile-v5 --recompile-all。5 程序全部正确。见 `docs/tmp/v5-iteration-results.md` | ✅ |
+| 49 | **Scanner cleanup + 框架统一** | ✅ scanner/ 是唯一实现。micro/runner 通过 CMake link libscanner.a。kernel_runner.cpp 删除全部重复 scanner/blob 代码。见 `docs/tmp/scanner-cleanup-results.md` | ✅ |
+| 50 | **Real program directive census** | ✅ 98 个 EM_BPF 扫描：67/98 有 sites，1029 总 sites。Corpus CMOV 最普遍（18/10prog）。见 `docs/tmp/real-program-directive-census.md` + `micro/directive_census.py` | ✅ |
+| 52 | **Corpus 真实执行性能测试** | ✅ 36 objects, 57 programs, 31 loadable, 10 runnable。**0 个可跑程序有 directive sites**。有 sites 的程序是 tracing 类型无法用 bpf_prog_test_run。需要扩充 XDP/TC corpus（Cilium/Katran）。见 `docs/tmp/corpus-perf-results.md` + `micro/run_corpus_perf.py` | ⚠️ corpus 不足 |
+| 53 | **Benchmark 基础设施审计** | ✅ 6+ 个散落的测试入口，v5 blob builder 仍在 kernel_runner.cpp 内，缺统一编排。建议统一到 bench/ driver + 单一 YAML 配置。见 `docs/tmp/benchmark-infrastructure-audit.md` | ✅ 设计完成 |
+| 54 | **Corpus 扩充 + kprobe/tp 测试方法** | ✅ 468 .bpf.o（含 selftests+bcc+xdp-tools repos），429 census，40 个真实程序同时有 sites+性能数据（29 test_run + 11 tracing）。`run_corpus_tracing.py` 实现 attach+trigger 测量。cilium/katran/xdp-tools 编译产物仍为 0。见 `docs/tmp/expanded-corpus-results.md` | ✅ |
+| 56 | **Corpus v5 framework recompile** | ✅ 40 程序中 37 apply v5 成功，28 有 runtime 数据。xdp_synproxy +15%/+31% faster。CMOV-only 程序多数变慢（policy-sensitivity 证据）。2 个 rotate-heavy TC 程序 v5 scanner 0 sites（gap）。见 `docs/tmp/corpus-v5-recompile-results.md` | ✅ |
+| 51 | **Framework architecture review** | ✅ 4/10，主要问题：bounds overflow、CPU gating、v4 vs v5 gap、userspace 分裂。见 `docs/tmp/framework-architecture-review.md` | ✅ |
+| 55 | **v5 实现 review** | ✅ **4.5/10**→**6.5/10**。核心问题：canonical binding 层缺失、CMOV 未上 v5、v5 代码未合入 scanner。已修复：CMOV 上 v5、scanner 统一、overflow-safe、CPU legality。仍缺：binding table + parameterized emitter。见 `docs/tmp/v5-implementation-review.md` + `docs/tmp/v5-design-gap-analysis.md` | ✅ |
+| 68 | **v5 design gap analysis** | ✅ **6.5/10**。10 项特性矩阵：constraint ✅、coexistence ✅、scanner integration ✅。缺：binding table (#58)、opcode mask (#67)、shape whitelist (#63)。见 `docs/tmp/v5-design-gap-analysis.md` | ✅ |
+| 69 | **Production corpus 编译** | ✅ Cilium 3 程序（658 CMOV sites）、Katran 5 程序（29 sites）、xdp-tools 13、xdp-tutorial 25。总 493 .bpf.o。见 `docs/tmp/production-program-compilation.md` | ✅ |
+| 70 | **Production corpus v5 recompile 测试** | Cilium/Katran/xdp-tools 46 个新程序在 framework kernel 上跑 v5 recompile | 🔄 |
+| 56 | **cmov_select emitter bug 修复** | subprog CMOV 产出错误结果（baseline→recompile result 不一致）。需在 linux-framework 上修复 emitter | 🔄 codex |
+| 57 | **严格 benchmarking 脚本** | CPU pinning + performance governor + 30×1000 + 统计检验 + 多模式对比 | 🔄 codex |
 | 22 | **消融补全** | cmov ablation 已有，补 byte-recompose / callee-saved / BMI | ❌ |
+
+### 🔴 P0.6 — v5 实现改进（基于 review，4.5/10 → 8/10）
+
+> **v5 review 评分 4.5/10**（`docs/tmp/v5-implementation-review.md`）。核心差距是"新 pattern 只需改 userspace"的论文声明只部分成立。
+
+#### v5 Blocker（论文 hard block）
+
+| # | 任务 | 说明 | 优先级 |
+|---|------|------|:---:|
+| 58 | **Canonical binding table + parameterized emitter** | ✅ v2 rule 携带 binding_count + struct bpf_jit_binding。kernel 提取 canonical params 后传给 emitter。COND_SELECT + ROTATE 验证通过。见 `docs/tmp/v5-canonical-binding-results.md` | ✅ |
+| 59 | **COND_SELECT 上 v5 path** | 论文最重要的 policy-sensitive case 必须走 v5 声明式框架，否则 reviewer 直接问"为什么最关键的 directive 不用你的框架" | **Critical** |
+| 60 | **v5 代码移入 scanner/** | v5 descriptor 定义、matcher、blob builder 从 kernel_runner.cpp 移到 scanner 库，消除"权威实现"分裂 | **High** |
+| 61 | **Overflow-safe bounds check** | kernel matcher/validator 中 `site_start + site_len` 缺溢出检查。所有相关路径改用 `check_add_overflow()` | **High** |
+| 62 | **Kernel-owned CPU legality** | 从 `(canonical_form, native_choice)` 推导 required CPU features，不信任 blob 的 `cpu_features_required`。例如 RORX 必须 kernel 检查 BMI2 | **High** |
+
+#### v5 改进（论文加分）
+
+| # | 任务 | 说明 | 优先级 |
+|---|------|------|:---:|
+| 63 | **Shape whitelist 扩展或泛化** | `bpf_jit_pattern_rule_shape_valid()` 硬编码 site_len 白名单（rotate: 4/5/6, wide: 4/10/22）。新 pattern 即使 userspace-only 也可能被 kernel 拒绝。改为 per-canonical-form 的 max_site_len | **Medium** |
+| 64 | **Overlap/priority 语义** | 当前 kernel 不拒绝也不仲裁重叠 rule。要么明确 reject overlap，要么实现 priority-aware lookup | **Medium** |
+| 65 | **Subprog 一致性** | kernel 仍 deactivate 非 main-subprog rule（jit-directive-v4）vs 已有 subprog-local 修复（jit-fixed-baselines）。两个分支需同步 | **Medium** |
+| 66 | **Extensibility 量化** | 统计 v4 vs v5 添加新 pattern 的代码量对比（v4: ~200 LOC kernel; v5: ~20 LOC userspace-only + 0 kernel for same-form）。论文 Table 需要这个数据 | **Medium** |
+| 67 | **Opcode mask/class 支持** | v5 design 说支持 opcode mask（如"any conditional jump"），但实现只有 exact opcode 匹配。添加 `BPF_JIT_CONSTRAINT_OPCODE_MASK` 或类似机制 | **Low** |
 
 #### v4 实现差距摘要（初始 Gap Review 2026-03-09，已大部分修复）
 
@@ -815,6 +902,11 @@ struct bpf_jit_dir_template {
 | **opt-v4-vm-lea** | **7.0-rc2 + v4 re-JIT (ADDR_CALC)** | ✅ | **4 程序 5 sites。stride_load_16 -12%，multi_acc_4 -7%** |
 | **opt-v4-vm-all** | **7.0-rc2 + v4 re-JIT (4 rules)** | ✅ | 正确性 100%。只有 LEA + cmov 有实际覆盖。见 `micro/results/v4_new_directives_test.json` |
 | opt-v3-vm | 7.0-rc2 + v3 可扩展框架 | 已被 v4 取代 | v4 POC 已实现框架核心功能 |
+| **fixed-all-vm** | **7.0-rc2 + all 4 fixed heuristics** | ✅ | **ROTATE/WIDE 匹配 v4，CMOV 伤害 log2_fold +28.3%，LEA 组合回归。见 `docs/tmp/kernel-fixed-baselines-test-results.md`** |
+| **fixed-ROTATE-vm** | **7.0-rc2 + ROTATE-only** | ✅ | rotate64_hash -12.1%，packet_rss_hash +2.7%（code -151B）。见 `docs/tmp/kernel-fixed-baselines-per-directive.md` |
+| **fixed-WIDE-vm** | **7.0-rc2 + WIDE-only** | ✅ | load_byte_recompose -14.2%，覆盖广于预期 |
+| **fixed-LEA-vm** | **7.0-rc2 + LEA-only** | ✅ | stride_load_4 -11.9%，stride_load_16 +141.4% 回归 |
+| **fixed-CMOV-vm** | **7.0-rc2 + CMOV-only** | ✅ | **只改 log2_fold codegen（+34B），+19.7% 变慢**。其他 5 程序 jited_len 不变 |
 | opt-arm64-vm | v4 framework on arm64 | ❌ | 跨架构验证 |
 
 ---
@@ -876,4 +968,8 @@ CI:        GitHub Actions ARM64 + x86 (manual trigger)
 | **`docs/tmp/rotate-recompile-debug.md`** | **ROTATE recompile 调试：kernel -EINVAL 根因分析** |
 | **`docs/tmp/jit-pass-framework-v5-design.md`** | **v5 声明式 Pattern + Canonical Lowering 框架设计（~950 行）** |
 | **`docs/tmp/jit-pass-framework-v5-review.md`** | **v5 设计 review（7.5/10）：5 must-fix 项** |
+| **`docs/tmp/kernel-fixed-baselines-test-results.md`** | **Kernel-fixed baselines 测试结果：fixed-all vs stock 6 程序对比。Go/no-go PASSED（log2_fold +28.3%）** |
+| **`docs/tmp/kernel-fixed-baselines-per-directive.md`** | **Per-directive 隔离测试：ROTATE/WIDE/LEA/CMOV 各自独立结果。Code size 可加，exec time 不可加。CMOV-only 隔离验证** |
+| **`docs/tmp/cmov-subprog-fix-results.md`** | **cmov_select subprog scan 修复：0→1 site，kernel subprog-local 验证。emitter correctness bug 待修** |
 | **`docs/paper/paper.tex`** | **ACM sigconf 论文初稿：characterization + system design（🔄进行中）** |
+| **`docs/tmp/policy-decision-layer-design.md`** | **Policy decision layer 设计（TODO #45）：3 级策略（static/profile/AB），per-site branch-miss 归因，log2_fold vs cmov_select 对比，论文 narrative** |

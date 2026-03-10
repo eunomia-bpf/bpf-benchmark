@@ -23,12 +23,14 @@ reference/papers/*.pdf
 
 # C++ build directory
 micro/build/
+scanner/build/
 
 # Generated benchmark inputs
 micro/generated-inputs/
 
 # Directive blobs
 *.directive.bin
+*.policy.bin
 
 # Temporary files
 /tmp/

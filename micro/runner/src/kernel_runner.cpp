@@ -1,5 +1,9 @@
 #include "micro_exec.hpp"
 
+#include <bpf_jit_scanner/pattern_v5.hpp>
+#include <bpf_jit_scanner/policy.h>
+#include <bpf_jit_scanner/scanner.h>
+
 #include <bpf/bpf.h>
 #include <bpf/libbpf.h>
 #include <linux/bpf.h>
@@ -62,38 +66,6 @@
 #ifndef BPF_PROG_JIT_RECOMPILE
 #define BPF_PROG_JIT_RECOMPILE 39
 #endif
-
-/* v4 policy blob format constants */
-#define BPF_JIT_POLICY_MAGIC    0x4A495450U  /* "JITP" */
-#define BPF_JIT_POLICY_VERSION  1
-#define BPF_JIT_ARCH_X86_64     1
-
-/* v4 rule kinds */
-#define BPF_JIT_RK_COND_SELECT  1
-#define BPF_JIT_RK_WIDE_MEM     2
-#define BPF_JIT_RK_ROTATE       3
-#define BPF_JIT_RK_ADDR_CALC    4
-
-/* COND_SELECT native choices */
-#define BPF_JIT_SEL_CMOVCC      1
-#define BPF_JIT_SEL_BRANCH      2
-
-/* WIDE_MEM native choices */
-#define BPF_JIT_WMEM_WIDE_LOAD  1
-#define BPF_JIT_WMEM_BYTE_LOADS 2
-
-/* ROTATE native choices */
-#define BPF_JIT_ROT_ROR         1
-#define BPF_JIT_ROT_RORX        2
-#define BPF_JIT_ROT_SHIFT       3
-
-/* ADDR_CALC native choices */
-#define BPF_JIT_ACALC_LEA       1
-#define BPF_JIT_ACALC_SHIFT_ADD 2
-
-/* CPU feature bits */
-#define BPF_JIT_X86_CMOV  (1U << 0)
-#define BPF_JIT_X86_BMI2  (1U << 1)
 
 namespace {
 
@@ -441,689 +413,49 @@ std::vector<uint8_t> load_xlated_program(int program_fd, uint32_t xlated_prog_le
     return xlated;
 }
 
-std::vector<bpf_func_info> load_func_info(int program_fd, uint32_t nr_func_info)
+/* ================================================================
+ * Build scanner policies from xlated BPF using the shared scanner library.
+ * ================================================================ */
+
+template <typename ScanFn>
+std::vector<bpf_jit_scan_rule> scan_xlated_program(uint32_t xlated_len,
+                                                   const char *scan_name,
+                                                   ScanFn &&scan_fn)
 {
-    if (nr_func_info == 0) {
+    const uint32_t max_rules = xlated_len / 8;
+    if (max_rules == 0) {
         return {};
     }
 
-    std::vector<bpf_func_info> func_info(nr_func_info);
-    bpf_prog_info info = {};
-    info.nr_func_info = nr_func_info;
-    info.func_info_rec_size = sizeof(bpf_func_info);
-    info.func_info = ptr_to_u64(func_info.data());
-
-    union bpf_attr attr = {};
-    attr.info.bpf_fd = program_fd;
-    attr.info.info_len = sizeof(info);
-    attr.info.info = ptr_to_u64(&info);
-    if (syscall(__NR_bpf, BPF_OBJ_GET_INFO_BY_FD, &attr, sizeof(attr)) != 0) {
-        fail("BPF_OBJ_GET_INFO_BY_FD (func_info dump) failed: " + std::string(strerror(errno)));
+    std::vector<bpf_jit_scan_rule> rules(max_rules);
+    const int rc = scan_fn(rules.data(), max_rules);
+    if (rc < 0) {
+        fail(std::string(scan_name) + " scan failed: " + std::string(strerror(-rc)));
     }
 
-    func_info.resize(info.nr_func_info);
-    return func_info;
-}
-
-/* ================================================================
- * v4: scan xlated bytecode for cmov-select patterns and build policy blob
- * ================================================================ */
-
-struct bpf_insn_raw {
-    uint8_t code;
-    uint8_t regs;
-    int16_t off;
-    int32_t imm;
-};
-
-static bool is_cond_jump_raw(const bpf_insn_raw &insn)
-{
-    uint8_t cls = insn.code & 0x07;
-    if (cls != 0x05 /* BPF_JMP */ && cls != 0x06 /* BPF_JMP32 */)
-        return false;
-    uint8_t op = insn.code & 0xf0;
-    switch (op) {
-    case 0x10: case 0x20: case 0x30: case 0x50: case 0x60:
-    case 0x70: case 0xa0: case 0xb0: case 0xc0: case 0xd0:
-        return true;
-    default:
-        return false;
-    }
-}
-
-static bool is_simple_mov_raw(const bpf_insn_raw &insn)
-{
-    uint8_t cls = insn.code & 0x07;
-    if (cls != 0x04 /* BPF_ALU */ && cls != 0x07 /* BPF_ALU64 */)
-        return false;
-    if ((insn.code & 0xf0) != 0xb0 /* BPF_MOV */)
-        return false;
-    if (insn.off != 0)
-        return false;
-    uint8_t src = insn.code & 0x08;
-    if (src == 0x08 /* BPF_X */)
-        return insn.imm == 0;
-    else
-        return (insn.regs >> 4) == 0;
-}
-
-struct policy_rule {
-    uint32_t site_start;
-    uint16_t site_len;
-    uint16_t rule_kind;
-    uint16_t native_choice;
-    uint16_t priority;
-    uint32_t cpu_features_required = 0;
-};
-
-static std::vector<policy_rule> find_cmov_select_sites_xlated(
-    const uint8_t *xlated_data, uint32_t xlated_len)
-{
-    std::vector<policy_rule> rules;
-    uint32_t insn_cnt = xlated_len / 8;
-    if (insn_cnt < 3)
-        return rules;
-
-    /* Parse all instructions */
-    std::vector<bpf_insn_raw> insns(insn_cnt);
-    for (uint32_t i = 0; i < insn_cnt; i++) {
-        std::memcpy(&insns[i], xlated_data + i * 8, sizeof(bpf_insn_raw));
-    }
-
-    uint32_t idx = 0;
-    while (idx < insn_cnt) {
-        /* Diamond: jcc+2, mov, ja+1, mov */
-        if (idx + 3 < insn_cnt &&
-            is_cond_jump_raw(insns[idx]) && insns[idx].off == 2 &&
-            is_simple_mov_raw(insns[idx + 1]) &&
-            is_simple_mov_raw(insns[idx + 3]) &&
-            insns[idx + 2].code == (0x05 | 0x00) /* BPF_JMP | BPF_JA */ &&
-            insns[idx + 2].off == 1 &&
-            (insns[idx + 1].regs & 0x0f) == (insns[idx + 3].regs & 0x0f))
-        {
-            rules.push_back({idx, 4, BPF_JIT_RK_COND_SELECT, BPF_JIT_SEL_CMOVCC, 0});
-            idx += 4;
-            continue;
-        }
-
-        /* Compact: mov, jcc+1, mov */
-        if (idx > 0 && idx + 1 < insn_cnt &&
-            is_simple_mov_raw(insns[idx - 1]) &&
-            is_cond_jump_raw(insns[idx]) && insns[idx].off == 1 &&
-            is_simple_mov_raw(insns[idx + 1]) &&
-            (insns[idx - 1].regs & 0x0f) == (insns[idx + 1].regs & 0x0f))
-        {
-            rules.push_back({idx - 1, 3, BPF_JIT_RK_COND_SELECT, BPF_JIT_SEL_CMOVCC, 0});
-            idx += 2;
-            continue;
-        }
-
-        idx++;
-    }
+    rules.resize(static_cast<size_t>(rc));
     return rules;
 }
 
-/*
- * Scan xlated BPF bytecode for byte-load ladder patterns and generate
- * WIDE_MEM rules with BPF_JIT_WMEM_WIDE_LOAD native_choice.
- *
- * Pattern recognized (N = 2, 4, or 8 bytes):
- *   [0]        ldxb dst, [base+off]          (BPF_LDX | BPF_MEM | BPF_B)
- *   [1]        ldxb tmp, [base+off+1]
- *   [2]        lsh64 tmp, 8                  (BPF_ALU64 | BPF_LSH | BPF_K, imm=8)
- *   [3]        or64  dst, tmp                (BPF_ALU64 | BPF_OR  | BPF_X)
- *   ... repeated for each additional byte, shift by i*8 ...
- *
- * Total insns for N bytes: 1 + (N-1)*3  (must satisfy (site_len+2)%3==0)
- * Only N==2, 4, 8 are supported by the kernel emitter.
- */
-static std::vector<policy_rule> find_wide_load_sites_xlated(
-    const uint8_t *xlated_data, uint32_t xlated_len)
-{
-    std::vector<policy_rule> rules;
-    uint32_t insn_cnt = xlated_len / 8;
-    if (insn_cnt < 4)
-        return rules;
-
-    std::vector<bpf_insn_raw> insns(insn_cnt);
-    for (uint32_t i = 0; i < insn_cnt; i++) {
-        std::memcpy(&insns[i], xlated_data + i * 8, sizeof(bpf_insn_raw));
-    }
-
-    /* BPF instruction codes */
-    constexpr uint8_t LDXB_CODE  = 0x71; /* BPF_LDX | BPF_MEM | BPF_B */
-    constexpr uint8_t LSH64_CODE = 0x67; /* BPF_ALU64 | BPF_LSH | BPF_K */
-    constexpr uint8_t OR64_CODE  = 0x4f; /* BPF_ALU64 | BPF_OR  | BPF_X */
-
-    uint32_t idx = 0;
-    while (idx < insn_cnt) {
-        /* First insn must be ldxb */
-        if (insns[idx].code != LDXB_CODE) {
-            idx++;
-            continue;
-        }
-
-        uint8_t base_reg = (insns[idx].regs >> 4) & 0x0f; /* src_reg is upper nibble */
-        int16_t base_off = insns[idx].off;
-        uint8_t dst_reg  = insns[idx].regs & 0x0f;        /* dst_reg is lower nibble */
-
-        /*
-         * Try high-byte-first 2-byte pattern (clang):
-         *   [0] ldxb tmp, [base+off+1]    (high byte)
-         *   [1] lsh64 tmp, 8
-         *   [2] ldxb dst, [base+off]      (low byte)
-         *   [3] or64 tmp, dst             (combine into tmp)
-         *
-         * Key: shift immediately follows first load (idx+1 is lsh),
-         * and second load is at offset-1 from first.
-         */
-        if (idx + 3 < insn_cnt) {
-            const auto &shift_insn = insns[idx + 1];
-            const auto &lo_load    = insns[idx + 2];
-            const auto &or_insn    = insns[idx + 3];
-
-            if (shift_insn.code == LSH64_CODE &&
-                shift_insn.imm == 8 &&
-                (shift_insn.regs & 0x0f) == dst_reg &&
-                lo_load.code == LDXB_CODE &&
-                ((lo_load.regs >> 4) & 0x0f) == base_reg &&
-                lo_load.off == base_off - 1 &&
-                or_insn.code == OR64_CODE &&
-                (or_insn.regs & 0x0f) == dst_reg && /* or dst = tmp (first load's dst) */
-                ((or_insn.regs >> 4) & 0x0f) == (lo_load.regs & 0x0f)) { /* or src = lo_load's dst */
-
-                rules.push_back({idx, 4, BPF_JIT_RK_WIDE_MEM, BPF_JIT_WMEM_WIDE_LOAD, 0});
-                idx += 4;
-                continue;
-            }
-        }
-
-        /* Try low-byte-first pattern (original) */
-        /* Count how many subsequent (ldxb, lsh64, or64) groups follow */
-        uint32_t n_extra = 0; /* extra bytes beyond the first */
-        while (idx + 1 + n_extra * 3 + 2 < insn_cnt) {
-            uint32_t g = idx + 1 + n_extra * 3;
-            const auto &load_insn  = insns[g];
-            const auto &shift_insn = insns[g + 1];
-            const auto &or_insn    = insns[g + 2];
-
-            uint8_t load_src = (load_insn.regs >> 4) & 0x0f;
-            uint8_t load_dst = load_insn.regs & 0x0f;
-            uint8_t shift_dst = shift_insn.regs & 0x0f;
-            uint8_t or_dst   = or_insn.regs & 0x0f;
-            uint8_t or_src   = (or_insn.regs >> 4) & 0x0f;
-
-            if (load_insn.code != LDXB_CODE)
-                break;
-            if (load_src != base_reg)
-                break;
-            if (load_insn.off != base_off + static_cast<int16_t>(n_extra + 1))
-                break;
-            if (shift_insn.code != LSH64_CODE)
-                break;
-            if (shift_dst != load_dst)
-                break;
-            if (shift_insn.imm != static_cast<int32_t>((n_extra + 1) * 8))
-                break;
-            if (or_insn.code != OR64_CODE)
-                break;
-            if (or_dst != dst_reg)
-                break;
-            if (or_src != load_dst)
-                break;
-
-            n_extra++;
-
-            /* Stop at 7 extra bytes (8 bytes total = maximum supported) */
-            if (n_extra == 7)
-                break;
-        }
-
-        if (n_extra == 0) {
-            /* Single byte load — not a ladder pattern */
-            idx++;
-            continue;
-        }
-
-        uint32_t total_bytes = n_extra + 1;
-        /* Kernel emitter only supports 2, 4, 8 */
-        if (total_bytes == 2 || total_bytes == 4 || total_bytes == 8) {
-            uint16_t site_len = static_cast<uint16_t>(1 + n_extra * 3);
-            rules.push_back({idx, site_len, BPF_JIT_RK_WIDE_MEM, BPF_JIT_WMEM_WIDE_LOAD, 0});
-            idx += site_len;
-        } else {
-            /* Unsupported width — skip the first insn and retry */
-            idx++;
-        }
-    }
-    return rules;
-}
-
-/*
- * Scan xlated BPF bytecode for rotate idioms and generate ROTATE rules.
- *
- * Four patterns:
- *
- * 4-insn (classic):
- *   [0] mov   tmp, dst        (BPF_ALU64|BPF_MOV|BPF_X or BPF_ALU|BPF_MOV|BPF_X)
- *   [1] lsh   dst, N          (BPF_ALU64|BPF_LSH|BPF_K or BPF_ALU|BPF_LSH|BPF_K)
- *   [2] rsh   tmp, (W-N)      (matching class)
- *   [3] or    dst, tmp        (matching class)
- *
- * 4-insn (64-bit commuted):
- *   [0] mov64  tmp, src
- *   [1] rsh64  tmp, (64-N)
- *   [2] lsh64  src, N
- *   [3] or64   src, tmp
- *
- * 5-insn (64-bit two-copy):
- *   [0] mov64  tmp, src
- *   [1] rsh64  tmp, (64-N)
- *   [2] mov64  dst, src       (same src as [0])
- *   [3] lsh64  dst, N
- *   [4] or64   dst, tmp
- *
- * 6-insn (clang masked 32-bit):
- *   [0] mov64  tmp, src
- *   [1] and64  tmp, mask      (BPF_ALU64|BPF_AND|BPF_K)
- *   [2] rsh64  tmp, (32-N)
- *   [3] mov64  dst, src       (same src as [0])
- *   [4] lsh64  dst, N
- *   [5] or64   dst, tmp
- */
-static std::vector<policy_rule> find_rotate_sites_xlated(
-    const uint8_t *xlated_data, uint32_t xlated_len, bool use_rorx = false)
-{
-    std::vector<policy_rule> rules;
-    uint32_t insn_cnt = xlated_len / 8;
-    if (insn_cnt < 4)
-        return rules;
-
-    std::vector<bpf_insn_raw> insns(insn_cnt);
-    for (uint32_t i = 0; i < insn_cnt; i++) {
-        std::memcpy(&insns[i], xlated_data + i * 8, sizeof(bpf_insn_raw));
-    }
-
-    constexpr uint8_t MOV64_X = 0xbf; /* BPF_ALU64 | BPF_MOV | BPF_X */
-    constexpr uint8_t MOV32_X = 0xbc; /* BPF_ALU   | BPF_MOV | BPF_X */
-    constexpr uint8_t LSH64_K = 0x67; /* BPF_ALU64 | BPF_LSH | BPF_K */
-    constexpr uint8_t LSH32_K = 0x64; /* BPF_ALU   | BPF_LSH | BPF_K */
-    constexpr uint8_t RSH64_K = 0x77; /* BPF_ALU64 | BPF_RSH | BPF_K */
-    constexpr uint8_t RSH32_K = 0x74; /* BPF_ALU   | BPF_RSH | BPF_K */
-    constexpr uint8_t OR64_X  = 0x4f; /* BPF_ALU64 | BPF_OR  | BPF_X */
-    constexpr uint8_t OR32_X  = 0x4c; /* BPF_ALU   | BPF_OR  | BPF_X */
-    constexpr uint8_t AND64_K = 0x57; /* BPF_ALU64 | BPF_AND | BPF_K */
-    constexpr uint8_t AND64_X = 0x5f; /* BPF_ALU64 | BPF_AND | BPF_X */
-
-    for (uint32_t idx = 0; idx < insn_cnt; idx++) {
-        /*
-         * Try 6-insn masked 32-bit rotate first (more specific pattern).
-         * Must check before 4-insn to avoid partial match on the first mov.
-         *
-         * Supports both AND64_K (immediate mask) and AND64_X (register mask).
-         * clang generates AND64_X when the mask constant doesn't fit in
-         * a sign-extended 32-bit immediate (e.g., 0xf0000000).
-         */
-        if (idx + 5 < insn_cnt) {
-            const auto &mov1 = insns[idx];
-            const auto &and_i = insns[idx + 1];
-            const auto &rsh = insns[idx + 2];
-            const auto &mov2 = insns[idx + 3];
-            const auto &lsh = insns[idx + 4];
-            const auto &ior = insns[idx + 5];
-
-            bool and_ok = (and_i.code == AND64_K && and_i.imm != 0) ||
-                          (and_i.code == AND64_X);
-
-            if (mov1.code == MOV64_X && mov1.off == 0 && mov1.imm == 0 &&
-                and_ok &&
-                rsh.code == RSH64_K &&
-                mov2.code == MOV64_X && mov2.off == 0 && mov2.imm == 0 &&
-                lsh.code == LSH64_K &&
-                ior.code == OR64_X) {
-
-                uint8_t tmp_reg = mov1.regs & 0x0f;       /* dst of mov1 = tmp */
-                uint8_t src_reg1 = (mov1.regs >> 4) & 0x0f; /* src of mov1 */
-                uint8_t src_reg2 = (mov2.regs >> 4) & 0x0f; /* src of mov2 */
-                uint8_t dst_reg = mov2.regs & 0x0f;        /* dst of mov2 */
-
-                if (src_reg1 == src_reg2 &&  /* same source */
-                    (and_i.regs & 0x0f) == tmp_reg &&  /* and on tmp */
-                    (rsh.regs & 0x0f) == tmp_reg &&    /* rsh on tmp */
-                    (lsh.regs & 0x0f) == dst_reg &&    /* lsh on dst */
-                    (ior.regs & 0x0f) == dst_reg &&    /* or dst = dst */
-                    ((ior.regs >> 4) & 0x0f) == tmp_reg) { /* or src = tmp */
-
-                    int32_t rot_amount = lsh.imm;
-                    int32_t rsh_amount = rsh.imm;
-
-                    if (rot_amount > 0 && rot_amount < 32 &&
-                        rsh_amount > 0 && rsh_amount < 32 &&
-                        rot_amount + rsh_amount == 32) {
-
-                        uint16_t native_choice = use_rorx ? BPF_JIT_ROT_RORX : BPF_JIT_ROT_ROR;
-                        uint32_t cpu_feat = use_rorx ? BPF_JIT_X86_BMI2 : 0;
-                        rules.push_back({idx, 6, BPF_JIT_RK_ROTATE, native_choice, 0, cpu_feat});
-                        idx += 5; /* will be incremented by loop */
-                        continue;
-                    }
-                }
-            }
-        }
-
-        /*
-         * Try 5-insn masked 32-bit rotate (no second mov).
-         * clang sometimes omits the second mov and operates directly on
-         * the original register.  Supports both orderings:
-         *   mov+and+rsh+lsh+or  (rsh on tmp, lsh on original)
-         *   mov+and+lsh+rsh+or  (lsh on original, rsh on tmp)
-         */
-        if (idx + 4 < insn_cnt) {
-            const auto &mov_i = insns[idx];
-            const auto &and_i = insns[idx + 1];
-            const auto &insn2 = insns[idx + 2];
-            const auto &insn3 = insns[idx + 3];
-            const auto &ior   = insns[idx + 4];
-
-            bool and_ok = (and_i.code == AND64_K) || (and_i.code == AND64_X);
-
-            if (mov_i.code == MOV64_X && mov_i.off == 0 && mov_i.imm == 0 &&
-                and_ok &&
-                ior.code == OR64_X) {
-
-                uint8_t tmp_reg = mov_i.regs & 0x0f;
-                uint8_t src_reg = (mov_i.regs >> 4) & 0x0f;
-
-                /* Determine ordering of lsh/rsh at positions 2,3 */
-                const bpf_insn_raw *lsh_p = nullptr;
-                const bpf_insn_raw *rsh_p = nullptr;
-                if (insn2.code == RSH64_K && insn3.code == LSH64_K) {
-                    rsh_p = &insn2; lsh_p = &insn3;
-                } else if (insn2.code == LSH64_K && insn3.code == RSH64_K) {
-                    lsh_p = &insn2; rsh_p = &insn3;
-                }
-
-                if (lsh_p && rsh_p &&
-                    (and_i.regs & 0x0f) == tmp_reg &&     /* and on tmp */
-                    (rsh_p->regs & 0x0f) == tmp_reg &&    /* rsh on tmp */
-                    (lsh_p->regs & 0x0f) == src_reg &&    /* lsh on original */
-                    (ior.regs & 0x0f) == src_reg &&        /* or dst = original */
-                    ((ior.regs >> 4) & 0x0f) == tmp_reg) { /* or src = tmp */
-
-                    int32_t rot_amount = lsh_p->imm;
-                    int32_t rsh_amount = rsh_p->imm;
-
-                    if (rot_amount > 0 && rot_amount < 32 &&
-                        rsh_amount > 0 && rsh_amount < 32 &&
-                        rot_amount + rsh_amount == 32) {
-
-                        uint16_t native_choice = use_rorx ? BPF_JIT_ROT_RORX : BPF_JIT_ROT_ROR;
-                        uint32_t cpu_feat = use_rorx ? BPF_JIT_X86_BMI2 : 0;
-                        rules.push_back({idx, 5, BPF_JIT_RK_ROTATE, native_choice, 0, cpu_feat});
-                        idx += 4;
-                        continue;
-                    }
-                }
-            }
-        }
-
-        /*
-         * Try 5-insn 64-bit two-copy rotate next.
-         * Must check before 4-insn patterns to avoid partial match on mov/rsh.
-         */
-        if (idx + 4 < insn_cnt) {
-            const auto &mov1 = insns[idx];
-            const auto &rsh = insns[idx + 1];
-            const auto &mov2 = insns[idx + 2];
-            const auto &lsh = insns[idx + 3];
-            const auto &ior = insns[idx + 4];
-
-            if (mov1.code == MOV64_X && mov1.off == 0 && mov1.imm == 0 &&
-                rsh.code == RSH64_K &&
-                mov2.code == MOV64_X && mov2.off == 0 && mov2.imm == 0 &&
-                lsh.code == LSH64_K &&
-                ior.code == OR64_X) {
-
-                uint8_t tmp_reg = mov1.regs & 0x0f;          /* dst of mov1 = tmp */
-                uint8_t src_reg1 = (mov1.regs >> 4) & 0x0f;  /* src of mov1 */
-                uint8_t src_reg2 = (mov2.regs >> 4) & 0x0f;  /* src of mov2 */
-                uint8_t dst_reg = mov2.regs & 0x0f;          /* dst of mov2 */
-                int32_t rot_amount = lsh.imm;
-                int32_t rsh_amount = rsh.imm;
-
-                if (src_reg1 == src_reg2 &&                    /* same original source */
-                    (rsh.regs & 0x0f) == tmp_reg &&            /* rsh on tmp */
-                    (lsh.regs & 0x0f) == dst_reg &&            /* lsh on dst */
-                    (ior.regs & 0x0f) == dst_reg &&            /* or dst = dst */
-                    ((ior.regs >> 4) & 0x0f) == tmp_reg &&     /* or src = tmp */
-                    rot_amount > 0 && rot_amount < 64 &&
-                    rsh_amount > 0 && rsh_amount < 64 &&
-                    rot_amount + rsh_amount == 64) {
-
-                    uint16_t native_choice = use_rorx ? BPF_JIT_ROT_RORX : BPF_JIT_ROT_ROR;
-                    uint32_t cpu_feat = use_rorx ? BPF_JIT_X86_BMI2 : 0;
-                    rules.push_back({idx, 5, BPF_JIT_RK_ROTATE, native_choice, 0, cpu_feat});
-                    idx += 4; /* will be incremented by loop */
-                    continue;
-                }
-            }
-        }
-
-        /* Try 4-insn 64-bit commuted rotate before the classic form. */
-        if (idx + 3 < insn_cnt) {
-            const auto &mov = insns[idx];
-            const auto &rsh = insns[idx + 1];
-            const auto &lsh = insns[idx + 2];
-            const auto &ior = insns[idx + 3];
-
-            if (mov.code == MOV64_X && mov.off == 0 && mov.imm == 0 &&
-                rsh.code == RSH64_K &&
-                lsh.code == LSH64_K &&
-                ior.code == OR64_X) {
-
-                uint8_t tmp_reg = mov.regs & 0x0f;         /* dst of mov = tmp */
-                uint8_t src_reg = (mov.regs >> 4) & 0x0f;  /* src of mov = original */
-                int32_t rot_amount = lsh.imm;
-                int32_t rsh_amount = rsh.imm;
-
-                if ((rsh.regs & 0x0f) == tmp_reg &&            /* rsh on tmp */
-                    (lsh.regs & 0x0f) == src_reg &&            /* lsh on original */
-                    (ior.regs & 0x0f) == src_reg &&            /* or dst = original */
-                    ((ior.regs >> 4) & 0x0f) == tmp_reg &&     /* or src = tmp */
-                    rot_amount > 0 && rot_amount < 64 &&
-                    rsh_amount > 0 && rsh_amount < 64 &&
-                    rot_amount + rsh_amount == 64) {
-
-                    uint16_t native_choice = use_rorx ? BPF_JIT_ROT_RORX : BPF_JIT_ROT_ROR;
-                    uint32_t cpu_feat = use_rorx ? BPF_JIT_X86_BMI2 : 0;
-                    rules.push_back({idx, 4, BPF_JIT_RK_ROTATE, native_choice, 0, cpu_feat});
-                    idx += 3; /* will be incremented by loop */
-                    continue;
-                }
-            }
-        }
-
-        /* Try 4-insn classic rotate */
-        if (idx + 3 >= insn_cnt)
-            continue;
-
-        const auto &mov = insns[idx];
-        const auto &lsh = insns[idx + 1];
-        const auto &rsh = insns[idx + 2];
-        const auto &ior = insns[idx + 3];
-
-        bool is64;
-        uint32_t width;
-
-        /* Determine width from mov instruction */
-        if (mov.code == MOV64_X) {
-            is64 = true;
-            width = 64;
-        } else if (mov.code == MOV32_X) {
-            is64 = false;
-            width = 32;
-        } else {
-            continue;
-        }
-
-        if (mov.off != 0 || mov.imm != 0)
-            continue;
-
-        uint8_t tmp_reg = mov.regs & 0x0f;      /* dst of mov = tmp */
-        uint8_t src_reg = (mov.regs >> 4) & 0x0f; /* src of mov = original dst */
-
-        /* Check lsh */
-        uint8_t expected_lsh = is64 ? LSH64_K : LSH32_K;
-        if (lsh.code != expected_lsh)
-            continue;
-        if ((lsh.regs & 0x0f) != src_reg) /* lsh dst must be original */
-            continue;
-        int32_t rot_amount = lsh.imm;
-        if (rot_amount <= 0 || rot_amount >= static_cast<int32_t>(width))
-            continue;
-
-        /* Check rsh */
-        uint8_t expected_rsh = is64 ? RSH64_K : RSH32_K;
-        if (rsh.code != expected_rsh)
-            continue;
-        if ((rsh.regs & 0x0f) != tmp_reg) /* rsh dst must be tmp */
-            continue;
-        if (rsh.imm != static_cast<int32_t>(width - rot_amount))
-            continue;
-
-        /* Check or */
-        uint8_t expected_or = is64 ? OR64_X : OR32_X;
-        if (ior.code != expected_or)
-            continue;
-        if ((ior.regs & 0x0f) != src_reg) /* or dst must be original */
-            continue;
-        if (((ior.regs >> 4) & 0x0f) != tmp_reg) /* or src must be tmp */
-            continue;
-
-        {
-            uint16_t native_choice = use_rorx ? BPF_JIT_ROT_RORX : BPF_JIT_ROT_ROR;
-            uint32_t cpu_feat = use_rorx ? BPF_JIT_X86_BMI2 : 0;
-            rules.push_back({idx, 4, BPF_JIT_RK_ROTATE, native_choice, 0, cpu_feat});
-        }
-        idx += 3; /* will be incremented by loop */
-    }
-    return rules;
-}
-
-/*
- * Scan xlated BPF bytecode for address calculation (LEA) patterns.
- *
- * Pattern:
- *   [0] mov64 dst, idx        (BPF_ALU64|BPF_MOV|BPF_X)
- *   [1] lsh64 dst, K          (BPF_ALU64|BPF_LSH|BPF_K, K in {1,2,3})
- *   [2] add64 dst, base       (BPF_ALU64|BPF_ADD|BPF_X)
- */
-static std::vector<policy_rule> find_addr_calc_sites_xlated(
-    const uint8_t *xlated_data, uint32_t xlated_len)
-{
-    std::vector<policy_rule> rules;
-    uint32_t insn_cnt = xlated_len / 8;
-    if (insn_cnt < 3)
-        return rules;
-
-    std::vector<bpf_insn_raw> insns(insn_cnt);
-    for (uint32_t i = 0; i < insn_cnt; i++) {
-        std::memcpy(&insns[i], xlated_data + i * 8, sizeof(bpf_insn_raw));
-    }
-
-    constexpr uint8_t MOV64_X = 0xbf; /* BPF_ALU64 | BPF_MOV | BPF_X */
-    constexpr uint8_t LSH64_K = 0x67; /* BPF_ALU64 | BPF_LSH | BPF_K */
-    constexpr uint8_t ADD64_X = 0x0f; /* BPF_ALU64 | BPF_ADD | BPF_X */
-
-    for (uint32_t idx = 0; idx + 2 < insn_cnt; idx++) {
-        const auto &mov = insns[idx];
-        const auto &lsh = insns[idx + 1];
-        const auto &add = insns[idx + 2];
-
-        /* [0] mov64 dst, idx */
-        if (mov.code != MOV64_X)
-            continue;
-        if (mov.off != 0 || mov.imm != 0)
-            continue;
-
-        uint8_t dst_reg = mov.regs & 0x0f;
-
-        /* [1] lsh64 dst, K where K in {1, 2, 3} */
-        if (lsh.code != LSH64_K)
-            continue;
-        if ((lsh.regs & 0x0f) != dst_reg)
-            continue;
-        if (lsh.imm < 1 || lsh.imm > 3)
-            continue;
-
-        /* [2] add64 dst, base (register) */
-        if (add.code != ADD64_X)
-            continue;
-        if ((add.regs & 0x0f) != dst_reg)
-            continue;
-
-        rules.push_back({idx, 3, BPF_JIT_RK_ADDR_CALC, BPF_JIT_ACALC_LEA, 0});
-        idx += 2; /* will be incremented by loop */
-    }
-    return rules;
-}
-
-static std::vector<uint8_t> build_policy_blob_from_xlated(
-    int program_fd,
+std::vector<uint8_t> build_policy_blob_from_scan_results(
     const bpf_prog_info &info,
-    const std::vector<policy_rule> &rules)
+    const std::vector<bpf_jit_scan_rule> &rules)
 {
-    uint32_t insn_cnt = info.xlated_prog_len / 8;
-    uint32_t rule_cnt = static_cast<uint32_t>(rules.size());
-
-    /* Header: 32 bytes */
-    struct __attribute__((packed)) {
-        uint32_t magic;
-        uint16_t version;
-        uint16_t hdr_len;
-        uint32_t total_len;
-        uint32_t rule_cnt;
-        uint32_t insn_cnt;
-        uint8_t  prog_tag[8];
-        uint16_t arch_id;
-        uint16_t flags;
-    } hdr = {};
-
-    hdr.magic = BPF_JIT_POLICY_MAGIC;
-    hdr.version = BPF_JIT_POLICY_VERSION;
-    hdr.hdr_len = 32;
-    hdr.rule_cnt = rule_cnt;
-    hdr.insn_cnt = insn_cnt;
-    std::memcpy(hdr.prog_tag, info.tag, 8);
-    hdr.arch_id = BPF_JIT_ARCH_X86_64;
-    hdr.flags = 0;
-
-    /* Each rule: 16 bytes */
-    struct __attribute__((packed)) {
-        uint32_t site_start;
-        uint16_t site_len;
-        uint16_t rule_kind;
-        uint16_t native_choice;
-        uint16_t priority;
-        uint32_t cpu_features_required;
-    } rule_entry = {};
-
-    uint32_t total_len = 32 + rule_cnt * 16;
-    hdr.total_len = total_len;
-
-    std::vector<uint8_t> blob(total_len, 0);
-    std::memcpy(blob.data(), &hdr, 32);
-
-    for (uint32_t i = 0; i < rule_cnt; i++) {
-        rule_entry.site_start = rules[i].site_start;
-        rule_entry.site_len = rules[i].site_len;
-        rule_entry.rule_kind = rules[i].rule_kind;
-        rule_entry.native_choice = rules[i].native_choice;
-        rule_entry.priority = rules[i].priority;
-        rule_entry.cpu_features_required = rules[i].cpu_features_required;
-        std::memcpy(blob.data() + 32 + i * 16, &rule_entry, 16);
+    uint8_t *blob_ptr = nullptr;
+    uint32_t blob_len = 0;
+    const int rc = bpf_jit_build_policy_blob(
+        rules.empty() ? nullptr : rules.data(),
+        static_cast<uint32_t>(rules.size()),
+        info.xlated_prog_len / 8,
+        info.tag,
+        &blob_ptr,
+        &blob_len);
+    if (rc < 0) {
+        fail("bpf_jit_build_policy_blob failed: " + std::string(strerror(-rc)));
     }
 
+    std::vector<uint8_t> blob(blob_ptr, blob_ptr + blob_len);
+    bpf_jit_free_policy_blob(blob_ptr);
     return blob;
 }
 
@@ -1360,6 +692,9 @@ sample_result run_kernel(const cli_options &options)
     const auto object_open_start = std::chrono::steady_clock::now();
     bpf_object_open_opts open_opts = {};
     open_opts.sz = sizeof(open_opts);
+    if (options.btf_custom_path.has_value()) {
+        open_opts.btf_custom_path = options.btf_custom_path->c_str();
+    }
     bpf_object *raw_object = bpf_object__open_file(options.program.c_str(), &open_opts);
     const int open_error = libbpf_get_error(raw_object);
     if (open_error != 0) {
@@ -1396,6 +731,18 @@ sample_result run_kernel(const cli_options &options)
     const bool do_recompile_wide   = options.recompile_wide   || options.recompile_all;
     const bool do_recompile_rotate = options.recompile_rotate || options.recompile_rotate_rorx || options.recompile_all;
     const bool do_recompile_lea    = options.recompile_lea    || options.recompile_all;
+    directive_scan_summary directive_scan {};
+    recompile_summary recompile {};
+    recompile.requested =
+        do_recompile_cmov || do_recompile_wide || do_recompile_rotate ||
+        do_recompile_lea || options.policy_blob.has_value();
+    if (options.policy_blob.has_value()) {
+        recompile.mode = "policy-blob";
+    } else if (options.recompile_v5) {
+        recompile.mode = "auto-scan-v5";
+    } else if (do_recompile_cmov || do_recompile_wide || do_recompile_rotate || do_recompile_lea) {
+        recompile.mode = "auto-scan-v4";
+    }
     if (do_recompile_cmov || do_recompile_wide || do_recompile_rotate || do_recompile_lea ||
         options.policy_blob.has_value()) {
         auto pre_info = load_prog_info(program_fd);
@@ -1408,72 +755,125 @@ sample_result run_kernel(const cli_options &options)
              * and build the combined policy blob from post-verifier bytecode.
              */
             auto xlated = load_xlated_program(program_fd, pre_info.xlated_prog_len);
-            std::vector<policy_rule> rules;
 
-            /* Compute main subprog scan length (restrict all scanners) */
-            uint32_t main_scan_len = static_cast<uint32_t>(xlated.size());
-            if (pre_info.nr_func_info > 1) {
-                auto func_info = load_func_info(program_fd, pre_info.nr_func_info);
-                if (func_info.size() > 1) {
-                    uint32_t main_subprog_len = func_info[1].insn_off * sizeof(bpf_insn_raw);
-                    if (main_subprog_len < main_scan_len) {
-                        main_scan_len = main_subprog_len;
+            /*
+             * Scan the full translated program, including subprogs.
+             * Kernel-side validators reject any directive site that would
+             * cross a subprog boundary, so userspace does not need to trim
+             * scanning to the main entry subprog.
+             */
+            directive_scan.performed = true;
+            uint32_t scan_len = static_cast<uint32_t>(xlated.size());
+            if (options.recompile_v5) {
+                const auto summary = bpf_jit_scanner::scan_v5_builtin(
+                    xlated.data(), scan_len,
+                    bpf_jit_scanner::V5ScanOptions {
+                        .scan_cmov = do_recompile_cmov,
+                        .scan_wide = do_recompile_wide,
+                        .scan_rotate = do_recompile_rotate,
+                        .scan_lea = do_recompile_lea,
+                        .use_rorx = options.recompile_rotate_rorx,
+                    });
+
+                directive_scan.cmov_sites = summary.cmov_sites;
+                directive_scan.wide_sites = summary.wide_sites;
+                directive_scan.rotate_sites = summary.rotate_sites;
+                directive_scan.lea_sites = summary.lea_sites;
+
+                auto print_v5_scan_status = [&](bool enabled,
+                                                uint64_t site_count,
+                                                const char *label,
+                                                const char *site_name) {
+                    if (!enabled) {
+                        return;
                     }
-                }
-            }
+                    if (site_count == 0) {
+                        fprintf(stderr, "%s: no %s sites found in xlated program (%u insns)\n",
+                                label, site_name, scan_len / 8);
+                        return;
+                    }
+                    fprintf(stderr, "%s: found %llu %s sites in xlated program (%u insns)\n",
+                            label,
+                            static_cast<unsigned long long>(site_count),
+                            site_name,
+                            scan_len / 8);
+                };
 
-            if (do_recompile_cmov) {
-                auto cmov_rules = find_cmov_select_sites_xlated(xlated.data(), main_scan_len);
-                if (cmov_rules.empty()) {
-                    fprintf(stderr, "recompile-cmov: no cmov-select sites found in xlated program (%u insns)\n",
-                            main_scan_len / 8);
-                } else {
-                    fprintf(stderr, "recompile-cmov: found %zu cmov-select sites in xlated program (%u insns)\n",
-                            cmov_rules.size(), main_scan_len / 8);
-                    rules.insert(rules.end(), cmov_rules.begin(), cmov_rules.end());
-                }
-            }
+                print_v5_scan_status(do_recompile_cmov, directive_scan.cmov_sites,
+                                     "recompile-cmov", "cmov");
+                print_v5_scan_status(do_recompile_wide, directive_scan.wide_sites,
+                                     "recompile-wide", "wide_load");
+                print_v5_scan_status(do_recompile_rotate, directive_scan.rotate_sites,
+                                     "recompile-rotate", "rotate");
+                print_v5_scan_status(do_recompile_lea, directive_scan.lea_sites,
+                                     "recompile-lea", "addr_calc");
 
-            if (do_recompile_wide) {
-                auto wide_rules = find_wide_load_sites_xlated(xlated.data(), main_scan_len);
-                if (wide_rules.empty()) {
-                    fprintf(stderr, "recompile-wide: no wide_load sites found in xlated program (%u insns)\n",
-                            pre_info.xlated_prog_len / 8);
-                } else {
-                    fprintf(stderr, "recompile-wide: found %zu wide_load sites in xlated program (%u insns)\n",
-                            wide_rules.size(), pre_info.xlated_prog_len / 8);
-                    rules.insert(rules.end(), wide_rules.begin(), wide_rules.end());
+                if (!summary.rules.empty()) {
+                    policy_data = bpf_jit_scanner::build_policy_blob_v5(
+                        pre_info.xlated_prog_len / 8,
+                        pre_info.tag,
+                        summary.rules);
                 }
-            }
+            } else {
+                std::vector<bpf_jit_scan_rule> rules;
+                auto append_rules = [&](uint64_t &site_counter,
+                                        const char *label,
+                                        const char *site_name,
+                                        auto &&scan_fn) {
+                    auto found_rules = scan_xlated_program(scan_len, label,
+                                                           std::forward<decltype(scan_fn)>(scan_fn));
+                    site_counter = found_rules.size();
+                    if (found_rules.empty()) {
+                        fprintf(stderr, "%s: no %s sites found in xlated program (%u insns)\n",
+                                label, site_name, scan_len / 8);
+                        return;
+                    }
 
-            if (do_recompile_rotate) {
-                bool use_rorx = options.recompile_rotate_rorx;
-                auto rotate_rules = find_rotate_sites_xlated(xlated.data(), main_scan_len,
-                                                             use_rorx);
-                if (rotate_rules.empty()) {
-                    fprintf(stderr, "recompile-rotate: no rotate sites found in xlated program (%u insns)\n",
-                            pre_info.xlated_prog_len / 8);
-                } else {
-                    fprintf(stderr, "recompile-rotate: found %zu rotate sites in xlated program (%u insns)\n",
-                            rotate_rules.size(), pre_info.xlated_prog_len / 8);
-                    rules.insert(rules.end(), rotate_rules.begin(), rotate_rules.end());
+                    fprintf(stderr, "%s: found %zu %s sites in xlated program (%u insns)\n",
+                            label, found_rules.size(), site_name, scan_len / 8);
+                    rules.insert(rules.end(), found_rules.begin(), found_rules.end());
+                };
+
+                if (do_recompile_cmov) {
+                    append_rules(directive_scan.cmov_sites,
+                                 "recompile-cmov", "cmov-select",
+                                 [&](bpf_jit_scan_rule *out, uint32_t max_rules) {
+                                     return bpf_jit_scan_cmov(xlated.data(), scan_len,
+                                                              out, max_rules);
+                                 });
                 }
-            }
 
-            if (do_recompile_lea) {
-                auto lea_rules = find_addr_calc_sites_xlated(xlated.data(), main_scan_len);
-                if (lea_rules.empty()) {
-                    fprintf(stderr, "recompile-lea: no addr_calc sites found in xlated program (%u insns)\n",
-                            pre_info.xlated_prog_len / 8);
-                } else {
-                    fprintf(stderr, "recompile-lea: found %zu addr_calc sites in xlated program (%u insns)\n",
-                            lea_rules.size(), pre_info.xlated_prog_len / 8);
-                    rules.insert(rules.end(), lea_rules.begin(), lea_rules.end());
+                if (do_recompile_wide) {
+                    append_rules(directive_scan.wide_sites,
+                                 "recompile-wide", "wide_load",
+                                 [&](bpf_jit_scan_rule *out, uint32_t max_rules) {
+                                     return bpf_jit_scan_wide_mem(xlated.data(), scan_len,
+                                                                  out, max_rules);
+                                 });
                 }
-            }
 
-            if (!rules.empty()) {
-                policy_data = build_policy_blob_from_xlated(program_fd, pre_info, rules);
+                if (do_recompile_rotate) {
+                    bool use_rorx = options.recompile_rotate_rorx;
+                    append_rules(directive_scan.rotate_sites,
+                                 "recompile-rotate", "rotate",
+                                 [&](bpf_jit_scan_rule *out, uint32_t max_rules) {
+                                     return bpf_jit_scan_rotate(xlated.data(), scan_len,
+                                                                use_rorx, out, max_rules);
+                                 });
+                }
+
+                if (do_recompile_lea) {
+                    append_rules(directive_scan.lea_sites,
+                                 "recompile-lea", "addr_calc",
+                                 [&](bpf_jit_scan_rule *out, uint32_t max_rules) {
+                                     return bpf_jit_scan_addr_calc(xlated.data(), scan_len,
+                                                                   out, max_rules);
+                                 });
+                }
+
+                if (!rules.empty()) {
+                    policy_data = build_policy_blob_from_scan_results(pre_info, rules);
+                }
             }
         } else {
             /*
@@ -1481,14 +881,16 @@ sample_result run_kernel(const cli_options &options)
              * to match the kernel's view.
              */
             policy_data = read_binary_file(*options.policy_blob);
-            if (policy_data.size() >= 32) {
-                uint32_t xlated_insn_cnt = pre_info.xlated_prog_len / 8;
+            if (policy_data.size() >= 28) {
+                const uint32_t xlated_insn_cnt = pre_info.xlated_prog_len / 8;
                 std::memcpy(policy_data.data() + 16, &xlated_insn_cnt, sizeof(xlated_insn_cnt));
                 std::memcpy(policy_data.data() + 20, pre_info.tag, 8);
             }
         }
 
         if (!policy_data.empty()) {
+            recompile.policy_generated = true;
+            recompile.policy_bytes = policy_data.size();
             /* Build a sealed memfd from the policy data */
             scoped_fd patched_memfd(sys_memfd_create("bpf-jit-policy", MFD_CLOEXEC | MFD_ALLOW_SEALING));
             if (patched_memfd.get() < 0) {
@@ -1501,6 +903,7 @@ sample_result run_kernel(const cli_options &options)
             }
 
             recompile_start = std::chrono::steady_clock::now();
+            recompile.syscall_attempted = true;
 
             /*
              * BPF_PROG_JIT_RECOMPILE syscall.
@@ -1524,9 +927,14 @@ sample_result run_kernel(const cli_options &options)
                                                     attr_buf, sizeof(attr_buf)));
             recompile_end = std::chrono::steady_clock::now();
             if (rc != 0) {
+                recompile.error =
+                    "BPF_PROG_JIT_RECOMPILE failed: " + std::string(strerror(errno)) +
+                    " (errno=" + std::to_string(errno) + ")";
                 fprintf(stderr, "BPF_PROG_JIT_RECOMPILE failed: %s (errno=%d)\n",
                         strerror(errno), errno);
                 /* Non-fatal: continue with stock JIT */
+            } else {
+                recompile.applied = true;
             }
         }
     }
@@ -1536,6 +944,10 @@ sample_result run_kernel(const cli_options &options)
         const auto jited_program = load_jited_program(program_fd, program_info.jited_prog_len);
         const auto dump_path = std::filesystem::path(benchmark_name_for_program(options.program) + ".kernel.bin");
         write_binary_file(dump_path, jited_program.data(), jited_program.size());
+    }
+    if (options.dump_xlated.has_value()) {
+        const auto xlated_program = load_xlated_program(program_fd, program_info.xlated_prog_len);
+        write_binary_file(*options.dump_xlated, xlated_program.data(), xlated_program.size());
     }
 
     sample_result sample;
@@ -1548,6 +960,8 @@ sample_result run_kernel(const cli_options &options)
         .bpf_bytecode_bytes = program_info.xlated_prog_len,
         .native_code_bytes = program_info.jited_prog_len,
     };
+    sample.directive_scan = directive_scan;
+    sample.recompile = recompile;
     if (options.compile_only) {
         sample.phases_ns = {
             {"memory_prepare_ns", elapsed_ns(memory_prepare_start, memory_prepare_end)},
@@ -1564,6 +978,7 @@ sample_result run_kernel(const cli_options &options)
 
     std::vector<uint8_t> packet;
     std::vector<uint8_t> packet_out;
+    std::vector<uint8_t> context_in;
     uint64_t result = 0;
     int result_fd = -1;
     uint32_t key = 0;
@@ -1631,6 +1046,10 @@ sample_result run_kernel(const cli_options &options)
             packet_out.assign(packet.size(), 0);
             exec_input_prepare_end = std::chrono::steady_clock::now();
         }
+    } else if (options.io_mode == "context") {
+        exec_input_prepare_start = std::chrono::steady_clock::now();
+        context_in = input_bytes;
+        exec_input_prepare_end = std::chrono::steady_clock::now();
     } else {
         exec_input_prepare_start = std::chrono::steady_clock::now();
         if (options.raw_packet) {
@@ -1644,11 +1063,18 @@ sample_result run_kernel(const cli_options &options)
 
     bpf_test_run_opts test_opts = {};
     test_opts.sz = sizeof(test_opts);
-    test_opts.repeat = options.repeat;
-    test_opts.data_in = packet.data();
-    test_opts.data_size_in = packet.size();
-    test_opts.data_out = packet_out.data();
-    test_opts.data_size_out = packet_out.size();
+    const uint32_t effective_repeat = options.io_mode == "context" ? 1u : options.repeat;
+    test_opts.repeat = options.io_mode == "context" ? 0u : options.repeat;
+    if (!packet.empty()) {
+        test_opts.data_in = packet.data();
+        test_opts.data_size_in = packet.size();
+        test_opts.data_out = packet_out.data();
+        test_opts.data_size_out = packet_out.size();
+    }
+    if (!context_in.empty()) {
+        test_opts.ctx_in = context_in.data();
+        test_opts.ctx_size_in = context_in.size();
+    }
 
     const uint64_t tsc_freq_hz = kHasTscMeasurement ? detect_tsc_freq_hz() : 0;
 
@@ -1672,7 +1098,7 @@ sample_result run_kernel(const cli_options &options)
             run_wall_end = std::chrono::steady_clock::now();
         });
     if (options.perf_scope == "full_repeat_avg") {
-        const uint32_t repeat = options.repeat > 0 ? options.repeat : 1;
+        const uint32_t repeat = effective_repeat;
         for (auto &counter : perf_counters.counters) {
             counter.value /= repeat;
         }
@@ -1685,6 +1111,10 @@ sample_result run_kernel(const cli_options &options)
         result_read_start = std::chrono::steady_clock::now();
         result = read_u64_result(packet_out.data(), packet_out.size());
         result_read_end = std::chrono::steady_clock::now();
+    } else if (options.io_mode == "context") {
+        result_read_start = std::chrono::steady_clock::now();
+        result = test_opts.retval;
+        result_read_end = std::chrono::steady_clock::now();
     } else {
         result_read_start = std::chrono::steady_clock::now();
         if (bpf_map_lookup_elem(result_fd, &key, &result) != 0) {
@@ -1696,7 +1126,7 @@ sample_result run_kernel(const cli_options &options)
     sample.exec_ns = test_opts.duration;
     if (kHasTscMeasurement && tsc_freq_hz > 0 && tsc_after > tsc_before) {
         const uint64_t total_cycles = tsc_after - tsc_before;
-        const uint32_t repeat = options.repeat > 0 ? options.repeat : 1;
+        const uint32_t repeat = effective_repeat;
         sample.exec_cycles = static_cast<uint64_t>(std::llround(
             static_cast<long double>(total_cycles) / static_cast<long double>(repeat)));
         sample.tsc_freq_hz = tsc_freq_hz;
@@ -1704,7 +1134,12 @@ sample_result run_kernel(const cli_options &options)
             (static_cast<long double>(total_cycles) * 1000000000.0L) /
             (static_cast<long double>(tsc_freq_hz) * static_cast<long double>(repeat))));
     }
-    sample.timing_source = "ktime";
+    if (sample.exec_ns == 0 && sample.wall_exec_ns.has_value()) {
+        sample.exec_ns = *sample.wall_exec_ns;
+        sample.timing_source = "wall_tsc";
+    } else {
+        sample.timing_source = "ktime";
+    }
     sample.result = result;
     sample.retval = test_opts.retval;
     sample.phases_ns = {
@@ -1712,10 +1147,16 @@ sample_result run_kernel(const cli_options &options)
         {"object_open_ns", elapsed_ns(object_open_start, object_open_end)},
         {"object_load_ns", elapsed_ns(object_load_start, object_load_end)},
         {options.io_mode == "packet" ? "packet_prepare_ns"
-                                     : (options.io_mode == "staged" ? "input_stage_ns" : "map_prepare_ns"),
+                                     : (options.io_mode == "staged"
+                                            ? "input_stage_ns"
+                                            : (options.io_mode == "context"
+                                                   ? "context_prepare_ns"
+                                                   : "map_prepare_ns")),
          elapsed_ns(exec_input_prepare_start, exec_input_prepare_end)},
         {"prog_run_wall_ns", elapsed_ns(run_wall_start, run_wall_end)},
-        {(options.io_mode == "packet" || options.io_mode == "staged") ? "result_extract_ns" : "result_read_ns",
+        {(options.io_mode == "packet" || options.io_mode == "staged")
+             ? "result_extract_ns"
+             : (options.io_mode == "context" ? "retval_read_ns" : "result_read_ns"),
          elapsed_ns(result_read_start, result_read_end)},
     };
     sample.perf_counters = std::move(perf_counters);

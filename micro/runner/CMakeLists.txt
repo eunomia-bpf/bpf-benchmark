@@ -23,6 +23,7 @@ set(MICRO_REPO_ROOT "${MICRO_REPO_ROOT}" CACHE PATH "Repository root")
 set(MICRO_LIBBPF_PREFIX "${MICRO_LIBBPF_PREFIX}" CACHE PATH "libbpf prefix")
 set(MICRO_LIBBPF_LIBRARY "${MICRO_LIBBPF_LIBRARY}" CACHE FILEPATH "libbpf static library")
 set(MICRO_LLVMBPF_ROOT "${MICRO_REPO_ROOT}/vendor/llvmbpf")
+set(MICRO_SCANNER_ROOT "${MICRO_REPO_ROOT}/scanner")
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBELF REQUIRED IMPORTED_TARGET libelf)
@@ -30,6 +31,14 @@ pkg_check_modules(ZLIB REQUIRED IMPORTED_TARGET zlib)
 pkg_check_modules(LIBZSTD REQUIRED IMPORTED_TARGET libzstd)
 
 add_subdirectory("${MICRO_LLVMBPF_ROOT}" "${CMAKE_BINARY_DIR}/llvmbpf")
+
+if(NOT EXISTS "${MICRO_SCANNER_ROOT}/CMakeLists.txt")
+    message(FATAL_ERROR "scanner/ was not found at ${MICRO_SCANNER_ROOT}")
+endif()
+
+set(BPF_JIT_SCANNER_BUILD_CLI OFF CACHE BOOL "Build the bpf-jit-scanner CLI tool" FORCE)
+set(BPF_JIT_SCANNER_BUILD_TESTS OFF CACHE BOOL "Build scanner unit tests" FORCE)
+add_subdirectory("${MICRO_SCANNER_ROOT}" "${CMAKE_BINARY_DIR}/scanner")
 
 add_library(vendor_libbpf STATIC IMPORTED GLOBAL)
 set_target_properties(vendor_libbpf PROPERTIES
@@ -59,6 +68,7 @@ target_link_libraries(micro_exec
     PRIVATE
         llvmbpf_vm
         spdlog::spdlog
+        bpf_jit_scanner::scanner
         vendor_libbpf
         PkgConfig::LIBELF
         PkgConfig::ZLIB

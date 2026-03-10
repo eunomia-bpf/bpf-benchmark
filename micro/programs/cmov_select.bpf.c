@@ -25,8 +25,8 @@ struct {
 /*
  * Keep the actual select in a dedicated subprog so the BPF body at the
  * directive site is just register-to-register choice, not extra load work.
- * NOTE: v4 scanner only scans main subprog, so cmov sites are not detected.
- * This is a known limitation — extending to subprogs is future work.
+ * The userspace scanner should find the select pattern across the full
+ * translated program, not just the entry subprog.
  */
 static __noinline u64 cmov_select_pick(u64 lhs, u64 rhs, u64 on_true, u64 on_false)
 {
