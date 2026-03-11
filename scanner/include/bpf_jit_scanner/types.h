@@ -26,6 +26,7 @@ extern "C" {
 #define BPF_JIT_CF_BITFIELD_EXTRACT   5
 #define BPF_JIT_CF_ZERO_EXT_ELIDE     6
 #define BPF_JIT_CF_ENDIAN_FUSION      7
+#define BPF_JIT_CF_BRANCH_FLIP        8
 
 #define BPF_JIT_SEL_CMOVCC      1
 #define BPF_JIT_SEL_BRANCH      2
@@ -48,6 +49,9 @@ extern "C" {
 
 #define BPF_JIT_ENDIAN_LOAD_SWAP 0
 #define BPF_JIT_ENDIAN_SWAP_STORE 1
+
+#define BPF_JIT_BFLIP_ORIGINAL   1
+#define BPF_JIT_BFLIP_FLIPPED    2
 
 #define BPF_JIT_X86_CMOV        (1U << 0)
 #define BPF_JIT_X86_BMI2        (1U << 1)

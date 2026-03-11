@@ -239,11 +239,17 @@ Recommended staged answer:
 
 Before adding any new semantics, v6 should remove current v5 friction:
 
-- delete the hard-coded shape whitelist in `vendor/linux-framework/kernel/bpf/jit_directives.c`
-- keep the existing `BPF_PROG_JIT_RECOMPILE` log channel and add `log_true_size`
-- make overlap semantics explicit at policy-parse time
+- `✅ DONE`: delete the hard-coded shape whitelist in `vendor/linux-framework/kernel/bpf/jit_directives.c`
+- `✅ DONE` for `log_level/log_size/log_buf`, `🔄 NEXT` for `log_true_size`
+- `✅ DONE`: raise tuple/binding capacity to 16
+- `🔄 NEXT`: make overlap semantics explicit at policy-parse time
 
-This tree already contains most of the `jit_recompile` log plumbing in `vendor/linux-framework/kernel/bpf/jit_directives.c`; the remaining gap is mainly parity with `BPF_PROG_LOAD` style truncation reporting.
+Current tree status:
+
+- shape whitelist removal is done
+- `BPF_PROG_JIT_RECOMPILE` userspace log buffer support is done
+- tuple/binding limits are now 16
+- the remaining tier-1 gap is mainly `log_true_size` parity plus explicit overlap semantics
 
 ### 3.2 Proposed policy v3 header and site model
 
@@ -375,6 +381,11 @@ Semantics:
 - `log_true_size` lets userspace detect truncation cleanly
 - `fact_ref` is future-only, if a kernel-owned fact channel is ever added
 
+Current tree status:
+
+- `✅ DONE`: `log_level`, `log_size`, `log_buf`
+- `🔄 NEXT`: `log_true_size`
+
 ### 3.7 Explicit overlap semantics
 
 Recommended rules:
@@ -394,6 +405,10 @@ Policy:
   - losers are marked inactive with a `shadowed` reject reason in the recompile log
 
 ### 3.8 Remove the shape whitelist
+
+Status:
+
+- `✅ DONE` in the current tree
 
 Recommended change:
 
@@ -471,6 +486,10 @@ For the next tier, the answer includes `BRANCH_FLIP`, `ZERO_EXT_ELIDE`, and `END
 
 ### 5.2 `BRANCH_FLIP`
 
+Status:
+
+- `✅ DONE` in the current tree
+
 Shape:
 
 - local if/else diamond:
@@ -505,6 +524,10 @@ Estimated x86 emitter work:
 
 ### 5.3 `ZERO_EXT_ELIDE`
 
+Status:
+
+- `✅ DONE` in the current tree
+
 Shape:
 
 - local pair such as `{ alu32 dst; zext dst }`
@@ -532,6 +555,10 @@ Estimated x86 emitter work:
 - roughly 40-60 LOC
 
 ### 5.4 `ENDIAN_FUSION`
+
+Status:
+
+- `✅ DONE` in the current tree
 
 Shape:
 
@@ -605,9 +632,9 @@ The key distinction is:
 | Directive family | What userspace needs for discovery | What kernel must prove | Real limit class | Status |
 | --- | --- | --- | --- | --- |
 | More patterns inside existing canonical forms | Pattern matching only | Existing validation/emitter path | None | `CAN` |
-| `BRANCH_FLIP` for a local single-entry/single-exit diamond | Workload hotness / branch policy | Local diamond match, same join, no interior outside edge | Engineering limitation only | `CAN` |
-| `ZERO_EXT_ELIDE` | Pattern matching only | Same-dst def32 followed by redundant zext | Engineering limitation only | `CAN` |
-| `ENDIAN_FUSION` | Pattern matching only plus CPU feature policy | Adjacent load plus endian-convert of supported width | Engineering limitation only | `CAN` |
+| `BRANCH_FLIP` for a local single-entry/single-exit diamond | Workload hotness / branch policy | Local diamond match, same join, no interior outside edge | Engineering limitation only | `✅ DONE` |
+| `ZERO_EXT_ELIDE` | Pattern matching only | Same-dst def32 followed by redundant zext | Engineering limitation only | `✅ DONE` |
+| `ENDIAN_FUSION` | Pattern matching only plus CPU feature policy | Adjacent load plus endian-convert of supported width | Engineering limitation only | `✅ DONE` |
 | `DIV_LIVENESS` | Liveness info from verifier log | Existing `insn_aux_data` liveness check plus local emitter legality | Information limitation only | `CAN` |
 | `PROLOGUE_TRIM` / `EPILOGUE_TRIM` | Policy only | Site-kind match at function entry/exit | Engineering limitation only | `CAN` |
 | `BOUNDS_ELIDE` | Bounds and dominance facts | That removing a check still preserves all verifier-proved safety conditions | Safety limitation | `CANNOT` |
@@ -653,13 +680,13 @@ Primary-path estimates:
 
 | Improvement | Estimated kernel LOC | Notes |
 | --- | --- | --- |
-| Remove shape whitelist | 20-40 | Delete helper plus parse/validate call sites |
-| Finish `jit_recompile` log parity (`log_true_size`) | 20-50 | The basic log channel already exists in this tree |
+| Remove shape whitelist | 20-40 | `✅ DONE` in current tree |
+| Finish `jit_recompile` log parity (`log_true_size`) | 20-50 | `log_level/log_size/log_buf` are done; `log_true_size` is still pending |
 | Explicit overlap semantics | 80-140 | Parse-time arbitration and logging |
 | `FUNC_ENTRY` / `FUNC_EXIT` site kinds | 180-325 | Common plus x86 dispatch hooks |
-| `BRANCH_FLIP` canonical form | 120-180 | Roughly 80-120 LOC x86 emitter plus common validation/dispatch |
-| `ZERO_EXT_ELIDE` canonical form | 60-90 | Roughly 40-60 LOC x86 emitter plus small common plumbing |
-| `ENDIAN_FUSION` canonical form | 80-120 | Roughly 60-80 LOC x86 emitter plus CPU-gating plumbing |
+| `BRANCH_FLIP` canonical form | 120-180 | `✅ DONE` in current tree |
+| `ZERO_EXT_ELIDE` canonical form | 60-90 | `✅ DONE` in current tree |
+| `ENDIAN_FUSION` canonical form | 80-120 | `✅ DONE` in current tree |
 | `DIV_LIVENESS` canonical form | 100-150 | Reuses existing liveness data |
 
 Not counted in the baseline path:
@@ -689,7 +716,10 @@ This is the zero-kernel-change plan.
 
 Status:
 
-- this phase is already in implementation in the current tree
+- `✅ DONE`: shape whitelist removal
+- `✅ DONE`: `BPF_PROG_JIT_RECOMPILE` log buffer (`log_level/log_size/log_buf`)
+- `✅ DONE`: tuple/binding limit 16
+- `🔄 NEXT`: `log_true_size` parity and explicit overlap semantics
 
 ### Phase 2: add new canonical forms that need only pattern matching
 
@@ -702,6 +732,13 @@ Status:
 - it needs better userspace ranking input
 - but that input already exists in verifier log
 - it does not require verifier export
+
+Status:
+
+- `✅ DONE`: `BRANCH_FLIP`
+- `✅ DONE`: `ZERO_EXT_ELIDE`
+- `✅ DONE`: `ENDIAN_FUSION`
+- `🔄 NEXT`: `DIV_LIVENESS`
 
 ### Phase 3: make entry/exit sites first-class
 

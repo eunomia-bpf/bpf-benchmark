@@ -2,6 +2,8 @@
 
 #include "bpf_jit_scanner/pattern_v5.hpp"
 
+#include <bpf/libbpf.h>
+
 #include <algorithm>
 #include <cerrno>
 #include <cstdarg>
@@ -10,6 +12,7 @@
 #include <cstring>
 #include <filesystem>
 #include <fcntl.h>
+#include <memory>
 #include <string>
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -106,6 +109,7 @@ struct CommandOptions {
     int prog_fd = -1;
     std::string xlated_path;
     std::string output_path;
+    std::string program_name;
     bpf_jit_scanner::V5ScanOptions scan_options = {
         .scan_cmov = false,
         .scan_wide = false,
@@ -114,6 +118,7 @@ struct CommandOptions {
         .scan_extract = false,
         .scan_zero_ext = false,
         .scan_endian = false,
+        .scan_branch_flip = false,
         .use_rorx = false,
     };
     bool families_explicit = false;
@@ -127,6 +132,25 @@ uint64_t ptr_to_u64(const void *ptr)
 {
     return static_cast<uint64_t>(reinterpret_cast<uintptr_t>(ptr));
 }
+
+struct bpf_object_deleter {
+    void operator()(bpf_object *obj) const
+    {
+        if (obj != nullptr) {
+            bpf_object__close(obj);
+        }
+    }
+};
+
+using bpf_object_ptr = std::unique_ptr<bpf_object, bpf_object_deleter>;
+
+int libbpf_silent(enum libbpf_print_level, const char *, va_list)
+{
+    return 0;
+}
+
+mini_bpf_prog_info fetch_prog_info(int prog_fd);
+std::vector<uint8_t> fetch_xlated(int prog_fd, const mini_bpf_prog_info &probe);
 
 [[noreturn]] void die(const char *fmt, ...)
 {
@@ -168,6 +192,110 @@ std::vector<uint8_t> read_file(const std::string &path)
     close(fd);
     data.resize(offset);
     return data;
+}
+
+bool data_is_elf_object(const std::vector<uint8_t> &data)
+{
+    return data.size() >= 4 &&
+           data[0] == 0x7f &&
+           data[1] == 'E' &&
+           data[2] == 'L' &&
+           data[3] == 'F';
+}
+
+[[noreturn]] void die_libbpf(const char *context, int error_code)
+{
+    char buffer[256] = {};
+    libbpf_strerror(error_code, buffer, sizeof(buffer));
+    die("%s: %s", context, buffer);
+}
+
+bpf_program *find_program(bpf_object *object, const std::string &program_name)
+{
+    bpf_program *program = nullptr;
+
+    if (program_name.empty()) {
+        program = bpf_object__next_program(object, nullptr);
+        if (program == nullptr) {
+            die("ELF object contains no BPF programs");
+        }
+        return program;
+    }
+
+    while ((program = bpf_object__next_program(object, program)) != nullptr) {
+        const char *current_name = bpf_program__name(program);
+        if (current_name != nullptr && program_name == current_name) {
+            return program;
+        }
+    }
+
+    die("unable to find program named '%s' in ELF object", program_name.c_str());
+}
+
+std::vector<uint8_t> read_object_program(const std::string &path,
+                                         const std::string &program_name)
+{
+    bpf_object_open_opts open_opts = {};
+    open_opts.sz = sizeof(open_opts);
+
+    bpf_object *raw_object = bpf_object__open_file(path.c_str(), &open_opts);
+    const int open_error = libbpf_get_error(raw_object);
+    if (open_error != 0) {
+        die_libbpf("bpf_object__open_file failed", open_error);
+    }
+    bpf_object_ptr object(raw_object);
+
+    bpf_program *program = find_program(object.get(), program_name);
+    const bpf_insn *insns = bpf_program__insns(program);
+    const size_t insn_cnt = bpf_program__insn_cnt(program);
+    if (insns == nullptr || insn_cnt == 0) {
+        die("selected ELF program contains no instructions");
+    }
+
+    std::vector<uint8_t> xlated(insn_cnt * sizeof(bpf_insn));
+    std::memcpy(xlated.data(), insns, xlated.size());
+    return xlated;
+}
+
+bool try_load_object_xlated(const std::string &path,
+                            const std::string &program_name,
+                            InputBundle &input)
+{
+    bpf_object_open_opts open_opts = {};
+    open_opts.sz = sizeof(open_opts);
+
+    auto *saved_print = libbpf_set_print(libbpf_silent);
+    bpf_object *raw_object = bpf_object__open_file(path.c_str(), &open_opts);
+    const int open_error = libbpf_get_error(raw_object);
+    if (open_error != 0) {
+        libbpf_set_print(saved_print);
+        return false;
+    }
+    bpf_object_ptr object(raw_object);
+
+    bpf_program *program = find_program(object.get(), program_name);
+    bpf_program *iter = nullptr;
+    while ((iter = bpf_object__next_program(object.get(), iter)) != nullptr) {
+        bpf_program__set_autoload(iter, iter == program);
+    }
+
+    if (bpf_object__load(object.get()) != 0) {
+        libbpf_set_print(saved_print);
+        return false;
+    }
+
+    libbpf_set_print(saved_print);
+
+    const int prog_fd = bpf_program__fd(program);
+    if (prog_fd < 0) {
+        return false;
+    }
+
+    const mini_bpf_prog_info info = fetch_prog_info(prog_fd);
+    input.xlated = fetch_xlated(prog_fd, info);
+    input.insn_cnt = info.xlated_prog_len / 8;
+    std::memcpy(input.prog_tag, info.tag, sizeof(input.prog_tag));
+    return true;
 }
 
 void write_file(const std::string &path, const uint8_t *data, uint32_t len)
@@ -237,11 +365,19 @@ InputBundle load_input(const CommandOptions &options)
         input.insn_cnt = info.xlated_prog_len / 8;
         std::memcpy(input.prog_tag, info.tag, sizeof(input.prog_tag));
     } else {
-        input.xlated = read_file(options.xlated_path);
-        if (input.xlated.size() % 8 != 0) {
-            die("xlated file size (%zu) is not a multiple of 8", input.xlated.size());
+        const auto data = read_file(options.xlated_path);
+        if (data_is_elf_object(data)) {
+            if (!try_load_object_xlated(options.xlated_path, options.program_name, input)) {
+                input.xlated = read_object_program(options.xlated_path, options.program_name);
+                input.insn_cnt = static_cast<uint32_t>(input.xlated.size() / 8);
+            }
+        } else {
+            input.xlated = data;
+            input.insn_cnt = static_cast<uint32_t>(input.xlated.size() / 8);
         }
-        input.insn_cnt = static_cast<uint32_t>(input.xlated.size() / 8);
+        if (input.xlated.size() % 8 != 0) {
+            die("offline input size (%zu) is not a multiple of 8", input.xlated.size());
+        }
     }
 
     if (options.has_prog_tag) {
@@ -334,11 +470,12 @@ void print_usage(const char *prog)
         "               Bitfield extract sites\n"
         "  --zero-ext   Redundant zero-extension sites\n"
         "  --endian     Endian fusion sites\n"
+        "  --branch-flip Branch flip sites\n"
         "  --rorx       Prefer RORX for rotate sites\n"
         "  --v5         Accepted for compatibility; scanner is already v5-only\n"
         "\n"
         "Shared options:\n"
-        "  --program-name <name>  Accepted for compatibility; ignored\n"
+        "  --program-name <name>  Select a program when scanning an ELF object path\n"
         "  --prog-tag <hex>       Override prog_tag for blob writing (16 hex chars)\n"
         "  --insn-cnt <n>         Override insn_cnt for blob writing\n"
         "  --output <file>        Output path (scan/apply: blob, dump: xlated)\n"
@@ -366,6 +503,7 @@ void enable_all_families(CommandOptions &options)
     options.scan_options.scan_extract = true;
     options.scan_options.scan_zero_ext = true;
     options.scan_options.scan_endian = true;
+    options.scan_options.scan_branch_flip = true;
 }
 
 CommandOptions parse_args(int argc, char **argv)
@@ -406,7 +544,7 @@ CommandOptions parse_args(int argc, char **argv)
         } else if (arg == "--output") {
             options.output_path = need_next();
         } else if (arg == "--program-name") {
-            static_cast<void>(need_next());
+            options.program_name = need_next();
         } else if (arg == "--policy") {
             die("--policy was removed; scanner is v5-only");
         } else if (arg == "--prog-tag") {
@@ -425,6 +563,7 @@ CommandOptions parse_args(int argc, char **argv)
             options.scan_options.scan_extract = false;
             options.scan_options.scan_zero_ext = false;
             options.scan_options.scan_endian = false;
+            options.scan_options.scan_branch_flip = false;
         } else if (arg == "--cmov") {
             options.scan_options.scan_cmov = true;
             options.families_explicit = true;
@@ -445,6 +584,9 @@ CommandOptions parse_args(int argc, char **argv)
             options.families_explicit = true;
         } else if (arg == "--endian") {
             options.scan_options.scan_endian = true;
+            options.families_explicit = true;
+        } else if (arg == "--branch-flip") {
+            options.scan_options.scan_branch_flip = true;
             options.families_explicit = true;
         } else if (arg == "--rorx") {
             options.scan_options.use_rorx = true;
@@ -504,6 +646,8 @@ void print_summary(const bpf_jit_scanner::V5ScanSummary &summary)
                 static_cast<unsigned long long>(summary.zero_ext_sites));
     std::printf("  endian: %llu\n",
                 static_cast<unsigned long long>(summary.endian_sites));
+    std::printf("  bflip:  %llu\n",
+                static_cast<unsigned long long>(summary.branch_flip_sites));
 }
 
 void run_scan(const CommandOptions &options)

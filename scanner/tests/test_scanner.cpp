@@ -387,6 +387,32 @@ void test_v5_endian_fusion_scan()
     CHECK_EQ(store_summary.rules[0].bindings.size(), 5u);
 }
 
+void test_v5_branch_flip_scan()
+{
+    using bpf_jit_scanner::V5ScanOptions;
+
+    auto diamond = encode({
+        {BPF_JEQ_K, regs(1, 0), 3, 0},
+        {BPF_MOV64_X, regs(4, 5), 0, 0},
+        {BPF_ADD64_X, regs(4, 6), 0, 0},
+        {BPF_JMP_JA, 0, 2, 0},
+        {BPF_MOV64_K, regs(4, 0), 0, 9},
+        {BPF_ADD64_X, regs(4, 7), 0, 0},
+    });
+
+    auto summary = bpf_jit_scanner::scan_v5_builtin(
+        diamond.data(), static_cast<uint32_t>(diamond.size()),
+        V5ScanOptions {.scan_branch_flip = true});
+    CHECK_EQ(summary.rules.size(), 1u);
+    CHECK_EQ(summary.branch_flip_sites, 1u);
+    CHECK_EQ(summary.rules[0].canonical_form,
+             static_cast<uint16_t>(BPF_JIT_CF_BRANCH_FLIP));
+    CHECK_EQ(summary.rules[0].native_choice,
+             static_cast<uint16_t>(BPF_JIT_BFLIP_FLIPPED));
+    CHECK_EQ(summary.rules[0].pattern.size(), 6u);
+    CHECK_EQ(summary.rules[0].bindings.size(), 6u);
+}
+
 void test_v5_abi_limits()
 {
     CHECK_EQ(BPF_JIT_MAX_PATTERN_LEN, 64);
@@ -406,6 +432,7 @@ int main()
     test_v5_bitfield_extract_scan();
     test_v5_zero_ext_elide_scan();
     test_v5_endian_fusion_scan();
+    test_v5_branch_flip_scan();
     test_v5_abi_limits();
 
     std::printf("PASS %d\n", g_pass);

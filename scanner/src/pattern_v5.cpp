@@ -36,6 +36,16 @@ constexpr uint8_t raw_src_reg(const bpf_insn_raw &insn)
     return static_cast<uint8_t>((insn.regs >> 4) & 0x0f);
 }
 
+constexpr uint8_t raw_class(const bpf_insn_raw &insn)
+{
+    return insn.code & 0x07U;
+}
+
+constexpr uint8_t raw_op(const bpf_insn_raw &insn)
+{
+    return insn.code & 0xf0U;
+}
+
 V5PatternInsn make_pattern_insn(uint8_t opcode,
                                 uint8_t dst_binding = 0,
                                 uint8_t src_binding = 0,
@@ -59,6 +69,17 @@ V5PatternInsn make_pattern_insn(uint8_t opcode,
     insn.expected_off = expected_off;
     insn.expected_imm = expected_imm;
     return insn;
+}
+
+V5PatternInsn make_exact_pattern_insn(const bpf_insn_raw &insn)
+{
+    return make_pattern_insn(
+        insn.code, 0, 0, 0, 0,
+        BPF_JIT_PATTERN_F_EXPECT_IMM |
+            BPF_JIT_PATTERN_F_EXPECT_DST_REG |
+            BPF_JIT_PATTERN_F_EXPECT_SRC_REG |
+            BPF_JIT_PATTERN_F_EXPECT_OFF,
+        raw_dst_reg(insn), raw_src_reg(insn), insn.off, insn.imm);
 }
 
 V5PatternConstraint make_constraint(uint8_t type,
@@ -273,6 +294,219 @@ bool match_v5_pattern_at(const std::vector<bpf_insn_raw> &insns,
     }
 
     return check_v5_constraints(desc.constraints, vars);
+}
+
+bool raw_is_cond_jump(const bpf_insn_raw &insn)
+{
+    if (raw_class(insn) != 0x05U && raw_class(insn) != 0x06U) {
+        return false;
+    }
+
+    switch (raw_op(insn)) {
+    case 0x10:
+    case 0x20:
+    case 0x30:
+    case 0x40:
+    case 0x50:
+    case 0x60:
+    case 0x70:
+    case 0xa0:
+    case 0xb0:
+    case 0xc0:
+    case 0xd0:
+        return true;
+    default:
+        return false;
+    }
+}
+
+bool raw_is_ja(const bpf_insn_raw &insn)
+{
+    return insn.code == 0x05 || insn.code == 0x06;
+}
+
+int32_t raw_jump_target(const std::vector<bpf_insn_raw> &insns, uint32_t idx)
+{
+    const auto &insn = insns[idx];
+
+    if (raw_class(insn) != 0x05U && raw_class(insn) != 0x06U) {
+        return -1;
+    }
+    if (raw_op(insn) == 0x80 || raw_op(insn) == 0x90) {
+        return -1;
+    }
+
+    if (raw_is_ja(insn)) {
+        if (raw_class(insn) == 0x05U) {
+            return static_cast<int32_t>(idx) + 1 + insn.off;
+        }
+        return static_cast<int32_t>(idx) + 1 + insn.imm;
+    }
+
+    return static_cast<int32_t>(idx) + 1 + insn.off;
+}
+
+bool raw_has_interior_edge(const std::vector<bpf_insn_raw> &insns,
+                           uint32_t site_start,
+                           uint32_t site_len)
+{
+    const uint32_t site_end = site_start + site_len;
+
+    for (uint32_t i = 0; i < insns.size(); ++i) {
+        const int32_t target = raw_jump_target(insns, i);
+        if (target < 0 ||
+            target >= static_cast<int32_t>(insns.size())) {
+            continue;
+        }
+        if ((i < site_start || i >= site_end) &&
+            static_cast<uint32_t>(target) > site_start &&
+            static_cast<uint32_t>(target) < site_end) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool raw_is_branch_flip_body_insn_supported(const bpf_insn_raw &insn)
+{
+    switch (raw_class(insn)) {
+    case 0x01:
+        switch (insn.code) {
+        case 0x61:
+        case 0x69:
+        case 0x71:
+        case 0x79:
+        case 0x81:
+        case 0x89:
+        case 0x91:
+            return true;
+        default:
+            return false;
+        }
+    case 0x04:
+    case 0x07:
+        if (raw_op(insn) == 0xd0U) {
+            return insn.code == 0xd4 || insn.code == 0xd7 || insn.code == 0xdc;
+        }
+        switch (raw_op(insn)) {
+        case 0x00:
+        case 0x10:
+        case 0x20:
+        case 0x30:
+        case 0x40:
+        case 0x50:
+        case 0x60:
+        case 0x70:
+        case 0x80:
+        case 0x90:
+        case 0xa0:
+        case 0xb0:
+        case 0xc0:
+            return true;
+        default:
+            return false;
+        }
+    default:
+        return false;
+    }
+}
+
+bool branch_flip_body_ok(const std::vector<bpf_insn_raw> &insns,
+                         uint32_t start,
+                         uint32_t len)
+{
+    if (len == 0 || len > 16 || start + len > insns.size()) {
+        return false;
+    }
+
+    for (uint32_t i = start; i < start + len; ++i) {
+        if (!raw_is_branch_flip_body_insn_supported(insns[i])) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool build_branch_flip_rule(const std::vector<bpf_insn_raw> &insns,
+                            uint32_t idx,
+                            V5PolicyRule *rule,
+                            uint32_t *site_len)
+{
+    const auto &jcc = insns[idx];
+    const int32_t body_b_start = raw_jump_target(insns, idx);
+    int32_t join_target;
+    uint32_t body_a_len;
+    uint32_t body_b_len;
+    uint32_t ja_idx;
+    V5PolicyRule out;
+
+    if (!raw_is_cond_jump(jcc) || jcc.off < 2 || jcc.off > 17) {
+        return false;
+    }
+    if (body_b_start < 0 || body_b_start >= static_cast<int32_t>(insns.size())) {
+        return false;
+    }
+
+    ja_idx = static_cast<uint32_t>(body_b_start - 1);
+    if (ja_idx <= idx || ja_idx >= insns.size() || !raw_is_ja(insns[ja_idx])) {
+        return false;
+    }
+
+    body_a_len = ja_idx - (idx + 1);
+    if (body_a_len == 0 || body_a_len > 16) {
+        return false;
+    }
+
+    join_target = raw_jump_target(insns, ja_idx);
+    if (join_target <= body_b_start ||
+        join_target > static_cast<int32_t>(insns.size())) {
+        return false;
+    }
+
+    body_b_len = static_cast<uint32_t>(join_target - body_b_start);
+    if (!branch_flip_body_ok(insns, idx + 1, body_a_len) ||
+        !branch_flip_body_ok(insns, static_cast<uint32_t>(body_b_start),
+                             body_b_len)) {
+        return false;
+    }
+
+    if (raw_has_interior_edge(insns, idx,
+                              static_cast<uint32_t>(join_target - idx))) {
+        return false;
+    }
+
+    out.family = V5Family::BranchFlip;
+    out.site_start = idx;
+    out.canonical_form = BPF_JIT_CF_BRANCH_FLIP;
+    out.native_choice = BPF_JIT_BFLIP_FLIPPED;
+    out.priority = 0;
+    out.cpu_features_required = 0;
+    out.pattern.reserve(static_cast<size_t>(join_target - static_cast<int32_t>(idx)));
+    for (uint32_t pos = idx; pos < static_cast<uint32_t>(join_target); ++pos) {
+        out.pattern.push_back(make_exact_pattern_insn(insns[pos]));
+    }
+    out.bindings = {
+        make_const_binding(BPF_JIT_BFLIP_PARAM_COND_OP, raw_op(jcc)),
+        make_const_binding(BPF_JIT_BFLIP_PARAM_BODY_A_START,
+                           static_cast<int32_t>(idx + 1)),
+        make_const_binding(BPF_JIT_BFLIP_PARAM_BODY_A_LEN,
+                           static_cast<int32_t>(body_a_len)),
+        make_const_binding(BPF_JIT_BFLIP_PARAM_BODY_B_START, body_b_start),
+        make_const_binding(BPF_JIT_BFLIP_PARAM_BODY_B_LEN,
+                           static_cast<int32_t>(body_b_len)),
+        make_const_binding(BPF_JIT_BFLIP_PARAM_JOIN_TARGET, join_target),
+    };
+
+    if (rule) {
+        *rule = std::move(out);
+    }
+    if (site_len) {
+        *site_len = static_cast<uint32_t>(join_target - static_cast<int32_t>(idx));
+    }
+
+    return true;
 }
 
 void append_blob_bytes(std::vector<uint8_t> &blob, const void *data, size_t size)
@@ -718,6 +952,8 @@ const char *v5_family_name(V5Family family)
         return "zero_ext_elide";
     case V5Family::EndianFusion:
         return "endian_fusion";
+    case V5Family::BranchFlip:
+        return "branch_flip";
     default:
         return "unknown";
     }
@@ -1399,6 +1635,7 @@ V5ScanSummary scan_v5_builtin(const uint8_t *xlated_data,
     }
 
     std::vector<V5PatternDesc> descs;
+    const auto insns = parse_xlated_insns(xlated_data, xlated_len);
     if (options.scan_cmov) {
         auto cmov_descs = build_v5_cond_select_descriptors();
         descs.insert(descs.end(), cmov_descs.begin(), cmov_descs.end());
@@ -1428,13 +1665,23 @@ V5ScanSummary scan_v5_builtin(const uint8_t *xlated_data,
         descs.insert(descs.end(), endian_descs.begin(), endian_descs.end());
     }
 
-    if (descs.empty()) {
+    if (descs.empty() && !options.scan_branch_flip) {
         return summary;
     }
-
-    const auto insns = parse_xlated_insns(xlated_data, xlated_len);
     for (uint32_t idx = 0; idx < insns.size();) {
         bool matched = false;
+
+        if (options.scan_branch_flip) {
+            V5PolicyRule branch_rule;
+            uint32_t branch_site_len = 0;
+
+            if (build_branch_flip_rule(insns, idx, &branch_rule, &branch_site_len)) {
+                summary.rules.push_back(std::move(branch_rule));
+                summary.branch_flip_sites++;
+                idx += branch_site_len;
+                continue;
+            }
+        }
 
         for (const auto &desc : descs) {
             if (!match_v5_pattern_at(insns, idx, desc)) {
@@ -1463,6 +1710,9 @@ V5ScanSummary scan_v5_builtin(const uint8_t *xlated_data,
                 break;
             case V5Family::EndianFusion:
                 summary.endian_sites++;
+                break;
+            case V5Family::BranchFlip:
+                summary.branch_flip_sites++;
                 break;
             }
 

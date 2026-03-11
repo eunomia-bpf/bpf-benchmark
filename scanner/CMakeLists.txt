@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+find_package(PkgConfig REQUIRED)
+
 # --------------------------------------------------------------------
 # Options
 # --------------------------------------------------------------------
@@ -44,8 +46,9 @@ target_compile_options(bpf_jit_scanner PRIVATE
 # --------------------------------------------------------------------
 
 if(BPF_JIT_SCANNER_BUILD_CLI)
+    pkg_check_modules(LIBBPF REQUIRED IMPORTED_TARGET libbpf)
     add_executable(bpf-jit-scanner src/cli.cpp)
-    target_link_libraries(bpf-jit-scanner PRIVATE bpf_jit_scanner)
+    target_link_libraries(bpf-jit-scanner PRIVATE bpf_jit_scanner PkgConfig::LIBBPF)
     target_compile_options(bpf-jit-scanner PRIVATE
         -Wall -Wextra
         -Wno-unused-parameter

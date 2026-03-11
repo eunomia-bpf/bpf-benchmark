@@ -23,6 +23,7 @@
 #define BPF_JIT_CF_BITFIELD_EXTRACT 5
 #define BPF_JIT_CF_ZERO_EXT_ELIDE 6
 #define BPF_JIT_CF_ENDIAN_FUSION 7
+#define BPF_JIT_CF_BRANCH_FLIP 8
 #endif
 
 #ifndef BPF_JIT_MAX_PATTERN_LEN
@@ -111,6 +112,20 @@
 #define BPF_JIT_ENDIAN_PARAM_DIRECTION 4
 #endif
 
+#ifndef BPF_JIT_BFLIP_ORIGINAL
+#define BPF_JIT_BFLIP_ORIGINAL 1
+#define BPF_JIT_BFLIP_FLIPPED 2
+#endif
+
+#ifndef BPF_JIT_BFLIP_PARAM_COND_OP
+#define BPF_JIT_BFLIP_PARAM_COND_OP 0
+#define BPF_JIT_BFLIP_PARAM_BODY_A_START 1
+#define BPF_JIT_BFLIP_PARAM_BODY_A_LEN 2
+#define BPF_JIT_BFLIP_PARAM_BODY_B_START 3
+#define BPF_JIT_BFLIP_PARAM_BODY_B_LEN 4
+#define BPF_JIT_BFLIP_PARAM_JOIN_TARGET 5
+#endif
+
 #ifndef BPF_JIT_BFX_PARAM_DST_REG
 #define BPF_JIT_BFX_PARAM_DST_REG 0
 #define BPF_JIT_BFX_PARAM_SRC_REG 1
@@ -145,6 +160,7 @@ enum class V5Family {
     BitfieldExtract,
     ZeroExtElide,
     EndianFusion,
+    BranchFlip,
 };
 
 struct __attribute__((packed)) V5PatternInsn {
@@ -229,6 +245,7 @@ struct V5ScanOptions {
     bool scan_extract = false;
     bool scan_zero_ext = false;
     bool scan_endian = false;
+    bool scan_branch_flip = false;
     bool use_rorx = false;
 };
 
@@ -241,6 +258,7 @@ struct V5ScanSummary {
     uint64_t bitfield_sites = 0;
     uint64_t zero_ext_sites = 0;
     uint64_t endian_sites = 0;
+    uint64_t branch_flip_sites = 0;
 };
 
 const char *v5_family_name(V5Family family);
