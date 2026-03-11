@@ -81,6 +81,11 @@ def kernel_mode_catalog() -> dict[str, ModeSpec]:
             "v5 auto-scan rotate+wide+lea",
             ("--recompile-v5", "--recompile-rotate", "--recompile-wide", "--recompile-lea"),
         ),
+        "recompile-v5-cmov": ModeSpec(
+            "recompile-v5-cmov",
+            "v5 auto-scan cmov",
+            ("--recompile-v5", "--recompile-cmov"),
+        ),
         "recompile-v5-rotate": ModeSpec(
             "recompile-v5-rotate",
             "v5 auto-scan rotate",
@@ -100,6 +105,11 @@ def kernel_mode_catalog() -> dict[str, ModeSpec]:
             "recompile-v5-lea",
             "v5 auto-scan lea",
             ("--recompile-v5", "--recompile-lea"),
+        ),
+        "recompile-v5-all": ModeSpec(
+            "recompile-v5-all",
+            "v5 auto-scan all",
+            ("--recompile-v5", "--recompile-all"),
         ),
     }
 
@@ -895,7 +905,7 @@ def apply_pinning(command: list[str], pinning: PinningSpec) -> list[str]:
 
 def wrap_command(command: list[str], runtime: RuntimeSpec, pinning: PinningSpec) -> list[str]:
     pinned = apply_pinning(command, pinning)
-    if runtime.require_sudo:
+    if runtime.require_sudo and os.geteuid() != 0:
         return ["sudo", "-n", *pinned]
     return pinned
 

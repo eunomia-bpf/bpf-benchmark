@@ -685,7 +685,7 @@ std::vector<V5PatternDesc> build_v5_rotate_descriptors(bool use_rorx)
     auto rotate6_masked = [&](uint8_t and_opcode) {
         std::vector<V5PatternInsn> pattern = {
             make_pattern_insn(kMov64X, 1, 2, 0, 0, zero_off_imm, 0, 0, 0, 0),
-            make_pattern_insn(and_opcode, 1, and_opcode == kAnd64X ? 6 : 0,
+            make_pattern_insn(and_opcode, 1, and_opcode == kAnd64X ? 7 : 0,
                               and_opcode == kAnd64K ? 3 : 0, 0,
                               and_opcode == kAnd64X ? zero_off_imm : zero_off,
                               0, 0, 0, 0),

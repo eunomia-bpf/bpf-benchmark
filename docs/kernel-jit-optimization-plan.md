@@ -723,7 +723,12 @@ struct bpf_jit_dir_template {
 | 55 | **v5 实现 review** | ✅ **4.5/10**→**6.5/10**。核心问题：canonical binding 层缺失、CMOV 未上 v5、v5 代码未合入 scanner。已修复：CMOV 上 v5、scanner 统一、overflow-safe、CPU legality。仍缺：binding table + parameterized emitter。见 `docs/tmp/v5-implementation-review.md` + `docs/tmp/v5-design-gap-analysis.md` | ✅ |
 | 68 | **v5 design gap analysis** | ✅ **6.5/10**。10 项特性矩阵：constraint ✅、coexistence ✅、scanner integration ✅。缺：binding table (#58)、opcode mask (#67)、shape whitelist (#63)。见 `docs/tmp/v5-design-gap-analysis.md` | ✅ |
 | 69 | **Production corpus 编译** | ✅ Cilium 3 程序（658 CMOV sites）、Katran 5 程序（29 sites）、xdp-tools 13、xdp-tutorial 25。总 493 .bpf.o。见 `docs/tmp/production-program-compilation.md` | ✅ |
-| 70 | **Production corpus v5 recompile 测试** | Cilium/Katran/xdp-tools 46 个新程序在 framework kernel 上跑 v5 recompile | 🔄 |
+| 70 | **Production corpus v5 recompile 测试** | ✅ 15/15 recompile 成功。katran balancer 5C+4W code -0.2%，xdp_vlan_swap 1C+1W code -5.7%。Cilium 仍无法加载。见 `docs/tmp/production-corpus-v5-rerun-results.md` | ✅ |
+| 71 | **Corpus 扩充 Round 2** | ✅ +21 .bpf.o（493→514）。loxilb 912 sites/prog（863 WIDE），Calico 314 sites（10 ROTATE），Suricata/systemd/tubular/netbird。见 `docs/tmp/corpus-expansion-round2.md` | ✅ |
+| 72 | **Scanner rotate gap 修复** | ✅ rotate6_masked(AND64_X) var binding bug。core_kern 0→818，test_verif_scale2 0→992，calico/from_hep_debug 0→10。scanner 47/47。见 `docs/tmp/scanner-gap-fix.md` | ✅ |
+| 73 | **loxilb/Calico v5 recompile 测试** | loxilb 863 WIDE + Calico 10 ROTATE 测试 | 🔄 codex |
+| 74 | **严格 benchmarking** | ✅ 10×1000, CPU pin host#23, perf governor, turbo off, Wilcoxon BH-adjusted。CMOV 0.655x (p=0.002)，ROTATE 1.193x/1.235x (p=0.002)，LEA 1.052x (p=0.012)，WIDE 不显著 (p=0.164)。见 `docs/tmp/rigorous-benchmark-results.md` | ✅ |
+| 75 | **论文更新** | 集成所有新数据到 paper.tex | 🔄 codex |
 | 56 | **cmov_select emitter bug 修复** | subprog CMOV 产出错误结果（baseline→recompile result 不一致）。需在 linux-framework 上修复 emitter | 🔄 codex |
 | 57 | **严格 benchmarking 脚本** | CPU pinning + performance governor + 30×1000 + 统计检验 + 多模式对比 | 🔄 codex |
 | 22 | **消融补全** | cmov ablation 已有，补 byte-recompose / callee-saved / BMI | ❌ |

@@ -81,6 +81,7 @@ constexpr uint8_t BPF_RSH32_K = 0x74;
 constexpr uint8_t BPF_OR64_X = 0x4f;
 constexpr uint8_t BPF_OR32_X = 0x4c;
 constexpr uint8_t BPF_AND64_K = 0x57;
+constexpr uint8_t BPF_AND64_X = 0x5f;
 constexpr uint8_t BPF_LDXB = 0x71;
 constexpr uint8_t BPF_ADD64_X = 0x0f;
 
@@ -346,6 +347,33 @@ void test_v5_cmov_scan_and_blob()
              static_cast<uint16_t>(diamond_summary.rules[0].bindings.size()));
 }
 
+void test_v5_rotate_masked_x_scan()
+{
+    using bpf_jit_scanner::V5ScanOptions;
+
+    auto masked_rotate = encode({
+        {BPF_MOV64_X, regs(3, 5), 0, 0},
+        {BPF_AND64_X, regs(3, 4), 0, 0},
+        {BPF_RSH64_K, regs(3, 0), 0, 28},
+        {BPF_MOV64_X, regs(7, 5), 0, 0},
+        {BPF_LSH64_K, regs(7, 0), 0, 4},
+        {BPF_OR64_X, regs(7, 3), 0, 0},
+    });
+
+    auto summary = bpf_jit_scanner::scan_v5_builtin(
+        masked_rotate.data(), static_cast<uint32_t>(masked_rotate.size()),
+        V5ScanOptions {.scan_rotate = true});
+
+    CHECK_EQ(summary.rules.size(), 1u);
+    CHECK_EQ(summary.rotate_sites, 1u);
+    CHECK_EQ(summary.rules[0].canonical_form,
+             static_cast<uint16_t>(BPF_JIT_CF_ROTATE));
+    CHECK_EQ(summary.rules[0].native_choice,
+             static_cast<uint16_t>(BPF_JIT_ROT_ROR));
+    CHECK_EQ(summary.rules[0].pattern.size(), 6u);
+    CHECK_EQ(summary.rules[0].bindings.size(), 4u);
+}
+
 } // namespace
 
 int main()
@@ -358,6 +386,7 @@ int main()
     test_overlap_resolution();
     test_policy_blob_build_and_patch();
     test_v5_cmov_scan_and_blob();
+    test_v5_rotate_masked_x_scan();
 
     std::printf("\n%s: %d passed, %d failed\n",
                 g_fail == 0 ? "OK" : "FAIL", g_pass, g_fail);

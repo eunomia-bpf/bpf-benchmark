@@ -36,11 +36,21 @@ DEFAULT_BTF_CANDIDATES = (
     Path("/sys/kernel/btf/vmlinux"),
     DEFAULT_KERNEL_TREE / "vmlinux",
 )
-PRODUCTION_OBJECT_DIRS = (
-    ROOT_DIR / "corpus" / "build" / "cilium",
-    ROOT_DIR / "corpus" / "build" / "katran",
-    ROOT_DIR / "corpus" / "build" / "xdp-tools",
-    ROOT_DIR / "corpus" / "build" / "xdp-tutorial",
+CORPUS_BUILD_DIR = ROOT_DIR / "corpus" / "build"
+PRODUCTION_OBJECT_DIRS = tuple(
+    CORPUS_BUILD_DIR / name
+    for name in (
+        "calico",
+        "cilium",
+        "katran",
+        "loxilb",
+        "netbird",
+        "suricata",
+        "systemd",
+        "tubular",
+        "xdp-tools",
+        "xdp-tutorial",
+    )
 )
 PERF_CAPABLE_ROOTS = {
     "classifier",
@@ -224,6 +234,17 @@ def run_text_command(command: list[str], timeout_seconds: int) -> dict[str, Any]
             "stderr": exc.stderr or "",
             "error": f"timeout after {timeout_seconds}s",
         }
+    except OSError as exc:
+        return {
+            "ok": False,
+            "command": command,
+            "returncode": None,
+            "timed_out": False,
+            "duration_seconds": time.monotonic() - start,
+            "stdout": "",
+            "stderr": "",
+            "error": f"exec failed: {exc}",
+        }
 
     stdout = completed.stdout or ""
     stderr = completed.stderr or ""
@@ -260,6 +281,18 @@ def run_command(command: list[str], timeout_seconds: int) -> dict[str, Any]:
             "stderr": exc.stderr or "",
             "sample": None,
             "error": f"timeout after {timeout_seconds}s",
+        }
+    except OSError as exc:
+        return {
+            "ok": False,
+            "command": command,
+            "returncode": None,
+            "timed_out": False,
+            "duration_seconds": time.monotonic() - start,
+            "stdout": "",
+            "stderr": "",
+            "sample": None,
+            "error": f"exec failed: {exc}",
         }
 
     stdout = completed.stdout or ""
@@ -481,18 +514,33 @@ def run_with_btf_fallback(
 
 def discover_programs(runner: Path, object_path: Path, timeout_seconds: int) -> dict[str, Any]:
     start = time.monotonic()
-    completed = subprocess.run(
-        [str(runner), "list-programs", "--program", str(object_path)],
-        cwd=ROOT_DIR,
-        capture_output=True,
-        text=True,
-        timeout=timeout_seconds,
-    )
-    stdout = completed.stdout or ""
-    stderr = completed.stderr or ""
-    ok = completed.returncode == 0
+    try:
+        completed = subprocess.run(
+            [str(runner), "list-programs", "--program", str(object_path)],
+            cwd=ROOT_DIR,
+            capture_output=True,
+            text=True,
+            timeout=timeout_seconds,
+        )
+        stdout = completed.stdout or ""
+        stderr = completed.stderr or ""
+        ok = completed.returncode == 0
+        returncode = completed.returncode
+    except subprocess.TimeoutExpired as exc:
+        stdout = exc.stdout or ""
+        stderr = exc.stderr or ""
+        ok = False
+        returncode = None
+        error = f"timeout after {timeout_seconds}s"
+    except OSError as exc:
+        stdout = ""
+        stderr = ""
+        ok = False
+        returncode = None
+        error = f"exec failed: {exc}"
+
     programs: list[dict[str, Any]] = []
-    error = None
+    error = locals().get("error")
     if ok:
         try:
             programs = parse_program_inventory(stdout)
@@ -500,7 +548,7 @@ def discover_programs(runner: Path, object_path: Path, timeout_seconds: int) -> 
             ok = False
             error = str(exc)
     if not ok and error is None:
-        error = extract_error(stderr, stdout, completed.returncode)
+        error = extract_error(stderr, stdout, returncode)
 
     fallback_scan = analyze_object(object_path, "production-corpus", ROOT_DIR)
     return {
@@ -654,6 +702,15 @@ def collect_object_paths(filters: list[str] | None, max_objects: int | None) -> 
     if max_objects is not None:
         objects = objects[:max_objects]
     return objects
+
+
+def infer_source(relpath: str) -> str:
+    prefix = "corpus/build/"
+    if relpath.startswith(prefix):
+        remainder = relpath[len(prefix):]
+        if remainder:
+            return remainder.split("/", 1)[0]
+    return "unknown"
 
 
 def detect_kernel_metadata(kernel_tree: Path) -> dict[str, str]:
@@ -1174,7 +1231,7 @@ def build_markdown(data: dict[str, Any]) -> str:
             "",
             "## Notes",
             "",
-            f"- These results were collected inside the framework guest booted from `{kernel_tree_display}`.",
+            f"- These results were collected inside the guest booted from `{kernel_tree_display}`.",
             "- Site counts come from the scanner CLI run on dumped post-verifier xlated bytecode. When that scan fails, the report falls back to the runner's `directive_scan` summary.",
             f"- The harness tries `/sys/kernel/btf/vmlinux` first and retries with the shared build-tree `{kernel_btf_display}` only for BTF/CO-RE-looking failures.",
             "- Objects that libbpf could not enumerate are still included through compile-time section census fallback so their directive-bearing sections are documented.",
@@ -1201,14 +1258,7 @@ def main() -> int:
 
     for object_path in object_paths:
         relpath = object_path.relative_to(ROOT_DIR).as_posix()
-        if "corpus/build/cilium/" in relpath:
-            source = "cilium"
-        elif "corpus/build/katran/" in relpath:
-            source = "katran"
-        elif "corpus/build/xdp-tools/" in relpath:
-            source = "xdp-tools"
-        else:
-            source = "xdp-tutorial"
+        source = infer_source(relpath)
 
         discovery = discover_programs(runner, object_path, args.timeout)
         object_record = {
