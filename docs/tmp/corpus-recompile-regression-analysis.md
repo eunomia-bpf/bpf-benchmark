@@ -1,221 +1,308 @@
 # Corpus Recompile Regression Analysis
 
-**Date**: 2026-03-11
-**Source data**: `docs/tmp/corpus-batch-recompile-results.md` (78 measured pairs, 200 repeats, VM 7.0-rc2)
-**Purpose**: Separate noise from real regressions, assess CMOV policy-sensitivity, recalculate reliable geomeans.
+- Date: 2026-03-11
+- Sources: `docs/kernel-jit-optimization-plan.md`, `docs/tmp/corpus-batch-recompile-results.md`, `docs/tmp/corpus-runnability-report.md`
+- Ratio definition: `baseline_ns / v5_ns` (same direction as the batch report; `> 1.0x` means v5 is faster)
+- Tier rule: `sub-resolution` if either side `< 50ns`; `reliable` only if both sides `> 200ns`; everything else is `low-confidence`
+- Program labels below use `<last-two-path-components>:<prog_name>` shorthand for readability
 
----
+## 1. Noise Classification
 
-## 1. Resolution Tier Classification
-
-The kernel `bpf_prog_test_run` uses `ktime_get_ns()` which has ~50-100ns resolution on most hardware. Programs with execution times below this threshold produce quantized, unreliable ratios.
-
-| Tier | Criterion | Programs | Notes |
-| --- | --- | --- | --- |
-| Sub-resolution | min(baseline, v5) < 50ns | 32 | Pure noise; ratios like 0.438x are 7ns vs 16ns (1 ktime quantum) |
-| Low-confidence | both in 50-200ns range | 12 | Marginal; within 1-3 ktime quanta of noise |
-| Reliable | max(baseline, v5) > 200ns | 34 | Trustworthy; large enough absolute times for meaningful ratios |
-
-### Sub-resolution programs (32)
-
-These are dominated by linux-selftests (14), xdp-tutorial (5), xdp-tools (3), katran (2), tracee (2), suricata (1), calico (1). All have baseline exec in the 7-17ns range. The reported ratios (0.438x to 1.286x) are entirely artifacts of ktime quantization. For example:
-
-- `__encap_vxlan_eth`: 7ns -> 16ns = 0.438x. This is a 1-quantum difference.
-- `__encap_gre_none`: 9ns -> 7ns = 1.286x. Also a 1-quantum difference.
-- `katran/balancer_ingress`: 11ns -> 16ns = 0.688x. Same.
-
-**All 32 sub-resolution results must be excluded from any performance claims.**
-
-### Low-confidence programs (12)
-
-All 12 are Calico programs (plus 1 xdp-tutorial) in the 169-198ns range. The absolute differences are 2-28ns, which is within the noise floor shown by the control programs (see Section 5). These should be reported with strong caveats.
-
----
-
-## 2. Recalculated Geomean (Excluding Sub-Resolution)
-
-| Scope | N | Geomean | Interpretation |
-| --- | --- | --- | --- |
-| All programs (reported) | 78 | 0.813x | Inflated by sub-resolution noise |
-| Excluding sub-resolution | 46 | 0.847x | More honest but still includes marginal data |
-| Reliable only (>200ns) | 34 | 0.805x | Most trustworthy but dominated by Calico |
-| Low-confidence + reliable | 46 | 0.847x | Same as excl. sub-resolution |
-
-**The corrected geomean, excluding sub-resolution noise, is 0.847x** (v5 is ~15% slower on average). However, this is heavily dominated by CMOV regressions on Calico programs, which is the expected policy-sensitivity effect (see Section 3).
-
----
-
-## 3. CMOV Policy-Sensitivity: Validated
-
-### CMOV-only reliable programs (11 programs, all Calico)
-
-Every single CMOV-only reliable program regresses:
-
-| Function | Instances | Ratio Range | Mean Ratio |
-| --- | --- | --- | --- |
-| calico_tc_skb_accepted_entrypoint | 5 | 0.596x - 0.877x | 0.729x |
-| calico_tc_skb_new_flow_entrypoint | 4 | 0.547x - 0.947x | 0.743x |
-| calico_tc_skb_ipv4_frag | 2 | 0.606x - 0.761x | 0.684x |
-
-**Geomean: 0.718x** (28% slower with CMOV).
-
-This is consistent with micro-benchmark results where CMOV on `log2_fold` showed +28-46% regression. CMOV converts branches to conditional moves, which hurts when the branch predictor is already performing well (highly predictable branches). These Calico packet-processing functions have deterministic early-exit paths that the branch predictor handles perfectly; replacing them with cmov removes this optimization.
-
-**Conclusion: CMOV-only regressions are NOT noise; they are real and validate the policy-sensitivity thesis.** CMOV is a policy-sensitive directive that requires workload profiling to apply correctly.
-
-### Code-size impact of CMOV-only
-
-CMOV-only programs show code ratio ~0.999x with +6 to +25 bytes added to JIT code. CMOV replaces a branch (jcc + mov = ~7-9B) with cmov (~4-6B) but adds setup code. The net effect is negligible on code size but negative on exec time for predictable branches.
-
----
-
-## 4. Per-Family Attribution (Reliable Programs)
-
-### CMOV-only (11 programs)
-
-- **Geomean: 0.718x** (28% regression)
-- **All 11 regress** (0/11 improved)
-- Range: 0.547x to 0.947x
-- All are Calico programs with predictable packet-processing branches
-- **Validates policy-sensitivity thesis**
-
-### WIDE-only (0 reliable programs)
-
-No reliable programs have WIDE as the sole applied family. The only WIDE-only program is `calico_xdp_main` (xdp_debug variant) at 170ns->198ns, which falls in the low-confidence tier. Its ratio of 0.859x could be real or noise.
-
-### ROTATE-only (1 reliable program)
-
-- `calico_tc_maglev`: 169ns -> 215ns = 0.786x
-- This is at the lower boundary of "reliable" (v5 is >200ns but baseline is borderline)
-- **Unexpected regression**: ROTATE should improve performance. Possible explanations:
-  - Measurement noise (baseline is only 169ns)
-  - ROTATE emitter has a code-size increase (3267 -> 3124 JIT bytes = 1.046x improvement), suggesting the rotation itself worked but overall program performance is noisy
-
-### CMOV+WIDE mixed (20 reliable programs)
-
-- **Geomean: 0.848x** (15% regression)
-- **15/20 regress, 5/20 improve**
-- Range: 0.601x to 1.711x
-- The improved programs include the 1.711x outlier (`from_nat_debug:calico_tc_skb_send_tcp_rst`)
-
-WIDE contributes code-size savings (jit_delta = -5 to -103 bytes) while CMOV adds exec-time regression. The net effect depends on which dominates. Programs with more WIDE savings (larger code shrink) show a weak positive correlation with better exec ratios (Pearson r = 0.25), but the effect is overwhelmed by measurement noise.
-
-### No families applied (2 control programs)
-
-- `test_verif_scale2:balancer_ingress`: 471ns -> 642ns = 0.734x (-36%)
-- `core_kern:balancer_ingress`: 548ns -> 485ns = 1.130x (+13%)
-
-These programs have 818 and 992 sites detected by the scanner but **no directives were actually applied** during recompile. Despite having identical baseline and v5 JIT sizes (48576/48576 and 50290/50290), they show -36% to +13% exec ratio variation. **This quantifies the noise floor: even with zero code changes, `bpf_prog_test_run` measurements vary by up to +-36% for these programs.**
-
----
-
-## 5. Cross-Object Variance Analysis (Noise Quantification)
-
-Calico builds the same function into multiple .bpf.o files (from_hep_debug, from_nat_debug, to_wep_debug, etc.). The same function with the same directive families applied shows extreme variance:
-
-| Function | N | Families | Ratio Range | Spread | CV |
+| Tier | Rule | Programs | Share | Geomean | Notes |
 | --- | --- | --- | --- | --- | --- |
-| calico_tc_skb_send_tcp_rst | 6 | cmov,wide | 0.839x - 1.711x | 0.872 | 28.5% |
-| calico_tc_skb_send_icmp_replies | 6 | cmov,wide | 0.601x - 1.197x | 0.596 | 26.8% |
-| calico_tc_skb_new_flow_entrypoint | 6 | cmov | 0.547x - 1.140x | 0.593 | 22.6% |
-| calico_tc_skb_accepted_entrypoint | 6 | cmov | 0.596x - 1.089x | 0.493 | 20.2% |
-| calico_tc_skb_ipv4_frag | 3 | cmov | 0.606x - 0.994x | 0.388 | 20.3% |
-| calico_tc_skb_icmp_inner_nat | 6 | cmov,wide | 0.680x - 0.971x | 0.291 | 15.7% |
-| calico_tc_main | 6 | cmov,wide | 0.659x - 1.009x | 0.350 | 12.6% |
+| sub-resolution | < 50ns on either side | 32 | 41.0% | 0.767x | Pure timing noise; exclude |
+| low-confidence | not sub-resolution, but not both > 200ns | 41 | 52.6% | 0.839x | Keep, but only as directional evidence |
+| reliable | both baseline and v5 > 200ns | 5 | 6.4% | 0.915x | Best available rows under the requested rule |
 
-**Key finding**: The coefficient of variation (CV) is 13-29% across instances of the same function. This means individual program ratios are not reliable for causal attribution. Only aggregate trends (geomean across many programs) are trustworthy.
+Key observations:
 
-The baseline exec times also vary significantly across instances of the same function (e.g., `calico_tc_main` baselines range from 183ns to 326ns), indicating that `bpf_prog_test_run` timing is sensitive to factors beyond the BPF program itself (cache state, scheduling, JIT allocation layout, etc.).
+- Only 5/78 rows (6.4%) satisfy the strict `both > 200ns` reliability rule.
+- 46/78 rows (59.0%) remain after removing pure sub-resolution noise, but 43/46 of them are Calico, 44/46 are `sched_cls`, and 42/46 have CMOV applied.
+- The strict rule is intentionally harsh: pairs like `169ns -> 215ns` and `200ns -> 229ns` stay `low-confidence`, not `reliable`.
 
----
+## 2. Recalculated Geomeans After Excluding Noise
 
-## 6. Summary and Interpretation
-
-### What the data actually shows:
-
-1. **32/78 programs (41%) are sub-resolution noise** and should be excluded from all claims.
-
-2. **CMOV regressions are real but expected**: The 11 CMOV-only reliable programs all regress (geomean 0.718x). This is the policy-sensitivity effect: CMOV hurts predictable branches. This **validates** the paper's thesis that directive application must be policy-driven.
-
-3. **WIDE impact is unobservable in isolation**: No reliable WIDE-only programs exist. WIDE's code-size benefit is real (-5 to -103 bytes) but its exec-time impact cannot be separated from CMOV in the mixed programs.
-
-4. **Measurement noise is severe**: Control programs with zero code changes show +-36% exec ratio variance. Same-function cross-object CV is 13-29%. Individual program ratios should not be cited as evidence of anything.
-
-5. **Corrected geomean is 0.847x** (excluding sub-resolution), driven primarily by CMOV policy-sensitivity on Calico programs.
-
-### Recommendations for the paper:
-
-1. **Do NOT cite the 0.813x geomean** from the raw results. Use 0.847x with explicit sub-resolution exclusion, or better yet, separate CMOV and non-CMOV programs.
-
-2. **Frame CMOV regression as a positive result**: It proves the policy-sensitivity thesis. The framework enables per-program policy control; blindly applying CMOV everywhere is the wrong strategy (and exactly what the "fixed baselines" approach does).
-
-3. **Report per-family geomeans separately**:
-   - CMOV-only reliable: 0.718x (regression, expected, validates thesis)
-   - CMOV+WIDE reliable: 0.848x (regression, CMOV dominates)
-   - Need WIDE-only and ROTATE-only data from larger programs to show substrate directive benefits
-
-4. **Acknowledge the noise floor**: State that `bpf_prog_test_run` has +-30% noise for short-running programs, and that robust evaluation requires either (a) longer-running programs or (b) higher-precision timing (e.g., rdtsc in-kernel).
-
-5. **Add a column to the data for resolution tier** so readers can assess which results are trustworthy.
-
----
-
-## Appendix: Raw Data by Tier
-
-### A. Sub-resolution programs (32, excluded from analysis)
-
-| Program | Baseline ns | v5 ns | Ratio | Families |
+| Scope | Programs | Geomean | Delta vs Raw 0.813x | Comment |
 | --- | --- | --- | --- | --- |
-| test_tc_tunnel:__encap_vxlan_eth | 7 | 16 | 0.438x | cmov |
-| test_tc_tunnel:decap_f | 7 | 16 | 0.438x | wide |
-| tracee:cgroup_skb_ingress | 8 | 16 | 0.500x | cmov, wide |
-| test_tc_change_tail:change_tail | 9 | 17 | 0.529x | cmov |
-| test_sockmap_update:copy_sock_map | 9 | 16 | 0.562x | cmov |
-| xdp_synproxy_kern:syncookie_tc | 8 | 14 | 0.571x | cmov, wide |
-| test_tc_bpf:pkt_ptr | 7 | 12 | 0.583x | cmov |
-| xdp_synproxy_kern:syncookie_xdp | 9 | 15 | 0.600x | cmov, wide |
-| test_tc_tunnel:__encap_gre_eth | 8 | 13 | 0.615x | cmov |
-| test_tc_tunnel:__encap_gre_mpls | 8 | 13 | 0.615x | cmov |
-| for_each_array_map_elem:test_pkt_access | 17 | 27 | 0.630x | cmov |
-| healthchecking:healthcheck_encap | 10 | 15 | 0.667x | cmov |
-| test_tc_tunnel:__encap_udp_eth | 8 | 12 | 0.667x | cmov |
-| test_tc_tunnel:__encap_udp_mpls | 8 | 12 | 0.667x | cmov |
-| katran/balancer:balancer_ingress | 11 | 16 | 0.688x | cmov, wide, rotate |
-| xdp_synproxy_kern:syncookie_tc | 10 | 14 | 0.714x | cmov, wide |
-| tracee:cgroup_skb_egress | 8 | 10 | 0.800x | cmov, wide |
-| test_tc_tunnel:__encap_ipip_none | 10 | 12 | 0.833x | cmov |
-| xdp_prog_kern:xdp_parser_func | 9 | 10 | 0.900x | cmov |
-| xdp_prog_kern:xdp_redirect_func | 10 | 11 | 0.909x | cmov, wide |
-| decap_sanity:decap_sanity | 8 | 8 | 1.000x | cmov |
-| test_tc_tunnel:__encap_udp_none | 7 | 7 | 1.000x | cmov |
-| xdp_synproxy_kern:syncookie_xdp | 10 | 10 | 1.000x | cmov, wide |
-| xdp_forward:xdp_fwd_fib_direct | 9 | 9 | 1.000x | cmov |
-| xdp_load_bytes:xdp_probe_prog | 15 | 15 | 1.000x | cmov |
-| xdp_prog_kern:xdp_icmp_echo_func | 10 | 10 | 1.000x | cmov |
-| xdp_prog_kern:xdp_redirect_map_func | 15 | 15 | 1.000x | cmov, wide |
-| calico/xdp_no_log:calico_xdp_main | 16 | 15 | 1.067x | wide |
-| suricata/xdp_filter:xdp_hashfilter | 10 | 9 | 1.111x | cmov |
-| xdp_prog_kern:xdp_vlan_swap_func | 10 | 9 | 1.111x | cmov, wide |
-| xdp_forward:xdp_fwd_fib_full | 9 | 8 | 1.125x | cmov |
-| test_tc_tunnel:__encap_gre_none | 9 | 7 | 1.286x | cmov |
+| Raw batch report | 78 | 0.813x | baseline | Includes all 32 sub-resolution rows |
+| Reliable + low-confidence | 46 | 0.847x | +0.034x | Removes pure noise only |
+| Reliable only | 5 | 0.915x | +0.102x | Strictest requested filter |
+| Reliable only, directives applied | 3 | 0.919x | +0.106x | Drops the two no-op control rows |
 
-### B. Low-confidence programs (12)
+Interpretation:
 
-| Program | Baseline ns | v5 ns | Ratio | Families |
+- Excluding pure sub-resolution noise moves the corpus geomean from `0.813x` to `0.847x`. The batch still points negative overall, but much less dramatically.
+- The strict reliable-only geomean is `0.915x`, but that number is fragile because 2 of the 5 reliable rows are control rows where no directive was applied at all.
+
+### Residual Noise Above 200ns
+
+The runnability report provides an earlier paired measurement for the same programs. Even after removing sub-resolution rows, sign stability is weak:
+
+- `21/46` non-sub rows flip sign between the runnability report and the batch rerun.
+- This includes `2/5` strict-reliable rows and `19/41` low-confidence rows.
+
+The two reliable no-op controls are the clearest proof that the batch still contains non-trivial measurement drift even when execution time is hundreds of ns:
+
+| Program | Baseline JIT | v5 JIT | Runnability Ratio | Batch Ratio |
 | --- | --- | --- | --- | --- |
-| calico/xdp_debug:calico_xdp_main | 170 | 198 | 0.859x | wide |
-| calico:calico_tc_skb_new_flow_entrypoint (from_wep) | 169 | 193 | 0.876x | cmov |
-| calico:calico_tc_skb_send_tcp_rst (to_hep) | 174 | 185 | 0.941x | cmov, wide |
-| xdp-tutorial:xdp_sample_prog | 175 | 184 | 0.951x | cmov |
-| calico:calico_tc_skb_icmp_inner_nat (to_nat) | 170 | 177 | 0.960x | cmov, wide |
-| calico:calico_tc_skb_icmp_inner_nat (to_wep) | 170 | 175 | 0.971x | cmov, wide |
-| calico:calico_tc_skb_send_icmp_replies (to_nat) | 174 | 177 | 0.983x | cmov, wide |
-| calico:calico_tc_skb_ipv4_frag (from_hep) | 176 | 177 | 0.994x | cmov |
-| calico:calico_tc_skb_send_tcp_rst (to_wep) | 178 | 179 | 0.994x | cmov, wide |
-| calico:calico_tc_skb_send_tcp_rst (to_nat) | 187 | 185 | 1.011x | cmov, wide |
-| calico:calico_tc_skb_accepted_entrypoint (from_nat) | 195 | 179 | 1.089x | cmov |
-| calico:calico_tc_skb_new_flow_entrypoint (from_hep) | 196 | 172 | 1.140x | cmov |
+| progs/core_kern:balancer_ingress | 50290 | 50290 | 1.004x | 1.130x |
+| progs/test_verif_scale2:balancer_ingress | 48576 | 48576 | 0.946x | 0.734x |
 
-### C. Reliable programs (34)
+These rows have identical JIT size before and after recompile, so their ratio movement is timing noise, not directive effect.
 
-See Section 4 for detailed per-family breakdown.
+## 3. Per-Family Attribution Among Strict-Reliable Programs
+
+Under the requested `both > 200ns` rule, the reliable pool is extremely sparse. Exact-family attribution looks like this:
+
+| Bucket | Reliable Programs | Geomean | Status |
+| --- | --- | --- | --- |
+| CMOV-only | 0 | n/a | none |
+| WIDE-only | 0 | n/a | none |
+| CMOV+WIDE | 3 | 0.919x | 3 mixed rows |
+| ROTATE (any) | 0 | n/a | none |
+| No applied family | 2 | 0.910x | noise-control rows |
+
+### CMOV-only reliable programs
+
+None. The strict rule leaves zero reliable pure-CMOV rows, so the batch cannot make a clean reliable-only causal statement about CMOV in isolation.
+
+### WIDE-only reliable programs
+
+None. The only non-sub WIDE-only row is `calico/xdp_debug:calico_xdp_main` at `170ns -> 198ns`, which remains low-confidence.
+
+### CMOV+WIDE reliable programs
+
+| Program | Project | Type | Baseline ns | v5 ns | Exec Ratio |
+| --- | --- | --- | --- | --- | --- |
+| calico/from_hep_debug:calico_tc_main | calico | sched_cls | 326 | 323 | 1.009x |
+| calico/from_nat_debug:calico_tc_main | calico | sched_cls | 305 | 333 | 0.916x |
+| calico/from_wep_debug:calico_tc_skb_send_tcp_rst | calico | sched_cls | 240 | 286 | 0.839x |
+
+Pattern: this is the only directive-applied reliable bucket, and it is mixed even here: one marginal win (`1.009x`) and two losses (`0.916x`, `0.839x`). Two of the three rows are Calico `sched_cls` mainline paths; one is a TCP-RST helper. This is too little data for family isolation, but it is enough to say that blanket `cmov+wide` is not an always-win policy.
+
+### ROTATE reliable programs
+
+None. The only exact `rotate` row is `calico/from_hep_debug:calico_tc_maglev` at `169ns -> 215ns`, which stays low-confidence by rule. The `cmov,wide,rotate` Katran row is sub-resolution (`11ns -> 16ns`).
+
+## 4. Policy-Sensitivity Signal Extraction
+
+### Strict-reliable evidence
+
+| Scope | Programs | Wins | Losses | Geomean |
+| --- | --- | --- | --- | --- |
+| CMOV applied, reliable only | 3 | 1 | 2 | 0.919x |
+| CMOV-only, reliable only | 0 | 0 | 0 | n/a |
+
+Reliable-only takeaway: there is not enough isolated CMOV data to prove the CMOV thesis from the strict-reliable subset alone.
+
+### Directional evidence after removing only pure noise
+
+| Scope | Programs | Wins | Losses | Geomean |
+| --- | --- | --- | --- | --- |
+| CMOV applied, reliable + low-confidence | 42 | 8 | 34 | 0.845x |
+| CMOV-only, reliable + low-confidence | 16 | 2 | 14 | 0.797x |
+| CMOV+WIDE, reliable + low-confidence | 26 | 6 | 20 | 0.876x |
+
+- `41/42` non-sub CMOV-applied rows are Calico `sched_cls` programs. `33/41` of those regress.
+- Pure-CMOV rows are almost entirely Calico too: `15/16` are Calico `sched_cls`, and `13/15` of those regress.
+- That directional concentration is consistent with the plan’s policy-sensitivity thesis: CMOV tends to hurt predictable packet-policy control flow. It is not definitive proof here, because almost all of these rows are still low-confidence and many flip sign across reruns.
+
+### Same directive helps some programs, hurts others
+
+The cleanest way to show this is to group repeated Calico symbols after sub-resolution removal:
+
+| Function family | Exact family set | Instances | Ratio range | Geomean |
+| --- | --- | --- | --- | --- |
+| calico_tc_host_ct_conflict | cmov, wide | 2 | 0.652x .. 1.079x | 0.838x |
+| calico_tc_main | cmov, wide | 6 | 0.659x .. 1.009x | 0.846x |
+| calico_tc_skb_accepted_entrypoint | cmov | 6 | 0.596x .. 1.089x | 0.774x |
+| calico_tc_skb_icmp_inner_nat | cmov, wide | 6 | 0.680x .. 0.971x | 0.802x |
+| calico_tc_skb_ipv4_frag | cmov | 3 | 0.606x .. 0.994x | 0.771x |
+| calico_tc_skb_new_flow_entrypoint | cmov | 6 | 0.547x .. 1.140x | 0.811x |
+| calico_tc_skb_send_icmp_replies | cmov, wide | 6 | 0.601x .. 1.197x | 0.862x |
+| calico_tc_skb_send_tcp_rst | cmov, wide | 6 | 0.839x .. 1.711x | 1.022x |
+| xdp_sample_prog | cmov | 1 | 0.951x .. 0.951x | 0.951x |
+
+Important patterns:
+
+- Pure-CMOV families are mostly negative but not uniform: `accepted_entrypoint` spans `0.596x .. 1.089x`, `new_flow_entrypoint` spans `0.547x .. 1.140x`, and `ipv4_frag` stays below `1.0x` in all three non-sub instances.
+- Mixed `cmov+wide` families are also split: `send_tcp_rst` is the only repeated mixed family with geomean above `1.0x` (`1.022x`), while `tc_main`, `icmp_inner_nat`, `send_icmp_replies`, and `host_ct_conflict` stay below `1.0x` on geomean.
+- So the corpus does expose the key paper signal: the same CMOV directive is present in both winners and losers. The clean reliable-only subset is too small to isolate it, but the non-sub corpus shows the policy sensitivity directionally.
+
+### Which programs benefit from CMOV? Which are harmed?
+
+CMOV-applied winners (after removing sub-resolution rows):
+
+| Program | Tier | Families | Baseline ns | v5 ns | Exec Ratio |
+| --- | --- | --- | --- | --- | --- |
+| calico/from_nat_debug:calico_tc_skb_send_tcp_rst | low-confidence | cmov, wide | 308 | 180 | 1.711x |
+| calico/to_wep_debug:calico_tc_skb_send_icmp_replies | low-confidence | cmov, wide | 225 | 188 | 1.197x |
+| calico/from_hep_debug:calico_tc_skb_send_icmp_replies | low-confidence | cmov, wide | 233 | 197 | 1.183x |
+| calico/from_hep_debug:calico_tc_skb_new_flow_entrypoint | low-confidence | cmov | 196 | 172 | 1.140x |
+| calico/from_nat_debug:calico_tc_skb_accepted_entrypoint | low-confidence | cmov | 195 | 179 | 1.089x |
+| calico/to_hep_debug:calico_tc_host_ct_conflict | low-confidence | cmov, wide | 206 | 191 | 1.079x |
+| calico/to_nat_debug:calico_tc_skb_send_tcp_rst | low-confidence | cmov, wide | 187 | 185 | 1.011x |
+| calico/from_hep_debug:calico_tc_main | reliable | cmov, wide | 326 | 323 | 1.009x |
+
+CMOV-applied losers (after removing sub-resolution rows):
+
+| Program | Tier | Families | Baseline ns | v5 ns | Exec Ratio |
+| --- | --- | --- | --- | --- | --- |
+| calico/to_nat_debug:calico_tc_skb_new_flow_entrypoint | low-confidence | cmov | 173 | 316 | 0.547x |
+| calico/from_wep_debug:calico_tc_skb_accepted_entrypoint | low-confidence | cmov | 180 | 302 | 0.596x |
+| calico/from_nat_debug:calico_tc_skb_send_icmp_replies | low-confidence | cmov, wide | 173 | 288 | 0.601x |
+| calico/to_wep_debug:calico_tc_skb_ipv4_frag | low-confidence | cmov | 172 | 284 | 0.606x |
+| calico/to_nat_debug:calico_tc_host_ct_conflict | low-confidence | cmov, wide | 174 | 267 | 0.652x |
+| calico/to_wep_debug:calico_tc_main | low-confidence | cmov, wide | 197 | 299 | 0.659x |
+| calico/to_wep_debug:calico_tc_skb_accepted_entrypoint | low-confidence | cmov | 171 | 254 | 0.673x |
+| calico/from_wep_debug:calico_tc_skb_icmp_inner_nat | low-confidence | cmov, wide | 191 | 281 | 0.680x |
+| calico/to_hep_debug:calico_tc_skb_send_icmp_replies | low-confidence | cmov, wide | 196 | 287 | 0.683x |
+| calico/from_nat_debug:calico_tc_skb_icmp_inner_nat | low-confidence | cmov, wide | 194 | 282 | 0.688x |
+| calico/from_nat_debug:calico_tc_skb_new_flow_entrypoint | low-confidence | cmov | 176 | 254 | 0.693x |
+| calico/from_hep_debug:calico_tc_skb_icmp_inner_nat | low-confidence | cmov, wide | 170 | 244 | 0.697x |
+| calico/from_wep_debug:calico_tc_skb_send_icmp_replies | low-confidence | cmov, wide | 171 | 238 | 0.718x |
+| calico/from_hep_debug:calico_tc_skb_accepted_entrypoint | low-confidence | cmov | 172 | 233 | 0.738x |
+| calico/from_nat_debug:calico_tc_skb_ipv4_frag | low-confidence | cmov | 172 | 226 | 0.761x |
+| calico/to_nat_debug:calico_tc_skb_accepted_entrypoint | low-confidence | cmov | 173 | 227 | 0.762x |
+| calico/to_hep_debug:calico_tc_skb_new_flow_entrypoint | low-confidence | cmov | 180 | 227 | 0.793x |
+| calico/to_hep_debug:calico_tc_main | low-confidence | cmov, wide | 183 | 228 | 0.803x |
+| calico/from_hep_debug:calico_tc_skb_send_tcp_rst | low-confidence | cmov, wide | 198 | 236 | 0.839x |
+| calico/from_wep_debug:calico_tc_skb_send_tcp_rst | reliable | cmov, wide | 240 | 286 | 0.839x |
+| calico/from_wep_debug:calico_tc_main | low-confidence | cmov, wide | 189 | 224 | 0.844x |
+| calico/to_hep_debug:calico_tc_skb_icmp_inner_nat | low-confidence | cmov, wide | 200 | 229 | 0.873x |
+| calico/from_wep_debug:calico_tc_skb_new_flow_entrypoint | low-confidence | cmov | 169 | 193 | 0.876x |
+| calico/to_hep_debug:calico_tc_skb_accepted_entrypoint | low-confidence | cmov | 178 | 203 | 0.877x |
+| calico/to_nat_debug:calico_tc_main | low-confidence | cmov, wide | 188 | 212 | 0.887x |
+| calico/from_nat_debug:calico_tc_main | reliable | cmov, wide | 305 | 333 | 0.916x |
+| calico/to_hep_debug:calico_tc_skb_send_tcp_rst | low-confidence | cmov, wide | 174 | 185 | 0.941x |
+| calico/to_wep_debug:calico_tc_skb_new_flow_entrypoint | low-confidence | cmov | 195 | 206 | 0.947x |
+| tracing04-xdp-tcpdump/xdp_sample_pkts_kern:xdp_sample_prog | low-confidence | cmov | 175 | 184 | 0.951x |
+| calico/to_nat_debug:calico_tc_skb_icmp_inner_nat | low-confidence | cmov, wide | 170 | 177 | 0.960x |
+| calico/to_wep_debug:calico_tc_skb_icmp_inner_nat | low-confidence | cmov, wide | 170 | 175 | 0.971x |
+| calico/to_nat_debug:calico_tc_skb_send_icmp_replies | low-confidence | cmov, wide | 174 | 177 | 0.983x |
+| calico/from_hep_debug:calico_tc_skb_ipv4_frag | low-confidence | cmov | 176 | 177 | 0.994x |
+| calico/to_wep_debug:calico_tc_skb_send_tcp_rst | low-confidence | cmov, wide | 178 | 179 | 0.994x |
+
+## 5. Recommendations
+
+1. Default directive families
+
+- Keep `wide_load` and `rotate_fusion` in the “substrate/default” bucket, but cite this batch carefully: it provides no strict-reliable isolated WIDE or ROTATE measurement (`0` reliable WIDE-only rows, `0` reliable ROTATE rows). The default-policy recommendation still comes mainly from the earlier fixed-baseline and microbenchmark evidence in the plan, not from this batch.
+- `lea_fusion` is not present here (`0` sites), so this corpus says nothing new about LEA policy.
+
+2. Families that need policy control
+
+- `cmov_select` still needs per-program policy. In the non-sub corpus, CMOV-applied rows split `8` wins vs `34` losses, and pure-CMOV rows are `2` wins vs `14` losses with `0.797x` geomean.
+- The CMOV signal is tightly coupled to Calico `sched_cls` packet-policy code, which is exactly the “predictable branch” regime where the plan already says blanket CMOV should fail.
+
+3. Optimal per-program policy (`skip CMOV where it hurts`)
+
+The exact counterfactual is not fully measured for mixed `cmov+wide` rows. The batch only gives `baseline` vs `v5-with-all-applied-families`, not `v5-with-wide-but-without-cmov`.
+
+Given that limitation, the defensible answer is a range:
+
+| Scope | Observed Geomean | Conservative Policy Geomean | Oracle Upper Bound | Meaning |
+| --- | --- | --- | --- | --- |
+| Reliable + low-confidence (46 rows) | 0.847x | 0.921x | 1.013x | Conservative: only disable pure-CMOV losers. Oracle: disable CMOV for any losing CMOV-applied row and assume it recovers to at least baseline. |
+| Reliable only (5 rows) | 0.915x | 0.915x | 0.965x | Same assumptions, but the sample is too small to be decisive. |
+
+My recommendation is to quote the range, not a fabricated single number. If a single “oracle” number is required for the paper, use `1.013x` and label it clearly as an upper bound under independent CMOV control. If you want the most conservative measured-policy statement, use `0.921x` on the 46 non-sub rows.
+
+4. Reporting guidance
+
+- Do not present the raw `0.813x` as the directive-framework verdict; it is heavily contaminated by 32 sub-resolution rows.
+- If you need one cleaned corpus number, use `0.847x` with the explicit note that only 5/78 rows are strict-reliable and 2 of those 5 are no-op controls.
+- The stronger paper narrative is policy sensitivity, not aggregate slowdown: the corpus shows that CMOV participates in both wins and losses, so blanket fixed policy is wrong.
+
+## Appendix A. Sub-Resolution Programs
+
+| Program | Project | Type | Families | Baseline ns | v5 ns | Exec Ratio |
+| --- | --- | --- | --- | --- | --- | --- |
+| calico/xdp_no_log:calico_xdp_main | calico | xdp | wide | 16 | 15 | 1.067x |
+| katran/balancer:balancer_ingress | katran | xdp | cmov, wide, rotate | 11 | 16 | 0.688x |
+| katran/healthchecking:healthcheck_encap | katran | sched_cls | cmov | 10 | 15 | 0.667x |
+| linux-selftests/test_tc_bpf:pkt_ptr | linux-selftests | sched_cls | cmov | 7 | 12 | 0.583x |
+| linux-selftests/xdp_synproxy_kern:syncookie_tc | linux-selftests | sched_cls | cmov, wide | 10 | 14 | 0.714x |
+| linux-selftests/xdp_synproxy_kern:syncookie_xdp | linux-selftests | xdp | cmov, wide | 9 | 15 | 0.600x |
+| progs/decap_sanity:decap_sanity | linux-selftests | sched_cls | cmov | 8 | 8 | 1.000x |
+| progs/for_each_array_map_elem:test_pkt_access | linux-selftests | sched_cls | cmov | 17 | 27 | 0.630x |
+| progs/test_sockmap_update:copy_sock_map | linux-selftests | sched_cls | cmov | 9 | 16 | 0.562x |
+| progs/test_tc_change_tail:change_tail | linux-selftests | sched_cls | cmov | 9 | 17 | 0.529x |
+| progs/test_tc_tunnel:__encap_gre_eth | linux-selftests | sched_cls | cmov | 8 | 13 | 0.615x |
+| progs/test_tc_tunnel:__encap_gre_mpls | linux-selftests | sched_cls | cmov | 8 | 13 | 0.615x |
+| progs/test_tc_tunnel:__encap_gre_none | linux-selftests | sched_cls | cmov | 9 | 7 | 1.286x |
+| progs/test_tc_tunnel:__encap_ipip_none | linux-selftests | sched_cls | cmov | 10 | 12 | 0.833x |
+| progs/test_tc_tunnel:__encap_udp_eth | linux-selftests | sched_cls | cmov | 8 | 12 | 0.667x |
+| progs/test_tc_tunnel:__encap_udp_mpls | linux-selftests | sched_cls | cmov | 8 | 12 | 0.667x |
+| progs/test_tc_tunnel:__encap_udp_none | linux-selftests | sched_cls | cmov | 7 | 7 | 1.000x |
+| progs/test_tc_tunnel:__encap_vxlan_eth | linux-selftests | sched_cls | cmov | 7 | 16 | 0.438x |
+| progs/test_tc_tunnel:decap_f | linux-selftests | sched_cls | wide | 7 | 16 | 0.438x |
+| progs/xdp_synproxy_kern:syncookie_tc | linux-selftests | sched_cls | cmov, wide | 8 | 14 | 0.571x |
+| progs/xdp_synproxy_kern:syncookie_xdp | linux-selftests | xdp | cmov, wide | 10 | 10 | 1.000x |
+| suricata/xdp_filter:xdp_hashfilter | suricata | xdp | cmov | 10 | 9 | 1.111x |
+| tracee/tracee:cgroup_skb_egress | tracee | cgroup_skb | cmov, wide | 8 | 10 | 0.800x |
+| tracee/tracee:cgroup_skb_ingress | tracee | cgroup_skb | cmov, wide | 8 | 16 | 0.500x |
+| xdp-tools/xdp_forward:xdp_fwd_fib_direct | xdp-tools | xdp | cmov | 9 | 9 | 1.000x |
+| xdp-tools/xdp_forward:xdp_fwd_fib_full | xdp-tools | xdp | cmov | 9 | 8 | 1.125x |
+| xdp-tools/xdp_load_bytes:xdp_probe_prog | xdp-tools | xdp | cmov | 15 | 15 | 1.000x |
+| packet02-rewriting/xdp_prog_kern:xdp_parser_func | xdp-tutorial | xdp | cmov | 9 | 10 | 0.900x |
+| packet02-rewriting/xdp_prog_kern:xdp_vlan_swap_func | xdp-tutorial | xdp | cmov, wide | 10 | 9 | 1.111x |
+| packet03-redirecting/xdp_prog_kern:xdp_icmp_echo_func | xdp-tutorial | xdp | cmov | 10 | 10 | 1.000x |
+| packet03-redirecting/xdp_prog_kern:xdp_redirect_func | xdp-tutorial | xdp | cmov, wide | 10 | 11 | 0.909x |
+| packet03-redirecting/xdp_prog_kern:xdp_redirect_map_func | xdp-tutorial | xdp | cmov, wide | 15 | 15 | 1.000x |
+
+## Appendix B. Low-Confidence Programs
+
+| Program | Project | Type | Families | Baseline ns | v5 ns | Exec Ratio |
+| --- | --- | --- | --- | --- | --- | --- |
+| calico/from_hep_debug:calico_tc_maglev | calico | sched_cls | rotate | 169 | 215 | 0.786x |
+| calico/from_hep_debug:calico_tc_skb_accepted_entrypoint | calico | sched_cls | cmov | 172 | 233 | 0.738x |
+| calico/from_hep_debug:calico_tc_skb_icmp_inner_nat | calico | sched_cls | cmov, wide | 170 | 244 | 0.697x |
+| calico/from_hep_debug:calico_tc_skb_ipv4_frag | calico | sched_cls | cmov | 176 | 177 | 0.994x |
+| calico/from_hep_debug:calico_tc_skb_new_flow_entrypoint | calico | sched_cls | cmov | 196 | 172 | 1.140x |
+| calico/from_hep_debug:calico_tc_skb_send_icmp_replies | calico | sched_cls | cmov, wide | 233 | 197 | 1.183x |
+| calico/from_hep_debug:calico_tc_skb_send_tcp_rst | calico | sched_cls | cmov, wide | 198 | 236 | 0.839x |
+| calico/from_nat_debug:calico_tc_skb_accepted_entrypoint | calico | sched_cls | cmov | 195 | 179 | 1.089x |
+| calico/from_nat_debug:calico_tc_skb_icmp_inner_nat | calico | sched_cls | cmov, wide | 194 | 282 | 0.688x |
+| calico/from_nat_debug:calico_tc_skb_ipv4_frag | calico | sched_cls | cmov | 172 | 226 | 0.761x |
+| calico/from_nat_debug:calico_tc_skb_new_flow_entrypoint | calico | sched_cls | cmov | 176 | 254 | 0.693x |
+| calico/from_nat_debug:calico_tc_skb_send_icmp_replies | calico | sched_cls | cmov, wide | 173 | 288 | 0.601x |
+| calico/from_nat_debug:calico_tc_skb_send_tcp_rst | calico | sched_cls | cmov, wide | 308 | 180 | 1.711x |
+| calico/from_wep_debug:calico_tc_main | calico | sched_cls | cmov, wide | 189 | 224 | 0.844x |
+| calico/from_wep_debug:calico_tc_skb_accepted_entrypoint | calico | sched_cls | cmov | 180 | 302 | 0.596x |
+| calico/from_wep_debug:calico_tc_skb_icmp_inner_nat | calico | sched_cls | cmov, wide | 191 | 281 | 0.680x |
+| calico/from_wep_debug:calico_tc_skb_new_flow_entrypoint | calico | sched_cls | cmov | 169 | 193 | 0.876x |
+| calico/from_wep_debug:calico_tc_skb_send_icmp_replies | calico | sched_cls | cmov, wide | 171 | 238 | 0.718x |
+| calico/to_hep_debug:calico_tc_host_ct_conflict | calico | sched_cls | cmov, wide | 206 | 191 | 1.079x |
+| calico/to_hep_debug:calico_tc_main | calico | sched_cls | cmov, wide | 183 | 228 | 0.803x |
+| calico/to_hep_debug:calico_tc_skb_accepted_entrypoint | calico | sched_cls | cmov | 178 | 203 | 0.877x |
+| calico/to_hep_debug:calico_tc_skb_icmp_inner_nat | calico | sched_cls | cmov, wide | 200 | 229 | 0.873x |
+| calico/to_hep_debug:calico_tc_skb_new_flow_entrypoint | calico | sched_cls | cmov | 180 | 227 | 0.793x |
+| calico/to_hep_debug:calico_tc_skb_send_icmp_replies | calico | sched_cls | cmov, wide | 196 | 287 | 0.683x |
+| calico/to_hep_debug:calico_tc_skb_send_tcp_rst | calico | sched_cls | cmov, wide | 174 | 185 | 0.941x |
+| calico/to_nat_debug:calico_tc_host_ct_conflict | calico | sched_cls | cmov, wide | 174 | 267 | 0.652x |
+| calico/to_nat_debug:calico_tc_main | calico | sched_cls | cmov, wide | 188 | 212 | 0.887x |
+| calico/to_nat_debug:calico_tc_skb_accepted_entrypoint | calico | sched_cls | cmov | 173 | 227 | 0.762x |
+| calico/to_nat_debug:calico_tc_skb_icmp_inner_nat | calico | sched_cls | cmov, wide | 170 | 177 | 0.960x |
+| calico/to_nat_debug:calico_tc_skb_new_flow_entrypoint | calico | sched_cls | cmov | 173 | 316 | 0.547x |
+| calico/to_nat_debug:calico_tc_skb_send_icmp_replies | calico | sched_cls | cmov, wide | 174 | 177 | 0.983x |
+| calico/to_nat_debug:calico_tc_skb_send_tcp_rst | calico | sched_cls | cmov, wide | 187 | 185 | 1.011x |
+| calico/to_wep_debug:calico_tc_main | calico | sched_cls | cmov, wide | 197 | 299 | 0.659x |
+| calico/to_wep_debug:calico_tc_skb_accepted_entrypoint | calico | sched_cls | cmov | 171 | 254 | 0.673x |
+| calico/to_wep_debug:calico_tc_skb_icmp_inner_nat | calico | sched_cls | cmov, wide | 170 | 175 | 0.971x |
+| calico/to_wep_debug:calico_tc_skb_ipv4_frag | calico | sched_cls | cmov | 172 | 284 | 0.606x |
+| calico/to_wep_debug:calico_tc_skb_new_flow_entrypoint | calico | sched_cls | cmov | 195 | 206 | 0.947x |
+| calico/to_wep_debug:calico_tc_skb_send_icmp_replies | calico | sched_cls | cmov, wide | 225 | 188 | 1.197x |
+| calico/to_wep_debug:calico_tc_skb_send_tcp_rst | calico | sched_cls | cmov, wide | 178 | 179 | 0.994x |
+| calico/xdp_debug:calico_xdp_main | calico | xdp | wide | 170 | 198 | 0.859x |
+| tracing04-xdp-tcpdump/xdp_sample_pkts_kern:xdp_sample_prog | xdp-tutorial | xdp | cmov | 175 | 184 | 0.951x |
+
+## Appendix C. Reliable Programs
+
+| Program | Project | Type | Families | Baseline ns | v5 ns | Exec Ratio |
+| --- | --- | --- | --- | --- | --- | --- |
+| calico/from_hep_debug:calico_tc_main | calico | sched_cls | cmov, wide | 326 | 323 | 1.009x |
+| calico/from_nat_debug:calico_tc_main | calico | sched_cls | cmov, wide | 305 | 333 | 0.916x |
+| calico/from_wep_debug:calico_tc_skb_send_tcp_rst | calico | sched_cls | cmov, wide | 240 | 286 | 0.839x |
+| progs/core_kern:balancer_ingress | linux-selftests | sched_cls | (none) | 548 | 485 | 1.130x |
+| progs/test_verif_scale2:balancer_ingress | linux-selftests | sched_cls | (none) | 471 | 642 | 0.734x |
