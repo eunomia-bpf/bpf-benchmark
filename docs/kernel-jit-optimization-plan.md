@@ -66,10 +66,13 @@
 | 理由 | 说明 |
 |------|------|
 | **可更新性** | userspace policy DB 可以每周更新，kernel heuristic 只能等升级 |
+| **上游接受成本** | kernel patch 审核周期长（月~年级），peephole 优化逐个上游化不现实；BpfReJIT 让优化以 userspace policy 形式即时部署，无需等待 kernel release cycle |
+| **算法迭代** | 优化 pattern 需要反复实验和迭代（不同 pattern 识别、不同 emission 策略）；kernel 代码一旦合入很难改，userspace scanner/policy 可以快速迭代而不影响 kernel 稳定性 |
 | **程序级组合** | 局部有利的变换可能全局有害（I-cache cliff），userspace 做全局预算 |
 | **Workload 适应** | 分支可预测性取决于运行时数据分布，不是 ISA 特性 |
 | **Fleet A/B testing** | 5% 机器先上新 policy，看效果再推广，无需改 kernel |
 | **所有权** | service owner 已经拥有 BPF 性能调优（Cilium/Katran），kernel maintainer 不应维护每个 service 的 heuristic |
+| **覆盖面** | kernel JIT 中有数十个可优化点（prologue NOP、零偏移编码、div/mod save/restore、endian fusion 等），不可能全部逐一 patch 上游；BpfReJIT 提供统一的参数化基础设施，一次性覆盖所有 backend lowering 决策 |
 
 ### 1.4 核心设计约束
 
@@ -377,4 +380,10 @@ VM 使用:   make -j$(nproc) bzImage && vng --run <worktree>/arch/x86/boot/bzIma
 | 74 | **Tetragon 真正端到端** | ✅ | **已修复为真实 daemon mode**（之前是 manual fallback）。安装 Tetragon v1.6.0 binary + BPF assets，拆分 tracing policy（tracepoint/kprobe 分文件），`--tracing-policy-dir` 加载。Framework-kernel VM daemon smoke（2026-03-11, `7.0.0-rc2-g2a6783cc77b6`, `/usr/local/bin/tetragon`）：5 个程序加载，`event_execve` 9 sites，recompile `1/5` 成功。总体均值：app `320199 -> 332336 ops/s`（`+3.8%`），agent CPU `32.37% -> 31.72%`（`-2.0%`），BPF avg ns `3627 -> 3100`（`-14.5%`）。per-workload：`stress_exec` app `+6.7%` CPU `-27.4%`，`file_io` `+4.0%`，`open_storm` `+2.6%`，`connect_storm` `-10.2%`（CMOV 回归）。结果：`e2e/results/tetragon-real-e2e.json`，`e2e/results/tetragon-real-e2e.md` |
 | 75 | **bpftrace 真正端到端** | ✅ | 已实现 `e2e/cases/bpftrace/`：5 个 `.bt` 脚本 + `case.py`，复用 `e2e/common/` 做 attach / workload / metrics / scanner plumbing，把 `bpftrace` 本身当作 tracing agent，测应用吞吐 + `bpftrace` CPU + BPF avg ns。Framework-kernel VM 全量实测（2026-03-11, `7.0.0-rc2-g2a6783cc77b6`, `bpftrace v0.20.2`）：5/5 baseline 成功，2/5 有 eligible CMOV sites（`open_latency` 5，`scheduler_latency` 4），aggregate 9 sites。真实端到端对比：`open_latency` BPF avg ns `277.17 -> 273.77`（`1.012x`），app `95367 -> 96082 ops/s`（`+0.75%`）；`scheduler_latency` `158.59 -> 163.27`（`0.971x`），app `41.72 -> 38.09 ops/s`（`-8.70%`）。eligible-script geomean `0.992x`，验证 policy-sensitivity。结果：`e2e/results/bpftrace-real-e2e.json`，`e2e/results/bpftrace-real-e2e.md`，`docs/tmp/bpftrace-real-e2e-report.md` |
 | 77 | **Directive gap 分析 + 下一步方向** | ✅ | 深度审查 kernel JIT（`bpf_jit_comp.c` 5433 行）+ corpus site census + 性能 gap 分解。结论：(1) CMOV 过度关注——corpus 10% sites 且多数回归，应作为 policy-sensitivity 证据而非性能主力；(2) 4 family 机制数量够但组合偏 peephole，缺 structural policy-sensitive family；(3) 18.5% prologue bucket 完全未覆盖；(4) 下一步 P0：`bitfield_extract`（~100-300 sites，~200 LOC）、`packet_ctx_wide_load`（~300-800 sites）、加宽 `cmov_select` 识别；P1：`bounds_window`、`branch_reorder`；kernel 清理：prologue NOP、零偏移编码、imm64 stack store、div/mod liveness。`docs/tmp/directive-gap-analysis.md` |
+| 78 | **加宽 cmov_select 识别** | ❌ | P0。当前 scanner 只认 2 种 diamond pattern（`scanner.cpp:114-146`），漏掉 JSET、switch-style、wider diamond。纯用户态改动：scanner pattern descriptors + pattern_v5.cpp。目标：让 switch_dispatch/binary_search/bounds_ladder 能被命中。 |
+| 79 | **bitfield_extract directive** | ❌ | P0。`(src >> c) & mask` → bextr 或 compact shr+and。Scanner 新 pattern family（用户态）+ kernel canonical validator/emitter（~100-200 LOC）。预估 corpus ~100-300 sites。Packet/socket 解析高频。 |
+| 80 | **packet_ctx_wide_load** | ❌ | P0。扩展 wide_load 到 packet/ctx 字段提取，支持 3/5/6/7 byte 宽度。Scanner 用户态 pattern 扩展 + kernel emitter 扩展。预估 ~300-800 sites，最大实际恢复 family。 |
+| 81 | **branch_reorder directive** | ❌ | P1。热/冷路径重排，第二个真正 policy-sensitive directive（哪条路径 hot 取决于 workload）。Scanner 识别 branch bias pattern，kernel validator/emitter ~250-400 LOC。 |
+| 82 | **bounds_window directive** | ❌ | P1。消除冗余 bounds check（dominating readable-window check 之后的重复 guard）。Scanner 识别 + kernel validator ~200 LOC。 |
+| 83 | **Kernel JIT 清理 patches** | ❌ | P0。非 directive，直接 patch：prologue NOP 浪费（`:519-531`）、零偏移内存编码（`:1584-1591`）、imm64 stack store（`:1849-1856`）、div/mod save/restore（`:3220-3288`）、endian fusion（`:3391-3446`）。改善所有程序 baseline。 |
 | 76 | **scx_rusty/lavd 端到端** | 🔄 | `e2e/cases/scx/` 已落地并在 framework VM（`7.0.0-rc2-g2a6783cc77b6`, `4` vCPU）跑通 `scx_rusty` userspace loader → 30s `hackbench` / `stress-ng --cpu 4` / `sysbench cpu` baseline。活跃 `13` 个 struct_ops programs，扫描到 `28` sites（CMOV `27`, LEA `1`；`rusty_enqueue=12`, `rusty_stopping=10`, `rusty_set_cpumask=2`, `rusty_runnable/quiescent/init_task/init` 各 `1`）。但 raw `bpftool struct_ops register` 虽 return `0` 仍不会保持 `sched_ext` enabled，且对 live struct_ops 调用 `BPF_PROG_JIT_RECOMPILE` 全部未成功（常见 `EINVAL`），因此当前只有 honest baseline + site census，没有 post-reJIT 对比；`scx_lavd` 仍待后续。`e2e/results/scx-e2e.json`, `e2e/results/scx-e2e.md`, `docs/tmp/scx-e2e-report.md` |
