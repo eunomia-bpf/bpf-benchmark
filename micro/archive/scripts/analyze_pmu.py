@@ -10,10 +10,12 @@ import numpy as np
 from scipy.stats import pearsonr, spearmanr
 
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent.parent.parent
 DEFAULT_INPUT = ROOT / "results" / "pmu_authoritative.json"
 DEFAULT_OUTPUT = ROOT / "results" / "pmu_analysis.md"
 RUNTIMES = ("llvmbpf", "kernel")
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Analyze PMU counters vs execution ratio.")
     parser.add_argument("input", nargs="?", default=str(DEFAULT_INPUT), help="Input result JSON.")
@@ -23,6 +25,8 @@ def parse_args() -> argparse.Namespace:
 
 def load_json(path: Path) -> dict[str, object]:
     return json.loads(path.read_text())
+
+
 def stat_mean(value: object) -> float | None:
     if isinstance(value, dict):
         value = value.get("mean")
@@ -72,6 +76,8 @@ def runtime_metrics(run: dict[str, object]) -> dict[str, float | None]:
 
 def format_value(value: float | None, precision: int) -> str:
     return "n/a" if value is None or not math.isfinite(value) else f"{value:.{precision}f}"
+
+
 def build_report(results: dict[str, object]) -> str:
     rows: list[dict[str, object]] = []
     ipc_deltas: list[float] = []

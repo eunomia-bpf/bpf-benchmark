@@ -219,12 +219,12 @@ Important limitations:
 - no per-family or v4/v5 mode matrix
 - no VM abstraction
 
-#### JIT dump pipeline: `micro/dump_all_jit.sh` + `micro/analyze_jit.py`
+#### JIT dump pipeline: `micro/dump_all_jit.sh` + `micro/archive/scripts/analyze_jit.py`
 
 Role:
 
 - `dump_all_jit.sh` iterates the pure-JIT suite and runs both `run-llvmbpf` and `run-kernel` with `--dump-jit`
-- `analyze_jit.py` consumes disassembly dumps from `micro/jit-dumps`
+- `micro/archive/scripts/analyze_jit.py` consumes disassembly dumps from `micro/jit-dumps`
 
 This is a distinct analysis pipeline outside `run_micro.py`.
 
@@ -294,12 +294,12 @@ This is part of the representativeness/static-analysis layer, not execution.
 
 These consume benchmark outputs but do not execute benchmarks directly:
 
-- `micro/analyze_statistics.py`
-- `micro/analyze_stability.py`
-- `micro/analyze_pmu.py`
-- `micro/analyze_performance_deep.py`
-- `micro/analyze_paradox.py`
-- `micro/analyze_representativeness.py`
+- `micro/archive/scripts/analyze_statistics.py`
+- `micro/archive/scripts/analyze_stability.py`
+- `micro/archive/scripts/analyze_pmu.py`
+- `micro/archive/scripts/analyze_performance_deep.py`
+- `micro/archive/scripts/analyze_paradox.py`
+- `micro/archive/scripts/analyze_representativeness.py`
 - `micro/generate_figures.py`
 - `micro/compute_combined_40_summary.py`
 - `micro/summarize_rq.py`

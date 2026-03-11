@@ -439,7 +439,7 @@ Most live/e2e coverage is v5-only
 Explicit policy blobs are effectively unbenchmarked
 
 - command plumbing exists for `--policy-blob` and `--directive-blob` in `micro/orchestrator/commands.py:66-67`
-- but even the local demo notes that explicit `--policy-blob` currently returns `EINVAL` in this checkout (`micro/demo_policy_iteration.py:463-465`)
+- but even the local demo notes that explicit `--policy-blob` currently returns `EINVAL` in this checkout (`micro/archive/scripts/demo_policy_iteration.py`)
 
 Tracing corpus under-tests recompile
 

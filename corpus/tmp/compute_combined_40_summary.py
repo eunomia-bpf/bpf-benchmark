@@ -24,7 +24,7 @@ for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpu
     if candidate_str not in sys.path:
         sys.path.insert(0, candidate_str)
 
-from analyze_statistics import (
+from micro.archive.scripts.analyze_statistics import (
     BOOTSTRAP_ITERATIONS,
     DEFAULT_SEED,
     apply_benjamini_hochberg_correction,

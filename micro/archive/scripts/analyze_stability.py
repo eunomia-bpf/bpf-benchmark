@@ -24,7 +24,7 @@ import numpy as np
 from scipy.stats import wilcoxon
 
 
-ROOT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 DEFAULT_INPUT = ROOT_DIR / "results" / "pure_jit_rigorous.json"
 DEFAULT_OUTPUT = ROOT_DIR / "results" / "stability_analysis.md"
 PLOT_DIR = ROOT_DIR / "results" / "stability"

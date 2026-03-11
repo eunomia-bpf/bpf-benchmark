@@ -117,7 +117,7 @@
 
 #### 额外说明
 
-仓库里确实有少量 ad-hoc policy 脚本，例如 `micro/demo_policy_iteration.py` 会硬编码某些 case 用 `--recompile-cmov` 或 `--recompile-all`。但这不是 active micro suite 的 manifest-driven policy 系统，不能替代 benchmark-level 配置机制。
+仓库里确实有少量 ad-hoc policy 脚本，例如 `micro/archive/scripts/demo_policy_iteration.py` 会硬编码某些 case 用 `--recompile-cmov` 或 `--recompile-all`。但这不是 active micro suite 的 manifest-driven policy 系统，不能替代 benchmark-level 配置机制。
 
 ### 1.3 Corpus recompile 的 policy 配置
 

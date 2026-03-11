@@ -12,7 +12,13 @@
 ## Directory Layout
 
 - `run_micro.py`: main pure-JIT runner
+- `benchmark_catalog.py`: suite YAML parser for micro manifests
+- `input_generators.py`: deterministic input generation for active benchmarks
 - `driver.py`: unified micro/corpus/e2e entrypoint
+- `_driver_impl_*.py`: active driver backends used by `driver.py`
+- `run_pass_ablation.py`, `run_rigorous.py`, `run_rigorous_framework_vm.py`: maintained compatibility wrappers around `driver.py`
+- `summarize_rq.py`, `generate_figures.py`: active reporting utilities
+- `archive/scripts/`: archived one-off analysis and demo scripts moved out of the active root
 - `orchestrator/`: shared Python helpers reused by `corpus/` and `e2e/`
 - `programs/*.bpf.c`: active pure-JIT benchmark sources
 - `programs/archive/runtime/*.bpf.c`: archived runtime-only benchmarks, preserved for history and excluded from the active build
@@ -72,4 +78,4 @@ Results live under `micro/results/`.
 - `pure_jit.llvmbpf_only.latest.json`: default `--llvmbpf-only` script output
 - `pure_jit.vm.latest.json`: default `--vm` script output
 
-Micro analysis scripts continue to read and write `micro/results/`.
+Archived analysis scripts under `micro/archive/scripts/` continue to read and write `micro/results/`.

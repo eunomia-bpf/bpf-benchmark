@@ -10,7 +10,7 @@ import numpy as np
 from scipy.stats import mannwhitneyu, wilcoxon
 
 
-ROOT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 DEFAULT_INPUT = ROOT_DIR / "results" / "pure_jit_rigorous.json"
 DEFAULT_OUTPUT = ROOT_DIR / "results" / "pure_jit_rigorous_analysis.md"
 BOOTSTRAP_ITERATIONS = 10_000

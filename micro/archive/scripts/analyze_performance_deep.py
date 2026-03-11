@@ -16,7 +16,7 @@ from elftools.elf.elffile import ELFFile
 from scipy.stats import linregress, pearsonr, spearmanr
 
 
-ROOT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 REPO_ROOT = ROOT_DIR.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))

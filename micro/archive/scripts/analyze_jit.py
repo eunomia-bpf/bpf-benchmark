@@ -4,15 +4,25 @@ from __future__ import annotations
 import argparse
 import math
 import re
+import sys
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
 
-from benchmark_catalog import CONFIG_PATH, load_suite
+SCRIPT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = SCRIPT_DIR.parent.parent
+REPO_ROOT = ROOT_DIR.parent
+for candidate in (REPO_ROOT, ROOT_DIR):
+    candidate_str = str(candidate)
+    if candidate_str not in sys.path:
+        sys.path.insert(0, candidate_str)
 
+try:
+    from benchmark_catalog import CONFIG_PATH, load_suite
+except ImportError:
+    from micro.benchmark_catalog import CONFIG_PATH, load_suite
 
-ROOT_DIR = Path(__file__).resolve().parent
 DEFAULT_DUMPS_DIR = ROOT_DIR / "jit-dumps"
 DEFAULT_OUTPUT = DEFAULT_DUMPS_DIR / "report.md"
 RUNTIMES = ("llvmbpf", "kernel")

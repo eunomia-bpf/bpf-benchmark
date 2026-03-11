@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
-ROOT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 DEFAULT_INPUT = ROOT_DIR / "results" / "pure_jit_authoritative.json"
 DEFAULT_OUTPUT = ROOT_DIR / "results" / "paradox_analysis.md"
 DEFAULT_AUTHORITATIVE_ANALYSIS = ROOT_DIR / "results" / "pure_jit_authoritative_analysis.md"

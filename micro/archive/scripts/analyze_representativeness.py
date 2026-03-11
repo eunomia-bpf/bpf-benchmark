@@ -7,14 +7,19 @@ import statistics
 import sys
 from pathlib import Path
 
-ROOT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 REPO_ROOT = ROOT_DIR.parent
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
+for candidate in (REPO_ROOT, ROOT_DIR):
+    candidate_str = str(candidate)
+    if candidate_str not in sys.path:
+        sys.path.insert(0, candidate_str)
 
 from elftools.elf.elffile import ELFFile
 
-from benchmark_catalog import load_suite
+try:
+    from benchmark_catalog import load_suite
+except ImportError:
+    from micro.benchmark_catalog import load_suite
 from corpus.analyze_bytecode import (
     SHF_EXECINSTR,
     collect_func_symbol_counts,

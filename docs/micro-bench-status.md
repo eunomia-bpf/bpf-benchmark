@@ -3,7 +3,7 @@
 > 本文档是 micro benchmark 层的统一参考，合并了原来分散在多个文件中的实验计划、进度追踪、RQ 定义和结果分析。
 > 详细的阶段性报告（含机器码分析细节）见 `docs/stage-log-2026-03-07.md`。
 
-> 更新说明（2026-03-07）：`config/micro_pure_jit.yaml` 当前包含 `30` 个 pure-jit / staged-codegen case，另有 `2` 个 packet-backed 对照 benchmark，其中新增 `bpf_call_chain` 作为首个 local-call benchmark；`config/micro_runtime.yaml` 当前包含 `9` 个 runtime case。第 4 节覆盖表与第 7 节进度已按此状态同步，并新增可复现的 representativeness 分析脚本 `micro/analyze_representativeness.py` 与真实程序 code-size / exec-time 外部验证脚本 `corpus/run_real_world_code_size.py`、`corpus/run_real_world_exec_time.py`。第 `6.1`、`6.1b`、`6.1e` 节现已切换为 authoritative pure-JIT run（`30` iterations × `1000` repeats，iteration 级 runtime 随机交错 / counterbalanced），覆盖 `31` 个 benchmark；执行时间 geomean 为 `0.849x`，BH-corrected paired Wilcoxon 显著 `25/31`，编译时间 geomean 为 `3.394x`。第 `6.2`、`6.4`、`6.5` 节已按同一 `31`-case authoritative 数据同步；第 `6.6` 节已切换为 authoritative runtime run（`9` case，执行时间 geomean `0.829x`，BH-corrected paired Wilcoxon 显著 `7/9`）。真实程序外部验证现已更新到 code-size `162` paired instances（`36` unique，geomean `0.618x`）与 exec-time `98` paired instances（`14` unique；valid packet rerun，instance geomean `0.514x` / unique geomean `0.484x`，`97/98` kernel exec ≥ `20ns`）。
+> 更新说明（2026-03-07）：`config/micro_pure_jit.yaml` 当前包含 `30` 个 pure-jit / staged-codegen case，另有 `2` 个 packet-backed 对照 benchmark，其中新增 `bpf_call_chain` 作为首个 local-call benchmark；`config/micro_runtime.yaml` 当前包含 `9` 个 runtime case。第 4 节覆盖表与第 7 节进度已按此状态同步，并新增可复现的 representativeness 分析脚本 `micro/archive/scripts/analyze_representativeness.py` 与真实程序 code-size / exec-time 外部验证脚本 `corpus/run_real_world_code_size.py`、`corpus/run_real_world_exec_time.py`。第 `6.1`、`6.1b`、`6.1e` 节现已切换为 authoritative pure-JIT run（`30` iterations × `1000` repeats，iteration 级 runtime 随机交错 / counterbalanced），覆盖 `31` 个 benchmark；执行时间 geomean 为 `0.849x`，BH-corrected paired Wilcoxon 显著 `25/31`，编译时间 geomean 为 `3.394x`。第 `6.2`、`6.4`、`6.5` 节已按同一 `31`-case authoritative 数据同步；第 `6.6` 节已切换为 authoritative runtime run（`9` case，执行时间 geomean `0.829x`，BH-corrected paired Wilcoxon 显著 `7/9`）。真实程序外部验证现已更新到 code-size `162` paired instances（`36` unique，geomean `0.618x`）与 exec-time `98` paired instances（`14` unique；valid packet rerun，instance geomean `0.514x` / unique geomean `0.484x`，`97/98` kernel exec ≥ `20ns`）。
 > Note: benchmarks use staged input via `bpf_map_lookup_elem`; this measures JIT codegen quality under realistic input staging, not helper-free isolation.
 
 ---
@@ -299,7 +299,7 @@ BPF:      CONFIG_BPF_JIT=y, CONFIG_BPF_SYSCALL=y, BTF enabled
 
 ### 6.1d 时间序列稳定性分析
 
-> 数据来源：`micro/results/pure_jit_authoritative.json`，分析脚本：`micro/analyze_stability.py`
+> 数据来源：`micro/results/pure_jit_authoritative.json`，分析脚本：`micro/archive/scripts/analyze_stability.py`
 > 覆盖 62 个 benchmark × runtime 对（31 benchmarks × 2 runtimes），时间序列图见 `micro/results/stability/`
 
 | 指标 | 值 |
@@ -451,7 +451,7 @@ authoritative `31`-case run 中，`10/31` 个 benchmark 出现 llvmbpf 代码更
 
 ### 6.7 Feature-Space Representativeness
 
-> 分析脚本：`micro/analyze_representativeness.py`
+> 分析脚本：`micro/archive/scripts/analyze_representativeness.py`
 > 报告：`micro/results/representativeness_report.md`
 > 真实语料：`corpus/results/bytecode_features.json`（`1588` 个程序）
 > 统计口径：当前 representativeness report 纳入 `35` 个 pure-jit benchmark 与 `9` 个 runtime benchmark，合计 `44` 个 benchmark，覆盖 `10` 个 category。其中 `31` 个 pure-jit benchmark 有 authoritative 结果（§6.1），另外 `4` 个（`load_byte`、`load_byte_recompose`、`load_word32`、`load_native_u64`）是后续添加的 byte-recompose 因果隔离 benchmark，尚无 authoritative 结果但已纳入 feature-space 覆盖分析
@@ -547,7 +547,7 @@ authoritative `31`-case run 中，`10/31` 个 benchmark 出现 llvmbpf 代码更
 - [x] **raw-packet 支持** — C++ runner 新增 `--raw-packet` flag，Python 脚本生成 valid packet。exec-time geomean 0.694x → 0.514x
 - [x] **BPF-to-BPF local call benchmark** — `bpf_call_chain` (3 `__noinline` subprograms × 64 rounds)。llvmbpf 0.74x exec, 0.62x code-size
 - [x] **因果隔离 byte-recompose 时间量化** — load_byte_recompose 0.447x，geomean 0.660x，4/4 显著
-- [x] **深度性能分析脚本** — `micro/analyze_performance_deep.py`，6 维分析 + 报告
+- [x] **深度性能分析脚本** — `micro/archive/scripts/analyze_performance_deep.py`，6 维分析 + 报告
 - [x] **exec-time 重跑** — 98/162 paired（14 unique），valid packet 后 geomean 0.514x，`97/98` kernel exec ≥ `20ns`
 - [x] **stage-log 论文化重写** — abstract + takeaway + narrative prose
 - [x] **文档全面同步** — stage-log / osdi-rigor-plan / micro-bench-status 三文档对齐
@@ -580,7 +580,7 @@ authoritative `31`-case run 中，`10/31` 个 benchmark 出现 llvmbpf 代码更
 - [x] JIT dump / code-size 采集 — `--dump-jit` flag + `code_size` JSON 字段（RQ1.1 已关闭）
 - [x] rdtsc 精确测量修正 — 消除 harness 开销，llvmbpf exec_ns 现在公平
 - [x] LLVM 优化级别消融 — `--opt-level 0/1/2/3`，发现 O1=O2=O3
-- [x] 指令级 JIT 分析 — `dump_all_jit.sh` + `analyze_jit.py`，byte-recompose / BMI / cmov / prologue / 依赖链
+- [x] 指令级 JIT 分析 — `dump_all_jit.sh` + `micro/archive/scripts/analyze_jit.py`，byte-recompose / BMI / cmov / prologue / 依赖链
 - [x] BCF 数据集获取 — 1588 个程序已下载到 `corpus/bcf/`
 - [x] llvmbpf dummy helper 注册 — 注册 helper 3-220 为 no-op stub，解锁 Cilium/collected/inspektor-gadget 编译
 - [x] ELF loader relocation 修复 — 跳过越界 relocation 而非 crash，支持带子程序的 ELF
@@ -616,7 +616,7 @@ authoritative `31`-case run 中，`10/31` 个 benchmark 出现 llvmbpf 代码更
 - [x] **T3.6 时间域因素分解** — 4 个 byte-recompose 因果隔离 benchmark 已完成 authoritative run（30 iter × 1000 repeat），geomean 0.660x，4/4 显著。`load_byte_recompose` 0.447x 量化了 byte-recompose pattern 的时间惩罚（2.24x）。详见 `micro/results/causal_isolation_analysis.md`。剩余：其他模式（branch/prologue）的隔离 benchmark 尚未构建。
 - [ ] **T3.7 LLVM Pass-level 消融** — 不只是 O0/O1/O2/O3，而是逐个 pass 启用（instcombine、GVN、RegAlloc、SimplifyCFG 等），识别对 BPF 最有价值的 pass
 - [ ] **T3.8 Perf counter 相关性分析** — supplementary only：IPC/branch-miss/cache-miss vs exec ratio 的 Pearson/Spearman 相关系数矩阵
-- [~] **T3.9 静态特征→优化收益预测模型 (RQ3.3)** — `micro/analyze_performance_deep.py` 已完成初步 linear regression：3 个静态特征（insn_count, branch_count, code_ratio）预测 exec_ratio，R²=0.070，说明简单静态特征几乎无法预测运行时性能。详见 `micro/results/performance_deep_analysis.md`。剩余：随机森林 / 更多特征（helper count, loop depth）未尝试。
+- [~] **T3.9 静态特征→优化收益预测模型 (RQ3.3)** — `micro/archive/scripts/analyze_performance_deep.py` 已完成初步 linear regression：3 个静态特征（insn_count, branch_count, code_ratio）预测 exec_ratio，R²=0.070，说明简单静态特征几乎无法预测运行时性能。详见 `micro/results/performance_deep_analysis.md`。剩余：随机森林 / 更多特征（helper count, loop depth）未尝试。
 
 **TODO — 补充实验：**
 - [ ] **T3.10 Spectre 2×2 实验** — 需重启 mitigations=off（低优先级）

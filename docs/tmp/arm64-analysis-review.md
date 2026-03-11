@@ -44,7 +44,7 @@ The pitfalls are:
 - `L/K` collapses two moving parts. A higher ARM64 ratio can mean a stronger ARM64 kernel JIT, a weaker ARM64 llvmbpf, or both. Line 75 overstates this when it defines positive `LK_diff` as "the ARM64 kernel JIT is relatively stronger." Mathematically, it only means `arm64_LK > x86_LK`.
 - Runtime/helper cases are not clean backend-quality measurements. `micro_runtime` uses user-space helper shims for llvmbpf and kernel helper implementations for eBPF; for example llvmbpf helper ID `5` is wired to `std::chrono::steady_clock::now()` in [micro/runner/src/llvmbpf_runner.cpp](/home/yunwei37/workspace/bpf-benchmark/micro/runner/src/llvmbpf_runner.cpp#L394), and kernel `exec_ns` comes from `test_opts.duration` in [micro/runner/src/kernel_runner.cpp](/home/yunwei37/workspace/bpf-benchmark/micro/runner/src/kernel_runner.cpp#L453).
 - Near-parity ratios should not carry strong architecture claims with only five ARM64 iterations. `struct_field_cluster = 0.953` (line 127), `atomic_counter_xadd = 1.031` (line 139), and `helper_call_10 = 1.008` (line 135) need uncertainty intervals.
-- Floor-bound kernel timings still matter even though line 25 flags some tiny cases. The repo itself defines `KERNEL_EXEC_SUBRESOLUTION_NS = 100.0` in [micro/analyze_statistics.py](/home/yunwei37/workspace/bpf-benchmark/micro/analyze_statistics.py#L20), so any benchmark with kernel median below `100ns` should be treated cautiously.
+- Floor-bound kernel timings still matter even though line 25 flags some tiny cases. The repo itself defines `KERNEL_EXEC_SUBRESOLUTION_NS = 100.0` in [micro/archive/scripts/analyze_statistics.py](/home/yunwei37/workspace/bpf-benchmark/micro/archive/scripts/analyze_statistics.py), so any benchmark with kernel median below `100ns` should be treated cautiously.
 
 Recommendation: keep `L/K` as the main cross-arch summary for pure-JIT kernels, but do not use it by itself to claim causal backend superiority.
 
@@ -90,7 +90,7 @@ Yes, the timing-source split affects comparability.
 On resolution:
 
 - The artifacts do not record `clock_getres(CLOCK_MONOTONIC)`, and there is no `clock_getres` call under `micro/`, so the effective ARM64 monotonic-clock resolution is not recoverable from the supplied artifacts.
-- The only explicit in-repo threshold is the project heuristic `KERNEL_EXEC_SUBRESOLUTION_NS = 100.0` in [micro/analyze_statistics.py](/home/yunwei37/workspace/bpf-benchmark/micro/analyze_statistics.py#L20). That is a caution threshold, not a measured clock resolution for the ARM64 VM.
+- The only explicit in-repo threshold is the project heuristic `KERNEL_EXEC_SUBRESOLUTION_NS = 100.0` in [micro/archive/scripts/analyze_statistics.py](/home/yunwei37/workspace/bpf-benchmark/micro/archive/scripts/analyze_statistics.py). That is a caution threshold, not a measured clock resolution for the ARM64 VM.
 - Practically, this means mid-size kernels like `bitcount`, `cmov_select`, or `helper_call_100` are usable, while tiny kernels and sub-`100ns` kernel medians need explicit caveats.
 
 ## 6. JIT Advisor Implications

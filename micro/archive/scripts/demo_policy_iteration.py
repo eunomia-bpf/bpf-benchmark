@@ -6,17 +6,26 @@ import json
 import shlex
 import statistics
 import subprocess
+import sys
 import tempfile
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from input_generators import materialize_input
+SCRIPT_DIR = Path(__file__).resolve().parent
+MICRO_ROOT = SCRIPT_DIR.parent.parent
+ROOT_DIR = MICRO_ROOT.parent
+for candidate in (ROOT_DIR, MICRO_ROOT):
+    candidate_str = str(candidate)
+    if candidate_str not in sys.path:
+        sys.path.insert(0, candidate_str)
 
+try:
+    from input_generators import materialize_input
+except ImportError:
+    from micro.input_generators import materialize_input
 
-ROOT_DIR = Path(__file__).resolve().parent.parent
-MICRO_ROOT = ROOT_DIR / "micro"
 RUNNER = MICRO_ROOT / "build" / "runner" / "micro_exec"
 RESULTS_MD = ROOT_DIR / "docs" / "tmp" / "policy-iteration-demo-results.md"
 RESULTS_JSON = ROOT_DIR / "docs" / "tmp" / "policy-iteration-demo-results.json"
