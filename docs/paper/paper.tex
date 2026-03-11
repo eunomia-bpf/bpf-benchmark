@@ -51,28 +51,30 @@
 \email{anonymous@example.com}
 
 \begin{abstract}
-eBPF is widely deployed for network policy, load balancing,
-observability, and scheduling.  The kernel JIT-compiles each program
-into native machine code that runs in kernel context---where a
-code-generation bug can crash the machine.  The JIT is therefore conservative: each BPF instruction maps to a
-fixed native sequence, and every instruction selection decision is
-hardcoded.  Operators cannot
-influence these choices, though the right ones depend on workload,
-microarchitecture, and deployment context the kernel lacks.
+eBPF is widely deployed in production infrastructure for network
+policy enforcement, load balancing, observability, and scheduling.
+Each program is JIT-compiled into native machine code and executed
+directly in kernel context: a code-generation bug can crash the
+machine.  The kernel therefore maps each BPF instruction to a single
+fixed native sequence, leaving every instruction-selection decision
+hardcoded---even though the right choice depends on workload
+characteristics, microarchitecture, and deployment context that
+the kernel cannot observe.
 
-Adding smarter heuristics to the kernel does not help: the same
-optimization can improve one workload and degrade another, and
-heuristics that are individually beneficial interact badly when
-combined.  Nor can operators supply native code directly---the kernel
-must be the sole source of the instructions it runs.
+Smarter heuristics in the kernel JIT cannot resolve this tension: the
+same transformation benefits one workload and hurts another, and
+individually profitable heuristics produce regressions when applied
+together.  The only alternative---supplying native code from
+userspace---is incompatible with eBPF's security model, which requires
+the kernel to be the sole source of the code it executes.
 
-We present \textsc{BpfReJIT}, which decouples \emph{safety} from
-\emph{optimization} in the kernel JIT\@.  The kernel determines which
-native code variants are safe to emit; privileged userspace selects
-which to apply for each program, based on workload and deployment
-context.  Evaluation shows that selective re-compilation captures
-available performance gains while avoiding the regressions that fixed
-heuristics produce.
+We present \textsc{BpfReJIT}, which separates these two concerns in
+the kernel JIT: the kernel enumerates the native code variants that
+are safe to emit for a given program structure; privileged userspace
+chooses which to apply, guided by profiling and deployment policy.
+Selective re-JIT recovers the performance left by the default
+compiler while avoiding the cross-workload regressions that any fixed
+heuristic would introduce.
 \end{abstract}
 
 \begin{CCSXML}
@@ -109,73 +111,79 @@ heuristics produce.
 %% ============================================================
 
 eBPF programs enforce network policy~\cite{cilium}, drive load
-balancers~\cite{katran}, power observability, and implement
-schedulers~\cite{sched_ext}.  They run on performance-critical code
-paths in production infrastructure, and every one of them is
-JIT-compiled by the kernel into native machine code that executes in
-kernel context.  A code-generation error here can crash the machine.
-To prevent this, the kernel JIT maps each BPF opcode to a single
-fixed native sequence, with every instruction selection decision
-hardcoded and no operator input~\cite{linux_bpf_jit}.
+balancers~\cite{katran}, instrument production systems for
+observability, and implement schedulers~\cite{sched_ext}.  All of them
+are JIT-compiled by the kernel into native machine code that executes
+in kernel context: a bug in the generated code can crash the machine.
+The kernel therefore compiles each BPF opcode to a single,
+hand-audited native sequence~\cite{linux_bpf_jit}.  Every
+instruction-selection decision is fixed at kernel compile time;
+operators have no input.
 
-This design conflates two concerns that ought to be separate.  The
-kernel must ensure that the generated code is \emph{safe}---this is
-non-negotiable.  But the kernel also makes every instruction selection
-decision, with no knowledge of the workload, the target
-microarchitecture's performance characteristics, or the operator's
-deployment constraints.  The result is a measurable code quality gap:
-the kernel JIT misses native instruction selection
-opportunities---conditional moves, wide-load fusion, rotate
-idioms---that the BPF instruction set cannot express and that no
-bytecode optimizer~\cite{k2,merlin,epso} can introduce
-(\S\ref{sec:motivation}).
+The design bundles two concerns into a single fixed mechanism.
+Safety is one: the kernel must certify that the generated code is
+correct before it runs in kernel context.  Optimization is the other:
+the kernel also makes every instruction-selection decision, with no
+knowledge of the workload, the target microarchitecture, or the
+operator's deployment constraints.  The result is a measurable code
+quality gap.  The kernel JIT misses target-specific
+instruction-selection opportunities---conditional moves, wide-load
+fusion, rotate idioms---that the BPF instruction set has no opcodes to
+express; bytecode optimizers~\cite{k2,merlin,epso} operating before
+JIT compilation cannot introduce them either (\S\ref{sec:motivation}).
 
-The natural response is to add smarter heuristics to the kernel
-compiler.  We show this approach is fundamentally limited.  Backend
+The obvious response is to add smarter heuristics to the kernel
+compiler.  We show this approach is structurally limited.  Backend
 optimization choices are workload-dependent: the same transformation
 improves one program and degrades another, depending on branch
-predictability and input distributions.  Individually beneficial
-heuristics interact unpredictably when combined, producing regressions
-that none causes in isolation.  No fixed policy is correct across
-programs (\S\ref{sec:policy_sensitivity}).
+predictability and input distribution.  Heuristics that are
+individually profitable interact unpredictably when composed,
+producing regressions that no individual optimization causes in
+isolation.  No fixed policy is correct across the programs a
+production JIT must serve (\S\ref{sec:policy_sensitivity}).
 
-Operators need a way to make these choices themselves.  But eBPF's
-security model requires the kernel to be the sole generator of the
-native code it executes.  Allowing userspace to supply machine code is
-unacceptable.
+Operators therefore need a mechanism to supply workload-specific
+optimization choices.  eBPF's security model, however, requires the
+kernel to be the sole generator of the native code it executes:
+admitting arbitrary machine code from userspace would bypass the
+verifier and violate kernel integrity.
 
-Our insight is that these requirements are not in conflict.
-Whether a native instruction alternative is \emph{safe} depends on
-the program structure and the CPU---the kernel can determine this.
-Whether it is \emph{beneficial} depends on the workload and the
-deployment---the operator should decide this.  Separating these two
-concerns lets the kernel retain full control over safety while giving
-operators control over performance.
+These two requirements are separable.  Whether a native code
+alternative is \emph{safe} depends on program structure and CPU
+microarchitecture---properties the kernel can determine after
+verification.  Whether it is \emph{beneficial} depends on workload
+behavior and deployment policy---properties the operator observes but
+the kernel cannot.  Splitting the question along this boundary lets
+the kernel retain full control over safety while allowing operators
+to drive optimization choices.
 
-We present \textsc{BpfReJIT}, an OS interface built on this
-separation.  The kernel defines a bounded set of safe native code
-alternatives for recognized instruction patterns; privileged userspace
-selects from these alternatives per program and per site, guided by
-profiling and deployment policy.  The safety side of the interface is
-small and stable across kernel versions; the optimization side evolves
-independently, without kernel upgrades.
+We present \textsc{BpfReJIT}, a kernel/userspace interface that
+operationalizes this separation.  After a program passes verification,
+the kernel enumerates a bounded set of safe native code alternatives
+for recognized instruction patterns; privileged userspace selects from
+these alternatives per program and per call site, guided by profiling
+and deployment policy.  The safety half of the interface is small and
+stable across kernel versions; the policy half evolves without kernel
+upgrades.
 
 \textbf{Contributions.}
 \begin{itemize}
-  \item A characterization of the kernel JIT code quality gap, tracing
-    it to native instruction selection deficiencies that bytecode
-    optimizers cannot reach (\S\ref{sec:motivation}).
-  \item Evidence that fixed kernel heuristics are insufficient:
-    workload-dependent optimizations and composition effects produce
-    regressions that no individual optimization causes
+  \item A measurement and root-cause analysis of the kernel JIT code
+    quality gap, attributing it to native instruction-selection
+    opportunities that are absent from the BPF ISA and unreachable by
+    bytecode optimizers (\S\ref{sec:motivation}).
+  \item A demonstration that no fixed kernel heuristic can close this
+    gap: workload-dependence and heuristic composition produce
+    regressions that isolate testing misses
     (\S\ref{sec:policy_sensitivity}, \S\ref{sec:eval_fixed}).
-  \item \textsc{BpfReJIT}: a kernel/userspace interface that decouples
-    safety from optimization in the JIT, covering four optimization
-    families with a declarative extension mechanism
+  \item \textsc{BpfReJIT}: a kernel/userspace co-design that decouples
+    safety determination from optimization selection, covering four
+    instruction-pattern families and supporting declarative extension
+    without kernel recompilation
     (\S\ref{sec:design}, \S\ref{sec:implementation}).
-  \item Evaluation on production programs showing that selective
-    re-compilation recovers available gains while avoiding every
-    regression that fixed heuristics produce
+  \item An evaluation on production eBPF programs showing that
+    \textsc{BpfReJIT} captures the available performance gains without
+    introducing any of the regressions produced by fixed heuristics
     (\S\ref{sec:evaluation}).
 \end{itemize}
 
