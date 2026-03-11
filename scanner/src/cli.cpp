@@ -1,32 +1,21 @@
 // SPDX-License-Identifier: MIT
 
-#include "bpf_jit_scanner/engine.hpp"
 #include "bpf_jit_scanner/pattern_v5.hpp"
-#include "bpf_jit_scanner/policy.h"
 
-#include <cerrno>
 #include <algorithm>
+#include <cerrno>
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <filesystem>
 #include <fcntl.h>
-#include <stdexcept>
 #include <string>
-#include <string_view>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/syscall.h>
 #include <unistd.h>
 #include <vector>
-
-using bpf_jit_scanner::PolicyConfig;
-using bpf_jit_scanner::PolicyDecision;
-using bpf_jit_scanner::PolicyEngine;
-using bpf_jit_scanner::PatternRegistry;
-using bpf_jit_scanner::ScanOptions;
-using bpf_jit_scanner::ScanReport;
 
 namespace {
 
@@ -110,7 +99,6 @@ struct InputBundle {
     std::vector<uint8_t> xlated;
     uint32_t insn_cnt = 0;
     uint8_t prog_tag[8] = {};
-    std::string program_name;
 };
 
 struct CommandOptions {
@@ -118,14 +106,19 @@ struct CommandOptions {
     int prog_fd = -1;
     std::string xlated_path;
     std::string output_path;
-    std::string policy_path;
-    std::string explicit_program_name;
-    ScanOptions scan_options;
+    bpf_jit_scanner::V5ScanOptions scan_options = {
+        .scan_cmov = false,
+        .scan_wide = false,
+        .scan_rotate = false,
+        .scan_lea = false,
+        .scan_extract = false,
+        .use_rorx = false,
+    };
+    bool families_explicit = false;
     bool has_prog_tag = false;
     uint8_t prog_tag[8] = {};
     bool has_insn_cnt = false;
     uint32_t insn_cnt = 0;
-    bool use_v5 = false;
 };
 
 uint64_t ptr_to_u64(const void *ptr)
@@ -232,37 +225,21 @@ std::vector<uint8_t> fetch_xlated(int prog_fd, const mini_bpf_prog_info &probe)
     return xlated;
 }
 
-std::string infer_program_name(const CommandOptions &options, const InputBundle &input)
-{
-    if (!options.explicit_program_name.empty()) {
-        return options.explicit_program_name;
-    }
-    if (!input.program_name.empty()) {
-        return input.program_name;
-    }
-    if (!options.xlated_path.empty()) {
-        return std::filesystem::path(options.xlated_path).filename().string();
-    }
-    return "unknown-program";
-}
-
 InputBundle load_input(const CommandOptions &options)
 {
     InputBundle input;
+
     if (options.prog_fd >= 0) {
         const mini_bpf_prog_info info = fetch_prog_info(options.prog_fd);
         input.xlated = fetch_xlated(options.prog_fd, info);
         input.insn_cnt = info.xlated_prog_len / 8;
         std::memcpy(input.prog_tag, info.tag, sizeof(input.prog_tag));
-        input.program_name.assign(info.name,
-                                  strnlen(info.name, sizeof(info.name)));
     } else {
         input.xlated = read_file(options.xlated_path);
         if (input.xlated.size() % 8 != 0) {
             die("xlated file size (%zu) is not a multiple of 8", input.xlated.size());
         }
         input.insn_cnt = static_cast<uint32_t>(input.xlated.size() / 8);
-        input.program_name = std::filesystem::path(options.xlated_path).filename().string();
     }
 
     if (options.has_prog_tag) {
@@ -270,9 +247,6 @@ InputBundle load_input(const CommandOptions &options)
     }
     if (options.has_insn_cnt) {
         input.insn_cnt = options.insn_cnt;
-    }
-    if (!options.explicit_program_name.empty()) {
-        input.program_name = options.explicit_program_name;
     }
     return input;
 }
@@ -331,12 +305,12 @@ void print_usage(const char *prog)
 {
     std::fprintf(stderr,
         "Usage:\n"
-        "  %s scan  (--prog-fd <fd> | --xlated <file>) [family flags] [--policy <file>] [--output <blob>]\n"
-        "  %s apply --prog-fd <fd> [family flags] [--policy <file>] [--output <blob>]\n"
+        "  %s scan  (--prog-fd <fd> | --xlated <file>) [family flags] [--output <blob>]\n"
+        "  %s apply --prog-fd <fd> [family flags] [--output <blob>]\n"
         "  %s dump  --prog-fd <fd> [--output <file>]\n"
         "\n"
         "Family flags:\n"
-        "  --all        Enable all registered families (default when omitted)\n"
+        "  --all        Enable all builtin families (default when omitted)\n"
         "  --cmov       Conditional-select sites\n"
         "  --wide-mem   Byte-ladder wide-load sites\n"
         "  --rotate     Rotate idioms\n"
@@ -344,11 +318,10 @@ void print_usage(const char *prog)
         "  --bitfield-extract, --extract\n"
         "               Bitfield extract sites\n"
         "  --rorx       Prefer RORX for rotate sites\n"
-        "  --v5         Use the v5 declarative-pattern scanner/blob format\n"
+        "  --v5         Accepted for compatibility; scanner is already v5-only\n"
         "\n"
         "Shared options:\n"
-        "  --policy <file>        Policy config file (v4 engine mode only)\n"
-        "  --program-name <name>  Override program name for policy matching\n"
+        "  --program-name <name>  Accepted for compatibility; ignored\n"
         "  --prog-tag <hex>       Override prog_tag for blob writing (16 hex chars)\n"
         "  --insn-cnt <n>         Override insn_cnt for blob writing\n"
         "  --output <file>        Output path (scan/apply: blob, dump: xlated)\n"
@@ -365,6 +338,15 @@ void parse_hex_tag(const char *hex, uint8_t tag[8])
         char byte[3] = {hex[i * 2], hex[i * 2 + 1], '\0'};
         tag[i] = static_cast<uint8_t>(std::strtoul(byte, nullptr, 16));
     }
+}
+
+void enable_all_families(CommandOptions &options)
+{
+    options.scan_options.scan_cmov = true;
+    options.scan_options.scan_wide = true;
+    options.scan_options.scan_rotate = true;
+    options.scan_options.scan_lea = true;
+    options.scan_options.scan_extract = true;
 }
 
 CommandOptions parse_args(int argc, char **argv)
@@ -386,7 +368,6 @@ CommandOptions parse_args(int argc, char **argv)
         die("unknown subcommand: %s", options.subcommand.c_str());
     }
 
-    bool families_explicit = false;
     for (int i = 2; i < argc; ++i) {
         const std::string arg = argv[i];
         auto need_next = [&]() -> const char * {
@@ -403,12 +384,12 @@ CommandOptions parse_args(int argc, char **argv)
             options.prog_fd = std::atoi(need_next());
         } else if (arg == "--xlated") {
             options.xlated_path = need_next();
-        } else if (arg == "--policy") {
-            options.policy_path = need_next();
-        } else if (arg == "--program-name") {
-            options.explicit_program_name = need_next();
         } else if (arg == "--output") {
             options.output_path = need_next();
+        } else if (arg == "--program-name") {
+            static_cast<void>(need_next());
+        } else if (arg == "--policy") {
+            die("--policy was removed; scanner is v5-only");
         } else if (arg == "--prog-tag") {
             parse_hex_tag(need_next(), options.prog_tag);
             options.has_prog_tag = true;
@@ -417,27 +398,31 @@ CommandOptions parse_args(int argc, char **argv)
                 std::strtoul(need_next(), nullptr, 0));
             options.has_insn_cnt = true;
         } else if (arg == "--all") {
-            options.scan_options.families.clear();
-            families_explicit = false;
+            options.families_explicit = false;
+            options.scan_options.scan_cmov = false;
+            options.scan_options.scan_wide = false;
+            options.scan_options.scan_rotate = false;
+            options.scan_options.scan_lea = false;
+            options.scan_options.scan_extract = false;
         } else if (arg == "--cmov") {
-            options.scan_options.families.push_back("cmov");
-            families_explicit = true;
+            options.scan_options.scan_cmov = true;
+            options.families_explicit = true;
         } else if (arg == "--wide-mem") {
-            options.scan_options.families.push_back("wide-mem");
-            families_explicit = true;
+            options.scan_options.scan_wide = true;
+            options.families_explicit = true;
         } else if (arg == "--rotate") {
-            options.scan_options.families.push_back("rotate");
-            families_explicit = true;
+            options.scan_options.scan_rotate = true;
+            options.families_explicit = true;
         } else if (arg == "--lea") {
-            options.scan_options.families.push_back("lea");
-            families_explicit = true;
+            options.scan_options.scan_lea = true;
+            options.families_explicit = true;
         } else if (arg == "--bitfield-extract" || arg == "--extract") {
-            options.scan_options.families.push_back("bitfield-extract");
-            families_explicit = true;
+            options.scan_options.scan_extract = true;
+            options.families_explicit = true;
         } else if (arg == "--rorx") {
             options.scan_options.use_rorx = true;
         } else if (arg == "--v5") {
-            options.use_v5 = true;
+            continue;
         } else {
             die("unknown option: %s", argv[i]);
         }
@@ -460,50 +445,17 @@ CommandOptions parse_args(int argc, char **argv)
         if (!options.xlated_path.empty()) {
             die("apply does not accept --xlated");
         }
-    } else {
-        if ((options.prog_fd < 0) == options.xlated_path.empty()) {
-            die("scan requires exactly one of --prog-fd or --xlated");
-        }
+    } else if ((options.prog_fd < 0) == options.xlated_path.empty()) {
+        die("scan requires exactly one of --prog-fd or --xlated");
     }
 
-    if (!families_explicit) {
-        options.scan_options.families.clear();
-    }
-    if (options.use_v5 && !options.policy_path.empty()) {
-        die("--policy is not supported with --v5");
+    if (!options.families_explicit) {
+        enable_all_families(options);
     }
     return options;
 }
 
-std::vector<uint8_t> build_blob(const std::vector<bpf_jit_scan_rule> &rules,
-                                const InputBundle &input)
-{
-    uint8_t *blob_ptr = nullptr;
-    uint32_t blob_len = 0;
-    const int rc = bpf_jit_build_policy_blob(rules.data(),
-                                             static_cast<uint32_t>(rules.size()),
-                                             input.insn_cnt,
-                                             input.prog_tag,
-                                             &blob_ptr,
-                                             &blob_len);
-    if (rc < 0) {
-        die("bpf_jit_build_policy_blob: %s", strerror(-rc));
-    }
-
-    std::vector<uint8_t> blob(blob_ptr, blob_ptr + blob_len);
-    bpf_jit_free_policy_blob(blob_ptr);
-    return blob;
-}
-
-std::vector<uint8_t> build_blob_v5(const bpf_jit_scanner::V5ScanSummary &summary,
-                                   const InputBundle &input)
-{
-    return bpf_jit_scanner::build_policy_blob_v5(input.insn_cnt,
-                                                 input.prog_tag,
-                                                 summary.rules);
-}
-
-void print_v5_summary(const bpf_jit_scanner::V5ScanSummary &summary)
+void print_summary(const bpf_jit_scanner::V5ScanSummary &summary)
 {
     std::printf("Accepted %zu v5 site(s)\n", summary.rules.size());
     std::printf("  cmov:   %llu\n",
@@ -518,111 +470,21 @@ void print_v5_summary(const bpf_jit_scanner::V5ScanSummary &summary)
                 static_cast<unsigned long long>(summary.bitfield_sites));
 }
 
-bpf_jit_scanner::V5ScanOptions make_v5_scan_options(const CommandOptions &options)
-{
-    bpf_jit_scanner::V5ScanOptions v5 = {};
-    const bool use_all = options.scan_options.families.empty();
-    const auto has_family = [&](const char *name) {
-        return std::find(options.scan_options.families.begin(),
-                         options.scan_options.families.end(),
-                         name) != options.scan_options.families.end();
-    };
-
-    v5.scan_cmov = use_all || has_family("cmov");
-    v5.scan_wide = use_all || has_family("wide-mem");
-    v5.scan_rotate = use_all || has_family("rotate");
-    v5.scan_lea = use_all || has_family("lea");
-    v5.scan_extract = use_all || has_family("bitfield-extract");
-    v5.use_rorx = options.scan_options.use_rorx;
-    return v5;
-}
-
-void print_decisions(const ScanReport &report,
-                     const std::vector<PolicyDecision> &decisions)
-{
-    std::printf("Accepted %zu site(s) from %zu candidate(s)",
-                report.merged_sites.size(), report.raw_sites.size());
-    if (!report.conflicts.empty()) {
-        std::printf(" (%zu overlap conflict(s) resolved)", report.conflicts.size());
-    }
-    std::printf("\n");
-
-    if (decisions.empty()) {
-        return;
-    }
-
-    std::printf("%-6s %-6s %-12s %-12s %-16s %-4s %-7s %-6s\n",
-                "START", "LEN", "FAMILY", "DECISION", "SOURCE", "LOOP", "BRDEN", "EMIT");
-    for (const auto &decision : decisions) {
-        const std::string choice = decision.emit_rule
-                                       ? bpf_jit_scanner::native_choice_name(
-                                             decision.site.rule.rule_kind,
-                                             decision.native_choice)
-                                       : "SKIP";
-        std::printf("%-6u %-6u %-12s %-12s %-16s %-4u %-7.2f %-6s\n",
-                    decision.site.rule.site_start,
-                    decision.site.rule.site_len,
-                    decision.site.family.c_str(),
-                    choice.c_str(),
-                    bpf_jit_scanner::decision_source_name(decision.source).c_str(),
-                    decision.site.features.loop_depth,
-                    decision.site.features.branch_density,
-                    decision.emit_rule ? "yes" : "no");
-    }
-
-    if (!report.conflicts.empty()) {
-        std::printf("\nConflicts:\n");
-        for (const auto &conflict : report.conflicts) {
-            std::printf("  keep %s@%u len=%u over %s@%u len=%u\n",
-                        conflict.winner.family.c_str(),
-                        conflict.winner.rule.site_start,
-                        conflict.winner.rule.site_len,
-                        conflict.loser.family.c_str(),
-                        conflict.loser.rule.site_start,
-                        conflict.loser.rule.site_len);
-        }
-    }
-}
-
 void run_scan(const CommandOptions &options)
 {
     const InputBundle input = load_input(options);
-    if (options.use_v5) {
-        const auto summary = bpf_jit_scanner::scan_v5_builtin(
-            input.xlated.data(),
-            static_cast<uint32_t>(input.xlated.size()),
-            make_v5_scan_options(options));
-        print_v5_summary(summary);
+    const auto summary = bpf_jit_scanner::scan_v5_builtin(
+        input.xlated.data(),
+        static_cast<uint32_t>(input.xlated.size()),
+        options.scan_options);
 
-        if (!options.output_path.empty()) {
-            const auto blob = build_blob_v5(summary, input);
-            write_file(options.output_path, blob.data(), static_cast<uint32_t>(blob.size()));
-            std::printf("Wrote %zu-byte v5 policy blob to %s\n",
-                        blob.size(), options.output_path.c_str());
-        }
-        return;
-    }
-
-    PolicyConfig config = {};
-    if (!options.policy_path.empty()) {
-        config = PolicyConfig::parse_file(options.policy_path);
-    }
-
-    const std::string program_name = infer_program_name(options, input);
-
-    PolicyEngine engine(PatternRegistry::builtin(), config);
-    const ScanReport report = engine.scan(input.xlated.data(),
-                                          static_cast<uint32_t>(input.xlated.size()),
-                                          options.scan_options);
-    const auto decisions = engine.decide(report, program_name);
-    const auto rules = engine.materialize(decisions);
-
-    print_decisions(report, decisions);
+    print_summary(summary);
 
     if (!options.output_path.empty()) {
-        const auto blob = build_blob(rules, input);
+        const auto blob = bpf_jit_scanner::build_policy_blob_v5(
+            input.insn_cnt, input.prog_tag, summary.rules);
         write_file(options.output_path, blob.data(), static_cast<uint32_t>(blob.size()));
-        std::printf("Wrote %zu-byte policy blob to %s\n",
+        std::printf("Wrote %zu-byte v5 policy blob to %s\n",
                     blob.size(), options.output_path.c_str());
     }
 }
@@ -630,47 +492,21 @@ void run_scan(const CommandOptions &options)
 void run_apply(const CommandOptions &options)
 {
     const InputBundle input = load_input(options);
-    if (options.use_v5) {
-        const auto summary = bpf_jit_scanner::scan_v5_builtin(
-            input.xlated.data(),
-            static_cast<uint32_t>(input.xlated.size()),
-            make_v5_scan_options(options));
-        const auto blob = build_blob_v5(summary, input);
+    const auto summary = bpf_jit_scanner::scan_v5_builtin(
+        input.xlated.data(),
+        static_cast<uint32_t>(input.xlated.size()),
+        options.scan_options);
+    const auto blob = bpf_jit_scanner::build_policy_blob_v5(
+        input.insn_cnt, input.prog_tag, summary.rules);
 
-        print_v5_summary(summary);
-        apply_policy_blob(options.prog_fd, blob);
-        std::printf("Applied %zu v5 rule(s) via BPF_PROG_JIT_RECOMPILE\n",
-                    summary.rules.size());
-
-        if (!options.output_path.empty()) {
-            write_file(options.output_path, blob.data(), static_cast<uint32_t>(blob.size()));
-            std::printf("Saved applied v5 blob to %s\n", options.output_path.c_str());
-        }
-        return;
-    }
-
-    PolicyConfig config = {};
-    if (!options.policy_path.empty()) {
-        config = PolicyConfig::parse_file(options.policy_path);
-    }
-
-    const std::string program_name = infer_program_name(options, input);
-
-    PolicyEngine engine(PatternRegistry::builtin(), config);
-    const ScanReport report = engine.scan(input.xlated.data(),
-                                          static_cast<uint32_t>(input.xlated.size()),
-                                          options.scan_options);
-    const auto decisions = engine.decide(report, program_name);
-    const auto rules = engine.materialize(decisions);
-    const auto blob = build_blob(rules, input);
-
-    print_decisions(report, decisions);
+    print_summary(summary);
     apply_policy_blob(options.prog_fd, blob);
-    std::printf("Applied %zu rule(s) via BPF_PROG_JIT_RECOMPILE\n", rules.size());
+    std::printf("Applied %zu v5 rule(s) via BPF_PROG_JIT_RECOMPILE\n",
+                summary.rules.size());
 
     if (!options.output_path.empty()) {
         write_file(options.output_path, blob.data(), static_cast<uint32_t>(blob.size()));
-        std::printf("Saved applied blob to %s\n", options.output_path.c_str());
+        std::printf("Saved applied v5 blob to %s\n", options.output_path.c_str());
     }
 }
 
@@ -694,17 +530,13 @@ void run_dump(const CommandOptions &options)
 
 int main(int argc, char **argv)
 {
-    try {
-        const CommandOptions options = parse_args(argc, argv);
-        if (options.subcommand == "scan") {
-            run_scan(options);
-        } else if (options.subcommand == "apply") {
-            run_apply(options);
-        } else {
-            run_dump(options);
-        }
-        return 0;
-    } catch (const std::exception &ex) {
-        die("%s", ex.what());
+    const CommandOptions options = parse_args(argc, argv);
+    if (options.subcommand == "scan") {
+        run_scan(options);
+    } else if (options.subcommand == "apply") {
+        run_apply(options);
+    } else {
+        run_dump(options);
     }
+    return 0;
 }

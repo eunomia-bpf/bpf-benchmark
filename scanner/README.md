@@ -1,37 +1,20 @@
 # bpf-jit-scanner
 
-`bpf-jit-scanner` is the userspace policy layer for the kernel JIT rewrite
-prototype. It keeps the original low-level C scan/blob APIs, and adds a new
-C++ engine that provides:
-
-- A pluggable pattern registry
-- Static per-site feature extraction
-- Policy selection from static heuristics plus config overrides
-- Overlap arbitration across pattern families
-- A profile-provider hook for future PGO
-
-The matcher bodies remain the same as the original extraction from
-`micro/runner/src/kernel_runner.cpp`. The redesign changes how matches are
-registered, merged, and turned into final policy rules.
+`bpf-jit-scanner` is the userspace front end for the v5 BpfReJIT policy
+format. It scans post-verifier xlated BPF bytecode, emits declarative pattern
+rules, and can pass the resulting blob to `BPF_PROG_JIT_RECOMPILE`.
 
 ## Layout
 
 ```text
 scanner/
 ├── CMakeLists.txt
-├── README.md
-├── examples/
-│   └── default_policy.yaml
 ├── include/bpf_jit_scanner/
-│   ├── engine.hpp
-│   ├── policy.h
-│   ├── scanner.h
+│   ├── pattern_v5.hpp
 │   └── types.h
 ├── src/
 │   ├── cli.cpp
-│   ├── engine.cpp
-│   ├── policy.cpp
-│   └── scanner.cpp
+│   └── pattern_v5.cpp
 └── tests/
     └── test_scanner.cpp
 ```
@@ -42,101 +25,44 @@ scanner/
 cd scanner
 cmake -B build
 cmake --build build
-./build/test_scanner
+ctest --test-dir build --output-on-failure
 ```
 
 ## CLI
 
 ```bash
-# Scan a live program and print policy decisions
+# Scan a live program and print the accepted v5 sites
 ./build/bpf-jit-scanner scan --prog-fd 5 --all
 
-# Offline scan from xlated bytecode using selected families
-./build/bpf-jit-scanner scan --xlated dump.bin --rotate --wide-mem
+# Offline scan from xlated bytecode and write a v5 blob
+./build/bpf-jit-scanner scan --xlated dump.bin --all --output policy.blob
 
-# Apply policy decisions to a live program
-./build/bpf-jit-scanner apply --prog-fd 5 --policy examples/default_policy.yaml
+# Apply a v5 blob generated from the current program
+./build/bpf-jit-scanner apply --prog-fd 5 --all
 
 # Dump post-verifier xlated bytecode for offline analysis
 ./build/bpf-jit-scanner dump --prog-fd 5 --output dump.bin
 ```
 
-`scan` and `apply` default to all registered families when no family flags are
-provided. `--rorx` requests BMI2 rotate lowering. `apply` builds a blob,
-creates a sealed memfd, and issues `BPF_PROG_JIT_RECOMPILE`.
+Supported family flags:
 
-## Policy File
+- `--cmov`
+- `--wide-mem`
+- `--rotate`
+- `--lea`
+- `--bitfield-extract` or `--extract`
+- `--all`
+- `--rorx`
 
-The parser intentionally supports a very small YAML subset: top-level
-`default_*` keys and an `overrides:` list with `program:` glob patterns.
+The CLI is v5-only. `--v5` is still accepted as a no-op so existing v5
+automation does not need to change in lockstep.
 
-```yaml
-default_rotate: rorx
-default_cmov: branch
-default_wide_mem: wide
-default_lea: lea
+## Library
 
-overrides:
-  - program: "log2_fold*"
-    cmov: branch
-  - program: "cmov_select*"
-    cmov: cmovcc
-```
+[`include/bpf_jit_scanner/pattern_v5.hpp`](./include/bpf_jit_scanner/pattern_v5.hpp)
+exposes the full v5 API:
 
-Supported values:
+- `scan_v5_builtin()`: builtin declarative-pattern scanning
+- `build_policy_blob_v5()`: serialize rules into the kernel v5 blob format
 
-- `default_cmov`: `branch`, `cmovcc`, `profile`, `skip`
-- `default_rotate`: `ror`, `rorx`, `profile`, `skip`
-- `default_wide_mem`: `wide`, `profile`, `skip`
-- `default_lea`: `lea`, `profile`, `skip`
-
-`profile` is a placeholder hook today. If no profile provider is installed, the
-engine falls back to the static heuristic and marks the decision source as a
-profile fallback.
-
-## APIs
-
-### C APIs
-
-The C layer remains the low-level boundary:
-
-- [`include/bpf_jit_scanner/scanner.h`](./include/bpf_jit_scanner/scanner.h)
-  exposes the family scanners.
-- [`include/bpf_jit_scanner/policy.h`](./include/bpf_jit_scanner/policy.h)
-  serializes final rules into the kernel blob format.
-
-These functions are intentionally simple and operate directly on raw xlated
-bytecode.
-
-### C++ Engine
-
-[`include/bpf_jit_scanner/engine.hpp`](./include/bpf_jit_scanner/engine.hpp)
-adds the higher-level orchestration layer:
-
-- `PatternRegistry`: register built-in or custom pattern families
-- `PolicyEngine::scan()`: collect raw candidates, extract features, resolve overlaps
-- `PolicyEngine::decide()`: apply static heuristics, config defaults, overrides,
-  and optional profile guidance
-- `PolicyEngine::materialize()`: emit the final `bpf_jit_scan_rule` list
-
-The built-in static heuristic is deliberately conservative for CMOV:
-
-- Loop-heavy / branch-dense sites prefer `CMOVCC`
-- Otherwise the engine prefers `BRANCH`
-- ROTATE, WIDE_MEM, and LEA default to their optimized lowerings
-
-## Pattern Families
-
-- `cmov`: 4-insn diamond and 3-insn compact conditional-select patterns
-- `wide-mem`: 2/4/8-byte byte-load ladders, including clang’s high-byte-first form
-- `rotate`: 4/5/6-insn rotate idioms
-- `lea`: `mov64 + lsh64 + add64` address-calculation idiom
-
-The engine merges sites from multiple families and rejects overlaps using a
-deterministic arbitration priority. Conflicts are reported in CLI output.
-
-## Notes
-
-- The scanner works on post-verifier xlated bytecode, not ELF instructions.
-- Offline blob generation uses a zero `prog_tag` unless `--prog-tag` is supplied.
-- The library has no third-party dependencies beyond a C++20 compiler and CMake.
+The scanner operates on post-verifier xlated bytecode, not ELF instructions.

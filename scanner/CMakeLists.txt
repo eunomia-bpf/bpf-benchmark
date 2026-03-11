@@ -17,10 +17,7 @@ option(BPF_JIT_SCANNER_BUILD_TESTS "Build unit tests"                     ON)
 # --------------------------------------------------------------------
 
 add_library(bpf_jit_scanner STATIC
-    src/scanner.cpp
     src/pattern_v5.cpp
-    src/policy.cpp
-    src/engine.cpp
 )
 add_library(bpf_jit_scanner::scanner ALIAS bpf_jit_scanner)
 
@@ -82,8 +79,10 @@ install(TARGETS bpf_jit_scanner
     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-install(DIRECTORY include/
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+install(FILES
+    include/bpf_jit_scanner/pattern_v5.hpp
+    include/bpf_jit_scanner/types.h
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/bpf_jit_scanner
 )
 
 if(BPF_JIT_SCANNER_BUILD_CLI)
