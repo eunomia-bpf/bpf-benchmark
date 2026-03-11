@@ -48,6 +48,17 @@ DEFAULT_OUTPUT = ROOT_DIR / "corpus" / "results" / "macro_corpus.latest.json"
 DEFAULT_RUNNER = ROOT_DIR / "micro" / "build" / "runner" / "micro_exec"
 DEFAULT_SCANNER = ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"
 DEFAULT_BPFTOOL = "bpftool"
+ZERO_DIRECTIVE_SCAN = {
+    "cmov_sites": 0,
+    "wide_sites": 0,
+    "rotate_sites": 0,
+    "lea_sites": 0,
+    "bitfield_sites": 0,
+    "zero_ext_sites": 0,
+    "endian_sites": 0,
+    "branch_flip_sites": 0,
+    "total_sites": 0,
+}
 
 
 class LibbpfHandle:
@@ -825,11 +836,7 @@ def run_attach_trigger_sample(
             },
             "directive_scan": {
                 "performed": recompile_v5,
-                "cmov_sites": 0,
-                "wide_sites": 0,
-                "rotate_sites": 0,
-                "lea_sites": 0,
-                "total_sites": 0,
+                **ZERO_DIRECTIVE_SCAN,
             },
             "recompile": recompile_record,
             "attached_programs": attached,
@@ -922,11 +929,7 @@ def run_compile_only_loadall_sample(
             },
             "directive_scan": {
                 "performed": recompile_v5,
-                "cmov_sites": 0,
-                "wide_sites": 0,
-                "rotate_sites": 0,
-                "lea_sites": 0,
-                "total_sites": 0,
+                **ZERO_DIRECTIVE_SCAN,
             },
             "recompile": recompile_record,
             "pinned_programs": pinned,

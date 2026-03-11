@@ -71,6 +71,26 @@ PERF_CAPABLE_ROOTS = {
     "tc",
     "xdp",
 }
+FAMILY_FIELDS = (
+    ("CMOV", "cmov_sites"),
+    ("WIDE", "wide_sites"),
+    ("ROTATE", "rotate_sites"),
+    ("LEA", "lea_sites"),
+    ("EXTRACT", "bitfield_sites"),
+    ("ZERO-EXT", "zero_ext_sites"),
+    ("ENDIAN", "endian_sites"),
+    ("BRANCH-FLIP", "branch_flip_sites"),
+)
+FALLBACK_SECTION_FIELDS = (
+    ("CMOV", "cmov"),
+    ("WIDE", "wide"),
+    ("ROTATE", "rotate"),
+    ("LEA", "lea"),
+    ("EXTRACT", "extract"),
+    ("ZERO-EXT", "zeroext"),
+    ("ENDIAN", "endian"),
+    ("BRANCH-FLIP", "bflip"),
+)
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -573,6 +593,10 @@ def discover_programs(runner: Path, object_path: Path, timeout_seconds: int) -> 
                 "wide": section.wide,
                 "rotate": section.rotate,
                 "lea": section.lea,
+                "extract": section.extract,
+                "zeroext": section.zeroext,
+                "endian": section.endian,
+                "bflip": section.bflip,
                 "total": section.total,
             }
             for section in fallback_scan.sections
@@ -582,6 +606,10 @@ def discover_programs(runner: Path, object_path: Path, timeout_seconds: int) -> 
             "wide": fallback_scan.wide,
             "rotate": fallback_scan.rotate,
             "lea": fallback_scan.lea,
+            "extract": fallback_scan.extract,
+            "zeroext": fallback_scan.zeroext,
+            "endian": fallback_scan.endian,
+            "bflip": fallback_scan.bflip,
             "total": fallback_scan.total,
             "insn_count": fallback_scan.insn_count,
             "exec_section_count": fallback_scan.exec_section_count,
@@ -591,48 +619,55 @@ def discover_programs(runner: Path, object_path: Path, timeout_seconds: int) -> 
 
 def directive_scan_from_record(record: dict[str, Any] | None) -> dict[str, int]:
     if not record or not record.get("ok") or not record.get("sample"):
-        return {
-            "cmov_sites": 0,
-            "wide_sites": 0,
-            "rotate_sites": 0,
-            "lea_sites": 0,
-            "total_sites": 0,
-        }
+        counts = {field: 0 for _, field in FAMILY_FIELDS}
+        counts["total_sites"] = 0
+        return counts
     scan = record["sample"].get("directive_scan") or {}
-    return {
-        "cmov_sites": int(scan.get("cmov_sites", 0) or 0),
-        "wide_sites": int(scan.get("wide_sites", 0) or 0),
-        "rotate_sites": int(scan.get("rotate_sites", 0) or 0),
-        "lea_sites": int(scan.get("lea_sites", 0) or 0),
-        "total_sites": int(scan.get("total_sites", 0) or 0),
-    }
+    counts = {field: 0 for _, field in FAMILY_FIELDS}
+    for _, field in FAMILY_FIELDS:
+        if field == "bitfield_sites":
+            value = scan.get("bitfield_sites", scan.get("extract_sites", 0))
+        else:
+            value = scan.get(field, 0)
+        counts[field] = int(value or 0)
+    total = scan.get("total_sites")
+    if total is None:
+        total = sum(counts[field] for _, field in FAMILY_FIELDS)
+    counts["total_sites"] = int(total or 0)
+    return counts
 
 
 def parse_scanner_v5_output(stdout: str) -> dict[str, int]:
-    counts = {
-        "cmov_sites": 0,
-        "wide_sites": 0,
-        "rotate_sites": 0,
-        "lea_sites": 0,
-        "total_sites": 0,
-    }
+    counts = directive_scan_from_record(None)
+    for line in stdout.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped.startswith("{") and stripped.endswith("}"):
+            try:
+                payload = json.loads(stripped)
+            except json.JSONDecodeError:
+                continue
+            summary = payload.get("summary")
+            if isinstance(summary, dict):
+                return directive_scan_from_record({"ok": True, "sample": {"directive_scan": summary}})
+
     patterns = {
         "cmov_sites": r"^\s*cmov:\s+(\d+)\s*$",
         "wide_sites": r"^\s*wide:\s+(\d+)\s*$",
         "rotate_sites": r"^\s*rotate:\s+(\d+)\s*$",
         "lea_sites": r"^\s*lea:\s+(\d+)\s*$",
+        "bitfield_sites": r"^\s*extract:\s*(\d+)\s*$",
+        "zero_ext_sites": r"^\s*zeroext:\s*(\d+)\s*$",
+        "endian_sites": r"^\s*endian:\s*(\d+)\s*$",
+        "branch_flip_sites": r"^\s*bflip:\s*(\d+)\s*$",
     }
     for line in stdout.splitlines():
         for key, pattern in patterns.items():
             match = re.match(pattern, line)
             if match:
                 counts[key] = int(match.group(1))
-    counts["total_sites"] = (
-        counts["cmov_sites"] +
-        counts["wide_sites"] +
-        counts["rotate_sites"] +
-        counts["lea_sites"]
-    )
+    counts["total_sites"] = sum(counts[field] for _, field in FAMILY_FIELDS)
     return counts
 
 
@@ -644,6 +679,7 @@ def build_scanner_command(scanner: Path, xlated_path: Path) -> list[str]:
         str(xlated_path),
         "--all",
         "--v5",
+        "--json",
     ]
 
 
@@ -923,10 +959,8 @@ def build_summary(programs: list[dict[str, Any]], objects: list[dict[str, Any]])
 
     family_totals = Counter()
     for record in framework_detected:
-        family_totals["cmov_sites"] += record["scanner_counts"]["cmov_sites"]
-        family_totals["wide_sites"] += record["scanner_counts"]["wide_sites"]
-        family_totals["rotate_sites"] += record["scanner_counts"]["rotate_sites"]
-        family_totals["lea_sites"] += record["scanner_counts"]["lea_sites"]
+        for _, field in FAMILY_FIELDS:
+            family_totals[field] += record["scanner_counts"].get(field, 0)
 
     failure_reasons = Counter()
     recompile_failures = Counter()
@@ -1035,10 +1069,10 @@ def build_markdown(data: dict[str, Any]) -> str:
                 ["Code-size median delta", format_pct(summary["code_size_delta_median_pct"])],
                 ["Code-size min delta", format_pct(summary["code_size_delta_min_pct"])],
                 ["Code-size max delta", format_pct(summary["code_size_delta_max_pct"])],
-                ["Framework CMOV sites", summary["family_totals"].get("cmov_sites", 0)],
-                ["Framework WIDE sites", summary["family_totals"].get("wide_sites", 0)],
-                ["Framework ROTATE sites", summary["family_totals"].get("rotate_sites", 0)],
-                ["Framework LEA sites", summary["family_totals"].get("lea_sites", 0)],
+                *[
+                    [f"Framework {label} sites", summary["family_totals"].get(field, 0)]
+                    for label, field in FAMILY_FIELDS
+                ],
             ],
         )
     )
@@ -1102,10 +1136,7 @@ def build_markdown(data: dict[str, Any]) -> str:
                 "yes" if record["perf_capable"] else "no",
                 "yes" if record["baseline_compile"] and record["baseline_compile"]["ok"] else "no",
                 "yes" if record["v5_compile"] and record["v5_compile"]["ok"] else "no",
-                scanner_counts["cmov_sites"],
-                scanner_counts["wide_sites"],
-                scanner_counts["rotate_sites"],
-                scanner_counts["lea_sites"],
+                *[scanner_counts.get(field, 0) for _, field in FAMILY_FIELDS],
                 "yes" if record["v5_compile_applied"] or record["v5_run_applied"] else "no",
                 baseline_sample.get("jited_prog_len", "n/a"),
                 v5_sample.get("jited_prog_len", "n/a"),
@@ -1121,10 +1152,7 @@ def build_markdown(data: dict[str, Any]) -> str:
                 "Perf-capable",
                 "Baseline Load",
                 "v5 Load",
-                "CMOV",
-                "WIDE",
-                "ROTATE",
-                "LEA",
+                *[label for label, _ in FAMILY_FIELDS],
                 "Applied",
                 "Baseline JIT Bytes",
                 "v5 JIT Bytes",
@@ -1160,15 +1188,20 @@ def build_markdown(data: dict[str, Any]) -> str:
         lines.extend(["", "## Discovery Failures", ""])
         lines.extend(
             markdown_table(
-                ["Object", "Error", "Fallback CMOV", "Fallback WIDE", "Fallback ROTATE", "Fallback LEA", "Exec Sections"],
+                [
+                    "Object",
+                    "Error",
+                    *[f"Fallback {label}" for label, _ in FALLBACK_SECTION_FIELDS],
+                    "Exec Sections",
+                ],
                 [
                     [
                         record["object_path"],
                         record["discovery"]["error"] or "unknown",
-                        record["discovery"]["fallback_totals"]["cmov"],
-                        record["discovery"]["fallback_totals"]["wide"],
-                        record["discovery"]["fallback_totals"]["rotate"],
-                        record["discovery"]["fallback_totals"]["lea"],
+                        *[
+                            record["discovery"]["fallback_totals"].get(field, 0)
+                            for _, field in FALLBACK_SECTION_FIELDS
+                        ],
                         record["discovery"]["fallback_totals"]["exec_section_count"],
                     ]
                     for record in discovery_failures
@@ -1187,10 +1220,7 @@ def build_markdown(data: dict[str, Any]) -> str:
                 [
                     section["name"],
                     section["insn_count"],
-                    section["cmov"],
-                    section["wide"],
-                    section["rotate"],
-                    section["lea"],
+                    *[section.get(field, 0) for _, field in FALLBACK_SECTION_FIELDS],
                     section["total"],
                 ]
                 for section in record["discovery"]["fallback_section_scan"]
@@ -1201,17 +1231,14 @@ def build_markdown(data: dict[str, Any]) -> str:
                     [
                         section["name"],
                         section["insn_count"],
-                        section["cmov"],
-                        section["wide"],
-                        section["rotate"],
-                        section["lea"],
+                        *[section.get(field, 0) for _, field in FALLBACK_SECTION_FIELDS],
                         section["total"],
                     ]
                     for section in record["discovery"]["fallback_section_scan"]
                 ]
             lines.extend(
                 markdown_table(
-                    ["Section", "Insns", "CMOV", "WIDE", "ROTATE", "LEA", "Total"],
+                    ["Section", "Insns", *[label for label, _ in FALLBACK_SECTION_FIELDS], "Total"],
                     section_rows,
                 )
             )

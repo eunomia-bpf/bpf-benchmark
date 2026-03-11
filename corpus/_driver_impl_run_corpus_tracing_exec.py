@@ -92,6 +92,16 @@ DEFAULT_TIMEOUT_SECONDS = 120
 DEFAULT_VM_TIMEOUT_SECONDS = 3600
 DEFAULT_VM_CPUS = 2
 DEFAULT_VM_MEM = "4G"
+FAMILY_FIELDS = (
+    ("CMOV", "cmov_sites"),
+    ("WIDE", "wide_sites"),
+    ("ROTATE", "rotate_sites"),
+    ("LEA", "lea_sites"),
+    ("EXTRACT", "bitfield_sites"),
+    ("ZERO-EXT", "zero_ext_sites"),
+    ("ENDIAN", "endian_sites"),
+    ("BRANCH-FLIP", "branch_flip_sites"),
+)
 MPROTECT_READ = 1
 MREMAP_PROT_EXEC = 4
 PR_SET_NAME = 15
@@ -1100,10 +1110,7 @@ def scanner_entry(
                 "program_name": f"id-{prog_id}",
                 "sites": {
                     "total_sites": 0,
-                    "cmov_sites": 0,
-                    "wide_sites": 0,
-                    "rotate_sites": 0,
-                    "lea_sites": 0,
+                    **{field: 0 for _, field in FAMILY_FIELDS},
                 },
                 "error": "no scanner result",
                 "stdout_tail": "",
@@ -1274,10 +1281,7 @@ def build_markdown(data: dict[str, Any]) -> str:
                     format_ratio(record.get("speedup")),
                     "yes" if recompile.get("applied") else "no",
                     scan_sites.get("total_sites", 0),
-                    scan_sites.get("cmov_sites", 0),
-                    scan_sites.get("wide_sites", 0),
-                    scan_sites.get("rotate_sites", 0),
-                    scan_sites.get("lea_sites", 0),
+                    *[scan_sites.get(field, 0) for _, field in FAMILY_FIELDS],
                 ]
             )
         lines.extend(["## Paired Measurements", ""])
@@ -1292,10 +1296,7 @@ def build_markdown(data: dict[str, Any]) -> str:
                     "Speedup",
                     "Applied",
                     "Sites",
-                    "CMOV",
-                    "WIDE",
-                    "ROTATE",
-                    "LEA",
+                    *[label for label, _ in FAMILY_FIELDS],
                 ],
                 rows,
             )

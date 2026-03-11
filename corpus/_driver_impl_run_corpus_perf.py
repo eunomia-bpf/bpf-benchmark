@@ -68,6 +68,16 @@ DEFAULT_OUTPUT_JSON = ROOT_DIR / "docs" / "tmp" / "corpus-perf-results.json"
 DEFAULT_OUTPUT_MD = ROOT_DIR / "docs" / "tmp" / "corpus-perf-results.md"
 DEFAULT_PACKET_PATH = ROOT_DIR / "micro" / "generated-inputs" / "corpus_dummy_packet_64.bin"
 DEFAULT_CONTEXT_PATH = ROOT_DIR / "micro" / "generated-inputs" / "corpus_dummy_context_64.bin"
+FAMILY_FIELDS = (
+    ("CMOV", "cmov_sites"),
+    ("WIDE", "wide_sites"),
+    ("ROTATE", "rotate_sites"),
+    ("LEA", "lea_sites"),
+    ("EXTRACT", "bitfield_sites"),
+    ("ZERO-EXT", "zero_ext_sites"),
+    ("ENDIAN", "endian_sites"),
+    ("BRANCH-FLIP", "branch_flip_sites"),
+)
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -451,10 +461,8 @@ def build_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
     speedups = [record["speedup_ratio"] for record in paired if record["speedup_ratio"] is not None]
     family_totals = Counter()
     for record in loadable:
-        family_totals["cmov_sites"] += record["directive_scan"]["cmov_sites"]
-        family_totals["wide_sites"] += record["directive_scan"]["wide_sites"]
-        family_totals["rotate_sites"] += record["directive_scan"]["rotate_sites"]
-        family_totals["lea_sites"] += record["directive_scan"]["lea_sites"]
+        for _, field in FAMILY_FIELDS:
+            family_totals[field] += record["directive_scan"].get(field, 0)
 
     failure_reasons = Counter()
     for record in records:
@@ -545,13 +553,15 @@ def build_markdown(
     ]
 
     stats_rows = [
-        ["CMOV sites", summary["family_totals"].get("cmov_sites", 0)],
-        ["WIDE sites", summary["family_totals"].get("wide_sites", 0)],
-        ["ROTATE sites", summary["family_totals"].get("rotate_sites", 0)],
-        ["LEA sites", summary["family_totals"].get("lea_sites", 0)],
-        ["Speedup min", format_ratio(summary["speedup_min"])],
-        ["Speedup max", format_ratio(summary["speedup_max"])],
+        [f"{label} sites", summary["family_totals"].get(field, 0)]
+        for label, field in FAMILY_FIELDS
     ]
+    stats_rows.extend(
+        [
+            ["Speedup min", format_ratio(summary["speedup_min"])],
+            ["Speedup max", format_ratio(summary["speedup_max"])],
+        ]
+    )
     lines.extend(markdown_table(["Metric", "Value"], stats_rows))
     lines.append("")
 
@@ -576,10 +586,7 @@ def build_markdown(
                     format_ratio(record["speedup_ratio"]),
                     "yes" if recompile_meta.get("applied") else "no",
                     "match" if correctness.get("matches") else "mismatch",
-                    record["directive_scan"]["cmov_sites"],
-                    record["directive_scan"]["wide_sites"],
-                    record["directive_scan"]["rotate_sites"],
-                    record["directive_scan"]["lea_sites"],
+                    *[record["directive_scan"].get(field, 0) for _, field in FAMILY_FIELDS],
                 ]
             )
         lines.extend(
@@ -592,10 +599,7 @@ def build_markdown(
                     "Speedup",
                     "Applied",
                     "Correct",
-                    "CMOV",
-                    "WIDE",
-                    "ROTATE",
-                    "LEA",
+                    *[label for label, _ in FAMILY_FIELDS],
                 ],
                 paired_rows,
             )
@@ -621,16 +625,13 @@ def build_markdown(
                     f"{record['object_path']}:{record['program_name']}",
                     record["section_name"],
                     "yes" if recompile_meta.get("applied") else "no",
-                    record["directive_scan"]["cmov_sites"],
-                    record["directive_scan"]["wide_sites"],
-                    record["directive_scan"]["rotate_sites"],
-                    record["directive_scan"]["lea_sites"],
+                    *[record["directive_scan"].get(field, 0) for _, field in FAMILY_FIELDS],
                     summarize_failure_reason(source),
                 ]
             )
         lines.extend(
             markdown_table(
-                ["Program", "Section", "Applied", "CMOV", "WIDE", "ROTATE", "LEA", "Failure"],
+                ["Program", "Section", "Applied", *[label for label, _ in FAMILY_FIELDS], "Failure"],
                 rows,
             )
         )

@@ -33,6 +33,16 @@ DEFAULT_PACKET_PATH = ROOT_DIR / "micro" / "generated-inputs" / "corpus_dummy_pa
 DEFAULT_CONTEXT_PATH = ROOT_DIR / "micro" / "generated-inputs" / "corpus_dummy_context_64.bin"
 DEFAULT_REPEAT = 5
 DEFAULT_TIMEOUT_SECONDS = 120
+FAMILY_FIELDS = (
+    ("CMOV", "cmov_sites"),
+    ("WIDE", "wide_sites"),
+    ("ROTATE", "rotate_sites"),
+    ("LEA", "lea_sites"),
+    ("EXTRACT", "bitfield_sites"),
+    ("ZERO-EXT", "zero_ext_sites"),
+    ("ENDIAN", "endian_sites"),
+    ("BRANCH-FLIP", "branch_flip_sites"),
+)
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -273,23 +283,33 @@ def invocation_summary(result: dict[str, Any] | None) -> dict[str, Any] | None:
     }
 
 
+def zero_directive_scan() -> dict[str, int]:
+    counts = {field: 0 for _, field in FAMILY_FIELDS}
+    counts["total_sites"] = 0
+    return counts
+
+
+def normalize_directive_scan(scan: dict[str, Any] | None) -> dict[str, int]:
+    normalized = zero_directive_scan()
+    payload = scan or {}
+    for _, field in FAMILY_FIELDS:
+        if field == "bitfield_sites":
+            value = payload.get("bitfield_sites", payload.get("extract_sites", 0))
+        else:
+            value = payload.get(field, 0)
+        normalized[field] = int(value or 0)
+    total = payload.get("total_sites")
+    if total is None:
+        total = sum(normalized[field] for _, field in FAMILY_FIELDS)
+    normalized["total_sites"] = int(total or 0)
+    return normalized
+
+
 def directive_scan_from_record(record: dict[str, Any] | None) -> dict[str, int]:
     if not record or not record.get("ok") or not record.get("sample"):
-        return {
-            "cmov_sites": 0,
-            "wide_sites": 0,
-            "rotate_sites": 0,
-            "lea_sites": 0,
-            "total_sites": 0,
-        }
+        return zero_directive_scan()
     scan = record["sample"].get("directive_scan") or {}
-    return {
-        "cmov_sites": int(scan.get("cmov_sites", 0) or 0),
-        "wide_sites": int(scan.get("wide_sites", 0) or 0),
-        "rotate_sites": int(scan.get("rotate_sites", 0) or 0),
-        "lea_sites": int(scan.get("lea_sites", 0) or 0),
-        "total_sites": int(scan.get("total_sites", 0) or 0),
-    }
+    return normalize_directive_scan(scan)
 
 
 def format_ratio(value: float | None) -> str:
@@ -336,14 +356,7 @@ def target_key(record: dict[str, Any]) -> tuple[str, str]:
 
 
 def family_counts(record: dict[str, Any]) -> dict[str, int]:
-    scan = record.get("directive_scan") or {}
-    return {
-        "cmov_sites": int(scan.get("cmov_sites", 0) or 0),
-        "wide_sites": int(scan.get("wide_sites", 0) or 0),
-        "rotate_sites": int(scan.get("rotate_sites", 0) or 0),
-        "lea_sites": int(scan.get("lea_sites", 0) or 0),
-        "total_sites": int(scan.get("total_sites", 0) or 0),
-    }
+    return normalize_directive_scan(record.get("directive_scan") or {})
 
 
 def build_target_union(
@@ -630,10 +643,8 @@ def build_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
 
     family_totals = Counter()
     for record in framework_detected:
-        family_totals["cmov_sites"] += record["framework_directive_scan"]["cmov_sites"]
-        family_totals["wide_sites"] += record["framework_directive_scan"]["wide_sites"]
-        family_totals["rotate_sites"] += record["framework_directive_scan"]["rotate_sites"]
-        family_totals["lea_sites"] += record["framework_directive_scan"]["lea_sites"]
+        for _, field in FAMILY_FIELDS:
+            family_totals[field] += record["framework_directive_scan"].get(field, 0)
 
     failure_reasons = Counter()
     for record in records:
@@ -717,10 +728,10 @@ def build_markdown(data: dict[str, Any]) -> str:
                 ["Code-size median delta", format_pct(summary["code_size_delta_median_pct"])],
                 ["Code-size min delta", format_pct(summary["code_size_delta_min_pct"])],
                 ["Code-size max delta", format_pct(summary["code_size_delta_max_pct"])],
-                ["Framework CMOV sites", summary["family_totals"].get("cmov_sites", 0)],
-                ["Framework WIDE sites", summary["family_totals"].get("wide_sites", 0)],
-                ["Framework ROTATE sites", summary["family_totals"].get("rotate_sites", 0)],
-                ["Framework LEA sites", summary["family_totals"].get("lea_sites", 0)],
+                *[
+                    [f"Framework {label} sites", summary["family_totals"].get(field, 0)]
+                    for label, field in FAMILY_FIELDS
+                ],
             ],
         )
     )
@@ -737,16 +748,13 @@ def build_markdown(data: dict[str, Any]) -> str:
             record["section_name"],
             "yes" if record["perf_capable"] else "no",
             "yes" if record["tracing_measured"] else "no",
-            record["host_directive_scan"]["cmov_sites"],
-            record["host_directive_scan"]["wide_sites"],
-            record["host_directive_scan"]["rotate_sites"],
-            record["host_directive_scan"]["lea_sites"],
+            *[record["host_directive_scan"].get(field, 0) for _, field in FAMILY_FIELDS],
         ]
         for record in compile_rows
     ]
     lines.extend(
         markdown_table(
-            ["Program", "Section", "Perf-capable", "Tracing-measured", "CMOV", "WIDE", "ROTATE", "LEA"],
+            ["Program", "Section", "Perf-capable", "Tracing-measured", *[label for label, _ in FAMILY_FIELDS]],
             target_rows,
         )
     )

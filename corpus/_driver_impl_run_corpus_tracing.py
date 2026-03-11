@@ -65,6 +65,16 @@ DEFAULT_OUTPUT_MD = Path(__file__).resolve().parent.parent / "docs" / "tmp" / "c
 BPF_STATS_RUN_TIME = 0
 BPF_TAG_SIZE = 8
 BPF_OBJ_NAME_LEN = 16
+FAMILY_FIELDS = (
+    ("CMOV", "cmov_sites"),
+    ("WIDE", "wide_sites"),
+    ("ROTATE", "rotate_sites"),
+    ("LEA", "lea_sites"),
+    ("EXTRACT", "bitfield_sites"),
+    ("ZERO-EXT", "zero_ext_sites"),
+    ("ENDIAN", "endian_sites"),
+    ("BRANCH-FLIP", "branch_flip_sites"),
+)
 SUPPORTED_ROOTS = {
     "fentry",
     "fexit",
@@ -840,16 +850,13 @@ def build_markdown(data: dict[str, Any]) -> str:
                     f"{record['object_path']}:{record['program_name']}",
                     record["section_name"],
                     record["trigger_name"],
-                    record["measurement"]["run_cnt_delta"],
-                    format_ns(record["measurement"]["run_time_ns_delta"]),
-                    format_avg_ns(record["measurement"]["average_ns_per_run"]),
-                    "yes" if probe.get("recompile_applied") else "no",
-                    record["directive_scan"]["cmov_sites"],
-                    record["directive_scan"]["wide_sites"],
-                    record["directive_scan"]["rotate_sites"],
-                    record["directive_scan"]["lea_sites"],
-                ]
-            )
+                record["measurement"]["run_cnt_delta"],
+                format_ns(record["measurement"]["run_time_ns_delta"]),
+                format_avg_ns(record["measurement"]["average_ns_per_run"]),
+                "yes" if probe.get("recompile_applied") else "no",
+                *[record["directive_scan"].get(field, 0) for _, field in FAMILY_FIELDS],
+            ]
+        )
         lines.extend(
             [
                 "## Measured Programs",
@@ -866,10 +873,7 @@ def build_markdown(data: dict[str, Any]) -> str:
                     "Run time ns",
                     "Avg ns/run",
                     "Recompile Applied",
-                    "CMOV",
-                    "WIDE",
-                    "ROTATE",
-                    "LEA",
+                    *[label for label, _ in FAMILY_FIELDS],
                 ],
                 rows,
             )
@@ -998,10 +1002,7 @@ def main(argv: list[str] | None = None) -> int:
             if args.skip_recompile_probe:
                 record["recompile_probe"] = None
                 record["directive_scan"] = {
-                    "cmov_sites": 0,
-                    "wide_sites": 0,
-                    "rotate_sites": 0,
-                    "lea_sites": 0,
+                    **{field: 0 for _, field in FAMILY_FIELDS},
                     "total_sites": 0,
                 }
             else:
