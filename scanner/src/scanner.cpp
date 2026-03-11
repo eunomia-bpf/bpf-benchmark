@@ -19,6 +19,16 @@
 
 namespace {
 
+constexpr uint8_t BPF_CLASS_MASK = 0x07;
+constexpr uint8_t BPF_JMP        = 0x05;
+constexpr uint8_t BPF_JMP32      = 0x06;
+constexpr uint8_t BPF_ALU        = 0x04;
+constexpr uint8_t BPF_ALU64      = 0x07;
+constexpr uint8_t BPF_SRC_X      = 0x08;
+constexpr uint8_t BPF_MOV_OP     = 0xb0;
+constexpr uint8_t BPF_END_OP     = 0xd0;
+constexpr uint8_t BPF_JA_CODE    = 0x05;
+
 // Raw 8-byte BPF instruction layout (little-endian host).
 struct bpf_insn_raw {
     uint8_t  code;
@@ -26,6 +36,26 @@ struct bpf_insn_raw {
     int16_t  off;
     int32_t  imm;
 };
+
+struct wide_mem_match_raw {
+    bool matched = false;
+    bool big_endian = false;
+    uint32_t site_len = 0;
+    uint8_t dst_reg = 0;
+    uint8_t base_reg = 0;
+    int16_t base_off = 0;
+    uint8_t width = 0;
+};
+
+constexpr uint8_t raw_dst_reg(const bpf_insn_raw &insn)
+{
+    return insn.regs & 0x0f;
+}
+
+constexpr uint8_t raw_src_reg(const bpf_insn_raw &insn)
+{
+    return static_cast<uint8_t>((insn.regs >> 4) & 0x0f);
+}
 
 static void parse_insns(const uint8_t *data, uint32_t byte_len,
                         std::vector<bpf_insn_raw> &insns)
@@ -40,12 +70,12 @@ static void parse_insns(const uint8_t *data, uint32_t byte_len,
 // Returns true when insn is a conditional jump (any variant of BPF_JMP / BPF_JMP32).
 static bool is_cond_jump_raw(const bpf_insn_raw &insn)
 {
-    uint8_t cls = insn.code & 0x07;
-    if (cls != 0x05 /* BPF_JMP */ && cls != 0x06 /* BPF_JMP32 */)
+    uint8_t cls = insn.code & BPF_CLASS_MASK;
+    if (cls != BPF_JMP && cls != BPF_JMP32)
         return false;
     uint8_t op = insn.code & 0xf0;
     switch (op) {
-    case 0x10: case 0x20: case 0x30: case 0x50: case 0x60:
+    case 0x10: case 0x20: case 0x30: case 0x40: case 0x50: case 0x60:
     case 0x70: case 0xa0: case 0xb0: case 0xc0: case 0xd0:
         return true;
     default:
@@ -53,21 +83,66 @@ static bool is_cond_jump_raw(const bpf_insn_raw &insn)
     }
 }
 
-// Returns true when insn is a register or immediate MOV with no side effects.
-static bool is_simple_mov_raw(const bpf_insn_raw &insn)
+static bool is_uncond_ja_raw(const bpf_insn_raw &insn)
 {
-    uint8_t cls = insn.code & 0x07;
-    if (cls != 0x04 /* BPF_ALU */ && cls != 0x07 /* BPF_ALU64 */)
-        return false;
-    if ((insn.code & 0xf0) != 0xb0 /* BPF_MOV */)
+    return insn.code == BPF_JA_CODE && raw_dst_reg(insn) == 0 &&
+           raw_src_reg(insn) == 0 && insn.imm == 0;
+}
+
+static bool is_pure_value_op_raw(const bpf_insn_raw &insn)
+{
+    const uint8_t cls = insn.code & BPF_CLASS_MASK;
+    if (cls != BPF_ALU && cls != BPF_ALU64)
         return false;
     if (insn.off != 0)
         return false;
-    uint8_t src = insn.code & 0x08;
-    if (src == 0x08 /* BPF_X */)
+    if ((insn.code & 0xf0) == BPF_END_OP)
+        return false;
+
+    const uint8_t src = insn.code & BPF_SRC_X;
+    if (src == BPF_SRC_X)
         return insn.imm == 0;
-    else
-        return (insn.regs >> 4) == 0;
+    return raw_src_reg(insn) == 0;
+}
+
+static bool targets_same(uint32_t from_a, int16_t off_a,
+                         uint32_t from_b, int16_t off_b)
+{
+    return static_cast<int64_t>(from_a) + 1 + off_a ==
+           static_cast<int64_t>(from_b) + 1 + off_b;
+}
+
+// Returns true when insn is a register or immediate MOV with no side effects.
+static bool is_simple_mov_raw(const bpf_insn_raw &insn)
+{
+    uint8_t cls = insn.code & BPF_CLASS_MASK;
+    if (cls != BPF_ALU && cls != BPF_ALU64)
+        return false;
+    if ((insn.code & 0xf0) != BPF_MOV_OP)
+        return false;
+    if (insn.off != 0)
+        return false;
+    uint8_t src = insn.code & BPF_SRC_X;
+    if (src == BPF_SRC_X)
+        return insn.imm == 0;
+    return raw_src_reg(insn) == 0;
+}
+
+static bool match_value_arm(const std::vector<bpf_insn_raw> &insns,
+                            uint32_t start, uint32_t arm_len,
+                            uint8_t dst_reg)
+{
+    if (arm_len == 0 || start + arm_len > insns.size())
+        return false;
+    if (!is_simple_mov_raw(insns[start + arm_len - 1]) ||
+        raw_dst_reg(insns[start + arm_len - 1]) != dst_reg)
+        return false;
+
+    for (uint32_t i = start; i + 1 < start + arm_len; ++i) {
+        if (!is_pure_value_op_raw(insns[i]) || raw_dst_reg(insns[i]) == dst_reg)
+            return false;
+    }
+    return true;
 }
 
 // Append a rule to the output buffer.  Returns false if buffer is full.
@@ -112,20 +187,107 @@ int bpf_jit_scan_cmov(const uint8_t *xlated, uint32_t len,
     uint32_t idx   = 0;
 
     while (idx < insn_cnt) {
-        // Diamond: jcc+2, mov, ja+1, mov  (4 insns)
-        if (idx + 3 < insn_cnt &&
-            is_cond_jump_raw(insns[idx]) && insns[idx].off == 2 &&
-            is_simple_mov_raw(insns[idx + 1]) &&
-            is_simple_mov_raw(insns[idx + 3]) &&
-            insns[idx + 2].code == (0x05 | 0x00) /* BPF_JMP | BPF_JA */ &&
-            insns[idx + 2].off == 1 &&
-            (insns[idx + 1].regs & 0x0f) == (insns[idx + 3].regs & 0x0f))
+        // Switch-style two-case chain:
+        //   mov false
+        //   guard-jcc -> join
+        //   select-jcc +1
+        //   ja else/default
+        //   mov true
+        //   ja join
+        if (idx + 5 < insn_cnt &&
+            is_simple_mov_raw(insns[idx]) &&
+            is_cond_jump_raw(insns[idx + 1]) &&
+            is_cond_jump_raw(insns[idx + 2]) && insns[idx + 2].off == 1 &&
+            is_uncond_ja_raw(insns[idx + 3]) &&
+            is_simple_mov_raw(insns[idx + 4]) &&
+            is_uncond_ja_raw(insns[idx + 5]) &&
+            raw_dst_reg(insns[idx]) == raw_dst_reg(insns[idx + 4]) &&
+            (insns[idx + 1].code & 0xf8) == (insns[idx + 2].code & 0xf8) &&
+            raw_dst_reg(insns[idx + 1]) == raw_dst_reg(insns[idx + 2]) &&
+            ((insns[idx + 1].code & BPF_SRC_X) ==
+             (insns[idx + 2].code & BPF_SRC_X)) &&
+            targets_same(idx + 1, insns[idx + 1].off,
+                         idx + 5, insns[idx + 5].off))
         {
             if (!emit_rule(rules, max_rules, count,
-                           idx, 4, BPF_JIT_RK_COND_SELECT, BPF_JIT_SEL_CMOVCC, 0))
+                           idx, 6, BPF_JIT_RK_COND_SELECT, BPF_JIT_SEL_CMOVCC, 0))
                 return -ENOBUFS;
-            idx += 4;
+            idx += 6;
             continue;
+        }
+
+        // Generalized diamond: jcc+(2..4), [pure value prep]*, mov, ja+1, mov.
+        if (is_cond_jump_raw(insns[idx]) &&
+            insns[idx].off >= 2 && insns[idx].off <= 4) {
+            const uint32_t false_arm_len = static_cast<uint32_t>(insns[idx].off - 1);
+            const uint32_t ja_idx = idx + false_arm_len + 1;
+            const uint32_t true_idx = ja_idx + 1;
+
+            if (true_idx < insn_cnt &&
+                match_value_arm(insns, idx + 1, false_arm_len,
+                                raw_dst_reg(insns[idx + false_arm_len])) &&
+                is_uncond_ja_raw(insns[ja_idx]) && insns[ja_idx].off == 1 &&
+                is_simple_mov_raw(insns[true_idx]) &&
+                raw_dst_reg(insns[idx + false_arm_len]) ==
+                    raw_dst_reg(insns[true_idx]))
+            {
+                if (!emit_rule(rules, max_rules, count,
+                               idx, false_arm_len + 3,
+                               BPF_JIT_RK_COND_SELECT, BPF_JIT_SEL_CMOVCC, 0))
+                    return -ENOBUFS;
+                idx += false_arm_len + 3;
+                continue;
+            }
+        }
+
+        // Branch-guarded update with shared join:
+        //   jcc -> join
+        //   [pure value prep]*, mov dst, val
+        //   ja -> join
+        for (uint32_t arm_len = 1; arm_len <= 3; ++arm_len) {
+            const uint32_t mov_idx = idx + arm_len;
+            const uint32_t ja_idx = mov_idx + 1;
+
+            if (ja_idx >= insn_cnt || !is_cond_jump_raw(insns[idx]) ||
+                !is_uncond_ja_raw(insns[ja_idx]) ||
+                !is_simple_mov_raw(insns[mov_idx])) {
+                continue;
+            }
+
+            const uint8_t dst_reg = raw_dst_reg(insns[mov_idx]);
+            if (!match_value_arm(insns, idx + 1, arm_len, dst_reg) ||
+                !targets_same(idx, insns[idx].off, ja_idx, insns[ja_idx].off)) {
+                continue;
+            }
+
+            if (!emit_rule(rules, max_rules, count,
+                           idx, arm_len + 2,
+                           BPF_JIT_RK_COND_SELECT, BPF_JIT_SEL_CMOVCC, 0))
+                return -ENOBUFS;
+            idx += arm_len + 2;
+            goto matched_site;
+        }
+
+        // Forward guarded update:
+        //   jcc +N
+        //   [pure value prep]*, mov dst, val
+        for (uint32_t arm_len = 1; arm_len <= 3; ++arm_len) {
+            if (idx + arm_len >= insn_cnt || !is_cond_jump_raw(insns[idx]) ||
+                insns[idx].off != static_cast<int16_t>(arm_len)) {
+                continue;
+            }
+
+            const uint8_t dst_reg = raw_dst_reg(insns[idx + arm_len]);
+            if (!match_value_arm(insns, idx + 1, arm_len, dst_reg)) {
+                continue;
+            }
+
+            if (!emit_rule(rules, max_rules, count,
+                           idx, arm_len + 1,
+                           BPF_JIT_RK_COND_SELECT, BPF_JIT_SEL_CMOVCC, 0))
+                return -ENOBUFS;
+            idx += arm_len + 1;
+            goto matched_site;
         }
 
         // Compact: mov, jcc+1, mov  (3 insns — anchored at the jcc)
@@ -133,7 +295,7 @@ int bpf_jit_scan_cmov(const uint8_t *xlated, uint32_t len,
             is_simple_mov_raw(insns[idx - 1]) &&
             is_cond_jump_raw(insns[idx]) && insns[idx].off == 1 &&
             is_simple_mov_raw(insns[idx + 1]) &&
-            (insns[idx - 1].regs & 0x0f) == (insns[idx + 1].regs & 0x0f))
+            raw_dst_reg(insns[idx - 1]) == raw_dst_reg(insns[idx + 1]))
         {
             if (!emit_rule(rules, max_rules, count,
                            idx - 1, 3, BPF_JIT_RK_COND_SELECT, BPF_JIT_SEL_CMOVCC, 0))
@@ -143,6 +305,8 @@ int bpf_jit_scan_cmov(const uint8_t *xlated, uint32_t len,
         }
 
         idx++;
+matched_site:
+        continue;
     }
 
     return static_cast<int>(count);

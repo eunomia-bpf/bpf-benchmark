@@ -318,6 +318,76 @@ V5PatternInsn make_jump_pattern(uint8_t opcode,
                              kExpectOffSrc, 0, 0, expected_off, 0);
 }
 
+V5PatternInsn make_jump_pattern_var_off(uint8_t opcode,
+                                        uint8_t lhs_binding,
+                                        uint8_t rhs_binding,
+                                        uint8_t off_binding)
+{
+    constexpr uint8_t kExpectImm = BPF_JIT_PATTERN_F_EXPECT_IMM;
+    constexpr uint8_t kExpectSrc = BPF_JIT_PATTERN_F_EXPECT_SRC_REG;
+
+    if ((opcode & 0x08U) != 0) {
+        return make_pattern_insn(opcode, lhs_binding, rhs_binding, 0, off_binding,
+                                 kExpectImm, 0, 0, 0, 0);
+    }
+
+    return make_pattern_insn(opcode, lhs_binding, 0, rhs_binding, off_binding,
+                             kExpectSrc, 0, 0, 0, 0);
+}
+
+V5PatternInsn make_simple_alu_pattern(uint8_t opcode,
+                                      uint8_t dst_binding,
+                                      uint8_t value_binding)
+{
+    constexpr uint8_t kExpectOffImm = BPF_JIT_PATTERN_F_EXPECT_OFF |
+                                      BPF_JIT_PATTERN_F_EXPECT_IMM;
+    constexpr uint8_t kExpectOffSrc = BPF_JIT_PATTERN_F_EXPECT_OFF |
+                                      BPF_JIT_PATTERN_F_EXPECT_SRC_REG;
+
+    if ((opcode & 0x08U) != 0) {
+        return make_pattern_insn(opcode, dst_binding, value_binding, 0, 0,
+                                 kExpectOffImm, 0, 0, 0, 0);
+    }
+
+    return make_pattern_insn(opcode, dst_binding, 0, value_binding, 0,
+                             kExpectOffSrc, 0, 0, 0, 0);
+}
+
+V5PatternInsn make_ja_pattern_var_off(uint8_t off_binding)
+{
+    constexpr uint8_t kJa = 0x05;
+    constexpr uint8_t kJaFlags = BPF_JIT_PATTERN_F_EXPECT_IMM |
+                                 BPF_JIT_PATTERN_F_EXPECT_DST_REG |
+                                 BPF_JIT_PATTERN_F_EXPECT_SRC_REG;
+
+    return make_pattern_insn(kJa, 0, 0, 0, off_binding, kJaFlags, 0, 0, 0, 0);
+}
+
+std::vector<V5Binding> make_select_bindings(uint8_t jump_opcode,
+                                            int32_t width,
+                                            uint8_t true_value_var,
+                                            uint8_t true_source_type,
+                                            uint8_t false_value_var,
+                                            uint8_t false_source_type)
+{
+    const bool jump_is_x = (jump_opcode & 0x08U) != 0;
+    return {
+        make_var_binding(BPF_JIT_SEL_PARAM_DST_REG, 1,
+                         BPF_JIT_BIND_SOURCE_REG),
+        make_const_binding(BPF_JIT_SEL_PARAM_COND_OP, jump_opcode & 0xf0U),
+        make_var_binding(BPF_JIT_SEL_PARAM_COND_A, 2,
+                         BPF_JIT_BIND_SOURCE_REG),
+        make_var_binding(BPF_JIT_SEL_PARAM_COND_B, 3,
+                         jump_is_x ? BPF_JIT_BIND_SOURCE_REG
+                                   : BPF_JIT_BIND_SOURCE_IMM),
+        make_var_binding(BPF_JIT_SEL_PARAM_TRUE_VAL, true_value_var,
+                         true_source_type),
+        make_var_binding(BPF_JIT_SEL_PARAM_FALSE_VAL, false_value_var,
+                         false_source_type),
+        make_const_binding(BPF_JIT_SEL_PARAM_WIDTH, width),
+    };
+}
+
 void add_v5_cond_select_descs_for_jump(std::vector<V5PatternDesc> &descs,
                                        uint8_t jump_opcode,
                                        uint8_t mov_x_opcode,
@@ -402,6 +472,223 @@ void add_v5_cond_select_descs_for_jump(std::vector<V5PatternDesc> &descs,
     }
 }
 
+void add_v5_guarded_update_descs_for_jump(std::vector<V5PatternDesc> &descs,
+                                          uint8_t jump_opcode,
+                                          uint8_t mov_x_opcode,
+                                          uint8_t mov_k_opcode)
+{
+    const bool is_jmp32 = (jump_opcode & 0x07U) == 0x06U;
+    const int32_t width = is_jmp32 ? 32 : 64;
+    const uint8_t move_opcodes[2] = {mov_x_opcode, mov_k_opcode};
+    const uint8_t add_x_opcode = is_jmp32 ? 0x0c : 0x0f;
+    const uint8_t xor_x_opcode = is_jmp32 ? 0xac : 0xaf;
+    const uint8_t lsh_k_opcode = is_jmp32 ? 0x64 : 0x67;
+    const uint8_t rsh_k_opcode = is_jmp32 ? 0x74 : 0x77;
+
+    for (const uint8_t true_opcode : move_opcodes) {
+        const uint8_t true_source_type = (true_opcode & 0x08U) != 0
+                                             ? BPF_JIT_BIND_SOURCE_REG
+                                             : BPF_JIT_BIND_SOURCE_IMM;
+
+        descs.push_back(make_v5_desc(
+            V5Family::Cmov,
+            BPF_JIT_CF_COND_SELECT,
+            BPF_JIT_SEL_CMOVCC,
+            0,
+            {
+                make_jump_pattern(jump_opcode, 2, 3, 1),
+                make_simple_mov_pattern(true_opcode, 1, 5),
+            },
+            {},
+            make_select_bindings(jump_opcode, width, 5, true_source_type,
+                                 1, BPF_JIT_BIND_SOURCE_REG)));
+
+        descs.push_back(make_v5_desc(
+            V5Family::Cmov,
+            BPF_JIT_CF_COND_SELECT,
+            BPF_JIT_SEL_CMOVCC,
+            0,
+            {
+                make_jump_pattern_var_off(jump_opcode, 2, 3, 6),
+                make_simple_mov_pattern(true_opcode, 1, 5),
+                make_ja_pattern_var_off(7),
+            },
+            {
+                make_constraint(BPF_JIT_CSTR_DIFF_CONST, 6, 7, 2),
+            },
+            make_select_bindings(jump_opcode, width, 5, true_source_type,
+                                 1, BPF_JIT_BIND_SOURCE_REG)));
+    }
+
+    descs.push_back(make_v5_desc(
+        V5Family::Cmov,
+        BPF_JIT_CF_COND_SELECT,
+        BPF_JIT_SEL_CMOVCC,
+        0,
+        {
+            make_jump_pattern_var_off(jump_opcode, 2, 3, 6),
+            make_simple_alu_pattern(add_x_opcode, 5, 7),
+            make_simple_mov_pattern(mov_x_opcode, 1, 5),
+            make_ja_pattern_var_off(8),
+        },
+        {
+            make_constraint(BPF_JIT_CSTR_DIFF_CONST, 6, 8, 3),
+        },
+        make_select_bindings(jump_opcode, width, 5, BPF_JIT_BIND_SOURCE_REG,
+                             1, BPF_JIT_BIND_SOURCE_REG)));
+
+    for (const uint8_t shift_opcode : {rsh_k_opcode, lsh_k_opcode}) {
+        descs.push_back(make_v5_desc(
+            V5Family::Cmov,
+            BPF_JIT_CF_COND_SELECT,
+            BPF_JIT_SEL_CMOVCC,
+            0,
+            {
+                make_jump_pattern(jump_opcode, 2, 3, 3),
+                make_simple_alu_pattern(shift_opcode, 6, 7),
+                make_simple_alu_pattern(xor_x_opcode, 5, 6),
+                make_simple_mov_pattern(mov_x_opcode, 1, 5),
+            },
+            {},
+            make_select_bindings(jump_opcode, width, 5, BPF_JIT_BIND_SOURCE_REG,
+                                 1, BPF_JIT_BIND_SOURCE_REG)));
+
+        descs.push_back(make_v5_desc(
+            V5Family::Cmov,
+            BPF_JIT_CF_COND_SELECT,
+            BPF_JIT_SEL_CMOVCC,
+            0,
+            {
+                make_jump_pattern_var_off(jump_opcode, 2, 3, 8),
+                make_simple_alu_pattern(shift_opcode, 6, 7),
+                make_simple_alu_pattern(xor_x_opcode, 5, 6),
+                make_simple_mov_pattern(mov_x_opcode, 1, 5),
+                make_ja_pattern_var_off(9),
+            },
+            {
+                make_constraint(BPF_JIT_CSTR_DIFF_CONST, 8, 9, 4),
+            },
+            make_select_bindings(jump_opcode, width, 5, BPF_JIT_BIND_SOURCE_REG,
+                                 1, BPF_JIT_BIND_SOURCE_REG)));
+    }
+}
+
+void add_v5_wide_diamond_descs_for_jump(std::vector<V5PatternDesc> &descs,
+                                        uint8_t jump_opcode,
+                                        uint8_t mov_x_opcode,
+                                        uint8_t mov_k_opcode)
+{
+    constexpr uint8_t kJa = 0x05;
+    constexpr uint8_t kJaFlags = BPF_JIT_PATTERN_F_EXPECT_OFF |
+                                 BPF_JIT_PATTERN_F_EXPECT_IMM |
+                                 BPF_JIT_PATTERN_F_EXPECT_DST_REG |
+                                 BPF_JIT_PATTERN_F_EXPECT_SRC_REG;
+    const bool is_jmp32 = (jump_opcode & 0x07U) == 0x06U;
+    const int32_t width = is_jmp32 ? 32 : 64;
+    const uint8_t add_x_opcode = is_jmp32 ? 0x0c : 0x0f;
+    const uint8_t xor_x_opcode = is_jmp32 ? 0xac : 0xaf;
+    const uint8_t lsh_k_opcode = is_jmp32 ? 0x64 : 0x67;
+    const uint8_t rsh_k_opcode = is_jmp32 ? 0x74 : 0x77;
+    const uint8_t move_opcodes[2] = {mov_x_opcode, mov_k_opcode};
+
+    for (const uint8_t true_opcode : move_opcodes) {
+        const uint8_t true_source_type = (true_opcode & 0x08U) != 0
+                                             ? BPF_JIT_BIND_SOURCE_REG
+                                             : BPF_JIT_BIND_SOURCE_IMM;
+
+        descs.push_back(make_v5_desc(
+            V5Family::Cmov,
+            BPF_JIT_CF_COND_SELECT,
+            BPF_JIT_SEL_CMOVCC,
+            0,
+            {
+                make_jump_pattern(jump_opcode, 2, 3, 3),
+                make_simple_alu_pattern(add_x_opcode, 6, 7),
+                make_simple_mov_pattern(mov_x_opcode, 1, 6),
+                make_pattern_insn(kJa, 0, 0, 0, 0, kJaFlags, 0, 0, 1, 0),
+                make_simple_mov_pattern(true_opcode, 1, 5),
+            },
+            {},
+            make_select_bindings(jump_opcode, width, 5, true_source_type,
+                                 6, BPF_JIT_BIND_SOURCE_REG)));
+
+        for (const uint8_t shift_opcode : {rsh_k_opcode, lsh_k_opcode}) {
+            descs.push_back(make_v5_desc(
+                V5Family::Cmov,
+                BPF_JIT_CF_COND_SELECT,
+                BPF_JIT_SEL_CMOVCC,
+                0,
+                {
+                    make_jump_pattern(jump_opcode, 2, 3, 4),
+                    make_simple_alu_pattern(shift_opcode, 6, 7),
+                    make_simple_alu_pattern(xor_x_opcode, 4, 6),
+                    make_simple_mov_pattern(mov_x_opcode, 1, 4),
+                    make_pattern_insn(kJa, 0, 0, 0, 0, kJaFlags, 0, 0, 1, 0),
+                    make_simple_mov_pattern(true_opcode, 1, 5),
+                },
+                {},
+                make_select_bindings(jump_opcode, width, 5, true_source_type,
+                                     4, BPF_JIT_BIND_SOURCE_REG)));
+        }
+    }
+}
+
+void add_v5_switch_chain_descs_for_jump(std::vector<V5PatternDesc> &descs,
+                                        uint8_t jump_opcode,
+                                        uint8_t mov_x_opcode,
+                                        uint8_t mov_k_opcode)
+{
+    const bool is_jmp32 = (jump_opcode & 0x07U) == 0x06U;
+    const bool jump_is_x = (jump_opcode & 0x08U) != 0;
+    const int32_t width = is_jmp32 ? 32 : 64;
+    const uint8_t move_opcodes[2] = {mov_x_opcode, mov_k_opcode};
+
+    for (const uint8_t true_opcode : move_opcodes) {
+        const uint8_t true_source_type = (true_opcode & 0x08U) != 0
+                                             ? BPF_JIT_BIND_SOURCE_REG
+                                             : BPF_JIT_BIND_SOURCE_IMM;
+        for (const uint8_t false_opcode : move_opcodes) {
+            const uint8_t false_source_type = (false_opcode & 0x08U) != 0
+                                                  ? BPF_JIT_BIND_SOURCE_REG
+                                                  : BPF_JIT_BIND_SOURCE_IMM;
+
+            descs.push_back(make_v5_desc(
+                V5Family::Cmov,
+                BPF_JIT_CF_COND_SELECT,
+                BPF_JIT_SEL_CMOVCC,
+                0,
+                {
+                    make_simple_mov_pattern(false_opcode, 1, 4),
+                    make_jump_pattern_var_off(jump_opcode, 2, 6, 7),
+                    make_jump_pattern(jump_opcode, 2, 3, 1),
+                    make_ja_pattern_var_off(8),
+                    make_simple_mov_pattern(true_opcode, 1, 5),
+                    make_ja_pattern_var_off(9),
+                },
+                {
+                    make_constraint(BPF_JIT_CSTR_DIFF_CONST, 7, 9, 4),
+                    make_constraint(BPF_JIT_CSTR_NOT_EQUAL, 3, 6),
+                },
+                {
+                    make_var_binding(BPF_JIT_SEL_PARAM_DST_REG, 1,
+                                     BPF_JIT_BIND_SOURCE_REG),
+                    make_const_binding(BPF_JIT_SEL_PARAM_COND_OP,
+                                       jump_opcode & 0xf0U),
+                    make_var_binding(BPF_JIT_SEL_PARAM_COND_A, 2,
+                                     BPF_JIT_BIND_SOURCE_REG),
+                    make_var_binding(BPF_JIT_SEL_PARAM_COND_B, 3,
+                                     jump_is_x ? BPF_JIT_BIND_SOURCE_REG
+                                               : BPF_JIT_BIND_SOURCE_IMM),
+                    make_var_binding(BPF_JIT_SEL_PARAM_TRUE_VAL, 5,
+                                     true_source_type),
+                    make_var_binding(BPF_JIT_SEL_PARAM_FALSE_VAL, 4,
+                                     false_source_type),
+                    make_const_binding(BPF_JIT_SEL_PARAM_WIDTH, width),
+                }));
+        }
+    }
+}
+
 } // namespace
 
 const char *v5_family_name(V5Family family)
@@ -423,19 +710,26 @@ const char *v5_family_name(V5Family family)
 std::vector<V5PatternDesc> build_v5_cond_select_descriptors()
 {
     constexpr uint8_t kJumpOpcodes[] = {
-        0x15, 0x1d, 0x25, 0x2d, 0x35, 0x3d, 0x65, 0x6d, 0x75, 0x7d,
-        0x16, 0x1e, 0x26, 0x2e, 0x36, 0x3e, 0x66, 0x6e, 0x76, 0x7e,
-        0x55, 0x5d, 0xa5, 0xad, 0xb5, 0xbd, 0xc5, 0xcd, 0xd5, 0xdd,
-        0x56, 0x5e, 0xa6, 0xae, 0xb6, 0xbe, 0xc6, 0xce, 0xd6, 0xde,
+        0x15, 0x1d, 0x25, 0x2d, 0x35, 0x3d, 0x45, 0x4d, 0x55, 0x5d,
+        0x65, 0x6d, 0x75, 0x7d, 0xa5, 0xad, 0xb5, 0xbd, 0xc5, 0xcd,
+        0xd5, 0xdd, 0x16, 0x1e, 0x26, 0x2e, 0x36, 0x3e, 0x46, 0x4e,
+        0x56, 0x5e, 0x66, 0x6e, 0x76, 0x7e, 0xa6, 0xae, 0xb6, 0xbe,
+        0xc6, 0xce, 0xd6, 0xde,
     };
 
     std::vector<V5PatternDesc> descs;
-    descs.reserve(320);
+    descs.reserve(2048);
     for (const uint8_t jump_opcode : kJumpOpcodes) {
         const bool is_jmp32 = (jump_opcode & 0x07U) == 0x06U;
         const uint8_t mov_x_opcode = is_jmp32 ? 0xbc : 0xbf;
         const uint8_t mov_k_opcode = is_jmp32 ? 0xb4 : 0xb7;
 
+        add_v5_switch_chain_descs_for_jump(descs, jump_opcode,
+                                           mov_x_opcode, mov_k_opcode);
+        add_v5_wide_diamond_descs_for_jump(descs, jump_opcode,
+                                           mov_x_opcode, mov_k_opcode);
+        add_v5_guarded_update_descs_for_jump(descs, jump_opcode,
+                                             mov_x_opcode, mov_k_opcode);
         add_v5_cond_select_descs_for_jump(descs, jump_opcode,
                                           mov_x_opcode, mov_k_opcode);
     }

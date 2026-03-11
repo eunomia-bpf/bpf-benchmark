@@ -143,6 +143,7 @@ bool is_cond_jump_raw(const bpf_insn_raw &insn)
     case 0x10:
     case 0x20:
     case 0x30:
+    case 0x40:
     case 0x50:
     case 0x60:
     case 0x70:

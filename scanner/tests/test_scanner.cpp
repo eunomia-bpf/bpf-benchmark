@@ -70,7 +70,10 @@ uint8_t regs(uint8_t dst, uint8_t src = 0)
 }
 
 constexpr uint8_t BPF_JMP_JA = 0x05;
+constexpr uint8_t BPF_JEQ_K = 0x15;
 constexpr uint8_t BPF_JEQ_X = 0x1d;
+constexpr uint8_t BPF_JSET_K = 0x45;
+constexpr uint8_t BPF_JNE_K = 0x55;
 constexpr uint8_t BPF_MOV64_X = 0xbf;
 constexpr uint8_t BPF_MOV64_K = 0xb7;
 constexpr uint8_t BPF_MOV32_X = 0xbc;
@@ -82,6 +85,7 @@ constexpr uint8_t BPF_OR64_X = 0x4f;
 constexpr uint8_t BPF_OR32_X = 0x4c;
 constexpr uint8_t BPF_AND64_K = 0x57;
 constexpr uint8_t BPF_AND64_X = 0x5f;
+constexpr uint8_t BPF_XOR64_X = 0xaf;
 constexpr uint8_t BPF_LDXB = 0x71;
 constexpr uint8_t BPF_ADD64_X = 0x0f;
 
@@ -374,11 +378,107 @@ void test_v5_rotate_masked_x_scan()
     CHECK_EQ(summary.rules[0].bindings.size(), 4u);
 }
 
+void test_c_api_cmov_broadening()
+{
+    auto wider_diamond = encode({
+        {BPF_JEQ_X, regs(0, 1), 3, 0},
+        {BPF_ADD64_X, regs(5, 6), 0, 0},
+        {BPF_MOV64_X, regs(2, 5), 0, 0},
+        {BPF_JMP_JA, 0, 1, 0},
+        {BPF_MOV64_X, regs(2, 4), 0, 0},
+    });
+    auto guarded_update = encode({
+        {BPF_JNE_K, regs(2, 0), 3, 0},
+        {BPF_ADD64_X, regs(5, 6), 0, 0},
+        {BPF_MOV64_X, regs(1, 5), 0, 0},
+        {BPF_JMP_JA, 0, 0, 0},
+        {BPF_MOV64_X, regs(7, 8), 0, 0},
+    });
+    auto jset_guarded = encode({
+        {BPF_JSET_K, regs(2, 0), 3, 1},
+        {BPF_RSH64_K, regs(5, 0), 0, 5},
+        {BPF_XOR64_X, regs(6, 5), 0, 0},
+        {BPF_MOV64_X, regs(1, 6), 0, 0},
+    });
+    auto switch_chain = encode({
+        {BPF_MOV64_K, regs(1, 0), 0, 10},
+        {BPF_JEQ_K, regs(2, 0), 4, 0},
+        {BPF_JEQ_K, regs(2, 0), 1, 1},
+        {BPF_JMP_JA, 0, 3, 0},
+        {BPF_MOV64_K, regs(1, 0), 0, 20},
+        {BPF_JMP_JA, 0, 0, 0},
+        {BPF_MOV64_X, regs(7, 8), 0, 0},
+        {BPF_MOV64_X, regs(9, 10), 0, 0},
+    });
+
+    bpf_jit_scan_rule rules[8];
+    CHECK_EQ(bpf_jit_scan_cmov(wider_diamond.data(),
+                               static_cast<uint32_t>(wider_diamond.size()),
+                               rules, 8), 1);
+    CHECK_EQ(bpf_jit_scan_cmov(guarded_update.data(),
+                               static_cast<uint32_t>(guarded_update.size()),
+                               rules, 8), 1);
+    CHECK_EQ(bpf_jit_scan_cmov(jset_guarded.data(),
+                               static_cast<uint32_t>(jset_guarded.size()),
+                               rules, 8), 1);
+    CHECK_EQ(bpf_jit_scan_cmov(switch_chain.data(),
+                               static_cast<uint32_t>(switch_chain.size()),
+                               rules, 8), 1);
+}
+
+void test_v5_cmov_broadening_scan()
+{
+    using bpf_jit_scanner::V5ScanOptions;
+
+    auto guarded_update = encode({
+        {BPF_JNE_K, regs(2, 0), 3, 0},
+        {BPF_ADD64_X, regs(5, 6), 0, 0},
+        {BPF_MOV64_X, regs(1, 5), 0, 0},
+        {BPF_JMP_JA, 0, 0, 0},
+        {BPF_MOV64_X, regs(7, 8), 0, 0},
+    });
+    auto jset_guarded = encode({
+        {BPF_JSET_K, regs(2, 0), 3, 1},
+        {BPF_RSH64_K, regs(5, 0), 0, 5},
+        {BPF_XOR64_X, regs(6, 5), 0, 0},
+        {BPF_MOV64_X, regs(1, 6), 0, 0},
+    });
+    auto switch_chain = encode({
+        {BPF_MOV64_K, regs(1, 0), 0, 10},
+        {BPF_JEQ_K, regs(2, 0), 4, 0},
+        {BPF_JEQ_K, regs(2, 0), 1, 1},
+        {BPF_JMP_JA, 0, 3, 0},
+        {BPF_MOV64_K, regs(1, 0), 0, 20},
+        {BPF_JMP_JA, 0, 0, 0},
+        {BPF_MOV64_X, regs(7, 8), 0, 0},
+        {BPF_MOV64_X, regs(9, 10), 0, 0},
+    });
+
+    auto guarded_summary = bpf_jit_scanner::scan_v5_builtin(
+        guarded_update.data(), static_cast<uint32_t>(guarded_update.size()),
+        V5ScanOptions {.scan_cmov = true});
+    CHECK_EQ(guarded_summary.cmov_sites, 1u);
+    CHECK_EQ(guarded_summary.rules[0].pattern.size(), 4u);
+
+    auto jset_summary = bpf_jit_scanner::scan_v5_builtin(
+        jset_guarded.data(), static_cast<uint32_t>(jset_guarded.size()),
+        V5ScanOptions {.scan_cmov = true});
+    CHECK_EQ(jset_summary.cmov_sites, 1u);
+    CHECK_EQ(jset_summary.rules[0].pattern.size(), 4u);
+
+    auto switch_summary = bpf_jit_scanner::scan_v5_builtin(
+        switch_chain.data(), static_cast<uint32_t>(switch_chain.size()),
+        V5ScanOptions {.scan_cmov = true});
+    CHECK_EQ(switch_summary.cmov_sites, 1u);
+    CHECK_EQ(switch_summary.rules[0].pattern.size(), 6u);
+}
+
 } // namespace
 
 int main()
 {
     test_c_api_scanners();
+    test_c_api_cmov_broadening();
     test_engine_static_cmov_policy();
     test_config_defaults_and_overrides();
     test_profile_placeholder_fallback();
@@ -386,6 +486,7 @@ int main()
     test_overlap_resolution();
     test_policy_blob_build_and_patch();
     test_v5_cmov_scan_and_blob();
+    test_v5_cmov_broadening_scan();
     test_v5_rotate_masked_x_scan();
 
     std::printf("\n%s: %d passed, %d failed\n",
