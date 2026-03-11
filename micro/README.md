@@ -1,19 +1,21 @@
 # Micro Benchmark
 
-`micro/` now contains only the isolated benchmark layer.
+`micro/` is the active isolated pure-JIT benchmark layer.
 
-- `config/micro_pure_jit.yaml`: default isolated JIT suite. As of March 11, 2026 it contains 56 benchmarks: 48 staged compute-oriented cases, 5 packet-backed parser/hash/bounds controls, and 3 map-backed kernel-only non-XDP controls.
-- `config/micro_runtime.yaml`: runtime mechanism suite. As of March 11, 2026 it contains 11 benchmarks: 8 map-backed map/atomic/probe-read/time cases plus 3 staged helper-call stress cases.
-- `run_micro.py`: main isolated benchmark runner
-- `run_rigorous.py` / `run_pass_ablation.py`: deeper micro-only evaluation modes
-- `orchestrator/`: shared Python orchestration utilities reused by `corpus/` and `e2e/`
+## Current Suite
 
-The corpus and end-to-end harnesses have moved out of this directory.
+- `config/micro_pure_jit.yaml` is the only active micro suite manifest.
+- The suite currently contains 56 benchmarks: 48 staged XDP cases, 5 packet-backed XDP controls, and 3 kernel-only non-XDP controls.
+- Program-type coverage is 53 XDP, 2 TC, and 1 cgroup_skb benchmarks.
+- The suite is designed to exercise the 8 canonical forms tracked in `docs/kernel-jit-optimization-plan.md`: `COND_SELECT`, `WIDE_MEM`, `ROTATE`, `ADDR_CALC`, `BITFIELD_EXTRACT`, `ZERO_EXT_ELIDE`, `ENDIAN_FUSION`, and `BRANCH_FLIP`.
 
-## Suite Semantics
+## Directory Layout
 
-- `micro_pure_jit.yaml` is for code-generation quality. The hot path should avoid map/helper work except for the explicit packet-backed controls and the small kernel-only non-XDP control subset.
-- `micro_runtime.yaml` intentionally measures map/helper/runtime mechanisms. Differences there mix code generation with runtime service overhead.
+- `run_micro.py`: main pure-JIT runner
+- `driver.py`: unified micro/corpus/e2e entrypoint
+- `orchestrator/`: shared Python helpers reused by `corpus/` and `e2e/`
+- `programs/*.bpf.c`: active pure-JIT benchmark sources
+- `programs/archive/runtime/*.bpf.c`: archived runtime-only benchmarks, preserved for history and excluded from the active build
 
 ## Build
 
@@ -22,50 +24,36 @@ git submodule update --init --recursive
 make -C micro
 ```
 
-`make -C micro` builds `micro_exec`, benchmark `.bpf.o` objects, and `micro/build/tools/directive_hint`. `run_micro.py` also re-invokes the incremental `make -C micro micro_exec` and `make -C micro programs` steps before running a suite.
-
-If you only need the runner and benchmark objects:
-
-```bash
-make -C micro micro_exec programs
-```
+`make -C micro` builds `micro_exec`, the active benchmark `.bpf.o` objects, and `micro/build/tools/directive_hint`.
 
 ## Usage
 
-List the current pure-JIT suite:
+List the active suite:
 
 ```bash
 python3 micro/run_micro.py --list
-```
-
-Or via the unified driver:
-
-```bash
 python3 micro/driver.py suite -- --list
 ```
 
-Run the default pure-JIT suite:
+Run the suite on the host:
 
 ```bash
-python3 micro/driver.py suite -- \
-  --runtime llvmbpf \
-  --runtime kernel \
-  --iterations 10 \
-  --warmups 2 \
-  --repeat 200 \
-  --shuffle-seed 20260306
+./scripts/run_micro.sh
 ```
 
-Run the runtime-focused micro suite:
+Run llvmbpf only:
 
 ```bash
-python3 micro/driver.py suite -- \
-  --suite config/micro_runtime.yaml \
-  --runtime llvmbpf \
-  --runtime kernel
+./scripts/run_micro.sh --llvmbpf-only
 ```
 
-Run a single benchmark smoke test:
+Run inside the framework-kernel VM:
+
+```bash
+./scripts/run_micro.sh --vm
+```
+
+Run a targeted smoke test directly:
 
 ```bash
 python3 micro/run_micro.py \
@@ -73,15 +61,15 @@ python3 micro/run_micro.py \
   --runtime llvmbpf \
   --iterations 1 \
   --warmups 0 \
-  --repeat 1 \
-  --output /tmp/micro-smoke.json
+  --repeat 10
 ```
 
 ## Outputs
 
-Default result files for the isolated suites live in `micro/results/`.
+Results live under `micro/results/`.
 
-- `pure_jit.latest.json`
-- `runtime.latest.json`
+- `pure_jit.latest.json`: default host run (`llvmbpf + kernel`)
+- `pure_jit.llvmbpf_only.latest.json`: default `--llvmbpf-only` script output
+- `pure_jit.vm.latest.json`: default `--vm` script output
 
-Micro-specific analysis scripts also continue to read and write `micro/results/`.
+Micro analysis scripts continue to read and write `micro/results/`.

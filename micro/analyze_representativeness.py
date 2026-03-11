@@ -26,7 +26,6 @@ DEFAULT_OUTPUT = ROOT_DIR / "results" / "representativeness_report.md"
 DEFAULT_CORPUS = REPO_ROOT / "corpus" / "results" / "bytecode_features.json"
 DEFAULT_SUITES = (
     REPO_ROOT / "config" / "micro_pure_jit.yaml",
-    REPO_ROOT / "config" / "micro_runtime.yaml",
 )
 
 FEATURES = (
@@ -46,7 +45,7 @@ def parse_args() -> argparse.Namespace:
         "--suite",
         action="append",
         dest="suites",
-        help="Optional suite manifest path. Defaults to both micro_pure_jit and micro_runtime.",
+        help="Optional suite manifest path. Defaults to micro_pure_jit.",
     )
     parser.add_argument(
         "--corpus",
@@ -222,20 +221,19 @@ def render_report(
             "",
             "## Static Feature Ranges",
             "",
-            "| Feature | Corpus median | Corpus p90 | Corpus p99 | Pure-JIT max | Runtime max | Combined max |",
-            "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+            "| Scope | Feature | Corpus median | Corpus p90 | Corpus p99 | Suite max |",
+            "| --- | --- | ---: | ---: | ---: | ---: |",
         ]
     )
 
-    for feature, label in FEATURES:
-        pure_max = max(int(record[feature]) for record in suite_records.get("micro_pure_jit", []))
-        runtime_max = max(int(record[feature]) for record in suite_records.get("micro_runtime", []))
-        combined_max = max(int(record[feature]) for record in all_suite_records)
-        corpus_stats = corpus_distributions[feature]
-        lines.append(
-            f"| {label} | {corpus_stats['median']} | {corpus_stats['p90']} | {corpus_stats['p99']} | "
-            f"{pure_max} | {runtime_max} | {combined_max} |"
-        )
+    for scope, records in (*suite_records.items(), ("combined", all_suite_records)):
+        for feature, label in FEATURES:
+            corpus_stats = corpus_distributions[feature]
+            suite_max = max(int(record[feature]) for record in records)
+            lines.append(
+                f"| {scope} | {label} | {corpus_stats['median']} | {corpus_stats['p90']} | "
+                f"{corpus_stats['p99']} | {suite_max} |"
+            )
 
     lines.extend(
         [
@@ -271,7 +269,7 @@ def render_report(
                 f"`{corpus_distributions['insn_count']['p90']}`."
             ),
             (
-                f"- Helper-heavy coverage: combined suite reaches `{combined_bounds['call_count'][1]}` static helper calls, "
+                f"- Call coverage: combined suite reaches `{combined_bounds['call_count'][1]}` static helper calls, "
                 f"which covers {format_percent(within_range(corpus_records, 'call_count', *combined_bounds['call_count']))} "
                 "of the corpus by that feature alone."
             ),

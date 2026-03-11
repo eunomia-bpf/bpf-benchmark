@@ -9,7 +9,6 @@ try:
     from orchestrator.catalog import (
         DEFAULT_MACRO_MANIFEST,
         DEFAULT_MICRO_MANIFEST,
-        DEFAULT_RUNTIME_MANIFEST,
         load_manifest,
         load_manifest_from_results,
     )
@@ -18,7 +17,6 @@ except ModuleNotFoundError:
     from micro.orchestrator.catalog import (
         DEFAULT_MACRO_MANIFEST,
         DEFAULT_MICRO_MANIFEST,
-        DEFAULT_RUNTIME_MANIFEST,
         load_manifest,
         load_manifest_from_results,
     )
@@ -39,10 +37,8 @@ def first_existing_path(candidates: tuple[Path, ...]) -> Path:
 
 def default_results_candidates() -> tuple[Path, ...]:
     candidates: list[Path] = []
-    for manifest_path in (DEFAULT_MICRO_MANIFEST, DEFAULT_RUNTIME_MANIFEST):
-        if not manifest_path.exists():
-            continue
-        manifest = load_manifest(manifest_path)
+    if DEFAULT_MICRO_MANIFEST.exists():
+        manifest = load_manifest(DEFAULT_MICRO_MANIFEST)
         candidates.append(manifest.defaults.output)
     candidates.append(RESULTS_DIR / "latest.json")
     return tuple(candidates)

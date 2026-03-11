@@ -176,74 +176,6 @@ def generate_branch_layout_random(output: Path) -> dict[str, int]:
     output.write_bytes(blob)
     return {"count": count, "hot_threshold": hot_threshold, "distribution": "random"}
 
-
-def generate_map_lookup_churn(output: Path) -> dict[str, int]:
-    rounds = 128
-    stride = 7
-    seed = 0x2468ACE1
-    word_count = 64
-    state = 0x0123_4567_89AB_CDEF
-
-    blob = bytearray(struct.pack("<III", rounds, stride, seed))
-    for index in range(word_count):
-        state = _lcg(state)
-        value = state ^ ((index + 1) * 0xD134_2543_DE82_EF95) ^ seed
-        blob.extend(struct.pack("<Q", value & MASK64))
-
-    output.write_bytes(blob)
-    return {"rounds": rounds, "stride": stride, "word_count": word_count}
-
-
-def generate_map_roundtrip(output: Path) -> dict[str, int]:
-    rounds = 64
-    mix = 0x31415926
-    seed = 0x0BAD_F00D_CAFE_BEEF
-
-    blob = bytearray(struct.pack("<IIQ", rounds, mix, seed))
-    output.write_bytes(blob)
-    return {"rounds": rounds, "mix": mix}
-
-
-def generate_hash_map_lookup(output: Path) -> dict[str, int]:
-    key_count = 64
-    blob = bytearray()
-
-    for index in range(key_count):
-        key = ((index + 1) * 2654435761) & 0xFFFFFFFF
-        blob.extend(struct.pack("<I", key))
-
-    output.write_bytes(blob)
-    return {"key_count": key_count}
-
-
-def generate_percpu_map_update(output: Path) -> dict[str, int]:
-    pair_count = 32
-    state = 0x1357_2468_9ABC_DEF0
-    blob = bytearray()
-
-    for index in range(pair_count):
-        state = _lcg(state)
-        value = state ^ ((index + 1) * 0xA076_1D64_78BD_642F)
-        blob.extend(struct.pack("<IQ", index, value & MASK64))
-
-    output.write_bytes(blob)
-    return {"pair_count": pair_count}
-
-
-def generate_probe_read_heavy(output: Path) -> dict[str, int]:
-    address = 0
-    count = 64
-
-    output.write_bytes(struct.pack("<QII", address, count, 0))
-    return {"count": count}
-
-
-def generate_get_time_heavy(output: Path) -> dict[str, int]:
-    count = 128
-    output.write_bytes(struct.pack("<I", count))
-    return {"count": count}
-
-
 def generate_spill_pressure(output: Path) -> dict[str, int]:
     count = 64
     seed = 0x1020_3040
@@ -624,23 +556,6 @@ def generate_const_fold_chain(output: Path) -> dict[str, int]:
     return {"count": count, "seed": seed}
 
 
-def _generate_helper_call(output: Path, seed: int, mix: int) -> dict[str, int]:
-    output.write_bytes(struct.pack("<II", seed, mix))
-    return {"seed": seed, "mix": mix}
-
-
-def generate_helper_call_1(output: Path) -> dict[str, int]:
-    return _generate_helper_call(output, seed=0x1020_3040, mix=0x5566_7788)
-
-
-def generate_helper_call_10(output: Path) -> dict[str, int]:
-    return _generate_helper_call(output, seed=0x90AB_CDEF, mix=0x1122_3344)
-
-
-def generate_helper_call_100(output: Path) -> dict[str, int]:
-    return _generate_helper_call(output, seed=0x7654_3210, mix=0xA1B2_C3D4)
-
-
 def _generate_load_isolation(output: Path, count: int, seed: int) -> dict[str, int]:
     """Generate data for byte-recompose causal isolation pair."""
     state = seed
@@ -658,22 +573,6 @@ def generate_load_byte_recompose(output: Path) -> dict[str, int]:
 
 def generate_load_native_u64(output: Path) -> dict[str, int]:
     return _generate_load_isolation(output, count=128, seed=0xBEEF_CAFE_1234_5678)
-
-
-def generate_map_lookup_repeat(output: Path) -> dict[str, int]:
-    rounds = 256
-    slots = 8
-    state = 0x0BAD_F00D_CAFE_BEEF
-
-    blob = bytearray(struct.pack("<II", rounds, slots))
-    for index in range(slots):
-        state = _lcg(state ^ ((index + 1) * 0xD134_2543_DE82_EF95))
-        value = (state ^ ((index + 1) * 0x9E37_79B9_7F4A_7C15)) & MASK64
-        blob.extend(struct.pack("<Q", value))
-
-    output.write_bytes(blob)
-    return {"rounds": rounds, "slots": slots}
-
 
 def generate_cmov_select(output: Path) -> dict[str, int]:
     groups = 32
@@ -853,21 +752,6 @@ def generate_packet_rss_hash(output: Path) -> dict[str, int]:
 
     output.write_bytes(packet)
     return {"packet_len": len(packet), "protocol": 6}
-
-
-def generate_atomic_counter_xadd(output: Path) -> dict[str, int]:
-    op_count = 32
-    seed = 0x1357_9BDF
-    blob = bytearray(struct.pack("<II", op_count, seed))
-
-    for index in range(op_count):
-        slot = (index * 5 + 1) % 4
-        delta = ((index * 11) % 17) + 1
-        blob.extend(struct.pack("<II", slot, delta))
-
-    output.write_bytes(blob)
-    return {"op_count": op_count, "slot_count": 4}
-
 
 def generate_imm64_storm(output: Path) -> dict[str, int]:
     state = 0x0123_4567_89AB_CDEF
@@ -1137,12 +1021,6 @@ GENERATORS = {
     "branch_layout": generate_branch_layout,
     "branch_layout_predictable": generate_branch_layout_predictable,
     "branch_layout_random": generate_branch_layout_random,
-    "map_lookup_churn": generate_map_lookup_churn,
-    "map_roundtrip": generate_map_roundtrip,
-    "hash_map_lookup": generate_hash_map_lookup,
-    "percpu_map_update": generate_percpu_map_update,
-    "probe_read_heavy": generate_probe_read_heavy,
-    "get_time_heavy": generate_get_time_heavy,
     "spill_pressure": generate_spill_pressure,
     "bounds_ladder": generate_bounds_ladder,
     "memory_pair_sum": generate_memory_pair_sum,
@@ -1172,19 +1050,14 @@ GENERATORS = {
     "bounds_check_heavy": generate_bounds_check_heavy,
     "packet_redundant_bounds": generate_packet_redundant_bounds,
     "const_fold_chain": generate_const_fold_chain,
-    "helper_call_1": generate_helper_call_1,
-    "helper_call_10": generate_helper_call_10,
-    "helper_call_100": generate_helper_call_100,
     "load_byte_recompose": generate_load_byte_recompose,
     "load_native_u64": generate_load_native_u64,
-    "map_lookup_repeat": generate_map_lookup_repeat,
     "cmov_select": generate_cmov_select,
     "cmov_dense": generate_cmov_dense,
     "memcmp_prefix_64": generate_memcmp_prefix_64,
     "packet_parse_vlans_tcpopts": generate_packet_parse_vlans_tcpopts,
     "local_call_fanout": generate_local_call_fanout,
     "packet_rss_hash": generate_packet_rss_hash,
-    "atomic_counter_xadd": generate_atomic_counter_xadd,
     "struct_field_cluster": generate_struct_field_cluster,
     "bitfield_extract": generate_bitfield_extract,
     "smallmul_strength_reduce": generate_smallmul_strength_reduce,

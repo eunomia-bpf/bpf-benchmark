@@ -125,6 +125,17 @@ def run_command(command: list[str], cpu: str | None) -> subprocess.CompletedProc
     return completed
 
 
+def read_git_sha() -> str:
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=ROOT_DIR,
+            stderr=subprocess.DEVNULL,
+        ).decode().strip()
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return "unknown"
+
+
 def list_suite(suite: SuiteSpec) -> None:
     print("Benchmarks")
     print("----------")
@@ -281,7 +292,7 @@ def main(argv: list[str] | None = None) -> int:
             "platform": platform.platform(),
             "python": sys.version.split()[0],
             "cpu_affinity": args.cpu,
-            "git_sha": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT_DIR).decode().strip(),
+            "git_sha": read_git_sha(),
             "kernel_version": platform.release(),
             "kernel_cmdline": read_required_text("/proc/cmdline"),
             "cpu_governor": read_optional_text("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"),

@@ -9,7 +9,6 @@ import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_MICRO_MANIFEST = REPO_ROOT / "config" / "micro_pure_jit.yaml"
-DEFAULT_RUNTIME_MANIFEST = REPO_ROOT / "config" / "micro_runtime.yaml"
 DEFAULT_MACRO_MANIFEST = REPO_ROOT / "corpus" / "config" / "macro_corpus.yaml"
 
 
@@ -428,7 +427,6 @@ __all__ = [
     "CorpusSpec",
     "DEFAULT_MACRO_MANIFEST",
     "DEFAULT_MICRO_MANIFEST",
-    "DEFAULT_RUNTIME_MANIFEST",
     "DefaultsSpec",
     "DimensionSummary",
     "ManifestSpec",

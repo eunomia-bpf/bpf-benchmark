@@ -33,14 +33,16 @@ make -C micro vendor_bpftool   # optional vendored bpftool
 
 ### Run benchmarks
 ```bash
+# One-shot entrypoints
+./scripts/run_micro.sh
+./scripts/run_micro.sh --llvmbpf-only
+./scripts/run_micro.sh --vm
+
 # List available benchmarks
 python3 micro/run_micro.py --list
 
 # Run default pure-jit suite (both runtimes)
 python3 micro/run_micro.py --runtime llvmbpf --runtime kernel --iterations 10 --warmups 2 --repeat 200
-
-# Run runtime suite (map/helper benchmarks)
-python3 micro/run_micro.py --suite config/micro_runtime.yaml --runtime llvmbpf --runtime kernel
 
 # Run specific benchmarks only
 python3 micro/run_micro.py --bench simple --bench bitcount --runtime llvmbpf --runtime kernel
@@ -62,8 +64,7 @@ make -C micro clean
 ### Three-layer benchmark model
 
 Configured via YAML files in `config/`:
-- **`micro_pure_jit.yaml`** — Current default isolated JIT suite (56 benchmarks as of March 11, 2026): 48 staged compute-oriented cases, 5 packet-backed parser/hash/bounds controls, and 3 map-backed kernel-only control cases. Most cases use `staged` IO mode, but the suite now also contains a small number of packet-backed and non-XDP map-backed controls.
-- **`micro_runtime.yaml`** — Runtime mechanism suite (11 benchmarks as of March 11, 2026): 8 map-backed map/atomic/probe-read/time cases plus 3 staged helper-call stress cases.
+- **`micro_pure_jit.yaml`** — Current default isolated JIT suite (56 benchmarks as of March 11, 2026): 48 staged XDP compute cases, 5 packet-backed XDP controls, and 3 kernel-only non-XDP controls (2 TC + 1 cgroup_skb). The active suite is aligned with the 8 canonical forms tracked in `docs/kernel-jit-optimization-plan.md`.
 - **`macro_corpus.yaml`** — Macro/corpus layer entry point.
 
 ### Key components
@@ -80,10 +81,12 @@ Configured via YAML files in `config/`:
 
 Both paths output a single JSON line per sample with `compile_ns`, `exec_ns`, `result`, `phases_ns`, and optional `perf_counters`.
 
-**`micro/programs/*.bpf.c`** — BPF benchmark programs. Each includes `common.h` and uses one of three macros:
-- `DEFINE_STAGED_INPUT_XDP_BENCH` — staged IO (pure-jit suite)
-- `DEFINE_MAP_BACKED_XDP_BENCH` — map IO (runtime suite)
-- `DEFINE_PACKET_BACKED_XDP_BENCH` — packet IO
+**`micro/programs/*.bpf.c`** — Active BPF benchmark programs. Each includes `common.h` and uses one of the active harness macros:
+- `DEFINE_STAGED_INPUT_XDP_BENCH` — staged XDP pure-jit path
+- `DEFINE_PACKET_BACKED_XDP_BENCH` / `DEFINE_FIXED_PACKET_BACKED_XDP_BENCH` — packet-backed XDP controls
+- `DEFINE_MAP_BACKED_TC_BENCH` / `DEFINE_MAP_BACKED_CGROUP_SKB_BENCH` — kernel-only non-XDP controls
+
+Archived runtime-only programs live under `micro/programs/archive/runtime/` and are not part of the active suite.
 
 Programs define a `bench_*()` function taking `(const u8 *data, u32 len, u64 *out)` and an `input_map` with a program-specific value struct.
 
@@ -96,7 +99,7 @@ Programs define a `bench_*()` function taking `(const u8 *data, u32 len, u64 *ou
 
 1. Create `micro/programs/<name>.bpf.c` with input struct, `input_map`, `bench_*` function, and the appropriate `DEFINE_*_XDP_BENCH` macro
 2. Add a generator function in `micro/input_generators.py` and register it in `GENERATORS`
-3. Add the benchmark entry to the relevant `config/*.yaml` with `name`, `base_name`, `kernel_input_size`, `input_generator`, `expected_result`, category/family/tags
+3. Add the benchmark entry to `config/micro_pure_jit.yaml` with `name`, `base_name`, `kernel_input_size`, `input_generator`, `expected_result`, category/family/tags
 
 ### Constraints
 - Kernel runtime requires `sudo -n` without password prompt
@@ -122,6 +125,8 @@ OpenAI Codex CLI is available on this machine (default model: `gpt-5.4`). Use it
 - **Never ask for confirmation** — just keep going, do all work, iterate multiple rounds autonomously
 - **ALWAYS include `docs/kernel-jit-optimization-plan.md` as context** — every codex prompt MUST reference this doc as the single source of truth for JIT optimization design
 - **NEVER delete old entries in tracking docs** — when tasks/experiments/docs are superseded, keep at least one line with status (e.g. "归入 #32", "已被 v3 取代"). This applies to TODO tables, VM experiment matrix, reference doc lists in `docs/kernel-jit-optimization-plan.md`
+- **Claude 只给高层次要求** — 不自己调研代码再给详细变更指令，让 codex 自己读代码、设计方案、实现
+- **Codex 必须测试验证** — 每个 codex prompt 必须要求写完代码后实际跑通（sudo / VM vng 等方式），不能只写不测
 
 ### Usage
 ```bash
@@ -138,6 +143,6 @@ echo "implement feature X" | codex exec --dangerously-bypass-approvals-and-sandb
 When delegating coding tasks, use `codex exec --dangerously-bypass-approvals-and-sandbox` so it can read/write files and run commands without interruption.
 
 ### Benchmark Program Design Rules
-- **Pure-JIT benchmarks** (`micro_pure_jit.yaml`): Must test ONLY JIT code generation quality. No map lookups, no helper calls — pure computation only. Use `DEFINE_STAGED_INPUT_XDP_BENCH` with `input_map` for input staging only.
-- **Runtime benchmarks** (`micro_runtime.yaml`): Test map/helper runtime mechanisms. Map lookups and helper calls are expected here.
+- **Pure-JIT benchmarks** (`micro_pure_jit.yaml`): Must test ONLY JIT code generation quality. No map lookups or helper calls in the benchmark hot path. Allowed harness shapes are staged XDP, packet-backed XDP controls, and the small TC/cgroup_skb kernel-only control subset already in the suite.
+- **Archived runtime benchmarks**: Runtime-mechanism cases removed from the active comparison live under `micro/programs/archive/runtime/`. Keep them out of the active manifest unless the suite definition changes again.
 - If a pure-JIT benchmark uses maps or helpers in its hot path, it is measuring runtime overhead, not JIT quality — this is a bug that must be fixed.
