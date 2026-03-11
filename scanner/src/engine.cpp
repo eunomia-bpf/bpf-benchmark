@@ -111,6 +111,10 @@ std::string canonical_family_name(std::string_view value)
     if (normalized == "addr-calc" || normalized == "addrcalc") {
         return "lea";
     }
+    if (normalized == "bitfield-extract" || normalized == "bit-extract" ||
+        normalized == "bitfield" || normalized == "extract") {
+        return "bitfield-extract";
+    }
     return normalized;
 }
 
@@ -201,6 +205,8 @@ uint32_t arbitration_priority_for_kind(uint32_t rule_kind)
     switch (rule_kind) {
     case BPF_JIT_RK_ROTATE:
         return 400;
+    case BPF_JIT_RK_BITFIELD_EXTRACT:
+        return 350;
     case BPF_JIT_RK_WIDE_MEM:
         return 300;
     case BPF_JIT_RK_ADDR_CALC:
@@ -241,6 +247,8 @@ int32_t estimate_code_delta(const bpf_jit_scan_rule &rule)
         return -static_cast<int32_t>(rule.site_len * 2);
     case BPF_JIT_RK_ROTATE:
         return rule.native_choice == BPF_JIT_ROT_RORX ? -4 : -3;
+    case BPF_JIT_RK_BITFIELD_EXTRACT:
+        return rule.site_len == 3 ? -1 : 0;
     case BPF_JIT_RK_ADDR_CALC:
         return -6;
     default:
@@ -398,6 +406,10 @@ Preference parse_choice_value(const std::string &family_key, std::string value)
         if (value == "lea") {
             return Preference::Lea;
         }
+    } else if (canonical_family == "bitfield-extract") {
+        if (value == "extract" || value == "bitfield-extract") {
+            return Preference::Extract;
+        }
     }
 
     throw std::runtime_error("unsupported value '" + value + "' for " + family_key);
@@ -418,6 +430,9 @@ std::optional<Preference> *preference_slot(FamilyPreferences &prefs, std::string
     if (canonical == "lea") {
         return &prefs.lea;
     }
+    if (canonical == "bitfield-extract") {
+        return &prefs.bitfield_extract;
+    }
     return nullptr;
 }
 
@@ -433,6 +448,8 @@ const std::optional<Preference> *preference_slot(const FamilyPreferences &prefs,
         return &prefs.wide_mem;
     case BPF_JIT_RK_ADDR_CALC:
         return &prefs.lea;
+    case BPF_JIT_RK_BITFIELD_EXTRACT:
+        return &prefs.bitfield_extract;
     default:
         return nullptr;
     }
@@ -479,6 +496,9 @@ std::pair<uint32_t, std::string> default_static_choice(const CandidateSite &site
     case BPF_JIT_RK_ADDR_CALC:
         return {BPF_JIT_ACALC_LEA,
                 "static heuristic enables LEA fusion"};
+    case BPF_JIT_RK_BITFIELD_EXTRACT:
+        return {BPF_JIT_BFX_EXTRACT,
+                "static heuristic enables canonical bitfield extraction"};
     default:
         return {site.rule.native_choice, "static heuristic keeps scan-native choice"};
     }
@@ -511,6 +531,11 @@ std::optional<uint32_t> choice_for_preference(const CandidateSite &site, Prefere
     case BPF_JIT_RK_ADDR_CALC:
         if (preference == Preference::Lea) {
             return BPF_JIT_ACALC_LEA;
+        }
+        break;
+    case BPF_JIT_RK_BITFIELD_EXTRACT:
+        if (preference == Preference::Extract) {
+            return BPF_JIT_BFX_EXTRACT;
         }
         break;
     default:
@@ -684,6 +709,19 @@ PatternRegistry PatternRegistry::builtin()
             return run_scan(options.max_rules_per_family,
                             [&](bpf_jit_scan_rule *rules, uint32_t max_rules) {
                                 return bpf_jit_scan_addr_calc(xlated, len, rules, max_rules);
+                            });
+        },
+    });
+    registry.register_family({
+        .name = "bitfield-extract",
+        .rule_kind = BPF_JIT_RK_BITFIELD_EXTRACT,
+        .arbitration_priority = arbitration_priority_for_kind(
+            BPF_JIT_RK_BITFIELD_EXTRACT),
+        .scanner = [](const uint8_t *xlated, uint32_t len, const ScanOptions &options) {
+            return run_scan(options.max_rules_per_family,
+                            [&](bpf_jit_scan_rule *rules, uint32_t max_rules) {
+                                return bpf_jit_scan_bitfield_extract(xlated, len, rules,
+                                                                     max_rules);
                             });
         },
     });
@@ -931,6 +969,8 @@ std::string rule_kind_name(uint32_t rule_kind)
         return "ROTATE";
     case BPF_JIT_RK_ADDR_CALC:
         return "ADDR_CALC";
+    case BPF_JIT_RK_BITFIELD_EXTRACT:
+        return "BITFIELD_EXTRACT";
     default:
         return "UNKNOWN";
     }
@@ -952,6 +992,8 @@ std::string native_choice_name(uint32_t rule_kind, uint32_t native_choice)
     case BPF_JIT_RK_ADDR_CALC:
         return native_choice == BPF_JIT_ACALC_LEA ? "LEA" :
                native_choice == BPF_JIT_ACALC_SHIFT_ADD ? "SHIFT_ADD" : "UNKNOWN";
+    case BPF_JIT_RK_BITFIELD_EXTRACT:
+        return native_choice == BPF_JIT_BFX_EXTRACT ? "EXTRACT" : "UNKNOWN";
     default:
         return "UNKNOWN";
     }

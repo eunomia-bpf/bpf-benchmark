@@ -753,14 +753,19 @@ sample_result run_kernel(const cli_options &options)
         options.recompile_all;
     const bool want_recompile_lea =
         options.recompile_lea || options.recompile_all;
+    const bool want_recompile_extract =
+        options.recompile_extract || options.recompile_all;
     const bool skip_cmov = has_skip_family(options, "cmov");
     const bool skip_wide = has_skip_family(options, "wide");
     const bool skip_rotate = has_skip_family(options, "rotate");
     const bool skip_lea = has_skip_family(options, "lea");
+    const bool skip_extract = has_skip_family(options, "extract");
     const bool do_recompile_cmov = want_recompile_cmov && !skip_cmov;
     const bool do_recompile_wide = want_recompile_wide && !skip_wide;
     const bool do_recompile_rotate = want_recompile_rotate && !skip_rotate;
     const bool do_recompile_lea = want_recompile_lea && !skip_lea;
+    const bool do_recompile_extract =
+        want_recompile_extract && !skip_extract;
     directive_scan_summary directive_scan {};
     recompile_summary recompile {};
     recompile.skipped_families = options.skip_families;
@@ -772,23 +777,29 @@ sample_result run_kernel(const cli_options &options)
                             "rotate");
     append_recompile_family(recompile.requested_families, do_recompile_lea,
                             "lea");
+    append_recompile_family(recompile.requested_families,
+                            do_recompile_extract, "extract");
     recompile.requested =
         do_recompile_cmov || do_recompile_wide || do_recompile_rotate ||
-        do_recompile_lea || options.policy_blob.has_value();
+        do_recompile_lea || do_recompile_extract ||
+        options.policy_blob.has_value();
     if (options.policy_blob.has_value()) {
         recompile.mode = "policy-blob";
     } else if (options.recompile_v5) {
         recompile.mode = "auto-scan-v5";
-    } else if (do_recompile_cmov || do_recompile_wide || do_recompile_rotate || do_recompile_lea) {
+    } else if (do_recompile_cmov || do_recompile_wide || do_recompile_rotate ||
+               do_recompile_lea || do_recompile_extract) {
         recompile.mode = "auto-scan-v4";
     }
-    if (do_recompile_cmov || do_recompile_wide || do_recompile_rotate || do_recompile_lea ||
+    if (do_recompile_cmov || do_recompile_wide || do_recompile_rotate ||
+        do_recompile_lea || do_recompile_extract ||
         options.policy_blob.has_value()) {
         auto pre_info = load_prog_info(program_fd);
 
         std::vector<uint8_t> policy_data;
 
-        if (do_recompile_cmov || do_recompile_wide || do_recompile_rotate || do_recompile_lea) {
+        if (do_recompile_cmov || do_recompile_wide || do_recompile_rotate ||
+            do_recompile_lea || do_recompile_extract) {
             /*
              * Auto-scan the xlated BPF program for enabled pattern types
              * and build the combined policy blob from post-verifier bytecode.
@@ -807,6 +818,9 @@ sample_result run_kernel(const cli_options &options)
             if (want_recompile_lea && skip_lea) {
                 fprintf(stderr, "recompile-lea: skipped by --skip-families\n");
             }
+            if (want_recompile_extract && skip_extract) {
+                fprintf(stderr, "recompile-extract: skipped by --skip-families\n");
+            }
 
             /*
              * Scan the full translated program, including subprogs.
@@ -824,6 +838,7 @@ sample_result run_kernel(const cli_options &options)
                         .scan_wide = do_recompile_wide,
                         .scan_rotate = do_recompile_rotate,
                         .scan_lea = do_recompile_lea,
+                        .scan_extract = do_recompile_extract,
                         .use_rorx = options.recompile_rotate_rorx,
                     });
 
@@ -831,6 +846,7 @@ sample_result run_kernel(const cli_options &options)
                 directive_scan.wide_sites = summary.wide_sites;
                 directive_scan.rotate_sites = summary.rotate_sites;
                 directive_scan.lea_sites = summary.lea_sites;
+                directive_scan.bitfield_sites = summary.bitfield_sites;
 
                 auto print_v5_scan_status = [&](bool enabled,
                                                 uint64_t site_count,
@@ -859,6 +875,9 @@ sample_result run_kernel(const cli_options &options)
                                      "recompile-rotate", "rotate");
                 print_v5_scan_status(do_recompile_lea, directive_scan.lea_sites,
                                      "recompile-lea", "addr_calc");
+                print_v5_scan_status(do_recompile_extract,
+                                     directive_scan.bitfield_sites,
+                                     "recompile-extract", "bitfield_extract");
 
                 if (!summary.rules.empty()) {
                     policy_data = bpf_jit_scanner::build_policy_blob_v5(
@@ -920,6 +939,15 @@ sample_result run_kernel(const cli_options &options)
                                  [&](bpf_jit_scan_rule *out, uint32_t max_rules) {
                                      return bpf_jit_scan_addr_calc(xlated.data(), scan_len,
                                                                    out, max_rules);
+                                 });
+                }
+
+                if (do_recompile_extract) {
+                    append_rules(directive_scan.bitfield_sites,
+                                 "recompile-extract", "bitfield_extract",
+                                 [&](bpf_jit_scan_rule *out, uint32_t max_rules) {
+                                     return bpf_jit_scan_bitfield_extract(
+                                         xlated.data(), scan_len, out, max_rules);
                                  });
                 }
 

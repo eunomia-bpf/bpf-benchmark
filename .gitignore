@@ -1,39 +1,60 @@
 output*
-venv
-.vscode
 dump*
 !micro/dump_all_jit.sh
 wasm-wasmtime.exe
-__pycache__/
-*.pyc
 *.kernel.bin
 *.llvmbpf.bin
-micro/jit-dumps/
-third-party/
+*.directive.bin
+*.policy.bin
+
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# C/C++ and build outputs
+*.o
+*.a
+*.so
+build/
+micro/build/
+scanner/build/
 corpus/build/
+
+# BPF build artifacts
+*.bpf.o
+*.bpf.d
+
+# Generated benchmark inputs and project outputs
+micro/jit-dumps/
+micro/generated-inputs/
+third-party/
 corpus/bcf/
 corpus/repos/
 corpus/inventory.json
 corpus/results/
 reference/papers/*.pdf
 
-# BPF build artifacts
-*.bpf.o
-*.bpf.d
-
-# C++ build directory
-micro/build/
-scanner/build/
-
-# Generated benchmark inputs
-micro/generated-inputs/
-
-# Directive blobs
-*.directive.bin
-*.policy.bin
-
-# Temporary files
+# Temporary files and scratch results
 /tmp/
+*.tmp
+.tmp-*
+
+# Keep checked-in reports and end-to-end results
+!docs/tmp/
+!e2e/results/
 
 # Paper build artifacts
 docs/paper/*.aux

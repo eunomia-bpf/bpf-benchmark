@@ -57,6 +57,8 @@ extern "C" {
 #define BPF_JIT_RK_ROTATE       3
 /** Address calculation: replace shift-add with LEA */
 #define BPF_JIT_RK_ADDR_CALC    4
+/** Bitfield extract: replace shift/mask idioms with compact extract lowering */
+#define BPF_JIT_RK_BITFIELD_EXTRACT 5
 
 /* ------------------------------------------------------------------ */
 /* Native choice values — COND_SELECT                                   */
@@ -88,6 +90,12 @@ extern "C" {
 #define BPF_JIT_ACALC_SHIFT_ADD 2  /* keep shift + add                  */
 
 /* ------------------------------------------------------------------ */
+/* Native choice values — BITFIELD_EXTRACT                             */
+/* ------------------------------------------------------------------ */
+
+#define BPF_JIT_BFX_EXTRACT     1  /* use canonical bitfield lowering   */
+
+/* ------------------------------------------------------------------ */
 /* CPU feature requirement bits                                         */
 /* ------------------------------------------------------------------ */
 
@@ -102,8 +110,10 @@ extern "C" {
 #define BPF_JIT_SCAN_WIDE_MEM   (1U << 1)
 #define BPF_JIT_SCAN_ROTATE     (1U << 2)
 #define BPF_JIT_SCAN_ADDR_CALC  (1U << 3)
+#define BPF_JIT_SCAN_BITFIELD_EXTRACT (1U << 4)
 #define BPF_JIT_SCAN_ALL        (BPF_JIT_SCAN_CMOV | BPF_JIT_SCAN_WIDE_MEM | \
-                                 BPF_JIT_SCAN_ROTATE | BPF_JIT_SCAN_ADDR_CALC)
+                                 BPF_JIT_SCAN_ROTATE | BPF_JIT_SCAN_ADDR_CALC | \
+                                 BPF_JIT_SCAN_BITFIELD_EXTRACT)
 
 /* ------------------------------------------------------------------ */
 /* Rule struct — matches the 16-byte on-wire format                     */

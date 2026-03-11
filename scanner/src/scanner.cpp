@@ -8,6 +8,8 @@
 
 #include "bpf_jit_scanner/scanner.h"
 
+#include <algorithm>
+#include <array>
 #include <cerrno>
 #include <cstdio>
 #include <cstring>
@@ -161,6 +163,210 @@ static bool emit_rule(struct bpf_jit_scan_rule *rules, uint32_t max_rules,
     rules[count].cpu_features_required = cpu_feat;
     rules[count].priority              = priority;
     count++;
+    return true;
+}
+
+static bool match_bitfield_extract_pattern(const std::vector<bpf_insn_raw> &insns,
+                                           uint32_t idx, uint32_t site_len)
+{
+    constexpr uint8_t MOV64_X = 0xbf; // BPF_ALU64 | BPF_MOV | BPF_X
+    constexpr uint8_t MOV32_X = 0xbc; // BPF_ALU   | BPF_MOV | BPF_X
+    constexpr uint8_t RSH64_K = 0x77; // BPF_ALU64 | BPF_RSH | BPF_K
+    constexpr uint8_t RSH32_K = 0x74; // BPF_ALU   | BPF_RSH | BPF_K
+    constexpr uint8_t AND64_K = 0x57; // BPF_ALU64 | BPF_AND | BPF_K
+    constexpr uint8_t AND32_K = 0x54; // BPF_ALU   | BPF_AND | BPF_K
+
+    const bpf_insn_raw *mov_insn = nullptr;
+    const bpf_insn_raw *first = nullptr;
+    const bpf_insn_raw *second = nullptr;
+    uint8_t dst_reg;
+    uint8_t mov_opcode;
+    uint8_t rsh_opcode;
+    uint8_t and_opcode;
+    int32_t shift;
+    uint32_t width;
+
+    if (site_len == 3) {
+        if (idx + 2 >= insns.size())
+            return false;
+        mov_insn = &insns[idx];
+        first = &insns[idx + 1];
+        second = &insns[idx + 2];
+    } else if (site_len == 2) {
+        if (idx + 1 >= insns.size())
+            return false;
+        first = &insns[idx];
+        second = &insns[idx + 1];
+    } else {
+        return false;
+    }
+
+    switch (first->code) {
+    case RSH64_K:
+    case AND64_K:
+        width = 64;
+        mov_opcode = MOV64_X;
+        rsh_opcode = RSH64_K;
+        and_opcode = AND64_K;
+        break;
+    case RSH32_K:
+    case AND32_K:
+        width = 32;
+        mov_opcode = MOV32_X;
+        rsh_opcode = RSH32_K;
+        and_opcode = AND32_K;
+        break;
+    default:
+        return false;
+    }
+
+    if (mov_insn) {
+        if (mov_insn->code != mov_opcode || mov_insn->off != 0 || mov_insn->imm != 0)
+            return false;
+        dst_reg = raw_dst_reg(*mov_insn);
+        if (raw_dst_reg(*first) != dst_reg || raw_dst_reg(*second) != dst_reg)
+            return false;
+    } else {
+        dst_reg = raw_dst_reg(*first);
+        if (raw_dst_reg(*second) != dst_reg)
+            return false;
+    }
+
+    if (first->off != 0 || second->off != 0)
+        return false;
+
+    if (first->code == rsh_opcode && second->code == and_opcode) {
+        shift = first->imm;
+    } else if (first->code == and_opcode && second->code == rsh_opcode) {
+        shift = second->imm;
+    } else {
+        return false;
+    }
+
+    return shift >= 0 && shift < static_cast<int32_t>(width);
+}
+
+static bool parse_wide_mem_match_raw(const std::vector<bpf_insn_raw> &insns,
+                                     uint32_t idx,
+                                     wide_mem_match_raw &match)
+{
+    constexpr uint8_t LDXB_CODE  = 0x71; // BPF_LDX | BPF_MEM | BPF_B
+    constexpr uint8_t LSH64_CODE = 0x67; // BPF_ALU64 | BPF_LSH | BPF_K
+    constexpr uint8_t OR64_CODE  = 0x4f; // BPF_ALU64 | BPF_OR  | BPF_X
+
+    if (idx >= insns.size() || insns[idx].code != LDXB_CODE) {
+        return false;
+    }
+
+    const auto &first = insns[idx];
+    const uint8_t dst_reg = raw_dst_reg(first);
+    const uint8_t base_reg = raw_src_reg(first);
+
+    std::array<int16_t, 8> offsets = {};
+    std::array<uint8_t, 8> shifts = {};
+    offsets[0] = first.off;
+
+    uint32_t count = 1;
+    uint32_t pos = idx + 1;
+
+    if (pos < insns.size()) {
+        const auto &shift_insn = insns[pos];
+        if (shift_insn.code == LSH64_CODE &&
+            raw_dst_reg(shift_insn) == dst_reg &&
+            shift_insn.off == 0 &&
+            shift_insn.imm > 0 &&
+            shift_insn.imm < 64 &&
+            (shift_insn.imm % 8) == 0)
+        {
+            shifts[0] = static_cast<uint8_t>(shift_insn.imm);
+            pos++;
+        }
+    }
+
+    while (pos < insns.size()) {
+        const auto &load_insn = insns[pos];
+        uint32_t next = pos + 1;
+        uint8_t shift_imm = 0;
+
+        if (count == offsets.size() ||
+            load_insn.code != LDXB_CODE ||
+            raw_src_reg(load_insn) != base_reg ||
+            raw_dst_reg(load_insn) == dst_reg) {
+            break;
+        }
+
+        if (next < insns.size()) {
+            const auto &shift_insn = insns[next];
+            if (shift_insn.code == LSH64_CODE &&
+                raw_dst_reg(shift_insn) == raw_dst_reg(load_insn) &&
+                shift_insn.off == 0 &&
+                shift_insn.imm > 0 &&
+                shift_insn.imm < 64 &&
+                (shift_insn.imm % 8) == 0)
+            {
+                shift_imm = static_cast<uint8_t>(shift_insn.imm);
+                next++;
+            }
+        }
+
+        if (next >= insns.size()) {
+            break;
+        }
+
+        const auto &or_insn = insns[next];
+        if (or_insn.code != OR64_CODE ||
+            raw_dst_reg(or_insn) != dst_reg ||
+            raw_src_reg(or_insn) != raw_dst_reg(load_insn)) {
+            break;
+        }
+
+        offsets[count] = load_insn.off;
+        shifts[count] = shift_imm;
+        count++;
+        pos = next + 1;
+    }
+
+    if (count < 2) {
+        return false;
+    }
+
+    int16_t min_off = offsets[0];
+    int16_t max_off = offsets[0];
+    for (uint32_t i = 0; i < count; ++i) {
+        min_off = std::min(min_off, offsets[i]);
+        max_off = std::max(max_off, offsets[i]);
+        for (uint32_t j = i + 1; j < count; ++j) {
+            if (offsets[i] == offsets[j]) {
+                return false;
+            }
+        }
+    }
+
+    const int width = max_off - min_off + 1;
+    if (width != static_cast<int>(count) || width < 2 || width > 8) {
+        return false;
+    }
+
+    bool little_endian = true;
+    bool big_endian = true;
+    for (uint32_t i = 0; i < count; ++i) {
+        const uint8_t le_shift = static_cast<uint8_t>((offsets[i] - min_off) * 8);
+        const uint8_t be_shift = static_cast<uint8_t>((max_off - offsets[i]) * 8);
+        little_endian &= shifts[i] == le_shift;
+        big_endian &= shifts[i] == be_shift;
+    }
+
+    if (!little_endian && !big_endian) {
+        return false;
+    }
+
+    match.matched = true;
+    match.big_endian = !little_endian && big_endian;
+    match.site_len = pos - idx;
+    match.dst_reg = dst_reg;
+    match.base_reg = base_reg;
+    match.base_off = min_off;
+    match.width = static_cast<uint8_t>(width);
     return true;
 }
 
@@ -329,102 +535,21 @@ int bpf_jit_scan_wide_mem(const uint8_t *xlated, uint32_t len,
     if (insn_cnt < 4)
         return 0;
 
-    constexpr uint8_t LDXB_CODE  = 0x71; // BPF_LDX | BPF_MEM | BPF_B
-    constexpr uint8_t LSH64_CODE = 0x67; // BPF_ALU64 | BPF_LSH | BPF_K
-    constexpr uint8_t OR64_CODE  = 0x4f; // BPF_ALU64 | BPF_OR  | BPF_X
-
     uint32_t count = 0;
     uint32_t idx   = 0;
 
     while (idx < insn_cnt) {
-        if (insns[idx].code != LDXB_CODE) {
+        wide_mem_match_raw match = {};
+        if (!parse_wide_mem_match_raw(insns, idx, match)) {
             idx++;
             continue;
         }
 
-        uint8_t base_reg = (insns[idx].regs >> 4) & 0x0f;
-        int16_t base_off =  insns[idx].off;
-        uint8_t dst_reg  =  insns[idx].regs & 0x0f;
-
-        // High-byte-first 2-byte pattern (clang):
-        //   [0] ldxb tmp, [base+off+1]    (high byte — the first load IS the high byte)
-        //   [1] lsh64 tmp, 8
-        //   [2] ldxb dst2, [base+off]     (low byte — offset is base_off - 1)
-        //   [3] or64 tmp, dst2
-        if (idx + 3 < insn_cnt) {
-            const auto &shift_insn = insns[idx + 1];
-            const auto &lo_load    = insns[idx + 2];
-            const auto &or_insn    = insns[idx + 3];
-
-            if (shift_insn.code == LSH64_CODE &&
-                shift_insn.imm == 8 &&
-                (shift_insn.regs & 0x0f) == dst_reg &&
-                lo_load.code == LDXB_CODE &&
-                ((lo_load.regs >> 4) & 0x0f) == base_reg &&
-                lo_load.off == base_off - 1 &&
-                or_insn.code == OR64_CODE &&
-                (or_insn.regs & 0x0f) == dst_reg &&
-                ((or_insn.regs >> 4) & 0x0f) == (lo_load.regs & 0x0f))
-            {
-                if (!emit_rule(rules, max_rules, count,
-                               idx, 4, BPF_JIT_RK_WIDE_MEM, BPF_JIT_WMEM_WIDE_LOAD, 0))
-                    return -ENOBUFS;
-                idx += 4;
-                continue;
-            }
-        }
-
-        // Low-byte-first pattern (generic):
-        //   [0]           ldxb dst,  [base+off]
-        //   [1]           ldxb tmp,  [base+off+1]
-        //   [2]           lsh64 tmp, 8
-        //   [3]           or64  dst, tmp
-        //   [4]           ldxb tmp,  [base+off+2]
-        //   [5]           lsh64 tmp, 16
-        //   [6]           or64  dst, tmp
-        //   ...
-        uint32_t n_extra = 0;
-        while (idx + 1 + n_extra * 3 + 2 < insn_cnt) {
-            uint32_t g = idx + 1 + n_extra * 3;
-            const auto &load_insn  = insns[g];
-            const auto &shift_insn = insns[g + 1];
-            const auto &or_insn    = insns[g + 2];
-
-            uint8_t load_src  = (load_insn.regs >> 4) & 0x0f;
-            uint8_t load_dst  =  load_insn.regs & 0x0f;
-            uint8_t shift_dst =  shift_insn.regs & 0x0f;
-            uint8_t or_dst    =  or_insn.regs & 0x0f;
-            uint8_t or_src    = (or_insn.regs >> 4) & 0x0f;
-
-            if (load_insn.code != LDXB_CODE) break;
-            if (load_src != base_reg) break;
-            if (load_insn.off != base_off + static_cast<int16_t>(n_extra + 1)) break;
-            if (shift_insn.code != LSH64_CODE) break;
-            if (shift_dst != load_dst) break;
-            if (shift_insn.imm != static_cast<int32_t>((n_extra + 1) * 8)) break;
-            if (or_insn.code != OR64_CODE) break;
-            if (or_dst != dst_reg) break;
-            if (or_src != load_dst) break;
-
-            n_extra++;
-            if (n_extra == 7) break; // max 8 bytes total
-        }
-
-        if (n_extra == 0) {
-            idx++;
-            continue;
-        }
-
-        uint32_t total_bytes = n_extra + 1;
-        if (total_bytes == 2 || total_bytes == 4 || total_bytes == 8) {
-            uint32_t site_len = 1 + n_extra * 3;
-            if (!emit_rule(rules, max_rules, count,
-                           idx, site_len, BPF_JIT_RK_WIDE_MEM, BPF_JIT_WMEM_WIDE_LOAD, 0))
-                return -ENOBUFS;
-            idx += site_len;
-        } else {
-            idx++; // unsupported width — skip first insn and retry
-        }
+        if (!emit_rule(rules, max_rules, count,
+                       idx, match.site_len,
+                       BPF_JIT_RK_WIDE_MEM, BPF_JIT_WMEM_WIDE_LOAD, 0))
+            return -ENOBUFS;
+        idx += match.site_len;
     }
 
     return static_cast<int>(count);
@@ -772,6 +897,48 @@ int bpf_jit_scan_addr_calc(const uint8_t *xlated, uint32_t len,
 }
 
 // ---------------------------------------------------------------------------
+// bpf_jit_scan_bitfield_extract
+// ---------------------------------------------------------------------------
+
+int bpf_jit_scan_bitfield_extract(const uint8_t *xlated, uint32_t len,
+                                  struct bpf_jit_scan_rule *rules,
+                                  uint32_t max_rules)
+{
+    if (!xlated || len % 8 != 0)
+        return -EINVAL;
+
+    std::vector<bpf_insn_raw> insns;
+    parse_insns(xlated, len, insns);
+    uint32_t insn_cnt = static_cast<uint32_t>(insns.size());
+
+    if (insn_cnt < 2)
+        return 0;
+
+    uint32_t count = 0;
+
+    for (uint32_t idx = 0; idx < insn_cnt; idx++) {
+        if (match_bitfield_extract_pattern(insns, idx, 3)) {
+            if (!emit_rule(rules, max_rules, count,
+                           idx, 3, BPF_JIT_RK_BITFIELD_EXTRACT,
+                           BPF_JIT_BFX_EXTRACT, 0))
+                return -ENOBUFS;
+            idx += 2;
+            continue;
+        }
+
+        if (match_bitfield_extract_pattern(insns, idx, 2)) {
+            if (!emit_rule(rules, max_rules, count,
+                           idx, 2, BPF_JIT_RK_BITFIELD_EXTRACT,
+                           BPF_JIT_BFX_EXTRACT, 0))
+                return -ENOBUFS;
+            idx += 1;
+        }
+    }
+
+    return static_cast<int>(count);
+}
+
+// ---------------------------------------------------------------------------
 // bpf_jit_scan_all
 // ---------------------------------------------------------------------------
 
@@ -804,6 +971,13 @@ int bpf_jit_scan_all(const uint8_t *xlated, uint32_t len,
     if (scan_flags & BPF_JIT_SCAN_ADDR_CALC) {
         if (total >= max_rules && max_rules > 0) return -ENOBUFS;
         int n = bpf_jit_scan_addr_calc(xlated, len, rules + total, max_rules - total);
+        if (n < 0) return n;
+        total += static_cast<uint32_t>(n);
+    }
+    if (scan_flags & BPF_JIT_SCAN_BITFIELD_EXTRACT) {
+        if (total >= max_rules && max_rules > 0) return -ENOBUFS;
+        int n = bpf_jit_scan_bitfield_extract(xlated, len, rules + total,
+                                              max_rules - total);
         if (n < 0) return n;
         total += static_cast<uint32_t>(n);
     }

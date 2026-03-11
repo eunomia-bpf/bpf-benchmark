@@ -102,6 +102,25 @@ int bpf_jit_scan_addr_calc(const uint8_t *xlated, uint32_t len,
                            struct bpf_jit_scan_rule *rules, uint32_t max_rules);
 
 /**
+ * bpf_jit_scan_bitfield_extract() - scan for bitfield extract idioms
+ * @xlated:    raw xlated BPF bytecode
+ * @len:       length in bytes
+ * @rules:     output array
+ * @max_rules: capacity of @rules
+ *
+ * Recognizes:
+ *   rsh{32,64} dst, shift ; and{32,64} dst, mask
+ *   and{32,64} dst, mask ; rsh{32,64} dst, shift
+ * and the corresponding 3-insn reg-copy forms:
+ *   mov{32,64} dst, src ; <pair above>
+ *
+ * Returns number of rules written, or negative on error.
+ */
+int bpf_jit_scan_bitfield_extract(const uint8_t *xlated, uint32_t len,
+                                  struct bpf_jit_scan_rule *rules,
+                                  uint32_t max_rules);
+
+/**
  * bpf_jit_scan_all() - scan for all enabled pattern families
  * @xlated:     raw xlated BPF bytecode
  * @len:        length in bytes
@@ -110,8 +129,9 @@ int bpf_jit_scan_addr_calc(const uint8_t *xlated, uint32_t len,
  * @rules:      output array
  * @max_rules:  capacity of @rules
  *
- * Runs all enabled scanners in order (cmov, wide_mem, rotate, addr_calc)
- * and collects results into @rules.
+ * Runs all enabled scanners in order
+ * (cmov, wide_mem, rotate, addr_calc, bitfield_extract) and collects
+ * results into @rules.
  *
  * Returns total number of rules written across all families, or negative
  * on error (ENOBUFS if the combined result would exceed @max_rules).

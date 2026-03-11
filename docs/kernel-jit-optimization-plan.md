@@ -114,6 +114,11 @@
 | Phase 2 (v4→v5) | Post-load re-JIT + 通用 dispatch + 声明式 pattern | ✅ |
 | Phase 3 | 跨架构 + 自动化 + 端到端部署 | ❌ |
 
+> **⚠️ v4 已废弃（DEPRECATED）**：v4 路径（policy version 1, `bpf_jit_rewrite_rule` 固定记录）不再接受任何修改。
+> 所有新 directive、新 pattern、新 emitter 必须走 v5 声明式路径（policy version 2, `BPF_JIT_RK_PATTERN`）。
+> v4 代码保留仅供向后兼容和调试参考，不会被删除但不会被扩展。
+> 原因：v5 实现了"新 pattern 只需用户态"的核心设计目标，v4 每个新 pattern 都需要 kernel 改动，违背论文 thesis。
+
 ---
 
 ## 2. Characterization 证据摘要

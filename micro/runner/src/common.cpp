@@ -83,6 +83,10 @@ std::optional<std::string> canonical_skip_family_name(std::string_view input)
         normalized == "addrcalc") {
         return std::string("lea");
     }
+    if (normalized == "extract" || normalized == "bitfield" ||
+        normalized == "bitfield-extract" || normalized == "bit-extract") {
+        return std::string("extract");
+    }
     return std::nullopt;
 }
 
@@ -107,7 +111,7 @@ void append_skip_families(std::vector<std::string> &families,
             const auto normalized = canonical_skip_family_name(token);
             if (!normalized.has_value()) {
                 fail("unknown family in --skip-families: " + token +
-                     " (expected cmov, wide, rotate, or lea)");
+                     " (expected cmov, wide, rotate, lea, or extract)");
             }
             append_unique(families, *normalized);
         }
@@ -202,7 +206,7 @@ cli_options parse_args(int argc, char **argv)
         fail(
             "usage: micro_exec <run-llvmbpf|run-kernel|list-programs> --program <path> [--program-name <name>] "
             "[--memory|--input <path>] [--btf-custom-path <path>] [--directive-blob <path>] [--policy-blob <path>] "
-            "[--manual-load] [--recompile-cmov] [--recompile-wide|--recompile-wide-mem] [--recompile-rotate] [--recompile-rotate-rorx] [--recompile-lea] [--recompile-all] [--recompile-v5] [--skip-families cmov,wide,rotate,lea] "
+            "[--manual-load] [--recompile-cmov] [--recompile-wide|--recompile-wide-mem] [--recompile-rotate] [--recompile-rotate-rorx] [--recompile-lea] [--recompile-extract|--recompile-bitfield-extract] [--recompile-all] [--recompile-v5] [--skip-families cmov,wide,rotate,lea,extract] "
             "[--io-mode map|staged|packet|context] [--raw-packet] [--repeat N] [--input-size|--kernel-input-size N] "
             "[--opt-level 0|1|2|3] [--no-cmov] [--llvm-disable-pass <name>] [--llvm-log-passes] "
             "[--perf-counters] [--perf-scope full_repeat_raw|full_repeat_avg] "
@@ -252,6 +256,11 @@ cli_options parse_args(int argc, char **argv)
         }
         if (current == "--recompile-lea") {
             options.recompile_lea = true;
+            continue;
+        }
+        if (current == "--recompile-extract" ||
+            current == "--recompile-bitfield-extract") {
+            options.recompile_extract = true;
             continue;
         }
         if (current == "--recompile-all") {
@@ -361,6 +370,9 @@ cli_options parse_args(int argc, char **argv)
     if (options.recompile_lea && options.command != "run-kernel") {
         fail("--recompile-lea is only valid with run-kernel");
     }
+    if (options.recompile_extract && options.command != "run-kernel") {
+        fail("--recompile-extract is only valid with run-kernel");
+    }
     if (options.recompile_rotate_rorx && options.command != "run-kernel") {
         fail("--recompile-rotate-rorx is only valid with run-kernel");
     }
@@ -376,7 +388,8 @@ cli_options parse_args(int argc, char **argv)
     if (options.recompile_v5 &&
         !(options.recompile_cmov || options.recompile_rotate ||
           options.recompile_rotate_rorx || options.recompile_wide ||
-          options.recompile_lea || options.recompile_all)) {
+          options.recompile_lea || options.recompile_extract ||
+          options.recompile_all)) {
         fail("--recompile-v5 requires at least one recompile family or --recompile-all");
     }
     if (!options.skip_families.empty() && options.policy_blob.has_value()) {
@@ -385,7 +398,8 @@ cli_options parse_args(int argc, char **argv)
     if (!options.skip_families.empty() &&
         !(options.recompile_cmov || options.recompile_rotate ||
           options.recompile_rotate_rorx || options.recompile_wide ||
-          options.recompile_lea || options.recompile_all)) {
+          options.recompile_lea || options.recompile_extract ||
+          options.recompile_all)) {
         fail("--skip-families requires an auto-scan recompile family or --recompile-all");
     }
     if (options.command != "list-programs") {
@@ -412,7 +426,8 @@ void print_json(const sample_result &sample)
         sample.directive_scan.cmov_sites +
         sample.directive_scan.wide_sites +
         sample.directive_scan.rotate_sites +
-        sample.directive_scan.lea_sites;
+        sample.directive_scan.lea_sites +
+        sample.directive_scan.bitfield_sites;
 
     std::cout
         << "{"
@@ -503,6 +518,7 @@ void print_json(const sample_result &sample)
         << "\"wide_sites\":" << sample.directive_scan.wide_sites << ","
         << "\"rotate_sites\":" << sample.directive_scan.rotate_sites << ","
         << "\"lea_sites\":" << sample.directive_scan.lea_sites << ","
+        << "\"bitfield_sites\":" << sample.directive_scan.bitfield_sites << ","
         << "\"total_sites\":" << total_directive_sites
         << "},"
         << "\"recompile\":{"

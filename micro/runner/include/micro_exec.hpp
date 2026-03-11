@@ -49,6 +49,7 @@ struct cli_options {
     bool recompile_rotate = false;                      // v4 auto-scan xlated for rotate
     bool recompile_rotate_rorx = false;                 // v4 rotate with RORX (BMI2)
     bool recompile_lea = false;                         // v4 auto-scan xlated for lea fusion
+    bool recompile_extract = false;                     // v4 auto-scan xlated for bitfield extract
     bool recompile_all = false;                         // auto-scan for all pattern types
     bool recompile_v5 = false;                          // use v5 declarative pattern blob
     std::vector<std::string> skip_families;             // skip selected auto-scan families
@@ -105,6 +106,7 @@ struct directive_scan_summary {
     uint64_t wide_sites = 0;
     uint64_t rotate_sites = 0;
     uint64_t lea_sites = 0;
+    uint64_t bitfield_sites = 0;
 };
 
 struct recompile_summary {

@@ -12,7 +12,7 @@
 #endif
 
 #ifndef BPF_JIT_RK_PATTERN
-#define BPF_JIT_RK_PATTERN 5
+#define BPF_JIT_RK_PATTERN 6
 #endif
 
 #ifndef BPF_JIT_CF_ROTATE
@@ -20,6 +20,7 @@
 #define BPF_JIT_CF_WIDE_MEM 2
 #define BPF_JIT_CF_ADDR_CALC 3
 #define BPF_JIT_CF_COND_SELECT 4
+#define BPF_JIT_CF_BITFIELD_EXTRACT 5
 #endif
 
 #ifndef BPF_JIT_MAX_PATTERN_LEN
@@ -67,11 +68,34 @@
 #define BPF_JIT_WMEM_PARAM_WIDTH 3
 #endif
 
+#ifndef BPF_JIT_WMEM_WIDTH_MASK
+#define BPF_JIT_WMEM_WIDTH_MASK 0xffU
+#define BPF_JIT_WMEM_F_BIG_ENDIAN (1U << 8)
+#endif
+
 #ifndef BPF_JIT_ACALC_PARAM_DST_REG
 #define BPF_JIT_ACALC_PARAM_DST_REG 0
 #define BPF_JIT_ACALC_PARAM_BASE_REG 1
 #define BPF_JIT_ACALC_PARAM_INDEX_REG 2
 #define BPF_JIT_ACALC_PARAM_SCALE 3
+#endif
+
+#ifndef BPF_JIT_BFX_EXTRACT
+#define BPF_JIT_BFX_EXTRACT 1
+#endif
+
+#ifndef BPF_JIT_BFX_PARAM_DST_REG
+#define BPF_JIT_BFX_PARAM_DST_REG 0
+#define BPF_JIT_BFX_PARAM_SRC_REG 1
+#define BPF_JIT_BFX_PARAM_SHIFT 2
+#define BPF_JIT_BFX_PARAM_MASK 3
+#define BPF_JIT_BFX_PARAM_WIDTH 4
+#define BPF_JIT_BFX_PARAM_ORDER 5
+#endif
+
+#ifndef BPF_JIT_BFX_ORDER_SHIFT_MASK
+#define BPF_JIT_BFX_ORDER_SHIFT_MASK 0
+#define BPF_JIT_BFX_ORDER_MASK_SHIFT 1
 #endif
 
 #ifndef BPF_JIT_SEL_PARAM_DST_REG
@@ -91,6 +115,7 @@ enum class V5Family {
     WideMem,
     Rotate,
     AddrCalc,
+    BitfieldExtract,
 };
 
 struct __attribute__((packed)) V5PatternInsn {
@@ -172,6 +197,7 @@ struct V5ScanOptions {
     bool scan_wide = false;
     bool scan_rotate = false;
     bool scan_lea = false;
+    bool scan_extract = false;
     bool use_rorx = false;
 };
 
@@ -181,6 +207,7 @@ struct V5ScanSummary {
     uint64_t wide_sites = 0;
     uint64_t rotate_sites = 0;
     uint64_t lea_sites = 0;
+    uint64_t bitfield_sites = 0;
 };
 
 const char *v5_family_name(V5Family family);
@@ -189,6 +216,7 @@ std::vector<V5PatternDesc> build_v5_cond_select_descriptors();
 std::vector<V5PatternDesc> build_v5_wide_descriptors();
 std::vector<V5PatternDesc> build_v5_rotate_descriptors(bool use_rorx);
 std::vector<V5PatternDesc> build_v5_lea_descriptors();
+std::vector<V5PatternDesc> build_v5_bitfield_extract_descriptors();
 
 V5ScanSummary scan_v5_builtin(const uint8_t *xlated_data,
                               uint32_t xlated_len,

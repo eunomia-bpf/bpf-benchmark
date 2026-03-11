@@ -664,6 +664,18 @@ benchmarks:
     expected_result: 9354240374969449171
     tags: [memory, fields, fixed-offsets, pure-jit]
 
+  - name: bitfield_extract
+    description: Packed-word bitfield extraction over staged two-word records
+    category: memory-local
+    family: bitfield-extract
+    level: packed-records
+    hypothesis: Repeated constant shift-and-mask extracts should reward compact canonical extract lowering over packed inputs
+    base_name: bitfield_extract
+    kernel_input_size: 520
+    input_generator: bitfield_extract
+    expected_result: 12211926182125163441
+    tags: [memory, fields, bitfield, pure-jit]
+
   - name: smallmul_strength_reduce
     description: Hot loop dominated by multiply-by-small-constant arithmetic and index scaling
     category: alu-mix

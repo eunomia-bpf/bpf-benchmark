@@ -84,6 +84,7 @@ constexpr uint8_t BPF_RSH32_K = 0x74;
 constexpr uint8_t BPF_OR64_X = 0x4f;
 constexpr uint8_t BPF_OR32_X = 0x4c;
 constexpr uint8_t BPF_AND64_K = 0x57;
+constexpr uint8_t BPF_AND32_K = 0x54;
 constexpr uint8_t BPF_AND64_X = 0x5f;
 constexpr uint8_t BPF_XOR64_X = 0xaf;
 constexpr uint8_t BPF_LDXB = 0x71;
@@ -124,6 +125,15 @@ void test_c_api_scanners()
         {BPF_LSH64_K, regs(2, 0), 0, 2},
         {BPF_ADD64_X, regs(2, 4), 0, 0},
     });
+    auto extract = encode({
+        {BPF_MOV64_X, regs(2, 1), 0, 0},
+        {BPF_RSH64_K, regs(2, 0), 0, 13},
+        {BPF_AND64_K, regs(2, 0), 0, 0x1ff},
+    });
+    auto extract32 = encode({
+        {BPF_RSH32_K, regs(3, 0), 0, 5},
+        {BPF_AND32_K, regs(3, 0), 0, 0x7f},
+    });
 
     bpf_jit_scan_rule rules[8];
     CHECK_EQ(bpf_jit_scan_cmov(cmov.data(), static_cast<uint32_t>(cmov.size()), rules, 8), 1);
@@ -131,6 +141,45 @@ void test_c_api_scanners()
                                  false, rules, 8), 1);
     CHECK_EQ(bpf_jit_scan_wide_mem(wide.data(), static_cast<uint32_t>(wide.size()), rules, 8), 1);
     CHECK_EQ(bpf_jit_scan_addr_calc(lea.data(), static_cast<uint32_t>(lea.size()), rules, 8), 1);
+    CHECK_EQ(bpf_jit_scan_bitfield_extract(extract.data(),
+                                           static_cast<uint32_t>(extract.size()),
+                                           rules, 8), 1);
+    CHECK_EQ(rules[0].site_len, 3u);
+    CHECK_EQ(bpf_jit_scan_bitfield_extract(extract32.data(),
+                                           static_cast<uint32_t>(extract32.size()),
+                                           rules, 8), 1);
+    CHECK_EQ(rules[0].site_len, 2u);
+
+    auto wide3 = encode({
+        {BPF_LDXB, regs(1, 2), 0, 0},
+        {BPF_LDXB, regs(3, 2), 1, 0},
+        {BPF_LSH64_K, regs(3, 0), 0, 8},
+        {BPF_OR64_X, regs(1, 3), 0, 0},
+        {BPF_LDXB, regs(4, 2), 2, 0},
+        {BPF_LSH64_K, regs(4, 0), 0, 16},
+        {BPF_OR64_X, regs(1, 4), 0, 0},
+    });
+    CHECK_EQ(bpf_jit_scan_wide_mem(wide3.data(),
+                                   static_cast<uint32_t>(wide3.size()),
+                                   rules, 8), 1);
+    CHECK_EQ(rules[0].site_len, 7u);
+
+    auto packet_be = encode({
+        {BPF_LDXB, regs(1, 2), 0x12, 0},
+        {BPF_LSH64_K, regs(1, 0), 0, 24},
+        {BPF_LDXB, regs(3, 2), 0x13, 0},
+        {BPF_LSH64_K, regs(3, 0), 0, 16},
+        {BPF_OR64_X, regs(1, 3), 0, 0},
+        {BPF_LDXB, regs(4, 2), 0x14, 0},
+        {BPF_LSH64_K, regs(4, 0), 0, 8},
+        {BPF_OR64_X, regs(1, 4), 0, 0},
+        {BPF_LDXB, regs(5, 2), 0x15, 0},
+        {BPF_OR64_X, regs(1, 5), 0, 0},
+    });
+    CHECK_EQ(bpf_jit_scan_wide_mem(packet_be.data(),
+                                   static_cast<uint32_t>(packet_be.size()),
+                                   rules, 8), 1);
+    CHECK_EQ(rules[0].site_len, 10u);
 }
 
 void test_engine_static_cmov_policy()
@@ -378,6 +427,41 @@ void test_v5_rotate_masked_x_scan()
     CHECK_EQ(summary.rules[0].bindings.size(), 4u);
 }
 
+void test_v5_bitfield_extract_scan()
+{
+    using bpf_jit_scanner::V5ScanOptions;
+
+    auto extract = encode({
+        {BPF_MOV64_X, regs(2, 1), 0, 0},
+        {BPF_RSH64_K, regs(2, 0), 0, 13},
+        {BPF_AND64_K, regs(2, 0), 0, 0x1ff},
+    });
+    auto mask_then_shift = encode({
+        {BPF_AND32_K, regs(3, 0), 0, 0x03f8},
+        {BPF_RSH32_K, regs(3, 0), 0, 3},
+    });
+
+    auto extract_summary = bpf_jit_scanner::scan_v5_builtin(
+        extract.data(), static_cast<uint32_t>(extract.size()),
+        V5ScanOptions {.scan_extract = true});
+    CHECK_EQ(extract_summary.rules.size(), 1u);
+    CHECK_EQ(extract_summary.bitfield_sites, 1u);
+    CHECK_EQ(extract_summary.rules[0].canonical_form,
+             static_cast<uint16_t>(BPF_JIT_CF_BITFIELD_EXTRACT));
+    CHECK_EQ(extract_summary.rules[0].native_choice,
+             static_cast<uint16_t>(BPF_JIT_BFX_EXTRACT));
+    CHECK_EQ(extract_summary.rules[0].pattern.size(), 3u);
+    CHECK_EQ(extract_summary.rules[0].bindings.size(), 6u);
+
+    auto mask_shift_summary = bpf_jit_scanner::scan_v5_builtin(
+        mask_then_shift.data(), static_cast<uint32_t>(mask_then_shift.size()),
+        V5ScanOptions {.scan_extract = true});
+    CHECK_EQ(mask_shift_summary.rules.size(), 1u);
+    CHECK_EQ(mask_shift_summary.bitfield_sites, 1u);
+    CHECK_EQ(mask_shift_summary.rules[0].pattern.size(), 2u);
+    CHECK_EQ(mask_shift_summary.rules[0].bindings.size(), 6u);
+}
+
 void test_c_api_cmov_broadening()
 {
     auto wider_diamond = encode({
@@ -473,6 +557,49 @@ void test_v5_cmov_broadening_scan()
     CHECK_EQ(switch_summary.rules[0].pattern.size(), 6u);
 }
 
+void test_v5_wide_scan_variants()
+{
+    using bpf_jit_scanner::V5ScanOptions;
+
+    auto wide3 = encode({
+        {BPF_LDXB, regs(1, 2), 0, 0},
+        {BPF_LDXB, regs(3, 2), 1, 0},
+        {BPF_LSH64_K, regs(3, 0), 0, 8},
+        {BPF_OR64_X, regs(1, 3), 0, 0},
+        {BPF_LDXB, regs(4, 2), 2, 0},
+        {BPF_LSH64_K, regs(4, 0), 0, 16},
+        {BPF_OR64_X, regs(1, 4), 0, 0},
+    });
+    auto wide3_summary = bpf_jit_scanner::scan_v5_builtin(
+        wide3.data(), static_cast<uint32_t>(wide3.size()),
+        V5ScanOptions {.scan_wide = true});
+    CHECK_EQ(wide3_summary.rules.size(), 1u);
+    CHECK_EQ(wide3_summary.wide_sites, 1u);
+    CHECK_EQ(wide3_summary.rules[0].pattern.size(), 7u);
+    CHECK_EQ(wide3_summary.rules[0].bindings.back().inline_const, 3);
+
+    auto packet_be = encode({
+        {BPF_LDXB, regs(1, 2), 0x22, 0},
+        {BPF_LSH64_K, regs(1, 0), 0, 24},
+        {BPF_LDXB, regs(3, 2), 0x23, 0},
+        {BPF_LSH64_K, regs(3, 0), 0, 16},
+        {BPF_OR64_X, regs(1, 3), 0, 0},
+        {BPF_LDXB, regs(4, 2), 0x24, 0},
+        {BPF_LSH64_K, regs(4, 0), 0, 8},
+        {BPF_OR64_X, regs(1, 4), 0, 0},
+        {BPF_LDXB, regs(5, 2), 0x25, 0},
+        {BPF_OR64_X, regs(1, 5), 0, 0},
+    });
+    auto packet_summary = bpf_jit_scanner::scan_v5_builtin(
+        packet_be.data(), static_cast<uint32_t>(packet_be.size()),
+        V5ScanOptions {.scan_wide = true});
+    CHECK_EQ(packet_summary.rules.size(), 1u);
+    CHECK_EQ(packet_summary.wide_sites, 1u);
+    CHECK_EQ(packet_summary.rules[0].pattern.size(), 10u);
+    CHECK_EQ(packet_summary.rules[0].bindings.back().inline_const,
+             static_cast<int32_t>(4 | BPF_JIT_WMEM_F_BIG_ENDIAN));
+}
+
 } // namespace
 
 int main()
@@ -488,6 +615,8 @@ int main()
     test_v5_cmov_scan_and_blob();
     test_v5_cmov_broadening_scan();
     test_v5_rotate_masked_x_scan();
+    test_v5_bitfield_extract_scan();
+    test_v5_wide_scan_variants();
 
     std::printf("\n%s: %d passed, %d failed\n",
                 g_fail == 0 ? "OK" : "FAIL", g_pass, g_fail);

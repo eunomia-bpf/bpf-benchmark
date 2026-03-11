@@ -341,6 +341,8 @@ void print_usage(const char *prog)
         "  --wide-mem   Byte-ladder wide-load sites\n"
         "  --rotate     Rotate idioms\n"
         "  --lea        Address-calculation sites\n"
+        "  --bitfield-extract, --extract\n"
+        "               Bitfield extract sites\n"
         "  --rorx       Prefer RORX for rotate sites\n"
         "  --v5         Use the v5 declarative-pattern scanner/blob format\n"
         "\n"
@@ -429,6 +431,9 @@ CommandOptions parse_args(int argc, char **argv)
         } else if (arg == "--lea") {
             options.scan_options.families.push_back("lea");
             families_explicit = true;
+        } else if (arg == "--bitfield-extract" || arg == "--extract") {
+            options.scan_options.families.push_back("bitfield-extract");
+            families_explicit = true;
         } else if (arg == "--rorx") {
             options.scan_options.use_rorx = true;
         } else if (arg == "--v5") {
@@ -509,6 +514,8 @@ void print_v5_summary(const bpf_jit_scanner::V5ScanSummary &summary)
                 static_cast<unsigned long long>(summary.rotate_sites));
     std::printf("  lea:    %llu\n",
                 static_cast<unsigned long long>(summary.lea_sites));
+    std::printf("  extract:%llu\n",
+                static_cast<unsigned long long>(summary.bitfield_sites));
 }
 
 bpf_jit_scanner::V5ScanOptions make_v5_scan_options(const CommandOptions &options)
@@ -525,6 +532,7 @@ bpf_jit_scanner::V5ScanOptions make_v5_scan_options(const CommandOptions &option
     v5.scan_wide = use_all || has_family("wide-mem");
     v5.scan_rotate = use_all || has_family("rotate");
     v5.scan_lea = use_all || has_family("lea");
+    v5.scan_extract = use_all || has_family("bitfield-extract");
     v5.use_rorx = options.scan_options.use_rorx;
     return v5;
 }

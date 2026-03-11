@@ -702,6 +702,8 @@ const char *v5_family_name(V5Family family)
         return "rotate";
     case V5Family::AddrCalc:
         return "addr_calc";
+    case V5Family::BitfieldExtract:
+        return "bitfield_extract";
     default:
         return "unknown";
     }
@@ -794,17 +796,63 @@ std::vector<V5PatternDesc> build_v5_wide_descriptors()
         };
     };
 
+    auto build_wide_be_high_first_pattern = [&](uint32_t total_bytes) {
+        std::vector<V5PatternInsn> pattern;
+        pattern.reserve(3 * total_bytes - 2);
+        pattern.push_back(make_pattern_insn(kLdxb, 1, 2, 0, 3, kExpectZero,
+                                            0, 0, 0, 0));
+        if (total_bytes > 1) {
+            pattern.push_back(make_pattern_insn(
+                kLsh64, 1, 0, 0, 0, kExpectZeroOffImm, 0, 0, 0,
+                static_cast<int32_t>((total_bytes - 1) * 8)));
+        }
+
+        for (uint32_t i = 1; i < total_bytes; ++i) {
+            const uint8_t tmp_reg_var = static_cast<uint8_t>(3 + i);
+            const uint8_t off_var = static_cast<uint8_t>(6 + i);
+
+            pattern.push_back(make_pattern_insn(kLdxb, tmp_reg_var, 2, 0,
+                                                off_var, kExpectZero, 0, 0, 0, 0));
+            if (i + 1 != total_bytes) {
+                pattern.push_back(make_pattern_insn(
+                    kLsh64, tmp_reg_var, 0, 0, 0, kExpectZeroOffImm,
+                    0, 0, 0,
+                    static_cast<int32_t>((total_bytes - i - 1) * 8)));
+            }
+            pattern.push_back(make_pattern_insn(kOr64, 1, tmp_reg_var, 0, 0,
+                                                kExpectZeroOffImm, 0, 0, 0, 0));
+        }
+
+        return pattern;
+    };
+
+    auto build_wide_be_bindings = [&](uint32_t total_bytes) {
+        return std::vector<V5Binding>{
+            make_var_binding(BPF_JIT_WMEM_PARAM_DST_REG, 1,
+                             BPF_JIT_BIND_SOURCE_REG),
+            make_var_binding(BPF_JIT_WMEM_PARAM_BASE_REG, 2,
+                             BPF_JIT_BIND_SOURCE_REG),
+            make_var_binding(BPF_JIT_WMEM_PARAM_BASE_OFF, 3,
+                             BPF_JIT_BIND_SOURCE_IMM),
+            make_const_binding(BPF_JIT_WMEM_PARAM_WIDTH,
+                               static_cast<int32_t>(total_bytes |
+                                                    BPF_JIT_WMEM_F_BIG_ENDIAN)),
+        };
+    };
+
     std::vector<V5PatternDesc> descs;
-    descs.push_back(make_v5_desc(V5Family::WideMem, BPF_JIT_CF_WIDE_MEM,
-                                 BPF_JIT_WMEM_WIDE_LOAD, 0,
-                                 build_wide_low_first_pattern(8),
-                                 build_wide_low_first_constraints(8),
-                                 build_wide_bindings(8)));
-    descs.push_back(make_v5_desc(V5Family::WideMem, BPF_JIT_CF_WIDE_MEM,
-                                 BPF_JIT_WMEM_WIDE_LOAD, 0,
-                                 build_wide_low_first_pattern(4),
-                                 build_wide_low_first_constraints(4),
-                                 build_wide_bindings(4)));
+    for (const uint32_t width : {8U, 7U, 6U, 5U, 4U, 3U, 2U}) {
+        descs.push_back(make_v5_desc(V5Family::WideMem, BPF_JIT_CF_WIDE_MEM,
+                                     BPF_JIT_WMEM_WIDE_LOAD, 0,
+                                     build_wide_low_first_pattern(width),
+                                     build_wide_low_first_constraints(width),
+                                     build_wide_bindings(width)));
+        descs.push_back(make_v5_desc(V5Family::WideMem, BPF_JIT_CF_WIDE_MEM,
+                                     BPF_JIT_WMEM_WIDE_LOAD, 0,
+                                     build_wide_be_high_first_pattern(width),
+                                     build_wide_low_first_constraints(width),
+                                     build_wide_be_bindings(width)));
+    }
     descs.push_back(make_v5_desc(
         V5Family::WideMem, BPF_JIT_CF_WIDE_MEM, BPF_JIT_WMEM_WIDE_LOAD, 0,
         {
@@ -833,11 +881,6 @@ std::vector<V5PatternDesc> build_v5_wide_descriptors()
                              BPF_JIT_BIND_SOURCE_IMM),
             make_const_binding(BPF_JIT_WMEM_PARAM_WIDTH, 2),
         }));
-    descs.push_back(make_v5_desc(V5Family::WideMem, BPF_JIT_CF_WIDE_MEM,
-                                 BPF_JIT_WMEM_WIDE_LOAD, 0,
-                                 build_wide_low_first_pattern(2),
-                                 build_wide_low_first_constraints(2),
-                                 build_wide_bindings(2)));
 
     return descs;
 }
@@ -1066,6 +1109,119 @@ std::vector<V5PatternDesc> build_v5_lea_descriptors()
     };
 }
 
+std::vector<V5PatternDesc> build_v5_bitfield_extract_descriptors()
+{
+    constexpr uint8_t kMov64X = 0xbf;
+    constexpr uint8_t kMov32X = 0xbc;
+    constexpr uint8_t kRsh64K = 0x77;
+    constexpr uint8_t kRsh32K = 0x74;
+    constexpr uint8_t kAnd64K = 0x57;
+    constexpr uint8_t kAnd32K = 0x54;
+    constexpr uint8_t kExpectZeroOff = BPF_JIT_PATTERN_F_EXPECT_OFF;
+    constexpr uint8_t kExpectZeroOffImm = BPF_JIT_PATTERN_F_EXPECT_OFF |
+                                          BPF_JIT_PATTERN_F_EXPECT_IMM;
+
+    auto build_extract_desc = [&](bool with_copy,
+                                  bool mask_first,
+                                  uint8_t mov_opcode,
+                                  uint8_t rsh_opcode,
+                                  uint8_t and_opcode,
+                                  int32_t width) {
+        std::vector<V5PatternInsn> pattern;
+        std::vector<V5PatternConstraint> constraints;
+        std::vector<V5Binding> bindings;
+        uint8_t shift_var;
+        uint8_t mask_var;
+
+        if (with_copy) {
+            pattern.push_back(make_pattern_insn(mov_opcode, 1, 2, 0, 0,
+                                                kExpectZeroOffImm, 0, 0, 0, 0));
+            if (mask_first) {
+                pattern.push_back(make_pattern_insn(and_opcode, 1, 0, 3, 0,
+                                                    kExpectZeroOff, 0, 0, 0, 0));
+                pattern.push_back(make_pattern_insn(rsh_opcode, 1, 0, 4, 0,
+                                                    kExpectZeroOff, 0, 0, 0, 0));
+                mask_var = 3;
+                shift_var = 4;
+            } else {
+                pattern.push_back(make_pattern_insn(rsh_opcode, 1, 0, 3, 0,
+                                                    kExpectZeroOff, 0, 0, 0, 0));
+                pattern.push_back(make_pattern_insn(and_opcode, 1, 0, 4, 0,
+                                                    kExpectZeroOff, 0, 0, 0, 0));
+                shift_var = 3;
+                mask_var = 4;
+            }
+            bindings = {
+                make_var_binding(BPF_JIT_BFX_PARAM_DST_REG, 1,
+                                 BPF_JIT_BIND_SOURCE_REG),
+                make_var_binding(BPF_JIT_BFX_PARAM_SRC_REG, 2,
+                                 BPF_JIT_BIND_SOURCE_REG),
+                make_var_binding(BPF_JIT_BFX_PARAM_SHIFT, shift_var,
+                                 BPF_JIT_BIND_SOURCE_IMM),
+                make_var_binding(BPF_JIT_BFX_PARAM_MASK, mask_var,
+                                 BPF_JIT_BIND_SOURCE_IMM),
+                make_const_binding(BPF_JIT_BFX_PARAM_WIDTH, width),
+                make_const_binding(BPF_JIT_BFX_PARAM_ORDER,
+                                   mask_first ? BPF_JIT_BFX_ORDER_MASK_SHIFT
+                                              : BPF_JIT_BFX_ORDER_SHIFT_MASK),
+            };
+        } else {
+            if (mask_first) {
+                pattern.push_back(make_pattern_insn(and_opcode, 1, 0, 2, 0,
+                                                    kExpectZeroOff, 0, 0, 0, 0));
+                pattern.push_back(make_pattern_insn(rsh_opcode, 1, 0, 3, 0,
+                                                    kExpectZeroOff, 0, 0, 0, 0));
+                mask_var = 2;
+                shift_var = 3;
+            } else {
+                pattern.push_back(make_pattern_insn(rsh_opcode, 1, 0, 2, 0,
+                                                    kExpectZeroOff, 0, 0, 0, 0));
+                pattern.push_back(make_pattern_insn(and_opcode, 1, 0, 3, 0,
+                                                    kExpectZeroOff, 0, 0, 0, 0));
+                shift_var = 2;
+                mask_var = 3;
+            }
+            bindings = {
+                make_var_binding(BPF_JIT_BFX_PARAM_DST_REG, 1,
+                                 BPF_JIT_BIND_SOURCE_REG),
+                make_var_binding(BPF_JIT_BFX_PARAM_SRC_REG, 1,
+                                 BPF_JIT_BIND_SOURCE_REG),
+                make_var_binding(BPF_JIT_BFX_PARAM_SHIFT, shift_var,
+                                 BPF_JIT_BIND_SOURCE_IMM),
+                make_var_binding(BPF_JIT_BFX_PARAM_MASK, mask_var,
+                                 BPF_JIT_BIND_SOURCE_IMM),
+                make_const_binding(BPF_JIT_BFX_PARAM_WIDTH, width),
+                make_const_binding(BPF_JIT_BFX_PARAM_ORDER,
+                                   mask_first ? BPF_JIT_BFX_ORDER_MASK_SHIFT
+                                              : BPF_JIT_BFX_ORDER_SHIFT_MASK),
+            };
+        }
+
+        constraints.push_back(make_constraint(BPF_JIT_CSTR_IMM_RANGE, shift_var, 0,
+                                              0, width - 1));
+
+        return make_v5_desc(V5Family::BitfieldExtract,
+                            BPF_JIT_CF_BITFIELD_EXTRACT,
+                            BPF_JIT_BFX_EXTRACT,
+                            0,
+                            std::move(pattern),
+                            std::move(constraints),
+                            std::move(bindings));
+    };
+
+    std::vector<V5PatternDesc> descs;
+    descs.reserve(8);
+    descs.push_back(build_extract_desc(true, false, kMov64X, kRsh64K, kAnd64K, 64));
+    descs.push_back(build_extract_desc(true, true,  kMov64X, kRsh64K, kAnd64K, 64));
+    descs.push_back(build_extract_desc(false, false, kMov64X, kRsh64K, kAnd64K, 64));
+    descs.push_back(build_extract_desc(false, true,  kMov64X, kRsh64K, kAnd64K, 64));
+    descs.push_back(build_extract_desc(true, false, kMov32X, kRsh32K, kAnd32K, 32));
+    descs.push_back(build_extract_desc(true, true,  kMov32X, kRsh32K, kAnd32K, 32));
+    descs.push_back(build_extract_desc(false, false, kMov32X, kRsh32K, kAnd32K, 32));
+    descs.push_back(build_extract_desc(false, true,  kMov32X, kRsh32K, kAnd32K, 32));
+    return descs;
+}
+
 V5ScanSummary scan_v5_builtin(const uint8_t *xlated_data,
                               uint32_t xlated_len,
                               const V5ScanOptions &options)
@@ -1092,6 +1248,10 @@ V5ScanSummary scan_v5_builtin(const uint8_t *xlated_data,
     if (options.scan_lea) {
         auto lea_descs = build_v5_lea_descriptors();
         descs.insert(descs.end(), lea_descs.begin(), lea_descs.end());
+    }
+    if (options.scan_extract) {
+        auto extract_descs = build_v5_bitfield_extract_descriptors();
+        descs.insert(descs.end(), extract_descs.begin(), extract_descs.end());
     }
 
     if (descs.empty()) {
@@ -1120,6 +1280,9 @@ V5ScanSummary scan_v5_builtin(const uint8_t *xlated_data,
                 break;
             case V5Family::AddrCalc:
                 summary.lea_sites++;
+                break;
+            case V5Family::BitfieldExtract:
+                summary.bitfield_sites++;
                 break;
             }
 

@@ -923,6 +923,55 @@ def generate_struct_field_cluster(output: Path) -> dict[str, int]:
     return {"record_count": record_count, "record_size": record_size}
 
 
+def generate_bitfield_extract(output: Path) -> dict[str, int]:
+    record_count = 32
+    record_words = 2
+    state = 0xA5A5_5A5A_DEAD_BEEF
+
+    blob = bytearray(struct.pack("<II", record_count, record_words))
+    params = [
+        (0x9E37_79B9_7F4A_7C15, 0, 0x3F),
+        (0xD134_2543_DE82_EF95, 7, 0x1F),
+        (0xA076_1D64_78BD_642F, 13, 0x7FF),
+        (0xE703_7ED1_A0B4_28DB, 19, 0xFF),
+        (0x8EBC_6AF0_9C88_C6E3, 11, 0x3FFF),
+        (0x5899_65CC_7537_4CC3, 29, 0x3FF),
+        (0x1D8E_4E27_C47D_124F, 17, 0x3FF),
+        (0xEB44_ACCA_B455_D165, 5, 0xF),
+        (0xF135_7AEA_2E62_A9C5, 9, 0xFF),
+        (0x94D0_49BB_1331_11EB, 21, 0xFFF),
+        (0xBF58_476D_1CE4_E5B9, 25, 0xFFFF),
+        (0x369D_EA0F_31A5_3F85, 31, 0xFFFFFF),
+    ]
+
+    for index in range(record_count):
+        fields: list[int] = []
+        for salt, shift, mask in params:
+            state = _lcg(state ^ ((index + 1) * salt))
+            fields.append((state >> shift) & mask)
+
+        word0 = (
+            fields[0]
+            | (fields[1] << 6)
+            | (fields[2] << 11)
+            | (fields[3] << 22)
+            | (fields[4] << 30)
+            | (fields[5] << 44)
+            | (fields[6] << 54)
+        ) & MASK64
+        word1 = (
+            fields[7]
+            | (fields[8] << 4)
+            | (fields[9] << 12)
+            | (fields[10] << 24)
+            | (fields[11] << 40)
+        ) & MASK64
+        blob.extend(struct.pack("<QQ", word0, word1))
+
+    output.write_bytes(blob)
+    return {"record_count": record_count, "record_words": record_words}
+
+
 def generate_smallmul_strength_reduce(output: Path) -> dict[str, int]:
     count = 128
     seed = 0x89AB_CDEF
@@ -1137,6 +1186,7 @@ GENERATORS = {
     "packet_rss_hash": generate_packet_rss_hash,
     "atomic_counter_xadd": generate_atomic_counter_xadd,
     "struct_field_cluster": generate_struct_field_cluster,
+    "bitfield_extract": generate_bitfield_extract,
     "smallmul_strength_reduce": generate_smallmul_strength_reduce,
     "imm64_storm": generate_imm64_storm,
     "alu32_64_pingpong": generate_alu32_64_pingpong,

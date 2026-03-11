@@ -33,6 +33,7 @@ enum class Preference {
     Rorx,
     Wide,
     Lea,
+    Extract,
 };
 
 struct SiteFeatures {
@@ -49,7 +50,7 @@ struct SiteFeatures {
 struct ProgramFeatures {
     uint32_t insn_count = 0;
     uint32_t subprogram_count = 1;
-    std::array<uint32_t, 5> candidate_count = {};
+    std::array<uint32_t, 7> candidate_count = {};
 };
 
 struct ScanOptions {
@@ -83,6 +84,7 @@ struct FamilyPreferences {
     std::optional<Preference> rotate;
     std::optional<Preference> wide_mem;
     std::optional<Preference> lea;
+    std::optional<Preference> bitfield_extract;
 };
 
 struct PolicyOverride {
