@@ -8,7 +8,6 @@ import math
 import os
 import platform
 import random
-import shlex
 import statistics
 import subprocess
 import sys
@@ -18,8 +17,6 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
-
-import yaml
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
 for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpus"):
@@ -33,6 +30,20 @@ try:
 except ImportError:
     from micro.orchestrator.catalog import load_catalog
     from micro.orchestrator.inventory import discover_object_programs
+try:
+    from common import (
+        add_repeat_argument,
+        ensure_parent,
+        materialize_dummy_context,
+        materialize_dummy_packet,
+    )
+except ImportError:
+    from corpus.common import (
+        add_repeat_argument,
+        ensure_parent,
+        materialize_dummy_context,
+        materialize_dummy_packet,
+    )
 
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -139,7 +150,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--runtime", action="append", dest="runtimes", help="Runtime name filter.")
     parser.add_argument("--iterations", type=int, help="Measured samples per benchmark/runtime pair.")
     parser.add_argument("--warmups", type=int, help="Warmup samples per benchmark/runtime pair.")
-    parser.add_argument("--repeat", type=int, help="Inner repeat count for test_run or trigger commands.")
+    add_repeat_argument(parser, help_text="Inner repeat count for test_run or trigger commands.")
     parser.add_argument("--output", help="Override JSON output path.")
     parser.add_argument("--seed", type=int, default=0, help="Seed used for runtime order shuffling.")
     parser.add_argument("--skip-recompile", action="store_true", help="Only run baseline kernel mode.")
@@ -238,50 +249,6 @@ def float_summary(values: list[float | int]) -> dict[str, float | int | None]:
         "p95": sorted_values[p95_index],
         "stdev": statistics.stdev(sorted_values) if len(sorted_values) > 1 else 0,
     }
-
-
-def ensure_parent(path: Path) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-
-
-def materialize_dummy_packet(path: Path) -> Path:
-    ensure_parent(path)
-    if path.exists() and path.stat().st_size == 64:
-        return path
-
-    packet = bytearray(64)
-    packet[0:6] = bytes.fromhex("001122334455")
-    packet[6:12] = bytes.fromhex("66778899aabb")
-    packet[12:14] = bytes.fromhex("0800")
-    packet[14] = 0x45
-    packet[15] = 0x00
-    packet[16:18] = (50).to_bytes(2, "big")
-    packet[18:20] = (0).to_bytes(2, "big")
-    packet[20:22] = (0x4000).to_bytes(2, "big")
-    packet[22] = 64
-    packet[23] = 6
-    packet[24:26] = (0).to_bytes(2, "big")
-    packet[26:30] = bytes([192, 0, 2, 1])
-    packet[30:34] = bytes([198, 51, 100, 2])
-    packet[34:36] = (12345).to_bytes(2, "big")
-    packet[36:38] = (80).to_bytes(2, "big")
-    packet[38:42] = (1).to_bytes(4, "big")
-    packet[42:46] = (0).to_bytes(4, "big")
-    packet[46] = 0x50
-    packet[47] = 0x02
-    packet[48:50] = (8192).to_bytes(2, "big")
-    packet[50:52] = (0).to_bytes(2, "big")
-    packet[52:54] = (0).to_bytes(2, "big")
-    path.write_bytes(packet)
-    return path
-
-
-def materialize_dummy_context(path: Path, size: int = 64) -> Path:
-    ensure_parent(path)
-    if path.exists() and path.stat().st_size == size:
-        return path
-    path.write_bytes(bytes(size))
-    return path
 
 
 def parse_runner_json(stdout: str) -> dict[str, Any]:

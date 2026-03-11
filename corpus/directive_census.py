@@ -13,6 +13,10 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from pathlib import Path
+try:
+    from common import build_scanner_command
+except ImportError:
+    from corpus.common import build_scanner_command
 
 try:
     from elftools.elf.elffile import ELFFile
@@ -272,10 +276,6 @@ def collect_inputs(repo_root: Path, corpus_build_report: Path | None = None) -> 
         raw_corpus_count=len(raw_corpus_paths),
         corpus_source=corpus_source,
     )
-
-
-def build_scanner_command(scanner: Path, xlated_path: Path) -> list[str]:
-    return [str(scanner), "scan", "--xlated", str(xlated_path), "--all", "--v5"]
 
 
 def parse_scanner_output(stdout: str) -> dict[str, int]:

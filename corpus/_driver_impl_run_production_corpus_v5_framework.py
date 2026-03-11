@@ -3,9 +3,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
-import os
-import re
 import statistics
 import subprocess
 import sys
@@ -24,6 +21,62 @@ for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpu
         sys.path.insert(0, candidate_str)
 
 from directive_census import analyze_object
+try:
+    from common import (
+        add_filter_argument,
+        add_max_programs_argument,
+        add_output_json_argument,
+        add_output_md_argument,
+        add_repeat_argument,
+        add_runner_argument,
+        add_scanner_argument,
+        add_timeout_argument,
+        build_run_kernel_command,
+        build_scanner_command,
+        directive_scan_from_record,
+        ensure_parent,
+        execution_plan,
+        format_ns,
+        format_pct,
+        format_ratio,
+        geomean,
+        markdown_table,
+        materialize_dummy_context,
+        materialize_dummy_packet,
+        normalize_section_root,
+        parse_scanner_v5_output,
+        run_command as shared_run_command,
+        run_text_command as shared_run_text_command,
+        summarize_stderr,
+    )
+except ImportError:
+    from corpus.common import (
+        add_filter_argument,
+        add_max_programs_argument,
+        add_output_json_argument,
+        add_output_md_argument,
+        add_repeat_argument,
+        add_runner_argument,
+        add_scanner_argument,
+        add_timeout_argument,
+        build_run_kernel_command,
+        build_scanner_command,
+        directive_scan_from_record,
+        ensure_parent,
+        execution_plan,
+        format_ns,
+        format_pct,
+        format_ratio,
+        geomean,
+        markdown_table,
+        materialize_dummy_context,
+        materialize_dummy_packet,
+        normalize_section_root,
+        parse_scanner_v5_output,
+        run_command as shared_run_command,
+        run_text_command as shared_run_text_command,
+        summarize_stderr,
+    )
 
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -100,59 +153,20 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "baseline and v5 recompile, recording compile/load/runtime failures."
         )
     )
-    parser.add_argument(
-        "--output-json",
-        default=str(DEFAULT_OUTPUT_JSON),
-        help="Path for structured JSON output.",
-    )
-    parser.add_argument(
-        "--output-md",
-        default=str(DEFAULT_OUTPUT_MD),
-        help="Path for markdown output.",
-    )
-    parser.add_argument(
-        "--runner",
-        default=str(DEFAULT_RUNNER),
-        help="Path to micro_exec inside the shared repo mount.",
-    )
-    parser.add_argument(
-        "--scanner",
-        default=str(DEFAULT_SCANNER),
-        help="Path to the scanner CLI binary.",
-    )
-    parser.add_argument(
-        "--repeat",
-        type=int,
-        default=DEFAULT_REPEAT,
-        help="Repeat count for measured runs.",
-    )
-    parser.add_argument(
-        "--timeout",
-        type=int,
-        default=DEFAULT_TIMEOUT_SECONDS,
-        help="Per-invocation timeout in seconds.",
-    )
-    parser.add_argument(
-        "--filter",
-        action="append",
-        dest="filters",
-        help="Only include objects or program names containing this substring. Repeatable.",
-    )
+    add_output_json_argument(parser, DEFAULT_OUTPUT_JSON)
+    add_output_md_argument(parser, DEFAULT_OUTPUT_MD)
+    add_runner_argument(parser, DEFAULT_RUNNER, help_text="Path to micro_exec inside the shared repo mount.")
+    add_scanner_argument(parser, DEFAULT_SCANNER, help_text="Path to the scanner CLI binary.")
+    add_repeat_argument(parser, DEFAULT_REPEAT, help_text="Repeat count for measured runs.")
+    add_timeout_argument(parser, DEFAULT_TIMEOUT_SECONDS, help_text="Per-invocation timeout in seconds.")
+    add_filter_argument(parser, help_text="Only include objects or program names containing this substring. Repeatable.")
     parser.add_argument(
         "--max-objects",
         type=int,
         help="Optional cap for smoke testing by object count.",
     )
-    parser.add_argument(
-        "--max-programs",
-        type=int,
-        help="Optional cap for smoke testing by discovered program count.",
-    )
+    add_max_programs_argument(parser, help_text="Optional cap for smoke testing by discovered program count.")
     return parser.parse_args(argv)
-
-
-def ensure_parent(path: Path) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
 
 
 def display_path(path: Path) -> str:
@@ -160,57 +174,6 @@ def display_path(path: Path) -> str:
         return path.relative_to(ROOT_DIR).as_posix()
     except ValueError:
         return str(path)
-
-
-def maybe_sudo_prefix() -> list[str]:
-    return [] if os.geteuid() == 0 else ["sudo", "-n"]
-
-
-def materialize_dummy_packet(path: Path) -> Path:
-    ensure_parent(path)
-    if path.exists() and path.stat().st_size == 64:
-        return path
-
-    packet = bytearray(64)
-    packet[0:6] = bytes.fromhex("001122334455")
-    packet[6:12] = bytes.fromhex("66778899aabb")
-    packet[12:14] = bytes.fromhex("0800")
-    packet[14] = 0x45
-    packet[15] = 0x00
-    packet[16:18] = (50).to_bytes(2, "big")
-    packet[18:20] = (0).to_bytes(2, "big")
-    packet[20:22] = (0x4000).to_bytes(2, "big")
-    packet[22] = 64
-    packet[23] = 6
-    packet[24:26] = (0).to_bytes(2, "big")
-    packet[26:30] = bytes([192, 0, 2, 1])
-    packet[30:34] = bytes([198, 51, 100, 2])
-    packet[34:36] = (12345).to_bytes(2, "big")
-    packet[36:38] = (80).to_bytes(2, "big")
-    packet[38:42] = (1).to_bytes(4, "big")
-    packet[42:46] = (0).to_bytes(4, "big")
-    packet[46] = 0x50
-    packet[47] = 0x02
-    packet[48:50] = (8192).to_bytes(2, "big")
-    packet[50:52] = (0).to_bytes(2, "big")
-    packet[52:54] = (0).to_bytes(2, "big")
-    path.write_bytes(packet)
-    return path
-
-
-def materialize_dummy_context(path: Path, size: int = 64) -> Path:
-    ensure_parent(path)
-    if path.exists() and path.stat().st_size == size:
-        return path
-    path.write_bytes(bytes(size))
-    return path
-
-
-def parse_runner_json(stdout: str) -> dict[str, Any]:
-    lines = [line.strip() for line in stdout.splitlines() if line.strip()]
-    if not lines:
-        raise RuntimeError("runner produced no JSON output")
-    return json.loads(lines[-1])
 
 
 def parse_program_inventory(stdout: str) -> list[dict[str, Any]]:
@@ -223,132 +186,12 @@ def parse_program_inventory(stdout: str) -> list[dict[str, Any]]:
     return payload
 
 
-def summarize_stderr(stderr: str, max_lines: int = 20, max_chars: int = 4000) -> str:
-    lines = [line.rstrip() for line in stderr.splitlines() if line.strip()]
-    if len(lines) > max_lines:
-        lines = lines[-max_lines:]
-    summary = "\n".join(lines)
-    if len(summary) > max_chars:
-        summary = summary[-max_chars:]
-    return summary
-
-
-def extract_error(stderr: str, stdout: str, returncode: int | None) -> str:
-    for text in (stderr, stdout):
-        lines = [line.strip() for line in text.splitlines() if line.strip()]
-        if lines:
-            return f"{lines[-1]} (exit={returncode})"
-    return f"command failed (exit={returncode})"
-
-
 def run_text_command(command: list[str], timeout_seconds: int) -> dict[str, Any]:
-    start = time.monotonic()
-    try:
-        completed = subprocess.run(
-            command,
-            cwd=ROOT_DIR,
-            capture_output=True,
-            text=True,
-            timeout=timeout_seconds,
-        )
-    except subprocess.TimeoutExpired as exc:
-        return {
-            "ok": False,
-            "command": command,
-            "returncode": None,
-            "timed_out": True,
-            "duration_seconds": time.monotonic() - start,
-            "stdout": exc.stdout or "",
-            "stderr": exc.stderr or "",
-            "error": f"timeout after {timeout_seconds}s",
-        }
-    except OSError as exc:
-        return {
-            "ok": False,
-            "command": command,
-            "returncode": None,
-            "timed_out": False,
-            "duration_seconds": time.monotonic() - start,
-            "stdout": "",
-            "stderr": "",
-            "error": f"exec failed: {exc}",
-        }
-
-    stdout = completed.stdout or ""
-    stderr = completed.stderr or ""
-    return {
-        "ok": completed.returncode == 0,
-        "command": command,
-        "returncode": completed.returncode,
-        "timed_out": False,
-        "duration_seconds": time.monotonic() - start,
-        "stdout": stdout,
-        "stderr": stderr,
-        "error": None if completed.returncode == 0 else extract_error(stderr, stdout, completed.returncode),
-    }
+    return shared_run_text_command(command, timeout_seconds, cwd=ROOT_DIR)
 
 
 def run_command(command: list[str], timeout_seconds: int) -> dict[str, Any]:
-    start = time.monotonic()
-    try:
-        completed = subprocess.run(
-            command,
-            cwd=ROOT_DIR,
-            capture_output=True,
-            text=True,
-            timeout=timeout_seconds,
-        )
-    except subprocess.TimeoutExpired as exc:
-        return {
-            "ok": False,
-            "command": command,
-            "returncode": None,
-            "timed_out": True,
-            "duration_seconds": time.monotonic() - start,
-            "stdout": exc.stdout or "",
-            "stderr": exc.stderr or "",
-            "sample": None,
-            "error": f"timeout after {timeout_seconds}s",
-        }
-    except OSError as exc:
-        return {
-            "ok": False,
-            "command": command,
-            "returncode": None,
-            "timed_out": False,
-            "duration_seconds": time.monotonic() - start,
-            "stdout": "",
-            "stderr": "",
-            "sample": None,
-            "error": f"exec failed: {exc}",
-        }
-
-    stdout = completed.stdout or ""
-    stderr = completed.stderr or ""
-    sample = None
-    parse_error = None
-    if completed.returncode == 0:
-        try:
-            sample = parse_runner_json(stdout)
-        except Exception as exc:  # pragma: no cover - runtime parse guard
-            parse_error = str(exc)
-
-    ok = completed.returncode == 0 and sample is not None
-    error = parse_error if parse_error is not None else None
-    if not ok and error is None:
-        error = extract_error(stderr, stdout, completed.returncode)
-
-    return {
-        "ok": ok,
-        "command": command,
-        "returncode": completed.returncode,
-        "timed_out": False,
-        "duration_seconds": time.monotonic() - start,
-        "stdout": stdout,
-        "stderr": stderr,
-        "sample": sample,
-        "error": error,
-    }
+    return shared_run_command(command, timeout_seconds, cwd=ROOT_DIR)
 
 
 def invocation_summary(result: dict[str, Any] | None) -> dict[str, Any] | None:
@@ -378,42 +221,6 @@ def text_invocation_summary(result: dict[str, Any] | None) -> dict[str, Any] | N
         "error": result["error"],
         "stdout": result["stdout"],
         "stderr_tail": summarize_stderr(result["stderr"]),
-    }
-
-
-def normalize_section_root(section_name: str) -> str:
-    if not section_name:
-        return "unknown"
-    root = section_name.split("/", 1)[0]
-    if root.startswith("kprobe"):
-        return "kprobe"
-    if root.startswith("kretprobe"):
-        return "kretprobe"
-    if root.startswith("raw_tp"):
-        return "raw_tp"
-    if root.startswith("raw_tracepoint"):
-        return "raw_tracepoint"
-    return root
-
-
-def execution_plan(section_name: str, packet_path: Path, context_path: Path) -> dict[str, Any]:
-    root = normalize_section_root(section_name)
-    if root in {"xdp", "socket", "classifier", "tc", "flow_dissector", "sk_skb", "sk_msg"}:
-        return {
-            "io_mode": "packet",
-            "memory_path": packet_path,
-            "input_size": 64,
-        }
-    if root in {"raw_tracepoint", "raw_tp"}:
-        return {
-            "io_mode": "context",
-            "memory_path": context_path,
-            "input_size": 64,
-        }
-    return {
-        "io_mode": "context",
-        "memory_path": None,
-        "input_size": 0,
     }
 
 
@@ -447,33 +254,20 @@ def build_runner_command(
     recompile_v5: bool,
     dump_xlated: Path | None = None,
 ) -> list[str]:
-    command = maybe_sudo_prefix() + [
-        str(runner),
-        "run-kernel",
-        "--program",
-        str(object_path),
-        "--program-name",
-        program_name,
-        "--io-mode",
-        io_mode,
-        "--repeat",
-        str(max(1, repeat)),
-    ]
-    if io_mode == "packet":
-        command.append("--raw-packet")
-    if memory_path is not None:
-        command.extend(["--memory", str(memory_path)])
-    if input_size > 0:
-        command.extend(["--input-size", str(input_size)])
-    if btf_custom_path is not None:
-        command.extend(["--btf-custom-path", str(btf_custom_path)])
-    if recompile_v5:
-        command.extend(["--recompile-v5", "--recompile-all"])
-    if dump_xlated is not None:
-        command.extend(["--dump-xlated", str(dump_xlated)])
-    if compile_only:
-        command.append("--compile-only")
-    return command
+    return build_run_kernel_command(
+        runner=runner,
+        object_path=object_path,
+        program_name=program_name,
+        io_mode=io_mode,
+        memory_path=memory_path,
+        input_size=input_size,
+        repeat=repeat,
+        compile_only=compile_only,
+        recompile_v5=recompile_v5,
+        dump_xlated=dump_xlated,
+        btf_custom_path=btf_custom_path,
+        use_sudo=True,
+    )
 
 
 def run_with_btf_fallback(
@@ -617,72 +411,6 @@ def discover_programs(runner: Path, object_path: Path, timeout_seconds: int) -> 
     }
 
 
-def directive_scan_from_record(record: dict[str, Any] | None) -> dict[str, int]:
-    if not record or not record.get("ok") or not record.get("sample"):
-        counts = {field: 0 for _, field in FAMILY_FIELDS}
-        counts["total_sites"] = 0
-        return counts
-    scan = record["sample"].get("directive_scan") or {}
-    counts = {field: 0 for _, field in FAMILY_FIELDS}
-    for _, field in FAMILY_FIELDS:
-        if field == "bitfield_sites":
-            value = scan.get("bitfield_sites", scan.get("extract_sites", 0))
-        else:
-            value = scan.get(field, 0)
-        counts[field] = int(value or 0)
-    total = scan.get("total_sites")
-    if total is None:
-        total = sum(counts[field] for _, field in FAMILY_FIELDS)
-    counts["total_sites"] = int(total or 0)
-    return counts
-
-
-def parse_scanner_v5_output(stdout: str) -> dict[str, int]:
-    counts = directive_scan_from_record(None)
-    for line in stdout.splitlines():
-        stripped = line.strip()
-        if not stripped:
-            continue
-        if stripped.startswith("{") and stripped.endswith("}"):
-            try:
-                payload = json.loads(stripped)
-            except json.JSONDecodeError:
-                continue
-            summary = payload.get("summary")
-            if isinstance(summary, dict):
-                return directive_scan_from_record({"ok": True, "sample": {"directive_scan": summary}})
-
-    patterns = {
-        "cmov_sites": r"^\s*cmov:\s+(\d+)\s*$",
-        "wide_sites": r"^\s*wide:\s+(\d+)\s*$",
-        "rotate_sites": r"^\s*rotate:\s+(\d+)\s*$",
-        "lea_sites": r"^\s*lea:\s+(\d+)\s*$",
-        "bitfield_sites": r"^\s*extract:\s*(\d+)\s*$",
-        "zero_ext_sites": r"^\s*zeroext:\s*(\d+)\s*$",
-        "endian_sites": r"^\s*endian:\s*(\d+)\s*$",
-        "branch_flip_sites": r"^\s*bflip:\s*(\d+)\s*$",
-    }
-    for line in stdout.splitlines():
-        for key, pattern in patterns.items():
-            match = re.match(pattern, line)
-            if match:
-                counts[key] = int(match.group(1))
-    counts["total_sites"] = sum(counts[field] for _, field in FAMILY_FIELDS)
-    return counts
-
-
-def build_scanner_command(scanner: Path, xlated_path: Path) -> list[str]:
-    return [
-        str(scanner),
-        "scan",
-        "--xlated",
-        str(xlated_path),
-        "--all",
-        "--v5",
-        "--json",
-    ]
-
-
 def size_ratio(baseline_record: dict[str, Any] | None, v5_record: dict[str, Any] | None) -> float | None:
     if not baseline_record or not v5_record:
         return None
@@ -783,41 +511,6 @@ def detect_kernel_metadata(kernel_tree: Path) -> dict[str, str]:
     }
 
 
-def geomean(values: list[float]) -> float | None:
-    positive = [value for value in values if value > 0]
-    if not positive:
-        return None
-    return math.exp(statistics.mean(math.log(value) for value in positive))
-
-
-def format_ratio(value: float | None) -> str:
-    if value is None:
-        return "n/a"
-    return f"{value:.3f}x"
-
-
-def format_pct(value: float | None) -> str:
-    if value is None:
-        return "n/a"
-    return f"{value:+.1f}%"
-
-
-def format_ns(value: Any) -> str:
-    if value is None:
-        return "n/a"
-    return str(int(value))
-
-
-def markdown_table(headers: list[str], rows: list[list[Any]]) -> list[str]:
-    lines = [
-        "| " + " | ".join(headers) + " |",
-        "| " + " | ".join("---" for _ in headers) + " |",
-    ]
-    for row in rows:
-        lines.append("| " + " | ".join(str(cell) for cell in row) + " |")
-    return lines
-
-
 def run_target(
     runner: Path,
     scanner: Path,
@@ -848,7 +541,7 @@ def run_target(
         )
         if baseline_compile_raw["ok"]:
             scanner_raw = run_text_command(
-                build_scanner_command(scanner, xlated_path),
+                build_scanner_command(scanner, xlated_path, json_output=True),
                 timeout_seconds,
             )
         v5_compile_raw = run_with_btf_fallback(

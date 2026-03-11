@@ -3,12 +3,8 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
-import os
 import statistics
-import subprocess
 import sys
-import time
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
@@ -21,7 +17,66 @@ for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpu
     if candidate_str not in sys.path:
         sys.path.insert(0, candidate_str)
 
-from policy_utils import POLICY_DIR as DEFAULT_POLICY_DIR, resolve_policy_path
+try:
+    from common import (
+        add_filter_argument,
+        add_max_programs_argument,
+        add_output_json_argument,
+        add_output_md_argument,
+        add_repeat_argument,
+        add_runner_argument,
+        add_timeout_argument,
+        build_run_kernel_command,
+        directive_scan_from_record,
+        ensure_parent,
+        execution_plan,
+        extract_error,
+        format_ns,
+        format_pct,
+        format_ratio,
+        geomean,
+        invocation_summary,
+        markdown_table,
+        materialize_dummy_context,
+        materialize_dummy_packet,
+        normalize_directive_scan,
+        normalize_section_root,
+        parse_runner_json,
+        require_minimum,
+        run_command as shared_run_command,
+        summarize_stderr,
+    )
+    from policy_utils import POLICY_DIR as DEFAULT_POLICY_DIR, resolve_policy_path
+except ImportError:
+    from corpus.common import (
+        add_filter_argument,
+        add_max_programs_argument,
+        add_output_json_argument,
+        add_output_md_argument,
+        add_repeat_argument,
+        add_runner_argument,
+        add_timeout_argument,
+        build_run_kernel_command,
+        directive_scan_from_record,
+        ensure_parent,
+        execution_plan,
+        extract_error,
+        format_ns,
+        format_pct,
+        format_ratio,
+        geomean,
+        invocation_summary,
+        markdown_table,
+        materialize_dummy_context,
+        materialize_dummy_packet,
+        normalize_directive_scan,
+        normalize_section_root,
+        parse_runner_json,
+        require_minimum,
+        run_command as shared_run_command,
+        summarize_stderr,
+    )
+    from corpus.policy_utils import POLICY_DIR as DEFAULT_POLICY_DIR, resolve_policy_path
 
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -55,21 +110,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "and timed runs for the bpf_prog_test_run-capable subset."
         )
     )
-    parser.add_argument(
-        "--output-json",
-        default=str(DEFAULT_OUTPUT_JSON),
-        help="Path for structured JSON output.",
-    )
-    parser.add_argument(
-        "--output-md",
-        default=str(DEFAULT_OUTPUT_MD),
-        help="Path for markdown output.",
-    )
-    parser.add_argument(
-        "--runner",
-        default=str(DEFAULT_RUNNER),
-        help="Path to the micro_exec runner.",
-    )
+    add_output_json_argument(parser, DEFAULT_OUTPUT_JSON)
+    add_output_md_argument(parser, DEFAULT_OUTPUT_MD)
+    add_runner_argument(parser, DEFAULT_RUNNER, help_text="Path to the micro_exec runner.")
     parser.add_argument(
         "--btf-custom-path",
         default=str(DEFAULT_BTF_PATH),
@@ -85,28 +128,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=str(DEFAULT_TRACING_RESULTS),
         help="Existing corpus tracing JSON used to derive the 40-program union.",
     )
-    parser.add_argument(
-        "--repeat",
-        type=int,
-        default=DEFAULT_REPEAT,
-        help="Repeat count for measured runs.",
-    )
-    parser.add_argument(
-        "--timeout",
-        type=int,
-        default=DEFAULT_TIMEOUT_SECONDS,
-        help="Per-invocation timeout in seconds.",
-    )
-    parser.add_argument(
-        "--max-programs",
-        type=int,
-        help="Optional cap for smoke testing.",
-    )
-    parser.add_argument(
-        "--filter",
-        action="append",
-        dest="filters",
-        help="Only include target programs whose object path or name contains this substring. Repeatable.",
+    add_repeat_argument(parser, DEFAULT_REPEAT, help_text="Repeat count for measured runs.")
+    add_timeout_argument(parser, DEFAULT_TIMEOUT_SECONDS, help_text="Per-invocation timeout in seconds.")
+    add_max_programs_argument(parser, help_text="Optional cap for smoke testing.")
+    add_filter_argument(
+        parser,
+        help_text="Only include target programs whose object path or name contains this substring. Repeatable.",
     )
     parser.add_argument(
         "--use-policy",
@@ -121,242 +148,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def ensure_parent(path: Path) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-
-
-def maybe_sudo_prefix() -> list[str]:
-    return [] if os.geteuid() == 0 else ["sudo", "-n"]
-
-
-def materialize_dummy_packet(path: Path) -> Path:
-    ensure_parent(path)
-    if path.exists() and path.stat().st_size == 64:
-        return path
-
-    packet = bytearray(64)
-    packet[0:6] = bytes.fromhex("001122334455")
-    packet[6:12] = bytes.fromhex("66778899aabb")
-    packet[12:14] = bytes.fromhex("0800")
-    packet[14] = 0x45
-    packet[15] = 0x00
-    packet[16:18] = (50).to_bytes(2, "big")
-    packet[18:20] = (0).to_bytes(2, "big")
-    packet[20:22] = (0x4000).to_bytes(2, "big")
-    packet[22] = 64
-    packet[23] = 6
-    packet[24:26] = (0).to_bytes(2, "big")
-    packet[26:30] = bytes([192, 0, 2, 1])
-    packet[30:34] = bytes([198, 51, 100, 2])
-    packet[34:36] = (12345).to_bytes(2, "big")
-    packet[36:38] = (80).to_bytes(2, "big")
-    packet[38:42] = (1).to_bytes(4, "big")
-    packet[42:46] = (0).to_bytes(4, "big")
-    packet[46] = 0x50
-    packet[47] = 0x02
-    packet[48:50] = (8192).to_bytes(2, "big")
-    packet[50:52] = (0).to_bytes(2, "big")
-    packet[52:54] = (0).to_bytes(2, "big")
-    path.write_bytes(packet)
-    return path
-
-
-def materialize_dummy_context(path: Path, size: int = 64) -> Path:
-    ensure_parent(path)
-    if path.exists() and path.stat().st_size == size:
-        return path
-    path.write_bytes(bytes(size))
-    return path
-
-
-def normalize_section_root(section_name: str) -> str:
-    if not section_name:
-        return "unknown"
-    root = section_name.split("/", 1)[0]
-    if root.startswith("kprobe"):
-        return "kprobe"
-    if root.startswith("kretprobe"):
-        return "kretprobe"
-    if root.startswith("raw_tp"):
-        return "raw_tp"
-    return root
-
-
-def execution_plan(section_name: str, packet_path: Path, context_path: Path) -> dict[str, Any]:
-    root = normalize_section_root(section_name)
-    if root in {"xdp", "socket", "classifier", "tc", "flow_dissector", "sk_skb", "sk_msg"}:
-        return {
-            "io_mode": "packet",
-            "memory_path": packet_path,
-            "input_size": 64,
-        }
-    if root in {"raw_tracepoint", "raw_tp"}:
-        return {
-            "io_mode": "context",
-            "memory_path": context_path,
-            "input_size": 64,
-        }
-    return {
-        "io_mode": "context",
-        "memory_path": None,
-        "input_size": 0,
-    }
-
-
-def parse_runner_json(stdout: str) -> dict[str, Any]:
-    lines = [line.strip() for line in stdout.splitlines() if line.strip()]
-    if not lines:
-        raise RuntimeError("runner produced no JSON output")
-    return json.loads(lines[-1])
-
-
-def extract_error(stderr: str, stdout: str, returncode: int | None) -> str:
-    for text in (stderr, stdout):
-        lines = [line.strip() for line in text.splitlines() if line.strip()]
-        if lines:
-            return f"{lines[-1]} (exit={returncode})"
-    return f"command failed (exit={returncode})"
-
-
-def summarize_stderr(stderr: str, max_lines: int = 20, max_chars: int = 4000) -> str:
-    lines = [line.rstrip() for line in stderr.splitlines() if line.strip()]
-    if len(lines) > max_lines:
-        lines = lines[-max_lines:]
-    summary = "\n".join(lines)
-    if len(summary) > max_chars:
-        summary = summary[-max_chars:]
-    return summary
-
-
 def run_command(command: list[str], timeout_seconds: int) -> dict[str, Any]:
-    start = time.monotonic()
-    try:
-        completed = subprocess.run(
-            command,
-            cwd=ROOT_DIR,
-            capture_output=True,
-            text=True,
-            timeout=timeout_seconds,
-        )
-    except subprocess.TimeoutExpired as exc:
-        duration_seconds = time.monotonic() - start
-        return {
-            "ok": False,
-            "command": command,
-            "returncode": None,
-            "timed_out": True,
-            "duration_seconds": duration_seconds,
-            "stdout": exc.stdout or "",
-            "stderr": exc.stderr or "",
-            "sample": None,
-            "error": f"timeout after {timeout_seconds}s",
-        }
-
-    duration_seconds = time.monotonic() - start
-    stdout = completed.stdout or ""
-    stderr = completed.stderr or ""
-    sample = None
-    parse_error = None
-    if completed.returncode == 0:
-        try:
-            sample = parse_runner_json(stdout)
-        except Exception as exc:
-            parse_error = str(exc)
-
-    ok = completed.returncode == 0 and sample is not None
-    error = parse_error if parse_error is not None else None
-    if not ok and error is None:
-        error = extract_error(stderr, stdout, completed.returncode)
-
-    return {
-        "ok": ok,
-        "command": command,
-        "returncode": completed.returncode,
-        "timed_out": False,
-        "duration_seconds": duration_seconds,
-        "stdout": stdout,
-        "stderr": stderr,
-        "sample": sample,
-        "error": error,
-    }
-
-
-def invocation_summary(result: dict[str, Any] | None) -> dict[str, Any] | None:
-    if result is None:
-        return None
-    return {
-        "ok": result["ok"],
-        "returncode": result["returncode"],
-        "timed_out": result["timed_out"],
-        "duration_seconds": result["duration_seconds"],
-        "error": result["error"],
-        "stderr_tail": summarize_stderr(result["stderr"]),
-        "sample": result["sample"],
-    }
-
-
-def zero_directive_scan() -> dict[str, int]:
-    counts = {field: 0 for _, field in FAMILY_FIELDS}
-    counts["total_sites"] = 0
-    return counts
-
-
-def normalize_directive_scan(scan: dict[str, Any] | None) -> dict[str, int]:
-    normalized = zero_directive_scan()
-    payload = scan or {}
-    for _, field in FAMILY_FIELDS:
-        if field == "bitfield_sites":
-            value = payload.get("bitfield_sites", payload.get("extract_sites", 0))
-        else:
-            value = payload.get(field, 0)
-        normalized[field] = int(value or 0)
-    total = payload.get("total_sites")
-    if total is None:
-        total = sum(normalized[field] for _, field in FAMILY_FIELDS)
-    normalized["total_sites"] = int(total or 0)
-    return normalized
-
-
-def directive_scan_from_record(record: dict[str, Any] | None) -> dict[str, int]:
-    if not record or not record.get("ok") or not record.get("sample"):
-        return zero_directive_scan()
-    scan = record["sample"].get("directive_scan") or {}
-    return normalize_directive_scan(scan)
-
-
-def format_ratio(value: float | None) -> str:
-    if value is None:
-        return "n/a"
-    return f"{value:.3f}x"
-
-
-def format_pct(value: float | None) -> str:
-    if value is None:
-        return "n/a"
-    return f"{value:+.1f}%"
-
-
-def format_ns(value: Any) -> str:
-    if value is None:
-        return "n/a"
-    return str(int(value))
-
-
-def markdown_table(headers: list[str], rows: list[list[Any]]) -> list[str]:
-    lines = [
-        "| " + " | ".join(headers) + " |",
-        "| " + " | ".join("---" for _ in headers) + " |",
-    ]
-    for row in rows:
-        lines.append("| " + " | ".join(str(cell) for cell in row) + " |")
-    return lines
-
-
-def geomean(values: list[float]) -> float | None:
-    positive = [value for value in values if value > 0]
-    if not positive:
-        return None
-    return math.exp(statistics.mean(math.log(value) for value in positive))
+    return shared_run_command(command, timeout_seconds, cwd=ROOT_DIR)
 
 
 def json_load(path: Path) -> dict[str, Any]:
@@ -454,33 +247,20 @@ def build_runner_command(
     recompile_v5: bool,
     policy_file: Path | None = None,
 ) -> list[str]:
-    command = maybe_sudo_prefix() + [
-        str(runner),
-        "run-kernel",
-        "--program",
-        str(object_path),
-        "--program-name",
-        program_name,
-        "--io-mode",
-        io_mode,
-        "--repeat",
-        str(max(1, repeat)),
-    ]
-    if io_mode == "packet":
-        command.append("--raw-packet")
-    if memory_path is not None:
-        command.extend(["--memory", str(memory_path)])
-    if input_size > 0:
-        command.extend(["--input-size", str(input_size)])
-    if btf_custom_path is not None:
-        command.extend(["--btf-custom-path", str(btf_custom_path)])
-    if policy_file is not None:
-        command.extend(["--policy-file", str(policy_file)])
-    elif recompile_v5:
-        command.extend(["--recompile-v5", "--recompile-all"])
-    if compile_only:
-        command.append("--compile-only")
-    return command
+    return build_run_kernel_command(
+        runner=runner,
+        object_path=object_path,
+        program_name=program_name,
+        io_mode=io_mode,
+        memory_path=memory_path,
+        input_size=input_size,
+        repeat=repeat,
+        compile_only=compile_only,
+        recompile_v5=recompile_v5,
+        policy_file=policy_file,
+        btf_custom_path=btf_custom_path,
+        use_sudo=True,
+    )
 
 
 def size_ratio(baseline_record: dict[str, Any] | None, v5_record: dict[str, Any] | None) -> float | None:
@@ -903,8 +683,7 @@ def build_markdown(data: dict[str, Any]) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
-    if args.repeat < 1:
-        raise SystemExit("--repeat must be >= 1")
+    require_minimum(args.repeat, 1, "--repeat")
 
     runner = Path(args.runner).resolve()
     if not runner.exists():

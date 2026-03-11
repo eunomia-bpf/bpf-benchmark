@@ -4,14 +4,11 @@ from __future__ import annotations
 import argparse
 import json
 import math
-import os
-import re
 import shlex
 import statistics
 import subprocess
 import sys
 import tempfile
-import time
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -31,7 +28,64 @@ except ImportError:
     from micro.orchestrator.inventory import load_packet_test_run_targets
     from micro.orchestrator.results import normalize_directive_scan, parse_json_lines as parse_json_payload_lines, parse_runner_sample
 
-from policy_utils import POLICY_DIR as DEFAULT_POLICY_DIR, resolve_policy_path
+try:
+    from common import (
+        add_filter_argument,
+        add_max_programs_argument,
+        add_output_json_argument,
+        add_output_md_argument,
+        add_repeat_argument,
+        add_runner_argument,
+        add_scanner_argument,
+        add_timeout_argument,
+        build_run_kernel_command,
+        build_scanner_command,
+        directive_scan_from_record,
+        ensure_parent,
+        format_ns,
+        format_pct,
+        format_ratio,
+        geomean,
+        markdown_table,
+        normalize_directive_scan as shared_normalize_directive_scan,
+        parse_scanner_v5_output,
+        relpath as shared_relpath,
+        require_minimum,
+        run_command as shared_run_command,
+        run_text_command as shared_run_text_command,
+        summarize_text,
+        text_invocation_summary,
+    )
+    from policy_utils import POLICY_DIR as DEFAULT_POLICY_DIR, resolve_policy_path
+except ImportError:
+    from corpus.common import (
+        add_filter_argument,
+        add_max_programs_argument,
+        add_output_json_argument,
+        add_output_md_argument,
+        add_repeat_argument,
+        add_runner_argument,
+        add_scanner_argument,
+        add_timeout_argument,
+        build_run_kernel_command,
+        build_scanner_command,
+        directive_scan_from_record,
+        ensure_parent,
+        format_ns,
+        format_pct,
+        format_ratio,
+        geomean,
+        markdown_table,
+        normalize_directive_scan as shared_normalize_directive_scan,
+        parse_scanner_v5_output,
+        relpath as shared_relpath,
+        require_minimum,
+        run_command as shared_run_command,
+        run_text_command as shared_run_text_command,
+        summarize_text,
+        text_invocation_summary,
+    )
+    from corpus.policy_utils import POLICY_DIR as DEFAULT_POLICY_DIR, resolve_policy_path
 
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -84,26 +138,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=str(DEFAULT_INVENTORY_JSON),
         help="Inventory JSON used to select the paired packet-test-run targets.",
     )
-    parser.add_argument(
-        "--output-json",
-        default=str(DEFAULT_OUTPUT_JSON),
-        help="Path for structured JSON output.",
-    )
-    parser.add_argument(
-        "--output-md",
-        default=str(DEFAULT_OUTPUT_MD),
-        help="Path for markdown output.",
-    )
-    parser.add_argument(
-        "--runner",
-        default=str(DEFAULT_RUNNER),
-        help="Path to micro_exec.",
-    )
-    parser.add_argument(
-        "--scanner",
-        default=str(DEFAULT_SCANNER),
-        help="Path to bpf-jit-scanner.",
-    )
+    add_output_json_argument(parser, DEFAULT_OUTPUT_JSON)
+    add_output_md_argument(parser, DEFAULT_OUTPUT_MD)
+    add_runner_argument(parser, DEFAULT_RUNNER, help_text="Path to micro_exec.")
+    add_scanner_argument(parser, DEFAULT_SCANNER, help_text="Path to bpf-jit-scanner.")
     parser.add_argument(
         "--kernel-tree",
         default=str(DEFAULT_KERNEL_TREE),
@@ -124,35 +162,19 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=DEFAULT_VNG,
         help="vng executable to use for strict guest runs.",
     )
-    parser.add_argument(
-        "--repeat",
-        type=int,
-        default=DEFAULT_REPEAT,
-        help="Repeat count passed to each micro_exec invocation.",
-    )
-    parser.add_argument(
-        "--timeout",
-        type=int,
-        default=DEFAULT_TIMEOUT_SECONDS,
-        help="Per-target timeout in seconds.",
-    )
+    add_repeat_argument(parser, DEFAULT_REPEAT, help_text="Repeat count passed to each micro_exec invocation.")
+    add_timeout_argument(parser, DEFAULT_TIMEOUT_SECONDS, help_text="Per-target timeout in seconds.")
     parser.add_argument(
         "--build-timeout",
         type=int,
         default=DEFAULT_BUILD_TIMEOUT_SECONDS,
         help="Kernel build timeout in seconds.",
     )
-    parser.add_argument(
-        "--filter",
-        action="append",
-        dest="filters",
-        help="Only include targets whose object path, program name, or source contains this substring. Repeatable.",
+    add_filter_argument(
+        parser,
+        help_text="Only include targets whose object path, program name, or source contains this substring. Repeatable.",
     )
-    parser.add_argument(
-        "--max-programs",
-        type=int,
-        help="Optional cap for smoke testing.",
-    )
+    add_max_programs_argument(parser, help_text="Optional cap for smoke testing.")
     parser.add_argument(
         "--skip-build",
         action="store_true",
@@ -190,16 +212,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def ensure_parent(path: Path) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-
-
 def relpath(path: Path | str) -> str:
-    candidate = Path(path)
-    try:
-        return candidate.relative_to(ROOT_DIR).as_posix()
-    except Exception:
-        return str(candidate)
+    return shared_relpath(path, ROOT_DIR)
 
 
 def zero_scan() -> dict[str, int]:
@@ -265,7 +279,7 @@ def normalize_skip_families(values: list[str] | None) -> list[str]:
 
 
 def normalize_scan(scan: dict[str, Any] | None) -> dict[str, int]:
-    return normalize_directive_scan(scan)
+    return shared_normalize_directive_scan(scan)
 
 
 def families_from_scan(scan: dict[str, Any] | None) -> list[str]:
@@ -273,96 +287,16 @@ def families_from_scan(scan: dict[str, Any] | None) -> list[str]:
     return [name for name, field in FAMILY_FIELDS if normalized[field] > 0]
 
 
-def parse_runner_json(stdout: str) -> dict[str, Any]:
-    return dict(parse_runner_sample(stdout))
-
-
 def parse_json_lines(stdout: str) -> list[dict[str, Any]]:
     return [payload for payload in parse_json_payload_lines(stdout) if isinstance(payload, dict)]
 
 
-def summarize_text(text: str, max_lines: int = 20, max_chars: int = 4000) -> str:
-    lines = [line.rstrip() for line in text.splitlines() if line.strip()]
-    if len(lines) > max_lines:
-        lines = lines[-max_lines:]
-    summary = "\n".join(lines)
-    if len(summary) > max_chars:
-        summary = summary[-max_chars:]
-    return summary
-
-
-def extract_error(stderr: str, stdout: str, returncode: int | None) -> str:
-    for text in (stderr, stdout):
-        lines = [line.strip() for line in text.splitlines() if line.strip()]
-        if lines:
-            return f"{lines[-1]} (exit={returncode})"
-    return f"command failed (exit={returncode})"
-
-
 def run_text_command(command: list[str], timeout_seconds: int) -> dict[str, Any]:
-    start = time.monotonic()
-    try:
-        completed = subprocess.run(
-            command,
-            cwd=ROOT_DIR,
-            capture_output=True,
-            text=True,
-            timeout=timeout_seconds,
-        )
-    except subprocess.TimeoutExpired as exc:
-        return {
-            "ok": False,
-            "command": command,
-            "returncode": None,
-            "timed_out": True,
-            "duration_seconds": time.monotonic() - start,
-            "stdout": exc.stdout or "",
-            "stderr": exc.stderr or "",
-            "error": f"timeout after {timeout_seconds}s",
-        }
-    except OSError as exc:
-        return {
-            "ok": False,
-            "command": command,
-            "returncode": None,
-            "timed_out": False,
-            "duration_seconds": time.monotonic() - start,
-            "stdout": "",
-            "stderr": "",
-            "error": f"exec failed: {exc}",
-        }
-
-    stdout = completed.stdout or ""
-    stderr = completed.stderr or ""
-    return {
-        "ok": completed.returncode == 0,
-        "command": command,
-        "returncode": completed.returncode,
-        "timed_out": False,
-        "duration_seconds": time.monotonic() - start,
-        "stdout": stdout,
-        "stderr": stderr,
-        "error": None if completed.returncode == 0 else extract_error(stderr, stdout, completed.returncode),
-    }
+    return shared_run_text_command(command, timeout_seconds, cwd=ROOT_DIR)
 
 
 def run_command(command: list[str], timeout_seconds: int) -> dict[str, Any]:
-    result = run_text_command(command, timeout_seconds)
-    sample = None
-    parse_error = None
-    if result["ok"]:
-        try:
-            sample = parse_runner_json(result["stdout"])
-        except Exception as exc:
-            parse_error = str(exc)
-    ok = result["ok"] and sample is not None
-    error = parse_error if parse_error is not None else result["error"]
-    return {
-        **result,
-        "ok": ok,
-        "sample": sample,
-        "error": error,
-    }
+    return shared_run_command(command, timeout_seconds, cwd=ROOT_DIR)
 
 
 def invocation_summary(result: dict[str, Any] | None) -> dict[str, Any] | None:
@@ -394,65 +328,6 @@ def text_invocation_summary(result: dict[str, Any] | None) -> dict[str, Any] | N
     }
 
 
-def directive_scan_from_record(record: dict[str, Any] | None) -> dict[str, int]:
-    if not record or not record.get("ok") or not record.get("sample"):
-        return zero_scan()
-    return normalize_scan((record["sample"] or {}).get("directive_scan"))
-
-
-def parse_scanner_v5_output(stdout: str) -> dict[str, int]:
-    counts = zero_scan()
-    stripped_stdout = stdout.strip()
-    if stripped_stdout.startswith("{"):
-        try:
-            payload = json.loads(stripped_stdout)
-        except json.JSONDecodeError:
-            payload = None
-        if isinstance(payload, dict):
-            summary = payload.get("summary") if isinstance(payload.get("summary"), dict) else payload
-            counts["cmov_sites"] = int(summary.get("cmov_sites", 0) or 0)
-            counts["wide_sites"] = int(summary.get("wide_sites", 0) or 0)
-            counts["rotate_sites"] = int(summary.get("rotate_sites", 0) or 0)
-            counts["lea_sites"] = int(summary.get("lea_sites", 0) or 0)
-            counts["bitfield_sites"] = int(summary.get("bitfield_sites", summary.get("extract_sites", 0)) or 0)
-            counts["zero_ext_sites"] = int(summary.get("zero_ext_sites", 0) or 0)
-            counts["endian_sites"] = int(summary.get("endian_sites", 0) or 0)
-            counts["branch_flip_sites"] = int(summary.get("branch_flip_sites", 0) or 0)
-            counts["total_sites"] = int(summary.get("total_sites", 0) or 0)
-            if counts["total_sites"] == 0:
-                counts["total_sites"] = sum(counts[field] for _, field in FAMILY_FIELDS)
-            return counts
-    patterns = {
-        "cmov_sites": re.compile(r"^\s*cmov:\s+(\d+)\s*$"),
-        "wide_sites": re.compile(r"^\s*wide:\s+(\d+)\s*$"),
-        "rotate_sites": re.compile(r"^\s*rotate:\s+(\d+)\s*$"),
-        "lea_sites": re.compile(r"^\s*lea:\s+(\d+)\s*$"),
-        "bitfield_sites": re.compile(r"^\s*extract:\s*(\d+)\s*$"),
-        "zero_ext_sites": re.compile(r"^\s*zeroext:\s*(\d+)\s*$"),
-        "endian_sites": re.compile(r"^\s*endian:\s*(\d+)\s*$"),
-        "branch_flip_sites": re.compile(r"^\s*bflip:\s*(\d+)\s*$"),
-    }
-    accepted = False
-    for line in stdout.splitlines():
-        stripped = line.strip()
-        if re.match(r"^Accepted\s+\d+\s+v5 site\(s\)\s*$", stripped):
-            accepted = True
-        for field, pattern in patterns.items():
-            match = pattern.match(stripped)
-            if match:
-                counts[field] = int(match.group(1))
-    counts["total_sites"] = sum(counts[field] for _, field in FAMILY_FIELDS)
-    if not accepted and counts["total_sites"] == 0:
-        raise RuntimeError("scanner did not emit a v5 summary")
-    return counts
-
-
-def maybe_sudo_prefix(enabled: bool) -> list[str]:
-    if not enabled:
-        return []
-    return [] if os.geteuid() == 0 else ["sudo", "-n"]
-
-
 def build_runner_command(
     *,
     runner: Path,
@@ -470,41 +345,22 @@ def build_runner_command(
     dump_xlated: Path | None = None,
     use_sudo: bool = False,
 ) -> list[str]:
-    command = maybe_sudo_prefix(use_sudo) + [
-        str(runner),
-        "run-kernel",
-        "--program",
-        str(object_path),
-        "--program-name",
-        program_name,
-        "--io-mode",
-        io_mode,
-        "--repeat",
-        str(max(1, repeat)),
-    ]
-    if io_mode == "packet":
-        command.append("--raw-packet")
-    if memory_path is not None:
-        command.extend(["--memory", str(memory_path)])
-    if input_size > 0:
-        command.extend(["--input-size", str(input_size)])
-    if btf_custom_path is not None:
-        command.extend(["--btf-custom-path", str(btf_custom_path)])
-    if policy_file is not None:
-        command.extend(["--policy-file", str(policy_file)])
-    elif recompile_v5:
-        command.extend(["--recompile-v5", "--recompile-all"])
-        if skip_families:
-            command.extend(["--skip-families", ",".join(skip_families)])
-    if dump_xlated is not None:
-        command.extend(["--dump-xlated", str(dump_xlated)])
-    if compile_only:
-        command.append("--compile-only")
-    return command
-
-
-def build_scanner_command(scanner: Path, xlated_path: Path) -> list[str]:
-    return [str(scanner), "scan", "--xlated", str(xlated_path), "--all", "--v5"]
+    return build_run_kernel_command(
+        runner=runner,
+        object_path=object_path,
+        program_name=program_name,
+        io_mode=io_mode,
+        memory_path=memory_path,
+        input_size=input_size,
+        repeat=repeat,
+        compile_only=compile_only,
+        recompile_v5=recompile_v5,
+        skip_families=skip_families,
+        policy_file=policy_file,
+        dump_xlated=dump_xlated,
+        btf_custom_path=btf_custom_path,
+        use_sudo=use_sudo,
+    )
 
 
 def size_ratio(
@@ -549,41 +405,6 @@ def speedup_ratio(
     if not baseline_ns or not v5_ns:
         return None
     return float(baseline_ns) / float(v5_ns)
-
-
-def geomean(values: list[float]) -> float | None:
-    positive = [value for value in values if value > 0]
-    if not positive:
-        return None
-    return math.exp(statistics.mean(math.log(value) for value in positive))
-
-
-def format_ratio(value: float | None) -> str:
-    if value is None:
-        return "n/a"
-    return f"{value:.3f}x"
-
-
-def format_pct(value: float | None) -> str:
-    if value is None:
-        return "n/a"
-    return f"{value:+.1f}%"
-
-
-def format_ns(value: Any) -> str:
-    if value is None:
-        return "n/a"
-    return str(int(value))
-
-
-def markdown_table(headers: list[str], rows: list[list[Any]]) -> list[str]:
-    lines = [
-        "| " + " | ".join(headers) + " |",
-        "| " + " | ".join("---" for _ in headers) + " |",
-    ]
-    for row in rows:
-        lines.append("| " + " | ".join(str(cell) for cell in row) + " |")
-    return lines
 
 
 def summarize_failure_reason(record: dict[str, Any] | None) -> str:
@@ -1408,8 +1229,7 @@ def build_markdown(data: dict[str, Any]) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
-    if args.repeat < 1:
-        raise SystemExit("--repeat must be >= 1")
+    require_minimum(args.repeat, 1, "--repeat")
     skip_families = normalize_skip_families(args.skip_families)
 
     if args.guest_info:

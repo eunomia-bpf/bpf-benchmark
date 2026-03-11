@@ -54,6 +54,32 @@ except ImportError:
         summarize_stderr,
     )
     from micro.orchestrator.inventory import discover_corpus_objects, discover_object_programs
+try:
+    from common import (
+        add_corpus_build_report_argument,
+        add_filter_argument,
+        add_max_programs_argument,
+        add_output_json_argument,
+        add_output_md_argument,
+        add_repeat_argument,
+        add_runner_argument,
+        add_section_filter_argument,
+        add_timeout_argument,
+        require_minimum,
+    )
+except ImportError:
+    from corpus.common import (
+        add_corpus_build_report_argument,
+        add_filter_argument,
+        add_max_programs_argument,
+        add_output_json_argument,
+        add_output_md_argument,
+        add_repeat_argument,
+        add_runner_argument,
+        add_section_filter_argument,
+        add_timeout_argument,
+        require_minimum,
+    )
 
 
 DEFAULT_TIMEOUT_SECONDS = 120
@@ -142,47 +168,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "and read run_cnt/run_time_ns from bpf_prog_info."
         )
     )
-    parser.add_argument(
-        "--output-json",
-        default=str(DEFAULT_OUTPUT_JSON),
-        help="Path for structured JSON results.",
-    )
-    parser.add_argument(
-        "--output-md",
-        default=str(DEFAULT_OUTPUT_MD),
-        help="Path for markdown summary output.",
-    )
-    parser.add_argument(
-        "--runner",
-        help="Path to the micro_exec runner binary. Defaults to the suite config runner path.",
-    )
-    parser.add_argument(
-        "--repeat",
-        type=int,
-        default=DEFAULT_REPEAT,
-        help="How many workload iterations to trigger per attached program.",
-    )
-    parser.add_argument(
-        "--timeout",
-        type=int,
-        default=DEFAULT_TIMEOUT_SECONDS,
-        help="Per-invocation timeout in seconds for helper commands.",
-    )
-    parser.add_argument(
-        "--filter",
-        action="append",
-        dest="filters",
-        help="Only include corpus object paths containing this substring. Repeatable.",
-    )
-    parser.add_argument(
-        "--section-filter",
-        action="append",
-        dest="section_filters",
-        help="Only include section names containing this substring. Repeatable.",
-    )
-    parser.add_argument(
-        "--corpus-build-report",
-        help=(
+    add_output_json_argument(parser, DEFAULT_OUTPUT_JSON, help_text="Path for structured JSON results.")
+    add_output_md_argument(parser, DEFAULT_OUTPUT_MD, help_text="Path for markdown summary output.")
+    add_runner_argument(parser, help_text="Path to the micro_exec runner binary. Defaults to the suite config runner path.")
+    add_repeat_argument(parser, DEFAULT_REPEAT, help_text="How many workload iterations to trigger per attached program.")
+    add_timeout_argument(parser, DEFAULT_TIMEOUT_SECONDS, help_text="Per-invocation timeout in seconds for helper commands.")
+    add_filter_argument(parser, help_text="Only include corpus object paths containing this substring. Repeatable.")
+    add_section_filter_argument(parser, help_text="Only include section names containing this substring. Repeatable.")
+    add_corpus_build_report_argument(
+        parser,
+        help_text=(
             "Optional expanded corpus build JSON report. When omitted, "
             "corpus/directive_census.py will use corpus/results/expanded_corpus_build.json if present."
         ),
@@ -192,11 +187,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         action="store_true",
         help="Skip the compile-only --recompile-all probe used to collect directive-scan metadata.",
     )
-    parser.add_argument(
-        "--max-programs",
-        type=int,
-        help="Stop after processing this many discovered tracing programs.",
-    )
+    add_max_programs_argument(parser, help_text="Stop after processing this many discovered tracing programs.")
     return parser.parse_args(argv)
 
 
@@ -943,8 +934,7 @@ def build_markdown(data: dict[str, Any]) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
-    if args.repeat < 1:
-        raise SystemExit("--repeat must be >= 1")
+    require_minimum(args.repeat, 1, "--repeat")
 
     ensure_root()
 

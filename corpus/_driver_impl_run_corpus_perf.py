@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 import statistics
 import subprocess
 import sys
@@ -60,6 +59,34 @@ except ImportError:
     )
     from micro.orchestrator.inventory import discover_corpus_objects, discover_object_programs
     from micro.orchestrator.results import parse_runner_sample
+try:
+    from common import (
+        add_corpus_build_report_argument,
+        add_filter_argument,
+        add_max_programs_argument,
+        add_output_json_argument,
+        add_output_md_argument,
+        add_repeat_argument,
+        add_runner_argument,
+        add_timeout_argument,
+        format_ratio,
+        geomean,
+        require_minimum,
+    )
+except ImportError:
+    from corpus.common import (
+        add_corpus_build_report_argument,
+        add_filter_argument,
+        add_max_programs_argument,
+        add_output_json_argument,
+        add_output_md_argument,
+        add_repeat_argument,
+        add_runner_argument,
+        add_timeout_argument,
+        format_ratio,
+        geomean,
+        require_minimum,
+    )
 
 
 DEFAULT_REPEAT = 200
@@ -84,38 +111,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Run real-world corpus BPF programs under the kernel runtime and compare stock JIT against JIT recompile."
     )
-    parser.add_argument(
-        "--output-json",
-        default=str(DEFAULT_OUTPUT_JSON),
-        help="Path for structured JSON results.",
-    )
-    parser.add_argument(
-        "--output-md",
-        default=str(DEFAULT_OUTPUT_MD),
-        help="Path for markdown summary output.",
-    )
-    parser.add_argument(
-        "--runner",
-        help="Path to the micro_exec runner binary. Defaults to the suite config runner path.",
-    )
-    parser.add_argument(
-        "--repeat",
-        type=int,
-        default=DEFAULT_REPEAT,
-        help="Repeat count passed to bpf_prog_test_run_opts for measured runs.",
-    )
-    parser.add_argument(
-        "--timeout",
-        type=int,
-        default=DEFAULT_TIMEOUT_SECONDS,
-        help="Per-invocation timeout in seconds.",
-    )
-    parser.add_argument(
-        "--filter",
-        action="append",
-        dest="filters",
-        help="Only include corpus object paths containing this substring. Repeatable.",
-    )
+    add_output_json_argument(parser, DEFAULT_OUTPUT_JSON, help_text="Path for structured JSON results.")
+    add_output_md_argument(parser, DEFAULT_OUTPUT_MD, help_text="Path for markdown summary output.")
+    add_runner_argument(parser, help_text="Path to the micro_exec runner binary. Defaults to the suite config runner path.")
+    add_repeat_argument(parser, DEFAULT_REPEAT, help_text="Repeat count passed to bpf_prog_test_run_opts for measured runs.")
+    add_timeout_argument(parser, DEFAULT_TIMEOUT_SECONDS, help_text="Per-invocation timeout in seconds.")
+    add_filter_argument(parser, help_text="Only include corpus object paths containing this substring. Repeatable.")
     parser.add_argument(
         "--kind",
         action="append",
@@ -125,18 +126,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "Examples: xdp, tc, socket, classifier, tracing."
         ),
     )
-    parser.add_argument(
-        "--corpus-build-report",
-        help=(
+    add_corpus_build_report_argument(
+        parser,
+        help_text=(
             "Optional expanded corpus build JSON report. When omitted, "
             "corpus/directive_census.py will use corpus/results/expanded_corpus_build.json if present."
         ),
     )
-    parser.add_argument(
-        "--max-programs",
-        type=int,
-        help="Stop after processing this many discovered programs.",
-    )
+    add_max_programs_argument(parser, help_text="Stop after processing this many discovered programs.")
     return parser.parse_args(argv)
 
 
@@ -305,19 +302,6 @@ def compute_speedup_ratio(
     if not baseline_exec_ns or not recompile_exec_ns:
         return None
     return float(baseline_exec_ns) / float(recompile_exec_ns)
-
-
-def geomean(values: list[float]) -> float | None:
-    positive = [value for value in values if value > 0]
-    if not positive:
-        return None
-    return math.exp(statistics.mean(math.log(value) for value in positive))
-
-
-def format_ratio(value: float | None) -> str:
-    if value is None:
-        return "n/a"
-    return f"{value:.3f}x"
 
 
 def format_ns(value: Any) -> str:
@@ -710,8 +694,7 @@ def build_markdown(
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
-    if args.repeat < 1:
-        raise SystemExit("--repeat must be >= 1")
+    require_minimum(args.repeat, 1, "--repeat")
 
     runner = Path(args.runner).resolve() if args.runner else runner_binary_from_config()
     if not runner.exists():

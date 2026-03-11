@@ -27,6 +27,42 @@ try:
     from orchestrator.inventory import discover_object_programs
 except ImportError:
     from micro.orchestrator.inventory import discover_object_programs
+try:
+    from common import (
+        add_corpus_build_report_argument,
+        add_filter_argument,
+        add_max_programs_argument,
+        add_output_json_argument,
+        add_output_md_argument,
+        add_repeat_argument,
+        add_runner_argument,
+        add_scanner_argument,
+        add_section_filter_argument,
+        add_timeout_argument,
+        ensure_parent,
+        require_minimum,
+        summarize_text,
+        write_json_output,
+        write_text_output,
+    )
+except ImportError:
+    from corpus.common import (
+        add_corpus_build_report_argument,
+        add_filter_argument,
+        add_max_programs_argument,
+        add_output_json_argument,
+        add_output_md_argument,
+        add_repeat_argument,
+        add_runner_argument,
+        add_scanner_argument,
+        add_section_filter_argument,
+        add_timeout_argument,
+        ensure_parent,
+        require_minimum,
+        summarize_text,
+        write_json_output,
+        write_text_output,
+    )
 
 
 ROOT_DIR = REPO_ROOT
@@ -59,8 +95,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "inside the framework-kernel VM and report stock vs v5 recompile deltas."
         )
     )
-    parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON), help="Path for structured JSON output.")
-    parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD), help="Path for markdown output.")
+    add_output_json_argument(parser, DEFAULT_OUTPUT_JSON)
+    add_output_md_argument(parser, DEFAULT_OUTPUT_MD)
     parser.add_argument(
         "--plan-md",
         default=str(DEFAULT_PLAN_MD),
@@ -71,37 +107,23 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=str(DEFAULT_KERNEL_IMAGE),
         help="Framework kernel bzImage used for the VM run.",
     )
-    parser.add_argument("--runner", help="Path to the micro_exec runner used for list-programs.")
-    parser.add_argument(
-        "--scanner",
-        default=str(tracing_exec_impl.DEFAULT_SCANNER),
-        help="Path to the bpf-jit-scanner binary.",
-    )
-    parser.add_argument(
-        "--corpus-build-report",
-        help=(
+    add_runner_argument(parser, help_text="Path to the micro_exec runner used for list-programs.")
+    add_scanner_argument(parser, tracing_exec_impl.DEFAULT_SCANNER, help_text="Path to the bpf-jit-scanner binary.")
+    add_corpus_build_report_argument(
+        parser,
+        help_text=(
             "Optional expanded corpus build JSON report. When omitted, "
             "corpus/results/expanded_corpus_build.json is used if present."
         ),
     )
-    parser.add_argument(
-        "--repeat",
-        type=int,
-        default=tracing_exec_impl.DEFAULT_REPEAT,
-        help="Measurement workload iterations per phase.",
-    )
+    add_repeat_argument(parser, tracing_exec_impl.DEFAULT_REPEAT, help_text="Measurement workload iterations per phase.")
     parser.add_argument(
         "--warmup-repeat",
         type=int,
         default=tracing_exec_impl.DEFAULT_WARMUP_REPEAT,
         help="Warmup workload iterations before baseline and recompile phases.",
     )
-    parser.add_argument(
-        "--timeout",
-        type=int,
-        default=tracing_exec_impl.DEFAULT_TIMEOUT_SECONDS,
-        help="Per-program timeout budget in seconds.",
-    )
+    add_timeout_argument(parser, tracing_exec_impl.DEFAULT_TIMEOUT_SECONDS, help_text="Per-program timeout budget in seconds.")
     parser.add_argument(
         "--vm-timeout",
         type=int,
@@ -110,28 +132,22 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("--cpus", type=int, default=tracing_exec_impl.DEFAULT_VM_CPUS, help="Guest CPU count.")
     parser.add_argument("--mem", default=tracing_exec_impl.DEFAULT_VM_MEM, help="Guest memory size.")
-    parser.add_argument("--filter", action="append", dest="filters", help="Only include objects/programs containing this substring.")
+    add_filter_argument(parser, help_text="Only include objects/programs containing this substring.")
     parser.add_argument("--source", action="append", dest="sources", help="Only include corpus/build/<source>/... objects.")
-    parser.add_argument("--section-filter", action="append", dest="section_filters", help="Only include matching section names.")
-    parser.add_argument("--max-programs", type=int, help="Optional cap for smoke tests.")
+    add_section_filter_argument(parser, help_text="Only include matching section names.")
+    add_max_programs_argument(parser, help_text="Optional cap for smoke tests.")
     parser.add_argument("--dry-run", action="store_true", help="List the tracing targets that would be tested, without booting the VM.")
     parser.add_argument("--guest-batch-json", help=argparse.SUPPRESS)
     parser.add_argument("--guest-single-target-json", help=argparse.SUPPRESS)
     return parser.parse_args(argv)
 
 
-def ensure_parent(path: Path) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-
-
 def write_json(path: Path, payload: dict[str, Any]) -> None:
-    ensure_parent(path)
-    path.write_text(json.dumps(payload, indent=2) + "\n")
+    write_json_output(path, payload)
 
 
 def write_text(path: Path, text: str) -> None:
-    ensure_parent(path)
-    path.write_text(text)
+    write_text_output(path, text)
 
 
 def project_name_for_object(object_path: Path) -> str:
@@ -484,16 +500,6 @@ def print_dry_run_listing(payload: dict[str, Any]) -> None:
         )
 
 
-def summarize_text(text: str, max_lines: int = 20, max_chars: int = 4000) -> str:
-    lines = [line.rstrip() for line in text.splitlines() if line.strip()]
-    if len(lines) > max_lines:
-        lines = lines[-max_lines:]
-    summary = "\n".join(lines)
-    if len(summary) > max_chars:
-        summary = summary[-max_chars:]
-    return summary
-
-
 def parse_last_json_line(stdout: str) -> dict[str, Any]:
     lines = [line.strip() for line in stdout.splitlines() if line.strip()]
     if not lines:
@@ -766,8 +772,7 @@ def build_final_markdown(payload: dict[str, Any]) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
-    if args.repeat < 1:
-        raise SystemExit("--repeat must be >= 1")
+    require_minimum(args.repeat, 1, "--repeat")
     if args.warmup_repeat < 0:
         raise SystemExit("--warmup-repeat must be >= 0")
 

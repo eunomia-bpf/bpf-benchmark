@@ -12,9 +12,8 @@ import socket
 import subprocess
 import sys
 import tempfile
-import threading
 import time
-from collections import Counter, defaultdict
+from collections import Counter
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -79,6 +78,36 @@ try:
     from orchestrator.inventory import discover_object_programs
 except ImportError:
     from micro.orchestrator.inventory import discover_object_programs
+try:
+    from common import (
+        add_corpus_build_report_argument,
+        add_filter_argument,
+        add_max_programs_argument,
+        add_output_json_argument,
+        add_output_md_argument,
+        add_repeat_argument,
+        add_runner_argument,
+        add_scanner_argument,
+        add_section_filter_argument,
+        add_timeout_argument,
+        format_ratio,
+        require_minimum,
+    )
+except ImportError:
+    from corpus.common import (
+        add_corpus_build_report_argument,
+        add_filter_argument,
+        add_max_programs_argument,
+        add_output_json_argument,
+        add_output_md_argument,
+        add_repeat_argument,
+        add_runner_argument,
+        add_scanner_argument,
+        add_section_filter_argument,
+        add_timeout_argument,
+        format_ratio,
+        require_minimum,
+    )
 
 
 ROOT_DIR = REPO_ROOT
@@ -237,30 +266,30 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "using bpf_prog_info run_cnt/run_time_ns."
         )
     )
-    parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON), help="Path for structured JSON output.")
-    parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD), help="Path for markdown output.")
-    parser.add_argument("--runner", help="Path to the micro_exec runner used for list-programs.")
-    parser.add_argument("--scanner", default=str(DEFAULT_SCANNER), help="Path to the bpf-jit-scanner binary.")
-    parser.add_argument(
-        "--corpus-build-report",
-        help=(
+    add_output_json_argument(parser, DEFAULT_OUTPUT_JSON)
+    add_output_md_argument(parser, DEFAULT_OUTPUT_MD)
+    add_runner_argument(parser, help_text="Path to the micro_exec runner used for list-programs.")
+    add_scanner_argument(parser, DEFAULT_SCANNER, help_text="Path to the bpf-jit-scanner binary.")
+    add_corpus_build_report_argument(
+        parser,
+        help_text=(
             "Optional expanded corpus build JSON report. When omitted, "
             "corpus/results/expanded_corpus_build.json is used if present."
         ),
     )
-    parser.add_argument("--repeat", type=int, default=DEFAULT_REPEAT, help="Measurement workload iterations per phase.")
+    add_repeat_argument(parser, DEFAULT_REPEAT, help_text="Measurement workload iterations per phase.")
     parser.add_argument(
         "--warmup-repeat",
         type=int,
         default=DEFAULT_WARMUP_REPEAT,
         help="Warmup workload iterations before baseline and recompile phases.",
     )
-    parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT_SECONDS, help="Per-program timeout budget in seconds.")
-    parser.add_argument("--filter", action="append", dest="filters", help="Only include objects/programs containing this substring.")
+    add_timeout_argument(parser, DEFAULT_TIMEOUT_SECONDS, help_text="Per-program timeout budget in seconds.")
+    add_filter_argument(parser, help_text="Only include objects/programs containing this substring.")
     parser.add_argument("--source", action="append", dest="sources", help="Only include corpus/build/<source>/... objects.")
-    parser.add_argument("--section-filter", action="append", dest="section_filters", help="Only include matching section names.")
+    add_section_filter_argument(parser, help_text="Only include matching section names.")
     parser.add_argument("--root", action="append", dest="roots", help="Only include canonical section roots.")
-    parser.add_argument("--max-programs", type=int, help="Optional cap for smoke tests.")
+    add_max_programs_argument(parser, help_text="Optional cap for smoke tests.")
     parser.add_argument("--vm", action="store_true", help="Run inside a virtme-ng guest.")
     parser.add_argument("--kernel", default=str(DEFAULT_VM_KERNEL), help="Kernel tree or bzImage used with --vm.")
     parser.add_argument("--cpus", type=int, default=DEFAULT_VM_CPUS, help="Guest CPU count for --vm.")
@@ -305,12 +334,6 @@ def format_avg_ns(value: float | None) -> str:
     if value is None:
         return "n/a"
     return f"{value:.2f}"
-
-
-def format_ratio(value: float | None) -> str:
-    if value is None:
-        return "n/a"
-    return f"{value:.3f}x"
 
 
 def speedup_ratio(baseline_avg_ns: float | None, recompile_avg_ns: float | None) -> float | None:
@@ -1446,8 +1469,7 @@ def run_vm_mode(args: argparse.Namespace) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
-    if args.repeat < 1:
-        raise SystemExit("--repeat must be >= 1")
+    require_minimum(args.repeat, 1, "--repeat")
     if args.warmup_repeat < 0:
         raise SystemExit("--warmup-repeat must be >= 0")
 
