@@ -111,7 +111,7 @@ def _census_entry(argv: list[str]) -> int:
     tool, *remaining = argv
     script_map = {
         "directive": "corpus/directive_census.py",
-        "cross-domain": "corpus/cross_domain_census.py",
+        "cross-domain": "corpus/tmp/cross_domain_census.py",
     }
     script_name = script_map.get(tool)
     if script_name is None:

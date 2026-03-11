@@ -12,8 +12,16 @@ from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 
+
+def find_repo_root() -> Path:
+    for candidate in Path(__file__).resolve().parents:
+        if (candidate / "micro").is_dir() and (candidate / "corpus").is_dir():
+            return candidate
+    raise RuntimeError("unable to locate repository root from script path")
+
+
 SCRIPT_DIR = Path(__file__).resolve().parent
-REPO_ROOT = SCRIPT_DIR.parent
+REPO_ROOT = find_repo_root()
 for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpus"):
     candidate_str = str(candidate)
     if candidate_str not in sys.path:
@@ -108,7 +116,7 @@ def find_corpus_objects(corpus_build_dir: Path) -> dict[str, list[Path]]:
 
 
 def main() -> int:
-    repo_root = Path(__file__).resolve().parent.parent
+    repo_root = REPO_ROOT
     corpus_build_dir = repo_root / "corpus" / "build"
     output_path = repo_root / "docs" / "tmp" / "cross-domain-directive-census.md"
 

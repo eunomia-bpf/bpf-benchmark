@@ -9,8 +9,16 @@ from pathlib import Path
 
 import numpy as np
 
+
+def find_repo_root() -> Path:
+    for candidate in Path(__file__).resolve().parents:
+        if (candidate / "micro").is_dir() and (candidate / "corpus").is_dir():
+            return candidate
+    raise RuntimeError("unable to locate repository root from script path")
+
+
 SCRIPT_DIR = Path(__file__).resolve().parent
-REPO_ROOT = SCRIPT_DIR.parent
+REPO_ROOT = find_repo_root()
 for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpus"):
     candidate_str = str(candidate)
     if candidate_str not in sys.path:

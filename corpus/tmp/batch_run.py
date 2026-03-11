@@ -13,10 +13,17 @@ from pathlib import Path
 from typing import Any
 
 
-ROOT = Path(__file__).resolve().parent
-REPO_ROOT = ROOT.parent
-DEFAULT_MANIFEST = ROOT / "bcf" / "manifest.json"
-DEFAULT_OUTPUT = ROOT / "results" / "bcf_batch.json"
+def find_repo_root() -> Path:
+    for candidate in Path(__file__).resolve().parents:
+        if (candidate / "micro").is_dir() and (candidate / "corpus").is_dir():
+            return candidate
+    raise RuntimeError("unable to locate repository root from script path")
+
+
+REPO_ROOT = find_repo_root()
+CORPUS_ROOT = REPO_ROOT / "corpus"
+DEFAULT_MANIFEST = CORPUS_ROOT / "bcf" / "manifest.json"
+DEFAULT_OUTPUT = CORPUS_ROOT / "results" / "bcf_batch.json"
 DEFAULT_RUNNER = REPO_ROOT / "micro" / "build" / "runner" / "micro_exec"
 DEFAULT_INPUT_SIZE = 256
 DEFAULT_REPEAT = 1

@@ -60,7 +60,7 @@ programs:
   - name: calico_tc_maglev
     description: Calico TC Maglev load-balancing program from the host endpoint datapath.
     source: corpus/build/calico/from_hep_debug.bpf.o
-    prog_type: tc
+    prog_type: sched_cls
     test_method: bpf_prog_test_run
     program_name: calico_tc_maglev
     sections: [tc]
@@ -92,7 +92,7 @@ programs:
   - name: linux_test_tc_cls
     description: Linux selftest TC classifier benchmark.
     source: corpus/build/linux-selftests/test_tc_bpf.bpf.o
-    prog_type: tc
+    prog_type: sched_cls
     test_method: bpf_prog_test_run
     program_name: cls
     sections: [tc]
@@ -108,7 +108,7 @@ programs:
   - name: linux_test_tcx_pkt_ptr
     description: Linux selftest TCX ingress packet pointer program.
     source: corpus/build/linux-selftests/test_tc_bpf.bpf.o
-    prog_type: tc
+    prog_type: sched_cls
     test_method: bpf_prog_test_run
     program_name: pkt_ptr
     sections: [tcx]
@@ -140,7 +140,7 @@ programs:
   - name: linux_tc_synproxy
     description: Linux selftest TC SYN proxy.
     source: corpus/build/linux-selftests/xdp_synproxy_kern.bpf.o
-    prog_type: tc
+    prog_type: sched_cls
     test_method: bpf_prog_test_run
     program_name: syncookie_tc
     sections: [tc]
