@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 
@@ -7,6 +8,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 CORPUS_DIR = ROOT_DIR / "corpus"
 POLICY_DIR = CORPUS_DIR / "policies"
 OBJECT_ROOT_NAMES = ("build", "expanded_corpus", "objects")
+PROGRAM_SAFE_CHARS = re.compile(r"[^A-Za-z0-9._-]+")
 
 
 def object_roots(corpus_dir: Path = CORPUS_DIR) -> tuple[Path, ...]:
@@ -31,11 +33,45 @@ def policy_path_for_object(object_path: Path, policy_dir: Path = POLICY_DIR) -> 
     return policy_dir / relative.parent / f"{relative.name}.policy.yaml"
 
 
+def object_policy_stem(object_path: Path) -> str:
+    name = object_relative_path(object_path).name
+    if name.endswith(".bpf.o"):
+        return name[:-len(".bpf.o")]
+    return Path(name).stem
+
+
+def sanitize_program_name(program_name: str) -> str:
+    sanitized = PROGRAM_SAFE_CHARS.sub("_", program_name.strip())
+    sanitized = sanitized.strip("._")
+    return sanitized or "unnamed-program"
+
+
+def program_policy_dir(object_path: Path, policy_dir: Path = POLICY_DIR) -> Path:
+    relative = object_relative_path(object_path)
+    return policy_dir / relative.parent / object_policy_stem(object_path)
+
+
+def policy_path_for_program(
+    object_path: Path,
+    program_name: str,
+    policy_dir: Path = POLICY_DIR,
+) -> Path:
+    return program_policy_dir(object_path, policy_dir) / f"{sanitize_program_name(program_name)}.policy.yaml"
+
+
 def legacy_flat_policy_path(object_path: Path, policy_dir: Path = POLICY_DIR) -> Path:
     return policy_dir / f"{object_path.name}.policy.yaml"
 
 
-def resolve_policy_path(object_path: Path, policy_dir: Path = POLICY_DIR) -> Path | None:
+def resolve_policy_path(
+    object_path: Path,
+    policy_dir: Path = POLICY_DIR,
+    program_name: str | None = None,
+) -> Path | None:
+    if program_name:
+        per_program = policy_path_for_program(object_path, program_name, policy_dir)
+        if per_program.exists():
+            return per_program
     mirrored = policy_path_for_object(object_path, policy_dir)
     if mirrored.exists():
         return mirrored
@@ -53,6 +89,10 @@ __all__ = [
     "legacy_flat_policy_path",
     "object_relative_path",
     "object_roots",
+    "object_policy_stem",
     "policy_path_for_object",
+    "policy_path_for_program",
+    "program_policy_dir",
     "resolve_policy_path",
+    "sanitize_program_name",
 ]

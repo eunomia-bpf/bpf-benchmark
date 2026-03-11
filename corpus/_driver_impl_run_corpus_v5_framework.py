@@ -111,7 +111,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--use-policy",
         action="store_true",
-        help="Prefer corpus/policies/*.policy.yaml for each object when present; otherwise fall back to the legacy all-apply recompile path.",
+        help="Prefer corpus/policies/*.policy.yaml for each program/object when present; otherwise fall back to the legacy all-apply recompile path.",
+    )
+    parser.add_argument(
+        "--policy-dir",
+        default=str(DEFAULT_POLICY_DIR),
+        help="Policy directory searched when --use-policy is enabled.",
     )
     return parser.parse_args(argv)
 
@@ -540,7 +545,11 @@ def run_target(
 ) -> dict[str, Any]:
     object_path = ROOT_DIR / target["object_path"]
     plan = execution_plan(target["section_name"], packet_path, context_path)
-    policy_path = resolve_policy_path(object_path, policy_dir) if use_policy else None
+    policy_path = resolve_policy_path(
+        object_path,
+        policy_dir,
+        program_name=target["program_name"],
+    ) if use_policy else None
 
     baseline_compile_raw = run_command(
         build_runner_command(
@@ -884,7 +893,7 @@ def build_markdown(data: dict[str, Any]) -> str:
             "- The 40 target programs are the union of the previously measured directive-bearing perf and tracing results from the expanded corpus.",
             "- Baseline and v5 compile-only probes were attempted for all 40 targets on the framework kernel.",
             "- Timed runs were attempted only for the 29 targets that were previously runnable through `bpf_prog_test_run`.",
-            "- `--use-policy` prefers a matching file under `corpus/policies/`; when none exists for an object, the driver falls back to the legacy auto-scan `--recompile-v5 --recompile-all` path.",
+            "- `--use-policy` prefers a matching per-program file under `corpus/policies/`, then falls back to object-level legacy policy files, and finally falls back to the legacy auto-scan `--recompile-v5 --recompile-all` path.",
             "- Guest CO-RE loading uses `--btf-custom-path` pointing at the framework build-tree `vmlinux`, because the guest kernel does not expose `/sys/kernel/btf/vmlinux`.",
             "",
         ]
@@ -930,6 +939,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.max_programs is not None:
         targets = targets[:args.max_programs]
 
+    policy_dir = Path(args.policy_dir).resolve()
     records: list[dict[str, Any]] = []
     for index, target in enumerate(targets, start=1):
         print(
@@ -948,7 +958,7 @@ def main(argv: list[str] | None = None) -> int:
                 args.repeat,
                 args.timeout,
                 use_policy=args.use_policy,
-                policy_dir=DEFAULT_POLICY_DIR,
+                policy_dir=policy_dir,
             )
         )
 
@@ -968,6 +978,7 @@ def main(argv: list[str] | None = None) -> int:
         "tracing_results_json": str(tracing_results_path),
         "repeat": args.repeat,
         "use_policy": args.use_policy,
+        "policy_dir": str(policy_dir),
         "summary": summary,
         "programs": records,
     }
