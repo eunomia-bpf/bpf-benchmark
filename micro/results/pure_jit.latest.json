@@ -1,13 +1,13 @@
 {
   "suite": "micro_staged_codegen",
   "manifest": "/home/yunwei37/workspace/bpf-benchmark/config/micro_pure_jit.yaml",
-  "generated_at": "2026-03-11T02:57:14.217086+00:00",
+  "generated_at": "2026-03-11T18:52:34.215049+00:00",
   "host": {
     "hostname": "lab",
     "platform": "Linux-6.15.11-061511-generic-x86_64-with-glibc2.39",
     "python": "3.12.3",
     "cpu_affinity": null,
-    "git_sha": "a2518a83d222bc2e6289992b17ced3b0f7dc44d1",
+    "git_sha": "99701f8befdf5541cd2b76183509946709c07136",
     "kernel_version": "6.15.11-061511-generic",
     "kernel_cmdline": "BOOT_IMAGE=/boot/vmlinuz-6.15.11-061511-generic root=UUID=85355174-a2ad-4e84-bf78-53fac30b89fb ro panic=10 panic_on_oops=1 softlockup_panic=1 hung_task_panic=1 splash quiet iommu=pt vt.handoff=7",
     "cpu_governor": "performance",
@@ -31,8 +31,8 @@
   },
   "defaults": {
     "iterations": 1,
-    "warmups": 1,
-    "repeat": 5,
+    "warmups": 0,
+    "repeat": 10,
     "perf_counters": false,
     "perf_scope": "full_repeat_raw",
     "shuffle_seed": null,
@@ -41,7 +41,7 @@
   "iteration_runtime_orders": {
     "simple": [
       [
-        "llvmbpf"
+        "kernel"
       ]
     ]
   },
@@ -62,45 +62,45 @@
       "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/simple.mem",
       "runs": [
         {
-          "runtime": "llvmbpf",
-          "label": "llvmbpf LLVM JIT",
-          "mode": "llvmbpf",
-          "repeat": 5,
+          "runtime": "kernel",
+          "label": "kernel eBPF",
+          "mode": "kernel",
+          "repeat": 10,
           "artifacts": {
             "program_object": "/home/yunwei37/workspace/bpf-benchmark/micro/programs/simple.bpf.o"
           },
           "samples": [
             {
-              "compile_ns": 6312936,
-              "exec_ns": 225,
-              "timing_source": "rdtsc",
+              "compile_ns": 552330,
+              "exec_ns": 107,
+              "timing_source": "ktime",
               "no_cmov": false,
-              "opt_level": 3,
               "disabled_passes": [],
-              "wall_exec_ns": 8721,
-              "exec_cycles": 831,
-              "tsc_freq_hz": 3686223388,
+              "wall_exec_ns": 3507593,
+              "exec_cycles": 12928835,
+              "tsc_freq_hz": 3685956623,
               "result": 12345678,
               "retval": 2,
-              "native_code_size": 104,
-              "bpf_insn_count": 29,
+              "jited_prog_len": 164,
+              "xlated_prog_len": 280,
               "code_size": {
-                "bpf_bytecode_bytes": 232,
-                "native_code_bytes": 104,
-                "inflation_ratio": 0.448276
+                "bpf_bytecode_bytes": 280,
+                "native_code_bytes": 164,
+                "inflation_ratio": 0.585714
               },
               "phases_ns": {
-                "program_image_ns": 148448,
-                "memory_prepare_ns": 43075,
-                "input_stage_ns": 2238,
-                "vm_load_code_ns": 212,
-                "jit_compile_ns": 6312936
+                "memory_prepare_ns": 62354,
+                "object_open_ns": 159562,
+                "object_load_ns": 392768,
+                "input_stage_ns": 3614,
+                "prog_run_wall_ns": 35075050,
+                "result_extract_ns": 27
               },
               "perf_counters": {},
               "perf_counters_meta": {
                 "requested": false,
                 "collected": false,
-                "include_kernel": false,
+                "include_kernel": true,
                 "scope": "full_repeat_raw",
                 "error": ""
               },
@@ -110,11 +110,14 @@
                 "wide_sites": 0,
                 "rotate_sites": 0,
                 "lea_sites": 0,
+                "bitfield_sites": 0,
                 "total_sites": 0
               },
               "recompile": {
                 "requested": false,
                 "mode": "none",
+                "requested_families": [],
+                "skipped_families": [],
                 "policy_generated": false,
                 "policy_bytes": 0,
                 "syscall_attempted": false,
@@ -126,67 +129,76 @@
           ],
           "compile_ns": {
             "count": 1,
-            "mean": 6312936,
-            "median": 6312936,
-            "min": 6312936,
-            "max": 6312936,
-            "p95": 6312936,
+            "mean": 552330,
+            "median": 552330,
+            "min": 552330,
+            "max": 552330,
+            "p95": 552330,
             "stdev": 0
           },
           "exec_ns": {
             "count": 1,
-            "mean": 225,
-            "median": 225,
-            "min": 225,
-            "max": 225,
-            "p95": 225,
+            "mean": 107,
+            "median": 107,
+            "min": 107,
+            "max": 107,
+            "p95": 107,
             "stdev": 0
           },
-          "timing_source": "rdtsc",
+          "timing_source": "ktime",
           "phases_ns": {
-            "program_image_ns": {
-              "count": 1,
-              "mean": 148448,
-              "median": 148448,
-              "min": 148448,
-              "max": 148448,
-              "p95": 148448,
-              "stdev": 0
-            },
             "memory_prepare_ns": {
               "count": 1,
-              "mean": 43075,
-              "median": 43075,
-              "min": 43075,
-              "max": 43075,
-              "p95": 43075,
+              "mean": 62354,
+              "median": 62354,
+              "min": 62354,
+              "max": 62354,
+              "p95": 62354,
+              "stdev": 0
+            },
+            "object_open_ns": {
+              "count": 1,
+              "mean": 159562,
+              "median": 159562,
+              "min": 159562,
+              "max": 159562,
+              "p95": 159562,
+              "stdev": 0
+            },
+            "object_load_ns": {
+              "count": 1,
+              "mean": 392768,
+              "median": 392768,
+              "min": 392768,
+              "max": 392768,
+              "p95": 392768,
               "stdev": 0
             },
             "input_stage_ns": {
               "count": 1,
-              "mean": 2238,
-              "median": 2238,
-              "min": 2238,
-              "max": 2238,
-              "p95": 2238,
+              "mean": 3614,
+              "median": 3614,
+              "min": 3614,
+              "max": 3614,
+              "p95": 3614,
               "stdev": 0
             },
-            "vm_load_code_ns": {
+            "prog_run_wall_ns": {
               "count": 1,
-              "mean": 212,
-              "median": 212,
-              "min": 212,
-              "max": 212,
-              "p95": 212,
+              "mean": 35075050,
+              "median": 35075050,
+              "min": 35075050,
+              "max": 35075050,
+              "p95": 35075050,
               "stdev": 0
             },
-            "jit_compile_ns": {
+            "result_extract_ns": {
               "count": 1,
-              "mean": 6312936,
-              "median": 6312936,
-              "min": 6312936,
-              "max": 6312936,
-              "p95": 6312936,
+              "mean": 27,
+              "median": 27,
+              "min": 27,
+              "max": 27,
+              "p95": 27,
               "stdev": 0
             }
           },
@@ -206,18 +218,18 @@
           },
           "wall_exec_ns": {
             "count": 1,
-            "mean": 8721,
-            "median": 8721,
-            "min": 8721,
-            "max": 8721,
-            "p95": 8721,
+            "mean": 3507593,
+            "median": 3507593,
+            "min": 3507593,
+            "max": 3507593,
+            "p95": 3507593,
             "stdev": 0
           },
           "baseline_adjustment": {
             "baseline_benchmark": "simple",
             "baseline_io_mode": "staged",
             "applied": true,
-            "baseline_exec_ns": 225.0,
+            "baseline_exec_ns": 107.0,
             "median_minus_baseline_ns": 0.0,
             "median_over_baseline_ratio": 1.0
           }

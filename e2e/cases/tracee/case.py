@@ -49,11 +49,15 @@ from e2e.common.workload import (  # noqa: E402
 )
 try:  # noqa: E402
     from micro.orchestrator.inventory import ProgramInventoryEntry, discover_object_programs
-    from micro.run_e2e_tracee import Libbpf as ManualLibbpf
-    from micro.run_e2e_tracee import ManualTraceeSession
 except ModuleNotFoundError:  # noqa: E402
     sys.path.insert(0, str(ROOT_DIR / "micro"))
     from orchestrator.inventory import ProgramInventoryEntry, discover_object_programs
+
+try:  # noqa: E402
+    from e2e.run_e2e_tracee import Libbpf as ManualLibbpf
+    from e2e.run_e2e_tracee import ManualTraceeSession
+except ModuleNotFoundError:  # noqa: E402
+    sys.path.insert(0, str(ROOT_DIR / "e2e"))
     from run_e2e_tracee import Libbpf as ManualLibbpf
     from run_e2e_tracee import ManualTraceeSession
 

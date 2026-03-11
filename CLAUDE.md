@@ -18,6 +18,10 @@ eBPF benchmarking suite comparing **llvmbpf** (userspace LLVM JIT) against **ker
 ```bash
 git submodule update --init --recursive
 make -C micro          # builds both micro_exec runner and BPF programs
+
+# e2e/corpus recompile paths expect the standalone scanner CLI
+cmake -S scanner -B scanner/build -DCMAKE_BUILD_TYPE=Release
+cmake --build scanner/build --target bpf-jit-scanner -j
 ```
 
 ### Build individual targets
@@ -58,8 +62,8 @@ make -C micro clean
 ### Three-layer benchmark model
 
 Configured via YAML files in `config/`:
-- **`micro_pure_jit.yaml`** — Pure JIT codegen/execution micro-benchmarks (22 cases). Uses `staged` IO mode: input staged via `input_map`, result returned in XDP test packet's first 8 bytes.
-- **`micro_runtime.yaml`** — Map/helper runtime mechanism benchmarks. Uses `map` IO mode: result written to `result_map`.
+- **`micro_pure_jit.yaml`** — Current default isolated JIT suite (56 benchmarks as of March 11, 2026): 48 staged compute-oriented cases, 5 packet-backed parser/hash/bounds controls, and 3 map-backed kernel-only control cases. Most cases use `staged` IO mode, but the suite now also contains a small number of packet-backed and non-XDP map-backed controls.
+- **`micro_runtime.yaml`** — Runtime mechanism suite (11 benchmarks as of March 11, 2026): 8 map-backed map/atomic/probe-read/time cases plus 3 staged helper-call stress cases.
 - **`macro_corpus.yaml`** — Macro/corpus layer entry point.
 
 ### Key components

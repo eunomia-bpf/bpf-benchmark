@@ -20,6 +20,8 @@
 
 The active corpus currently spans 23 source projects and stores fetched repos under `corpus/repos/`, built objects under `corpus/build/`, and measurement outputs under `corpus/results/` plus `docs/tmp/`.
 
+`corpus/build/<repo>/` is also the object root consumed by the `e2e/` layer for cases such as `tracee`, `tetragon`, and `scx`.
+
 ## Common Commands
 
 Fetch or refresh the upstream corpus working copies:

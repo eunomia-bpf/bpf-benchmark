@@ -23,23 +23,55 @@ bpf-benchmark/
 
 ## Quick Start
 
-Build the shared runner and benchmark objects:
+Initialize submodules, activate the shared virtualenv used in this workspace, and build the micro layer:
 
 ```bash
-make -C micro micro_exec programs
+git submodule update --init --recursive
+source /home/yunwei37/workspace/.venv/bin/activate
+make -C micro
 ```
 
-List the current micro suite:
+List the current micro suite and run the minimal smoke benchmark:
 
 ```bash
 python3 micro/run_micro.py --list
+python3 micro/run_micro.py --bench simple --runtime llvmbpf --iterations 1 --warmups 0 --repeat 10
+python3 micro/run_micro.py --bench simple --runtime kernel --iterations 1 --warmups 0 --repeat 10
 ```
 
-Run a corpus census or corpus perf harness:
+The kernel runtime command requires passwordless `sudo -n`.
+
+Build the standalone scanner CLI required by `corpus/` recompile paths and `e2e/`:
 
 ```bash
+cmake -S scanner -B scanner/build -DCMAKE_BUILD_TYPE=Release
+cmake --build scanner/build --target bpf-jit-scanner -j
+```
+
+Check the higher-level entrypoints:
+
+```bash
+python3 micro/driver.py suite -- --list
+python3 corpus/build_expanded_corpus.py --help
+python3 e2e/run.py --help
+```
+
+Prepare the corpus-derived objects used by the end-to-end cases:
+
+```bash
+python3 corpus/build_expanded_corpus.py --repo tracee --repo tetragon --repo scx
+```
+
+Then run layer-specific workflows:
+
+```bash
+python3 micro/driver.py suite -- --runtime llvmbpf --runtime kernel
 python3 corpus/directive_census.py --help
-python3 corpus/run_corpus_perf.py --help
+python3 corpus/run_macro_corpus.py --list
+python3 e2e/run.py tracee --smoke
+python3 e2e/run.py tetragon --smoke
+python3 e2e/run.py bpftrace --smoke
+python3 e2e/run.py scx --smoke
 ```
 
 ## Layer Notes
@@ -48,6 +80,6 @@ python3 corpus/run_corpus_perf.py --help
 
 `corpus/` owns the 23-project real-world corpus, fetch/build tooling, declarative corpus config in `corpus/config/`, and the measurement / analysis scripts for corpus-wide experiments.
 
-`e2e/` is reserved for full deployment-style evaluation. The current Tracee, Tetragon, and bpftrace probe harnesses now live there as the first slice of that layer.
+`e2e/` owns full deployment-style evaluation via the unified `e2e/run.py` entrypoint plus per-case assets under `e2e/cases/`.
 
 `legacy/` contains the old multi-runtime userspace benchmark and external reference repositories. They are preserved for history but are not part of the active refactored workflow.
