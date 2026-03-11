@@ -1,6 +1,7 @@
 #include "micro_exec.hpp"
 
 #include <bpf_jit_scanner/pattern_v5.hpp>
+#include <bpf_jit_scanner/policy_config.hpp>
 
 #include <bpf/bpf.h>
 #include <bpf/libbpf.h>
@@ -385,6 +386,60 @@ void append_recompile_family(std::vector<std::string> &families,
 {
     if (enabled) {
         families.emplace_back(family);
+    }
+}
+
+void assign_directive_scan_summary(
+    directive_scan_summary &directive_scan,
+    const bpf_jit_scanner::V5ScanSummary &summary)
+{
+    directive_scan.performed = true;
+    directive_scan.cmov_sites = summary.cmov_sites;
+    directive_scan.wide_sites = summary.wide_sites;
+    directive_scan.rotate_sites = summary.rotate_sites;
+    directive_scan.lea_sites = summary.lea_sites;
+    directive_scan.bitfield_sites = summary.bitfield_sites;
+    directive_scan.zero_ext_sites = summary.zero_ext_sites;
+    directive_scan.endian_sites = summary.endian_sites;
+    directive_scan.branch_flip_sites = summary.branch_flip_sites;
+}
+
+void assign_recompile_site_summary(
+    recompile_summary &recompile,
+    const bpf_jit_scanner::V5ScanSummary &summary)
+{
+    recompile.cmov_sites = summary.cmov_sites;
+    recompile.wide_sites = summary.wide_sites;
+    recompile.rotate_sites = summary.rotate_sites;
+    recompile.lea_sites = summary.lea_sites;
+    recompile.bitfield_sites = summary.bitfield_sites;
+    recompile.zero_ext_sites = summary.zero_ext_sites;
+    recompile.endian_sites = summary.endian_sites;
+    recompile.branch_flip_sites = summary.branch_flip_sites;
+}
+
+void assign_policy_family_lists(
+    recompile_summary &recompile,
+    const bpf_jit_scanner::V5PolicyConfig &config)
+{
+    constexpr bpf_jit_scanner::V5Family families[] = {
+        bpf_jit_scanner::V5Family::Cmov,
+        bpf_jit_scanner::V5Family::WideMem,
+        bpf_jit_scanner::V5Family::Rotate,
+        bpf_jit_scanner::V5Family::AddrCalc,
+        bpf_jit_scanner::V5Family::BitfieldExtract,
+        bpf_jit_scanner::V5Family::ZeroExtElide,
+        bpf_jit_scanner::V5Family::EndianFusion,
+        bpf_jit_scanner::V5Family::BranchFlip,
+    };
+
+    recompile.requested_families.clear();
+    recompile.skipped_families.clear();
+    for (const auto family : families) {
+        auto &target = bpf_jit_scanner::v5_policy_allows_family(config, family)
+                           ? recompile.requested_families
+                           : recompile.skipped_families;
+        target.emplace_back(bpf_jit_scanner::v5_family_name(family));
     }
 }
 
@@ -820,6 +875,8 @@ sample_result run_kernel(const cli_options &options)
     const bool do_recompile_endian = want_recompile_endian && !skip_endian;
     const bool do_recompile_branch_flip =
         want_recompile_branch_flip && !skip_branch_flip;
+    const bool has_policy_config =
+        options.policy.has_value() || options.policy_file.has_value();
     directive_scan_summary directive_scan {};
     recompile_summary recompile {};
     recompile.skipped_families = options.skip_families;
@@ -844,8 +901,13 @@ sample_result run_kernel(const cli_options &options)
         do_recompile_lea || do_recompile_extract ||
         do_recompile_zero_ext || do_recompile_endian ||
         do_recompile_branch_flip ||
+        has_policy_config ||
         options.policy_blob.has_value();
-    if (options.policy_blob.has_value()) {
+    if (options.policy.has_value()) {
+        recompile.mode = "policy-inline";
+    } else if (options.policy_file.has_value()) {
+        recompile.mode = "policy-file";
+    } else if (options.policy_blob.has_value()) {
         recompile.mode = "policy-blob";
     } else if (do_recompile_cmov || do_recompile_wide || do_recompile_rotate ||
                do_recompile_lea || do_recompile_extract ||
@@ -853,11 +915,7 @@ sample_result run_kernel(const cli_options &options)
                do_recompile_branch_flip) {
         recompile.mode = "auto-scan-v5";
     }
-    if (do_recompile_cmov || do_recompile_wide || do_recompile_rotate ||
-        do_recompile_lea || do_recompile_extract ||
-        do_recompile_zero_ext || do_recompile_endian ||
-        do_recompile_branch_flip ||
-        options.policy_blob.has_value()) {
+    if (recompile.requested) {
         auto pre_info = load_prog_info(program_fd);
 
         std::vector<uint8_t> policy_data;
@@ -903,7 +961,6 @@ sample_result run_kernel(const cli_options &options)
              * cross a subprog boundary, so userspace does not need to trim
              * scanning to the main entry subprog.
              */
-            directive_scan.performed = true;
             uint32_t scan_len = static_cast<uint32_t>(xlated.size());
             const auto summary = bpf_jit_scanner::scan_v5_builtin(
                 xlated.data(), scan_len,
@@ -919,22 +976,8 @@ sample_result run_kernel(const cli_options &options)
                     .use_rorx = options.recompile_rotate_rorx,
                 });
 
-            directive_scan.cmov_sites = summary.cmov_sites;
-            directive_scan.wide_sites = summary.wide_sites;
-            directive_scan.rotate_sites = summary.rotate_sites;
-            directive_scan.lea_sites = summary.lea_sites;
-            directive_scan.bitfield_sites = summary.bitfield_sites;
-            directive_scan.zero_ext_sites = summary.zero_ext_sites;
-            directive_scan.endian_sites = summary.endian_sites;
-            directive_scan.branch_flip_sites = summary.branch_flip_sites;
-            recompile.cmov_sites = summary.cmov_sites;
-            recompile.wide_sites = summary.wide_sites;
-            recompile.rotate_sites = summary.rotate_sites;
-            recompile.lea_sites = summary.lea_sites;
-            recompile.bitfield_sites = summary.bitfield_sites;
-            recompile.zero_ext_sites = summary.zero_ext_sites;
-            recompile.endian_sites = summary.endian_sites;
-            recompile.branch_flip_sites = summary.branch_flip_sites;
+            assign_directive_scan_summary(directive_scan, summary);
+            assign_recompile_site_summary(recompile, summary);
 
             auto print_v5_scan_status = [&](bool enabled,
                                             uint64_t site_count,
@@ -981,6 +1024,61 @@ sample_result run_kernel(const cli_options &options)
                     pre_info.xlated_prog_len / 8,
                     pre_info.tag,
                     summary.rules);
+            }
+        } else if (has_policy_config) {
+            const auto policy_config = options.policy.has_value()
+                ? bpf_jit_scanner::parse_policy_config_text(
+                      *options.policy,
+                      "<micro-exec-inline-policy>")
+                : bpf_jit_scanner::load_policy_config_file(
+                      options.policy_file->string());
+            assign_policy_family_lists(recompile, policy_config);
+
+            auto xlated = load_xlated_program(program_fd, pre_info.xlated_prog_len);
+            const uint32_t scan_len = static_cast<uint32_t>(xlated.size());
+            const auto discovered = bpf_jit_scanner::scan_v5_builtin(
+                xlated.data(), scan_len,
+                bpf_jit_scanner::V5ScanOptions {
+                    .scan_cmov = true,
+                    .scan_wide = true,
+                    .scan_rotate = true,
+                    .scan_lea = true,
+                    .scan_extract = true,
+                    .scan_zero_ext = true,
+                    .scan_endian = true,
+                    .scan_branch_flip = true,
+                    .use_rorx = false,
+                });
+            assign_directive_scan_summary(directive_scan, discovered);
+
+            const auto selected_rules =
+                bpf_jit_scanner::filter_rules_by_policy(
+                    discovered.rules, policy_config);
+            const auto selected_summary =
+                bpf_jit_scanner::summarize_rules(selected_rules);
+            assign_recompile_site_summary(recompile, selected_summary);
+
+            if (selected_rules.empty()) {
+                if (discovered.rules.empty()) {
+                    std::fprintf(
+                        stderr,
+                        "recompile-policy: no eligible sites found in xlated program (%u insns)\n",
+                        scan_len / 8);
+                } else {
+                    std::fprintf(
+                        stderr,
+                        "recompile-policy: policy selected 0 of %zu eligible rules\n",
+                        discovered.rules.size());
+                }
+            } else {
+                std::fprintf(
+                    stderr,
+                    "recompile-policy: kept %zu of %zu eligible rules\n",
+                    selected_rules.size(), discovered.rules.size());
+                policy_data = bpf_jit_scanner::build_policy_blob_v5(
+                    pre_info.xlated_prog_len / 8,
+                    pre_info.tag,
+                    selected_rules);
             }
         } else {
             /*

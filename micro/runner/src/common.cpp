@@ -151,7 +151,7 @@ std::string usage_text()
 {
     return
         "usage: micro_exec <run-llvmbpf|run-kernel|list-programs> [--program <path>|<path>] [--program-name <name>] "
-        "[--memory|--input <path>] [--btf-custom-path <path>] [--directive-blob <path>] [--policy-blob <path>] "
+        "[--memory|--input <path>] [--btf-custom-path <path>] [--directive-blob <path>] [--policy <yaml-or-json>] [--policy-file <path>] [--policy-blob <path>] "
         "[--manual-load] [--recompile-cmov] [--recompile-wide|--recompile-wide-mem] [--recompile-rotate] [--recompile-rotate-rorx] [--recompile-lea] [--recompile-extract|--recompile-bitfield-extract] [--recompile-all] [--recompile-v5] [--skip-families cmov,wide,rotate,lea,extract,zero-ext,endian,branch-flip] "
         "[--io-mode map|staged|packet|context] [--raw-packet] [--repeat N] [--warmup N] [--input-size|--kernel-input-size N] "
         "[--opt-level 0|1|2|3] [--no-cmov] [--llvm-disable-pass <name>] [--llvm-log-passes] "
@@ -264,6 +264,14 @@ cli_options parse_args(int argc, char **argv)
         }
         if (current == "--directive-blob" && index + 1 < argc) {
             options.directive_blob = std::filesystem::path(argv[++index]);
+            continue;
+        }
+        if (current == "--policy" && index + 1 < argc) {
+            options.policy = std::string(argv[++index]);
+            continue;
+        }
+        if (current == "--policy-file" && index + 1 < argc) {
+            options.policy_file = std::filesystem::path(argv[++index]);
             continue;
         }
         if (current == "--policy-blob" && index + 1 < argc) {
@@ -388,6 +396,12 @@ cli_options parse_args(int argc, char **argv)
     if (options.directive_blob.has_value() && options.command != "run-kernel") {
         fail("--directive-blob is only valid with run-kernel");
     }
+    if (options.policy.has_value() && options.command != "run-kernel") {
+        fail("--policy is only valid with run-kernel");
+    }
+    if (options.policy_file.has_value() && options.command != "run-kernel") {
+        fail("--policy-file is only valid with run-kernel");
+    }
     if (options.policy_blob.has_value() && options.command != "run-kernel") {
         fail("--policy-blob is only valid with run-kernel");
     }
@@ -428,8 +442,21 @@ cli_options parse_args(int argc, char **argv)
           options.recompile_all)) {
         fail("--recompile-v5 requires at least one recompile family or --recompile-all");
     }
-    if (!options.skip_families.empty() && options.policy_blob.has_value()) {
-        fail("--skip-families cannot be used with --policy-blob");
+    if ((options.policy.has_value() || options.policy_file.has_value()) &&
+        options.policy_blob.has_value()) {
+        fail("--policy/--policy-file cannot be used with --policy-blob");
+    }
+    if ((options.policy.has_value() || options.policy_file.has_value()) &&
+        (options.recompile_cmov || options.recompile_rotate ||
+         options.recompile_rotate_rorx || options.recompile_wide ||
+         options.recompile_lea || options.recompile_extract ||
+         options.recompile_all || options.recompile_v5)) {
+        fail("--policy/--policy-file cannot be combined with auto-scan recompile flags");
+    }
+    if (!options.skip_families.empty() &&
+        (options.policy.has_value() || options.policy_file.has_value() ||
+         options.policy_blob.has_value())) {
+        fail("--skip-families cannot be used with --policy, --policy-file, or --policy-blob");
     }
     if (!options.skip_families.empty() &&
         !(options.recompile_cmov || options.recompile_rotate ||

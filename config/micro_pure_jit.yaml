@@ -46,6 +46,13 @@ runtimes:
     repeat: 200
     sudo: true
 
+  - name: kernel-recompile
+    label: kernel eBPF + manifest recompile policy
+    mode: kernel-recompile
+    repeat: 200
+    sudo: true
+    aliases: [kernel_recompile, recompile]
+
 benchmarks:
   - name: simple
     description: Return-only baseline
@@ -106,6 +113,8 @@ benchmarks:
     kernel_input_size: 1032
     input_generator: log2_fold
     expected_result: 9
+    policy:
+      COND_SELECT: skip
     tags: [bitops, branch, pure-jit]
 
   - name: dep_chain_short
@@ -190,6 +199,8 @@ benchmarks:
     kernel_input_size: 4104
     input_generator: cmov_select
     expected_result: 11332120082118096118
+    policy:
+      COND_SELECT: apply
     tags: [branch, select, cmov, pure-jit]
 
   - name: cmov_dense
@@ -202,6 +213,7 @@ benchmarks:
     kernel_input_size: 1024
     input_generator: cmov_dense
     expected_result: 15544056576594566652
+    policy_file: micro/policies/cmov_dense.yaml
     tags: [branch, select, cmov, dense, pure-jit]
 
   - name: checksum

@@ -23,6 +23,8 @@ def build_runner_command(
     memory: Path | str | None = None,
     btf_custom_path: Path | str | None = None,
     directive_blob: Path | str | None = None,
+    policy: str | None = None,
+    policy_file: Path | str | None = None,
     policy_blob: Path | str | None = None,
     io_mode: str | None = None,
     raw_packet: bool = False,
@@ -64,6 +66,9 @@ def build_runner_command(
         command.extend(["--input-size", str(input_size)])
     _append_path_option(command, "--btf-custom-path", btf_custom_path)
     _append_path_option(command, "--directive-blob", directive_blob)
+    if policy is not None:
+        command.extend(["--policy", policy])
+    _append_path_option(command, "--policy-file", policy_file)
     _append_path_option(command, "--policy-blob", policy_blob)
     if opt_level is not None:
         command.extend(["--opt-level", str(opt_level)])
@@ -116,6 +121,8 @@ def build_micro_benchmark_command(
     repeat: int,
     memory: Path | str | None = None,
     input_size: int | None = None,
+    policy: str | None = None,
+    policy_file: Path | str | None = None,
     perf_counters: bool = False,
     perf_scope: str = "full_repeat_raw",
     require_sudo: bool = False,
@@ -145,6 +152,24 @@ def build_micro_benchmark_command(
             input_size=input_size,
             perf_counters=perf_counters,
             perf_scope=perf_scope,
+        )
+        return maybe_prepend_sudo(command, enabled=require_sudo)
+
+    if runtime_mode in {"kernel-recompile", "kernel_recompile"}:
+        command = build_runner_command(
+            runner_binary,
+            "run-kernel",
+            program=program,
+            io_mode=io_mode,
+            repeat=repeat,
+            memory=memory,
+            input_size=input_size,
+            policy=policy,
+            policy_file=policy_file,
+            perf_counters=perf_counters,
+            perf_scope=perf_scope,
+            recompile_v5=policy is None and policy_file is None,
+            recompile_all=policy is None and policy_file is None,
         )
         return maybe_prepend_sudo(command, enabled=require_sudo)
 

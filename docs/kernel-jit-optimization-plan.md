@@ -6,7 +6,7 @@
 > - 每个任务做完 → 立即更新本文档（任务条目状态 + 关键数据 + 文档路径）。
 > - 每次 context 压缩后 → 完整读取本文档恢复全局状态。
 > - 用 agent background 跑任务，不阻塞主对话。
-> 上次更新：2026-03-11（corpus v6 full recompile 完成：163 measured, geomean 0.868x, 92 applied）
+> 上次更新：2026-03-11（P2 micro manifest-driven policy 完成；tracing-VM/code-size codex 并行中）
 
 ---
 
@@ -413,4 +413,5 @@ VM 使用:   make -j$(nproc) bzImage && vng --run <worktree>/arch/x86/boot/bzIma
 | 99 | **Micro 目录 Python 脚本整理** | ❌ | micro/ 下有 analyze_*.py / demo_policy_iteration.py / _driver_impl_*.py 等一次性脚本，需移到 micro/tmp/ 或 archive/。整理后完整执行 micro suite 验证（llvmbpf + kernel + VM）。blocked by #94。 |
 | 98 | **Policy design v2：程序无关自动 tuning** | ✅ | 设计完成（793 行）。核心：auto-tuner 自动生成 per-program policy，人类不需要理解程序。默认行为改为 stock（不再 blind all-apply）。scanner 升级为 policy compiler。→ `docs/tmp/policy-configuration-design-v2.md` |
 | 98a | **Policy P0+P1 实现** | 🔄 | 统一 8-family surface（micro_exec/e2e/corpus）+ scanner --json + compile-policy 子命令。**纯用户态**。codex 实现中。 |
+| 98b | **P2 Micro manifest-driven policy** | ✅ | 已完成 manifest-driven policy 接线：`BenchmarkSpec` 新增 `policy` / `policy_file`，`config/micro_pure_jit.yaml` 新增 `kernel-recompile` runtime 与 3 个 policy 示例（`log2_fold` inline skip `cmov`，`cmov_select` inline apply `cmov`，`cmov_dense` policy file），`run_micro.py` 仅在 `kernel-recompile` runtime 传 `--policy/--policy-file`，无 policy 时回退 `--recompile-v5 --recompile-all`；`micro_exec` 新增 `--policy` / `--policy-file` 并对 live xlated program 扫描 + policy filter + blob build 后调用 `BPF_PROG_JIT_RECOMPILE`，`EINVAL`/不可用时 non-fatal fallback。验证：`make -C micro -j$(nproc)`、`cd scanner/build && cmake .. && make -j$(nproc)`、`python3 micro/run_micro.py --bench log2_fold --bench cmov_dense --runtime kernel --iterations 2 --warmups 1 --repeat 10 --output /tmp/p2-micro-kernel-pass-smoke.json`、`python3 micro/run_micro.py --bench simple --bench log2_fold --bench cmov_dense --runtime kernel-recompile --iterations 1 --warmups 0 --repeat 10 --output /tmp/p2-micro-kernel-recompile.json`；额外确认：用户给定的 `log2_fold + cmov_select + runtime=kernel` 命令在当前环境下仍因 `cmov_select` 返回 `0` 而失败，且 direct `sudo -n ./micro/build/runner/micro_exec run-kernel ... cmov_select.bpf.o ...` 同样返回 `0`（`llvmbpf` 正常），属 pre-existing kernel-path issue。 |
 | 76 | **scx_rusty/lavd 端到端** | 🔄 | `e2e/cases/scx/` 已落地并在 framework VM（`7.0.0-rc2-g2a6783cc77b6`, `4` vCPU）跑通 `scx_rusty` userspace loader → 30s `hackbench` / `stress-ng --cpu 4` / `sysbench cpu` baseline。活跃 `13` 个 struct_ops programs，扫描到 `28` sites（CMOV `27`, LEA `1`；`rusty_enqueue=12`, `rusty_stopping=10`, `rusty_set_cpumask=2`, `rusty_runnable/quiescent/init_task/init` 各 `1`）。但 raw `bpftool struct_ops register` 虽 return `0` 仍不会保持 `sched_ext` enabled，且对 live struct_ops 调用 `BPF_PROG_JIT_RECOMPILE` 全部未成功（常见 `EINVAL`），因此当前只有 honest baseline + site census，没有 post-reJIT 对比；`scx_lavd` 仍待后续。`e2e/results/scx-e2e.json`, `e2e/results/scx-e2e.md`, `docs/tmp/scx-e2e-report.md` |

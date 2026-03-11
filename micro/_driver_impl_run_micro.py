@@ -194,6 +194,13 @@ def resolve_memory_file(benchmark, regenerate_inputs: bool) -> Path | None:
     return path
 
 
+def resolve_policy_inputs(benchmark) -> tuple[str | None, Path | None]:
+    inline_policy = benchmark.inline_policy_text
+    if inline_policy is not None:
+        return inline_policy, None
+    return None, benchmark.policy_file
+
+
 def attach_baseline_adjustments(results: dict[str, object], baseline_benchmark: str | None) -> None:
     if not baseline_benchmark:
         return
@@ -339,6 +346,8 @@ def main(argv: list[str] | None = None) -> int:
             "tags": list(benchmark.tags),
             "expected_result": benchmark.expected_result,
             "input": str(memory_file) if memory_file else None,
+            "policy": dict(benchmark.policy) if benchmark.policy is not None else None,
+            "policy_file": str(benchmark.policy_file) if benchmark.policy_file else None,
             "runs": [],
         }
 
@@ -347,6 +356,10 @@ def main(argv: list[str] | None = None) -> int:
         iteration_runtime_orders: list[list[str]] = []
         for runtime in runtimes:
             repeat = args.repeat if args.repeat is not None else runtime.default_repeat
+            inline_policy: str | None = None
+            policy_file: Path | None = None
+            if runtime.mode in {"kernel-recompile", "kernel_recompile"}:
+                inline_policy, policy_file = resolve_policy_inputs(benchmark)
             command = build_micro_benchmark_command(
                 suite.build.runner_binary,
                 runtime_mode=runtime.mode,
@@ -355,6 +368,8 @@ def main(argv: list[str] | None = None) -> int:
                 repeat=repeat,
                 memory=memory_file,
                 input_size=benchmark.kernel_input_size,
+                policy=inline_policy,
+                policy_file=policy_file,
                 perf_counters=args.perf_counters,
                 perf_scope=args.perf_scope,
                 require_sudo=runtime.require_sudo,
@@ -366,6 +381,7 @@ def main(argv: list[str] | None = None) -> int:
             runtime_samples[runtime.name] = {
                 "repeat": repeat,
                 "command": command,
+                "policy_file": policy_file,
                 "samples": [],
             }
 
@@ -395,6 +411,7 @@ def main(argv: list[str] | None = None) -> int:
             sample_entry = runtime_samples[runtime.name]
             samples = sample_entry["samples"]
             repeat = sample_entry["repeat"]
+            runtime_policy_file = sample_entry["policy_file"]
             compile_values = [sample["compile_ns"] for sample in samples]
             exec_values = [sample["exec_ns"] for sample in samples]
             result_values = [sample["result"] for sample in samples]
@@ -409,6 +426,7 @@ def main(argv: list[str] | None = None) -> int:
                 "repeat": repeat,
                 "artifacts": {
                     "program_object": str(benchmark.program_object),
+                    "policy_file": str(runtime_policy_file) if runtime_policy_file is not None else None,
                 },
                 "samples": samples,
                 "compile_ns": ns_summary(compile_values),

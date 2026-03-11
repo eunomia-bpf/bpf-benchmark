@@ -43,6 +43,8 @@ struct cli_options {
     std::optional<std::filesystem::path> memory;
     std::optional<std::filesystem::path> btf_custom_path;
     std::optional<std::filesystem::path> directive_blob;
+    std::optional<std::string> policy;                 // inline YAML/JSON policy config
+    std::optional<std::filesystem::path> policy_file;  // policy config file
     std::optional<std::filesystem::path> policy_blob;    // scanner-generated recompile policy
     bool recompile_cmov = false;                        // auto-scan xlated for cmov
     bool recompile_wide = false;                        // auto-scan xlated for wide_load
