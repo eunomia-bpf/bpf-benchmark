@@ -1,0 +1,107 @@
+{
+  "generated_at": "2026-03-10T20:33:52.021212+00:00",
+  "repo_root": "/home/yunwei37/workspace/bpf-benchmark",
+  "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec",
+  "corpus_source": "expanded build report `/home/yunwei37/workspace/bpf-benchmark/corpus/results/expanded_corpus_build.json`",
+  "repeat": 5,
+  "objects_found": 1,
+  "inventory_failures": [],
+  "summary": {
+    "programs_found": 2,
+    "supported_programs": 2,
+    "measured_programs": 0,
+    "programs_with_positive_runs": 0,
+    "zero_run_programs": 0,
+    "attach_failures": 2,
+    "skipped_programs": 0,
+    "directive_bearing_programs": 0,
+    "directive_bearing_measured_programs": 0,
+    "average_ns_per_run_min": null,
+    "average_ns_per_run_max": null,
+    "failure_reasons": {
+      "bpf_object__load failed: Invalid argument": 2
+    }
+  },
+  "programs": [
+    {
+      "object_path": "corpus/build/bcc/libbpf-tools/cpudist.bpf.o",
+      "program_name": "sched_switch_btf",
+      "section_name": "tp_btf/sched_switch",
+      "section_root": "tp_btf",
+      "insn_count": 5,
+      "trigger_name": "sched",
+      "trigger_description": "spawn short-lived processes to force scheduler activity",
+      "skip_reason": null,
+      "recompile_probe": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.034684630983974785,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: prog 'handle_switch': relo #3: <byte_off> [382] struct task_struct___x.__state (0:0 @ offset 0)\nlibbpf: prog 'handle_switch': relo #3: matching candidate #0 <byte_off> [115] struct task_struct.__state (0:1 @ offset 24)\nlibbpf: prog 'handle_switch': relo #3: patched insn #97 (ALU/ALU64) imm 0 -> 24\nlibbpf: CO-RE relocating [383] struct task_struct___o: found target candidate [115] struct task_struct in [vmlinux]\nlibbpf: prog 'handle_switch': relo #4: <byte_off> [383] struct task_struct___o.state (0:0 @ offset 0)\nlibbpf: prog 'handle_switch': relo #4: non-matching candidate #0 <byte_off> [115] struct task_struct (0 @ offset 0)\nlibbpf: prog 'handle_switch': relo #4: no matching targets found\nlibbpf: prog 'handle_switch': relo #4: substituting insn #128 w/ invalid insn\nlibbpf: prog 'handle_switch': relo #5: <byte_off> [31] struct task_struct.comm (0:128 @ offset 3312)\nlibbpf: prog 'handle_switch': relo #5: matching candidate #0 <byte_off> [115] struct task_struct.comm (0:128 @ offset 3312)\nlibbpf: prog 'handle_switch': relo #5: patched insn #193 (ALU/ALU64) imm 3312 -> 3312\nlibbpf: prog 'handle_switch': relo #6: <byte_off> [31] struct task_struct.comm (0:128 @ offset 3312)\nlibbpf: prog 'handle_switch': relo #6: matching candidate #0 <byte_off> [115] struct task_struct.comm (0:128 @ offset 3312)\nlibbpf: prog 'handle_switch': relo #6: patched insn #307 (ALU/ALU64) imm 3312 -> 3312\nlibbpf: prog 'sched_switch_btf': added 393 insns from sub-prog 'handle_switch'\nlibbpf: prog 'sched_switch_btf': insn #2 relocated, imm 2 points to subprog 'handle_switch' (now at 5 offset)\nlibbpf: map 'cgroup_map': created successfully, fd=4\nlibbpf: Error in bpf_create_map_xattr(start): -EINVAL. Retrying without BTF.\nlibbpf: map 'start': failed to create: -EINVAL\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "directive_scan": {
+          "cmov_sites": 0,
+          "wide_sites": 0,
+          "rotate_sites": 0,
+          "lea_sites": 0,
+          "total_sites": 0
+        },
+        "recompile_applied": false,
+        "recompile_requested": false,
+        "recompile_error": null
+      },
+      "directive_scan": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "measurement": {
+        "ok": false,
+        "error": "bpf_object__load failed: Invalid argument"
+      }
+    },
+    {
+      "object_path": "corpus/build/bcc/libbpf-tools/cpudist.bpf.o",
+      "program_name": "sched_switch_tp",
+      "section_name": "raw_tp/sched_switch",
+      "section_root": "raw_tp",
+      "insn_count": 5,
+      "trigger_name": "sched",
+      "trigger_description": "spawn short-lived processes to force scheduler activity",
+      "skip_reason": null,
+      "recompile_probe": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.034765885036904365,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: prog 'handle_switch': relo #3: <byte_off> [382] struct task_struct___x.__state (0:0 @ offset 0)\nlibbpf: prog 'handle_switch': relo #3: matching candidate #0 <byte_off> [115] struct task_struct.__state (0:1 @ offset 24)\nlibbpf: prog 'handle_switch': relo #3: patched insn #97 (ALU/ALU64) imm 0 -> 24\nlibbpf: CO-RE relocating [383] struct task_struct___o: found target candidate [115] struct task_struct in [vmlinux]\nlibbpf: prog 'handle_switch': relo #4: <byte_off> [383] struct task_struct___o.state (0:0 @ offset 0)\nlibbpf: prog 'handle_switch': relo #4: non-matching candidate #0 <byte_off> [115] struct task_struct (0 @ offset 0)\nlibbpf: prog 'handle_switch': relo #4: no matching targets found\nlibbpf: prog 'handle_switch': relo #4: substituting insn #128 w/ invalid insn\nlibbpf: prog 'handle_switch': relo #5: <byte_off> [31] struct task_struct.comm (0:128 @ offset 3312)\nlibbpf: prog 'handle_switch': relo #5: matching candidate #0 <byte_off> [115] struct task_struct.comm (0:128 @ offset 3312)\nlibbpf: prog 'handle_switch': relo #5: patched insn #193 (ALU/ALU64) imm 3312 -> 3312\nlibbpf: prog 'handle_switch': relo #6: <byte_off> [31] struct task_struct.comm (0:128 @ offset 3312)\nlibbpf: prog 'handle_switch': relo #6: matching candidate #0 <byte_off> [115] struct task_struct.comm (0:128 @ offset 3312)\nlibbpf: prog 'handle_switch': relo #6: patched insn #307 (ALU/ALU64) imm 3312 -> 3312\nlibbpf: prog 'sched_switch_tp': added 393 insns from sub-prog 'handle_switch'\nlibbpf: prog 'sched_switch_tp': insn #2 relocated, imm 2 points to subprog 'handle_switch' (now at 5 offset)\nlibbpf: map 'cgroup_map': created successfully, fd=4\nlibbpf: Error in bpf_create_map_xattr(start): -EINVAL. Retrying without BTF.\nlibbpf: map 'start': failed to create: -EINVAL\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "directive_scan": {
+          "cmov_sites": 0,
+          "wide_sites": 0,
+          "rotate_sites": 0,
+          "lea_sites": 0,
+          "total_sites": 0
+        },
+        "recompile_applied": false,
+        "recompile_requested": false,
+        "recompile_error": null
+      },
+      "directive_scan": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "measurement": {
+        "ok": false,
+        "error": "bpf_object__load failed: Invalid argument"
+      }
+    }
+  ]
+}

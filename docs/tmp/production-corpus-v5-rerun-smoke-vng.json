@@ -1,0 +1,388 @@
+{
+  "generated_at": "2026-03-10T22:06:41.944690+00:00",
+  "repo_root": "/home/yunwei37/workspace/bpf-benchmark",
+  "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec",
+  "scanner_binary": "/home/yunwei37/workspace/bpf-benchmark/scanner/build/bpf-jit-scanner",
+  "btf_candidates": [
+    "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux"
+  ],
+  "repeat": 10,
+  "kernel_release": "7.0.0-rc2-g1572a4ddb52b-dirty",
+  "kernel_tree": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux",
+  "kernel_branch": "",
+  "kernel_commit": "",
+  "objects": [
+    {
+      "object_path": "corpus/build/katran/balancer.bpf.o",
+      "source": "katran",
+      "discovery": {
+        "ok": true,
+        "duration_seconds": 0.5367099689999999,
+        "programs": [
+          {
+            "name": "balancer_ingress",
+            "section_name": "xdp",
+            "insn_count": 2322
+          }
+        ],
+        "error": null,
+        "stderr_tail": "",
+        "fallback_section_scan": [
+          {
+            "name": ".text",
+            "insn_count": 224,
+            "cmov": 0,
+            "wide": 0,
+            "rotate": 20,
+            "lea": 0,
+            "total": 20
+          },
+          {
+            "name": "xdp",
+            "insn_count": 2322,
+            "cmov": 5,
+            "wide": 4,
+            "rotate": 0,
+            "lea": 0,
+            "total": 9
+          }
+        ],
+        "fallback_totals": {
+          "cmov": 5,
+          "wide": 4,
+          "rotate": 20,
+          "lea": 0,
+          "total": 29,
+          "insn_count": 2546,
+          "exec_section_count": 2
+        }
+      }
+    }
+  ],
+  "programs": [
+    {
+      "object_path": "corpus/build/katran/balancer.bpf.o",
+      "source": "katran",
+      "program_name": "balancer_ingress",
+      "section_name": "xdp",
+      "insn_count": 2322,
+      "perf_capable": true,
+      "io_mode": "packet",
+      "input_size": 64,
+      "memory_path": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/corpus_dummy_packet_64.bin",
+      "scanner_cli": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.03215875700000037,
+        "error": null,
+        "stdout": "Accepted 9 v5 site(s)\n  cmov:   5\n  wide:   4\n  rotate: 0\n  lea:    0\n",
+        "stderr_tail": ""
+      },
+      "scanner_counts": {
+        "cmov_sites": 5,
+        "wide_sites": 4,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 9
+      },
+      "baseline_compile": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.7963278899999997,
+        "error": null,
+        "stderr_tail": "libbpf: prog 'balancer_ingress': added 76 insns from sub-prog 'jhash_2words'\nlibbpf: prog 'balancer_ingress': insn #1282 relocated, imm 1187 points to subprog 'jhash_2words' (now at 2470 offset)\nlibbpf: prog 'balancer_ingress': insn #1986 relocated, imm 483 points to subprog 'jhash_2words' (now at 2470 offset)\nlibbpf: map 'stats': created successfully, fd=4\nlibbpf: map 'ctl_array': created successfully, fd=5\nlibbpf: map 'vip_map': created successfully, fd=6\nlibbpf: map 'fallback_cache': created successfully, fd=7\nlibbpf: map 'lru_mapping': created successfully, fd=8\nlibbpf: map 'ch_rings': created successfully, fd=10\nlibbpf: map 'reals': created successfully, fd=11\nlibbpf: map 'reals_stats': created successfully, fd=12\nlibbpf: map 'lru_miss_stats': created successfully, fd=13\nlibbpf: map 'vip_miss_stats': created successfully, fd=14\nlibbpf: map 'quic_stats_map': created successfully, fd=15\nlibbpf: map 'stable_rt_stats': created successfully, fd=16\nlibbpf: map 'decap_vip_stats': created successfully, fd=17\nlibbpf: map 'server_id_map': created successfully, fd=18\nlibbpf: map 'tpr_stats_map': created successfully, fd=19\nlibbpf: map 'server_id_stats': created successfully, fd=20\nlibbpf: map 'vip_to_down_reals_map': created successfully, fd=21",
+        "sample": {
+          "compile_ns": 323083323,
+          "exec_ns": 0,
+          "timing_source": "unknown",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "result": 0,
+          "retval": 0,
+          "jited_prog_len": 13654,
+          "xlated_prog_len": 23872,
+          "code_size": {
+            "bpf_bytecode_bytes": 23872,
+            "native_code_bytes": 13654,
+            "inflation_ratio": 0.571967
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 3398657,
+            "object_open_ns": 7519145,
+            "object_load_ns": 315564178
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": false,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": false,
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 0
+          },
+          "recompile": {
+            "requested": false,
+            "mode": "none",
+            "policy_generated": false,
+            "policy_bytes": 0,
+            "syscall_attempted": false,
+            "applied": false,
+            "error": ""
+          }
+        },
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "v5_compile": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.5816819610000001,
+        "error": null,
+        "stderr_tail": "libbpf: map 'ctl_array': created successfully, fd=5\nlibbpf: map 'vip_map': created successfully, fd=6\nlibbpf: map 'fallback_cache': created successfully, fd=7\nlibbpf: map 'lru_mapping': created successfully, fd=8\nlibbpf: map 'ch_rings': created successfully, fd=10\nlibbpf: map 'reals': created successfully, fd=11\nlibbpf: map 'reals_stats': created successfully, fd=12\nlibbpf: map 'lru_miss_stats': created successfully, fd=13\nlibbpf: map 'vip_miss_stats': created successfully, fd=14\nlibbpf: map 'quic_stats_map': created successfully, fd=15\nlibbpf: map 'stable_rt_stats': created successfully, fd=16\nlibbpf: map 'decap_vip_stats': created successfully, fd=17\nlibbpf: map 'server_id_map': created successfully, fd=18\nlibbpf: map 'tpr_stats_map': created successfully, fd=19\nlibbpf: map 'server_id_stats': created successfully, fd=20\nlibbpf: map 'vip_to_down_reals_map': created successfully, fd=21\nrecompile-cmov: found 5 cmov sites in xlated program (2984 insns)\nrecompile-wide: found 4 wide_load sites in xlated program (2984 insns)\nrecompile-rotate: no rotate sites found in xlated program (2984 insns)\nrecompile-lea: no addr_calc sites found in xlated program (2984 insns)",
+        "sample": {
+          "compile_ns": 76321631,
+          "exec_ns": 0,
+          "timing_source": "unknown",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "result": 0,
+          "retval": 0,
+          "jited_prog_len": 13626,
+          "xlated_prog_len": 23872,
+          "code_size": {
+            "bpf_bytecode_bytes": 23872,
+            "native_code_bytes": 13626,
+            "inflation_ratio": 0.570794
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 1283949,
+            "object_open_ns": 7045304,
+            "object_load_ns": 68827645
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": false,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 5,
+            "wide_sites": 4,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 9
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v5",
+            "policy_generated": true,
+            "policy_bytes": 1252,
+            "syscall_attempted": true,
+            "applied": true,
+            "error": ""
+          }
+        },
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "baseline_run": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.615518475,
+        "error": null,
+        "stderr_tail": "libbpf: prog 'balancer_ingress': added 76 insns from sub-prog 'jhash_2words'\nlibbpf: prog 'balancer_ingress': insn #1282 relocated, imm 1187 points to subprog 'jhash_2words' (now at 2470 offset)\nlibbpf: prog 'balancer_ingress': insn #1986 relocated, imm 483 points to subprog 'jhash_2words' (now at 2470 offset)\nlibbpf: map 'stats': created successfully, fd=4\nlibbpf: map 'ctl_array': created successfully, fd=5\nlibbpf: map 'vip_map': created successfully, fd=6\nlibbpf: map 'fallback_cache': created successfully, fd=7\nlibbpf: map 'lru_mapping': created successfully, fd=8\nlibbpf: map 'ch_rings': created successfully, fd=10\nlibbpf: map 'reals': created successfully, fd=11\nlibbpf: map 'reals_stats': created successfully, fd=12\nlibbpf: map 'lru_miss_stats': created successfully, fd=13\nlibbpf: map 'vip_miss_stats': created successfully, fd=14\nlibbpf: map 'quic_stats_map': created successfully, fd=15\nlibbpf: map 'stable_rt_stats': created successfully, fd=16\nlibbpf: map 'decap_vip_stats': created successfully, fd=17\nlibbpf: map 'server_id_map': created successfully, fd=18\nlibbpf: map 'tpr_stats_map': created successfully, fd=19\nlibbpf: map 'server_id_stats': created successfully, fd=20\nlibbpf: map 'vip_to_down_reals_map': created successfully, fd=21",
+        "sample": {
+          "compile_ns": 75088513,
+          "exec_ns": 145,
+          "timing_source": "ktime",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "wall_exec_ns": 1830171,
+          "exec_cycles": 6746217,
+          "tsc_freq_hz": 3686113276,
+          "result": 0,
+          "retval": 2,
+          "jited_prog_len": 13654,
+          "xlated_prog_len": 23872,
+          "code_size": {
+            "bpf_bytecode_bytes": 23872,
+            "native_code_bytes": 13654,
+            "inflation_ratio": 0.571967
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 1460311,
+            "object_open_ns": 7892741,
+            "object_load_ns": 67195772,
+            "packet_prepare_ns": 1893,
+            "prog_run_wall_ns": 18301059,
+            "result_extract_ns": 51
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": true,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": false,
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 0
+          },
+          "recompile": {
+            "requested": false,
+            "mode": "none",
+            "policy_generated": false,
+            "policy_bytes": 0,
+            "syscall_attempted": false,
+            "applied": false,
+            "error": ""
+          }
+        },
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "v5_run": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.6455368589999999,
+        "error": null,
+        "stderr_tail": "libbpf: map 'ctl_array': created successfully, fd=5\nlibbpf: map 'vip_map': created successfully, fd=6\nlibbpf: map 'fallback_cache': created successfully, fd=7\nlibbpf: map 'lru_mapping': created successfully, fd=8\nlibbpf: map 'ch_rings': created successfully, fd=10\nlibbpf: map 'reals': created successfully, fd=11\nlibbpf: map 'reals_stats': created successfully, fd=12\nlibbpf: map 'lru_miss_stats': created successfully, fd=13\nlibbpf: map 'vip_miss_stats': created successfully, fd=14\nlibbpf: map 'quic_stats_map': created successfully, fd=15\nlibbpf: map 'stable_rt_stats': created successfully, fd=16\nlibbpf: map 'decap_vip_stats': created successfully, fd=17\nlibbpf: map 'server_id_map': created successfully, fd=18\nlibbpf: map 'tpr_stats_map': created successfully, fd=19\nlibbpf: map 'server_id_stats': created successfully, fd=20\nlibbpf: map 'vip_to_down_reals_map': created successfully, fd=21\nrecompile-cmov: found 5 cmov sites in xlated program (2984 insns)\nrecompile-wide: found 4 wide_load sites in xlated program (2984 insns)\nrecompile-rotate: no rotate sites found in xlated program (2984 insns)\nrecompile-lea: no addr_calc sites found in xlated program (2984 insns)",
+        "sample": {
+          "compile_ns": 77588098,
+          "exec_ns": 122,
+          "timing_source": "ktime",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "wall_exec_ns": 2101667,
+          "exec_cycles": 7747034,
+          "tsc_freq_hz": 3686137888,
+          "result": 0,
+          "retval": 2,
+          "jited_prog_len": 13626,
+          "xlated_prog_len": 23872,
+          "code_size": {
+            "bpf_bytecode_bytes": 23872,
+            "native_code_bytes": 13626,
+            "inflation_ratio": 0.570794
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 1549894,
+            "object_open_ns": 7675353,
+            "object_load_ns": 69479010,
+            "packet_prepare_ns": 465,
+            "prog_run_wall_ns": 21016074,
+            "result_extract_ns": 41
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": true,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 5,
+            "wide_sites": 4,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 9
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v5",
+            "policy_generated": true,
+            "policy_bytes": 1252,
+            "syscall_attempted": true,
+            "applied": true,
+            "error": ""
+          }
+        },
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "v5_compile_applied": true,
+      "v5_run_applied": true,
+      "size_ratio": 1.0020548950535741,
+      "size_delta_pct": -0.20506811190859822,
+      "speedup_ratio": 1.1885245901639345
+    }
+  ],
+  "summary": {
+    "objects_attempted": 1,
+    "objects_discovered": 1,
+    "objects_with_discovery_failures": 0,
+    "programs_attempted": 1,
+    "perf_capable_targets": 1,
+    "compile_only_targets": 0,
+    "baseline_compile_successes": 1,
+    "v5_compile_successes": 1,
+    "scanner_successes": 1,
+    "framework_detected_programs": 1,
+    "framework_recompile_applied_programs": 1,
+    "framework_recompile_failures": 0,
+    "compile_pairs": 1,
+    "measured_pairs": 1,
+    "speedup_geomean": 1.1885245901639345,
+    "speedup_median": 1.1885245901639345,
+    "speedup_min": 1.1885245901639345,
+    "speedup_max": 1.1885245901639345,
+    "code_size_ratio_geomean": 1.0020548950535741,
+    "code_size_delta_median_pct": -0.20506811190859822,
+    "code_size_delta_min_pct": -0.20506811190859822,
+    "code_size_delta_max_pct": -0.20506811190859822,
+    "family_totals": {
+      "cmov_sites": 5,
+      "wide_sites": 4,
+      "rotate_sites": 0,
+      "lea_sites": 0
+    },
+    "failure_reasons": {},
+    "recompile_failure_reasons": {}
+  }
+}

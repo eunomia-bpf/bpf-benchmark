@@ -34,3 +34,14 @@ micro/generated-inputs/
 
 # Temporary files
 /tmp/
+
+# Paper build artifacts
+docs/paper/*.aux
+docs/paper/*.bbl
+docs/paper/*.blg
+docs/paper/*.fdb_latexmk
+docs/paper/*.fls
+docs/paper/*.log
+docs/paper/*.out
+docs/paper/*.pdf
+docs/paper/*.synctex.gz

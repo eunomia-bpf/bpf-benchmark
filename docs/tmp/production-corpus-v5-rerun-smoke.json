@@ -1,0 +1,276 @@
+{
+  "generated_at": "2026-03-10T22:03:26.996050+00:00",
+  "repo_root": "/home/yunwei37/workspace/bpf-benchmark",
+  "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec",
+  "scanner_binary": "/home/yunwei37/workspace/bpf-benchmark/scanner/build/bpf-jit-scanner",
+  "btf_candidates": [
+    "/sys/kernel/btf/vmlinux",
+    "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux"
+  ],
+  "repeat": 10,
+  "kernel_release": "6.15.11-061511-generic",
+  "kernel_tree": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux",
+  "kernel_branch": "jit-fixed-baselines",
+  "kernel_commit": "1572a4ddb",
+  "objects": [
+    {
+      "object_path": "corpus/build/katran/balancer.bpf.o",
+      "source": "katran",
+      "discovery": {
+        "ok": true,
+        "duration_seconds": 0.014018766989465803,
+        "programs": [
+          {
+            "name": "balancer_ingress",
+            "section_name": "xdp",
+            "insn_count": 2322
+          }
+        ],
+        "error": null,
+        "stderr_tail": "",
+        "fallback_section_scan": [
+          {
+            "name": ".text",
+            "insn_count": 224,
+            "cmov": 0,
+            "wide": 0,
+            "rotate": 20,
+            "lea": 0,
+            "total": 20
+          },
+          {
+            "name": "xdp",
+            "insn_count": 2322,
+            "cmov": 5,
+            "wide": 4,
+            "rotate": 0,
+            "lea": 0,
+            "total": 9
+          }
+        ],
+        "fallback_totals": {
+          "cmov": 5,
+          "wide": 4,
+          "rotate": 20,
+          "lea": 0,
+          "total": 29,
+          "insn_count": 2546,
+          "exec_section_count": 2
+        }
+      }
+    }
+  ],
+  "programs": [
+    {
+      "object_path": "corpus/build/katran/balancer.bpf.o",
+      "source": "katran",
+      "program_name": "balancer_ingress",
+      "section_name": "xdp",
+      "insn_count": 2322,
+      "perf_capable": true,
+      "io_mode": "packet",
+      "input_size": 64,
+      "memory_path": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/corpus_dummy_packet_64.bin",
+      "scanner_cli": null,
+      "scanner_counts": {
+        "cmov_sites": 5,
+        "wide_sites": 4,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 9
+      },
+      "baseline_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.11014325096039101,
+        "error": "unable to open file for writing: /tmp/production-corpus-g121pr9e.xlated (exit=1)",
+        "stderr_tail": "libbpf: prog 'balancer_ingress': insn #1282 relocated, imm 1187 points to subprog 'jhash_2words' (now at 2470 offset)\nlibbpf: prog 'balancer_ingress': insn #1986 relocated, imm 483 points to subprog 'jhash_2words' (now at 2470 offset)\nlibbpf: map 'stats': created successfully, fd=4\nlibbpf: map 'ctl_array': created successfully, fd=5\nlibbpf: map 'vip_map': created successfully, fd=6\nlibbpf: map 'fallback_cache': created successfully, fd=7\nlibbpf: map 'lru_mapping': created successfully, fd=8\nlibbpf: map 'ch_rings': created successfully, fd=10\nlibbpf: map 'reals': created successfully, fd=11\nlibbpf: map 'reals_stats': created successfully, fd=12\nlibbpf: map 'lru_miss_stats': created successfully, fd=13\nlibbpf: map 'vip_miss_stats': created successfully, fd=14\nlibbpf: map 'quic_stats_map': created successfully, fd=15\nlibbpf: map 'stable_rt_stats': created successfully, fd=16\nlibbpf: map 'decap_vip_stats': created successfully, fd=17\nlibbpf: map 'server_id_map': created successfully, fd=18\nlibbpf: map 'tpr_stats_map': created successfully, fd=19\nlibbpf: map 'server_id_stats': created successfully, fd=20\nlibbpf: map 'vip_to_down_reals_map': created successfully, fd=21\nunable to open file for writing: /tmp/production-corpus-g121pr9e.xlated",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/sys/kernel/btf/vmlinux",
+            "ok": false,
+            "error": "unable to open file for writing: /tmp/production-corpus-g121pr9e.xlated (exit=1)"
+          },
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "unable to open file for writing: /tmp/production-corpus-g121pr9e.xlated (exit=1)"
+          }
+        ]
+      },
+      "v5_compile": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.11414383095689118,
+        "error": null,
+        "stderr_tail": "libbpf: map 'vip_map': created successfully, fd=6\nlibbpf: map 'fallback_cache': created successfully, fd=7\nlibbpf: map 'lru_mapping': created successfully, fd=8\nlibbpf: map 'ch_rings': created successfully, fd=10\nlibbpf: map 'reals': created successfully, fd=11\nlibbpf: map 'reals_stats': created successfully, fd=12\nlibbpf: map 'lru_miss_stats': created successfully, fd=13\nlibbpf: map 'vip_miss_stats': created successfully, fd=14\nlibbpf: map 'quic_stats_map': created successfully, fd=15\nlibbpf: map 'stable_rt_stats': created successfully, fd=16\nlibbpf: map 'decap_vip_stats': created successfully, fd=17\nlibbpf: map 'server_id_map': created successfully, fd=18\nlibbpf: map 'tpr_stats_map': created successfully, fd=19\nlibbpf: map 'server_id_stats': created successfully, fd=20\nlibbpf: map 'vip_to_down_reals_map': created successfully, fd=21\nrecompile-cmov: found 5 cmov sites in xlated program (2990 insns)\nrecompile-wide: found 4 wide_load sites in xlated program (2990 insns)\nrecompile-rotate: no rotate sites found in xlated program (2990 insns)\nrecompile-lea: no addr_calc sites found in xlated program (2990 insns)\nBPF_PROG_JIT_RECOMPILE failed: Invalid argument (errno=22)",
+        "sample": {
+          "compile_ns": 82418974,
+          "exec_ns": 0,
+          "timing_source": "unknown",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "result": 0,
+          "retval": 0,
+          "jited_prog_len": 13652,
+          "xlated_prog_len": 23920,
+          "code_size": {
+            "bpf_bytecode_bytes": 23920,
+            "native_code_bytes": 13652,
+            "inflation_ratio": 0.570736
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 45862,
+            "object_open_ns": 315232,
+            "object_load_ns": 82103388
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": false,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 5,
+            "wide_sites": 4,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 9
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v5",
+            "policy_generated": true,
+            "policy_bytes": 1252,
+            "syscall_attempted": true,
+            "applied": false,
+            "error": "BPF_PROG_JIT_RECOMPILE failed: Invalid argument (errno=22)"
+          }
+        },
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "baseline_run": null,
+      "v5_run": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.19994666002457961,
+        "error": null,
+        "stderr_tail": "libbpf: map 'vip_map': created successfully, fd=6\nlibbpf: map 'fallback_cache': created successfully, fd=7\nlibbpf: map 'lru_mapping': created successfully, fd=8\nlibbpf: map 'ch_rings': created successfully, fd=10\nlibbpf: map 'reals': created successfully, fd=11\nlibbpf: map 'reals_stats': created successfully, fd=12\nlibbpf: map 'lru_miss_stats': created successfully, fd=13\nlibbpf: map 'vip_miss_stats': created successfully, fd=14\nlibbpf: map 'quic_stats_map': created successfully, fd=15\nlibbpf: map 'stable_rt_stats': created successfully, fd=16\nlibbpf: map 'decap_vip_stats': created successfully, fd=17\nlibbpf: map 'server_id_map': created successfully, fd=18\nlibbpf: map 'tpr_stats_map': created successfully, fd=19\nlibbpf: map 'server_id_stats': created successfully, fd=20\nlibbpf: map 'vip_to_down_reals_map': created successfully, fd=21\nrecompile-cmov: found 5 cmov sites in xlated program (2990 insns)\nrecompile-wide: found 4 wide_load sites in xlated program (2990 insns)\nrecompile-rotate: no rotate sites found in xlated program (2990 insns)\nrecompile-lea: no addr_calc sites found in xlated program (2990 insns)\nBPF_PROG_JIT_RECOMPILE failed: Invalid argument (errno=22)",
+        "sample": {
+          "compile_ns": 86032371,
+          "exec_ns": 89,
+          "timing_source": "ktime",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "wall_exec_ns": 3580159,
+          "exec_cycles": 13197221,
+          "tsc_freq_hz": 3686211098,
+          "result": 0,
+          "retval": 2,
+          "jited_prog_len": 13652,
+          "xlated_prog_len": 23920,
+          "code_size": {
+            "bpf_bytecode_bytes": 23920,
+            "native_code_bytes": 13652,
+            "inflation_ratio": 0.570736
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 54171,
+            "object_open_ns": 350422,
+            "object_load_ns": 85681566,
+            "packet_prepare_ns": 322,
+            "prog_run_wall_ns": 35801298,
+            "result_extract_ns": 61
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": true,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 5,
+            "wide_sites": 4,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 9
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v5",
+            "policy_generated": true,
+            "policy_bytes": 1252,
+            "syscall_attempted": true,
+            "applied": false,
+            "error": "BPF_PROG_JIT_RECOMPILE failed: Invalid argument (errno=22)"
+          }
+        },
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "v5_compile_applied": false,
+      "v5_run_applied": false,
+      "size_ratio": null,
+      "size_delta_pct": null,
+      "speedup_ratio": null
+    }
+  ],
+  "summary": {
+    "objects_attempted": 1,
+    "objects_discovered": 1,
+    "objects_with_discovery_failures": 0,
+    "programs_attempted": 1,
+    "perf_capable_targets": 1,
+    "compile_only_targets": 0,
+    "baseline_compile_successes": 0,
+    "v5_compile_successes": 1,
+    "scanner_successes": 0,
+    "framework_detected_programs": 1,
+    "framework_recompile_applied_programs": 0,
+    "framework_recompile_failures": 0,
+    "compile_pairs": 0,
+    "measured_pairs": 0,
+    "speedup_geomean": null,
+    "speedup_median": null,
+    "speedup_min": null,
+    "speedup_max": null,
+    "code_size_ratio_geomean": null,
+    "code_size_delta_median_pct": null,
+    "code_size_delta_min_pct": null,
+    "code_size_delta_max_pct": null,
+    "family_totals": {
+      "cmov_sites": 5,
+      "wide_sites": 4,
+      "rotate_sites": 0,
+      "lea_sites": 0
+    },
+    "failure_reasons": {
+      "unable to open file for writing: /tmp/production-corpus-g121pr9e.xlated (exit=1)": 1
+    },
+    "recompile_failure_reasons": {}
+  }
+}

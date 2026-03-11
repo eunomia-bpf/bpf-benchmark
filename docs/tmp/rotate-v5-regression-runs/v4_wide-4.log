@@ -1,0 +1,10 @@
+{"compile_ns":8683090,"exec_ns":104,"timing_source":"ktime","no_cmov":false,"disabled_passes":[],"wall_exec_ns":193023,"exec_cycles":711506,"tsc_freq_hz":3686120558,"result":2666935177028490406,"retval":2,"jited_prog_len":3463,"xlated_prog_len":7984,"code_size":{"bpf_bytecode_bytes":7984,"native_code_bytes":3463,"inflation_ratio":0.433742},"phases_ns":{"memory_prepare_ns":2236048,"object_open_ns":6536982,"object_load_ns":2079216,"input_stage_ns":1616,"prog_run_wall_ns":19301557,"result_extract_ns":48},"perf_counters":{},"perf_counters_meta":{"requested":false,"collected":false,"include_kernel":true,"scope":"full_repeat_raw","error":""},"directive_scan":{"performed":true,"cmov_sites":0,"wide_sites":8,"rotate_sites":0,"lea_sites":0,"total_sites":8},"recompile":{"requested":true,"mode":"auto-scan-v4","policy_generated":true,"policy_bytes":160,"syscall_attempted":true,"applied":true,"error":""}}
+ key [8], sz = 4.
+libbpf: map 'input_map': found value [11], sz = 64.
+libbpf: map 'input_map': found max_entries = 1.
+libbpf: sec '.relxdp': collecting relocation for section(3) 'xdp'
+libbpf: sec '.relxdp': relo #0: insn #10 against 'input_map'
+libbpf: prog 'rotate64_hash_xdp': found map 0 (input_map, sec 5, off 0) for insn #10
+libbpf: object 'rotate64_hash': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...
+libbpf: map 'input_map': created successfully, fd=4
+recompile-wide: found 8 wide_load sites in xlated program (998 insns)
