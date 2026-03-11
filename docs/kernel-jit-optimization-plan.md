@@ -6,7 +6,7 @@
 > - 每个任务做完 → 立即更新本文档（任务条目状态 + 关键数据 + 文档路径）。
 > - 每次 context 压缩后 → 完整读取本文档恢复全局状态。
 > - 用 agent background 跑任务，不阻塞主对话。
-> 上次更新：2026-03-11（directive 扩展 #78-#80,#83 完成 + interface 审计）
+> 上次更新：2026-03-11（v4 删除 + v6 tier-1 完成 + framework audit 通过）
 
 ---
 
@@ -114,10 +114,9 @@
 | Phase 2 (v4→v5) | Post-load re-JIT + 通用 dispatch + 声明式 pattern | ✅ |
 | Phase 3 | 跨架构 + 自动化 + 端到端部署 | ❌ |
 
-> **⚠️ v4 已废弃（DEPRECATED）**：v4 路径（policy version 1, `bpf_jit_rewrite_rule` 固定记录）不再接受任何修改。
-> 所有新 directive、新 pattern、新 emitter 必须走 v5 声明式路径（policy version 2, `BPF_JIT_RK_PATTERN`）。
-> v4 代码保留仅供向后兼容和调试参考，不会被删除但不会被扩展。
-> 原因：v5 实现了"新 pattern 只需用户态"的核心设计目标，v4 每个新 pattern 都需要 kernel 改动，违背论文 thesis。
+> **⚠️ v4 已删除**：v4 legacy code 已在 `a99cd78ed` 中完全移除（-778 LOC）。
+> 只保留 v5 声明式路径（policy version 2, `BPF_JIT_RK_PATTERN`）。
+> v6 tier-1 改进已完成：通用 site/pattern 上限 24→64、`BPF_PROG_JIT_RECOMPILE` 新增 `log_level/log_size/log_buf`、tuple/binding 上限 12→16。报告：`docs/tmp/v6-tier1-implementation.md`。
 
 ---
 
@@ -356,8 +355,8 @@ VM 使用:   make -j$(nproc) bzImage && vng --run <worktree>/arch/x86/boot/bzIma
 | 48 | **Benchmark 基础设施重构** | 🔄 | P0 5/5 修复完成：call-overhead category、macro repeat、默认路径、按需 root/scanner、stats 统一 median。`docs/tmp/p0-bugfix-report.md`。P1 结构问题待做 |
 | 49 | **端到端部署评估** | ❌ | Cilium/Katran 级别，论文 go 条件之一。需至少一个 PPS throughput 数据（见 #63） |
 | 50 | **论文更新** | 🔄 | 集成 Round 3 + fixed baselines + corpus 数据 |
-| 51 | jit_recompile 加 log_level/log_buf | ❌ | 用户态无法观察 rule accept/reject，policy 迭代缺 feedback |
-| 52 | Shape whitelist 扩展 | ❌ | 硬编码 site_len 白名单，新 pattern 可能被 kernel 误拒 |
+| 51 | jit_recompile 加 log_level/log_buf | ✅ | framework kernel 已加 `log_level/log_size/log_buf`，scanner `apply` 默认携带 16 KiB log buffer，失败时直接回显 kernel 诊断。`docs/tmp/v6-tier1-implementation.md` |
+| 52 | Shape whitelist 扩展 | ✅ | v5 active path 保留 generic `site_len <= 64` + `pattern_count == site_len`，删除 per-form 固定长度 gate 的约束效果；scanner ABI 常量同步到 64。`docs/tmp/v6-tier1-implementation.md` |
 | 53 | Overlap/priority 语义 | ❌ | 当前 kernel 不拒绝也不仲裁重叠 rule |
 | 54 | Subprog 一致性 | ❌ | v4 分支与 fixed-baselines 分支的 subprog 处理不同步 |
 | 55 | K2/Merlin/EPSO 对比实验 | ✅ | **正交非替代**。backend-only gap 占 surplus 89.1%。dual-pass spot check: size geomean 0.995x（IR 侧几乎碰不到 backend gap）。K2/Merlin 代码可获取但不兼容当前 pipeline，EPSO 无公开 artifact。`docs/tmp/k2-merlin-epso-comparison.md`，`micro/results/llvm_dual_pass_boundary_spotcheck.md` |
@@ -392,4 +391,8 @@ VM 使用:   make -j$(nproc) bzImage && vng --run <worktree>/arch/x86/boot/bzIma
 | 82 | **bounds_window directive** | ❌ | P1。消除冗余 bounds check（dominating readable-window check 之后的重复 guard）。Scanner 识别 + kernel validator ~200 LOC。 |
 | 83 | **Kernel JIT 清理 patches** | ✅ | commit `0496966`（kernel `8c66cec7c`）。已实现：零偏移内存编码优化 + imm64 stack store 优化。Code size：load_byte_recompose 422→418, stride_load_16 517→514。Prologue NOP / div-mod / endian fusion 待做。`docs/tmp/kernel-jit-cleanup-patches.md` |
 | 84 | **Interface 设计审计 + v6 提案** | ✅ | 审计 v5 UAPI 接口强度：contiguous-only、local-CFG-only、no verifier facts、kernel-owned emitters。发现 bitfield_extract x86 dispatch wiring bug。v6 提案：fact-backed region rewrites + restricted template plans（需新 kernel semantics）。branch_reorder / bounds_window 无法用当前 v5 表达。`docs/tmp/interface-design-audit.md`，`docs/tmp/interface-improvement-proposals.md` |
+| 85 | **v4 legacy 代码删除** | ✅ | commit `a99cd78ed`（vendor/linux-framework）。删除 778 LOC v4 代码，只保留 v5 声明式路径。8 files changed。kernel build + scanner build + scanner tests 全部通过。 |
+| 86 | **v6 tier-1：去摩擦改进** | ✅ | 已完成：shape/site generic upper bound 64、`jit_recompile` log buffer、tuple/binding 12→16（`present_mask` 升到 `u32`）。构建与 `scanner` smoke 均通过。`docs/tmp/v6-tier1-implementation.md` |
+| 87 | **v6 接口设计研究** | 🔄 | verifier log 信息提取 + UAPI 扩展设计 + existing work 对比。codex 调研中。→ `docs/tmp/v6-interface-design.md` |
+| 88 | **Benchmark 框架审计 v2** | ✅ | 一键 build + smoke test 全部通过。修复：Tracee import 路径、文档更新（README/CLAUDE.md/e2e/README）。56 pure-jit + 11 runtime = 67 benchmarks。`docs/tmp/benchmark-framework-audit-v2.md` |
 | 76 | **scx_rusty/lavd 端到端** | 🔄 | `e2e/cases/scx/` 已落地并在 framework VM（`7.0.0-rc2-g2a6783cc77b6`, `4` vCPU）跑通 `scx_rusty` userspace loader → 30s `hackbench` / `stress-ng --cpu 4` / `sysbench cpu` baseline。活跃 `13` 个 struct_ops programs，扫描到 `28` sites（CMOV `27`, LEA `1`；`rusty_enqueue=12`, `rusty_stopping=10`, `rusty_set_cpumask=2`, `rusty_runnable/quiescent/init_task/init` 各 `1`）。但 raw `bpftool struct_ops register` 虽 return `0` 仍不会保持 `sched_ext` enabled，且对 live struct_ops 调用 `BPF_PROG_JIT_RECOMPILE` 全部未成功（常见 `EINVAL`），因此当前只有 honest baseline + site census，没有 post-reJIT 对比；`scx_lavd` 仍待后续。`e2e/results/scx-e2e.json`, `e2e/results/scx-e2e.md`, `docs/tmp/scx-e2e-report.md` |

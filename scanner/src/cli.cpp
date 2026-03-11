@@ -258,7 +258,9 @@ int sys_memfd_create(const char *name, unsigned int flags)
 
 void apply_policy_blob(int prog_fd, const std::vector<uint8_t> &blob)
 {
+    constexpr uint32_t kRecompileLogSize = 16 * 1024;
     int memfd = sys_memfd_create("bpf-jit-policy", MFD_CLOEXEC | MFD_ALLOW_SEALING);
+    std::vector<char> log_buf(kRecompileLogSize, '\0');
     if (memfd < 0) {
         die("memfd_create: %s", strerror(errno));
     }
@@ -286,10 +288,16 @@ void apply_policy_blob(int prog_fd, const std::vector<uint8_t> &blob)
         uint32_t prog_fd;
         int32_t policy_fd;
         uint32_t flags;
+        uint32_t log_level;
+        uint32_t log_size;
+        uint64_t log_buf;
     } __attribute__((aligned(8))) attr = {};
     attr.prog_fd = static_cast<uint32_t>(prog_fd);
     attr.policy_fd = memfd;
     attr.flags = 0;
+    attr.log_level = 1;
+    attr.log_size = static_cast<uint32_t>(log_buf.size());
+    attr.log_buf = ptr_to_u64(log_buf.data());
 
     alignas(8) char attr_buf[256] = {};
     std::memcpy(attr_buf, &attr, sizeof(attr));
@@ -297,6 +305,11 @@ void apply_policy_blob(int prog_fd, const std::vector<uint8_t> &blob)
                                             attr_buf, sizeof(attr_buf)));
     close(memfd);
     if (rc != 0) {
+        const std::string kernel_log(log_buf.data());
+        if (!kernel_log.empty()) {
+            die("BPF_PROG_JIT_RECOMPILE: %s\n%s", strerror(errno),
+                kernel_log.c_str());
+        }
         die("BPF_PROG_JIT_RECOMPILE: %s", strerror(errno));
     }
 }

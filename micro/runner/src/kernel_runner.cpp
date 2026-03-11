@@ -1,8 +1,6 @@
 #include "micro_exec.hpp"
 
 #include <bpf_jit_scanner/pattern_v5.hpp>
-#include <bpf_jit_scanner/policy.h>
-#include <bpf_jit_scanner/scanner.h>
 
 #include <bpf/bpf.h>
 #include <bpf/libbpf.h>
@@ -430,52 +428,6 @@ std::vector<uint8_t> load_xlated_program(int program_fd, uint32_t xlated_prog_le
     return xlated;
 }
 
-/* ================================================================
- * Build scanner policies from xlated BPF using the shared scanner library.
- * ================================================================ */
-
-template <typename ScanFn>
-std::vector<bpf_jit_scan_rule> scan_xlated_program(uint32_t xlated_len,
-                                                   const char *scan_name,
-                                                   ScanFn &&scan_fn)
-{
-    const uint32_t max_rules = xlated_len / 8;
-    if (max_rules == 0) {
-        return {};
-    }
-
-    std::vector<bpf_jit_scan_rule> rules(max_rules);
-    const int rc = scan_fn(rules.data(), max_rules);
-    if (rc < 0) {
-        fail(std::string(scan_name) + " scan failed: " + std::string(strerror(-rc)));
-    }
-
-    rules.resize(static_cast<size_t>(rc));
-    return rules;
-}
-
-std::vector<uint8_t> build_policy_blob_from_scan_results(
-    const bpf_prog_info &info,
-    const std::vector<bpf_jit_scan_rule> &rules)
-{
-    uint8_t *blob_ptr = nullptr;
-    uint32_t blob_len = 0;
-    const int rc = bpf_jit_build_policy_blob(
-        rules.empty() ? nullptr : rules.data(),
-        static_cast<uint32_t>(rules.size()),
-        info.xlated_prog_len / 8,
-        info.tag,
-        &blob_ptr,
-        &blob_len);
-    if (rc < 0) {
-        fail("bpf_jit_build_policy_blob failed: " + std::string(strerror(-rc)));
-    }
-
-    std::vector<uint8_t> blob(blob_ptr, blob_ptr + blob_len);
-    bpf_jit_free_policy_blob(blob_ptr);
-    return blob;
-}
-
 std::vector<uint8_t> build_packet_input(const std::vector<uint8_t> &input_bytes)
 {
     std::vector<uint8_t> packet(input_bytes.size() + sizeof(uint64_t), 0);
@@ -785,11 +737,9 @@ sample_result run_kernel(const cli_options &options)
         options.policy_blob.has_value();
     if (options.policy_blob.has_value()) {
         recompile.mode = "policy-blob";
-    } else if (options.recompile_v5) {
-        recompile.mode = "auto-scan-v5";
     } else if (do_recompile_cmov || do_recompile_wide || do_recompile_rotate ||
                do_recompile_lea || do_recompile_extract) {
-        recompile.mode = "auto-scan-v4";
+        recompile.mode = "auto-scan-v5";
     }
     if (do_recompile_cmov || do_recompile_wide || do_recompile_rotate ||
         do_recompile_lea || do_recompile_extract ||
@@ -830,130 +780,59 @@ sample_result run_kernel(const cli_options &options)
              */
             directive_scan.performed = true;
             uint32_t scan_len = static_cast<uint32_t>(xlated.size());
-            if (options.recompile_v5) {
-                const auto summary = bpf_jit_scanner::scan_v5_builtin(
-                    xlated.data(), scan_len,
-                    bpf_jit_scanner::V5ScanOptions {
-                        .scan_cmov = do_recompile_cmov,
-                        .scan_wide = do_recompile_wide,
-                        .scan_rotate = do_recompile_rotate,
-                        .scan_lea = do_recompile_lea,
-                        .scan_extract = do_recompile_extract,
-                        .use_rorx = options.recompile_rotate_rorx,
-                    });
+            const auto summary = bpf_jit_scanner::scan_v5_builtin(
+                xlated.data(), scan_len,
+                bpf_jit_scanner::V5ScanOptions {
+                    .scan_cmov = do_recompile_cmov,
+                    .scan_wide = do_recompile_wide,
+                    .scan_rotate = do_recompile_rotate,
+                    .scan_lea = do_recompile_lea,
+                    .scan_extract = do_recompile_extract,
+                    .use_rorx = options.recompile_rotate_rorx,
+                });
 
-                directive_scan.cmov_sites = summary.cmov_sites;
-                directive_scan.wide_sites = summary.wide_sites;
-                directive_scan.rotate_sites = summary.rotate_sites;
-                directive_scan.lea_sites = summary.lea_sites;
-                directive_scan.bitfield_sites = summary.bitfield_sites;
+            directive_scan.cmov_sites = summary.cmov_sites;
+            directive_scan.wide_sites = summary.wide_sites;
+            directive_scan.rotate_sites = summary.rotate_sites;
+            directive_scan.lea_sites = summary.lea_sites;
+            directive_scan.bitfield_sites = summary.bitfield_sites;
 
-                auto print_v5_scan_status = [&](bool enabled,
-                                                uint64_t site_count,
-                                                const char *label,
-                                                const char *site_name) {
-                    if (!enabled) {
-                        return;
-                    }
-                    if (site_count == 0) {
-                        fprintf(stderr, "%s: no %s sites found in xlated program (%u insns)\n",
-                                label, site_name, scan_len / 8);
-                        return;
-                    }
-                    fprintf(stderr, "%s: found %llu %s sites in xlated program (%u insns)\n",
-                            label,
-                            static_cast<unsigned long long>(site_count),
-                            site_name,
-                            scan_len / 8);
-                };
-
-                print_v5_scan_status(do_recompile_cmov, directive_scan.cmov_sites,
-                                     "recompile-cmov", "cmov");
-                print_v5_scan_status(do_recompile_wide, directive_scan.wide_sites,
-                                     "recompile-wide", "wide_load");
-                print_v5_scan_status(do_recompile_rotate, directive_scan.rotate_sites,
-                                     "recompile-rotate", "rotate");
-                print_v5_scan_status(do_recompile_lea, directive_scan.lea_sites,
-                                     "recompile-lea", "addr_calc");
-                print_v5_scan_status(do_recompile_extract,
-                                     directive_scan.bitfield_sites,
-                                     "recompile-extract", "bitfield_extract");
-
-                if (!summary.rules.empty()) {
-                    policy_data = bpf_jit_scanner::build_policy_blob_v5(
-                        pre_info.xlated_prog_len / 8,
-                        pre_info.tag,
-                        summary.rules);
+            auto print_v5_scan_status = [&](bool enabled,
+                                            uint64_t site_count,
+                                            const char *label,
+                                            const char *site_name) {
+                if (!enabled) {
+                    return;
                 }
-            } else {
-                std::vector<bpf_jit_scan_rule> rules;
-                auto append_rules = [&](uint64_t &site_counter,
-                                        const char *label,
-                                        const char *site_name,
-                                        auto &&scan_fn) {
-                    auto found_rules = scan_xlated_program(scan_len, label,
-                                                           std::forward<decltype(scan_fn)>(scan_fn));
-                    site_counter = found_rules.size();
-                    if (found_rules.empty()) {
-                        fprintf(stderr, "%s: no %s sites found in xlated program (%u insns)\n",
-                                label, site_name, scan_len / 8);
-                        return;
-                    }
-
-                    fprintf(stderr, "%s: found %zu %s sites in xlated program (%u insns)\n",
-                            label, found_rules.size(), site_name, scan_len / 8);
-                    rules.insert(rules.end(), found_rules.begin(), found_rules.end());
-                };
-
-                if (do_recompile_cmov) {
-                    append_rules(directive_scan.cmov_sites,
-                                 "recompile-cmov", "cmov-select",
-                                 [&](bpf_jit_scan_rule *out, uint32_t max_rules) {
-                                     return bpf_jit_scan_cmov(xlated.data(), scan_len,
-                                                              out, max_rules);
-                                 });
+                if (site_count == 0) {
+                    fprintf(stderr, "%s: no %s sites found in xlated program (%u insns)\n",
+                            label, site_name, scan_len / 8);
+                    return;
                 }
+                fprintf(stderr, "%s: found %llu %s sites in xlated program (%u insns)\n",
+                        label,
+                        static_cast<unsigned long long>(site_count),
+                        site_name,
+                        scan_len / 8);
+            };
 
-                if (do_recompile_wide) {
-                    append_rules(directive_scan.wide_sites,
-                                 "recompile-wide", "wide_load",
-                                 [&](bpf_jit_scan_rule *out, uint32_t max_rules) {
-                                     return bpf_jit_scan_wide_mem(xlated.data(), scan_len,
-                                                                  out, max_rules);
-                                 });
-                }
+            print_v5_scan_status(do_recompile_cmov, directive_scan.cmov_sites,
+                                 "recompile-cmov", "cmov");
+            print_v5_scan_status(do_recompile_wide, directive_scan.wide_sites,
+                                 "recompile-wide", "wide_load");
+            print_v5_scan_status(do_recompile_rotate, directive_scan.rotate_sites,
+                                 "recompile-rotate", "rotate");
+            print_v5_scan_status(do_recompile_lea, directive_scan.lea_sites,
+                                 "recompile-lea", "addr_calc");
+            print_v5_scan_status(do_recompile_extract,
+                                 directive_scan.bitfield_sites,
+                                 "recompile-extract", "bitfield_extract");
 
-                if (do_recompile_rotate) {
-                    bool use_rorx = options.recompile_rotate_rorx;
-                    append_rules(directive_scan.rotate_sites,
-                                 "recompile-rotate", "rotate",
-                                 [&](bpf_jit_scan_rule *out, uint32_t max_rules) {
-                                     return bpf_jit_scan_rotate(xlated.data(), scan_len,
-                                                                use_rorx, out, max_rules);
-                                 });
-                }
-
-                if (do_recompile_lea) {
-                    append_rules(directive_scan.lea_sites,
-                                 "recompile-lea", "addr_calc",
-                                 [&](bpf_jit_scan_rule *out, uint32_t max_rules) {
-                                     return bpf_jit_scan_addr_calc(xlated.data(), scan_len,
-                                                                   out, max_rules);
-                                 });
-                }
-
-                if (do_recompile_extract) {
-                    append_rules(directive_scan.bitfield_sites,
-                                 "recompile-extract", "bitfield_extract",
-                                 [&](bpf_jit_scan_rule *out, uint32_t max_rules) {
-                                     return bpf_jit_scan_bitfield_extract(
-                                         xlated.data(), scan_len, out, max_rules);
-                                 });
-                }
-
-                if (!rules.empty()) {
-                    policy_data = build_policy_blob_from_scan_results(pre_info, rules);
-                }
+            if (!summary.rules.empty()) {
+                policy_data = bpf_jit_scanner::build_policy_blob_v5(
+                    pre_info.xlated_prog_len / 8,
+                    pre_info.tag,
+                    summary.rules);
             }
         } else {
             /*

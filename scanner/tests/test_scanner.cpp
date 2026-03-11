@@ -311,6 +311,13 @@ void test_v5_bitfield_extract_scan()
     CHECK_EQ(mask_shift_summary.rules[0].bindings.size(), 6u);
 }
 
+void test_v5_abi_limits()
+{
+    CHECK_EQ(BPF_JIT_MAX_PATTERN_LEN, 64);
+    CHECK_EQ(BPF_JIT_MAX_BINDINGS, 16);
+    CHECK_EQ(BPF_JIT_MAX_CANONICAL_PARAMS, 16);
+}
+
 } // namespace
 
 int main()
@@ -321,6 +328,7 @@ int main()
     test_v5_wide_scan_variants();
     test_v5_lea_scan();
     test_v5_bitfield_extract_scan();
+    test_v5_abi_limits();
 
     std::printf("PASS %d\n", g_pass);
     if (g_fail) {

@@ -43,15 +43,15 @@ struct cli_options {
     std::optional<std::filesystem::path> memory;
     std::optional<std::filesystem::path> btf_custom_path;
     std::optional<std::filesystem::path> directive_blob;
-    std::optional<std::filesystem::path> policy_blob;    // v4 recompile policy
-    bool recompile_cmov = false;                        // v4 auto-scan xlated for cmov
-    bool recompile_wide = false;                        // v4 auto-scan xlated for wide_load
-    bool recompile_rotate = false;                      // v4 auto-scan xlated for rotate
-    bool recompile_rotate_rorx = false;                 // v4 rotate with RORX (BMI2)
-    bool recompile_lea = false;                         // v4 auto-scan xlated for lea fusion
-    bool recompile_extract = false;                     // v4 auto-scan xlated for bitfield extract
+    std::optional<std::filesystem::path> policy_blob;    // scanner-generated recompile policy
+    bool recompile_cmov = false;                        // auto-scan xlated for cmov
+    bool recompile_wide = false;                        // auto-scan xlated for wide_load
+    bool recompile_rotate = false;                      // auto-scan xlated for rotate
+    bool recompile_rotate_rorx = false;                 // rotate with RORX (BMI2)
+    bool recompile_lea = false;                         // auto-scan xlated for lea fusion
+    bool recompile_extract = false;                     // auto-scan xlated for bitfield extract
     bool recompile_all = false;                         // auto-scan for all pattern types
-    bool recompile_v5 = false;                          // use v5 declarative pattern blob
+    bool recompile_v5 = false;                          // compatibility flag; scanner path is v5-only
     std::vector<std::string> skip_families;             // skip selected auto-scan families
     std::optional<std::string> program_name;
     std::string io_mode = "map";
