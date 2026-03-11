@@ -21,6 +21,8 @@ for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpu
     if candidate_str not in sys.path:
         sys.path.insert(0, candidate_str)
 
+from policy_utils import POLICY_DIR as DEFAULT_POLICY_DIR, resolve_policy_path
+
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_OUTPUT_JSON = ROOT_DIR / "docs" / "tmp" / "corpus-v5-recompile-results.json"
@@ -105,6 +107,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         action="append",
         dest="filters",
         help="Only include target programs whose object path or name contains this substring. Repeatable.",
+    )
+    parser.add_argument(
+        "--use-policy",
+        action="store_true",
+        help="Prefer corpus/policies/*.policy.yaml for each object when present; otherwise fall back to the legacy all-apply recompile path.",
     )
     return parser.parse_args(argv)
 
@@ -440,6 +447,7 @@ def build_runner_command(
     *,
     compile_only: bool,
     recompile_v5: bool,
+    policy_file: Path | None = None,
 ) -> list[str]:
     command = maybe_sudo_prefix() + [
         str(runner),
@@ -461,7 +469,9 @@ def build_runner_command(
         command.extend(["--input-size", str(input_size)])
     if btf_custom_path is not None:
         command.extend(["--btf-custom-path", str(btf_custom_path)])
-    if recompile_v5:
+    if policy_file is not None:
+        command.extend(["--policy-file", str(policy_file)])
+    elif recompile_v5:
         command.extend(["--recompile-v5", "--recompile-all"])
     if compile_only:
         command.append("--compile-only")
@@ -524,9 +534,13 @@ def run_target(
     target: dict[str, Any],
     repeat: int,
     timeout_seconds: int,
+    *,
+    use_policy: bool,
+    policy_dir: Path,
 ) -> dict[str, Any]:
     object_path = ROOT_DIR / target["object_path"]
     plan = execution_plan(target["section_name"], packet_path, context_path)
+    policy_path = resolve_policy_path(object_path, policy_dir) if use_policy else None
 
     baseline_compile_raw = run_command(
         build_runner_command(
@@ -540,6 +554,7 @@ def run_target(
             1,
             compile_only=True,
             recompile_v5=False,
+            policy_file=None,
         ),
         timeout_seconds,
     )
@@ -554,7 +569,8 @@ def run_target(
             plan["input_size"],
             1,
             compile_only=True,
-            recompile_v5=True,
+            recompile_v5=policy_path is None,
+            policy_file=policy_path,
         ),
         timeout_seconds,
     )
@@ -574,6 +590,7 @@ def run_target(
                 repeat,
                 compile_only=False,
                 recompile_v5=False,
+                policy_file=None,
             ),
             timeout_seconds,
         )
@@ -589,7 +606,8 @@ def run_target(
                     plan["input_size"],
                     repeat,
                     compile_only=False,
-                    recompile_v5=True,
+                    recompile_v5=policy_path is None,
+                    policy_file=policy_path,
                 ),
                 timeout_seconds,
             )
@@ -604,6 +622,8 @@ def run_target(
         "io_mode": plan["io_mode"],
         "input_size": plan["input_size"],
         "memory_path": str(plan["memory_path"]) if plan["memory_path"] is not None else None,
+        "policy_path": str(policy_path) if policy_path is not None else None,
+        "policy_mode": "policy-file" if policy_path is not None else "auto-scan-v5",
         "baseline_compile": baseline_compile,
         "v5_compile": v5_compile,
         "baseline_run": baseline_run,
@@ -864,6 +884,7 @@ def build_markdown(data: dict[str, Any]) -> str:
             "- The 40 target programs are the union of the previously measured directive-bearing perf and tracing results from the expanded corpus.",
             "- Baseline and v5 compile-only probes were attempted for all 40 targets on the framework kernel.",
             "- Timed runs were attempted only for the 29 targets that were previously runnable through `bpf_prog_test_run`.",
+            "- `--use-policy` prefers a matching file under `corpus/policies/`; when none exists for an object, the driver falls back to the legacy auto-scan `--recompile-v5 --recompile-all` path.",
             "- Guest CO-RE loading uses `--btf-custom-path` pointing at the framework build-tree `vmlinux`, because the guest kernel does not expose `/sys/kernel/btf/vmlinux`.",
             "",
         ]
@@ -926,6 +947,8 @@ def main(argv: list[str] | None = None) -> int:
                 target,
                 args.repeat,
                 args.timeout,
+                use_policy=args.use_policy,
+                policy_dir=DEFAULT_POLICY_DIR,
             )
         )
 
@@ -944,6 +967,7 @@ def main(argv: list[str] | None = None) -> int:
         "perf_results_json": str(perf_results_path),
         "tracing_results_json": str(tracing_results_path),
         "repeat": args.repeat,
+        "use_policy": args.use_policy,
         "summary": summary,
         "programs": records,
     }

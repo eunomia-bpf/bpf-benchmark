@@ -240,6 +240,63 @@ std::vector<V5Family> parse_family_list(const YAML::Node &families_node,
                        "selection.families must be a sequence or scalar");
 }
 
+V5PolicyConfig parse_family_action_map(const YAML::Node &families_node,
+                                       const std::string &source_name)
+{
+    if (!families_node.IsMap()) {
+        throw_policy_error(source_name, "families must be a mapping");
+    }
+
+    V5PolicyConfig config = {};
+    config.selection.mode = V5PolicySelectionMode::Allowlist;
+
+    for (const auto &entry : families_node) {
+        if (!entry.first.IsScalar()) {
+            throw_policy_error(source_name,
+                               "families keys must be scalar family names");
+        }
+
+        const std::string raw_name = entry.first.as<std::string>();
+        const auto family = parse_v5_family_name(raw_name);
+        if (!family.has_value()) {
+            throw_policy_error(source_name,
+                               "unknown family '" + raw_name +
+                                   "' in families mapping");
+        }
+
+        const YAML::Node action_node = entry.second;
+        bool enabled = true;
+        if (action_node.IsScalar()) {
+            const std::string action = lower_ascii(action_node.as<std::string>());
+            if (action == "apply" || action == "enable" || action == "enabled" ||
+                action == "keep" || action == "on" || action == "true") {
+                enabled = true;
+            } else if (action == "skip" || action == "disable" ||
+                       action == "disabled" || action == "drop" ||
+                       action == "off" || action == "false") {
+                enabled = false;
+            } else {
+                throw_policy_error(source_name,
+                                   "families." + raw_name +
+                                       " must be apply/skip (or enable/disable)");
+            }
+        } else if (action_node.IsDefined() && !action_node.IsNull()) {
+            throw_policy_error(source_name,
+                               "families." + raw_name +
+                                   " must be a scalar apply/skip value");
+        }
+
+        if (enabled &&
+            std::find(config.selection.families.begin(),
+                      config.selection.families.end(),
+                      *family) == config.selection.families.end()) {
+            config.selection.families.push_back(*family);
+        }
+    }
+
+    return config;
+}
+
 std::vector<V5PolicySiteOverride> parse_site_overrides(
     const YAML::Node &site_overrides_node,
     const std::string &source_name)
@@ -309,11 +366,18 @@ V5PolicyConfig parse_policy_node(const YAML::Node &root,
     if (!selection_node.IsMap()) {
         throw_policy_error(source_name, "selection must be a mapping");
     }
-    if (!parse_selection_mode(selection_node, source_name, &config.selection)) {
-        throw_policy_error(source_name, "selection.mode is required");
+
+    const YAML::Node families_node = selection_node["families"];
+    if (families_node && families_node.IsMap()) {
+        const auto shorthand = parse_family_action_map(families_node, source_name);
+        config.selection = shorthand.selection;
+    } else {
+        if (!parse_selection_mode(selection_node, source_name, &config.selection)) {
+            throw_policy_error(source_name, "selection.mode is required");
+        }
+        config.selection.families =
+            parse_family_list(families_node, source_name);
     }
-    config.selection.families =
-        parse_family_list(selection_node["families"], source_name);
     config.site_overrides =
         parse_site_overrides(root["site_overrides"], source_name);
     return config;

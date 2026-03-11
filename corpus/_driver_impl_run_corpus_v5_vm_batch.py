@@ -31,6 +31,8 @@ except ImportError:
     from micro.orchestrator.inventory import load_packet_test_run_targets
     from micro.orchestrator.results import normalize_directive_scan, parse_json_lines as parse_json_payload_lines, parse_runner_sample
 
+from policy_utils import POLICY_DIR as DEFAULT_POLICY_DIR, resolve_policy_path
+
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 SELF_RELATIVE = Path(__file__).resolve().relative_to(ROOT_DIR)
@@ -165,6 +167,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--force-host-fallback",
         action="store_true",
         help="Skip VM execution and run host compile-only + scanner fallback directly.",
+    )
+    parser.add_argument(
+        "--use-policy",
+        action="store_true",
+        help="Prefer corpus/policies/*.policy.yaml for each object when present; otherwise fall back to the legacy auto-scan recompile path.",
     )
     parser.add_argument(
         "--guest-info",
@@ -454,6 +461,7 @@ def build_runner_command(
     compile_only: bool,
     recompile_v5: bool,
     skip_families: list[str],
+    policy_file: Path | None = None,
     dump_xlated: Path | None = None,
     use_sudo: bool = False,
 ) -> list[str]:
@@ -477,7 +485,9 @@ def build_runner_command(
         command.extend(["--input-size", str(input_size)])
     if btf_custom_path is not None:
         command.extend(["--btf-custom-path", str(btf_custom_path)])
-    if recompile_v5:
+    if policy_file is not None:
+        command.extend(["--policy-file", str(policy_file)])
+    elif recompile_v5:
         command.extend(["--recompile-v5", "--recompile-all"])
         if skip_families:
             command.extend(["--skip-families", ",".join(skip_families)])
@@ -611,6 +621,8 @@ def build_empty_record(target: dict[str, Any], execution_mode: str) -> dict[str,
     return {
         **target,
         "execution_mode": execution_mode,
+        "policy_path": None,
+        "policy_mode": "auto-scan-v5",
         "scan_source": "inventory",
         "scanner_counts": normalize_scan(target.get("inventory_scan")),
         "scanner_cli": None,
@@ -646,10 +658,13 @@ def run_target_locally(
     enable_recompile: bool,
     enable_exec: bool,
     skip_families: list[str],
+    use_policy: bool,
+    policy_dir: Path,
 ) -> dict[str, Any]:
     record = build_empty_record(target, execution_mode)
     object_path = ROOT_DIR / target["object_path"]
     memory_path = Path(target["memory_path"]) if target.get("memory_path") else None
+    policy_path = resolve_policy_path(object_path, policy_dir) if use_policy else None
     inventory_scan = normalize_scan(target.get("inventory_scan"))
     scanner_result = None
     scan_source = "inventory"
@@ -670,6 +685,7 @@ def run_target_locally(
                 compile_only=True,
                 recompile_v5=False,
                 skip_families=[],
+                policy_file=None,
                 dump_xlated=xlated_path,
                 use_sudo=use_sudo,
             ),
@@ -705,8 +721,9 @@ def run_target_locally(
                     repeat=repeat,
                     btf_custom_path=btf_custom_path,
                     compile_only=True,
-                    recompile_v5=True,
+                    recompile_v5=policy_path is None,
                     skip_families=skip_families,
+                    policy_file=policy_path,
                     use_sudo=use_sudo,
                 ),
                 timeout_seconds,
@@ -725,6 +742,7 @@ def run_target_locally(
                     compile_only=False,
                     recompile_v5=False,
                     skip_families=[],
+                    policy_file=None,
                     use_sudo=use_sudo,
                 ),
                 timeout_seconds,
@@ -741,14 +759,17 @@ def run_target_locally(
                     repeat=repeat,
                     btf_custom_path=btf_custom_path,
                     compile_only=False,
-                    recompile_v5=True,
+                    recompile_v5=policy_path is None,
                     skip_families=skip_families,
+                    policy_file=policy_path,
                     use_sudo=use_sudo,
                 ),
                 timeout_seconds,
             )
 
     record["scanner_cli"] = text_invocation_summary(scanner_result)
+    record["policy_path"] = str(policy_path) if policy_path is not None else None
+    record["policy_mode"] = "policy-file" if policy_path is not None else "auto-scan-v5"
     record["scan_source"] = scan_source
     record["scanner_counts"] = scanner_counts
     record["eligible_families"] = families_from_scan(scanner_counts)
@@ -816,6 +837,8 @@ def run_guest_target_mode(args: argparse.Namespace) -> int:
         enable_recompile=True,
         enable_exec=bool(target.get("can_test_run")),
         skip_families=normalize_skip_families(args.skip_families),
+        use_policy=args.use_policy,
+        policy_dir=DEFAULT_POLICY_DIR,
     )
     print(json.dumps(record, sort_keys=True))
     return 0
@@ -881,6 +904,7 @@ def run_target_in_guest(
     timeout_seconds: int,
     vng_binary: str,
     skip_families: list[str],
+    use_policy: bool,
 ) -> dict[str, Any]:
     handle = tempfile.NamedTemporaryFile(
         mode="w",
@@ -912,6 +936,8 @@ def run_target_in_guest(
         ]
         if skip_families:
             guest_argv.extend(["--skip-families", ",".join(skip_families)])
+        if use_policy:
+            guest_argv.append("--use-policy")
         guest_exec = build_guest_exec(guest_argv)
         invocation = run_text_command(
             build_vng_command(
@@ -1358,6 +1384,7 @@ def build_markdown(data: dict[str, Any]) -> str:
             "",
             "- Target selection comes from the runnability inventory and keeps every packet-test-run target whose baseline run already succeeds; the current scanner pass determines whether v5 has any eligible families.",
             "- In strict VM mode, each target boots the framework v5 guest once and runs baseline compile-only, v5 compile-only, baseline test_run, and v5 test_run in that order.",
+            "- `--use-policy` prefers a matching file under `corpus/policies/`; when none exists for an object, the driver falls back to the legacy auto-scan `--recompile-v5 --recompile-all` path.",
             "- `--skip-families` filters families out of the auto-generated v5 policy; the family columns above report applied families, not just eligible sites.",
             "- Host fallback mode only does baseline compile-only plus offline scanner scan; it does not attempt recompile or runtime measurement.",
             "- Family summaries are overlap-based: one program can contribute to multiple family rows, so those rows are not isolated causal attributions.",
@@ -1460,6 +1487,7 @@ def main(argv: list[str] | None = None) -> int:
                 timeout_seconds=args.timeout,
                 vng_binary=args.vng,
                 skip_families=skip_families,
+                use_policy=args.use_policy,
             )
         else:
             record = run_target_locally(
@@ -1474,6 +1502,8 @@ def main(argv: list[str] | None = None) -> int:
                 enable_recompile=False,
                 enable_exec=False,
                 skip_families=[],
+                use_policy=args.use_policy,
+                policy_dir=DEFAULT_POLICY_DIR,
             )
         records.append(record)
 
@@ -1494,6 +1524,7 @@ def main(argv: list[str] | None = None) -> int:
         "kernel_build": text_invocation_summary(kernel_build),
         "guest_smoke": guest_smoke,
         "skip_families": skip_families,
+        "use_policy": args.use_policy,
         "summary": summary,
         "programs": records,
     }
