@@ -503,6 +503,44 @@ spec:
     path.write_text(policy + "\n")
 
 
+def write_tetragon_policies(directory: Path) -> list[Path]:
+    directory.mkdir(parents=True, exist_ok=True)
+    tracepoint_path = directory / "tetragon-e2e-tracepoint.yaml"
+    tracepoint_path.write_text(
+        """
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: bpf-benchmark-tetragon-e2e-tracepoint
+spec:
+  tracepoints:
+    - subsystem: syscalls
+      event: sys_enter_execve
+""".strip()
+        + "\n"
+    )
+
+    kprobe_path = directory / "tetragon-e2e-kprobes.yaml"
+    kprobe_path.write_text(
+        """
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: bpf-benchmark-tetragon-e2e-kprobes
+spec:
+  kprobes:
+    - call: security_bprm_check
+      syscall: false
+    - call: security_file_open
+      syscall: false
+    - call: security_socket_connect
+      syscall: false
+""".strip()
+        + "\n"
+    )
+    return [tracepoint_path, kprobe_path]
+
+
 def current_prog_ids() -> list[int]:
     payload = run_json_command([bpftool_binary(), "-j", "-p", "prog", "show"], timeout=30)
     if not isinstance(payload, list):
@@ -986,9 +1024,9 @@ def daemon_payload(
     limitations: list[str],
 ) -> dict[str, object]:
     with tempfile.TemporaryDirectory(prefix="tetragon-policy-") as tempdir:
-        policy_path = Path(tempdir) / "tetragon-e2e-policy.yaml"
-        write_tetragon_policy(policy_path)
-        command = [tetragon_binary, "--tracing-policy", str(policy_path)]
+        policy_dir = Path(tempdir)
+        policy_paths = write_tetragon_policies(policy_dir)
+        command = [tetragon_binary, "--tracing-policy-dir", str(policy_dir)]
         with TetragonAgentSession(command, load_timeout) as session:
             prog_ids = [int(program["id"]) for program in session.programs]
             baseline = run_phase(DEFAULT_WORKLOADS, duration_s, prog_ids, agent_pid=session.pid)
@@ -1010,7 +1048,8 @@ def daemon_payload(
                 "setup": dict(setup_result),
                 "host": host_metadata(),
                 "tetragon_launch_command": command,
-                "policy_path": str(policy_path),
+                "policy_dir": str(policy_dir),
+                "policy_paths": [str(path) for path in policy_paths],
                 "tetragon_programs": session.programs,
                 "agent_logs": session.collector_snapshot(),
                 "baseline": baseline,

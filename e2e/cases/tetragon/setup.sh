@@ -89,5 +89,5 @@ echo "TETRA_BINARY=${tetra_bin}"
 echo "STRESS_NG_BINARY=$(command -v stress-ng || true)"
 
 if [[ -n "${tetragon_bin}" ]]; then
-  "${tetragon_bin}" version >/dev/null 2>&1 || "${tetragon_bin}" --version >/dev/null 2>&1 || true
+  timeout 5s "${tetragon_bin}" --help >/dev/null 2>&1 || true
 fi
