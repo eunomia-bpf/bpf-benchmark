@@ -1,0 +1,4 @@
+tracepoint:sched:sched_process_exec
+{
+  @[comm] = count();
+}

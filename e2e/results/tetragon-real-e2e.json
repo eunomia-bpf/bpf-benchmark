@@ -1,0 +1,821 @@
+{
+  "baseline": {
+    "summary": {
+      "agent_cpu_total_pct": {
+        "count": 4,
+        "max": 99.99810774830681,
+        "mean": 46.311856137224694,
+        "median": 42.562159951991845,
+        "min": 0.12499689660830021
+      },
+      "app_throughput": {
+        "count": 4,
+        "max": 1067819.5538658004,
+        "mean": 339803.07619894965,
+        "median": 145616.98855759046,
+        "min": 158.77381481724112
+      },
+      "bpf_avg_ns_per_run": {
+        "count": 4,
+        "max": 506.0445193637621,
+        "mean": 364.9864301191362,
+        "median": 367.8894114689325,
+        "min": 218.1223781749176
+      },
+      "events_per_sec": {
+        "count": 4,
+        "max": 559241.5607062429,
+        "mean": 143095.14282944365,
+        "median": 6547.231521823365,
+        "min": 44.547567884893155
+      },
+      "system_cpu_busy_pct": {
+        "count": 4,
+        "max": 50.031230480949404,
+        "mean": 35.63248025342986,
+        "median": 44.5721300765116,
+        "min": 3.354430379746831
+      }
+    },
+    "workloads": [
+      {
+        "agent_cpu": {
+          "sys_pct": 0.4999951627342986,
+          "total_pct": 1.124989116152172,
+          "user_pct": 0.6249939534178732
+        },
+        "app_throughput": 158.77381481724112,
+        "bpf": {
+          "programs": {
+            "18": {
+              "avg_ns_per_run": 2042.0094339622642,
+              "bytes_jited": 18292,
+              "bytes_xlated": 31776,
+              "id": 18,
+              "name": "event_execve",
+              "run_cnt_delta": 1272,
+              "run_time_ns_delta": 2597436,
+              "type": "tracepoint"
+            },
+            "30": {
+              "avg_ns_per_run": 316.28661616161617,
+              "bytes_jited": 1727,
+              "bytes_xlated": 3048,
+              "id": 30,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 10296,
+              "run_time_ns_delta": 3256487,
+              "type": "kprobe"
+            },
+            "43": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 1727,
+              "bytes_xlated": 3048,
+              "id": 43,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            }
+          },
+          "summary": {
+            "active_programs": 2,
+            "avg_ns_per_run": 506.0445193637621,
+            "total_events": 11568,
+            "total_run_time_ns": 5853923
+          }
+        },
+        "description": "stress-ng execve workload",
+        "duration_s": 8.005098331000001,
+        "events_per_sec": 1445.0790635765893,
+        "events_total": 11568,
+        "kind": "exec_storm",
+        "metric": "bogo-ops/s",
+        "name": "stress_exec",
+        "ops_per_sec": 158.77381481724112,
+        "ops_total": 1271.0,
+        "stderr_tail": "fallback=rapid_exec_loop",
+        "stdout_tail": "",
+        "system_cpu": {
+          "busy_pct": 3.354430379746831
+        }
+      },
+      {
+        "agent_cpu": {
+          "sys_pct": 0.0,
+          "total_pct": 0.12499689660830021,
+          "user_pct": 0.12499689660830021
+        },
+        "app_throughput": 1067819.5538658004,
+        "bpf": {
+          "programs": {
+            "18": {
+              "avg_ns_per_run": 5810.5,
+              "bytes_jited": 18292,
+              "bytes_xlated": 31776,
+              "id": 18,
+              "name": "event_execve",
+              "run_cnt_delta": 2,
+              "run_time_ns_delta": 11621,
+              "type": "tracepoint"
+            },
+            "30": {
+              "avg_ns_per_run": 426.31088082901556,
+              "bytes_jited": 1727,
+              "bytes_xlated": 3048,
+              "id": 30,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 386,
+              "run_time_ns_delta": 164556,
+              "type": "kprobe"
+            },
+            "43": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 1727,
+              "bytes_xlated": 3048,
+              "id": 43,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            }
+          },
+          "summary": {
+            "active_programs": 2,
+            "avg_ns_per_run": 454.0644329896907,
+            "total_events": 388,
+            "total_run_time_ns": 176177
+          }
+        },
+        "description": "fio or dd file workload",
+        "duration_s": 8.709790868999999,
+        "events_per_sec": 44.547567884893155,
+        "events_total": 388,
+        "kind": "file_io",
+        "metric": "ops/s",
+        "name": "file_io",
+        "ops_per_sec": 1067819.5538658004,
+        "ops_total": 9300485.0,
+        "stderr_tail": "",
+        "stdout_tail": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 6.366206,\n        \"750\" : 91.136290,\n        \"1000\" : 2.261463\n      },\n      \"latency_us\" : {\n        \"2\" : 0.104554,\n        \"4\" : 0.041976,\n        \"10\" : 0.088856,\n        \"20\" : 0.010000,\n        \"50\" : 0.010000,\n        \"100\" : 0.010000,\n        \"250\" : 0.010000,\n        \"500\" : 0.010000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}",
+        "system_cpu": {
+          "busy_pct": 47.217010631644776
+        }
+      },
+      {
+        "agent_cpu": {
+          "sys_pct": 50.24904914352417,
+          "total_pct": 99.99810774830681,
+          "user_pct": 49.74905860478264
+        },
+        "app_throughput": 279597.5928661529,
+        "bpf": {
+          "programs": {
+            "18": {
+              "avg_ns_per_run": 6914.0,
+              "bytes_jited": 18292,
+              "bytes_xlated": 31776,
+              "id": 18,
+              "name": "event_execve",
+              "run_cnt_delta": 1,
+              "run_time_ns_delta": 6914,
+              "type": "tracepoint"
+            },
+            "30": {
+              "avg_ns_per_run": 218.120881532897,
+              "bytes_jited": 1727,
+              "bytes_xlated": 3048,
+              "id": 30,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 4473934,
+              "run_time_ns_delta": 975858428,
+              "type": "kprobe"
+            },
+            "43": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 1727,
+              "bytes_xlated": 3048,
+              "id": 43,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            }
+          },
+          "summary": {
+            "active_programs": 2,
+            "avg_ns_per_run": 218.1223781749176,
+            "total_events": 4473935,
+            "total_run_time_ns": 975865342
+          }
+        },
+        "description": "stress-ng open workload",
+        "duration_s": 8.000004495999999,
+        "events_per_sec": 559241.5607062429,
+        "events_total": 4473935,
+        "kind": "open_storm",
+        "metric": "bogo-ops/s",
+        "name": "open_storm",
+        "ops_per_sec": 279597.5928661529,
+        "ops_total": 2236782.0,
+        "stderr_tail": "",
+        "stdout_tail": "",
+        "system_cpu": {
+          "busy_pct": 50.031230480949404
+        }
+      },
+      {
+        "agent_cpu": {
+          "sys_pct": 71.37443136882708,
+          "total_pct": 83.99933078783151,
+          "user_pct": 12.62489941900444
+        },
+        "app_throughput": 11636.384249028075,
+        "bpf": {
+          "programs": {
+            "18": {
+              "avg_ns_per_run": 5766.0,
+              "bytes_jited": 18292,
+              "bytes_xlated": 31776,
+              "id": 18,
+              "name": "event_execve",
+              "run_cnt_delta": 1,
+              "run_time_ns_delta": 5766,
+              "type": "tracepoint"
+            },
+            "30": {
+              "avg_ns_per_run": 528.9306930693069,
+              "bytes_jited": 1727,
+              "bytes_xlated": 3048,
+              "id": 30,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 101,
+              "run_time_ns_delta": 53422,
+              "type": "kprobe"
+            },
+            "43": {
+              "avg_ns_per_run": 281.38727106718943,
+              "bytes_jited": 1727,
+              "bytes_xlated": 3048,
+              "id": 43,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 93095,
+              "run_time_ns_delta": 26195748,
+              "type": "kprobe"
+            }
+          },
+          "summary": {
+            "active_programs": 3,
+            "avg_ns_per_run": 281.7143899481743,
+            "total_events": 93197,
+            "total_run_time_ns": 26254936
+          }
+        },
+        "description": "rapid loopback TCP connect storm",
+        "duration_s": 8.000165516000003,
+        "events_per_sec": 11649.38398007014,
+        "events_total": 93197,
+        "kind": "connect_storm",
+        "metric": "ops/s",
+        "name": "connect_storm",
+        "ops_per_sec": 11636.384249028075,
+        "ops_total": 93093.0,
+        "stderr_tail": "transient_connect_failures=2",
+        "stdout_tail": "",
+        "system_cpu": {
+          "busy_pct": 41.92724952137843
+        }
+      }
+    ]
+  },
+  "comparison": {
+    "comparable": true,
+    "workloads": [
+      {
+        "agent_cpu_delta_pct": -18.89884217690302,
+        "app_throughput_delta_pct": 100.14978390425684,
+        "baseline_agent_cpu_pct": 83.99933078783151,
+        "baseline_events_per_sec": 11649.38398007014,
+        "baseline_ops_per_sec": 11636.384249028075,
+        "bpf_avg_ns_delta_pct": -6.188657810026954,
+        "events_per_sec_delta_pct": 100.0148694706306,
+        "name": "connect_storm",
+        "post_agent_cpu_pct": 68.12442983258453,
+        "post_events_per_sec": 23300.500161869844,
+        "post_ops_per_sec": 23290.19792869867
+      },
+      {
+        "agent_cpu_delta_pct": -100.0,
+        "app_throughput_delta_pct": 3.542466020722976,
+        "baseline_agent_cpu_pct": 0.12499689660830021,
+        "baseline_events_per_sec": 44.547567884893155,
+        "baseline_ops_per_sec": 1067819.5538658004,
+        "bpf_avg_ns_delta_pct": -16.687128486091357,
+        "events_per_sec_delta_pct": -8.634538012713156,
+        "name": "file_io",
+        "post_agent_cpu_pct": 0.0,
+        "post_events_per_sec": 40.70109120213286,
+        "post_ops_per_sec": 1105646.698724132
+      },
+      {
+        "agent_cpu_delta_pct": -0.000286431259391669,
+        "app_throughput_delta_pct": 0.002151962456634199,
+        "baseline_agent_cpu_pct": 99.99810774830681,
+        "baseline_events_per_sec": 559241.5607062429,
+        "baseline_ops_per_sec": 279597.5928661529,
+        "bpf_avg_ns_delta_pct": -0.8128535961531458,
+        "events_per_sec_delta_pct": 0.0014364423671158967,
+        "name": "open_storm",
+        "post_agent_cpu_pct": 99.99782132246742,
+        "post_events_per_sec": 559249.5938889554,
+        "post_ops_per_sec": 279603.609701381
+      },
+      {
+        "agent_cpu_delta_pct": 33.333641414397974,
+        "app_throughput_delta_pct": -8.183824950785663,
+        "baseline_agent_cpu_pct": 1.124989116152172,
+        "baseline_events_per_sec": 1445.0790635765893,
+        "baseline_ops_per_sec": 158.77381481724112,
+        "bpf_avg_ns_delta_pct": 17.115105541587123,
+        "events_per_sec_delta_pct": -8.507511025877285,
+        "name": "stress_exec",
+        "post_agent_cpu_pct": 1.499988954081342,
+        "post_events_per_sec": 1322.1388029101668,
+        "post_ops_per_sec": 145.7800437449135
+      }
+    ]
+  },
+  "duration_s": 8,
+  "fallback_reason": "Tetragon failed to become healthy: level=info msg=\"Starting tetragon\" version=v1.6.0\nlevel=info msg=\"config settings\" config=\"map[bpf-dir:tetragon bpf-lib:/var/lib/tetragon/ btf: cgroup-rate: cluster-name: config-dir: cpuprofile: cri-endpoint: data-cache-size:1024 debug:false disable-kprobe-multi:false enable-ancestors:[] enable-cgidmap:false enable-cgidmap-debug:false enable-cgtrackerid:true enable-compatibility-syscall64-size-type:false enable-cri:false enable-export-aggregation:false enable-k8s-api:false enable-msg-handling-latency:false enable-pid-set-filter:false enable-pod-annotations:false enable-pod-info:false enable-policy-filter:false enable-policy-filter-cgroup-map:false enable-policy-filter-debug:false enable-process-cred:false enable-process-ns:false enable-tracing-policy-crd:true event-cache-retries:15 event-cache-retry-delay:2 event-queue-size:10000 execve-map-entries:0 execve-map-size: export-aggregation-buffer-size:10000 export-aggregation-window-size:15s export-allowlist: export-denylist: export-file-compress:false export-file-max-backups:5 export-file-max-size-mb:10 export-file-perm:600 export-file-rotation-interval:0s export-filename: export-rate-limit:-1 expose-stack-addresses:false field-filters: force-large-progs:false force-small-progs:false generate-docs:false gops-address: health-server-address::6789 health-server-interval:10 k8s-controlplane-retry:1 k8s-kubeconfig-path: keep-sensors-on-exit:false kernel: log-format:text log-level:info memprofile: metrics-label-filter:namespace,workload,pod,binary metrics-server: netns-dir:/var/run/docker/netns/ pprof-address: process-cache-gc-interval:30s process-cache-size:65536 procfs:/proc/ rb-queue-size:65535 rb-size:0 rb-size-total:0 redaction-filters: release-pinned-bpf:true server-address:localhost:54321 tracing-policy:/tmp/tetragon-policy-z3x4mv4w/tetragon-e2e-policy.yaml tracing-policy-dir:/etc/tetragon/tetragon.tp.d use-perf-ring-buffer:false username-metadata:disabled verbose:0]\"\nlevel=info msg=\"Tetragon pid file creation succeeded\" pid=141 pidfile=/var/run/tetragon/tetragon.pid\nlevel=error msg=\"Failed to execute tetragon\" error=\"struct alignment checks failed: program \\\"bpf_alignchecker.o\\\" cannot be found (errors: bpf_alignchecker.o: stat bpf_alignchecker.o: no such file or directory;bpf_alignchecker.o.gz: stat bpf_alignchecker.o.gz: no such file or directory;/var/lib/tetragon/bpf_alignchecker.o: stat /var/lib/tetragon/bpf_alignchecker.o: no such file or directory;/var/lib/tetragon/bpf_alignchecker.o.gz: stat /var/lib/tetragon/bpf_alignchecker.o.gz: no such file or directory)\"\nlevel=info msg=\"Tetragon current security context\" SELinux=\"kernel\\x00\" AppArmor=\"\" Smack=\"\" Lockdown=\"\"",
+  "generated_at": "2026-03-11T17:01:37.629812+00:00",
+  "host": {
+    "git_sha": "unknown",
+    "hostname": "virtme-ng",
+    "kernel": "7.0.0-rc2-g2a6783cc77b6",
+    "platform": "Linux-7.0.0-rc2-g2a6783cc77b6-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "limitations": [
+    "Daemon mode failed and manual fallback was used instead: Tetragon failed to become healthy: level=info msg=\"Starting tetragon\" version=v1.6.0\nlevel=info msg=\"config settings\" config=\"map[bpf-dir:tetragon bpf-lib:/var/lib/tetragon/ btf: cgroup-rate: cluster-name: config-dir: cpuprofile: cri-endpoint: data-cache-size:1024 debug:false disable-kprobe-multi:false enable-ancestors:[] enable-cgidmap:false enable-cgidmap-debug:false enable-cgtrackerid:true enable-compatibility-syscall64-size-type:false enable-cri:false enable-export-aggregation:false enable-k8s-api:false enable-msg-handling-latency:false enable-pid-set-filter:false enable-pod-annotations:false enable-pod-info:false enable-policy-filter:false enable-policy-filter-cgroup-map:false enable-policy-filter-debug:false enable-process-cred:false enable-process-ns:false enable-tracing-policy-crd:true event-cache-retries:15 event-cache-retry-delay:2 event-queue-size:10000 execve-map-entries:0 execve-map-size: export-aggregation-buffer-size:10000 export-aggregation-window-size:15s export-allowlist: export-denylist: export-file-compress:false export-file-max-backups:5 export-file-max-size-mb:10 export-file-perm:600 export-file-rotation-interval:0s export-filename: export-rate-limit:-1 expose-stack-addresses:false field-filters: force-large-progs:false force-small-progs:false generate-docs:false gops-address: health-server-address::6789 health-server-interval:10 k8s-controlplane-retry:1 k8s-kubeconfig-path: keep-sensors-on-exit:false kernel: log-format:text log-level:info memprofile: metrics-label-filter:namespace,workload,pod,binary metrics-server: netns-dir:/var/run/docker/netns/ pprof-address: process-cache-gc-interval:30s process-cache-size:65536 procfs:/proc/ rb-queue-size:65535 rb-size:0 rb-size-total:0 redaction-filters: release-pinned-bpf:true server-address:localhost:54321 tracing-policy:/tmp/tetragon-policy-z3x4mv4w/tetragon-e2e-policy.yaml tracing-policy-dir:/etc/tetragon/tetragon.tp.d use-perf-ring-buffer:false username-metadata:disabled verbose:0]\"\nlevel=info msg=\"Tetragon pid file creation succeeded\" pid=141 pidfile=/var/run/tetragon/tetragon.pid\nlevel=error msg=\"Failed to execute tetragon\" error=\"struct alignment checks failed: program \\\"bpf_alignchecker.o\\\" cannot be found (errors: bpf_alignchecker.o: stat bpf_alignchecker.o: no such file or directory;bpf_alignchecker.o.gz: stat bpf_alignchecker.o.gz: no such file or directory;/var/lib/tetragon/bpf_alignchecker.o: stat /var/lib/tetragon/bpf_alignchecker.o: no such file or directory;/var/lib/tetragon/bpf_alignchecker.o.gz: stat /var/lib/tetragon/bpf_alignchecker.o.gz: no such file or directory)\"\nlevel=info msg=\"Tetragon current security context\" SELinux=\"kernel\\x00\" AppArmor=\"\" Smack=\"\" Lockdown=\"\"",
+    "events_total and events_per_sec are derived from aggregate BPF run_cnt deltas, so a single application operation can increment multiple program counters.",
+    "Manual fallback uses directly loaded Tetragon BPF objects; agent CPU therefore reflects the benchmark controller process rather than a real Tetragon daemon."
+  ],
+  "manual_failures": [],
+  "mode": "manual_fallback",
+  "post_rejit": {
+    "summary": {
+      "agent_cpu_total_pct": {
+        "count": 4,
+        "max": 99.99782132246742,
+        "mean": 42.40556002728332,
+        "median": 34.812209393332935,
+        "min": 0.0
+      },
+      "app_throughput": {
+        "count": 4,
+        "max": 1105646.698724132,
+        "mean": 352171.57159948914,
+        "median": 151446.90381503984,
+        "min": 145.7800437449135
+      },
+      "bpf_avg_ns_per_run": {
+        "count": 4,
+        "max": 592.6545729402873,
+        "mean": 362.8945258799827,
+        "median": 321.28708399986783,
+        "min": 216.34936257990802
+      },
+      "events_per_sec": {
+        "count": 4,
+        "max": 559249.5938889554,
+        "mean": 145978.23348623439,
+        "median": 12311.319482390005,
+        "min": 40.70109120213286
+      },
+      "system_cpu_busy_pct": {
+        "count": 4,
+        "max": 50.0,
+        "mean": 34.15637261228034,
+        "median": 41.32033535738802,
+        "min": 3.984819734345346
+      }
+    },
+    "workloads": [
+      {
+        "agent_cpu": {
+          "sys_pct": 0.49999631802711403,
+          "total_pct": 1.499988954081342,
+          "user_pct": 0.9999926360542281
+        },
+        "app_throughput": 145.7800437449135,
+        "bpf": {
+          "programs": {
+            "18": {
+              "avg_ns_per_run": 2331.150684931507,
+              "bytes_jited": 18432,
+              "bytes_xlated": 31776,
+              "id": 18,
+              "name": "event_execve",
+              "run_cnt_delta": 1168,
+              "run_time_ns_delta": 2722784,
+              "type": "tracepoint"
+            },
+            "30": {
+              "avg_ns_per_run": 377.0042480883602,
+              "bytes_jited": 1721,
+              "bytes_xlated": 3048,
+              "id": 30,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 9416,
+              "run_time_ns_delta": 3549872,
+              "type": "kprobe"
+            },
+            "43": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 1721,
+              "bytes_xlated": 3048,
+              "id": 43,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            }
+          },
+          "summary": {
+            "active_programs": 2,
+            "avg_ns_per_run": 592.6545729402873,
+            "total_events": 10584,
+            "total_run_time_ns": 6272656
+          }
+        },
+        "description": "stress-ng execve workload",
+        "duration_s": 8.005210933,
+        "events_per_sec": 1322.1388029101668,
+        "events_total": 10584,
+        "kind": "exec_storm",
+        "metric": "bogo-ops/s",
+        "name": "stress_exec",
+        "ops_per_sec": 145.7800437449135,
+        "ops_total": 1167.0,
+        "stderr_tail": "fallback=rapid_exec_loop",
+        "stdout_tail": "",
+        "system_cpu": {
+          "busy_pct": 3.984819734345346
+        }
+      },
+      {
+        "agent_cpu": {
+          "sys_pct": 0.0,
+          "total_pct": 0.0,
+          "user_pct": 0.0
+        },
+        "app_throughput": 1105646.698724132,
+        "bpf": {
+          "programs": {
+            "18": {
+              "avg_ns_per_run": 6277.5,
+              "bytes_jited": 18432,
+              "bytes_xlated": 31776,
+              "id": 18,
+              "name": "event_execve",
+              "run_cnt_delta": 2,
+              "run_time_ns_delta": 12555,
+              "type": "tracepoint"
+            },
+            "30": {
+              "avg_ns_per_run": 343.38757396449705,
+              "bytes_jited": 1721,
+              "bytes_xlated": 3048,
+              "id": 30,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 338,
+              "run_time_ns_delta": 116065,
+              "type": "kprobe"
+            },
+            "43": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 1721,
+              "bytes_xlated": 3048,
+              "id": 43,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            }
+          },
+          "summary": {
+            "active_programs": 2,
+            "avg_ns_per_run": 378.29411764705884,
+            "total_events": 340,
+            "total_run_time_ns": 128620
+          }
+        },
+        "description": "fio or dd file workload",
+        "duration_s": 8.353584386999998,
+        "events_per_sec": 40.70109120213286,
+        "events_total": 340,
+        "kind": "file_io",
+        "metric": "ops/s",
+        "name": "file_io",
+        "ops_per_sec": 1105646.698724132,
+        "ops_total": 9236113.0,
+        "stderr_tail": "",
+        "stdout_tail": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 4.062120,\n        \"750\" : 93.327085,\n        \"1000\" : 2.376238\n      },\n      \"latency_us\" : {\n        \"2\" : 0.107892,\n        \"4\" : 0.018027,\n        \"10\" : 0.107913,\n        \"20\" : 0.010000,\n        \"50\" : 0.010000,\n        \"100\" : 0.010000,\n        \"250\" : 0.010000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}",
+        "system_cpu": {
+          "busy_pct": 48.87359198998749
+        }
+      },
+      {
+        "agent_cpu": {
+          "sys_pct": 51.24888342776455,
+          "total_pct": 99.99782132246742,
+          "user_pct": 48.74893789470287
+        },
+        "app_throughput": 279603.609701381,
+        "bpf": {
+          "programs": {
+            "18": {
+              "avg_ns_per_run": 5828.0,
+              "bytes_jited": 18432,
+              "bytes_xlated": 31776,
+              "id": 18,
+              "name": "event_execve",
+              "run_cnt_delta": 1,
+              "run_time_ns_delta": 5828,
+              "type": "tracepoint"
+            },
+            "30": {
+              "avg_ns_per_run": 216.3481083134967,
+              "bytes_jited": 1721,
+              "bytes_xlated": 3048,
+              "id": 30,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 4474050,
+              "run_time_ns_delta": 967952254,
+              "type": "kprobe"
+            },
+            "43": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 1721,
+              "bytes_xlated": 3048,
+              "id": 43,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            }
+          },
+          "summary": {
+            "active_programs": 2,
+            "avg_ns_per_run": 216.34936257990802,
+            "total_events": 4474051,
+            "total_run_time_ns": 967958082
+          }
+        },
+        "description": "stress-ng open workload",
+        "duration_s": 8.000097003,
+        "events_per_sec": 559249.5938889554,
+        "events_total": 4474051,
+        "kind": "open_storm",
+        "metric": "bogo-ops/s",
+        "name": "open_storm",
+        "ops_per_sec": 279603.609701381,
+        "ops_total": 2236856.0,
+        "stderr_tail": "",
+        "stdout_tail": "",
+        "system_cpu": {
+          "busy_pct": 50.0
+        }
+      },
+      {
+        "agent_cpu": {
+          "sys_pct": 42.12464743776328,
+          "total_pct": 68.12442983258453,
+          "user_pct": 25.999782394821253
+        },
+        "app_throughput": 23290.19792869867,
+        "bpf": {
+          "programs": {
+            "18": {
+              "avg_ns_per_run": 7096.0,
+              "bytes_jited": 18432,
+              "bytes_xlated": 31776,
+              "id": 18,
+              "name": "event_execve",
+              "run_cnt_delta": 1,
+              "run_time_ns_delta": 7096,
+              "type": "tracepoint"
+            },
+            "30": {
+              "avg_ns_per_run": 470.7625,
+              "bytes_jited": 1721,
+              "bytes_xlated": 3048,
+              "id": 30,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 80,
+              "run_time_ns_delta": 37661,
+              "type": "kprobe"
+            },
+            "43": {
+              "avg_ns_per_run": 264.15853728345206,
+              "bytes_jited": 1721,
+              "bytes_xlated": 3048,
+              "id": 43,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 192163,
+              "run_time_ns_delta": 50761497,
+              "type": "kprobe"
+            }
+          },
+          "summary": {
+            "active_programs": 3,
+            "avg_ns_per_run": 264.2800503526768,
+            "total_events": 192244,
+            "total_run_time_ns": 50806254
+          }
+        },
+        "description": "rapid loopback TCP connect storm",
+        "duration_s": 8.250638340999998,
+        "events_per_sec": 23300.500161869844,
+        "events_total": 192244,
+        "kind": "connect_storm",
+        "metric": "ops/s",
+        "name": "connect_storm",
+        "ops_per_sec": 23290.19792869867,
+        "ops_total": 192159.0,
+        "stderr_tail": "transient_connect_failures=4",
+        "stdout_tail": "",
+        "system_cpu": {
+          "busy_pct": 33.76707872478855
+        }
+      }
+    ]
+  },
+  "programs": [
+    {
+      "id": 18,
+      "name": "event_execve",
+      "rejit_avg_ns": 2344.934300341297,
+      "rejit_events": 1172,
+      "sites": 37,
+      "speedup": 0.8762091206638782,
+      "stock_avg_ns": 2054.6528213166143,
+      "stock_events": 1276,
+      "type": "tracepoint"
+    },
+    {
+      "id": 30,
+      "name": "generic_kprobe_",
+      "rejit_avg_ns": 216.69959615369174,
+      "rejit_events": 4483884,
+      "sites": 2,
+      "speedup": 1.0077137782898822,
+      "stock_avg_ns": 218.37116879392835,
+      "stock_events": 4484717,
+      "type": "kprobe"
+    },
+    {
+      "id": 43,
+      "name": "generic_kprobe_",
+      "rejit_avg_ns": 264.15853728345206,
+      "rejit_events": 192163,
+      "sites": 2,
+      "speedup": 1.065221188612391,
+      "stock_avg_ns": 281.38727106718943,
+      "stock_events": 93095,
+      "type": "kprobe"
+    }
+  ],
+  "recompile_results": {
+    "18": {
+      "applied": true,
+      "counts": {
+        "cmov_sites": 37,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 37,
+        "wide_sites": 0
+      },
+      "error": "",
+      "program_name": "event_execve",
+      "stderr_tail": "",
+      "stdout_tail": "Accepted 37 v5 site(s)\n  cmov:   37\n  wide:   0\n  rotate: 0\n  lea:    0\nApplied 37 v5 rule(s) via BPF_PROG_JIT_RECOMPILE\n"
+    },
+    "30": {
+      "applied": true,
+      "counts": {
+        "cmov_sites": 1,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 2,
+        "wide_sites": 1
+      },
+      "error": "",
+      "program_name": "generic_kprobe_",
+      "stderr_tail": "",
+      "stdout_tail": "Accepted 2 v5 site(s)\n  cmov:   1\n  wide:   1\n  rotate: 0\n  lea:    0\nApplied 2 v5 rule(s) via BPF_PROG_JIT_RECOMPILE\n"
+    },
+    "43": {
+      "applied": true,
+      "counts": {
+        "cmov_sites": 1,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 2,
+        "wide_sites": 1
+      },
+      "error": "",
+      "program_name": "generic_kprobe_",
+      "stderr_tail": "",
+      "stdout_tail": "Accepted 2 v5 site(s)\n  cmov:   1\n  wide:   1\n  rotate: 0\n  lea:    0\nApplied 2 v5 rule(s) via BPF_PROG_JIT_RECOMPILE\n"
+    }
+  },
+  "recompile_summary": {
+    "applied": true,
+    "applied_programs": 3,
+    "errors": [],
+    "requested_programs": 3
+  },
+  "scan_results": {
+    "18": {
+      "error": "",
+      "program_name": "event_execve",
+      "sites": {
+        "cmov_sites": 37,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 37,
+        "wide_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "Accepted 37 v5 site(s)\n  cmov:   37\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+    },
+    "30": {
+      "error": "",
+      "program_name": "generic_kprobe_",
+      "sites": {
+        "cmov_sites": 1,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 2,
+        "wide_sites": 1
+      },
+      "stderr_tail": "",
+      "stdout_tail": "Accepted 2 v5 site(s)\n  cmov:   1\n  wide:   1\n  rotate: 0\n  lea:    0\n"
+    },
+    "43": {
+      "error": "",
+      "program_name": "generic_kprobe_",
+      "sites": {
+        "cmov_sites": 1,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 2,
+        "wide_sites": 1
+      },
+      "stderr_tail": "",
+      "stdout_tail": "Accepted 2 v5 site(s)\n  cmov:   1\n  wide:   1\n  rotate: 0\n  lea:    0\n"
+    }
+  },
+  "setup": {
+    "returncode": 0,
+    "stderr_tail": "",
+    "stdout_tail": "TETRAGON_BINARY=/usr/local/bin/tetragon\nTETRA_BINARY=/usr/local/bin/tetra\nSTRESS_NG_BINARY=/bin/stress-ng",
+    "tetra_binary": "/usr/local/bin/tetra",
+    "tetragon_binary": "/usr/local/bin/tetragon"
+  },
+  "smoke": true,
+  "tetragon_binary": null,
+  "tetragon_programs": [
+    {
+      "attach_kind": "tracepoint",
+      "attach_target": "syscalls/sys_enter_execve",
+      "id": 18,
+      "name": "event_execve",
+      "object_path": "corpus/build/tetragon/bpf_execve_event.bpf.o",
+      "section_name": "tracepoint/sys_execve",
+      "target_id": "execve-tracepoint",
+      "type": "tracepoint"
+    },
+    {
+      "attach_kind": "kprobe",
+      "attach_target": "security_file_open",
+      "id": 30,
+      "name": "generic_kprobe_event",
+      "object_path": "corpus/build/tetragon/bpf_generic_kprobe.bpf.o",
+      "section_name": "kprobe/generic_kprobe",
+      "target_id": "open-kprobe",
+      "type": "kprobe"
+    },
+    {
+      "attach_kind": "kprobe",
+      "attach_target": "security_socket_connect",
+      "id": 43,
+      "name": "generic_kprobe_event",
+      "object_path": "corpus/build/tetragon/bpf_generic_kprobe.bpf.o",
+      "section_name": "kprobe/generic_kprobe",
+      "target_id": "connect-kprobe",
+      "type": "kprobe"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+events:
+  - execve
+  - security_file_open
+  - security_socket_connect
+  - sched_process_exec
+workloads:
+  - name: exec_storm
+    kind: exec_storm
+    rate: 4
+    command: stress-ng --exec 4 --exec-method execve --timeout {duration}s --metrics-brief
+    metric: bogo-ops/s
+  - name: file_io
+    kind: file_io
+    command: fio --name=test --rw=randread --bs=4k --size=100M --runtime={duration} --time_based
+    metric: IOPS
+  - name: network
+    kind: network
+    command: wrk -t2 -c10 -d{duration}s http://127.0.0.1:{port}/
+    metric: req/s
+measurement_duration_s: 60
+smoke_duration_s: 10
+

@@ -1,0 +1,11 @@
+kprobe:do_sys_openat2
+{
+  @start[tid] = nsecs;
+}
+
+kretprobe:do_sys_openat2
+/@start[tid]/
+{
+  @latency_ns = hist(nsecs - @start[tid]);
+  delete(@start[tid]);
+}

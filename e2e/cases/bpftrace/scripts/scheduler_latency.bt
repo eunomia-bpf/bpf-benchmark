@@ -1,0 +1,11 @@
+tracepoint:sched:sched_wakeup
+{
+  @wakeup_ns[args->pid] = nsecs;
+}
+
+tracepoint:sched:sched_switch
+/@wakeup_ns[args->next_pid]/
+{
+  @runq_latency_us = hist((nsecs - @wakeup_ns[args->next_pid]) / 1000);
+  delete(@wakeup_ns[args->next_pid]);
+}

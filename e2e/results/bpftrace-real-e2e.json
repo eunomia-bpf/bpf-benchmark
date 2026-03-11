@@ -1,0 +1,1699 @@
+{
+  "duration_s": 30,
+  "generated_at": "2026-03-11T16:38:36.319564+00:00",
+  "host": {
+    "git_sha": "unknown",
+    "hostname": "virtme-ng",
+    "kernel": "7.0.0-rc2-g2a6783cc77b6",
+    "platform": "Linux-7.0.0-rc2-g2a6783cc77b6-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "records": [
+    {
+      "baseline": {
+        "measurement": {
+          "agent_cpu": {
+            "sys_pct": 0.0,
+            "total_pct": 0.033332929769330416,
+            "user_pct": 0.033332929769330416
+          },
+          "bpf": {
+            "programs": {
+              "5": {
+                "avg_ns_per_run": 304.37474120082817,
+                "bytes_jited": 502,
+                "bytes_xlated": 872,
+                "id": 5,
+                "name": "do_sys_openat2",
+                "run_cnt_delta": 1449,
+                "run_time_ns_delta": 441039,
+                "type": "kprobe"
+              },
+              "6": {
+                "avg_ns_per_run": 249.95583160800552,
+                "bytes_jited": 97,
+                "bytes_xlated": 136,
+                "id": 6,
+                "name": "do_sys_openat2",
+                "run_cnt_delta": 1449,
+                "run_time_ns_delta": 362186,
+                "type": "kprobe"
+              }
+            },
+            "summary": {
+              "active_programs": 2,
+              "avg_ns_per_run": 277.16528640441686,
+              "total_events": 2898,
+              "total_run_time_ns": 803225
+            }
+          },
+          "final_stats": {
+            "5": {
+              "bytes_jited": 502,
+              "bytes_xlated": 872,
+              "id": 5,
+              "name": "do_sys_openat2",
+              "run_cnt": 1769,
+              "run_time_ns": 566596,
+              "type": "kprobe"
+            },
+            "6": {
+              "bytes_jited": 97,
+              "bytes_xlated": 136,
+              "id": 6,
+              "name": "do_sys_openat2",
+              "run_cnt": 1766,
+              "run_time_ns": 460911,
+              "type": "kprobe"
+            }
+          },
+          "initial_stats": {
+            "5": {
+              "bytes_jited": 502,
+              "bytes_xlated": 872,
+              "id": 5,
+              "name": "do_sys_openat2",
+              "run_cnt": 320,
+              "run_time_ns": 125557,
+              "type": "kprobe"
+            },
+            "6": {
+              "bytes_jited": 97,
+              "bytes_xlated": 136,
+              "id": 6,
+              "name": "do_sys_openat2",
+              "run_cnt": 317,
+              "run_time_ns": 98725,
+              "type": "kprobe"
+            }
+          },
+          "system_cpu": {
+            "busy_pct": 49.4994994994995
+          },
+          "workload": {
+            "duration_s": 30.544689496000004,
+            "ops_per_sec": 95367.05227864464,
+            "ops_total": 2912957.0,
+            "stderr": "",
+            "stdout": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.025232,\n        \"500\" : 99.886610,\n        \"750\" : 0.030965,\n        \"1000\" : 0.010000\n      },\n      \"latency_us\" : {\n        \"2\" : 0.010000,\n        \"4\" : 0.048027,\n        \"10\" : 0.010000,\n        \"20\" : 0.010000,\n        \"50\" : 0.010000,\n        \"100\" : 0.000000,\n        \"250\" : 0.010000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}"
+          }
+        },
+        "phase": "baseline",
+        "process": {
+          "returncode": 0,
+          "stderr_tail": "",
+          "stdout_tail": "@latency_ns:\n[256, 512)            87 |@@@@@@@@                                            |\n[512, 1K)            460 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@         |\n[1K, 2K)             547 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|\n[2K, 4K)              88 |@@@@@@@@                                            |\n[4K, 8K)             245 |@@@@@@@@@@@@@@@@@@@@@@@                             |\n[8K, 16K)             52 |@@@@                                                |\n[16K, 32K)            35 |@@@                                                 |\n[32K, 64K)             4 |                                                    |\n[64K, 128K)           13 |@                                                   |\n[128K, 256K)          12 |@                                                   |\n[256K, 512K)          42 |@@@                                                 |\n[512K, 1M)           131 |@@@@@@@@@@@@                                        |\n[1M, 2M)              50 |@@@@                                                |\n@start[231]: 44512105017"
+        },
+        "prog_ids": [
+          5,
+          6
+        ],
+        "programs": [
+          {
+            "btf_id": 2,
+            "bytes_jited": 502,
+            "bytes_memlock": 4096,
+            "bytes_xlated": 872,
+            "gpl_compatible": true,
+            "id": 5,
+            "jited": true,
+            "loaded_at": 1773246883,
+            "map_ids": [
+              3,
+              2
+            ],
+            "name": "do_sys_openat2",
+            "orphaned": false,
+            "owner_fds": [
+              {
+                "fd": 10,
+                "pid": 231
+              }
+            ],
+            "owner_pids": [
+              231
+            ],
+            "pids": [
+              {
+                "comm": "bpftrace",
+                "pid": 231
+              }
+            ],
+            "run_cnt": 244,
+            "run_time_ns": 77044,
+            "tag": "c05bbc3339d5820b",
+            "type": "kprobe",
+            "uid": 0
+          },
+          {
+            "btf_id": 3,
+            "bytes_jited": 97,
+            "bytes_memlock": 4096,
+            "bytes_xlated": 136,
+            "gpl_compatible": true,
+            "id": 6,
+            "jited": true,
+            "loaded_at": 1773246883,
+            "map_ids": [
+              3
+            ],
+            "name": "do_sys_openat2",
+            "orphaned": false,
+            "owner_fds": [
+              {
+                "fd": 12,
+                "pid": 231
+              }
+            ],
+            "owner_pids": [
+              231
+            ],
+            "pids": [
+              {
+                "comm": "bpftrace",
+                "pid": 231
+              }
+            ],
+            "run_cnt": 243,
+            "run_time_ns": 64833,
+            "tag": "0eb5132b24490987",
+            "type": "kprobe",
+            "uid": 0
+          }
+        ],
+        "reason": "",
+        "recompile_results": {},
+        "recompile_summary": {
+          "applied_programs": 0,
+          "eligible_programs": 0,
+          "errors": []
+        },
+        "scan_results": {
+          "5": {
+            "error": "",
+            "program_name": "do_sys_openat2",
+            "sites": {
+              "cmov_sites": 5,
+              "lea_sites": 0,
+              "rotate_sites": 0,
+              "total_sites": 5,
+              "wide_sites": 0
+            },
+            "stderr_tail": "",
+            "stdout_tail": "Accepted 5 v5 site(s)\n  cmov:   5\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+          },
+          "6": {
+            "error": "",
+            "program_name": "do_sys_openat2",
+            "sites": {
+              "cmov_sites": 0,
+              "lea_sites": 0,
+              "rotate_sites": 0,
+              "total_sites": 0,
+              "wide_sites": 0
+            },
+            "stderr_tail": "",
+            "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+          }
+        },
+        "site_totals": {
+          "cmov_sites": 5,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 5,
+          "wide_sites": 0
+        },
+        "status": "ok"
+      },
+      "description": "kprobe do_sys_openat2 latency histogram",
+      "name": "open_latency",
+      "rejit": {
+        "measurement": {
+          "agent_cpu": {
+            "sys_pct": 0.03333296695180489,
+            "total_pct": 0.03333296695180489,
+            "user_pct": 0.0
+          },
+          "bpf": {
+            "programs": {
+              "56": {
+                "avg_ns_per_run": 305.0780287474333,
+                "bytes_jited": 531,
+                "bytes_xlated": 872,
+                "id": 56,
+                "name": "do_sys_openat2",
+                "run_cnt_delta": 487,
+                "run_time_ns_delta": 148573,
+                "type": "kprobe"
+              },
+              "57": {
+                "avg_ns_per_run": 242.45995893223818,
+                "bytes_jited": 97,
+                "bytes_xlated": 136,
+                "id": 57,
+                "name": "do_sys_openat2",
+                "run_cnt_delta": 487,
+                "run_time_ns_delta": 118078,
+                "type": "kprobe"
+              }
+            },
+            "summary": {
+              "active_programs": 2,
+              "avg_ns_per_run": 273.76899383983573,
+              "total_events": 974,
+              "total_run_time_ns": 266651
+            }
+          },
+          "final_stats": {
+            "56": {
+              "bytes_jited": 531,
+              "bytes_xlated": 872,
+              "id": 56,
+              "name": "do_sys_openat2",
+              "run_cnt": 676,
+              "run_time_ns": 247035,
+              "type": "kprobe"
+            },
+            "57": {
+              "bytes_jited": 97,
+              "bytes_xlated": 136,
+              "id": 57,
+              "name": "do_sys_openat2",
+              "run_cnt": 673,
+              "run_time_ns": 206612,
+              "type": "kprobe"
+            }
+          },
+          "initial_stats": {
+            "56": {
+              "bytes_jited": 531,
+              "bytes_xlated": 872,
+              "id": 56,
+              "name": "do_sys_openat2",
+              "run_cnt": 189,
+              "run_time_ns": 98462,
+              "type": "kprobe"
+            },
+            "57": {
+              "bytes_jited": 97,
+              "bytes_xlated": 136,
+              "id": 57,
+              "name": "do_sys_openat2",
+              "run_cnt": 186,
+              "run_time_ns": 88534,
+              "type": "kprobe"
+            }
+          },
+          "system_cpu": {
+            "busy_pct": 49.82491245622811
+          },
+          "workload": {
+            "duration_s": 30.282427621000004,
+            "ops_per_sec": 96082.48837957322,
+            "ops_total": 2909611.0,
+            "stderr": "",
+            "stdout": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 99.859603,\n        \"750\" : 0.086025,\n        \"1000\" : 0.010000\n      },\n      \"latency_us\" : {\n        \"2\" : 0.010000,\n        \"4\" : 0.044508,\n        \"10\" : 0.010000,\n        \"20\" : 0.010000,\n        \"50\" : 0.010000,\n        \"100\" : 0.000000,\n        \"250\" : 0.010000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}"
+          }
+        },
+        "phase": "rejit",
+        "process": {
+          "returncode": 0,
+          "stderr_tail": "",
+          "stdout_tail": "@latency_ns:\n[512, 1K)              8 |@                                                   |\n[1K, 2K)             114 |@@@@@@@@@@@@@@@@@@@@@@@                             |\n[2K, 4K)             254 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|\n[4K, 8K)              37 |@@@@@@@                                             |\n[8K, 16K)             25 |@@@@@                                               |\n[16K, 32K)             6 |@                                                   |\n[32K, 64K)             1 |                                                    |\n[64K, 128K)            0 |                                                    |\n[128K, 256K)           0 |                                                    |\n[256K, 512K)          30 |@@@@@@                                              |\n[512K, 1M)           181 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@               |\n[1M, 2M)              17 |@@@                                                 |\n@start[254]: 77348068137"
+        },
+        "prog_ids": [
+          56,
+          57
+        ],
+        "programs": [
+          {
+            "btf_id": 59,
+            "bytes_jited": 502,
+            "bytes_memlock": 4096,
+            "bytes_xlated": 872,
+            "gpl_compatible": true,
+            "id": 56,
+            "jited": true,
+            "loaded_at": 1773246915,
+            "map_ids": [
+              28,
+              27
+            ],
+            "name": "do_sys_openat2",
+            "orphaned": false,
+            "owner_fds": [
+              {
+                "fd": 10,
+                "pid": 254
+              }
+            ],
+            "owner_pids": [
+              254
+            ],
+            "pids": [
+              {
+                "comm": "bpftrace",
+                "pid": 254
+              }
+            ],
+            "run_cnt": 84,
+            "run_time_ns": 47286,
+            "tag": "c05bbc3339d5820b",
+            "type": "kprobe",
+            "uid": 0
+          },
+          {
+            "btf_id": 60,
+            "bytes_jited": 97,
+            "bytes_memlock": 4096,
+            "bytes_xlated": 136,
+            "gpl_compatible": true,
+            "id": 57,
+            "jited": true,
+            "loaded_at": 1773246915,
+            "map_ids": [
+              28
+            ],
+            "name": "do_sys_openat2",
+            "orphaned": false,
+            "owner_fds": [
+              {
+                "fd": 12,
+                "pid": 254
+              }
+            ],
+            "owner_pids": [
+              254
+            ],
+            "pids": [
+              {
+                "comm": "bpftrace",
+                "pid": 254
+              }
+            ],
+            "run_cnt": 83,
+            "run_time_ns": 43585,
+            "tag": "0eb5132b24490987",
+            "type": "kprobe",
+            "uid": 0
+          }
+        ],
+        "reason": "",
+        "recompile_results": {
+          "56": {
+            "applied": true,
+            "counts": {
+              "cmov_sites": 5,
+              "lea_sites": 0,
+              "rotate_sites": 0,
+              "total_sites": 5,
+              "wide_sites": 0
+            },
+            "error": "",
+            "program_name": "do_sys_openat2",
+            "stderr_tail": "",
+            "stdout_tail": "Accepted 5 v5 site(s)\n  cmov:   5\n  wide:   0\n  rotate: 0\n  lea:    0\nApplied 5 v5 rule(s) via BPF_PROG_JIT_RECOMPILE\n"
+          }
+        },
+        "recompile_summary": {
+          "applied_programs": 1,
+          "eligible_programs": 1,
+          "errors": []
+        },
+        "scan_results": {
+          "56": {
+            "error": "",
+            "program_name": "do_sys_openat2",
+            "sites": {
+              "cmov_sites": 5,
+              "lea_sites": 0,
+              "rotate_sites": 0,
+              "total_sites": 5,
+              "wide_sites": 0
+            },
+            "stderr_tail": "",
+            "stdout_tail": "Accepted 5 v5 site(s)\n  cmov:   5\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+          },
+          "57": {
+            "error": "",
+            "program_name": "do_sys_openat2",
+            "sites": {
+              "cmov_sites": 0,
+              "lea_sites": 0,
+              "rotate_sites": 0,
+              "total_sites": 0,
+              "wide_sites": 0
+            },
+            "stderr_tail": "",
+            "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+          }
+        },
+        "site_totals": {
+          "cmov_sites": 5,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 5,
+          "wide_sites": 0
+        },
+        "status": "ok"
+      },
+      "script_path": "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/open_latency.bt",
+      "script_text": "kprobe:do_sys_openat2\n{\n  @start[tid] = nsecs;\n}\n\nkretprobe:do_sys_openat2\n/@start[tid]/\n{\n  @latency_ns = hist(nsecs - @start[tid]);\n  delete(@start[tid]);\n}\n",
+      "summary": {
+        "avg_ns_delta_pct": -1.2253672199142354,
+        "baseline_status": "ok",
+        "cpu_baseline": 0.033332929769330416,
+        "cpu_delta_pct": 0.00011154877393521142,
+        "cpu_rejit": 0.03333296695180489,
+        "name": "open_latency",
+        "note": "",
+        "rejit_avg_ns": 273.76899383983573,
+        "rejit_status": "ok",
+        "sites": 5,
+        "speedup": 1.0124056874262688,
+        "stock_avg_ns": 277.16528640441686,
+        "workload_ops_baseline": 95367.05227864464,
+        "workload_ops_delta_pct": 0.7501921091554853,
+        "workload_ops_rejit": 96082.48837957322
+      }
+    },
+    {
+      "baseline": {
+        "measurement": {
+          "agent_cpu": {
+            "sys_pct": 0.0,
+            "total_pct": 0.0,
+            "user_pct": 0.0
+          },
+          "bpf": {
+            "programs": {
+              "114": {
+                "avg_ns_per_run": 467.1065862242333,
+                "bytes_jited": 172,
+                "bytes_xlated": 264,
+                "id": 114,
+                "name": "sched_process_e",
+                "run_cnt_delta": 5967,
+                "run_time_ns_delta": 2787225,
+                "type": "tracepoint"
+              }
+            },
+            "summary": {
+              "active_programs": 1,
+              "avg_ns_per_run": 467.1065862242333,
+              "total_events": 5967,
+              "total_run_time_ns": 2787225
+            }
+          },
+          "final_stats": {
+            "114": {
+              "bytes_jited": 172,
+              "bytes_xlated": 264,
+              "id": 114,
+              "name": "sched_process_e",
+              "run_cnt": 5972,
+              "run_time_ns": 2796007,
+              "type": "tracepoint"
+            }
+          },
+          "initial_stats": {
+            "114": {
+              "bytes_jited": 172,
+              "bytes_xlated": 264,
+              "id": 114,
+              "name": "sched_process_e",
+              "run_cnt": 5,
+              "run_time_ns": 8782,
+              "type": "tracepoint"
+            }
+          },
+          "system_cpu": {
+            "busy_pct": 5.301490514905149
+          },
+          "workload": {
+            "duration_s": 30.003451709000004,
+            "ops_per_sec": 198.84378830354393,
+            "ops_total": 5966.0,
+            "stderr": "fallback=rapid_exec_loop",
+            "stdout": ""
+          }
+        },
+        "phase": "baseline",
+        "process": {
+          "returncode": 0,
+          "stderr_tail": "",
+          "stdout_tail": "@[bpf-jit-scanner]: 1\n@[bpftool]: 5\n@[true]: 5966"
+        },
+        "prog_ids": [
+          114
+        ],
+        "programs": [
+          {
+            "btf_id": 127,
+            "bytes_jited": 172,
+            "bytes_memlock": 4096,
+            "bytes_xlated": 264,
+            "gpl_compatible": true,
+            "id": 114,
+            "jited": true,
+            "loaded_at": 1773246948,
+            "map_ids": [
+              56
+            ],
+            "name": "tracepoint_sched_sched_process_exec",
+            "orphaned": false,
+            "owner_fds": [
+              {
+                "fd": 9,
+                "pid": 271
+              }
+            ],
+            "owner_pids": [
+              271
+            ],
+            "pids": [
+              {
+                "comm": "bpftrace",
+                "pid": 271
+              }
+            ],
+            "run_cnt": 2,
+            "run_time_ns": 4622,
+            "tag": "c6e63be105342ecb",
+            "type": "tracepoint",
+            "uid": 0
+          }
+        ],
+        "reason": "",
+        "recompile_results": {},
+        "recompile_summary": {
+          "applied_programs": 0,
+          "eligible_programs": 0,
+          "errors": []
+        },
+        "scan_results": {
+          "114": {
+            "error": "",
+            "program_name": "sched_process_e",
+            "sites": {
+              "cmov_sites": 0,
+              "lea_sites": 0,
+              "rotate_sites": 0,
+              "total_sites": 0,
+              "wide_sites": 0
+            },
+            "stderr_tail": "",
+            "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+          }
+        },
+        "site_totals": {
+          "cmov_sites": 0,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 0,
+          "wide_sites": 0
+        },
+        "status": "ok"
+      },
+      "description": "tracepoint sched_process_exec counter",
+      "name": "exec_trace",
+      "rejit": {
+        "measurement": null,
+        "phase": "rejit",
+        "process": {
+          "returncode": 0,
+          "stderr_tail": "",
+          "stdout_tail": "@[bpf-jit-scanner]: 1\n@[bpftool]: 3"
+        },
+        "prog_ids": [
+          162
+        ],
+        "programs": [
+          {
+            "btf_id": 183,
+            "bytes_jited": 172,
+            "bytes_memlock": 4096,
+            "bytes_xlated": 264,
+            "gpl_compatible": true,
+            "id": 162,
+            "jited": true,
+            "loaded_at": 1773246980,
+            "map_ids": [
+              80
+            ],
+            "name": "tracepoint_sched_sched_process_exec",
+            "orphaned": false,
+            "owner_fds": [
+              {
+                "fd": 9,
+                "pid": 6248
+              }
+            ],
+            "owner_pids": [
+              6248
+            ],
+            "pids": [
+              {
+                "comm": "bpftrace",
+                "pid": 6248
+              }
+            ],
+            "run_cnt": 2,
+            "run_time_ns": 4794,
+            "tag": "c6e63be105342ecb",
+            "type": "tracepoint",
+            "uid": 0
+          }
+        ],
+        "reason": "no eligible directive sites",
+        "recompile_results": {},
+        "recompile_summary": {
+          "applied_programs": 0,
+          "eligible_programs": 0,
+          "errors": []
+        },
+        "scan_results": {
+          "162": {
+            "error": "",
+            "program_name": "sched_process_e",
+            "sites": {
+              "cmov_sites": 0,
+              "lea_sites": 0,
+              "rotate_sites": 0,
+              "total_sites": 0,
+              "wide_sites": 0
+            },
+            "stderr_tail": "",
+            "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+          }
+        },
+        "site_totals": {
+          "cmov_sites": 0,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 0,
+          "wide_sites": 0
+        },
+        "status": "skipped"
+      },
+      "script_path": "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/exec_trace.bt",
+      "script_text": "tracepoint:sched:sched_process_exec\n{\n  @[comm] = count();\n}\n",
+      "summary": {
+        "avg_ns_delta_pct": null,
+        "baseline_status": "ok",
+        "cpu_baseline": 0.0,
+        "cpu_delta_pct": null,
+        "cpu_rejit": null,
+        "name": "exec_trace",
+        "note": "no eligible directive sites",
+        "rejit_avg_ns": null,
+        "rejit_status": "skipped",
+        "sites": 0,
+        "speedup": null,
+        "stock_avg_ns": 467.1065862242333,
+        "workload_ops_baseline": 198.84378830354393,
+        "workload_ops_delta_pct": null,
+        "workload_ops_rejit": null
+      }
+    },
+    {
+      "baseline": {
+        "measurement": {
+          "agent_cpu": {
+            "sys_pct": 0.0,
+            "total_pct": 0.0,
+            "user_pct": 0.0
+          },
+          "bpf": {
+            "programs": {
+              "193": {
+                "avg_ns_per_run": 141.93730172511212,
+                "bytes_jited": 98,
+                "bytes_xlated": 136,
+                "id": 193,
+                "name": "sched_wakeup",
+                "run_cnt_delta": 1451268,
+                "run_time_ns_delta": 205989064,
+                "type": "tracepoint"
+              },
+              "194": {
+                "avg_ns_per_run": 168.52165264321604,
+                "bytes_jited": 519,
+                "bytes_xlated": 864,
+                "id": 194,
+                "name": "sched_switch",
+                "run_cnt_delta": 2434137,
+                "run_time_ns_delta": 410204790,
+                "type": "tracepoint"
+              }
+            },
+            "summary": {
+              "active_programs": 2,
+              "avg_ns_per_run": 158.59192387923525,
+              "total_events": 3885405,
+              "total_run_time_ns": 616193854
+            }
+          },
+          "final_stats": {
+            "193": {
+              "bytes_jited": 98,
+              "bytes_xlated": 136,
+              "id": 193,
+              "name": "sched_wakeup",
+              "run_cnt": 1452723,
+              "run_time_ns": 206284210,
+              "type": "tracepoint"
+            },
+            "194": {
+              "bytes_jited": 519,
+              "bytes_xlated": 864,
+              "id": 194,
+              "name": "sched_switch",
+              "run_cnt": 2437038,
+              "run_time_ns": 410564726,
+              "type": "tracepoint"
+            }
+          },
+          "initial_stats": {
+            "193": {
+              "bytes_jited": 98,
+              "bytes_xlated": 136,
+              "id": 193,
+              "name": "sched_wakeup",
+              "run_cnt": 1455,
+              "run_time_ns": 295146,
+              "type": "tracepoint"
+            },
+            "194": {
+              "bytes_jited": 519,
+              "bytes_xlated": 864,
+              "id": 194,
+              "name": "sched_switch",
+              "run_cnt": 2901,
+              "run_time_ns": 359936,
+              "type": "tracepoint"
+            }
+          },
+          "system_cpu": {
+            "busy_pct": 71.04010876954453
+          },
+          "workload": {
+            "duration_s": 30.01129856899999,
+            "ops_per_sec": 41.71762168576227,
+            "ops_total": 1252.0,
+            "stderr": "",
+            "stdout": "Time: 0.010\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.011\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.010\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.010\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.010\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.011\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.010\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.009\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.010\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.011\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.010\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.010\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.010\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.011"
+          }
+        },
+        "phase": "baseline",
+        "process": {
+          "returncode": 0,
+          "stderr_tail": "",
+          "stdout_tail": "@runq_latency_us:\n[0]               609512 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|\n[1]               109244 |@@@@@@@@@                                           |\n[2, 4)             80347 |@@@@@@                                              |\n[4, 8)             47743 |@@@@                                                |\n[8, 16)            44670 |@@@                                                 |\n[16, 32)           48995 |@@@@                                                |\n[32, 64)           57913 |@@@@                                                |\n[64, 128)          30991 |@@                                                  |\n[128, 256)         21623 |@                                                   |\n[256, 512)         28182 |@@                                                  |\n[512, 1K)          39928 |@@@                                                 |\n[1K, 2K)           58151 |@@@@                                                |\n[2K, 4K)           99014 |@@@@@@@@                                            |\n[4K, 8K)          146376 |@@@@@@@@@@@@                                        |\n[8K, 16K)          24677 |@@                                                  |"
+        },
+        "prog_ids": [
+          193,
+          194
+        ],
+        "programs": [
+          {
+            "btf_id": 217,
+            "bytes_jited": 98,
+            "bytes_memlock": 4096,
+            "bytes_xlated": 136,
+            "gpl_compatible": true,
+            "id": 193,
+            "jited": true,
+            "loaded_at": 1773246982,
+            "map_ids": [
+              97
+            ],
+            "name": "sched_wakeup",
+            "orphaned": false,
+            "owner_fds": [
+              {
+                "fd": 10,
+                "pid": 6256
+              }
+            ],
+            "owner_pids": [
+              6256
+            ],
+            "pids": [
+              {
+                "comm": "bpftrace",
+                "pid": 6256
+              }
+            ],
+            "run_cnt": 595,
+            "run_time_ns": 155308,
+            "tag": "c10fc60476d92e5a",
+            "type": "tracepoint",
+            "uid": 0
+          },
+          {
+            "btf_id": 218,
+            "bytes_jited": 519,
+            "bytes_memlock": 4096,
+            "bytes_xlated": 864,
+            "gpl_compatible": true,
+            "id": 194,
+            "jited": true,
+            "loaded_at": 1773246982,
+            "map_ids": [
+              97,
+              96
+            ],
+            "name": "sched_switch",
+            "orphaned": false,
+            "owner_fds": [
+              {
+                "fd": 12,
+                "pid": 6256
+              }
+            ],
+            "owner_pids": [
+              6256
+            ],
+            "pids": [
+              {
+                "comm": "bpftrace",
+                "pid": 6256
+              }
+            ],
+            "run_cnt": 1229,
+            "run_time_ns": 190149,
+            "tag": "6e369fca0d6eb85a",
+            "type": "tracepoint",
+            "uid": 0
+          }
+        ],
+        "reason": "",
+        "recompile_results": {},
+        "recompile_summary": {
+          "applied_programs": 0,
+          "eligible_programs": 0,
+          "errors": []
+        },
+        "scan_results": {
+          "193": {
+            "error": "",
+            "program_name": "sched_wakeup",
+            "sites": {
+              "cmov_sites": 0,
+              "lea_sites": 0,
+              "rotate_sites": 0,
+              "total_sites": 0,
+              "wide_sites": 0
+            },
+            "stderr_tail": "",
+            "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+          },
+          "194": {
+            "error": "",
+            "program_name": "sched_switch",
+            "sites": {
+              "cmov_sites": 4,
+              "lea_sites": 0,
+              "rotate_sites": 0,
+              "total_sites": 4,
+              "wide_sites": 0
+            },
+            "stderr_tail": "",
+            "stdout_tail": "Accepted 4 v5 site(s)\n  cmov:   4\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+          }
+        },
+        "site_totals": {
+          "cmov_sites": 4,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 4,
+          "wide_sites": 0
+        },
+        "status": "ok"
+      },
+      "description": "tracepoint wakeup/switch run queue latency histogram",
+      "name": "scheduler_latency",
+      "rejit": {
+        "measurement": {
+          "agent_cpu": {
+            "sys_pct": 0.0,
+            "total_pct": 0.0,
+            "user_pct": 0.0
+          },
+          "bpf": {
+            "programs": {
+              "243": {
+                "avg_ns_per_run": 142.2059866396651,
+                "bytes_jited": 98,
+                "bytes_xlated": 136,
+                "id": 243,
+                "name": "sched_wakeup",
+                "run_cnt_delta": 1395474,
+                "run_time_ns_delta": 198444757,
+                "type": "tracepoint"
+              },
+              "244": {
+                "avg_ns_per_run": 175.91933153018735,
+                "bytes_jited": 543,
+                "bytes_xlated": 864,
+                "id": 244,
+                "name": "sched_switch",
+                "run_cnt_delta": 2322977,
+                "run_time_ns_delta": 408656561,
+                "type": "tracepoint"
+              }
+            },
+            "summary": {
+              "active_programs": 2,
+              "avg_ns_per_run": 163.26726316952946,
+              "total_events": 3718451,
+              "total_run_time_ns": 607101318
+            }
+          },
+          "final_stats": {
+            "243": {
+              "bytes_jited": 98,
+              "bytes_xlated": 136,
+              "id": 243,
+              "name": "sched_wakeup",
+              "run_cnt": 1397357,
+              "run_time_ns": 198830889,
+              "type": "tracepoint"
+            },
+            "244": {
+              "bytes_jited": 543,
+              "bytes_xlated": 864,
+              "id": 244,
+              "name": "sched_switch",
+              "run_cnt": 2326727,
+              "run_time_ns": 409157775,
+              "type": "tracepoint"
+            }
+          },
+          "initial_stats": {
+            "243": {
+              "bytes_jited": 98,
+              "bytes_xlated": 136,
+              "id": 243,
+              "name": "sched_wakeup",
+              "run_cnt": 1883,
+              "run_time_ns": 386132,
+              "type": "tracepoint"
+            },
+            "244": {
+              "bytes_jited": 543,
+              "bytes_xlated": 864,
+              "id": 244,
+              "name": "sched_switch",
+              "run_cnt": 3750,
+              "run_time_ns": 501214,
+              "type": "tracepoint"
+            }
+          },
+          "system_cpu": {
+            "busy_pct": 67.72841575859178
+          },
+          "workload": {
+            "duration_s": 30.008973812999983,
+            "ops_per_sec": 38.088606665545115,
+            "ops_total": 1143.0,
+            "stderr": "",
+            "stdout": "Time: 0.040\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.017\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.032\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.016\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.028\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.023\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.034\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.028\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.023\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.015\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.021\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.024\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.025\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.016"
+          }
+        },
+        "phase": "rejit",
+        "process": {
+          "returncode": 0,
+          "stderr_tail": "",
+          "stdout_tail": "@runq_latency_us:\n[0]               576742 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|\n[1]               123447 |@@@@@@@@@@@                                         |\n[2, 4)             73465 |@@@@@@                                              |\n[4, 8)             47111 |@@@@                                                |\n[8, 16)            43661 |@@@                                                 |\n[16, 32)           45495 |@@@@                                                |\n[32, 64)           56844 |@@@@@                                               |\n[64, 128)          33801 |@@@                                                 |\n[128, 256)         23154 |@@                                                  |\n[256, 512)         27927 |@@                                                  |\n[512, 1K)          41675 |@@@                                                 |\n[1K, 2K)           56658 |@@@@@                                               |\n[2K, 4K)           86273 |@@@@@@@                                             |\n[4K, 8K)          131728 |@@@@@@@@@@@                                         |\n[8K, 16K)          23993 |@@                                                  |\n[16K, 32K)           872 |                                                    |\n[32K, 64K)            34 |                                                    |"
+        },
+        "prog_ids": [
+          243,
+          244
+        ],
+        "programs": [
+          {
+            "btf_id": 274,
+            "bytes_jited": 98,
+            "bytes_memlock": 4096,
+            "bytes_xlated": 136,
+            "gpl_compatible": true,
+            "id": 243,
+            "jited": true,
+            "loaded_at": 1773247014,
+            "map_ids": [
+              122
+            ],
+            "name": "sched_wakeup",
+            "orphaned": false,
+            "owner_fds": [
+              {
+                "fd": 10,
+                "pid": 3396
+              }
+            ],
+            "owner_pids": [
+              3396
+            ],
+            "pids": [
+              {
+                "comm": "bpftrace",
+                "pid": 3396
+              }
+            ],
+            "run_cnt": 614,
+            "run_time_ns": 144172,
+            "tag": "c10fc60476d92e5a",
+            "type": "tracepoint",
+            "uid": 0
+          },
+          {
+            "btf_id": 275,
+            "bytes_jited": 519,
+            "bytes_memlock": 4096,
+            "bytes_xlated": 864,
+            "gpl_compatible": true,
+            "id": 244,
+            "jited": true,
+            "loaded_at": 1773247014,
+            "map_ids": [
+              122,
+              121
+            ],
+            "name": "sched_switch",
+            "orphaned": false,
+            "owner_fds": [
+              {
+                "fd": 12,
+                "pid": 3396
+              }
+            ],
+            "owner_pids": [
+              3396
+            ],
+            "pids": [
+              {
+                "comm": "bpftrace",
+                "pid": 3396
+              }
+            ],
+            "run_cnt": 1263,
+            "run_time_ns": 215007,
+            "tag": "6e369fca0d6eb85a",
+            "type": "tracepoint",
+            "uid": 0
+          }
+        ],
+        "reason": "",
+        "recompile_results": {
+          "244": {
+            "applied": true,
+            "counts": {
+              "cmov_sites": 4,
+              "lea_sites": 0,
+              "rotate_sites": 0,
+              "total_sites": 4,
+              "wide_sites": 0
+            },
+            "error": "",
+            "program_name": "sched_switch",
+            "stderr_tail": "",
+            "stdout_tail": "Accepted 4 v5 site(s)\n  cmov:   4\n  wide:   0\n  rotate: 0\n  lea:    0\nApplied 4 v5 rule(s) via BPF_PROG_JIT_RECOMPILE\n"
+          }
+        },
+        "recompile_summary": {
+          "applied_programs": 1,
+          "eligible_programs": 1,
+          "errors": []
+        },
+        "scan_results": {
+          "243": {
+            "error": "",
+            "program_name": "sched_wakeup",
+            "sites": {
+              "cmov_sites": 0,
+              "lea_sites": 0,
+              "rotate_sites": 0,
+              "total_sites": 0,
+              "wide_sites": 0
+            },
+            "stderr_tail": "",
+            "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+          },
+          "244": {
+            "error": "",
+            "program_name": "sched_switch",
+            "sites": {
+              "cmov_sites": 4,
+              "lea_sites": 0,
+              "rotate_sites": 0,
+              "total_sites": 4,
+              "wide_sites": 0
+            },
+            "stderr_tail": "",
+            "stdout_tail": "Accepted 4 v5 site(s)\n  cmov:   4\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+          }
+        },
+        "site_totals": {
+          "cmov_sites": 4,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 4,
+          "wide_sites": 0
+        },
+        "status": "ok"
+      },
+      "script_path": "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/scheduler_latency.bt",
+      "script_text": "tracepoint:sched:sched_wakeup\n{\n  @wakeup_ns[args->pid] = nsecs;\n}\n\ntracepoint:sched:sched_switch\n/@wakeup_ns[args->next_pid]/\n{\n  @runq_latency_us = hist((nsecs - @wakeup_ns[args->next_pid]) / 1000);\n  delete(@wakeup_ns[args->next_pid]);\n}\n",
+      "summary": {
+        "avg_ns_delta_pct": 2.948031132943684,
+        "baseline_status": "ok",
+        "cpu_baseline": 0.0,
+        "cpu_delta_pct": null,
+        "cpu_rejit": 0.0,
+        "name": "scheduler_latency",
+        "note": "",
+        "rejit_avg_ns": 163.26726316952946,
+        "rejit_status": "ok",
+        "sites": 4,
+        "speedup": 0.9713638901055165,
+        "stock_avg_ns": 158.59192387923525,
+        "workload_ops_baseline": 41.71762168576227,
+        "workload_ops_delta_pct": -8.698997866064099,
+        "workload_ops_rejit": 38.088606665545115
+      }
+    },
+    {
+      "baseline": {
+        "measurement": {
+          "agent_cpu": {
+            "sys_pct": 0.0,
+            "total_pct": 0.03333326306459256,
+            "user_pct": 0.03333326306459256
+          },
+          "bpf": {
+            "programs": {
+              "302": {
+                "avg_ns_per_run": 58.41756157228169,
+                "bytes_jited": 169,
+                "bytes_xlated": 264,
+                "id": 302,
+                "name": "vfs_read",
+                "run_cnt_delta": 8623442,
+                "run_time_ns_delta": 503760454,
+                "type": "kprobe"
+              }
+            },
+            "summary": {
+              "active_programs": 1,
+              "avg_ns_per_run": 58.41756157228169,
+              "total_events": 8623442,
+              "total_run_time_ns": 503760454
+            }
+          },
+          "final_stats": {
+            "302": {
+              "bytes_jited": 169,
+              "bytes_xlated": 264,
+              "id": 302,
+              "name": "vfs_read",
+              "run_cnt": 8660037,
+              "run_time_ns": 513657267,
+              "type": "kprobe"
+            }
+          },
+          "initial_stats": {
+            "302": {
+              "bytes_jited": 169,
+              "bytes_xlated": 264,
+              "id": 302,
+              "name": "vfs_read",
+              "run_cnt": 36595,
+              "run_time_ns": 9896813,
+              "type": "kprobe"
+            }
+          },
+          "system_cpu": {
+            "busy_pct": 17.78468586387435
+          },
+          "workload": {
+            "duration_s": 30.008838295999993,
+            "ops_per_sec": 286499.0612164416,
+            "ops_total": 8597504.0,
+            "stderr": "",
+            "stdout": ""
+          }
+        },
+        "phase": "baseline",
+        "process": {
+          "returncode": 0,
+          "stderr_tail": "",
+          "stdout_tail": "@[bpf-jit-scanner]: 6\n@[python3]: 6377\n@[bpftool]: 45655\n@[dd]: 8607999"
+        },
+        "prog_ids": [
+          302
+        ],
+        "programs": [
+          {
+            "btf_id": 342,
+            "bytes_jited": 169,
+            "bytes_memlock": 4096,
+            "bytes_xlated": 264,
+            "gpl_compatible": true,
+            "id": 302,
+            "jited": true,
+            "loaded_at": 1773247048,
+            "map_ids": [
+              150
+            ],
+            "name": "vfs_read",
+            "orphaned": false,
+            "owner_fds": [
+              {
+                "fd": 9,
+                "pid": 4993
+              }
+            ],
+            "owner_pids": [
+              4993
+            ],
+            "pids": [
+              {
+                "comm": "bpftrace",
+                "pid": 4993
+              }
+            ],
+            "run_cnt": 18301,
+            "run_time_ns": 8200348,
+            "tag": "5770d1936c476869",
+            "type": "kprobe",
+            "uid": 0
+          }
+        ],
+        "reason": "",
+        "recompile_results": {},
+        "recompile_summary": {
+          "applied_programs": 0,
+          "eligible_programs": 0,
+          "errors": []
+        },
+        "scan_results": {
+          "302": {
+            "error": "",
+            "program_name": "vfs_read",
+            "sites": {
+              "cmov_sites": 0,
+              "lea_sites": 0,
+              "rotate_sites": 0,
+              "total_sites": 0,
+              "wide_sites": 0
+            },
+            "stderr_tail": "",
+            "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+          }
+        },
+        "site_totals": {
+          "cmov_sites": 0,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 0,
+          "wide_sites": 0
+        },
+        "status": "ok"
+      },
+      "description": "kprobe vfs_read counter by comm",
+      "name": "vfs_read_count",
+      "rejit": {
+        "measurement": null,
+        "phase": "rejit",
+        "process": {
+          "returncode": 0,
+          "stderr_tail": "",
+          "stdout_tail": "@[bpf-jit-scanner]: 6\n@[python3]: 63\n@[bpftool]: 27393"
+        },
+        "prog_ids": [
+          351
+        ],
+        "programs": [
+          {
+            "btf_id": 398,
+            "bytes_jited": 169,
+            "bytes_memlock": 4096,
+            "bytes_xlated": 264,
+            "gpl_compatible": true,
+            "id": 351,
+            "jited": true,
+            "loaded_at": 1773247081,
+            "map_ids": [
+              174
+            ],
+            "name": "vfs_read",
+            "orphaned": false,
+            "owner_fds": [
+              {
+                "fd": 9,
+                "pid": 7104
+              }
+            ],
+            "owner_pids": [
+              7104
+            ],
+            "pids": [
+              {
+                "comm": "bpftrace",
+                "pid": 7104
+              }
+            ],
+            "run_cnt": 18304,
+            "run_time_ns": 887546,
+            "tag": "5770d1936c476869",
+            "type": "kprobe",
+            "uid": 0
+          }
+        ],
+        "reason": "no eligible directive sites",
+        "recompile_results": {},
+        "recompile_summary": {
+          "applied_programs": 0,
+          "eligible_programs": 0,
+          "errors": []
+        },
+        "scan_results": {
+          "351": {
+            "error": "",
+            "program_name": "vfs_read",
+            "sites": {
+              "cmov_sites": 0,
+              "lea_sites": 0,
+              "rotate_sites": 0,
+              "total_sites": 0,
+              "wide_sites": 0
+            },
+            "stderr_tail": "",
+            "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+          }
+        },
+        "site_totals": {
+          "cmov_sites": 0,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 0,
+          "wide_sites": 0
+        },
+        "status": "skipped"
+      },
+      "script_path": "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/vfs_read_count.bt",
+      "script_text": "kprobe:vfs_read\n{\n  @[comm] = count();\n}\n",
+      "summary": {
+        "avg_ns_delta_pct": null,
+        "baseline_status": "ok",
+        "cpu_baseline": 0.03333326306459256,
+        "cpu_delta_pct": null,
+        "cpu_rejit": null,
+        "name": "vfs_read_count",
+        "note": "no eligible directive sites",
+        "rejit_avg_ns": null,
+        "rejit_status": "skipped",
+        "sites": 0,
+        "speedup": null,
+        "stock_avg_ns": 58.41756157228169,
+        "workload_ops_baseline": 286499.0612164416,
+        "workload_ops_delta_pct": null,
+        "workload_ops_rejit": null
+      }
+    },
+    {
+      "baseline": {
+        "measurement": {
+          "agent_cpu": {
+            "sys_pct": 0.0,
+            "total_pct": 0.0,
+            "user_pct": 0.0
+          },
+          "bpf": {
+            "programs": {
+              "382": {
+                "avg_ns_per_run": 305.5880281690141,
+                "bytes_jited": 160,
+                "bytes_xlated": 256,
+                "id": 382,
+                "name": "tcp_v4_connect",
+                "run_cnt_delta": 568,
+                "run_time_ns_delta": 173574,
+                "type": "kprobe"
+              }
+            },
+            "summary": {
+              "active_programs": 1,
+              "avg_ns_per_run": 305.5880281690141,
+              "total_events": 568,
+              "total_run_time_ns": 173574
+            }
+          },
+          "final_stats": {
+            "382": {
+              "bytes_jited": 160,
+              "bytes_xlated": 256,
+              "id": 382,
+              "name": "tcp_v4_connect",
+              "run_cnt": 568,
+              "run_time_ns": 173574,
+              "type": "kprobe"
+            }
+          },
+          "initial_stats": {
+            "382": {
+              "bytes_jited": 160,
+              "bytes_xlated": 256,
+              "id": 382,
+              "name": "tcp_v4_connect",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "type": "kprobe"
+            }
+          },
+          "system_cpu": {
+            "busy_pct": 4.430273535828155
+          },
+          "workload": {
+            "duration_s": 30.009147514000006,
+            "ops_per_sec": 18.927561995388707,
+            "ops_total": 568.0,
+            "stderr": "",
+            "stdout": ""
+          }
+        },
+        "phase": "baseline",
+        "process": {
+          "returncode": 0,
+          "stderr_tail": "",
+          "stdout_tail": "@connects: 568"
+        },
+        "prog_ids": [
+          382
+        ],
+        "programs": [
+          {
+            "btf_id": 432,
+            "bytes_jited": 160,
+            "bytes_memlock": 4096,
+            "bytes_xlated": 256,
+            "gpl_compatible": true,
+            "id": 382,
+            "jited": true,
+            "loaded_at": 1773247082,
+            "map_ids": [
+              190
+            ],
+            "name": "tcp_v4_connect",
+            "orphaned": false,
+            "owner_fds": [
+              {
+                "fd": 9,
+                "pid": 7111
+              }
+            ],
+            "owner_pids": [
+              7111
+            ],
+            "pids": [
+              {
+                "comm": "bpftrace",
+                "pid": 7111
+              }
+            ],
+            "tag": "8489de36aaac1fb4",
+            "type": "kprobe",
+            "uid": 0
+          }
+        ],
+        "reason": "",
+        "recompile_results": {},
+        "recompile_summary": {
+          "applied_programs": 0,
+          "eligible_programs": 0,
+          "errors": []
+        },
+        "scan_results": {
+          "382": {
+            "error": "",
+            "program_name": "tcp_v4_connect",
+            "sites": {
+              "cmov_sites": 0,
+              "lea_sites": 0,
+              "rotate_sites": 0,
+              "total_sites": 0,
+              "wide_sites": 0
+            },
+            "stderr_tail": "",
+            "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+          }
+        },
+        "site_totals": {
+          "cmov_sites": 0,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 0,
+          "wide_sites": 0
+        },
+        "status": "ok"
+      },
+      "description": "kprobe tcp_v4_connect counter",
+      "name": "tcp_connect",
+      "rejit": {
+        "measurement": null,
+        "phase": "rejit",
+        "process": {
+          "returncode": 0,
+          "stderr_tail": "",
+          "stdout_tail": "@connects: 0"
+        },
+        "prog_ids": [
+          431
+        ],
+        "programs": [
+          {
+            "btf_id": 488,
+            "bytes_jited": 160,
+            "bytes_memlock": 4096,
+            "bytes_xlated": 256,
+            "gpl_compatible": true,
+            "id": 431,
+            "jited": true,
+            "loaded_at": 1773247114,
+            "map_ids": [
+              214
+            ],
+            "name": "tcp_v4_connect",
+            "orphaned": false,
+            "owner_fds": [
+              {
+                "fd": 9,
+                "pid": 8259
+              }
+            ],
+            "owner_pids": [
+              8259
+            ],
+            "pids": [
+              {
+                "comm": "bpftrace",
+                "pid": 8259
+              }
+            ],
+            "tag": "8489de36aaac1fb4",
+            "type": "kprobe",
+            "uid": 0
+          }
+        ],
+        "reason": "no eligible directive sites",
+        "recompile_results": {},
+        "recompile_summary": {
+          "applied_programs": 0,
+          "eligible_programs": 0,
+          "errors": []
+        },
+        "scan_results": {
+          "431": {
+            "error": "",
+            "program_name": "tcp_v4_connect",
+            "sites": {
+              "cmov_sites": 0,
+              "lea_sites": 0,
+              "rotate_sites": 0,
+              "total_sites": 0,
+              "wide_sites": 0
+            },
+            "stderr_tail": "",
+            "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+          }
+        },
+        "site_totals": {
+          "cmov_sites": 0,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 0,
+          "wide_sites": 0
+        },
+        "status": "skipped"
+      },
+      "script_path": "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcp_connect.bt",
+      "script_text": "kprobe:tcp_v4_connect\n{\n  @connects = count();\n}\n",
+      "summary": {
+        "avg_ns_delta_pct": null,
+        "baseline_status": "ok",
+        "cpu_baseline": 0.0,
+        "cpu_delta_pct": null,
+        "cpu_rejit": null,
+        "name": "tcp_connect",
+        "note": "no eligible directive sites",
+        "rejit_avg_ns": null,
+        "rejit_status": "skipped",
+        "sites": 0,
+        "speedup": null,
+        "stock_avg_ns": 305.5880281690141,
+        "workload_ops_baseline": 18.927561995388707,
+        "workload_ops_delta_pct": null,
+        "workload_ops_rejit": null
+      }
+    }
+  ],
+  "runner": "/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec",
+  "scanner": "/home/yunwei37/workspace/bpf-benchmark/scanner/build/bpf-jit-scanner",
+  "selected_scripts": [
+    "open_latency",
+    "exec_trace",
+    "scheduler_latency",
+    "vfs_read_count",
+    "tcp_connect"
+  ],
+  "smoke": false,
+  "summary": {
+    "baseline_successes": 5,
+    "rejit_successes": 2,
+    "scripts_with_sites": 2,
+    "site_totals": {
+      "cmov_sites": 9,
+      "lea_sites": 0,
+      "rotate_sites": 0,
+      "total_sites": 9,
+      "wide_sites": 0
+    },
+    "speedup_geomean": 0.9916724897380839
+  },
+  "tool_versions": {
+    "bpftool_path": "/usr/local/sbin/bpftool",
+    "bpftool_version_text": "bpftool v7.7.0\nusing libbpf v1.7\nfeatures: llvm, skeletons",
+    "bpftrace_path": "/bin/bpftrace",
+    "bpftrace_version": [
+      0,
+      20,
+      2
+    ],
+    "bpftrace_version_text": "bpftrace v0.20.2",
+    "curl_path": "/bin/curl",
+    "fio_path": "/bin/fio",
+    "stress_ng_path": "/bin/stress-ng"
+  }
+}
