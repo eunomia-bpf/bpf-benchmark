@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
@@ -87,6 +88,17 @@ std::optional<std::string> canonical_skip_family_name(std::string_view input)
         normalized == "bitfield-extract" || normalized == "bit-extract") {
         return std::string("extract");
     }
+    if (normalized == "zero-ext" || normalized == "zeroext" ||
+        normalized == "zero-ext-elide" || normalized == "zext") {
+        return std::string("zero-ext");
+    }
+    if (normalized == "endian" || normalized == "endian-fusion") {
+        return std::string("endian");
+    }
+    if (normalized == "branch-flip" || normalized == "branchflip" ||
+        normalized == "bflip") {
+        return std::string("branch-flip");
+    }
     return std::nullopt;
 }
 
@@ -111,7 +123,7 @@ void append_skip_families(std::vector<std::string> &families,
             const auto normalized = canonical_skip_family_name(token);
             if (!normalized.has_value()) {
                 fail("unknown family in --skip-families: " + token +
-                     " (expected cmov, wide, rotate, lea, or extract)");
+                     " (expected cmov, wide, rotate, lea, extract, zero-ext, endian, or branch-flip)");
             }
             append_unique(families, *normalized);
         }
@@ -133,6 +145,18 @@ void print_json_string_array(const std::vector<std::string> &values)
         std::cout << "\"" << json_escape(values[index]) << "\"";
     }
     std::cout << "]";
+}
+
+std::string usage_text()
+{
+    return
+        "usage: micro_exec <run-llvmbpf|run-kernel|list-programs> [--program <path>|<path>] [--program-name <name>] "
+        "[--memory|--input <path>] [--btf-custom-path <path>] [--directive-blob <path>] [--policy-blob <path>] "
+        "[--manual-load] [--recompile-cmov] [--recompile-wide|--recompile-wide-mem] [--recompile-rotate] [--recompile-rotate-rorx] [--recompile-lea] [--recompile-extract|--recompile-bitfield-extract] [--recompile-all] [--recompile-v5] [--skip-families cmov,wide,rotate,lea,extract,zero-ext,endian,branch-flip] "
+        "[--io-mode map|staged|packet|context] [--raw-packet] [--repeat N] [--warmup N] [--input-size|--kernel-input-size N] "
+        "[--opt-level 0|1|2|3] [--no-cmov] [--llvm-disable-pass <name>] [--llvm-log-passes] "
+        "[--perf-counters] [--perf-scope full_repeat_raw|full_repeat_avg] "
+        "[--dump-jit] [--dump-xlated <path>] [--compile-only]";
 }
 
 } // namespace
@@ -202,15 +226,14 @@ std::vector<uint8_t> materialize_memory(const std::optional<std::filesystem::pat
 
 cli_options parse_args(int argc, char **argv)
 {
+    if (argc >= 2 &&
+        (std::string_view(argv[1]) == "--help" ||
+         std::string_view(argv[1]) == "-h")) {
+        std::cout << usage_text() << "\n";
+        std::exit(0);
+    }
     if (argc < 3) {
-        fail(
-            "usage: micro_exec <run-llvmbpf|run-kernel|list-programs> [--program <path>|<path>] [--program-name <name>] "
-            "[--memory|--input <path>] [--btf-custom-path <path>] [--directive-blob <path>] [--policy-blob <path>] "
-            "[--manual-load] [--recompile-cmov] [--recompile-wide|--recompile-wide-mem] [--recompile-rotate] [--recompile-rotate-rorx] [--recompile-lea] [--recompile-extract|--recompile-bitfield-extract] [--recompile-all] [--recompile-v5] [--skip-families cmov,wide,rotate,lea,extract] "
-            "[--io-mode map|staged|packet|context] [--raw-packet] [--repeat N] [--warmup N] [--input-size|--kernel-input-size N] "
-            "[--opt-level 0|1|2|3] [--no-cmov] [--llvm-disable-pass <name>] [--llvm-log-passes] "
-            "[--perf-counters] [--perf-scope full_repeat_raw|full_repeat_avg] "
-            "[--dump-jit] [--dump-xlated <path>] [--compile-only]");
+        fail(usage_text());
     }
 
     cli_options options;
@@ -218,6 +241,10 @@ cli_options parse_args(int argc, char **argv)
 
     for (int index = 2; index < argc; ++index) {
         const std::string_view current = argv[index];
+        if (current == "--help" || current == "-h") {
+            std::cout << usage_text() << "\n";
+            std::exit(0);
+        }
         if ((current == "--program" || current == "--bpf-object") && index + 1 < argc) {
             options.program = argv[++index];
             continue;
@@ -436,7 +463,19 @@ void print_json(const sample_result &sample)
         sample.directive_scan.wide_sites +
         sample.directive_scan.rotate_sites +
         sample.directive_scan.lea_sites +
-        sample.directive_scan.bitfield_sites;
+        sample.directive_scan.bitfield_sites +
+        sample.directive_scan.zero_ext_sites +
+        sample.directive_scan.endian_sites +
+        sample.directive_scan.branch_flip_sites;
+    const uint64_t total_recompile_sites =
+        sample.recompile.cmov_sites +
+        sample.recompile.wide_sites +
+        sample.recompile.rotate_sites +
+        sample.recompile.lea_sites +
+        sample.recompile.bitfield_sites +
+        sample.recompile.zero_ext_sites +
+        sample.recompile.endian_sites +
+        sample.recompile.branch_flip_sites;
 
     std::cout
         << "{"
@@ -528,6 +567,10 @@ void print_json(const sample_result &sample)
         << "\"rotate_sites\":" << sample.directive_scan.rotate_sites << ","
         << "\"lea_sites\":" << sample.directive_scan.lea_sites << ","
         << "\"bitfield_sites\":" << sample.directive_scan.bitfield_sites << ","
+        << "\"extract_sites\":" << sample.directive_scan.bitfield_sites << ","
+        << "\"zero_ext_sites\":" << sample.directive_scan.zero_ext_sites << ","
+        << "\"endian_sites\":" << sample.directive_scan.endian_sites << ","
+        << "\"branch_flip_sites\":" << sample.directive_scan.branch_flip_sites << ","
         << "\"total_sites\":" << total_directive_sites
         << "},"
         << "\"recompile\":{"
@@ -542,6 +585,16 @@ void print_json(const sample_result &sample)
         << "\"policy_bytes\":" << sample.recompile.policy_bytes << ","
         << "\"syscall_attempted\":" << (sample.recompile.syscall_attempted ? "true" : "false") << ","
         << "\"applied\":" << (sample.recompile.applied ? "true" : "false") << ","
+        << "\"cmov_sites\":" << sample.recompile.cmov_sites << ","
+        << "\"wide_sites\":" << sample.recompile.wide_sites << ","
+        << "\"rotate_sites\":" << sample.recompile.rotate_sites << ","
+        << "\"lea_sites\":" << sample.recompile.lea_sites << ","
+        << "\"bitfield_sites\":" << sample.recompile.bitfield_sites << ","
+        << "\"extract_sites\":" << sample.recompile.bitfield_sites << ","
+        << "\"zero_ext_sites\":" << sample.recompile.zero_ext_sites << ","
+        << "\"endian_sites\":" << sample.recompile.endian_sites << ","
+        << "\"branch_flip_sites\":" << sample.recompile.branch_flip_sites << ","
+        << "\"total_sites\":" << total_recompile_sites << ","
         << "\"error\":\"" << json_escape(sample.recompile.error) << "\""
         << "}"
         << "}\n";

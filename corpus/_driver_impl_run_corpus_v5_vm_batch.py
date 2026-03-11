@@ -54,7 +54,20 @@ FAMILY_FIELDS = (
     ("rotate", "rotate_sites"),
     ("lea", "lea_sites"),
     ("extract", "bitfield_sites"),
+    ("zero-ext", "zero_ext_sites"),
+    ("endian", "endian_sites"),
+    ("branch-flip", "branch_flip_sites"),
 )
+FAMILY_DISPLAY_NAMES = {
+    "cmov": "CMOV",
+    "wide": "WIDE",
+    "rotate": "ROTATE",
+    "lea": "LEA",
+    "extract": "EXTRACT",
+    "zero-ext": "ZERO-EXT",
+    "endian": "ENDIAN",
+    "branch-flip": "BRANCH-FLIP",
+}
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -146,7 +159,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--skip-families",
         action="append",
-        help="Comma-separated recompile families to skip from the auto-generated v5 policy blob. Supported: cmov, wide, rotate, lea, extract.",
+        help="Comma-separated recompile families to skip from the auto-generated v5 policy blob. Supported: cmov, wide, rotate, lea, extract, zero-ext, endian, branch-flip.",
     )
     parser.add_argument(
         "--force-host-fallback",
@@ -184,6 +197,9 @@ def zero_scan() -> dict[str, int]:
         "rotate_sites": 0,
         "lea_sites": 0,
         "bitfield_sites": 0,
+        "zero_ext_sites": 0,
+        "endian_sites": 0,
+        "branch_flip_sites": 0,
         "total_sites": 0,
     }
 
@@ -204,11 +220,20 @@ def canonical_family_name(value: str) -> str:
         "bitfield": "extract",
         "bitfield-extract": "extract",
         "bit-extract": "extract",
+        "zero-ext": "zero-ext",
+        "zeroext": "zero-ext",
+        "zero-ext-elide": "zero-ext",
+        "zext": "zero-ext",
+        "endian": "endian",
+        "endian-fusion": "endian",
+        "branch-flip": "branch-flip",
+        "branchflip": "branch-flip",
+        "bflip": "branch-flip",
     }
     if normalized not in mapping:
         raise SystemExit(
             f"unsupported family in --skip-families: {value} "
-            "(expected cmov, wide, rotate, lea, or extract)"
+            "(expected cmov, wide, rotate, lea, extract, zero-ext, endian, or branch-flip)"
         )
     return mapping[normalized]
 
@@ -365,12 +390,35 @@ def directive_scan_from_record(record: dict[str, Any] | None) -> dict[str, int]:
 
 def parse_scanner_v5_output(stdout: str) -> dict[str, int]:
     counts = zero_scan()
+    stripped_stdout = stdout.strip()
+    if stripped_stdout.startswith("{"):
+        try:
+            payload = json.loads(stripped_stdout)
+        except json.JSONDecodeError:
+            payload = None
+        if isinstance(payload, dict):
+            summary = payload.get("summary") if isinstance(payload.get("summary"), dict) else payload
+            counts["cmov_sites"] = int(summary.get("cmov_sites", 0) or 0)
+            counts["wide_sites"] = int(summary.get("wide_sites", 0) or 0)
+            counts["rotate_sites"] = int(summary.get("rotate_sites", 0) or 0)
+            counts["lea_sites"] = int(summary.get("lea_sites", 0) or 0)
+            counts["bitfield_sites"] = int(summary.get("bitfield_sites", summary.get("extract_sites", 0)) or 0)
+            counts["zero_ext_sites"] = int(summary.get("zero_ext_sites", 0) or 0)
+            counts["endian_sites"] = int(summary.get("endian_sites", 0) or 0)
+            counts["branch_flip_sites"] = int(summary.get("branch_flip_sites", 0) or 0)
+            counts["total_sites"] = int(summary.get("total_sites", 0) or 0)
+            if counts["total_sites"] == 0:
+                counts["total_sites"] = sum(counts[field] for _, field in FAMILY_FIELDS)
+            return counts
     patterns = {
         "cmov_sites": re.compile(r"^\s*cmov:\s+(\d+)\s*$"),
         "wide_sites": re.compile(r"^\s*wide:\s+(\d+)\s*$"),
         "rotate_sites": re.compile(r"^\s*rotate:\s+(\d+)\s*$"),
         "lea_sites": re.compile(r"^\s*lea:\s+(\d+)\s*$"),
         "bitfield_sites": re.compile(r"^\s*extract:\s*(\d+)\s*$"),
+        "zero_ext_sites": re.compile(r"^\s*zeroext:\s*(\d+)\s*$"),
+        "endian_sites": re.compile(r"^\s*endian:\s*(\d+)\s*$"),
+        "branch_flip_sites": re.compile(r"^\s*bflip:\s*(\d+)\s*$"),
     }
     accepted = False
     for line in stdout.splitlines():
@@ -978,25 +1026,21 @@ def build_summary(records: list[dict[str, Any]], effective_mode: str, fallback_r
             scan = normalize_scan(item.get("scanner_counts"))
             for _, field in FAMILY_FIELDS:
                 counts[field] += scan[field]
-        by_source.append(
-            {
-                "source_name": source_name,
-                "programs": len(items),
-                "compile_pairs": len(source_compile),
-                "measured_pairs": len(source_measured),
-                "applied_programs": sum(1 for item in items if item.get("v5_compile_applied") or item.get("v5_run_applied")),
-                "cmov_sites": counts["cmov_sites"],
-                "wide_sites": counts["wide_sites"],
-                "rotate_sites": counts["rotate_sites"],
-                "lea_sites": counts["lea_sites"],
-                "bitfield_sites": counts["bitfield_sites"],
-                "total_sites": sum(counts[field] for _, field in FAMILY_FIELDS),
-                "code_size_ratio_geomean": geomean(source_size),
-                "exec_ratio_geomean": geomean(source_exec),
-                "wins": sum(1 for item in source_measured if (item.get("speedup_ratio") or 0) > 1.0),
-                "regressions": sum(1 for item in source_measured if (item.get("speedup_ratio") or 0) < 1.0),
-            }
-        )
+        source_row = {
+            "source_name": source_name,
+            "programs": len(items),
+            "compile_pairs": len(source_compile),
+            "measured_pairs": len(source_measured),
+            "applied_programs": sum(1 for item in items if item.get("v5_compile_applied") or item.get("v5_run_applied")),
+            "total_sites": sum(counts[field] for _, field in FAMILY_FIELDS),
+            "code_size_ratio_geomean": geomean(source_size),
+            "exec_ratio_geomean": geomean(source_exec),
+            "wins": sum(1 for item in source_measured if (item.get("speedup_ratio") or 0) > 1.0),
+            "regressions": sum(1 for item in source_measured if (item.get("speedup_ratio") or 0) < 1.0),
+        }
+        for _, field in FAMILY_FIELDS:
+            source_row[field] = counts[field]
+        by_source.append(source_row)
     by_source.sort(key=lambda item: (-item["programs"], item["source_name"]))
 
     by_family: list[dict[str, Any]] = []
@@ -1100,6 +1144,7 @@ def build_markdown(data: dict[str, Any]) -> str:
     records = sorted(data["programs"], key=lambda item: (item["source_name"], item["object_path"], item["program_name"]))
     build_summary_data = data.get("kernel_build") or {}
     guest_info = (data.get("guest_smoke") or {}).get("payload")
+    family_headers = [FAMILY_DISPLAY_NAMES[name] for name, _ in FAMILY_FIELDS]
     lines: list[str] = [
         "# Corpus Batch Recompile Results",
         "",
@@ -1118,11 +1163,10 @@ def build_markdown(data: dict[str, Any]) -> str:
         f"- Code-size ratio geomean (baseline/v5): {format_ratio(summary['code_size_ratio_geomean'])}",
         f"- Exec-time ratio geomean (baseline/v5): {format_ratio(summary['exec_ratio_geomean'])}",
         f"- Total sites: {sum(summary['family_totals'].get(field, 0) for _, field in FAMILY_FIELDS)}",
-        f"- CMOV sites: {summary['family_totals'].get('cmov_sites', 0)}",
-        f"- WIDE sites: {summary['family_totals'].get('wide_sites', 0)}",
-        f"- ROTATE sites: {summary['family_totals'].get('rotate_sites', 0)}",
-        f"- LEA sites: {summary['family_totals'].get('lea_sites', 0)}",
-        f"- EXTRACT sites: {summary['family_totals'].get('bitfield_sites', 0)}",
+        *[
+            f"- {FAMILY_DISPLAY_NAMES[name]} sites: {summary['family_totals'].get(field, 0)}"
+            for name, field in FAMILY_FIELDS
+        ],
     ]
     if summary.get("fallback_reason"):
         lines.append(f"- Fallback reason: {summary['fallback_reason']}")
@@ -1138,7 +1182,17 @@ def build_markdown(data: dict[str, Any]) -> str:
     lines.extend(["## By Project", ""])
     lines.extend(
         markdown_table(
-            ["Project", "Programs", "Compile Pairs", "Measured Pairs", "Applied", "CMOV", "WIDE", "ROTATE", "LEA", "EXTRACT", "Code Ratio", "Exec Ratio", "Regressions"],
+            [
+                "Project",
+                "Programs",
+                "Compile Pairs",
+                "Measured Pairs",
+                "Applied",
+                *family_headers,
+                "Code Ratio",
+                "Exec Ratio",
+                "Regressions",
+            ],
             [
                 [
                     row["source_name"],
@@ -1146,11 +1200,7 @@ def build_markdown(data: dict[str, Any]) -> str:
                     row["compile_pairs"],
                     row["measured_pairs"],
                     row["applied_programs"],
-                    row["cmov_sites"],
-                    row["wide_sites"],
-                    row["rotate_sites"],
-                    row["lea_sites"],
-                    row["bitfield_sites"],
+                    *[row[field] for _, field in FAMILY_FIELDS],
                     format_ratio(row["code_size_ratio_geomean"]),
                     format_ratio(row["exec_ratio_geomean"]),
                     row["regressions"],

@@ -107,6 +107,9 @@ struct directive_scan_summary {
     uint64_t rotate_sites = 0;
     uint64_t lea_sites = 0;
     uint64_t bitfield_sites = 0;
+    uint64_t zero_ext_sites = 0;
+    uint64_t endian_sites = 0;
+    uint64_t branch_flip_sites = 0;
 };
 
 struct recompile_summary {
@@ -118,6 +121,14 @@ struct recompile_summary {
     uint64_t policy_bytes = 0;
     bool syscall_attempted = false;
     bool applied = false;
+    uint64_t cmov_sites = 0;
+    uint64_t wide_sites = 0;
+    uint64_t rotate_sites = 0;
+    uint64_t lea_sites = 0;
+    uint64_t bitfield_sites = 0;
+    uint64_t zero_ext_sites = 0;
+    uint64_t endian_sites = 0;
+    uint64_t branch_flip_sites = 0;
     std::string error;
 };
 

@@ -39,6 +39,10 @@ class DirectiveScanSummary(TypedDict, total=False):
     rotate_sites: int
     lea_sites: int
     bitfield_sites: int
+    extract_sites: int
+    zero_ext_sites: int
+    endian_sites: int
+    branch_flip_sites: int
     total_sites: int
 
 
@@ -49,6 +53,16 @@ class RecompileSummary(TypedDict, total=False):
     policy_bytes: int
     syscall_attempted: bool
     applied: bool
+    cmov_sites: int
+    wide_sites: int
+    rotate_sites: int
+    lea_sites: int
+    bitfield_sites: int
+    extract_sites: int
+    zero_ext_sites: int
+    endian_sites: int
+    branch_flip_sites: int
+    total_sites: int
     error: str
 
 
@@ -134,6 +148,9 @@ def zero_directive_scan() -> dict[str, int]:
         "rotate_sites": 0,
         "lea_sites": 0,
         "bitfield_sites": 0,
+        "zero_ext_sites": 0,
+        "endian_sites": 0,
+        "branch_flip_sites": 0,
         "total_sites": 0,
     }
 
@@ -142,8 +159,16 @@ def normalize_directive_scan(scan: Mapping[str, object] | None) -> dict[str, int
     normalized = zero_directive_scan()
     if not scan:
         return normalized
-    for field in ("cmov_sites", "wide_sites", "rotate_sites", "lea_sites", "bitfield_sites"):
-        normalized[field] = int(scan.get(field, 0) or 0)
+    normalized["cmov_sites"] = int(scan.get("cmov_sites", 0) or 0)
+    normalized["wide_sites"] = int(scan.get("wide_sites", 0) or 0)
+    normalized["rotate_sites"] = int(scan.get("rotate_sites", 0) or 0)
+    normalized["lea_sites"] = int(scan.get("lea_sites", 0) or 0)
+    normalized["bitfield_sites"] = int(
+        scan.get("bitfield_sites", scan.get("extract_sites", 0)) or 0
+    )
+    normalized["zero_ext_sites"] = int(scan.get("zero_ext_sites", 0) or 0)
+    normalized["endian_sites"] = int(scan.get("endian_sites", 0) or 0)
+    normalized["branch_flip_sites"] = int(scan.get("branch_flip_sites", 0) or 0)
     normalized["total_sites"] = int(
         scan.get(
             "total_sites",
@@ -151,7 +176,10 @@ def normalize_directive_scan(scan: Mapping[str, object] | None) -> dict[str, int
             normalized["wide_sites"] +
             normalized["rotate_sites"] +
             normalized["lea_sites"] +
-            normalized["bitfield_sites"],
+            normalized["bitfield_sites"] +
+            normalized["zero_ext_sites"] +
+            normalized["endian_sites"] +
+            normalized["branch_flip_sites"],
         )
         or 0
     )
@@ -187,6 +215,7 @@ def normalize_runner_sample(sample: Mapping[str, object]) -> RunnerSample:
             "policy_bytes": 0,
             "syscall_attempted": False,
             "applied": False,
+            **zero_directive_scan(),
             "error": "",
         },
     )

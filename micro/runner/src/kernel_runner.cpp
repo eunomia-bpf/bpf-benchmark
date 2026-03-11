@@ -798,17 +798,28 @@ sample_result run_kernel(const cli_options &options)
         options.recompile_lea || options.recompile_all;
     const bool want_recompile_extract =
         options.recompile_extract || options.recompile_all;
+    const bool want_recompile_zero_ext = options.recompile_all;
+    const bool want_recompile_endian = options.recompile_all;
+    const bool want_recompile_branch_flip = options.recompile_all;
     const bool skip_cmov = has_skip_family(options, "cmov");
     const bool skip_wide = has_skip_family(options, "wide");
     const bool skip_rotate = has_skip_family(options, "rotate");
     const bool skip_lea = has_skip_family(options, "lea");
     const bool skip_extract = has_skip_family(options, "extract");
+    const bool skip_zero_ext = has_skip_family(options, "zero-ext");
+    const bool skip_endian = has_skip_family(options, "endian");
+    const bool skip_branch_flip = has_skip_family(options, "branch-flip");
     const bool do_recompile_cmov = want_recompile_cmov && !skip_cmov;
     const bool do_recompile_wide = want_recompile_wide && !skip_wide;
     const bool do_recompile_rotate = want_recompile_rotate && !skip_rotate;
     const bool do_recompile_lea = want_recompile_lea && !skip_lea;
     const bool do_recompile_extract =
         want_recompile_extract && !skip_extract;
+    const bool do_recompile_zero_ext =
+        want_recompile_zero_ext && !skip_zero_ext;
+    const bool do_recompile_endian = want_recompile_endian && !skip_endian;
+    const bool do_recompile_branch_flip =
+        want_recompile_branch_flip && !skip_branch_flip;
     directive_scan_summary directive_scan {};
     recompile_summary recompile {};
     recompile.skipped_families = options.skip_families;
@@ -822,25 +833,39 @@ sample_result run_kernel(const cli_options &options)
                             "lea");
     append_recompile_family(recompile.requested_families,
                             do_recompile_extract, "extract");
+    append_recompile_family(recompile.requested_families,
+                            do_recompile_zero_ext, "zero-ext");
+    append_recompile_family(recompile.requested_families,
+                            do_recompile_endian, "endian");
+    append_recompile_family(recompile.requested_families,
+                            do_recompile_branch_flip, "branch-flip");
     recompile.requested =
         do_recompile_cmov || do_recompile_wide || do_recompile_rotate ||
         do_recompile_lea || do_recompile_extract ||
+        do_recompile_zero_ext || do_recompile_endian ||
+        do_recompile_branch_flip ||
         options.policy_blob.has_value();
     if (options.policy_blob.has_value()) {
         recompile.mode = "policy-blob";
     } else if (do_recompile_cmov || do_recompile_wide || do_recompile_rotate ||
-               do_recompile_lea || do_recompile_extract) {
+               do_recompile_lea || do_recompile_extract ||
+               do_recompile_zero_ext || do_recompile_endian ||
+               do_recompile_branch_flip) {
         recompile.mode = "auto-scan-v5";
     }
     if (do_recompile_cmov || do_recompile_wide || do_recompile_rotate ||
         do_recompile_lea || do_recompile_extract ||
+        do_recompile_zero_ext || do_recompile_endian ||
+        do_recompile_branch_flip ||
         options.policy_blob.has_value()) {
         auto pre_info = load_prog_info(program_fd);
 
         std::vector<uint8_t> policy_data;
 
         if (do_recompile_cmov || do_recompile_wide || do_recompile_rotate ||
-            do_recompile_lea || do_recompile_extract) {
+            do_recompile_lea || do_recompile_extract ||
+            do_recompile_zero_ext || do_recompile_endian ||
+            do_recompile_branch_flip) {
             /*
              * Auto-scan the xlated BPF program for enabled pattern types
              * and build the combined policy blob from post-verifier bytecode.
@@ -862,6 +887,15 @@ sample_result run_kernel(const cli_options &options)
             if (want_recompile_extract && skip_extract) {
                 fprintf(stderr, "recompile-extract: skipped by --skip-families\n");
             }
+            if (want_recompile_zero_ext && skip_zero_ext) {
+                fprintf(stderr, "recompile-zero-ext: skipped by --skip-families\n");
+            }
+            if (want_recompile_endian && skip_endian) {
+                fprintf(stderr, "recompile-endian: skipped by --skip-families\n");
+            }
+            if (want_recompile_branch_flip && skip_branch_flip) {
+                fprintf(stderr, "recompile-branch-flip: skipped by --skip-families\n");
+            }
 
             /*
              * Scan the full translated program, including subprogs.
@@ -879,6 +913,9 @@ sample_result run_kernel(const cli_options &options)
                     .scan_rotate = do_recompile_rotate,
                     .scan_lea = do_recompile_lea,
                     .scan_extract = do_recompile_extract,
+                    .scan_zero_ext = do_recompile_zero_ext,
+                    .scan_endian = do_recompile_endian,
+                    .scan_branch_flip = do_recompile_branch_flip,
                     .use_rorx = options.recompile_rotate_rorx,
                 });
 
@@ -887,6 +924,17 @@ sample_result run_kernel(const cli_options &options)
             directive_scan.rotate_sites = summary.rotate_sites;
             directive_scan.lea_sites = summary.lea_sites;
             directive_scan.bitfield_sites = summary.bitfield_sites;
+            directive_scan.zero_ext_sites = summary.zero_ext_sites;
+            directive_scan.endian_sites = summary.endian_sites;
+            directive_scan.branch_flip_sites = summary.branch_flip_sites;
+            recompile.cmov_sites = summary.cmov_sites;
+            recompile.wide_sites = summary.wide_sites;
+            recompile.rotate_sites = summary.rotate_sites;
+            recompile.lea_sites = summary.lea_sites;
+            recompile.bitfield_sites = summary.bitfield_sites;
+            recompile.zero_ext_sites = summary.zero_ext_sites;
+            recompile.endian_sites = summary.endian_sites;
+            recompile.branch_flip_sites = summary.branch_flip_sites;
 
             auto print_v5_scan_status = [&](bool enabled,
                                             uint64_t site_count,
@@ -918,6 +966,15 @@ sample_result run_kernel(const cli_options &options)
             print_v5_scan_status(do_recompile_extract,
                                  directive_scan.bitfield_sites,
                                  "recompile-extract", "bitfield_extract");
+            print_v5_scan_status(do_recompile_zero_ext,
+                                 directive_scan.zero_ext_sites,
+                                 "recompile-zero-ext", "zero_ext_elide");
+            print_v5_scan_status(do_recompile_endian,
+                                 directive_scan.endian_sites,
+                                 "recompile-endian", "endian_fusion");
+            print_v5_scan_status(do_recompile_branch_flip,
+                                 directive_scan.branch_flip_sites,
+                                 "recompile-branch-flip", "branch_flip");
 
             if (!summary.rules.empty()) {
                 policy_data = bpf_jit_scanner::build_policy_blob_v5(

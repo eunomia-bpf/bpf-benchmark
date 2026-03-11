@@ -6,7 +6,7 @@
 > - 每个任务做完 → 立即更新本文档（任务条目状态 + 关键数据 + 文档路径）。
 > - 每次 context 压缩后 → 完整读取本文档恢复全局状态。
 > - 用 agent background 跑任务，不阻塞主对话。
-> 上次更新：2026-03-11（8-family per-section census 完成 + corpus v6 recompile 进行中）
+> 上次更新：2026-03-11（corpus v6 full recompile 完成：163 measured, geomean 0.868x, 92 applied）
 
 ---
 
@@ -132,7 +132,8 @@
 | branch_layout 输入敏感性 | predictable 0.225x vs random 0.326x，差 44.6% |
 | Real-program code-size | 0.618x geomean (36 unique) |
 | Real-program exec-time | 0.514x geomean (14 unique) |
-| Corpus directive coverage (5 fam) | 143/560 objects with sites, **14593** total sites（5 families, per-section） |
+| Corpus directive coverage (5 fam) | 143/560 objects with sites, **14593** total sites（5 families, per-section）|
+| Corpus v6 full recompile | 166 targets, **163 measured pairs**, 92 applied, exec geomean **0.868x**, code-size 0.999x, wins 40 / regressions 107 |
 | Corpus 8-family census | 157/560 corpus objects with sites, **16535** total sites（8 families, per-section）。新: endian=1386, bflip=2264, zeroext=0（x86-64 预期） |
 | Pass ablation | 仅 InstCombinePass + SimplifyCFGPass 有效 |
 | cmov 消融 | switch_dispatch +26%，binary_search +12%；bounds_ladder -18%，large_mixed -24% |
@@ -358,8 +359,8 @@ VM 使用:   make -j$(nproc) bzImage && vng --run <worktree>/arch/x86/boot/bzIma
 | 46 | **COND_SELECT 上 v5 path** | ✅ | v5 pattern descriptor + canonical binding + parameterized emitter。scanner 找到 1 cmov site，VM 验证 result 一致，xlated 7480 不变，jited 4168→4167。`docs/tmp/cmov-v5-migration-report.md`，包含在 `jit-directive-v5` commit `2a6783cc7` |
 | 47 | **cmov_select emitter bug 修复** | ✅ | 根因：absolute-vs-local site index 混用。修复：`bpf_jit_rule_local_site_start()` rebases site_start 到 subprog 本地。验证：cmov_select baseline=recompile，log2_fold 无回归。`docs/tmp/cmov-emitter-fix-report.md`，包含在 `jit-directive-v5` commit `2a6783cc7` |
 | 48 | **Benchmark 基础设施重构** | 🔄 | P0 5/5 修复完成：call-overhead category、macro repeat、默认路径、按需 root/scanner、stats 统一 median。`docs/tmp/p0-bugfix-report.md`。P1 结构问题待做 |
-| 49 | **端到端部署评估** | ❌ | Cilium/Katran 级别，论文 go 条件之一。需至少一个 PPS throughput 数据（见 #63） |
-| 50 | **论文更新** | 🔄 | 集成 Round 3 + fixed baselines + corpus 数据 |
+| 49 | **端到端部署评估** | 已取消 | 用户决定不再追求独立 PPS throughput 数据，现有 Tracee/Tetragon/bpftrace E2E 已足够 |
+| 50 | **论文更新** | 已取消 | 用户决定移除 |
 | 51 | jit_recompile 加 log_level/log_buf | ✅ | framework kernel 已加 `log_level/log_size/log_buf`，scanner `apply` 默认携带 16 KiB log buffer，失败时直接回显 kernel 诊断。`docs/tmp/v6-tier1-implementation.md` |
 | 52 | Shape whitelist 扩展 | ✅ | v5 active path 保留 generic `site_len <= 64` + `pattern_count == site_len`，删除 per-form 固定长度 gate 的约束效果；scanner ABI 常量同步到 64。`docs/tmp/v6-tier1-implementation.md` |
 | 53 | Overlap/priority 语义 | ❌ | 当前 kernel 不拒绝也不仲裁重叠 rule |
@@ -372,7 +373,7 @@ VM 使用:   make -j$(nproc) bzImage && vng --run <worktree>/arch/x86/boot/bzIma
 | 60 | 严格重跑（30×1000） | ❌ | CPU pinning + performance governor |
 | 61 | **Benchmark 多样性** | 🟡 | 67 micro: 64 XDP + 2 tc + 1 cgroup_skb。Corpus recompile paired: 61 tc + 16 xdp + 2 cgroup_skb = 79。Census 覆盖全类型。审计报告: `docs/tmp/benchmark-diversity-audit.md` |
 | 62 | **CMOV kernel JIT benefit 信号增强** | ❌ | cmov_select 仅 2.8% 改善，需更强 signal（更多 cmov-heavy benchmark 或不同微架构） |
-| 63 | **End-to-end throughput 数据** | ❌ | 至少一个 PPS 数据（Katran XDP / Calico），#49 的子任务 |
+| 63 | **End-to-end throughput 数据** | 已取消 | 随 #49 一起取消 |
 | 64 | **Corpus 可运行性盘点 + 自动化 recompile** | ✅ | 532 objects, 1836 progs, 1214 loadable, 274 有 sites, 381 truly runnable。79 paired baseline/recompile (sched_cls 61, xdp 16, cgroup_skb 2)。3069 total sites (CMOV 840, WIDE 389, ROTATE 1840)。新脚本 `micro/run_corpus_runnability.py`。`docs/tmp/corpus-runnability-report.md`, `docs/tmp/corpus-runnability-results.json` |
 | 65 | **Corpus 批量 recompile 实验** | ✅ | 78 measured pairs，7 项目。原始 exec geomean 0.813x，**排除噪声后 0.847x**（32/78 sub-resolution <50ns）。CMOV-only 可靠程序 0.718x（11/11 回归，验证 policy-sensitivity）。CMOV+WIDE 0.848x。噪声严重（控制组 ±36%）。`docs/tmp/corpus-batch-recompile-results.md`，`docs/tmp/corpus-recompile-regression-analysis.md` |
 | 66 | **非网络端到端场景研究** | ✅ | **最佳 OSDI 方案**：Phase 1: Tracee（169 progs, 555 sites）+ Tetragon（kprobe/tracepoint）+ bpftrace（--emit-elf）。Phase 2: scx_rusty（11 struct_ops hooks）+ scx_lavd（22 hooks）。Corpus 已有大量非网络程序未利用：kprobe 508, tracing 442, tracepoint 151, lsm 75, struct_ops 51。核心差距不是"有没有程序"而是"有没有 honest attach+trigger 路径"。`docs/tmp/non-networking-evaluation-plan.md` |
@@ -401,7 +402,15 @@ VM 使用:   make -j$(nproc) bzImage && vng --run <worktree>/arch/x86/boot/bzIma
 | 87 | **v6 接口设计研究** | ✅ | 核心修正：verifier log 已暴露所有 discovery 所需信息（bounds/types/stack/branch/SCC/liveness），零 kernel 改动即可使用。v6 baseline 不需要 verifier 变更。安全验证仍靠 pattern match + constraints + kernel-owned emitter。`docs/tmp/v6-interface-design.md`，`docs/tmp/interface-improvement-proposals.md` |
 | 88 | **Benchmark 框架审计 v2** | ✅ | 一键 build + smoke test 全部通过。修复：Tracee import 路径、文档更新（README/CLAUDE.md/e2e/README）。56 pure-jit + 11 runtime = 67 benchmarks。`docs/tmp/benchmark-framework-audit-v2.md` |
 | 89 | **新 canonical forms 实现** | ✅ | 已完成：ZERO_EXT_ELIDE（32-bit ALU + redundant zext → 只发 ALU, x86 自动零扩展）、ENDIAN_FUSION（ldx+bswap / bswap+stx → movbe，含 MOVBE CPU gating）、BRANCH_FLIP（local if/else diamond body swap，含 ORIGINAL/FLIPPED native choice）。Scanner pattern + kernel validator + x86 emitter 已落地，构建测试通过。2026-03-11 follow-up：修复 `ZERO_EXT_ELIDE` 对真实 verifier zext（`BPF_ZEXT_REG`, `BPF_ALU|MOV|X`, `imm=1`）的匹配错误，并与 kernel validator 对齐。→ `docs/tmp/new-canonical-forms-implementation.md` |
-| 90 | **Corpus 修复 + 全量 v6 recompile** | 🔄 | 修复 `corpus/directive_census.py` + `simple.bpf.o` run-kernel map issue + 用新 scanner（14593 sites, 143 objects）全量重跑 recompile。codex 实现中。→ `docs/tmp/corpus-full-recompile-v6.md` |
+| 90 | **Corpus 修复 + 全量 v6 recompile** | ✅ | 166 targets, **163 measured pairs**, 92 applied programs（5 families: CMOV 79/446, WIDE 39/342, ROTATE 2/1840, EXTRACT 37/86, LEA 0/0）。Exec geomean **0.868x**（all measured）/ 0.892x（applied only）。Code-size geomean 0.999x。Wins 40 / regressions 107（仍 CMOV-dominated regression，与 policy-sensitivity thesis 一致）。By source: selftests 0.802x, calico 0.935x, katran 0.776x, suricata 1.111x, tracee 0.653x。16 newly positive programs across 6 objects (geomean 0.917x)。→ `docs/tmp/corpus-full-recompile-v6.md`, `corpus/results/corpus_v5_vm_batch_full.json` |
 | 91 | **优化方向深度研究** | ✅ | **Top 3**: (1) SESE control-flow region specialization（block order + branch polarity + hot fallthrough, 350-700 LOC, 2-6% exec plausible）; (2) Verifier-fact-guided late specialization（DIV_LIVENESS / NARROW_CMP / TYPE_SPECIALIZED_LOAD, 300-550 LOC）; (3) Typed semantic region plans（multi-atom composition: ROT+ROT→NOP, WIDE+EXTRACT→FIELD_LOAD, 550-900 LOC）。**不应做**: generic rewrite interpreter（破坏 fail-closed）。`docs/tmp/optimization-beyond-isel.md` |
 | 92 | **8-family corpus census** | ✅ | 已按 per-section 方法重跑：627 objects 全部成功扫描，220 objects 有 sites，17637 total sites；其中 corpus 为 560 objects / 157 with sites / **16535** sites。新 families: endian=1386, bflip=2264（aggregate 2279，含 micro 15）, **zeroext=0**。调查结论：这不是 `--all`/CLI 漏算；scanner 已修正为可识别真实 verifier zext，但 per-section/raw ELF section 方法本身看不到 verifier 后插入的 zext，而 x86-64 live xlated 路径又因 `bpf_jit_needs_zext()=false` 不会插该 pair，所以 corpus 仍为 0。输出：`docs/tmp/corpus-8families-census-persection.md`，`docs/tmp/corpus-8families-persection.json`。 |
+| 93 | **Micro suite 精简 + 一键运行** | ✅ | 已删除 `config/micro_runtime.yaml`，active micro suite 只保留 56-case pure-jit manifest；11 个 runtime `.bpf.c` 已移到 `micro/programs/archive/runtime/`；`micro/README.md` / `CLAUDE.md` / summarize/representativeness defaults 已同步为 pure-jit-only；新增 `scripts/run_micro.sh`（host / VM / llvmbpf-only 三模式）。验证：`make -C micro clean && make -C micro`、`python3 micro/run_micro.py --list`、`python3 micro/run_micro.py --runtime llvmbpf --bench simple --iterations 1 --warmups 0 --repeat 10`、`python3 micro/run_micro.py --runtime kernel --bench simple --iterations 1 --warmups 0 --repeat 10`、`./scripts/run_micro.sh --llvmbpf-only --bench simple --iterations 1 --warmups 0 --repeat 10`、`./scripts/run_micro.sh --vm --bench simple --iterations 1 --warmups 0 --repeat 10`。 |
+| 94 | **Micro input 去 map** | ✅ | input 数据改为通过 XDP/TC packet buffer 传入，热路径零 map lookup。验证：llvmbpf + kernel 两个 runtime，simple/bitcount/rotate64_hash/tc_*/cgroup_hash_chain 结果正确。commit `29a12e5`。 |
+| 95 | **Tracing corpus exec driver** | ✅ | `corpus/run_corpus_tracing_exec.py`：attach+trigger+run_cnt/run_time_ns 测量 tracing 类程序。自动推断 attach target + 生成 syscall workload。Host smoke：kprobe/tracepoint/placeholder 3 组成功 paired avg_ns，LSM attach OK 但 workload 未触发。VM recompile 待跑。commit `cd78eb6`。 |
+| 96 | **Corpus 目录整理** | ✅ | 一次性脚本移到 corpus/tmp/，更新 README，验证核心脚本。15 组 --help/import 检查全部通过。 |
+| 97 | **Per-program policy 配置设计** | ✅ | 调研完成。现状：scanner 默认 all-apply，micro/corpus/e2e 无 per-program policy，family surface 漂移（scanner 8 / runner 5 / e2e 4）。设计：统一 YAML policy schema（match+selection+site_overrides），自动 tuning 5 阶段（census→screening→leave-one-out→combo→site refinement），实现路径 P0-P4。→ `docs/tmp/policy-configuration-design.md`（960 行） |
+| 99 | **Micro 目录 Python 脚本整理** | ❌ | micro/ 下有 analyze_*.py / demo_policy_iteration.py / _driver_impl_*.py 等一次性脚本，需移到 micro/tmp/ 或 archive/。整理后完整执行 micro suite 验证（llvmbpf + kernel + VM）。blocked by #94。 |
+| 98 | **Policy design v2：程序无关自动 tuning** | ✅ | 设计完成（793 行）。核心：auto-tuner 自动生成 per-program policy，人类不需要理解程序。默认行为改为 stock（不再 blind all-apply）。scanner 升级为 policy compiler。→ `docs/tmp/policy-configuration-design-v2.md` |
+| 98a | **Policy P0+P1 实现** | 🔄 | 统一 8-family surface（micro_exec/e2e/corpus）+ scanner --json + compile-policy 子命令。**纯用户态**。codex 实现中。 |
 | 76 | **scx_rusty/lavd 端到端** | 🔄 | `e2e/cases/scx/` 已落地并在 framework VM（`7.0.0-rc2-g2a6783cc77b6`, `4` vCPU）跑通 `scx_rusty` userspace loader → 30s `hackbench` / `stress-ng --cpu 4` / `sysbench cpu` baseline。活跃 `13` 个 struct_ops programs，扫描到 `28` sites（CMOV `27`, LEA `1`；`rusty_enqueue=12`, `rusty_stopping=10`, `rusty_set_cpumask=2`, `rusty_runnable/quiescent/init_task/init` 各 `1`）。但 raw `bpftool struct_ops register` 虽 return `0` 仍不会保持 `sched_ext` enabled，且对 live struct_ops 调用 `BPF_PROG_JIT_RECOMPILE` 全部未成功（常见 `EINVAL`），因此当前只有 honest baseline + site census，没有 post-reJIT 对比；`scx_lavd` 仍待后续。`e2e/results/scx-e2e.json`, `e2e/results/scx-e2e.md`, `docs/tmp/scx-e2e-report.md` |

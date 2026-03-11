@@ -1,9 +1,13 @@
 // SPDX-License-Identifier: MIT
 
 #include "bpf_jit_scanner/pattern_v5.hpp"
+#include "bpf_jit_scanner/policy_config.hpp"
 
+#include <array>
 #include <cstdio>
 #include <cstring>
+#include <stdexcept>
+#include <string>
 #include <vector>
 
 namespace {
@@ -432,6 +436,121 @@ void test_v5_abi_limits()
     CHECK_EQ(BPF_JIT_MAX_CANONICAL_PARAMS, 16);
 }
 
+void test_v5_family_aliases_and_policy_filter()
+{
+    using bpf_jit_scanner::V5ScanOptions;
+
+    auto mixed = encode({
+        {BPF_JEQ_X, regs(0, 1), 2, 0},
+        {BPF_MOV64_X, regs(2, 3), 0, 0},
+        {BPF_JMP_JA, 0, 1, 0},
+        {BPF_MOV64_X, regs(2, 4), 0, 0},
+        {BPF_MOV64_X, regs(3, 5), 0, 0},
+        {BPF_AND64_X, regs(3, 4), 0, 0},
+        {BPF_RSH64_K, regs(3, 0), 0, 28},
+        {BPF_MOV64_X, regs(7, 5), 0, 0},
+        {BPF_LSH64_K, regs(7, 0), 0, 4},
+        {BPF_OR64_X, regs(7, 3), 0, 0},
+    });
+
+    auto summary = bpf_jit_scanner::scan_v5_builtin(
+        mixed.data(), static_cast<uint32_t>(mixed.size()),
+        V5ScanOptions {.scan_cmov = true, .scan_rotate = true});
+    CHECK_EQ(summary.rules.size(), 2u);
+    CHECK_EQ(summary.cmov_sites, 1u);
+    CHECK_EQ(summary.rotate_sites, 1u);
+
+    auto allow_config = bpf_jit_scanner::parse_policy_config_text(
+        R"({"selection":{"mode":"allowlist","families":["wide-load","rotate"]}})",
+        "inline.json");
+    auto allowed_rules = bpf_jit_scanner::filter_rules_by_policy(
+        summary.rules, allow_config);
+    CHECK_EQ(allowed_rules.size(), 1u);
+    CHECK_EQ(allowed_rules[0].family, bpf_jit_scanner::V5Family::Rotate);
+
+    auto deny_config = bpf_jit_scanner::parse_policy_config_text(
+        "selection:\n"
+        "  mode: denylist\n"
+        "  families: [cond_select]\n",
+        "inline.yaml");
+    auto denied_rules = bpf_jit_scanner::filter_rules_by_policy(
+        summary.rules, deny_config);
+    CHECK_EQ(denied_rules.size(), 1u);
+    CHECK_EQ(denied_rules[0].family, bpf_jit_scanner::V5Family::Rotate);
+
+    const auto branch_flip = bpf_jit_scanner::parse_v5_family_name("branch_flip");
+    CHECK(branch_flip.has_value());
+    if (branch_flip.has_value()) {
+        CHECK_EQ(*branch_flip, bpf_jit_scanner::V5Family::BranchFlip);
+    }
+
+    auto override_config = bpf_jit_scanner::parse_policy_config_text(
+        "selection:\n"
+        "  mode: allowlist\n"
+        "  families: []\n"
+        "site_overrides:\n"
+        "  - site_id: cmov:0:cond-select-64\n"
+        "    action: enable\n",
+        "override.yaml");
+    auto override_rules = bpf_jit_scanner::filter_rules_by_policy(
+        summary.rules, override_config);
+    CHECK_EQ(override_rules.size(), 1u);
+    CHECK_EQ(override_rules[0].family, bpf_jit_scanner::V5Family::Cmov);
+}
+
+void test_v5_policy_config_validation()
+{
+    bool threw = false;
+    try {
+        static_cast<void>(bpf_jit_scanner::parse_policy_config_text(
+            "selection:\n"
+            "  mode: allowlist\n"
+            "  families: [not-a-family]\n",
+            "bad.yaml"));
+    } catch (const std::runtime_error &) {
+        threw = true;
+    }
+    CHECK(threw);
+}
+
+void test_v5_scan_manifest_json()
+{
+    using bpf_jit_scanner::V5ProgramInfo;
+    using bpf_jit_scanner::V5ScanOptions;
+
+    auto diamond = encode({
+        {BPF_JEQ_X, regs(0, 1), 2, 0},
+        {BPF_MOV64_X, regs(2, 3), 0, 0},
+        {BPF_JMP_JA, 0, 1, 0},
+        {BPF_MOV64_X, regs(2, 4), 0, 0},
+    });
+    auto summary = bpf_jit_scanner::scan_v5_builtin(
+        diamond.data(), static_cast<uint32_t>(diamond.size()),
+        V5ScanOptions {.scan_cmov = true});
+
+    V5ProgramInfo program = {};
+    program.name = "demo-program";
+    program.insn_cnt = static_cast<uint32_t>(diamond.size() / 8);
+    program.prog_tag = std::array<uint8_t, 8> {
+        0xde, 0xad, 0xbe, 0xef, 0x12, 0x34, 0x56, 0x78,
+    };
+
+    const auto manifest = bpf_jit_scanner::build_scan_manifest(program, summary);
+    const std::string json = bpf_jit_scanner::scan_manifest_to_json(manifest);
+
+    CHECK(json.find("\"name\":\"demo-program\"") != std::string::npos);
+    CHECK(json.find("\"prog_tag\":\"deadbeef12345678\"") != std::string::npos);
+    CHECK(json.find("\"total_sites\":1") != std::string::npos);
+    CHECK(json.find("\"cmov_sites\":1") != std::string::npos);
+    CHECK(json.find("\"family\":\"cmov\"") != std::string::npos);
+    CHECK(json.find("\"site_id\":\"cmov:0:cond-select-64\"") != std::string::npos);
+    CHECK(json.find("\"start_insn\":0") != std::string::npos);
+    CHECK(json.find("\"pattern_kind\":\"cond-select-64\"") != std::string::npos);
+    CHECK(json.find("\"site_len\":4") != std::string::npos);
+    CHECK(json.find("\"canonical_form\":4") != std::string::npos);
+    CHECK(json.find("\"native_choice\":1") != std::string::npos);
+}
+
 } // namespace
 
 int main()
@@ -446,6 +565,9 @@ int main()
     test_v5_endian_fusion_scan();
     test_v5_branch_flip_scan();
     test_v5_abi_limits();
+    test_v5_family_aliases_and_policy_filter();
+    test_v5_policy_config_validation();
+    test_v5_scan_manifest_json();
 
     std::printf("PASS %d\n", g_pass);
     if (g_fail) {

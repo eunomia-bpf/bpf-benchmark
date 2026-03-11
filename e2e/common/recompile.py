@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import ctypes
 import ctypes.util
+import json
 import os
 import re
 from functools import lru_cache
@@ -62,18 +63,84 @@ def _scanner_counts(stdout: str) -> dict[str, int]:
         "wide_sites": 0,
         "rotate_sites": 0,
         "lea_sites": 0,
+        "bitfield_sites": 0,
+        "zero_ext_sites": 0,
+        "endian_sites": 0,
+        "branch_flip_sites": 0,
     }
+    payload = None
+    stripped_stdout = stdout.strip()
+    if stripped_stdout.startswith("{"):
+        try:
+            candidate = json.loads(stripped_stdout)
+        except json.JSONDecodeError:
+            candidate = None
+        if isinstance(candidate, dict):
+            payload = candidate
+    for line in reversed(stdout.splitlines()):
+        if payload is not None:
+            break
+        text = line.strip()
+        if not text.startswith("{"):
+            continue
+        try:
+            candidate = json.loads(text)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(candidate, dict):
+            payload = candidate
+            break
+    if payload is not None:
+        summary = payload.get("summary") if isinstance(payload.get("summary"), dict) else payload
+        counts["total_sites"] = int(summary.get("total_sites", 0) or 0)
+        counts["cmov_sites"] = int(summary.get("cmov_sites", 0) or 0)
+        counts["wide_sites"] = int(summary.get("wide_sites", 0) or 0)
+        counts["rotate_sites"] = int(summary.get("rotate_sites", 0) or 0)
+        counts["lea_sites"] = int(summary.get("lea_sites", 0) or 0)
+        counts["bitfield_sites"] = int(
+            summary.get("bitfield_sites", summary.get("extract_sites", 0)) or 0
+        )
+        counts["zero_ext_sites"] = int(summary.get("zero_ext_sites", 0) or 0)
+        counts["endian_sites"] = int(summary.get("endian_sites", 0) or 0)
+        counts["branch_flip_sites"] = int(summary.get("branch_flip_sites", 0) or 0)
+        if counts["total_sites"] == 0:
+            counts["total_sites"] = (
+                counts["cmov_sites"]
+                + counts["wide_sites"]
+                + counts["rotate_sites"]
+                + counts["lea_sites"]
+                + counts["bitfield_sites"]
+                + counts["zero_ext_sites"]
+                + counts["endian_sites"]
+                + counts["branch_flip_sites"]
+            )
+        return counts
     patterns = {
         "total_sites": r"Accepted\s+(\d+)\s+v5 site",
         "cmov_sites": r"cmov:\s+(\d+)",
         "wide_sites": r"wide:\s+(\d+)",
         "rotate_sites": r"rotate:\s+(\d+)",
         "lea_sites": r"lea:\s+(\d+)",
+        "bitfield_sites": r"extract:\s*(\d+)",
+        "zero_ext_sites": r"zeroext:\s*(\d+)",
+        "endian_sites": r"endian:\s*(\d+)",
+        "branch_flip_sites": r"bflip:\s*(\d+)",
     }
     for field, pattern in patterns.items():
         match = re.search(pattern, stdout)
         if match:
             counts[field] = int(match.group(1))
+    if counts["total_sites"] == 0:
+        counts["total_sites"] = (
+            counts["cmov_sites"]
+            + counts["wide_sites"]
+            + counts["rotate_sites"]
+            + counts["lea_sites"]
+            + counts["bitfield_sites"]
+            + counts["zero_ext_sites"]
+            + counts["endian_sites"]
+            + counts["branch_flip_sites"]
+        )
     return counts
 
 
@@ -114,6 +181,7 @@ def scan_programs(
                     "--prog-fd",
                     str(fd),
                     "--all",
+                    "--json",
                     "--v5",
                     "--program-name",
                     program_name,

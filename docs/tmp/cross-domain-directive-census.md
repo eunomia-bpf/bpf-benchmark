@@ -7,230 +7,625 @@ executable ELF sections in `.bpf.o` files across multiple BPF program domains.
 
 | Domain | Sources | Objects | Programs | Insns | CMOV | WIDE | ROTATE | LEA | Total Sites | Objects w/ Sites |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Networking | 9 | 61 | 148 | 349819 | 1051 | 1864 | 30 | 0 | 2945 | 39 |
-| Tracing | 1 | 57 | 366 | 23707 | 109 | 0 | 0 | 0 | 109 | 20 |
-| Security/Resource | 1 | 6 | 16 | 668 | 3 | 0 | 0 | 0 | 3 | 2 |
-| Testing | 1 | 361 | 667 | 68350 | 74 | 6 | 1810 | 0 | 1890 | 37 |
-| Examples | 1 | 12 | 22 | 946 | 0 | 0 | 0 | 0 | 0 | 0 |
-| Other | 2 | 17 | 29 | 1120 | 0 | 0 | 0 | 0 | 0 | 0 |
-| **Total** | **15** | **514** | **1248** | **444610** | **1237** | **1870** | **1840** | **0** | **4947** | **98** |
+| Networking | 9 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| Tracing | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| Security/Resource | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| Testing | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| Examples | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| Other | 8 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| **Total** | **22** | **0** | **0** | **0** | **0** | **0** | **0** | **0** | **0** | **0** |
 
 ## Per-Source Breakdown
 
 | Source | Domain | Objects | Programs | Insns | CMOV | WIDE | ROTATE | LEA | Total | w/ Sites |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| bcc | Tracing | 57 | 366 | 23707 | 109 | 0 | 0 | 0 | 109 | 20 |
-| calico | Networking | 8 | 8 | 158995 | 196 | 108 | 10 | 0 | 314 | 8 |
-| cilium | Networking | 3 | 9 | 97621 | 658 | 0 | 0 | 0 | 658 | 3 |
-| katran | Networking | 5 | 6 | 3013 | 6 | 4 | 20 | 0 | 30 | 2 |
-| libbpf-bootstrap | Examples | 12 | 22 | 946 | 0 | 0 | 0 | 0 | 0 | 0 |
-| linux-selftests | Testing | 361 | 667 | 68350 | 74 | 6 | 1810 | 0 | 1890 | 37 |
-| loxilb | Networking | 3 | 20 | 77619 | 98 | 1729 | 0 | 0 | 1827 | 3 |
-| manual-test | Other | 2 | 4 | 48 | 0 | 0 | 0 | 0 | 0 | 0 |
-| netbird | Networking | 1 | 2 | 264 | 0 | 0 | 0 | 0 | 0 | 0 |
-| real_world_code_size | Other | 15 | 25 | 1072 | 0 | 0 | 0 | 0 | 0 | 0 |
-| suricata | Networking | 2 | 2 | 744 | 2 | 0 | 0 | 0 | 2 | 2 |
-| systemd | Security/Resource | 6 | 16 | 668 | 3 | 0 | 0 | 0 | 3 | 2 |
-| tubular | Networking | 1 | 1 | 124 | 0 | 0 | 0 | 0 | 0 | 0 |
-| xdp-tools | Networking | 13 | 58 | 9094 | 51 | 1 | 0 | 0 | 52 | 11 |
-| xdp-tutorial | Networking | 25 | 42 | 2345 | 40 | 22 | 0 | 0 | 62 | 10 |
-
-## Networking Domain Details
-
-Sources: calico, cilium, katran, loxilb, netbird, suricata, tubular, xdp-tools, xdp-tutorial
-
-### Programs with Directive Sites (39 of 61)
-
-| Program | Source | Insns | CMOV | WIDE | ROTATE | LEA | Total |
-| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| llb_ebpf_emain.bpf.o | loxilb | 37938 | 49 | 863 | 0 | 0 | 912 |
-| llb_ebpf_main.bpf.o | loxilb | 37895 | 49 | 863 | 0 | 0 | 912 |
-| bpf_xdp.bpf.o | cilium | 26129 | 408 | 0 | 0 | 0 | 408 |
-| bpf_lxc.bpf.o | cilium | 41881 | 142 | 0 | 0 | 0 | 142 |
-| bpf_overlay.bpf.o | cilium | 29611 | 108 | 0 | 0 | 0 | 108 |
-| from_hep_debug.bpf.o | calico | 28053 | 34 | 18 | 10 | 0 | 62 |
-| to_hep_debug.bpf.o | calico | 30897 | 40 | 20 | 0 | 0 | 60 |
-| to_nat_debug.bpf.o | calico | 30655 | 40 | 20 | 0 | 0 | 60 |
-| from_nat_debug.bpf.o | calico | 24102 | 31 | 14 | 0 | 0 | 45 |
-| to_wep_debug.bpf.o | calico | 18809 | 28 | 16 | 0 | 0 | 44 |
-| from_wep_debug.bpf.o | calico | 24628 | 23 | 14 | 0 | 0 | 37 |
-| xdp_flowtable.bpf.o | xdp-tools | 2744 | 30 | 0 | 0 | 0 | 30 |
-| balancer.bpf.o | katran | 2546 | 5 | 4 | 20 | 0 | 29 |
-| xdp_vlan01_kern.bpf.o | xdp-tutorial | 113 | 12 | 6 | 0 | 0 | 18 |
-| xdp_prog_kern_02.bpf.o | xdp-tutorial | 338 | 1 | 9 | 0 | 0 | 10 |
-| xdp_prog_kern_03.bpf.o | xdp-tutorial | 507 | 5 | 4 | 0 | 0 | 9 |
-| xdp_vlan02_kern.bpf.o | xdp-tutorial | 127 | 9 | 0 | 0 | 0 | 9 |
-| xdp_prog_kern.bpf.o | xdp-tutorial | 306 | 4 | 2 | 0 | 0 | 6 |
-| xdp_debug.bpf.o | calico | 1435 | 0 | 4 | 0 | 0 | 4 |
-| xdp_basic.bpf.o | xdp-tools | 1116 | 3 | 1 | 0 | 0 | 4 |
-| trace_prog_kern.bpf.o | xdp-tutorial | 176 | 4 | 0 | 0 | 0 | 4 |
-| llb_xdp_main.bpf.o | loxilb | 1786 | 0 | 3 | 0 | 0 | 3 |
-| xdp_redirect_cpumap.bpf.o | xdp-tools | 1364 | 3 | 0 | 0 | 0 | 3 |
-| xdp_trafficgen.bpf.o | xdp-tools | 1070 | 3 | 0 | 0 | 0 | 3 |
-| xdp_prog_kern.bpf.o | xdp-tutorial | 117 | 2 | 1 | 0 | 0 | 3 |
-| xdp_no_log.bpf.o | calico | 416 | 0 | 2 | 0 | 0 | 2 |
-| xdp_forward.bpf.o | xdp-tools | 302 | 2 | 0 | 0 | 0 | 2 |
-| xdp_monitor.bpf.o | xdp-tools | 541 | 2 | 0 | 0 | 0 | 2 |
-| xdp_redirect_basic.bpf.o | xdp-tools | 630 | 2 | 0 | 0 | 0 | 2 |
-| xdp_redirect_devmap.bpf.o | xdp-tools | 632 | 2 | 0 | 0 | 0 | 2 |
-| xdp_redirect_devmap_multi.bpf.o | xdp-tools | 612 | 2 | 0 | 0 | 0 | 2 |
-| healthchecking.bpf.o | katran | 325 | 1 | 0 | 0 | 0 | 1 |
-| xdp_filter.bpf.o | suricata | 334 | 1 | 0 | 0 | 0 | 1 |
-| xdp_lb.bpf.o | suricata | 410 | 1 | 0 | 0 | 0 | 1 |
-| xdp_flowtable_sample.bpf.o | xdp-tools | 25 | 1 | 0 | 0 | 0 | 1 |
-| xdp_load_bytes.bpf.o | xdp-tools | 13 | 1 | 0 | 0 | 0 | 1 |
-| xdp_prog_fail2.bpf.o | xdp-tutorial | 7 | 1 | 0 | 0 | 0 | 1 |
-| xdp_prog_kern4.bpf.o | xdp-tutorial | 25 | 1 | 0 | 0 | 0 | 1 |
-| xdp_sample_pkts_kern.bpf.o | xdp-tutorial | 33 | 1 | 0 | 0 | 0 | 1 |
-
-## Tracing Domain Details
-
-Sources: bcc
-
-### Programs with Directive Sites (20 of 57)
-
-| Program | Source | Insns | CMOV | WIDE | ROTATE | LEA | Total |
-| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| biostacks.bpf.o | bcc | 569 | 15 | 0 | 0 | 0 | 15 |
-| cpudist.bpf.o | bcc | 403 | 14 | 0 | 0 | 0 | 14 |
-| readahead.bpf.o | bcc | 289 | 10 | 0 | 0 | 0 | 10 |
-| biolatency.bpf.o | bcc | 534 | 7 | 0 | 0 | 0 | 7 |
-| fsdist.bpf.o | bcc | 350 | 7 | 0 | 0 | 0 | 7 |
-| futexctn.bpf.o | bcc | 215 | 7 | 0 | 0 | 0 | 7 |
-| runqlat.bpf.o | bcc | 422 | 7 | 0 | 0 | 0 | 7 |
-| funclatency.bpf.o | bcc | 171 | 6 | 0 | 0 | 0 | 6 |
-| hardirqs.bpf.o | bcc | 248 | 6 | 0 | 0 | 0 | 6 |
-| softirqs.bpf.o | bcc | 181 | 6 | 0 | 0 | 0 | 6 |
-| bitesize.bpf.o | bcc | 140 | 4 | 0 | 0 | 0 | 4 |
-| tcprtt.bpf.o | bcc | 499 | 4 | 0 | 0 | 0 | 4 |
-| tcpsynbl.bpf.o | bcc | 93 | 4 | 0 | 0 | 0 | 4 |
-| biotop.bpf.o | bcc | 551 | 3 | 0 | 0 | 0 | 3 |
-| filetop.bpf.o | bcc | 179 | 2 | 0 | 0 | 0 | 2 |
-| llcstat.bpf.o | bcc | 110 | 2 | 0 | 0 | 0 | 2 |
-| memleak.bpf.o | bcc | 1606 | 2 | 0 | 0 | 0 | 2 |
-| biopattern.bpf.o | bcc | 101 | 1 | 0 | 0 | 0 | 1 |
-| ksnoop.bpf.o | bcc | 700 | 1 | 0 | 0 | 0 | 1 |
-| runqlen.bpf.o | bcc | 83 | 1 | 0 | 0 | 0 | 1 |
-
-## Security/Resource Domain Details
-
-Sources: systemd
-
-### Programs with Directive Sites (2 of 6)
-
-| Program | Source | Insns | CMOV | WIDE | ROTATE | LEA | Total |
-| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| restrict-ifaces.bpf.o | systemd | 38 | 2 | 0 | 0 | 0 | 2 |
-| userns-restrict.bpf.o | systemd | 258 | 1 | 0 | 0 | 0 | 1 |
-
-## Testing Domain Details
-
-Sources: linux-selftests
-
-### Programs with Directive Sites (37 of 361)
-
-| Program | Source | Insns | CMOV | WIDE | ROTATE | LEA | Total |
-| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| test_verif_scale2.bpf.o | linux-selftests | 14750 | 0 | 0 | 992 | 0 | 992 |
-| core_kern.bpf.o | linux-selftests | 15789 | 0 | 0 | 818 | 0 | 818 |
-| test_tc_tunnel.bpf.o | linux-selftests | 2339 | 8 | 1 | 0 | 0 | 9 |
-| xdp_synproxy_kern.bpf.o | linux-selftests | 2203 | 4 | 5 | 0 | 0 | 9 |
-| test_core_reloc_module.bpf.o | linux-selftests | 137 | 6 | 0 | 0 | 0 | 6 |
-| bpf_cc_cubic.bpf.o | linux-selftests | 159 | 4 | 0 | 0 | 0 | 4 |
-| bpf_cubic.bpf.o | linux-selftests | 558 | 4 | 0 | 0 | 0 | 4 |
-| bpf_iter_ksym.bpf.o | linux-selftests | 149 | 3 | 0 | 0 | 0 | 3 |
-| bpf_iter_task_vmas.bpf.o | linux-selftests | 124 | 3 | 0 | 0 | 0 | 3 |
-| setget_sockopt.bpf.o | linux-selftests | 917 | 3 | 0 | 0 | 0 | 3 |
-| test_skmsg_load_helpers.bpf.o | linux-selftests | 98 | 3 | 0 | 0 | 0 | 3 |
-| uprobe_multi_pid_filter.bpf.o | linux-selftests | 49 | 3 | 0 | 0 | 0 | 3 |
-| bpf_hashmap_lookup.bpf.o | linux-selftests | 60 | 2 | 0 | 0 | 0 | 2 |
-| decap_sanity.bpf.o | linux-selftests | 75 | 2 | 0 | 0 | 0 | 2 |
-| kfunc_call_test.bpf.o | linux-selftests | 212 | 2 | 0 | 0 | 0 | 2 |
-| test_cgroup1_hierarchy.bpf.o | linux-selftests | 54 | 2 | 0 | 0 | 0 | 2 |
-| test_kernel_flag.bpf.o | linux-selftests | 14 | 2 | 0 | 0 | 0 | 2 |
-| test_overhead.bpf.o | linux-selftests | 16 | 2 | 0 | 0 | 0 | 2 |
-| token_lsm.bpf.o | linux-selftests | 36 | 2 | 0 | 0 | 0 | 2 |
-| verifier_arena.bpf.o | linux-selftests | 88 | 2 | 0 | 0 | 0 | 2 |
-| bpf_dctcp.bpf.o | linux-selftests | 294 | 1 | 0 | 0 | 0 | 1 |
-| bpf_iter_sockmap.bpf.o | linux-selftests | 47 | 1 | 0 | 0 | 0 | 1 |
-| bpf_iter_unix.bpf.o | linux-selftests | 143 | 1 | 0 | 0 | 0 | 1 |
-| bpf_mod_race.bpf.o | linux-selftests | 39 | 1 | 0 | 0 | 0 | 1 |
-| for_each_array_map_elem.bpf.o | linux-selftests | 59 | 1 | 0 | 0 | 0 | 1 |
-| get_func_ip_uprobe_test.bpf.o | linux-selftests | 13 | 1 | 0 | 0 | 0 | 1 |
-| local_storage.bpf.o | linux-selftests | 188 | 1 | 0 | 0 | 0 | 1 |
-| lru_bug.bpf.o | linux-selftests | 60 | 1 | 0 | 0 | 0 | 1 |
-| map_kptr.bpf.o | linux-selftests | 1543 | 1 | 0 | 0 | 0 | 1 |
-| mptcpify.bpf.o | linux-selftests | 38 | 1 | 0 | 0 | 0 | 1 |
-| tcp_ca_write_sk_pacing.bpf.o | linux-selftests | 41 | 1 | 0 | 0 | 0 | 1 |
-| test_perf_skip.bpf.o | linux-selftests | 8 | 1 | 0 | 0 | 0 | 1 |
-| test_sockmap_update.bpf.o | linux-selftests | 33 | 1 | 0 | 0 | 0 | 1 |
-| test_task_under_cgroup.bpf.o | linux-selftests | 65 | 1 | 0 | 0 | 0 | 1 |
-| test_tc_change_tail.bpf.o | linux-selftests | 85 | 1 | 0 | 0 | 0 | 1 |
-| test_varlen.bpf.o | linux-selftests | 192 | 1 | 0 | 0 | 0 | 1 |
-| xfrm_info.bpf.o | linux-selftests | 35 | 1 | 0 | 0 | 0 | 1 |
-
-## Examples Domain Details
-
-Sources: libbpf-bootstrap
-
-No programs with directive sites in this domain.
-
-## Other Domain Details
-
-Sources: manual-test, real_world_code_size
-
-No programs with directive sites in this domain.
+| KubeArmor | Other | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| bcc | Tracing | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| calico | Networking | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| cilium | Networking | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| coroot-node-agent | Other | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| datadog-agent | Other | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| katran | Networking | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| libbpf-bootstrap | Examples | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| linux-selftests | Testing | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| loxilb | Networking | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| manual-test | Other | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| netbird | Networking | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| opentelemetry-ebpf-profiler | Other | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| real_world_code_size | Other | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| scx | Other | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| suricata | Networking | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| systemd | Security/Resource | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| tetragon | Tracing | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| tracee | Other | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| tubular | Networking | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| xdp-tools | Networking | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| xdp-tutorial | Networking | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 
 ## Top 20 Programs by Total Sites (All Domains)
 
-| Program | Source | Domain | Insns | CMOV | WIDE | ROTATE | LEA | Total |
-| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| test_verif_scale2.bpf.o | linux-selftests | Testing | 14750 | 0 | 0 | 992 | 0 | 992 |
-| llb_ebpf_emain.bpf.o | loxilb | Networking | 37938 | 49 | 863 | 0 | 0 | 912 |
-| llb_ebpf_main.bpf.o | loxilb | Networking | 37895 | 49 | 863 | 0 | 0 | 912 |
-| core_kern.bpf.o | linux-selftests | Testing | 15789 | 0 | 0 | 818 | 0 | 818 |
-| bpf_xdp.bpf.o | cilium | Networking | 26129 | 408 | 0 | 0 | 0 | 408 |
-| bpf_lxc.bpf.o | cilium | Networking | 41881 | 142 | 0 | 0 | 0 | 142 |
-| bpf_overlay.bpf.o | cilium | Networking | 29611 | 108 | 0 | 0 | 0 | 108 |
-| from_hep_debug.bpf.o | calico | Networking | 28053 | 34 | 18 | 10 | 0 | 62 |
-| to_hep_debug.bpf.o | calico | Networking | 30897 | 40 | 20 | 0 | 0 | 60 |
-| to_nat_debug.bpf.o | calico | Networking | 30655 | 40 | 20 | 0 | 0 | 60 |
-| from_nat_debug.bpf.o | calico | Networking | 24102 | 31 | 14 | 0 | 0 | 45 |
-| to_wep_debug.bpf.o | calico | Networking | 18809 | 28 | 16 | 0 | 0 | 44 |
-| from_wep_debug.bpf.o | calico | Networking | 24628 | 23 | 14 | 0 | 0 | 37 |
-| xdp_flowtable.bpf.o | xdp-tools | Networking | 2744 | 30 | 0 | 0 | 0 | 30 |
-| balancer.bpf.o | katran | Networking | 2546 | 5 | 4 | 20 | 0 | 29 |
-| xdp_vlan01_kern.bpf.o | xdp-tutorial | Networking | 113 | 12 | 6 | 0 | 0 | 18 |
-| biostacks.bpf.o | bcc | Tracing | 569 | 15 | 0 | 0 | 0 | 15 |
-| cpudist.bpf.o | bcc | Tracing | 403 | 14 | 0 | 0 | 0 | 14 |
-| readahead.bpf.o | bcc | Tracing | 289 | 10 | 0 | 0 | 0 | 10 |
-| xdp_prog_kern_02.bpf.o | xdp-tutorial | Networking | 338 | 1 | 9 | 0 | 0 | 10 |
+
+## Failed Objects
+
+- `corpus/build/KubeArmor/enforcer.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/KubeArmor/protectproc.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/KubeArmor/system_monitor.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/bashreadline.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/bindsnoop.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/biolatency.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/biopattern.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/biosnoop.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/biostacks.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/biotop.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/bitesize.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/cachestat.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/capable.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/cpudist.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/cpufreq.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/drsnoop.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/execsnoop.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/exitsnoop.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/filelife.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/filetop.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/fsdist.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/fsslower.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/funclatency.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/futexctn.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/gethostlatency.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/hardirqs.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/javagc.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/klockstat.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/ksnoop.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/llcstat.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/mdflush.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/memleak.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/mountsnoop.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/numamove.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/offcputime.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/oomkill.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/opensnoop.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/profile.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/readahead.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/runqlat.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/runqlen.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/runqslower.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/sigsnoop.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/slabratetop.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/softirqs.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/solisten.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/statsnoop.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/syncsnoop.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/syscount.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/tcpconnect.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/tcpconnlat.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/tcplife.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/tcppktlat.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/tcprtt.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/tcpstates.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/tcpsynbl.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/tcptop.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/tcptracer.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/vfsstat.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/bcc/libbpf-tools/wakeuptime.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/calico/from_hep_debug.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/calico/from_nat_debug.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/calico/from_wep_debug.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/calico/to_hep_debug.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/calico/to_nat_debug.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/calico/to_wep_debug.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/calico/xdp_debug.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/calico/xdp_no_log.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/cilium/bpf_lxc.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/cilium/bpf_overlay.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/cilium/bpf_xdp.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/coroot-node-agent/ebpf.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/datadog-agent/noisy-neighbor-kern.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/datadog-agent/oom-kill-kern.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/katran/balancer.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/katran/healthchecking.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/katran/healthchecking_ipip.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/katran/xdp_pktcntr.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/katran/xdp_root.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/libbpf-bootstrap/examples/c/bootstrap.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/libbpf-bootstrap/examples/c/bootstrap_legacy.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/libbpf-bootstrap/examples/c/fentry.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/libbpf-bootstrap/examples/c/kprobe.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/libbpf-bootstrap/examples/c/ksyscall.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/libbpf-bootstrap/examples/c/lsm.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/libbpf-bootstrap/examples/c/minimal.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/libbpf-bootstrap/examples/c/profile.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/libbpf-bootstrap/examples/c/task_iter.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/libbpf-bootstrap/examples/c/tc.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/libbpf-bootstrap/examples/c/uprobe.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/libbpf-bootstrap/examples/c/usdt.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/minimal_sched_ext.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/test_tc_bpf.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/arena_htab.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/arena_htab_asm.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/arena_list.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/async_stack_depth.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bench_local_storage_create.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_cc_cubic.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_cubic.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_dctcp.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_dctcp_release.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_flow.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_gotox.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_hashmap_full_update_bench.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_hashmap_lookup.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_bpf_array_map.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_bpf_hash_map.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_bpf_link.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_bpf_map.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_bpf_percpu_array_map.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_bpf_percpu_hash_map.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_bpf_sk_storage_helpers.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_bpf_sk_storage_map.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_ipv6_route.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_ksym.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_map_elem.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_netlink.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_setsockopt.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_sockmap.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_task_btf.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_task_file.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_task_stack.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_task_vmas.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_tasks.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_test_kern1.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_test_kern2.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_test_kern3.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_test_kern4.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_test_kern5.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_test_kern6.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_unix.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_vma_offset.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_loop.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_loop_bench.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_mod_race.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_syscall_macro.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_tcp_nogpl.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___diff_arr_dim.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___diff_arr_val_sz.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___equiv_zero_sz_arr.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_bad_signed_arr_elem_sz.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_bad_zero_sz_arr.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_non_array.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_too_shallow.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_too_small.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_wrong_val_type.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___fixed_arr.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields___bit_sz_change.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields___bitfield_vs_int.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields___err_too_big_bitfield.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields___just_big_enough.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enum64val.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enum64val___diff.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enum64val___err_missing.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enum64val___val3_missing.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enumval.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enumval___diff.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enumval___err_missing.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enumval___val3_missing.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_existence.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_existence___minimal.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_existence___wrong_field_defs.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_flavors.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_flavors__err_wrong_name.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_ints.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_ints___bool.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_ints___reverse_sign.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_misc.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_mods.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_mods___mod_swap.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_mods___typedefs.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___anon_embed.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___dup_compat_types.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_array_container.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_array_field.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_dup_incompat_types.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_missing_container.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_missing_field.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_nonstruct_container.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_partial_match_dups.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_too_deep.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___extra_nesting.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___struct_union_mixup.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___diff_enum_def.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___diff_func_proto.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___diff_ptr_type.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___err_non_enum.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___err_non_int.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___err_non_ptr.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_ptr_as_arr.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_ptr_as_arr___diff_sz.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_size.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_size___diff_offs.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_size___diff_sz.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_size___err_ambiguous.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___all_missing.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___diff.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___diff_sz.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___fn_wrong_args.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___incompat.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_id.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_id___missing_targets.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_data.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_bitfields.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_multidim.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_namespacing.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_ordering.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_packing.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_padding.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_syntax.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_type_tag.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_type_tag_user.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cb_refs.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgroup_ancestor.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgroup_hierarchical_stats.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgroup_iter.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgroup_mprog.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgroup_preorder.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgroup_skb_direct_packet_access.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgroup_skb_sk_lookup_kern.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgrp_kfunc_failure.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgrp_kfunc_success.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgrp_ls_attach_cgroup.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgrp_ls_negative.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgrp_ls_recursion.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgrp_ls_sleepable.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgrp_ls_tp_btf.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/core_kern.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/core_kern_overflow.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cpumask_failure.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cpumask_success.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/decap_sanity.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/dummy_st_ops_fail.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/dummy_st_ops_success.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/exhandler_kern.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/fexit_sleep.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/find_vma.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/find_vma_fail1.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/find_vma_fail2.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/for_each_array_map_elem.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/for_each_hash_map_elem.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/for_each_hash_modify.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/for_each_map_elem_write_key.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/for_each_multi_maps.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/freplace_unreliable_prog.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/get_branch_snapshot.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/get_func_ip_uprobe_test.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/ima.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/ip_check_defrag.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/iters_testmod_seq.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/jeq_infer_not_null_fail.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/jit_probe_mem.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/kfunc_call_destructive.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/kfunc_call_fail.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/kfunc_call_race.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/kfunc_call_test.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/kfunc_call_test_subprog.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/kfunc_implicit_args.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/kprobe_multi_verifier.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/kprobe_write_ctx.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/ksym_race.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/linked_funcs1.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/linked_funcs2.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/linked_maps1.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/linked_maps2.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/linked_vars1.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/linked_vars2.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/local_storage.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/local_storage_bench.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/local_storage_rcu_tasks_trace_bench.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/loop1.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/loop2.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/loop3.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/loop6.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/lru_bug.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/lsm.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/lsm_cgroup.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/lsm_cgroup_nonvoid.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/lsm_tailcall.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/map_kptr.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/map_kptr_fail.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/map_kptr_race.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/map_percpu_stats.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/missed_kprobe.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/missed_kprobe_recursion.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/missed_tp_recursion.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/mmap_inner_array.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/mptcp_sock.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/mptcp_sockmap.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/mptcpify.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/nested_acquire.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/nested_trust_failure.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/nested_trust_success.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/netif_receive_skb.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/netns_cookie_prog.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/perf_event_stackmap.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/prepare.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/priv_freplace_prog.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/priv_map.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/priv_prog.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/raw_tp_null.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/raw_tp_null_fail.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/rcu_tasks_trace_gp.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/recursion.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/res_spin_lock.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/security_bpf_map.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/setget_sockopt.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/sk_storage_omem_uncharge.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/skb_pkt_end.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/sock_addr_kern.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/sock_destroy_prog.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/sock_destroy_prog_fail.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/socket_cookie_prog.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/sockopt_qos_to_cc.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/stacktrace_ips.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/stacktrace_map.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/stacktrace_map_skip.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/summarization.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/summarization_freplace.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/tailcall_bpf2bpf_fentry.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/tailcall_bpf2bpf_fexit.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/tailcall_bpf2bpf_hierarchy_fentry.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/task_kfunc_failure.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/task_local_storage.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/task_local_storage_exit_creds.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/task_ls_recursion.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/task_ls_uptr.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/task_storage_nodeadlock.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/tcp_ca_incompl_cong_ops.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/tcp_ca_kfunc.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/tcp_ca_unsupp_cong_op.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/tcp_ca_update.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/tcp_ca_write_sk_pacing.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_access_variable_array.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_assign_reuse.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_attach_kprobe_sleepable.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_attach_probe.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_attach_probe_manual.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_autoattach.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_autoload.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_bpf_cookie.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_bpf_nf.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_bpf_nf_fail.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_btf_decl_tag.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_btf_skc_cls_ingress.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_build_id.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_cgroup1_hierarchy.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_core_read_macros.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_core_reloc_module.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_custom_sec_handlers.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_d_path.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_d_path_check_rdonly_mem.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_d_path_check_types.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_endian.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_fill_link_info.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_global_func17.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_global_func_ctx_args.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_global_map_resize.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_kernel_flag.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_kfunc_dynptr_param.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_ksyms_btf.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_ksyms_btf_null_check.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_ksyms_btf_write_check.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_ksyms_module.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_ksyms_weak.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_ldsx_insn.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_libbpf_get_fd_by_id_opts.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_lookup_and_delete.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_map_init.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_map_lookup_percpu_elem.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_map_ops.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_migrate_reuseport.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_netfilter_link_attach.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_overhead.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_perf_link.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_perf_skip.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_pinning_htab.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_probe_user.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_prog_array_init.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_ptr_untrusted.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_raw_tp_test_run.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_send_signal_kern.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_sk_storage_trace_itself.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_sk_storage_tracing.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_skb_helpers.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_skc_to_unix_sock.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_skmsg_load_helpers.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_sockmap_change_tail.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_sockmap_invalid_update.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_sockmap_progs_query.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_sockmap_skb_verdict_attach.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_sockmap_update.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_subprogs.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_subprogs_extable.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_subprogs_unused.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_task_local_data.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_task_pt_regs.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_task_under_cgroup.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_tc_change_tail.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_tc_tunnel.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_tcpbpf_kern.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_trace_ext_tracing.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_tracepoint.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_unpriv_bpf_disabled.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_uprobe.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_uprobe_autoattach.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_urandom_usdt.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_usdt.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_usdt_multispec.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_varlen.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_verif_scale2.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_xdp_devmap_tailcall.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_xdp_do_redirect.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/timer_crash.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/timer_start_deadlock.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/token_lsm.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/trace_dummy_st_ops.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/trace_printk.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/trace_vprintk.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/tracing_failure.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/tracing_struct.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/tracing_struct_many_args.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/uprobe_multi.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/uprobe_multi_pid_filter.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/uprobe_multi_usdt.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/uprobe_multi_verifier.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/uprobe_syscall.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/uprobe_syscall_executed.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/uptr_map_failure.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/uptr_update_failure.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/uretprobe_stack.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_arena.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_arena_globals1.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_arena_globals2.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_arena_large.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_bits_iter.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_btf_unreliable_prog.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_const.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_ctx.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_default_trusted_ptr.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_jit_inline.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_kfunc_prog_types.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_lsm.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_mtu.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_netfilter_ctx.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_typedef.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_unpriv_perf.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/xdp_flowtable.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/xdp_hw_metadata.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/xdp_metadata.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/xdp_metadata2.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/xdp_synproxy_kern.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/xfrm_info.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/linux-selftests/xdp_synproxy_kern.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/loxilb/llb_ebpf_emain.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/loxilb/llb_ebpf_main.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/loxilb/llb_xdp_main.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/manual-test/fentry.gen.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/manual-test/fentry.tmp.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/netbird/prog.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/opentelemetry-ebpf-profiler/generic_probe.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/opentelemetry-ebpf-profiler/native_stack_trace.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/opentelemetry-ebpf-profiler/sched_monitor.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/real_world_code_size/libbpf-bootstrap/bootstrap.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/real_world_code_size/libbpf-bootstrap/bootstrap_legacy.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/real_world_code_size/libbpf-bootstrap/fentry.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/real_world_code_size/libbpf-bootstrap/kprobe.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/real_world_code_size/libbpf-bootstrap/ksyscall.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/real_world_code_size/libbpf-bootstrap/lsm.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/real_world_code_size/libbpf-bootstrap/minimal.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/real_world_code_size/libbpf-bootstrap/minimal_legacy.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/real_world_code_size/libbpf-bootstrap/minimal_ns.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/real_world_code_size/libbpf-bootstrap/profile.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/real_world_code_size/libbpf-bootstrap/sockfilter.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/real_world_code_size/libbpf-bootstrap/task_iter.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/real_world_code_size/libbpf-bootstrap/tc.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/real_world_code_size/libbpf-bootstrap/uprobe.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/real_world_code_size/libbpf-bootstrap/usdt.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/scx/scx_bpfland_main.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/scx/scx_flash_main.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/scx/scx_lavd_main.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/scx/scx_rusty_main.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/suricata/xdp_filter.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/suricata/xdp_lb.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/systemd/bind-iface.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/systemd/restrict-fs.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/systemd/restrict-ifaces.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/systemd/socket-bind.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/systemd/sysctl-monitor.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/systemd/userns-restrict.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/tetragon/bpf_cgroup.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/tetragon/bpf_cgroup_mkdir.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/tetragon/bpf_cgroup_release.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/tetragon/bpf_cgroup_rmdir.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/tetragon/bpf_cgtracker.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/tetragon/bpf_enforcer.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/tetragon/bpf_execve_bprm_commit_creds.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/tetragon/bpf_execve_event.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/tetragon/bpf_execve_map_update.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/tetragon/bpf_exit.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/tetragon/bpf_fmodret_enforcer.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/tetragon/bpf_fork.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/tetragon/bpf_generic_kprobe.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/tetragon/bpf_generic_lsm_core.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/tetragon/bpf_generic_lsm_output.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/tetragon/bpf_generic_rawtp.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/tetragon/bpf_generic_retkprobe.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/tetragon/bpf_generic_retuprobe.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/tetragon/bpf_generic_tracepoint.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/tetragon/bpf_generic_uprobe.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/tetragon/bpf_generic_usdt.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/tetragon/bpf_multi_enforcer.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/tetragon/bpf_prog_iter.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/tracee/lsm_check.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/tracee/tracee.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/tubular/inet-kern.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tools/xdp_basic.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tools/xdp_flowtable.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tools/xdp_flowtable_sample.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tools/xdp_forward.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tools/xdp_load_bytes.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tools/xdp_monitor.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tools/xdp_redirect_basic.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tools/xdp_redirect_cpumap.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tools/xdp_redirect_devmap.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tools/xdp_redirect_devmap_multi.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tools/xdp_sample.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tools/xdp_trafficgen.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tools/xdpsock.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tutorial/advanced03-AF_XDP/af_xdp_kern.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tutorial/basic01-xdp-pass/xdp_pass_kern.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tutorial/basic02-prog-by-name/xdp_prog_kern.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tutorial/basic03-map-counter/xdp_prog_kern.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tutorial/basic04-pinning-maps/xdp_prog_kern.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_fail1.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_fail2.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_fail3.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_kern.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_kern2.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_kern3.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_kern4.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tutorial/packet-solutions/tc_reply_kern_02.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tutorial/packet-solutions/xdp_prog_kern_02.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tutorial/packet-solutions/xdp_prog_kern_03.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tutorial/packet-solutions/xdp_vlan01_kern.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tutorial/packet-solutions/xdp_vlan02_kern.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tutorial/packet01-parsing/xdp_prog_kern.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tutorial/packet02-rewriting/xdp_prog_kern.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tutorial/packet03-redirecting/xdp_prog_kern.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tutorial/tracing01-xdp-simple/trace_prog_kern.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tutorial/tracing01-xdp-simple/xdp_prog_kern.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tutorial/tracing02-xdp-monitor/trace_prog_kern.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tutorial/tracing03-xdp-debug-print/xdp_prog_kern.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
+- `corpus/build/xdp-tutorial/tracing04-xdp-tcpdump/xdp_sample_pkts_kern.bpf.o`: analyze_object() missing 1 required positional argument: 'scanner'
 
 ## Key Findings
 
 ### Cross-Domain Coverage
 
-- **Networking**: 39/61 objects (63.9%) have at least one directive site
-- **Tracing**: 20/57 objects (35.1%) have at least one directive site
-- **Security/Resource**: 2/6 objects (33.3%) have at least one directive site
-- **Testing**: 37/361 objects (10.2%) have at least one directive site
-- **Examples**: 0/12 objects (0.0%) have at least one directive site
-- **Other**: 0/17 objects (0.0%) have at least one directive site
 
 ### Directive Family Distribution
 
-- **CMOV**: appears in Networking (1051), Tracing (109), Security/Resource (3), Testing (74)
-- **WIDE**: appears in Networking (1864), Testing (6)
-- **ROTATE**: appears in Networking (30), Testing (1810)
+- **CMOV**: not found in any domain
+- **WIDE**: not found in any domain
+- **ROTATE**: not found in any domain
 - **LEA**: not found in any domain
 
 ### Distribution Pattern
 
-- Dominant family by raw count: **WIDE** (1870 sites)
-- Total directive sites across all 514 objects: 4947
-- Objects with at least one site: 98/514 (19.1%)
-- Total BPF instructions scanned: 444610
-- Site density: 11.13 sites per 1000 instructions
+- Dominant family by raw count: **CMOV** (0 sites)
+- Total directive sites across all 0 objects: 0
+- Objects with at least one site: 0/0 (0.0%)
+- Total BPF instructions scanned: 0
 
 ## Methodology
 

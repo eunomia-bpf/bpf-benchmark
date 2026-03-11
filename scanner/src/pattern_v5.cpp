@@ -2,7 +2,9 @@
 
 #include "bpf_jit_scanner/pattern_v5.hpp"
 
+#include <cctype>
 #include <cstring>
+#include <string>
 #include <utility>
 
 namespace bpf_jit_scanner {
@@ -941,22 +943,69 @@ const char *v5_family_name(V5Family family)
     case V5Family::Cmov:
         return "cmov";
     case V5Family::WideMem:
-        return "wide_load";
+        return "wide";
     case V5Family::Rotate:
         return "rotate";
     case V5Family::AddrCalc:
-        return "addr_calc";
+        return "lea";
     case V5Family::BitfieldExtract:
-        return "bitfield_extract";
+        return "extract";
     case V5Family::ZeroExtElide:
-        return "zero_ext_elide";
+        return "zero-ext";
     case V5Family::EndianFusion:
-        return "endian_fusion";
+        return "endian";
     case V5Family::BranchFlip:
-        return "branch_flip";
+        return "branch-flip";
     default:
         return "unknown";
     }
+}
+
+std::optional<V5Family> parse_v5_family_name(std::string_view name)
+{
+    std::string normalized;
+    normalized.reserve(name.size());
+    for (const unsigned char ch : name) {
+        if (std::isalnum(ch) != 0) {
+            normalized.push_back(static_cast<char>(std::tolower(ch)));
+        } else if (ch == '-' || ch == '_') {
+            normalized.push_back('-');
+        }
+    }
+
+    if (normalized == "cmov" || normalized == "cond-select" ||
+        normalized == "condselect") {
+        return V5Family::Cmov;
+    }
+    if (normalized == "wide" || normalized == "wide-mem" ||
+        normalized == "wide-load" || normalized == "widemem" ||
+        normalized == "wideload") {
+        return V5Family::WideMem;
+    }
+    if (normalized == "rotate") {
+        return V5Family::Rotate;
+    }
+    if (normalized == "lea" || normalized == "addr-calc" ||
+        normalized == "addrcalc") {
+        return V5Family::AddrCalc;
+    }
+    if (normalized == "extract" || normalized == "bitfield-extract" ||
+        normalized == "bitfieldextract") {
+        return V5Family::BitfieldExtract;
+    }
+    if (normalized == "zero-ext" || normalized == "zeroext" ||
+        normalized == "zero-ext-elide" || normalized == "zeroextelide") {
+        return V5Family::ZeroExtElide;
+    }
+    if (normalized == "endian" || normalized == "endian-fusion" ||
+        normalized == "endianfusion") {
+        return V5Family::EndianFusion;
+    }
+    if (normalized == "branch-flip" || normalized == "branchflip" ||
+        normalized == "bflip") {
+        return V5Family::BranchFlip;
+    }
+    return std::nullopt;
 }
 
 std::vector<V5PatternDesc> build_v5_cond_select_descriptors()

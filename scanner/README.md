@@ -11,10 +11,12 @@ scanner/
 ├── CMakeLists.txt
 ├── include/bpf_jit_scanner/
 │   ├── pattern_v5.hpp
+│   ├── policy_config.hpp
 │   └── types.h
 ├── src/
 │   ├── cli.cpp
-│   └── pattern_v5.cpp
+│   ├── pattern_v5.cpp
+│   └── policy_config.cpp
 └── tests/
     └── test_scanner.cpp
 ```
@@ -41,8 +43,20 @@ ctest --test-dir build --output-on-failure
 # Offline scan from xlated bytecode and write a v5 blob
 ./build/bpf-jit-scanner scan --xlated dump.bin --all --output policy.blob
 
+# Emit a machine-readable site manifest
+./build/bpf-jit-scanner scan --xlated dump.bin --all --json
+
+# Compile a filtered blob from a YAML/JSON policy file
+./build/bpf-jit-scanner compile-policy --xlated dump.bin --config policy.yaml --output policy.blob
+
+# Or stream the filtered blob to stdout
+./build/bpf-jit-scanner compile-policy --xlated dump.bin --config policy.yaml > policy.blob
+
 # Apply a v5 blob generated from the current program
 ./build/bpf-jit-scanner apply --prog-fd 5 --all
+
+# Apply a filtered policy directly from config
+./build/bpf-jit-scanner apply --prog-fd 5 --config policy.yaml
 
 # Dump post-verifier xlated bytecode for offline analysis
 ./build/bpf-jit-scanner dump --prog-fd 5 --output dump.bin
@@ -64,6 +78,19 @@ Supported family flags:
 The CLI is v5-only. `--v5` is still accepted as a no-op so existing v5
 automation does not need to change in lockstep.
 
+`scan --json` prints a JSON manifest with program metadata, per-family counts,
+and per-site entries. `compile-policy` reads a single-program policy file with a
+minimal schema such as:
+
+```yaml
+version: 1
+selection:
+  mode: allowlist   # or denylist
+  families: [wide, rotate, endian]
+```
+
+JSON input is accepted too because the parser goes through `yaml-cpp`.
+
 When `scan` is given a positional file path, the CLI auto-detects ELF input.
 For `.bpf.o` objects it first tries to load the selected program and fetch
 kernel xlated bytecode. If loading is unavailable, it falls back to scanning
@@ -77,6 +104,12 @@ exposes the full v5 API:
 
 - `scan_v5_builtin()`: builtin declarative-pattern scanning
 - `build_policy_blob_v5()`: serialize rules into the kernel v5 blob format
+
+[`include/bpf_jit_scanner/policy_config.hpp`](./include/bpf_jit_scanner/policy_config.hpp)
+adds:
+
+- policy config loading/filtering for family allowlists and denylists
+- JSON manifest construction for `scan --json`
 
 The library API operates on post-verifier xlated bytecode. The CLI can also
 accept ELF objects for convenience and will resolve them to xlated or raw BPF

@@ -5,6 +5,8 @@
 #include "types.h"
 
 #include <cstdint>
+#include <optional>
+#include <string_view>
 #include <vector>
 
 #ifndef BPF_JIT_POLICY_VERSION_2
@@ -262,6 +264,7 @@ struct V5ScanSummary {
 };
 
 const char *v5_family_name(V5Family family);
+std::optional<V5Family> parse_v5_family_name(std::string_view name);
 
 std::vector<V5PatternDesc> build_v5_cond_select_descriptors();
 std::vector<V5PatternDesc> build_v5_wide_descriptors();

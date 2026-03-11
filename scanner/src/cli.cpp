@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "bpf_jit_scanner/pattern_v5.hpp"
+#include "bpf_jit_scanner/policy_config.hpp"
 
 #include <bpf/libbpf.h>
 
@@ -12,6 +13,7 @@
 #include <cstring>
 #include <filesystem>
 #include <fcntl.h>
+#include <exception>
 #include <memory>
 #include <string>
 #include <sys/mman.h>
@@ -102,6 +104,7 @@ struct InputBundle {
     std::vector<uint8_t> xlated;
     uint32_t insn_cnt = 0;
     uint8_t prog_tag[8] = {};
+    std::string program_name;
 };
 
 struct CommandOptions {
@@ -110,6 +113,7 @@ struct CommandOptions {
     std::string xlated_path;
     std::string output_path;
     std::string program_name;
+    std::string config_path;
     bpf_jit_scanner::V5ScanOptions scan_options = {
         .scan_cmov = false,
         .scan_wide = false,
@@ -126,6 +130,7 @@ struct CommandOptions {
     uint8_t prog_tag[8] = {};
     bool has_insn_cnt = false;
     uint32_t insn_cnt = 0;
+    bool json_output = false;
 };
 
 uint64_t ptr_to_u64(const void *ptr)
@@ -232,8 +237,15 @@ bpf_program *find_program(bpf_object *object, const std::string &program_name)
     die("unable to find program named '%s' in ELF object", program_name.c_str());
 }
 
+std::string extract_program_name(bpf_program *program)
+{
+    const char *current_name = bpf_program__name(program);
+    return current_name != nullptr ? current_name : "";
+}
+
 std::vector<uint8_t> read_object_program(const std::string &path,
-                                         const std::string &program_name)
+                                         const std::string &program_name,
+                                         std::string *resolved_program_name)
 {
     bpf_object_open_opts open_opts = {};
     open_opts.sz = sizeof(open_opts);
@@ -246,6 +258,9 @@ std::vector<uint8_t> read_object_program(const std::string &path,
     bpf_object_ptr object(raw_object);
 
     bpf_program *program = find_program(object.get(), program_name);
+    if (resolved_program_name != nullptr) {
+        *resolved_program_name = extract_program_name(program);
+    }
     const bpf_insn *insns = bpf_program__insns(program);
     const size_t insn_cnt = bpf_program__insn_cnt(program);
     if (insns == nullptr || insn_cnt == 0) {
@@ -274,6 +289,7 @@ bool try_load_object_xlated(const std::string &path,
     bpf_object_ptr object(raw_object);
 
     bpf_program *program = find_program(object.get(), program_name);
+    input.program_name = extract_program_name(program);
     bpf_program *iter = nullptr;
     while ((iter = bpf_object__next_program(object.get(), iter)) != nullptr) {
         bpf_program__set_autoload(iter, iter == program);
@@ -298,13 +314,8 @@ bool try_load_object_xlated(const std::string &path,
     return true;
 }
 
-void write_file(const std::string &path, const uint8_t *data, uint32_t len)
+void write_all(int fd, const uint8_t *data, uint32_t len, const char *target)
 {
-    int fd = open(path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    if (fd < 0) {
-        die("open(%s): %s", path.c_str(), strerror(errno));
-    }
-
     size_t offset = 0;
     while (offset < len) {
         const ssize_t rc = write(fd, data + offset, len - offset);
@@ -312,11 +323,35 @@ void write_file(const std::string &path, const uint8_t *data, uint32_t len)
             if (errno == EINTR) {
                 continue;
             }
-            die("write(%s): %s", path.c_str(), strerror(errno));
+            die("write(%s): %s", target, strerror(errno));
         }
         offset += static_cast<size_t>(rc);
     }
+}
+
+void write_file(const std::string &path, const uint8_t *data, uint32_t len)
+{
+    int fd = open(path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (fd < 0) {
+        die("open(%s): %s", path.c_str(), strerror(errno));
+    }
+
+    write_all(fd, data, len, path.c_str());
     close(fd);
+}
+
+void write_stdout(const uint8_t *data, uint32_t len)
+{
+    write_all(STDOUT_FILENO, data, len, "stdout");
+}
+
+bpf_jit_scanner::V5PolicyConfig load_policy_config_or_die(const std::string &path)
+{
+    try {
+        return bpf_jit_scanner::load_policy_config_file(path);
+    } catch (const std::exception &ex) {
+        die("%s", ex.what());
+    }
 }
 
 mini_bpf_prog_info fetch_prog_info(int prog_fd)
@@ -364,16 +399,22 @@ InputBundle load_input(const CommandOptions &options)
         input.xlated = fetch_xlated(options.prog_fd, info);
         input.insn_cnt = info.xlated_prog_len / 8;
         std::memcpy(input.prog_tag, info.tag, sizeof(input.prog_tag));
+        input.program_name.assign(info.name, strnlen(info.name, sizeof(info.name)));
     } else {
         const auto data = read_file(options.xlated_path);
         if (data_is_elf_object(data)) {
             if (!try_load_object_xlated(options.xlated_path, options.program_name, input)) {
-                input.xlated = read_object_program(options.xlated_path, options.program_name);
+                input.xlated = read_object_program(options.xlated_path,
+                                                  options.program_name,
+                                                  &input.program_name);
                 input.insn_cnt = static_cast<uint32_t>(input.xlated.size() / 8);
             }
         } else {
             input.xlated = data;
             input.insn_cnt = static_cast<uint32_t>(input.xlated.size() / 8);
+            input.program_name = options.program_name.empty()
+                                     ? std::filesystem::path(options.xlated_path).filename().string()
+                                     : options.program_name;
         }
         if (input.xlated.size() % 8 != 0) {
             die("offline input size (%zu) is not a multiple of 8", input.xlated.size());
@@ -385,6 +426,9 @@ InputBundle load_input(const CommandOptions &options)
     }
     if (options.has_insn_cnt) {
         input.insn_cnt = options.insn_cnt;
+    }
+    if (!options.program_name.empty()) {
+        input.program_name = options.program_name;
     }
     return input;
 }
@@ -456,8 +500,9 @@ void print_usage(const char *prog)
 {
     std::fprintf(stderr,
         "Usage:\n"
-        "  %s scan  (<file> | --prog-fd <fd> | --xlated <file>) [family flags] [--output <blob>]\n"
-        "  %s apply --prog-fd <fd> [family flags] [--output <blob>]\n"
+        "  %s scan  (<file> | --prog-fd <fd> | --xlated <file>) [family flags] [--json] [--output <blob>]\n"
+        "  %s compile-policy (<file> | --prog-fd <fd> | --xlated <file>) --config <policy.{yaml,json}> [family flags] [--output <blob>|-]\n"
+        "  %s apply --prog-fd <fd> [family flags] [--config <policy.{yaml,json}>] [--output <blob>]\n"
         "  %s dump  --prog-fd <fd> [--output <file>]\n"
         "\n"
         "Family flags:\n"
@@ -476,11 +521,13 @@ void print_usage(const char *prog)
         "\n"
         "Shared options:\n"
         "  --program-name <name>  Select a program when scanning an ELF object path\n"
+        "  --config <file>        Policy YAML/JSON used by compile-policy or apply\n"
+        "  --json                 Emit scan manifest JSON instead of text summary\n"
         "  --prog-tag <hex>       Override prog_tag for blob writing (16 hex chars)\n"
         "  --insn-cnt <n>         Override insn_cnt for blob writing\n"
-        "  --output <file>        Output path (scan/apply: blob, dump: xlated)\n"
+        "  --output <file>        Output path (scan/apply/compile-policy: blob, dump: xlated)\n"
         "  -h, --help             Show this help\n",
-        prog, prog, prog);
+        prog, prog, prog, prog);
 }
 
 void parse_hex_tag(const char *hex, uint8_t tag[8])
@@ -520,6 +567,7 @@ CommandOptions parse_args(int argc, char **argv)
         std::exit(0);
     }
     if (options.subcommand != "scan" &&
+        options.subcommand != "compile-policy" &&
         options.subcommand != "apply" &&
         options.subcommand != "dump") {
         die("unknown subcommand: %s", options.subcommand.c_str());
@@ -545,6 +593,10 @@ CommandOptions parse_args(int argc, char **argv)
             options.output_path = need_next();
         } else if (arg == "--program-name") {
             options.program_name = need_next();
+        } else if (arg == "--config") {
+            options.config_path = need_next();
+        } else if (arg == "--json") {
+            options.json_output = true;
         } else if (arg == "--policy") {
             die("--policy was removed; scanner is v5-only");
         } else if (arg == "--prog-tag") {
@@ -593,7 +645,8 @@ CommandOptions parse_args(int argc, char **argv)
         } else if (arg == "--v5") {
             continue;
         } else if (!arg.empty() && arg[0] != '-' &&
-                   options.subcommand == "scan" &&
+                   (options.subcommand == "scan" ||
+                    options.subcommand == "compile-policy") &&
                    options.prog_fd < 0 &&
                    options.xlated_path.empty()) {
             options.xlated_path = arg;
@@ -609,6 +662,12 @@ CommandOptions parse_args(int argc, char **argv)
         if (!options.xlated_path.empty()) {
             die("dump does not accept --xlated");
         }
+        if (!options.config_path.empty()) {
+            die("dump does not accept --config");
+        }
+        if (options.json_output) {
+            die("dump does not accept --json");
+        }
         return options;
     }
 
@@ -619,8 +678,28 @@ CommandOptions parse_args(int argc, char **argv)
         if (!options.xlated_path.empty()) {
             die("apply does not accept --xlated");
         }
+        if (options.json_output) {
+            die("apply does not accept --json");
+        }
     } else if ((options.prog_fd < 0) == options.xlated_path.empty()) {
+        if (options.subcommand == "compile-policy") {
+            die("compile-policy requires exactly one of --prog-fd or --xlated");
+        }
         die("scan requires exactly one of --prog-fd or --xlated");
+    }
+
+    if (options.subcommand == "scan" && !options.config_path.empty()) {
+        die("scan does not accept --config; use compile-policy instead");
+    }
+    if ((options.subcommand == "scan" || options.subcommand == "apply") &&
+        options.output_path == "-") {
+        die("%s does not support --output -", options.subcommand.c_str());
+    }
+    if (options.subcommand == "compile-policy" && options.config_path.empty()) {
+        die("compile-policy requires --config");
+    }
+    if (options.subcommand == "compile-policy" && options.json_output) {
+        die("compile-policy does not accept --json");
     }
 
     if (!options.families_explicit) {
@@ -650,6 +729,15 @@ void print_summary(const bpf_jit_scanner::V5ScanSummary &summary)
                 static_cast<unsigned long long>(summary.branch_flip_sites));
 }
 
+bpf_jit_scanner::V5ProgramInfo build_program_info(const InputBundle &input)
+{
+    bpf_jit_scanner::V5ProgramInfo program;
+    program.name = input.program_name;
+    program.insn_cnt = input.insn_cnt;
+    std::memcpy(program.prog_tag.data(), input.prog_tag, sizeof(input.prog_tag));
+    return program;
+}
+
 void run_scan(const CommandOptions &options)
 {
     const InputBundle input = load_input(options);
@@ -658,31 +746,80 @@ void run_scan(const CommandOptions &options)
         static_cast<uint32_t>(input.xlated.size()),
         options.scan_options);
 
-    print_summary(summary);
+    if (options.json_output) {
+        const auto manifest = bpf_jit_scanner::build_scan_manifest(
+            build_program_info(input), summary);
+        const auto json = bpf_jit_scanner::scan_manifest_to_json(manifest);
+        write_stdout(reinterpret_cast<const uint8_t *>(json.data()),
+                     static_cast<uint32_t>(json.size()));
+    } else {
+        print_summary(summary);
+    }
 
     if (!options.output_path.empty()) {
         const auto blob = bpf_jit_scanner::build_policy_blob_v5(
             input.insn_cnt, input.prog_tag, summary.rules);
         write_file(options.output_path, blob.data(), static_cast<uint32_t>(blob.size()));
-        std::printf("Wrote %zu-byte v5 policy blob to %s\n",
-                    blob.size(), options.output_path.c_str());
+        if (options.json_output) {
+            std::fprintf(stderr, "Wrote %zu-byte v5 policy blob to %s\n",
+                         blob.size(), options.output_path.c_str());
+        } else {
+            std::printf("Wrote %zu-byte v5 policy blob to %s\n",
+                        blob.size(), options.output_path.c_str());
+        }
     }
 }
 
-void run_apply(const CommandOptions &options)
+void run_compile_policy(const CommandOptions &options)
 {
     const InputBundle input = load_input(options);
     const auto summary = bpf_jit_scanner::scan_v5_builtin(
         input.xlated.data(),
         static_cast<uint32_t>(input.xlated.size()),
         options.scan_options);
+    const auto config = load_policy_config_or_die(options.config_path);
+    const auto filtered_rules = bpf_jit_scanner::filter_rules_by_policy(
+        summary.rules, config);
     const auto blob = bpf_jit_scanner::build_policy_blob_v5(
-        input.insn_cnt, input.prog_tag, summary.rules);
+        input.insn_cnt, input.prog_tag, filtered_rules);
 
-    print_summary(summary);
+    if (options.output_path.empty() || options.output_path == "-") {
+        write_stdout(blob.data(), static_cast<uint32_t>(blob.size()));
+        return;
+    }
+
+    write_file(options.output_path, blob.data(), static_cast<uint32_t>(blob.size()));
+    std::printf("Wrote %zu-byte filtered v5 policy blob (%zu/%zu rules) to %s\n",
+                blob.size(), filtered_rules.size(), summary.rules.size(),
+                options.output_path.c_str());
+}
+
+void run_apply(const CommandOptions &options)
+{
+    const InputBundle input = load_input(options);
+    const auto discovered = bpf_jit_scanner::scan_v5_builtin(
+        input.xlated.data(),
+        static_cast<uint32_t>(input.xlated.size()),
+        options.scan_options);
+    auto selected_rules = discovered.rules;
+    if (!options.config_path.empty()) {
+        const auto config = load_policy_config_or_die(options.config_path);
+        selected_rules = bpf_jit_scanner::filter_rules_by_policy(
+            discovered.rules, config);
+    }
+    const auto selected_summary =
+        bpf_jit_scanner::summarize_rules(selected_rules);
+    const auto blob = bpf_jit_scanner::build_policy_blob_v5(
+        input.insn_cnt, input.prog_tag, selected_rules);
+
+    print_summary(selected_summary);
+    if (!options.config_path.empty()) {
+        std::printf("Policy filter kept %zu of %zu v5 rule(s)\n",
+                    selected_rules.size(), discovered.rules.size());
+    }
     apply_policy_blob(options.prog_fd, blob);
     std::printf("Applied %zu v5 rule(s) via BPF_PROG_JIT_RECOMPILE\n",
-                summary.rules.size());
+                selected_rules.size());
 
     if (!options.output_path.empty()) {
         write_file(options.output_path, blob.data(), static_cast<uint32_t>(blob.size()));
@@ -713,6 +850,8 @@ int main(int argc, char **argv)
     const CommandOptions options = parse_args(argc, argv);
     if (options.subcommand == "scan") {
         run_scan(options);
+    } else if (options.subcommand == "compile-policy") {
+        run_compile_policy(options);
     } else if (options.subcommand == "apply") {
         run_apply(options);
     } else {

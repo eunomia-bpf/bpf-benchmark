@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(PkgConfig REQUIRED)
+find_package(yaml-cpp CONFIG REQUIRED)
 
 # --------------------------------------------------------------------
 # Options
@@ -20,6 +21,7 @@ option(BPF_JIT_SCANNER_BUILD_TESTS "Build unit tests"                     ON)
 
 add_library(bpf_jit_scanner STATIC
     src/pattern_v5.cpp
+    src/policy_config.cpp
 )
 add_library(bpf_jit_scanner::scanner ALIAS bpf_jit_scanner)
 
@@ -35,6 +37,8 @@ target_include_directories(bpf_jit_scanner
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
+
+target_link_libraries(bpf_jit_scanner PUBLIC yaml-cpp)
 
 target_compile_options(bpf_jit_scanner PRIVATE
     -Wall -Wextra -Wpedantic
@@ -84,6 +88,7 @@ install(TARGETS bpf_jit_scanner
 
 install(FILES
     include/bpf_jit_scanner/pattern_v5.hpp
+    include/bpf_jit_scanner/policy_config.hpp
     include/bpf_jit_scanner/types.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/bpf_jit_scanner
 )
