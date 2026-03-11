@@ -19,6 +19,7 @@
 #include <fstream>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <sys/syscall.h>
 #include <thread>
 #include <unordered_map>
@@ -305,6 +306,22 @@ std::string libbpf_error_string(int error_code)
     char buffer[256];
     libbpf_strerror(error_code, buffer, sizeof(buffer));
     return std::string(buffer);
+}
+
+bool has_skip_family(const cli_options &options, std::string_view family)
+{
+    return std::find(options.skip_families.begin(),
+                     options.skip_families.end(),
+                     family) != options.skip_families.end();
+}
+
+void append_recompile_family(std::vector<std::string> &families,
+                             bool enabled,
+                             std::string_view family)
+{
+    if (enabled) {
+        families.emplace_back(family);
+    }
 }
 
 bpf_program *find_program(bpf_object *object, const std::optional<std::string> &program_name)
@@ -727,12 +744,34 @@ sample_result run_kernel(const cli_options &options)
     /* v4 post-load re-JIT: apply policy blob via BPF_PROG_JIT_RECOMPILE */
     std::chrono::steady_clock::time_point recompile_start {};
     std::chrono::steady_clock::time_point recompile_end {};
-    const bool do_recompile_cmov   = options.recompile_cmov   || options.recompile_all;
-    const bool do_recompile_wide   = options.recompile_wide   || options.recompile_all;
-    const bool do_recompile_rotate = options.recompile_rotate || options.recompile_rotate_rorx || options.recompile_all;
-    const bool do_recompile_lea    = options.recompile_lea    || options.recompile_all;
+    const bool want_recompile_cmov =
+        options.recompile_cmov || options.recompile_all;
+    const bool want_recompile_wide =
+        options.recompile_wide || options.recompile_all;
+    const bool want_recompile_rotate =
+        options.recompile_rotate || options.recompile_rotate_rorx ||
+        options.recompile_all;
+    const bool want_recompile_lea =
+        options.recompile_lea || options.recompile_all;
+    const bool skip_cmov = has_skip_family(options, "cmov");
+    const bool skip_wide = has_skip_family(options, "wide");
+    const bool skip_rotate = has_skip_family(options, "rotate");
+    const bool skip_lea = has_skip_family(options, "lea");
+    const bool do_recompile_cmov = want_recompile_cmov && !skip_cmov;
+    const bool do_recompile_wide = want_recompile_wide && !skip_wide;
+    const bool do_recompile_rotate = want_recompile_rotate && !skip_rotate;
+    const bool do_recompile_lea = want_recompile_lea && !skip_lea;
     directive_scan_summary directive_scan {};
     recompile_summary recompile {};
+    recompile.skipped_families = options.skip_families;
+    append_recompile_family(recompile.requested_families, do_recompile_cmov,
+                            "cmov");
+    append_recompile_family(recompile.requested_families, do_recompile_wide,
+                            "wide");
+    append_recompile_family(recompile.requested_families, do_recompile_rotate,
+                            "rotate");
+    append_recompile_family(recompile.requested_families, do_recompile_lea,
+                            "lea");
     recompile.requested =
         do_recompile_cmov || do_recompile_wide || do_recompile_rotate ||
         do_recompile_lea || options.policy_blob.has_value();
@@ -755,6 +794,19 @@ sample_result run_kernel(const cli_options &options)
              * and build the combined policy blob from post-verifier bytecode.
              */
             auto xlated = load_xlated_program(program_fd, pre_info.xlated_prog_len);
+
+            if (want_recompile_cmov && skip_cmov) {
+                fprintf(stderr, "recompile-cmov: skipped by --skip-families\n");
+            }
+            if (want_recompile_wide && skip_wide) {
+                fprintf(stderr, "recompile-wide: skipped by --skip-families\n");
+            }
+            if (want_recompile_rotate && skip_rotate) {
+                fprintf(stderr, "recompile-rotate: skipped by --skip-families\n");
+            }
+            if (want_recompile_lea && skip_lea) {
+                fprintf(stderr, "recompile-lea: skipped by --skip-families\n");
+            }
 
             /*
              * Scan the full translated program, including subprogs.

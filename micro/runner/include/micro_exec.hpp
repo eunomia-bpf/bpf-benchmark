@@ -51,6 +51,7 @@ struct cli_options {
     bool recompile_lea = false;                         // v4 auto-scan xlated for lea fusion
     bool recompile_all = false;                         // auto-scan for all pattern types
     bool recompile_v5 = false;                          // use v5 declarative pattern blob
+    std::vector<std::string> skip_families;             // skip selected auto-scan families
     std::optional<std::string> program_name;
     std::string io_mode = "map";
     bool manual_load = false;
@@ -109,6 +110,8 @@ struct directive_scan_summary {
 struct recompile_summary {
     bool requested = false;
     std::string mode = "none";
+    std::vector<std::string> requested_families;
+    std::vector<std::string> skipped_families;
     bool policy_generated = false;
     uint64_t policy_bytes = 0;
     bool syscall_attempted = false;

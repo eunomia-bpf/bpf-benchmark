@@ -129,6 +129,11 @@ def parse_args() -> argparse.Namespace:
         help="Skip `make -C vendor/linux-framework bzImage` and use the existing image.",
     )
     parser.add_argument(
+        "--skip-families",
+        action="append",
+        help="Comma-separated recompile families to skip from the auto-generated v5 policy blob. Supported: cmov, wide, rotate, lea.",
+    )
+    parser.add_argument(
         "--force-host-fallback",
         action="store_true",
         help="Skip VM execution and run host compile-only + scanner fallback directly.",
@@ -165,6 +170,41 @@ def zero_scan() -> dict[str, int]:
         "lea_sites": 0,
         "total_sites": 0,
     }
+
+
+def canonical_family_name(value: str) -> str:
+    normalized = value.strip().lower().replace("_", "-")
+    mapping = {
+        "cmov": "cmov",
+        "cond-select": "cmov",
+        "wide": "wide",
+        "wide-mem": "wide",
+        "wide-load": "wide",
+        "rotate": "rotate",
+        "lea": "lea",
+        "addr-calc": "lea",
+        "addrcalc": "lea",
+    }
+    if normalized not in mapping:
+        raise SystemExit(
+            f"unsupported family in --skip-families: {value} "
+            "(expected cmov, wide, rotate, or lea)"
+        )
+    return mapping[normalized]
+
+
+def normalize_skip_families(values: list[str] | None) -> list[str]:
+    normalized: list[str] = []
+    seen: set[str] = set()
+    for raw in values or []:
+        for item in raw.split(","):
+            if not item.strip():
+                continue
+            family = canonical_family_name(item)
+            if family not in seen:
+                seen.add(family)
+                normalized.append(family)
+    return normalized
 
 
 def normalize_scan(scan: dict[str, Any] | None) -> dict[str, int]:
@@ -364,6 +404,7 @@ def build_runner_command(
     btf_custom_path: Path | None,
     compile_only: bool,
     recompile_v5: bool,
+    skip_families: list[str],
     dump_xlated: Path | None = None,
     use_sudo: bool = False,
 ) -> list[str]:
@@ -389,6 +430,8 @@ def build_runner_command(
         command.extend(["--btf-custom-path", str(btf_custom_path)])
     if recompile_v5:
         command.extend(["--recompile-v5", "--recompile-all"])
+        if skip_families:
+            command.extend(["--skip-families", ",".join(skip_families)])
     if dump_xlated is not None:
         command.extend(["--dump-xlated", str(dump_xlated)])
     if compile_only:
@@ -496,6 +539,25 @@ def program_label(record: dict[str, Any]) -> str:
     return f"{record['object_path']}:{record['program_name']}"
 
 
+def recompile_metadata(record: dict[str, Any] | None) -> dict[str, Any]:
+    if not record or not record.get("ok"):
+        return {}
+    return ((record.get("sample") or {}).get("recompile") or {})
+
+
+def effective_applied_families(
+    requested_families: list[str],
+    eligible_families: list[str],
+    applied: bool,
+) -> list[str]:
+    if not applied:
+        return []
+    if not requested_families:
+        return list(eligible_families)
+    eligible_set = set(eligible_families)
+    return [family for family in requested_families if family in eligible_set]
+
+
 def build_empty_record(target: dict[str, Any], execution_mode: str) -> dict[str, Any]:
     return {
         **target,
@@ -510,6 +572,8 @@ def build_empty_record(target: dict[str, Any], execution_mode: str) -> dict[str,
         "v5_compile_applied": False,
         "v5_run_applied": False,
         "eligible_families": families_from_scan(target.get("inventory_scan")),
+        "requested_families_compile": [],
+        "requested_families_run": [],
         "applied_families_compile": [],
         "applied_families_run": [],
         "size_ratio": None,
@@ -532,6 +596,7 @@ def run_target_locally(
     use_sudo: bool,
     enable_recompile: bool,
     enable_exec: bool,
+    skip_families: list[str],
 ) -> dict[str, Any]:
     record = build_empty_record(target, execution_mode)
     object_path = ROOT_DIR / target["object_path"]
@@ -555,6 +620,7 @@ def run_target_locally(
                 btf_custom_path=btf_custom_path,
                 compile_only=True,
                 recompile_v5=False,
+                skip_families=[],
                 dump_xlated=xlated_path,
                 use_sudo=use_sudo,
             ),
@@ -591,6 +657,7 @@ def run_target_locally(
                     btf_custom_path=btf_custom_path,
                     compile_only=True,
                     recompile_v5=True,
+                    skip_families=skip_families,
                     use_sudo=use_sudo,
                 ),
                 timeout_seconds,
@@ -608,6 +675,7 @@ def run_target_locally(
                     btf_custom_path=btf_custom_path,
                     compile_only=False,
                     recompile_v5=False,
+                    skip_families=[],
                     use_sudo=use_sudo,
                 ),
                 timeout_seconds,
@@ -625,6 +693,7 @@ def run_target_locally(
                     btf_custom_path=btf_custom_path,
                     compile_only=False,
                     recompile_v5=True,
+                    skip_families=skip_families,
                     use_sudo=use_sudo,
                 ),
                 timeout_seconds,
@@ -640,8 +709,18 @@ def run_target_locally(
     record["v5_run"] = invocation_summary(v5_run_raw)
     record["v5_compile_applied"] = bool((((record["v5_compile"] or {}).get("sample") or {}).get("recompile") or {}).get("applied"))
     record["v5_run_applied"] = bool((((record["v5_run"] or {}).get("sample") or {}).get("recompile") or {}).get("applied"))
-    record["applied_families_compile"] = list(record["eligible_families"]) if record["v5_compile_applied"] else []
-    record["applied_families_run"] = list(record["eligible_families"]) if record["v5_run_applied"] else []
+    record["requested_families_compile"] = list(recompile_metadata(record["v5_compile"]).get("requested_families") or [])
+    record["requested_families_run"] = list(recompile_metadata(record["v5_run"]).get("requested_families") or [])
+    record["applied_families_compile"] = effective_applied_families(
+        record["requested_families_compile"],
+        record["eligible_families"],
+        record["v5_compile_applied"],
+    )
+    record["applied_families_run"] = effective_applied_families(
+        record["requested_families_run"],
+        record["eligible_families"],
+        record["v5_run_applied"],
+    )
     record["size_ratio"] = size_ratio(record["baseline_compile"], record["v5_compile"])
     record["size_delta_pct"] = size_delta_pct(record["baseline_compile"], record["v5_compile"])
     record["speedup_ratio"] = speedup_ratio(record["baseline_run"], record["v5_run"])
@@ -687,6 +766,7 @@ def run_guest_target_mode(args: argparse.Namespace) -> int:
         use_sudo=False,
         enable_recompile=True,
         enable_exec=bool(target.get("can_test_run")),
+        skip_families=normalize_skip_families(args.skip_families),
     )
     print(json.dumps(record, sort_keys=True))
     return 0
@@ -796,6 +876,7 @@ def run_target_in_guest(
     repeat: int,
     timeout_seconds: int,
     vng_binary: str,
+    skip_families: list[str],
 ) -> dict[str, Any]:
     handle = tempfile.NamedTemporaryFile(
         mode="w",
@@ -809,24 +890,25 @@ def run_target_in_guest(
             json.dump(target, handle)
             handle.write("\n")
         target_path = Path(handle.name)
-        guest_exec = build_guest_exec(
-            [
-                "python3",
-                str(SELF_RELATIVE),
-                "--guest-target-json",
-                str(target_path),
-                "--runner",
-                str(runner),
-                "--scanner",
-                str(scanner),
-                "--btf-custom-path",
-                str(btf_custom_path),
-                "--repeat",
-                str(repeat),
-                "--timeout",
-                str(timeout_seconds),
-            ]
-        )
+        guest_argv = [
+            "python3",
+            str(SELF_RELATIVE),
+            "--guest-target-json",
+            str(target_path),
+            "--runner",
+            str(runner),
+            "--scanner",
+            str(scanner),
+            "--btf-custom-path",
+            str(btf_custom_path),
+            "--repeat",
+            str(repeat),
+            "--timeout",
+            str(timeout_seconds),
+        ]
+        if skip_families:
+            guest_argv.extend(["--skip-families", ",".join(skip_families)])
+        guest_exec = build_guest_exec(guest_argv)
         invocation = run_text_command(
             build_vng_command(
                 vng_binary=vng_binary,
@@ -1029,7 +1111,7 @@ def build_summary(records: list[dict[str, Any]], effective_mode: str, fallback_r
                 "source_name": record["source_name"],
                 "prog_type_name": record["prog_type_name"],
                 "speedup_ratio": record.get("speedup_ratio"),
-                "eligible_families": record.get("eligible_families", []),
+                "families": record.get("applied_families_run") or record.get("eligible_families", []),
             }
             for record in top_speedups
         ],
@@ -1039,7 +1121,7 @@ def build_summary(records: list[dict[str, Any]], effective_mode: str, fallback_r
                 "source_name": record["source_name"],
                 "prog_type_name": record["prog_type_name"],
                 "speedup_ratio": record.get("speedup_ratio"),
-                "eligible_families": record.get("eligible_families", []),
+                "families": record.get("applied_families_run") or record.get("eligible_families", []),
             }
             for record in top_regressions
         ],
@@ -1049,7 +1131,7 @@ def build_summary(records: list[dict[str, Any]], effective_mode: str, fallback_r
                 "source_name": record["source_name"],
                 "prog_type_name": record["prog_type_name"],
                 "size_ratio": record.get("size_ratio"),
-                "eligible_families": record.get("eligible_families", []),
+                "families": record.get("applied_families_compile") or record.get("eligible_families", []),
             }
             for record in top_code_shrinks
         ],
@@ -1071,6 +1153,7 @@ def build_markdown(data: dict[str, Any]) -> str:
         f"- Requested mode: `strict-vm`",
         f"- Effective mode: `{summary['effective_mode']}`",
         f"- Repeat: {data['repeat']}",
+        f"- Skip families: `{', '.join(data.get('skip_families') or []) or 'none'}`",
         f"- Target programs: {summary['targets_attempted']}",
         f"- Compile pairs: {summary['compile_pairs']}",
         f"- Measured pairs: {summary['measured_pairs']}",
@@ -1152,7 +1235,7 @@ def build_markdown(data: dict[str, Any]) -> str:
                         row["source_name"],
                         row["prog_type_name"],
                         format_ratio(row["speedup_ratio"]),
-                        ", ".join(row["eligible_families"]),
+                        ", ".join(row["families"]),
                     ]
                     for row in summary["top_speedups"]
                 ],
@@ -1171,7 +1254,7 @@ def build_markdown(data: dict[str, Any]) -> str:
                         row["source_name"],
                         row["prog_type_name"],
                         format_ratio(row["speedup_ratio"]),
-                        ", ".join(row["eligible_families"]),
+                        ", ".join(row["families"]),
                     ]
                     for row in summary["top_regressions"]
                 ],
@@ -1190,7 +1273,7 @@ def build_markdown(data: dict[str, Any]) -> str:
                         row["source_name"],
                         row["prog_type_name"],
                         format_ratio(row["size_ratio"]),
-                        ", ".join(row["eligible_families"]),
+                        ", ".join(row["families"]),
                     ]
                     for row in summary["top_code_shrinks"]
                 ],
@@ -1265,6 +1348,7 @@ def build_markdown(data: dict[str, Any]) -> str:
             "",
             "- Target selection comes from the runnability inventory and keeps only the 79 packet-test-run programs that previously formed a paired baseline/recompile set with directive sites.",
             "- In strict VM mode, each target boots the framework v5 guest once and runs baseline compile-only, v5 compile-only, baseline test_run, and v5 test_run in that order.",
+            "- `--skip-families` filters families out of the auto-generated v5 policy; the family columns above report applied families, not just eligible sites.",
             "- Host fallback mode only does baseline compile-only plus offline scanner scan; it does not attempt recompile or runtime measurement.",
             "- Family summaries are overlap-based: one program can contribute to multiple family rows, so those rows are not isolated causal attributions.",
         ]
@@ -1276,6 +1360,7 @@ def main() -> int:
     args = parse_args()
     if args.repeat < 1:
         raise SystemExit("--repeat must be >= 1")
+    skip_families = normalize_skip_families(args.skip_families)
 
     if args.guest_info:
         return run_guest_info_mode()
@@ -1364,6 +1449,7 @@ def main() -> int:
                 repeat=args.repeat,
                 timeout_seconds=args.timeout,
                 vng_binary=args.vng,
+                skip_families=skip_families,
             )
         else:
             record = run_target_locally(
@@ -1377,6 +1463,7 @@ def main() -> int:
                 use_sudo=True,
                 enable_recompile=False,
                 enable_exec=False,
+                skip_families=[],
             )
         records.append(record)
 
@@ -1396,6 +1483,7 @@ def main() -> int:
         "timeout_seconds": args.timeout,
         "kernel_build": text_invocation_summary(kernel_build),
         "guest_smoke": guest_smoke,
+        "skip_families": skip_families,
         "summary": summary,
         "programs": records,
     }

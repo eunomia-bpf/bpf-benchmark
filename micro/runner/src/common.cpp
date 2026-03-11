@@ -1,5 +1,7 @@
 #include "micro_exec.hpp"
 
+#include <algorithm>
+#include <cctype>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
@@ -34,6 +36,99 @@ std::string json_escape(std::string_view input)
         }
     }
     return output;
+}
+
+std::string trim(std::string_view input)
+{
+    size_t start = 0;
+    while (start < input.size() &&
+           std::isspace(static_cast<unsigned char>(input[start])) != 0) {
+        ++start;
+    }
+
+    size_t end = input.size();
+    while (end > start &&
+           std::isspace(static_cast<unsigned char>(input[end - 1])) != 0) {
+        --end;
+    }
+
+    return std::string(input.substr(start, end - start));
+}
+
+std::string lower_ascii(std::string_view input)
+{
+    std::string output(input);
+    for (char &ch : output) {
+        ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+    }
+    return output;
+}
+
+std::optional<std::string> canonical_skip_family_name(std::string_view input)
+{
+    std::string normalized = lower_ascii(trim(input));
+    std::replace(normalized.begin(), normalized.end(), '_', '-');
+
+    if (normalized == "cmov" || normalized == "cond-select") {
+        return std::string("cmov");
+    }
+    if (normalized == "wide" || normalized == "wide-mem" ||
+        normalized == "wide-load") {
+        return std::string("wide");
+    }
+    if (normalized == "rotate") {
+        return std::string("rotate");
+    }
+    if (normalized == "lea" || normalized == "addr-calc" ||
+        normalized == "addrcalc") {
+        return std::string("lea");
+    }
+    return std::nullopt;
+}
+
+void append_unique(std::vector<std::string> &values, std::string value)
+{
+    if (std::find(values.begin(), values.end(), value) == values.end()) {
+        values.push_back(std::move(value));
+    }
+}
+
+void append_skip_families(std::vector<std::string> &families,
+                          std::string_view value)
+{
+    size_t start = 0;
+    while (start <= value.size()) {
+        const size_t comma = value.find(',', start);
+        const std::string token =
+            trim(value.substr(start, comma == std::string_view::npos
+                                         ? std::string_view::npos
+                                         : comma - start));
+        if (!token.empty()) {
+            const auto normalized = canonical_skip_family_name(token);
+            if (!normalized.has_value()) {
+                fail("unknown family in --skip-families: " + token +
+                     " (expected cmov, wide, rotate, or lea)");
+            }
+            append_unique(families, *normalized);
+        }
+
+        if (comma == std::string_view::npos) {
+            break;
+        }
+        start = comma + 1;
+    }
+}
+
+void print_json_string_array(const std::vector<std::string> &values)
+{
+    std::cout << "[";
+    for (size_t index = 0; index < values.size(); ++index) {
+        if (index != 0) {
+            std::cout << ",";
+        }
+        std::cout << "\"" << json_escape(values[index]) << "\"";
+    }
+    std::cout << "]";
 }
 
 } // namespace
@@ -107,7 +202,7 @@ cli_options parse_args(int argc, char **argv)
         fail(
             "usage: micro_exec <run-llvmbpf|run-kernel|list-programs> --program <path> [--program-name <name>] "
             "[--memory|--input <path>] [--btf-custom-path <path>] [--directive-blob <path>] [--policy-blob <path>] "
-            "[--manual-load] [--recompile-cmov] [--recompile-wide|--recompile-wide-mem] [--recompile-rotate] [--recompile-rotate-rorx] [--recompile-lea] [--recompile-all] [--recompile-v5] "
+            "[--manual-load] [--recompile-cmov] [--recompile-wide|--recompile-wide-mem] [--recompile-rotate] [--recompile-rotate-rorx] [--recompile-lea] [--recompile-all] [--recompile-v5] [--skip-families cmov,wide,rotate,lea] "
             "[--io-mode map|staged|packet|context] [--raw-packet] [--repeat N] [--input-size|--kernel-input-size N] "
             "[--opt-level 0|1|2|3] [--no-cmov] [--llvm-disable-pass <name>] [--llvm-log-passes] "
             "[--perf-counters] [--perf-scope full_repeat_raw|full_repeat_avg] "
@@ -165,6 +260,10 @@ cli_options parse_args(int argc, char **argv)
         }
         if (current == "--recompile-v5") {
             options.recompile_v5 = true;
+            continue;
+        }
+        if (current == "--skip-families" && index + 1 < argc) {
+            append_skip_families(options.skip_families, argv[++index]);
             continue;
         }
         if (current == "--program-name" && index + 1 < argc) {
@@ -271,11 +370,23 @@ cli_options parse_args(int argc, char **argv)
     if (options.recompile_v5 && options.command != "run-kernel") {
         fail("--recompile-v5 is only valid with run-kernel");
     }
+    if (!options.skip_families.empty() && options.command != "run-kernel") {
+        fail("--skip-families is only valid with run-kernel");
+    }
     if (options.recompile_v5 &&
         !(options.recompile_cmov || options.recompile_rotate ||
           options.recompile_rotate_rorx || options.recompile_wide ||
           options.recompile_lea || options.recompile_all)) {
         fail("--recompile-v5 requires at least one recompile family or --recompile-all");
+    }
+    if (!options.skip_families.empty() && options.policy_blob.has_value()) {
+        fail("--skip-families cannot be used with --policy-blob");
+    }
+    if (!options.skip_families.empty() &&
+        !(options.recompile_cmov || options.recompile_rotate ||
+          options.recompile_rotate_rorx || options.recompile_wide ||
+          options.recompile_lea || options.recompile_all)) {
+        fail("--skip-families requires an auto-scan recompile family or --recompile-all");
     }
     if (options.command != "list-programs") {
         if (options.io_mode != "map" &&
@@ -397,7 +508,12 @@ void print_json(const sample_result &sample)
         << "\"recompile\":{"
         << "\"requested\":" << (sample.recompile.requested ? "true" : "false") << ","
         << "\"mode\":\"" << json_escape(sample.recompile.mode) << "\","
-        << "\"policy_generated\":" << (sample.recompile.policy_generated ? "true" : "false") << ","
+        << "\"requested_families\":";
+    print_json_string_array(sample.recompile.requested_families);
+    std::cout << ",\"skipped_families\":";
+    print_json_string_array(sample.recompile.skipped_families);
+    std::cout
+        << ",\"policy_generated\":" << (sample.recompile.policy_generated ? "true" : "false") << ","
         << "\"policy_bytes\":" << sample.recompile.policy_bytes << ","
         << "\"syscall_attempted\":" << (sample.recompile.syscall_attempted ? "true" : "false") << ","
         << "\"applied\":" << (sample.recompile.applied ? "true" : "false") << ","
