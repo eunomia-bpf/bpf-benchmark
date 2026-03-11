@@ -10,11 +10,21 @@ BpfReJIT v6 should strengthen the same core boundary, not change it:
 - userspace owns pattern discovery, cost model, and policy
 - kernel never executes userspace-supplied machine code
 
-The right v6 question is therefore not "how do we inject more code from userspace?", but:
+The main v6 correction is architectural:
 
-> how do we let userspace make richer optimization decisions while keeping legality and emission kernel-owned?
+- userspace fact discovery and kernel safety validation are different problems
+- verifier log already solves the discovery side for the current v6 scope
+- most near-term gaps are missing canonical forms or missing site kinds, not missing verifier semantics
 
-The main answer is a stronger fact channel plus a richer site model.
+So the right v6 question is not "how do we export more verifier internals first?" It is:
+
+> how do we remove current v5 friction, add the missing site kinds, and add more kernel-owned canonical emitters while letting userspace drive policy with facts it can already read today?
+
+The main answer is:
+
+- use verifier log parsing in userspace now
+- keep kernel legality checks pattern-based now
+- reserve kernel verifier-fact export as optional future work, not a prerequisite
 
 ---
 
@@ -22,7 +32,7 @@ The main answer is a stronger fact channel plus a richer site model.
 
 ### 1.1 Acquisition path
 
-Today userspace can already ask the verifier to emit a textual trace through `BPF_PROG_LOAD.log_level/log_size/log_buf/log_true_size`; the shared logging machinery is in `vendor/linux-framework/kernel/bpf/log.c`, and the log-level bits are defined in `vendor/linux-framework/include/linux/bpf_verifier.h:623-629`.
+Today userspace can already ask the verifier to emit a textual trace through `BPF_PROG_LOAD.log_level/log_size/log_buf/log_true_size`; the shared logging machinery is in `vendor/linux-framework/kernel/bpf/log.c`, and the log-level bits are defined in `vendor/linux-framework/include/linux/bpf_verifier.h`.
 
 Operationally, if userspace wants to mine facts from the log, it should use:
 
@@ -32,26 +42,25 @@ Operationally, if userspace wants to mine facts from the log, it should use:
 
 Relevant code:
 
-- `vendor/linux-framework/include/linux/bpf_verifier.h:623-629`
-- `vendor/linux-framework/include/uapi/linux/bpf.h:1794-1821`
-- `vendor/linux-framework/kernel/bpf/log.c:13-38`
-- `vendor/linux-framework/kernel/bpf/log.c:226-257`
-- `vendor/linux-framework/kernel/bpf/verifier.c:26116-26122`
+- `vendor/linux-framework/include/linux/bpf_verifier.h`
+- `vendor/linux-framework/include/uapi/linux/bpf.h`
+- `vendor/linux-framework/kernel/bpf/log.c`
+- `vendor/linux-framework/kernel/bpf/verifier.c`
 
 ### 1.2 Fact classes visible in the log today
 
-| Fact class | Log format today | Code references | Immediate value to userspace | Main caveat |
-| --- | --- | --- | --- | --- |
-| Register type and modifiers | `R6=pkt(...)`, `R1=trusted_ptr_foo(...)`, `R2=scalar(...)` | `vendor/linux-framework/kernel/bpf/log.c:440-492`, `vendor/linux-framework/kernel/bpf/log.c:673-747` | Pointer class, nullability, trusted/untrusted, mem/packet/BTF distinctions | Textual, not a stable ABI |
-| Scalar bounds and tnum | `smin/smax/umin/umax/smin32/...`, `var_off=(value; mask)` | `vendor/linux-framework/kernel/bpf/log.c:591-645`, `vendor/linux-framework/kernel/bpf/log.c:724-742` | Enough to recover min/max windows and bit-level uncertainty | Omitted defaults and coalesced equal 32/64-bit bounds mean parser must normalize |
-| Pointer provenance | `id=`, `ref_obj_id=`, `off=`, `imm=`, `r=`, `sz=`, BTF type names, map key/value sizes | `vendor/linux-framework/include/linux/bpf_verifier.h:37-210`, `vendor/linux-framework/kernel/bpf/log.c:697-742` | Correlates same-provenance pointers across a region; distinguishes map/pkt/mem/BTF access windows | Some pointer types are underprinted (`PTR_TO_STACK`, `PTR_TO_ARENA`) |
-| Stack slot state | `fp-8=...`, spill state, `dynptr_*`, `iter_*` | `vendor/linux-framework/include/linux/bpf_verifier.h:213-240`, `vendor/linux-framework/kernel/bpf/log.c:538-547`, `vendor/linux-framework/kernel/bpf/log.c:770-825` | Spilled reg facts, zero/misc/invalid bytes, dynptr/iter presence, stack occupancy | `STACK_IRQ_FLAG` only prints as `f`; no class/ref details |
-| Ref-set summary | `refs=...` | `vendor/linux-framework/kernel/bpf/log.c:826-833` | Tells userspace whether ref-tracked objects are live | No ref type or allocation-site detail |
-| Branch / path trace | `from A to B:`, `safe`, caller/callee transitions, `cur state:` / `old state:` | `vendor/linux-framework/kernel/bpf/verifier.c:10936-10940`, `vendor/linux-framework/kernel/bpf/verifier.c:11275-11279`, `vendor/linux-framework/kernel/bpf/verifier.c:20567-20572`, `vendor/linux-framework/kernel/bpf/verifier.c:21237-21273` | Userspace can reconstruct visited states and some branch outcomes | No explicit stable edge IDs or dominance tree |
-| SCC and loop context | `SCC enter`, `SCC exit`, `SCC backedge` | `vendor/linux-framework/kernel/bpf/verifier.c:1907-1920`, `vendor/linux-framework/kernel/bpf/verifier.c:1941`, `vendor/linux-framework/kernel/bpf/verifier.c:1983`, `vendor/linux-framework/kernel/bpf/verifier.c:2013` | Lets userspace know when a site is in a loop/SCC | `LEVEL2` only |
-| Live register pressure | `Live regs before insn:` bitmap | `vendor/linux-framework/include/linux/bpf_verifier.h:595-597`, `vendor/linux-framework/kernel/bpf/verifier.c:25701-25717` | Useful for code-size / register-pressure heuristics | Registers only; no stack live-in/live-out |
-| CFG rejection / dead markers | `unreachable insn N`, `back-edge from insn A to B`, `infinite loop detected` | `vendor/linux-framework/kernel/bpf/verifier.c:18249`, `vendor/linux-framework/kernel/bpf/verifier.c:18978-18989`, `vendor/linux-framework/kernel/bpf/verifier.c:20567-20572` | Userspace can detect rejected dead/unreachable shapes | Runtime-dead code is not exported as a structured fact |
-| Source correlation | source line text + `@ file:line` | `vendor/linux-framework/kernel/bpf/log.c:381-433` | Handy for tooling and policy debugging | Line-only, no columns; duplicates suppressed |
+| Fact class | Log format today | Immediate value to userspace | Main caveat |
+| --- | --- | --- | --- |
+| Register type and modifiers | `R6=pkt(...)`, `R1=trusted_ptr_foo(...)`, `R2=scalar(...)` | Pointer class, nullability, trusted/untrusted, mem/packet/BTF distinctions | Textual, not a stable ABI |
+| Scalar bounds and tnum | `smin/smax/umin/umax/smin32/...`, `var_off=(value; mask)` | Enough to recover min/max windows and bit-level uncertainty | Omitted defaults and coalesced equal 32/64-bit bounds mean parser must normalize |
+| Pointer provenance | `id=`, `ref_obj_id=`, `off=`, `imm=`, `r=`, `sz=`, BTF type names, map key/value sizes | Correlates same-provenance pointers across a region; distinguishes map/pkt/mem/BTF access windows | Some pointer types are underprinted |
+| Stack slot state | `fp-8=...`, spill state, `dynptr_*`, `iter_*` | Spilled reg facts, zero/misc/invalid bytes, dynptr/iter presence, stack occupancy | Some stack details are still underprinted |
+| Ref-set summary | `refs=...` | Tells userspace whether ref-tracked objects are live | No ref type or allocation-site detail |
+| Branch / path trace | `from A to B:`, `safe`, caller/callee transitions, `cur state:` / `old state:` | Userspace can reconstruct visited states and some branch outcomes | No explicit stable edge IDs or dominance tree |
+| SCC and loop context | `SCC enter`, `SCC exit`, `SCC backedge` | Lets userspace know when a site is in a loop/SCC | `LEVEL2` only |
+| Live register pressure | `Live regs before insn:` bitmap | Useful for code-size and register-pressure heuristics | Registers only; no stack live-in/live-out |
+| CFG rejection / dead markers | `unreachable insn N`, `back-edge from insn A to B`, `infinite loop detected` | Userspace can detect rejected dead/unreachable shapes | Runtime-dead code is not exported as a structured fact |
+| Source correlation | source line text + `@ file:line` | Handy for tooling and policy debugging | Line-only; duplicates suppressed |
 
 ### 1.3 Concrete information userspace can recover
 
@@ -68,11 +77,11 @@ Userspace can already extract the fact categories called out in the v6 requireme
 - dead code markers:
   - partially yes, through `unreachable insn` rejection and `safe` pruning markers
 - loop / pressure context:
-  - SCC membership and live-reg-before sets at `LEVEL2`
+  - SCC membership and `live_regs_before` sets at `LEVEL2`
 
 ### 1.4 What the log is not
 
-The current verifier log is useful, but it is not a production fact ABI.
+The current verifier log is useful, but it is not a kernel safety ABI.
 
 Important limits:
 
@@ -83,36 +92,51 @@ Important limits:
 - One BPF instruction can appear with multiple verifier states.
 - It does not export a stable per-edge or per-state identifier.
 - Some real verifier facts are not printed at all:
-  - `STACK_IRQ_FLAG` class details
+  - richer stack metadata
   - ref type / allocation insn
   - stack liveness
-  - "after" liveness
-  - a retained `seen` bitmap for runtime-dead code
+  - a stable runtime-dead bitmap
 
-Relevant code:
+That matters for ergonomics, but it does not force verifier changes for the current v6 baseline, because the kernel does not need to trust parsed log text as the legality proof.
 
-- `vendor/linux-framework/kernel/bpf/log.c:749-852`
-- `vendor/linux-framework/kernel/bpf/log.c:854-865`
-- `vendor/linux-framework/kernel/bpf/verifier.c:21268-21283`
-- `vendor/linux-framework/kernel/bpf/verifier.c:22257-22310`
+### 1.5 Zero-kernel-change production path
 
-### 1.5 Optimization assessment
+This is the key correction.
 
-These logs are already enough for:
+For the current v6 scope, a complete zero-verifier-change workflow already exists:
+
+1. Userspace loads the program with verifier logging enabled.
+2. Userspace parses the log to recover bounds, types, stack state, branch context, SCC context, and liveness.
+3. Userspace uses those facts only for discovery and policy:
+   - decide whether a site is interesting
+   - rank legal alternatives
+   - decide hot-path placement, code-size budget, or liveness-sensitive choices
+4. Userspace sends ordinary re-JIT rules that name a site, a pattern, constraints, and a kernel-owned canonical form.
+5. The kernel ignores the parsed text and independently re-validates safety against the real xlated program before emitting native code.
+
+So:
+
+- discovery uses verifier log
+- safety uses pattern match plus kernel-owned emitter validation
+- no verifier export is required to make v6 useful
+
+### 1.6 Optimization assessment
+
+The current verifier log is already enough for:
 
 - better userspace site discovery for existing v5 families
-- fact-gated local peepholes over contiguous regions
-- cost-model heuristics that avoid expansion in loops or under high live-reg pressure
-- prototyping `bounds_window`-style candidates offline
+- policy-sensitive `BRANCH_FLIP` ranking based on workload hotness
+- `DIV_LIVENESS` ranking using `live_regs_before`
+- loop-aware and pressure-aware heuristics that avoid code expansion in SCCs or high-pressure regions
+- offline experiments for bounds-oriented ideas
 
-They are not enough, by themselves, for a production legality boundary for:
+It is not, by itself, a kernel safety proof for transformations whose correctness depends on semantic reasoning rather than local shape preservation.
 
-- fact-backed check removal
-- general `branch_reorder`
-- `subprog_inline`
-- general `dead_store_elim`
+That boundary is the important one:
 
-The reason is structural: the log gives a rich trace, but not a stable kernel-owned summary that `BPF_PROG_JIT_RECOMPILE` can re-bind against.
+- if userspace needs more information to choose among already-safe alternatives, parse verifier log
+- if kernel needs to prove the transform preserves safety, use pattern match plus constraints when that is enough
+- only transforms like `BOUNDS_ELIDE` or general `DEAD_STORE_ELIM` need extra kernel-side reasoning
 
 ---
 
@@ -123,27 +147,29 @@ The reason is structural: the log gives a rich trace, but not a stable kernel-ow
 Mechanism:
 
 - userspace requests `BPF_PROG_LOAD` verifier log
-- parses textual register/stack/CFG facts
-- constructs a richer rule or policy from those facts
+- parses textual register/stack/CFG/liveness facts
+- constructs richer policy from those facts
 
 Pros:
 
-- zero new verifier semantics
+- zero verifier changes
+- zero new kernel state
 - richest information immediately available
-- path-sensitive trace can be richer than any first summary export
+- already enough for the current v6 discovery problem
+- production-safe because the kernel still does not trust the parsed text as the legality proof
 
 Cons:
 
 - text ABI is brittle
-- truncation / log-level dependence is awkward
-- the kernel cannot treat parsed log text as a stable legality proof
-- poor fit for long-term fail-closed re-JIT
+- truncation and log-level dependence are awkward
+- userspace parsers must be version-aware
+- poor fit if the long-term goal is a stable machine-readable fact ABI
 
 Best use:
 
-- immediate research
-- userspace-only prototype
-- discovery and ranking, not final safety binding
+- recommended production solution for v6 discovery and policy construction
+- immediate deployment path
+- acceptable long-term path as long as fact parsing remains on the discovery side, not the kernel safety side
 
 ### 2.2 Option 2: export a verifier summary through `BPF_OBJ_GET_INFO_BY_FD`
 
@@ -152,62 +178,58 @@ Mechanism:
 - extend `struct bpf_prog_info` with an optional verifier-fact array
 - expose a kernel-owned summary keyed to the loaded program
 
-Recommended semantic choice:
-
-- export only path-invariant facts
-- if the verifier saw conflicting states for the same `(insn, reg/slot)`, omit the fact rather than export an unsound union
-
 Pros:
 
 - stable machine-readable ABI
-- kernel-owned facts, so re-JIT can trust them
-- natural fit for tooling: query once, build policy, recompile
-- good precedent in existing Linux APIs
+- cleaner tooling
+- easier versioning than free-form text
 
 Cons:
 
-- needs some retained summary state
-- loses some path-sensitive richness relative to raw logs
+- needs verifier-summary capture and syscall plumbing
+- duplicates information userspace can already recover today
+- still does not remove the need for kernel-side legality checks in the re-JIT path
 
 Best use:
 
-- production v6 fact channel
+- optional future optimization for tooling and ergonomics
+- not required for baseline v6
 
 ### 2.3 Option 3: add `fact_ref` to `BPF_PROG_JIT_RECOMPILE`
 
 Mechanism:
 
 - the recompile syscall carries a cookie/reference to a specific verifier-summary snapshot
-- the policy blob carries per-rule `fact_id` references
+- policies can bind to that snapshot
 
 Pros:
 
-- fail-closed against stale policies
-- keeps `BPF_PROG_JIT_RECOMPILE` self-contained
-- cleanly separates "query facts" from "recompile against those facts"
+- fail-closed against stale fact-backed policies
+- clean binder if option 2 ever exists
 
 Cons:
 
 - not useful by itself
-- must sit on top of option 2, or at least some kernel-owned fact table
+- only makes sense on top of option 2 or another kernel-owned fact table
 
 Best use:
 
-- binder on top of option 2, not a standalone fact channel
+- optional future binder on top of option 2
+- not part of the required v6 baseline
 
 ### 2.4 Recommendation
 
 Recommended staged answer:
 
-1. Use option 1 immediately for research and policy prototyping.
-2. Implement option 2 as the real v6 fact channel.
-3. Add option 3 so the recompile path can reject stale fact-backed policies.
-
-This keeps verifier changes minimal:
-
-- first prove which fact kinds are actually useful
-- then export only those facts, in a stable summary
-- avoid turning the verifier log itself into the long-term ABI
+1. Use option 1 now, including in production, for discovery and policy ranking.
+2. Keep the baseline re-JIT legality boundary syntactic:
+   - site naming
+   - pattern match
+   - constraints
+   - overlap policy
+   - kernel-owned emitter validation
+3. Treat option 2 and option 3 as future optimizations only.
+4. Do not block `BRANCH_FLIP`, `ZERO_EXT_ELIDE`, `ENDIAN_FUSION`, `DIV_LIVENESS`, or `PROLOGUE_TRIM` on verifier changes.
 
 ---
 
@@ -215,11 +237,13 @@ This keeps verifier changes minimal:
 
 ### 3.1 Friction fixes first
 
-Before adding new semantics, v6 should remove current v5 friction:
+Before adding any new semantics, v6 should remove current v5 friction:
 
-- delete the hard-coded shape whitelist in `vendor/linux-framework/kernel/bpf/jit_directives.c:214-233`
-- add `log_level/log_size/log_buf/log_true_size` to `BPF_PROG_JIT_RECOMPILE`
+- delete the hard-coded shape whitelist in `vendor/linux-framework/kernel/bpf/jit_directives.c`
+- keep the existing `BPF_PROG_JIT_RECOMPILE` log channel and add `log_true_size`
 - make overlap semantics explicit at policy-parse time
+
+This tree already contains most of the `jit_recompile` log plumbing in `vendor/linux-framework/kernel/bpf/jit_directives.c`; the remaining gap is mainly parity with `BPF_PROG_LOAD` style truncation reporting.
 
 ### 3.2 Proposed policy v3 header and site model
 
@@ -265,34 +289,13 @@ Design notes:
 - `FUNC_ENTRY` and `FUNC_EXIT` solve the current inability to name prologue/epilogue sites at all.
 - `subprog_idx` makes entry/exit sites explicit without needing pseudo-insn indices.
 
-Current motivation:
+### 3.3 Primary v6 pattern rule
 
-- rules today are keyed only by `site_start/site_len`
-- lookup happens only from the per-insn JIT loop
-- prologue emission lives outside that loop
-
-Relevant code:
-
-- `vendor/linux-framework/include/uapi/linux/bpf.h:1640-1650`
-- `vendor/linux-framework/include/linux/bpf_jit_directives.h:55-78`
-- `vendor/linux-framework/kernel/bpf/jit_directives.c:169-233`
-- `vendor/linux-framework/kernel/bpf/jit_directives.c:2075-2108`
-- `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:510-565`
-- `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:3401-3456`
-- `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:4398-4424`
-
-### 3.3 Fact-backed pattern rule
+The primary v6 rule should still be a pattern rule. That is the right abstraction for the next wave of canonical forms.
 
 ```c
 enum bpf_jit_rule_kind {
-	BPF_JIT_RK_PATTERN  = 6,
-	BPF_JIT_RK_TEMPLATE = 7,
-};
-
-struct bpf_jit_fact_ref {
-	__u32 fact_id;        /* from bpf_prog_info verifier-fact table */
-	__u16 expected_kind;  /* enum bpf_prog_verifier_fact_kind */
-	__u16 flags;
+	BPF_JIT_RK_PATTERN = 6,
 };
 
 struct bpf_jit_rewrite_rule_v3 {
@@ -306,130 +309,73 @@ struct bpf_jit_rewrite_rule_v3 {
 	__u16 pattern_count;
 	__u16 constraint_count;
 	__u16 binding_count;
-	__u16 fact_count;
 	__u16 rule_len;
 	__u16 reserved;
 	/* followed by:
 	 *   struct bpf_jit_pattern_insn pattern[pattern_count];
 	 *   struct bpf_jit_pattern_constraint constraint[constraint_count];
 	 *   struct bpf_jit_binding binding[binding_count];
-	 *   struct bpf_jit_fact_ref fact[fact_count];
 	 */
 };
 ```
 
 Semantics:
 
-- `fact_count == 0` means current v5-style syntactic rule
-- `fact_count > 0` means the kernel must also validate referenced verifier facts before activating the rule
-- facts are conjunctive
-- missing or stale facts fail closed
+- the baseline rule remains purely syntactic
+- userspace may use verifier-log facts to decide when to emit the rule
+- kernel safety still depends only on the matched BPF region and the emitter's own legality checks
 
-### 3.4 Exported verifier summary
+### 3.4 Optional future fact-backed extension
 
-Recommended `bpf_prog_info` tail extension:
+If a later phase proves that a kernel-owned fact ABI is worth the cost, the cleanest extension is still a tail-appended fact reference array:
 
 ```c
-enum bpf_prog_verifier_fact_kind {
-	BPF_PROG_FACT_REG_TYPE   = 1,
-	BPF_PROG_FACT_REG_BOUNDS = 2,
-	BPF_PROG_FACT_STACK_SLOT = 3,
-	BPF_PROG_FACT_BRANCH     = 4,
-	BPF_PROG_FACT_INSN_AUX   = 5,
-};
-
-enum bpf_prog_verifier_fact_flags {
-	BPF_PROG_FACT_PATH_INVARIANT = (1U << 0),
-	BPF_PROG_FACT_ALWAYS_TRUE    = (1U << 1),
-	BPF_PROG_FACT_ALWAYS_FALSE   = (1U << 2),
-};
-
-struct bpf_prog_verifier_fact {
+struct bpf_jit_fact_ref {
 	__u32 fact_id;
-	__u32 insn_idx;
-	__u16 kind;
-	__u8  subject; /* regno for REG_*, stack slot for STACK_SLOT, 0xff otherwise */
-	__u8  flags;
-	union {
-		struct {
-			__u32 reg_type;
-			__u32 id;
-			__u32 ref_obj_id;
-			__s32 off;
-			__u64 aux; /* btf_id, pkt range, or mem_size depending on reg_type */
-		} reg_type;
-		struct {
-			__s64 smin_value;
-			__s64 smax_value;
-			__u64 umin_value;
-			__u64 umax_value;
-			__s32 s32_min_value;
-			__s32 s32_max_value;
-			__u32 u32_min_value;
-			__u32 u32_max_value;
-			__u64 tnum_value;
-			__u64 tnum_mask;
-		} reg_bounds;
-		struct {
-			__u32 slot_kind_mask;
-			__u32 spilled_reg_type;
-			__u32 spilled_ref_obj_id;
-			__u32 reserved;
-		} stack_slot;
-		struct {
-			__u32 branch_target;
-			__u32 fallthrough_target;
-			__u32 reserved0;
-			__u32 reserved1;
-		} branch;
-		struct {
-			__u32 live_regs_before;
-			__u32 scc_id;
-			__u32 prune_point;
-			__u32 seen;
-		} insn_aux;
-	};
+	__u16 expected_kind;
+	__u16 flags;
 };
-
-/* tail extension to struct bpf_prog_info */
-__u64 verifier_fact_cookie;
-__u32 nr_verifier_facts;
-__u32 verifier_fact_rec_size;
-__aligned_u64 verifier_facts;
 ```
 
-Why this shape:
+That should stay future-only until phase-0 log parsing proves that the extra kernel complexity is justified.
 
-- mirrors existing `func_info` / `line_info` query style
-- keeps facts attached to the loaded program
-- supports a compact path-invariant summary without inventing a new fd type
-- `BPF_PROG_FACT_BRANCH` should be emitted only when the verifier proved a direction or target relation invariant across all reachable states for that instruction
+### 3.5 Optional future exported verifier summary
 
-### 3.5 `BPF_PROG_JIT_RECOMPILE` attr extension
+If a structured fact ABI is later added, `BPF_OBJ_GET_INFO_BY_FD` remains the most natural place for it, keyed to the loaded program in the same style as `func_info` or `line_info`.
+
+A future summary should be treated as:
+
+- an optional tooling and binding optimization
+- not a prerequisite for the baseline v6 interface
+- not a replacement for kernel-side pattern validation
+
+### 3.6 `BPF_PROG_JIT_RECOMPILE` attr extension
+
+Baseline v6 only needs the log channel to reach parity with `BPF_PROG_LOAD`:
 
 ```c
 struct { /* BPF_PROG_JIT_RECOMPILE */
-	__u32        prog_fd;
-	__s32        policy_fd;
-	__u32        flags;
-	__u32        log_level;
-	__u32        log_size;
+	__u32         prog_fd;
+	__s32         policy_fd;
+	__u32         flags;
+	__u32         log_level;
+	__u32         log_size;
 	__aligned_u64 log_buf;
-	__u32        log_true_size;
-	__u32        reserved0;
-	__u64        fact_ref; /* must match bpf_prog_info.verifier_fact_cookie */
+	__u32         log_true_size;
+	__u32         reserved0;
+	/* optional future:
+	 * __u64      fact_ref;
+	 */
 } jit_recompile;
 ```
 
 Semantics:
 
-- `log_*` mirrors `BPF_PROG_LOAD` / `BPF_BTF_LOAD`
-- `fact_ref == 0` means no fact binding
-- `fact_ref != 0` means:
-  - the policy may carry `fact_ref[]`
-  - the kernel rejects the recompile if the cookie does not match the current program summary
+- `log_*` mirrors `BPF_PROG_LOAD`
+- `log_true_size` lets userspace detect truncation cleanly
+- `fact_ref` is future-only, if a kernel-owned fact channel is ever added
 
-### 3.6 Explicit overlap semantics
+### 3.7 Explicit overlap semantics
 
 Recommended rules:
 
@@ -447,9 +393,7 @@ Policy:
   - tie is `-EINVAL`
   - losers are marked inactive with a `shadowed` reject reason in the recompile log
 
-This is stricter and cleaner than current behavior, where rules are sorted by `(site_start, -priority)` but interval overlap is not a first-class kernel semantic.
-
-### 3.7 Remove the shape whitelist
+### 3.8 Remove the shape whitelist
 
 Recommended change:
 
@@ -460,9 +404,9 @@ The real checks should be:
 
 - exact pattern match
 - constraint validation
+- site-kind validation
 - canonical-param validation
-- fact validation, when present
-- emitter/template-specific legality
+- emitter-specific legality
 
 If those pass, a fixed site-length whitelist is just friction.
 
@@ -477,9 +421,9 @@ Current problem:
 
 Relevant code:
 
-- prologue: `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:510-565`
-- per-insn dispatch: `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:3401-3456`
-- shared exit / epilogue: `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:4398-4424`
+- prologue: `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c`
+- per-insn dispatch: `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c`
+- shared exit / epilogue: `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c`
 
 Recommended semantics:
 
@@ -490,105 +434,193 @@ Recommended semantics:
   - site is `(subprog_idx, exit)`
   - rule is consulted when emitting shared cleanup / return sequence
 
-Why only these two first:
+Why this belongs in v6:
 
-- they solve the concrete prologue/epilogue gap
-- they do not require a general label-preserving CFG interface
-- they let userspace express `prologue_trim` / `epilogue_trim` without touching verifier semantics
+- it solves the concrete `PROLOGUE_TRIM` / `EPILOGUE_TRIM` gap
+- it is an engineering limitation in the current interface, not a verifier limitation
+- it does not require a general label-preserving CFG interface
 
 ---
 
-## 5. Restricted Template Plan
+## 5. New Canonical Forms Implementable via Pure Pattern Match
 
-### 5.1 Safety boundary
+### 5.1 Where the canonical-form bottleneck really is
 
-The template tier is useful only if it stays narrow.
+Canonical form means:
 
-Safe and useful userspace control:
+- many BPF spellings
+- one semantics
+- one kernel-owned native emitter family
 
-- choose a kernel-defined `template_id`
-- supply a small arg list of regs/immediates/enums
-- bind the template to verifier facts through `fact_ref[]`
-- choose among kernel-owned local layout variants
+v5 already moved the many-to-one reduction to userspace:
 
-Out of scope:
+- userspace matches the local BPF shape
+- userspace binds a small semantic tuple
+- kernel validates the region and dispatches to a kernel-owned emitter
 
-- raw native bytes
-- arbitrary branches or labels
-- arbitrary stack pointer arithmetic
-- arbitrary helper/kfunc call injection
-- arbitrary composition of native opcodes
+The real bottleneck is now on the emit side:
 
-### 5.2 UAPI shape
+- every new canonical form still needs a new kernel validator/emitter pair
+- but many useful forms do not need verifier facts and do not need a new safety model
 
-```c
-enum bpf_jit_template_arg_kind {
-	BPF_JIT_TARG_REG  = 0,
-	BPF_JIT_TARG_IMM  = 1,
-	BPF_JIT_TARG_ENUM = 2,
-};
+So the right question is not "what needs a new fact ABI?" It is:
 
-struct bpf_jit_template_arg {
-	__u8  kind;
-	__u8  index;
-	__u16 reserved;
-	__s32 value;
-};
+> which additional canonical forms can be proven correct by local pattern preservation alone?
 
-struct bpf_jit_template_rule_v1 {
-	struct bpf_jit_site_desc site;
-	__u32 cpu_features_required;
-	__u16 rule_kind;       /* BPF_JIT_RK_TEMPLATE */
-	__u16 template_id;
-	__u16 priority;
-	__u16 conflict_group;
-	__u16 arg_count;
-	__u16 fact_count;
-	__u16 rule_len;
-	__u16 reserved;
-	/* followed by:
-	 *   struct bpf_jit_template_arg arg[arg_count];
-	 *   struct bpf_jit_fact_ref fact[fact_count];
-	 */
-};
-```
+For the next tier, the answer includes `BRANCH_FLIP`, `ZERO_EXT_ELIDE`, and `ENDIAN_FUSION`, with `DIV_LIVENESS` as the first information-sensitive but still local extension.
 
-### 5.3 First useful templates
+### 5.2 `BRANCH_FLIP`
 
-Reasonable first templates:
+Shape:
 
-- `WIDE_LOAD_PLAN`
-  - userspace chooses chunking / order from a kernel-defined menu
-- `LOCAL_BRANCH_LAYOUT`
-  - only for tiny single-entry/single-exit local regions
-- `FUNC_ENTRY_PLAN`
-  - prologue/entry variant menu
-- `FUNC_EXIT_PLAN`
-  - epilogue/cleanup variant menu
+- local if/else diamond:
+  - `{ jcc target, body_A, ja join, body_B, join: }`
 
-This gives userspace more control than current fixed canonical emitters, without crossing into native-code injection.
+Mechanism:
+
+- match a contiguous single-entry/single-exit local diamond, in the same validation style as the current local `COND_SELECT` path in `vendor/linux-framework/kernel/bpf/jit_directives.c`
+- emit the inverted condition
+- swap the fallthrough and taken bodies
+
+Why this is safe by pure pattern match:
+
+- both bodies are preserved
+- only branch polarity and linearized order change
+- the region still has the same entry and same join
+- the same outside-edge exclusion used for local diamonds is enough
+
+Why this is policy-sensitive:
+
+- which body should come first depends on workload hotness and branch predictability
+- that decision belongs in userspace
+
+Why this does not need verifier facts or template plans:
+
+- the kernel only needs to prove it matched the local diamond correctly
+- userspace only needs workload policy to choose body order
+
+Estimated x86 emitter work:
+
+- roughly 80-120 LOC for the emitter itself
+
+### 5.3 `ZERO_EXT_ELIDE`
+
+Shape:
+
+- local pair such as `{ alu32 dst; zext dst }`
+- in practice, the trailing zero-extension often comes from verifier patching in `opt_subreg_zext_lo32_rnd_hi32()` in `vendor/linux-framework/kernel/bpf/verifier.c`
+
+Mechanism:
+
+- match a 32-bit defining op on `dst`
+- match the immediately following zero-extension of the same `dst`
+- emit only the 32-bit op on x86
+
+Why this is safe by pure pattern match:
+
+- x86 32-bit ALU writes already zero-extend the upper 32 bits
+- if the first instruction is a 32-bit def on the same destination, the explicit zero-extension is redundant
+- no non-local reasoning is required
+
+Why this is a canonical form problem, not a verifier problem:
+
+- the verifier already knows about zero-extension
+- the current gap is only that the kernel lacks a dedicated emitter family for the redundant pair
+
+Estimated x86 emitter work:
+
+- roughly 40-60 LOC
+
+### 5.4 `ENDIAN_FUSION`
+
+Shape:
+
+- local load plus endian-convert sequence:
+  - `{ ldxh/ldxw/ldxdw; bswap/endian-convert }`
+
+Mechanism:
+
+- match a contiguous load followed by byte-swap
+- on x86, emit `movbe` when the width is 16/32/64 and CPU feature gating allows it
+
+Why this is safe by pure pattern match:
+
+- the transform preserves both the memory access and the byte order conversion
+- the load and swap stay adjacent and local
+- the kernel still owns the exact native sequence
+
+Important caveat:
+
+- `movbe` is only meaningful for widths that x86 actually supports; 8-bit loads are not part of this useful subset
+
+Why this is an emitter gap, not a verifier gap:
+
+- current x86 code already lowers this semantics as `emit_ldx()` plus `emit_bswap_width()` in `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c`
+- `movbe` is just another kernel-owned emission choice for the same local semantics
+
+Estimated x86 emitter work:
+
+- roughly 60-80 LOC
+
+### 5.5 `DIV_LIVENESS`
+
+Shape:
+
+- local div/mod site where the architectural scratch/result constraints make `rdx` save/restore conditional
+
+Mechanism:
+
+- userspace discovers candidate sites using verifier-log liveness
+- kernel validates the same condition from existing liveness data and chooses the cheaper emitter variant when `rdx` is absent from the fallthrough successor's `live_regs_before`
+
+Why this is not a verifier-change requirement:
+
+- userspace can already recover `live_regs_before` from verifier log
+- the verifier already computes `insn_aux_data[].live_regs_before`
+- the current x86 div/mod path in `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c` already makes the save/restore of `rdx` explicit
+
+Limit class:
+
+- this is an information limitation for userspace ranking, not a new kernel safety model
+
+Estimated x86 emitter work:
+
+- roughly 80-100 LOC
 
 ---
 
 ## 6. CAN / CANNOT
 
-| Directive family | With current verifier log only | With full v6 (`fact` summary + `fact_ref` + `site_kind` + templates where needed) | Status |
-| --- | --- | --- | --- |
-| More `cmov_select` / `rotate` / `wide_mem` / `addr_calc` patterns inside existing canonical forms | Yes | Yes | `CAN` |
-| More `bitfield_extract` patterns | Yes | Yes | `CAN` |
-| `packet_ctx_wide_load` that depends on pointer type / access window facts | Prototype only | Yes | `CAN` |
-| Local `bounds_window` where an earlier dominating check proves a later load window | Prototype only; not a sound kernel contract | Yes, if rules reference kernel-owned verifier facts | `CAN` |
-| `prologue_trim` / `epilogue_trim` | No | Yes, via `FUNC_ENTRY` / `FUNC_EXIT` | `CAN` |
-| Tiny local branch-layout choice inside one validated region | No | Partially, via restricted template plans | `PARTIAL` |
-| General `branch_reorder` over arbitrary CFG regions | No | No | `CANNOT` |
-| `subprog_inline` | No | No | `CANNOT` |
-| General `dead_store_elim` | No | No | `CANNOT` |
-| Raw native code injection | Never | Never | `CANNOT` |
+The key distinction is:
 
-Key point:
+- engineering limitation:
+  - missing canonical form, missing site kind, or missing emitter plumbing
+- information limitation:
+  - userspace needs more facts to rank sites, but verifier log already provides enough
+- safety limitation:
+  - local pattern preservation is not enough to prove the transform correct
+- structural limitation:
+  - current architecture has no model for the required region shape
 
-- v6 should unlock fact-backed local and entry/exit decisions
-- it should not pretend to be a general CFG rewrite or external code-install interface
+| Directive family | What userspace needs for discovery | What kernel must prove | Real limit class | Status |
+| --- | --- | --- | --- | --- |
+| More patterns inside existing canonical forms | Pattern matching only | Existing validation/emitter path | None | `CAN` |
+| `BRANCH_FLIP` for a local single-entry/single-exit diamond | Workload hotness / branch policy | Local diamond match, same join, no interior outside edge | Engineering limitation only | `CAN` |
+| `ZERO_EXT_ELIDE` | Pattern matching only | Same-dst def32 followed by redundant zext | Engineering limitation only | `CAN` |
+| `ENDIAN_FUSION` | Pattern matching only plus CPU feature policy | Adjacent load plus endian-convert of supported width | Engineering limitation only | `CAN` |
+| `DIV_LIVENESS` | Liveness info from verifier log | Existing `insn_aux_data` liveness check plus local emitter legality | Information limitation only | `CAN` |
+| `PROLOGUE_TRIM` / `EPILOGUE_TRIM` | Policy only | Site-kind match at function entry/exit | Engineering limitation only | `CAN` |
+| `BOUNDS_ELIDE` | Bounds and dominance facts | That removing a check still preserves all verifier-proved safety conditions | Safety limitation | `CANNOT` |
+| General `DEAD_STORE_ELIM` | Memory-side-effect facts | Alias, overwrite, and liveness reasoning beyond local shape | Safety limitation | `CANNOT` |
+| General `branch_reorder` over arbitrary CFG regions | CFG hotness and layout policy | Label-preserving multi-block layout rewrite | Structural limitation | `CANNOT` |
+| `SUBPROG_INLINE` | Call hotness and size budget | Cross-subprog frame/control-flow rewrite | Structural limitation | `CANNOT` |
+| Non-contiguous pattern families | Region-level analysis | Matching and re-emitting disjoint spans | Structural limitation | `CANNOT` |
+
+The previous v6 draft was too pessimistic about several rows:
+
+- `BRANCH_FLIP` is not a safety blocker; it is a missing canonical form
+- `ZERO_EXT_ELIDE` and `ENDIAN_FUSION` are the same category
+- `DIV_LIVENESS` is not blocked on verifier export; it is blocked only on surfacing existing liveness to userspace policy, which the verifier log already does
 
 ---
 
@@ -599,8 +631,8 @@ Key point:
 | JVMCI / Graal | VM exposes metadata/profile information to an external compiler; VM installs compiled code | Strong example of a structured optimization interface with a runtime install barrier | External compiler owns machine-code generation; BpfReJIT should not cross that line | Use a structured fact/control interface, but keep emission kernel-owned |
 | .NET Dynamic PGO / ReadyToRun | Runtime and ahead-of-time artifacts guide which runtime-owned code path is used | Good precedent for fact/profile-guided policy choices | Policy and emission remain runtime-internal; not an external policy plane | Facts should guide choices, but the runtime/kernel still owns legality and emission |
 | GCC / LLVM plugin interfaces | Compiler exposes pass-manager/plugin hooks and reusable analyses | Good precedent for explicit extension points instead of hard-coded heuristics | In-process compiler plugins can arbitrarily transform IR/code; no kernel safety boundary | Expose structured hooks and facts, not ad hoc knobs |
-| `perf_event_open` | Kernel exports structured measurement data to userspace via a normal Linux interface | Strong precedent for "kernel data -> userspace analysis/policy" | `perf_event_open` exports data, not rewrite legality | A verifier-summary export is natural Linux API design |
-| eBPF verifier log | Kernel already exports analysis results to userspace | Immediate precedent for a fact channel with zero semantic redesign | Textual, path-trace-oriented, unstable as long-term ABI | Great bootstrap path, weak production ABI |
+| `perf_event_open` | Kernel exports structured measurement data to userspace via a normal Linux interface | Strong precedent for "kernel data -> userspace analysis/policy" | `perf_event_open` exports data, not rewrite legality | A future verifier-summary export would be natural Linux API design |
+| eBPF verifier log | Kernel already exports analysis results to userspace | Immediate precedent for a zero-kernel-change fact channel | Textual and unstable as a formal ABI | Strong production path for discovery, but not the kernel legality contract |
 
 External references:
 
@@ -617,77 +649,98 @@ External references:
 
 These are rough incremental estimates for this tree, excluding tests/docs and any vendored UAPI sync work.
 
+Primary-path estimates:
+
 | Improvement | Estimated kernel LOC | Notes |
 | --- | --- | --- |
-| Remove shape whitelist | 20-40 | Delete helper + two call sites |
-| `jit_recompile` log channel | 140-230 | Reuse existing verifier-log infra |
+| Remove shape whitelist | 20-40 | Delete helper plus parse/validate call sites |
+| Finish `jit_recompile` log parity (`log_true_size`) | 20-50 | The basic log channel already exists in this tree |
 | Explicit overlap semantics | 80-140 | Parse-time arbitration and logging |
-| `FUNC_ENTRY` / `FUNC_EXIT` site kinds | 180-325 | Common + x86 dispatch hooks |
-| Export verifier summary in `bpf_prog_info` | 330-520 | Summary capture + syscall plumbing |
-| `fact_ref` binding in recompile path | 80-140 | Cookie check + rule-side fact validation plumbing |
-| Restricted template plan tier | 430-660 | Common framework + first useful x86 templates |
+| `FUNC_ENTRY` / `FUNC_EXIT` site kinds | 180-325 | Common plus x86 dispatch hooks |
+| `BRANCH_FLIP` canonical form | 120-180 | Roughly 80-120 LOC x86 emitter plus common validation/dispatch |
+| `ZERO_EXT_ELIDE` canonical form | 60-90 | Roughly 40-60 LOC x86 emitter plus small common plumbing |
+| `ENDIAN_FUSION` canonical form | 80-120 | Roughly 60-80 LOC x86 emitter plus CPU-gating plumbing |
+| `DIV_LIVENESS` canonical form | 100-150 | Reuses existing liveness data |
+
+Not counted in the baseline path:
+
+- verifier-summary export
+- `fact_ref` binding
+
+Those are optional future optimizations, not required v6 cost.
 
 ---
 
 ## 9. Recommended Implementation Order
 
-### Phase 0: userspace-only prototype
+### Phase 0: parse verifier log in userspace
 
 1. Parse existing verifier logs in userspace.
-2. Use that to validate which fact kinds materially improve policy quality.
+2. Use that to drive discovery, ranking, and workload-sensitive policy.
+3. Treat this as the baseline fact path.
 
-This de-risks the summary design before new kernel state is added.
+This is the zero-kernel-change plan.
 
 ### Phase 1: remove current v5 friction
 
 1. Remove shape whitelist.
-2. Add `jit_recompile` log channel.
+2. Finish `jit_recompile` log parity and truncation reporting.
 3. Make overlap semantics explicit.
 
-This immediately improves policy iteration even before any new fact ABI lands.
+Status:
 
-### Phase 2: make entry/exit sites first-class
+- this phase is already in implementation in the current tree
 
-4. Add `FUNC_ENTRY` / `FUNC_EXIT`.
+### Phase 2: add new canonical forms that need only pattern matching
 
-This unlocks prologue/epilogue work without touching verifier semantics.
+1. `BRANCH_FLIP`
+2. `ZERO_EXT_ELIDE`
+3. `ENDIAN_FUSION`
 
-### Phase 3: production fact channel
+`DIV_LIVENESS` should follow immediately after or alongside this phase:
 
-5. Export path-invariant verifier facts through `BPF_OBJ_GET_INFO_BY_FD`.
-6. Add `fact_ref` binding to `BPF_PROG_JIT_RECOMPILE`.
-7. Extend pattern rules with `fact_count + fact_ref[]`.
+- it needs better userspace ranking input
+- but that input already exists in verifier log
+- it does not require verifier export
 
-This is the actual v6 boundary expansion.
+### Phase 3: make entry/exit sites first-class
 
-### Phase 4: optional richer emission control
+1. Add `FUNC_ENTRY`.
+2. Add `FUNC_EXIT`.
+3. Use them for `PROLOGUE_TRIM` / `EPILOGUE_TRIM`.
 
-8. Add a restricted template tier for a very small initial template set.
+### Phase 4: optional verifier-fact export
 
-Only do this after phases 1-3 are stable; otherwise too many moving pieces land at once.
+Only do this if phase 0 proves that a kernel-owned fact ABI is worth the complexity cost.
+
+If it lands, treat it as:
+
+- a tooling optimization
+- an optional stale-policy binder
+- not the dependency that unlocks the main v6 optimizations
 
 ---
 
 ## 10. Bottom Line
 
-The current verifier log already contains enough information to prove that v6 should be fact-aware:
+The corrected v6 picture is:
 
-- bounds
-- pointer class/provenance
-- stack slot state
-- loop context
-- live-reg pressure
+- verifier log already exposes the information userspace needs for discovery
+- baseline v6 therefore needs zero verifier changes
+- kernel safety still comes from pattern match, constraints, site kinds, and kernel-owned emitters
+- several things previously labeled "cannot" are actually engineering gaps:
+  - `BRANCH_FLIP`
+  - `ZERO_EXT_ELIDE`
+  - `ENDIAN_FUSION`
+  - `PROLOGUE_TRIM`
+- `DIV_LIVENESS` is an information problem for userspace ranking, but verifier log already covers it
+- the real safety blockers are transforms like `BOUNDS_ELIDE` and general `DEAD_STORE_ELIM`
+- the real structural blockers are transforms like `SUBPROG_INLINE`, non-contiguous rewrites, and arbitrary CFG relayout
 
-But the log is still the wrong long-term ABI. The right v6 direction is:
-
-- use log parsing now to validate the policy opportunity
-- export a small kernel-owned verifier summary next
-- bind recompile requests to that summary with `fact_ref`
-- add `FUNC_ENTRY` / `FUNC_EXIT`
-- keep emitters and templates kernel-owned
+So the main v6 bottleneck is not "missing verifier facts." It is that the emit side is still locked to too few kernel-owned canonical forms.
 
 That preserves the core BpfReJIT novelty:
 
-> kernel-validated, userspace-driven optimization
+> userspace decides policy, kernel proves safety, kernel emits native code
 
-while meaningfully expanding what userspace can decide.
+without inventing verifier changes that the current design does not actually need.
