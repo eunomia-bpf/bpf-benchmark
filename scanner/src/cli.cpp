@@ -112,6 +112,8 @@ struct CommandOptions {
         .scan_rotate = false,
         .scan_lea = false,
         .scan_extract = false,
+        .scan_zero_ext = false,
+        .scan_endian = false,
         .use_rorx = false,
     };
     bool families_explicit = false;
@@ -318,7 +320,7 @@ void print_usage(const char *prog)
 {
     std::fprintf(stderr,
         "Usage:\n"
-        "  %s scan  (--prog-fd <fd> | --xlated <file>) [family flags] [--output <blob>]\n"
+        "  %s scan  (<file> | --prog-fd <fd> | --xlated <file>) [family flags] [--output <blob>]\n"
         "  %s apply --prog-fd <fd> [family flags] [--output <blob>]\n"
         "  %s dump  --prog-fd <fd> [--output <file>]\n"
         "\n"
@@ -330,6 +332,8 @@ void print_usage(const char *prog)
         "  --lea        Address-calculation sites\n"
         "  --bitfield-extract, --extract\n"
         "               Bitfield extract sites\n"
+        "  --zero-ext   Redundant zero-extension sites\n"
+        "  --endian     Endian fusion sites\n"
         "  --rorx       Prefer RORX for rotate sites\n"
         "  --v5         Accepted for compatibility; scanner is already v5-only\n"
         "\n"
@@ -360,6 +364,8 @@ void enable_all_families(CommandOptions &options)
     options.scan_options.scan_rotate = true;
     options.scan_options.scan_lea = true;
     options.scan_options.scan_extract = true;
+    options.scan_options.scan_zero_ext = true;
+    options.scan_options.scan_endian = true;
 }
 
 CommandOptions parse_args(int argc, char **argv)
@@ -417,6 +423,8 @@ CommandOptions parse_args(int argc, char **argv)
             options.scan_options.scan_rotate = false;
             options.scan_options.scan_lea = false;
             options.scan_options.scan_extract = false;
+            options.scan_options.scan_zero_ext = false;
+            options.scan_options.scan_endian = false;
         } else if (arg == "--cmov") {
             options.scan_options.scan_cmov = true;
             options.families_explicit = true;
@@ -432,10 +440,21 @@ CommandOptions parse_args(int argc, char **argv)
         } else if (arg == "--bitfield-extract" || arg == "--extract") {
             options.scan_options.scan_extract = true;
             options.families_explicit = true;
+        } else if (arg == "--zero-ext") {
+            options.scan_options.scan_zero_ext = true;
+            options.families_explicit = true;
+        } else if (arg == "--endian") {
+            options.scan_options.scan_endian = true;
+            options.families_explicit = true;
         } else if (arg == "--rorx") {
             options.scan_options.use_rorx = true;
         } else if (arg == "--v5") {
             continue;
+        } else if (!arg.empty() && arg[0] != '-' &&
+                   options.subcommand == "scan" &&
+                   options.prog_fd < 0 &&
+                   options.xlated_path.empty()) {
+            options.xlated_path = arg;
         } else {
             die("unknown option: %s", argv[i]);
         }
@@ -481,6 +500,10 @@ void print_summary(const bpf_jit_scanner::V5ScanSummary &summary)
                 static_cast<unsigned long long>(summary.lea_sites));
     std::printf("  extract:%llu\n",
                 static_cast<unsigned long long>(summary.bitfield_sites));
+    std::printf("  zeroext:%llu\n",
+                static_cast<unsigned long long>(summary.zero_ext_sites));
+    std::printf("  endian: %llu\n",
+                static_cast<unsigned long long>(summary.endian_sites));
 }
 
 void run_scan(const CommandOptions &options)

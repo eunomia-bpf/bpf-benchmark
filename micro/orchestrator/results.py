@@ -38,6 +38,7 @@ class DirectiveScanSummary(TypedDict, total=False):
     wide_sites: int
     rotate_sites: int
     lea_sites: int
+    bitfield_sites: int
     total_sites: int
 
 
@@ -132,6 +133,7 @@ def zero_directive_scan() -> dict[str, int]:
         "wide_sites": 0,
         "rotate_sites": 0,
         "lea_sites": 0,
+        "bitfield_sites": 0,
         "total_sites": 0,
     }
 
@@ -140,12 +142,16 @@ def normalize_directive_scan(scan: Mapping[str, object] | None) -> dict[str, int
     normalized = zero_directive_scan()
     if not scan:
         return normalized
-    for field in ("cmov_sites", "wide_sites", "rotate_sites", "lea_sites"):
+    for field in ("cmov_sites", "wide_sites", "rotate_sites", "lea_sites", "bitfield_sites"):
         normalized[field] = int(scan.get(field, 0) or 0)
     normalized["total_sites"] = int(
         scan.get(
             "total_sites",
-            normalized["cmov_sites"] + normalized["wide_sites"] + normalized["rotate_sites"] + normalized["lea_sites"],
+            normalized["cmov_sites"] +
+            normalized["wide_sites"] +
+            normalized["rotate_sites"] +
+            normalized["lea_sites"] +
+            normalized["bitfield_sites"],
         )
         or 0
     )

@@ -53,14 +53,15 @@ FAMILY_FIELDS = (
     ("wide", "wide_sites"),
     ("rotate", "rotate_sites"),
     ("lea", "lea_sites"),
+    ("extract", "bitfield_sites"),
 )
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Run the inventory-derived 79-program corpus v5 recompile batch on the "
-            "framework kernel guest, with automatic host compile-only fallback."
+            "Run the inventory-derived packet-test-run corpus v5 recompile batch on "
+            "the framework kernel guest, with automatic host compile-only fallback."
         )
     )
     parser.add_argument(
@@ -145,7 +146,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--skip-families",
         action="append",
-        help="Comma-separated recompile families to skip from the auto-generated v5 policy blob. Supported: cmov, wide, rotate, lea.",
+        help="Comma-separated recompile families to skip from the auto-generated v5 policy blob. Supported: cmov, wide, rotate, lea, extract.",
     )
     parser.add_argument(
         "--force-host-fallback",
@@ -182,6 +183,7 @@ def zero_scan() -> dict[str, int]:
         "wide_sites": 0,
         "rotate_sites": 0,
         "lea_sites": 0,
+        "bitfield_sites": 0,
         "total_sites": 0,
     }
 
@@ -198,11 +200,15 @@ def canonical_family_name(value: str) -> str:
         "lea": "lea",
         "addr-calc": "lea",
         "addrcalc": "lea",
+        "extract": "extract",
+        "bitfield": "extract",
+        "bitfield-extract": "extract",
+        "bit-extract": "extract",
     }
     if normalized not in mapping:
         raise SystemExit(
             f"unsupported family in --skip-families: {value} "
-            "(expected cmov, wide, rotate, or lea)"
+            "(expected cmov, wide, rotate, lea, or extract)"
         )
     return mapping[normalized]
 
@@ -364,6 +370,7 @@ def parse_scanner_v5_output(stdout: str) -> dict[str, int]:
         "wide_sites": re.compile(r"^\s*wide:\s+(\d+)\s*$"),
         "rotate_sites": re.compile(r"^\s*rotate:\s+(\d+)\s*$"),
         "lea_sites": re.compile(r"^\s*lea:\s+(\d+)\s*$"),
+        "bitfield_sites": re.compile(r"^\s*extract:\s*(\d+)\s*$"),
     }
     accepted = False
     for line in stdout.splitlines():
@@ -794,6 +801,7 @@ def load_targets(
         inventory_json,
         filters=filters,
         max_programs=max_programs,
+        require_inventory_sites=False,
     )
 
 
@@ -981,7 +989,8 @@ def build_summary(records: list[dict[str, Any]], effective_mode: str, fallback_r
                 "wide_sites": counts["wide_sites"],
                 "rotate_sites": counts["rotate_sites"],
                 "lea_sites": counts["lea_sites"],
-                "total_sites": counts["cmov_sites"] + counts["wide_sites"] + counts["rotate_sites"] + counts["lea_sites"],
+                "bitfield_sites": counts["bitfield_sites"],
+                "total_sites": sum(counts[field] for _, field in FAMILY_FIELDS),
                 "code_size_ratio_geomean": geomean(source_size),
                 "exec_ratio_geomean": geomean(source_exec),
                 "wins": sum(1 for item in source_measured if (item.get("speedup_ratio") or 0) > 1.0),
@@ -1108,11 +1117,12 @@ def build_markdown(data: dict[str, Any]) -> str:
         f"- Recompile applied programs: {summary['applied_programs']}",
         f"- Code-size ratio geomean (baseline/v5): {format_ratio(summary['code_size_ratio_geomean'])}",
         f"- Exec-time ratio geomean (baseline/v5): {format_ratio(summary['exec_ratio_geomean'])}",
-        f"- Total sites: {summary['family_totals'].get('cmov_sites', 0) + summary['family_totals'].get('wide_sites', 0) + summary['family_totals'].get('rotate_sites', 0) + summary['family_totals'].get('lea_sites', 0)}",
+        f"- Total sites: {sum(summary['family_totals'].get(field, 0) for _, field in FAMILY_FIELDS)}",
         f"- CMOV sites: {summary['family_totals'].get('cmov_sites', 0)}",
         f"- WIDE sites: {summary['family_totals'].get('wide_sites', 0)}",
         f"- ROTATE sites: {summary['family_totals'].get('rotate_sites', 0)}",
         f"- LEA sites: {summary['family_totals'].get('lea_sites', 0)}",
+        f"- EXTRACT sites: {summary['family_totals'].get('bitfield_sites', 0)}",
     ]
     if summary.get("fallback_reason"):
         lines.append(f"- Fallback reason: {summary['fallback_reason']}")
@@ -1128,7 +1138,7 @@ def build_markdown(data: dict[str, Any]) -> str:
     lines.extend(["## By Project", ""])
     lines.extend(
         markdown_table(
-            ["Project", "Programs", "Compile Pairs", "Measured Pairs", "Applied", "CMOV", "WIDE", "ROTATE", "Code Ratio", "Exec Ratio", "Regressions"],
+            ["Project", "Programs", "Compile Pairs", "Measured Pairs", "Applied", "CMOV", "WIDE", "ROTATE", "LEA", "EXTRACT", "Code Ratio", "Exec Ratio", "Regressions"],
             [
                 [
                     row["source_name"],
@@ -1139,6 +1149,8 @@ def build_markdown(data: dict[str, Any]) -> str:
                     row["cmov_sites"],
                     row["wide_sites"],
                     row["rotate_sites"],
+                    row["lea_sites"],
+                    row["bitfield_sites"],
                     format_ratio(row["code_size_ratio_geomean"]),
                     format_ratio(row["exec_ratio_geomean"]),
                     row["regressions"],
@@ -1294,7 +1306,7 @@ def build_markdown(data: dict[str, Any]) -> str:
             "",
             "## Notes",
             "",
-            "- Target selection comes from the runnability inventory and keeps only the 79 packet-test-run programs that previously formed a paired baseline/recompile set with directive sites.",
+            "- Target selection comes from the runnability inventory and keeps every packet-test-run target whose baseline run already succeeds; the current scanner pass determines whether v5 has any eligible families.",
             "- In strict VM mode, each target boots the framework v5 guest once and runs baseline compile-only, v5 compile-only, baseline test_run, and v5 test_run in that order.",
             "- `--skip-families` filters families out of the auto-generated v5 policy; the family columns above report applied families, not just eligible sites.",
             "- Host fallback mode only does baseline compile-only plus offline scanner scan; it does not attempt recompile or runtime measurement.",

@@ -206,6 +206,51 @@ struct object_deleter {
 
 using bpf_object_ptr = std::unique_ptr<bpf_object, object_deleter>;
 
+const char *prepare_phase_name(std::string_view io_mode)
+{
+    if (io_mode == "packet") {
+        return "packet_prepare_ns";
+    }
+    if (io_mode == "staged") {
+        return "input_stage_ns";
+    }
+    if (io_mode == "context") {
+        return "context_prepare_ns";
+    }
+    return "map_prepare_ns";
+}
+
+const char *result_phase_name(std::string_view io_mode)
+{
+    if (io_mode == "packet" || io_mode == "staged") {
+        return "result_extract_ns";
+    }
+    if (io_mode == "context") {
+        return "retval_read_ns";
+    }
+    return "result_read_ns";
+}
+
+std::string resolve_effective_io_mode(std::string_view requested_io_mode,
+                                      bpf_object *object)
+{
+    if (requested_io_mode != "map") {
+        return std::string(requested_io_mode);
+    }
+
+    const bool has_input_map =
+        bpf_object__find_map_by_name(object, "input_map") != nullptr;
+    const bool has_result_map =
+        bpf_object__find_map_by_name(object, "result_map") != nullptr;
+    if (has_input_map && !has_result_map) {
+        std::fprintf(stderr,
+                     "io-mode: requested map but result_map is absent; "
+                     "falling back to staged\n");
+        return "staged";
+    }
+    return std::string(requested_io_mode);
+}
+
 class scoped_fd {
   public:
     scoped_fd() = default;
@@ -692,6 +737,8 @@ sample_result run_kernel(const cli_options &options)
         }
     }
     const auto object_load_end = std::chrono::steady_clock::now();
+    const std::string effective_io_mode =
+        resolve_effective_io_mode(options.io_mode, object.get());
 
     /* v4 post-load re-JIT: apply policy blob via BPF_PROG_JIT_RECOMPILE */
     std::chrono::steady_clock::time_point recompile_start {};
@@ -942,7 +989,7 @@ sample_result run_kernel(const cli_options &options)
     int result_fd = -1;
     uint32_t key = 0;
 
-    if (options.io_mode == "map") {
+    if (effective_io_mode == "map") {
         bpf_map *input_map = bpf_object__find_map_by_name(object.get(), "input_map");
         bpf_map *result_map = bpf_object__find_map_by_name(object.get(), "result_map");
         if (input_map == nullptr || result_map == nullptr) {
@@ -972,7 +1019,7 @@ sample_result run_kernel(const cli_options &options)
 
         packet.assign(64, 0);
         packet_out.assign(packet.size(), 0);
-    } else if (options.io_mode == "staged") {
+    } else if (effective_io_mode == "staged") {
         bpf_map *input_map = bpf_object__find_map_by_name(object.get(), "input_map");
         if (input_map != nullptr) {
             const uint32_t input_value_size = bpf_map__value_size(input_map);
@@ -1005,7 +1052,7 @@ sample_result run_kernel(const cli_options &options)
             packet_out.assign(packet.size(), 0);
             exec_input_prepare_end = std::chrono::steady_clock::now();
         }
-    } else if (options.io_mode == "context") {
+    } else if (effective_io_mode == "context") {
         exec_input_prepare_start = std::chrono::steady_clock::now();
         context_in = input_bytes;
         exec_input_prepare_end = std::chrono::steady_clock::now();
@@ -1022,8 +1069,9 @@ sample_result run_kernel(const cli_options &options)
 
     bpf_test_run_opts test_opts = {};
     test_opts.sz = sizeof(test_opts);
-    const uint32_t effective_repeat = options.io_mode == "context" ? 1u : options.repeat;
-    test_opts.repeat = options.io_mode == "context" ? 0u : options.repeat;
+    const uint32_t effective_repeat =
+        effective_io_mode == "context" ? 1u : options.repeat;
+    test_opts.repeat = effective_io_mode == "context" ? 0u : options.repeat;
     if (!packet.empty()) {
         test_opts.data_in = packet.data();
         test_opts.data_size_in = packet.size();
@@ -1066,11 +1114,11 @@ sample_result run_kernel(const cli_options &options)
         fail("bpf_prog_test_run_opts failed: " + std::string(strerror(errno)));
     }
 
-    if (options.io_mode == "packet" || options.io_mode == "staged") {
+    if (effective_io_mode == "packet" || effective_io_mode == "staged") {
         result_read_start = std::chrono::steady_clock::now();
         result = read_u64_result(packet_out.data(), packet_out.size());
         result_read_end = std::chrono::steady_clock::now();
-    } else if (options.io_mode == "context") {
+    } else if (effective_io_mode == "context") {
         result_read_start = std::chrono::steady_clock::now();
         result = test_opts.retval;
         result_read_end = std::chrono::steady_clock::now();
@@ -1105,17 +1153,10 @@ sample_result run_kernel(const cli_options &options)
         {"memory_prepare_ns", elapsed_ns(memory_prepare_start, memory_prepare_end)},
         {"object_open_ns", elapsed_ns(object_open_start, object_open_end)},
         {"object_load_ns", elapsed_ns(object_load_start, object_load_end)},
-        {options.io_mode == "packet" ? "packet_prepare_ns"
-                                     : (options.io_mode == "staged"
-                                            ? "input_stage_ns"
-                                            : (options.io_mode == "context"
-                                                   ? "context_prepare_ns"
-                                                   : "map_prepare_ns")),
+        {prepare_phase_name(effective_io_mode),
          elapsed_ns(exec_input_prepare_start, exec_input_prepare_end)},
         {"prog_run_wall_ns", elapsed_ns(run_wall_start, run_wall_end)},
-        {(options.io_mode == "packet" || options.io_mode == "staged")
-             ? "result_extract_ns"
-             : (options.io_mode == "context" ? "retval_read_ns" : "result_read_ns"),
+        {result_phase_name(effective_io_mode),
          elapsed_ns(result_read_start, result_read_end)},
     };
     sample.perf_counters = std::move(perf_counters);

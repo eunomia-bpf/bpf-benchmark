@@ -204,6 +204,7 @@ def load_packet_test_run_targets(
     *,
     filters: list[str] | None = None,
     max_programs: int | None = None,
+    require_inventory_sites: bool = False,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     payload = json.loads(inventory_json.read_text())
     selected: list[dict[str, Any]] = []
@@ -213,11 +214,9 @@ def load_packet_test_run_targets(
         if record.get("strategy") != "packet_test_run":
             continue
         inventory_scan = normalize_directive_scan(record.get("directive_scan"))
-        if inventory_scan["total_sites"] <= 0:
+        if require_inventory_sites and inventory_scan["total_sites"] <= 0:
             continue
         if not (record.get("baseline_run") or {}).get("ok"):
-            continue
-        if not (record.get("recompile_run") or {}).get("ok"):
             continue
         selected.append(
             {

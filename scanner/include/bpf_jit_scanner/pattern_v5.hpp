@@ -21,6 +21,8 @@
 #define BPF_JIT_CF_ADDR_CALC 3
 #define BPF_JIT_CF_COND_SELECT 4
 #define BPF_JIT_CF_BITFIELD_EXTRACT 5
+#define BPF_JIT_CF_ZERO_EXT_ELIDE 6
+#define BPF_JIT_CF_ENDIAN_FUSION 7
 #endif
 
 #ifndef BPF_JIT_MAX_PATTERN_LEN
@@ -84,6 +86,31 @@
 #define BPF_JIT_BFX_EXTRACT 1
 #endif
 
+#ifndef BPF_JIT_ZEXT_ELIDE
+#define BPF_JIT_ZEXT_ELIDE 1
+#endif
+
+#ifndef BPF_JIT_ZEXT_PARAM_DST_REG
+#define BPF_JIT_ZEXT_PARAM_DST_REG 0
+#endif
+
+#ifndef BPF_JIT_ENDIAN_MOVBE
+#define BPF_JIT_ENDIAN_MOVBE 1
+#endif
+
+#ifndef BPF_JIT_ENDIAN_LOAD_SWAP
+#define BPF_JIT_ENDIAN_LOAD_SWAP 0
+#define BPF_JIT_ENDIAN_SWAP_STORE 1
+#endif
+
+#ifndef BPF_JIT_ENDIAN_PARAM_DATA_REG
+#define BPF_JIT_ENDIAN_PARAM_DATA_REG 0
+#define BPF_JIT_ENDIAN_PARAM_BASE_REG 1
+#define BPF_JIT_ENDIAN_PARAM_OFFSET 2
+#define BPF_JIT_ENDIAN_PARAM_WIDTH 3
+#define BPF_JIT_ENDIAN_PARAM_DIRECTION 4
+#endif
+
 #ifndef BPF_JIT_BFX_PARAM_DST_REG
 #define BPF_JIT_BFX_PARAM_DST_REG 0
 #define BPF_JIT_BFX_PARAM_SRC_REG 1
@@ -116,6 +143,8 @@ enum class V5Family {
     Rotate,
     AddrCalc,
     BitfieldExtract,
+    ZeroExtElide,
+    EndianFusion,
 };
 
 struct __attribute__((packed)) V5PatternInsn {
@@ -198,6 +227,8 @@ struct V5ScanOptions {
     bool scan_rotate = false;
     bool scan_lea = false;
     bool scan_extract = false;
+    bool scan_zero_ext = false;
+    bool scan_endian = false;
     bool use_rorx = false;
 };
 
@@ -208,6 +239,8 @@ struct V5ScanSummary {
     uint64_t rotate_sites = 0;
     uint64_t lea_sites = 0;
     uint64_t bitfield_sites = 0;
+    uint64_t zero_ext_sites = 0;
+    uint64_t endian_sites = 0;
 };
 
 const char *v5_family_name(V5Family family);
@@ -217,6 +250,8 @@ std::vector<V5PatternDesc> build_v5_wide_descriptors();
 std::vector<V5PatternDesc> build_v5_rotate_descriptors(bool use_rorx);
 std::vector<V5PatternDesc> build_v5_lea_descriptors();
 std::vector<V5PatternDesc> build_v5_bitfield_extract_descriptors();
+std::vector<V5PatternDesc> build_v5_zero_ext_elide_descriptors();
+std::vector<V5PatternDesc> build_v5_endian_fusion_descriptors();
 
 V5ScanSummary scan_v5_builtin(const uint8_t *xlated_data,
                               uint32_t xlated_len,

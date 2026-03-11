@@ -6,6 +6,7 @@
 #include <cerrno>
 #include <chrono>
 #include <cmath>
+#include <cstdio>
 #include <cstring>
 #include <ctime>
 #include <fstream>
@@ -454,6 +455,39 @@ std::vector<uint8_t> build_result_packet()
     return std::vector<uint8_t>(64, 0);
 }
 
+const char *prepare_phase_name(std::string_view io_mode)
+{
+    if (io_mode == "packet") {
+        return "packet_prepare_ns";
+    }
+    if (io_mode == "staged") {
+        return "input_stage_ns";
+    }
+    return "map_prepare_ns";
+}
+
+std::string resolve_effective_io_mode(const cli_options &options,
+                                      const program_image &image)
+{
+    if (options.io_mode != "map") {
+        return options.io_mode;
+    }
+
+    bool has_input_map = false;
+    bool has_result_map = false;
+    for (const auto &spec : image.maps) {
+        has_input_map = has_input_map || spec.name == "input_map";
+        has_result_map = has_result_map || spec.name == "result_map";
+    }
+    if (has_input_map && !has_result_map) {
+        std::fprintf(stderr,
+                     "io-mode: requested map but result_map is absent; "
+                     "falling back to staged\n");
+        return "staged";
+    }
+    return options.io_mode;
+}
+
 userspace_map_state initialize_map_state(const program_image &image, const std::vector<uint8_t> &input_bytes)
 {
     userspace_map_state state;
@@ -502,6 +536,7 @@ sample_result run_llvmbpf(const cli_options &options)
     const auto program_image_start = clock_type::now();
     const auto image = load_program_image(options.program, options.program_name);
     const auto program_image_end = clock_type::now();
+    const std::string effective_io_mode = resolve_effective_io_mode(options, image);
 
     const auto memory_prepare_start = clock_type::now();
     auto input_bytes = materialize_memory(options.memory, options.input_size);
@@ -510,9 +545,9 @@ sample_result run_llvmbpf(const cli_options &options)
     const auto exec_input_prepare_start = clock_type::now();
     auto map_state = userspace_map_state {};
     auto packet_input = std::vector<uint8_t> {};
-    if (options.io_mode == "map") {
+    if (effective_io_mode == "map") {
         map_state = initialize_map_state(image, input_bytes);
-    } else if (options.io_mode == "staged") {
+    } else if (effective_io_mode == "staged") {
         map_state = initialize_map_state(image, input_bytes);
         packet_input = build_result_packet();
     } else {
@@ -588,8 +623,7 @@ sample_result run_llvmbpf(const cli_options &options)
         sample.phases_ns = {
             {"program_image_ns", elapsed_ns(program_image_start, program_image_end)},
             {"memory_prepare_ns", elapsed_ns(memory_prepare_start, memory_prepare_end)},
-            {options.io_mode == "packet" ? "packet_prepare_ns"
-                                         : (options.io_mode == "staged" ? "input_stage_ns" : "map_prepare_ns"),
+            {prepare_phase_name(effective_io_mode),
              elapsed_ns(exec_input_prepare_start, exec_input_prepare_end)},
             {"vm_load_code_ns", elapsed_ns(load_code_start, load_code_end)},
             {"jit_compile_ns", sample.compile_ns},
@@ -641,7 +675,7 @@ sample_result run_llvmbpf(const cli_options &options)
     perf_counter_capture perf_counters;
     if (options.perf_scope == "full_repeat_avg") {
         exec_start = clock_type::now();
-        if (options.io_mode == "map") {
+        if (effective_io_mode == "map") {
             uint8_t dummy_ctx[8] = {};
             perf_counters = measure_perf_counters(perf_options, [&]() {
                 run_map_repeat(dummy_ctx, sizeof(dummy_ctx));
@@ -672,7 +706,7 @@ sample_result run_llvmbpf(const cli_options &options)
             perf_options,
             [&]() {
                 exec_start = clock_type::now();
-                if (options.io_mode == "map") {
+                if (effective_io_mode == "map") {
                     uint8_t dummy_ctx[8] = {};
                     run_map_repeat(dummy_ctx, sizeof(dummy_ctx));
                 } else {
@@ -708,13 +742,12 @@ sample_result run_llvmbpf(const cli_options &options)
         sample.timing_source = "clock_monotonic";
     }
     sample.wall_exec_ns = elapsed_ns(exec_start, exec_end) / repeat;
-    sample.result = options.io_mode == "map" ? read_result_value(map_state) : result;
+    sample.result = effective_io_mode == "map" ? read_result_value(map_state) : result;
     sample.retval = static_cast<uint32_t>(retval);
     sample.phases_ns = {
         {"program_image_ns", elapsed_ns(program_image_start, program_image_end)},
         {"memory_prepare_ns", elapsed_ns(memory_prepare_start, memory_prepare_end)},
-        {options.io_mode == "packet" ? "packet_prepare_ns"
-                                     : (options.io_mode == "staged" ? "input_stage_ns" : "map_prepare_ns"),
+        {prepare_phase_name(effective_io_mode),
          elapsed_ns(exec_input_prepare_start, exec_input_prepare_end)},
         {"vm_load_code_ns", elapsed_ns(load_code_start, load_code_end)},
         {"jit_compile_ns", sample.compile_ns},

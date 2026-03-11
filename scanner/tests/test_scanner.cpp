@@ -75,6 +75,14 @@ constexpr uint8_t BPF_AND64_X = 0x5f;
 constexpr uint8_t BPF_XOR64_X = 0xaf;
 constexpr uint8_t BPF_LDXB = 0x71;
 constexpr uint8_t BPF_ADD64_X = 0x0f;
+constexpr uint8_t BPF_ADD32_K = 0x04;
+constexpr uint8_t BPF_NEG32 = 0x84;
+constexpr uint8_t BPF_LDXH = 0x69;
+constexpr uint8_t BPF_LDXW = 0x61;
+constexpr uint8_t BPF_STXH = 0x6b;
+constexpr uint8_t BPF_STXW = 0x63;
+constexpr uint8_t BPF_ENDIAN_BE = 0xdc;
+constexpr uint8_t BPF_BSWAP = 0xd7;
 
 void test_v5_cmov_scan_and_blob()
 {
@@ -311,6 +319,74 @@ void test_v5_bitfield_extract_scan()
     CHECK_EQ(mask_shift_summary.rules[0].bindings.size(), 6u);
 }
 
+void test_v5_zero_ext_elide_scan()
+{
+    using bpf_jit_scanner::V5ScanOptions;
+
+    auto self_mov = encode({
+        {BPF_ADD32_K, regs(3, 0), 0, 7},
+        {BPF_MOV64_X, regs(3, 3), 0, 0},
+    });
+    auto and_mask = encode({
+        {BPF_NEG32, regs(4, 0), 0, 0},
+        {BPF_AND64_K, regs(4, 0), 0, -1},
+    });
+
+    auto mov_summary = bpf_jit_scanner::scan_v5_builtin(
+        self_mov.data(), static_cast<uint32_t>(self_mov.size()),
+        V5ScanOptions {.scan_zero_ext = true});
+    CHECK_EQ(mov_summary.rules.size(), 1u);
+    CHECK_EQ(mov_summary.zero_ext_sites, 1u);
+    CHECK_EQ(mov_summary.rules[0].canonical_form,
+             static_cast<uint16_t>(BPF_JIT_CF_ZERO_EXT_ELIDE));
+    CHECK_EQ(mov_summary.rules[0].native_choice,
+             static_cast<uint16_t>(BPF_JIT_ZEXT_ELIDE));
+    CHECK_EQ(mov_summary.rules[0].pattern.size(), 2u);
+    CHECK_EQ(mov_summary.rules[0].bindings.size(), 1u);
+
+    auto and_summary = bpf_jit_scanner::scan_v5_builtin(
+        and_mask.data(), static_cast<uint32_t>(and_mask.size()),
+        V5ScanOptions {.scan_zero_ext = true});
+    CHECK_EQ(and_summary.rules.size(), 1u);
+    CHECK_EQ(and_summary.zero_ext_sites, 1u);
+    CHECK_EQ(and_summary.rules[0].pattern.size(), 2u);
+    CHECK_EQ(and_summary.rules[0].bindings.size(), 1u);
+}
+
+void test_v5_endian_fusion_scan()
+{
+    using bpf_jit_scanner::V5ScanOptions;
+
+    auto load_swap = encode({
+        {BPF_LDXW, regs(3, 5), 12, 0},
+        {BPF_BSWAP, regs(3, 0), 0, 32},
+    });
+    auto swap_store = encode({
+        {BPF_ENDIAN_BE, regs(4, 0), 0, 16},
+        {BPF_STXH, regs(5, 4), 8, 0},
+    });
+
+    auto load_summary = bpf_jit_scanner::scan_v5_builtin(
+        load_swap.data(), static_cast<uint32_t>(load_swap.size()),
+        V5ScanOptions {.scan_endian = true});
+    CHECK_EQ(load_summary.rules.size(), 1u);
+    CHECK_EQ(load_summary.endian_sites, 1u);
+    CHECK_EQ(load_summary.rules[0].canonical_form,
+             static_cast<uint16_t>(BPF_JIT_CF_ENDIAN_FUSION));
+    CHECK_EQ(load_summary.rules[0].native_choice,
+             static_cast<uint16_t>(BPF_JIT_ENDIAN_MOVBE));
+    CHECK_EQ(load_summary.rules[0].cpu_features_required,
+             static_cast<uint32_t>(BPF_JIT_X86_MOVBE));
+    CHECK_EQ(load_summary.rules[0].bindings.size(), 5u);
+
+    auto store_summary = bpf_jit_scanner::scan_v5_builtin(
+        swap_store.data(), static_cast<uint32_t>(swap_store.size()),
+        V5ScanOptions {.scan_endian = true});
+    CHECK_EQ(store_summary.rules.size(), 1u);
+    CHECK_EQ(store_summary.endian_sites, 1u);
+    CHECK_EQ(store_summary.rules[0].bindings.size(), 5u);
+}
+
 void test_v5_abi_limits()
 {
     CHECK_EQ(BPF_JIT_MAX_PATTERN_LEN, 64);
@@ -328,6 +404,8 @@ int main()
     test_v5_wide_scan_variants();
     test_v5_lea_scan();
     test_v5_bitfield_extract_scan();
+    test_v5_zero_ext_elide_scan();
+    test_v5_endian_fusion_scan();
     test_v5_abi_limits();
 
     std::printf("PASS %d\n", g_pass);

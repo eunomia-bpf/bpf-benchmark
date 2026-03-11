@@ -353,6 +353,16 @@ V5PatternInsn make_simple_alu_pattern(uint8_t opcode,
                              kExpectOffSrc, 0, 0, 0, 0);
 }
 
+V5PatternInsn make_simple_unary_alu_pattern(uint8_t opcode, uint8_t dst_binding)
+{
+    constexpr uint8_t kExpectZero = BPF_JIT_PATTERN_F_EXPECT_OFF |
+                                    BPF_JIT_PATTERN_F_EXPECT_IMM |
+                                    BPF_JIT_PATTERN_F_EXPECT_SRC_REG;
+
+    return make_pattern_insn(opcode, dst_binding, 0, 0, 0, kExpectZero,
+                             0, 0, 0, 0);
+}
+
 V5PatternInsn make_ja_pattern_var_off(uint8_t off_binding)
 {
     constexpr uint8_t kJa = 0x05;
@@ -704,6 +714,10 @@ const char *v5_family_name(V5Family family)
         return "addr_calc";
     case V5Family::BitfieldExtract:
         return "bitfield_extract";
+    case V5Family::ZeroExtElide:
+        return "zero_ext_elide";
+    case V5Family::EndianFusion:
+        return "endian_fusion";
     default:
         return "unknown";
     }
@@ -1222,6 +1236,158 @@ std::vector<V5PatternDesc> build_v5_bitfield_extract_descriptors()
     return descs;
 }
 
+std::vector<V5PatternDesc> build_v5_zero_ext_elide_descriptors()
+{
+    constexpr uint8_t kMov64X = 0xbf;
+    constexpr uint8_t kAnd64K = 0x57;
+    constexpr uint8_t kExpectZeroOffImm = BPF_JIT_PATTERN_F_EXPECT_OFF |
+                                          BPF_JIT_PATTERN_F_EXPECT_IMM;
+    const uint8_t binary_ops[] = {
+        0x04, 0x0c, 0x14, 0x1c, 0x24, 0x2c, 0x34, 0x3c,
+        0x44, 0x4c, 0x54, 0x5c, 0x64, 0x6c, 0x74, 0x7c,
+        0x94, 0x9c, 0xa4, 0xac, 0xb4, 0xbc, 0xc4, 0xcc,
+    };
+    const uint8_t unary_ops[] = {
+        0x84,
+    };
+
+    std::vector<V5PatternDesc> descs;
+    descs.reserve(2 * (sizeof(binary_ops) + sizeof(unary_ops)));
+
+    auto append_desc = [&](V5PatternInsn first) {
+        const std::vector<V5Binding> bindings = {
+            make_var_binding(BPF_JIT_ZEXT_PARAM_DST_REG, 1,
+                             BPF_JIT_BIND_SOURCE_REG),
+        };
+
+        descs.push_back(make_v5_desc(
+            V5Family::ZeroExtElide,
+            BPF_JIT_CF_ZERO_EXT_ELIDE,
+            BPF_JIT_ZEXT_ELIDE,
+            0,
+            {
+                first,
+                make_pattern_insn(kMov64X, 1, 1, 0, 0, kExpectZeroOffImm,
+                                  0, 0, 0, 0),
+            },
+            {},
+            bindings));
+
+        descs.push_back(make_v5_desc(
+            V5Family::ZeroExtElide,
+            BPF_JIT_CF_ZERO_EXT_ELIDE,
+            BPF_JIT_ZEXT_ELIDE,
+            0,
+            {
+                first,
+                make_pattern_insn(kAnd64K, 1, 0, 0, 0, kExpectZeroOffImm,
+                                  0, 0, 0, -1),
+            },
+            {},
+            bindings));
+    };
+
+    for (const uint8_t opcode : binary_ops) {
+        append_desc(make_simple_alu_pattern(opcode, 1, 2));
+    }
+    for (const uint8_t opcode : unary_ops) {
+        append_desc(make_simple_unary_alu_pattern(opcode, 1));
+    }
+
+    return descs;
+}
+
+std::vector<V5PatternDesc> build_v5_endian_fusion_descriptors()
+{
+    constexpr uint8_t kLdxMemH = 0x69;
+    constexpr uint8_t kLdxMemW = 0x61;
+    constexpr uint8_t kLdxMemDw = 0x79;
+    constexpr uint8_t kStxMemH = 0x6b;
+    constexpr uint8_t kStxMemW = 0x63;
+    constexpr uint8_t kStxMemDw = 0x7b;
+    constexpr uint8_t kEndianBe = 0xdc;
+    constexpr uint8_t kBswap = 0xd7;
+    constexpr uint8_t kExpectZeroImm = BPF_JIT_PATTERN_F_EXPECT_IMM;
+    constexpr uint8_t kExpectEndian = BPF_JIT_PATTERN_F_EXPECT_OFF |
+                                      BPF_JIT_PATTERN_F_EXPECT_SRC_REG |
+                                      BPF_JIT_PATTERN_F_EXPECT_IMM;
+
+    struct EndianWidthDesc {
+        uint8_t load_opcode;
+        uint8_t store_opcode;
+        int32_t bits;
+    };
+    const EndianWidthDesc widths[] = {
+        {kLdxMemH, kStxMemH, 16},
+        {kLdxMemW, kStxMemW, 32},
+        {kLdxMemDw, kStxMemDw, 64},
+    };
+    const uint8_t endian_opcodes[] = {
+        kEndianBe,
+        kBswap,
+    };
+
+    std::vector<V5PatternDesc> descs;
+    descs.reserve(12);
+
+    for (const auto &width : widths) {
+        for (const uint8_t endian_opcode : endian_opcodes) {
+            const std::vector<V5Binding> bindings = {
+                make_var_binding(BPF_JIT_ENDIAN_PARAM_DATA_REG, 1,
+                                 BPF_JIT_BIND_SOURCE_REG),
+                make_var_binding(BPF_JIT_ENDIAN_PARAM_BASE_REG, 2,
+                                 BPF_JIT_BIND_SOURCE_REG),
+                make_var_binding(BPF_JIT_ENDIAN_PARAM_OFFSET, 3,
+                                 BPF_JIT_BIND_SOURCE_IMM),
+                make_const_binding(BPF_JIT_ENDIAN_PARAM_WIDTH, width.bits),
+                make_const_binding(BPF_JIT_ENDIAN_PARAM_DIRECTION,
+                                   BPF_JIT_ENDIAN_LOAD_SWAP),
+            };
+            const std::vector<V5Binding> store_bindings = {
+                make_var_binding(BPF_JIT_ENDIAN_PARAM_DATA_REG, 1,
+                                 BPF_JIT_BIND_SOURCE_REG),
+                make_var_binding(BPF_JIT_ENDIAN_PARAM_BASE_REG, 2,
+                                 BPF_JIT_BIND_SOURCE_REG),
+                make_var_binding(BPF_JIT_ENDIAN_PARAM_OFFSET, 3,
+                                 BPF_JIT_BIND_SOURCE_IMM),
+                make_const_binding(BPF_JIT_ENDIAN_PARAM_WIDTH, width.bits),
+                make_const_binding(BPF_JIT_ENDIAN_PARAM_DIRECTION,
+                                   BPF_JIT_ENDIAN_SWAP_STORE),
+            };
+
+            descs.push_back(make_v5_desc(
+                V5Family::EndianFusion,
+                BPF_JIT_CF_ENDIAN_FUSION,
+                BPF_JIT_ENDIAN_MOVBE,
+                BPF_JIT_X86_MOVBE,
+                {
+                    make_pattern_insn(width.load_opcode, 1, 2, 0, 3,
+                                      kExpectZeroImm, 0, 0, 0, 0),
+                    make_pattern_insn(endian_opcode, 1, 0, 0, 0,
+                                      kExpectEndian, 0, 0, 0, width.bits),
+                },
+                {},
+                bindings));
+
+            descs.push_back(make_v5_desc(
+                V5Family::EndianFusion,
+                BPF_JIT_CF_ENDIAN_FUSION,
+                BPF_JIT_ENDIAN_MOVBE,
+                BPF_JIT_X86_MOVBE,
+                {
+                    make_pattern_insn(endian_opcode, 1, 0, 0, 0,
+                                      kExpectEndian, 0, 0, 0, width.bits),
+                    make_pattern_insn(width.store_opcode, 2, 1, 0, 3,
+                                      kExpectZeroImm, 0, 0, 0, 0),
+                },
+                {},
+                store_bindings));
+        }
+    }
+
+    return descs;
+}
+
 V5ScanSummary scan_v5_builtin(const uint8_t *xlated_data,
                               uint32_t xlated_len,
                               const V5ScanOptions &options)
@@ -1253,6 +1419,14 @@ V5ScanSummary scan_v5_builtin(const uint8_t *xlated_data,
         auto extract_descs = build_v5_bitfield_extract_descriptors();
         descs.insert(descs.end(), extract_descs.begin(), extract_descs.end());
     }
+    if (options.scan_zero_ext) {
+        auto zero_ext_descs = build_v5_zero_ext_elide_descriptors();
+        descs.insert(descs.end(), zero_ext_descs.begin(), zero_ext_descs.end());
+    }
+    if (options.scan_endian) {
+        auto endian_descs = build_v5_endian_fusion_descriptors();
+        descs.insert(descs.end(), endian_descs.begin(), endian_descs.end());
+    }
 
     if (descs.empty()) {
         return summary;
@@ -1283,6 +1457,12 @@ V5ScanSummary scan_v5_builtin(const uint8_t *xlated_data,
                 break;
             case V5Family::BitfieldExtract:
                 summary.bitfield_sites++;
+                break;
+            case V5Family::ZeroExtElide:
+                summary.zero_ext_sites++;
+                break;
+            case V5Family::EndianFusion:
+                summary.endian_sites++;
                 break;
             }
 

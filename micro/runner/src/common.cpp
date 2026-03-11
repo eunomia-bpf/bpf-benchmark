@@ -204,10 +204,10 @@ cli_options parse_args(int argc, char **argv)
 {
     if (argc < 3) {
         fail(
-            "usage: micro_exec <run-llvmbpf|run-kernel|list-programs> --program <path> [--program-name <name>] "
+            "usage: micro_exec <run-llvmbpf|run-kernel|list-programs> [--program <path>|<path>] [--program-name <name>] "
             "[--memory|--input <path>] [--btf-custom-path <path>] [--directive-blob <path>] [--policy-blob <path>] "
             "[--manual-load] [--recompile-cmov] [--recompile-wide|--recompile-wide-mem] [--recompile-rotate] [--recompile-rotate-rorx] [--recompile-lea] [--recompile-extract|--recompile-bitfield-extract] [--recompile-all] [--recompile-v5] [--skip-families cmov,wide,rotate,lea,extract] "
-            "[--io-mode map|staged|packet|context] [--raw-packet] [--repeat N] [--input-size|--kernel-input-size N] "
+            "[--io-mode map|staged|packet|context] [--raw-packet] [--repeat N] [--warmup N] [--input-size|--kernel-input-size N] "
             "[--opt-level 0|1|2|3] [--no-cmov] [--llvm-disable-pass <name>] [--llvm-log-passes] "
             "[--perf-counters] [--perf-scope full_repeat_raw|full_repeat_avg] "
             "[--dump-jit] [--dump-xlated <path>] [--compile-only]");
@@ -220,6 +220,11 @@ cli_options parse_args(int argc, char **argv)
         const std::string_view current = argv[index];
         if ((current == "--program" || current == "--bpf-object") && index + 1 < argc) {
             options.program = argv[++index];
+            continue;
+        }
+        if (!current.empty() && current.front() != '-' && options.program.empty() &&
+            options.command != "list-programs") {
+            options.program = std::filesystem::path(current);
             continue;
         }
         if ((current == "--memory" || current == "--input") && index + 1 < argc) {
@@ -293,6 +298,10 @@ cli_options parse_args(int argc, char **argv)
         }
         if (current == "--repeat" && index + 1 < argc) {
             options.repeat = static_cast<uint32_t>(std::stoul(argv[++index]));
+            continue;
+        }
+        if ((current == "--warmup" || current == "--warmups") && index + 1 < argc) {
+            static_cast<void>(std::stoul(argv[++index]));
             continue;
         }
         if ((current == "--input-size" || current == "--kernel-input-size") &&
