@@ -16,12 +16,11 @@ from typing import Callable
 
 try:
     from benchmark_catalog import BenchmarkSpec, ROOT_DIR, RuntimeSpec, SuiteSpec
-    from input_generators import materialize_input
 except ImportError:
     from micro.benchmark_catalog import BenchmarkSpec, ROOT_DIR, RuntimeSpec, SuiteSpec
-    from micro.input_generators import materialize_input
 
 from .commands import build_runner_command, maybe_prepend_sudo
+from .benchmarks import resolve_memory_file, select_benchmarks
 
 try:
     import numpy as np
@@ -598,18 +597,6 @@ def resolve_runtime(name: str, suite: SuiteSpec) -> RuntimeSpec:
     return runtime
 
 
-def select_benchmarks(names: list[str] | None, suite: SuiteSpec) -> list[BenchmarkSpec]:
-    if not names:
-        return list(suite.benchmarks.values())
-    selected: list[BenchmarkSpec] = []
-    for name in names:
-        benchmark = suite.benchmarks.get(name)
-        if benchmark is None:
-            raise SystemExit(f"unknown benchmark: {name}")
-        selected.append(benchmark)
-    return selected
-
-
 def resolve_modes(runtime: RuntimeSpec, raw_modes: str | None) -> list[ModeSpec]:
     if runtime.mode == "llvmbpf":
         names = ["stock"] if not raw_modes else [part.strip() for part in raw_modes.split(",") if part.strip()]
@@ -695,13 +682,6 @@ def parse_micro_exec_output(stdout: str) -> dict[str, object]:
     if not isinstance(payload, dict):
         raise RuntimeError("micro_exec payload was not an object")
     return payload
-
-
-def resolve_memory_file(benchmark: BenchmarkSpec, regenerate_inputs: bool) -> Path | None:
-    if benchmark.input_generator is None:
-        return None
-    path, _ = materialize_input(benchmark.input_generator, force=regenerate_inputs)
-    return path
 
 
 def run_mode_iteration(command: list[str]) -> dict[str, object]:

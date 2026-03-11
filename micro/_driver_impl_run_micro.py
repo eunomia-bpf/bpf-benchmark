@@ -12,8 +12,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from benchmark_catalog import CONFIG_PATH, ROOT_DIR, SuiteSpec, load_suite
-from input_generators import materialize_input
 try:
+    from orchestrator.benchmarks import resolve_memory_file, select_benchmarks
     from orchestrator.commands import build_micro_benchmark_command
     from orchestrator.environment import (
         ensure_build_steps,
@@ -31,6 +31,7 @@ try:
         summarize_phase_timings,
     )
 except ImportError:
+    from micro.orchestrator.benchmarks import resolve_memory_file, select_benchmarks
     from micro.orchestrator.commands import build_micro_benchmark_command
     from micro.orchestrator.environment import (
         ensure_build_steps,
@@ -153,18 +154,6 @@ def list_suite(suite: SuiteSpec) -> None:
         print(f"{runtime.name:12} {runtime.label}{aliases}")
 
 
-def select_benchmarks(names: list[str] | None, suite: SuiteSpec):
-    if not names:
-        return list(suite.benchmarks.values())
-
-    selected = []
-    for name in names:
-        if name not in suite.benchmarks:
-            raise SystemExit(f"unknown benchmark: {name}")
-        selected.append(suite.benchmarks[name])
-    return selected
-
-
 def select_runtimes(names: list[str] | None, suite: SuiteSpec):
     requested = names or list(suite.defaults.runtimes)
     selected = []
@@ -185,13 +174,6 @@ def ensure_artifacts_built(suite: SuiteSpec, build_bpftool: bool) -> None:
         root_dir=ROOT_DIR,
         build_order=build_order,
     )
-
-
-def resolve_memory_file(benchmark, regenerate_inputs: bool) -> Path | None:
-    if benchmark.input_generator is None:
-        return None
-    path, _ = materialize_input(benchmark.input_generator, force=regenerate_inputs)
-    return path
 
 
 def resolve_policy_inputs(benchmark) -> tuple[str | None, Path | None]:

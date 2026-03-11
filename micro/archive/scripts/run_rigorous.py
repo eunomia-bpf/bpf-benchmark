@@ -2,6 +2,15 @@
 from __future__ import annotations
 
 import sys
+from pathlib import Path
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+MICRO_ROOT = SCRIPT_DIR.parent.parent
+REPO_ROOT = MICRO_ROOT.parent
+for candidate in (REPO_ROOT, MICRO_ROOT):
+    candidate_str = str(candidate)
+    if candidate_str not in sys.path:
+        sys.path.insert(0, candidate_str)
 
 try:
     from _driver_impl_run_rigorous import *  # type: ignore[F403]

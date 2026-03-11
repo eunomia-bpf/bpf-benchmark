@@ -15,12 +15,16 @@ from pathlib import Path
 from typing import Any
 
 from benchmark_catalog import CONFIG_PATH, ROOT_DIR, BenchmarkSpec, SuiteSpec, load_suite
-from input_generators import materialize_input
 try:
+    from orchestrator.benchmarks import resolve_memory_file, select_benchmarks as select_suite_benchmarks
     from orchestrator.commands import build_runner_command, maybe_prepend_taskset
     from orchestrator.environment import ensure_build_steps, read_optional_text, read_required_text
     from orchestrator.results import ns_summary, parse_runner_sample
 except ImportError:
+    from micro.orchestrator.benchmarks import (
+        resolve_memory_file,
+        select_benchmarks as select_suite_benchmarks,
+    )
     from micro.orchestrator.commands import build_runner_command, maybe_prepend_taskset
     from micro.orchestrator.environment import ensure_build_steps, read_optional_text, read_required_text
     from micro.orchestrator.results import ns_summary, parse_runner_sample
@@ -171,14 +175,7 @@ def ensure_artifacts_built(suite: SuiteSpec) -> None:
 
 
 def select_benchmarks(requested: list[str] | None, suite: SuiteSpec) -> list[BenchmarkSpec]:
-    selected_names = requested or ABLATION_BENCHMARKS
-    selected: list[BenchmarkSpec] = []
-    for name in selected_names:
-        benchmark = suite.benchmarks.get(name)
-        if benchmark is None:
-            raise SystemExit(f"unknown benchmark: {name}")
-        selected.append(benchmark)
-    return selected
+    return select_suite_benchmarks(requested, suite, default_names=ABLATION_BENCHMARKS)
 
 
 def select_passes(requested: list[str] | None) -> list[str]:
@@ -217,13 +214,6 @@ def load_benchmark_names_from_results(path: Path) -> list[str]:
     if not names:
         raise SystemExit(f"benchmark source has no benchmark names: {path}")
     return names
-
-
-def resolve_memory_file(benchmark: BenchmarkSpec, regenerate_inputs: bool) -> Path | None:
-    if benchmark.input_generator is None:
-        return None
-    path, _ = materialize_input(benchmark.input_generator, force=regenerate_inputs)
-    return path
 
 
 def config_key(disabled_pass: str | None) -> str:
