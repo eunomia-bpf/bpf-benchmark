@@ -34,9 +34,9 @@ make -C micro vendor_bpftool   # optional vendored bpftool
 ### Run benchmarks
 ```bash
 # One-shot entrypoints
-./scripts/run_micro.sh
-./scripts/run_micro.sh --llvmbpf-only
-./scripts/run_micro.sh --vm
+./docs/paper/scripts/run_micro.sh
+./docs/paper/scripts/run_micro.sh --llvmbpf-only
+./docs/paper/scripts/run_micro.sh --vm
 
 # List available benchmarks
 python3 micro/run_micro.py --list

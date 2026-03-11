@@ -43,19 +43,19 @@ python3 micro/driver.py suite -- --list
 Run the suite on the host:
 
 ```bash
-./scripts/run_micro.sh
+./docs/paper/scripts/run_micro.sh
 ```
 
 Run llvmbpf only:
 
 ```bash
-./scripts/run_micro.sh --llvmbpf-only
+./docs/paper/scripts/run_micro.sh --llvmbpf-only
 ```
 
 Run inside the framework-kernel VM:
 
 ```bash
-./scripts/run_micro.sh --vm
+./docs/paper/scripts/run_micro.sh --vm
 ```
 
 Run a targeted smoke test directly:

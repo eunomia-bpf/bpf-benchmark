@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 MICRO_DIR="$ROOT_DIR/micro"
 RESULTS_DIR="$MICRO_DIR/results"
 VENV_ACTIVATE="/home/yunwei37/workspace/.venv/bin/activate"
@@ -16,17 +16,17 @@ extra_args=()
 
 usage() {
     cat <<EOF
-Usage: ./scripts/run_micro.sh [--vm] [--llvmbpf-only] [extra run_micro.py args]
+Usage: ./docs/paper/scripts/run_micro.sh [--vm] [--llvmbpf-only] [extra run_micro.py args]
 
 Modes:
   --vm             Run inside vng with $DEFAULT_KERNEL_IMAGE
   --llvmbpf-only   Run only the llvmbpf runtime
 
 Examples:
-  ./scripts/run_micro.sh
-  ./scripts/run_micro.sh --vm
-  ./scripts/run_micro.sh --llvmbpf-only
-  ./scripts/run_micro.sh --bench simple --iterations 1 --warmups 0 --repeat 10
+  ./docs/paper/scripts/run_micro.sh
+  ./docs/paper/scripts/run_micro.sh --vm
+  ./docs/paper/scripts/run_micro.sh --llvmbpf-only
+  ./docs/paper/scripts/run_micro.sh --bench simple --iterations 1 --warmups 0 --repeat 10
 EOF
 }
 
@@ -78,7 +78,7 @@ while (($# > 0)); do
             shift 2
             ;;
         --runtime)
-            echo "--runtime is managed by scripts/run_micro.sh; use --llvmbpf-only or the default dual-runtime mode." >&2
+            echo "--runtime is managed by docs/paper/scripts/run_micro.sh; use --llvmbpf-only or the default dual-runtime mode." >&2
             exit 2
             ;;
         --help|-h)

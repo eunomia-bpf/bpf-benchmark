@@ -16,7 +16,7 @@ import urllib3
 from bs4 import BeautifulSoup
 
 
-REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
+REPO_ROOT = pathlib.Path(__file__).resolve().parents[3]
 PLAN_PATH = REPO_ROOT / "docs" / "ebpf-bench-research-plan.md"
 OUT_DIR = REPO_ROOT / "reference" / "papers"
 PCHAIGNO_URL = "https://pchaigno.github.io/bpf/2025/01/07/research-papers-bpf.html"
