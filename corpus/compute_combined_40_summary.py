@@ -2,11 +2,19 @@
 from __future__ import annotations
 
 import math
+import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parent
+for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpus"):
+    candidate_str = str(candidate)
+    if candidate_str not in sys.path:
+        sys.path.insert(0, candidate_str)
 
 from analyze_statistics import (
     BOOTSTRAP_ITERATIONS,
@@ -19,15 +27,15 @@ from analyze_statistics import (
 )
 
 
-ROOT_DIR = Path(__file__).resolve().parent
-RESULTS_DIR = ROOT_DIR / "results"
+MICRO_RESULTS_DIR = REPO_ROOT / "micro" / "results"
+CORPUS_RESULTS_DIR = REPO_ROOT / "corpus" / "results"
 
-PURE_JIT_LATEST_PATH = RESULTS_DIR / "pure_jit.latest.json"
-PURE_JIT_AUTHORITATIVE_PATH = RESULTS_DIR / "pure_jit_authoritative.json"
-NEW_PURE_JIT_PATH = RESULTS_DIR / "new_benchmarks_authoritative.json"
-RUNTIME_AUTHORITATIVE_PATH = RESULTS_DIR / "runtime_authoritative.json"
-NEW_RUNTIME_PATH = RESULTS_DIR / "new_runtime_authoritative.json"
-OUTPUT_PATH = RESULTS_DIR / "combined_40_summary.md"
+PURE_JIT_LATEST_PATH = MICRO_RESULTS_DIR / "pure_jit.latest.json"
+PURE_JIT_AUTHORITATIVE_PATH = MICRO_RESULTS_DIR / "pure_jit_authoritative.json"
+NEW_PURE_JIT_PATH = MICRO_RESULTS_DIR / "new_benchmarks_authoritative.json"
+RUNTIME_AUTHORITATIVE_PATH = MICRO_RESULTS_DIR / "runtime_authoritative.json"
+NEW_RUNTIME_PATH = MICRO_RESULTS_DIR / "new_runtime_authoritative.json"
+OUTPUT_PATH = CORPUS_RESULTS_DIR / "combined_40_summary.md"
 
 EXPECTED_ORIGINAL_PURE_JIT_COUNT = 31
 EXPECTED_NEW_PURE_JIT_COUNT = 9
@@ -59,15 +67,15 @@ def choose_original_pure_jit_source() -> tuple[ResultSource, ResultSource | None
     if PURE_JIT_AUTHORITATIVE_PATH.exists():
         authoritative_source = load_source(PURE_JIT_AUTHORITATIVE_PATH)
         note = (
-            f"Selected `{PURE_JIT_AUTHORITATIVE_PATH.relative_to(ROOT_DIR.parent)}` as the original pure-JIT source "
+            f"Selected `{PURE_JIT_AUTHORITATIVE_PATH.relative_to(REPO_ROOT)}` as the original pure-JIT source "
             f"because it exists and contains {authoritative_source.benchmark_count} benchmarks."
         )
         return authoritative_source, latest_source, note
 
     if latest_source is not None and latest_source.benchmark_count == EXPECTED_ORIGINAL_PURE_JIT_COUNT:
         note = (
-            f"Fell back to `{PURE_JIT_LATEST_PATH.relative_to(ROOT_DIR.parent)}` because "
-            f"`{PURE_JIT_AUTHORITATIVE_PATH.relative_to(ROOT_DIR.parent)}` is missing."
+            f"Fell back to `{PURE_JIT_LATEST_PATH.relative_to(REPO_ROOT)}` because "
+            f"`{PURE_JIT_AUTHORITATIVE_PATH.relative_to(REPO_ROOT)}` is missing."
         )
         return latest_source, latest_source, note
 
@@ -94,7 +102,7 @@ def combine_results(suite_name: str, sources: list[ResultSource]) -> dict[str, o
         "suite": suite_name,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "benchmarks": combined_benchmarks,
-        "combined_from": [str(source.path.relative_to(ROOT_DIR.parent)) for source in sources],
+        "combined_from": [str(source.path.relative_to(REPO_ROOT)) for source in sources],
     }
 
 
@@ -133,7 +141,7 @@ def format_count(value: int, total: int) -> str:
 
 
 def format_path(path: Path) -> str:
-    return str(path.relative_to(ROOT_DIR.parent))
+    return str(path.relative_to(REPO_ROOT))
 
 
 def build_pure_jit_detail_rows(rows: list[dict[str, object]]) -> list[str]:
@@ -355,6 +363,7 @@ def main() -> int:
         runtime_rows,
         runtime_summary,
     )
+    OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT_PATH.write_text(report)
     print(report)
     return 0

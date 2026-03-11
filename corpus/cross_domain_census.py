@@ -12,8 +12,13 @@ from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 
-# Reuse scanning functions from directive_census.py
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parent
+for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpus"):
+    candidate_str = str(candidate)
+    if candidate_str not in sys.path:
+        sys.path.insert(0, candidate_str)
+
 from directive_census import (
     Insn,
     SectionResult,

@@ -10,4 +10,4 @@ if [[ -f /home/yunwei37/workspace/.venv/bin/activate ]]; then
 fi
 
 cd "${REPO_ROOT}"
-exec sudo python3 micro/run_corpus_tracing.py "$@"
+exec sudo python3 corpus/run_corpus_tracing.py "$@"

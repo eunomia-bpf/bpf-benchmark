@@ -1,37 +1,53 @@
 # Real-World Corpus
 
-This directory tracks real-world eBPF program-source candidates used by the characterization pipeline.
+`corpus/` owns the real-world program layer: collection, declarative configs, measurement, and analysis.
 
-- `repos.yaml` describes upstream repos, sparse checkout paths, harvest globs, and optional excludes.
-- `fetch_real_world_corpus.py` performs shallow partial clones and emits `inventory.json`.
-- `build_expanded_corpus.py` compiles harvested upstream sources into `corpus/build/<repo>/...` and logs failures without stopping the sweep.
-- `run_real_world_code_size.py` compiles supported real-world `.bpf.c` sources and compares per-program native code size across `llvmbpf` and `kernel`.
-- `repos/` is ignored and stores local working copies.
-- `../config/macro_corpus.yaml` is the macro-layer config entrypoint for corpus fetching.
+## What Lives Here
 
-Use:
+- `config/macro_corpus.yaml`: declarative corpus measurement suite
+- `config/corpus_manifest.yaml`: 23-project corpus snapshot / metadata manifest
+- `repos.yaml`: upstream repo harvest manifest
+- `fetch_real_world_corpus.py`: shallow sparse checkout fetcher + inventory generator
+- `build_expanded_corpus.py`: corpus-wide `.bpf.c` build sweep into `corpus/build/`
+- `run_corpus_perf.py`: stock-vs-recompile packet-test-run corpus measurements
+- `run_corpus_tracing.py`: tracing attach/trigger corpus measurements
+- `run_corpus_runnability.py`: runnable-program inventory + paired measurement feasibility
+- `run_corpus_v5_framework.py`: 40-program framework-kernel corpus union
+- `run_production_corpus_v5_framework.py`: production-skewed framework-kernel corpus run
+- `run_corpus_v5_vm_batch.py`: VM batch recompile harness
+- `run_macro_corpus.py`: declarative macro/corpus suite runner
+- `directive_census.py` / `cross_domain_census.py`: corpus-wide directive analysis
+
+The active corpus currently spans 23 source projects and stores fetched repos under `corpus/repos/`, built objects under `corpus/build/`, and measurement outputs under `corpus/results/` plus `docs/tmp/`.
+
+## Common Commands
+
+Fetch or refresh the upstream corpus working copies:
 
 ```bash
 python3 corpus/fetch_real_world_corpus.py
 ```
 
-Build the broad corpus snapshot:
+Build the expanded corpus snapshot:
 
 ```bash
 python3 corpus/build_expanded_corpus.py
 ```
 
-Run the current first-wave code-size validation:
+Inspect directive-bearing sites across the built corpus:
 
 ```bash
-python3 corpus/run_real_world_code_size.py --repo libbpf-bootstrap
+python3 corpus/directive_census.py
 ```
 
-Outputs:
+Run the packet-test-run corpus perf harness:
 
-- `corpus/results/real_world_code_size.json`
-- `corpus/results/real_world_code_size.md`
-- `corpus/results/expanded_corpus_build.json`
-- `corpus/results/expanded_corpus_build.md`
+```bash
+python3 corpus/run_corpus_perf.py --help
+```
 
-The current manifest covers `xdp-examples`, `xdp-tools`, `xdp-tutorial`, `bcc`, `katran`, `tetragon`, `cilium`, `libbpf-bootstrap`, and `linux-selftests`.
+List the declarative macro suite:
+
+```bash
+python3 corpus/run_macro_corpus.py --list
+```

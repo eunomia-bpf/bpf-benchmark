@@ -20,7 +20,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parent
 REPO_ROOT = ROOT.parent
-DEFAULT_CONFIG = REPO_ROOT / "config" / "macro_corpus.yaml"
+DEFAULT_CONFIG = ROOT / "config" / "macro_corpus.yaml"
 DEFAULT_MANIFEST = ROOT / "repos.yaml"
 DEFAULT_INVENTORY = ROOT / "inventory.json"
 DEFAULT_BUILD_ROOT = ROOT / "build"

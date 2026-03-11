@@ -6,39 +6,35 @@ import subprocess
 import sys
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 try:
     from benchmark_catalog import CONFIG_PATH, ROOT_DIR
 except ImportError:
     from micro.benchmark_catalog import CONFIG_PATH, ROOT_DIR
 
 try:
-    import _driver_impl_run_corpus_perf as run_corpus_perf_impl
-    import _driver_impl_run_corpus_tracing as run_corpus_tracing_impl
-    import _driver_impl_run_corpus_v5_framework as run_corpus_v5_framework_impl
-    import _driver_impl_run_corpus_v5_vm_batch as run_corpus_v5_vm_batch_impl
-    import _driver_impl_run_macro_corpus as run_macro_corpus_impl
     import _driver_impl_run_micro as run_micro_impl
     import _driver_impl_run_pass_ablation as run_pass_ablation_impl
-    import _driver_impl_run_production_corpus_v5_framework as run_production_corpus_v5_framework_impl
     import _driver_impl_run_rigorous as run_rigorous_impl
     import _driver_impl_run_rigorous_framework_vm as run_rigorous_framework_vm_impl
 except ImportError:
     from micro import (
-        _driver_impl_run_corpus_perf as run_corpus_perf_impl,
-        _driver_impl_run_corpus_tracing as run_corpus_tracing_impl,
-        _driver_impl_run_corpus_v5_framework as run_corpus_v5_framework_impl,
-        _driver_impl_run_corpus_v5_vm_batch as run_corpus_v5_vm_batch_impl,
-        _driver_impl_run_macro_corpus as run_macro_corpus_impl,
         _driver_impl_run_micro as run_micro_impl,
         _driver_impl_run_pass_ablation as run_pass_ablation_impl,
-        _driver_impl_run_production_corpus_v5_framework as run_production_corpus_v5_framework_impl,
         _driver_impl_run_rigorous as run_rigorous_impl,
         _driver_impl_run_rigorous_framework_vm as run_rigorous_framework_vm_impl,
     )
-
-
-MICRO_DIR = Path(__file__).resolve().parent
-
+from corpus import (
+    _driver_impl_run_corpus_perf as run_corpus_perf_impl,
+    _driver_impl_run_corpus_tracing as run_corpus_tracing_impl,
+    _driver_impl_run_corpus_v5_framework as run_corpus_v5_framework_impl,
+    _driver_impl_run_corpus_v5_vm_batch as run_corpus_v5_vm_batch_impl,
+    _driver_impl_run_macro_corpus as run_macro_corpus_impl,
+    _driver_impl_run_production_corpus_v5_framework as run_production_corpus_v5_framework_impl,
+)
 
 def _strip_separator(argv: list[str]) -> list[str]:
     return [arg for arg in argv if arg != "--"]
@@ -57,7 +53,7 @@ def _detect_suite_kind(suite_path: Path) -> str:
 
 
 def _run_python_script(script_name: str, argv: list[str]) -> int:
-    completed = subprocess.run([sys.executable, str(MICRO_DIR / script_name), *argv], cwd=ROOT_DIR)
+    completed = subprocess.run([sys.executable, str(REPO_ROOT / script_name), *argv], cwd=ROOT_DIR)
     return int(completed.returncode)
 
 
@@ -111,11 +107,11 @@ def _corpus_entry(argv: list[str]) -> int:
 def _census_entry(argv: list[str]) -> int:
     argv = _strip_separator(list(argv))
     if not argv:
-        return _run_python_script("directive_census.py", [])
+        return _run_python_script("corpus/directive_census.py", [])
     tool, *remaining = argv
     script_map = {
-        "directive": "directive_census.py",
-        "cross-domain": "cross_domain_census.py",
+        "directive": "corpus/directive_census.py",
+        "cross-domain": "corpus/cross_domain_census.py",
     }
     script_name = script_map.get(tool)
     if script_name is None:

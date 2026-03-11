@@ -11,7 +11,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parent
 REPO_ROOT = ROOT.parent
-DEFAULT_CONFIG = REPO_ROOT / "config" / "macro_corpus.yaml"
+DEFAULT_CONFIG = ROOT / "config" / "macro_corpus.yaml"
 
 
 def run(command: list[str], cwd: Path | None = None) -> None:

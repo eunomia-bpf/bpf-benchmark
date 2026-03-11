@@ -17,6 +17,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parent
+for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpus"):
+    candidate_str = str(candidate)
+    if candidate_str not in sys.path:
+        sys.path.insert(0, candidate_str)
+
 try:
     from orchestrator.inventory import load_packet_test_run_targets
     from orchestrator.results import normalize_directive_scan, parse_json_lines as parse_json_payload_lines, parse_runner_sample
@@ -28,7 +35,7 @@ except ImportError:
 ROOT_DIR = Path(__file__).resolve().parent.parent
 SELF_RELATIVE = Path(__file__).resolve().relative_to(ROOT_DIR)
 DEFAULT_INVENTORY_JSON = ROOT_DIR / "docs" / "tmp" / "corpus-runnability-results.json"
-DEFAULT_OUTPUT_JSON = ROOT_DIR / "micro" / "results" / "corpus_v5_vm_batch.json"
+DEFAULT_OUTPUT_JSON = ROOT_DIR / "corpus" / "results" / "corpus_v5_vm_batch.json"
 DEFAULT_OUTPUT_MD = ROOT_DIR / "docs" / "tmp" / "corpus-batch-recompile-results.md"
 DEFAULT_RUNNER = ROOT_DIR / "micro" / "build" / "runner" / "micro_exec"
 DEFAULT_SCANNER = ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"

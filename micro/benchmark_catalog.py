@@ -12,6 +12,14 @@ ROOT_DIR = REPO_ROOT
 CONFIG_PATH = REPO_ROOT / "config" / "micro_pure_jit.yaml"
 
 
+def _manifest_root(path: Path) -> Path:
+    try:
+        path.relative_to(ROOT_DIR)
+    except ValueError:
+        return path.parent.parent
+    return ROOT_DIR
+
+
 @dataclass(frozen=True)
 class ToolchainSpec:
     name: str
@@ -96,7 +104,7 @@ def _load_commands(raw_commands: dict[str, list[str]]) -> dict[str, tuple[str, .
 
 def load_suite(path: Path = CONFIG_PATH) -> SuiteSpec:
     manifest_path = path.resolve()
-    root_dir = manifest_path.parent.parent
+    root_dir = _manifest_root(manifest_path)
 
     data = yaml.safe_load(manifest_path.read_text())
     benchmark_defaults = data.get("benchmark_defaults", {})

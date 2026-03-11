@@ -10,7 +10,15 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_MICRO_MANIFEST = REPO_ROOT / "config" / "micro_pure_jit.yaml"
 DEFAULT_RUNTIME_MANIFEST = REPO_ROOT / "config" / "micro_runtime.yaml"
-DEFAULT_MACRO_MANIFEST = REPO_ROOT / "config" / "macro_corpus.yaml"
+DEFAULT_MACRO_MANIFEST = REPO_ROOT / "corpus" / "config" / "macro_corpus.yaml"
+
+
+def _manifest_root(path: Path) -> Path:
+    try:
+        path.relative_to(REPO_ROOT)
+    except ValueError:
+        return path.parent.parent
+    return REPO_ROOT
 
 
 def _resolve_path(value: str | Path | None, root_dir: Path) -> Path | None:
@@ -226,7 +234,7 @@ def _validate_target_names(targets: list[CatalogTarget]) -> tuple[CatalogTarget,
 
 
 def _load_micro_catalog(path: Path, data: Mapping[str, Any]) -> CatalogManifest:
-    root_dir = path.parent.parent
+    root_dir = _manifest_root(path)
     defaults_raw = dict(data.get("defaults", {}))
     build_data = dict(data.get("build", {}))
     benchmark_defaults = dict(data.get("benchmark_defaults", {}))
@@ -295,7 +303,7 @@ def _load_micro_catalog(path: Path, data: Mapping[str, Any]) -> CatalogManifest:
 
 
 def _load_macro_catalog(path: Path, data: Mapping[str, Any]) -> CatalogManifest:
-    root_dir = path.parent.parent
+    root_dir = _manifest_root(path)
     defaults_raw = dict(data.get("defaults", {}))
     build_data = dict(data.get("build", {}))
     raw_runtimes = data.get("runtimes")

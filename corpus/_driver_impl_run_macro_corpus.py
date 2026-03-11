@@ -20,6 +20,13 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parent
+for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpus"):
+    candidate_str = str(candidate)
+    if candidate_str not in sys.path:
+        sys.path.insert(0, candidate_str)
+
 try:
     from orchestrator.catalog import load_catalog
     from orchestrator.inventory import discover_object_programs
@@ -29,7 +36,7 @@ except ImportError:
 
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
-DEFAULT_SUITE = ROOT_DIR / "config" / "macro_corpus.yaml"
+DEFAULT_SUITE = ROOT_DIR / "corpus" / "config" / "macro_corpus.yaml"
 DEFAULT_PACKET = ROOT_DIR / "corpus" / "inputs" / "macro_dummy_packet_64.bin"
 DEFAULT_CONTEXT = ROOT_DIR / "corpus" / "inputs" / "macro_dummy_context_64.bin"
 DEFAULT_BTF_CANDIDATES = (
@@ -37,7 +44,7 @@ DEFAULT_BTF_CANDIDATES = (
     ROOT_DIR / "vendor" / "linux-framework" / "vmlinux",
     ROOT_DIR / "vendor" / "linux" / "vmlinux",
 )
-DEFAULT_OUTPUT = ROOT_DIR / "micro" / "results" / "macro_corpus.latest.json"
+DEFAULT_OUTPUT = ROOT_DIR / "corpus" / "results" / "macro_corpus.latest.json"
 DEFAULT_RUNNER = ROOT_DIR / "micro" / "build" / "runner" / "micro_exec"
 DEFAULT_SCANNER = ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"
 DEFAULT_BPFTOOL = "bpftool"

@@ -18,6 +18,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parent
+for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpus"):
+    candidate_str = str(candidate)
+    if candidate_str not in sys.path:
+        sys.path.insert(0, candidate_str)
+
 from benchmark_catalog import ROOT_DIR, load_suite
 try:
     from orchestrator.corpus import (
@@ -167,7 +174,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--corpus-build-report",
         help=(
             "Optional expanded corpus build JSON report. When omitted, "
-            "micro/directive_census.py will use corpus/results/expanded_corpus_build.json if present."
+            "corpus/directive_census.py will use corpus/results/expanded_corpus_build.json if present."
         ),
     )
     parser.add_argument(
