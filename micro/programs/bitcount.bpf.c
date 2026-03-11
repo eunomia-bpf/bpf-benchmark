@@ -3,17 +3,6 @@
 #define BITCOUNT_MAX_COUNT 256U
 #define BITCOUNT_INPUT_SIZE (8U + BITCOUNT_MAX_COUNT * 8U)
 
-struct bitcount_input_value {
-    unsigned char data[BITCOUNT_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct bitcount_input_value);
-} input_map SEC(".maps");
-
 static __always_inline u64 micro_popcount64(u64 value)
 {
     u64 count = 0;

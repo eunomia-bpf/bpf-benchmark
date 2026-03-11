@@ -4,17 +4,6 @@
 #define PACKET_PARSE_MAX_SIZE 64U
 #define PACKET_PARSE_INPUT_SIZE (8U + PACKET_PARSE_MAX_COUNT * PACKET_PARSE_MAX_SIZE)
 
-struct packet_parse_input_value {
-    unsigned char data[PACKET_PARSE_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct packet_parse_input_value);
-} input_map SEC(".maps");
-
 static __always_inline int bench_packet_parse(const u8 *data, u32 len, u64 *out)
 {
     if (!micro_has_bytes(len, 0, 8)) {

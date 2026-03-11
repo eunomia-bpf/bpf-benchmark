@@ -5,17 +5,6 @@
 #define BINARY_SEARCH_INPUT_SIZE \
     (8U + (BINARY_SEARCH_MAX_DATA_LEN + BINARY_SEARCH_MAX_QUERY_LEN) * 8U)
 
-struct binary_search_input_value {
-    unsigned char data[BINARY_SEARCH_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct binary_search_input_value);
-} input_map SEC(".maps");
-
 static __always_inline int bench_binary_search(const u8 *data, u32 len, u64 *out)
 {
     if (!micro_has_bytes(len, 0, 8)) {

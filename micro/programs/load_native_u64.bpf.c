@@ -15,21 +15,11 @@ struct lnu_aligned {
     __u64 values[LNU_COUNT];
 };
 
-struct load_native_u64_input_value {
-    unsigned char data[LNU_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct load_native_u64_input_value);
-} input_map SEC(".maps");
-
 static __always_inline int bench_load_native_u64(const u8 *data, u32 len, u64 *out)
 {
     /* Reinterpret the byte array as an aligned struct.
-     * BPF verifier accepts this for map value pointers. */
+     * The harness provides a fixed-size packet payload, so the verifier sees
+     * a bounded packet window here. */
     const struct lnu_aligned *inp = (const struct lnu_aligned *)data;
 
     if (inp->count != LNU_COUNT)

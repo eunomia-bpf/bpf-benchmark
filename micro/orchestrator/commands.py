@@ -128,6 +128,7 @@ def build_micro_benchmark_command(
             io_mode=io_mode,
             repeat=repeat,
             memory=memory,
+            input_size=input_size,
             perf_counters=perf_counters,
             perf_scope=perf_scope,
         )

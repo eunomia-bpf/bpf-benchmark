@@ -26,6 +26,7 @@
 #define CGROUP_SKB_OK 1
 #endif
 
+#define MICRO_RESULT_PREFIX_SIZE 8U
 #define MICRO_UNBOUNDED_LEN 0xFFFFFFFFU
 
 static __always_inline int micro_has_bytes(u32 len, u32 offset, u32 size)
@@ -77,6 +78,12 @@ static __always_inline void micro_write_u64_le(u8 *data, u64 value)
     }
 }
 
+static __always_inline void micro_write_skb_result(struct __sk_buff *skb, u64 value)
+{
+    skb->cb[0] = (u32)value;
+    skb->cb[1] = (u32)(value >> 32);
+}
+
 static __always_inline u64 micro_rotl64(u64 value, u32 shift)
 {
     shift &= 63U;
@@ -95,6 +102,38 @@ static __always_inline u32 micro_rotl32(u32 value, u32 shift)
     return (value << shift) | (value >> (32U - shift));
 }
 
+static __always_inline int micro_prepare_packet_payload(u8 *data,
+                                                        u8 *data_end,
+                                                        u32 input_size,
+                                                        u8 **payload,
+                                                        u32 *payload_len)
+{
+    u8 *payload_ptr;
+
+    if (data > data_end) {
+        return -1;
+    }
+
+    payload_ptr = data + MICRO_RESULT_PREFIX_SIZE;
+    if (payload_ptr > data_end) {
+        return -1;
+    }
+
+    if (input_size == MICRO_UNBOUNDED_LEN) {
+        *payload = payload_ptr;
+        *payload_len = (u32)(data_end - payload_ptr);
+        return 0;
+    }
+
+    if (payload_ptr + input_size > data_end) {
+        return -1;
+    }
+
+    *payload = payload_ptr;
+    *payload_len = input_size;
+    return 0;
+}
+
 #define DEFINE_PACKET_BACKED_XDP_BENCH(PROG_NAME, BENCH_FN)                      \
     SEC("xdp") int PROG_NAME(struct xdp_md *ctx)                                 \
     {                                                                            \
@@ -103,14 +142,11 @@ static __always_inline u32 micro_rotl32(u32 value, u32 shift)
         u8 *payload;                                                             \
         u64 result = 0;                                                          \
         u32 payload_len;                                                         \
-        if (data > data_end) {                                                   \
+        if (micro_prepare_packet_payload(                                        \
+                data, data_end, MICRO_UNBOUNDED_LEN, &payload, &payload_len) <   \
+            0) {                                                                 \
             return XDP_ABORTED;                                                  \
         }                                                                        \
-        payload = data + 8U;                                                     \
-        if (payload > data_end) {                                                \
-            return XDP_ABORTED;                                                  \
-        }                                                                        \
-        payload_len = (u32)(data_end - payload);                                 \
         if (BENCH_FN(payload, payload_len, &result) < 0) {                       \
             return XDP_ABORTED;                                                  \
         }                                                                        \
@@ -125,20 +161,13 @@ static __always_inline u32 micro_rotl32(u32 value, u32 shift)
         u8 *data = (u8 *)(long)ctx->data;                                        \
         u8 *data_end = (u8 *)(long)ctx->data_end;                                \
         u8 *payload;                                                             \
-        u8 *payload_end;                                                         \
         u64 result = 0;                                                          \
-        if (data > data_end) {                                                   \
+        u32 payload_len;                                                         \
+        if (micro_prepare_packet_payload(                                        \
+                data, data_end, INPUT_SIZE, &payload, &payload_len) < 0) {       \
             return XDP_ABORTED;                                                  \
         }                                                                        \
-        payload = data + 8U;                                                     \
-        if (payload > data_end) {                                                \
-            return XDP_ABORTED;                                                  \
-        }                                                                        \
-        payload_end = payload + (INPUT_SIZE);                                    \
-        if (payload_end > data_end) {                                            \
-            return XDP_ABORTED;                                                  \
-        }                                                                        \
-        if (BENCH_FN(payload, INPUT_SIZE, &result) < 0) {                        \
+        if (BENCH_FN(payload, payload_len, &result) < 0) {                       \
             return XDP_ABORTED;                                                  \
         }                                                                        \
         micro_write_u64_le(data, result);                                        \
@@ -149,19 +178,16 @@ static __always_inline u32 micro_rotl32(u32 value, u32 shift)
 #define DEFINE_STAGED_INPUT_XDP_BENCH(PROG_NAME, BENCH_FN, INPUT_TYPE, INPUT_SIZE) \
     SEC("xdp") int PROG_NAME(struct xdp_md *ctx)                                  \
     {                                                                             \
-        struct INPUT_TYPE *input;                                                 \
         u8 *data = (u8 *)(long)ctx->data;                                         \
         u8 *data_end = (u8 *)(long)ctx->data_end;                                 \
+        u8 *payload;                                                              \
         u64 result = 0;                                                           \
-        __u32 key = 0;                                                            \
-        if (data > data_end || data + 8U > data_end) {                            \
+        u32 payload_len;                                                          \
+        if (micro_prepare_packet_payload(                                         \
+                data, data_end, INPUT_SIZE, &payload, &payload_len) < 0) {        \
             return XDP_ABORTED;                                                   \
         }                                                                         \
-        input = bpf_map_lookup_elem(&input_map, &key);                            \
-        if (!input) {                                                             \
-            return XDP_ABORTED;                                                   \
-        }                                                                         \
-        if (BENCH_FN(input->data, INPUT_SIZE, &result) < 0) {                     \
+        if (BENCH_FN(payload, payload_len, &result) < 0) {                        \
             return XDP_ABORTED;                                                   \
         }                                                                         \
         micro_write_u64_le(data, result);                                         \
@@ -202,54 +228,58 @@ static __always_inline u32 micro_rotl32(u32 value, u32 shift)
         __type(value, __u64);                                                   \
     } result_map SEC(".maps");
 
-#define DEFINE_STAGED_INPUT_TC_BENCH(PROG_NAME, BENCH_FN, INPUT_TYPE, INPUT_SIZE) \
-    MICRO_DEFINE_SINGLE_RESULT_MAP()                                            \
+#define DEFINE_FIXED_PACKET_BACKED_TC_BENCH(PROG_NAME, BENCH_FN, INPUT_SIZE)    \
     SEC("tc") int PROG_NAME(struct __sk_buff *skb)                              \
     {                                                                           \
-        struct INPUT_TYPE *input;                                               \
+        u8 *data = (u8 *)(long)skb->data;                                       \
+        u8 *data_end = (u8 *)(long)skb->data_end;                               \
+        u8 *payload;                                                            \
         u64 result = ~0ULL;                                                     \
-        __u32 key = 0;                                                          \
-        (void)skb;                                                              \
-        input = bpf_map_lookup_elem(&input_map, &key);                          \
-        if (!input) {                                                           \
-            bpf_map_update_elem(&result_map, &key, &result, BPF_ANY);           \
+        u32 payload_len;                                                        \
+        if (micro_prepare_packet_payload(                                       \
+                data, data_end, INPUT_SIZE, &payload, &payload_len) < 0) {      \
+            micro_write_skb_result(skb, result);                                \
             return TC_ACT_SHOT;                                                 \
         }                                                                       \
-        if (BENCH_FN(input->data, INPUT_SIZE, &result) < 0) {                   \
-            result = ~0ULL;                                                     \
-            bpf_map_update_elem(&result_map, &key, &result, BPF_ANY);           \
+        if (BENCH_FN(payload, payload_len, &result) < 0) {                      \
+            micro_write_skb_result(skb, result);                                \
             return TC_ACT_SHOT;                                                 \
         }                                                                       \
-        bpf_map_update_elem(&result_map, &key, &result, BPF_ANY);               \
+        micro_write_skb_result(skb, result);                                    \
         return TC_ACT_OK;                                                       \
     }                                                                           \
     char LICENSE[] SEC("license") = "GPL";
 
+#define DEFINE_STAGED_INPUT_TC_BENCH(PROG_NAME, BENCH_FN, INPUT_TYPE, INPUT_SIZE) \
+    DEFINE_FIXED_PACKET_BACKED_TC_BENCH(PROG_NAME, BENCH_FN, INPUT_SIZE)
+
 #define DEFINE_MAP_BACKED_TC_BENCH(PROG_NAME, BENCH_FN, INPUT_TYPE, INPUT_SIZE) \
     DEFINE_STAGED_INPUT_TC_BENCH(PROG_NAME, BENCH_FN, INPUT_TYPE, INPUT_SIZE)
 
-#define DEFINE_STAGED_INPUT_CGROUP_SKB_BENCH(PROG_NAME, BENCH_FN, INPUT_TYPE, INPUT_SIZE) \
-    MICRO_DEFINE_SINGLE_RESULT_MAP()                                                     \
+#define DEFINE_FIXED_PACKET_BACKED_CGROUP_SKB_BENCH(PROG_NAME, BENCH_FN, INPUT_SIZE) \
     SEC("cgroup_skb/egress") int PROG_NAME(struct __sk_buff *skb)                        \
     {                                                                                    \
-        struct INPUT_TYPE *input;                                                        \
+        u8 *data = (u8 *)(long)skb->data;                                                \
+        u8 *data_end = (u8 *)(long)skb->data_end;                                        \
+        u8 *payload;                                                                     \
         u64 result = ~0ULL;                                                              \
-        __u32 key = 0;                                                                   \
-        (void)skb;                                                                       \
-        input = bpf_map_lookup_elem(&input_map, &key);                                   \
-        if (!input) {                                                                    \
-            bpf_map_update_elem(&result_map, &key, &result, BPF_ANY);                    \
+        u32 payload_len;                                                                 \
+        if (micro_prepare_packet_payload(                                                \
+                data, data_end, INPUT_SIZE, &payload, &payload_len) < 0) {               \
+            micro_write_skb_result(skb, result);                                         \
             return CGROUP_SKB_DROP;                                                      \
         }                                                                                \
-        if (BENCH_FN(input->data, INPUT_SIZE, &result) < 0) {                            \
-            result = ~0ULL;                                                              \
-            bpf_map_update_elem(&result_map, &key, &result, BPF_ANY);                    \
+        if (BENCH_FN(payload, payload_len, &result) < 0) {                               \
+            micro_write_skb_result(skb, result);                                         \
             return CGROUP_SKB_DROP;                                                      \
         }                                                                                \
-        bpf_map_update_elem(&result_map, &key, &result, BPF_ANY);                        \
+        micro_write_skb_result(skb, result);                                             \
         return CGROUP_SKB_OK;                                                            \
     }                                                                                    \
     char LICENSE[] SEC("license") = "GPL";
+
+#define DEFINE_STAGED_INPUT_CGROUP_SKB_BENCH(PROG_NAME, BENCH_FN, INPUT_TYPE, INPUT_SIZE) \
+    DEFINE_FIXED_PACKET_BACKED_CGROUP_SKB_BENCH(PROG_NAME, BENCH_FN, INPUT_SIZE)
 
 #define DEFINE_MAP_BACKED_CGROUP_SKB_BENCH(PROG_NAME, BENCH_FN, INPUT_TYPE, INPUT_SIZE) \
     DEFINE_STAGED_INPUT_CGROUP_SKB_BENCH(PROG_NAME, BENCH_FN, INPUT_TYPE, INPUT_SIZE)

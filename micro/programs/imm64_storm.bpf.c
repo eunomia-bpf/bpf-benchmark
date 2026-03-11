@@ -2,17 +2,6 @@
 
 #define IMM64_STORM_INPUT_SIZE 32U
 
-struct imm64_storm_input_value {
-    unsigned char data[IMM64_STORM_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct imm64_storm_input_value);
-} input_map SEC(".maps");
-
 #define IMM64_STORM_STEP(ID)                                                    \
     do {                                                                        \
         const u64 k = 0x9E3779B97F4A7C15ULL +                                   \

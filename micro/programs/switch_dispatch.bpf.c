@@ -3,17 +3,6 @@
 #define SWITCH_DISPATCH_COUNT 128U
 #define SWITCH_DISPATCH_INPUT_SIZE (4U + SWITCH_DISPATCH_COUNT * 4U)
 
-struct switch_dispatch_input_value {
-    unsigned char data[SWITCH_DISPATCH_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct switch_dispatch_input_value);
-} input_map SEC(".maps");
-
 static __always_inline u32 switch_value(u32 value)
 {
     switch (value) {

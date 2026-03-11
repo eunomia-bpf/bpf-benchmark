@@ -3,17 +3,6 @@
 #define CONST_FOLD_CHAIN_COUNT 128U
 #define CONST_FOLD_CHAIN_INPUT_SIZE (8U + CONST_FOLD_CHAIN_COUNT * 4U)
 
-struct const_fold_chain_input_value {
-    unsigned char data[CONST_FOLD_CHAIN_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct const_fold_chain_input_value);
-} input_map SEC(".maps");
-
 static __always_inline int
 bench_const_fold_chain(const u8 *data, u32 len, u64 *out)
 {

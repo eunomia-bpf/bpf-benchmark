@@ -7,20 +7,9 @@
  * the clean 4-insn rotate pattern (mov+lsh+rsh+or) without masking.
  * This exercises the ROTATE directive's 4-insn variant.
  *
- * Input: 8 u64 words (64 bytes) from input_map.
+ * Input: 8 u64 words (64 bytes) from the packet payload.
  * Output: 64-bit hash result.
  */
-
-struct rotate64_hash_input {
-    unsigned char data[64];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct rotate64_hash_input);
-} input_map SEC(".maps");
 
 /*
  * SipHash-like round: 4 adds, 4 rotates, 2 xors per round.

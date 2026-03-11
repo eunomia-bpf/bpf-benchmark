@@ -3,17 +3,6 @@
 #define BRANCH_DENSE_COUNT 128U
 #define BRANCH_DENSE_INPUT_SIZE (8U + BRANCH_DENSE_COUNT * 4U)
 
-struct branch_dense_input_value {
-    unsigned char data[BRANCH_DENSE_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct branch_dense_input_value);
-} input_map SEC(".maps");
-
 static __always_inline int bench_branch_dense(const u8 *data, u32 len, u64 *out)
 {
     if (!micro_has_bytes(len, 0, 8U)) {

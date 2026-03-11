@@ -3,17 +3,6 @@
 #define BRANCH_FANOUT_32_COUNT 128U
 #define BRANCH_FANOUT_32_INPUT_SIZE (4U + BRANCH_FANOUT_32_COUNT * 4U)
 
-struct branch_fanout_32_input_value {
-    unsigned char data[BRANCH_FANOUT_32_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct branch_fanout_32_input_value);
-} input_map SEC(".maps");
-
 #define BRANCH_FANOUT_CASE(TAG, SALT)                                           \
     case (TAG): {                                                               \
         u64 tmp = ((u64)value << (((SALT) & 7U) + 1U)) ^ acc;                   \

@@ -4,17 +4,6 @@
 #define TC_CHECKSUM_MAX_WORDS 512U
 #define TC_CHECKSUM_INPUT_SIZE (8U + TC_CHECKSUM_MAX_WORDS * 2U)
 
-struct tc_checksum_input_value {
-    unsigned char data[TC_CHECKSUM_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct tc_checksum_input_value);
-} input_map SEC(".maps");
-
 static __always_inline int bench_checksum(const u8 *data, u32 len, u64 *out)
 {
     if (!micro_has_bytes(len, 0, 8)) {

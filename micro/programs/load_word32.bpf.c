@@ -4,17 +4,6 @@
 #define LOAD_WORD32_BYTES_PER_ITER 4U
 #define LOAD_WORD32_INPUT_SIZE (8U + LOAD_WORD32_COUNT * LOAD_WORD32_BYTES_PER_ITER)
 
-struct load_word32_input_value {
-    unsigned char data[LOAD_WORD32_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct load_word32_input_value);
-} input_map SEC(".maps");
-
 static __always_inline int bench_load_word32(const u8 *data, u32 len, u64 *out)
 {
     if (!micro_has_bytes(len, 0, 8U)) {

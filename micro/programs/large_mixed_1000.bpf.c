@@ -3,17 +3,6 @@
 #define LARGE_MIXED_1000_COUNT 32U
 #define LARGE_MIXED_1000_INPUT_SIZE (8U + LARGE_MIXED_1000_COUNT * 8U)
 
-struct large_mixed_1000_input_value {
-    unsigned char data[LARGE_MIXED_1000_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct large_mixed_1000_input_value);
-} input_map SEC(".maps");
-
 #define LARGE_MIXED_STEP(SALT)                                                  \
     do {                                                                        \
         tmp += value ^ ((u64)(SALT) * 0x9E3779B97F4A7C15ULL);                   \

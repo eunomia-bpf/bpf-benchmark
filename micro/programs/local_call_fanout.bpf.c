@@ -4,17 +4,6 @@
 #define LOCAL_CALL_FANOUT_RECORD_SIZE 24U
 #define LOCAL_CALL_FANOUT_INPUT_SIZE (8U + LOCAL_CALL_FANOUT_RECORDS * LOCAL_CALL_FANOUT_RECORD_SIZE)
 
-struct local_call_fanout_input_value {
-    unsigned char data[LOCAL_CALL_FANOUT_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct local_call_fanout_input_value);
-} input_map SEC(".maps");
-
 static __noinline u64 local_call_linear(u64 acc, const u8 *data, u32 offset, u32 tag)
 {
     u64 left = micro_read_u64_le(data, offset + 8U);

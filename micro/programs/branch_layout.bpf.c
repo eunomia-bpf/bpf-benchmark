@@ -3,17 +3,6 @@
 #define BRANCH_LAYOUT_MAX_COUNT 512U
 #define BRANCH_LAYOUT_INPUT_SIZE (8U + BRANCH_LAYOUT_MAX_COUNT * 8U)
 
-struct branch_layout_input_value {
-    unsigned char data[BRANCH_LAYOUT_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct branch_layout_input_value);
-} input_map SEC(".maps");
-
 static __always_inline int bench_branch_layout(const u8 *data, u32 len, u64 *out)
 {
     if (!micro_has_bytes(len, 0, 8)) {

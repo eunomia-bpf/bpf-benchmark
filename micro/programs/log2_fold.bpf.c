@@ -3,17 +3,6 @@
 #define LOG2_FOLD_COUNT 128U
 #define LOG2_FOLD_INPUT_SIZE (8U + LOG2_FOLD_COUNT * 8U)
 
-struct log2_fold_input_value {
-    unsigned char data[LOG2_FOLD_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct log2_fold_input_value);
-} input_map SEC(".maps");
-
 static __always_inline u64 micro_log2_u32(u32 value)
 {
     u32 shift;

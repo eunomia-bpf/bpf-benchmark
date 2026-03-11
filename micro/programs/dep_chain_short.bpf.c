@@ -3,17 +3,6 @@
 #define DEP_CHAIN_SHORT_COUNT 64U
 #define DEP_CHAIN_SHORT_INPUT_SIZE (8U + DEP_CHAIN_SHORT_COUNT * 8U)
 
-struct dep_chain_short_input_value {
-    unsigned char data[DEP_CHAIN_SHORT_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct dep_chain_short_input_value);
-} input_map SEC(".maps");
-
 static __always_inline int bench_dep_chain_short(const u8 *data, u32 len, u64 *out)
 {
     if (!micro_has_bytes(len, 0, 8)) {

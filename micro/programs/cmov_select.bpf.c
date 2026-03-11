@@ -11,17 +11,6 @@
 #define CMOV_SELECT_Y_OFFSET (CMOV_SELECT_X_OFFSET + CMOV_SELECT_ARRAY_BYTES)
 #define CMOV_SELECT_INPUT_SIZE (CMOV_SELECT_Y_OFFSET + CMOV_SELECT_ARRAY_BYTES)
 
-struct cmov_select_input_value {
-    unsigned char data[CMOV_SELECT_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct cmov_select_input_value);
-} input_map SEC(".maps");
-
 /*
  * Keep the actual select in a dedicated subprog so the BPF body at the
  * directive site is just register-to-register choice, not extra load work.

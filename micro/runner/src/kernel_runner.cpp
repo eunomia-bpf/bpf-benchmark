@@ -69,6 +69,7 @@
 namespace {
 
 using clock_type = std::chrono::steady_clock;
+constexpr size_t kEthernetHeaderSize = 14;
 
 #if defined(__x86_64__) || defined(__i386__)
 constexpr bool kHasTscMeasurement = true;
@@ -229,6 +230,26 @@ const char *result_phase_name(std::string_view io_mode)
         return "retval_read_ns";
     }
     return "result_read_ns";
+}
+
+enum class packet_context_kind {
+    none,
+    xdp,
+    skb,
+};
+
+packet_context_kind resolve_packet_context_kind(uint32_t prog_type)
+{
+    switch (prog_type) {
+    case BPF_PROG_TYPE_XDP:
+        return packet_context_kind::xdp;
+    case BPF_PROG_TYPE_SCHED_CLS:
+    case BPF_PROG_TYPE_SCHED_ACT:
+    case BPF_PROG_TYPE_CGROUP_SKB:
+        return packet_context_kind::skb;
+    default:
+        return packet_context_kind::none;
+    }
 }
 
 std::string resolve_effective_io_mode(std::string_view requested_io_mode,
@@ -473,10 +494,27 @@ std::vector<uint8_t> load_xlated_program(int program_fd, uint32_t xlated_prog_le
     return xlated;
 }
 
-std::vector<uint8_t> build_packet_input(const std::vector<uint8_t> &input_bytes)
+bool skb_payload_starts_after_l2(uint32_t prog_type)
 {
-    std::vector<uint8_t> packet(input_bytes.size() + sizeof(uint64_t), 0);
-    std::copy(input_bytes.begin(), input_bytes.end(), packet.begin() + sizeof(uint64_t));
+    return prog_type == BPF_PROG_TYPE_CGROUP_SKB;
+}
+
+std::vector<uint8_t> build_packet_input(const std::vector<uint8_t> &input_bytes,
+                                        uint32_t prog_type)
+{
+    const size_t prefix_offset =
+        skb_payload_starts_after_l2(prog_type) ? kEthernetHeaderSize : 0;
+    std::vector<uint8_t> packet(prefix_offset + input_bytes.size() + sizeof(uint64_t), 0);
+
+    if (prefix_offset == kEthernetHeaderSize) {
+        packet[12] = 0x08;
+        packet[13] = 0x00;
+    }
+
+    std::copy(
+        input_bytes.begin(),
+        input_bytes.end(),
+        packet.begin() + prefix_offset + sizeof(uint64_t));
     return packet;
 }
 
@@ -488,6 +526,12 @@ uint64_t read_u64_result(const uint8_t *data, size_t length)
     uint64_t result = 0;
     std::memcpy(&result, data, sizeof(result));
     return result;
+}
+
+uint64_t read_skb_result(const __sk_buff &ctx)
+{
+    return static_cast<uint64_t>(ctx.cb[0]) |
+           (static_cast<uint64_t>(ctx.cb[1]) << 32);
 }
 
 int sys_memfd_create(const char *name, unsigned int flags)
@@ -946,6 +990,7 @@ sample_result run_kernel(const cli_options &options)
     }
 
     const auto program_info = load_prog_info(program_fd);
+    const auto packet_kind = resolve_packet_context_kind(program_info.type);
     if (options.dump_jit) {
         const auto jited_program = load_jited_program(program_fd, program_info.jited_prog_len);
         const auto dump_path = std::filesystem::path(benchmark_name_for_program(options.program) + ".kernel.bin");
@@ -985,42 +1030,28 @@ sample_result run_kernel(const cli_options &options)
     std::vector<uint8_t> packet;
     std::vector<uint8_t> packet_out;
     std::vector<uint8_t> context_in;
+    __sk_buff context_out = {};
     uint64_t result = 0;
     int result_fd = -1;
     uint32_t key = 0;
+    const bool result_from_skb_context =
+        packet_kind == packet_context_kind::skb &&
+        (effective_io_mode == "packet" || effective_io_mode == "staged");
 
     if (effective_io_mode == "map") {
         bpf_map *input_map = bpf_object__find_map_by_name(object.get(), "input_map");
         bpf_map *result_map = bpf_object__find_map_by_name(object.get(), "result_map");
-        if (input_map == nullptr || result_map == nullptr) {
-            fail("required maps input_map/result_map not found");
+        if (result_map == nullptr) {
+            fail("required result_map not found");
         }
 
-        const uint32_t input_value_size = bpf_map__value_size(input_map);
-        if (input_bytes.size() < input_value_size) {
-            input_bytes.resize(input_value_size, 0);
-        }
-
-        const int input_fd = bpf_map__fd(input_map);
         result_fd = bpf_map__fd(result_map);
-        if (input_fd < 0 || result_fd < 0) {
+        if (result_fd < 0) {
             fail("unable to obtain map fd");
         }
 
         uint64_t zero = 0;
         exec_input_prepare_start = std::chrono::steady_clock::now();
-        if (bpf_map_update_elem(input_fd, &key, input_bytes.data(), BPF_ANY) != 0) {
-            fail("bpf_map_update_elem(input_map) failed: " + std::string(strerror(errno)));
-        }
-        if (bpf_map_update_elem(result_fd, &key, &zero, BPF_ANY) != 0) {
-            fail("bpf_map_update_elem(result_map) failed: " + std::string(strerror(errno)));
-        }
-        exec_input_prepare_end = std::chrono::steady_clock::now();
-
-        packet.assign(64, 0);
-        packet_out.assign(packet.size(), 0);
-    } else if (effective_io_mode == "staged") {
-        bpf_map *input_map = bpf_object__find_map_by_name(object.get(), "input_map");
         if (input_map != nullptr) {
             const uint32_t input_value_size = bpf_map__value_size(input_map);
             if (input_bytes.size() < input_value_size) {
@@ -1032,36 +1063,51 @@ sample_result run_kernel(const cli_options &options)
                 fail("unable to obtain input_map fd");
             }
 
-            exec_input_prepare_start = std::chrono::steady_clock::now();
             if (bpf_map_update_elem(input_fd, &key, input_bytes.data(), BPF_ANY) != 0) {
                 fail("bpf_map_update_elem(input_map) failed: " + std::string(strerror(errno)));
             }
-            exec_input_prepare_end = std::chrono::steady_clock::now();
-
             packet.assign(64, 0);
             packet_out.assign(packet.size(), 0);
         } else {
-            // Packet-backed XDP programs use the same result path, but their
-            // input is carried by the test packet rather than an input map.
-            exec_input_prepare_start = std::chrono::steady_clock::now();
+            if (packet_kind == packet_context_kind::none) {
+                fail("io-mode map without input_map requires an XDP or skb packet context");
+            }
             if (options.raw_packet) {
                 packet = input_bytes;
             } else {
-                packet = build_packet_input(input_bytes);
+                packet = build_packet_input(input_bytes, program_info.type);
             }
             packet_out.assign(packet.size(), 0);
-            exec_input_prepare_end = std::chrono::steady_clock::now();
         }
+        if (bpf_map_update_elem(result_fd, &key, &zero, BPF_ANY) != 0) {
+            fail("bpf_map_update_elem(result_map) failed: " + std::string(strerror(errno)));
+        }
+        exec_input_prepare_end = std::chrono::steady_clock::now();
+    } else if (effective_io_mode == "staged") {
+        if (packet_kind == packet_context_kind::none) {
+            fail("io-mode staged requires an XDP or skb packet context");
+        }
+        exec_input_prepare_start = std::chrono::steady_clock::now();
+        if (options.raw_packet) {
+            packet = input_bytes;
+        } else {
+            packet = build_packet_input(input_bytes, program_info.type);
+        }
+        packet_out.assign(packet.size(), 0);
+        exec_input_prepare_end = std::chrono::steady_clock::now();
     } else if (effective_io_mode == "context") {
         exec_input_prepare_start = std::chrono::steady_clock::now();
         context_in = input_bytes;
         exec_input_prepare_end = std::chrono::steady_clock::now();
     } else {
         exec_input_prepare_start = std::chrono::steady_clock::now();
+        if (packet_kind == packet_context_kind::none) {
+            fail("io-mode packet requires an XDP or skb packet context");
+        }
         if (options.raw_packet) {
             packet = input_bytes;
         } else {
-            packet = build_packet_input(input_bytes);
+            packet = build_packet_input(input_bytes, program_info.type);
         }
         packet_out.assign(packet.size(), 0);
         exec_input_prepare_end = std::chrono::steady_clock::now();
@@ -1081,6 +1127,10 @@ sample_result run_kernel(const cli_options &options)
     if (!context_in.empty()) {
         test_opts.ctx_in = context_in.data();
         test_opts.ctx_size_in = context_in.size();
+    }
+    if (result_from_skb_context) {
+        test_opts.ctx_out = &context_out;
+        test_opts.ctx_size_out = sizeof(context_out);
     }
 
     const uint64_t tsc_freq_hz = kHasTscMeasurement ? detect_tsc_freq_hz() : 0;
@@ -1116,7 +1166,11 @@ sample_result run_kernel(const cli_options &options)
 
     if (effective_io_mode == "packet" || effective_io_mode == "staged") {
         result_read_start = std::chrono::steady_clock::now();
-        result = read_u64_result(packet_out.data(), packet_out.size());
+        if (result_from_skb_context) {
+            result = read_skb_result(context_out);
+        } else {
+            result = read_u64_result(packet_out.data(), packet_out.size());
+        }
         result_read_end = std::chrono::steady_clock::now();
     } else if (effective_io_mode == "context") {
         result_read_start = std::chrono::steady_clock::now();

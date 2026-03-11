@@ -3,17 +3,6 @@
 #define FIBONACCI_ITER_INPUT_SIZE 16U
 #define FIBONACCI_ITER_ROUNDS 1024U
 
-struct fibonacci_iter_input_value {
-    unsigned char data[FIBONACCI_ITER_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct fibonacci_iter_input_value);
-} input_map SEC(".maps");
-
 static __always_inline int bench_fibonacci_iter(const u8 *data, u32 len, u64 *out)
 {
     if (!micro_has_bytes(len, 0, FIBONACCI_ITER_INPUT_SIZE)) {

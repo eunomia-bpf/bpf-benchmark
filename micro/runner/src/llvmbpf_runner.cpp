@@ -6,6 +6,7 @@
 #include <cerrno>
 #include <chrono>
 #include <cmath>
+#include <cstddef>
 #include <cstdio>
 #include <cstring>
 #include <ctime>
@@ -23,6 +24,11 @@ using clock_type = std::chrono::steady_clock;
 constexpr uint32_t kMapTypeHash = 1;
 constexpr uint32_t kMapTypeArray = 2;
 constexpr uint32_t kMapTypePercpuArray = 6;
+constexpr uint32_t kProgTypeSchedCls = 3;
+constexpr uint32_t kProgTypeSchedAct = 4;
+constexpr uint32_t kProgTypeXdp = 6;
+constexpr uint32_t kProgTypeCgroupSkb = 8;
+constexpr size_t kEthernetHeaderSize = 14;
 constexpr uintptr_t kLow32SearchStart = 0x10000000ULL;
 constexpr uintptr_t kLow32SearchEnd = 0x100000000ULL;
 
@@ -141,7 +147,7 @@ void *map_low_u32_region(size_t size)
         munmap(mapping, mapping_size);
     }
 
-    fail("unable to allocate llvmbpf packet buffer below 4 GiB for xdp_md");
+    fail("unable to allocate llvmbpf packet buffer below 4 GiB for packet context");
 }
 
 std::optional<uint64_t> read_nominal_tsc_freq_hz()
@@ -262,6 +268,48 @@ struct xdp_md_ctx {
     uint32_t rx_queue_index = 0;
     uint32_t egress_ifindex = 0;
 };
+
+struct sk_buff_ctx {
+    uint32_t len = 0;
+    uint32_t pkt_type = 0;
+    uint32_t mark = 0;
+    uint32_t queue_mapping = 0;
+    uint32_t protocol = 0;
+    uint32_t vlan_present = 0;
+    uint32_t vlan_tci = 0;
+    uint32_t vlan_proto = 0;
+    uint32_t priority = 0;
+    uint32_t ingress_ifindex = 0;
+    uint32_t ifindex = 0;
+    uint32_t tc_index = 0;
+    uint32_t cb[5] = {};
+    uint32_t hash = 0;
+    uint32_t tc_classid = 0;
+    uint32_t data = 0;
+    uint32_t data_end = 0;
+    uint32_t napi_id = 0;
+    uint32_t family = 0;
+    uint32_t remote_ip4 = 0;
+    uint32_t local_ip4 = 0;
+    uint32_t remote_ip6[4] = {};
+    uint32_t local_ip6[4] = {};
+    uint32_t remote_port = 0;
+    uint32_t local_port = 0;
+    uint32_t data_meta = 0;
+    uint64_t flow_keys = 0;
+    uint64_t tstamp = 0;
+    uint32_t wire_len = 0;
+    uint32_t gso_segs = 0;
+    uint64_t sk = 0;
+    uint32_t gso_size = 0;
+    uint8_t tstamp_type = 0;
+    uint8_t pad[3] = {};
+    uint64_t hwtstamp = 0;
+};
+
+static_assert(offsetof(sk_buff_ctx, data) == 76);
+static_assert(offsetof(sk_buff_ctx, data_end) == 80);
+static_assert(offsetof(sk_buff_ctx, data_meta) == 140);
 
 struct userspace_map_state {
     std::unordered_map<uint32_t, userspace_map> maps_by_id;
@@ -433,10 +481,54 @@ private:
     size_t mapping_size_ = 0;
 };
 
-std::vector<uint8_t> build_packet_input(const std::vector<uint8_t> &input_bytes)
+enum class packet_context_kind {
+    none,
+    xdp,
+    skb,
+};
+
+packet_context_kind resolve_packet_context_kind(uint32_t prog_type)
 {
-    std::vector<uint8_t> packet(input_bytes.size() + sizeof(uint64_t), 0);
-    std::copy(input_bytes.begin(), input_bytes.end(), packet.begin() + sizeof(uint64_t));
+    switch (prog_type) {
+    case kProgTypeXdp:
+        return packet_context_kind::xdp;
+    case kProgTypeSchedCls:
+    case kProgTypeSchedAct:
+    case kProgTypeCgroupSkb:
+        return packet_context_kind::skb;
+    default:
+        return packet_context_kind::none;
+    }
+}
+
+bool image_has_map(const program_image &image, std::string_view name)
+{
+    return std::any_of(image.maps.begin(), image.maps.end(), [&](const auto &spec) {
+        return spec.name == name;
+    });
+}
+
+bool skb_payload_starts_after_l2(uint32_t prog_type)
+{
+    return prog_type == kProgTypeCgroupSkb;
+}
+
+std::vector<uint8_t> build_packet_input(const std::vector<uint8_t> &input_bytes,
+                                        uint32_t prog_type)
+{
+    const size_t prefix_offset =
+        skb_payload_starts_after_l2(prog_type) ? kEthernetHeaderSize : 0;
+    std::vector<uint8_t> packet(prefix_offset + input_bytes.size() + sizeof(uint64_t), 0);
+
+    if (prefix_offset == kEthernetHeaderSize) {
+        packet[12] = 0x08;
+        packet[13] = 0x00;
+    }
+
+    std::copy(
+        input_bytes.begin(),
+        input_bytes.end(),
+        packet.begin() + prefix_offset + sizeof(uint64_t));
     return packet;
 }
 
@@ -450,9 +542,10 @@ uint64_t read_u64_result(const uint8_t *data, size_t length)
     return result;
 }
 
-std::vector<uint8_t> build_result_packet()
+uint64_t read_skb_result(const sk_buff_ctx &ctx)
 {
-    return std::vector<uint8_t>(64, 0);
+    return static_cast<uint64_t>(ctx.cb[0]) |
+           (static_cast<uint64_t>(ctx.cb[1]) << 32);
 }
 
 const char *prepare_phase_name(std::string_view io_mode)
@@ -541,20 +634,26 @@ sample_result run_llvmbpf(const cli_options &options)
     const auto memory_prepare_start = clock_type::now();
     auto input_bytes = materialize_memory(options.memory, options.input_size);
     const auto memory_prepare_end = clock_type::now();
+    const bool has_input_map = image_has_map(image, "input_map");
+    const bool has_result_map = image_has_map(image, "result_map");
+    const bool result_from_map = effective_io_mode == "map";
+    const bool input_from_packet =
+        effective_io_mode == "packet" ||
+        effective_io_mode == "staged" ||
+        (effective_io_mode == "map" && !has_input_map);
+    const auto packet_kind = resolve_packet_context_kind(image.prog_type);
 
     const auto exec_input_prepare_start = clock_type::now();
     auto map_state = userspace_map_state {};
     auto packet_input = std::vector<uint8_t> {};
-    if (effective_io_mode == "map") {
+    if ((effective_io_mode == "map" && has_input_map) || has_result_map) {
         map_state = initialize_map_state(image, input_bytes);
-    } else if (effective_io_mode == "staged") {
-        map_state = initialize_map_state(image, input_bytes);
-        packet_input = build_result_packet();
-    } else {
+    }
+    if (input_from_packet) {
         if (options.raw_packet) {
             packet_input = input_bytes;
         } else {
-            packet_input = build_packet_input(input_bytes);
+            packet_input = build_packet_input(input_bytes, image.prog_type);
         }
     }
     const auto exec_input_prepare_end = clock_type::now();
@@ -637,7 +736,10 @@ sample_result run_llvmbpf(const cli_options &options)
     uint64_t total_exec_ns = 0;
     const auto tsc_freq_hz = detect_tsc_freq_hz();
     const uint32_t repeat = options.repeat > 0 ? options.repeat : 1;
-    active_map_state = &map_state;
+    active_map_state =
+        ((effective_io_mode == "map" && has_input_map) || has_result_map)
+            ? &map_state
+            : nullptr;
     clock_type::time_point exec_start {};
     clock_type::time_point exec_end {};
     const perf_counter_options perf_options = {
@@ -671,11 +773,50 @@ sample_result run_llvmbpf(const cli_options &options)
             }
         }
     };
+    const auto run_skb_repeat = [&](sk_buff_ctx &ctx) {
+        for (uint32_t index = 0; index < repeat; ++index) {
+            const uint64_t measure_start = tsc_freq_hz.has_value() ? rdtsc_start() : monotonic_now_ns();
+            if (vm.exec(&ctx, sizeof(ctx), retval) < 0) {
+                fail("llvmbpf exec failed: " + vm.get_error_message());
+            }
+            if (tsc_freq_hz.has_value()) {
+                total_exec_cycles += rdtsc_end() - measure_start;
+            } else {
+                total_exec_ns += monotonic_now_ns() - measure_start;
+            }
+        }
+    };
+    const auto run_packet_context = [&](lowmem_buffer &packet_buffer)
+        -> std::optional<uint64_t> {
+        const auto packet_address = reinterpret_cast<uintptr_t>(packet_buffer.data());
+        if (packet_kind == packet_context_kind::xdp) {
+            xdp_md_ctx ctx = {};
+            ctx.data = static_cast<uint32_t>(packet_address);
+            ctx.data_end = static_cast<uint32_t>(packet_address + packet_buffer.size());
+            run_packet_repeat(ctx);
+            return std::nullopt;
+        }
+        if (packet_kind == packet_context_kind::skb) {
+            const size_t data_offset =
+                skb_payload_starts_after_l2(image.prog_type) ? kEthernetHeaderSize : 0;
+            if (packet_buffer.size() < data_offset) {
+                fail("packet buffer shorter than skb L2 offset");
+            }
+            sk_buff_ctx ctx = {};
+            ctx.len = static_cast<uint32_t>(packet_buffer.size() - data_offset);
+            ctx.data = static_cast<uint32_t>(packet_address + data_offset);
+            ctx.data_end = static_cast<uint32_t>(packet_address + packet_buffer.size());
+            ctx.data_meta = ctx.data;
+            run_skb_repeat(ctx);
+            return read_skb_result(ctx);
+        }
+        fail("io-mode requires an XDP or skb packet context");
+    };
 
     perf_counter_capture perf_counters;
     if (options.perf_scope == "full_repeat_avg") {
         exec_start = clock_type::now();
-        if (effective_io_mode == "map") {
+        if (packet_input.empty()) {
             uint8_t dummy_ctx[8] = {};
             perf_counters = measure_perf_counters(perf_options, [&]() {
                 run_map_repeat(dummy_ctx, sizeof(dummy_ctx));
@@ -683,18 +824,20 @@ sample_result run_llvmbpf(const cli_options &options)
         } else {
             lowmem_buffer packet_buffer(packet_input.size());
             std::memcpy(packet_buffer.data(), packet_input.data(), packet_input.size());
-
-            xdp_md_ctx ctx = {};
-            const auto packet_address = reinterpret_cast<uintptr_t>(packet_buffer.data());
-            ctx.data = static_cast<uint32_t>(packet_address);
-            ctx.data_end = static_cast<uint32_t>(packet_address + packet_input.size());
+            std::optional<uint64_t> skb_result;
 
             perf_counters = measure_perf_counters(perf_options, [&]() {
-                run_packet_repeat(ctx);
+                skb_result = run_packet_context(packet_buffer);
             });
-            result = read_u64_result(
-                packet_buffer.data(),
-                packet_buffer.size());
+            if (!result_from_map) {
+                if (skb_result.has_value()) {
+                    result = *skb_result;
+                } else {
+                    result = read_u64_result(
+                        packet_buffer.data(),
+                        packet_buffer.size());
+                }
+            }
         }
         exec_end = clock_type::now();
 
@@ -706,22 +849,23 @@ sample_result run_llvmbpf(const cli_options &options)
             perf_options,
             [&]() {
                 exec_start = clock_type::now();
-                if (effective_io_mode == "map") {
+                if (packet_input.empty()) {
                     uint8_t dummy_ctx[8] = {};
                     run_map_repeat(dummy_ctx, sizeof(dummy_ctx));
                 } else {
                     lowmem_buffer packet_buffer(packet_input.size());
                     std::memcpy(packet_buffer.data(), packet_input.data(), packet_input.size());
 
-                    xdp_md_ctx ctx = {};
-                    const auto packet_address = reinterpret_cast<uintptr_t>(packet_buffer.data());
-                    ctx.data = static_cast<uint32_t>(packet_address);
-                    ctx.data_end = static_cast<uint32_t>(packet_address + packet_input.size());
-
-                    run_packet_repeat(ctx);
-                    result = read_u64_result(
-                        packet_buffer.data(),
-                        packet_buffer.size());
+                    const auto skb_result = run_packet_context(packet_buffer);
+                    if (!result_from_map) {
+                        if (skb_result.has_value()) {
+                            result = *skb_result;
+                        } else {
+                            result = read_u64_result(
+                                packet_buffer.data(),
+                                packet_buffer.size());
+                        }
+                    }
                 }
                 exec_end = clock_type::now();
             });
@@ -742,7 +886,7 @@ sample_result run_llvmbpf(const cli_options &options)
         sample.timing_source = "clock_monotonic";
     }
     sample.wall_exec_ns = elapsed_ns(exec_start, exec_end) / repeat;
-    sample.result = effective_io_mode == "map" ? read_result_value(map_state) : result;
+    sample.result = result_from_map ? read_result_value(map_state) : result;
     sample.retval = static_cast<uint32_t>(retval);
     sample.phases_ns = {
         {"program_image_ns", elapsed_ns(program_image_start, program_image_end)},

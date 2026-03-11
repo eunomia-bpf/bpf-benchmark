@@ -4,17 +4,6 @@
 #define BOUNDS_LADDER_RECORD_SIZE 32U
 #define BOUNDS_LADDER_INPUT_SIZE (8U + BOUNDS_LADDER_RECORDS * BOUNDS_LADDER_RECORD_SIZE)
 
-struct bounds_ladder_input_value {
-    unsigned char data[BOUNDS_LADDER_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct bounds_ladder_input_value);
-} input_map SEC(".maps");
-
 static __always_inline int bench_bounds_ladder(const u8 *data, u32 len, u64 *out)
 {
     if (!micro_has_bytes(len, 0, 8)) {

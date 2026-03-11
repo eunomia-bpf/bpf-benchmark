@@ -4,17 +4,6 @@
 #define LOAD_BYTE_BYTES_PER_ITER 4U
 #define LOAD_BYTE_INPUT_SIZE (8U + LOAD_BYTE_COUNT * LOAD_BYTE_BYTES_PER_ITER)
 
-struct load_byte_input_value {
-    unsigned char data[LOAD_BYTE_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct load_byte_input_value);
-} input_map SEC(".maps");
-
 static __always_inline int bench_load_byte(const u8 *data, u32 len, u64 *out)
 {
     if (!micro_has_bytes(len, 0, 8U)) {

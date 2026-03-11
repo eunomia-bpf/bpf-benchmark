@@ -3,17 +3,6 @@
 #define CODE_CLONE_2_COUNT 128U
 #define CODE_CLONE_2_INPUT_SIZE (8U + CODE_CLONE_2_COUNT * 8U)
 
-struct code_clone_2_input_value {
-    unsigned char data[CODE_CLONE_2_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct code_clone_2_input_value);
-} input_map SEC(".maps");
-
 #define CODE_CLONE_STEP(SALT)                                                   \
     do {                                                                        \
         acc += value ^ ((u64)(SALT) + ((u64)i << (i & 7U)));                    \

@@ -5,17 +5,6 @@
 #define NESTED_LOOP_2_VALUES (NESTED_LOOP_2_OUTER * NESTED_LOOP_2_INNER)
 #define NESTED_LOOP_2_INPUT_SIZE (16U + NESTED_LOOP_2_VALUES * 8U)
 
-struct nested_loop_2_input_value {
-    unsigned char data[NESTED_LOOP_2_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct nested_loop_2_input_value);
-} input_map SEC(".maps");
-
 static __always_inline int bench_nested_loop_2(const u8 *data, u32 len, u64 *out)
 {
     if (!micro_has_bytes(len, 0, 16U)) {

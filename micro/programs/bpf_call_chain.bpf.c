@@ -3,17 +3,6 @@
 #define BPF_CALL_CHAIN_INPUT_SIZE 64U
 #define BPF_CALL_CHAIN_ROUNDS 64U
 
-struct bpf_call_chain_input_value {
-    unsigned char data[BPF_CALL_CHAIN_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct bpf_call_chain_input_value);
-} input_map SEC(".maps");
-
 /* Three __noinline subprograms to force BPF-to-BPF calls */
 static __noinline u64 sub_hash(u64 val, u64 mix)
 {

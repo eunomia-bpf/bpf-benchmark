@@ -3,17 +3,6 @@
 #define MULTI_ACC_4_COUNT 128U
 #define MULTI_ACC_4_INPUT_SIZE (8U + MULTI_ACC_4_COUNT * 8U)
 
-struct multi_acc_4_input_value {
-    unsigned char data[MULTI_ACC_4_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct multi_acc_4_input_value);
-} input_map SEC(".maps");
-
 static __always_inline int bench_multi_acc_4(const u8 *data, u32 len, u64 *out)
 {
     if (!micro_has_bytes(len, 0, 8)) {

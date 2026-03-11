@@ -4,17 +4,6 @@
 #define MEMCMP_PREFIX_LEN 64U
 #define MEMCMP_PREFIX_INPUT_SIZE (4U + MEMCMP_PREFIX_SCENARIOS * MEMCMP_PREFIX_LEN)
 
-struct memcmp_prefix_64_input_value {
-    unsigned char data[MEMCMP_PREFIX_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct memcmp_prefix_64_input_value);
-} input_map SEC(".maps");
-
 static __always_inline u8 memcmp_prefix_pattern_byte(u32 index)
 {
     return (u8)((((index * 29U) ^ (index << 2U) ^ 0xA5U) + 0x11U) & 0xFFU);

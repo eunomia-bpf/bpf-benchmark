@@ -1,4 +1,4 @@
-# Micro codegen benchmarks with staged/map-backed inputs and packet-context execution where needed.
+# Micro codegen benchmarks with packet-fed pure-jit inputs and packet-context execution where needed.
 suite_name: micro_staged_codegen
 
 paths:
@@ -688,7 +688,8 @@ benchmarks:
     expected_result: 4880578162264678397
     tags: [alu, strength-reduce, lea-like, pure-jit]
 
-  # Kernel-only non-XDP breadth checks. These use skb program types with map-backed I/O.
+  # Kernel-only non-XDP breadth checks. These use skb program types with packet-fed
+  # staged input and skb-context result extraction.
   - name: tc_bitcount
     description: TC version of Kernighan popcount over generated u64 input
     category: alu-mix
@@ -696,7 +697,7 @@ benchmarks:
     level: medium
     hypothesis: Reuses the staged popcount kernel under a sched_cls hook to validate non-XDP packet execution
     base_name: tc_bitcount
-    io_mode: map
+    io_mode: staged
     kernel_input_size: 2056
     input_generator: bitcount
     expected_result: 3035568289764064166
@@ -707,9 +708,9 @@ benchmarks:
     category: memory-local
     family: reduction
     level: medium
-    hypothesis: Reuses the checksum reduction under a sched_cls hook to validate map-backed result extraction
+    hypothesis: Reuses the checksum reduction under a sched_cls hook with packet-fed staged input and skb-context result extraction
     base_name: tc_checksum
-    io_mode: map
+    io_mode: staged
     kernel_input_size: 1032
     input_generator: checksum
     expected_result: 0
@@ -720,9 +721,9 @@ benchmarks:
     category: alu-mix
     family: hash-chain
     level: short
-    hypothesis: Exercises a non-XDP cgroup_skb hook with staged map input and map-backed result extraction
+    hypothesis: Exercises a non-XDP cgroup_skb hook with packet-fed staged input and skb-context result extraction
     base_name: cgroup_hash_chain
-    io_mode: map
+    io_mode: staged
     kernel_input_size: 72
     input_generator: hash_chain
     expected_result: 12027228624407116210

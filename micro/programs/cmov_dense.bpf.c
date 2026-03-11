@@ -10,17 +10,6 @@ struct cmov_dense_input {
     u64 y[CMOV_DENSE_COUNT];
 };
 
-struct cmov_dense_input_value {
-    unsigned char data[CMOV_DENSE_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct cmov_dense_input_value);
-} input_map SEC(".maps");
-
 #define CMOV_DENSE_ROT(INDEX) ((((INDEX) * 5U) & 15U) + 1U)
 #define CMOV_DENSE_SHIFT(INDEX) ((((INDEX) * 3U) >> 1U) & 7U)
 #define CMOV_DENSE_BIAS(INDEX) ((u64)(0x9E37U + ((INDEX) * 0x45D9U)))

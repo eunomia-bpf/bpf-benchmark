@@ -4,17 +4,6 @@
 #define HASH_CHAIN_WORDS 8U
 #define HASH_CHAIN_INPUT_SIZE (8U + HASH_CHAIN_WORDS * 8U)
 
-struct cgroup_hash_chain_input_value {
-    unsigned char data[HASH_CHAIN_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct cgroup_hash_chain_input_value);
-} input_map SEC(".maps");
-
 static __always_inline int bench_hash_chain(const u8 *data, u32 len, u64 *out)
 {
     if (!micro_has_bytes(len, 0, 8)) {

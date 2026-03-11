@@ -3,17 +3,6 @@
 #define ALU32_64_PINGPONG_COUNT 64U
 #define ALU32_64_PINGPONG_INPUT_SIZE (8U + ALU32_64_PINGPONG_COUNT * 8U)
 
-struct alu32_64_pingpong_input_value {
-    unsigned char data[ALU32_64_PINGPONG_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct alu32_64_pingpong_input_value);
-} input_map SEC(".maps");
-
 static __always_inline int bench_alu32_64_pingpong(const u8 *data, u32 len, u64 *out)
 {
     if (!micro_has_bytes(len, 0, 8U)) {

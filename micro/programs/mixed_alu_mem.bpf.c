@@ -3,17 +3,6 @@
 #define MIXED_ALU_MEM_COUNT 128U
 #define MIXED_ALU_MEM_INPUT_SIZE (8U + MIXED_ALU_MEM_COUNT * 8U)
 
-struct mixed_alu_mem_input_value {
-    unsigned char data[MIXED_ALU_MEM_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct mixed_alu_mem_input_value);
-} input_map SEC(".maps");
-
 static __always_inline int bench_mixed_alu_mem(const u8 *data, u32 len, u64 *out)
 {
     if (!micro_has_bytes(len, 0, 8U)) {

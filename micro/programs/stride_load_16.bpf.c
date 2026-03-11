@@ -4,17 +4,6 @@
 #define STRIDE_LOAD_16_INPUT_SIZE (8U + STRIDE_LOAD_16_COUNT * 8U)
 #define STRIDE_LOAD_16_STRIDE 16U
 
-struct stride_load_16_input_value {
-    unsigned char data[STRIDE_LOAD_16_INPUT_SIZE];
-};
-
-struct {
-    __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 1);
-    __type(key, __u32);
-    __type(value, struct stride_load_16_input_value);
-} input_map SEC(".maps");
-
 static __always_inline int bench_stride_load_16(const u8 *data, u32 len, u64 *out)
 {
     if (!micro_has_bytes(len, 0, 8)) {
