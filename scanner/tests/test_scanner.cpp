@@ -323,24 +323,36 @@ void test_v5_zero_ext_elide_scan()
 {
     using bpf_jit_scanner::V5ScanOptions;
 
-    auto self_mov = encode({
+    auto zext_reg = encode({
         {BPF_ADD32_K, regs(3, 0), 0, 7},
-        {BPF_MOV64_X, regs(3, 3), 0, 0},
+        {BPF_MOV32_X, regs(3, 3), 0, 1},
+    });
+    auto self_mov = encode({
+        {BPF_ADD32_K, regs(5, 0), 0, 7},
+        {BPF_MOV64_X, regs(5, 5), 0, 0},
     });
     auto and_mask = encode({
         {BPF_NEG32, regs(4, 0), 0, 0},
         {BPF_AND64_K, regs(4, 0), 0, -1},
     });
 
+    auto zext_summary = bpf_jit_scanner::scan_v5_builtin(
+        zext_reg.data(), static_cast<uint32_t>(zext_reg.size()),
+        V5ScanOptions {.scan_zero_ext = true});
+    CHECK_EQ(zext_summary.rules.size(), 1u);
+    CHECK_EQ(zext_summary.zero_ext_sites, 1u);
+    CHECK_EQ(zext_summary.rules[0].canonical_form,
+             static_cast<uint16_t>(BPF_JIT_CF_ZERO_EXT_ELIDE));
+    CHECK_EQ(zext_summary.rules[0].native_choice,
+             static_cast<uint16_t>(BPF_JIT_ZEXT_ELIDE));
+    CHECK_EQ(zext_summary.rules[0].pattern.size(), 2u);
+    CHECK_EQ(zext_summary.rules[0].bindings.size(), 1u);
+
     auto mov_summary = bpf_jit_scanner::scan_v5_builtin(
         self_mov.data(), static_cast<uint32_t>(self_mov.size()),
         V5ScanOptions {.scan_zero_ext = true});
     CHECK_EQ(mov_summary.rules.size(), 1u);
     CHECK_EQ(mov_summary.zero_ext_sites, 1u);
-    CHECK_EQ(mov_summary.rules[0].canonical_form,
-             static_cast<uint16_t>(BPF_JIT_CF_ZERO_EXT_ELIDE));
-    CHECK_EQ(mov_summary.rules[0].native_choice,
-             static_cast<uint16_t>(BPF_JIT_ZEXT_ELIDE));
     CHECK_EQ(mov_summary.rules[0].pattern.size(), 2u);
     CHECK_EQ(mov_summary.rules[0].bindings.size(), 1u);
 

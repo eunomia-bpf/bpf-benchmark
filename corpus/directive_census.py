@@ -9,8 +9,9 @@ import statistics
 import struct
 import subprocess
 import tempfile
+from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 
 try:
@@ -22,12 +23,26 @@ except ImportError as exc:  # pragma: no cover - runtime dependency failure
 SHF_EXECINSTR = 0x4
 INSN_SIZE = 8
 FAMILY_FIELDS = (
-    ("CMOV", "cmov"),
+    ("COND_SELECT", "cmov"),
     ("WIDE_MEM", "wide"),
     ("ROTATE", "rotate"),
+    ("ADDR_CALC", "lea"),
     ("BITFIELD_EXTRACT", "extract"),
-    ("LEA", "lea"),
+    ("ZERO_EXT_ELIDE", "zeroext"),
+    ("ENDIAN_FUSION", "endian"),
+    ("BRANCH_FLIP", "bflip"),
 )
+NEW_FAMILY_LABELS = {"ZERO_EXT_ELIDE", "ENDIAN_FUSION", "BRANCH_FLIP"}
+SCANNER_PATTERNS = {
+    "cmov": re.compile(r"^\s*cmov:\s*(\d+)\s*$"),
+    "wide": re.compile(r"^\s*wide:\s*(\d+)\s*$"),
+    "rotate": re.compile(r"^\s*rotate:\s*(\d+)\s*$"),
+    "lea": re.compile(r"^\s*lea:\s*(\d+)\s*$"),
+    "extract": re.compile(r"^\s*extract:\s*(\d+)\s*$"),
+    "zeroext": re.compile(r"^\s*zeroext:\s*(\d+)\s*$"),
+    "endian": re.compile(r"^\s*endian:\s*(\d+)\s*$"),
+    "bflip": re.compile(r"^\s*bflip:\s*(\d+)\s*$"),
+}
 
 
 @dataclass(frozen=True)
@@ -45,12 +60,24 @@ class SectionResult:
     cmov: int
     wide: int
     rotate: int
-    extract: int
     lea: int
+    extract: int
+    zeroext: int
+    endian: int
+    bflip: int
 
     @property
     def total(self) -> int:
-        return self.cmov + self.wide + self.rotate + self.extract + self.lea
+        return (
+            self.cmov
+            + self.wide
+            + self.rotate
+            + self.lea
+            + self.extract
+            + self.zeroext
+            + self.endian
+            + self.bflip
+        )
 
 
 @dataclass(frozen=True)
@@ -63,13 +90,25 @@ class ProgramResult:
     cmov: int
     wide: int
     rotate: int
-    extract: int
     lea: int
+    extract: int
+    zeroext: int
+    endian: int
+    bflip: int
     sections: tuple[SectionResult, ...]
 
     @property
     def total(self) -> int:
-        return self.cmov + self.wide + self.rotate + self.extract + self.lea
+        return (
+            self.cmov
+            + self.wide
+            + self.rotate
+            + self.lea
+            + self.extract
+            + self.zeroext
+            + self.endian
+            + self.bflip
+        )
 
 
 @dataclass(frozen=True)
@@ -100,8 +139,15 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--output",
-        default=str(repo_root / "docs" / "tmp" / "real-program-directive-census.md"),
+        help="Deprecated alias for --output-md.",
+    )
+    parser.add_argument(
+        "--output-md",
         help="Markdown report path.",
+    )
+    parser.add_argument(
+        "--output-json",
+        help="Optional JSON report path.",
     )
     parser.add_argument(
         "--corpus-build-report",
@@ -229,17 +275,10 @@ def collect_inputs(repo_root: Path, corpus_build_report: Path | None = None) -> 
 
 
 def build_scanner_command(scanner: Path, xlated_path: Path) -> list[str]:
-    return [str(scanner), "scan", str(xlated_path), "--all", "--v5"]
+    return [str(scanner), "scan", "--xlated", str(xlated_path), "--all", "--v5"]
 
 
 def parse_scanner_output(stdout: str) -> dict[str, int]:
-    patterns = {
-        "cmov": re.compile(r"^\s*cmov:\s+(\d+)\s*$"),
-        "wide": re.compile(r"^\s*wide:\s+(\d+)\s*$"),
-        "rotate": re.compile(r"^\s*rotate:\s+(\d+)\s*$"),
-        "lea": re.compile(r"^\s*lea:\s+(\d+)\s*$"),
-        "extract": re.compile(r"^\s*extract:\s*(\d+)\s*$"),
-    }
     counts = {field: 0 for _, field in FAMILY_FIELDS}
     accepted = False
     for line in stdout.splitlines():
@@ -247,17 +286,19 @@ def parse_scanner_output(stdout: str) -> dict[str, int]:
         if re.match(r"^Accepted\s+\d+\s+v5 site\(s\)\s*$", stripped):
             accepted = True
         for _, field in FAMILY_FIELDS:
-            match = patterns[field].match(stripped)
+            match = SCANNER_PATTERNS[field].match(stripped)
             if match:
                 counts[field] = int(match.group(1))
-    if not accepted and any(counts.values()):
+    if not accepted:
         raise RuntimeError(f"scanner output missing acceptance summary:\n{stdout}")
     return counts
 
 
 def analyze_section(section, scanner: Path) -> SectionResult:
     data = section.data()
-    with tempfile.NamedTemporaryFile(prefix="bpf-jit-section-", suffix=".xlated", delete=False) as handle:
+    with tempfile.NamedTemporaryFile(
+        prefix="bpf-jit-section-", suffix=".xlated", delete=False
+    ) as handle:
         handle.write(data)
         temp_path = Path(handle.name)
     try:
@@ -282,8 +323,11 @@ def analyze_section(section, scanner: Path) -> SectionResult:
         cmov=counts["cmov"],
         wide=counts["wide"],
         rotate=counts["rotate"],
-        extract=counts["extract"],
         lea=counts["lea"],
+        extract=counts["extract"],
+        zeroext=counts["zeroext"],
+        endian=counts["endian"],
+        bflip=counts["bflip"],
     )
 
 
@@ -306,13 +350,18 @@ def analyze_object(path: Path, source: str, repo_root: Path, scanner: Path) -> P
         cmov=sum(section.cmov for section in section_results),
         wide=sum(section.wide for section in section_results),
         rotate=sum(section.rotate for section in section_results),
-        extract=sum(section.extract for section in section_results),
         lea=sum(section.lea for section in section_results),
+        extract=sum(section.extract for section in section_results),
+        zeroext=sum(section.zeroext for section in section_results),
+        endian=sum(section.endian for section in section_results),
+        bflip=sum(section.bflip for section in section_results),
         sections=tuple(section_results),
     )
 
 
-def analyze_many(paths: tuple[Path, ...], source: str, repo_root: Path, scanner: Path, workers: int) -> list[ProgramResult]:
+def analyze_many(
+    paths: tuple[Path, ...], source: str, repo_root: Path, scanner: Path, workers: int
+) -> list[ProgramResult]:
     if not paths:
         return []
     with ThreadPoolExecutor(max_workers=max(1, workers)) as executor:
@@ -326,14 +375,10 @@ def analyze_many(paths: tuple[Path, ...], source: str, repo_root: Path, scanner:
 def sort_results(results: list[ProgramResult]) -> list[ProgramResult]:
     return sorted(
         results,
-        key=lambda item: (
-            -item.total,
-            -item.cmov,
-            -item.wide,
-            -item.rotate,
-            -item.extract,
-            -item.lea,
-            item.relpath,
+        key=lambda item: tuple(
+            [-item.total]
+            + [-getattr(item, field) for _, field in FAMILY_FIELDS]
+            + [item.relpath]
         ),
     )
 
@@ -383,6 +428,89 @@ def dataset_summary_rows(results: list[ProgramResult]) -> list[list[object]]:
     return rows
 
 
+def dataset_summary_dict(results: list[ProgramResult]) -> dict[str, object]:
+    totals = family_totals(results)
+    coverage = family_object_coverage(results)
+    return {
+        "objects": len(results),
+        "objects_with_sites": objects_with_sites(results),
+        "coverage_percent": round((objects_with_sites(results) / len(results) * 100), 1) if results else 0.0,
+        "executable_sections": sum(item.exec_section_count for item in results),
+        "bpf_instructions": sum(item.insn_count for item in results),
+        "total_sites": sum(item.total for item in results),
+        "average_sites_per_object": round(mean_sites(results), 2),
+        "families": {
+            label: {"sites": totals[label], "objects": coverage[label]}
+            for label, _ in FAMILY_FIELDS
+        },
+    }
+
+
+def family_summary_rows(
+    all_results: list[ProgramResult],
+    micro_results: list[ProgramResult],
+    corpus_results: list[ProgramResult],
+) -> list[list[object]]:
+    all_totals = family_totals(all_results)
+    all_coverage = family_object_coverage(all_results)
+    micro_totals = family_totals(micro_results)
+    micro_coverage = family_object_coverage(micro_results)
+    corpus_totals = family_totals(corpus_results)
+    corpus_coverage = family_object_coverage(corpus_results)
+    rows: list[list[object]] = []
+    for label, _ in FAMILY_FIELDS:
+        rows.append(
+            [
+                label,
+                all_totals[label],
+                all_coverage[label],
+                micro_totals[label],
+                micro_coverage[label],
+                corpus_totals[label],
+                corpus_coverage[label],
+            ]
+        )
+    return rows
+
+
+def project_name(result: ProgramResult) -> str:
+    parts = Path(result.relpath).parts
+    if len(parts) >= 2 and parts[0] == "micro":
+        return "micro"
+    if len(parts) >= 3 and parts[0] == "corpus" and parts[1] == "build":
+        return parts[2]
+    if parts:
+        return parts[0]
+    return result.source
+
+
+def project_summary_rows(results: list[ProgramResult]) -> list[list[object]]:
+    grouped: dict[str, list[ProgramResult]] = defaultdict(list)
+    for result in results:
+        grouped[project_name(result)].append(result)
+
+    rows: list[list[object]] = []
+    for project, items in grouped.items():
+        totals = family_totals(items)
+        rows.append(
+            [
+                project,
+                len(items),
+                objects_with_sites(items),
+                sum(item.total for item in items),
+                totals["COND_SELECT"],
+                totals["WIDE_MEM"],
+                totals["ROTATE"],
+                totals["ADDR_CALC"],
+                totals["BITFIELD_EXTRACT"],
+                totals["ZERO_EXT_ELIDE"],
+                totals["ENDIAN_FUSION"],
+                totals["BRANCH_FLIP"],
+            ]
+        )
+    return sorted(rows, key=lambda row: (-int(row[3]), str(row[0])))
+
+
 def top_rows(results: list[ProgramResult], top_n: int) -> list[list[object]]:
     rows: list[list[object]] = []
     for item in sort_results(results)[:top_n]:
@@ -394,24 +522,123 @@ def top_rows(results: list[ProgramResult], top_n: int) -> list[list[object]]:
                 item.cmov,
                 item.wide,
                 item.rotate,
-                item.extract,
                 item.lea,
+                item.extract,
+                item.zeroext,
+                item.endian,
+                item.bflip,
                 item.total,
             ]
         )
     return rows
 
 
-def render_report(repo_root: Path, inputs: ScanInputs, micro_results: list[ProgramResult], corpus_results: list[ProgramResult], top_n: int, scanner: Path) -> str:
+def serialize_program(result: ProgramResult) -> dict[str, object]:
+    payload = asdict(result)
+    payload["total"] = result.total
+    return payload
+
+
+def build_json_payload(
+    repo_root: Path,
+    inputs: ScanInputs,
+    micro_results: list[ProgramResult],
+    corpus_results: list[ProgramResult],
+    top_n: int,
+    scanner: Path,
+) -> dict[str, object]:
+    all_results = sort_results(micro_results + corpus_results)
+    return {
+        "metadata": {
+            "repo_root": str(repo_root),
+            "scanner": str(scanner),
+            "raw_micro_count": inputs.raw_micro_count,
+            "raw_corpus_count": inputs.raw_corpus_count,
+            "corpus_source": inputs.corpus_source,
+            "micro_objects": len(micro_results),
+            "corpus_objects": len(corpus_results),
+            "total_objects": len(all_results),
+            "skipped_non_bpf_count": len(inputs.skipped_non_bpf),
+            "skipped_non_bpf": list(inputs.skipped_non_bpf),
+            "method": "extract executable non-dot ELF sections, then run bpf-jit-scanner scan --xlated <section> --all --v5",
+        },
+        "aggregate_summary": dataset_summary_dict(all_results),
+        "micro_summary": dataset_summary_dict(micro_results),
+        "corpus_summary": dataset_summary_dict(corpus_results),
+        "family_summary": [
+            {
+                "family": label,
+                "all_sites": family_totals(all_results)[label],
+                "all_objects": family_object_coverage(all_results)[label],
+                "micro_sites": family_totals(micro_results)[label],
+                "micro_objects": family_object_coverage(micro_results)[label],
+                "corpus_sites": family_totals(corpus_results)[label],
+                "corpus_objects": family_object_coverage(corpus_results)[label],
+            }
+            for label, _ in FAMILY_FIELDS
+        ],
+        "project_summary": [
+            {
+                "project": row[0],
+                "objects": row[1],
+                "objects_with_sites": row[2],
+                "total_sites": row[3],
+                "families": {
+                    "COND_SELECT": row[4],
+                    "WIDE_MEM": row[5],
+                    "ROTATE": row[6],
+                    "ADDR_CALC": row[7],
+                    "BITFIELD_EXTRACT": row[8],
+                    "ZERO_EXT_ELIDE": row[9],
+                    "ENDIAN_FUSION": row[10],
+                    "BRANCH_FLIP": row[11],
+                },
+            }
+            for row in project_summary_rows(all_results)
+        ],
+        "top_objects": [
+            {
+                "object": row[0],
+                "insns": row[1],
+                "sections": row[2],
+                "cmov": row[3],
+                "wide": row[4],
+                "rotate": row[5],
+                "lea": row[6],
+                "extract": row[7],
+                "zeroext": row[8],
+                "endian": row[9],
+                "bflip": row[10],
+                "total": row[11],
+            }
+            for row in top_rows(corpus_results, top_n)
+        ],
+        "objects": [serialize_program(result) for result in all_results],
+    }
+
+
+def render_report(
+    repo_root: Path,
+    inputs: ScanInputs,
+    micro_results: list[ProgramResult],
+    corpus_results: list[ProgramResult],
+    top_n: int,
+    scanner: Path,
+) -> str:
     all_results = sort_results(micro_results + corpus_results)
     corpus_totals = family_totals(corpus_results)
     corpus_coverage = family_object_coverage(corpus_results)
-    dominant_family = max(corpus_totals.items(), key=lambda item: (item[1], item[0])) if corpus_totals else None
-    widest_family = max(corpus_coverage.items(), key=lambda item: (item[1], item[0])) if corpus_coverage else None
+    dominant_family = (
+        max(corpus_totals.items(), key=lambda item: (item[1], item[0])) if corpus_totals else None
+    )
+    widest_family = (
+        max(corpus_coverage.items(), key=lambda item: (item[1], item[0])) if corpus_coverage else None
+    )
     top_corpus = sort_results(corpus_results)[:3]
+    project_rows = project_summary_rows(all_results)
 
     lines: list[str] = [
-        "# Real Program Directive Census",
+        "# Scanner-backed 8-Family Directive Census",
         "",
         f"- Repository root: `{repo_root}`",
         f"- Scanner CLI: `{scanner}`",
@@ -419,7 +646,7 @@ def render_report(repo_root: Path, inputs: ScanInputs, micro_results: list[Progr
         f"- Corpus source: {inputs.corpus_source}",
         f"- Actual `EM_BPF` objects scanned: {len(micro_results)} micro + {len(corpus_results)} corpus = {len(all_results)} total",
         f"- Skipped non-BPF `.bpf.o` artifacts: {len(inputs.skipped_non_bpf)}",
-        "- Method: extract each executable non-dot ELF section, then invoke `bpf-jit-scanner scan <section> --all --v5`.",
+        "- Method: extract each executable non-dot ELF section, then invoke `bpf-jit-scanner scan --xlated <section> --all --v5`.",
         "",
         "## Aggregate Summary",
         "",
@@ -429,10 +656,50 @@ def render_report(repo_root: Path, inputs: ScanInputs, micro_results: list[Progr
     lines.extend(markdown_table(["Metric", "Value"], dataset_summary_rows(micro_results)))
     lines.extend(["", "## Corpus Summary", ""])
     lines.extend(markdown_table(["Metric", "Value"], dataset_summary_rows(corpus_results)))
-    lines.extend(["", "## Top Objects By Total Sites", ""])
+    lines.extend(["", "## Family Summary", ""])
     lines.extend(
         markdown_table(
-            ["Object", "Insns", "Secs", "CMOV", "WIDE", "ROTATE", "EXTRACT", "LEA", "Total"],
+            ["Family", "All Sites", "All Objects", "Micro Sites", "Micro Objects", "Corpus Sites", "Corpus Objects"],
+            family_summary_rows(all_results, micro_results, corpus_results),
+        )
+    )
+    lines.extend(["", "## Project Summary", ""])
+    lines.extend(
+        markdown_table(
+            [
+                "Project",
+                "Objects",
+                "With Sites",
+                "Total",
+                "CMOV",
+                "WIDE",
+                "ROTATE",
+                "LEA",
+                "EXTRACT",
+                "ZEROEXT",
+                "ENDIAN",
+                "BFLIP",
+            ],
+            project_rows,
+        )
+    )
+    lines.extend(["", f"## Top {top_n} Corpus Objects By Total Sites", ""])
+    lines.extend(
+        markdown_table(
+            [
+                "Object",
+                "Insns",
+                "Secs",
+                "CMOV",
+                "WIDE",
+                "ROTATE",
+                "LEA",
+                "EXTRACT",
+                "ZEROEXT",
+                "ENDIAN",
+                "BFLIP",
+                "Total",
+            ],
             top_rows(corpus_results, top_n),
         )
     )
@@ -453,8 +720,21 @@ def render_report(repo_root: Path, inputs: ScanInputs, micro_results: list[Progr
         )
     if top_corpus:
         lines.append(
-            f"- Highest-density corpus objects: "
+            "- Highest-density corpus objects: "
             + ", ".join(f"`{item.relpath}` ({item.total})" for item in top_corpus)
+            + "."
+        )
+    new_family_bits = [
+        f"`{label}` = {corpus_totals[label]} sites across {corpus_coverage[label]} corpus objects"
+        for label, _ in FAMILY_FIELDS
+        if label in NEW_FAMILY_LABELS
+    ]
+    if new_family_bits:
+        lines.append("- New-family corpus totals: " + "; ".join(new_family_bits) + ".")
+    if project_rows:
+        lines.append(
+            "- Top projects by total sites: "
+            + ", ".join(f"`{row[0]}` ({row[3]})" for row in project_rows[:5])
             + "."
         )
     lines.append(
@@ -467,7 +747,9 @@ def main() -> int:
     args = parse_args()
     repo_root = Path(args.repo_root).resolve()
     scanner = Path(args.scanner).resolve()
-    output_path = Path(args.output).resolve()
+    default_output_md = repo_root / "docs" / "tmp" / "real-program-directive-census.md"
+    output_md = Path(args.output_md or args.output or default_output_md).resolve()
+    output_json = Path(args.output_json).resolve() if args.output_json else None
     corpus_build_report = Path(args.corpus_build_report).resolve() if args.corpus_build_report else None
     if not scanner.exists():
         raise SystemExit(f"scanner not found: {scanner}")
@@ -477,12 +759,22 @@ def main() -> int:
     corpus_results = analyze_many(inputs.corpus_paths, "corpus", repo_root, scanner, args.workers)
 
     report = render_report(repo_root, inputs, micro_results, corpus_results, args.top_n, scanner)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(report)
+    output_md.parent.mkdir(parents=True, exist_ok=True)
+    output_md.write_text(report)
+
+    if output_json is not None:
+        payload = build_json_payload(
+            repo_root, inputs, micro_results, corpus_results, args.top_n, scanner
+        )
+        output_json.parent.mkdir(parents=True, exist_ok=True)
+        output_json.write_text(json.dumps(payload, indent=2) + "\n")
 
     total_sites = sum(item.total for item in micro_results + corpus_results)
+    outputs = [str(output_md)]
+    if output_json is not None:
+        outputs.append(str(output_json))
     print(
-        f"Wrote {output_path} for {len(micro_results) + len(corpus_results)} objects "
+        f"Wrote {', '.join(outputs)} for {len(micro_results) + len(corpus_results)} objects "
         f"with {total_sites} total candidate sites "
         f"({len(inputs.skipped_non_bpf)} non-BPF artifacts skipped)."
     )

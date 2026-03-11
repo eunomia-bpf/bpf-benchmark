@@ -30,6 +30,7 @@ except ImportError:
 from corpus import (
     _driver_impl_run_corpus_perf as run_corpus_perf_impl,
     _driver_impl_run_corpus_tracing as run_corpus_tracing_impl,
+    _driver_impl_run_corpus_tracing_exec as run_corpus_tracing_exec_impl,
     _driver_impl_run_corpus_v5_framework as run_corpus_v5_framework_impl,
     _driver_impl_run_corpus_v5_vm_batch as run_corpus_v5_vm_batch_impl,
     _driver_impl_run_macro_corpus as run_macro_corpus_impl,
@@ -87,13 +88,14 @@ def _ablation_entry(argv: list[str]) -> int:
 def _corpus_entry(argv: list[str]) -> int:
     argv = _strip_separator(list(argv))
     if not argv:
-        raise SystemExit("corpus mode required: macro | perf | tracing | v5-framework | v5-production | v5-vm-batch")
+        raise SystemExit("corpus mode required: macro | perf | tracing | tracing-exec | v5-framework | v5-production | v5-vm-batch")
     mode, *remaining = argv
     remaining = _strip_separator(remaining)
     dispatch = {
         "macro": run_macro_corpus_impl.main,
         "perf": run_corpus_perf_impl.main,
         "tracing": run_corpus_tracing_impl.main,
+        "tracing-exec": run_corpus_tracing_exec_impl.main,
         "v5-framework": run_corpus_v5_framework_impl.main,
         "v5-production": run_production_corpus_v5_framework_impl.main,
         "v5-vm-batch": run_corpus_v5_vm_batch_impl.main,

@@ -6,7 +6,7 @@
 > - 每个任务做完 → 立即更新本文档（任务条目状态 + 关键数据 + 文档路径）。
 > - 每次 context 压缩后 → 完整读取本文档恢复全局状态。
 > - 用 agent background 跑任务，不阻塞主对话。
-> 上次更新：2026-03-11（v6 接口设计完成 + 3 新 canonical forms 实现中 + corpus v6 recompile 中）
+> 上次更新：2026-03-11（8-family per-section census 完成 + corpus v6 recompile 进行中）
 
 ---
 
@@ -47,7 +47,7 @@
 4. **Policy-sensitive 证据** — 同一合法站点在不同 workload 下需要不同 lowering
 
 **Go 条件（全部满足才提交）**：
-1. 原型实现多个 directive，展示框架泛化能力 ✅（5 families: COND_SELECT, WIDE_MEM, ROTATE, ADDR_CALC, BITFIELD_EXTRACT; + 3 新 forms 实现中）
+1. 原型实现多个 directive，展示框架泛化能力 ✅（8 families: COND_SELECT, WIDE_MEM, ROTATE, ADDR_CALC, BITFIELD_EXTRACT, ZERO_EXT_ELIDE, ENDIAN_FUSION, BRANCH_FLIP）
 2. Fixed kernel baseline 不能在所有场景下达到同等收益 ✅（CMOV +28.3%）
 3. 评估包含真实程序和至少一个端到端部署 ✅（Tracee daemon +21.65% exec_storm, Tetragon daemon +3.8% app, bpftrace 5/5 attach）
 4. 与 characterization 深度整合 ✅（已合并）
@@ -132,7 +132,8 @@
 | branch_layout 输入敏感性 | predictable 0.225x vs random 0.326x，差 44.6% |
 | Real-program code-size | 0.618x geomean (36 unique) |
 | Real-program exec-time | 0.514x geomean (14 unique) |
-| Corpus directive coverage | 143/560 objects with sites, **14593** total sites（5 families） |
+| Corpus directive coverage (5 fam) | 143/560 objects with sites, **14593** total sites（5 families, per-section） |
+| Corpus 8-family census | 157/560 corpus objects with sites, **16535** total sites（8 families, per-section）。新: endian=1386, bflip=2264, zeroext=0（x86-64 预期） |
 | Pass ablation | 仅 InstCombinePass + SimplifyCFGPass 有效 |
 | cmov 消融 | switch_dispatch +26%，binary_search +12%；bounds_ladder -18%，large_mixed -24% |
 
@@ -145,20 +146,20 @@
 | Directive | Why userspace policy | 证据 | 状态 |
 |-----------|---------------------|------|:---:|
 | **`cmov_select`** | 依赖分支可预测性/依赖链深度/CPU 家族 | cmov ablation 混合结果；log2_fold +28% vs cmov_select -82% | ✅ v4+v5 |
-| **`branch_flip`** | 依赖 workload 热度/输入分布/code-size budget | branch_layout 差 44.6% | 🔄 简单 if/else body swap 可用 pattern match（`BRANCH_FLIP`），通用 CFG relayout 仍 scope 外 |
+| **`branch_flip`** | 依赖 workload 热度/输入分布/code-size budget | branch_layout 差 44.6%；**2279 corpus sites** (tracee 1791) | ✅ 简单 if/else body swap 可用 pattern match（`BRANCH_FLIP`），通用 CFG relayout 仍 scope 外 |
 | **`subprog_inline`** | 依赖热度/code-size/I-cache | corpus 97.2% multi-function | future |
 
 ### 3.2 Substrate（peephole，复用框架基础设施）
 
 | Directive | 状态 | 说明 |
 |-----------|:---:|------|
-| `wide_load` | ✅ v4+v5 | 50.7% surplus recovery，**2835 corpus sites**（扩展后） |
-| `rotate_fusion` | ✅ v4+v5 | BMI2 依赖，**1840 corpus sites**，-28.4% exec |
-| `lea_fusion` | ✅ v4+v5 | 5 micro sites，stride_load_16 -12% |
-| `bitfield_extract` | ✅ v5 | **544 corpus sites** (41 objects)，Cilium 高频 |
-| `zero_ext_elide` | 🔄 | 32-bit ALU + redundant zext → skip zext（x86 自动零扩展），纯 pattern match |
-| `endian_fusion` | 🔄 | ldx+bswap → movbe（需 MOVBE CPU feature），纯 pattern match |
-| `branch_flip` | 🔄 | 第二个 policy-sensitive directive（if/else body swap, 哪个 body 先走取决于 workload），纯 pattern match |
+| `wide_load` | ✅ v4+v5 | 50.7% surplus recovery，**2987 corpus sites**（per-section 8-fam census） |
+| `rotate_fusion` | ✅ v4+v5 | BMI2 依赖，**2685 corpus sites**，-28.4% exec |
+| `lea_fusion` | ✅ v4+v5 | 19 sites (11 objects)，stride_load_16 -12% |
+| `bitfield_extract` | ✅ v5 | **557 corpus sites** (46 objects)，Cilium 高频 |
+| `zero_ext_elide` | ✅ | 32-bit ALU + redundant zext → skip zext。**x86-64 上 corpus 0 sites**（verifier 不插 zext, `bpf_jit_needs_zext()=false`），形式为非 x86 架构准备（RISC-V/ARM）|
+| `endian_fusion` | ✅ | ldx+bswap → movbe（需 MOVBE CPU feature），纯 pattern match。**1386 corpus sites** (50 objects)，Calico 786 最多 |
+| `branch_flip` | ✅ | 第二个 policy-sensitive directive（if/else body swap, 哪个 body 先走取决于 workload），纯 pattern match。**2279 corpus sites** (27 objects)，tracee 1791 最多 |
 | `bounds_window` | ❌ | 冗余 bounds check，需 retained facts |
 
 ### 3.3 不应做的方向
@@ -369,7 +370,7 @@ VM 使用:   make -j$(nproc) bzImage && vng --run <worktree>/arch/x86/boot/bzIma
 | 58 | ZERO_EXTEND directive | ❌ | movzx vs xor+mov |
 | 59 | ARM64 target backend | ❌ | 跨架构验证 |
 | 60 | 严格重跑（30×1000） | ❌ | CPU pinning + performance governor |
-| 61 | **Benchmark 多样性** | ❌ | 当前 61 个 micro 全是 XDP，需补 cgroup_skb/fentry/TC 类型 |
+| 61 | **Benchmark 多样性** | 🟡 | 67 micro: 64 XDP + 2 tc + 1 cgroup_skb。Corpus recompile paired: 61 tc + 16 xdp + 2 cgroup_skb = 79。Census 覆盖全类型。审计报告: `docs/tmp/benchmark-diversity-audit.md` |
 | 62 | **CMOV kernel JIT benefit 信号增强** | ❌ | cmov_select 仅 2.8% 改善，需更强 signal（更多 cmov-heavy benchmark 或不同微架构） |
 | 63 | **End-to-end throughput 数据** | ❌ | 至少一个 PPS 数据（Katran XDP / Calico），#49 的子任务 |
 | 64 | **Corpus 可运行性盘点 + 自动化 recompile** | ✅ | 532 objects, 1836 progs, 1214 loadable, 274 有 sites, 381 truly runnable。79 paired baseline/recompile (sched_cls 61, xdp 16, cgroup_skb 2)。3069 total sites (CMOV 840, WIDE 389, ROTATE 1840)。新脚本 `micro/run_corpus_runnability.py`。`docs/tmp/corpus-runnability-report.md`, `docs/tmp/corpus-runnability-results.json` |
@@ -399,7 +400,8 @@ VM 使用:   make -j$(nproc) bzImage && vng --run <worktree>/arch/x86/boot/bzIma
 | 86 | **v6 tier-1：去摩擦改进** | ✅ | 已完成：shape/site generic upper bound 64、`jit_recompile` log buffer、tuple/binding 12→16（`present_mask` 升到 `u32`）。构建与 `scanner` smoke 均通过。`docs/tmp/v6-tier1-implementation.md` |
 | 87 | **v6 接口设计研究** | ✅ | 核心修正：verifier log 已暴露所有 discovery 所需信息（bounds/types/stack/branch/SCC/liveness），零 kernel 改动即可使用。v6 baseline 不需要 verifier 变更。安全验证仍靠 pattern match + constraints + kernel-owned emitter。`docs/tmp/v6-interface-design.md`，`docs/tmp/interface-improvement-proposals.md` |
 | 88 | **Benchmark 框架审计 v2** | ✅ | 一键 build + smoke test 全部通过。修复：Tracee import 路径、文档更新（README/CLAUDE.md/e2e/README）。56 pure-jit + 11 runtime = 67 benchmarks。`docs/tmp/benchmark-framework-audit-v2.md` |
-| 89 | **新 canonical forms 实现** | ✅ | 已完成：ZERO_EXT_ELIDE（32-bit ALU + redundant zext → 只发 ALU, x86 自动零扩展）、ENDIAN_FUSION（ldx+bswap / bswap+stx → movbe，含 MOVBE CPU gating）、BRANCH_FLIP（local if/else diamond body swap，含 ORIGINAL/FLIPPED native choice）。Scanner pattern + kernel validator + x86 emitter 已落地，构建测试通过。→ `docs/tmp/new-canonical-forms-implementation.md` |
+| 89 | **新 canonical forms 实现** | ✅ | 已完成：ZERO_EXT_ELIDE（32-bit ALU + redundant zext → 只发 ALU, x86 自动零扩展）、ENDIAN_FUSION（ldx+bswap / bswap+stx → movbe，含 MOVBE CPU gating）、BRANCH_FLIP（local if/else diamond body swap，含 ORIGINAL/FLIPPED native choice）。Scanner pattern + kernel validator + x86 emitter 已落地，构建测试通过。2026-03-11 follow-up：修复 `ZERO_EXT_ELIDE` 对真实 verifier zext（`BPF_ZEXT_REG`, `BPF_ALU|MOV|X`, `imm=1`）的匹配错误，并与 kernel validator 对齐。→ `docs/tmp/new-canonical-forms-implementation.md` |
 | 90 | **Corpus 修复 + 全量 v6 recompile** | 🔄 | 修复 `corpus/directive_census.py` + `simple.bpf.o` run-kernel map issue + 用新 scanner（14593 sites, 143 objects）全量重跑 recompile。codex 实现中。→ `docs/tmp/corpus-full-recompile-v6.md` |
 | 91 | **优化方向深度研究** | ✅ | **Top 3**: (1) SESE control-flow region specialization（block order + branch polarity + hot fallthrough, 350-700 LOC, 2-6% exec plausible）; (2) Verifier-fact-guided late specialization（DIV_LIVENESS / NARROW_CMP / TYPE_SPECIALIZED_LOAD, 300-550 LOC）; (3) Typed semantic region plans（multi-atom composition: ROT+ROT→NOP, WIDE+EXTRACT→FIELD_LOAD, 550-900 LOC）。**不应做**: generic rewrite interpreter（破坏 fail-closed）。`docs/tmp/optimization-beyond-isel.md` |
+| 92 | **8-family corpus census** | ✅ | 已按 per-section 方法重跑：627 objects 全部成功扫描，220 objects 有 sites，17637 total sites；其中 corpus 为 560 objects / 157 with sites / **16535** sites。新 families: endian=1386, bflip=2264（aggregate 2279，含 micro 15）, **zeroext=0**。调查结论：这不是 `--all`/CLI 漏算；scanner 已修正为可识别真实 verifier zext，但 per-section/raw ELF section 方法本身看不到 verifier 后插入的 zext，而 x86-64 live xlated 路径又因 `bpf_jit_needs_zext()=false` 不会插该 pair，所以 corpus 仍为 0。输出：`docs/tmp/corpus-8families-census-persection.md`，`docs/tmp/corpus-8families-persection.json`。 |
 | 76 | **scx_rusty/lavd 端到端** | 🔄 | `e2e/cases/scx/` 已落地并在 framework VM（`7.0.0-rc2-g2a6783cc77b6`, `4` vCPU）跑通 `scx_rusty` userspace loader → 30s `hackbench` / `stress-ng --cpu 4` / `sysbench cpu` baseline。活跃 `13` 个 struct_ops programs，扫描到 `28` sites（CMOV `27`, LEA `1`；`rusty_enqueue=12`, `rusty_stopping=10`, `rusty_set_cpumask=2`, `rusty_runnable/quiescent/init_task/init` 各 `1`）。但 raw `bpftool struct_ops register` 虽 return `0` 仍不会保持 `sched_ext` enabled，且对 live struct_ops 调用 `BPF_PROG_JIT_RECOMPILE` 全部未成功（常见 `EINVAL`），因此当前只有 honest baseline + site census，没有 post-reJIT 对比；`scx_lavd` 仍待后续。`e2e/results/scx-e2e.json`, `e2e/results/scx-e2e.md`, `docs/tmp/scx-e2e-report.md` |

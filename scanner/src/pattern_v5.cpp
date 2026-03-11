@@ -1475,9 +1475,10 @@ std::vector<V5PatternDesc> build_v5_bitfield_extract_descriptors()
 std::vector<V5PatternDesc> build_v5_zero_ext_elide_descriptors()
 {
     constexpr uint8_t kMov64X = 0xbf;
+    constexpr uint8_t kMov32X = 0xbc;
     constexpr uint8_t kAnd64K = 0x57;
-    constexpr uint8_t kExpectZeroOffImm = BPF_JIT_PATTERN_F_EXPECT_OFF |
-                                          BPF_JIT_PATTERN_F_EXPECT_IMM;
+    constexpr uint8_t kExpectOffImm = BPF_JIT_PATTERN_F_EXPECT_OFF |
+                                      BPF_JIT_PATTERN_F_EXPECT_IMM;
     const uint8_t binary_ops[] = {
         0x04, 0x0c, 0x14, 0x1c, 0x24, 0x2c, 0x34, 0x3c,
         0x44, 0x4c, 0x54, 0x5c, 0x64, 0x6c, 0x74, 0x7c,
@@ -1488,7 +1489,7 @@ std::vector<V5PatternDesc> build_v5_zero_ext_elide_descriptors()
     };
 
     std::vector<V5PatternDesc> descs;
-    descs.reserve(2 * (sizeof(binary_ops) + sizeof(unary_ops)));
+    descs.reserve(3 * (sizeof(binary_ops) + sizeof(unary_ops)));
 
     auto append_desc = [&](V5PatternInsn first) {
         const std::vector<V5Binding> bindings = {
@@ -1503,7 +1504,20 @@ std::vector<V5PatternDesc> build_v5_zero_ext_elide_descriptors()
             0,
             {
                 first,
-                make_pattern_insn(kMov64X, 1, 1, 0, 0, kExpectZeroOffImm,
+                make_pattern_insn(kMov32X, 1, 1, 0, 0, kExpectOffImm,
+                                  0, 0, 0, 1),
+            },
+            {},
+            bindings));
+
+        descs.push_back(make_v5_desc(
+            V5Family::ZeroExtElide,
+            BPF_JIT_CF_ZERO_EXT_ELIDE,
+            BPF_JIT_ZEXT_ELIDE,
+            0,
+            {
+                first,
+                make_pattern_insn(kMov64X, 1, 1, 0, 0, kExpectOffImm,
                                   0, 0, 0, 0),
             },
             {},
@@ -1516,7 +1530,7 @@ std::vector<V5PatternDesc> build_v5_zero_ext_elide_descriptors()
             0,
             {
                 first,
-                make_pattern_insn(kAnd64K, 1, 0, 0, 0, kExpectZeroOffImm,
+                make_pattern_insn(kAnd64K, 1, 0, 0, 0, kExpectOffImm,
                                   0, 0, 0, -1),
             },
             {},
