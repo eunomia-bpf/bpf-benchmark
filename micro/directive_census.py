@@ -688,6 +688,10 @@ def collect_inputs(repo_root: Path, corpus_build_report: Path | None = None) -> 
     )
 
 
+def expected_micro_object_count(repo_root: Path) -> int:
+    return len(tuple((repo_root / "micro" / "programs").glob("*.bpf.c")))
+
+
 def sort_results(results: list[ProgramResult]) -> list[ProgramResult]:
     return sorted(results, key=lambda item: (-item.total, -item.rotate, -item.wide, -item.lea, -item.cmov, item.relpath))
 
@@ -1010,8 +1014,12 @@ def main() -> int:
     )
 
     inputs = collect_inputs(repo_root, corpus_build_report)
-    if inputs.raw_micro_count != 62:
-        print(f"warning: expected 62 micro object paths, found {inputs.raw_micro_count}", file=sys.stderr)
+    expected_micro_objects = expected_micro_object_count(repo_root)
+    if inputs.raw_micro_count != expected_micro_objects:
+        print(
+            f"warning: expected {expected_micro_objects} micro object paths, found {inputs.raw_micro_count}",
+            file=sys.stderr,
+        )
 
     micro_results = [analyze_object(path, "micro", repo_root) for path in inputs.micro_paths]
     corpus_results = [analyze_object(path, "corpus", repo_root) for path in inputs.corpus_paths]

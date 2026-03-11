@@ -3,10 +3,8 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 import platform
 import random
-import statistics
 import subprocess
 import sys
 from collections import Counter
@@ -15,6 +13,40 @@ from pathlib import Path
 
 from benchmark_catalog import CONFIG_PATH, ROOT_DIR, SuiteSpec, load_suite
 from input_generators import materialize_input
+try:
+    from orchestrator.commands import build_micro_benchmark_command
+    from orchestrator.environment import (
+        ensure_build_steps,
+        read_optional_text,
+        read_required_text,
+        validate_publication_environment,
+    )
+    from orchestrator.results import (
+        derive_perf_metrics,
+        ns_summary,
+        parse_runner_sample,
+        summarize_named_counters,
+        summarize_optional_ns,
+        summarize_perf_counter_meta,
+        summarize_phase_timings,
+    )
+except ImportError:
+    from micro.orchestrator.commands import build_micro_benchmark_command
+    from micro.orchestrator.environment import (
+        ensure_build_steps,
+        read_optional_text,
+        read_required_text,
+        validate_publication_environment,
+    )
+    from micro.orchestrator.results import (
+        derive_perf_metrics,
+        ns_summary,
+        parse_runner_sample,
+        summarize_named_counters,
+        summarize_optional_ns,
+        summarize_perf_counter_meta,
+        summarize_phase_timings,
+    )
 
 
 DEFAULT_RUNTIME_ORDER_SEED = 0
@@ -65,31 +97,6 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def ns_summary(values: list[int]) -> dict[str, float | int | None]:
-    if not values:
-        return {
-            "count": 0,
-            "mean": None,
-            "median": None,
-            "min": None,
-            "max": None,
-            "p95": None,
-            "stdev": None,
-        }
-
-    sorted_values = sorted(values)
-    p95_index = min(len(sorted_values) - 1, math.ceil(len(sorted_values) * 0.95) - 1)
-    return {
-        "count": len(values),
-        "mean": statistics.mean(values),
-        "median": statistics.median(values),
-        "min": sorted_values[0],
-        "max": sorted_values[-1],
-        "p95": sorted_values[p95_index],
-        "stdev": statistics.stdev(values) if len(values) > 1 else 0,
-    }
-
-
 def format_ns(value: float | int | None) -> str:
     if value is None:
         return "n/a"
@@ -116,79 +123,6 @@ def run_command(command: list[str], cpu: str | None) -> subprocess.CompletedProc
         details = completed.stderr.strip() or completed.stdout.strip()
         raise RuntimeError(f"command failed ({completed.returncode}): {' '.join(full_command)}\n{details}")
     return completed
-
-
-def run_host_command(command: list[str]) -> subprocess.CompletedProcess[str]:
-    completed = subprocess.run(command, capture_output=True, text=True)
-    if completed.returncode != 0:
-        details = completed.stderr.strip() or completed.stdout.strip()
-        raise RuntimeError(f"command failed ({completed.returncode}): {' '.join(command)}\n{details}")
-    return completed
-
-
-def read_required_file(path: str) -> str:
-    return Path(path).read_text().strip()
-
-
-def read_optional_file(path: str) -> str:
-    try:
-        return Path(path).read_text().strip()
-    except OSError:
-        return "unknown"
-
-
-def validate_environment(host: dict[str, object], args: argparse.Namespace, strict_env: bool) -> None:
-    strict_failures: list[str] = []
-
-    def report_publication_issue(message: str) -> None:
-        if strict_env:
-            strict_failures.append(message)
-            return
-        print(f"[WARN] {message}")
-
-    governor = str(host.get("cpu_governor", "unknown"))
-    if governor != "performance":
-        report_publication_issue(
-            f"CPU governor is '{governor}', not 'performance'. "
-            "Results may have frequency scaling noise."
-        )
-
-    no_turbo = str(host.get("turbo_state", "unknown"))
-    if no_turbo != "1":
-        report_publication_issue(
-            "Turbo boost is enabled. Consider disabling for stable measurements."
-        )
-
-    perf_event_paranoid = str(host.get("perf_event_paranoid", "unknown"))
-    try:
-        perf_event_paranoid_value = int(perf_event_paranoid)
-    except ValueError:
-        perf_event_paranoid_value = None
-    if perf_event_paranoid_value is not None and perf_event_paranoid_value > 1:
-        print(f"[WARN] perf_event_paranoid={perf_event_paranoid}. Some perf counters may not be available.")
-
-    if args.cpu is None:
-        report_publication_issue(
-            "No CPU affinity set. Consider using --cpu for isolated measurements."
-        )
-
-    try:
-        sudo_available = subprocess.run(
-            ["sudo", "-n", "true"],
-            capture_output=True,
-            text=True,
-        ).returncode == 0
-    except OSError:
-        sudo_available = False
-    if not sudo_available:
-        report_publication_issue(
-            "sudo -n is not available. Passwordless sudo is required for publication-grade runs."
-        )
-
-    if strict_failures:
-        for failure in strict_failures:
-            print(f"[ERROR] {failure}", file=sys.stderr)
-        sys.exit(1)
 
 
 def list_suite(suite: SuiteSpec) -> None:
@@ -235,13 +169,11 @@ def ensure_artifacts_built(suite: SuiteSpec, build_bpftool: bool) -> None:
     build_order = ["micro_exec", "programs"]
     if build_bpftool:
         build_order.append("bpftool")
-
-    for step in build_order:
-        command = list(suite.build.commands[step])
-        print(f"[build] {step}: {' '.join(command)}")
-        completed = subprocess.run(command, cwd=ROOT_DIR, text=True)
-        if completed.returncode != 0:
-            raise RuntimeError(f"build step failed: {step}")
+    ensure_build_steps(
+        suite.build.commands,
+        root_dir=ROOT_DIR,
+        build_order=build_order,
+    )
 
 
 def resolve_memory_file(benchmark, regenerate_inputs: bool) -> Path | None:
@@ -249,160 +181,6 @@ def resolve_memory_file(benchmark, regenerate_inputs: bool) -> Path | None:
         return None
     path, _ = materialize_input(benchmark.input_generator, force=regenerate_inputs)
     return path
-
-
-def parse_helper_output(stdout: str) -> dict[str, object]:
-    payload = stdout.strip().splitlines()
-    if not payload:
-        raise RuntimeError("helper produced no output")
-    return json.loads(payload[-1])
-
-
-def summarize_phase_timings(samples: list[dict[str, object]]) -> dict[str, dict[str, float | int | None]]:
-    buckets: dict[str, list[int]] = {}
-    for sample in samples:
-        for name, value in sample.get("phases_ns", {}).items():
-            buckets.setdefault(str(name), []).append(int(value))
-    return {name: ns_summary(values) for name, values in buckets.items()}
-
-
-def summarize_named_counters(samples: list[dict[str, object]], field_name: str) -> dict[str, dict[str, float | int | None]]:
-    buckets: dict[str, list[int]] = {}
-    for sample in samples:
-        for name, value in sample.get(field_name, {}).items():
-            buckets.setdefault(str(name), []).append(int(value))
-    return {name: ns_summary(values) for name, values in buckets.items()}
-
-
-def summarize_optional_ns(samples: list[dict[str, object]], field_name: str) -> dict[str, float | int | None] | None:
-    values = [
-        int(value)
-        for sample in samples
-        if (value := sample.get(field_name)) is not None
-    ]
-    if not values:
-        return None
-    return ns_summary(values)
-
-
-def summarize_perf_counter_meta(samples: list[dict[str, object]]) -> dict[str, object]:
-    metas = [sample.get("perf_counters_meta", {}) for sample in samples]
-    hardware_counter_names = (
-        "cycles",
-        "instructions",
-        "branches",
-        "branch_misses",
-        "cache_references",
-        "cache_misses",
-    )
-    software_counter_names = (
-        "task_clock_ns",
-        "context_switches",
-        "cpu_migrations",
-        "page_faults",
-    )
-    collected_samples = sum(1 for meta in metas if meta.get("collected"))
-    errors = Counter(str(meta.get("error", "")) for meta in metas if meta.get("error"))
-    include_kernel = next((meta.get("include_kernel") for meta in metas if meta.get("collected")), None)
-    scope = next((meta.get("scope") for meta in metas if meta.get("scope")), "full_repeat_raw")
-    hardware_counters_observed = any(
-        any(int(sample.get("perf_counters", {}).get(name, 0)) > 0 for name in hardware_counter_names)
-        for sample in samples
-    )
-    software_counters_observed = any(
-        any(int(sample.get("perf_counters", {}).get(name, 0)) > 0 for name in software_counter_names)
-        for sample in samples
-    )
-    return {
-        "requested": any(bool(meta.get("requested")) for meta in metas),
-        "collected_samples": collected_samples,
-        "include_kernel": include_kernel,
-        "scope": scope,
-        "hardware_counters_observed": hardware_counters_observed,
-        "software_counters_observed": software_counters_observed,
-        "errors": dict(errors),
-    }
-
-
-def derive_perf_metrics(counter_summary: dict[str, dict[str, float | int | None]]) -> dict[str, float]:
-    derived: dict[str, float] = {}
-
-    def median_of(name: str) -> float | None:
-        summary = counter_summary.get(name)
-        if not summary:
-            return None
-        value = summary.get("median")
-        if value is None:
-            return None
-        return float(value)
-
-    cycles = median_of("cycles")
-    instructions = median_of("instructions")
-    branches = median_of("branches")
-    branch_misses = median_of("branch_misses")
-    cache_refs = median_of("cache_references")
-    cache_misses = median_of("cache_misses")
-
-    if cycles not in (None, 0.0) and instructions is not None:
-        derived["ipc_median"] = instructions / cycles
-    if branches not in (None, 0.0) and branch_misses is not None:
-        derived["branch_miss_rate_median"] = branch_misses / branches
-    if cache_refs not in (None, 0.0) and cache_misses is not None:
-        derived["cache_miss_rate_median"] = cache_misses / cache_refs
-
-    return derived
-
-
-def resolve_helper_command(
-    suite: SuiteSpec,
-    runtime,
-    benchmark,
-    memory_file: Path | None,
-    repeat: int,
-    perf_counters: bool,
-    perf_scope: str = "full_repeat_raw",
-) -> list[str]:
-    binary = str(suite.build.runner_binary)
-    if runtime.mode == "llvmbpf":
-        command = [
-            binary,
-            "run-llvmbpf",
-            "--program",
-            str(benchmark.program_object),
-            "--io-mode",
-            benchmark.io_mode,
-            "--repeat",
-            str(repeat),
-        ]
-        if memory_file is not None:
-            command.extend(["--memory", str(memory_file)])
-        if perf_counters:
-            command.extend(["--perf-counters", "--perf-scope", perf_scope])
-            return ["sudo", "-n", *command]
-        return command
-
-    if runtime.mode == "kernel":
-        command = [
-            binary,
-            "run-kernel",
-            "--program",
-            str(benchmark.program_object),
-            "--io-mode",
-            benchmark.io_mode,
-            "--repeat",
-            str(repeat),
-            "--input-size",
-            str(benchmark.kernel_input_size),
-        ]
-        if memory_file is not None:
-            command.extend(["--memory", str(memory_file)])
-        if perf_counters:
-            command.extend(["--perf-counters", "--perf-scope", perf_scope])
-        if runtime.require_sudo:
-            return ["sudo", "-n", *command]
-        return command
-
-    raise RuntimeError(f"unsupported runtime mode: {runtime.mode}")
 
 
 def attach_baseline_adjustments(results: dict[str, object], baseline_benchmark: str | None) -> None:
@@ -505,10 +283,10 @@ def main() -> int:
             "cpu_affinity": args.cpu,
             "git_sha": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT_DIR).decode().strip(),
             "kernel_version": platform.release(),
-            "kernel_cmdline": read_required_file("/proc/cmdline"),
-            "cpu_governor": read_optional_file("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"),
-            "turbo_state": read_optional_file("/sys/devices/system/cpu/intel_pstate/no_turbo"),
-            "perf_event_paranoid": read_optional_file("/proc/sys/kernel/perf_event_paranoid"),
+            "kernel_cmdline": read_required_text("/proc/cmdline"),
+            "cpu_governor": read_optional_text("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"),
+            "turbo_state": read_optional_text("/sys/devices/system/cpu/intel_pstate/no_turbo"),
+            "perf_event_paranoid": read_optional_text("/proc/sys/kernel/perf_event_paranoid"),
         },
         "toolchains": {
             name: {"root": str(toolchain.root)}
@@ -531,7 +309,11 @@ def main() -> int:
         "benchmarks": [],
     }
 
-    validate_environment(results["host"], args, args.strict_env)
+    validate_publication_environment(
+        results["host"],
+        cpu=args.cpu,
+        strict=args.strict_env,
+    )
 
     for benchmark in benchmarks:
         memory_file = resolve_memory_file(benchmark, args.regenerate_inputs)
@@ -554,18 +336,21 @@ def main() -> int:
         iteration_runtime_orders: list[list[str]] = []
         for runtime in runtimes:
             repeat = args.repeat if args.repeat is not None else runtime.default_repeat
-            command = resolve_helper_command(
-                suite,
-                runtime,
-                benchmark,
-                memory_file,
-                repeat,
-                args.perf_counters,
-                args.perf_scope,
+            command = build_micro_benchmark_command(
+                suite.build.runner_binary,
+                runtime_mode=runtime.mode,
+                program=benchmark.program_object,
+                io_mode=benchmark.io_mode,
+                repeat=repeat,
+                memory=memory_file,
+                input_size=benchmark.kernel_input_size,
+                perf_counters=args.perf_counters,
+                perf_scope=args.perf_scope,
+                require_sudo=runtime.require_sudo,
             )
 
             for _ in range(warmups):
-                parse_helper_output(run_command(command, args.cpu).stdout)
+                parse_runner_sample(run_command(command, args.cpu).stdout)
 
             runtime_samples[runtime.name] = {
                 "repeat": repeat,
@@ -585,7 +370,7 @@ def main() -> int:
             iteration_runtime_orders.append([runtime.name for runtime in ordered])
             for runtime in ordered:
                 sample_entry = runtime_samples[runtime.name]
-                sample = parse_helper_output(run_command(sample_entry["command"], args.cpu).stdout)
+                sample = parse_runner_sample(run_command(sample_entry["command"], args.cpu).stdout)
                 sample["iteration_index"] = iteration_idx
                 if benchmark.expected_result is not None and sample["result"] != benchmark.expected_result:
                     raise RuntimeError(

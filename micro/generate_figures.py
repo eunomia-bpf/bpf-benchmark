@@ -8,6 +8,7 @@ import json
 import math
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Iterable
 
 import matplotlib
 
@@ -39,41 +40,40 @@ plt.rcParams.update(
     }
 )
 
-ROOT_DIR = Path(__file__).resolve().parent
-RESULTS_DIR = ROOT_DIR / "results"
+MICRO_DIR = Path(__file__).resolve().parent
+RESULTS_DIR = MICRO_DIR / "results"
 FIGURES_DIR = RESULTS_DIR / "figures"
 PURE_JIT_RESULTS = RESULTS_DIR / "pure_jit_authoritative.json"
-CAUSAL_RESULTS = RESULTS_DIR / "causal_isolation_authoritative.json"
-CATEGORY_ORDER = (
-    "baseline",
-    "alu-mix",
-    "control-flow",
-    "dependency-ilp",
-    "loop-shape",
-    "memory-local",
-    "program-scale",
-    "call-size",
+CAUSAL_RESULTS_CANDIDATES = (
+    RESULTS_DIR / "causal_isolation_authoritative.json",
+    RESULTS_DIR / "pure_jit_with_cmov.json",
+    RESULTS_DIR / "pure_jit.latest.json",
 )
-CATEGORY_LABELS = {
-    "baseline": "baseline",
-    "alu-mix": "alu\nmix",
-    "control-flow": "control\nflow",
-    "dependency-ilp": "dependency\nILP",
-    "loop-shape": "loop\nshape",
-    "memory-local": "memory\nlocal",
-    "program-scale": "program\nscale",
-    "call-size": "call\nsize",
+
+
+def first_existing_path(candidates: Iterable[Path]) -> Path:
+    candidate_list = tuple(candidates)
+    for candidate in candidate_list:
+        if candidate.exists():
+            return candidate
+    return candidate_list[0]
+
+
+CAUSAL_RESULTS = first_existing_path(CAUSAL_RESULTS_CANDIDATES)
+CATEGORY_MAP = {
+    "baseline": {"label": "baseline", "color": "#4E79A7"},
+    "alu-mix": {"label": "alu\nmix", "color": "#F28E2B"},
+    "control-flow": {"label": "control\nflow", "color": "#E15759"},
+    "dependency-ilp": {"label": "dependency\nILP", "color": "#76B7B2"},
+    "loop-shape": {"label": "loop\nshape", "color": "#59A14F"},
+    "memory-local": {"label": "memory\nlocal", "color": "#EDC948"},
+    "program-scale": {"label": "program\nscale", "color": "#B07AA1"},
+    "call-overhead": {"label": "call\noverhead", "color": "#BAB0AC"},
+    "call-size": {"label": "call\nsize", "color": "#9C755F"},
 }
-CATEGORY_COLORS = {
-    "baseline": "#4E79A7",
-    "alu-mix": "#F28E2B",
-    "control-flow": "#E15759",
-    "dependency-ilp": "#76B7B2",
-    "loop-shape": "#59A14F",
-    "memory-local": "#EDC948",
-    "program-scale": "#B07AA1",
-    "call-size": "#9C755F",
-}
+CATEGORY_ORDER = tuple(CATEGORY_MAP)
+CATEGORY_LABELS = {name: meta["label"] for name, meta in CATEGORY_MAP.items()}
+CATEGORY_COLORS = {name: meta["color"] for name, meta in CATEGORY_MAP.items()}
 RUNTIME_COLORS = {
     "llvmbpf": "#2E8B57",
     "kernel": "#C44E52",
@@ -109,7 +109,7 @@ class CategorySummary:
 class CausalRuntimeSummary:
     benchmark: str
     runtime: str
-    mean_exec_ns: float
+    median_exec_ns: float
     ci_low: float
     ci_high: float
 
@@ -117,13 +117,17 @@ class CausalRuntimeSummary:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--pure-json", default=str(PURE_JIT_RESULTS), help="Path to the 31-benchmark authoritative JSON.")
-    parser.add_argument("--causal-json", default=str(CAUSAL_RESULTS), help="Path to the causal-isolation authoritative JSON.")
+    parser.add_argument(
+        "--causal-json",
+        default=str(CAUSAL_RESULTS),
+        help="Path to a causal-capable JSON result file. Defaults to the first existing causal results candidate.",
+    )
     parser.add_argument("--figures-dir", default=str(FIGURES_DIR), help="Output directory for generated PDF figures.")
     parser.add_argument(
         "--bootstrap-iterations",
         type=int,
         default=BOOTSTRAP_ITERATIONS,
-        help="Bootstrap iterations for causal-isolation mean confidence intervals.",
+        help="Bootstrap iterations for causal-isolation median confidence intervals.",
     )
     parser.add_argument(
         "--seed",
@@ -168,6 +172,21 @@ def extract_metric_samples(run: dict[str, object], metric: str) -> np.ndarray:
         [value for _, value in extract_metric_samples_with_iteration(run, metric)],
         dtype=np.float64,
     )
+
+
+def extract_metric_center(run: dict[str, object], metric: str, center: str = "median") -> float:
+    summary = run.get(metric)
+    if isinstance(summary, dict):
+        value = summary.get(center)
+        if value is not None:
+            return float(value)
+
+    values = extract_metric_samples(run, metric)
+    if center == "median":
+        return float(np.median(values))
+    if center == "mean":
+        return float(np.mean(values))
+    raise ValueError(f"unsupported center: {center}")
 
 
 def extract_native_code_bytes(run: dict[str, object]) -> float:
@@ -246,11 +265,11 @@ def percentile_interval(values: np.ndarray) -> tuple[float, float]:
     return float(low), float(high)
 
 
-def bootstrap_mean_ci(values: np.ndarray, iterations: int, seed: int) -> tuple[float, float]:
+def bootstrap_median_ci(values: np.ndarray, iterations: int, seed: int) -> tuple[float, float]:
     rng = np.random.default_rng(seed)
     indices = rng.integers(0, values.size, size=(iterations, values.size))
-    means = values[indices].mean(axis=1)
-    return percentile_interval(means)
+    medians = np.median(values[indices], axis=1)
+    return percentile_interval(medians)
 
 
 def geometric_mean(values: list[float]) -> float:
@@ -282,6 +301,24 @@ def format_ns(value: float) -> str:
     return f"{value:.1f}" if value < 100.0 else f"{value:.0f}"
 
 
+def require_known_category(category: str) -> str:
+    if category not in CATEGORY_MAP:
+        known = ", ".join(CATEGORY_ORDER)
+        raise KeyError(f"unknown benchmark category {category!r}; known categories: {known}")
+    return category
+
+
+def is_causal_isolation_benchmark(benchmark: dict[str, object]) -> bool:
+    if str(benchmark.get("family", "")) == "causal-isolation":
+        return True
+    if str(benchmark.get("category", "")) == "causal-isolation":
+        return True
+    tags = benchmark.get("tags", [])
+    if isinstance(tags, list):
+        return any(str(tag) == "causal-isolation" for tag in tags)
+    return False
+
+
 def build_benchmark_records(results: dict[str, object]) -> list[BenchmarkRecord]:
     records: list[dict[str, object]] = []
     exec_pvalues: list[float] = []
@@ -292,16 +329,19 @@ def build_benchmark_records(results: dict[str, object]) -> list[BenchmarkRecord]
 
         llvmbpf_exec = extract_metric_samples(llvmbpf_run, "exec_ns")
         kernel_exec = extract_metric_samples(kernel_run, "exec_ns")
-        llvmbpf_compile = extract_metric_samples(llvmbpf_run, "compile_ns")
-        kernel_compile = extract_metric_samples(kernel_run, "compile_ns")
+        llvmbpf_exec_median = extract_metric_center(llvmbpf_run, "exec_ns", center="median")
+        kernel_exec_median = extract_metric_center(kernel_run, "exec_ns", center="median")
+        llvmbpf_compile_median = extract_metric_center(llvmbpf_run, "compile_ns", center="median")
+        kernel_compile_median = extract_metric_center(kernel_run, "compile_ns", center="median")
+        category = require_known_category(str(benchmark["category"]))
 
         records.append(
             {
                 "name": str(benchmark["name"]),
-                "category": str(benchmark["category"]),
-                "exec_ratio": float(np.mean(llvmbpf_exec) / np.mean(kernel_exec)),
+                "category": category,
+                "exec_ratio": float(llvmbpf_exec_median / kernel_exec_median),
                 "code_size_ratio": extract_native_code_bytes(llvmbpf_run) / extract_native_code_bytes(kernel_run),
-                "compile_ratio": float(np.mean(llvmbpf_compile) / np.mean(kernel_compile)),
+                "compile_ratio": float(llvmbpf_compile_median / kernel_compile_median),
             }
         )
         exec_pvalues.append(paired_wilcoxon_pvalue(llvmbpf_run, kernel_run, "exec_ns"))
@@ -339,11 +379,14 @@ def summarize_categories(records: list[BenchmarkRecord]) -> list[CategorySummary
 
 def build_causal_summaries(results: dict[str, object], iterations: int, seed: int) -> list[CausalRuntimeSummary]:
     summaries: list[CausalRuntimeSummary] = []
-    for benchmark_index, benchmark in enumerate(results.get("benchmarks", [])):
+    causal_benchmarks = [benchmark for benchmark in results.get("benchmarks", []) if is_causal_isolation_benchmark(benchmark)]
+    if not causal_benchmarks:
+        raise ValueError("causal results file does not contain any causal-isolation benchmarks")
+    for benchmark_index, benchmark in enumerate(causal_benchmarks):
         for runtime_index, runtime in enumerate(("llvmbpf", "kernel")):
             run = get_run(benchmark, runtime)
             exec_samples = extract_metric_samples(run, "exec_ns")
-            ci_low, ci_high = bootstrap_mean_ci(
+            ci_low, ci_high = bootstrap_median_ci(
                 exec_samples,
                 iterations=iterations,
                 seed=seed + benchmark_index * 101 + runtime_index,
@@ -352,7 +395,7 @@ def build_causal_summaries(results: dict[str, object], iterations: int, seed: in
                 CausalRuntimeSummary(
                     benchmark=str(benchmark["name"]),
                     runtime=runtime,
-                    mean_exec_ns=float(np.mean(exec_samples)),
+                    median_exec_ns=extract_metric_center(run, "exec_ns", center="median"),
                     ci_low=ci_low,
                     ci_high=ci_high,
                 )
@@ -658,9 +701,9 @@ def plot_causal_isolation(summaries: list[CausalRuntimeSummary], output_path: Pa
         upper_errors: list[float] = []
         for benchmark in benchmarks:
             summary = summary_lookup[(benchmark, runtime)]
-            means.append(summary.mean_exec_ns)
-            lower_errors.append(max(0.0, summary.mean_exec_ns - summary.ci_low))
-            upper_errors.append(max(0.0, summary.ci_high - summary.mean_exec_ns))
+            means.append(summary.median_exec_ns)
+            lower_errors.append(max(0.0, summary.median_exec_ns - summary.ci_low))
+            upper_errors.append(max(0.0, summary.ci_high - summary.median_exec_ns))
 
         offset = (-width / 2.0) if runtime == "llvmbpf" else (width / 2.0)
         bars = ax.bar(
@@ -677,7 +720,7 @@ def plot_causal_isolation(summaries: list[CausalRuntimeSummary], output_path: Pa
         )
         add_bar_labels(ax, bars, means, max(means) * 0.025, format_ns)
 
-    ax.set_ylabel("Mean execution time (ns)")
+    ax.set_ylabel("Median execution time (ns)")
     ax.set_xticks(x, [benchmark.replace("_", "\n") for benchmark in benchmarks])
     ax.grid(True, axis="y")
     ax.grid(False, axis="x")

@@ -9,9 +9,25 @@ import statistics
 from pathlib import Path
 
 
-ROOT_DIR = Path(__file__).resolve().parent
-DEFAULT_RESULTS = ROOT_DIR / "results" / "latest.json"
-DEFAULT_CORPUS = ROOT_DIR.parent / "corpus" / "inventory.json"
+REPO_ROOT = Path(__file__).resolve().parent.parent
+MICRO_DIR = REPO_ROOT / "micro"
+RESULTS_DIR = MICRO_DIR / "results"
+DEFAULT_RESULTS_CANDIDATES = (
+    RESULTS_DIR / "pure_jit.latest.json",
+    RESULTS_DIR / "runtime.latest.json",
+    RESULTS_DIR / "latest.json",
+)
+DEFAULT_CORPUS = REPO_ROOT / "corpus" / "inventory.json"
+
+
+def first_existing_path(candidates: tuple[Path, ...]) -> Path:
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return candidates[0]
+
+
+DEFAULT_RESULTS = first_existing_path(DEFAULT_RESULTS_CANDIDATES)
 
 
 def parse_args() -> argparse.Namespace:

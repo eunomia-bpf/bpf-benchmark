@@ -571,11 +571,29 @@ std::vector<program_descriptor> list_programs(const std::filesystem::path &path)
     while ((program = bpf_object__next_program(object.get(), program)) != nullptr) {
         const char *program_name = bpf_program__name(program);
         const char *section_name = bpf_program__section_name(program);
+        enum bpf_prog_type prog_type = bpf_program__type(program);
+        enum bpf_attach_type attach_type = bpf_program__expected_attach_type(program);
+
+        if (prog_type == BPF_PROG_TYPE_UNSPEC && section_name != nullptr) {
+            enum bpf_prog_type inferred_prog_type = BPF_PROG_TYPE_UNSPEC;
+            enum bpf_attach_type inferred_attach_type = attach_type;
+            if (libbpf_prog_type_by_name(section_name, &inferred_prog_type, &inferred_attach_type) == 0) {
+                prog_type = inferred_prog_type;
+                attach_type = inferred_attach_type;
+            }
+        }
+
+        const char *prog_type_name = libbpf_bpf_prog_type_str(prog_type);
+        const char *attach_type_name = libbpf_bpf_attach_type_str(attach_type);
         programs.push_back(
             {
                 .name = program_name == nullptr ? "" : program_name,
                 .section_name = section_name == nullptr ? "" : section_name,
                 .insn_count = bpf_program__insn_cnt(program),
+                .prog_type = static_cast<uint32_t>(prog_type),
+                .expected_attach_type = static_cast<uint32_t>(attach_type),
+                .prog_type_name = prog_type_name == nullptr ? "" : prog_type_name,
+                .attach_type_name = attach_type_name == nullptr ? "" : attach_type_name,
             });
     }
 

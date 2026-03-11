@@ -418,7 +418,11 @@ void print_program_inventory(const std::vector<program_descriptor> &programs)
             << "{"
             << "\"name\":\"" << json_escape(program.name) << "\","
             << "\"section_name\":\"" << json_escape(program.section_name) << "\","
-            << "\"insn_count\":" << program.insn_count
+            << "\"insn_count\":" << program.insn_count << ","
+            << "\"prog_type\":" << program.prog_type << ","
+            << "\"expected_attach_type\":" << program.expected_attach_type << ","
+            << "\"prog_type_name\":\"" << json_escape(program.prog_type_name) << "\","
+            << "\"attach_type_name\":\"" << json_escape(program.attach_type_name) << "\""
             << "}";
     }
     std::cout << "]\n";

@@ -495,6 +495,7 @@ def build_runner_command(
     spec: ProgramSpec,
     program_name: str,
     *,
+    repeat: int,
     compile_only: bool,
     recompile_v5: bool,
 ) -> list[str]:
@@ -511,7 +512,7 @@ def build_runner_command(
         "--io-mode",
         io_mode,
         "--repeat",
-        "1",
+        str(max(1, repeat)),
     ]
     if io_mode == "packet":
         command.append("--raw-packet")
@@ -533,10 +534,18 @@ def run_micro_exec_sample(
     spec: ProgramSpec,
     program_name: str,
     *,
+    repeat: int,
     compile_only: bool,
     recompile_v5: bool,
 ) -> dict[str, Any]:
-    command = build_runner_command(suite, spec, program_name, compile_only=compile_only, recompile_v5=recompile_v5)
+    command = build_runner_command(
+        suite,
+        spec,
+        program_name,
+        repeat=repeat,
+        compile_only=compile_only,
+        recompile_v5=recompile_v5,
+    )
     started_ns = time.perf_counter_ns()
     completed = run_text_command(command)
     sample = parse_runner_json(completed.stdout)
@@ -544,6 +553,7 @@ def run_micro_exec_sample(
     sample.setdefault("phases_ns", {})
     sample.setdefault("code_size", {})
     sample["command"] = command
+    sample["effective_repeat"] = max(1, repeat)
     sample["runner_wall_ns"] = time.perf_counter_ns() - started_ns
     return sample
 
@@ -752,7 +762,7 @@ def run_attach_trigger_sample(
     repeat: int,
     recompile_v5: bool,
     iteration_idx: int,
-    libbpf: LibbpfHandle,
+    libbpf: LibbpfHandle | None,
 ) -> dict[str, Any]:
     if not spec.trigger:
         raise RuntimeError(f"{spec.name}: attach_trigger requires a trigger command")
@@ -786,6 +796,8 @@ def run_attach_trigger_sample(
         recompile_ns = 0
         apply_info = None
         if recompile_v5:
+            if libbpf is None:
+                raise RuntimeError("libbpf is required for recompile_v5 attach-trigger runs")
             recompile_record["policy_generated"] = True
             recompile_record["syscall_attempted"] = True
             apply_info = apply_recompile_v5(suite.scanner_binary, libbpf, attached)
@@ -832,6 +844,7 @@ def run_attach_trigger_sample(
                 "stdout_tail": trigger["stdout_tail"],
                 "stderr_tail": trigger["stderr_tail"],
             },
+            "effective_repeat": max(1, repeat),
             "bpftool_command": load_command,
         }
         if apply_info is not None:
@@ -851,7 +864,7 @@ def run_compile_only_loadall_sample(
     *,
     recompile_v5: bool,
     iteration_idx: int,
-    libbpf: LibbpfHandle,
+    libbpf: LibbpfHandle | None,
 ) -> dict[str, Any]:
     pin_dir = unique_pin_dir(spec.name, "kernel_recompile_v5" if recompile_v5 else "kernel", iteration_idx)
     btf_path = detect_btf_path(spec.btf_path)
@@ -882,6 +895,8 @@ def run_compile_only_loadall_sample(
         recompile_ns = 0
         apply_info = None
         if recompile_v5:
+            if libbpf is None:
+                raise RuntimeError("libbpf is required for recompile_v5 bpftool loadall runs")
             recompile_record["policy_generated"] = True
             recompile_record["syscall_attempted"] = True
             apply_info = apply_recompile_v5(suite.scanner_binary, libbpf, pinned)
@@ -920,6 +935,7 @@ def run_compile_only_loadall_sample(
             },
             "recompile": recompile_record,
             "pinned_programs": pinned,
+            "effective_repeat": 1,
             "bpftool_command": load_command,
         }
         if apply_info is not None:
@@ -937,7 +953,7 @@ def execute_sample(
     *,
     repeat: int,
     iteration_idx: int,
-    libbpf: LibbpfHandle,
+    libbpf: LibbpfHandle | None,
 ) -> dict[str, Any]:
     recompile_v5 = runtime.mode == "kernel-recompile-v5"
     if recompile_v5 and not spec.recompile_supported:
@@ -972,9 +988,23 @@ def execute_sample(
         suite,
         spec,
         program_name,
+        repeat=repeat,
         compile_only=compile_only,
         recompile_v5=recompile_v5,
     )
+
+
+def runtimes_require_recompile_support(runtimes: list[RuntimeSpec]) -> bool:
+    return any(runtime.mode == "kernel-recompile-v5" for runtime in runtimes)
+
+
+def benchmarks_require_libbpf_for_recompile(programs: list[ProgramSpec]) -> bool:
+    for program in programs:
+        if program.test_method == "attach_trigger":
+            return True
+        if program.test_method == "compile_only" and program.compile_loader == "bpftool_loadall":
+            return True
+    return False
 
 
 def host_metadata() -> dict[str, Any]:
@@ -991,27 +1021,33 @@ def host_metadata() -> dict[str, Any]:
 
 def main() -> int:
     args = parse_args()
-    maybe_reexec_as_root(args)
     suite = load_suite(Path(args.suite).resolve(), args.output)
 
     if args.list:
         list_suite(suite)
         return 0
 
-    maybe_build_runner(suite, args.skip_build)
-    if not suite.scanner_binary.exists():
-        raise SystemExit(f"scanner binary missing: {suite.scanner_binary}")
-
     benchmarks = select_programs(suite.programs, args.benches)
     runtimes = select_runtimes(suite.runtimes, args.runtimes)
     if args.skip_recompile:
         runtimes = [runtime for runtime in runtimes if runtime.mode != "kernel-recompile-v5"]
+    if not runtimes:
+        raise SystemExit("no runtimes selected")
+
+    maybe_build_runner(suite, args.skip_build)
+
+    needs_recompile_support = runtimes_require_recompile_support(runtimes)
+    if needs_recompile_support and not suite.scanner_binary.exists():
+        raise SystemExit(f"scanner binary missing: {suite.scanner_binary}")
+
+    maybe_reexec_as_root(args)
 
     iterations = args.iterations if args.iterations is not None else suite.defaults_iterations
     warmups = args.warmups if args.warmups is not None else suite.defaults_warmups
     repeat = args.repeat if args.repeat is not None else suite.defaults_repeat
 
-    libbpf = LibbpfHandle()
+    needs_libbpf = needs_recompile_support and benchmarks_require_libbpf_for_recompile(benchmarks)
+    libbpf = LibbpfHandle() if needs_libbpf else None
 
     results = {
         "suite_name": suite.suite_name,
@@ -1086,6 +1122,7 @@ def main() -> int:
                 "label": runtime.label,
                 "mode": runtime.mode,
                 "repeat": repeat,
+                "effective_repeat": max(1, repeat) if spec.test_method in {"bpf_prog_test_run", "attach_trigger"} else 1,
                 "artifacts": {
                     "program_object": str(spec.source),
                 },

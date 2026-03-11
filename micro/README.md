@@ -127,7 +127,8 @@ python3 micro/analyze_representativeness.py \
 
 ## 当前覆盖
 
-- `micro_pure_jit`: 29 个 case
+- `micro_pure_jit`: 55 个 case
+- 以下 family 列表目前只列出代表性 benchmark，不再逐项穷举完整 55-case manifest
 - `baseline`: `simple`, `memory_pair_sum`
 - `alu-mix`: `bitcount`, `log2_fold`, `mixed_alu_mem`
 - `control-flow`: `binary_search`, `branch_layout`, `switch_dispatch`, `branch_dense`
@@ -136,9 +137,11 @@ python3 micro/analyze_representativeness.py \
 - `loop-shape`: `fibonacci_iter`, `fixed_loop_small`, `fixed_loop_large`, `nested_loop_2`, `nested_loop_3`
 - `call-size`: `code_clone_2`, `code_clone_8`
 - `program-scale`: `large_mixed_500`, `large_mixed_1000`
-- `micro_runtime`: 5 个 case
+- `micro_runtime`: 11 个 case
+- 以下 runtime family 同样只列出代表性 benchmark
 - `map-runtime`: `map_lookup_churn`, `map_roundtrip`
 - `helper-runtime`: `helper_call_1`, `helper_call_10`, `helper_call_100`
+- 当前 `micro/programs/` 目录共有 66 个 `.bpf.o` / `.bpf.c` benchmark 对象
 
 每个 `benchmark × runtime` 组合会记录：
 

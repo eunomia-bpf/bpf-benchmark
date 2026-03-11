@@ -31,6 +31,10 @@ struct program_descriptor {
     std::string name;
     std::string section_name;
     uint64_t insn_count = 0;
+    uint32_t prog_type = 0;
+    uint32_t expected_attach_type = 0;
+    std::string prog_type_name;
+    std::string attach_type_name;
 };
 
 struct cli_options {
