@@ -24,20 +24,77 @@
 > POC v2 证明了单个 JIT-level directive 的可行性（cmov_select）；
 > v3 要证明这个机制可以**泛化为通用的可扩展框架**——用户态无需改内核代码就能定义新的优化 rule。
 
-### 1.2 两篇论文策略
+### 1.1b 论文故事（OSDI/SOSP 版，2026-03-11）
+
+#### 1. eBPF 已是关键基础设施，但 kernel JIT 耦合了安全和优化
+
+eBPF 程序运行在 fleet-scale 网络、追踪、安全、调度的 hot path 上。每个部署的 BPF 程序都由内核 JIT 编译为 native code，**直接在内核态执行**——任何代码生成错误都可能导致内核崩溃或安全漏洞，因此 JIT 必须提供严格的安全保证。JIT code quality 直接决定 CPU 成本。
+
+但当前 JIT 将安全保证和另一个不同的关注点耦合在一起：**决定如何优化生成的代码**。优化决策取决于部署上下文——workload 行为、目标微架构、fleet 约束——内核没有这些信息，operator 也无法介入。
+
+#### 2. 为什么不能在 kernel 里修
+
+- **不是 bytecode 层的问题**：BPF ISA 没有 cmov/wide-load/rotate，bytecode 优化器（K2/Merlin/EPSO）触及不到 native instruction selection。
+- **固定启发式必然错**：
+  - Policy-sensitivity：同一优化对不同 workload 方向相反（CMOV: predictable +34.5%, unpredictable -2.8%）
+  - Combination interference：各自有益的启发式组合产生新回退（fixed-all → stride_load_16 +141%）
+- **新模式受限于 kernel release 周期**（月级），kernel JIT 成为优化演化的瓶颈。
+
+#### 3. 安全约束：使问题 non-trivial
+
+Operator 需要控制优化决策，但 eBPF 安全模型要求内核是唯一生成 native code 的实体。不能上传机器码，不能绕 verifier，不能扩大 TCB。
+
+→ 表面矛盾：需要外部控制优化，但不能开放 native code emission。
+
+#### 4. Thesis：安全与优化可以分离
+
+> **内核 JIT 的 backend 决策可以安全地分解为 safety（哪些 native code 变体可以安全生成）和 optimization（哪些变体应当应用）。**
+>
+> - **Safety（内核负责）**：内核定义有界的 safe variant menu，验证每个请求，不合法则 fail-closed。
+> - **Optimization（用户态负责）**：特权用户态根据 workload、硬件、fleet policy 选择变体。
+>
+> 内核从不执行用户态提供的代码——只在自己预定义的安全变体间切换。
+
+#### 5. 可扩展性
+
+- **Safety 接口稳定且小**：每新增一个优化族 ~100 LOC kernel
+- **Optimization policy 独立于 kernel 演化**：新 pattern、新 CPU、新 workload → userspace 更新，无需 kernel release
+- 这不是四个 peephole 的论文——是一个可扩展的 OS 接口，让 JIT optimization policy 像 scheduling policy (sched_ext) 一样从内核分离
+
+#### 论文主线（Abstract → Conclusion）
+
+1. **问题**：Kernel JIT 耦合安全和优化，operator 无法控制 native code quality
+2. **不可修复**：policy-sensitive + combination interference + bytecode optimizer 够不到 + kernel release 瓶颈
+3. **安全约束**：不能让 userspace 控制 native code emission
+4. **Thesis**：安全与优化可以分离
+5. **系统**：BpfReJIT——kernel-defined safe variant menu + userspace selection + fail-closed
+6. **可扩展性**：safety 接口稳定，optimization policy 独立演化
+7. **证据**：policy-sensitivity 证明分离必要；60 生产程序证明 practical；selective re-compilation 避免所有 regression
+
+#### 类比定位
+
+| 系统 | 耦合了什么 | 分离出什么 |
+|------|-----------|-----------|
+| Exokernel | 保护 + 资源管理 | 应用控制资源管理 |
+| sched_ext | 调度机制 + 调度策略 | BPF 程序定义调度策略 |
+| **BpfReJIT** | **JIT 安全 + JIT 优化策略** | **用户态定义优化策略** |
+
+### 1.2 两篇论文策略（已合并，保留记录）
+
+> 两篇论文已合并为 `docs/paper/paper.tex`，以下为历史记录。
 
 | 论文 | 状态 | 说明 |
 |------|:---:|------|
-| **Paper 1: Characterization** | 数据就绪 | `paper-comparison.md`，量化 kernel JIT vs LLVM -O3 差距 |
-| **Paper 2: Optimization** | 设计就绪，待实现 | 本文档，userspace-guided backend optimization |
-| **最终合并** | 计划中 | 两篇最终合并为一个完整故事，但**现在先拆开**，确保每个方面独立达到顶会水准 |
+| **Paper 1: Characterization** | 已合并 | `paper-comparison.md`，量化 kernel JIT vs LLVM -O3 差距 |
+| **Paper 2: Optimization** | 已合并 | 本文档，userspace-guided backend optimization |
+| **最终合并** | ✅ 完成 | `docs/paper/paper.tex` |
 
-**合并后的故事线**：
-1. Characterization 揭示差距来自 backend lowering（不是 bytecode）
-2. Bytecode 优化器（K2/Merlin/EPSO）无法触及这些 backend 决策
-3. 部分 backend 决策的 legality 稳定但 profitability 依赖部署环境
-4. 设计 mechanism/policy 分离的框架
-5. 实现 + 评估
+**合并后的故事线**（旧版，被 1.1b 取代）：
+1. ~~Characterization 揭示差距来自 backend lowering（不是 bytecode）~~
+2. ~~Bytecode 优化器（K2/Merlin/EPSO）无法触及这些 backend 决策~~
+3. ~~部分 backend 决策的 legality 稳定但 profitability 依赖部署环境~~
+4. ~~设计 mechanism/policy 分离的框架~~
+5. ~~实现 + 评估~~
 
 ### 1.3 OSDI/SOSP Novelty 分析
 

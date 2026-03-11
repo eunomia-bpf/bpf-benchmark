@@ -1,6 +1,226 @@
-macro_suite: macro_corpus
+suite_name: macro_corpus
 
 corpus:
   manifest: corpus/repos.yaml
   local_repos: corpus/repos
   inventory: corpus/inventory.json
+
+defaults:
+  iterations: 3
+  warmups: 1
+  repeat: 1
+  output: micro/results/macro_corpus.latest.json
+
+build:
+  runner_binary: micro/build/runner/micro_exec
+  scanner_binary: scanner/build/bpf-jit-scanner
+  bpftool_binary: bpftool
+
+runtimes:
+  - name: kernel
+    label: kernel eBPF
+    mode: kernel
+  - name: kernel_recompile_v5
+    label: kernel eBPF recompile v5
+    mode: kernel-recompile-v5
+
+programs:
+  - name: katran_balancer
+    description: Meta Katran XDP load balancer ingress datapath.
+    source: corpus/build/katran/balancer.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: balancer_ingress
+    sections: [xdp]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: katran
+    level: production
+    hypothesis: Large production XDP load balancers expose meaningful JIT compile and code-size costs.
+    tags: [networking, load-balancer, production, xdp]
+
+  - name: calico_xdp_main
+    description: Calico XDP fast path for Kubernetes dataplane policy and service handling.
+    source: corpus/build/calico/xdp_no_log.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: calico_xdp_main
+    sections: [xdp]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: calico
+    level: production
+    hypothesis: Medium-sized Kubernetes datapaths should sit between Katran and selftests on compile time and code size.
+    tags: [networking, kubernetes, policy, production, xdp]
+
+  - name: calico_tc_maglev
+    description: Calico TC Maglev load-balancing program from the host endpoint datapath.
+    source: corpus/build/calico/from_hep_debug.bpf.o
+    prog_type: tc
+    test_method: bpf_prog_test_run
+    program_name: calico_tc_maglev
+    sections: [tc]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: calico
+    level: production
+    hypothesis: TC datapaths stress a different JIT mix than XDP while remaining replayable via test_run.
+    tags: [networking, kubernetes, load-balancer, production, tc]
+
+  - name: suricata_xdp_filter
+    description: Suricata XDP hash-based flow filter.
+    source: corpus/build/suricata/xdp_filter.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: xdp_hashfilter
+    sections: [xdp]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: security
+    family: suricata
+    level: production
+    hypothesis: Security-oriented XDP filters provide smaller but still realistic map-heavy packet pipelines.
+    tags: [security, observability, production, xdp]
+
+  - name: linux_test_tc_cls
+    description: Linux selftest TC classifier benchmark.
+    source: corpus/build/linux-selftests/test_tc_bpf.bpf.o
+    prog_type: tc
+    test_method: bpf_prog_test_run
+    program_name: cls
+    sections: [tc]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: selftests
+    family: linux-selftests
+    level: support
+    hypothesis: Kernel selftests provide compact control programs for calibration against production datapaths.
+    tags: [selftests, tc, control]
+
+  - name: linux_test_tcx_pkt_ptr
+    description: Linux selftest TCX ingress packet pointer program.
+    source: corpus/build/linux-selftests/test_tc_bpf.bpf.o
+    prog_type: tc
+    test_method: bpf_prog_test_run
+    program_name: pkt_ptr
+    sections: [tcx]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: selftests
+    family: linux-selftests
+    level: support
+    hypothesis: TCX programs give a smaller modern ingress baseline against production TC code.
+    tags: [selftests, tcx, control]
+
+  - name: linux_xdp_synproxy
+    description: Linux selftest XDP SYN proxy.
+    source: corpus/build/linux-selftests/xdp_synproxy_kern.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: syncookie_xdp
+    sections: [xdp]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: selftests
+    family: linux-selftests
+    level: support
+    hypothesis: The in-kernel SYN proxy is a realistic but still self-contained stress case for XDP control flow.
+    tags: [selftests, networking, synproxy, xdp]
+
+  - name: linux_tc_synproxy
+    description: Linux selftest TC SYN proxy.
+    source: corpus/build/linux-selftests/xdp_synproxy_kern.bpf.o
+    prog_type: tc
+    test_method: bpf_prog_test_run
+    program_name: syncookie_tc
+    sections: [tc]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: selftests
+    family: linux-selftests
+    level: support
+    hypothesis: The TC SYN proxy complements XDP with a verifier- and helper-heavy TC path.
+    tags: [selftests, networking, synproxy, tc]
+
+  - name: systemd_sysctl_monitor
+    description: systemd cgroup/sysctl monitor compiled and JITed without runtime replay.
+    source: corpus/build/systemd/sysctl-monitor.bpf.o
+    prog_type: cgroup_sysctl
+    test_method: compile_only
+    program_name: sysctl_monitor
+    sections: [cgroup/sysctl]
+    io_mode: context
+    test_input: corpus/inputs/macro_dummy_context_64.bin
+    input_size: 64
+    category: resource-control
+    family: systemd
+    level: production
+    hypothesis: Some cgroup hooks are loadable and optimizable even when test_run execution is not supported by the kernel.
+    tags: [systemd, cgroup, production, compile-only]
+
+  - name: datadog_oom_kill
+    description: Datadog OOM kill kprobe compiled in CO-RE mode and measured as compile-only.
+    source: corpus/build/datadog-agent/oom-kill-kern.bpf.o
+    prog_type: kprobe
+    test_method: compile_only
+    program_name: kprobe__oom_kill_process
+    sections: [kprobe/oom_kill_process]
+    io_mode: context
+    test_input: corpus/inputs/macro_dummy_context_64.bin
+    input_size: 64
+    category: observability
+    family: datadog-agent
+    level: production
+    hypothesis: Production tracing probes are still useful compile-time JIT cases even when no safe synthetic trigger exists.
+    tags: [observability, datadog, kprobe, production, compile-only]
+
+  - name: tracee_lsm_bpf
+    description: Tracee LSM probe for BPF capability checks.
+    source: corpus/build/tracee/lsm_check.bpf.o
+    prog_type: lsm
+    test_method: attach_trigger
+    program_name: lsm_bpf_check
+    trigger: "bpftool prog show >/dev/null"
+    trigger_timeout_seconds: 20
+    category: security
+    family: tracee
+    level: production
+    hypothesis: Attached LSM probes exercise a realistic live-attach and trigger path absent from test_run-only suites.
+    tags: [security, observability, tracee, production, attach]
+
+  - name: tetragon_execve
+    description: Tetragon execve tracepoint pipeline compiled and JITed via bpftool loadall.
+    source: corpus/build/tetragon/bpf_execve_event.bpf.o
+    prog_type: tracepoint
+    test_method: compile_only
+    compile_loader: bpftool_loadall
+    program_names: [event_execve, execve_rate, execve_send]
+    category: security
+    family: tetragon
+    level: production
+    hypothesis: Production tracepoint pipelines still belong in the corpus even when autoattach is not yet stable for the full object.
+    tags: [security, observability, tetragon, production, compile-only]
+
+  - name: coroot_process_lifecycle
+    description: Coroot node agent process-lifecycle tracer compiled and JITed via bpftool loadall.
+    source: corpus/build/coroot-node-agent/ebpf.bpf.o
+    prog_type: tracepoint
+    test_method: compile_only
+    compile_loader: bpftool_loadall
+    program_names: [task_newtask, sched_process_exit, oom_mark_victim]
+    category: observability
+    family: coroot-node-agent
+    level: production
+    hypothesis: Large multi-fragment node agents still belong in the macro corpus even when autoattach is too brittle for the default suite.
+    tags: [observability, coroot, tracepoint, production, compile-only]

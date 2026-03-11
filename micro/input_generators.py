@@ -74,6 +74,21 @@ def generate_checksum(output: Path) -> dict[str, int]:
     return {"rounds": rounds, "word_count": word_count}
 
 
+def generate_hash_chain(output: Path) -> dict[str, int]:
+    rounds = 16
+    word_count = 8
+    state = 0xFACE_CAFE_1234_5678
+
+    blob = bytearray(struct.pack("<II", rounds, word_count))
+    for index in range(word_count):
+        state = _lcg(state ^ ((index + 1) * 0x9E37_79B9_7F4A_7C15))
+        word = state ^ ((index + 1) * 0xD134_2543_DE82_EF95)
+        blob.extend(struct.pack("<Q", word & MASK64))
+
+    output.write_bytes(blob)
+    return {"rounds": rounds, "word_count": word_count}
+
+
 def _write_be16(packet: bytearray, offset: int, value: int) -> None:
     packet[offset] = (value >> 8) & 0xFF
     packet[offset + 1] = value & 0xFF
@@ -707,6 +722,26 @@ def generate_cmov_select(output: Path) -> dict[str, int]:
     return {"count": count, "groups": groups, "lanes": lanes}
 
 
+def generate_cmov_dense(output: Path) -> dict[str, int]:
+    count = 32
+    state = 0xC001_D00D_F00D_BAAD
+
+    arrays: list[list[int]] = [[], [], [], []]
+
+    for index in range(count):
+        for array_index, values in enumerate(arrays):
+            state = _lcg(state ^ ((index + 1) * (array_index + 3) * 0x9E37_79B9_7F4A_7C15))
+            values.append(state & MASK64)
+
+    blob = bytearray()
+    for values in arrays:
+        for value in values:
+            blob.extend(struct.pack("<Q", value))
+
+    output.write_bytes(blob)
+    return {"count": count, "arrays": len(arrays)}
+
+
 def generate_memcmp_prefix_64(output: Path) -> dict[str, int]:
     scenario_count = 3
     pattern = bytearray(_memcmp_prefix_pattern_byte(index) for index in range(64))
@@ -1048,6 +1083,7 @@ GENERATORS = {
     "bitcount": generate_bitcount,
     "binary_search": generate_binary_search,
     "checksum": generate_checksum,
+    "hash_chain": generate_hash_chain,
     "packet_parse": generate_packet_parse,
     "branch_layout": generate_branch_layout,
     "branch_layout_predictable": generate_branch_layout_predictable,
@@ -1094,6 +1130,7 @@ GENERATORS = {
     "load_native_u64": generate_load_native_u64,
     "map_lookup_repeat": generate_map_lookup_repeat,
     "cmov_select": generate_cmov_select,
+    "cmov_dense": generate_cmov_dense,
     "memcmp_prefix_64": generate_memcmp_prefix_64,
     "packet_parse_vlans_tcpopts": generate_packet_parse_vlans_tcpopts,
     "local_call_fanout": generate_local_call_fanout,

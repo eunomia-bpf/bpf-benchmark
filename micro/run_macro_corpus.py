@@ -1,0 +1,1129 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import ctypes
+import json
+import math
+import os
+import platform
+import random
+import shlex
+import statistics
+import subprocess
+import sys
+import time
+from collections import Counter
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+DEFAULT_SUITE = ROOT_DIR / "config" / "macro_corpus.yaml"
+DEFAULT_PACKET = ROOT_DIR / "corpus" / "inputs" / "macro_dummy_packet_64.bin"
+DEFAULT_CONTEXT = ROOT_DIR / "corpus" / "inputs" / "macro_dummy_context_64.bin"
+DEFAULT_BTF_CANDIDATES = (
+    Path("/sys/kernel/btf/vmlinux"),
+    ROOT_DIR / "vendor" / "linux-framework" / "vmlinux",
+    ROOT_DIR / "vendor" / "linux" / "vmlinux",
+)
+DEFAULT_OUTPUT = ROOT_DIR / "micro" / "results" / "macro_corpus.latest.json"
+DEFAULT_RUNNER = ROOT_DIR / "micro" / "build" / "runner" / "micro_exec"
+DEFAULT_SCANNER = ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"
+DEFAULT_BPFTOOL = "bpftool"
+
+
+class LibbpfHandle:
+    def __init__(self) -> None:
+        load_error: OSError | None = None
+        self.lib: ctypes.CDLL | None = None
+        for name in ("libbpf.so.1", "libbpf.so"):
+            try:
+                self.lib = ctypes.CDLL(name, use_errno=True)
+                break
+            except OSError as exc:
+                load_error = exc
+        if self.lib is None:
+            raise RuntimeError(f"unable to load libbpf: {load_error}")
+
+        self.lib.bpf_prog_get_fd_by_id.argtypes = [ctypes.c_uint]
+        self.lib.bpf_prog_get_fd_by_id.restype = ctypes.c_int
+
+    def prog_fd_by_id(self, prog_id: int) -> int:
+        assert self.lib is not None
+        fd = int(self.lib.bpf_prog_get_fd_by_id(int(prog_id)))
+        if fd < 0:
+            err = ctypes.get_errno()
+            raise OSError(err, f"bpf_prog_get_fd_by_id({prog_id}) failed")
+        return fd
+
+
+@dataclass(frozen=True)
+class RuntimeSpec:
+    name: str
+    label: str
+    mode: str
+
+
+@dataclass(frozen=True)
+class ProgramSpec:
+    name: str
+    description: str
+    source: Path
+    prog_type: str
+    test_method: str
+    tags: tuple[str, ...]
+    sections: tuple[str, ...]
+    program_names: tuple[str, ...]
+    io_mode: str | None
+    test_input: Path | None
+    input_size: int | None
+    trigger: str | None
+    trigger_timeout_seconds: int
+    compile_loader: str
+    category: str | None = None
+    family: str | None = None
+    level: str | None = None
+    hypothesis: str | None = None
+    btf_path: Path | None = None
+    recompile_supported: bool = True
+
+
+@dataclass(frozen=True)
+class SuiteSpec:
+    suite_name: str
+    manifest_path: Path
+    output_path: Path
+    defaults_iterations: int
+    defaults_warmups: int
+    defaults_repeat: int
+    runner_binary: Path
+    bpftool_binary: str
+    scanner_binary: Path
+    runtimes: tuple[RuntimeSpec, ...]
+    programs: tuple[ProgramSpec, ...]
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Run the declarative macro eBPF corpus.")
+    parser.add_argument("--suite", default=str(DEFAULT_SUITE), help="Path to macro corpus YAML.")
+    parser.add_argument("--bench", action="append", dest="benches", help="Benchmark name filter.")
+    parser.add_argument("--runtime", action="append", dest="runtimes", help="Runtime name filter.")
+    parser.add_argument("--iterations", type=int, help="Measured samples per benchmark/runtime pair.")
+    parser.add_argument("--warmups", type=int, help="Warmup samples per benchmark/runtime pair.")
+    parser.add_argument("--repeat", type=int, help="Inner repeat count for test_run or trigger commands.")
+    parser.add_argument("--output", help="Override JSON output path.")
+    parser.add_argument("--seed", type=int, default=0, help="Seed used for runtime order shuffling.")
+    parser.add_argument("--skip-recompile", action="store_true", help="Only run baseline kernel mode.")
+    parser.add_argument("--skip-build", action="store_true", help="Do not build micro_exec when missing.")
+    parser.add_argument("--list", action="store_true", help="List configured benchmarks and runtimes.")
+    parser.add_argument("--no-sudo-reexec", action="store_true", help="Do not automatically re-exec under sudo.")
+    return parser.parse_args()
+
+
+def maybe_reexec_as_root(args: argparse.Namespace) -> None:
+    if args.no_sudo_reexec or os.geteuid() == 0:
+        return
+    probe = subprocess.run(["sudo", "-n", "true"], capture_output=True, text=True)
+    if probe.returncode != 0:
+        raise SystemExit("macro corpus runner requires root or passwordless sudo")
+    os.execvp("sudo", ["sudo", "-n", sys.executable, *sys.argv])
+
+
+def ns_summary(values: list[int]) -> dict[str, float | int | None]:
+    if not values:
+        return {
+            "count": 0,
+            "mean": None,
+            "median": None,
+            "min": None,
+            "max": None,
+            "p95": None,
+            "stdev": None,
+        }
+
+    sorted_values = sorted(values)
+    p95_index = min(len(sorted_values) - 1, math.ceil(len(sorted_values) * 0.95) - 1)
+    return {
+        "count": len(values),
+        "mean": statistics.mean(values),
+        "median": statistics.median(values),
+        "min": sorted_values[0],
+        "max": sorted_values[-1],
+        "p95": sorted_values[p95_index],
+        "stdev": statistics.stdev(values) if len(values) > 1 else 0,
+    }
+
+
+def summarize_phase_timings(samples: list[dict[str, Any]]) -> dict[str, dict[str, float | int | None]]:
+    buckets: dict[str, list[int]] = {}
+    for sample in samples:
+        for name, value in sample.get("phases_ns", {}).items():
+            buckets.setdefault(str(name), []).append(int(value))
+    return {name: ns_summary(values) for name, values in buckets.items()}
+
+
+def summarize_optional_ns(samples: list[dict[str, Any]], field_name: str) -> dict[str, float | int | None] | None:
+    values = [int(sample[field_name]) for sample in samples if sample.get(field_name) is not None]
+    if not values:
+        return None
+    return ns_summary(values)
+
+
+def summarize_code_size(samples: list[dict[str, Any]]) -> dict[str, dict[str, float | int | None]]:
+    buckets: dict[str, list[float | int]] = {}
+    for sample in samples:
+        code_size = sample.get("code_size", {})
+        if not isinstance(code_size, dict):
+            continue
+        for name in ("bpf_bytecode_bytes", "native_code_bytes", "inflation_ratio"):
+            value = code_size.get(name)
+            if value is None:
+                continue
+            buckets.setdefault(name, []).append(value)
+
+    return {
+        name: ns_summary([int(value) for value in values]) if name != "inflation_ratio" else float_summary(values)
+        for name, values in buckets.items()
+    }
+
+
+def float_summary(values: list[float | int]) -> dict[str, float | int | None]:
+    if not values:
+        return {
+            "count": 0,
+            "mean": None,
+            "median": None,
+            "min": None,
+            "max": None,
+            "p95": None,
+            "stdev": None,
+        }
+    sorted_values = sorted(float(value) for value in values)
+    p95_index = min(len(sorted_values) - 1, math.ceil(len(sorted_values) * 0.95) - 1)
+    return {
+        "count": len(sorted_values),
+        "mean": statistics.mean(sorted_values),
+        "median": statistics.median(sorted_values),
+        "min": sorted_values[0],
+        "max": sorted_values[-1],
+        "p95": sorted_values[p95_index],
+        "stdev": statistics.stdev(sorted_values) if len(sorted_values) > 1 else 0,
+    }
+
+
+def ensure_parent(path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+
+def materialize_dummy_packet(path: Path) -> Path:
+    ensure_parent(path)
+    if path.exists() and path.stat().st_size == 64:
+        return path
+
+    packet = bytearray(64)
+    packet[0:6] = bytes.fromhex("001122334455")
+    packet[6:12] = bytes.fromhex("66778899aabb")
+    packet[12:14] = bytes.fromhex("0800")
+    packet[14] = 0x45
+    packet[15] = 0x00
+    packet[16:18] = (50).to_bytes(2, "big")
+    packet[18:20] = (0).to_bytes(2, "big")
+    packet[20:22] = (0x4000).to_bytes(2, "big")
+    packet[22] = 64
+    packet[23] = 6
+    packet[24:26] = (0).to_bytes(2, "big")
+    packet[26:30] = bytes([192, 0, 2, 1])
+    packet[30:34] = bytes([198, 51, 100, 2])
+    packet[34:36] = (12345).to_bytes(2, "big")
+    packet[36:38] = (80).to_bytes(2, "big")
+    packet[38:42] = (1).to_bytes(4, "big")
+    packet[42:46] = (0).to_bytes(4, "big")
+    packet[46] = 0x50
+    packet[47] = 0x02
+    packet[48:50] = (8192).to_bytes(2, "big")
+    packet[50:52] = (0).to_bytes(2, "big")
+    packet[52:54] = (0).to_bytes(2, "big")
+    path.write_bytes(packet)
+    return path
+
+
+def materialize_dummy_context(path: Path, size: int = 64) -> Path:
+    ensure_parent(path)
+    if path.exists() and path.stat().st_size == size:
+        return path
+    path.write_bytes(bytes(size))
+    return path
+
+
+def parse_runner_json(stdout: str) -> dict[str, Any]:
+    lines = [line.strip() for line in stdout.splitlines() if line.strip()]
+    if not lines:
+        raise RuntimeError("runner produced no output")
+    return json.loads(lines[-1])
+
+
+def run_text_command(
+    command: list[str],
+    *,
+    timeout_seconds: int = 180,
+    pass_fds: tuple[int, ...] = (),
+) -> subprocess.CompletedProcess[str]:
+    completed = subprocess.run(
+        command,
+        cwd=ROOT_DIR,
+        capture_output=True,
+        text=True,
+        timeout=timeout_seconds,
+        pass_fds=pass_fds,
+    )
+    if completed.returncode != 0:
+        details = (completed.stderr or completed.stdout).strip()
+        raise RuntimeError(f"command failed ({completed.returncode}): {' '.join(command)}\n{details}")
+    return completed
+
+
+def maybe_build_runner(suite: SuiteSpec, skip_build: bool) -> None:
+    if suite.runner_binary.exists():
+        return
+    if skip_build:
+        raise SystemExit(f"runner binary missing: {suite.runner_binary}")
+    completed = subprocess.run(["make", "-C", "micro", "micro_exec"], cwd=ROOT_DIR, text=True)
+    if completed.returncode != 0:
+        raise SystemExit("failed to build micro_exec")
+
+
+def detect_btf_path(preferred: Path | None = None) -> Path | None:
+    candidates: list[Path] = []
+    if preferred is not None:
+        candidates.append(preferred)
+    for candidate in DEFAULT_BTF_CANDIDATES:
+        if candidate not in candidates:
+            candidates.append(candidate)
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return None
+
+
+def load_suite(path: Path, output_override: str | None) -> SuiteSpec:
+    data = yaml.safe_load(path.read_text())
+    defaults = data.get("defaults", {})
+    build = data.get("build", {})
+    runtimes = tuple(
+        RuntimeSpec(
+            name=str(entry["name"]),
+            label=str(entry.get("label", entry["name"])),
+            mode=str(entry.get("mode", entry["name"])),
+        )
+        for entry in data.get(
+            "runtimes",
+            (
+                {"name": "kernel", "label": "kernel eBPF", "mode": "kernel"},
+                {"name": "kernel_recompile_v5", "label": "kernel eBPF recompile v5", "mode": "kernel-recompile-v5"},
+            ),
+        )
+    )
+    programs = []
+    for entry in data["programs"]:
+        source = Path(entry["source"])
+        if not source.is_absolute():
+            source = (ROOT_DIR / source).resolve()
+        test_input = entry.get("test_input")
+        input_path = None
+        if test_input:
+            input_path = Path(test_input)
+            if not input_path.is_absolute():
+                input_path = (ROOT_DIR / input_path).resolve()
+        btf_path = entry.get("btf_path")
+        resolved_btf = None
+        if btf_path:
+            resolved_btf = Path(btf_path)
+            if not resolved_btf.is_absolute():
+                resolved_btf = (ROOT_DIR / resolved_btf).resolve()
+        names = entry.get("program_names") or ([entry["program_name"]] if entry.get("program_name") else [])
+        programs.append(
+            ProgramSpec(
+                name=str(entry["name"]),
+                description=str(entry.get("description", entry["name"])),
+                source=source,
+                prog_type=str(entry["prog_type"]),
+                test_method=str(entry["test_method"]),
+                tags=tuple(str(tag) for tag in entry.get("tags", [])),
+                sections=tuple(str(section) for section in entry.get("sections", [])),
+                program_names=tuple(str(name) for name in names),
+                io_mode=str(entry["io_mode"]) if entry.get("io_mode") else None,
+                test_input=input_path,
+                input_size=int(entry["input_size"]) if entry.get("input_size") is not None else None,
+                trigger=str(entry["trigger"]) if entry.get("trigger") else None,
+                trigger_timeout_seconds=int(entry.get("trigger_timeout_seconds", 30)),
+                compile_loader=str(entry.get("compile_loader", "micro_exec")),
+                category=str(entry["category"]) if entry.get("category") else None,
+                family=str(entry["family"]) if entry.get("family") else None,
+                level=str(entry["level"]) if entry.get("level") else None,
+                hypothesis=str(entry["hypothesis"]) if entry.get("hypothesis") else None,
+                btf_path=resolved_btf,
+                recompile_supported=bool(entry.get("recompile_supported", True)),
+            )
+        )
+
+    output_path = Path(output_override or defaults.get("output", DEFAULT_OUTPUT))
+    if not output_path.is_absolute():
+        output_path = (ROOT_DIR / output_path).resolve()
+
+    runner_binary = Path(build.get("runner_binary", DEFAULT_RUNNER))
+    if not runner_binary.is_absolute():
+        runner_binary = (ROOT_DIR / runner_binary).resolve()
+    scanner_binary = Path(build.get("scanner_binary", DEFAULT_SCANNER))
+    if not scanner_binary.is_absolute():
+        scanner_binary = (ROOT_DIR / scanner_binary).resolve()
+
+    return SuiteSpec(
+        suite_name=str(data["suite_name"]),
+        manifest_path=path.resolve(),
+        output_path=output_path,
+        defaults_iterations=int(defaults.get("iterations", 5)),
+        defaults_warmups=int(defaults.get("warmups", 1)),
+        defaults_repeat=int(defaults.get("repeat", 50)),
+        runner_binary=runner_binary,
+        bpftool_binary=str(build.get("bpftool_binary", DEFAULT_BPFTOOL)),
+        scanner_binary=scanner_binary,
+        runtimes=runtimes,
+        programs=tuple(programs),
+    )
+
+
+def list_suite(suite: SuiteSpec) -> None:
+    print("Benchmarks")
+    print("----------")
+    for program in suite.programs:
+        tags = ",".join(program.tags)
+        print(f"{program.name:26} {program.test_method:18} {program.prog_type:12} {tags}")
+    print()
+    print("Runtimes")
+    print("--------")
+    for runtime in suite.runtimes:
+        print(f"{runtime.name:20} {runtime.label}")
+
+
+def select_programs(programs: tuple[ProgramSpec, ...], names: list[str] | None) -> list[ProgramSpec]:
+    if not names:
+        return list(programs)
+    selected = []
+    by_name = {program.name: program for program in programs}
+    for name in names:
+        program = by_name.get(name)
+        if program is None:
+            raise SystemExit(f"unknown benchmark: {name}")
+        selected.append(program)
+    return selected
+
+
+def select_runtimes(runtimes: tuple[RuntimeSpec, ...], names: list[str] | None) -> list[RuntimeSpec]:
+    if not names:
+        return list(runtimes)
+    by_name = {runtime.name: runtime for runtime in runtimes}
+    selected = []
+    for name in names:
+        runtime = by_name.get(name)
+        if runtime is None:
+            raise SystemExit(f"unknown runtime: {name}")
+        selected.append(runtime)
+    return selected
+
+
+def discover_program_inventory(runner: Path, object_path: Path) -> list[dict[str, Any]]:
+    completed = run_text_command([str(runner), "list-programs", "--program", str(object_path)])
+    payload = parse_runner_json(completed.stdout)
+    if not isinstance(payload, list):
+        raise RuntimeError(f"unexpected list-programs payload for {object_path}")
+    return payload
+
+
+def program_matches(spec: ProgramSpec, program: dict[str, Any]) -> bool:
+    name = str(program.get("name", ""))
+    section_name = str(program.get("section_name", ""))
+    if spec.program_names and name not in spec.program_names:
+        return False
+    if spec.sections:
+        if section_name in spec.sections:
+            return True
+        root = section_name.split("/", 1)[0]
+        return root in spec.sections
+    return not spec.program_names or name in spec.program_names
+
+
+def choose_programs(spec: ProgramSpec, inventory: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    selected = [program for program in inventory if program_matches(spec, program)]
+    if not selected and spec.program_names:
+        raise RuntimeError(f"{spec.name}: none of {spec.program_names} found in {spec.source}")
+    if not selected:
+        return inventory
+    return selected
+
+
+def default_io_plan(spec: ProgramSpec) -> tuple[str, Path | None, int]:
+    root = spec.prog_type
+    io_mode = spec.io_mode
+    input_path = spec.test_input
+    input_size = spec.input_size if spec.input_size is not None else 64
+
+    if io_mode is None:
+        if root in {"xdp", "tc", "classifier", "socket", "flow_dissector", "sk_skb", "sk_msg"}:
+            io_mode = "packet"
+        else:
+            io_mode = "context"
+
+    if input_path is None:
+        if io_mode == "packet":
+            input_path = materialize_dummy_packet(DEFAULT_PACKET)
+        elif io_mode == "context":
+            input_path = materialize_dummy_context(DEFAULT_CONTEXT, input_size)
+
+    if io_mode == "context" and input_path is not None and input_size <= 0:
+        input_size = max(1, input_path.stat().st_size)
+
+    return io_mode, input_path, input_size
+
+
+def build_runner_command(
+    suite: SuiteSpec,
+    spec: ProgramSpec,
+    program_name: str,
+    *,
+    compile_only: bool,
+    recompile_v5: bool,
+) -> list[str]:
+    io_mode, input_path, input_size = default_io_plan(spec)
+    btf_path = detect_btf_path(spec.btf_path)
+
+    command = [
+        str(suite.runner_binary),
+        "run-kernel",
+        "--program",
+        str(spec.source),
+        "--program-name",
+        program_name,
+        "--io-mode",
+        io_mode,
+        "--repeat",
+        "1",
+    ]
+    if io_mode == "packet":
+        command.append("--raw-packet")
+    if input_path is not None:
+        command.extend(["--memory", str(input_path)])
+    if input_size > 0:
+        command.extend(["--input-size", str(input_size)])
+    if btf_path is not None:
+        command.extend(["--btf-custom-path", str(btf_path)])
+    if compile_only:
+        command.append("--compile-only")
+    if recompile_v5:
+        command.extend(["--recompile-v5", "--recompile-all"])
+    return command
+
+
+def run_micro_exec_sample(
+    suite: SuiteSpec,
+    spec: ProgramSpec,
+    program_name: str,
+    *,
+    compile_only: bool,
+    recompile_v5: bool,
+) -> dict[str, Any]:
+    command = build_runner_command(suite, spec, program_name, compile_only=compile_only, recompile_v5=recompile_v5)
+    started_ns = time.perf_counter_ns()
+    completed = run_text_command(command)
+    sample = parse_runner_json(completed.stdout)
+    sample.setdefault("wall_exec_ns", None)
+    sample.setdefault("phases_ns", {})
+    sample.setdefault("code_size", {})
+    sample["command"] = command
+    sample["runner_wall_ns"] = time.perf_counter_ns() - started_ns
+    return sample
+
+
+def unique_pin_dir(spec_name: str, runtime_name: str, iteration_idx: int) -> Path:
+    slug = "".join(ch if ch.isalnum() else "_" for ch in spec_name)
+    return Path("/sys/fs/bpf") / f"macro_corpus_{slug}_{runtime_name}_{os.getpid()}_{iteration_idx}"
+
+
+def bpftool_json(bpftool_binary: str, command: list[str]) -> Any:
+    completed = subprocess.run(
+        [bpftool_binary, *command],
+        cwd=ROOT_DIR,
+        capture_output=True,
+        text=True,
+        timeout=180,
+    )
+    stdout = completed.stdout.strip()
+    if not stdout:
+        details = (completed.stderr or completed.stdout).strip()
+        raise RuntimeError(
+            f"bpftool command failed ({completed.returncode}): {bpftool_binary} {' '.join(command)}\n{details}"
+        )
+
+    try:
+        payload = json.loads(stdout)
+    except json.JSONDecodeError as exc:
+        details = (completed.stderr or completed.stdout).strip()
+        raise RuntimeError(
+            f"bpftool command returned non-JSON output ({completed.returncode}): "
+            f"{bpftool_binary} {' '.join(command)}\n{details}"
+        ) from exc
+
+    if completed.returncode != 0 and isinstance(payload, dict) and "error" in payload:
+        raise RuntimeError(
+            f"bpftool command failed ({completed.returncode}): {bpftool_binary} {' '.join(command)}\n{payload['error']}"
+        )
+    return payload
+
+
+def attached_programs_for_pin_dir(bpftool_binary: str, pin_dir: Path) -> list[dict[str, Any]]:
+    records = []
+    if not pin_dir.exists():
+        return records
+    for path in sorted(pin_dir.iterdir()):
+        try:
+            link_info = bpftool_json(bpftool_binary, ["-j", "-p", "link", "show", "pinned", str(path)])
+            records.append(
+                {
+                    "pin_path": str(path),
+                    "program_name": path.name,
+                    "prog_id": int(link_info["prog_id"]),
+                    "link_id": int(link_info["id"]),
+                    "type": str(link_info["type"]),
+                    "attach_type": str(link_info.get("attach_type", "")),
+                }
+            )
+        except RuntimeError as exc:
+            if "incorrect object type: prog" not in str(exc):
+                raise
+            prog_info = bpftool_json(bpftool_binary, ["-j", "-p", "prog", "show", "pinned", str(path)])
+            if isinstance(prog_info, list):
+                if len(prog_info) != 1:
+                    raise RuntimeError(f"unexpected pinned program payload for {path}")
+                prog_info = prog_info[0]
+            records.append(
+                {
+                    "pin_path": str(path),
+                    "program_name": path.name,
+                    "prog_id": int(prog_info["id"]),
+                    "link_id": None,
+                    "type": str(prog_info.get("type", "")),
+                    "attach_type": str(prog_info.get("attach_type", "")),
+                }
+            )
+    return records
+
+
+def pinned_programs_for_pin_dir(bpftool_binary: str, pin_dir: Path) -> list[dict[str, Any]]:
+    records = []
+    if not pin_dir.exists():
+        return records
+    for path in sorted(pin_dir.iterdir()):
+        prog_info = bpftool_json(bpftool_binary, ["-j", "-p", "prog", "show", "pinned", str(path)])
+        if isinstance(prog_info, list):
+            if len(prog_info) != 1:
+                raise RuntimeError(f"unexpected pinned program payload for {path}")
+            prog_info = prog_info[0]
+        records.append(
+            {
+                "pin_path": str(path),
+                "program_name": path.name,
+                "prog_id": int(prog_info["id"]),
+                "type": str(prog_info.get("type", "")),
+                "attach_type": str(prog_info.get("attach_type", "")),
+            }
+        )
+    return records
+
+
+def program_info_by_id(bpftool_binary: str, prog_id: int) -> dict[str, Any]:
+    payload = bpftool_json(bpftool_binary, ["-j", "-p", "prog", "show", "id", str(prog_id)])
+    if isinstance(payload, list):
+        if len(payload) != 1:
+            raise RuntimeError(f"unexpected prog info payload for id {prog_id}")
+        return payload[0]
+    return payload
+
+
+def aggregate_program_infos(infos: list[dict[str, Any]]) -> dict[str, Any]:
+    bytes_xlated = sum(int(info.get("bytes_xlated", 0)) for info in infos)
+    bytes_jited = sum(int(info.get("bytes_jited", 0)) for info in infos)
+    ratio = None if bytes_xlated == 0 else bytes_jited / bytes_xlated
+    return {
+        "bpf_bytecode_bytes": bytes_xlated,
+        "native_code_bytes": bytes_jited,
+        "inflation_ratio": ratio,
+        "per_program": infos,
+    }
+
+
+def run_trigger_command(command_text: str, repeat: int, timeout_seconds: int) -> dict[str, Any]:
+    started_ns = time.perf_counter_ns()
+    returncodes: list[int] = []
+    stderr_chunks: list[str] = []
+    stdout_chunks: list[str] = []
+
+    for _ in range(max(1, repeat)):
+        completed = subprocess.run(
+            ["/bin/bash", "-lc", command_text],
+            cwd=ROOT_DIR,
+            capture_output=True,
+            text=True,
+            timeout=timeout_seconds,
+        )
+        returncodes.append(int(completed.returncode))
+        if completed.stdout:
+            stdout_chunks.append(completed.stdout.strip())
+        if completed.stderr:
+            stderr_chunks.append(completed.stderr.strip())
+
+    wall_ns = time.perf_counter_ns() - started_ns
+    avg_ns = wall_ns // max(1, repeat)
+    return {
+        "returncode": returncodes[-1] if returncodes else 0,
+        "returncodes": returncodes,
+        "wall_exec_ns": wall_ns,
+        "exec_ns": avg_ns,
+        "stdout_tail": "\n".join(text for text in stdout_chunks if text)[-4000:],
+        "stderr_tail": "\n".join(text for text in stderr_chunks if text)[-4000:],
+    }
+
+
+def apply_recompile_v5(scanner_binary: Path, libbpf: LibbpfHandle, attached: list[dict[str, Any]]) -> dict[str, Any]:
+    total_ns = 0
+    details = []
+    errors: list[str] = []
+    for entry in attached:
+        fd = libbpf.prog_fd_by_id(int(entry["prog_id"]))
+        os.set_inheritable(fd, True)
+        command = [
+            str(scanner_binary),
+            "apply",
+            "--prog-fd",
+            str(fd),
+            "--all",
+            "--v5",
+            "--program-name",
+            entry["program_name"],
+        ]
+        started_ns = time.perf_counter_ns()
+        completed: subprocess.CompletedProcess[str] | None = None
+        error_text = ""
+        try:
+            completed = run_text_command(command, pass_fds=(fd,))
+        except Exception as exc:
+            error_text = str(exc)
+            errors.append(f"{entry['program_name']}: {error_text}")
+        finally:
+            os.close(fd)
+        wall_ns = time.perf_counter_ns() - started_ns
+        total_ns += wall_ns
+        details.append(
+            {
+                "program_name": entry["program_name"],
+                "prog_id": entry["prog_id"],
+                "scanner_command": command,
+                "stdout": completed.stdout.strip()[-4000:] if completed is not None else "",
+                "stderr": completed.stderr.strip()[-4000:] if completed is not None else "",
+                "wall_ns": wall_ns,
+                "error": error_text,
+            }
+        )
+    return {
+        "applied": len(attached) > 0 and not errors,
+        "wall_ns": total_ns,
+        "details": details,
+        "error": "; ".join(errors),
+    }
+
+
+def run_attach_trigger_sample(
+    suite: SuiteSpec,
+    spec: ProgramSpec,
+    *,
+    repeat: int,
+    recompile_v5: bool,
+    iteration_idx: int,
+    libbpf: LibbpfHandle,
+) -> dict[str, Any]:
+    if not spec.trigger:
+        raise RuntimeError(f"{spec.name}: attach_trigger requires a trigger command")
+
+    pin_dir = unique_pin_dir(spec.name, "kernel_recompile_v5" if recompile_v5 else "kernel", iteration_idx)
+    btf_path = detect_btf_path(spec.btf_path)
+    load_command = [suite.bpftool_binary, "prog", "loadall", str(spec.source), str(pin_dir)]
+    if btf_path is not None:
+        load_command.extend(["kernel_btf", str(btf_path)])
+    load_command.append("autoattach")
+
+    started_ns = time.perf_counter_ns()
+    recompile_record = {
+        "requested": recompile_v5,
+        "mode": "auto-scan-v5" if recompile_v5 else "none",
+        "policy_generated": False,
+        "policy_bytes": 0,
+        "syscall_attempted": False,
+        "applied": False,
+        "error": "",
+    }
+    try:
+        run_text_command(load_command)
+        load_ns = time.perf_counter_ns() - started_ns
+        attached = attached_programs_for_pin_dir(suite.bpftool_binary, pin_dir)
+        if spec.program_names:
+            attached = [entry for entry in attached if entry["program_name"] in spec.program_names]
+        if not attached:
+            raise RuntimeError(f"{spec.name}: no attached programs found under {pin_dir}")
+
+        recompile_ns = 0
+        apply_info = None
+        if recompile_v5:
+            recompile_record["policy_generated"] = True
+            recompile_record["syscall_attempted"] = True
+            apply_info = apply_recompile_v5(suite.scanner_binary, libbpf, attached)
+            recompile_ns = int(apply_info["wall_ns"])
+            recompile_record["applied"] = bool(apply_info["applied"])
+            recompile_record["error"] = str(apply_info.get("error", ""))
+
+        infos = [program_info_by_id(suite.bpftool_binary, int(entry["prog_id"])) for entry in attached]
+        code_size = aggregate_program_infos(infos)
+        trigger = run_trigger_command(spec.trigger, repeat, spec.trigger_timeout_seconds)
+        sample = {
+            "compile_ns": load_ns + recompile_ns,
+            "exec_ns": trigger["exec_ns"],
+            "wall_exec_ns": trigger["wall_exec_ns"],
+            "timing_source": "wall_clock",
+            "result": trigger["returncode"],
+            "retval": trigger["returncode"],
+            "code_size": code_size,
+            "phases_ns": {
+                "object_load_ns": load_ns,
+                "trigger_total_ns": trigger["wall_exec_ns"],
+            },
+            "perf_counters": {},
+            "perf_counters_meta": {
+                "requested": False,
+                "collected": False,
+                "include_kernel": False,
+                "scope": "full_repeat_raw",
+                "error": "",
+            },
+            "directive_scan": {
+                "performed": recompile_v5,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "total_sites": 0,
+            },
+            "recompile": recompile_record,
+            "attached_programs": attached,
+            "trigger": {
+                "command": spec.trigger,
+                "returncodes": trigger["returncodes"],
+                "stdout_tail": trigger["stdout_tail"],
+                "stderr_tail": trigger["stderr_tail"],
+            },
+            "bpftool_command": load_command,
+        }
+        if apply_info is not None:
+            sample["phases_ns"]["recompile_apply_ns"] = recompile_ns
+            sample["recompile"]["details"] = apply_info["details"]
+        return sample
+    except Exception as exc:
+        recompile_record["error"] = str(exc)
+        raise
+    finally:
+        subprocess.run(["rm", "-rf", str(pin_dir)], cwd=ROOT_DIR, capture_output=True, text=True, check=False)
+
+
+def run_compile_only_loadall_sample(
+    suite: SuiteSpec,
+    spec: ProgramSpec,
+    *,
+    recompile_v5: bool,
+    iteration_idx: int,
+    libbpf: LibbpfHandle,
+) -> dict[str, Any]:
+    pin_dir = unique_pin_dir(spec.name, "kernel_recompile_v5" if recompile_v5 else "kernel", iteration_idx)
+    btf_path = detect_btf_path(spec.btf_path)
+    load_command = [suite.bpftool_binary, "prog", "loadall", str(spec.source), str(pin_dir)]
+    if btf_path is not None:
+        load_command.extend(["kernel_btf", str(btf_path)])
+
+    recompile_record = {
+        "requested": recompile_v5,
+        "mode": "auto-scan-v5" if recompile_v5 else "none",
+        "policy_generated": False,
+        "policy_bytes": 0,
+        "syscall_attempted": False,
+        "applied": False,
+        "error": "",
+    }
+
+    started_ns = time.perf_counter_ns()
+    try:
+        run_text_command(load_command)
+        load_ns = time.perf_counter_ns() - started_ns
+        pinned = pinned_programs_for_pin_dir(suite.bpftool_binary, pin_dir)
+        if spec.program_names:
+            pinned = [entry for entry in pinned if entry["program_name"] in spec.program_names]
+        if not pinned:
+            raise RuntimeError(f"{spec.name}: no pinned programs found under {pin_dir}")
+
+        recompile_ns = 0
+        apply_info = None
+        if recompile_v5:
+            recompile_record["policy_generated"] = True
+            recompile_record["syscall_attempted"] = True
+            apply_info = apply_recompile_v5(suite.scanner_binary, libbpf, pinned)
+            recompile_ns = int(apply_info["wall_ns"])
+            recompile_record["applied"] = bool(apply_info["applied"])
+            recompile_record["error"] = str(apply_info.get("error", ""))
+
+        infos = [program_info_by_id(suite.bpftool_binary, int(entry["prog_id"])) for entry in pinned]
+        code_size = aggregate_program_infos(infos)
+        sample = {
+            "compile_ns": load_ns + recompile_ns,
+            "exec_ns": 0,
+            "wall_exec_ns": 0,
+            "timing_source": "none",
+            "result": 0,
+            "retval": 0,
+            "code_size": code_size,
+            "phases_ns": {
+                "object_load_ns": load_ns,
+            },
+            "perf_counters": {},
+            "perf_counters_meta": {
+                "requested": False,
+                "collected": False,
+                "include_kernel": False,
+                "scope": "full_repeat_raw",
+                "error": "",
+            },
+            "directive_scan": {
+                "performed": recompile_v5,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "total_sites": 0,
+            },
+            "recompile": recompile_record,
+            "pinned_programs": pinned,
+            "bpftool_command": load_command,
+        }
+        if apply_info is not None:
+            sample["phases_ns"]["recompile_apply_ns"] = recompile_ns
+            sample["recompile"]["details"] = apply_info["details"]
+        return sample
+    finally:
+        subprocess.run(["rm", "-rf", str(pin_dir)], cwd=ROOT_DIR, capture_output=True, text=True, check=False)
+
+
+def execute_sample(
+    suite: SuiteSpec,
+    spec: ProgramSpec,
+    runtime: RuntimeSpec,
+    *,
+    repeat: int,
+    iteration_idx: int,
+    libbpf: LibbpfHandle,
+) -> dict[str, Any]:
+    recompile_v5 = runtime.mode == "kernel-recompile-v5"
+    if recompile_v5 and not spec.recompile_supported:
+        raise RuntimeError(f"{spec.name}: runtime {runtime.name} disabled by config")
+
+    inventory = discover_program_inventory(suite.runner_binary, spec.source)
+    selected = choose_programs(spec, inventory)
+    if spec.test_method == "attach_trigger":
+        return run_attach_trigger_sample(
+            suite,
+            spec,
+            repeat=repeat,
+            recompile_v5=recompile_v5,
+            iteration_idx=iteration_idx,
+            libbpf=libbpf,
+        )
+
+    compile_only = spec.test_method == "compile_only"
+    if compile_only and spec.compile_loader == "bpftool_loadall":
+        return run_compile_only_loadall_sample(
+            suite,
+            spec,
+            recompile_v5=recompile_v5,
+            iteration_idx=iteration_idx,
+            libbpf=libbpf,
+        )
+
+    if len(selected) != 1:
+        raise RuntimeError(f"{spec.name}: expected exactly one selected program, found {len(selected)}")
+    program_name = str(selected[0]["name"])
+    return run_micro_exec_sample(
+        suite,
+        spec,
+        program_name,
+        compile_only=compile_only,
+        recompile_v5=recompile_v5,
+    )
+
+
+def host_metadata() -> dict[str, Any]:
+    return {
+        "hostname": platform.node(),
+        "kernel_release": platform.release(),
+        "kernel_version": platform.version(),
+        "machine": platform.machine(),
+        "arch": platform.architecture()[0],
+        "euid": os.geteuid(),
+        "python": sys.version.split()[0],
+    }
+
+
+def main() -> int:
+    args = parse_args()
+    maybe_reexec_as_root(args)
+    suite = load_suite(Path(args.suite).resolve(), args.output)
+
+    if args.list:
+        list_suite(suite)
+        return 0
+
+    maybe_build_runner(suite, args.skip_build)
+    if not suite.scanner_binary.exists():
+        raise SystemExit(f"scanner binary missing: {suite.scanner_binary}")
+
+    benchmarks = select_programs(suite.programs, args.benches)
+    runtimes = select_runtimes(suite.runtimes, args.runtimes)
+    if args.skip_recompile:
+        runtimes = [runtime for runtime in runtimes if runtime.mode != "kernel-recompile-v5"]
+
+    iterations = args.iterations if args.iterations is not None else suite.defaults_iterations
+    warmups = args.warmups if args.warmups is not None else suite.defaults_warmups
+    repeat = args.repeat if args.repeat is not None else suite.defaults_repeat
+
+    libbpf = LibbpfHandle()
+
+    results = {
+        "suite_name": suite.suite_name,
+        "manifest_path": str(suite.manifest_path),
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "host": host_metadata(),
+        "defaults": {
+            "iterations": iterations,
+            "warmups": warmups,
+            "repeat": repeat,
+            "seed": args.seed,
+        },
+        "benchmarks": [],
+    }
+
+    rng = random.Random(args.seed)
+    for spec in benchmarks:
+        inventory = discover_program_inventory(suite.runner_binary, spec.source)
+        selected_inventory = choose_programs(spec, inventory)
+        benchmark_record = {
+            "name": spec.name,
+            "description": spec.description,
+            "category": spec.category or spec.prog_type,
+            "family": spec.family,
+            "level": spec.level,
+            "hypothesis": spec.hypothesis,
+            "prog_type": spec.prog_type,
+            "test_method": spec.test_method,
+            "tags": list(spec.tags),
+            "artifacts": {
+                "program_object": str(spec.source),
+                "test_input": str(spec.test_input) if spec.test_input else None,
+            },
+            "program_inventory": inventory,
+            "selected_programs": selected_inventory,
+            "runs": [],
+        }
+
+        runtime_order = list(runtimes)
+        rng.shuffle(runtime_order)
+
+        for runtime in runtime_order:
+            print(f"[bench] {spec.name} [{runtime.name}]")
+            for _ in range(warmups):
+                execute_sample(
+                    suite,
+                    spec,
+                    runtime,
+                    repeat=repeat,
+                    iteration_idx=-1,
+                    libbpf=libbpf,
+                )
+
+            samples = []
+            for iteration_idx in range(iterations):
+                sample = execute_sample(
+                    suite,
+                    spec,
+                    runtime,
+                    repeat=repeat,
+                    iteration_idx=iteration_idx,
+                    libbpf=libbpf,
+                )
+                sample["iteration_index"] = iteration_idx
+                samples.append(sample)
+
+            compile_values = [int(sample["compile_ns"]) for sample in samples]
+            exec_values = [int(sample["exec_ns"]) for sample in samples]
+            result_values = [sample.get("result") for sample in samples]
+            run_record = {
+                "runtime": runtime.name,
+                "label": runtime.label,
+                "mode": runtime.mode,
+                "repeat": repeat,
+                "artifacts": {
+                    "program_object": str(spec.source),
+                },
+                "samples": samples,
+                "compile_ns": ns_summary(compile_values),
+                "exec_ns": ns_summary(exec_values),
+                "timing_source": str(samples[0].get("timing_source", "unknown")) if samples else "unknown",
+                "phases_ns": summarize_phase_timings(samples),
+                "perf_counters": {},
+                "perf_counters_meta": {
+                    "requested": False,
+                    "collected_samples": 0,
+                    "include_kernel": False,
+                    "scope": "full_repeat_raw",
+                    "hardware_counters_observed": False,
+                    "software_counters_observed": False,
+                    "errors": {},
+                },
+                "derived_metrics": {},
+                "result_distribution": dict(Counter(str(value) for value in result_values)),
+                "code_size": summarize_code_size(samples),
+            }
+            wall_exec_summary = summarize_optional_ns(samples, "wall_exec_ns")
+            if wall_exec_summary is not None:
+                run_record["wall_exec_ns"] = wall_exec_summary
+            benchmark_record["runs"].append(run_record)
+            print(
+                f"  compile median {run_record['compile_ns']['median']} ns | "
+                f"exec median {run_record['exec_ns']['median']} ns"
+            )
+
+        results["benchmarks"].append(benchmark_record)
+
+    ensure_parent(suite.output_path)
+    suite.output_path.write_text(json.dumps(results, indent=2) + "\n")
+    print(f"[done] wrote {suite.output_path}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

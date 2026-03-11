@@ -2,6 +2,7 @@
 #define MICRO_PROGRAMS_COMMON_H
 
 #include <linux/bpf.h>
+#include <linux/pkt_cls.h>
 #include <bpf/bpf_helpers.h>
 
 #define u8 unsigned char
@@ -15,6 +16,14 @@
 
 #ifndef __noinline
 #define __noinline __attribute__((__noinline__))
+#endif
+
+#ifndef CGROUP_SKB_DROP
+#define CGROUP_SKB_DROP 0
+#endif
+
+#ifndef CGROUP_SKB_OK
+#define CGROUP_SKB_OK 1
 #endif
 
 #define MICRO_UNBOUNDED_LEN 0xFFFFFFFFU
@@ -184,5 +193,65 @@ static __always_inline u32 micro_rotl32(u32 value, u32 shift)
         return XDP_PASS;                                                       \
     }                                                                          \
     char LICENSE[] SEC("license") = "GPL";
+
+#define MICRO_DEFINE_SINGLE_RESULT_MAP()                                        \
+    struct {                                                                    \
+        __uint(type, BPF_MAP_TYPE_ARRAY);                                       \
+        __uint(max_entries, 1);                                                 \
+        __type(key, __u32);                                                     \
+        __type(value, __u64);                                                   \
+    } result_map SEC(".maps");
+
+#define DEFINE_STAGED_INPUT_TC_BENCH(PROG_NAME, BENCH_FN, INPUT_TYPE, INPUT_SIZE) \
+    MICRO_DEFINE_SINGLE_RESULT_MAP()                                            \
+    SEC("tc") int PROG_NAME(struct __sk_buff *skb)                              \
+    {                                                                           \
+        struct INPUT_TYPE *input;                                               \
+        u64 result = ~0ULL;                                                     \
+        __u32 key = 0;                                                          \
+        (void)skb;                                                              \
+        input = bpf_map_lookup_elem(&input_map, &key);                          \
+        if (!input) {                                                           \
+            bpf_map_update_elem(&result_map, &key, &result, BPF_ANY);           \
+            return TC_ACT_SHOT;                                                 \
+        }                                                                       \
+        if (BENCH_FN(input->data, INPUT_SIZE, &result) < 0) {                   \
+            result = ~0ULL;                                                     \
+            bpf_map_update_elem(&result_map, &key, &result, BPF_ANY);           \
+            return TC_ACT_SHOT;                                                 \
+        }                                                                       \
+        bpf_map_update_elem(&result_map, &key, &result, BPF_ANY);               \
+        return TC_ACT_OK;                                                       \
+    }                                                                           \
+    char LICENSE[] SEC("license") = "GPL";
+
+#define DEFINE_MAP_BACKED_TC_BENCH(PROG_NAME, BENCH_FN, INPUT_TYPE, INPUT_SIZE) \
+    DEFINE_STAGED_INPUT_TC_BENCH(PROG_NAME, BENCH_FN, INPUT_TYPE, INPUT_SIZE)
+
+#define DEFINE_STAGED_INPUT_CGROUP_SKB_BENCH(PROG_NAME, BENCH_FN, INPUT_TYPE, INPUT_SIZE) \
+    MICRO_DEFINE_SINGLE_RESULT_MAP()                                                     \
+    SEC("cgroup_skb/egress") int PROG_NAME(struct __sk_buff *skb)                        \
+    {                                                                                    \
+        struct INPUT_TYPE *input;                                                        \
+        u64 result = ~0ULL;                                                              \
+        __u32 key = 0;                                                                   \
+        (void)skb;                                                                       \
+        input = bpf_map_lookup_elem(&input_map, &key);                                   \
+        if (!input) {                                                                    \
+            bpf_map_update_elem(&result_map, &key, &result, BPF_ANY);                    \
+            return CGROUP_SKB_DROP;                                                      \
+        }                                                                                \
+        if (BENCH_FN(input->data, INPUT_SIZE, &result) < 0) {                            \
+            result = ~0ULL;                                                              \
+            bpf_map_update_elem(&result_map, &key, &result, BPF_ANY);                    \
+            return CGROUP_SKB_DROP;                                                      \
+        }                                                                                \
+        bpf_map_update_elem(&result_map, &key, &result, BPF_ANY);                        \
+        return CGROUP_SKB_OK;                                                            \
+    }                                                                                    \
+    char LICENSE[] SEC("license") = "GPL";
+
+#define DEFINE_MAP_BACKED_CGROUP_SKB_BENCH(PROG_NAME, BENCH_FN, INPUT_TYPE, INPUT_SIZE) \
+    DEFINE_STAGED_INPUT_CGROUP_SKB_BENCH(PROG_NAME, BENCH_FN, INPUT_TYPE, INPUT_SIZE)
 
 #endif
