@@ -1,0 +1,4082 @@
+schema_version: 1
+generated_at: '2026-03-11T07:07:47'
+corpus_root: corpus/build
+measurement_inputs:
+- docs/tmp/corpus-runnability-results.json
+- docs/tmp/corpus-expansion-round3-priority-runnability.json
+- docs/tmp/corpus-expansion-round3-selftests-runnability.json
+summary:
+  projects: 23
+  object_files: 560
+  measured_objects: 463
+  inventory_failures: 97
+  programs_found: 2010
+  loadable_programs: 1280
+  directive_bearing_programs: 293
+  packet_candidate_programs: 314
+  packet_runnable_programs: 176
+  packet_paired_programs: 84
+  tracing_candidate_programs: 1057
+  tracing_positive_programs: 215
+  true_runnable_programs: 391
+  directive_site_totals:
+    cmov: 894
+    wide: 396
+    rotate: 1840
+    lea: 1
+projects:
+  KubeArmor:
+    source_url: https://github.com/kubearmor/KubeArmor.git
+    license: Apache-2.0
+    build:
+      mode: prebuilt
+      instructions:
+      - prebuilt objects already promoted into corpus/build/
+    workload_categories:
+    - tracing-observability
+    - security
+    known_capabilities:
+    - tracing attach coverage
+    - LSM policy/monitoring coverage
+    known_requirements:
+    - attach target availability and trigger heuristic support
+    - LSM hooks enabled
+    - tracepoint availability and trigger heuristic support
+    - standalone load still fails on kubearmor_containers map creation in this environment
+    directive_family_coverage_expectations:
+      expected_families: []
+      measured_site_totals:
+        cmov: 0
+        wide: 0
+        rotate: 0
+        lea: 0
+    measured_summary:
+      objects_on_disk: 3
+      measured_objects: 3
+      inventory_failures: 0
+      programs_found: 63
+      loadable_programs: 0
+      directive_bearing_programs: 0
+      packet_runnable_programs: 0
+      packet_paired_programs: 0
+      tracing_positive_programs: 0
+      true_runnable_programs: 0
+      observed_prog_types:
+      - kprobe
+      - lsm
+      - tracepoint
+    objects:
+    - path: enforcer.bpf.o
+      status: measured
+      program_count: 7
+      prog_types:
+      - lsm
+    - path: protectproc.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - lsm
+    - path: system_monitor.bpf.o
+      status: measured
+      program_count: 55
+      prog_types:
+      - kprobe
+      - tracepoint
+  bcc:
+    source_url: https://github.com/iovisor/bcc.git
+    license: Apache-2.0
+    build:
+      mode: prebuilt
+      instructions:
+      - prebuilt objects already promoted into corpus/build/
+    workload_categories:
+    - tracing-observability
+    known_capabilities:
+    - tracing attach coverage
+    known_requirements:
+    - attach target availability and trigger heuristic support
+    - perf event setup
+    - raw tracepoint attachment support
+    - tracepoint availability and trigger heuristic support
+    - fentry/fexit or tracing attach targets plus trigger heuristics
+    directive_family_coverage_expectations:
+      expected_families:
+      - cmov
+      measured_site_totals:
+        cmov: 116
+        wide: 0
+        rotate: 0
+        lea: 0
+    measured_summary:
+      objects_on_disk: 57
+      measured_objects: 57
+      inventory_failures: 0
+      programs_found: 365
+      loadable_programs: 289
+      directive_bearing_programs: 30
+      packet_runnable_programs: 0
+      packet_paired_programs: 0
+      tracing_positive_programs: 91
+      true_runnable_programs: 91
+      observed_prog_types:
+      - kprobe
+      - perf_event
+      - raw_tracepoint
+      - tracepoint
+      - tracing
+    objects:
+    - path: libbpf-tools/bashreadline.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - kprobe
+    - path: libbpf-tools/bindsnoop.bpf.o
+      status: measured
+      program_count: 4
+      prog_types:
+      - kprobe
+    - path: libbpf-tools/biolatency.bpf.o
+      status: measured
+      program_count: 6
+      prog_types:
+      - raw_tracepoint
+      - tracing
+      directive_families:
+      - cmov
+    - path: libbpf-tools/biopattern.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracepoint
+      directive_families:
+      - cmov
+    - path: libbpf-tools/biosnoop.bpf.o
+      status: measured
+      program_count: 6
+      prog_types:
+      - kprobe
+      - tracing
+    - path: libbpf-tools/biostacks.bpf.o
+      status: measured
+      program_count: 5
+      prog_types:
+      - kprobe
+      - tracing
+      directive_families:
+      - cmov
+    - path: libbpf-tools/biotop.bpf.o
+      status: measured
+      program_count: 7
+      prog_types:
+      - kprobe
+      - tracing
+      directive_families:
+      - cmov
+    - path: libbpf-tools/bitesize.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+      directive_families:
+      - cmov
+    - path: libbpf-tools/cachestat.bpf.o
+      status: measured
+      program_count: 11
+      prog_types:
+      - kprobe
+      - tracepoint
+      - tracing
+    - path: libbpf-tools/capable.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - kprobe
+    - path: libbpf-tools/cpudist.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - raw_tracepoint
+      - tracing
+    - path: libbpf-tools/cpufreq.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - perf_event
+      - tracing
+    - path: libbpf-tools/drsnoop.bpf.o
+      status: measured
+      program_count: 4
+      prog_types:
+      - raw_tracepoint
+      - tracing
+    - path: libbpf-tools/execsnoop.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - tracepoint
+    - path: libbpf-tools/exitsnoop.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracepoint
+    - path: libbpf-tools/filelife.bpf.o
+      status: measured
+      program_count: 5
+      prog_types:
+      - kprobe
+      directive_families:
+      - cmov
+    - path: libbpf-tools/filetop.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - kprobe
+      directive_families:
+      - cmov
+    - path: libbpf-tools/fsdist.bpf.o
+      status: measured
+      program_count: 20
+      prog_types:
+      - kprobe
+      - tracing
+      directive_families:
+      - cmov
+    - path: libbpf-tools/fsslower.bpf.o
+      status: measured
+      program_count: 16
+      prog_types:
+      - kprobe
+      - tracing
+    - path: libbpf-tools/funclatency.bpf.o
+      status: measured
+      program_count: 4
+      prog_types:
+      - kprobe
+      - tracing
+      directive_families:
+      - cmov
+    - path: libbpf-tools/futexctn.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - tracepoint
+    - path: libbpf-tools/gethostlatency.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - kprobe
+    - path: libbpf-tools/hardirqs.bpf.o
+      status: measured
+      program_count: 4
+      prog_types:
+      - raw_tracepoint
+      - tracing
+    - path: libbpf-tools/javagc.bpf.o
+      status: measured
+      program_count: 4
+      prog_types:
+      - kprobe
+    - path: libbpf-tools/klockstat.bpf.o
+      status: measured
+      program_count: 73
+      prog_types:
+      - kprobe
+      - tracing
+    - path: libbpf-tools/ksnoop.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - kprobe
+      directive_families:
+      - cmov
+    - path: libbpf-tools/llcstat.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - perf_event
+    - path: libbpf-tools/mdflush.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - kprobe
+      - tracing
+    - path: libbpf-tools/memleak.bpf.o
+      status: measured
+      program_count: 32
+      prog_types:
+      - kprobe
+      - tracepoint
+    - path: libbpf-tools/mountsnoop.bpf.o
+      status: measured
+      program_count: 12
+      prog_types:
+      - tracepoint
+    - path: libbpf-tools/numamove.bpf.o
+      status: measured
+      program_count: 8
+      prog_types:
+      - kprobe
+      - tracing
+    - path: libbpf-tools/offcputime.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - raw_tracepoint
+      - tracing
+    - path: libbpf-tools/oomkill.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - kprobe
+    - path: libbpf-tools/opensnoop.bpf.o
+      status: measured
+      program_count: 6
+      prog_types:
+      - tracepoint
+    - path: libbpf-tools/profile.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - perf_event
+    - path: libbpf-tools/readahead.bpf.o
+      status: measured
+      program_count: 7
+      prog_types:
+      - tracing
+      directive_families:
+      - cmov
+    - path: libbpf-tools/runqlat.bpf.o
+      status: measured
+      program_count: 6
+      prog_types:
+      - raw_tracepoint
+      - tracing
+      directive_families:
+      - cmov
+    - path: libbpf-tools/runqlen.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - perf_event
+    - path: libbpf-tools/runqslower.bpf.o
+      status: measured
+      program_count: 6
+      prog_types:
+      - raw_tracepoint
+      - tracing
+    - path: libbpf-tools/sigsnoop.bpf.o
+      status: measured
+      program_count: 7
+      prog_types:
+      - tracepoint
+    - path: libbpf-tools/slabratetop.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - kprobe
+    - path: libbpf-tools/softirqs.bpf.o
+      status: measured
+      program_count: 4
+      prog_types:
+      - raw_tracepoint
+      - tracing
+    - path: libbpf-tools/solisten.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - kprobe
+      - tracing
+    - path: libbpf-tools/statsnoop.bpf.o
+      status: measured
+      program_count: 12
+      prog_types:
+      - tracepoint
+    - path: libbpf-tools/syncsnoop.bpf.o
+      status: measured
+      program_count: 8
+      prog_types:
+      - tracepoint
+    - path: libbpf-tools/syscount.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - tracepoint
+    - path: libbpf-tools/tcpconnect.bpf.o
+      status: measured
+      program_count: 4
+      prog_types:
+      - kprobe
+    - path: libbpf-tools/tcpconnlat.bpf.o
+      status: measured
+      program_count: 7
+      prog_types:
+      - kprobe
+      - tracepoint
+      - tracing
+    - path: libbpf-tools/tcplife.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracepoint
+    - path: libbpf-tools/tcppktlat.bpf.o
+      status: measured
+      program_count: 6
+      prog_types:
+      - raw_tracepoint
+      - tracing
+    - path: libbpf-tools/tcprtt.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - kprobe
+      - tracing
+      directive_families:
+      - cmov
+    - path: libbpf-tools/tcpstates.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracepoint
+    - path: libbpf-tools/tcpsynbl.bpf.o
+      status: measured
+      program_count: 4
+      prog_types:
+      - kprobe
+      - tracing
+      directive_families:
+      - cmov
+    - path: libbpf-tools/tcptop.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - kprobe
+    - path: libbpf-tools/tcptracer.bpf.o
+      status: measured
+      program_count: 7
+      prog_types:
+      - kprobe
+    - path: libbpf-tools/vfsstat.bpf.o
+      status: measured
+      program_count: 16
+      prog_types:
+      - kprobe
+      - tracing
+    - path: libbpf-tools/wakeuptime.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - tracing
+  calico:
+    source_url: https://github.com/projectcalico/calico.git
+    license: Apache-2.0 repo; GPL-2.0 for felix/bpf-gpl artifacts
+    build:
+      mode: prebuilt
+      instructions:
+      - prebuilt objects already promoted into corpus/build/
+    workload_categories:
+    - networking
+    known_capabilities:
+    - packet-program coverage
+    known_requirements:
+    - packet input for tc test_run or live tc attach point
+    - packet input for bpf_prog_test_run or live XDP attach point
+    directive_family_coverage_expectations:
+      expected_families:
+      - cmov
+      - wide
+      - rotate
+      measured_site_totals:
+        cmov: 196
+        wide: 108
+        rotate: 10
+        lea: 0
+    measured_summary:
+      objects_on_disk: 8
+      measured_objects: 8
+      inventory_failures: 0
+      programs_found: 59
+      loadable_programs: 59
+      directive_bearing_programs: 44
+      packet_runnable_programs: 59
+      packet_paired_programs: 44
+      tracing_positive_programs: 0
+      true_runnable_programs: 59
+      observed_prog_types:
+      - sched_cls
+      - xdp
+    objects:
+    - path: from_hep_debug.bpf.o
+      status: measured
+      program_count: 9
+      prog_types:
+      - sched_cls
+      directive_families:
+      - cmov
+      - rotate
+      - wide
+    - path: from_nat_debug.bpf.o
+      status: measured
+      program_count: 8
+      prog_types:
+      - sched_cls
+      directive_families:
+      - cmov
+      - wide
+    - path: from_wep_debug.bpf.o
+      status: measured
+      program_count: 8
+      prog_types:
+      - sched_cls
+      directive_families:
+      - cmov
+      - wide
+    - path: to_hep_debug.bpf.o
+      status: measured
+      program_count: 9
+      prog_types:
+      - sched_cls
+      directive_families:
+      - cmov
+      - wide
+    - path: to_nat_debug.bpf.o
+      status: measured
+      program_count: 9
+      prog_types:
+      - sched_cls
+      directive_families:
+      - cmov
+      - wide
+    - path: to_wep_debug.bpf.o
+      status: measured
+      program_count: 8
+      prog_types:
+      - sched_cls
+      directive_families:
+      - cmov
+      - wide
+    - path: xdp_debug.bpf.o
+      status: measured
+      program_count: 4
+      prog_types:
+      - xdp
+      directive_families:
+      - wide
+    - path: xdp_no_log.bpf.o
+      status: measured
+      program_count: 4
+      prog_types:
+      - xdp
+      directive_families:
+      - wide
+  cilium:
+    source_url: https://github.com/cilium/cilium.git
+    license: Apache-2.0
+    build:
+      mode: prebuilt
+      instructions:
+      - prebuilt objects already promoted into corpus/build/
+    workload_categories:
+    - networking
+    known_capabilities:
+    - object present but not inventoryable with current runner/libbpf path
+    known_requirements:
+    - all three current objects still fail libbpf open because of static tc/tail programs
+    directive_family_coverage_expectations:
+      expected_families: []
+      measured_site_totals:
+        cmov: 0
+        wide: 0
+        rotate: 0
+        lea: 0
+    measured_summary:
+      objects_on_disk: 3
+      measured_objects: 0
+      inventory_failures: 3
+      programs_found: 0
+      loadable_programs: 0
+      directive_bearing_programs: 0
+      packet_runnable_programs: 0
+      packet_paired_programs: 0
+      tracing_positive_programs: 0
+      true_runnable_programs: 0
+      observed_prog_types: []
+    objects:
+    - path: bpf_lxc.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'bpf_object__open_file failed: Operation not supported (exit=1)'
+    - path: bpf_overlay.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'bpf_object__open_file failed: Operation not supported (exit=1)'
+    - path: bpf_xdp.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'bpf_object__open_file failed: Operation not supported (exit=1)'
+  coroot-node-agent:
+    source_url: https://github.com/coroot/coroot-node-agent.git
+    license: unknown
+    build:
+      mode: prebuilt
+      instructions:
+      - prebuilt objects already promoted into corpus/build/
+    workload_categories:
+    - tracing-observability
+    known_capabilities:
+    - tracing attach coverage
+    known_requirements:
+    - attach target availability and trigger heuristic support
+    - tracepoint availability and trigger heuristic support
+    directive_family_coverage_expectations:
+      expected_families:
+      - cmov
+      - wide
+      measured_site_totals:
+        cmov: 106
+        wide: 32
+        rotate: 0
+        lea: 0
+    measured_summary:
+      objects_on_disk: 1
+      measured_objects: 1
+      inventory_failures: 0
+      programs_found: 46
+      loadable_programs: 46
+      directive_bearing_programs: 16
+      packet_runnable_programs: 0
+      packet_paired_programs: 0
+      tracing_positive_programs: 16
+      true_runnable_programs: 16
+      observed_prog_types:
+      - kprobe
+      - tracepoint
+    objects:
+    - path: ebpf.bpf.o
+      status: measured
+      program_count: 46
+      prog_types:
+      - kprobe
+      - tracepoint
+      directive_families:
+      - cmov
+      - wide
+  datadog-agent:
+    source_url: https://github.com/DataDog/datadog-agent.git
+    license: Apache-2.0
+    build:
+      mode: prebuilt
+      instructions:
+      - prebuilt objects already promoted into corpus/build/
+    workload_categories:
+    - tracing-observability
+    known_capabilities:
+    - tracing attach coverage
+    known_requirements:
+    - attach target availability and trigger heuristic support
+    - one additional object remains inventory-failed in the current corpus
+    directive_family_coverage_expectations:
+      expected_families: []
+      measured_site_totals:
+        cmov: 0
+        wide: 0
+        rotate: 0
+        lea: 0
+    measured_summary:
+      objects_on_disk: 2
+      measured_objects: 1
+      inventory_failures: 1
+      programs_found: 1
+      loadable_programs: 1
+      directive_bearing_programs: 0
+      packet_runnable_programs: 0
+      packet_paired_programs: 0
+      tracing_positive_programs: 0
+      true_runnable_programs: 0
+      observed_prog_types:
+      - kprobe
+    objects:
+    - path: noisy-neighbor-kern.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'bpf_object__open_file failed: No such file or directory (exit=1)'
+    - path: oom-kill-kern.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - kprobe
+  katran:
+    source_url: https://github.com/facebookincubator/katran.git
+    license: GPL-2.0
+    build:
+      mode: prebuilt
+      instructions:
+      - prebuilt objects already promoted into corpus/build/
+    workload_categories:
+    - networking
+    known_capabilities:
+    - packet-program coverage
+    known_requirements:
+    - packet input for tc test_run or live tc attach point
+    - packet input for bpf_prog_test_run or live XDP attach point
+    directive_family_coverage_expectations:
+      expected_families:
+      - cmov
+      - wide
+      - rotate
+      measured_site_totals:
+        cmov: 6
+        wide: 4
+        rotate: 20
+        lea: 0
+    measured_summary:
+      objects_on_disk: 5
+      measured_objects: 5
+      inventory_failures: 0
+      programs_found: 5
+      loadable_programs: 5
+      directive_bearing_programs: 2
+      packet_runnable_programs: 5
+      packet_paired_programs: 2
+      tracing_positive_programs: 0
+      true_runnable_programs: 5
+      observed_prog_types:
+      - sched_cls
+      - xdp
+    objects:
+    - path: balancer.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - xdp
+      directive_families:
+      - cmov
+      - rotate
+      - wide
+    - path: healthchecking.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - sched_cls
+      directive_families:
+      - cmov
+    - path: healthchecking_ipip.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - sched_cls
+    - path: xdp_pktcntr.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - xdp
+    - path: xdp_root.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - xdp
+  libbpf-bootstrap:
+    source_url: https://github.com/libbpf/libbpf-bootstrap.git
+    license: BSD-3-Clause
+    build:
+      mode: prebuilt
+      instructions:
+      - prebuilt objects already promoted into corpus/build/
+    workload_categories:
+    - networking
+    - tracing-observability
+    - security
+    known_capabilities:
+    - packet-program coverage
+    - tracing attach coverage
+    - LSM policy/monitoring coverage
+    known_requirements:
+    - attach target availability and trigger heuristic support
+    - LSM hooks enabled
+    - perf event setup
+    - packet input for tc test_run or live tc attach point
+    - tracepoint availability and trigger heuristic support
+    - fentry/fexit or tracing attach targets plus trigger heuristics
+    directive_family_coverage_expectations:
+      expected_families: []
+      measured_site_totals:
+        cmov: 0
+        wide: 0
+        rotate: 0
+        lea: 0
+    measured_summary:
+      objects_on_disk: 12
+      measured_objects: 12
+      inventory_failures: 0
+      programs_found: 21
+      loadable_programs: 20
+      directive_bearing_programs: 0
+      packet_runnable_programs: 1
+      packet_paired_programs: 0
+      tracing_positive_programs: 11
+      true_runnable_programs: 12
+      observed_prog_types:
+      - kprobe
+      - lsm
+      - perf_event
+      - sched_cls
+      - tracepoint
+      - tracing
+    objects:
+    - path: examples/c/bootstrap.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - tracepoint
+    - path: examples/c/bootstrap_legacy.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - tracepoint
+    - path: examples/c/fentry.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - tracing
+    - path: examples/c/kprobe.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - kprobe
+    - path: examples/c/ksyscall.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - kprobe
+    - path: examples/c/lsm.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - lsm
+    - path: examples/c/minimal.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracepoint
+    - path: examples/c/profile.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - perf_event
+    - path: examples/c/task_iter.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: examples/c/tc.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - sched_cls
+    - path: examples/c/uprobe.bpf.o
+      status: measured
+      program_count: 4
+      prog_types:
+      - kprobe
+    - path: examples/c/usdt.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - kprobe
+  linux-selftests:
+    source_url: https://github.com/torvalds/linux.git
+    license: GPL-2.0 WITH Linux-syscall-note / mixed kernel licenses
+    build:
+      mode: mixed
+      repo_path: corpus/repos/linux-selftests
+      instructions:
+      - most objects remain prebuilt/promoted from prior corpus rounds
+      - round-3 additions were compiled from tools/testing/selftests/bpf/progs/*.c with clang -target bpf and bpftool gen
+        object
+    workload_categories:
+    - networking
+    - tracing-observability
+    - security
+    - cgroup-policy
+    - scheduler-hot-path
+    known_capabilities:
+    - packet-program coverage
+    - tracing attach coverage
+    - cgroup attach coverage
+    - LSM policy/monitoring coverage
+    - sched_ext / struct_ops coverage
+    known_requirements:
+    - cgroup attachment context
+    - freplace target program registration
+    - packet input for flow dissector test_run
+    - attach target availability and trigger heuristic support
+    - LSM hooks enabled
+    - netfilter hook context
+    - perf event setup
+    - raw tracepoint attachment support
+    - packet input for tc test_run or live tc attach point
+    - socket lookup attachment context
+    - sockmap/sockhash message redirection context
+    - SO_REUSEPORT socket group context
+    - sockmap/sockhash skb context
+    - TCP socket lifecycle context
+    - socket test harness
+    - struct_ops registration and matching kernel support
+    - synthetic syscall harness or attach trigger support
+    - tracepoint availability and trigger heuristic support
+    - fentry/fexit or tracing attach targets plus trigger heuristics
+    - packet input for bpf_prog_test_run or live XDP attach point
+    directive_family_coverage_expectations:
+      expected_families:
+      - cmov
+      - wide
+      - rotate
+      measured_site_totals:
+        cmov: 75
+        wide: 20
+        rotate: 1810
+        lea: 0
+    measured_summary:
+      objects_on_disk: 369
+      measured_objects: 280
+      inventory_failures: 89
+      programs_found: 892
+      loadable_programs: 565
+      directive_bearing_programs: 59
+      packet_runnable_programs: 81
+      packet_paired_programs: 25
+      tracing_positive_programs: 57
+      true_runnable_programs: 138
+      observed_prog_types:
+      - cgroup_skb
+      - cgroup_sock
+      - cgroup_sock_addr
+      - cgroup_sockopt
+      - ext
+      - flow_dissector
+      - kprobe
+      - lsm
+      - netfilter
+      - perf_event
+      - raw_tracepoint
+      - sched_cls
+      - sk_lookup
+      - sk_msg
+      - sk_reuseport
+      - sk_skb
+      - sock_ops
+      - socket_filter
+      - struct_ops
+      - syscall
+      - tracepoint
+      - tracing
+      - unspec
+      - xdp
+    objects:
+    - path: minimal_sched_ext.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/minimal_sched_ext.bpf.o
+        (exit=1)'
+    - path: test_tc_bpf.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - sched_cls
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/arena_htab.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - syscall
+    - path: tools/testing/selftests/bpf/progs/arena_htab_asm.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - syscall
+    - path: tools/testing/selftests/bpf/progs/arena_list.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - syscall
+    - path: tools/testing/selftests/bpf/progs/async_stack_depth.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - sched_cls
+    - path: tools/testing/selftests/bpf/progs/bench_local_storage_create.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - lsm
+      - raw_tracepoint
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/bpf_cc_cubic.bpf.o
+      status: measured
+      program_count: 7
+      prog_types:
+      - struct_ops
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/bpf_cubic.bpf.o
+      status: measured
+      program_count: 7
+      prog_types:
+      - struct_ops
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/bpf_dctcp.bpf.o
+      status: measured
+      program_count: 7
+      prog_types:
+      - struct_ops
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/bpf_dctcp_release.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - struct_ops
+    - path: tools/testing/selftests/bpf/progs/bpf_flow.bpf.o
+      status: measured
+      program_count: 7
+      prog_types:
+      - flow_dissector
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/bpf_gotox.bpf.o
+      status: measured
+      program_count: 13
+      prog_types:
+      - syscall
+    - path: tools/testing/selftests/bpf/progs/bpf_hashmap_full_update_bench.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/bpf_hashmap_lookup.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/bpf_iter_bpf_array_map.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/bpf_iter_bpf_hash_map.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/bpf_iter_bpf_link.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/bpf_iter_bpf_map.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/bpf_iter_bpf_percpu_array_map.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/bpf_iter_bpf_percpu_hash_map.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/bpf_iter_bpf_sk_storage_helpers.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/bpf_iter_bpf_sk_storage_map.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/bpf_iter_ipv6_route.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/bpf_iter_ksym.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/bpf_iter_map_elem.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/bpf_iter_netlink.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/bpf_iter_setsockopt.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/bpf_iter_sockmap.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/bpf_iter_task_btf.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/bpf_iter_task_file.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/bpf_iter_task_stack.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/bpf_iter_task_vmas.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/bpf_iter_tasks.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/bpf_iter_test_kern1.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/bpf_iter_test_kern2.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/bpf_iter_test_kern3.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/bpf_iter_test_kern4.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/bpf_iter_test_kern5.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/bpf_iter_test_kern6.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/bpf_iter_unix.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/bpf_iter_vma_offset.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/bpf_loop.bpf.o
+      status: measured
+      program_count: 6
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/bpf_loop_bench.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/bpf_mod_race.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - tracing
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/bpf_syscall_macro.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - kprobe
+    - path: tools/testing/selftests/bpf/progs/bpf_tcp_nogpl.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - struct_ops
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_arrays.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___diff_arr_dim.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___diff_arr_dim.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___diff_arr_val_sz.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___diff_arr_val_sz.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___equiv_zero_sz_arr.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___equiv_zero_sz_arr.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_bad_signed_arr_elem_sz.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_bad_signed_arr_elem_sz.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_bad_zero_sz_arr.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_bad_zero_sz_arr.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_non_array.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_non_array.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_too_shallow.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_too_shallow.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_too_small.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_too_small.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_wrong_val_type.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_wrong_val_type.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___fixed_arr.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___fixed_arr.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields___bit_sz_change.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields___bit_sz_change.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields___bitfield_vs_int.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields___bitfield_vs_int.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields___err_too_big_bitfield.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields___err_too_big_bitfield.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields___just_big_enough.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields___just_big_enough.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_enum64val.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enum64val.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_enum64val___diff.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enum64val___diff.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_enum64val___err_missing.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enum64val___err_missing.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_enum64val___val3_missing.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enum64val___val3_missing.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_enumval.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enumval.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_enumval___diff.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enumval___diff.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_enumval___err_missing.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enumval___err_missing.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_enumval___val3_missing.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enumval___val3_missing.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_existence.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_existence.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_existence___minimal.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_existence___minimal.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_existence___wrong_field_defs.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_existence___wrong_field_defs.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_flavors.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_flavors.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_flavors__err_wrong_name.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_flavors__err_wrong_name.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_ints.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_ints.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_ints___bool.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_ints___bool.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_ints___reverse_sign.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_ints___reverse_sign.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_misc.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_misc.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_mods.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_mods.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_mods___mod_swap.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_mods___mod_swap.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_mods___typedefs.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_mods___typedefs.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_nesting.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___anon_embed.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___anon_embed.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___dup_compat_types.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___dup_compat_types.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_array_container.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_array_container.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_array_field.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_array_field.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_dup_incompat_types.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_dup_incompat_types.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_missing_container.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_missing_container.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_missing_field.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_missing_field.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_nonstruct_container.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_nonstruct_container.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_partial_match_dups.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_partial_match_dups.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_too_deep.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_too_deep.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___extra_nesting.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___extra_nesting.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___struct_union_mixup.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___struct_union_mixup.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_primitives.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___diff_enum_def.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___diff_enum_def.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___diff_func_proto.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___diff_func_proto.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___diff_ptr_type.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___diff_ptr_type.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___err_non_enum.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___err_non_enum.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___err_non_int.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___err_non_int.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___err_non_ptr.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___err_non_ptr.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_ptr_as_arr.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_ptr_as_arr.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_ptr_as_arr___diff_sz.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_ptr_as_arr___diff_sz.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_size.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_size.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_size___diff_offs.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_size___diff_offs.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_size___diff_sz.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_size___diff_sz.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_size___err_ambiguous.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_size___err_ambiguous.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_type_based.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___all_missing.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___all_missing.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___diff.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___diff.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___diff_sz.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___diff_sz.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___fn_wrong_args.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___fn_wrong_args.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___incompat.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___incompat.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_type_id.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_id.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf__core_reloc_type_id___missing_targets.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_id___missing_targets.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf_data.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_data.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf_dump_test_case_bitfields.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_bitfields.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf_dump_test_case_multidim.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_multidim.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf_dump_test_case_namespacing.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_namespacing.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf_dump_test_case_ordering.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_ordering.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf_dump_test_case_packing.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_packing.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf_dump_test_case_padding.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_padding.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf_dump_test_case_syntax.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_syntax.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/btf_type_tag.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/btf_type_tag_user.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/cb_refs.bpf.o
+      status: measured
+      program_count: 4
+      prog_types:
+      - sched_cls
+    - path: tools/testing/selftests/bpf/progs/cgroup_ancestor.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - sched_cls
+    - path: tools/testing/selftests/bpf/progs/cgroup_hierarchical_stats.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/cgroup_iter.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/cgroup_mprog.bpf.o
+      status: measured
+      program_count: 4
+      prog_types:
+      - cgroup_sockopt
+    - path: tools/testing/selftests/bpf/progs/cgroup_preorder.bpf.o
+      status: measured
+      program_count: 4
+      prog_types:
+      - cgroup_sockopt
+    - path: tools/testing/selftests/bpf/progs/cgroup_skb_direct_packet_access.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - cgroup_skb
+    - path: tools/testing/selftests/bpf/progs/cgroup_skb_sk_lookup_kern.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - cgroup_skb
+    - path: tools/testing/selftests/bpf/progs/cgrp_kfunc_failure.bpf.o
+      status: measured
+      program_count: 13
+      prog_types:
+      - kprobe
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/cgrp_kfunc_success.bpf.o
+      status: measured
+      program_count: 7
+      prog_types:
+      - syscall
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/cgrp_ls_attach_cgroup.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - cgroup_sock_addr
+      - sock_ops
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/cgrp_ls_negative.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/cgrp_ls_recursion.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/cgrp_ls_sleepable.bpf.o
+      status: measured
+      program_count: 4
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/cgrp_ls_tp_btf.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/core_kern.bpf.o
+      status: measured
+      program_count: 5
+      prog_types:
+      - raw_tracepoint
+      - sched_cls
+      - tracing
+      directive_families:
+      - rotate
+    - path: tools/testing/selftests/bpf/progs/core_kern_overflow.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - raw_tracepoint
+    - path: tools/testing/selftests/bpf/progs/cpumask_failure.bpf.o
+      status: measured
+      program_count: 12
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/cpumask_success.bpf.o
+      status: measured
+      program_count: 23
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/decap_sanity.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - sched_cls
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/dummy_st_ops_fail.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - struct_ops
+    - path: tools/testing/selftests/bpf/progs/dummy_st_ops_success.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - struct_ops
+    - path: tools/testing/selftests/bpf/progs/exhandler_kern.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/fexit_sleep.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/find_vma.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - perf_event
+      - raw_tracepoint
+    - path: tools/testing/selftests/bpf/progs/find_vma_fail1.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - raw_tracepoint
+    - path: tools/testing/selftests/bpf/progs/find_vma_fail2.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - raw_tracepoint
+    - path: tools/testing/selftests/bpf/progs/for_each_array_map_elem.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - sched_cls
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/for_each_hash_map_elem.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - sched_cls
+    - path: tools/testing/selftests/bpf/progs/for_each_hash_modify.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - sched_cls
+    - path: tools/testing/selftests/bpf/progs/for_each_map_elem_write_key.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - raw_tracepoint
+    - path: tools/testing/selftests/bpf/progs/for_each_multi_maps.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - sched_cls
+    - path: tools/testing/selftests/bpf/progs/freplace_unreliable_prog.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - ext
+    - path: tools/testing/selftests/bpf/progs/get_branch_snapshot.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/get_func_ip_uprobe_test.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - kprobe
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/ima.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - lsm
+    - path: tools/testing/selftests/bpf/progs/ip_check_defrag.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - netfilter
+    - path: tools/testing/selftests/bpf/progs/iters_testmod_seq.bpf.o
+      status: measured
+      program_count: 6
+      prog_types:
+      - raw_tracepoint
+      - socket_filter
+    - path: tools/testing/selftests/bpf/progs/jeq_infer_not_null_fail.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - raw_tracepoint
+    - path: tools/testing/selftests/bpf/progs/jit_probe_mem.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - sched_cls
+    - path: tools/testing/selftests/bpf/progs/kfunc_call_destructive.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - sched_cls
+    - path: tools/testing/selftests/bpf/progs/kfunc_call_fail.bpf.o
+      status: measured
+      program_count: 8
+      prog_types:
+      - sched_cls
+      - syscall
+    - path: tools/testing/selftests/bpf/progs/kfunc_call_race.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - sched_cls
+    - path: tools/testing/selftests/bpf/progs/kfunc_call_test.bpf.o
+      status: measured
+      program_count: 10
+      prog_types:
+      - sched_cls
+      - syscall
+    - path: tools/testing/selftests/bpf/progs/kfunc_call_test_subprog.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - sched_cls
+    - path: tools/testing/selftests/bpf/progs/kfunc_implicit_args.bpf.o
+      status: measured
+      program_count: 4
+      prog_types:
+      - syscall
+    - path: tools/testing/selftests/bpf/progs/kprobe_multi_verifier.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - kprobe
+    - path: tools/testing/selftests/bpf/progs/kprobe_write_ctx.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - kprobe
+    - path: tools/testing/selftests/bpf/progs/ksym_race.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - sched_cls
+    - path: tools/testing/selftests/bpf/progs/linked_funcs1.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'bpf_object__open_file failed: No such file or directory (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/linked_funcs2.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'bpf_object__open_file failed: No such file or directory (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/linked_maps1.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'bpf_object__open_file failed: Operation not supported (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/linked_maps2.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'bpf_object__open_file failed: Operation not supported (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/linked_vars1.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'bpf_object__open_file failed: No such file or directory (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/linked_vars2.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'bpf_object__open_file failed: No such file or directory (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/local_storage.bpf.o
+      status: measured
+      program_count: 5
+      prog_types:
+      - lsm
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/local_storage_bench.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/local_storage_rcu_tasks_trace_bench.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/loop1.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - raw_tracepoint
+    - path: tools/testing/selftests/bpf/progs/loop2.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - raw_tracepoint
+    - path: tools/testing/selftests/bpf/progs/loop3.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - raw_tracepoint
+    - path: tools/testing/selftests/bpf/progs/loop6.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - kprobe
+    - path: tools/testing/selftests/bpf/progs/lru_bug.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - tracing
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/lsm.bpf.o
+      status: measured
+      program_count: 4
+      prog_types:
+      - lsm
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/lsm_cgroup.bpf.o
+      status: measured
+      program_count: 6
+      prog_types:
+      - lsm
+    - path: tools/testing/selftests/bpf/progs/lsm_cgroup_nonvoid.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - lsm
+    - path: tools/testing/selftests/bpf/progs/lsm_tailcall.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - lsm
+    - path: tools/testing/selftests/bpf/progs/map_kptr.bpf.o
+      status: measured
+      program_count: 13
+      prog_types:
+      - lsm
+      - sched_cls
+      - syscall
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/map_kptr_fail.bpf.o
+      status: measured
+      program_count: 20
+      prog_types:
+      - sched_cls
+      - syscall
+    - path: tools/testing/selftests/bpf/progs/map_kptr_race.bpf.o
+      status: measured
+      program_count: 7
+      prog_types:
+      - sched_cls
+      - syscall
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/map_percpu_stats.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/missed_kprobe.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - kprobe
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/missed_kprobe_recursion.bpf.o
+      status: measured
+      program_count: 7
+      prog_types:
+      - kprobe
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/missed_tp_recursion.bpf.o
+      status: measured
+      program_count: 5
+      prog_types:
+      - kprobe
+      - tracepoint
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/mmap_inner_array.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/mptcp_sock.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - sock_ops
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/mptcp_sockmap.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - sk_skb
+      - sock_ops
+    - path: tools/testing/selftests/bpf/progs/mptcpify.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/nested_acquire.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/nested_trust_failure.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/nested_trust_success.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/netif_receive_skb.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/netns_cookie_prog.bpf.o
+      status: measured
+      program_count: 4
+      prog_types:
+      - cgroup_skb
+      - sched_cls
+      - sk_msg
+      - sock_ops
+    - path: tools/testing/selftests/bpf/progs/perf_event_stackmap.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - perf_event
+    - path: tools/testing/selftests/bpf/progs/prepare.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - cgroup_skb
+    - path: tools/testing/selftests/bpf/progs/priv_freplace_prog.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - ext
+    - path: tools/testing/selftests/bpf/progs/priv_map.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/priv_map.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/priv_prog.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - xdp
+    - path: tools/testing/selftests/bpf/progs/raw_tp_null.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/raw_tp_null_fail.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/rcu_tasks_trace_gp.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - syscall
+    - path: tools/testing/selftests/bpf/progs/recursion.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/res_spin_lock.bpf.o
+      status: measured
+      program_count: 4
+      prog_types:
+      - sched_cls
+    - path: tools/testing/selftests/bpf/progs/security_bpf_map.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/setget_sockopt.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - cgroup_sockopt
+      - lsm
+      - sock_ops
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/sk_storage_omem_uncharge.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/skb_pkt_end.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - sched_cls
+    - path: tools/testing/selftests/bpf/progs/sock_addr_kern.bpf.o
+      status: measured
+      program_count: 9
+      prog_types:
+      - syscall
+    - path: tools/testing/selftests/bpf/progs/sock_destroy_prog.bpf.o
+      status: measured
+      program_count: 5
+      prog_types:
+      - cgroup_sock_addr
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/sock_destroy_prog_fail.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/socket_cookie_prog.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - cgroup_sock_addr
+      - sock_ops
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/sockopt_qos_to_cc.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - cgroup_sockopt
+    - path: tools/testing/selftests/bpf/progs/stacktrace_ips.bpf.o
+      status: measured
+      program_count: 5
+      prog_types:
+      - kprobe
+      - raw_tracepoint
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/stacktrace_map.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracepoint
+    - path: tools/testing/selftests/bpf/progs/stacktrace_map_skip.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracepoint
+    - path: tools/testing/selftests/bpf/progs/summarization.bpf.o
+      status: measured
+      program_count: 6
+      prog_types:
+      - kprobe
+      - sched_cls
+    - path: tools/testing/selftests/bpf/progs/summarization_freplace.bpf.o
+      status: measured
+      program_count: 4
+      prog_types:
+      - ext
+    - path: tools/testing/selftests/bpf/progs/tailcall_bpf2bpf_fentry.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/tailcall_bpf2bpf_fexit.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/tailcall_bpf2bpf_hierarchy_fentry.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/task_kfunc_failure.bpf.o
+      status: measured
+      program_count: 20
+      prog_types:
+      - kprobe
+      - lsm
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/task_local_storage.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/task_local_storage_exit_creds.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/task_ls_recursion.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/task_ls_uptr.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/task_storage_nodeadlock.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - lsm
+    - path: tools/testing/selftests/bpf/progs/tcp_ca_incompl_cong_ops.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - struct_ops
+    - path: tools/testing/selftests/bpf/progs/tcp_ca_kfunc.bpf.o
+      status: measured
+      program_count: 11
+      prog_types:
+      - struct_ops
+    - path: tools/testing/selftests/bpf/progs/tcp_ca_unsupp_cong_op.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - struct_ops
+    - path: tools/testing/selftests/bpf/progs/tcp_ca_update.bpf.o
+      status: measured
+      program_count: 5
+      prog_types:
+      - struct_ops
+    - path: tools/testing/selftests/bpf/progs/tcp_ca_write_sk_pacing.bpf.o
+      status: measured
+      program_count: 4
+      prog_types:
+      - struct_ops
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/test_access_variable_array.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/test_assign_reuse.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - sched_cls
+      - sk_reuseport
+      directive_families:
+      - cmov
+      - wide
+    - path: tools/testing/selftests/bpf/progs/test_attach_kprobe_sleepable.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - kprobe
+    - path: tools/testing/selftests/bpf/progs/test_attach_probe.bpf.o
+      status: measured
+      program_count: 12
+      prog_types:
+      - kprobe
+    - path: tools/testing/selftests/bpf/progs/test_attach_probe_manual.bpf.o
+      status: measured
+      program_count: 5
+      prog_types:
+      - kprobe
+    - path: tools/testing/selftests/bpf/progs/test_autoattach.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - raw_tracepoint
+    - path: tools/testing/selftests/bpf/progs/test_autoload.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - raw_tracepoint
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/test_bpf_cookie.bpf.o
+      status: measured
+      program_count: 14
+      prog_types:
+      - kprobe
+      - lsm
+      - perf_event
+      - raw_tracepoint
+      - tracepoint
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/test_bpf_nf.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - sched_cls
+      - xdp
+    - path: tools/testing/selftests/bpf/progs/test_bpf_nf_fail.bpf.o
+      status: measured
+      program_count: 12
+      prog_types:
+      - sched_cls
+      - xdp
+    - path: tools/testing/selftests/bpf/progs/test_btf_decl_tag.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/test_btf_skc_cls_ingress.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - sched_cls
+    - path: tools/testing/selftests/bpf/progs/test_build_id.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - kprobe
+    - path: tools/testing/selftests/bpf/progs/test_cgroup1_hierarchy.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - lsm
+      - tracing
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/test_core_read_macros.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - raw_tracepoint
+    - path: tools/testing/selftests/bpf/progs/test_core_reloc_module.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - raw_tracepoint
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/test_custom_sec_handlers.bpf.o
+      status: measured
+      program_count: 6
+      prog_types:
+      - kprobe
+      - unspec
+    - path: tools/testing/selftests/bpf/progs/test_d_path.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/test_d_path_check_rdonly_mem.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/test_d_path_check_types.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/test_endian.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - raw_tracepoint
+    - path: tools/testing/selftests/bpf/progs/test_fill_link_info.bpf.o
+      status: measured
+      program_count: 6
+      prog_types:
+      - kprobe
+      - perf_event
+      - tracepoint
+    - path: tools/testing/selftests/bpf/progs/test_global_func17.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - sched_cls
+    - path: tools/testing/selftests/bpf/progs/test_global_func_ctx_args.bpf.o
+      status: measured
+      program_count: 9
+      prog_types:
+      - kprobe
+      - perf_event
+      - raw_tracepoint
+    - path: tools/testing/selftests/bpf/progs/test_global_map_resize.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - struct_ops
+      - tracepoint
+    - path: tools/testing/selftests/bpf/progs/test_kernel_flag.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - lsm
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/test_kfunc_dynptr_param.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - lsm
+    - path: tools/testing/selftests/bpf/progs/test_ksyms_btf.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - raw_tracepoint
+    - path: tools/testing/selftests/bpf/progs/test_ksyms_btf_null_check.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - raw_tracepoint
+    - path: tools/testing/selftests/bpf/progs/test_ksyms_btf_write_check.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - raw_tracepoint
+    - path: tools/testing/selftests/bpf/progs/test_ksyms_module.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - sched_cls
+    - path: tools/testing/selftests/bpf/progs/test_ksyms_weak.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - raw_tracepoint
+    - path: tools/testing/selftests/bpf/progs/test_ldsx_insn.bpf.o
+      status: measured
+      program_count: 5
+      prog_types:
+      - cgroup_sockopt
+      - raw_tracepoint
+      - sched_cls
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/test_libbpf_get_fd_by_id_opts.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - lsm
+    - path: tools/testing/selftests/bpf/progs/test_lookup_and_delete.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracepoint
+    - path: tools/testing/selftests/bpf/progs/test_map_init.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracepoint
+    - path: tools/testing/selftests/bpf/progs/test_map_lookup_percpu_elem.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracepoint
+    - path: tools/testing/selftests/bpf/progs/test_map_ops.bpf.o
+      status: measured
+      program_count: 7
+      prog_types:
+      - tracepoint
+    - path: tools/testing/selftests/bpf/progs/test_migrate_reuseport.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - sk_reuseport
+      - xdp
+    - path: tools/testing/selftests/bpf/progs/test_netfilter_link_attach.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - netfilter
+    - path: tools/testing/selftests/bpf/progs/test_overhead.bpf.o
+      status: measured
+      program_count: 5
+      prog_types:
+      - kprobe
+      - raw_tracepoint
+      - tracing
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/test_perf_link.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - perf_event
+    - path: tools/testing/selftests/bpf/progs/test_perf_skip.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - perf_event
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/test_pinning_htab.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_pinning_htab.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/test_probe_user.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - kprobe
+    - path: tools/testing/selftests/bpf/progs/test_prog_array_init.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - raw_tracepoint
+    - path: tools/testing/selftests/bpf/progs/test_ptr_untrusted.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - lsm
+      - raw_tracepoint
+    - path: tools/testing/selftests/bpf/progs/test_raw_tp_test_run.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - raw_tracepoint
+    - path: tools/testing/selftests/bpf/progs/test_send_signal_kern.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - perf_event
+      - tracepoint
+    - path: tools/testing/selftests/bpf/progs/test_sk_storage_trace_itself.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/test_sk_storage_tracing.bpf.o
+      status: measured
+      program_count: 6
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/test_skb_helpers.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - sched_cls
+    - path: tools/testing/selftests/bpf/progs/test_skc_to_unix_sock.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/test_skmsg_load_helpers.bpf.o
+      status: measured
+      program_count: 4
+      prog_types:
+      - sk_msg
+      - sk_skb
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/test_sockmap_change_tail.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - sk_skb
+    - path: tools/testing/selftests/bpf/progs/test_sockmap_invalid_update.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - sock_ops
+    - path: tools/testing/selftests/bpf/progs/test_sockmap_progs_query.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - sk_msg
+      - sk_skb
+    - path: tools/testing/selftests/bpf/progs/test_sockmap_skb_verdict_attach.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - sk_skb
+    - path: tools/testing/selftests/bpf/progs/test_sockmap_update.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - sched_cls
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/test_subprogs.bpf.o
+      status: measured
+      program_count: 4
+      prog_types:
+      - raw_tracepoint
+    - path: tools/testing/selftests/bpf/progs/test_subprogs_extable.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/test_subprogs_unused.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - raw_tracepoint
+    - path: tools/testing/selftests/bpf/progs/test_task_local_data.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - syscall
+    - path: tools/testing/selftests/bpf/progs/test_task_pt_regs.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - kprobe
+    - path: tools/testing/selftests/bpf/progs/test_task_under_cgroup.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - lsm
+      - tracing
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/test_tc_change_tail.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - sched_cls
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/test_tc_tunnel.bpf.o
+      status: measured
+      program_count: 19
+      prog_types:
+      - sched_cls
+      directive_families:
+      - cmov
+      - wide
+    - path: tools/testing/selftests/bpf/progs/test_tcpbpf_kern.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - sock_ops
+    - path: tools/testing/selftests/bpf/progs/test_trace_ext_tracing.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/test_tracepoint.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracepoint
+    - path: tools/testing/selftests/bpf/progs/test_unpriv_bpf_disabled.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - perf_event
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/test_uprobe.bpf.o
+      status: measured
+      program_count: 6
+      prog_types:
+      - kprobe
+    - path: tools/testing/selftests/bpf/progs/test_uprobe_autoattach.bpf.o
+      status: measured
+      program_count: 5
+      prog_types:
+      - kprobe
+    - path: tools/testing/selftests/bpf/progs/test_urandom_usdt.bpf.o
+      status: measured
+      program_count: 4
+      prog_types:
+      - kprobe
+    - path: tools/testing/selftests/bpf/progs/test_usdt.bpf.o
+      status: measured
+      program_count: 4
+      prog_types:
+      - kprobe
+    - path: tools/testing/selftests/bpf/progs/test_usdt_multispec.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'bpf_object__open_file failed: No such file or directory (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/test_varlen.bpf.o
+      status: measured
+      program_count: 5
+      prog_types:
+      - raw_tracepoint
+      - tracepoint
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/test_verif_scale2.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - sched_cls
+      directive_families:
+      - rotate
+    - path: tools/testing/selftests/bpf/progs/test_xdp_devmap_tailcall.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - xdp
+    - path: tools/testing/selftests/bpf/progs/test_xdp_do_redirect.bpf.o
+      status: measured
+      program_count: 5
+      prog_types:
+      - sched_cls
+      - xdp
+    - path: tools/testing/selftests/bpf/progs/timer_crash.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/timer_start_deadlock.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - syscall
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/token_lsm.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - lsm
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/trace_dummy_st_ops.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/trace_printk.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/trace_vprintk.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/tracing_failure.bpf.o
+      status: measured
+      program_count: 4
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/tracing_struct.bpf.o
+      status: measured
+      program_count: 13
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/tracing_struct_many_args.bpf.o
+      status: measured
+      program_count: 6
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/uprobe_multi.bpf.o
+      status: measured
+      program_count: 7
+      prog_types:
+      - kprobe
+    - path: tools/testing/selftests/bpf/progs/uprobe_multi_pid_filter.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - kprobe
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/uprobe_multi_usdt.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - kprobe
+    - path: tools/testing/selftests/bpf/progs/uprobe_multi_verifier.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - kprobe
+    - path: tools/testing/selftests/bpf/progs/uprobe_syscall.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - kprobe
+    - path: tools/testing/selftests/bpf/progs/uprobe_syscall_executed.bpf.o
+      status: measured
+      program_count: 6
+      prog_types:
+      - kprobe
+    - path: tools/testing/selftests/bpf/progs/uptr_map_failure.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/uptr_map_failure.bpf.o
+        (exit=1)'
+    - path: tools/testing/selftests/bpf/progs/uptr_update_failure.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - syscall
+    - path: tools/testing/selftests/bpf/progs/uretprobe_stack.bpf.o
+      status: measured
+      program_count: 7
+      prog_types:
+      - kprobe
+    - path: tools/testing/selftests/bpf/progs/verifier_arena.bpf.o
+      status: measured
+      program_count: 18
+      prog_types:
+      - socket_filter
+      - syscall
+      - tracing
+      directive_families:
+      - cmov
+    - path: tools/testing/selftests/bpf/progs/verifier_arena_globals1.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - syscall
+    - path: tools/testing/selftests/bpf/progs/verifier_arena_globals2.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - syscall
+    - path: tools/testing/selftests/bpf/progs/verifier_arena_large.bpf.o
+      status: measured
+      program_count: 4
+      prog_types:
+      - syscall
+    - path: tools/testing/selftests/bpf/progs/verifier_bits_iter.bpf.o
+      status: measured
+      program_count: 13
+      prog_types:
+      - syscall
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/verifier_btf_unreliable_prog.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - kprobe
+    - path: tools/testing/selftests/bpf/progs/verifier_const.bpf.o
+      status: measured
+      program_count: 8
+      prog_types:
+      - lsm
+      - sched_cls
+    - path: tools/testing/selftests/bpf/progs/verifier_ctx.bpf.o
+      status: measured
+      program_count: 30
+      prog_types:
+      - cgroup_sock
+      - cgroup_sock_addr
+      - cgroup_sockopt
+      - flow_dissector
+      - netfilter
+      - sched_cls
+      - sk_lookup
+      - sk_reuseport
+      - sock_ops
+      - socket_filter
+    - path: tools/testing/selftests/bpf/progs/verifier_default_trusted_ptr.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - syscall
+    - path: tools/testing/selftests/bpf/progs/verifier_jit_inline.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/verifier_kfunc_prog_types.bpf.o
+      status: measured
+      program_count: 12
+      prog_types:
+      - perf_event
+      - raw_tracepoint
+      - syscall
+      - tracepoint
+    - path: tools/testing/selftests/bpf/progs/verifier_lsm.bpf.o
+      status: measured
+      program_count: 16
+      prog_types:
+      - lsm
+    - path: tools/testing/selftests/bpf/progs/verifier_mtu.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - sched_cls
+    - path: tools/testing/selftests/bpf/progs/verifier_netfilter_ctx.bpf.o
+      status: measured
+      program_count: 6
+      prog_types:
+      - netfilter
+    - path: tools/testing/selftests/bpf/progs/verifier_typedef.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: tools/testing/selftests/bpf/progs/verifier_unpriv_perf.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - perf_event
+    - path: tools/testing/selftests/bpf/progs/xdp_flowtable.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - xdp
+    - path: tools/testing/selftests/bpf/progs/xdp_hw_metadata.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - xdp
+    - path: tools/testing/selftests/bpf/progs/xdp_metadata.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - xdp
+    - path: tools/testing/selftests/bpf/progs/xdp_metadata2.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - ext
+    - path: tools/testing/selftests/bpf/progs/xdp_synproxy_kern.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - sched_cls
+      - xdp
+      directive_families:
+      - cmov
+      - wide
+    - path: tools/testing/selftests/bpf/progs/xfrm_info.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - sched_cls
+    - path: xdp_synproxy_kern.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - sched_cls
+      - xdp
+      directive_families:
+      - cmov
+      - wide
+  loxilb:
+    source_url: https://github.com/loxilb-io/loxilb-ebpf.git
+    license: unknown
+    build:
+      mode: prebuilt
+      instructions:
+      - prebuilt objects already promoted into corpus/build/
+    workload_categories:
+    - tracing-observability
+    known_capabilities:
+    - tracing attach coverage
+    known_requirements: []
+    directive_family_coverage_expectations:
+      expected_families: []
+      measured_site_totals:
+        cmov: 0
+        wide: 0
+        rotate: 0
+        lea: 0
+    measured_summary:
+      objects_on_disk: 3
+      measured_objects: 3
+      inventory_failures: 0
+      programs_found: 18
+      loadable_programs: 0
+      directive_bearing_programs: 0
+      packet_runnable_programs: 0
+      packet_paired_programs: 0
+      tracing_positive_programs: 0
+      true_runnable_programs: 0
+      observed_prog_types:
+      - unspec
+    objects:
+    - path: llb_ebpf_emain.bpf.o
+      status: measured
+      program_count: 8
+      prog_types:
+      - unspec
+    - path: llb_ebpf_main.bpf.o
+      status: measured
+      program_count: 8
+      prog_types:
+      - unspec
+    - path: llb_xdp_main.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - unspec
+  manual-test:
+    source_url: null
+    license: local / unknown
+    build:
+      mode: prebuilt
+      instructions:
+      - prebuilt objects already promoted into corpus/build/
+    workload_categories:
+    - tracing-observability
+    - synthetic-control
+    known_capabilities:
+    - tracing attach coverage
+    known_requirements:
+    - fentry/fexit or tracing attach targets plus trigger heuristics
+    directive_family_coverage_expectations:
+      expected_families: []
+      measured_site_totals:
+        cmov: 0
+        wide: 0
+        rotate: 0
+        lea: 0
+    measured_summary:
+      objects_on_disk: 2
+      measured_objects: 2
+      inventory_failures: 0
+      programs_found: 4
+      loadable_programs: 4
+      directive_bearing_programs: 0
+      packet_runnable_programs: 0
+      packet_paired_programs: 0
+      tracing_positive_programs: 4
+      true_runnable_programs: 4
+      observed_prog_types:
+      - tracing
+    objects:
+    - path: fentry.gen.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - tracing
+    - path: fentry.tmp.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - tracing
+  netbird:
+    source_url: https://github.com/netbirdio/netbird.git
+    license: 'mixed: BSD-3-Clause plus AGPL-3.0 subtrees'
+    build:
+      mode: source-backed
+      repo_path: corpus/repos/netbird
+      instructions:
+      - clang -target bpf compile client/firewall/uspfilter/ebpf/prog.c
+      - include corpus/include/netbird_legacy_bpf_map_def.h for legacy map definitions
+      - finalize with bpftool gen object into corpus/build/netbird/
+    workload_categories:
+    - networking
+    known_capabilities:
+    - object present but not inventoryable with current runner/libbpf path
+    known_requirements:
+    - current object still fails libbpf v1 open because the object uses legacy map definitions
+    directive_family_coverage_expectations:
+      expected_families: []
+      measured_site_totals:
+        cmov: 0
+        wide: 0
+        rotate: 0
+        lea: 0
+    measured_summary:
+      objects_on_disk: 1
+      measured_objects: 0
+      inventory_failures: 1
+      programs_found: 0
+      loadable_programs: 0
+      directive_bearing_programs: 0
+      packet_runnable_programs: 0
+      packet_paired_programs: 0
+      tracing_positive_programs: 0
+      true_runnable_programs: 0
+      observed_prog_types: []
+    objects:
+    - path: prog.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'bpf_object__open_file failed: Operation not supported (exit=1)'
+  opentelemetry-ebpf-profiler:
+    source_url: https://github.com/open-telemetry/opentelemetry-ebpf-profiler.git
+    license: Apache-2.0
+    build:
+      mode: prebuilt
+      instructions:
+      - prebuilt objects already promoted into corpus/build/
+    workload_categories:
+    - tracing-observability
+    known_capabilities:
+    - object present but not inventoryable with current runner/libbpf path
+    known_requirements:
+    - current objects are composite/extern-map heavy and remain inventory-failed
+    directive_family_coverage_expectations:
+      expected_families: []
+      measured_site_totals:
+        cmov: 0
+        wide: 0
+        rotate: 0
+        lea: 0
+    measured_summary:
+      objects_on_disk: 3
+      measured_objects: 0
+      inventory_failures: 3
+      programs_found: 0
+      loadable_programs: 0
+      directive_bearing_programs: 0
+      packet_runnable_programs: 0
+      packet_paired_programs: 0
+      tracing_positive_programs: 0
+      true_runnable_programs: 0
+      observed_prog_types: []
+    objects:
+    - path: generic_probe.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'bpf_object__open_file failed: No such file or directory (exit=1)'
+    - path: native_stack_trace.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'bpf_object__open_file failed: Operation not supported (exit=1)'
+    - path: sched_monitor.bpf.o
+      status: inventory_failed
+      prog_types: []
+      open_error: 'bpf_object__open_file failed: No such file or directory (exit=1)'
+  real_world_code_size:
+    source_url: null
+    license: local / unknown
+    build:
+      mode: prebuilt
+      instructions:
+      - prebuilt objects already promoted into corpus/build/
+    workload_categories:
+    - networking
+    - tracing-observability
+    - security
+    - synthetic-control
+    known_capabilities:
+    - packet-program coverage
+    - tracing attach coverage
+    - LSM policy/monitoring coverage
+    known_requirements:
+    - attach target availability and trigger heuristic support
+    - LSM hooks enabled
+    - perf event setup
+    - packet input for tc test_run or live tc attach point
+    - socket test harness
+    - tracepoint availability and trigger heuristic support
+    - fentry/fexit or tracing attach targets plus trigger heuristics
+    directive_family_coverage_expectations:
+      expected_families: []
+      measured_site_totals:
+        cmov: 0
+        wide: 0
+        rotate: 0
+        lea: 0
+    measured_summary:
+      objects_on_disk: 15
+      measured_objects: 15
+      inventory_failures: 0
+      programs_found: 24
+      loadable_programs: 23
+      directive_bearing_programs: 0
+      packet_runnable_programs: 2
+      packet_paired_programs: 0
+      tracing_positive_programs: 12
+      true_runnable_programs: 14
+      observed_prog_types:
+      - kprobe
+      - lsm
+      - perf_event
+      - sched_cls
+      - socket_filter
+      - tracepoint
+      - tracing
+    objects:
+    - path: libbpf-bootstrap/bootstrap.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - tracepoint
+    - path: libbpf-bootstrap/bootstrap_legacy.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - tracepoint
+    - path: libbpf-bootstrap/fentry.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - tracing
+    - path: libbpf-bootstrap/kprobe.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - kprobe
+    - path: libbpf-bootstrap/ksyscall.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - kprobe
+    - path: libbpf-bootstrap/lsm.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - lsm
+    - path: libbpf-bootstrap/minimal.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracepoint
+    - path: libbpf-bootstrap/minimal_legacy.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracepoint
+    - path: libbpf-bootstrap/minimal_ns.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracepoint
+    - path: libbpf-bootstrap/profile.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - perf_event
+    - path: libbpf-bootstrap/sockfilter.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - socket_filter
+    - path: libbpf-bootstrap/task_iter.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: libbpf-bootstrap/tc.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - sched_cls
+    - path: libbpf-bootstrap/uprobe.bpf.o
+      status: measured
+      program_count: 4
+      prog_types:
+      - kprobe
+    - path: libbpf-bootstrap/usdt.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - kprobe
+  scx:
+    source_url: https://github.com/sched-ext/scx.git
+    license: GPL-2.0
+    build:
+      mode: source-backed
+      repo_path: corpus/repos/scx
+      instructions:
+      - cargo build --release -p scx_bpfland -p scx_rusty -p scx_lavd -p scx_flash
+      - promote target/release/build/*/out/bpf.bpf.o into corpus/build/scx/
+    workload_categories:
+    - tracing-observability
+    - scheduler-hot-path
+    known_capabilities:
+    - tracing attach coverage
+    - sched_ext / struct_ops coverage
+    known_requirements:
+    - struct_ops registration and matching kernel support
+    - synthetic syscall harness or attach trigger support
+    - tracepoint availability and trigger heuristic support
+    - fentry/fexit or tracing attach targets plus trigger heuristics
+    - sched_ext objects depend on struct_ops registration and sched_ext kfunc/BTF availability
+    directive_family_coverage_expectations:
+      expected_families:
+      - cmov
+      - lea
+      measured_site_totals:
+        cmov: 49
+        wide: 0
+        rotate: 0
+        lea: 1
+    measured_summary:
+      objects_on_disk: 4
+      measured_objects: 4
+      inventory_failures: 0
+      programs_found: 85
+      loadable_programs: 39
+      directive_bearing_programs: 13
+      packet_runnable_programs: 0
+      packet_paired_programs: 0
+      tracing_positive_programs: 0
+      true_runnable_programs: 0
+      observed_prog_types:
+      - struct_ops
+      - syscall
+      - tracepoint
+      - tracing
+    objects:
+    - path: scx_bpfland_main.bpf.o
+      status: measured
+      program_count: 12
+      prog_types:
+      - struct_ops
+      - syscall
+      directive_families:
+      - cmov
+    - path: scx_flash_main.bpf.o
+      status: measured
+      program_count: 14
+      prog_types:
+      - struct_ops
+      - syscall
+      directive_families:
+      - cmov
+    - path: scx_lavd_main.bpf.o
+      status: measured
+      program_count: 46
+      prog_types:
+      - struct_ops
+      - syscall
+      - tracepoint
+      - tracing
+    - path: scx_rusty_main.bpf.o
+      status: measured
+      program_count: 13
+      prog_types:
+      - struct_ops
+      directive_families:
+      - cmov
+      - lea
+  suricata:
+    source_url: https://github.com/OISF/suricata.git
+    license: GPL-2.0
+    build:
+      mode: prebuilt
+      instructions:
+      - prebuilt objects already promoted into corpus/build/
+    workload_categories:
+    - networking
+    known_capabilities:
+    - packet-program coverage
+    known_requirements:
+    - packet input for bpf_prog_test_run or live XDP attach point
+    directive_family_coverage_expectations:
+      expected_families:
+      - cmov
+      measured_site_totals:
+        cmov: 2
+        wide: 0
+        rotate: 0
+        lea: 0
+    measured_summary:
+      objects_on_disk: 2
+      measured_objects: 2
+      inventory_failures: 0
+      programs_found: 2
+      loadable_programs: 2
+      directive_bearing_programs: 2
+      packet_runnable_programs: 2
+      packet_paired_programs: 2
+      tracing_positive_programs: 0
+      true_runnable_programs: 2
+      observed_prog_types:
+      - xdp
+    objects:
+    - path: xdp_filter.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - xdp
+      directive_families:
+      - cmov
+    - path: xdp_lb.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - xdp
+      directive_families:
+      - cmov
+  systemd:
+    source_url: https://github.com/systemd/systemd.git
+    license: LGPL-2.1-or-later project default; BPF sources include GPL-2.0-or-later pieces
+    build:
+      mode: source-backed
+      repo_path: corpus/repos/systemd
+      instructions:
+      - generate vmlinux.h for the running kernel
+      - clang -target bpf compile src/network/bpf/*.bpf.c and src/nsresourced/bpf/*.bpf.c
+      - finalize linked objects with bpftool gen object into corpus/build/systemd/
+    workload_categories:
+    - tracing-observability
+    - security
+    - cgroup-policy
+    known_capabilities:
+    - tracing attach coverage
+    - cgroup attach coverage
+    - LSM policy/monitoring coverage
+    known_requirements:
+    - cgroup attachment context
+    - cgroup sysctl attachment context
+    - attach target availability and trigger heuristic support
+    - LSM hooks enabled
+    - source-backed rebuild now covers cgroup_skb, cgroup_sock, cgroup_sock_addr, cgroup_sysctl, kprobe, and lsm programs
+    directive_family_coverage_expectations:
+      expected_families:
+      - cmov
+      measured_site_totals:
+        cmov: 4
+        wide: 0
+        rotate: 0
+        lea: 0
+    measured_summary:
+      objects_on_disk: 6
+      measured_objects: 6
+      inventory_failures: 0
+      programs_found: 14
+      loadable_programs: 9
+      directive_bearing_programs: 4
+      packet_runnable_programs: 0
+      packet_paired_programs: 0
+      tracing_positive_programs: 0
+      true_runnable_programs: 0
+      observed_prog_types:
+      - cgroup_skb
+      - cgroup_sock
+      - cgroup_sock_addr
+      - cgroup_sysctl
+      - kprobe
+      - lsm
+    objects:
+    - path: bind-iface.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - cgroup_sock
+    - path: restrict-fs.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - lsm
+    - path: restrict-ifaces.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - cgroup_skb
+    - path: socket-bind.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - cgroup_sock_addr
+    - path: sysctl-monitor.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - cgroup_sysctl
+    - path: userns-restrict.bpf.o
+      status: measured
+      program_count: 7
+      prog_types:
+      - kprobe
+      - lsm
+      directive_families:
+      - cmov
+  tetragon:
+    source_url: https://github.com/cilium/tetragon.git
+    license: Apache-2.0
+    build:
+      mode: source-backed
+      repo_path: corpus/repos/tetragon
+      instructions:
+      - make -C bpf -j$(nproc)
+      - promote curated bpf/objs/*.o into corpus/build/tetragon/
+    workload_categories:
+    - tracing-observability
+    - security
+    known_capabilities:
+    - tracing attach coverage
+    - LSM policy/monitoring coverage
+    known_requirements:
+    - attach target availability and trigger heuristic support
+    - LSM hooks enabled
+    - raw tracepoint attachment support
+    - tracepoint availability and trigger heuristic support
+    - fentry/fexit or tracing attach targets plus trigger heuristics
+    - objects now build and many load, but the current runner still lacks honest attach+trigger paths
+    directive_family_coverage_expectations:
+      expected_families: []
+      measured_site_totals:
+        cmov: 0
+        wide: 0
+        rotate: 0
+        lea: 0
+    measured_summary:
+      objects_on_disk: 23
+      measured_objects: 23
+      inventory_failures: 0
+      programs_found: 90
+      loadable_programs: 14
+      directive_bearing_programs: 0
+      packet_runnable_programs: 0
+      packet_paired_programs: 0
+      tracing_positive_programs: 0
+      true_runnable_programs: 0
+      observed_prog_types:
+      - kprobe
+      - lsm
+      - raw_tracepoint
+      - tracepoint
+      - tracing
+      - unspec
+    objects:
+    - path: bpf_cgroup.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - raw_tracepoint
+    - path: bpf_cgroup_mkdir.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - raw_tracepoint
+    - path: bpf_cgroup_release.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - raw_tracepoint
+    - path: bpf_cgroup_rmdir.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - raw_tracepoint
+    - path: bpf_cgtracker.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - raw_tracepoint
+    - path: bpf_enforcer.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - kprobe
+    - path: bpf_execve_bprm_commit_creds.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - kprobe
+    - path: bpf_execve_event.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - tracepoint
+    - path: bpf_execve_map_update.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - unspec
+    - path: bpf_exit.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - kprobe
+    - path: bpf_fmodret_enforcer.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: bpf_fork.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - kprobe
+    - path: bpf_generic_kprobe.bpf.o
+      status: measured
+      program_count: 12
+      prog_types:
+      - kprobe
+      - tracing
+    - path: bpf_generic_lsm_core.bpf.o
+      status: measured
+      program_count: 7
+      prog_types:
+      - lsm
+    - path: bpf_generic_lsm_output.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - lsm
+    - path: bpf_generic_rawtp.bpf.o
+      status: measured
+      program_count: 9
+      prog_types:
+      - raw_tracepoint
+    - path: bpf_generic_retkprobe.bpf.o
+      status: measured
+      program_count: 5
+      prog_types:
+      - kprobe
+    - path: bpf_generic_retuprobe.bpf.o
+      status: measured
+      program_count: 5
+      prog_types:
+      - kprobe
+    - path: bpf_generic_tracepoint.bpf.o
+      status: measured
+      program_count: 8
+      prog_types:
+      - tracepoint
+    - path: bpf_generic_uprobe.bpf.o
+      status: measured
+      program_count: 13
+      prog_types:
+      - kprobe
+    - path: bpf_generic_usdt.bpf.o
+      status: measured
+      program_count: 12
+      prog_types:
+      - kprobe
+    - path: bpf_multi_enforcer.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - kprobe
+    - path: bpf_prog_iter.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+  tracee:
+    source_url: https://github.com/aquasecurity/tracee.git
+    license: Apache-2.0
+    build:
+      mode: prebuilt
+      instructions:
+      - prebuilt objects already promoted into corpus/build/
+    workload_categories:
+    - tracing-observability
+    - security
+    - cgroup-policy
+    known_capabilities:
+    - tracing attach coverage
+    - cgroup attach coverage
+    - LSM policy/monitoring coverage
+    known_requirements:
+    - cgroup attachment context
+    - attach target availability and trigger heuristic support
+    - LSM hooks enabled
+    - raw tracepoint attachment support
+    - objects load and expose many sites, but only a subset have attach triggers in the current runner
+    directive_family_coverage_expectations:
+      expected_families:
+      - cmov
+      - wide
+      measured_site_totals:
+        cmov: 326
+        wide: 229
+        rotate: 0
+        lea: 0
+    measured_summary:
+      objects_on_disk: 2
+      measured_objects: 2
+      inventory_failures: 0
+      programs_found: 170
+      loadable_programs: 170
+      directive_bearing_programs: 110
+      packet_runnable_programs: 2
+      packet_paired_programs: 2
+      tracing_positive_programs: 24
+      true_runnable_programs: 26
+      observed_prog_types:
+      - cgroup_skb
+      - kprobe
+      - lsm
+      - raw_tracepoint
+    objects:
+    - path: lsm_check.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - lsm
+    - path: tracee.bpf.o
+      status: measured
+      program_count: 169
+      prog_types:
+      - cgroup_skb
+      - kprobe
+      - lsm
+      - raw_tracepoint
+      directive_families:
+      - cmov
+      - wide
+  tubular:
+    source_url: https://github.com/cloudflare/tubular.git
+    license: unknown
+    build:
+      mode: prebuilt
+      instructions:
+      - prebuilt objects already promoted into corpus/build/
+    workload_categories:
+    - tracing-observability
+    known_capabilities:
+    - tracing attach coverage
+    known_requirements: []
+    directive_family_coverage_expectations:
+      expected_families: []
+      measured_site_totals:
+        cmov: 0
+        wide: 0
+        rotate: 0
+        lea: 0
+    measured_summary:
+      objects_on_disk: 1
+      measured_objects: 1
+      inventory_failures: 0
+      programs_found: 1
+      loadable_programs: 0
+      directive_bearing_programs: 0
+      packet_runnable_programs: 0
+      packet_paired_programs: 0
+      tracing_positive_programs: 0
+      true_runnable_programs: 0
+      observed_prog_types:
+      - unspec
+    objects:
+    - path: inet-kern.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - unspec
+  xdp-examples:
+    source_url: https://github.com/xdp-project/bpf-examples.git
+    license: mixed / example-specific
+    build:
+      mode: prebuilt
+      instructions:
+      - prebuilt objects already promoted into corpus/build/
+    workload_categories:
+    - networking
+    known_capabilities:
+    - object present but not inventoryable with current runner/libbpf path
+    known_requirements:
+    - directory exists but currently has no promoted .bpf.o objects
+    directive_family_coverage_expectations:
+      expected_families: []
+      measured_site_totals:
+        cmov: 0
+        wide: 0
+        rotate: 0
+        lea: 0
+    measured_summary:
+      objects_on_disk: 0
+      measured_objects: 0
+      inventory_failures: 0
+      programs_found: 0
+      loadable_programs: 0
+      directive_bearing_programs: 0
+      packet_runnable_programs: 0
+      packet_paired_programs: 0
+      tracing_positive_programs: 0
+      true_runnable_programs: 0
+      observed_prog_types: []
+    objects: []
+  xdp-tools:
+    source_url: https://github.com/xdp-project/xdp-tools.git
+    license: mixed GPL-2.0, LGPL-2.1, BSD-2-Clause
+    build:
+      mode: prebuilt
+      instructions:
+      - prebuilt objects already promoted into corpus/build/
+    workload_categories:
+    - networking
+    - tracing-observability
+    known_capabilities:
+    - packet-program coverage
+    - tracing attach coverage
+    known_requirements:
+    - fentry/fexit or tracing attach targets plus trigger heuristics
+    - packet input for bpf_prog_test_run or live XDP attach point
+    directive_family_coverage_expectations:
+      expected_families:
+      - cmov
+      measured_site_totals:
+        cmov: 3
+        wide: 0
+        rotate: 0
+        lea: 0
+    measured_summary:
+      objects_on_disk: 13
+      measured_objects: 13
+      inventory_failures: 0
+      programs_found: 99
+      loadable_programs: 5
+      directive_bearing_programs: 3
+      packet_runnable_programs: 4
+      packet_paired_programs: 3
+      tracing_positive_programs: 0
+      true_runnable_programs: 4
+      observed_prog_types:
+      - tracing
+      - xdp
+    objects:
+    - path: xdp_basic.bpf.o
+      status: measured
+      program_count: 15
+      prog_types:
+      - tracing
+      - xdp
+    - path: xdp_flowtable.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - xdp
+    - path: xdp_flowtable_sample.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - xdp
+    - path: xdp_forward.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - xdp
+      directive_families:
+      - cmov
+    - path: xdp_load_bytes.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - xdp
+      directive_families:
+      - cmov
+    - path: xdp_monitor.bpf.o
+      status: measured
+      program_count: 8
+      prog_types:
+      - tracing
+    - path: xdp_redirect_basic.bpf.o
+      status: measured
+      program_count: 10
+      prog_types:
+      - tracing
+      - xdp
+    - path: xdp_redirect_cpumap.bpf.o
+      status: measured
+      program_count: 20
+      prog_types:
+      - tracing
+      - xdp
+    - path: xdp_redirect_devmap.bpf.o
+      status: measured
+      program_count: 12
+      prog_types:
+      - tracing
+      - xdp
+    - path: xdp_redirect_devmap_multi.bpf.o
+      status: measured
+      program_count: 12
+      prog_types:
+      - tracing
+      - xdp
+    - path: xdp_sample.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracing
+    - path: xdp_trafficgen.bpf.o
+      status: measured
+      program_count: 14
+      prog_types:
+      - tracing
+      - xdp
+    - path: xdpsock.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - xdp
+  xdp-tutorial:
+    source_url: https://github.com/xdp-project/xdp-tutorial.git
+    license: mixed tutorial text + GPL-2.0 code samples
+    build:
+      mode: prebuilt
+      instructions:
+      - prebuilt objects already promoted into corpus/build/
+    workload_categories:
+    - networking
+    - tracing-observability
+    known_capabilities:
+    - packet-program coverage
+    - tracing attach coverage
+    known_requirements:
+    - packet input for tc test_run or live tc attach point
+    - tracepoint availability and trigger heuristic support
+    - packet input for bpf_prog_test_run or live XDP attach point
+    directive_family_coverage_expectations:
+      expected_families:
+      - cmov
+      - wide
+      measured_site_totals:
+        cmov: 11
+        wide: 3
+        rotate: 0
+        lea: 0
+    measured_summary:
+      objects_on_disk: 25
+      measured_objects: 25
+      inventory_failures: 0
+      programs_found: 51
+      loadable_programs: 29
+      directive_bearing_programs: 10
+      packet_runnable_programs: 20
+      packet_paired_programs: 6
+      tracing_positive_programs: 0
+      true_runnable_programs: 20
+      observed_prog_types:
+      - sched_cls
+      - tracepoint
+      - unspec
+      - xdp
+    objects:
+    - path: advanced03-AF_XDP/af_xdp_kern.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - xdp
+    - path: basic01-xdp-pass/xdp_pass_kern.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - xdp
+    - path: basic02-prog-by-name/xdp_prog_kern.bpf.o
+      status: measured
+      program_count: 2
+      prog_types:
+      - xdp
+    - path: basic03-map-counter/xdp_prog_kern.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - xdp
+    - path: basic04-pinning-maps/xdp_prog_kern.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - xdp
+    - path: experiment01-tailgrow/xdp_prog_fail1.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - unspec
+    - path: experiment01-tailgrow/xdp_prog_fail2.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - unspec
+    - path: experiment01-tailgrow/xdp_prog_fail3.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - unspec
+    - path: experiment01-tailgrow/xdp_prog_kern.bpf.o
+      status: measured
+      program_count: 5
+      prog_types:
+      - unspec
+    - path: experiment01-tailgrow/xdp_prog_kern2.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - unspec
+    - path: experiment01-tailgrow/xdp_prog_kern3.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - unspec
+    - path: experiment01-tailgrow/xdp_prog_kern4.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - unspec
+    - path: packet-solutions/tc_reply_kern_02.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - sched_cls
+    - path: packet-solutions/xdp_prog_kern_02.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - unspec
+    - path: packet-solutions/xdp_prog_kern_03.bpf.o
+      status: measured
+      program_count: 5
+      prog_types:
+      - unspec
+    - path: packet-solutions/xdp_vlan01_kern.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - unspec
+    - path: packet-solutions/xdp_vlan02_kern.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - unspec
+    - path: packet01-parsing/xdp_prog_kern.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - xdp
+    - path: packet02-rewriting/xdp_prog_kern.bpf.o
+      status: measured
+      program_count: 3
+      prog_types:
+      - xdp
+      directive_families:
+      - cmov
+      - wide
+    - path: packet03-redirecting/xdp_prog_kern.bpf.o
+      status: measured
+      program_count: 5
+      prog_types:
+      - xdp
+      directive_families:
+      - cmov
+      - wide
+    - path: tracing01-xdp-simple/trace_prog_kern.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - tracepoint
+    - path: tracing01-xdp-simple/xdp_prog_kern.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - xdp
+    - path: tracing02-xdp-monitor/trace_prog_kern.bpf.o
+      status: measured
+      program_count: 8
+      prog_types:
+      - tracepoint
+      directive_families:
+      - cmov
+    - path: tracing03-xdp-debug-print/xdp_prog_kern.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - xdp
+    - path: tracing04-xdp-tcpdump/xdp_sample_pkts_kern.bpf.o
+      status: measured
+      program_count: 1
+      prog_types:
+      - xdp
+      directive_families:
+      - cmov
