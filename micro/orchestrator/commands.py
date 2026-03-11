@@ -45,6 +45,7 @@ def build_runner_command(
     recompile_lea: bool = False,
     recompile_all: bool = False,
     recompile_v5: bool = False,
+    skip_families: Sequence[str] = (),
 ) -> list[str]:
     command = [
         str(runner_binary),
@@ -85,6 +86,8 @@ def build_runner_command(
     _append_bool_option(command, "--recompile-rotate-rorx", recompile_rotate_rorx)
     _append_bool_option(command, "--recompile-lea", recompile_lea)
     _append_bool_option(command, "--recompile-all", recompile_all)
+    if skip_families:
+        command.extend(["--skip-families", ",".join(str(family) for family in skip_families)])
     return command
 
 

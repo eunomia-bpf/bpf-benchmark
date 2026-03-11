@@ -8,7 +8,7 @@ import json
 import math
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Mapping, Sequence
 
 import matplotlib
 
@@ -20,6 +20,11 @@ from matplotlib.colors import to_rgb
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 from scipy.stats import linregress, wilcoxon
+
+try:
+    from orchestrator.catalog import DEFAULT_MICRO_MANIFEST, ManifestSpec, load_manifest, load_manifest_from_results
+except ModuleNotFoundError:
+    from micro.orchestrator.catalog import DEFAULT_MICRO_MANIFEST, ManifestSpec, load_manifest, load_manifest_from_results
 
 
 plt.rcParams.update(
@@ -43,10 +48,16 @@ plt.rcParams.update(
 MICRO_DIR = Path(__file__).resolve().parent
 RESULTS_DIR = MICRO_DIR / "results"
 FIGURES_DIR = RESULTS_DIR / "figures"
-PURE_JIT_RESULTS = RESULTS_DIR / "pure_jit_authoritative.json"
+DEFAULT_MICRO_CATALOG = load_manifest(DEFAULT_MICRO_MANIFEST) if DEFAULT_MICRO_MANIFEST.exists() else None
+PURE_JIT_RESULTS_CANDIDATES = (
+    DEFAULT_MICRO_CATALOG.defaults.output if DEFAULT_MICRO_CATALOG is not None else RESULTS_DIR / "pure_jit.latest.json",
+    RESULTS_DIR / "pure_jit_authoritative.json",
+    RESULTS_DIR / "pure_jit_full_31.json",
+)
 CAUSAL_RESULTS_CANDIDATES = (
     RESULTS_DIR / "causal_isolation_authoritative.json",
     RESULTS_DIR / "pure_jit_with_cmov.json",
+    DEFAULT_MICRO_CATALOG.defaults.output if DEFAULT_MICRO_CATALOG is not None else RESULTS_DIR / "pure_jit.latest.json",
     RESULTS_DIR / "pure_jit.latest.json",
 )
 
@@ -59,8 +70,28 @@ def first_existing_path(candidates: Iterable[Path]) -> Path:
     return candidate_list[0]
 
 
+def most_complete_results_path(candidates: Iterable[Path]) -> Path:
+    candidate_list = tuple(candidates)
+    existing = [candidate for candidate in candidate_list if candidate.exists()]
+    if not existing:
+        return candidate_list[0]
+
+    def benchmark_count(path: Path) -> int:
+        try:
+            payload = json.loads(path.read_text())
+        except Exception:
+            return -1
+        benchmarks = payload.get("benchmarks")
+        if not isinstance(benchmarks, list):
+            return -1
+        return len(benchmarks)
+
+    return max(existing, key=lambda path: (benchmark_count(path), path.stat().st_mtime_ns))
+
+
+PURE_JIT_RESULTS = most_complete_results_path(PURE_JIT_RESULTS_CANDIDATES)
 CAUSAL_RESULTS = first_existing_path(CAUSAL_RESULTS_CANDIDATES)
-CATEGORY_MAP = {
+CATEGORY_DISPLAY = {
     "baseline": {"label": "baseline", "color": "#4E79A7"},
     "alu-mix": {"label": "alu\nmix", "color": "#F28E2B"},
     "control-flow": {"label": "control\nflow", "color": "#E15759"},
@@ -71,9 +102,18 @@ CATEGORY_MAP = {
     "call-overhead": {"label": "call\noverhead", "color": "#BAB0AC"},
     "call-size": {"label": "call\nsize", "color": "#9C755F"},
 }
-CATEGORY_ORDER = tuple(CATEGORY_MAP)
-CATEGORY_LABELS = {name: meta["label"] for name, meta in CATEGORY_MAP.items()}
-CATEGORY_COLORS = {name: meta["color"] for name, meta in CATEGORY_MAP.items()}
+FALLBACK_CATEGORY_COLORS = (
+    "#4E79A7",
+    "#F28E2B",
+    "#E15759",
+    "#76B7B2",
+    "#59A14F",
+    "#EDC948",
+    "#B07AA1",
+    "#BAB0AC",
+    "#9C755F",
+    "#FF9DA7",
+)
 RUNTIME_COLORS = {
     "llvmbpf": "#2E8B57",
     "kernel": "#C44E52",
@@ -116,7 +156,11 @@ class CausalRuntimeSummary:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--pure-json", default=str(PURE_JIT_RESULTS), help="Path to the 31-benchmark authoritative JSON.")
+    parser.add_argument(
+        "--pure-json",
+        default=str(PURE_JIT_RESULTS),
+        help="Path to the pure-JIT results JSON. Defaults to the active suite output when present.",
+    )
     parser.add_argument(
         "--causal-json",
         default=str(CAUSAL_RESULTS),
@@ -140,6 +184,32 @@ def parse_args() -> argparse.Namespace:
 
 def load_results(path: Path) -> dict[str, object]:
     return json.loads(path.read_text())
+
+
+def build_category_context(
+    manifest: ManifestSpec | None,
+    records: Iterable[BenchmarkRecord],
+) -> tuple[tuple[str, ...], dict[str, str], dict[str, str]]:
+    order: list[str] = list(manifest.categories if manifest is not None else ())
+    for record in records:
+        if record.category not in order:
+            order.append(record.category)
+
+    labels: dict[str, str] = {}
+    colors: dict[str, str] = {}
+    fallback_index = 0
+    for category in order:
+        meta = CATEGORY_DISPLAY.get(category)
+        if meta is None:
+            color = FALLBACK_CATEGORY_COLORS[fallback_index % len(FALLBACK_CATEGORY_COLORS)]
+            label = category.replace("-", "\n")
+            fallback_index += 1
+        else:
+            color = meta["color"]
+            label = meta["label"]
+        labels[category] = label
+        colors[category] = color
+    return tuple(order), labels, colors
 
 
 def get_run(benchmark: dict[str, object], runtime: str) -> dict[str, object]:
@@ -301,9 +371,9 @@ def format_ns(value: float) -> str:
     return f"{value:.1f}" if value < 100.0 else f"{value:.0f}"
 
 
-def require_known_category(category: str) -> str:
-    if category not in CATEGORY_MAP:
-        known = ", ".join(CATEGORY_ORDER)
+def require_known_category(category: str, known_categories: set[str] | None = None) -> str:
+    if known_categories is not None and category not in known_categories:
+        known = ", ".join(sorted(known_categories))
         raise KeyError(f"unknown benchmark category {category!r}; known categories: {known}")
     return category
 
@@ -319,7 +389,11 @@ def is_causal_isolation_benchmark(benchmark: dict[str, object]) -> bool:
     return False
 
 
-def build_benchmark_records(results: dict[str, object]) -> list[BenchmarkRecord]:
+def build_benchmark_records(
+    results: dict[str, object],
+    *,
+    known_categories: set[str] | None = None,
+) -> list[BenchmarkRecord]:
     records: list[dict[str, object]] = []
     exec_pvalues: list[float] = []
 
@@ -333,7 +407,7 @@ def build_benchmark_records(results: dict[str, object]) -> list[BenchmarkRecord]
         kernel_exec_median = extract_metric_center(kernel_run, "exec_ns", center="median")
         llvmbpf_compile_median = extract_metric_center(llvmbpf_run, "compile_ns", center="median")
         kernel_compile_median = extract_metric_center(kernel_run, "compile_ns", center="median")
-        category = require_known_category(str(benchmark["category"]))
+        category = require_known_category(str(benchmark["category"]), known_categories)
 
         records.append(
             {
@@ -361,9 +435,9 @@ def build_benchmark_records(results: dict[str, object]) -> list[BenchmarkRecord]
     ]
 
 
-def summarize_categories(records: list[BenchmarkRecord]) -> list[CategorySummary]:
+def summarize_categories(records: list[BenchmarkRecord], category_order: Sequence[str]) -> list[CategorySummary]:
     summaries: list[CategorySummary] = []
-    for category in CATEGORY_ORDER:
+    for category in category_order:
         category_records = [record for record in records if record.category == category]
         if not category_records:
             continue
@@ -549,8 +623,14 @@ def plot_ratio_bars(
     plt.close(fig)
 
 
-def plot_category_breakdown(records: list[BenchmarkRecord], output_path: Path) -> None:
-    summaries = summarize_categories(records)
+def plot_category_breakdown(
+    records: list[BenchmarkRecord],
+    output_path: Path,
+    *,
+    category_order: Sequence[str],
+    category_labels: Mapping[str, str],
+) -> None:
+    summaries = summarize_categories(records, category_order)
     categories = [summary.category for summary in summaries]
     exec_geomeans = [summary.exec_geomean for summary in summaries]
     code_geomeans = [summary.code_geomean for summary in summaries]
@@ -582,7 +662,7 @@ def plot_category_breakdown(records: list[BenchmarkRecord], output_path: Path) -
     ax.axhline(1.0, color=PARITY_COLOR, linestyle="--", linewidth=1.0)
     ax.set_ylim(0.0, max_value * 1.22)
     ax.set_ylabel("Geomean ratio (llvmbpf / kernel)")
-    ax.set_xticks(x, [CATEGORY_LABELS[category] for category in categories])
+    ax.set_xticks(x, [category_labels[category] for category in categories])
     ax.grid(True, axis="y")
     ax.grid(False, axis="x")
     ax.legend(frameon=False, ncol=2, loc="upper left")
@@ -594,7 +674,14 @@ def plot_category_breakdown(records: list[BenchmarkRecord], output_path: Path) -
     plt.close(fig)
 
 
-def plot_size_vs_exec_scatter(records: list[BenchmarkRecord], output_path: Path) -> None:
+def plot_size_vs_exec_scatter(
+    records: list[BenchmarkRecord],
+    output_path: Path,
+    *,
+    category_order: Sequence[str],
+    category_labels: Mapping[str, str],
+    category_colors: Mapping[str, str],
+) -> None:
     x = np.asarray([record.code_size_ratio for record in records], dtype=np.float64)
     y = np.asarray([record.exec_ratio for record in records], dtype=np.float64)
     fit = linregress(x, y)
@@ -603,7 +690,7 @@ def plot_size_vs_exec_scatter(records: list[BenchmarkRecord], output_path: Path)
     residual_stdev = sample_stdev(residuals)
 
     fig, ax = plt.subplots(figsize=(7.4, 5.4), constrained_layout=True)
-    for category in CATEGORY_ORDER:
+    for category in category_order:
         category_records = [record for record in records if record.category == category]
         if not category_records:
             continue
@@ -611,11 +698,11 @@ def plot_size_vs_exec_scatter(records: list[BenchmarkRecord], output_path: Path)
             [record.code_size_ratio for record in category_records],
             [record.exec_ratio for record in category_records],
             s=46,
-            color=CATEGORY_COLORS[category],
+            color=category_colors[category],
             edgecolor="white",
             linewidth=0.5,
             alpha=0.95,
-            label=category,
+            label=category_labels[category].replace("\n", " "),
         )
 
     x_min = max(0.0, min(float(x.min()) - 0.05, 0.15))
@@ -735,10 +822,13 @@ def main() -> int:
     args = parse_args()
     pure_results = load_results(Path(args.pure_json))
     causal_results = load_results(Path(args.causal_json))
+    manifest = load_manifest_from_results(pure_results, fallback=DEFAULT_MICRO_MANIFEST)
     figures_dir = Path(args.figures_dir)
     figures_dir.mkdir(parents=True, exist_ok=True)
 
-    benchmark_records = build_benchmark_records(pure_results)
+    known_categories = set(manifest.categories) if manifest is not None else None
+    benchmark_records = build_benchmark_records(pure_results, known_categories=known_categories)
+    category_order, category_labels, category_colors = build_category_context(manifest, benchmark_records)
     causal_summaries = build_causal_summaries(causal_results, args.bootstrap_iterations, args.seed)
 
     outputs = [
@@ -767,7 +857,12 @@ def main() -> int:
         win_label="llvmbpf smaller",
         loss_label="kernel smaller",
     )
-    plot_category_breakdown(benchmark_records, outputs[2])
+    plot_category_breakdown(
+        benchmark_records,
+        outputs[2],
+        category_order=category_order,
+        category_labels=category_labels,
+    )
     plot_ratio_bars(
         benchmark_records,
         metric="compile_ratio",
@@ -777,7 +872,13 @@ def main() -> int:
         loss_label="kernel compiles faster",
         highlight_wins=True,
     )
-    plot_size_vs_exec_scatter(benchmark_records, outputs[4])
+    plot_size_vs_exec_scatter(
+        benchmark_records,
+        outputs[4],
+        category_order=category_order,
+        category_labels=category_labels,
+        category_colors=category_colors,
+    )
     plot_causal_isolation(causal_summaries, outputs[5])
 
     print("Generated figures:")

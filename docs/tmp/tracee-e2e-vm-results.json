@@ -1,0 +1,1448 @@
+{
+  "generated_at": "2026-03-11T15:39:23.905356+00:00",
+  "mode_requested": "manual",
+  "mode_selected": "manual",
+  "tracee_binary": null,
+  "tracee_object": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tracee/tracee.bpf.o",
+  "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec",
+  "scanner_binary": "/home/yunwei37/workspace/bpf-benchmark/scanner/build/bpf-jit-scanner",
+  "tooling": {
+    "bpftool": "/sbin/bpftool",
+    "stress-ng": "/bin/stress-ng",
+    "fio": "/bin/fio",
+    "wrk": null,
+    "tracee": null,
+    "curl": "/bin/curl",
+    "dd": "/bin/dd"
+  },
+  "tool_install": {
+    "attempted": false,
+    "installed": [],
+    "error": null
+  },
+  "host": {
+    "hostname": "virtme-ng",
+    "platform": "Linux-7.0.0-rc2-g2a6783cc77b6-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "kernel_version": "7.0.0-rc2-g2a6783cc77b6",
+    "git_sha": "b07cbba99c7a93c9741bcb75590e7c52fc585977",
+    "kernel_cmdline": "virtme_hostname=virtme-ng nr_open=1048576 virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp console=ttyS0 earlyprintk=serial,ttyS0,115200 quiet loglevel=0 panic=-1 virtme.exec=`YmFzaCAtbGMgJy4vdHJhY2VlX3ZtX2d1ZXN0LnNoID4gL3RtcC90cmFjZWVfdm1fZ3Vlc3QubG9nIDI+JjE7IHN0YXR1cz0kPzsgZWNobyBfX1RSQUNFRV9WTV9TVEFUVVNfQkVHSU5fXzsgZWNobyAkc3RhdHVzOyBlY2hvIF9fVFJBQ0VFX1ZNX1NUQVRVU19FTkRfXzsgZWNobyBfX1RSQUNFRV9WTV9MT0dfQkVHSU5fXzsgY2F0IC90bXAvdHJhY2VlX3ZtX2d1ZXN0LmxvZzsgZWNobyBfX1RSQUNFRV9WTV9MT0dfRU5EX187IGVjaG8gX19UUkFDRUVfVk1fTURfQkVHSU5fXzsgY2F0IGRvY3MvdG1wL3RyYWNlZS1lMmUtdm0tcmVzdWx0cy5tZDsgZWNobyBfX1RSQUNFRV9WTV9NRF9FTkRfXzsgZWNobyBfX1RSQUNFRV9WTV9KU09OX0JFR0lOX187IGNhdCBkb2NzL3RtcC90cmFjZWUtZTJlLXZtLXJlc3VsdHMuanNvbjsgZWNobyBfX1RSQUNFRV9WTV9KU09OX0VORF9fOyBleGl0ICRzdGF0dXMn` virtme_chdir=home/yunwei37/workspace/bpf-benchmark rootfstype=9p rootflags=version=9p2000.L,trans=virtio,access=any raid=noautodetect ro quiet loglevel=1 init=/home/yunwei37/.local/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init",
+    "cpu_governor": "unknown",
+    "turbo_state": "unknown",
+    "perf_event_paranoid": "2"
+  },
+  "requested_events": [
+    "execve",
+    "open",
+    "security_file_open",
+    "connect",
+    "module_load"
+  ],
+  "selected_programs": [
+    {
+      "name": "tracepoint__sched__sched_process_exec",
+      "section_name": "raw_tracepoint/sched_process_exec",
+      "prog_type_name": "raw_tracepoint",
+      "attach_type_name": "cgroup_inet_ingress"
+    },
+    {
+      "name": "trace_security_file_open",
+      "section_name": "kprobe/security_file_open",
+      "prog_type_name": "kprobe",
+      "attach_type_name": "cgroup_inet_ingress"
+    },
+    {
+      "name": "trace_security_socket_connect",
+      "section_name": "kprobe/security_socket_connect",
+      "prog_type_name": "kprobe",
+      "attach_type_name": "cgroup_inet_ingress"
+    },
+    {
+      "name": "tracepoint__module__module_load",
+      "section_name": "raw_tracepoint/module_load",
+      "prog_type_name": "raw_tracepoint",
+      "attach_type_name": "cgroup_inet_ingress"
+    },
+    {
+      "name": "lsm_file_open_test",
+      "section_name": "lsm/file_open",
+      "prog_type_name": "lsm",
+      "attach_type_name": "lsm_mac"
+    }
+  ],
+  "directive_scan": {
+    "tracepoint__sched__sched_process_exec": {
+      "performed": true,
+      "cmov_sites": 4,
+      "wide_sites": 0,
+      "rotate_sites": 0,
+      "lea_sites": 0,
+      "total_sites": 4
+    },
+    "trace_security_file_open": {
+      "performed": true,
+      "cmov_sites": 2,
+      "wide_sites": 3,
+      "rotate_sites": 0,
+      "lea_sites": 0,
+      "total_sites": 5
+    },
+    "trace_security_socket_connect": {
+      "performed": true,
+      "cmov_sites": 3,
+      "wide_sites": 0,
+      "rotate_sites": 0,
+      "lea_sites": 0,
+      "total_sites": 3
+    },
+    "tracepoint__module__module_load": {
+      "performed": true,
+      "cmov_sites": 3,
+      "wide_sites": 0,
+      "rotate_sites": 0,
+      "lea_sites": 0,
+      "total_sites": 3
+    },
+    "lsm_file_open_test": {
+      "performed": true,
+      "cmov_sites": 2,
+      "wide_sites": 0,
+      "rotate_sites": 0,
+      "lea_sites": 0,
+      "total_sites": 2
+    }
+  },
+  "records": [
+    {
+      "suite": "tracee_e2e",
+      "target": {
+        "name": "tracee",
+        "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tracee/tracee.bpf.o",
+        "events": [
+          "execve",
+          "open",
+          "security_file_open",
+          "connect",
+          "module_load"
+        ]
+      },
+      "backend": "kernel",
+      "policy_mode": "stock",
+      "transport": "local",
+      "manifest": null,
+      "host": {
+        "hostname": "virtme-ng",
+        "platform": "Linux-7.0.0-rc2-g2a6783cc77b6-x86_64-with-glibc2.39",
+        "python": "3.12.3",
+        "kernel_version": "7.0.0-rc2-g2a6783cc77b6",
+        "git_sha": "b07cbba99c7a93c9741bcb75590e7c52fc585977",
+        "kernel_cmdline": "virtme_hostname=virtme-ng nr_open=1048576 virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp console=ttyS0 earlyprintk=serial,ttyS0,115200 quiet loglevel=0 panic=-1 virtme.exec=`YmFzaCAtbGMgJy4vdHJhY2VlX3ZtX2d1ZXN0LnNoID4gL3RtcC90cmFjZWVfdm1fZ3Vlc3QubG9nIDI+JjE7IHN0YXR1cz0kPzsgZWNobyBfX1RSQUNFRV9WTV9TVEFUVVNfQkVHSU5fXzsgZWNobyAkc3RhdHVzOyBlY2hvIF9fVFJBQ0VFX1ZNX1NUQVRVU19FTkRfXzsgZWNobyBfX1RSQUNFRV9WTV9MT0dfQkVHSU5fXzsgY2F0IC90bXAvdHJhY2VlX3ZtX2d1ZXN0LmxvZzsgZWNobyBfX1RSQUNFRV9WTV9MT0dfRU5EX187IGVjaG8gX19UUkFDRUVfVk1fTURfQkVHSU5fXzsgY2F0IGRvY3MvdG1wL3RyYWNlZS1lMmUtdm0tcmVzdWx0cy5tZDsgZWNobyBfX1RSQUNFRV9WTV9NRF9FTkRfXzsgZWNobyBfX1RSQUNFRV9WTV9KU09OX0JFR0lOX187IGNhdCBkb2NzL3RtcC90cmFjZWUtZTJlLXZtLXJlc3VsdHMuanNvbjsgZWNobyBfX1RSQUNFRV9WTV9KU09OX0VORF9fOyBleGl0ICRzdGF0dXMn` virtme_chdir=home/yunwei37/workspace/bpf-benchmark rootfstype=9p rootflags=version=9p2000.L,trans=virtio,access=any raid=noautodetect ro quiet loglevel=1 init=/home/yunwei37/.local/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init",
+        "cpu_governor": "unknown",
+        "turbo_state": "unknown",
+        "perf_event_paranoid": "2"
+      },
+      "inventory": {
+        "selected_program_count": 5,
+        "selected_programs": [
+          {
+            "name": "tracepoint__sched__sched_process_exec",
+            "section_name": "raw_tracepoint/sched_process_exec",
+            "prog_type_name": "raw_tracepoint",
+            "attach_type_name": "cgroup_inet_ingress"
+          },
+          {
+            "name": "trace_security_file_open",
+            "section_name": "kprobe/security_file_open",
+            "prog_type_name": "kprobe",
+            "attach_type_name": "cgroup_inet_ingress"
+          },
+          {
+            "name": "trace_security_socket_connect",
+            "section_name": "kprobe/security_socket_connect",
+            "prog_type_name": "kprobe",
+            "attach_type_name": "cgroup_inet_ingress"
+          },
+          {
+            "name": "tracepoint__module__module_load",
+            "section_name": "raw_tracepoint/module_load",
+            "prog_type_name": "raw_tracepoint",
+            "attach_type_name": "cgroup_inet_ingress"
+          },
+          {
+            "name": "lsm_file_open_test",
+            "section_name": "lsm/file_open",
+            "prog_type_name": "lsm",
+            "attach_type_name": "lsm_mac"
+          }
+        ],
+        "aggregated_program_metrics": {
+          "lsm_file_open_test": {
+            "prog_id": 51,
+            "total_run_cnt_delta": 1747,
+            "total_run_time_ns_delta": 255897,
+            "average_ns_per_run": 152.98507231242334
+          },
+          "trace_security_file_open": {
+            "prog_id": 48,
+            "total_run_cnt_delta": 1747,
+            "total_run_time_ns_delta": 558137,
+            "average_ns_per_run": 341.60417284611805
+          },
+          "trace_security_socket_connect": {
+            "prog_id": 49,
+            "total_run_cnt_delta": 43,
+            "total_run_time_ns_delta": 34587,
+            "average_ns_per_run": 824.7789473684211
+          },
+          "tracepoint__module__module_load": {
+            "prog_id": 50,
+            "total_run_cnt_delta": 0,
+            "total_run_time_ns_delta": 0,
+            "average_ns_per_run": null
+          },
+          "tracepoint__sched__sched_process_exec": {
+            "prog_id": 46,
+            "total_run_cnt_delta": 37,
+            "total_run_time_ns_delta": 75848,
+            "average_ns_per_run": 2862.4166666666665
+          }
+        }
+      },
+      "artifacts": {
+        "tracee_object": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tracee/tracee.bpf.o",
+        "tracee_binary": null,
+        "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec",
+        "scanner_binary": "/home/yunwei37/workspace/bpf-benchmark/scanner/build/bpf-jit-scanner"
+      },
+      "compile": null,
+      "execution": {
+        "variant": "stock",
+        "workloads": [
+          {
+            "name": "process-exec",
+            "description": "stress-ng exec workload for execve coverage",
+            "event_names": [
+              "execve"
+            ],
+            "requested_ops": 25,
+            "completed_ops": 25,
+            "duration_seconds": 0.13636843700000156,
+            "ops_per_sec": 183.3268793716519,
+            "events_captured": {
+              "execve": 1
+            },
+            "events_per_sec": {
+              "execve": 7.333075174866076
+            },
+            "total_events": 1,
+            "total_events_per_sec": 7.333075174866076,
+            "agent_cpu_percent": null,
+            "drop_counters": null,
+            "relevant_program_deltas": [
+              {
+                "name": "tracepoint__sched__sched_process_exec",
+                "prog_id": 46,
+                "run_cnt_delta": 1,
+                "run_time_ns_delta": 4407,
+                "average_ns_per_run": 4407.0,
+                "bytes_xlated": 34920,
+                "bytes_jited": 20298
+              }
+            ],
+            "all_program_deltas": [
+              {
+                "name": "lsm_file_open_test",
+                "prog_id": 51,
+                "run_cnt_delta": 254,
+                "run_time_ns_delta": 42705,
+                "average_ns_per_run": 168.12992125984252,
+                "bytes_xlated": 13440,
+                "bytes_jited": 7369
+              },
+              {
+                "name": "trace_security_file_open",
+                "prog_id": 48,
+                "run_cnt_delta": 254,
+                "run_time_ns_delta": 96047,
+                "average_ns_per_run": 378.1377952755906,
+                "bytes_xlated": 36664,
+                "bytes_jited": 22797
+              },
+              {
+                "name": "trace_security_socket_connect",
+                "prog_id": 49,
+                "run_cnt_delta": 5,
+                "run_time_ns_delta": 4257,
+                "average_ns_per_run": 851.4,
+                "bytes_xlated": 15560,
+                "bytes_jited": 10164
+              },
+              {
+                "name": "tracepoint__module__module_load",
+                "prog_id": 50,
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "average_ns_per_run": null,
+                "bytes_xlated": 32248,
+                "bytes_jited": 19665
+              },
+              {
+                "name": "tracepoint__sched__sched_process_exec",
+                "prog_id": 46,
+                "run_cnt_delta": 1,
+                "run_time_ns_delta": 4407,
+                "average_ns_per_run": 4407.0,
+                "bytes_xlated": 34920,
+                "bytes_jited": 20298
+              }
+            ],
+            "average_ns_per_run": 4407.0,
+            "command": [
+              "/bin/stress-ng",
+              "--exec",
+              "1",
+              "--exec-method",
+              "execve",
+              "--exec-ops",
+              "25",
+              "--timeout",
+              "25s",
+              "--metrics-brief"
+            ],
+            "stdout_tail": "stress-ng: info:  [151] setting to a 25 secs run per stressor\nstress-ng: info:  [151] dispatching hogs:\nstress-ng: metrc: [151] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [151]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: warn:  [151] metrics-check: all bogo-op counters are zero, data may be incorrect\nstress-ng: info:  [151] skipped: 1: exec (1)\nstress-ng: info:  [151] passed: 0\nstress-ng: info:  [151] failed: 0\nstress-ng: info:  [151] metrics untrustworthy: 0\nstress-ng: info:  [151] successful run completed in 0.00 secs",
+            "stderr_tail": "",
+            "unsupported_events": []
+          },
+          {
+            "name": "file-open",
+            "description": "dd write/read loop for security_file_open coverage",
+            "event_names": [
+              "open",
+              "security_file_open"
+            ],
+            "requested_ops": 12,
+            "completed_ops": 12,
+            "duration_seconds": 0.29703635099999914,
+            "ops_per_sec": 40.39909579955766,
+            "events_captured": {
+              "security_file_open": 920
+            },
+            "events_per_sec": {
+              "security_file_open": 3097.2640112994204
+            },
+            "total_events": 920,
+            "total_events_per_sec": 3097.2640112994204,
+            "agent_cpu_percent": null,
+            "drop_counters": null,
+            "relevant_program_deltas": [
+              {
+                "name": "lsm_file_open_test",
+                "prog_id": 51,
+                "run_cnt_delta": 460,
+                "run_time_ns_delta": 70028,
+                "average_ns_per_run": 152.23478260869564,
+                "bytes_xlated": 13440,
+                "bytes_jited": 7369
+              },
+              {
+                "name": "trace_security_file_open",
+                "prog_id": 48,
+                "run_cnt_delta": 460,
+                "run_time_ns_delta": 165315,
+                "average_ns_per_run": 359.3804347826087,
+                "bytes_xlated": 36664,
+                "bytes_jited": 22797
+              }
+            ],
+            "all_program_deltas": [
+              {
+                "name": "lsm_file_open_test",
+                "prog_id": 51,
+                "run_cnt_delta": 460,
+                "run_time_ns_delta": 70028,
+                "average_ns_per_run": 152.23478260869564,
+                "bytes_xlated": 13440,
+                "bytes_jited": 7369
+              },
+              {
+                "name": "trace_security_file_open",
+                "prog_id": 48,
+                "run_cnt_delta": 460,
+                "run_time_ns_delta": 165315,
+                "average_ns_per_run": 359.3804347826087,
+                "bytes_xlated": 36664,
+                "bytes_jited": 22797
+              },
+              {
+                "name": "trace_security_socket_connect",
+                "prog_id": 49,
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "average_ns_per_run": null,
+                "bytes_xlated": 15560,
+                "bytes_jited": 10164
+              },
+              {
+                "name": "tracepoint__module__module_load",
+                "prog_id": 50,
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "average_ns_per_run": null,
+                "bytes_xlated": 32248,
+                "bytes_jited": 19665
+              },
+              {
+                "name": "tracepoint__sched__sched_process_exec",
+                "prog_id": 46,
+                "run_cnt_delta": 24,
+                "run_time_ns_delta": 42556,
+                "average_ns_per_run": 1773.1666666666667,
+                "bytes_xlated": 34920,
+                "bytes_jited": 20298
+              }
+            ],
+            "average_ns_per_run": 255.80760869565216,
+            "command": [
+              "dd",
+              "loop"
+            ],
+            "stdout_tail": "",
+            "stderr_tail": "",
+            "unsupported_events": [
+              "open"
+            ]
+          },
+          {
+            "name": "network-connect",
+            "description": "curl loop against a localhost HTTP server",
+            "event_names": [
+              "connect"
+            ],
+            "requested_ops": 12,
+            "completed_ops": 12,
+            "duration_seconds": 0.8856252399999995,
+            "ops_per_sec": 13.549749327379159,
+            "events_captured": {
+              "connect": 38
+            },
+            "events_per_sec": {
+              "connect": 42.90753953670067
+            },
+            "total_events": 38,
+            "total_events_per_sec": 42.90753953670067,
+            "agent_cpu_percent": null,
+            "drop_counters": null,
+            "relevant_program_deltas": [
+              {
+                "name": "trace_security_socket_connect",
+                "prog_id": 49,
+                "run_cnt_delta": 38,
+                "run_time_ns_delta": 30330,
+                "average_ns_per_run": 798.1578947368421,
+                "bytes_xlated": 15560,
+                "bytes_jited": 10164
+              }
+            ],
+            "all_program_deltas": [
+              {
+                "name": "lsm_file_open_test",
+                "prog_id": 51,
+                "run_cnt_delta": 1033,
+                "run_time_ns_delta": 143164,
+                "average_ns_per_run": 138.59051306873184,
+                "bytes_xlated": 13440,
+                "bytes_jited": 7369
+              },
+              {
+                "name": "trace_security_file_open",
+                "prog_id": 48,
+                "run_cnt_delta": 1033,
+                "run_time_ns_delta": 296775,
+                "average_ns_per_run": 287.2942884801549,
+                "bytes_xlated": 36664,
+                "bytes_jited": 22797
+              },
+              {
+                "name": "trace_security_socket_connect",
+                "prog_id": 49,
+                "run_cnt_delta": 38,
+                "run_time_ns_delta": 30330,
+                "average_ns_per_run": 798.1578947368421,
+                "bytes_xlated": 15560,
+                "bytes_jited": 10164
+              },
+              {
+                "name": "tracepoint__module__module_load",
+                "prog_id": 50,
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "average_ns_per_run": null,
+                "bytes_xlated": 32248,
+                "bytes_jited": 19665
+              },
+              {
+                "name": "tracepoint__sched__sched_process_exec",
+                "prog_id": 46,
+                "run_cnt_delta": 12,
+                "run_time_ns_delta": 28885,
+                "average_ns_per_run": 2407.0833333333335,
+                "bytes_xlated": 34920,
+                "bytes_jited": 20298
+              }
+            ],
+            "average_ns_per_run": 798.1578947368421,
+            "command": [
+              "/bin/curl",
+              "loop",
+              "http://127.0.0.1:43595/"
+            ],
+            "stdout_tail": "",
+            "stderr_tail": "",
+            "unsupported_events": []
+          }
+        ]
+      },
+      "directive_scan": {
+        "programs": {
+          "tracepoint__sched__sched_process_exec": {
+            "performed": true,
+            "cmov_sites": 4,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 4
+          },
+          "trace_security_file_open": {
+            "performed": true,
+            "cmov_sites": 2,
+            "wide_sites": 3,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 5
+          },
+          "trace_security_socket_connect": {
+            "performed": true,
+            "cmov_sites": 3,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 3
+          },
+          "tracepoint__module__module_load": {
+            "performed": true,
+            "cmov_sites": 3,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 3
+          },
+          "lsm_file_open_test": {
+            "performed": true,
+            "cmov_sites": 2,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 2
+          }
+        },
+        "summary": {
+          "performed": true,
+          "cmov_sites": 14,
+          "wide_sites": 3,
+          "rotate_sites": 0,
+          "lea_sites": 0,
+          "total_sites": 17
+        }
+      },
+      "recompile": {
+        "requested": false,
+        "mode": "stock",
+        "requested_programs": 5,
+        "applied_programs": 0,
+        "skipped_programs": 0,
+        "applied": false,
+        "error": null,
+        "details": []
+      },
+      "perf_counters": null,
+      "samples": [],
+      "statistics": {
+        "workload_ops_per_sec": {
+          "count": 3,
+          "mean": 79.09190816619623,
+          "median": 40.39909579955766,
+          "min": 13.549749327379159,
+          "max": 183.3268793716519,
+          "p95": 183.3268793716519,
+          "stdev": 91.26291014507153
+        },
+        "events_per_sec": {
+          "count": 3,
+          "mean": 1049.168208670329,
+          "median": 42.90753953670067,
+          "min": 7.333075174866076,
+          "max": 3097.2640112994204,
+          "p95": 3097.2640112994204,
+          "stdev": 1773.7921801013879
+        },
+        "average_ns_per_run": {
+          "count": 3,
+          "mean": 1820.321834477498,
+          "median": 798.1578947368421,
+          "min": 255.80760869565216,
+          "max": 4407.0,
+          "p95": 4407.0,
+          "stdev": 2256.482640568144
+        },
+        "agent_cpu_percent": {
+          "count": 0,
+          "mean": null,
+          "median": null,
+          "min": null,
+          "max": null,
+          "p95": null,
+          "stdev": null
+        },
+        "event_totals": {
+          "execve": 1,
+          "security_file_open": 920,
+          "connect": 38
+        }
+      },
+      "correctness": {
+        "comparable": true,
+        "applied": false
+      },
+      "metadata": {
+        "benchmark_mode": "manual",
+        "tracee_install": {
+          "explicit": null,
+          "apt_attempted": false,
+          "error": "tracee package not available via apt"
+        },
+        "requested_events": [
+          "execve",
+          "open",
+          "security_file_open",
+          "connect",
+          "module_load"
+        ]
+      }
+    },
+    {
+      "suite": "tracee_e2e",
+      "target": {
+        "name": "tracee",
+        "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tracee/tracee.bpf.o",
+        "events": [
+          "execve",
+          "open",
+          "security_file_open",
+          "connect",
+          "module_load"
+        ]
+      },
+      "backend": "kernel",
+      "policy_mode": "v5-all",
+      "transport": "local",
+      "manifest": null,
+      "host": {
+        "hostname": "virtme-ng",
+        "platform": "Linux-7.0.0-rc2-g2a6783cc77b6-x86_64-with-glibc2.39",
+        "python": "3.12.3",
+        "kernel_version": "7.0.0-rc2-g2a6783cc77b6",
+        "git_sha": "b07cbba99c7a93c9741bcb75590e7c52fc585977",
+        "kernel_cmdline": "virtme_hostname=virtme-ng nr_open=1048576 virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp console=ttyS0 earlyprintk=serial,ttyS0,115200 quiet loglevel=0 panic=-1 virtme.exec=`YmFzaCAtbGMgJy4vdHJhY2VlX3ZtX2d1ZXN0LnNoID4gL3RtcC90cmFjZWVfdm1fZ3Vlc3QubG9nIDI+JjE7IHN0YXR1cz0kPzsgZWNobyBfX1RSQUNFRV9WTV9TVEFUVVNfQkVHSU5fXzsgZWNobyAkc3RhdHVzOyBlY2hvIF9fVFJBQ0VFX1ZNX1NUQVRVU19FTkRfXzsgZWNobyBfX1RSQUNFRV9WTV9MT0dfQkVHSU5fXzsgY2F0IC90bXAvdHJhY2VlX3ZtX2d1ZXN0LmxvZzsgZWNobyBfX1RSQUNFRV9WTV9MT0dfRU5EX187IGVjaG8gX19UUkFDRUVfVk1fTURfQkVHSU5fXzsgY2F0IGRvY3MvdG1wL3RyYWNlZS1lMmUtdm0tcmVzdWx0cy5tZDsgZWNobyBfX1RSQUNFRV9WTV9NRF9FTkRfXzsgZWNobyBfX1RSQUNFRV9WTV9KU09OX0JFR0lOX187IGNhdCBkb2NzL3RtcC90cmFjZWUtZTJlLXZtLXJlc3VsdHMuanNvbjsgZWNobyBfX1RSQUNFRV9WTV9KU09OX0VORF9fOyBleGl0ICRzdGF0dXMn` virtme_chdir=home/yunwei37/workspace/bpf-benchmark rootfstype=9p rootflags=version=9p2000.L,trans=virtio,access=any raid=noautodetect ro quiet loglevel=1 init=/home/yunwei37/.local/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init",
+        "cpu_governor": "unknown",
+        "turbo_state": "unknown",
+        "perf_event_paranoid": "2"
+      },
+      "inventory": {
+        "selected_program_count": 5,
+        "selected_programs": [
+          {
+            "name": "tracepoint__sched__sched_process_exec",
+            "section_name": "raw_tracepoint/sched_process_exec",
+            "prog_type_name": "raw_tracepoint",
+            "attach_type_name": "cgroup_inet_ingress"
+          },
+          {
+            "name": "trace_security_file_open",
+            "section_name": "kprobe/security_file_open",
+            "prog_type_name": "kprobe",
+            "attach_type_name": "cgroup_inet_ingress"
+          },
+          {
+            "name": "trace_security_socket_connect",
+            "section_name": "kprobe/security_socket_connect",
+            "prog_type_name": "kprobe",
+            "attach_type_name": "cgroup_inet_ingress"
+          },
+          {
+            "name": "tracepoint__module__module_load",
+            "section_name": "raw_tracepoint/module_load",
+            "prog_type_name": "raw_tracepoint",
+            "attach_type_name": "cgroup_inet_ingress"
+          },
+          {
+            "name": "lsm_file_open_test",
+            "section_name": "lsm/file_open",
+            "prog_type_name": "lsm",
+            "attach_type_name": "lsm_mac"
+          }
+        ],
+        "aggregated_program_metrics": {
+          "lsm_file_open_test": {
+            "prog_id": 58,
+            "total_run_cnt_delta": 1737,
+            "total_run_time_ns_delta": 341668,
+            "average_ns_per_run": 166.2431349076892
+          },
+          "trace_security_file_open": {
+            "prog_id": 55,
+            "total_run_cnt_delta": 1737,
+            "total_run_time_ns_delta": 781729,
+            "average_ns_per_run": 353.82365756655537
+          },
+          "trace_security_socket_connect": {
+            "prog_id": 56,
+            "total_run_cnt_delta": 41,
+            "total_run_time_ns_delta": 45318,
+            "average_ns_per_run": 802.6722222222222
+          },
+          "tracepoint__module__module_load": {
+            "prog_id": 57,
+            "total_run_cnt_delta": 0,
+            "total_run_time_ns_delta": 0,
+            "average_ns_per_run": null
+          },
+          "tracepoint__sched__sched_process_exec": {
+            "prog_id": 54,
+            "total_run_cnt_delta": 37,
+            "total_run_time_ns_delta": 88609,
+            "average_ns_per_run": 2380.972222222222
+          }
+        }
+      },
+      "artifacts": {
+        "tracee_object": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tracee/tracee.bpf.o",
+        "tracee_binary": null,
+        "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec",
+        "scanner_binary": "/home/yunwei37/workspace/bpf-benchmark/scanner/build/bpf-jit-scanner"
+      },
+      "compile": null,
+      "execution": {
+        "variant": "bpfrejit",
+        "workloads": [
+          {
+            "name": "process-exec",
+            "description": "stress-ng exec workload for execve coverage",
+            "event_names": [
+              "execve"
+            ],
+            "requested_ops": 25,
+            "completed_ops": 25,
+            "duration_seconds": 0.06230630000000126,
+            "ops_per_sec": 401.2435339604421,
+            "events_captured": {
+              "execve": 1
+            },
+            "events_per_sec": {
+              "execve": 16.049741358417684
+            },
+            "total_events": 1,
+            "total_events_per_sec": 16.049741358417684,
+            "agent_cpu_percent": null,
+            "drop_counters": null,
+            "relevant_program_deltas": [
+              {
+                "name": "tracepoint__sched__sched_process_exec",
+                "prog_id": 54,
+                "run_cnt_delta": 1,
+                "run_time_ns_delta": 1628,
+                "average_ns_per_run": 1628.0,
+                "bytes_xlated": 34920,
+                "bytes_jited": 20320
+              }
+            ],
+            "all_program_deltas": [
+              {
+                "name": "lsm_file_open_test",
+                "prog_id": 58,
+                "run_cnt_delta": 254,
+                "run_time_ns_delta": 30016,
+                "average_ns_per_run": 118.1732283464567,
+                "bytes_xlated": 13440,
+                "bytes_jited": 7380
+              },
+              {
+                "name": "trace_security_file_open",
+                "prog_id": 55,
+                "run_cnt_delta": 254,
+                "run_time_ns_delta": 43728,
+                "average_ns_per_run": 172.15748031496062,
+                "bytes_xlated": 36664,
+                "bytes_jited": 22766
+              },
+              {
+                "name": "trace_security_socket_connect",
+                "prog_id": 56,
+                "run_cnt_delta": 5,
+                "run_time_ns_delta": 2012,
+                "average_ns_per_run": 402.4,
+                "bytes_xlated": 15560,
+                "bytes_jited": 10178
+              },
+              {
+                "name": "tracepoint__module__module_load",
+                "prog_id": 57,
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "average_ns_per_run": null,
+                "bytes_xlated": 32248,
+                "bytes_jited": 19677
+              },
+              {
+                "name": "tracepoint__sched__sched_process_exec",
+                "prog_id": 54,
+                "run_cnt_delta": 1,
+                "run_time_ns_delta": 1628,
+                "average_ns_per_run": 1628.0,
+                "bytes_xlated": 34920,
+                "bytes_jited": 20320
+              }
+            ],
+            "average_ns_per_run": 1628.0,
+            "command": [
+              "/bin/stress-ng",
+              "--exec",
+              "1",
+              "--exec-method",
+              "execve",
+              "--exec-ops",
+              "25",
+              "--timeout",
+              "25s",
+              "--metrics-brief"
+            ],
+            "stdout_tail": "stress-ng: info:  [211] setting to a 25 secs run per stressor\nstress-ng: info:  [211] dispatching hogs:\nstress-ng: metrc: [211] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [211]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: warn:  [211] metrics-check: all bogo-op counters are zero, data may be incorrect\nstress-ng: info:  [211] skipped: 1: exec (1)\nstress-ng: info:  [211] passed: 0\nstress-ng: info:  [211] failed: 0\nstress-ng: info:  [211] metrics untrustworthy: 0\nstress-ng: info:  [211] successful run completed in 0.00 secs",
+            "stderr_tail": "",
+            "unsupported_events": []
+          },
+          {
+            "name": "file-open",
+            "description": "dd write/read loop for security_file_open coverage",
+            "event_names": [
+              "open",
+              "security_file_open"
+            ],
+            "requested_ops": 12,
+            "completed_ops": 12,
+            "duration_seconds": 0.2822817640000004,
+            "ops_per_sec": 42.510716349356464,
+            "events_captured": {
+              "security_file_open": 916
+            },
+            "events_per_sec": {
+              "security_file_open": 3244.9846813342106
+            },
+            "total_events": 916,
+            "total_events_per_sec": 3244.9846813342106,
+            "agent_cpu_percent": null,
+            "drop_counters": null,
+            "relevant_program_deltas": [
+              {
+                "name": "lsm_file_open_test",
+                "prog_id": 58,
+                "run_cnt_delta": 458,
+                "run_time_ns_delta": 63343,
+                "average_ns_per_run": 138.30349344978166,
+                "bytes_xlated": 13440,
+                "bytes_jited": 7380
+              },
+              {
+                "name": "trace_security_file_open",
+                "prog_id": 55,
+                "run_cnt_delta": 458,
+                "run_time_ns_delta": 140183,
+                "average_ns_per_run": 306.0764192139738,
+                "bytes_xlated": 36664,
+                "bytes_jited": 22766
+              }
+            ],
+            "all_program_deltas": [
+              {
+                "name": "lsm_file_open_test",
+                "prog_id": 58,
+                "run_cnt_delta": 458,
+                "run_time_ns_delta": 63343,
+                "average_ns_per_run": 138.30349344978166,
+                "bytes_xlated": 13440,
+                "bytes_jited": 7380
+              },
+              {
+                "name": "trace_security_file_open",
+                "prog_id": 55,
+                "run_cnt_delta": 458,
+                "run_time_ns_delta": 140183,
+                "average_ns_per_run": 306.0764192139738,
+                "bytes_xlated": 36664,
+                "bytes_jited": 22766
+              },
+              {
+                "name": "trace_security_socket_connect",
+                "prog_id": 56,
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "average_ns_per_run": null,
+                "bytes_xlated": 15560,
+                "bytes_jited": 10178
+              },
+              {
+                "name": "tracepoint__module__module_load",
+                "prog_id": 57,
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "average_ns_per_run": null,
+                "bytes_xlated": 32248,
+                "bytes_jited": 19677
+              },
+              {
+                "name": "tracepoint__sched__sched_process_exec",
+                "prog_id": 54,
+                "run_cnt_delta": 24,
+                "run_time_ns_delta": 41604,
+                "average_ns_per_run": 1733.5,
+                "bytes_xlated": 34920,
+                "bytes_jited": 20320
+              }
+            ],
+            "average_ns_per_run": 222.18995633187774,
+            "command": [
+              "dd",
+              "loop"
+            ],
+            "stdout_tail": "",
+            "stderr_tail": "",
+            "unsupported_events": [
+              "open"
+            ]
+          },
+          {
+            "name": "network-connect",
+            "description": "curl loop against a localhost HTTP server",
+            "event_names": [
+              "connect"
+            ],
+            "requested_ops": 12,
+            "completed_ops": 12,
+            "duration_seconds": 0.9389162549999988,
+            "ops_per_sec": 12.780692565600557,
+            "events_captured": {
+              "connect": 36
+            },
+            "events_per_sec": {
+              "connect": 38.34207769680167
+            },
+            "total_events": 36,
+            "total_events_per_sec": 38.34207769680167,
+            "agent_cpu_percent": null,
+            "drop_counters": null,
+            "relevant_program_deltas": [
+              {
+                "name": "trace_security_socket_connect",
+                "prog_id": 56,
+                "run_cnt_delta": 36,
+                "run_time_ns_delta": 43306,
+                "average_ns_per_run": 1202.9444444444443,
+                "bytes_xlated": 15560,
+                "bytes_jited": 10178
+              }
+            ],
+            "all_program_deltas": [
+              {
+                "name": "lsm_file_open_test",
+                "prog_id": 58,
+                "run_cnt_delta": 1025,
+                "run_time_ns_delta": 248309,
+                "average_ns_per_run": 242.25268292682927,
+                "bytes_xlated": 13440,
+                "bytes_jited": 7380
+              },
+              {
+                "name": "trace_security_file_open",
+                "prog_id": 55,
+                "run_cnt_delta": 1025,
+                "run_time_ns_delta": 597818,
+                "average_ns_per_run": 583.2370731707317,
+                "bytes_xlated": 36664,
+                "bytes_jited": 22766
+              },
+              {
+                "name": "trace_security_socket_connect",
+                "prog_id": 56,
+                "run_cnt_delta": 36,
+                "run_time_ns_delta": 43306,
+                "average_ns_per_run": 1202.9444444444443,
+                "bytes_xlated": 15560,
+                "bytes_jited": 10178
+              },
+              {
+                "name": "tracepoint__module__module_load",
+                "prog_id": 57,
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "average_ns_per_run": null,
+                "bytes_xlated": 32248,
+                "bytes_jited": 19677
+              },
+              {
+                "name": "tracepoint__sched__sched_process_exec",
+                "prog_id": 54,
+                "run_cnt_delta": 12,
+                "run_time_ns_delta": 45377,
+                "average_ns_per_run": 3781.4166666666665,
+                "bytes_xlated": 34920,
+                "bytes_jited": 20320
+              }
+            ],
+            "average_ns_per_run": 1202.9444444444443,
+            "command": [
+              "/bin/curl",
+              "loop",
+              "http://127.0.0.1:41881/"
+            ],
+            "stdout_tail": "",
+            "stderr_tail": "",
+            "unsupported_events": []
+          }
+        ]
+      },
+      "directive_scan": {
+        "programs": {
+          "tracepoint__sched__sched_process_exec": {
+            "performed": true,
+            "cmov_sites": 4,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 4
+          },
+          "trace_security_file_open": {
+            "performed": true,
+            "cmov_sites": 2,
+            "wide_sites": 3,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 5
+          },
+          "trace_security_socket_connect": {
+            "performed": true,
+            "cmov_sites": 3,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 3
+          },
+          "tracepoint__module__module_load": {
+            "performed": true,
+            "cmov_sites": 3,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 3
+          },
+          "lsm_file_open_test": {
+            "performed": true,
+            "cmov_sites": 2,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 2
+          }
+        },
+        "summary": {
+          "performed": true,
+          "cmov_sites": 14,
+          "wide_sites": 3,
+          "rotate_sites": 0,
+          "lea_sites": 0,
+          "total_sites": 17
+        }
+      },
+      "recompile": {
+        "requested": true,
+        "mode": "v5",
+        "requested_programs": 5,
+        "applied_programs": 5,
+        "skipped_programs": 0,
+        "applied": true,
+        "error": null,
+        "details": [
+          {
+            "program": "tracepoint__sched__sched_process_exec",
+            "prog_id": 54,
+            "attempted": true,
+            "applied": true,
+            "stdout_tail": "Accepted 4 v5 site(s)\n  cmov:   4\n  wide:   0\n  rotate: 0\n  lea:    0\nApplied 4 v5 rule(s) via BPF_PROG_JIT_RECOMPILE",
+            "stderr_tail": "",
+            "error": null
+          },
+          {
+            "program": "trace_security_file_open",
+            "prog_id": 55,
+            "attempted": true,
+            "applied": true,
+            "stdout_tail": "Accepted 5 v5 site(s)\n  cmov:   2\n  wide:   3\n  rotate: 0\n  lea:    0\nApplied 5 v5 rule(s) via BPF_PROG_JIT_RECOMPILE",
+            "stderr_tail": "",
+            "error": null
+          },
+          {
+            "program": "trace_security_socket_connect",
+            "prog_id": 56,
+            "attempted": true,
+            "applied": true,
+            "stdout_tail": "Accepted 3 v5 site(s)\n  cmov:   3\n  wide:   0\n  rotate: 0\n  lea:    0\nApplied 3 v5 rule(s) via BPF_PROG_JIT_RECOMPILE",
+            "stderr_tail": "",
+            "error": null
+          },
+          {
+            "program": "tracepoint__module__module_load",
+            "prog_id": 57,
+            "attempted": true,
+            "applied": true,
+            "stdout_tail": "Accepted 3 v5 site(s)\n  cmov:   3\n  wide:   0\n  rotate: 0\n  lea:    0\nApplied 3 v5 rule(s) via BPF_PROG_JIT_RECOMPILE",
+            "stderr_tail": "",
+            "error": null
+          },
+          {
+            "program": "lsm_file_open_test",
+            "prog_id": 58,
+            "attempted": true,
+            "applied": true,
+            "stdout_tail": "Accepted 2 v5 site(s)\n  cmov:   2\n  wide:   0\n  rotate: 0\n  lea:    0\nApplied 2 v5 rule(s) via BPF_PROG_JIT_RECOMPILE",
+            "stderr_tail": "",
+            "error": null
+          }
+        ]
+      },
+      "perf_counters": null,
+      "samples": [],
+      "statistics": {
+        "workload_ops_per_sec": {
+          "count": 3,
+          "mean": 152.17831429179972,
+          "median": 42.510716349356464,
+          "min": 12.780692565600557,
+          "max": 401.2435339604421,
+          "p95": 401.2435339604421,
+          "stdev": 216.208421008497
+        },
+        "events_per_sec": {
+          "count": 3,
+          "mean": 1099.7921667964767,
+          "median": 38.34207769680167,
+          "min": 16.049741358417684,
+          "max": 3244.9846813342106,
+          "p95": 3244.9846813342106,
+          "stdev": 1857.8246500642626
+        },
+        "average_ns_per_run": {
+          "count": 3,
+          "mean": 1017.7114669254407,
+          "median": 1202.9444444444443,
+          "min": 222.18995633187774,
+          "max": 1628.0,
+          "p95": 1628.0,
+          "stdev": 720.977747014399
+        },
+        "agent_cpu_percent": {
+          "count": 0,
+          "mean": null,
+          "median": null,
+          "min": null,
+          "max": null,
+          "p95": null,
+          "stdev": null
+        },
+        "event_totals": {
+          "execve": 1,
+          "security_file_open": 916,
+          "connect": 36
+        }
+      },
+      "correctness": {
+        "comparable": true,
+        "applied": true
+      },
+      "metadata": {
+        "benchmark_mode": "manual",
+        "tracee_install": {
+          "explicit": null,
+          "apt_attempted": false,
+          "error": "tracee package not available via apt"
+        },
+        "requested_events": [
+          "execve",
+          "open",
+          "security_file_open",
+          "connect",
+          "module_load"
+        ]
+      }
+    }
+  ],
+  "comparison": {
+    "comparable": true,
+    "events_per_sec_speedup": 0.893597677956016,
+    "workload_ops_per_sec_speedup": 1.0522690052340709,
+    "average_ns_per_run_ratio": 1.507150968970949
+  },
+  "cgroup_test_run": {
+    "repeat": 8,
+    "records": [
+      {
+        "program": "cgroup_skb_ingress",
+        "baseline": {
+          "compile_ns": 344560751,
+          "exec_ns": 42,
+          "timing_source": "ktime",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "wall_exec_ns": 1369,
+          "exec_cycles": 5048,
+          "tsc_freq_hz": 3686105124,
+          "result": 0,
+          "retval": 1,
+          "jited_prog_len": 19482,
+          "xlated_prog_len": 31080,
+          "code_size": {
+            "bpf_bytecode_bytes": 31080,
+            "native_code_bytes": 19482,
+            "inflation_ratio": 0.626834
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 2971779,
+            "object_open_ns": 320283008,
+            "object_load_ns": 24277743,
+            "packet_prepare_ns": 1465,
+            "prog_run_wall_ns": 11094,
+            "result_extract_ns": 42
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": true,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": false,
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 0
+          },
+          "recompile": {
+            "requested": false,
+            "mode": "none",
+            "requested_families": [],
+            "skipped_families": [],
+            "policy_generated": false,
+            "policy_bytes": 0,
+            "syscall_attempted": false,
+            "applied": false,
+            "error": ""
+          }
+        },
+        "rejit": {
+          "compile_ns": 345247273,
+          "exec_ns": 69,
+          "timing_source": "ktime",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "wall_exec_ns": 1338,
+          "exec_cycles": 4931,
+          "tsc_freq_hz": 3686247892,
+          "result": 0,
+          "retval": 1,
+          "jited_prog_len": 17880,
+          "xlated_prog_len": 31080,
+          "code_size": {
+            "bpf_bytecode_bytes": 31080,
+            "native_code_bytes": 17880,
+            "inflation_ratio": 0.57529
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 2415017,
+            "object_open_ns": 317467403,
+            "object_load_ns": 27080978,
+            "packet_prepare_ns": 473,
+            "prog_run_wall_ns": 10789,
+            "result_extract_ns": 41
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": true,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 3,
+            "wide_sites": 107,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 110
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v5",
+            "requested_families": [
+              "cmov",
+              "wide",
+              "rotate",
+              "lea"
+            ],
+            "skipped_families": [],
+            "policy_generated": true,
+            "policy_bytes": 15408,
+            "syscall_attempted": true,
+            "applied": true,
+            "error": ""
+          }
+        }
+      },
+      {
+        "program": "cgroup_skb_egress",
+        "baseline": {
+          "compile_ns": 311056439,
+          "exec_ns": 49,
+          "timing_source": "ktime",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "wall_exec_ns": 1387,
+          "exec_cycles": 5112,
+          "tsc_freq_hz": 3686233827,
+          "result": 0,
+          "retval": 1,
+          "jited_prog_len": 19482,
+          "xlated_prog_len": 31080,
+          "code_size": {
+            "bpf_bytecode_bytes": 31080,
+            "native_code_bytes": 19482,
+            "inflation_ratio": 0.626834
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 1183789,
+            "object_open_ns": 286571767,
+            "object_load_ns": 24484672,
+            "packet_prepare_ns": 974,
+            "prog_run_wall_ns": 11173,
+            "result_extract_ns": 40
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": true,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": false,
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 0
+          },
+          "recompile": {
+            "requested": false,
+            "mode": "none",
+            "requested_families": [],
+            "skipped_families": [],
+            "policy_generated": false,
+            "policy_bytes": 0,
+            "syscall_attempted": false,
+            "applied": false,
+            "error": ""
+          }
+        },
+        "rejit": {
+          "compile_ns": 271844574,
+          "exec_ns": 58,
+          "timing_source": "ktime",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "wall_exec_ns": 1311,
+          "exec_cycles": 4834,
+          "tsc_freq_hz": 3686228772,
+          "result": 0,
+          "retval": 1,
+          "jited_prog_len": 17880,
+          "xlated_prog_len": 31080,
+          "code_size": {
+            "bpf_bytecode_bytes": 31080,
+            "native_code_bytes": 17880,
+            "inflation_ratio": 0.57529
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 1313875,
+            "object_open_ns": 243937942,
+            "object_load_ns": 27219643,
+            "packet_prepare_ns": 369,
+            "prog_run_wall_ns": 10561,
+            "result_extract_ns": 34
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": true,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 3,
+            "wide_sites": 107,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 110
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v5",
+            "requested_families": [
+              "cmov",
+              "wide",
+              "rotate",
+              "lea"
+            ],
+            "skipped_families": [],
+            "policy_generated": true,
+            "policy_bytes": 15408,
+            "syscall_attempted": true,
+            "applied": true,
+            "error": ""
+          }
+        }
+      }
+    ]
+  },
+  "tracee_install": {
+    "explicit": null,
+    "apt_attempted": false,
+    "error": "tracee package not available via apt"
+  },
+  "notes": [
+    "wrk is not installed; the connect workload uses a curl loop against a localhost HTTP server.",
+    "Manual fallback does not isolate Tracee's high-level `open` user event from the monolithic object; the file workload reports `security_file_open` and marks `open` as unsupported."
+  ],
+  "dry_run": false
+}

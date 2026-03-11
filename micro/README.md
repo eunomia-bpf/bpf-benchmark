@@ -12,9 +12,23 @@
 
 `micro_pure_jit` 的每个 benchmark 还显式记录 `category / family / level / hypothesis`，并支持用 `--shuffle-seed` 打乱执行顺序，结果摘要默认输出 geometric mean 和 bootstrap confidence interval，方便直接进入论文表格和图。
 
+当前的共享 Python 编排层放在 `micro/orchestrator/`：`catalog.py` 统一解析 `config/micro_*.yaml` 和 `config/macro_corpus.yaml`，`reporting.py` 统一负责 RQ markdown / corpus snapshot / per-benchmark statistics，避免这些逻辑继续散落在单个脚本里。
+
+统一入口现在是 `micro/driver.py`，支持：
+
+- `suite`
+- `rigorous`
+- `ablation`
+- `census`
+- `corpus`
+
+旧的 `run_*.py` 入口仍然保留，但现在只是兼容包装层：导入时继续暴露原有符号，作为脚本执行时则统一转发到 `micro/driver.py`。
+
 ## 结构
 
 - `../config/*.yaml`: suite、runtime、build 命令和 toolchain 路径
+- `orchestrator/catalog.py`: 统一 manifest loader，带基本 validation 和 dimension metadata
+- `orchestrator/reporting.py`: RQ/corpus markdown 与 per-benchmark statistics
 - `programs/*.bpf.c`: benchmark 源文件，`programs/common.h` 提供公共 helper / wrapper
 - `run_micro.py`: 读取 suite、生成输入、调度实验、聚合 JSON
 - `build/runner/micro_exec`: 实际执行 `llvmbpf` 和 `kernel eBPF`
@@ -47,19 +61,19 @@ make -C micro vendor_bpftool
 列出当前 suite：
 
 ```bash
-python3 micro/run_micro.py --list
+python3 micro/driver.py suite -- --list
 ```
 
 列出 runtime suite：
 
 ```bash
-python3 micro/run_micro.py --suite config/micro_runtime.yaml --list
+python3 micro/driver.py suite --suite config/micro_runtime.yaml -- --list
 ```
 
 运行默认 pure-jit suite：
 
 ```bash
-python3 micro/run_micro.py \
+python3 micro/driver.py suite -- \
   --runtime llvmbpf \
   --runtime kernel \
   --iterations 10 \
@@ -71,7 +85,7 @@ python3 micro/run_micro.py \
 运行 runtime suite：
 
 ```bash
-python3 micro/run_micro.py \
+python3 micro/driver.py suite -- \
   --suite config/micro_runtime.yaml \
   --runtime llvmbpf \
   --runtime kernel
@@ -80,7 +94,7 @@ python3 micro/run_micro.py \
 运行并采集 `perf_event` 计数器：
 
 ```bash
-python3 micro/run_micro.py \
+python3 micro/driver.py suite -- \
   --runtime llvmbpf \
   --runtime kernel \
   --iterations 10 \
@@ -92,7 +106,7 @@ python3 micro/run_micro.py \
 只跑部分 benchmark：
 
 ```bash
-python3 micro/run_micro.py \
+python3 micro/driver.py suite -- \
   --bench simple \
   --bench bitcount \
   --runtime llvmbpf \
@@ -102,7 +116,7 @@ python3 micro/run_micro.py \
 如需顺手把 vendored `bpftool` 也编出来：
 
 ```bash
-python3 micro/run_micro.py --build-bpftool
+python3 micro/driver.py suite -- --build-bpftool
 ```
 
 结果默认写到 suite 自己的默认输出：
@@ -117,6 +131,8 @@ python3 micro/summarize_rq.py \
   --results micro/results/pure-jit-expanded-full.json \
   --output docs/preliminary-characterization-summary.md
 ```
+
+`micro/summarize_rq.py` 现在会优先读取结果 JSON 里记录的 `manifest`，并用 `orchestrator/reporting.py` 里的共享逻辑生成 RQ 摘要和 corpus snapshot。
 
 生成 micro suite 相对 BCF 语料库的 representativeness 报告：
 

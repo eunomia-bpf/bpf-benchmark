@@ -4,6 +4,7 @@ import json
 import math
 import statistics
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Mapping, Sequence, TypedDict
 
 
@@ -98,6 +99,10 @@ class UnifiedResultRecord:
     metadata: Mapping[str, object] | None = None
 
 
+def load_json(path: str | Path) -> Any:
+    return json.loads(Path(path).read_text())
+
+
 def parse_last_json_line(stdout: str, *, label: str = "runner") -> Any:
     lines = [line.strip() for line in stdout.splitlines() if line.strip()]
     if not lines:
@@ -106,6 +111,45 @@ def parse_last_json_line(stdout: str, *, label: str = "runner") -> Any:
         return json.loads(lines[-1])
     except json.JSONDecodeError as exc:
         raise RuntimeError(f"unable to parse {label} JSON output: {exc}") from exc
+
+
+def parse_json_lines(stdout: str) -> list[Any]:
+    payloads: list[Any] = []
+    for line in stdout.splitlines():
+        text = line.strip()
+        if not text or (not text.startswith("{") and not text.startswith("[")):
+            continue
+        try:
+            payloads.append(json.loads(text))
+        except json.JSONDecodeError:
+            continue
+    return payloads
+
+
+def zero_directive_scan() -> dict[str, int]:
+    return {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0,
+    }
+
+
+def normalize_directive_scan(scan: Mapping[str, object] | None) -> dict[str, int]:
+    normalized = zero_directive_scan()
+    if not scan:
+        return normalized
+    for field in ("cmov_sites", "wide_sites", "rotate_sites", "lea_sites"):
+        normalized[field] = int(scan.get(field, 0) or 0)
+    normalized["total_sites"] = int(
+        scan.get(
+            "total_sites",
+            normalized["cmov_sites"] + normalized["wide_sites"] + normalized["rotate_sites"] + normalized["lea_sites"],
+        )
+        or 0
+    )
+    return normalized
 
 
 def normalize_runner_sample(sample: Mapping[str, object]) -> RunnerSample:
@@ -126,14 +170,7 @@ def normalize_runner_sample(sample: Mapping[str, object]) -> RunnerSample:
     )
     normalized.setdefault(
         "directive_scan",
-        {
-            "performed": False,
-            "cmov_sites": 0,
-            "wide_sites": 0,
-            "rotate_sites": 0,
-            "lea_sites": 0,
-            "total_sites": 0,
-        },
+        {"performed": False, **zero_directive_scan()},
     )
     normalized.setdefault(
         "recompile",
@@ -155,6 +192,34 @@ def parse_runner_sample(stdout: str) -> RunnerSample:
     if not isinstance(payload, dict):
         raise RuntimeError("runner sample payload was not a JSON object")
     return normalize_runner_sample(payload)
+
+
+def summarize_per_benchmark_samples(samples: Sequence[Mapping[str, object]]) -> dict[str, object]:
+    counter_summary = summarize_named_counters(samples, "perf_counters")
+    code_size_ratios = [
+        float(code_size.get("inflation_ratio"))
+        for sample in samples
+        for code_size in [sample.get("code_size")]
+        if isinstance(code_size, Mapping) and code_size.get("inflation_ratio") is not None
+    ]
+    return {
+        "sample_count": len(samples),
+        "compile_ns": summarize_optional_ns(samples, "compile_ns"),
+        "exec_ns": summarize_optional_ns(samples, "exec_ns"),
+        "wall_exec_ns": summarize_optional_ns(samples, "wall_exec_ns"),
+        "phases_ns": summarize_phase_timings(samples),
+        "perf_counters": counter_summary,
+        "perf_counters_meta": summarize_perf_counter_meta(samples),
+        "derived_perf_metrics": derive_perf_metrics(counter_summary),
+        "inflation_ratio": float_summary(code_size_ratios) if code_size_ratios else None,
+    }
+
+
+def geometric_mean(values: Sequence[float | int]) -> float | None:
+    positive = [float(value) for value in values if float(value) > 0.0]
+    if not positive:
+        return None
+    return math.exp(statistics.mean(math.log(value) for value in positive))
 
 
 def ns_summary(values: Sequence[int]) -> SummaryStats:
@@ -327,12 +392,18 @@ __all__ = [
     "UnifiedResultRecord",
     "derive_perf_metrics",
     "float_summary",
+    "geometric_mean",
+    "load_json",
     "normalize_runner_sample",
     "ns_summary",
+    "normalize_directive_scan",
+    "parse_json_lines",
     "parse_last_json_line",
     "parse_runner_sample",
     "summarize_named_counters",
     "summarize_optional_ns",
+    "summarize_per_benchmark_samples",
     "summarize_perf_counter_meta",
     "summarize_phase_timings",
+    "zero_directive_scan",
 ]
