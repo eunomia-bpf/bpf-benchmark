@@ -25,6 +25,8 @@ Core corpus pipeline and measurement entrypoints kept at the top level:
 - `run_macro_corpus.py`: declarative macro/corpus suite runner
 - `run_corpus_perf.py`: packet-test-run stock vs recompile corpus measurements
 - `run_corpus_tracing.py`: tracing attach/trigger corpus measurements
+- `run_corpus_tracing_exec.py`: in-place stock vs recompile tracing measurements on the current kernel
+- `run_tracing_corpus_vm.py`: framework-kernel VM runner for the full tracing corpus attach/trigger stock vs recompile comparison
 - `run_corpus_runnability.py`: runnable-program inventory and feasibility report
 - `run_corpus_v5_framework.py`: 40-program framework-kernel corpus union runner
 - `run_production_corpus_v5_framework.py`: production-skewed framework-kernel corpus runner

@@ -404,8 +404,11 @@ class KernelCatalog:
 
     def has_tracepoint(self, category: str, name: str) -> bool:
         for base in SYS_TRACE_EVENTS:
-            if (base / category / name).exists():
-                return True
+            try:
+                if (base / category / name).exists():
+                    return True
+            except OSError:
+                continue
         return False
 
 
