@@ -1,0 +1,23 @@
+
+vendor/linux-framework/modules.order not found: kernel modules not enabled or kernel not compiled properly, kernel modules disabled
+
+libbpf: loading object from ./micro/programs/mixed_alu_mem.bpf.o
+libbpf: elf: section(3) xdp, size 2136, link 0, flags 6, type=1
+libbpf: sec 'xdp': found program 'mixed_alu_mem_xdp' at insn offset 0 (0 bytes), code size 267 insns (2136 bytes)
+libbpf: elf: section(4) license, size 4, link 0, flags 3, type=1
+libbpf: license of ./micro/programs/mixed_alu_mem.bpf.o is GPL
+libbpf: elf: section(15) .BTF, size 1625, link 0, flags 0, type=1
+libbpf: elf: section(17) .BTF.ext, size 2224, link 0, flags 0, type=1
+libbpf: elf: section(25) .symtab, size 456, link 1, flags 0, type=2
+libbpf: looking for externs among 19 symbols...
+libbpf: collected 0 externs total
+libbpf: object 'mixed_alu_mem': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...
+recompile-cmov: skipped by --skip-families
+recompile-wide: skipped by --skip-families
+recompile-rotate: skipped by --skip-families
+recompile-lea: skipped by --skip-families
+recompile-zero-ext: skipped by --skip-families
+recompile-endian: skipped by --skip-families
+recompile-branch-flip: skipped by --skip-families
+recompile-extract: found 2 bitfield_extract sites in xlated program (267 insns)
+{"compile_ns":17309169,"exec_ns":0,"timing_source":"unknown","no_cmov":false,"disabled_passes":[],"result":0,"retval":0,"jited_prog_len":1089,"xlated_prog_len":2136,"code_size":{"bpf_bytecode_bytes":2136,"native_code_bytes":1089,"inflation_ratio":0.509831},"phases_ns":{"memory_prepare_ns":3502187,"object_open_ns":7099687,"object_load_ns":10178572},"perf_counters":{},"perf_counters_meta":{"requested":false,"collected":false,"include_kernel":false,"scope":"full_repeat_raw","error":""},"directive_scan":{"performed":true,"cmov_sites":0,"wide_sites":0,"rotate_sites":0,"lea_sites":0,"bitfield_sites":2,"extract_sites":2,"zero_ext_sites":0,"endian_sites":0,"branch_flip_sites":0,"total_sites":2},"recompile":{"requested":true,"mode":"auto-scan-v5","requested_families":["extract"],"skipped_families":["wide","rotate","lea","zero-ext","endian","branch-flip","cmov"],"policy_generated":true,"policy_bytes":296,"syscall_attempted":true,"applied":true,"cmov_sites":0,"wide_sites":0,"rotate_sites":0,"lea_sites":0,"bitfield_sites":2,"extract_sites":2,"zero_ext_sites":0,"endian_sites":0,"branch_flip_sites":0,"total_sites":2,"error":""}}

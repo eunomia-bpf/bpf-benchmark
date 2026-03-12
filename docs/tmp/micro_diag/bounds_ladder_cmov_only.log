@@ -1,0 +1,22 @@
+
+vendor/linux-framework/modules.order not found: kernel modules not enabled or kernel not compiled properly, kernel modules disabled
+
+libbpf: loading object from ./micro/programs/bounds_ladder.bpf.o
+libbpf: elf: section(3) xdp, size 1440, link 0, flags 6, type=1
+libbpf: sec 'xdp': found program 'bounds_ladder_xdp' at insn offset 0 (0 bytes), code size 180 insns (1440 bytes)
+libbpf: elf: section(4) license, size 4, link 0, flags 3, type=1
+libbpf: license of ./micro/programs/bounds_ladder.bpf.o is GPL
+libbpf: elf: section(15) .BTF, size 1246, link 0, flags 0, type=1
+libbpf: elf: section(17) .BTF.ext, size 2176, link 0, flags 0, type=1
+libbpf: elf: section(25) .symtab, size 456, link 1, flags 0, type=2
+libbpf: looking for externs among 19 symbols...
+libbpf: collected 0 externs total
+libbpf: object 'bounds_ladder': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...
+recompile-wide: skipped by --skip-families
+recompile-rotate: skipped by --skip-families
+recompile-lea: skipped by --skip-families
+recompile-extract: skipped by --skip-families
+recompile-zero-ext: skipped by --skip-families
+recompile-endian: skipped by --skip-families
+recompile-branch-flip: skipped by --skip-families
+recompile-cmov: found 2 cmov sites in xlated program (180 insns)

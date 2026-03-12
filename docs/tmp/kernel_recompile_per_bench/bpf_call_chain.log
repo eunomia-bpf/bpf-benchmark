@@ -1,0 +1,5 @@
+[bench] bpf_call_chain
+  kernel           status=ok               exec=462 ns applied=-
+  kernel-recompile status=result-mismatch  exec=24 ns applied=True
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/kernel_recompile_per_bench/bpf_call_chain.json
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/kernel_recompile_per_bench/bpf_call_chain.md

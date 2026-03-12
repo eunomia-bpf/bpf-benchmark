@@ -1,0 +1,18 @@
+[build] reusing existing artifacts
+[WARN] CPU governor is 'unknown', not 'performance'. Results may have frequency scaling noise.
+[WARN] Turbo boost is enabled. Consider disabling for stable measurements.
+[WARN] perf_event_paranoid=2. Some perf counters may not be available.
+[WARN] No CPU affinity set. Consider using --cpu for isolated measurements.
+[bench] binary_search
+  kernel     compile median 14.706 ms | exec median 721 ns | result 126
+  kernel-recompile compile median 14.682 ms | exec median 724 ns | result 126
+[bench] switch_dispatch
+  kernel     compile median 27.559 ms | exec median 409 ns | result 16
+  kernel-recompile compile median 26.875 ms | exec median 394 ns | result 16
+[bench] branch_dense
+  kernel     compile median 10.221 ms | exec median 584 ns | result 15654347328787340782
+  kernel-recompile compile median 10.261 ms | exec median 611 ns | result 15654347328787340782
+[bench] bpf_call_chain
+  kernel     compile median 4.078 ms | exec median 509 ns | result 17813494880153753973
+  kernel-recompile compile median 3.914 ms | exec median 524 ns | result 17813494880153753973
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/micro/results/tmp_tuned_smoke.json

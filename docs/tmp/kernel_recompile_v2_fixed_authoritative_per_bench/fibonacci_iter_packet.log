@@ -1,0 +1,5 @@
+[bench] fibonacci_iter_packet
+  kernel           status=ok               exec=956 ns applied=-
+  kernel-recompile status=ok               exec=928.5 ns applied=False
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/kernel_recompile_v2_fixed_authoritative_per_bench/fibonacci_iter_packet.json
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/kernel_recompile_v2_fixed_authoritative_per_bench/fibonacci_iter_packet.md

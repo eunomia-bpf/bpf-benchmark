@@ -1,0 +1,7 @@
+version: 2
+program: 'mixed_alu_mem_xdp'
+default: skip
+sites:
+  - insn: 228
+    family: extract
+    action: apply

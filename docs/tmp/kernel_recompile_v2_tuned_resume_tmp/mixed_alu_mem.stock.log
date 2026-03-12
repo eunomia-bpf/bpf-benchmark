@@ -1,0 +1,7 @@
+[build] reusing existing artifacts
+[WARN] CPU governor is 'unknown', not 'performance'. Results may have frequency scaling noise.
+[WARN] Turbo boost is enabled. Consider disabling for stable measurements.
+[WARN] perf_event_paranoid=2. Some perf counters may not be available.
+[bench] mixed_alu_mem
+  kernel     compile median 9.303 ms | exec median 901 ns | result 5008154085265630854
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/kernel_recompile_v2_tuned_resume_tmp/mixed_alu_mem.stock.json

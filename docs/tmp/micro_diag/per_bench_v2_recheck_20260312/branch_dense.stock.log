@@ -1,0 +1,7 @@
+[build] reusing existing artifacts
+[WARN] CPU governor is 'unknown', not 'performance'. Results may have frequency scaling noise.
+[WARN] Turbo boost is enabled. Consider disabling for stable measurements.
+[WARN] perf_event_paranoid=2. Some perf counters may not be available.
+[bench] branch_dense
+  kernel     compile median 15.982 ms | exec median 5.102 us | result 15654347328787340782
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/micro_diag/per_bench_v2_recheck_20260312/branch_dense.stock.json

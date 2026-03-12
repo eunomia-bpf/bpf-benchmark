@@ -1,0 +1,443 @@
+{
+  "suite": "micro_staged_codegen",
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/config/micro_pure_jit.yaml",
+  "generated_at": "2026-03-12T03:14:39.284750+00:00",
+  "host": {
+    "hostname": "virtme-ng",
+    "platform": "Linux-7.0.0-rc2-ge52504a75c05-dirty-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "cpu_affinity": "0",
+    "git_sha": "unknown",
+    "kernel_version": "7.0.0-rc2-ge52504a75c05-dirty",
+    "kernel_cmdline": "virtme_hostname=virtme-ng nr_open=1048576 virtme_initmount0=home/yunwei37/workspace/bpf-benchmark/micro/results virtme_initmount1=home/yunwei37/workspace/bpf-benchmark/docs/tmp virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp console=ttyS0 earlyprintk=serial,ttyS0,115200 quiet loglevel=0 panic=-1 virtme.exec=`c2V0IC1ldTsgY29tbWFuZCAtdiBzdWRvIHx8IHRydWU7IGlmIFsgLWYgL3N5cy9kZXZpY2VzL3N5c3RlbS9jcHUvY3B1MC9jcHVmcmVxL3NjYWxpbmdfZ292ZXJub3IgXTsgdGhlbiBlY2hvIHBlcmZvcm1hbmNlID4gL3N5cy9kZXZpY2VzL3N5c3RlbS9jcHUvY3B1MC9jcHVmcmVxL3NjYWxpbmdfZ292ZXJub3IgfHwgdHJ1ZTsgZmk7IHRhc2tzZXQgLWMgMCBweXRob24zIG1pY3JvL3J1bl9taWNyby5weSAtLWJlbmNoIGNtb3Zfc2VsZWN0IC0tcnVudGltZSBrZXJuZWwgLS1ydW50aW1lIGtlcm5lbC1yZWNvbXBpbGUgLS1pdGVyYXRpb25zIDEgLS13YXJtdXBzIDAgLS1yZXBlYXQgNTAgLS1jcHUgMCAtLW91dHB1dCBkb2NzL3RtcC9rZXJuZWxfcmVjb21waWxlX3Ntb2tlLmpzb24=` virtme_chdir=home/yunwei37/workspace/bpf-benchmark rootfstype=9p rootflags=version=9p2000.L,trans=virtio,access=any raid=noautodetect ro quiet loglevel=1 init=/home/yunwei37/.local/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init",
+    "cpu_governor": "unknown",
+    "turbo_state": "unknown",
+    "perf_event_paranoid": "2"
+  },
+  "toolchains": {
+    "llvmbpf": {
+      "root": "/home/yunwei37/workspace/bpf-benchmark/vendor/llvmbpf"
+    },
+    "libbpf": {
+      "root": "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf"
+    },
+    "bpftool": {
+      "root": "/home/yunwei37/workspace/bpf-benchmark/vendor/bpftool"
+    }
+  },
+  "build": {
+    "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec",
+    "bpftool_binary": "/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/bpftool/bpftool"
+  },
+  "defaults": {
+    "iterations": 1,
+    "warmups": 0,
+    "repeat": 50,
+    "perf_counters": false,
+    "perf_scope": "full_repeat_raw",
+    "shuffle_seed": null,
+    "runtime_order_seed": 0
+  },
+  "iteration_runtime_orders": {
+    "cmov_select": [
+      [
+        "kernel",
+        "kernel-recompile"
+      ]
+    ]
+  },
+  "benchmarks": [
+    {
+      "name": "cmov_select",
+      "description": "Repeated single-diamond value selection over staged compare/select arrays",
+      "category": "control-flow",
+      "family": "select-diamond",
+      "level": "repeated-cmov",
+      "hypothesis": "Narrow assignment-only diamonds should expose whether the backend can lower hot selects without branch overhead",
+      "io_mode": "staged",
+      "tags": [
+        "branch",
+        "select",
+        "cmov",
+        "pure-jit"
+      ],
+      "expected_result": 4719383495603449331,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/cmov_select.mem",
+      "policy": {
+        "cmov": "apply"
+      },
+      "policy_file": null,
+      "runs": [
+        {
+          "runtime": "kernel",
+          "label": "kernel eBPF",
+          "mode": "kernel",
+          "repeat": 50,
+          "artifacts": {
+            "program_object": "/home/yunwei37/workspace/bpf-benchmark/micro/programs/cmov_select.bpf.o",
+            "policy_file": null
+          },
+          "samples": [
+            {
+              "compile_ns": 11387377,
+              "exec_ns": 1733,
+              "timing_source": "ktime",
+              "no_cmov": false,
+              "disabled_passes": [],
+              "wall_exec_ns": 263512,
+              "exec_cycles": 971375,
+              "tsc_freq_hz": 3686264621,
+              "result": 4719383495603449331,
+              "retval": 2,
+              "jited_prog_len": 2507,
+              "xlated_prog_len": 4272,
+              "code_size": {
+                "bpf_bytecode_bytes": 4272,
+                "native_code_bytes": 2507,
+                "inflation_ratio": 0.586845
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 1087539,
+                "object_open_ns": 5005354,
+                "object_load_ns": 6382023,
+                "input_stage_ns": 1184,
+                "prog_run_wall_ns": 13175957,
+                "result_extract_ns": 84
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": true,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "directive_scan": {
+                "performed": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0
+              },
+              "recompile": {
+                "requested": false,
+                "mode": "none",
+                "requested_families": [],
+                "skipped_families": [],
+                "policy_generated": false,
+                "policy_bytes": 0,
+                "syscall_attempted": false,
+                "applied": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0,
+                "error": ""
+              },
+              "iteration_index": 0
+            }
+          ],
+          "compile_ns": {
+            "count": 1,
+            "mean": 11387377,
+            "median": 11387377,
+            "min": 11387377,
+            "max": 11387377,
+            "p95": 11387377,
+            "stdev": 0
+          },
+          "exec_ns": {
+            "count": 1,
+            "mean": 1733,
+            "median": 1733,
+            "min": 1733,
+            "max": 1733,
+            "p95": 1733,
+            "stdev": 0
+          },
+          "timing_source": "ktime",
+          "phases_ns": {
+            "memory_prepare_ns": {
+              "count": 1,
+              "mean": 1087539,
+              "median": 1087539,
+              "min": 1087539,
+              "max": 1087539,
+              "p95": 1087539,
+              "stdev": 0
+            },
+            "object_open_ns": {
+              "count": 1,
+              "mean": 5005354,
+              "median": 5005354,
+              "min": 5005354,
+              "max": 5005354,
+              "p95": 5005354,
+              "stdev": 0
+            },
+            "object_load_ns": {
+              "count": 1,
+              "mean": 6382023,
+              "median": 6382023,
+              "min": 6382023,
+              "max": 6382023,
+              "p95": 6382023,
+              "stdev": 0
+            },
+            "input_stage_ns": {
+              "count": 1,
+              "mean": 1184,
+              "median": 1184,
+              "min": 1184,
+              "max": 1184,
+              "p95": 1184,
+              "stdev": 0
+            },
+            "prog_run_wall_ns": {
+              "count": 1,
+              "mean": 13175957,
+              "median": 13175957,
+              "min": 13175957,
+              "max": 13175957,
+              "p95": 13175957,
+              "stdev": 0
+            },
+            "result_extract_ns": {
+              "count": 1,
+              "mean": 84,
+              "median": 84,
+              "min": 84,
+              "max": 84,
+              "p95": 84,
+              "stdev": 0
+            }
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected_samples": 0,
+            "include_kernel": null,
+            "scope": "full_repeat_raw",
+            "hardware_counters_observed": false,
+            "software_counters_observed": false,
+            "errors": {}
+          },
+          "derived_metrics": {},
+          "result_distribution": {
+            "4719383495603449331": 1
+          },
+          "wall_exec_ns": {
+            "count": 1,
+            "mean": 263512,
+            "median": 263512,
+            "min": 263512,
+            "max": 263512,
+            "p95": 263512,
+            "stdev": 0
+          }
+        },
+        {
+          "runtime": "kernel-recompile",
+          "label": "kernel eBPF + manifest recompile policy",
+          "mode": "kernel-recompile",
+          "repeat": 50,
+          "artifacts": {
+            "program_object": "/home/yunwei37/workspace/bpf-benchmark/micro/programs/cmov_select.bpf.o",
+            "policy_file": null
+          },
+          "samples": [
+            {
+              "compile_ns": 5947200,
+              "exec_ns": 1701,
+              "timing_source": "ktime",
+              "no_cmov": false,
+              "disabled_passes": [],
+              "wall_exec_ns": 155465,
+              "exec_cycles": 573083,
+              "tsc_freq_hz": 3686259202,
+              "result": 4719383495603449331,
+              "retval": 2,
+              "jited_prog_len": 2386,
+              "xlated_prog_len": 4272,
+              "code_size": {
+                "bpf_bytecode_bytes": 4272,
+                "native_code_bytes": 2386,
+                "inflation_ratio": 0.558521
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 37389,
+                "object_open_ns": 2042410,
+                "object_load_ns": 3837714,
+                "input_stage_ns": 969,
+                "prog_run_wall_ns": 7774133,
+                "result_extract_ns": 106
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": true,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "directive_scan": {
+                "performed": true,
+                "cmov_sites": 1,
+                "wide_sites": 6,
+                "rotate_sites": 4,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 11
+              },
+              "recompile": {
+                "requested": true,
+                "mode": "policy-inline",
+                "requested_families": [
+                  "cmov",
+                  "wide",
+                  "rotate",
+                  "lea",
+                  "extract",
+                  "zero-ext",
+                  "endian",
+                  "branch-flip"
+                ],
+                "skipped_families": [],
+                "policy_generated": true,
+                "policy_bytes": 1692,
+                "syscall_attempted": true,
+                "applied": true,
+                "cmov_sites": 1,
+                "wide_sites": 6,
+                "rotate_sites": 4,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 11,
+                "error": ""
+              },
+              "iteration_index": 0
+            }
+          ],
+          "compile_ns": {
+            "count": 1,
+            "mean": 5947200,
+            "median": 5947200,
+            "min": 5947200,
+            "max": 5947200,
+            "p95": 5947200,
+            "stdev": 0
+          },
+          "exec_ns": {
+            "count": 1,
+            "mean": 1701,
+            "median": 1701,
+            "min": 1701,
+            "max": 1701,
+            "p95": 1701,
+            "stdev": 0
+          },
+          "timing_source": "ktime",
+          "phases_ns": {
+            "memory_prepare_ns": {
+              "count": 1,
+              "mean": 37389,
+              "median": 37389,
+              "min": 37389,
+              "max": 37389,
+              "p95": 37389,
+              "stdev": 0
+            },
+            "object_open_ns": {
+              "count": 1,
+              "mean": 2042410,
+              "median": 2042410,
+              "min": 2042410,
+              "max": 2042410,
+              "p95": 2042410,
+              "stdev": 0
+            },
+            "object_load_ns": {
+              "count": 1,
+              "mean": 3837714,
+              "median": 3837714,
+              "min": 3837714,
+              "max": 3837714,
+              "p95": 3837714,
+              "stdev": 0
+            },
+            "input_stage_ns": {
+              "count": 1,
+              "mean": 969,
+              "median": 969,
+              "min": 969,
+              "max": 969,
+              "p95": 969,
+              "stdev": 0
+            },
+            "prog_run_wall_ns": {
+              "count": 1,
+              "mean": 7774133,
+              "median": 7774133,
+              "min": 7774133,
+              "max": 7774133,
+              "p95": 7774133,
+              "stdev": 0
+            },
+            "result_extract_ns": {
+              "count": 1,
+              "mean": 106,
+              "median": 106,
+              "min": 106,
+              "max": 106,
+              "p95": 106,
+              "stdev": 0
+            }
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected_samples": 0,
+            "include_kernel": null,
+            "scope": "full_repeat_raw",
+            "hardware_counters_observed": false,
+            "software_counters_observed": false,
+            "errors": {}
+          },
+          "derived_metrics": {},
+          "result_distribution": {
+            "4719383495603449331": 1
+          },
+          "wall_exec_ns": {
+            "count": 1,
+            "mean": 155465,
+            "median": 155465,
+            "min": 155465,
+            "max": 155465,
+            "p95": 155465,
+            "stdev": 0
+          }
+        }
+      ]
+    }
+  ]
+}

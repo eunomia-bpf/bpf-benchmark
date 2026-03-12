@@ -1,0 +1,5 @@
+[bench] local_call_fanout
+  kernel           status=ok               exec=155.5 ns applied=-
+  kernel-recompile status=ok               exec=148 ns applied=True
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/kernel_recompile_v2_tuned_resume_tmp/local_call_fanout.json
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/kernel_recompile_v2_tuned_resume_tmp/local_call_fanout.md

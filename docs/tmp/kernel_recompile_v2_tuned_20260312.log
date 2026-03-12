@@ -1,0 +1,62 @@
+[build] reusing existing artifacts
+[WARN] CPU governor is 'unknown', not 'performance'. Results may have frequency scaling noise.
+[WARN] Turbo boost is enabled. Consider disabling for stable measurements.
+[WARN] perf_event_paranoid=2. Some perf counters may not be available.
+[bench] simple
+  kernel     compile median 1.897 ms | exec median 7 ns | result 12345678
+  kernel-recompile compile median 1.902 ms | exec median 7 ns | result 12345678
+[bench] simple_packet
+  kernel     compile median 1.945 ms | exec median 7 ns | result 12345678
+  kernel-recompile compile median 1.929 ms | exec median 7 ns | result 12345678
+[bench] memory_pair_sum
+  kernel     compile median 1.828 ms | exec median 9.5 ns | result 2459565876494606865
+  kernel-recompile compile median 1.833 ms | exec median 9.5 ns | result 2459565876494606865
+[bench] bitcount
+  kernel     compile median 80.239 ms | exec median 5.147 us | result 3035568289764064166
+  kernel-recompile compile median 80.015 ms | exec median 5.967 us | result 3035568289764064166
+[bench] log2_fold
+  kernel     compile median 7.074 ms | exec median 391 ns | result 9
+  kernel-recompile compile median 8.897 ms | exec median 375 ns | result 9
+[bench] dep_chain_short
+  kernel     compile median 2.211 ms | exec median 147.5 ns | result 10694056033381314190
+  kernel-recompile compile median 2.413 ms | exec median 147 ns | result 10694056033381314190
+[bench] dep_chain_long
+  kernel     compile median 3.286 ms | exec median 578.5 ns | result 11607914882895964593
+  kernel-recompile compile median 3.220 ms | exec median 578 ns | result 11607914882895964593
+[bench] binary_search
+  kernel     compile median 15.947 ms | exec median 657.5 ns | result 126
+  kernel-recompile compile median 14.666 ms | exec median 701 ns | result 126
+[bench] branch_layout
+  kernel     compile median 10.050 ms | exec median 657 ns | result 65835136
+  kernel-recompile compile median 9.536 ms | exec median 656 ns | result 65835136
+[bench] switch_dispatch
+  kernel     compile median 28.458 ms | exec median 392.5 ns | result 16
+  kernel-recompile compile median 28.821 ms | exec median 415 ns | result 16
+[bench] branch_dense
+  kernel     compile median 12.594 ms | exec median 639 ns | result 15654347328787340782
+  kernel-recompile compile median 12.700 ms | exec median 657 ns | result 15654347328787340782
+[bench] cmov_select
+  kernel     compile median 6.228 ms | exec median 661.5 ns | result 4719383495603449331
+  kernel-recompile compile median 7.327 ms | exec median 637.5 ns | result 4719383495603449331
+[bench] cmov_dense
+  kernel     compile median 2.570 ms | exec median 58 ns | result 15544056576594566652
+  kernel-recompile compile median 2.298 ms | exec median 49 ns | result 15544056576594566652
+[bench] checksum
+  kernel     compile median 35.424 ms | exec median 20.793 us | result 0
+  kernel-recompile compile median 37.356 ms | exec median 20.779 us | result 0
+[bench] load_word32
+  kernel     compile median 2.266 ms | exec median 122 ns | result 548570475964
+  kernel-recompile compile median 2.046 ms | exec median 107.5 ns | result 548570475964
+[bench] load_byte
+  kernel     compile median 2.418 ms | exec median 327 ns | result 133744
+  kernel-recompile compile median 2.411 ms | exec median 327 ns | result 133744
+[bench] load_byte_recompose
+  kernel     compile median 2.381 ms | exec median 206 ns | result 1253018829653002637
+  kernel-recompile compile median 2.405 ms | exec median 206 ns | result 1253018829653002637
+[bench] load_native_u64
+  kernel     compile median 2.005 ms | exec median 89 ns | result 1253018829653002637
+  kernel-recompile compile median 2.221 ms | exec median 94 ns | result 1253018829653002637
+[bench] packet_parse
+  kernel     compile median 3.315 ms | exec median 115 ns | result 2969312
+  kernel-recompile compile median 3.298 ms | exec median 103 ns | result 2969312
+[bench] bounds_ladder

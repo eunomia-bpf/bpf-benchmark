@@ -1,0 +1,5 @@
+[bench] packet_parse
+  kernel           status=ok               exec=103 ns applied=-
+  kernel-recompile status=ok               exec=109.5 ns applied=False
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/kernel_recompile_v2_tuned_per_bench/packet_parse.json
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/kernel_recompile_v2_tuned_per_bench/packet_parse.md

@@ -1,0 +1,5 @@
+[bench] smallmul_strength_reduce
+  kernel           status=ok               exec=358 ns applied=-
+  kernel-recompile status=ok               exec=390.5 ns applied=False
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/kernel_recompile_v2_tuned_resume_tmp/smallmul_strength_reduce.json
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/kernel_recompile_v2_tuned_resume_tmp/smallmul_strength_reduce.md

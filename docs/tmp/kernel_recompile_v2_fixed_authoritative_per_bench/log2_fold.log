@@ -1,0 +1,5 @@
+[bench] log2_fold
+  kernel           status=ok               exec=358.5 ns applied=-
+  kernel-recompile status=ok               exec=344 ns applied=True
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/kernel_recompile_v2_fixed_authoritative_per_bench/log2_fold.json
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/kernel_recompile_v2_fixed_authoritative_per_bench/log2_fold.md

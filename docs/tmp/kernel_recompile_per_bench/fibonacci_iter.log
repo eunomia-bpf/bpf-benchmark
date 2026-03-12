@@ -1,0 +1,5 @@
+[bench] fibonacci_iter
+  kernel           status=ok               exec=987 ns applied=-
+  kernel-recompile status=ok               exec=996.5 ns applied=True
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/kernel_recompile_per_bench/fibonacci_iter.json
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/kernel_recompile_per_bench/fibonacci_iter.md

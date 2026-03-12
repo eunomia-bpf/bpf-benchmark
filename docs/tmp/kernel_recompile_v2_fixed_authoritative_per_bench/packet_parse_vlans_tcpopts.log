@@ -1,0 +1,5 @@
+[bench] packet_parse_vlans_tcpopts
+  kernel           status=ok               exec=27 ns applied=-
+  kernel-recompile status=ok               exec=27 ns applied=False
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/kernel_recompile_v2_fixed_authoritative_per_bench/packet_parse_vlans_tcpopts.json
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/kernel_recompile_v2_fixed_authoritative_per_bench/packet_parse_vlans_tcpopts.md

@@ -1,0 +1,5 @@
+[bench] alu32_64_pingpong
+  kernel           status=ok               exec=533.5 ns applied=-
+  kernel-recompile status=ok               exec=529 ns applied=False
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/kernel_recompile_v2_fixed_authoritative_per_bench/alu32_64_pingpong.json
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/kernel_recompile_v2_fixed_authoritative_per_bench/alu32_64_pingpong.md

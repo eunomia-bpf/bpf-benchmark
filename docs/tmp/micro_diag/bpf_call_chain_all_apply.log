@@ -1,0 +1,38 @@
+
+vendor/linux-framework/modules.order not found: kernel modules not enabled or kernel not compiled properly, kernel modules disabled
+
+libbpf: loading object from ./micro/programs/bpf_call_chain.bpf.o
+libbpf: elf: section(2) .text, size 824, link 0, flags 6, type=1
+libbpf: sec '.text': found program 'sub_hash' at insn offset 0 (0 bytes), code size 17 insns (136 bytes)
+libbpf: sec '.text': found program 'sub_fold' at insn offset 17 (136 bytes), code size 73 insns (584 bytes)
+libbpf: sec '.text': found program 'sub_combine' at insn offset 90 (720 bytes), code size 13 insns (104 bytes)
+libbpf: elf: section(3) xdp, size 896, link 0, flags 6, type=1
+libbpf: sec 'xdp': found program 'bpf_call_chain_xdp' at insn offset 0 (0 bytes), code size 112 insns (896 bytes)
+libbpf: elf: section(4) .relxdp, size 48, link 26, flags 40, type=9
+libbpf: elf: section(5) license, size 4, link 0, flags 3, type=1
+libbpf: license of ./micro/programs/bpf_call_chain.bpf.o is GPL
+libbpf: elf: section(16) .BTF, size 1800, link 0, flags 0, type=1
+libbpf: elf: section(18) .BTF.ext, size 2168, link 0, flags 0, type=1
+libbpf: elf: section(26) .symtab, size 528, link 1, flags 0, type=2
+libbpf: looking for externs among 22 symbols...
+libbpf: collected 0 externs total
+libbpf: sec '.relxdp': collecting relocation for section(3) 'xdp'
+libbpf: sec '.relxdp': relo #0: insn #68 against '.text'
+libbpf: sec '.relxdp': relo #1: insn #73 against '.text'
+libbpf: sec '.relxdp': relo #2: insn #77 against '.text'
+libbpf: object 'bpf_call_chain': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...
+libbpf: prog 'bpf_call_chain_xdp': added 17 insns from sub-prog 'sub_hash'
+libbpf: prog 'bpf_call_chain_xdp': insn #68 relocated, imm 43 points to subprog 'sub_hash' (now at 112 offset)
+libbpf: prog 'bpf_call_chain_xdp': added 73 insns from sub-prog 'sub_fold'
+libbpf: prog 'bpf_call_chain_xdp': insn #73 relocated, imm 55 points to subprog 'sub_fold' (now at 129 offset)
+libbpf: prog 'bpf_call_chain_xdp': added 13 insns from sub-prog 'sub_combine'
+libbpf: prog 'bpf_call_chain_xdp': insn #77 relocated, imm 124 points to subprog 'sub_combine' (now at 202 offset)
+recompile-cmov: found 1 cmov sites in xlated program (215 insns)
+recompile-wide: found 2 wide_load sites in xlated program (215 insns)
+recompile-rotate: no rotate sites found in xlated program (215 insns)
+recompile-lea: no addr_calc sites found in xlated program (215 insns)
+recompile-extract: no bitfield_extract sites found in xlated program (215 insns)
+recompile-zero-ext: no zero_ext_elide sites found in xlated program (215 insns)
+recompile-endian: no endian_fusion sites found in xlated program (215 insns)
+recompile-branch-flip: no branch_flip sites found in xlated program (215 insns)
+{"compile_ns":10054206,"exec_ns":1507,"timing_source":"ktime","no_cmov":false,"disabled_passes":[],"wall_exec_ns":112574,"exec_cycles":414910,"tsc_freq_hz":3685671515,"result":13335792585254919774,"retval":2,"jited_prog_len":899,"xlated_prog_len":1720,"code_size":{"bpf_bytecode_bytes":1720,"native_code_bytes":899,"inflation_ratio":0.522674},"phases_ns":{"memory_prepare_ns":2689632,"object_open_ns":6525430,"object_load_ns":3496116,"input_stage_ns":325,"prog_run_wall_ns":112650,"result_extract_ns":51},"perf_counters":{},"perf_counters_meta":{"requested":false,"collected":false,"include_kernel":true,"scope":"full_repeat_raw","error":""},"directive_scan":{"performed":true,"cmov_sites":1,"wide_sites":2,"rotate_sites":0,"lea_sites":0,"bitfield_sites":0,"extract_sites":0,"zero_ext_sites":0,"endian_sites":0,"branch_flip_sites":0,"total_sites":3},"recompile":{"requested":true,"mode":"auto-scan-v5","requested_families":["cmov","wide","rotate","lea","extract","zero-ext","endian","branch-flip"],"skipped_families":[],"policy_generated":true,"policy_bytes":460,"syscall_attempted":true,"applied":true,"cmov_sites":1,"wide_sites":2,"rotate_sites":0,"lea_sites":0,"bitfield_sites":0,"extract_sites":0,"zero_ext_sites":0,"endian_sites":0,"branch_flip_sites":0,"total_sites":3,"error":""}}
