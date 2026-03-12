@@ -25,6 +25,13 @@ from e2e.cases.scx.case import (  # noqa: E402
     run_scx_case,
     persist_results as persist_scx_results,
 )
+from e2e.cases.xdp_forwarding.case import (  # noqa: E402
+    DEFAULT_OUTPUT_JSON as DEFAULT_XDP_OUTPUT_JSON,
+    DEFAULT_OUTPUT_MD as DEFAULT_XDP_OUTPUT_MD,
+    DEFAULT_XDP_OBJECT,
+    persist_results as persist_xdp_results,
+    run_xdp_forwarding_case,
+)
 from e2e.cases.tetragon.case import (  # noqa: E402
     DEFAULT_EXECVE_OBJECT as DEFAULT_TETRAGON_EXECVE_OBJECT,
     DEFAULT_KPROBE_OBJECT as DEFAULT_TETRAGON_KPROBE_OBJECT,
@@ -45,10 +52,11 @@ from e2e.cases.tracee.case import (  # noqa: E402
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Unified entrypoint for repository end-to-end benchmarks.")
-    parser.add_argument("case", choices=("tracee", "tetragon", "bpftrace", "scx"))
+    parser.add_argument("case", choices=("tracee", "tetragon", "bpftrace", "scx", "xdp_forwarding"))
     parser.add_argument("--vm", action="store_true", help="Run the benchmark inside a virtme-ng guest.")
     parser.add_argument("--kernel", help="Kernel image used with --vm.")
     parser.add_argument("--smoke", action="store_true", help="Run the smoke-sized configuration.")
+    parser.add_argument("--dry-run", action="store_true", help="Resolve the execution plan without running the live workload.")
     parser.add_argument("--duration", type=int, help="Override the per-workload duration in seconds.")
     parser.add_argument("--tracee-binary", help="Explicit Tracee binary path.")
     parser.add_argument("--tetragon-binary", help="Explicit Tetragon binary path.")
@@ -75,6 +83,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--bpftool-binary", default="/usr/local/sbin/bpftool")
     parser.add_argument("--bpftool", help="Explicit bpftool path for Tetragon runs.")
     parser.add_argument("--scheduler-extra-arg", action="append", default=[])
+    parser.add_argument("--xdp-object", default=str(DEFAULT_XDP_OBJECT))
+    parser.add_argument("--xdp-program", default="xdp_fwd_fib_full")
+    parser.add_argument("--attach-type", choices=("xdp", "xdpgeneric", "xdpdrv"), default="xdp")
+    parser.add_argument("--packet-size", type=int, default=64)
+    parser.add_argument("--parallel-streams", type=int, default=4)
+    parser.add_argument("--server-port", type=int, default=5201)
     parser.add_argument("--cpus", type=int, default=2, help="Guest CPU count for --vm runs.")
     parser.add_argument("--mem", default="4G", help="Guest memory size for --vm runs.")
     parser.add_argument("--timeout", type=int, default=2400, help="VM timeout in seconds.")
@@ -182,12 +196,71 @@ def persist_bpftrace_results(args: argparse.Namespace, payload: dict[str, object
     write_text(Path(args.report_md).resolve(), build_bpftrace_report(payload) + "\n")
 
 
+def run_xdp_vm(args: argparse.Namespace) -> int:
+    if not args.kernel:
+        raise SystemExit("--kernel is required with --vm")
+
+    bpftool_binary = (
+        str(Path(args.bpftool_binary).resolve())
+        if Path(args.bpftool_binary).exists()
+        else str(args.bpftool_binary)
+    )
+    guest_command = [
+        "python3",
+        "e2e/run.py",
+        "xdp_forwarding",
+        "--output-json",
+        str(Path(args.output_json).resolve()),
+        "--output-md",
+        str(Path(args.output_md).resolve()),
+        "--xdp-object",
+        str(Path(args.xdp_object).resolve()),
+        "--xdp-program",
+        args.xdp_program,
+        "--attach-type",
+        args.attach_type,
+        "--scanner",
+        str(Path(args.scanner).resolve()),
+        "--bpftool-binary",
+        bpftool_binary,
+        "--packet-size",
+        str(int(args.packet_size)),
+        "--parallel-streams",
+        str(int(args.parallel_streams)),
+        "--server-port",
+        str(int(args.server_port)),
+    ]
+    if args.smoke:
+        guest_command.append("--smoke")
+    if args.dry_run:
+        guest_command.append("--dry-run")
+    if args.duration is not None:
+        guest_command.extend(["--duration", str(int(args.duration))])
+
+    guest_script = write_guest_script([guest_command])
+    completed = run_in_vm(args.kernel, guest_script, args.cpus, args.mem, args.timeout)
+    sys.stdout.write(completed.stdout)
+    sys.stderr.write(completed.stderr)
+    if completed.returncode != 0:
+        raise SystemExit(
+            f"vng run failed with exit {completed.returncode}: {tail_text(completed.stderr or completed.stdout)}"
+        )
+    return 0
+
+
 def apply_case_defaults(args: argparse.Namespace) -> None:
     if args.case == "scx":
         if args.output_json == str(DEFAULT_OUTPUT_JSON):
             args.output_json = str(DEFAULT_SCX_OUTPUT_JSON)
         if args.output_md == str(DEFAULT_OUTPUT_MD):
             args.output_md = str(DEFAULT_SCX_OUTPUT_MD)
+        return
+
+    if args.case == "xdp_forwarding":
+        if args.output_json == str(DEFAULT_OUTPUT_JSON):
+            args.output_json = str(DEFAULT_XDP_OUTPUT_JSON)
+        if args.output_md == str(DEFAULT_OUTPUT_MD):
+            args.output_md = str(DEFAULT_XDP_OUTPUT_MD)
         return
 
     if args.case == "tetragon":
@@ -217,6 +290,8 @@ def main(argv: list[str] | None = None) -> int:
             return run_tracee_vm(args)
         if args.case == "scx":
             return run_scx_vm(args)
+        if args.case == "xdp_forwarding":
+            return run_xdp_vm(args)
         if args.case in {"tetragon", "bpftrace"}:
             raise SystemExit(f"--vm is not yet supported for {args.case}")
         raise SystemExit(f"unsupported e2e case: {args.case}")
@@ -236,6 +311,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.case == "scx":
         payload = run_scx_case(args)
         persist_scx_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve())
+        return 0
+    if args.case == "xdp_forwarding":
+        payload = run_xdp_forwarding_case(args)
+        persist_xdp_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve())
         return 0
     raise SystemExit(f"unsupported e2e case: {args.case}")
 
