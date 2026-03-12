@@ -170,9 +170,24 @@ def select_runtimes(names: list[str] | None, suite: SuiteSpec):
 
 
 def ensure_artifacts_built(suite: SuiteSpec, build_bpftool: bool) -> None:
-    build_order = ["micro_exec", "programs"]
-    if build_bpftool:
+    build_order: list[str] = []
+    if not suite.build.runner_binary.exists():
+        build_order.append("micro_exec")
+
+    missing_program_objects = any(
+        not benchmark.program_object.exists()
+        for benchmark in suite.benchmarks.values()
+    )
+    if missing_program_objects:
+        build_order.append("programs")
+
+    if build_bpftool and not suite.build.bpftool_binary.exists():
         build_order.append("bpftool")
+
+    if not build_order:
+        print("[build] reusing existing artifacts")
+        return
+
     ensure_build_steps(
         suite.build.commands,
         root_dir=ROOT_DIR,

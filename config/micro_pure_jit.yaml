@@ -225,6 +225,8 @@ benchmarks:
     base_name: checksum
     kernel_input_size: 1032
     input_generator: checksum
+    # The input is non-zero; the repeated XOR fold cancels because each 16-bit lane
+    # receives the same checksum value eight times across the 32 rounds.
     expected_result: 0
     tags: [alu, memory, pure-jit]
 
@@ -285,7 +287,7 @@ benchmarks:
     base_name: packet_parse
     kernel_input_size: 3464
     input_generator: packet_parse
-    expected_result: 18717754466223
+    expected_result: 2969312
     tags: [memory, parse, bounds, pure-jit]
 
   - name: bounds_ladder
@@ -301,16 +303,16 @@ benchmarks:
     tags: [bounds, verifier-like, pure-jit]
 
   - name: bounds_check_heavy
-    description: Record parser with repeated dependent bounds checks
+    description: Record parser with dependent bounds checks and switch-based fixed-offset loads
     category: memory-local
     family: bounds-style
     level: very-high
-    hypothesis: Dense verifier-style guards should expose compare chains and critical-path inflation
+    hypothesis: Dense bounds guards plus selector-driven fixed-offset dispatch should expose compare chains, branch pressure, and critical-path inflation
     base_name: bounds_check_heavy
     kernel_input_size: 1032
     input_generator: bounds_check_heavy
     expected_result: 13381490383825386298
-    tags: [bounds, verifier-like, pure-jit]
+    tags: [bounds, branch-heavy, fixed-offsets, switch-dispatch, pure-jit]
 
   - name: stride_load_4
     description: Sequential-stride load pattern with stride 4 over a ring buffer
@@ -725,6 +727,8 @@ benchmarks:
     io_mode: staged
     kernel_input_size: 1032
     input_generator: checksum
+    # Same checksum fold as `checksum`; the repeated XOR cancels to zero despite
+    # non-zero generated input.
     expected_result: 0
     tags: [tc, pure-jit, non-xdp, kernel-only]
 

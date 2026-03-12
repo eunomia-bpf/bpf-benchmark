@@ -4,6 +4,11 @@
 #define BOUNDS_CHECK_HEAVY_RECORD_SIZE 32U
 #define BOUNDS_CHECK_HEAVY_INPUT_SIZE (8U + BOUNDS_CHECK_HEAVY_RECORDS * BOUNDS_CHECK_HEAVY_RECORD_SIZE)
 
+/*
+ * The staged XDP path rejects the original variable-offset packet loads for
+ * this benchmark, so the hot loop now keeps the dependent bounds checks but
+ * routes the dynamic reads through fixed-offset switch ladders.
+ */
 static __always_inline u32 bounds_check_heavy_read_mid(const u8 *data, u32 base, u32 off)
 {
     switch (off) {

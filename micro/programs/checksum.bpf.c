@@ -28,6 +28,11 @@ static __always_inline int bench_checksum(const u8 *data, u32 len, u64 *out)
             sum = (sum & 0xFFFFU) + (sum >> 16);
         }
         sum = (sum & 0xFFFFU) + (sum >> 16);
+        /*
+         * The same checksum value is folded into four 16-bit lanes. With 32
+         * rounds each lane toggles eight times, so the final accumulator is
+         * intentionally zero even though the staged input is non-zero.
+         */
         acc ^= (u64)(~sum & 0xFFFFU) << ((round & 3) * 16);
     }
 

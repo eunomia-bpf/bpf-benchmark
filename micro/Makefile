@@ -6,6 +6,7 @@ LIBBPF_BUILD_DIR := $(BUILD_DIR)/vendor/libbpf
 LIBBPF_OBJDIR := $(LIBBPF_BUILD_DIR)/obj
 LIBBPF_PREFIX := $(LIBBPF_BUILD_DIR)/prefix
 LIBBPF_A := $(LIBBPF_OBJDIR)/libbpf.a
+LIBBPF_HEADER := $(LIBBPF_PREFIX)/include/bpf/bpf.h
 
 BPFTOOL_BUILD_DIR := $(BUILD_DIR)/vendor/bpftool/
 BPFTOOL_BIN := $(BPFTOOL_BUILD_DIR)bpftool
@@ -24,9 +25,9 @@ deps: vendor_libbpf micro_exec directive_hint vendor_bpftool
 programs:
 	$(MAKE) -C $(ROOT_DIR)/programs
 
-vendor_libbpf: $(LIBBPF_A)
+vendor_libbpf: $(LIBBPF_A) $(LIBBPF_HEADER)
 
-$(LIBBPF_A):
+$(LIBBPF_A) $(LIBBPF_HEADER):
 	mkdir -p $(LIBBPF_OBJDIR)
 	mkdir -p $(LIBBPF_PREFIX)
 	$(MAKE) -C $(REPO_ROOT)/vendor/libbpf/src \
@@ -36,8 +37,10 @@ $(LIBBPF_A):
 		PREFIX=$(LIBBPF_PREFIX) \
 		$(LIBBPF_A) install_headers
 
-micro_exec: vendor_libbpf
-	mkdir -p $(RUNNER_BUILD_DIR)
+$(RUNNER_BUILD_DIR) $(TOOLS_BUILD_DIR) $(BPFTOOL_BUILD_DIR):
+	mkdir -p $@
+
+micro_exec: $(LIBBPF_A) $(LIBBPF_HEADER) | $(RUNNER_BUILD_DIR)
 	cmake -S $(ROOT_DIR)/runner -B $(RUNNER_BUILD_DIR) \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DMICRO_REPO_ROOT=$(REPO_ROOT) \
@@ -45,8 +48,7 @@ micro_exec: vendor_libbpf
 		-DMICRO_LIBBPF_LIBRARY=$(LIBBPF_A)
 	cmake --build $(RUNNER_BUILD_DIR) --target micro_exec -j
 
-directive_hint: vendor_libbpf
-	mkdir -p $(TOOLS_BUILD_DIR)
+directive_hint: $(LIBBPF_A) $(LIBBPF_HEADER) | $(TOOLS_BUILD_DIR)
 	$(CXX) -O2 -g -Wall -Wextra -std=c++20 \
 		-I$(LIBBPF_PREFIX)/include \
 		-I$(ROOT_DIR)/runner/include \
@@ -56,8 +58,7 @@ directive_hint: vendor_libbpf
 		$(ROOT_DIR)/runner/src/elf_program_loader.cpp \
 		$(LIBBPF_A) -lelf -lz
 
-vendor_bpftool:
-	mkdir -p $(BPFTOOL_BUILD_DIR)
+vendor_bpftool: | $(BPFTOOL_BUILD_DIR)
 	$(MAKE) -C $(REPO_ROOT)/vendor/bpftool/src \
 		OUTPUT=$(BPFTOOL_BUILD_DIR) \
 		BPF_DIR=$(REPO_ROOT)/vendor/libbpf/src
