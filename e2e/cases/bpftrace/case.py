@@ -26,7 +26,7 @@ from e2e.common.metrics import (  # noqa: E402
     sample_cpu_usage,
     sample_total_cpu_usage,
 )
-from e2e.common.recompile import apply_recompile, scan_programs  # noqa: E402
+from e2e.common.recompile import PolicyTarget, apply_recompile, resolve_policy_files, scan_programs  # noqa: E402
 from e2e.common.workload import (  # noqa: E402
     WorkloadResult,
     run_dd_read_load,
@@ -43,6 +43,7 @@ DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "bpftrace-real-e2e.md"
 DEFAULT_REPORT_MD = ROOT_DIR / "docs" / "tmp" / "bpftrace-real-e2e-report.md"
 DEFAULT_RUNNER = ROOT_DIR / "micro" / "build" / "runner" / "micro_exec"
 DEFAULT_SCANNER = ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"
+BPFTRACE_POLICY_OBJECT_DIR = ROOT_DIR / "corpus" / "build" / "bpftrace"
 MIN_BPFTRACE_VERSION = (0, 16, 0)
 
 
@@ -247,6 +248,23 @@ def aggregate_site_totals(records: Mapping[int, Mapping[str, object]]) -> dict[s
     return totals
 
 
+def resolve_bpftrace_policy_files(
+    spec: ScriptSpec,
+    programs: Sequence[Mapping[str, object]],
+) -> dict[int, str]:
+    object_hint = BPFTRACE_POLICY_OBJECT_DIR / f"{spec.name}.bpf.o"
+    targets = [
+        PolicyTarget(
+            prog_id=int(program.get("id", 0)),
+            object_path=object_hint,
+            program_name=str(program.get("name", "")).strip() or None,
+        )
+        for program in programs
+        if int(program.get("id", 0) or 0) > 0
+    ]
+    return resolve_policy_files(targets)
+
+
 def run_named_workload(kind: str, duration_s: int) -> WorkloadResult:
     if kind == "open_latency":
         return run_file_open_load(duration_s)
@@ -360,6 +378,11 @@ def run_phase(
         "programs": [],
         "prog_ids": [],
         "scan_results": {},
+        "policy_matches": {},
+        "policy_summary": {
+            "configured_programs": 0,
+            "fallback_programs": 0,
+        },
         "site_totals": {
             "total_sites": 0,
             "cmov_sites": 0,
@@ -386,6 +409,12 @@ def run_phase(
         prog_ids = [int(program["id"]) for program in programs]
         result["programs"] = programs
         result["prog_ids"] = prog_ids
+        policy_files = resolve_bpftrace_policy_files(spec, programs)
+        result["policy_matches"] = {str(prog_id): path for prog_id, path in policy_files.items()}
+        result["policy_summary"] = {
+            "configured_programs": len(policy_files),
+            "fallback_programs": max(0, len(prog_ids) - len(policy_files)),
+        }
 
         scan_results = scan_programs(prog_ids, scanner_binary)
         result["scan_results"] = {str(key): value for key, value in scan_results.items()}
@@ -403,7 +432,11 @@ def run_phase(
                 result["reason"] = "no eligible directive sites"
                 return result
 
-            recompile_results = apply_recompile(eligible_prog_ids, scanner_binary)
+            recompile_results = apply_recompile(
+                eligible_prog_ids,
+                scanner_binary,
+                policy_files=policy_files,
+            )
             applied_programs = sum(1 for record in recompile_results.values() if record.get("applied"))
             errors = sorted({str(record.get("error", "")).strip() for record in recompile_results.values() if record.get("error")})
             result["recompile_results"] = {str(key): value for key, value in recompile_results.items()}

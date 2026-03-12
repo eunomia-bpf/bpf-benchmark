@@ -39,7 +39,7 @@ from e2e.common.metrics import (  # noqa: E402
     sample_cpu_usage,
     sample_total_cpu_usage,
 )
-from e2e.common.recompile import apply_recompile, scan_programs  # noqa: E402
+from e2e.common.recompile import PolicyTarget, apply_recompile, resolve_policy_files, scan_programs  # noqa: E402
 from e2e.common.workload import (  # noqa: E402
     WorkloadResult,
     run_exec_storm,
@@ -647,6 +647,25 @@ def select_manual_programs(inventory: Sequence[ProgramInventoryEntry]) -> list[P
     return [by_name[name] for name in MANUAL_PROGRAM_NAMES]
 
 
+def resolve_tracee_policy_files(tracee_object: Path, program_ids_by_name: Mapping[str, int]) -> dict[int, str]:
+    return resolve_policy_files(
+        PolicyTarget(
+            prog_id=int(prog_id),
+            object_path=tracee_object,
+            program_name=name,
+        )
+        for name, prog_id in program_ids_by_name.items()
+        if int(prog_id) > 0
+    )
+
+
+def build_policy_summary(policy_files: Mapping[int, str], prog_ids: Sequence[int]) -> dict[str, int]:
+    return {
+        "configured_programs": len(policy_files),
+        "fallback_programs": max(0, len(prog_ids) - len(policy_files)),
+    }
+
+
 def run_phase(
     workloads: Sequence[Mapping[str, object]],
     duration_s: int,
@@ -696,9 +715,18 @@ def run_manual_fallback(
         with ManualTraceeSession(ManualLibbpf(), tracee_object, selected) as session:
             prog_ids = [int(handle.prog_id) for handle in session.program_handles.values()]
             prog_fds = {int(handle.prog_id): int(handle.prog_fd) for handle in session.program_handles.values()}
+            policy_files = resolve_tracee_policy_files(
+                tracee_object,
+                {name: int(handle.prog_id) for name, handle in session.program_handles.items()},
+            )
             baseline = run_phase(workloads, duration_s, prog_ids, prog_fds=prog_fds, agent_pid=None, collector=None)
             scan_results = scan_programs(prog_ids, scanner_binary, prog_fds=prog_fds)
-            recompile_results = apply_recompile(prog_ids, scanner_binary, prog_fds=prog_fds)
+            recompile_results = apply_recompile(
+                prog_ids,
+                scanner_binary,
+                prog_fds=prog_fds,
+                policy_files=policy_files,
+            )
             applied = sum(1 for record in recompile_results.values() if record.get("applied"))
             post = run_phase(workloads, duration_s, prog_ids, prog_fds=prog_fds, agent_pid=None, collector=None) if applied > 0 else None
 
@@ -716,6 +744,8 @@ def run_manual_fallback(
         "host": host_metadata(),
         "config": dict(config),
         "baseline": baseline,
+        "policy_matches": {str(key): value for key, value in policy_files.items()},
+        "policy_summary": build_policy_summary(policy_files, prog_ids),
         "scan_results": {str(key): value for key, value in scan_results.items()},
         "recompile_results": {str(key): value for key, value in recompile_results.items()},
         "recompile_summary": {
@@ -772,6 +802,14 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
     with enable_bpf_stats():
         with TraceeAgentSession(commands, load_timeout=int(args.load_timeout)) as session:
             prog_ids = [int(program["id"]) for program in session.programs]
+            policy_files = resolve_tracee_policy_files(
+                tracee_object,
+                {
+                    str(program.get("name", "")).strip(): int(program.get("id", 0))
+                    for program in session.programs
+                    if int(program.get("id", 0) or 0) > 0 and str(program.get("name", "")).strip()
+                },
+            )
             baseline = run_phase(
                 workloads,
                 duration_s,
@@ -781,7 +819,12 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                 collector=session.collector,
             )
             scan_results = scan_programs(prog_ids, scanner_binary, prog_fds=session.program_fds)
-            recompile_results = apply_recompile(prog_ids, scanner_binary, prog_fds=session.program_fds)
+            recompile_results = apply_recompile(
+                prog_ids,
+                scanner_binary,
+                prog_fds=session.program_fds,
+                policy_files=policy_files,
+            )
             applied = sum(1 for record in recompile_results.values() if record.get("applied"))
             if applied == 0:
                 limitations.append("BPF_PROG_JIT_RECOMPILE did not apply on this kernel; post-ReJIT measurement was skipped.")
@@ -810,6 +853,8 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
         "host": host_metadata(),
         "config": dict(config),
         "baseline": baseline,
+        "policy_matches": {str(key): value for key, value in policy_files.items()},
+        "policy_summary": build_policy_summary(policy_files, prog_ids),
         "scan_results": {str(key): value for key, value in scan_results.items()},
         "recompile_results": {str(key): value for key, value in recompile_results.items()},
         "recompile_summary": {

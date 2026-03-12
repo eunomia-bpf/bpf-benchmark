@@ -5,11 +5,21 @@ import ctypes.util
 import json
 import os
 import re
+from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
+from typing import Iterable, Mapping
 
 from . import run_command
 from .metrics import sample_bpf_stats
+
+
+@dataclass(frozen=True, slots=True)
+class PolicyTarget:
+    prog_id: int
+    object_path: Path | str | None = None
+    program_name: str | None = None
+    policy_file: Path | str | None = None
 
 
 @lru_cache(maxsize=1)
@@ -150,6 +160,33 @@ def _take_prog_fd(prog_id: int, prog_fds: dict[int, int] | None = None) -> int:
     return _prog_fd_by_id(int(prog_id))
 
 
+def _normalize_policy_path(value: Path | str | None) -> str | None:
+    if value is None:
+        return None
+    return str(Path(value).resolve())
+
+
+def resolve_policy_files(targets: Iterable[PolicyTarget]) -> dict[int, str]:
+    from corpus.policy_utils import resolve_policy_path
+
+    resolved: dict[int, str] = {}
+    for target in targets:
+        prog_id = int(target.prog_id)
+        explicit_policy = _normalize_policy_path(target.policy_file)
+        if explicit_policy is not None:
+            resolved[prog_id] = explicit_policy
+            continue
+        if target.object_path is None:
+            continue
+        policy_path = resolve_policy_path(
+            Path(target.object_path).resolve(),
+            program_name=target.program_name,
+        )
+        if policy_path is not None:
+            resolved[prog_id] = str(policy_path.resolve())
+    return resolved
+
+
 def scan_programs(
     prog_ids: list[int] | tuple[int, ...],
     scanner_binary: str | Path,
@@ -207,10 +244,19 @@ def apply_recompile(
     scanner_binary: str | Path,
     *,
     prog_fds: dict[int, int] | None = None,
+    policy_file: str | Path | None = None,
+    policy_files: Mapping[int, str | Path] | None = None,
 ) -> dict[int, dict[str, object]]:
     results: dict[int, dict[str, object]] = {}
     stats = sample_bpf_stats(list(prog_ids), prog_fds=prog_fds)
+    default_policy = _normalize_policy_path(policy_file)
+    normalized_policy_files = {
+        int(prog_id): normalized
+        for prog_id, raw_path in (policy_files or {}).items()
+        if (normalized := _normalize_policy_path(raw_path)) is not None
+    }
     for prog_id in prog_ids:
+        selected_policy = normalized_policy_files.get(int(prog_id), default_policy)
         try:
             fd = _take_prog_fd(int(prog_id), prog_fds)
         except OSError as exc:
@@ -219,6 +265,8 @@ def apply_recompile(
                 "program_name": program_name,
                 "counts": _scanner_counts(""),
                 "applied": False,
+                "policy_file": selected_policy,
+                "policy_mode": "config" if selected_policy else "all",
                 "error": str(exc),
                 "stdout_tail": "",
                 "stderr_tail": "",
@@ -227,17 +275,21 @@ def apply_recompile(
         try:
             os.set_inheritable(fd, True)
             program_name = str(stats.get(int(prog_id), {}).get("name", f"id-{prog_id}"))
+            command = [
+                str(scanner_binary),
+                "apply",
+                "--prog-fd",
+                str(fd),
+                "--v5",
+                "--program-name",
+                program_name,
+            ]
+            if selected_policy is not None:
+                command.extend(["--config", selected_policy])
+            else:
+                command.append("--all")
             completed = run_command(
-                [
-                    str(scanner_binary),
-                    "apply",
-                    "--prog-fd",
-                    str(fd),
-                    "--all",
-                    "--v5",
-                    "--program-name",
-                    program_name,
-                ],
+                command,
                 check=False,
                 timeout=60,
                 pass_fds=(fd,),
@@ -246,6 +298,8 @@ def apply_recompile(
                 "program_name": program_name,
                 "counts": _scanner_counts(completed.stdout or ""),
                 "applied": completed.returncode == 0,
+                "policy_file": selected_policy,
+                "policy_mode": "config" if selected_policy else "all",
                 "error": "" if completed.returncode == 0 else (completed.stderr or completed.stdout).strip(),
                 "stdout_tail": completed.stdout[-4000:] if completed.stdout else "",
                 "stderr_tail": completed.stderr[-4000:] if completed.stderr else "",
@@ -256,6 +310,8 @@ def apply_recompile(
 
 
 __all__ = [
+    "PolicyTarget",
     "apply_recompile",
+    "resolve_policy_files",
     "scan_programs",
 ]
