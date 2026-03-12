@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cerrno>
+#include <cctype>
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
@@ -114,6 +115,9 @@ struct CommandOptions {
     std::string output_path;
     std::string program_name;
     std::string config_path;
+    bpf_jit_scanner::V5PolicyAction default_action =
+        bpf_jit_scanner::V5PolicyAction::Skip;
+    bool default_action_explicit = false;
     bpf_jit_scanner::V5ScanOptions scan_options = {
         .scan_cmov = false,
         .scan_wide = false,
@@ -131,6 +135,7 @@ struct CommandOptions {
     bool has_insn_cnt = false;
     uint32_t insn_cnt = 0;
     bool json_output = false;
+    bool per_site_output = false;
 };
 
 uint64_t ptr_to_u64(const void *ptr)
@@ -500,9 +505,10 @@ void print_usage(const char *prog)
 {
     std::fprintf(stderr,
         "Usage:\n"
-        "  %s scan  (<file> | --prog-fd <fd> | --xlated <file>) [family flags] [--json] [--output <blob>]\n"
+        "  %s scan  (<file> | --prog-fd <fd> | --xlated <file>) [family flags] [--json] [--per-site] [--output <blob>]\n"
+        "  %s generate-policy (<file> | --prog-fd <fd> | --xlated <file>) [family flags] [--program-name <name>] [--default apply|skip] [--output <yaml>|-]\n"
         "  %s compile-policy (<file> | --prog-fd <fd> | --xlated <file>) --config <policy.{yaml,json}> [family flags] [--output <blob>|-]\n"
-        "  %s apply --prog-fd <fd> [family flags] [--config <policy.{yaml,json}>] [--output <blob>]\n"
+        "  %s apply (<file> | --prog-fd <fd> | --xlated <file>) [family flags] [--config <policy.{yaml,json}>] [--program-name <name>] [--output <blob>|-]\n"
         "  %s dump  --prog-fd <fd> [--output <file>]\n"
         "\n"
         "Family flags:\n"
@@ -522,12 +528,14 @@ void print_usage(const char *prog)
         "Shared options:\n"
         "  --program-name <name>  Select a program when scanning an ELF object path\n"
         "  --config <file>        Policy YAML/JSON used by compile-policy or apply\n"
+        "  --default <action>     Default action for generate-policy (apply or skip)\n"
         "  --json                 Emit scan manifest JSON instead of text summary\n"
+        "  --per-site             Accepted for compatibility; scan --json is already per-site\n"
         "  --prog-tag <hex>       Override prog_tag for blob writing (16 hex chars)\n"
         "  --insn-cnt <n>         Override insn_cnt for blob writing\n"
         "  --output <file>        Output path (scan/apply/compile-policy: blob, dump: xlated)\n"
         "  -h, --help             Show this help\n",
-        prog, prog, prog, prog);
+        prog, prog, prog, prog, prog);
 }
 
 void parse_hex_tag(const char *hex, uint8_t tag[8])
@@ -539,6 +547,22 @@ void parse_hex_tag(const char *hex, uint8_t tag[8])
         char byte[3] = {hex[i * 2], hex[i * 2 + 1], '\0'};
         tag[i] = static_cast<uint8_t>(std::strtoul(byte, nullptr, 16));
     }
+}
+
+bpf_jit_scanner::V5PolicyAction parse_policy_action_or_die(const char *raw)
+{
+    std::string value(raw);
+    std::transform(value.begin(), value.end(), value.begin(),
+                   [](unsigned char ch) {
+                       return static_cast<char>(std::tolower(ch));
+                   });
+    if (value == "apply") {
+        return bpf_jit_scanner::V5PolicyAction::Apply;
+    }
+    if (value == "skip") {
+        return bpf_jit_scanner::V5PolicyAction::Skip;
+    }
+    die("--default must be 'apply' or 'skip'");
 }
 
 void enable_all_families(CommandOptions &options)
@@ -567,6 +591,7 @@ CommandOptions parse_args(int argc, char **argv)
         std::exit(0);
     }
     if (options.subcommand != "scan" &&
+        options.subcommand != "generate-policy" &&
         options.subcommand != "compile-policy" &&
         options.subcommand != "apply" &&
         options.subcommand != "dump") {
@@ -595,8 +620,13 @@ CommandOptions parse_args(int argc, char **argv)
             options.program_name = need_next();
         } else if (arg == "--config") {
             options.config_path = need_next();
+        } else if (arg == "--default") {
+            options.default_action = parse_policy_action_or_die(need_next());
+            options.default_action_explicit = true;
         } else if (arg == "--json") {
             options.json_output = true;
+        } else if (arg == "--per-site") {
+            options.per_site_output = true;
         } else if (arg == "--policy") {
             die("--policy was removed; scanner is v5-only");
         } else if (arg == "--prog-tag") {
@@ -646,7 +676,9 @@ CommandOptions parse_args(int argc, char **argv)
             continue;
         } else if (!arg.empty() && arg[0] != '-' &&
                    (options.subcommand == "scan" ||
-                    options.subcommand == "compile-policy") &&
+                    options.subcommand == "generate-policy" ||
+                    options.subcommand == "compile-policy" ||
+                    options.subcommand == "apply") &&
                    options.prog_fd < 0 &&
                    options.xlated_path.empty()) {
             options.xlated_path = arg;
@@ -668,38 +700,65 @@ CommandOptions parse_args(int argc, char **argv)
         if (options.json_output) {
             die("dump does not accept --json");
         }
+        if (options.per_site_output) {
+            die("dump does not accept --per-site");
+        }
         return options;
     }
 
-    if (options.subcommand == "apply") {
-        if (options.prog_fd < 0) {
-            die("apply requires --prog-fd");
+    const bool requires_input =
+        options.subcommand == "scan" ||
+        options.subcommand == "generate-policy" ||
+        options.subcommand == "compile-policy" ||
+        options.subcommand == "apply";
+    if (requires_input &&
+        ((options.prog_fd < 0) == options.xlated_path.empty())) {
+        if (options.subcommand == "scan") {
+            die("scan requires exactly one of --prog-fd or --xlated");
         }
-        if (!options.xlated_path.empty()) {
-            die("apply does not accept --xlated");
+        if (options.subcommand == "generate-policy") {
+            die("generate-policy requires exactly one of --prog-fd or --xlated");
         }
-        if (options.json_output) {
-            die("apply does not accept --json");
-        }
-    } else if ((options.prog_fd < 0) == options.xlated_path.empty()) {
         if (options.subcommand == "compile-policy") {
             die("compile-policy requires exactly one of --prog-fd or --xlated");
         }
-        die("scan requires exactly one of --prog-fd or --xlated");
+        die("apply requires exactly one of --prog-fd or --xlated");
     }
 
     if (options.subcommand == "scan" && !options.config_path.empty()) {
         die("scan does not accept --config; use compile-policy instead");
     }
-    if ((options.subcommand == "scan" || options.subcommand == "apply") &&
-        options.output_path == "-") {
-        die("%s does not support --output -", options.subcommand.c_str());
+    if (options.subcommand == "scan" && options.output_path == "-") {
+        die("scan does not support --output -");
     }
     if (options.subcommand == "compile-policy" && options.config_path.empty()) {
         die("compile-policy requires --config");
     }
-    if (options.subcommand == "compile-policy" && options.json_output) {
-        die("compile-policy does not accept --json");
+    if ((options.subcommand == "generate-policy" ||
+         options.subcommand == "compile-policy" ||
+         options.subcommand == "apply") &&
+        options.json_output) {
+        die("%s does not accept --json", options.subcommand.c_str());
+    }
+    if (options.subcommand != "scan" && options.per_site_output) {
+        die("%s does not accept --per-site", options.subcommand.c_str());
+    }
+    if (options.subcommand == "scan" && options.per_site_output &&
+        !options.json_output) {
+        die("scan --per-site requires --json");
+    }
+    if ((options.subcommand == "scan" || options.subcommand == "apply") &&
+        options.prog_fd >= 0 &&
+        options.output_path == "-") {
+        die("%s does not support --output -", options.subcommand.c_str());
+    }
+    if ((options.subcommand == "scan" || options.subcommand == "generate-policy") &&
+        !options.config_path.empty()) {
+        die("%s does not accept --config", options.subcommand.c_str());
+    }
+    if (options.subcommand != "generate-policy" &&
+        options.default_action_explicit) {
+        die("%s does not accept --default", options.subcommand.c_str());
     }
 
     if (!options.families_explicit) {
@@ -708,25 +767,46 @@ CommandOptions parse_args(int argc, char **argv)
     return options;
 }
 
-void print_summary(const bpf_jit_scanner::V5ScanSummary &summary)
+void print_summary(FILE *stream, const bpf_jit_scanner::V5ScanSummary &summary)
 {
-    std::printf("Accepted %zu v5 site(s)\n", summary.rules.size());
-    std::printf("  cmov:   %llu\n",
-                static_cast<unsigned long long>(summary.cmov_sites));
-    std::printf("  wide:   %llu\n",
-                static_cast<unsigned long long>(summary.wide_sites));
-    std::printf("  rotate: %llu\n",
-                static_cast<unsigned long long>(summary.rotate_sites));
-    std::printf("  lea:    %llu\n",
-                static_cast<unsigned long long>(summary.lea_sites));
-    std::printf("  extract:%llu\n",
-                static_cast<unsigned long long>(summary.bitfield_sites));
-    std::printf("  zeroext:%llu\n",
-                static_cast<unsigned long long>(summary.zero_ext_sites));
-    std::printf("  endian: %llu\n",
-                static_cast<unsigned long long>(summary.endian_sites));
-    std::printf("  bflip:  %llu\n",
-                static_cast<unsigned long long>(summary.branch_flip_sites));
+    std::fprintf(stream, "Accepted %zu v5 site(s)\n", summary.rules.size());
+    std::fprintf(stream, "  cmov:   %llu\n",
+                 static_cast<unsigned long long>(summary.cmov_sites));
+    std::fprintf(stream, "  wide:   %llu\n",
+                 static_cast<unsigned long long>(summary.wide_sites));
+    std::fprintf(stream, "  rotate: %llu\n",
+                 static_cast<unsigned long long>(summary.rotate_sites));
+    std::fprintf(stream, "  lea:    %llu\n",
+                 static_cast<unsigned long long>(summary.lea_sites));
+    std::fprintf(stream, "  extract:%llu\n",
+                 static_cast<unsigned long long>(summary.bitfield_sites));
+    std::fprintf(stream, "  zeroext:%llu\n",
+                 static_cast<unsigned long long>(summary.zero_ext_sites));
+    std::fprintf(stream, "  endian: %llu\n",
+                 static_cast<unsigned long long>(summary.endian_sites));
+    std::fprintf(stream, "  bflip:  %llu\n",
+                 static_cast<unsigned long long>(summary.branch_flip_sites));
+}
+
+void print_policy_warnings(
+    const bpf_jit_scanner::V5PolicyFilterResult &filter_result)
+{
+    for (const auto &warning : filter_result.warnings) {
+        std::fprintf(stderr, "warning: %s\n", warning.c_str());
+    }
+}
+
+void maybe_warn_program_mismatch(const InputBundle &input,
+                                 const bpf_jit_scanner::V5PolicyConfig &config)
+{
+    if (config.program.empty() || input.program_name.empty() ||
+        config.program == input.program_name) {
+        return;
+    }
+    std::fprintf(stderr,
+                 "warning: policy program '%s' does not match input program "
+                 "'%s'\n",
+                 config.program.c_str(), input.program_name.c_str());
 }
 
 bpf_jit_scanner::V5ProgramInfo build_program_info(const InputBundle &input)
@@ -753,7 +833,7 @@ void run_scan(const CommandOptions &options)
         write_stdout(reinterpret_cast<const uint8_t *>(json.data()),
                      static_cast<uint32_t>(json.size()));
     } else {
-        print_summary(summary);
+        print_summary(stdout, summary);
     }
 
     if (!options.output_path.empty()) {
@@ -770,6 +850,29 @@ void run_scan(const CommandOptions &options)
     }
 }
 
+void run_generate_policy(const CommandOptions &options)
+{
+    const InputBundle input = load_input(options);
+    const auto summary = bpf_jit_scanner::scan_v5_builtin(
+        input.xlated.data(),
+        static_cast<uint32_t>(input.xlated.size()),
+        options.scan_options);
+    const auto yaml = bpf_jit_scanner::render_policy_v2_yaml(
+        build_program_info(input), summary, options.default_action);
+
+    if (options.output_path.empty() || options.output_path == "-") {
+        write_stdout(reinterpret_cast<const uint8_t *>(yaml.data()),
+                     static_cast<uint32_t>(yaml.size()));
+        return;
+    }
+
+    write_file(options.output_path,
+               reinterpret_cast<const uint8_t *>(yaml.data()),
+               static_cast<uint32_t>(yaml.size()));
+    std::printf("Wrote version 2 policy template (%zu site entries) to %s\n",
+                summary.rules.size(), options.output_path.c_str());
+}
+
 void run_compile_policy(const CommandOptions &options)
 {
     const InputBundle input = load_input(options);
@@ -778,8 +881,12 @@ void run_compile_policy(const CommandOptions &options)
         static_cast<uint32_t>(input.xlated.size()),
         options.scan_options);
     const auto config = load_policy_config_or_die(options.config_path);
-    const auto filtered_rules = bpf_jit_scanner::filter_rules_by_policy(
-        summary.rules, config);
+    maybe_warn_program_mismatch(input, config);
+    const auto filter_result =
+        bpf_jit_scanner::filter_rules_by_policy_detailed(
+            summary.rules, config);
+    print_policy_warnings(filter_result);
+    const auto &filtered_rules = filter_result.rules;
     const auto blob = bpf_jit_scanner::build_policy_blob_v5(
         input.insn_cnt, input.prog_tag, filtered_rules);
 
@@ -801,25 +908,41 @@ void run_apply(const CommandOptions &options)
         input.xlated.data(),
         static_cast<uint32_t>(input.xlated.size()),
         options.scan_options);
-    auto selected_rules = discovered.rules;
+    bpf_jit_scanner::V5PolicyFilterResult filter_result;
+    filter_result.rules = discovered.rules;
     if (!options.config_path.empty()) {
         const auto config = load_policy_config_or_die(options.config_path);
-        selected_rules = bpf_jit_scanner::filter_rules_by_policy(
+        maybe_warn_program_mismatch(input, config);
+        filter_result = bpf_jit_scanner::filter_rules_by_policy_detailed(
             discovered.rules, config);
+        print_policy_warnings(filter_result);
     }
     const auto selected_summary =
-        bpf_jit_scanner::summarize_rules(selected_rules);
+        bpf_jit_scanner::summarize_rules(filter_result.rules);
     const auto blob = bpf_jit_scanner::build_policy_blob_v5(
-        input.insn_cnt, input.prog_tag, selected_rules);
+        input.insn_cnt, input.prog_tag, filter_result.rules);
 
-    print_summary(selected_summary);
+    const bool live_apply = options.prog_fd >= 0;
+    if (!live_apply) {
+        if (options.output_path.empty() || options.output_path == "-") {
+            write_stdout(blob.data(), static_cast<uint32_t>(blob.size()));
+            return;
+        }
+        write_file(options.output_path, blob.data(), static_cast<uint32_t>(blob.size()));
+        std::printf("Wrote %zu-byte filtered v5 policy blob (%zu/%zu rules) to %s\n",
+                    blob.size(), filter_result.rules.size(),
+                    discovered.rules.size(), options.output_path.c_str());
+        return;
+    }
+
+    print_summary(stdout, selected_summary);
     if (!options.config_path.empty()) {
         std::printf("Policy filter kept %zu of %zu v5 rule(s)\n",
-                    selected_rules.size(), discovered.rules.size());
+                    filter_result.rules.size(), discovered.rules.size());
     }
     apply_policy_blob(options.prog_fd, blob);
     std::printf("Applied %zu v5 rule(s) via BPF_PROG_JIT_RECOMPILE\n",
-                selected_rules.size());
+                filter_result.rules.size());
 
     if (!options.output_path.empty()) {
         write_file(options.output_path, blob.data(), static_cast<uint32_t>(blob.size()));
@@ -850,6 +973,8 @@ int main(int argc, char **argv)
     const CommandOptions options = parse_args(argc, argv);
     if (options.subcommand == "scan") {
         run_scan(options);
+    } else if (options.subcommand == "generate-policy") {
+        run_generate_policy(options);
     } else if (options.subcommand == "compile-policy") {
         run_compile_policy(options);
     } else if (options.subcommand == "apply") {

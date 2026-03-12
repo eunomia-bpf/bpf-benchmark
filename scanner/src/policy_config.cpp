@@ -13,6 +13,7 @@
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace bpf_jit_scanner {
 
@@ -177,6 +178,88 @@ std::string rule_site_id(const V5PolicyRule &rule)
            std::to_string(rule.site_start) + ":" + rule_pattern_kind(rule);
 }
 
+struct V5PolicySiteKey {
+    uint32_t insn = 0;
+    V5Family family = V5Family::Cmov;
+
+    bool operator==(const V5PolicySiteKey &other) const
+    {
+        return insn == other.insn && family == other.family;
+    }
+};
+
+struct V5PolicySiteKeyHash {
+    size_t operator()(const V5PolicySiteKey &key) const
+    {
+        return (static_cast<size_t>(key.insn) << 8) ^
+               static_cast<size_t>(key.family);
+    }
+};
+
+const char *policy_action_name(V5PolicyAction action)
+{
+    switch (action) {
+    case V5PolicyAction::Apply:
+        return "apply";
+    case V5PolicyAction::Skip:
+        return "skip";
+    default:
+        return "skip";
+    }
+}
+
+std::optional<V5PolicyAction> parse_policy_action_name(std::string value)
+{
+    value = lower_ascii(std::move(value));
+    if (value == "apply" || value == "enable" || value == "enabled" ||
+        value == "keep" || value == "on" || value == "true") {
+        return V5PolicyAction::Apply;
+    }
+    if (value == "skip" || value == "disable" || value == "disabled" ||
+        value == "drop" || value == "off" || value == "false") {
+        return V5PolicyAction::Skip;
+    }
+    return std::nullopt;
+}
+
+V5PolicyAction parse_policy_action(const YAML::Node &node,
+                                   const std::string &source_name,
+                                   const std::string &field_name)
+{
+    if (!node || !node.IsScalar()) {
+        throw_policy_error(source_name, field_name + " must be a scalar");
+    }
+
+    const auto action = parse_policy_action_name(node.as<std::string>());
+    if (!action.has_value()) {
+        throw_policy_error(source_name,
+                           field_name +
+                               " must be apply/skip (or enable/disable)");
+    }
+    return *action;
+}
+
+std::string yaml_single_quoted(const std::string &value)
+{
+    std::ostringstream out;
+    out << '\'';
+    for (const char ch : value) {
+        if (ch == '\'') {
+            out << "''";
+        } else {
+            out << ch;
+        }
+    }
+    out << '\'';
+    return out.str();
+}
+
+std::string describe_site_key(const V5PolicySiteKey &site)
+{
+    return std::string(v5_family_name(site.family)) + " insn " +
+           std::to_string(site.insn);
+}
+
 bool parse_selection_mode(const YAML::Node &selection_node,
                           const std::string &source_name,
                           V5PolicySelection *selection)
@@ -267,19 +350,14 @@ V5PolicyConfig parse_family_action_map(const YAML::Node &families_node,
         const YAML::Node action_node = entry.second;
         bool enabled = true;
         if (action_node.IsScalar()) {
-            const std::string action = lower_ascii(action_node.as<std::string>());
-            if (action == "apply" || action == "enable" || action == "enabled" ||
-                action == "keep" || action == "on" || action == "true") {
-                enabled = true;
-            } else if (action == "skip" || action == "disable" ||
-                       action == "disabled" || action == "drop" ||
-                       action == "off" || action == "false") {
-                enabled = false;
-            } else {
+            const auto action =
+                parse_policy_action_name(action_node.as<std::string>());
+            if (!action.has_value()) {
                 throw_policy_error(source_name,
                                    "families." + raw_name +
                                        " must be apply/skip (or enable/disable)");
             }
+            enabled = *action == V5PolicyAction::Apply;
         } else if (action_node.IsDefined() && !action_node.IsNull()) {
             throw_policy_error(source_name,
                                "families." + raw_name +
@@ -340,6 +418,64 @@ std::vector<V5PolicySiteOverride> parse_site_overrides(
     return overrides;
 }
 
+std::vector<V5PolicySite> parse_v2_sites(const YAML::Node &sites_node,
+                                         const std::string &source_name)
+{
+    std::vector<V5PolicySite> sites;
+    if (!sites_node || sites_node.IsNull()) {
+        return sites;
+    }
+    if (!sites_node.IsSequence()) {
+        throw_policy_error(source_name, "sites must be a sequence");
+    }
+
+    std::unordered_set<V5PolicySiteKey, V5PolicySiteKeyHash> seen;
+    seen.reserve(sites_node.size());
+    for (const auto &site_node : sites_node) {
+        if (!site_node.IsMap()) {
+            throw_policy_error(source_name, "sites entries must be mappings");
+        }
+
+        const YAML::Node insn_node = site_node["insn"];
+        const YAML::Node family_node = site_node["family"];
+        const YAML::Node action_node = site_node["action"];
+        if (!insn_node || !insn_node.IsScalar()) {
+            throw_policy_error(source_name, "sites.insn must be a scalar");
+        }
+        if (!family_node || !family_node.IsScalar()) {
+            throw_policy_error(source_name, "sites.family must be a scalar");
+        }
+
+        const auto family = parse_v5_family_name(family_node.as<std::string>());
+        if (!family.has_value()) {
+            throw_policy_error(source_name,
+                               "unknown family '" +
+                                   family_node.as<std::string>() +
+                                   "' in sites.family");
+        }
+
+        V5PolicySite site = {};
+        site.insn = insn_node.as<uint32_t>();
+        site.family = *family;
+        site.action = action_node
+                          ? parse_policy_action(action_node, source_name,
+                                                "sites.action")
+                          : V5PolicyAction::Apply;
+
+        const V5PolicySiteKey key {
+            .insn = site.insn,
+            .family = site.family,
+        };
+        if (!seen.insert(key).second) {
+            throw_policy_error(source_name,
+                               "duplicate sites entry for " +
+                                   describe_site_key(key));
+        }
+        sites.push_back(site);
+    }
+    return sites;
+}
+
 V5PolicyConfig parse_policy_node(const YAML::Node &root,
                                  const std::string &source_name)
 {
@@ -349,18 +485,42 @@ V5PolicyConfig parse_policy_node(const YAML::Node &root,
 
     V5PolicyConfig config = {};
     const YAML::Node version_node = root["version"];
+    const bool looks_like_v2 =
+        root["sites"] || root["default"] || root["program"];
     if (version_node) {
         if (!version_node.IsScalar()) {
             throw_policy_error(source_name, "version must be a scalar");
         }
         config.version = version_node.as<uint32_t>();
-        if (config.version != 1U) {
+        if (config.version != 1U && config.version != 2U) {
             throw_policy_error(source_name,
                                "unsupported policy version " +
                                    std::to_string(config.version));
         }
+    } else if (looks_like_v2) {
+        config.version = 2;
     }
 
+    if (config.version == 2U) {
+        config.schema = V5PolicySchema::PerSiteV2;
+        if (const YAML::Node program_node = root["program"];
+            program_node && !program_node.IsNull()) {
+            if (!program_node.IsScalar()) {
+                throw_policy_error(source_name, "program must be a scalar");
+            }
+            config.program = program_node.as<std::string>();
+        }
+        const YAML::Node default_node = root["default"];
+        if (!default_node || default_node.IsNull()) {
+            throw_policy_error(source_name, "default is required for version 2");
+        }
+        config.default_action =
+            parse_policy_action(default_node, source_name, "default");
+        config.sites = parse_v2_sites(root["sites"], source_name);
+        return config;
+    }
+
+    config.schema = V5PolicySchema::LegacyV1;
     const YAML::Node selection_node =
         root["selection"] ? root["selection"] : root;
     if (!selection_node.IsMap()) {
@@ -413,26 +573,95 @@ V5PolicyConfig parse_policy_config_text(const std::string &text,
     }
 }
 
+const char *v5_policy_action_name(V5PolicyAction action)
+{
+    return policy_action_name(action);
+}
+
 bool v5_policy_allows_family(const V5PolicyConfig &config, V5Family family)
 {
+    if (config.schema == V5PolicySchema::PerSiteV2) {
+        if (config.default_action == V5PolicyAction::Apply) {
+            return true;
+        }
+        return std::any_of(config.sites.begin(), config.sites.end(),
+                           [family](const V5PolicySite &site) {
+                               return site.family == family &&
+                                      site.action == V5PolicyAction::Apply;
+                           });
+    }
+
     const bool listed = family_in_list(config.selection.families, family);
     return config.selection.mode == V5PolicySelectionMode::Allowlist
                ? listed
                : !listed;
 }
 
-std::vector<V5PolicyRule> filter_rules_by_policy(
+V5PolicyFilterResult filter_rules_by_policy_detailed(
     const std::vector<V5PolicyRule> &rules,
     const V5PolicyConfig &config)
 {
+    V5PolicyFilterResult result;
+
+    if (config.schema == V5PolicySchema::PerSiteV2) {
+        std::unordered_map<V5PolicySiteKey, V5PolicyAction, V5PolicySiteKeyHash>
+            explicit_sites;
+        explicit_sites.reserve(config.sites.size());
+        std::unordered_set<V5PolicySiteKey, V5PolicySiteKeyHash> matched_sites;
+        matched_sites.reserve(config.sites.size());
+
+        for (const auto &site : config.sites) {
+            explicit_sites[V5PolicySiteKey {
+                .insn = site.insn,
+                .family = site.family,
+            }] = site.action;
+        }
+
+        result.rules.reserve(rules.size());
+        for (const auto &rule : rules) {
+            const V5PolicySiteKey key {
+                .insn = rule.site_start,
+                .family = rule.family,
+            };
+            V5PolicyAction action = config.default_action;
+            if (const auto explicit_it = explicit_sites.find(key);
+                explicit_it != explicit_sites.end()) {
+                action = explicit_it->second;
+                if (matched_sites.insert(key).second) {
+                    result.matched_site_count++;
+                }
+            }
+            if (action == V5PolicyAction::Apply) {
+                result.rules.push_back(rule);
+            }
+        }
+
+        result.unmatched_site_count =
+            explicit_sites.size() >= matched_sites.size()
+                ? explicit_sites.size() - matched_sites.size()
+                : 0;
+        if (result.unmatched_site_count != 0) {
+            result.warnings.reserve(result.unmatched_site_count);
+            for (const auto &[key, action] : explicit_sites) {
+                if (matched_sites.find(key) != matched_sites.end()) {
+                    continue;
+                }
+                result.warnings.push_back(
+                    "policy site " + describe_site_key(key) + " action=" +
+                    policy_action_name(action) +
+                    " was not found in the live program; skipping");
+            }
+        }
+        return result;
+    }
+
     std::unordered_map<std::string, bool> overrides;
     overrides.reserve(config.site_overrides.size());
     for (const auto &site_override : config.site_overrides) {
         overrides[site_override.site_id] = site_override.enabled;
     }
 
-    std::vector<V5PolicyRule> filtered;
-    filtered.reserve(rules.size());
+    result.rules.reserve(rules.size());
     for (const auto &rule : rules) {
         bool keep = v5_policy_allows_family(config, rule.family);
         const auto override_it = overrides.find(rule_site_id(rule));
@@ -440,10 +669,17 @@ std::vector<V5PolicyRule> filter_rules_by_policy(
             keep = override_it->second;
         }
         if (keep) {
-            filtered.push_back(rule);
+            result.rules.push_back(rule);
         }
     }
-    return filtered;
+    return result;
+}
+
+std::vector<V5PolicyRule> filter_rules_by_policy(
+    const std::vector<V5PolicyRule> &rules,
+    const V5PolicyConfig &config)
+{
+    return filter_rules_by_policy_detailed(rules, config).rules;
 }
 
 V5ScanSummary summarize_rules(const std::vector<V5PolicyRule> &rules)
@@ -533,6 +769,7 @@ std::string scan_manifest_to_json(const V5ScanManifest &manifest)
         out << "{"
             << "\"site_id\":\"" << json_escape(site.site_id) << "\","
             << "\"family\":\"" << v5_family_name(site.family) << "\","
+            << "\"insn\":" << site.start_insn << ","
             << "\"start_insn\":" << site.start_insn << ","
             << "\"pattern_kind\":\"" << json_escape(site.pattern_kind) << "\","
             << "\"site_len\":" << site.site_len << ","
@@ -542,6 +779,28 @@ std::string scan_manifest_to_json(const V5ScanManifest &manifest)
     }
     out << "]"
         << "}\n";
+    return out.str();
+}
+
+std::string render_policy_v2_yaml(const V5ProgramInfo &program,
+                                  const V5ScanSummary &summary,
+                                  V5PolicyAction default_action)
+{
+    std::ostringstream out;
+    out << "version: 2\n";
+    out << "program: " << yaml_single_quoted(program.name) << "\n";
+    out << "default: " << policy_action_name(default_action) << "\n";
+    if (summary.rules.empty()) {
+        out << "sites: []\n";
+        return out.str();
+    }
+
+    out << "sites:\n";
+    for (const auto &rule : summary.rules) {
+        out << "  - insn: " << rule.site_start << "\n";
+        out << "    family: " << v5_family_name(rule.family) << "\n";
+        out << "    action: " << policy_action_name(default_action) << "\n";
+    }
     return out.str();
 }
 

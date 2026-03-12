@@ -1052,13 +1052,16 @@ sample_result run_kernel(const cli_options &options)
             assign_directive_scan_summary(directive_scan, discovered);
 
             const auto selected_rules =
-                bpf_jit_scanner::filter_rules_by_policy(
+                bpf_jit_scanner::filter_rules_by_policy_detailed(
                     discovered.rules, policy_config);
+            for (const auto &warning : selected_rules.warnings) {
+                std::fprintf(stderr, "recompile-policy: %s\n", warning.c_str());
+            }
             const auto selected_summary =
-                bpf_jit_scanner::summarize_rules(selected_rules);
+                bpf_jit_scanner::summarize_rules(selected_rules.rules);
             assign_recompile_site_summary(recompile, selected_summary);
 
-            if (selected_rules.empty()) {
+            if (selected_rules.rules.empty()) {
                 if (discovered.rules.empty()) {
                     std::fprintf(
                         stderr,
@@ -1074,11 +1077,11 @@ sample_result run_kernel(const cli_options &options)
                 std::fprintf(
                     stderr,
                     "recompile-policy: kept %zu of %zu eligible rules\n",
-                    selected_rules.size(), discovered.rules.size());
+                    selected_rules.rules.size(), discovered.rules.size());
                 policy_data = bpf_jit_scanner::build_policy_blob_v5(
                     pre_info.xlated_prog_len / 8,
                     pre_info.tag,
-                    selected_rules);
+                    selected_rules.rules);
             }
         } else {
             /*

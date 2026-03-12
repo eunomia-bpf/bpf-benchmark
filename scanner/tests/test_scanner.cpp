@@ -496,6 +496,51 @@ void test_v5_family_aliases_and_policy_filter()
         summary.rules, override_config);
     CHECK_EQ(override_rules.size(), 1u);
     CHECK_EQ(override_rules[0].family, bpf_jit_scanner::V5Family::Cmov);
+
+    auto shorthand_config = bpf_jit_scanner::parse_policy_config_text(
+        "families:\n"
+        "  cmov: skip\n"
+        "  rotate: apply\n",
+        "shorthand.yaml");
+    auto shorthand_rules = bpf_jit_scanner::filter_rules_by_policy(
+        summary.rules, shorthand_config);
+    CHECK_EQ(shorthand_rules.size(), 1u);
+    CHECK_EQ(shorthand_rules[0].family, bpf_jit_scanner::V5Family::Rotate);
+
+    auto v2_skip_default = bpf_jit_scanner::parse_policy_config_text(
+        "version: 2\n"
+        "program: mixed-demo\n"
+        "default: skip\n"
+        "sites:\n"
+        "  - insn: 4\n"
+        "    family: rotate\n"
+        "    action: apply\n"
+        "  - insn: 99\n"
+        "    family: cmov\n"
+        "    action: skip\n",
+        "per-site.yaml");
+    auto v2_skip_result = bpf_jit_scanner::filter_rules_by_policy_detailed(
+        summary.rules, v2_skip_default);
+    CHECK_EQ(v2_skip_result.rules.size(), 1u);
+    CHECK_EQ(v2_skip_result.rules[0].family, bpf_jit_scanner::V5Family::Rotate);
+    CHECK_EQ(v2_skip_result.matched_site_count, 1u);
+    CHECK_EQ(v2_skip_result.unmatched_site_count, 1u);
+    CHECK_EQ(v2_skip_result.warnings.size(), 1u);
+    CHECK(v2_skip_result.warnings[0].find("cmov insn 99") != std::string::npos);
+
+    auto v2_apply_default = bpf_jit_scanner::parse_policy_config_text(
+        "version: 2\n"
+        "program: mixed-demo\n"
+        "default: apply\n"
+        "sites:\n"
+        "  - insn: 0\n"
+        "    family: cmov\n"
+        "    action: skip\n",
+        "per-site-apply.yaml");
+    auto v2_apply_rules = bpf_jit_scanner::filter_rules_by_policy(
+        summary.rules, v2_apply_default);
+    CHECK_EQ(v2_apply_rules.size(), 1u);
+    CHECK_EQ(v2_apply_rules[0].family, bpf_jit_scanner::V5Family::Rotate);
 }
 
 void test_v5_policy_config_validation()
@@ -544,11 +589,21 @@ void test_v5_scan_manifest_json()
     CHECK(json.find("\"cmov_sites\":1") != std::string::npos);
     CHECK(json.find("\"family\":\"cmov\"") != std::string::npos);
     CHECK(json.find("\"site_id\":\"cmov:0:cond-select-64\"") != std::string::npos);
+    CHECK(json.find("\"insn\":0") != std::string::npos);
     CHECK(json.find("\"start_insn\":0") != std::string::npos);
     CHECK(json.find("\"pattern_kind\":\"cond-select-64\"") != std::string::npos);
     CHECK(json.find("\"site_len\":4") != std::string::npos);
     CHECK(json.find("\"canonical_form\":4") != std::string::npos);
     CHECK(json.find("\"native_choice\":1") != std::string::npos);
+
+    const std::string yaml = bpf_jit_scanner::render_policy_v2_yaml(
+        program, summary, bpf_jit_scanner::V5PolicyAction::Skip);
+    CHECK(yaml.find("version: 2") != std::string::npos);
+    CHECK(yaml.find("program: 'demo-program'") != std::string::npos);
+    CHECK(yaml.find("default: skip") != std::string::npos);
+    CHECK(yaml.find("insn: 0") != std::string::npos);
+    CHECK(yaml.find("family: cmov") != std::string::npos);
+    CHECK(yaml.find("action: skip") != std::string::npos);
 }
 
 } // namespace
