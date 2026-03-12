@@ -54,6 +54,7 @@ DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "bpftrace-real-e2e.md"
 DEFAULT_REPORT_MD = ROOT_DIR / "docs" / "tmp" / "bpftrace-real-e2e-report.md"
 DEFAULT_RUNNER = ROOT_DIR / "micro" / "build" / "runner" / "micro_exec"
 DEFAULT_SCANNER = ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"
+DEFAULT_DURATION_S = 30
 BPFTRACE_POLICY_OBJECT_DIR = ROOT_DIR / "corpus" / "build" / "bpftrace"
 MIN_BPFTRACE_VERSION = (0, 16, 0)
 
@@ -720,7 +721,7 @@ def run_case(args: argparse.Namespace) -> dict[str, object]:
     if not scripts:
         raise RuntimeError("no scripts selected")
 
-    duration_s = int(args.smoke_duration if args.smoke else args.duration)
+    duration_s = int(args.smoke_duration if args.smoke else (args.duration or DEFAULT_DURATION_S))
     records: list[dict[str, object]] = []
     with enable_bpf_stats():
         for spec in scripts:
