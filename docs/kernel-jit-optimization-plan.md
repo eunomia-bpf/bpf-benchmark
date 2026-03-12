@@ -6,7 +6,7 @@
 > - 每个任务做完 → 立即更新本文档（任务条目状态 + 关键数据 + 文档路径）。
 > - 每次 context 压缩后 → 完整读取本文档恢复全局状态。
 > - 用 agent background 跑任务，不阻塞主对话。
-> 上次更新：2026-03-12（strict rerun ✅ 56/56 30×1000；corpus tuned-policy ✅ 0.898x；llvmbpf inline POC ✅ 1.30x；XDP forwarding E2E ✅ dry-run；micro fix ✅ 56/56）
+> 上次更新：2026-03-12（strict rerun ✅ 56/56 30×1000；corpus tuned-policy ✅ 0.898x；code-size VM full ✅ 1208/1183 1.003x；llvmbpf inline POC ✅ 1.30x；XDP forwarding E2E ✅ dry-run；micro fix ✅ 56/56）
 
 ---
 
@@ -426,7 +426,7 @@ VM 使用:   make -j$(nproc) bzImage && vng --run <worktree>/arch/x86/boot/bzIma
 | 104 | **#50 Corpus rerun with tuned policy** | ✅ | 完成。Geomean 0.868x→0.898x（+3.5%），cmov:skip subset 0.841x→0.866x。个案大幅改善：`test_tc_tunnel encap_ip6gre_mpls` 0.583x→1.429x。仍未达 1.0x——剩余回归来自 non-CMOV families（WIDE_MEM/ROTATE 的 sub-ktime noise）。142 measured pairs (21 harness failures)。`corpus/results/corpus_v5_tuned_policy.json`, `docs/tmp/corpus-tuned-policy-comparison.md` |
 | 105 | **E2E policy 接线** | ✅ | `e2e/common/recompile.py` 新增 per-program `--config` 支持；命中 policy 时传 `scanner apply --config <yaml>`，未命中时保持旧的 `--all --v5` 回退。`tracee`/`tetragon` 现按 live prog 名回查 `corpus/policies/`；`bpftrace` 增加 best-effort `corpus/build/bpftrace/<script>.bpf.o` 映射，当前无命中时自动回退。验证：`python3 -m py_compile e2e/common/recompile.py e2e/cases/bpftrace/case.py e2e/cases/tracee/case.py e2e/cases/tetragon/case.py`、`python3 e2e/run.py --help`、`python3 e2e/cases/{bpftrace,tracee,tetragon}/case.py --help`；helper dry-run 命中 `tracee 15/15`、`tetragon 3/5` 现有 live-program policies。 |
 | 106 | **结果目录规范化** | ✅ | 命名约定 `<suite>_authoritative_<date>.json` + `*.latest.json` symlinks。各目录 `README.md` 已落地。commits `7371a42` + `f0d86ff`。 |
-| 107 | **Code-size 全量 VM run** | ❌ | 加大内存重跑 1282 loadable 程序 |
+| 107 | **Code-size 全量 VM run** | ✅ | framework-kernel VM `4G` / `2` vCPU 全量完成。首次按原命令跑通但因 `vng` 缺少 `--rwdir` 仅写入 guest overlay；随后补 `--rwdir corpus/results` + `docs/tmp` 持久化成功。结果：`560` objects scanned，`2010` programs discovered，`1208` loadable，`1183` compile pairs，`421` site-positive，`414` applied，`25` recompile failures，overall code-size geomean `1.003x` (recompile/stock)，median delta `+0.0%`。按 prog type 看：负向最明显 `sk_reuseport 0.944x`、`cgroup_skb 0.974x`；正向最明显 `lsm 1.012x`、`sk_msg 1.015x`。Artifacts: `corpus/results/code_size_full_vm_20260312.json`, `corpus/results/code_size.latest.json`, `docs/tmp/code-size-full-vm-results.md`。 |
 | 108 | **Tracing corpus VM 全量 run** | ❌ | 473 程序长时间 VM 执行 |
 | 109 | **scx struct_ops recompile EINVAL** | ❌ | 调查 struct_ops 上 BPF_PROG_JIT_RECOMPILE EINVAL 原因 |
 | 110 | **llvmbpf array map inline POC** | ✅ | POC 完成：`register_array_map()` API + JIT-time helper-1 call rewrite → LLVM 常量传播后扫描 `_bpf_helper_ext_0001`，常量 handle 且已注册 array map 时 inline 为 `key < max_entries ? base + key*stride : 0`。Benchmark: baseline 7.51 ns → inline 5.77 ns = **1.30x speedup (−23%)**，helper calls 10M→0。Tests: 78 assertions / 13 cases pass。Commit `7f19854` in vendor/llvmbpf。后续：需在 `micro/runner/src/llvmbpf_runner.cpp` 加 glue code 让 runtime suite 自动受益。`docs/tmp/llvmbpf-array-map-inline-poc.md` |
