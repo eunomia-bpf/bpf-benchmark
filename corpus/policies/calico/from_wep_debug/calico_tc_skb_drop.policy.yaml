@@ -1,0 +1,22 @@
+version: 2
+program: calico_tc_skb_drop
+default: apply
+sites:
+- insn: 9
+  family: branch-flip
+  action: skip
+- insn: 61
+  family: branch-flip
+  action: skip
+- insn: 191
+  family: endian
+  action: apply
+- insn: 207
+  family: endian
+  action: apply
+- insn: 225
+  family: endian
+  action: apply
+- insn: 239
+  family: endian
+  action: apply

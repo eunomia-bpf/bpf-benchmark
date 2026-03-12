@@ -1,0 +1,40 @@
+version: 2
+program: calico_tc_skb_send_tcp_rst
+default: apply
+sites:
+- insn: 19
+  family: branch-flip
+  action: skip
+- insn: 70
+  family: branch-flip
+  action: skip
+- insn: 743
+  family: endian
+  action: apply
+- insn: 857
+  family: endian
+  action: apply
+- insn: 1127
+  family: cmov
+  action: apply
+- insn: 1212
+  family: extract
+  action: apply
+- insn: 1216
+  family: extract
+  action: apply
+- insn: 1220
+  family: extract
+  action: apply
+- insn: 1223
+  family: endian
+  action: apply
+- insn: 1368
+  family: wide
+  action: apply
+- insn: 1373
+  family: wide
+  action: apply
+- insn: 1485
+  family: cmov
+  action: apply

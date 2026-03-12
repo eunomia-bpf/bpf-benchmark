@@ -1,0 +1,52 @@
+version: 2
+program: calico_tc_skb_send_icmp_replies
+default: apply
+sites:
+- insn: 19
+  family: branch-flip
+  action: skip
+- insn: 71
+  family: branch-flip
+  action: skip
+- insn: 127
+  family: cmov
+  action: skip
+- insn: 311
+  family: cmov
+  action: skip
+- insn: 1118
+  family: endian
+  action: apply
+- insn: 1483
+  family: wide
+  action: apply
+- insn: 1488
+  family: wide
+  action: apply
+- insn: 1649
+  family: endian
+  action: apply
+- insn: 1652
+  family: endian
+  action: apply
+- insn: 1716
+  family: endian
+  action: apply
+- insn: 1731
+  family: endian
+  action: apply
+- insn: 1749
+  family: endian
+  action: apply
+- insn: 1767
+  family: endian
+  action: apply
+- insn: 2167
+  family: endian
+  action: apply
+- insn: 2250
+  family: cmov
+  action: skip
+- insn: 2406
+  family: cmov
+  action: skip

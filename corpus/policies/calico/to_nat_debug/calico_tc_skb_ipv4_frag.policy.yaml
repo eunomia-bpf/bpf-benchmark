@@ -1,0 +1,13 @@
+version: 2
+program: calico_tc_skb_ipv4_frag
+default: apply
+sites:
+- insn: 9
+  family: branch-flip
+  action: skip
+- insn: 61
+  family: branch-flip
+  action: skip
+- insn: 118
+  family: cmov
+  action: skip

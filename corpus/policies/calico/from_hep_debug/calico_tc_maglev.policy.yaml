@@ -1,0 +1,43 @@
+version: 2
+program: calico_tc_maglev
+default: apply
+sites:
+- insn: 9
+  family: branch-flip
+  action: skip
+- insn: 60
+  family: branch-flip
+  action: skip
+- insn: 249
+  family: rotate
+  action: apply
+- insn: 278
+  family: rotate
+  action: apply
+- insn: 289
+  family: rotate
+  action: apply
+- insn: 300
+  family: rotate
+  action: apply
+- insn: 317
+  family: rotate
+  action: apply
+- insn: 336
+  family: rotate
+  action: apply
+- insn: 346
+  family: rotate
+  action: apply
+- insn: 355
+  family: rotate
+  action: apply
+- insn: 364
+  family: rotate
+  action: apply
+- insn: 385
+  family: rotate
+  action: apply
+- insn: 506
+  family: endian
+  action: apply
