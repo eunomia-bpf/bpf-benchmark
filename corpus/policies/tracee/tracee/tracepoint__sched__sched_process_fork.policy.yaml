@@ -4,13 +4,69 @@
 # Section: raw_tracepoint/sched_process_fork
 # Total scanner sites: 48
 # Family site totals: cmov=28, wide=0, rotate=0, extract=0, lea=0, zero-ext=0, endian=0, branch-flip=20
-# Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.
-# CMOV evidence: corpus/results/corpus_v5_vm_batch_authoritative_20260311.json object geomean=0.653x across 2 measured CMOV-applied program(s) (regressions=2, wins=0)
-# Explicitly skipped CMOV sites in this program: 28
+# Selection model: explicit site allowlist; keep every discovered site except CMOV.
+# Excluded CMOV sites from allowlist: 28
 
-version: 2
+version: 3
 program: 'tracepoint__sched__sched_process_fork'
-default: apply
-families:
-  cmov: skip
-sites: []
+sites:
+  - insn: 318
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 359
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 391
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 430
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 470
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 815
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 847
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2020
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2700
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 3014
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 3046
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 3408
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 3440
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 3518
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 3550
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 3875
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 3916
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 3948
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 3987
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 4027
+    family: branch-flip
+    pattern_kind: 'branch-flip'

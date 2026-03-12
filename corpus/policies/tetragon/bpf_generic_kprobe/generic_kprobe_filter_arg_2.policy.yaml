@@ -4,9 +4,81 @@
 # Section: kprobe
 # Total scanner sites: 40
 # Family site totals: cmov=16, wide=24, rotate=0, extract=0, lea=0, zero-ext=0, endian=0, branch-flip=0
-# Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.
+# Selection model: explicit site allowlist; keep every discovered site except CMOV.
+# Excluded CMOV sites from allowlist: 16
 
-version: 2
+version: 3
 program: 'generic_kprobe_filter_arg_2'
-default: apply
-sites: []
+sites:
+  - insn: 61
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 72
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 87
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 112
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 131
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 159
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 957
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1006
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1059
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1071
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1095
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1123
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1920
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1942
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 2105
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 2258
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 3055
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 3182
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 3219
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 3245
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 3423
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 3458
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 3509
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 3556
+    family: wide
+    pattern_kind: 'wide-load-2'

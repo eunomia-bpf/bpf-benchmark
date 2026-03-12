@@ -4,13 +4,27 @@
 # Section: kprobe/check_helper_call
 # Total scanner sites: 10
 # Family site totals: cmov=4, wide=0, rotate=0, extract=0, lea=0, zero-ext=0, endian=0, branch-flip=6
-# Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.
-# CMOV evidence: corpus/results/corpus_v5_vm_batch_authoritative_20260311.json object geomean=0.653x across 2 measured CMOV-applied program(s) (regressions=2, wins=0)
-# Explicitly skipped CMOV sites in this program: 4
+# Selection model: explicit site allowlist; keep every discovered site except CMOV.
+# Excluded CMOV sites from allowlist: 4
 
-version: 2
+version: 3
 program: 'trace_check_helper_call'
-default: apply
-families:
-  cmov: skip
-sites: []
+sites:
+  - insn: 317
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 359
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 391
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 431
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 472
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 993
+    family: branch-flip
+    pattern_kind: 'branch-flip'

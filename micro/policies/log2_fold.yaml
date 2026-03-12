@@ -1,6 +1,16 @@
-version: 2
+# Regenerated from HEAD version 2 policy semantics against a live framework-kernel manifest.
+# Eligible live sites: cmov=8, wide=3
+# Selected live sites: wide=3
+
+version: 3
 program: 'log2_fold_xdp'
-default: apply
-families:
-  cmov: skip
-sites: []
+sites:
+  - insn: 10
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 41
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 73
+    family: wide
+    pattern_kind: 'wide-load-2'

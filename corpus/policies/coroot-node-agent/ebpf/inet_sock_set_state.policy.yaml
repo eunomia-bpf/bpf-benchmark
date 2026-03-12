@@ -4,9 +4,57 @@
 # Section: tracepoint/sock/inet_sock_set_state
 # Total scanner sites: 23
 # Family site totals: cmov=7, wide=16, rotate=0, extract=0, lea=0, zero-ext=0, endian=0, branch-flip=0
-# Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.
+# Selection model: explicit site allowlist; keep every discovered site except CMOV.
+# Excluded CMOV sites from allowlist: 7
 
-version: 2
+version: 3
 program: 'inet_sock_set_state'
-default: apply
-sites: []
+sites:
+  - insn: 162
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 167
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 172
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 177
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 182
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 187
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 208
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 213
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 217
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 221
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 225
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 229
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 278
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 288
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 300
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 312
+    family: wide
+    pattern_kind: 'wide-load-2'

@@ -4,9 +4,26 @@
 # Section: xdp_patch_ports
 # Total scanner sites: 6
 # Family site totals: cmov=0, wide=0, rotate=0, extract=1, lea=0, zero-ext=0, endian=5, branch-flip=0
-# Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.
+# Selection model: explicit site allowlist; keep every discovered site except CMOV.
 
-version: 2
+version: 3
 program: 'xdp_patch_ports_func'
-default: apply
-sites: []
+sites:
+  - insn: 61
+    family: endian
+    pattern_kind: 'endian-load-swap-16'
+  - insn: 65
+    family: endian
+    pattern_kind: 'endian-load-swap-16'
+  - insn: 68
+    family: endian
+    pattern_kind: 'endian-swap-store-16'
+  - insn: 84
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 91
+    family: endian
+    pattern_kind: 'endian-load-swap-16'
+  - insn: 94
+    family: endian
+    pattern_kind: 'endian-swap-store-16'

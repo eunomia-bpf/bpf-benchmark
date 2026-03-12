@@ -4,9 +4,9 @@
 # Section: fmod_ret/security_bpf_map
 # Total scanner sites: 1
 # Family site totals: cmov=1, wide=0, rotate=0, extract=0, lea=0, zero-ext=0, endian=0, branch-flip=0
-# Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.
+# Selection model: explicit site allowlist; keep every discovered site except CMOV.
+# Excluded CMOV sites from allowlist: 1
 
-version: 2
+version: 3
 program: 'fmod_bpf_map'
-default: apply
 sites: []

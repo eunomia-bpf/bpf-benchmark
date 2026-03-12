@@ -4,9 +4,33 @@
 # Section: lsm
 # Total scanner sites: 11
 # Family site totals: cmov=3, wide=8, rotate=0, extract=0, lea=0, zero-ext=0, endian=0, branch-flip=0
-# Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.
+# Selection model: explicit site allowlist; keep every discovered site except CMOV.
+# Excluded CMOV sites from allowlist: 3
 
-version: 2
+version: 3
 program: 'generic_lsm_actions'
-default: apply
-sites: []
+sites:
+  - insn: 28
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 200
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 246
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 339
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 377
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 689
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 740
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 820
+    family: wide
+    pattern_kind: 'wide-load-2'

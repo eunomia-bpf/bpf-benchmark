@@ -4,9 +4,68 @@
 # Section: uprobe.s/generic_uprobe
 # Total scanner sites: 20
 # Family site totals: cmov=0, wide=20, rotate=0, extract=0, lea=0, zero-ext=0, endian=0, branch-flip=0
-# Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.
+# Selection model: explicit site allowlist; keep every discovered site except CMOV.
 
-version: 2
+version: 3
 program: 'generic_sleepable_preload'
-default: apply
-sites: []
+sites:
+  - insn: 17
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 41
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 68
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 192
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 214
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 241
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 364
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 386
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 413
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 536
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 558
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 585
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 708
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 730
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 756
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1072
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1124
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1176
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1228
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1278
+    family: wide
+    pattern_kind: 'wide-load-2'

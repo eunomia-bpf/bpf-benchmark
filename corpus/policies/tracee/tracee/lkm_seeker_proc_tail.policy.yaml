@@ -4,13 +4,399 @@
 # Section: uprobe/lkm_seeker_proc_tail
 # Total scanner sites: 240
 # Family site totals: cmov=110, wide=0, rotate=0, extract=0, lea=0, zero-ext=0, endian=0, branch-flip=130
-# Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.
-# CMOV evidence: corpus/results/corpus_v5_vm_batch_authoritative_20260311.json object geomean=0.653x across 2 measured CMOV-applied program(s) (regressions=2, wins=0)
-# Explicitly skipped CMOV sites in this program: 110
+# Selection model: explicit site allowlist; keep every discovered site except CMOV.
+# Excluded CMOV sites from allowlist: 110
 
-version: 2
+version: 3
 program: 'lkm_seeker_proc_tail'
-default: apply
-families:
-  cmov: skip
-sites: []
+sites:
+  - insn: 206
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 402
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 434
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 474
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 799
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1027
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1069
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1101
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1141
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1182
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1390
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1618
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1660
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1692
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1732
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1773
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1981
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2209
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2251
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2283
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2323
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2364
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2572
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2800
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2842
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2874
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2914
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2955
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 3163
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 3391
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 3433
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 3465
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 3505
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 3546
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 3754
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 3982
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 4024
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 4056
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 4096
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 4137
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 4345
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 4573
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 4615
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 4647
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 4687
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 4728
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 4936
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 5164
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 5206
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 5238
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 5278
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 5319
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 5527
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 5755
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 5797
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 5829
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 5869
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 5910
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 6118
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 6346
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 6388
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 6420
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 6460
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 6501
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 6709
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 6937
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 6979
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 7011
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 7051
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 7092
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 7300
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 7528
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 7570
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 7602
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 7642
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 7683
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 7891
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 8119
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 8161
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 8193
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 8233
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 8274
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 8482
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 8710
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 8752
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 8784
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 8824
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 8865
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 9073
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 9301
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 9343
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 9375
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 9415
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 9456
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 9664
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 9892
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 9934
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 9966
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 10006
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 10047
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 10255
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 10483
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 10525
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 10557
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 10597
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 10638
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 10846
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 11074
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 11116
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 11148
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 11188
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 11229
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 11437
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 11665
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 11707
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 11739
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 11779
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 11820
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 12028
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 12256
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 12298
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 12330
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 12370
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 12411
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 12619
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 12848
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 12890
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 12922
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 12962
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 13003
+    family: branch-flip
+    pattern_kind: 'branch-flip'

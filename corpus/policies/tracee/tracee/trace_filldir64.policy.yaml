@@ -4,13 +4,42 @@
 # Section: kprobe/filldir64
 # Total scanner sites: 16
 # Family site totals: cmov=5, wide=0, rotate=0, extract=0, lea=0, zero-ext=0, endian=0, branch-flip=11
-# Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.
-# CMOV evidence: corpus/results/corpus_v5_vm_batch_authoritative_20260311.json object geomean=0.653x across 2 measured CMOV-applied program(s) (regressions=2, wins=0)
-# Explicitly skipped CMOV sites in this program: 5
+# Selection model: explicit site allowlist; keep every discovered site except CMOV.
+# Excluded CMOV sites from allowlist: 5
 
-version: 2
+version: 3
 program: 'trace_filldir64'
-default: apply
-families:
-  cmov: skip
-sites: []
+sites:
+  - insn: 321
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 363
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 395
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 434
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 474
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1004
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1363
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1405
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1438
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1477
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1517
+    family: branch-flip
+    pattern_kind: 'branch-flip'

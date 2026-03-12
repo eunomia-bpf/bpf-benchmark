@@ -1,7 +1,6 @@
-version: 2
+version: 3
 program: mixed-demo
-default: skip
 sites:
   - insn: 4
     family: rotate
-    action: apply
+    pattern_kind: rotate-64

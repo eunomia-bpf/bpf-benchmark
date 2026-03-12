@@ -4,13 +4,9 @@
 # Section: tc
 # Total scanner sites: 1
 # Family site totals: cmov=1, wide=0, rotate=0, extract=0, lea=0, zero-ext=0, endian=0, branch-flip=0
-# Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.
-# CMOV evidence: corpus/results/corpus_v5_vm_batch_authoritative_20260311.json object geomean=0.777x across 10 measured CMOV-applied program(s) (regressions=6, wins=3)
-# Explicitly skipped CMOV sites in this program: 1
+# Selection model: explicit site allowlist; keep every discovered site except CMOV.
+# Excluded CMOV sites from allowlist: 1
 
-version: 2
+version: 3
 program: '__encap_gre_mpls'
-default: apply
-families:
-  cmov: skip
 sites: []

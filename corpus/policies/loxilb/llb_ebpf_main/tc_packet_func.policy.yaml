@@ -4,9 +4,291 @@
 # Section: tc_packet_hook1
 # Total scanner sites: 104
 # Family site totals: cmov=10, wide=83, rotate=0, extract=10, lea=0, zero-ext=0, endian=0, branch-flip=1
-# Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.
+# Selection model: explicit site allowlist; keep every discovered site except CMOV.
+# Excluded CMOV sites from allowlist: 10
 
-version: 2
+version: 3
 program: 'tc_packet_func'
-default: apply
-sites: []
+sites:
+  - insn: 502
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 613
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 731
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1137
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1215
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1220
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1231
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1381
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1401
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1593
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1690
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1702
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 2005
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2110
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 2115
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 2126
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 2149
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2154
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 2175
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 2365
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2465
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 2477
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 2492
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 2503
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 2519
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 2530
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 2582
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 2727
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 2735
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 2746
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 2915
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 3048
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 3118
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 3133
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 3144
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 3155
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 3166
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 3177
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 3188
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 3199
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 3210
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 3215
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 3228
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 3234
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 3244
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 3627
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 3637
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 3650
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 3662
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 3726
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 3759
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 3961
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 3972
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 4180
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 4190
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 4203
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 4215
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 4284
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 4296
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 4310
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 4416
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 4464
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 4475
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 4492
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 4504
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 4518
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 4636
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 4746
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 4757
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 4768
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 4779
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 4911
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 5006
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 5284
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 5435
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 5661
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 6470
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 6480
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 6493
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 6505
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 6544
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 6554
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 6567
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 6579
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 6648
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 6659
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 6670
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 6681
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 6815
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 6932
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 7119
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 7152
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 7157
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 7168
+    family: wide
+    pattern_kind: 'wide-load-2'

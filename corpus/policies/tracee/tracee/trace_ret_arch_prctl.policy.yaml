@@ -4,13 +4,57 @@
 # Section: kretprobe/arch_prctl
 # Total scanner sites: 45
 # Family site totals: cmov=29, wide=0, rotate=0, extract=5, lea=0, zero-ext=0, endian=0, branch-flip=11
-# Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.
-# CMOV evidence: corpus/results/corpus_v5_vm_batch_authoritative_20260311.json object geomean=0.653x across 2 measured CMOV-applied program(s) (regressions=2, wins=0)
-# Explicitly skipped CMOV sites in this program: 29
+# Selection model: explicit site allowlist; keep every discovered site except CMOV.
+# Excluded CMOV sites from allowlist: 29
 
-version: 2
+version: 3
 program: 'trace_ret_arch_prctl'
-default: apply
-families:
-  cmov: skip
-sites: []
+sites:
+  - insn: 318
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 361
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 394
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 433
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 474
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1009
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1396
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1531
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1655
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1777
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1899
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2122
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2163
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2196
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2235
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2275
+    family: branch-flip
+    pattern_kind: 'branch-flip'

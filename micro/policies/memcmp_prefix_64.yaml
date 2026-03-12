@@ -1,13 +1,16 @@
-version: 2
+# Regenerated from HEAD version 2 policy semantics against a live framework-kernel manifest.
+# Eligible live sites: rotate=3, wide=1
+# Selected live sites: rotate=3
+
+version: 3
 program: 'memcmp_prefix_64_xdp'
-default: skip
 sites:
   - insn: 47
     family: rotate
-    action: apply
+    pattern_kind: 'rotate-64'
   - insn: 79
     family: rotate
-    action: apply
+    pattern_kind: 'rotate-64'
   - insn: 132
     family: rotate
-    action: apply
+    pattern_kind: 'rotate-64'

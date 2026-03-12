@@ -4,9 +4,21 @@
 # Section: uprobe/openssl_SSL_write_enter
 # Total scanner sites: 19
 # Family site totals: cmov=15, wide=1, rotate=0, extract=0, lea=0, zero-ext=0, endian=3, branch-flip=0
-# Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.
+# Selection model: explicit site allowlist; keep every discovered site except CMOV.
+# Excluded CMOV sites from allowlist: 15
 
-version: 2
+version: 3
 program: 'openssl_SSL_write_enter'
-default: apply
-sites: []
+sites:
+  - insn: 153
+    family: endian
+    pattern_kind: 'endian-load-swap-32'
+  - insn: 242
+    family: endian
+    pattern_kind: 'endian-load-swap-32'
+  - insn: 611
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 691
+    family: endian
+    pattern_kind: 'endian-load-swap-32'

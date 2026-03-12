@@ -26,7 +26,7 @@ Recommended canonical shape:
 ```yaml
 version: 2
 program: "<program-name>"          # optional
-default: apply|skip                # required; stock is a compatibility alias for skip
+default: apply|skip                # required
 families:                          # optional
   <family>: apply|skip
 sites:                             # optional; emit [] when unused
@@ -41,7 +41,7 @@ sites:                             # optional; emit [] when unused
 | --- | --- | --- | --- |
 | `version` | integer | yes | Must be exactly `2`. Any other version is rejected by `scanner`. |
 | `program` | string | no | Human/tooling identifier for the target BPF program. Recommended to match the exact program name. Current C++ filtering logic does not validate it against the live program; selection is driven by discovered rule families/sites. |
-| `default` | scalar string | yes | Baseline action for every live-discovered eligible rule before applying `families` or `sites` overrides. Normative values are `apply` or `skip`. `stock` is accepted as a compatibility alias and is semantically identical to `skip`. |
+| `default` | scalar string | yes | Baseline action for every live-discovered eligible rule before applying `families` or `sites` overrides. Valid values are `apply` or `skip`. |
 | `families` | mapping `<family> -> <action>` | no | Family-level override applied to all live-discovered rules in that family. If omitted, no family-level overrides exist. |
 | `sites` | sequence of site objects | no | Exact override keyed by `(insn, family)` against the live-discovered program. If omitted or `[]`, there are no explicit site overrides. |
 
@@ -51,7 +51,7 @@ sites:                             # optional; emit [] when unused
 | --- | --- | --- | --- |
 | `insn` | non-negative integer | yes | Live instruction offset used as part of the exact site key. |
 | `family` | scalar string | yes | Rule family for the exact site key. |
-| `action` | scalar string | yes in the spec | Exact action override for this `(insn, family)` site. Current C++ parser also tolerates omission and defaults it to `apply`; Python parser does not. New policy files should always write it explicitly. |
+| `action` | scalar string | yes | Exact action override for this `(insn, family)` site. |
 
 ### 2.3 Canonical Family Names
 
@@ -66,7 +66,7 @@ Use these canonical names in new policy files:
 - `endian`
 - `branch-flip`
 
-Both C++ and Python accept some aliases, but the accepted alias sets are not perfectly identical. New authoritative policy files should use only the canonical names above.
+Policy parsers accept only these canonical family names.
 
 ### 2.4 Validity Rules
 
@@ -78,8 +78,6 @@ Normatively, a valid v2 policy should satisfy all of the following:
 - `sites`, if present, is a list of mappings with `insn`, `family`, and explicit `action`.
 - Duplicate `families` entries are invalid.
 - Duplicate `sites` entries for the same `(insn, family)` are invalid.
-
-Current parser tolerance is documented in Section 6; do not treat parser tolerance as the format contract.
 
 ## 3. Selection Semantics and Priority
 
@@ -222,18 +220,14 @@ Migration rule:
 - rewrite old files into the v2 schema described in this document
 - do not expect runtime compatibility with old policy documents
 
-## 6. Known Python vs C++ Parser Differences
+## 6. Parser Alignment
 
-The v2 format contract is this document. Current parser implementations still have a few known differences.
+The C++ scanner parser and the Python corpus parser are expected to enforce the same v2 contract for policy files:
 
-| Topic | C++ scanner parser | Python corpus parser/renderer | Guidance |
-| --- | --- | --- | --- |
-| Missing `sites[*].action` | Accepted; defaults to `apply` | Rejected | Always write explicit `action` in every site entry. |
-| Duplicate `families` entries in YAML text | Rejected after family-name normalization | PyYAML mapping load can silently collapse duplicate keys before `parse_policy_v2()` sees them; practical behavior is often last-key-wins, not an explicit parser error | Treat duplicate family keys as invalid and avoid relying on YAML-loader behavior. |
-| Duplicate `sites` entries for the same `(insn, family)` | Rejected | Accepted and preserved in order | Treat duplicates as invalid; new authoritative files must not contain them. |
-| `default: stock` | Accepted and normalized to `skip` in the C++ config object | Accepted as a literal default string and preserved as `stock` in the Python document object | Prefer writing `skip` in new files; treat `stock` only as a compatibility alias. |
-
-There is also alias skew at the family-name level. To avoid cross-parser surprises, use only the canonical family names from Section 2.3.
+- `default` must be `apply` or `skip`
+- family names must be canonical
+- every `sites[*]` entry must carry an explicit `action`
+- duplicate `families` and duplicate `(insn, family)` `sites` entries are invalid
 
 ## 7. Recommended Examples
 
@@ -286,7 +280,7 @@ For new steady-state policy artifacts:
 
 - write `version: 2`
 - include `program`
-- use `apply`/`skip`, not `stock`
+- use `apply` or `skip`
 - use canonical family names only
 - prefer family-level policy
 - keep `sites` empty unless exact-site control is intentionally required

@@ -4,13 +4,42 @@
 # Section: kretprobe/kallsyms_lookup_name
 # Total scanner sites: 17
 # Family site totals: cmov=6, wide=0, rotate=0, extract=0, lea=0, zero-ext=0, endian=0, branch-flip=11
-# Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.
-# CMOV evidence: corpus/results/corpus_v5_vm_batch_authoritative_20260311.json object geomean=0.653x across 2 measured CMOV-applied program(s) (regressions=2, wins=0)
-# Explicitly skipped CMOV sites in this program: 6
+# Selection model: explicit site allowlist; keep every discovered site except CMOV.
+# Excluded CMOV sites from allowlist: 6
 
-version: 2
+version: 3
 program: 'trace_ret_kallsyms_lookup_name'
-default: apply
-families:
-  cmov: skip
-sites: []
+sites:
+  - insn: 345
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 387
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 421
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 460
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 500
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1029
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1409
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1450
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1482
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1521
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1561
+    family: branch-flip
+    pattern_kind: 'branch-flip'

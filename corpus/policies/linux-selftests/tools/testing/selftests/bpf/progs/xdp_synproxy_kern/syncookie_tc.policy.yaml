@@ -4,13 +4,69 @@
 # Section: tc
 # Total scanner sites: 23
 # Family site totals: cmov=3, wide=2, rotate=0, extract=8, lea=0, zero-ext=0, endian=10, branch-flip=0
-# Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.
-# CMOV evidence: corpus/results/corpus_v5_vm_batch_authoritative_20260311.json object geomean=0.949x across 2 measured CMOV-applied program(s) (regressions=1, wins=0)
-# Explicitly skipped CMOV sites in this program: 3
+# Selection model: explicit site allowlist; keep every discovered site except CMOV.
+# Excluded CMOV sites from allowlist: 3
 
-version: 2
+version: 3
 program: 'syncookie_tc'
-default: apply
-families:
-  cmov: skip
-sites: []
+sites:
+  - insn: 6
+    family: endian
+    pattern_kind: 'endian-load-swap-16'
+  - insn: 50
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 195
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 518
+    family: endian
+    pattern_kind: 'endian-swap-store-32'
+  - insn: 574
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 583
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 656
+    family: endian
+    pattern_kind: 'endian-load-swap-32'
+  - insn: 659
+    family: endian
+    pattern_kind: 'endian-swap-store-32'
+  - insn: 662
+    family: endian
+    pattern_kind: 'endian-swap-store-32'
+  - insn: 668
+    family: endian
+    pattern_kind: 'endian-swap-store-32'
+  - insn: 707
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 735
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 739
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 748
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 849
+    family: endian
+    pattern_kind: 'endian-load-swap-32'
+  - insn: 852
+    family: endian
+    pattern_kind: 'endian-swap-store-32'
+  - insn: 855
+    family: endian
+    pattern_kind: 'endian-swap-store-32'
+  - insn: 861
+    family: endian
+    pattern_kind: 'endian-swap-store-32'
+  - insn: 897
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1022
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'

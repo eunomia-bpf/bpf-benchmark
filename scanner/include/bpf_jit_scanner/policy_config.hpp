@@ -10,27 +10,15 @@
 
 namespace bpf_jit_scanner {
 
-enum class V5PolicyAction {
-    Apply,
-    Skip,
-};
-
 struct V5PolicySite {
     uint32_t insn = 0;
     V5Family family = V5Family::Cmov;
-    V5PolicyAction action = V5PolicyAction::Apply;
-};
-
-struct V5PolicyFamilyAction {
-    V5Family family = V5Family::Cmov;
-    V5PolicyAction action = V5PolicyAction::Apply;
+    std::string pattern_kind = "pattern";
 };
 
 struct V5PolicyConfig {
-    uint32_t version = 2;
+    uint32_t version = 3;
     std::string program;
-    V5PolicyAction default_action = V5PolicyAction::Skip;
-    std::vector<V5PolicyFamilyAction> families;
     std::vector<V5PolicySite> sites;
 };
 
@@ -67,7 +55,6 @@ V5PolicyConfig load_policy_config_file(const std::string &path);
 V5PolicyConfig parse_policy_config_text(const std::string &text,
                                         const std::string &source_name = {});
 
-const char *v5_policy_action_name(V5PolicyAction action);
 bool v5_policy_allows_family(const V5PolicyConfig &config, V5Family family);
 V5PolicyFilterResult filter_rules_by_policy_detailed(
     const std::vector<V5PolicyRule> &rules,
@@ -80,9 +67,8 @@ V5ScanSummary summarize_rules(const std::vector<V5PolicyRule> &rules);
 V5ScanManifest build_scan_manifest(const V5ProgramInfo &program,
                                    const V5ScanSummary &summary);
 std::string scan_manifest_to_json(const V5ScanManifest &manifest);
-std::string render_policy_v2_yaml(const V5ProgramInfo &program,
-                                  const V5ScanSummary &summary,
-                                  V5PolicyAction default_action);
+std::string render_policy_v3_yaml(const V5ProgramInfo &program,
+                                  const V5ScanSummary &summary);
 
 } // namespace bpf_jit_scanner
 

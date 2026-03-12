@@ -1,13 +1,16 @@
-version: 2
+# Regenerated from HEAD version 2 policy semantics against a live framework-kernel manifest.
+# Eligible live sites: branch-flip=3, rotate=7, wide=1
+# Selected live sites: branch-flip=3
+
+version: 3
 program: 'large_mixed_500_xdp'
-default: skip
 sites:
   - insn: 345
     family: branch-flip
-    action: apply
+    pattern_kind: 'branch-flip'
   - insn: 403
     family: branch-flip
-    action: apply
+    pattern_kind: 'branch-flip'
   - insn: 461
     family: branch-flip
-    action: apply
+    pattern_kind: 'branch-flip'

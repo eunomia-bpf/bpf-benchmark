@@ -4,9 +4,21 @@
 # Section: xdp
 # Total scanner sites: 33
 # Family site totals: cmov=29, wide=0, rotate=0, extract=0, lea=0, zero-ext=0, endian=2, branch-flip=2
-# Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.
+# Selection model: explicit site allowlist; keep every discovered site except CMOV.
+# Excluded CMOV sites from allowlist: 29
 
-version: 2
+version: 3
 program: 'xdp_fwd_flow_direct'
-default: apply
-sites: []
+sites:
+  - insn: 51
+    family: endian
+    pattern_kind: 'endian-load-swap-16'
+  - insn: 86
+    family: endian
+    pattern_kind: 'endian-load-swap-16'
+  - insn: 133
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 172
+    family: branch-flip
+    pattern_kind: 'branch-flip'

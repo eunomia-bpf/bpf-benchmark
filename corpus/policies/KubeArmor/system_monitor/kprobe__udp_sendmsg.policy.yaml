@@ -4,9 +4,12 @@
 # Section: kprobe/udp_sendmsg
 # Total scanner sites: 3
 # Family site totals: cmov=2, wide=0, rotate=0, extract=0, lea=0, zero-ext=0, endian=1, branch-flip=0
-# Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.
+# Selection model: explicit site allowlist; keep every discovered site except CMOV.
+# Excluded CMOV sites from allowlist: 2
 
-version: 2
+version: 3
 program: 'kprobe__udp_sendmsg'
-default: apply
-sites: []
+sites:
+  - insn: 279
+    family: endian
+    pattern_kind: 'endian-swap-store-16'

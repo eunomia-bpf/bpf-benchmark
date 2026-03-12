@@ -3,12 +3,11 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 import os
 import subprocess
 import sys
 import tempfile
-from collections import Counter, defaultdict
+from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
@@ -27,7 +26,7 @@ from policy_utils import (
     object_relative_path,
     object_roots,
     policy_path_for_program,
-    render_policy_v2_text,
+    render_policy_v3_text,
 )
 
 try:
@@ -43,8 +42,6 @@ except ImportError as exc:  # pragma: no cover - runtime dependency failure
 
 DEFAULT_SCANNER = ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"
 DEFAULT_RUNNER = ROOT_DIR / "micro" / "build" / "runner" / "micro_exec"
-DEFAULT_RESULTS_MD = ROOT_DIR / "docs" / "tmp" / "corpus-full-recompile-v6.md"
-DEFAULT_RESULTS_JSON = ROOT_DIR / "corpus" / "results" / "corpus_v5_vm_batch.latest.json"
 DEFAULT_TIMEOUT_SECONDS = 180
 DEFAULT_WORKERS = max(1, min(8, os.cpu_count() or 1))
 SHF_EXECINSTR = 0x4
@@ -73,9 +70,8 @@ SCANNER_SUMMARY_FIELDS = (
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Generate per-program version 2 corpus policy YAMLs from scanner "
-            "site manifests, carrying forward the existing object-level CMOV "
-            "skip heuristic as explicit per-site exclusions."
+            "Generate per-program version 3 corpus policy YAMLs from scanner "
+            "site manifests, keeping every discovered site except CMOV."
         )
     )
     parser.add_argument(
@@ -92,16 +88,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--policy-dir",
         default=str(POLICY_DIR),
         help="Output directory for generated policy files.",
-    )
-    parser.add_argument(
-        "--results-md",
-        default=str(DEFAULT_RESULTS_MD),
-        help="Authoritative v6 markdown report used to discover the matching JSON artifact.",
-    )
-    parser.add_argument(
-        "--results-json",
-        default=str(DEFAULT_RESULTS_JSON),
-        help="Fallback v6 VM batch JSON when the markdown report does not name one.",
     )
     parser.add_argument(
         "--object-root",
@@ -135,7 +121,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Plan the version 2 policy outputs without writing files.",
+        help="Plan the version 3 policy outputs without writing files.",
     )
     return parser.parse_args(argv)
 
@@ -298,56 +284,6 @@ def scan_program_manifest_from_section(
     finally:
         tmp_path.unlink(missing_ok=True)
 
-
-def load_results_json_path(results_md: Path, fallback_json: Path) -> Path:
-    if results_md.exists():
-        for line in results_md.read_text().splitlines():
-            prefix = "- VM batch JSON: `"
-            if line.startswith(prefix) and line.endswith("`"):
-                candidate = Path(line[len(prefix):-1])
-                resolved = candidate if candidate.is_absolute() else (ROOT_DIR / candidate).resolve()
-                if resolved.exists():
-                    return resolved
-    return fallback_json.resolve()
-
-
-def load_cmov_regressors(results_json: Path) -> dict[Path, dict[str, Any]]:
-    payload = json.loads(results_json.read_text())
-    records = payload.get("programs") or payload.get("records") or []
-    object_ratios: dict[Path, list[float]] = defaultdict(list)
-    object_regressions: Counter[Path] = Counter()
-    object_wins: Counter[Path] = Counter()
-    for record in records:
-        if not isinstance(record, dict):
-            continue
-        if not record.get("v5_run_applied"):
-            continue
-        applied = {canonical_policy_family_name(str(value)) for value in (record.get("applied_families_run") or [])}
-        if "cmov" not in applied:
-            continue
-        ratio = record.get("speedup_ratio")
-        if not isinstance(ratio, (int, float)) or ratio <= 0:
-            continue
-        object_path = (ROOT_DIR / str(record.get("object_path", ""))).resolve()
-        object_ratios[object_path].append(float(ratio))
-        if ratio < 1.0:
-            object_regressions[object_path] += 1
-        elif ratio > 1.0:
-            object_wins[object_path] += 1
-
-    regressors: dict[Path, dict[str, Any]] = {}
-    for object_path, ratios in object_ratios.items():
-        geomean = math.exp(sum(math.log(value) for value in ratios) / len(ratios))
-        if geomean < 1.0:
-            regressors[object_path] = {
-                "geomean": geomean,
-                "samples": len(ratios),
-                "regressions": object_regressions[object_path],
-                "wins": object_wins[object_path],
-            }
-    return regressors
-
-
 def object_scan_summary(
     scanner: Path,
     runner: Path,
@@ -428,23 +364,36 @@ def render_program_policy_text(
     program_name: str,
     section_name: str,
     manifest: dict[str, Any],
-    cmov_skip: bool,
-    cmov_evidence: dict[str, Any] | None,
-    results_json: Path,
 ) -> str:
     site_counts = Counter()
-    skipped_counts = Counter()
+    rendered_sites: list[dict[str, Any]] = []
     for entry in manifest.get("sites") or []:
         if not isinstance(entry, dict):
             continue
         family = canonical_policy_family_name(str(entry.get("family", "")))
         site_counts[family] += 1
-        if cmov_skip and family == "cmov":
-            skipped_counts[family] += 1
+        if family == "cmov":
+            continue
+        pattern_kind = str(entry.get("pattern_kind", "")).strip()
+        insn = int(entry.get("insn", entry.get("start_insn", -1)))
+        if insn < 0 or not pattern_kind:
+            continue
+        rendered_sites.append(
+            {
+                "insn": insn,
+                "family": family,
+                "pattern_kind": pattern_kind,
+            }
+        )
+    rendered_sites.sort(
+        key=lambda item: (
+            int(item["insn"]),
+            str(item["family"]),
+            str(item["pattern_kind"]),
+        )
+    )
 
-    family_actions: dict[str, str] = {}
-    if cmov_skip and skipped_counts.get("cmov", 0) > 0:
-        family_actions["cmov"] = "skip"
+    cmov_site_count = site_counts.get("cmov", 0)
 
     comments = [
         "Auto-generated by corpus/generate_default_policies.py.",
@@ -454,24 +403,16 @@ def render_program_policy_text(
         f"Total scanner sites: {int((manifest.get('summary') or {}).get('total_sites', 0) or 0)}",
         "Family site totals: "
         + ", ".join(f"{family}={site_counts.get(family, 0)}" for family in POLICY_FAMILY_KEYS),
-        "Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.",
+        "Selection model: explicit site allowlist; keep every discovered site except CMOV.",
     ]
-    if cmov_evidence is not None:
+    if cmov_site_count > 0:
         comments.append(
-            "CMOV evidence: "
-            f"{results_json.relative_to(ROOT_DIR).as_posix()} object geomean={cmov_evidence['geomean']:.3f}x "
-            f"across {cmov_evidence['samples']} measured CMOV-applied program(s) "
-            f"(regressions={cmov_evidence['regressions']}, wins={cmov_evidence['wins']})"
-        )
-        comments.append(
-            f"Explicitly skipped CMOV sites in this program: {skipped_counts.get('cmov', 0)}"
+            f"Excluded CMOV sites from allowlist: {cmov_site_count}"
         )
 
-    return render_policy_v2_text(
+    return render_policy_v3_text(
         program_name=program_name,
-        default_action="apply",
-        families=family_actions,
-        sites=[],
+        sites=rendered_sites,
         comments=comments,
     )
 
@@ -508,8 +449,6 @@ def main(argv: list[str] | None = None) -> int:
     scanner = Path(args.scanner).resolve()
     runner = Path(args.runner).resolve()
     policy_dir = Path(args.policy_dir).resolve()
-    results_md = Path(args.results_md).resolve()
-    fallback_results_json = Path(args.results_json).resolve()
     selected_roots = (
         tuple(Path(item).resolve() for item in args.object_roots)
         if args.object_roots
@@ -524,11 +463,6 @@ def main(argv: list[str] | None = None) -> int:
         raise SystemExit(f"scanner not found: {scanner}")
     if not runner.exists():
         raise SystemExit(f"runner not found: {runner}")
-
-    results_json = load_results_json_path(results_md, fallback_results_json)
-    if not results_json.exists():
-        raise SystemExit(f"results JSON not found: {results_json}")
-    cmov_regressors = load_cmov_regressors(results_json)
 
     object_paths = discover_object_paths(
         selected_roots,
@@ -576,25 +510,25 @@ def main(argv: list[str] | None = None) -> int:
             continue
         policy_positive_objects += 1
         object_path = Path(summary["object_path"]).resolve()
-        cmov_evidence = cmov_regressors.get(object_path)
-        cmov_skip = cmov_evidence is not None
-        if cmov_skip:
-            cmov_skip_objects += 1
+        object_has_cmov_policy = False
         for program in programs:
-            if cmov_skip:
+            manifest = program["manifest"]
+            summary_payload = manifest.get("summary") or {}
+            cmov_site_count = int(summary_payload.get("cmov_sites", 0) or 0)
+            if cmov_site_count > 0:
+                object_has_cmov_policy = True
                 cmov_skip_programs += 1
             policy_path = policy_path_for_program(object_path, program["program_name"], policy_dir)
             text = render_program_policy_text(
                 object_path=object_path,
                 program_name=program["program_name"],
                 section_name=program["section_name"],
-                manifest=program["manifest"],
-                cmov_skip=cmov_skip,
-                cmov_evidence=cmov_evidence,
-                results_json=results_json,
+                manifest=manifest,
             )
             planned_outputs.append((policy_path, text))
             policy_positive_programs += 1
+        if object_has_cmov_policy:
+            cmov_skip_objects += 1
 
     planned_outputs.sort(key=lambda item: display_path(item[0]))
 
@@ -629,8 +563,7 @@ def main(argv: list[str] | None = None) -> int:
         f"cmov_skip_objects={cmov_skip_objects} "
         f"cmov_skip_programs={cmov_skip_programs} "
         f"stale_removed={(0 if args.dry_run else len(stale_paths))} "
-        f"warnings={warning_count} "
-        f"results_json={results_json.relative_to(ROOT_DIR).as_posix()}"
+        f"warnings={warning_count}"
     )
     return 0
 

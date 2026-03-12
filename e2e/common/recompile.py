@@ -213,9 +213,9 @@ def _write_live_remapped_policy(
     *,
     program_name: str,
 ) -> tuple[Path, dict[str, Any]]:
-    from corpus.policy_utils import remap_policy_v2_to_live
+    from corpus.policy_utils import remap_policy_v3_to_live
 
-    text, summary = remap_policy_v2_to_live(
+    text, summary = remap_policy_v3_to_live(
         Path(policy_path),
         live_manifest,
         program_name=program_name,
@@ -256,10 +256,10 @@ def _normalize_policy_path(value: Path | str | None) -> str | None:
 
 @lru_cache(maxsize=None)
 def _policy_program_name(policy_path: str) -> str | None:
-    from corpus.policy_utils import parse_policy_v2
+    from corpus.policy_utils import parse_policy_v3
 
     try:
-        document = parse_policy_v2(Path(policy_path))
+        document = parse_policy_v3(Path(policy_path))
     except Exception:
         return None
     if not document.program:

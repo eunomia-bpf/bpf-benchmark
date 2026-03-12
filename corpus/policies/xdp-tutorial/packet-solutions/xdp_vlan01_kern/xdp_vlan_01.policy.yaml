@@ -4,9 +4,27 @@
 # Section: xdp_vlan01
 # Total scanner sites: 18
 # Family site totals: cmov=12, wide=6, rotate=0, extract=0, lea=0, zero-ext=0, endian=0, branch-flip=0
-# Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.
+# Selection model: explicit site allowlist; keep every discovered site except CMOV.
+# Excluded CMOV sites from allowlist: 12
 
-version: 2
+version: 3
 program: 'xdp_vlan_01'
-default: apply
-sites: []
+sites:
+  - insn: 17
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 33
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 49
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 65
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 81
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 97
+    family: wide
+    pattern_kind: 'wide-load-2'

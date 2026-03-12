@@ -484,104 +484,73 @@ void test_v5_policy_filter()
         CHECK_EQ(*branch_flip, bpf_jit_scanner::V5Family::BranchFlip);
     }
 
-    auto v2_skip_default = bpf_jit_scanner::parse_policy_config_text(
-        "version: 2\n"
+    auto rotate_only = bpf_jit_scanner::parse_policy_config_text(
+        "version: 3\n"
         "program: mixed-demo\n"
-        "default: skip\n"
         "sites:\n"
         "  - insn: 4\n"
         "    family: rotate\n"
-        "    action: apply\n"
+        "    pattern_kind: rotate-64\n"
         "  - insn: 99\n"
         "    family: cmov\n"
-        "    action: skip\n",
+        "    pattern_kind: cond-select-64\n",
         "per-site.yaml");
-    auto v2_skip_result = bpf_jit_scanner::filter_rules_by_policy_detailed(
-        summary.rules, v2_skip_default);
-    CHECK_EQ(v2_skip_result.rules.size(), 1u);
-    CHECK_EQ(v2_skip_result.rules[0].family, bpf_jit_scanner::V5Family::Rotate);
-    CHECK_EQ(v2_skip_result.matched_site_count, 1u);
-    CHECK_EQ(v2_skip_result.unmatched_site_count, 1u);
-    CHECK_EQ(v2_skip_result.warnings.size(), 1u);
-    CHECK(v2_skip_result.warnings[0].find("cmov insn 99") != std::string::npos);
+    auto rotate_only_result = bpf_jit_scanner::filter_rules_by_policy_detailed(
+        summary.rules, rotate_only);
+    CHECK_EQ(rotate_only_result.rules.size(), 1u);
+    CHECK_EQ(rotate_only_result.rules[0].family,
+             bpf_jit_scanner::V5Family::Rotate);
+    CHECK_EQ(rotate_only_result.matched_site_count, 1u);
+    CHECK_EQ(rotate_only_result.unmatched_site_count, 1u);
+    CHECK_EQ(rotate_only_result.warnings.size(), 1u);
+    CHECK(rotate_only_result.warnings[0].find(
+              "cmov insn 99 pattern_kind cond-select-64") !=
+          std::string::npos);
 
-    auto v2_apply_default = bpf_jit_scanner::parse_policy_config_text(
-        "version: 2\n"
+    auto all_sites = bpf_jit_scanner::parse_policy_config_text(
+        "version: 3\n"
         "program: mixed-demo\n"
-        "default: apply\n"
         "sites:\n"
         "  - insn: 0\n"
         "    family: cmov\n"
-        "    action: skip\n",
-        "per-site-apply.yaml");
-    auto v2_apply_rules = bpf_jit_scanner::filter_rules_by_policy(
-        summary.rules, v2_apply_default);
-    CHECK_EQ(v2_apply_rules.size(), 1u);
-    CHECK_EQ(v2_apply_rules[0].family, bpf_jit_scanner::V5Family::Rotate);
+        "    pattern_kind: cond-select-64\n"
+        "  - insn: 4\n"
+        "    family: rotate\n"
+        "    pattern_kind: rotate-64\n",
+        "all-sites.yaml");
+    auto all_site_rules = bpf_jit_scanner::filter_rules_by_policy(
+        summary.rules, all_sites);
+    CHECK_EQ(all_site_rules.size(), 2u);
 
-    auto v2_stock_default = bpf_jit_scanner::parse_policy_config_text(
-        "version: 2\n"
+    auto cmov_only = bpf_jit_scanner::parse_policy_config_text(
+        "version: 3\n"
         "program: mixed-demo\n"
-        "default: stock\n"
         "sites:\n"
         "  - insn: 0\n"
         "    family: cmov\n"
-        "    action: apply\n",
-        "per-site-stock.yaml");
-    auto v2_stock_rules = bpf_jit_scanner::filter_rules_by_policy(
-        summary.rules, v2_stock_default);
-    CHECK_EQ(v2_stock_rules.size(), 1u);
-    CHECK_EQ(v2_stock_rules[0].family, bpf_jit_scanner::V5Family::Cmov);
-
-    auto family_only = bpf_jit_scanner::parse_policy_config_text(
-        "version: 2\n"
-        "program: mixed-demo\n"
-        "default: skip\n"
-        "families:\n"
-        "  rotate: apply\n",
-        "family-only.yaml");
-    auto family_only_rules = bpf_jit_scanner::filter_rules_by_policy(
-        summary.rules, family_only);
-    CHECK_EQ(family_only_rules.size(), 1u);
-    CHECK_EQ(family_only_rules[0].family, bpf_jit_scanner::V5Family::Rotate);
+        "    pattern_kind: cond-select-64\n",
+        "cmov-only.yaml");
+    auto cmov_only_rules = bpf_jit_scanner::filter_rules_by_policy(
+        summary.rules, cmov_only);
+    CHECK_EQ(cmov_only_rules.size(), 1u);
+    CHECK_EQ(cmov_only_rules[0].family, bpf_jit_scanner::V5Family::Cmov);
+    CHECK(bpf_jit_scanner::v5_policy_allows_family(
+        cmov_only, bpf_jit_scanner::V5Family::Cmov));
     CHECK(!bpf_jit_scanner::v5_policy_allows_family(
-        family_only, bpf_jit_scanner::V5Family::Cmov));
-    CHECK(bpf_jit_scanner::v5_policy_allows_family(
-        family_only, bpf_jit_scanner::V5Family::Rotate));
+        cmov_only, bpf_jit_scanner::V5Family::Rotate));
 
-    auto family_skip = bpf_jit_scanner::parse_policy_config_text(
-        "version: 2\n"
+    auto pattern_kind_mismatch = bpf_jit_scanner::parse_policy_config_text(
+        "version: 3\n"
         "program: mixed-demo\n"
-        "default: apply\n"
-        "families:\n"
-        "  cmov: skip\n",
-        "family-skip.yaml");
-    auto family_skip_rules = bpf_jit_scanner::filter_rules_by_policy(
-        summary.rules, family_skip);
-    CHECK_EQ(family_skip_rules.size(), 1u);
-    CHECK_EQ(family_skip_rules[0].family, bpf_jit_scanner::V5Family::Rotate);
-    CHECK(!bpf_jit_scanner::v5_policy_allows_family(
-        family_skip, bpf_jit_scanner::V5Family::Cmov));
-    CHECK(bpf_jit_scanner::v5_policy_allows_family(
-        family_skip, bpf_jit_scanner::V5Family::Rotate));
-
-    auto site_override = bpf_jit_scanner::parse_policy_config_text(
-        "version: 2\n"
-        "program: mixed-demo\n"
-        "default: skip\n"
-        "families:\n"
-        "  cmov: skip\n"
         "sites:\n"
-        "  - insn: 0\n"
-        "    family: cmov\n"
-        "    action: apply\n",
-        "site-override.yaml");
-    auto site_override_rules = bpf_jit_scanner::filter_rules_by_policy(
-        summary.rules, site_override);
-    CHECK_EQ(site_override_rules.size(), 1u);
-    CHECK_EQ(site_override_rules[0].family, bpf_jit_scanner::V5Family::Cmov);
-    CHECK(bpf_jit_scanner::v5_policy_allows_family(
-        site_override, bpf_jit_scanner::V5Family::Cmov));
+        "  - insn: 4\n"
+        "    family: rotate\n"
+        "    pattern_kind: mismatch-pattern\n",
+        "pattern-kind-mismatch.yaml");
+    auto mismatch_rules = bpf_jit_scanner::filter_rules_by_policy(
+        summary.rules, pattern_kind_mismatch);
+    CHECK_EQ(mismatch_rules.size(), 1u);
+    CHECK_EQ(mismatch_rules[0].family, bpf_jit_scanner::V5Family::Rotate);
 }
 
 void test_v5_policy_config_validation()
@@ -589,7 +558,7 @@ void test_v5_policy_config_validation()
     bool threw = false;
     try {
         static_cast<void>(bpf_jit_scanner::parse_policy_config_text(
-            "version: 1\n"
+            "version: 2\n"
             "default: skip\n"
             "sites: []\n",
             "bad-version.yaml"));
@@ -601,9 +570,11 @@ void test_v5_policy_config_validation()
     threw = false;
     try {
         static_cast<void>(bpf_jit_scanner::parse_policy_config_text(
-            "version: 2\n"
-            "sites: []\n",
-            "missing-default.yaml"));
+            "version: 3\n"
+            "sites:\n"
+            "  - insn: 0\n"
+            "    family: cmov\n",
+            "missing-pattern-kind.yaml"));
     } catch (const std::runtime_error &) {
         threw = true;
     }
@@ -612,12 +583,11 @@ void test_v5_policy_config_validation()
     threw = false;
     try {
         static_cast<void>(bpf_jit_scanner::parse_policy_config_text(
-            "version: 2\n"
-            "default: skip\n"
+            "version: 3\n"
             "sites:\n"
             "  - insn: 0\n"
             "    family: not-a-family\n"
-            "    action: apply\n",
+            "    pattern_kind: cond-select-64\n",
             "bad.yaml"));
     } catch (const std::runtime_error &) {
         threw = true;
@@ -627,11 +597,10 @@ void test_v5_policy_config_validation()
     threw = false;
     try {
         static_cast<void>(bpf_jit_scanner::parse_policy_config_text(
-            "version: 2\n"
+            "version: 3\n"
             "default: skip\n"
-            "families:\n"
-            "  not-a-family: apply\n",
-            "bad-family.yaml"));
+            "sites: []\n",
+            "unexpected-default.yaml"));
     } catch (const std::runtime_error &) {
         threw = true;
     }
@@ -640,11 +609,43 @@ void test_v5_policy_config_validation()
     threw = false;
     try {
         static_cast<void>(bpf_jit_scanner::parse_policy_config_text(
-            "version: 2\n"
-            "default: skip\n"
+            "version: 3\n"
             "families:\n"
-            "  cmov: maybe\n",
-            "bad-family-action.yaml"));
+            "  cmov: apply\n"
+            "sites: []\n",
+            "unexpected-families.yaml"));
+    } catch (const std::runtime_error &) {
+        threw = true;
+    }
+    CHECK(threw);
+
+    threw = false;
+    try {
+        static_cast<void>(bpf_jit_scanner::parse_policy_config_text(
+            "version: 3\n"
+            "sites:\n"
+            "  - insn: 0\n"
+            "    family: cmov\n"
+            "    pattern_kind: cond-select-64\n"
+            "    action: apply\n",
+            "unexpected-action.yaml"));
+    } catch (const std::runtime_error &) {
+        threw = true;
+    }
+    CHECK(threw);
+
+    threw = false;
+    try {
+        static_cast<void>(bpf_jit_scanner::parse_policy_config_text(
+            "version: 3\n"
+            "sites:\n"
+            "  - insn: 4\n"
+            "    family: rotate\n"
+            "    pattern_kind: rotate-64\n"
+            "  - insn: 4\n"
+            "    family: rotate\n"
+            "    pattern_kind: rotate-64\n",
+            "duplicate-site.yaml"));
     } catch (const std::runtime_error &) {
         threw = true;
     }
@@ -654,7 +655,6 @@ void test_v5_policy_config_validation()
 void test_v5_policy_parser_golden()
 {
     using bpf_jit_scanner::V5Family;
-    using bpf_jit_scanner::V5PolicyAction;
     using bpf_jit_scanner::V5ScanOptions;
 
     auto mixed = encode({
@@ -680,8 +680,8 @@ void test_v5_policy_parser_golden()
         const auto path = golden_dir / "01-valid-empty.yaml";
         const auto config = bpf_jit_scanner::parse_policy_config_text(
             read_text_file(path), path.string());
-        CHECK(config.default_action == V5PolicyAction::Skip);
-        CHECK_EQ(config.families.size(), 0u);
+        CHECK_EQ(config.version, 3u);
+        CHECK(config.program == "mixed-demo");
         CHECK_EQ(config.sites.size(), 0u);
         auto result =
             bpf_jit_scanner::filter_rules_by_policy_detailed(summary.rules, config);
@@ -691,41 +691,39 @@ void test_v5_policy_parser_golden()
     }
 
     {
-        const auto path = golden_dir / "02-valid-stock-alias.yaml";
+        const auto path = golden_dir / "02-valid-rotate-only.yaml";
         const auto config = bpf_jit_scanner::parse_policy_config_text(
             read_text_file(path), path.string());
-        CHECK(config.default_action == V5PolicyAction::Skip);
-        CHECK_EQ(config.families.size(), 0u);
-        CHECK_EQ(config.sites.size(), 0u);
-        auto result =
-            bpf_jit_scanner::filter_rules_by_policy_detailed(summary.rules, config);
-        CHECK_EQ(result.rules.size(), 0u);
-    }
-
-    {
-        const auto path = golden_dir / "03-valid-family-site-precedence.yaml";
-        const auto config = bpf_jit_scanner::parse_policy_config_text(
-            read_text_file(path), path.string());
-        CHECK(config.default_action == V5PolicyAction::Apply);
-        CHECK_EQ(config.families.size(), 2u);
-        CHECK_EQ(config.sites.size(), 2u);
+        CHECK(config.program == "mixed-demo");
+        CHECK_EQ(config.sites.size(), 1u);
+        CHECK_EQ(config.sites[0].family, V5Family::Rotate);
+        CHECK(config.sites[0].pattern_kind == "rotate-64");
         auto result =
             bpf_jit_scanner::filter_rules_by_policy_detailed(summary.rules, config);
         CHECK_EQ(result.rules.size(), 1u);
-        CHECK_EQ(result.rules[0].family, V5Family::Cmov);
+        CHECK_EQ(result.rules[0].family, V5Family::Rotate);
+    }
+
+    {
+        const auto path = golden_dir / "03-valid-both-sites.yaml";
+        const auto config = bpf_jit_scanner::parse_policy_config_text(
+            read_text_file(path), path.string());
+        CHECK_EQ(config.sites.size(), 2u);
+        auto result =
+            bpf_jit_scanner::filter_rules_by_policy_detailed(summary.rules, config);
+        CHECK_EQ(result.rules.size(), 2u);
         CHECK_EQ(result.matched_site_count, 2u);
         CHECK_EQ(result.unmatched_site_count, 0u);
     }
 
     {
-        const auto path = golden_dir / "04-valid-family-alias.yaml";
+        const auto path = golden_dir / "04-valid-programless-cmov.yaml";
         const auto config = bpf_jit_scanner::parse_policy_config_text(
             read_text_file(path), path.string());
-        CHECK(config.default_action == V5PolicyAction::Skip);
-        CHECK_EQ(config.families.size(), 1u);
-        CHECK_EQ(config.families[0].family, V5Family::Cmov);
-        CHECK(config.families[0].action == V5PolicyAction::Apply);
-        CHECK_EQ(config.sites.size(), 0u);
+        CHECK(config.program.empty());
+        CHECK_EQ(config.sites.size(), 1u);
+        CHECK_EQ(config.sites[0].family, V5Family::Cmov);
+        CHECK(config.sites[0].pattern_kind == "cond-select-64");
         auto result =
             bpf_jit_scanner::filter_rules_by_policy_detailed(summary.rules, config);
         CHECK_EQ(result.rules.size(), 1u);
@@ -733,27 +731,28 @@ void test_v5_policy_parser_golden()
     }
 
     {
-        const auto path = golden_dir / "05-valid-site-only-apply.yaml";
+        const auto path = golden_dir / "05-valid-rotate-then-cmov.yaml";
         const auto config = bpf_jit_scanner::parse_policy_config_text(
             read_text_file(path), path.string());
-        CHECK(config.default_action == V5PolicyAction::Skip);
-        CHECK_EQ(config.families.size(), 0u);
-        CHECK_EQ(config.sites.size(), 1u);
+        CHECK(config.program == "mixed-demo");
+        CHECK_EQ(config.sites.size(), 2u);
         CHECK_EQ(config.sites[0].family, V5Family::Rotate);
-        CHECK(config.sites[0].action == V5PolicyAction::Apply);
+        CHECK(config.sites[0].pattern_kind == "rotate-64");
+        CHECK_EQ(config.sites[1].family, V5Family::Cmov);
+        CHECK(config.sites[1].pattern_kind == "cond-select-64");
         auto result =
             bpf_jit_scanner::filter_rules_by_policy_detailed(summary.rules, config);
-        CHECK_EQ(result.rules.size(), 1u);
-        CHECK_EQ(result.rules[0].family, V5Family::Rotate);
-        CHECK_EQ(result.matched_site_count, 1u);
+        CHECK_EQ(result.rules.size(), 2u);
+        CHECK_EQ(result.matched_site_count, 2u);
         CHECK_EQ(result.unmatched_site_count, 0u);
     }
 
     for (const char *filename : {
-             "06-invalid-missing-site-action.yaml",
-             "07-invalid-duplicate-site.yaml",
-             "08-invalid-duplicate-family-alias.yaml",
-             "09-invalid-duplicate-family-key.yaml",
+             "06-invalid-version-2.yaml",
+             "07-invalid-missing-pattern-kind.yaml",
+             "08-invalid-duplicate-site.yaml",
+             "09-invalid-noncanonical-family.yaml",
+             "10-invalid-unknown-site-field.yaml",
          }) {
         bool threw = false;
         try {
@@ -805,14 +804,15 @@ void test_v5_scan_manifest_json()
     CHECK(json.find("\"canonical_form\":4") != std::string::npos);
     CHECK(json.find("\"native_choice\":1") != std::string::npos);
 
-    const std::string yaml = bpf_jit_scanner::render_policy_v2_yaml(
-        program, summary, bpf_jit_scanner::V5PolicyAction::Skip);
-    CHECK(yaml.find("version: 2") != std::string::npos);
+    const std::string yaml = bpf_jit_scanner::render_policy_v3_yaml(
+        program, summary);
+    CHECK(yaml.find("version: 3") != std::string::npos);
     CHECK(yaml.find("program: 'demo-program'") != std::string::npos);
-    CHECK(yaml.find("default: skip") != std::string::npos);
     CHECK(yaml.find("insn: 0") != std::string::npos);
     CHECK(yaml.find("family: cmov") != std::string::npos);
-    CHECK(yaml.find("action: skip") != std::string::npos);
+    CHECK(yaml.find("pattern_kind: 'cond-select-64'") != std::string::npos);
+    CHECK(yaml.find("default:") == std::string::npos);
+    CHECK(yaml.find("action:") == std::string::npos);
 }
 
 } // namespace

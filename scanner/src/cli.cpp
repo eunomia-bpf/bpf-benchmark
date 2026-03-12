@@ -115,9 +115,6 @@ struct CommandOptions {
     std::string output_path;
     std::string program_name;
     std::string config_path;
-    bpf_jit_scanner::V5PolicyAction default_action =
-        bpf_jit_scanner::V5PolicyAction::Skip;
-    bool default_action_explicit = false;
     bpf_jit_scanner::V5ScanOptions scan_options = {
         .scan_cmov = false,
         .scan_wide = false,
@@ -506,9 +503,9 @@ void print_usage(const char *prog)
     std::fprintf(stderr,
         "Usage:\n"
         "  %s scan  (<file> | --prog-fd <fd> | --xlated <file>) [family flags] [--json] [--per-site] [--output <blob>]\n"
-        "  %s generate-policy (<file> | --prog-fd <fd> | --xlated <file>) [family flags] [--program-name <name>] [--default apply|skip] [--output <yaml>|-]\n"
-        "  %s compile-policy (<file> | --prog-fd <fd> | --xlated <file>) --config <policy-v2.{yaml,json}> [family flags] [--output <blob>|-]\n"
-        "  %s apply (<file> | --prog-fd <fd> | --xlated <file>) [family flags] [--config <policy-v2.{yaml,json}>] [--program-name <name>] [--output <blob>|-]\n"
+        "  %s generate-policy (<file> | --prog-fd <fd> | --xlated <file>) [family flags] [--program-name <name>] [--output <yaml>|-]\n"
+        "  %s compile-policy (<file> | --prog-fd <fd> | --xlated <file>) --config <policy-v3.{yaml,json}> [family flags] [--output <blob>|-]\n"
+        "  %s apply (<file> | --prog-fd <fd> | --xlated <file>) [family flags] [--config <policy-v3.{yaml,json}>] [--program-name <name>] [--output <blob>|-]\n"
         "  %s dump  --prog-fd <fd> [--output <file>]\n"
         "\n"
         "Family flags:\n"
@@ -527,8 +524,7 @@ void print_usage(const char *prog)
         "\n"
         "Shared options:\n"
         "  --program-name <name>  Select a program when scanning an ELF object path\n"
-        "  --config <file>        Version 2 policy YAML/JSON used by compile-policy or apply\n"
-        "  --default <action>     Default action for generate-policy (apply or skip)\n"
+        "  --config <file>        Version 3 policy YAML/JSON used by compile-policy or apply\n"
         "  --json                 Emit scan manifest JSON instead of text summary\n"
         "  --per-site             Accepted for compatibility; scan --json is already per-site\n"
         "  --prog-tag <hex>       Override prog_tag for blob writing (16 hex chars)\n"
@@ -547,22 +543,6 @@ void parse_hex_tag(const char *hex, uint8_t tag[8])
         char byte[3] = {hex[i * 2], hex[i * 2 + 1], '\0'};
         tag[i] = static_cast<uint8_t>(std::strtoul(byte, nullptr, 16));
     }
-}
-
-bpf_jit_scanner::V5PolicyAction parse_policy_action_or_die(const char *raw)
-{
-    std::string value(raw);
-    std::transform(value.begin(), value.end(), value.begin(),
-                   [](unsigned char ch) {
-                       return static_cast<char>(std::tolower(ch));
-                   });
-    if (value == "apply") {
-        return bpf_jit_scanner::V5PolicyAction::Apply;
-    }
-    if (value == "skip") {
-        return bpf_jit_scanner::V5PolicyAction::Skip;
-    }
-    die("--default must be 'apply' or 'skip'");
 }
 
 void enable_all_families(CommandOptions &options)
@@ -621,8 +601,7 @@ CommandOptions parse_args(int argc, char **argv)
         } else if (arg == "--config") {
             options.config_path = need_next();
         } else if (arg == "--default") {
-            options.default_action = parse_policy_action_or_die(need_next());
-            options.default_action_explicit = true;
+            die("--default was removed; version 3 policies are explicit site allowlists");
         } else if (arg == "--json") {
             options.json_output = true;
         } else if (arg == "--per-site") {
@@ -756,10 +735,6 @@ CommandOptions parse_args(int argc, char **argv)
         !options.config_path.empty()) {
         die("%s does not accept --config", options.subcommand.c_str());
     }
-    if (options.subcommand != "generate-policy" &&
-        options.default_action_explicit) {
-        die("%s does not accept --default", options.subcommand.c_str());
-    }
 
     if (!options.families_explicit) {
         enable_all_families(options);
@@ -857,8 +832,8 @@ void run_generate_policy(const CommandOptions &options)
         input.xlated.data(),
         static_cast<uint32_t>(input.xlated.size()),
         options.scan_options);
-    const auto yaml = bpf_jit_scanner::render_policy_v2_yaml(
-        build_program_info(input), summary, options.default_action);
+    const auto yaml = bpf_jit_scanner::render_policy_v3_yaml(
+        build_program_info(input), summary);
 
     if (options.output_path.empty() || options.output_path == "-") {
         write_stdout(reinterpret_cast<const uint8_t *>(yaml.data()),
@@ -869,7 +844,7 @@ void run_generate_policy(const CommandOptions &options)
     write_file(options.output_path,
                reinterpret_cast<const uint8_t *>(yaml.data()),
                static_cast<uint32_t>(yaml.size()));
-    std::printf("Wrote version 2 policy template (%zu site entries) to %s\n",
+    std::printf("Wrote version 3 policy template (%zu site entries) to %s\n",
                 summary.rules.size(), options.output_path.c_str());
 }
 

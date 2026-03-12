@@ -4,13 +4,84 @@
 # Section: tc
 # Total scanner sites: 42
 # Family site totals: cmov=17, wide=0, rotate=0, extract=3, lea=0, zero-ext=0, endian=22, branch-flip=0
-# Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.
-# CMOV evidence: corpus/results/corpus_v5_vm_batch_authoritative_20260311.json object geomean=0.900x across 7 measured CMOV-applied program(s) (regressions=5, wins=2)
-# Explicitly skipped CMOV sites in this program: 17
+# Selection model: explicit site allowlist; keep every discovered site except CMOV.
+# Excluded CMOV sites from allowlist: 17
 
-version: 2
+version: 3
 program: 'calico_tc_skb_new_flow_entrypoint'
-default: apply
-families:
-  cmov: skip
-sites: []
+sites:
+  - insn: 411
+    family: extract
+    pattern_kind: 'bitfield-extract-64-mask-shift'
+  - insn: 902
+    family: endian
+    pattern_kind: 'endian-load-swap-32'
+  - insn: 1072
+    family: endian
+    pattern_kind: 'endian-load-swap-32'
+  - insn: 1218
+    family: endian
+    pattern_kind: 'endian-load-swap-32'
+  - insn: 1564
+    family: endian
+    pattern_kind: 'endian-load-swap-16'
+  - insn: 1567
+    family: endian
+    pattern_kind: 'endian-load-swap-16'
+  - insn: 1631
+    family: endian
+    pattern_kind: 'endian-load-swap-16'
+  - insn: 1646
+    family: endian
+    pattern_kind: 'endian-load-swap-16'
+  - insn: 1665
+    family: endian
+    pattern_kind: 'endian-load-swap-32'
+  - insn: 1684
+    family: endian
+    pattern_kind: 'endian-load-swap-32'
+  - insn: 2239
+    family: endian
+    pattern_kind: 'endian-load-swap-32'
+  - insn: 2624
+    family: endian
+    pattern_kind: 'endian-load-swap-32'
+  - insn: 2653
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2693
+    family: extract
+    pattern_kind: 'bitfield-extract-64-mask-shift'
+  - insn: 3153
+    family: endian
+    pattern_kind: 'endian-load-swap-32'
+  - insn: 3323
+    family: endian
+    pattern_kind: 'endian-load-swap-32'
+  - insn: 3469
+    family: endian
+    pattern_kind: 'endian-load-swap-32'
+  - insn: 3707
+    family: endian
+    pattern_kind: 'endian-load-swap-16'
+  - insn: 3714
+    family: endian
+    pattern_kind: 'endian-load-swap-16'
+  - insn: 3717
+    family: endian
+    pattern_kind: 'endian-load-swap-16'
+  - insn: 4208
+    family: endian
+    pattern_kind: 'endian-load-swap-16'
+  - insn: 4212
+    family: endian
+    pattern_kind: 'endian-swap-store-16'
+  - insn: 4226
+    family: endian
+    pattern_kind: 'endian-swap-store-16'
+  - insn: 4228
+    family: endian
+    pattern_kind: 'endian-swap-store-16'
+  - insn: 4247
+    family: endian
+    pattern_kind: 'endian-load-swap-32'

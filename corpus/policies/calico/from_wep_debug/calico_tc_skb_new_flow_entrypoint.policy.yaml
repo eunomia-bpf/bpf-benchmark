@@ -4,13 +4,57 @@
 # Section: tc
 # Total scanner sites: 21
 # Family site totals: cmov=5, wide=0, rotate=0, extract=2, lea=0, zero-ext=0, endian=14, branch-flip=0
-# Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.
-# CMOV evidence: corpus/results/corpus_v5_vm_batch_authoritative_20260311.json object geomean=0.850x across 7 measured CMOV-applied program(s) (regressions=6, wins=1)
-# Explicitly skipped CMOV sites in this program: 5
+# Selection model: explicit site allowlist; keep every discovered site except CMOV.
+# Excluded CMOV sites from allowlist: 5
 
-version: 2
+version: 3
 program: 'calico_tc_skb_new_flow_entrypoint'
-default: apply
-families:
-  cmov: skip
-sites: []
+sites:
+  - insn: 417
+    family: extract
+    pattern_kind: 'bitfield-extract-64-mask-shift'
+  - insn: 908
+    family: endian
+    pattern_kind: 'endian-load-swap-32'
+  - insn: 1069
+    family: endian
+    pattern_kind: 'endian-load-swap-32'
+  - insn: 1399
+    family: extract
+    pattern_kind: 'bitfield-extract-64-mask-shift'
+  - insn: 1817
+    family: endian
+    pattern_kind: 'endian-load-swap-32'
+  - insn: 1977
+    family: endian
+    pattern_kind: 'endian-load-swap-32'
+  - insn: 2081
+    family: endian
+    pattern_kind: 'endian-load-swap-16'
+  - insn: 2088
+    family: endian
+    pattern_kind: 'endian-load-swap-16'
+  - insn: 2091
+    family: endian
+    pattern_kind: 'endian-load-swap-16'
+  - insn: 2957
+    family: endian
+    pattern_kind: 'endian-load-swap-16'
+  - insn: 2960
+    family: endian
+    pattern_kind: 'endian-load-swap-16'
+  - insn: 3024
+    family: endian
+    pattern_kind: 'endian-load-swap-16'
+  - insn: 3039
+    family: endian
+    pattern_kind: 'endian-load-swap-16'
+  - insn: 3058
+    family: endian
+    pattern_kind: 'endian-load-swap-32'
+  - insn: 3077
+    family: endian
+    pattern_kind: 'endian-load-swap-32'
+  - insn: 3561
+    family: endian
+    pattern_kind: 'endian-load-swap-32'

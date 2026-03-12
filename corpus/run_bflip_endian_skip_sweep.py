@@ -14,8 +14,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-import yaml
-
 SCRIPT_DIR = Path(__file__).resolve().parent
 ROOT_DIR = SCRIPT_DIR.parent
 for candidate in (ROOT_DIR, SCRIPT_DIR, ROOT_DIR / "micro", ROOT_DIR / "corpus"):
@@ -44,10 +42,11 @@ try:
     from common import build_run_kernel_command
     from policy_utils import (
         POLICY_DIR,
-        PolicyDocumentV2,
-        parse_policy_v2,
+        PolicyDocumentV3,
+        parse_policy_v3,
         policy_path_for_program,
-        render_policy_v2_text,
+        remap_policy_v3_to_live,
+        render_policy_v3_text,
     )
 except ImportError:
     from corpus._driver_impl_run_corpus_v5_vm_batch import (
@@ -65,10 +64,11 @@ except ImportError:
     from corpus.common import build_run_kernel_command
     from corpus.policy_utils import (
         POLICY_DIR,
-        PolicyDocumentV2,
-        parse_policy_v2,
+        PolicyDocumentV3,
+        parse_policy_v3,
         policy_path_for_program,
-        render_policy_v2_text,
+        remap_policy_v3_to_live,
+        render_policy_v3_text,
     )
 
 
@@ -204,7 +204,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         action="store_true",
         help=(
             "Do not start the generated sweep policies from the existing per-program "
-            "version 2 policy. The default preserves the current tuned decisions and "
+            "version 3 policy. The default preserves the current tuned decisions and "
             "then adds branch-flip/endian skips on top."
         ),
     )
@@ -361,19 +361,15 @@ def collect_guest_info(args: argparse.Namespace) -> dict[str, Any]:
     }
 
 
-def effective_default_action(default_action: str) -> str:
-    return "skip" if default_action == "stock" else default_action
-
-
 def load_program_policy(
     policy_root: Path,
     object_path: Path,
     program_name: str,
-) -> PolicyDocumentV2 | None:
+) -> PolicyDocumentV3 | None:
     policy_path = policy_path_for_program(object_path, program_name, policy_root)
     if not policy_path.exists():
         return None
-    return parse_policy_v2(policy_path)
+    return parse_policy_v3(policy_path)
 
 
 def dump_guest_xlated(
@@ -419,15 +415,15 @@ def scanner_generate_policy_from_xlated(
     xlated_path: Path,
     program_name: str,
     output_path: Path,
-) -> dict[str, Any]:
+) -> PolicyDocumentV3:
     ensure_parent(output_path)
     command = [
         str(scanner),
         "generate-policy",
         "--xlated",
         str(xlated_path),
-        "--default",
-        "apply",
+        "--program-name",
+        program_name,
         "--output",
         str(output_path),
     ]
@@ -444,11 +440,7 @@ def scanner_generate_policy_from_xlated(
         raise RuntimeError(
             f"scanner generate-policy failed for {relpath(xlated_path)} ({program_name}): {detail}"
         )
-    payload = yaml.safe_load(output_path.read_text())
-    if not isinstance(payload, dict):
-        raise RuntimeError(f"invalid version 2 policy for {relpath(xlated_path)} ({program_name})")
-    payload["program"] = program_name
-    return payload
+    return parse_policy_v3(output_path)
 
 
 def write_skip_policy(
@@ -458,66 +450,66 @@ def write_skip_policy(
     object_path: Path,
     program_name: str,
     output_path: Path,
-    base_policy: PolicyDocumentV2 | None,
+    base_policy: PolicyDocumentV3 | None,
     skip_families: set[str],
 ) -> dict[str, Any]:
-    payload = scanner_generate_policy_from_xlated(
+    template_policy = scanner_generate_policy_from_xlated(
         scanner=scanner,
         xlated_path=xlated_path,
         program_name=program_name,
         output_path=output_path,
     )
-    sites = payload.get("sites")
-    if not isinstance(sites, list):
-        raise RuntimeError(f"policy template missing sites list for {relpath(object_path)}:{program_name}")
-
-    output_default = base_policy.default if base_policy is not None else "apply"
-    baseline_default = effective_default_action(output_default)
-    baseline_actions = (
-        {(site.insn, site.family): site.action for site in base_policy.sites}
-        if base_policy is not None
-        else {}
-    )
 
     site_counts: dict[str, int] = {}
     skip_counts: dict[str, int] = {}
-    rendered_sites: list[dict[str, Any]] = []
-    for entry in sites:
-        if not isinstance(entry, dict):
-            raise RuntimeError(f"invalid site entry in {output_path}")
-        insn = int(entry.get("insn", -1))
-        family = str(entry.get("family", "")).strip()
-        if insn < 0 or not family:
-            raise RuntimeError(f"invalid site entry in {output_path}")
+    for site in template_policy.sites:
+        family = str(site.family)
         site_counts[family] = site_counts.get(family, 0) + 1
-        action = baseline_actions.get((insn, family), baseline_default)
-        if family in skip_families:
-            action = "skip"
-        if action == "skip":
-            skip_counts[family] = skip_counts.get(family, 0) + 1
-        if action != baseline_default:
-            rendered_sites.append(
-                {
-                    "insn": insn,
-                    "family": family,
-                    "action": action,
-                }
-            )
+
+    baseline_policy = template_policy
+    if base_policy is not None:
+        baseline_text, _ = remap_policy_v3_to_live(
+            base_policy,
+            {
+                "sites": [
+                    {
+                        "insn": site.insn,
+                        "family": site.family,
+                        "pattern_kind": site.pattern_kind,
+                    }
+                    for site in template_policy.sites
+                ]
+            },
+            program_name=program_name,
+        )
+        baseline_policy = parse_policy_v3(baseline_text)
+
+    rendered_sites: list[dict[str, Any]] = []
+    for site in baseline_policy.sites:
+        if site.family in skip_families:
+            skip_counts[site.family] = skip_counts.get(site.family, 0) + 1
+            continue
+        rendered_sites.append(
+            {
+                "insn": site.insn,
+                "family": site.family,
+                "pattern_kind": site.pattern_kind,
+            }
+        )
 
     output_path.write_text(
-        render_policy_v2_text(
+        render_policy_v3_text(
             program_name=program_name,
-            default_action=output_default,
             sites=rendered_sites,
         )
     )
     return {
         "policy_path": str(output_path),
         "xlated_path": str(xlated_path),
-        "site_count": len(sites),
+        "site_count": len(template_policy.sites),
+        "baseline_site_count": len(baseline_policy.sites),
         "rendered_site_count": len(rendered_sites),
         "site_counts": site_counts,
-        "default_action": output_default,
         "skip_families": sorted(skip_families),
         "skip_counts": skip_counts,
     }
@@ -737,8 +729,8 @@ def build_markdown(payload: dict[str, Any]) -> str:
         "## Notes",
         "",
         "- Round 1 remeasures the existing `corpus/policies/` tuned policy as the same-setup baseline.",
-        "- Round 2 and Round 3 use per-program version 2 policies generated from `scanner generate-policy` templates.",
-        "- When `preserve_existing_policy=true`, Round 2 and Round 3 start from the current per-program v2 policy and then force `branch-flip` / `endian` sites to `skip`.",
+        "- Round 2 and Round 3 use per-program version 3 policies generated from `scanner generate-policy` templates.",
+        "- When `preserve_existing_policy=true`, Round 2 and Round 3 start from the current per-program v3 allowlist and then remove `branch-flip` / `endian` sites.",
         "",
         "## Per-Program Results",
         "",
@@ -957,7 +949,7 @@ def main(argv: list[str] | None = None) -> int:
                     "key": item["key"],
                     "label": short_program_label(item["object_path"], program_name),
                     "source_policy_path": str(current_policy_path) if current_policy_path.exists() else None,
-                    "source_policy_default": base_policy.default if base_policy is not None else None,
+                    "source_policy_site_count": len(base_policy.sites) if base_policy is not None else None,
                     "relative_policy_path": str(
                         current_policy_path.relative_to(policy_dir)
                     ),
@@ -969,7 +961,7 @@ def main(argv: list[str] | None = None) -> int:
             )
             print(
                 f"[policy {index}/{len(selected)}] {short_program_label(item['object_path'], program_name)}"
-                f" source_default={base_policy.default if base_policy is not None else 'apply'}"
+                f" source_sites={len(base_policy.sites) if base_policy is not None else round2_meta['baseline_site_count']}"
                 f" forced_skips={sorted(round3_skips)}",
                 flush=True,
             )

@@ -138,7 +138,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--use-policy",
         action="store_true",
-        help="Prefer per-program version 2 policy files under corpus/policies/ when present; otherwise keep stock JIT.",
+        help="Prefer per-program version 3 policy files under corpus/policies/ when present; otherwise keep stock JIT.",
     )
     parser.add_argument(
         "--blind-apply",
@@ -690,7 +690,7 @@ def build_markdown(data: dict[str, Any]) -> str:
             "- Baseline and v5 compile-only probes were attempted for all 40 targets on the framework kernel.",
             "- Timed runs were attempted only for the 29 targets that were previously runnable through `bpf_prog_test_run`.",
             "- Default steady-state semantics are stock: without `--use-policy` or `--blind-apply`, the v5 lane does not request recompile.",
-            "- `--use-policy` only considers per-program version 2 policy files under `corpus/policies/`; if no match exists, the driver stays on stock JIT.",
+            "- `--use-policy` only considers per-program version 3 policy files under `corpus/policies/`; if no match exists, the driver stays on stock JIT.",
             "- `--blind-apply` forces the old debug/exploration path with `--recompile-v5 --recompile-all`.",
             "- Guest CO-RE loading uses `--btf-custom-path` pointing at the framework build-tree `vmlinux`, because the guest kernel does not expose `/sys/kernel/btf/vmlinux`.",
             "",

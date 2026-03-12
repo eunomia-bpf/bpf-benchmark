@@ -4,9 +4,80 @@
 # Section: kprobe
 # Total scanner sites: 24
 # Family site totals: cmov=0, wide=22, rotate=0, extract=0, lea=2, zero-ext=0, endian=0, branch-flip=0
-# Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.
+# Selection model: explicit site allowlist; keep every discovered site except CMOV.
 
-version: 2
+version: 3
 program: 'generic_kprobe_actions'
-default: apply
-sites: []
+sites:
+  - insn: 26
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 127
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 170
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 240
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 275
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 405
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 415
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 598
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 735
+    family: lea
+    pattern_kind: 'addr-calc'
+  - insn: 770
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 815
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 896
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 958
+    family: lea
+    pattern_kind: 'addr-calc'
+  - insn: 1052
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1062
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1200
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1315
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1427
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1469
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1525
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1655
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1707
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1801
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1811
+    family: wide
+    pattern_kind: 'wide-load-2'

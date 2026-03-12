@@ -79,20 +79,19 @@ The CLI is v5-only. `--v5` is still accepted as a no-op so existing v5
 automation does not need to change in lockstep.
 
 `scan --json` prints a JSON manifest with program metadata, per-family counts,
-and per-site entries. `compile-policy` reads a single-program version 2 policy
+and per-site entries. `compile-policy` reads a single-program version 3 policy
 file with a per-site schema such as:
 
 ```yaml
-version: 2
+version: 3
 program: demo-program
-default: skip
 sites:
   - insn: 12
     family: wide
-    action: apply
+    pattern_kind: wide-load-4
   - insn: 44
     family: rotate
-    action: apply
+    pattern_kind: rotate-64
 ```
 
 JSON input is accepted too because the parser goes through `yaml-cpp`.
@@ -114,7 +113,7 @@ exposes the full v5 API:
 [`include/bpf_jit_scanner/policy_config.hpp`](./include/bpf_jit_scanner/policy_config.hpp)
 adds:
 
-- version 2 policy config loading/filtering for per-site apply/skip decisions
+- version 3 policy config loading/filtering for explicit per-site allowlists
 - JSON manifest construction for `scan --json`
 
 The library API operates on post-verifier xlated bytecode. The CLI can also

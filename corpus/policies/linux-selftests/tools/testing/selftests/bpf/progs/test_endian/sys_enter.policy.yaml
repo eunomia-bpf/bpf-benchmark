@@ -4,9 +4,17 @@
 # Section: raw_tp/sys_enter
 # Total scanner sites: 3
 # Family site totals: cmov=0, wide=0, rotate=0, extract=0, lea=0, zero-ext=0, endian=3, branch-flip=0
-# Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.
+# Selection model: explicit site allowlist; keep every discovered site except CMOV.
 
-version: 2
+version: 3
 program: 'sys_enter'
-default: apply
-sites: []
+sites:
+  - insn: 15
+    family: endian
+    pattern_kind: 'endian-load-swap-16'
+  - insn: 22
+    family: endian
+    pattern_kind: 'endian-load-swap-32'
+  - insn: 29
+    family: endian
+    pattern_kind: 'endian-load-swap-64'

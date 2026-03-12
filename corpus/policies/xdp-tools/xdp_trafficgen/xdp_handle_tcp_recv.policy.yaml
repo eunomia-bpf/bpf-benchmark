@@ -4,9 +4,21 @@
 # Section: xdp
 # Total scanner sites: 6
 # Family site totals: cmov=2, wide=0, rotate=0, extract=1, lea=0, zero-ext=0, endian=3, branch-flip=0
-# Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.
+# Selection model: explicit site allowlist; keep every discovered site except CMOV.
+# Excluded CMOV sites from allowlist: 2
 
-version: 2
+version: 3
 program: 'xdp_handle_tcp_recv'
-default: apply
-sites: []
+sites:
+  - insn: 111
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 213
+    family: endian
+    pattern_kind: 'endian-load-swap-32'
+  - insn: 272
+    family: endian
+    pattern_kind: 'endian-swap-store-16'
+  - insn: 274
+    family: endian
+    pattern_kind: 'endian-load-swap-32'

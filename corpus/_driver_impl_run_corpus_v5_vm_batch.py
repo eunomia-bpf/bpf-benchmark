@@ -208,7 +208,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--use-policy",
         action="store_true",
-        help="Prefer per-program version 2 policy files under corpus/policies/ when present; otherwise keep stock JIT.",
+        help="Prefer per-program version 3 policy files under corpus/policies/ when present; otherwise keep stock JIT.",
     )
     parser.add_argument(
         "--policy-dir",
@@ -1261,7 +1261,7 @@ def build_markdown(data: dict[str, Any]) -> str:
             "- Target selection comes from the runnability inventory and keeps every packet-test-run target whose baseline run already succeeds; the current scanner pass determines whether v5 has any eligible families.",
             "- In strict VM mode, each target boots the framework v5 guest once and runs baseline compile-only, v5 compile-only, baseline test_run, and v5 test_run in that order.",
             "- Default steady-state semantics are stock: without `--use-policy` or `--blind-apply`, the v5 lane does not request recompile.",
-            "- `--use-policy` only considers per-program version 2 policy files under `corpus/policies/`; if no match exists, the driver stays on stock JIT.",
+            "- `--use-policy` only considers per-program version 3 policy files under `corpus/policies/`; if no match exists, the driver stays on stock JIT.",
             "- `--blind-apply` forces the old debug/exploration path with `--recompile-v5 --recompile-all`.",
             "- `--skip-families` only applies together with `--blind-apply`; the family columns above report applied families, not just eligible sites.",
             "- Host fallback mode only does baseline compile-only plus offline scanner scan; it does not attempt recompile or runtime measurement.",

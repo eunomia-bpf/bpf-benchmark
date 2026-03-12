@@ -4,13 +4,42 @@
 # Section: kprobe/security_socket_listen
 # Total scanner sites: 24
 # Family site totals: cmov=13, wide=0, rotate=0, extract=0, lea=0, zero-ext=0, endian=1, branch-flip=10
-# Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.
-# CMOV evidence: corpus/results/corpus_v5_vm_batch_authoritative_20260311.json object geomean=0.653x across 2 measured CMOV-applied program(s) (regressions=2, wins=0)
-# Explicitly skipped CMOV sites in this program: 13
+# Selection model: explicit site allowlist; keep every discovered site except CMOV.
+# Excluded CMOV sites from allowlist: 13
 
-version: 2
+version: 3
 program: 'trace_security_socket_listen'
-default: apply
-families:
-  cmov: skip
-sites: []
+sites:
+  - insn: 318
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 361
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 395
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 434
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 475
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1012
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1407
+    family: endian
+    pattern_kind: 'endian-swap-store-16'
+  - insn: 1645
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1686
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1718
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1757
+    family: branch-flip
+    pattern_kind: 'branch-flip'

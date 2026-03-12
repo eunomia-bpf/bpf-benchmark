@@ -4,9 +4,27 @@
 # Section: struct_ops.s/lavd_init
 # Total scanner sites: 7
 # Family site totals: cmov=1, wide=0, rotate=0, extract=1, lea=0, zero-ext=0, endian=0, branch-flip=5
-# Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.
+# Selection model: explicit site allowlist; keep every discovered site except CMOV.
+# Excluded CMOV sites from allowlist: 1
 
-version: 2
+version: 3
 program: 'lavd_init'
-default: apply
-sites: []
+sites:
+  - insn: 22
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 381
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 387
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 550
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 554
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 669
+    family: branch-flip
+    pattern_kind: 'branch-flip'

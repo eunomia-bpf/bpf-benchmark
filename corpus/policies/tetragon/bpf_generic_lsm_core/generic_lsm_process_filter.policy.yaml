@@ -4,9 +4,72 @@
 # Section: lsm
 # Total scanner sites: 544
 # Family site totals: cmov=523, wide=6, rotate=0, extract=2, lea=0, zero-ext=0, endian=0, branch-flip=13
-# Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.
+# Selection model: explicit site allowlist; keep every discovered site except CMOV.
+# Excluded CMOV sites from allowlist: 523
 
-version: 2
+version: 3
 program: 'generic_lsm_process_filter'
-default: apply
-sites: []
+sites:
+  - insn: 222
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 231
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 247
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 322
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1691
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1709
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1722
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 1848
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1865
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1884
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1903
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1922
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1941
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1961
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1981
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2015
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2045
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 2090
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 2099
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 2133
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 2221
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'

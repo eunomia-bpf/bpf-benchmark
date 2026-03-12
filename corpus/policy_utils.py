@@ -14,8 +14,17 @@ CORPUS_DIR = ROOT_DIR / "corpus"
 POLICY_DIR = CORPUS_DIR / "policies"
 OBJECT_ROOT_NAMES = ("build", "expanded_corpus", "objects")
 PROGRAM_SAFE_CHARS = re.compile(r"[^A-Za-z0-9._-]+")
-VALID_POLICY_ACTIONS = {"apply", "skip"}
-VALID_POLICY_DEFAULTS = {"apply", "skip", "stock"}
+CANONICAL_POLICY_FAMILIES = (
+    "cmov",
+    "wide",
+    "rotate",
+    "lea",
+    "extract",
+    "zero-ext",
+    "endian",
+    "branch-flip",
+)
+CANONICAL_POLICY_FAMILY_SET = set(CANONICAL_POLICY_FAMILIES)
 POLICY_FAMILY_ALIASES = {
     "cmov": "cmov",
     "cond-select": "cmov",
@@ -46,7 +55,6 @@ POLICY_FAMILY_ALIASES = {
     "branchflip": "branch-flip",
     "bflip": "branch-flip",
 }
-CANONICAL_POLICY_FAMILIES = tuple(dict.fromkeys(POLICY_FAMILY_ALIASES.values()))
 POLICY_FAMILY_ORDER = {family: index for index, family in enumerate(CANONICAL_POLICY_FAMILIES)}
 
 
@@ -80,29 +88,21 @@ _UniqueKeyLoader.add_constructor(
 
 
 @dataclass(frozen=True, slots=True)
-class PolicySiteV2:
+class PolicySiteV3:
     insn: int
     family: str
-    action: str
+    pattern_kind: str
 
 
 @dataclass(frozen=True, slots=True)
-class PolicyFamilyActionV2:
-    family: str
-    action: str
-
-
-@dataclass(frozen=True, slots=True)
-class PolicyDocumentV2:
+class PolicyDocumentV3:
     version: int
     program: str | None
-    default: str
-    families: tuple[PolicyFamilyActionV2, ...]
-    sites: tuple[PolicySiteV2, ...]
+    sites: tuple[PolicySiteV3, ...]
 
 
 @dataclass(frozen=True, slots=True)
-class PolicyRemapSummaryV2:
+class PolicyRemapSummaryV3:
     explicit_sites: int
     remapped_sites: int
     dropped_sites: int
@@ -176,83 +176,67 @@ def canonical_policy_family_name(value: str) -> str:
     return POLICY_FAMILY_ALIASES[normalized]
 
 
+def strict_policy_family_name(value: str) -> str:
+    normalized = value.strip().lower()
+    if normalized not in CANONICAL_POLICY_FAMILY_SET:
+        raise ValueError(f"unknown policy family: {value}")
+    return normalized
+
+
 def yaml_single_quoted(value: str) -> str:
     return "'" + value.replace("'", "''") + "'"
 
 
-def _normalize_policy_families(
-    families: Mapping[str, Any] | Sequence[Mapping[str, Any]],
-) -> list[tuple[str, str]]:
-    if isinstance(families, Mapping):
-        raw_items = [
-            {"family": family, "action": action}
-            for family, action in families.items()
-        ]
-    else:
-        raw_items = list(families)
-
-    normalized: list[tuple[str, str]] = []
-    seen: set[str] = set()
-    for entry in raw_items:
-        if not isinstance(entry, Mapping):
-            raise ValueError("policy families entries must be mappings")
-        family = canonical_policy_family_name(str(entry.get("family", "")))
-        action = str(entry.get("action", "")).strip().lower()
-        if action not in VALID_POLICY_ACTIONS:
-            raise ValueError("policy family action must be 'apply' or 'skip'")
-        if family in seen:
-            raise ValueError(f"duplicate policy family entry: {family}")
-        seen.add(family)
-        normalized.append((family, action))
-    normalized.sort(key=lambda item: POLICY_FAMILY_ORDER.get(item[0], len(POLICY_FAMILY_ORDER)))
-    return normalized
+def _normalize_policy_site_v3(entry: Mapping[str, Any]) -> tuple[int, str, str]:
+    for field_name in entry:
+        if field_name not in {"insn", "family", "pattern_kind"}:
+            raise ValueError(f"unknown policy site field: {field_name}")
+    insn = int(entry.get("insn", -1))
+    family = strict_policy_family_name(str(entry.get("family", "")))
+    pattern_kind = str(entry.get("pattern_kind", "")).strip()
+    if insn < 0:
+        raise ValueError("policy site insn must be >= 0")
+    if not pattern_kind:
+        raise ValueError("policy site pattern_kind must be a non-empty string")
+    return insn, family, pattern_kind
 
 
-def render_policy_v2_text(
+def render_policy_v3_text(
     *,
     program_name: str | None,
-    default_action: str,
-    families: Mapping[str, Any] | Sequence[Mapping[str, Any]] = (),
     sites: Sequence[Mapping[str, Any]] = (),
     comments: Iterable[str] = (),
 ) -> str:
-    normalized_default = default_action.strip().lower()
-    if normalized_default not in VALID_POLICY_DEFAULTS:
-        raise ValueError("policy default must be 'apply', 'skip', or 'stock'")
-
-    rendered_families = _normalize_policy_families(families)
     rendered_sites: list[tuple[int, str, str]] = []
+    seen_sites: set[tuple[int, str, str]] = set()
     for raw_site in sites:
-        insn = int(raw_site.get("insn", -1))
-        family = canonical_policy_family_name(str(raw_site.get("family", "")))
-        action = str(raw_site.get("action", "")).strip().lower()
-        if insn < 0:
-            raise ValueError("policy site insn must be >= 0")
-        if action not in VALID_POLICY_ACTIONS:
-            raise ValueError("policy site action must be 'apply' or 'skip'")
-        rendered_sites.append((insn, family, action))
+        if not isinstance(raw_site, Mapping):
+            raise ValueError("policy sites entries must be mappings")
+        site = _normalize_policy_site_v3(raw_site)
+        if site in seen_sites:
+            raise ValueError(
+                "duplicate policy site entry: "
+                f"{site[1]} insn {site[0]} pattern_kind {site[2]}"
+            )
+        seen_sites.add(site)
+        rendered_sites.append(site)
 
     lines: list[str] = [f"# {line}" for line in comments]
     if lines:
         lines.append("")
-    lines.append("version: 2")
+    lines.append("version: 3")
     if program_name is not None:
         lines.append(f"program: {yaml_single_quoted(program_name)}")
-    lines.append(f"default: {normalized_default}")
-    if rendered_families:
-        lines.append("families:")
-        for family, action in rendered_families:
-            lines.append(f"  {family}: {action}")
     if not rendered_sites:
         lines.append("sites: []")
         lines.append("")
         return "\n".join(lines)
 
     lines.append("sites:")
-    for insn, family, action in rendered_sites:
+    for insn, family, pattern_kind in rendered_sites:
         lines.append(f"  - insn: {insn}")
         lines.append(f"    family: {family}")
-        lines.append(f"    action: {action}")
+        lines.append(f"    pattern_kind: {yaml_single_quoted(pattern_kind)}")
     lines.append("")
     return "\n".join(lines)
 
@@ -276,25 +260,14 @@ def _load_policy_payload(policy: Path | str | Mapping[str, Any]) -> Mapping[str,
     return loaded
 
 
-def parse_policy_v2(policy: Path | str | Mapping[str, Any]) -> PolicyDocumentV2:
+def parse_policy_v3(policy: Path | str | Mapping[str, Any]) -> PolicyDocumentV3:
     payload = _load_policy_payload(policy)
     version = int(payload.get("version", 0) or 0)
-    if version != 2:
-        raise ValueError(f"expected version 2 policy, got {version}")
-
-    default = str(payload.get("default", "")).strip().lower()
-    if default not in VALID_POLICY_DEFAULTS:
-        raise ValueError("policy default must be 'apply', 'skip', or 'stock'")
-    if default == "stock":
-        default = "skip"
-
-    raw_families = payload.get("families") or {}
-    if not isinstance(raw_families, Mapping):
-        raise ValueError("policy families must be a mapping")
-    families = tuple(
-        PolicyFamilyActionV2(family=family, action=action)
-        for family, action in _normalize_policy_families(raw_families)
-    )
+    if version != 3:
+        raise ValueError(f"expected version 3 policy, got {version}")
+    for field_name in payload:
+        if field_name not in {"version", "program", "sites"}:
+            raise ValueError(f"unknown policy field: {field_name}")
 
     raw_sites = payload.get("sites")
     if raw_sites is None:
@@ -302,52 +275,50 @@ def parse_policy_v2(policy: Path | str | Mapping[str, Any]) -> PolicyDocumentV2:
     if not isinstance(raw_sites, list):
         raise ValueError("policy sites must be a list")
 
-    sites: list[PolicySiteV2] = []
-    seen_sites: set[tuple[int, str]] = set()
+    sites: list[PolicySiteV3] = []
+    seen_sites: set[tuple[int, str, str]] = set()
     for entry in raw_sites:
         if not isinstance(entry, Mapping):
             raise ValueError("policy sites entries must be mappings")
-        insn = int(entry.get("insn", -1))
-        family = canonical_policy_family_name(str(entry.get("family", "")))
-        if "action" not in entry:
-            raise ValueError("policy site action must be 'apply' or 'skip'")
-        action = str(entry.get("action", "")).strip().lower()
-        if insn < 0:
-            raise ValueError("policy site insn must be >= 0")
-        if action not in VALID_POLICY_ACTIONS:
-            raise ValueError("policy site action must be 'apply' or 'skip'")
-        site_key = (insn, family)
+        insn, family, pattern_kind = _normalize_policy_site_v3(entry)
+        site_key = (insn, family, pattern_kind)
         if site_key in seen_sites:
-            raise ValueError(f"duplicate policy site entry: {family} insn {insn}")
+            raise ValueError(
+                f"duplicate policy site entry: {family} insn {insn} pattern_kind {pattern_kind}"
+            )
         seen_sites.add(site_key)
-        sites.append(PolicySiteV2(insn=insn, family=family, action=action))
+        sites.append(
+            PolicySiteV3(
+                insn=insn,
+                family=family,
+                pattern_kind=pattern_kind,
+            )
+        )
 
     program_value = payload.get("program")
     program = None if program_value is None else str(program_value)
-    return PolicyDocumentV2(
-        version=2,
+    return PolicyDocumentV3(
+        version=3,
         program=program,
-        default=default,
-        families=families,
         sites=tuple(sites),
     )
 
 
-def remap_policy_v2_to_live(
-    policy: Path | str | Mapping[str, Any] | PolicyDocumentV2,
+def remap_policy_v3_to_live(
+    policy: Path | str | Mapping[str, Any] | PolicyDocumentV3,
     live_manifest: Mapping[str, Any],
     *,
     program_name: str | None = None,
     comments: Iterable[str] = (),
-) -> tuple[str, PolicyRemapSummaryV2]:
-    document = policy if isinstance(policy, PolicyDocumentV2) else parse_policy_v2(policy)
+) -> tuple[str, PolicyRemapSummaryV3]:
+    document = policy if isinstance(policy, PolicyDocumentV3) else parse_policy_v3(policy)
     raw_sites = live_manifest.get("sites")
     if raw_sites is None:
         raise ValueError("live manifest must contain a sites list")
     if not isinstance(raw_sites, Sequence) or isinstance(raw_sites, (str, bytes, bytearray)):
         raise ValueError("live manifest sites must be a sequence")
 
-    live_sites_by_family: dict[str, list[int]] = defaultdict(list)
+    live_sites_by_key: dict[tuple[str, str], list[int]] = defaultdict(list)
     live_family_counts: Counter[str] = Counter()
     live_total_sites = 0
     for entry in raw_sites:
@@ -367,14 +338,14 @@ def remap_policy_v2_to_live(
             continue
         if insn < 0:
             continue
-        live_sites_by_family[family].append(insn)
+        pattern_kind = str(entry.get("pattern_kind", "")).strip()
+        if not pattern_kind:
+            continue
+        live_sites_by_key[(family, pattern_kind)].append(insn)
         live_family_counts[family] += 1
         live_total_sites += 1
 
-    for insns in live_sites_by_family.values():
-        insns.sort()
-
-    next_live_index: dict[str, int] = defaultdict(int)
+    next_live_index: dict[tuple[str, str], int] = defaultdict(int)
     remapped_sites: list[dict[str, Any]] = []
     policy_family_counts: Counter[str] = Counter()
     remapped_family_counts: Counter[str] = Counter()
@@ -382,8 +353,9 @@ def remap_policy_v2_to_live(
 
     for site in document.sites:
         policy_family_counts[site.family] += 1
-        family_sites = live_sites_by_family.get(site.family, [])
-        position = next_live_index[site.family]
+        site_key = (site.family, site.pattern_kind)
+        family_sites = live_sites_by_key.get(site_key, [])
+        position = next_live_index[site_key]
         if position >= len(family_sites):
             dropped_family_counts[site.family] += 1
             continue
@@ -391,14 +363,16 @@ def remap_policy_v2_to_live(
             {
                 "insn": family_sites[position],
                 "family": site.family,
-                "action": site.action,
+                "pattern_kind": site.pattern_kind,
             }
         )
-        next_live_index[site.family] = position + 1
+        next_live_index[site_key] = position + 1
         remapped_family_counts[site.family] += 1
 
     remap_comments = list(comments)
-    remap_comments.append("Remapped onto live scanner sites by family order.")
+    remap_comments.append(
+        "Remapped onto live scanner sites by family + pattern_kind order."
+    )
     remap_comments.append(
         "Live site totals: "
         + ", ".join(
@@ -411,23 +385,18 @@ def remap_policy_v2_to_live(
     )
     if dropped_family_counts:
         remap_comments.append(
-            "Dropped explicit policy sites with no live family match: "
+            "Dropped explicit policy sites with no live family/pattern_kind match: "
             + ", ".join(
                 f"{family}={count}" for family, count in sorted(dropped_family_counts.items())
             )
         )
 
-    text = render_policy_v2_text(
+    text = render_policy_v3_text(
         program_name=program_name if program_name is not None else document.program,
-        default_action=document.default,
-        families=[
-            {"family": family_action.family, "action": family_action.action}
-            for family_action in document.families
-        ],
         sites=remapped_sites,
         comments=remap_comments,
     )
-    summary = PolicyRemapSummaryV2(
+    summary = PolicyRemapSummaryV3(
         explicit_sites=len(document.sites),
         remapped_sites=len(remapped_sites),
         dropped_sites=max(0, len(document.sites) - len(remapped_sites)),
@@ -440,25 +409,18 @@ def remap_policy_v2_to_live(
     return text, summary
 
 
-def generate_default_policy_v2(
+def generate_default_policy_v3(
     scanner_binary: Path | str,
     object_path: Path | str,
     *,
     program_name: str | None = None,
-    default: str = "skip",
     output_path: Path | str | None = None,
     timeout_seconds: int = 60,
 ) -> str:
-    normalized_default = default.strip().lower()
-    if normalized_default not in VALID_POLICY_ACTIONS:
-        raise ValueError("default must be 'apply' or 'skip'")
-
     command = [
         str(Path(scanner_binary).resolve()),
         "generate-policy",
         str(Path(object_path).resolve()),
-        "--default",
-        normalized_default,
     ]
     if program_name:
         command.extend(["--program-name", program_name])
@@ -488,21 +450,20 @@ __all__ = [
     "CORPUS_DIR",
     "OBJECT_ROOT_NAMES",
     "POLICY_DIR",
-    "PolicyDocumentV2",
-    "PolicyFamilyActionV2",
-    "PolicyRemapSummaryV2",
-    "PolicySiteV2",
+    "PolicyDocumentV3",
+    "PolicyRemapSummaryV3",
+    "PolicySiteV3",
     "ROOT_DIR",
     "canonical_policy_family_name",
-    "generate_default_policy_v2",
+    "generate_default_policy_v3",
     "object_policy_stem",
     "object_relative_path",
     "object_roots",
-    "parse_policy_v2",
+    "parse_policy_v3",
     "policy_path_for_program",
     "program_policy_dir",
-    "remap_policy_v2_to_live",
-    "render_policy_v2_text",
+    "remap_policy_v3_to_live",
+    "render_policy_v3_text",
     "resolve_policy_path",
     "sanitize_program_name",
 ]

@@ -4,13 +4,69 @@
 # Section: kprobe/syscall_checker
 # Total scanner sites: 41
 # Family site totals: cmov=21, wide=0, rotate=0, extract=0, lea=0, zero-ext=0, endian=0, branch-flip=20
-# Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.
-# CMOV evidence: corpus/results/corpus_v5_vm_batch_authoritative_20260311.json object geomean=0.653x across 2 measured CMOV-applied program(s) (regressions=2, wins=0)
-# Explicitly skipped CMOV sites in this program: 21
+# Selection model: explicit site allowlist; keep every discovered site except CMOV.
+# Excluded CMOV sites from allowlist: 21
 
-version: 2
+version: 3
 program: 'syscall_checker'
-default: apply
-families:
-  cmov: skip
-sites: []
+sites:
+  - insn: 370
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 413
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 446
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 485
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 525
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1052
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2164
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2207
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2241
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2280
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2578
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2620
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2654
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2693
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2733
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 3464
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 4390
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 4431
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 4463
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 4502
+    family: branch-flip
+    pattern_kind: 'branch-flip'
