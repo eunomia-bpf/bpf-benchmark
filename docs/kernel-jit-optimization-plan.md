@@ -370,7 +370,7 @@ VM 使用:   make -j$(nproc) bzImage && vng --run <worktree>/arch/x86/boot/bzIma
 | 57 | 消融补全 | ❌ | byte-recompose / callee-saved / BMI |
 | 58 | ZERO_EXTEND directive | ❌ | movzx vs xor+mov |
 | 59 | ARM64 target backend | ❌ | 跨架构验证 |
-| 60 | 严格重跑（30×1000） | ❌ | CPU pinning + performance governor |
+| 60 | 严格重跑（30×1000） | ✅ | host 完成 strict pure-jit dual-runtime 重跑：**56/56 pass**, `30×1000`, `taskset -c 0`/`--cpu 0`, governor=`performance`, turbo=`off`。结果：`micro/results/pure_jit_authoritative_strict_20260312.json`，`micro/results/pure_jit.latest.json` 已更新。并修复 `micro/Makefile` clean 后并行重建目录依赖，`make -C micro clean && make -C micro -j$(nproc)` 现稳定通过。 |
 | 61 | **Benchmark 多样性** | 🟡 | 67 micro: 64 XDP + 2 tc + 1 cgroup_skb。Corpus recompile paired: 61 tc + 16 xdp + 2 cgroup_skb = 79。Census 覆盖全类型。审计报告: `docs/tmp/benchmark-diversity-audit.md` |
 | 62 | **CMOV kernel JIT benefit 信号增强** | ❌ | cmov_select 仅 2.8% 改善，需更强 signal（更多 cmov-heavy benchmark 或不同微架构） |
 | 63 | **End-to-end throughput 数据** | 已取消 | 随 #49 一起取消 |

@@ -27,9 +27,10 @@ programs:
 
 vendor_libbpf: $(LIBBPF_A) $(LIBBPF_HEADER)
 
-$(LIBBPF_A) $(LIBBPF_HEADER):
+$(LIBBPF_A) $(LIBBPF_HEADER) &:
 	mkdir -p $(LIBBPF_OBJDIR)
 	mkdir -p $(LIBBPF_PREFIX)
+	mkdir -p $(LIBBPF_PREFIX)/include
 	$(MAKE) -C $(REPO_ROOT)/vendor/libbpf/src \
 		BUILD_STATIC_ONLY=1 \
 		OBJDIR=$(LIBBPF_OBJDIR) \
@@ -37,7 +38,13 @@ $(LIBBPF_A) $(LIBBPF_HEADER):
 		PREFIX=$(LIBBPF_PREFIX) \
 		$(LIBBPF_A) install_headers
 
-$(RUNNER_BUILD_DIR) $(TOOLS_BUILD_DIR) $(BPFTOOL_BUILD_DIR):
+$(RUNNER_BUILD_DIR):
+	mkdir -p $@
+
+$(TOOLS_BUILD_DIR):
+	mkdir -p $@
+
+$(BPFTOOL_BUILD_DIR):
 	mkdir -p $@
 
 micro_exec: $(LIBBPF_A) $(LIBBPF_HEADER) | $(RUNNER_BUILD_DIR)
