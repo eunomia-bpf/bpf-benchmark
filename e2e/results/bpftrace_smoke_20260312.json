@@ -1,0 +1,303 @@
+{
+  "duration_s": 5,
+  "generated_at": "2026-03-12T23:22:27.834543+00:00",
+  "host": {
+    "git_sha": "e9850f3db2d9cc60198d3ecf1c78537ffcd1f723",
+    "hostname": "lab",
+    "kernel": "6.15.11-061511-generic",
+    "platform": "Linux-6.15.11-061511-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "records": [
+    {
+      "baseline": {
+        "measurement": {
+          "agent_cpu": {
+            "sys_pct": 0.0,
+            "total_pct": 0.0,
+            "user_pct": 0.0
+          },
+          "bpf": {
+            "programs": {
+              "193043": {
+                "avg_ns_per_run": 542.3327082993641,
+                "bytes_jited": 161,
+                "bytes_xlated": 264,
+                "id": 193043,
+                "name": "sched_process_e",
+                "run_cnt_delta": 24532,
+                "run_time_ns_delta": 13304506,
+                "type": "tracepoint"
+              }
+            },
+            "summary": {
+              "active_programs": 1,
+              "avg_ns_per_run": 542.3327082993641,
+              "total_events": 24532,
+              "total_run_time_ns": 13304506
+            }
+          },
+          "final_stats": {
+            "193043": {
+              "bytes_jited": 161,
+              "bytes_xlated": 264,
+              "id": 193043,
+              "name": "sched_process_e",
+              "run_cnt": 24546,
+              "run_time_ns": 13329034,
+              "type": "tracepoint"
+            }
+          },
+          "initial_stats": {
+            "193043": {
+              "bytes_jited": 161,
+              "bytes_xlated": 264,
+              "id": 193043,
+              "name": "sched_process_e",
+              "run_cnt": 14,
+              "run_time_ns": 24528,
+              "type": "tracepoint"
+            }
+          },
+          "system_cpu": {
+            "busy_pct": 96.86750839060252
+          },
+          "workload": {
+            "duration_s": 5.068370940047316,
+            "ops_per_sec": 444844.9071051914,
+            "ops_total": 2254639.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [2254639] setting to a 5 secs run per stressor\nstress-ng: info:  [2254639] dispatching hogs: 2 exec\nstress-ng: info:  [2254639] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [2254639] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [2254639]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [2254639] exec              30972      5.01     34.41     64.89      6185.84         311.90\nstress-ng: info:  [2254639] skipped: 0\nstress-ng: info:  [2254639] passed: 2: exec (2)\nstress-ng: info:  [2254639] failed: 0\nstress-ng: info:  [2254639] metrics untrustworthy: 0\nstress-ng: info:  [2254639] successful run completed in 5.01 secs"
+          }
+        },
+        "phase": "baseline",
+        "policy_matches": {},
+        "policy_summary": {
+          "configured_programs": 0,
+          "fallback_programs": 1
+        },
+        "process": {
+          "returncode": 0,
+          "stderr_tail": "",
+          "stdout_tail": "@[getconf]: 1\n@[locale]: 1\n@[tail]: 1\n@[python]: 1\n@[python3]: 1\n@[ldconfig]: 1\n@[getopt]: 1\n@[locale-check]: 1\n@[bpf-jit-scanner]: 1\n@[rg]: 1\n@[lsb_release]: 1\n@[ip]: 1\n@[ldconfig.real]: 1\n@[sudo]: 1\n@[ps]: 2\n@[sleep]: 2\n@[cut]: 2\n@[cpuUsage.sh]: 2\n@[codex]: 2\n@[9]: 2\n@[which]: 2\n@[tr]: 3\n@[nl]: 4\n@[bpftool]: 5\n@[base64]: 6\n@[sh]: 7\n@[sed]: 7\n@[bash]: 18\n@[git]: 47\n@[cat]: 123\n@[stress-ng]: 24298"
+        },
+        "prog_ids": [
+          193043
+        ],
+        "programs": [
+          {
+            "btf_id": 322078,
+            "bytes_jited": 161,
+            "bytes_memlock": 4096,
+            "bytes_xlated": 264,
+            "gpl_compatible": true,
+            "id": 193043,
+            "jited": true,
+            "loaded_at": 1773357738,
+            "map_ids": [
+              229886
+            ],
+            "name": "tracepoint_sched_sched_process_exec",
+            "orphaned": false,
+            "owner_fds": [
+              {
+                "fd": 9,
+                "pid": 2254619
+              }
+            ],
+            "owner_pids": [
+              2254619
+            ],
+            "pids": [
+              {
+                "comm": "bpftrace",
+                "pid": 2254619
+              }
+            ],
+            "run_cnt": 2,
+            "run_time_ns": 2831,
+            "tag": "afe1b01453072a6e",
+            "type": "tracepoint",
+            "uid": 0
+          }
+        ],
+        "reason": "",
+        "recompile_results": {},
+        "recompile_summary": {
+          "applied_programs": 0,
+          "eligible_programs": 0,
+          "errors": []
+        },
+        "scan_results": {
+          "193043": {
+            "error": "",
+            "program_name": "sched_process_e",
+            "sites": {
+              "bitfield_sites": 0,
+              "branch_flip_sites": 0,
+              "cmov_sites": 0,
+              "endian_sites": 0,
+              "lea_sites": 0,
+              "rotate_sites": 0,
+              "total_sites": 0,
+              "wide_sites": 0,
+              "zero_ext_sites": 0
+            },
+            "stderr_tail": "",
+            "stdout_tail": "{\"program\":{\"name\":\"sched_process_e\",\"insn_cnt\":33,\"prog_tag\":\"afe1b01453072a6e\"},\"summary\":{\"total_sites\":0,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"extract_sites\":0,\"bitfield_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0},\"sites\":[]}\n"
+          }
+        },
+        "site_totals": {
+          "cmov_sites": 0,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 0,
+          "wide_sites": 0
+        },
+        "status": "ok"
+      },
+      "description": "tracepoint sched_process_exec counter",
+      "name": "exec_trace",
+      "rejit": {
+        "measurement": null,
+        "phase": "rejit",
+        "policy_matches": {},
+        "policy_summary": {
+          "configured_programs": 0,
+          "fallback_programs": 1
+        },
+        "process": {
+          "returncode": 0,
+          "stderr_tail": "",
+          "stdout_tail": "@[which]: 1\n@[bash]: 1\n@[bpf-jit-scanner]: 1\n@[ps]: 1\n@[cpuUsage.sh]: 1\n@[python3]: 1\n@[sed]: 1\n@[sleep]: 1\n@[bpftool]: 3\n@[sh]: 3\n@[base64]: 6\n@[cat]: 37"
+        },
+        "prog_ids": [
+          193091
+        ],
+        "programs": [
+          {
+            "btf_id": 322134,
+            "bytes_jited": 161,
+            "bytes_memlock": 4096,
+            "bytes_xlated": 264,
+            "gpl_compatible": true,
+            "id": 193091,
+            "jited": true,
+            "loaded_at": 1773357745,
+            "map_ids": [
+              229910
+            ],
+            "name": "tracepoint_sched_sched_process_exec",
+            "orphaned": false,
+            "owner_fds": [
+              {
+                "fd": 9,
+                "pid": 2301490
+              }
+            ],
+            "owner_pids": [
+              2301490
+            ],
+            "pids": [
+              {
+                "comm": "bpftrace",
+                "pid": 2301490
+              }
+            ],
+            "run_cnt": 47,
+            "run_time_ns": 32787,
+            "tag": "afe1b01453072a6e",
+            "type": "tracepoint",
+            "uid": 0
+          }
+        ],
+        "reason": "no eligible directive sites",
+        "recompile_results": {},
+        "recompile_summary": {
+          "applied_programs": 0,
+          "eligible_programs": 0,
+          "errors": []
+        },
+        "scan_results": {
+          "193091": {
+            "error": "",
+            "program_name": "sched_process_e",
+            "sites": {
+              "bitfield_sites": 0,
+              "branch_flip_sites": 0,
+              "cmov_sites": 0,
+              "endian_sites": 0,
+              "lea_sites": 0,
+              "rotate_sites": 0,
+              "total_sites": 0,
+              "wide_sites": 0,
+              "zero_ext_sites": 0
+            },
+            "stderr_tail": "",
+            "stdout_tail": "{\"program\":{\"name\":\"sched_process_e\",\"insn_cnt\":33,\"prog_tag\":\"afe1b01453072a6e\"},\"summary\":{\"total_sites\":0,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"extract_sites\":0,\"bitfield_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0},\"sites\":[]}\n"
+          }
+        },
+        "site_totals": {
+          "cmov_sites": 0,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 0,
+          "wide_sites": 0
+        },
+        "status": "skipped"
+      },
+      "script_path": "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/exec_trace.bt",
+      "script_text": "tracepoint:sched:sched_process_exec\n{\n  @[comm] = count();\n}\n",
+      "summary": {
+        "avg_ns_delta_pct": null,
+        "baseline_status": "ok",
+        "cpu_baseline": 0.0,
+        "cpu_delta_pct": null,
+        "cpu_rejit": null,
+        "name": "exec_trace",
+        "note": "no eligible directive sites",
+        "rejit_avg_ns": null,
+        "rejit_status": "skipped",
+        "sites": 0,
+        "speedup": null,
+        "stock_avg_ns": 542.3327082993641,
+        "workload_ops_baseline": 444844.9071051914,
+        "workload_ops_delta_pct": null,
+        "workload_ops_rejit": null
+      }
+    }
+  ],
+  "runner": "/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec",
+  "scanner": "/home/yunwei37/workspace/bpf-benchmark/scanner/build/bpf-jit-scanner",
+  "selected_scripts": [
+    "exec_trace"
+  ],
+  "smoke": true,
+  "summary": {
+    "baseline_successes": 1,
+    "rejit_successes": 0,
+    "scripts_with_sites": 0,
+    "site_totals": {
+      "cmov_sites": 0,
+      "lea_sites": 0,
+      "rotate_sites": 0,
+      "total_sites": 0,
+      "wide_sites": 0
+    },
+    "speedup_geomean": null
+  },
+  "tool_versions": {
+    "bpftool_path": "/usr/local/sbin/bpftool",
+    "bpftool_version_text": "bpftool v7.7.0\nusing libbpf v1.7\nfeatures: llvm, skeletons",
+    "bpftrace_path": "/usr/bin/bpftrace",
+    "bpftrace_version": [
+      0,
+      20,
+      2
+    ],
+    "bpftrace_version_text": "bpftrace v0.20.2",
+    "curl_path": "/usr/bin/curl",
+    "fio_path": "/usr/bin/fio",
+    "stress_ng_path": "/usr/bin/stress-ng"
+  }
+}

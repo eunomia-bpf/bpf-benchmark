@@ -1,9 +1,9 @@
 # bpftrace Real End-to-End Benchmark
 
-- Generated: `2026-03-11T16:38:36.319564+00:00`
+- Generated: `2026-03-12T23:23:02.030969+00:00`
 - Mode: `full`
-- Duration per phase: `30s`
-- Host kernel: `7.0.0-rc2-g2a6783cc77b6`
+- Duration per phase: `5s`
+- Host kernel: `6.15.11-061511-generic`
 - bpftrace: `bpftrace v0.20.2`
 - bpftool: `bpftool v7.7.0
 using libbpf v1.7
@@ -12,30 +12,24 @@ features: llvm, skeletons`
 
 ## Summary
 
-- Scripts selected: `5`
-- Baseline successes: `5`
-- ReJIT successes: `2`
+- Scripts selected: `2`
+- Baseline successes: `2`
+- ReJIT successes: `0`
 - Eligible-site scripts: `2`
-- Aggregate sites: `9` (cmov=9, wide=0, rotate=0, lea=0)
-- Geomean speedup: `0.992x`
+- Aggregate sites: `12` (cmov=12, wide=0, rotate=0, lea=0)
+- Geomean speedup: `n/a`
 
 ## Per-Script
 
 | Script | Sites | Stock ns | ReJIT ns | Speedup | Ops/s Stock | Ops/s ReJIT | CPU% Stock | CPU% ReJIT | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| open_latency | 5 | 277.17 | 273.77 | 1.012x | 95367.05 | 96082.49 | 0.03 | 0.03 | ok |
-| exec_trace | 0 | 467.11 | n/a | n/a | 198.84 | n/a | 0.00 | n/a | no eligible directive sites |
-| scheduler_latency | 4 | 158.59 | 163.27 | 0.971x | 41.72 | 38.09 | 0.00 | 0.00 | ok |
-| vfs_read_count | 0 | 58.42 | n/a | n/a | 286499.06 | n/a | 0.03 | n/a | no eligible directive sites |
-| tcp_connect | 0 | 305.59 | n/a | n/a | 18.93 | n/a | 0.00 | n/a | no eligible directive sites |
+| open_latency | 6 | 147.87 | n/a | n/a | 39356.29 | n/a | 0.20 | n/a | BPF_PROG_JIT_RECOMPILE did not apply |
+| scheduler_latency | 6 | 123.38 | n/a | n/a | 41.13 | n/a | 0.00 | n/a | BPF_PROG_JIT_RECOMPILE did not apply |
 
 ## Comparison
 
-- open_latency: avg_ns_delta=-1.23%, ops_delta=0.75%, cpu_delta=0.00%
-- exec_trace: avg_ns_delta=n/a%, ops_delta=n/a%, cpu_delta=n/a%
-- scheduler_latency: avg_ns_delta=2.95%, ops_delta=-8.70%, cpu_delta=n/a%
-- vfs_read_count: avg_ns_delta=n/a%, ops_delta=n/a%, cpu_delta=n/a%
-- tcp_connect: avg_ns_delta=n/a%, ops_delta=n/a%, cpu_delta=n/a%
+- open_latency: avg_ns_delta=n/a%, ops_delta=n/a%, cpu_delta=n/a%
+- scheduler_latency: avg_ns_delta=n/a%, ops_delta=n/a%, cpu_delta=n/a%
 
 ## Notes
 
