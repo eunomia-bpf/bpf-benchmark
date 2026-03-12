@@ -15,40 +15,23 @@ enum class V5PolicyAction {
     Skip,
 };
 
-enum class V5PolicySelectionMode {
-    Allowlist,
-    Denylist,
-};
-
-enum class V5PolicySchema {
-    LegacyV1,
-    PerSiteV2,
-};
-
-struct V5PolicySelection {
-    V5PolicySelectionMode mode = V5PolicySelectionMode::Allowlist;
-    std::vector<V5Family> families;
-};
-
 struct V5PolicySite {
     uint32_t insn = 0;
     V5Family family = V5Family::Cmov;
     V5PolicyAction action = V5PolicyAction::Apply;
 };
 
-struct V5PolicySiteOverride {
-    std::string site_id;
-    bool enabled = true;
+struct V5PolicyFamilyAction {
+    V5Family family = V5Family::Cmov;
+    V5PolicyAction action = V5PolicyAction::Apply;
 };
 
 struct V5PolicyConfig {
-    uint32_t version = 1;
-    V5PolicySchema schema = V5PolicySchema::LegacyV1;
+    uint32_t version = 2;
     std::string program;
     V5PolicyAction default_action = V5PolicyAction::Skip;
-    V5PolicySelection selection;
+    std::vector<V5PolicyFamilyAction> families;
     std::vector<V5PolicySite> sites;
-    std::vector<V5PolicySiteOverride> site_overrides;
 };
 
 struct V5PolicyFilterResult {

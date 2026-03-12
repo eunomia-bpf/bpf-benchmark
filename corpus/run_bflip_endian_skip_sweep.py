@@ -42,7 +42,13 @@ try:
         run_text_command,
     )
     from common import build_run_kernel_command
-    from policy_utils import POLICY_DIR, policy_path_for_object, policy_path_for_program
+    from policy_utils import (
+        POLICY_DIR,
+        PolicyDocumentV2,
+        parse_policy_v2,
+        policy_path_for_program,
+        render_policy_v2_text,
+    )
 except ImportError:
     from corpus._driver_impl_run_corpus_v5_vm_batch import (
         DEFAULT_BTF_PATH,
@@ -57,7 +63,13 @@ except ImportError:
         run_text_command,
     )
     from corpus.common import build_run_kernel_command
-    from corpus.policy_utils import POLICY_DIR, policy_path_for_object, policy_path_for_program
+    from corpus.policy_utils import (
+        POLICY_DIR,
+        PolicyDocumentV2,
+        parse_policy_v2,
+        policy_path_for_program,
+        render_policy_v2_text,
+    )
 
 
 SELF_RELATIVE = Path(__file__).resolve().relative_to(ROOT_DIR)
@@ -81,23 +93,6 @@ RECOMPILE_SITE_FIELDS = (
     ("endian", "endian_sites"),
     ("branch-flip", "branch_flip_sites"),
 )
-V1_TO_V2_FAMILY = {
-    "cmov": "cmov",
-    "wide": "wide",
-    "wide_mem": "wide",
-    "rotate": "rotate",
-    "lea": "lea",
-    "extract": "extract",
-    "bitfield-extract": "extract",
-    "bitfield_extract": "extract",
-    "zero-ext": "zero-ext",
-    "zeroext": "zero-ext",
-    "zero_ext": "zero-ext",
-    "endian": "endian",
-    "bflip": "branch-flip",
-    "branch-flip": "branch-flip",
-    "branch_flip": "branch-flip",
-}
 SCANNER_FLAGS = {
     "cmov": "--cmov",
     "wide": "--wide-mem",
@@ -208,9 +203,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--no-preserve-object-skips",
         action="store_true",
         help=(
-            "Do not carry forward existing object-level skip families into the "
-            "per-program v2 policies. The default preserves them so the sweep "
-            "isolates branch-flip/endian changes against the current tuned policy."
+            "Do not start the generated sweep policies from the existing per-program "
+            "version 2 policy. The default preserves the current tuned decisions and "
+            "then adds branch-flip/endian skips on top."
         ),
     )
     return parser.parse_args(argv)
@@ -366,28 +361,19 @@ def collect_guest_info(args: argparse.Namespace) -> dict[str, Any]:
     }
 
 
-def load_skip_families_from_object_policy(
+def effective_default_action(default_action: str) -> str:
+    return "skip" if default_action == "stock" else default_action
+
+
+def load_program_policy(
     policy_root: Path,
     object_path: Path,
-) -> set[str]:
-    policy_path = policy_path_for_object(object_path, policy_root)
+    program_name: str,
+) -> PolicyDocumentV2 | None:
+    policy_path = policy_path_for_program(object_path, program_name, policy_root)
     if not policy_path.exists():
-        return set()
-    payload = yaml.safe_load(policy_path.read_text())
-    if not isinstance(payload, dict):
-        return set()
-
-    skips: set[str] = set()
-    families = payload.get("families")
-    if isinstance(families, dict):
-        for raw_name, raw_action in families.items():
-            action = str(raw_action or "").strip().lower()
-            if action != "skip":
-                continue
-            mapped = V1_TO_V2_FAMILY.get(str(raw_name).strip().lower())
-            if mapped:
-                skips.add(mapped)
-    return skips
+        return None
+    return parse_policy_v2(policy_path)
 
 
 def dump_guest_xlated(
@@ -472,6 +458,7 @@ def write_skip_policy(
     object_path: Path,
     program_name: str,
     output_path: Path,
+    base_policy: PolicyDocumentV2 | None,
     skip_families: set[str],
 ) -> dict[str, Any]:
     payload = scanner_generate_policy_from_xlated(
@@ -480,33 +467,57 @@ def write_skip_policy(
         program_name=program_name,
         output_path=output_path,
     )
-    payload["version"] = 2
-    payload["program"] = program_name
-    payload["default"] = "apply"
-
     sites = payload.get("sites")
     if not isinstance(sites, list):
         raise RuntimeError(f"policy template missing sites list for {relpath(object_path)}:{program_name}")
 
+    output_default = base_policy.default if base_policy is not None else "apply"
+    baseline_default = effective_default_action(output_default)
+    baseline_actions = (
+        {(site.insn, site.family): site.action for site in base_policy.sites}
+        if base_policy is not None
+        else {}
+    )
+
     site_counts: dict[str, int] = {}
     skip_counts: dict[str, int] = {}
+    rendered_sites: list[dict[str, Any]] = []
     for entry in sites:
         if not isinstance(entry, dict):
             raise RuntimeError(f"invalid site entry in {output_path}")
+        insn = int(entry.get("insn", -1))
         family = str(entry.get("family", "")).strip()
+        if insn < 0 or not family:
+            raise RuntimeError(f"invalid site entry in {output_path}")
         site_counts[family] = site_counts.get(family, 0) + 1
-        action = "skip" if family in skip_families else "apply"
-        entry["action"] = action
+        action = baseline_actions.get((insn, family), baseline_default)
+        if family in skip_families:
+            action = "skip"
         if action == "skip":
             skip_counts[family] = skip_counts.get(family, 0) + 1
+        if action != baseline_default:
+            rendered_sites.append(
+                {
+                    "insn": insn,
+                    "family": family,
+                    "action": action,
+                }
+            )
 
-    with output_path.open("w") as handle:
-        yaml.safe_dump(payload, handle, sort_keys=False)
+    output_path.write_text(
+        render_policy_v2_text(
+            program_name=program_name,
+            default_action=output_default,
+            sites=rendered_sites,
+        )
+    )
     return {
         "policy_path": str(output_path),
         "xlated_path": str(xlated_path),
         "site_count": len(sites),
+        "rendered_site_count": len(rendered_sites),
         "site_counts": site_counts,
+        "default_action": output_default,
         "skip_families": sorted(skip_families),
         "skip_counts": skip_counts,
     }
@@ -707,7 +718,7 @@ def build_markdown(payload: dict[str, Any]) -> str:
         f"- Selected programs: `{len(selected)}` high-confidence Calico regressors (`stock exec_ns >= 100`, tuned ratio `< 1.0x`)",
         f"- VM kernel: `{relpath(payload['kernel_image'])}`",
         f"- Repeat count: `{payload['repeat']}`",
-        f"- Preserve existing object-level skips: `{payload['preserve_object_skips']}`",
+        f"- Preserve existing per-program policy decisions: `{payload['preserve_existing_policy']}`",
         "",
         "## Takeaway",
         "",
@@ -727,7 +738,7 @@ def build_markdown(payload: dict[str, Any]) -> str:
         "",
         "- Round 1 remeasures the existing `corpus/policies/` tuned policy as the same-setup baseline.",
         "- Round 2 and Round 3 use per-program version 2 policies generated from `scanner generate-policy` templates.",
-        "- When `preserve_object_skips=true`, existing object-level skip families (currently CMOV on some Calico objects) are copied into the per-program v2 files so the sweep isolates the branch-flip/endian change instead of silently re-enabling CMOV.",
+        "- When `preserve_existing_policy=true`, Round 2 and Round 3 start from the current per-program v2 policy and then force `branch-flip` / `endian` sites to `skip`.",
         "",
         "## Per-Program Results",
         "",
@@ -828,7 +839,7 @@ def main(argv: list[str] | None = None) -> int:
     btf_custom_path = Path(args.btf_custom_path).resolve()
     output_json = Path(args.output_json).resolve()
     output_md = Path(args.output_md).resolve()
-    preserve_object_skips = not args.no_preserve_object_skips
+    preserve_existing_policy = not args.no_preserve_object_skips
 
     for path, label in (
         (input_json, "input JSON"),
@@ -866,7 +877,7 @@ def main(argv: list[str] | None = None) -> int:
         "timeout_seconds": args.timeout,
         "memory": str(args.memory),
         "cpus": str(args.cpus),
-        "preserve_object_skips": preserve_object_skips,
+        "preserve_existing_policy": preserve_existing_policy,
         "install_policies": not args.no_install,
         "selected_programs": selected,
         "guest_smoke": None,
@@ -906,15 +917,14 @@ def main(argv: list[str] | None = None) -> int:
         for index, item in enumerate(selected, start=1):
             object_path = (ROOT_DIR / item["object_path"]).resolve()
             program_name = item["program_name"]
-            baseline_skips = (
-                load_skip_families_from_object_policy(policy_dir, object_path)
-                if preserve_object_skips
-                else set()
+            current_policy_path = policy_path_for_program(object_path, program_name, policy_dir)
+            base_policy = (
+                load_program_policy(policy_dir, object_path, program_name)
+                if preserve_existing_policy
+                else None
             )
-            round2_skips = set(baseline_skips)
-            round2_skips.add("branch-flip")
-            round3_skips = set(round2_skips)
-            round3_skips.add("endian")
+            round2_skips = {"branch-flip"}
+            round3_skips = {"branch-flip", "endian"}
 
             xlated_path = temp_root / "xlated" / Path(item["object_path"]).name / f"{program_name}.xlated"
             dump_guest_xlated(
@@ -930,6 +940,7 @@ def main(argv: list[str] | None = None) -> int:
                 object_path=object_path,
                 program_name=program_name,
                 output_path=round2_path,
+                base_policy=base_policy,
                 skip_families=round2_skips,
             )
             round3_meta = write_skip_policy(
@@ -938,17 +949,17 @@ def main(argv: list[str] | None = None) -> int:
                 object_path=object_path,
                 program_name=program_name,
                 output_path=round3_path,
+                base_policy=base_policy,
                 skip_families=round3_skips,
             )
             generated_policy_metadata.append(
                 {
                     "key": item["key"],
                     "label": short_program_label(item["object_path"], program_name),
-                    "baseline_object_skips": sorted(baseline_skips),
+                    "source_policy_path": str(current_policy_path) if current_policy_path.exists() else None,
+                    "source_policy_default": base_policy.default if base_policy is not None else None,
                     "relative_policy_path": str(
-                        policy_path_for_program(object_path, program_name, policy_dir)
-                        .resolve()
-                        .relative_to(policy_dir)
+                        current_policy_path.relative_to(policy_dir)
                     ),
                     "round2_policy_path": str(round2_path),
                     "round3_policy_path": str(round3_path),
@@ -958,7 +969,8 @@ def main(argv: list[str] | None = None) -> int:
             )
             print(
                 f"[policy {index}/{len(selected)}] {short_program_label(item['object_path'], program_name)}"
-                f" baseline_skips={sorted(baseline_skips)}",
+                f" source_default={base_policy.default if base_policy is not None else 'apply'}"
+                f" forced_skips={sorted(round3_skips)}",
                 flush=True,
             )
 

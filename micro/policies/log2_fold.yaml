@@ -1,0 +1,6 @@
+version: 2
+program: 'log2_fold_xdp'
+default: apply
+families:
+  cmov: skip
+sites: []

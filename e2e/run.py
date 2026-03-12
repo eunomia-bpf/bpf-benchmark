@@ -86,6 +86,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--xdp-object", default=str(DEFAULT_XDP_OBJECT))
     parser.add_argument("--xdp-program", default="xdp_fwd_fib_full")
     parser.add_argument("--attach-type", choices=("xdp", "xdpgeneric", "xdpdrv"), default="xdp")
+    parser.add_argument("--topology-mode", choices=("veth", "preexisting"), default="veth")
+    parser.add_argument("--source-if")
+    parser.add_argument("--sink-if")
+    parser.add_argument("--router-left-if")
+    parser.add_argument("--router-right-if")
     parser.add_argument("--packet-size", type=int, default=64)
     parser.add_argument("--parallel-streams", type=int, default=4)
     parser.add_argument("--server-port", type=int, default=5201)
@@ -219,6 +224,16 @@ def run_xdp_vm(args: argparse.Namespace) -> int:
         args.xdp_program,
         "--attach-type",
         args.attach_type,
+        "--topology-mode",
+        "preexisting",
+        "--router-left-if",
+        "eth0",
+        "--source-if",
+        "eth1",
+        "--router-right-if",
+        "eth2",
+        "--sink-if",
+        "eth3",
         "--scanner",
         str(Path(args.scanner).resolve()),
         "--bpftool-binary",
@@ -238,7 +253,14 @@ def run_xdp_vm(args: argparse.Namespace) -> int:
         guest_command.extend(["--duration", str(int(args.duration))])
 
     guest_script = write_guest_script([guest_command])
-    completed = run_in_vm(args.kernel, guest_script, args.cpus, args.mem, args.timeout)
+    completed = run_in_vm(
+        args.kernel,
+        guest_script,
+        args.cpus,
+        args.mem,
+        args.timeout,
+        networks=("loop", "loop"),
+    )
     sys.stdout.write(completed.stdout)
     sys.stderr.write(completed.stderr)
     if completed.returncode != 0:

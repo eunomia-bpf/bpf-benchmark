@@ -138,7 +138,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--use-policy",
         action="store_true",
-        help="Prefer corpus/policies/*.policy.yaml for each program/object when present; otherwise fall back to the legacy all-apply recompile path.",
+        help="Prefer per-program version 2 policy files under corpus/policies/ when present; otherwise keep stock JIT.",
+    )
+    parser.add_argument(
+        "--blind-apply",
+        action="store_true",
+        help="Ignore per-program policies and force blind all-apply auto-scan recompile for debugging.",
     )
     parser.add_argument(
         "--policy-dir",
@@ -245,6 +250,7 @@ def build_runner_command(
     *,
     compile_only: bool,
     recompile_v5: bool,
+    recompile_all: bool = False,
     policy_file: Path | None = None,
 ) -> list[str]:
     return build_run_kernel_command(
@@ -257,6 +263,7 @@ def build_runner_command(
         repeat=repeat,
         compile_only=compile_only,
         recompile_v5=recompile_v5,
+        recompile_all=recompile_all,
         policy_file=policy_file,
         btf_custom_path=btf_custom_path,
         use_sudo=True,
@@ -321,6 +328,7 @@ def run_target(
     timeout_seconds: int,
     *,
     use_policy: bool,
+    blind_apply: bool,
     policy_dir: Path,
 ) -> dict[str, Any]:
     object_path = ROOT_DIR / target["object_path"]
@@ -330,6 +338,10 @@ def run_target(
         policy_dir,
         program_name=target["program_name"],
     ) if use_policy else None
+    active_policy_path = None if blind_apply else policy_path
+    recompile_v5 = blind_apply
+    recompile_all = blind_apply
+    policy_mode = "blind-apply-v5" if blind_apply else ("policy-file" if active_policy_path is not None else "stock")
 
     baseline_compile_raw = run_command(
         build_runner_command(
@@ -343,6 +355,7 @@ def run_target(
             1,
             compile_only=True,
             recompile_v5=False,
+            recompile_all=False,
             policy_file=None,
         ),
         timeout_seconds,
@@ -358,8 +371,9 @@ def run_target(
             plan["input_size"],
             1,
             compile_only=True,
-            recompile_v5=policy_path is None,
-            policy_file=policy_path,
+            recompile_v5=recompile_v5,
+            recompile_all=recompile_all,
+            policy_file=active_policy_path,
         ),
         timeout_seconds,
     )
@@ -379,6 +393,7 @@ def run_target(
                 repeat,
                 compile_only=False,
                 recompile_v5=False,
+                recompile_all=False,
                 policy_file=None,
             ),
             timeout_seconds,
@@ -395,8 +410,9 @@ def run_target(
                     plan["input_size"],
                     repeat,
                     compile_only=False,
-                    recompile_v5=policy_path is None,
-                    policy_file=policy_path,
+                    recompile_v5=recompile_v5,
+                    recompile_all=recompile_all,
+                    policy_file=active_policy_path,
                 ),
                 timeout_seconds,
             )
@@ -411,8 +427,8 @@ def run_target(
         "io_mode": plan["io_mode"],
         "input_size": plan["input_size"],
         "memory_path": str(plan["memory_path"]) if plan["memory_path"] is not None else None,
-        "policy_path": str(policy_path) if policy_path is not None else None,
-        "policy_mode": "policy-file" if policy_path is not None else "auto-scan-v5",
+        "policy_path": str(active_policy_path) if active_policy_path is not None else None,
+        "policy_mode": policy_mode,
         "baseline_compile": baseline_compile,
         "v5_compile": v5_compile,
         "baseline_run": baseline_run,
@@ -673,7 +689,9 @@ def build_markdown(data: dict[str, Any]) -> str:
             "- The 40 target programs are the union of the previously measured directive-bearing perf and tracing results from the expanded corpus.",
             "- Baseline and v5 compile-only probes were attempted for all 40 targets on the framework kernel.",
             "- Timed runs were attempted only for the 29 targets that were previously runnable through `bpf_prog_test_run`.",
-            "- `--use-policy` prefers a matching per-program file under `corpus/policies/`, then falls back to object-level legacy policy files, and finally falls back to the legacy auto-scan `--recompile-v5 --recompile-all` path.",
+            "- Default steady-state semantics are stock: without `--use-policy` or `--blind-apply`, the v5 lane does not request recompile.",
+            "- `--use-policy` only considers per-program version 2 policy files under `corpus/policies/`; if no match exists, the driver stays on stock JIT.",
+            "- `--blind-apply` forces the old debug/exploration path with `--recompile-v5 --recompile-all`.",
             "- Guest CO-RE loading uses `--btf-custom-path` pointing at the framework build-tree `vmlinux`, because the guest kernel does not expose `/sys/kernel/btf/vmlinux`.",
             "",
         ]
@@ -684,6 +702,8 @@ def build_markdown(data: dict[str, Any]) -> str:
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     require_minimum(args.repeat, 1, "--repeat")
+    if args.use_policy and args.blind_apply:
+        raise SystemExit("--use-policy cannot be combined with --blind-apply")
 
     runner = Path(args.runner).resolve()
     if not runner.exists():
@@ -737,6 +757,7 @@ def main(argv: list[str] | None = None) -> int:
                 args.repeat,
                 args.timeout,
                 use_policy=args.use_policy,
+                blind_apply=args.blind_apply,
                 policy_dir=policy_dir,
             )
         )
@@ -757,6 +778,7 @@ def main(argv: list[str] | None = None) -> int:
         "tracing_results_json": str(tracing_results_path),
         "repeat": args.repeat,
         "use_policy": args.use_policy,
+        "blind_apply": args.blind_apply,
         "policy_dir": str(policy_dir),
         "summary": summary,
         "programs": records,

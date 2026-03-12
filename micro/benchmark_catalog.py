@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
 import yaml
 
@@ -12,45 +10,6 @@ MICRO_ROOT = Path(__file__).resolve().parent
 REPO_ROOT = MICRO_ROOT.parent
 ROOT_DIR = REPO_ROOT
 CONFIG_PATH = REPO_ROOT / "config" / "micro_pure_jit.yaml"
-
-_POLICY_FAMILY_ALIASES = {
-    "cmov": "cmov",
-    "cond-select": "cmov",
-    "condselect": "cmov",
-    "wide": "wide",
-    "wide-mem": "wide",
-    "widemem": "wide",
-    "wide-load": "wide",
-    "wideload": "wide",
-    "rotate": "rotate",
-    "lea": "lea",
-    "addr-calc": "lea",
-    "addrcalc": "lea",
-    "extract": "extract",
-    "bitfield-extract": "extract",
-    "bitfieldextract": "extract",
-    "zero-ext": "zero-ext",
-    "zeroext": "zero-ext",
-    "zero-ext-elide": "zero-ext",
-    "zeroextelide": "zero-ext",
-    "endian": "endian",
-    "endian-fusion": "endian",
-    "endianfusion": "endian",
-    "branch-flip": "branch-flip",
-    "branchflip": "branch-flip",
-    "bflip": "branch-flip",
-}
-
-_POLICY_ACTION_ALIASES = {
-    "apply": "apply",
-    "enable": "apply",
-    "enabled": "apply",
-    "keep": "apply",
-    "skip": "skip",
-    "disable": "skip",
-    "disabled": "skip",
-    "drop": "skip",
-}
 
 
 def _manifest_root(path: Path) -> Path:
@@ -120,24 +79,6 @@ class BenchmarkSpec:
     def program_object(self) -> Path:
         return self.program_dir / f"{self.base_name}.bpf.o"
 
-    @property
-    def inline_policy_text(self) -> str | None:
-        if self.policy is None:
-            return None
-        skipped = [
-            family
-            for family, action in self.policy.items()
-            if action == "skip"
-        ]
-        config = {
-            "version": 1,
-            "selection": {
-                "mode": "denylist",
-                "families": skipped,
-            },
-        }
-        return json.dumps(config, sort_keys=True)
-
 
 @dataclass(frozen=True)
 class SuiteSpec:
@@ -165,48 +106,12 @@ def _load_commands(raw_commands: dict[str, list[str]]) -> dict[str, tuple[str, .
     return {name: tuple(command) for name, command in raw_commands.items()}
 
 
-def _canonical_policy_token(value: str) -> str:
-    token = []
-    for ch in value.strip():
-        if ch.isalnum():
-            token.append(ch.lower())
-        elif ch in {"-", "_"}:
-            token.append("-")
-    return "".join(token)
-
-
-def _load_inline_policy(raw_policy: Any, benchmark_name: str) -> dict[str, str] | None:
+def _reject_inline_policy(raw_policy: object, benchmark_name: str) -> None:
     if raw_policy is None:
-        return None
-    if not isinstance(raw_policy, dict):
-        raise ValueError(f"benchmark {benchmark_name}: policy must be a mapping")
-
-    normalized: dict[str, str] = {}
-    for raw_family, raw_action in raw_policy.items():
-        if not isinstance(raw_family, str):
-            raise ValueError(f"benchmark {benchmark_name}: policy family names must be strings")
-
-        family_token = _canonical_policy_token(raw_family)
-        family = _POLICY_FAMILY_ALIASES.get(family_token)
-        if family is None:
-            raise ValueError(
-                f"benchmark {benchmark_name}: unknown policy family '{raw_family}'"
-            )
-
-        if isinstance(raw_action, bool):
-            action = "apply" if raw_action else "skip"
-        else:
-            action_token = _canonical_policy_token(str(raw_action))
-            action = _POLICY_ACTION_ALIASES.get(action_token)
-            if action is None:
-                raise ValueError(
-                    f"benchmark {benchmark_name}: unknown policy action '{raw_action}' "
-                    "(expected apply/skip)"
-                )
-
-        normalized[family] = action
-
-    return normalized
+        return
+    raise ValueError(
+        f"benchmark {benchmark_name}: inline 'policy' is no longer supported; use policy_file"
+    )
 
 
 def load_suite(path: Path = CONFIG_PATH) -> SuiteSpec:
@@ -259,9 +164,12 @@ def load_suite(path: Path = CONFIG_PATH) -> SuiteSpec:
         for alias in runtime.aliases:
             runtime_aliases[alias] = runtime.name
 
-    benchmarks = {
-        benchmark_data["name"]: BenchmarkSpec(
-            name=benchmark_data["name"],
+    benchmarks: dict[str, BenchmarkSpec] = {}
+    for benchmark_data in data["benchmarks"]:
+        benchmark_name = benchmark_data["name"]
+        _reject_inline_policy(benchmark_data.get("policy"), benchmark_name)
+        benchmarks[benchmark_name] = BenchmarkSpec(
+            name=benchmark_name,
             description=benchmark_data["description"],
             category=benchmark_data["category"],
             base_name=benchmark_data["base_name"],
@@ -274,14 +182,9 @@ def load_suite(path: Path = CONFIG_PATH) -> SuiteSpec:
             input_generator=benchmark_data.get("input_generator"),
             tags=tuple(benchmark_data.get("tags", ())),
             expected_result=benchmark_data.get("expected_result"),
-            policy=_load_inline_policy(
-                benchmark_data.get("policy"),
-                benchmark_data["name"],
-            ),
+            policy=None,
             policy_file=_resolve_path(benchmark_data.get("policy_file"), root_dir),
         )
-        for benchmark_data in data["benchmarks"]
-    }
 
     return SuiteSpec(
         suite_name=str(data.get("suite_name", manifest_path.stem)),

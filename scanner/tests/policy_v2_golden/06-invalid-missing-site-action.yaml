@@ -1,0 +1,6 @@
+version: 2
+program: mixed-demo
+default: skip
+sites:
+  - insn: 0
+    family: cmov

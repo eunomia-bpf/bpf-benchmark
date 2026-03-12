@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import sys
 import time
+import traceback
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -46,6 +47,7 @@ DEFAULT_XDP_OBJECT = ROOT_DIR / "corpus" / "build" / "xdp-tools" / "xdp_forward.
 DEFAULT_SCANNER = ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"
 DEFAULT_PROGRAM_NAME = "xdp_fwd_fib_full"
 DEFAULT_ATTACH_TYPE = "xdp"
+DEFAULT_TOPOLOGY_MODE = "veth"
 DEFAULT_BPFTOOL = "/usr/local/sbin/bpftool"
 DEFAULT_DURATION_S = 20
 DEFAULT_SMOKE_DURATION_S = 5
@@ -91,16 +93,22 @@ def unique_suffix() -> str:
     return f"{os.getpid():x}"[-4:].rjust(4, "0")
 
 
-def build_topology() -> Topology:
+def build_topology(
+    *,
+    source_if: str | None = None,
+    sink_if: str | None = None,
+    router_left_if: str | None = None,
+    router_right_if: str | None = None,
+) -> Topology:
     suffix = unique_suffix()
     return Topology(
         run_id=f"xdp-fwd-{suffix}",
         source_ns=f"xdp-src-{suffix}",
         sink_ns=f"xdp-dst-{suffix}",
-        source_if=f"xfs{suffix}",
-        sink_if=f"xfd{suffix}",
-        router_left_if=f"xfrl{suffix}",
-        router_right_if=f"xfrr{suffix}",
+        source_if=source_if or f"xfs{suffix}",
+        sink_if=sink_if or f"xfd{suffix}",
+        router_left_if=router_left_if or f"xfrl{suffix}",
+        router_right_if=router_right_if or f"xfrr{suffix}",
         source_ip="10.201.0.2/24",
         source_gateway="10.201.0.1",
         router_left_ip="10.201.0.1/24",
@@ -136,10 +144,9 @@ def render_hex_u32(value: int) -> list[str]:
 
 
 def ip_link_details(device: str, *, netns: str | None = None) -> dict[str, object]:
-    command = ["ip"]
+    command = ["ip", "-j", "link", "show", "dev", device]
     if netns:
-        command.extend(["netns", "exec", netns])
-    command.extend(["-j", "link", "show", "dev", device])
+        command = ["ip", "netns", "exec", netns, *command]
     payload = run_json_command(command, timeout=15)
     if not isinstance(payload, list) or not payload or not isinstance(payload[0], dict):
         raise RuntimeError(f"unexpected ip link payload for {device}")
@@ -237,6 +244,7 @@ def probe_tools(bpftool_binary: str | None = None) -> dict[str, object]:
         "ip": which("ip"),
         "bpftool": resolved_bpftool,
         "iperf3": which("iperf3"),
+        "nping": which("nping"),
         "ping": which("ping"),
         "sysctl": which("sysctl"),
     }
@@ -264,12 +272,14 @@ class XdpForwardingSession:
         self,
         *,
         topology: Topology,
+        topology_mode: str,
         object_path: Path,
         program_name: str,
         attach_type: str,
         bpftool_binary: str,
     ) -> None:
         self.topology = topology
+        self.topology_mode = topology_mode
         self.object_path = object_path
         self.program_name = program_name
         self.attach_type = attach_type
@@ -283,10 +293,14 @@ class XdpForwardingSession:
         self.original_sysctls: dict[tuple[str | None, str], str] = {}
 
     def __enter__(self) -> "XdpForwardingSession":
-        self.create_topology()
-        self.configure_router()
-        self.load_program()
-        self.attach_program()
+        try:
+            self.create_topology()
+            self.configure_router()
+            self.load_program()
+            self.attach_program()
+        except Exception:
+            self.cleanup()
+            raise
         return self
 
     def __exit__(self, exc_type, exc, tb) -> None:
@@ -304,53 +318,19 @@ class XdpForwardingSession:
     def create_topology(self) -> None:
         run_command(["ip", "netns", "add", self.topology.source_ns], timeout=20)
         run_command(["ip", "netns", "add", self.topology.sink_ns], timeout=20)
-
-        run_command(
-            [
-                "ip",
-                "link",
-                "add",
-                self.topology.router_left_if,
-                "type",
-                "veth",
-                "peer",
-                "name",
-                self.topology.source_if,
-            ],
-            timeout=20,
-        )
-        run_command(
-            [
-                "ip",
-                "link",
-                "add",
-                self.topology.router_right_if,
-                "type",
-                "veth",
-                "peer",
-                "name",
-                self.topology.sink_if,
-            ],
-            timeout=20,
-        )
-
-        run_command(
-            ["ip", "link", "set", self.topology.source_if, "netns", self.topology.source_ns],
-            timeout=20,
-        )
-        run_command(
-            ["ip", "link", "set", self.topology.sink_if, "netns", self.topology.sink_ns],
-            timeout=20,
-        )
+        if self.topology_mode == "preexisting":
+            self._prepare_preexisting_topology()
+        else:
+            self._create_veth_topology()
 
         run_command(["ip", "link", "set", "dev", self.topology.router_left_if, "up"], timeout=20)
         run_command(["ip", "link", "set", "dev", self.topology.router_right_if, "up"], timeout=20)
         run_command(
-            ["ip", "addr", "add", self.topology.router_left_ip, "dev", self.topology.router_left_if],
+            ["ip", "addr", "replace", self.topology.router_left_ip, "dev", self.topology.router_left_if],
             timeout=20,
         )
         run_command(
-            ["ip", "addr", "add", self.topology.router_right_ip, "dev", self.topology.router_right_if],
+            ["ip", "addr", "replace", self.topology.router_right_ip, "dev", self.topology.router_right_if],
             timeout=20,
         )
 
@@ -395,7 +375,7 @@ class XdpForwardingSession:
                 self.topology.source_ns,
                 "ip",
                 "addr",
-                "add",
+                "replace",
                 self.topology.source_ip,
                 "dev",
                 self.topology.source_if,
@@ -410,7 +390,7 @@ class XdpForwardingSession:
                 self.topology.sink_ns,
                 "ip",
                 "addr",
-                "add",
+                "replace",
                 self.topology.sink_ip,
                 "dev",
                 self.topology.sink_if,
@@ -449,6 +429,66 @@ class XdpForwardingSession:
                 "dev",
                 self.topology.sink_if,
             ],
+            timeout=20,
+        )
+
+    def _create_veth_topology(self) -> None:
+        run_command(
+            [
+                "ip",
+                "link",
+                "add",
+                self.topology.router_left_if,
+                "type",
+                "veth",
+                "peer",
+                "name",
+                self.topology.source_if,
+            ],
+            timeout=20,
+        )
+        run_command(
+            [
+                "ip",
+                "link",
+                "add",
+                self.topology.router_right_if,
+                "type",
+                "veth",
+                "peer",
+                "name",
+                self.topology.sink_if,
+            ],
+            timeout=20,
+        )
+        run_command(
+            ["ip", "link", "set", self.topology.source_if, "netns", self.topology.source_ns],
+            timeout=20,
+        )
+        run_command(
+            ["ip", "link", "set", self.topology.sink_if, "netns", self.topology.sink_ns],
+            timeout=20,
+        )
+
+    def _prepare_preexisting_topology(self) -> None:
+        for device in (
+            self.topology.router_left_if,
+            self.topology.source_if,
+            self.topology.router_right_if,
+            self.topology.sink_if,
+        ):
+            try:
+                ip_link_details(device)
+            except Exception as exc:
+                raise RuntimeError(
+                    f"preexisting topology requires root-netns interface {device!r}, but it was not found"
+                ) from exc
+        run_command(
+            ["ip", "link", "set", self.topology.source_if, "netns", self.topology.source_ns],
+            timeout=20,
+        )
+        run_command(
+            ["ip", "link", "set", self.topology.sink_if, "netns", self.topology.sink_ns],
             timeout=20,
         )
 
@@ -640,10 +680,19 @@ class XdpForwardingSession:
                 check=False,
                 timeout=15,
             )
-        run_command(["ip", "link", "del", self.topology.router_left_if], check=False, timeout=15)
-        run_command(["ip", "link", "del", self.topology.router_right_if], check=False, timeout=15)
+        if self.topology_mode == "preexisting":
+            for device in (self.topology.router_left_if, self.topology.router_right_if):
+                run_command(["ip", "addr", "flush", "dev", device], check=False, timeout=15)
+                run_command(["ip", "link", "set", "dev", device, "down"], check=False, timeout=15)
+        else:
+            run_command(["ip", "link", "del", self.topology.router_left_if], check=False, timeout=15)
+            run_command(["ip", "link", "del", self.topology.router_right_if], check=False, timeout=15)
         run_command(["ip", "netns", "del", self.topology.source_ns], check=False, timeout=15)
         run_command(["ip", "netns", "del", self.topology.sink_ns], check=False, timeout=15)
+        if self.topology_mode == "preexisting":
+            for device in (self.topology.source_if, self.topology.sink_if):
+                run_command(["ip", "addr", "flush", "dev", device], check=False, timeout=15)
+                run_command(["ip", "link", "set", "dev", device, "down"], check=False, timeout=15)
         for (netns, key), value in reversed(list(self.original_sysctls.items())):
             try:
                 sysctl_set(key, value, netns=netns)
@@ -832,9 +881,15 @@ def compare_phases(baseline: Mapping[str, object] | None, post: Mapping[str, obj
     return {
         "baseline_receiver_pps": baseline_pps,
         "post_rejit_receiver_pps": post_pps,
+        "receiver_pps_speedup_ratio": (float(post_pps) / float(baseline_pps))
+        if baseline_pps not in (None, 0) and post_pps is not None
+        else None,
         "receiver_pps_delta_pct": percent_delta(baseline_pps, post_pps),
         "baseline_receiver_bps": baseline_bps,
         "post_rejit_receiver_bps": post_bps,
+        "receiver_bps_speedup_ratio": (float(post_bps) / float(baseline_bps))
+        if baseline_bps not in (None, 0) and post_bps is not None
+        else None,
         "receiver_bps_delta_pct": percent_delta(baseline_bps, post_bps),
     }
 
@@ -845,9 +900,11 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         "",
         f"- Generated at: `{payload.get('generated_at', 'unknown')}`",
         f"- Mode: `{payload.get('mode', 'unknown')}`",
+        f"- Status: `{payload.get('status', 'unknown')}`",
         f"- XDP object: `{payload.get('xdp_object', 'unknown')}`",
         f"- Program: `{payload.get('xdp_program', 'unknown')}`",
         f"- Attach type: `{payload.get('attach_type', 'unknown')}`",
+        f"- Topology mode: `{payload.get('topology_mode', 'unknown')}`",
         f"- Duration: `{payload.get('duration_s', 'unknown')}` s",
     ]
     comparison = payload.get("comparison")
@@ -860,6 +917,17 @@ def build_markdown(payload: Mapping[str, object]) -> str:
                 f"- Baseline receiver PPS: `{comparison.get('baseline_receiver_pps')}`",
                 f"- Post-ReJIT receiver PPS: `{comparison.get('post_rejit_receiver_pps')}`",
                 f"- Improvement: `{comparison.get('receiver_pps_delta_pct')}` %",
+            ]
+        )
+    failure = payload.get("failure")
+    if isinstance(failure, Mapping):
+        lines.extend(
+            [
+                "",
+                "## Failure",
+                "",
+                f"- Type: `{failure.get('type', 'unknown')}`",
+                f"- Message: `{failure.get('message', 'unknown')}`",
             ]
         )
     limitations = payload.get("limitations")
@@ -882,6 +950,11 @@ def build_case_parser() -> argparse.ArgumentParser:
     parser.add_argument("--xdp-object", default=str(DEFAULT_XDP_OBJECT))
     parser.add_argument("--xdp-program", default=DEFAULT_PROGRAM_NAME)
     parser.add_argument("--attach-type", choices=("xdp", "xdpgeneric", "xdpdrv"), default=DEFAULT_ATTACH_TYPE)
+    parser.add_argument("--topology-mode", choices=("veth", "preexisting"), default=DEFAULT_TOPOLOGY_MODE)
+    parser.add_argument("--source-if")
+    parser.add_argument("--sink-if")
+    parser.add_argument("--router-left-if")
+    parser.add_argument("--router-right-if")
     parser.add_argument("--scanner", default=str(DEFAULT_SCANNER))
     parser.add_argument("--bpftool-binary", default=DEFAULT_BPFTOOL)
     parser.add_argument("--duration", type=int)
@@ -923,6 +996,10 @@ def dry_run_payload(
         notes.append("The default XDP forwarding object is missing.")
     if not scanner_binary.exists():
         notes.append("The scanner binary is missing; recompile cannot run.")
+    if args.topology_mode == "preexisting":
+        notes.append(
+            "The preexisting topology mode expects four pre-provisioned interfaces (for example, eth0/eth1/eth2/eth3 from two `vng --network loop` pairs)."
+        )
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "mode": "dry-run",
@@ -931,6 +1008,7 @@ def dry_run_payload(
         "xdp_object": str(object_path),
         "xdp_program": args.xdp_program,
         "attach_type": args.attach_type,
+        "topology_mode": args.topology_mode,
         "packet_size": int(args.packet_size),
         "parallel_streams": int(args.parallel_streams),
         "server_port": int(args.server_port),
@@ -941,17 +1019,44 @@ def dry_run_payload(
         "topology_plan": asdict(topology),
         "policy_matches": {str(key): value for key, value in policy_files.items()},
         "notes": notes,
-        "setup_requirements": [
-            "Run inside a framework-kernel virtme-ng guest for actual BPF_PROG_JIT_RECOMPILE measurements.",
-            "The guest needs `ip`, `bpftool`, `iperf3`, and the built `scanner/build/bpf-jit-scanner`.",
-            "The case creates two netns endpoints plus two router-side veth interfaces, enables IPv4 forwarding, pins the XDP object under /sys/fs/bpf, and updates the xdp_tx_ports devmap.",
-        ],
+        "setup_requirements": (
+            [
+                "Run inside a framework-kernel virtme-ng guest for actual BPF_PROG_JIT_RECOMPILE measurements.",
+                "Launch the guest with two `vng --network loop` links (or another four-interface topology) before using `--topology-mode preexisting`.",
+                "The case moves the endpoint interfaces into two netns instances, configures the remaining two interfaces as the root router, enables IPv4 forwarding, pins the XDP object under /sys/fs/bpf, and updates the xdp_tx_ports devmap.",
+            ]
+            if args.topology_mode == "preexisting"
+            else [
+                "Run inside a framework-kernel virtme-ng guest for actual BPF_PROG_JIT_RECOMPILE measurements.",
+                "The guest needs `ip`, `bpftool`, `iperf3`, and the built `scanner/build/bpf-jit-scanner`.",
+                "The case creates two netns endpoints plus two router-side veth interfaces, enables IPv4 forwarding, pins the XDP object under /sys/fs/bpf, and updates the xdp_tx_ports devmap.",
+            ]
+        ),
     }
 
 
 def run_xdp_forwarding_case(args: argparse.Namespace) -> dict[str, object]:
     duration_s = int(args.duration or (DEFAULT_SMOKE_DURATION_S if args.smoke else DEFAULT_DURATION_S))
-    topology = build_topology()
+    topology_mode = str(args.topology_mode)
+    if topology_mode == "preexisting":
+        missing = [
+            option
+            for option, value in (
+                ("--source-if", args.source_if),
+                ("--sink-if", args.sink_if),
+                ("--router-left-if", args.router_left_if),
+                ("--router-right-if", args.router_right_if),
+            )
+            if not value
+        ]
+        if missing:
+            raise RuntimeError(f"preexisting topology mode requires {', '.join(missing)}")
+    topology = build_topology(
+        source_if=args.source_if,
+        sink_if=args.sink_if,
+        router_left_if=args.router_left_if,
+        router_right_if=args.router_right_if,
+    )
     object_path = Path(args.xdp_object).resolve()
     scanner_binary = Path(args.scanner).resolve()
     bpftool_binary = (
@@ -982,49 +1087,36 @@ def run_xdp_forwarding_case(args: argparse.Namespace) -> dict[str, object]:
     recompile_results: dict[int, dict[str, object]] = {}
     session_snapshot: dict[str, object] = {}
     policy_matches: dict[int, str] = {}
+    failure: dict[str, object] | None = None
 
-    with enable_bpf_stats():
-        with XdpForwardingSession(
-            topology=topology,
-            object_path=object_path,
-            program_name=args.xdp_program,
-            attach_type=args.attach_type,
-            bpftool_binary=bpftool_binary,
-        ) as session:
-            session_snapshot = session.snapshot()
-            prog_ids = [session.program_id]
-            policy_matches = resolve_policy_files(
-                [
-                    PolicyTarget(
-                        prog_id=session.program_id,
-                        object_path=object_path,
-                        program_name=str(session.program_info.get("name", args.xdp_program)),
-                    )
-                ]
-            )
-            baseline = run_phase(
-                "stock",
-                topology,
-                prog_ids,
-                duration_s=duration_s,
-                packet_size=int(args.packet_size),
-                parallel_streams=int(args.parallel_streams),
-                port=int(args.server_port),
-            )
-            scan_results = scan_programs(prog_ids, scanner_binary)
-            recompile_results = apply_recompile(
-                prog_ids,
-                scanner_binary,
-                policy_files=policy_matches,
-            )
-            applied = sum(1 for record in recompile_results.values() if record.get("applied"))
-            if applied == 0:
-                limitations.append(
-                    "BPF_PROG_JIT_RECOMPILE did not apply on this kernel; the post-ReJIT PPS phase was skipped."
+    if topology_mode == "preexisting":
+        limitations.append(
+            "This VM run used pre-provisioned virtio loop NIC pairs instead of guest-created veth pairs because the framework kernel is built without veth support (`CONFIG_VETH` is not set in `vendor/linux-framework/.config`)."
+        )
+
+    try:
+        with enable_bpf_stats():
+            with XdpForwardingSession(
+                topology=topology,
+                topology_mode=topology_mode,
+                object_path=object_path,
+                program_name=args.xdp_program,
+                attach_type=args.attach_type,
+                bpftool_binary=bpftool_binary,
+            ) as session:
+                session_snapshot = session.snapshot()
+                prog_ids = [session.program_id]
+                policy_matches = resolve_policy_files(
+                    [
+                        PolicyTarget(
+                            prog_id=session.program_id,
+                            object_path=object_path,
+                            program_name=str(session.program_info.get("name", args.xdp_program)),
+                        )
+                    ]
                 )
-            else:
-                post = run_phase(
-                    "bpfrejit",
+                baseline = run_phase(
+                    "stock",
                     topology,
                     prog_ids,
                     duration_s=duration_s,
@@ -1032,20 +1124,53 @@ def run_xdp_forwarding_case(args: argparse.Namespace) -> dict[str, object]:
                     parallel_streams=int(args.parallel_streams),
                     port=int(args.server_port),
                 )
+                scan_results = scan_programs(prog_ids, scanner_binary)
+                recompile_results = apply_recompile(
+                    prog_ids,
+                    scanner_binary,
+                    policy_files=policy_matches,
+                )
+                applied = sum(1 for record in recompile_results.values() if record.get("applied"))
+                if applied == 0:
+                    limitations.append(
+                        "BPF_PROG_JIT_RECOMPILE did not apply on this kernel; the post-ReJIT PPS phase was skipped."
+                    )
+                else:
+                    post = run_phase(
+                        "bpfrejit",
+                        topology,
+                        prog_ids,
+                        duration_s=duration_s,
+                        packet_size=int(args.packet_size),
+                        parallel_streams=int(args.parallel_streams),
+                        port=int(args.server_port),
+                    )
+    except Exception as exc:
+        failure = {
+            "type": exc.__class__.__name__,
+            "message": str(exc),
+            "traceback_tail": tail_text(traceback.format_exc(), max_lines=40, max_chars=12000),
+        }
+        limitations.append(f"Live XDP forwarding benchmark failed: {exc}")
 
+    status = "failed" if failure else ("partial" if baseline is None or post is None else "ok")
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "mode": "xdp_forwarding",
+        "status": status,
         "smoke": bool(args.smoke),
         "duration_s": duration_s,
         "xdp_object": str(object_path),
         "xdp_program": args.xdp_program,
         "attach_type": args.attach_type,
+        "topology_mode": topology_mode,
         "packet_size": int(args.packet_size),
         "parallel_streams": int(args.parallel_streams),
         "server_port": int(args.server_port),
         "host": host_metadata(),
         "tooling": dict(tools),
+        "scanner": str(scanner_binary),
+        "bpftool_binary": bpftool_binary,
         "session": session_snapshot,
         "baseline": baseline,
         "policy_matches": {str(key): value for key, value in policy_matches.items()},
@@ -1053,6 +1178,7 @@ def run_xdp_forwarding_case(args: argparse.Namespace) -> dict[str, object]:
         "recompile_results": {str(key): value for key, value in recompile_results.items()},
         "post_rejit": post,
         "comparison": compare_phases(baseline, post),
+        "failure": failure,
         "limitations": limitations,
     }
     return payload

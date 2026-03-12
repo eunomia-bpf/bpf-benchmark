@@ -108,6 +108,8 @@ DEFAULT_KERNEL_IMAGE = DEFAULT_KERNEL_TREE / "arch" / "x86" / "boot" / "bzImage"
 DEFAULT_BTF_PATH = DEFAULT_KERNEL_TREE / "vmlinux"
 DEFAULT_HOST_BTF_PATH = Path("/sys/kernel/btf/vmlinux")
 DEFAULT_VNG = "vng"
+DEFAULT_VNG_MEMORY = "4G"
+DEFAULT_VNG_CPUS = "2"
 DEFAULT_REPEAT = 200
 DEFAULT_TIMEOUT_SECONDS = 240
 DEFAULT_BUILD_TIMEOUT_SECONDS = 3600
@@ -194,6 +196,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Comma-separated recompile families to skip from the auto-generated v5 policy blob. Supported: cmov, wide, rotate, lea, extract, zero-ext, endian, branch-flip.",
     )
     parser.add_argument(
+        "--blind-apply",
+        action="store_true",
+        help="Ignore per-program policies and force blind all-apply auto-scan recompile for debugging.",
+    )
+    parser.add_argument(
         "--force-host-fallback",
         action="store_true",
         help="Skip VM execution and run host compile-only + scanner fallback directly.",
@@ -201,7 +208,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--use-policy",
         action="store_true",
-        help="Prefer corpus/policies/*.policy.yaml for each program/object when present; otherwise fall back to the legacy auto-scan recompile path.",
+        help="Prefer per-program version 2 policy files under corpus/policies/ when present; otherwise keep stock JIT.",
     )
     parser.add_argument(
         "--policy-dir",
@@ -349,6 +356,7 @@ def build_runner_command(
     compile_only: bool,
     recompile_v5: bool,
     skip_families: list[str],
+    recompile_all: bool = False,
     policy_file: Path | None = None,
     dump_xlated: Path | None = None,
     use_sudo: bool = False,
@@ -363,6 +371,7 @@ def build_runner_command(
         repeat=repeat,
         compile_only=compile_only,
         recompile_v5=recompile_v5,
+        recompile_all=recompile_all,
         skip_families=skip_families,
         policy_file=policy_file,
         dump_xlated=dump_xlated,
@@ -455,8 +464,8 @@ def build_empty_record(target: dict[str, Any], execution_mode: str) -> dict[str,
     return {
         **target,
         "execution_mode": execution_mode,
-        "policy_path": None,
-        "policy_mode": "auto-scan-v5",
+        "policy_path": target.get("policy_path"),
+        "policy_mode": str(target.get("policy_mode", "stock")),
         "scan_source": "inventory",
         "scanner_counts": normalize_scan(target.get("inventory_scan")),
         "scanner_cli": None,
@@ -493,6 +502,7 @@ def run_target_locally(
     enable_exec: bool,
     skip_families: list[str],
     use_policy: bool,
+    blind_apply: bool,
     policy_dir: Path,
 ) -> dict[str, Any]:
     record = build_empty_record(target, execution_mode)
@@ -503,6 +513,10 @@ def run_target_locally(
         policy_dir,
         program_name=target["program_name"],
     ) if use_policy else None
+    active_policy_path = None if blind_apply else policy_path
+    recompile_v5 = blind_apply
+    recompile_all = blind_apply
+    policy_mode = "blind-apply-v5" if blind_apply else ("policy-file" if active_policy_path is not None else "stock")
     inventory_scan = normalize_scan(target.get("inventory_scan"))
     scanner_result = None
     scan_source = "inventory"
@@ -522,6 +536,7 @@ def run_target_locally(
                 btf_custom_path=btf_custom_path,
                 compile_only=True,
                 recompile_v5=False,
+                recompile_all=False,
                 skip_families=[],
                 policy_file=None,
                 dump_xlated=xlated_path,
@@ -559,9 +574,10 @@ def run_target_locally(
                     repeat=repeat,
                     btf_custom_path=btf_custom_path,
                     compile_only=True,
-                    recompile_v5=policy_path is None,
+                    recompile_v5=recompile_v5,
+                    recompile_all=recompile_all,
                     skip_families=skip_families,
-                    policy_file=policy_path,
+                    policy_file=active_policy_path,
                     use_sudo=use_sudo,
                 ),
                 timeout_seconds,
@@ -579,6 +595,7 @@ def run_target_locally(
                     btf_custom_path=btf_custom_path,
                     compile_only=False,
                     recompile_v5=False,
+                    recompile_all=False,
                     skip_families=[],
                     policy_file=None,
                     use_sudo=use_sudo,
@@ -597,17 +614,18 @@ def run_target_locally(
                     repeat=repeat,
                     btf_custom_path=btf_custom_path,
                     compile_only=False,
-                    recompile_v5=policy_path is None,
+                    recompile_v5=recompile_v5,
+                    recompile_all=recompile_all,
                     skip_families=skip_families,
-                    policy_file=policy_path,
+                    policy_file=active_policy_path,
                     use_sudo=use_sudo,
                 ),
                 timeout_seconds,
             )
 
     record["scanner_cli"] = text_invocation_summary(scanner_result)
-    record["policy_path"] = str(policy_path) if policy_path is not None else None
-    record["policy_mode"] = "policy-file" if policy_path is not None else "auto-scan-v5"
+    record["policy_path"] = str(active_policy_path) if active_policy_path is not None else None
+    record["policy_mode"] = policy_mode
     record["scan_source"] = scan_source
     record["scanner_counts"] = scanner_counts
     record["eligible_families"] = families_from_scan(scanner_counts)
@@ -677,6 +695,7 @@ def run_guest_target_mode(args: argparse.Namespace) -> int:
         enable_exec=bool(target.get("can_test_run")),
         skip_families=normalize_skip_families(args.skip_families),
         use_policy=args.use_policy,
+        blind_apply=args.blind_apply,
         policy_dir=policy_dir,
     )
     print(json.dumps(record, sort_keys=True))
@@ -691,8 +710,10 @@ def build_vng_command(*, vng_binary: str, kernel_image: Path, guest_exec: str) -
         "--cwd",
         str(ROOT_DIR),
         "--disable-monitor",
+        "--memory",
+        DEFAULT_VNG_MEMORY,
         "--cpus",
-        "1",
+        DEFAULT_VNG_CPUS,
         "--exec",
         guest_exec,
     ]
@@ -744,6 +765,7 @@ def run_target_in_guest(
     vng_binary: str,
     skip_families: list[str],
     use_policy: bool,
+    blind_apply: bool,
     policy_dir: Path,
 ) -> dict[str, Any]:
     handle = tempfile.NamedTemporaryFile(
@@ -754,8 +776,18 @@ def run_target_in_guest(
         delete=False,
     )
     try:
+        policy_path = resolve_policy_path(
+            ROOT_DIR / str(target["object_path"]),
+            policy_dir,
+            program_name=str(target["program_name"]),
+        ) if use_policy and not blind_apply else None
+        guest_target = {
+            **target,
+            "policy_mode": "blind-apply-v5" if blind_apply else ("policy-file" if policy_path is not None else "stock"),
+            "policy_path": str(policy_path) if policy_path is not None else None,
+        }
         with handle:
-            json.dump(target, handle)
+            json.dump(guest_target, handle)
             handle.write("\n")
         target_path = Path(handle.name)
         guest_argv = [
@@ -778,6 +810,8 @@ def run_target_in_guest(
         ]
         if skip_families:
             guest_argv.extend(["--skip-families", ",".join(skip_families)])
+        if blind_apply:
+            guest_argv.append("--blind-apply")
         if use_policy:
             guest_argv.append("--use-policy")
         guest_exec = build_guest_exec(guest_argv)
@@ -1226,8 +1260,10 @@ def build_markdown(data: dict[str, Any]) -> str:
             "",
             "- Target selection comes from the runnability inventory and keeps every packet-test-run target whose baseline run already succeeds; the current scanner pass determines whether v5 has any eligible families.",
             "- In strict VM mode, each target boots the framework v5 guest once and runs baseline compile-only, v5 compile-only, baseline test_run, and v5 test_run in that order.",
-            "- `--use-policy` prefers a matching per-program file under `corpus/policies/`, then falls back to object-level legacy policy files, and finally falls back to the legacy auto-scan `--recompile-v5 --recompile-all` path.",
-            "- `--skip-families` filters families out of the auto-generated v5 policy; the family columns above report applied families, not just eligible sites.",
+            "- Default steady-state semantics are stock: without `--use-policy` or `--blind-apply`, the v5 lane does not request recompile.",
+            "- `--use-policy` only considers per-program version 2 policy files under `corpus/policies/`; if no match exists, the driver stays on stock JIT.",
+            "- `--blind-apply` forces the old debug/exploration path with `--recompile-v5 --recompile-all`.",
+            "- `--skip-families` only applies together with `--blind-apply`; the family columns above report applied families, not just eligible sites.",
             "- Host fallback mode only does baseline compile-only plus offline scanner scan; it does not attempt recompile or runtime measurement.",
             "- Family summaries are overlap-based: one program can contribute to multiple family rows, so those rows are not isolated causal attributions.",
         ]
@@ -1239,6 +1275,10 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     require_minimum(args.repeat, 1, "--repeat")
     skip_families = normalize_skip_families(args.skip_families)
+    if args.use_policy and args.blind_apply:
+        raise SystemExit("--use-policy cannot be combined with --blind-apply")
+    if skip_families and not args.blind_apply:
+        raise SystemExit("--skip-families requires --blind-apply")
 
     if args.guest_info:
         return run_guest_info_mode()
@@ -1333,6 +1373,7 @@ def main(argv: list[str] | None = None) -> int:
                 vng_binary=args.vng,
                 skip_families=skip_families,
                 use_policy=args.use_policy,
+                blind_apply=args.blind_apply,
                 policy_dir=policy_dir,
             )
         else:
@@ -1349,6 +1390,7 @@ def main(argv: list[str] | None = None) -> int:
                 enable_exec=False,
                 skip_families=[],
                 use_policy=args.use_policy,
+                blind_apply=False,
                 policy_dir=policy_dir,
             )
         records.append(record)
@@ -1371,6 +1413,7 @@ def main(argv: list[str] | None = None) -> int:
         "guest_smoke": guest_smoke,
         "skip_families": skip_families,
         "use_policy": args.use_policy,
+        "blind_apply": args.blind_apply,
         "policy_dir": str(policy_dir),
         "summary": summary,
         "programs": records,

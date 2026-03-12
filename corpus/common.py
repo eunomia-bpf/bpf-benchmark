@@ -215,7 +215,9 @@ def build_run_kernel_command(
     use_sudo: bool = False,
 ) -> list[str]:
     if recompile_all is None:
-        recompile_all = recompile_v5 and policy_file is None
+        recompile_all = False
+        if policy_file is None:
+            recompile_v5 = False
     command = build_base_runner_command(
         runner,
         "run-kernel",

@@ -1,0 +1,13 @@
+version: 2
+program: 'large_mixed_500_xdp'
+default: skip
+sites:
+  - insn: 345
+    family: branch-flip
+    action: apply
+  - insn: 403
+    family: branch-flip
+    action: apply
+  - insn: 461
+    family: branch-flip
+    action: apply

@@ -20,7 +20,20 @@ for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpu
     if candidate_str not in sys.path:
         sys.path.insert(0, candidate_str)
 
-from policy_utils import POLICY_DIR, ROOT_DIR, object_relative_path, object_roots, policy_path_for_object
+from policy_utils import (
+    POLICY_DIR,
+    ROOT_DIR,
+    canonical_policy_family_name,
+    object_relative_path,
+    object_roots,
+    policy_path_for_program,
+    render_policy_v2_text,
+)
+
+try:
+    from orchestrator.inventory import discover_object_programs
+except ImportError:
+    from micro.orchestrator.inventory import discover_object_programs
 
 try:
     from elftools.elf.elffile import ELFFile
@@ -29,35 +42,51 @@ except ImportError as exc:  # pragma: no cover - runtime dependency failure
 
 
 DEFAULT_SCANNER = ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"
+DEFAULT_RUNNER = ROOT_DIR / "micro" / "build" / "runner" / "micro_exec"
 DEFAULT_RESULTS_MD = ROOT_DIR / "docs" / "tmp" / "corpus-full-recompile-v6.md"
 DEFAULT_RESULTS_JSON = ROOT_DIR / "corpus" / "results" / "corpus_v5_vm_batch.latest.json"
 DEFAULT_TIMEOUT_SECONDS = 180
 DEFAULT_WORKERS = max(1, min(8, os.cpu_count() or 1))
 SHF_EXECINSTR = 0x4
-POLICY_FAMILY_KEYS = ("cmov", "wide_mem", "rotate", "extract", "lea", "zeroext", "endian", "bflip")
+POLICY_FAMILY_KEYS = (
+    "cmov",
+    "wide",
+    "rotate",
+    "extract",
+    "lea",
+    "zero-ext",
+    "endian",
+    "branch-flip",
+)
 SCANNER_SUMMARY_FIELDS = (
     ("cmov", "cmov_sites"),
-    ("wide_mem", "wide_sites"),
+    ("wide", "wide_sites"),
     ("rotate", "rotate_sites"),
     ("extract", "extract_sites"),
     ("lea", "lea_sites"),
-    ("zeroext", "zero_ext_sites"),
+    ("zero-ext", "zero_ext_sites"),
     ("endian", "endian_sites"),
-    ("bflip", "branch_flip_sites"),
+    ("branch-flip", "branch_flip_sites"),
 )
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Generate default per-object corpus policy YAMLs from scanner --json "
-            "site census, with CMOV disabled for known v6 corpus regressors."
+            "Generate per-program version 2 corpus policy YAMLs from scanner "
+            "site manifests, carrying forward the existing object-level CMOV "
+            "skip heuristic as explicit per-site exclusions."
         )
     )
     parser.add_argument(
         "--scanner",
         default=str(DEFAULT_SCANNER),
         help="Path to bpf-jit-scanner.",
+    )
+    parser.add_argument(
+        "--runner",
+        default=str(DEFAULT_RUNNER),
+        help="Path to micro_exec, used to enumerate program names in each object.",
     )
     parser.add_argument(
         "--policy-dir",
@@ -95,7 +124,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--workers",
         type=int,
         default=DEFAULT_WORKERS,
-        help="Concurrent workers used for per-object scanner subprocesses.",
+        help="Concurrent workers used for per-object inventory + scanner subprocesses.",
     )
     parser.add_argument(
         "--timeout",
@@ -106,7 +135,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Scan and print the planned policy outputs without writing files.",
+        help="Plan the version 2 policy outputs without writing files.",
     )
     return parser.parse_args(argv)
 
@@ -175,23 +204,99 @@ def discover_object_paths(
     return discovered
 
 
-def scan_xlated_section(scanner: Path, xlated_path: Path, *, timeout_seconds: int) -> dict[str, Any]:
-    payload = run_json_command(
-        [
-            str(scanner),
-            "scan",
-            "--xlated",
-            str(xlated_path),
-            "--all",
-            "--json",
-            "--v5",
-        ],
-        timeout_seconds=timeout_seconds,
-        label=f"scanner:{xlated_path}",
-    )
+def scan_program_manifest(
+    scanner: Path,
+    object_path: Path,
+    program_name: str,
+    section_name: str,
+    *,
+    timeout_seconds: int,
+) -> dict[str, Any]:
+    label = f"scanner:{object_relative_path(object_path).as_posix()}:{program_name}"
+    try:
+        payload = run_json_command(
+            [
+                str(scanner),
+                "scan",
+                str(object_path),
+                "--program-name",
+                program_name,
+                "--all",
+                "--json",
+            ],
+            timeout_seconds=timeout_seconds,
+            label=label,
+        )
+    except RuntimeError:
+        payload = scan_program_manifest_from_section(
+            scanner,
+            object_path,
+            program_name,
+            section_name,
+            timeout_seconds=timeout_seconds,
+            label=label,
+        )
     if not isinstance(payload, dict):
-        raise RuntimeError(f"scanner output for {xlated_path} was not a JSON object")
+        raise RuntimeError(
+            f"scanner output for {object_relative_path(object_path).as_posix()}:{program_name} "
+            "was not a JSON object"
+        )
     return payload
+
+
+def load_executable_section_bytes(object_path: Path, section_name: str) -> bytes:
+    with object_path.open("rb") as handle:
+        elf = ELFFile(handle)
+        for section in elf.iter_sections():
+            name = section.name or ""
+            flags = int(section.header["sh_flags"])
+            if name != section_name:
+                continue
+            if not (flags & SHF_EXECINSTR) or section.data_size <= 0:
+                raise RuntimeError(
+                    f"section {section_name} in {object_relative_path(object_path).as_posix()} is not executable"
+                )
+            return bytes(section.data())
+    raise RuntimeError(
+        f"unable to locate executable section {section_name} in {object_relative_path(object_path).as_posix()}"
+    )
+
+
+def scan_program_manifest_from_section(
+    scanner: Path,
+    object_path: Path,
+    program_name: str,
+    section_name: str,
+    *,
+    timeout_seconds: int,
+    label: str,
+) -> dict[str, Any]:
+    section_bytes = load_executable_section_bytes(object_path, section_name)
+    with tempfile.NamedTemporaryFile(
+        prefix="corpus-policy-program-",
+        suffix=".xlated",
+        dir=ROOT_DIR,
+        delete=False,
+    ) as handle:
+        handle.write(section_bytes)
+        tmp_path = Path(handle.name)
+    try:
+        return run_json_command(
+            [
+                str(scanner),
+                "scan",
+                "--xlated",
+                str(tmp_path),
+                "--program-name",
+                program_name,
+                "--all",
+                "--json",
+            ],
+            timeout_seconds=timeout_seconds,
+            label=f"{label}:section-fallback",
+        )
+    finally:
+        tmp_path.unlink(missing_ok=True)
 
 
 def load_results_json_path(results_md: Path, fallback_json: Path) -> Path:
@@ -200,7 +305,9 @@ def load_results_json_path(results_md: Path, fallback_json: Path) -> Path:
             prefix = "- VM batch JSON: `"
             if line.startswith(prefix) and line.endswith("`"):
                 candidate = Path(line[len(prefix):-1])
-                return candidate if candidate.is_absolute() else (ROOT_DIR / candidate).resolve()
+                resolved = candidate if candidate.is_absolute() else (ROOT_DIR / candidate).resolve()
+                if resolved.exists():
+                    return resolved
     return fallback_json.resolve()
 
 
@@ -215,7 +322,7 @@ def load_cmov_regressors(results_json: Path) -> dict[Path, dict[str, Any]]:
             continue
         if not record.get("v5_run_applied"):
             continue
-        applied = set(record.get("applied_families_run") or [])
+        applied = {canonical_policy_family_name(str(value)) for value in (record.get("applied_families_run") or [])}
         if "cmov" not in applied:
             continue
         ratio = record.get("speedup_ratio")
@@ -241,88 +348,132 @@ def load_cmov_regressors(results_json: Path) -> dict[Path, dict[str, Any]]:
     return regressors
 
 
-def is_scannable_code_section(section: Any) -> bool:
-    name = section.name or ""
-    flags = int(section.header["sh_flags"])
-    return bool(flags & SHF_EXECINSTR) and section.data_size > 0 and not name.startswith(".")
-
-
 def object_scan_summary(
     scanner: Path,
+    runner: Path,
     object_path: Path,
     *,
     timeout_seconds: int,
 ) -> dict[str, Any]:
-    manifests: list[dict[str, Any]] = []
+    warnings: list[str] = []
+    try:
+        programs = discover_object_programs(runner, object_path, timeout_seconds=timeout_seconds)
+    except Exception as exc:
+        return {
+            "object_path": object_path,
+            "relative_path": object_relative_path(object_path),
+            "program_count": 0,
+            "site_positive_programs": 0,
+            "total_sites": 0,
+            "family_totals": {},
+            "programs": [],
+            "warnings": [
+                "inventory failed for "
+                f"{object_relative_path(object_path).as_posix()}: {exc}"
+            ],
+        }
+    program_records: list[dict[str, Any]] = []
     family_totals = Counter()
-    scannable_sections = 0
-    site_positive_sections = 0
+    site_positive_programs = 0
     total_sites = 0
 
-    with object_path.open("rb") as handle:
-        elf = ELFFile(handle)
-        for section in elf.iter_sections():
-            if not is_scannable_code_section(section):
-                continue
-            scannable_sections += 1
-            with tempfile.NamedTemporaryFile(
-                prefix="corpus-policy-section-",
-                suffix=".xlated",
-                dir=ROOT_DIR,
-                delete=False,
-            ) as tmp:
-                tmp.write(section.data())
-                tmp_path = Path(tmp.name)
-            try:
-                manifest = scan_xlated_section(scanner, tmp_path, timeout_seconds=timeout_seconds)
-            finally:
-                tmp_path.unlink(missing_ok=True)
-            manifests.append(manifest)
-            summary = manifest.get("summary") or {}
-            section_total_sites = int(summary.get("total_sites", 0) or 0)
-            if section_total_sites > 0:
-                site_positive_sections += 1
-                total_sites += section_total_sites
-            for family_key, field in SCANNER_SUMMARY_FIELDS:
-                family_totals[family_key] += int(summary.get(field, 0) or 0)
+    for entry in programs:
+        try:
+            manifest = scan_program_manifest(
+                scanner,
+                object_path,
+                entry.name,
+                entry.section_name,
+                timeout_seconds=timeout_seconds,
+            )
+        except Exception as exc:
+            warnings.append(
+                "program scan failed for "
+                f"{object_relative_path(object_path).as_posix()}:{entry.name}: {exc}"
+            )
+            continue
+        summary = manifest.get("summary") or {}
+        site_total = int(summary.get("total_sites", 0) or 0)
+        if site_total <= 0:
+            continue
+        site_positive_programs += 1
+        total_sites += site_total
+        for family_key, field in SCANNER_SUMMARY_FIELDS:
+            family_totals[family_key] += int(summary.get(field, 0) or 0)
+        program_records.append(
+            {
+                "program_name": entry.name,
+                "section_name": entry.section_name,
+                "site_total": site_total,
+                "manifest": manifest,
+            }
+        )
 
+    program_records.sort(key=lambda item: (item["section_name"], item["program_name"]))
     return {
         "object_path": object_path,
         "relative_path": object_relative_path(object_path),
-        "program_count": scannable_sections,
-        "site_positive_programs": site_positive_sections,
+        "program_count": len(programs),
+        "site_positive_programs": site_positive_programs,
         "total_sites": total_sites,
         "family_totals": dict(family_totals),
-        "manifests": manifests,
+        "programs": program_records,
+        "warnings": warnings,
     }
 
 
-def render_policy_text(
-    summary: dict[str, Any],
+def render_program_policy_text(
     *,
+    object_path: Path,
+    program_name: str,
+    section_name: str,
+    manifest: dict[str, Any],
     cmov_skip: bool,
     cmov_evidence: dict[str, Any] | None,
     results_json: Path,
 ) -> str:
-    lines = [
-        "# Auto-generated by corpus/generate_default_policies.py.",
-        f"# Object: {summary['relative_path'].as_posix()}",
-        f"# Site-positive executable sections: {summary['site_positive_programs']} / {summary['program_count']}",
-        f"# Total scanner sites: {summary['total_sites']}",
+    site_counts = Counter()
+    skipped_counts = Counter()
+    for entry in manifest.get("sites") or []:
+        if not isinstance(entry, dict):
+            continue
+        family = canonical_policy_family_name(str(entry.get("family", "")))
+        site_counts[family] += 1
+        if cmov_skip and family == "cmov":
+            skipped_counts[family] += 1
+
+    family_actions: dict[str, str] = {}
+    if cmov_skip and skipped_counts.get("cmov", 0) > 0:
+        family_actions["cmov"] = "skip"
+
+    comments = [
+        "Auto-generated by corpus/generate_default_policies.py.",
+        f"Object: {object_relative_path(object_path).as_posix()}",
+        f"Program: {program_name}",
+        f"Section: {section_name}",
+        f"Total scanner sites: {int((manifest.get('summary') or {}).get('total_sites', 0) or 0)}",
+        "Family site totals: "
+        + ", ".join(f"{family}={site_counts.get(family, 0)}" for family in POLICY_FAMILY_KEYS),
+        "Selection model: live scanner applies all families by default; policy uses family-level skips for known regressors.",
     ]
     if cmov_evidence is not None:
-        lines.append(
-            "# CMOV evidence: "
+        comments.append(
+            "CMOV evidence: "
             f"{results_json.relative_to(ROOT_DIR).as_posix()} object geomean={cmov_evidence['geomean']:.3f}x "
             f"across {cmov_evidence['samples']} measured CMOV-applied program(s) "
             f"(regressions={cmov_evidence['regressions']}, wins={cmov_evidence['wins']})"
         )
-    lines.append("families:")
-    for key in POLICY_FAMILY_KEYS:
-        value = "skip" if key == "cmov" and cmov_skip else "apply"
-        lines.append(f"  {key}: {value}")
-    lines.append("")
-    return "\n".join(lines)
+        comments.append(
+            f"Explicitly skipped CMOV sites in this program: {skipped_counts.get('cmov', 0)}"
+        )
+
+    return render_policy_v2_text(
+        program_name=program_name,
+        default_action="apply",
+        families=family_actions,
+        sites=[],
+        comments=comments,
+    )
 
 
 def write_policy_file(path: Path, text: str) -> None:
@@ -330,10 +481,32 @@ def write_policy_file(path: Path, text: str) -> None:
     path.write_text(text)
 
 
+def display_path(path: Path) -> str:
+    try:
+        return path.relative_to(ROOT_DIR).as_posix()
+    except ValueError:
+        return str(path)
+
+
+def prune_empty_policy_dirs(policy_dir: Path) -> None:
+    if not policy_dir.exists():
+        return
+    for path in sorted(
+        (candidate for candidate in policy_dir.rglob("*") if candidate.is_dir()),
+        key=lambda candidate: len(candidate.parts),
+        reverse=True,
+    ):
+        try:
+            path.rmdir()
+        except OSError:
+            continue
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
 
     scanner = Path(args.scanner).resolve()
+    runner = Path(args.runner).resolve()
     policy_dir = Path(args.policy_dir).resolve()
     results_md = Path(args.results_md).resolve()
     fallback_results_json = Path(args.results_json).resolve()
@@ -344,13 +517,13 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     if not selected_roots:
-        raise SystemExit("no corpus object roots found; expected corpus/build, corpus/expanded_corpus, or corpus/objects")
-
+        raise SystemExit(
+            "no corpus object roots found; expected corpus/build, corpus/expanded_corpus, or corpus/objects"
+        )
     if not scanner.exists():
-        if args.dry_run:
-            print(f"dry-run: scanner not found, no files written: {scanner}")
-            return 0
         raise SystemExit(f"scanner not found: {scanner}")
+    if not runner.exists():
+        raise SystemExit(f"runner not found: {runner}")
 
     results_json = load_results_json_path(results_md, fallback_results_json)
     if not results_json.exists():
@@ -366,12 +539,12 @@ def main(argv: list[str] | None = None) -> int:
         raise SystemExit("no corpus objects matched the selected roots/filters")
 
     summaries: list[dict[str, Any]] = []
-    failures: list[str] = []
     with ThreadPoolExecutor(max_workers=max(1, args.workers)) as executor:
         future_to_path = {
             executor.submit(
                 object_scan_summary,
                 scanner,
+                runner,
                 object_path,
                 timeout_seconds=args.timeout,
             ): object_path
@@ -382,43 +555,81 @@ def main(argv: list[str] | None = None) -> int:
             try:
                 summaries.append(future.result())
             except Exception as exc:
-                failures.append(f"{object_path}: {exc}")
+                raise SystemExit(f"failed to scan {object_path}: {exc}") from exc
 
     summaries.sort(key=lambda item: item["relative_path"].as_posix())
-    if failures:
-        detail = "\n".join(failures[:20])
-        raise SystemExit(f"failed to scan {len(failures)} object(s):\n{detail}")
 
-    written = 0
-    cmov_skipped = 0
-    site_positive = [summary for summary in summaries if summary["total_sites"] > 0]
-    for summary in site_positive:
+    warning_count = 0
+    for summary in summaries:
+        for warning in summary.get("warnings") or []:
+            print(f"warning: {warning}", file=sys.stderr)
+            warning_count += 1
+
+    planned_outputs: list[tuple[Path, str]] = []
+    policy_positive_objects = 0
+    policy_positive_programs = 0
+    cmov_skip_objects = 0
+    cmov_skip_programs = 0
+    for summary in summaries:
+        programs = summary["programs"]
+        if not programs:
+            continue
+        policy_positive_objects += 1
         object_path = Path(summary["object_path"]).resolve()
-        policy_path = policy_path_for_object(object_path, policy_dir)
         cmov_evidence = cmov_regressors.get(object_path)
         cmov_skip = cmov_evidence is not None
         if cmov_skip:
-            cmov_skipped += 1
-        text = render_policy_text(
-            summary,
-            cmov_skip=cmov_skip,
-            cmov_evidence=cmov_evidence,
-            results_json=results_json,
-        )
-        if args.dry_run:
-            action = "would write"
-        else:
+            cmov_skip_objects += 1
+        for program in programs:
+            if cmov_skip:
+                cmov_skip_programs += 1
+            policy_path = policy_path_for_program(object_path, program["program_name"], policy_dir)
+            text = render_program_policy_text(
+                object_path=object_path,
+                program_name=program["program_name"],
+                section_name=program["section_name"],
+                manifest=program["manifest"],
+                cmov_skip=cmov_skip,
+                cmov_evidence=cmov_evidence,
+                results_json=results_json,
+            )
+            planned_outputs.append((policy_path, text))
+            policy_positive_programs += 1
+
+    planned_outputs.sort(key=lambda item: display_path(item[0]))
+
+    stale_paths: list[Path] = []
+    if not args.dry_run and policy_dir.exists():
+        planned_set = {path.resolve() for path, _ in planned_outputs}
+        stale_paths = [
+            path
+            for path in sorted(policy_dir.rglob("*.policy.yaml"))
+            if path.resolve() not in planned_set
+        ]
+        for stale_path in stale_paths:
+            stale_path.unlink()
+
+    action = "would write" if args.dry_run else "wrote"
+    for policy_path, text in planned_outputs:
+        if not args.dry_run:
             write_policy_file(policy_path, text)
-            action = "wrote"
-        written += 1
-        print(f"{action} {policy_path.relative_to(ROOT_DIR).as_posix()}")
+        print(f"{action} {display_path(policy_path)}")
+
+    if not args.dry_run and stale_paths:
+        for stale_path in stale_paths:
+            print(f"removed stale {display_path(stale_path)}")
+        prune_empty_policy_dirs(policy_dir)
 
     print(
         "summary: "
         f"scanned_objects={len(summaries)} "
-        f"site_positive_objects={len(site_positive)} "
-        f"policies={'planned' if args.dry_run else 'written'}={written} "
-        f"cmov_skips={cmov_skipped} "
+        f"site_positive_objects={policy_positive_objects} "
+        f"site_positive_programs={policy_positive_programs} "
+        f"policies={'planned' if args.dry_run else 'written'}={len(planned_outputs)} "
+        f"cmov_skip_objects={cmov_skip_objects} "
+        f"cmov_skip_programs={cmov_skip_programs} "
+        f"stale_removed={(0 if args.dry_run else len(stale_paths))} "
+        f"warnings={warning_count} "
         f"results_json={results_json.relative_to(ROOT_DIR).as_posix()}"
     )
     return 0

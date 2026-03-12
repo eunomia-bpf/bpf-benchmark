@@ -1,0 +1,10 @@
+version: 2
+program: mixed-demo
+default: skip
+sites:
+  - insn: 4
+    family: rotate
+    action: apply
+  - insn: 4
+    family: rotate
+    action: skip

@@ -126,6 +126,7 @@ def build_micro_benchmark_command(
     perf_counters: bool = False,
     perf_scope: str = "full_repeat_raw",
     require_sudo: bool = False,
+    blind_apply: bool = False,
 ) -> list[str]:
     if runtime_mode == "llvmbpf":
         command = build_runner_command(
@@ -156,6 +157,8 @@ def build_micro_benchmark_command(
         return maybe_prepend_sudo(command, enabled=require_sudo)
 
     if runtime_mode in {"kernel-recompile", "kernel_recompile"}:
+        if blind_apply and (policy is not None or policy_file is not None):
+            raise RuntimeError("blind_apply cannot be combined with policy or policy_file")
         command = build_runner_command(
             runner_binary,
             "run-kernel",
@@ -168,8 +171,8 @@ def build_micro_benchmark_command(
             policy_file=policy_file,
             perf_counters=perf_counters,
             perf_scope=perf_scope,
-            recompile_v5=policy is None and policy_file is None,
-            recompile_all=policy is None and policy_file is None,
+            recompile_v5=blind_apply,
+            recompile_all=blind_apply,
         )
         return maybe_prepend_sudo(command, enabled=require_sudo)
 

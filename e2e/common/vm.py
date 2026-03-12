@@ -40,6 +40,8 @@ def run_in_vm(
     cpus: int,
     mem: str,
     timeout: int,
+    *,
+    networks: Sequence[str] = (),
 ) -> subprocess.CompletedProcess[str]:
     vng = which("vng") or "/home/yunwei37/.local/bin/vng"
     kernel = Path(kernel_path).resolve()
@@ -61,9 +63,10 @@ def run_in_vm(
         str(RESULTS_DIR),
         "--rwdir",
         str(ROOT_DIR / "docs" / "tmp"),
-        "--exec",
-        guest_path,
     ]
+    for network in networks:
+        command.extend(["--network", str(network)])
+    command.extend(["--exec", guest_path])
     try:
         return subprocess.run(
             command,

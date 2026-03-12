@@ -65,6 +65,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--iterations", type=int, help="Measured runs per pair.")
     parser.add_argument("--warmups", type=int, help="Warmup runs per pair.")
     parser.add_argument("--repeat", type=int, help="Repeat count inside each helper sample.")
+    parser.add_argument(
+        "--blind-apply",
+        action="store_true",
+        help="For `kernel-recompile`, ignore manifest policy and force blind all-apply auto-scan.",
+    )
     parser.add_argument("--output", help="Override JSON output path.")
     parser.add_argument("--cpu", help="Pin child processes to a specific CPU via taskset.")
     parser.add_argument(
@@ -196,9 +201,6 @@ def ensure_artifacts_built(suite: SuiteSpec, build_bpftool: bool) -> None:
 
 
 def resolve_policy_inputs(benchmark) -> tuple[str | None, Path | None]:
-    inline_policy = benchmark.inline_policy_text
-    if inline_policy is not None:
-        return inline_policy, None
     return None, benchmark.policy_file
 
 
@@ -281,6 +283,11 @@ def main(argv: list[str] | None = None) -> int:
 
     benchmarks = select_benchmarks(args.benches, suite)
     runtimes = select_runtimes(args.runtimes, suite)
+    if args.blind_apply and not any(
+        runtime.mode in {"kernel-recompile", "kernel_recompile"}
+        for runtime in runtimes
+    ):
+        raise SystemExit("--blind-apply requires --runtime kernel-recompile")
     if args.shuffle_seed is not None:
         random.Random(args.shuffle_seed).shuffle(benchmarks)
     runtime_order_seed = args.shuffle_seed if args.shuffle_seed is not None else DEFAULT_RUNTIME_ORDER_SEED
@@ -328,6 +335,7 @@ def main(argv: list[str] | None = None) -> int:
             "iterations": iterations,
             "warmups": warmups,
             "repeat": args.repeat if args.repeat is not None else suite.defaults.repeat,
+            "blind_apply": args.blind_apply,
             "perf_counters": args.perf_counters,
             "perf_scope": args.perf_scope,
             "shuffle_seed": args.shuffle_seed,
@@ -369,7 +377,11 @@ def main(argv: list[str] | None = None) -> int:
             inline_policy: str | None = None
             policy_file: Path | None = None
             if runtime.mode in {"kernel-recompile", "kernel_recompile"}:
-                inline_policy, policy_file = resolve_policy_inputs(benchmark)
+                if args.blind_apply:
+                    inline_policy = None
+                    policy_file = None
+                else:
+                    inline_policy, policy_file = resolve_policy_inputs(benchmark)
             command = build_micro_benchmark_command(
                 suite.build.runner_binary,
                 runtime_mode=runtime.mode,
@@ -383,6 +395,9 @@ def main(argv: list[str] | None = None) -> int:
                 perf_counters=args.perf_counters,
                 perf_scope=args.perf_scope,
                 require_sudo=runtime.require_sudo,
+                blind_apply=bool(
+                    args.blind_apply and runtime.mode in {"kernel-recompile", "kernel_recompile"}
+                ),
             )
 
             for _ in range(warmups):

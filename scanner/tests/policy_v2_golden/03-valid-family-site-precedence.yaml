@@ -1,0 +1,13 @@
+version: 2
+program: mixed-demo
+default: apply
+families:
+  cmov: skip
+  rotate: apply
+sites:
+  - insn: 0
+    family: cmov
+    action: apply
+  - insn: 4
+    family: rotate
+    action: skip
