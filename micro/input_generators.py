@@ -106,7 +106,7 @@ def _memcmp_prefix_pattern_byte(index: int) -> int:
 
 
 def generate_packet_parse(output: Path) -> dict[str, int]:
-    packet_count = 64
+    packet_count = 54
     packet_size = 64
     blob = bytearray(struct.pack("<II", packet_count, packet_size))
 
@@ -131,7 +131,7 @@ def generate_packet_parse(output: Path) -> dict[str, int]:
 
 
 def generate_branch_layout(output: Path) -> dict[str, int]:
-    count = 512
+    count = 432
     hot_threshold = 900
 
     blob = bytearray(struct.pack("<II", count, hot_threshold))
@@ -147,7 +147,7 @@ def generate_branch_layout(output: Path) -> dict[str, int]:
 
 
 def generate_branch_layout_predictable(output: Path) -> dict[str, int]:
-    count = 512
+    count = 432
     hot_threshold = 900
 
     blob = bytearray(struct.pack("<II", count, hot_threshold))
@@ -160,7 +160,7 @@ def generate_branch_layout_predictable(output: Path) -> dict[str, int]:
 
 
 def generate_branch_layout_random(output: Path) -> dict[str, int]:
-    count = 512
+    count = 432
     hot_threshold = 900
     state = 0x1234_5678_9ABC_DEF0
 
@@ -575,7 +575,7 @@ def generate_load_native_u64(output: Path) -> dict[str, int]:
     return _generate_load_isolation(output, count=128, seed=0xBEEF_CAFE_1234_5678)
 
 def generate_cmov_select(output: Path) -> dict[str, int]:
-    groups = 32
+    groups = 27
     lanes = 4
     count = groups * lanes
     compare_mask = (1 << 63) - 1

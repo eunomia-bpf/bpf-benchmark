@@ -1,6 +1,6 @@
 #include "common.h"
 
-#define BRANCH_LAYOUT_MAX_COUNT 512U
+#define BRANCH_LAYOUT_MAX_COUNT 432U
 #define BRANCH_LAYOUT_INPUT_SIZE (8U + BRANCH_LAYOUT_MAX_COUNT * 8U)
 
 static __always_inline int bench_branch_layout(const u8 *data, u32 len, u64 *out)
