@@ -21,6 +21,10 @@ except ModuleNotFoundError:
         load_manifest_from_results,
     )
     from micro.orchestrator.reporting import render_corpus_summary_markdown, render_rq_summary_markdown
+try:
+    from results_layout import latest_output_path
+except ImportError:
+    from micro.results_layout import latest_output_path
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -40,7 +44,7 @@ def default_results_candidates() -> tuple[Path, ...]:
     if DEFAULT_MICRO_MANIFEST.exists():
         manifest = load_manifest(DEFAULT_MICRO_MANIFEST)
         candidates.append(manifest.defaults.output)
-    candidates.append(RESULTS_DIR / "latest.json")
+    candidates.append(latest_output_path(RESULTS_DIR, "pure_jit"))
     return tuple(candidates)
 
 

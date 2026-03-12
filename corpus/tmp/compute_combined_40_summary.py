@@ -39,7 +39,10 @@ MICRO_RESULTS_DIR = REPO_ROOT / "micro" / "results"
 CORPUS_RESULTS_DIR = REPO_ROOT / "corpus" / "results"
 
 PURE_JIT_LATEST_PATH = MICRO_RESULTS_DIR / "pure_jit.latest.json"
-PURE_JIT_AUTHORITATIVE_PATH = MICRO_RESULTS_DIR / "pure_jit_authoritative.json"
+PURE_JIT_AUTHORITATIVE_PATH = next(
+    iter(sorted(MICRO_RESULTS_DIR.glob("pure_jit_authoritative_*.json"))),
+    MICRO_RESULTS_DIR / "pure_jit.latest.json",
+)
 NEW_PURE_JIT_PATH = MICRO_RESULTS_DIR / "new_benchmarks_authoritative.json"
 RUNTIME_AUTHORITATIVE_PATH = MICRO_RESULTS_DIR / "runtime_authoritative.json"
 NEW_RUNTIME_PATH = MICRO_RESULTS_DIR / "new_runtime_authoritative.json"

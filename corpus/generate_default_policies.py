@@ -30,7 +30,7 @@ except ImportError as exc:  # pragma: no cover - runtime dependency failure
 
 DEFAULT_SCANNER = ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"
 DEFAULT_RESULTS_MD = ROOT_DIR / "docs" / "tmp" / "corpus-full-recompile-v6.md"
-DEFAULT_RESULTS_JSON = ROOT_DIR / "corpus" / "results" / "corpus_v5_vm_batch_full.json"
+DEFAULT_RESULTS_JSON = ROOT_DIR / "corpus" / "results" / "corpus_v5_vm_batch.latest.json"
 DEFAULT_TIMEOUT_SECONDS = 180
 DEFAULT_WORKERS = max(1, min(8, os.cpu_count() or 1))
 SHF_EXECINSTR = 0x4

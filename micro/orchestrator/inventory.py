@@ -175,7 +175,7 @@ def collect_corpus_object_paths(
 ) -> tuple[list[Path], str]:
     report_path = corpus_build_report
     if report_path is None:
-        candidate = repo_root / "corpus" / "results" / "expanded_corpus_build.json"
+        candidate = repo_root / "corpus" / "results" / "expanded_corpus_build.latest.json"
         if candidate.exists():
             report_path = candidate
 

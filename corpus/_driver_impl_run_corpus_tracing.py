@@ -179,7 +179,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         parser,
         help_text=(
             "Optional expanded corpus build JSON report. When omitted, "
-            "corpus/directive_census.py will use corpus/results/expanded_corpus_build.json if present."
+            "corpus/directive_census.py will use corpus/results/expanded_corpus_build.latest.json if present."
         ),
     )
     parser.add_argument(

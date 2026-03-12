@@ -15,11 +15,16 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+try:
+    from results_layout import authoritative_output_path, maybe_refresh_latest_alias, smoke_output_path
+except ImportError:
+    from corpus.results_layout import authoritative_output_path, maybe_refresh_latest_alias, smoke_output_path
+
 
 ROOT = Path(__file__).resolve().parent
 REPO_ROOT = ROOT.parent
 DEFAULT_INVENTORY = ROOT / "inventory.json"
-DEFAULT_OUTPUT = ROOT / "results" / "real_world_code_size.json"
+DEFAULT_OUTPUT = authoritative_output_path(ROOT / "results", "real_world_code_size")
 DEFAULT_REPORT = ROOT / "results" / "real_world_code_size.md"
 DEFAULT_RUNNER = REPO_ROOT / "micro" / "build" / "runner" / "micro_exec"
 DEFAULT_BUILD_ROOT = ROOT / "build" / "real_world_code_size"
@@ -779,7 +784,10 @@ def render_report(
 def main() -> int:
     args = parse_args()
     inventory_path = Path(args.inventory).resolve()
-    output_path = Path(args.output).resolve()
+    if args.output == str(DEFAULT_OUTPUT) and args.max_sources is not None:
+        output_path = smoke_output_path(ROOT / "results", "real_world_code_size")
+    else:
+        output_path = Path(args.output).resolve()
     report_path = Path(args.report).resolve()
     runner_path = Path(args.runner).resolve()
     build_root = Path(args.build_root).resolve()
@@ -933,6 +941,7 @@ def main() -> int:
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(payload, indent=2))
+    maybe_refresh_latest_alias(output_path)
     report_path.write_text(render_report(payload, source_records, runtimes))
 
     print(f"[done] wrote {output_path}")

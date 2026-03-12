@@ -16,6 +16,10 @@ from typing import Any
 
 from benchmark_catalog import CONFIG_PATH, ROOT_DIR, BenchmarkSpec, SuiteSpec, load_suite
 try:
+    from results_layout import latest_output_path
+except ImportError:
+    from micro.results_layout import latest_output_path
+try:
     from orchestrator.benchmarks import resolve_memory_file, select_benchmarks as select_suite_benchmarks
     from orchestrator.commands import build_runner_command, maybe_prepend_taskset
     from orchestrator.environment import ensure_build_steps, read_optional_text, read_required_text
@@ -34,7 +38,7 @@ ROOT = Path(__file__).resolve().parent
 RUNNER = ROOT / "build" / "runner" / "micro_exec"
 DEFAULT_OUTPUT = ROOT / "results" / "pass_ablation.json"
 DEFAULT_REPORT = ROOT / "results" / "pass_ablation.md"
-DEFAULT_AUTHORITATIVE_SOURCE = ROOT / "results" / "pure_jit_authoritative.json"
+DEFAULT_AUTHORITATIVE_SOURCE = latest_output_path(ROOT / "results", "pure_jit")
 DEFAULT_ITERATIONS = 5
 DEFAULT_WARMUPS = 0
 DEFAULT_REPEAT = 200

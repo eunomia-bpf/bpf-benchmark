@@ -20,10 +20,13 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from e2e.common import (  # noqa: E402
+    RESULTS_DIR,
     ROOT_DIR,
+    authoritative_output_path,
     chown_to_invoking_user,
     ensure_root,
     run_command,
+    smoke_output_path,
     tail_text,
     which,
     write_json,
@@ -36,7 +39,7 @@ from e2e.common.vm import run_in_vm, write_guest_script  # noqa: E402
 from e2e.common.workload import WorkloadResult  # noqa: E402
 
 
-DEFAULT_OUTPUT_JSON = ROOT_DIR / "e2e" / "results" / "scx-e2e.json"
+DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "scx")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "scx-e2e.md"
 DEFAULT_SCX_BINARY = ROOT_DIR / "corpus" / "repos" / "scx" / "target" / "release" / "scx_rusty"
 DEFAULT_SCX_REPO = ROOT_DIR / "corpus" / "repos" / "scx"
@@ -846,11 +849,15 @@ def build_case_parser() -> argparse.ArgumentParser:
 
 
 def run_scx_vm(args: argparse.Namespace) -> int:
+    if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.smoke:
+        output_json = smoke_output_path(RESULTS_DIR, "scx")
+    else:
+        output_json = Path(args.output_json).resolve()
     guest_command = [
         "python3",
         "e2e/cases/scx/case.py",
         "--output-json",
-        str(Path(args.output_json).resolve()),
+        str(output_json),
         "--output-md",
         str(Path(args.output_md).resolve()),
         "--scheduler-binary",
@@ -890,7 +897,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.vm:
         return run_scx_vm(args)
     payload = run_scx_case(args)
-    persist_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve())
+    if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.smoke:
+        output_json = smoke_output_path(RESULTS_DIR, "scx")
+    else:
+        output_json = Path(args.output_json).resolve()
+    persist_results(payload, output_json, Path(args.output_md).resolve())
     print(json.dumps(payload, indent=2, sort_keys=True))
     return 0
 

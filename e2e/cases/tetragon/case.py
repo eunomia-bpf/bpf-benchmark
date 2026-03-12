@@ -23,12 +23,15 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from e2e.common import (  # noqa: E402
+    RESULTS_DIR,
     ROOT_DIR,
+    authoritative_output_path,
     chown_to_invoking_user,
     ensure_root,
     resolve_bpftool_binary,
     run_command,
     run_json_command,
+    smoke_output_path,
     tail_text,
     which,
     write_json,
@@ -53,7 +56,7 @@ except ModuleNotFoundError:  # noqa: E402
 
 DEFAULT_SETUP_SCRIPT = Path(__file__).with_name("setup.sh")
 DEFAULT_GUEST_SCRIPT = Path(__file__).with_name("guest_smoke.sh")
-DEFAULT_OUTPUT_JSON = ROOT_DIR / "e2e" / "results" / "tetragon-real-e2e.json"
+DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "tetragon")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "tetragon-real-e2e.md"
 DEFAULT_EXECVE_OBJECT = ROOT_DIR / "corpus" / "build" / "tetragon" / "bpf_execve_event.bpf.o"
 DEFAULT_KPROBE_OBJECT = ROOT_DIR / "corpus" / "build" / "tetragon" / "bpf_generic_kprobe.bpf.o"
@@ -1249,7 +1252,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = build_case_parser()
     args = parser.parse_args(argv)
     payload = run_tetragon_case(args)
-    persist_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve())
+    if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.smoke:
+        output_json = smoke_output_path(RESULTS_DIR, "tetragon")
+    else:
+        output_json = Path(args.output_json).resolve()
+    persist_results(payload, output_json, Path(args.output_md).resolve())
     print(json.dumps(payload, indent=2, sort_keys=True))
     return 0
 

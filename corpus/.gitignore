@@ -2,3 +2,9 @@ repos/
 inventory.json
 bcf/
 results/
+!results/
+results/*
+!results/README.md
+!results/*_authoritative_*.json
+!results/*_smoke_*.json
+!results/*.latest.json

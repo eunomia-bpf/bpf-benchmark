@@ -24,7 +24,7 @@ if str(REPO_ROOT) not in sys.path:
 from corpus.analyze_bytecode import SHF_EXECINSTR, is_skipped_section, parse_section_bytecode
 
 
-DEFAULT_INPUT = ROOT_DIR / "results" / "pure_jit_authoritative.json"
+DEFAULT_INPUT = ROOT_DIR / "results" / "pure_jit.latest.json"
 DEFAULT_OUTPUT = ROOT_DIR / "results" / "performance_deep_analysis.md"
 DEFAULT_PROGRAM_DIR = ROOT_DIR / "programs"
 CATEGORY_ORDER = (

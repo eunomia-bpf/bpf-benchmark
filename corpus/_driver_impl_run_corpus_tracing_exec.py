@@ -26,6 +26,11 @@ for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpu
     if candidate_str not in sys.path:
         sys.path.insert(0, candidate_str)
 
+try:
+    from results_layout import authoritative_output_path, smoke_output_path
+except ImportError:
+    from corpus.results_layout import authoritative_output_path, smoke_output_path
+
 from e2e.common import ensure_root, resolve_bpftool_binary, write_json, write_text
 from e2e.common.recompile import apply_recompile, scan_programs
 from e2e.common.vm import run_in_vm, write_guest_script
@@ -111,7 +116,7 @@ except ImportError:
 
 
 ROOT_DIR = REPO_ROOT
-DEFAULT_OUTPUT_JSON = ROOT_DIR / "corpus" / "results" / "tracing_exec_driver.json"
+DEFAULT_OUTPUT_JSON = authoritative_output_path(ROOT_DIR / "corpus" / "results", "tracing_exec_driver")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "corpus" / "results" / "tracing_exec_driver.md"
 DEFAULT_SCANNER = ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"
 DEFAULT_VM_KERNEL = ROOT_DIR / "vendor" / "linux-framework"
@@ -274,7 +279,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         parser,
         help_text=(
             "Optional expanded corpus build JSON report. When omitted, "
-            "corpus/results/expanded_corpus_build.json is used if present."
+            "corpus/results/expanded_corpus_build.latest.json is used if present."
         ),
     )
     add_repeat_argument(parser, DEFAULT_REPEAT, help_text="Measurement workload iterations per phase.")
@@ -1401,7 +1406,7 @@ def apply_filters(
 def discover_corpus_bpf_objects(corpus_build_report: Path | None) -> tuple[list[Path], list[str], str]:
     report_path = corpus_build_report
     if report_path is None:
-        candidate = ROOT_DIR / "corpus" / "results" / "expanded_corpus_build.json"
+        candidate = ROOT_DIR / "corpus" / "results" / "expanded_corpus_build.latest.json"
         if candidate.exists():
             report_path = candidate
 
@@ -1594,7 +1599,10 @@ def main(argv: list[str] | None = None) -> int:
         "programs": records,
     }
 
-    output_json = Path(args.output_json).resolve()
+    if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.max_programs is not None:
+        output_json = smoke_output_path(ROOT_DIR / "corpus" / "results", "tracing_exec_driver")
+    else:
+        output_json = Path(args.output_json).resolve()
     output_md = Path(args.output_md).resolve()
     write_json(output_json, payload)
     write_text(output_md, build_markdown(payload) + "\n")

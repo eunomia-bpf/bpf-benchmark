@@ -2,6 +2,9 @@ __pycache__/
 *.pyc
 generated-inputs/*.mem
 results/*.json
+!results/*_authoritative_*.json
+!results/*_smoke_*.json
+!results/*.latest.json
 build/
 programs/*.bpf.o
 programs/*.bpf.d

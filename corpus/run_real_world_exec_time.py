@@ -15,11 +15,15 @@ from pathlib import Path
 from typing import Any
 
 from run_real_world_code_size import DEFAULT_RUNNER, ensure_runner_binary
+try:
+    from results_layout import authoritative_output_path, latest_output_path, maybe_refresh_latest_alias, smoke_output_path
+except ImportError:
+    from corpus.results_layout import authoritative_output_path, latest_output_path, maybe_refresh_latest_alias, smoke_output_path
 
 
 ROOT = Path(__file__).resolve().parent
-DEFAULT_INPUT = ROOT / "results" / "real_world_code_size.json"
-DEFAULT_OUTPUT = ROOT / "results" / "real_world_exec_time.json"
+DEFAULT_INPUT = latest_output_path(ROOT / "results", "real_world_code_size")
+DEFAULT_OUTPUT = authoritative_output_path(ROOT / "results", "real_world_exec_time")
 DEFAULT_REPORT = ROOT / "results" / "real_world_exec_time.md"
 DEFAULT_REPEAT = 1000
 DEFAULT_ITERATIONS = 10
@@ -30,7 +34,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Compare exec_ns across llvmbpf and kernel for real-world BPF programs."
     )
-    parser.add_argument("--input", default=str(DEFAULT_INPUT), help="Path to real_world_code_size.json.")
+    parser.add_argument("--input", default=str(DEFAULT_INPUT), help="Path to real_world_code_size.latest.json.")
     parser.add_argument("--output", default=str(DEFAULT_OUTPUT), help="Path to output JSON payload.")
     parser.add_argument("--report", default=str(DEFAULT_REPORT), help="Path to Markdown report.")
     parser.add_argument("--runner", default=str(DEFAULT_RUNNER), help="Path to micro/build/runner/micro_exec.")
@@ -422,7 +426,7 @@ def render_report(payload: dict[str, Any]) -> str:
             "",
             "## Notes",
             "",
-            "- Inputs come from the subset of programs that already compiled successfully on both runtimes in `real_world_code_size.json`.",
+            "- Inputs come from the subset of programs that already compiled successfully on both runtimes in `real_world_code_size.latest.json`.",
             f"- Each median is computed across separate `micro_exec` invocations; each invocation uses packet mode with a generated valid raw packet input from `{payload['packet_input']}`.",
             "- Kernel runs are attempted first; if `run-kernel` fails, the program is recorded as unsupported for exec-time comparison and llvmbpf is marked `skipped`.",
             "- `--program-name` uses the libbpf program name stored in the code-size results; section names are reported alongside the measurements.",
@@ -434,7 +438,10 @@ def render_report(payload: dict[str, Any]) -> str:
 def main() -> int:
     args = parse_args()
     input_path = Path(args.input).resolve()
-    output_path = Path(args.output).resolve()
+    if args.output == str(DEFAULT_OUTPUT) and args.max_programs is not None:
+        output_path = smoke_output_path(ROOT / "results", "real_world_exec_time")
+    else:
+        output_path = Path(args.output).resolve()
     report_path = Path(args.report).resolve()
     runner_path = Path(args.runner).resolve()
     ensure_runner_binary(runner_path)
@@ -505,6 +512,7 @@ def main() -> int:
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(payload, indent=2) + "\n")
+    maybe_refresh_latest_alias(output_path)
     report_path.write_text(render_report(payload))
     print(f"[done] wrote {output_path}")
     print(f"[done] wrote {report_path}")

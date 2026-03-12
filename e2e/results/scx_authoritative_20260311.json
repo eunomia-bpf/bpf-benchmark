@@ -1,0 +1,1302 @@
+{
+  "baseline": {
+    "summary": {
+      "agent_cpu_total_pct": {
+        "count": 3,
+        "max": 0.1333329980052878,
+        "mean": 0.08888070010563111,
+        "median": 0.06666171008854241,
+        "min": 0.0666473922230631
+      },
+      "context_switches_per_sec": {
+        "count": 3,
+        "max": 194764.50660269364,
+        "mean": 65153.28601657068,
+        "median": 354.94740763867884,
+        "min": 340.40403937972525
+      },
+      "latency_ms_p50": {
+        "count": 2,
+        "max": 381.5,
+        "mean": 190.915,
+        "median": 190.915,
+        "min": 0.33
+      },
+      "latency_ms_p95": {
+        "count": 2,
+        "max": 406.5,
+        "mean": 203.42,
+        "median": 203.42,
+        "min": 0.34
+      },
+      "system_cpu_busy_pct": {
+        "count": 3,
+        "max": 99.67510829723426,
+        "mean": 98.81054726311885,
+        "median": 99.51670694108824,
+        "min": 97.23982655103403
+      },
+      "throughput": {
+        "count": 3,
+        "max": 12047.28,
+        "mean": 6659.254734730566,
+        "median": 7927.96,
+        "min": 2.5242041916991598
+      }
+    },
+    "workloads": [
+      {
+        "agent_cpu": {
+          "sys_pct": 0.0666664990026439,
+          "total_pct": 0.1333329980052878,
+          "user_pct": 0.0666664990026439
+        },
+        "command": [
+          "/bin/hackbench",
+          "-g",
+          "4",
+          "-l",
+          "1000"
+        ],
+        "context_switches_per_sec": 194764.50660269364,
+        "context_switches_total": 5864067,
+        "duration_s": 30.108499245000004,
+        "iterations": 76,
+        "kind": "hackbench",
+        "latency_ms_p50": 381.5,
+        "latency_ms_p95": 406.5,
+        "metric": "runs/s",
+        "name": "hackbench",
+        "ops_per_sec": 2.5242041916991598,
+        "ops_total": 76.0,
+        "processes_started": 12244,
+        "stderr_tail": "",
+        "stdout_tail": "Time: 0.380\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.394\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.362\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.382\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.375\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.382\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.380\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.393\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.375\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.374\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.364\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.362\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.397\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.381",
+        "system_cpu": {
+          "busy_pct": 97.23982655103403
+        }
+      },
+      {
+        "agent_cpu": {
+          "sys_pct": 0.033330855044271204,
+          "total_pct": 0.06666171008854241,
+          "user_pct": 0.033330855044271204
+        },
+        "command": [
+          "/bin/stress-ng",
+          "--cpu",
+          "4",
+          "--timeout",
+          "30s",
+          "--metrics-brief"
+        ],
+        "context_switches_per_sec": 354.94740763867884,
+        "context_switches_total": 10699,
+        "duration_s": 30.142493704000003,
+        "iterations": null,
+        "kind": "stress_ng_cpu",
+        "latency_ms_p50": null,
+        "latency_ms_p95": null,
+        "metric": "bogo-ops/s",
+        "name": "stress-ng-cpu",
+        "ops_per_sec": 7927.96,
+        "ops_total": 237841.0,
+        "processes_started": 7,
+        "stderr_tail": "",
+        "stdout_tail": "stress-ng: info:  [12429] setting to a 30 secs run per stressor\nstress-ng: info:  [12429] dispatching hogs: 4 cpu\nstress-ng: metrc: [12429] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [12429]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [12429] cpu              237841     30.00    119.91      0.01      7927.96        1983.28\nstress-ng: info:  [12429] skipped: 0\nstress-ng: info:  [12429] passed: 4: cpu (4)\nstress-ng: info:  [12429] failed: 0\nstress-ng: info:  [12429] metrics untrustworthy: 0\nstress-ng: info:  [12429] successful run completed in 30.00 secs",
+        "system_cpu": {
+          "busy_pct": 99.51670694108824
+        }
+      },
+      {
+        "agent_cpu": {
+          "sys_pct": 0.03332369611153155,
+          "total_pct": 0.0666473922230631,
+          "user_pct": 0.03332369611153155
+        },
+        "command": [
+          "/bin/sysbench",
+          "cpu",
+          "--threads=4",
+          "--time=30",
+          "run"
+        ],
+        "context_switches_per_sec": 340.40403937972525,
+        "context_switches_total": 10250,
+        "duration_s": 30.111276055000005,
+        "iterations": null,
+        "kind": "sysbench_cpu",
+        "latency_ms_p50": 0.33,
+        "latency_ms_p95": 0.34,
+        "metric": "events/s",
+        "name": "sysbench-cpu",
+        "ops_per_sec": 12047.28,
+        "ops_total": 361438.0,
+        "processes_started": 7,
+        "stderr_tail": "",
+        "stdout_tail": "sysbench 1.0.20 (using system LuaJIT 2.1.0-beta3)\nRunning the test with following options:\nNumber of threads: 4\nInitializing random number generator from current time\nPrime numbers limit: 10000\nInitializing worker threads...\nThreads started!\nCPU speed:\n    events per second: 12047.28\nGeneral statistics:\n    total time:                          30.0003s\n    total number of events:              361438\nLatency (ms):\n         min:                                    0.32\n         avg:                                    0.33\n         max:                                    0.64\n         95th percentile:                        0.34\n         sum:                               119939.41\nThreads fairness:\n    events (avg/stddev):           90359.5000/15.32\n    execution time (avg/stddev):   29.9849/0.00",
+        "system_cpu": {
+          "busy_pct": 99.67510829723426
+        }
+      }
+    ]
+  },
+  "comparison": {
+    "comparable": false,
+    "reason": "post-ReJIT measurements are unavailable"
+  },
+  "duration_s": 30,
+  "generated_at": "2026-03-11T16:36:43.475678+00:00",
+  "host": {
+    "git_sha": "unknown",
+    "hostname": "virtme-ng",
+    "kernel": "7.0.0-rc2-g2a6783cc77b6",
+    "platform": "Linux-7.0.0-rc2-g2a6783cc77b6-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "limitations": [
+    "Raw `bpftool struct_ops register` returned success but did not leave sched_ext enabled, so the standalone bpftool path is not a usable end-to-end loader here.",
+    "bpftool does not expose per-program run_cnt/run_time_ns for these struct_ops programs on this kernel, so BPF runtime deltas are unavailable.",
+    "BPF_PROG_JIT_RECOMPILE did not apply to any loaded scx_rusty struct_ops program on this kernel, so post-ReJIT workload measurement was skipped."
+  ],
+  "mode": "scx_rusty_loader",
+  "post_rejit": null,
+  "preflight": {
+    "available_workloads": [
+      "hackbench",
+      "stress-ng-cpu",
+      "sysbench-cpu"
+    ],
+    "bpftool_register_probe": {
+      "after_ops": [],
+      "after_state": "disabled",
+      "attempted": true,
+      "before_state": "disabled",
+      "bpftool": "/usr/local/sbin/bpftool",
+      "returncode": 0,
+      "stderr_tail": "libbpf: struct_ops rusty: member sub_attach not found in kernel, skipping it as it's set to zero\nlibbpf: struct_ops rusty: member sub_detach not found in kernel, skipping it as it's set to zero\nlibbpf: struct_ops rusty: member sub_cgroup_id not found in kernel, skipping it as it's set to zero\nRegistered sched_ext_ops rusty map id 19 link id 1",
+      "stdout_tail": "",
+      "struct_ops_program_count_after": 0,
+      "usable": false
+    },
+    "loader_error": null,
+    "runtime_counters_available": false,
+    "state_before": "disabled"
+  },
+  "recompile_results": {
+    "37": {
+      "applied": false,
+      "counts": {
+        "cmov_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0
+      },
+      "error": "BPF_PROG_JIT_RECOMPILE: Invalid argument",
+      "program_name": "rusty_select_cp",
+      "stderr_tail": "BPF_PROG_JIT_RECOMPILE: Invalid argument\n",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+    },
+    "39": {
+      "applied": false,
+      "counts": {
+        "cmov_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0
+      },
+      "error": "",
+      "program_name": "rusty_enqueue",
+      "stderr_tail": "",
+      "stdout_tail": ""
+    },
+    "40": {
+      "applied": false,
+      "counts": {
+        "cmov_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0
+      },
+      "error": "BPF_PROG_JIT_RECOMPILE: Invalid argument",
+      "program_name": "rusty_dispatch",
+      "stderr_tail": "BPF_PROG_JIT_RECOMPILE: Invalid argument\n",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+    },
+    "41": {
+      "applied": false,
+      "counts": {
+        "cmov_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0
+      },
+      "error": "",
+      "program_name": "rusty_runnable",
+      "stderr_tail": "",
+      "stdout_tail": ""
+    },
+    "42": {
+      "applied": false,
+      "counts": {
+        "cmov_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0
+      },
+      "error": "BPF_PROG_JIT_RECOMPILE: Invalid argument",
+      "program_name": "rusty_running",
+      "stderr_tail": "BPF_PROG_JIT_RECOMPILE: Invalid argument\n",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+    },
+    "43": {
+      "applied": false,
+      "counts": {
+        "cmov_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0
+      },
+      "error": "",
+      "program_name": "rusty_stopping",
+      "stderr_tail": "",
+      "stdout_tail": ""
+    },
+    "44": {
+      "applied": false,
+      "counts": {
+        "cmov_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0
+      },
+      "error": "",
+      "program_name": "rusty_quiescent",
+      "stderr_tail": "",
+      "stdout_tail": ""
+    },
+    "45": {
+      "applied": false,
+      "counts": {
+        "cmov_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0
+      },
+      "error": "BPF_PROG_JIT_RECOMPILE: Invalid argument",
+      "program_name": "rusty_set_weigh",
+      "stderr_tail": "BPF_PROG_JIT_RECOMPILE: Invalid argument\n",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+    },
+    "46": {
+      "applied": false,
+      "counts": {
+        "cmov_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0
+      },
+      "error": "",
+      "program_name": "rusty_set_cpuma",
+      "stderr_tail": "",
+      "stdout_tail": ""
+    },
+    "47": {
+      "applied": false,
+      "counts": {
+        "cmov_sites": 1,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 1,
+        "wide_sites": 0
+      },
+      "error": "BPF_PROG_JIT_RECOMPILE: Invalid argument",
+      "program_name": "rusty_init_task",
+      "stderr_tail": "BPF_PROG_JIT_RECOMPILE: Invalid argument\n",
+      "stdout_tail": "Accepted 1 v5 site(s)\n  cmov:   1\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+    },
+    "48": {
+      "applied": false,
+      "counts": {
+        "cmov_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0
+      },
+      "error": "BPF_PROG_JIT_RECOMPILE: Invalid argument",
+      "program_name": "rusty_exit_task",
+      "stderr_tail": "BPF_PROG_JIT_RECOMPILE: Invalid argument\n",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+    },
+    "49": {
+      "applied": false,
+      "counts": {
+        "cmov_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0
+      },
+      "error": "",
+      "program_name": "rusty_init",
+      "stderr_tail": "",
+      "stdout_tail": ""
+    },
+    "50": {
+      "applied": false,
+      "counts": {
+        "cmov_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0
+      },
+      "error": "BPF_PROG_JIT_RECOMPILE: Invalid argument",
+      "program_name": "rusty_exit",
+      "stderr_tail": "BPF_PROG_JIT_RECOMPILE: Invalid argument\n",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+    }
+  },
+  "recompile_summary": {
+    "applied": false,
+    "applied_programs": 0,
+    "errors": [
+      "BPF_PROG_JIT_RECOMPILE: Invalid argument"
+    ],
+    "requested_programs": 13,
+    "site_bearing_programs": 7,
+    "site_totals": {
+      "cmov_sites": 27,
+      "lea_sites": 1,
+      "rotate_sites": 0,
+      "total_sites": 28,
+      "wide_sites": 0
+    }
+  },
+  "scan_results": {
+    "37": {
+      "error": "",
+      "program_name": "rusty_select_cp",
+      "sites": {
+        "cmov_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+    },
+    "39": {
+      "error": "",
+      "program_name": "rusty_enqueue",
+      "sites": {
+        "cmov_sites": 12,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 12,
+        "wide_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "Accepted 12 v5 site(s)\n  cmov:   12\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+    },
+    "40": {
+      "error": "",
+      "program_name": "rusty_dispatch",
+      "sites": {
+        "cmov_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+    },
+    "41": {
+      "error": "",
+      "program_name": "rusty_runnable",
+      "sites": {
+        "cmov_sites": 1,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 1,
+        "wide_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "Accepted 1 v5 site(s)\n  cmov:   1\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+    },
+    "42": {
+      "error": "",
+      "program_name": "rusty_running",
+      "sites": {
+        "cmov_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+    },
+    "43": {
+      "error": "",
+      "program_name": "rusty_stopping",
+      "sites": {
+        "cmov_sites": 10,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 10,
+        "wide_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "Accepted 10 v5 site(s)\n  cmov:   10\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+    },
+    "44": {
+      "error": "",
+      "program_name": "rusty_quiescent",
+      "sites": {
+        "cmov_sites": 1,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 1,
+        "wide_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "Accepted 1 v5 site(s)\n  cmov:   1\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+    },
+    "45": {
+      "error": "",
+      "program_name": "rusty_set_weigh",
+      "sites": {
+        "cmov_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+    },
+    "46": {
+      "error": "",
+      "program_name": "rusty_set_cpuma",
+      "sites": {
+        "cmov_sites": 2,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 2,
+        "wide_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "Accepted 2 v5 site(s)\n  cmov:   2\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+    },
+    "47": {
+      "error": "",
+      "program_name": "rusty_init_task",
+      "sites": {
+        "cmov_sites": 1,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 1,
+        "wide_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "Accepted 1 v5 site(s)\n  cmov:   1\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+    },
+    "48": {
+      "error": "",
+      "program_name": "rusty_exit_task",
+      "sites": {
+        "cmov_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+    },
+    "49": {
+      "error": "",
+      "program_name": "rusty_init",
+      "sites": {
+        "cmov_sites": 0,
+        "lea_sites": 1,
+        "rotate_sites": 0,
+        "total_sites": 1,
+        "wide_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "Accepted 1 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    1\n"
+    },
+    "50": {
+      "error": "",
+      "program_name": "rusty_exit",
+      "sites": {
+        "cmov_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n"
+    }
+  },
+  "scheduler_binary": "/home/yunwei37/workspace/bpf-benchmark/corpus/repos/scx/target/release/scx_rusty",
+  "scheduler_object": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/scx/scx_rusty_main.bpf.o",
+  "scheduler_ops": [
+    "rusty_1.1.0_gf33d9a7_x86_64_unknown_linux_gnu"
+  ],
+  "scheduler_output": {
+    "stderr_tail": [
+      "09:35:11 \u001b[0m\u001b[34m[INFO] \u001b[0mRunning scx_rusty (build ID: 1.1.0-gf33d9a7 x86_64-unknown-linux-gnu)",
+      "09:35:11 \u001b[0m\u001b[34m[INFO] \u001b[0mNODE[00] mask= f",
+      "09:35:11 \u001b[0m\u001b[34m[INFO] \u001b[0m DOM[00] mask= f",
+      "09:35:11 \u001b[0m\u001b[34m[INFO] \u001b[0mlibbpf: struct_ops rusty: member sub_attach not found in kernel, skipping it as it's set to zero",
+      "",
+      "09:35:11 \u001b[0m\u001b[34m[INFO] \u001b[0mlibbpf: struct_ops rusty: member sub_detach not found in kernel, skipping it as it's set to zero",
+      "",
+      "09:35:11 \u001b[0m\u001b[34m[INFO] \u001b[0mlibbpf: struct_ops rusty: member sub_cgroup_id not found in kernel, skipping it as it's set to zero",
+      "",
+      "09:35:11 \u001b[0m\u001b[33m[WARN] \u001b[0mlibbpf: map 'rusty': BPF map skeleton link is uninitialized",
+      "",
+      "09:35:11 \u001b[0m\u001b[34m[INFO] \u001b[0mRusty scheduler started! Run `scx_rusty --monitor` for metrics."
+    ],
+    "stdout_tail": [
+      "slice=1000us",
+      "direct_greedy_cpus=0",
+      "  kick_greedy_cpus=f",
+      "  NODE[00] load=  6.34 imbal=  +0.00 delta=  +0.00",
+      "   DOM[00] load=  6.34 imbal=  +0.00 delta=  +0.00",
+      "###### Wed, 11 Mar 2026 09:36:29 -0700, load balance @ -1329.0ms ######",
+      "cpu= 100.00 load=    6.34 mig=0 task_err=0 time_used= 0.2ms",
+      "tot=    218 sync_prev_idle= 0.00 wsync= 0.00",
+      "prev_idle= 0.00 greedy_idle= 0.00 pin= 0.00",
+      "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+      "dsq=100.00 greedy_local= 0.00 greedy_xnuma= 0.00",
+      "kick_greedy= 0.00 rep= 0.00",
+      "dl_clamp=74.77 dl_preset=25.23",
+      "slice=1000us",
+      "direct_greedy_cpus=0",
+      "  kick_greedy_cpus=f",
+      "  NODE[00] load=  6.34 imbal=  +0.00 delta=  +0.00",
+      "   DOM[00] load=  6.34 imbal=  +0.00 delta=  +0.00",
+      "###### Wed, 11 Mar 2026 09:36:30 -0700, load balance @  -332.1ms ######",
+      "cpu= 100.00 load=    6.34 mig=0 task_err=0 time_used= 0.2ms",
+      "tot=    231 sync_prev_idle= 0.00 wsync= 0.00",
+      "prev_idle= 0.00 greedy_idle= 0.00 pin= 0.00",
+      "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+      "dsq=100.00 greedy_local= 0.00 greedy_xnuma= 0.00",
+      "kick_greedy= 0.00 rep= 0.00",
+      "dl_clamp=77.06 dl_preset=22.94",
+      "slice=1000us",
+      "direct_greedy_cpus=0",
+      "  kick_greedy_cpus=f",
+      "  NODE[00] load=  6.34 imbal=  +0.00 delta=  +0.00",
+      "   DOM[00] load=  6.34 imbal=  +0.00 delta=  +0.00",
+      "###### Wed, 11 Mar 2026 09:36:31 -0700, load balance @ -1350.1ms ######",
+      "cpu= 100.00 load=    6.34 mig=0 task_err=0 time_used= 0.2ms",
+      "tot=    217 sync_prev_idle= 0.00 wsync= 0.00",
+      "prev_idle= 0.00 greedy_idle= 0.00 pin= 0.00",
+      "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+      "dsq=100.00 greedy_local= 0.00 greedy_xnuma= 0.00",
+      "kick_greedy= 0.00 rep= 0.00",
+      "dl_clamp=81.57 dl_preset=18.43",
+      "slice=1000us",
+      "direct_greedy_cpus=0",
+      "  kick_greedy_cpus=f",
+      "  NODE[00] load=  6.34 imbal=  +0.00 delta=  +0.00",
+      "   DOM[00] load=  6.34 imbal=  +0.00 delta=  +0.00",
+      "###### Wed, 11 Mar 2026 09:36:32 -0700, load balance @  -368.1ms ######",
+      "cpu= 100.00 load=    6.34 mig=0 task_err=0 time_used= 0.2ms",
+      "tot=    234 sync_prev_idle= 0.00 wsync= 0.00",
+      "prev_idle= 0.00 greedy_idle= 0.00 pin= 0.00",
+      "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+      "dsq=100.00 greedy_local= 0.00 greedy_xnuma= 0.00",
+      "kick_greedy= 0.00 rep= 0.00",
+      "dl_clamp=77.78 dl_preset=22.22",
+      "slice=1000us",
+      "direct_greedy_cpus=0",
+      "  kick_greedy_cpus=f",
+      "  NODE[00] load=  6.34 imbal=  +0.00 delta=  +0.00",
+      "   DOM[00] load=  6.34 imbal=  +0.00 delta=  +0.00",
+      "###### Wed, 11 Mar 2026 09:36:33 -0700, load balance @ -1377.1ms ######",
+      "cpu= 100.00 load=    6.34 mig=0 task_err=0 time_used= 0.2ms",
+      "tot=    225 sync_prev_idle= 0.00 wsync= 0.00",
+      "prev_idle= 0.00 greedy_idle= 0.00 pin= 0.00",
+      "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+      "dsq=100.00 greedy_local= 0.00 greedy_xnuma= 0.00",
+      "kick_greedy= 0.00 rep= 0.00",
+      "dl_clamp=70.67 dl_preset=29.33",
+      "slice=1000us",
+      "direct_greedy_cpus=0",
+      "  kick_greedy_cpus=f",
+      "  NODE[00] load=  6.34 imbal=  +0.00 delta=  +0.00",
+      "   DOM[00] load=  6.34 imbal=  +0.00 delta=  +0.00",
+      "###### Wed, 11 Mar 2026 09:36:34 -0700, load balance @  -371.1ms ######",
+      "cpu= 100.00 load=    6.35 mig=0 task_err=0 time_used= 0.2ms",
+      "tot=    229 sync_prev_idle= 0.00 wsync= 0.00",
+      "prev_idle= 0.00 greedy_idle= 0.00 pin= 0.00",
+      "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+      "dsq=100.00 greedy_local= 0.00 greedy_xnuma= 0.00",
+      "kick_greedy= 0.00 rep= 0.00",
+      "dl_clamp=75.55 dl_preset=24.45",
+      "slice=1000us",
+      "direct_greedy_cpus=0",
+      "  kick_greedy_cpus=f",
+      "  NODE[00] load=  6.35 imbal=  +0.00 delta=  +0.00",
+      "   DOM[00] load=  6.35 imbal=  +0.00 delta=  +0.00",
+      "###### Wed, 11 Mar 2026 09:36:35 -0700, load balance @ -1373.1ms ######",
+      "cpu= 100.00 load=    6.35 mig=0 task_err=0 time_used= 0.2ms",
+      "tot=    217 sync_prev_idle= 0.00 wsync= 0.00",
+      "prev_idle= 0.00 greedy_idle= 0.00 pin= 0.00",
+      "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+      "dsq=100.00 greedy_local= 0.00 greedy_xnuma= 0.00",
+      "kick_greedy= 0.00 rep= 0.00",
+      "dl_clamp=73.73 dl_preset=26.27",
+      "slice=1000us",
+      "direct_greedy_cpus=0",
+      "  kick_greedy_cpus=f",
+      "  NODE[00] load=  6.35 imbal=  +0.00 delta=  +0.00",
+      "   DOM[00] load=  6.35 imbal=  +0.00 delta=  +0.00",
+      "###### Wed, 11 Mar 2026 09:36:36 -0700, load balance @  -383.1ms ######",
+      "cpu= 100.00 load=    6.31 mig=0 task_err=0 time_used= 0.2ms",
+      "tot=    233 sync_prev_idle= 0.00 wsync= 0.00",
+      "prev_idle= 0.00 greedy_idle= 0.00 pin= 0.00",
+      "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+      "dsq=100.00 greedy_local= 0.00 greedy_xnuma= 0.00",
+      "kick_greedy= 0.00 rep= 0.00",
+      "dl_clamp=77.68 dl_preset=22.32",
+      "slice=1000us",
+      "direct_greedy_cpus=0",
+      "  kick_greedy_cpus=f",
+      "  NODE[00] load=  6.31 imbal=  +0.00 delta=  +0.00",
+      "   DOM[00] load=  6.31 imbal=  +0.00 delta=  +0.00",
+      "###### Wed, 11 Mar 2026 09:36:37 -0700, load balance @ -1387.1ms ######",
+      "cpu= 100.00 load=    6.31 mig=0 task_err=0 time_used= 0.2ms",
+      "tot=    222 sync_prev_idle= 0.00 wsync= 0.00",
+      "prev_idle= 0.00 greedy_idle= 0.00 pin= 0.00",
+      "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+      "dsq=100.00 greedy_local= 0.00 greedy_xnuma= 0.00",
+      "kick_greedy= 0.00 rep= 0.00",
+      "dl_clamp=71.17 dl_preset=28.83",
+      "slice=1000us",
+      "direct_greedy_cpus=0",
+      "  kick_greedy_cpus=f",
+      "  NODE[00] load=  6.31 imbal=  +0.00 delta=  +0.00",
+      "   DOM[00] load=  6.31 imbal=  +0.00 delta=  +0.00",
+      "###### Wed, 11 Mar 2026 09:36:38 -0700, load balance @  -385.1ms ######",
+      "cpu= 100.00 load=    6.33 mig=0 task_err=0 time_used= 0.2ms",
+      "tot=    236 sync_prev_idle= 0.00 wsync= 0.00",
+      "prev_idle= 0.00 greedy_idle= 0.00 pin= 0.00",
+      "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+      "dsq=100.00 greedy_local= 0.00 greedy_xnuma= 0.00",
+      "kick_greedy= 0.00 rep= 0.00",
+      "dl_clamp=71.61 dl_preset=28.39",
+      "slice=1000us",
+      "direct_greedy_cpus=0",
+      "  kick_greedy_cpus=f",
+      "  NODE[00] load=  6.33 imbal=  +0.00 delta=  +0.00",
+      "   DOM[00] load=  6.33 imbal=  +0.00 delta=  +0.00",
+      "###### Wed, 11 Mar 2026 09:36:39 -0700, load balance @ -1390.1ms ######",
+      "cpu= 100.00 load=    6.33 mig=0 task_err=0 time_used= 0.2ms",
+      "tot=    223 sync_prev_idle= 0.00 wsync= 0.00",
+      "prev_idle= 0.00 greedy_idle= 0.00 pin= 0.00",
+      "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+      "dsq=100.00 greedy_local= 0.00 greedy_xnuma= 0.00",
+      "kick_greedy= 0.00 rep= 0.00",
+      "dl_clamp=83.41 dl_preset=16.59",
+      "slice=1000us",
+      "direct_greedy_cpus=0",
+      "  kick_greedy_cpus=f",
+      "  NODE[00] load=  6.33 imbal=  +0.00 delta=  +0.00",
+      "   DOM[00] load=  6.33 imbal=  +0.00 delta=  +0.00",
+      "###### Wed, 11 Mar 2026 09:36:40 -0700, load balance @  -396.1ms ######",
+      "cpu= 100.00 load=    6.31 mig=0 task_err=0 time_used= 0.2ms",
+      "tot=    228 sync_prev_idle= 0.00 wsync= 0.00",
+      "prev_idle= 0.00 greedy_idle= 0.00 pin= 0.00",
+      "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+      "dsq=100.00 greedy_local= 0.00 greedy_xnuma= 0.00",
+      "kick_greedy= 0.00 rep= 0.00",
+      "dl_clamp=75.00 dl_preset=25.00",
+      "slice=1000us",
+      "direct_greedy_cpus=0",
+      "  kick_greedy_cpus=f",
+      "  NODE[00] load=  6.31 imbal=  +0.00 delta=  +0.00",
+      "   DOM[00] load=  6.31 imbal=  +0.00 delta=  +0.00",
+      "###### Wed, 11 Mar 2026 09:36:41 -0700, load balance @ -1401.1ms ######",
+      "cpu= 100.00 load=    6.31 mig=0 task_err=0 time_used= 0.2ms",
+      "tot=    221 sync_prev_idle= 0.00 wsync= 0.00",
+      "prev_idle= 0.00 greedy_idle= 0.00 pin= 0.00",
+      "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+      "dsq=100.00 greedy_local= 0.00 greedy_xnuma= 0.00",
+      "kick_greedy= 0.00 rep= 0.00",
+      "dl_clamp=79.64 dl_preset=20.36",
+      "slice=1000us",
+      "direct_greedy_cpus=0",
+      "  kick_greedy_cpus=f",
+      "  NODE[00] load=  6.31 imbal=  +0.00 delta=  +0.00",
+      "   DOM[00] load=  6.31 imbal=  +0.00 delta=  +0.00",
+      "###### Wed, 11 Mar 2026 09:36:42 -0700, load balance @  -424.1ms ######",
+      "cpu= 100.00 load=    6.32 mig=0 task_err=0 time_used= 0.2ms",
+      "tot=    233 sync_prev_idle= 0.00 wsync= 0.00",
+      "prev_idle= 0.00 greedy_idle= 0.00 pin= 0.00",
+      "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+      "dsq=100.00 greedy_local= 0.00 greedy_xnuma= 0.00",
+      "kick_greedy= 0.00 rep= 0.00",
+      "dl_clamp=78.54 dl_preset=21.46",
+      "slice=1000us",
+      "direct_greedy_cpus=0",
+      "  kick_greedy_cpus=f",
+      "  NODE[00] load=  6.32 imbal=  +0.00 delta=  +0.00",
+      "   DOM[00] load=  6.32 imbal=  +0.00 delta=  +0.00",
+      "###### Wed, 11 Mar 2026 09:36:43 -0700, load balance @ -1425.4ms ######",
+      "cpu=  51.64 load=    6.32 mig=0 task_err=0 time_used= 0.3ms",
+      "tot=   2783 sync_prev_idle= 5.14 wsync= 0.00",
+      "prev_idle=84.91 greedy_idle= 0.00 pin= 0.00",
+      "dir= 1.55 dir_greedy= 0.00 dir_greedy_far= 0.00",
+      "dsq= 8.41 greedy_local= 0.00 greedy_xnuma= 0.00",
+      "kick_greedy= 0.00 rep= 0.00",
+      "dl_clamp= 7.29 dl_preset= 1.08",
+      "slice=20000us",
+      "direct_greedy_cpus=f",
+      "  kick_greedy_cpus=f",
+      "  NODE[00] load=  6.32 imbal=  +0.00 delta=  +0.00",
+      "   DOM[00] load=  6.32 imbal=  +0.00 delta=  +0.00"
+    ]
+  },
+  "scheduler_programs": [
+    {
+      "btf_id": 36,
+      "bytes_jited": 3912,
+      "bytes_memlock": 8192,
+      "bytes_xlated": 6624,
+      "gpl_compatible": true,
+      "id": 37,
+      "jited": true,
+      "loaded_at": 1773246911,
+      "map_ids": [
+        35,
+        36,
+        26,
+        38,
+        31,
+        37,
+        30,
+        33,
+        40,
+        32,
+        28
+      ],
+      "name": "rusty_select_cpu",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 21,
+          "pid": 157
+        }
+      ],
+      "owner_pids": [
+        157
+      ],
+      "pids": [
+        {
+          "comm": "scx_rusty",
+          "pid": 157
+        }
+      ],
+      "tag": "a7b54cc006fad249",
+      "type": "struct_ops",
+      "uid": 0
+    },
+    {
+      "btf_id": 36,
+      "bytes_jited": 7799,
+      "bytes_memlock": 20480,
+      "bytes_xlated": 13064,
+      "gpl_compatible": true,
+      "id": 39,
+      "jited": true,
+      "loaded_at": 1773246911,
+      "map_ids": [
+        31,
+        36,
+        35,
+        38,
+        37,
+        30,
+        33,
+        40,
+        32,
+        26,
+        29
+      ],
+      "name": "rusty_enqueue",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 22,
+          "pid": 157
+        }
+      ],
+      "owner_pids": [
+        157
+      ],
+      "pids": [
+        {
+          "comm": "scx_rusty",
+          "pid": 157
+        }
+      ],
+      "tag": "77e6a0703b80285c",
+      "type": "struct_ops",
+      "uid": 0
+    },
+    {
+      "btf_id": 36,
+      "bytes_jited": 724,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 1304,
+      "gpl_compatible": true,
+      "id": 40,
+      "jited": true,
+      "loaded_at": 1773246911,
+      "map_ids": [
+        36,
+        35,
+        37,
+        31,
+        40
+      ],
+      "name": "rusty_dispatch",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 23,
+          "pid": 157
+        }
+      ],
+      "owner_pids": [
+        157
+      ],
+      "pids": [
+        {
+          "comm": "scx_rusty",
+          "pid": 157
+        }
+      ],
+      "tag": "3dec396178022f8d",
+      "type": "struct_ops",
+      "uid": 0
+    },
+    {
+      "btf_id": 36,
+      "bytes_jited": 2276,
+      "bytes_memlock": 8192,
+      "bytes_xlated": 3656,
+      "gpl_compatible": true,
+      "id": 41,
+      "jited": true,
+      "loaded_at": 1773246911,
+      "map_ids": [
+        37,
+        36,
+        33,
+        35,
+        40,
+        32,
+        29
+      ],
+      "name": "rusty_runnable",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 24,
+          "pid": 157
+        }
+      ],
+      "owner_pids": [
+        157
+      ],
+      "pids": [
+        {
+          "comm": "scx_rusty",
+          "pid": 157
+        }
+      ],
+      "tag": "bac2eda01427c682",
+      "type": "struct_ops",
+      "uid": 0
+    },
+    {
+      "btf_id": 36,
+      "bytes_jited": 677,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 952,
+      "gpl_compatible": true,
+      "id": 42,
+      "jited": true,
+      "loaded_at": 1773246911,
+      "map_ids": [
+        37,
+        36,
+        26,
+        33,
+        35,
+        40,
+        32
+      ],
+      "name": "rusty_running",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 25,
+          "pid": 157
+        }
+      ],
+      "owner_pids": [
+        157
+      ],
+      "pids": [
+        {
+          "comm": "scx_rusty",
+          "pid": 157
+        }
+      ],
+      "tag": "7c06f2e9e4ee47e2",
+      "type": "struct_ops",
+      "uid": 0
+    },
+    {
+      "btf_id": 36,
+      "bytes_jited": 1277,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 1840,
+      "gpl_compatible": true,
+      "id": 43,
+      "jited": true,
+      "loaded_at": 1773246911,
+      "map_ids": [
+        36,
+        37,
+        33,
+        35,
+        40,
+        32
+      ],
+      "name": "rusty_stopping",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 26,
+          "pid": 157
+        }
+      ],
+      "owner_pids": [
+        157
+      ],
+      "pids": [
+        {
+          "comm": "scx_rusty",
+          "pid": 157
+        }
+      ],
+      "tag": "54cde6013b8227be",
+      "type": "struct_ops",
+      "uid": 0
+    },
+    {
+      "btf_id": 36,
+      "bytes_jited": 2373,
+      "bytes_memlock": 8192,
+      "bytes_xlated": 3808,
+      "gpl_compatible": true,
+      "id": 44,
+      "jited": true,
+      "loaded_at": 1773246911,
+      "map_ids": [
+        37,
+        36,
+        33,
+        35,
+        40,
+        32,
+        29
+      ],
+      "name": "rusty_quiescent",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 27,
+          "pid": 157
+        }
+      ],
+      "owner_pids": [
+        157
+      ],
+      "pids": [
+        {
+          "comm": "scx_rusty",
+          "pid": 157
+        }
+      ],
+      "tag": "ecab36fd53f76b5f",
+      "type": "struct_ops",
+      "uid": 0
+    },
+    {
+      "btf_id": 36,
+      "bytes_jited": 337,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 392,
+      "gpl_compatible": true,
+      "id": 45,
+      "jited": true,
+      "loaded_at": 1773246911,
+      "map_ids": [
+        37,
+        36,
+        33,
+        35,
+        40,
+        32
+      ],
+      "name": "rusty_set_weight",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 28,
+          "pid": 157
+        }
+      ],
+      "owner_pids": [
+        157
+      ],
+      "pids": [
+        {
+          "comm": "scx_rusty",
+          "pid": 157
+        }
+      ],
+      "tag": "02bfb3e1f472b57a",
+      "type": "struct_ops",
+      "uid": 0
+    },
+    {
+      "btf_id": 36,
+      "bytes_jited": 6202,
+      "bytes_memlock": 20480,
+      "bytes_xlated": 10360,
+      "gpl_compatible": true,
+      "id": 46,
+      "jited": true,
+      "loaded_at": 1773246911,
+      "map_ids": [
+        37,
+        38,
+        33,
+        35,
+        36,
+        40,
+        32,
+        30,
+        26,
+        29
+      ],
+      "name": "rusty_set_cpumask",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 29,
+          "pid": 157
+        }
+      ],
+      "owner_pids": [
+        157
+      ],
+      "pids": [
+        {
+          "comm": "scx_rusty",
+          "pid": 157
+        }
+      ],
+      "tag": "1d5fa5db525bd8ef",
+      "type": "struct_ops",
+      "uid": 0
+    },
+    {
+      "btf_id": 36,
+      "bytes_jited": 5448,
+      "bytes_memlock": 24576,
+      "bytes_xlated": 8848,
+      "gpl_compatible": true,
+      "id": 47,
+      "jited": true,
+      "loaded_at": 1773246911,
+      "map_ids": [
+        36,
+        30,
+        37,
+        33,
+        35,
+        41,
+        32,
+        40,
+        26,
+        29
+      ],
+      "name": "rusty_init_task",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 30,
+          "pid": 157
+        }
+      ],
+      "owner_pids": [
+        157
+      ],
+      "pids": [
+        {
+          "comm": "scx_rusty",
+          "pid": 157
+        }
+      ],
+      "tag": "eed41ef284338d58",
+      "type": "struct_ops",
+      "uid": 0
+    },
+    {
+      "btf_id": 36,
+      "bytes_jited": 1786,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 2792,
+      "gpl_compatible": true,
+      "id": 48,
+      "jited": true,
+      "loaded_at": 1773246911,
+      "map_ids": [
+        30,
+        31,
+        33,
+        35,
+        36,
+        40,
+        32,
+        41,
+        37
+      ],
+      "name": "rusty_exit_task",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 31,
+          "pid": 157
+        }
+      ],
+      "owner_pids": [
+        157
+      ],
+      "pids": [
+        {
+          "comm": "scx_rusty",
+          "pid": 157
+        }
+      ],
+      "tag": "258733b1097b791c",
+      "type": "struct_ops",
+      "uid": 0
+    },
+    {
+      "btf_id": 36,
+      "bytes_jited": 7731,
+      "bytes_memlock": 16384,
+      "bytes_xlated": 12816,
+      "gpl_compatible": true,
+      "id": 49,
+      "jited": true,
+      "loaded_at": 1773246911,
+      "map_ids": [
+        38,
+        37,
+        36,
+        32,
+        41,
+        35,
+        40,
+        28,
+        27,
+        26
+      ],
+      "name": "rusty_init",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 32,
+          "pid": 157
+        }
+      ],
+      "owner_pids": [
+        157
+      ],
+      "pids": [
+        {
+          "comm": "scx_rusty",
+          "pid": 157
+        }
+      ],
+      "tag": "24ea0b8a2a54f52a",
+      "type": "struct_ops",
+      "uid": 0
+    },
+    {
+      "btf_id": 36,
+      "bytes_jited": 167,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 240,
+      "gpl_compatible": true,
+      "id": 50,
+      "jited": true,
+      "loaded_at": 1773246911,
+      "map_ids": [
+        37,
+        36,
+        39,
+        40
+      ],
+      "name": "rusty_exit",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 33,
+          "pid": 157
+        }
+      ],
+      "owner_pids": [
+        157
+      ],
+      "pids": [
+        {
+          "comm": "scx_rusty",
+          "pid": 157
+        }
+      ],
+      "tag": "11ab5b228921e73d",
+      "type": "struct_ops",
+      "uid": 0
+    }
+  ],
+  "smoke": false
+}

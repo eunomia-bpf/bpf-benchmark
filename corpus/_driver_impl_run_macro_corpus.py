@@ -25,6 +25,11 @@ for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpu
         sys.path.insert(0, candidate_str)
 
 try:
+    from results_layout import maybe_refresh_latest_alias, refresh_latest_alias
+except ImportError:
+    from corpus.results_layout import maybe_refresh_latest_alias, refresh_latest_alias
+
+try:
     from orchestrator.catalog import load_catalog
     from orchestrator.inventory import discover_object_programs
 except ImportError:
@@ -1121,9 +1126,20 @@ def main(argv: list[str] | None = None) -> int:
 
         results["benchmarks"].append(benchmark_record)
 
-    ensure_parent(suite.output_path)
-    suite.output_path.write_text(json.dumps(results, indent=2) + "\n")
-    print(f"[done] wrote {suite.output_path}")
+    output_path = suite.output_path
+    latest_alias_path: Path | None = None
+    if output_path.name.endswith(".latest.json"):
+        suite_name = output_path.name[: -len(".latest.json")]
+        output_path = output_path.parent / f"{suite_name}_authoritative_{results['generated_at'][:10].replace('-', '')}.json"
+        latest_alias_path = suite.output_path
+
+    ensure_parent(output_path)
+    output_path.write_text(json.dumps(results, indent=2) + "\n")
+    if latest_alias_path is not None:
+        refresh_latest_alias(latest_alias_path, output_path)
+    else:
+        maybe_refresh_latest_alias(output_path)
+    print(f"[done] wrote {output_path}")
     return 0
 
 

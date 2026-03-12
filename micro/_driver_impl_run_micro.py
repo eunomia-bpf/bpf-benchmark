@@ -13,6 +13,10 @@ from pathlib import Path
 
 from benchmark_catalog import CONFIG_PATH, ROOT_DIR, SuiteSpec, load_suite
 try:
+    from results_layout import maybe_refresh_latest_alias, refresh_latest_alias, smoke_output_path
+except ImportError:
+    from micro.results_layout import maybe_refresh_latest_alias, refresh_latest_alias, smoke_output_path
+try:
     from orchestrator.benchmarks import resolve_memory_file, select_benchmarks
     from orchestrator.commands import build_micro_benchmark_command
     from orchestrator.environment import (
@@ -268,7 +272,16 @@ def main(argv: list[str] | None = None) -> int:
 
     iterations = args.iterations if args.iterations is not None else suite.defaults.iterations
     warmups = args.warmups if args.warmups is not None else suite.defaults.warmups
-    output_path = Path(args.output).resolve() if args.output else suite.defaults.output
+    if args.output:
+        output_path = Path(args.output).resolve()
+    else:
+        output_path = suite.defaults.output
+        default_runtime_names = set(suite.defaults.runtimes)
+        selected_runtime_names = {runtime.name for runtime in runtimes}
+        full_benchmark_selection = len(benchmarks) == len(suite.benchmarks)
+        authoritative_run = full_benchmark_selection and default_runtime_names.issubset(selected_runtime_names)
+        if not authoritative_run:
+            output_path = smoke_output_path(output_path.parent, "pure_jit")
 
     ensure_artifacts_built(suite, args.build_bpftool)
 
@@ -435,9 +448,20 @@ def main(argv: list[str] | None = None) -> int:
 
     attach_baseline_adjustments(results, suite.analysis.baseline_benchmark)
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(json.dumps(results, indent=2))
-    print(f"[done] wrote {output_path}")
+    write_path = output_path
+    latest_alias_path: Path | None = None
+    if output_path.name.endswith(".latest.json"):
+        suite_name = output_path.name[: -len(".latest.json")]
+        write_path = output_path.parent / f"{suite_name}_authoritative_{results['generated_at'][:10].replace('-', '')}.json"
+        latest_alias_path = output_path
+
+    write_path.parent.mkdir(parents=True, exist_ok=True)
+    write_path.write_text(json.dumps(results, indent=2) + "\n")
+    if latest_alias_path is not None:
+        refresh_latest_alias(latest_alias_path, write_path)
+    else:
+        maybe_refresh_latest_alias(write_path)
+    print(f"[done] wrote {write_path}")
     return 0
 
 

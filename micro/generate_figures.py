@@ -25,6 +25,10 @@ try:
     from orchestrator.catalog import DEFAULT_MICRO_MANIFEST, ManifestSpec, load_manifest, load_manifest_from_results
 except ModuleNotFoundError:
     from micro.orchestrator.catalog import DEFAULT_MICRO_MANIFEST, ManifestSpec, load_manifest, load_manifest_from_results
+try:
+    from results_layout import authoritative_candidates, latest_output_path
+except ImportError:
+    from micro.results_layout import authoritative_candidates, latest_output_path
 
 
 plt.rcParams.update(
@@ -50,15 +54,14 @@ RESULTS_DIR = MICRO_DIR / "results"
 FIGURES_DIR = RESULTS_DIR / "figures"
 DEFAULT_MICRO_CATALOG = load_manifest(DEFAULT_MICRO_MANIFEST) if DEFAULT_MICRO_MANIFEST.exists() else None
 PURE_JIT_RESULTS_CANDIDATES = (
-    DEFAULT_MICRO_CATALOG.defaults.output if DEFAULT_MICRO_CATALOG is not None else RESULTS_DIR / "pure_jit.latest.json",
-    RESULTS_DIR / "pure_jit_authoritative.json",
-    RESULTS_DIR / "pure_jit_full_31.json",
+    DEFAULT_MICRO_CATALOG.defaults.output if DEFAULT_MICRO_CATALOG is not None else latest_output_path(RESULTS_DIR, "pure_jit"),
+    *authoritative_candidates(RESULTS_DIR, "pure_jit"),
 )
 CAUSAL_RESULTS_CANDIDATES = (
-    RESULTS_DIR / "causal_isolation_authoritative.json",
-    RESULTS_DIR / "pure_jit_with_cmov.json",
-    DEFAULT_MICRO_CATALOG.defaults.output if DEFAULT_MICRO_CATALOG is not None else RESULTS_DIR / "pure_jit.latest.json",
-    RESULTS_DIR / "pure_jit.latest.json",
+    *tuple(sorted(RESULTS_DIR.glob("causal_isolation_authoritative_*.json"), reverse=True)),
+    *tuple(sorted(RESULTS_DIR.glob("pure_jit_with_cmov_authoritative_*.json"), reverse=True)),
+    DEFAULT_MICRO_CATALOG.defaults.output if DEFAULT_MICRO_CATALOG is not None else latest_output_path(RESULTS_DIR, "pure_jit"),
+    latest_output_path(RESULTS_DIR, "pure_jit"),
 )
 
 

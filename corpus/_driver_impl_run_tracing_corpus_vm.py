@@ -19,6 +19,11 @@ for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpu
         sys.path.insert(0, candidate_str)
 
 try:
+    from results_layout import authoritative_output_path, smoke_output_path
+except ImportError:
+    from corpus.results_layout import authoritative_output_path, smoke_output_path
+
+try:
     import _driver_impl_run_corpus_tracing_exec as tracing_exec_impl
 except ImportError:
     from corpus import _driver_impl_run_corpus_tracing_exec as tracing_exec_impl
@@ -67,7 +72,7 @@ except ImportError:
 
 ROOT_DIR = REPO_ROOT
 SELF_RELATIVE = Path(__file__).resolve().relative_to(ROOT_DIR)
-DEFAULT_OUTPUT_JSON = ROOT_DIR / "corpus" / "results" / "tracing_corpus_vm.json"
+DEFAULT_OUTPUT_JSON = authoritative_output_path(ROOT_DIR / "corpus" / "results", "tracing_corpus_vm")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "docs" / "tmp" / "tracing-corpus-vm-report.md"
 DEFAULT_PLAN_MD = ROOT_DIR / "docs" / "tmp" / "tracing-corpus-vm-plan.md"
 DEFAULT_KERNEL_IMAGE = ROOT_DIR / "vendor" / "linux-framework" / "arch" / "x86" / "boot" / "bzImage"
@@ -113,7 +118,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         parser,
         help_text=(
             "Optional expanded corpus build JSON report. When omitted, "
-            "corpus/results/expanded_corpus_build.json is used if present."
+            "corpus/results/expanded_corpus_build.latest.json is used if present."
         ),
     )
     add_repeat_argument(parser, tracing_exec_impl.DEFAULT_REPEAT, help_text="Measurement workload iterations per phase.")
@@ -652,7 +657,10 @@ def run_guest_batch_mode(args: argparse.Namespace, runner: Path, scanner: Path) 
         "summary": summary,
         "programs": records,
     }
-    output_json = Path(args.output_json).resolve()
+    if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.max_programs is not None:
+        output_json = smoke_output_path(ROOT_DIR / "corpus" / "results", "tracing_corpus_vm")
+    else:
+        output_json = Path(args.output_json).resolve()
     output_md = Path(args.output_md).resolve()
     tracing_exec_impl.write_json(output_json, payload)
     tracing_exec_impl.write_text(output_md, tracing_exec_impl.build_markdown(payload) + "\n")
@@ -776,7 +784,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.warmup_repeat < 0:
         raise SystemExit("--warmup-repeat must be >= 0")
 
-    output_json = Path(args.output_json).resolve()
+    if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.max_programs is not None:
+        output_json = smoke_output_path(ROOT_DIR / "corpus" / "results", "tracing_corpus_vm")
+    else:
+        output_json = Path(args.output_json).resolve()
     output_md = Path(args.output_md).resolve()
     plan_md = Path(args.plan_md).resolve()
     kernel_image = Path(args.kernel_image).resolve()

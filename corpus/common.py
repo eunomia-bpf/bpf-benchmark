@@ -8,6 +8,11 @@ from pathlib import Path
 from typing import Any, Sequence
 
 try:
+    from results_layout import maybe_refresh_latest_alias
+except ImportError:
+    from corpus.results_layout import maybe_refresh_latest_alias
+
+try:
     from orchestrator.commands import build_runner_command as build_base_runner_command
     from orchestrator.corpus import (
         directive_scan_from_record,
@@ -289,6 +294,7 @@ def parse_scanner_v5_output(stdout: str) -> dict[str, int]:
 def write_json_output(path: Path, payload: Any) -> None:
     ensure_parent(path)
     path.write_text(json.dumps(payload, indent=2) + "\n")
+    maybe_refresh_latest_alias(path)
 
 
 def write_text_output(path: Path, text: str) -> None:

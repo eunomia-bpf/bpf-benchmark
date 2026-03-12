@@ -25,7 +25,10 @@ from scipy.stats import wilcoxon
 
 
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
-DEFAULT_INPUT = ROOT_DIR / "results" / "pure_jit_rigorous.json"
+DEFAULT_INPUT = next(
+    iter(sorted((ROOT_DIR / "results" / "rigorous").glob("*_summary.json"), reverse=True)),
+    ROOT_DIR / "results" / "pure_jit.latest.json",
+)
 DEFAULT_OUTPUT = ROOT_DIR / "results" / "stability_analysis.md"
 PLOT_DIR = ROOT_DIR / "results" / "stability"
 ROLLING_WINDOW = 5

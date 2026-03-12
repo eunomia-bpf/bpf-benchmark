@@ -130,7 +130,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         parser,
         help_text=(
             "Optional expanded corpus build JSON report. When omitted, "
-            "corpus/directive_census.py will use corpus/results/expanded_corpus_build.json if present."
+            "corpus/directive_census.py will use corpus/results/expanded_corpus_build.latest.json if present."
         ),
     )
     add_max_programs_argument(parser, help_text="Stop after processing this many discovered programs.")

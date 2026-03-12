@@ -11,7 +11,7 @@ from pathlib import Path
 
 
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
-DEFAULT_INPUT = ROOT_DIR / "results" / "pure_jit_authoritative.json"
+DEFAULT_INPUT = ROOT_DIR / "results" / "pure_jit.latest.json"
 DEFAULT_OUTPUT = ROOT_DIR / "results" / "paradox_analysis.md"
 DEFAULT_AUTHORITATIVE_ANALYSIS = ROOT_DIR / "results" / "pure_jit_authoritative_analysis.md"
 DEFAULT_PROGRAMS_DIR = ROOT_DIR / "programs"

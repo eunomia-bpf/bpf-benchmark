@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import shlex
 import statistics
 import subprocess
@@ -20,6 +21,11 @@ for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpu
     candidate_str = str(candidate)
     if candidate_str not in sys.path:
         sys.path.insert(0, candidate_str)
+
+try:
+    from results_layout import authoritative_output_path, smoke_output_path
+except ImportError:
+    from corpus.results_layout import authoritative_output_path, smoke_output_path
 
 try:
     from orchestrator.inventory import load_packet_test_run_targets
@@ -55,6 +61,7 @@ try:
         run_text_command as shared_run_text_command,
         summarize_text,
         text_invocation_summary,
+        write_json_output,
     )
     from policy_utils import POLICY_DIR as DEFAULT_POLICY_DIR, resolve_policy_path
 except ImportError:
@@ -84,6 +91,7 @@ except ImportError:
         run_text_command as shared_run_text_command,
         summarize_text,
         text_invocation_summary,
+        write_json_output,
     )
     from corpus.policy_utils import POLICY_DIR as DEFAULT_POLICY_DIR, resolve_policy_path
 
@@ -91,7 +99,7 @@ except ImportError:
 ROOT_DIR = Path(__file__).resolve().parent.parent
 SELF_RELATIVE = Path(__file__).resolve().relative_to(ROOT_DIR)
 DEFAULT_INVENTORY_JSON = ROOT_DIR / "docs" / "tmp" / "corpus-runnability-results.json"
-DEFAULT_OUTPUT_JSON = ROOT_DIR / "corpus" / "results" / "corpus_v5_vm_batch.json"
+DEFAULT_OUTPUT_JSON = authoritative_output_path(ROOT_DIR / "corpus" / "results", "corpus_v5_vm_batch")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "docs" / "tmp" / "corpus-batch-recompile-results.md"
 DEFAULT_RUNNER = ROOT_DIR / "micro" / "build" / "runner" / "micro_exec"
 DEFAULT_SCANNER = ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"
@@ -1238,7 +1246,10 @@ def main(argv: list[str] | None = None) -> int:
         return run_guest_target_mode(args)
 
     inventory_json = Path(args.inventory_json).resolve()
-    output_json = Path(args.output_json).resolve()
+    if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.max_programs is not None:
+        output_json = smoke_output_path(ROOT_DIR / "corpus" / "results", "corpus_v5_vm_batch")
+    else:
+        output_json = Path(args.output_json).resolve()
     output_md = Path(args.output_md).resolve()
     runner = Path(args.runner).resolve()
     scanner = Path(args.scanner).resolve()
@@ -1367,7 +1378,7 @@ def main(argv: list[str] | None = None) -> int:
 
     ensure_parent(output_json)
     ensure_parent(output_md)
-    output_json.write_text(json.dumps(result, indent=2) + "\n")
+    write_json_output(output_json, result)
     output_md.write_text(build_markdown(result))
 
     print(f"Wrote {output_json}")

@@ -11,6 +11,10 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+try:
+    from results_layout import authoritative_output_path, maybe_refresh_latest_alias, smoke_output_path
+except ImportError:
+    from corpus.results_layout import authoritative_output_path, maybe_refresh_latest_alias, smoke_output_path
 
 
 def find_repo_root() -> Path:
@@ -23,7 +27,7 @@ def find_repo_root() -> Path:
 REPO_ROOT = find_repo_root()
 CORPUS_ROOT = REPO_ROOT / "corpus"
 DEFAULT_MANIFEST = CORPUS_ROOT / "bcf" / "manifest.json"
-DEFAULT_OUTPUT = CORPUS_ROOT / "results" / "bcf_batch.json"
+DEFAULT_OUTPUT = authoritative_output_path(CORPUS_ROOT / "results", "bcf_batch")
 DEFAULT_RUNNER = REPO_ROOT / "micro" / "build" / "runner" / "micro_exec"
 DEFAULT_INPUT_SIZE = 256
 DEFAULT_REPEAT = 1
@@ -179,7 +183,10 @@ def invoke_runtime(command: list[str]) -> dict[str, Any]:
 def main() -> int:
     args = parse_args()
     manifest_path = Path(args.manifest).resolve()
-    output_path = Path(args.output).resolve()
+    if args.output == str(DEFAULT_OUTPUT) and args.max_programs is not None:
+        output_path = smoke_output_path(CORPUS_ROOT / "results", "bcf_batch")
+    else:
+        output_path = Path(args.output).resolve()
     runner_path = Path(args.runner).resolve()
 
     if not manifest_path.exists():
@@ -278,6 +285,7 @@ def main() -> int:
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(payload, indent=2))
+    maybe_refresh_latest_alias(output_path)
     print(f"[done] wrote {output_path}")
     return 0
 

@@ -17,7 +17,18 @@ from typing import Any, Mapping, Sequence
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from e2e.common import ROOT_DIR, ensure_root, run_command, tail_text, which, write_json, write_text  # noqa: E402
+from e2e.common import (  # noqa: E402
+    RESULTS_DIR,
+    ROOT_DIR,
+    authoritative_output_path,
+    ensure_root,
+    run_command,
+    smoke_output_path,
+    tail_text,
+    which,
+    write_json,
+    write_text,
+)
 from e2e.common.agent import find_bpf_programs, start_agent, stop_agent  # noqa: E402
 from e2e.common.metrics import (  # noqa: E402
     compute_delta,
@@ -38,7 +49,7 @@ from e2e.common.workload import (  # noqa: E402
 
 
 DEFAULT_SCRIPT_DIR = Path(__file__).with_name("scripts")
-DEFAULT_OUTPUT_JSON = ROOT_DIR / "e2e" / "results" / "bpftrace-real-e2e.json"
+DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "bpftrace")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "bpftrace-real-e2e.md"
 DEFAULT_REPORT_MD = ROOT_DIR / "docs" / "tmp" / "bpftrace-real-e2e-report.md"
 DEFAULT_RUNNER = ROOT_DIR / "micro" / "build" / "runner" / "micro_exec"
@@ -794,7 +805,10 @@ def main() -> None:
     args = parse_args()
     payload = run_case(args)
 
-    output_json = Path(args.output_json).resolve()
+    if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.smoke:
+        output_json = smoke_output_path(RESULTS_DIR, "bpftrace")
+    else:
+        output_json = Path(args.output_json).resolve()
     output_md = Path(args.output_md).resolve()
     report_md = Path(args.report_md).resolve()
     write_json(output_json, payload)

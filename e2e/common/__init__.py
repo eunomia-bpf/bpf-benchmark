@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shlex
 import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Sequence
 
@@ -13,10 +15,42 @@ ROOT_DIR = Path(__file__).resolve().parents[2]
 RESULTS_DIR = ROOT_DIR / "e2e" / "results"
 DEFAULT_VENV_ACTIVATE = Path("/home/yunwei37/workspace/.venv/bin/activate")
 BPFTOOL_ENV_VARS = ("BPFTOOL_BIN", "BPFTOOL")
+RESULT_FILE_RE = re.compile(r"^(?P<suite>.+)_(?P<kind>authoritative|smoke)_(?P<date>\d{8})\.json$")
 
 
 def ensure_parent(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+
+
+def result_date_stamp(now: datetime | None = None) -> str:
+    current = now or datetime.now(timezone.utc)
+    return current.astimezone(timezone.utc).strftime("%Y%m%d")
+
+
+def authoritative_output_path(results_dir: Path, suite: str, *, stamp: str | None = None) -> Path:
+    return results_dir / f"{suite}_authoritative_{stamp or result_date_stamp()}.json"
+
+
+def smoke_output_path(results_dir: Path, suite: str, *, stamp: str | None = None) -> Path:
+    return results_dir / f"{suite}_smoke_{stamp or result_date_stamp()}.json"
+
+
+def latest_output_path(results_dir: Path, suite: str) -> Path:
+    return results_dir / f"{suite}.latest.json"
+
+
+def refresh_latest_alias(latest_path: Path, target_path: Path) -> None:
+    ensure_parent(latest_path)
+    if latest_path.exists() or latest_path.is_symlink():
+        latest_path.unlink()
+    latest_path.symlink_to(Path(os.path.relpath(target_path, latest_path.parent)))
+
+
+def maybe_refresh_latest_alias(path: Path) -> None:
+    match = RESULT_FILE_RE.fullmatch(path.name)
+    if match is None or match.group("kind") != "authoritative":
+        return
+    refresh_latest_alias(latest_output_path(path.parent, match.group("suite")), path)
 
 
 def tail_text(text: str, *, max_lines: int = 12, max_chars: int = 4000) -> str:
@@ -119,6 +153,7 @@ def chown_to_invoking_user(path: Path) -> None:
 def write_json(path: Path, payload: Any) -> None:
     ensure_parent(path)
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    maybe_refresh_latest_alias(path)
     chown_to_invoking_user(path)
 
 
@@ -159,14 +194,18 @@ __all__ = [
     "DEFAULT_VENV_ACTIVATE",
     "RESULTS_DIR",
     "ROOT_DIR",
+    "authoritative_output_path",
     "chown_to_invoking_user",
     "describe_command",
     "ensure_parent",
     "ensure_root",
+    "latest_output_path",
+    "result_date_stamp",
     "resolve_binary",
     "resolve_bpftool_binary",
     "run_command",
     "run_json_command",
+    "smoke_output_path",
     "sudo_available",
     "tail_text",
     "which",

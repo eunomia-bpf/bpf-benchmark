@@ -16,6 +16,10 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+try:
+    from results_layout import authoritative_output_path, maybe_refresh_latest_alias, smoke_output_path
+except ImportError:
+    from corpus.results_layout import authoritative_output_path, maybe_refresh_latest_alias, smoke_output_path
 
 
 ROOT = Path(__file__).resolve().parent
@@ -24,7 +28,7 @@ DEFAULT_CONFIG = ROOT / "config" / "macro_corpus.yaml"
 DEFAULT_MANIFEST = ROOT / "repos.yaml"
 DEFAULT_INVENTORY = ROOT / "inventory.json"
 DEFAULT_BUILD_ROOT = ROOT / "build"
-DEFAULT_OUTPUT_JSON = ROOT / "results" / "expanded_corpus_build.json"
+DEFAULT_OUTPUT_JSON = authoritative_output_path(ROOT / "results", "expanded_corpus_build")
 DEFAULT_OUTPUT_MD = ROOT / "results" / "expanded_corpus_build.md"
 DEFAULT_TIMEOUT_SECONDS = 90
 DEFAULT_MAX_WORKERS = min(8, (os.cpu_count() or 4))
@@ -508,7 +512,10 @@ def main() -> int:
     manifest_path = Path(args.manifest).resolve()
     inventory_path = Path(args.inventory).resolve()
     build_root = Path(args.build_root).resolve()
-    output_json = Path(args.output_json).resolve()
+    if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.max_sources is not None:
+        output_json = smoke_output_path(ROOT / "results", "expanded_corpus_build")
+    else:
+        output_json = Path(args.output_json).resolve()
     output_md = Path(args.output_md).resolve()
     selected_repos = set(args.repos or [])
 
@@ -578,6 +585,7 @@ def main() -> int:
     ensure_parent(output_json)
     ensure_parent(output_md)
     output_json.write_text(json.dumps(payload, indent=2))
+    maybe_refresh_latest_alias(output_json)
     output_md.write_text(render_report(payload, records))
     print(f"[done] wrote {output_json}")
     print(f"[done] wrote {output_md}")

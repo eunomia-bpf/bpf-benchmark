@@ -1,0 +1,112 @@
+{
+  "dataset": "real_world_exec_time",
+  "generated_at": "2026-03-07T21:53:04.116017+00:00",
+  "code_size_input": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/real_world_code_size.json",
+  "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec",
+  "repeat": 1000,
+  "iterations": 1,
+  "io_mode": "packet",
+  "host": {
+    "platform": "Linux-6.15.11-061511-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "programs": [
+    {
+      "repo": "bcf/cilium",
+      "selection": "bcf-cilium",
+      "artifact_kind": "prebuilt_object",
+      "relative_path": "clang-14_-O1_bpf_host.o",
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/bcf/cilium/clang-14_-O1_bpf_host.o",
+      "program_name": "cil_from_netdev",
+      "section_name": "tc",
+      "insn_count": 1143,
+      "code_size": {
+        "llvmbpf_native_code_bytes": 3189,
+        "kernel_native_code_bytes": 5904
+      },
+      "runs": [
+        {
+          "runtime": "kernel",
+          "command": [
+            "sudo",
+            "-n",
+            "/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec",
+            "run-kernel",
+            "--program",
+            "/home/yunwei37/workspace/bpf-benchmark/corpus/bcf/cilium/clang-14_-O1_bpf_host.o",
+            "--program-name",
+            "cil_from_netdev",
+            "--repeat",
+            "1000",
+            "--io-mode",
+            "packet"
+          ],
+          "status": "error",
+          "repeat": 1000,
+          "iterations_requested": 1,
+          "iterations_completed": 0,
+          "timing_source": null,
+          "exec_ns_samples": [],
+          "median_exec_ns": null,
+          "error": "bpf_prog_test_run_opts failed: Invalid argument",
+          "stdout_excerpt": "",
+          "stderr_excerpt": "...ed map at '/sys/fs/bpf/IP_MASQ_AGENT_IPV6'\nlibbpf: map 'IP_MASQ_AGENT_IPV6': skipping creation (preset fd=42)\nlibbpf: reused pinned map at '/sys/fs/bpf/test_cilium_skip_lb6'\nlibbpf: map 'test_cilium_skip_lb6': skipping creation (preset fd=43)\nlibbpf: reused pinned map at '/sys/fs/bpf/test_cilium_lb6_reverse_nat'\nlibbpf: map 'test_cilium_lb6_reverse_nat': skipping creation (preset fd=44)\nlibbpf: reused pinned map at '/sys/fs/bpf/test_cilium_lb6_services'\nlibbpf: map 'test_cilium_lb6_services': skipping creation (preset fd=45)\nlibbpf: reused pinned map at '/sys/fs/bpf/test_cilium_lb6_backends'\nlibbpf: map 'test_cilium_lb6_backends': skipping creation (preset fd=46)\nlibbpf: reused pinned map at '/sys/fs/bpf/test_cilium_lb6_affinity'\nlibbpf: map 'test_cilium_lb6_affinity': skipping creation (preset fd=47)\nlibbpf: reused pinned map at '/sys/fs/bpf/test_cilium_lb6_source_range'\nlibbpf: map 'test_cilium_lb6_source_range': skipping creation (preset fd=48)\nlibbpf: reused pinned map at '/sys/fs/bpf/test_cilium_skip_lb4'\nlibbpf: map 'test_cilium_skip_lb4': skipping creation (preset fd=49)\nlibbpf: reused pinned map at '/sys/fs/bpf/test_cilium_lb4_reverse_nat'\nlibbpf: map 'test_cilium_lb4_reverse_nat': skipping creation (preset fd=50)\nlibbpf: reused pinned map at '/sys/fs/bpf/test_cilium_lb4_services'\nlibbpf: map 'test_cilium_lb4_services': skipping creation (preset fd=51)\nlibbpf: reused pinned map at '/sys/fs/bpf/test_cilium_lb4_backends'\nlibbpf: map 'test_cilium_lb4_backends': skipping creation (preset fd=52)\nlibbpf: reused pinned map at '/sys/fs/bpf/test_cilium_lb4_affinity'\nlibbpf: map 'test_cilium_lb4_affinity': skipping creation (preset fd=53)\nlibbpf: reused pinned map at '/sys/fs/bpf/test_cilium_lb4_source_range'\nlibbpf: map 'test_cilium_lb4_source_range': skipping creation (preset fd=54)\nlibbpf: reused pinned map at '/sys/fs/bpf/test_cilium_lb_affinity_match'\nlibbpf: map 'test_cilium_lb_affinity_match': skipping creation (preset fd=55)\nlibbpf: map 'CT_TAIL_CALL_BUFFER6': created successfully, fd=56\nlibbpf: map 'CT_TAIL_CALL_BUFFER4': created successfully, fd=57\nlibbpf: map '.rodata.config': created successfully, fd=58\nlibbpf: prog '__send_drop_notify': skipped loading\nlibbpf: prog 'tail_icmp6_send_time_exceeded': skipped loading\nlibbpf: prog 'tail_icmp6_handle_ns': skipped loading\nlibbpf: prog 'tail_srv6_encap': skipped loading\nlibbpf: prog 'tail_srv6_decap': skipped loading\nlibbpf: prog 'tail_nodeport_ipv6_dsr': skipped loading\nlibbpf: prog 'tail_nodeport_rev_dnat_ingress_ipv6': skipped loading\nlibbpf: prog 'tail_nodeport_nat_ingress_ipv6': skipped loading\nlibbpf: prog 'tail_nodeport_nat_egress_ipv6': skipped loading\nlibbpf: prog 'tail_nodeport_ipv4_dsr': skipped loading\nlibbpf: prog 'tail_nodeport_rev_dnat_ingress_ipv4': skipped loading\nlibbpf: prog 'tail_nodeport_nat_ingress_ipv4': skipped loading\nlibbpf: prog 'tail_nodeport_nat_egress_ipv4': skipped loading\nlibbpf: prog 'tail_handle_snat_fwd_ipv6': skipped loading\nlibbpf: prog 'tail_handle_nat_fwd_ipv6': skipped loading\nlibbpf: prog 'tail_handle_snat_fwd_ipv4': skipped loading\nlibbpf: prog 'tail_handle_nat_fwd_ipv4': skipped loading\nlibbpf: prog 'tail_handle_ipv6_cont_from_host': skipped loading\nlibbpf: prog 'tail_handle_ipv6_cont_from_netdev': skipped loading\nlibbpf: prog 'tail_handle_ipv6_from_host': skipped loading\nlibbpf: prog 'tail_handle_ipv6_from_netdev': skipped loading\nlibbpf: prog 'tail_handle_ipv4_cont_from_host': skipped loading\nlibbpf: prog 'tail_handle_ipv4_cont_from_netdev': skipped loading\nlibbpf: prog 'tail_handle_ipv4_from_host': skipped loading\nlibbpf: prog 'tail_handle_ipv4_from_netdev': skipped loading\nlibbpf: prog 'cil_from_host': skipped loading\nlibbpf: prog 'cil_to_netdev': skipped loading\nlibbpf: prog 'cil_to_host': skipped loading\nlibbpf: prog 'handle_lxc_traffic': skipped loading\nlibbpf: prog 'tail_ipv6_host_policy_ingress': skipped loading\nlibbpf: prog 'tail_ipv4_host_policy_ingress': skipped loading\nbpf_prog_test_run_opts failed: Invalid argument"
+        },
+        {
+          "runtime": "llvmbpf",
+          "command": [
+            "/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec",
+            "run-llvmbpf",
+            "--program",
+            "/home/yunwei37/workspace/bpf-benchmark/corpus/bcf/cilium/clang-14_-O1_bpf_host.o",
+            "--program-name",
+            "cil_from_netdev",
+            "--repeat",
+            "1000",
+            "--io-mode",
+            "packet"
+          ],
+          "status": "skipped",
+          "repeat": 1000,
+          "iterations_requested": 1,
+          "iterations_completed": 0,
+          "timing_source": null,
+          "exec_ns_samples": [],
+          "median_exec_ns": null,
+          "error": "skipped because kernel run did not succeed",
+          "stdout_excerpt": "",
+          "stderr_excerpt": ""
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "programs": {
+      "paired_from_code_size": 1,
+      "kernel_test_run_ok": 0,
+      "llvmbpf_run_ok": 0,
+      "paired_exec_ok": 0
+    },
+    "runtime_status": {
+      "kernel": {
+        "error": 1
+      },
+      "llvmbpf": {
+        "skipped": 1
+      }
+    },
+    "runtime_failure_breakdown": {
+      "kernel": {
+        "bpf_prog_test_run_opts failed: Invalid argument": 1
+      },
+      "llvmbpf": {}
+    },
+    "llvmbpf_over_kernel_exec_ratio": {
+      "paired_programs": 0,
+      "geomean": null,
+      "min": null,
+      "median": null,
+      "max": null
+    }
+  }
+}

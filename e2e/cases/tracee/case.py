@@ -21,11 +21,14 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from e2e.common import (  # noqa: E402
+    RESULTS_DIR,
     ROOT_DIR,
+    authoritative_output_path,
     chown_to_invoking_user,
     describe_command,
     ensure_root,
     run_command,
+    smoke_output_path,
     tail_text,
     which,
     write_json,
@@ -64,7 +67,7 @@ except ModuleNotFoundError:  # noqa: E402
 
 DEFAULT_CONFIG = Path(__file__).with_name("config.yaml")
 DEFAULT_SETUP_SCRIPT = Path(__file__).with_name("setup.sh")
-DEFAULT_OUTPUT_JSON = ROOT_DIR / "e2e" / "results" / "tracee-e2e-real.json"
+DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "tracee")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "tracee-e2e-real.md"
 DEFAULT_TRACEE_OBJECT = ROOT_DIR / "corpus" / "build" / "tracee" / "tracee.bpf.o"
 DEFAULT_RUNNER = ROOT_DIR / "micro" / "build" / "runner" / "micro_exec"
@@ -898,7 +901,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = build_case_parser()
     args = parser.parse_args(argv)
     payload = run_tracee_case(args)
-    persist_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve())
+    if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.smoke:
+        output_json = smoke_output_path(RESULTS_DIR, "tracee")
+    else:
+        output_json = Path(args.output_json).resolve()
+    persist_results(payload, output_json, Path(args.output_md).resolve())
     print(json.dumps(payload, indent=2, sort_keys=True))
     return 0
 
