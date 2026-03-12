@@ -1,3 +1,5 @@
+> Superseded by `docs/tmp/policy-v2-authoritative-spec.md`.
+
 # Policy Configuration Design v2
 
 ## 背景与 v2 结论
