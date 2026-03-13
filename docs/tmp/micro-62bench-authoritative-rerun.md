@@ -3,7 +3,7 @@
 ## Methodology
 
 - Kernel: `7.0.0-rc2-g05a1845490ed-dirty`
-- Benchmarks: `55` from `config/micro_pure_jit.yaml`
+- Benchmarks: `56` from `config/micro_pure_jit.yaml`
 - Runtimes: `kernel` vs `kernel-recompile`
 - Warmups / iterations / repeat: `2 / 2 / 500`
 - CPU pinning: `taskset -c 0`
@@ -13,14 +13,15 @@
 ## Headline Numbers
 
 - Overall geomean (stock / recompile, valid pairs only): `1.020x`
-- Applied-only geomean (stock / recompile): `0.995x`
-- Wins / losses / ties: `26 / 25 / 4`
-- Valid / invalid pairs: `55 / 0`
+- Applied-only geomean (stock / recompile): `0.999x`
+- Wins / losses / ties: `27 / 25 / 4`
+- Valid / invalid pairs: `56 / 0`
 
 ## Per-Family Breakdown
 
 | Family | Benchmarks | Valid | Applied | Geomean | Applied-only Geomean | Wins | Losses | Ties |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| addr-calc | 1 | 1 | 1 | 1.053x | 1.053x | 1 | 0 | 0 |
 | baseline | 3 | 3 | 0 | 0.928x | n/a | 0 | 1 | 2 |
 | bitfield-extract | 1 | 1 | 0 | 1.292x | n/a | 1 | 0 | 0 |
 | bounds-density | 2 | 2 | 1 | 1.169x | 1.123x | 2 | 0 | 0 |
@@ -119,3 +120,4 @@
 | smallmul_strength_reduce | strength-reduce | 435 ns | 366.5 ns | 1.187x | no | 0 | win |
 | cond_select_dense | select-diamond | 87 ns | 99.5 ns | 0.874x | yes | 104 | loss |
 | rotate_dense | rotate-canonical | 243.5 ns | 230 ns | 1.059x | yes | 256 | win |
+| addr_calc_stride | addr-calc | 158.5 ns | 150.5 ns | 1.053x | yes | 8 | win |

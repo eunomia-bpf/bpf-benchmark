@@ -188,3 +188,6 @@ subprocess.TimeoutExpired: Command '['/home/yunwei37/.local/bin/vng', '--run', '
   [ok] collected rotate_dense (vm exit 0)
   [aggregate] benchmarks=55 valid=55
 [resume] addr_calc_stride
+  [ok] collected addr_calc_stride (vm exit 0)
+  [aggregate] benchmarks=56 valid=56
+[resume] extract_dense
