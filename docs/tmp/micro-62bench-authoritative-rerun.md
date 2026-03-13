@@ -3,7 +3,7 @@
 ## Methodology
 
 - Kernel: `7.0.0-rc2-g05a1845490ed-dirty`
-- Benchmarks: `48` from `config/micro_pure_jit.yaml`
+- Benchmarks: `49` from `config/micro_pure_jit.yaml`
 - Runtimes: `kernel` vs `kernel-recompile`
 - Warmups / iterations / repeat: `2 / 2 / 500`
 - CPU pinning: `taskset -c 0`
@@ -12,17 +12,17 @@
 
 ## Headline Numbers
 
-- Overall geomean (stock / recompile, valid pairs only): `1.009x`
+- Overall geomean (stock / recompile, valid pairs only): `1.013x`
 - Applied-only geomean (stock / recompile): `1.001x`
-- Wins / losses / ties: `21 / 24 / 3`
-- Valid / invalid pairs: `48 / 0`
+- Wins / losses / ties: `22 / 24 / 3`
+- Valid / invalid pairs: `49 / 0`
 
 ## Per-Family Breakdown
 
 | Family | Benchmarks | Valid | Applied | Geomean | Applied-only Geomean | Wins | Losses | Ties |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | baseline | 3 | 3 | 0 | 0.928x | n/a | 0 | 1 | 2 |
-| bounds-density | 1 | 1 | 1 | 1.123x | 1.123x | 1 | 0 | 0 |
+| bounds-density | 2 | 2 | 1 | 1.169x | 1.123x | 2 | 0 | 0 |
 | bounds-style | 1 | 1 | 0 | 0.901x | n/a | 0 | 1 | 0 |
 | bpf-local-call | 2 | 2 | 1 | 0.751x | 0.779x | 0 | 2 | 0 |
 | branch-density | 1 | 1 | 1 | 1.039x | 1.039x | 1 | 0 | 0 |
@@ -107,3 +107,4 @@
 | deep_guard_tree_8 | deep-guards | 146 ns | 133.5 ns | 1.094x | no | 0 | win |
 | mega_basic_block_2048 | mega-block | 974.5 ns | 978.5 ns | 0.996x | no | 0 | loss |
 | rotate64_hash | rotate-hash | 103 ns | 79 ns | 1.304x | no | 0 | win |
+| packet_redundant_bounds | bounds-density | 218.5 ns | 179.5 ns | 1.217x | no | 0 | win |
