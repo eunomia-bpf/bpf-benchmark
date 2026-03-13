@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import os
 import platform
 import random
 import subprocess
@@ -104,6 +106,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Build vendored bpftool in addition to the runner and program artifacts.",
     )
     parser.add_argument("--list", action="store_true", help="List benchmarks and runtimes.")
+    parser.add_argument(
+        "--policy-dir",
+        help="Override policy directory (for named policy sets under config/policies/).",
+    )
     return parser.parse_args(argv)
 
 
@@ -144,6 +150,102 @@ def read_git_sha() -> str:
         ).decode().strip()
     except (FileNotFoundError, subprocess.CalledProcessError):
         return "unknown"
+
+
+def _git_rev_parse(repo_dir: Path, short: bool = False) -> str:
+    args = ["git", "rev-parse", "--short", "HEAD"] if short else ["git", "rev-parse", "HEAD"]
+    try:
+        return subprocess.check_output(args, cwd=repo_dir, stderr=subprocess.DEVNULL).decode().strip()
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return "unknown"
+
+
+def _read_cpu_model() -> str:
+    try:
+        for line in Path("/proc/cpuinfo").read_text().splitlines():
+            if line.startswith("model name"):
+                return line.split(":", 1)[1].strip()
+    except OSError:
+        pass
+    return platform.processor() or "unknown"
+
+
+def _detect_environment() -> str:
+    """Detect whether we are running inside a VM or on bare metal."""
+    # Check for virtualization hints in /proc/cpuinfo and DMI
+    indicators = [
+        "/sys/class/dmi/id/sys_vendor",
+        "/sys/class/dmi/id/product_name",
+        "/sys/class/dmi/id/board_vendor",
+    ]
+    vm_keywords = {"kvm", "qemu", "vmware", "virtualbox", "xen", "vng", "virtio", "bochs", "hyper-v"}
+    for path in indicators:
+        try:
+            value = Path(path).read_text().lower()
+            if any(kw in value for kw in vm_keywords):
+                return "vm"
+        except OSError:
+            pass
+    # Check /proc/cpuinfo flags for hypervisor bit
+    try:
+        for line in Path("/proc/cpuinfo").read_text().splitlines():
+            if line.startswith("flags") and "hypervisor" in line:
+                return "vm"
+    except OSError:
+        pass
+    return "bare-metal"
+
+
+def _hash_policy_files(policy_dir: Path) -> str:
+    """SHA-256 of all policy YAML files in a directory, concatenated in sorted order."""
+    try:
+        yaml_files = sorted(policy_dir.glob("**/*.yaml"))
+        if not yaml_files:
+            return "no-policies"
+        h = hashlib.sha256()
+        for f in yaml_files:
+            h.update(f.read_bytes())
+        return h.hexdigest()[:16]
+    except OSError:
+        return "unknown"
+
+
+def collect_provenance(
+    args: argparse.Namespace,
+    iterations: int,
+    warmups: int,
+    policy_dir: Path | None = None,
+) -> dict:
+    """Gather reproducibility metadata for embedding in the output JSON."""
+    # kernel commit: prefer vendor/linux-framework, fall back to running kernel release
+    linux_dir = ROOT_DIR / "vendor" / "linux-framework"
+    kernel_commit = _git_rev_parse(linux_dir) if linux_dir.is_dir() else "unknown"
+
+    # scanner commit
+    scanner_dir = ROOT_DIR / "scanner"
+    scanner_commit = _git_rev_parse(scanner_dir) if scanner_dir.is_dir() else "unknown"
+
+    # policy files hash
+    default_policy_dir = ROOT_DIR / "micro" / "policies"
+    effective_policy_dir = policy_dir if (policy_dir and policy_dir.is_dir()) else default_policy_dir
+    policy_files_hash = _hash_policy_files(effective_policy_dir)
+
+    repeat = args.repeat  # may be None; actual default is resolved later per-runtime
+
+    return {
+        "kernel_commit": kernel_commit,
+        "scanner_commit": scanner_commit,
+        "policy_files_hash": policy_files_hash,
+        "policy_dir": str(effective_policy_dir),
+        "params": {
+            "iterations": iterations,
+            "warmups": warmups,
+            "repeat": repeat,
+        },
+        "cpu_model": _read_cpu_model(),
+        "environment": _detect_environment(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
 
 
 def list_suite(suite: SuiteSpec) -> None:
@@ -294,6 +396,7 @@ def main(argv: list[str] | None = None) -> int:
 
     iterations = args.iterations if args.iterations is not None else suite.defaults.iterations
     warmups = args.warmups if args.warmups is not None else suite.defaults.warmups
+    policy_dir = Path(args.policy_dir).resolve() if getattr(args, "policy_dir", None) else None
     if args.output:
         output_path = Path(args.output).resolve()
     else:
@@ -311,6 +414,7 @@ def main(argv: list[str] | None = None) -> int:
         "suite": suite.suite_name,
         "manifest": str(suite.manifest_path),
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "provenance": collect_provenance(args, iterations, warmups, policy_dir),
         "host": {
             "hostname": platform.node(),
             "platform": platform.platform(),

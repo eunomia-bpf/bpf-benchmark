@@ -56,13 +56,20 @@ VM_XDP_OUTPUT_MD := $(E2E_RESULTS_DIR)/xdp_forwarding.latest.md
 # e.g. make vm-micro BENCH="simple bitcount" → --bench simple --bench bitcount
 BENCH_FLAGS := $(foreach b,$(BENCH),--bench $(b))
 
+# Named policy set support: POLICY=default|all-apply|baseline
+POLICY ?= default
+POLICY_DIR_BASE := $(ROOT_DIR)/config/policies
+POLICY_DIR := $(POLICY_DIR_BASE)/$(POLICY)
+# Pass --policy-dir only when a named policy dir exists (non-default paths override micro/policies)
+POLICY_DIR_FLAG := $(if $(wildcard $(POLICY_DIR)/.),--policy-dir "$(POLICY_DIR)",)
+
 MICRO_ARGS := --iterations $(ITERATIONS) --warmups $(WARMUPS) --repeat $(REPEAT) $(BENCH_FLAGS)
 LOCAL_SMOKE_ARGS := --bench simple --iterations 1 --warmups 0 --repeat 10
 VM_SMOKE_ARGS := --bench simple --bench load_byte_recompose --iterations 1 --warmups 0 --repeat 10
 VENV_ACTIVATE := source "$(VENV)/bin/activate" &&
 
 .PHONY: all micro scanner kernel kernel-tests scanner-tests clean \
-	smoke check validate \
+	smoke check validate verify-build compare \
 	vm-selftest vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 	help
 
@@ -89,18 +96,39 @@ help:
 	@echo "  make vm-e2e           - E2E benchmarks (tracee/tetragon/bpftrace/xdp) in VM"
 	@echo "  make vm-all           - All VM benchmarks"
 	@echo ""
+	@echo "Utility targets:"
+	@echo "  make verify-build     - Verify bzImage, scanner, micro_exec artifacts exist"
+	@echo "  make compare OLD=a.json NEW=b.json  - Compare two result JSON files"
+	@echo ""
 	@echo "Tunable parameters:"
 	@echo "  ITERATIONS=N          - JIT iterations (default: 10)"
 	@echo "  WARMUPS=N             - Warmup iterations (default: 2)"
 	@echo "  REPEAT=N              - Repeat count (default: 200)"
 	@echo "  BENCH=\"name1 name2\"   - Run only specific benchmarks (vm-micro)"
 	@echo "  BZIMAGE=path          - Custom kernel image path"
+	@echo "  POLICY=name           - Named policy set under config/policies/ (default: default)"
+	@echo "                          Options: default | all-apply | baseline"
 	@echo ""
 	@echo "Results are written to:"
 	@echo "  micro/results/        - Micro benchmark results"
 	@echo "  corpus/results/       - Corpus benchmark results"
 	@echo "  e2e/results/          - E2E benchmark results"
 	@echo "  docs/tmp/             - Analysis reports (.md only)"
+
+verify-build:
+	@test -f "$(BZIMAGE_PATH)" || (echo "ERROR: bzImage not found at $(BZIMAGE_PATH)" && exit 1)
+	@echo "Kernel:     $$(cd "$(KERNEL_DIR)" && git rev-parse --short HEAD 2>/dev/null || echo 'n/a')"
+	@echo "Scanner:    $$(cd "$(SCANNER_DIR)" && git rev-parse --short HEAD 2>/dev/null || echo 'n/a')"
+	@echo "micro_exec: $$(ls -la "$(MICRO_RUNNER)" 2>/dev/null | awk '{print $$6,$$7,$$8}' || echo 'not built')"
+	@echo "bzImage:    $$(ls -lh "$(BZIMAGE_PATH)" | awk '{print $$5, $$6, $$7, $$8}')"
+	@echo "POLICY:     $(POLICY) (dir: $(POLICY_DIR))"
+	@echo "[verify-build] OK"
+
+# Compare two result JSON files: make compare OLD=path/to/old.json NEW=path/to/new.json
+compare:
+	@test -n "$(OLD)" || (echo "ERROR: OLD= required. Usage: make compare OLD=a.json NEW=b.json" && exit 1)
+	@test -n "$(NEW)" || (echo "ERROR: NEW= required. Usage: make compare OLD=a.json NEW=b.json" && exit 1)
+	$(VENV_ACTIVATE) python3 "$(MICRO_DIR)/compare_results.py" "$(OLD)" "$(NEW)"
 
 all:
 	@echo "=== Running make all ==="
@@ -173,8 +201,9 @@ vm-micro-smoke: micro | $(BZIMAGE_PATH)
 
 # Run the full micro benchmark suite in a VM.
 # To run only specific benchmarks: make vm-micro BENCH="simple bitcount"
-vm-micro: micro | $(BZIMAGE_PATH)
-	@echo "=== Running make vm-micro ==="
+# To use a named policy set: make vm-micro POLICY=all-apply
+vm-micro: micro verify-build | $(BZIMAGE_PATH)
+	@echo "=== Running make vm-micro (POLICY=$(POLICY)) ==="
 	mkdir -p "$(MICRO_RESULTS_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
 		bash -lc 'cd "$(ROOT_DIR)" && $(VENV_ACTIVATE) python3 "$(MICRO_DIR)/run_micro.py" \
@@ -182,10 +211,11 @@ vm-micro: micro | $(BZIMAGE_PATH)
 			--runtime kernel \
 			--runtime kernel-recompile \
 			$(MICRO_ARGS) \
+			$(POLICY_DIR_FLAG) \
 			--output "$(VM_MICRO_OUTPUT)"'
 
 # The corpus batch harness already manages one vng boot per target internally.
-vm-corpus: micro scanner | $(BZIMAGE_PATH)
+vm-corpus: micro scanner verify-build | $(BZIMAGE_PATH)
 	@echo "=== Running make vm-corpus ==="
 	mkdir -p "$(CORPUS_RESULTS_DIR)"
 	$(VENV_ACTIVATE) python3 "$(ROOT_DIR)/corpus/run_corpus_v5_vm_batch.py" \
@@ -199,7 +229,7 @@ vm-corpus: micro scanner | $(BZIMAGE_PATH)
 		--output-json "$(VM_CORPUS_OUTPUT_JSON)" \
 		--output-md "$(VM_CORPUS_OUTPUT_MD)"
 
-vm-e2e: micro scanner | $(BZIMAGE_PATH)
+vm-e2e: micro scanner verify-build | $(BZIMAGE_PATH)
 	@echo "=== Running make vm-e2e ==="
 	mkdir -p "$(E2E_RESULTS_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
