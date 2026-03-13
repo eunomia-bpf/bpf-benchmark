@@ -1,0 +1,8 @@
+# Per-form ablation: only cmov sites
+# Original: 3 sites, filtered: 1 cmov sites
+program: switch_dispatch_xdp
+sites:
+- family: cmov
+  insn: 51
+  pattern_kind: cond-select-64
+version: 3

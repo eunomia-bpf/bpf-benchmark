@@ -1,0 +1,11 @@
+# Per-form ablation: only cmov sites
+# Original: 4 sites, filtered: 2 cmov sites
+program: bounds_ladder_xdp
+sites:
+- family: cmov
+  insn: 144
+  pattern_kind: cond-select-64
+- family: cmov
+  insn: 152
+  pattern_kind: cond-select-64
+version: 3

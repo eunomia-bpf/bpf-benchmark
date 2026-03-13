@@ -1,0 +1,11 @@
+# Per-form ablation: only wide sites
+# Original: 7 sites, filtered: 2 wide sites
+program: branch_dense_xdp
+sites:
+- family: wide
+  insn: 10
+  pattern_kind: wide-load-2
+- family: wide
+  insn: 23
+  pattern_kind: wide-load-2
+version: 3

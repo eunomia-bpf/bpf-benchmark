@@ -1,0 +1,5 @@
+# Per-form ablation: only lea sites
+# Original: 3 sites, filtered: 0 lea sites
+program: bpf_call_chain_xdp
+sites: []
+version: 3

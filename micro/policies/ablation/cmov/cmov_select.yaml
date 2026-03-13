@@ -1,0 +1,8 @@
+# Per-form ablation: only cmov sites
+# Original: 1 sites, filtered: 1 cmov sites
+program: cmov_select_xdp
+sites:
+- family: cmov
+  insn: 530
+  pattern_kind: cond-select-64
+version: 3
