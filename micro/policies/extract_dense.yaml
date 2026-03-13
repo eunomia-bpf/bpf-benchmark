@@ -1,0 +1,1539 @@
+version: 3
+program: 'extract_dense_xdp'
+sites:
+  - insn: 11
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 14
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 23
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 27
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 33
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 37
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 43
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 47
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 53
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 57
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 63
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 67
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 73
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 77
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 83
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 87
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 93
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 97
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 103
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 107
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 113
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 117
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 123
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 127
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 133
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 137
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 143
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 147
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 153
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 157
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 163
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 167
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 173
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 177
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 183
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 187
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 193
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 197
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 203
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 207
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 213
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 217
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 223
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 227
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 233
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 237
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 243
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 247
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 253
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 257
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 263
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 267
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 273
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 277
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 283
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 287
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 293
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 297
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 303
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 307
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 313
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 317
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 323
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 327
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 333
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 337
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 343
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 347
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 353
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 357
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 363
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 367
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 373
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 377
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 383
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 387
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 393
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 397
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 403
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 407
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 413
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 417
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 423
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 427
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 433
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 437
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 443
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 447
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 453
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 457
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 463
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 467
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 473
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 477
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 483
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 487
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 493
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 497
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 503
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 507
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 513
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 517
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 523
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 527
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 533
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 537
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 543
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 547
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 553
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 557
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 563
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 567
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 573
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 577
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 583
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 587
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 593
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 597
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 603
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 607
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 613
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 617
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 623
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 627
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 633
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 637
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 643
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 647
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 653
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 657
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 663
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 667
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 673
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 677
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 683
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 687
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 693
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 697
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 703
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 707
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 713
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 717
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 723
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 727
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 733
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 737
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 743
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 747
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 753
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 757
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 763
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 767
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 773
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 777
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 783
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 787
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 793
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 797
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 803
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 807
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 813
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 817
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 823
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 827
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 833
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 837
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 843
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 847
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 853
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 857
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 863
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 867
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 873
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 877
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 883
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 887
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 893
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 897
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 903
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 907
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 913
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 917
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 923
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 927
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 933
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 937
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 943
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 947
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 953
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 957
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 963
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 967
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 973
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 977
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 983
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 987
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 993
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 997
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1003
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1007
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1013
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1017
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1023
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1027
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1033
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1037
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1043
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1047
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1053
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1057
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1063
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1067
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1073
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1077
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1083
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1087
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1093
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1097
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1103
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1107
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1113
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1117
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1123
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1127
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1133
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1137
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1143
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1147
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1153
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1157
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1163
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1167
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1173
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1177
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1183
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1187
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1193
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1197
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1203
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1207
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1213
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1217
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1223
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1227
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1233
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1237
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1243
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1247
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1253
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1257
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1263
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1267
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1273
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1277
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1283
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1287
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1293
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1297
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1303
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1307
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1313
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1317
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1323
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1327
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1333
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1337
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1343
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1347
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1353
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1357
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1363
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1367
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1373
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1377
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1383
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1387
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1393
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1397
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1403
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1407
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1413
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1417
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1423
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1427
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1433
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1437
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1443
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1447
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1453
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1457
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1463
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1467
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1473
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1477
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1483
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1487
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1493
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1497
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1503
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1507
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1513
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1517
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1523
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1527
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1533
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1537
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1543
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1547
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1553
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1557
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1563
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1567
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1573
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1577
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1583
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1587
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1593
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1597
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1603
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1607
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1613
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1617
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1623
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1627
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1633
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1637
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1643
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1647
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1653
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1657
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1663
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1667
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1673
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1677
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1683
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1687
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1693
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1697
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1703
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1707
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1713
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1717
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1723
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1727
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1733
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1737
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1743
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1747
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1753
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1757
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1763
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1767
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1773
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1777
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1783
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1787
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1793
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1797
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1803
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1807
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1813
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1817
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1823
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1827
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1833
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1837
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1843
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1847
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1853
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1857
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1863
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1867
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1873
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1877
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1883
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1887
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1893
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1897
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1903
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1907
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1913
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1917
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1923
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1927
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1933
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1937
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1943
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1947
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1953
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1957
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1963
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1967
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1973
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1977
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1983
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1987
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1993
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 1997
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2003
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2007
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2013
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2017
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2023
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2027
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2033
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2037
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2043
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2047
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2053
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2057
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2063
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2067
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2073
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2077
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2083
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2087
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2093
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2097
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2103
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2107
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2113
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2117
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2123
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2127
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2133
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2137
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2143
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2147
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2153
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2157
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2163
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2167
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2173
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2177
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2183
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2187
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2193
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2197
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2203
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2207
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2213
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2217
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2223
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2227
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2233
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2237
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2243
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2247
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2253
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2257
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2263
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2267
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2273
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2277
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2283
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2287
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2293
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2297
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2303
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2307
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2313
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2317
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2323
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2327
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2333
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2337
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2343
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2347
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2353
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2357
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2363
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2367
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2373
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2377
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2383
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2387
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2393
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2397
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2403
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2407
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2413
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2417
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2423
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2427
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2433
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2437
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2443
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2447
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2453
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2457
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2463
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2467
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2473
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2477
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2483
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2487
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2493
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2497
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2503
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2507
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2513
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2517
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2523
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2527
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2533
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2537
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2543
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2547
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2553
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2557
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2563
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'
+  - insn: 2567
+    family: extract
+    pattern_kind: 'bitfield-extract-64-shift-mask'

@@ -1,0 +1,771 @@
+version: 3
+program: 'rotate_dense_xdp'
+sites:
+  - insn: 24
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 42
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 52
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 62
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 79
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 88
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 99
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 108
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 119
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 128
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 139
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 148
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 159
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 168
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 179
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 188
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 199
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 208
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 219
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 228
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 239
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 248
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 259
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 268
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 279
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 288
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 299
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 308
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 319
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 328
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 339
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 348
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 387
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 396
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 406
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 415
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 426
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 435
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 446
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 455
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 466
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 475
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 486
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 495
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 506
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 515
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 526
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 535
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 546
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 555
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 566
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 575
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 586
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 595
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 606
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 615
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 626
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 635
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 646
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 655
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 666
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 675
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 686
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 695
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 727
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 736
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 746
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 755
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 766
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 775
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 786
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 795
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 806
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 815
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 826
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 835
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 846
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 855
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 866
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 875
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 886
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 895
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 906
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 915
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 926
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 935
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 946
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 955
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 966
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 975
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 986
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 995
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1006
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1015
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1026
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1035
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1064
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1073
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1083
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1092
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1103
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1112
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1123
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1132
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1143
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1152
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1163
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1172
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1183
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1192
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1203
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1212
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1223
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1232
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1243
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1252
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1263
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1272
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1283
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1292
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1303
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1312
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1323
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1332
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1343
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1352
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1363
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1372
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1405
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1414
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1424
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1433
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1444
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1453
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1464
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1473
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1484
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1493
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1504
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1513
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1524
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1533
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1544
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1553
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1564
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1573
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1584
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1593
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1604
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1613
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1624
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1633
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1644
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1653
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1664
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1673
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1684
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1693
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1704
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1713
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1745
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1754
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1764
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1773
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1784
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1793
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1804
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1813
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1824
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1833
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1844
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1853
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1864
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1873
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1884
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1893
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1904
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1913
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1924
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1933
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1944
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1953
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1964
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1973
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1984
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 1993
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2004
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2013
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2024
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2033
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2044
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2053
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2084
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2093
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2103
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2112
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2123
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2132
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2143
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2152
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2163
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2172
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2183
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2192
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2203
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2212
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2223
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2232
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2243
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2252
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2263
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2272
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2283
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2292
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2303
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2312
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2323
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2332
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2343
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2352
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2363
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2372
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2383
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2392
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2424
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2433
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2443
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2452
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2463
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2472
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2483
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2492
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2503
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2512
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2523
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2532
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2543
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2552
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2563
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2572
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2583
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2592
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2603
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2612
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2623
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2632
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2643
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2652
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2663
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2672
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2683
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2692
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2703
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2712
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2723
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 2732
+    family: rotate
+    pattern_kind: 'rotate-64'
