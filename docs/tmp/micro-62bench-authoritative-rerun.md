@@ -3,7 +3,7 @@
 ## Methodology
 
 - Kernel: `7.0.0-rc2-g05a1845490ed-dirty`
-- Benchmarks: `49` from `config/micro_pure_jit.yaml`
+- Benchmarks: `51` from `config/micro_pure_jit.yaml`
 - Runtimes: `kernel` vs `kernel-recompile`
 - Warmups / iterations / repeat: `2 / 2 / 500`
 - CPU pinning: `taskset -c 0`
@@ -12,10 +12,10 @@
 
 ## Headline Numbers
 
-- Overall geomean (stock / recompile, valid pairs only): `1.013x`
+- Overall geomean (stock / recompile, valid pairs only): `1.014x`
 - Applied-only geomean (stock / recompile): `1.001x`
-- Wins / losses / ties: `22 / 24 / 3`
-- Valid / invalid pairs: `49 / 0`
+- Wins / losses / ties: `23 / 24 / 4`
+- Valid / invalid pairs: `51 / 0`
 
 ## Per-Family Breakdown
 
@@ -31,8 +31,10 @@
 | byte-compare | 1 | 1 | 1 | 0.869x | 0.869x | 0 | 1 | 0 |
 | causal-isolation | 2 | 2 | 0 | 0.908x | n/a | 0 | 2 | 0 |
 | code-clone | 2 | 2 | 0 | 0.970x | n/a | 1 | 1 | 0 |
+| const-fold | 1 | 1 | 0 | 1.095x | n/a | 1 | 0 | 0 |
 | deep-guards | 1 | 1 | 0 | 1.094x | n/a | 1 | 0 | 0 |
 | dep-chain | 2 | 2 | 0 | 1.018x | n/a | 1 | 1 | 0 |
+| field-access | 1 | 1 | 0 | 1.000x | n/a | 0 | 0 | 1 |
 | fixed-loop | 2 | 2 | 0 | 1.171x | n/a | 1 | 1 | 0 |
 | immediate-stress | 1 | 1 | 0 | 1.000x | n/a | 0 | 0 | 1 |
 | large-mixed | 2 | 2 | 1 | 0.926x | 0.860x | 0 | 2 | 0 |
@@ -108,3 +110,5 @@
 | mega_basic_block_2048 | mega-block | 974.5 ns | 978.5 ns | 0.996x | no | 0 | loss |
 | rotate64_hash | rotate-hash | 103 ns | 79 ns | 1.304x | no | 0 | win |
 | packet_redundant_bounds | bounds-density | 218.5 ns | 179.5 ns | 1.217x | no | 0 | win |
+| const_fold_chain | const-fold | 317.5 ns | 290 ns | 1.095x | no | 0 | win |
+| struct_field_cluster | field-access | 87 ns | 87 ns | 1.000x | no | 0 | tie |

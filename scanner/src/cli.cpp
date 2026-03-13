@@ -797,6 +797,11 @@ void run_enumerate(const CommandOptions &options)
 
         close(prog_fd);
         results.push_back(std::move(res));
+
+        // If filtering to a single prog_id, stop after finding it
+        if (options.enumerate_prog_id_filter != 0) {
+            break;
+        }
     }
 
     // Print results
