@@ -1,0 +1,266 @@
+{
+  "suite": "micro_staged_codegen",
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/config/micro_pure_jit.yaml",
+  "generated_at": "2026-03-13T19:25:49.643280+00:00",
+  "host": {
+    "hostname": "virtme-ng",
+    "platform": "Linux-7.0.0-rc2-ga7ce05b49cb2-dirty-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "cpu_affinity": "0",
+    "git_sha": "unknown",
+    "kernel_version": "7.0.0-rc2-ga7ce05b49cb2-dirty",
+    "kernel_cmdline": "virtme_hostname=virtme-ng nr_open=1048576 virtme_initmount0=home/yunwei37/workspace/bpf-benchmark/micro/results virtme_initmount1=home/yunwei37/workspace/bpf-benchmark/docs/tmp virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp console=ttyS0 earlyprintk=serial,ttyS0,115200 quiet loglevel=0 panic=-1 virtme.exec=`YmFzaCAtbGMgJ3NldCAtZXVvIHBpcGVmYWlsOyBpZiBbIC1kIC9zeXMvZGV2aWNlcy9zeXN0ZW0vY3B1IF07IHRoZW4gZm9yIGYgaW4gL3N5cy9kZXZpY2VzL3N5c3RlbS9jcHUvY3B1Ki9jcHVmcmVxL3NjYWxpbmdfZ292ZXJub3I7IGRvIFsgLWYgIiRmIiBdIHx8IGNvbnRpbnVlOyBlY2hvIHBlcmZvcm1hbmNlID4gIiRmIiB8fCB0cnVlOyBkb25lOyBmaTsgdGFza3NldCAtYyAwIHB5dGhvbjMgLXUgZG9jcy90bXAva2VybmVsX3JlY29tcGlsZV9taWNyb19zdHJpY3QucHkgLS1iZW5jaCBjbW92X2RlbnNlIC0taXRlcmF0aW9ucyAyIC0td2FybXVwcyAyIC0tcmVwZWF0IDUwMCAtLWNwdSAwIC0tb3V0cHV0LWpzb24gL2hvbWUveXVud2VpMzcvd29ya3NwYWNlL2JwZi1iZW5jaG1hcmsvZG9jcy90bXAva2VybmVsX3JlY29tcGlsZV9wZXJfYmVuY2hfcG9zdF9iZXh0ci9jbW92X2RlbnNlLmpzb24gLS1vdXRwdXQtbWQgL2hvbWUveXVud2VpMzcvd29ya3NwYWNlL2JwZi1iZW5jaG1hcmsvZG9jcy90bXAva2VybmVsX3JlY29tcGlsZV9wZXJfYmVuY2hfcG9zdF9iZXh0ci9jbW92X2RlbnNlLm1kIDI+JjEgfCB0ZWUgL2hvbWUveXVud2VpMzcvd29ya3NwYWNlL2JwZi1iZW5jaG1hcmsvZG9jcy90bXAva2VybmVsX3JlY29tcGlsZV9wZXJfYmVuY2hfcG9zdF9iZXh0ci9jbW92X2RlbnNlLmxvZyc=` virtme_chdir=home/yunwei37/workspace/bpf-benchmark rootfstype=9p rootflags=version=9p2000.L,trans=virtio,access=any raid=noautodetect ro quiet loglevel=1 init=/home/yunwei37/.local/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init",
+    "cpu_governor": "unknown",
+    "turbo_state": "unknown",
+    "perf_event_paranoid": "2"
+  },
+  "defaults": {
+    "iterations": 2,
+    "warmups": 2,
+    "repeat": 500,
+    "cpu": "0"
+  },
+  "benchmarks": [
+    {
+      "name": "cmov_dense",
+      "description": "32 inlined compare/select sites over staged u64 arrays",
+      "category": "control-flow",
+      "family": "select-diamond",
+      "level": "dense-32",
+      "io_mode": "staged",
+      "tags": [
+        "branch",
+        "select",
+        "cmov",
+        "dense",
+        "pure-jit"
+      ],
+      "expected_result": 15544056576594566652,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/cmov_dense.mem",
+      "policy": null,
+      "policy_file": "/home/yunwei37/workspace/bpf-benchmark/micro/policies/cmov_dense.yaml",
+      "runs": [
+        {
+          "runtime": "kernel",
+          "label": "kernel eBPF",
+          "mode": "kernel",
+          "repeat": 500,
+          "command": [
+            "sudo",
+            "-n",
+            "/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec",
+            "run-kernel",
+            "--program",
+            "/home/yunwei37/workspace/bpf-benchmark/micro/programs/cmov_dense.bpf.o",
+            "--io-mode",
+            "staged",
+            "--repeat",
+            "500",
+            "--memory",
+            "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/cmov_dense.mem",
+            "--input-size",
+            "1024"
+          ],
+          "measurement_complete": false,
+          "status": "command-failed",
+          "failures": [
+            {
+              "phase": "warmup",
+              "iteration_index": 0,
+              "reason": "command-failed",
+              "returncode": 1,
+              "stdout_tail": "",
+              "stderr_tail": "sudo: /home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec: command not found"
+            }
+          ],
+          "samples": [],
+          "artifacts": {
+            "program_object": "/home/yunwei37/workspace/bpf-benchmark/micro/programs/cmov_dense.bpf.o",
+            "policy_file": null
+          },
+          "compile_ns": {
+            "count": 0,
+            "mean": null,
+            "median": null,
+            "min": null,
+            "max": null,
+            "p95": null,
+            "stdev": null
+          },
+          "exec_ns": {
+            "count": 0,
+            "mean": null,
+            "median": null,
+            "min": null,
+            "max": null,
+            "p95": null,
+            "stdev": null
+          },
+          "phases_ns": {},
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false
+          },
+          "derived_metrics": {},
+          "wall_exec_ns": null,
+          "timing_source": "unknown",
+          "recompile_observation": {
+            "requested": false,
+            "applied": false,
+            "requested_families": [],
+            "skipped_families": [],
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "bitfield_sites": 0,
+            "zero_ext_sites": 0,
+            "endian_sites": 0,
+            "branch_flip_sites": 0,
+            "total_sites": 0,
+            "errors": []
+          }
+        },
+        {
+          "runtime": "kernel-recompile",
+          "label": "kernel eBPF + manifest recompile policy",
+          "mode": "kernel-recompile",
+          "repeat": 500,
+          "command": [
+            "sudo",
+            "-n",
+            "/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec",
+            "run-kernel",
+            "--program",
+            "/home/yunwei37/workspace/bpf-benchmark/micro/programs/cmov_dense.bpf.o",
+            "--io-mode",
+            "staged",
+            "--repeat",
+            "500",
+            "--memory",
+            "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/cmov_dense.mem",
+            "--input-size",
+            "1024",
+            "--policy-file",
+            "/home/yunwei37/workspace/bpf-benchmark/micro/policies/cmov_dense.yaml"
+          ],
+          "measurement_complete": false,
+          "status": "command-failed",
+          "failures": [
+            {
+              "phase": "warmup",
+              "iteration_index": 0,
+              "reason": "command-failed",
+              "returncode": 1,
+              "stdout_tail": "",
+              "stderr_tail": "sudo: /home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec: command not found"
+            }
+          ],
+          "samples": [],
+          "artifacts": {
+            "program_object": "/home/yunwei37/workspace/bpf-benchmark/micro/programs/cmov_dense.bpf.o",
+            "policy_file": "/home/yunwei37/workspace/bpf-benchmark/micro/policies/cmov_dense.yaml"
+          },
+          "compile_ns": {
+            "count": 0,
+            "mean": null,
+            "median": null,
+            "min": null,
+            "max": null,
+            "p95": null,
+            "stdev": null
+          },
+          "exec_ns": {
+            "count": 0,
+            "mean": null,
+            "median": null,
+            "min": null,
+            "max": null,
+            "p95": null,
+            "stdev": null
+          },
+          "phases_ns": {},
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false
+          },
+          "derived_metrics": {},
+          "wall_exec_ns": null,
+          "timing_source": "unknown",
+          "recompile_observation": {
+            "requested": false,
+            "applied": false,
+            "requested_families": [],
+            "skipped_families": [],
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "bitfield_sites": 0,
+            "zero_ext_sites": 0,
+            "endian_sites": 0,
+            "branch_flip_sites": 0,
+            "total_sites": 0,
+            "errors": []
+          }
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "benchmark_rows": [
+      {
+        "name": "cmov_dense",
+        "category": "control-flow",
+        "family": "select-diamond",
+        "io_mode": "staged",
+        "stock_exec_ns_median": null,
+        "recompile_exec_ns_median": null,
+        "ratio_stock_over_recompile": null,
+        "ratio_status": "n/a",
+        "stock_complete": false,
+        "recompile_complete": false,
+        "recompile_applied": false,
+        "recompile_total_sites": 0,
+        "recompile_sites": {
+          "cmov": 0,
+          "wide": 0,
+          "rotate": 0,
+          "lea": 0,
+          "bitfield_extract": 0,
+          "zero_ext": 0,
+          "endian": 0,
+          "branch_flip": 0
+        },
+        "stock_status": "command-failed",
+        "recompile_status": "command-failed"
+      }
+    ],
+    "overall": {
+      "benchmarks_total": 1,
+      "valid_pairs": 0,
+      "invalid_pairs": 1,
+      "applied_pairs": 0,
+      "geomean_stock_over_recompile": null,
+      "applied_only_geomean_stock_over_recompile": null,
+      "wins": 0,
+      "losses": 0,
+      "ties": 0
+    },
+    "family_breakdown": [
+      {
+        "family": "select-diamond",
+        "benchmarks": 1,
+        "valid_pairs": 0,
+        "applied_pairs": 0,
+        "geomean_stock_over_recompile": null,
+        "applied_only_geomean_stock_over_recompile": null,
+        "wins": 0,
+        "losses": 0,
+        "ties": 0
+      }
+    ]
+  }
+}

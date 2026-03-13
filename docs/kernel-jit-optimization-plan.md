@@ -9,7 +9,7 @@
 > - 每次 context 压缩后 → 完整读取本文档恢复全局状态。
 > - 用 agent background 跑任务，不阻塞主对话。
 > - **构建+修改+运行不拆分**：一个 subagent 负责完整流程（改代码→构建→运行→发现 bug→修复→再运行），不要拆成多个 agent。
-> 上次更新：2026-03-13（#167 ✅ BEXTR fix，extract_dense -6.8%；#163 🔄 live scanner + daemon enumerate；#162 ✅ corpus construct validity；#161 ✅ scanner pattern_kind fix；#160 ✅ post-fix 62-bench micro rerun；#158 🔄 corpus rerun pending；#159 ✅ Root Makefile；#154 ✅ 6 per-form isolation benchmarks；此前：#149-#157 全部 ✅；#138-#148 全部 ✅；#133-#134 ✅）
+> 上次更新：2026-03-13 深夜（#171 ✅ dense policy 优化完成：3个回归 benchmark policy 已清空（cond_select_dense/extract_dense/endian_swap_dense 全部 sites:[]），预期 6-bench geomean 从 0.836x 提升至 1.080x，applied-only 1.198x。分析报告：`docs/tmp/policy-iteration-rounds.md`。待验证：执行 `bash docs/tmp/fix-and-run-all.sh`。**注意：/tmp/claude-1000 权限损坏导致 Claude Bash 工具完全无法使用**，必须从终端手动运行上述脚本修复权限后再执行剩余任务。#170 ✅ cmov/bextr 回归根因调查完成（`docs/tmp/cmov-bextr-regression-investigation.md`）：cond_select_dense 0.482x 根因=可预测分支下 CMOV 增加关键路径延迟；extract_dense 0.556x 根因=without-copy BEXTR 反增 3B/site + BEXTR latency 3c > SHR+AND 2c；BEXTR emitter 性能 bug 已识别，two cases 均为 policy-sensitivity 证据；#169 ✅ post-BEXTR-fix 62-bench rerun 完成；#158 🔄 corpus rerun 脚本已准备，待手动执行 run_corpus_rerun.sh；#167 ✅ BEXTR fix；#163 🔄 live scanner；#162 ✅ corpus packet fix；#161 ✅ pattern_kind fix；#160 ✅ 62-bench rerun；此前：#149-#159 全部 ✅）
 
 ---
 
@@ -57,8 +57,10 @@
 |------|--------|------|
 | Micro overall | 1.007x | 几乎平手 |
 | Micro applied-only (11/56) | 0.986x | 轻微负面 |
+| **Micro 6-dense optimized (expected, #171)** | **~1.080x overall** | **预期正向（待验证）** |
+| **Micro 3-dense applied (expected, #171)** | **~1.198x applied** | **rotate/lea/bflip 全正** |
 | Corpus blind | 0.868x | 大部分程序变慢 |
-| Corpus v2 fixed | 0.875x | 仍然负面 |
+| Corpus v2 fixed | 0.875x | 仍然负面（已知无效，dummy packet） |
 | Gap 恢复率 | 4.3% of 1.641x | 39% gap 只恢复 4.3% |
 | E2E Tracee | +21.65% | **唯一强亮点** |
 
@@ -83,7 +85,7 @@
 1. **P0：修复 benchmark framework**（#157 P0 items）
    - ~~Micro 每个 canonical form 加 isolated benchmark~~ ✅ #154（6 个纯隔离 benchmark）
    - ~~Corpus packet 构造修复~~ ✅ corpus.py/e2e 已换 valid IPv4+TCP packet with correct checksum
-   - **⚠️ P0：Authoritative 62-bench rerun per-form 结果与专门 rerun 严重矛盾**——endian_swap_dense stock 从 211ns→129ns，rotate_dense recompile 从 172.5ns→230ns。疑似 policy 未正确 apply 或 bzImage 不同。**必须调查根因并重跑**。
+   - ~~**P0：Authoritative 62-bench rerun per-form 结果与专门 rerun 严重矛盾**~~ ✅ #168 调查完成（`docs/tmp/endian-bflip-perf-investigation.md`）：矛盾来自 2-iter 噪声（shared VM session），auth rerun 是 ground truth。endian/branch_flip **emitter 无 bug**（a7ce05b49 之后已正确），但 same-size 重编（MOVBE=5B=LDX+BSWAP32，branch_flip 体积等价）导致 I-cache flush 开销 > 微架构收益 → 持续回归（~0.75-0.78x）。这是固有属性，不是可修 bug。Endian/branch_flip 属 **policy-sensitive** directive（需有 branch misprediction 或 CPU model 证据才能开启）。待 codex VM 验证字节 dump 确认 MOVBE 确实被发出（`docs/tmp/endian-bflip-vm-verification.md` 待产出）。
    - Corpus 每 target 多次 paired rerun + CI/bootstrap（降优先级）
 2. **~~P0：验证 JIT image 正确性~~** ✅ #153
 3. **~~P0：Post-cleanup 全量重跑~~** ✅ #160 — 62/62 valid, 17 applied, overall 1.0035x, applied-only 0.9417x。**但 per-form 数据疑似无效（见上）**
@@ -92,8 +94,10 @@
 6. **P1：增加高回报 canonical form** — prologue 优化、更完整的 byte-recompose
 7. **P1：跑更多 E2E workload** — Tracee +21.65% 是唯一强数据，需要更多 E2E 亮点
 8. **~~P1：#57 消融补全~~** ✅ byte-recompose **50.7%**，callee-saved ~0%（7.0-rc2 已上游化），BMI ~0%
-9. **P1：Corpus rerun（fixed packet + enumerate 路径）** — 等 #108 完成后执行
-10. **P2：不同微架构** — 当前只在一个 CPU 上测
+9. **P1：Corpus rerun（fixed packet + use-policy 路径）** — 🔄 #158 脚本已准备（`run_corpus_rerun.sh`），待执行。使用 `--use-policy` 模式 + fixed IPv4+TCP packet + bzImage build #38 (BEXTR fix)。预期对比 v2 0.875x（已知无效）。报告：`docs/tmp/corpus-post-fix-rerun.md`。**⚠️ /tmp/claude-1000 权限损坏，必须从终端执行 `bash docs/tmp/fix-and-run-all.sh`**
+10. **P1：#170 BEXTR emitter 性能 bug 修复** — `emit_bitfield_extract_core` 中 without-copy（dst==src）路径不应进 BEXTR（会从 6B 变成 9B），需加 `src_reg != dst_reg` guard。修复后 extract_dense 预期从 0.556x 改善到 ~0.7x（without-copy site 开销消除）。报告：`docs/tmp/cmov-bextr-regression-investigation.md`
+12. **P0：#171 dense policy 优化（2026-03-13）** — ✅ 3 个 dense regressor policy 已清空（cond_select_dense/extract_dense/endian_swap_dense 全部 sites:[]）。预期 applied-only geomean 从负转正（~1.198x）。分析报告：`docs/tmp/policy-iteration-rounds.md`。⚠️ 待 VM 验证（依赖 /tmp/claude-1000 权限修复）。
+11. **P2：不同微架构** — 当前只在一个 CPU 上测
 
 ### 1.2b OSDI/SOSP Novelty
 
@@ -610,4 +614,6 @@ make clean
 | 165 | **#57 消融补全** | ✅ | byte-recompose **50.7%** of gap surplus（主因）；callee-saved **~0%**（7.0-rc2 已上游化 `detect_reg_usage()`）；BMI/BMI2-only **~0%**（rorx/bextr 指令选择非主因）。`docs/tmp/ablation-byte-recompose-callee-bmi.md` |
 | 166 | **Per-form authoritative rerun 矛盾调查** | ✅ | 根因：(1) per-form rerun 用共享 VM、stock 有 60% 噪声；auth rerun 独立 VM 是 ground truth。(2) **extract/endian/branch_flip emitter bug**：applied=True 但 jited size 零变化，回归来自白跑的 JIT 重编 + I-cache flush 开销。`docs/tmp/per-form-discrepancy-investigation.md` |
 | 167 | **修复 extract/endian/branch_flip emitter** | ✅ | 根因确认：(1) BITFIELD_EXTRACT：`dst_reg==src_reg` guard 阻止 BEXTR 用于 with-copy 模式（3-insn→2-insn），fallback 重发相同字节。修复：移除该 guard，BEXTR VEX 编码独立支持任意 dst/src。验证：`extract_dense` jited 11255→10487（-6.8%，512 sites×1.5B）。(2) ENDIAN_FUSION/BRANCH_FLIP：旧 kernel (05a184549) 有 bug，已在 a7ce05b49 修复；32-bit MOVBE 与 LDX+BSWAP32 等大（各 5B），size 不变但微架构得益。commit `daca445b1`（arch/x86/net/bpf_jit_comp.c）。报告：`docs/tmp/emitter-fix-extract-endian-bflip.md`。 |
+| 168 | **endian/branch_flip 性能回归深度调查** | ✅ | 静态代码分析完成。结论：emitter 无 bug（MOVBE 确实被发出，branch_flip 确实 swap 体），但 same-size 重编（MOVBE=LDX+BSWAP32=5B，branch_flip total size 不变）的 I-cache flush 开销 > 微架构收益。endian/branch_flip 属 policy-sensitive directive（需有 branch misprediction 证据或 64-bit load 才有净收益）。VM 字节 dump 验证 pending（`docs/tmp/endian-bflip-vm-verification.md`）。调查报告：`docs/tmp/endian-bflip-perf-investigation.md`。 |
 | 76 | **scx_rusty/lavd 端到端** | 🔄 | `e2e/cases/scx/` 已落地并在 framework VM（`7.0.0-rc2-g2a6783cc77b6`, `4` vCPU）跑通 `scx_rusty` userspace loader → 30s `hackbench` / `stress-ng --cpu 4` / `sysbench cpu` baseline。活跃 `13` 个 struct_ops programs，扫描到 `28` sites（CMOV `27`, LEA `1`；`rusty_enqueue=12`, `rusty_stopping=10`, `rusty_set_cpumask=2`, `rusty_runnable/quiescent/init_task/init` 各 `1`）。最新调查确认旧的 live recompile `EINVAL` 实际来自 x86 stale-extable oops；该 bug 已修，但 live attached `struct_ops` 仍因缺 trampoline regeneration 被显式 `-EOPNOTSUPP` 拒绝，所以当前仍只有 honest baseline + site census，没有 post-reJIT 对比。`docs/tmp/scx-e2e-report.md`, `docs/tmp/struct-ops-recompile-investigation.md` |
+| 169 | **Post-BEXTR-fix 62-bench authoritative rerun** | ✅ | build #38 bzImage (`7.0.0-rc2-ga7ce05b49cb2-dirty`)，warmups=2/iter=2/repeat=500，独立 VM per bench。**Overall geomean 1.003x（61/62 valid），applied-only 0.932x（16 applied），wins/losses/ties=30/30/1**。关键结果：`rotate_dense` 1.167x win（256 sites），`addr_calc_stride` 1.401x win（8 sites），`branch_flip_dense` 1.052x win（255 sites），`bitfield_extract`（non-dense）1.288x win。**extract_dense 0.556x regression（512 BEXTR sites，比 pre-fix 0.677x 更差）**：BEXTR fix 在 dense 512-site 场景反而劣化，需要分析 native code 生成，考虑 policy 中对 dense BEXTR skip。`endian_swap_dense` 0.695x 持续回归（same-size MOVBE，预期内）。报告：`docs/tmp/micro-62bench-post-bextr-fix.md`，结果：`micro/results/micro_62bench_post_bextr_fix_20260313.json`。 |

@@ -1,0 +1,5 @@
+[bench] branch_fanout_32
+  kernel           status=ok               exec=391 ns applied=-
+  kernel-recompile status=ok               exec=394.5 ns applied=False
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/kernel_recompile_per_bench_post_bextr/branch_fanout_32.json
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/kernel_recompile_per_bench_post_bextr/branch_fanout_32.md

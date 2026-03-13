@@ -1,0 +1,5 @@
+[bench] load_byte
+  kernel           status=ok               exec=326.5 ns applied=-
+  kernel-recompile status=ok               exec=301.5 ns applied=False
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/kernel_recompile_per_bench_post_bextr/load_byte.json
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/kernel_recompile_per_bench_post_bextr/load_byte.md

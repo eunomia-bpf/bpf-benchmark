@@ -186,7 +186,15 @@ def ensure_root(argv: Sequence[str] | None = None) -> None:
     if not sudo_available():
         raise SystemExit("passwordless sudo is required for e2e benchmarking")
     script_argv = list(argv if argv is not None else sys.argv)
-    os.execvp("sudo", ["sudo", "-n", sys.executable, *script_argv])
+    sudo_cmd = ["sudo", "-n"]
+    # Preserve TMPDIR so that tempfile.TemporaryDirectory() and tempfile.NamedTemporaryFile()
+    # continue to use the writable path set by the VM guest script.
+    tmpdir = os.environ.get("TMPDIR", "").strip()
+    if tmpdir:
+        sudo_cmd.append(f"TMPDIR={tmpdir}")
+    sudo_cmd.append(sys.executable)
+    sudo_cmd.extend(script_argv)
+    os.execvp("sudo", sudo_cmd)
 
 
 __all__ = [

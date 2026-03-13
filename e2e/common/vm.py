@@ -17,10 +17,16 @@ def write_guest_script(commands: Sequence[str | Sequence[str]]) -> Path:
         dir=ROOT_DIR,
         delete=False,
     )
+    # docs/tmp is mounted --rwdir in virtme-ng; use a vm-tmp subdirectory so that
+    # Python's tempfile module (and any subprocesses) can create temp files even
+    # when the VM's /tmp is read-only (virtme-ng only mounts specific --rwdir paths).
+    vm_tmp_dir = ROOT_DIR / "docs" / "tmp" / "vm-tmp"
     with handle:
         handle.write("#!/bin/bash\nset -eu\n")
         handle.write(f"cd {shlex.quote(str(ROOT_DIR))}\n")
         handle.write('export PATH="/usr/local/sbin:$PATH"\n')
+        handle.write(f"mkdir -p {shlex.quote(str(vm_tmp_dir))}\n")
+        handle.write(f"export TMPDIR={shlex.quote(str(vm_tmp_dir))}\n")
         if DEFAULT_VENV_ACTIVATE.exists():
             handle.write(f". {shlex.quote(str(DEFAULT_VENV_ACTIVATE))}\n")
         for command in commands:

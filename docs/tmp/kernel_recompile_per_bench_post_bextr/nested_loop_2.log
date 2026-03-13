@@ -1,0 +1,5 @@
+[bench] nested_loop_2
+  kernel           status=ok               exec=615 ns applied=-
+  kernel-recompile status=ok               exec=592 ns applied=False
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/kernel_recompile_per_bench_post_bextr/nested_loop_2.json
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/kernel_recompile_per_bench_post_bextr/nested_loop_2.md
