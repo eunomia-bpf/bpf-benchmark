@@ -1,6 +1,6 @@
 # bpftrace Real End-to-End Benchmark
 
-- Generated: `2026-03-12T23:23:02.030969+00:00`
+- Generated: `2026-03-12T23:28:12.307982+00:00`
 - Mode: `full`
 - Duration per phase: `5s`
 - Host kernel: `6.15.11-061511-generic`
@@ -23,8 +23,8 @@ features: llvm, skeletons`
 
 | Script | Sites | Stock ns | ReJIT ns | Speedup | Ops/s Stock | Ops/s ReJIT | CPU% Stock | CPU% ReJIT | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| open_latency | 6 | 147.87 | n/a | n/a | 39356.29 | n/a | 0.20 | n/a | BPF_PROG_JIT_RECOMPILE did not apply |
-| scheduler_latency | 6 | 123.38 | n/a | n/a | 41.13 | n/a | 0.00 | n/a | BPF_PROG_JIT_RECOMPILE did not apply |
+| open_latency | 6 | 196.67 | n/a | n/a | 43191.06 | n/a | 0.00 | n/a | policy filtered all live sites |
+| scheduler_latency | 6 | 145.22 | n/a | n/a | 41.75 | n/a | 0.00 | n/a | policy filtered all live sites |
 
 ## Comparison
 

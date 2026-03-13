@@ -1,8 +1,8 @@
 {
   "duration_s": 5,
-  "generated_at": "2026-03-12T23:23:02.030969+00:00",
+  "generated_at": "2026-03-12T23:28:12.307982+00:00",
   "host": {
-    "git_sha": "da10f84a60caa24e5744c16891d25bec2091ae8a",
+    "git_sha": "677d4e62f78a58c2cf803f8fa80604867c6fe3bc",
     "hostname": "lab",
     "kernel": "6.15.11-061511-generic",
     "platform": "Linux-6.15.11-061511-generic-x86_64-with-glibc2.39",
@@ -13,174 +13,176 @@
       "baseline": {
         "measurement": {
           "agent_cpu": {
-            "sys_pct": 0.19999727087559863,
-            "total_pct": 0.19999727087559863,
+            "sys_pct": 0.0,
+            "total_pct": 0.0,
             "user_pct": 0.0
           },
           "bpf": {
             "programs": {
-              "193123": {
-                "avg_ns_per_run": 167.2469493777939,
+              "193491": {
+                "avg_ns_per_run": 210.02398903358466,
                 "bytes_jited": 491,
                 "bytes_xlated": 872,
-                "id": 193123,
+                "id": 193491,
                 "name": "do_sys_openat2",
-                "run_cnt_delta": 57939,
-                "run_time_ns_delta": 9690121,
+                "run_cnt_delta": 2918,
+                "run_time_ns_delta": 612850,
                 "type": "kprobe"
               },
-              "193124": {
-                "avg_ns_per_run": 128.4930012599458,
+              "193492": {
+                "avg_ns_per_run": 183.31973954763538,
                 "bytes_jited": 86,
                 "bytes_xlated": 136,
-                "id": 193124,
+                "id": 193492,
                 "name": "do_sys_openat2",
-                "run_cnt_delta": 57939,
-                "run_time_ns_delta": 7444756,
+                "run_cnt_delta": 2918,
+                "run_time_ns_delta": 534927,
                 "type": "kprobe"
               }
             },
             "summary": {
               "active_programs": 2,
-              "avg_ns_per_run": 147.86997531886985,
-              "total_events": 115878,
-              "total_run_time_ns": 17134877
+              "avg_ns_per_run": 196.67186429061002,
+              "total_events": 5836,
+              "total_run_time_ns": 1147777
             }
           },
           "final_stats": {
-            "193123": {
+            "193491": {
               "bytes_jited": 491,
               "bytes_xlated": 872,
-              "id": 193123,
+              "id": 193491,
               "name": "do_sys_openat2",
-              "run_cnt": 74332,
-              "run_time_ns": 12706909,
+              "run_cnt": 4061,
+              "run_time_ns": 830453,
               "type": "kprobe"
             },
-            "193124": {
+            "193492": {
               "bytes_jited": 86,
               "bytes_xlated": 136,
-              "id": 193124,
+              "id": 193492,
               "name": "do_sys_openat2",
-              "run_cnt": 74325,
-              "run_time_ns": 9799607,
+              "run_cnt": 4058,
+              "run_time_ns": 719331,
               "type": "kprobe"
             }
           },
           "initial_stats": {
-            "193123": {
+            "193491": {
               "bytes_jited": 491,
               "bytes_xlated": 872,
-              "id": 193123,
+              "id": 193491,
               "name": "do_sys_openat2",
-              "run_cnt": 16393,
-              "run_time_ns": 3016788,
+              "run_cnt": 1143,
+              "run_time_ns": 217603,
               "type": "kprobe"
             },
-            "193124": {
+            "193492": {
               "bytes_jited": 86,
               "bytes_xlated": 136,
-              "id": 193124,
+              "id": 193492,
               "name": "do_sys_openat2",
-              "run_cnt": 16386,
-              "run_time_ns": 2354851,
+              "run_cnt": 1140,
+              "run_time_ns": 184404,
               "type": "kprobe"
             }
           },
           "system_cpu": {
-            "busy_pct": 24.844423168980377
+            "busy_pct": 12.422108926114749
           },
           "workload": {
-            "duration_s": 5.2831965199438855,
-            "ops_per_sec": 39356.28728083135,
-            "ops_total": 207927.0,
+            "duration_s": 5.283662422094494,
+            "ops_per_sec": 43191.0636542023,
+            "ops_total": 228207.0,
             "stderr": "",
-            "stdout": "        \"500\" : 0.010000,\n        \"750\" : 0.010000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.010000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ],\n  \"disk_util\" : [\n    {\n      \"name\" : \"nvme0n1\",\n      \"read_ios\" : 202399,\n      \"write_ios\" : 9,\n      \"read_sectors\" : 1619192,\n      \"write_sectors\" : 2120,\n      \"read_merges\" : 0,\n      \"write_merges\" : 80,\n      \"read_ticks\" : 2300,\n      \"write_ticks\" : 12,\n      \"in_queue\" : 2315,\n      \"util\" : 46.606607\n    }\n  ]\n}"
+            "stdout": "        \"500\" : 0.010000,\n        \"750\" : 0.010000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.010000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ],\n  \"disk_util\" : [\n    {\n      \"name\" : \"nvme0n1\",\n      \"read_ios\" : 222620,\n      \"write_ios\" : 8,\n      \"read_sectors\" : 1781024,\n      \"write_sectors\" : 2832,\n      \"read_merges\" : 0,\n      \"write_merges\" : 113,\n      \"read_ticks\" : 1662,\n      \"write_ticks\" : 14,\n      \"in_queue\" : 1683,\n      \"util\" : 34.427542\n    }\n  ]\n}"
           }
         },
         "phase": "baseline",
-        "policy_matches": {},
+        "policy_matches": {
+          "193491": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/bpftrace/open_latency/kretprobe_do_sys_openat2.policy.yaml"
+        },
         "policy_summary": {
-          "configured_programs": 0,
-          "fallback_programs": 2
+          "configured_programs": 1,
+          "fallback_programs": 0
         },
         "process": {
           "returncode": 0,
           "stderr_tail": "",
-          "stdout_tail": "@latency_ns:\n[256, 512)             1 |                                                    |\n[512, 1K)          16042 |@@@@@@@@@@@@@@@@@@@@@                               |\n[1K, 2K)           38629 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|\n[2K, 4K)           16115 |@@@@@@@@@@@@@@@@@@@@@                               |\n[4K, 8K)            2955 |@@@                                                 |\n[8K, 16K)            520 |                                                    |\n[16K, 32K)            50 |                                                    |\n[32K, 64K)             9 |                                                    |\n[64K, 128K)            4 |                                                    |\n@start[1941199]: 533696945709898\n@start[2302545]: 533697044060466"
+          "stdout_tail": "@latency_ns:\n[512, 1K)            274 |@@@@@@                                              |\n[1K, 2K)            2108 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|\n[2K, 4K)             884 |@@@@@@@@@@@@@@@@@@@@@                               |\n[4K, 8K)             456 |@@@@@@@@@@@                                         |\n[8K, 16K)            307 |@@@@@@@                                             |\n[16K, 32K)            20 |                                                    |\n[32K, 64K)             6 |                                                    |\n[64K, 128K)            3 |                                                    |\n@start[2423866]: 534007252408860"
         },
         "prog_ids": [
-          193123,
-          193124
+          193491,
+          193492
         ],
         "programs": [
           {
-            "btf_id": 322168,
+            "btf_id": 322580,
             "bytes_jited": 491,
             "bytes_memlock": 4096,
             "bytes_xlated": 872,
             "gpl_compatible": true,
-            "id": 193123,
+            "id": 193491,
             "jited": true,
-            "loaded_at": 1773357761,
+            "loaded_at": 1773358071,
             "map_ids": [
-              229927,
-              229926
+              230111,
+              230110
             ],
             "name": "do_sys_openat2",
             "orphaned": false,
             "owner_fds": [
               {
                 "fd": 10,
-                "pid": 2302545
+                "pid": 2423866
               }
             ],
             "owner_pids": [
-              2302545
+              2423866
             ],
             "pids": [
               {
                 "comm": "bpftrace",
-                "pid": 2302545
+                "pid": 2423866
               }
             ],
-            "run_cnt": 10050,
-            "run_time_ns": 1827487,
+            "run_cnt": 618,
+            "run_time_ns": 122328,
             "tag": "df1fc480a0a60631",
             "type": "kprobe",
             "uid": 0
           },
           {
-            "btf_id": 322169,
+            "btf_id": 322581,
             "bytes_jited": 86,
             "bytes_memlock": 4096,
             "bytes_xlated": 136,
             "gpl_compatible": true,
-            "id": 193124,
+            "id": 193492,
             "jited": true,
-            "loaded_at": 1773357761,
+            "loaded_at": 1773358071,
             "map_ids": [
-              229927
+              230111
             ],
             "name": "do_sys_openat2",
             "orphaned": false,
             "owner_fds": [
               {
                 "fd": 12,
-                "pid": 2302545
+                "pid": 2423866
               }
             ],
             "owner_pids": [
-              2302545
+              2423866
             ],
             "pids": [
               {
                 "comm": "bpftrace",
-                "pid": 2302545
+                "pid": 2423866
               }
             ],
-            "run_cnt": 10044,
-            "run_time_ns": 1457625,
+            "run_cnt": 616,
+            "run_time_ns": 100599,
             "tag": "14edc011e2e365d8",
             "type": "kprobe",
             "uid": 0
@@ -191,10 +193,11 @@
         "recompile_summary": {
           "applied_programs": 0,
           "eligible_programs": 0,
-          "errors": []
+          "errors": [],
+          "noop_programs": 0
         },
         "scan_results": {
-          "193123": {
+          "193491": {
             "error": "",
             "program_name": "do_sys_openat2",
             "sites": {
@@ -211,7 +214,7 @@
             "stderr_tail": "",
             "stdout_tail": "{\"program\":{\"name\":\"do_sys_openat2\",\"insn_cnt\":109,\"prog_tag\":\"df1fc480a0a60631\"},\"summary\":{\"total_sites\":6,\"cmov_sites\":6,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"extract_sites\":0,\"bitfield_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0},\"sites\":[{\"site_id\":\"cmov:41:cond-select-64\",\"family\":\"cmov\",\"insn\":41,\"start_insn\":41,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:46:cond-select-64\",\"family\":\"cmov\",\"insn\":46,\"start_insn\":46,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:51:cond-select-64\",\"family\":\"cmov\",\"insn\":51,\"start_insn\":51,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:56:cond-select-64\",\"family\":\"cmov\",\"insn\":56,\"start_insn\":56,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:61:cond-select-64\",\"family\":\"cmov\",\"insn\":61,\"start_insn\":61,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:66:cond-select-64\",\"family\":\"cmov\",\"insn\":66,\"start_insn\":66,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1}]}\n"
           },
-          "193124": {
+          "193492": {
             "error": "",
             "program_name": "do_sys_openat2",
             "sites": {
@@ -243,96 +246,98 @@
       "rejit": {
         "measurement": null,
         "phase": "rejit",
-        "policy_matches": {},
+        "policy_matches": {
+          "193542": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/bpftrace/open_latency/kretprobe_do_sys_openat2.policy.yaml"
+        },
         "policy_summary": {
-          "configured_programs": 0,
-          "fallback_programs": 2
+          "configured_programs": 1,
+          "fallback_programs": 0
         },
         "process": {
           "returncode": 0,
           "stderr_tail": "",
-          "stdout_tail": "@latency_ns:\n[512, 1K)           5420 |@@@@@@@@@@@                                         |\n[1K, 2K)           25201 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|\n[2K, 4K)            3590 |@@@@@@@                                             |\n[4K, 8K)             606 |@                                                   |\n[8K, 16K)            132 |                                                    |\n[16K, 32K)            16 |                                                    |\n[32K, 64K)             1 |                                                    |\n[64K, 128K)            1 |                                                    |\n@start[2233519]: 533699868533015\n@start[2233533]: 533699869173599\n@start[2233521]: 533699869722425\n@start[2233516]: 533699870497101\n@start[2233528]: 533699870991607\n@start[2233524]: 533699871067966\n@start[2233526]: 533699871104373\n@start[2233523]: 533699871399687\n@start[2233530]: 533699871464587\n@start[2233531]: 533699871546331\n@start[2233529]: 533699871631385\n@start[2233532]: 533699871776604\n@start[2233518]: 533699871909220\n@start[2233517]: 533699871999620\n@start[2233520]: 533699872246873\n@start[2233527]: 533699872407911\n@start[2233522]: 533699872777159\n@start[2233525]: 533699872814908\n@start[2302975]: 533699938063554"
+          "stdout_tail": "@latency_ns:\n[512, 1K)            122 |@@@@@                                               |\n[1K, 2K)            1091 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|\n[2K, 4K)             332 |@@@@@@@@@@@@@@@                                     |\n[4K, 8K)             108 |@@@@@                                               |\n[8K, 16K)             76 |@@@                                                 |\n[16K, 32K)             4 |                                                    |\n[32K, 64K)             2 |                                                    |\n[64K, 128K)            1 |                                                    |\n@start[2423943]: 534010142322508"
         },
         "prog_ids": [
-          193174,
-          193175
+          193542,
+          193543
         ],
         "programs": [
           {
-            "btf_id": 322225,
+            "btf_id": 322637,
             "bytes_jited": 491,
             "bytes_memlock": 4096,
             "bytes_xlated": 872,
             "gpl_compatible": true,
-            "id": 193174,
+            "id": 193542,
             "jited": true,
-            "loaded_at": 1773357770,
+            "loaded_at": 1773358080,
             "map_ids": [
-              229952,
-              229951
+              230136,
+              230135
             ],
             "name": "do_sys_openat2",
             "orphaned": false,
             "owner_fds": [
               {
                 "fd": 10,
-                "pid": 2302975
+                "pid": 2423943
               }
             ],
             "owner_pids": [
-              2302975
+              2423943
             ],
             "pids": [
               {
                 "comm": "bpftrace",
-                "pid": 2302975
+                "pid": 2423943
               }
             ],
-            "run_cnt": 31433,
-            "run_time_ns": 4297951,
+            "run_cnt": 1220,
+            "run_time_ns": 242062,
             "tag": "df1fc480a0a60631",
             "type": "kprobe",
             "uid": 0
           },
           {
-            "btf_id": 322226,
+            "btf_id": 322638,
             "bytes_jited": 86,
             "bytes_memlock": 4096,
             "bytes_xlated": 136,
             "gpl_compatible": true,
-            "id": 193175,
+            "id": 193543,
             "jited": true,
-            "loaded_at": 1773357770,
+            "loaded_at": 1773358080,
             "map_ids": [
-              229952
+              230136
             ],
             "name": "do_sys_openat2",
             "orphaned": false,
             "owner_fds": [
               {
                 "fd": 12,
-                "pid": 2302975
+                "pid": 2423943
               }
             ],
             "owner_pids": [
-              2302975
+              2423943
             ],
             "pids": [
               {
                 "comm": "bpftrace",
-                "pid": 2302975
+                "pid": 2423943
               }
             ],
-            "run_cnt": 31431,
-            "run_time_ns": 3186863,
+            "run_cnt": 1218,
+            "run_time_ns": 208201,
             "tag": "14edc011e2e365d8",
             "type": "kprobe",
             "uid": 0
           }
         ],
-        "reason": "BPF_PROG_JIT_RECOMPILE did not apply",
+        "reason": "policy filtered all live sites",
         "recompile_results": {
-          "193174": {
+          "193542": {
             "applied": false,
             "counts": {
               "bitfield_sites": 0,
@@ -346,20 +351,34 @@
               "zero_ext_sites": 0
             },
             "error": "",
-            "policy_file": null,
-            "policy_mode": "stock",
-            "program_name": "do_sys_openat2",
+            "noop": true,
+            "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/bpftrace/open_latency/kretprobe_do_sys_openat2.policy.yaml",
+            "policy_mode": "policy-file",
+            "policy_remap": {
+              "dropped_family_counts": {},
+              "dropped_sites": 0,
+              "explicit_sites": 0,
+              "live_family_counts": {
+                "cmov": 6
+              },
+              "live_total_sites": 6,
+              "policy_family_counts": {},
+              "remapped_family_counts": {},
+              "remapped_sites": 0
+            },
+            "program_name": "kretprobe:do_sys_openat2",
             "stderr_tail": "",
-            "stdout_tail": ""
+            "stdout_tail": "Accepted 0 v5 site(s)\nSkipped BPF_PROG_JIT_RECOMPILE because policy filtering left no live sites.\n"
           }
         },
         "recompile_summary": {
           "applied_programs": 0,
           "eligible_programs": 1,
-          "errors": []
+          "errors": [],
+          "noop_programs": 1
         },
         "scan_results": {
-          "193174": {
+          "193542": {
             "error": "",
             "program_name": "do_sys_openat2",
             "sites": {
@@ -376,7 +395,7 @@
             "stderr_tail": "",
             "stdout_tail": "{\"program\":{\"name\":\"do_sys_openat2\",\"insn_cnt\":109,\"prog_tag\":\"df1fc480a0a60631\"},\"summary\":{\"total_sites\":6,\"cmov_sites\":6,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"extract_sites\":0,\"bitfield_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0},\"sites\":[{\"site_id\":\"cmov:41:cond-select-64\",\"family\":\"cmov\",\"insn\":41,\"start_insn\":41,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:46:cond-select-64\",\"family\":\"cmov\",\"insn\":46,\"start_insn\":46,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:51:cond-select-64\",\"family\":\"cmov\",\"insn\":51,\"start_insn\":51,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:56:cond-select-64\",\"family\":\"cmov\",\"insn\":56,\"start_insn\":56,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:61:cond-select-64\",\"family\":\"cmov\",\"insn\":61,\"start_insn\":61,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:66:cond-select-64\",\"family\":\"cmov\",\"insn\":66,\"start_insn\":66,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1}]}\n"
           },
-          "193175": {
+          "193543": {
             "error": "",
             "program_name": "do_sys_openat2",
             "sites": {
@@ -408,17 +427,17 @@
       "summary": {
         "avg_ns_delta_pct": null,
         "baseline_status": "ok",
-        "cpu_baseline": 0.19999727087559863,
+        "cpu_baseline": 0.0,
         "cpu_delta_pct": null,
         "cpu_rejit": null,
         "name": "open_latency",
-        "note": "BPF_PROG_JIT_RECOMPILE did not apply",
+        "note": "policy filtered all live sites",
         "rejit_avg_ns": null,
         "rejit_status": "skipped",
         "sites": 6,
         "speedup": null,
-        "stock_avg_ns": 147.86997531886985,
-        "workload_ops_baseline": 39356.28728083135,
+        "stock_avg_ns": 196.67186429061002,
+        "workload_ops_baseline": 43191.0636542023,
         "workload_ops_delta_pct": null,
         "workload_ops_rejit": null
       }
@@ -433,168 +452,171 @@
           },
           "bpf": {
             "programs": {
-              "193215": {
-                "avg_ns_per_run": 156.966544794131,
+              "193583": {
+                "avg_ns_per_run": 190.3674141682039,
                 "bytes_jited": 87,
                 "bytes_xlated": 136,
-                "id": 193215,
+                "id": 193583,
                 "name": "sched_wakeup",
-                "run_cnt_delta": 711399,
-                "run_time_ns_delta": 111665843,
+                "run_cnt_delta": 404949,
+                "run_time_ns_delta": 77089094,
                 "type": "tracepoint"
               },
-              "193216": {
-                "avg_ns_per_run": 106.73457012956604,
+              "193584": {
+                "avg_ns_per_run": 123.59007870271242,
                 "bytes_jited": 508,
                 "bytes_xlated": 864,
-                "id": 193216,
+                "id": 193584,
                 "name": "sched_switch",
-                "run_cnt_delta": 1434944,
-                "run_time_ns_delta": 153158131,
+                "run_cnt_delta": 845333,
+                "run_time_ns_delta": 104474772,
                 "type": "tracepoint"
               }
             },
             "summary": {
               "active_programs": 2,
-              "avg_ns_per_run": 123.38380864568245,
-              "total_events": 2146343,
-              "total_run_time_ns": 264823974
+              "avg_ns_per_run": 145.21833154440358,
+              "total_events": 1250282,
+              "total_run_time_ns": 181563866
             }
           },
           "final_stats": {
-            "193215": {
+            "193583": {
               "bytes_jited": 87,
               "bytes_xlated": 136,
-              "id": 193215,
+              "id": 193583,
               "name": "sched_wakeup",
-              "run_cnt": 765345,
-              "run_time_ns": 124874155,
+              "run_cnt": 427889,
+              "run_time_ns": 86409157,
               "type": "tracepoint"
             },
-            "193216": {
+            "193584": {
               "bytes_jited": 508,
               "bytes_xlated": 864,
-              "id": 193216,
+              "id": 193584,
               "name": "sched_switch",
-              "run_cnt": 1543171,
-              "run_time_ns": 167518133,
+              "run_cnt": 891203,
+              "run_time_ns": 113264536,
               "type": "tracepoint"
             }
           },
           "initial_stats": {
-            "193215": {
+            "193583": {
               "bytes_jited": 87,
               "bytes_xlated": 136,
-              "id": 193215,
+              "id": 193583,
               "name": "sched_wakeup",
-              "run_cnt": 53946,
-              "run_time_ns": 13208312,
+              "run_cnt": 22940,
+              "run_time_ns": 9320063,
               "type": "tracepoint"
             },
-            "193216": {
+            "193584": {
               "bytes_jited": 508,
               "bytes_xlated": 864,
-              "id": 193216,
+              "id": 193584,
               "name": "sched_switch",
-              "run_cnt": 108227,
-              "run_time_ns": 14360002,
+              "run_cnt": 45870,
+              "run_time_ns": 8789764,
               "type": "tracepoint"
             }
           },
           "system_cpu": {
-            "busy_pct": 41.76575989574849
+            "busy_pct": 27.08265538561666
           },
           "workload": {
-            "duration_s": 5.008654759963974,
-            "ops_per_sec": 41.12880800781759,
-            "ops_total": 206.0,
+            "duration_s": 5.006011545076035,
+            "ops_per_sec": 41.7498038344667,
+            "ops_total": 209.0,
             "stderr": "",
-            "stdout": "Time: 0.010\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.007\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.011\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.010\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.010\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.010\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.006\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.008\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.008\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.009\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.007\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.007\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.009\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.008"
+            "stdout": "Time: 0.008\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.009\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.010\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.009\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.010\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.008\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.010\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.009\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.009\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.010\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.010\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.007\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.006\nRunning in process mode with 8 groups using 32 file descriptors each (== 256 tasks)\nEach sender will pass 10 messages of 100 bytes\nTime: 0.009"
           }
         },
         "phase": "baseline",
-        "policy_matches": {},
+        "policy_matches": {
+          "193584": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/bpftrace/scheduler_latency/tracepoint_sched_sched_switch.policy.yaml"
+        },
         "policy_summary": {
-          "configured_programs": 0,
-          "fallback_programs": 2
+          "configured_programs": 1,
+          "fallback_programs": 0
         },
         "process": {
           "returncode": 0,
           "stderr_tail": "",
-          "stdout_tail": "@wakeup_ns[2334221]: 533705138359441\n@wakeup_ns[2334735]: 533705184294497\n@wakeup_ns[2335506]: 533705259998806\n@wakeup_ns[2335763]: 533705283020121\n@wakeup_ns[2336281]: 533705326710795\n@wakeup_ns[2337865]: 533705473215575\n@wakeup_ns[2338122]: 533705498193848\n@wakeup_ns[2338893]: 533705573751691\n@wakeup_ns[2339664]: 533705644915137\n@wakeup_ns[2340949]: 533705767544519\n@wakeup_ns[2341463]: 533705817518831\n@wakeup_ns[2341720]: 533705842550704\n@wakeup_ns[2342234]: 533705890377671\n@wakeup_ns[2342491]: 533705917263164\n@wakeup_ns[2342748]: 533705941770881\n@wakeup_ns[2343005]: 533705965070378\n@wakeup_ns[2343776]: 533706036247096\n@wakeup_ns[2344033]: 533706061830076\n@wakeup_ns[2344290]: 533706086292999\n@wakeup_ns[2344547]: 533706110998475\n@wakeup_ns[2344804]: 533706135659526\n@wakeup_ns[2345061]: 533706159566849\n@wakeup_ns[2347117]: 533706350713078\n@wakeup_ns[2348736]: 533706499836302\n@wakeup_ns[2349250]: 533706546279617\n@wakeup_ns[2350021]: 533706621837758\n@wakeup_ns[2350278]: 533706645981374\n@wakeup_ns[2350797]: 533706694114363\n@wakeup_ns[2351315]: 533706743840342\n@wakeup_ns[2351311]: 533706744196734\n@wakeup_ns[2352082]: 533706815548412\n@wakeup_ns[2352339]: 533706840815859\n@wakeup_ns[2352596]: 533706863541250\n@wakeup_ns[2353367]: 533706935527391\n@wakeup_ns[2353624]: 533706961578804\n@wakeup_ns[2353881]: 533706987664443\n@wakeup_ns[2354138]: 533707012583475\n@wakeup_ns[2354395]: 533707037507509\n@wakeup_ns[2354909]: 533707082064037\n@wakeup_ns[2355937]: 533707175595768"
+          "stdout_tail": "@wakeup_ns[2463571]: 534016158776326\n@wakeup_ns[2463828]: 534016184634809\n@wakeup_ns[2464342]: 534016231197606\n@wakeup_ns[2464599]: 534016254839356\n@wakeup_ns[2465113]: 534016301770960\n@wakeup_ns[2465370]: 534016327799580\n@wakeup_ns[2465627]: 534016352149317\n@wakeup_ns[2465884]: 534016376173358\n@wakeup_ns[2466141]: 534016399230963\n@wakeup_ns[2466655]: 534016446646577\n@wakeup_ns[2467169]: 534016493219893\n@wakeup_ns[2467426]: 534016516280746\n@wakeup_ns[2467940]: 534016565074501\n@wakeup_ns[2468197]: 534016590493638\n@wakeup_ns[2468711]: 534016639592540\n@wakeup_ns[2468968]: 534016664427307\n@wakeup_ns[2469225]: 534016687881302\n@wakeup_ns[2469739]: 534016734304721\n@wakeup_ns[2470253]: 534016781792286\n@wakeup_ns[2470510]: 534016805026996\n@wakeup_ns[2470767]: 534016829380905\n@wakeup_ns[2471024]: 534016854394337\n@wakeup_ns[2471795]: 534016928842045\n@wakeup_ns[2472052]: 534016953100896\n@wakeup_ns[2472309]: 534016975909145\n@wakeup_ns[2472566]: 534016998946922\n@wakeup_ns[2472823]: 534017024043010\n@wakeup_ns[2473337]: 534017072350006\n@wakeup_ns[2473851]: 534017120354573\n@wakeup_ns[2474108]: 534017143249498\n@wakeup_ns[2474622]: 534017192309988\n@wakeup_ns[2474879]: 534017216263982\n@wakeup_ns[2475136]: 534017240938013\n@wakeup_ns[2475393]: 534017264847649\n@wakeup_ns[2475650]: 534017289672114\n@wakeup_ns[2475907]: 534017312905423\n@wakeup_ns[2476164]: 534017336997173\n@wakeup_ns[2476421]: 534017361092307\n@wakeup_ns[2476678]: 534017385997796\n@wakeup_ns[2476935]: 534017407476794"
         },
         "prog_ids": [
-          193215,
-          193216
+          193583,
+          193584
         ],
         "programs": [
           {
-            "btf_id": 322271,
+            "btf_id": 322683,
             "bytes_jited": 87,
             "bytes_memlock": 4096,
             "bytes_xlated": 136,
             "gpl_compatible": true,
-            "id": 193215,
+            "id": 193583,
             "jited": true,
-            "loaded_at": 1773357772,
+            "loaded_at": 1773358082,
             "map_ids": [
-              229973
+              230157
             ],
             "name": "sched_wakeup",
             "orphaned": false,
             "owner_fds": [
               {
                 "fd": 10,
-                "pid": 2303276
+                "pid": 2423964
               }
             ],
             "owner_pids": [
-              2303276
+              2423964
             ],
             "pids": [
               {
                 "comm": "bpftrace",
-                "pid": 2303276
+                "pid": 2423964
               }
             ],
-            "run_cnt": 37708,
-            "run_time_ns": 9754551,
+            "recursion_misses": 2,
+            "run_cnt": 15830,
+            "run_time_ns": 6853397,
             "tag": "21271ea1785e5ea8",
             "type": "tracepoint",
             "uid": 0
           },
           {
-            "btf_id": 322272,
+            "btf_id": 322684,
             "bytes_jited": 508,
             "bytes_memlock": 4096,
             "bytes_xlated": 864,
             "gpl_compatible": true,
-            "id": 193216,
+            "id": 193584,
             "jited": true,
-            "loaded_at": 1773357772,
+            "loaded_at": 1773358082,
             "map_ids": [
-              229973,
-              229972
+              230157,
+              230156
             ],
             "name": "sched_switch",
             "orphaned": false,
             "owner_fds": [
               {
                 "fd": 12,
-                "pid": 2303276
+                "pid": 2423964
               }
             ],
             "owner_pids": [
-              2303276
+              2423964
             ],
             "pids": [
               {
                 "comm": "bpftrace",
-                "pid": 2303276
+                "pid": 2423964
               }
             ],
-            "run_cnt": 75590,
-            "run_time_ns": 10501437,
+            "run_cnt": 31653,
+            "run_time_ns": 6376889,
             "tag": "5621a8f68c5f3d19",
             "type": "tracepoint",
             "uid": 0
@@ -605,10 +627,11 @@
         "recompile_summary": {
           "applied_programs": 0,
           "eligible_programs": 0,
-          "errors": []
+          "errors": [],
+          "noop_programs": 0
         },
         "scan_results": {
-          "193215": {
+          "193583": {
             "error": "",
             "program_name": "sched_wakeup",
             "sites": {
@@ -625,7 +648,7 @@
             "stderr_tail": "",
             "stdout_tail": "{\"program\":{\"name\":\"sched_wakeup\",\"insn_cnt\":17,\"prog_tag\":\"21271ea1785e5ea8\"},\"summary\":{\"total_sites\":0,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"extract_sites\":0,\"bitfield_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0},\"sites\":[]}\n"
           },
-          "193216": {
+          "193584": {
             "error": "",
             "program_name": "sched_switch",
             "sites": {
@@ -657,96 +680,98 @@
       "rejit": {
         "measurement": null,
         "phase": "rejit",
-        "policy_matches": {},
+        "policy_matches": {
+          "193634": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/bpftrace/scheduler_latency/tracepoint_sched_sched_switch.policy.yaml"
+        },
         "policy_summary": {
-          "configured_programs": 0,
-          "fallback_programs": 2
+          "configured_programs": 1,
+          "fallback_programs": 0
         },
         "process": {
           "returncode": 0,
           "stderr_tail": "",
-          "stdout_tail": "@runq_latency_us:\n[0]                28498 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|\n[1]                16162 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@                       |\n[2, 4)              5529 |@@@@@@@@@@                                          |\n[4, 8)              2501 |@@@@                                                |\n[8, 16)              232 |                                                    |\n[16, 32)              51 |                                                    |\n[32, 64)               6 |                                                    |\n[64, 128)              2 |                                                    |"
+          "stdout_tail": "@runq_latency_us:\n[0]                 5029 |@@@@@@@@@@@@@@@@@@@@@@@@@@@                         |\n[1]                 4987 |@@@@@@@@@@@@@@@@@@@@@@@@@@@                         |\n[2, 4)              9366 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|\n[4, 8)              2553 |@@@@@@@@@@@@@@                                      |\n[8, 16)              697 |@@@                                                 |\n[16, 32)              10 |                                                    |\n[32, 64)               2 |                                                    |\n[64, 128)              2 |                                                    |\n[128, 256)             0 |                                                    |\n[256, 512)             0 |                                                    |\n[512, 1K)              4 |                                                    |"
         },
         "prog_ids": [
-          193265,
-          193266
+          193633,
+          193634
         ],
         "programs": [
           {
-            "btf_id": 322328,
+            "btf_id": 322740,
             "bytes_jited": 87,
             "bytes_memlock": 4096,
             "bytes_xlated": 136,
             "gpl_compatible": true,
-            "id": 193265,
+            "id": 193633,
             "jited": true,
-            "loaded_at": 1773357779,
+            "loaded_at": 1773358090,
             "map_ids": [
-              229998
+              230182
             ],
             "name": "sched_wakeup",
             "orphaned": false,
             "owner_fds": [
               {
                 "fd": 10,
-                "pid": 2356709
+                "pid": 2477709
               }
             ],
             "owner_pids": [
-              2356709
+              2477709
             ],
             "pids": [
               {
                 "comm": "bpftrace",
-                "pid": 2356709
+                "pid": 2477709
               }
             ],
-            "run_cnt": 36864,
-            "run_time_ns": 8435648,
+            "run_cnt": 15615,
+            "run_time_ns": 6713488,
             "tag": "21271ea1785e5ea8",
             "type": "tracepoint",
             "uid": 0
           },
           {
-            "btf_id": 322329,
+            "btf_id": 322741,
             "bytes_jited": 508,
             "bytes_memlock": 4096,
             "bytes_xlated": 864,
             "gpl_compatible": true,
-            "id": 193266,
+            "id": 193634,
             "jited": true,
-            "loaded_at": 1773357779,
+            "loaded_at": 1773358090,
             "map_ids": [
-              229998,
-              229997
+              230182,
+              230181
             ],
             "name": "sched_switch",
             "orphaned": false,
             "owner_fds": [
               {
                 "fd": 12,
-                "pid": 2356709
+                "pid": 2477709
               }
             ],
             "owner_pids": [
-              2356709
+              2477709
             ],
             "pids": [
               {
                 "comm": "bpftrace",
-                "pid": 2356709
+                "pid": 2477709
               }
             ],
-            "run_cnt": 73687,
-            "run_time_ns": 9043724,
+            "run_cnt": 31231,
+            "run_time_ns": 6404568,
             "tag": "5621a8f68c5f3d19",
             "type": "tracepoint",
             "uid": 0
           }
         ],
-        "reason": "BPF_PROG_JIT_RECOMPILE did not apply",
+        "reason": "policy filtered all live sites",
         "recompile_results": {
-          "193266": {
+          "193634": {
             "applied": false,
             "counts": {
               "bitfield_sites": 0,
@@ -760,20 +785,34 @@
               "zero_ext_sites": 0
             },
             "error": "",
-            "policy_file": null,
-            "policy_mode": "stock",
-            "program_name": "sched_switch",
+            "noop": true,
+            "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/bpftrace/scheduler_latency/tracepoint_sched_sched_switch.policy.yaml",
+            "policy_mode": "policy-file",
+            "policy_remap": {
+              "dropped_family_counts": {},
+              "dropped_sites": 0,
+              "explicit_sites": 0,
+              "live_family_counts": {
+                "cmov": 6
+              },
+              "live_total_sites": 6,
+              "policy_family_counts": {},
+              "remapped_family_counts": {},
+              "remapped_sites": 0
+            },
+            "program_name": "tracepoint:sched:sched_switch",
             "stderr_tail": "",
-            "stdout_tail": ""
+            "stdout_tail": "Accepted 0 v5 site(s)\nSkipped BPF_PROG_JIT_RECOMPILE because policy filtering left no live sites.\n"
           }
         },
         "recompile_summary": {
           "applied_programs": 0,
           "eligible_programs": 1,
-          "errors": []
+          "errors": [],
+          "noop_programs": 1
         },
         "scan_results": {
-          "193265": {
+          "193633": {
             "error": "",
             "program_name": "sched_wakeup",
             "sites": {
@@ -790,7 +829,7 @@
             "stderr_tail": "",
             "stdout_tail": "{\"program\":{\"name\":\"sched_wakeup\",\"insn_cnt\":17,\"prog_tag\":\"21271ea1785e5ea8\"},\"summary\":{\"total_sites\":0,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"extract_sites\":0,\"bitfield_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0},\"sites\":[]}\n"
           },
-          "193266": {
+          "193634": {
             "error": "",
             "program_name": "sched_switch",
             "sites": {
@@ -826,13 +865,13 @@
         "cpu_delta_pct": null,
         "cpu_rejit": null,
         "name": "scheduler_latency",
-        "note": "BPF_PROG_JIT_RECOMPILE did not apply",
+        "note": "policy filtered all live sites",
         "rejit_avg_ns": null,
         "rejit_status": "skipped",
         "sites": 6,
         "speedup": null,
-        "stock_avg_ns": 123.38380864568245,
-        "workload_ops_baseline": 41.12880800781759,
+        "stock_avg_ns": 145.21833154440358,
+        "workload_ops_baseline": 41.7498038344667,
         "workload_ops_delta_pct": null,
         "workload_ops_rejit": null
       }

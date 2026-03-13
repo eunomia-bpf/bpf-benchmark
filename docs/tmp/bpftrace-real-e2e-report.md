@@ -1,6 +1,6 @@
 # bpftrace Real E2E Report
 
-- Generated: `2026-03-12T23:23:02.030969+00:00`
+- Generated: `2026-03-12T23:28:12.307982+00:00`
 - Run mode: `full`
 - Duration per phase: `5s`
 - Guest kernel: `6.15.11-061511-generic`
@@ -14,10 +14,10 @@
 
 ## Per-Script
 
-- `open_latency`: sites=6, stock_ns=147.87, rejit_ns=n/a, speedup=n/a, ops_stock=39356.29, ops_rejit=n/a, cpu_stock=0.20, cpu_rejit=n/a
-- Note: BPF_PROG_JIT_RECOMPILE did not apply
-- `scheduler_latency`: sites=6, stock_ns=123.38, rejit_ns=n/a, speedup=n/a, ops_stock=41.13, ops_rejit=n/a, cpu_stock=0.00, cpu_rejit=n/a
-- Note: BPF_PROG_JIT_RECOMPILE did not apply
+- `open_latency`: sites=6, stock_ns=196.67, rejit_ns=n/a, speedup=n/a, ops_stock=43191.06, ops_rejit=n/a, cpu_stock=0.00, cpu_rejit=n/a
+- Note: policy filtered all live sites
+- `scheduler_latency`: sites=6, stock_ns=145.22, rejit_ns=n/a, speedup=n/a, ops_stock=41.75, ops_rejit=n/a, cpu_stock=0.00, cpu_rejit=n/a
+- Note: policy filtered all live sites
 
 ## Comparison
 
