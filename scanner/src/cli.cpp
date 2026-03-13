@@ -550,6 +550,12 @@ static int bpf_prog_get_fd_by_id(uint32_t prog_id)
     return fd; // -1 on error
 }
 
+struct EnumerateSiteInfo {
+    uint32_t insn = 0;
+    std::string family;
+    std::string pattern_kind;
+};
+
 struct EnumerateResult {
     uint32_t prog_id = 0;
     std::string name;
@@ -558,6 +564,7 @@ struct EnumerateResult {
     uint32_t applied_sites = 0;
     bool recompile_ok = false;
     std::string error;
+    std::vector<EnumerateSiteInfo> sites;
 };
 
 static const char *bpf_prog_type_str(uint32_t t)
@@ -696,6 +703,23 @@ void run_enumerate(const CommandOptions &options)
         res.total_sites = static_cast<uint32_t>(summary.rules.size());
         res.applied_sites = res.total_sites; // default: apply all
 
+        // Populate per-site manifest for JSON output.
+        {
+            bpf_jit_scanner::V5ProgramInfo prog_info;
+            prog_info.name = res.name;
+            prog_info.insn_cnt = info.xlated_prog_len / 8;
+            std::memcpy(prog_info.prog_tag.data(), info.tag, sizeof(info.tag));
+            const auto manifest = bpf_jit_scanner::build_scan_manifest(prog_info, summary);
+            res.sites.reserve(manifest.sites.size());
+            for (const auto &site : manifest.sites) {
+                res.sites.push_back(EnumerateSiteInfo{
+                    .insn = site.start_insn,
+                    .family = std::string(bpf_jit_scanner::v5_family_name(site.family)),
+                    .pattern_kind = site.pattern_kind,
+                });
+            }
+        }
+
         if (res.total_sites > 0) {
             total_with_sites++;
         }
@@ -819,6 +843,15 @@ void run_enumerate(const CommandOptions &options)
             if (!r.error.empty()) {
                 std::printf(",\"error\":\"%s\"", r.error.c_str());
             }
+            // Emit per-site manifest array.
+            std::printf(",\"sites\":[");
+            for (size_t j = 0; j < r.sites.size(); ++j) {
+                const auto &s = r.sites[j];
+                std::printf("%s{\"insn\":%u,\"family\":\"%s\",\"pattern_kind\":\"%s\"}",
+                            j == 0 ? "" : ",",
+                            s.insn, s.family.c_str(), s.pattern_kind.c_str());
+            }
+            std::printf("]");
             std::printf("}%s\n", i + 1 < results.size() ? "," : "");
         }
         std::printf("]\n");

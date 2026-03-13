@@ -404,9 +404,14 @@ def _enumerate_apply_one(
 
 
 def _scan_counts_from_enumerate(record: Mapping[str, Any]) -> dict[str, int]:
-    """Convert an enumerate JSON record's site fields into the _scanner_counts shape."""
+    """Convert an enumerate JSON record's site fields into the _scanner_counts shape.
+
+    When the enumerate record includes a per-site "sites" array (new format),
+    per-family counts are derived from it.  Otherwise, only total_sites is
+    populated (legacy format without per-site detail).
+    """
     total = int(record.get("total_sites", 0) or 0)
-    return {
+    counts: dict[str, int] = {
         "total_sites": total,
         "cmov_sites": 0,
         "wide_sites": 0,
@@ -417,6 +422,26 @@ def _scan_counts_from_enumerate(record: Mapping[str, Any]) -> dict[str, int]:
         "endian_sites": 0,
         "branch_flip_sites": 0,
     }
+    sites = record.get("sites")
+    if isinstance(sites, list):
+        _family_to_count_key = {
+            "cmov": "cmov_sites",
+            "wide": "wide_sites",
+            "rotate": "rotate_sites",
+            "lea": "lea_sites",
+            "extract": "bitfield_sites",
+            "zero-ext": "zero_ext_sites",
+            "endian": "endian_sites",
+            "branch-flip": "branch_flip_sites",
+        }
+        for site in sites:
+            if not isinstance(site, Mapping):
+                continue
+            family = str(site.get("family", "")).strip()
+            key = _family_to_count_key.get(family)
+            if key:
+                counts[key] += 1
+    return counts
 
 
 def scan_programs(
@@ -596,28 +621,35 @@ def _apply_one_enumerate(
     policy_dir_path: str | None = None
     try:
         if selected_policy is not None:
-            # Step 1: get live manifest from enumerate --json
+            # Step 1: get live manifest from enumerate --json.
+            # enumerate --json now includes a per-site "sites" array with
+            # {insn, family, pattern_kind} entries, so we can build the live
+            # manifest directly without a fallback to scan --prog-fd.
             scan_record = _enumerate_scan_one(scanner_binary, prog_id)
             enum_name = str(scan_record.get("name") or "").strip()
             if enum_name:
                 program_name = enum_name
-            # Build a minimal live manifest compatible with remap_policy_v3_to_live.
-            # enumerate --json gives total_sites / applied_sites but not per-site details.
-            # We need the full scan manifest; fall back to legacy _scan_live_manifest
-            # to get it using the caller-held fd (if available).
-            fd: int | None = None
-            try:
-                fd = _take_prog_fd(prog_id, prog_fds)
-                os.set_inheritable(fd, True)
-                live_manifest = _scan_live_manifest(scanner_binary, fd, program_name)
-            except OSError:
-                live_manifest = None
-            finally:
-                if fd is not None:
-                    try:
-                        os.close(fd)
-                    except OSError:
-                        pass
+            # Extract per-site data from enumerate record.
+            enum_sites = scan_record.get("sites")
+            if isinstance(enum_sites, list) and enum_sites:
+                # Build a live manifest compatible with remap_policy_v3_to_live.
+                live_manifest = {"sites": enum_sites}
+            else:
+                # Old scanner binary without per-site output: fall back to
+                # legacy _scan_live_manifest via scan --prog-fd.
+                fd: int | None = None
+                try:
+                    fd = _take_prog_fd(prog_id, prog_fds)
+                    os.set_inheritable(fd, True)
+                    live_manifest = _scan_live_manifest(scanner_binary, fd, program_name)
+                except OSError:
+                    live_manifest = None
+                finally:
+                    if fd is not None:
+                        try:
+                            os.close(fd)
+                        except OSError:
+                            pass
             if live_manifest is None:
                 # Cannot remap policy without live manifest; fall back to legacy path.
                 return _apply_one_legacy(
