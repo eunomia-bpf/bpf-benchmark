@@ -3,7 +3,7 @@
 ## Methodology
 
 - Kernel: `7.0.0-rc2-g05a1845490ed-dirty`
-- Benchmarks: `45` from `config/micro_pure_jit.yaml`
+- Benchmarks: `47` from `config/micro_pure_jit.yaml`
 - Runtimes: `kernel` vs `kernel-recompile`
 - Warmups / iterations / repeat: `2 / 2 / 500`
 - CPU pinning: `taskset -c 0`
@@ -12,10 +12,10 @@
 
 ## Headline Numbers
 
-- Overall geomean (stock / recompile, valid pairs only): `1.002x`
+- Overall geomean (stock / recompile, valid pairs only): `1.003x`
 - Applied-only geomean (stock / recompile): `1.001x`
-- Wins / losses / ties: `19 / 23 / 3`
-- Valid / invalid pairs: `45 / 0`
+- Wins / losses / ties: `20 / 24 / 3`
+- Valid / invalid pairs: `47 / 0`
 
 ## Per-Family Breakdown
 
@@ -31,12 +31,14 @@
 | byte-compare | 1 | 1 | 1 | 0.869x | 0.869x | 0 | 1 | 0 |
 | causal-isolation | 2 | 2 | 0 | 0.908x | n/a | 0 | 2 | 0 |
 | code-clone | 2 | 2 | 0 | 0.970x | n/a | 1 | 1 | 0 |
+| deep-guards | 1 | 1 | 0 | 1.094x | n/a | 1 | 0 | 0 |
 | dep-chain | 2 | 2 | 0 | 1.018x | n/a | 1 | 1 | 0 |
 | fixed-loop | 2 | 2 | 0 | 1.171x | n/a | 1 | 1 | 0 |
 | immediate-stress | 1 | 1 | 0 | 1.000x | n/a | 0 | 0 | 1 |
 | large-mixed | 2 | 2 | 1 | 0.926x | 0.860x | 0 | 2 | 0 |
 | load-width | 2 | 2 | 0 | 1.162x | n/a | 2 | 0 | 0 |
 | log2-fold | 1 | 1 | 1 | 1.206x | 1.206x | 1 | 0 | 0 |
+| mega-block | 1 | 1 | 0 | 0.996x | n/a | 0 | 1 | 0 |
 | mixed-alu-mem | 1 | 1 | 1 | 1.018x | 1.018x | 1 | 0 | 0 |
 | mixed-width | 1 | 1 | 0 | 1.117x | n/a | 1 | 0 | 0 |
 | multi-acc | 2 | 2 | 0 | 0.989x | n/a | 0 | 2 | 0 |
@@ -101,3 +103,5 @@
 | imm64_storm | immediate-stress | 188.5 ns | 188.5 ns | 1.000x | no | 0 | tie |
 | alu32_64_pingpong | mixed-width | 592.5 ns | 530.5 ns | 1.117x | no | 0 | win |
 | branch_fanout_32 | branch-fanout | 521 ns | 418 ns | 1.246x | no | 0 | win |
+| deep_guard_tree_8 | deep-guards | 146 ns | 133.5 ns | 1.094x | no | 0 | win |
+| mega_basic_block_2048 | mega-block | 974.5 ns | 978.5 ns | 0.996x | no | 0 | loss |
