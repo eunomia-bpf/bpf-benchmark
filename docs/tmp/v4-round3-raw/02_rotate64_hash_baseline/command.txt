@@ -1,1 +1,0 @@
-vng --run vendor/linux/arch/x86/boot/bzImage --exec "micro/build/runner/micro_exec run-kernel --program micro/programs/rotate64_hash.bpf.o --memory micro/generated-inputs/rotate64_hash.mem --input-size 64 --io-mode staged --repeat 5" 2>&1

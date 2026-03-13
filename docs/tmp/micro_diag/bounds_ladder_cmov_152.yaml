@@ -1,7 +1,0 @@
-version: 2
-program: 'bounds_ladder_xdp'
-default: skip
-sites:
-  - insn: 152
-    family: cmov
-    action: apply

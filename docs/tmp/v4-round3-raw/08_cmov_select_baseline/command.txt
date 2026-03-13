@@ -1,1 +1,0 @@
-vng --run vendor/linux/arch/x86/boot/bzImage --exec "micro/build/runner/micro_exec run-kernel --program micro/programs/cmov_select.bpf.o --memory micro/generated-inputs/cmov_select.mem --input-size 1024 --io-mode staged --repeat 5" 2>&1

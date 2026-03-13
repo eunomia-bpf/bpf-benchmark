@@ -1,9 +1,0 @@
-{"compile_ns":8219711,"exec_ns":93,"timing_source":"ktime","no_cmov":false,"disabled_passes":[],"wall_exec_ns":157444,"exec_cycles":580345,"tsc_freq_hz":3686044597,"result":2666935177028490406,"retval":2,"jited_prog_len":3559,"xlated_prog_len":7984,"code_size":{"bpf_bytecode_bytes":7984,"native_code_bytes":3559,"inflation_ratio":0.445767},"phases_ns":{"memory_prepare_ns":2293180,"object_open_ns":6165437,"object_load_ns":2054274,"input_stage_ns":1235,"prog_run_wall_ns":15745257,"result_extract_ns":69},"perf_counters":{},"perf_counters_meta":{"requested":false,"collected":false,"include_kernel":true,"scope":"full_repeat_raw","error":""},"directive_scan":{"performed":false,"cmov_sites":0,"wide_sites":0,"rotate_sites":0,"lea_sites":0,"total_sites":0},"recompile":{"requested":false,"mode":"none","policy_generated":false,"policy_bytes":0,"syscall_attempted":false,"applied":false,"error":""}}
- found key [8], sz = 4.
-libbpf: map 'input_map': found value [11], sz = 64.
-libbpf: map 'input_map': found max_entries = 1.
-libbpf: sec '.relxdp': collecting relocation for section(3) 'xdp'
-libbpf: sec '.relxdp': relo #0: insn #10 against 'input_map'
-libbpf: prog 'rotate64_hash_xdp': found map 0 (input_map, sec 5, off 0) for insn #10
-libbpf: object 'rotate64_hash': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...
-libbpf: map 'input_map': created successfully, fd=4

@@ -32,26 +32,51 @@ make -C micro vendor_bpftool   # optional vendored bpftool
 ```
 
 ### Run benchmarks
-```bash
-# One-shot entrypoints
-./docs/paper/scripts/run_micro.sh
-./docs/paper/scripts/run_micro.sh --llvmbpf-only
-./docs/paper/scripts/run_micro.sh --vm
 
+**The Makefile is the single canonical entry point for running benchmarks.**
+
+```bash
+# Full micro benchmark suite in VM (results → micro/results/vm_micro.latest.json)
+make vm-micro
+
+# Run only specific benchmarks
+make vm-micro BENCH="simple bitcount"
+
+# Tune parameters
+make vm-micro ITERATIONS=10 WARMUPS=2 REPEAT=500
+
+# Quick smoke test (no VM needed)
+make smoke
+
+# Corpus benchmark in VM (results → corpus/results/vm_corpus.latest.json)
+make vm-corpus
+
+# E2E benchmarks in VM (results → e2e/results/)
+make vm-e2e
+
+# All VM benchmarks
+make vm-all
+
+# Show all available targets and parameters
+make help
+```
+
+Results are written to:
+- `micro/results/` — micro benchmark results (JSON)
+- `corpus/results/` — corpus benchmark results (JSON)
+- `e2e/results/` — E2E benchmark results (JSON)
+- `docs/tmp/` — analysis reports (.md) only, never JSON results
+
+For direct invocation (advanced use only):
+```bash
 # List available benchmarks
 python3 micro/run_micro.py --list
 
-# Run default pure-jit suite (both runtimes)
-python3 micro/run_micro.py --runtime llvmbpf --runtime kernel --iterations 10 --warmups 2 --repeat 200
-
-# Run specific benchmarks only
-python3 micro/run_micro.py --bench simple --bench bitcount --runtime llvmbpf --runtime kernel
-
-# With perf counters
+# Run with perf counters (direct invocation)
 python3 micro/run_micro.py --runtime llvmbpf --runtime kernel --perf-counters
 
 # Generate RQ-oriented markdown summary from results
-python3 micro/summarize_rq.py --results micro/results/pure_jit.latest.json --output docs/summary.md
+python3 micro/summarize_rq.py --results micro/results/vm_micro.latest.json --output docs/summary.md
 ```
 
 ### Clean
@@ -117,7 +142,7 @@ OpenAI Codex CLI is available on this machine (default model: `gpt-5.4`). Use it
 - **Claude Code must NEVER**: write analysis code directly, run benchmarks directly, or manually analyze data — always delegate to codex
 
 ### Workflow Rules
-- **Codex output goes to `docs/tmp/`** — codex writes analysis/review/design docs into `docs/tmp/`
+- **Codex output goes to `docs/tmp/`** — codex writes analysis/review/design reports (.md) into `docs/tmp/`; JSON results go to `micro/results/`, `corpus/results/`, or `e2e/results/`
 - **Claude maintains non-tmp docs** — Claude directly edits `CLAUDE.md`, `docs/kernel-jit-optimization-plan.md`, and other non-tmp documents
 - **Codex runs in background** — use `run_in_background: true` for all codex tasks; Claude dispatches and moves on
 - **Review cycle** — when codex produces a new document, dispatch another codex to review it; iterate until quality is sufficient

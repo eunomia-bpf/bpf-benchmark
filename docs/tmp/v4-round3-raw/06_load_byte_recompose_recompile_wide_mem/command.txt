@@ -1,1 +1,0 @@
-vng --run vendor/linux/arch/x86/boot/bzImage --exec "micro/build/runner/micro_exec run-kernel --program micro/programs/load_byte_recompose.bpf.o --memory micro/generated-inputs/load_byte_recompose.mem --input-size 64 --io-mode staged --repeat 5 --recompile-wide-mem" 2>&1

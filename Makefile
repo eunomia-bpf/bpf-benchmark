@@ -6,6 +6,12 @@ MICRO_DIR := $(ROOT_DIR)/micro
 SCANNER_DIR := $(ROOT_DIR)/scanner
 KERNEL_DIR := $(ROOT_DIR)/vendor/linux-framework
 KERNEL_TEST_DIR := $(ROOT_DIR)/tests/kernel
+
+# Result output directories (canonical locations)
+MICRO_RESULTS_DIR := $(ROOT_DIR)/micro/results
+CORPUS_RESULTS_DIR := $(ROOT_DIR)/corpus/results
+E2E_RESULTS_DIR := $(ROOT_DIR)/e2e/results
+# docs/tmp is for analysis reports (.md) only, NOT for JSON results
 TMP_DIR := $(ROOT_DIR)/docs/tmp
 
 BZIMAGE ?= vendor/linux-framework/arch/x86/boot/bzImage
@@ -14,6 +20,10 @@ ITERATIONS ?= 10
 WARMUPS ?= 2
 REPEAT ?= 200
 VENV ?= /home/yunwei37/workspace/.venv
+# Optional: pass BENCH=name1 BENCH2=name2 ... via BENCH_FILTER env var, e.g.:
+#   make vm-micro BENCH=simple
+#   make vm-micro BENCH="simple bitcount"
+BENCH ?=
 
 VNG ?= vng
 NPROC ?= $(shell nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
@@ -26,29 +36,71 @@ MICRO_RUNNER := $(MICRO_DIR)/build/runner/micro_exec
 KERNEL_SELFTEST := $(KERNEL_TEST_DIR)/build/test_recompile
 VMLINUX_PATH := $(KERNEL_DIR)/vmlinux
 
-SMOKE_OUTPUT := $(TMP_DIR)/root-makefile-smoke.json
-VM_MICRO_SMOKE_OUTPUT := $(TMP_DIR)/root-makefile-vm-micro-smoke.json
-VM_MICRO_OUTPUT := $(TMP_DIR)/root-makefile-vm-micro.json
-VM_CORPUS_OUTPUT_JSON := $(TMP_DIR)/root-makefile-vm-corpus.json
-VM_CORPUS_OUTPUT_MD := $(TMP_DIR)/root-makefile-vm-corpus.md
-VM_TRACEE_OUTPUT_JSON := $(TMP_DIR)/root-makefile-vm-tracee.json
-VM_TRACEE_OUTPUT_MD := $(TMP_DIR)/root-makefile-vm-tracee.md
-VM_TETRAGON_OUTPUT_JSON := $(TMP_DIR)/root-makefile-vm-tetragon.json
-VM_TETRAGON_OUTPUT_MD := $(TMP_DIR)/root-makefile-vm-tetragon.md
-VM_BPFTRACE_OUTPUT_JSON := $(TMP_DIR)/root-makefile-vm-bpftrace.json
-VM_BPFTRACE_OUTPUT_MD := $(TMP_DIR)/root-makefile-vm-bpftrace.md
-VM_BPFTRACE_REPORT_MD := $(TMP_DIR)/root-makefile-vm-bpftrace-report.md
-VM_XDP_OUTPUT_JSON := $(TMP_DIR)/root-makefile-vm-xdp-forwarding.json
-VM_XDP_OUTPUT_MD := $(TMP_DIR)/root-makefile-vm-xdp-forwarding.md
+# Canonical output file paths
+SMOKE_OUTPUT := $(MICRO_RESULTS_DIR)/smoke.latest.json
+VM_MICRO_SMOKE_OUTPUT := $(MICRO_RESULTS_DIR)/vm_micro_smoke.latest.json
+VM_MICRO_OUTPUT := $(MICRO_RESULTS_DIR)/vm_micro.latest.json
+VM_CORPUS_OUTPUT_JSON := $(CORPUS_RESULTS_DIR)/vm_corpus.latest.json
+VM_CORPUS_OUTPUT_MD := $(CORPUS_RESULTS_DIR)/vm_corpus.latest.md
+VM_TRACEE_OUTPUT_JSON := $(E2E_RESULTS_DIR)/tracee.latest.json
+VM_TRACEE_OUTPUT_MD := $(E2E_RESULTS_DIR)/tracee.latest.md
+VM_TETRAGON_OUTPUT_JSON := $(E2E_RESULTS_DIR)/tetragon.latest.json
+VM_TETRAGON_OUTPUT_MD := $(E2E_RESULTS_DIR)/tetragon.latest.md
+VM_BPFTRACE_OUTPUT_JSON := $(E2E_RESULTS_DIR)/bpftrace.latest.json
+VM_BPFTRACE_OUTPUT_MD := $(E2E_RESULTS_DIR)/bpftrace.latest.md
+VM_BPFTRACE_REPORT_MD := $(E2E_RESULTS_DIR)/bpftrace_report.latest.md
+VM_XDP_OUTPUT_JSON := $(E2E_RESULTS_DIR)/xdp_forwarding.latest.json
+VM_XDP_OUTPUT_MD := $(E2E_RESULTS_DIR)/xdp_forwarding.latest.md
 
-MICRO_ARGS := --iterations $(ITERATIONS) --warmups $(WARMUPS) --repeat $(REPEAT)
+# Build --bench flags from BENCH variable (space-separated list of benchmark names)
+# e.g. make vm-micro BENCH="simple bitcount" → --bench simple --bench bitcount
+BENCH_FLAGS := $(foreach b,$(BENCH),--bench $(b))
+
+MICRO_ARGS := --iterations $(ITERATIONS) --warmups $(WARMUPS) --repeat $(REPEAT) $(BENCH_FLAGS)
 LOCAL_SMOKE_ARGS := --bench simple --iterations 1 --warmups 0 --repeat 10
 VM_SMOKE_ARGS := --bench simple --bench load_byte_recompose --iterations 1 --warmups 0 --repeat 10
 VENV_ACTIVATE := source "$(VENV)/bin/activate" &&
 
 .PHONY: all micro scanner kernel kernel-tests scanner-tests clean \
 	smoke check validate \
-	vm-selftest vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all
+	vm-selftest vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
+	help
+
+help:
+	@echo "=== BPF Benchmark Suite ==="
+	@echo ""
+	@echo "Build targets:"
+	@echo "  make all              - Build micro runner, scanner, and kernel tests"
+	@echo "  make micro            - Build micro_exec runner and BPF programs"
+	@echo "  make scanner          - Build bpf-jit-scanner"
+	@echo "  make kernel           - Build kernel bzImage"
+	@echo "  make kernel-tests     - Build kernel recompile test binary"
+	@echo ""
+	@echo "Test/smoke targets:"
+	@echo "  make smoke            - Quick llvmbpf smoke test (no VM)"
+	@echo "  make check            - Build + scanner tests + smoke"
+	@echo "  make validate         - check + vm-selftest + vm-micro-smoke"
+	@echo ""
+	@echo "Benchmark targets (require VM):"
+	@echo "  make vm-selftest      - Run kernel recompile selftests in VM"
+	@echo "  make vm-micro-smoke   - Quick kernel+recompile smoke in VM"
+	@echo "  make vm-micro         - Full micro benchmark suite in VM"
+	@echo "  make vm-corpus        - Corpus benchmark in VM"
+	@echo "  make vm-e2e           - E2E benchmarks (tracee/tetragon/bpftrace/xdp) in VM"
+	@echo "  make vm-all           - All VM benchmarks"
+	@echo ""
+	@echo "Tunable parameters:"
+	@echo "  ITERATIONS=N          - JIT iterations (default: 10)"
+	@echo "  WARMUPS=N             - Warmup iterations (default: 2)"
+	@echo "  REPEAT=N              - Repeat count (default: 200)"
+	@echo "  BENCH=\"name1 name2\"   - Run only specific benchmarks (vm-micro)"
+	@echo "  BZIMAGE=path          - Custom kernel image path"
+	@echo ""
+	@echo "Results are written to:"
+	@echo "  micro/results/        - Micro benchmark results"
+	@echo "  corpus/results/       - Corpus benchmark results"
+	@echo "  e2e/results/          - E2E benchmark results"
+	@echo "  docs/tmp/             - Analysis reports (.md only)"
 
 all:
 	@echo "=== Running make all ==="
@@ -86,7 +138,7 @@ $(BZIMAGE_PATH):
 
 smoke: micro
 	@echo "=== Running make smoke ==="
-	mkdir -p "$(TMP_DIR)"
+	mkdir -p "$(MICRO_RESULTS_DIR)"
 	$(VENV_ACTIVATE) python3 "$(MICRO_DIR)/run_micro.py" \
 		--runtime llvmbpf \
 		$(LOCAL_SMOKE_ARGS) \
@@ -111,7 +163,7 @@ vm-selftest: kernel-tests | $(BZIMAGE_PATH)
 
 vm-micro-smoke: micro | $(BZIMAGE_PATH)
 	@echo "=== Running make vm-micro-smoke ==="
-	mkdir -p "$(TMP_DIR)"
+	mkdir -p "$(MICRO_RESULTS_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
 		bash -lc 'cd "$(ROOT_DIR)" && $(VENV_ACTIVATE) python3 "$(MICRO_DIR)/run_micro.py" \
 			--runtime kernel \
@@ -119,9 +171,11 @@ vm-micro-smoke: micro | $(BZIMAGE_PATH)
 			$(VM_SMOKE_ARGS) \
 			--output "$(VM_MICRO_SMOKE_OUTPUT)"'
 
+# Run the full micro benchmark suite in a VM.
+# To run only specific benchmarks: make vm-micro BENCH="simple bitcount"
 vm-micro: micro | $(BZIMAGE_PATH)
 	@echo "=== Running make vm-micro ==="
-	mkdir -p "$(TMP_DIR)"
+	mkdir -p "$(MICRO_RESULTS_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
 		bash -lc 'cd "$(ROOT_DIR)" && $(VENV_ACTIVATE) python3 "$(MICRO_DIR)/run_micro.py" \
 			--runtime llvmbpf \
@@ -133,7 +187,7 @@ vm-micro: micro | $(BZIMAGE_PATH)
 # The corpus batch harness already manages one vng boot per target internally.
 vm-corpus: micro scanner | $(BZIMAGE_PATH)
 	@echo "=== Running make vm-corpus ==="
-	mkdir -p "$(TMP_DIR)"
+	mkdir -p "$(CORPUS_RESULTS_DIR)"
 	$(VENV_ACTIVATE) python3 "$(ROOT_DIR)/corpus/run_corpus_v5_vm_batch.py" \
 		--skip-build \
 		--kernel-image "$(BZIMAGE_PATH)" \
@@ -147,7 +201,7 @@ vm-corpus: micro scanner | $(BZIMAGE_PATH)
 
 vm-e2e: micro scanner | $(BZIMAGE_PATH)
 	@echo "=== Running make vm-e2e ==="
-	mkdir -p "$(TMP_DIR)"
+	mkdir -p "$(E2E_RESULTS_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
 		bash -lc 'cd "$(ROOT_DIR)" && $(VENV_ACTIVATE) python3 "$(ROOT_DIR)/e2e/run.py" tracee \
 			--output-json "$(VM_TRACEE_OUTPUT_JSON)" \

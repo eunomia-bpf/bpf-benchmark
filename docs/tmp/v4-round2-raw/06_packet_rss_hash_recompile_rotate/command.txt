@@ -1,1 +1,0 @@
-/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec run-kernel --program /home/yunwei37/workspace/bpf-benchmark/micro/programs/packet_rss_hash.bpf.o --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_rss_hash.mem --input-size 54 --io-mode packet --raw-packet --repeat 5 --recompile-rotate

@@ -1,1 +1,0 @@
-vng --run vendor/linux/arch/x86/boot/bzImage --exec "micro/build/runner/micro_exec run-kernel --program micro/programs/packet_rss_hash.bpf.o --memory micro/generated-inputs/packet_rss_hash.mem --input-size 56 --io-mode staged --repeat 5" 2>&1
