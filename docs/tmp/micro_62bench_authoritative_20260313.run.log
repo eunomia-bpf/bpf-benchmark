@@ -191,3 +191,6 @@ subprocess.TimeoutExpired: Command '['/home/yunwei37/.local/bin/vng', '--run', '
   [ok] collected addr_calc_stride (vm exit 0)
   [aggregate] benchmarks=56 valid=56
 [resume] extract_dense
+  [ok] collected extract_dense (vm exit 0)
+  [aggregate] benchmarks=57 valid=57
+[resume] endian_swap_dense
