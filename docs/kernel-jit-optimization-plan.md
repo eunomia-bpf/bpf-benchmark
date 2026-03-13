@@ -9,7 +9,7 @@
 > - 每次 context 压缩后 → 完整读取本文档恢复全局状态。
 > - 用 agent background 跑任务，不阻塞主对话。
 > - **构建+修改+运行不拆分**：一个 subagent 负责完整流程（改代码→构建→运行→发现 bug→修复→再运行），不要拆成多个 agent。
-> 上次更新：2026-03-13 深夜（#171 ✅ dense policy 优化完成：3个回归 benchmark policy 已清空（cond_select_dense/extract_dense/endian_swap_dense 全部 sites:[]），预期 6-bench geomean 从 0.836x 提升至 1.080x，applied-only 1.198x。分析报告：`docs/tmp/policy-iteration-rounds.md`。待验证：执行 `bash docs/tmp/fix-and-run-all.sh`。**注意：/tmp/claude-1000 权限损坏导致 Claude Bash 工具完全无法使用**，必须从终端手动运行上述脚本修复权限后再执行剩余任务。#170 ✅ cmov/bextr 回归根因调查完成（`docs/tmp/cmov-bextr-regression-investigation.md`）：cond_select_dense 0.482x 根因=可预测分支下 CMOV 增加关键路径延迟；extract_dense 0.556x 根因=without-copy BEXTR 反增 3B/site + BEXTR latency 3c > SHR+AND 2c；BEXTR emitter 性能 bug 已识别，two cases 均为 policy-sensitivity 证据；#169 ✅ post-BEXTR-fix 62-bench rerun 完成；#158 🔄 corpus rerun 脚本已准备，待手动执行 run_corpus_rerun.sh；#167 ✅ BEXTR fix；#163 🔄 live scanner；#162 ✅ corpus packet fix；#161 ✅ pattern_kind fix；#160 ✅ 62-bench rerun；此前：#149-#159 全部 ✅）
+> 上次更新：2026-03-13 深夜（#172 ✅ Tracee E2E post-BEXTR-fix 有效 rerun 完成：recompile 11/13 applied（旧 0/13 无效数据已弃用），exec_storm +5.97% app / -7.11% BPF ns，network +3.26%，无 drops。数据：`e2e/results/tracee_authoritative_20260313_postfix.json`，报告：`docs/tmp/tracee-e2e-post-fix-rerun.md`。#171 ✅ dense policy 优化完成：3个回归 benchmark policy 已清空（cond_select_dense/extract_dense/endian_swap_dense 全部 sites:[]），预期 6-bench geomean 从 0.836x 提升至 1.080x，applied-only 1.198x。分析报告：`docs/tmp/policy-iteration-rounds.md`。待验证：执行 `bash docs/tmp/fix-and-run-all.sh`。#170 ✅ cmov/bextr 回归根因调查完成（`docs/tmp/cmov-bextr-regression-investigation.md`）：cond_select_dense 0.482x 根因=可预测分支下 CMOV 增加关键路径延迟；extract_dense 0.556x 根因=without-copy BEXTR 反增 3B/site + BEXTR latency 3c > SHR+AND 2c；BEXTR emitter 性能 bug 已识别，two cases 均为 policy-sensitivity 证据；#169 ✅ post-BEXTR-fix 62-bench rerun 完成；#158 🔄 corpus rerun 脚本已准备，待手动执行 run_corpus_rerun.sh；#167 ✅ BEXTR fix；#163 🔄 live scanner；#162 ✅ corpus packet fix；#161 ✅ pattern_kind fix；#160 ✅ 62-bench rerun；此前：#149-#159 全部 ✅）
 
 ---
 
@@ -62,7 +62,8 @@
 | Corpus blind | 0.868x | 大部分程序变慢 |
 | Corpus v2 fixed | 0.875x | 仍然负面（已知无效，dummy packet） |
 | Gap 恢复率 | 4.3% of 1.641x | 39% gap 只恢复 4.3% |
-| E2E Tracee | +21.65% | **唯一强亮点** |
+| E2E Tracee exec_storm (pre-fix, recompile=0/13, **无效**) | +21.65% | 已被 #172 取代 |
+| **E2E Tracee exec_storm (post-BEXTR-fix, recompile=11/13, #172)** | **+5.97%** | app; BPF ns -7.11%, network +3.26% |
 
 #### 性能不够强的根因分析（#113/#116/#125/#77 + #155/#157 更新）
 
@@ -92,7 +93,7 @@
 4. **~~P1：Measurement 改进~~** ✅ #156
 5. **P0：框架解耦** — ✅ #163 scanner enumerate 已实现（197 live progs, 1920 sites），🔄 #108 E2E pipeline 切换中
 6. **P1：增加高回报 canonical form** — prologue 优化、更完整的 byte-recompose
-7. **P1：跑更多 E2E workload** — Tracee +21.65% 是唯一强数据，需要更多 E2E 亮点
+7. **P1：跑更多 E2E workload** — ✅ #172 Tracee 已完成有效 rerun（post-BEXTR-fix，11/13 applied，exec_storm +5.97% app / -7.11% BPF ns）。报告：`docs/tmp/tracee-e2e-post-fix-rerun.md`，数据：`e2e/results/tracee_authoritative_20260313_postfix.json`。旧 +21.65% 数据已作废（recompile 0/13）。需要更多 E2E workload（Tetragon 等）。
 8. **~~P1：#57 消融补全~~** ✅ byte-recompose **50.7%**，callee-saved ~0%（7.0-rc2 已上游化），BMI ~0%
 9. **P1：Corpus rerun（fixed packet + use-policy 路径）** — 🔄 #158 脚本已准备（`run_corpus_rerun.sh`），待执行。使用 `--use-policy` 模式 + fixed IPv4+TCP packet + bzImage build #38 (BEXTR fix)。预期对比 v2 0.875x（已知无效）。报告：`docs/tmp/corpus-post-fix-rerun.md`。**⚠️ /tmp/claude-1000 权限损坏，必须从终端执行 `bash docs/tmp/fix-and-run-all.sh`**
 10. **P1：#170 BEXTR emitter 性能 bug 修复** — `emit_bitfield_extract_core` 中 without-copy（dst==src）路径不应进 BEXTR（会从 6B 变成 9B），需加 `src_reg != dst_reg` guard。修复后 extract_dense 预期从 0.556x 改善到 ~0.7x（without-copy site 开销消除）。报告：`docs/tmp/cmov-bextr-regression-investigation.md`

@@ -1,0 +1,8 @@
+version: 3
+program: 'cond_select_dense_xdp'
+sites: []
+# Policy: skip all CMOV sites (104 sites)
+# Reason: predictable-branch benchmarks → CMOV adds critical-path latency
+# Analysis: docs/tmp/cmov-bextr-regression-investigation.md
+# Authoritative result (pre-fix): 0.482x → skip entire benchmark
+# This is a policy-sensitivity evidence point (log2_fold +28.3% vs this -52%)

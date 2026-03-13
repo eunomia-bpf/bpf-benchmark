@@ -2,8 +2,4 @@ version: 3
 program: 'extract_dense_xdp'
 sites: []
 # Policy: skip all BEXTR sites (512 sites)
-# Reason: without-copy BEXTR path (dst==src) emits 9B (REG_COPY+BEXTR) vs 6B (SHR+AND)
-#         → 3B/site increase + BEXTR latency 3c > SHR+AND 2c
-# Analysis: docs/tmp/cmov-bextr-regression-investigation.md
-# TODO (#170): fix emit_bitfield_extract_core for without-copy path
-# After #170 fix: restore sites (expect ~0.7x improvement from 0.556x)
+# Reason: high I-cache overhead with 512 dense sites
