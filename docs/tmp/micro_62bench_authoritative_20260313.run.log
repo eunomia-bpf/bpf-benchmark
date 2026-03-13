@@ -134,3 +134,6 @@ subprocess.TimeoutExpired: Command '['/home/yunwei37/.local/bin/vng', '--run', '
   [ok] collected large_mixed_1000 (vm exit 0)
   [aggregate] benchmarks=37 valid=37
 [resume] bpf_call_chain
+  [ok] collected bpf_call_chain (vm exit 0)
+  [aggregate] benchmarks=38 valid=38
+[resume] memcmp_prefix_64
