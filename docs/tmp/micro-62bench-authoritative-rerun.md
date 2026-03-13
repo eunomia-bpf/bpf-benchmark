@@ -3,7 +3,7 @@
 ## Methodology
 
 - Kernel: `7.0.0-rc2-g05a1845490ed-dirty`
-- Benchmarks: `51` from `config/micro_pure_jit.yaml`
+- Benchmarks: `52` from `config/micro_pure_jit.yaml`
 - Runtimes: `kernel` vs `kernel-recompile`
 - Warmups / iterations / repeat: `2 / 2 / 500`
 - CPU pinning: `taskset -c 0`
@@ -12,16 +12,17 @@
 
 ## Headline Numbers
 
-- Overall geomean (stock / recompile, valid pairs only): `1.014x`
+- Overall geomean (stock / recompile, valid pairs only): `1.019x`
 - Applied-only geomean (stock / recompile): `1.001x`
-- Wins / losses / ties: `23 / 24 / 4`
-- Valid / invalid pairs: `51 / 0`
+- Wins / losses / ties: `24 / 24 / 4`
+- Valid / invalid pairs: `52 / 0`
 
 ## Per-Family Breakdown
 
 | Family | Benchmarks | Valid | Applied | Geomean | Applied-only Geomean | Wins | Losses | Ties |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | baseline | 3 | 3 | 0 | 0.928x | n/a | 0 | 1 | 2 |
+| bitfield-extract | 1 | 1 | 0 | 1.292x | n/a | 1 | 0 | 0 |
 | bounds-density | 2 | 2 | 1 | 1.169x | 1.123x | 2 | 0 | 0 |
 | bounds-style | 1 | 1 | 0 | 0.901x | n/a | 0 | 1 | 0 |
 | bpf-local-call | 2 | 2 | 1 | 0.751x | 0.779x | 0 | 2 | 0 |
@@ -112,3 +113,4 @@
 | packet_redundant_bounds | bounds-density | 218.5 ns | 179.5 ns | 1.217x | no | 0 | win |
 | const_fold_chain | const-fold | 317.5 ns | 290 ns | 1.095x | no | 0 | win |
 | struct_field_cluster | field-access | 87 ns | 87 ns | 1.000x | no | 0 | tie |
+| bitfield_extract | bitfield-extract | 312 ns | 241.5 ns | 1.292x | no | 0 | win |

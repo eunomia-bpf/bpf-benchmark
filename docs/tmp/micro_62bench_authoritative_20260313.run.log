@@ -176,3 +176,6 @@ subprocess.TimeoutExpired: Command '['/home/yunwei37/.local/bin/vng', '--run', '
   [ok] collected struct_field_cluster (vm exit 0)
   [aggregate] benchmarks=51 valid=51
 [resume] bitfield_extract
+  [ok] collected bitfield_extract (vm exit 0)
+  [aggregate] benchmarks=52 valid=52
+[resume] smallmul_strength_reduce
