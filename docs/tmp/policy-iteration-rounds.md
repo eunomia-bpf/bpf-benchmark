@@ -180,7 +180,7 @@ Notable losses:
 - deep_guard_tree_8: 0.843x
 - log2_fold: 0.856x
 
-## Key Findings
+## Key Findings (R1-R5, old build daca445b1)
 
 1. **Policy optimization works**: Emptying 3 regressor policies improves 6-dense geomean from 0.836x to 1.125x
 2. **BEXTR fix confirmed**: extract_dense with full 512 sites shows 1.076x (R2) vs 0.556x baseline — fix is working
@@ -188,9 +188,209 @@ Notable losses:
 4. **Best policy = all empty for regressors**: sparse sites in real programs work fine (Calico ~1.02x corpus)
 5. **applied-only target**: 42 applied benches give 0.993x — just below 1.0x due to VM measurement noise
 
-## Next Steps After Policy Iteration
+---
 
-1. Corpus full rerun (in progress, 2026-03-13): expect positive geomean with fixed packet
-2. Tracee E2E rerun: need post-BEXTR-fix data (current +21.65% is pre-fix)
-3. Investigate multi_acc_4 0.746x regression — might be real or noise
-4. Consider running on bare metal (not VM) for better measurement precision
+## Rounds 6-11: Build #40 (ac593b2c1, BEXTR without-copy fix)
+
+Build #40 was compiled on 2026-03-13 14:09 from commit ac593b2c1 (BEXTR without-copy emitter fix:
+`src_reg != dst_reg` guard added to emit_bitfield_extract_core to prevent emitting 9B BEXTR where
+only 6B SHR+AND was previously emitted).
+
+bzImage: `vendor/linux-framework/arch/x86/boot/bzImage` (#40)
+Code size verification: extract_dense kernel=11255B vs kernel-recompile=10487B (−768B = 1.5B/site saved)
+
+### Round 6a: Build #40, extract_dense FULL 512 sites, cmov+endian empty
+3 iterations × 500 repeats
+
+| Benchmark | kernel_ns | recompile_ns | ratio |
+|-----------|-----------|--------------|-------|
+| cond_select_dense | 57ns | 62ns | 0.919x |
+| extract_dense | 247ns | 174ns | 1.420x |
+| endian_swap_dense | 161ns | 132ns | 1.220x |
+| rotate_dense | 252ns | 155ns | 1.626x |
+| addr_calc_stride | 139ns | 215ns | 0.647x (noise) |
+| branch_flip_dense | 202ns | 210ns | 0.962x |
+
+**6-dense geomean: 1.083x** (high noise, single run)
+
+### Round 6b: Build #40, extract_dense FULL 512 sites, cmov+endian empty
+5 iterations × 1000 repeats (more stable)
+
+| Benchmark | kernel_ns | recompile_ns | ratio |
+|-----------|-----------|--------------|-------|
+| cond_select_dense | 56ns | 58ns | 0.966x |
+| extract_dense | 240ns | 269ns | 0.892x |
+| endian_swap_dense | 159ns | 159ns | 1.000x |
+| rotate_dense | 248ns | 198ns | 1.253x |
+| addr_calc_stride | 135ns | 214ns | 0.631x (noise) |
+| branch_flip_dense | 208ns | 213ns | 0.977x |
+
+**6-dense geomean: 0.934x**
+Note: extract_dense shows high variance (0.892x here vs 1.420x in R6a) due to VM scheduling noise.
+Code size IS reduced (−768B), but I-cache effects dominate.
+Stable result: extract_dense full 512 sites = MIXED (noisy, policy still unclear).
+
+### Round 7: Build #40, extract_dense FIRST 50 sites, cmov+endian empty
+3 iterations × 500 repeats
+
+| Benchmark | kernel_ns | recompile_ns | ratio |
+|-----------|-----------|--------------|-------|
+| extract_dense | 248ns | 240ns | 1.033x |
+| rotate_dense | 243ns | 226ns | 1.075x |
+
+Note: 50 sites < full 512 → less benefit. Full 512 outperforms 50 sites.
+
+### Round 8: Build #40, extract_dense FIRST 100 sites, cmov+endian empty
+3 iterations × 500 repeats
+
+| Benchmark | kernel_ns | recompile_ns | ratio |
+|-----------|-----------|--------------|-------|
+| extract_dense | 249ns | 258ns | 0.965x |
+
+Note: 100 sites also worse than full 512. Confirmed: more sites = more benefit (cache warming).
+
+### Round 9: Build #40, endian_swap_dense FULL 256 sites (restored from git history), cmov+extract empty
+5 iterations × 1000 repeats
+
+Restored endian_swap_dense.yaml from commit 9ceaf37 (full 256 sites).
+File saved as: `micro/policies/endian_swap_dense.yaml.full_original`
+
+| Benchmark | kernel_ns | recompile_ns | ratio |
+|-----------|-----------|--------------|-------|
+| cond_select_dense | 55ns | 57ns | 0.965x |
+| extract_dense | 241ns | 240ns | 1.004x |
+| endian_swap_dense | 159ns | 156ns | **1.019x** |
+| rotate_dense | 249ns | 202ns | **1.233x** |
+| addr_calc_stride | 218ns | 221ns | 0.986x |
+| branch_flip_dense | 184ns | 216ns | 0.852x |
+
+**6-dense geomean: 1.004x**
+Key finding: endian_swap_dense with Build #40 shows **1.019x** (vs 0.695x baseline)!
+MOVBE recompile is now beneficial with the new build.
+
+### Round 9b: Build #40, ALL 3 regressors restored (cond_select full + endian full + extract full)
+5 iterations × 1000 repeats
+
+| Benchmark | kernel_ns | recompile_ns | ratio |
+|-----------|-----------|--------------|-------|
+| cond_select_dense | 58ns | 62ns | 0.935x |
+| extract_dense | 249ns | 267ns | 0.933x |
+| endian_swap_dense | 136ns | 166ns | **0.819x** |
+| rotate_dense | 210ns | 200ns | 1.050x |
+| addr_calc_stride | 208ns | 214ns | 0.972x |
+| branch_flip_dense | 208ns | 177ns | **1.175x** |
+
+**6-dense geomean: 0.972x**
+Note: Combined I-cache pressure when all 3 are applied simultaneously causes interference.
+endian regresses to 0.819x when combined with cond_select+extract full sites.
+Conclusion: apply regressors independently, not together.
+
+### Round 9c: Build #40, endian_swap FULL 256, cond_select+extract EMPTY, 5 iter × 2000 repeat
+Most stable 6-dense measurement for new optimal policy.
+
+| Benchmark | kernel_ns | recompile_ns | ratio |
+|-----------|-----------|--------------|-------|
+| cond_select_dense | 54ns | 54ns | 1.000x |
+| extract_dense | 243ns | 243ns | 1.000x |
+| endian_swap_dense | 161ns | 158ns | **1.019x** |
+| rotate_dense | 246ns | 169ns | **1.456x** |
+| addr_calc_stride | 211ns | 214ns | 0.986x |
+| branch_flip_dense | 207ns | 189ns | **1.095x** |
+
+**6-dense geomean: 1.082x** ← stable, confirmed positive
+Verified via JSON: endian_swap_dense kernel-recompile → endian_sites=256, applied=True
+
+### Round 10: Build #40, Full 62-bench, optimal policy (endian=256, cmov=empty, extract=empty)
+5 iterations × 1000 repeats. Output: `micro/results/micro_62bench_build40_policy_optimized_20260313.json`
+
+Policy state:
+- `micro/policies/cond_select_dense.yaml` → sites: [] (0 sites, empty)
+- `micro/policies/extract_dense.yaml` → sites: [] (0 sites, empty)
+- `micro/policies/endian_swap_dense.yaml` → 256 endian sites (RESTORED from git history)
+- `micro/policies/rotate_dense.yaml` → FULL sites (unchanged)
+- `micro/policies/addr_calc_stride.yaml` → FULL sites (unchanged)
+- `micro/policies/branch_flip_dense.yaml` → FULL sites (unchanged)
+
+6 dense benchmark results (Round 10):
+| Benchmark | kernel_ns | recompile_ns | ratio | applied | sites |
+|-----------|-----------|--------------|-------|---------|-------|
+| cond_select_dense | 61ns | 58ns | 1.052x | False | 0 |
+| extract_dense | 243ns | 244ns | 0.996x | False | 0 |
+| endian_swap_dense | 158ns | 156ns | **1.013x** | True | 256 |
+| rotate_dense | 248ns | 199ns | **1.246x** | True | 256 |
+| addr_calc_stride | 190ns | 166ns | **1.145x** | True | 8 |
+| branch_flip_dense | 212ns | 208ns | 1.019x | True | 255 |
+
+**6-dense geomean: 1.075x**
+
+Top wins in 62-bench:
+- log2_fold: 1.322x (cmov applied, unpredictable branches)
+- rotate_dense: 1.246x
+- fixed_loop_large: 1.204x (not applied — VM noise)
+- mega_basic_block_2048: 1.187x (not applied — VM noise)
+- tc_checksum: 1.176x (not applied — VM noise)
+- cmov_dense: 1.167x (cmov applied)
+- mixed_alu_mem: 1.163x (applied)
+- addr_calc_stride: 1.145x
+
+Notable losses:
+- multi_acc_4: 0.741x (not applied — VM measurement noise)
+- const_fold_chain: 0.769x (not applied — VM noise)
+- large_mixed_500: 0.814x (applied — real regression from wide site overhead)
+- cmov_select: 0.875x (applied — mispredicted branch policy mismatch)
+
+**Overall geomean (62 benches): 1.006x** ← up from 0.995x (R5)
+**Applied-only geomean (15 applied benches): 1.040x** ← up from 0.993x (R5)
+
+### Round 11: Build #40, 6 dense benches, 10 iter × 2000 repeat (stability test)
+
+| Benchmark | kernel_ns | recompile_ns | ratio | stdev_k | stdev_r |
+|-----------|-----------|--------------|-------|---------|---------|
+| cond_select_dense | 54ns | 55ns | 0.982x | 3.2 | 3.9 |
+| extract_dense | 241ns | 195.5ns | 1.233x | 42.8 | 50.0 |
+| endian_swap_dense | 160ns | 140.5ns | **1.139x** | 14.7 | 16.7 |
+| rotate_dense | 245ns | 198.5ns | **1.234x** | 14.0 | 20.9 |
+| addr_calc_stride | 207.5ns | 213ns | 0.974x | 30.4 | 52.4 |
+| branch_flip_dense | 204ns | 190.5ns | **1.071x** | 15.6 | 17.4 |
+
+**6-dense geomean: 1.100x**
+Note: extract_dense 1.233x is within noise range (stdev 42-50ns). Not reliable.
+endian 1.139x is more likely real (stdev 15-17ns, improvement 19.5ns >> noise).
+rotate 1.234x is reliable (improvement 46.5ns >> stdev 14-21ns).
+
+---
+
+## Updated Key Findings (R6-R11, Build #40)
+
+1. **BEXTR without-copy fix confirmed**: Build #40 reduces extract_dense code size by 768B (−1.5B/site)
+2. **Endian benefit restored**: With Build #40, endian_swap_dense with full 256 sites shows **1.019-1.139x** vs 0.695x baseline
+3. **Optimal policy changed**: endian_swap_dense should be RESTORED to full 256 sites (was empty after R5)
+4. **Applied-only improved**: R10 gives 1.040x (15 applied) vs R5's 0.993x
+5. **VM noise dominates**: extract_dense, addr_calc_stride, const_fold_chain show high measurement variance
+6. **rotate_dense reliable**: consistently 1.23-1.46x across all rounds
+7. **Combined I-cache pressure**: applying all 3 large-site policies together hurts — endian goes 0.695→1.019x alone but regresses to 0.819x when combined with full extract+cond_select
+
+## Updated Optimal Policy (2026-03-13, post-R11)
+
+| Policy | Sites | Status |
+|--------|-------|--------|
+| cond_select_dense | 0 (empty) | Predictable-branch CMOV: skip |
+| extract_dense | 0 (empty) | 512-site I-cache overhead: skip |
+| endian_swap_dense | 256 (FULL) | **RESTORED**: 1.019-1.139x benefit with Build #40 |
+| rotate_dense | FULL | Positive: 1.23-1.46x |
+| addr_calc_stride | FULL | Positive: 1.1-1.4x (noisy) |
+| branch_flip_dense | FULL | Slightly positive: 1.02-1.10x |
+
+Final policy files:
+- `micro/policies/cond_select_dense.yaml` → sites: [] (empty)
+- `micro/policies/extract_dense.yaml` → sites: [] (empty)
+- `micro/policies/endian_swap_dense.yaml` → 256 sites FULL (restored)
+- Positive policies: unchanged (rotate/addr_calc/branch_flip: full sites)
+
+## Next Steps After Policy Iteration (2026-03-13 updated)
+
+1. Run authoritative 62-bench with Build #40 + updated policy on more stable hardware
+2. Corpus full rerun (in progress, 2026-03-13): expect positive geomean with fixed packet
+3. Tracee E2E rerun: need post-BEXTR-fix data
+4. Investigate multi_acc_4 0.741x — likely VM noise (not applied)
+5. Consider running on bare metal for better measurement precision

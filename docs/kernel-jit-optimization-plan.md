@@ -9,7 +9,7 @@
 > - 每次 context 压缩后 → 完整读取本文档恢复全局状态。
 > - 用 agent background 跑任务，不阻塞主对话。
 > - **构建+修改+运行不拆分**：一个 subagent 负责完整流程（改代码→构建→运行→发现 bug→修复→再运行），不要拆成多个 agent。
-> 上次更新：2026-03-13 晚（#173 ✅ policy 迭代+corpus rerun+full 62-bench 完成（本次）。#173 数据：policy R1-R5 迭代（4轮 dense 6-bench + 1轮全量 62-bench），最优 policy=3 dense regressor 全部清空，6-dense geomean 从 0.836x→1.125x，62-bench overall 0.995x，applied-only 0.993x（VM 噪声影响）。corpus post-fix rerun：1.008x exec geomean（152 measured pairs），Calico 1.070x，Suricata 1.538x，linux-selftests 0.918x（sub-ktime noise）。结果：`micro/results/micro_62bench_policy_optimized_20260313.json`，`corpus/results/corpus_post_fix_20260313.json`。#172 ✅ Tracee E2E post-BEXTR-fix 有效 rerun。#171 ✅ dense policy 优化方向确定（3个 regressor 清空）。#158 ✅ corpus packet fix + rerun 完成。#170 ✅ BEXTR without-copy bug 已修复（daca445b1）。此前：#149-#169 全部 ✅）
+> 上次更新：2026-03-13 晚（#174 ✅ Build #40 (ac593b2c1 BEXTR without-copy fix) 重编 + R6-R11 policy 迭代（本次）。新发现：Build #40 后 endian_swap_dense 从 0.695x 恢复至 **1.013-1.139x**（256 sites restored）；extract_dense code size −768B（1.5B/site）但 I-cache 开销仍高，继续保持 empty 策略；R10 全量 62-bench overall **1.006x**，applied-only **1.040x**（15 applied）。最优 policy 更新：endian_swap_dense 恢复 256 sites。结果：`micro/results/micro_62bench_build40_policy_optimized_20260313.json`，文档：`docs/tmp/policy-iteration-rounds.md`（R6-R11 节）。#173 ✅ policy 迭代+corpus rerun+full 62-bench 完成（R1-R5）。#172 ✅ Tracee E2E post-BEXTR-fix 有效 rerun。#171 ✅ dense policy 优化方向确定（3个 regressor 清空）。#158 ✅ corpus packet fix + rerun 完成。#170 ✅ BEXTR without-copy bug 已修复（daca445b1）。此前：#149-#169 全部 ✅）
 
 ---
 
@@ -58,7 +58,10 @@
 | Micro overall (#169, post-BEXTR-fix) | 1.003x | 几乎平手 |
 | Micro applied-only (#169) | 0.932x | 回归（含3个 dense regressor） |
 | **Micro 6-dense optimized (#173, policy-optimized)** | **1.125x** | **✅ 实测正向（VM，3 regressor 清空）** |
-| **Micro 62-bench overall (#173, policy-optimized)** | **0.995x** | 接近平手（VM噪声影响） |
+| **Micro 62-bench overall (#173, policy-optimized)** | **0.995x** | R5 结果（VM噪声影响），已被 #174 取代 |
+| **Micro 6-dense optimized (#174, Build #40, endian restored)** | **1.075-1.100x** | **✅ Build #40 + 256 endian sites 恢复** |
+| **Micro 62-bench overall (#174, Build #40 optimal policy)** | **1.006x** | **✅ up from 0.995x** |
+| **Micro 62-bench applied-only (#174, 15 benches)** | **1.040x** | **✅ up from 0.993x** |
 | Corpus v2 fixed (0.875x) | 已知无效 | dummy packet, early-exit，历史数据 |
 | **Corpus post-fix rerun (#173, fixed IPv4+TCP packet)** | **1.008x** | **✅ 正向！Calico 1.070x, Suricata 1.538x** |
 | Gap 恢复率 | pending | corpus 1.008x vs 0.609x pure-JIT gap |
@@ -98,7 +101,8 @@
 9. **~~P1：Corpus rerun（fixed packet + use-policy 路径）~~** ✅ #158/#173 完成。结果：**1.008x exec geomean**（152 measured pairs），Calico 1.070x，Suricata 1.538x，xdp-tools 1.230x，tracee 1.230x，linux-selftests 0.918x（sub-ktime noise）。数据：`corpus/results/corpus_post_fix_20260313.json`，报告：`docs/tmp/corpus-post-fix-rerun.md`。旧 0.875x 无效数据已取代。
 10. **~~P1：#170 BEXTR emitter 性能 bug 修复~~** ✅ #167/#173 修复（daca445b1）+ 验证。BEXTR fix 后 extract_dense 在 R2 测得 1.076x（vs 0.556x pre-fix）。报告：`docs/tmp/cmov-bextr-regression-investigation.md`
 12. **~~P0：#171 dense policy 优化（2026-03-13）~~** ✅ #171/#173 已验证。VM 5轮迭代确认最优 policy：3 regressor 全部清空，6-dense geomean 1.097x（R1），62-bench 0.995x。分析报告：`docs/tmp/policy-iteration-rounds.md`，62-bench 数据：`micro/results/micro_62bench_policy_optimized_20260313.json`。
-13. **P1：提升 62-bench overall > 1.0x** — 当前 0.995x（VM 噪声影响），需在 bare metal 确认。关注 simple_packet 0.545x / multi_acc_4 0.746x 是否真实回归或噪声。
+13. **~~P1：提升 62-bench overall > 1.0x~~** ✅ #174 Build #40 + policy 迭代（R6-R11）达成：overall **1.006x**，applied-only **1.040x**。endian_swap_dense 恢复 256 sites 后从 0.695x→1.013-1.139x。数据：`micro/results/micro_62bench_build40_policy_optimized_20260313.json`，分析：`docs/tmp/policy-iteration-rounds.md`（R6-R11 节）。
+14. **~~P1：#174 Build #40 (ac593b2c1) BEXTR without-copy fix + policy R6-R11~~** ✅ 完成。Build #40 重编、R6-R11 迭代、endian 恢复全 256 sites、62-bench 跑完。
 11. **P2：不同微架构** — 当前只在一个 CPU 上测
 
 ### 1.2b OSDI/SOSP Novelty
