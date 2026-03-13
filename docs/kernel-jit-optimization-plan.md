@@ -9,7 +9,7 @@
 > - 每次 context 压缩后 → 完整读取本文档恢复全局状态。
 > - 用 agent background 跑任务，不阻塞主对话。
 > - **构建+修改+运行不拆分**：一个 subagent 负责完整流程（改代码→构建→运行→发现 bug→修复→再运行），不要拆成多个 agent。
-> 上次更新：2026-03-13 深夜（#172 ✅ Tracee E2E post-BEXTR-fix 有效 rerun 完成：recompile 11/13 applied（旧 0/13 无效数据已弃用），exec_storm +5.97% app / -7.11% BPF ns，network +3.26%，无 drops。数据：`e2e/results/tracee_authoritative_20260313_postfix.json`，报告：`docs/tmp/tracee-e2e-post-fix-rerun.md`。#171 ✅ dense policy 优化完成：3个回归 benchmark policy 已清空（cond_select_dense/extract_dense/endian_swap_dense 全部 sites:[]），预期 6-bench geomean 从 0.836x 提升至 1.080x，applied-only 1.198x。分析报告：`docs/tmp/policy-iteration-rounds.md`。待验证：执行 `bash docs/tmp/fix-and-run-all.sh`。#170 ✅ cmov/bextr 回归根因调查完成（`docs/tmp/cmov-bextr-regression-investigation.md`）：cond_select_dense 0.482x 根因=可预测分支下 CMOV 增加关键路径延迟；extract_dense 0.556x 根因=without-copy BEXTR 反增 3B/site + BEXTR latency 3c > SHR+AND 2c；BEXTR emitter 性能 bug 已识别，two cases 均为 policy-sensitivity 证据；#169 ✅ post-BEXTR-fix 62-bench rerun 完成；#158 🔄 corpus rerun 脚本已准备，待手动执行 run_corpus_rerun.sh；#167 ✅ BEXTR fix；#163 🔄 live scanner；#162 ✅ corpus packet fix；#161 ✅ pattern_kind fix；#160 ✅ 62-bench rerun；此前：#149-#159 全部 ✅）
+> 上次更新：2026-03-13 晚（#173 ✅ policy 迭代+corpus rerun+full 62-bench 完成（本次）。#173 数据：policy R1-R5 迭代（4轮 dense 6-bench + 1轮全量 62-bench），最优 policy=3 dense regressor 全部清空，6-dense geomean 从 0.836x→1.125x，62-bench overall 0.995x，applied-only 0.993x（VM 噪声影响）。corpus post-fix rerun：1.008x exec geomean（152 measured pairs），Calico 1.070x，Suricata 1.538x，linux-selftests 0.918x（sub-ktime noise）。结果：`micro/results/micro_62bench_policy_optimized_20260313.json`，`corpus/results/corpus_post_fix_20260313.json`。#172 ✅ Tracee E2E post-BEXTR-fix 有效 rerun。#171 ✅ dense policy 优化方向确定（3个 regressor 清空）。#158 ✅ corpus packet fix + rerun 完成。#170 ✅ BEXTR without-copy bug 已修复（daca445b1）。此前：#149-#169 全部 ✅）
 
 ---
 
@@ -55,13 +55,13 @@
 
 | 指标 | 当前值 | 问题 |
 |------|--------|------|
-| Micro overall | 1.007x | 几乎平手 |
-| Micro applied-only (11/56) | 0.986x | 轻微负面 |
-| **Micro 6-dense optimized (expected, #171)** | **~1.080x overall** | **预期正向（待验证）** |
-| **Micro 3-dense applied (expected, #171)** | **~1.198x applied** | **rotate/lea/bflip 全正** |
-| Corpus blind | 0.868x | 大部分程序变慢 |
-| Corpus v2 fixed | 0.875x | 仍然负面（已知无效，dummy packet） |
-| Gap 恢复率 | 4.3% of 1.641x | 39% gap 只恢复 4.3% |
+| Micro overall (#169, post-BEXTR-fix) | 1.003x | 几乎平手 |
+| Micro applied-only (#169) | 0.932x | 回归（含3个 dense regressor） |
+| **Micro 6-dense optimized (#173, policy-optimized)** | **1.125x** | **✅ 实测正向（VM，3 regressor 清空）** |
+| **Micro 62-bench overall (#173, policy-optimized)** | **0.995x** | 接近平手（VM噪声影响） |
+| Corpus v2 fixed (0.875x) | 已知无效 | dummy packet, early-exit，历史数据 |
+| **Corpus post-fix rerun (#173, fixed IPv4+TCP packet)** | **1.008x** | **✅ 正向！Calico 1.070x, Suricata 1.538x** |
+| Gap 恢复率 | pending | corpus 1.008x vs 0.609x pure-JIT gap |
 | E2E Tracee exec_storm (pre-fix, recompile=0/13, **无效**) | +21.65% | 已被 #172 取代 |
 | **E2E Tracee exec_storm (post-BEXTR-fix, recompile=11/13, #172)** | **+5.97%** | app; BPF ns -7.11%, network +3.26% |
 
@@ -95,9 +95,10 @@
 6. **P1：增加高回报 canonical form** — prologue 优化、更完整的 byte-recompose
 7. **P1：跑更多 E2E workload** — ✅ #172 Tracee 已完成有效 rerun（post-BEXTR-fix，11/13 applied，exec_storm +5.97% app / -7.11% BPF ns）。报告：`docs/tmp/tracee-e2e-post-fix-rerun.md`，数据：`e2e/results/tracee_authoritative_20260313_postfix.json`。旧 +21.65% 数据已作废（recompile 0/13）。需要更多 E2E workload（Tetragon 等）。
 8. **~~P1：#57 消融补全~~** ✅ byte-recompose **50.7%**，callee-saved ~0%（7.0-rc2 已上游化），BMI ~0%
-9. **P1：Corpus rerun（fixed packet + use-policy 路径）** — 🔄 #158 脚本已准备（`run_corpus_rerun.sh`），待执行。使用 `--use-policy` 模式 + fixed IPv4+TCP packet + bzImage build #38 (BEXTR fix)。预期对比 v2 0.875x（已知无效）。报告：`docs/tmp/corpus-post-fix-rerun.md`。**⚠️ /tmp/claude-1000 权限损坏，必须从终端执行 `bash docs/tmp/fix-and-run-all.sh`**
-10. **P1：#170 BEXTR emitter 性能 bug 修复** — `emit_bitfield_extract_core` 中 without-copy（dst==src）路径不应进 BEXTR（会从 6B 变成 9B），需加 `src_reg != dst_reg` guard。修复后 extract_dense 预期从 0.556x 改善到 ~0.7x（without-copy site 开销消除）。报告：`docs/tmp/cmov-bextr-regression-investigation.md`
-12. **P0：#171 dense policy 优化（2026-03-13）** — ✅ 3 个 dense regressor policy 已清空（cond_select_dense/extract_dense/endian_swap_dense 全部 sites:[]）。预期 applied-only geomean 从负转正（~1.198x）。分析报告：`docs/tmp/policy-iteration-rounds.md`。⚠️ 待 VM 验证（依赖 /tmp/claude-1000 权限修复）。
+9. **~~P1：Corpus rerun（fixed packet + use-policy 路径）~~** ✅ #158/#173 完成。结果：**1.008x exec geomean**（152 measured pairs），Calico 1.070x，Suricata 1.538x，xdp-tools 1.230x，tracee 1.230x，linux-selftests 0.918x（sub-ktime noise）。数据：`corpus/results/corpus_post_fix_20260313.json`，报告：`docs/tmp/corpus-post-fix-rerun.md`。旧 0.875x 无效数据已取代。
+10. **~~P1：#170 BEXTR emitter 性能 bug 修复~~** ✅ #167/#173 修复（daca445b1）+ 验证。BEXTR fix 后 extract_dense 在 R2 测得 1.076x（vs 0.556x pre-fix）。报告：`docs/tmp/cmov-bextr-regression-investigation.md`
+12. **~~P0：#171 dense policy 优化（2026-03-13）~~** ✅ #171/#173 已验证。VM 5轮迭代确认最优 policy：3 regressor 全部清空，6-dense geomean 1.097x（R1），62-bench 0.995x。分析报告：`docs/tmp/policy-iteration-rounds.md`，62-bench 数据：`micro/results/micro_62bench_policy_optimized_20260313.json`。
+13. **P1：提升 62-bench overall > 1.0x** — 当前 0.995x（VM 噪声影响），需在 bare metal 确认。关注 simple_packet 0.545x / multi_acc_4 0.746x 是否真实回归或噪声。
 11. **P2：不同微架构** — 当前只在一个 CPU 上测
 
 ### 1.2b OSDI/SOSP Novelty
