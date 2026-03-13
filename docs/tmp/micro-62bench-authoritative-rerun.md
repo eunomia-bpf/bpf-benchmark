@@ -3,7 +3,7 @@
 ## Methodology
 
 - Kernel: `7.0.0-rc2-g05a1845490ed-dirty`
-- Benchmarks: `54` from `config/micro_pure_jit.yaml`
+- Benchmarks: `55` from `config/micro_pure_jit.yaml`
 - Runtimes: `kernel` vs `kernel-recompile`
 - Warmups / iterations / repeat: `2 / 2 / 500`
 - CPU pinning: `taskset -c 0`
@@ -12,10 +12,10 @@
 
 ## Headline Numbers
 
-- Overall geomean (stock / recompile, valid pairs only): `1.019x`
-- Applied-only geomean (stock / recompile): `0.989x`
-- Wins / losses / ties: `25 / 25 / 4`
-- Valid / invalid pairs: `54 / 0`
+- Overall geomean (stock / recompile, valid pairs only): `1.020x`
+- Applied-only geomean (stock / recompile): `0.995x`
+- Wins / losses / ties: `26 / 25 / 4`
+- Valid / invalid pairs: `55 / 0`
 
 ## Per-Family Breakdown
 
@@ -51,6 +51,7 @@
 | popcount | 1 | 1 | 0 | 1.010x | n/a | 1 | 0 | 0 |
 | recurrence | 2 | 2 | 0 | 0.999x | n/a | 1 | 1 | 0 |
 | reduction | 1 | 1 | 0 | 0.995x | n/a | 0 | 1 | 0 |
+| rotate-canonical | 1 | 1 | 1 | 1.059x | 1.059x | 1 | 0 | 0 |
 | rotate-hash | 1 | 1 | 0 | 1.304x | n/a | 1 | 0 | 0 |
 | search | 1 | 1 | 1 | 0.935x | 0.935x | 0 | 1 | 0 |
 | select-diamond | 3 | 3 | 3 | 1.104x | 1.104x | 1 | 2 | 0 |
@@ -117,3 +118,4 @@
 | bitfield_extract | bitfield-extract | 312 ns | 241.5 ns | 1.292x | no | 0 | win |
 | smallmul_strength_reduce | strength-reduce | 435 ns | 366.5 ns | 1.187x | no | 0 | win |
 | cond_select_dense | select-diamond | 87 ns | 99.5 ns | 0.874x | yes | 104 | loss |
+| rotate_dense | rotate-canonical | 243.5 ns | 230 ns | 1.059x | yes | 256 | win |
