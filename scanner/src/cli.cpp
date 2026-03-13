@@ -21,6 +21,7 @@
 #include <sys/stat.h>
 #include <sys/syscall.h>
 #include <unistd.h>
+#include <unordered_map>
 #include <vector>
 
 namespace {
@@ -126,6 +127,23 @@ struct InputBundle {
     std::string program_name;
 };
 
+// Cost-model parameters (used by enumerate --recompile and optionally apply)
+struct CostModelOptions {
+    // Rule 1: Skip same-size forms (ENDIAN_FUSION 32-bit MOVBE=5B=LDX+BSWAP32,
+    //         BRANCH_FLIP body swap does not change code size).
+    // Rationale: full-image recompile I-cache flush cost >= micro-arch benefit.
+    bool skip_same_size = true;
+
+    // Rule 2: Skip CMOV/COND_SELECT by default.
+    // Rationale: predictable branches -> CMOV adds critical-path latency (policy-sensitive).
+    bool skip_cmov = true;
+
+    // Rule 3: Skip a family within a program when site count exceeds this threshold.
+    // Rationale: large-site recompile I-cache flush cost > per-site benefit.
+    // 0 = disabled (no limit).
+    uint32_t max_sites_per_form = 128;
+};
+
 struct CommandOptions {
     std::string subcommand;
     int prog_fd = -1;
@@ -155,6 +173,9 @@ struct CommandOptions {
     bool enumerate_recompile = false;
     std::string enumerate_policy_dir;
     uint32_t enumerate_prog_id_filter = 0; // 0 = all
+    // cost-model options (effective when enumerate --recompile is used,
+    // or when apply is invoked without an explicit --config)
+    CostModelOptions cost_model = {};
 };
 
 uint64_t ptr_to_u64(const void *ptr)
@@ -606,6 +627,94 @@ static const char *bpf_prog_type_str(uint32_t t)
     }
 }
 
+// ---------------------------------------------------------------------------
+// Cost-model filter: removes rules that are predicted to be net-negative.
+// Applied in enumerate --recompile path and in apply (without explicit config).
+//
+// Rule 1 (--skip-same-size, default on):
+//   EndianFusion and BranchFlip are same-size rewrites:
+//     MOVBE 32-bit (5 bytes) == LDX+BSWAP32 (5 bytes)
+//     BranchFlip body swap conserves native code size
+//   Full-image recompile I-cache flush cost >= micro-arch benefit.
+//   Skip unless explicitly disabled.
+//
+// Rule 2 (--skip-cmov, default on):
+//   COND_SELECT/CMOV is policy-sensitive: on predictable branches CMOV adds
+//   critical-path latency.  Only beneficial when branches are unpredictable.
+//   Skip unless explicitly disabled.
+//
+// Rule 3 (--max-sites-per-form N, default 128):
+//   When a form has > N sites in one program the I-cache flush from full-image
+//   recompile dominates per-site benefit.  Skip that family entirely.
+//   Set to 0 to disable.
+// ---------------------------------------------------------------------------
+std::vector<bpf_jit_scanner::V5PolicyRule> apply_cost_model(
+    const std::vector<bpf_jit_scanner::V5PolicyRule> &rules,
+    const CostModelOptions &cm,
+    bool verbose = false)
+{
+    if (!cm.skip_same_size && !cm.skip_cmov && cm.max_sites_per_form == 0) {
+        return rules; // cost model disabled
+    }
+
+    // Phase 1: count per-family sites for the max-sites-per-form check
+    std::unordered_map<int, uint32_t> family_count;
+    if (cm.max_sites_per_form > 0) {
+        for (const auto &r : rules) {
+            family_count[static_cast<int>(r.family)]++;
+        }
+    }
+
+    std::vector<bpf_jit_scanner::V5PolicyRule> out;
+    out.reserve(rules.size());
+
+    for (const auto &r : rules) {
+        const auto fam = r.family;
+
+        // Rule 2: skip CMOV
+        if (cm.skip_cmov && fam == bpf_jit_scanner::V5Family::Cmov) {
+            if (verbose) {
+                std::fprintf(stderr,
+                             "  cost-model: skip cmov site insn=%u (--skip-cmov)\n",
+                             r.site_start);
+            }
+            continue;
+        }
+
+        // Rule 1: skip same-size forms
+        if (cm.skip_same_size &&
+            (fam == bpf_jit_scanner::V5Family::EndianFusion ||
+             fam == bpf_jit_scanner::V5Family::BranchFlip)) {
+            if (verbose) {
+                std::fprintf(stderr,
+                             "  cost-model: skip same-size form %s insn=%u (--skip-same-size)\n",
+                             bpf_jit_scanner::v5_family_name(fam),
+                             r.site_start);
+            }
+            continue;
+        }
+
+        // Rule 3: skip when dense site count exceeds threshold
+        if (cm.max_sites_per_form > 0) {
+            const uint32_t cnt = family_count[static_cast<int>(fam)];
+            if (cnt > cm.max_sites_per_form) {
+                if (verbose) {
+                    std::fprintf(stderr,
+                                 "  cost-model: skip dense form %s insn=%u"
+                                 " (site_count=%u > max=%u)\n",
+                                 bpf_jit_scanner::v5_family_name(fam),
+                                 r.site_start, cnt, cm.max_sites_per_form);
+                }
+                continue;
+            }
+        }
+
+        out.push_back(r);
+    }
+
+    return out;
+}
+
 void run_enumerate(const CommandOptions &options)
 {
     if (!options.families_explicit) {
@@ -728,6 +837,7 @@ void run_enumerate(const CommandOptions &options)
         if (options.enumerate_recompile && res.total_sites > 0) {
             // Optionally filter by policy if a policy dir / config was given
             std::vector<bpf_jit_scanner::V5PolicyRule> rules_to_apply = summary.rules;
+            bool policy_file_loaded = false;
 
             if (!options.enumerate_policy_dir.empty()) {
                 // Try to load <policy_dir>/<name>.policy.yaml
@@ -740,13 +850,26 @@ void run_enumerate(const CommandOptions &options)
                         const auto fr = bpf_jit_scanner::filter_rules_by_policy_detailed(
                             summary.rules, config);
                         rules_to_apply = fr.rules;
-                        res.applied_sites = static_cast<uint32_t>(rules_to_apply.size());
+                        policy_file_loaded = true;
                     } catch (const std::exception &ex) {
                         std::fprintf(stderr, "  warning: failed to load policy %s: %s\n",
                                      policy_path.c_str(), ex.what());
                     }
                 }
             }
+
+            // Apply cost-model filter (never-slower guarantee).
+            // When a per-program policy file was successfully loaded, trust it
+            // completely: the operator made a deliberate site-level decision.
+            // When no policy file applies (automatic / fallback path), apply
+            // the cost model to prevent known-bad forms from being applied:
+            //   Rule 1: skip same-size forms (ENDIAN_FUSION, BRANCH_FLIP)
+            //   Rule 2: skip CMOV (policy-sensitive, predictable branches)
+            //   Rule 3: skip families with > max_sites_per_form sites
+            if (!policy_file_loaded) {
+                rules_to_apply = apply_cost_model(rules_to_apply, options.cost_model);
+            }
+            res.applied_sites = static_cast<uint32_t>(rules_to_apply.size());
 
             if (!rules_to_apply.empty()) {
                 const uint32_t insn_cnt = info.xlated_prog_len / 8;
@@ -921,6 +1044,17 @@ void print_usage(const char *prog)
         "  --recompile            (enumerate) Apply BPF_PROG_JIT_RECOMPILE for found sites\n"
         "  --policy-dir <dir>     (enumerate) Per-program policy YAML directory\n"
         "  --prog-id <id>         (enumerate) Scan only a specific prog_id\n"
+        "\n"
+        "Cost-model options (never-slower guarantee, applied in enumerate --recompile):\n"
+        "  --skip-same-size       Skip EndianFusion+BranchFlip (same native-code size,\n"
+        "                         I-cache flush cost >= benefit). Default: ON\n"
+        "  --no-skip-same-size    Disable same-size form filtering\n"
+        "  --skip-cmov            Skip COND_SELECT (policy-sensitive: predictable\n"
+        "                         branches -> CMOV adds latency). Default: ON\n"
+        "  --no-skip-cmov         Disable CMOV filtering\n"
+        "  --max-sites-per-form N Skip a family when site_count > N per program\n"
+        "                         (I-cache flush dominates for dense sites). Default: 128\n"
+        "                         Set to 0 to disable.\n"
         "  -h, --help             Show this help\n",
         prog, prog, prog, prog, prog, prog);
 }
@@ -1060,6 +1194,17 @@ CommandOptions parse_args(int argc, char **argv)
                 die("--prog-id is only valid with the enumerate subcommand");
             }
             options.enumerate_prog_id_filter = static_cast<uint32_t>(
+                std::strtoul(need_next(), nullptr, 0));
+        } else if (arg == "--skip-same-size") {
+            options.cost_model.skip_same_size = true;
+        } else if (arg == "--no-skip-same-size") {
+            options.cost_model.skip_same_size = false;
+        } else if (arg == "--skip-cmov") {
+            options.cost_model.skip_cmov = true;
+        } else if (arg == "--no-skip-cmov") {
+            options.cost_model.skip_cmov = false;
+        } else if (arg == "--max-sites-per-form") {
+            options.cost_model.max_sites_per_form = static_cast<uint32_t>(
                 std::strtoul(need_next(), nullptr, 0));
         } else if (!arg.empty() && arg[0] != '-' &&
                    (options.subcommand == "scan" ||
