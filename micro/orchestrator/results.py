@@ -70,6 +70,7 @@ class RunnerSample(TypedDict, total=False):
     compile_ns: int
     exec_ns: int
     timing_source: str
+    timing_source_wall: str
     opt_level: int
     no_cmov: bool
     wall_exec_ns: int
@@ -188,6 +189,7 @@ def normalize_directive_scan(scan: Mapping[str, object] | None) -> dict[str, int
 
 def normalize_runner_sample(sample: Mapping[str, object]) -> RunnerSample:
     normalized: RunnerSample = dict(sample)
+    normalized.setdefault("timing_source_wall", "unavailable")
     normalized.setdefault("disabled_passes", [])
     normalized.setdefault("code_size", {})
     normalized.setdefault("phases_ns", {})

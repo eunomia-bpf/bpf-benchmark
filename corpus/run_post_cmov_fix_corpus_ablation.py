@@ -771,6 +771,7 @@ def compare_groups(
 
     return {
         "pair_count": len(compared),
+        "measured_programs": len(normalized_ratios),
         "missing_only_with": only_with,
         "missing_only_without": only_without,
         "normalized_with_over_without_ratio_geomean": normalized_geomean,
@@ -836,7 +837,8 @@ def build_markdown(
                 f"- Normalized Group A / Group B geomean: {format_ratio(comparison.get('normalized_with_over_without_ratio_geomean'))}",
                 f"- Direct Group B / Group A exec geomean: {format_ratio(comparison.get('direct_without_over_with_exec_ratio_geomean'))}",
                 f"- Baseline drift geomean (Group B / Group A): {format_ratio(comparison.get('baseline_ratio_without_over_with_geomean'))}",
-                f"- Compared programs: {comparison['pair_count']}",
+                f"- Paired programs: {comparison['pair_count']}",
+                f"- Measured programs: {comparison['measured_programs']}",
                 f"- Wins for Group A: {comparison['wins']}",
                 f"- Regressions for Group A: {comparison['regressions']}",
                 "",
@@ -856,7 +858,8 @@ def build_markdown(
             f"- Normalized Group A / Group B geomean: {format_ratio(comparison.get('normalized_with_over_without_ratio_geomean'))}",
             f"- Direct Group B / Group A exec geomean: {format_ratio(comparison.get('direct_without_over_with_exec_ratio_geomean'))}",
             f"- Baseline drift geomean (Group B / Group A): {format_ratio(comparison.get('baseline_ratio_without_over_with_geomean'))}",
-            f"- Compared programs: {comparison['pair_count']}",
+            f"- Paired programs: {comparison['pair_count']}",
+            f"- Measured programs: {comparison['measured_programs']}",
             f"- Wins for Group A: {comparison['wins']}",
             f"- Regressions for Group A: {comparison['regressions']}",
             f"- Ties: {comparison['ties']}",

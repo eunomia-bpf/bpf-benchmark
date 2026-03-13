@@ -181,6 +181,32 @@ def _scanner_json_payload(stdout: str) -> dict[str, Any] | None:
     return payload
 
 
+def _counts_from_family_counts(family_counts: Mapping[str, Any] | None) -> dict[str, int]:
+    raw = family_counts or {}
+    counts = {
+        "total_sites": 0,
+        "cmov_sites": int(raw.get("cmov", 0) or 0),
+        "wide_sites": int(raw.get("wide", 0) or 0),
+        "rotate_sites": int(raw.get("rotate", 0) or 0),
+        "lea_sites": int(raw.get("lea", 0) or 0),
+        "bitfield_sites": int(raw.get("extract", 0) or 0),
+        "zero_ext_sites": int(raw.get("zero-ext", 0) or 0),
+        "endian_sites": int(raw.get("endian", 0) or 0),
+        "branch_flip_sites": int(raw.get("branch-flip", 0) or 0),
+    }
+    counts["total_sites"] = (
+        counts["cmov_sites"]
+        + counts["wide_sites"]
+        + counts["rotate_sites"]
+        + counts["lea_sites"]
+        + counts["bitfield_sites"]
+        + counts["zero_ext_sites"]
+        + counts["endian_sites"]
+        + counts["branch_flip_sites"]
+    )
+    return counts
+
+
 def _scan_live_manifest(scanner_binary: str | Path, fd: int, program_name: str) -> dict[str, Any]:
     completed = run_command(
         [
@@ -409,6 +435,23 @@ def apply_recompile(
                     program_name=program_name,
                 )
                 effective_policy = str(temp_policy_path)
+                if int(remap_summary.get("remapped_sites", 0) or 0) <= 0:
+                    results[int(prog_id)] = {
+                        "program_name": program_name,
+                        "counts": _counts_from_family_counts(remap_summary.get("remapped_family_counts")),
+                        "applied": False,
+                        "noop": True,
+                        "policy_file": selected_policy,
+                        "policy_remap": remap_summary,
+                        "policy_mode": "policy-file",
+                        "error": "",
+                        "stdout_tail": (
+                            "Accepted 0 v5 site(s)\n"
+                            "Skipped BPF_PROG_JIT_RECOMPILE because policy filtering left no live sites.\n"
+                        ),
+                        "stderr_tail": "",
+                    }
+                    continue
             command = [
                 str(scanner_binary),
                 "apply",

@@ -127,6 +127,7 @@ OpenAI Codex CLI is available on this machine (default model: `gpt-5.4`). Use it
 - **NEVER delete old entries in tracking docs** — when tasks/experiments/docs are superseded, keep at least one line with status (e.g. "归入 #32", "已被 v3 取代"). This applies to TODO tables, VM experiment matrix, reference doc lists in `docs/kernel-jit-optimization-plan.md`
 - **Claude 只给高层次要求** — 不自己调研代码再给详细变更指令，让 codex 自己读代码、设计方案、实现
 - **Codex 必须测试验证** — 每个 codex prompt 必须要求写完代码后实际跑通（sudo / VM vng 等方式），不能只写不测
+- **构建+修改+运行不拆分** — 一个 subagent 负责完整流程（改代码→构建→运行→发现 bug→修复→再运行），不要拆成多个 agent，这样发现问题能立刻修
 
 ### Usage
 ```bash

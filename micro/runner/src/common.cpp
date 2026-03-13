@@ -153,8 +153,8 @@ std::string usage_text()
         "usage: micro_exec <run-llvmbpf|run-kernel|list-programs> [--program <path>|<path>] [--program-name <name>] "
         "[--memory|--input <path>] [--btf-custom-path <path>] [--directive-blob <path>] [--policy <yaml-or-json>] [--policy-file <path>] [--policy-blob <path>] "
         "[--manual-load] [--recompile-cmov] [--recompile-wide|--recompile-wide-mem] [--recompile-rotate] [--recompile-rotate-rorx] [--recompile-lea] [--recompile-extract|--recompile-bitfield-extract] [--recompile-all] [--recompile-v5] [--skip-families cmov,wide,rotate,lea,extract,zero-ext,endian,branch-flip] "
-        "[--io-mode map|staged|packet|context] [--raw-packet] [--repeat N] [--warmup N] [--input-size|--kernel-input-size N] "
-        "[--opt-level 0|1|2|3] [--no-cmov] [--llvm-disable-pass <name>] [--llvm-log-passes] "
+        "[--io-mode map|staged|packet|context] [--raw-packet] [--repeat N] [--warmup N] [--adaptive-repeat|--no-adaptive-repeat] [--target-window-ns N] [--input-size|--kernel-input-size N] "
+        "[--opt-level 0|1|2|3] [--no-cmov] [--llvm-target-cpu <cpu>] [--llvm-target-features <csv>] [--llvm-disable-pass <name>] [--llvm-log-passes] "
         "[--perf-counters] [--perf-scope full_repeat_raw|full_repeat_avg] "
         "[--dump-jit] [--dump-xlated <path>] [--compile-only]";
 }
@@ -245,7 +245,8 @@ cli_options parse_args(int argc, char **argv)
             std::cout << usage_text() << "\n";
             std::exit(0);
         }
-        if ((current == "--program" || current == "--bpf-object") && index + 1 < argc) {
+        if ((current == "--program" || current == "--bpf-object" ||
+             current == "--bpf-obj") && index + 1 < argc) {
             options.program = argv[++index];
             continue;
         }
@@ -336,7 +337,19 @@ cli_options parse_args(int argc, char **argv)
             continue;
         }
         if ((current == "--warmup" || current == "--warmups") && index + 1 < argc) {
-            static_cast<void>(std::stoul(argv[++index]));
+            options.warmup_repeat = static_cast<uint32_t>(std::stoul(argv[++index]));
+            continue;
+        }
+        if (current == "--adaptive-repeat") {
+            options.adaptive_repeat = true;
+            continue;
+        }
+        if (current == "--no-adaptive-repeat") {
+            options.adaptive_repeat = false;
+            continue;
+        }
+        if (current == "--target-window-ns" && index + 1 < argc) {
+            options.target_window_ns = std::stoull(argv[++index]);
             continue;
         }
         if ((current == "--input-size" || current == "--kernel-input-size") &&
@@ -354,6 +367,14 @@ cli_options parse_args(int argc, char **argv)
         }
         if (current == "--no-cmov") {
             options.no_cmov = true;
+            continue;
+        }
+        if (current == "--llvm-target-cpu" && index + 1 < argc) {
+            options.llvm_target_cpu = std::string(argv[++index]);
+            continue;
+        }
+        if (current == "--llvm-target-features" && index + 1 < argc) {
+            options.llvm_target_features = std::string(argv[++index]);
             continue;
         }
         if (current == "--llvm-disable-pass" && index + 1 < argc) {
@@ -392,6 +413,9 @@ cli_options parse_args(int argc, char **argv)
     }
     if (options.perf_scope != "full_repeat_raw" && options.perf_scope != "full_repeat_avg") {
         fail("--perf-scope must be one of full_repeat_raw or full_repeat_avg");
+    }
+    if (options.target_window_ns == 0) {
+        fail("--target-window-ns must be >= 1");
     }
     if (options.directive_blob.has_value() && options.command != "run-kernel") {
         fail("--directive-blob is only valid with run-kernel");
@@ -509,6 +533,7 @@ void print_json(const sample_result &sample)
         << "\"compile_ns\":" << sample.compile_ns << ","
         << "\"exec_ns\":" << sample.exec_ns << ","
         << "\"timing_source\":\"" << json_escape(sample.timing_source) << "\""
+        << ",\"timing_source_wall\":\"" << json_escape(sample.timing_source_wall) << "\""
         << ",\"no_cmov\":" << (sample.no_cmov ? "true" : "false");
 
     if (sample.opt_level.has_value()) {
@@ -523,8 +548,11 @@ void print_json(const sample_result &sample)
     }
     std::cout << "]";
 
+    std::cout << ",\"wall_exec_ns\":";
     if (sample.wall_exec_ns.has_value()) {
-        std::cout << ",\"wall_exec_ns\":" << *sample.wall_exec_ns;
+        std::cout << *sample.wall_exec_ns;
+    } else {
+        std::cout << "null";
     }
     if (sample.exec_cycles.has_value()) {
         std::cout << ",\"exec_cycles\":" << *sample.exec_cycles;

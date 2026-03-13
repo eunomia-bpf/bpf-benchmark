@@ -350,34 +350,59 @@ def source_name_for_path(path: Path, object_root: Path) -> str:
     return parts[0] if parts else "unknown"
 
 
+def _ipv4_checksum(header: bytes | bytearray) -> int:
+    """Compute RFC 791 one's complement checksum over a 20-byte IPv4 header."""
+    s = 0
+    for i in range(0, len(header), 2):
+        s += (header[i] << 8) + header[i + 1]
+    while s >> 16:
+        s = (s & 0xFFFF) + (s >> 16)
+    return ~s & 0xFFFF
+
+
 def materialize_dummy_packet(path: Path) -> Path:
     ensure_parent(path)
+    # Regenerate if absent, wrong size, or missing broadcast-dst sentinel (version marker).
+    _MAGIC = bytes.fromhex("ffffffffffff")
     if path.exists() and path.stat().st_size == 64:
-        return path
+        if path.read_bytes()[0:6] == _MAGIC:
+            return path
 
     packet = bytearray(64)
-    packet[0:6] = bytes.fromhex("001122334455")
-    packet[6:12] = bytes.fromhex("66778899aabb")
-    packet[12:14] = bytes.fromhex("0800")
-    packet[14] = 0x45
-    packet[15] = 0x00
-    packet[16:18] = (50).to_bytes(2, "big")
-    packet[18:20] = (0).to_bytes(2, "big")
-    packet[20:22] = (0x4000).to_bytes(2, "big")
-    packet[22] = 64
-    packet[23] = 6
-    packet[24:26] = (0).to_bytes(2, "big")
-    packet[26:30] = bytes([192, 0, 2, 1])
-    packet[30:34] = bytes([198, 51, 100, 2])
-    packet[34:36] = (12345).to_bytes(2, "big")
-    packet[36:38] = (80).to_bytes(2, "big")
-    packet[38:42] = (1).to_bytes(4, "big")
-    packet[42:46] = (0).to_bytes(4, "big")
-    packet[46] = 0x50
-    packet[47] = 0x02
-    packet[48:50] = (8192).to_bytes(2, "big")
-    packet[50:52] = (0).to_bytes(2, "big")
-    packet[52:54] = (0).to_bytes(2, "big")
+
+    # Ethernet header
+    packet[0:6] = _MAGIC                              # dst MAC (broadcast sentinel)
+    packet[6:12] = bytes.fromhex("001122334455")      # src MAC
+    packet[12:14] = bytes.fromhex("0800")              # EtherType = IPv4
+
+    # IPv4 header (checksum filled after construction)
+    packet[14] = 0x45        # version=4, IHL=5
+    packet[15] = 0x00        # DSCP/ECN
+    packet[16:18] = (50).to_bytes(2, "big")            # total length (20+20+10)
+    packet[18:20] = (0).to_bytes(2, "big")             # identification
+    packet[20:22] = (0x4000).to_bytes(2, "big")        # flags=DF, frag_offset=0
+    packet[22] = 64           # TTL
+    packet[23] = 6            # protocol = TCP
+    packet[24:26] = (0).to_bytes(2, "big")             # checksum placeholder
+    packet[26:30] = bytes([10, 0, 0, 1])               # src IP = 10.0.0.1
+    packet[30:34] = bytes([10, 0, 0, 2])               # dst IP = 10.0.0.2
+    chk = _ipv4_checksum(packet[14:34])
+    packet[24:26] = chk.to_bytes(2, "big")
+
+    # TCP header
+    packet[34:36] = (12345).to_bytes(2, "big")         # src_port
+    packet[36:38] = (80).to_bytes(2, "big")            # dst_port
+    packet[38:42] = (1).to_bytes(4, "big")             # seq = 1
+    packet[42:46] = (0).to_bytes(4, "big")             # ack = 0
+    packet[46] = 0x50        # data_offset=5
+    packet[47] = 0x02        # flags = SYN
+    packet[48:50] = (8192).to_bytes(2, "big")          # window
+    packet[50:52] = (0).to_bytes(2, "big")             # TCP checksum (0)
+    packet[52:54] = (0).to_bytes(2, "big")             # urgent pointer
+
+    # Payload
+    packet[54:64] = bytes([0x41] * 10)                 # 'A' * 10
+
     path.write_bytes(packet)
     return path
 

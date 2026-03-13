@@ -60,9 +60,14 @@ struct cli_options {
     bool manual_load = false;
     bool raw_packet = false;
     uint32_t repeat = 1;
+    uint32_t warmup_repeat = 5;
+    bool adaptive_repeat = true;
+    uint64_t target_window_ns = 100000;
     uint32_t input_size = 0;
     int opt_level = 3;
     bool no_cmov = false;
+    std::optional<std::string> llvm_target_cpu;
+    std::optional<std::string> llvm_target_features;
     std::vector<std::string> disabled_passes;
     bool log_passes = false;
     bool perf_counters = false;
@@ -138,6 +143,7 @@ struct sample_result {
     uint64_t compile_ns = 0;
     uint64_t exec_ns = 0;
     std::string timing_source = "unknown";
+    std::string timing_source_wall = "unavailable";
     std::optional<int> opt_level;
     bool no_cmov = false;
     std::optional<uint64_t> wall_exec_ns;

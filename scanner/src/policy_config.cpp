@@ -202,24 +202,6 @@ struct V5PolicySiteKeyHash {
     }
 };
 
-struct V5RuleSiteKey {
-    uint32_t insn = 0;
-    V5Family family = V5Family::Cmov;
-
-    bool operator==(const V5RuleSiteKey &other) const
-    {
-        return insn == other.insn && family == other.family;
-    }
-};
-
-struct V5RuleSiteKeyHash {
-    size_t operator()(const V5RuleSiteKey &key) const
-    {
-        return (static_cast<size_t>(key.insn) << 8) ^
-               static_cast<size_t>(key.family);
-    }
-};
-
 std::optional<V5Family> parse_policy_family_name(std::string value)
 {
     value = lower_ascii(std::move(value));
@@ -448,24 +430,23 @@ V5PolicyFilterResult filter_rules_by_policy_detailed(
     const V5PolicyConfig &config)
 {
     V5PolicyFilterResult result;
-    std::unordered_multimap<V5RuleSiteKey, size_t, V5RuleSiteKeyHash> explicit_sites;
+    std::unordered_multimap<V5PolicySiteKey, size_t, V5PolicySiteKeyHash>
+        explicit_sites;
     std::unordered_set<size_t> matched_site_indices;
     explicit_sites.reserve(config.sites.size());
     matched_site_indices.reserve(config.sites.size());
 
     for (size_t index = 0; index < config.sites.size(); ++index) {
         const auto &site = config.sites[index];
-        explicit_sites.emplace(V5RuleSiteKey {
-            .insn = site.insn,
-            .family = site.family,
-        }, index);
+        explicit_sites.emplace(policy_site_key(site), index);
     }
 
     result.rules.reserve(rules.size());
     for (const auto &rule : rules) {
-        const V5RuleSiteKey key {
+        const V5PolicySiteKey key {
             .insn = rule.site_start,
             .family = rule.family,
+            .pattern_kind = rule_pattern_kind(rule),
         };
         const auto [begin, end] = explicit_sites.equal_range(key);
         if (begin == end) {

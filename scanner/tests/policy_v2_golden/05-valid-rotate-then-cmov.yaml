@@ -3,7 +3,7 @@ program: mixed-demo
 sites:
   - insn: 4
     family: rotate
-    pattern_kind: rotate-64
+    pattern_kind: rotate-32
   - insn: 0
     family: cmov
     pattern_kind: cond-select-64

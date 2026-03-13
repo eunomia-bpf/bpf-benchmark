@@ -16,6 +16,7 @@
 #include <cstring>
 #include <fcntl.h>
 #include <fstream>
+#include <limits>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -195,6 +196,143 @@ uint64_t detect_tsc_freq_hz()
     }
 
     return calibrate_tsc_freq_hz();
+}
+
+constexpr uint32_t kAdaptiveProbeRepeat = 10;
+constexpr uint64_t kAdaptiveRepeatThresholdNs = 50;
+
+struct kernel_test_run_context {
+    int program_fd = -1;
+    bpf_test_run_opts *test_opts = nullptr;
+    uint32_t effective_repeat = 1;
+    uint64_t tsc_freq_hz = 0;
+    std::vector<uint8_t> *packet_out = nullptr;
+    __sk_buff *context_out = nullptr;
+    uint32_t context_out_size = 0;
+    int result_fd = -1;
+    uint32_t result_key = 0;
+    bool reset_result_map = false;
+};
+
+struct kernel_test_run_measurement {
+    uint64_t exec_ns = 0;
+    std::optional<uint64_t> wall_exec_ns;
+    std::optional<uint64_t> exec_cycles;
+    uint32_t retval = 0;
+    std::chrono::steady_clock::time_point wall_start {};
+    std::chrono::steady_clock::time_point wall_end {};
+};
+
+uint32_t clamp_repeat_count(uint64_t repeat)
+{
+    const uint64_t max_repeat =
+        static_cast<uint64_t>(std::numeric_limits<uint32_t>::max());
+    return static_cast<uint32_t>(std::min(std::max<uint64_t>(repeat, 1u), max_repeat));
+}
+
+void reset_kernel_test_run_state(kernel_test_run_context &context)
+{
+    if (context.test_opts == nullptr) {
+        fail("internal error: missing test run options");
+    }
+
+    context.test_opts->duration = 0;
+    context.test_opts->retval = 0;
+
+    if (context.packet_out != nullptr) {
+        std::fill(context.packet_out->begin(), context.packet_out->end(), 0);
+        context.test_opts->data_out =
+            context.packet_out->empty() ? nullptr : context.packet_out->data();
+        context.test_opts->data_size_out =
+            static_cast<__u32>(context.packet_out->size());
+    }
+
+    if (context.context_out != nullptr) {
+        std::memset(context.context_out, 0, sizeof(*context.context_out));
+        context.test_opts->ctx_out = context.context_out;
+        context.test_opts->ctx_size_out = context.context_out_size;
+    }
+
+    if (context.reset_result_map) {
+        uint64_t zero = 0;
+        if (bpf_map_update_elem(context.result_fd, &context.result_key, &zero,
+                                BPF_ANY) != 0) {
+            fail("bpf_map_update_elem(result_map) failed: " +
+                 std::string(strerror(errno)));
+        }
+    }
+}
+
+kernel_test_run_measurement execute_kernel_test_run(
+    kernel_test_run_context &context)
+{
+    reset_kernel_test_run_state(context);
+
+    kernel_test_run_measurement measurement {};
+    uint64_t tsc_before = 0;
+    uint64_t tsc_after = 0;
+
+    measurement.wall_start = std::chrono::steady_clock::now();
+    tsc_before = rdtsc_start();
+    const int run_error =
+        bpf_prog_test_run_opts(context.program_fd, context.test_opts);
+    tsc_after = rdtsc_end();
+    measurement.wall_end = std::chrono::steady_clock::now();
+
+    if (run_error != 0) {
+        fail("bpf_prog_test_run_opts failed: " + std::string(strerror(errno)));
+    }
+
+    measurement.exec_ns = context.test_opts->duration;
+    measurement.retval = context.test_opts->retval;
+
+    if (kHasTscMeasurement && context.tsc_freq_hz > 0 &&
+        tsc_after > tsc_before) {
+        const uint64_t total_cycles = tsc_after - tsc_before;
+        const uint32_t repeat = context.effective_repeat;
+        measurement.exec_cycles = static_cast<uint64_t>(std::llround(
+            static_cast<long double>(total_cycles) /
+            static_cast<long double>(repeat)));
+        measurement.wall_exec_ns = static_cast<uint64_t>(std::llround(
+            (static_cast<long double>(total_cycles) * 1000000000.0L) /
+            (static_cast<long double>(context.tsc_freq_hz) *
+             static_cast<long double>(repeat))));
+    }
+
+    return measurement;
+}
+
+uint32_t resolve_kernel_repeat(const cli_options &options,
+                               std::string_view effective_io_mode,
+                               const kernel_test_run_context &base_context)
+{
+    if (effective_io_mode == "context") {
+        return 1u;
+    }
+
+    if (!options.adaptive_repeat) {
+        return options.repeat;
+    }
+
+    bpf_test_run_opts probe_opts = *base_context.test_opts;
+    probe_opts.repeat = kAdaptiveProbeRepeat;
+
+    kernel_test_run_context probe_context = base_context;
+    probe_context.test_opts = &probe_opts;
+    probe_context.effective_repeat = kAdaptiveProbeRepeat;
+
+    const auto probe = execute_kernel_test_run(probe_context);
+    const uint64_t threshold_ns =
+        kAdaptiveRepeatThresholdNs * static_cast<uint64_t>(kAdaptiveProbeRepeat);
+    if (probe.exec_ns >= threshold_ns) {
+        return options.repeat;
+    }
+
+    const uint64_t probe_avg_ns = std::max<uint64_t>(probe.exec_ns, 1u);
+    const uint64_t target_repeat =
+        (options.target_window_ns + probe_avg_ns - 1) / probe_avg_ns;
+    return clamp_repeat_count(
+        std::max<uint64_t>(options.repeat, target_repeat));
 }
 
 struct object_deleter {
@@ -1273,9 +1411,10 @@ sample_result run_kernel(const cli_options &options)
 
     bpf_test_run_opts test_opts = {};
     test_opts.sz = sizeof(test_opts);
-    const uint32_t effective_repeat =
+    const uint32_t requested_repeat =
         effective_io_mode == "context" ? 1u : options.repeat;
-    test_opts.repeat = effective_io_mode == "context" ? 0u : options.repeat;
+    test_opts.repeat =
+        effective_io_mode == "context" ? 0u : requested_repeat;
     if (!packet.empty()) {
         test_opts.data_in = packet.data();
         test_opts.data_size_in = packet.size();
@@ -1292,12 +1431,33 @@ sample_result run_kernel(const cli_options &options)
     }
 
     const uint64_t tsc_freq_hz = kHasTscMeasurement ? detect_tsc_freq_hz() : 0;
+    kernel_test_run_context run_context = {
+        .program_fd = program_fd,
+        .test_opts = &test_opts,
+        .effective_repeat = requested_repeat,
+        .tsc_freq_hz = tsc_freq_hz,
+        .packet_out = packet_out.empty() ? nullptr : &packet_out,
+        .context_out = result_from_skb_context ? &context_out : nullptr,
+        .context_out_size = static_cast<uint32_t>(sizeof(context_out)),
+        .result_fd = result_fd,
+        .result_key = key,
+        .reset_result_map = effective_io_mode == "map",
+    };
 
-    std::chrono::steady_clock::time_point run_wall_start {};
-    std::chrono::steady_clock::time_point run_wall_end {};
-    uint64_t tsc_before = 0;
-    uint64_t tsc_after = 0;
-    int run_error = 0;
+    const uint32_t effective_repeat =
+        resolve_kernel_repeat(options, effective_io_mode, run_context);
+    run_context.effective_repeat = effective_repeat;
+    test_opts.repeat =
+        effective_io_mode == "context" ? 0u : effective_repeat;
+
+    if (recompile.applied) {
+        for (uint32_t warmup_index = 0; warmup_index < options.warmup_repeat;
+             ++warmup_index) {
+            static_cast<void>(execute_kernel_test_run(run_context));
+        }
+    }
+
+    kernel_test_run_measurement run_measurement {};
     const perf_counter_options perf_options = {
         .enabled = options.perf_counters,
         .include_kernel = true,
@@ -1306,20 +1466,13 @@ sample_result run_kernel(const cli_options &options)
     auto perf_counters = measure_perf_counters(
         perf_options,
         [&]() {
-            run_wall_start = std::chrono::steady_clock::now();
-            tsc_before = rdtsc_start();
-            run_error = bpf_prog_test_run_opts(program_fd, &test_opts);
-            tsc_after = rdtsc_end();
-            run_wall_end = std::chrono::steady_clock::now();
+            run_measurement = execute_kernel_test_run(run_context);
         });
     if (options.perf_scope == "full_repeat_avg") {
         const uint32_t repeat = effective_repeat;
         for (auto &counter : perf_counters.counters) {
             counter.value /= repeat;
         }
-    }
-    if (run_error != 0) {
-        fail("bpf_prog_test_run_opts failed: " + std::string(strerror(errno)));
     }
 
     if (effective_io_mode == "packet" || effective_io_mode == "staged") {
@@ -1332,7 +1485,7 @@ sample_result run_kernel(const cli_options &options)
         result_read_end = std::chrono::steady_clock::now();
     } else if (effective_io_mode == "context") {
         result_read_start = std::chrono::steady_clock::now();
-        result = test_opts.retval;
+        result = run_measurement.retval;
         result_read_end = std::chrono::steady_clock::now();
     } else {
         result_read_start = std::chrono::steady_clock::now();
@@ -1342,32 +1495,24 @@ sample_result run_kernel(const cli_options &options)
         result_read_end = std::chrono::steady_clock::now();
     }
 
-    sample.exec_ns = test_opts.duration;
-    if (kHasTscMeasurement && tsc_freq_hz > 0 && tsc_after > tsc_before) {
-        const uint64_t total_cycles = tsc_after - tsc_before;
-        const uint32_t repeat = effective_repeat;
-        sample.exec_cycles = static_cast<uint64_t>(std::llround(
-            static_cast<long double>(total_cycles) / static_cast<long double>(repeat)));
-        sample.tsc_freq_hz = tsc_freq_hz;
-        sample.wall_exec_ns = static_cast<uint64_t>(std::llround(
-            (static_cast<long double>(total_cycles) * 1000000000.0L) /
-            (static_cast<long double>(tsc_freq_hz) * static_cast<long double>(repeat))));
-    }
-    if (sample.exec_ns == 0 && sample.wall_exec_ns.has_value()) {
-        sample.exec_ns = *sample.wall_exec_ns;
-        sample.timing_source = "wall_tsc";
-    } else {
-        sample.timing_source = "ktime";
-    }
+    sample.exec_ns = run_measurement.exec_ns;
+    sample.wall_exec_ns = run_measurement.wall_exec_ns;
+    sample.exec_cycles = run_measurement.exec_cycles;
+    sample.tsc_freq_hz = tsc_freq_hz > 0 ? std::optional<uint64_t>(tsc_freq_hz)
+                                         : std::nullopt;
+    sample.timing_source = "ktime";
+    sample.timing_source_wall =
+        sample.wall_exec_ns.has_value() ? "rdtsc" : "unavailable";
     sample.result = result;
-    sample.retval = test_opts.retval;
+    sample.retval = run_measurement.retval;
     sample.phases_ns = {
         {"memory_prepare_ns", elapsed_ns(memory_prepare_start, memory_prepare_end)},
         {"object_open_ns", elapsed_ns(object_open_start, object_open_end)},
         {"object_load_ns", elapsed_ns(object_load_start, object_load_end)},
         {prepare_phase_name(effective_io_mode),
          elapsed_ns(exec_input_prepare_start, exec_input_prepare_end)},
-        {"prog_run_wall_ns", elapsed_ns(run_wall_start, run_wall_end)},
+        {"prog_run_wall_ns",
+         elapsed_ns(run_measurement.wall_start, run_measurement.wall_end)},
         {result_phase_name(effective_io_mode),
          elapsed_ns(result_read_start, result_read_end)},
     };

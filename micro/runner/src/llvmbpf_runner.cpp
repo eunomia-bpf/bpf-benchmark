@@ -668,6 +668,14 @@ sample_result run_llvmbpf(const cli_options &options)
         }
         fail("llvmbpf set_no_cmov failed: " + vm.get_error_message());
     }
+    if (options.llvm_target_cpu.has_value() &&
+        vm.set_target_cpu(*options.llvm_target_cpu) < 0) {
+        fail("llvmbpf set_target_cpu failed: " + vm.get_error_message());
+    }
+    if (options.llvm_target_features.has_value() &&
+        vm.set_target_features(*options.llvm_target_features) < 0) {
+        fail("llvmbpf set_target_features failed: " + vm.get_error_message());
+    }
     if (!options.disabled_passes.empty() &&
         vm.set_disabled_passes(options.disabled_passes) < 0) {
         fail("llvmbpf set_disabled_passes failed: " + vm.get_error_message());

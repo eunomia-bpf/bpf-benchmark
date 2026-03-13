@@ -49,9 +49,25 @@ namespace {
 #define BPF_OBJ_GET_INFO_BY_FD 15
 #endif
 
+#ifndef BPF_PROG_GET_NEXT_ID
+#define BPF_PROG_GET_NEXT_ID 11
+#endif
+
+#ifndef BPF_PROG_GET_FD_BY_ID
+#define BPF_PROG_GET_FD_BY_ID 13
+#endif
+
 #ifndef BPF_PROG_JIT_RECOMPILE
 #define BPF_PROG_JIT_RECOMPILE 39
 #endif
+
+// Union for BPF_PROG_GET_NEXT_ID / BPF_PROG_GET_FD_BY_ID
+struct mini_bpf_attr_id {
+    uint32_t start_id;   // used by GET_NEXT_ID
+    uint32_t prog_id;    // same field, used by GET_FD_BY_ID
+    uint32_t next_id;
+    uint32_t open_flags;
+};
 
 struct mini_bpf_prog_info {
     uint32_t type;
@@ -133,6 +149,10 @@ struct CommandOptions {
     uint32_t insn_cnt = 0;
     bool json_output = false;
     bool per_site_output = false;
+    // enumerate subcommand options
+    bool enumerate_recompile = false;
+    std::string enumerate_policy_dir;
+    uint32_t enumerate_prog_id_filter = 0; // 0 = all
 };
 
 uint64_t ptr_to_u64(const void *ptr)
@@ -498,6 +518,333 @@ void apply_policy_blob(int prog_fd, const std::vector<uint8_t> &blob)
     }
 }
 
+// -----------------------------------------------------------------------
+// enumerate: scan all live BPF programs in the kernel
+// -----------------------------------------------------------------------
+
+// Returns -1 on end-of-list, -2 on error (check errno), otherwise next_id
+static int bpf_prog_get_next_id(uint32_t start_id, uint32_t *next_id)
+{
+    alignas(8) char attr_buf[256] = {};
+    auto *a = reinterpret_cast<mini_bpf_attr_id *>(attr_buf);
+    a->start_id = start_id;
+    if (syscall(__NR_bpf, BPF_PROG_GET_NEXT_ID, attr_buf, sizeof(attr_buf)) != 0) {
+        if (errno == ENOENT) {
+            return -1; // end of list
+        }
+        return -2; // error
+    }
+    *next_id = a->next_id;
+    return 0;
+}
+
+static int bpf_prog_get_fd_by_id(uint32_t prog_id)
+{
+    alignas(8) char attr_buf[256] = {};
+    auto *a = reinterpret_cast<mini_bpf_attr_id *>(attr_buf);
+    a->prog_id = prog_id;
+    int fd = static_cast<int>(syscall(__NR_bpf, BPF_PROG_GET_FD_BY_ID,
+                                      attr_buf, sizeof(attr_buf)));
+    return fd; // -1 on error
+}
+
+struct EnumerateResult {
+    uint32_t prog_id = 0;
+    std::string name;
+    uint32_t prog_type = 0;
+    uint32_t total_sites = 0;
+    uint32_t applied_sites = 0;
+    bool recompile_ok = false;
+    std::string error;
+};
+
+static const char *bpf_prog_type_str(uint32_t t)
+{
+    switch (t) {
+    case 0:  return "unspec";
+    case 1:  return "socket_filter";
+    case 2:  return "kprobe";
+    case 3:  return "sched_cls";
+    case 4:  return "sched_act";
+    case 5:  return "tracepoint";
+    case 6:  return "xdp";
+    case 7:  return "perf_event";
+    case 8:  return "cgroup_skb";
+    case 9:  return "cgroup_sock";
+    case 10: return "lwt_in";
+    case 11: return "lwt_out";
+    case 12: return "lwt_xmit";
+    case 13: return "sock_ops";
+    case 14: return "sk_skb";
+    case 15: return "cgroup_device";
+    case 16: return "sk_msg";
+    case 17: return "raw_tracepoint";
+    case 18: return "cgroup_sock_addr";
+    case 19: return "lwt_seg6local";
+    case 20: return "lirc_mode2";
+    case 21: return "sk_reuseport";
+    case 22: return "flow_dissector";
+    case 23: return "cgroup_sysctl";
+    case 24: return "raw_tracepoint_writable";
+    case 25: return "cgroup_sockopt";
+    case 26: return "tracing";
+    case 27: return "struct_ops";
+    case 28: return "ext";
+    case 29: return "lsm";
+    case 30: return "sk_lookup";
+    case 31: return "syscall";
+    default: return "unknown";
+    }
+}
+
+void run_enumerate(const CommandOptions &options)
+{
+    if (!options.families_explicit) {
+        // print notice that all families are enabled
+    }
+
+    std::vector<EnumerateResult> results;
+    uint32_t total_progs = 0;
+    uint32_t total_with_sites = 0;
+    uint32_t total_recompiled = 0;
+
+    std::fprintf(stderr, "Enumerating live BPF programs...\n");
+
+    uint32_t id = 0;
+    while (true) {
+        uint32_t next_id = 0;
+        const int rc = bpf_prog_get_next_id(id, &next_id);
+        if (rc == -1) {
+            break; // end of list
+        }
+        if (rc == -2) {
+            std::fprintf(stderr, "BPF_PROG_GET_NEXT_ID: %s\n", strerror(errno));
+            break;
+        }
+        id = next_id;
+
+        // Filter by prog_id if requested
+        if (options.enumerate_prog_id_filter != 0 &&
+            id != options.enumerate_prog_id_filter) {
+            continue;
+        }
+
+        total_progs++;
+
+        EnumerateResult res;
+        res.prog_id = id;
+
+        int prog_fd = bpf_prog_get_fd_by_id(id);
+        if (prog_fd < 0) {
+            res.error = std::string("BPF_PROG_GET_FD_BY_ID: ") + strerror(errno);
+            results.push_back(std::move(res));
+            continue;
+        }
+
+        // fetch info + xlated bytecode
+        mini_bpf_prog_info info = {};
+        {
+            mini_bpf_attr attr = {};
+            attr.info.bpf_fd = static_cast<uint32_t>(prog_fd);
+            attr.info.info_len = sizeof(info);
+            attr.info.info = ptr_to_u64(&info);
+            if (syscall(__NR_bpf, BPF_OBJ_GET_INFO_BY_FD, &attr, sizeof(attr)) != 0) {
+                res.error = std::string("BPF_OBJ_GET_INFO_BY_FD: ") + strerror(errno);
+                close(prog_fd);
+                results.push_back(std::move(res));
+                continue;
+            }
+        }
+
+        res.prog_type = info.type;
+        res.name.assign(info.name, strnlen(info.name, sizeof(info.name)));
+
+        if (info.xlated_prog_len == 0) {
+            res.error = "xlated_prog_len=0 (no xlated access or unprivileged)";
+            close(prog_fd);
+            results.push_back(std::move(res));
+            continue;
+        }
+
+        // Fetch xlated bytecode
+        std::vector<uint8_t> xlated(info.xlated_prog_len);
+        {
+            mini_bpf_prog_info info2 = {};
+            info2.xlated_prog_len = info.xlated_prog_len;
+            info2.xlated_prog_insns = ptr_to_u64(xlated.data());
+            mini_bpf_attr attr = {};
+            attr.info.bpf_fd = static_cast<uint32_t>(prog_fd);
+            attr.info.info_len = sizeof(info2);
+            attr.info.info = ptr_to_u64(&info2);
+            if (syscall(__NR_bpf, BPF_OBJ_GET_INFO_BY_FD, &attr, sizeof(attr)) != 0) {
+                res.error = std::string("BPF_OBJ_GET_INFO_BY_FD (xlated): ") + strerror(errno);
+                close(prog_fd);
+                results.push_back(std::move(res));
+                continue;
+            }
+            xlated.resize(info2.xlated_prog_len);
+        }
+
+        // Pattern matching
+        const auto summary = bpf_jit_scanner::scan_v5_builtin(
+            xlated.data(),
+            static_cast<uint32_t>(xlated.size()),
+            options.scan_options);
+
+        res.total_sites = static_cast<uint32_t>(summary.rules.size());
+        res.applied_sites = res.total_sites; // default: apply all
+
+        if (res.total_sites > 0) {
+            total_with_sites++;
+        }
+
+        // optionally apply recompile
+        if (options.enumerate_recompile && res.total_sites > 0) {
+            // Optionally filter by policy if a policy dir / config was given
+            std::vector<bpf_jit_scanner::V5PolicyRule> rules_to_apply = summary.rules;
+
+            if (!options.enumerate_policy_dir.empty()) {
+                // Try to load <policy_dir>/<name>.policy.yaml
+                std::string policy_path =
+                    options.enumerate_policy_dir + "/" + res.name + ".policy.yaml";
+                std::filesystem::path pp(policy_path);
+                if (std::filesystem::exists(pp)) {
+                    try {
+                        const auto config = bpf_jit_scanner::load_policy_config_file(policy_path);
+                        const auto fr = bpf_jit_scanner::filter_rules_by_policy_detailed(
+                            summary.rules, config);
+                        rules_to_apply = fr.rules;
+                        res.applied_sites = static_cast<uint32_t>(rules_to_apply.size());
+                    } catch (const std::exception &ex) {
+                        std::fprintf(stderr, "  warning: failed to load policy %s: %s\n",
+                                     policy_path.c_str(), ex.what());
+                    }
+                }
+            }
+
+            if (!rules_to_apply.empty()) {
+                const uint32_t insn_cnt = info.xlated_prog_len / 8;
+                const auto blob = bpf_jit_scanner::build_policy_blob_v5(
+                    insn_cnt, info.tag, rules_to_apply);
+
+                // memfd + seals + BPF_PROG_JIT_RECOMPILE
+                int memfd = sys_memfd_create("bpf-jit-enumerate-policy",
+                                              MFD_CLOEXEC | MFD_ALLOW_SEALING);
+                if (memfd < 0) {
+                    res.error = std::string("memfd_create: ") + strerror(errno);
+                } else {
+                    size_t off = 0;
+                    bool write_ok = true;
+                    while (off < blob.size()) {
+                        const ssize_t n = write(memfd, blob.data() + off,
+                                                blob.size() - off);
+                        if (n < 0) {
+                            if (errno == EINTR) continue;
+                            write_ok = false;
+                            break;
+                        }
+                        off += static_cast<size_t>(n);
+                    }
+                    if (!write_ok) {
+                        res.error = std::string("write(memfd): ") + strerror(errno);
+                        close(memfd);
+                    } else {
+                        const int seals = F_SEAL_WRITE | F_SEAL_GROW | F_SEAL_SHRINK;
+                        if (fcntl(memfd, F_ADD_SEALS, seals) != 0) {
+                            res.error = std::string("fcntl(F_ADD_SEALS): ") + strerror(errno);
+                            close(memfd);
+                        } else {
+                            constexpr uint32_t kRecompileLogSize = 16 * 1024;
+                            std::vector<char> log_buf(kRecompileLogSize, '\0');
+                            struct {
+                                uint32_t prog_fd;
+                                int32_t policy_fd;
+                                uint32_t flags;
+                                uint32_t log_level;
+                                uint32_t log_size;
+                                uint64_t log_buf;
+                            } __attribute__((aligned(8))) rcattr = {};
+                            rcattr.prog_fd = static_cast<uint32_t>(prog_fd);
+                            rcattr.policy_fd = memfd;
+                            rcattr.flags = 0;
+                            rcattr.log_level = 1;
+                            rcattr.log_size = static_cast<uint32_t>(log_buf.size());
+                            rcattr.log_buf = ptr_to_u64(log_buf.data());
+                            alignas(8) char rcattr_buf[256] = {};
+                            std::memcpy(rcattr_buf, &rcattr, sizeof(rcattr));
+                            const int rrc = static_cast<int>(
+                                syscall(__NR_bpf, BPF_PROG_JIT_RECOMPILE,
+                                        rcattr_buf, sizeof(rcattr_buf)));
+                            close(memfd);
+                            if (rrc == 0) {
+                                res.recompile_ok = true;
+                                total_recompiled++;
+                            } else {
+                                const std::string klog(log_buf.data());
+                                res.error = std::string("BPF_PROG_JIT_RECOMPILE: ") +
+                                             strerror(errno);
+                                if (!klog.empty()) {
+                                    res.error += "\n  kernel log: " + klog.substr(0, 256);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        close(prog_fd);
+        results.push_back(std::move(res));
+    }
+
+    // Print results
+    if (options.json_output) {
+        std::printf("[\n");
+        for (size_t i = 0; i < results.size(); ++i) {
+            const auto &r = results[i];
+            std::printf("  {\"prog_id\":%u,\"name\":\"%s\",\"type\":\"%s\","
+                        "\"total_sites\":%u,\"applied_sites\":%u,"
+                        "\"recompile_ok\":%s",
+                        r.prog_id, r.name.c_str(),
+                        bpf_prog_type_str(r.prog_type),
+                        r.total_sites, r.applied_sites,
+                        r.recompile_ok ? "true" : "false");
+            if (!r.error.empty()) {
+                std::printf(",\"error\":\"%s\"", r.error.c_str());
+            }
+            std::printf("}%s\n", i + 1 < results.size() ? "," : "");
+        }
+        std::printf("]\n");
+    } else {
+        for (const auto &r : results) {
+            std::printf("prog_id=%-6u  type=%-20s  name=%-20s  sites=%u",
+                        r.prog_id, bpf_prog_type_str(r.prog_type),
+                        r.name.empty() ? "(unnamed)" : r.name.c_str(),
+                        r.total_sites);
+            if (options.enumerate_recompile && r.total_sites > 0) {
+                if (r.recompile_ok) {
+                    std::printf("  [RECOMPILED %u sites]", r.applied_sites);
+                } else if (!r.error.empty()) {
+                    std::printf("  [RECOMPILE FAILED]");
+                }
+            }
+            if (!r.error.empty()) {
+                std::printf("  error: %s", r.error.c_str());
+            }
+            std::printf("\n");
+        }
+        std::fprintf(stderr,
+                     "\nSummary: scanned %u programs, %u with optimization sites%s\n",
+                     total_progs, total_with_sites,
+                     options.enumerate_recompile
+                         ? (std::string(", ") + std::to_string(total_recompiled) +
+                            " recompiled").c_str()
+                         : "");
+    }
+}
+
+// -----------------------------------------------------------------------
+
 void print_usage(const char *prog)
 {
     std::fprintf(stderr,
@@ -507,6 +854,7 @@ void print_usage(const char *prog)
         "  %s compile-policy (<file> | --prog-fd <fd> | --xlated <file>) --config <policy-v3.{yaml,json}> [family flags] [--output <blob>|-]\n"
         "  %s apply (<file> | --prog-fd <fd> | --xlated <file>) [family flags] [--config <policy-v3.{yaml,json}>] [--program-name <name>] [--output <blob>|-]\n"
         "  %s dump  --prog-fd <fd> [--output <file>]\n"
+        "  %s enumerate [family flags] [--recompile] [--policy-dir <dir>] [--prog-id <id>] [--json]\n"
         "\n"
         "Family flags:\n"
         "  --all        Enable all builtin families (default when omitted)\n"
@@ -530,8 +878,11 @@ void print_usage(const char *prog)
         "  --prog-tag <hex>       Override prog_tag for blob writing (16 hex chars)\n"
         "  --insn-cnt <n>         Override insn_cnt for blob writing\n"
         "  --output <file>        Output path (scan/apply/compile-policy: blob, dump: xlated)\n"
+        "  --recompile            (enumerate) Apply BPF_PROG_JIT_RECOMPILE for found sites\n"
+        "  --policy-dir <dir>     (enumerate) Per-program policy YAML directory\n"
+        "  --prog-id <id>         (enumerate) Scan only a specific prog_id\n"
         "  -h, --help             Show this help\n",
-        prog, prog, prog, prog, prog);
+        prog, prog, prog, prog, prog, prog);
 }
 
 void parse_hex_tag(const char *hex, uint8_t tag[8])
@@ -574,7 +925,8 @@ CommandOptions parse_args(int argc, char **argv)
         options.subcommand != "generate-policy" &&
         options.subcommand != "compile-policy" &&
         options.subcommand != "apply" &&
-        options.subcommand != "dump") {
+        options.subcommand != "dump" &&
+        options.subcommand != "enumerate") {
         die("unknown subcommand: %s", options.subcommand.c_str());
     }
 
@@ -653,6 +1005,22 @@ CommandOptions parse_args(int argc, char **argv)
             options.scan_options.use_rorx = true;
         } else if (arg == "--v5") {
             continue;
+        } else if (arg == "--recompile") {
+            if (options.subcommand != "enumerate") {
+                die("--recompile is only valid with the enumerate subcommand");
+            }
+            options.enumerate_recompile = true;
+        } else if (arg == "--policy-dir") {
+            if (options.subcommand != "enumerate") {
+                die("--policy-dir is only valid with the enumerate subcommand");
+            }
+            options.enumerate_policy_dir = need_next();
+        } else if (arg == "--prog-id") {
+            if (options.subcommand != "enumerate") {
+                die("--prog-id is only valid with the enumerate subcommand");
+            }
+            options.enumerate_prog_id_filter = static_cast<uint32_t>(
+                std::strtoul(need_next(), nullptr, 0));
         } else if (!arg.empty() && arg[0] != '-' &&
                    (options.subcommand == "scan" ||
                     options.subcommand == "generate-policy" ||
@@ -681,6 +1049,26 @@ CommandOptions parse_args(int argc, char **argv)
         }
         if (options.per_site_output) {
             die("dump does not accept --per-site");
+        }
+        return options;
+    }
+
+    if (options.subcommand == "enumerate") {
+        // enumerate does not take a positional file argument or --prog-fd
+        if (options.prog_fd >= 0) {
+            die("enumerate does not accept --prog-fd; use scan --prog-fd instead");
+        }
+        if (!options.xlated_path.empty()) {
+            die("enumerate does not accept a positional file argument");
+        }
+        if (!options.config_path.empty()) {
+            die("enumerate does not accept --config (use --policy-dir)");
+        }
+        if (options.per_site_output) {
+            die("enumerate does not accept --per-site");
+        }
+        if (!options.families_explicit) {
+            enable_all_families(options);
         }
         return options;
     }
@@ -954,6 +1342,8 @@ int main(int argc, char **argv)
         run_compile_policy(options);
     } else if (options.subcommand == "apply") {
         run_apply(options);
+    } else if (options.subcommand == "enumerate") {
+        run_enumerate(options);
     } else {
         run_dump(options);
     }

@@ -1,23 +1,30 @@
 # Kernel eBPF JIT 优化：计划与进度
 
 > 本文档是 kernel JIT 优化论文的单一 hub。
+> **论文核心方向：必须追求 net speedup，越多越好。架构贡献和 policy-sensitivity 是支撑论据，不是主卖点。Paper 必须展示真实程序上的可测量加速。**
+> **⚠️ Corpus exec geomean 0.875x 已确认无效（#162）**：dummy packet 导致 XDP/TC 程序 early-exit，优化 site 未被执行，测量值是噪声+布局效应。**必须修复 corpus packet 构造使 site 被实际执行**，而不是转向 code size。Code size 不是论文关注点。
 > **编辑规则**：
 > - 任何 TODO/实验/文档引用条目被取代时，必须至少保留一行并标注状态，不得直接删除。
 > - 每个任务做完 → 立即更新本文档（任务条目状态 + 关键数据 + 文档路径）。
 > - 每次 context 压缩后 → 完整读取本文档恢复全局状态。
 > - 用 agent background 跑任务，不阻塞主对话。
-> 上次更新：2026-03-12（#145 ✅ v3 policy per-site directive list；#142 ✅ v1 cleanup 已被 #145 取代；#141 ✅ per_family v1→v2；#140 ✅ Tetragon connect_storm = workload noise；#139 ✅ micro authoritative rerun 56/56 valid, applied-only 1.049x；#138 ✅ cmov/extract correctness fix；#137 ✅ bpftrace policy artifacts；#133 ✅ corpus v2 fixed 0.875x；此前：#134 ✅ E2E rerun；#130-#132 ✅ steady-state/inline/spec fixes；#135-#136 ✅ parser consistency + plan doc fix；#128-#129 ✅ corpus diagnosis + micro mismatch fix；#118-#126 ✅ kernel-recompile micro/XDP/corpus/per-family/gap/tuned）
+> - **构建+修改+运行不拆分**：一个 subagent 负责完整流程（改代码→构建→运行→发现 bug→修复→再运行），不要拆成多个 agent。
+> 上次更新：2026-03-13（#163 🔄 live scanner + daemon enumerate；#162 ✅ corpus construct validity；#161 ✅ scanner pattern_kind fix；#160 ✅ post-fix 62-bench micro rerun；#158 🔄 corpus rerun pending；#159 ✅ Root Makefile；#154 ✅ 6 per-form isolation benchmarks；此前：#149-#157 全部 ✅；#138-#148 全部 ✅；#133-#134 ✅）
 
 ---
 
 ## 1. 论文定位与策略
 
-### 1.1 核心 Thesis：安全与优化的分离
+### 1.1 核心 Thesis：安全与优化的分离 → 实现 Net Speedup
 
 > eBPF 程序由内核 JIT 编译为 native code 并在内核态执行——代码生成错误可导致内核崩溃。
 > JIT 因此必须保守，但优化决策取决于 workload/微架构/部署上下文，而内核没有这些信息。
 > **BpfReJIT 将安全（哪些 native code 变体可以安全生成）和优化（哪些变体应当应用）分离。**
 > 内核定义有界的 safe variant menu，特权用户态根据上下文选择变体。
+>
+> **⚠️ 论文方向决定**：分离安全与优化是手段，不是目的。目的是**让真实 eBPF 程序跑得更快**。
+> Paper 必须展示：(1) characterization gap 存在且有意义；(2) BpfReJIT 能恢复显著部分的 gap（net speedup）；(3) 恢复需要 policy control（不能用 fixed heuristics）。
+> 当前 (2) 不够强（4.3% gap recovery，corpus 0.875x），**必须改进到 net positive 才能提交**。
 
 #### 论文逻辑链条（Abstract → Conclusion）
 
@@ -38,7 +45,55 @@
 | sched_ext | 调度机制 + 调度策略 | BPF 程序定义调度策略 |
 | **BpfReJIT** | **JIT 安全 + JIT 优化策略** | **用户态定义优化策略** |
 
-### 1.2 OSDI/SOSP Novelty
+### 1.2 论文叙事方向：必须追求 Net Speedup
+
+> **⚠️ 核心方向决定（2026-03-13）：论文叙事必须以 net speedup 为中心，越多越好。**
+> 架构贡献和 policy-sensitivity 是支撑论据，不是主卖点。Paper 必须展示真实程序上的可测量加速。
+> 如果当前数据不够，必须增加 canonical form 覆盖面、改进 policy tuning、或加更多有 sites 的 benchmark。
+
+#### 当前性能现实与差距
+
+| 指标 | 当前值 | 问题 |
+|------|--------|------|
+| Micro overall | 1.007x | 几乎平手 |
+| Micro applied-only (11/56) | 0.986x | 轻微负面 |
+| Corpus blind | 0.868x | 大部分程序变慢 |
+| Corpus v2 fixed | 0.875x | 仍然负面 |
+| Gap 恢复率 | 4.3% of 1.641x | 39% gap 只恢复 4.3% |
+| E2E Tracee | +21.65% | **唯一强亮点** |
+
+#### 性能不够强的根因分析（#113/#116/#125/#77 + #155/#157 更新）
+
+> **⚠️ 2026-03-13 重大更新**：#157 benchmark framework 审计和 #155 regressor root cause 分析表明，
+> 之前列出的根因大部分是表象。**真正的根因是 benchmark framework 的 construct validity 问题**。
+
+1. **~~覆盖面不够~~** → 仍然是问题，但不是主因
+2. **~~CMOV net-negative~~** → 已 cmov:skip，不再是主因
+3. **~~Non-CMOV regression~~** → **#155 发现 top-10 regressors 中 7/10 是 sub-ktime noise**，只有 3 个真实回归（全是 Calico + branch-flip）
+4. **~~Sub-ktime 噪声~~** → **#157 发现 ktime 精度被高估**（repeat=200 下步长仅 0.15-0.5ns），不是 corpus 0.875x 的主因
+
+**真正的根因（#157 发现，#162 确认）**：
+1. **Corpus construct validity**：所有 corpus 程序共用同一个 64B dummy packet，**没有证据表明该 packet 触发了被优化的 site**。**#162 分析确认**：94/156 程序 exec_ns < 100ns（noise-dominated），未优化程序中 88% 也有 >5% 偏差；Calico 同一程序 6 个 .bpf.o 代码变化一致（-0.4%）但 speedup 从 0.531x 到 1.037x，证明短 baseline 版本提前退出未执行到 site。**结论：corpus exec geomean 0.875x 无效，应以 code size 为主要 corpus 指标，或构造 path-targeted packet。**
+2. **Micro coverage + isolation**：只有 8/56 applied（非文档说的 11/56），family 混合严重（cmov_dense 的 policy 实际是 rotate=26），无 per-form 隔离 benchmark。**#154 已修复**：新增 6 个纯隔离 benchmark，覆盖全部 non-WIDE_MEM canonical forms。
+3. **Kernel emitter bugs**：#150 发现 RORX 指针 bug 和 same-site lookup bug，之前所有性能数据可能被污染。**已修复**，bzImage 已重建。
+4. **无 JIT image 验证**：不知道 re-JIT 是否只改了 site 字节。**#153 已验证**：zero-site identity 已修复，site-only diff 是 full-image recompile 的固有属性。
+
+#### 必须做的性能改进 TODO（按优先级，2026-03-13 更新）
+
+1. **P0：修复 benchmark framework**（#157 P0 items）
+   - ~~Micro 每个 canonical form 加 isolated benchmark~~ ✅ #154（6 个纯隔离 benchmark）
+   - Corpus 加 path witness 证明 input 触发 site，否则不计入 headline — **#162 确认 corpus exec 无效**
+   - **必须修复 corpus packet 构造使 site 被实际执行**（code size 不是论文关注点）
+   - Corpus 每 target 多次 paired rerun + CI/bootstrap（降优先级，因 exec 指标本身无效）
+2. **~~P0：验证 JIT image 正确性~~** ✅ #153 — zero-site identity 已修复，site-only diff 是架构属性
+3. **P0：Post-cleanup 全量重跑**（#160）— 62 benchmarks（含 6 新 per-form），修复后 bzImage + runner，🔄 codex 运行中
+4. **~~P1：Measurement 改进~~** ✅ #156 — dual TSC + warmup 已落地
+5. **P1：增加高回报 canonical form** — prologue 优化、更完整的 byte-recompose
+6. **P1：跑更多 E2E workload** — Tracee +21.65% 是唯一强数据，需要更多 E2E 亮点
+7. **P1：#57 消融补全** — byte-recompose / callee-saved / BMI 各自贡献量化，🔄 codex 运行中
+8. **P2：不同微架构** — 当前只在一个 CPU 上测
+
+### 1.2b OSDI/SOSP Novelty
 
 **真正 novel 的部分**：
 1. **Safety/optimization 分离** — kernel 管安全，userspace 管优化策略
@@ -51,6 +106,7 @@
 2. Fixed kernel baseline 不能在所有场景下达到同等收益 ✅（CMOV +28.3%）
 3. 评估包含真实程序和至少一个端到端部署 ✅（Tracee daemon +21.65% exec_storm, Tetragon daemon +3.8% app, bpftrace 5/5 attach）
 4. 与 characterization 深度整合 ✅（已合并）
+5. **真实程序上可测量的 net speedup** 🔴（当前不足，必须改进）
 
 **与 existing work 的关键差异**：
 
@@ -76,6 +132,10 @@
 
 ### 1.4 核心设计约束
 
+> **⚠️ 约束 0（最高优先级）：系统必须在真实程序上产生可测量的 net speedup。**
+> 如果 canonical form 不够多、覆盖面不够广、policy 不够精、导致整体没有加速，那系统的实际价值就不足以支撑论文。
+> 所有设计决策必须服务于"让真实程序跑得更快"这个目标。
+
 1. **xlated_prog_len 不变量**：所有 directive 只改 native code emission，不改 BPF 指令。如果 xlated 变了说明优化在错误的层。
 2. **正确 directive 判断标准**：用户态能不能做同样的事？如果能 → 错误的层（POC v1 wide_load 教训：BPF 指令重写 = 错误层）。
 3. **Kernel 改动最小化**：参数化 validator 模板，每个 directive ~50-100 LOC。
@@ -85,6 +145,7 @@
 7. **Pipeline placement**：directive rewrites 发生在 `do_check()` 之后、`convert_ctx_accesses()` 之前。
 8. **Constant blinding 兼容**：constant blinding 是独立的第二次 BPF 重写，会打乱 insn offset——当前设计在 blinding 发生时直接 drop directive set。
 9. **JIT convergence loop**：x86 JIT 是 convergence loop + final image pass，directive 必须跨 pass 确定性一致。
+10. **Net speedup 驱动**：每新增一个 canonical form，必须验证它在 corpus 上 net positive。只有安全贡献没有性能贡献的 form 不够。
 
 ### 1.5 设计方向决策
 
@@ -302,6 +363,64 @@ VM 使用:   make -j$(nproc) bzImage && vng --run <worktree>/arch/x86/boot/bzIma
 
 > v4 policy 优先级：在 `jit-fixed-baselines` 上，如果 v4 policy 附加到 prog，v4 规则优先于 fixed heuristic。
 
+### 6.4 Root Makefile 一键命令速查
+
+根目录 `Makefile` 提供一键构建+测试。所有 VM 目标自动依赖 bzImage。
+
+#### 构建目标
+
+| 命令 | 作用 |
+|------|------|
+| `make all` | 构建 micro_exec + BPF programs + scanner + kernel-tests |
+| `make micro` | 只构建 micro_exec 和 BPF programs |
+| `make scanner` | 只构建 scanner CLI |
+| `make kernel` | 编译 bzImage（vendor/linux-framework） |
+| `make kernel-tests` | 编译 kernel self-tests (test_recompile) |
+
+#### 快速验证（无需 VM）
+
+| 命令 | 作用 |
+|------|------|
+| `make smoke` | 构建 + 本地 llvmbpf smoke test (simple, 1 iter, 10 repeat) |
+| `make scanner-tests` | 构建 + 运行 scanner unit tests (ctest) |
+| `make check` | = `all` + `scanner-tests` + `smoke`（完整本地验证） |
+
+#### VM 目标（需要 bzImage + vng）
+
+| 命令 | 作用 |
+|------|------|
+| `make vm-selftest` | VM 中跑 kernel self-tests (test_recompile) |
+| `make vm-micro-smoke` | VM 中跑 micro smoke (simple + load_byte_recompose, kernel + recompile) |
+| `make vm-micro` | VM 中跑全量 micro suite (llvmbpf + kernel + recompile, 默认 10iter/2warm/200rep) |
+| `make vm-corpus` | 跑 corpus batch (per-target VM boot, 用 policy, 默认 200 repeat) |
+| `make vm-e2e` | 跑全部 E2E (tracee + tetragon + bpftrace + xdp_forwarding) |
+| `make vm-all` | = `vm-selftest` + `vm-micro` + `vm-corpus` + `vm-e2e`（完整 VM 验证） |
+| `make validate` | = `check` + `vm-selftest` + `vm-micro-smoke`（最小 VM 验证） |
+
+#### 可调参数
+
+```bash
+make vm-micro ITERATIONS=2 WARMUPS=2 REPEAT=500          # strict run
+make vm-micro BZIMAGE=/path/to/other/bzImage              # 自定义 kernel
+make vm-corpus REPEAT=100                                  # 快速 corpus
+```
+
+#### 典型工作流
+
+```bash
+# 改完代码后最小验证
+make check                    # 本地：编译 + scanner tests + smoke
+
+# 改完 kernel 后
+make kernel && make validate  # 重编 bzImage + 本地验证 + VM smoke
+
+# 全量评估
+make vm-all                   # 跑全部 micro + corpus + e2e
+
+# 清理
+make clean
+```
+
 ---
 
 ## 7. 任务追踪
@@ -464,7 +583,25 @@ VM 使用:   make -j$(nproc) bzImage && vng --run <worktree>/arch/x86/boot/bzIma
 | 140 | **Tetragon connect_storm -50.5% 回归调查** | ✅ | 结论：**workload 噪声**，不是 policy 回归。(1) 绝对吞吐在 3 次 run 间飘 337→2488→1509 ops/s；(2) tracked BPF events 只有 7-10/phase，runtime 几乎不变；(3) Tetragon v2 policy 无 `cmov: skip`，唯一 live apply 的 non-CMOV family 只有 branch-flip(28 sites)；(4) `bpf_generic_kprobe` corpus path 与 daemon-mode 非同一条被测路径。建议做 5-10 组复跑取中位数确认。`docs/tmp/tetragon-connect-storm-investigation.md`。 |
 | 141 | **micro/policies/per_family v1→v2 升级** | ✅ | 8 个 per-family policy 文件从 v1 `selection: {mode: allowlist, families: [...]}` 升级为 v2 `version: 2, default: skip, families: {<fam>: apply}, sites: []`。Python `parse_policy_v2()` 8/8 OK，C++ `test_scanner` 169 PASS。 |
 | 142 | **v1 policy 残留清理 + v2 纯化** | ✅ 已被 #145 取代 | 审计所有 policy 文件和 scanner/Python 代码，删除 v1 compat 逻辑，统一为纯 v2。codex `b0qtbqqih` 完成。后续 #145 进一步将 v2 family/default 抽象替换为 v3 per-site directive list。 |
-| 143 | **Post-cmov-fix micro 全量重跑** | 🔄 | cmov emitter 修好后（broader patterns fail-close），per-site skip workaround 已移除。56 个 benchmark 全部 blind apply 重跑，看 applied 数涨多少、overall/applied-only geomean 变化。对比 #139（只有 8 applied）。VM `2/10/500`。 |
-| 144 | **Post-cmov-fix corpus 抽样重跑 + cmov 消融** | 🔄 | 两组 corpus 抽样 VM rerun：(1) 全 family apply（含 cmov）vs (2) cmov:skip。分析 cmov fix 后 cmov 是否仍然整体回归，定位剩余 cmov 回归的具体程序和 pattern。如果 cmov 变正面，可移除 cmov skip。选 30-50 个有 cmov sites 的高置信度程序抽样。 |
+| 143 | **Post-cmov-fix micro 全量重跑** | ✅ | 56/56 valid, 0 crash。**11/56 applied**（从 #139 的 8 涨到 11，新增 binary_search/switch_dispatch/branch_dense）。Overall geomean **1.007x**，applied-only **0.986x**（新加入的 3 个 benchmark cmov site 被 fail-close 回 stock）。报告：`docs/tmp/post-cmov-fix-micro-rerun.md`，数据：`micro/results/post_cmov_fix_micro.json`。 |
+| 144 | **Post-cmov-fix corpus 抽样重跑 + cmov 消融** | ✅ | 以可 `packet_test_run` 的 CMOV-bearing corpus 程序做 45-program / 7-source VM 抽样（84 eligible pool, 42 measured timing pairs），比较两组 v3 policy：(A) allowlist 含 CMOV vs (B) 当前 `cmov:skip`。结果：**CMOV 仍整体负面**；Group A/Group B 归一化 geomean **0.906x**，对 stock 的 exec geomean 分别 **0.859x** vs **0.947x**。wins/losses/ties = **21/20/1**，但少数重度回归主导整体结果：`xdp_fwd_fib_full` **0.133x**、`balancer_ingress` **0.187x**、`xdp_fwd_fib_direct` **0.333x**、`cgroup_skb_ingress` **0.643x**。当前 runnable sample 中所有 live CMOV 都是 **`cond-select-64`**；`calico`/`linux-selftests` 小幅正面，但被 `katran`/`xdp-tools`/`tracee ingress` 的大幅负面抵消。结论：**暂时保留 corpus steady-state 的 `cmov:skip`**。报告：`docs/tmp/post-cmov-fix-corpus-ablation.md`；数据：`corpus/results/post_cmov_fix_corpus_ablation.json`。 |
 | 145 | **v3 policy: per-site directive list** | ✅ | 已完成 v2→v3 迁移：policy 现为 scanner sites 子集（`version: 3`, `sites: [{insn, family, pattern_kind}]`），不在 list 中即不 apply。scanner C++ parser/filter/CLI、Python `policy_utils.py`、`generate_default_policies.py`、`auto_tune.py`、`e2e/common/recompile.py`、`run_bflip_endian_skip_sweep.py` 已切到 v3-only；scanner README + golden tests 已更新；`micro/policies/`、`micro/policies/per_family/`、`corpus/policies/` 已重生成并用 `parse_policy_v3()` 验证 **614** 个 YAML 全部通过。验证：`cmake --build scanner/build --target bpf-jit-scanner --target test_scanner -j`、`./scanner/build/test_scanner` = **PASS 163**、`python3 -m py_compile corpus/policy_utils.py`。 |
+| 146 | **Recompile 开销测量** | ✅ | Scanner latency: **4.32ms** median (micro), **4.42ms** (corpus 50-object)。Kernel recompile syscall: **29.89μs** median, **63.31μs** p90。Scanner/syscall ratio 207.8x — overhead 完全 userspace-dominated。Blob size: 164B (1 site) → 9.6KB (86 sites) → 213KB (992 sites)。线性 scaling: 13.03ms/1k insns (R²=0.997)。报告：`docs/tmp/recompile-overhead-measurement.md`。 |
+| 147 | **bpftrace E2E v3 validation** | ✅ | 修复 `recompile.py` remapped_sites==0 EINVAL bug 和 bpftrace/case.py v3 parsing。VM 验证：v3 policy resolve + remap + no-op 成功，正向控制 1-site apply 成功。报告：`docs/tmp/bpftrace-e2e-v3-validation.md`。 |
+| 148 | **架构 Review + 图** | ✅ | Mermaid 架构图 + 流程图。关键发现：WIDE_MEM/ROTATE/ADDR_CALC 缺 canonical-site validation，scanner `pattern_kind` filtering bug，无 rollback/recompile-lock/tracepoints。报告：`docs/tmp/architecture-review-and-diagrams.md`。 |
+| 149 | **Canonical-site validation hardening** | ✅ | 内核 `bpf_jit_validate_canonical_site()` 现接回 `WIDE_MEM` / `ROTATE` / `ADDR_CALC` exact validators，并把 `WIDE_MEM` / `ROTATE` / `ADDR_CALC` / `BITFIELD_EXTRACT` / `ZERO_EXT_ELIDE` / `ENDIAN_FUSION` / `BRANCH_FLIP` 全部收紧为“site shape + extracted canonical params”双重校验；同时给 `ZERO_EXT_ELIDE` / `ENDIAN_FUSION` / `BRANCH_FLIP` 补了 interior-edge 拒绝，`BRANCH_FLIP` 参数校验放宽到接受 `JSET`。构建验证：`make -C vendor/linux-framework -j$(nproc) bzImage` ✅；VM smoke：`bitcount` / `cmov_dense` / `load_byte_recompose` 均 `stock == kernel-recompile`，结果写入 `micro/results/pure_jit_smoke_20260313.json`。 |
+| 150 | **Kernel engineering cleanup** | ✅ | codex 全量审读 ~5800 LOC kernel 变更，修复：RORX emitter 指针 bug、branch-flip/extract validation 收紧、same-site rule lookup bug、dead legacy emitters 删除、LEA emission 清理、interior-edge validation 集中化、FineIBT shadow state 移除。bzImage + VM 验证通过。`docs/tmp/kernel-engineering-cleanup.md` |
+| 151 | **Kernel self-tests** | ✅ | 18/18 tests PASS。覆盖：lifecycle、malformed blob rejection、correctness preservation、concurrency EBUSY、recompile-after-attach。3 个初始 test-side 失败已修复（XDP packet padding、COND_SELECT 3-insn 形式、ROTATE 64-bit 形式），无 kernel bug。`tests/kernel/test_recompile.c`，`docs/tmp/kernel-selftest-run.md` |
+| 152 | **Kernel 5 safety fixes** | ✅ | smp_store_release() 发布 bpf_func、不清 exception_cb、synchronize_rcu() 退役旧 image、扩展 rollback、recompile_count 饱和、masked ROTATE 收紧。bzImage + VM 验证通过。`docs/tmp/kernel-safety-fixes.md` |
+| 153 | **JIT image binary diff + zero-site identity** | ✅ | **重大发现：re-JIT 是全程序重编译，site 优化会改变 non-site 字节。** 实测 `test_wide`：site 从 18→6 bytes（省 12 bytes），整个 image 149→137 bytes，downstream 相对跳转编码也跟着变了（`[0x91]=ef → [0x85]=3f`）。**Zero-site identity 已修复**：新增 `num_applied == 0` short-circuit，0 applied sites 保留原 image（19/20 tests pass）。**Site-only diff 仍失败**：这是 full-image recompile 的固有属性，不是 bug。修复方向：(1) patch-site 设计，(2) fixed-width site reservation + NOP padding，(3) relaxed contract（只保证语义等价）。**这确认了 code layout shift 是性能回归的潜在来源。** `docs/tmp/jit-image-diff-analysis.md`，`tests/kernel/test_recompile.c` |
+| 154 | **Per-canonical-form instruction benchmark 分析 + 实现** | ✅ | Scanner 实际扫描全部 56 objects。**结论：只有 WIDE_MEM 有纯隔离 benchmark（23 个），其余 7 个 form 全部缺失纯 benchmark。** 29 个是 mixed form，4 个 no-site。**已实现 6 个纯隔离 benchmark**：`cond_select_dense`（cmov=256）、`rotate_dense`（rotate=256）、`addr_calc_stride`（lea=8）、`extract_dense`（extract=512）、`endian_swap_dense`（endian=256）、`branch_flip_dense`（bflip=255）。全部通过 scanner isolation 验证（target form sites > 0, 其余 form = 0）。编译 + `run_micro.py --list` + scanner 验证通过。`docs/tmp/per-form-benchmark-analysis.md`，`docs/tmp/per-form-benchmarks-implementation.md` |
+| 155 | **Corpus regressor root cause（per-site leave-one-out）** | ✅ | Top-10 regressors 中只有 **3/10 是真实回归**（exec_ns >= 100ns），其余 7/10 是 sub-ktime noise（exec_ns 7-25ns）。3 个真实回归全是 Calico 程序，共同因素是 **branch-flip**（2-4 sites），次级嫌疑 endian（6-47 sites）。但结合 #157 结论，dummy packet 可能根本没走到 site 对应路径，回归可能是 code layout shift 在无关路径上的影响。`docs/tmp/corpus-regressor-root-cause.md` |
+| 156 | **Measurement improvement（dual TSC + warmup + adaptive）** | ✅ | kernel runner 修复落地：(1) `exec_ns` 始终保留 ktime，`wall_exec_ns` 始终单独输出 rdtsc，新增 `timing_source_wall` 字段；(2) `--warmup` 接入 runner，默认 5 次，recompile applied 后执行；(3) `duration==0` fallback 逻辑删除。`make -C micro micro_exec` 通过，`simple` 输出确认双时间源。`docs/tmp/kernel-runner-measurement-fixes.md` |
+| 157 | **Benchmark framework 审计 v3** | ✅ | **P0 发现**：(1) corpus 全部程序共用同一个 64B dummy packet，无证据表明触发了优化 site（construct validity 问题）；(2) corpus 每 target 仅 1 次 fresh pair，无重复/CI/显著性检验；(3) micro 只有 8/56 applied（非文档说的 11/56），family 混合严重，无 per-form isolation。**P1**：kernel runner 已采 TSC 但不用、re-JIT 后无 warmup、无自动 JIT diff、corpus 顺序固定。**关键纠正**：ktime repeat=200 下量化步长仅 0.15-0.5ns/sample，不是主因；corpus 0.875x 最大嫌疑是 construct validity（dummy packet 没触发优化路径）。`docs/tmp/benchmark-framework-audit-v3.md` |
+| 158 | **Post-cleanup 验证 + 全量重跑** | 🔄 | bzImage rebuild OK (`7.0.0-rc2-g05a1845490ed-dirty`)，self-tests 19/20 pass（预期的 site-only diff fail），micro smoke 通过（`load_byte_recompose` stock==recompile, wide_sites=1 applied）。**修复后 full micro rerun 已完成**：per-benchmark VM boot 路径在 fixed bzImage + dual-TSC/warmup runner 上拿到 `62/62` valid pairs；但 **corpus rerun 仍待执行**。验证：`docs/tmp/post-cleanup-validation.md`；micro artifacts：`micro/results/post_fix_micro_62bench_20260313.json`，`docs/tmp/post-fix-micro-62bench-rerun.md`。 |
+| 159 | **Root Makefile 一键构建+测试** | ✅ | 根目录 `Makefile` 已创建。构建目标：`all`（micro+scanner+kernel-tests）、`micro`、`scanner`、`kernel`。VM 目标：`vm-selftest`、`vm-micro-smoke`、`vm-micro`、`vm-corpus`、`vm-e2e`、`vm-all`。Quick 验证：`smoke`、`check`（all+scanner-tests+smoke）、`validate`（check+vm-selftest+vm-micro-smoke）。验证：`make scanner`、`make scanner-tests`（1/1 pass）、`make smoke`（compile 6.234ms, exec 81ns）全部通过。`docs/tmp/root-makefile-report.md` |
+| 160 | **Post-fix 全量 micro 重跑（62 bench, 新 per-form + fixes）** | ✅ | 修复后 bzImage + runner（dual TSC + warmup）上完成 strict rerun：**`62/62` valid，`14/62` applied，overall geomean `0.978x`，applied-only `0.877x`**（stock / recompile）。对齐旧口径的 shared-56 子集为 `0.983x` overall、`0.869x` applied-only，低于 #143 的 `1.007x` / `0.986x`。6 个新增 per-form rows 中 `3/6` applied，整体 geomean `0.931x`；`rotate_dense` `1.187x` 是唯一 applied win，`cond_select_dense` `0.837x`、`extract_dense` `0.753x` 为 applied losses，`addr_calc_stride` / `endian_swap_dense` / `branch_flip_dense` 因当前 per-family policy catalog 空/lookup miss 未实际应用。Top win / loss：`packet_rss_hash 2.875x`，`memcmp_prefix_64 0.560x`。数据：`micro/results/post_fix_micro_62bench_20260313.json`；报告：`docs/tmp/post-fix-micro-62bench-rerun.md`。 |
+| 161 | **Scanner pattern_kind filtering bug fix** | ✅ | 调查确认：#148 指向的是已提交基线中的真实 bug，`filter_rules_by_policy_detailed()` 旧实现只按 `(insn, family)` 匹配，确实忽略 `pattern_kind`；当前工作区已在 `scanner/src/policy_config.cpp` 修复为 `(insn, family, pattern_kind)` 精确匹配，并补了 scanner/Python tests。验证：`cmake --build scanner/build --target test_scanner -j`、`./scanner/build/test_scanner` = `PASS 179`、`python3 -m unittest corpus.tests.test_policy_utils` = `OK`。报告：`docs/tmp/scanner-pattern-kind-investigation.md`。 |
+| 162 | **Corpus construct validity 分析** | ✅ | **假说成立**：corpus 0.875x 主要由测量噪声和代码布局效应构成，非优化 site 实际执行效率。三层证据：(1) 94/156 程序 exec_ns < 100ns，其中 58/66 未优化程序也显示 >5% 偏差（noise-dominated）；(2) Calico `calico_tc_main` 6 个 .bpf.o 中代码变化一致（-0.4%），但 speedup 从 0.531x 到 1.037x，证明 baseline 短的版本提前退出未执行到 site；(3) 优化 site 位于 insn 424-8315，175ns 退出只执行约 400-600 条指令。**结论**：corpus exec geomean **无效**（噪声+布局主导），corpus code size **有效**，micro 数据 **有效**。建议：构造 path-targeted packet 或以 code size 为主要 corpus 指标。`docs/tmp/corpus-construct-validity-analysis.md` |
+| 163 | **Live scanner + daemon enumerate 架构** | 🔄 | 三组件完全解耦架构：(A) 原始应用不修改照常加载 BPF 程序；(B) BpfReJIT daemon 用 `BPF_PROG_GET_NEXT_ID` 枚举内核中已加载的 live 程序，通过 `bpf_prog_info.xlated_prog_insns` + `jited_prog_insns` 提取字节码+机器码做分析，scanner 不再只依赖 .bpf.o ELF 文件；(C) kernel `BPF_PROG_JIT_RECOMPILE` 验证并 re-JIT（已有）。scanner 新增 `enumerate` 子命令。当前 scanner 代码仍是 .bpf.o-based 分析路径，此条负责实现 live-program introspection 路径。文档已改：`docs/tmp/research-progress-report.md`。代码 🔄 agent 运行中。 |
 | 76 | **scx_rusty/lavd 端到端** | 🔄 | `e2e/cases/scx/` 已落地并在 framework VM（`7.0.0-rc2-g2a6783cc77b6`, `4` vCPU）跑通 `scx_rusty` userspace loader → 30s `hackbench` / `stress-ng --cpu 4` / `sysbench cpu` baseline。活跃 `13` 个 struct_ops programs，扫描到 `28` sites（CMOV `27`, LEA `1`；`rusty_enqueue=12`, `rusty_stopping=10`, `rusty_set_cpumask=2`, `rusty_runnable/quiescent/init_task/init` 各 `1`）。最新调查确认旧的 live recompile `EINVAL` 实际来自 x86 stale-extable oops；该 bug 已修，但 live attached `struct_ops` 仍因缺 trampoline regeneration 被显式 `-EOPNOTSUPP` 拒绝，所以当前仍只有 honest baseline + site census，没有 post-reJIT 对比。`docs/tmp/scx-e2e-report.md`, `docs/tmp/struct-ops-recompile-investigation.md` |

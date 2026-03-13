@@ -77,6 +77,33 @@ std::string read_text_file(const std::filesystem::path &path)
                        std::istreambuf_iterator<char>());
 }
 
+int32_t binding_const_or(const bpf_jit_scanner::V5PolicyRule &rule,
+                         uint8_t canonical_param,
+                         int32_t fallback)
+{
+    for (const auto &binding : rule.bindings) {
+        if (binding.canonical_param == canonical_param &&
+            binding.source_type == BPF_JIT_BIND_SOURCE_CONST) {
+            return binding.inline_const;
+        }
+    }
+    return fallback;
+}
+
+bool set_binding_const(bpf_jit_scanner::V5PolicyRule *rule,
+                       uint8_t canonical_param,
+                       int32_t value)
+{
+    for (auto &binding : rule->bindings) {
+        if (binding.canonical_param == canonical_param &&
+            binding.source_type == BPF_JIT_BIND_SOURCE_CONST) {
+            binding.inline_const = value;
+            return true;
+        }
+    }
+    return false;
+}
+
 constexpr uint8_t BPF_JMP_JA = 0x05;
 constexpr uint8_t BPF_JEQ_K = 0x15;
 constexpr uint8_t BPF_JEQ_X = 0x1d;
@@ -490,7 +517,7 @@ void test_v5_policy_filter()
         "sites:\n"
         "  - insn: 4\n"
         "    family: rotate\n"
-        "    pattern_kind: rotate-64\n"
+        "    pattern_kind: rotate-32\n"
         "  - insn: 99\n"
         "    family: cmov\n"
         "    pattern_kind: cond-select-64\n",
@@ -516,7 +543,7 @@ void test_v5_policy_filter()
         "    pattern_kind: cond-select-64\n"
         "  - insn: 4\n"
         "    family: rotate\n"
-        "    pattern_kind: rotate-64\n",
+        "    pattern_kind: rotate-32\n",
         "all-sites.yaml");
     auto all_site_rules = bpf_jit_scanner::filter_rules_by_policy(
         summary.rules, all_sites);
@@ -539,6 +566,74 @@ void test_v5_policy_filter()
     CHECK(!bpf_jit_scanner::v5_policy_allows_family(
         cmov_only, bpf_jit_scanner::V5Family::Rotate));
 
+    bpf_jit_scanner::V5PolicyRule rotate64_variant = {};
+    bool found_rotate_rule = false;
+    for (const auto &rule : summary.rules) {
+        if (rule.family != bpf_jit_scanner::V5Family::Rotate) {
+            continue;
+        }
+        rotate64_variant = rule;
+        found_rotate_rule = true;
+        break;
+    }
+    CHECK(found_rotate_rule);
+    if (found_rotate_rule) {
+        CHECK(set_binding_const(
+            &rotate64_variant, BPF_JIT_ROT_PARAM_WIDTH, 64));
+        std::vector<bpf_jit_scanner::V5PolicyRule> colliding_rules = summary.rules;
+        colliding_rules.push_back(rotate64_variant);
+
+        auto rotate64_only = bpf_jit_scanner::parse_policy_config_text(
+            "version: 3\n"
+            "program: mixed-demo\n"
+            "sites:\n"
+            "  - insn: 4\n"
+            "    family: rotate\n"
+            "    pattern_kind: rotate-64\n",
+            "rotate64-only.yaml");
+        auto rotate64_only_result =
+            bpf_jit_scanner::filter_rules_by_policy_detailed(
+                colliding_rules, rotate64_only);
+        CHECK_EQ(rotate64_only_result.rules.size(), 1u);
+        CHECK_EQ(rotate64_only_result.matched_site_count, 1u);
+        CHECK_EQ(rotate64_only_result.unmatched_site_count, 0u);
+        CHECK_EQ(rotate64_only_result.warnings.size(), 0u);
+        if (!rotate64_only_result.rules.empty()) {
+            CHECK_EQ(binding_const_or(rotate64_only_result.rules[0],
+                                      BPF_JIT_ROT_PARAM_WIDTH, -1),
+                     64);
+        }
+
+        auto distinct_rotate_sites = bpf_jit_scanner::parse_policy_config_text(
+            "version: 3\n"
+            "program: mixed-demo\n"
+            "sites:\n"
+            "  - insn: 4\n"
+            "    family: rotate\n"
+            "    pattern_kind: rotate-32\n"
+            "  - insn: 4\n"
+            "    family: rotate\n"
+            "    pattern_kind: rotate-64\n",
+            "distinct-rotate-sites.yaml");
+        auto distinct_rotate_result =
+            bpf_jit_scanner::filter_rules_by_policy_detailed(
+                colliding_rules, distinct_rotate_sites);
+        CHECK_EQ(distinct_rotate_result.rules.size(), 2u);
+        CHECK_EQ(distinct_rotate_result.matched_site_count, 2u);
+        CHECK_EQ(distinct_rotate_result.unmatched_site_count, 0u);
+        CHECK_EQ(distinct_rotate_result.warnings.size(), 0u);
+        bool saw_rotate64 = false;
+        bool saw_rotate32 = false;
+        for (const auto &rule : distinct_rotate_result.rules) {
+            const auto width =
+                binding_const_or(rule, BPF_JIT_ROT_PARAM_WIDTH, -1);
+            saw_rotate64 = saw_rotate64 || width == 64;
+            saw_rotate32 = saw_rotate32 || width == 32;
+        }
+        CHECK(saw_rotate64);
+        CHECK(saw_rotate32);
+    }
+
     auto pattern_kind_mismatch = bpf_jit_scanner::parse_policy_config_text(
         "version: 3\n"
         "program: mixed-demo\n"
@@ -547,10 +642,15 @@ void test_v5_policy_filter()
         "    family: rotate\n"
         "    pattern_kind: mismatch-pattern\n",
         "pattern-kind-mismatch.yaml");
-    auto mismatch_rules = bpf_jit_scanner::filter_rules_by_policy(
+    auto mismatch_result = bpf_jit_scanner::filter_rules_by_policy_detailed(
         summary.rules, pattern_kind_mismatch);
-    CHECK_EQ(mismatch_rules.size(), 1u);
-    CHECK_EQ(mismatch_rules[0].family, bpf_jit_scanner::V5Family::Rotate);
+    CHECK_EQ(mismatch_result.rules.size(), 0u);
+    CHECK_EQ(mismatch_result.matched_site_count, 0u);
+    CHECK_EQ(mismatch_result.unmatched_site_count, 1u);
+    CHECK_EQ(mismatch_result.warnings.size(), 1u);
+    CHECK(mismatch_result.warnings[0].find(
+              "rotate insn 4 pattern_kind mismatch-pattern") !=
+          std::string::npos);
 }
 
 void test_v5_policy_config_validation()
@@ -641,10 +741,10 @@ void test_v5_policy_config_validation()
             "sites:\n"
             "  - insn: 4\n"
             "    family: rotate\n"
-            "    pattern_kind: rotate-64\n"
+            "    pattern_kind: rotate-32\n"
             "  - insn: 4\n"
             "    family: rotate\n"
-            "    pattern_kind: rotate-64\n",
+            "    pattern_kind: rotate-32\n",
             "duplicate-site.yaml"));
     } catch (const std::runtime_error &) {
         threw = true;
@@ -697,7 +797,7 @@ void test_v5_policy_parser_golden()
         CHECK(config.program == "mixed-demo");
         CHECK_EQ(config.sites.size(), 1u);
         CHECK_EQ(config.sites[0].family, V5Family::Rotate);
-        CHECK(config.sites[0].pattern_kind == "rotate-64");
+        CHECK(config.sites[0].pattern_kind == "rotate-32");
         auto result =
             bpf_jit_scanner::filter_rules_by_policy_detailed(summary.rules, config);
         CHECK_EQ(result.rules.size(), 1u);
@@ -737,7 +837,7 @@ void test_v5_policy_parser_golden()
         CHECK(config.program == "mixed-demo");
         CHECK_EQ(config.sites.size(), 2u);
         CHECK_EQ(config.sites[0].family, V5Family::Rotate);
-        CHECK(config.sites[0].pattern_kind == "rotate-64");
+        CHECK(config.sites[0].pattern_kind == "rotate-32");
         CHECK_EQ(config.sites[1].family, V5Family::Cmov);
         CHECK(config.sites[1].pattern_kind == "cond-select-64");
         auto result =

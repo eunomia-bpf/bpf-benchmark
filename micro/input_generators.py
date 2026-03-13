@@ -641,6 +641,46 @@ def generate_cmov_dense(output: Path) -> dict[str, int]:
     return {"count": count, "arrays": len(arrays)}
 
 
+def generate_cond_select_dense(output: Path) -> dict[str, int]:
+    groups = 13
+    lanes = 8
+    count = groups * lanes
+    state = 0xC0DE_CAFE_1234_5678
+
+    compare_lhs: list[int] = []
+    compare_rhs: list[int] = []
+    on_true: list[int] = []
+    on_false: list[int] = []
+
+    for index in range(count):
+        state = _lcg(state ^ ((index + 1) * 0x9E37_79B9_7F4A_7C15))
+        base = state & ((1 << 61) - 1)
+        state = _lcg(state ^ ((index + 5) * 0xA076_1D64_78BD_642F))
+        delta = ((state >> 9) & 0xFFFFF) + 1
+
+        if index & 1:
+            lhs = base
+            rhs = base + delta
+        else:
+            rhs = base
+            lhs = base + delta
+
+        state = _lcg(state ^ ((index + 9) * 0xD134_2543_DE82_EF95))
+        compare_lhs.append(lhs & MASK64)
+        compare_rhs.append(rhs & MASK64)
+        on_true.append((state ^ ((index + 1) * 0x94D0_49BB_1331_11EB)) & MASK64)
+        state = _lcg(state ^ ((index + 13) * 0xBF58_476D_1CE4_E5B9))
+        on_false.append((state ^ ((index + 1) * 0x369D_EA0F_31A5_3F85)) & MASK64)
+
+    blob = bytearray()
+    for values in (compare_lhs, compare_rhs, on_true, on_false):
+        for value in values:
+            blob.extend(struct.pack("<Q", value))
+
+    output.write_bytes(blob)
+    return {"groups": groups, "lanes": lanes, "count": count}
+
+
 def generate_memcmp_prefix_64(output: Path) -> dict[str, int]:
     scenario_count = 3
     pattern = bytearray(_memcmp_prefix_pattern_byte(index) for index in range(64))
@@ -856,6 +896,22 @@ def generate_bitfield_extract(output: Path) -> dict[str, int]:
     return {"record_count": record_count, "record_words": record_words}
 
 
+def generate_extract_dense(output: Path) -> dict[str, int]:
+    groups = 32
+    lanes = 8
+    count = groups * lanes
+    state = 0x1357_9BDF_2468_ACE0
+
+    blob = bytearray()
+    for index in range(count):
+        state = _lcg(state ^ ((index + 1) * 0x8EBC_6AF0_9C88_C6E3))
+        value = (state ^ ((index + 3) * 0x5899_65CC_7537_4CC3)) & MASK64
+        blob.extend(struct.pack("<Q", value))
+
+    output.write_bytes(blob)
+    return {"groups": groups, "lanes": lanes, "count": count}
+
+
 def generate_smallmul_strength_reduce(output: Path) -> dict[str, int]:
     count = 128
     seed = 0x89AB_CDEF
@@ -986,6 +1042,64 @@ def generate_deep_guard_tree_8(output: Path) -> dict[str, int]:
     return {"record_count": record_count, "record_size": record_size}
 
 
+def generate_rotate_dense(output: Path) -> dict[str, int]:
+    state = 0x0DDC_0FFE_EE11_2244
+    seeds: list[int] = []
+
+    for index in range(8):
+        state = _lcg(state ^ ((index + 1) * 0x94D0_49BB_1331_11EB))
+        seeds.append((state ^ ((index + 7) * 0xD134_2543_DE82_EF95)) & MASK64)
+
+    output.write_bytes(struct.pack("<QQQQQQQQ", *seeds))
+    return {"seeds": len(seeds), "bytes": len(seeds) * 8}
+
+
+def generate_addr_calc_stride(output: Path) -> dict[str, int]:
+    value_count = 256
+    state = 0x0123_4567_89AB_CDEF
+
+    blob = bytearray()
+    for index in range(value_count):
+        state = _lcg(state ^ ((index + 1) * 0xA076_1D64_78BD_642F))
+        value = (state ^ ((index + 11) * 0x9E37_79B9_7F4A_7C15)) & MASK64
+        blob.extend(struct.pack("<Q", value))
+
+    output.write_bytes(blob)
+    return {"value_count": value_count, "bytes": value_count * 8}
+
+
+def generate_endian_swap_dense(output: Path) -> dict[str, int]:
+    groups = 32
+    lanes = 8
+    count = groups * lanes
+    state = 0x55AA_33CC_77EE_11FF
+
+    blob = bytearray()
+    for index in range(count):
+        state = _lcg(state ^ ((index + 1) * 0xE703_7ED1_A0B4_28DB))
+        value = ((state >> 16) ^ ((index + 1) * 0x9E37_79B9)) & 0xFFFFFFFF
+        blob.extend(struct.pack("<I", value))
+
+    output.write_bytes(blob)
+    return {"groups": groups, "lanes": lanes, "count": count}
+
+
+def generate_branch_flip_dense(output: Path) -> dict[str, int]:
+    groups = 32
+    lanes = 8
+    count = groups * lanes
+    state = 0x4242_A5A5_C3C3_5A5A
+
+    blob = bytearray()
+    for index in range(count):
+        state = _lcg(state ^ ((index + 1) * 0xBF58_476D_1CE4_E5B9))
+        value = (state ^ ((index + 1) * 0x369D_EA0F_31A5_3F85)) & MASK64
+        blob.extend(struct.pack("<Q", value))
+
+    output.write_bytes(blob)
+    return {"groups": groups, "lanes": lanes, "count": count}
+
+
 def generate_mega_basic_block_2048(output: Path) -> dict[str, int]:
     state = 0x1357_2468_ACE0_BDF1
     words: list[int] = []
@@ -1054,21 +1168,27 @@ GENERATORS = {
     "load_native_u64": generate_load_native_u64,
     "cmov_select": generate_cmov_select,
     "cmov_dense": generate_cmov_dense,
+    "cond_select_dense": generate_cond_select_dense,
     "memcmp_prefix_64": generate_memcmp_prefix_64,
     "packet_parse_vlans_tcpopts": generate_packet_parse_vlans_tcpopts,
     "local_call_fanout": generate_local_call_fanout,
     "packet_rss_hash": generate_packet_rss_hash,
     "struct_field_cluster": generate_struct_field_cluster,
     "bitfield_extract": generate_bitfield_extract,
+    "extract_dense": generate_extract_dense,
     "smallmul_strength_reduce": generate_smallmul_strength_reduce,
     "imm64_storm": generate_imm64_storm,
     "alu32_64_pingpong": generate_alu32_64_pingpong,
     "branch_fanout_32": generate_branch_fanout_32,
     "branch_fanout_32_predictable": generate_branch_fanout_32_predictable,
     "branch_fanout_32_random": generate_branch_fanout_32_random,
+    "branch_flip_dense": generate_branch_flip_dense,
     "deep_guard_tree_8": generate_deep_guard_tree_8,
     "mega_basic_block_2048": generate_mega_basic_block_2048,
     "rotate64_hash": generate_rotate64_hash,
+    "rotate_dense": generate_rotate_dense,
+    "addr_calc_stride": generate_addr_calc_stride,
+    "endian_swap_dense": generate_endian_swap_dense,
 }
 
 
