@@ -3,7 +3,7 @@
 ## Methodology
 
 - Kernel: `7.0.0-rc2-g05a1845490ed-dirty`
-- Benchmarks: `35` from `config/micro_pure_jit.yaml`
+- Benchmarks: `37` from `config/micro_pure_jit.yaml`
 - Runtimes: `kernel` vs `kernel-recompile`
 - Warmups / iterations / repeat: `2 / 2 / 500`
 - CPU pinning: `taskset -c 0`
@@ -12,10 +12,10 @@
 
 ## Headline Numbers
 
-- Overall geomean (stock / recompile, valid pairs only): `1.018x`
-- Applied-only geomean (stock / recompile): `1.071x`
-- Wins / losses / ties: `16 / 17 / 2`
-- Valid / invalid pairs: `35 / 0`
+- Overall geomean (stock / recompile, valid pairs only): `1.013x`
+- Applied-only geomean (stock / recompile): `1.045x`
+- Wins / losses / ties: `16 / 19 / 2`
+- Valid / invalid pairs: `37 / 0`
 
 ## Per-Family Breakdown
 
@@ -30,6 +30,7 @@
 | code-clone | 2 | 2 | 0 | 0.970x | n/a | 1 | 1 | 0 |
 | dep-chain | 2 | 2 | 0 | 1.018x | n/a | 1 | 1 | 0 |
 | fixed-loop | 2 | 2 | 0 | 1.171x | n/a | 1 | 1 | 0 |
+| large-mixed | 2 | 2 | 1 | 0.926x | 0.860x | 0 | 2 | 0 |
 | load-width | 2 | 2 | 0 | 1.162x | n/a | 2 | 0 | 0 |
 | log2-fold | 1 | 1 | 1 | 1.206x | 1.206x | 1 | 0 | 0 |
 | mixed-alu-mem | 1 | 1 | 1 | 1.018x | 1.018x | 1 | 0 | 0 |
@@ -84,3 +85,5 @@
 | nested_loop_3 | nested-loop | 860 ns | 844 ns | 1.019x | no | 0 | win |
 | code_clone_2 | code-clone | 370 ns | 396 ns | 0.934x | no | 0 | loss |
 | code_clone_8 | code-clone | 1.492 us | 1.482 us | 1.007x | no | 0 | win |
+| large_mixed_500 | large-mixed | 618.5 ns | 719 ns | 0.860x | yes | 3 | loss |
+| large_mixed_1000 | large-mixed | 1.213 us | 1.217 us | 0.997x | no | 0 | loss |
