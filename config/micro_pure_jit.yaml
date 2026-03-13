@@ -382,6 +382,7 @@ benchmarks:
     kernel_input_size: 1032
     input_generator: multi_acc_4
     expected_result: 1366287837132792961
+    policy_file: micro/policies/multi_acc_4.yaml
     tags: [compute, ilp, pure-jit]
 
   - name: multi_acc_8
@@ -394,6 +395,7 @@ benchmarks:
     kernel_input_size: 1032
     input_generator: multi_acc_8
     expected_result: 6524869553103642107
+    policy_file: micro/policies/multi_acc_8.yaml
     tags: [compute, ilp, pure-jit]
 
   - name: fibonacci_iter

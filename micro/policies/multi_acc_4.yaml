@@ -1,0 +1,17 @@
+# Policy for multi_acc_4_xdp
+# Scanner found: wide=2 (setup code, count+seed u32 reads), lea=1 (hot loop, insn 93)
+# Wide sites at insn 10+23 optimize the cold count/seed reads (run once).
+# LEA site at insn 93 is in the hot loop: r2 = (r9 << 1) + r7 -> LEA r2, [r7 + r9*2]
+
+version: 3
+program: 'multi_acc_4_xdp'
+sites:
+  - insn: 10
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 23
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 93
+    family: lea
+    pattern_kind: 'addr-calc'
