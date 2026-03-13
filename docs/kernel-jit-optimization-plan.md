@@ -78,20 +78,22 @@
 3. **Kernel emitter bugs**：#150 发现 RORX 指针 bug 和 same-site lookup bug，之前所有性能数据可能被污染。**已修复**，bzImage 已重建。
 4. **无 JIT image 验证**：不知道 re-JIT 是否只改了 site 字节。**#153 已验证**：zero-site identity 已修复，site-only diff 是 full-image recompile 的固有属性。
 
-#### 必须做的性能改进 TODO（按优先级，2026-03-13 更新）
+#### 必须做的性能改进 TODO（按优先级，2026-03-13 晚更新）
 
 1. **P0：修复 benchmark framework**（#157 P0 items）
    - ~~Micro 每个 canonical form 加 isolated benchmark~~ ✅ #154（6 个纯隔离 benchmark）
-   - Corpus 加 path witness 证明 input 触发 site，否则不计入 headline — **#162 确认 corpus exec 无效**
-   - **必须修复 corpus packet 构造使 site 被实际执行**（code size 不是论文关注点）
-   - Corpus 每 target 多次 paired rerun + CI/bootstrap（降优先级，因 exec 指标本身无效）
-2. **~~P0：验证 JIT image 正确性~~** ✅ #153 — zero-site identity 已修复，site-only diff 是架构属性
-3. **P0：Post-cleanup 全量重跑**（#160）— 62 benchmarks（含 6 新 per-form），修复后 bzImage + runner，🔄 codex 运行中
-4. **~~P1：Measurement 改进~~** ✅ #156 — dual TSC + warmup 已落地
-5. **P1：增加高回报 canonical form** — prologue 优化、更完整的 byte-recompose
-6. **P1：跑更多 E2E workload** — Tracee +21.65% 是唯一强数据，需要更多 E2E 亮点
-7. **P1：#57 消融补全** — byte-recompose / callee-saved / BMI 各自贡献量化，🔄 codex 运行中
-8. **P2：不同微架构** — 当前只在一个 CPU 上测
+   - ~~Corpus packet 构造修复~~ ✅ corpus.py/e2e 已换 valid IPv4+TCP packet with correct checksum
+   - **⚠️ P0：Authoritative 62-bench rerun per-form 结果与专门 rerun 严重矛盾**——endian_swap_dense stock 从 211ns→129ns，rotate_dense recompile 从 172.5ns→230ns。疑似 policy 未正确 apply 或 bzImage 不同。**必须调查根因并重跑**。
+   - Corpus 每 target 多次 paired rerun + CI/bootstrap（降优先级）
+2. **~~P0：验证 JIT image 正确性~~** ✅ #153
+3. **~~P0：Post-cleanup 全量重跑~~** ✅ #160 — 62/62 valid, 17 applied, overall 1.0035x, applied-only 0.9417x。**但 per-form 数据疑似无效（见上）**
+4. **~~P1：Measurement 改进~~** ✅ #156
+5. **P0：框架解耦** — ✅ #163 scanner enumerate 已实现（197 live progs, 1920 sites），🔄 #108 E2E pipeline 切换中
+6. **P1：增加高回报 canonical form** — prologue 优化、更完整的 byte-recompose
+7. **P1：跑更多 E2E workload** — Tracee +21.65% 是唯一强数据，需要更多 E2E 亮点
+8. **~~P1：#57 消融补全~~** ✅ byte-recompose **50.7%**，callee-saved ~0%（7.0-rc2 已上游化），BMI ~0%
+9. **P1：Corpus rerun（fixed packet + enumerate 路径）** — 等 #108 完成后执行
+10. **P2：不同微架构** — 当前只在一个 CPU 上测
 
 ### 1.2b OSDI/SOSP Novelty
 
@@ -603,5 +605,9 @@ make clean
 | 160 | **Post-fix 全量 micro 重跑（62 bench, 新 per-form + fixes）** | ✅ | 修复后 bzImage + runner（dual TSC + warmup）上完成 strict rerun：**`62/62` valid，`14/62` applied，overall geomean `0.978x`，applied-only `0.877x`**（stock / recompile）。对齐旧口径的 shared-56 子集为 `0.983x` overall、`0.869x` applied-only，低于 #143 的 `1.007x` / `0.986x`。6 个新增 per-form rows 中 `3/6` applied，整体 geomean `0.931x`；`rotate_dense` `1.187x` 是唯一 applied win，`cond_select_dense` `0.837x`、`extract_dense` `0.753x` 为 applied losses，`addr_calc_stride` / `endian_swap_dense` / `branch_flip_dense` 因当前 per-family policy catalog 空/lookup miss 未实际应用。Top win / loss：`packet_rss_hash 2.875x`，`memcmp_prefix_64 0.560x`。数据：`micro/results/post_fix_micro_62bench_20260313.json`；报告：`docs/tmp/post-fix-micro-62bench-rerun.md`。 |
 | 161 | **Scanner pattern_kind filtering bug fix** | ✅ | 调查确认：#148 指向的是已提交基线中的真实 bug，`filter_rules_by_policy_detailed()` 旧实现只按 `(insn, family)` 匹配，确实忽略 `pattern_kind`；当前工作区已在 `scanner/src/policy_config.cpp` 修复为 `(insn, family, pattern_kind)` 精确匹配，并补了 scanner/Python tests。验证：`cmake --build scanner/build --target test_scanner -j`、`./scanner/build/test_scanner` = `PASS 179`、`python3 -m unittest corpus.tests.test_policy_utils` = `OK`。报告：`docs/tmp/scanner-pattern-kind-investigation.md`。 |
 | 162 | **Corpus construct validity 分析** | ✅ | **假说成立**：corpus 0.875x 主要由测量噪声和代码布局效应构成，非优化 site 实际执行效率。三层证据：(1) 94/156 程序 exec_ns < 100ns，其中 58/66 未优化程序也显示 >5% 偏差（noise-dominated）；(2) Calico `calico_tc_main` 6 个 .bpf.o 中代码变化一致（-0.4%），但 speedup 从 0.531x 到 1.037x，证明 baseline 短的版本提前退出未执行到 site；(3) 优化 site 位于 insn 424-8315，175ns 退出只执行约 400-600 条指令。**结论**：corpus exec geomean **无效**（噪声+布局主导），corpus code size **有效**，micro 数据 **有效**。建议：构造 path-targeted packet 或以 code size 为主要 corpus 指标。`docs/tmp/corpus-construct-validity-analysis.md` |
-| 163 | **Live scanner + daemon enumerate 架构** | ✅ | 三组件完全解耦架构：(A) 原始应用不修改照常加载 BPF 程序；(B) BpfReJIT daemon 用 `BPF_PROG_GET_NEXT_ID` 枚举内核中已加载的 live 程序，通过 `bpf_prog_info.xlated_prog_insns` + `jited_prog_insns` 提取字节码+机器码做分析，scanner 不再只依赖 .bpf.o ELF 文件；(C) kernel `BPF_PROG_JIT_RECOMPILE` 验证并 re-JIT（已有）。scanner 新增 `enumerate` 子命令。当前 scanner 代码仍是 .bpf.o-based 分析路径，此条负责实现 live-program introspection 路径。文档已改：`docs/tmp/research-progress-report.md`。代码 🔄 agent 运行中。 |
+| 163 | **Live scanner + daemon enumerate 架构** | ✅ | 三组件完全解耦：scanner `enumerate` 子命令用 `BPF_PROG_GET_NEXT_ID` → `BPF_OBJ_GET_INFO_BY_FD` → `xlated_prog_insns` 分析 live 程序。修复 `mini_bpf_attr_id` struct 布局 bug（`next_id` offset 错误导致死循环）。Host smoke：197 live progs, 165 with sites, 1920 total sites, `--prog-id` 过滤 0.2s。`docs/tmp/scanner-enumerate-implementation.md` |
+| 164 | **E2E pipeline 切 enumerate 路径** | ✅ | `e2e/common/recompile.py` 新增 `_enumerate_scan_one()` + `_enumerate_apply_one()`，`_USE_ENUMERATE_PATH=True`。Case 文件不需改（公共 API 不变）。Graceful fallback 到 legacy `scan --prog-fd` 路径。`docs/tmp/e2e-enumerate-pipeline-switch.md` |
+| 165 | **#57 消融补全** | ✅ | byte-recompose **50.7%** of gap surplus（主因）；callee-saved **~0%**（7.0-rc2 已上游化 `detect_reg_usage()`）；BMI/BMI2-only **~0%**（rorx/bextr 指令选择非主因）。`docs/tmp/ablation-byte-recompose-callee-bmi.md` |
+| 166 | **Per-form authoritative rerun 矛盾调查** | ✅ | 根因：(1) per-form rerun 用共享 VM、stock 有 60% 噪声；auth rerun 独立 VM 是 ground truth。(2) **extract/endian/branch_flip emitter bug**：applied=True 但 jited size 零变化，回归来自白跑的 JIT 重编 + I-cache flush 开销。`docs/tmp/per-form-discrepancy-investigation.md` |
+| 167 | **修复 extract/endian/branch_flip emitter** | 🔄 | 三个 emitter 声称 applied 但产出相同机器码。需修复 kernel emitter 使其实际生成优化代码。sonnet agent 运行中。 |
 | 76 | **scx_rusty/lavd 端到端** | 🔄 | `e2e/cases/scx/` 已落地并在 framework VM（`7.0.0-rc2-g2a6783cc77b6`, `4` vCPU）跑通 `scx_rusty` userspace loader → 30s `hackbench` / `stress-ng --cpu 4` / `sysbench cpu` baseline。活跃 `13` 个 struct_ops programs，扫描到 `28` sites（CMOV `27`, LEA `1`；`rusty_enqueue=12`, `rusty_stopping=10`, `rusty_set_cpumask=2`, `rusty_runnable/quiescent/init_task/init` 各 `1`）。最新调查确认旧的 live recompile `EINVAL` 实际来自 x86 stale-extable oops；该 bug 已修，但 live attached `struct_ops` 仍因缺 trampoline regeneration 被显式 `-EOPNOTSUPP` 拒绝，所以当前仍只有 honest baseline + site census，没有 post-reJIT 对比。`docs/tmp/scx-e2e-report.md`, `docs/tmp/struct-ops-recompile-investigation.md` |
