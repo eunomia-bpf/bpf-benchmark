@@ -3,7 +3,7 @@
 ## Methodology
 
 - Kernel: `7.0.0-rc2-g05a1845490ed-dirty`
-- Benchmarks: `31` from `config/micro_pure_jit.yaml`
+- Benchmarks: `35` from `config/micro_pure_jit.yaml`
 - Runtimes: `kernel` vs `kernel-recompile`
 - Warmups / iterations / repeat: `2 / 2 / 500`
 - CPU pinning: `taskset -c 0`
@@ -12,10 +12,10 @@
 
 ## Headline Numbers
 
-- Overall geomean (stock / recompile, valid pairs only): `1.017x`
+- Overall geomean (stock / recompile, valid pairs only): `1.018x`
 - Applied-only geomean (stock / recompile): `1.071x`
-- Wins / losses / ties: `13 / 16 / 2`
-- Valid / invalid pairs: `31 / 0`
+- Wins / losses / ties: `16 / 17 / 2`
+- Valid / invalid pairs: `35 / 0`
 
 ## Per-Family Breakdown
 
@@ -27,12 +27,14 @@
 | branch-density | 1 | 1 | 1 | 1.039x | 1.039x | 1 | 0 | 0 |
 | branch-skew | 1 | 1 | 0 | 1.117x | n/a | 1 | 0 | 0 |
 | causal-isolation | 2 | 2 | 0 | 0.908x | n/a | 0 | 2 | 0 |
+| code-clone | 2 | 2 | 0 | 0.970x | n/a | 1 | 1 | 0 |
 | dep-chain | 2 | 2 | 0 | 1.018x | n/a | 1 | 1 | 0 |
 | fixed-loop | 2 | 2 | 0 | 1.171x | n/a | 1 | 1 | 0 |
 | load-width | 2 | 2 | 0 | 1.162x | n/a | 2 | 0 | 0 |
 | log2-fold | 1 | 1 | 1 | 1.206x | 1.206x | 1 | 0 | 0 |
 | mixed-alu-mem | 1 | 1 | 1 | 1.018x | 1.018x | 1 | 0 | 0 |
 | multi-acc | 2 | 2 | 0 | 0.989x | n/a | 0 | 2 | 0 |
+| nested-loop | 2 | 2 | 0 | 1.081x | n/a | 2 | 0 | 0 |
 | parser | 1 | 1 | 0 | 0.950x | n/a | 0 | 1 | 0 |
 | popcount | 1 | 1 | 0 | 1.010x | n/a | 1 | 0 | 0 |
 | recurrence | 2 | 2 | 0 | 0.999x | n/a | 1 | 1 | 0 |
@@ -78,3 +80,7 @@
 | fibonacci_iter_packet | recurrence | 927 ns | 880.5 ns | 1.053x | no | 0 | win |
 | fixed_loop_small | fixed-loop | 157 ns | 114 ns | 1.377x | no | 0 | win |
 | fixed_loop_large | fixed-loop | 1.480 us | 1.486 us | 0.996x | no | 0 | loss |
+| nested_loop_2 | nested-loop | 659.5 ns | 575 ns | 1.147x | no | 0 | win |
+| nested_loop_3 | nested-loop | 860 ns | 844 ns | 1.019x | no | 0 | win |
+| code_clone_2 | code-clone | 370 ns | 396 ns | 0.934x | no | 0 | loss |
+| code_clone_8 | code-clone | 1.492 us | 1.482 us | 1.007x | no | 0 | win |

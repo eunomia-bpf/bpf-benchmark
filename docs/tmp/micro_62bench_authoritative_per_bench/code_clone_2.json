@@ -1,0 +1,674 @@
+{
+  "suite": "micro_staged_codegen",
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/config/micro_pure_jit.yaml",
+  "generated_at": "2026-03-13T05:55:05.695115+00:00",
+  "host": {
+    "hostname": "virtme-ng",
+    "platform": "Linux-7.0.0-rc2-g05a1845490ed-dirty-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "cpu_affinity": "0",
+    "git_sha": "unknown",
+    "kernel_version": "7.0.0-rc2-g05a1845490ed-dirty",
+    "kernel_cmdline": "virtme_hostname=virtme-ng nr_open=1048576 virtme_initmount0=home/yunwei37/workspace/bpf-benchmark/micro/results virtme_initmount1=home/yunwei37/workspace/bpf-benchmark/docs/tmp virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp console=ttyS0 earlyprintk=serial,ttyS0,115200 quiet loglevel=0 panic=-1 virtme.exec=`YmFzaCAtbGMgJ3NldCAtZXVvIHBpcGVmYWlsOyBpZiBbIC1kIC9zeXMvZGV2aWNlcy9zeXN0ZW0vY3B1IF07IHRoZW4gZm9yIGYgaW4gL3N5cy9kZXZpY2VzL3N5c3RlbS9jcHUvY3B1Ki9jcHVmcmVxL3NjYWxpbmdfZ292ZXJub3I7IGRvIFsgLWYgIiRmIiBdIHx8IGNvbnRpbnVlOyBlY2hvIHBlcmZvcm1hbmNlID4gIiRmIiB8fCB0cnVlOyBkb25lOyBmaTsgdGFza3NldCAtYyAwIHB5dGhvbjMgLXUgZG9jcy90bXAva2VybmVsX3JlY29tcGlsZV9taWNyb19zdHJpY3QucHkgLS1iZW5jaCBjb2RlX2Nsb25lXzIgLS1pdGVyYXRpb25zIDIgLS13YXJtdXBzIDIgLS1yZXBlYXQgNTAwIC0tY3B1IDAgLS1vdXRwdXQtanNvbiAvaG9tZS95dW53ZWkzNy93b3Jrc3BhY2UvYnBmLWJlbmNobWFyay9kb2NzL3RtcC9taWNyb182MmJlbmNoX2F1dGhvcml0YXRpdmVfcGVyX2JlbmNoL2NvZGVfY2xvbmVfMi5qc29uIC0tb3V0cHV0LW1kIC9ob21lL3l1bndlaTM3L3dvcmtzcGFjZS9icGYtYmVuY2htYXJrL2RvY3MvdG1wL21pY3JvXzYyYmVuY2hfYXV0aG9yaXRhdGl2ZV9wZXJfYmVuY2gvY29kZV9jbG9uZV8yLm1kIDI+JjEgfCB0ZWUgL2hvbWUveXVud2VpMzcvd29ya3NwYWNlL2JwZi1iZW5jaG1hcmsvZG9jcy90bXAvbWljcm9fNjJiZW5jaF9hdXRob3JpdGF0aXZlX3Blcl9iZW5jaC9jb2RlX2Nsb25lXzIubG9nJw==` virtme_chdir=home/yunwei37/workspace/bpf-benchmark rootfstype=9p rootflags=version=9p2000.L,trans=virtio,access=any raid=noautodetect ro quiet loglevel=1 init=/home/yunwei37/.local/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init",
+    "cpu_governor": "unknown",
+    "turbo_state": "unknown",
+    "perf_event_paranoid": "2"
+  },
+  "defaults": {
+    "iterations": 2,
+    "warmups": 2,
+    "repeat": 500,
+    "cpu": "0"
+  },
+  "benchmarks": [
+    {
+      "name": "code_clone_2",
+      "description": "Two-clone repeated scalar block inside the steady-state loop",
+      "category": "call-size",
+      "family": "code-clone",
+      "level": "clone-2",
+      "io_mode": "staged",
+      "tags": [
+        "compute",
+        "code-size",
+        "pure-jit"
+      ],
+      "expected_result": 8165017386613414132,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/code_clone_2.mem",
+      "policy": null,
+      "policy_file": null,
+      "runs": [
+        {
+          "runtime": "kernel",
+          "label": "kernel eBPF",
+          "mode": "kernel",
+          "repeat": 500,
+          "command": [
+            "sudo",
+            "-n",
+            "/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec",
+            "run-kernel",
+            "--program",
+            "/home/yunwei37/workspace/bpf-benchmark/micro/programs/code_clone_2.bpf.o",
+            "--io-mode",
+            "staged",
+            "--repeat",
+            "500",
+            "--memory",
+            "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/code_clone_2.mem",
+            "--input-size",
+            "1032"
+          ],
+          "measurement_complete": true,
+          "status": "ok",
+          "failures": [],
+          "samples": [
+            {
+              "compile_ns": 2788827,
+              "exec_ns": 370,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "no_cmov": false,
+              "disabled_passes": [],
+              "wall_exec_ns": 15697,
+              "exec_cycles": 57860,
+              "tsc_freq_hz": 3686110226,
+              "result": 8165017386613414132,
+              "retval": 2,
+              "jited_prog_len": 485,
+              "xlated_prog_len": 912,
+              "code_size": {
+                "bpf_bytecode_bytes": 912,
+                "native_code_bytes": 485,
+                "inflation_ratio": 0.531798
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 1246448,
+                "object_open_ns": 1973975,
+                "object_load_ns": 814852,
+                "input_stage_ns": 979,
+                "prog_run_wall_ns": 7848035,
+                "result_extract_ns": 143
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": true,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "directive_scan": {
+                "performed": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0
+              },
+              "recompile": {
+                "requested": false,
+                "mode": "none",
+                "requested_families": [],
+                "skipped_families": [],
+                "policy_generated": false,
+                "policy_bytes": 0,
+                "syscall_attempted": false,
+                "applied": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0,
+                "error": ""
+              },
+              "stdout_tail": "{\"compile_ns\":2788827,\"exec_ns\":370,\"timing_source\":\"ktime\",\"timing_source_wall\":\"rdtsc\",\"no_cmov\":false,\"disabled_passes\":[],\"wall_exec_ns\":15697,\"exec_cycles\":57860,\"tsc_freq_hz\":3686110226,\"result\":8165017386613414132,\"retval\":2,\"jited_prog_len\":485,\"xlated_prog_len\":912,\"code_size\":{\"bpf_bytecode_bytes\":912,\"native_code_bytes\":485,\"inflation_ratio\":0.531798},\"phases_ns\":{\"memory_prepare_ns\":1246448,\"object_open_ns\":1973975,\"object_load_ns\":814852,\"input_stage_ns\":979,\"prog_run_wall_ns\":7848035,\"result_extract_ns\":143},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":true,\"scope\":\"full_repeat_raw\",\"error\":\"\"},\"directive_scan\":{\"performed\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":0,\"extract_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0,\"total_sites\":0},\"recompile\":{\"requested\":false,\"mode\":\"none\",\"requested_families\":[],\"skipped_families\":[],\"policy_generated\":false,\"policy_bytes\":0,\"syscall_attempted\":false,\"applied\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":0,\"extract_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0,\"total_sites\":0,\"error\":\"\"}}",
+              "stderr_tail": "libbpf: loading object from /home/yunwei37/workspace/bpf-benchmark/micro/programs/code_clone_2.bpf.o\nlibbpf: elf: section(3) xdp, size 912, link 0, flags 6, type=1\nlibbpf: sec 'xdp': found program 'code_clone_2_xdp' at insn offset 0 (0 bytes), code size 114 insns (912 bytes)\nlibbpf: elf: section(4) license, size 4, link 0, flags 3, type=1\nlibbpf: license of /home/yunwei37/workspace/bpf-benchmark/micro/programs/code_clone_2.bpf.o is GPL\nlibbpf: elf: section(15) .BTF, size 1177, link 0, flags 0, type=1\nlibbpf: elf: section(17) .BTF.ext, size 1120, link 0, flags 0, type=1\nlibbpf: elf: section(25) .symtab, size 408, link 1, flags 0, type=2\nlibbpf: looking for externs among 17 symbols...\nlibbpf: collected 0 externs total\nlibbpf: object 'code_clone_2': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...",
+              "iteration_index": 0
+            },
+            {
+              "compile_ns": 2733650,
+              "exec_ns": 370,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "no_cmov": false,
+              "disabled_passes": [],
+              "wall_exec_ns": 15512,
+              "exec_cycles": 57182,
+              "tsc_freq_hz": 3686184398,
+              "result": 8165017386613414132,
+              "retval": 2,
+              "jited_prog_len": 485,
+              "xlated_prog_len": 912,
+              "code_size": {
+                "bpf_bytecode_bytes": 912,
+                "native_code_bytes": 485,
+                "inflation_ratio": 0.531798
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 1414624,
+                "object_open_ns": 1924546,
+                "object_load_ns": 809104,
+                "input_stage_ns": 855,
+                "prog_run_wall_ns": 7755870,
+                "result_extract_ns": 49
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": true,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "directive_scan": {
+                "performed": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0
+              },
+              "recompile": {
+                "requested": false,
+                "mode": "none",
+                "requested_families": [],
+                "skipped_families": [],
+                "policy_generated": false,
+                "policy_bytes": 0,
+                "syscall_attempted": false,
+                "applied": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0,
+                "error": ""
+              },
+              "stdout_tail": "{\"compile_ns\":2733650,\"exec_ns\":370,\"timing_source\":\"ktime\",\"timing_source_wall\":\"rdtsc\",\"no_cmov\":false,\"disabled_passes\":[],\"wall_exec_ns\":15512,\"exec_cycles\":57182,\"tsc_freq_hz\":3686184398,\"result\":8165017386613414132,\"retval\":2,\"jited_prog_len\":485,\"xlated_prog_len\":912,\"code_size\":{\"bpf_bytecode_bytes\":912,\"native_code_bytes\":485,\"inflation_ratio\":0.531798},\"phases_ns\":{\"memory_prepare_ns\":1414624,\"object_open_ns\":1924546,\"object_load_ns\":809104,\"input_stage_ns\":855,\"prog_run_wall_ns\":7755870,\"result_extract_ns\":49},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":true,\"scope\":\"full_repeat_raw\",\"error\":\"\"},\"directive_scan\":{\"performed\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":0,\"extract_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0,\"total_sites\":0},\"recompile\":{\"requested\":false,\"mode\":\"none\",\"requested_families\":[],\"skipped_families\":[],\"policy_generated\":false,\"policy_bytes\":0,\"syscall_attempted\":false,\"applied\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":0,\"extract_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0,\"total_sites\":0,\"error\":\"\"}}",
+              "stderr_tail": "libbpf: loading object from /home/yunwei37/workspace/bpf-benchmark/micro/programs/code_clone_2.bpf.o\nlibbpf: elf: section(3) xdp, size 912, link 0, flags 6, type=1\nlibbpf: sec 'xdp': found program 'code_clone_2_xdp' at insn offset 0 (0 bytes), code size 114 insns (912 bytes)\nlibbpf: elf: section(4) license, size 4, link 0, flags 3, type=1\nlibbpf: license of /home/yunwei37/workspace/bpf-benchmark/micro/programs/code_clone_2.bpf.o is GPL\nlibbpf: elf: section(15) .BTF, size 1177, link 0, flags 0, type=1\nlibbpf: elf: section(17) .BTF.ext, size 1120, link 0, flags 0, type=1\nlibbpf: elf: section(25) .symtab, size 408, link 1, flags 0, type=2\nlibbpf: looking for externs among 17 symbols...\nlibbpf: collected 0 externs total\nlibbpf: object 'code_clone_2': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...",
+              "iteration_index": 1
+            }
+          ],
+          "artifacts": {
+            "program_object": "/home/yunwei37/workspace/bpf-benchmark/micro/programs/code_clone_2.bpf.o",
+            "policy_file": null
+          },
+          "compile_ns": {
+            "count": 2,
+            "mean": 2761238.5,
+            "median": 2761238.5,
+            "min": 2733650,
+            "max": 2788827,
+            "p95": 2788827,
+            "stdev": 39016.030865530134
+          },
+          "exec_ns": {
+            "count": 2,
+            "mean": 370,
+            "median": 370.0,
+            "min": 370,
+            "max": 370,
+            "p95": 370,
+            "stdev": 0.0
+          },
+          "phases_ns": {
+            "memory_prepare_ns": {
+              "count": 2,
+              "mean": 1330536,
+              "median": 1330536.0,
+              "min": 1246448,
+              "max": 1414624,
+              "p95": 1414624,
+              "stdev": 118918.39003282881
+            },
+            "object_open_ns": {
+              "count": 2,
+              "mean": 1949260.5,
+              "median": 1949260.5,
+              "min": 1924546,
+              "max": 1973975,
+              "p95": 1973975,
+              "stdev": 34951.58108726986
+            },
+            "object_load_ns": {
+              "count": 2,
+              "mean": 811978,
+              "median": 811978.0,
+              "min": 809104,
+              "max": 814852,
+              "p95": 814852,
+              "stdev": 4064.4497782602753
+            },
+            "input_stage_ns": {
+              "count": 2,
+              "mean": 917,
+              "median": 917.0,
+              "min": 855,
+              "max": 979,
+              "p95": 979,
+              "stdev": 87.68124086713189
+            },
+            "prog_run_wall_ns": {
+              "count": 2,
+              "mean": 7801952.5,
+              "median": 7801952.5,
+              "min": 7755870,
+              "max": 7848035,
+              "p95": 7848035,
+              "stdev": 65170.496488058154
+            },
+            "result_extract_ns": {
+              "count": 2,
+              "mean": 96,
+              "median": 96.0,
+              "min": 49,
+              "max": 143,
+              "p95": 143,
+              "stdev": 66.46803743153546
+            }
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected_samples": 0,
+            "include_kernel": null,
+            "scope": "full_repeat_raw",
+            "hardware_counters_observed": false,
+            "software_counters_observed": false,
+            "errors": {}
+          },
+          "derived_metrics": {},
+          "wall_exec_ns": {
+            "count": 2,
+            "mean": 15604.5,
+            "median": 15604.5,
+            "min": 15512,
+            "max": 15697,
+            "p95": 15697,
+            "stdev": 130.8147545195113
+          },
+          "timing_source": "ktime",
+          "recompile_observation": {
+            "requested": false,
+            "applied": false,
+            "requested_families": [],
+            "skipped_families": [],
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "bitfield_sites": 0,
+            "zero_ext_sites": 0,
+            "endian_sites": 0,
+            "branch_flip_sites": 0,
+            "total_sites": 0,
+            "errors": []
+          }
+        },
+        {
+          "runtime": "kernel-recompile",
+          "label": "kernel eBPF + manifest recompile policy",
+          "mode": "kernel-recompile",
+          "repeat": 500,
+          "command": [
+            "sudo",
+            "-n",
+            "/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec",
+            "run-kernel",
+            "--program",
+            "/home/yunwei37/workspace/bpf-benchmark/micro/programs/code_clone_2.bpf.o",
+            "--io-mode",
+            "staged",
+            "--repeat",
+            "500",
+            "--memory",
+            "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/code_clone_2.mem",
+            "--input-size",
+            "1032"
+          ],
+          "measurement_complete": true,
+          "status": "ok",
+          "failures": [],
+          "samples": [
+            {
+              "compile_ns": 3063320,
+              "exec_ns": 370,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "no_cmov": false,
+              "disabled_passes": [],
+              "wall_exec_ns": 15647,
+              "exec_cycles": 57677,
+              "tsc_freq_hz": 3686153707,
+              "result": 8165017386613414132,
+              "retval": 2,
+              "jited_prog_len": 485,
+              "xlated_prog_len": 912,
+              "code_size": {
+                "bpf_bytecode_bytes": 912,
+                "native_code_bytes": 485,
+                "inflation_ratio": 0.531798
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 1170519,
+                "object_open_ns": 2275142,
+                "object_load_ns": 788178,
+                "input_stage_ns": 867,
+                "prog_run_wall_ns": 7823075,
+                "result_extract_ns": 57
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": true,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "directive_scan": {
+                "performed": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0
+              },
+              "recompile": {
+                "requested": false,
+                "mode": "none",
+                "requested_families": [],
+                "skipped_families": [],
+                "policy_generated": false,
+                "policy_bytes": 0,
+                "syscall_attempted": false,
+                "applied": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0,
+                "error": ""
+              },
+              "stdout_tail": "{\"compile_ns\":3063320,\"exec_ns\":370,\"timing_source\":\"ktime\",\"timing_source_wall\":\"rdtsc\",\"no_cmov\":false,\"disabled_passes\":[],\"wall_exec_ns\":15647,\"exec_cycles\":57677,\"tsc_freq_hz\":3686153707,\"result\":8165017386613414132,\"retval\":2,\"jited_prog_len\":485,\"xlated_prog_len\":912,\"code_size\":{\"bpf_bytecode_bytes\":912,\"native_code_bytes\":485,\"inflation_ratio\":0.531798},\"phases_ns\":{\"memory_prepare_ns\":1170519,\"object_open_ns\":2275142,\"object_load_ns\":788178,\"input_stage_ns\":867,\"prog_run_wall_ns\":7823075,\"result_extract_ns\":57},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":true,\"scope\":\"full_repeat_raw\",\"error\":\"\"},\"directive_scan\":{\"performed\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":0,\"extract_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0,\"total_sites\":0},\"recompile\":{\"requested\":false,\"mode\":\"none\",\"requested_families\":[],\"skipped_families\":[],\"policy_generated\":false,\"policy_bytes\":0,\"syscall_attempted\":false,\"applied\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":0,\"extract_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0,\"total_sites\":0,\"error\":\"\"}}",
+              "stderr_tail": "libbpf: loading object from /home/yunwei37/workspace/bpf-benchmark/micro/programs/code_clone_2.bpf.o\nlibbpf: elf: section(3) xdp, size 912, link 0, flags 6, type=1\nlibbpf: sec 'xdp': found program 'code_clone_2_xdp' at insn offset 0 (0 bytes), code size 114 insns (912 bytes)\nlibbpf: elf: section(4) license, size 4, link 0, flags 3, type=1\nlibbpf: license of /home/yunwei37/workspace/bpf-benchmark/micro/programs/code_clone_2.bpf.o is GPL\nlibbpf: elf: section(15) .BTF, size 1177, link 0, flags 0, type=1\nlibbpf: elf: section(17) .BTF.ext, size 1120, link 0, flags 0, type=1\nlibbpf: elf: section(25) .symtab, size 408, link 1, flags 0, type=2\nlibbpf: looking for externs among 17 symbols...\nlibbpf: collected 0 externs total\nlibbpf: object 'code_clone_2': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...",
+              "iteration_index": 0
+            },
+            {
+              "compile_ns": 2847398,
+              "exec_ns": 422,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "no_cmov": false,
+              "disabled_passes": [],
+              "wall_exec_ns": 15952,
+              "exec_cycles": 58801,
+              "tsc_freq_hz": 3686197149,
+              "result": 8165017386613414132,
+              "retval": 2,
+              "jited_prog_len": 485,
+              "xlated_prog_len": 912,
+              "code_size": {
+                "bpf_bytecode_bytes": 912,
+                "native_code_bytes": 485,
+                "inflation_ratio": 0.531798
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 1041514,
+                "object_open_ns": 1980804,
+                "object_load_ns": 866594,
+                "input_stage_ns": 940,
+                "prog_run_wall_ns": 7975685,
+                "result_extract_ns": 51
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": true,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "directive_scan": {
+                "performed": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0
+              },
+              "recompile": {
+                "requested": false,
+                "mode": "none",
+                "requested_families": [],
+                "skipped_families": [],
+                "policy_generated": false,
+                "policy_bytes": 0,
+                "syscall_attempted": false,
+                "applied": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0,
+                "error": ""
+              },
+              "stdout_tail": "{\"compile_ns\":2847398,\"exec_ns\":422,\"timing_source\":\"ktime\",\"timing_source_wall\":\"rdtsc\",\"no_cmov\":false,\"disabled_passes\":[],\"wall_exec_ns\":15952,\"exec_cycles\":58801,\"tsc_freq_hz\":3686197149,\"result\":8165017386613414132,\"retval\":2,\"jited_prog_len\":485,\"xlated_prog_len\":912,\"code_size\":{\"bpf_bytecode_bytes\":912,\"native_code_bytes\":485,\"inflation_ratio\":0.531798},\"phases_ns\":{\"memory_prepare_ns\":1041514,\"object_open_ns\":1980804,\"object_load_ns\":866594,\"input_stage_ns\":940,\"prog_run_wall_ns\":7975685,\"result_extract_ns\":51},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":true,\"scope\":\"full_repeat_raw\",\"error\":\"\"},\"directive_scan\":{\"performed\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":0,\"extract_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0,\"total_sites\":0},\"recompile\":{\"requested\":false,\"mode\":\"none\",\"requested_families\":[],\"skipped_families\":[],\"policy_generated\":false,\"policy_bytes\":0,\"syscall_attempted\":false,\"applied\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":0,\"extract_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0,\"total_sites\":0,\"error\":\"\"}}",
+              "stderr_tail": "libbpf: loading object from /home/yunwei37/workspace/bpf-benchmark/micro/programs/code_clone_2.bpf.o\nlibbpf: elf: section(3) xdp, size 912, link 0, flags 6, type=1\nlibbpf: sec 'xdp': found program 'code_clone_2_xdp' at insn offset 0 (0 bytes), code size 114 insns (912 bytes)\nlibbpf: elf: section(4) license, size 4, link 0, flags 3, type=1\nlibbpf: license of /home/yunwei37/workspace/bpf-benchmark/micro/programs/code_clone_2.bpf.o is GPL\nlibbpf: elf: section(15) .BTF, size 1177, link 0, flags 0, type=1\nlibbpf: elf: section(17) .BTF.ext, size 1120, link 0, flags 0, type=1\nlibbpf: elf: section(25) .symtab, size 408, link 1, flags 0, type=2\nlibbpf: looking for externs among 17 symbols...\nlibbpf: collected 0 externs total\nlibbpf: object 'code_clone_2': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...",
+              "iteration_index": 1
+            }
+          ],
+          "artifacts": {
+            "program_object": "/home/yunwei37/workspace/bpf-benchmark/micro/programs/code_clone_2.bpf.o",
+            "policy_file": null
+          },
+          "compile_ns": {
+            "count": 2,
+            "mean": 2955359,
+            "median": 2955359.0,
+            "min": 2847398,
+            "max": 3063320,
+            "p95": 3063320,
+            "stdev": 152679.91040736172
+          },
+          "exec_ns": {
+            "count": 2,
+            "mean": 396,
+            "median": 396.0,
+            "min": 370,
+            "max": 422,
+            "p95": 422,
+            "stdev": 36.76955262170047
+          },
+          "phases_ns": {
+            "memory_prepare_ns": {
+              "count": 2,
+              "mean": 1106016.5,
+              "median": 1106016.5,
+              "min": 1041514,
+              "max": 1170519,
+              "p95": 1170519,
+              "stdev": 91220.31030697057
+            },
+            "object_open_ns": {
+              "count": 2,
+              "mean": 2127973,
+              "median": 2127973.0,
+              "min": 1980804,
+              "max": 2275142,
+              "p95": 2275142,
+              "stdev": 208128.39576088602
+            },
+            "object_load_ns": {
+              "count": 2,
+              "mean": 827386,
+              "median": 827386.0,
+              "min": 788178,
+              "max": 866594,
+              "p95": 866594,
+              "stdev": 55448.48535352431
+            },
+            "input_stage_ns": {
+              "count": 2,
+              "mean": 903.5,
+              "median": 903.5,
+              "min": 867,
+              "max": 940,
+              "p95": 940,
+              "stdev": 51.61879502661797
+            },
+            "prog_run_wall_ns": {
+              "count": 2,
+              "mean": 7899380,
+              "median": 7899380.0,
+              "min": 7823075,
+              "max": 7975685,
+              "p95": 7975685,
+              "stdev": 107911.56587687902
+            },
+            "result_extract_ns": {
+              "count": 2,
+              "mean": 54,
+              "median": 54.0,
+              "min": 51,
+              "max": 57,
+              "p95": 57,
+              "stdev": 4.242640687119285
+            }
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected_samples": 0,
+            "include_kernel": null,
+            "scope": "full_repeat_raw",
+            "hardware_counters_observed": false,
+            "software_counters_observed": false,
+            "errors": {}
+          },
+          "derived_metrics": {},
+          "wall_exec_ns": {
+            "count": 2,
+            "mean": 15799.5,
+            "median": 15799.5,
+            "min": 15647,
+            "max": 15952,
+            "p95": 15952,
+            "stdev": 215.667568261897
+          },
+          "timing_source": "ktime",
+          "recompile_observation": {
+            "requested": false,
+            "applied": false,
+            "requested_families": [],
+            "skipped_families": [],
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "bitfield_sites": 0,
+            "zero_ext_sites": 0,
+            "endian_sites": 0,
+            "branch_flip_sites": 0,
+            "total_sites": 0,
+            "errors": []
+          }
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "benchmark_rows": [
+      {
+        "name": "code_clone_2",
+        "category": "call-size",
+        "family": "code-clone",
+        "io_mode": "staged",
+        "stock_exec_ns_median": 370.0,
+        "recompile_exec_ns_median": 396.0,
+        "ratio_stock_over_recompile": 0.9343434343434344,
+        "ratio_status": "loss",
+        "stock_complete": true,
+        "recompile_complete": true,
+        "recompile_applied": false,
+        "recompile_total_sites": 0,
+        "recompile_sites": {
+          "cmov": 0,
+          "wide": 0,
+          "rotate": 0,
+          "lea": 0,
+          "bitfield_extract": 0,
+          "zero_ext": 0,
+          "endian": 0,
+          "branch_flip": 0
+        },
+        "stock_status": "ok",
+        "recompile_status": "ok"
+      }
+    ],
+    "overall": {
+      "benchmarks_total": 1,
+      "valid_pairs": 1,
+      "invalid_pairs": 0,
+      "applied_pairs": 0,
+      "geomean_stock_over_recompile": 0.9343434343434344,
+      "applied_only_geomean_stock_over_recompile": null,
+      "wins": 0,
+      "losses": 1,
+      "ties": 0
+    },
+    "family_breakdown": [
+      {
+        "family": "code-clone",
+        "benchmarks": 1,
+        "valid_pairs": 1,
+        "applied_pairs": 0,
+        "geomean_stock_over_recompile": 0.9343434343434344,
+        "applied_only_geomean_stock_over_recompile": null,
+        "wins": 0,
+        "losses": 1,
+        "ties": 0
+      }
+    ]
+  }
+}

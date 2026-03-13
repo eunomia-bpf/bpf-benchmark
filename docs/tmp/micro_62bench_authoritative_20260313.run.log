@@ -116,3 +116,15 @@ subprocess.TimeoutExpired: Command '['/home/yunwei37/.local/bin/vng', '--run', '
   [ok] collected fixed_loop_large (vm exit 0)
   [aggregate] benchmarks=31 valid=31
 [resume] nested_loop_2
+  [ok] collected nested_loop_2 (vm exit 0)
+  [aggregate] benchmarks=32 valid=32
+[resume] nested_loop_3
+  [ok] collected nested_loop_3 (vm exit 0)
+  [aggregate] benchmarks=33 valid=33
+[resume] code_clone_2
+  [ok] collected code_clone_2 (vm exit 0)
+  [aggregate] benchmarks=34 valid=34
+[resume] code_clone_8
+  [ok] collected code_clone_8 (vm exit 0)
+  [aggregate] benchmarks=35 valid=35
+[resume] large_mixed_500
