@@ -3,58 +3,58 @@
     "summary": {
       "agent_cpu_total_pct": {
         "count": 3,
-        "max": 21.683124883696422,
-        "mean": 10.294370839337171,
-        "median": 9.03332205733852,
-        "min": 0.16666557697656903
+        "max": 21.633286774534092,
+        "mean": 10.316645910696048,
+        "median": 9.199984401119782,
+        "min": 0.11666655643427079
       },
       "app_throughput": {
         "count": 3,
-        "max": 718511.1675589788,
-        "mean": 241221.23254115396,
-        "median": 4991.6710607426385,
-        "min": 160.85900374051403
+        "max": 4871.188601990146,
+        "mean": 3121.3369615679153,
+        "median": 4332.315321477536,
+        "min": 160.50696123606414
       },
       "bpf_avg_ns_per_run": {
         "count": 3,
-        "max": 92.1859991465166,
-        "mean": 56.12092889784327,
-        "median": 43.83859964471756,
-        "min": 32.33818790229565
+        "max": 95.63331080014508,
+        "mean": 62.22982439345511,
+        "median": 46.86608838549948,
+        "min": 44.19007399472078
       },
       "events_per_sec": {
         "count": 3,
-        "max": 4993.949428559457,
-        "mean": 2204.1084448823653,
-        "median": 1612.2231976636806,
-        "min": 6.152708423958318
+        "max": 4873.536772728782,
+        "mean": 2162.428904849147,
+        "median": 1608.1860905821288,
+        "min": 5.56385123652973
       },
       "system_cpu_busy_pct": {
         "count": 3,
-        "max": 40.509119197856336,
-        "mean": 24.829185337193003,
-        "median": 24.989578991246354,
-        "min": 8.988857822476316
+        "max": 40.43233895373973,
+        "mean": 17.092540123228716,
+        "median": 9.074591977292645,
+        "min": 1.770689438653772
       }
     },
     "workloads": [
       {
         "agent_cpu": {
-          "sys_pct": 2.6833299838219586,
-          "total_pct": 9.03332205733852,
-          "user_pct": 6.349992073516561
+          "sys_pct": 2.816661890922542,
+          "total_pct": 9.199984401119782,
+          "user_pct": 6.38332251019724
         },
-        "app_throughput": 160.85900374051403,
+        "app_throughput": 160.50696123606414,
         "bpf": {
           "programs": {
             "17": {
-              "avg_ns_per_run": 87.9358847521084,
+              "avg_ns_per_run": 91.42283441704474,
               "bytes_jited": 246,
               "bytes_xlated": 264,
               "id": 17,
               "name": "tracepoint__raw",
-              "run_cnt_delta": 2061990,
-              "run_time_ns_delta": 181322915,
+              "run_cnt_delta": 2069893,
+              "run_time_ns_delta": 189235485,
               "type": "raw_tracepoint"
             },
             "19": {
@@ -78,13 +78,13 @@
               "type": "raw_tracepoint"
             },
             "21": {
-              "avg_ns_per_run": 76.23585274419372,
+              "avg_ns_per_run": 80.15742733589674,
               "bytes_jited": 274,
               "bytes_xlated": 320,
               "id": 21,
               "name": "tracepoint__raw",
-              "run_cnt_delta": 2061990,
-              "run_time_ns_delta": 157197566,
+              "run_cnt_delta": 2069901,
+              "run_time_ns_delta": 165917939,
               "type": "raw_tracepoint"
             },
             "22": {
@@ -158,13 +158,13 @@
               "type": "kprobe"
             },
             "29": {
-              "avg_ns_per_run": 4400.4954489036,
+              "avg_ns_per_run": 4322.246966082356,
               "bytes_jited": 19597,
               "bytes_xlated": 32248,
               "id": 29,
               "name": "tracepoint__sch",
-              "run_cnt_delta": 9668,
-              "run_time_ns_delta": 42543990,
+              "run_cnt_delta": 9641,
+              "run_time_ns_delta": 41670783,
               "type": "raw_tracepoint"
             },
             "30": {
@@ -180,9 +180,9 @@
           },
           "summary": {
             "active_programs": 3,
-            "avg_ns_per_run": 92.1859991465166,
-            "total_events": 4133648,
-            "total_run_time_ns": 381064471
+            "avg_ns_per_run": 95.63331080014508,
+            "total_events": 4149435,
+            "total_run_time_ns": 396824207
           }
         },
         "command_template": "stress-ng --exec 4 --exec-method execve --timeout {duration}s --metrics-brief",
@@ -191,42 +191,42 @@
           "lost_event_count": 0,
           "lost_write_count": 0
         },
-        "duration_s": 60.002858251999996,
+        "duration_s": 60.003628041000006,
         "event_counts": {
-          "execve": 9655,
-          "sched_process_exec": 9653,
-          "security_file_open": 77430
+          "execve": 9631,
+          "sched_process_exec": 9631,
+          "security_file_open": 77235
         },
-        "events_per_sec": 1612.2231976636806,
-        "events_total": 96738,
+        "events_per_sec": 1608.1860905821288,
+        "events_total": 96497,
         "kind": "exec_storm",
         "metric": "bogo-ops/s",
         "name": "exec_storm",
-        "ops_per_sec": 160.85900374051403,
-        "ops_total": 9652.0,
+        "ops_per_sec": 160.50696123606414,
+        "ops_total": 9631.0,
         "stderr_tail": "fallback=rapid_exec_loop",
         "stdout_tail": "",
         "system_cpu": {
-          "busy_pct": 8.988857822476316
+          "busy_pct": 9.074591977292645
         }
       },
       {
         "agent_cpu": {
-          "sys_pct": 0.06666623079062761,
-          "total_pct": 0.16666557697656903,
-          "user_pct": 0.09999934618594143
+          "sys_pct": 0.06666660367672617,
+          "total_pct": 0.11666655643427079,
+          "user_pct": 0.049999952757544625
         },
-        "app_throughput": 718511.1675589788,
+        "app_throughput": 4332.315321477536,
         "bpf": {
           "programs": {
             "17": {
-              "avg_ns_per_run": 29.44552322230996,
+              "avg_ns_per_run": 36.88706141706964,
               "bytes_jited": 246,
               "bytes_xlated": 264,
               "id": 17,
               "name": "tracepoint__raw",
-              "run_cnt_delta": 87292608,
-              "run_time_ns_delta": 2570376516,
+              "run_cnt_delta": 646856,
+              "run_time_ns_delta": 23860617,
               "type": "raw_tracepoint"
             },
             "19": {
@@ -250,13 +250,13 @@
               "type": "raw_tracepoint"
             },
             "21": {
-              "avg_ns_per_run": 35.23024467318012,
+              "avg_ns_per_run": 56.76918355862819,
               "bytes_jited": 274,
               "bytes_xlated": 320,
               "id": 21,
               "name": "tracepoint__raw",
-              "run_cnt_delta": 87292608,
-              "run_time_ns_delta": 3075339938,
+              "run_cnt_delta": 646856,
+              "run_time_ns_delta": 36721487,
               "type": "raw_tracepoint"
             },
             "22": {
@@ -330,13 +330,13 @@
               "type": "kprobe"
             },
             "29": {
-              "avg_ns_per_run": 8876.666666666666,
+              "avg_ns_per_run": 7063.571428571428,
               "bytes_jited": 19597,
               "bytes_xlated": 32248,
               "id": 29,
               "name": "tracepoint__sch",
-              "run_cnt_delta": 6,
-              "run_time_ns_delta": 53260,
+              "run_cnt_delta": 7,
+              "run_time_ns_delta": 49445,
               "type": "raw_tracepoint"
             },
             "30": {
@@ -352,9 +352,9 @@
           },
           "summary": {
             "active_programs": 3,
-            "avg_ns_per_run": 32.33818790229565,
-            "total_events": 174585222,
-            "total_run_time_ns": 5645769714
+            "avg_ns_per_run": 46.86608838549948,
+            "total_events": 1293719,
+            "total_run_time_ns": 60631549
           }
         },
         "command_template": "fio --name=test --rw=randread --bs=4k --size=100M --runtime={duration} --time_based",
@@ -363,42 +363,42 @@
           "lost_event_count": 0,
           "lost_write_count": 0
         },
-        "duration_s": 60.786238227,
+        "duration_s": 66.50069965399999,
         "event_counts": {
           "execve": 4,
           "sched_process_exec": 2,
-          "security_file_open": 368
+          "security_file_open": 364
         },
-        "events_per_sec": 6.152708423958318,
-        "events_total": 374,
+        "events_per_sec": 5.56385123652973,
+        "events_total": 370,
         "kind": "file_io",
         "metric": "IOPS",
         "name": "file_io",
-        "ops_per_sec": 718511.1675589788,
-        "ops_total": 43675591.0,
+        "ops_per_sec": 4332.315321477536,
+        "ops_total": 288102.0,
         "stderr_tail": "",
-        "stdout_tail": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.010000,\n        \"750\" : 29.023479,\n        \"1000\" : 35.800924\n      },\n      \"latency_us\" : {\n        \"2\" : 34.390120,\n        \"4\" : 0.603632,\n        \"10\" : 0.179318,\n        \"20\" : 0.010000,\n        \"50\" : 0.010000,\n        \"100\" : 0.010000,\n        \"250\" : 0.010000,\n        \"500\" : 0.010000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.010000,\n        \"4\" : 0.010000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}",
+        "stdout_tail": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000\n      },\n      \"latency_us\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 89.574873,\n        \"500\" : 9.680252,\n        \"750\" : 0.529674,\n        \"1000\" : 0.071850\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.098229,\n        \"4\" : 0.043387,\n        \"10\" : 0.010000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}",
         "system_cpu": {
-          "busy_pct": 24.989578991246354
+          "busy_pct": 1.770689438653772
         }
       },
       {
         "agent_cpu": {
-          "sys_pct": 5.583279658753499,
-          "total_pct": 21.683124883696422,
-          "user_pct": 16.099845224942925
+          "sys_pct": 5.666654470987359,
+          "total_pct": 21.633286774534092,
+          "user_pct": 15.966632303546735
         },
-        "app_throughput": 4991.6710607426385,
+        "app_throughput": 4871.188601990146,
         "bpf": {
           "programs": {
             "17": {
-              "avg_ns_per_run": 32.957853497429,
+              "avg_ns_per_run": 33.192613358732466,
               "bytes_jited": 246,
               "bytes_xlated": 264,
               "id": 17,
               "name": "tracepoint__raw",
-              "run_cnt_delta": 25778865,
-              "run_time_ns_delta": 849616056,
+              "run_cnt_delta": 25086422,
+              "run_time_ns_delta": 832683906,
               "type": "raw_tracepoint"
             },
             "19": {
@@ -422,13 +422,13 @@
               "type": "raw_tracepoint"
             },
             "21": {
-              "avg_ns_per_run": 43.111257923884544,
+              "avg_ns_per_run": 43.42010359229387,
               "bytes_jited": 274,
               "bytes_xlated": 320,
               "id": 21,
               "name": "tracepoint__raw",
-              "run_cnt_delta": 25778865,
-              "run_time_ns_delta": 1111359298,
+              "run_cnt_delta": 25086422,
+              "run_time_ns_delta": 1089255042,
               "type": "raw_tracepoint"
             },
             "22": {
@@ -502,13 +502,13 @@
               "type": "kprobe"
             },
             "29": {
-              "avg_ns_per_run": 1040.7614128135338,
+              "avg_ns_per_run": 1053.3853606506377,
               "bytes_jited": 19597,
               "bytes_xlated": 32248,
               "id": 29,
               "name": "tracepoint__sch",
-              "run_cnt_delta": 300167,
-              "run_time_ns_delta": 312402231,
+              "run_cnt_delta": 292513,
+              "run_time_ns_delta": 308128912,
               "type": "raw_tracepoint"
             },
             "30": {
@@ -524,9 +524,9 @@
           },
           "summary": {
             "active_programs": 3,
-            "avg_ns_per_run": 43.83859964471756,
-            "total_events": 51857897,
-            "total_run_time_ns": 2273377585
+            "avg_ns_per_run": 44.19007399472078,
+            "total_events": 50465357,
+            "total_run_time_ns": 2230067860
           }
         },
         "command_template": "wrk -t2 -c10 -d{duration}s http://127.0.0.1:{port}/",
@@ -535,31 +535,149 @@
           "lost_event_count": 0,
           "lost_write_count": 0
         },
-        "duration_s": 60.13076509799998,
+        "duration_s": 60.04674092900001,
         "event_counts": {
           "execve": 4,
           "sched_process_exec": 2,
-          "security_file_open": 118,
-          "security_socket_connect": 300166
+          "security_file_open": 122,
+          "security_socket_connect": 292512
         },
-        "events_per_sec": 4993.949428559457,
-        "events_total": 300290,
+        "events_per_sec": 4873.536772728782,
+        "events_total": 292640,
         "kind": "network",
         "metric": "req/s",
         "name": "network",
-        "ops_per_sec": 4991.6710607426385,
-        "ops_total": 300153.0,
+        "ops_per_sec": 4871.188601990146,
+        "ops_total": 292499.0,
         "stderr_tail": "",
-        "stdout_tail": "Running 1m test @ http://127.0.0.1:33263/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     2.04ms   11.80ms 416.41ms   99.29%\n    Req/Sec     2.51k   719.71     5.01k    53.04%\n  300153 requests in 1.00m, 44.37MB read\nRequests/sec:   4994.27\nTransfer/sec:    755.98KB",
+        "stdout_tail": "Running 1m test @ http://127.0.0.1:38545/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     1.82ms   11.18ms 418.41ms   99.57%\n    Req/Sec     2.45k   725.87     4.23k    50.67%\n  292499 requests in 1.00m, 43.24MB read\nRequests/sec:   4874.82\nTransfer/sec:    737.89KB",
         "system_cpu": {
-          "busy_pct": 40.509119197856336
+          "busy_pct": 40.43233895373973
         }
       }
     ]
   },
   "comparison": {
-    "comparable": false,
-    "reason": "recompile did not apply successfully"
+    "comparable": true,
+    "programs": [
+      {
+        "baseline_avg_ns_per_run": 37.613695502574146,
+        "delta_pct": -0.18602737486145157,
+        "id": 17,
+        "name": "tracepoint__raw",
+        "post_avg_ns_per_run": 37.54372373224233
+      },
+      {
+        "baseline_avg_ns_per_run": null,
+        "delta_pct": null,
+        "id": 19,
+        "name": "sys_enter_init",
+        "post_avg_ns_per_run": null
+      },
+      {
+        "baseline_avg_ns_per_run": null,
+        "delta_pct": null,
+        "id": 20,
+        "name": "sys_enter_submi",
+        "post_avg_ns_per_run": null
+      },
+      {
+        "baseline_avg_ns_per_run": 46.465710557774706,
+        "delta_pct": -0.7353492747334845,
+        "id": 21,
+        "name": "tracepoint__raw",
+        "post_avg_ns_per_run": 46.12402529218835
+      },
+      {
+        "baseline_avg_ns_per_run": null,
+        "delta_pct": null,
+        "id": 22,
+        "name": "sys_exit_init",
+        "post_avg_ns_per_run": null
+      },
+      {
+        "baseline_avg_ns_per_run": null,
+        "delta_pct": null,
+        "id": 23,
+        "name": "sys_exit_submit",
+        "post_avg_ns_per_run": null
+      },
+      {
+        "baseline_avg_ns_per_run": null,
+        "delta_pct": null,
+        "id": 24,
+        "name": "syscall__execve",
+        "post_avg_ns_per_run": null
+      },
+      {
+        "baseline_avg_ns_per_run": null,
+        "delta_pct": null,
+        "id": 25,
+        "name": "syscall__execve",
+        "post_avg_ns_per_run": null
+      },
+      {
+        "baseline_avg_ns_per_run": null,
+        "delta_pct": null,
+        "id": 26,
+        "name": "syscall__execve",
+        "post_avg_ns_per_run": null
+      },
+      {
+        "baseline_avg_ns_per_run": null,
+        "delta_pct": null,
+        "id": 27,
+        "name": "syscall__execve",
+        "post_avg_ns_per_run": null
+      },
+      {
+        "baseline_avg_ns_per_run": null,
+        "delta_pct": null,
+        "id": 28,
+        "name": "sys_dup_exit_ta",
+        "post_avg_ns_per_run": null
+      },
+      {
+        "baseline_avg_ns_per_run": 1157.8236105917044,
+        "delta_pct": -1.5311669520593298,
+        "id": 29,
+        "name": "tracepoint__sch",
+        "post_avg_ns_per_run": 1140.0953981031842
+      },
+      {
+        "baseline_avg_ns_per_run": null,
+        "delta_pct": null,
+        "id": 30,
+        "name": "lkm_seeker_modt",
+        "post_avg_ns_per_run": null
+      }
+    ],
+    "workloads": [
+      {
+        "agent_cpu_delta_pct": 0.5434116593509172,
+        "app_throughput_delta_pct": 6.27750423742498,
+        "bpf_avg_ns_delta_pct": -4.223073435539174,
+        "events_per_sec_delta_pct": 6.168968690183617,
+        "lost_event_count_delta": 0,
+        "name": "exec_storm"
+      },
+      {
+        "agent_cpu_delta_pct": -0.00017353953486596405,
+        "app_throughput_delta_pct": 6.999726088789866,
+        "bpf_avg_ns_delta_pct": 2.6699549845722617,
+        "events_per_sec_delta_pct": 1.2079011974046703,
+        "lost_event_count_delta": 0,
+        "name": "file_io"
+      },
+      {
+        "agent_cpu_delta_pct": 0.770514450361979,
+        "app_throughput_delta_pct": 1.4358851846422713,
+        "bpf_avg_ns_delta_pct": -0.3538160987064033,
+        "events_per_sec_delta_pct": 1.4300861695199523,
+        "lost_event_count_delta": 0,
+        "name": "network"
+      }
+    ]
   },
   "config": {
     "events": [
@@ -593,17 +711,15 @@
     ]
   },
   "duration_s": 60,
-  "generated_at": "2026-03-13T19:27:15.921898+00:00",
+  "generated_at": "2026-03-13T22:29:19.047527+00:00",
   "host": {
     "git_sha": "unknown",
     "hostname": "virtme-ng",
-    "kernel": "7.0.0-rc2-ga7ce05b49cb2-dirty",
-    "platform": "Linux-7.0.0-rc2-ga7ce05b49cb2-dirty-x86_64-with-glibc2.39",
+    "kernel": "7.0.0-rc2-gac593b2c1c6f-dirty",
+    "platform": "Linux-7.0.0-rc2-gac593b2c1c6f-dirty-x86_64-with-glibc2.39",
     "python": "3.12.3"
   },
-  "limitations": [
-    "BPF_PROG_JIT_RECOMPILE did not apply on this kernel; post-ReJIT measurement was skipped."
-  ],
+  "limitations": [],
   "mode": "tracee_daemon",
   "policy_matches": {
     "19": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/sys_enter_init.policy.yaml",
@@ -622,7 +738,566 @@
     "configured_programs": 11,
     "fallback_programs": 2
   },
-  "post_rejit": null,
+  "post_rejit": {
+    "summary": {
+      "agent_cpu_total_pct": {
+        "count": 3,
+        "max": 21.799974375220124,
+        "mean": 10.388872972735243,
+        "median": 9.249978189013932,
+        "min": 0.11666635397167141
+      },
+      "app_throughput": {
+        "count": 3,
+        "max": 4941.133277442105,
+        "mean": 3249.093865751588,
+        "median": 4635.565527283639,
+        "min": 170.58279252902014
+      },
+      "bpf_avg_ns_per_run": {
+        "count": 3,
+        "max": 91.59464585621754,
+        "mean": 61.248586701178965,
+        "median": 48.117391848422166,
+        "min": 44.03372239889718
+      },
+      "events_per_sec": {
+        "count": 3,
+        "max": 4943.2325480820455,
+        "mean": 2218.752730711437,
+        "median": 1707.3945869900283,
+        "min": 5.631057062237587
+      },
+      "system_cpu_busy_pct": {
+        "count": 3,
+        "max": 40.62864801764019,
+        "mean": 17.067735486496414,
+        "median": 8.902934159306852,
+        "min": 1.6716242825422056
+      }
+    },
+    "workloads": [
+      {
+        "agent_cpu": {
+          "sys_pct": 2.4833274777713084,
+          "total_pct": 9.249978189013932,
+          "user_pct": 6.766650711242624
+        },
+        "app_throughput": 170.58279252902014,
+        "bpf": {
+          "programs": {
+            "17": {
+              "avg_ns_per_run": 88.42675234017454,
+              "bytes_jited": 246,
+              "bytes_xlated": 264,
+              "id": 17,
+              "name": "tracepoint__raw",
+              "run_cnt_delta": 2163407,
+              "run_time_ns_delta": 191303055,
+              "type": "raw_tracepoint"
+            },
+            "19": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 2518,
+              "bytes_xlated": 4552,
+              "id": 19,
+              "name": "sys_enter_init",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "20": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 17414,
+              "bytes_xlated": 30376,
+              "id": 20,
+              "name": "sys_enter_submi",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "21": {
+              "avg_ns_per_run": 76.21411597540362,
+              "bytes_jited": 274,
+              "bytes_xlated": 320,
+              "id": 21,
+              "name": "tracepoint__raw",
+              "run_cnt_delta": 2163407,
+              "run_time_ns_delta": 164882152,
+              "type": "raw_tracepoint"
+            },
+            "22": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 2101,
+              "bytes_xlated": 3800,
+              "id": 22,
+              "name": "sys_exit_init",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "23": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 11522,
+              "bytes_xlated": 19880,
+              "id": 23,
+              "name": "sys_exit_submit",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "24": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 20392,
+              "bytes_xlated": 31992,
+              "id": 24,
+              "name": "syscall__execve",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "25": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 20363,
+              "bytes_xlated": 32008,
+              "id": 25,
+              "name": "syscall__execve",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "26": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 20651,
+              "bytes_xlated": 32400,
+              "id": 26,
+              "name": "syscall__execve",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "27": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 20619,
+              "bytes_xlated": 32408,
+              "id": 27,
+              "name": "syscall__execve",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "28": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 12263,
+              "bytes_xlated": 18744,
+              "id": 28,
+              "name": "sys_dup_exit_ta",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "29": {
+              "avg_ns_per_run": 4011.089568275054,
+              "bytes_jited": 19597,
+              "bytes_xlated": 32248,
+              "id": 29,
+              "name": "tracepoint__sch",
+              "run_cnt_delta": 10238,
+              "run_time_ns_delta": 41065535,
+              "type": "raw_tracepoint"
+            },
+            "30": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 58565,
+              "bytes_xlated": 108072,
+              "id": 30,
+              "name": "lkm_seeker_modt",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            }
+          },
+          "summary": {
+            "active_programs": 3,
+            "avg_ns_per_run": 91.59464585621754,
+            "total_events": 4337052,
+            "total_run_time_ns": 397250742
+          }
+        },
+        "command_template": "stress-ng --exec 4 --exec-method execve --timeout {duration}s --metrics-brief",
+        "drop_counters": {
+          "event_count": 0,
+          "lost_event_count": 0,
+          "lost_write_count": 0
+        },
+        "duration_s": 60.00019021999998,
+        "event_counts": {
+          "execve": 10238,
+          "sched_process_exec": 10236,
+          "security_file_open": 81970,
+          "security_socket_connect": 0
+        },
+        "events_per_sec": 1707.3945869900283,
+        "events_total": 102444,
+        "kind": "exec_storm",
+        "metric": "bogo-ops/s",
+        "name": "exec_storm",
+        "ops_per_sec": 170.58279252902014,
+        "ops_total": 10235.0,
+        "stderr_tail": "fallback=rapid_exec_loop",
+        "stdout_tail": "",
+        "system_cpu": {
+          "busy_pct": 8.902934159306852
+        }
+      },
+      {
+        "agent_cpu": {
+          "sys_pct": 0.03333324399190612,
+          "total_pct": 0.11666635397167141,
+          "user_pct": 0.08333310997976529
+        },
+        "app_throughput": 4635.565527283639,
+        "bpf": {
+          "programs": {
+            "17": {
+              "avg_ns_per_run": 38.75207875722118,
+              "bytes_jited": 246,
+              "bytes_xlated": 264,
+              "id": 17,
+              "name": "tracepoint__raw",
+              "run_cnt_delta": 679252,
+              "run_time_ns_delta": 26322427,
+              "type": "raw_tracepoint"
+            },
+            "19": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 2518,
+              "bytes_xlated": 4552,
+              "id": 19,
+              "name": "sys_enter_init",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "20": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 17414,
+              "bytes_xlated": 30376,
+              "id": 20,
+              "name": "sys_enter_submi",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "21": {
+              "avg_ns_per_run": 57.43017466271722,
+              "bytes_jited": 274,
+              "bytes_xlated": 320,
+              "id": 21,
+              "name": "tracepoint__raw",
+              "run_cnt_delta": 679252,
+              "run_time_ns_delta": 39009561,
+              "type": "raw_tracepoint"
+            },
+            "22": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 2101,
+              "bytes_xlated": 3800,
+              "id": 22,
+              "name": "sys_exit_init",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "23": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 11522,
+              "bytes_xlated": 19880,
+              "id": 23,
+              "name": "sys_exit_submit",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "24": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 20392,
+              "bytes_xlated": 31992,
+              "id": 24,
+              "name": "syscall__execve",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "25": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 20363,
+              "bytes_xlated": 32008,
+              "id": 25,
+              "name": "syscall__execve",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "26": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 20651,
+              "bytes_xlated": 32400,
+              "id": 26,
+              "name": "syscall__execve",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "27": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 20619,
+              "bytes_xlated": 32408,
+              "id": 27,
+              "name": "syscall__execve",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "28": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 12263,
+              "bytes_xlated": 18744,
+              "id": 28,
+              "name": "sys_dup_exit_ta",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "29": {
+              "avg_ns_per_run": 5995.0,
+              "bytes_jited": 19597,
+              "bytes_xlated": 32248,
+              "id": 29,
+              "name": "tracepoint__sch",
+              "run_cnt_delta": 6,
+              "run_time_ns_delta": 35970,
+              "type": "raw_tracepoint"
+            },
+            "30": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 58565,
+              "bytes_xlated": 108072,
+              "id": 30,
+              "name": "lkm_seeker_modt",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            }
+          },
+          "summary": {
+            "active_programs": 3,
+            "avg_ns_per_run": 48.117391848422166,
+            "total_events": 1358510,
+            "total_run_time_ns": 65367958
+          }
+        },
+        "command_template": "fio --name=test --rw=randread --bs=4k --size=100M --runtime={duration} --time_based",
+        "drop_counters": {
+          "event_count": 0,
+          "lost_event_count": 0,
+          "lost_write_count": 0
+        },
+        "duration_s": 65.52943717699998,
+        "event_counts": {
+          "execve": 4,
+          "sched_process_exec": 2,
+          "security_file_open": 363,
+          "security_socket_connect": 0
+        },
+        "events_per_sec": 5.631057062237587,
+        "events_total": 369,
+        "kind": "file_io",
+        "metric": "IOPS",
+        "name": "file_io",
+        "ops_per_sec": 4635.565527283639,
+        "ops_total": 303766.0,
+        "stderr_tail": "",
+        "stdout_tail": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000\n      },\n      \"latency_us\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.010000,\n        \"250\" : 94.439470,\n        \"500\" : 5.214211,\n        \"750\" : 0.270603,\n        \"1000\" : 0.026007\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.033578,\n        \"4\" : 0.015472,\n        \"10\" : 0.010000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}",
+        "system_cpu": {
+          "busy_pct": 1.6716242825422056
+        }
+      },
+      {
+        "agent_cpu": {
+          "sys_pct": 5.816659829473871,
+          "total_pct": 21.799974375220124,
+          "user_pct": 15.983314545746254
+        },
+        "app_throughput": 4941.133277442105,
+        "bpf": {
+          "programs": {
+            "17": {
+              "avg_ns_per_run": 33.186242211449375,
+              "bytes_jited": 246,
+              "bytes_xlated": 264,
+              "id": 17,
+              "name": "tracepoint__raw",
+              "run_cnt_delta": 25450820,
+              "run_time_ns_delta": 844617077,
+              "type": "raw_tracepoint"
+            },
+            "19": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 2518,
+              "bytes_xlated": 4552,
+              "id": 19,
+              "name": "sys_enter_init",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "20": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 17414,
+              "bytes_xlated": 30376,
+              "id": 20,
+              "name": "sys_enter_submi",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "21": {
+              "avg_ns_per_run": 43.264516742486094,
+              "bytes_jited": 274,
+              "bytes_xlated": 320,
+              "id": 21,
+              "name": "tracepoint__raw",
+              "run_cnt_delta": 25450820,
+              "run_time_ns_delta": 1101117428,
+              "type": "raw_tracepoint"
+            },
+            "22": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 2101,
+              "bytes_xlated": 3800,
+              "id": 22,
+              "name": "sys_exit_init",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "23": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 11522,
+              "bytes_xlated": 19880,
+              "id": 23,
+              "name": "sys_exit_submit",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "24": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 20392,
+              "bytes_xlated": 31992,
+              "id": 24,
+              "name": "syscall__execve",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "25": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 20363,
+              "bytes_xlated": 32008,
+              "id": 25,
+              "name": "syscall__execve",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "26": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 20651,
+              "bytes_xlated": 32400,
+              "id": 26,
+              "name": "syscall__execve",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "27": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 20619,
+              "bytes_xlated": 32408,
+              "id": 27,
+              "name": "syscall__execve",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "28": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 12263,
+              "bytes_xlated": 18744,
+              "id": 28,
+              "name": "sys_dup_exit_ta",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "29": {
+              "avg_ns_per_run": 1040.8919031916544,
+              "bytes_jited": 19597,
+              "bytes_xlated": 32248,
+              "id": 29,
+              "name": "tracepoint__sch",
+              "run_cnt_delta": 296586,
+              "run_time_ns_delta": 308713966,
+              "type": "raw_tracepoint"
+            },
+            "30": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 58565,
+              "bytes_xlated": 108072,
+              "id": 30,
+              "name": "lkm_seeker_modt",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            }
+          },
+          "summary": {
+            "active_programs": 3,
+            "avg_ns_per_run": 44.03372239889718,
+            "total_events": 51198226,
+            "total_run_time_ns": 2254448471
+          }
+        },
+        "command_template": "wrk -t2 -c10 -d{duration}s http://127.0.0.1:{port}/",
+        "drop_counters": {
+          "event_count": 0,
+          "lost_event_count": 0,
+          "lost_write_count": 0
+        },
+        "duration_s": 60.02084609899998,
+        "event_counts": {
+          "execve": 4,
+          "sched_process_exec": 2,
+          "security_file_open": 109,
+          "security_socket_connect": 296582
+        },
+        "events_per_sec": 4943.2325480820455,
+        "events_total": 296697,
+        "kind": "network",
+        "metric": "req/s",
+        "name": "network",
+        "ops_per_sec": 4941.133277442105,
+        "ops_total": 296571.0,
+        "stderr_tail": "",
+        "stdout_tail": "Running 1m test @ http://127.0.0.1:38117/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     1.83ms   11.34ms 416.58ms   99.54%\n    Req/Sec     2.48k   687.56     4.30k    53.00%\n  296571 requests in 1.00m, 43.84MB read\nRequests/sec:   4942.63\nTransfer/sec:    748.15KB",
+        "system_cpu": {
+          "busy_pct": 40.62864801764019
+        }
+      }
+    ]
+  },
   "recompile_results": {
     "17": {
       "applied": false,
@@ -645,7 +1320,7 @@
       "stdout_tail": ""
     },
     "19": {
-      "applied": false,
+      "applied": true,
       "counts": {
         "bitfield_sites": 0,
         "branch_flip_sites": 2,
@@ -657,16 +1332,53 @@
         "wide_sites": 0,
         "zero_ext_sites": 0
       },
-      "error": "enumerate failed ([Errno 13] Permission denied: '/tmp/e2e-enumerate-policy-dir-_2b6yi71'), legacy apply failed: [Errno 13] Permission denied: '/tmp/e2e-live-policy-q_0e1j12.policy.yaml'",
+      "enumerate_record": {
+        "applied_sites": 2,
+        "name": "sys_enter_init",
+        "prog_id": 19,
+        "recompile_ok": true,
+        "sites": [
+          {
+            "family": "branch-flip",
+            "insn": 29,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 90,
+            "pattern_kind": "branch-flip"
+          }
+        ],
+        "total_sites": 2,
+        "type": "raw_tracepoint"
+      },
+      "error": "",
       "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/sys_enter_init.policy.yaml",
       "policy_mode": "policy-file",
-      "policy_remap": null,
+      "policy_remap": {
+        "dropped_family_counts": {
+          "branch-flip": 3
+        },
+        "dropped_sites": 3,
+        "explicit_sites": 5,
+        "live_family_counts": {
+          "branch-flip": 2
+        },
+        "live_total_sites": 2,
+        "policy_family_counts": {
+          "branch-flip": 5
+        },
+        "remapped_family_counts": {
+          "branch-flip": 2
+        },
+        "remapped_sites": 2
+      },
       "program_name": "sys_enter_init",
       "stderr_tail": "",
-      "stdout_tail": ""
+      "stdout_tail": "enumerate --prog-id 19 --recompile: total_sites=2 applied=True"
     },
     "20": {
-      "applied": false,
+      "applied": true,
       "counts": {
         "bitfield_sites": 0,
         "branch_flip_sites": 5,
@@ -678,13 +1390,88 @@
         "wide_sites": 0,
         "zero_ext_sites": 0
       },
-      "error": "enumerate failed ([Errno 13] Permission denied: '/tmp/e2e-enumerate-policy-dir-dbotid83'), legacy apply failed: [Errno 13] Permission denied: '/tmp/e2e-live-policy-gego8s3l.policy.yaml'",
+      "enumerate_record": {
+        "applied_sites": 5,
+        "name": "sys_enter_submi",
+        "prog_id": 20,
+        "recompile_ok": true,
+        "sites": [
+          {
+            "family": "branch-flip",
+            "insn": 9,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 24,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 166,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 264,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "cmov",
+            "insn": 797,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 800,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 812,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 1479,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "cmov",
+            "insn": 3781,
+            "pattern_kind": "cond-select-64"
+          }
+        ],
+        "total_sites": 9,
+        "type": "raw_tracepoint"
+      },
+      "error": "",
       "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/sys_enter_submit.policy.yaml",
       "policy_mode": "policy-file",
-      "policy_remap": null,
+      "policy_remap": {
+        "dropped_family_counts": {
+          "branch-flip": 6,
+          "extract": 1
+        },
+        "dropped_sites": 7,
+        "explicit_sites": 12,
+        "live_family_counts": {
+          "branch-flip": 5,
+          "cmov": 4
+        },
+        "live_total_sites": 9,
+        "policy_family_counts": {
+          "branch-flip": 11,
+          "extract": 1
+        },
+        "remapped_family_counts": {
+          "branch-flip": 5
+        },
+        "remapped_sites": 5
+      },
       "program_name": "sys_enter_submi",
       "stderr_tail": "",
-      "stdout_tail": ""
+      "stdout_tail": "enumerate --prog-id 20 --recompile: total_sites=9 applied=True"
     },
     "21": {
       "applied": false,
@@ -707,7 +1494,7 @@
       "stdout_tail": ""
     },
     "22": {
-      "applied": false,
+      "applied": true,
       "counts": {
         "bitfield_sites": 0,
         "branch_flip_sites": 2,
@@ -719,16 +1506,53 @@
         "wide_sites": 0,
         "zero_ext_sites": 0
       },
-      "error": "enumerate failed ([Errno 13] Permission denied: '/tmp/e2e-enumerate-policy-dir-83_b_sz0'), legacy apply failed: [Errno 13] Permission denied: '/tmp/e2e-live-policy-dak69lkj.policy.yaml'",
+      "enumerate_record": {
+        "applied_sites": 2,
+        "name": "sys_exit_init",
+        "prog_id": 22,
+        "recompile_ok": true,
+        "sites": [
+          {
+            "family": "branch-flip",
+            "insn": 28,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 89,
+            "pattern_kind": "branch-flip"
+          }
+        ],
+        "total_sites": 2,
+        "type": "raw_tracepoint"
+      },
+      "error": "",
       "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/sys_exit_init.policy.yaml",
       "policy_mode": "policy-file",
-      "policy_remap": null,
+      "policy_remap": {
+        "dropped_family_counts": {
+          "branch-flip": 3
+        },
+        "dropped_sites": 3,
+        "explicit_sites": 5,
+        "live_family_counts": {
+          "branch-flip": 2
+        },
+        "live_total_sites": 2,
+        "policy_family_counts": {
+          "branch-flip": 5
+        },
+        "remapped_family_counts": {
+          "branch-flip": 2
+        },
+        "remapped_sites": 2
+      },
       "program_name": "sys_exit_init",
       "stderr_tail": "",
-      "stdout_tail": ""
+      "stdout_tail": "enumerate --prog-id 22 --recompile: total_sites=2 applied=True"
     },
     "23": {
-      "applied": false,
+      "applied": true,
       "counts": {
         "bitfield_sites": 5,
         "branch_flip_sites": 4,
@@ -740,16 +1564,197 @@
         "wide_sites": 0,
         "zero_ext_sites": 0
       },
-      "error": "enumerate failed ([Errno 13] Permission denied: '/tmp/e2e-enumerate-policy-dir-i878vabo'), legacy apply failed: [Errno 13] Permission denied: '/tmp/e2e-live-policy-kdjqomss.policy.yaml'",
+      "enumerate_record": {
+        "applied_sites": 9,
+        "name": "sys_exit_submit",
+        "prog_id": 23,
+        "recompile_ok": true,
+        "sites": [
+          {
+            "family": "branch-flip",
+            "insn": 9,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 24,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 166,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 263,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "cmov",
+            "insn": 803,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 806,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 818,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1450,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "extract",
+            "insn": 1475,
+            "pattern_kind": "bitfield-extract-64-shift-mask"
+          },
+          {
+            "family": "cmov",
+            "insn": 1497,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1511,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1567,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1594,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "extract",
+            "insn": 1617,
+            "pattern_kind": "bitfield-extract-64-shift-mask"
+          },
+          {
+            "family": "cmov",
+            "insn": 1639,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1653,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1724,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "extract",
+            "insn": 1747,
+            "pattern_kind": "bitfield-extract-64-shift-mask"
+          },
+          {
+            "family": "cmov",
+            "insn": 1769,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1783,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1851,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "extract",
+            "insn": 1874,
+            "pattern_kind": "bitfield-extract-64-shift-mask"
+          },
+          {
+            "family": "cmov",
+            "insn": 1896,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1910,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1978,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "extract",
+            "insn": 2003,
+            "pattern_kind": "bitfield-extract-64-shift-mask"
+          },
+          {
+            "family": "cmov",
+            "insn": 2025,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 2039,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 2106,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 2469,
+            "pattern_kind": "cond-select-64"
+          }
+        ],
+        "total_sites": 30,
+        "type": "raw_tracepoint"
+      },
+      "error": "",
       "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/sys_exit_submit.policy.yaml",
       "policy_mode": "policy-file",
-      "policy_remap": null,
+      "policy_remap": {
+        "dropped_family_counts": {
+          "branch-flip": 7
+        },
+        "dropped_sites": 7,
+        "explicit_sites": 16,
+        "live_family_counts": {
+          "branch-flip": 4,
+          "cmov": 21,
+          "extract": 5
+        },
+        "live_total_sites": 30,
+        "policy_family_counts": {
+          "branch-flip": 11,
+          "extract": 5
+        },
+        "remapped_family_counts": {
+          "branch-flip": 4,
+          "extract": 5
+        },
+        "remapped_sites": 9
+      },
       "program_name": "sys_exit_submit",
       "stderr_tail": "",
-      "stdout_tail": ""
+      "stdout_tail": "enumerate --prog-id 23 --recompile: total_sites=30 applied=True"
     },
     "24": {
-      "applied": false,
+      "applied": true,
       "counts": {
         "bitfield_sites": 0,
         "branch_flip_sites": 2,
@@ -761,16 +1766,84 @@
         "wide_sites": 0,
         "zero_ext_sites": 0
       },
-      "error": "enumerate failed ([Errno 13] Permission denied: '/tmp/e2e-enumerate-policy-dir-1u5t9j53'), legacy apply failed: [Errno 13] Permission denied: '/tmp/e2e-live-policy-9vlqgxso.policy.yaml'",
+      "enumerate_record": {
+        "applied_sites": 2,
+        "name": "syscall__execve",
+        "prog_id": 24,
+        "recompile_ok": true,
+        "sites": [
+          {
+            "family": "branch-flip",
+            "insn": 9,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 24,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "cmov",
+            "insn": 144,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 147,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 160,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1184,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 2589,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 3967,
+            "pattern_kind": "cond-select-64"
+          }
+        ],
+        "total_sites": 8,
+        "type": "raw_tracepoint"
+      },
+      "error": "",
       "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/syscall__execve_enter.policy.yaml",
       "policy_mode": "policy-file",
-      "policy_remap": null,
+      "policy_remap": {
+        "dropped_family_counts": {
+          "branch-flip": 3
+        },
+        "dropped_sites": 3,
+        "explicit_sites": 5,
+        "live_family_counts": {
+          "branch-flip": 2,
+          "cmov": 6
+        },
+        "live_total_sites": 8,
+        "policy_family_counts": {
+          "branch-flip": 5
+        },
+        "remapped_family_counts": {
+          "branch-flip": 2
+        },
+        "remapped_sites": 2
+      },
       "program_name": "syscall__execve",
       "stderr_tail": "",
-      "stdout_tail": ""
+      "stdout_tail": "enumerate --prog-id 24 --recompile: total_sites=8 applied=True"
     },
     "25": {
-      "applied": false,
+      "applied": true,
       "counts": {
         "bitfield_sites": 0,
         "branch_flip_sites": 2,
@@ -782,16 +1855,84 @@
         "wide_sites": 0,
         "zero_ext_sites": 0
       },
-      "error": "enumerate failed ([Errno 13] Permission denied: '/tmp/e2e-enumerate-policy-dir-li59h5tr'), legacy apply failed: [Errno 13] Permission denied: '/tmp/e2e-live-policy-zzmhlr8j.policy.yaml'",
+      "enumerate_record": {
+        "applied_sites": 2,
+        "name": "syscall__execve",
+        "prog_id": 25,
+        "recompile_ok": true,
+        "sites": [
+          {
+            "family": "branch-flip",
+            "insn": 9,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 24,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "cmov",
+            "insn": 144,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 147,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 160,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1186,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 2591,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 3969,
+            "pattern_kind": "cond-select-64"
+          }
+        ],
+        "total_sites": 8,
+        "type": "raw_tracepoint"
+      },
+      "error": "",
       "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/syscall__execve_exit.policy.yaml",
       "policy_mode": "policy-file",
-      "policy_remap": null,
+      "policy_remap": {
+        "dropped_family_counts": {
+          "branch-flip": 3
+        },
+        "dropped_sites": 3,
+        "explicit_sites": 5,
+        "live_family_counts": {
+          "branch-flip": 2,
+          "cmov": 6
+        },
+        "live_total_sites": 8,
+        "policy_family_counts": {
+          "branch-flip": 5
+        },
+        "remapped_family_counts": {
+          "branch-flip": 2
+        },
+        "remapped_sites": 2
+      },
       "program_name": "syscall__execve",
       "stderr_tail": "",
-      "stdout_tail": ""
+      "stdout_tail": "enumerate --prog-id 25 --recompile: total_sites=8 applied=True"
     },
     "26": {
-      "applied": false,
+      "applied": true,
       "counts": {
         "bitfield_sites": 0,
         "branch_flip_sites": 2,
@@ -803,16 +1944,84 @@
         "wide_sites": 0,
         "zero_ext_sites": 0
       },
-      "error": "enumerate failed ([Errno 13] Permission denied: '/tmp/e2e-enumerate-policy-dir-xi5yxoot'), legacy apply failed: [Errno 13] Permission denied: '/tmp/e2e-live-policy-r41ug0vv.policy.yaml'",
+      "enumerate_record": {
+        "applied_sites": 2,
+        "name": "syscall__execve",
+        "prog_id": 26,
+        "recompile_ok": true,
+        "sites": [
+          {
+            "family": "branch-flip",
+            "insn": 9,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 24,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "cmov",
+            "insn": 144,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 147,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 160,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1212,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 2640,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 4018,
+            "pattern_kind": "cond-select-64"
+          }
+        ],
+        "total_sites": 8,
+        "type": "raw_tracepoint"
+      },
+      "error": "",
       "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/syscall__execveat_enter.policy.yaml",
       "policy_mode": "policy-file",
-      "policy_remap": null,
+      "policy_remap": {
+        "dropped_family_counts": {
+          "branch-flip": 3
+        },
+        "dropped_sites": 3,
+        "explicit_sites": 5,
+        "live_family_counts": {
+          "branch-flip": 2,
+          "cmov": 6
+        },
+        "live_total_sites": 8,
+        "policy_family_counts": {
+          "branch-flip": 5
+        },
+        "remapped_family_counts": {
+          "branch-flip": 2
+        },
+        "remapped_sites": 2
+      },
       "program_name": "syscall__execve",
       "stderr_tail": "",
-      "stdout_tail": ""
+      "stdout_tail": "enumerate --prog-id 26 --recompile: total_sites=8 applied=True"
     },
     "27": {
-      "applied": false,
+      "applied": true,
       "counts": {
         "bitfield_sites": 0,
         "branch_flip_sites": 2,
@@ -824,16 +2033,84 @@
         "wide_sites": 0,
         "zero_ext_sites": 0
       },
-      "error": "enumerate failed ([Errno 13] Permission denied: '/tmp/e2e-enumerate-policy-dir-jiowcisl'), legacy apply failed: [Errno 13] Permission denied: '/tmp/e2e-live-policy-omgp9635.policy.yaml'",
+      "enumerate_record": {
+        "applied_sites": 2,
+        "name": "syscall__execve",
+        "prog_id": 27,
+        "recompile_ok": true,
+        "sites": [
+          {
+            "family": "branch-flip",
+            "insn": 9,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 24,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "cmov",
+            "insn": 144,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 147,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 160,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1213,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 2641,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 4019,
+            "pattern_kind": "cond-select-64"
+          }
+        ],
+        "total_sites": 8,
+        "type": "raw_tracepoint"
+      },
+      "error": "",
       "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/syscall__execveat_exit.policy.yaml",
       "policy_mode": "policy-file",
-      "policy_remap": null,
+      "policy_remap": {
+        "dropped_family_counts": {
+          "branch-flip": 3
+        },
+        "dropped_sites": 3,
+        "explicit_sites": 5,
+        "live_family_counts": {
+          "branch-flip": 2,
+          "cmov": 6
+        },
+        "live_total_sites": 8,
+        "policy_family_counts": {
+          "branch-flip": 5
+        },
+        "remapped_family_counts": {
+          "branch-flip": 2
+        },
+        "remapped_sites": 2
+      },
       "program_name": "syscall__execve",
       "stderr_tail": "",
-      "stdout_tail": ""
+      "stdout_tail": "enumerate --prog-id 27 --recompile: total_sites=8 applied=True"
     },
     "28": {
-      "applied": false,
+      "applied": true,
       "counts": {
         "bitfield_sites": 0,
         "branch_flip_sites": 2,
@@ -845,16 +2122,104 @@
         "wide_sites": 0,
         "zero_ext_sites": 0
       },
-      "error": "enumerate failed ([Errno 13] Permission denied: '/tmp/e2e-enumerate-policy-dir-yg2dcx8x'), legacy apply failed: [Errno 13] Permission denied: '/tmp/e2e-live-policy-rno471c6.policy.yaml'",
+      "enumerate_record": {
+        "applied_sites": 2,
+        "name": "sys_dup_exit_ta",
+        "prog_id": 28,
+        "recompile_ok": true,
+        "sites": [
+          {
+            "family": "branch-flip",
+            "insn": 9,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 24,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "cmov",
+            "insn": 137,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 140,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 153,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1360,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1375,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1735,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1945,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1960,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 2320,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 2339,
+            "pattern_kind": "cond-select-64"
+          }
+        ],
+        "total_sites": 12,
+        "type": "kprobe"
+      },
+      "error": "",
       "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/sys_dup_exit_tail.policy.yaml",
       "policy_mode": "policy-file",
-      "policy_remap": null,
+      "policy_remap": {
+        "dropped_family_counts": {
+          "branch-flip": 9
+        },
+        "dropped_sites": 9,
+        "explicit_sites": 11,
+        "live_family_counts": {
+          "branch-flip": 2,
+          "cmov": 10
+        },
+        "live_total_sites": 12,
+        "policy_family_counts": {
+          "branch-flip": 11
+        },
+        "remapped_family_counts": {
+          "branch-flip": 2
+        },
+        "remapped_sites": 2
+      },
       "program_name": "sys_dup_exit_ta",
       "stderr_tail": "",
-      "stdout_tail": ""
+      "stdout_tail": "enumerate --prog-id 28 --recompile: total_sites=12 applied=True"
     },
     "29": {
-      "applied": false,
+      "applied": true,
       "counts": {
         "bitfield_sites": 0,
         "branch_flip_sites": 10,
@@ -866,16 +2231,129 @@
         "wide_sites": 0,
         "zero_ext_sites": 0
       },
-      "error": "enumerate failed ([Errno 13] Permission denied: '/tmp/e2e-enumerate-policy-dir-j6o3gd0z'), legacy apply failed: [Errno 13] Permission denied: '/tmp/e2e-live-policy-9dmq5m4q.policy.yaml'",
+      "enumerate_record": {
+        "applied_sites": 10,
+        "name": "tracepoint__sch",
+        "prog_id": 29,
+        "recompile_ok": true,
+        "sites": [
+          {
+            "family": "branch-flip",
+            "insn": 9,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 24,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 166,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 266,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 884,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 1089,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 1183,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "cmov",
+            "insn": 1261,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1264,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1276,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 1572,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 1985,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "cmov",
+            "insn": 2094,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 2097,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 2109,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 3762,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 3817,
+            "pattern_kind": "branch-flip"
+          }
+        ],
+        "total_sites": 17,
+        "type": "raw_tracepoint"
+      },
+      "error": "",
       "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/tracepoint__sched__sched_process_fork.policy.yaml",
       "policy_mode": "policy-file",
-      "policy_remap": null,
+      "policy_remap": {
+        "dropped_family_counts": {
+          "branch-flip": 10
+        },
+        "dropped_sites": 10,
+        "explicit_sites": 20,
+        "live_family_counts": {
+          "branch-flip": 10,
+          "cmov": 7
+        },
+        "live_total_sites": 17,
+        "policy_family_counts": {
+          "branch-flip": 20
+        },
+        "remapped_family_counts": {
+          "branch-flip": 10
+        },
+        "remapped_sites": 10
+      },
       "program_name": "tracepoint__sch",
       "stderr_tail": "",
-      "stdout_tail": ""
+      "stdout_tail": "enumerate --prog-id 29 --recompile: total_sites=17 applied=True"
     },
     "30": {
-      "applied": false,
+      "applied": true,
       "counts": {
         "bitfield_sites": 0,
         "branch_flip_sites": 4,
@@ -887,31 +2365,177 @@
         "wide_sites": 0,
         "zero_ext_sites": 0
       },
-      "error": "enumerate failed ([Errno 13] Permission denied: '/tmp/e2e-enumerate-policy-dir-m_vjl23_'), legacy apply failed: [Errno 13] Permission denied: '/tmp/e2e-live-policy-5osrroge.policy.yaml'",
+      "enumerate_record": {
+        "applied_sites": 4,
+        "name": "lkm_seeker_modt",
+        "prog_id": 30,
+        "recompile_ok": true,
+        "sites": [
+          {
+            "family": "branch-flip",
+            "insn": 9,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 24,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 65,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "cmov",
+            "insn": 1108,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1717,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 2326,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 2935,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 3544,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 4153,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 4762,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 5371,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 5980,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 6589,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 7198,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 7807,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 8416,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 9025,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 9634,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 10243,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 10852,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 11461,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 12070,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 12270,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 12313,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "cmov",
+            "insn": 12919,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 13473,
+            "pattern_kind": "cond-select-64"
+          }
+        ],
+        "total_sites": 26,
+        "type": "kprobe"
+      },
+      "error": "",
       "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/lkm_seeker_modtree_loop.policy.yaml",
       "policy_mode": "policy-file",
-      "policy_remap": null,
+      "policy_remap": {
+        "dropped_family_counts": {
+          "branch-flip": 81
+        },
+        "dropped_sites": 81,
+        "explicit_sites": 85,
+        "live_family_counts": {
+          "branch-flip": 4,
+          "cmov": 22
+        },
+        "live_total_sites": 26,
+        "policy_family_counts": {
+          "branch-flip": 85
+        },
+        "remapped_family_counts": {
+          "branch-flip": 4
+        },
+        "remapped_sites": 4
+      },
       "program_name": "lkm_seeker_modt",
       "stderr_tail": "",
-      "stdout_tail": ""
+      "stdout_tail": "enumerate --prog-id 30 --recompile: total_sites=26 applied=True"
     }
   },
   "recompile_summary": {
-    "applied": false,
-    "applied_programs": 0,
-    "errors": [
-      "enumerate failed ([Errno 13] Permission denied: '/tmp/e2e-enumerate-policy-dir-1u5t9j53'), legacy apply failed: [Errno 13] Permission denied: '/tmp/e2e-live-policy-9vlqgxso.policy.yaml'",
-      "enumerate failed ([Errno 13] Permission denied: '/tmp/e2e-enumerate-policy-dir-83_b_sz0'), legacy apply failed: [Errno 13] Permission denied: '/tmp/e2e-live-policy-dak69lkj.policy.yaml'",
-      "enumerate failed ([Errno 13] Permission denied: '/tmp/e2e-enumerate-policy-dir-_2b6yi71'), legacy apply failed: [Errno 13] Permission denied: '/tmp/e2e-live-policy-q_0e1j12.policy.yaml'",
-      "enumerate failed ([Errno 13] Permission denied: '/tmp/e2e-enumerate-policy-dir-dbotid83'), legacy apply failed: [Errno 13] Permission denied: '/tmp/e2e-live-policy-gego8s3l.policy.yaml'",
-      "enumerate failed ([Errno 13] Permission denied: '/tmp/e2e-enumerate-policy-dir-i878vabo'), legacy apply failed: [Errno 13] Permission denied: '/tmp/e2e-live-policy-kdjqomss.policy.yaml'",
-      "enumerate failed ([Errno 13] Permission denied: '/tmp/e2e-enumerate-policy-dir-j6o3gd0z'), legacy apply failed: [Errno 13] Permission denied: '/tmp/e2e-live-policy-9dmq5m4q.policy.yaml'",
-      "enumerate failed ([Errno 13] Permission denied: '/tmp/e2e-enumerate-policy-dir-jiowcisl'), legacy apply failed: [Errno 13] Permission denied: '/tmp/e2e-live-policy-omgp9635.policy.yaml'",
-      "enumerate failed ([Errno 13] Permission denied: '/tmp/e2e-enumerate-policy-dir-li59h5tr'), legacy apply failed: [Errno 13] Permission denied: '/tmp/e2e-live-policy-zzmhlr8j.policy.yaml'",
-      "enumerate failed ([Errno 13] Permission denied: '/tmp/e2e-enumerate-policy-dir-m_vjl23_'), legacy apply failed: [Errno 13] Permission denied: '/tmp/e2e-live-policy-5osrroge.policy.yaml'",
-      "enumerate failed ([Errno 13] Permission denied: '/tmp/e2e-enumerate-policy-dir-xi5yxoot'), legacy apply failed: [Errno 13] Permission denied: '/tmp/e2e-live-policy-r41ug0vv.policy.yaml'",
-      "enumerate failed ([Errno 13] Permission denied: '/tmp/e2e-enumerate-policy-dir-yg2dcx8x'), legacy apply failed: [Errno 13] Permission denied: '/tmp/e2e-live-policy-rno471c6.policy.yaml'"
-    ],
+    "applied": true,
+    "applied_programs": 11,
+    "errors": [],
     "requested_programs": 13
   },
   "scan_results": {
@@ -921,6 +2545,7 @@
         "name": "tracepoint__raw",
         "prog_id": 17,
         "recompile_ok": false,
+        "sites": [],
         "total_sites": 0,
         "type": "raw_tracepoint"
       },
@@ -946,6 +2571,18 @@
         "name": "sys_enter_init",
         "prog_id": 19,
         "recompile_ok": false,
+        "sites": [
+          {
+            "family": "branch-flip",
+            "insn": 29,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 90,
+            "pattern_kind": "branch-flip"
+          }
+        ],
         "total_sites": 2,
         "type": "raw_tracepoint"
       },
@@ -953,7 +2590,7 @@
       "program_name": "sys_enter_init",
       "sites": {
         "bitfield_sites": 0,
-        "branch_flip_sites": 0,
+        "branch_flip_sites": 2,
         "cmov_sites": 0,
         "endian_sites": 0,
         "lea_sites": 0,
@@ -971,6 +2608,53 @@
         "name": "sys_enter_submi",
         "prog_id": 20,
         "recompile_ok": false,
+        "sites": [
+          {
+            "family": "branch-flip",
+            "insn": 9,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 24,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 166,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 264,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "cmov",
+            "insn": 797,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 800,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 812,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 1479,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "cmov",
+            "insn": 3781,
+            "pattern_kind": "cond-select-64"
+          }
+        ],
         "total_sites": 9,
         "type": "raw_tracepoint"
       },
@@ -978,8 +2662,8 @@
       "program_name": "sys_enter_submi",
       "sites": {
         "bitfield_sites": 0,
-        "branch_flip_sites": 0,
-        "cmov_sites": 0,
+        "branch_flip_sites": 5,
+        "cmov_sites": 4,
         "endian_sites": 0,
         "lea_sites": 0,
         "rotate_sites": 0,
@@ -996,6 +2680,7 @@
         "name": "tracepoint__raw",
         "prog_id": 21,
         "recompile_ok": false,
+        "sites": [],
         "total_sites": 0,
         "type": "raw_tracepoint"
       },
@@ -1021,6 +2706,18 @@
         "name": "sys_exit_init",
         "prog_id": 22,
         "recompile_ok": false,
+        "sites": [
+          {
+            "family": "branch-flip",
+            "insn": 28,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 89,
+            "pattern_kind": "branch-flip"
+          }
+        ],
         "total_sites": 2,
         "type": "raw_tracepoint"
       },
@@ -1028,7 +2725,7 @@
       "program_name": "sys_exit_init",
       "sites": {
         "bitfield_sites": 0,
-        "branch_flip_sites": 0,
+        "branch_flip_sites": 2,
         "cmov_sites": 0,
         "endian_sites": 0,
         "lea_sites": 0,
@@ -1046,15 +2743,167 @@
         "name": "sys_exit_submit",
         "prog_id": 23,
         "recompile_ok": false,
+        "sites": [
+          {
+            "family": "branch-flip",
+            "insn": 9,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 24,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 166,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 263,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "cmov",
+            "insn": 803,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 806,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 818,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1450,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "extract",
+            "insn": 1475,
+            "pattern_kind": "bitfield-extract-64-shift-mask"
+          },
+          {
+            "family": "cmov",
+            "insn": 1497,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1511,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1567,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1594,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "extract",
+            "insn": 1617,
+            "pattern_kind": "bitfield-extract-64-shift-mask"
+          },
+          {
+            "family": "cmov",
+            "insn": 1639,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1653,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1724,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "extract",
+            "insn": 1747,
+            "pattern_kind": "bitfield-extract-64-shift-mask"
+          },
+          {
+            "family": "cmov",
+            "insn": 1769,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1783,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1851,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "extract",
+            "insn": 1874,
+            "pattern_kind": "bitfield-extract-64-shift-mask"
+          },
+          {
+            "family": "cmov",
+            "insn": 1896,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1910,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1978,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "extract",
+            "insn": 2003,
+            "pattern_kind": "bitfield-extract-64-shift-mask"
+          },
+          {
+            "family": "cmov",
+            "insn": 2025,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 2039,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 2106,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 2469,
+            "pattern_kind": "cond-select-64"
+          }
+        ],
         "total_sites": 30,
         "type": "raw_tracepoint"
       },
       "error": "",
       "program_name": "sys_exit_submit",
       "sites": {
-        "bitfield_sites": 0,
-        "branch_flip_sites": 0,
-        "cmov_sites": 0,
+        "bitfield_sites": 5,
+        "branch_flip_sites": 4,
+        "cmov_sites": 21,
         "endian_sites": 0,
         "lea_sites": 0,
         "rotate_sites": 0,
@@ -1071,6 +2920,48 @@
         "name": "syscall__execve",
         "prog_id": 24,
         "recompile_ok": false,
+        "sites": [
+          {
+            "family": "branch-flip",
+            "insn": 9,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 24,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "cmov",
+            "insn": 144,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 147,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 160,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1184,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 2589,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 3967,
+            "pattern_kind": "cond-select-64"
+          }
+        ],
         "total_sites": 8,
         "type": "raw_tracepoint"
       },
@@ -1078,8 +2969,8 @@
       "program_name": "syscall__execve",
       "sites": {
         "bitfield_sites": 0,
-        "branch_flip_sites": 0,
-        "cmov_sites": 0,
+        "branch_flip_sites": 2,
+        "cmov_sites": 6,
         "endian_sites": 0,
         "lea_sites": 0,
         "rotate_sites": 0,
@@ -1096,6 +2987,48 @@
         "name": "syscall__execve",
         "prog_id": 25,
         "recompile_ok": false,
+        "sites": [
+          {
+            "family": "branch-flip",
+            "insn": 9,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 24,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "cmov",
+            "insn": 144,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 147,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 160,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1186,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 2591,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 3969,
+            "pattern_kind": "cond-select-64"
+          }
+        ],
         "total_sites": 8,
         "type": "raw_tracepoint"
       },
@@ -1103,8 +3036,8 @@
       "program_name": "syscall__execve",
       "sites": {
         "bitfield_sites": 0,
-        "branch_flip_sites": 0,
-        "cmov_sites": 0,
+        "branch_flip_sites": 2,
+        "cmov_sites": 6,
         "endian_sites": 0,
         "lea_sites": 0,
         "rotate_sites": 0,
@@ -1121,6 +3054,48 @@
         "name": "syscall__execve",
         "prog_id": 26,
         "recompile_ok": false,
+        "sites": [
+          {
+            "family": "branch-flip",
+            "insn": 9,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 24,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "cmov",
+            "insn": 144,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 147,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 160,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1212,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 2640,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 4018,
+            "pattern_kind": "cond-select-64"
+          }
+        ],
         "total_sites": 8,
         "type": "raw_tracepoint"
       },
@@ -1128,8 +3103,8 @@
       "program_name": "syscall__execve",
       "sites": {
         "bitfield_sites": 0,
-        "branch_flip_sites": 0,
-        "cmov_sites": 0,
+        "branch_flip_sites": 2,
+        "cmov_sites": 6,
         "endian_sites": 0,
         "lea_sites": 0,
         "rotate_sites": 0,
@@ -1146,6 +3121,48 @@
         "name": "syscall__execve",
         "prog_id": 27,
         "recompile_ok": false,
+        "sites": [
+          {
+            "family": "branch-flip",
+            "insn": 9,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 24,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "cmov",
+            "insn": 144,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 147,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 160,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1213,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 2641,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 4019,
+            "pattern_kind": "cond-select-64"
+          }
+        ],
         "total_sites": 8,
         "type": "raw_tracepoint"
       },
@@ -1153,8 +3170,8 @@
       "program_name": "syscall__execve",
       "sites": {
         "bitfield_sites": 0,
-        "branch_flip_sites": 0,
-        "cmov_sites": 0,
+        "branch_flip_sites": 2,
+        "cmov_sites": 6,
         "endian_sites": 0,
         "lea_sites": 0,
         "rotate_sites": 0,
@@ -1171,6 +3188,68 @@
         "name": "sys_dup_exit_ta",
         "prog_id": 28,
         "recompile_ok": false,
+        "sites": [
+          {
+            "family": "branch-flip",
+            "insn": 9,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 24,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "cmov",
+            "insn": 137,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 140,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 153,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1360,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1375,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1735,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1945,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1960,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 2320,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 2339,
+            "pattern_kind": "cond-select-64"
+          }
+        ],
         "total_sites": 12,
         "type": "kprobe"
       },
@@ -1178,8 +3257,8 @@
       "program_name": "sys_dup_exit_ta",
       "sites": {
         "bitfield_sites": 0,
-        "branch_flip_sites": 0,
-        "cmov_sites": 0,
+        "branch_flip_sites": 2,
+        "cmov_sites": 10,
         "endian_sites": 0,
         "lea_sites": 0,
         "rotate_sites": 0,
@@ -1196,6 +3275,93 @@
         "name": "tracepoint__sch",
         "prog_id": 29,
         "recompile_ok": false,
+        "sites": [
+          {
+            "family": "branch-flip",
+            "insn": 9,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 24,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 166,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 266,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 884,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 1089,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 1183,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "cmov",
+            "insn": 1261,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1264,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1276,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 1572,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 1985,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "cmov",
+            "insn": 2094,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 2097,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 2109,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 3762,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 3817,
+            "pattern_kind": "branch-flip"
+          }
+        ],
         "total_sites": 17,
         "type": "raw_tracepoint"
       },
@@ -1203,8 +3369,8 @@
       "program_name": "tracepoint__sch",
       "sites": {
         "bitfield_sites": 0,
-        "branch_flip_sites": 0,
-        "cmov_sites": 0,
+        "branch_flip_sites": 10,
+        "cmov_sites": 7,
         "endian_sites": 0,
         "lea_sites": 0,
         "rotate_sites": 0,
@@ -1221,6 +3387,138 @@
         "name": "lkm_seeker_modt",
         "prog_id": 30,
         "recompile_ok": false,
+        "sites": [
+          {
+            "family": "branch-flip",
+            "insn": 9,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 24,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 65,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "cmov",
+            "insn": 1108,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 1717,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 2326,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 2935,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 3544,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 4153,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 4762,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 5371,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 5980,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 6589,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 7198,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 7807,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 8416,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 9025,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 9634,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 10243,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 10852,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 11461,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 12070,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 12270,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "branch-flip",
+            "insn": 12313,
+            "pattern_kind": "branch-flip"
+          },
+          {
+            "family": "cmov",
+            "insn": 12919,
+            "pattern_kind": "cond-select-64"
+          },
+          {
+            "family": "cmov",
+            "insn": 13473,
+            "pattern_kind": "cond-select-64"
+          }
+        ],
         "total_sites": 26,
         "type": "kprobe"
       },
@@ -1228,8 +3526,8 @@
       "program_name": "lkm_seeker_modt",
       "sites": {
         "bitfield_sites": 0,
-        "branch_flip_sites": 0,
-        "cmov_sites": 0,
+        "branch_flip_sites": 4,
+        "cmov_sites": 22,
         "endian_sites": 0,
         "lea_sites": 0,
         "rotate_sites": 0,
@@ -1281,7 +3579,7 @@
       "gpl_compatible": true,
       "id": 17,
       "jited": true,
-      "loaded_at": 1773429847,
+      "loaded_at": 1773440578,
       "map_ids": [
         124,
         125,
@@ -1317,7 +3615,7 @@
       "gpl_compatible": true,
       "id": 19,
       "jited": true,
-      "loaded_at": 1773429847,
+      "loaded_at": 1773440578,
       "map_ids": [
         126,
         169,
@@ -1357,7 +3655,7 @@
       "gpl_compatible": true,
       "id": 20,
       "jited": true,
-      "loaded_at": 1773429847,
+      "loaded_at": 1773440578,
       "map_ids": [
         166,
         127,
@@ -1413,7 +3711,7 @@
       "gpl_compatible": true,
       "id": 21,
       "jited": true,
-      "loaded_at": 1773429847,
+      "loaded_at": 1773440578,
       "map_ids": [
         124,
         131,
@@ -1449,7 +3747,7 @@
       "gpl_compatible": true,
       "id": 22,
       "jited": true,
-      "loaded_at": 1773429847,
+      "loaded_at": 1773440578,
       "map_ids": [
         126,
         169,
@@ -1489,7 +3787,7 @@
       "gpl_compatible": true,
       "id": 23,
       "jited": true,
-      "loaded_at": 1773429847,
+      "loaded_at": 1773440578,
       "map_ids": [
         166,
         127,
@@ -1543,7 +3841,7 @@
       "gpl_compatible": true,
       "id": 24,
       "jited": true,
-      "loaded_at": 1773429847,
+      "loaded_at": 1773440578,
       "map_ids": [
         166,
         127,
@@ -1593,7 +3891,7 @@
       "gpl_compatible": true,
       "id": 25,
       "jited": true,
-      "loaded_at": 1773429847,
+      "loaded_at": 1773440578,
       "map_ids": [
         166,
         127,
@@ -1643,7 +3941,7 @@
       "gpl_compatible": true,
       "id": 26,
       "jited": true,
-      "loaded_at": 1773429847,
+      "loaded_at": 1773440578,
       "map_ids": [
         166,
         127,
@@ -1693,7 +3991,7 @@
       "gpl_compatible": true,
       "id": 27,
       "jited": true,
-      "loaded_at": 1773429847,
+      "loaded_at": 1773440578,
       "map_ids": [
         166,
         127,
@@ -1743,7 +4041,7 @@
       "gpl_compatible": true,
       "id": 28,
       "jited": true,
-      "loaded_at": 1773429847,
+      "loaded_at": 1773440578,
       "map_ids": [
         166,
         127,
@@ -1793,7 +4091,7 @@
       "gpl_compatible": true,
       "id": 29,
       "jited": true,
-      "loaded_at": 1773429847,
+      "loaded_at": 1773440578,
       "map_ids": [
         166,
         127,
@@ -1849,7 +4147,7 @@
       "gpl_compatible": true,
       "id": 30,
       "jited": true,
-      "loaded_at": 1773429847,
+      "loaded_at": 1773440578,
       "map_ids": [
         166,
         127,
