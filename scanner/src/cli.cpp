@@ -61,12 +61,14 @@ namespace {
 #define BPF_PROG_JIT_RECOMPILE 39
 #endif
 
-// Union for BPF_PROG_GET_NEXT_ID / BPF_PROG_GET_FD_BY_ID
+// Attr for BPF_PROG_GET_NEXT_ID / BPF_PROG_GET_FD_BY_ID.
+// Kernel layout: [start_id/prog_id (u32)][next_id/id (u32)][open_flags (u32)]
+// start_id and prog_id are the SAME field at offset 0 in the kernel union.
+// next_id is written back by the kernel at offset 4 (same slot as "id").
 struct mini_bpf_attr_id {
-    uint32_t start_id;   // used by GET_NEXT_ID
-    uint32_t prog_id;    // same field, used by GET_FD_BY_ID
-    uint32_t next_id;
-    uint32_t open_flags;
+    uint32_t start_id;   // offset 0: input for GET_NEXT_ID; prog_id for GET_FD_BY_ID
+    uint32_t next_id;    // offset 4: output for GET_NEXT_ID (kernel writes here)
+    uint32_t open_flags; // offset 8
 };
 
 struct mini_bpf_prog_info {
@@ -542,7 +544,7 @@ static int bpf_prog_get_fd_by_id(uint32_t prog_id)
 {
     alignas(8) char attr_buf[256] = {};
     auto *a = reinterpret_cast<mini_bpf_attr_id *>(attr_buf);
-    a->prog_id = prog_id;
+    a->start_id = prog_id; // prog_id is at offset 0 in the kernel union
     int fd = static_cast<int>(syscall(__NR_bpf, BPF_PROG_GET_FD_BY_ID,
                                       attr_buf, sizeof(attr_buf)));
     return fd; // -1 on error
