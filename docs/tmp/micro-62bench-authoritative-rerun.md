@@ -3,7 +3,7 @@
 ## Methodology
 
 - Kernel: `7.0.0-rc2-g05a1845490ed-dirty`
-- Benchmarks: `52` from `config/micro_pure_jit.yaml`
+- Benchmarks: `53` from `config/micro_pure_jit.yaml`
 - Runtimes: `kernel` vs `kernel-recompile`
 - Warmups / iterations / repeat: `2 / 2 / 500`
 - CPU pinning: `taskset -c 0`
@@ -12,10 +12,10 @@
 
 ## Headline Numbers
 
-- Overall geomean (stock / recompile, valid pairs only): `1.019x`
+- Overall geomean (stock / recompile, valid pairs only): `1.022x`
 - Applied-only geomean (stock / recompile): `1.001x`
-- Wins / losses / ties: `24 / 24 / 4`
-- Valid / invalid pairs: `52 / 0`
+- Wins / losses / ties: `25 / 24 / 4`
+- Valid / invalid pairs: `53 / 0`
 
 ## Per-Family Breakdown
 
@@ -55,6 +55,7 @@
 | search | 1 | 1 | 1 | 0.935x | 0.935x | 0 | 1 | 0 |
 | select-diamond | 2 | 2 | 2 | 1.240x | 1.240x | 1 | 1 | 0 |
 | spill-pressure | 1 | 1 | 0 | 0.923x | n/a | 0 | 1 | 0 |
+| strength-reduce | 1 | 1 | 0 | 1.187x | n/a | 1 | 0 | 0 |
 | stride-load | 2 | 2 | 0 | 0.942x | n/a | 1 | 1 | 0 |
 | switch-dispatch | 1 | 1 | 1 | 0.840x | 0.840x | 0 | 1 | 0 |
 
@@ -114,3 +115,4 @@
 | const_fold_chain | const-fold | 317.5 ns | 290 ns | 1.095x | no | 0 | win |
 | struct_field_cluster | field-access | 87 ns | 87 ns | 1.000x | no | 0 | tie |
 | bitfield_extract | bitfield-extract | 312 ns | 241.5 ns | 1.292x | no | 0 | win |
+| smallmul_strength_reduce | strength-reduce | 435 ns | 366.5 ns | 1.187x | no | 0 | win |
