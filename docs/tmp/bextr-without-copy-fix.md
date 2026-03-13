@@ -78,37 +78,32 @@ if (boot_cpu_has(X86_FEATURE_BMI1) &&
 
 ---
 
-## 后续验证（TODO）
+## 验证结果（2026-03-13 Build #41）
 
-1. **编译 bzImage**：
-   ```bash
-   cd /home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework
-   make -j$(nproc) bzImage
-   ```
+**已完成验证**。详见 `docs/tmp/targeted-rerun-extract-build41.md`。
 
-2. **VM 中跑 extract_dense 对比**：
-   ```bash
-   source /home/yunwei37/workspace/.venv/bin/activate
-   vng --run vendor/linux-framework/arch/x86/boot/bzImage --exec \
-     'cd /home/yunwei37/workspace/bpf-benchmark && python3 micro/run_micro.py \
-       --runtime kernel --bench extract_dense --bench bitfield_extract --bench rotate_dense \
-       --iterations 2 --warmups 1 --repeat 200 \
-       --output micro/results/bextr_without_copy_fix_stock.json'
-   ```
+### 实测结果（build #41, 7 iter, 5 warmup, 1000 repeat）
 
-3. **Recompile 对比**（用 policy 重编）：
-   ```bash
-   vng --run vendor/linux-framework/arch/x86/boot/bzImage --exec \
-     'cd /home/yunwei37/workspace/bpf-benchmark && python3 micro/run_micro.py \
-       --runtime kernel --bench extract_dense --bench bitfield_extract --bench rotate_dense \
-       --iterations 2 --warmups 1 --repeat 200 \
-       --recompile-policy micro/policies/ \
-       --output micro/results/bextr_without_copy_fix_recompile.json'
-   ```
+- **extract_dense（full 512 sites policy）**: kernel=181ns → recompile=266ns → **0.680x** (仍是 loss)
+- **bitfield_extract（无 policy）**: kernel=278ns → recompile=227ns → **1.225x** (win, 扫描开销小)
+- **jited_prog_len**: 仍为 10487B（与 build #38 相同）
 
-4. **检查 jited size**：确认 extract_dense 的 jited 从 10487 减少到约 9715（增加 ~772B 额外节省）
+### 为何 jited_len 未变化
 
-5. **更新 MEMORY.md 和 plan doc** 中 extract_dense 的 ratio
+extract_dense 的 BPF 代码几乎全为 **with-copy** 模式（word、f0、f1 分配到不同寄存器），
+without-copy sites 极少甚至为零，fix 对 code size 影响可忽略。
+512 sites 均为 with-copy，BEXTR 一直能正确应用，只是密集 I-cache flush 开销不变。
+
+### 最终结论
+
+- BEXTR without-copy fix 本身正确，但对 extract_dense 影响极小
+- 根本问题：512 dense sites 的 **I-cache flush 开销 >> BEXTR 节省**
+- **最优 policy**: `sites: []`（跳过所有 extract_dense 的 BEXTR 应用）
+- build #41 已编译进 bzImage（触发 `touch bpf_jit_comp.c && make bzImage`）
+
+### 数据文件
+- `micro/results/targeted_build41_fullpolicy_20260313.json`
+- `micro/results/targeted_build41_emptypolicy_20260313.json`
 
 ---
 

@@ -2,7 +2,12 @@ version: 3
 program: 'extract_dense_xdp'
 sites: []
 # Policy: skip all BEXTR sites (512 sites)
-# Reason: high I-cache overhead with 512 dense sites
-# Note: Build #40 (ac593b2c1) reduces code size by 768B (-1.5B/site),
-#       but full-image I-cache flush overhead still outweighs execution benefit
-# Updated: 2026-03-13 after R6-R11 policy iteration with Build #40
+# Reason: 512 dense sites → I-cache flush overhead > BEXTR execution benefit
+#   - Build #38 (without-copy bug): 0.556x (worst, 25% sites emitted 9B instead of 6B)
+#   - Build #41 (without-copy fixed): 0.680x (better but still loss)
+#   - Root cause: extract_dense uses with-copy pattern (distinct src/dst regs for word/f0/f1)
+#     so fix has minimal impact on code size; I-cache flush dominates for 512 dense sites.
+#   - Empty policy: ~neutral (scan overhead ~10ns, no recompile applied)
+# Analysis: docs/tmp/cmov-bextr-regression-investigation.md
+#            docs/tmp/targeted-rerun-extract-build41.md
+# Decision: keep sites: [] (skip BEXTR for dense 512-site extract_dense)
