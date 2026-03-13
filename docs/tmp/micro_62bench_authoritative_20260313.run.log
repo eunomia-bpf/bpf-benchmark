@@ -194,3 +194,19 @@ subprocess.TimeoutExpired: Command '['/home/yunwei37/.local/bin/vng', '--run', '
   [ok] collected extract_dense (vm exit 0)
   [aggregate] benchmarks=57 valid=57
 [resume] endian_swap_dense
+  [ok] collected endian_swap_dense (vm exit 0)
+  [aggregate] benchmarks=58 valid=58
+[resume] branch_flip_dense
+  [ok] collected branch_flip_dense (vm exit 0)
+  [aggregate] benchmarks=59 valid=59
+[resume] tc_bitcount
+  [ok] collected tc_bitcount (vm exit 0)
+  [aggregate] benchmarks=60 valid=60
+[resume] tc_checksum
+  [ok] collected tc_checksum (vm exit 0)
+  [aggregate] benchmarks=61 valid=61
+[resume] cgroup_hash_chain
+  [ok] collected cgroup_hash_chain (vm exit 0)
+  [aggregate] benchmarks=62 valid=62
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/micro/results/micro_62bench_authoritative_20260313.json
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/micro-62bench-authoritative-rerun.md

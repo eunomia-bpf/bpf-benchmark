@@ -1,124 +1,92 @@
-# Kernel Recompile Micro Strict
+# 62-Benchmark Authoritative Micro Rerun
 
 ## Methodology
 
-- Kernel: `7.0.0-rc2-g05a1845490ed-dirty`
-- Benchmarks: `57` from `config/micro_pure_jit.yaml`
-- Runtimes: `kernel` vs `kernel-recompile`
-- Warmups / iterations / repeat: `2 / 2 / 500`
-- CPU pinning: `taskset -c 0`
-- CPU governor: `unknown`
-- Turbo state: `unknown`
+- Plan reference read first: `docs/kernel-jit-optimization-plan.md`
+- Kernel image: `vendor/linux-framework/arch/x86/boot/bzImage`
+- Kernel version context: `7.0.0-rc2-g05a1845490ed-dirty`
+- Suite: `config/micro_pure_jit.yaml`
+- Active benchmarks collected: `62`
+- Runtimes compared: `kernel` vs `kernel-recompile`
+- Parameters: `--warmups 2 --iterations 2 --repeat 500`
+- Runner: `docs/tmp/kernel_recompile_micro_resume.py`
+- Isolation model: one benchmark per VM boot via `vng`
+- Output JSON: `micro/results/micro_62bench_authoritative_20260313.json`
+- Per-benchmark artifacts: `docs/tmp/micro_62bench_authoritative_per_bench/`
+- Live log: `docs/tmp/micro_62bench_authoritative_20260313.run.log`
 
-## Headline Numbers
+Interpretation: all reported ratios are `stock / recompile`, so values greater than `1.0x` mean the recompiled kernel is faster.
 
-- Overall geomean (stock / recompile, valid pairs only): `1.013x`
-- Applied-only geomean (stock / recompile): `0.973x`
-- Wins / losses / ties: `27 / 26 / 4`
-- Valid / invalid pairs: `57 / 0`
+## Headline Numbers vs #160
 
-## Per-Family Breakdown
+Comparison target: `micro/results/post_fix_micro_62bench_20260313.json`
 
-| Family | Benchmarks | Valid | Applied | Geomean | Applied-only Geomean | Wins | Losses | Ties |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| addr-calc | 1 | 1 | 1 | 1.053x | 1.053x | 1 | 0 | 0 |
-| baseline | 3 | 3 | 0 | 0.928x | n/a | 0 | 1 | 2 |
-| bitfield-extract | 2 | 2 | 1 | 0.935x | 0.677x | 1 | 1 | 0 |
-| bounds-density | 2 | 2 | 1 | 1.169x | 1.123x | 2 | 0 | 0 |
-| bounds-style | 1 | 1 | 0 | 0.901x | n/a | 0 | 1 | 0 |
-| bpf-local-call | 2 | 2 | 1 | 0.751x | 0.779x | 0 | 2 | 0 |
-| branch-density | 1 | 1 | 1 | 1.039x | 1.039x | 1 | 0 | 0 |
-| branch-fanout | 1 | 1 | 0 | 1.246x | n/a | 1 | 0 | 0 |
-| branch-skew | 1 | 1 | 0 | 1.117x | n/a | 1 | 0 | 0 |
-| byte-compare | 1 | 1 | 1 | 0.869x | 0.869x | 0 | 1 | 0 |
-| causal-isolation | 2 | 2 | 0 | 0.908x | n/a | 0 | 2 | 0 |
-| code-clone | 2 | 2 | 0 | 0.970x | n/a | 1 | 1 | 0 |
-| const-fold | 1 | 1 | 0 | 1.095x | n/a | 1 | 0 | 0 |
-| deep-guards | 1 | 1 | 0 | 1.094x | n/a | 1 | 0 | 0 |
-| dep-chain | 2 | 2 | 0 | 1.018x | n/a | 1 | 1 | 0 |
-| field-access | 1 | 1 | 0 | 1.000x | n/a | 0 | 0 | 1 |
-| fixed-loop | 2 | 2 | 0 | 1.171x | n/a | 1 | 1 | 0 |
-| immediate-stress | 1 | 1 | 0 | 1.000x | n/a | 0 | 0 | 1 |
-| large-mixed | 2 | 2 | 1 | 0.926x | 0.860x | 0 | 2 | 0 |
-| load-width | 2 | 2 | 0 | 1.162x | n/a | 2 | 0 | 0 |
-| log2-fold | 1 | 1 | 1 | 1.206x | 1.206x | 1 | 0 | 0 |
-| mega-block | 1 | 1 | 0 | 0.996x | n/a | 0 | 1 | 0 |
-| mixed-alu-mem | 1 | 1 | 1 | 1.018x | 1.018x | 1 | 0 | 0 |
-| mixed-width | 1 | 1 | 0 | 1.117x | n/a | 1 | 0 | 0 |
-| multi-acc | 2 | 2 | 0 | 0.989x | n/a | 0 | 2 | 0 |
-| nested-loop | 2 | 2 | 0 | 1.081x | n/a | 2 | 0 | 0 |
-| packet-hash | 1 | 1 | 0 | 1.279x | n/a | 1 | 0 | 0 |
-| parser | 2 | 2 | 0 | 0.861x | n/a | 0 | 2 | 0 |
-| popcount | 1 | 1 | 0 | 1.010x | n/a | 1 | 0 | 0 |
-| recurrence | 2 | 2 | 0 | 0.999x | n/a | 1 | 1 | 0 |
-| reduction | 1 | 1 | 0 | 0.995x | n/a | 0 | 1 | 0 |
-| rotate-canonical | 1 | 1 | 1 | 1.059x | 1.059x | 1 | 0 | 0 |
-| rotate-hash | 1 | 1 | 0 | 1.304x | n/a | 1 | 0 | 0 |
-| search | 1 | 1 | 1 | 0.935x | 0.935x | 0 | 1 | 0 |
-| select-diamond | 3 | 3 | 3 | 1.104x | 1.104x | 1 | 2 | 0 |
-| spill-pressure | 1 | 1 | 0 | 0.923x | n/a | 0 | 1 | 0 |
-| strength-reduce | 1 | 1 | 0 | 1.187x | n/a | 1 | 0 | 0 |
-| stride-load | 2 | 2 | 0 | 0.942x | n/a | 1 | 1 | 0 |
-| switch-dispatch | 1 | 1 | 1 | 0.840x | 0.840x | 0 | 1 | 0 |
+| Metric | #160 existing | Authoritative rerun | Delta / note |
+| --- | ---: | ---: | --- |
+| Benchmarks total | 62 | 62 | unchanged |
+| Valid pairs | 61 | 62 | `+1` |
+| Invalid pairs | 1 | 0 | fixed |
+| Applied pairs | 14 | 17 | `+3` |
+| Overall geomean | 0.9660x | 1.0035x | from overall slowdown to slight speedup |
+| Applied-only geomean | 1.0064x | 0.9417x | applied set regressed |
+| Wins / losses / ties | 27 / 32 / 2 | 29 / 29 / 4 | slightly more balanced |
 
-## Per-Benchmark Table
+Main readout: the authoritative rerun is marginally net-positive overall (`1.0035x`), but the applied subset is clearly net-negative (`0.9417x`). The applied-pair count increased from `14` to `17` because `addr_calc_stride`, `endian_swap_dense`, and `branch_flip_dense` now show applied recompile sites in the final dataset.
 
-| Benchmark | Family | Stock median | Recompile median | Stock/Recompile | Applied | Sites | Status |
+## Per-Form Benchmarks
+
+| Benchmark | Form | Stock median | Recompile median | Ratio | #160 ratio | Applied sites | Result |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
-| simple | baseline | 9 ns | 9 ns | 1.000x | no | 0 | tie |
-| simple_packet | baseline | 6 ns | 6 ns | 1.000x | no | 0 | tie |
-| memory_pair_sum | baseline | 8 ns | 10 ns | 0.800x | no | 0 | loss |
-| bitcount | popcount | 4.615 us | 4.569 us | 1.010x | no | 0 | win |
-| log2_fold | log2-fold | 470.5 ns | 390 ns | 1.206x | yes | 3 | win |
-| dep_chain_short | dep-chain | 154.5 ns | 160 ns | 0.966x | no | 0 | loss |
-| dep_chain_long | dep-chain | 631.5 ns | 588 ns | 1.074x | no | 0 | win |
-| binary_search | search | 618 ns | 661 ns | 0.935x | yes | 3 | loss |
-| branch_layout | branch-skew | 694.5 ns | 622 ns | 1.117x | no | 0 | win |
-| switch_dispatch | switch-dispatch | 308 ns | 366.5 ns | 0.840x | yes | 3 | loss |
-| branch_dense | branch-density | 662 ns | 637 ns | 1.039x | yes | 7 | win |
-| cmov_select | select-diamond | 582 ns | 654.5 ns | 0.889x | yes | 1 | loss |
-| cmov_dense | select-diamond | 60.5 ns | 35 ns | 1.729x | yes | 26 | win |
-| checksum | reduction | 17.794 us | 17.887 us | 0.995x | no | 0 | loss |
-| load_word32 | load-width | 103.5 ns | 83.5 ns | 1.240x | no | 0 | win |
-| load_byte | load-width | 354.5 ns | 325.5 ns | 1.089x | no | 0 | win |
-| load_byte_recompose | causal-isolation | 205 ns | 218 ns | 0.940x | no | 0 | loss |
-| load_native_u64 | causal-isolation | 113 ns | 129 ns | 0.876x | no | 0 | loss |
-| packet_parse | parser | 105 ns | 110.5 ns | 0.950x | no | 0 | loss |
-| bounds_ladder | bounds-density | 224 ns | 199.5 ns | 1.123x | yes | 4 | win |
-| bounds_check_heavy | bounds-style | 296 ns | 328.5 ns | 0.901x | no | 0 | loss |
-| stride_load_4 | stride-load | 269 ns | 349 ns | 0.771x | no | 0 | loss |
-| stride_load_16 | stride-load | 306.5 ns | 266 ns | 1.152x | no | 0 | win |
-| mixed_alu_mem | mixed-alu-mem | 816 ns | 801.5 ns | 1.018x | yes | 3 | win |
-| spill_pressure | spill-pressure | 411 ns | 445.5 ns | 0.923x | no | 0 | loss |
-| multi_acc_4 | multi-acc | 311.5 ns | 316 ns | 0.986x | no | 0 | loss |
-| multi_acc_8 | multi-acc | 562.5 ns | 567 ns | 0.992x | no | 0 | loss |
-| fibonacci_iter | recurrence | 876.5 ns | 925 ns | 0.948x | no | 0 | loss |
-| fibonacci_iter_packet | recurrence | 927 ns | 880.5 ns | 1.053x | no | 0 | win |
-| fixed_loop_small | fixed-loop | 157 ns | 114 ns | 1.377x | no | 0 | win |
-| fixed_loop_large | fixed-loop | 1.480 us | 1.486 us | 0.996x | no | 0 | loss |
-| nested_loop_2 | nested-loop | 659.5 ns | 575 ns | 1.147x | no | 0 | win |
-| nested_loop_3 | nested-loop | 860 ns | 844 ns | 1.019x | no | 0 | win |
-| code_clone_2 | code-clone | 370 ns | 396 ns | 0.934x | no | 0 | loss |
-| code_clone_8 | code-clone | 1.492 us | 1.482 us | 1.007x | no | 0 | win |
-| large_mixed_500 | large-mixed | 618.5 ns | 719 ns | 0.860x | yes | 3 | loss |
-| large_mixed_1000 | large-mixed | 1.213 us | 1.217 us | 0.997x | no | 0 | loss |
-| bpf_call_chain | bpf-local-call | 419 ns | 538 ns | 0.779x | yes | 3 | loss |
-| memcmp_prefix_64 | byte-compare | 135.5 ns | 156 ns | 0.869x | yes | 3 | loss |
-| packet_parse_vlans_tcpopts | parser | 16 ns | 20.5 ns | 0.780x | no | 0 | loss |
-| local_call_fanout | bpf-local-call | 125 ns | 172.5 ns | 0.725x | no | 0 | loss |
-| packet_rss_hash | packet-hash | 27.5 ns | 21.5 ns | 1.279x | no | 0 | win |
-| imm64_storm | immediate-stress | 188.5 ns | 188.5 ns | 1.000x | no | 0 | tie |
-| alu32_64_pingpong | mixed-width | 592.5 ns | 530.5 ns | 1.117x | no | 0 | win |
-| branch_fanout_32 | branch-fanout | 521 ns | 418 ns | 1.246x | no | 0 | win |
-| deep_guard_tree_8 | deep-guards | 146 ns | 133.5 ns | 1.094x | no | 0 | win |
-| mega_basic_block_2048 | mega-block | 974.5 ns | 978.5 ns | 0.996x | no | 0 | loss |
-| rotate64_hash | rotate-hash | 103 ns | 79 ns | 1.304x | no | 0 | win |
-| packet_redundant_bounds | bounds-density | 218.5 ns | 179.5 ns | 1.217x | no | 0 | win |
-| const_fold_chain | const-fold | 317.5 ns | 290 ns | 1.095x | no | 0 | win |
-| struct_field_cluster | field-access | 87 ns | 87 ns | 1.000x | no | 0 | tie |
-| bitfield_extract | bitfield-extract | 312 ns | 241.5 ns | 1.292x | no | 0 | win |
-| smallmul_strength_reduce | strength-reduce | 435 ns | 366.5 ns | 1.187x | no | 0 | win |
-| cond_select_dense | select-diamond | 87 ns | 99.5 ns | 0.874x | yes | 104 | loss |
-| rotate_dense | rotate-canonical | 243.5 ns | 230 ns | 1.059x | yes | 256 | win |
-| addr_calc_stride | addr-calc | 158.5 ns | 150.5 ns | 1.053x | yes | 8 | win |
-| extract_dense | bitfield-extract | 148.5 ns | 219.5 ns | 0.677x | yes | 512 | loss |
+| `rotate_dense` | rotate | 243.5 ns | 230.0 ns | 1.0587x | 1.1609x | 256 | win |
+| `cond_select_dense` | cmov/select | 87.0 ns | 99.5 ns | 0.8744x | 0.7832x | 104 | loss |
+| `addr_calc_stride` | lea/addr-calc | 158.5 ns | 150.5 ns | 1.0532x | 0.6708x | 8 | win |
+| `extract_dense` | bitfield extract | 148.5 ns | 219.5 ns | 0.6765x | 0.7861x | 512 | loss |
+| `endian_swap_dense` | endian fusion | 129.0 ns | 201.5 ns | 0.6402x | 0.7790x | 256 | loss |
+| `branch_flip_dense` | branch flip | 258.5 ns | 305.5 ns | 0.8462x | 0.7495x | 255 | loss |
+
+Per-form summary:
+
+- Positive: `rotate_dense` and `addr_calc_stride`
+- Negative: `cond_select_dense`, `extract_dense`, `endian_swap_dense`, `branch_flip_dense`
+- Best per-form outcome: `rotate_dense` at `1.0587x`
+- Worst per-form outcome: `endian_swap_dense` at `0.6402x`
+
+## Top Wins and Losses
+
+Applied-only wins are the most relevant view here because they isolate cases where the recompile path actually changed code.
+
+### Top Applied Wins
+
+| Benchmark | Ratio | Applied sites |
+| --- | ---: | ---: |
+| `cmov_dense` | 1.7286x | 26 |
+| `log2_fold` | 1.2064x | 3 |
+| `bounds_ladder` | 1.1228x | 4 |
+| `rotate_dense` | 1.0587x | 256 |
+| `addr_calc_stride` | 1.0532x | 8 |
+
+### Top Applied Losses
+
+| Benchmark | Ratio | Applied sites |
+| --- | ---: | ---: |
+| `endian_swap_dense` | 0.6402x | 256 |
+| `extract_dense` | 0.6765x | 512 |
+| `bpf_call_chain` | 0.7788x | 3 |
+| `switch_dispatch` | 0.8404x | 3 |
+| `branch_flip_dense` | 0.8462x | 255 |
+
+Interpretation: the applied-only regression is dominated by the dense new forms, especially `extract_dense` and `endian_swap_dense`. `cmov_dense` remains the strongest positive result by a wide margin.
+
+## Issues Encountered
+
+- The first invocation used the script default `--timeout 300` and aborted on `mixed_alu_mem` with uncaught `subprocess.TimeoutExpired`.
+- Resume worked as intended. Re-running the same collection with `--timeout 900` resumed from `23` completed benchmarks and finished the full `62/62`.
+- The final authoritative JSON contains `62` benchmarks, `62` valid pairs, and `0` synthetic failure rows.
+
+## Final Verification
+
+- Output JSON benchmark count: `62`
+- Output JSON valid pairs: `62`
+- Output JSON applied pairs: `17`
+- Overall geomean: `1.0035267416761544x`
+- Applied-only geomean: `0.9416527179875053x`
