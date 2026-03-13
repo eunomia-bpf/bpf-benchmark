@@ -1,0 +1,5 @@
+[bench] cond_select_dense
+  kernel           status=ok               exec=67 ns applied=-
+  kernel-recompile status=ok               exec=63.5 ns applied=True
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/post_fix_micro_6new_probe/cond_select_dense.json
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/post_fix_micro_6new_probe/cond_select_dense.md

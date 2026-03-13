@@ -1,0 +1,5 @@
+[bench] cmov_select
+  kernel           status=ok               exec=582 ns applied=-
+  kernel-recompile status=ok               exec=654.5 ns applied=True
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/micro_62bench_authoritative_per_bench/cmov_select.json
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/micro_62bench_authoritative_per_bench/cmov_select.md

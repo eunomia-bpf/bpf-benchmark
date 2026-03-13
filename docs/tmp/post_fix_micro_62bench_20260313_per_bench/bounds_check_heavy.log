@@ -1,0 +1,5 @@
+[bench] bounds_check_heavy
+  kernel           status=ok               exec=301 ns applied=-
+  kernel-recompile status=ok               exec=286.5 ns applied=False
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/post_fix_micro_62bench_20260313_per_bench/bounds_check_heavy.json
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/post_fix_micro_62bench_20260313_per_bench/bounds_check_heavy.md

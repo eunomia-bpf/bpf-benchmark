@@ -1,0 +1,3126 @@
+{
+  "corpus_inventory": [
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/KubeArmor/enforcer.bpf.o",
+      "program_name": "enforce_proc",
+      "insn_cnt": 11295,
+      "num_sites": 65
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/KubeArmor/protectproc.bpf.o",
+      "program_name": "enforce_file",
+      "insn_cnt": 5139,
+      "num_sites": 2
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/KubeArmor/system_monitor.bpf.o",
+      "program_name": "sys_enter_setns",
+      "insn_cnt": 66,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/bashreadline.bpf.o",
+      "program_name": "printret",
+      "insn_cnt": 36,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/bindsnoop.bpf.o",
+      "program_name": "ipv4_bind_entry",
+      "insn_cnt": 30,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/biolatency.bpf.o",
+      "program_name": "block_rq_insert_btf",
+      "insn_cnt": 3,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/biopattern.bpf.o",
+      "program_name": "handle__block_rq_complete",
+      "insn_cnt": 101,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/biosnoop.bpf.o",
+      "program_name": "blk_account_io_start",
+      "insn_cnt": 31,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/biostacks.bpf.o",
+      "program_name": "blk_account_io_merge_bio",
+      "insn_cnt": 123,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/biotop.bpf.o",
+      "program_name": "blk_mq_start_request",
+      "insn_cnt": 23,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/bitesize.bpf.o",
+      "program_name": "block_rq_issue",
+      "insn_cnt": 13,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/cachestat.bpf.o",
+      "program_name": "fentry_add_to_page_cache_lru",
+      "insn_cnt": 6,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/capable.bpf.o",
+      "program_name": "kprobe__cap_capable_entry",
+      "insn_cnt": 38,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/cpudist.bpf.o",
+      "program_name": "sched_switch_btf",
+      "insn_cnt": 5,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/cpufreq.bpf.o",
+      "program_name": "cpu_frequency",
+      "insn_cnt": 34,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/drsnoop.bpf.o",
+      "program_name": "direct_reclaim_begin_btf",
+      "insn_cnt": 41,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/execsnoop.bpf.o",
+      "program_name": "tracepoint__syscalls__sys_enter_execve",
+      "insn_cnt": 2236,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/exitsnoop.bpf.o",
+      "program_name": "sched_process_exit",
+      "insn_cnt": 100,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/filelife.bpf.o",
+      "program_name": "vfs_create",
+      "insn_cnt": 57,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/filetop.bpf.o",
+      "program_name": "vfs_read_entry",
+      "insn_cnt": 6,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/fsdist.bpf.o",
+      "program_name": "file_read_entry",
+      "insn_cnt": 21,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/fsslower.bpf.o",
+      "program_name": "file_read_entry",
+      "insn_cnt": 43,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/funclatency.bpf.o",
+      "program_name": "dummy_fentry",
+      "insn_cnt": 31,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/futexctn.bpf.o",
+      "program_name": "futex_enter",
+      "insn_cnt": 46,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/gethostlatency.bpf.o",
+      "program_name": "handle_entry",
+      "insn_cnt": 49,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/hardirqs.bpf.o",
+      "program_name": "irq_handler_entry_btf",
+      "insn_cnt": 34,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/javagc.bpf.o",
+      "program_name": "handle_gc_start",
+      "insn_cnt": 17,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/klockstat.bpf.o",
+      "program_name": "rtnetlink_rcv_msg",
+      "insn_cnt": 22,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/ksnoop.bpf.o",
+      "program_name": "kprobe_entry",
+      "insn_cnt": 4,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/llcstat.bpf.o",
+      "program_name": "on_cache_miss",
+      "insn_cnt": 55,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/mdflush.bpf.o",
+      "program_name": "md_flush_request",
+      "insn_cnt": 63,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/memleak.bpf.o",
+      "program_name": "malloc_enter",
+      "insn_cnt": 40,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/mountsnoop.bpf.o",
+      "program_name": "mount_entry",
+      "insn_cnt": 35,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/numamove.bpf.o",
+      "program_name": "fentry_migrate_misplaced_page",
+      "insn_cnt": 14,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/offcputime.bpf.o",
+      "program_name": "sched_switch",
+      "insn_cnt": 5,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/oomkill.bpf.o",
+      "program_name": "oom_kill_process",
+      "insn_cnt": 86,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/opensnoop.bpf.o",
+      "program_name": "tracepoint__syscalls__sys_enter_open",
+      "insn_cnt": 46,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/profile.bpf.o",
+      "program_name": "do_perf_event",
+      "insn_cnt": 125,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/readahead.bpf.o",
+      "program_name": "do_page_cache_ra",
+      "insn_cnt": 14,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/runqlat.bpf.o",
+      "program_name": "sched_wakeup",
+      "insn_cnt": 32,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/runqlen.bpf.o",
+      "program_name": "do_sample",
+      "insn_cnt": 83,
+      "num_sites": 3
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/runqslower.bpf.o",
+      "program_name": "sched_wakeup",
+      "insn_cnt": 50,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/sigsnoop.bpf.o",
+      "program_name": "kill_entry",
+      "insn_cnt": 5,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/slabratetop.bpf.o",
+      "program_name": "kmem_cache_alloc",
+      "insn_cnt": 59,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/softirqs.bpf.o",
+      "program_name": "softirq_entry_btf",
+      "insn_cnt": 25,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/solisten.bpf.o",
+      "program_name": "inet_listen_entry",
+      "insn_cnt": 36,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/statsnoop.bpf.o",
+      "program_name": "handle_statfs_entry",
+      "insn_cnt": 26,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/syncsnoop.bpf.o",
+      "program_name": "tracepoint__syscalls__sys_enter_sync",
+      "insn_cnt": 25,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/syscount.bpf.o",
+      "program_name": "sys_enter",
+      "insn_cnt": 31,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/tcpconnect.bpf.o",
+      "program_name": "tcp_v4_connect",
+      "insn_cnt": 32,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/tcpconnlat.bpf.o",
+      "program_name": "tcp_v4_connect",
+      "insn_cnt": 33,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/tcplife.bpf.o",
+      "program_name": "inet_sock_set_state",
+      "insn_cnt": 309,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/tcppktlat.bpf.o",
+      "program_name": "tcp_probe_btf",
+      "insn_cnt": 5,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/tcprtt.bpf.o",
+      "program_name": "tcp_rcv",
+      "insn_cnt": 4,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/tcpstates.bpf.o",
+      "program_name": "handle_set_state",
+      "insn_cnt": 137,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/tcpsynbl.bpf.o",
+      "program_name": "tcp_v4_syn_recv_kprobe",
+      "insn_cnt": 4,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/tcptop.bpf.o",
+      "program_name": "tcp_sendmsg",
+      "insn_cnt": 6,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/tcptracer.bpf.o",
+      "program_name": "tcp_v4_connect",
+      "insn_cnt": 44,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/vfsstat.bpf.o",
+      "program_name": "kprobe_vfs_read",
+      "insn_cnt": 6,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/wakeuptime.bpf.o",
+      "program_name": "sched_switch",
+      "insn_cnt": 29,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bpftrace/exec_trace.bpf.o",
+      "program_name": "tracepoint:sched:sched_process_exec",
+      "insn_cnt": 29,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bpftrace/open_latency.bpf.o",
+      "program_name": "kprobe:do_sys_openat2",
+      "insn_cnt": 17,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bpftrace/scheduler_latency.bpf.o",
+      "program_name": "tracepoint:sched:sched_wakeup",
+      "insn_cnt": 17,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bpftrace/tcp_connect.bpf.o",
+      "program_name": "kprobe:tcp_v4_connect",
+      "insn_cnt": 24,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bpftrace/vfs_read_count.bpf.o",
+      "program_name": "kprobe:vfs_read",
+      "insn_cnt": 29,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/calico/from_hep_debug.bpf.o",
+      "program_name": "calico_tc_main",
+      "insn_cnt": 8829,
+      "num_sites": 86
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/calico/from_nat_debug.bpf.o",
+      "program_name": "calico_tc_main",
+      "insn_cnt": 6776,
+      "num_sites": 60
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/calico/from_wep_debug.bpf.o",
+      "program_name": "calico_tc_main",
+      "insn_cnt": 7048,
+      "num_sites": 69
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/calico/to_hep_debug.bpf.o",
+      "program_name": "calico_tc_main",
+      "insn_cnt": 8091,
+      "num_sites": 71
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/calico/to_nat_debug.bpf.o",
+      "program_name": "calico_tc_main",
+      "insn_cnt": 8066,
+      "num_sites": 70
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/calico/to_wep_debug.bpf.o",
+      "program_name": "calico_tc_main",
+      "insn_cnt": 6237,
+      "num_sites": 59
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/calico/xdp_debug.bpf.o",
+      "program_name": "calico_xdp_main",
+      "insn_cnt": 959,
+      "num_sites": 10
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/calico/xdp_no_log.bpf.o",
+      "program_name": "calico_xdp_main",
+      "insn_cnt": 338,
+      "num_sites": 6
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/coroot-node-agent/ebpf.bpf.o",
+      "program_name": "uv_io_poll_exit",
+      "insn_cnt": 20,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/datadog-agent/oom-kill-kern.bpf.o",
+      "program_name": "kprobe__oom_kill_process",
+      "insn_cnt": 294,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/katran/balancer.bpf.o",
+      "program_name": "balancer_ingress",
+      "insn_cnt": 2322,
+      "num_sites": 18
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/katran/healthchecking.bpf.o",
+      "program_name": "healthcheck_encap",
+      "insn_cnt": 325,
+      "num_sites": 2
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/katran/healthchecking_ipip.bpf.o",
+      "program_name": "healthcheck_encap",
+      "insn_cnt": 103,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/katran/xdp_pktcntr.bpf.o",
+      "program_name": "pktcntr",
+      "insn_cnt": 22,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/katran/xdp_root.bpf.o",
+      "program_name": "xdp_root",
+      "insn_cnt": 17,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/libbpf-bootstrap/examples/c/bootstrap.bpf.o",
+      "program_name": "handle_exec",
+      "insn_cnt": 63,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/libbpf-bootstrap/examples/c/bootstrap_legacy.bpf.o",
+      "program_name": "handle_exec",
+      "insn_cnt": 81,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/libbpf-bootstrap/examples/c/fentry.bpf.o",
+      "program_name": "do_unlinkat",
+      "insn_cnt": 11,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/libbpf-bootstrap/examples/c/kprobe.bpf.o",
+      "program_name": "do_unlinkat",
+      "insn_cnt": 19,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/libbpf-bootstrap/examples/c/ksyscall.bpf.o",
+      "program_name": "tgkill_entry",
+      "insn_cnt": 84,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/libbpf-bootstrap/examples/c/lsm.bpf.o",
+      "program_name": "lsm_bpf",
+      "insn_cnt": 12,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/libbpf-bootstrap/examples/c/minimal.bpf.o",
+      "program_name": "handle_tp",
+      "insn_cnt": 13,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/libbpf-bootstrap/examples/c/profile.bpf.o",
+      "program_name": "profile",
+      "insn_cnt": 45,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/libbpf-bootstrap/examples/c/task_iter.bpf.o",
+      "program_name": "get_tasks",
+      "insn_cnt": 45,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/libbpf-bootstrap/examples/c/tc.bpf.o",
+      "program_name": "tc_ingress",
+      "insn_cnt": 18,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/libbpf-bootstrap/examples/c/uprobe.bpf.o",
+      "program_name": "uprobe_add",
+      "insn_cnt": 8,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/libbpf-bootstrap/examples/c/usdt.bpf.o",
+      "program_name": "usdt_auto_attach",
+      "insn_cnt": 33,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/test_tc_bpf.bpf.o",
+      "program_name": "cls",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/arena_htab.bpf.o",
+      "program_name": "arena_htab_llvm",
+      "insn_cnt": 6,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/arena_htab_asm.bpf.o",
+      "program_name": "arena_htab_asm",
+      "insn_cnt": 105,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/async_stack_depth.bpf.o",
+      "program_name": "pseudo_call_check",
+      "insn_cnt": 56,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bench_local_storage_create.bpf.o",
+      "program_name": "kmalloc",
+      "insn_cnt": 6,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_cc_cubic.bpf.o",
+      "program_name": "bpf_cubic_init",
+      "insn_cnt": 3,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_cubic.bpf.o",
+      "program_name": "bpf_cubic_init",
+      "insn_cnt": 26,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_dctcp.bpf.o",
+      "program_name": "bpf_dctcp_init",
+      "insn_cnt": 97,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_dctcp_release.bpf.o",
+      "program_name": "dctcp_nouse_release",
+      "insn_cnt": 8,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_flow.bpf.o",
+      "program_name": "_dissect",
+      "insn_cnt": 118,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_gotox.bpf.o",
+      "program_name": "one_switch",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_hashmap_full_update_bench.bpf.o",
+      "program_name": "benchmark",
+      "insn_cnt": 26,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_hashmap_lookup.bpf.o",
+      "program_name": "benchmark",
+      "insn_cnt": 35,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_bpf_array_map.bpf.o",
+      "program_name": "dump_bpf_array_map",
+      "insn_cnt": 44,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_bpf_hash_map.bpf.o",
+      "program_name": "dump_bpf_hash_map",
+      "insn_cnt": 112,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_bpf_link.bpf.o",
+      "program_name": "dump_bpf_link",
+      "insn_cnt": 13,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_bpf_map.bpf.o",
+      "program_name": "dump_bpf_map",
+      "insn_cnt": 40,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_bpf_percpu_array_map.bpf.o",
+      "program_name": "dump_bpf_percpu_array_map",
+      "insn_cnt": 30,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_bpf_percpu_hash_map.bpf.o",
+      "program_name": "dump_bpf_percpu_hash_map",
+      "insn_cnt": 48,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_bpf_sk_storage_helpers.bpf.o",
+      "program_name": "delete_bpf_sk_storage_map",
+      "insn_cnt": 8,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_bpf_sk_storage_map.bpf.o",
+      "program_name": "rw_bpf_sk_storage_map",
+      "insn_cnt": 25,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_ipv6_route.bpf.o",
+      "program_name": "dump_ipv6_route",
+      "insn_cnt": 123,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_ksym.bpf.o",
+      "program_name": "dump_ksym",
+      "insn_cnt": 149,
+      "num_sites": 4
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_map_elem.bpf.o",
+      "program_name": "dump_bpf_map_values",
+      "insn_cnt": 17,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_netlink.bpf.o",
+      "program_name": "dump_netlink",
+      "insn_cnt": 99,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_setsockopt.bpf.o",
+      "program_name": "change_tcp_cc",
+      "insn_cnt": 63,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_sockmap.bpf.o",
+      "program_name": "copy",
+      "insn_cnt": 47,
+      "num_sites": 3
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_task_btf.bpf.o",
+      "program_name": "dump_task_struct",
+      "insn_cnt": 42,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_task_file.bpf.o",
+      "program_name": "dump_task_file",
+      "insn_cnt": 68,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_task_stack.bpf.o",
+      "program_name": "dump_task_stack",
+      "insn_cnt": 57,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_task_vmas.bpf.o",
+      "program_name": "proc_maps",
+      "insn_cnt": 124,
+      "num_sites": 4
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_tasks.bpf.o",
+      "program_name": "dump_task",
+      "insn_cnt": 58,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_test_kern1.bpf.o",
+      "program_name": "dump_task",
+      "insn_cnt": 19,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_test_kern2.bpf.o",
+      "program_name": "dump_task",
+      "insn_cnt": 19,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_test_kern3.bpf.o",
+      "program_name": "dump_task",
+      "insn_cnt": 11,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_test_kern4.bpf.o",
+      "program_name": "dump_bpf_map",
+      "insn_cnt": 80,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_test_kern5.bpf.o",
+      "program_name": "dump_bpf_hash_map",
+      "insn_cnt": 10,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_test_kern6.bpf.o",
+      "program_name": "dump_bpf_hash_map",
+      "insn_cnt": 10,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_unix.bpf.o",
+      "program_name": "dump_unix",
+      "insn_cnt": 143,
+      "num_sites": 4
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_vma_offset.bpf.o",
+      "program_name": "get_vma_offset",
+      "insn_cnt": 51,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_loop.bpf.o",
+      "program_name": "test_prog",
+      "insn_cnt": 36,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_loop_bench.bpf.o",
+      "program_name": "benchmark",
+      "insn_cnt": 8,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_mod_race.bpf.o",
+      "program_name": "widen_race",
+      "insn_cnt": 18,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_syscall_macro.bpf.o",
+      "program_name": "handle_sys_prctl",
+      "insn_cnt": 117,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_tcp_nogpl.bpf.o",
+      "program_name": "nogpltcp_init",
+      "insn_cnt": 1,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_data.bpf.o",
+      "program_name": "func",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_bitfields.bpf.o",
+      "program_name": "f",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_multidim.bpf.o",
+      "program_name": "f",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_namespacing.bpf.o",
+      "program_name": "f",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_ordering.bpf.o",
+      "program_name": "f",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_packing.bpf.o",
+      "program_name": "f",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_padding.bpf.o",
+      "program_name": "f",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_syntax.bpf.o",
+      "program_name": "f",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_type_tag.bpf.o",
+      "program_name": "sub",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_type_tag_user.bpf.o",
+      "program_name": "test_user1",
+      "insn_cnt": 7,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cb_refs.bpf.o",
+      "program_name": "underflow_prog",
+      "insn_cnt": 19,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgroup_ancestor.bpf.o",
+      "program_name": "log_cgroup_id",
+      "insn_cnt": 33,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgroup_hierarchical_stats.bpf.o",
+      "program_name": "counter",
+      "insn_cnt": 39,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgroup_iter.bpf.o",
+      "program_name": "cgroup_id_printer",
+      "insn_cnt": 50,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgroup_mprog.bpf.o",
+      "program_name": "getsockopt_1",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgroup_preorder.bpf.o",
+      "program_name": "child",
+      "insn_cnt": 13,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgroup_skb_direct_packet_access.bpf.o",
+      "program_name": "direct_packet_access",
+      "insn_cnt": 6,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgroup_skb_sk_lookup_kern.bpf.o",
+      "program_name": "ingress_lookup",
+      "insn_cnt": 87,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgrp_kfunc_failure.bpf.o",
+      "program_name": "cgrp_kfunc_acquire_untrusted",
+      "insn_cnt": 10,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgrp_kfunc_success.bpf.o",
+      "program_name": "test_cgrp_acquire_release_argument",
+      "insn_cnt": 23,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgrp_ls_attach_cgroup.bpf.o",
+      "program_name": "set_cookie",
+      "insn_cnt": 25,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgrp_ls_negative.bpf.o",
+      "program_name": "on_enter",
+      "insn_cnt": 9,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgrp_ls_recursion.bpf.o",
+      "program_name": "on_update",
+      "insn_cnt": 59,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgrp_ls_sleepable.bpf.o",
+      "program_name": "cgroup_iter",
+      "insn_cnt": 16,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgrp_ls_tp_btf.bpf.o",
+      "program_name": "on_enter",
+      "insn_cnt": 98,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/core_kern.bpf.o",
+      "program_name": "tp_xdp_devmap_xmit_multi",
+      "insn_cnt": 5,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/core_kern_overflow.bpf.o",
+      "program_name": "core_relo_proto",
+      "insn_cnt": 6,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cpumask_failure.bpf.o",
+      "program_name": "test_alloc_no_release",
+      "insn_cnt": 22,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cpumask_success.bpf.o",
+      "program_name": "test_alloc_free_cpumask",
+      "insn_cnt": 26,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/decap_sanity.bpf.o",
+      "program_name": "decap_sanity",
+      "insn_cnt": 75,
+      "num_sites": 2
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/dummy_st_ops_fail.bpf.o",
+      "program_name": "test_unsupported_field_sleepable",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/dummy_st_ops_success.bpf.o",
+      "program_name": "test_1",
+      "insn_cnt": 8,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/exhandler_kern.bpf.o",
+      "program_name": "trace_task_newtask",
+      "insn_cnt": 18,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/fexit_sleep.bpf.o",
+      "program_name": "nanosleep_fentry",
+      "insn_cnt": 15,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/find_vma.bpf.o",
+      "program_name": "handle_getpid",
+      "insn_cnt": 35,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/find_vma_fail1.bpf.o",
+      "program_name": "handle_getpid",
+      "insn_cnt": 13,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/find_vma_fail2.bpf.o",
+      "program_name": "handle_getpid",
+      "insn_cnt": 13,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/for_each_array_map_elem.bpf.o",
+      "program_name": "test_pkt_access",
+      "insn_cnt": 35,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/for_each_hash_map_elem.bpf.o",
+      "program_name": "test_pkt_access",
+      "insn_cnt": 30,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/for_each_hash_modify.bpf.o",
+      "program_name": "test_pkt_access",
+      "insn_cnt": 9,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/for_each_map_elem_write_key.bpf.o",
+      "program_name": "test_map_key_write",
+      "insn_cnt": 9,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/for_each_multi_maps.bpf.o",
+      "program_name": "test_pkt_access",
+      "insn_cnt": 22,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/freplace_unreliable_prog.bpf.o",
+      "program_name": "replace_btf_unreliable_kprobe",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/get_branch_snapshot.bpf.o",
+      "program_name": "test1",
+      "insn_cnt": 62,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/get_func_ip_uprobe_test.bpf.o",
+      "program_name": "test1",
+      "insn_cnt": 13,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/ima.bpf.o",
+      "program_name": "bprm_committed_creds",
+      "insn_cnt": 43,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/ip_check_defrag.bpf.o",
+      "program_name": "defrag",
+      "insn_cnt": 62,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/iters_testmod_seq.bpf.o",
+      "program_name": "testmod_seq_empty",
+      "insn_cnt": 28,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/jeq_infer_not_null_fail.bpf.o",
+      "program_name": "jeq_infer_not_null_ptr_to_btfid",
+      "insn_cnt": 14,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/jit_probe_mem.bpf.o",
+      "program_name": "test_jit_probe_mem",
+      "insn_cnt": 34,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/kfunc_call_destructive.bpf.o",
+      "program_name": "kfunc_destructive_test",
+      "insn_cnt": 3,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/kfunc_call_fail.bpf.o",
+      "program_name": "kfunc_syscall_test_fail",
+      "insn_cnt": 4,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/kfunc_call_race.bpf.o",
+      "program_name": "kfunc_call_fail",
+      "insn_cnt": 4,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/kfunc_call_test.bpf.o",
+      "program_name": "kfunc_call_test4",
+      "insn_cnt": 17,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/kfunc_call_test_subprog.bpf.o",
+      "program_name": "kfunc_call_test1",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/kfunc_implicit_args.bpf.o",
+      "program_name": "test_kfunc_implicit_arg",
+      "insn_cnt": 3,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/kprobe_multi_verifier.bpf.o",
+      "program_name": "kprobe_session_return_0",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/kprobe_write_ctx.bpf.o",
+      "program_name": "kprobe_write_ctx",
+      "insn_cnt": 4,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/ksym_race.bpf.o",
+      "program_name": "ksym_fail",
+      "insn_cnt": 5,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/local_storage.bpf.o",
+      "program_name": "unlink_hook",
+      "insn_cnt": 53,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/local_storage_bench.bpf.o",
+      "program_name": "get_local",
+      "insn_cnt": 22,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/local_storage_rcu_tasks_trace_bench.bpf.o",
+      "program_name": "get_local",
+      "insn_cnt": 24,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/loop1.bpf.o",
+      "program_name": "nested_loops",
+      "insn_cnt": 33,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/loop2.bpf.o",
+      "program_name": "while_true",
+      "insn_cnt": 16,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/loop3.bpf.o",
+      "program_name": "while_true",
+      "insn_cnt": 16,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/loop6.bpf.o",
+      "program_name": "trace_virtqueue_add_sgs",
+      "insn_cnt": 170,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/lru_bug.bpf.o",
+      "program_name": "printk",
+      "insn_cnt": 19,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/lsm.bpf.o",
+      "program_name": "test_int_hook",
+      "insn_cnt": 30,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/lsm_cgroup.bpf.o",
+      "program_name": "socket_post_create",
+      "insn_cnt": 56,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/lsm_cgroup_nonvoid.bpf.o",
+      "program_name": "nonvoid_socket_clone",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/lsm_tailcall.bpf.o",
+      "program_name": "lsm_file_permission_prog",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/map_kptr.bpf.o",
+      "program_name": "test_map_kptr",
+      "insn_cnt": 52,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/map_kptr_fail.bpf.o",
+      "program_name": "size_not_bpf_dw",
+      "insn_cnt": 11,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/map_kptr_race.bpf.o",
+      "program_name": "test_htab_leak",
+      "insn_cnt": 56,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/map_percpu_stats.bpf.o",
+      "program_name": "dump_bpf_map",
+      "insn_cnt": 21,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/missed_kprobe.bpf.o",
+      "program_name": "trigger",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/missed_kprobe_recursion.bpf.o",
+      "program_name": "trigger",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/missed_tp_recursion.bpf.o",
+      "program_name": "trigger",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/mmap_inner_array.bpf.o",
+      "program_name": "add_to_list_in_inner_array",
+      "insn_cnt": 42,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/mptcp_sock.bpf.o",
+      "program_name": "_sockops",
+      "insn_cnt": 58,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/mptcp_sockmap.bpf.o",
+      "program_name": "mptcp_sockmap_inject",
+      "insn_cnt": 20,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/mptcpify.bpf.o",
+      "program_name": "mptcpify",
+      "insn_cnt": 38,
+      "num_sites": 3
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/nested_acquire.bpf.o",
+      "program_name": "test_nested_acquire_nonzero",
+      "insn_cnt": 8,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/nested_trust_failure.bpf.o",
+      "program_name": "test_invalid_nested_user_cpus",
+      "insn_cnt": 6,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/nested_trust_success.bpf.o",
+      "program_name": "test_read_cpumask",
+      "insn_cnt": 6,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/netif_receive_skb.bpf.o",
+      "program_name": "trace_netif_receive_skb",
+      "insn_cnt": 5271,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/netns_cookie_prog.bpf.o",
+      "program_name": "get_netns_cookie_sockops",
+      "insn_cnt": 29,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/perf_event_stackmap.bpf.o",
+      "program_name": "oncpu",
+      "insn_cnt": 52,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/prepare.bpf.o",
+      "program_name": "program",
+      "insn_cnt": 6,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/priv_freplace_prog.bpf.o",
+      "program_name": "new_xdp_prog2",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/priv_prog.bpf.o",
+      "program_name": "xdp_prog1",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/raw_tp_null.bpf.o",
+      "program_name": "test_raw_tp_null",
+      "insn_cnt": 16,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/raw_tp_null_fail.bpf.o",
+      "program_name": "test_raw_tp_null_bpf_testmod_test_raw_tp_null_arg_1",
+      "insn_cnt": 4,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/rcu_tasks_trace_gp.bpf.o",
+      "program_name": "call_rcu_tasks_trace",
+      "insn_cnt": 4,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/recursion.bpf.o",
+      "program_name": "on_delete",
+      "insn_cnt": 27,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/res_spin_lock.bpf.o",
+      "program_name": "res_spin_lock_test",
+      "insn_cnt": 48,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/security_bpf_map.bpf.o",
+      "program_name": "fmod_bpf_map",
+      "insn_cnt": 22,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/setget_sockopt.bpf.o",
+      "program_name": "socket_post_create",
+      "insn_cnt": 148,
+      "num_sites": 2
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/sk_storage_omem_uncharge.bpf.o",
+      "program_name": "bpf_sk_storage_free",
+      "insn_cnt": 21,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/skb_pkt_end.bpf.o",
+      "program_name": "main_prog",
+      "insn_cnt": 22,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/sock_addr_kern.bpf.o",
+      "program_name": "init_sock",
+      "insn_cnt": 3,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/sock_destroy_prog.bpf.o",
+      "program_name": "sock_connect",
+      "insn_cnt": 31,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/sock_destroy_prog_fail.bpf.o",
+      "program_name": "trace_tcp_destroy_sock",
+      "insn_cnt": 4,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/socket_cookie_prog.bpf.o",
+      "program_name": "set_cookie",
+      "insn_cnt": 20,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/sockopt_qos_to_cc.bpf.o",
+      "program_name": "sockopt_qos_to_cc",
+      "insn_cnt": 58,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/stacktrace_ips.bpf.o",
+      "program_name": "kprobe_test",
+      "insn_cnt": 9,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/stacktrace_map.bpf.o",
+      "program_name": "oncpu",
+      "insn_cnt": 46,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/stacktrace_map_skip.bpf.o",
+      "program_name": "oncpu",
+      "insn_cnt": 54,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/summarization.bpf.o",
+      "program_name": "main_changes_with_subprogs",
+      "insn_cnt": 6,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/summarization_freplace.bpf.o",
+      "program_name": "changes_pkt_data",
+      "insn_cnt": 3,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/tailcall_bpf2bpf_fentry.bpf.o",
+      "program_name": "fentry",
+      "insn_cnt": 7,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/tailcall_bpf2bpf_fexit.bpf.o",
+      "program_name": "fexit",
+      "insn_cnt": 7,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/tailcall_bpf2bpf_hierarchy_fentry.bpf.o",
+      "program_name": "fentry",
+      "insn_cnt": 25,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/task_kfunc_failure.bpf.o",
+      "program_name": "task_kfunc_acquire_untrusted",
+      "insn_cnt": 10,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/task_local_storage.bpf.o",
+      "program_name": "on_enter",
+      "insn_cnt": 24,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/task_local_storage_exit_creds.bpf.o",
+      "program_name": "trace_exit_creds",
+      "insn_cnt": 19,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/task_ls_recursion.bpf.o",
+      "program_name": "on_update",
+      "insn_cnt": 44,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/task_ls_uptr.bpf.o",
+      "program_name": "on_enter",
+      "insn_cnt": 49,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/task_storage_nodeadlock.bpf.o",
+      "program_name": "socket_post_create",
+      "insn_cnt": 38,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/tcp_ca_incompl_cong_ops.bpf.o",
+      "program_name": "incompl_cong_ops_ssthresh",
+      "insn_cnt": 3,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/tcp_ca_kfunc.bpf.o",
+      "program_name": "init",
+      "insn_cnt": 8,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/tcp_ca_unsupp_cong_op.bpf.o",
+      "program_name": "unsupp_cong_op_get_info",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/tcp_ca_update.bpf.o",
+      "program_name": "ca_update_1_init",
+      "insn_cnt": 6,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/tcp_ca_write_sk_pacing.bpf.o",
+      "program_name": "write_sk_pacing_init",
+      "insn_cnt": 4,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_access_variable_array.bpf.o",
+      "program_name": "fentry_fentry",
+      "insn_cnt": 7,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_assign_reuse.bpf.o",
+      "program_name": "reuse_accept",
+      "insn_cnt": 122,
+      "num_sites": 7
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_attach_kprobe_sleepable.bpf.o",
+      "program_name": "handle_kprobe_sleepable",
+      "insn_cnt": 6,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_attach_probe.bpf.o",
+      "program_name": "handle_kprobe_auto",
+      "insn_cnt": 25,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_attach_probe_manual.bpf.o",
+      "program_name": "handle_kprobe",
+      "insn_cnt": 6,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_autoattach.bpf.o",
+      "program_name": "prog1",
+      "insn_cnt": 6,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_autoload.bpf.o",
+      "program_name": "prog1",
+      "insn_cnt": 6,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_bpf_cookie.bpf.o",
+      "program_name": "handle_kprobe",
+      "insn_cnt": 17,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_bpf_nf.bpf.o",
+      "program_name": "nf_xdp_ct_test",
+      "insn_cnt": 476,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_bpf_nf_fail.bpf.o",
+      "program_name": "alloc_release",
+      "insn_cnt": 20,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_btf_decl_tag.bpf.o",
+      "program_name": "sub",
+      "insn_cnt": 4,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_btf_skc_cls_ingress.bpf.o",
+      "program_name": "cls_ingress",
+      "insn_cnt": 152,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_build_id.bpf.o",
+      "program_name": "uprobe_nofault",
+      "insn_cnt": 10,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_cgroup1_hierarchy.bpf.o",
+      "program_name": "lsm_run",
+      "insn_cnt": 3,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_core_read_macros.bpf.o",
+      "program_name": "handler",
+      "insn_cnt": 112,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_core_reloc_module.bpf.o",
+      "program_name": "test_core_module_probed",
+      "insn_cnt": 83,
+      "num_sites": 4
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_custom_sec_handlers.bpf.o",
+      "program_name": "abc1",
+      "insn_cnt": 6,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_d_path.bpf.o",
+      "program_name": "prog_stat",
+      "insn_cnt": 35,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_d_path_check_rdonly_mem.bpf.o",
+      "program_name": "d_path_check_rdonly_mem",
+      "insn_cnt": 13,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_d_path_check_types.bpf.o",
+      "program_name": "d_path_check_rdonly_mem",
+      "insn_cnt": 11,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_endian.bpf.o",
+      "program_name": "sys_enter",
+      "insn_cnt": 36,
+      "num_sites": 3
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_fill_link_info.bpf.o",
+      "program_name": "kprobe_run",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_global_func17.bpf.o",
+      "program_name": "global_func17",
+      "insn_cnt": 4,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_global_func_ctx_args.bpf.o",
+      "program_name": "kprobe_typedef_ctx",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_global_map_resize.bpf.o",
+      "program_name": "bss_array_sum",
+      "insn_cnt": 45,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_kernel_flag.bpf.o",
+      "program_name": "bpf",
+      "insn_cnt": 14,
+      "num_sites": 2
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_kfunc_dynptr_param.bpf.o",
+      "program_name": "not_valid_dynptr",
+      "insn_cnt": 6,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_ksyms_btf.bpf.o",
+      "program_name": "handler",
+      "insn_cnt": 55,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_ksyms_btf_null_check.bpf.o",
+      "program_name": "handler",
+      "insn_cnt": 16,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_ksyms_btf_write_check.bpf.o",
+      "program_name": "handler1",
+      "insn_cnt": 11,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_ksyms_module.bpf.o",
+      "program_name": "load",
+      "insn_cnt": 16,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_ksyms_weak.bpf.o",
+      "program_name": "pass_handler",
+      "insn_cnt": 47,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_ldsx_insn.bpf.o",
+      "program_name": "rdonly_map_prog",
+      "insn_cnt": 22,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_libbpf_get_fd_by_id_opts.bpf.o",
+      "program_name": "check_access",
+      "insn_cnt": 12,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_lookup_and_delete.bpf.o",
+      "program_name": "bpf_lookup_and_delete_test",
+      "insn_cnt": 16,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_map_init.bpf.o",
+      "program_name": "sysenter_getpgid",
+      "insn_cnt": 16,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_map_lookup_percpu_elem.bpf.o",
+      "program_name": "sysenter_getuid",
+      "insn_cnt": 57,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_map_ops.bpf.o",
+      "program_name": "map_update",
+      "insn_cnt": 25,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_migrate_reuseport.bpf.o",
+      "program_name": "drop_ack",
+      "insn_cnt": 41,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_netfilter_link_attach.bpf.o",
+      "program_name": "nf_link_attach_test",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_overhead.bpf.o",
+      "program_name": "prog1",
+      "insn_cnt": 5,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_perf_link.bpf.o",
+      "program_name": "handler",
+      "insn_cnt": 6,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_perf_skip.bpf.o",
+      "program_name": "handler",
+      "insn_cnt": 8,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_probe_user.bpf.o",
+      "program_name": "handle_sys_connect",
+      "insn_cnt": 57,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_prog_array_init.bpf.o",
+      "program_name": "tailcall_1",
+      "insn_cnt": 6,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_ptr_untrusted.bpf.o",
+      "program_name": "lsm_run",
+      "insn_cnt": 12,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_raw_tp_test_run.bpf.o",
+      "program_name": "rename",
+      "insn_cnt": 16,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_send_signal_kern.bpf.o",
+      "program_name": "send_signal_tp",
+      "insn_cnt": 66,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_sk_storage_trace_itself.bpf.o",
+      "program_name": "trace_bpf_sk_storage_free",
+      "insn_cnt": 11,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_sk_storage_tracing.bpf.o",
+      "program_name": "trace_inet_sock_set_state",
+      "insn_cnt": 20,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_skb_helpers.bpf.o",
+      "program_name": "test_skb_helpers",
+      "insn_cnt": 18,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_skc_to_unix_sock.bpf.o",
+      "program_name": "unix_listen",
+      "insn_cnt": 46,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_skmsg_load_helpers.bpf.o",
+      "program_name": "prog_msg_verdict",
+      "insn_cnt": 32,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_sockmap_change_tail.bpf.o",
+      "program_name": "prog_skb_verdict",
+      "insn_cnt": 33,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_sockmap_invalid_update.bpf.o",
+      "program_name": "bpf_sockmap",
+      "insn_cnt": 13,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_sockmap_progs_query.bpf.o",
+      "program_name": "prog_skb_verdict",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_sockmap_skb_verdict_attach.bpf.o",
+      "program_name": "prog_skb_verdict",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_sockmap_update.bpf.o",
+      "program_name": "copy_sock_map",
+      "insn_cnt": 33,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_subprogs.bpf.o",
+      "program_name": "prog1",
+      "insn_cnt": 29,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_subprogs_extable.bpf.o",
+      "program_name": "handle_fexit_ret_subprogs",
+      "insn_cnt": 17,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_subprogs_unused.bpf.o",
+      "program_name": "main_prog",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_task_local_data.bpf.o",
+      "program_name": "task_main",
+      "insn_cnt": 178,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_task_pt_regs.bpf.o",
+      "program_name": "handle_uprobe",
+      "insn_cnt": 22,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_task_under_cgroup.bpf.o",
+      "program_name": "tp_btf_run",
+      "insn_cnt": 38,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_tc_change_tail.bpf.o",
+      "program_name": "change_tail",
+      "insn_cnt": 85,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_tc_tunnel.bpf.o",
+      "program_name": "__encap_ipip_none",
+      "insn_cnt": 107,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_tcpbpf_kern.bpf.o",
+      "program_name": "bpf_testcb",
+      "insn_cnt": 166,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_trace_ext_tracing.bpf.o",
+      "program_name": "fentry",
+      "insn_cnt": 7,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_tracepoint.bpf.o",
+      "program_name": "oncpu",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_unpriv_bpf_disabled.bpf.o",
+      "program_name": "sys_nanosleep_enter",
+      "insn_cnt": 25,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_uprobe.bpf.o",
+      "program_name": "test1",
+      "insn_cnt": 12,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_uprobe_autoattach.bpf.o",
+      "program_name": "handle_uprobe_noautoattach",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_urandom_usdt.bpf.o",
+      "program_name": "urand_read_without_sema",
+      "insn_cnt": 33,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_usdt.bpf.o",
+      "program_name": "usdt0",
+      "insn_cnt": 93,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_varlen.bpf.o",
+      "program_name": "handler64_unsigned",
+      "insn_cnt": 51,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_verif_scale2.bpf.o",
+      "program_name": "balancer_ingress",
+      "insn_cnt": 14750,
+      "num_sites": 992
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_xdp_devmap_tailcall.bpf.o",
+      "program_name": "xdp_devmap",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_xdp_do_redirect.bpf.o",
+      "program_name": "xdp_redirect",
+      "insn_cnt": 52,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/timer_crash.bpf.o",
+      "program_name": "sys_enter",
+      "insn_cnt": 43,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/timer_start_deadlock.bpf.o",
+      "program_name": "tp_hrtimer_cancel",
+      "insn_cnt": 21,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/token_lsm.bpf.o",
+      "program_name": "token_capable",
+      "insn_cnt": 18,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/trace_dummy_st_ops.bpf.o",
+      "program_name": "fentry_test_1",
+      "insn_cnt": 12,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/trace_printk.bpf.o",
+      "program_name": "sys_enter",
+      "insn_cnt": 14,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/trace_vprintk.bpf.o",
+      "program_name": "sys_enter",
+      "insn_cnt": 58,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/tracing_failure.bpf.o",
+      "program_name": "test_spin_lock",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/tracing_struct.bpf.o",
+      "program_name": "test_struct_arg_1",
+      "insn_cnt": 22,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/tracing_struct_many_args.bpf.o",
+      "program_name": "test_struct_many_args_1",
+      "insn_cnt": 36,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/uprobe_multi.bpf.o",
+      "program_name": "uprobe",
+      "insn_cnt": 5,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/uprobe_multi_pid_filter.bpf.o",
+      "program_name": "uprobe_multi_0",
+      "insn_cnt": 17,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/uprobe_multi_usdt.bpf.o",
+      "program_name": "usdt0",
+      "insn_cnt": 7,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/uprobe_multi_verifier.bpf.o",
+      "program_name": "uprobe_sesison_return_0",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/uprobe_syscall.bpf.o",
+      "program_name": "probe",
+      "insn_cnt": 46,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/uprobe_syscall_executed.bpf.o",
+      "program_name": "test_uprobe",
+      "insn_cnt": 15,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/uptr_update_failure.bpf.o",
+      "program_name": "not_used",
+      "insn_cnt": 24,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/uretprobe_stack.bpf.o",
+      "program_name": "uprobe_1",
+      "insn_cnt": 21,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_arena_large.bpf.o",
+      "program_name": "big_alloc1",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_bits_iter.bpf.o",
+      "program_name": "no_destroy",
+      "insn_cnt": 13,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_btf_unreliable_prog.bpf.o",
+      "program_name": "btf_unreliable_kprobe",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_const.bpf.o",
+      "program_name": "tcx1",
+      "insn_cnt": 13,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_ctx.bpf.o",
+      "program_name": "context_stores_via_bpf_atomic",
+      "insn_cnt": 3,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_default_trusted_ptr.bpf.o",
+      "program_name": "test_default_trusted_ptr",
+      "insn_cnt": 5,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_jit_inline.bpf.o",
+      "program_name": "inline_bpf_get_current_task",
+      "insn_cnt": 3,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_kfunc_prog_types.bpf.o",
+      "program_name": "task_kfunc_raw_tp",
+      "insn_cnt": 14,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_lsm.bpf.o",
+      "program_name": "errno_zero_retval_test1",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_mtu.bpf.o",
+      "program_name": "tc_uninit_mtu",
+      "insn_cnt": 8,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_netfilter_ctx.bpf.o",
+      "program_name": "with_invalid_ctx_access_test1",
+      "insn_cnt": 3,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_typedef.bpf.o",
+      "program_name": "resolve_typedef",
+      "insn_cnt": 4,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_unpriv_perf.bpf.o",
+      "program_name": "fill_of_different_pointers_ldx",
+      "insn_cnt": 12,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/xdp_flowtable.bpf.o",
+      "program_name": "xdp_flowtable_do_lookup",
+      "insn_cnt": 149,
+      "num_sites": 2
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/xdp_hw_metadata.bpf.o",
+      "program_name": "rx",
+      "insn_cnt": 124,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/xdp_metadata.bpf.o",
+      "program_name": "rx",
+      "insn_cnt": 71,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/xdp_metadata2.bpf.o",
+      "program_name": "freplace_rx",
+      "insn_cnt": 15,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/xdp_synproxy_kern.bpf.o",
+      "program_name": "syncookie_xdp",
+      "insn_cnt": 1047,
+      "num_sites": 23
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/xfrm_info.bpf.o",
+      "program_name": "set_xfrm_info",
+      "insn_cnt": 16,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/xdp_synproxy_kern.bpf.o",
+      "program_name": "syncookie_xdp",
+      "insn_cnt": 1047,
+      "num_sites": 23
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_emain.bpf.o",
+      "program_name": "tc_packet_func_fast",
+      "insn_cnt": 7237,
+      "num_sites": 104
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_main.bpf.o",
+      "program_name": "tc_packet_func_fast",
+      "insn_cnt": 7239,
+      "num_sites": 104
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_xdp_main.bpf.o",
+      "program_name": "xdp_packet_func",
+      "insn_cnt": 1784,
+      "num_sites": 3
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/manual-test/fentry.gen.bpf.o",
+      "program_name": "do_unlinkat",
+      "insn_cnt": 11,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/manual-test/fentry.tmp.bpf.o",
+      "program_name": "do_unlinkat",
+      "insn_cnt": 11,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/real_world_code_size/libbpf-bootstrap/bootstrap.bpf.o",
+      "program_name": "handle_exec",
+      "insn_cnt": 63,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/real_world_code_size/libbpf-bootstrap/bootstrap_legacy.bpf.o",
+      "program_name": "handle_exec",
+      "insn_cnt": 81,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/real_world_code_size/libbpf-bootstrap/fentry.bpf.o",
+      "program_name": "do_unlinkat",
+      "insn_cnt": 11,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/real_world_code_size/libbpf-bootstrap/kprobe.bpf.o",
+      "program_name": "do_unlinkat",
+      "insn_cnt": 19,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/real_world_code_size/libbpf-bootstrap/ksyscall.bpf.o",
+      "program_name": "tgkill_entry",
+      "insn_cnt": 84,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/real_world_code_size/libbpf-bootstrap/lsm.bpf.o",
+      "program_name": "lsm_bpf",
+      "insn_cnt": 12,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/real_world_code_size/libbpf-bootstrap/minimal.bpf.o",
+      "program_name": "handle_tp",
+      "insn_cnt": 13,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/real_world_code_size/libbpf-bootstrap/minimal_legacy.bpf.o",
+      "program_name": "handle_tp",
+      "insn_cnt": 33,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/real_world_code_size/libbpf-bootstrap/minimal_ns.bpf.o",
+      "program_name": "handle_tp",
+      "insn_cnt": 21,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/real_world_code_size/libbpf-bootstrap/profile.bpf.o",
+      "program_name": "profile",
+      "insn_cnt": 45,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/real_world_code_size/libbpf-bootstrap/sockfilter.bpf.o",
+      "program_name": "socket_handler",
+      "insn_cnt": 72,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/real_world_code_size/libbpf-bootstrap/task_iter.bpf.o",
+      "program_name": "get_tasks",
+      "insn_cnt": 45,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/real_world_code_size/libbpf-bootstrap/tc.bpf.o",
+      "program_name": "tc_ingress",
+      "insn_cnt": 18,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/real_world_code_size/libbpf-bootstrap/uprobe.bpf.o",
+      "program_name": "uprobe_add",
+      "insn_cnt": 8,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/real_world_code_size/libbpf-bootstrap/usdt.bpf.o",
+      "program_name": "usdt_auto_attach",
+      "insn_cnt": 33,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/scx/scx_bpfland_main.bpf.o",
+      "program_name": "bpfland_select_cpu",
+      "insn_cnt": 118,
+      "num_sites": 3
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/scx/scx_flash_main.bpf.o",
+      "program_name": "flash_select_cpu",
+      "insn_cnt": 159,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/suricata/xdp_filter.bpf.o",
+      "program_name": "xdp_hashfilter",
+      "insn_cnt": 334,
+      "num_sites": 3
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/suricata/xdp_lb.bpf.o",
+      "program_name": "xdp_loadfilter",
+      "insn_cnt": 410,
+      "num_sites": 8
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/systemd/bind-iface.bpf.o",
+      "program_name": "sd_bind_interface",
+      "insn_cnt": 6,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/systemd/restrict-fs.bpf.o",
+      "program_name": "restrict_filesystems",
+      "insn_cnt": 63,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/systemd/restrict-ifaces.bpf.o",
+      "program_name": "sd_restrictif_e",
+      "insn_cnt": 19,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/systemd/socket-bind.bpf.o",
+      "program_name": "sd_bind4",
+      "insn_cnt": 82,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/systemd/sysctl-monitor.bpf.o",
+      "program_name": "sysctl_monitor",
+      "insn_cnt": 118,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/systemd/userns-restrict.bpf.o",
+      "program_name": "userns_restrict_path_chown",
+      "insn_cnt": 78,
+      "num_sites": 3
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_cgroup.bpf.o",
+      "program_name": "tg_cgroup_rmdir",
+      "insn_cnt": 41,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_cgroup_mkdir.bpf.o",
+      "program_name": "tg_tp_cgrp_mkdir",
+      "insn_cnt": 447,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_cgroup_release.bpf.o",
+      "program_name": "tg_tp_cgrp_release",
+      "insn_cnt": 352,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_cgroup_rmdir.bpf.o",
+      "program_name": "tg_tp_cgrp_rmdir",
+      "insn_cnt": 352,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_cgtracker.bpf.o",
+      "program_name": "tg_cgtracker_cgroup_mkdir",
+      "insn_cnt": 168,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_enforcer.bpf.o",
+      "program_name": "kprobe_enforcer",
+      "insn_cnt": 35,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_execve_bprm_commit_creds.bpf.o",
+      "program_name": "tg_kp_bprm_committing_creds",
+      "insn_cnt": 292,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_execve_event.bpf.o",
+      "program_name": "execve_rate",
+      "insn_cnt": 206,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_execve_map_update.bpf.o",
+      "program_name": "execve_map_update",
+      "insn_cnt": 12,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_exit.bpf.o",
+      "program_name": "event_exit_acct_process",
+      "insn_cnt": 140,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_fmodret_enforcer.bpf.o",
+      "program_name": "fmodret_enforcer",
+      "insn_cnt": 30,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_fork.bpf.o",
+      "program_name": "event_wake_up_new_task",
+      "insn_cnt": 1290,
+      "num_sites": 5
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_generic_kprobe.bpf.o",
+      "program_name": "generic_kprobe_setup_event",
+      "insn_cnt": 250,
+      "num_sites": 3
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_generic_lsm_core.bpf.o",
+      "program_name": "generic_lsm_setup_event",
+      "insn_cnt": 122,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_generic_lsm_output.bpf.o",
+      "program_name": "generic_lsm_output",
+      "insn_cnt": 367,
+      "num_sites": 6
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_generic_rawtp.bpf.o",
+      "program_name": "generic_rawtp_setup_event",
+      "insn_cnt": 117,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_generic_retkprobe.bpf.o",
+      "program_name": "generic_retkprobe_filter_arg",
+      "insn_cnt": 463,
+      "num_sites": 16
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_generic_retuprobe.bpf.o",
+      "program_name": "generic_retuprobe_filter_arg",
+      "insn_cnt": 463,
+      "num_sites": 16
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_generic_tracepoint.bpf.o",
+      "program_name": "generic_tracepoint_process_event",
+      "insn_cnt": 2633,
+      "num_sites": 54
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_generic_uprobe.bpf.o",
+      "program_name": "generic_uprobe_setup_event",
+      "insn_cnt": 194,
+      "num_sites": 2
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_generic_usdt.bpf.o",
+      "program_name": "generic_usdt_setup_event",
+      "insn_cnt": 970,
+      "num_sites": 31
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_multi_enforcer.bpf.o",
+      "program_name": "kprobe_multi_enforcer",
+      "insn_cnt": 35,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_prog_iter.bpf.o",
+      "program_name": "iter",
+      "insn_cnt": 13,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tracee/lsm_check.bpf.o",
+      "program_name": "lsm_bpf_check",
+      "insn_cnt": 14,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tracee/tracee.bpf.o",
+      "program_name": "tracepoint__raw_syscalls__sys_enter",
+      "insn_cnt": 29,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tubular/inet-kern.bpf.o",
+      "program_name": "dispatcher",
+      "insn_cnt": 124,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tools/xdp_basic.bpf.o",
+      "program_name": "tp_xdp_redirect_err",
+      "insn_cnt": 81,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tools/xdp_flowtable.bpf.o",
+      "program_name": "xdp_fwd_flow_full",
+      "insn_cnt": 1372,
+      "num_sites": 33
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tools/xdp_flowtable_sample.bpf.o",
+      "program_name": "xdp_fwd_flowtable_sample",
+      "insn_cnt": 25,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tools/xdp_forward.bpf.o",
+      "program_name": "xdp_fwd_fib_full",
+      "insn_cnt": 151,
+      "num_sites": 3
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tools/xdp_load_bytes.bpf.o",
+      "program_name": "xdp_probe_prog",
+      "insn_cnt": 13,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tools/xdp_monitor.bpf.o",
+      "program_name": "tp_xdp_redirect_err",
+      "insn_cnt": 81,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tools/xdp_redirect_basic.bpf.o",
+      "program_name": "tp_xdp_redirect_err",
+      "insn_cnt": 81,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tools/xdp_redirect_cpumap.bpf.o",
+      "program_name": "tp_xdp_redirect_err",
+      "insn_cnt": 81,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tools/xdp_redirect_devmap.bpf.o",
+      "program_name": "tp_xdp_redirect_err",
+      "insn_cnt": 81,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tools/xdp_redirect_devmap_multi.bpf.o",
+      "program_name": "tp_xdp_redirect_err",
+      "insn_cnt": 81,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tools/xdp_sample.bpf.o",
+      "program_name": "tp_xdp_cpumap_kthread",
+      "insn_cnt": 28,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tools/xdp_trafficgen.bpf.o",
+      "program_name": "tp_xdp_redirect_err",
+      "insn_cnt": 81,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tools/xdpsock.bpf.o",
+      "program_name": "xdp_sock_prog",
+      "insn_cnt": 17,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/advanced03-AF_XDP/af_xdp_kern.bpf.o",
+      "program_name": "xdp_sock_prog",
+      "insn_cnt": 31,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/basic01-xdp-pass/xdp_pass_kern.bpf.o",
+      "program_name": "xdp_prog_simple",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/basic02-prog-by-name/xdp_prog_kern.bpf.o",
+      "program_name": "xdp_pass_func",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/basic03-map-counter/xdp_prog_kern.bpf.o",
+      "program_name": "xdp_stats1_func",
+      "insn_cnt": 14,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/basic04-pinning-maps/xdp_prog_kern.bpf.o",
+      "program_name": "xdp_pass_func",
+      "insn_cnt": 21,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_fail1.bpf.o",
+      "program_name": "_xdp_fail1",
+      "insn_cnt": 13,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_fail2.bpf.o",
+      "program_name": "_xdp_fail2",
+      "insn_cnt": 7,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_fail3.bpf.o",
+      "program_name": "_xdp_fail3",
+      "insn_cnt": 14,
+      "num_sites": 2
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_kern.bpf.o",
+      "program_name": "grow_parse",
+      "insn_cnt": 110,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_kern2.bpf.o",
+      "program_name": "_xdp_end_loop",
+      "insn_cnt": 18,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_kern3.bpf.o",
+      "program_name": "_xdp_works1",
+      "insn_cnt": 16,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_kern4.bpf.o",
+      "program_name": "_xdp_test1",
+      "insn_cnt": 25,
+      "num_sites": 2
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/packet-solutions/tc_reply_kern_02.bpf.o",
+      "program_name": "_fix_port_egress",
+      "insn_cnt": 97,
+      "num_sites": 6
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/packet-solutions/xdp_prog_kern_02.bpf.o",
+      "program_name": "xdp_patch_ports_func",
+      "insn_cnt": 125,
+      "num_sites": 6
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/packet-solutions/xdp_prog_kern_03.bpf.o",
+      "program_name": "xdp_icmp_echo_func",
+      "insn_cnt": 194,
+      "num_sites": 4
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/packet-solutions/xdp_vlan01_kern.bpf.o",
+      "program_name": "xdp_vlan_01",
+      "insn_cnt": 113,
+      "num_sites": 18
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/packet-solutions/xdp_vlan02_kern.bpf.o",
+      "program_name": "xdp_vlan_02",
+      "insn_cnt": 127,
+      "num_sites": 17
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/packet01-parsing/xdp_prog_kern.bpf.o",
+      "program_name": "xdp_parser_func",
+      "insn_cnt": 35,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/packet02-rewriting/xdp_prog_kern.bpf.o",
+      "program_name": "xdp_port_rewrite_func",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/packet03-redirecting/xdp_prog_kern.bpf.o",
+      "program_name": "xdp_icmp_echo_func",
+      "insn_cnt": 100,
+      "num_sites": 2
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/tracing01-xdp-simple/trace_prog_kern.bpf.o",
+      "program_name": "trace_xdp_exception",
+      "insn_cnt": 29,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/tracing01-xdp-simple/xdp_prog_kern.bpf.o",
+      "program_name": "xdp_drop_func",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/tracing02-xdp-monitor/trace_prog_kern.bpf.o",
+      "program_name": "trace_xdp_redirect_err",
+      "insn_cnt": 18,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/tracing03-xdp-debug-print/xdp_prog_kern.bpf.o",
+      "program_name": "xdp_prog_simple",
+      "insn_cnt": 49,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/tracing04-xdp-tcpdump/xdp_sample_pkts_kern.bpf.o",
+      "program_name": "xdp_sample_prog",
+      "insn_cnt": 33,
+      "num_sites": 1
+    }
+  ],
+  "selected_sample": [
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_tcp_nogpl.bpf.o",
+      "program_name": "nogpltcp_init",
+      "insn_cnt": 1,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/test_tc_bpf.bpf.o",
+      "program_name": "cls",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/freplace_unreliable_prog.bpf.o",
+      "program_name": "replace_btf_unreliable_kprobe",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_netfilter_link_attach.bpf.o",
+      "program_name": "nf_link_attach_test",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/basic02-prog-by-name/xdp_prog_kern.bpf.o",
+      "program_name": "xdp_pass_func",
+      "insn_cnt": 2,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_netfilter_ctx.bpf.o",
+      "program_name": "with_invalid_ctx_access_test1",
+      "insn_cnt": 3,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/ksnoop.bpf.o",
+      "program_name": "kprobe_entry",
+      "insn_cnt": 4,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/core_kern.bpf.o",
+      "program_name": "tp_xdp_devmap_xmit_multi",
+      "insn_cnt": 5,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/summarization.bpf.o",
+      "program_name": "main_changes_with_subprogs",
+      "insn_cnt": 6,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_fail2.bpf.o",
+      "program_name": "_xdp_fail2",
+      "insn_cnt": 7,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/libbpf-bootstrap/examples/c/uprobe.bpf.o",
+      "program_name": "uprobe_add",
+      "insn_cnt": 8,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/map_kptr_fail.bpf.o",
+      "program_name": "size_not_bpf_dw",
+      "insn_cnt": 11,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/find_vma_fail2.bpf.o",
+      "program_name": "handle_getpid",
+      "insn_cnt": 13,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/xdp_metadata2.bpf.o",
+      "program_name": "freplace_rx",
+      "insn_cnt": 15,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgrp_ls_sleepable.bpf.o",
+      "program_name": "cgroup_iter",
+      "insn_cnt": 16,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/lru_bug.bpf.o",
+      "program_name": "printk",
+      "insn_cnt": 19,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/softirqs.bpf.o",
+      "program_name": "softirq_entry_btf",
+      "insn_cnt": 25,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/advanced03-AF_XDP/af_xdp_kern.bpf.o",
+      "program_name": "xdp_sock_prog",
+      "insn_cnt": 31,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/runqlat.bpf.o",
+      "program_name": "sched_wakeup",
+      "insn_cnt": 32,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/task_storage_nodeadlock.bpf.o",
+      "program_name": "socket_post_create",
+      "insn_cnt": 38,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/tracing03-xdp-debug-print/xdp_prog_kern.bpf.o",
+      "program_name": "xdp_prog_simple",
+      "insn_cnt": 49,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/systemd/restrict-fs.bpf.o",
+      "program_name": "restrict_filesystems",
+      "insn_cnt": 63,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/KubeArmor/system_monitor.bpf.o",
+      "program_name": "sys_enter_setns",
+      "insn_cnt": 66,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/runqlen.bpf.o",
+      "program_name": "do_sample",
+      "insn_cnt": 83,
+      "num_sites": 3
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_kern.bpf.o",
+      "program_name": "grow_parse",
+      "insn_cnt": 110,
+      "num_sites": 1
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/packet-solutions/xdp_vlan02_kern.bpf.o",
+      "program_name": "xdp_vlan_02",
+      "insn_cnt": 127,
+      "num_sites": 17
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/tcpstates.bpf.o",
+      "program_name": "handle_set_state",
+      "insn_cnt": 137,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/xdp_flowtable.bpf.o",
+      "program_name": "xdp_flowtable_do_lookup",
+      "insn_cnt": 149,
+      "num_sites": 2
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/loop6.bpf.o",
+      "program_name": "trace_virtqueue_add_sgs",
+      "insn_cnt": 170,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_generic_kprobe.bpf.o",
+      "program_name": "generic_kprobe_setup_event",
+      "insn_cnt": 250,
+      "num_sites": 3
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_execve_bprm_commit_creds.bpf.o",
+      "program_name": "tg_kp_bprm_committing_creds",
+      "insn_cnt": 292,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/suricata/xdp_filter.bpf.o",
+      "program_name": "xdp_hashfilter",
+      "insn_cnt": 334,
+      "num_sites": 3
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/suricata/xdp_lb.bpf.o",
+      "program_name": "xdp_loadfilter",
+      "insn_cnt": 410,
+      "num_sites": 8
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_bpf_nf.bpf.o",
+      "program_name": "nf_xdp_ct_test",
+      "insn_cnt": 476,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/calico/xdp_debug.bpf.o",
+      "program_name": "calico_xdp_main",
+      "insn_cnt": 959,
+      "num_sites": 10
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_generic_usdt.bpf.o",
+      "program_name": "generic_usdt_setup_event",
+      "insn_cnt": 970,
+      "num_sites": 31
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/xdp_synproxy_kern.bpf.o",
+      "program_name": "syncookie_xdp",
+      "insn_cnt": 1047,
+      "num_sites": 23
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/xdp_synproxy_kern.bpf.o",
+      "program_name": "syncookie_xdp",
+      "insn_cnt": 1047,
+      "num_sites": 23
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tools/xdp_flowtable.bpf.o",
+      "program_name": "xdp_fwd_flow_full",
+      "insn_cnt": 1372,
+      "num_sites": 33
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_xdp_main.bpf.o",
+      "program_name": "xdp_packet_func",
+      "insn_cnt": 1784,
+      "num_sites": 3
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/execsnoop.bpf.o",
+      "program_name": "tracepoint__syscalls__sys_enter_execve",
+      "insn_cnt": 2236,
+      "num_sites": 0
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/katran/balancer.bpf.o",
+      "program_name": "balancer_ingress",
+      "insn_cnt": 2322,
+      "num_sites": 18
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_generic_tracepoint.bpf.o",
+      "program_name": "generic_tracepoint_process_event",
+      "insn_cnt": 2633,
+      "num_sites": 54
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/KubeArmor/protectproc.bpf.o",
+      "program_name": "enforce_file",
+      "insn_cnt": 5139,
+      "num_sites": 2
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/calico/from_nat_debug.bpf.o",
+      "program_name": "calico_tc_main",
+      "insn_cnt": 6776,
+      "num_sites": 60
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_emain.bpf.o",
+      "program_name": "tc_packet_func_fast",
+      "insn_cnt": 7237,
+      "num_sites": 104
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/calico/to_hep_debug.bpf.o",
+      "program_name": "calico_tc_main",
+      "insn_cnt": 8091,
+      "num_sites": 71
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/calico/from_hep_debug.bpf.o",
+      "program_name": "calico_tc_main",
+      "insn_cnt": 8829,
+      "num_sites": 86
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/KubeArmor/enforcer.bpf.o",
+      "program_name": "enforce_proc",
+      "insn_cnt": 11295,
+      "num_sites": 65
+    },
+    {
+      "object_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_verif_scale2.bpf.o",
+      "program_name": "balancer_ingress",
+      "insn_cnt": 14750,
+      "num_sites": 992
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+version: 3
+program: 'packet_rss_hash_xdp'
+sites:
+  - insn: 107
+    family: rotate
+    pattern_kind: 'rotate-32'
+  - insn: 122
+    family: rotate
+    pattern_kind: 'rotate-32'
+  - insn: 132
+    family: rotate
+    pattern_kind: 'rotate-32'
+  - insn: 143
+    family: rotate
+    pattern_kind: 'rotate-32'
+  - insn: 154
+    family: rotate
+    pattern_kind: 'rotate-32'
+  - insn: 170
+    family: rotate
+    pattern_kind: 'rotate-32'
+  - insn: 192
+    family: rotate
+    pattern_kind: 'rotate-32'
+  - insn: 203
+    family: rotate
+    pattern_kind: 'rotate-32'
+  - insn: 223
+    family: rotate
+    pattern_kind: 'rotate-32'
+  - insn: 232
+    family: rotate
+    pattern_kind: 'rotate-32'
+  - insn: 242
+    family: rotate
+    pattern_kind: 'rotate-32'

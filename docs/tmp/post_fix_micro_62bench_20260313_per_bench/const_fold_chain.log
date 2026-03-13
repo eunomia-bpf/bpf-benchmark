@@ -1,0 +1,5 @@
+[bench] const_fold_chain
+  kernel           status=ok               exec=355 ns applied=-
+  kernel-recompile status=ok               exec=455.5 ns applied=False
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/post_fix_micro_62bench_20260313_per_bench/const_fold_chain.json
+[done] wrote /home/yunwei37/workspace/bpf-benchmark/docs/tmp/post_fix_micro_62bench_20260313_per_bench/const_fold_chain.md
