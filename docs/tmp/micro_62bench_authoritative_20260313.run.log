@@ -146,3 +146,9 @@ subprocess.TimeoutExpired: Command '['/home/yunwei37/.local/bin/vng', '--run', '
   [ok] collected local_call_fanout (vm exit 0)
   [aggregate] benchmarks=41 valid=41
 [resume] packet_rss_hash
+  [ok] collected packet_rss_hash (vm exit 0)
+  [aggregate] benchmarks=42 valid=42
+[resume] imm64_storm
+  [ok] collected imm64_storm (vm exit 0)
+  [aggregate] benchmarks=43 valid=43
+[resume] alu32_64_pingpong

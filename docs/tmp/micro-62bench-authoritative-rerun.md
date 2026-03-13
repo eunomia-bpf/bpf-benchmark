@@ -3,7 +3,7 @@
 ## Methodology
 
 - Kernel: `7.0.0-rc2-g05a1845490ed-dirty`
-- Benchmarks: `41` from `config/micro_pure_jit.yaml`
+- Benchmarks: `43` from `config/micro_pure_jit.yaml`
 - Runtimes: `kernel` vs `kernel-recompile`
 - Warmups / iterations / repeat: `2 / 2 / 500`
 - CPU pinning: `taskset -c 0`
@@ -12,10 +12,10 @@
 
 ## Headline Numbers
 
-- Overall geomean (stock / recompile, valid pairs only): `0.988x`
+- Overall geomean (stock / recompile, valid pairs only): `0.994x`
 - Applied-only geomean (stock / recompile): `1.001x`
-- Wins / losses / ties: `16 / 23 / 2`
-- Valid / invalid pairs: `41 / 0`
+- Wins / losses / ties: `17 / 23 / 3`
+- Valid / invalid pairs: `43 / 0`
 
 ## Per-Family Breakdown
 
@@ -32,12 +32,14 @@
 | code-clone | 2 | 2 | 0 | 0.970x | n/a | 1 | 1 | 0 |
 | dep-chain | 2 | 2 | 0 | 1.018x | n/a | 1 | 1 | 0 |
 | fixed-loop | 2 | 2 | 0 | 1.171x | n/a | 1 | 1 | 0 |
+| immediate-stress | 1 | 1 | 0 | 1.000x | n/a | 0 | 0 | 1 |
 | large-mixed | 2 | 2 | 1 | 0.926x | 0.860x | 0 | 2 | 0 |
 | load-width | 2 | 2 | 0 | 1.162x | n/a | 2 | 0 | 0 |
 | log2-fold | 1 | 1 | 1 | 1.206x | 1.206x | 1 | 0 | 0 |
 | mixed-alu-mem | 1 | 1 | 1 | 1.018x | 1.018x | 1 | 0 | 0 |
 | multi-acc | 2 | 2 | 0 | 0.989x | n/a | 0 | 2 | 0 |
 | nested-loop | 2 | 2 | 0 | 1.081x | n/a | 2 | 0 | 0 |
+| packet-hash | 1 | 1 | 0 | 1.279x | n/a | 1 | 0 | 0 |
 | parser | 2 | 2 | 0 | 0.861x | n/a | 0 | 2 | 0 |
 | popcount | 1 | 1 | 0 | 1.010x | n/a | 1 | 0 | 0 |
 | recurrence | 2 | 2 | 0 | 0.999x | n/a | 1 | 1 | 0 |
@@ -93,3 +95,5 @@
 | memcmp_prefix_64 | byte-compare | 135.5 ns | 156 ns | 0.869x | yes | 3 | loss |
 | packet_parse_vlans_tcpopts | parser | 16 ns | 20.5 ns | 0.780x | no | 0 | loss |
 | local_call_fanout | bpf-local-call | 125 ns | 172.5 ns | 0.725x | no | 0 | loss |
+| packet_rss_hash | packet-hash | 27.5 ns | 21.5 ns | 1.279x | no | 0 | win |
+| imm64_storm | immediate-stress | 188.5 ns | 188.5 ns | 1.000x | no | 0 | tie |
