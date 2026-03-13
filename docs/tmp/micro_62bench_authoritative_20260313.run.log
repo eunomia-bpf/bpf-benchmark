@@ -164,3 +164,6 @@ subprocess.TimeoutExpired: Command '['/home/yunwei37/.local/bin/vng', '--run', '
   [ok] collected mega_basic_block_2048 (vm exit 0)
   [aggregate] benchmarks=47 valid=47
 [resume] rotate64_hash
+  [ok] collected rotate64_hash (vm exit 0)
+  [aggregate] benchmarks=48 valid=48
+[resume] packet_redundant_bounds

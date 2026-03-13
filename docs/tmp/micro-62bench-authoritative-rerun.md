@@ -3,7 +3,7 @@
 ## Methodology
 
 - Kernel: `7.0.0-rc2-g05a1845490ed-dirty`
-- Benchmarks: `47` from `config/micro_pure_jit.yaml`
+- Benchmarks: `48` from `config/micro_pure_jit.yaml`
 - Runtimes: `kernel` vs `kernel-recompile`
 - Warmups / iterations / repeat: `2 / 2 / 500`
 - CPU pinning: `taskset -c 0`
@@ -12,10 +12,10 @@
 
 ## Headline Numbers
 
-- Overall geomean (stock / recompile, valid pairs only): `1.003x`
+- Overall geomean (stock / recompile, valid pairs only): `1.009x`
 - Applied-only geomean (stock / recompile): `1.001x`
-- Wins / losses / ties: `20 / 24 / 3`
-- Valid / invalid pairs: `47 / 0`
+- Wins / losses / ties: `21 / 24 / 3`
+- Valid / invalid pairs: `48 / 0`
 
 ## Per-Family Breakdown
 
@@ -48,6 +48,7 @@
 | popcount | 1 | 1 | 0 | 1.010x | n/a | 1 | 0 | 0 |
 | recurrence | 2 | 2 | 0 | 0.999x | n/a | 1 | 1 | 0 |
 | reduction | 1 | 1 | 0 | 0.995x | n/a | 0 | 1 | 0 |
+| rotate-hash | 1 | 1 | 0 | 1.304x | n/a | 1 | 0 | 0 |
 | search | 1 | 1 | 1 | 0.935x | 0.935x | 0 | 1 | 0 |
 | select-diamond | 2 | 2 | 2 | 1.240x | 1.240x | 1 | 1 | 0 |
 | spill-pressure | 1 | 1 | 0 | 0.923x | n/a | 0 | 1 | 0 |
@@ -105,3 +106,4 @@
 | branch_fanout_32 | branch-fanout | 521 ns | 418 ns | 1.246x | no | 0 | win |
 | deep_guard_tree_8 | deep-guards | 146 ns | 133.5 ns | 1.094x | no | 0 | win |
 | mega_basic_block_2048 | mega-block | 974.5 ns | 978.5 ns | 0.996x | no | 0 | loss |
+| rotate64_hash | rotate-hash | 103 ns | 79 ns | 1.304x | no | 0 | win |
