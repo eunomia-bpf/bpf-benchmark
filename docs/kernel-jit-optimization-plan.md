@@ -9,7 +9,7 @@
 > - 每次 context 压缩后 → 完整读取本文档恢复全局状态。
 > - 用 agent background 跑任务，不阻塞主对话。
 > - **构建+修改+运行不拆分**：一个 subagent 负责完整流程（改代码→构建→运行→发现 bug→修复→再运行），不要拆成多个 agent。
-> 上次更新：2026-03-13（#163 🔄 live scanner + daemon enumerate；#162 ✅ corpus construct validity；#161 ✅ scanner pattern_kind fix；#160 ✅ post-fix 62-bench micro rerun；#158 🔄 corpus rerun pending；#159 ✅ Root Makefile；#154 ✅ 6 per-form isolation benchmarks；此前：#149-#157 全部 ✅；#138-#148 全部 ✅；#133-#134 ✅）
+> 上次更新：2026-03-13（#167 ✅ BEXTR fix，extract_dense -6.8%；#163 🔄 live scanner + daemon enumerate；#162 ✅ corpus construct validity；#161 ✅ scanner pattern_kind fix；#160 ✅ post-fix 62-bench micro rerun；#158 🔄 corpus rerun pending；#159 ✅ Root Makefile；#154 ✅ 6 per-form isolation benchmarks；此前：#149-#157 全部 ✅；#138-#148 全部 ✅；#133-#134 ✅）
 
 ---
 
@@ -609,5 +609,5 @@ make clean
 | 164 | **E2E pipeline 切 enumerate 路径** | ✅ | `e2e/common/recompile.py` 新增 `_enumerate_scan_one()` + `_enumerate_apply_one()`，`_USE_ENUMERATE_PATH=True`。Case 文件不需改（公共 API 不变）。Graceful fallback 到 legacy `scan --prog-fd` 路径。`docs/tmp/e2e-enumerate-pipeline-switch.md` |
 | 165 | **#57 消融补全** | ✅ | byte-recompose **50.7%** of gap surplus（主因）；callee-saved **~0%**（7.0-rc2 已上游化 `detect_reg_usage()`）；BMI/BMI2-only **~0%**（rorx/bextr 指令选择非主因）。`docs/tmp/ablation-byte-recompose-callee-bmi.md` |
 | 166 | **Per-form authoritative rerun 矛盾调查** | ✅ | 根因：(1) per-form rerun 用共享 VM、stock 有 60% 噪声；auth rerun 独立 VM 是 ground truth。(2) **extract/endian/branch_flip emitter bug**：applied=True 但 jited size 零变化，回归来自白跑的 JIT 重编 + I-cache flush 开销。`docs/tmp/per-form-discrepancy-investigation.md` |
-| 167 | **修复 extract/endian/branch_flip emitter** | 🔄 | 三个 emitter 声称 applied 但产出相同机器码。需修复 kernel emitter 使其实际生成优化代码。sonnet agent 运行中。 |
+| 167 | **修复 extract/endian/branch_flip emitter** | ✅ | 根因确认：(1) BITFIELD_EXTRACT：`dst_reg==src_reg` guard 阻止 BEXTR 用于 with-copy 模式（3-insn→2-insn），fallback 重发相同字节。修复：移除该 guard，BEXTR VEX 编码独立支持任意 dst/src。验证：`extract_dense` jited 11255→10487（-6.8%，512 sites×1.5B）。(2) ENDIAN_FUSION/BRANCH_FLIP：旧 kernel (05a184549) 有 bug，已在 a7ce05b49 修复；32-bit MOVBE 与 LDX+BSWAP32 等大（各 5B），size 不变但微架构得益。commit `daca445b1`（arch/x86/net/bpf_jit_comp.c）。报告：`docs/tmp/emitter-fix-extract-endian-bflip.md`。 |
 | 76 | **scx_rusty/lavd 端到端** | 🔄 | `e2e/cases/scx/` 已落地并在 framework VM（`7.0.0-rc2-g2a6783cc77b6`, `4` vCPU）跑通 `scx_rusty` userspace loader → 30s `hackbench` / `stress-ng --cpu 4` / `sysbench cpu` baseline。活跃 `13` 个 struct_ops programs，扫描到 `28` sites（CMOV `27`, LEA `1`；`rusty_enqueue=12`, `rusty_stopping=10`, `rusty_set_cpumask=2`, `rusty_runnable/quiescent/init_task/init` 各 `1`）。最新调查确认旧的 live recompile `EINVAL` 实际来自 x86 stale-extable oops；该 bug 已修，但 live attached `struct_ops` 仍因缺 trampoline regeneration 被显式 `-EOPNOTSUPP` 拒绝，所以当前仍只有 honest baseline + site census，没有 post-reJIT 对比。`docs/tmp/scx-e2e-report.md`, `docs/tmp/struct-ops-recompile-investigation.md` |
