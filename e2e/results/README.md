@@ -14,10 +14,11 @@ Conventions:
 
 Current authoritative aliases:
 
-- `bpftrace.latest.json` -> `bpftrace_authoritative_20260311.json`
+- `bpftrace.latest.json` -> `bpftrace_authoritative_20260312.json`
 - `scx.latest.json` -> `scx_authoritative_20260311.json`
+- `tracee.latest.json` -> `tracee_authoritative_20260313_postfix.json`
+- `xdp_forwarding.latest.json` -> `xdp_forwarding_authoritative_20260312.json`
 
-Current smoke-only checked-in cases:
-
-- `tracee_smoke_20260311.json`
-- `tetragon_smoke_20260311.json`
+Note: `tracee_authoritative_20260313.json` contains the primary exec_storm/file_io/network run
+(+6.3%/+7.0%/+1.4% geomean 1.049x). The `_postfix` variant used for `tracee.latest.json` is a
+supplementary measurement from the same day with slightly different workload timing.
