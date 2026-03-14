@@ -66,35 +66,6 @@ jobs:
             --suite config/micro_pure_jit.yaml \
             --output "micro/results/${RESULT_PREFIX}_pure_jit.json"
 
-      - name: Run runtime suite with both runtimes
-        id: runtime_full
-        continue-on-error: true
-        run: |
-          python3 micro/run_micro.py \
-            --runtime llvmbpf \
-            --runtime kernel \
-            --iterations 5 \
-            --warmups 1 \
-            --repeat 200 \
-            --suite config/micro_runtime.yaml \
-            --output "micro/results/${RESULT_PREFIX}_runtime.json"
-
-      - name: Fallback runtime suite to kernel-only
-        if: always()
-        continue-on-error: true
-        run: |
-          if [ -s "micro/results/${RESULT_PREFIX}_runtime.json" ]; then
-            echo "Combined runtime suite run produced output; skipping fallback."
-            exit 0
-          fi
-          python3 micro/run_micro.py \
-            --runtime kernel \
-            --iterations 5 \
-            --warmups 1 \
-            --repeat 200 \
-            --suite config/micro_runtime.yaml \
-            --output "micro/results/${RESULT_PREFIX}_runtime.json"
-
       - name: Upload benchmark artifacts
         if: always()
         uses: actions/upload-artifact@v4

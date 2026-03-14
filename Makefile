@@ -190,13 +190,14 @@ vm-selftest: kernel-tests | $(BZIMAGE_PATH)
 		bash -lc 'cd "$(ROOT_DIR)" && sudo -n "$(KERNEL_SELFTEST)"'
 
 vm-micro-smoke: micro | $(BZIMAGE_PATH)
-	@echo "=== Running make vm-micro-smoke ==="
+	@echo "=== Running make vm-micro-smoke (POLICY=$(POLICY)) ==="
 	mkdir -p "$(MICRO_RESULTS_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
 		bash -lc 'cd "$(ROOT_DIR)" && $(VENV_ACTIVATE) python3 "$(MICRO_DIR)/run_micro.py" \
 			--runtime kernel \
 			--runtime kernel-recompile \
 			$(VM_SMOKE_ARGS) \
+			$(POLICY_DIR_FLAG) \
 			--output "$(VM_MICRO_SMOKE_OUTPUT)"'
 
 # Run the full micro benchmark suite in a VM.

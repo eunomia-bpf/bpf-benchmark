@@ -1,9 +1,0 @@
-version: 3
-program: 'endian_swap_dense_xdp'
-sites: []
-# Policy: skip all ENDIAN_FUSION sites (256 sites)
-# Reason: MOVBE 32-bit = 5B = LDX+BSWAP32 5B (same size)
-#         → I-cache flush from recompile > any micro-arch benefit
-#         → persistent regression ~0.695x
-# Analysis: docs/tmp/endian-bflip-perf-investigation.md
-# ENDIAN_FUSION is policy-sensitive: only beneficial with branch misprediction or specific CPU model

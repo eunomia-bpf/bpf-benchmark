@@ -50,8 +50,21 @@ def _extract_ratio(benchmark_record: dict, numerator_runtime: str, denominator_r
     return float(num_val) / float(den_val)
 
 
+def _extract_abs(benchmark_record: dict, runtime: str) -> float | None:
+    """Extract absolute exec_ns median for a single runtime."""
+    for run in benchmark_record.get("runs", []):
+        if str(run.get("runtime", "")) == runtime:
+            val = run.get("exec_ns", {}).get("median")
+            return float(val) if val is not None else None
+    return None
+
+
 def _infer_comparison_pair(benchmarks: list[dict]) -> tuple[str, str]:
-    """Infer which runtimes to compare: prefer kernel-recompile/kernel, fall back to llvmbpf/kernel."""
+    """Infer which runtimes to compare: prefer kernel-recompile/kernel, fall back to llvmbpf/kernel.
+
+    Returns ("", "") only when zero runtimes are found (no data).
+    Returns (runtime, "") when only one runtime exists — caller should use absolute mode.
+    """
     runtime_names: set[str] = set()
     for b in benchmarks:
         for run in b.get("runs", []):
@@ -65,6 +78,8 @@ def _infer_comparison_pair(benchmarks: list[dict]) -> tuple[str, str]:
     names = sorted(runtime_names)
     if len(names) >= 2:
         return names[0], names[1]
+    if len(names) == 1:
+        return names[0], ""
     return "", ""
 
 
@@ -106,11 +121,15 @@ def compare(old_path: Path, new_path: Path) -> int:
     old_by_name = {b["name"]: b for b in old_benchmarks}
     new_by_name = {b["name"]: b for b in new_benchmarks}
 
-    # Infer runtime pair (prefer new file's runtimes)
-    num_rt, den_rt = _infer_comparison_pair(new_benchmarks or old_benchmarks)
-    if not num_rt or not den_rt:
+    # Infer runtime pair from combined runtimes (prefer new file)
+    combined = new_benchmarks or old_benchmarks
+    num_rt, den_rt = _infer_comparison_pair(combined)
+    if not num_rt:
         print("ERROR: cannot infer runtime pair from result files.", file=sys.stderr)
         return 1
+
+    # Single-runtime mode: compare absolute exec_ns across the two files
+    single_runtime_mode = not den_rt
 
     all_names = sorted(set(old_by_name) | set(new_by_name))
 
@@ -118,8 +137,12 @@ def compare(old_path: Path, new_path: Path) -> int:
     for name in all_names:
         old_rec = old_by_name.get(name)
         new_rec = new_by_name.get(name)
-        old_ratio = _extract_ratio(old_rec, num_rt, den_rt) if old_rec else None
-        new_ratio = _extract_ratio(new_rec, num_rt, den_rt) if new_rec else None
+        if single_runtime_mode:
+            old_ratio = _extract_abs(old_rec, num_rt) if old_rec else None
+            new_ratio = _extract_abs(new_rec, num_rt) if new_rec else None
+        else:
+            old_ratio = _extract_ratio(old_rec, num_rt, den_rt) if old_rec else None
+            new_ratio = _extract_ratio(new_rec, num_rt, den_rt) if new_rec else None
         rows.append(BenchRow(name=name, old_ratio=old_ratio, new_ratio=new_ratio))
 
     # Print header
@@ -128,52 +151,77 @@ def compare(old_path: Path, new_path: Path) -> int:
     print(f"       {old_path}")
     print(f"  NEW: {_provenance_summary(new_path)}")
     print(f"       {new_path}")
-    print(f"  Ratio: {num_rt} / {den_rt}  (lower=faster numerator)\n")
+    if single_runtime_mode:
+        print(f"  Mode: single-runtime absolute exec_ns  ({num_rt})  (lower=faster)\n")
+        col_label_old = "OLD exec_ns"
+        col_label_new = "NEW exec_ns"
+        delta_label = "Delta ns"
+    else:
+        print(f"  Ratio: {num_rt} / {den_rt}  (lower=faster numerator)\n")
+        col_label_old = "OLD ratio"
+        col_label_new = "NEW ratio"
+        delta_label = "Delta"
 
     col_w = max((len(r.name) for r in rows), default=20)
-    header = f"{'Benchmark':{col_w}}  {'OLD ratio':>10}  {'NEW ratio':>10}  {'Delta':>10}  Flag"
+    header = f"{'Benchmark':{col_w}}  {col_label_old:>12}  {col_label_new:>12}  {delta_label:>12}  Flag"
     sep = "-" * len(header)
     print(header)
     print(sep)
 
-    old_ratios_shared: list[float] = []
-    new_ratios_shared: list[float] = []
+    old_vals_shared: list[float] = []
+    new_vals_shared: list[float] = []
     regressions: list[str] = []
     improvements: list[str] = []
 
     for row in rows:
-        old_str = f"{row.old_ratio:.4f}" if row.old_ratio is not None else "  n/a  "
-        new_str = f"{row.new_ratio:.4f}" if row.new_ratio is not None else "  n/a  "
+        old_str = f"{row.old_ratio:.4f}" if row.old_ratio is not None else "    n/a   "
+        new_str = f"{row.new_ratio:.4f}" if row.new_ratio is not None else "    n/a   "
         flag = ""
-        delta_str = "  n/a  "
+        delta_str = "    n/a   "
         if row.old_ratio is not None and row.new_ratio is not None:
             delta = row.new_ratio - row.old_ratio
-            delta_str = f"{delta:+.4f}"
-            if abs(delta) >= SIGNIFICANT_DELTA:
-                if delta > 0:
-                    flag = "WORSE"
-                    regressions.append(row.name)
-                else:
-                    flag = "BETTER"
-                    improvements.append(row.name)
-            old_ratios_shared.append(row.old_ratio)
-            new_ratios_shared.append(row.new_ratio)
+            if single_runtime_mode:
+                # For absolute ns: threshold as fraction of old value
+                delta_str = f"{delta:+.1f}"
+                rel_change = delta / row.old_ratio if row.old_ratio != 0 else 0.0
+                if abs(rel_change) >= SIGNIFICANT_DELTA:
+                    if delta > 0:
+                        flag = "WORSE"
+                        regressions.append(row.name)
+                    else:
+                        flag = "BETTER"
+                        improvements.append(row.name)
+            else:
+                delta_str = f"{delta:+.4f}"
+                if abs(delta) >= SIGNIFICANT_DELTA:
+                    if delta > 0:
+                        flag = "WORSE"
+                        regressions.append(row.name)
+                    else:
+                        flag = "BETTER"
+                        improvements.append(row.name)
+            old_vals_shared.append(row.old_ratio)
+            new_vals_shared.append(row.new_ratio)
 
-        print(f"{row.name:{col_w}}  {old_str:>10}  {new_str:>10}  {delta_str:>10}  {flag}")
+        print(f"{row.name:{col_w}}  {old_str:>12}  {new_str:>12}  {delta_str:>12}  {flag}")
 
     print(sep)
 
-    # Overall geomean
-    old_geomean = _geomean(old_ratios_shared)
-    new_geomean = _geomean(new_ratios_shared)
-    old_geo_str = f"{old_geomean:.4f}" if old_geomean is not None else "  n/a  "
-    new_geo_str = f"{new_geomean:.4f}" if new_geomean is not None else "  n/a  "
-    geo_delta_str = "  n/a  "
+    # Overall geomean (ratios) or geomean of absolute values
+    old_geomean = _geomean(old_vals_shared)
+    new_geomean = _geomean(new_vals_shared)
+    old_geo_str = f"{old_geomean:.4f}" if old_geomean is not None else "    n/a   "
+    new_geo_str = f"{new_geomean:.4f}" if new_geomean is not None else "    n/a   "
+    geo_delta_str = "    n/a   "
     if old_geomean is not None and new_geomean is not None:
         geo_delta = new_geomean - old_geomean
-        geo_delta_str = f"{geo_delta:+.4f}"
+        if single_runtime_mode:
+            geo_delta_str = f"{geo_delta:+.1f}"
+        else:
+            geo_delta_str = f"{geo_delta:+.4f}"
 
-    print(f"{'GEOMEAN (shared)':{col_w}}  {old_geo_str:>10}  {new_geo_str:>10}  {geo_delta_str:>10}")
+    summary_label = "GEOMEAN exec_ns (shared)" if single_runtime_mode else "GEOMEAN (shared)"
+    print(f"{summary_label:{col_w}}  {old_geo_str:>12}  {new_geo_str:>12}  {geo_delta_str:>12}")
     print()
 
     if improvements:
@@ -184,7 +232,7 @@ def compare(old_path: Path, new_path: Path) -> int:
         print(f"No significant changes (threshold: {int(SIGNIFICANT_DELTA*100)}%).")
     print()
 
-    return 0
+    return 1 if regressions else 0
 
 
 def main(argv: list[str] | None = None) -> int:
