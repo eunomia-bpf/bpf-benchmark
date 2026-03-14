@@ -265,7 +265,7 @@ def list_suite(suite: SuiteSpec) -> None:
         print(f"{runtime.name:12} {runtime.label}{aliases}")
 
 
-def select_runtimes(names: list[str] | None, suite: SuiteSpec):
+def select_runtimes(names: list[str] | None, suite: SuiteSpec) -> list[RuntimeSpec]:
     requested = names or list(suite.defaults.runtimes)
     selected = []
     for raw_name in requested:

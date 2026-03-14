@@ -17,13 +17,11 @@ except ImportError:
 
 try:
     import _driver_impl_run_micro as run_micro_impl
-    import _driver_impl_run_pass_ablation as run_pass_ablation_impl
     import _driver_impl_run_rigorous as run_rigorous_impl
     import _driver_impl_run_rigorous_framework_vm as run_rigorous_framework_vm_impl
 except ImportError:
     from micro import (
         _driver_impl_run_micro as run_micro_impl,
-        _driver_impl_run_pass_ablation as run_pass_ablation_impl,
         _driver_impl_run_rigorous as run_rigorous_impl,
         _driver_impl_run_rigorous_framework_vm as run_rigorous_framework_vm_impl,
     )
@@ -82,14 +80,11 @@ def _rigorous_entry(argv: list[str]) -> int:
     return run_rigorous_impl.main(remaining)
 
 
-def _ablation_entry(argv: list[str]) -> int:
-    return run_pass_ablation_impl.main(argv)
-
-
 def _corpus_entry(argv: list[str]) -> int:
     argv = _strip_separator(list(argv))
-    if not argv:
-        raise SystemExit("corpus mode required: macro | perf | tracing | tracing-exec | tracing-vm | v5-framework | v5-production | v5-vm-batch")
+    modes_help = "macro | perf | tracing | tracing-exec | tracing-vm | v5-framework | v5-production | v5-vm-batch"
+    if not argv or argv[0] in ("-h", "--help"):
+        raise SystemExit(f"corpus mode required: {modes_help}")
     mode, *remaining = argv
     remaining = _strip_separator(remaining)
     dispatch = {
@@ -104,7 +99,7 @@ def _corpus_entry(argv: list[str]) -> int:
     }
     entry = dispatch.get(mode)
     if entry is None:
-        raise SystemExit(f"unknown corpus mode: {mode}")
+        raise SystemExit(f"unknown corpus mode: {mode}\nAvailable modes: {modes_help}")
     return entry(remaining)
 
 
@@ -125,7 +120,7 @@ def _census_entry(argv: list[str]) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Unified benchmark driver entry point.")
-    parser.add_argument("subcommand", choices=["suite", "rigorous", "ablation", "census", "corpus"])
+    parser.add_argument("subcommand", choices=["suite", "rigorous", "census", "corpus"])
     parser.add_argument("args", nargs=argparse.REMAINDER)
     return parser
 
@@ -141,8 +136,6 @@ def main(argv: list[str] | None = None) -> int:
         return _suite_entry(forwarded)
     if parsed.subcommand == "rigorous":
         return _rigorous_entry(forwarded)
-    if parsed.subcommand == "ablation":
-        return _ablation_entry(forwarded)
     if parsed.subcommand == "census":
         return _census_entry(forwarded)
     if parsed.subcommand == "corpus":

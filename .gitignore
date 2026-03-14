@@ -57,9 +57,6 @@ tmp/
 *.tmp.md
 .tmp-*
 
-# Ablation policy directories (generated during ablation experiments)
-micro/policies/ablation/
-
 # Log files in docs/tmp
 docs/tmp/**/*.log
 

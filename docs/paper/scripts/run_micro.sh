@@ -11,7 +11,24 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 MICRO_DIR="$ROOT_DIR/micro"
 RESULTS_DIR="$MICRO_DIR/results"
-VENV_ACTIVATE="/home/yunwei37/workspace/.venv/bin/activate"
+# Auto-detect virtualenv activate script across common locations.
+_find_venv_activate() {
+    local candidates=(
+        "$HOME/workspace/.venv/bin/activate"
+        "$HOME/.venv/bin/activate"
+        "$ROOT_DIR/.venv/bin/activate"
+        "$ROOT_DIR/venv/bin/activate"
+    )
+    for c in "${candidates[@]}"; do
+        if [[ -f "$c" ]]; then
+            echo "$c"
+            return
+        fi
+    done
+    # fall back to first candidate even if missing (error will be reported below)
+    echo "${candidates[0]}"
+}
+VENV_ACTIVATE="$(_find_venv_activate)"
 DEFAULT_KERNEL_IMAGE="$ROOT_DIR/vendor/linux-framework/arch/x86/boot/bzImage"
 
 mode="host"

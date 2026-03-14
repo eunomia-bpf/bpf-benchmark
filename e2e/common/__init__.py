@@ -13,7 +13,22 @@ from typing import Any, Sequence
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 RESULTS_DIR = ROOT_DIR / "e2e" / "results"
-DEFAULT_VENV_ACTIVATE = Path("/home/yunwei37/workspace/.venv/bin/activate")
+def _find_venv_activate() -> Path:
+    """Search common locations for a virtualenv activate script."""
+    candidates = [
+        Path.home() / "workspace" / ".venv" / "bin" / "activate",
+        Path.home() / ".venv" / "bin" / "activate",
+        ROOT_DIR / ".venv" / "bin" / "activate",
+        ROOT_DIR / "venv" / "bin" / "activate",
+    ]
+    for c in candidates:
+        if c.exists():
+            return c
+    # fall back to first candidate even if it does not exist
+    return candidates[0]
+
+
+DEFAULT_VENV_ACTIVATE = _find_venv_activate()
 BPFTOOL_ENV_VARS = ("BPFTOOL_BIN", "BPFTOOL")
 RESULT_FILE_RE = re.compile(r"^(?P<suite>.+)_(?P<kind>authoritative|smoke)_(?P<date>\d{8})\.json$")
 

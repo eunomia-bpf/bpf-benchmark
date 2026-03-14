@@ -49,7 +49,7 @@ def run_in_vm(
     *,
     networks: Sequence[str] = (),
 ) -> subprocess.CompletedProcess[str]:
-    vng = which("vng") or "/home/yunwei37/.local/bin/vng"
+    vng = which("vng") or str(Path.home() / ".local" / "bin" / "vng")
     kernel = Path(kernel_path).resolve()
     script = Path(script_path).resolve()
     guest_path = f"./{script.relative_to(ROOT_DIR).as_posix()}"

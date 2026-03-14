@@ -60,14 +60,14 @@
 | **Micro 6-dense optimized (#173, policy-optimized)** | **1.125x** | **✅ 实测正向（VM，3 regressor 清空）** |
 | **Micro 62-bench overall (#173, policy-optimized)** | **0.995x** | R5 结果（VM噪声影响），已被 #174 取代 |
 | **Micro 6-dense optimized (#174, Build #40, endian restored)** | **1.075-1.100x** | **✅ Build #40 + 256 endian sites 恢复** |
-| **Micro 62-bench overall (#174, Build #40 optimal policy)** | **1.006x** | **✅ up from 0.995x** |
-| **Micro 62-bench applied-only (#174, 15 benches)** | **1.040x** | **✅ up from 0.993x** |
+| **Micro 62-bench overall (#174, Build #40 R10 optimal policy)** | **1.006x** | **✅ up from 0.995x** |
+| **Micro 62-bench applied-only (#174, Build #40, 15 benches)** | **1.040x** | **✅ up from 0.993x** |
 | Corpus v2 fixed (0.875x) | 已知无效 | dummy packet, early-exit，历史数据 |
 | **Corpus post-fix rerun (#173, fixed IPv4+TCP packet, build #38)** | **1.008x** | ✅ 正向！Calico 1.070x, Suricata 1.538x（已被 #175 取代） |
 | **Corpus Build #42 rerun (#175, BEXTR without-copy fix, ac593b2c1)** | **1.046x** | **✅ 提升 3.8%！Calico 1.097x, xdp-tutorial 1.091x, linux-selftests 1.005x** |
-| Gap 恢复率 | pending | corpus 1.008x vs 0.609x pure-JIT gap |
-| E2E Tracee exec_storm (pre-fix, recompile=0/13, **无效**) | +21.65% | 已被 #172 取代 |
-| **E2E Tracee exec_storm (post-BEXTR-fix, recompile=11/13, #172)** | **+5.97%** | app; BPF ns -7.11%, network +3.26% |
+| Gap 恢复率 | pending | corpus 1.046x vs 0.609x pure-JIT gap |
+| E2E Tracee exec_storm (pre-fix, recompile=0/13, **无效**) | ~~+21.65%~~ | **无效** — recompile 0/13，已被最新数据取代 |
+| **E2E Tracee exec_storm (post-BEXTR-fix, recompile=11/13, #172, authoritative)** | **+6.28%** | app throughput; file_io **+7.00%**; network +1.44%; BPF ns -4.22% |
 
 #### 性能不够强的根因分析（#113/#116/#125/#77 + #155/#157 更新）
 
@@ -117,7 +117,7 @@
 **Go 条件（全部满足才提交）**：
 1. 原型实现多个 directive，展示框架泛化能力 ✅（8 families: COND_SELECT, WIDE_MEM, ROTATE, ADDR_CALC, BITFIELD_EXTRACT, ZERO_EXT_ELIDE, ENDIAN_FUSION, BRANCH_FLIP）
 2. Fixed kernel baseline 不能在所有场景下达到同等收益 ✅（CMOV +28.3%）
-3. 评估包含真实程序和至少一个端到端部署 ✅（Tracee daemon +21.65% exec_storm, Tetragon daemon +3.8% app, bpftrace 5/5 attach）
+3. 评估包含真实程序和至少一个端到端部署 ✅（Tracee daemon exec_storm **+6.28%** / file_io **+7.00%**（post-BEXTR-fix authoritative, recompile=11/13）; ~~+21.65%~~ **无效**（recompile=0/13）; Tetragon daemon +3.8% app, bpftrace 5/5 attach）
 4. 与 characterization 深度整合 ✅（已合并）
 5. **真实程序上可测量的 net speedup** 🔴（当前不足，必须改进）
 
