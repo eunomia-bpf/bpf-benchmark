@@ -124,7 +124,17 @@ help:
 	@echo "  docs/tmp/             - Analysis reports (.md only)"
 
 verify-build:
-	@test -f "$(BZIMAGE_PATH)" || (echo "ERROR: bzImage not found at $(BZIMAGE_PATH)" && exit 1)
+	@test -f "$(BZIMAGE_PATH)" || (echo "ERROR: bzImage not found at $(BZIMAGE_PATH). Run: make kernel" && exit 1)
+	@test -f "$(MICRO_RUNNER)" || (echo "ERROR: micro_exec not found. Run: make micro" && exit 1)
+	@test -f "$(SCANNER_PATH)" || (echo "ERROR: scanner not found. Run: make scanner" && exit 1)
+	@# Check if kernel source is newer than bzImage (stale build detection)
+	@if [ "$$(find "$(KERNEL_DIR)/arch/x86/net/bpf_jit_comp.c" "$(KERNEL_DIR)/kernel/bpf/jit_directives.c" -newer "$(BZIMAGE_PATH)" 2>/dev/null | head -1)" ]; then \
+		echo "WARNING: kernel source is newer than bzImage — consider: make kernel"; \
+	fi
+	@# Check if scanner source is newer than binary
+	@if [ "$$(find "$(SCANNER_DIR)/src/" -name '*.cpp' -newer "$(SCANNER_PATH)" 2>/dev/null | head -1)" ]; then \
+		echo "WARNING: scanner source is newer than binary — consider: make scanner"; \
+	fi
 	@echo "Kernel:     $$(cd "$(KERNEL_DIR)" && git rev-parse --short HEAD 2>/dev/null || echo 'n/a')"
 	@echo "Scanner:    $$(cd "$(SCANNER_DIR)" && git rev-parse --short HEAD 2>/dev/null || echo 'n/a')"
 	@echo "micro_exec: $$(ls -la "$(MICRO_RUNNER)" 2>/dev/null | awk '{print $$6,$$7,$$8}' || echo 'not built')"
@@ -211,7 +221,7 @@ vm-micro-smoke: micro | $(BZIMAGE_PATH)
 # Run the full micro benchmark suite in a VM.
 # To run only specific benchmarks: make vm-micro BENCH="simple bitcount"
 # To use a named policy set: make vm-micro POLICY=all-apply
-vm-micro: micro verify-build | $(BZIMAGE_PATH)
+vm-micro: micro scanner verify-build | $(BZIMAGE_PATH)
 	@echo "=== Running make vm-micro (POLICY=$(POLICY)) ==="
 	mkdir -p "$(MICRO_RESULTS_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
