@@ -685,42 +685,121 @@ def run_trigger_command(command_text: str, repeat: int, timeout_seconds: int) ->
     }
 
 
+def _apply_one_v5_enumerate(
+    scanner_binary: Path,
+    prog_id: int,
+    program_name: str,
+) -> tuple[str, str, str, str]:
+    """Try scanner enumerate --prog-id --recompile path.
+
+    Returns (stdout, stderr, command_str, error_text).
+    Raises RuntimeError on hard failure so the caller can fall back.
+    """
+    command = [
+        str(scanner_binary),
+        "enumerate",
+        "--prog-id",
+        str(prog_id),
+        "--all",
+        "--recompile",
+        "--json",
+    ]
+    command_str = " ".join(command)
+    try:
+        completed = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+    except Exception as exc:
+        raise RuntimeError(str(exc)) from exc
+    if completed.returncode != 0:
+        detail = (completed.stderr or completed.stdout or "").strip()
+        raise RuntimeError(detail or f"enumerate --prog-id {prog_id} --recompile failed (rc={completed.returncode})")
+    return (
+        completed.stdout.strip()[-4000:],
+        completed.stderr.strip()[-4000:],
+        command_str,
+        "",
+    )
+
+
+def _apply_one_v5_legacy(
+    scanner_binary: Path,
+    libbpf: LibbpfHandle,
+    prog_id: int,
+    program_name: str,
+) -> tuple[str, str, str, str]:
+    """Fall-back path: scanner apply --prog-fd <fd> --all --v5 --program-name <name>.
+
+    Returns (stdout, stderr, command_str, error_text).
+    """
+    try:
+        fd = libbpf.prog_fd_by_id(prog_id)
+    except OSError as exc:
+        return ("", "", "", str(exc))
+    os.set_inheritable(fd, True)
+    command = [
+        str(scanner_binary),
+        "apply",
+        "--prog-fd",
+        str(fd),
+        "--all",
+        "--v5",
+        "--program-name",
+        program_name,
+    ]
+    command_str = " ".join(command)
+    error_text = ""
+    stdout_text = ""
+    stderr_text = ""
+    try:
+        completed = run_text_command(command, pass_fds=(fd,))
+        stdout_text = completed.stdout.strip()[-4000:]
+        stderr_text = completed.stderr.strip()[-4000:]
+    except Exception as exc:
+        error_text = str(exc)
+    finally:
+        os.close(fd)
+    return (stdout_text, stderr_text, command_str, error_text)
+
+
 def apply_recompile_v5(scanner_binary: Path, libbpf: LibbpfHandle, attached: list[dict[str, Any]]) -> dict[str, Any]:
     total_ns = 0
     details = []
     errors: list[str] = []
     for entry in attached:
-        fd = libbpf.prog_fd_by_id(int(entry["prog_id"]))
-        os.set_inheritable(fd, True)
-        command = [
-            str(scanner_binary),
-            "apply",
-            "--prog-fd",
-            str(fd),
-            "--all",
-            "--v5",
-            "--program-name",
-            entry["program_name"],
-        ]
+        prog_id = int(entry["prog_id"])
+        program_name = entry["program_name"]
         started_ns = time.perf_counter_ns()
-        completed: subprocess.CompletedProcess[str] | None = None
         error_text = ""
+        enumerate_attempted = False
+        # Prefer scanner enumerate --prog-id --recompile; fall back to legacy apply --prog-fd.
         try:
-            completed = run_text_command(command, pass_fds=(fd,))
+            stdout_text, stderr_text, command_str, error_text = _apply_one_v5_enumerate(
+                scanner_binary, prog_id, program_name
+            )
+            enumerate_attempted = True
         except Exception as exc:
-            error_text = str(exc)
-            errors.append(f"{entry['program_name']}: {error_text}")
-        finally:
-            os.close(fd)
+            fallback_error = str(exc)
+            stdout_text, stderr_text, command_str, error_text = _apply_one_v5_legacy(
+                scanner_binary, libbpf, prog_id, program_name
+            )
+            if error_text:
+                error_text = f"enumerate failed ({fallback_error}), apply --prog-fd also failed: {error_text}"
         wall_ns = time.perf_counter_ns() - started_ns
         total_ns += wall_ns
+        if error_text:
+            errors.append(f"{program_name}: {error_text}")
         details.append(
             {
-                "program_name": entry["program_name"],
+                "program_name": program_name,
                 "prog_id": entry["prog_id"],
-                "scanner_command": command,
-                "stdout": completed.stdout.strip()[-4000:] if completed is not None else "",
-                "stderr": completed.stderr.strip()[-4000:] if completed is not None else "",
+                "enumerate_attempted": enumerate_attempted,
+                "scanner_command": command_str,
+                "stdout": stdout_text,
+                "stderr": stderr_text,
                 "wall_ns": wall_ns,
                 "error": error_text,
             }
