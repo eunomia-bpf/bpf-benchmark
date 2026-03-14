@@ -9,6 +9,7 @@ permissions:
 jobs:
   benchmark:
     if: github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip ci]')
+    timeout-minutes: 60
     runs-on: ubuntu-latest
     env:
       RESULT_PREFIX: x86_ci
@@ -36,7 +37,7 @@ jobs:
         continue-on-error: true
         run: |
           mkdir -p micro/results
-          python3 micro/run_micro.py \
+          python3 micro/driver.py suite \
             --runtime llvmbpf \
             --runtime kernel \
             --iterations 5 \
@@ -53,7 +54,7 @@ jobs:
             echo "Combined pure JIT run produced output; skipping fallback."
             exit 0
           fi
-          python3 micro/run_micro.py \
+          python3 micro/driver.py suite \
             --runtime llvmbpf \
             --iterations 5 \
             --warmups 1 \

@@ -19,7 +19,11 @@ SCANNER ?= scanner/build/bpf-jit-scanner
 ITERATIONS ?= 10
 WARMUPS ?= 2
 REPEAT ?= 200
-VENV ?= /home/yunwei37/workspace/.venv
+# Auto-detect virtualenv: check common locations before falling back to system Python.
+# Override with: make VENV=/path/to/venv ...
+_VENV_CANDIDATES := $(HOME)/workspace/.venv $(HOME)/.venv .venv venv
+_VENV_FOUND := $(firstword $(foreach v,$(_VENV_CANDIDATES),$(if $(wildcard $(v)/bin/activate),$(v),)))
+VENV ?= $(_VENV_FOUND)
 # Optional: pass BENCH=name1 BENCH2=name2 ... via BENCH_FILTER env var, e.g.:
 #   make vm-micro BENCH=simple
 #   make vm-micro BENCH="simple bitcount"
@@ -72,7 +76,7 @@ POLICY_DIR_FLAG := $(if $(filter-out default,$(POLICY)),--policy-dir "$(POLICY_D
 MICRO_ARGS := --iterations $(ITERATIONS) --warmups $(WARMUPS) --repeat $(REPEAT) $(BENCH_FLAGS)
 LOCAL_SMOKE_ARGS := --bench simple --iterations 1 --warmups 0 --repeat 10
 VM_SMOKE_ARGS := --bench simple --bench load_byte_recompose --iterations 1 --warmups 0 --repeat 10
-VENV_ACTIVATE := source "$(VENV)/bin/activate" &&
+VENV_ACTIVATE := $(if $(VENV),source "$(VENV)/bin/activate" &&,)
 
 # File-based dependency sources (for proper incremental rebuilds)
 MICRO_RUNNER_SOURCES := $(wildcard \
