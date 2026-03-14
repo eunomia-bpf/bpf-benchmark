@@ -9,7 +9,7 @@
 > - 每次 context 压缩后 → 完整读取本文档恢复全局状态。
 > - 用 agent background 跑任务，不阻塞主对话。
 > - **构建+修改+运行不拆分**：一个 subagent 负责完整流程（改代码→构建→运行→发现 bug→修复→再运行），不要拆成多个 agent。
-> 上次更新：2026-03-14（#179 ✅ Per-form ablation 完成。7 canonical forms × 19 targeted benchmarks，单独激活每个 form，其余 sites 清空。结果（geomean ratio，越低越好）：ROTATE **0.923x** (WIN, +7.7%)、ENDIAN **0.981x** (WIN)、BRANCH-FLIP **0.992x** (WIN)、LEA **0.999x** (neutral)、WIDE **1.007x** (LOSS)、EXTRACT **1.067x** (LOSS)、CMOV **1.068x** (LOSS, cond_select_dense 1.538x 主导)。ALL-combined reference（当前 policy）**0.988x** (WIN)。关键 insight：ROTATE 是最高价值 form，CMOV/EXTRACT 在 dense-site 场景严重回归（I-cache flush + 预测分支惩罚）。数据：`micro/results/per_form_ablation_20260313/`，报告：`docs/tmp/micro-per-form-ablation.md`。commit bb6308f。）
+> 上次更新：2026-03-14（#180-#183 新增；#170 ✅ enumerate per-site manifest 完成；#171 ❌ 暂不做；#173 ✅ corpus pipeline 切 enumerate；框架重构/P0修复/Opus review 归档；§8 下一步新增。）（#179 ✅ Per-form ablation 完成。7 canonical forms × 19 targeted benchmarks，单独激活每个 form，其余 sites 清空。结果（geomean ratio，越低越好）：ROTATE **0.923x** (WIN, +7.7%)、ENDIAN **0.981x** (WIN)、BRANCH-FLIP **0.992x** (WIN)、LEA **0.999x** (neutral)、WIDE **1.007x** (LOSS)、EXTRACT **1.067x** (LOSS)、CMOV **1.068x** (LOSS, cond_select_dense 1.538x 主导)。ALL-combined reference（当前 policy）**0.988x** (WIN)。关键 insight：ROTATE 是最高价值 form，CMOV/EXTRACT 在 dense-site 场景严重回归（I-cache flush + 预测分支惩罚）。数据：`micro/results/per_form_ablation_20260313/`，报告：`docs/tmp/micro-per-form-ablation.md`。commit bb6308f。）
 > #176 ✅ 新 Makefile vm-micro 端到端验证通过（kernel 7de19ef03 + guarded-update COND_SELECT emitter）。make vm-micro ITERATIONS=3 WARMUPS=3 REPEAT=500 完整跑出 62-bench 结果：overall **1.054x**，16 applied geomean **1.074x**，14 regressors（多为 sub-100ns 噪声）。Provenance 含 kernel_commit/policy_files_hash/params/cpu_model/environment。数据：`micro/results/vm_micro_authoritative_20260314.json`。Tracee E2E 更新：exec_storm **+6.28%**，file_io **+7.00%**，network +1.44%（数据：`e2e/results/tracee-e2e-real.md`）。旧 +21.65% 明确标注无效。#175 ✅ Corpus Build #42 (ac593b2c1 BEXTR without-copy fix) 重跑完成。新数据：**corpus exec geomean 1.046x**（vs 旧版 build #38 的 1.008x，提升 3.8%），152 measured pairs，39 applied programs。Calico 1.097x，xdp-tutorial 1.091x，linux-selftests 1.005x，katran 0.872x（仍有回归）。数据：`corpus/results/corpus_post_fix_build39_20260313.json`（实际为 build #42），报告：`docs/tmp/active/corpus-post-fix-build39.md`。#174 ✅ Build #40 (ac593b2c1 BEXTR without-copy fix) 重编 + R6-R11 policy 迭代。新发现：Build #40 后 endian_swap_dense 从 0.695x 恢复至 **1.013-1.139x**（256 sites restored）；R10 全量 62-bench overall **1.006x**，applied-only **1.040x**（15 applied）。结果：`micro/results/micro_62bench_build40_policy_optimized_20260313.json`。#173 ✅ policy 迭代+corpus rerun+full 62-bench 完成（R1-R5）。#172 ✅ Tracee E2E post-BEXTR-fix 有效 rerun。此前：#149-#175 全部 ✅）
 
 ---
@@ -56,15 +56,15 @@
 
 | 指标 | 当前值 | 问题 |
 |------|--------|------|
-| Micro overall (#169, post-BEXTR-fix) | 1.003x | 几乎平手 |
-| Micro applied-only (#169) | 0.932x | 回归（含3个 dense regressor） |
+| Micro overall (#169, post-BEXTR-fix) | 1.003x | 已被 #176 取代 |
+| Micro applied-only (#169) | 0.932x | 已被 #176 取代 |
 | **Micro 6-dense optimized (#173, policy-optimized)** | **1.125x** | **✅ 实测正向（VM，3 regressor 清空）** |
 | **Micro 62-bench overall (#173, policy-optimized)** | **0.995x** | R5 结果（VM噪声影响），已被 #174 取代 |
 | **Micro 6-dense optimized (#174, Build #40, endian restored)** | **1.075-1.100x** | **✅ Build #40 + 256 endian sites 恢复** |
 | **Micro 62-bench overall (#174, Build #40 R10 optimal policy)** | **1.006x** | **✅ up from 0.995x** |
 | **Micro 62-bench applied-only (#174, Build #40, 15 benches)** | **1.040x** | **✅ up from 0.993x** |
-| **Micro 62-bench overall (vm-micro Makefile flow, 7de19ef03, 20260314)** | **1.054x** | **✅ 新 Makefile vm-micro 验证通过！16 applied, 14 regressors; kernel 7de19ef03（+guarded-update COND_SELECT emitter）** |
-| **Micro 62-bench applied-only (vm-micro 20260314, 16 benches)** | **1.074x** | **✅ 含新 guarded-update emitter 收益；噪声影响：仅 3 iter，sub-100ns benches 噪声大** |
+| **Micro 62-bench overall (vm-micro Makefile flow, 7de19ef03, 20260314) ← 当前权威** | **1.054x** | **✅ Makefile vm-micro 验证；16 applied, 14 regressors; kernel 7de19ef03（+guarded-update COND_SELECT emitter）** |
+| **Micro 62-bench applied-only (vm-micro 20260314, 16 benches) ← 当前权威** | **1.074x** | **✅ 含 guarded-update emitter；数据：`micro/results/vm_micro_authoritative_20260314.json`** |
 | Corpus v2 fixed (0.875x) | 已知无效 | dummy packet, early-exit，历史数据 |
 | **Corpus post-fix rerun (#173, fixed IPv4+TCP packet, build #38)** | **1.008x** | ✅ 正向！Calico 1.070x, Suricata 1.538x（已被 #175 取代） |
 | **Corpus Build #42 rerun (#175, BEXTR without-copy fix, ac593b2c1)** | **1.046x** | **✅ 提升 3.8%！Calico 1.097x, xdp-tutorial 1.091x, linux-selftests 1.005x** |
@@ -625,10 +625,10 @@ make clean
 | 166 | **Per-form authoritative rerun 矛盾调查** | ✅ | 根因：(1) per-form rerun 用共享 VM、stock 有 60% 噪声；auth rerun 独立 VM 是 ground truth。(2) **extract/endian/branch_flip emitter bug**：applied=True 但 jited size 零变化，回归来自白跑的 JIT 重编 + I-cache flush 开销。`docs/tmp/2026-03-13/per-form-discrepancy-investigation.md` |
 | 167 | **修复 extract/endian/branch_flip emitter** | ✅ | 根因确认：(1) BITFIELD_EXTRACT：`dst_reg==src_reg` guard 阻止 BEXTR 用于 with-copy 模式（3-insn→2-insn），fallback 重发相同字节。修复：移除该 guard，BEXTR VEX 编码独立支持任意 dst/src。验证：`extract_dense` jited 11255→10487（-6.8%，512 sites×1.5B）。(2) ENDIAN_FUSION/BRANCH_FLIP：旧 kernel (05a184549) 有 bug，已在 a7ce05b49 修复；32-bit MOVBE 与 LDX+BSWAP32 等大（各 5B），size 不变但微架构得益。commit `daca445b1`（arch/x86/net/bpf_jit_comp.c）。报告：`docs/tmp/2026-03-13/emitter-fix-extract-endian-bflip.md`。 |
 | 168 | **endian/branch_flip 性能回归深度调查** | ✅ | 静态代码分析完成。结论：emitter 无 bug（MOVBE 确实被发出，branch_flip 确实 swap 体），但 same-size 重编（MOVBE=LDX+BSWAP32=5B，branch_flip total size 不变）的 I-cache flush 开销 > 微架构收益。endian/branch_flip 属 policy-sensitive directive（需有 branch misprediction 证据或 64-bit load 才有净收益）。VM 字节 dump 验证已取消（静态分析已足够定论）。调查报告：`docs/tmp/2026-03-13/endian-bflip-perf-investigation.md`。 |
-| 170 | **解耦 Gap 1：enumerate per-site manifest 输出** | ✅ | enumerate --json 只输出 total_sites，无 per-site {insn,family,pattern_kind}。导致 E2E policy-file apply 仍 fallback 到旧 scan --prog-fd。修复：~30 行 C++ 让 enumerate 输出 per-site manifest。agent 运行中。 |
-| 171 | **解耦 Gap 2：Daemon 模式（持续监控）** | ❌ | 当前 scanner enumerate 是一次性 CLI，跑一次退出。真正解耦需要 daemon 模式：持续监控 BPF_PROG_GET_NEXT_ID，新程序加载后自动分析+优化。论文 eval 不阻塞，但系统完整性需要。 |
+| 170 | **解耦 Gap 1：enumerate per-site manifest 输出** | ✅ | enumerate --json 输出 per-site {insn,family,pattern_kind} manifest，E2E policy-file apply 已切换到 enumerate 路径（`a1328ac`）。commit `a1328ac`。 |
+| 171 | **解耦 Gap 2：Daemon 模式（持续监控）** | ❌ 暂不做 | 用户决定：论文 eval 不需要 daemon 模式，暂不实现。当前 CLI enumerate 模式够用。 |
 | 172 | **解耦 Gap 3：Native code（jited_prog_insns）分析** | ❌ | 当前 scanner 只分析 BPF insn 做 pattern matching，jited_prog_insns 提取了但未用于分析。缺失能力：(1) 检测 native code 是否已有 CMOV/BEXTR（避免重复优化）；(2) 用 native code 做更精确的 cost model（如 instruction count、code size delta 预测）。这是架构最大缺口。 |
-| 173 | **解耦 Gap 4：Corpus pipeline 切 enumerate** | ❌ 低优先级 | corpus drivers 仍用 .bpf.o + scan --prog-fd。功能正确但不符合三组件解耦架构。 |
+| 173 | **解耦 Gap 4：Corpus pipeline 切 enumerate** | ✅ | corpus drivers 已切换到 enumerate 路径。commit `a1328ac`（2026-03-14）。 |
 | 76 | **scx_rusty/lavd 端到端** | 🔄 | `e2e/cases/scx/` 已落地并在 framework VM（`7.0.0-rc2-g2a6783cc77b6`, `4` vCPU）跑通 `scx_rusty` userspace loader → 30s `hackbench` / `stress-ng --cpu 4` / `sysbench cpu` baseline。活跃 `13` 个 struct_ops programs，扫描到 `28` sites（CMOV `27`, LEA `1`；`rusty_enqueue=12`, `rusty_stopping=10`, `rusty_set_cpumask=2`, `rusty_runnable/quiescent/init_task/init` 各 `1`）。最新调查确认旧的 live recompile `EINVAL` 实际来自 x86 stale-extable oops；该 bug 已修，但 live attached `struct_ops` 仍因缺 trampoline regeneration 被显式 `-EOPNOTSUPP` 拒绝，所以当前仍只有 honest baseline + site census，没有 post-reJIT 对比。`docs/tmp/2026-03-11/scx-e2e-report.md`, `docs/tmp/2026-03-11/struct-ops-recompile-investigation.md` |
 | 169 | **Post-BEXTR-fix 62-bench authoritative rerun** | ✅ | build #38 bzImage (`7.0.0-rc2-ga7ce05b49cb2-dirty`)，warmups=2/iter=2/repeat=500，独立 VM per bench。**Overall geomean 1.003x（61/62 valid），applied-only 0.932x（16 applied），wins/losses/ties=30/30/1**。关键结果：`rotate_dense` 1.167x win（256 sites），`addr_calc_stride` 1.401x win（8 sites），`branch_flip_dense` 1.052x win（255 sites），`bitfield_extract`（non-dense）1.288x win。**extract_dense 0.556x regression（512 BEXTR sites，比 pre-fix 0.677x 更差）**：BEXTR fix 在 dense 512-site 场景反而劣化，需要分析 native code 生成，考虑 policy 中对 dense BEXTR skip。`endian_swap_dense` 0.695x 持续回归（same-size MOVBE，预期内）。报告：`docs/tmp/active/micro-62bench-post-bextr-fix.md`，结果：`micro/results/micro_62bench_post_bextr_fix_20260313.json`。 |
 | 174 | **Patch-site 架构（只改 site 字节，不重编整个 image）** | ❌ | 消除 I-cache flush 开销的最大架构改进。当前 re-JIT 是全程序重编译，site 优化改变 non-site 字节（downstream 跳转 offset 漂移）。Patch-site 设计：预分配 site 区域 + NOP padding，re-apply 时只 patch site 字节，不触碰其余 image。预计解决 endian_swap_dense（256 sites）和 extract_dense（512 sites）的 I-cache flush 回归。 |
@@ -637,3 +637,38 @@ make clean
 | 177 | **Cost model（跳过不值得的优化）** | ❌ | 跳过 same-size rewrite（MOVBE=5B=LDX+BSWAP32）、dense 超阈值（BEXTR 512 sites I-cache overhead > gain）。需要 native code 分析（#172）或启发式阈值。目标：让 policy 自动化，减少手工 tuning 依赖。 |
 | 178 | **更多 E2E workload 数据** | ❌ | 当前只有 Tracee exec_storm +5.97%（app）作为强 E2E 数据点。需要 Tetragon connect_storm 复跑确认（#140 噪声）、XDP forwarding +0.27% 数据点偏弱、scx_rusty 因 struct_ops EOPNOTSUPP 缺数据。目标：≥3 个 E2E workload 均正向。 |
 | 179 | **Per-form ablation（7 canonical forms × 19 targeted benchmarks）** | ✅ | 224 个 per-family filtered policy YAML（32 bench × 7 families），在 VM 中逐 family 单独激活。Geomean ratio：ROTATE **0.923x** (WIN)，ENDIAN **0.981x**，BRANCH-FLIP **0.992x**，LEA **0.999x**，WIDE **1.007x**，EXTRACT **1.067x**，CMOV **1.068x**（cond_select_dense 1.538x 主导）。ALL-combined 0.988x。数据：`micro/results/per_form_ablation_20260313/*.json`（8 files），report：`docs/tmp/micro-per-form-ablation.md`，policy 文件：`micro/policies/ablation/`。commit bb6308f。 |
+| 180 | **框架重构：单一 Makefile 入口 + file-based deps + provenance + verify-build + compare + POLICY=** | ✅ | 根 Makefile 提供 vm-micro/vm-corpus/vm-e2e/vm-all 等目标；file-based deps 用 stamp 文件避免不必要重编；provenance 含 kernel_commit/policy_files_hash/params/cpu_model/environment；verify-build 检测 stale artifacts；compare target 直接 diff 两份 JSON；POLICY=default/all-apply/baseline 切换 policy 集合。已验证（make smoke、make scanner-tests、make vm-micro 全量跑通）。commit 系列（#159/framework commits）。 |
+| 181 | **P0 修复：CI driver.py、hardcoded path、requirements.txt** | ✅ | CI pipeline 修复：driver.py 统一入口、hardcoded path 替换为相对路径、requirements.txt 补全依赖。CI 通过。 |
+| 182 | **Opus 深度 review（架构✅、方法学有gap、kernel✅）** | ✅ | Opus 对架构做深度 review：架构设计合格，kernel 实现合格，但方法学有 gap（per-form ablation 结果与论文叙事的 net speedup claim 有张力）。`docs/tmp/deep-review-*.md`。 |
+| 183 | **下一步优先任务（2026-03-14 更新）** | 🔄 | 详见 §8 下一步。 |
+
+---
+
+## 8. 下一步（优先级排序，2026-03-14 更新）
+
+> 基于当前实验状态，论文仍需解决"Go 条件 5：真实程序上可测量的 net speedup"。
+
+### P0：必须解决（论文 go/no-go）
+
+| 优先级 | 任务 | 说明 |
+|--------|------|------|
+| **P0.1** | **更多 E2E workload 正向数据** | 当前仅 Tracee exec_storm +6.28% / file_io +7.00%。需要 Tetragon connect_storm 复跑（#140 有噪声）、XDP forwarding 数据加强（当前 +0.27% 偏弱）。目标：≥3 个 E2E workload 均正向。 |
+| **P0.2** | **Corpus overall > 1.05x 且方差小** | 当前 1.046x（build #42）来自 39 applied programs / 152 pairs。katran 0.872x 是主要回归来源。需要分析 katran 回归根因（branch-flip？code layout？）并修复或 skip。 |
+| **P0.3** | **论文叙事 vs ablation 一致性** | Per-form ablation 显示 ROTATE best (0.923x)、CMOV worst (1.068x)。论文需要解释为什么 combined 0.988x 仍比 ROTATE-only 好（其他 form 贡献）。需要撰写清晰的 ablation 分析节。 |
+
+### P1：改进评估覆盖
+
+| 优先级 | 任务 | 说明 |
+|--------|------|------|
+| **P1.1** | **Prologue 优化 canonical form（#176）** | 占 pure-JIT gap 约 18.5%，高回报。约 50-100 LOC kernel + scanner。 |
+| **P1.2** | **Patch-site 架构（#174）** | 消除 I-cache flush 开销，预计修复 endian_swap_dense / extract_dense 回归。架构大改，但性能 impact 显著。 |
+| **P1.3** | **WIDE_MEM 扩展覆盖（#175）** | byte-recompose 占 gap 50.7%，最大单 family 空间。 |
+| **P1.4** | **Native code 分析（#172）** | 检测 native code 是否已有 CMOV/BEXTR，避免重复优化，实现更精确 cost model。 |
+
+### P2：论文写作
+
+| 优先级 | 任务 | 说明 |
+|--------|------|------|
+| **P2.1** | **Paper tex 更新** | 用最新数据（20260314 authoritative、corpus build #42、Tracee post-fix）更新所有表格和性能声明。`docs/paper/paper.tex`。 |
+| **P2.2** | **Ablation section 撰写** | 基于 #179 per-form ablation 结果，撰写 §Evaluation ablation subsection。 |
+| **P2.3** | **第二微架构数据点** | 当前只有一个 CPU（Intel x86）。需要 AMD 或 Atom-class x86 数据，或 arm64 recompile 数据。 |

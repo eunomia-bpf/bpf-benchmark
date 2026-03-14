@@ -133,9 +133,11 @@ Programs define a `bench_*()` function taking `(const u8 *data, u32 len, u64 *ou
 - llvmbpf does not support BPF-to-BPF internal subprogram calls (ELF loader limitation)
 - `--perf-counters` uses `perf_event_open`; kernel counters include kernel-mode, llvmbpf counters are user-mode only
 
-## Using Codex CLI as Subagent
+## Using Sonnet Subagent
 
-OpenAI Codex CLI is available on this machine (default model: `gpt-5.4`). Use it as a subagent for code writing tasks.
+> **Note (2026-03-14)**: Codex quota exhausted (renews 2026-03-18). All subagent tasks are now delegated to Claude Sonnet via the Agent tool (`run_in_background: true`).
+
+Sonnet subagent is available for code writing and analysis tasks.
 
 ### Division of Labor (IMPORTANT)
 - **Codex handles**: ALL code implementation, benchmark runs, data analysis, analysis scripts, experiments, research, code review, CI fixes
@@ -155,7 +157,11 @@ OpenAI Codex CLI is available on this machine (default model: `gpt-5.4`). Use it
 - **Codex 必须测试验证** — 每个 codex prompt 必须要求写完代码后实际跑通（sudo / VM vng 等方式），不能只写不测
 - **构建+修改+运行不拆分** — 一个 subagent 负责完整流程（改代码→构建→运行→发现 bug→修复→再运行），不要拆成多个 agent，这样发现问题能立刻修
 
-### Usage
+### Usage (Sonnet Agent)
+
+When delegating coding/analysis tasks, use the Agent tool with `run_in_background: true`. Include `docs/kernel-jit-optimization-plan.md` as context in every prompt.
+
+### Legacy Codex CLI (quota exhausted, renews 2026-03-18)
 ```bash
 # Non-interactive execution — no sandbox, no prompts
 codex exec --dangerously-bypass-approvals-and-sandbox "your prompt here"
@@ -166,8 +172,6 @@ codex exec --dangerously-bypass-approvals-and-sandbox -C /path/to/dir "your prom
 # Pipe prompt from stdin
 echo "implement feature X" | codex exec --dangerously-bypass-approvals-and-sandbox -
 ```
-
-When delegating coding tasks, use `codex exec --dangerously-bypass-approvals-and-sandbox` so it can read/write files and run commands without interruption.
 
 ### Benchmark Program Design Rules
 - **Pure-JIT benchmarks** (`micro_pure_jit.yaml`): Must test ONLY JIT code generation quality. No map lookups or helper calls in the benchmark hot path. Allowed harness shapes are staged XDP, packet-backed XDP controls, and the small TC/cgroup_skb kernel-only control subset already in the suite.
