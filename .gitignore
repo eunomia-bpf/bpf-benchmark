@@ -48,9 +48,18 @@ corpus/results/
 reference/papers/*.pdf
 
 # Temporary files and scratch results
+# /tmp/ and tmp/ - the repo-root scratch directory (old layout, superseded by docs/tmp/)
 /tmp/
+tmp/
 *.tmp
+*.tmp.md
 .tmp-*
+
+# Ablation policy directories (generated during ablation experiments)
+micro/policies/ablation/
+
+# Log files in docs/tmp
+docs/tmp/**/*.log
 
 # Keep checked-in reports and end-to-end results
 !docs/tmp/

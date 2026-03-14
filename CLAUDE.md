@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-eBPF benchmarking suite comparing **llvmbpf** (userspace LLVM JIT) against **kernel eBPF** across micro-benchmarks. The main active development area is `micro/`, which runs declarative YAML-driven benchmark suites. A legacy `user_bpf_benchmark/` directory compares multiple userspace runtimes (ubpf, rbpf, wasmtime, native) but is largely static.
+eBPF benchmarking suite comparing **llvmbpf** (userspace LLVM JIT) against **kernel eBPF** across micro-benchmarks. The main active development area is `micro/`, which runs declarative YAML-driven benchmark suites. A legacy `legacy/user_bpf_benchmark/` directory compares multiple userspace runtimes (ubpf, rbpf, wasmtime, native) but is not part of the active pipeline.
 
 ## Build & Run
 
@@ -89,8 +89,9 @@ make -C micro clean
 ### Three-layer benchmark model
 
 Configured via YAML files in `config/`:
-- **`micro_pure_jit.yaml`** — Current default isolated JIT suite (56 benchmarks as of March 11, 2026): 48 staged XDP compute cases, 5 packet-backed XDP controls, and 3 kernel-only non-XDP controls (2 TC + 1 cgroup_skb). The active suite is aligned with the 8 canonical forms tracked in `docs/kernel-jit-optimization-plan.md`.
-- **`macro_corpus.yaml`** — Macro/corpus layer entry point.
+- **`config/micro_pure_jit.yaml`** — Current default isolated JIT suite (62 benchmarks as of March 13, 2026): 48 staged XDP compute cases + 6 per-form dense variants, 5 packet-backed XDP controls, and 3 kernel-only non-XDP controls (2 TC + 1 cgroup_skb). The active suite is aligned with the 8 canonical forms tracked in `docs/kernel-jit-optimization-plan.md`.
+- **`corpus/config/macro_corpus.yaml`** — Macro/corpus layer entry point.
+- **`config/ablation/`** — Per-family ablation suite YAML files used for ablation experiments.
 
 ### Key components
 
