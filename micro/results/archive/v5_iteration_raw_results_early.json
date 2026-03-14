@@ -1,0 +1,592 @@
+[
+  {
+    "name": "log2_fold baseline",
+    "command": "vng --run vendor/linux-framework/arch/x86/boot/bzImage --exec cd /home/yunwei37/workspace/bpf-benchmark && sudo micro/build/runner/micro_exec run-kernel --program micro/programs/log2_fold.bpf.o --input micro/generated-inputs/log2_fold.mem --io-mode staged --kernel-input-size 8200 --repeat 5",
+    "returncode": 0,
+    "stdout": "{\"compile_ns\":15085079,\"exec_ns\":622,\"timing_source\":\"ktime\",\"no_cmov\":false,\"disabled_passes\":[],\"wall_exec_ns\":3441218,\"exec_cycles\":12685032,\"tsc_freq_hz\":3686203799,\"result\":9,\"retval\":2,\"jited_prog_len\":648,\"xlated_prog_len\":1112,\"code_size\":{\"bpf_bytecode_bytes\":1112,\"native_code_bytes\":648,\"inflation_ratio\":0.582734},\"phases_ns\":{\"memory_prepare_ns\":2757633,\"object_open_ns\":6693427,\"object_load_ns\":8391652,\"input_stage_ns\":1467,\"prog_run_wall_ns\":17206141,\"result_extract_ns\":85},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":true,\"scope\":\"full_repeat_raw\",\"error\":\"\"},\"directive_scan\":{\"performed\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"total_sites\":0},\"recompile\":{\"requested\":false,\"mode\":\"none\",\"policy_generated\":false,\"policy_bytes\":0,\"syscall_attempted\":false,\"applied\":false,\"error\":\"\"}}\n",
+    "stderr": "\nvendor/linux-framework/modules.order not found: kernel modules not enabled or kernel not compiled properly, kernel modules disabled\n\nlibbpf: loading object from micro/programs/log2_fold.bpf.o\nlibbpf: elf: section(3) xdp, size 1064, link 0, flags 6, type=1\nlibbpf: sec 'xdp': found program 'log2_fold_xdp' at insn offset 0 (0 bytes), code size 133 insns (1064 bytes)\nlibbpf: elf: section(4) .relxdp, size 16, link 27, flags 40, type=9\nlibbpf: elf: section(5) .maps, size 32, link 0, flags 3, type=1\nlibbpf: elf: section(6) license, size 4, link 0, flags 3, type=1\nlibbpf: license of micro/programs/log2_fold.bpf.o is GPL\nlibbpf: elf: section(17) .BTF, size 1691, link 0, flags 0, type=1\nlibbpf: elf: section(19) .BTF.ext, size 1152, link 0, flags 0, type=1\nlibbpf: elf: section(27) .symtab, size 672, link 1, flags 0, type=2\nlibbpf: looking for externs among 28 symbols...\nlibbpf: collected 0 externs total\nlibbpf: map 'input_map': at sec_idx 5, offset 0.\nlibbpf: map 'input_map': found type = 2.\nlibbpf: map 'input_map': found key [8], sz = 4.\nlibbpf: map 'input_map': found value [11], sz = 1032.\nlibbpf: map 'input_map': found max_entries = 1.\nlibbpf: sec '.relxdp': collecting relocation for section(3) 'xdp'\nlibbpf: sec '.relxdp': relo #0: insn #10 against 'input_map'\nlibbpf: prog 'log2_fold_xdp': found map 0 (input_map, sec 5, off 0) for insn #10\nlibbpf: object 'log2_fold': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'input_map': created successfully, fd=4\n",
+    "parsed": {
+      "compile_ns": 15085079,
+      "exec_ns": 622,
+      "timing_source": "ktime",
+      "no_cmov": false,
+      "disabled_passes": [],
+      "wall_exec_ns": 3441218,
+      "exec_cycles": 12685032,
+      "tsc_freq_hz": 3686203799,
+      "result": 9,
+      "retval": 2,
+      "jited_prog_len": 648,
+      "xlated_prog_len": 1112,
+      "code_size": {
+        "bpf_bytecode_bytes": 1112,
+        "native_code_bytes": 648,
+        "inflation_ratio": 0.582734
+      },
+      "phases_ns": {
+        "memory_prepare_ns": 2757633,
+        "object_open_ns": 6693427,
+        "object_load_ns": 8391652,
+        "input_stage_ns": 1467,
+        "prog_run_wall_ns": 17206141,
+        "result_extract_ns": 85
+      },
+      "perf_counters": {},
+      "perf_counters_meta": {
+        "requested": false,
+        "collected": false,
+        "include_kernel": true,
+        "scope": "full_repeat_raw",
+        "error": ""
+      },
+      "directive_scan": {
+        "performed": false,
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "recompile": {
+        "requested": false,
+        "mode": "none",
+        "policy_generated": false,
+        "policy_bytes": 0,
+        "syscall_attempted": false,
+        "applied": false,
+        "error": ""
+      }
+    }
+  },
+  {
+    "name": "log2_fold v5 cmov",
+    "command": "vng --run vendor/linux-framework/arch/x86/boot/bzImage --exec cd /home/yunwei37/workspace/bpf-benchmark && sudo micro/build/runner/micro_exec run-kernel --program micro/programs/log2_fold.bpf.o --input micro/generated-inputs/log2_fold.mem --io-mode staged --kernel-input-size 8200 --repeat 5 --recompile-v5 --recompile-cmov",
+    "returncode": 0,
+    "stdout": "{\"compile_ns\":13466151,\"exec_ns\":1095,\"timing_source\":\"ktime\",\"no_cmov\":false,\"disabled_passes\":[],\"wall_exec_ns\":3096049,\"exec_cycles\":11412738,\"tsc_freq_hz\":3686226814,\"result\":9,\"retval\":2,\"jited_prog_len\":682,\"xlated_prog_len\":1112,\"code_size\":{\"bpf_bytecode_bytes\":1112,\"native_code_bytes\":682,\"inflation_ratio\":0.613309},\"phases_ns\":{\"memory_prepare_ns\":2650878,\"object_open_ns\":5859848,\"object_load_ns\":7583602,\"input_stage_ns\":1599,\"prog_run_wall_ns\":15480631,\"result_extract_ns\":157},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":true,\"scope\":\"full_repeat_raw\",\"error\":\"\"},\"directive_scan\":{\"performed\":true,\"cmov_sites\":6,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"total_sites\":6},\"recompile\":{\"requested\":true,\"mode\":\"auto-scan-v5\",\"policy_generated\":true,\"policy_bytes\":488,\"syscall_attempted\":true,\"applied\":true,\"error\":\"\"}}\n",
+    "stderr": "\nvendor/linux-framework/modules.order not found: kernel modules not enabled or kernel not compiled properly, kernel modules disabled\n\nlibbpf: loading object from micro/programs/log2_fold.bpf.o\nlibbpf: elf: section(3) xdp, size 1064, link 0, flags 6, type=1\nlibbpf: sec 'xdp': found program 'log2_fold_xdp' at insn offset 0 (0 bytes), code size 133 insns (1064 bytes)\nlibbpf: elf: section(4) .relxdp, size 16, link 27, flags 40, type=9\nlibbpf: elf: section(5) .maps, size 32, link 0, flags 3, type=1\nlibbpf: elf: section(6) license, size 4, link 0, flags 3, type=1\nlibbpf: license of micro/programs/log2_fold.bpf.o is GPL\nlibbpf: elf: section(17) .BTF, size 1691, link 0, flags 0, type=1\nlibbpf: elf: section(19) .BTF.ext, size 1152, link 0, flags 0, type=1\nlibbpf: elf: section(27) .symtab, size 672, link 1, flags 0, type=2\nlibbpf: looking for externs among 28 symbols...\nlibbpf: collected 0 externs total\nlibbpf: map 'input_map': at sec_idx 5, offset 0.\nlibbpf: map 'input_map': found type = 2.\nlibbpf: map 'input_map': found key [8], sz = 4.\nlibbpf: map 'input_map': found value [11], sz = 1032.\nlibbpf: map 'input_map': found max_entries = 1.\nlibbpf: sec '.relxdp': collecting relocation for section(3) 'xdp'\nlibbpf: sec '.relxdp': relo #0: insn #10 against 'input_map'\nlibbpf: prog 'log2_fold_xdp': found map 0 (input_map, sec 5, off 0) for insn #10\nlibbpf: object 'log2_fold': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'input_map': created successfully, fd=4\nrecompile-cmov: found 6 cmov sites in xlated program (139 insns)\n",
+    "parsed": {
+      "compile_ns": 13466151,
+      "exec_ns": 1095,
+      "timing_source": "ktime",
+      "no_cmov": false,
+      "disabled_passes": [],
+      "wall_exec_ns": 3096049,
+      "exec_cycles": 11412738,
+      "tsc_freq_hz": 3686226814,
+      "result": 9,
+      "retval": 2,
+      "jited_prog_len": 682,
+      "xlated_prog_len": 1112,
+      "code_size": {
+        "bpf_bytecode_bytes": 1112,
+        "native_code_bytes": 682,
+        "inflation_ratio": 0.613309
+      },
+      "phases_ns": {
+        "memory_prepare_ns": 2650878,
+        "object_open_ns": 5859848,
+        "object_load_ns": 7583602,
+        "input_stage_ns": 1599,
+        "prog_run_wall_ns": 15480631,
+        "result_extract_ns": 157
+      },
+      "perf_counters": {},
+      "perf_counters_meta": {
+        "requested": false,
+        "collected": false,
+        "include_kernel": true,
+        "scope": "full_repeat_raw",
+        "error": ""
+      },
+      "directive_scan": {
+        "performed": true,
+        "cmov_sites": 6,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 6
+      },
+      "recompile": {
+        "requested": true,
+        "mode": "auto-scan-v5",
+        "policy_generated": true,
+        "policy_bytes": 488,
+        "syscall_attempted": true,
+        "applied": true,
+        "error": ""
+      }
+    }
+  },
+  {
+    "name": "rotate64_hash baseline",
+    "command": "vng --run vendor/linux-framework/arch/x86/boot/bzImage --exec cd /home/yunwei37/workspace/bpf-benchmark && sudo micro/build/runner/micro_exec run-kernel --program micro/programs/rotate64_hash.bpf.o --input micro/generated-inputs/rotate64_hash.mem --io-mode staged --kernel-input-size 8200 --repeat 5",
+    "returncode": 0,
+    "stdout": "{\"compile_ns\":10186380,\"exec_ns\":298,\"timing_source\":\"ktime\",\"no_cmov\":false,\"disabled_passes\":[],\"wall_exec_ns\":3060565,\"exec_cycles\":11281895,\"tsc_freq_hz\":3686213429,\"result\":2666935177028490406,\"retval\":2,\"jited_prog_len\":3559,\"xlated_prog_len\":7984,\"code_size\":{\"bpf_bytecode_bytes\":7984,\"native_code_bytes\":3559,\"inflation_ratio\":0.445767},\"phases_ns\":{\"memory_prepare_ns\":2993547,\"object_open_ns\":8113416,\"object_load_ns\":2072964,\"input_stage_ns\":1176,\"prog_run_wall_ns\":15303105,\"result_extract_ns\":61},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":true,\"scope\":\"full_repeat_raw\",\"error\":\"\"},\"directive_scan\":{\"performed\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"total_sites\":0},\"recompile\":{\"requested\":false,\"mode\":\"none\",\"policy_generated\":false,\"policy_bytes\":0,\"syscall_attempted\":false,\"applied\":false,\"error\":\"\"}}\n",
+    "stderr": "\nvendor/linux-framework/modules.order not found: kernel modules not enabled or kernel not compiled properly, kernel modules disabled\n\nlibbpf: loading object from micro/programs/rotate64_hash.bpf.o\nlibbpf: elf: section(3) xdp, size 7936, link 0, flags 6, type=1\nlibbpf: sec 'xdp': found program 'rotate64_hash_xdp' at insn offset 0 (0 bytes), code size 992 insns (7936 bytes)\nlibbpf: elf: section(4) .relxdp, size 16, link 27, flags 40, type=9\nlibbpf: elf: section(5) .maps, size 32, link 0, flags 3, type=1\nlibbpf: elf: section(6) license, size 4, link 0, flags 3, type=1\nlibbpf: license of micro/programs/rotate64_hash.bpf.o is GPL\nlibbpf: elf: section(17) .BTF, size 1457, link 0, flags 0, type=1\nlibbpf: elf: section(19) .BTF.ext, size 6656, link 0, flags 0, type=1\nlibbpf: elf: section(27) .symtab, size 384, link 1, flags 0, type=2\nlibbpf: looking for externs among 16 symbols...\nlibbpf: collected 0 externs total\nlibbpf: map 'input_map': at sec_idx 5, offset 0.\nlibbpf: map 'input_map': found type = 2.\nlibbpf: map 'input_map': found key [8], sz = 4.\nlibbpf: map 'input_map': found value [11], sz = 64.\nlibbpf: map 'input_map': found max_entries = 1.\nlibbpf: sec '.relxdp': collecting relocation for section(3) 'xdp'\nlibbpf: sec '.relxdp': relo #0: insn #10 against 'input_map'\nlibbpf: prog 'rotate64_hash_xdp': found map 0 (input_map, sec 5, off 0) for insn #10\nlibbpf: object 'rotate64_hash': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'input_map': created successfully, fd=4\n",
+    "parsed": {
+      "compile_ns": 10186380,
+      "exec_ns": 298,
+      "timing_source": "ktime",
+      "no_cmov": false,
+      "disabled_passes": [],
+      "wall_exec_ns": 3060565,
+      "exec_cycles": 11281895,
+      "tsc_freq_hz": 3686213429,
+      "result": 2666935177028490406,
+      "retval": 2,
+      "jited_prog_len": 3559,
+      "xlated_prog_len": 7984,
+      "code_size": {
+        "bpf_bytecode_bytes": 7984,
+        "native_code_bytes": 3559,
+        "inflation_ratio": 0.445767
+      },
+      "phases_ns": {
+        "memory_prepare_ns": 2993547,
+        "object_open_ns": 8113416,
+        "object_load_ns": 2072964,
+        "input_stage_ns": 1176,
+        "prog_run_wall_ns": 15303105,
+        "result_extract_ns": 61
+      },
+      "perf_counters": {},
+      "perf_counters_meta": {
+        "requested": false,
+        "collected": false,
+        "include_kernel": true,
+        "scope": "full_repeat_raw",
+        "error": ""
+      },
+      "directive_scan": {
+        "performed": false,
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "recompile": {
+        "requested": false,
+        "mode": "none",
+        "policy_generated": false,
+        "policy_bytes": 0,
+        "syscall_attempted": false,
+        "applied": false,
+        "error": ""
+      }
+    }
+  },
+  {
+    "name": "rotate64_hash v5 all",
+    "command": "vng --run vendor/linux-framework/arch/x86/boot/bzImage --exec cd /home/yunwei37/workspace/bpf-benchmark && sudo micro/build/runner/micro_exec run-kernel --program micro/programs/rotate64_hash.bpf.o --input micro/generated-inputs/rotate64_hash.mem --io-mode staged --kernel-input-size 8200 --repeat 5 --recompile-v5 --recompile-all",
+    "returncode": 0,
+    "stdout": "{\"compile_ns\":9519379,\"exec_ns\":578,\"timing_source\":\"ktime\",\"no_cmov\":false,\"disabled_passes\":[],\"wall_exec_ns\":3088099,\"exec_cycles\":11383487,\"tsc_freq_hz\":3686244745,\"result\":2666935177028490406,\"retval\":2,\"jited_prog_len\":2313,\"xlated_prog_len\":7984,\"code_size\":{\"bpf_bytecode_bytes\":7984,\"native_code_bytes\":2313,\"inflation_ratio\":0.289704},\"phases_ns\":{\"memory_prepare_ns\":2580424,\"object_open_ns\":7269973,\"object_load_ns\":2109504,\"input_stage_ns\":1352,\"prog_run_wall_ns\":15440672,\"result_extract_ns\":82},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":true,\"scope\":\"full_repeat_raw\",\"error\":\"\"},\"directive_scan\":{\"performed\":true,\"cmov_sites\":0,\"wide_sites\":8,\"rotate_sites\":115,\"lea_sites\":0,\"total_sites\":123},\"recompile\":{\"requested\":true,\"mode\":\"auto-scan-v5\",\"policy_generated\":true,\"policy_bytes\":18724,\"syscall_attempted\":true,\"applied\":true,\"error\":\"\"}}\n",
+    "stderr": "\nvendor/linux-framework/modules.order not found: kernel modules not enabled or kernel not compiled properly, kernel modules disabled\n\nlibbpf: loading object from micro/programs/rotate64_hash.bpf.o\nlibbpf: elf: section(3) xdp, size 7936, link 0, flags 6, type=1\nlibbpf: sec 'xdp': found program 'rotate64_hash_xdp' at insn offset 0 (0 bytes), code size 992 insns (7936 bytes)\nlibbpf: elf: section(4) .relxdp, size 16, link 27, flags 40, type=9\nlibbpf: elf: section(5) .maps, size 32, link 0, flags 3, type=1\nlibbpf: elf: section(6) license, size 4, link 0, flags 3, type=1\nlibbpf: license of micro/programs/rotate64_hash.bpf.o is GPL\nlibbpf: elf: section(17) .BTF, size 1457, link 0, flags 0, type=1\nlibbpf: elf: section(19) .BTF.ext, size 6656, link 0, flags 0, type=1\nlibbpf: elf: section(27) .symtab, size 384, link 1, flags 0, type=2\nlibbpf: looking for externs among 16 symbols...\nlibbpf: collected 0 externs total\nlibbpf: map 'input_map': at sec_idx 5, offset 0.\nlibbpf: map 'input_map': found type = 2.\nlibbpf: map 'input_map': found key [8], sz = 4.\nlibbpf: map 'input_map': found value [11], sz = 64.\nlibbpf: map 'input_map': found max_entries = 1.\nlibbpf: sec '.relxdp': collecting relocation for section(3) 'xdp'\nlibbpf: sec '.relxdp': relo #0: insn #10 against 'input_map'\nlibbpf: prog 'rotate64_hash_xdp': found map 0 (input_map, sec 5, off 0) for insn #10\nlibbpf: object 'rotate64_hash': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'input_map': created successfully, fd=4\nrecompile-cmov: no cmov sites found in xlated program (998 insns)\nrecompile-wide: found 8 wide_load sites in xlated program (998 insns)\nrecompile-rotate: found 115 rotate sites in xlated program (998 insns)\nrecompile-lea: no addr_calc sites found in xlated program (998 insns)\n",
+    "parsed": {
+      "compile_ns": 9519379,
+      "exec_ns": 578,
+      "timing_source": "ktime",
+      "no_cmov": false,
+      "disabled_passes": [],
+      "wall_exec_ns": 3088099,
+      "exec_cycles": 11383487,
+      "tsc_freq_hz": 3686244745,
+      "result": 2666935177028490406,
+      "retval": 2,
+      "jited_prog_len": 2313,
+      "xlated_prog_len": 7984,
+      "code_size": {
+        "bpf_bytecode_bytes": 7984,
+        "native_code_bytes": 2313,
+        "inflation_ratio": 0.289704
+      },
+      "phases_ns": {
+        "memory_prepare_ns": 2580424,
+        "object_open_ns": 7269973,
+        "object_load_ns": 2109504,
+        "input_stage_ns": 1352,
+        "prog_run_wall_ns": 15440672,
+        "result_extract_ns": 82
+      },
+      "perf_counters": {},
+      "perf_counters_meta": {
+        "requested": false,
+        "collected": false,
+        "include_kernel": true,
+        "scope": "full_repeat_raw",
+        "error": ""
+      },
+      "directive_scan": {
+        "performed": true,
+        "cmov_sites": 0,
+        "wide_sites": 8,
+        "rotate_sites": 115,
+        "lea_sites": 0,
+        "total_sites": 123
+      },
+      "recompile": {
+        "requested": true,
+        "mode": "auto-scan-v5",
+        "policy_generated": true,
+        "policy_bytes": 18724,
+        "syscall_attempted": true,
+        "applied": true,
+        "error": ""
+      }
+    }
+  },
+  {
+    "name": "load_byte_recompose baseline",
+    "command": "vng --run vendor/linux-framework/arch/x86/boot/bzImage --exec cd /home/yunwei37/workspace/bpf-benchmark && sudo micro/build/runner/micro_exec run-kernel --program micro/programs/load_byte_recompose.bpf.o --input micro/generated-inputs/load_byte_recompose.mem --io-mode staged --kernel-input-size 8200 --repeat 5",
+    "returncode": 0,
+    "stdout": "{\"compile_ns\":8706696,\"exec_ns\":583,\"timing_source\":\"ktime\",\"no_cmov\":false,\"disabled_passes\":[],\"wall_exec_ns\":3258564,\"exec_cycles\":12011739,\"tsc_freq_hz\":3686205687,\"result\":1253018829653002637,\"retval\":2,\"jited_prog_len\":422,\"xlated_prog_len\":744,\"code_size\":{\"bpf_bytecode_bytes\":744,\"native_code_bytes\":422,\"inflation_ratio\":0.567204},\"phases_ns\":{\"memory_prepare_ns\":2315582,\"object_open_ns\":6175973,\"object_load_ns\":2530723,\"input_stage_ns\":1241,\"prog_run_wall_ns\":16292930,\"result_extract_ns\":103},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":true,\"scope\":\"full_repeat_raw\",\"error\":\"\"},\"directive_scan\":{\"performed\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"total_sites\":0},\"recompile\":{\"requested\":false,\"mode\":\"none\",\"policy_generated\":false,\"policy_bytes\":0,\"syscall_attempted\":false,\"applied\":false,\"error\":\"\"}}\n",
+    "stderr": "\nvendor/linux-framework/modules.order not found: kernel modules not enabled or kernel not compiled properly, kernel modules disabled\n\nlibbpf: loading object from micro/programs/load_byte_recompose.bpf.o\nlibbpf: elf: section(3) xdp, size 696, link 0, flags 6, type=1\nlibbpf: sec 'xdp': found program 'load_byte_recompose_xdp' at insn offset 0 (0 bytes), code size 87 insns (696 bytes)\nlibbpf: elf: section(4) .relxdp, size 16, link 26, flags 40, type=9\nlibbpf: elf: section(5) .maps, size 32, link 0, flags 3, type=1\nlibbpf: elf: section(6) license, size 4, link 0, flags 3, type=1\nlibbpf: license of micro/programs/load_byte_recompose.bpf.o is GPL\nlibbpf: elf: section(16) .BTF, size 1349, link 0, flags 0, type=1\nlibbpf: elf: section(18) .BTF.ext, size 976, link 0, flags 0, type=1\nlibbpf: elf: section(26) .symtab, size 408, link 1, flags 0, type=2\nlibbpf: looking for externs among 17 symbols...\nlibbpf: collected 0 externs total\nlibbpf: map 'input_map': at sec_idx 5, offset 0.\nlibbpf: map 'input_map': found type = 2.\nlibbpf: map 'input_map': found key [8], sz = 4.\nlibbpf: map 'input_map': found value [11], sz = 1032.\nlibbpf: map 'input_map': found max_entries = 1.\nlibbpf: sec '.relxdp': collecting relocation for section(3) 'xdp'\nlibbpf: sec '.relxdp': relo #0: insn #10 against 'input_map'\nlibbpf: prog 'load_byte_recompose_xdp': found map 0 (input_map, sec 5, off 0) for insn #10\nlibbpf: object 'load_byte_recom': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'input_map': created successfully, fd=4\n",
+    "parsed": {
+      "compile_ns": 8706696,
+      "exec_ns": 583,
+      "timing_source": "ktime",
+      "no_cmov": false,
+      "disabled_passes": [],
+      "wall_exec_ns": 3258564,
+      "exec_cycles": 12011739,
+      "tsc_freq_hz": 3686205687,
+      "result": 1253018829653002637,
+      "retval": 2,
+      "jited_prog_len": 422,
+      "xlated_prog_len": 744,
+      "code_size": {
+        "bpf_bytecode_bytes": 744,
+        "native_code_bytes": 422,
+        "inflation_ratio": 0.567204
+      },
+      "phases_ns": {
+        "memory_prepare_ns": 2315582,
+        "object_open_ns": 6175973,
+        "object_load_ns": 2530723,
+        "input_stage_ns": 1241,
+        "prog_run_wall_ns": 16292930,
+        "result_extract_ns": 103
+      },
+      "perf_counters": {},
+      "perf_counters_meta": {
+        "requested": false,
+        "collected": false,
+        "include_kernel": true,
+        "scope": "full_repeat_raw",
+        "error": ""
+      },
+      "directive_scan": {
+        "performed": false,
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "recompile": {
+        "requested": false,
+        "mode": "none",
+        "policy_generated": false,
+        "policy_bytes": 0,
+        "syscall_attempted": false,
+        "applied": false,
+        "error": ""
+      }
+    }
+  },
+  {
+    "name": "load_byte_recompose v5 wide",
+    "command": "vng --run vendor/linux-framework/arch/x86/boot/bzImage --exec cd /home/yunwei37/workspace/bpf-benchmark && sudo micro/build/runner/micro_exec run-kernel --program micro/programs/load_byte_recompose.bpf.o --input micro/generated-inputs/load_byte_recompose.mem --io-mode staged --kernel-input-size 8200 --repeat 5 --recompile-v5 --recompile-wide",
+    "returncode": 0,
+    "stdout": "{\"compile_ns\":8640926,\"exec_ns\":452,\"timing_source\":\"ktime\",\"no_cmov\":false,\"disabled_passes\":[],\"wall_exec_ns\":3814689,\"exec_cycles\":14061776,\"tsc_freq_hz\":3686218347,\"result\":1253018829653002637,\"retval\":2,\"jited_prog_len\":410,\"xlated_prog_len\":744,\"code_size\":{\"bpf_bytecode_bytes\":744,\"native_code_bytes\":410,\"inflation_ratio\":0.551075},\"phases_ns\":{\"memory_prepare_ns\":2578492,\"object_open_ns\":6212248,\"object_load_ns\":2414115,\"input_stage_ns\":1216,\"prog_run_wall_ns\":19073304,\"result_extract_ns\":56},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":true,\"scope\":\"full_repeat_raw\",\"error\":\"\"},\"directive_scan\":{\"performed\":true,\"cmov_sites\":0,\"wide_sites\":1,\"rotate_sites\":0,\"lea_sites\":0,\"total_sites\":1},\"recompile\":{\"requested\":true,\"mode\":\"auto-scan-v5\",\"policy_generated\":true,\"policy_bytes\":140,\"syscall_attempted\":true,\"applied\":true,\"error\":\"\"}}\n",
+    "stderr": "\nvendor/linux-framework/modules.order not found: kernel modules not enabled or kernel not compiled properly, kernel modules disabled\n\nlibbpf: loading object from micro/programs/load_byte_recompose.bpf.o\nlibbpf: elf: section(3) xdp, size 696, link 0, flags 6, type=1\nlibbpf: sec 'xdp': found program 'load_byte_recompose_xdp' at insn offset 0 (0 bytes), code size 87 insns (696 bytes)\nlibbpf: elf: section(4) .relxdp, size 16, link 26, flags 40, type=9\nlibbpf: elf: section(5) .maps, size 32, link 0, flags 3, type=1\nlibbpf: elf: section(6) license, size 4, link 0, flags 3, type=1\nlibbpf: license of micro/programs/load_byte_recompose.bpf.o is GPL\nlibbpf: elf: section(16) .BTF, size 1349, link 0, flags 0, type=1\nlibbpf: elf: section(18) .BTF.ext, size 976, link 0, flags 0, type=1\nlibbpf: elf: section(26) .symtab, size 408, link 1, flags 0, type=2\nlibbpf: looking for externs among 17 symbols...\nlibbpf: collected 0 externs total\nlibbpf: map 'input_map': at sec_idx 5, offset 0.\nlibbpf: map 'input_map': found type = 2.\nlibbpf: map 'input_map': found key [8], sz = 4.\nlibbpf: map 'input_map': found value [11], sz = 1032.\nlibbpf: map 'input_map': found max_entries = 1.\nlibbpf: sec '.relxdp': collecting relocation for section(3) 'xdp'\nlibbpf: sec '.relxdp': relo #0: insn #10 against 'input_map'\nlibbpf: prog 'load_byte_recompose_xdp': found map 0 (input_map, sec 5, off 0) for insn #10\nlibbpf: object 'load_byte_recom': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'input_map': created successfully, fd=4\nrecompile-wide: found 1 wide_load sites in xlated program (93 insns)\n",
+    "parsed": {
+      "compile_ns": 8640926,
+      "exec_ns": 452,
+      "timing_source": "ktime",
+      "no_cmov": false,
+      "disabled_passes": [],
+      "wall_exec_ns": 3814689,
+      "exec_cycles": 14061776,
+      "tsc_freq_hz": 3686218347,
+      "result": 1253018829653002637,
+      "retval": 2,
+      "jited_prog_len": 410,
+      "xlated_prog_len": 744,
+      "code_size": {
+        "bpf_bytecode_bytes": 744,
+        "native_code_bytes": 410,
+        "inflation_ratio": 0.551075
+      },
+      "phases_ns": {
+        "memory_prepare_ns": 2578492,
+        "object_open_ns": 6212248,
+        "object_load_ns": 2414115,
+        "input_stage_ns": 1216,
+        "prog_run_wall_ns": 19073304,
+        "result_extract_ns": 56
+      },
+      "perf_counters": {},
+      "perf_counters_meta": {
+        "requested": false,
+        "collected": false,
+        "include_kernel": true,
+        "scope": "full_repeat_raw",
+        "error": ""
+      },
+      "directive_scan": {
+        "performed": true,
+        "cmov_sites": 0,
+        "wide_sites": 1,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 1
+      },
+      "recompile": {
+        "requested": true,
+        "mode": "auto-scan-v5",
+        "policy_generated": true,
+        "policy_bytes": 140,
+        "syscall_attempted": true,
+        "applied": true,
+        "error": ""
+      }
+    }
+  },
+  {
+    "name": "stride_load_16 baseline",
+    "command": "vng --run vendor/linux-framework/arch/x86/boot/bzImage --exec cd /home/yunwei37/workspace/bpf-benchmark && sudo micro/build/runner/micro_exec run-kernel --program micro/programs/stride_load_16.bpf.o --input micro/generated-inputs/stride_load_16.mem --io-mode staged --kernel-input-size 32800 --repeat 5",
+    "returncode": 0,
+    "stdout": "{\"compile_ns\":8036518,\"exec_ns\":598,\"timing_source\":\"ktime\",\"no_cmov\":false,\"disabled_passes\":[],\"wall_exec_ns\":3058449,\"exec_cycles\":11274091,\"tsc_freq_hz\":3686211588,\"result\":17112594108265627168,\"retval\":2,\"jited_prog_len\":517,\"xlated_prog_len\":920,\"code_size\":{\"bpf_bytecode_bytes\":920,\"native_code_bytes\":517,\"inflation_ratio\":0.561957},\"phases_ns\":{\"memory_prepare_ns\":2274037,\"object_open_ns\":5754286,\"object_load_ns\":2282232,\"input_stage_ns\":1127,\"prog_run_wall_ns\":15292498,\"result_extract_ns\":74},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":true,\"scope\":\"full_repeat_raw\",\"error\":\"\"},\"directive_scan\":{\"performed\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"total_sites\":0},\"recompile\":{\"requested\":false,\"mode\":\"none\",\"policy_generated\":false,\"policy_bytes\":0,\"syscall_attempted\":false,\"applied\":false,\"error\":\"\"}}\n",
+    "stderr": "\nvendor/linux-framework/modules.order not found: kernel modules not enabled or kernel not compiled properly, kernel modules disabled\n\nlibbpf: loading object from micro/programs/stride_load_16.bpf.o\nlibbpf: elf: section(3) xdp, size 872, link 0, flags 6, type=1\nlibbpf: sec 'xdp': found program 'stride_load_16_xdp' at insn offset 0 (0 bytes), code size 109 insns (872 bytes)\nlibbpf: elf: section(4) .relxdp, size 16, link 26, flags 40, type=9\nlibbpf: elf: section(5) .maps, size 32, link 0, flags 3, type=1\nlibbpf: elf: section(6) license, size 4, link 0, flags 3, type=1\nlibbpf: license of micro/programs/stride_load_16.bpf.o is GPL\nlibbpf: elf: section(16) .BTF, size 1556, link 0, flags 0, type=1\nlibbpf: elf: section(18) .BTF.ext, size 1056, link 0, flags 0, type=1\nlibbpf: elf: section(26) .symtab, size 408, link 1, flags 0, type=2\nlibbpf: looking for externs among 17 symbols...\nlibbpf: collected 0 externs total\nlibbpf: map 'input_map': at sec_idx 5, offset 0.\nlibbpf: map 'input_map': found type = 2.\nlibbpf: map 'input_map': found key [8], sz = 4.\nlibbpf: map 'input_map': found value [11], sz = 1032.\nlibbpf: map 'input_map': found max_entries = 1.\nlibbpf: sec '.relxdp': collecting relocation for section(3) 'xdp'\nlibbpf: sec '.relxdp': relo #0: insn #10 against 'input_map'\nlibbpf: prog 'stride_load_16_xdp': found map 0 (input_map, sec 5, off 0) for insn #10\nlibbpf: object 'stride_load_16': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'input_map': created successfully, fd=4\n",
+    "parsed": {
+      "compile_ns": 8036518,
+      "exec_ns": 598,
+      "timing_source": "ktime",
+      "no_cmov": false,
+      "disabled_passes": [],
+      "wall_exec_ns": 3058449,
+      "exec_cycles": 11274091,
+      "tsc_freq_hz": 3686211588,
+      "result": 17112594108265627168,
+      "retval": 2,
+      "jited_prog_len": 517,
+      "xlated_prog_len": 920,
+      "code_size": {
+        "bpf_bytecode_bytes": 920,
+        "native_code_bytes": 517,
+        "inflation_ratio": 0.561957
+      },
+      "phases_ns": {
+        "memory_prepare_ns": 2274037,
+        "object_open_ns": 5754286,
+        "object_load_ns": 2282232,
+        "input_stage_ns": 1127,
+        "prog_run_wall_ns": 15292498,
+        "result_extract_ns": 74
+      },
+      "perf_counters": {},
+      "perf_counters_meta": {
+        "requested": false,
+        "collected": false,
+        "include_kernel": true,
+        "scope": "full_repeat_raw",
+        "error": ""
+      },
+      "directive_scan": {
+        "performed": false,
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "recompile": {
+        "requested": false,
+        "mode": "none",
+        "policy_generated": false,
+        "policy_bytes": 0,
+        "syscall_attempted": false,
+        "applied": false,
+        "error": ""
+      }
+    }
+  },
+  {
+    "name": "stride_load_16 v5 lea",
+    "command": "vng --run vendor/linux-framework/arch/x86/boot/bzImage --exec cd /home/yunwei37/workspace/bpf-benchmark && sudo micro/build/runner/micro_exec run-kernel --program micro/programs/stride_load_16.bpf.o --input micro/generated-inputs/stride_load_16.mem --io-mode staged --kernel-input-size 32800 --repeat 5 --recompile-v5 --recompile-lea",
+    "returncode": 0,
+    "stdout": "{\"compile_ns\":12732746,\"exec_ns\":521,\"timing_source\":\"ktime\",\"no_cmov\":false,\"disabled_passes\":[],\"wall_exec_ns\":3362430,\"exec_cycles\":12394648,\"tsc_freq_hz\":3686217562,\"result\":17112594108265627168,\"retval\":2,\"jited_prog_len\":511,\"xlated_prog_len\":920,\"code_size\":{\"bpf_bytecode_bytes\":920,\"native_code_bytes\":511,\"inflation_ratio\":0.555435},\"phases_ns\":{\"memory_prepare_ns\":4143604,\"object_open_ns\":9631891,\"object_load_ns\":3086510,\"input_stage_ns\":1592,\"prog_run_wall_ns\":16812238,\"result_extract_ns\":63},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":true,\"scope\":\"full_repeat_raw\",\"error\":\"\"},\"directive_scan\":{\"performed\":true,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":1,\"total_sites\":1},\"recompile\":{\"requested\":true,\"mode\":\"auto-scan-v5\",\"policy_generated\":true,\"policy_bytes\":124,\"syscall_attempted\":true,\"applied\":true,\"error\":\"\"}}\n",
+    "stderr": "\nvendor/linux-framework/modules.order not found: kernel modules not enabled or kernel not compiled properly, kernel modules disabled\n\nlibbpf: loading object from micro/programs/stride_load_16.bpf.o\nlibbpf: elf: section(3) xdp, size 872, link 0, flags 6, type=1\nlibbpf: sec 'xdp': found program 'stride_load_16_xdp' at insn offset 0 (0 bytes), code size 109 insns (872 bytes)\nlibbpf: elf: section(4) .relxdp, size 16, link 26, flags 40, type=9\nlibbpf: elf: section(5) .maps, size 32, link 0, flags 3, type=1\nlibbpf: elf: section(6) license, size 4, link 0, flags 3, type=1\nlibbpf: license of micro/programs/stride_load_16.bpf.o is GPL\nlibbpf: elf: section(16) .BTF, size 1556, link 0, flags 0, type=1\nlibbpf: elf: section(18) .BTF.ext, size 1056, link 0, flags 0, type=1\nlibbpf: elf: section(26) .symtab, size 408, link 1, flags 0, type=2\nlibbpf: looking for externs among 17 symbols...\nlibbpf: collected 0 externs total\nlibbpf: map 'input_map': at sec_idx 5, offset 0.\nlibbpf: map 'input_map': found type = 2.\nlibbpf: map 'input_map': found key [8], sz = 4.\nlibbpf: map 'input_map': found value [11], sz = 1032.\nlibbpf: map 'input_map': found max_entries = 1.\nlibbpf: sec '.relxdp': collecting relocation for section(3) 'xdp'\nlibbpf: sec '.relxdp': relo #0: insn #10 against 'input_map'\nlibbpf: prog 'stride_load_16_xdp': found map 0 (input_map, sec 5, off 0) for insn #10\nlibbpf: object 'stride_load_16': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'input_map': created successfully, fd=4\nrecompile-lea: found 1 addr_calc sites in xlated program (115 insns)\n",
+    "parsed": {
+      "compile_ns": 12732746,
+      "exec_ns": 521,
+      "timing_source": "ktime",
+      "no_cmov": false,
+      "disabled_passes": [],
+      "wall_exec_ns": 3362430,
+      "exec_cycles": 12394648,
+      "tsc_freq_hz": 3686217562,
+      "result": 17112594108265627168,
+      "retval": 2,
+      "jited_prog_len": 511,
+      "xlated_prog_len": 920,
+      "code_size": {
+        "bpf_bytecode_bytes": 920,
+        "native_code_bytes": 511,
+        "inflation_ratio": 0.555435
+      },
+      "phases_ns": {
+        "memory_prepare_ns": 4143604,
+        "object_open_ns": 9631891,
+        "object_load_ns": 3086510,
+        "input_stage_ns": 1592,
+        "prog_run_wall_ns": 16812238,
+        "result_extract_ns": 63
+      },
+      "perf_counters": {},
+      "perf_counters_meta": {
+        "requested": false,
+        "collected": false,
+        "include_kernel": true,
+        "scope": "full_repeat_raw",
+        "error": ""
+      },
+      "directive_scan": {
+        "performed": true,
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 1,
+        "total_sites": 1
+      },
+      "recompile": {
+        "requested": true,
+        "mode": "auto-scan-v5",
+        "policy_generated": true,
+        "policy_bytes": 124,
+        "syscall_attempted": true,
+        "applied": true,
+        "error": ""
+      }
+    }
+  },
+  {
+    "name": "packet_rss_hash baseline",
+    "command": "vng --run vendor/linux-framework/arch/x86/boot/bzImage --exec cd /home/yunwei37/workspace/bpf-benchmark && sudo micro/build/runner/micro_exec run-kernel --program micro/programs/packet_rss_hash.bpf.o --input micro/generated-inputs/packet_rss_hash.mem --io-mode staged --kernel-input-size 8200 --repeat 5",
+    "returncode": 0,
+    "stdout": "{\"compile_ns\":9104804,\"exec_ns\":165,\"timing_source\":\"ktime\",\"no_cmov\":false,\"disabled_passes\":[],\"wall_exec_ns\":3540392,\"exec_cycles\":13050588,\"tsc_freq_hz\":3686198505,\"result\":11016707074064960918,\"retval\":2,\"jited_prog_len\":1021,\"xlated_prog_len\":2088,\"code_size\":{\"bpf_bytecode_bytes\":2088,\"native_code_bytes\":1021,\"inflation_ratio\":0.488985},\"phases_ns\":{\"memory_prepare_ns\":3135648,\"object_open_ns\":6597018,\"object_load_ns\":2507786,\"input_stage_ns\":208426,\"prog_run_wall_ns\":17702059,\"result_extract_ns\":116},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":true,\"scope\":\"full_repeat_raw\",\"error\":\"\"},\"directive_scan\":{\"performed\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"total_sites\":0},\"recompile\":{\"requested\":false,\"mode\":\"none\",\"policy_generated\":false,\"policy_bytes\":0,\"syscall_attempted\":false,\"applied\":false,\"error\":\"\"}}\n",
+    "stderr": "\nvendor/linux-framework/modules.order not found: kernel modules not enabled or kernel not compiled properly, kernel modules disabled\n\nlibbpf: loading object from micro/programs/packet_rss_hash.bpf.o\nlibbpf: elf: section(3) xdp, size 2088, link 0, flags 6, type=1\nlibbpf: sec 'xdp': found program 'packet_rss_hash_xdp' at insn offset 0 (0 bytes), code size 261 insns (2088 bytes)\nlibbpf: elf: section(4) license, size 4, link 0, flags 3, type=1\nlibbpf: license of micro/programs/packet_rss_hash.bpf.o is GPL\nlibbpf: elf: section(15) .BTF, size 1802, link 0, flags 0, type=1\nlibbpf: elf: section(17) .BTF.ext, size 1920, link 0, flags 0, type=1\nlibbpf: elf: section(25) .symtab, size 384, link 1, flags 0, type=2\nlibbpf: looking for externs among 16 symbols...\nlibbpf: collected 0 externs total\nlibbpf: object 'packet_rss_hash': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\n",
+    "parsed": {
+      "compile_ns": 9104804,
+      "exec_ns": 165,
+      "timing_source": "ktime",
+      "no_cmov": false,
+      "disabled_passes": [],
+      "wall_exec_ns": 3540392,
+      "exec_cycles": 13050588,
+      "tsc_freq_hz": 3686198505,
+      "result": 11016707074064960918,
+      "retval": 2,
+      "jited_prog_len": 1021,
+      "xlated_prog_len": 2088,
+      "code_size": {
+        "bpf_bytecode_bytes": 2088,
+        "native_code_bytes": 1021,
+        "inflation_ratio": 0.488985
+      },
+      "phases_ns": {
+        "memory_prepare_ns": 3135648,
+        "object_open_ns": 6597018,
+        "object_load_ns": 2507786,
+        "input_stage_ns": 208426,
+        "prog_run_wall_ns": 17702059,
+        "result_extract_ns": 116
+      },
+      "perf_counters": {},
+      "perf_counters_meta": {
+        "requested": false,
+        "collected": false,
+        "include_kernel": true,
+        "scope": "full_repeat_raw",
+        "error": ""
+      },
+      "directive_scan": {
+        "performed": false,
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "recompile": {
+        "requested": false,
+        "mode": "none",
+        "policy_generated": false,
+        "policy_bytes": 0,
+        "syscall_attempted": false,
+        "applied": false,
+        "error": ""
+      }
+    }
+  },
+  {
+    "name": "packet_rss_hash v5 rotate",
+    "command": "vng --run vendor/linux-framework/arch/x86/boot/bzImage --exec cd /home/yunwei37/workspace/bpf-benchmark && sudo micro/build/runner/micro_exec run-kernel --program micro/programs/packet_rss_hash.bpf.o --input micro/generated-inputs/packet_rss_hash.mem --io-mode staged --kernel-input-size 8200 --repeat 5 --recompile-v5 --recompile-rotate",
+    "returncode": 0,
+    "stdout": "{\"compile_ns\":7877827,\"exec_ns\":171,\"timing_source\":\"ktime\",\"no_cmov\":false,\"disabled_passes\":[],\"wall_exec_ns\":3182907,\"exec_cycles\":11732804,\"tsc_freq_hz\":3686190866,\"result\":11016707074064960918,\"retval\":2,\"jited_prog_len\":1007,\"xlated_prog_len\":2088,\"code_size\":{\"bpf_bytecode_bytes\":2088,\"native_code_bytes\":1007,\"inflation_ratio\":0.48228},\"phases_ns\":{\"memory_prepare_ns\":2535813,\"object_open_ns\":5832619,\"object_load_ns\":2022396,\"input_stage_ns\":16525,\"prog_run_wall_ns\":15914416,\"result_extract_ns\":69},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":true,\"scope\":\"full_repeat_raw\",\"error\":\"\"},\"directive_scan\":{\"performed\":true,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":1,\"lea_sites\":0,\"total_sites\":1},\"recompile\":{\"requested\":true,\"mode\":\"auto-scan-v5\",\"policy_generated\":true,\"policy_bytes\":188,\"syscall_attempted\":true,\"applied\":true,\"error\":\"\"}}\n",
+    "stderr": "\nvendor/linux-framework/modules.order not found: kernel modules not enabled or kernel not compiled properly, kernel modules disabled\n\nlibbpf: loading object from micro/programs/packet_rss_hash.bpf.o\nlibbpf: elf: section(3) xdp, size 2088, link 0, flags 6, type=1\nlibbpf: sec 'xdp': found program 'packet_rss_hash_xdp' at insn offset 0 (0 bytes), code size 261 insns (2088 bytes)\nlibbpf: elf: section(4) license, size 4, link 0, flags 3, type=1\nlibbpf: license of micro/programs/packet_rss_hash.bpf.o is GPL\nlibbpf: elf: section(15) .BTF, size 1802, link 0, flags 0, type=1\nlibbpf: elf: section(17) .BTF.ext, size 1920, link 0, flags 0, type=1\nlibbpf: elf: section(25) .symtab, size 384, link 1, flags 0, type=2\nlibbpf: looking for externs among 16 symbols...\nlibbpf: collected 0 externs total\nlibbpf: object 'packet_rss_hash': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nrecompile-rotate: found 1 rotate sites in xlated program (261 insns)\n",
+    "parsed": {
+      "compile_ns": 7877827,
+      "exec_ns": 171,
+      "timing_source": "ktime",
+      "no_cmov": false,
+      "disabled_passes": [],
+      "wall_exec_ns": 3182907,
+      "exec_cycles": 11732804,
+      "tsc_freq_hz": 3686190866,
+      "result": 11016707074064960918,
+      "retval": 2,
+      "jited_prog_len": 1007,
+      "xlated_prog_len": 2088,
+      "code_size": {
+        "bpf_bytecode_bytes": 2088,
+        "native_code_bytes": 1007,
+        "inflation_ratio": 0.48228
+      },
+      "phases_ns": {
+        "memory_prepare_ns": 2535813,
+        "object_open_ns": 5832619,
+        "object_load_ns": 2022396,
+        "input_stage_ns": 16525,
+        "prog_run_wall_ns": 15914416,
+        "result_extract_ns": 69
+      },
+      "perf_counters": {},
+      "perf_counters_meta": {
+        "requested": false,
+        "collected": false,
+        "include_kernel": true,
+        "scope": "full_repeat_raw",
+        "error": ""
+      },
+      "directive_scan": {
+        "performed": true,
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 1,
+        "lea_sites": 0,
+        "total_sites": 1
+      },
+      "recompile": {
+        "requested": true,
+        "mode": "auto-scan-v5",
+        "policy_generated": true,
+        "policy_bytes": 188,
+        "syscall_attempted": true,
+        "applied": true,
+        "error": ""
+      }
+    }
+  }
+]

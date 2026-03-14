@@ -1,0 +1,109 @@
+{
+  "corpus_source": "expanded build report `/home/yunwei37/workspace/bpf-benchmark/corpus/results/expanded_corpus_build.json`",
+  "generated_at": "2026-03-11T21:55:58.774030+00:00",
+  "inventory_failures": [],
+  "mode": "host",
+  "objects_found": 1,
+  "programs": [
+    {
+      "attach_seconds": 0.005002262012567371,
+      "attach_target": {
+        "attach_kind": "kprobe",
+        "category": null,
+        "name": null,
+        "retprobe": false,
+        "section_root": "kprobe",
+        "target": "ext4_file_read_iter",
+        "target_source": "placeholder"
+      },
+      "attach_type_name": "cgroup_inet_ingress",
+      "baseline_avg_ns": 199.60638297872342,
+      "baseline_measurement": {
+        "average_ns_per_run": 199.60638297872342,
+        "bytes_jited_after": 85,
+        "bytes_xlated_after": 136,
+        "ok": true,
+        "run_cnt_after": 576,
+        "run_cnt_before": 388,
+        "run_cnt_delta": 188,
+        "run_time_ns_after": 128591,
+        "run_time_ns_before": 91065,
+        "run_time_ns_delta": 37526,
+        "workload_seconds": 0.00027633801801130176
+      },
+      "insn_count": 21,
+      "object_path": "corpus/build/bcc/libbpf-tools/fsdist.bpf.o",
+      "prog_id": 140714,
+      "prog_type_name": "kprobe",
+      "program_name": "file_read_entry",
+      "recompile": {
+        "applied": false,
+        "counts": {
+          "cmov_sites": 0,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 0,
+          "wide_sites": 0
+        },
+        "error": "BPF_PROG_JIT_RECOMPILE: Invalid argument",
+        "program_name": "file_read_entry",
+        "stderr_tail": "BPF_PROG_JIT_RECOMPILE: Invalid argument\n",
+        "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n  extract:0\n  zeroext:0\n  endian: 0\n  bflip:  0\n"
+      },
+      "recompile_avg_ns": 147.77333333333334,
+      "recompile_measurement": {
+        "average_ns_per_run": 147.77333333333334,
+        "bytes_jited_after": 85,
+        "bytes_xlated_after": 136,
+        "ok": true,
+        "run_cnt_after": 1191,
+        "run_cnt_before": 1116,
+        "run_cnt_delta": 75,
+        "run_time_ns_after": 241316,
+        "run_time_ns_before": 230233,
+        "run_time_ns_delta": 11083,
+        "workload_seconds": 0.0002533129882067442
+      },
+      "scan": {
+        "error": "",
+        "program_name": "file_read_entry",
+        "sites": {
+          "cmov_sites": 0,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 0,
+          "wide_sites": 0
+        },
+        "stderr_tail": "",
+        "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n  extract:0\n  zeroext:0\n  endian: 0\n  bflip:  0\n"
+      },
+      "section_name": "kprobe/dummy_file_read",
+      "section_root": "kprobe",
+      "speedup": 1.3507605091946455,
+      "status": "paired_apply_failed",
+      "workload": {
+        "description": "read a temporary file repeatedly",
+        "name": "read"
+      }
+    }
+  ],
+  "repeat": 30,
+  "repo_root": "/home/yunwei37/workspace/bpf-benchmark",
+  "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec",
+  "scanner_binary": "/home/yunwei37/workspace/bpf-benchmark/scanner/build/bpf-jit-scanner",
+  "skipped_non_bpf": [],
+  "summary": {
+    "applied_speedup_geomean": null,
+    "attach_failures": 0,
+    "attached_programs": 1,
+    "failure_reasons": {},
+    "inventory_failures": 0,
+    "paired_applied_measurements": 0,
+    "paired_measurements": 1,
+    "programs_considered": 1,
+    "skipped_programs": 0,
+    "speedup_geomean": 1.3507605091946455,
+    "zero_run_programs": 0
+  },
+  "warmup_repeat": 5
+}

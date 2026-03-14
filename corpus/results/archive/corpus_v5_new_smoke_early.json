@@ -1,0 +1,379 @@
+{
+  "generated_at": "2026-03-10T22:28:29.144346+00:00",
+  "repo_root": "/home/yunwei37/workspace/bpf-benchmark",
+  "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec",
+  "scanner_binary": "/home/yunwei37/workspace/bpf-benchmark/scanner/build/bpf-jit-scanner",
+  "btf_candidates": [
+    "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux"
+  ],
+  "repeat": 10,
+  "kernel_release": "7.0.0-rc2-g1572a4ddb52b-dirty",
+  "kernel_tree": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux",
+  "kernel_branch": "",
+  "kernel_commit": "",
+  "objects": [
+    {
+      "object_path": "corpus/build/suricata/xdp_filter.bpf.o",
+      "source": "suricata",
+      "discovery": {
+        "ok": true,
+        "duration_seconds": 0.6321179610000001,
+        "programs": [
+          {
+            "name": "xdp_hashfilter",
+            "section_name": "xdp",
+            "insn_count": 334
+          }
+        ],
+        "error": null,
+        "stderr_tail": "",
+        "fallback_section_scan": [
+          {
+            "name": "xdp",
+            "insn_count": 334,
+            "cmov": 1,
+            "wide": 0,
+            "rotate": 0,
+            "lea": 0,
+            "total": 1
+          }
+        ],
+        "fallback_totals": {
+          "cmov": 1,
+          "wide": 0,
+          "rotate": 0,
+          "lea": 0,
+          "total": 1,
+          "insn_count": 334,
+          "exec_section_count": 1
+        }
+      }
+    }
+  ],
+  "programs": [
+    {
+      "object_path": "corpus/build/suricata/xdp_filter.bpf.o",
+      "source": "suricata",
+      "program_name": "xdp_hashfilter",
+      "section_name": "xdp",
+      "insn_count": 334,
+      "perf_capable": true,
+      "io_mode": "packet",
+      "input_size": 64,
+      "memory_path": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/corpus_dummy_packet_64.bin",
+      "scanner_cli": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.02050251699999972,
+        "error": null,
+        "stdout": "Accepted 1 v5 site(s)\n  cmov:   1\n  wide:   0\n  rotate: 0\n  lea:    0\n",
+        "stderr_tail": ""
+      },
+      "scanner_counts": {
+        "cmov_sites": 1,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 1
+      },
+      "baseline_compile": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.07333326199999934,
+        "error": null,
+        "stderr_tail": "libbpf: sec '.relxdp': relo #4: insn #129 against 'tx_peer'\nlibbpf: prog 'xdp_hashfilter': found map 5 (tx_peer, sec 7, off 160) for insn #129\nlibbpf: sec '.relxdp': relo #5: insn #170 against 'flow_table_v6'\nlibbpf: prog 'xdp_hashfilter': found map 1 (flow_table_v6, sec 7, off 32) for insn #170\nlibbpf: sec '.relxdp': relo #6: insn #183 against 'tx_peer_int'\nlibbpf: prog 'xdp_hashfilter': found map 6 (tx_peer_int, sec 7, off 192) for insn #183\nlibbpf: sec '.relxdp': relo #7: insn #248 against 'cpus_available'\nlibbpf: prog 'xdp_hashfilter': found map 3 (cpus_available, sec 7, off 96) for insn #248\nlibbpf: sec '.relxdp': relo #8: insn #323 against 'cpus_available'\nlibbpf: prog 'xdp_hashfilter': found map 3 (cpus_available, sec 7, off 96) for insn #323\nlibbpf: sec '.relxdp': relo #9: insn #331 against 'cpu_map'\nlibbpf: prog 'xdp_hashfilter': found map 2 (cpu_map, sec 7, off 64) for insn #331\nlibbpf: object 'xdp_filter': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'flow_table_v4': created successfully, fd=4\nlibbpf: map 'flow_table_v6': created successfully, fd=5\nlibbpf: map 'cpu_map': created successfully, fd=6\nlibbpf: map 'cpus_available': created successfully, fd=7\nlibbpf: map 'cpus_count': created successfully, fd=8\nlibbpf: map 'tx_peer': created successfully, fd=9\nlibbpf: map 'tx_peer_int': created successfully, fd=10",
+        "sample": {
+          "compile_ns": 44189060,
+          "exec_ns": 0,
+          "timing_source": "unknown",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "result": 0,
+          "retval": 0,
+          "jited_prog_len": 1645,
+          "xlated_prog_len": 3040,
+          "code_size": {
+            "bpf_bytecode_bytes": 3040,
+            "native_code_bytes": 1645,
+            "inflation_ratio": 0.541118
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 2660172,
+            "object_open_ns": 3684673,
+            "object_load_ns": 40504387
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": false,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": false,
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 0
+          },
+          "recompile": {
+            "requested": false,
+            "mode": "none",
+            "policy_generated": false,
+            "policy_bytes": 0,
+            "syscall_attempted": false,
+            "applied": false,
+            "error": ""
+          }
+        },
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "v5_compile": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.07826010299999986,
+        "error": null,
+        "stderr_tail": "libbpf: sec '.relxdp': relo #6: insn #183 against 'tx_peer_int'\nlibbpf: prog 'xdp_hashfilter': found map 6 (tx_peer_int, sec 7, off 192) for insn #183\nlibbpf: sec '.relxdp': relo #7: insn #248 against 'cpus_available'\nlibbpf: prog 'xdp_hashfilter': found map 3 (cpus_available, sec 7, off 96) for insn #248\nlibbpf: sec '.relxdp': relo #8: insn #323 against 'cpus_available'\nlibbpf: prog 'xdp_hashfilter': found map 3 (cpus_available, sec 7, off 96) for insn #323\nlibbpf: sec '.relxdp': relo #9: insn #331 against 'cpu_map'\nlibbpf: prog 'xdp_hashfilter': found map 2 (cpu_map, sec 7, off 64) for insn #331\nlibbpf: object 'xdp_filter': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'flow_table_v4': created successfully, fd=4\nlibbpf: map 'flow_table_v6': created successfully, fd=5\nlibbpf: map 'cpu_map': created successfully, fd=6\nlibbpf: map 'cpus_available': created successfully, fd=7\nlibbpf: map 'cpus_count': created successfully, fd=8\nlibbpf: map 'tx_peer': created successfully, fd=9\nlibbpf: map 'tx_peer_int': created successfully, fd=10\nrecompile-cmov: found 1 cmov sites in xlated program (380 insns)\nrecompile-wide: no wide_load sites found in xlated program (380 insns)\nrecompile-rotate: no rotate sites found in xlated program (380 insns)\nrecompile-lea: no addr_calc sites found in xlated program (380 insns)",
+        "sample": {
+          "compile_ns": 48057231,
+          "exec_ns": 0,
+          "timing_source": "unknown",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "result": 0,
+          "retval": 0,
+          "jited_prog_len": 1651,
+          "xlated_prog_len": 3040,
+          "code_size": {
+            "bpf_bytecode_bytes": 3040,
+            "native_code_bytes": 1651,
+            "inflation_ratio": 0.543092
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 2512104,
+            "object_open_ns": 3981335,
+            "object_load_ns": 44027869
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": false,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 1,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 1
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v5",
+            "policy_generated": true,
+            "policy_bytes": 164,
+            "syscall_attempted": true,
+            "applied": true,
+            "error": ""
+          }
+        },
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "baseline_run": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.11438806100000054,
+        "error": null,
+        "stderr_tail": "libbpf: sec '.relxdp': relo #4: insn #129 against 'tx_peer'\nlibbpf: prog 'xdp_hashfilter': found map 5 (tx_peer, sec 7, off 160) for insn #129\nlibbpf: sec '.relxdp': relo #5: insn #170 against 'flow_table_v6'\nlibbpf: prog 'xdp_hashfilter': found map 1 (flow_table_v6, sec 7, off 32) for insn #170\nlibbpf: sec '.relxdp': relo #6: insn #183 against 'tx_peer_int'\nlibbpf: prog 'xdp_hashfilter': found map 6 (tx_peer_int, sec 7, off 192) for insn #183\nlibbpf: sec '.relxdp': relo #7: insn #248 against 'cpus_available'\nlibbpf: prog 'xdp_hashfilter': found map 3 (cpus_available, sec 7, off 96) for insn #248\nlibbpf: sec '.relxdp': relo #8: insn #323 against 'cpus_available'\nlibbpf: prog 'xdp_hashfilter': found map 3 (cpus_available, sec 7, off 96) for insn #323\nlibbpf: sec '.relxdp': relo #9: insn #331 against 'cpu_map'\nlibbpf: prog 'xdp_hashfilter': found map 2 (cpu_map, sec 7, off 64) for insn #331\nlibbpf: object 'xdp_filter': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'flow_table_v4': created successfully, fd=4\nlibbpf: map 'flow_table_v6': created successfully, fd=5\nlibbpf: map 'cpu_map': created successfully, fd=6\nlibbpf: map 'cpus_available': created successfully, fd=7\nlibbpf: map 'cpus_count': created successfully, fd=8\nlibbpf: map 'tx_peer': created successfully, fd=9\nlibbpf: map 'tx_peer_int': created successfully, fd=10",
+        "sample": {
+          "compile_ns": 44979693,
+          "exec_ns": 46,
+          "timing_source": "ktime",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "wall_exec_ns": 1883271,
+          "exec_cycles": 6942312,
+          "tsc_freq_hz": 3686304496,
+          "result": 0,
+          "retval": 2,
+          "jited_prog_len": 1645,
+          "xlated_prog_len": 3040,
+          "code_size": {
+            "bpf_bytecode_bytes": 3040,
+            "native_code_bytes": 1645,
+            "inflation_ratio": 0.541118
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 2168441,
+            "object_open_ns": 3860480,
+            "object_load_ns": 41119213,
+            "packet_prepare_ns": 1200,
+            "prog_run_wall_ns": 18833542,
+            "result_extract_ns": 75
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": true,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": false,
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 0
+          },
+          "recompile": {
+            "requested": false,
+            "mode": "none",
+            "policy_generated": false,
+            "policy_bytes": 0,
+            "syscall_attempted": false,
+            "applied": false,
+            "error": ""
+          }
+        },
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "v5_run": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.08830111500000015,
+        "error": null,
+        "stderr_tail": "libbpf: sec '.relxdp': relo #6: insn #183 against 'tx_peer_int'\nlibbpf: prog 'xdp_hashfilter': found map 6 (tx_peer_int, sec 7, off 192) for insn #183\nlibbpf: sec '.relxdp': relo #7: insn #248 against 'cpus_available'\nlibbpf: prog 'xdp_hashfilter': found map 3 (cpus_available, sec 7, off 96) for insn #248\nlibbpf: sec '.relxdp': relo #8: insn #323 against 'cpus_available'\nlibbpf: prog 'xdp_hashfilter': found map 3 (cpus_available, sec 7, off 96) for insn #323\nlibbpf: sec '.relxdp': relo #9: insn #331 against 'cpu_map'\nlibbpf: prog 'xdp_hashfilter': found map 2 (cpu_map, sec 7, off 64) for insn #331\nlibbpf: object 'xdp_filter': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'flow_table_v4': created successfully, fd=4\nlibbpf: map 'flow_table_v6': created successfully, fd=5\nlibbpf: map 'cpu_map': created successfully, fd=6\nlibbpf: map 'cpus_available': created successfully, fd=7\nlibbpf: map 'cpus_count': created successfully, fd=8\nlibbpf: map 'tx_peer': created successfully, fd=9\nlibbpf: map 'tx_peer_int': created successfully, fd=10\nrecompile-cmov: found 1 cmov sites in xlated program (380 insns)\nrecompile-wide: no wide_load sites found in xlated program (380 insns)\nrecompile-rotate: no rotate sites found in xlated program (380 insns)\nrecompile-lea: no addr_calc sites found in xlated program (380 insns)",
+        "sample": {
+          "compile_ns": 25780986,
+          "exec_ns": 84,
+          "timing_source": "ktime",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "wall_exec_ns": 1422296,
+          "exec_cycles": 5242898,
+          "tsc_freq_hz": 3686222797,
+          "result": 0,
+          "retval": 2,
+          "jited_prog_len": 1651,
+          "xlated_prog_len": 3040,
+          "code_size": {
+            "bpf_bytecode_bytes": 3040,
+            "native_code_bytes": 1651,
+            "inflation_ratio": 0.543092
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 2209284,
+            "object_open_ns": 4718754,
+            "object_load_ns": 21026444,
+            "packet_prepare_ns": 570,
+            "prog_run_wall_ns": 14223246,
+            "result_extract_ns": 78
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": true,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 1,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 1
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v5",
+            "policy_generated": true,
+            "policy_bytes": 164,
+            "syscall_attempted": true,
+            "applied": true,
+            "error": ""
+          }
+        },
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "v5_compile_applied": true,
+      "v5_run_applied": true,
+      "size_ratio": 0.9963658388855239,
+      "size_delta_pct": 0.364741641337386,
+      "speedup_ratio": 0.5476190476190477
+    }
+  ],
+  "summary": {
+    "objects_attempted": 1,
+    "objects_discovered": 1,
+    "objects_with_discovery_failures": 0,
+    "programs_attempted": 1,
+    "perf_capable_targets": 1,
+    "compile_only_targets": 0,
+    "baseline_compile_successes": 1,
+    "v5_compile_successes": 1,
+    "scanner_successes": 1,
+    "framework_detected_programs": 1,
+    "framework_recompile_applied_programs": 1,
+    "framework_recompile_failures": 0,
+    "compile_pairs": 1,
+    "measured_pairs": 1,
+    "speedup_geomean": 0.5476190476190477,
+    "speedup_median": 0.5476190476190477,
+    "speedup_min": 0.5476190476190477,
+    "speedup_max": 0.5476190476190477,
+    "code_size_ratio_geomean": 0.9963658388855239,
+    "code_size_delta_median_pct": 0.364741641337386,
+    "code_size_delta_min_pct": 0.364741641337386,
+    "code_size_delta_max_pct": 0.364741641337386,
+    "family_totals": {
+      "cmov_sites": 1,
+      "wide_sites": 0,
+      "rotate_sites": 0,
+      "lea_sites": 0
+    },
+    "failure_reasons": {},
+    "recompile_failure_reasons": {}
+  }
+}

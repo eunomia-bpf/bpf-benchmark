@@ -1,0 +1,85 @@
+# Regenerated from HEAD version 2 policy semantics against a live framework-kernel manifest.
+# Eligible live sites: cmov=32, rotate=26
+# Selected live sites: rotate=26
+
+version: 3
+program: 'cmov_dense_xdp'
+sites:
+  - insn: 19
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 39
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 57
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 75
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 111
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 129
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 147
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 165
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 183
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 219
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 236
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 272
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 290
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 308
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 325
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 343
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 361
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 397
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 415
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 433
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 451
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 469
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 505
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 522
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 558
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 576
+    family: rotate
+    pattern_kind: 'rotate-64'

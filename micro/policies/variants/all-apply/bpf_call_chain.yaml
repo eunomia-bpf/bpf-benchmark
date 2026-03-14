@@ -1,0 +1,16 @@
+# Regenerated from HEAD version 2 policy semantics against a live framework-kernel manifest.
+# Eligible live sites: cmov=1, wide=2
+# Selected live sites: cmov=1, wide=2
+
+version: 3
+program: 'bpf_call_chain_xdp'
+sites:
+  - insn: 11
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 15
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 85
+    family: cmov
+    pattern_kind: 'cond-select-64'

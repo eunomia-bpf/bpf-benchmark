@@ -1,0 +1,19 @@
+# Regenerated from HEAD version 2 policy semantics against a live framework-kernel manifest.
+# Eligible live sites: cmov=2, wide=2
+# Selected live sites: cmov=2, wide=2
+
+version: 3
+program: 'bounds_ladder_xdp'
+sites:
+  - insn: 10
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 23
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 144
+    family: cmov
+    pattern_kind: 'cond-select-64'
+  - insn: 152
+    family: cmov
+    pattern_kind: 'cond-select-64'

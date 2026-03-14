@@ -1,0 +1,3514 @@
+{
+  "generated_at": "2026-03-11T15:30:57.132237+00:00",
+  "mode": "direct-objects",
+  "smoke": true,
+  "runner_binary": "micro/build/runner/micro_exec",
+  "scanner_binary": "scanner/build/bpf-jit-scanner",
+  "bpftool_binary": "/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/bpftool/bpftool",
+  "tetragon_binary": null,
+  "preflight": {
+    "sudo_n_true": "yes",
+    "bpftool": "/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/bpftool/bpftool",
+    "stress_ng": "/usr/bin/stress-ng",
+    "scanner": "scanner/build/bpf-jit-scanner",
+    "runner": "micro/build/runner/micro_exec",
+    "execve_object": "corpus/build/tetragon/bpf_execve_event.bpf.o",
+    "kprobe_object": "corpus/build/tetragon/bpf_generic_kprobe.bpf.o",
+    "btf": "/sys/kernel/btf/vmlinux",
+    "kernel_release": "6.15.11-061511-generic",
+    "tetragon_binary": "not found"
+  },
+  "targets": [
+    {
+      "target_id": "execve-tracepoint",
+      "object_path": "corpus/build/tetragon/bpf_execve_event.bpf.o",
+      "object_label": "execve tracepoint object",
+      "program_name": "event_execve",
+      "section_name": "tracepoint/sys_execve",
+      "program_type": "tracepoint",
+      "attach_kind": "tracepoint",
+      "attach_target": "syscalls/sys_enter_execve",
+      "workloads": [
+        "rapid-execve",
+        "stress-exec"
+      ],
+      "bpftool_probe": {
+        "ok": false,
+        "pin_dir": "/sys/fs/bpf/tetragon_probe_bpf_execve_event.bpf_3598799",
+        "error": "mkdir: cannot create directory \u2018/sys/fs/bpf/tetragon_probe_bpf_execve_event.bpf_3598799\u2019: Operation not permitted"
+      },
+      "stock": {
+        "ok": true,
+        "mode": "attach",
+        "recompile_requested": false,
+        "target_id": "execve-tracepoint",
+        "object_path": "corpus/build/tetragon/bpf_execve_event.bpf.o",
+        "program_name": "event_execve",
+        "attach_kind": "tracepoint",
+        "attach_target": "syscalls/sys_enter_execve",
+        "inventory_entry": {
+          "name": "event_execve",
+          "section_name": "tracepoint/sys_execve",
+          "insn_count": 3940,
+          "prog_type": 5,
+          "expected_attach_type": 0,
+          "prog_type_name": "tracepoint",
+          "attach_type_name": "cgroup_inet_ingress"
+        },
+        "loaded_programs": [
+          {
+            "name": "execve_rate",
+            "section_name": "tracepoint",
+            "prog_fd": 256,
+            "prog_id": 134777,
+            "prog_info": {
+              "id": 134777,
+              "name": "execve_rate",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 1133,
+              "xlated_prog_len": 1960,
+              "verified_insns": 235,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 134777,
+              "type": "tracepoint",
+              "name": "execve_rate",
+              "tag": "39006a6dd18db069",
+              "gpl_compatible": true,
+              "loaded_at": 1773243038,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 1960,
+              "jited": true,
+              "bytes_jited": 1133,
+              "bytes_memlock": 4096,
+              "map_ids": [
+                129749,
+                129793,
+                129792,
+                129794,
+                129750,
+                129787,
+                129748,
+                129804
+              ],
+              "btf_id": 224729,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "execve_send",
+            "section_name": "tracepoint",
+            "prog_fd": 257,
+            "prog_id": 134779,
+            "prog_info": {
+              "id": 134779,
+              "name": "execve_send",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 1949,
+              "xlated_prog_len": 3032,
+              "verified_insns": 544,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 134779,
+              "type": "tracepoint",
+              "name": "execve_send",
+              "tag": "c701ba3c073843bd",
+              "gpl_compatible": true,
+              "loaded_at": 1773243038,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 3032,
+              "jited": true,
+              "bytes_jited": 1949,
+              "bytes_memlock": 4096,
+              "map_ids": [
+                129749,
+                129781,
+                129795,
+                129750,
+                129787,
+                129804
+              ],
+              "btf_id": 224729,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "event_execve",
+            "section_name": "tracepoint/sys_execve",
+            "prog_fd": 258,
+            "prog_id": 134780,
+            "prog_info": {
+              "id": 134780,
+              "name": "event_execve",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 18176,
+              "xlated_prog_len": 31664,
+              "verified_insns": 46777,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 134780,
+              "type": "tracepoint",
+              "name": "event_execve",
+              "tag": "895570417beed577",
+              "gpl_compatible": true,
+              "loaded_at": 1773243038,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 31664,
+              "jited": true,
+              "bytes_jited": 18176,
+              "bytes_memlock": 32768,
+              "map_ids": [
+                129749,
+                129781,
+                129785,
+                129786,
+                129802,
+                129750,
+                129787,
+                129777,
+                129784,
+                129751,
+                129778,
+                129791,
+                129748,
+                129804
+              ],
+              "btf_id": 224729,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          }
+        ],
+        "target_fd": 258,
+        "target_prog_id": 134780,
+        "target_prog_info": {
+          "id": 134780,
+          "name": "event_execve",
+          "run_cnt": 0,
+          "run_time_ns": 0,
+          "jited_prog_len": 18176,
+          "xlated_prog_len": 31664,
+          "verified_insns": 46777,
+          "attach_btf_obj_id": 0,
+          "attach_btf_id": 0
+        },
+        "target_bpftool": {
+          "id": 134780,
+          "type": "tracepoint",
+          "name": "event_execve",
+          "tag": "895570417beed577",
+          "gpl_compatible": true,
+          "loaded_at": 1773243038,
+          "uid": 0,
+          "orphaned": false,
+          "bytes_xlated": 31664,
+          "jited": true,
+          "bytes_jited": 18176,
+          "bytes_memlock": 32768,
+          "map_ids": [
+            129749,
+            129781,
+            129785,
+            129786,
+            129802,
+            129750,
+            129787,
+            129777,
+            129784,
+            129751,
+            129778,
+            129791,
+            129748,
+            129804
+          ],
+          "btf_id": 224729,
+          "pids": [
+            {
+              "pid": 3598799,
+              "comm": "python"
+            }
+          ]
+        },
+        "directive_scan": {
+          "ok": true,
+          "command": "/home/yunwei37/workspace/bpf-benchmark/scanner/build/bpf-jit-scanner scan --prog-fd 258 --all --v5 --program-name event_execve",
+          "counts": {
+            "total_sites": 37,
+            "cmov_sites": 37,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0
+          },
+          "stdout_tail": "Accepted 37 v5 site(s)\n  cmov:   37\n  wide:   0\n  rotate: 0\n  lea:    0\n",
+          "stderr_tail": "",
+          "error": ""
+        },
+        "recompile": {
+          "ok": false,
+          "error": ""
+        },
+        "aggregate": {
+          "run_cnt_before": 0,
+          "run_cnt_after": 272,
+          "run_cnt_delta": 272,
+          "run_time_ns_before": 0,
+          "run_time_ns_after": 710310,
+          "run_time_ns_delta": 710310,
+          "avg_ns_per_run": 2611.4338235294117,
+          "events_per_second": 1478.341206322424,
+          "total_cpu_time_ns": 710310,
+          "wall_seconds": 0.18399000097997487
+        },
+        "workloads": [
+          {
+            "name": "rapid-execve",
+            "description": "rapid execve loop",
+            "trigger": {
+              "command": "for i in $(seq 1 250); do /bin/true; done",
+              "returncode": 0,
+              "stdout_tail": "",
+              "stderr_tail": "",
+              "wall_seconds": 0.1409609310212545
+            },
+            "measurement": {
+              "run_cnt_before": 0,
+              "run_cnt_after": 264,
+              "run_cnt_delta": 264,
+              "run_time_ns_before": 0,
+              "run_time_ns_after": 671766,
+              "run_time_ns_delta": 671766,
+              "avg_ns_per_run": 2544.568181818182,
+              "events_per_second": 1872.8593666864565,
+              "total_cpu_time_ns": 671766,
+              "wall_seconds": 0.1409609310212545
+            }
+          },
+          {
+            "name": "stress-exec",
+            "description": "stress-ng exec workload",
+            "trigger": {
+              "command": "stress-ng --exec 1 --timeout 1s --metrics-brief --quiet",
+              "returncode": 0,
+              "stdout_tail": "",
+              "stderr_tail": "",
+              "wall_seconds": 0.043029069958720356
+            },
+            "measurement": {
+              "run_cnt_before": 264,
+              "run_cnt_after": 272,
+              "run_cnt_delta": 8,
+              "run_time_ns_before": 671766,
+              "run_time_ns_after": 710310,
+              "run_time_ns_delta": 38544,
+              "avg_ns_per_run": 4818.0,
+              "events_per_second": 185.9208206841269,
+              "total_cpu_time_ns": 38544,
+              "wall_seconds": 0.043029069958720356
+            }
+          }
+        ],
+        "error": ""
+      },
+      "rejit": {
+        "ok": false,
+        "mode": "attach",
+        "recompile_requested": true,
+        "target_id": "execve-tracepoint",
+        "object_path": "corpus/build/tetragon/bpf_execve_event.bpf.o",
+        "program_name": "event_execve",
+        "attach_kind": "tracepoint",
+        "attach_target": "syscalls/sys_enter_execve",
+        "inventory_entry": {
+          "name": "event_execve",
+          "section_name": "tracepoint/sys_execve",
+          "insn_count": 3940,
+          "prog_type": 5,
+          "expected_attach_type": 0,
+          "prog_type_name": "tracepoint",
+          "attach_type_name": "cgroup_inet_ingress"
+        },
+        "loaded_programs": [
+          {
+            "name": "execve_rate",
+            "section_name": "tracepoint",
+            "prog_fd": 256,
+            "prog_id": 134819,
+            "prog_info": {
+              "id": 134819,
+              "name": "execve_rate",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 1133,
+              "xlated_prog_len": 1960,
+              "verified_insns": 235,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 134819,
+              "type": "tracepoint",
+              "name": "execve_rate",
+              "tag": "39006a6dd18db069",
+              "gpl_compatible": true,
+              "loaded_at": 1773243040,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 1960,
+              "jited": true,
+              "bytes_jited": 1133,
+              "bytes_memlock": 4096,
+              "map_ids": [
+                129823,
+                129867,
+                129866,
+                129868,
+                129824,
+                129861,
+                129822,
+                129877
+              ],
+              "btf_id": 224775,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "execve_send",
+            "section_name": "tracepoint",
+            "prog_fd": 257,
+            "prog_id": 134820,
+            "prog_info": {
+              "id": 134820,
+              "name": "execve_send",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 1949,
+              "xlated_prog_len": 3032,
+              "verified_insns": 544,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 134820,
+              "type": "tracepoint",
+              "name": "execve_send",
+              "tag": "c701ba3c073843bd",
+              "gpl_compatible": true,
+              "loaded_at": 1773243040,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 3032,
+              "jited": true,
+              "bytes_jited": 1949,
+              "bytes_memlock": 4096,
+              "map_ids": [
+                129823,
+                129855,
+                129869,
+                129824,
+                129861,
+                129877
+              ],
+              "btf_id": 224775,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "event_execve",
+            "section_name": "tracepoint/sys_execve",
+            "prog_fd": 258,
+            "prog_id": 134821,
+            "prog_info": {
+              "id": 134821,
+              "name": "event_execve",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 18176,
+              "xlated_prog_len": 31664,
+              "verified_insns": 46777,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 134821,
+              "type": "tracepoint",
+              "name": "event_execve",
+              "tag": "895570417beed577",
+              "gpl_compatible": true,
+              "loaded_at": 1773243040,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 31664,
+              "jited": true,
+              "bytes_jited": 18176,
+              "bytes_memlock": 32768,
+              "map_ids": [
+                129823,
+                129855,
+                129859,
+                129860,
+                129876,
+                129824,
+                129861,
+                129851,
+                129858,
+                129825,
+                129852,
+                129865,
+                129822,
+                129877
+              ],
+              "btf_id": 224775,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          }
+        ],
+        "target_fd": 258,
+        "target_prog_id": 134821,
+        "target_prog_info": {
+          "id": 134821,
+          "name": "event_execve",
+          "run_cnt": 0,
+          "run_time_ns": 0,
+          "jited_prog_len": 18176,
+          "xlated_prog_len": 31664,
+          "verified_insns": 46777,
+          "attach_btf_obj_id": 0,
+          "attach_btf_id": 0
+        },
+        "target_bpftool": {
+          "id": 134821,
+          "type": "tracepoint",
+          "name": "event_execve",
+          "tag": "895570417beed577",
+          "gpl_compatible": true,
+          "loaded_at": 1773243040,
+          "uid": 0,
+          "orphaned": false,
+          "bytes_xlated": 31664,
+          "jited": true,
+          "bytes_jited": 18176,
+          "bytes_memlock": 32768,
+          "map_ids": [
+            129823,
+            129855,
+            129859,
+            129860,
+            129876,
+            129824,
+            129861,
+            129851,
+            129858,
+            129825,
+            129852,
+            129865,
+            129822,
+            129877
+          ],
+          "btf_id": 224775,
+          "pids": [
+            {
+              "pid": 3598799,
+              "comm": "python"
+            }
+          ]
+        },
+        "directive_scan": {
+          "ok": true,
+          "command": "/home/yunwei37/workspace/bpf-benchmark/scanner/build/bpf-jit-scanner scan --prog-fd 258 --all --v5 --program-name event_execve",
+          "counts": {
+            "total_sites": 37,
+            "cmov_sites": 37,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0
+          },
+          "stdout_tail": "Accepted 37 v5 site(s)\n  cmov:   37\n  wide:   0\n  rotate: 0\n  lea:    0\n",
+          "stderr_tail": "",
+          "error": ""
+        },
+        "recompile": {
+          "ok": false,
+          "command": "/home/yunwei37/workspace/bpf-benchmark/scanner/build/bpf-jit-scanner apply --prog-fd 258 --all --v5 --program-name event_execve",
+          "counts": {
+            "total_sites": 37,
+            "cmov_sites": 37,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0
+          },
+          "stdout_tail": "Accepted 37 v5 site(s)\n  cmov:   37\n  wide:   0\n  rotate: 0\n  lea:    0\n",
+          "stderr_tail": "BPF_PROG_JIT_RECOMPILE: Invalid argument\n",
+          "error": "BPF_PROG_JIT_RECOMPILE: Invalid argument"
+        },
+        "error": "BPF_PROG_JIT_RECOMPILE: Invalid argument"
+      },
+      "speedup": null
+    },
+    {
+      "target_id": "open-kprobe",
+      "object_path": "corpus/build/tetragon/bpf_generic_kprobe.bpf.o",
+      "object_label": "generic kprobe object",
+      "program_name": "generic_kprobe_event",
+      "section_name": "kprobe/generic_kprobe",
+      "program_type": "kprobe",
+      "attach_kind": "kprobe",
+      "attach_target": "security_file_open",
+      "workloads": [
+        "file-ops-dd",
+        "stress-open"
+      ],
+      "bpftool_probe": {
+        "ok": false,
+        "pin_dir": "/sys/fs/bpf/tetragon_probe_bpf_generic_kprobe.bpf_3598799",
+        "error": "mkdir: cannot create directory \u2018/sys/fs/bpf/tetragon_probe_bpf_generic_kprobe.bpf_3598799\u2019: Operation not permitted"
+      },
+      "stock": {
+        "ok": true,
+        "mode": "attach",
+        "recompile_requested": false,
+        "target_id": "open-kprobe",
+        "object_path": "corpus/build/tetragon/bpf_generic_kprobe.bpf.o",
+        "program_name": "generic_kprobe_event",
+        "attach_kind": "kprobe",
+        "attach_target": "security_file_open",
+        "inventory_entry": {
+          "name": "generic_kprobe_event",
+          "section_name": "kprobe/generic_kprobe",
+          "insn_count": 399,
+          "prog_type": 2,
+          "expected_attach_type": 0,
+          "prog_type_name": "kprobe",
+          "attach_type_name": "cgroup_inet_ingress"
+        },
+        "loaded_programs": [
+          {
+            "name": "generic_kprobe_setup_event",
+            "section_name": "kprobe",
+            "prog_fd": 66,
+            "prog_id": 134859,
+            "prog_info": {
+              "id": 134859,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 1308,
+              "xlated_prog_len": 2224,
+              "verified_insns": 300,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 134859,
+              "type": "kprobe",
+              "name": "generic_kprobe_setup_event",
+              "tag": "faee8b0e3d870e5d",
+              "gpl_compatible": true,
+              "loaded_at": 1773243041,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 2224,
+              "jited": true,
+              "bytes_jited": 1308,
+              "bytes_memlock": 4096,
+              "map_ids": [
+                129956,
+                129958,
+                129936,
+                129924,
+                129894,
+                129970
+              ],
+              "btf_id": 224820,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_process_event",
+            "section_name": "kprobe",
+            "prog_fd": 67,
+            "prog_id": 134860,
+            "prog_info": {
+              "id": 134860,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 13804,
+              "xlated_prog_len": 23968,
+              "verified_insns": 22963,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 134860,
+              "type": "kprobe",
+              "name": "generic_kprobe_process_event",
+              "tag": "b1944fbd306d3a36",
+              "gpl_compatible": true,
+              "loaded_at": 1773243041,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 23968,
+              "jited": true,
+              "bytes_jited": 13804,
+              "bytes_memlock": 24576,
+              "map_ids": [
+                129956,
+                129958,
+                129894,
+                129897,
+                129936,
+                129962,
+                129937,
+                129970
+              ],
+              "btf_id": 224820,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_process_filter",
+            "section_name": "kprobe",
+            "prog_fd": 68,
+            "prog_id": 134861,
+            "prog_info": {
+              "id": 134861,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 10566,
+              "xlated_prog_len": 19384,
+              "verified_insns": 175639,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 134861,
+              "type": "kprobe",
+              "name": "generic_kprobe_process_filter",
+              "tag": "f5c0d687b542c7f5",
+              "gpl_compatible": true,
+              "loaded_at": 1773243041,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 19384,
+              "jited": true,
+              "bytes_jited": 10566,
+              "bytes_memlock": 20480,
+              "map_ids": [
+                129956,
+                129929,
+                129957,
+                129894,
+                129959,
+                129961,
+                129970
+              ],
+              "btf_id": 224820,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_filter_arg",
+            "section_name": "kprobe",
+            "prog_fd": 69,
+            "prog_id": 134862,
+            "prog_info": {
+              "id": 134862,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 2770,
+              "xlated_prog_len": 4192,
+              "verified_insns": 932,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 134862,
+              "type": "kprobe",
+              "name": "generic_kprobe_filter_arg",
+              "tag": "7f2d2742207d73d6",
+              "gpl_compatible": true,
+              "loaded_at": 1773243041,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 4192,
+              "jited": true,
+              "bytes_jited": 2770,
+              "bytes_memlock": 8192,
+              "map_ids": [
+                129956,
+                129957,
+                129894,
+                129943,
+                129936,
+                129970
+              ],
+              "btf_id": 224820,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_actions",
+            "section_name": "kprobe",
+            "prog_fd": 70,
+            "prog_id": 134863,
+            "prog_info": {
+              "id": 134863,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 9778,
+              "xlated_prog_len": 17352,
+              "verified_insns": 45262,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 134863,
+              "type": "kprobe",
+              "name": "generic_kprobe_actions",
+              "tag": "3dd41931ddce928d",
+              "gpl_compatible": true,
+              "loaded_at": 1773243041,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 17352,
+              "jited": true,
+              "bytes_jited": 9778,
+              "bytes_memlock": 20480,
+              "map_ids": [
+                129956,
+                129957,
+                129922,
+                129962,
+                129953,
+                129895,
+                129963,
+                129948,
+                129949,
+                129923,
+                129924,
+                129894,
+                129970
+              ],
+              "btf_id": 224820,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_output",
+            "section_name": "kprobe",
+            "prog_fd": 71,
+            "prog_id": 134864,
+            "prog_info": {
+              "id": 134864,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 475,
+              "xlated_prog_len": 856,
+              "verified_insns": 104,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 134864,
+              "type": "kprobe",
+              "name": "generic_kprobe_output",
+              "tag": "144e2f59ee798049",
+              "gpl_compatible": true,
+              "loaded_at": 1773243041,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 856,
+              "jited": true,
+              "bytes_jited": 475,
+              "bytes_memlock": 4096,
+              "map_ids": [
+                129956,
+                129896,
+                129935,
+                129923,
+                129970
+              ],
+              "btf_id": 224820,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_path",
+            "section_name": "kprobe",
+            "prog_fd": 72,
+            "prog_id": 134865,
+            "prog_info": {
+              "id": 134865,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 16067,
+              "xlated_prog_len": 29888,
+              "verified_insns": 8682,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 134865,
+              "type": "kprobe",
+              "name": "generic_kprobe_path",
+              "tag": "5a6d474a2fd26846",
+              "gpl_compatible": true,
+              "loaded_at": 1773243041,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 29888,
+              "jited": true,
+              "bytes_jited": 16067,
+              "bytes_memlock": 32768,
+              "map_ids": [
+                129956,
+                129897,
+                129924,
+                129894,
+                129970
+              ],
+              "btf_id": 224820,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_process_event_2",
+            "section_name": "kprobe",
+            "prog_fd": 73,
+            "prog_id": 134866,
+            "prog_info": {
+              "id": 134866,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 15370,
+              "xlated_prog_len": 26656,
+              "verified_insns": 22594,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 134866,
+              "type": "kprobe",
+              "name": "generic_kprobe_process_event_2",
+              "tag": "95bad0e4f84e0a62",
+              "gpl_compatible": true,
+              "loaded_at": 1773243041,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 26656,
+              "jited": true,
+              "bytes_jited": 15370,
+              "bytes_memlock": 28672,
+              "map_ids": [
+                129956,
+                129958,
+                129894,
+                129897,
+                129936,
+                129924,
+                129970
+              ],
+              "btf_id": 224820,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_filter_arg_2",
+            "section_name": "kprobe",
+            "prog_fd": 74,
+            "prog_id": 134867,
+            "prog_info": {
+              "id": 134867,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 20018,
+              "xlated_prog_len": 31640,
+              "verified_insns": 10345,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 134867,
+              "type": "kprobe",
+              "name": "generic_kprobe_filter_arg_2",
+              "tag": "e5ddd78add663a6f",
+              "gpl_compatible": true,
+              "loaded_at": 1773243041,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 31640,
+              "jited": true,
+              "bytes_jited": 20018,
+              "bytes_memlock": 32768,
+              "map_ids": [
+                129956,
+                129957,
+                129919,
+                129920,
+                129916,
+                129917,
+                129914,
+                129952,
+                129899,
+                129903,
+                129945,
+                129943,
+                129947,
+                129894,
+                129936,
+                129905,
+                129909,
+                129901,
+                129907,
+                129970
+              ],
+              "btf_id": 224820,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_event",
+            "section_name": "kprobe/generic_kprobe",
+            "prog_fd": 75,
+            "prog_id": 134868,
+            "prog_info": {
+              "id": 134868,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 1686,
+              "xlated_prog_len": 3016,
+              "verified_insns": 420,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 134868,
+              "type": "kprobe",
+              "name": "generic_kprobe_event",
+              "tag": "2207b2a0aa0b90fd",
+              "gpl_compatible": true,
+              "loaded_at": 1773243041,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 3016,
+              "jited": true,
+              "bytes_jited": 1686,
+              "bytes_memlock": 4096,
+              "map_ids": [
+                129956,
+                129958,
+                129966,
+                129925,
+                129941,
+                129894,
+                129970
+              ],
+              "btf_id": 224820,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_override",
+            "section_name": "kprobe/generic_kprobe_override",
+            "prog_fd": 76,
+            "prog_id": 134869,
+            "prog_info": {
+              "id": 134869,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 115,
+              "xlated_prog_len": 184,
+              "verified_insns": 20,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 134869,
+              "type": "kprobe",
+              "name": "generic_kprobe_override",
+              "tag": "273b5c45fd6af953",
+              "gpl_compatible": true,
+              "loaded_at": 1773243041,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 184,
+              "jited": true,
+              "bytes_jited": 115,
+              "bytes_memlock": 4096,
+              "map_ids": [
+                129895,
+                129970
+              ],
+              "btf_id": 224820,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_fmodret_override",
+            "section_name": "fmod_ret/security_task_prctl",
+            "prog_fd": 77,
+            "prog_id": 134870,
+            "prog_info": {
+              "id": 134870,
+              "name": "generic_fmodret",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 107,
+              "xlated_prog_len": 168,
+              "verified_insns": 18,
+              "attach_btf_obj_id": 1,
+              "attach_btf_id": 127974
+            },
+            "bpftool": {
+              "id": 134870,
+              "type": "tracing",
+              "name": "generic_fmodret_override",
+              "tag": "5cdef3c0198ad861",
+              "gpl_compatible": true,
+              "loaded_at": 1773243041,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 168,
+              "jited": true,
+              "bytes_jited": 107,
+              "bytes_memlock": 4096,
+              "map_ids": [
+                129895,
+                129970
+              ],
+              "btf_id": 224820,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          }
+        ],
+        "target_fd": 75,
+        "target_prog_id": 134868,
+        "target_prog_info": {
+          "id": 134868,
+          "name": "generic_kprobe_",
+          "run_cnt": 0,
+          "run_time_ns": 0,
+          "jited_prog_len": 1686,
+          "xlated_prog_len": 3016,
+          "verified_insns": 420,
+          "attach_btf_obj_id": 0,
+          "attach_btf_id": 0
+        },
+        "target_bpftool": {
+          "id": 134868,
+          "type": "kprobe",
+          "name": "generic_kprobe_event",
+          "tag": "2207b2a0aa0b90fd",
+          "gpl_compatible": true,
+          "loaded_at": 1773243041,
+          "uid": 0,
+          "orphaned": false,
+          "bytes_xlated": 3016,
+          "jited": true,
+          "bytes_jited": 1686,
+          "bytes_memlock": 4096,
+          "map_ids": [
+            129956,
+            129958,
+            129966,
+            129925,
+            129941,
+            129894,
+            129970
+          ],
+          "btf_id": 224820,
+          "pids": [
+            {
+              "pid": 3598799,
+              "comm": "python"
+            }
+          ]
+        },
+        "directive_scan": {
+          "ok": true,
+          "command": "/home/yunwei37/workspace/bpf-benchmark/scanner/build/bpf-jit-scanner scan --prog-fd 75 --all --v5 --program-name generic_kprobe_event",
+          "counts": {
+            "total_sites": 2,
+            "cmov_sites": 1,
+            "wide_sites": 1,
+            "rotate_sites": 0,
+            "lea_sites": 0
+          },
+          "stdout_tail": "Accepted 2 v5 site(s)\n  cmov:   1\n  wide:   1\n  rotate: 0\n  lea:    0\n",
+          "stderr_tail": "",
+          "error": ""
+        },
+        "recompile": {
+          "ok": false,
+          "error": ""
+        },
+        "aggregate": {
+          "run_cnt_before": 0,
+          "run_cnt_after": 203994,
+          "run_cnt_delta": 203994,
+          "run_time_ns_before": 0,
+          "run_time_ns_after": 46008714,
+          "run_time_ns_delta": 46008714,
+          "avg_ns_per_run": 225.53954528074354,
+          "events_per_second": 131922.17908638506,
+          "total_cpu_time_ns": 46008714,
+          "wall_seconds": 1.5463207279681228
+        },
+        "workloads": [
+          {
+            "name": "file-ops-dd",
+            "description": "dd file write workload",
+            "trigger": {
+              "command": "dd if=/dev/zero of=/tmp/tetragon-open-kprobe-sz_041i3/tetragon-dd.bin bs=4k count=32 oflag=dsync status=none && rm -f /tmp/tetragon-open-kprobe-sz_041i3/tetragon-dd.bin",
+              "returncode": 0,
+              "stdout_tail": "",
+              "stderr_tail": "",
+              "wall_seconds": 0.22490059299161658
+            },
+            "measurement": {
+              "run_cnt_before": 0,
+              "run_cnt_after": 15099,
+              "run_cnt_delta": 15099,
+              "run_time_ns_before": 0,
+              "run_time_ns_after": 4080774,
+              "run_time_ns_delta": 4080774,
+              "avg_ns_per_run": 270.2678323067753,
+              "events_per_second": 67136.32809568818,
+              "total_cpu_time_ns": 4080774,
+              "wall_seconds": 0.22490059299161658
+            }
+          },
+          {
+            "name": "stress-open",
+            "description": "stress-ng open workload",
+            "trigger": {
+              "command": "stress-ng --open 1 --timeout 1s --metrics-brief --quiet",
+              "returncode": 0,
+              "stdout_tail": "",
+              "stderr_tail": "",
+              "wall_seconds": 1.3214201349765062
+            },
+            "measurement": {
+              "run_cnt_before": 15099,
+              "run_cnt_after": 203994,
+              "run_cnt_delta": 188895,
+              "run_time_ns_before": 4080774,
+              "run_time_ns_after": 46008714,
+              "run_time_ns_delta": 41927940,
+              "avg_ns_per_run": 221.96426586198683,
+              "events_per_second": 142948.48019956832,
+              "total_cpu_time_ns": 41927940,
+              "wall_seconds": 1.3214201349765062
+            }
+          }
+        ],
+        "error": ""
+      },
+      "rejit": {
+        "ok": false,
+        "mode": "attach",
+        "recompile_requested": true,
+        "target_id": "open-kprobe",
+        "object_path": "corpus/build/tetragon/bpf_generic_kprobe.bpf.o",
+        "program_name": "generic_kprobe_event",
+        "attach_kind": "kprobe",
+        "attach_target": "security_file_open",
+        "inventory_entry": {
+          "name": "generic_kprobe_event",
+          "section_name": "kprobe/generic_kprobe",
+          "insn_count": 399,
+          "prog_type": 2,
+          "expected_attach_type": 0,
+          "prog_type_name": "kprobe",
+          "attach_type_name": "cgroup_inet_ingress"
+        },
+        "loaded_programs": [
+          {
+            "name": "generic_kprobe_setup_event",
+            "section_name": "kprobe",
+            "prog_fd": 66,
+            "prog_id": 134989,
+            "prog_info": {
+              "id": 134989,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 1308,
+              "xlated_prog_len": 2224,
+              "verified_insns": 300,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 134989,
+              "type": "kprobe",
+              "name": "generic_kprobe_setup_event",
+              "tag": "faee8b0e3d870e5d",
+              "gpl_compatible": true,
+              "loaded_at": 1773243046,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 2224,
+              "jited": true,
+              "bytes_jited": 1308,
+              "bytes_memlock": 4096,
+              "map_ids": [
+                130085,
+                130087,
+                130065,
+                130053,
+                130023,
+                130099
+              ],
+              "btf_id": 224964,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_process_event",
+            "section_name": "kprobe",
+            "prog_fd": 67,
+            "prog_id": 134990,
+            "prog_info": {
+              "id": 134990,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 13804,
+              "xlated_prog_len": 23968,
+              "verified_insns": 22963,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 134990,
+              "type": "kprobe",
+              "name": "generic_kprobe_process_event",
+              "tag": "b1944fbd306d3a36",
+              "gpl_compatible": true,
+              "loaded_at": 1773243046,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 23968,
+              "jited": true,
+              "bytes_jited": 13804,
+              "bytes_memlock": 24576,
+              "map_ids": [
+                130085,
+                130087,
+                130023,
+                130026,
+                130065,
+                130091,
+                130066,
+                130099
+              ],
+              "btf_id": 224964,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_process_filter",
+            "section_name": "kprobe",
+            "prog_fd": 68,
+            "prog_id": 134991,
+            "prog_info": {
+              "id": 134991,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 10566,
+              "xlated_prog_len": 19384,
+              "verified_insns": 175639,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 134991,
+              "type": "kprobe",
+              "name": "generic_kprobe_process_filter",
+              "tag": "f5c0d687b542c7f5",
+              "gpl_compatible": true,
+              "loaded_at": 1773243046,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 19384,
+              "jited": true,
+              "bytes_jited": 10566,
+              "bytes_memlock": 20480,
+              "map_ids": [
+                130085,
+                130058,
+                130086,
+                130023,
+                130088,
+                130090,
+                130099
+              ],
+              "btf_id": 224964,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_filter_arg",
+            "section_name": "kprobe",
+            "prog_fd": 69,
+            "prog_id": 134992,
+            "prog_info": {
+              "id": 134992,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 2770,
+              "xlated_prog_len": 4192,
+              "verified_insns": 932,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 134992,
+              "type": "kprobe",
+              "name": "generic_kprobe_filter_arg",
+              "tag": "7f2d2742207d73d6",
+              "gpl_compatible": true,
+              "loaded_at": 1773243046,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 4192,
+              "jited": true,
+              "bytes_jited": 2770,
+              "bytes_memlock": 8192,
+              "map_ids": [
+                130085,
+                130086,
+                130023,
+                130072,
+                130065,
+                130099
+              ],
+              "btf_id": 224964,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_actions",
+            "section_name": "kprobe",
+            "prog_fd": 70,
+            "prog_id": 134993,
+            "prog_info": {
+              "id": 134993,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 9778,
+              "xlated_prog_len": 17352,
+              "verified_insns": 45262,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 134993,
+              "type": "kprobe",
+              "name": "generic_kprobe_actions",
+              "tag": "3dd41931ddce928d",
+              "gpl_compatible": true,
+              "loaded_at": 1773243046,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 17352,
+              "jited": true,
+              "bytes_jited": 9778,
+              "bytes_memlock": 20480,
+              "map_ids": [
+                130085,
+                130086,
+                130051,
+                130091,
+                130082,
+                130024,
+                130092,
+                130077,
+                130078,
+                130052,
+                130053,
+                130023,
+                130099
+              ],
+              "btf_id": 224964,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_output",
+            "section_name": "kprobe",
+            "prog_fd": 71,
+            "prog_id": 134994,
+            "prog_info": {
+              "id": 134994,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 475,
+              "xlated_prog_len": 856,
+              "verified_insns": 104,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 134994,
+              "type": "kprobe",
+              "name": "generic_kprobe_output",
+              "tag": "144e2f59ee798049",
+              "gpl_compatible": true,
+              "loaded_at": 1773243046,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 856,
+              "jited": true,
+              "bytes_jited": 475,
+              "bytes_memlock": 4096,
+              "map_ids": [
+                130085,
+                130025,
+                130064,
+                130052,
+                130099
+              ],
+              "btf_id": 224964,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_path",
+            "section_name": "kprobe",
+            "prog_fd": 72,
+            "prog_id": 134995,
+            "prog_info": {
+              "id": 134995,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 16067,
+              "xlated_prog_len": 29888,
+              "verified_insns": 8682,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 134995,
+              "type": "kprobe",
+              "name": "generic_kprobe_path",
+              "tag": "5a6d474a2fd26846",
+              "gpl_compatible": true,
+              "loaded_at": 1773243046,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 29888,
+              "jited": true,
+              "bytes_jited": 16067,
+              "bytes_memlock": 32768,
+              "map_ids": [
+                130085,
+                130026,
+                130053,
+                130023,
+                130099
+              ],
+              "btf_id": 224964,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_process_event_2",
+            "section_name": "kprobe",
+            "prog_fd": 73,
+            "prog_id": 134996,
+            "prog_info": {
+              "id": 134996,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 15370,
+              "xlated_prog_len": 26656,
+              "verified_insns": 22594,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 134996,
+              "type": "kprobe",
+              "name": "generic_kprobe_process_event_2",
+              "tag": "95bad0e4f84e0a62",
+              "gpl_compatible": true,
+              "loaded_at": 1773243046,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 26656,
+              "jited": true,
+              "bytes_jited": 15370,
+              "bytes_memlock": 28672,
+              "map_ids": [
+                130085,
+                130087,
+                130023,
+                130026,
+                130065,
+                130053,
+                130099
+              ],
+              "btf_id": 224964,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_filter_arg_2",
+            "section_name": "kprobe",
+            "prog_fd": 74,
+            "prog_id": 134997,
+            "prog_info": {
+              "id": 134997,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 20018,
+              "xlated_prog_len": 31640,
+              "verified_insns": 10345,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 134997,
+              "type": "kprobe",
+              "name": "generic_kprobe_filter_arg_2",
+              "tag": "e5ddd78add663a6f",
+              "gpl_compatible": true,
+              "loaded_at": 1773243046,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 31640,
+              "jited": true,
+              "bytes_jited": 20018,
+              "bytes_memlock": 32768,
+              "map_ids": [
+                130085,
+                130086,
+                130048,
+                130049,
+                130045,
+                130046,
+                130043,
+                130081,
+                130028,
+                130032,
+                130074,
+                130072,
+                130076,
+                130023,
+                130065,
+                130034,
+                130038,
+                130030,
+                130036,
+                130099
+              ],
+              "btf_id": 224964,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_event",
+            "section_name": "kprobe/generic_kprobe",
+            "prog_fd": 75,
+            "prog_id": 134998,
+            "prog_info": {
+              "id": 134998,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 1686,
+              "xlated_prog_len": 3016,
+              "verified_insns": 420,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 134998,
+              "type": "kprobe",
+              "name": "generic_kprobe_event",
+              "tag": "2207b2a0aa0b90fd",
+              "gpl_compatible": true,
+              "loaded_at": 1773243046,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 3016,
+              "jited": true,
+              "bytes_jited": 1686,
+              "bytes_memlock": 4096,
+              "map_ids": [
+                130085,
+                130087,
+                130095,
+                130054,
+                130070,
+                130023,
+                130099
+              ],
+              "btf_id": 224964,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_override",
+            "section_name": "kprobe/generic_kprobe_override",
+            "prog_fd": 76,
+            "prog_id": 134999,
+            "prog_info": {
+              "id": 134999,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 115,
+              "xlated_prog_len": 184,
+              "verified_insns": 20,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 134999,
+              "type": "kprobe",
+              "name": "generic_kprobe_override",
+              "tag": "273b5c45fd6af953",
+              "gpl_compatible": true,
+              "loaded_at": 1773243046,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 184,
+              "jited": true,
+              "bytes_jited": 115,
+              "bytes_memlock": 4096,
+              "map_ids": [
+                130024,
+                130099
+              ],
+              "btf_id": 224964,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_fmodret_override",
+            "section_name": "fmod_ret/security_task_prctl",
+            "prog_fd": 77,
+            "prog_id": 135000,
+            "prog_info": {
+              "id": 135000,
+              "name": "generic_fmodret",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 107,
+              "xlated_prog_len": 168,
+              "verified_insns": 18,
+              "attach_btf_obj_id": 1,
+              "attach_btf_id": 127974
+            },
+            "bpftool": {
+              "id": 135000,
+              "type": "tracing",
+              "name": "generic_fmodret_override",
+              "tag": "5cdef3c0198ad861",
+              "gpl_compatible": true,
+              "loaded_at": 1773243046,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 168,
+              "jited": true,
+              "bytes_jited": 107,
+              "bytes_memlock": 4096,
+              "map_ids": [
+                130024,
+                130099
+              ],
+              "btf_id": 224964,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          }
+        ],
+        "target_fd": 75,
+        "target_prog_id": 134998,
+        "target_prog_info": {
+          "id": 134998,
+          "name": "generic_kprobe_",
+          "run_cnt": 0,
+          "run_time_ns": 0,
+          "jited_prog_len": 1686,
+          "xlated_prog_len": 3016,
+          "verified_insns": 420,
+          "attach_btf_obj_id": 0,
+          "attach_btf_id": 0
+        },
+        "target_bpftool": {
+          "id": 134998,
+          "type": "kprobe",
+          "name": "generic_kprobe_event",
+          "tag": "2207b2a0aa0b90fd",
+          "gpl_compatible": true,
+          "loaded_at": 1773243046,
+          "uid": 0,
+          "orphaned": false,
+          "bytes_xlated": 3016,
+          "jited": true,
+          "bytes_jited": 1686,
+          "bytes_memlock": 4096,
+          "map_ids": [
+            130085,
+            130087,
+            130095,
+            130054,
+            130070,
+            130023,
+            130099
+          ],
+          "btf_id": 224964,
+          "pids": [
+            {
+              "pid": 3598799,
+              "comm": "python"
+            }
+          ]
+        },
+        "directive_scan": {
+          "ok": true,
+          "command": "/home/yunwei37/workspace/bpf-benchmark/scanner/build/bpf-jit-scanner scan --prog-fd 75 --all --v5 --program-name generic_kprobe_event",
+          "counts": {
+            "total_sites": 2,
+            "cmov_sites": 1,
+            "wide_sites": 1,
+            "rotate_sites": 0,
+            "lea_sites": 0
+          },
+          "stdout_tail": "Accepted 2 v5 site(s)\n  cmov:   1\n  wide:   1\n  rotate: 0\n  lea:    0\n",
+          "stderr_tail": "",
+          "error": ""
+        },
+        "recompile": {
+          "ok": false,
+          "command": "/home/yunwei37/workspace/bpf-benchmark/scanner/build/bpf-jit-scanner apply --prog-fd 75 --all --v5 --program-name generic_kprobe_event",
+          "counts": {
+            "total_sites": 2,
+            "cmov_sites": 1,
+            "wide_sites": 1,
+            "rotate_sites": 0,
+            "lea_sites": 0
+          },
+          "stdout_tail": "Accepted 2 v5 site(s)\n  cmov:   1\n  wide:   1\n  rotate: 0\n  lea:    0\n",
+          "stderr_tail": "BPF_PROG_JIT_RECOMPILE: Invalid argument\n",
+          "error": "BPF_PROG_JIT_RECOMPILE: Invalid argument"
+        },
+        "error": "BPF_PROG_JIT_RECOMPILE: Invalid argument"
+      },
+      "speedup": null
+    },
+    {
+      "target_id": "connect-kprobe",
+      "object_path": "corpus/build/tetragon/bpf_generic_kprobe.bpf.o",
+      "object_label": "generic kprobe object",
+      "program_name": "generic_kprobe_event",
+      "section_name": "kprobe/generic_kprobe",
+      "program_type": "kprobe",
+      "attach_kind": "kprobe",
+      "attach_target": "security_socket_connect",
+      "workloads": [
+        "connect-loopback"
+      ],
+      "bpftool_probe": {
+        "ok": false,
+        "pin_dir": "/sys/fs/bpf/tetragon_probe_bpf_generic_kprobe.bpf_3598799",
+        "error": "mkdir: cannot create directory \u2018/sys/fs/bpf/tetragon_probe_bpf_generic_kprobe.bpf_3598799\u2019: Operation not permitted"
+      },
+      "stock": {
+        "ok": true,
+        "mode": "attach",
+        "recompile_requested": false,
+        "target_id": "connect-kprobe",
+        "object_path": "corpus/build/tetragon/bpf_generic_kprobe.bpf.o",
+        "program_name": "generic_kprobe_event",
+        "attach_kind": "kprobe",
+        "attach_target": "security_socket_connect",
+        "inventory_entry": {
+          "name": "generic_kprobe_event",
+          "section_name": "kprobe/generic_kprobe",
+          "insn_count": 399,
+          "prog_type": 2,
+          "expected_attach_type": 0,
+          "prog_type_name": "kprobe",
+          "attach_type_name": "cgroup_inet_ingress"
+        },
+        "loaded_programs": [
+          {
+            "name": "generic_kprobe_setup_event",
+            "section_name": "kprobe",
+            "prog_fd": 66,
+            "prog_id": 135190,
+            "prog_info": {
+              "id": 135190,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 1308,
+              "xlated_prog_len": 2224,
+              "verified_insns": 300,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 135190,
+              "type": "kprobe",
+              "name": "generic_kprobe_setup_event",
+              "tag": "faee8b0e3d870e5d",
+              "gpl_compatible": true,
+              "loaded_at": 1773243049,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 2224,
+              "jited": true,
+              "bytes_jited": 1308,
+              "bytes_memlock": 4096,
+              "map_ids": [
+                131181,
+                131183,
+                131161,
+                131149,
+                131119,
+                131195
+              ],
+              "btf_id": 225202,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_process_event",
+            "section_name": "kprobe",
+            "prog_fd": 67,
+            "prog_id": 135191,
+            "prog_info": {
+              "id": 135191,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 13804,
+              "xlated_prog_len": 23968,
+              "verified_insns": 22963,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 135191,
+              "type": "kprobe",
+              "name": "generic_kprobe_process_event",
+              "tag": "b1944fbd306d3a36",
+              "gpl_compatible": true,
+              "loaded_at": 1773243049,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 23968,
+              "jited": true,
+              "bytes_jited": 13804,
+              "bytes_memlock": 24576,
+              "map_ids": [
+                131181,
+                131183,
+                131119,
+                131122,
+                131161,
+                131187,
+                131162,
+                131195
+              ],
+              "btf_id": 225202,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_process_filter",
+            "section_name": "kprobe",
+            "prog_fd": 68,
+            "prog_id": 135192,
+            "prog_info": {
+              "id": 135192,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 10566,
+              "xlated_prog_len": 19384,
+              "verified_insns": 175639,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 135192,
+              "type": "kprobe",
+              "name": "generic_kprobe_process_filter",
+              "tag": "f5c0d687b542c7f5",
+              "gpl_compatible": true,
+              "loaded_at": 1773243049,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 19384,
+              "jited": true,
+              "bytes_jited": 10566,
+              "bytes_memlock": 20480,
+              "map_ids": [
+                131181,
+                131154,
+                131182,
+                131119,
+                131184,
+                131186,
+                131195
+              ],
+              "btf_id": 225202,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_filter_arg",
+            "section_name": "kprobe",
+            "prog_fd": 69,
+            "prog_id": 135193,
+            "prog_info": {
+              "id": 135193,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 2770,
+              "xlated_prog_len": 4192,
+              "verified_insns": 932,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 135193,
+              "type": "kprobe",
+              "name": "generic_kprobe_filter_arg",
+              "tag": "7f2d2742207d73d6",
+              "gpl_compatible": true,
+              "loaded_at": 1773243049,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 4192,
+              "jited": true,
+              "bytes_jited": 2770,
+              "bytes_memlock": 8192,
+              "map_ids": [
+                131181,
+                131182,
+                131119,
+                131168,
+                131161,
+                131195
+              ],
+              "btf_id": 225202,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_actions",
+            "section_name": "kprobe",
+            "prog_fd": 70,
+            "prog_id": 135194,
+            "prog_info": {
+              "id": 135194,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 9778,
+              "xlated_prog_len": 17352,
+              "verified_insns": 45262,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 135194,
+              "type": "kprobe",
+              "name": "generic_kprobe_actions",
+              "tag": "3dd41931ddce928d",
+              "gpl_compatible": true,
+              "loaded_at": 1773243049,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 17352,
+              "jited": true,
+              "bytes_jited": 9778,
+              "bytes_memlock": 20480,
+              "map_ids": [
+                131181,
+                131182,
+                131147,
+                131187,
+                131178,
+                131120,
+                131188,
+                131173,
+                131174,
+                131148,
+                131149,
+                131119,
+                131195
+              ],
+              "btf_id": 225202,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_output",
+            "section_name": "kprobe",
+            "prog_fd": 71,
+            "prog_id": 135195,
+            "prog_info": {
+              "id": 135195,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 475,
+              "xlated_prog_len": 856,
+              "verified_insns": 104,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 135195,
+              "type": "kprobe",
+              "name": "generic_kprobe_output",
+              "tag": "144e2f59ee798049",
+              "gpl_compatible": true,
+              "loaded_at": 1773243049,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 856,
+              "jited": true,
+              "bytes_jited": 475,
+              "bytes_memlock": 4096,
+              "map_ids": [
+                131181,
+                131121,
+                131160,
+                131148,
+                131195
+              ],
+              "btf_id": 225202,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_path",
+            "section_name": "kprobe",
+            "prog_fd": 72,
+            "prog_id": 135196,
+            "prog_info": {
+              "id": 135196,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 16067,
+              "xlated_prog_len": 29888,
+              "verified_insns": 8682,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 135196,
+              "type": "kprobe",
+              "name": "generic_kprobe_path",
+              "tag": "5a6d474a2fd26846",
+              "gpl_compatible": true,
+              "loaded_at": 1773243049,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 29888,
+              "jited": true,
+              "bytes_jited": 16067,
+              "bytes_memlock": 32768,
+              "map_ids": [
+                131181,
+                131122,
+                131149,
+                131119,
+                131195
+              ],
+              "btf_id": 225202,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_process_event_2",
+            "section_name": "kprobe",
+            "prog_fd": 73,
+            "prog_id": 135197,
+            "prog_info": {
+              "id": 135197,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 15370,
+              "xlated_prog_len": 26656,
+              "verified_insns": 22594,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 135197,
+              "type": "kprobe",
+              "name": "generic_kprobe_process_event_2",
+              "tag": "95bad0e4f84e0a62",
+              "gpl_compatible": true,
+              "loaded_at": 1773243049,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 26656,
+              "jited": true,
+              "bytes_jited": 15370,
+              "bytes_memlock": 28672,
+              "map_ids": [
+                131181,
+                131183,
+                131119,
+                131122,
+                131161,
+                131149,
+                131195
+              ],
+              "btf_id": 225202,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_filter_arg_2",
+            "section_name": "kprobe",
+            "prog_fd": 74,
+            "prog_id": 135198,
+            "prog_info": {
+              "id": 135198,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 20018,
+              "xlated_prog_len": 31640,
+              "verified_insns": 10345,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 135198,
+              "type": "kprobe",
+              "name": "generic_kprobe_filter_arg_2",
+              "tag": "e5ddd78add663a6f",
+              "gpl_compatible": true,
+              "loaded_at": 1773243049,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 31640,
+              "jited": true,
+              "bytes_jited": 20018,
+              "bytes_memlock": 32768,
+              "map_ids": [
+                131181,
+                131182,
+                131144,
+                131145,
+                131141,
+                131142,
+                131139,
+                131177,
+                131124,
+                131128,
+                131170,
+                131168,
+                131172,
+                131119,
+                131161,
+                131130,
+                131134,
+                131126,
+                131132,
+                131195
+              ],
+              "btf_id": 225202,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_event",
+            "section_name": "kprobe/generic_kprobe",
+            "prog_fd": 75,
+            "prog_id": 135199,
+            "prog_info": {
+              "id": 135199,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 1686,
+              "xlated_prog_len": 3016,
+              "verified_insns": 420,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 135199,
+              "type": "kprobe",
+              "name": "generic_kprobe_event",
+              "tag": "2207b2a0aa0b90fd",
+              "gpl_compatible": true,
+              "loaded_at": 1773243049,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 3016,
+              "jited": true,
+              "bytes_jited": 1686,
+              "bytes_memlock": 4096,
+              "map_ids": [
+                131181,
+                131183,
+                131191,
+                131150,
+                131166,
+                131119,
+                131195
+              ],
+              "btf_id": 225202,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_override",
+            "section_name": "kprobe/generic_kprobe_override",
+            "prog_fd": 76,
+            "prog_id": 135200,
+            "prog_info": {
+              "id": 135200,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 115,
+              "xlated_prog_len": 184,
+              "verified_insns": 20,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 135200,
+              "type": "kprobe",
+              "name": "generic_kprobe_override",
+              "tag": "273b5c45fd6af953",
+              "gpl_compatible": true,
+              "loaded_at": 1773243049,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 184,
+              "jited": true,
+              "bytes_jited": 115,
+              "bytes_memlock": 4096,
+              "map_ids": [
+                131120,
+                131195
+              ],
+              "btf_id": 225202,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_fmodret_override",
+            "section_name": "fmod_ret/security_task_prctl",
+            "prog_fd": 77,
+            "prog_id": 135201,
+            "prog_info": {
+              "id": 135201,
+              "name": "generic_fmodret",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 107,
+              "xlated_prog_len": 168,
+              "verified_insns": 18,
+              "attach_btf_obj_id": 1,
+              "attach_btf_id": 127974
+            },
+            "bpftool": {
+              "id": 135201,
+              "type": "tracing",
+              "name": "generic_fmodret_override",
+              "tag": "5cdef3c0198ad861",
+              "gpl_compatible": true,
+              "loaded_at": 1773243049,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 168,
+              "jited": true,
+              "bytes_jited": 107,
+              "bytes_memlock": 4096,
+              "map_ids": [
+                131120,
+                131195
+              ],
+              "btf_id": 225202,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          }
+        ],
+        "target_fd": 75,
+        "target_prog_id": 135199,
+        "target_prog_info": {
+          "id": 135199,
+          "name": "generic_kprobe_",
+          "run_cnt": 0,
+          "run_time_ns": 0,
+          "jited_prog_len": 1686,
+          "xlated_prog_len": 3016,
+          "verified_insns": 420,
+          "attach_btf_obj_id": 0,
+          "attach_btf_id": 0
+        },
+        "target_bpftool": {
+          "id": 135199,
+          "type": "kprobe",
+          "name": "generic_kprobe_event",
+          "tag": "2207b2a0aa0b90fd",
+          "gpl_compatible": true,
+          "loaded_at": 1773243049,
+          "uid": 0,
+          "orphaned": false,
+          "bytes_xlated": 3016,
+          "jited": true,
+          "bytes_jited": 1686,
+          "bytes_memlock": 4096,
+          "map_ids": [
+            131181,
+            131183,
+            131191,
+            131150,
+            131166,
+            131119,
+            131195
+          ],
+          "btf_id": 225202,
+          "pids": [
+            {
+              "pid": 3598799,
+              "comm": "python"
+            }
+          ]
+        },
+        "directive_scan": {
+          "ok": true,
+          "command": "/home/yunwei37/workspace/bpf-benchmark/scanner/build/bpf-jit-scanner scan --prog-fd 75 --all --v5 --program-name generic_kprobe_event",
+          "counts": {
+            "total_sites": 2,
+            "cmov_sites": 1,
+            "wide_sites": 1,
+            "rotate_sites": 0,
+            "lea_sites": 0
+          },
+          "stdout_tail": "Accepted 2 v5 site(s)\n  cmov:   1\n  wide:   1\n  rotate: 0\n  lea:    0\n",
+          "stderr_tail": "",
+          "error": ""
+        },
+        "recompile": {
+          "ok": false,
+          "error": ""
+        },
+        "aggregate": {
+          "run_cnt_before": 0,
+          "run_cnt_after": 166,
+          "run_cnt_delta": 166,
+          "run_time_ns_before": 0,
+          "run_time_ns_after": 114225,
+          "run_time_ns_delta": 114225,
+          "avg_ns_per_run": 688.1024096385543,
+          "events_per_second": 325.08634006032855,
+          "total_cpu_time_ns": 114225,
+          "wall_seconds": 0.5106335749733262
+        },
+        "workloads": [
+          {
+            "name": "connect-loopback",
+            "description": "loopback TCP connect storm",
+            "trigger": {
+              "command": "loopback-tcp-connect 128",
+              "returncode": 0,
+              "stdout_tail": "",
+              "stderr_tail": "",
+              "wall_seconds": 0.5106335749733262
+            },
+            "measurement": {
+              "run_cnt_before": 0,
+              "run_cnt_after": 166,
+              "run_cnt_delta": 166,
+              "run_time_ns_before": 0,
+              "run_time_ns_after": 114225,
+              "run_time_ns_delta": 114225,
+              "avg_ns_per_run": 688.1024096385543,
+              "events_per_second": 325.08634006032855,
+              "total_cpu_time_ns": 114225,
+              "wall_seconds": 0.5106335749733262
+            }
+          }
+        ],
+        "error": ""
+      },
+      "rejit": {
+        "ok": false,
+        "mode": "attach",
+        "recompile_requested": true,
+        "target_id": "connect-kprobe",
+        "object_path": "corpus/build/tetragon/bpf_generic_kprobe.bpf.o",
+        "program_name": "generic_kprobe_event",
+        "attach_kind": "kprobe",
+        "attach_target": "security_socket_connect",
+        "inventory_entry": {
+          "name": "generic_kprobe_event",
+          "section_name": "kprobe/generic_kprobe",
+          "insn_count": 399,
+          "prog_type": 2,
+          "expected_attach_type": 0,
+          "prog_type_name": "kprobe",
+          "attach_type_name": "cgroup_inet_ingress"
+        },
+        "loaded_programs": [
+          {
+            "name": "generic_kprobe_setup_event",
+            "section_name": "kprobe",
+            "prog_fd": 66,
+            "prog_id": 135363,
+            "prog_info": {
+              "id": 135363,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 1308,
+              "xlated_prog_len": 2224,
+              "verified_insns": 300,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 135363,
+              "type": "kprobe",
+              "name": "generic_kprobe_setup_event",
+              "tag": "faee8b0e3d870e5d",
+              "gpl_compatible": true,
+              "loaded_at": 1773243053,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 2224,
+              "jited": true,
+              "bytes_jited": 1308,
+              "bytes_memlock": 4096,
+              "map_ids": [
+                131742,
+                131744,
+                131722,
+                131710,
+                131680,
+                131756
+              ],
+              "btf_id": 225391,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_process_event",
+            "section_name": "kprobe",
+            "prog_fd": 67,
+            "prog_id": 135364,
+            "prog_info": {
+              "id": 135364,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 13804,
+              "xlated_prog_len": 23968,
+              "verified_insns": 22963,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 135364,
+              "type": "kprobe",
+              "name": "generic_kprobe_process_event",
+              "tag": "b1944fbd306d3a36",
+              "gpl_compatible": true,
+              "loaded_at": 1773243053,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 23968,
+              "jited": true,
+              "bytes_jited": 13804,
+              "bytes_memlock": 24576,
+              "map_ids": [
+                131742,
+                131744,
+                131680,
+                131683,
+                131722,
+                131748,
+                131723,
+                131756
+              ],
+              "btf_id": 225391,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_process_filter",
+            "section_name": "kprobe",
+            "prog_fd": 68,
+            "prog_id": 135365,
+            "prog_info": {
+              "id": 135365,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 10566,
+              "xlated_prog_len": 19384,
+              "verified_insns": 175639,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 135365,
+              "type": "kprobe",
+              "name": "generic_kprobe_process_filter",
+              "tag": "f5c0d687b542c7f5",
+              "gpl_compatible": true,
+              "loaded_at": 1773243053,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 19384,
+              "jited": true,
+              "bytes_jited": 10566,
+              "bytes_memlock": 20480,
+              "map_ids": [
+                131742,
+                131715,
+                131743,
+                131680,
+                131745,
+                131747,
+                131756
+              ],
+              "btf_id": 225391,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_filter_arg",
+            "section_name": "kprobe",
+            "prog_fd": 69,
+            "prog_id": 135366,
+            "prog_info": {
+              "id": 135366,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 2770,
+              "xlated_prog_len": 4192,
+              "verified_insns": 932,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 135366,
+              "type": "kprobe",
+              "name": "generic_kprobe_filter_arg",
+              "tag": "7f2d2742207d73d6",
+              "gpl_compatible": true,
+              "loaded_at": 1773243053,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 4192,
+              "jited": true,
+              "bytes_jited": 2770,
+              "bytes_memlock": 8192,
+              "map_ids": [
+                131742,
+                131743,
+                131680,
+                131729,
+                131722,
+                131756
+              ],
+              "btf_id": 225391,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_actions",
+            "section_name": "kprobe",
+            "prog_fd": 70,
+            "prog_id": 135367,
+            "prog_info": {
+              "id": 135367,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 9778,
+              "xlated_prog_len": 17352,
+              "verified_insns": 45262,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 135367,
+              "type": "kprobe",
+              "name": "generic_kprobe_actions",
+              "tag": "3dd41931ddce928d",
+              "gpl_compatible": true,
+              "loaded_at": 1773243053,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 17352,
+              "jited": true,
+              "bytes_jited": 9778,
+              "bytes_memlock": 20480,
+              "map_ids": [
+                131742,
+                131743,
+                131708,
+                131748,
+                131739,
+                131681,
+                131749,
+                131734,
+                131735,
+                131709,
+                131710,
+                131680,
+                131756
+              ],
+              "btf_id": 225391,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_output",
+            "section_name": "kprobe",
+            "prog_fd": 71,
+            "prog_id": 135368,
+            "prog_info": {
+              "id": 135368,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 475,
+              "xlated_prog_len": 856,
+              "verified_insns": 104,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 135368,
+              "type": "kprobe",
+              "name": "generic_kprobe_output",
+              "tag": "144e2f59ee798049",
+              "gpl_compatible": true,
+              "loaded_at": 1773243053,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 856,
+              "jited": true,
+              "bytes_jited": 475,
+              "bytes_memlock": 4096,
+              "map_ids": [
+                131742,
+                131682,
+                131721,
+                131709,
+                131756
+              ],
+              "btf_id": 225391,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_path",
+            "section_name": "kprobe",
+            "prog_fd": 72,
+            "prog_id": 135369,
+            "prog_info": {
+              "id": 135369,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 16067,
+              "xlated_prog_len": 29888,
+              "verified_insns": 8682,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 135369,
+              "type": "kprobe",
+              "name": "generic_kprobe_path",
+              "tag": "5a6d474a2fd26846",
+              "gpl_compatible": true,
+              "loaded_at": 1773243053,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 29888,
+              "jited": true,
+              "bytes_jited": 16067,
+              "bytes_memlock": 32768,
+              "map_ids": [
+                131742,
+                131683,
+                131710,
+                131680,
+                131756
+              ],
+              "btf_id": 225391,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_process_event_2",
+            "section_name": "kprobe",
+            "prog_fd": 73,
+            "prog_id": 135370,
+            "prog_info": {
+              "id": 135370,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 15370,
+              "xlated_prog_len": 26656,
+              "verified_insns": 22594,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 135370,
+              "type": "kprobe",
+              "name": "generic_kprobe_process_event_2",
+              "tag": "95bad0e4f84e0a62",
+              "gpl_compatible": true,
+              "loaded_at": 1773243053,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 26656,
+              "jited": true,
+              "bytes_jited": 15370,
+              "bytes_memlock": 28672,
+              "map_ids": [
+                131742,
+                131744,
+                131680,
+                131683,
+                131722,
+                131710,
+                131756
+              ],
+              "btf_id": 225391,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_filter_arg_2",
+            "section_name": "kprobe",
+            "prog_fd": 74,
+            "prog_id": 135371,
+            "prog_info": {
+              "id": 135371,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 20018,
+              "xlated_prog_len": 31640,
+              "verified_insns": 10345,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 135371,
+              "type": "kprobe",
+              "name": "generic_kprobe_filter_arg_2",
+              "tag": "e5ddd78add663a6f",
+              "gpl_compatible": true,
+              "loaded_at": 1773243053,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 31640,
+              "jited": true,
+              "bytes_jited": 20018,
+              "bytes_memlock": 32768,
+              "map_ids": [
+                131742,
+                131743,
+                131705,
+                131706,
+                131702,
+                131703,
+                131700,
+                131738,
+                131685,
+                131689,
+                131731,
+                131729,
+                131733,
+                131680,
+                131722,
+                131691,
+                131695,
+                131687,
+                131693,
+                131756
+              ],
+              "btf_id": 225391,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_event",
+            "section_name": "kprobe/generic_kprobe",
+            "prog_fd": 75,
+            "prog_id": 135372,
+            "prog_info": {
+              "id": 135372,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 1686,
+              "xlated_prog_len": 3016,
+              "verified_insns": 420,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 135372,
+              "type": "kprobe",
+              "name": "generic_kprobe_event",
+              "tag": "2207b2a0aa0b90fd",
+              "gpl_compatible": true,
+              "loaded_at": 1773243053,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 3016,
+              "jited": true,
+              "bytes_jited": 1686,
+              "bytes_memlock": 4096,
+              "map_ids": [
+                131742,
+                131744,
+                131752,
+                131711,
+                131727,
+                131680,
+                131756
+              ],
+              "btf_id": 225391,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_kprobe_override",
+            "section_name": "kprobe/generic_kprobe_override",
+            "prog_fd": 76,
+            "prog_id": 135373,
+            "prog_info": {
+              "id": 135373,
+              "name": "generic_kprobe_",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 115,
+              "xlated_prog_len": 184,
+              "verified_insns": 20,
+              "attach_btf_obj_id": 0,
+              "attach_btf_id": 0
+            },
+            "bpftool": {
+              "id": 135373,
+              "type": "kprobe",
+              "name": "generic_kprobe_override",
+              "tag": "273b5c45fd6af953",
+              "gpl_compatible": true,
+              "loaded_at": 1773243053,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 184,
+              "jited": true,
+              "bytes_jited": 115,
+              "bytes_memlock": 4096,
+              "map_ids": [
+                131681,
+                131756
+              ],
+              "btf_id": 225391,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          },
+          {
+            "name": "generic_fmodret_override",
+            "section_name": "fmod_ret/security_task_prctl",
+            "prog_fd": 77,
+            "prog_id": 135374,
+            "prog_info": {
+              "id": 135374,
+              "name": "generic_fmodret",
+              "run_cnt": 0,
+              "run_time_ns": 0,
+              "jited_prog_len": 107,
+              "xlated_prog_len": 168,
+              "verified_insns": 18,
+              "attach_btf_obj_id": 1,
+              "attach_btf_id": 127974
+            },
+            "bpftool": {
+              "id": 135374,
+              "type": "tracing",
+              "name": "generic_fmodret_override",
+              "tag": "5cdef3c0198ad861",
+              "gpl_compatible": true,
+              "loaded_at": 1773243053,
+              "uid": 0,
+              "orphaned": false,
+              "bytes_xlated": 168,
+              "jited": true,
+              "bytes_jited": 107,
+              "bytes_memlock": 4096,
+              "map_ids": [
+                131681,
+                131756
+              ],
+              "btf_id": 225391,
+              "pids": [
+                {
+                  "pid": 3598799,
+                  "comm": "python"
+                }
+              ]
+            }
+          }
+        ],
+        "target_fd": 75,
+        "target_prog_id": 135372,
+        "target_prog_info": {
+          "id": 135372,
+          "name": "generic_kprobe_",
+          "run_cnt": 0,
+          "run_time_ns": 0,
+          "jited_prog_len": 1686,
+          "xlated_prog_len": 3016,
+          "verified_insns": 420,
+          "attach_btf_obj_id": 0,
+          "attach_btf_id": 0
+        },
+        "target_bpftool": {
+          "id": 135372,
+          "type": "kprobe",
+          "name": "generic_kprobe_event",
+          "tag": "2207b2a0aa0b90fd",
+          "gpl_compatible": true,
+          "loaded_at": 1773243053,
+          "uid": 0,
+          "orphaned": false,
+          "bytes_xlated": 3016,
+          "jited": true,
+          "bytes_jited": 1686,
+          "bytes_memlock": 4096,
+          "map_ids": [
+            131742,
+            131744,
+            131752,
+            131711,
+            131727,
+            131680,
+            131756
+          ],
+          "btf_id": 225391,
+          "pids": [
+            {
+              "pid": 3598799,
+              "comm": "python"
+            }
+          ]
+        },
+        "directive_scan": {
+          "ok": true,
+          "command": "/home/yunwei37/workspace/bpf-benchmark/scanner/build/bpf-jit-scanner scan --prog-fd 75 --all --v5 --program-name generic_kprobe_event",
+          "counts": {
+            "total_sites": 2,
+            "cmov_sites": 1,
+            "wide_sites": 1,
+            "rotate_sites": 0,
+            "lea_sites": 0
+          },
+          "stdout_tail": "Accepted 2 v5 site(s)\n  cmov:   1\n  wide:   1\n  rotate: 0\n  lea:    0\n",
+          "stderr_tail": "",
+          "error": ""
+        },
+        "recompile": {
+          "ok": false,
+          "command": "/home/yunwei37/workspace/bpf-benchmark/scanner/build/bpf-jit-scanner apply --prog-fd 75 --all --v5 --program-name generic_kprobe_event",
+          "counts": {
+            "total_sites": 2,
+            "cmov_sites": 1,
+            "wide_sites": 1,
+            "rotate_sites": 0,
+            "lea_sites": 0
+          },
+          "stdout_tail": "Accepted 2 v5 site(s)\n  cmov:   1\n  wide:   1\n  rotate: 0\n  lea:    0\n",
+          "stderr_tail": "BPF_PROG_JIT_RECOMPILE: Invalid argument\n",
+          "error": "BPF_PROG_JIT_RECOMPILE: Invalid argument"
+        },
+        "error": "BPF_PROG_JIT_RECOMPILE: Invalid argument"
+      },
+      "speedup": null
+    }
+  ],
+  "summary": {
+    "targets": 3,
+    "stock_ok": 3,
+    "rejit_ok": 0,
+    "comparisons": 0,
+    "best_speedup": null,
+    "worst_speedup": null,
+    "stock_failures": 0,
+    "rejit_failures": 3
+  },
+  "details": {
+    "inventory": {
+      "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_execve_event.bpf.o": {
+        "execve_rate": {
+          "name": "execve_rate",
+          "section_name": "tracepoint",
+          "insn_count": 206,
+          "prog_type": 5,
+          "expected_attach_type": 0,
+          "prog_type_name": "tracepoint",
+          "attach_type_name": "cgroup_inet_ingress"
+        },
+        "execve_send": {
+          "name": "execve_send",
+          "section_name": "tracepoint",
+          "insn_count": 351,
+          "prog_type": 5,
+          "expected_attach_type": 0,
+          "prog_type_name": "tracepoint",
+          "attach_type_name": "cgroup_inet_ingress"
+        },
+        "event_execve": {
+          "name": "event_execve",
+          "section_name": "tracepoint/sys_execve",
+          "insn_count": 3940,
+          "prog_type": 5,
+          "expected_attach_type": 0,
+          "prog_type_name": "tracepoint",
+          "attach_type_name": "cgroup_inet_ingress"
+        }
+      },
+      "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_generic_kprobe.bpf.o": {
+        "generic_kprobe_setup_event": {
+          "name": "generic_kprobe_setup_event",
+          "section_name": "kprobe",
+          "insn_count": 250,
+          "prog_type": 2,
+          "expected_attach_type": 0,
+          "prog_type_name": "kprobe",
+          "attach_type_name": "cgroup_inet_ingress"
+        },
+        "generic_kprobe_process_event": {
+          "name": "generic_kprobe_process_event",
+          "section_name": "kprobe",
+          "insn_count": 2931,
+          "prog_type": 2,
+          "expected_attach_type": 0,
+          "prog_type_name": "kprobe",
+          "attach_type_name": "cgroup_inet_ingress"
+        },
+        "generic_kprobe_process_filter": {
+          "name": "generic_kprobe_process_filter",
+          "section_name": "kprobe",
+          "insn_count": 2313,
+          "prog_type": 2,
+          "expected_attach_type": 0,
+          "prog_type_name": "kprobe",
+          "attach_type_name": "cgroup_inet_ingress"
+        },
+        "generic_kprobe_filter_arg": {
+          "name": "generic_kprobe_filter_arg",
+          "section_name": "kprobe",
+          "insn_count": 488,
+          "prog_type": 2,
+          "expected_attach_type": 0,
+          "prog_type_name": "kprobe",
+          "attach_type_name": "cgroup_inet_ingress"
+        },
+        "generic_kprobe_actions": {
+          "name": "generic_kprobe_actions",
+          "section_name": "kprobe",
+          "insn_count": 2035,
+          "prog_type": 2,
+          "expected_attach_type": 0,
+          "prog_type_name": "kprobe",
+          "attach_type_name": "cgroup_inet_ingress"
+        },
+        "generic_kprobe_output": {
+          "name": "generic_kprobe_output",
+          "section_name": "kprobe",
+          "insn_count": 85,
+          "prog_type": 2,
+          "expected_attach_type": 0,
+          "prog_type_name": "kprobe",
+          "attach_type_name": "cgroup_inet_ingress"
+        },
+        "generic_kprobe_path": {
+          "name": "generic_kprobe_path",
+          "section_name": "kprobe",
+          "insn_count": 3712,
+          "prog_type": 2,
+          "expected_attach_type": 0,
+          "prog_type_name": "kprobe",
+          "attach_type_name": "cgroup_inet_ingress"
+        },
+        "generic_kprobe_process_event_2": {
+          "name": "generic_kprobe_process_event_2",
+          "section_name": "kprobe",
+          "insn_count": 3299,
+          "prog_type": 2,
+          "expected_attach_type": 0,
+          "prog_type_name": "kprobe",
+          "attach_type_name": "cgroup_inet_ingress"
+        },
+        "generic_kprobe_filter_arg_2": {
+          "name": "generic_kprobe_filter_arg_2",
+          "section_name": "kprobe",
+          "insn_count": 3769,
+          "prog_type": 2,
+          "expected_attach_type": 0,
+          "prog_type_name": "kprobe",
+          "attach_type_name": "cgroup_inet_ingress"
+        },
+        "generic_kprobe_event": {
+          "name": "generic_kprobe_event",
+          "section_name": "kprobe/generic_kprobe",
+          "insn_count": 399,
+          "prog_type": 2,
+          "expected_attach_type": 0,
+          "prog_type_name": "kprobe",
+          "attach_type_name": "cgroup_inet_ingress"
+        },
+        "generic_kprobe_override": {
+          "name": "generic_kprobe_override",
+          "section_name": "kprobe/generic_kprobe_override",
+          "insn_count": 21,
+          "prog_type": 2,
+          "expected_attach_type": 0,
+          "prog_type_name": "kprobe",
+          "attach_type_name": "cgroup_inet_ingress"
+        },
+        "generic_fmodret_override": {
+          "name": "generic_fmodret_override",
+          "section_name": "fmod_ret/security_task_prctl",
+          "insn_count": 19,
+          "prog_type": 26,
+          "expected_attach_type": 26,
+          "prog_type_name": "tracing",
+          "attach_type_name": "modify_return"
+        }
+      }
+    },
+    "bpftool_probes": {
+      "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_execve_event.bpf.o": {
+        "ok": false,
+        "pin_dir": "/sys/fs/bpf/tetragon_probe_bpf_execve_event.bpf_3598799",
+        "error": "mkdir: cannot create directory \u2018/sys/fs/bpf/tetragon_probe_bpf_execve_event.bpf_3598799\u2019: Operation not permitted"
+      },
+      "/home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_generic_kprobe.bpf.o": {
+        "ok": false,
+        "pin_dir": "/sys/fs/bpf/tetragon_probe_bpf_generic_kprobe.bpf_3598799",
+        "error": "mkdir: cannot create directory \u2018/sys/fs/bpf/tetragon_probe_bpf_generic_kprobe.bpf_3598799\u2019: Operation not permitted"
+      }
+    }
+  }
+}

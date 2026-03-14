@@ -1,0 +1,736 @@
+{
+  "generated_at": "2026-03-10T20:33:53.710064+00:00",
+  "repo_root": "/home/yunwei37/workspace/bpf-benchmark",
+  "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec",
+  "dummy_packet_path": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/corpus_dummy_packet_64.bin",
+  "dummy_context_path": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/corpus_dummy_context_64.bin",
+  "corpus_source": "expanded build report `/home/yunwei37/workspace/bpf-benchmark/corpus/results/expanded_corpus_build.json`",
+  "repeat": 20,
+  "objects_found": 429,
+  "inventory_failures": [
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___diff_arr_dim.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___diff_arr_dim.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___diff_arr_dim.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___diff_arr_val_sz.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___diff_arr_val_sz.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___diff_arr_val_sz.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___equiv_zero_sz_arr.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___equiv_zero_sz_arr.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___equiv_zero_sz_arr.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_bad_signed_arr_elem_sz.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_bad_signed_arr_elem_sz.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_bad_signed_arr_elem_sz.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_bad_zero_sz_arr.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_bad_zero_sz_arr.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_bad_zero_sz_arr.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_non_array.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_non_array.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_non_array.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_too_shallow.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_too_shallow.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_too_shallow.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_too_small.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_too_small.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_too_small.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_wrong_val_type.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_wrong_val_type.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___err_wrong_val_type.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___fixed_arr.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___fixed_arr.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_arrays___fixed_arr.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields___bit_sz_change.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields___bit_sz_change.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields___bit_sz_change.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields___bitfield_vs_int.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields___bitfield_vs_int.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields___bitfield_vs_int.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields___err_too_big_bitfield.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields___err_too_big_bitfield.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields___err_too_big_bitfield.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields___just_big_enough.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields___just_big_enough.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_bitfields___just_big_enough.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enum64val.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enum64val.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enum64val.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enum64val___diff.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enum64val___diff.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enum64val___diff.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enum64val___err_missing.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enum64val___err_missing.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enum64val___err_missing.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enum64val___val3_missing.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enum64val___val3_missing.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enum64val___val3_missing.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enumval.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enumval.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enumval.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enumval___diff.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enumval___diff.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enumval___diff.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enumval___err_missing.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enumval___err_missing.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enumval___err_missing.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enumval___val3_missing.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enumval___val3_missing.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_enumval___val3_missing.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_existence.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_existence.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_existence.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_existence___minimal.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_existence___minimal.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_existence___minimal.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_existence___wrong_field_defs.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_existence___wrong_field_defs.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_existence___wrong_field_defs.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_flavors.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_flavors.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_flavors.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_flavors__err_wrong_name.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_flavors__err_wrong_name.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_flavors__err_wrong_name.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_ints.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_ints.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_ints.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_ints___bool.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_ints___bool.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_ints___bool.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_ints___reverse_sign.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_ints___reverse_sign.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_ints___reverse_sign.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_misc.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_misc.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_misc.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_mods.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_mods.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_mods.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_mods___mod_swap.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_mods___mod_swap.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_mods___mod_swap.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_mods___typedefs.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_mods___typedefs.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_mods___typedefs.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___anon_embed.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___anon_embed.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___anon_embed.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___dup_compat_types.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___dup_compat_types.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___dup_compat_types.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_array_container.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_array_container.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_array_container.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_array_field.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_array_field.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_array_field.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_dup_incompat_types.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_dup_incompat_types.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_dup_incompat_types.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_missing_container.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_missing_container.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_missing_container.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_missing_field.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_missing_field.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_missing_field.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_nonstruct_container.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_nonstruct_container.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_nonstruct_container.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_partial_match_dups.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_partial_match_dups.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_partial_match_dups.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_too_deep.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_too_deep.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___err_too_deep.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___extra_nesting.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___extra_nesting.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___extra_nesting.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___struct_union_mixup.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___struct_union_mixup.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_nesting___struct_union_mixup.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___diff_enum_def.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___diff_enum_def.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___diff_enum_def.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___diff_func_proto.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___diff_func_proto.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___diff_func_proto.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___diff_ptr_type.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___diff_ptr_type.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___diff_ptr_type.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___err_non_enum.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___err_non_enum.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___err_non_enum.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___err_non_int.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___err_non_int.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___err_non_int.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___err_non_ptr.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___err_non_ptr.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_primitives___err_non_ptr.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_ptr_as_arr.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_ptr_as_arr.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_ptr_as_arr.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_ptr_as_arr___diff_sz.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_ptr_as_arr___diff_sz.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_ptr_as_arr___diff_sz.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_size.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_size.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_size.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_size___diff_offs.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_size___diff_offs.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_size___diff_offs.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_size___diff_sz.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_size___diff_sz.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_size___diff_sz.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_size___err_ambiguous.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_size___err_ambiguous.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_size___err_ambiguous.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___all_missing.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___all_missing.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___all_missing.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___diff.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___diff.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___diff.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___diff_sz.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___diff_sz.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___diff_sz.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___fn_wrong_args.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___fn_wrong_args.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___fn_wrong_args.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___incompat.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___incompat.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_based___incompat.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_id.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_id.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_id.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_id___missing_targets.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_id___missing_targets.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf__core_reloc_type_id___missing_targets.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_data.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_data.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_data.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_bitfields.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_bitfields.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_bitfields.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_multidim.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_multidim.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_multidim.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_namespacing.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_namespacing.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_namespacing.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_ordering.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_ordering.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_ordering.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_packing.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_packing.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_packing.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_padding.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_padding.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_padding.bpf.o"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_syntax.bpf.o",
+      "error": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_syntax.bpf.o (exit=1)",
+      "stderr_tail": "no program found in object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/btf_dump_test_case_syntax.bpf.o"
+    }
+  ],
+  "skipped_non_bpf_artifacts": [],
+  "summary": {
+    "programs_found": 4,
+    "loadable_programs": 1,
+    "baseline_runnable_programs": 1,
+    "recompile_runnable_programs": 1,
+    "paired_measurements": 1,
+    "directive_bearing_loadable_programs": 0,
+    "directive_bearing_paired_programs": 0,
+    "correctness_mismatches": 0,
+    "speedup_geomean": 0.9583333333333334,
+    "speedup_median": 0.9583333333333334,
+    "speedup_min": 0.9583333333333334,
+    "speedup_max": 0.9583333333333334,
+    "family_totals": {
+      "cmov_sites": 0,
+      "wide_sites": 0,
+      "rotate_sites": 0,
+      "lea_sites": 0
+    },
+    "failure_reasons": {
+      "bpf_object__load failed: Permission denied (exit=1)": 2,
+      "bpf_object__load failed: Invalid argument (exit=1)": 1
+    }
+  },
+  "programs": [
+    {
+      "object_path": "corpus/build/libbpf-bootstrap/examples/c/tc.bpf.o",
+      "program_name": "tc_ingress",
+      "section_name": "tc",
+      "insn_count": 18,
+      "program_kind": "tc",
+      "io_mode": "packet",
+      "input_size": 64,
+      "memory_path": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/corpus_dummy_packet_64.bin",
+      "load_compile": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.035131605982314795,
+        "error": null,
+        "stderr_tail": "libbpf: loaded kernel BTF from '/sys/kernel/btf/vmlinux'\nlibbpf: sec 'tc': found 5 CO-RE relocations\nlibbpf: CO-RE relocating [2] struct __sk_buff: found target candidate [15151] struct __sk_buff in [vmlinux]\nlibbpf: prog 'tc_ingress': relo #0: <byte_off> [2] struct __sk_buff.protocol (0:4 @ offset 16)\nlibbpf: prog 'tc_ingress': relo #0: matching candidate #0 <byte_off> [15151] struct __sk_buff.protocol (0:4 @ offset 16)\nlibbpf: prog 'tc_ingress': relo #0: patched insn #0 (LDX/ST/STX) off 16 -> 16\nlibbpf: prog 'tc_ingress': relo #1: <byte_off> [2] struct __sk_buff.data (0:15 @ offset 76)\nlibbpf: prog 'tc_ingress': relo #1: matching candidate #0 <byte_off> [15151] struct __sk_buff.data (0:15 @ offset 76)\nlibbpf: prog 'tc_ingress': relo #1: patched insn #2 (LDX/ST/STX) off 76 -> 76\nlibbpf: prog 'tc_ingress': relo #2: <byte_off> [2] struct __sk_buff.data_end (0:16 @ offset 80)\nlibbpf: prog 'tc_ingress': relo #2: matching candidate #0 <byte_off> [15151] struct __sk_buff.data_end (0:16 @ offset 80)\nlibbpf: prog 'tc_ingress': relo #2: patched insn #3 (LDX/ST/STX) off 80 -> 80\nlibbpf: CO-RE relocating [19] struct iphdr: found target candidate [23765] struct iphdr in [vmlinux]\nlibbpf: prog 'tc_ingress': relo #3: <byte_off> [19] struct iphdr.ttl (0:6 @ offset 8)\nlibbpf: prog 'tc_ingress': relo #3: matching candidate #0 <byte_off> [23765] struct iphdr.ttl (0:6 @ offset 8)\nlibbpf: prog 'tc_ingress': relo #3: patched insn #9 (LDX/ST/STX) off 8 -> 8\nlibbpf: prog 'tc_ingress': relo #4: <byte_off> [19] struct iphdr.tot_len (0:3 @ offset 2)\nlibbpf: prog 'tc_ingress': relo #4: matching candidate #0 <byte_off> [23765] struct iphdr.tot_len (0:3 @ offset 2)\nlibbpf: prog 'tc_ingress': relo #4: patched insn #10 (LDX/ST/STX) off 2 -> 2\nlibbpf: map 'tc.rodata': created successfully, fd=4",
+        "sample": {
+          "compile_ns": 13773462,
+          "exec_ns": 0,
+          "timing_source": "unknown",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "result": 0,
+          "retval": 0,
+          "jited_prog_len": 100,
+          "xlated_prog_len": 144,
+          "code_size": {
+            "bpf_bytecode_bytes": 144,
+            "native_code_bytes": 100,
+            "inflation_ratio": 0.694444
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 40155,
+            "object_open_ns": 97721,
+            "object_load_ns": 13675741
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": false,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": false,
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 0
+          },
+          "recompile": {
+            "requested": false,
+            "mode": "none",
+            "policy_generated": false,
+            "policy_bytes": 0,
+            "syscall_attempted": false,
+            "applied": false,
+            "error": ""
+          }
+        }
+      },
+      "baseline_run": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.05442967201815918,
+        "error": null,
+        "stderr_tail": "libbpf: loaded kernel BTF from '/sys/kernel/btf/vmlinux'\nlibbpf: sec 'tc': found 5 CO-RE relocations\nlibbpf: CO-RE relocating [2] struct __sk_buff: found target candidate [15151] struct __sk_buff in [vmlinux]\nlibbpf: prog 'tc_ingress': relo #0: <byte_off> [2] struct __sk_buff.protocol (0:4 @ offset 16)\nlibbpf: prog 'tc_ingress': relo #0: matching candidate #0 <byte_off> [15151] struct __sk_buff.protocol (0:4 @ offset 16)\nlibbpf: prog 'tc_ingress': relo #0: patched insn #0 (LDX/ST/STX) off 16 -> 16\nlibbpf: prog 'tc_ingress': relo #1: <byte_off> [2] struct __sk_buff.data (0:15 @ offset 76)\nlibbpf: prog 'tc_ingress': relo #1: matching candidate #0 <byte_off> [15151] struct __sk_buff.data (0:15 @ offset 76)\nlibbpf: prog 'tc_ingress': relo #1: patched insn #2 (LDX/ST/STX) off 76 -> 76\nlibbpf: prog 'tc_ingress': relo #2: <byte_off> [2] struct __sk_buff.data_end (0:16 @ offset 80)\nlibbpf: prog 'tc_ingress': relo #2: matching candidate #0 <byte_off> [15151] struct __sk_buff.data_end (0:16 @ offset 80)\nlibbpf: prog 'tc_ingress': relo #2: patched insn #3 (LDX/ST/STX) off 80 -> 80\nlibbpf: CO-RE relocating [19] struct iphdr: found target candidate [23765] struct iphdr in [vmlinux]\nlibbpf: prog 'tc_ingress': relo #3: <byte_off> [19] struct iphdr.ttl (0:6 @ offset 8)\nlibbpf: prog 'tc_ingress': relo #3: matching candidate #0 <byte_off> [23765] struct iphdr.ttl (0:6 @ offset 8)\nlibbpf: prog 'tc_ingress': relo #3: patched insn #9 (LDX/ST/STX) off 8 -> 8\nlibbpf: prog 'tc_ingress': relo #4: <byte_off> [19] struct iphdr.tot_len (0:3 @ offset 2)\nlibbpf: prog 'tc_ingress': relo #4: matching candidate #0 <byte_off> [23765] struct iphdr.tot_len (0:3 @ offset 2)\nlibbpf: prog 'tc_ingress': relo #4: patched insn #10 (LDX/ST/STX) off 2 -> 2\nlibbpf: map 'tc.rodata': created successfully, fd=4",
+        "sample": {
+          "compile_ns": 13766933,
+          "exec_ns": 23,
+          "timing_source": "ktime",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "wall_exec_ns": 447,
+          "exec_cycles": 1648,
+          "tsc_freq_hz": 3686262984,
+          "result": 0,
+          "retval": 0,
+          "jited_prog_len": 100,
+          "xlated_prog_len": 144,
+          "code_size": {
+            "bpf_bytecode_bytes": 144,
+            "native_code_bytes": 100,
+            "inflation_ratio": 0.694444
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 43976,
+            "object_open_ns": 107341,
+            "object_load_ns": 13659592,
+            "packet_prepare_ns": 737,
+            "prog_run_wall_ns": 8992,
+            "result_extract_ns": 35
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": true,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": false,
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 0
+          },
+          "recompile": {
+            "requested": false,
+            "mode": "none",
+            "policy_generated": false,
+            "policy_bytes": 0,
+            "syscall_attempted": false,
+            "applied": false,
+            "error": ""
+          }
+        }
+      },
+      "recompile_run": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.053908805013634264,
+        "error": null,
+        "stderr_tail": "libbpf: prog 'tc_ingress': relo #0: matching candidate #0 <byte_off> [15151] struct __sk_buff.protocol (0:4 @ offset 16)\nlibbpf: prog 'tc_ingress': relo #0: patched insn #0 (LDX/ST/STX) off 16 -> 16\nlibbpf: prog 'tc_ingress': relo #1: <byte_off> [2] struct __sk_buff.data (0:15 @ offset 76)\nlibbpf: prog 'tc_ingress': relo #1: matching candidate #0 <byte_off> [15151] struct __sk_buff.data (0:15 @ offset 76)\nlibbpf: prog 'tc_ingress': relo #1: patched insn #2 (LDX/ST/STX) off 76 -> 76\nlibbpf: prog 'tc_ingress': relo #2: <byte_off> [2] struct __sk_buff.data_end (0:16 @ offset 80)\nlibbpf: prog 'tc_ingress': relo #2: matching candidate #0 <byte_off> [15151] struct __sk_buff.data_end (0:16 @ offset 80)\nlibbpf: prog 'tc_ingress': relo #2: patched insn #3 (LDX/ST/STX) off 80 -> 80\nlibbpf: CO-RE relocating [19] struct iphdr: found target candidate [23765] struct iphdr in [vmlinux]\nlibbpf: prog 'tc_ingress': relo #3: <byte_off> [19] struct iphdr.ttl (0:6 @ offset 8)\nlibbpf: prog 'tc_ingress': relo #3: matching candidate #0 <byte_off> [23765] struct iphdr.ttl (0:6 @ offset 8)\nlibbpf: prog 'tc_ingress': relo #3: patched insn #9 (LDX/ST/STX) off 8 -> 8\nlibbpf: prog 'tc_ingress': relo #4: <byte_off> [19] struct iphdr.tot_len (0:3 @ offset 2)\nlibbpf: prog 'tc_ingress': relo #4: matching candidate #0 <byte_off> [23765] struct iphdr.tot_len (0:3 @ offset 2)\nlibbpf: prog 'tc_ingress': relo #4: patched insn #10 (LDX/ST/STX) off 2 -> 2\nlibbpf: map 'tc.rodata': created successfully, fd=4\nrecompile-cmov: no cmov-select sites found in xlated program (18 insns)\nrecompile-wide: no wide_load sites found in xlated program (18 insns)\nrecompile-rotate: no rotate sites found in xlated program (18 insns)\nrecompile-lea: no addr_calc sites found in xlated program (18 insns)",
+        "sample": {
+          "compile_ns": 13860889,
+          "exec_ns": 24,
+          "timing_source": "ktime",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "wall_exec_ns": 458,
+          "exec_cycles": 1689,
+          "tsc_freq_hz": 3686293355,
+          "result": 0,
+          "retval": 0,
+          "jited_prog_len": 100,
+          "xlated_prog_len": 144,
+          "code_size": {
+            "bpf_bytecode_bytes": 144,
+            "native_code_bytes": 100,
+            "inflation_ratio": 0.694444
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 43084,
+            "object_open_ns": 106829,
+            "object_load_ns": 13754060,
+            "packet_prepare_ns": 323,
+            "prog_run_wall_ns": 9212,
+            "result_extract_ns": 35
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": true,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 0
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v4",
+            "policy_generated": false,
+            "policy_bytes": 0,
+            "syscall_attempted": false,
+            "applied": false,
+            "error": ""
+          }
+        }
+      },
+      "recompile_compile": null,
+      "metadata_source": "recompile_run",
+      "directive_scan": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "correctness": {
+        "comparable": true,
+        "matches": true,
+        "baseline_result": 0,
+        "baseline_retval": 0,
+        "recompile_result": 0,
+        "recompile_retval": 0
+      },
+      "speedup_ratio": 0.9583333333333334
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/async_stack_depth.bpf.o",
+      "program_name": "pseudo_call_check",
+      "section_name": "tc",
+      "insn_count": 56,
+      "program_kind": "tc",
+      "io_mode": "packet",
+      "input_size": 64,
+      "memory_path": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/corpus_dummy_packet_64.bin",
+      "load_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.021151828987058252,
+        "error": "bpf_object__load failed: Permission denied (exit=1)",
+        "stderr_tail": "libbpf: sec '.reltc': relo #0: insn #39 against 'hmap'\nlibbpf: prog 'pseudo_call_check': found map 0 (hmap, sec 5, off 0) for insn #39\nlibbpf: sec '.reltc': relo #1: insn #44 against '.text'\nlibbpf: sec '.reltc': relo #2: insn #46 against '.text'\nlibbpf: sec '.reltc': relo #3: insn #95 against 'hmap'\nlibbpf: prog 'async_call_root_check': found map 0 (hmap, sec 5, off 0) for insn #39\nlibbpf: sec '.reltc': relo #4: insn #100 against '.text'\nlibbpf: object 'async_stack_dep': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: prog 'pseudo_call_check': added 40 insns from sub-prog 'timer_cb'\nlibbpf: prog 'pseudo_call_check': insn #44 relocated, imm 11 points to subprog 'timer_cb' (now at 56 offset)\nlibbpf: prog 'pseudo_call_check': insn #46 relocated, imm 9 points to subprog 'timer_cb' (now at 56 offset)\nlibbpf: map 'hmap': created successfully, fd=4\nlibbpf: prog 'pseudo_call_check': BPF program load failed: -EACCES\nlibbpf: prog 'pseudo_call_check': -- BEGIN PROG LOAD LOG --\ncombined stack size of 2 calls is 544. Too large\nprocessed 136 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 2\n-- END PROG LOAD LOG --\nlibbpf: prog 'pseudo_call_check': failed to load: -EACCES\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/async_stack_depth.bpf.o'\nbpf_object__load failed: Permission denied",
+        "sample": null
+      },
+      "baseline_run": null,
+      "recompile_run": null,
+      "recompile_compile": null,
+      "metadata_source": "recompile_run",
+      "directive_scan": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "correctness": {
+        "comparable": false,
+        "matches": null
+      },
+      "speedup_ratio": null
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/async_stack_depth.bpf.o",
+      "program_name": "async_call_root_check",
+      "section_name": "tc",
+      "insn_count": 54,
+      "program_kind": "tc",
+      "io_mode": "packet",
+      "input_size": 64,
+      "memory_path": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/corpus_dummy_packet_64.bin",
+      "load_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.020371152961160988,
+        "error": "bpf_object__load failed: Permission denied (exit=1)",
+        "stderr_tail": "libbpf: sec '.reltc': relo #1: insn #44 against '.text'\nlibbpf: sec '.reltc': relo #2: insn #46 against '.text'\nlibbpf: sec '.reltc': relo #3: insn #95 against 'hmap'\nlibbpf: prog 'async_call_root_check': found map 0 (hmap, sec 5, off 0) for insn #39\nlibbpf: sec '.reltc': relo #4: insn #100 against '.text'\nlibbpf: object 'async_stack_dep': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: prog 'async_call_root_check': added 48 insns from sub-prog 'bad_timer_cb'\nlibbpf: prog 'async_call_root_check': added 40 insns from sub-prog 'timer_cb'\nlibbpf: prog 'bad_timer_cb': insn #45 relocated, imm 2 points to subprog 'timer_cb' (now at 102 offset)\nlibbpf: prog 'async_call_root_check': insn #44 relocated, imm 9 points to subprog 'bad_timer_cb' (now at 54 offset)\nlibbpf: map 'hmap': created successfully, fd=4\nlibbpf: prog 'pseudo_call_check': skipped loading\nlibbpf: prog 'async_call_root_check': BPF program load failed: -EACCES\nlibbpf: prog 'async_call_root_check': -- BEGIN PROG LOAD LOG --\ncombined stack size of 2 calls is 576. Too large\nprocessed 142 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 1\n-- END PROG LOAD LOG --\nlibbpf: prog 'async_call_root_check': failed to load: -EACCES\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/async_stack_depth.bpf.o'\nbpf_object__load failed: Permission denied",
+        "sample": null
+      },
+      "baseline_run": null,
+      "recompile_run": null,
+      "recompile_compile": null,
+      "metadata_source": "recompile_run",
+      "directive_scan": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "correctness": {
+        "comparable": false,
+        "matches": null
+      },
+      "speedup_ratio": null
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cb_refs.bpf.o",
+      "program_name": "underflow_prog",
+      "section_name": "tc",
+      "insn_count": 19,
+      "program_kind": "tc",
+      "io_mode": "packet",
+      "input_size": 64,
+      "memory_path": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/corpus_dummy_packet_64.bin",
+      "load_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.06020107300719246,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: prog 'leak_prog': found map 0 (array_map, sec 5, off 0) for insn #12\nlibbpf: sec '.rel?tc': relo #6: insn #33 against '.text'\nlibbpf: sec '.rel?tc': relo #7: insn #43 against 'bpf_kfunc_call_test_release'\nlibbpf: prog 'leak_prog': found extern #1 'bpf_kfunc_call_test_release' (sym 15) for insn #24\nlibbpf: sec '.rel?tc': relo #8: insn #51 against 'bpf_kfunc_call_test_acquire'\nlibbpf: prog 'nested_cb': found extern #0 'bpf_kfunc_call_test_acquire' (sym 13) for insn #5\nlibbpf: sec '.rel?tc': relo #9: insn #56 against 'array_map'\nlibbpf: prog 'nested_cb': found map 0 (array_map, sec 5, off 0) for insn #10\nlibbpf: sec '.rel?tc': relo #10: insn #58 against '.text'\nlibbpf: sec '.rel?tc': relo #11: insn #63 against 'bpf_kfunc_call_test_release'\nlibbpf: prog 'nested_cb': found extern #1 'bpf_kfunc_call_test_release' (sym 15) for insn #17\nlibbpf: sec '.rel?tc': relo #12: insn #70 against 'bpf_kfunc_call_test_acquire'\nlibbpf: prog 'non_cb_transfer_ref': found extern #0 'bpf_kfunc_call_test_acquire' (sym 13) for insn #4\nlibbpf: sec '.rel?tc': relo #13: insn #75 against '.text'\nlibbpf: sec '.rel?tc': relo #14: insn #78 against 'bpf_kfunc_call_test_acquire'\nlibbpf: prog 'non_cb_transfer_ref': found extern #0 'bpf_kfunc_call_test_acquire' (sym 13) for insn #12\nlibbpf: object 'cb_refs': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: loaded kernel BTF from '/sys/kernel/btf/vmlinux'\nlibbpf: extern (func ksym) 'bpf_kfunc_call_test_acquire': not found in kernel or module BTFs\nbpf_object__load failed: Invalid argument",
+        "sample": null
+      },
+      "baseline_run": null,
+      "recompile_run": null,
+      "recompile_compile": null,
+      "metadata_source": "recompile_run",
+      "directive_scan": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "correctness": {
+        "comparable": false,
+        "matches": null
+      },
+      "speedup_ratio": null
+    }
+  ]
+}

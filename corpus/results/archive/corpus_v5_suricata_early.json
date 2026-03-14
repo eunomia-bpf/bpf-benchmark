@@ -1,0 +1,478 @@
+{
+  "generated_at": "2026-03-10T22:31:59.117481+00:00",
+  "repo_root": "/home/yunwei37/workspace/bpf-benchmark",
+  "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec",
+  "scanner_binary": "/home/yunwei37/workspace/bpf-benchmark/scanner/build/bpf-jit-scanner",
+  "btf_candidates": [
+    "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux"
+  ],
+  "repeat": 100,
+  "kernel_release": "7.0.0-rc2-g1572a4ddb52b-dirty",
+  "kernel_tree": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux",
+  "kernel_branch": "",
+  "kernel_commit": "",
+  "objects": [
+    {
+      "object_path": "corpus/build/suricata/xdp_filter.bpf.o",
+      "source": "suricata",
+      "discovery": {
+        "ok": true,
+        "duration_seconds": 0.5813041880000003,
+        "programs": [
+          {
+            "name": "xdp_hashfilter",
+            "section_name": "xdp",
+            "insn_count": 334
+          }
+        ],
+        "error": null,
+        "stderr_tail": "",
+        "fallback_section_scan": [
+          {
+            "name": "xdp",
+            "insn_count": 334,
+            "cmov": 1,
+            "wide": 0,
+            "rotate": 0,
+            "lea": 0,
+            "total": 1
+          }
+        ],
+        "fallback_totals": {
+          "cmov": 1,
+          "wide": 0,
+          "rotate": 0,
+          "lea": 0,
+          "total": 1,
+          "insn_count": 334,
+          "exec_section_count": 1
+        }
+      }
+    },
+    {
+      "object_path": "corpus/build/suricata/xdp_lb.bpf.o",
+      "source": "suricata",
+      "discovery": {
+        "ok": true,
+        "duration_seconds": 0.026740999000000265,
+        "programs": [
+          {
+            "name": "xdp_loadfilter",
+            "section_name": "xdp",
+            "insn_count": 410
+          }
+        ],
+        "error": null,
+        "stderr_tail": "",
+        "fallback_section_scan": [
+          {
+            "name": "xdp",
+            "insn_count": 410,
+            "cmov": 1,
+            "wide": 0,
+            "rotate": 0,
+            "lea": 0,
+            "total": 1
+          }
+        ],
+        "fallback_totals": {
+          "cmov": 1,
+          "wide": 0,
+          "rotate": 0,
+          "lea": 0,
+          "total": 1,
+          "insn_count": 410,
+          "exec_section_count": 1
+        }
+      }
+    }
+  ],
+  "programs": [
+    {
+      "object_path": "corpus/build/suricata/xdp_filter.bpf.o",
+      "source": "suricata",
+      "program_name": "xdp_hashfilter",
+      "section_name": "xdp",
+      "insn_count": 334,
+      "perf_capable": true,
+      "io_mode": "packet",
+      "input_size": 64,
+      "memory_path": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/corpus_dummy_packet_64.bin",
+      "scanner_cli": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.015522953000000506,
+        "error": null,
+        "stdout": "Accepted 1 v5 site(s)\n  cmov:   1\n  wide:   0\n  rotate: 0\n  lea:    0\n",
+        "stderr_tail": ""
+      },
+      "scanner_counts": {
+        "cmov_sites": 1,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 1
+      },
+      "baseline_compile": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.06920938499999973,
+        "error": null,
+        "stderr_tail": "libbpf: sec '.relxdp': relo #4: insn #129 against 'tx_peer'\nlibbpf: prog 'xdp_hashfilter': found map 5 (tx_peer, sec 7, off 160) for insn #129\nlibbpf: sec '.relxdp': relo #5: insn #170 against 'flow_table_v6'\nlibbpf: prog 'xdp_hashfilter': found map 1 (flow_table_v6, sec 7, off 32) for insn #170\nlibbpf: sec '.relxdp': relo #6: insn #183 against 'tx_peer_int'\nlibbpf: prog 'xdp_hashfilter': found map 6 (tx_peer_int, sec 7, off 192) for insn #183\nlibbpf: sec '.relxdp': relo #7: insn #248 against 'cpus_available'\nlibbpf: prog 'xdp_hashfilter': found map 3 (cpus_available, sec 7, off 96) for insn #248\nlibbpf: sec '.relxdp': relo #8: insn #323 against 'cpus_available'\nlibbpf: prog 'xdp_hashfilter': found map 3 (cpus_available, sec 7, off 96) for insn #323\nlibbpf: sec '.relxdp': relo #9: insn #331 against 'cpu_map'\nlibbpf: prog 'xdp_hashfilter': found map 2 (cpu_map, sec 7, off 64) for insn #331\nlibbpf: object 'xdp_filter': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'flow_table_v4': created successfully, fd=4\nlibbpf: map 'flow_table_v6': created successfully, fd=5\nlibbpf: map 'cpu_map': created successfully, fd=6\nlibbpf: map 'cpus_available': created successfully, fd=7\nlibbpf: map 'cpus_count': created successfully, fd=8\nlibbpf: map 'tx_peer': created successfully, fd=9\nlibbpf: map 'tx_peer_int': created successfully, fd=10",
+        "sample": {
+          "compile_ns": 43455264,
+          "exec_ns": 0,
+          "timing_source": "unknown",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "result": 0,
+          "retval": 0,
+          "jited_prog_len": 1645,
+          "xlated_prog_len": 3040,
+          "code_size": {
+            "bpf_bytecode_bytes": 3040,
+            "native_code_bytes": 1645,
+            "inflation_ratio": 0.541118
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 2562472,
+            "object_open_ns": 2696270,
+            "object_load_ns": 40758994
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": false,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": false,
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 0
+          },
+          "recompile": {
+            "requested": false,
+            "mode": "none",
+            "policy_generated": false,
+            "policy_bytes": 0,
+            "syscall_attempted": false,
+            "applied": false,
+            "error": ""
+          }
+        },
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "v5_compile": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.07179477800000011,
+        "error": null,
+        "stderr_tail": "libbpf: sec '.relxdp': relo #6: insn #183 against 'tx_peer_int'\nlibbpf: prog 'xdp_hashfilter': found map 6 (tx_peer_int, sec 7, off 192) for insn #183\nlibbpf: sec '.relxdp': relo #7: insn #248 against 'cpus_available'\nlibbpf: prog 'xdp_hashfilter': found map 3 (cpus_available, sec 7, off 96) for insn #248\nlibbpf: sec '.relxdp': relo #8: insn #323 against 'cpus_available'\nlibbpf: prog 'xdp_hashfilter': found map 3 (cpus_available, sec 7, off 96) for insn #323\nlibbpf: sec '.relxdp': relo #9: insn #331 against 'cpu_map'\nlibbpf: prog 'xdp_hashfilter': found map 2 (cpu_map, sec 7, off 64) for insn #331\nlibbpf: object 'xdp_filter': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'flow_table_v4': created successfully, fd=4\nlibbpf: map 'flow_table_v6': created successfully, fd=5\nlibbpf: map 'cpu_map': created successfully, fd=6\nlibbpf: map 'cpus_available': created successfully, fd=7\nlibbpf: map 'cpus_count': created successfully, fd=8\nlibbpf: map 'tx_peer': created successfully, fd=9\nlibbpf: map 'tx_peer_int': created successfully, fd=10\nrecompile-cmov: found 1 cmov sites in xlated program (380 insns)\nrecompile-wide: no wide_load sites found in xlated program (380 insns)\nrecompile-rotate: no rotate sites found in xlated program (380 insns)\nrecompile-lea: no addr_calc sites found in xlated program (380 insns)",
+        "sample": {
+          "compile_ns": 45773223,
+          "exec_ns": 0,
+          "timing_source": "unknown",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "result": 0,
+          "retval": 0,
+          "jited_prog_len": 1651,
+          "xlated_prog_len": 3040,
+          "code_size": {
+            "bpf_bytecode_bytes": 3040,
+            "native_code_bytes": 1651,
+            "inflation_ratio": 0.543092
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 810351,
+            "object_open_ns": 2233350,
+            "object_load_ns": 43492224
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": false,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 1,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 1
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v5",
+            "policy_generated": true,
+            "policy_bytes": 164,
+            "syscall_attempted": true,
+            "applied": true,
+            "error": ""
+          }
+        },
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "baseline_run": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.1072835990000005,
+        "error": null,
+        "stderr_tail": "libbpf: sec '.relxdp': relo #4: insn #129 against 'tx_peer'\nlibbpf: prog 'xdp_hashfilter': found map 5 (tx_peer, sec 7, off 160) for insn #129\nlibbpf: sec '.relxdp': relo #5: insn #170 against 'flow_table_v6'\nlibbpf: prog 'xdp_hashfilter': found map 1 (flow_table_v6, sec 7, off 32) for insn #170\nlibbpf: sec '.relxdp': relo #6: insn #183 against 'tx_peer_int'\nlibbpf: prog 'xdp_hashfilter': found map 6 (tx_peer_int, sec 7, off 192) for insn #183\nlibbpf: sec '.relxdp': relo #7: insn #248 against 'cpus_available'\nlibbpf: prog 'xdp_hashfilter': found map 3 (cpus_available, sec 7, off 96) for insn #248\nlibbpf: sec '.relxdp': relo #8: insn #323 against 'cpus_available'\nlibbpf: prog 'xdp_hashfilter': found map 3 (cpus_available, sec 7, off 96) for insn #323\nlibbpf: sec '.relxdp': relo #9: insn #331 against 'cpu_map'\nlibbpf: prog 'xdp_hashfilter': found map 2 (cpu_map, sec 7, off 64) for insn #331\nlibbpf: object 'xdp_filter': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'flow_table_v4': created successfully, fd=4\nlibbpf: map 'flow_table_v6': created successfully, fd=5\nlibbpf: map 'cpu_map': created successfully, fd=6\nlibbpf: map 'cpus_available': created successfully, fd=7\nlibbpf: map 'cpus_count': created successfully, fd=8\nlibbpf: map 'tx_peer': created successfully, fd=9\nlibbpf: map 'tx_peer_int': created successfully, fd=10",
+        "sample": {
+          "compile_ns": 44922199,
+          "exec_ns": 12,
+          "timing_source": "ktime",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "wall_exec_ns": 160004,
+          "exec_cycles": 589806,
+          "tsc_freq_hz": 3686207099,
+          "result": 0,
+          "retval": 2,
+          "jited_prog_len": 1645,
+          "xlated_prog_len": 3040,
+          "code_size": {
+            "bpf_bytecode_bytes": 3040,
+            "native_code_bytes": 1645,
+            "inflation_ratio": 0.541118
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 857338,
+            "object_open_ns": 2512556,
+            "object_load_ns": 42409643,
+            "packet_prepare_ns": 1467,
+            "prog_run_wall_ns": 16000462,
+            "result_extract_ns": 96
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": true,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": false,
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 0
+          },
+          "recompile": {
+            "requested": false,
+            "mode": "none",
+            "policy_generated": false,
+            "policy_bytes": 0,
+            "syscall_attempted": false,
+            "applied": false,
+            "error": ""
+          }
+        },
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "v5_run": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.10553378300000027,
+        "error": null,
+        "stderr_tail": "libbpf: sec '.relxdp': relo #6: insn #183 against 'tx_peer_int'\nlibbpf: prog 'xdp_hashfilter': found map 6 (tx_peer_int, sec 7, off 192) for insn #183\nlibbpf: sec '.relxdp': relo #7: insn #248 against 'cpus_available'\nlibbpf: prog 'xdp_hashfilter': found map 3 (cpus_available, sec 7, off 96) for insn #248\nlibbpf: sec '.relxdp': relo #8: insn #323 against 'cpus_available'\nlibbpf: prog 'xdp_hashfilter': found map 3 (cpus_available, sec 7, off 96) for insn #323\nlibbpf: sec '.relxdp': relo #9: insn #331 against 'cpu_map'\nlibbpf: prog 'xdp_hashfilter': found map 2 (cpu_map, sec 7, off 64) for insn #331\nlibbpf: object 'xdp_filter': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'flow_table_v4': created successfully, fd=4\nlibbpf: map 'flow_table_v6': created successfully, fd=5\nlibbpf: map 'cpu_map': created successfully, fd=6\nlibbpf: map 'cpus_available': created successfully, fd=7\nlibbpf: map 'cpus_count': created successfully, fd=8\nlibbpf: map 'tx_peer': created successfully, fd=9\nlibbpf: map 'tx_peer_int': created successfully, fd=10\nrecompile-cmov: found 1 cmov sites in xlated program (380 insns)\nrecompile-wide: no wide_load sites found in xlated program (380 insns)\nrecompile-rotate: no rotate sites found in xlated program (380 insns)\nrecompile-lea: no addr_calc sites found in xlated program (380 insns)",
+        "sample": {
+          "compile_ns": 43378239,
+          "exec_ns": 10,
+          "timing_source": "ktime",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "wall_exec_ns": 142607,
+          "exec_cycles": 525686,
+          "tsc_freq_hz": 3686266103,
+          "result": 0,
+          "retval": 2,
+          "jited_prog_len": 1651,
+          "xlated_prog_len": 3040,
+          "code_size": {
+            "bpf_bytecode_bytes": 3040,
+            "native_code_bytes": 1651,
+            "inflation_ratio": 0.543092
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 1474943,
+            "object_open_ns": 2619178,
+            "object_load_ns": 40712995,
+            "packet_prepare_ns": 338,
+            "prog_run_wall_ns": 14260351,
+            "result_extract_ns": 44
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": true,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 1,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 1
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v5",
+            "policy_generated": true,
+            "policy_bytes": 164,
+            "syscall_attempted": true,
+            "applied": true,
+            "error": ""
+          }
+        },
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "v5_compile_applied": true,
+      "v5_run_applied": true,
+      "size_ratio": 0.9963658388855239,
+      "size_delta_pct": 0.364741641337386,
+      "speedup_ratio": 1.2
+    },
+    {
+      "object_path": "corpus/build/suricata/xdp_lb.bpf.o",
+      "source": "suricata",
+      "program_name": "xdp_loadfilter",
+      "section_name": "xdp",
+      "insn_count": 410,
+      "perf_capable": true,
+      "io_mode": "packet",
+      "input_size": 64,
+      "memory_path": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/corpus_dummy_packet_64.bin",
+      "scanner_cli": null,
+      "scanner_counts": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "baseline_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.029748104000000275,
+        "error": "bpf_object__load failed: Argument list too long (exit=1)",
+        "stderr_tail": "libbpf: prog 'xdp_loadfilter': found map 2 (cpus_count, sec 7, off 64) for insn #97\nlibbpf: sec '.relxdp': relo #1: insn #156 against 'cpus_available'\nlibbpf: prog 'xdp_loadfilter': found map 1 (cpus_available, sec 7, off 32) for insn #156\nlibbpf: sec '.relxdp': relo #2: insn #167 against 'cpus_count'\nlibbpf: prog 'xdp_loadfilter': found map 2 (cpus_count, sec 7, off 64) for insn #167\nlibbpf: sec '.relxdp': relo #3: insn #226 against 'cpus_available'\nlibbpf: prog 'xdp_loadfilter': found map 1 (cpus_available, sec 7, off 32) for insn #226\nlibbpf: sec '.relxdp': relo #4: insn #240 against 'cpus_count'\nlibbpf: prog 'xdp_loadfilter': found map 2 (cpus_count, sec 7, off 64) for insn #240\nlibbpf: sec '.relxdp': relo #5: insn #311 against 'cpus_available'\nlibbpf: prog 'xdp_loadfilter': found map 1 (cpus_available, sec 7, off 32) for insn #311\nlibbpf: sec '.relxdp': relo #6: insn #326 against 'cpus_count'\nlibbpf: prog 'xdp_loadfilter': found map 2 (cpus_count, sec 7, off 64) for insn #326\nlibbpf: sec '.relxdp': relo #7: insn #397 against 'cpus_available'\nlibbpf: prog 'xdp_loadfilter': found map 1 (cpus_available, sec 7, off 32) for insn #397\nlibbpf: sec '.relxdp': relo #8: insn #405 against 'cpu_map'\nlibbpf: prog 'xdp_loadfilter': found map 0 (cpu_map, sec 7, off 0) for insn #405\nlibbpf: object 'xdp_lb': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'cpu_map': failed to create: -E2BIG\nbpf_object__load failed: Argument list too long",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Argument list too long (exit=1)"
+          }
+        ]
+      },
+      "v5_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.023970099000000467,
+        "error": "bpf_object__load failed: Argument list too long (exit=1)",
+        "stderr_tail": "libbpf: prog 'xdp_loadfilter': found map 2 (cpus_count, sec 7, off 64) for insn #97\nlibbpf: sec '.relxdp': relo #1: insn #156 against 'cpus_available'\nlibbpf: prog 'xdp_loadfilter': found map 1 (cpus_available, sec 7, off 32) for insn #156\nlibbpf: sec '.relxdp': relo #2: insn #167 against 'cpus_count'\nlibbpf: prog 'xdp_loadfilter': found map 2 (cpus_count, sec 7, off 64) for insn #167\nlibbpf: sec '.relxdp': relo #3: insn #226 against 'cpus_available'\nlibbpf: prog 'xdp_loadfilter': found map 1 (cpus_available, sec 7, off 32) for insn #226\nlibbpf: sec '.relxdp': relo #4: insn #240 against 'cpus_count'\nlibbpf: prog 'xdp_loadfilter': found map 2 (cpus_count, sec 7, off 64) for insn #240\nlibbpf: sec '.relxdp': relo #5: insn #311 against 'cpus_available'\nlibbpf: prog 'xdp_loadfilter': found map 1 (cpus_available, sec 7, off 32) for insn #311\nlibbpf: sec '.relxdp': relo #6: insn #326 against 'cpus_count'\nlibbpf: prog 'xdp_loadfilter': found map 2 (cpus_count, sec 7, off 64) for insn #326\nlibbpf: sec '.relxdp': relo #7: insn #397 against 'cpus_available'\nlibbpf: prog 'xdp_loadfilter': found map 1 (cpus_available, sec 7, off 32) for insn #397\nlibbpf: sec '.relxdp': relo #8: insn #405 against 'cpu_map'\nlibbpf: prog 'xdp_loadfilter': found map 0 (cpu_map, sec 7, off 0) for insn #405\nlibbpf: object 'xdp_lb': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'cpu_map': failed to create: -E2BIG\nbpf_object__load failed: Argument list too long",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Argument list too long (exit=1)"
+          }
+        ]
+      },
+      "baseline_run": null,
+      "v5_run": null,
+      "v5_compile_applied": false,
+      "v5_run_applied": false,
+      "size_ratio": null,
+      "size_delta_pct": null,
+      "speedup_ratio": null
+    }
+  ],
+  "summary": {
+    "objects_attempted": 2,
+    "objects_discovered": 2,
+    "objects_with_discovery_failures": 0,
+    "programs_attempted": 2,
+    "perf_capable_targets": 2,
+    "compile_only_targets": 0,
+    "baseline_compile_successes": 1,
+    "v5_compile_successes": 1,
+    "scanner_successes": 1,
+    "framework_detected_programs": 1,
+    "framework_recompile_applied_programs": 1,
+    "framework_recompile_failures": 0,
+    "compile_pairs": 1,
+    "measured_pairs": 1,
+    "speedup_geomean": 1.2,
+    "speedup_median": 1.2,
+    "speedup_min": 1.2,
+    "speedup_max": 1.2,
+    "code_size_ratio_geomean": 0.9963658388855239,
+    "code_size_delta_median_pct": 0.364741641337386,
+    "code_size_delta_min_pct": 0.364741641337386,
+    "code_size_delta_max_pct": 0.364741641337386,
+    "family_totals": {
+      "cmov_sites": 1,
+      "wide_sites": 0,
+      "rotate_sites": 0,
+      "lea_sites": 0
+    },
+    "failure_reasons": {
+      "bpf_object__load failed: Argument list too long (exit=1)": 1
+    },
+    "recompile_failure_reasons": {}
+  }
+}

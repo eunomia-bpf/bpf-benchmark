@@ -8,3 +8,8 @@ results/*
 !results/*_authoritative_*.json
 !results/*_smoke_*.json
 !results/*.latest.json
+!results/archive/
+results/archive/*
+!results/archive/*_authoritative_*.json
+!results/archive/*_smoke_*.json
+!results/archive/*.json

@@ -1,0 +1,148 @@
+{
+  "generated_at": "2026-03-10T22:04:52.695226+00:00",
+  "kernel_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux",
+  "repeat": 100,
+  "iterations": 1,
+  "notes": [],
+  "summary": {
+    "log2_fold": {
+      "baseline": {
+        "exec_ns_values": [
+          523
+        ],
+        "exec_ns": 523,
+        "jited_prog_len_values": [
+          648
+        ],
+        "jited_prog_len": 648,
+        "directive_scan": {
+          "performed": false,
+          "cmov_sites": 0,
+          "wide_sites": 0,
+          "rotate_sites": 0,
+          "lea_sites": 0,
+          "total_sites": 0
+        },
+        "recompile": {
+          "requested": false,
+          "mode": "none",
+          "policy_generated": false,
+          "policy_bytes": 0,
+          "syscall_attempted": false,
+          "applied": false,
+          "error": ""
+        }
+      },
+      "cmov": {
+        "exec_ns_values": [
+          741
+        ],
+        "exec_ns": 741,
+        "jited_prog_len_values": [
+          682
+        ],
+        "jited_prog_len": 682,
+        "directive_scan": {
+          "performed": true,
+          "cmov_sites": 6,
+          "wide_sites": 0,
+          "rotate_sites": 0,
+          "lea_sites": 0,
+          "total_sites": 6
+        },
+        "recompile": {
+          "requested": true,
+          "mode": "auto-scan-v5",
+          "policy_generated": true,
+          "policy_bytes": 824,
+          "syscall_attempted": true,
+          "applied": true,
+          "error": ""
+        }
+      },
+      "revert": {
+        "exec_ns_values": [
+          627
+        ],
+        "exec_ns": 627,
+        "jited_prog_len_values": [
+          648
+        ],
+        "jited_prog_len": 648,
+        "directive_scan": {
+          "performed": false,
+          "cmov_sites": 0,
+          "wide_sites": 0,
+          "rotate_sites": 0,
+          "lea_sites": 0,
+          "total_sites": 0
+        },
+        "recompile": {
+          "requested": false,
+          "mode": "none",
+          "policy_generated": false,
+          "policy_bytes": 0,
+          "syscall_attempted": false,
+          "applied": false,
+          "error": ""
+        }
+      }
+    },
+    "rotate64_hash": {
+      "baseline": {
+        "exec_ns_values": [
+          85
+        ],
+        "exec_ns": 85,
+        "jited_prog_len_values": [
+          3559
+        ],
+        "jited_prog_len": 3559,
+        "directive_scan": {
+          "performed": false,
+          "cmov_sites": 0,
+          "wide_sites": 0,
+          "rotate_sites": 0,
+          "lea_sites": 0,
+          "total_sites": 0
+        },
+        "recompile": {
+          "requested": false,
+          "mode": "none",
+          "policy_generated": false,
+          "policy_bytes": 0,
+          "syscall_attempted": false,
+          "applied": false,
+          "error": ""
+        }
+      },
+      "rotate": {
+        "exec_ns_values": [
+          123
+        ],
+        "exec_ns": 123,
+        "jited_prog_len_values": [
+          2313
+        ],
+        "jited_prog_len": 2313,
+        "directive_scan": {
+          "performed": true,
+          "cmov_sites": 0,
+          "wide_sites": 8,
+          "rotate_sites": 115,
+          "lea_sites": 0,
+          "total_sites": 123
+        },
+        "recompile": {
+          "requested": true,
+          "mode": "auto-scan-v5",
+          "policy_generated": true,
+          "policy_bytes": 22660,
+          "syscall_attempted": true,
+          "applied": true,
+          "error": ""
+        }
+      }
+    }
+  }
+}

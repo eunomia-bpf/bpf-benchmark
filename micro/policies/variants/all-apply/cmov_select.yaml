@@ -1,0 +1,10 @@
+# Regenerated from HEAD version 2 policy semantics against a live framework-kernel manifest.
+# Eligible live sites: cmov=1, rotate=4, wide=6
+# Selected live sites: cmov=1
+
+version: 3
+program: 'cmov_select_xdp'
+sites:
+  - insn: 530
+    family: cmov
+    pattern_kind: 'cond-select-64'

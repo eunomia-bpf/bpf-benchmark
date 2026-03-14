@@ -1,0 +1,1466 @@
+{
+  "generated_at": "2026-03-10T22:33:55.460830+00:00",
+  "repo_root": "/home/yunwei37/workspace/bpf-benchmark",
+  "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec",
+  "scanner_binary": "/home/yunwei37/workspace/bpf-benchmark/scanner/build/bpf-jit-scanner",
+  "btf_candidates": [
+    "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux"
+  ],
+  "repeat": 100,
+  "kernel_release": "7.0.0-rc2-g1572a4ddb52b-dirty",
+  "kernel_tree": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux",
+  "kernel_branch": "",
+  "kernel_commit": "",
+  "objects": [
+    {
+      "object_path": "corpus/build/loxilb/llb_ebpf_emain.bpf.o",
+      "source": "loxilb",
+      "discovery": {
+        "ok": true,
+        "duration_seconds": 0.5519617830000003,
+        "programs": [
+          {
+            "name": "tc_packet_func_fast",
+            "section_name": "tc_packet_hook0",
+            "insn_count": 7237
+          },
+          {
+            "name": "tc_packet_func",
+            "section_name": "tc_packet_hook1",
+            "insn_count": 7290
+          },
+          {
+            "name": "tc_packet_func_slow",
+            "section_name": "tc_packet_hook2",
+            "insn_count": 17030
+          },
+          {
+            "name": "tc_packet_func_fw",
+            "section_name": "tc_packet_hook3",
+            "insn_count": 678
+          },
+          {
+            "name": "tc_csum_func1",
+            "section_name": "tc_packet_hook4",
+            "insn_count": 404
+          },
+          {
+            "name": "tc_csum_func2",
+            "section_name": "tc_packet_hook5",
+            "insn_count": 404
+          },
+          {
+            "name": "tc_slow_unp_func",
+            "section_name": "tc_packet_hook6",
+            "insn_count": 4171
+          },
+          {
+            "name": "tc_packet_func_masq",
+            "section_name": "tc_packet_hook7",
+            "insn_count": 549
+          }
+        ],
+        "error": null,
+        "stderr_tail": "",
+        "fallback_section_scan": [
+          {
+            "name": ".text",
+            "insn_count": 175,
+            "cmov": 1,
+            "wide": 0,
+            "rotate": 0,
+            "lea": 0,
+            "total": 1
+          },
+          {
+            "name": "tc_packet_hook0",
+            "insn_count": 7237,
+            "cmov": 6,
+            "wide": 83,
+            "rotate": 0,
+            "lea": 0,
+            "total": 89
+          },
+          {
+            "name": "tc_packet_hook1",
+            "insn_count": 7290,
+            "cmov": 6,
+            "wide": 83,
+            "rotate": 0,
+            "lea": 0,
+            "total": 89
+          },
+          {
+            "name": "tc_packet_hook2",
+            "insn_count": 17030,
+            "cmov": 28,
+            "wide": 472,
+            "rotate": 0,
+            "lea": 0,
+            "total": 500
+          },
+          {
+            "name": "tc_packet_hook3",
+            "insn_count": 678,
+            "cmov": 2,
+            "wide": 19,
+            "rotate": 0,
+            "lea": 0,
+            "total": 21
+          },
+          {
+            "name": "tc_packet_hook4",
+            "insn_count": 404,
+            "cmov": 0,
+            "wide": 13,
+            "rotate": 0,
+            "lea": 0,
+            "total": 13
+          },
+          {
+            "name": "tc_packet_hook5",
+            "insn_count": 404,
+            "cmov": 0,
+            "wide": 13,
+            "rotate": 0,
+            "lea": 0,
+            "total": 13
+          },
+          {
+            "name": "tc_packet_hook6",
+            "insn_count": 4171,
+            "cmov": 0,
+            "wide": 175,
+            "rotate": 0,
+            "lea": 0,
+            "total": 175
+          },
+          {
+            "name": "tc_packet_hook7",
+            "insn_count": 549,
+            "cmov": 6,
+            "wide": 5,
+            "rotate": 0,
+            "lea": 0,
+            "total": 11
+          }
+        ],
+        "fallback_totals": {
+          "cmov": 49,
+          "wide": 863,
+          "rotate": 0,
+          "lea": 0,
+          "total": 912,
+          "insn_count": 37938,
+          "exec_section_count": 9
+        }
+      }
+    },
+    {
+      "object_path": "corpus/build/loxilb/llb_ebpf_main.bpf.o",
+      "source": "loxilb",
+      "discovery": {
+        "ok": true,
+        "duration_seconds": 0.15957384300000044,
+        "programs": [
+          {
+            "name": "tc_packet_func_fast",
+            "section_name": "tc_packet_hook0",
+            "insn_count": 7239
+          },
+          {
+            "name": "tc_packet_func",
+            "section_name": "tc_packet_hook1",
+            "insn_count": 7290
+          },
+          {
+            "name": "tc_packet_func_slow",
+            "section_name": "tc_packet_hook2",
+            "insn_count": 17030
+          },
+          {
+            "name": "tc_packet_func_fw",
+            "section_name": "tc_packet_hook3",
+            "insn_count": 678
+          },
+          {
+            "name": "tc_csum_func1",
+            "section_name": "tc_packet_hook4",
+            "insn_count": 404
+          },
+          {
+            "name": "tc_csum_func2",
+            "section_name": "tc_packet_hook5",
+            "insn_count": 404
+          },
+          {
+            "name": "tc_slow_unp_func",
+            "section_name": "tc_packet_hook6",
+            "insn_count": 4171
+          },
+          {
+            "name": "tc_packet_func_masq",
+            "section_name": "tc_packet_hook7",
+            "insn_count": 549
+          }
+        ],
+        "error": null,
+        "stderr_tail": "",
+        "fallback_section_scan": [
+          {
+            "name": ".text",
+            "insn_count": 130,
+            "cmov": 1,
+            "wide": 0,
+            "rotate": 0,
+            "lea": 0,
+            "total": 1
+          },
+          {
+            "name": "tc_packet_hook0",
+            "insn_count": 7239,
+            "cmov": 6,
+            "wide": 83,
+            "rotate": 0,
+            "lea": 0,
+            "total": 89
+          },
+          {
+            "name": "tc_packet_hook1",
+            "insn_count": 7290,
+            "cmov": 6,
+            "wide": 83,
+            "rotate": 0,
+            "lea": 0,
+            "total": 89
+          },
+          {
+            "name": "tc_packet_hook2",
+            "insn_count": 17030,
+            "cmov": 28,
+            "wide": 472,
+            "rotate": 0,
+            "lea": 0,
+            "total": 500
+          },
+          {
+            "name": "tc_packet_hook3",
+            "insn_count": 678,
+            "cmov": 2,
+            "wide": 19,
+            "rotate": 0,
+            "lea": 0,
+            "total": 21
+          },
+          {
+            "name": "tc_packet_hook4",
+            "insn_count": 404,
+            "cmov": 0,
+            "wide": 13,
+            "rotate": 0,
+            "lea": 0,
+            "total": 13
+          },
+          {
+            "name": "tc_packet_hook5",
+            "insn_count": 404,
+            "cmov": 0,
+            "wide": 13,
+            "rotate": 0,
+            "lea": 0,
+            "total": 13
+          },
+          {
+            "name": "tc_packet_hook6",
+            "insn_count": 4171,
+            "cmov": 0,
+            "wide": 175,
+            "rotate": 0,
+            "lea": 0,
+            "total": 175
+          },
+          {
+            "name": "tc_packet_hook7",
+            "insn_count": 549,
+            "cmov": 6,
+            "wide": 5,
+            "rotate": 0,
+            "lea": 0,
+            "total": 11
+          }
+        ],
+        "fallback_totals": {
+          "cmov": 49,
+          "wide": 863,
+          "rotate": 0,
+          "lea": 0,
+          "total": 912,
+          "insn_count": 37895,
+          "exec_section_count": 9
+        }
+      }
+    },
+    {
+      "object_path": "corpus/build/loxilb/llb_xdp_main.bpf.o",
+      "source": "loxilb",
+      "discovery": {
+        "ok": true,
+        "duration_seconds": 0.027714553999999225,
+        "programs": [
+          {
+            "name": "xdp_packet_func",
+            "section_name": "xdp_packet_hook",
+            "insn_count": 1784
+          },
+          {
+            "name": "xdp_pass_func",
+            "section_name": "xdp_pass",
+            "insn_count": 2
+          }
+        ],
+        "error": null,
+        "stderr_tail": "",
+        "fallback_section_scan": [
+          {
+            "name": "xdp_packet_hook",
+            "insn_count": 1784,
+            "cmov": 0,
+            "wide": 3,
+            "rotate": 0,
+            "lea": 0,
+            "total": 3
+          },
+          {
+            "name": "xdp_pass",
+            "insn_count": 2,
+            "cmov": 0,
+            "wide": 0,
+            "rotate": 0,
+            "lea": 0,
+            "total": 0
+          }
+        ],
+        "fallback_totals": {
+          "cmov": 0,
+          "wide": 3,
+          "rotate": 0,
+          "lea": 0,
+          "total": 3,
+          "insn_count": 1786,
+          "exec_section_count": 2
+        }
+      }
+    }
+  ],
+  "programs": [
+    {
+      "object_path": "corpus/build/loxilb/llb_ebpf_emain.bpf.o",
+      "source": "loxilb",
+      "program_name": "tc_packet_func_fast",
+      "section_name": "tc_packet_hook0",
+      "insn_count": 7237,
+      "perf_capable": false,
+      "io_mode": "context",
+      "input_size": 0,
+      "memory_path": null,
+      "scanner_cli": null,
+      "scanner_counts": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "baseline_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.7363456379999995,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'sess_v4_stats_map': created successfully, fd=32\nlibbpf: map 'fc_v4_map': created successfully, fd=33\nlibbpf: map 'fc_v4_stats_map': created successfully, fd=34\nlibbpf: map 'fw_v4_map': created successfully, fd=35\nlibbpf: map 'fw_stats_map': created successfully, fd=36\nlibbpf: map 'fw_v6_map': created successfully, fd=37\nlibbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': missing BPF prog type, check ELF section name 'tc_packet_hook0'\nlibbpf: prog 'tc_packet_func_fast': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_emain.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "v5_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.4639932689999995,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'sess_v4_stats_map': created successfully, fd=32\nlibbpf: map 'fc_v4_map': created successfully, fd=33\nlibbpf: map 'fc_v4_stats_map': created successfully, fd=34\nlibbpf: map 'fw_v4_map': created successfully, fd=35\nlibbpf: map 'fw_stats_map': created successfully, fd=36\nlibbpf: map 'fw_v6_map': created successfully, fd=37\nlibbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': missing BPF prog type, check ELF section name 'tc_packet_hook0'\nlibbpf: prog 'tc_packet_func_fast': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_emain.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "baseline_run": null,
+      "v5_run": null,
+      "v5_compile_applied": false,
+      "v5_run_applied": false,
+      "size_ratio": null,
+      "size_delta_pct": null,
+      "speedup_ratio": null
+    },
+    {
+      "object_path": "corpus/build/loxilb/llb_ebpf_emain.bpf.o",
+      "source": "loxilb",
+      "program_name": "tc_packet_func",
+      "section_name": "tc_packet_hook1",
+      "insn_count": 7290,
+      "perf_capable": false,
+      "io_mode": "context",
+      "input_size": 0,
+      "memory_path": null,
+      "scanner_cli": null,
+      "scanner_counts": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "baseline_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.36777628900000003,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'fc_v4_map': created successfully, fd=33\nlibbpf: map 'fc_v4_stats_map': created successfully, fd=34\nlibbpf: map 'fw_v4_map': created successfully, fd=35\nlibbpf: map 'fw_stats_map': created successfully, fd=36\nlibbpf: map 'fw_v6_map': created successfully, fd=37\nlibbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': skipped loading\nlibbpf: prog 'tc_packet_func': missing BPF prog type, check ELF section name 'tc_packet_hook1'\nlibbpf: prog 'tc_packet_func': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_emain.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "v5_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.40216029299999967,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'fc_v4_map': created successfully, fd=33\nlibbpf: map 'fc_v4_stats_map': created successfully, fd=34\nlibbpf: map 'fw_v4_map': created successfully, fd=35\nlibbpf: map 'fw_stats_map': created successfully, fd=36\nlibbpf: map 'fw_v6_map': created successfully, fd=37\nlibbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': skipped loading\nlibbpf: prog 'tc_packet_func': missing BPF prog type, check ELF section name 'tc_packet_hook1'\nlibbpf: prog 'tc_packet_func': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_emain.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "baseline_run": null,
+      "v5_run": null,
+      "v5_compile_applied": false,
+      "v5_run_applied": false,
+      "size_ratio": null,
+      "size_delta_pct": null,
+      "speedup_ratio": null
+    },
+    {
+      "object_path": "corpus/build/loxilb/llb_ebpf_emain.bpf.o",
+      "source": "loxilb",
+      "program_name": "tc_packet_func_slow",
+      "section_name": "tc_packet_hook2",
+      "insn_count": 17030,
+      "perf_capable": false,
+      "io_mode": "context",
+      "input_size": 0,
+      "memory_path": null,
+      "scanner_cli": null,
+      "scanner_counts": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "baseline_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.40441181699999973,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'fc_v4_stats_map': created successfully, fd=34\nlibbpf: map 'fw_v4_map': created successfully, fd=35\nlibbpf: map 'fw_stats_map': created successfully, fd=36\nlibbpf: map 'fw_v6_map': created successfully, fd=37\nlibbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': skipped loading\nlibbpf: prog 'tc_packet_func': skipped loading\nlibbpf: prog 'tc_packet_func_slow': missing BPF prog type, check ELF section name 'tc_packet_hook2'\nlibbpf: prog 'tc_packet_func_slow': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_emain.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "v5_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.46940104000000016,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'fc_v4_stats_map': created successfully, fd=34\nlibbpf: map 'fw_v4_map': created successfully, fd=35\nlibbpf: map 'fw_stats_map': created successfully, fd=36\nlibbpf: map 'fw_v6_map': created successfully, fd=37\nlibbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': skipped loading\nlibbpf: prog 'tc_packet_func': skipped loading\nlibbpf: prog 'tc_packet_func_slow': missing BPF prog type, check ELF section name 'tc_packet_hook2'\nlibbpf: prog 'tc_packet_func_slow': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_emain.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "baseline_run": null,
+      "v5_run": null,
+      "v5_compile_applied": false,
+      "v5_run_applied": false,
+      "size_ratio": null,
+      "size_delta_pct": null,
+      "speedup_ratio": null
+    },
+    {
+      "object_path": "corpus/build/loxilb/llb_ebpf_emain.bpf.o",
+      "source": "loxilb",
+      "program_name": "tc_packet_func_fw",
+      "section_name": "tc_packet_hook3",
+      "insn_count": 678,
+      "perf_capable": false,
+      "io_mode": "context",
+      "input_size": 0,
+      "memory_path": null,
+      "scanner_cli": null,
+      "scanner_counts": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "baseline_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.3878480959999999,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'fw_v4_map': created successfully, fd=35\nlibbpf: map 'fw_stats_map': created successfully, fd=36\nlibbpf: map 'fw_v6_map': created successfully, fd=37\nlibbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': skipped loading\nlibbpf: prog 'tc_packet_func': skipped loading\nlibbpf: prog 'tc_packet_func_slow': skipped loading\nlibbpf: prog 'tc_packet_func_fw': missing BPF prog type, check ELF section name 'tc_packet_hook3'\nlibbpf: prog 'tc_packet_func_fw': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_emain.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "v5_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.41198851800000025,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'fw_v4_map': created successfully, fd=35\nlibbpf: map 'fw_stats_map': created successfully, fd=36\nlibbpf: map 'fw_v6_map': created successfully, fd=37\nlibbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': skipped loading\nlibbpf: prog 'tc_packet_func': skipped loading\nlibbpf: prog 'tc_packet_func_slow': skipped loading\nlibbpf: prog 'tc_packet_func_fw': missing BPF prog type, check ELF section name 'tc_packet_hook3'\nlibbpf: prog 'tc_packet_func_fw': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_emain.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "baseline_run": null,
+      "v5_run": null,
+      "v5_compile_applied": false,
+      "v5_run_applied": false,
+      "size_ratio": null,
+      "size_delta_pct": null,
+      "speedup_ratio": null
+    },
+    {
+      "object_path": "corpus/build/loxilb/llb_ebpf_emain.bpf.o",
+      "source": "loxilb",
+      "program_name": "tc_csum_func1",
+      "section_name": "tc_packet_hook4",
+      "insn_count": 404,
+      "perf_capable": false,
+      "io_mode": "context",
+      "input_size": 0,
+      "memory_path": null,
+      "scanner_cli": null,
+      "scanner_counts": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "baseline_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.4095565300000006,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'fw_stats_map': created successfully, fd=36\nlibbpf: map 'fw_v6_map': created successfully, fd=37\nlibbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': skipped loading\nlibbpf: prog 'tc_packet_func': skipped loading\nlibbpf: prog 'tc_packet_func_slow': skipped loading\nlibbpf: prog 'tc_packet_func_fw': skipped loading\nlibbpf: prog 'tc_csum_func1': missing BPF prog type, check ELF section name 'tc_packet_hook4'\nlibbpf: prog 'tc_csum_func1': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_emain.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "v5_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.4092967430000005,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'fw_stats_map': created successfully, fd=36\nlibbpf: map 'fw_v6_map': created successfully, fd=37\nlibbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': skipped loading\nlibbpf: prog 'tc_packet_func': skipped loading\nlibbpf: prog 'tc_packet_func_slow': skipped loading\nlibbpf: prog 'tc_packet_func_fw': skipped loading\nlibbpf: prog 'tc_csum_func1': missing BPF prog type, check ELF section name 'tc_packet_hook4'\nlibbpf: prog 'tc_csum_func1': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_emain.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "baseline_run": null,
+      "v5_run": null,
+      "v5_compile_applied": false,
+      "v5_run_applied": false,
+      "size_ratio": null,
+      "size_delta_pct": null,
+      "speedup_ratio": null
+    },
+    {
+      "object_path": "corpus/build/loxilb/llb_ebpf_emain.bpf.o",
+      "source": "loxilb",
+      "program_name": "tc_csum_func2",
+      "section_name": "tc_packet_hook5",
+      "insn_count": 404,
+      "perf_capable": false,
+      "io_mode": "context",
+      "input_size": 0,
+      "memory_path": null,
+      "scanner_cli": null,
+      "scanner_counts": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "baseline_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.3864173209999997,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'fw_v6_map': created successfully, fd=37\nlibbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': skipped loading\nlibbpf: prog 'tc_packet_func': skipped loading\nlibbpf: prog 'tc_packet_func_slow': skipped loading\nlibbpf: prog 'tc_packet_func_fw': skipped loading\nlibbpf: prog 'tc_csum_func1': skipped loading\nlibbpf: prog 'tc_csum_func2': missing BPF prog type, check ELF section name 'tc_packet_hook5'\nlibbpf: prog 'tc_csum_func2': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_emain.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "v5_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.43271470999999906,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'fw_v6_map': created successfully, fd=37\nlibbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': skipped loading\nlibbpf: prog 'tc_packet_func': skipped loading\nlibbpf: prog 'tc_packet_func_slow': skipped loading\nlibbpf: prog 'tc_packet_func_fw': skipped loading\nlibbpf: prog 'tc_csum_func1': skipped loading\nlibbpf: prog 'tc_csum_func2': missing BPF prog type, check ELF section name 'tc_packet_hook5'\nlibbpf: prog 'tc_csum_func2': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_emain.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "baseline_run": null,
+      "v5_run": null,
+      "v5_compile_applied": false,
+      "v5_run_applied": false,
+      "size_ratio": null,
+      "size_delta_pct": null,
+      "speedup_ratio": null
+    },
+    {
+      "object_path": "corpus/build/loxilb/llb_ebpf_emain.bpf.o",
+      "source": "loxilb",
+      "program_name": "tc_slow_unp_func",
+      "section_name": "tc_packet_hook6",
+      "insn_count": 4171,
+      "perf_capable": false,
+      "io_mode": "context",
+      "input_size": 0,
+      "memory_path": null,
+      "scanner_cli": null,
+      "scanner_counts": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "baseline_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.3993539109999986,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': skipped loading\nlibbpf: prog 'tc_packet_func': skipped loading\nlibbpf: prog 'tc_packet_func_slow': skipped loading\nlibbpf: prog 'tc_packet_func_fw': skipped loading\nlibbpf: prog 'tc_csum_func1': skipped loading\nlibbpf: prog 'tc_csum_func2': skipped loading\nlibbpf: prog 'tc_slow_unp_func': missing BPF prog type, check ELF section name 'tc_packet_hook6'\nlibbpf: prog 'tc_slow_unp_func': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_emain.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "v5_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.4124956389999994,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': skipped loading\nlibbpf: prog 'tc_packet_func': skipped loading\nlibbpf: prog 'tc_packet_func_slow': skipped loading\nlibbpf: prog 'tc_packet_func_fw': skipped loading\nlibbpf: prog 'tc_csum_func1': skipped loading\nlibbpf: prog 'tc_csum_func2': skipped loading\nlibbpf: prog 'tc_slow_unp_func': missing BPF prog type, check ELF section name 'tc_packet_hook6'\nlibbpf: prog 'tc_slow_unp_func': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_emain.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "baseline_run": null,
+      "v5_run": null,
+      "v5_compile_applied": false,
+      "v5_run_applied": false,
+      "size_ratio": null,
+      "size_delta_pct": null,
+      "speedup_ratio": null
+    },
+    {
+      "object_path": "corpus/build/loxilb/llb_ebpf_emain.bpf.o",
+      "source": "loxilb",
+      "program_name": "tc_packet_func_masq",
+      "section_name": "tc_packet_hook7",
+      "insn_count": 549,
+      "perf_capable": false,
+      "io_mode": "context",
+      "input_size": 0,
+      "memory_path": null,
+      "scanner_cli": null,
+      "scanner_counts": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "baseline_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.39514028899999865,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': skipped loading\nlibbpf: prog 'tc_packet_func': skipped loading\nlibbpf: prog 'tc_packet_func_slow': skipped loading\nlibbpf: prog 'tc_packet_func_fw': skipped loading\nlibbpf: prog 'tc_csum_func1': skipped loading\nlibbpf: prog 'tc_csum_func2': skipped loading\nlibbpf: prog 'tc_slow_unp_func': skipped loading\nlibbpf: prog 'tc_packet_func_masq': missing BPF prog type, check ELF section name 'tc_packet_hook7'\nlibbpf: prog 'tc_packet_func_masq': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_emain.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "v5_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.4091280400000006,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': skipped loading\nlibbpf: prog 'tc_packet_func': skipped loading\nlibbpf: prog 'tc_packet_func_slow': skipped loading\nlibbpf: prog 'tc_packet_func_fw': skipped loading\nlibbpf: prog 'tc_csum_func1': skipped loading\nlibbpf: prog 'tc_csum_func2': skipped loading\nlibbpf: prog 'tc_slow_unp_func': skipped loading\nlibbpf: prog 'tc_packet_func_masq': missing BPF prog type, check ELF section name 'tc_packet_hook7'\nlibbpf: prog 'tc_packet_func_masq': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_emain.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "baseline_run": null,
+      "v5_run": null,
+      "v5_compile_applied": false,
+      "v5_run_applied": false,
+      "size_ratio": null,
+      "size_delta_pct": null,
+      "speedup_ratio": null
+    },
+    {
+      "object_path": "corpus/build/loxilb/llb_ebpf_main.bpf.o",
+      "source": "loxilb",
+      "program_name": "tc_packet_func_fast",
+      "section_name": "tc_packet_hook0",
+      "insn_count": 7239,
+      "perf_capable": false,
+      "io_mode": "context",
+      "input_size": 0,
+      "memory_path": null,
+      "scanner_cli": null,
+      "scanner_counts": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "baseline_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.35403399099999966,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'sess_v4_stats_map': created successfully, fd=32\nlibbpf: map 'fc_v4_map': created successfully, fd=33\nlibbpf: map 'fc_v4_stats_map': created successfully, fd=34\nlibbpf: map 'fw_v4_map': created successfully, fd=35\nlibbpf: map 'fw_stats_map': created successfully, fd=36\nlibbpf: map 'fw_v6_map': created successfully, fd=37\nlibbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': missing BPF prog type, check ELF section name 'tc_packet_hook0'\nlibbpf: prog 'tc_packet_func_fast': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_main.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "v5_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.41210927300000044,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'sess_v4_stats_map': created successfully, fd=32\nlibbpf: map 'fc_v4_map': created successfully, fd=33\nlibbpf: map 'fc_v4_stats_map': created successfully, fd=34\nlibbpf: map 'fw_v4_map': created successfully, fd=35\nlibbpf: map 'fw_stats_map': created successfully, fd=36\nlibbpf: map 'fw_v6_map': created successfully, fd=37\nlibbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': missing BPF prog type, check ELF section name 'tc_packet_hook0'\nlibbpf: prog 'tc_packet_func_fast': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_main.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "baseline_run": null,
+      "v5_run": null,
+      "v5_compile_applied": false,
+      "v5_run_applied": false,
+      "size_ratio": null,
+      "size_delta_pct": null,
+      "speedup_ratio": null
+    },
+    {
+      "object_path": "corpus/build/loxilb/llb_ebpf_main.bpf.o",
+      "source": "loxilb",
+      "program_name": "tc_packet_func",
+      "section_name": "tc_packet_hook1",
+      "insn_count": 7290,
+      "perf_capable": false,
+      "io_mode": "context",
+      "input_size": 0,
+      "memory_path": null,
+      "scanner_cli": null,
+      "scanner_counts": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "baseline_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.4412268130000001,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'fc_v4_map': created successfully, fd=33\nlibbpf: map 'fc_v4_stats_map': created successfully, fd=34\nlibbpf: map 'fw_v4_map': created successfully, fd=35\nlibbpf: map 'fw_stats_map': created successfully, fd=36\nlibbpf: map 'fw_v6_map': created successfully, fd=37\nlibbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': skipped loading\nlibbpf: prog 'tc_packet_func': missing BPF prog type, check ELF section name 'tc_packet_hook1'\nlibbpf: prog 'tc_packet_func': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_main.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "v5_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.3733615669999999,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'fc_v4_map': created successfully, fd=33\nlibbpf: map 'fc_v4_stats_map': created successfully, fd=34\nlibbpf: map 'fw_v4_map': created successfully, fd=35\nlibbpf: map 'fw_stats_map': created successfully, fd=36\nlibbpf: map 'fw_v6_map': created successfully, fd=37\nlibbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': skipped loading\nlibbpf: prog 'tc_packet_func': missing BPF prog type, check ELF section name 'tc_packet_hook1'\nlibbpf: prog 'tc_packet_func': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_main.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "baseline_run": null,
+      "v5_run": null,
+      "v5_compile_applied": false,
+      "v5_run_applied": false,
+      "size_ratio": null,
+      "size_delta_pct": null,
+      "speedup_ratio": null
+    },
+    {
+      "object_path": "corpus/build/loxilb/llb_ebpf_main.bpf.o",
+      "source": "loxilb",
+      "program_name": "tc_packet_func_slow",
+      "section_name": "tc_packet_hook2",
+      "insn_count": 17030,
+      "perf_capable": false,
+      "io_mode": "context",
+      "input_size": 0,
+      "memory_path": null,
+      "scanner_cli": null,
+      "scanner_counts": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "baseline_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.41016522000000144,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'fc_v4_stats_map': created successfully, fd=34\nlibbpf: map 'fw_v4_map': created successfully, fd=35\nlibbpf: map 'fw_stats_map': created successfully, fd=36\nlibbpf: map 'fw_v6_map': created successfully, fd=37\nlibbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': skipped loading\nlibbpf: prog 'tc_packet_func': skipped loading\nlibbpf: prog 'tc_packet_func_slow': missing BPF prog type, check ELF section name 'tc_packet_hook2'\nlibbpf: prog 'tc_packet_func_slow': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_main.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "v5_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.40223889600000007,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'fc_v4_stats_map': created successfully, fd=34\nlibbpf: map 'fw_v4_map': created successfully, fd=35\nlibbpf: map 'fw_stats_map': created successfully, fd=36\nlibbpf: map 'fw_v6_map': created successfully, fd=37\nlibbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': skipped loading\nlibbpf: prog 'tc_packet_func': skipped loading\nlibbpf: prog 'tc_packet_func_slow': missing BPF prog type, check ELF section name 'tc_packet_hook2'\nlibbpf: prog 'tc_packet_func_slow': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_main.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "baseline_run": null,
+      "v5_run": null,
+      "v5_compile_applied": false,
+      "v5_run_applied": false,
+      "size_ratio": null,
+      "size_delta_pct": null,
+      "speedup_ratio": null
+    },
+    {
+      "object_path": "corpus/build/loxilb/llb_ebpf_main.bpf.o",
+      "source": "loxilb",
+      "program_name": "tc_packet_func_fw",
+      "section_name": "tc_packet_hook3",
+      "insn_count": 678,
+      "perf_capable": false,
+      "io_mode": "context",
+      "input_size": 0,
+      "memory_path": null,
+      "scanner_cli": null,
+      "scanner_counts": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "baseline_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.4338296849999992,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'fw_v4_map': created successfully, fd=35\nlibbpf: map 'fw_stats_map': created successfully, fd=36\nlibbpf: map 'fw_v6_map': created successfully, fd=37\nlibbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': skipped loading\nlibbpf: prog 'tc_packet_func': skipped loading\nlibbpf: prog 'tc_packet_func_slow': skipped loading\nlibbpf: prog 'tc_packet_func_fw': missing BPF prog type, check ELF section name 'tc_packet_hook3'\nlibbpf: prog 'tc_packet_func_fw': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_main.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "v5_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.4081409350000005,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'fw_v4_map': created successfully, fd=35\nlibbpf: map 'fw_stats_map': created successfully, fd=36\nlibbpf: map 'fw_v6_map': created successfully, fd=37\nlibbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': skipped loading\nlibbpf: prog 'tc_packet_func': skipped loading\nlibbpf: prog 'tc_packet_func_slow': skipped loading\nlibbpf: prog 'tc_packet_func_fw': missing BPF prog type, check ELF section name 'tc_packet_hook3'\nlibbpf: prog 'tc_packet_func_fw': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_main.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "baseline_run": null,
+      "v5_run": null,
+      "v5_compile_applied": false,
+      "v5_run_applied": false,
+      "size_ratio": null,
+      "size_delta_pct": null,
+      "speedup_ratio": null
+    },
+    {
+      "object_path": "corpus/build/loxilb/llb_ebpf_main.bpf.o",
+      "source": "loxilb",
+      "program_name": "tc_csum_func1",
+      "section_name": "tc_packet_hook4",
+      "insn_count": 404,
+      "perf_capable": false,
+      "io_mode": "context",
+      "input_size": 0,
+      "memory_path": null,
+      "scanner_cli": null,
+      "scanner_counts": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "baseline_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.39276981799999966,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'fw_stats_map': created successfully, fd=36\nlibbpf: map 'fw_v6_map': created successfully, fd=37\nlibbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': skipped loading\nlibbpf: prog 'tc_packet_func': skipped loading\nlibbpf: prog 'tc_packet_func_slow': skipped loading\nlibbpf: prog 'tc_packet_func_fw': skipped loading\nlibbpf: prog 'tc_csum_func1': missing BPF prog type, check ELF section name 'tc_packet_hook4'\nlibbpf: prog 'tc_csum_func1': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_main.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "v5_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.39516121099999957,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'fw_stats_map': created successfully, fd=36\nlibbpf: map 'fw_v6_map': created successfully, fd=37\nlibbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': skipped loading\nlibbpf: prog 'tc_packet_func': skipped loading\nlibbpf: prog 'tc_packet_func_slow': skipped loading\nlibbpf: prog 'tc_packet_func_fw': skipped loading\nlibbpf: prog 'tc_csum_func1': missing BPF prog type, check ELF section name 'tc_packet_hook4'\nlibbpf: prog 'tc_csum_func1': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_main.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "baseline_run": null,
+      "v5_run": null,
+      "v5_compile_applied": false,
+      "v5_run_applied": false,
+      "size_ratio": null,
+      "size_delta_pct": null,
+      "speedup_ratio": null
+    },
+    {
+      "object_path": "corpus/build/loxilb/llb_ebpf_main.bpf.o",
+      "source": "loxilb",
+      "program_name": "tc_csum_func2",
+      "section_name": "tc_packet_hook5",
+      "insn_count": 404,
+      "perf_capable": false,
+      "io_mode": "context",
+      "input_size": 0,
+      "memory_path": null,
+      "scanner_cli": null,
+      "scanner_counts": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "baseline_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.38006598800000013,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'fw_v6_map': created successfully, fd=37\nlibbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': skipped loading\nlibbpf: prog 'tc_packet_func': skipped loading\nlibbpf: prog 'tc_packet_func_slow': skipped loading\nlibbpf: prog 'tc_packet_func_fw': skipped loading\nlibbpf: prog 'tc_csum_func1': skipped loading\nlibbpf: prog 'tc_csum_func2': missing BPF prog type, check ELF section name 'tc_packet_hook5'\nlibbpf: prog 'tc_csum_func2': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_main.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "v5_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.4012859800000008,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'fw_v6_map': created successfully, fd=37\nlibbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': skipped loading\nlibbpf: prog 'tc_packet_func': skipped loading\nlibbpf: prog 'tc_packet_func_slow': skipped loading\nlibbpf: prog 'tc_packet_func_fw': skipped loading\nlibbpf: prog 'tc_csum_func1': skipped loading\nlibbpf: prog 'tc_csum_func2': missing BPF prog type, check ELF section name 'tc_packet_hook5'\nlibbpf: prog 'tc_csum_func2': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_main.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "baseline_run": null,
+      "v5_run": null,
+      "v5_compile_applied": false,
+      "v5_run_applied": false,
+      "size_ratio": null,
+      "size_delta_pct": null,
+      "speedup_ratio": null
+    },
+    {
+      "object_path": "corpus/build/loxilb/llb_ebpf_main.bpf.o",
+      "source": "loxilb",
+      "program_name": "tc_slow_unp_func",
+      "section_name": "tc_packet_hook6",
+      "insn_count": 4171,
+      "perf_capable": false,
+      "io_mode": "context",
+      "input_size": 0,
+      "memory_path": null,
+      "scanner_cli": null,
+      "scanner_counts": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "baseline_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.4106877659999988,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': skipped loading\nlibbpf: prog 'tc_packet_func': skipped loading\nlibbpf: prog 'tc_packet_func_slow': skipped loading\nlibbpf: prog 'tc_packet_func_fw': skipped loading\nlibbpf: prog 'tc_csum_func1': skipped loading\nlibbpf: prog 'tc_csum_func2': skipped loading\nlibbpf: prog 'tc_slow_unp_func': missing BPF prog type, check ELF section name 'tc_packet_hook6'\nlibbpf: prog 'tc_slow_unp_func': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_main.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "v5_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.3891564450000011,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': skipped loading\nlibbpf: prog 'tc_packet_func': skipped loading\nlibbpf: prog 'tc_packet_func_slow': skipped loading\nlibbpf: prog 'tc_packet_func_fw': skipped loading\nlibbpf: prog 'tc_csum_func1': skipped loading\nlibbpf: prog 'tc_csum_func2': skipped loading\nlibbpf: prog 'tc_slow_unp_func': missing BPF prog type, check ELF section name 'tc_packet_hook6'\nlibbpf: prog 'tc_slow_unp_func': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_main.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "baseline_run": null,
+      "v5_run": null,
+      "v5_compile_applied": false,
+      "v5_run_applied": false,
+      "size_ratio": null,
+      "size_delta_pct": null,
+      "speedup_ratio": null
+    },
+    {
+      "object_path": "corpus/build/loxilb/llb_ebpf_main.bpf.o",
+      "source": "loxilb",
+      "program_name": "tc_packet_func_masq",
+      "section_name": "tc_packet_hook7",
+      "insn_count": 549,
+      "perf_capable": false,
+      "io_mode": "context",
+      "input_size": 0,
+      "memory_path": null,
+      "scanner_cli": null,
+      "scanner_counts": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "baseline_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.4001631259999989,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': skipped loading\nlibbpf: prog 'tc_packet_func': skipped loading\nlibbpf: prog 'tc_packet_func_slow': skipped loading\nlibbpf: prog 'tc_packet_func_fw': skipped loading\nlibbpf: prog 'tc_csum_func1': skipped loading\nlibbpf: prog 'tc_csum_func2': skipped loading\nlibbpf: prog 'tc_slow_unp_func': skipped loading\nlibbpf: prog 'tc_packet_func_masq': missing BPF prog type, check ELF section name 'tc_packet_hook7'\nlibbpf: prog 'tc_packet_func_masq': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_main.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "v5_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.39539225500000086,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: map 'llb_ebpf.rodata': created successfully, fd=47\nlibbpf: prog 'tc_packet_func_fast': skipped loading\nlibbpf: prog 'tc_packet_func': skipped loading\nlibbpf: prog 'tc_packet_func_slow': skipped loading\nlibbpf: prog 'tc_packet_func_fw': skipped loading\nlibbpf: prog 'tc_csum_func1': skipped loading\nlibbpf: prog 'tc_csum_func2': skipped loading\nlibbpf: prog 'tc_slow_unp_func': skipped loading\nlibbpf: prog 'tc_packet_func_masq': missing BPF prog type, check ELF section name 'tc_packet_hook7'\nlibbpf: prog 'tc_packet_func_masq': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_main.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "baseline_run": null,
+      "v5_run": null,
+      "v5_compile_applied": false,
+      "v5_run_applied": false,
+      "size_ratio": null,
+      "size_delta_pct": null,
+      "speedup_ratio": null
+    },
+    {
+      "object_path": "corpus/build/loxilb/llb_xdp_main.bpf.o",
+      "source": "loxilb",
+      "program_name": "xdp_packet_func",
+      "section_name": "xdp_packet_hook",
+      "insn_count": 1784,
+      "perf_capable": false,
+      "io_mode": "context",
+      "input_size": 0,
+      "memory_path": null,
+      "scanner_cli": null,
+      "scanner_counts": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "baseline_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.32878862200000114,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'sess_v4_stats_map': created successfully, fd=31\nlibbpf: map 'fc_v4_map': created successfully, fd=32\nlibbpf: map 'fc_v4_stats_map': created successfully, fd=33\nlibbpf: map 'fw_v4_map': created successfully, fd=34\nlibbpf: map 'fw_stats_map': created successfully, fd=35\nlibbpf: map 'fw_v6_map': created successfully, fd=36\nlibbpf: map 'pgm_tbl': created successfully, fd=37\nlibbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: prog 'xdp_packet_func': missing BPF prog type, check ELF section name 'xdp_packet_hook'\nlibbpf: prog 'xdp_packet_func': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_xdp_main.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "v5_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.41304060499999906,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'sess_v4_stats_map': created successfully, fd=31\nlibbpf: map 'fc_v4_map': created successfully, fd=32\nlibbpf: map 'fc_v4_stats_map': created successfully, fd=33\nlibbpf: map 'fw_v4_map': created successfully, fd=34\nlibbpf: map 'fw_stats_map': created successfully, fd=35\nlibbpf: map 'fw_v6_map': created successfully, fd=36\nlibbpf: map 'pgm_tbl': created successfully, fd=37\nlibbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: prog 'xdp_packet_func': missing BPF prog type, check ELF section name 'xdp_packet_hook'\nlibbpf: prog 'xdp_packet_func': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_xdp_main.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "baseline_run": null,
+      "v5_run": null,
+      "v5_compile_applied": false,
+      "v5_run_applied": false,
+      "size_ratio": null,
+      "size_delta_pct": null,
+      "speedup_ratio": null
+    },
+    {
+      "object_path": "corpus/build/loxilb/llb_xdp_main.bpf.o",
+      "source": "loxilb",
+      "program_name": "xdp_pass_func",
+      "section_name": "xdp_pass",
+      "insn_count": 2,
+      "perf_capable": false,
+      "io_mode": "context",
+      "input_size": 0,
+      "memory_path": null,
+      "scanner_cli": null,
+      "scanner_counts": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "baseline_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.40305116300000066,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'fc_v4_map': created successfully, fd=32\nlibbpf: map 'fc_v4_stats_map': created successfully, fd=33\nlibbpf: map 'fw_v4_map': created successfully, fd=34\nlibbpf: map 'fw_stats_map': created successfully, fd=35\nlibbpf: map 'fw_v6_map': created successfully, fd=36\nlibbpf: map 'pgm_tbl': created successfully, fd=37\nlibbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: prog 'xdp_packet_func': skipped loading\nlibbpf: prog 'xdp_pass_func': missing BPF prog type, check ELF section name 'xdp_pass'\nlibbpf: prog 'xdp_pass_func': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_xdp_main.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "v5_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.40206118000000046,
+        "error": "bpf_object__load failed: Invalid argument (exit=1)",
+        "stderr_tail": "libbpf: map 'fc_v4_map': created successfully, fd=32\nlibbpf: map 'fc_v4_stats_map': created successfully, fd=33\nlibbpf: map 'fw_v4_map': created successfully, fd=34\nlibbpf: map 'fw_stats_map': created successfully, fd=35\nlibbpf: map 'fw_v6_map': created successfully, fd=36\nlibbpf: map 'pgm_tbl': created successfully, fd=37\nlibbpf: map 'polx_map': created successfully, fd=38\nlibbpf: map 'xfck': created successfully, fd=39\nlibbpf: map 'crc32c_map': created successfully, fd=40\nlibbpf: map 'cpu_map': created successfully, fd=41\nlibbpf: map 'live_cpu_map': created successfully, fd=42\nlibbpf: map 'pplat_map': created successfully, fd=43\nlibbpf: map 'xctk': created successfully, fd=44\nlibbpf: map 'gparser': created successfully, fd=45\nlibbpf: map 'ct_ctr': created successfully, fd=46\nlibbpf: prog 'xdp_packet_func': skipped loading\nlibbpf: prog 'xdp_pass_func': missing BPF prog type, check ELF section name 'xdp_pass'\nlibbpf: prog 'xdp_pass_func': failed to load: -EINVAL\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_xdp_main.bpf.o'\nbpf_object__load failed: Invalid argument",
+        "sample": null,
+        "btf_path_used": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+        "btf_attempts": [
+          {
+            "btf_path": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux/vmlinux",
+            "ok": false,
+            "error": "bpf_object__load failed: Invalid argument (exit=1)"
+          }
+        ]
+      },
+      "baseline_run": null,
+      "v5_run": null,
+      "v5_compile_applied": false,
+      "v5_run_applied": false,
+      "size_ratio": null,
+      "size_delta_pct": null,
+      "speedup_ratio": null
+    }
+  ],
+  "summary": {
+    "objects_attempted": 3,
+    "objects_discovered": 3,
+    "objects_with_discovery_failures": 0,
+    "programs_attempted": 18,
+    "perf_capable_targets": 0,
+    "compile_only_targets": 18,
+    "baseline_compile_successes": 0,
+    "v5_compile_successes": 0,
+    "scanner_successes": 0,
+    "framework_detected_programs": 0,
+    "framework_recompile_applied_programs": 0,
+    "framework_recompile_failures": 0,
+    "compile_pairs": 0,
+    "measured_pairs": 0,
+    "speedup_geomean": null,
+    "speedup_median": null,
+    "speedup_min": null,
+    "speedup_max": null,
+    "code_size_ratio_geomean": null,
+    "code_size_delta_median_pct": null,
+    "code_size_delta_min_pct": null,
+    "code_size_delta_max_pct": null,
+    "family_totals": {},
+    "failure_reasons": {
+      "bpf_object__load failed: Invalid argument (exit=1)": 18
+    },
+    "recompile_failure_reasons": {}
+  }
+}

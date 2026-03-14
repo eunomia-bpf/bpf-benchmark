@@ -1,0 +1,529 @@
+{
+  "artifacts": {
+    "full_inventory_json": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun/full_sample_inventory.json",
+    "smoke_inventory_json": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun/smoke_sample_inventory.json",
+    "with_cmov_policy_dir": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun/policies_with_cmov",
+    "without_cmov_policy_dir": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun/policies_without_cmov"
+  },
+  "generated_at": "2026-03-12T23:09:57.077085+00:00",
+  "inventory_json": "/home/yunwei37/workspace/bpf-benchmark/docs/tmp/corpus-runnability-results.json",
+  "kernel_image": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/arch/x86/boot/bzImage",
+  "results_dir": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun",
+  "selection": {
+    "eligible_by_source": {
+      "calico": 44,
+      "katran": 2,
+      "linux-selftests": 25,
+      "suricata": 2,
+      "tracee": 2,
+      "xdp-tools": 3,
+      "xdp-tutorial": 6
+    },
+    "eligible_programs": 84,
+    "eligible_sources": 7,
+    "inventory_summary": {
+      "baseline_failures": {
+        "bpf_prog_test_run_opts failed: Unknown error 524 (exit=1)": 10
+      },
+      "directive_bearing_programs": 274,
+      "family_totals": {
+        "cmov_sites": 840,
+        "lea_sites": 0,
+        "rotate_sites": 1840,
+        "wide_sites": 389
+      },
+      "load_failures": {
+        "bpf_object__load failed: Argument list too long (exit=1)": 1,
+        "bpf_object__load failed: Bad file descriptor (exit=1)": 17,
+        "bpf_object__load failed: Invalid argument (exit=1)": 453,
+        "bpf_object__load failed: No such file or directory (exit=1)": 1,
+        "bpf_object__load failed: No such process (exit=1)": 67,
+        "bpf_object__load failed: Permission denied (exit=1)": 82,
+        "bpf_object__load failed: Unknown error 524 (exit=1)": 1
+      },
+      "loadable_programs": 1214,
+      "objects_found": 433,
+      "packet_candidate_programs": 304,
+      "packet_paired_programs": 79,
+      "packet_runnable_programs": 166,
+      "packet_speedup_geomean": 0.9699887819013712,
+      "packet_speedup_median": 1.0,
+      "programs_found": 1836,
+      "recompile_failures": {},
+      "strategy_counts": {
+        "cgroup_custom_harness": 40,
+        "iterator_custom_harness": 49,
+        "kernel_registration_required": 58,
+        "load_only_other": 44,
+        "lsm_custom_harness": 67,
+        "netfilter_custom_harness": 9,
+        "packet_test_run": 304,
+        "perf_event_custom": 21,
+        "socket_custom_harness": 15,
+        "synthetic_syscall_only": 74,
+        "tracing_attach_trigger": 1007,
+        "user_tracing_custom_target": 148
+      },
+      "tracing_avg_ns_max": 338334.5,
+      "tracing_avg_ns_min": 29.98872180451128,
+      "tracing_candidate_programs": 1007,
+      "tracing_failures": {
+        "[Errno 97] Address family not supported by protocol": 1,
+        "bpf_program__attach failed: Invalid argument": 2,
+        "bpf_program__attach failed: No such file or directory": 34
+      },
+      "tracing_measured_programs": 379,
+      "tracing_positive_programs": 215,
+      "tracing_skip_reasons": {
+        "dynamic attach target placeholder": 20,
+        "missing attach target in section name": 24,
+        "no trigger heuristic for section `fentry/__x64_sys_getpgid` / program `benchmark`": 2,
+        "no trigger heuristic for section `fentry/__x64_sys_getpgid` / program `get_local`": 2,
+        "no trigger heuristic for section `fentry/__x64_sys_nanosleep` / program `sys_enter`": 2,
+        "no trigger heuristic for section `fentry/blk_account_io_start` / program `blk_account_io_start`": 2,
+        "no trigger heuristic for section `fentry/bpf_fentry_test1` / program `sub`": 2,
+        "no trigger heuristic for section `fentry/bpf_local_storage_update` / program `on_update`": 2,
+        "no trigger heuristic for section `kprobe/inet6_bind` / program `ipv6_bind_entry`": 1,
+        "no trigger heuristic for section `kprobe/inet_bind` / program `ipv4_bind_entry`": 1,
+        "no trigger heuristic for section `kretprobe/inet6_bind` / program `ipv6_bind_exit`": 1,
+        "no trigger heuristic for section `kretprobe/inet_bind` / program `ipv4_bind_exit`": 1
+      },
+      "true_runnable_objects": 145,
+      "true_runnable_programs": 381
+    },
+    "programs": [
+      {
+        "cmov_pattern_counts": {
+          "cond-select-64": 20
+        },
+        "cmov_sites": 20,
+        "current_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/calico/from_hep_debug/calico_tc_main.policy.yaml",
+        "family_counts": {
+          "cmov": 20,
+          "endian": 53,
+          "extract": 1,
+          "wide": 12
+        },
+        "input_size": 64,
+        "io_mode": "packet",
+        "object_path": "corpus/build/calico/from_hep_debug.bpf.o",
+        "prog_type_name": "sched_cls",
+        "program_name": "calico_tc_main",
+        "scanner_summary": {
+          "bitfield_sites": 1,
+          "branch_flip_sites": 0,
+          "cmov_sites": 20,
+          "endian_sites": 53,
+          "extract_sites": 1,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 86,
+          "wide_sites": 12,
+          "zero_ext_sites": 0
+        },
+        "section_name": "tc",
+        "source_name": "calico",
+        "with_cmov_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun/policies_with_cmov/calico/from_hep_debug/calico_tc_main.policy.yaml",
+        "without_cmov_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun/policies_without_cmov/calico/from_hep_debug/calico_tc_main.policy.yaml"
+      },
+      {
+        "cmov_pattern_counts": {
+          "cond-select-64": 21
+        },
+        "cmov_sites": 21,
+        "current_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/calico/from_wep_debug/calico_tc_main.policy.yaml",
+        "family_counts": {
+          "cmov": 21,
+          "endian": 40,
+          "wide": 8
+        },
+        "input_size": 64,
+        "io_mode": "packet",
+        "object_path": "corpus/build/calico/from_wep_debug.bpf.o",
+        "prog_type_name": "sched_cls",
+        "program_name": "calico_tc_main",
+        "scanner_summary": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 21,
+          "endian_sites": 40,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 69,
+          "wide_sites": 8,
+          "zero_ext_sites": 0
+        },
+        "section_name": "tc",
+        "source_name": "calico",
+        "with_cmov_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun/policies_with_cmov/calico/from_wep_debug/calico_tc_main.policy.yaml",
+        "without_cmov_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun/policies_without_cmov/calico/from_wep_debug/calico_tc_main.policy.yaml"
+      },
+      {
+        "cmov_pattern_counts": {
+          "cond-select-64": 8
+        },
+        "cmov_sites": 8,
+        "current_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/katran/balancer/balancer_ingress.policy.yaml",
+        "family_counts": {
+          "cmov": 8,
+          "endian": 4,
+          "extract": 2,
+          "wide": 4
+        },
+        "input_size": 64,
+        "io_mode": "packet",
+        "object_path": "corpus/build/katran/balancer.bpf.o",
+        "prog_type_name": "xdp",
+        "program_name": "balancer_ingress",
+        "scanner_summary": {
+          "bitfield_sites": 2,
+          "branch_flip_sites": 0,
+          "cmov_sites": 8,
+          "endian_sites": 4,
+          "extract_sites": 2,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 18,
+          "wide_sites": 4,
+          "zero_ext_sites": 0
+        },
+        "section_name": "xdp",
+        "source_name": "katran",
+        "with_cmov_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun/policies_with_cmov/katran/balancer/balancer_ingress.policy.yaml",
+        "without_cmov_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun/policies_without_cmov/katran/balancer/balancer_ingress.policy.yaml"
+      },
+      {
+        "cmov_pattern_counts": {
+          "cond-select-64": 1
+        },
+        "cmov_sites": 1,
+        "current_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/katran/healthchecking/healthcheck_encap.policy.yaml",
+        "family_counts": {
+          "cmov": 1,
+          "endian": 1
+        },
+        "input_size": 64,
+        "io_mode": "packet",
+        "object_path": "corpus/build/katran/healthchecking.bpf.o",
+        "prog_type_name": "sched_cls",
+        "program_name": "healthcheck_encap",
+        "scanner_summary": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 1,
+          "endian_sites": 1,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 2,
+          "wide_sites": 0,
+          "zero_ext_sites": 0
+        },
+        "section_name": "tc",
+        "source_name": "katran",
+        "with_cmov_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun/policies_with_cmov/katran/healthchecking/healthcheck_encap.policy.yaml",
+        "without_cmov_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun/policies_without_cmov/katran/healthchecking/healthcheck_encap.policy.yaml"
+      },
+      {
+        "cmov_pattern_counts": {
+          "cond-select-64": 3
+        },
+        "cmov_sites": 3,
+        "current_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/linux-selftests/tools/testing/selftests/bpf/progs/xdp_synproxy_kern/syncookie_tc.policy.yaml",
+        "family_counts": {
+          "cmov": 3,
+          "endian": 10,
+          "extract": 8,
+          "wide": 2
+        },
+        "input_size": 64,
+        "io_mode": "packet",
+        "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/xdp_synproxy_kern.bpf.o",
+        "prog_type_name": "sched_cls",
+        "program_name": "syncookie_tc",
+        "scanner_summary": {
+          "bitfield_sites": 8,
+          "branch_flip_sites": 0,
+          "cmov_sites": 3,
+          "endian_sites": 10,
+          "extract_sites": 8,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 23,
+          "wide_sites": 2,
+          "zero_ext_sites": 0
+        },
+        "section_name": "tc",
+        "source_name": "linux-selftests",
+        "with_cmov_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun/policies_with_cmov/linux-selftests/tools/testing/selftests/bpf/progs/xdp_synproxy_kern/syncookie_tc.policy.yaml",
+        "without_cmov_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun/policies_without_cmov/linux-selftests/tools/testing/selftests/bpf/progs/xdp_synproxy_kern/syncookie_tc.policy.yaml"
+      },
+      {
+        "cmov_pattern_counts": {
+          "cond-select-64": 3
+        },
+        "cmov_sites": 3,
+        "current_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/linux-selftests/xdp_synproxy_kern/syncookie_tc.policy.yaml",
+        "family_counts": {
+          "cmov": 3,
+          "endian": 10,
+          "extract": 8,
+          "wide": 2
+        },
+        "input_size": 64,
+        "io_mode": "packet",
+        "object_path": "corpus/build/linux-selftests/xdp_synproxy_kern.bpf.o",
+        "prog_type_name": "sched_cls",
+        "program_name": "syncookie_tc",
+        "scanner_summary": {
+          "bitfield_sites": 8,
+          "branch_flip_sites": 0,
+          "cmov_sites": 3,
+          "endian_sites": 10,
+          "extract_sites": 8,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 23,
+          "wide_sites": 2,
+          "zero_ext_sites": 0
+        },
+        "section_name": "tc",
+        "source_name": "linux-selftests",
+        "with_cmov_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun/policies_with_cmov/linux-selftests/xdp_synproxy_kern/syncookie_tc.policy.yaml",
+        "without_cmov_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun/policies_without_cmov/linux-selftests/xdp_synproxy_kern/syncookie_tc.policy.yaml"
+      },
+      {
+        "cmov_pattern_counts": {
+          "cond-select-64": 2
+        },
+        "cmov_sites": 2,
+        "current_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/suricata/xdp_lb/xdp_loadfilter.policy.yaml",
+        "family_counts": {
+          "cmov": 2,
+          "extract": 6
+        },
+        "input_size": 64,
+        "io_mode": "packet",
+        "object_path": "corpus/build/suricata/xdp_lb.bpf.o",
+        "prog_type_name": "xdp",
+        "program_name": "xdp_loadfilter",
+        "scanner_summary": {
+          "bitfield_sites": 6,
+          "branch_flip_sites": 0,
+          "cmov_sites": 2,
+          "endian_sites": 0,
+          "extract_sites": 6,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 8,
+          "wide_sites": 0,
+          "zero_ext_sites": 0
+        },
+        "section_name": "xdp",
+        "source_name": "suricata",
+        "with_cmov_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun/policies_with_cmov/suricata/xdp_lb/xdp_loadfilter.policy.yaml",
+        "without_cmov_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun/policies_without_cmov/suricata/xdp_lb/xdp_loadfilter.policy.yaml"
+      },
+      {
+        "cmov_pattern_counts": {
+          "cond-select-64": 13
+        },
+        "cmov_sites": 13,
+        "current_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/cgroup_skb_egress.policy.yaml",
+        "family_counts": {
+          "cmov": 13,
+          "endian": 2,
+          "extract": 1,
+          "wide": 107
+        },
+        "input_size": 64,
+        "io_mode": "packet",
+        "object_path": "corpus/build/tracee/tracee.bpf.o",
+        "prog_type_name": "cgroup_skb",
+        "program_name": "cgroup_skb_egress",
+        "scanner_summary": {
+          "bitfield_sites": 1,
+          "branch_flip_sites": 0,
+          "cmov_sites": 13,
+          "endian_sites": 2,
+          "extract_sites": 1,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 123,
+          "wide_sites": 107,
+          "zero_ext_sites": 0
+        },
+        "section_name": "cgroup_skb/egress",
+        "source_name": "tracee",
+        "with_cmov_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun/policies_with_cmov/tracee/tracee/cgroup_skb_egress.policy.yaml",
+        "without_cmov_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun/policies_without_cmov/tracee/tracee/cgroup_skb_egress.policy.yaml"
+      },
+      {
+        "cmov_pattern_counts": {
+          "cond-select-64": 1
+        },
+        "cmov_sites": 1,
+        "current_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/xdp-tools/xdp_forward/xdp_fwd_fib_direct.policy.yaml",
+        "family_counts": {
+          "cmov": 1,
+          "endian": 2
+        },
+        "input_size": 64,
+        "io_mode": "packet",
+        "object_path": "corpus/build/xdp-tools/xdp_forward.bpf.o",
+        "prog_type_name": "xdp",
+        "program_name": "xdp_fwd_fib_direct",
+        "scanner_summary": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 1,
+          "endian_sites": 2,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 3,
+          "wide_sites": 0,
+          "zero_ext_sites": 0
+        },
+        "section_name": "xdp",
+        "source_name": "xdp-tools",
+        "with_cmov_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun/policies_with_cmov/xdp-tools/xdp_forward/xdp_fwd_fib_direct.policy.yaml",
+        "without_cmov_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun/policies_without_cmov/xdp-tools/xdp_forward/xdp_fwd_fib_direct.policy.yaml"
+      },
+      {
+        "cmov_pattern_counts": {
+          "cond-select-64": 1
+        },
+        "cmov_sites": 1,
+        "current_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/xdp-tools/xdp_load_bytes/xdp_probe_prog.policy.yaml",
+        "family_counts": {
+          "cmov": 1
+        },
+        "input_size": 64,
+        "io_mode": "packet",
+        "object_path": "corpus/build/xdp-tools/xdp_load_bytes.bpf.o",
+        "prog_type_name": "xdp",
+        "program_name": "xdp_probe_prog",
+        "scanner_summary": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 1,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 1,
+          "wide_sites": 0,
+          "zero_ext_sites": 0
+        },
+        "section_name": "xdp",
+        "source_name": "xdp-tools",
+        "with_cmov_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun/policies_with_cmov/xdp-tools/xdp_load_bytes/xdp_probe_prog.policy.yaml",
+        "without_cmov_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun/policies_without_cmov/xdp-tools/xdp_load_bytes/xdp_probe_prog.policy.yaml"
+      },
+      {
+        "cmov_pattern_counts": {
+          "cond-select-64": 2
+        },
+        "cmov_sites": 2,
+        "current_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/xdp-tutorial/packet02-rewriting/xdp_prog_kern/xdp_vlan_swap_func.policy.yaml",
+        "family_counts": {
+          "cmov": 2,
+          "wide": 1
+        },
+        "input_size": 64,
+        "io_mode": "packet",
+        "object_path": "corpus/build/xdp-tutorial/packet02-rewriting/xdp_prog_kern.bpf.o",
+        "prog_type_name": "xdp",
+        "program_name": "xdp_vlan_swap_func",
+        "scanner_summary": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 2,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 3,
+          "wide_sites": 1,
+          "zero_ext_sites": 0
+        },
+        "section_name": "xdp",
+        "source_name": "xdp-tutorial",
+        "with_cmov_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun/policies_with_cmov/xdp-tutorial/packet02-rewriting/xdp_prog_kern/xdp_vlan_swap_func.policy.yaml",
+        "without_cmov_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun/policies_without_cmov/xdp-tutorial/packet02-rewriting/xdp_prog_kern/xdp_vlan_swap_func.policy.yaml"
+      },
+      {
+        "cmov_pattern_counts": {
+          "cond-select-64": 2
+        },
+        "cmov_sites": 2,
+        "current_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/xdp-tutorial/packet03-redirecting/xdp_prog_kern/xdp_icmp_echo_func.policy.yaml",
+        "family_counts": {
+          "cmov": 2
+        },
+        "input_size": 64,
+        "io_mode": "packet",
+        "object_path": "corpus/build/xdp-tutorial/packet03-redirecting/xdp_prog_kern.bpf.o",
+        "prog_type_name": "xdp",
+        "program_name": "xdp_icmp_echo_func",
+        "scanner_summary": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 2,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 2,
+          "wide_sites": 0,
+          "zero_ext_sites": 0
+        },
+        "section_name": "xdp",
+        "source_name": "xdp-tutorial",
+        "with_cmov_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun/policies_with_cmov/xdp-tutorial/packet03-redirecting/xdp_prog_kern/xdp_icmp_echo_func.policy.yaml",
+        "without_cmov_policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_dryrun/policies_without_cmov/xdp-tutorial/packet03-redirecting/xdp_prog_kern/xdp_icmp_echo_func.policy.yaml"
+      }
+    ],
+    "selected_by_source": [
+      {
+        "cmov_sites": 41,
+        "programs": 2,
+        "source_name": "calico"
+      },
+      {
+        "cmov_sites": 9,
+        "programs": 2,
+        "source_name": "katran"
+      },
+      {
+        "cmov_sites": 6,
+        "programs": 2,
+        "source_name": "linux-selftests"
+      },
+      {
+        "cmov_sites": 2,
+        "programs": 1,
+        "source_name": "suricata"
+      },
+      {
+        "cmov_sites": 13,
+        "programs": 1,
+        "source_name": "tracee"
+      },
+      {
+        "cmov_sites": 2,
+        "programs": 2,
+        "source_name": "xdp-tools"
+      },
+      {
+        "cmov_sites": 4,
+        "programs": 2,
+        "source_name": "xdp-tutorial"
+      }
+    ],
+    "selected_programs": 12,
+    "smoke_programs": 6
+  }
+}

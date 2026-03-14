@@ -1,0 +1,1455 @@
+{
+  "agent_logs": {
+    "stderr_tail": [
+      "level=info msg=\"Starting tetragon\" version=v1.6.0",
+      "level=info msg=\"config settings\" config=\"map[bpf-dir:tetragon bpf-lib:/usr/local/lib/tetragon/bpf/ btf: cgroup-rate: cluster-name: config-dir: cpuprofile: cri-endpoint: data-cache-size:1024 debug:false disable-kprobe-multi:false enable-ancestors:[] enable-cgidmap:false enable-cgidmap-debug:false enable-cgtrackerid:true enable-compatibility-syscall64-size-type:false enable-cri:false enable-export-aggregation:false enable-k8s-api:false enable-msg-handling-latency:false enable-pid-set-filter:false enable-pod-annotations:false enable-pod-info:false enable-policy-filter:false enable-policy-filter-cgroup-map:false enable-policy-filter-debug:false enable-process-cred:false enable-process-ns:false enable-tracing-policy-crd:true event-cache-retries:15 event-cache-retry-delay:2 event-queue-size:10000 execve-map-entries:0 execve-map-size: export-aggregation-buffer-size:10000 export-aggregation-window-size:15s export-allowlist: export-denylist: export-file-compress:true export-file-max-backups:5 export-file-max-size-mb:10 export-file-perm:600 export-file-rotation-interval:0s export-filename:/var/log/tetragon/tetragon.log export-rate-limit:-1 expose-stack-addresses:false field-filters: force-large-progs:false force-small-progs:false generate-docs:false gops-address: health-server-address::6789 health-server-interval:10 k8s-controlplane-retry:1 k8s-kubeconfig-path: keep-sensors-on-exit:false kernel: log-format:text log-level:info memprofile: metrics-label-filter:namespace,workload,pod,binary metrics-server: netns-dir:/var/run/docker/netns/ pprof-address: process-cache-gc-interval:30s process-cache-size:65536 procfs:/proc/ rb-queue-size:65535 rb-size:0 rb-size-total:0 redaction-filters: release-pinned-bpf:true server-address:unix:///var/run/tetragon/tetragon.sock tracing-policy: tracing-policy-dir:/tmp/tetragon-policy-jb9yy08b use-perf-ring-buffer:false username-metadata:disabled verbose:0]\"",
+      "level=info msg=\"Tetragon pid file creation succeeded\" pid=141 pidfile=/var/run/tetragon/tetragon.pid",
+      "level=info msg=\"BPF: successfully released pinned BPF programs and maps\" bpf-dir=/sys/fs/bpf/tetragon",
+      "level=info msg=\"BPF detected features: override_return: true, buildid: true, kprobe_multi: true, uprobe_multi true, fmodret: true, fmodret_syscall: true, signal: true, large: true, link_pin: true, lsm: false, missed_stats_kprobe_multi: true, missed_stats_kprobe: true, batch_update: true, uprobe_refctroff: true, audit_loginuid: true probe_write_user: true uprobe_regs_change: true\"",
+      "level=warn msg=\"Deployment mode is unknown, advanced Cgroups tracking will be disabled\" confmap-update=tg_conf_map",
+      "level=info msg=\"Updated TetragonConf map successfully\" confmap-update=tg_conf_map deployment.mode=unknown log.level=0 cgroup.fs.magic=Cgroupv2 cgroup.hierarchyID=0 NSPID=141",
+      "level=info msg=\"Disabling Kubernetes API\"",
+      "level=info msg=\"Configured redaction filters\" redactionFilters=\"\"",
+      "level=info msg=\"Configured field filters\" fieldFilters=[]",
+      "level=info msg=\"Starting JSON exporter\" logger=\"&{Filename:/var/log/tetragon/tetragon.log MaxSize:10 MaxAge:0 MaxBackups:5 LocalTime:false Compress:true FileMode:-rw------- size:0 file:<nil> mu:{_:{} mu:{state:0 sema:0}} millCh:<nil> startMill:{_:{} done:{_:{} v:0} m:{_:{} mu:{state:0 sema:0}}}}\" request=\"\"",
+      "level=info msg=\"Exporter configuration\" enabled=true fileName=/var/log/tetragon/tetragon.log",
+      "level=info msg=\"Starting gRPC server\" protocol=unix address=/var/run/tetragon/tetragon.sock",
+      "level=info msg=\"Starting gRPC health server\" address=:6789 interval=10"
+    ],
+    "stdout_tail": [
+      "level=info msg=\"Tetragon current security context\" SELinux=\"kernel\\x00\" AppArmor=\"\" Smack=\"\" Lockdown=\"\"",
+      "level=info msg=\"Kernel does not support user namespaces\" error=\"namespace '/proc/1/ns/user' readlink /proc/1/ns/user: no such file or directory\"",
+      "level=warn msg=\"Unable to mount BPF filesystem\" error=\"multiple mount points detected at /sys/fs/bpf\"",
+      "level=info msg=\"BTF discovery: default kernel btf file found\" btf-file=/sys/kernel/btf/vmlinux",
+      "level=error msg=\"unable to read /sys/kernel/security directory\" error=\"open /sys/kernel/security: no such file or directory\"",
+      "level=error msg=\"Detecting kernel config failed\" error=\"open /boot/config-7.0.0-rc2-ge52504a75c05-dirty: no such file or directory\"",
+      "level=error msg=\"Detecting kernel config failed\" error=\"open /boot/config-7.0.0-rc2-ge52504a75c05-dirty: no such file or directory\"",
+      "level=info msg=\"Cgroup mode detection succeeded\" cgroup.fs=/sys/fs/cgroup cgroup.mode=\"Unified mode (Cgroupv2)\"",
+      "level=info msg=\"Cgroupv2 supported controllers detected successfully\" cgroup.fs=/sys/fs/cgroup cgroup.path=/proc/1/root/sys/fs/cgroup cgroup.controllers=\"[cpuset cpu io hugetlb pids rdma misc]\" cgroup.hierarchyID=0",
+      "level=info msg=\"Cgroupv2 supported controllers detected successfully\" cgroup.fs=/sys/fs/cgroup cgroup.path=/sys/fs/cgroup cgroup.controllers=\"[cpuset cpu io hugetlb pids rdma misc]\" cgroup.hierarchyID=0",
+      "level=warn msg=\"Failed to detect deployment mode from Cgroupv2 path\" cgroup.fs=/sys/fs/cgroup error=\"cgroup path is empty\"",
+      "level=warn msg=\"Unable to find Cgroup migration path for pid=141\" cgroup.fs=/sys/fs/cgroup error=\"could not validate Cgroupv2 hierarchy\"",
+      "level=warn msg=\"Detection of deployment mode failed\" cgroup.fs=/sys/fs/cgroup error=\"could not detect Cgroup migration path for pid=141\"",
+      "level=warn msg=\"Deployment mode detection failed\" cgroup.fs=/sys/fs/cgroup deployment.mode=unknown",
+      "level=info msg=\"Exit probe on acct_process\"",
+      "level=info msg=\"Set execve_map entries 32768\" size=28M",
+      "level=info msg=\"BPF ring buffer size (bytes)\" total=128K",
+      "level=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux",
+      "level=info msg=\"Loading sensor\" name=__base__",
+      "level=info msg=\"Loading kernel version 7.0.0\"",
+      "level=info msg=\"Loaded sensor successfully\" sensor=__base__",
+      "level=info msg=\"Available sensors\" sensors=__base__",
+      "level=info msg=\"Registered sensors (policy-handlers)\" policy-handlers=\"enforcer, loader sensor, tracing\"",
+      "level=info msg=\"Registered probe types\" types=\"enforcer, generic_kprobe, generic_lsm, generic_tracepoint, generic_uprobe, generic_usdt, loader, execve\"",
+      "level=info msg=\"Creating new EventCache\" retries=15 delay=2s",
+      "level=info msg=\"Starting process manager\" enableK8s=false enableProcessCred=false enableProcessNs=false",
+      "level=info msg=\"Successfully detected bpftool path\" bpftool=/usr/local/sbin/bpftool",
+      "level=warn msg=\"failed to locate gops binary, on bugtool debugging ensure you have gops installed\"",
+      "level=info msg=\"BPF: found active BPF resources\" bpf-dir=/sys/fs/bpf/tetragon pinned-bpf=\"[__base__ execve_map execve_map_stats execve_map_update_data tcpmon_map tg_conf_map tg_errmetrics_map tg_execve_joined_info_map tg_execve_joined_info_map_stats tg_mbset_gen tg_mbset_map tg_rb_events tg_stats_map]\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/1/ns/user' readlink /proc/1/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/10/ns/user' readlink /proc/10/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/11/ns/user' readlink /proc/11/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/12/ns/user' readlink /proc/12/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/122/ns/user' readlink /proc/122/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/123/ns/user' readlink /proc/123/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/125/ns/user' readlink /proc/125/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/13/ns/user' readlink /proc/13/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/138/ns/user' readlink /proc/138/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/14/ns/user' readlink /proc/14/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/141/ns/user' readlink /proc/141/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/15/ns/user' readlink /proc/15/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/16/ns/user' readlink /proc/16/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/17/ns/user' readlink /proc/17/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/18/ns/user' readlink /proc/18/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/19/ns/user' readlink /proc/19/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/2/ns/user' readlink /proc/2/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/20/ns/user' readlink /proc/20/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/21/ns/user' readlink /proc/21/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/22/ns/user' readlink /proc/22/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/23/ns/user' readlink /proc/23/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/24/ns/user' readlink /proc/24/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/25/ns/user' readlink /proc/25/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/26/ns/user' readlink /proc/26/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/27/ns/user' readlink /proc/27/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/28/ns/user' readlink /proc/28/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/29/ns/user' readlink /proc/29/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/3/ns/user' readlink /proc/3/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/30/ns/user' readlink /proc/30/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/31/ns/user' readlink /proc/31/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/32/ns/user' readlink /proc/32/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/33/ns/user' readlink /proc/33/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/34/ns/user' readlink /proc/34/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/35/ns/user' readlink /proc/35/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/36/ns/user' readlink /proc/36/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/37/ns/user' readlink /proc/37/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/38/ns/user' readlink /proc/38/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/39/ns/user' readlink /proc/39/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/4/ns/user' readlink /proc/4/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/40/ns/user' readlink /proc/40/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/41/ns/user' readlink /proc/41/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/42/ns/user' readlink /proc/42/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/43/ns/user' readlink /proc/43/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/44/ns/user' readlink /proc/44/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/45/ns/user' readlink /proc/45/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/46/ns/user' readlink /proc/46/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/47/ns/user' readlink /proc/47/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/48/ns/user' readlink /proc/48/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/49/ns/user' readlink /proc/49/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/5/ns/user' readlink /proc/5/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/50/ns/user' readlink /proc/50/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/51/ns/user' readlink /proc/51/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/52/ns/user' readlink /proc/52/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/53/ns/user' readlink /proc/53/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/54/ns/user' readlink /proc/54/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/55/ns/user' readlink /proc/55/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/56/ns/user' readlink /proc/56/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/57/ns/user' readlink /proc/57/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/6/ns/user' readlink /proc/6/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/61/ns/user' readlink /proc/61/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/62/ns/user' readlink /proc/62/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/63/ns/user' readlink /proc/63/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/7/ns/user' readlink /proc/7/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/70/ns/user' readlink /proc/70/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/8/ns/user' readlink /proc/8/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/9/ns/user' readlink /proc/9/ns/user: no such file or directory\"",
+      "level=info msg=\"Read ProcFS /proc/ appended 66/122 entries\"",
+      "level=info msg=\"Cgroup rate disabled (0/0s)\"",
+      "level=info msg=\"Added kprobe\" return=false function=security_bprm_check override=false",
+      "level=info msg=\"Added kprobe\" return=false function=security_file_open override=false",
+      "level=info msg=\"Added kprobe\" return=false function=security_socket_connect override=false",
+      "level=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux",
+      "level=info msg=\"Loading sensor\" name=generic_kprobe",
+      "level=info msg=\"Loading kernel version 7.0.0\"",
+      "level=info msg=\"Loaded generic kprobe sensor: /usr/local/lib/tetragon/bpf/bpf_multi_kprobe_v612.o -> kprobe_multi (3 functions)\"",
+      "level=info msg=\"Loaded sensor successfully\" sensor=generic_kprobe",
+      "level=info msg=\"Added TracingPolicy with success\" TracingPolicy=/tmp/tetragon-policy-jb9yy08b/tetragon-e2e-kprobes.yaml metadata.namespace=\"\" metadata.name=bpf-benchmark-tetragon-e2e-kprobes",
+      "level=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux",
+      "level=info msg=\"Loading sensor\" name=generic_tracepoint",
+      "level=info msg=\"Loading kernel version 7.0.0\"",
+      "level=info msg=\"Loaded generic tracepoint program: /usr/local/lib/tetragon/bpf/bpf_generic_tracepoint_v612.o -> syscalls/sys_enter_execve\"",
+      "level=info msg=\"Loaded sensor successfully\" sensor=generic_tracepoint",
+      "level=info msg=\"Added TracingPolicy with success\" TracingPolicy=/tmp/tetragon-policy-jb9yy08b/tetragon-e2e-tracepoint.yaml metadata.namespace=\"\" metadata.name=bpf-benchmark-tetragon-e2e-tracepoint",
+      "level=info msg=\"Perf ring buffer size (bytes)\" percpu=68K total=136K",
+      "level=info msg=\"Events queue size (events)\" size=63K",
+      "level=info msg=\"Listening for events...\""
+    ]
+  },
+  "baseline": {
+    "summary": {
+      "agent_cpu_total_pct": {
+        "count": 4,
+        "max": 112.49975268054371,
+        "mean": 32.84158969357762,
+        "median": 9.399969965744804,
+        "min": 0.06666616227714948
+      },
+      "app_throughput": {
+        "count": 4,
+        "max": 1144689.1576471261,
+        "mean": 339334.2353207032,
+        "median": 106233.60484600051,
+        "min": 180.57394368553324
+      },
+      "bpf_avg_ns_per_run": {
+        "count": 4,
+        "max": 4743.692307692308,
+        "mean": 3886.728192968988,
+        "median": 4052.2977320918226,
+        "min": 2698.625
+      },
+      "events_per_sec": {
+        "count": 4,
+        "max": 723.0290022727866,
+        "mean": 180.9870838826364,
+        "median": 0.34572821211427085,
+        "min": 0.22787683353051263
+      },
+      "system_cpu_busy_pct": {
+        "count": 4,
+        "max": 99.33222036727881,
+        "mean": 41.95638178636607,
+        "median": 30.171156479121137,
+        "min": 8.150993819943208
+      }
+    },
+    "workloads": [
+      {
+        "agent_cpu": {
+          "sys_pct": 1.533330216686335,
+          "total_pct": 10.333312329842691,
+          "user_pct": 8.799982113156357
+        },
+        "app_throughput": 180.57394368553324,
+        "bpf": {
+          "programs": {
+            "22": {
+              "avg_ns_per_run": 3028.19918923899,
+              "bytes_jited": 1008,
+              "bytes_xlated": 1792,
+              "id": 22,
+              "name": "event_exit_acct",
+              "run_cnt_delta": 5427,
+              "run_time_ns_delta": 16434037,
+              "type": "kprobe"
+            },
+            "24": {
+              "avg_ns_per_run": 4255.6373181064655,
+              "bytes_jited": 7313,
+              "bytes_xlated": 11312,
+              "id": 24,
+              "name": "event_wake_up_n",
+              "run_cnt_delta": 5429,
+              "run_time_ns_delta": 23103855,
+              "type": "kprobe"
+            },
+            "25": {
+              "avg_ns_per_run": 5736.760841483669,
+              "bytes_jited": 11213,
+              "bytes_xlated": 20216,
+              "id": 25,
+              "name": "event_execve",
+              "run_cnt_delta": 5419,
+              "run_time_ns_delta": 31087507,
+              "type": "tracepoint"
+            },
+            "28": {
+              "avg_ns_per_run": 472.66672817863076,
+              "bytes_jited": 1534,
+              "bytes_xlated": 2560,
+              "id": 28,
+              "name": "tg_kp_bprm_comm",
+              "run_cnt_delta": 5419,
+              "run_time_ns_delta": 2561381,
+              "type": "kprobe"
+            },
+            "29": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 313,
+              "bytes_xlated": 504,
+              "id": 29,
+              "name": "execve_map_upda",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "socket_filter"
+            }
+          },
+          "summary": {
+            "active_programs": 4,
+            "avg_ns_per_run": 3373.595464183645,
+            "total_events": 21694,
+            "total_run_time_ns": 73186780
+          }
+        },
+        "description": "stress-ng execve workload",
+        "duration_s": 30.004328916,
+        "events_per_sec": 723.0290022727866,
+        "events_total": 21694,
+        "kind": "exec_storm",
+        "metric": "bogo-ops/s",
+        "name": "stress_exec",
+        "ops_per_sec": 180.57394368553324,
+        "ops_total": 5418.0,
+        "stderr_tail": "fallback=rapid_exec_loop",
+        "stdout_tail": "",
+        "system_cpu": {
+          "busy_pct": 10.825968728755953
+        }
+      },
+      {
+        "agent_cpu": {
+          "sys_pct": 0.03333308113857474,
+          "total_pct": 0.06666616227714948,
+          "user_pct": 0.03333308113857474
+        },
+        "app_throughput": 1144689.1576471261,
+        "bpf": {
+          "programs": {
+            "22": {
+              "avg_ns_per_run": 6310.0,
+              "bytes_jited": 1008,
+              "bytes_xlated": 1792,
+              "id": 22,
+              "name": "event_exit_acct",
+              "run_cnt_delta": 3,
+              "run_time_ns_delta": 18930,
+              "type": "kprobe"
+            },
+            "24": {
+              "avg_ns_per_run": 4069.6666666666665,
+              "bytes_jited": 7313,
+              "bytes_xlated": 11312,
+              "id": 24,
+              "name": "event_wake_up_n",
+              "run_cnt_delta": 6,
+              "run_time_ns_delta": 24418,
+              "type": "kprobe"
+            },
+            "25": {
+              "avg_ns_per_run": 8223.5,
+              "bytes_jited": 11213,
+              "bytes_xlated": 20216,
+              "id": 25,
+              "name": "event_execve",
+              "run_cnt_delta": 2,
+              "run_time_ns_delta": 16447,
+              "type": "tracepoint"
+            },
+            "28": {
+              "avg_ns_per_run": 936.5,
+              "bytes_jited": 1534,
+              "bytes_xlated": 2560,
+              "id": 28,
+              "name": "tg_kp_bprm_comm",
+              "run_cnt_delta": 2,
+              "run_time_ns_delta": 1873,
+              "type": "kprobe"
+            },
+            "29": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 313,
+              "bytes_xlated": 504,
+              "id": 29,
+              "name": "execve_map_upda",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "socket_filter"
+            }
+          },
+          "summary": {
+            "active_programs": 4,
+            "avg_ns_per_run": 4743.692307692308,
+            "total_events": 13,
+            "total_run_time_ns": 61668
+          }
+        },
+        "description": "fio or dd file workload",
+        "duration_s": 30.603373646,
+        "events_per_sec": 0.42478976829076354,
+        "events_total": 13,
+        "kind": "file_io",
+        "metric": "ops/s",
+        "name": "file_io",
+        "ops_per_sec": 1144689.1576471261,
+        "ops_total": 35031350.0,
+        "stderr_tail": "",
+        "stdout_tail": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 6.360748,\n        \"750\" : 91.337519,\n        \"1000\" : 2.052818\n      },\n      \"latency_us\" : {\n        \"2\" : 0.131134,\n        \"4\" : 0.028746,\n        \"10\" : 0.088763,\n        \"20\" : 0.010000,\n        \"50\" : 0.010000,\n        \"100\" : 0.010000,\n        \"250\" : 0.010000,\n        \"500\" : 0.000000,\n        \"750\" : 0.010000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}",
+        "system_cpu": {
+          "busy_pct": 49.51634422948632
+        }
+      },
+      {
+        "agent_cpu": {
+          "sys_pct": 10.033311276101823,
+          "total_pct": 112.49975268054371,
+          "user_pct": 102.46644140444188
+        },
+        "app_throughput": 209978.92488518127,
+        "bpf": {
+          "programs": {
+            "22": {
+              "avg_ns_per_run": 3384.0,
+              "bytes_jited": 1008,
+              "bytes_xlated": 1792,
+              "id": 22,
+              "name": "event_exit_acct",
+              "run_cnt_delta": 1,
+              "run_time_ns_delta": 3384,
+              "type": "kprobe"
+            },
+            "24": {
+              "avg_ns_per_run": 2141.4,
+              "bytes_jited": 7313,
+              "bytes_xlated": 11312,
+              "id": 24,
+              "name": "event_wake_up_n",
+              "run_cnt_delta": 5,
+              "run_time_ns_delta": 10707,
+              "type": "kprobe"
+            },
+            "25": {
+              "avg_ns_per_run": 6877.0,
+              "bytes_jited": 11213,
+              "bytes_xlated": 20216,
+              "id": 25,
+              "name": "event_execve",
+              "run_cnt_delta": 1,
+              "run_time_ns_delta": 6877,
+              "type": "tracepoint"
+            },
+            "28": {
+              "avg_ns_per_run": 621.0,
+              "bytes_jited": 1534,
+              "bytes_xlated": 2560,
+              "id": 28,
+              "name": "tg_kp_bprm_comm",
+              "run_cnt_delta": 1,
+              "run_time_ns_delta": 621,
+              "type": "kprobe"
+            },
+            "29": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 313,
+              "bytes_xlated": 504,
+              "id": 29,
+              "name": "execve_map_upda",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "socket_filter"
+            }
+          },
+          "summary": {
+            "active_programs": 4,
+            "avg_ns_per_run": 2698.625,
+            "total_events": 8,
+            "total_run_time_ns": 21589
+          }
+        },
+        "description": "stress-ng open workload",
+        "duration_s": 30.000001206999997,
+        "events_per_sec": 0.2666666559377782,
+        "events_total": 8,
+        "kind": "open_storm",
+        "metric": "bogo-ops/s",
+        "name": "open_storm",
+        "ops_per_sec": 209978.92488518127,
+        "ops_total": 6299368.0,
+        "stderr_tail": "",
+        "stdout_tail": "",
+        "system_cpu": {
+          "busy_pct": 99.33222036727881
+        }
+      },
+      {
+        "agent_cpu": {
+          "sys_pct": 0.9666622064872463,
+          "total_pct": 8.466627601646916,
+          "user_pct": 7.499965395159671
+        },
+        "app_throughput": 2488.2848068197522,
+        "bpf": {
+          "programs": {
+            "22": {
+              "avg_ns_per_run": 3818.0,
+              "bytes_jited": 1008,
+              "bytes_xlated": 1792,
+              "id": 22,
+              "name": "event_exit_acct",
+              "run_cnt_delta": 1,
+              "run_time_ns_delta": 3818,
+              "type": "kprobe"
+            },
+            "24": {
+              "avg_ns_per_run": 4151.25,
+              "bytes_jited": 7313,
+              "bytes_xlated": 11312,
+              "id": 24,
+              "name": "event_wake_up_n",
+              "run_cnt_delta": 4,
+              "run_time_ns_delta": 16605,
+              "type": "kprobe"
+            },
+            "25": {
+              "avg_ns_per_run": 10917.0,
+              "bytes_jited": 11213,
+              "bytes_xlated": 20216,
+              "id": 25,
+              "name": "event_execve",
+              "run_cnt_delta": 1,
+              "run_time_ns_delta": 10917,
+              "type": "tracepoint"
+            },
+            "28": {
+              "avg_ns_per_run": 1777.0,
+              "bytes_jited": 1534,
+              "bytes_xlated": 2560,
+              "id": 28,
+              "name": "tg_kp_bprm_comm",
+              "run_cnt_delta": 1,
+              "run_time_ns_delta": 1777,
+              "type": "kprobe"
+            },
+            "29": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 313,
+              "bytes_xlated": 504,
+              "id": 29,
+              "name": "execve_map_upda",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "socket_filter"
+            }
+          },
+          "summary": {
+            "active_programs": 4,
+            "avg_ns_per_run": 4731.0,
+            "total_events": 7,
+            "total_run_time_ns": 33117
+          }
+        },
+        "description": "rapid loopback TCP connect storm",
+        "duration_s": 30.718348555000006,
+        "events_per_sec": 0.22787683353051263,
+        "events_total": 7,
+        "kind": "connect_storm",
+        "metric": "ops/s",
+        "name": "connect_storm",
+        "ops_per_sec": 2488.2848068197522,
+        "ops_total": 76436.0,
+        "stderr_tail": "transient_connect_failures=27",
+        "stdout_tail": "",
+        "system_cpu": {
+          "busy_pct": 8.150993819943208
+        }
+      }
+    ]
+  },
+  "comparison": {
+    "comparable": true,
+    "workloads": [
+      {
+        "agent_cpu_delta_pct": 24.409469599330112,
+        "app_throughput_delta_pct": 3.9220712994358577,
+        "baseline_agent_cpu_pct": 8.466627601646916,
+        "baseline_events_per_sec": 0.22787683353051263,
+        "baseline_ops_per_sec": 2488.2848068197522,
+        "bpf_avg_ns_delta_pct": 8.545460035631255,
+        "events_per_sec_delta_pct": -0.2700920056286957,
+        "name": "connect_storm",
+        "post_agent_cpu_pct": 10.533286492159412,
+        "post_events_per_sec": 0.2272613564204669,
+        "post_ops_per_sec": 2585.8771110762527
+      },
+      {
+        "agent_cpu_delta_pct": 49.99836673514114,
+        "app_throughput_delta_pct": -0.6293089459934652,
+        "baseline_agent_cpu_pct": 0.06666616227714948,
+        "baseline_events_per_sec": 0.42478976829076354,
+        "baseline_ops_per_sec": 1144689.1576471261,
+        "bpf_avg_ns_delta_pct": -0.6762015956411709,
+        "events_per_sec_delta_pct": 0.953619110326878,
+        "name": "file_io",
+        "post_agent_cpu_pct": 0.099998154580723,
+        "post_events_per_sec": 0.4288406446998975,
+        "post_ops_per_sec": 1137485.5263742355
+      },
+      {
+        "agent_cpu_delta_pct": 0.17194006712103715,
+        "app_throughput_delta_pct": -1.0813258731787616,
+        "baseline_agent_cpu_pct": 112.49975268054371,
+        "baseline_events_per_sec": 0.2666666559377782,
+        "baseline_ops_per_sec": 209978.92488518127,
+        "bpf_avg_ns_delta_pct": -7.706084888909482,
+        "events_per_sec_delta_pct": -25.000008377498734,
+        "name": "open_storm",
+        "post_agent_cpu_pct": 112.69318483081364,
+        "post_events_per_sec": 0.19999996961333794,
+        "post_ops_per_sec": 207708.3684421752
+      },
+      {
+        "agent_cpu_delta_pct": 11.290294134903853,
+        "app_throughput_delta_pct": 4.876405890967195,
+        "baseline_agent_cpu_pct": 10.333312329842691,
+        "baseline_events_per_sec": 723.0290022727866,
+        "baseline_ops_per_sec": 180.57394368553324,
+        "bpf_avg_ns_delta_pct": 3.5890035311034665,
+        "events_per_sec_delta_pct": 4.797708581913383,
+        "name": "stress_exec",
+        "post_agent_cpu_pct": 11.499973685760217,
+        "post_events_per_sec": 757.7178267645508,
+        "post_ops_per_sec": 189.37946211296637
+      }
+    ]
+  },
+  "duration_s": 30,
+  "generated_at": "2026-03-12T04:42:23.194335+00:00",
+  "host": {
+    "git_sha": "unknown",
+    "hostname": "virtme-ng",
+    "kernel": "7.0.0-rc2-ge52504a75c05-dirty",
+    "platform": "Linux-7.0.0-rc2-ge52504a75c05-dirty-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "limitations": [
+    "events_total and events_per_sec are derived from aggregate BPF run_cnt deltas, so a single application operation can increment multiple program counters."
+  ],
+  "mode": "tetragon_daemon",
+  "policy_dir": "/tmp/tetragon-policy-jb9yy08b",
+  "policy_matches": {
+    "24": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tetragon/bpf_fork/event_wake_up_new_task.policy.yaml",
+    "25": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tetragon/bpf_execve_event/event_execve.policy.yaml",
+    "29": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tetragon/bpf_execve_map_update/execve_map_update.policy.yaml"
+  },
+  "policy_paths": [
+    "/tmp/tetragon-policy-jb9yy08b/tetragon-e2e-tracepoint.yaml",
+    "/tmp/tetragon-policy-jb9yy08b/tetragon-e2e-kprobes.yaml"
+  ],
+  "policy_summary": {
+    "configured_programs": 3,
+    "fallback_programs": 2
+  },
+  "post_rejit": {
+    "summary": {
+      "agent_cpu_total_pct": {
+        "count": 4,
+        "max": 112.69318483081364,
+        "mean": 33.7066107908285,
+        "median": 11.016630088959815,
+        "min": 0.099998154580723
+      },
+      "app_throughput": {
+        "count": 4,
+        "max": 1137485.5263742355,
+        "mean": 336992.2878474,
+        "median": 105147.12277662574,
+        "min": 189.37946211296637
+      },
+      "bpf_avg_ns_per_run": {
+        "count": 4,
+        "max": 5135.285714285715,
+        "mean": 3958.060422521527,
+        "median": 4103.144654566864,
+        "min": 2490.6666666666665
+      },
+      "events_per_sec": {
+        "count": 4,
+        "max": 757.7178267645508,
+        "mean": 189.6434821838211,
+        "median": 0.3280510005601822,
+        "min": 0.19999996961333794
+      },
+      "system_cpu_busy_pct": {
+        "count": 4,
+        "max": 99.09774436090225,
+        "mean": 42.54890536688955,
+        "median": 30.680055974406976,
+        "min": 9.737765157841993
+      }
+    },
+    "workloads": [
+      {
+        "agent_cpu": {
+          "sys_pct": 1.4333300535875053,
+          "total_pct": 11.499973685760217,
+          "user_pct": 10.066643632172712
+        },
+        "app_throughput": 189.37946211296637,
+        "bpf": {
+          "programs": {
+            "22": {
+              "avg_ns_per_run": 3130.3489354214325,
+              "bytes_jited": 1008,
+              "bytes_xlated": 1792,
+              "id": 22,
+              "name": "event_exit_acct",
+              "run_cnt_delta": 5683,
+              "run_time_ns_delta": 17789773,
+              "type": "kprobe"
+            },
+            "24": {
+              "avg_ns_per_run": 4465.701143359718,
+              "bytes_jited": 7313,
+              "bytes_xlated": 11312,
+              "id": 24,
+              "name": "event_wake_up_n",
+              "run_cnt_delta": 5685,
+              "run_time_ns_delta": 25387511,
+              "type": "kprobe"
+            },
+            "25": {
+              "avg_ns_per_run": 5916.789371810663,
+              "bytes_jited": 11213,
+              "bytes_xlated": 20216,
+              "id": 25,
+              "name": "event_execve",
+              "run_cnt_delta": 5683,
+              "run_time_ns_delta": 33625114,
+              "type": "tracepoint"
+            },
+            "28": {
+              "avg_ns_per_run": 465.51451698046804,
+              "bytes_jited": 1534,
+              "bytes_xlated": 2560,
+              "id": 28,
+              "name": "tg_kp_bprm_comm",
+              "run_cnt_delta": 5683,
+              "run_time_ns_delta": 2645519,
+              "type": "kprobe"
+            },
+            "29": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 313,
+              "bytes_xlated": 504,
+              "id": 29,
+              "name": "execve_map_upda",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "socket_filter"
+            }
+          },
+          "summary": {
+            "active_programs": 4,
+            "avg_ns_per_run": 3494.6739245183426,
+            "total_events": 22734,
+            "total_run_time_ns": 79447917
+          }
+        },
+        "description": "stress-ng execve workload",
+        "duration_s": 30.00325344999999,
+        "events_per_sec": 757.7178267645508,
+        "events_total": 22734,
+        "kind": "exec_storm",
+        "metric": "bogo-ops/s",
+        "name": "stress_exec",
+        "ops_per_sec": 189.37946211296637,
+        "ops_total": 5682.0,
+        "stderr_tail": "fallback=rapid_exec_loop",
+        "stdout_tail": "",
+        "system_cpu": {
+          "busy_pct": 11.485216202358572
+        }
+      },
+      {
+        "agent_cpu": {
+          "sys_pct": 0.033332718193574334,
+          "total_pct": 0.099998154580723,
+          "user_pct": 0.06666543638714867
+        },
+        "app_throughput": 1137485.5263742355,
+        "bpf": {
+          "programs": {
+            "22": {
+              "avg_ns_per_run": 6871.333333333333,
+              "bytes_jited": 1008,
+              "bytes_xlated": 1792,
+              "id": 22,
+              "name": "event_exit_acct",
+              "run_cnt_delta": 3,
+              "run_time_ns_delta": 20614,
+              "type": "kprobe"
+            },
+            "24": {
+              "avg_ns_per_run": 3876.1666666666665,
+              "bytes_jited": 7313,
+              "bytes_xlated": 11312,
+              "id": 24,
+              "name": "event_wake_up_n",
+              "run_cnt_delta": 6,
+              "run_time_ns_delta": 23257,
+              "type": "kprobe"
+            },
+            "25": {
+              "avg_ns_per_run": 7960.0,
+              "bytes_jited": 11213,
+              "bytes_xlated": 20216,
+              "id": 25,
+              "name": "event_execve",
+              "run_cnt_delta": 2,
+              "run_time_ns_delta": 15920,
+              "type": "tracepoint"
+            },
+            "28": {
+              "avg_ns_per_run": 730.0,
+              "bytes_jited": 1534,
+              "bytes_xlated": 2560,
+              "id": 28,
+              "name": "tg_kp_bprm_comm",
+              "run_cnt_delta": 2,
+              "run_time_ns_delta": 1460,
+              "type": "kprobe"
+            },
+            "29": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 313,
+              "bytes_xlated": 504,
+              "id": 29,
+              "name": "execve_map_upda",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "socket_filter"
+            }
+          },
+          "summary": {
+            "active_programs": 4,
+            "avg_ns_per_run": 4711.615384615385,
+            "total_events": 13,
+            "total_run_time_ns": 61251
+          }
+        },
+        "description": "fio or dd file workload",
+        "duration_s": 30.314290776000007,
+        "events_per_sec": 0.4288406446998975,
+        "events_total": 13,
+        "kind": "file_io",
+        "metric": "ops/s",
+        "name": "file_io",
+        "ops_per_sec": 1137485.5263742355,
+        "ops_total": 34482067.0,
+        "stderr_tail": "",
+        "stdout_tail": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 3.938415,\n        \"750\" : 92.025234,\n        \"1000\" : 3.671856\n      },\n      \"latency_us\" : {\n        \"2\" : 0.242802,\n        \"4\" : 0.020524,\n        \"10\" : 0.100945,\n        \"20\" : 0.010000,\n        \"50\" : 0.010000,\n        \"100\" : 0.000000,\n        \"250\" : 0.010000,\n        \"500\" : 0.010000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}",
+        "system_cpu": {
+          "busy_pct": 49.87489574645538
+        }
+      },
+      {
+        "agent_cpu": {
+          "sys_pct": 10.19938318788198,
+          "total_pct": 112.69318483081364,
+          "user_pct": 102.49380164293166
+        },
+        "app_throughput": 207708.3684421752,
+        "bpf": {
+          "programs": {
+            "22": {
+              "avg_ns_per_run": 2338.0,
+              "bytes_jited": 1008,
+              "bytes_xlated": 1792,
+              "id": 22,
+              "name": "event_exit_acct",
+              "run_cnt_delta": 1,
+              "run_time_ns_delta": 2338,
+              "type": "kprobe"
+            },
+            "24": {
+              "avg_ns_per_run": 2074.3333333333335,
+              "bytes_jited": 7313,
+              "bytes_xlated": 11312,
+              "id": 24,
+              "name": "event_wake_up_n",
+              "run_cnt_delta": 3,
+              "run_time_ns_delta": 6223,
+              "type": "kprobe"
+            },
+            "25": {
+              "avg_ns_per_run": 5772.0,
+              "bytes_jited": 11213,
+              "bytes_xlated": 20216,
+              "id": 25,
+              "name": "event_execve",
+              "run_cnt_delta": 1,
+              "run_time_ns_delta": 5772,
+              "type": "tracepoint"
+            },
+            "28": {
+              "avg_ns_per_run": 611.0,
+              "bytes_jited": 1534,
+              "bytes_xlated": 2560,
+              "id": 28,
+              "name": "tg_kp_bprm_comm",
+              "run_cnt_delta": 1,
+              "run_time_ns_delta": 611,
+              "type": "kprobe"
+            },
+            "29": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 313,
+              "bytes_xlated": 504,
+              "id": 29,
+              "name": "execve_map_upda",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "socket_filter"
+            }
+          },
+          "summary": {
+            "active_programs": 4,
+            "avg_ns_per_run": 2490.6666666666665,
+            "total_events": 6,
+            "total_run_time_ns": 14944
+          }
+        },
+        "description": "stress-ng open workload",
+        "duration_s": 30.000004558,
+        "events_per_sec": 0.19999996961333794,
+        "events_total": 6,
+        "kind": "open_storm",
+        "metric": "bogo-ops/s",
+        "name": "open_storm",
+        "ops_per_sec": 207708.3684421752,
+        "ops_total": 6231252.0,
+        "stderr_tail": "",
+        "stdout_tail": "",
+        "system_cpu": {
+          "busy_pct": 99.09774436090225
+        }
+      },
+      {
+        "agent_cpu": {
+          "sys_pct": 1.1333282934601898,
+          "total_pct": 10.533286492159412,
+          "user_pct": 9.399958198699222
+        },
+        "app_throughput": 2585.8771110762527,
+        "bpf": {
+          "programs": {
+            "22": {
+              "avg_ns_per_run": 5908.0,
+              "bytes_jited": 1008,
+              "bytes_xlated": 1792,
+              "id": 22,
+              "name": "event_exit_acct",
+              "run_cnt_delta": 1,
+              "run_time_ns_delta": 5908,
+              "type": "kprobe"
+            },
+            "24": {
+              "avg_ns_per_run": 3999.25,
+              "bytes_jited": 7313,
+              "bytes_xlated": 11312,
+              "id": 24,
+              "name": "event_wake_up_n",
+              "run_cnt_delta": 4,
+              "run_time_ns_delta": 15997,
+              "type": "kprobe"
+            },
+            "25": {
+              "avg_ns_per_run": 12007.0,
+              "bytes_jited": 11213,
+              "bytes_xlated": 20216,
+              "id": 25,
+              "name": "event_execve",
+              "run_cnt_delta": 1,
+              "run_time_ns_delta": 12007,
+              "type": "tracepoint"
+            },
+            "28": {
+              "avg_ns_per_run": 2035.0,
+              "bytes_jited": 1534,
+              "bytes_xlated": 2560,
+              "id": 28,
+              "name": "tg_kp_bprm_comm",
+              "run_cnt_delta": 1,
+              "run_time_ns_delta": 2035,
+              "type": "kprobe"
+            },
+            "29": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 313,
+              "bytes_xlated": 504,
+              "id": 29,
+              "name": "execve_map_upda",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "socket_filter"
+            }
+          },
+          "summary": {
+            "active_programs": 4,
+            "avg_ns_per_run": 5135.285714285715,
+            "total_events": 7,
+            "total_run_time_ns": 35947
+          }
+        },
+        "description": "rapid loopback TCP connect storm",
+        "duration_s": 30.801541055,
+        "events_per_sec": 0.2272613564204669,
+        "events_total": 7,
+        "kind": "connect_storm",
+        "metric": "ops/s",
+        "name": "connect_storm",
+        "ops_per_sec": 2585.8771110762527,
+        "ops_total": 79649.0,
+        "stderr_tail": "transient_connect_failures=28",
+        "stdout_tail": "",
+        "system_cpu": {
+          "busy_pct": 9.737765157841993
+        }
+      }
+    ]
+  },
+  "programs": [
+    {
+      "id": 22,
+      "name": "event_exit_acct",
+      "rejit_avg_ns": 3132.6710618846696,
+      "rejit_events": 5688,
+      "sites": 6,
+      "speedup": 0.9672967605263934,
+      "stock_avg_ns": 3030.2225699558176,
+      "stock_events": 5432,
+      "type": "kprobe"
+    },
+    {
+      "id": 24,
+      "name": "event_wake_up_n",
+      "rejit_avg_ns": 4463.493857493858,
+      "rejit_events": 5698,
+      "sites": 13,
+      "speedup": 0.952933729923043,
+      "stock_avg_ns": 4253.413850110213,
+      "stock_events": 5444,
+      "type": "kprobe"
+    },
+    {
+      "id": 25,
+      "name": "event_execve",
+      "rejit_avg_ns": 5918.553367328996,
+      "rejit_events": 5687,
+      "sites": 29,
+      "speedup": 0.9696361743169968,
+      "stock_avg_ns": 5738.8434445878665,
+      "stock_events": 5423,
+      "type": "tracepoint"
+    },
+    {
+      "id": 28,
+      "name": "tg_kp_bprm_comm",
+      "rejit_avg_ns": 465.90909090909093,
+      "rejit_events": 5687,
+      "sites": 3,
+      "speedup": 1.0154462969376143,
+      "stock_avg_ns": 473.1056610732067,
+      "stock_events": 5423,
+      "type": "kprobe"
+    },
+    {
+      "id": 29,
+      "name": "execve_map_upda",
+      "rejit_avg_ns": null,
+      "rejit_events": 0,
+      "sites": 1,
+      "speedup": null,
+      "stock_avg_ns": null,
+      "stock_events": 0,
+      "type": "socket_filter"
+    }
+  ],
+  "recompile_results": {
+    "22": {
+      "applied": true,
+      "counts": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 6,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 6,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "error": "",
+      "policy_file": null,
+      "policy_mode": "all",
+      "program_name": "event_exit_acct",
+      "stderr_tail": "",
+      "stdout_tail": "Accepted 6 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n  extract:0\n  zeroext:0\n  endian: 0\n  bflip:  6\nApplied 6 v5 rule(s) via BPF_PROG_JIT_RECOMPILE\n"
+    },
+    "24": {
+      "applied": false,
+      "counts": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "error": "warning: policy site branch-flip insn 1091 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 589 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 680 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 605 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 580 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tetragon/bpf_fork/event_wake_up_new_task.policy.yaml",
+      "policy_mode": "config",
+      "program_name": "event_wake_up_new_task",
+      "stderr_tail": "warning: policy site branch-flip insn 1091 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 589 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 680 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 605 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 580 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules\n\n",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n  extract:0\n  zeroext:0\n  endian: 0\n  bflip:  0\nPolicy filter kept 0 of 13 v5 rule(s)\n"
+    },
+    "25": {
+      "applied": false,
+      "counts": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "error": "warning: policy site cmov insn 3886 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3881 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3783 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3778 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3775 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3675 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3577 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3575 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3572 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3469 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3371 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3369 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3366 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3363 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3263 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3474 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3261 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3255 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3058 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3056 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3052 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3049 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3878 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2955 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2953 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2949 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3672 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2891 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2888 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3258 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2690 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3159 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2946 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2662 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3678 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2897 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2560 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2485 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2308 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3155 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2303 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2141 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3569 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 1581 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3152 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2460 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 1519 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3161 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2469 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 1457 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3472 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 1271 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3680 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 1195 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3466 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 1123 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2895 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2327 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 1333 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 1049 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3781 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 941 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 921 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3884 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 547 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 1395 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 543 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 433 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 420 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tetragon/bpf_execve_event/event_execve.policy.yaml",
+      "policy_mode": "config",
+      "program_name": "event_execve",
+      "stderr_tail": " skipping\nwarning: policy site cmov insn 2891 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2888 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3258 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2690 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3159 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2946 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2662 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3678 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2897 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2560 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2485 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2308 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3155 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2303 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2141 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3569 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 1581 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3152 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2460 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 1519 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3161 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2469 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 1457 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3472 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 1271 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3680 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 1195 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3466 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 1123 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2895 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2327 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 1333 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 1049 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3781 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 941 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 921 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3884 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 547 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 1395 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 543 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 433 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 420 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules\n\n",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n  extract:0\n  zeroext:0\n  endian: 0\n  bflip:  0\nPolicy filter kept 0 of 29 v5 rule(s)\n"
+    },
+    "28": {
+      "applied": true,
+      "counts": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 3,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 3,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "error": "",
+      "policy_file": null,
+      "policy_mode": "all",
+      "program_name": "tg_kp_bprm_comm",
+      "stderr_tail": "",
+      "stdout_tail": "Accepted 3 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n  extract:0\n  zeroext:0\n  endian: 0\n  bflip:  3\nApplied 3 v5 rule(s) via BPF_PROG_JIT_RECOMPILE\n"
+    },
+    "29": {
+      "applied": false,
+      "counts": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "error": "warning: policy site cmov insn 8 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tetragon/bpf_execve_map_update/execve_map_update.policy.yaml",
+      "policy_mode": "config",
+      "program_name": "execve_map_update",
+      "stderr_tail": "warning: policy site cmov insn 8 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules\n\n",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n  extract:0\n  zeroext:0\n  endian: 0\n  bflip:  0\nPolicy filter kept 0 of 1 v5 rule(s)\n"
+    }
+  },
+  "recompile_summary": {
+    "applied": true,
+    "applied_programs": 2,
+    "errors": [
+      "warning: policy site branch-flip insn 1091 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 589 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 680 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 605 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 580 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "warning: policy site cmov insn 3886 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3881 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3783 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3778 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3775 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3675 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3577 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3575 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3572 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3469 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3371 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3369 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3366 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3363 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3263 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3474 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3261 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3255 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3058 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3056 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3052 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3049 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3878 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2955 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2953 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2949 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3672 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2891 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2888 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3258 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2690 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3159 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2946 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2662 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3678 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2897 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2560 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2485 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2308 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3155 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2303 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2141 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3569 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 1581 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3152 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2460 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 1519 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3161 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2469 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 1457 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3472 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 1271 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3680 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 1195 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3466 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 1123 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2895 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 2327 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 1333 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 1049 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3781 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 941 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 921 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 3884 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 547 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 1395 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 543 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 433 action=apply was not found in the live program; skipping\nwarning: policy site cmov insn 420 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "warning: policy site cmov insn 8 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules"
+    ],
+    "requested_programs": 5
+  },
+  "scan_results": {
+    "22": {
+      "error": "",
+      "program_name": "event_exit_acct",
+      "sites": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 6,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 6,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "{\"program\":{\"name\":\"event_exit_acct\",\"insn_cnt\":224,\"prog_tag\":\"7e516d9d3499652d\"},\"summary\":{\"total_sites\":6,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"extract_sites\":0,\"bitfield_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":6},\"sites\":[{\"site_id\":\"branch-flip:28:branch-flip\",\"family\":\"branch-flip\",\"insn\":28,\"start_insn\":28,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:67:branch-flip\",\"family\":\"branch-flip\",\"insn\":67,\"start_insn\":67,\"pattern_kind\":\"branch-flip\",\"site_len\":5,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:95:branch-flip\",\"family\":\"branch-flip\",\"insn\":95,\"start_insn\":95,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:134:branch-flip\",\"family\":\"branch-flip\",\"insn\":134,\"start_insn\":134,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:192:branch-flip\",\"family\":\"branch-flip\",\"insn\":192,\"start_insn\":192,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:211:branch-flip\",\"family\":\"branch-flip\",\"insn\":211,\"start_insn\":211,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2}]}\n"
+    },
+    "24": {
+      "error": "",
+      "program_name": "event_wake_up_n",
+      "sites": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 13,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 13,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "{\"program\":{\"name\":\"event_wake_up_n\",\"insn_cnt\":1414,\"prog_tag\":\"2a0eaab979f2e440\"},\"summary\":{\"total_sites\":13,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"extract_sites\":0,\"bitfield_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":13},\"sites\":[{\"site_id\":\"branch-flip:141:branch-flip\",\"family\":\"branch-flip\",\"insn\":141,\"start_insn\":141,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:278:branch-flip\",\"family\":\"branch-flip\",\"insn\":278,\"start_insn\":278,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:295:branch-flip\",\"family\":\"branch-flip\",\"insn\":295,\"start_insn\":295,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:911:branch-flip\",\"family\":\"branch-flip\",\"insn\":911,\"start_insn\":911,\"pattern_kind\":\"branch-flip\",\"site_len\":5,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:1037:branch-flip\",\"family\":\"branch-flip\",\"insn\":1037,\"start_insn\":1037,\"pattern_kind\":\"branch-flip\",\"site_len\":5,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:1104:branch-flip\",\"family\":\"branch-flip\",\"insn\":1104,\"start_insn\":1104,\"pattern_kind\":\"branch-flip\",\"site_len\":4,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:1129:branch-flip\",\"family\":\"branch-flip\",\"insn\":1129,\"start_insn\":1129,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:1186:branch-flip\",\"family\":\"branch-flip\",\"insn\":1186,\"start_insn\":1186,\"pattern_kind\":\"branch-flip\",\"site_len\":5,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:1214:branch-flip\",\"family\":\"branch-flip\",\"insn\":1214,\"start_insn\":1214,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:1252:branch-flip\",\"family\":\"branch-flip\",\"insn\":1252,\"start_insn\":1252,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:1303:branch-flip\",\"family\":\"branch-flip\",\"insn\":1303,\"start_insn\":1303,\"pattern_kind\":\"branch-flip\",\"site_len\":5,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:1332:branch-flip\",\"family\":\"branch-flip\",\"insn\":1332,\"start_insn\":1332,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:1372:branch-flip\",\"family\":\"branch-flip\",\"insn\":1372,\"start_insn\":1372,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2}]}\n"
+    },
+    "25": {
+      "error": "",
+      "program_name": "event_execve",
+      "sites": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 14,
+        "cmov_sites": 15,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 29,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": ":551,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"cmov:1058:cond-select-64\",\"family\":\"cmov\",\"insn\":1058,\"start_insn\":1058,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"branch-flip:1084:branch-flip\",\"family\":\"branch-flip\",\"insn\":1084,\"start_insn\":1084,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"cmov:1244:cond-select-64\",\"family\":\"cmov\",\"insn\":1244,\"start_insn\":1244,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1249:cond-select-64\",\"family\":\"cmov\",\"insn\":1249,\"start_insn\":1249,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1267:cond-select-64\",\"family\":\"cmov\",\"insn\":1267,\"start_insn\":1267,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"branch-flip:1563:branch-flip\",\"family\":\"branch-flip\",\"insn\":1563,\"start_insn\":1563,\"pattern_kind\":\"branch-flip\",\"site_len\":5,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"cmov:1572:cond-select-64\",\"family\":\"cmov\",\"insn\":1572,\"start_insn\":1572,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1600:cond-select-64\",\"family\":\"cmov\",\"insn\":1600,\"start_insn\":1600,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1781:cond-select-64\",\"family\":\"cmov\",\"insn\":1781,\"start_insn\":1781,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1784:cond-select-64\",\"family\":\"cmov\",\"insn\":1784,\"start_insn\":1784,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1787:cond-select-64\",\"family\":\"cmov\",\"insn\":1787,\"start_insn\":1787,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1790:cond-select-64\",\"family\":\"cmov\",\"insn\":1790,\"start_insn\":1790,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"branch-flip:1839:branch-flip\",\"family\":\"branch-flip\",\"insn\":1839,\"start_insn\":1839,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:2034:branch-flip\",\"family\":\"branch-flip\",\"insn\":2034,\"start_insn\":2034,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"cmov:2167:cond-select-64\",\"family\":\"cmov\",\"insn\":2167,\"start_insn\":2167,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:2170:cond-select-64\",\"family\":\"cmov\",\"insn\":2170,\"start_insn\":2170,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"branch-flip:2242:branch-flip\",\"family\":\"branch-flip\",\"insn\":2242,\"start_insn\":2242,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"cmov:2306:cond-select-64\",\"family\":\"cmov\",\"insn\":2306,\"start_insn\":2306,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"branch-flip:2336:branch-flip\",\"family\":\"branch-flip\",\"insn\":2336,\"start_insn\":2336,\"pattern_kind\":\"branch-flip\",\"site_len\":5,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"cmov:2390:cond-select-64\",\"family\":\"cmov\",\"insn\":2390,\"start_insn\":2390,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"branch-flip:2416:branch-flip\",\"family\":\"branch-flip\",\"insn\":2416,\"start_insn\":2416,\"pattern_kind\":\"branch-flip\",\"site_len\":5,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:2444:branch-flip\",\"family\":\"branch-flip\",\"insn\":2444,\"start_insn\":2444,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:2483:branch-flip\",\"family\":\"branch-flip\",\"insn\":2483,\"start_insn\":2483,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2}]}\n"
+    },
+    "28": {
+      "error": "",
+      "program_name": "tg_kp_bprm_comm",
+      "sites": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 3,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 3,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "{\"program\":{\"name\":\"tg_kp_bprm_comm\",\"insn_cnt\":320,\"prog_tag\":\"32a909870df35447\"},\"summary\":{\"total_sites\":3,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"extract_sites\":0,\"bitfield_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":3},\"sites\":[{\"site_id\":\"branch-flip:24:branch-flip\",\"family\":\"branch-flip\",\"insn\":24,\"start_insn\":24,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:291:branch-flip\",\"family\":\"branch-flip\",\"insn\":291,\"start_insn\":291,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:308:branch-flip\",\"family\":\"branch-flip\",\"insn\":308,\"start_insn\":308,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2}]}\n"
+    },
+    "29": {
+      "error": "",
+      "program_name": "execve_map_upda",
+      "sites": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 1,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 1,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "{\"program\":{\"name\":\"execve_map_upda\",\"insn_cnt\":63,\"prog_tag\":\"03d4702765d04c43\"},\"summary\":{\"total_sites\":1,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"extract_sites\":0,\"bitfield_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":1},\"sites\":[{\"site_id\":\"branch-flip:8:branch-flip\",\"family\":\"branch-flip\",\"insn\":8,\"start_insn\":8,\"pattern_kind\":\"branch-flip\",\"site_len\":5,\"canonical_form\":8,\"native_choice\":2}]}\n"
+    }
+  },
+  "setup": {
+    "returncode": 0,
+    "stderr_tail": "",
+    "stdout_tail": "TETRAGON_BINARY=/usr/local/bin/tetragon\nTETRA_BINARY=/usr/local/bin/tetra\nSTRESS_NG_BINARY=/bin/stress-ng",
+    "tetra_binary": "/usr/local/bin/tetra",
+    "tetragon_binary": "/usr/local/bin/tetragon"
+  },
+  "smoke": false,
+  "tetragon_binary": "/usr/local/bin/tetragon",
+  "tetragon_launch_command": [
+    "/usr/local/bin/tetragon",
+    "--tracing-policy-dir",
+    "/tmp/tetragon-policy-jb9yy08b"
+  ],
+  "tetragon_programs": [
+    {
+      "btf_id": 76,
+      "bytes_jited": 1008,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 1792,
+      "gpl_compatible": true,
+      "id": 22,
+      "jited": true,
+      "loaded_at": 1773290295,
+      "map_ids": [
+        11,
+        45,
+        10,
+        17,
+        18,
+        22,
+        13
+      ],
+      "name": "event_exit_acct_process",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 55,
+          "pid": 141
+        },
+        {
+          "fd": 66,
+          "pid": 141
+        }
+      ],
+      "owner_pids": [
+        141
+      ],
+      "pids": [
+        {
+          "comm": "tetragon",
+          "pid": 141
+        }
+      ],
+      "run_cnt": 3,
+      "run_time_ns": 11917,
+      "tag": "7e516d9d3499652d",
+      "type": "kprobe",
+      "uid": 0
+    },
+    {
+      "btf_id": 122,
+      "bytes_jited": 7313,
+      "bytes_memlock": 12288,
+      "bytes_xlated": 11312,
+      "gpl_compatible": true,
+      "id": 24,
+      "jited": true,
+      "loaded_at": 1773290295,
+      "map_ids": [
+        11,
+        68,
+        13,
+        10,
+        90,
+        84,
+        91,
+        85,
+        17,
+        18,
+        22
+      ],
+      "name": "event_wake_up_new_task",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 61,
+          "pid": 141
+        },
+        {
+          "fd": 67,
+          "pid": 141
+        }
+      ],
+      "owner_pids": [
+        141
+      ],
+      "pids": [
+        {
+          "comm": "tetragon",
+          "pid": 141
+        }
+      ],
+      "run_cnt": 4,
+      "run_time_ns": 22958,
+      "tag": "2a0eaab979f2e440",
+      "type": "kprobe",
+      "uid": 0
+    },
+    {
+      "btf_id": 171,
+      "bytes_jited": 11213,
+      "bytes_memlock": 20480,
+      "bytes_xlated": 20216,
+      "gpl_compatible": true,
+      "id": 25,
+      "jited": true,
+      "loaded_at": 1773290295,
+      "map_ids": [
+        112,
+        11,
+        20,
+        19,
+        12,
+        14,
+        21,
+        158,
+        136,
+        10,
+        122,
+        15,
+        116,
+        18,
+        17,
+        22
+      ],
+      "name": "event_execve",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 78,
+          "pid": 141
+        },
+        {
+          "fd": 84,
+          "pid": 141
+        }
+      ],
+      "owner_pids": [
+        141
+      ],
+      "pids": [
+        {
+          "comm": "tetragon",
+          "pid": 141
+        }
+      ],
+      "run_cnt": 4,
+      "run_time_ns": 30200,
+      "tag": "e910c4d9d5e66bd7",
+      "type": "tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 207,
+      "bytes_jited": 1534,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 2560,
+      "gpl_compatible": true,
+      "id": 28,
+      "jited": true,
+      "loaded_at": 1773290295,
+      "map_ids": [
+        11,
+        185,
+        12,
+        14
+      ],
+      "name": "tg_kp_bprm_committing_creds",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 42,
+          "pid": 141
+        },
+        {
+          "fd": 50,
+          "pid": 141
+        }
+      ],
+      "owner_pids": [
+        141
+      ],
+      "pids": [
+        {
+          "comm": "tetragon",
+          "pid": 141
+        }
+      ],
+      "run_cnt": 4,
+      "run_time_ns": 6303,
+      "tag": "32a909870df35447",
+      "type": "kprobe",
+      "uid": 0
+    },
+    {
+      "btf_id": 249,
+      "bytes_jited": 313,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 504,
+      "gpl_compatible": true,
+      "id": 29,
+      "jited": true,
+      "loaded_at": 1773290295,
+      "map_ids": [
+        16,
+        11
+      ],
+      "name": "execve_map_update",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 46,
+          "pid": 141
+        }
+      ],
+      "owner_pids": [
+        141
+      ],
+      "pids": [
+        {
+          "comm": "tetragon",
+          "pid": 141
+        }
+      ],
+      "tag": "03d4702765d04c43",
+      "type": "socket_filter",
+      "uid": 0
+    }
+  ]
+}

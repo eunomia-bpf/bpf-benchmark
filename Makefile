@@ -57,11 +57,17 @@ VM_XDP_OUTPUT_MD := $(E2E_RESULTS_DIR)/xdp_forwarding.latest.md
 BENCH_FLAGS := $(foreach b,$(BENCH),--bench $(b))
 
 # Named policy set support: POLICY=default|all-apply|baseline
+# default → micro/policies/ (canonical per-benchmark policies)
+# all-apply → micro/policies/variants/all-apply/ (all sites applied, for ablation)
+# baseline → micro/policies/variants/baseline/ (no sites, stock kernel)
 POLICY ?= default
-POLICY_DIR_BASE := $(ROOT_DIR)/config/policies
-POLICY_DIR := $(POLICY_DIR_BASE)/$(POLICY)
-# Pass --policy-dir only when a named policy dir exists (non-default paths override micro/policies)
-POLICY_DIR_FLAG := $(if $(wildcard $(POLICY_DIR)/.),--policy-dir "$(POLICY_DIR)",)
+ifeq ($(POLICY),default)
+  POLICY_DIR := $(ROOT_DIR)/micro/policies
+else
+  POLICY_DIR := $(ROOT_DIR)/micro/policies/variants/$(POLICY)
+endif
+# Pass --policy-dir only when a non-default policy is requested
+POLICY_DIR_FLAG := $(if $(filter-out default,$(POLICY)),--policy-dir "$(POLICY_DIR)",)
 
 MICRO_ARGS := --iterations $(ITERATIONS) --warmups $(WARMUPS) --repeat $(REPEAT) $(BENCH_FLAGS)
 LOCAL_SMOKE_ARGS := --bench simple --iterations 1 --warmups 0 --repeat 10
@@ -106,8 +112,10 @@ help:
 	@echo "  REPEAT=N              - Repeat count (default: 200)"
 	@echo "  BENCH=\"name1 name2\"   - Run only specific benchmarks (vm-micro)"
 	@echo "  BZIMAGE=path          - Custom kernel image path"
-	@echo "  POLICY=name           - Named policy set under config/policies/ (default: default)"
-	@echo "                          Options: default | all-apply | baseline"
+	@echo "  POLICY=name           - Named policy set (default: default)"
+	@echo "                          default  → micro/policies/"
+	@echo "                          all-apply → micro/policies/variants/all-apply/"
+	@echo "                          baseline → micro/policies/variants/baseline/"
 	@echo ""
 	@echo "Results are written to:"
 	@echo "  micro/results/        - Micro benchmark results"

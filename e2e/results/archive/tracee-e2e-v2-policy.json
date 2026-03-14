@@ -1,0 +1,2010 @@
+{
+  "baseline": {
+    "summary": {
+      "agent_cpu_total_pct": {
+        "count": 3,
+        "max": 13.649964524424696,
+        "mean": 6.505540906905117,
+        "median": 5.783325612111698,
+        "min": 0.08333258417895709
+      },
+      "app_throughput": {
+        "count": 3,
+        "max": 885409.8751529795,
+        "mean": 296856.917726757,
+        "median": 4979.719281048306,
+        "min": 181.15874624323803
+      },
+      "bpf_avg_ns_per_run": {
+        "count": 3,
+        "max": 70.7445735145859,
+        "mean": 47.545450436749434,
+        "median": 41.52662975567909,
+        "min": 30.365148039983325
+      },
+      "events_per_sec": {
+        "count": 3,
+        "max": 4982.034678025247,
+        "mean": 2267.736312500758,
+        "median": 1815.3039666101395,
+        "min": 5.870292866887363
+      },
+      "system_cpu_busy_pct": {
+        "count": 3,
+        "max": 69.54697268133938,
+        "mean": 43.96520092926964,
+        "median": 49.858215179316105,
+        "min": 12.490414927153449
+      }
+    },
+    "workloads": [
+      {
+        "agent_cpu": {
+          "sys_pct": 1.6333311527001335,
+          "total_pct": 5.783325612111698,
+          "user_pct": 4.149994459411564
+        },
+        "app_throughput": 181.15874624323803,
+        "bpf": {
+          "programs": {
+            "17": {
+              "avg_ns_per_run": 72.27331294525447,
+              "bytes_jited": 246,
+              "bytes_xlated": 264,
+              "id": 17,
+              "name": "tracepoint__raw",
+              "run_cnt_delta": 1984820,
+              "run_time_ns_delta": 143449517,
+              "type": "raw_tracepoint"
+            },
+            "19": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 2518,
+              "bytes_xlated": 4552,
+              "id": 19,
+              "name": "sys_enter_init",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "20": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 17414,
+              "bytes_xlated": 30376,
+              "id": 20,
+              "name": "sys_enter_submi",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "21": {
+              "avg_ns_per_run": 53.12197075805363,
+              "bytes_jited": 274,
+              "bytes_xlated": 320,
+              "id": 21,
+              "name": "tracepoint__raw",
+              "run_cnt_delta": 1984820,
+              "run_time_ns_delta": 105437550,
+              "type": "raw_tracepoint"
+            },
+            "22": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 2101,
+              "bytes_xlated": 3800,
+              "id": 22,
+              "name": "sys_exit_init",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "23": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 11522,
+              "bytes_xlated": 19880,
+              "id": 23,
+              "name": "sys_exit_submit",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "24": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 20392,
+              "bytes_xlated": 31992,
+              "id": 24,
+              "name": "syscall__execve",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "25": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 20363,
+              "bytes_xlated": 32008,
+              "id": 25,
+              "name": "syscall__execve",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "26": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 20651,
+              "bytes_xlated": 32400,
+              "id": 26,
+              "name": "syscall__execve",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "27": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 20619,
+              "bytes_xlated": 32408,
+              "id": 27,
+              "name": "syscall__execve",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "28": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 12263,
+              "bytes_xlated": 18744,
+              "id": 28,
+              "name": "sys_dup_exit_ta",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "29": {
+              "avg_ns_per_run": 3005.9115133694754,
+              "bytes_jited": 19597,
+              "bytes_xlated": 32248,
+              "id": 29,
+              "name": "tracepoint__sch",
+              "run_cnt_delta": 10883,
+              "run_time_ns_delta": 32713335,
+              "type": "raw_tracepoint"
+            },
+            "30": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 58565,
+              "bytes_xlated": 108072,
+              "id": 30,
+              "name": "lkm_seeker_modt",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "34": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 61576,
+              "bytes_xlated": 111768,
+              "id": 34,
+              "name": "lkm_seeker_kset",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "35": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 660,
+              "bytes_xlated": 1048,
+              "id": 35,
+              "name": "lkm_seeker_mod_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            }
+          },
+          "summary": {
+            "active_programs": 3,
+            "avg_ns_per_run": 70.7445735145859,
+            "total_events": 3980523,
+            "total_run_time_ns": 281600402
+          }
+        },
+        "command_template": "stress-ng --exec 4 --exec-method execve --timeout {duration}s --metrics-brief",
+        "drop_counters": {
+          "event_count": 0,
+          "lost_event_count": 0,
+          "lost_write_count": 0
+        },
+        "duration_s": 60.00262325400001,
+        "event_counts": {
+          "execve": 10873,
+          "sched_process_exec": 10871,
+          "security_file_open": 87179
+        },
+        "events_per_sec": 1815.3039666101395,
+        "events_total": 108923,
+        "kind": "exec_storm",
+        "metric": "bogo-ops/s",
+        "name": "exec_storm",
+        "ops_per_sec": 181.15874624323803,
+        "ops_total": 10870.0,
+        "stderr_tail": "fallback=rapid_exec_loop",
+        "stdout_tail": "",
+        "system_cpu": {
+          "busy_pct": 12.490414927153449
+        }
+      },
+      {
+        "agent_cpu": {
+          "sys_pct": 0.03333303367158283,
+          "total_pct": 0.08333258417895709,
+          "user_pct": 0.04999955050737425
+        },
+        "app_throughput": 885409.8751529795,
+        "bpf": {
+          "programs": {
+            "17": {
+              "avg_ns_per_run": 28.85794395113703,
+              "bytes_jited": 246,
+              "bytes_xlated": 264,
+              "id": 17,
+              "name": "tracepoint__raw",
+              "run_cnt_delta": 107300232,
+              "run_time_ns_delta": 3096464081,
+              "type": "raw_tracepoint"
+            },
+            "19": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 2518,
+              "bytes_xlated": 4552,
+              "id": 19,
+              "name": "sys_enter_init",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "20": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 17414,
+              "bytes_xlated": 30376,
+              "id": 20,
+              "name": "sys_enter_submi",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "21": {
+              "avg_ns_per_run": 31.872105355746108,
+              "bytes_jited": 274,
+              "bytes_xlated": 320,
+              "id": 21,
+              "name": "tracepoint__raw",
+              "run_cnt_delta": 107300232,
+              "run_time_ns_delta": 3419884299,
+              "type": "raw_tracepoint"
+            },
+            "22": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 2101,
+              "bytes_xlated": 3800,
+              "id": 22,
+              "name": "sys_exit_init",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "23": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 11522,
+              "bytes_xlated": 19880,
+              "id": 23,
+              "name": "sys_exit_submit",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "24": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 20392,
+              "bytes_xlated": 31992,
+              "id": 24,
+              "name": "syscall__execve",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "25": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 20363,
+              "bytes_xlated": 32008,
+              "id": 25,
+              "name": "syscall__execve",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "26": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 20651,
+              "bytes_xlated": 32400,
+              "id": 26,
+              "name": "syscall__execve",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "27": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 20619,
+              "bytes_xlated": 32408,
+              "id": 27,
+              "name": "syscall__execve",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "28": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 12263,
+              "bytes_xlated": 18744,
+              "id": 28,
+              "name": "sys_dup_exit_ta",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "29": {
+              "avg_ns_per_run": 4443.5,
+              "bytes_jited": 19597,
+              "bytes_xlated": 32248,
+              "id": 29,
+              "name": "tracepoint__sch",
+              "run_cnt_delta": 6,
+              "run_time_ns_delta": 26661,
+              "type": "raw_tracepoint"
+            },
+            "30": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 58565,
+              "bytes_xlated": 108072,
+              "id": 30,
+              "name": "lkm_seeker_modt",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "34": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 61576,
+              "bytes_xlated": 111768,
+              "id": 34,
+              "name": "lkm_seeker_kset",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "35": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 660,
+              "bytes_xlated": 1048,
+              "id": 35,
+              "name": "lkm_seeker_mod_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            }
+          },
+          "summary": {
+            "active_programs": 3,
+            "avg_ns_per_run": 30.365148039983325,
+            "total_events": 214600470,
+            "total_run_time_ns": 6516375041
+          }
+        },
+        "command_template": "fio --name=test --rw=randread --bs=4k --size=100M --runtime={duration} --time_based",
+        "drop_counters": {
+          "event_count": 0,
+          "lost_event_count": 0,
+          "lost_write_count": 0
+        },
+        "duration_s": 60.64433377899999,
+        "event_counts": {
+          "execve": 4,
+          "sched_process_exec": 2,
+          "security_file_open": 350
+        },
+        "events_per_sec": 5.870292866887363,
+        "events_total": 356,
+        "kind": "file_io",
+        "metric": "IOPS",
+        "name": "file_io",
+        "ops_per_sec": 885409.8751529795,
+        "ops_total": 53695092.0,
+        "stderr_tail": "",
+        "stdout_tail": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.010000,\n        \"750\" : 77.965303,\n        \"1000\" : 21.423321\n      },\n      \"latency_us\" : {\n        \"2\" : 0.468114,\n        \"4\" : 0.032832,\n        \"10\" : 0.109816,\n        \"20\" : 0.010000,\n        \"50\" : 0.010000,\n        \"100\" : 0.000000,\n        \"250\" : 0.010000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}",
+        "system_cpu": {
+          "busy_pct": 49.858215179316105
+        }
+      },
+      {
+        "agent_cpu": {
+          "sys_pct": 2.966658956468371,
+          "total_pct": 13.649964524424696,
+          "user_pct": 10.683305567956324
+        },
+        "app_throughput": 4979.719281048306,
+        "bpf": {
+          "programs": {
+            "17": {
+              "avg_ns_per_run": 33.32714988830121,
+              "bytes_jited": 246,
+              "bytes_xlated": 264,
+              "id": 17,
+              "name": "tracepoint__raw",
+              "run_cnt_delta": 23443404,
+              "run_time_ns_delta": 781301839,
+              "type": "raw_tracepoint"
+            },
+            "19": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 2518,
+              "bytes_xlated": 4552,
+              "id": 19,
+              "name": "sys_enter_init",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "20": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 17414,
+              "bytes_xlated": 30376,
+              "id": 20,
+              "name": "sys_enter_submi",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "21": {
+              "avg_ns_per_run": 38.99503028655736,
+              "bytes_jited": 274,
+              "bytes_xlated": 320,
+              "id": 21,
+              "name": "tracepoint__raw",
+              "run_cnt_delta": 23443404,
+              "run_time_ns_delta": 914176249,
+              "type": "raw_tracepoint"
+            },
+            "22": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 2101,
+              "bytes_xlated": 3800,
+              "id": 22,
+              "name": "sys_exit_init",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "23": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 11522,
+              "bytes_xlated": 19880,
+              "id": 23,
+              "name": "sys_exit_submit",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "24": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 20392,
+              "bytes_xlated": 31992,
+              "id": 24,
+              "name": "syscall__execve",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "25": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 20363,
+              "bytes_xlated": 32008,
+              "id": 25,
+              "name": "syscall__execve",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "26": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 20651,
+              "bytes_xlated": 32400,
+              "id": 26,
+              "name": "syscall__execve",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "27": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 20619,
+              "bytes_xlated": 32408,
+              "id": 27,
+              "name": "syscall__execve",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "raw_tracepoint"
+            },
+            "28": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 12263,
+              "bytes_xlated": 18744,
+              "id": 28,
+              "name": "sys_dup_exit_ta",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "29": {
+              "avg_ns_per_run": 883.0177548242078,
+              "bytes_jited": 19597,
+              "bytes_xlated": 32248,
+              "id": 29,
+              "name": "tracepoint__sch",
+              "run_cnt_delta": 298961,
+              "run_time_ns_delta": 263987871,
+              "type": "raw_tracepoint"
+            },
+            "30": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 58565,
+              "bytes_xlated": 108072,
+              "id": 30,
+              "name": "lkm_seeker_modt",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "34": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 61576,
+              "bytes_xlated": 111768,
+              "id": 34,
+              "name": "lkm_seeker_kset",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "35": {
+              "avg_ns_per_run": null,
+              "bytes_jited": 660,
+              "bytes_xlated": 1048,
+              "id": 35,
+              "name": "lkm_seeker_mod_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            }
+          },
+          "summary": {
+            "active_programs": 3,
+            "avg_ns_per_run": 41.52662975567909,
+            "total_events": 47185769,
+            "total_run_time_ns": 1959465959
+          }
+        },
+        "command_template": "wrk -t2 -c10 -d{duration}s http://127.0.0.1:{port}/",
+        "drop_counters": {
+          "event_count": 0,
+          "lost_event_count": 0,
+          "lost_write_count": 0
+        },
+        "duration_s": 60.03290208299998,
+        "event_counts": {
+          "execve": 4,
+          "sched_process_exec": 2,
+          "security_file_open": 120,
+          "security_socket_connect": 298960
+        },
+        "events_per_sec": 4982.034678025247,
+        "events_total": 299086,
+        "kind": "network",
+        "metric": "req/s",
+        "name": "network",
+        "ops_per_sec": 4979.719281048306,
+        "ops_total": 298947.0,
+        "stderr_tail": "",
+        "stdout_tail": "Running 1m test @ http://127.0.0.1:42299/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     1.49ms    6.73ms 210.39ms   99.70%\n    Req/Sec     2.50k   730.01     4.37k    48.92%\n  298947 requests in 1.00m, 44.19MB read\nRequests/sec:   4981.97\nTransfer/sec:    754.11KB",
+        "system_cpu": {
+          "busy_pct": 69.54697268133938
+        }
+      }
+    ]
+  },
+  "comparison": {
+    "comparable": false,
+    "reason": "recompile did not apply successfully"
+  },
+  "config": {
+    "events": [
+      "execve",
+      "security_file_open",
+      "security_socket_connect",
+      "sched_process_exec"
+    ],
+    "measurement_duration_s": 60,
+    "smoke_duration_s": 10,
+    "workloads": [
+      {
+        "command": "stress-ng --exec 4 --exec-method execve --timeout {duration}s --metrics-brief",
+        "kind": "exec_storm",
+        "metric": "bogo-ops/s",
+        "name": "exec_storm",
+        "rate": 4
+      },
+      {
+        "command": "fio --name=test --rw=randread --bs=4k --size=100M --runtime={duration} --time_based",
+        "kind": "file_io",
+        "metric": "IOPS",
+        "name": "file_io"
+      },
+      {
+        "command": "wrk -t2 -c10 -d{duration}s http://127.0.0.1:{port}/",
+        "kind": "network",
+        "metric": "req/s",
+        "name": "network"
+      }
+    ]
+  },
+  "duration_s": 60,
+  "generated_at": "2026-03-12T04:55:32.574683+00:00",
+  "host": {
+    "git_sha": "unknown",
+    "hostname": "virtme-ng",
+    "kernel": "7.0.0-rc2-ge52504a75c05-dirty",
+    "platform": "Linux-7.0.0-rc2-ge52504a75c05-dirty-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "limitations": [
+    "BPF_PROG_JIT_RECOMPILE did not apply on this kernel; post-ReJIT measurement was skipped."
+  ],
+  "mode": "tracee_daemon",
+  "policy_matches": {
+    "19": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/sys_enter_init.policy.yaml",
+    "20": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/sys_enter_submit.policy.yaml",
+    "22": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/sys_exit_init.policy.yaml",
+    "23": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/sys_exit_submit.policy.yaml",
+    "24": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/syscall__execve_enter.policy.yaml",
+    "25": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/syscall__execve_exit.policy.yaml",
+    "26": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/syscall__execveat_enter.policy.yaml",
+    "27": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/syscall__execveat_exit.policy.yaml",
+    "28": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/sys_dup_exit_tail.policy.yaml",
+    "29": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/tracepoint__sched__sched_process_fork.policy.yaml",
+    "30": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/lkm_seeker_modtree_loop.policy.yaml",
+    "34": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/lkm_seeker_kset_tail.policy.yaml",
+    "35": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/lkm_seeker_mod_tree_tail.policy.yaml"
+  },
+  "policy_summary": {
+    "configured_programs": 13,
+    "fallback_programs": 2
+  },
+  "post_rejit": null,
+  "recompile_results": {
+    "17": {
+      "applied": false,
+      "counts": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "error": "BPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "policy_file": null,
+      "policy_mode": "all",
+      "program_name": "tracepoint__raw",
+      "stderr_tail": "BPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules\n\n",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n  extract:0\n  zeroext:0\n  endian: 0\n  bflip:  0\n"
+    },
+    "19": {
+      "applied": false,
+      "counts": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "error": "warning: policy site branch-flip insn 258 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 217 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 177 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 145 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 104 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/sys_enter_init.policy.yaml",
+      "policy_mode": "config",
+      "program_name": "sys_enter_init",
+      "stderr_tail": "warning: policy site branch-flip insn 258 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 217 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 177 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 145 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 104 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules\n\n",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n  extract:0\n  zeroext:0\n  endian: 0\n  bflip:  0\nPolicy filter kept 0 of 2 v5 rule(s)\n"
+    },
+    "20": {
+      "applied": false,
+      "counts": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "error": "warning: policy site branch-flip insn 3415 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3487 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3448 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1030 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 469 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 429 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 390 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3373 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 357 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3527 action=apply was not found in the live program; skipping\nwarning: policy site extract insn 3289 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 316 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/sys_enter_submit.policy.yaml",
+      "policy_mode": "config",
+      "program_name": "sys_enter_submit",
+      "stderr_tail": "warning: policy site branch-flip insn 3415 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3487 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3448 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1030 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 469 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 429 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 390 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3373 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 357 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3527 action=apply was not found in the live program; skipping\nwarning: policy site extract insn 3289 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 316 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules\n\n",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n  extract:0\n  zeroext:0\n  endian: 0\n  bflip:  0\nPolicy filter kept 0 of 9 v5 rule(s)\n"
+    },
+    "21": {
+      "applied": false,
+      "counts": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "error": "BPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "policy_file": null,
+      "policy_mode": "all",
+      "program_name": "tracepoint__raw",
+      "stderr_tail": "BPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules\n\n",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n  extract:0\n  zeroext:0\n  endian: 0\n  bflip:  0\n"
+    },
+    "22": {
+      "applied": false,
+      "counts": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "error": "warning: policy site branch-flip insn 217 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 177 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 145 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 259 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 104 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/sys_exit_init.policy.yaml",
+      "policy_mode": "config",
+      "program_name": "sys_exit_init",
+      "stderr_tail": "warning: policy site branch-flip insn 217 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 177 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 145 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 259 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 104 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules\n\n",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n  extract:0\n  zeroext:0\n  endian: 0\n  bflip:  0\nPolicy filter kept 0 of 2 v5 rule(s)\n"
+    },
+    "23": {
+      "applied": false,
+      "counts": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "error": "warning: policy site branch-flip insn 2311 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2199 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2240 action=apply was not found in the live program; skipping\nwarning: policy site extract insn 1971 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2272 action=apply was not found in the live program; skipping\nwarning: policy site extract insn 1442 action=apply was not found in the live program; skipping\nwarning: policy site extract insn 1843 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1041 action=apply was not found in the live program; skipping\nwarning: policy site extract insn 1715 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 471 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2351 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 430 action=apply was not found in the live program; skipping\nwarning: policy site extract insn 1584 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 391 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 358 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 316 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/sys_exit_submit.policy.yaml",
+      "policy_mode": "config",
+      "program_name": "sys_exit_submit",
+      "stderr_tail": "warning: policy site branch-flip insn 2311 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2199 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2240 action=apply was not found in the live program; skipping\nwarning: policy site extract insn 1971 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2272 action=apply was not found in the live program; skipping\nwarning: policy site extract insn 1442 action=apply was not found in the live program; skipping\nwarning: policy site extract insn 1843 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1041 action=apply was not found in the live program; skipping\nwarning: policy site extract insn 1715 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 471 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2351 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 430 action=apply was not found in the live program; skipping\nwarning: policy site extract insn 1584 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 391 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 358 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 316 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules\n\n",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n  extract:0\n  zeroext:0\n  endian: 0\n  bflip:  0\nPolicy filter kept 0 of 30 v5 rule(s)\n"
+    },
+    "24": {
+      "applied": false,
+      "counts": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "error": "warning: policy site branch-flip insn 2416 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2376 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2337 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2304 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 355 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/syscall__execve_enter.policy.yaml",
+      "policy_mode": "config",
+      "program_name": "syscall__execve_enter",
+      "stderr_tail": "warning: policy site branch-flip insn 2416 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2376 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2337 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2304 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 355 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules\n\n",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n  extract:0\n  zeroext:0\n  endian: 0\n  bflip:  0\nPolicy filter kept 0 of 8 v5 rule(s)\n"
+    },
+    "25": {
+      "applied": false,
+      "counts": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "error": "warning: policy site branch-flip insn 2442 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2402 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2363 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2330 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 355 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/syscall__execve_exit.policy.yaml",
+      "policy_mode": "config",
+      "program_name": "syscall__execve_exit",
+      "stderr_tail": "warning: policy site branch-flip insn 2442 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2402 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2363 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2330 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 355 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules\n\n",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n  extract:0\n  zeroext:0\n  endian: 0\n  bflip:  0\nPolicy filter kept 0 of 8 v5 rule(s)\n"
+    },
+    "26": {
+      "applied": false,
+      "counts": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "error": "warning: policy site branch-flip insn 2384 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2312 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2271 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2345 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 355 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/syscall__execveat_enter.policy.yaml",
+      "policy_mode": "config",
+      "program_name": "syscall__execveat_enter",
+      "stderr_tail": "warning: policy site branch-flip insn 2384 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2312 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2271 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2345 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 355 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules\n\n",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n  extract:0\n  zeroext:0\n  endian: 0\n  bflip:  0\nPolicy filter kept 0 of 8 v5 rule(s)\n"
+    },
+    "27": {
+      "applied": false,
+      "counts": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "error": "warning: policy site branch-flip insn 2371 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2338 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2297 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2410 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 355 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/syscall__execveat_exit.policy.yaml",
+      "policy_mode": "config",
+      "program_name": "syscall__execveat_exit",
+      "stderr_tail": "warning: policy site branch-flip insn 2371 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2338 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2297 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2410 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 355 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules\n\n",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n  extract:0\n  zeroext:0\n  endian: 0\n  bflip:  0\nPolicy filter kept 0 of 8 v5 rule(s)\n"
+    },
+    "28": {
+      "applied": false,
+      "counts": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "error": "warning: policy site branch-flip insn 2136 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2096 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2057 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2025 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1512 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1472 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1433 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1984 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1401 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1360 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 348 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/sys_dup_exit_tail.policy.yaml",
+      "policy_mode": "config",
+      "program_name": "sys_dup_exit_tail",
+      "stderr_tail": "warning: policy site branch-flip insn 2136 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2096 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2057 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2025 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1512 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1472 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1433 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1984 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1401 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1360 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 348 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules\n\n",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n  extract:0\n  zeroext:0\n  endian: 0\n  bflip:  0\nPolicy filter kept 0 of 12 v5 rule(s)\n"
+    },
+    "29": {
+      "applied": false,
+      "counts": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "error": "warning: policy site branch-flip insn 4027 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3948 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3916 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3875 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3987 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3550 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3518 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3440 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3408 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3014 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2700 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3046 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 815 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 470 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 430 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 391 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 359 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2020 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 847 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 318 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/tracepoint__sched__sched_process_fork.policy.yaml",
+      "policy_mode": "config",
+      "program_name": "tracepoint__sched__sched_process_fork",
+      "stderr_tail": "warning: policy site branch-flip insn 4027 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3948 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3916 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3875 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3987 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3550 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3518 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3440 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3408 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3014 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2700 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3046 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 815 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 470 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 430 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 391 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 359 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2020 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 847 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 318 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules\n\n",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n  extract:0\n  zeroext:0\n  endian: 0\n  bflip:  0\nPolicy filter kept 0 of 17 v5 rule(s)\n"
+    },
+    "30": {
+      "applied": false,
+      "counts": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "error": "warning: policy site branch-flip insn 12105 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12065 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 11991 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 11480 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 11440 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 11366 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 10815 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 10741 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 10230 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12860 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 10190 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 10158 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 10116 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 9605 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 9565 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 9533 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 9491 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 8980 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 8940 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 8908 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 8866 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 8355 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 8315 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 8283 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 8241 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12892 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7730 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7690 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7658 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7616 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7105 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7065 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7033 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 6991 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 6480 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 13471 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 6440 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 13439 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 6408 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 6366 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 5855 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 5815 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 5783 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 5741 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 5230 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 5190 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 5158 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 5116 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4605 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12931 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4565 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4533 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4491 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3980 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3940 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3908 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3866 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3355 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3315 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3283 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2730 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2690 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2658 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2616 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2105 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12033 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2065 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2033 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1991 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1480 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 11408 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1440 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1408 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1366 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 10783 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 815 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 13510 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 783 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 741 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3241 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 482 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 10855 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 442 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 855 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 410 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/lkm_seeker_modtree_loop.policy.yaml",
+      "policy_mode": "config",
+      "program_name": "lkm_seeker_modtree_loop",
+      "stderr_tail": "ot found in the live program; skipping\nwarning: policy site branch-flip insn 5158 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 5116 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4605 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12931 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4565 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4533 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4491 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3980 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3940 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3908 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3866 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3355 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3315 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3283 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2730 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2690 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2658 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2616 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2105 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12033 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2065 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2033 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1991 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1480 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 11408 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1440 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1408 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1366 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 10783 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 815 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 13510 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 783 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 741 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3241 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 482 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 10855 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 442 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 855 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 410 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules\n\n",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n  extract:0\n  zeroext:0\n  endian: 0\n  bflip:  0\nPolicy filter kept 0 of 26 v5 rule(s)\n"
+    },
+    "34": {
+      "applied": false,
+      "counts": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "error": "warning: policy site branch-flip insn 14260 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 13578 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 13544 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 13501 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12921 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12878 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12367 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12251 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 11750 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 11711 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 13617 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 11677 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 11634 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 10504 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 10465 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 10431 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 10388 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 9258 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 9219 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 9185 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 11082 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 9142 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 8514 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 8012 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7973 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7939 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 9836 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7896 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7268 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 14332 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 6766 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 14293 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 6727 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 6693 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 8590 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 6650 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 6138 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 6065 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12327 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 6022 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 11049 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 5520 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 5481 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 5447 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7344 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 5404 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4892 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4819 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4776 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 9803 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4274 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 11122 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4235 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4201 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 6098 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4158 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3646 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3573 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3530 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 8557 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3028 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 9876 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2989 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 11006 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2955 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4852 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2912 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12294 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2400 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2360 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2327 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12954 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2284 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12995 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 8630 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1743 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 9760 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1709 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3606 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1666 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1154 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1114 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1081 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1038 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7384 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 497 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 458 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7311 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1782 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 424 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/lkm_seeker_kset_tail.policy.yaml",
+      "policy_mode": "config",
+      "program_name": "lkm_seeker_kset_tail",
+      "stderr_tail": "found in the live program; skipping\nwarning: policy site branch-flip insn 11122 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4235 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4201 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 6098 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4158 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3646 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3573 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3530 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 8557 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3028 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 9876 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2989 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 11006 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2955 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4852 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2912 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12294 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2400 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2360 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2327 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12954 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2284 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12995 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 8630 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1743 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 9760 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1709 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3606 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1666 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1154 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1114 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1081 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1038 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7384 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 497 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 458 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7311 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1782 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 424 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules\n\n",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n  extract:0\n  zeroext:0\n  endian: 0\n  bflip:  0\nPolicy filter kept 0 of 26 v5 rule(s)\n"
+    },
+    "35": {
+      "applied": false,
+      "counts": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "error": "warning: policy site branch-flip insn 158 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "policy_file": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/tracee/tracee/lkm_seeker_mod_tree_tail.policy.yaml",
+      "policy_mode": "config",
+      "program_name": "lkm_seeker_mod_tree_tail",
+      "stderr_tail": "warning: policy site branch-flip insn 158 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules\n\n",
+      "stdout_tail": "Accepted 0 v5 site(s)\n  cmov:   0\n  wide:   0\n  rotate: 0\n  lea:    0\n  extract:0\n  zeroext:0\n  endian: 0\n  bflip:  0\nPolicy filter kept 0 of 2 v5 rule(s)\n"
+    }
+  },
+  "recompile_summary": {
+    "applied": false,
+    "applied_programs": 0,
+    "errors": [
+      "BPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "warning: policy site branch-flip insn 12105 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12065 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 11991 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 11480 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 11440 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 11366 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 10815 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 10741 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 10230 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12860 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 10190 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 10158 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 10116 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 9605 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 9565 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 9533 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 9491 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 8980 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 8940 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 8908 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 8866 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 8355 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 8315 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 8283 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 8241 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12892 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7730 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7690 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7658 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7616 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7105 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7065 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7033 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 6991 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 6480 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 13471 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 6440 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 13439 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 6408 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 6366 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 5855 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 5815 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 5783 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 5741 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 5230 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 5190 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 5158 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 5116 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4605 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12931 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4565 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4533 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4491 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3980 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3940 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3908 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3866 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3355 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3315 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3283 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2730 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2690 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2658 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2616 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2105 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12033 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2065 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2033 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1991 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1480 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 11408 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1440 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1408 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1366 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 10783 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 815 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 13510 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 783 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 741 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3241 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 482 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 10855 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 442 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 855 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 410 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "warning: policy site branch-flip insn 14260 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 13578 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 13544 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 13501 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12921 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12878 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12367 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12251 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 11750 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 11711 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 13617 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 11677 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 11634 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 10504 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 10465 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 10431 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 10388 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 9258 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 9219 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 9185 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 11082 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 9142 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 8514 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 8012 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7973 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7939 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 9836 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7896 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7268 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 14332 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 6766 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 14293 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 6727 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 6693 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 8590 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 6650 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 6138 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 6065 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12327 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 6022 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 11049 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 5520 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 5481 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 5447 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7344 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 5404 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4892 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4819 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4776 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 9803 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4274 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 11122 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4235 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4201 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 6098 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4158 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3646 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3573 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3530 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 8557 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3028 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 9876 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2989 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 11006 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2955 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 4852 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2912 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12294 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2400 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2360 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2327 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12954 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2284 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 12995 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 8630 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1743 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 9760 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1709 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3606 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1666 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1154 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1114 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1081 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1038 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7384 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 497 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 458 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 7311 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1782 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 424 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "warning: policy site branch-flip insn 158 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "warning: policy site branch-flip insn 2136 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2096 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2057 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2025 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1512 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1472 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1433 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1984 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1401 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1360 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 348 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "warning: policy site branch-flip insn 217 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 177 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 145 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 259 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 104 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "warning: policy site branch-flip insn 2311 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2199 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2240 action=apply was not found in the live program; skipping\nwarning: policy site extract insn 1971 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2272 action=apply was not found in the live program; skipping\nwarning: policy site extract insn 1442 action=apply was not found in the live program; skipping\nwarning: policy site extract insn 1843 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1041 action=apply was not found in the live program; skipping\nwarning: policy site extract insn 1715 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 471 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2351 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 430 action=apply was not found in the live program; skipping\nwarning: policy site extract insn 1584 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 391 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 358 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 316 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "warning: policy site branch-flip insn 2371 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2338 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2297 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2410 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 355 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "warning: policy site branch-flip insn 2384 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2312 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2271 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2345 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 355 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "warning: policy site branch-flip insn 2416 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2376 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2337 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2304 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 355 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "warning: policy site branch-flip insn 2442 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2402 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2363 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2330 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 355 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "warning: policy site branch-flip insn 258 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 217 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 177 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 145 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 104 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "warning: policy site branch-flip insn 3415 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3487 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3448 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 1030 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 469 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 429 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 390 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3373 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 357 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3527 action=apply was not found in the live program; skipping\nwarning: policy site extract insn 3289 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 316 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules",
+      "warning: policy site branch-flip insn 4027 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3948 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3916 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3875 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3987 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3550 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3518 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3440 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3408 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3014 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2700 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 3046 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 815 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 470 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 430 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 391 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 359 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 2020 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 847 action=apply was not found in the live program; skipping\nwarning: policy site branch-flip insn 318 action=apply was not found in the live program; skipping\nBPF_PROG_JIT_RECOMPILE: Invalid argument\npolicy has no rules"
+    ],
+    "requested_programs": 15
+  },
+  "scan_results": {
+    "17": {
+      "error": "",
+      "program_name": "tracepoint__raw",
+      "sites": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "{\"program\":{\"name\":\"tracepoint__raw\",\"insn_cnt\":33,\"prog_tag\":\"42088bd94d9b148c\"},\"summary\":{\"total_sites\":0,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"extract_sites\":0,\"bitfield_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0},\"sites\":[]}\n"
+    },
+    "19": {
+      "error": "",
+      "program_name": "sys_enter_init",
+      "sites": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 2,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 2,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "{\"program\":{\"name\":\"sys_enter_init\",\"insn_cnt\":569,\"prog_tag\":\"abe39884a800ee0b\"},\"summary\":{\"total_sites\":2,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"extract_sites\":0,\"bitfield_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":2},\"sites\":[{\"site_id\":\"branch-flip:29:branch-flip\",\"family\":\"branch-flip\",\"insn\":29,\"start_insn\":29,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:90:branch-flip\",\"family\":\"branch-flip\",\"insn\":90,\"start_insn\":90,\"pattern_kind\":\"branch-flip\",\"site_len\":5,\"canonical_form\":8,\"native_choice\":2}]}\n"
+    },
+    "20": {
+      "error": "",
+      "program_name": "sys_enter_submi",
+      "sites": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 5,
+        "cmov_sites": 4,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 9,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "{\"program\":{\"name\":\"sys_enter_submi\",\"insn_cnt\":3797,\"prog_tag\":\"070bc7144b208ee9\"},\"summary\":{\"total_sites\":9,\"cmov_sites\":4,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"extract_sites\":0,\"bitfield_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":5},\"sites\":[{\"site_id\":\"branch-flip:9:branch-flip\",\"family\":\"branch-flip\",\"insn\":9,\"start_insn\":9,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:24:branch-flip\",\"family\":\"branch-flip\",\"insn\":24,\"start_insn\":24,\"pattern_kind\":\"branch-flip\",\"site_len\":5,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:166:branch-flip\",\"family\":\"branch-flip\",\"insn\":166,\"start_insn\":166,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:264:branch-flip\",\"family\":\"branch-flip\",\"insn\":264,\"start_insn\":264,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"cmov:797:cond-select-64\",\"family\":\"cmov\",\"insn\":797,\"start_insn\":797,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:800:cond-select-64\",\"family\":\"cmov\",\"insn\":800,\"start_insn\":800,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:812:cond-select-64\",\"family\":\"cmov\",\"insn\":812,\"start_insn\":812,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"branch-flip:1479:branch-flip\",\"family\":\"branch-flip\",\"insn\":1479,\"start_insn\":1479,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"cmov:3781:cond-select-64\",\"family\":\"cmov\",\"insn\":3781,\"start_insn\":3781,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1}]}\n"
+    },
+    "21": {
+      "error": "",
+      "program_name": "tracepoint__raw",
+      "sites": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "{\"program\":{\"name\":\"tracepoint__raw\",\"insn_cnt\":40,\"prog_tag\":\"805bc16b4b998d1f\"},\"summary\":{\"total_sites\":0,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"extract_sites\":0,\"bitfield_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0},\"sites\":[]}\n"
+    },
+    "22": {
+      "error": "",
+      "program_name": "sys_exit_init",
+      "sites": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 2,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 2,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "{\"program\":{\"name\":\"sys_exit_init\",\"insn_cnt\":475,\"prog_tag\":\"b0f6718eba750572\"},\"summary\":{\"total_sites\":2,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"extract_sites\":0,\"bitfield_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":2},\"sites\":[{\"site_id\":\"branch-flip:28:branch-flip\",\"family\":\"branch-flip\",\"insn\":28,\"start_insn\":28,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:89:branch-flip\",\"family\":\"branch-flip\",\"insn\":89,\"start_insn\":89,\"pattern_kind\":\"branch-flip\",\"site_len\":5,\"canonical_form\":8,\"native_choice\":2}]}\n"
+    },
+    "23": {
+      "error": "",
+      "program_name": "sys_exit_submit",
+      "sites": {
+        "bitfield_sites": 5,
+        "branch_flip_sites": 4,
+        "cmov_sites": 21,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 30,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "-64\",\"family\":\"cmov\",\"insn\":1450,\"start_insn\":1450,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"extract:1475:bitfield-extract-64-shift-mask\",\"family\":\"extract\",\"insn\":1475,\"start_insn\":1475,\"pattern_kind\":\"bitfield-extract-64-shift-mask\",\"site_len\":2,\"canonical_form\":5,\"native_choice\":1},{\"site_id\":\"cmov:1497:cond-select-64\",\"family\":\"cmov\",\"insn\":1497,\"start_insn\":1497,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1511:cond-select-64\",\"family\":\"cmov\",\"insn\":1511,\"start_insn\":1511,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1567:cond-select-64\",\"family\":\"cmov\",\"insn\":1567,\"start_insn\":1567,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1594:cond-select-64\",\"family\":\"cmov\",\"insn\":1594,\"start_insn\":1594,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"extract:1617:bitfield-extract-64-shift-mask\",\"family\":\"extract\",\"insn\":1617,\"start_insn\":1617,\"pattern_kind\":\"bitfield-extract-64-shift-mask\",\"site_len\":2,\"canonical_form\":5,\"native_choice\":1},{\"site_id\":\"cmov:1639:cond-select-64\",\"family\":\"cmov\",\"insn\":1639,\"start_insn\":1639,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1653:cond-select-64\",\"family\":\"cmov\",\"insn\":1653,\"start_insn\":1653,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1724:cond-select-64\",\"family\":\"cmov\",\"insn\":1724,\"start_insn\":1724,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"extract:1747:bitfield-extract-64-shift-mask\",\"family\":\"extract\",\"insn\":1747,\"start_insn\":1747,\"pattern_kind\":\"bitfield-extract-64-shift-mask\",\"site_len\":2,\"canonical_form\":5,\"native_choice\":1},{\"site_id\":\"cmov:1769:cond-select-64\",\"family\":\"cmov\",\"insn\":1769,\"start_insn\":1769,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1783:cond-select-64\",\"family\":\"cmov\",\"insn\":1783,\"start_insn\":1783,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1851:cond-select-64\",\"family\":\"cmov\",\"insn\":1851,\"start_insn\":1851,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"extract:1874:bitfield-extract-64-shift-mask\",\"family\":\"extract\",\"insn\":1874,\"start_insn\":1874,\"pattern_kind\":\"bitfield-extract-64-shift-mask\",\"site_len\":2,\"canonical_form\":5,\"native_choice\":1},{\"site_id\":\"cmov:1896:cond-select-64\",\"family\":\"cmov\",\"insn\":1896,\"start_insn\":1896,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1910:cond-select-64\",\"family\":\"cmov\",\"insn\":1910,\"start_insn\":1910,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1978:cond-select-64\",\"family\":\"cmov\",\"insn\":1978,\"start_insn\":1978,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"extract:2003:bitfield-extract-64-shift-mask\",\"family\":\"extract\",\"insn\":2003,\"start_insn\":2003,\"pattern_kind\":\"bitfield-extract-64-shift-mask\",\"site_len\":2,\"canonical_form\":5,\"native_choice\":1},{\"site_id\":\"cmov:2025:cond-select-64\",\"family\":\"cmov\",\"insn\":2025,\"start_insn\":2025,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:2039:cond-select-64\",\"family\":\"cmov\",\"insn\":2039,\"start_insn\":2039,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:2106:cond-select-64\",\"family\":\"cmov\",\"insn\":2106,\"start_insn\":2106,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:2469:cond-select-64\",\"family\":\"cmov\",\"insn\":2469,\"start_insn\":2469,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1}]}\n"
+    },
+    "24": {
+      "error": "",
+      "program_name": "syscall__execve",
+      "sites": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 2,
+        "cmov_sites": 6,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 8,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "{\"program\":{\"name\":\"syscall__execve\",\"insn_cnt\":3999,\"prog_tag\":\"6ad5edab8f1b2f01\"},\"summary\":{\"total_sites\":8,\"cmov_sites\":6,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"extract_sites\":0,\"bitfield_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":2},\"sites\":[{\"site_id\":\"branch-flip:9:branch-flip\",\"family\":\"branch-flip\",\"insn\":9,\"start_insn\":9,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:24:branch-flip\",\"family\":\"branch-flip\",\"insn\":24,\"start_insn\":24,\"pattern_kind\":\"branch-flip\",\"site_len\":5,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"cmov:144:cond-select-64\",\"family\":\"cmov\",\"insn\":144,\"start_insn\":144,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:147:cond-select-64\",\"family\":\"cmov\",\"insn\":147,\"start_insn\":147,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:160:cond-select-64\",\"family\":\"cmov\",\"insn\":160,\"start_insn\":160,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1184:cond-select-64\",\"family\":\"cmov\",\"insn\":1184,\"start_insn\":1184,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:2589:cond-select-64\",\"family\":\"cmov\",\"insn\":2589,\"start_insn\":2589,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:3967:cond-select-64\",\"family\":\"cmov\",\"insn\":3967,\"start_insn\":3967,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1}]}\n"
+    },
+    "25": {
+      "error": "",
+      "program_name": "syscall__execve",
+      "sites": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 2,
+        "cmov_sites": 6,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 8,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "{\"program\":{\"name\":\"syscall__execve\",\"insn_cnt\":4001,\"prog_tag\":\"ba61096b68e62e3b\"},\"summary\":{\"total_sites\":8,\"cmov_sites\":6,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"extract_sites\":0,\"bitfield_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":2},\"sites\":[{\"site_id\":\"branch-flip:9:branch-flip\",\"family\":\"branch-flip\",\"insn\":9,\"start_insn\":9,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:24:branch-flip\",\"family\":\"branch-flip\",\"insn\":24,\"start_insn\":24,\"pattern_kind\":\"branch-flip\",\"site_len\":5,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"cmov:144:cond-select-64\",\"family\":\"cmov\",\"insn\":144,\"start_insn\":144,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:147:cond-select-64\",\"family\":\"cmov\",\"insn\":147,\"start_insn\":147,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:160:cond-select-64\",\"family\":\"cmov\",\"insn\":160,\"start_insn\":160,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1186:cond-select-64\",\"family\":\"cmov\",\"insn\":1186,\"start_insn\":1186,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:2591:cond-select-64\",\"family\":\"cmov\",\"insn\":2591,\"start_insn\":2591,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:3969:cond-select-64\",\"family\":\"cmov\",\"insn\":3969,\"start_insn\":3969,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1}]}\n"
+    },
+    "26": {
+      "error": "",
+      "program_name": "syscall__execve",
+      "sites": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 2,
+        "cmov_sites": 6,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 8,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "{\"program\":{\"name\":\"syscall__execve\",\"insn_cnt\":4050,\"prog_tag\":\"ee6684e308aba477\"},\"summary\":{\"total_sites\":8,\"cmov_sites\":6,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"extract_sites\":0,\"bitfield_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":2},\"sites\":[{\"site_id\":\"branch-flip:9:branch-flip\",\"family\":\"branch-flip\",\"insn\":9,\"start_insn\":9,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:24:branch-flip\",\"family\":\"branch-flip\",\"insn\":24,\"start_insn\":24,\"pattern_kind\":\"branch-flip\",\"site_len\":5,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"cmov:144:cond-select-64\",\"family\":\"cmov\",\"insn\":144,\"start_insn\":144,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:147:cond-select-64\",\"family\":\"cmov\",\"insn\":147,\"start_insn\":147,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:160:cond-select-64\",\"family\":\"cmov\",\"insn\":160,\"start_insn\":160,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1212:cond-select-64\",\"family\":\"cmov\",\"insn\":1212,\"start_insn\":1212,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:2640:cond-select-64\",\"family\":\"cmov\",\"insn\":2640,\"start_insn\":2640,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:4018:cond-select-64\",\"family\":\"cmov\",\"insn\":4018,\"start_insn\":4018,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1}]}\n"
+    },
+    "27": {
+      "error": "",
+      "program_name": "syscall__execve",
+      "sites": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 2,
+        "cmov_sites": 6,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 8,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "{\"program\":{\"name\":\"syscall__execve\",\"insn_cnt\":4051,\"prog_tag\":\"9082de17b528a7d2\"},\"summary\":{\"total_sites\":8,\"cmov_sites\":6,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"extract_sites\":0,\"bitfield_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":2},\"sites\":[{\"site_id\":\"branch-flip:9:branch-flip\",\"family\":\"branch-flip\",\"insn\":9,\"start_insn\":9,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:24:branch-flip\",\"family\":\"branch-flip\",\"insn\":24,\"start_insn\":24,\"pattern_kind\":\"branch-flip\",\"site_len\":5,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"cmov:144:cond-select-64\",\"family\":\"cmov\",\"insn\":144,\"start_insn\":144,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:147:cond-select-64\",\"family\":\"cmov\",\"insn\":147,\"start_insn\":147,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:160:cond-select-64\",\"family\":\"cmov\",\"insn\":160,\"start_insn\":160,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1213:cond-select-64\",\"family\":\"cmov\",\"insn\":1213,\"start_insn\":1213,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:2641:cond-select-64\",\"family\":\"cmov\",\"insn\":2641,\"start_insn\":2641,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:4019:cond-select-64\",\"family\":\"cmov\",\"insn\":4019,\"start_insn\":4019,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1}]}\n"
+    },
+    "28": {
+      "error": "",
+      "program_name": "sys_dup_exit_ta",
+      "sites": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 2,
+        "cmov_sites": 10,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 12,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "{\"program\":{\"name\":\"sys_dup_exit_ta\",\"insn_cnt\":2343,\"prog_tag\":\"461008212564f6cc\"},\"summary\":{\"total_sites\":12,\"cmov_sites\":10,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"extract_sites\":0,\"bitfield_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":2},\"sites\":[{\"site_id\":\"branch-flip:9:branch-flip\",\"family\":\"branch-flip\",\"insn\":9,\"start_insn\":9,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:24:branch-flip\",\"family\":\"branch-flip\",\"insn\":24,\"start_insn\":24,\"pattern_kind\":\"branch-flip\",\"site_len\":5,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"cmov:137:cond-select-64\",\"family\":\"cmov\",\"insn\":137,\"start_insn\":137,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:140:cond-select-64\",\"family\":\"cmov\",\"insn\":140,\"start_insn\":140,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:153:cond-select-64\",\"family\":\"cmov\",\"insn\":153,\"start_insn\":153,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1360:cond-select-64\",\"family\":\"cmov\",\"insn\":1360,\"start_insn\":1360,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1375:cond-select-64\",\"family\":\"cmov\",\"insn\":1375,\"start_insn\":1375,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1735:cond-select-64\",\"family\":\"cmov\",\"insn\":1735,\"start_insn\":1735,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1945:cond-select-64\",\"family\":\"cmov\",\"insn\":1945,\"start_insn\":1945,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1960:cond-select-64\",\"family\":\"cmov\",\"insn\":1960,\"start_insn\":1960,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:2320:cond-select-64\",\"family\":\"cmov\",\"insn\":2320,\"start_insn\":2320,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:2339:cond-select-64\",\"family\":\"cmov\",\"insn\":2339,\"start_insn\":2339,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1}]}\n"
+    },
+    "29": {
+      "error": "",
+      "program_name": "tracepoint__sch",
+      "sites": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 10,
+        "cmov_sites": 7,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 17,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "{\"program\":{\"name\":\"tracepoint__sch\",\"insn_cnt\":4031,\"prog_tag\":\"60586e32da083686\"},\"summary\":{\"total_sites\":17,\"cmov_sites\":7,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"extract_sites\":0,\"bitfield_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":10},\"sites\":[{\"site_id\":\"branch-flip:9:branch-flip\",\"family\":\"branch-flip\",\"insn\":9,\"start_insn\":9,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:24:branch-flip\",\"family\":\"branch-flip\",\"insn\":24,\"start_insn\":24,\"pattern_kind\":\"branch-flip\",\"site_len\":5,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:166:branch-flip\",\"family\":\"branch-flip\",\"insn\":166,\"start_insn\":166,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:266:branch-flip\",\"family\":\"branch-flip\",\"insn\":266,\"start_insn\":266,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:884:branch-flip\",\"family\":\"branch-flip\",\"insn\":884,\"start_insn\":884,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:1089:branch-flip\",\"family\":\"branch-flip\",\"insn\":1089,\"start_insn\":1089,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:1183:branch-flip\",\"family\":\"branch-flip\",\"insn\":1183,\"start_insn\":1183,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"cmov:1261:cond-select-64\",\"family\":\"cmov\",\"insn\":1261,\"start_insn\":1261,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1264:cond-select-64\",\"family\":\"cmov\",\"insn\":1264,\"start_insn\":1264,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1276:cond-select-64\",\"family\":\"cmov\",\"insn\":1276,\"start_insn\":1276,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"branch-flip:1572:branch-flip\",\"family\":\"branch-flip\",\"insn\":1572,\"start_insn\":1572,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:1985:branch-flip\",\"family\":\"branch-flip\",\"insn\":1985,\"start_insn\":1985,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"cmov:2094:cond-select-64\",\"family\":\"cmov\",\"insn\":2094,\"start_insn\":2094,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:2097:cond-select-64\",\"family\":\"cmov\",\"insn\":2097,\"start_insn\":2097,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:2109:cond-select-64\",\"family\":\"cmov\",\"insn\":2109,\"start_insn\":2109,\"pattern_kind\":\"cond-select-64\",\"site_len\":3,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:3762:cond-select-64\",\"family\":\"cmov\",\"insn\":3762,\"start_insn\":3762,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"branch-flip:3817:branch-flip\",\"family\":\"branch-flip\",\"insn\":3817,\"start_insn\":3817,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2}]}\n"
+    },
+    "30": {
+      "error": "",
+      "program_name": "lkm_seeker_modt",
+      "sites": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 4,
+        "cmov_sites": 22,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 26,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "ily\":\"branch-flip\",\"insn\":65,\"start_insn\":65,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"cmov:1108:cond-select-64\",\"family\":\"cmov\",\"insn\":1108,\"start_insn\":1108,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1717:cond-select-64\",\"family\":\"cmov\",\"insn\":1717,\"start_insn\":1717,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:2326:cond-select-64\",\"family\":\"cmov\",\"insn\":2326,\"start_insn\":2326,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:2935:cond-select-64\",\"family\":\"cmov\",\"insn\":2935,\"start_insn\":2935,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:3544:cond-select-64\",\"family\":\"cmov\",\"insn\":3544,\"start_insn\":3544,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:4153:cond-select-64\",\"family\":\"cmov\",\"insn\":4153,\"start_insn\":4153,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:4762:cond-select-64\",\"family\":\"cmov\",\"insn\":4762,\"start_insn\":4762,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:5371:cond-select-64\",\"family\":\"cmov\",\"insn\":5371,\"start_insn\":5371,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:5980:cond-select-64\",\"family\":\"cmov\",\"insn\":5980,\"start_insn\":5980,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:6589:cond-select-64\",\"family\":\"cmov\",\"insn\":6589,\"start_insn\":6589,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:7198:cond-select-64\",\"family\":\"cmov\",\"insn\":7198,\"start_insn\":7198,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:7807:cond-select-64\",\"family\":\"cmov\",\"insn\":7807,\"start_insn\":7807,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:8416:cond-select-64\",\"family\":\"cmov\",\"insn\":8416,\"start_insn\":8416,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:9025:cond-select-64\",\"family\":\"cmov\",\"insn\":9025,\"start_insn\":9025,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:9634:cond-select-64\",\"family\":\"cmov\",\"insn\":9634,\"start_insn\":9634,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:10243:cond-select-64\",\"family\":\"cmov\",\"insn\":10243,\"start_insn\":10243,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:10852:cond-select-64\",\"family\":\"cmov\",\"insn\":10852,\"start_insn\":10852,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:11461:cond-select-64\",\"family\":\"cmov\",\"insn\":11461,\"start_insn\":11461,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:12070:cond-select-64\",\"family\":\"cmov\",\"insn\":12070,\"start_insn\":12070,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:12270:cond-select-64\",\"family\":\"cmov\",\"insn\":12270,\"start_insn\":12270,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"branch-flip:12313:branch-flip\",\"family\":\"branch-flip\",\"insn\":12313,\"start_insn\":12313,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"cmov:12919:cond-select-64\",\"family\":\"cmov\",\"insn\":12919,\"start_insn\":12919,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:13473:cond-select-64\",\"family\":\"cmov\",\"insn\":13473,\"start_insn\":13473,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1}]}\n"
+    },
+    "34": {
+      "error": "",
+      "program_name": "lkm_seeker_kset",
+      "sites": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 3,
+        "cmov_sites": 23,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 26,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "amily\":\"cmov\",\"insn\":710,\"start_insn\":710,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1307:cond-select-64\",\"family\":\"cmov\",\"insn\":1307,\"start_insn\":1307,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:1905:cond-select-64\",\"family\":\"cmov\",\"insn\":1905,\"start_insn\":1905,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:2503:cond-select-64\",\"family\":\"cmov\",\"insn\":2503,\"start_insn\":2503,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:3101:cond-select-64\",\"family\":\"cmov\",\"insn\":3101,\"start_insn\":3101,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:3699:cond-select-64\",\"family\":\"cmov\",\"insn\":3699,\"start_insn\":3699,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:4297:cond-select-64\",\"family\":\"cmov\",\"insn\":4297,\"start_insn\":4297,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:4895:cond-select-64\",\"family\":\"cmov\",\"insn\":4895,\"start_insn\":4895,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:5493:cond-select-64\",\"family\":\"cmov\",\"insn\":5493,\"start_insn\":5493,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:6091:cond-select-64\",\"family\":\"cmov\",\"insn\":6091,\"start_insn\":6091,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:6689:cond-select-64\",\"family\":\"cmov\",\"insn\":6689,\"start_insn\":6689,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:7287:cond-select-64\",\"family\":\"cmov\",\"insn\":7287,\"start_insn\":7287,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:7885:cond-select-64\",\"family\":\"cmov\",\"insn\":7885,\"start_insn\":7885,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:8483:cond-select-64\",\"family\":\"cmov\",\"insn\":8483,\"start_insn\":8483,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:9081:cond-select-64\",\"family\":\"cmov\",\"insn\":9081,\"start_insn\":9081,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:9679:cond-select-64\",\"family\":\"cmov\",\"insn\":9679,\"start_insn\":9679,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:10277:cond-select-64\",\"family\":\"cmov\",\"insn\":10277,\"start_insn\":10277,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:10875:cond-select-64\",\"family\":\"cmov\",\"insn\":10875,\"start_insn\":10875,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:11473:cond-select-64\",\"family\":\"cmov\",\"insn\":11473,\"start_insn\":11473,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:12071:cond-select-64\",\"family\":\"cmov\",\"insn\":12071,\"start_insn\":12071,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:12670:cond-select-64\",\"family\":\"cmov\",\"insn\":12670,\"start_insn\":12670,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"cmov:13276:cond-select-64\",\"family\":\"cmov\",\"insn\":13276,\"start_insn\":13276,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1},{\"site_id\":\"branch-flip:13329:branch-flip\",\"family\":\"branch-flip\",\"insn\":13329,\"start_insn\":13329,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"cmov:13946:cond-select-64\",\"family\":\"cmov\",\"insn\":13946,\"start_insn\":13946,\"pattern_kind\":\"cond-select-64\",\"site_len\":2,\"canonical_form\":4,\"native_choice\":1}]}\n"
+    },
+    "35": {
+      "error": "",
+      "program_name": "lkm_seeker_mod_",
+      "sites": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 2,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 2,
+        "wide_sites": 0,
+        "zero_ext_sites": 0
+      },
+      "stderr_tail": "",
+      "stdout_tail": "{\"program\":{\"name\":\"lkm_seeker_mod_\",\"insn_cnt\":131,\"prog_tag\":\"0f5bb4e291b61133\"},\"summary\":{\"total_sites\":2,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"extract_sites\":0,\"bitfield_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":2},\"sites\":[{\"site_id\":\"branch-flip:11:branch-flip\",\"family\":\"branch-flip\",\"insn\":11,\"start_insn\":11,\"pattern_kind\":\"branch-flip\",\"site_len\":7,\"canonical_form\":8,\"native_choice\":2},{\"site_id\":\"branch-flip:26:branch-flip\",\"family\":\"branch-flip\",\"insn\":26,\"start_insn\":26,\"pattern_kind\":\"branch-flip\",\"site_len\":5,\"canonical_form\":8,\"native_choice\":2}]}\n"
+    }
+  },
+  "setup": {
+    "returncode": 0,
+    "stderr_tail": "",
+    "stdout_tail": "",
+    "tracee_binary": null
+  },
+  "smoke": false,
+  "tracee_binary": "/tmp/tracee-bin/tracee",
+  "tracee_launch_command": [
+    [
+      "/tmp/tracee-bin/tracee",
+      "--events",
+      "execve,security_file_open,security_socket_connect,sched_process_exec",
+      "--output",
+      "json"
+    ],
+    [
+      "/tmp/tracee-bin/tracee",
+      "--events",
+      "execve,security_file_open,security_socket_connect,sched_process_exec",
+      "--output",
+      "destinations.stdout.format=json"
+    ],
+    [
+      "/tmp/tracee-bin/tracee",
+      "--events",
+      "execve,security_file_open,security_socket_connect,sched_process_exec",
+      "--output",
+      "format:json"
+    ]
+  ],
+  "tracee_programs": [
+    {
+      "btf_id": 24,
+      "bytes_jited": 246,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 264,
+      "gpl_compatible": true,
+      "id": 17,
+      "jited": true,
+      "loaded_at": 1773291146,
+      "map_ids": [
+        124,
+        125,
+        226,
+        227
+      ],
+      "name": "tracepoint__raw_syscalls__sys_enter",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 20,
+          "pid": 155
+        }
+      ],
+      "owner_pids": [
+        155
+      ],
+      "pids": [
+        {
+          "comm": "tracee",
+          "pid": 155
+        }
+      ],
+      "tag": "42088bd94d9b148c",
+      "type": "raw_tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 24,
+      "bytes_jited": 2518,
+      "bytes_memlock": 8192,
+      "bytes_xlated": 4552,
+      "gpl_compatible": true,
+      "id": 19,
+      "jited": true,
+      "loaded_at": 1773291146,
+      "map_ids": [
+        126,
+        169,
+        127,
+        124,
+        128,
+        129,
+        226,
+        227
+      ],
+      "name": "sys_enter_init",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 56,
+          "pid": 155
+        }
+      ],
+      "owner_pids": [
+        155
+      ],
+      "pids": [
+        {
+          "comm": "tracee",
+          "pid": 155
+        }
+      ],
+      "tag": "abe39884a800ee0b",
+      "type": "raw_tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 24,
+      "bytes_jited": 17414,
+      "bytes_memlock": 32768,
+      "bytes_xlated": 30376,
+      "gpl_compatible": true,
+      "id": 20,
+      "jited": true,
+      "loaded_at": 1773291146,
+      "map_ids": [
+        166,
+        127,
+        124,
+        136,
+        169,
+        126,
+        143,
+        211,
+        181,
+        178,
+        184,
+        187,
+        190,
+        202,
+        205,
+        139,
+        208,
+        158,
+        227,
+        130,
+        162,
+        213,
+        129,
+        226
+      ],
+      "name": "sys_enter_submit",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 59,
+          "pid": 155
+        }
+      ],
+      "owner_pids": [
+        155
+      ],
+      "pids": [
+        {
+          "comm": "tracee",
+          "pid": 155
+        }
+      ],
+      "tag": "070bc7144b208ee9",
+      "type": "raw_tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 24,
+      "bytes_jited": 274,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 320,
+      "gpl_compatible": true,
+      "id": 21,
+      "jited": true,
+      "loaded_at": 1773291146,
+      "map_ids": [
+        124,
+        131,
+        226,
+        227
+      ],
+      "name": "tracepoint__raw_syscalls__sys_exit",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 62,
+          "pid": 155
+        }
+      ],
+      "owner_pids": [
+        155
+      ],
+      "pids": [
+        {
+          "comm": "tracee",
+          "pid": 155
+        }
+      ],
+      "tag": "805bc16b4b998d1f",
+      "type": "raw_tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 24,
+      "bytes_jited": 2101,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 3800,
+      "gpl_compatible": true,
+      "id": 22,
+      "jited": true,
+      "loaded_at": 1773291146,
+      "map_ids": [
+        126,
+        169,
+        127,
+        124,
+        132,
+        133,
+        226,
+        227
+      ],
+      "name": "sys_exit_init",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 65,
+          "pid": 155
+        }
+      ],
+      "owner_pids": [
+        155
+      ],
+      "pids": [
+        {
+          "comm": "tracee",
+          "pid": 155
+        }
+      ],
+      "tag": "b0f6718eba750572",
+      "type": "raw_tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 24,
+      "bytes_jited": 11522,
+      "bytes_memlock": 20480,
+      "bytes_xlated": 19880,
+      "gpl_compatible": true,
+      "id": 23,
+      "jited": true,
+      "loaded_at": 1773291146,
+      "map_ids": [
+        166,
+        127,
+        124,
+        136,
+        169,
+        126,
+        143,
+        211,
+        181,
+        178,
+        184,
+        187,
+        190,
+        202,
+        205,
+        139,
+        208,
+        226,
+        162,
+        213,
+        133,
+        227
+      ],
+      "name": "sys_exit_submit",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 68,
+          "pid": 155
+        }
+      ],
+      "owner_pids": [
+        155
+      ],
+      "pids": [
+        {
+          "comm": "tracee",
+          "pid": 155
+        }
+      ],
+      "tag": "34f99fe04fae7f67",
+      "type": "raw_tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 24,
+      "bytes_jited": 20392,
+      "bytes_memlock": 32768,
+      "bytes_xlated": 31992,
+      "gpl_compatible": true,
+      "id": 24,
+      "jited": true,
+      "loaded_at": 1773291146,
+      "map_ids": [
+        166,
+        127,
+        126,
+        136,
+        211,
+        181,
+        178,
+        184,
+        187,
+        190,
+        202,
+        205,
+        139,
+        208,
+        162,
+        213,
+        226,
+        227
+      ],
+      "name": "syscall__execve_enter",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 71,
+          "pid": 155
+        }
+      ],
+      "owner_pids": [
+        155
+      ],
+      "pids": [
+        {
+          "comm": "tracee",
+          "pid": 155
+        }
+      ],
+      "tag": "6ad5edab8f1b2f01",
+      "type": "raw_tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 24,
+      "bytes_jited": 20363,
+      "bytes_memlock": 32768,
+      "bytes_xlated": 32008,
+      "gpl_compatible": true,
+      "id": 25,
+      "jited": true,
+      "loaded_at": 1773291146,
+      "map_ids": [
+        166,
+        127,
+        126,
+        136,
+        211,
+        181,
+        178,
+        184,
+        187,
+        190,
+        202,
+        205,
+        139,
+        208,
+        162,
+        213,
+        226,
+        227
+      ],
+      "name": "syscall__execve_exit",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 74,
+          "pid": 155
+        }
+      ],
+      "owner_pids": [
+        155
+      ],
+      "pids": [
+        {
+          "comm": "tracee",
+          "pid": 155
+        }
+      ],
+      "tag": "ba61096b68e62e3b",
+      "type": "raw_tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 24,
+      "bytes_jited": 20651,
+      "bytes_memlock": 32768,
+      "bytes_xlated": 32400,
+      "gpl_compatible": true,
+      "id": 26,
+      "jited": true,
+      "loaded_at": 1773291146,
+      "map_ids": [
+        166,
+        127,
+        126,
+        136,
+        211,
+        181,
+        178,
+        184,
+        187,
+        190,
+        202,
+        205,
+        139,
+        208,
+        162,
+        213,
+        226,
+        227
+      ],
+      "name": "syscall__execveat_enter",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 77,
+          "pid": 155
+        }
+      ],
+      "owner_pids": [
+        155
+      ],
+      "pids": [
+        {
+          "comm": "tracee",
+          "pid": 155
+        }
+      ],
+      "tag": "ee6684e308aba477",
+      "type": "raw_tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 24,
+      "bytes_jited": 20619,
+      "bytes_memlock": 32768,
+      "bytes_xlated": 32408,
+      "gpl_compatible": true,
+      "id": 27,
+      "jited": true,
+      "loaded_at": 1773291146,
+      "map_ids": [
+        166,
+        127,
+        126,
+        136,
+        211,
+        181,
+        178,
+        184,
+        187,
+        190,
+        202,
+        205,
+        139,
+        208,
+        162,
+        213,
+        226,
+        227
+      ],
+      "name": "syscall__execveat_exit",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 80,
+          "pid": 155
+        }
+      ],
+      "owner_pids": [
+        155
+      ],
+      "pids": [
+        {
+          "comm": "tracee",
+          "pid": 155
+        }
+      ],
+      "tag": "9082de17b528a7d2",
+      "type": "raw_tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 24,
+      "bytes_jited": 12263,
+      "bytes_memlock": 20480,
+      "bytes_xlated": 18744,
+      "gpl_compatible": true,
+      "id": 28,
+      "jited": true,
+      "loaded_at": 1773291146,
+      "map_ids": [
+        166,
+        127,
+        126,
+        136,
+        211,
+        181,
+        178,
+        184,
+        187,
+        190,
+        202,
+        205,
+        139,
+        208,
+        162,
+        213,
+        226,
+        227
+      ],
+      "name": "sys_dup_exit_tail",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 83,
+          "pid": 155
+        }
+      ],
+      "owner_pids": [
+        155
+      ],
+      "pids": [
+        {
+          "comm": "tracee",
+          "pid": 155
+        }
+      ],
+      "tag": "461008212564f6cc",
+      "type": "kprobe",
+      "uid": 0
+    },
+    {
+      "btf_id": 24,
+      "bytes_jited": 19597,
+      "bytes_memlock": 32768,
+      "bytes_xlated": 32248,
+      "gpl_compatible": true,
+      "id": 29,
+      "jited": true,
+      "loaded_at": 1773291146,
+      "map_ids": [
+        166,
+        127,
+        124,
+        136,
+        169,
+        126,
+        143,
+        211,
+        168,
+        212,
+        181,
+        178,
+        184,
+        228,
+        187,
+        190,
+        202,
+        205,
+        139,
+        208,
+        162,
+        213,
+        226,
+        227
+      ],
+      "name": "tracepoint__sched__sched_process_fork",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 86,
+          "pid": 155
+        }
+      ],
+      "owner_pids": [
+        155
+      ],
+      "pids": [
+        {
+          "comm": "tracee",
+          "pid": 155
+        }
+      ],
+      "tag": "60586e32da083686",
+      "type": "raw_tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 24,
+      "bytes_jited": 58565,
+      "bytes_memlock": 114688,
+      "bytes_xlated": 108072,
+      "gpl_compatible": true,
+      "id": 30,
+      "jited": true,
+      "loaded_at": 1773291146,
+      "map_ids": [
+        166,
+        127,
+        126,
+        136,
+        140,
+        141,
+        222,
+        146,
+        228,
+        162,
+        213,
+        169,
+        168,
+        212,
+        142,
+        226,
+        227
+      ],
+      "name": "lkm_seeker_modtree_loop",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 89,
+          "pid": 155
+        }
+      ],
+      "owner_pids": [
+        155
+      ],
+      "pids": [
+        {
+          "comm": "tracee",
+          "pid": 155
+        }
+      ],
+      "tag": "97070d73e83f4ce5",
+      "type": "kprobe",
+      "uid": 0
+    },
+    {
+      "btf_id": 24,
+      "bytes_jited": 61576,
+      "bytes_memlock": 122880,
+      "bytes_xlated": 111768,
+      "gpl_compatible": true,
+      "id": 34,
+      "jited": true,
+      "loaded_at": 1773291146,
+      "map_ids": [
+        169,
+        166,
+        127,
+        126,
+        136,
+        152,
+        222,
+        146,
+        228,
+        162,
+        213,
+        142,
+        168,
+        212,
+        226,
+        227
+      ],
+      "name": "lkm_seeker_kset_tail",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 92,
+          "pid": 155
+        }
+      ],
+      "owner_pids": [
+        155
+      ],
+      "pids": [
+        {
+          "comm": "tracee",
+          "pid": 155
+        }
+      ],
+      "tag": "ea744330f0ba125c",
+      "type": "kprobe",
+      "uid": 0
+    },
+    {
+      "btf_id": 24,
+      "bytes_jited": 660,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 1048,
+      "gpl_compatible": true,
+      "id": 35,
+      "jited": true,
+      "loaded_at": 1773291146,
+      "map_ids": [
+        169,
+        166,
+        127,
+        126,
+        136,
+        152,
+        140,
+        142,
+        168,
+        212,
+        226,
+        227
+      ],
+      "name": "lkm_seeker_mod_tree_tail",
+      "orphaned": false,
+      "owner_fds": [
+        {
+          "fd": 110,
+          "pid": 155
+        }
+      ],
+      "owner_pids": [
+        155
+      ],
+      "pids": [
+        {
+          "comm": "tracee",
+          "pid": 155
+        }
+      ],
+      "tag": "0f5bb4e291b61133",
+      "type": "kprobe",
+      "uid": 0
+    }
+  ]
+}

@@ -1,0 +1,742 @@
+{
+  "kernel_release": "7.0.0-rc2-g266712bf690c",
+  "program": "/home/yunwei37/workspace/bpf-benchmark/micro/programs/load_byte_recompose.bpf.o",
+  "directive_blob": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/load_byte_recompose.directive.bin",
+  "repeat": 200,
+  "warmups": 2,
+  "iterations": 10,
+  "baseline": {
+    "samples": [
+      {
+        "compile_ns": 6038488,
+        "exec_ns": 288,
+        "timing_source": "ktime",
+        "no_cmov": false,
+        "disabled_passes": [],
+        "wall_exec_ns": 54997,
+        "exec_cycles": 202707,
+        "tsc_freq_hz": 3685796604,
+        "result": 1253018829653002637,
+        "retval": 2,
+        "jited_prog_len": 422,
+        "xlated_prog_len": 744,
+        "code_size": {
+          "bpf_bytecode_bytes": 744,
+          "native_code_bytes": 422,
+          "inflation_ratio": 0.567204
+        },
+        "phases_ns": {
+          "memory_prepare_ns": 1115736,
+          "object_open_ns": 3810454,
+          "object_load_ns": 2228034,
+          "input_stage_ns": 996,
+          "prog_run_wall_ns": 10998615,
+          "result_extract_ns": 59
+        },
+        "perf_counters": {},
+        "perf_counters_meta": {
+          "requested": false,
+          "collected": false,
+          "include_kernel": true,
+          "scope": "full_repeat_raw",
+          "error": ""
+        }
+      },
+      {
+        "compile_ns": 5771061,
+        "exec_ns": 315,
+        "timing_source": "ktime",
+        "no_cmov": false,
+        "disabled_passes": [],
+        "wall_exec_ns": 58164,
+        "exec_cycles": 214377,
+        "tsc_freq_hz": 3685727673,
+        "result": 1253018829653002637,
+        "retval": 2,
+        "jited_prog_len": 422,
+        "xlated_prog_len": 744,
+        "code_size": {
+          "bpf_bytecode_bytes": 744,
+          "native_code_bytes": 422,
+          "inflation_ratio": 0.567204
+        },
+        "phases_ns": {
+          "memory_prepare_ns": 1074480,
+          "object_open_ns": 3948251,
+          "object_load_ns": 1822810,
+          "input_stage_ns": 1155,
+          "prog_run_wall_ns": 11631884,
+          "result_extract_ns": 56
+        },
+        "perf_counters": {},
+        "perf_counters_meta": {
+          "requested": false,
+          "collected": false,
+          "include_kernel": true,
+          "scope": "full_repeat_raw",
+          "error": ""
+        }
+      },
+      {
+        "compile_ns": 4689150,
+        "exec_ns": 288,
+        "timing_source": "ktime",
+        "no_cmov": false,
+        "disabled_passes": [],
+        "wall_exec_ns": 57842,
+        "exec_cycles": 213189,
+        "tsc_freq_hz": 3685707079,
+        "result": 1253018829653002637,
+        "retval": 2,
+        "jited_prog_len": 422,
+        "xlated_prog_len": 744,
+        "code_size": {
+          "bpf_bytecode_bytes": 744,
+          "native_code_bytes": 422,
+          "inflation_ratio": 0.567204
+        },
+        "phases_ns": {
+          "memory_prepare_ns": 1004223,
+          "object_open_ns": 3122738,
+          "object_load_ns": 1566412,
+          "input_stage_ns": 1090,
+          "prog_run_wall_ns": 11568627,
+          "result_extract_ns": 59
+        },
+        "perf_counters": {},
+        "perf_counters_meta": {
+          "requested": false,
+          "collected": false,
+          "include_kernel": true,
+          "scope": "full_repeat_raw",
+          "error": ""
+        }
+      },
+      {
+        "compile_ns": 4607518,
+        "exec_ns": 298,
+        "timing_source": "ktime",
+        "no_cmov": false,
+        "disabled_passes": [],
+        "wall_exec_ns": 55798,
+        "exec_cycles": 205670,
+        "tsc_freq_hz": 3685956683,
+        "result": 1253018829653002637,
+        "retval": 2,
+        "jited_prog_len": 422,
+        "xlated_prog_len": 744,
+        "code_size": {
+          "bpf_bytecode_bytes": 744,
+          "native_code_bytes": 422,
+          "inflation_ratio": 0.567204
+        },
+        "phases_ns": {
+          "memory_prepare_ns": 944463,
+          "object_open_ns": 3041161,
+          "object_load_ns": 1566357,
+          "input_stage_ns": 1234,
+          "prog_run_wall_ns": 11159902,
+          "result_extract_ns": 60
+        },
+        "perf_counters": {},
+        "perf_counters_meta": {
+          "requested": false,
+          "collected": false,
+          "include_kernel": true,
+          "scope": "full_repeat_raw",
+          "error": ""
+        }
+      },
+      {
+        "compile_ns": 6372876,
+        "exec_ns": 242,
+        "timing_source": "ktime",
+        "no_cmov": false,
+        "disabled_passes": [],
+        "wall_exec_ns": 62721,
+        "exec_cycles": 231167,
+        "tsc_freq_hz": 3685636102,
+        "result": 1253018829653002637,
+        "retval": 2,
+        "jited_prog_len": 422,
+        "xlated_prog_len": 744,
+        "code_size": {
+          "bpf_bytecode_bytes": 744,
+          "native_code_bytes": 422,
+          "inflation_ratio": 0.567204
+        },
+        "phases_ns": {
+          "memory_prepare_ns": 1242377,
+          "object_open_ns": 3964059,
+          "object_load_ns": 2408817,
+          "input_stage_ns": 1826,
+          "prog_run_wall_ns": 12545458,
+          "result_extract_ns": 116
+        },
+        "perf_counters": {},
+        "perf_counters_meta": {
+          "requested": false,
+          "collected": false,
+          "include_kernel": true,
+          "scope": "full_repeat_raw",
+          "error": ""
+        }
+      },
+      {
+        "compile_ns": 4600113,
+        "exec_ns": 223,
+        "timing_source": "ktime",
+        "no_cmov": false,
+        "disabled_passes": [],
+        "wall_exec_ns": 55320,
+        "exec_cycles": 203900,
+        "tsc_freq_hz": 3685809590,
+        "result": 1253018829653002637,
+        "retval": 2,
+        "jited_prog_len": 422,
+        "xlated_prog_len": 744,
+        "code_size": {
+          "bpf_bytecode_bytes": 744,
+          "native_code_bytes": 422,
+          "inflation_ratio": 0.567204
+        },
+        "phases_ns": {
+          "memory_prepare_ns": 962015,
+          "object_open_ns": 3033286,
+          "object_load_ns": 1566827,
+          "input_stage_ns": 1168,
+          "prog_run_wall_ns": 11065939,
+          "result_extract_ns": 55
+        },
+        "perf_counters": {},
+        "perf_counters_meta": {
+          "requested": false,
+          "collected": false,
+          "include_kernel": true,
+          "scope": "full_repeat_raw",
+          "error": ""
+        }
+      },
+      {
+        "compile_ns": 4634408,
+        "exec_ns": 291,
+        "timing_source": "ktime",
+        "no_cmov": false,
+        "disabled_passes": [],
+        "wall_exec_ns": 73105,
+        "exec_cycles": 269460,
+        "tsc_freq_hz": 3685920486,
+        "result": 1253018829653002637,
+        "retval": 2,
+        "jited_prog_len": 422,
+        "xlated_prog_len": 744,
+        "code_size": {
+          "bpf_bytecode_bytes": 744,
+          "native_code_bytes": 422,
+          "inflation_ratio": 0.567204
+        },
+        "phases_ns": {
+          "memory_prepare_ns": 951688,
+          "object_open_ns": 3057499,
+          "object_load_ns": 1576909,
+          "input_stage_ns": 1172,
+          "prog_run_wall_ns": 14621061,
+          "result_extract_ns": 52
+        },
+        "perf_counters": {},
+        "perf_counters_meta": {
+          "requested": false,
+          "collected": false,
+          "include_kernel": true,
+          "scope": "full_repeat_raw",
+          "error": ""
+        }
+      },
+      {
+        "compile_ns": 5608541,
+        "exec_ns": 324,
+        "timing_source": "ktime",
+        "no_cmov": false,
+        "disabled_passes": [],
+        "wall_exec_ns": 55009,
+        "exec_cycles": 202768,
+        "tsc_freq_hz": 3686091594,
+        "result": 1253018829653002637,
+        "retval": 2,
+        "jited_prog_len": 422,
+        "xlated_prog_len": 744,
+        "code_size": {
+          "bpf_bytecode_bytes": 744,
+          "native_code_bytes": 422,
+          "inflation_ratio": 0.567204
+        },
+        "phases_ns": {
+          "memory_prepare_ns": 1228462,
+          "object_open_ns": 3877247,
+          "object_load_ns": 1731294,
+          "input_stage_ns": 1160,
+          "prog_run_wall_ns": 11001265,
+          "result_extract_ns": 58
+        },
+        "perf_counters": {},
+        "perf_counters_meta": {
+          "requested": false,
+          "collected": false,
+          "include_kernel": true,
+          "scope": "full_repeat_raw",
+          "error": ""
+        }
+      },
+      {
+        "compile_ns": 4559614,
+        "exec_ns": 125,
+        "timing_source": "ktime",
+        "no_cmov": false,
+        "disabled_passes": [],
+        "wall_exec_ns": 61125,
+        "exec_cycles": 225293,
+        "tsc_freq_hz": 3685778427,
+        "result": 1253018829653002637,
+        "retval": 2,
+        "jited_prog_len": 422,
+        "xlated_prog_len": 744,
+        "code_size": {
+          "bpf_bytecode_bytes": 744,
+          "native_code_bytes": 422,
+          "inflation_ratio": 0.567204
+        },
+        "phases_ns": {
+          "memory_prepare_ns": 929578,
+          "object_open_ns": 3014412,
+          "object_load_ns": 1545202,
+          "input_stage_ns": 1016,
+          "prog_run_wall_ns": 12225662,
+          "result_extract_ns": 62
+        },
+        "perf_counters": {},
+        "perf_counters_meta": {
+          "requested": false,
+          "collected": false,
+          "include_kernel": true,
+          "scope": "full_repeat_raw",
+          "error": ""
+        }
+      },
+      {
+        "compile_ns": 5266827,
+        "exec_ns": 129,
+        "timing_source": "ktime",
+        "no_cmov": false,
+        "disabled_passes": [],
+        "wall_exec_ns": 53853,
+        "exec_cycles": 198490,
+        "tsc_freq_hz": 3685745890,
+        "result": 1253018829653002637,
+        "retval": 2,
+        "jited_prog_len": 422,
+        "xlated_prog_len": 744,
+        "code_size": {
+          "bpf_bytecode_bytes": 744,
+          "native_code_bytes": 422,
+          "inflation_ratio": 0.567204
+        },
+        "phases_ns": {
+          "memory_prepare_ns": 1038634,
+          "object_open_ns": 3550226,
+          "object_load_ns": 1716601,
+          "input_stage_ns": 1204,
+          "prog_run_wall_ns": 10770440,
+          "result_extract_ns": 128
+        },
+        "perf_counters": {},
+        "perf_counters_meta": {
+          "requested": false,
+          "collected": false,
+          "include_kernel": true,
+          "scope": "full_repeat_raw",
+          "error": ""
+        }
+      }
+    ],
+    "exec_ns": {
+      "median": 288.0,
+      "min": 125,
+      "max": 324
+    },
+    "compile_ns": {
+      "median": 4977988.5,
+      "min": 4559614,
+      "max": 6372876
+    },
+    "jited_prog_len": 422,
+    "xlated_prog_len": 744
+  },
+  "with_directives": {
+    "samples": [
+      {
+        "compile_ns": 12806633,
+        "exec_ns": 100,
+        "timing_source": "ktime",
+        "no_cmov": false,
+        "disabled_passes": [],
+        "wall_exec_ns": 77399,
+        "exec_cycles": 285262,
+        "tsc_freq_hz": 3685585973,
+        "result": 1253018829653002637,
+        "retval": 2,
+        "jited_prog_len": 296,
+        "xlated_prog_len": 504,
+        "code_size": {
+          "bpf_bytecode_bytes": 504,
+          "native_code_bytes": 296,
+          "inflation_ratio": 0.587302
+        },
+        "phases_ns": {
+          "memory_prepare_ns": 931884,
+          "object_open_ns": 3063371,
+          "object_load_ns": 9743262,
+          "input_stage_ns": 3210,
+          "prog_run_wall_ns": 15480328,
+          "result_extract_ns": 81
+        },
+        "perf_counters": {},
+        "perf_counters_meta": {
+          "requested": false,
+          "collected": false,
+          "include_kernel": true,
+          "scope": "full_repeat_raw",
+          "error": ""
+        }
+      },
+      {
+        "compile_ns": 17998362,
+        "exec_ns": 129,
+        "timing_source": "ktime",
+        "no_cmov": false,
+        "disabled_passes": [],
+        "wall_exec_ns": 64393,
+        "exec_cycles": 237329,
+        "tsc_freq_hz": 3685650778,
+        "result": 1253018829653002637,
+        "retval": 2,
+        "jited_prog_len": 296,
+        "xlated_prog_len": 504,
+        "code_size": {
+          "bpf_bytecode_bytes": 504,
+          "native_code_bytes": 296,
+          "inflation_ratio": 0.587302
+        },
+        "phases_ns": {
+          "memory_prepare_ns": 2971663,
+          "object_open_ns": 5162608,
+          "object_load_ns": 12835754,
+          "input_stage_ns": 1324,
+          "prog_run_wall_ns": 12876371,
+          "result_extract_ns": 68
+        },
+        "perf_counters": {},
+        "perf_counters_meta": {
+          "requested": false,
+          "collected": false,
+          "include_kernel": true,
+          "scope": "full_repeat_raw",
+          "error": ""
+        }
+      },
+      {
+        "compile_ns": 15226636,
+        "exec_ns": 155,
+        "timing_source": "ktime",
+        "no_cmov": false,
+        "disabled_passes": [],
+        "wall_exec_ns": 61843,
+        "exec_cycles": 227946,
+        "tsc_freq_hz": 3685886163,
+        "result": 1253018829653002637,
+        "retval": 2,
+        "jited_prog_len": 296,
+        "xlated_prog_len": 504,
+        "code_size": {
+          "bpf_bytecode_bytes": 504,
+          "native_code_bytes": 296,
+          "inflation_ratio": 0.587302
+        },
+        "phases_ns": {
+          "memory_prepare_ns": 972431,
+          "object_open_ns": 3590501,
+          "object_load_ns": 11636135,
+          "input_stage_ns": 1693,
+          "prog_run_wall_ns": 12367850,
+          "result_extract_ns": 58
+        },
+        "perf_counters": {},
+        "perf_counters_meta": {
+          "requested": false,
+          "collected": false,
+          "include_kernel": true,
+          "scope": "full_repeat_raw",
+          "error": ""
+        }
+      },
+      {
+        "compile_ns": 15193194,
+        "exec_ns": 127,
+        "timing_source": "ktime",
+        "no_cmov": false,
+        "disabled_passes": [],
+        "wall_exec_ns": 58580,
+        "exec_cycles": 215910,
+        "tsc_freq_hz": 3685726621,
+        "result": 1253018829653002637,
+        "retval": 2,
+        "jited_prog_len": 296,
+        "xlated_prog_len": 504,
+        "code_size": {
+          "bpf_bytecode_bytes": 504,
+          "native_code_bytes": 296,
+          "inflation_ratio": 0.587302
+        },
+        "phases_ns": {
+          "memory_prepare_ns": 1328319,
+          "object_open_ns": 4141498,
+          "object_load_ns": 11051696,
+          "input_stage_ns": 1663,
+          "prog_run_wall_ns": 11714494,
+          "result_extract_ns": 56
+        },
+        "perf_counters": {},
+        "perf_counters_meta": {
+          "requested": false,
+          "collected": false,
+          "include_kernel": true,
+          "scope": "full_repeat_raw",
+          "error": ""
+        }
+      },
+      {
+        "compile_ns": 15699684,
+        "exec_ns": 130,
+        "timing_source": "ktime",
+        "no_cmov": false,
+        "disabled_passes": [],
+        "wall_exec_ns": 58588,
+        "exec_cycles": 215935,
+        "tsc_freq_hz": 3685627152,
+        "result": 1253018829653002637,
+        "retval": 2,
+        "jited_prog_len": 296,
+        "xlated_prog_len": 504,
+        "code_size": {
+          "bpf_bytecode_bytes": 504,
+          "native_code_bytes": 296,
+          "inflation_ratio": 0.587302
+        },
+        "phases_ns": {
+          "memory_prepare_ns": 995998,
+          "object_open_ns": 4406268,
+          "object_load_ns": 11293416,
+          "input_stage_ns": 1240,
+          "prog_run_wall_ns": 11715484,
+          "result_extract_ns": 58
+        },
+        "perf_counters": {},
+        "perf_counters_meta": {
+          "requested": false,
+          "collected": false,
+          "include_kernel": true,
+          "scope": "full_repeat_raw",
+          "error": ""
+        }
+      },
+      {
+        "compile_ns": 13545156,
+        "exec_ns": 59,
+        "timing_source": "ktime",
+        "no_cmov": false,
+        "disabled_passes": [],
+        "wall_exec_ns": 58161,
+        "exec_cycles": 214371,
+        "tsc_freq_hz": 3685830856,
+        "result": 1253018829653002637,
+        "retval": 2,
+        "jited_prog_len": 296,
+        "xlated_prog_len": 504,
+        "code_size": {
+          "bpf_bytecode_bytes": 504,
+          "native_code_bytes": 296,
+          "inflation_ratio": 0.587302
+        },
+        "phases_ns": {
+          "memory_prepare_ns": 973027,
+          "object_open_ns": 3210066,
+          "object_load_ns": 10335090,
+          "input_stage_ns": 3560,
+          "prog_run_wall_ns": 11631977,
+          "result_extract_ns": 202
+        },
+        "perf_counters": {},
+        "perf_counters_meta": {
+          "requested": false,
+          "collected": false,
+          "include_kernel": true,
+          "scope": "full_repeat_raw",
+          "error": ""
+        }
+      },
+      {
+        "compile_ns": 15942391,
+        "exec_ns": 151,
+        "timing_source": "ktime",
+        "no_cmov": false,
+        "disabled_passes": [],
+        "wall_exec_ns": 65599,
+        "exec_cycles": 241775,
+        "tsc_freq_hz": 3685678089,
+        "result": 1253018829653002637,
+        "retval": 2,
+        "jited_prog_len": 296,
+        "xlated_prog_len": 504,
+        "code_size": {
+          "bpf_bytecode_bytes": 504,
+          "native_code_bytes": 296,
+          "inflation_ratio": 0.587302
+        },
+        "phases_ns": {
+          "memory_prepare_ns": 1018656,
+          "object_open_ns": 3810546,
+          "object_load_ns": 12131845,
+          "input_stage_ns": 2060,
+          "prog_run_wall_ns": 13120111,
+          "result_extract_ns": 65
+        },
+        "perf_counters": {},
+        "perf_counters_meta": {
+          "requested": false,
+          "collected": false,
+          "include_kernel": true,
+          "scope": "full_repeat_raw",
+          "error": ""
+        }
+      },
+      {
+        "compile_ns": 14580242,
+        "exec_ns": 131,
+        "timing_source": "ktime",
+        "no_cmov": false,
+        "disabled_passes": [],
+        "wall_exec_ns": 65720,
+        "exec_cycles": 242228,
+        "tsc_freq_hz": 3685747878,
+        "result": 1253018829653002637,
+        "retval": 2,
+        "jited_prog_len": 296,
+        "xlated_prog_len": 504,
+        "code_size": {
+          "bpf_bytecode_bytes": 504,
+          "native_code_bytes": 296,
+          "inflation_ratio": 0.587302
+        },
+        "phases_ns": {
+          "memory_prepare_ns": 908287,
+          "object_open_ns": 3444615,
+          "object_load_ns": 11135627,
+          "input_stage_ns": 2603,
+          "prog_run_wall_ns": 13142435,
+          "result_extract_ns": 69
+        },
+        "perf_counters": {},
+        "perf_counters_meta": {
+          "requested": false,
+          "collected": false,
+          "include_kernel": true,
+          "scope": "full_repeat_raw",
+          "error": ""
+        }
+      },
+      {
+        "compile_ns": 14114481,
+        "exec_ns": 152,
+        "timing_source": "ktime",
+        "no_cmov": false,
+        "disabled_passes": [],
+        "wall_exec_ns": 61660,
+        "exec_cycles": 227271,
+        "tsc_freq_hz": 3685884869,
+        "result": 1253018829653002637,
+        "retval": 2,
+        "jited_prog_len": 296,
+        "xlated_prog_len": 504,
+        "code_size": {
+          "bpf_bytecode_bytes": 504,
+          "native_code_bytes": 296,
+          "inflation_ratio": 0.587302
+        },
+        "phases_ns": {
+          "memory_prepare_ns": 1149305,
+          "object_open_ns": 3745200,
+          "object_load_ns": 10369281,
+          "input_stage_ns": 1588,
+          "prog_run_wall_ns": 12331627,
+          "result_extract_ns": 71
+        },
+        "perf_counters": {},
+        "perf_counters_meta": {
+          "requested": false,
+          "collected": false,
+          "include_kernel": true,
+          "scope": "full_repeat_raw",
+          "error": ""
+        }
+      },
+      {
+        "compile_ns": 13896752,
+        "exec_ns": 131,
+        "timing_source": "ktime",
+        "no_cmov": false,
+        "disabled_passes": [],
+        "wall_exec_ns": 58513,
+        "exec_cycles": 215682,
+        "tsc_freq_hz": 3686073386,
+        "result": 1253018829653002637,
+        "retval": 2,
+        "jited_prog_len": 296,
+        "xlated_prog_len": 504,
+        "code_size": {
+          "bpf_bytecode_bytes": 504,
+          "native_code_bytes": 296,
+          "inflation_ratio": 0.587302
+        },
+        "phases_ns": {
+          "memory_prepare_ns": 1025385,
+          "object_open_ns": 3414975,
+          "object_load_ns": 10481777,
+          "input_stage_ns": 1213,
+          "prog_run_wall_ns": 11701740,
+          "result_extract_ns": 23
+        },
+        "perf_counters": {},
+        "perf_counters_meta": {
+          "requested": false,
+          "collected": false,
+          "include_kernel": true,
+          "scope": "full_repeat_raw",
+          "error": ""
+        }
+      }
+    ],
+    "exec_ns": {
+      "median": 130.5,
+      "min": 59,
+      "max": 155
+    },
+    "compile_ns": {
+      "median": 14886718.0,
+      "min": 12806633,
+      "max": 17998362
+    },
+    "jited_prog_len": 296,
+    "xlated_prog_len": 504
+  },
+  "directive_over_baseline_exec_ratio": 0.453125,
+  "baseline_delta_ns": -157.5
+}
