@@ -74,6 +74,24 @@ LOCAL_SMOKE_ARGS := --bench simple --iterations 1 --warmups 0 --repeat 10
 VM_SMOKE_ARGS := --bench simple --bench load_byte_recompose --iterations 1 --warmups 0 --repeat 10
 VENV_ACTIVATE := source "$(VENV)/bin/activate" &&
 
+# File-based dependency sources (for proper incremental rebuilds)
+MICRO_RUNNER_SOURCES := $(wildcard \
+	$(MICRO_DIR)/runner/src/*.cpp \
+	$(MICRO_DIR)/runner/src/*.h \
+	$(MICRO_DIR)/runner/CMakeLists.txt)
+MICRO_BPF_SOURCES := $(wildcard \
+	$(MICRO_DIR)/programs/*.bpf.c \
+	$(MICRO_DIR)/programs/common.h)
+SCANNER_SOURCES := $(wildcard \
+	$(SCANNER_DIR)/src/*.cpp \
+	$(SCANNER_DIR)/include/bpf_jit_scanner/*.hpp \
+	$(SCANNER_DIR)/CMakeLists.txt)
+KERNEL_JIT_SOURCES := \
+	$(KERNEL_DIR)/arch/x86/net/bpf_jit_comp.c \
+	$(KERNEL_DIR)/kernel/bpf/jit_directives.c
+# Stamp file for BPF program objects (programs/ has no separate build dir)
+MICRO_BPF_STAMP := $(MICRO_DIR)/programs/.build.stamp
+
 .PHONY: all micro scanner kernel kernel-tests scanner-tests clean \
 	smoke check validate verify-build compare \
 	vm-selftest vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
@@ -154,6 +172,7 @@ all:
 	$(MAKE) scanner
 	$(MAKE) kernel-tests
 
+# PHONY build targets (for manual invocation / forced rebuild)
 micro:
 	@echo "=== Running make micro ==="
 	$(MAKE) -C "$(MICRO_DIR)" micro_exec programs
@@ -178,11 +197,28 @@ scanner-tests: scanner
 	cmake --build "$(SCANNER_BUILD_DIR)" --target test_scanner -j"$(NPROC)"
 	ctest --test-dir "$(SCANNER_BUILD_DIR)" --output-on-failure
 
-$(BZIMAGE_PATH):
-	@echo "=== Running make kernel (missing bzImage) ==="
+# File-based targets for incremental rebuilds (used by vm-* targets)
+$(MICRO_RUNNER): $(MICRO_RUNNER_SOURCES)
+	@echo "=== Building micro_exec (sources changed) ==="
+	$(MAKE) -C "$(MICRO_DIR)" micro_exec
+
+$(MICRO_BPF_STAMP): $(MICRO_BPF_SOURCES)
+	@echo "=== Building BPF programs (sources changed) ==="
+	$(MAKE) -C "$(MICRO_DIR)" programs
+	touch "$@"
+
+$(SCANNER_PATH): $(SCANNER_SOURCES)
+	@echo "=== Building bpf-jit-scanner (sources changed) ==="
+	cmake -S "$(SCANNER_DIR)" -B "$(SCANNER_BUILD_DIR)" \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DBPF_JIT_SCANNER_BUILD_TESTS=ON
+	cmake --build "$(SCANNER_BUILD_DIR)" --target bpf-jit-scanner -j"$(NPROC)"
+
+$(BZIMAGE_PATH): $(KERNEL_JIT_SOURCES)
+	@echo "=== Building bzImage (kernel sources changed) ==="
 	$(MAKE) -C "$(KERNEL_DIR)" -j"$(NPROC)" bzImage
 
-smoke: micro
+smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP)
 	@echo "=== Running make smoke ==="
 	mkdir -p "$(MICRO_RESULTS_DIR)"
 	$(VENV_ACTIVATE) python3 "$(MICRO_DIR)/driver.py" suite \
@@ -202,12 +238,12 @@ validate:
 	$(MAKE) vm-selftest
 	$(MAKE) vm-micro-smoke
 
-vm-selftest: kernel-tests | $(BZIMAGE_PATH)
+vm-selftest: kernel-tests $(BZIMAGE_PATH)
 	@echo "=== Running make vm-selftest ==="
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
 		bash -lc 'cd "$(ROOT_DIR)" && sudo -n "$(KERNEL_SELFTEST)"'
 
-vm-micro-smoke: micro | $(BZIMAGE_PATH)
+vm-micro-smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(BZIMAGE_PATH)
 	@echo "=== Running make vm-micro-smoke (POLICY=$(POLICY)) ==="
 	mkdir -p "$(MICRO_RESULTS_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
@@ -221,7 +257,7 @@ vm-micro-smoke: micro | $(BZIMAGE_PATH)
 # Run the full micro benchmark suite in a VM.
 # To run only specific benchmarks: make vm-micro BENCH="simple bitcount"
 # To use a named policy set: make vm-micro POLICY=all-apply
-vm-micro: micro scanner verify-build | $(BZIMAGE_PATH)
+vm-micro: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(SCANNER_PATH) verify-build $(BZIMAGE_PATH)
 	@echo "=== Running make vm-micro (POLICY=$(POLICY)) ==="
 	mkdir -p "$(MICRO_RESULTS_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
@@ -234,7 +270,7 @@ vm-micro: micro scanner verify-build | $(BZIMAGE_PATH)
 			--output "$(VM_MICRO_OUTPUT)"'
 
 # The corpus batch harness already manages one vng boot per target internally.
-vm-corpus: micro scanner verify-build | $(BZIMAGE_PATH)
+vm-corpus: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(SCANNER_PATH) verify-build $(BZIMAGE_PATH)
 	@echo "=== Running make vm-corpus ==="
 	mkdir -p "$(CORPUS_RESULTS_DIR)"
 	$(VENV_ACTIVATE) python3 "$(MICRO_DIR)/driver.py" corpus v5-vm-batch \
@@ -248,7 +284,7 @@ vm-corpus: micro scanner verify-build | $(BZIMAGE_PATH)
 		--output-json "$(VM_CORPUS_OUTPUT_JSON)" \
 		--output-md "$(VM_CORPUS_OUTPUT_MD)"
 
-vm-e2e: micro scanner verify-build | $(BZIMAGE_PATH)
+vm-e2e: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(SCANNER_PATH) verify-build $(BZIMAGE_PATH)
 	@echo "=== Running make vm-e2e ==="
 	mkdir -p "$(E2E_RESULTS_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
@@ -285,6 +321,7 @@ vm-all:
 clean:
 	@echo "=== Running make clean ==="
 	$(MAKE) -C "$(MICRO_DIR)" clean
+	rm -f "$(MICRO_BPF_STAMP)"
 	rm -rf "$(SCANNER_BUILD_DIR)"
 	$(MAKE) -C "$(KERNEL_TEST_DIR)" clean
 	$(MAKE) -C "$(KERNEL_DIR)" clean

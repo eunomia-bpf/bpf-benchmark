@@ -36,6 +36,8 @@ corpus/build/
 # BPF build artifacts
 *.bpf.o
 *.bpf.d
+# Makefile incremental rebuild stamp files
+.build.stamp
 
 # Generated benchmark inputs and project outputs
 micro/jit-dumps/
