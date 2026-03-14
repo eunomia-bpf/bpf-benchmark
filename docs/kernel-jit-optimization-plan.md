@@ -654,8 +654,6 @@ make clean
 |--------|------|------|
 | **P0.1** | **更多 E2E workload 正向数据** | 当前仅 Tracee exec_storm +6.28% / file_io +7.00%。需要 Tetragon connect_storm 复跑（#140 有噪声）、XDP forwarding 数据加强（当前 +0.27% 偏弱）。目标：≥3 个 E2E workload 均正向。 |
 | **P0.2** | **Corpus overall > 1.05x 且方差小** | 当前 1.046x（build #42）来自 39 applied programs / 152 pairs。katran 0.872x 是主要回归来源。需要分析 katran 回归根因（branch-flip？code layout？）并修复或 skip。 |
-| **P0.3** | **论文叙事 vs ablation 一致性** | Per-form ablation 显示 ROTATE best (0.923x)、CMOV worst (1.068x)。论文需要解释为什么 combined 0.988x 仍比 ROTATE-only 好（其他 form 贡献）。需要撰写清晰的 ablation 分析节。 |
-
 ### P1：改进评估覆盖
 
 | 优先级 | 任务 | 说明 |
@@ -664,11 +662,3 @@ make clean
 | **P1.2** | **Patch-site 架构（#174）** | 消除 I-cache flush 开销，预计修复 endian_swap_dense / extract_dense 回归。架构大改，但性能 impact 显著。 |
 | **P1.3** | **WIDE_MEM 扩展覆盖（#175）** | byte-recompose 占 gap 50.7%，最大单 family 空间。 |
 | **P1.4** | **Native code 分析（#172）** | 检测 native code 是否已有 CMOV/BEXTR，避免重复优化，实现更精确 cost model。 |
-
-### P2：论文写作
-
-| 优先级 | 任务 | 说明 |
-|--------|------|------|
-| **P2.1** | **Paper tex 更新** | 用最新数据（20260314 authoritative、corpus build #42、Tracee post-fix）更新所有表格和性能声明。`docs/paper/paper.tex`。 |
-| **P2.2** | **Ablation section 撰写** | 基于 #179 per-form ablation 结果，撰写 §Evaluation ablation subsection。 |
-| **P2.3** | **第二微架构数据点** | 当前只有一个 CPU（Intel x86）。需要 AMD 或 Atom-class x86 数据，或 arm64 recompile 数据。 |
