@@ -42,7 +42,7 @@ benchmarks:
   kernel_input_size: 16
   level: small
   name: memory_pair_sum
-  policy_file: micro/policies/memory_pair_sum.yaml
+  policy_file: micro/policies/ablation/endian/memory_pair_sum.yaml
   tags:
   - memory
   - baseline
@@ -57,7 +57,7 @@ benchmarks:
   kernel_input_size: 2056
   level: medium
   name: bitcount
-  policy_file: micro/policies/bitcount.yaml
+  policy_file: micro/policies/ablation/endian/bitcount.yaml
   tags:
   - bitops
   - pure-jit
@@ -100,7 +100,7 @@ benchmarks:
   kernel_input_size: 2056
   level: long
   name: dep_chain_long
-  policy_file: micro/policies/dep_chain_long.yaml
+  policy_file: micro/policies/ablation/endian/dep_chain_long.yaml
   tags:
   - compute
   - dep-chain
@@ -212,7 +212,7 @@ benchmarks:
   kernel_input_size: 1032
   level: medium
   name: checksum
-  policy_file: micro/policies/checksum.yaml
+  policy_file: micro/policies/ablation/endian/checksum.yaml
   tags:
   - alu
   - memory
@@ -244,7 +244,7 @@ benchmarks:
   kernel_input_size: 1032
   level: byte
   name: load_byte
-  policy_file: micro/policies/load_byte.yaml
+  policy_file: micro/policies/ablation/endian/load_byte.yaml
   tags:
   - memory
   - load-width
@@ -261,7 +261,7 @@ benchmarks:
   kernel_input_size: 1032
   level: byte-recompose
   name: load_byte_recompose
-  policy_file: micro/policies/load_byte_recompose.yaml
+  policy_file: micro/policies/ablation/endian/load_byte_recompose.yaml
   tags:
   - memory
   - byte-recompose
@@ -294,7 +294,7 @@ benchmarks:
   kernel_input_size: 3464
   level: fixed-l3l4
   name: packet_parse
-  policy_file: micro/policies/packet_parse.yaml
+  policy_file: micro/policies/ablation/endian/packet_parse.yaml
   tags:
   - memory
   - parse
@@ -405,7 +405,7 @@ benchmarks:
   kernel_input_size: 1032
   level: 4-lane
   name: multi_acc_4
-  policy_file: micro/policies/multi_acc_4.yaml
+  policy_file: micro/policies/ablation/endian/multi_acc_4.yaml
   tags:
   - compute
   - ilp
@@ -420,7 +420,7 @@ benchmarks:
   kernel_input_size: 1032
   level: 8-lane
   name: multi_acc_8
-  policy_file: micro/policies/multi_acc_8.yaml
+  policy_file: micro/policies/ablation/endian/multi_acc_8.yaml
   tags:
   - compute
   - ilp
@@ -436,7 +436,7 @@ benchmarks:
   kernel_input_size: 16
   level: long
   name: fibonacci_iter
-  policy_file: micro/policies/fibonacci_iter.yaml
+  policy_file: micro/policies/ablation/endian/fibonacci_iter.yaml
   tags:
   - compute
   - loop
@@ -499,7 +499,7 @@ benchmarks:
   kernel_input_size: 2064
   level: 2-level
   name: nested_loop_2
-  policy_file: micro/policies/nested_loop_2.yaml
+  policy_file: micro/policies/ablation/endian/nested_loop_2.yaml
   tags:
   - compute
   - loop
@@ -516,7 +516,7 @@ benchmarks:
   kernel_input_size: 2064
   level: 3-level
   name: nested_loop_3
-  policy_file: micro/policies/nested_loop_3.yaml
+  policy_file: micro/policies/ablation/endian/nested_loop_3.yaml
   tags:
   - compute
   - loop
@@ -715,7 +715,7 @@ benchmarks:
   kernel_input_size: 516
   level: sparse-32
   name: branch_fanout_32
-  policy_file: micro/policies/branch_fanout_32.yaml
+  policy_file: micro/policies/ablation/endian/branch_fanout_32.yaml
   tags:
   - branch
   - fanout
@@ -848,7 +848,7 @@ benchmarks:
   kernel_input_size: 1032
   level: smallmul
   name: smallmul_strength_reduce
-  policy_file: micro/policies/smallmul_strength_reduce.yaml
+  policy_file: micro/policies/ablation/endian/smallmul_strength_reduce.yaml
   tags:
   - alu
   - strength-reduce
@@ -970,7 +970,7 @@ benchmarks:
   kernel_input_size: 2056
   level: medium
   name: tc_bitcount
-  policy_file: micro/policies/tc_bitcount.yaml
+  policy_file: micro/policies/ablation/endian/tc_bitcount.yaml
   tags:
   - tc
   - pure-jit
