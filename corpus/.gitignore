@@ -8,8 +8,11 @@ results/*
 !results/*_authoritative_*.json
 !results/*_smoke_*.json
 !results/*.latest.json
+!results/bytecode_features.json
+!results/helper_pareto.json
+!results/corpus-8families-persection.json
+!results/recompile_overhead_corpus_inventory.json
+!results/post_cmov_fix_corpus_ablation.json
 !results/archive/
 results/archive/*
-!results/archive/*_authoritative_*.json
-!results/archive/*_smoke_*.json
 !results/archive/*.json
