@@ -1,0 +1,27 @@
+program: addr_calc_stride_xdp
+sites:
+- family: lea
+  insn: 23
+  pattern_kind: addr-calc
+- family: lea
+  insn: 36
+  pattern_kind: addr-calc
+- family: lea
+  insn: 49
+  pattern_kind: addr-calc
+- family: lea
+  insn: 62
+  pattern_kind: addr-calc
+- family: lea
+  insn: 75
+  pattern_kind: addr-calc
+- family: lea
+  insn: 88
+  pattern_kind: addr-calc
+- family: lea
+  insn: 97
+  pattern_kind: addr-calc
+- family: lea
+  insn: 106
+  pattern_kind: addr-calc
+version: 3

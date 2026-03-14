@@ -1,0 +1,12 @@
+program: memcmp_prefix_64_xdp
+sites:
+- family: rotate
+  insn: 47
+  pattern_kind: rotate-64
+- family: rotate
+  insn: 79
+  pattern_kind: rotate-64
+- family: rotate
+  insn: 132
+  pattern_kind: rotate-64
+version: 3

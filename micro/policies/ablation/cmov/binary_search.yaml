@@ -1,0 +1,6 @@
+program: binary_search_xdp
+sites:
+- family: cmov
+  insn: 152
+  pattern_kind: cond-select-64
+version: 3

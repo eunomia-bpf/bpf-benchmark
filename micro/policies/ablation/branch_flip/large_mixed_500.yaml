@@ -1,0 +1,12 @@
+program: large_mixed_500_xdp
+sites:
+- family: branch-flip
+  insn: 345
+  pattern_kind: branch-flip
+- family: branch-flip
+  insn: 403
+  pattern_kind: branch-flip
+- family: branch-flip
+  insn: 461
+  pattern_kind: branch-flip
+version: 3

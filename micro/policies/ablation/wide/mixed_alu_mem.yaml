@@ -1,0 +1,6 @@
+program: mixed_alu_mem_xdp
+sites:
+- family: wide
+  insn: 10
+  pattern_kind: wide-load-2
+version: 3
