@@ -10,7 +10,7 @@ RESULT_FILE_RE = re.compile(r"^(?P<suite>.+)_(?P<kind>authoritative|smoke)_(?P<d
 
 def result_date_stamp(now: datetime | None = None) -> str:
     current = now or datetime.now(timezone.utc)
-    return current.astimezone(timezone.utc).strftime("%Y%m%d")
+    return current.astimezone(timezone.utc).strftime("%Y%m%d_%H%M%S")
 
 
 def authoritative_output_path(results_dir: Path, suite: str, *, stamp: str | None = None) -> Path:
