@@ -1,121 +1,176 @@
 # bpf-jit-scanner
 
-`bpf-jit-scanner` is the userspace front end for the v5 BpfReJIT policy
-format. It scans post-verifier xlated BPF bytecode, emits declarative pattern
-rules, and can pass the resulting blob to `BPF_PROG_JIT_RECOMPILE`.
-
-## Layout
-
-```text
-scanner/
-├── CMakeLists.txt
-├── include/bpf_jit_scanner/
-│   ├── pattern_v5.hpp
-│   ├── policy_config.hpp
-│   └── types.h
-├── src/
-│   ├── cli.cpp
-│   ├── pattern_v5.cpp
-│   └── policy_config.cpp
-└── tests/
-    └── test_scanner.cpp
-```
+`bpf-jit-scanner` is the userspace front end for BpfReJIT's v5 policy format.
+It scans post-verifier xlated BPF bytecode for optimization sites, serializes
+the results into a binary policy blob, and can trigger `BPF_PROG_JIT_RECOMPILE`
+to apply the specializations to live kernel programs.
 
 ## Build
 
 ```bash
-cd scanner
-cmake -B build
-cmake --build build
-ctest --test-dir build --output-on-failure
+cmake -S scanner -B scanner/build -DCMAKE_BUILD_TYPE=Release
+cmake --build scanner/build --target bpf-jit-scanner -j
+# run unit tests
+ctest --test-dir scanner/build --output-on-failure
 ```
 
-## CLI
+The binary is produced at `scanner/build/bpf-jit-scanner`.
+
+## Subcommands
+
+### `scan` — analyze a BPF program for optimization sites
 
 ```bash
-# Scan a live program and print the accepted v5 sites
-./build/bpf-jit-scanner scan --prog-fd 5 --all
+# Scan a BPF ELF object (auto-detects; tries to load and fetch kernel xlated,
+# falls back to raw ELF instructions if loading fails)
+bpf-jit-scanner scan prog.bpf.o --all
 
-# Scan a BPF ELF object; the CLI will try to load it and fetch xlated
-# bytecode, then fall back to the ELF program instructions if loading fails
-./build/bpf-jit-scanner scan ../micro/programs/simple.bpf.o --all
+# Scan a live program by fd
+bpf-jit-scanner scan --prog-fd 5 --all
 
-# Offline scan from xlated bytecode and write a v5 blob
-./build/bpf-jit-scanner scan --xlated dump.bin --all --output policy.blob
+# Offline scan from raw xlated dump, write v5 blob
+bpf-jit-scanner scan --xlated dump.bin --all --output policy.blob
 
-# Emit a machine-readable site manifest
-./build/bpf-jit-scanner scan --xlated dump.bin --all --json
-
-# Compile a filtered blob from a YAML/JSON policy file
-./build/bpf-jit-scanner compile-policy --xlated dump.bin --config policy.yaml --output policy.blob
-
-# Or stream the filtered blob to stdout
-./build/bpf-jit-scanner compile-policy --xlated dump.bin --config policy.yaml > policy.blob
-
-# Apply a v5 blob generated from the current program
-./build/bpf-jit-scanner apply --prog-fd 5 --all
-
-# Apply a filtered policy directly from config
-./build/bpf-jit-scanner apply --prog-fd 5 --config policy.yaml
-
-# Dump post-verifier xlated bytecode for offline analysis
-./build/bpf-jit-scanner dump --prog-fd 5 --output dump.bin
+# Emit a JSON site manifest (prog metadata + per-site entries)
+bpf-jit-scanner scan prog.bpf.o --all --json
 ```
 
-Supported family flags:
+### `enumerate` — scan all live BPF programs in the kernel
 
-- `--cmov`
-- `--wide-mem`
-- `--rotate`
-- `--lea`
-- `--bitfield-extract` or `--extract`
-- `--zero-ext`
-- `--endian`
-- `--branch-flip`
-- `--all`
-- `--rorx`
+```bash
+# List every loaded program with its site counts
+sudo bpf-jit-scanner enumerate
 
-The CLI is v5-only. `--v5` is still accepted as a no-op so existing v5
-automation does not need to change in lockstep.
+# Enumerate and immediately apply BPF_PROG_JIT_RECOMPILE (with cost-model filter)
+sudo bpf-jit-scanner enumerate --recompile
 
-`scan --json` prints a JSON manifest with program metadata, per-family counts,
-and per-site entries. `compile-policy` reads a single-program version 3 policy
-file with a per-site schema such as:
+# JSON output
+sudo bpf-jit-scanner enumerate --json
+
+# Apply per-program policy YAML from a directory
+sudo bpf-jit-scanner enumerate --recompile --policy-dir micro/policies/
+
+# Limit to a single program by id
+sudo bpf-jit-scanner enumerate --recompile --prog-id 42
+```
+
+`enumerate --recompile` applies a built-in cost model by default (see below).
+
+### `apply` — apply a policy to a live program
+
+```bash
+# Apply all detected sites (all families)
+sudo bpf-jit-scanner apply --prog-fd 5 --all
+
+# Apply only sites listed in an explicit policy file
+sudo bpf-jit-scanner apply --prog-fd 5 --config policy.yaml
+```
+
+### `generate-policy` — emit a v3 policy YAML from detected sites
+
+```bash
+# Write YAML to stdout (pipe or redirect)
+bpf-jit-scanner generate-policy prog.bpf.o --all > policy.yaml
+
+# Write to a file
+bpf-jit-scanner generate-policy --xlated dump.bin --all --output policy.yaml \
+    --program-name my_prog
+```
+
+The output is a version 3 policy file that can be edited, committed, and passed
+back to `compile-policy` or `apply --config`.
+
+### `compile-policy` — compile a v3 YAML into a binary blob
+
+```bash
+# Produce a blob that matches only the sites in the policy file
+bpf-jit-scanner compile-policy prog.bpf.o --config policy.yaml --output policy.blob
+
+# Stream to stdout
+bpf-jit-scanner compile-policy --xlated dump.bin --config policy.yaml > policy.blob
+```
+
+### `dump` — dump xlated bytecode from a live program
+
+```bash
+sudo bpf-jit-scanner dump --prog-fd 5 --output dump.bin
+```
+
+## The 8 Canonical Optimization Forms
+
+| Flag | Form | What it does |
+|---|---|---|
+| `--rotate` | ROTATE | Replaces 3-insn rotate-via-shifts with `ROR`/`RORX` |
+| `--wide-mem` | WIDE\_MEM | Replaces a byte-ladder of 4–8 `ldx/stx` with a single wide load/store |
+| `--lea` | ADDR\_CALC | Replaces `shift + add` address calculations with `LEA` |
+| `--cmov` | COND\_SELECT | Replaces if-then-else branch pairs with `CMOVcc` |
+| `--bitfield-extract` | BITFIELD\_EXTRACT | Replaces `and + shift` bit-field extraction with `BEXTR` |
+| `--zero-ext` | ZERO\_EXT\_ELIDE | Removes redundant 32-bit zero-extension `mov r32, r32` |
+| `--endian` | ENDIAN\_FUSION | Replaces `ldx + bswap` or `bswap + stx` pairs with `MOVBE` |
+| `--branch-flip` | BRANCH\_FLIP | Inverts a branch condition to eliminate a unconditional jump |
+
+Use `--all` to enable all eight families at once.  Use individual flags to
+restrict scanning to a subset.  `--rorx` additionally prefers the BMI2 `RORX`
+variant over `ROR` where available.
+
+## v3 Policy Format
 
 ```yaml
 version: 3
-program: demo-program
+program: my-prog-name   # matched against BPF program name
 sites:
-  - insn: 12
-    family: wide
+  - insn: 12            # instruction index in the xlated stream
+    family: wide        # one of: rotate wide lea cmov extract zero-ext endian branch-flip
     pattern_kind: wide-load-4
   - insn: 44
     family: rotate
     pattern_kind: rotate-64
 ```
 
-JSON input is accepted too because the parser goes through `yaml-cpp`.
+JSON is accepted too (yaml-cpp parses both).  `generate-policy` produces this
+format; edit the file to add or remove sites, then pass it to `compile-policy`
+or `apply --config`.
 
-When `scan` is given a positional file path, the CLI auto-detects ELF input.
-For `.bpf.o` objects it first tries to load the selected program and fetch
-kernel xlated bytecode. If loading is unavailable, it falls back to scanning
-the ELF program instructions directly. `--program-name` selects the program in
-multi-program objects.
+## Cost Model (enumerate --recompile)
 
-## Library
+Three default rules guard against net-negative rewrites when using
+`enumerate --recompile`:
 
-[`include/bpf_jit_scanner/pattern_v5.hpp`](./include/bpf_jit_scanner/pattern_v5.hpp)
-exposes the full v5 API:
+| Rule | Default | Flag to override |
+|---|---|---|
+| Skip same-size forms (`endian`, `branch-flip`) — I-cache flush cost >= benefit | ON | `--no-skip-same-size` |
+| Skip COND\_SELECT (`cmov`) — predictable branches: CMOV adds latency | ON | `--no-skip-cmov` |
+| Skip a family when site\_count > 128 per program — dense recompile I-cache overhead dominates | 128 | `--max-sites-per-form N` (0 = disable) |
 
-- `scan_v5_builtin()`: builtin declarative-pattern scanning
-- `build_policy_blob_v5()`: serialize rules into the kernel v5 blob format
+## Family Flags Reference
 
-[`include/bpf_jit_scanner/policy_config.hpp`](./include/bpf_jit_scanner/policy_config.hpp)
-adds:
+```
+--all                Enable all families (default when no family flag given)
+--cmov               COND_SELECT sites
+--wide-mem           WIDE_MEM byte-ladder sites
+--rotate             ROTATE idioms
+--lea                ADDR_CALC / LEA sites
+--bitfield-extract   BITFIELD_EXTRACT sites (alias: --extract)
+--zero-ext           ZERO_EXT_ELIDE sites
+--endian             ENDIAN_FUSION sites
+--branch-flip        BRANCH_FLIP sites
+--rorx               Prefer RORX (BMI2) over ROR for rotate sites
+--v5                 No-op compatibility alias (scanner is already v5-only)
+```
 
-- version 3 policy config loading/filtering for explicit per-site allowlists
-- JSON manifest construction for `scan --json`
+## Layout
 
-The library API operates on post-verifier xlated bytecode. The CLI can also
-accept ELF objects for convenience and will resolve them to xlated or raw BPF
-instructions before calling the library.
+```
+scanner/
+├── CMakeLists.txt
+├── include/bpf_jit_scanner/
+│   ├── pattern_v5.hpp      # v5 scan API: scan_v5_builtin(), build_policy_blob_v5()
+│   ├── policy_config.hpp   # v3 policy load/filter, JSON manifest builder
+│   └── types.h             # ABI constants (magic, version, CF_* family ids)
+├── src/
+│   ├── cli.cpp             # all subcommand implementations
+│   ├── pattern_v5.cpp      # pattern matching engine
+│   └── policy_config.cpp   # YAML/JSON config parser
+└── tests/
+    └── test_scanner.cpp
+```

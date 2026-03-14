@@ -1,8 +1,0 @@
-# Per-form ablation: only cmov sites
-# Original: 3 sites, filtered: 1 cmov sites
-program: binary_search_xdp
-sites:
-- family: cmov
-  insn: 152
-  pattern_kind: cond-select-64
-version: 3
