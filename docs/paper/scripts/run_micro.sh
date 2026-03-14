@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+# DEPRECATED: Use Makefile targets instead:
+#   make smoke           → host llvmbpf-only smoke (replaces --llvmbpf-only)
+#   make vm-micro        → VM full suite (replaces --vm)
+#   make vm-micro-smoke  → VM quick smoke
+#   make vm-micro BENCH="simple bitcount"  → specific benchmarks in VM
+# This script is kept for backward compatibility but all entry points have been
+# consolidated into the root Makefile calling micro/driver.py directly.
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
@@ -17,6 +24,8 @@ extra_args=()
 usage() {
     cat <<EOF
 Usage: ./docs/paper/scripts/run_micro.sh [--vm] [--llvmbpf-only] [extra run_micro.py args]
+
+DEPRECATED: Use Makefile targets instead (make smoke / make vm-micro / make vm-micro-smoke).
 
 Modes:
   --vm             Run inside vng with $DEFAULT_KERNEL_IMAGE
@@ -110,7 +119,7 @@ make -C "$MICRO_DIR"
 # shellcheck disable=SC1091
 source "$VENV_ACTIVATE"
 
-run_micro_cmd=(python3 "$MICRO_DIR/run_micro.py")
+run_micro_cmd=(python3 "$MICRO_DIR/driver.py" suite)
 if [[ "$llvmbpf_only" -eq 1 ]]; then
     run_micro_cmd+=(--runtime llvmbpf)
 else

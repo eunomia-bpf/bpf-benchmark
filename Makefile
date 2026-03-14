@@ -185,7 +185,7 @@ $(BZIMAGE_PATH):
 smoke: micro
 	@echo "=== Running make smoke ==="
 	mkdir -p "$(MICRO_RESULTS_DIR)"
-	$(VENV_ACTIVATE) python3 "$(MICRO_DIR)/run_micro.py" \
+	$(VENV_ACTIVATE) python3 "$(MICRO_DIR)/driver.py" suite \
 		--runtime llvmbpf \
 		$(LOCAL_SMOKE_ARGS) \
 		--output "$(SMOKE_OUTPUT)"
@@ -211,7 +211,7 @@ vm-micro-smoke: micro | $(BZIMAGE_PATH)
 	@echo "=== Running make vm-micro-smoke (POLICY=$(POLICY)) ==="
 	mkdir -p "$(MICRO_RESULTS_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
-		bash -lc 'cd "$(ROOT_DIR)" && $(VENV_ACTIVATE) python3 "$(MICRO_DIR)/run_micro.py" \
+		bash -lc 'cd "$(ROOT_DIR)" && $(VENV_ACTIVATE) python3 "$(MICRO_DIR)/driver.py" suite \
 			--runtime kernel \
 			--runtime kernel-recompile \
 			$(VM_SMOKE_ARGS) \
@@ -225,7 +225,7 @@ vm-micro: micro scanner verify-build | $(BZIMAGE_PATH)
 	@echo "=== Running make vm-micro (POLICY=$(POLICY)) ==="
 	mkdir -p "$(MICRO_RESULTS_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
-		bash -lc 'cd "$(ROOT_DIR)" && $(VENV_ACTIVATE) python3 "$(MICRO_DIR)/run_micro.py" \
+		bash -lc 'cd "$(ROOT_DIR)" && $(VENV_ACTIVATE) python3 "$(MICRO_DIR)/driver.py" suite \
 			--runtime llvmbpf \
 			--runtime kernel \
 			--runtime kernel-recompile \
@@ -237,7 +237,7 @@ vm-micro: micro scanner verify-build | $(BZIMAGE_PATH)
 vm-corpus: micro scanner verify-build | $(BZIMAGE_PATH)
 	@echo "=== Running make vm-corpus ==="
 	mkdir -p "$(CORPUS_RESULTS_DIR)"
-	$(VENV_ACTIVATE) python3 "$(ROOT_DIR)/corpus/run_corpus_v5_vm_batch.py" \
+	$(VENV_ACTIVATE) python3 "$(MICRO_DIR)/driver.py" corpus v5-vm-batch \
 		--skip-build \
 		--kernel-image "$(BZIMAGE_PATH)" \
 		--runner "$(MICRO_RUNNER)" \
