@@ -521,6 +521,7 @@ benchmarks:
     kernel_input_size: 264
     input_generator: large_mixed_1000
     expected_result: 4283793436325605125
+    policy_file: micro/policies/large_mixed_1000.yaml
     tags: [compute, memory, code-size, pure-jit]
 
   - name: bpf_call_chain
@@ -585,6 +586,7 @@ benchmarks:
     kernel_input_size: 54
     input_generator: packet_rss_hash
     expected_result: 11016707074064960918
+    policy_file: micro/policies/packet_rss_hash.yaml
     tags: [packet, hash, endian, pure-jit]
 
   - name: imm64_storm
@@ -658,6 +660,7 @@ benchmarks:
     kernel_input_size: 64
     input_generator: rotate64_hash
     expected_result: 2666935177028490406
+    policy_file: micro/policies/rotate64_hash.yaml
     tags: [compute, rotate, hash, pure-jit]
 
   - name: packet_redundant_bounds

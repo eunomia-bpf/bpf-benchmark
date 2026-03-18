@@ -9,7 +9,8 @@
 > - 每次 context 压缩后 → 完整读取本文档恢复全局状态。
 > - 用 agent background 跑任务，不阻塞主对话。
 > - **构建+修改+运行不拆分**：一个 subagent 负责完整流程（改代码→构建→运行→发现 bug→修复→再运行），不要拆成多个 agent。
-> 上次更新：2026-03-14（#180-#183 新增；#170 ✅ enumerate per-site manifest 完成；#171 ❌ 暂不做；#173 ✅ corpus pipeline 切 enumerate；框架重构/P0修复/Opus review 归档；§8 下一步新增。）（#179 ✅ Per-form ablation 完成。7 canonical forms × 19 targeted benchmarks，单独激活每个 form，其余 sites 清空。结果（geomean ratio，越低越好）：ROTATE **0.923x** (WIN, +7.7%)、ENDIAN **0.981x** (WIN)、BRANCH-FLIP **0.992x** (WIN)、LEA **0.999x** (neutral)、WIDE **1.007x** (LOSS)、EXTRACT **1.067x** (LOSS)、CMOV **1.068x** (LOSS, cond_select_dense 1.538x 主导)。ALL-combined reference（当前 policy）**0.988x** (WIN)。关键 insight：ROTATE 是最高价值 form，CMOV/EXTRACT 在 dense-site 场景严重回归（I-cache flush + 预测分支惩罚）。数据：`micro/results/per_form_ablation_20260313/`，报告：`docs/tmp/micro-per-form-ablation.md`。commit bb6308f。）
+> 上次更新：2026-03-18（§8 "下一步"合并入 §7 任务追踪表 #183-#188，不再单独列出；性能数据确认为最新权威值。）
+> 前次更新：2026-03-14（#180-#183 新增；#170 ✅ enumerate per-site manifest 完成；#171 ❌ 暂不做；#173 ✅ corpus pipeline 切 enumerate；框架重构/P0修复/Opus review 归档。）（#179 ✅ Per-form ablation 完成。7 canonical forms × 19 targeted benchmarks，单独激活每个 form，其余 sites 清空。结果（geomean ratio，越低越好）：ROTATE **0.923x** (WIN, +7.7%)、ENDIAN **0.981x** (WIN)、BRANCH-FLIP **0.992x** (WIN)、LEA **0.999x** (neutral)、WIDE **1.007x** (LOSS)、EXTRACT **1.067x** (LOSS)、CMOV **1.068x** (LOSS, cond_select_dense 1.538x 主导)。ALL-combined reference（当前 policy）**0.988x** (WIN)。关键 insight：ROTATE 是最高价值 form，CMOV/EXTRACT 在 dense-site 场景严重回归（I-cache flush + 预测分支惩罚）。数据：`micro/results/per_form_ablation_20260313/`，报告：`docs/tmp/micro-per-form-ablation.md`。commit bb6308f。）
 > #176 ✅ 新 Makefile vm-micro 端到端验证通过（kernel 7de19ef03 + guarded-update COND_SELECT emitter）。make vm-micro ITERATIONS=3 WARMUPS=3 REPEAT=500 完整跑出 62-bench 结果：overall **1.054x**，16 applied geomean **1.074x**，14 regressors（多为 sub-100ns 噪声）。Provenance 含 kernel_commit/policy_files_hash/params/cpu_model/environment。数据：`micro/results/vm_micro_authoritative_20260314.json`。Tracee E2E 更新：exec_storm **+6.28%**，file_io **+7.00%**，network +1.44%（数据：`e2e/results/tracee-e2e-real.md`）。旧 +21.65% 明确标注无效。#175 ✅ Corpus Build #42 (ac593b2c1 BEXTR without-copy fix) 重跑完成。新数据：**corpus exec geomean 1.046x**（vs 旧版 build #38 的 1.008x，提升 3.8%），152 measured pairs，39 applied programs。Calico 1.097x，xdp-tutorial 1.091x，linux-selftests 1.005x，katran 0.872x（仍有回归）。数据：`corpus/results/corpus_post_fix_build39_20260313.json`（实际为 build #42），报告：`docs/tmp/active/corpus-post-fix-build39.md`。#174 ✅ Build #40 (ac593b2c1 BEXTR without-copy fix) 重编 + R6-R11 policy 迭代。新发现：Build #40 后 endian_swap_dense 从 0.695x 恢复至 **1.013-1.139x**（256 sites restored）；R10 全量 62-bench overall **1.006x**，applied-only **1.040x**（15 applied）。结果：`micro/results/micro_62bench_build40_policy_optimized_20260313.json`。#173 ✅ policy 迭代+corpus rerun+full 62-bench 完成（R1-R5）。#172 ✅ Tracee E2E post-BEXTR-fix 有效 rerun。此前：#149-#175 全部 ✅）
 
 ---
@@ -640,25 +641,10 @@ make clean
 | 180 | **框架重构：单一 Makefile 入口 + file-based deps + provenance + verify-build + compare + POLICY=** | ✅ | 根 Makefile 提供 vm-micro/vm-corpus/vm-e2e/vm-all 等目标；file-based deps 用 stamp 文件避免不必要重编；provenance 含 kernel_commit/policy_files_hash/params/cpu_model/environment；verify-build 检测 stale artifacts；compare target 直接 diff 两份 JSON；POLICY=default/all-apply/baseline 切换 policy 集合。已验证（make smoke、make scanner-tests、make vm-micro 全量跑通）。commit 系列（#159/framework commits）。 |
 | 181 | **P0 修复：CI driver.py、hardcoded path、requirements.txt** | ✅ | CI pipeline 修复：driver.py 统一入口、hardcoded path 替换为相对路径、requirements.txt 补全依赖。CI 通过。 |
 | 182 | **Opus 深度 review（架构✅、方法学有gap、kernel✅）** | ✅ | Opus 对架构做深度 review：架构设计合格，kernel 实现合格，但方法学有 gap（per-form ablation 结果与论文叙事的 net speedup claim 有张力）。`docs/tmp/deep-review-*.md`。 |
-| 183 | **下一步优先任务（2026-03-14 更新）** | 🔄 | 详见 §8 下一步。 |
-
----
-
-## 8. 下一步（优先级排序，2026-03-14 更新）
-
-> 基于当前实验状态，论文仍需解决"Go 条件 5：真实程序上可测量的 net speedup"。
-
-### P0：必须解决（论文 go/no-go）
-
-| 优先级 | 任务 | 说明 |
-|--------|------|------|
-| **P0.1** | **更多 E2E workload 正向数据** | 当前仅 Tracee exec_storm +6.28% / file_io +7.00%。需要 Tetragon connect_storm 复跑（#140 有噪声）、XDP forwarding 数据加强（当前 +0.27% 偏弱）。目标：≥3 个 E2E workload 均正向。 |
-| **P0.2** | **Corpus overall > 1.05x 且方差小** | 当前 1.046x（build #42）来自 39 applied programs / 152 pairs。katran 0.872x 是主要回归来源。需要分析 katran 回归根因（branch-flip？code layout？）并修复或 skip。 |
-### P1：改进评估覆盖
-
-| 优先级 | 任务 | 说明 |
-|--------|------|------|
-| **P1.1** | **Prologue 优化 canonical form（#176）** | 占 pure-JIT gap 约 18.5%，高回报。约 50-100 LOC kernel + scanner。 |
-| **P1.2** | **Patch-site 架构（#174）** | 消除 I-cache flush 开销，预计修复 endian_swap_dense / extract_dense 回归。架构大改，但性能 impact 显著。 |
-| **P1.3** | **WIDE_MEM 扩展覆盖（#175）** | byte-recompose 占 gap 50.7%，最大单 family 空间。 |
-| **P1.4** | **Native code 分析（#172）** | 检测 native code 是否已有 CMOV/BEXTR，避免重复优化，实现更精确 cost model。 |
+| 183 | **P0.1：更多 E2E workload 正向数据** | 🔄 | 当前仅 Tracee exec_storm +6.28% / file_io +7.00%。需要 Tetragon connect_storm 复跑（#140 有噪声）、XDP forwarding 数据加强（当前 +0.27% 偏弱）。目标：≥3 个 E2E workload 均正向。 |
+| 184 | **P0.2：Corpus overall > 1.05x 且方差小** | 🔄 | 当前 1.046x（build #42）来自 39 applied programs / 152 pairs。katran 0.872x 是主要回归来源。需要分析 katran 回归根因（branch-flip？code layout？）并修复或 skip。 |
+| 185 | **P1.1：Prologue 优化 canonical form（#176）** | ❌ | 占 pure-JIT gap 约 18.5%，高回报。约 50-100 LOC kernel + scanner。 |
+| 186 | **P1.2：Patch-site 架构（#174）** | ❌ | 消除 I-cache flush 开销，预计修复 endian_swap_dense / extract_dense 回归。架构大改，但性能 impact 显著。 |
+| 187 | **P1.3：WIDE_MEM 扩展覆盖（#175）** | ❌ | byte-recompose 占 gap 50.7%，最大单 family 空间。 |
+| 188 | **P1.4：Native code 分析（#172）** | ❌ | 检测 native code 是否已有 CMOV/BEXTR，避免重复优化，实现更精确 cost model。 |
+| 189 | **Micro policy 优化 Round 1（2026-03-18）** | 🔄 | 清除 6 个 regressor（memcmp_prefix_64/branch_flip_dense/addr_calc_stride/multi_acc_8/large_mixed_500/bpf_call_chain）+ 扩展 ROTATE 覆盖（rotate64_hash 116 sites 新增，large_mixed_1000 7 sites 新增，large_mixed_500 改为 rotate-only 7 sites）。R1 全量 rerun：overall 1.021x，applied-only 1.041x（15 applied）。rotate64_hash **+70.4%** 是最大新 win。**但仍有 8 个 applied loss**（log2_fold -27.8%、switch_dispatch -13.4%、branch_dense -7.4% 等），且 VM 噪声大（R2 实为旧数据复制，只有 1 次有效 rerun）。需要：(1) 进一步消除 loss benchmarks 的 policy；(2) 更稳定的 authoritative rerun（ITERATIONS=10+）。分析：`docs/tmp/micro_performance_improvement_analysis.md`，结果：`docs/tmp/micro_policy_improvement_results.md`，数据：`micro/results/vm_micro_policy_improved_full_20260318.json`。 |

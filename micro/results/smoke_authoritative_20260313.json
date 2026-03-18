@@ -1,11 +1,11 @@
 {
   "suite": "micro_staged_codegen",
   "manifest": "/home/yunwei37/workspace/bpf-benchmark/config/micro_pure_jit.yaml",
-  "generated_at": "2026-03-14T03:08:06.906966+00:00",
+  "generated_at": "2026-03-14T15:40:34.254004+00:00",
   "provenance": {
     "kernel_commit": "7de19ef03692e843fc62d7a5d764d2e5e0c7c093",
-    "scanner_commit": "3533f223cfa4dfd31b5a21ae369f2b937a75b9ca",
-    "policy_files_hash": "73a261773c0d3a66",
+    "scanner_commit": "94004a62177a3a0aca28556de0806b5979d2de6f",
+    "policy_files_hash": "408e2c57ce7dfb62",
     "policy_dir": "/home/yunwei37/workspace/bpf-benchmark/micro/policies",
     "params": {
       "iterations": 1,
@@ -14,18 +14,18 @@
     },
     "cpu_model": "Intel(R) Core(TM) Ultra 9 285K",
     "environment": "bare-metal",
-    "timestamp": "2026-03-14T03:08:06.915002+00:00"
+    "timestamp": "2026-03-14T15:40:34.260558+00:00"
   },
   "host": {
     "hostname": "lab",
     "platform": "Linux-6.15.11-061511-generic-x86_64-with-glibc2.39",
     "python": "3.12.3",
     "cpu_affinity": null,
-    "git_sha": "3533f223cfa4dfd31b5a21ae369f2b937a75b9ca",
+    "git_sha": "94004a62177a3a0aca28556de0806b5979d2de6f",
     "kernel_version": "6.15.11-061511-generic",
     "kernel_cmdline": "BOOT_IMAGE=/boot/vmlinuz-6.15.11-061511-generic root=UUID=85355174-a2ad-4e84-bf78-53fac30b89fb ro panic=10 panic_on_oops=1 softlockup_panic=1 hung_task_panic=1 splash quiet iommu=pt vt.handoff=7",
-    "cpu_governor": "performance",
-    "turbo_state": "1",
+    "cpu_governor": "powersave",
+    "turbo_state": "0",
     "perf_event_paranoid": "2"
   },
   "toolchains": {
@@ -89,16 +89,16 @@
           },
           "samples": [
             {
-              "compile_ns": 6003269,
-              "exec_ns": 73,
+              "compile_ns": 37470093,
+              "exec_ns": 17,
               "timing_source": "rdtsc",
               "timing_source_wall": "unavailable",
               "no_cmov": false,
               "opt_level": 3,
               "disabled_passes": [],
-              "wall_exec_ns": 2603,
-              "exec_cycles": 269,
-              "tsc_freq_hz": 3686220646,
+              "wall_exec_ns": 1453,
+              "exec_cycles": 63,
+              "tsc_freq_hz": 3686254336,
               "result": 12345678,
               "retval": 2,
               "native_code_size": 73,
@@ -109,11 +109,11 @@
                 "inflation_ratio": 0.380208
               },
               "phases_ns": {
-                "program_image_ns": 124644,
-                "memory_prepare_ns": 49838,
-                "input_stage_ns": 714,
-                "vm_load_code_ns": 277,
-                "jit_compile_ns": 6003269
+                "program_image_ns": 633952,
+                "memory_prepare_ns": 112854,
+                "input_stage_ns": 785,
+                "vm_load_code_ns": 279,
+                "jit_compile_ns": 37470093
               },
               "perf_counters": {},
               "perf_counters_meta": {
@@ -162,67 +162,67 @@
           ],
           "compile_ns": {
             "count": 1,
-            "mean": 6003269,
-            "median": 6003269,
-            "min": 6003269,
-            "max": 6003269,
-            "p95": 6003269,
+            "mean": 37470093,
+            "median": 37470093,
+            "min": 37470093,
+            "max": 37470093,
+            "p95": 37470093,
             "stdev": 0
           },
           "exec_ns": {
             "count": 1,
-            "mean": 73,
-            "median": 73,
-            "min": 73,
-            "max": 73,
-            "p95": 73,
+            "mean": 17,
+            "median": 17,
+            "min": 17,
+            "max": 17,
+            "p95": 17,
             "stdev": 0
           },
           "timing_source": "rdtsc",
           "phases_ns": {
             "program_image_ns": {
               "count": 1,
-              "mean": 124644,
-              "median": 124644,
-              "min": 124644,
-              "max": 124644,
-              "p95": 124644,
+              "mean": 633952,
+              "median": 633952,
+              "min": 633952,
+              "max": 633952,
+              "p95": 633952,
               "stdev": 0
             },
             "memory_prepare_ns": {
               "count": 1,
-              "mean": 49838,
-              "median": 49838,
-              "min": 49838,
-              "max": 49838,
-              "p95": 49838,
+              "mean": 112854,
+              "median": 112854,
+              "min": 112854,
+              "max": 112854,
+              "p95": 112854,
               "stdev": 0
             },
             "input_stage_ns": {
               "count": 1,
-              "mean": 714,
-              "median": 714,
-              "min": 714,
-              "max": 714,
-              "p95": 714,
+              "mean": 785,
+              "median": 785,
+              "min": 785,
+              "max": 785,
+              "p95": 785,
               "stdev": 0
             },
             "vm_load_code_ns": {
               "count": 1,
-              "mean": 277,
-              "median": 277,
-              "min": 277,
-              "max": 277,
-              "p95": 277,
+              "mean": 279,
+              "median": 279,
+              "min": 279,
+              "max": 279,
+              "p95": 279,
               "stdev": 0
             },
             "jit_compile_ns": {
               "count": 1,
-              "mean": 6003269,
-              "median": 6003269,
-              "min": 6003269,
-              "max": 6003269,
-              "p95": 6003269,
+              "mean": 37470093,
+              "median": 37470093,
+              "min": 37470093,
+              "max": 37470093,
+              "p95": 37470093,
               "stdev": 0
             }
           },
@@ -242,18 +242,18 @@
           },
           "wall_exec_ns": {
             "count": 1,
-            "mean": 2603,
-            "median": 2603,
-            "min": 2603,
-            "max": 2603,
-            "p95": 2603,
+            "mean": 1453,
+            "median": 1453,
+            "min": 1453,
+            "max": 1453,
+            "p95": 1453,
             "stdev": 0
           },
           "baseline_adjustment": {
             "baseline_benchmark": "simple",
             "baseline_io_mode": "staged",
             "applied": true,
-            "baseline_exec_ns": 73.0,
+            "baseline_exec_ns": 17.0,
             "median_minus_baseline_ns": 0.0,
             "median_over_baseline_ratio": 1.0
           }

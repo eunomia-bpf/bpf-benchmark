@@ -1,13 +1,10 @@
-# Rotate-only policy: replace regressing branch-flip sites with the 7 rotate sites.
-# Eligible live sites: wide=1, rotate=7, branch-flip=3
+# Rotate-only policy: enable the 7 rotate sites and continue skipping branch-flip and wide sites.
+# Eligible live sites: wide=1, rotate=7, branch-flip=8
 # Selected live sites: rotate=7
 
 version: 3
-program: 'large_mixed_500_xdp'
+program: 'large_mixed_1000_xdp'
 sites:
-  - insn: 66
-    family: rotate
-    pattern_kind: 'rotate-64'
   - insn: 225
     family: rotate
     pattern_kind: 'rotate-64'
@@ -23,6 +20,9 @@ sites:
   - insn: 449
     family: rotate
     pattern_kind: 'rotate-64'
-  - insn: 513
+  - insn: 507
+    family: rotate
+    pattern_kind: 'rotate-64'
+  - insn: 565
     family: rotate
     pattern_kind: 'rotate-64'

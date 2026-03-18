@@ -1,27 +1,7 @@
+# Cleared: lea=8 sites caused -5.6% regression (LEA AGU competition > original ALU ILP benefit)
+# Eligible live sites: lea=8
+# Selected live sites: none
+
 version: 3
 program: 'addr_calc_stride_xdp'
-sites:
-  - insn: 23
-    family: lea
-    pattern_kind: 'addr-calc'
-  - insn: 36
-    family: lea
-    pattern_kind: 'addr-calc'
-  - insn: 49
-    family: lea
-    pattern_kind: 'addr-calc'
-  - insn: 62
-    family: lea
-    pattern_kind: 'addr-calc'
-  - insn: 75
-    family: lea
-    pattern_kind: 'addr-calc'
-  - insn: 88
-    family: lea
-    pattern_kind: 'addr-calc'
-  - insn: 97
-    family: lea
-    pattern_kind: 'addr-calc'
-  - insn: 106
-    family: lea
-    pattern_kind: 'addr-calc'
+sites: []
