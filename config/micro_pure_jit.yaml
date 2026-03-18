@@ -25,7 +25,7 @@ defaults:
   warmups: 2
   repeat: 200
   runtimes: [llvmbpf, kernel]
-  output: micro/results/pure_jit.latest.json
+  output: micro/results/dev/pure_jit.json
 
 benchmark_defaults:
   io_mode: staged

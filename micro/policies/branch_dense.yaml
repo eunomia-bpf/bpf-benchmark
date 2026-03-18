@@ -1,28 +1,7 @@
-# Regenerated from HEAD version 2 policy semantics against a live framework-kernel manifest.
+# Cleared for policy iteration: the branch-flip+cmov+wide mix regressed in the latest authoritative run.
 # Eligible live sites: branch-flip=4, cmov=1, wide=2
-# Selected live sites: branch-flip=4, cmov=1, wide=2
+# Selected live sites: none
 
 version: 3
 program: 'branch_dense_xdp'
-sites:
-  - insn: 10
-    family: wide
-    pattern_kind: 'wide-load-2'
-  - insn: 23
-    family: wide
-    pattern_kind: 'wide-load-2'
-  - insn: 75
-    family: branch-flip
-    pattern_kind: 'branch-flip'
-  - insn: 90
-    family: branch-flip
-    pattern_kind: 'branch-flip'
-  - insn: 114
-    family: branch-flip
-    pattern_kind: 'branch-flip'
-  - insn: 127
-    family: branch-flip
-    pattern_kind: 'branch-flip'
-  - insn: 152
-    family: cmov
-    pattern_kind: 'cond-select-64'
+sites: []

@@ -1,13 +1,7 @@
-# Removed LEA sites (caused -3.1% regression with high register pressure), kept WIDE for cold setup
+# Cleared for policy iteration: even the remaining 2 wide sites regressed in the latest authoritative run.
 # Eligible live sites: wide=2, lea=2
-# Selected live sites: wide=2
+# Selected live sites: none
 
 version: 3
 program: 'multi_acc_8_xdp'
-sites:
-  - insn: 10
-    family: wide
-    pattern_kind: 'wide-load-2'
-  - insn: 23
-    family: wide
-    pattern_kind: 'wide-load-2'
+sites: []
