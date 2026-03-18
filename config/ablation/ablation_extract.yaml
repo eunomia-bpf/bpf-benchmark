@@ -1031,7 +1031,7 @@ build:
   runner_binary: micro/build/runner/micro_exec
 defaults:
   iterations: 10
-  output: micro/results/pure_jit.latest.json
+  output: micro/results/dev/pure_jit.json
   repeat: 200
   runtimes:
   - llvmbpf

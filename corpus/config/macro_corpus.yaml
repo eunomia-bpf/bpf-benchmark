@@ -9,7 +9,7 @@ defaults:
   iterations: 3
   warmups: 1
   repeat: 1
-  output: corpus/results/macro_corpus.latest.json
+  output: corpus/results/dev/macro_corpus.json
 
 build:
   runner_binary: micro/build/runner/micro_exec

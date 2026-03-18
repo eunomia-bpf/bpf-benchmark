@@ -44,7 +44,7 @@ make all
 # Quick smoke test (no VM required)
 make smoke
 
-# Full micro benchmark suite in VM → micro/results/vm_micro.latest.json
+# Full micro benchmark suite in VM → micro/results/dev/vm_micro.json
 make vm-micro
 
 # Show all targets and parameters
@@ -67,9 +67,10 @@ make compare OLD=a.json NEW=b.json   # diff two result JSON files
 ```
 
 Results are written to:
-- `micro/results/` — micro benchmark results (JSON)
-- `corpus/results/` — corpus benchmark results (JSON)
-- `e2e/results/` — E2E benchmark results (JSON)
+- `micro/results/dev/` — default Makefile micro outputs
+- `corpus/results/dev/` — default Makefile corpus outputs
+- `e2e/results/dev/` — default Makefile E2E outputs
+- `*/results/` top-level — checked-in authoritative JSON only
 - `docs/tmp/` — analysis reports (.md only, never JSON results)
 
 ## Building Components Individually

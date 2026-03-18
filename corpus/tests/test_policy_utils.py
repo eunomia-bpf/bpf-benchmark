@@ -10,7 +10,7 @@ if str(ROOT_DIR) not in sys.path:
 
 from corpus.policy_utils import parse_policy_v3, remap_policy_v3_to_live
 
-GOLDEN_DIR = ROOT_DIR / "scanner" / "tests" / "policy_v2_golden"
+GOLDEN_DIR = ROOT_DIR / "scanner" / "tests" / "policy_v3_golden"
 
 
 class PolicyUtilsTest(unittest.TestCase):

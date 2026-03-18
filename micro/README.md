@@ -73,8 +73,8 @@ python3 micro/run_micro.py \
 
 Results live under `micro/results/`.
 
-- `pure_jit.latest.json`: default host run (`llvmbpf + kernel`)
-- `pure_jit.llvmbpf_only.latest.json`: default `--llvmbpf-only` script output
-- `pure_jit.vm.latest.json`: default `--vm` script output
+- `micro/results/dev/`: default working outputs for direct runs and Makefile targets
+- `micro/results/`: checked-in authoritative JSON plus `README.md`
+- `micro/results/archive/`: historical and intermediate artifacts
 
 Archived analysis scripts under `micro/archive/scripts/` continue to read and write `micro/results/`.

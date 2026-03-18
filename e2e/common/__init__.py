@@ -55,17 +55,13 @@ def latest_output_path(results_dir: Path, suite: str) -> Path:
 
 
 def refresh_latest_alias(latest_path: Path, target_path: Path) -> None:
-    ensure_parent(latest_path)
-    if latest_path.exists() or latest_path.is_symlink():
-        latest_path.unlink()
-    latest_path.symlink_to(Path(os.path.relpath(target_path, latest_path.parent)))
+    _ = (latest_path, target_path)
+    return
 
 
 def maybe_refresh_latest_alias(path: Path) -> None:
-    match = RESULT_FILE_RE.fullmatch(path.name)
-    if match is None or match.group("kind") != "authoritative":
-        return
-    refresh_latest_alias(latest_output_path(path.parent, match.group("suite")), path)
+    _ = path
+    return
 
 
 def tail_text(text: str, *, max_lines: int = 12, max_chars: int = 4000) -> str:

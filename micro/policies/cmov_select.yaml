@@ -1,19 +1,7 @@
-# Rotate-only replacement for policy iteration: clear the regressing cmov choice and keep only scanner-confirmed rotate sites.
+# Cleared in round 3: current live manifest has no cmov sites, and the rotate-only fallback regressed.
 # Eligible live sites: wide=6, rotate=4
-# Selected live sites: rotate=4
+# Selected live sites: none
 
 version: 3
 program: 'cmov_select_xdp'
-sites:
-  - insn: 236
-    family: rotate
-    pattern_kind: 'rotate-64'
-  - insn: 349
-    family: rotate
-    pattern_kind: 'rotate-64'
-  - insn: 421
-    family: rotate
-    pattern_kind: 'rotate-64'
-  - insn: 480
-    family: rotate
-    pattern_kind: 'rotate-64'
+sites: []
