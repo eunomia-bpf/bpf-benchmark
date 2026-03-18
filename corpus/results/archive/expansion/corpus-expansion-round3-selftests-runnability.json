@@ -1,0 +1,2379 @@
+{
+  "generated_at": "2026-03-11T13:51:31.170484+00:00",
+  "repo_root": "/home/yunwei37/workspace/bpf-benchmark",
+  "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec",
+  "scanner_binary": "/home/yunwei37/workspace/bpf-benchmark/scanner/build/bpf-jit-scanner",
+  "corpus_root": "/home/yunwei37/workspace/bpf-benchmark/corpus/build",
+  "packet_repeat": 200,
+  "tracing_repeat": 10,
+  "recompile_mode": "v5",
+  "objects_scanned": 5,
+  "skipped_non_bpf_artifacts": [],
+  "inventory_failures": [],
+  "summary": {
+    "programs_found": 14,
+    "objects_found": 5,
+    "loadable_programs": 13,
+    "directive_bearing_programs": 6,
+    "packet_candidate_programs": 10,
+    "packet_runnable_programs": 10,
+    "packet_paired_programs": 5,
+    "tracing_candidate_programs": 1,
+    "tracing_measured_programs": 0,
+    "tracing_positive_programs": 0,
+    "true_runnable_programs": 10,
+    "true_runnable_objects": 4,
+    "packet_speedup_geomean": 1.023274633558337,
+    "packet_speedup_median": 1.0128205128205128,
+    "tracing_avg_ns_min": null,
+    "tracing_avg_ns_max": null,
+    "family_totals": {
+      "cmov_sites": 5,
+      "wide_sites": 7,
+      "rotate_sites": 0,
+      "lea_sites": 0
+    },
+    "strategy_counts": {
+      "packet_test_run": 10,
+      "socket_custom_harness": 3,
+      "tracing_attach_trigger": 1
+    },
+    "load_failures": {
+      "bpf_object__load failed: No such process (exit=1)": 1
+    },
+    "baseline_failures": {},
+    "recompile_failures": {},
+    "tracing_failures": {},
+    "tracing_skip_reasons": {}
+  },
+  "objects": [
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_flow.bpf.o",
+      "source_name": "linux-selftests",
+      "programs": 7,
+      "loadable": 7,
+      "directive_sites": 4,
+      "directive_bearing_programs": 4,
+      "packet_candidates": 7,
+      "packet_runnable": 7,
+      "packet_paired": 4,
+      "tracing_candidates": 0,
+      "tracing_positive": 0,
+      "true_runnable": true,
+      "strategies": "packet_test_run"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_assign_reuse.bpf.o",
+      "source_name": "linux-selftests",
+      "programs": 3,
+      "loadable": 3,
+      "directive_sites": 8,
+      "directive_bearing_programs": 2,
+      "packet_candidates": 1,
+      "packet_runnable": 1,
+      "packet_paired": 1,
+      "tracing_candidates": 0,
+      "tracing_positive": 0,
+      "true_runnable": true,
+      "strategies": "socket_custom_harness, packet_test_run"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgroup_skb_sk_lookup_kern.bpf.o",
+      "source_name": "linux-selftests",
+      "programs": 1,
+      "loadable": 1,
+      "directive_sites": 0,
+      "directive_bearing_programs": 0,
+      "packet_candidates": 1,
+      "packet_runnable": 1,
+      "packet_paired": 0,
+      "tracing_candidates": 0,
+      "tracing_positive": 0,
+      "true_runnable": true,
+      "strategies": "packet_test_run"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_migrate_reuseport.bpf.o",
+      "source_name": "linux-selftests",
+      "programs": 2,
+      "loadable": 2,
+      "directive_sites": 0,
+      "directive_bearing_programs": 0,
+      "packet_candidates": 1,
+      "packet_runnable": 1,
+      "packet_paired": 0,
+      "tracing_candidates": 0,
+      "tracing_positive": 0,
+      "true_runnable": true,
+      "strategies": "packet_test_run, socket_custom_harness"
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/trace_dummy_st_ops.bpf.o",
+      "source_name": "linux-selftests",
+      "programs": 1,
+      "loadable": 0,
+      "directive_sites": 0,
+      "directive_bearing_programs": 0,
+      "packet_candidates": 0,
+      "packet_runnable": 0,
+      "packet_paired": 0,
+      "tracing_candidates": 1,
+      "tracing_positive": 0,
+      "true_runnable": false,
+      "strategies": "tracing_attach_trigger"
+    }
+  ],
+  "sources": [
+    {
+      "source_name": "linux-selftests",
+      "objects": 5,
+      "programs": 14,
+      "loadable": 13,
+      "directive_bearing": 6,
+      "packet_runnable": 10,
+      "packet_paired": 5,
+      "tracing_positive": 0,
+      "true_runnable_programs": 10
+    }
+  ],
+  "prog_types": [
+    {
+      "prog_type_name": "flow_dissector",
+      "programs": 7,
+      "objects": 1,
+      "loadable": 7,
+      "directive_bearing": 4,
+      "packet_runnable": 7,
+      "packet_paired": 4,
+      "tracing_positive": 0,
+      "top_strategy": "packet_test_run"
+    },
+    {
+      "prog_type_name": "sk_reuseport",
+      "programs": 3,
+      "objects": 2,
+      "loadable": 3,
+      "directive_bearing": 1,
+      "packet_runnable": 0,
+      "packet_paired": 0,
+      "tracing_positive": 0,
+      "top_strategy": "socket_custom_harness"
+    },
+    {
+      "prog_type_name": "cgroup_skb",
+      "programs": 1,
+      "objects": 1,
+      "loadable": 1,
+      "directive_bearing": 0,
+      "packet_runnable": 1,
+      "packet_paired": 0,
+      "tracing_positive": 0,
+      "top_strategy": "packet_test_run"
+    },
+    {
+      "prog_type_name": "sched_cls",
+      "programs": 1,
+      "objects": 1,
+      "loadable": 1,
+      "directive_bearing": 1,
+      "packet_runnable": 1,
+      "packet_paired": 1,
+      "tracing_positive": 0,
+      "top_strategy": "packet_test_run"
+    },
+    {
+      "prog_type_name": "tracing",
+      "programs": 1,
+      "objects": 1,
+      "loadable": 0,
+      "directive_bearing": 0,
+      "packet_runnable": 0,
+      "packet_paired": 0,
+      "tracing_positive": 0,
+      "top_strategy": "tracing_attach_trigger"
+    },
+    {
+      "prog_type_name": "xdp",
+      "programs": 1,
+      "objects": 1,
+      "loadable": 1,
+      "directive_bearing": 0,
+      "packet_runnable": 1,
+      "packet_paired": 0,
+      "tracing_positive": 0,
+      "top_strategy": "packet_test_run"
+    }
+  ],
+  "programs": [
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_flow.bpf.o",
+      "source_name": "linux-selftests",
+      "program_name": "_dissect",
+      "section_name": "flow_dissector",
+      "section_root": "flow_dissector",
+      "insn_count": 118,
+      "prog_type": 22,
+      "expected_attach_type": 17,
+      "prog_type_name": "flow_dissector",
+      "attach_type_name": "flow_dissector",
+      "strategy": "packet_test_run",
+      "strategy_reason": "packet-backed bpf_prog_test_run is available for this program type",
+      "io_mode": "packet",
+      "input_size": 64,
+      "memory_path": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/corpus_dummy_packet_64.bin",
+      "recompile_probe": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.0099671549978666,
+        "error": null,
+        "stderr_tail": "libbpf: prog 'flow_dissector_5': found map 1 (last_dissection, sec 5, off 32) for insn #107\nlibbpf: sec '.relflow_dissector': relo #62: insn #2796 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #119\nlibbpf: sec '.relflow_dissector': relo #63: insn #2807 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #130\nlibbpf: sec '.relflow_dissector': relo #64: insn #2815 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #138\nlibbpf: object 'bpf_flow': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'jmp_table': created successfully, fd=4\nlibbpf: map 'last_dissection': created successfully, fd=5\nlibbpf: prog 'flow_dissector_0': skipped loading\nlibbpf: prog 'flow_dissector_1': skipped loading\nlibbpf: prog 'flow_dissector_2': skipped loading\nlibbpf: prog 'flow_dissector_3': skipped loading\nlibbpf: prog 'flow_dissector_4': skipped loading\nlibbpf: prog 'flow_dissector_5': skipped loading\nrecompile-cmov: no cmov sites found in xlated program (118 insns)\nrecompile-wide: no wide_load sites found in xlated program (118 insns)\nrecompile-rotate: no rotate sites found in xlated program (118 insns)\nrecompile-lea: no addr_calc sites found in xlated program (118 insns)",
+        "sample": {
+          "compile_ns": 985375,
+          "exec_ns": 0,
+          "timing_source": "unknown",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "result": 0,
+          "retval": 0,
+          "jited_prog_len": 711,
+          "xlated_prog_len": 944,
+          "code_size": {
+            "bpf_bytecode_bytes": 944,
+            "native_code_bytes": 711,
+            "inflation_ratio": 0.753178
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 56880,
+            "object_open_ns": 437904,
+            "object_load_ns": 547471
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": false,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 0
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v5",
+            "policy_generated": false,
+            "policy_bytes": 0,
+            "syscall_attempted": false,
+            "applied": false,
+            "error": ""
+          }
+        }
+      },
+      "baseline_compile": null,
+      "offline_scan": null,
+      "loadable": true,
+      "directive_scan": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "scan_source": "runner_recompile_probe",
+      "baseline_run": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.030599325022194535,
+        "error": null,
+        "stderr_tail": "libbpf: prog 'flow_dissector_4': found map 1 (last_dissection, sec 5, off 32) for insn #59\nlibbpf: sec '.relflow_dissector': relo #60: insn #2671 against 'last_dissection'\nlibbpf: prog 'flow_dissector_4': found map 1 (last_dissection, sec 5, off 32) for insn #110\nlibbpf: sec '.relflow_dissector': relo #61: insn #2784 against 'last_dissection'\nlibbpf: prog 'flow_dissector_5': found map 1 (last_dissection, sec 5, off 32) for insn #107\nlibbpf: sec '.relflow_dissector': relo #62: insn #2796 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #119\nlibbpf: sec '.relflow_dissector': relo #63: insn #2807 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #130\nlibbpf: sec '.relflow_dissector': relo #64: insn #2815 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #138\nlibbpf: object 'bpf_flow': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'jmp_table': created successfully, fd=4\nlibbpf: map 'last_dissection': created successfully, fd=5\nlibbpf: prog 'flow_dissector_0': skipped loading\nlibbpf: prog 'flow_dissector_1': skipped loading\nlibbpf: prog 'flow_dissector_2': skipped loading\nlibbpf: prog 'flow_dissector_3': skipped loading\nlibbpf: prog 'flow_dissector_4': skipped loading\nlibbpf: prog 'flow_dissector_5': skipped loading",
+        "sample": {
+          "compile_ns": 934576,
+          "exec_ns": 73,
+          "timing_source": "ktime",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "wall_exec_ns": 112,
+          "exec_cycles": 414,
+          "tsc_freq_hz": 3686030032,
+          "result": 917518,
+          "retval": 2,
+          "jited_prog_len": 711,
+          "xlated_prog_len": 944,
+          "code_size": {
+            "bpf_bytecode_bytes": 944,
+            "native_code_bytes": 711,
+            "inflation_ratio": 0.753178
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 55214,
+            "object_open_ns": 409369,
+            "object_load_ns": 525207,
+            "packet_prepare_ns": 587,
+            "prog_run_wall_ns": 22629,
+            "result_extract_ns": 112
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": true,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": false,
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 0
+          },
+          "recompile": {
+            "requested": false,
+            "mode": "none",
+            "policy_generated": false,
+            "policy_bytes": 0,
+            "syscall_attempted": false,
+            "applied": false,
+            "error": ""
+          }
+        }
+      },
+      "recompile_run": null,
+      "correctness": {
+        "comparable": false,
+        "matches": null
+      },
+      "speedup_ratio": null,
+      "tracing_trigger_name": null,
+      "tracing_trigger_description": null,
+      "tracing_skip_reason": null,
+      "tracing_measurement": null
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_flow.bpf.o",
+      "source_name": "linux-selftests",
+      "program_name": "flow_dissector_0",
+      "section_name": "flow_dissector",
+      "section_root": "flow_dissector",
+      "insn_count": 615,
+      "prog_type": 22,
+      "expected_attach_type": 17,
+      "prog_type_name": "flow_dissector",
+      "attach_type_name": "flow_dissector",
+      "strategy": "packet_test_run",
+      "strategy_reason": "packet-backed bpf_prog_test_run is available for this program type",
+      "io_mode": "packet",
+      "input_size": 64,
+      "memory_path": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/corpus_dummy_packet_64.bin",
+      "recompile_probe": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.01292105601169169,
+        "error": null,
+        "stderr_tail": "libbpf: sec '.relflow_dissector': relo #62: insn #2796 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #119\nlibbpf: sec '.relflow_dissector': relo #63: insn #2807 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #130\nlibbpf: sec '.relflow_dissector': relo #64: insn #2815 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #138\nlibbpf: object 'bpf_flow': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'jmp_table': created successfully, fd=4\nlibbpf: map 'last_dissection': created successfully, fd=5\nlibbpf: prog '_dissect': skipped loading\nlibbpf: prog 'flow_dissector_1': skipped loading\nlibbpf: prog 'flow_dissector_2': skipped loading\nlibbpf: prog 'flow_dissector_3': skipped loading\nlibbpf: prog 'flow_dissector_4': skipped loading\nlibbpf: prog 'flow_dissector_5': skipped loading\nrecompile-cmov: found 1 cmov sites in xlated program (615 insns)\nrecompile-wide: no wide_load sites found in xlated program (615 insns)\nrecompile-rotate: no rotate sites found in xlated program (615 insns)\nrecompile-lea: no addr_calc sites found in xlated program (615 insns)\nBPF_PROG_JIT_RECOMPILE failed: Invalid argument (errno=22)",
+        "sample": {
+          "compile_ns": 1272175,
+          "exec_ns": 0,
+          "timing_source": "unknown",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "result": 0,
+          "retval": 0,
+          "jited_prog_len": 3152,
+          "xlated_prog_len": 4920,
+          "code_size": {
+            "bpf_bytecode_bytes": 4920,
+            "native_code_bytes": 3152,
+            "inflation_ratio": 0.64065
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 53648,
+            "object_open_ns": 397897,
+            "object_load_ns": 873105
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": false,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 1,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 1
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v5",
+            "policy_generated": true,
+            "policy_bytes": 164,
+            "syscall_attempted": true,
+            "applied": false,
+            "error": "BPF_PROG_JIT_RECOMPILE failed: Invalid argument (errno=22)"
+          }
+        }
+      },
+      "baseline_compile": null,
+      "offline_scan": null,
+      "loadable": true,
+      "directive_scan": {
+        "cmov_sites": 1,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 1
+      },
+      "scan_source": "runner_recompile_probe",
+      "baseline_run": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.03042593999998644,
+        "error": null,
+        "stderr_tail": "libbpf: prog 'flow_dissector_4': found map 1 (last_dissection, sec 5, off 32) for insn #59\nlibbpf: sec '.relflow_dissector': relo #60: insn #2671 against 'last_dissection'\nlibbpf: prog 'flow_dissector_4': found map 1 (last_dissection, sec 5, off 32) for insn #110\nlibbpf: sec '.relflow_dissector': relo #61: insn #2784 against 'last_dissection'\nlibbpf: prog 'flow_dissector_5': found map 1 (last_dissection, sec 5, off 32) for insn #107\nlibbpf: sec '.relflow_dissector': relo #62: insn #2796 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #119\nlibbpf: sec '.relflow_dissector': relo #63: insn #2807 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #130\nlibbpf: sec '.relflow_dissector': relo #64: insn #2815 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #138\nlibbpf: object 'bpf_flow': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'jmp_table': created successfully, fd=4\nlibbpf: map 'last_dissection': created successfully, fd=5\nlibbpf: prog '_dissect': skipped loading\nlibbpf: prog 'flow_dissector_1': skipped loading\nlibbpf: prog 'flow_dissector_2': skipped loading\nlibbpf: prog 'flow_dissector_3': skipped loading\nlibbpf: prog 'flow_dissector_4': skipped loading\nlibbpf: prog 'flow_dissector_5': skipped loading",
+        "sample": {
+          "compile_ns": 1205694,
+          "exec_ns": 91,
+          "timing_source": "ktime",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "wall_exec_ns": 142,
+          "exec_cycles": 523,
+          "tsc_freq_hz": 3685996084,
+          "result": 917518,
+          "retval": 2,
+          "jited_prog_len": 3152,
+          "xlated_prog_len": 4920,
+          "code_size": {
+            "bpf_bytecode_bytes": 4920,
+            "native_code_bytes": 3152,
+            "inflation_ratio": 0.64065
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 44811,
+            "object_open_ns": 368989,
+            "object_load_ns": 836705,
+            "packet_prepare_ns": 574,
+            "prog_run_wall_ns": 28464,
+            "result_extract_ns": 25
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": true,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": false,
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 0
+          },
+          "recompile": {
+            "requested": false,
+            "mode": "none",
+            "policy_generated": false,
+            "policy_bytes": 0,
+            "syscall_attempted": false,
+            "applied": false,
+            "error": ""
+          }
+        }
+      },
+      "recompile_run": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.03351632703561336,
+        "error": null,
+        "stderr_tail": "libbpf: sec '.relflow_dissector': relo #62: insn #2796 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #119\nlibbpf: sec '.relflow_dissector': relo #63: insn #2807 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #130\nlibbpf: sec '.relflow_dissector': relo #64: insn #2815 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #138\nlibbpf: object 'bpf_flow': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'jmp_table': created successfully, fd=4\nlibbpf: map 'last_dissection': created successfully, fd=5\nlibbpf: prog '_dissect': skipped loading\nlibbpf: prog 'flow_dissector_1': skipped loading\nlibbpf: prog 'flow_dissector_2': skipped loading\nlibbpf: prog 'flow_dissector_3': skipped loading\nlibbpf: prog 'flow_dissector_4': skipped loading\nlibbpf: prog 'flow_dissector_5': skipped loading\nrecompile-cmov: found 1 cmov sites in xlated program (615 insns)\nrecompile-wide: no wide_load sites found in xlated program (615 insns)\nrecompile-rotate: no rotate sites found in xlated program (615 insns)\nrecompile-lea: no addr_calc sites found in xlated program (615 insns)\nBPF_PROG_JIT_RECOMPILE failed: Invalid argument (errno=22)",
+        "sample": {
+          "compile_ns": 1288195,
+          "exec_ns": 79,
+          "timing_source": "ktime",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "wall_exec_ns": 112,
+          "exec_cycles": 413,
+          "tsc_freq_hz": 3685973260,
+          "result": 917518,
+          "retval": 2,
+          "jited_prog_len": 3152,
+          "xlated_prog_len": 4920,
+          "code_size": {
+            "bpf_bytecode_bytes": 4920,
+            "native_code_bytes": 3152,
+            "inflation_ratio": 0.64065
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 47750,
+            "object_open_ns": 408699,
+            "object_load_ns": 878158,
+            "packet_prepare_ns": 286,
+            "prog_run_wall_ns": 22452,
+            "result_extract_ns": 45
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": true,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 1,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 1
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v5",
+            "policy_generated": true,
+            "policy_bytes": 164,
+            "syscall_attempted": true,
+            "applied": false,
+            "error": "BPF_PROG_JIT_RECOMPILE failed: Invalid argument (errno=22)"
+          }
+        }
+      },
+      "correctness": {
+        "comparable": true,
+        "matches": true,
+        "baseline_result": 917518,
+        "baseline_retval": 2,
+        "recompile_result": 917518,
+        "recompile_retval": 2
+      },
+      "speedup_ratio": 1.1518987341772151,
+      "tracing_trigger_name": null,
+      "tracing_trigger_description": null,
+      "tracing_skip_reason": null,
+      "tracing_measurement": null
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_flow.bpf.o",
+      "source_name": "linux-selftests",
+      "program_name": "flow_dissector_1",
+      "section_name": "flow_dissector",
+      "section_root": "flow_dissector",
+      "insn_count": 624,
+      "prog_type": 22,
+      "expected_attach_type": 17,
+      "prog_type_name": "flow_dissector",
+      "attach_type_name": "flow_dissector",
+      "strategy": "packet_test_run",
+      "strategy_reason": "packet-backed bpf_prog_test_run is available for this program type",
+      "io_mode": "packet",
+      "input_size": 64,
+      "memory_path": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/corpus_dummy_packet_64.bin",
+      "recompile_probe": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.013427046011202037,
+        "error": null,
+        "stderr_tail": "libbpf: sec '.relflow_dissector': relo #62: insn #2796 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #119\nlibbpf: sec '.relflow_dissector': relo #63: insn #2807 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #130\nlibbpf: sec '.relflow_dissector': relo #64: insn #2815 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #138\nlibbpf: object 'bpf_flow': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'jmp_table': created successfully, fd=4\nlibbpf: map 'last_dissection': created successfully, fd=5\nlibbpf: prog '_dissect': skipped loading\nlibbpf: prog 'flow_dissector_0': skipped loading\nlibbpf: prog 'flow_dissector_2': skipped loading\nlibbpf: prog 'flow_dissector_3': skipped loading\nlibbpf: prog 'flow_dissector_4': skipped loading\nlibbpf: prog 'flow_dissector_5': skipped loading\nrecompile-cmov: found 1 cmov sites in xlated program (624 insns)\nrecompile-wide: no wide_load sites found in xlated program (624 insns)\nrecompile-rotate: no rotate sites found in xlated program (624 insns)\nrecompile-lea: no addr_calc sites found in xlated program (624 insns)\nBPF_PROG_JIT_RECOMPILE failed: Invalid argument (errno=22)",
+        "sample": {
+          "compile_ns": 1293671,
+          "exec_ns": 0,
+          "timing_source": "unknown",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "result": 0,
+          "retval": 0,
+          "jited_prog_len": 3298,
+          "xlated_prog_len": 4992,
+          "code_size": {
+            "bpf_bytecode_bytes": 4992,
+            "native_code_bytes": 3298,
+            "inflation_ratio": 0.660657
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 53676,
+            "object_open_ns": 401879,
+            "object_load_ns": 890834
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": false,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 1,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 1
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v5",
+            "policy_generated": true,
+            "policy_bytes": 164,
+            "syscall_attempted": true,
+            "applied": false,
+            "error": "BPF_PROG_JIT_RECOMPILE failed: Invalid argument (errno=22)"
+          }
+        }
+      },
+      "baseline_compile": null,
+      "offline_scan": null,
+      "loadable": true,
+      "directive_scan": {
+        "cmov_sites": 1,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 1
+      },
+      "scan_source": "runner_recompile_probe",
+      "baseline_run": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.030056403018534184,
+        "error": null,
+        "stderr_tail": "libbpf: prog 'flow_dissector_4': found map 1 (last_dissection, sec 5, off 32) for insn #59\nlibbpf: sec '.relflow_dissector': relo #60: insn #2671 against 'last_dissection'\nlibbpf: prog 'flow_dissector_4': found map 1 (last_dissection, sec 5, off 32) for insn #110\nlibbpf: sec '.relflow_dissector': relo #61: insn #2784 against 'last_dissection'\nlibbpf: prog 'flow_dissector_5': found map 1 (last_dissection, sec 5, off 32) for insn #107\nlibbpf: sec '.relflow_dissector': relo #62: insn #2796 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #119\nlibbpf: sec '.relflow_dissector': relo #63: insn #2807 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #130\nlibbpf: sec '.relflow_dissector': relo #64: insn #2815 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #138\nlibbpf: object 'bpf_flow': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'jmp_table': created successfully, fd=4\nlibbpf: map 'last_dissection': created successfully, fd=5\nlibbpf: prog '_dissect': skipped loading\nlibbpf: prog 'flow_dissector_0': skipped loading\nlibbpf: prog 'flow_dissector_2': skipped loading\nlibbpf: prog 'flow_dissector_3': skipped loading\nlibbpf: prog 'flow_dissector_4': skipped loading\nlibbpf: prog 'flow_dissector_5': skipped loading",
+        "sample": {
+          "compile_ns": 1230039,
+          "exec_ns": 80,
+          "timing_source": "ktime",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "wall_exec_ns": 101,
+          "exec_cycles": 372,
+          "tsc_freq_hz": 3686285943,
+          "result": 148283749433358,
+          "retval": 2,
+          "jited_prog_len": 3298,
+          "xlated_prog_len": 4992,
+          "code_size": {
+            "bpf_bytecode_bytes": 4992,
+            "native_code_bytes": 3298,
+            "inflation_ratio": 0.660657
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 54419,
+            "object_open_ns": 384196,
+            "object_load_ns": 845843,
+            "packet_prepare_ns": 621,
+            "prog_run_wall_ns": 20225,
+            "result_extract_ns": 22
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": true,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": false,
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 0
+          },
+          "recompile": {
+            "requested": false,
+            "mode": "none",
+            "policy_generated": false,
+            "policy_bytes": 0,
+            "syscall_attempted": false,
+            "applied": false,
+            "error": ""
+          }
+        }
+      },
+      "recompile_run": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.033377853978890926,
+        "error": null,
+        "stderr_tail": "libbpf: sec '.relflow_dissector': relo #62: insn #2796 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #119\nlibbpf: sec '.relflow_dissector': relo #63: insn #2807 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #130\nlibbpf: sec '.relflow_dissector': relo #64: insn #2815 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #138\nlibbpf: object 'bpf_flow': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'jmp_table': created successfully, fd=4\nlibbpf: map 'last_dissection': created successfully, fd=5\nlibbpf: prog '_dissect': skipped loading\nlibbpf: prog 'flow_dissector_0': skipped loading\nlibbpf: prog 'flow_dissector_2': skipped loading\nlibbpf: prog 'flow_dissector_3': skipped loading\nlibbpf: prog 'flow_dissector_4': skipped loading\nlibbpf: prog 'flow_dissector_5': skipped loading\nrecompile-cmov: found 1 cmov sites in xlated program (624 insns)\nrecompile-wide: no wide_load sites found in xlated program (624 insns)\nrecompile-rotate: no rotate sites found in xlated program (624 insns)\nrecompile-lea: no addr_calc sites found in xlated program (624 insns)\nBPF_PROG_JIT_RECOMPILE failed: Invalid argument (errno=22)",
+        "sample": {
+          "compile_ns": 1250261,
+          "exec_ns": 80,
+          "timing_source": "ktime",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "wall_exec_ns": 111,
+          "exec_cycles": 410,
+          "tsc_freq_hz": 3686177004,
+          "result": 148283749433358,
+          "retval": 2,
+          "jited_prog_len": 3298,
+          "xlated_prog_len": 4992,
+          "code_size": {
+            "bpf_bytecode_bytes": 4992,
+            "native_code_bytes": 3298,
+            "inflation_ratio": 0.660657
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 49285,
+            "object_open_ns": 381605,
+            "object_load_ns": 867706,
+            "packet_prepare_ns": 305,
+            "prog_run_wall_ns": 22319,
+            "result_extract_ns": 25
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": true,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 1,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 1
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v5",
+            "policy_generated": true,
+            "policy_bytes": 164,
+            "syscall_attempted": true,
+            "applied": false,
+            "error": "BPF_PROG_JIT_RECOMPILE failed: Invalid argument (errno=22)"
+          }
+        }
+      },
+      "correctness": {
+        "comparable": true,
+        "matches": true,
+        "baseline_result": 148283749433358,
+        "baseline_retval": 2,
+        "recompile_result": 148283749433358,
+        "recompile_retval": 2
+      },
+      "speedup_ratio": 1.0,
+      "tracing_trigger_name": null,
+      "tracing_trigger_description": null,
+      "tracing_skip_reason": null,
+      "tracing_measurement": null
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_flow.bpf.o",
+      "source_name": "linux-selftests",
+      "program_name": "flow_dissector_2",
+      "section_name": "flow_dissector",
+      "section_root": "flow_dissector",
+      "insn_count": 557,
+      "prog_type": 22,
+      "expected_attach_type": 17,
+      "prog_type_name": "flow_dissector",
+      "attach_type_name": "flow_dissector",
+      "strategy": "packet_test_run",
+      "strategy_reason": "packet-backed bpf_prog_test_run is available for this program type",
+      "io_mode": "packet",
+      "input_size": 64,
+      "memory_path": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/corpus_dummy_packet_64.bin",
+      "recompile_probe": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.012610328034497797,
+        "error": null,
+        "stderr_tail": "libbpf: sec '.relflow_dissector': relo #62: insn #2796 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #119\nlibbpf: sec '.relflow_dissector': relo #63: insn #2807 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #130\nlibbpf: sec '.relflow_dissector': relo #64: insn #2815 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #138\nlibbpf: object 'bpf_flow': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'jmp_table': created successfully, fd=4\nlibbpf: map 'last_dissection': created successfully, fd=5\nlibbpf: prog '_dissect': skipped loading\nlibbpf: prog 'flow_dissector_0': skipped loading\nlibbpf: prog 'flow_dissector_1': skipped loading\nlibbpf: prog 'flow_dissector_3': skipped loading\nlibbpf: prog 'flow_dissector_4': skipped loading\nlibbpf: prog 'flow_dissector_5': skipped loading\nrecompile-cmov: found 1 cmov sites in xlated program (557 insns)\nrecompile-wide: no wide_load sites found in xlated program (557 insns)\nrecompile-rotate: no rotate sites found in xlated program (557 insns)\nrecompile-lea: no addr_calc sites found in xlated program (557 insns)\nBPF_PROG_JIT_RECOMPILE failed: Invalid argument (errno=22)",
+        "sample": {
+          "compile_ns": 1231389,
+          "exec_ns": 0,
+          "timing_source": "unknown",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "result": 0,
+          "retval": 0,
+          "jited_prog_len": 3039,
+          "xlated_prog_len": 4456,
+          "code_size": {
+            "bpf_bytecode_bytes": 4456,
+            "native_code_bytes": 3039,
+            "inflation_ratio": 0.682002
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 57366,
+            "object_open_ns": 389528,
+            "object_load_ns": 840858
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": false,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 1,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 1
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v5",
+            "policy_generated": true,
+            "policy_bytes": 164,
+            "syscall_attempted": true,
+            "applied": false,
+            "error": "BPF_PROG_JIT_RECOMPILE failed: Invalid argument (errno=22)"
+          }
+        }
+      },
+      "baseline_compile": null,
+      "offline_scan": null,
+      "loadable": true,
+      "directive_scan": {
+        "cmov_sites": 1,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 1
+      },
+      "scan_source": "runner_recompile_probe",
+      "baseline_run": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.029981927014887333,
+        "error": null,
+        "stderr_tail": "libbpf: prog 'flow_dissector_4': found map 1 (last_dissection, sec 5, off 32) for insn #59\nlibbpf: sec '.relflow_dissector': relo #60: insn #2671 against 'last_dissection'\nlibbpf: prog 'flow_dissector_4': found map 1 (last_dissection, sec 5, off 32) for insn #110\nlibbpf: sec '.relflow_dissector': relo #61: insn #2784 against 'last_dissection'\nlibbpf: prog 'flow_dissector_5': found map 1 (last_dissection, sec 5, off 32) for insn #107\nlibbpf: sec '.relflow_dissector': relo #62: insn #2796 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #119\nlibbpf: sec '.relflow_dissector': relo #63: insn #2807 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #130\nlibbpf: sec '.relflow_dissector': relo #64: insn #2815 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #138\nlibbpf: object 'bpf_flow': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'jmp_table': created successfully, fd=4\nlibbpf: map 'last_dissection': created successfully, fd=5\nlibbpf: prog '_dissect': skipped loading\nlibbpf: prog 'flow_dissector_0': skipped loading\nlibbpf: prog 'flow_dissector_1': skipped loading\nlibbpf: prog 'flow_dissector_3': skipped loading\nlibbpf: prog 'flow_dissector_4': skipped loading\nlibbpf: prog 'flow_dissector_5': skipped loading",
+        "sample": {
+          "compile_ns": 1196466,
+          "exec_ns": 79,
+          "timing_source": "ktime",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "wall_exec_ns": 104,
+          "exec_cycles": 384,
+          "tsc_freq_hz": 3686289476,
+          "result": 1441806,
+          "retval": 2,
+          "jited_prog_len": 3039,
+          "xlated_prog_len": 4456,
+          "code_size": {
+            "bpf_bytecode_bytes": 4456,
+            "native_code_bytes": 3039,
+            "inflation_ratio": 0.682002
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 55642,
+            "object_open_ns": 387794,
+            "object_load_ns": 808672,
+            "packet_prepare_ns": 819,
+            "prog_run_wall_ns": 20896,
+            "result_extract_ns": 23
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": true,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": false,
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 0
+          },
+          "recompile": {
+            "requested": false,
+            "mode": "none",
+            "policy_generated": false,
+            "policy_bytes": 0,
+            "syscall_attempted": false,
+            "applied": false,
+            "error": ""
+          }
+        }
+      },
+      "recompile_run": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.03279905504314229,
+        "error": null,
+        "stderr_tail": "libbpf: sec '.relflow_dissector': relo #62: insn #2796 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #119\nlibbpf: sec '.relflow_dissector': relo #63: insn #2807 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #130\nlibbpf: sec '.relflow_dissector': relo #64: insn #2815 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #138\nlibbpf: object 'bpf_flow': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'jmp_table': created successfully, fd=4\nlibbpf: map 'last_dissection': created successfully, fd=5\nlibbpf: prog '_dissect': skipped loading\nlibbpf: prog 'flow_dissector_0': skipped loading\nlibbpf: prog 'flow_dissector_1': skipped loading\nlibbpf: prog 'flow_dissector_3': skipped loading\nlibbpf: prog 'flow_dissector_4': skipped loading\nlibbpf: prog 'flow_dissector_5': skipped loading\nrecompile-cmov: found 1 cmov sites in xlated program (557 insns)\nrecompile-wide: no wide_load sites found in xlated program (557 insns)\nrecompile-rotate: no rotate sites found in xlated program (557 insns)\nrecompile-lea: no addr_calc sites found in xlated program (557 insns)\nBPF_PROG_JIT_RECOMPILE failed: Invalid argument (errno=22)",
+        "sample": {
+          "compile_ns": 1189342,
+          "exec_ns": 78,
+          "timing_source": "ktime",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "wall_exec_ns": 103,
+          "exec_cycles": 381,
+          "tsc_freq_hz": 3686246126,
+          "result": 1441806,
+          "retval": 2,
+          "jited_prog_len": 3039,
+          "xlated_prog_len": 4456,
+          "code_size": {
+            "bpf_bytecode_bytes": 4456,
+            "native_code_bytes": 3039,
+            "inflation_ratio": 0.682002
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 45434,
+            "object_open_ns": 388376,
+            "object_load_ns": 800066,
+            "packet_prepare_ns": 269,
+            "prog_run_wall_ns": 20745,
+            "result_extract_ns": 24
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": true,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 1,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 1
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v5",
+            "policy_generated": true,
+            "policy_bytes": 164,
+            "syscall_attempted": true,
+            "applied": false,
+            "error": "BPF_PROG_JIT_RECOMPILE failed: Invalid argument (errno=22)"
+          }
+        }
+      },
+      "correctness": {
+        "comparable": true,
+        "matches": true,
+        "baseline_result": 1441806,
+        "baseline_retval": 2,
+        "recompile_result": 1441806,
+        "recompile_retval": 2
+      },
+      "speedup_ratio": 1.0128205128205128,
+      "tracing_trigger_name": null,
+      "tracing_trigger_description": null,
+      "tracing_skip_reason": null,
+      "tracing_measurement": null
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_flow.bpf.o",
+      "source_name": "linux-selftests",
+      "program_name": "flow_dissector_3",
+      "section_name": "flow_dissector",
+      "section_root": "flow_dissector",
+      "insn_count": 647,
+      "prog_type": 22,
+      "expected_attach_type": 17,
+      "prog_type_name": "flow_dissector",
+      "attach_type_name": "flow_dissector",
+      "strategy": "packet_test_run",
+      "strategy_reason": "packet-backed bpf_prog_test_run is available for this program type",
+      "io_mode": "packet",
+      "input_size": 64,
+      "memory_path": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/corpus_dummy_packet_64.bin",
+      "recompile_probe": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.012575265020132065,
+        "error": null,
+        "stderr_tail": "libbpf: sec '.relflow_dissector': relo #62: insn #2796 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #119\nlibbpf: sec '.relflow_dissector': relo #63: insn #2807 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #130\nlibbpf: sec '.relflow_dissector': relo #64: insn #2815 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #138\nlibbpf: object 'bpf_flow': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'jmp_table': created successfully, fd=4\nlibbpf: map 'last_dissection': created successfully, fd=5\nlibbpf: prog '_dissect': skipped loading\nlibbpf: prog 'flow_dissector_0': skipped loading\nlibbpf: prog 'flow_dissector_1': skipped loading\nlibbpf: prog 'flow_dissector_2': skipped loading\nlibbpf: prog 'flow_dissector_4': skipped loading\nlibbpf: prog 'flow_dissector_5': skipped loading\nrecompile-cmov: found 1 cmov sites in xlated program (647 insns)\nrecompile-wide: no wide_load sites found in xlated program (647 insns)\nrecompile-rotate: no rotate sites found in xlated program (647 insns)\nrecompile-lea: no addr_calc sites found in xlated program (647 insns)\nBPF_PROG_JIT_RECOMPILE failed: Invalid argument (errno=22)",
+        "sample": {
+          "compile_ns": 1247077,
+          "exec_ns": 0,
+          "timing_source": "unknown",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "result": 0,
+          "retval": 0,
+          "jited_prog_len": 3371,
+          "xlated_prog_len": 5176,
+          "code_size": {
+            "bpf_bytecode_bytes": 5176,
+            "native_code_bytes": 3371,
+            "inflation_ratio": 0.651275
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 45200,
+            "object_open_ns": 391765,
+            "object_load_ns": 854261
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": false,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 1,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 1
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v5",
+            "policy_generated": true,
+            "policy_bytes": 164,
+            "syscall_attempted": true,
+            "applied": false,
+            "error": "BPF_PROG_JIT_RECOMPILE failed: Invalid argument (errno=22)"
+          }
+        }
+      },
+      "baseline_compile": null,
+      "offline_scan": null,
+      "loadable": true,
+      "directive_scan": {
+        "cmov_sites": 1,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 1
+      },
+      "scan_source": "runner_recompile_probe",
+      "baseline_run": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.03055521397618577,
+        "error": null,
+        "stderr_tail": "libbpf: prog 'flow_dissector_4': found map 1 (last_dissection, sec 5, off 32) for insn #59\nlibbpf: sec '.relflow_dissector': relo #60: insn #2671 against 'last_dissection'\nlibbpf: prog 'flow_dissector_4': found map 1 (last_dissection, sec 5, off 32) for insn #110\nlibbpf: sec '.relflow_dissector': relo #61: insn #2784 against 'last_dissection'\nlibbpf: prog 'flow_dissector_5': found map 1 (last_dissection, sec 5, off 32) for insn #107\nlibbpf: sec '.relflow_dissector': relo #62: insn #2796 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #119\nlibbpf: sec '.relflow_dissector': relo #63: insn #2807 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #130\nlibbpf: sec '.relflow_dissector': relo #64: insn #2815 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #138\nlibbpf: object 'bpf_flow': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'jmp_table': created successfully, fd=4\nlibbpf: map 'last_dissection': created successfully, fd=5\nlibbpf: prog '_dissect': skipped loading\nlibbpf: prog 'flow_dissector_0': skipped loading\nlibbpf: prog 'flow_dissector_1': skipped loading\nlibbpf: prog 'flow_dissector_2': skipped loading\nlibbpf: prog 'flow_dissector_4': skipped loading\nlibbpf: prog 'flow_dissector_5': skipped loading",
+        "sample": {
+          "compile_ns": 1268921,
+          "exec_ns": 78,
+          "timing_source": "ktime",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "wall_exec_ns": 98,
+          "exec_cycles": 360,
+          "tsc_freq_hz": 3686293257,
+          "result": 72339069016080398,
+          "retval": 0,
+          "jited_prog_len": 3371,
+          "xlated_prog_len": 5176,
+          "code_size": {
+            "bpf_bytecode_bytes": 5176,
+            "native_code_bytes": 3371,
+            "inflation_ratio": 0.651275
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 48996,
+            "object_open_ns": 390850,
+            "object_load_ns": 878071,
+            "packet_prepare_ns": 689,
+            "prog_run_wall_ns": 19564,
+            "result_extract_ns": 22
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": true,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": false,
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 0
+          },
+          "recompile": {
+            "requested": false,
+            "mode": "none",
+            "policy_generated": false,
+            "policy_bytes": 0,
+            "syscall_attempted": false,
+            "applied": false,
+            "error": ""
+          }
+        }
+      },
+      "recompile_run": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.03380455001024529,
+        "error": null,
+        "stderr_tail": "libbpf: sec '.relflow_dissector': relo #62: insn #2796 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #119\nlibbpf: sec '.relflow_dissector': relo #63: insn #2807 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #130\nlibbpf: sec '.relflow_dissector': relo #64: insn #2815 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #138\nlibbpf: object 'bpf_flow': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'jmp_table': created successfully, fd=4\nlibbpf: map 'last_dissection': created successfully, fd=5\nlibbpf: prog '_dissect': skipped loading\nlibbpf: prog 'flow_dissector_0': skipped loading\nlibbpf: prog 'flow_dissector_1': skipped loading\nlibbpf: prog 'flow_dissector_2': skipped loading\nlibbpf: prog 'flow_dissector_4': skipped loading\nlibbpf: prog 'flow_dissector_5': skipped loading\nrecompile-cmov: found 1 cmov sites in xlated program (647 insns)\nrecompile-wide: no wide_load sites found in xlated program (647 insns)\nrecompile-rotate: no rotate sites found in xlated program (647 insns)\nrecompile-lea: no addr_calc sites found in xlated program (647 insns)\nBPF_PROG_JIT_RECOMPILE failed: Invalid argument (errno=22)",
+        "sample": {
+          "compile_ns": 1207929,
+          "exec_ns": 73,
+          "timing_source": "ktime",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "wall_exec_ns": 106,
+          "exec_cycles": 390,
+          "tsc_freq_hz": 3686220431,
+          "result": 72339069016080398,
+          "retval": 0,
+          "jited_prog_len": 3371,
+          "xlated_prog_len": 5176,
+          "code_size": {
+            "bpf_bytecode_bytes": 5176,
+            "native_code_bytes": 3371,
+            "inflation_ratio": 0.651275
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 58193,
+            "object_open_ns": 400052,
+            "object_load_ns": 806835,
+            "packet_prepare_ns": 288,
+            "prog_run_wall_ns": 21204,
+            "result_extract_ns": 19
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": true,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 1,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 1
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v5",
+            "policy_generated": true,
+            "policy_bytes": 164,
+            "syscall_attempted": true,
+            "applied": false,
+            "error": "BPF_PROG_JIT_RECOMPILE failed: Invalid argument (errno=22)"
+          }
+        }
+      },
+      "correctness": {
+        "comparable": true,
+        "matches": true,
+        "baseline_result": 72339069016080398,
+        "baseline_retval": 0,
+        "recompile_result": 72339069016080398,
+        "recompile_retval": 0
+      },
+      "speedup_ratio": 1.0684931506849316,
+      "tracing_trigger_name": null,
+      "tracing_trigger_description": null,
+      "tracing_skip_reason": null,
+      "tracing_measurement": null
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_flow.bpf.o",
+      "source_name": "linux-selftests",
+      "program_name": "flow_dissector_4",
+      "section_name": "flow_dissector",
+      "section_root": "flow_dissector",
+      "insn_count": 116,
+      "prog_type": 22,
+      "expected_attach_type": 17,
+      "prog_type_name": "flow_dissector",
+      "attach_type_name": "flow_dissector",
+      "strategy": "packet_test_run",
+      "strategy_reason": "packet-backed bpf_prog_test_run is available for this program type",
+      "io_mode": "packet",
+      "input_size": 64,
+      "memory_path": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/corpus_dummy_packet_64.bin",
+      "recompile_probe": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.009826863999478519,
+        "error": null,
+        "stderr_tail": "libbpf: prog 'flow_dissector_5': found map 1 (last_dissection, sec 5, off 32) for insn #107\nlibbpf: sec '.relflow_dissector': relo #62: insn #2796 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #119\nlibbpf: sec '.relflow_dissector': relo #63: insn #2807 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #130\nlibbpf: sec '.relflow_dissector': relo #64: insn #2815 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #138\nlibbpf: object 'bpf_flow': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'jmp_table': created successfully, fd=4\nlibbpf: map 'last_dissection': created successfully, fd=5\nlibbpf: prog '_dissect': skipped loading\nlibbpf: prog 'flow_dissector_0': skipped loading\nlibbpf: prog 'flow_dissector_1': skipped loading\nlibbpf: prog 'flow_dissector_2': skipped loading\nlibbpf: prog 'flow_dissector_3': skipped loading\nlibbpf: prog 'flow_dissector_5': skipped loading\nrecompile-cmov: no cmov sites found in xlated program (116 insns)\nrecompile-wide: no wide_load sites found in xlated program (116 insns)\nrecompile-rotate: no rotate sites found in xlated program (116 insns)\nrecompile-lea: no addr_calc sites found in xlated program (116 insns)",
+        "sample": {
+          "compile_ns": 854430,
+          "exec_ns": 0,
+          "timing_source": "unknown",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "result": 0,
+          "retval": 0,
+          "jited_prog_len": 465,
+          "xlated_prog_len": 928,
+          "code_size": {
+            "bpf_bytecode_bytes": 928,
+            "native_code_bytes": 465,
+            "inflation_ratio": 0.501078
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 49221,
+            "object_open_ns": 391853,
+            "object_load_ns": 462577
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": false,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 0
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v5",
+            "policy_generated": false,
+            "policy_bytes": 0,
+            "syscall_attempted": false,
+            "applied": false,
+            "error": ""
+          }
+        }
+      },
+      "baseline_compile": null,
+      "offline_scan": null,
+      "loadable": true,
+      "directive_scan": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "scan_source": "runner_recompile_probe",
+      "baseline_run": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.029475738992914557,
+        "error": null,
+        "stderr_tail": "libbpf: prog 'flow_dissector_4': found map 1 (last_dissection, sec 5, off 32) for insn #59\nlibbpf: sec '.relflow_dissector': relo #60: insn #2671 against 'last_dissection'\nlibbpf: prog 'flow_dissector_4': found map 1 (last_dissection, sec 5, off 32) for insn #110\nlibbpf: sec '.relflow_dissector': relo #61: insn #2784 against 'last_dissection'\nlibbpf: prog 'flow_dissector_5': found map 1 (last_dissection, sec 5, off 32) for insn #107\nlibbpf: sec '.relflow_dissector': relo #62: insn #2796 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #119\nlibbpf: sec '.relflow_dissector': relo #63: insn #2807 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #130\nlibbpf: sec '.relflow_dissector': relo #64: insn #2815 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #138\nlibbpf: object 'bpf_flow': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'jmp_table': created successfully, fd=4\nlibbpf: map 'last_dissection': created successfully, fd=5\nlibbpf: prog '_dissect': skipped loading\nlibbpf: prog 'flow_dissector_0': skipped loading\nlibbpf: prog 'flow_dissector_1': skipped loading\nlibbpf: prog 'flow_dissector_2': skipped loading\nlibbpf: prog 'flow_dissector_3': skipped loading\nlibbpf: prog 'flow_dissector_5': skipped loading",
+        "sample": {
+          "compile_ns": 818551,
+          "exec_ns": 71,
+          "timing_source": "ktime",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "wall_exec_ns": 98,
+          "exec_cycles": 362,
+          "tsc_freq_hz": 3686216120,
+          "result": 917518,
+          "retval": 0,
+          "jited_prog_len": 465,
+          "xlated_prog_len": 928,
+          "code_size": {
+            "bpf_bytecode_bytes": 928,
+            "native_code_bytes": 465,
+            "inflation_ratio": 0.501078
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 45632,
+            "object_open_ns": 376671,
+            "object_load_ns": 441880,
+            "packet_prepare_ns": 527,
+            "prog_run_wall_ns": 19764,
+            "result_extract_ns": 48
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": true,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": false,
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 0
+          },
+          "recompile": {
+            "requested": false,
+            "mode": "none",
+            "policy_generated": false,
+            "policy_bytes": 0,
+            "syscall_attempted": false,
+            "applied": false,
+            "error": ""
+          }
+        }
+      },
+      "recompile_run": null,
+      "correctness": {
+        "comparable": false,
+        "matches": null
+      },
+      "speedup_ratio": null,
+      "tracing_trigger_name": null,
+      "tracing_trigger_description": null,
+      "tracing_skip_reason": null,
+      "tracing_measurement": null
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_flow.bpf.o",
+      "source_name": "linux-selftests",
+      "program_name": "flow_dissector_5",
+      "section_name": "flow_dissector",
+      "section_root": "flow_dissector",
+      "insn_count": 183,
+      "prog_type": 22,
+      "expected_attach_type": 17,
+      "prog_type_name": "flow_dissector",
+      "attach_type_name": "flow_dissector",
+      "strategy": "packet_test_run",
+      "strategy_reason": "packet-backed bpf_prog_test_run is available for this program type",
+      "io_mode": "packet",
+      "input_size": 64,
+      "memory_path": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/corpus_dummy_packet_64.bin",
+      "recompile_probe": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.010586020012851804,
+        "error": null,
+        "stderr_tail": "libbpf: prog 'flow_dissector_5': found map 1 (last_dissection, sec 5, off 32) for insn #107\nlibbpf: sec '.relflow_dissector': relo #62: insn #2796 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #119\nlibbpf: sec '.relflow_dissector': relo #63: insn #2807 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #130\nlibbpf: sec '.relflow_dissector': relo #64: insn #2815 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #138\nlibbpf: object 'bpf_flow': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'jmp_table': created successfully, fd=4\nlibbpf: map 'last_dissection': created successfully, fd=5\nlibbpf: prog '_dissect': skipped loading\nlibbpf: prog 'flow_dissector_0': skipped loading\nlibbpf: prog 'flow_dissector_1': skipped loading\nlibbpf: prog 'flow_dissector_2': skipped loading\nlibbpf: prog 'flow_dissector_3': skipped loading\nlibbpf: prog 'flow_dissector_4': skipped loading\nrecompile-cmov: no cmov sites found in xlated program (183 insns)\nrecompile-wide: no wide_load sites found in xlated program (183 insns)\nrecompile-rotate: no rotate sites found in xlated program (183 insns)\nrecompile-lea: no addr_calc sites found in xlated program (183 insns)",
+        "sample": {
+          "compile_ns": 1005280,
+          "exec_ns": 0,
+          "timing_source": "unknown",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "result": 0,
+          "retval": 0,
+          "jited_prog_len": 940,
+          "xlated_prog_len": 1464,
+          "code_size": {
+            "bpf_bytecode_bytes": 1464,
+            "native_code_bytes": 940,
+            "inflation_ratio": 0.642077
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 56404,
+            "object_open_ns": 415584,
+            "object_load_ns": 589696
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": false,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 0
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v5",
+            "policy_generated": false,
+            "policy_bytes": 0,
+            "syscall_attempted": false,
+            "applied": false,
+            "error": ""
+          }
+        }
+      },
+      "baseline_compile": null,
+      "offline_scan": null,
+      "loadable": true,
+      "directive_scan": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "scan_source": "runner_recompile_probe",
+      "baseline_run": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.02987368800677359,
+        "error": null,
+        "stderr_tail": "libbpf: prog 'flow_dissector_4': found map 1 (last_dissection, sec 5, off 32) for insn #59\nlibbpf: sec '.relflow_dissector': relo #60: insn #2671 against 'last_dissection'\nlibbpf: prog 'flow_dissector_4': found map 1 (last_dissection, sec 5, off 32) for insn #110\nlibbpf: sec '.relflow_dissector': relo #61: insn #2784 against 'last_dissection'\nlibbpf: prog 'flow_dissector_5': found map 1 (last_dissection, sec 5, off 32) for insn #107\nlibbpf: sec '.relflow_dissector': relo #62: insn #2796 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #119\nlibbpf: sec '.relflow_dissector': relo #63: insn #2807 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #130\nlibbpf: sec '.relflow_dissector': relo #64: insn #2815 against 'jmp_table'\nlibbpf: prog 'flow_dissector_5': found map 0 (jmp_table, sec 5, off 0) for insn #138\nlibbpf: object 'bpf_flow': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'jmp_table': created successfully, fd=4\nlibbpf: map 'last_dissection': created successfully, fd=5\nlibbpf: prog '_dissect': skipped loading\nlibbpf: prog 'flow_dissector_0': skipped loading\nlibbpf: prog 'flow_dissector_1': skipped loading\nlibbpf: prog 'flow_dissector_2': skipped loading\nlibbpf: prog 'flow_dissector_3': skipped loading\nlibbpf: prog 'flow_dissector_4': skipped loading",
+        "sample": {
+          "compile_ns": 996631,
+          "exec_ns": 145,
+          "timing_source": "ktime",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "wall_exec_ns": 171,
+          "exec_cycles": 629,
+          "tsc_freq_hz": 3686264247,
+          "result": 1179666,
+          "retval": 2,
+          "jited_prog_len": 940,
+          "xlated_prog_len": 1464,
+          "code_size": {
+            "bpf_bytecode_bytes": 1464,
+            "native_code_bytes": 940,
+            "inflation_ratio": 0.642077
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 57062,
+            "object_open_ns": 392102,
+            "object_load_ns": 604529,
+            "packet_prepare_ns": 673,
+            "prog_run_wall_ns": 34207,
+            "result_extract_ns": 50
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": true,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": false,
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 0
+          },
+          "recompile": {
+            "requested": false,
+            "mode": "none",
+            "policy_generated": false,
+            "policy_bytes": 0,
+            "syscall_attempted": false,
+            "applied": false,
+            "error": ""
+          }
+        }
+      },
+      "recompile_run": null,
+      "correctness": {
+        "comparable": false,
+        "matches": null
+      },
+      "speedup_ratio": null,
+      "tracing_trigger_name": null,
+      "tracing_trigger_description": null,
+      "tracing_skip_reason": null,
+      "tracing_measurement": null
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgroup_skb_sk_lookup_kern.bpf.o",
+      "source_name": "linux-selftests",
+      "program_name": "ingress_lookup",
+      "section_name": "cgroup_skb/ingress",
+      "section_root": "cgroup_skb",
+      "insn_count": 87,
+      "prog_type": 8,
+      "expected_attach_type": 0,
+      "prog_type_name": "cgroup_skb",
+      "attach_type_name": "cgroup_inet_ingress",
+      "strategy": "packet_test_run",
+      "strategy_reason": "packet-backed bpf_prog_test_run is available for this program type",
+      "io_mode": "packet",
+      "input_size": 64,
+      "memory_path": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/corpus_dummy_packet_64.bin",
+      "recompile_probe": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.009123292984440923,
+        "error": null,
+        "stderr_tail": "libbpf: sec 'cgroup_skb/ingress': found program 'ingress_lookup' at insn offset 0 (0 bytes), code size 87 insns (696 bytes)\nlibbpf: elf: section(4) license, size 4, link 0, flags 3, type=1\nlibbpf: license of /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgroup_skb_sk_lookup_kern.bpf.o is GPL\nlibbpf: elf: section(5) .bss, size 2, link 0, flags 3, type=8\nlibbpf: elf: section(6) .relcgroup_skb/ingress, size 16, link 2, flags 40, type=9\nlibbpf: elf: section(7) .BTF, size 2349, link 0, flags 0, type=1\nlibbpf: elf: section(8) .BTF.ext, size 736, link 0, flags 0, type=1\nlibbpf: looking for externs among 8 symbols...\nlibbpf: collected 0 externs total\nlibbpf: map 'cgroup_s.bss' (global data): at sec_idx 5, offset 0, flags 400.\nlibbpf: map 0 is \"cgroup_s.bss\"\nlibbpf: sec '.relcgroup_skb/ingress': collecting relocation for section(3) 'cgroup_skb/ingress'\nlibbpf: sec '.relcgroup_skb/ingress': relo #0: insn #25 against 'g_serv_port'\nlibbpf: prog 'ingress_lookup': found data map 0 (cgroup_s.bss, sec 5, off 0) for insn 25\nlibbpf: object 'cgroup_skb_sk_l': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'cgroup_s.bss': created successfully, fd=4\nrecompile-cmov: no cmov sites found in xlated program (87 insns)\nrecompile-wide: no wide_load sites found in xlated program (87 insns)\nrecompile-rotate: no rotate sites found in xlated program (87 insns)\nrecompile-lea: no addr_calc sites found in xlated program (87 insns)",
+        "sample": {
+          "compile_ns": 603459,
+          "exec_ns": 0,
+          "timing_source": "unknown",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "result": 0,
+          "retval": 0,
+          "jited_prog_len": 412,
+          "xlated_prog_len": 696,
+          "code_size": {
+            "bpf_bytecode_bytes": 696,
+            "native_code_bytes": 412,
+            "inflation_ratio": 0.591954
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 50200,
+            "object_open_ns": 127342,
+            "object_load_ns": 476117
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": false,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 0
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v5",
+            "policy_generated": false,
+            "policy_bytes": 0,
+            "syscall_attempted": false,
+            "applied": false,
+            "error": ""
+          }
+        }
+      },
+      "baseline_compile": null,
+      "offline_scan": null,
+      "loadable": true,
+      "directive_scan": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "scan_source": "runner_recompile_probe",
+      "baseline_run": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.03004559804685414,
+        "error": null,
+        "stderr_tail": "libbpf: loading object from /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgroup_skb_sk_lookup_kern.bpf.o\nlibbpf: elf: section(2) .symtab, size 192, link 1, flags 0, type=2\nlibbpf: elf: section(3) cgroup_skb/ingress, size 696, link 0, flags 6, type=1\nlibbpf: sec 'cgroup_skb/ingress': found program 'ingress_lookup' at insn offset 0 (0 bytes), code size 87 insns (696 bytes)\nlibbpf: elf: section(4) license, size 4, link 0, flags 3, type=1\nlibbpf: license of /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgroup_skb_sk_lookup_kern.bpf.o is GPL\nlibbpf: elf: section(5) .bss, size 2, link 0, flags 3, type=8\nlibbpf: elf: section(6) .relcgroup_skb/ingress, size 16, link 2, flags 40, type=9\nlibbpf: elf: section(7) .BTF, size 2349, link 0, flags 0, type=1\nlibbpf: elf: section(8) .BTF.ext, size 736, link 0, flags 0, type=1\nlibbpf: looking for externs among 8 symbols...\nlibbpf: collected 0 externs total\nlibbpf: map 'cgroup_s.bss' (global data): at sec_idx 5, offset 0, flags 400.\nlibbpf: map 0 is \"cgroup_s.bss\"\nlibbpf: sec '.relcgroup_skb/ingress': collecting relocation for section(3) 'cgroup_skb/ingress'\nlibbpf: sec '.relcgroup_skb/ingress': relo #0: insn #25 against 'g_serv_port'\nlibbpf: prog 'ingress_lookup': found data map 0 (cgroup_s.bss, sec 5, off 0) for insn 25\nlibbpf: object 'cgroup_skb_sk_l': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'cgroup_s.bss': created successfully, fd=4",
+        "sample": {
+          "compile_ns": 582337,
+          "exec_ns": 10,
+          "timing_source": "ktime",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "wall_exec_ns": 77,
+          "exec_cycles": 283,
+          "tsc_freq_hz": 3686142727,
+          "result": 0,
+          "retval": 1,
+          "jited_prog_len": 412,
+          "xlated_prog_len": 696,
+          "code_size": {
+            "bpf_bytecode_bytes": 696,
+            "native_code_bytes": 412,
+            "inflation_ratio": 0.591954
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 43552,
+            "object_open_ns": 124027,
+            "object_load_ns": 458310,
+            "packet_prepare_ns": 545,
+            "prog_run_wall_ns": 15481,
+            "result_extract_ns": 21
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": true,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": false,
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 0
+          },
+          "recompile": {
+            "requested": false,
+            "mode": "none",
+            "policy_generated": false,
+            "policy_bytes": 0,
+            "syscall_attempted": false,
+            "applied": false,
+            "error": ""
+          }
+        }
+      },
+      "recompile_run": null,
+      "correctness": {
+        "comparable": false,
+        "matches": null
+      },
+      "speedup_ratio": null,
+      "tracing_trigger_name": null,
+      "tracing_trigger_description": null,
+      "tracing_skip_reason": null,
+      "tracing_measurement": null
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_assign_reuse.bpf.o",
+      "source_name": "linux-selftests",
+      "program_name": "reuse_accept",
+      "section_name": "sk_reuseport",
+      "section_root": "sk_reuseport",
+      "insn_count": 122,
+      "prog_type": 21,
+      "expected_attach_type": 39,
+      "prog_type_name": "sk_reuseport",
+      "attach_type_name": "sk_reuseport_select",
+      "strategy": "socket_custom_harness",
+      "strategy_reason": "requires socket lifecycle or listener setup beyond packet test_run",
+      "io_mode": "context",
+      "input_size": 0,
+      "memory_path": null,
+      "recompile_probe": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.00958708900725469,
+        "error": null,
+        "stderr_tail": "libbpf: prog 'tc_main': found data map 1 (test_ass.bss, sec 6, off 0) for insn 147\nlibbpf: sec '.reltc': relo #8: insn #154 against 'sk_map'\nlibbpf: prog 'tc_main': found map 0 (sk_map, sec 8, off 0) for insn #154\nlibbpf: sec '.reltc': relo #9: insn #178 against 'dest_port'\nlibbpf: prog 'tc_main': found data map 2 (test_ass.rodata, sec 7, off 0) for insn 178\nlibbpf: sec '.reltc': relo #10: insn #194 against 'headers'\nlibbpf: prog 'tc_main': found data map 1 (test_ass.bss, sec 6, off 0) for insn 194\nlibbpf: sec '.reltc': relo #11: insn #201 against 'sk_map'\nlibbpf: prog 'tc_main': found map 0 (sk_map, sec 8, off 0) for insn #201\nlibbpf: object 'test_assign_reu': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'sk_map': created successfully, fd=4\nlibbpf: map 'test_ass.bss': created successfully, fd=5\nlibbpf: map 'test_ass.rodata': created successfully, fd=6\nlibbpf: prog 'reuse_drop': skipped loading\nlibbpf: prog 'tc_main': skipped loading\nrecompile-cmov: no cmov sites found in xlated program (124 insns)\nrecompile-wide: found 7 wide_load sites in xlated program (124 insns)\nrecompile-rotate: no rotate sites found in xlated program (124 insns)\nrecompile-lea: no addr_calc sites found in xlated program (124 insns)\nBPF_PROG_JIT_RECOMPILE failed: Invalid argument (errno=22)",
+        "sample": {
+          "compile_ns": 782091,
+          "exec_ns": 0,
+          "timing_source": "unknown",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "result": 0,
+          "retval": 0,
+          "jited_prog_len": 570,
+          "xlated_prog_len": 992,
+          "code_size": {
+            "bpf_bytecode_bytes": 992,
+            "native_code_bytes": 570,
+            "inflation_ratio": 0.574597
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 214,
+            "object_open_ns": 265842,
+            "object_load_ns": 515229
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": false,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 0,
+            "wide_sites": 7,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 7
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v5",
+            "policy_generated": true,
+            "policy_bytes": 1012,
+            "syscall_attempted": true,
+            "applied": false,
+            "error": "BPF_PROG_JIT_RECOMPILE failed: Invalid argument (errno=22)"
+          }
+        }
+      },
+      "baseline_compile": null,
+      "offline_scan": null,
+      "loadable": true,
+      "directive_scan": {
+        "cmov_sites": 0,
+        "wide_sites": 7,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 7
+      },
+      "scan_source": "runner_recompile_probe",
+      "baseline_run": null,
+      "recompile_run": null,
+      "correctness": {
+        "comparable": false,
+        "matches": null
+      },
+      "speedup_ratio": null,
+      "tracing_trigger_name": null,
+      "tracing_trigger_description": null,
+      "tracing_skip_reason": null,
+      "tracing_measurement": null
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_assign_reuse.bpf.o",
+      "source_name": "linux-selftests",
+      "program_name": "reuse_drop",
+      "section_name": "sk_reuseport",
+      "section_root": "sk_reuseport",
+      "insn_count": 11,
+      "prog_type": 21,
+      "expected_attach_type": 39,
+      "prog_type_name": "sk_reuseport",
+      "attach_type_name": "sk_reuseport_select",
+      "strategy": "socket_custom_harness",
+      "strategy_reason": "requires socket lifecycle or listener setup beyond packet test_run",
+      "io_mode": "context",
+      "input_size": 0,
+      "memory_path": null,
+      "recompile_probe": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.009020230965688825,
+        "error": null,
+        "stderr_tail": "libbpf: sec '.reltc': relo #7: insn #147 against 'headers'\nlibbpf: prog 'tc_main': found data map 1 (test_ass.bss, sec 6, off 0) for insn 147\nlibbpf: sec '.reltc': relo #8: insn #154 against 'sk_map'\nlibbpf: prog 'tc_main': found map 0 (sk_map, sec 8, off 0) for insn #154\nlibbpf: sec '.reltc': relo #9: insn #178 against 'dest_port'\nlibbpf: prog 'tc_main': found data map 2 (test_ass.rodata, sec 7, off 0) for insn 178\nlibbpf: sec '.reltc': relo #10: insn #194 against 'headers'\nlibbpf: prog 'tc_main': found data map 1 (test_ass.bss, sec 6, off 0) for insn 194\nlibbpf: sec '.reltc': relo #11: insn #201 against 'sk_map'\nlibbpf: prog 'tc_main': found map 0 (sk_map, sec 8, off 0) for insn #201\nlibbpf: object 'test_assign_reu': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'sk_map': created successfully, fd=4\nlibbpf: map 'test_ass.bss': created successfully, fd=5\nlibbpf: map 'test_ass.rodata': created successfully, fd=6\nlibbpf: prog 'reuse_accept': skipped loading\nlibbpf: prog 'tc_main': skipped loading\nrecompile-cmov: no cmov sites found in xlated program (11 insns)\nrecompile-wide: no wide_load sites found in xlated program (11 insns)\nrecompile-rotate: no rotate sites found in xlated program (11 insns)\nrecompile-lea: no addr_calc sites found in xlated program (11 insns)",
+        "sample": {
+          "compile_ns": 669119,
+          "exec_ns": 0,
+          "timing_source": "unknown",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "result": 0,
+          "retval": 0,
+          "jited_prog_len": 55,
+          "xlated_prog_len": 88,
+          "code_size": {
+            "bpf_bytecode_bytes": 88,
+            "native_code_bytes": 55,
+            "inflation_ratio": 0.625
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 163,
+            "object_open_ns": 278100,
+            "object_load_ns": 391019
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": false,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 0
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v5",
+            "policy_generated": false,
+            "policy_bytes": 0,
+            "syscall_attempted": false,
+            "applied": false,
+            "error": ""
+          }
+        }
+      },
+      "baseline_compile": null,
+      "offline_scan": null,
+      "loadable": true,
+      "directive_scan": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "scan_source": "runner_recompile_probe",
+      "baseline_run": null,
+      "recompile_run": null,
+      "correctness": {
+        "comparable": false,
+        "matches": null
+      },
+      "speedup_ratio": null,
+      "tracing_trigger_name": null,
+      "tracing_trigger_description": null,
+      "tracing_skip_reason": null,
+      "tracing_measurement": null
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_assign_reuse.bpf.o",
+      "source_name": "linux-selftests",
+      "program_name": "tc_main",
+      "section_name": "tc",
+      "section_root": "tc",
+      "insn_count": 220,
+      "prog_type": 3,
+      "expected_attach_type": 0,
+      "prog_type_name": "sched_cls",
+      "attach_type_name": "cgroup_inet_ingress",
+      "strategy": "packet_test_run",
+      "strategy_reason": "packet-backed bpf_prog_test_run is available for this program type",
+      "io_mode": "packet",
+      "input_size": 64,
+      "memory_path": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/corpus_dummy_packet_64.bin",
+      "recompile_probe": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.010201610974036157,
+        "error": null,
+        "stderr_tail": "libbpf: prog 'tc_main': found data map 1 (test_ass.bss, sec 6, off 0) for insn 147\nlibbpf: sec '.reltc': relo #8: insn #154 against 'sk_map'\nlibbpf: prog 'tc_main': found map 0 (sk_map, sec 8, off 0) for insn #154\nlibbpf: sec '.reltc': relo #9: insn #178 against 'dest_port'\nlibbpf: prog 'tc_main': found data map 2 (test_ass.rodata, sec 7, off 0) for insn 178\nlibbpf: sec '.reltc': relo #10: insn #194 against 'headers'\nlibbpf: prog 'tc_main': found data map 1 (test_ass.bss, sec 6, off 0) for insn 194\nlibbpf: sec '.reltc': relo #11: insn #201 against 'sk_map'\nlibbpf: prog 'tc_main': found map 0 (sk_map, sec 8, off 0) for insn #201\nlibbpf: object 'test_assign_reu': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'sk_map': created successfully, fd=4\nlibbpf: map 'test_ass.bss': created successfully, fd=5\nlibbpf: map 'test_ass.rodata': created successfully, fd=6\nlibbpf: prog 'reuse_accept': skipped loading\nlibbpf: prog 'reuse_drop': skipped loading\nrecompile-cmov: found 1 cmov sites in xlated program (220 insns)\nrecompile-wide: no wide_load sites found in xlated program (220 insns)\nrecompile-rotate: no rotate sites found in xlated program (220 insns)\nrecompile-lea: no addr_calc sites found in xlated program (220 insns)\nBPF_PROG_JIT_RECOMPILE failed: Invalid argument (errno=22)",
+        "sample": {
+          "compile_ns": 770066,
+          "exec_ns": 0,
+          "timing_source": "unknown",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "result": 0,
+          "retval": 0,
+          "jited_prog_len": 1046,
+          "xlated_prog_len": 1760,
+          "code_size": {
+            "bpf_bytecode_bytes": 1760,
+            "native_code_bytes": 1046,
+            "inflation_ratio": 0.594318
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 50585,
+            "object_open_ns": 243841,
+            "object_load_ns": 525341
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": false,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 1,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 1
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v5",
+            "policy_generated": true,
+            "policy_bytes": 164,
+            "syscall_attempted": true,
+            "applied": false,
+            "error": "BPF_PROG_JIT_RECOMPILE failed: Invalid argument (errno=22)"
+          }
+        }
+      },
+      "baseline_compile": null,
+      "offline_scan": null,
+      "loadable": true,
+      "directive_scan": {
+        "cmov_sites": 1,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 1
+      },
+      "scan_source": "runner_recompile_probe",
+      "baseline_run": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.029757673968560994,
+        "error": null,
+        "stderr_tail": "libbpf: sec '.reltc': relo #5: insn #107 against 'sk_map'\nlibbpf: prog 'tc_main': found map 0 (sk_map, sec 8, off 0) for insn #107\nlibbpf: sec '.reltc': relo #6: insn #131 against 'dest_port'\nlibbpf: prog 'tc_main': found data map 2 (test_ass.rodata, sec 7, off 0) for insn 131\nlibbpf: sec '.reltc': relo #7: insn #147 against 'headers'\nlibbpf: prog 'tc_main': found data map 1 (test_ass.bss, sec 6, off 0) for insn 147\nlibbpf: sec '.reltc': relo #8: insn #154 against 'sk_map'\nlibbpf: prog 'tc_main': found map 0 (sk_map, sec 8, off 0) for insn #154\nlibbpf: sec '.reltc': relo #9: insn #178 against 'dest_port'\nlibbpf: prog 'tc_main': found data map 2 (test_ass.rodata, sec 7, off 0) for insn 178\nlibbpf: sec '.reltc': relo #10: insn #194 against 'headers'\nlibbpf: prog 'tc_main': found data map 1 (test_ass.bss, sec 6, off 0) for insn 194\nlibbpf: sec '.reltc': relo #11: insn #201 against 'sk_map'\nlibbpf: prog 'tc_main': found map 0 (sk_map, sec 8, off 0) for insn #201\nlibbpf: object 'test_assign_reu': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'sk_map': created successfully, fd=4\nlibbpf: map 'test_ass.bss': created successfully, fd=5\nlibbpf: map 'test_ass.rodata': created successfully, fd=6\nlibbpf: prog 'reuse_accept': skipped loading\nlibbpf: prog 'reuse_drop': skipped loading",
+        "sample": {
+          "compile_ns": 758506,
+          "exec_ns": 18,
+          "timing_source": "ktime",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "wall_exec_ns": 93,
+          "exec_cycles": 341,
+          "tsc_freq_hz": 3686048268,
+          "result": 0,
+          "retval": 2,
+          "jited_prog_len": 1046,
+          "xlated_prog_len": 1760,
+          "code_size": {
+            "bpf_bytecode_bytes": 1760,
+            "native_code_bytes": 1046,
+            "inflation_ratio": 0.594318
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 43622,
+            "object_open_ns": 229283,
+            "object_load_ns": 529223,
+            "packet_prepare_ns": 557,
+            "prog_run_wall_ns": 18635,
+            "result_extract_ns": 48
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": true,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": false,
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 0
+          },
+          "recompile": {
+            "requested": false,
+            "mode": "none",
+            "policy_generated": false,
+            "policy_bytes": 0,
+            "syscall_attempted": false,
+            "applied": false,
+            "error": ""
+          }
+        }
+      },
+      "recompile_run": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.030899995006620884,
+        "error": null,
+        "stderr_tail": "libbpf: prog 'tc_main': found data map 1 (test_ass.bss, sec 6, off 0) for insn 147\nlibbpf: sec '.reltc': relo #8: insn #154 against 'sk_map'\nlibbpf: prog 'tc_main': found map 0 (sk_map, sec 8, off 0) for insn #154\nlibbpf: sec '.reltc': relo #9: insn #178 against 'dest_port'\nlibbpf: prog 'tc_main': found data map 2 (test_ass.rodata, sec 7, off 0) for insn 178\nlibbpf: sec '.reltc': relo #10: insn #194 against 'headers'\nlibbpf: prog 'tc_main': found data map 1 (test_ass.bss, sec 6, off 0) for insn 194\nlibbpf: sec '.reltc': relo #11: insn #201 against 'sk_map'\nlibbpf: prog 'tc_main': found map 0 (sk_map, sec 8, off 0) for insn #201\nlibbpf: object 'test_assign_reu': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'sk_map': created successfully, fd=4\nlibbpf: map 'test_ass.bss': created successfully, fd=5\nlibbpf: map 'test_ass.rodata': created successfully, fd=6\nlibbpf: prog 'reuse_accept': skipped loading\nlibbpf: prog 'reuse_drop': skipped loading\nrecompile-cmov: found 1 cmov sites in xlated program (220 insns)\nrecompile-wide: no wide_load sites found in xlated program (220 insns)\nrecompile-rotate: no rotate sites found in xlated program (220 insns)\nrecompile-lea: no addr_calc sites found in xlated program (220 insns)\nBPF_PROG_JIT_RECOMPILE failed: Invalid argument (errno=22)",
+        "sample": {
+          "compile_ns": 818148,
+          "exec_ns": 20,
+          "timing_source": "ktime",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "wall_exec_ns": 101,
+          "exec_cycles": 371,
+          "tsc_freq_hz": 3686196768,
+          "result": 0,
+          "retval": 2,
+          "jited_prog_len": 1046,
+          "xlated_prog_len": 1760,
+          "code_size": {
+            "bpf_bytecode_bytes": 1760,
+            "native_code_bytes": 1046,
+            "inflation_ratio": 0.594318
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 47337,
+            "object_open_ns": 248162,
+            "object_load_ns": 569180,
+            "packet_prepare_ns": 348,
+            "prog_run_wall_ns": 20255,
+            "result_extract_ns": 71
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": true,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 1,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 1
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v5",
+            "policy_generated": true,
+            "policy_bytes": 164,
+            "syscall_attempted": true,
+            "applied": false,
+            "error": "BPF_PROG_JIT_RECOMPILE failed: Invalid argument (errno=22)"
+          }
+        }
+      },
+      "correctness": {
+        "comparable": true,
+        "matches": true,
+        "baseline_result": 0,
+        "baseline_retval": 2,
+        "recompile_result": 0,
+        "recompile_retval": 2
+      },
+      "speedup_ratio": 0.9,
+      "tracing_trigger_name": null,
+      "tracing_trigger_description": null,
+      "tracing_skip_reason": null,
+      "tracing_measurement": null
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_migrate_reuseport.bpf.o",
+      "source_name": "linux-selftests",
+      "program_name": "drop_ack",
+      "section_name": "xdp",
+      "section_root": "xdp",
+      "insn_count": 41,
+      "prog_type": 6,
+      "expected_attach_type": 37,
+      "prog_type_name": "xdp",
+      "attach_type_name": "xdp",
+      "strategy": "packet_test_run",
+      "strategy_reason": "packet-backed bpf_prog_test_run is available for this program type",
+      "io_mode": "packet",
+      "input_size": 64,
+      "memory_path": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/corpus_dummy_packet_64.bin",
+      "recompile_probe": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.00916669302387163,
+        "error": null,
+        "stderr_tail": "libbpf: prog 'migrate_reuseport': found map 0 (migrate_map, sec 6, off 0) for insn #10\nlibbpf: sec '.relsk_reuseport/migrate': relo #1: insn #17 against 'reuseport_map'\nlibbpf: prog 'migrate_reuseport': found map 1 (reuseport_map, sec 6, off 32) for insn #17\nlibbpf: sec '.relsk_reuseport/migrate': relo #2: insn #26 against 'migrated_at_close'\nlibbpf: prog 'migrate_reuseport': found data map 2 (test_mig.bss, sec 5, off 0) for insn 26\nlibbpf: sec '.relsk_reuseport/migrate': relo #3: insn #31 against 'migrated_at_close_fastopen'\nlibbpf: prog 'migrate_reuseport': found data map 2 (test_mig.bss, sec 5, off 0) for insn 31\nlibbpf: sec '.relsk_reuseport/migrate': relo #4: insn #35 against 'migrated_at_send_synack'\nlibbpf: prog 'migrate_reuseport': found data map 2 (test_mig.bss, sec 5, off 0) for insn 35\nlibbpf: sec '.relsk_reuseport/migrate': relo #5: insn #38 against 'migrated_at_recv_ack'\nlibbpf: prog 'migrate_reuseport': found data map 2 (test_mig.bss, sec 5, off 0) for insn 38\nlibbpf: object 'test_migrate_re': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'migrate_map': created successfully, fd=4\nlibbpf: map 'reuseport_map': created successfully, fd=5\nlibbpf: map 'test_mig.bss': created successfully, fd=6\nlibbpf: prog 'migrate_reuseport': skipped loading\nrecompile-cmov: no cmov sites found in xlated program (41 insns)\nrecompile-wide: no wide_load sites found in xlated program (41 insns)\nrecompile-rotate: no rotate sites found in xlated program (41 insns)\nrecompile-lea: no addr_calc sites found in xlated program (41 insns)",
+        "sample": {
+          "compile_ns": 667998,
+          "exec_ns": 0,
+          "timing_source": "unknown",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "result": 0,
+          "retval": 0,
+          "jited_prog_len": 217,
+          "xlated_prog_len": 328,
+          "code_size": {
+            "bpf_bytecode_bytes": 328,
+            "native_code_bytes": 217,
+            "inflation_ratio": 0.661585
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 56259,
+            "object_open_ns": 196095,
+            "object_load_ns": 471903
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": false,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 0
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v5",
+            "policy_generated": false,
+            "policy_bytes": 0,
+            "syscall_attempted": false,
+            "applied": false,
+            "error": ""
+          }
+        }
+      },
+      "baseline_compile": null,
+      "offline_scan": null,
+      "loadable": true,
+      "directive_scan": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "scan_source": "runner_recompile_probe",
+      "baseline_run": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.057258524000644684,
+        "error": null,
+        "stderr_tail": "libbpf: sec '.relxdp': relo #0: insn #30 against 'server_port'\nlibbpf: prog 'drop_ack': found data map 2 (test_mig.bss, sec 5, off 0) for insn 30\nlibbpf: sec '.relsk_reuseport/migrate': collecting relocation for section(4) 'sk_reuseport/migrate'\nlibbpf: sec '.relsk_reuseport/migrate': relo #0: insn #10 against 'migrate_map'\nlibbpf: prog 'migrate_reuseport': found map 0 (migrate_map, sec 6, off 0) for insn #10\nlibbpf: sec '.relsk_reuseport/migrate': relo #1: insn #17 against 'reuseport_map'\nlibbpf: prog 'migrate_reuseport': found map 1 (reuseport_map, sec 6, off 32) for insn #17\nlibbpf: sec '.relsk_reuseport/migrate': relo #2: insn #26 against 'migrated_at_close'\nlibbpf: prog 'migrate_reuseport': found data map 2 (test_mig.bss, sec 5, off 0) for insn 26\nlibbpf: sec '.relsk_reuseport/migrate': relo #3: insn #31 against 'migrated_at_close_fastopen'\nlibbpf: prog 'migrate_reuseport': found data map 2 (test_mig.bss, sec 5, off 0) for insn 31\nlibbpf: sec '.relsk_reuseport/migrate': relo #4: insn #35 against 'migrated_at_send_synack'\nlibbpf: prog 'migrate_reuseport': found data map 2 (test_mig.bss, sec 5, off 0) for insn 35\nlibbpf: sec '.relsk_reuseport/migrate': relo #5: insn #38 against 'migrated_at_recv_ack'\nlibbpf: prog 'migrate_reuseport': found data map 2 (test_mig.bss, sec 5, off 0) for insn 38\nlibbpf: object 'test_migrate_re': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'migrate_map': created successfully, fd=4\nlibbpf: map 'reuseport_map': created successfully, fd=5\nlibbpf: map 'test_mig.bss': created successfully, fd=6\nlibbpf: prog 'migrate_reuseport': skipped loading",
+        "sample": {
+          "compile_ns": 614204,
+          "exec_ns": 9,
+          "timing_source": "ktime",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "wall_exec_ns": 135765,
+          "exec_cycles": 500469,
+          "tsc_freq_hz": 3686297312,
+          "result": 0,
+          "retval": 2,
+          "jited_prog_len": 217,
+          "xlated_prog_len": 328,
+          "code_size": {
+            "bpf_bytecode_bytes": 328,
+            "native_code_bytes": 217,
+            "inflation_ratio": 0.661585
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 52356,
+            "object_open_ns": 193580,
+            "object_load_ns": 420624,
+            "packet_prepare_ns": 550,
+            "prog_run_wall_ns": 27153194,
+            "result_extract_ns": 23
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": true,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": false,
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 0
+          },
+          "recompile": {
+            "requested": false,
+            "mode": "none",
+            "policy_generated": false,
+            "policy_bytes": 0,
+            "syscall_attempted": false,
+            "applied": false,
+            "error": ""
+          }
+        }
+      },
+      "recompile_run": null,
+      "correctness": {
+        "comparable": false,
+        "matches": null
+      },
+      "speedup_ratio": null,
+      "tracing_trigger_name": null,
+      "tracing_trigger_description": null,
+      "tracing_skip_reason": null,
+      "tracing_measurement": null
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_migrate_reuseport.bpf.o",
+      "source_name": "linux-selftests",
+      "program_name": "migrate_reuseport",
+      "section_name": "sk_reuseport/migrate",
+      "section_root": "sk_reuseport",
+      "insn_count": 43,
+      "prog_type": 21,
+      "expected_attach_type": 40,
+      "prog_type_name": "sk_reuseport",
+      "attach_type_name": "sk_reuseport_select_or_migrate",
+      "strategy": "socket_custom_harness",
+      "strategy_reason": "requires socket lifecycle or listener setup beyond packet test_run",
+      "io_mode": "context",
+      "input_size": 0,
+      "memory_path": null,
+      "recompile_probe": {
+        "ok": true,
+        "returncode": 0,
+        "timed_out": false,
+        "duration_seconds": 0.009748331038281322,
+        "error": null,
+        "stderr_tail": "libbpf: prog 'migrate_reuseport': found map 0 (migrate_map, sec 6, off 0) for insn #10\nlibbpf: sec '.relsk_reuseport/migrate': relo #1: insn #17 against 'reuseport_map'\nlibbpf: prog 'migrate_reuseport': found map 1 (reuseport_map, sec 6, off 32) for insn #17\nlibbpf: sec '.relsk_reuseport/migrate': relo #2: insn #26 against 'migrated_at_close'\nlibbpf: prog 'migrate_reuseport': found data map 2 (test_mig.bss, sec 5, off 0) for insn 26\nlibbpf: sec '.relsk_reuseport/migrate': relo #3: insn #31 against 'migrated_at_close_fastopen'\nlibbpf: prog 'migrate_reuseport': found data map 2 (test_mig.bss, sec 5, off 0) for insn 31\nlibbpf: sec '.relsk_reuseport/migrate': relo #4: insn #35 against 'migrated_at_send_synack'\nlibbpf: prog 'migrate_reuseport': found data map 2 (test_mig.bss, sec 5, off 0) for insn 35\nlibbpf: sec '.relsk_reuseport/migrate': relo #5: insn #38 against 'migrated_at_recv_ack'\nlibbpf: prog 'migrate_reuseport': found data map 2 (test_mig.bss, sec 5, off 0) for insn 38\nlibbpf: object 'test_migrate_re': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'migrate_map': created successfully, fd=4\nlibbpf: map 'reuseport_map': created successfully, fd=5\nlibbpf: map 'test_mig.bss': created successfully, fd=6\nlibbpf: prog 'drop_ack': skipped loading\nrecompile-cmov: no cmov sites found in xlated program (46 insns)\nrecompile-wide: no wide_load sites found in xlated program (46 insns)\nrecompile-rotate: no rotate sites found in xlated program (46 insns)\nrecompile-lea: no addr_calc sites found in xlated program (46 insns)",
+        "sample": {
+          "compile_ns": 716915,
+          "exec_ns": 0,
+          "timing_source": "unknown",
+          "no_cmov": false,
+          "disabled_passes": [],
+          "result": 0,
+          "retval": 0,
+          "jited_prog_len": 230,
+          "xlated_prog_len": 368,
+          "code_size": {
+            "bpf_bytecode_bytes": 368,
+            "native_code_bytes": 230,
+            "inflation_ratio": 0.625
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 302,
+            "object_open_ns": 225109,
+            "object_load_ns": 491806
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected": false,
+            "include_kernel": false,
+            "scope": "full_repeat_raw",
+            "error": ""
+          },
+          "directive_scan": {
+            "performed": true,
+            "cmov_sites": 0,
+            "wide_sites": 0,
+            "rotate_sites": 0,
+            "lea_sites": 0,
+            "total_sites": 0
+          },
+          "recompile": {
+            "requested": true,
+            "mode": "auto-scan-v5",
+            "policy_generated": false,
+            "policy_bytes": 0,
+            "syscall_attempted": false,
+            "applied": false,
+            "error": ""
+          }
+        }
+      },
+      "baseline_compile": null,
+      "offline_scan": null,
+      "loadable": true,
+      "directive_scan": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "scan_source": "runner_recompile_probe",
+      "baseline_run": null,
+      "recompile_run": null,
+      "correctness": {
+        "comparable": false,
+        "matches": null
+      },
+      "speedup_ratio": null,
+      "tracing_trigger_name": null,
+      "tracing_trigger_description": null,
+      "tracing_skip_reason": null,
+      "tracing_measurement": null
+    },
+    {
+      "object_path": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/trace_dummy_st_ops.bpf.o",
+      "source_name": "linux-selftests",
+      "program_name": "fentry_test_1",
+      "section_name": "fentry/test_1",
+      "section_root": "fentry",
+      "insn_count": 12,
+      "prog_type": 26,
+      "expected_attach_type": 24,
+      "prog_type_name": "tracing",
+      "attach_type_name": "trace_fentry",
+      "strategy": "tracing_attach_trigger",
+      "strategy_reason": "requires load + attach + external trigger to collect runtime",
+      "io_mode": "context",
+      "input_size": 0,
+      "memory_path": null,
+      "recompile_probe": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.16882316797273234,
+        "error": "bpf_object__load failed: No such process (exit=1)",
+        "stderr_tail": "libbpf: elf: section(5) license, size 4, link 0, flags 3, type=1\nlibbpf: license of /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/trace_dummy_st_ops.bpf.o is GPL\nlibbpf: elf: section(6) .relfentry/test_1, size 16, link 2, flags 40, type=9\nlibbpf: elf: section(7) .BTF, size 640, link 0, flags 0, type=1\nlibbpf: elf: section(8) .BTF.ext, size 160, link 0, flags 0, type=1\nlibbpf: looking for externs among 6 symbols...\nlibbpf: collected 0 externs total\nlibbpf: map 'trace_du.bss' (global data): at sec_idx 4, offset 0, flags 400.\nlibbpf: map 0 is \"trace_du.bss\"\nlibbpf: sec '.relfentry/test_1': collecting relocation for section(3) 'fentry/test_1'\nlibbpf: sec '.relfentry/test_1': relo #0: insn #6 against 'val'\nlibbpf: prog 'fentry_test_1': found data map 0 (trace_du.bss, sec 4, off 0) for insn 6\nlibbpf: object 'trace_dummy_st_': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: loaded kernel BTF from '/sys/kernel/btf/vmlinux'\nlibbpf: map 'trace_du.bss': created successfully, fd=4\nlibbpf: prog 'fentry_test_1': failed to find kernel BTF type ID of 'test_1': -ESRCH\nlibbpf: prog 'fentry_test_1': failed to prepare load attributes: -ESRCH\nlibbpf: prog 'fentry_test_1': failed to load: -ESRCH\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/trace_dummy_st_ops.bpf.o'\nbpf_object__load failed: No such process",
+        "sample": null
+      },
+      "baseline_compile": {
+        "ok": false,
+        "returncode": 1,
+        "timed_out": false,
+        "duration_seconds": 0.17258250602753833,
+        "error": "bpf_object__load failed: No such process (exit=1)",
+        "stderr_tail": "libbpf: elf: section(5) license, size 4, link 0, flags 3, type=1\nlibbpf: license of /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/trace_dummy_st_ops.bpf.o is GPL\nlibbpf: elf: section(6) .relfentry/test_1, size 16, link 2, flags 40, type=9\nlibbpf: elf: section(7) .BTF, size 640, link 0, flags 0, type=1\nlibbpf: elf: section(8) .BTF.ext, size 160, link 0, flags 0, type=1\nlibbpf: looking for externs among 6 symbols...\nlibbpf: collected 0 externs total\nlibbpf: map 'trace_du.bss' (global data): at sec_idx 4, offset 0, flags 400.\nlibbpf: map 0 is \"trace_du.bss\"\nlibbpf: sec '.relfentry/test_1': collecting relocation for section(3) 'fentry/test_1'\nlibbpf: sec '.relfentry/test_1': relo #0: insn #6 against 'val'\nlibbpf: prog 'fentry_test_1': found data map 0 (trace_du.bss, sec 4, off 0) for insn 6\nlibbpf: object 'trace_dummy_st_': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: loaded kernel BTF from '/sys/kernel/btf/vmlinux'\nlibbpf: map 'trace_du.bss': created successfully, fd=4\nlibbpf: prog 'fentry_test_1': failed to find kernel BTF type ID of 'test_1': -ESRCH\nlibbpf: prog 'fentry_test_1': failed to prepare load attributes: -ESRCH\nlibbpf: prog 'fentry_test_1': failed to load: -ESRCH\nlibbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/trace_dummy_st_ops.bpf.o'\nbpf_object__load failed: No such process",
+        "sample": null
+      },
+      "offline_scan": null,
+      "loadable": false,
+      "directive_scan": {
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+        "total_sites": 0
+      },
+      "scan_source": "none",
+      "baseline_run": null,
+      "recompile_run": null,
+      "correctness": {
+        "comparable": false,
+        "matches": null
+      },
+      "speedup_ratio": null,
+      "tracing_trigger_name": null,
+      "tracing_trigger_description": null,
+      "tracing_skip_reason": null,
+      "tracing_measurement": null
+    }
+  ]
+}

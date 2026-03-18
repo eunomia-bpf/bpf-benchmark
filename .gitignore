@@ -46,8 +46,13 @@ third-party/
 corpus/bcf/
 corpus/repos/
 corpus/inventory.json
-corpus/results/
 reference/papers/*.pdf
+
+# Keep authoritative/archive results tracked, but ignore working outputs under results/dev.
+*/results/dev/
+!*/results/dev/
+*/results/dev/*
+!*/results/dev/.gitkeep
 
 # Temporary files and scratch results
 # /tmp/ and tmp/ - the repo-root scratch directory (old layout, superseded by docs/tmp/)

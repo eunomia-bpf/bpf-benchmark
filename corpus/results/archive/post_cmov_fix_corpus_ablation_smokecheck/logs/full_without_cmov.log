@@ -1,0 +1,13 @@
+[1/10] calico corpus/build/calico/from_hep_debug.bpf.o:calico_tc_main
+[2/10] calico corpus/build/calico/from_wep_debug.bpf.o:calico_tc_main
+[3/10] katran corpus/build/katran/balancer.bpf.o:balancer_ingress
+[4/10] linux-selftests corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/xdp_synproxy_kern.bpf.o:syncookie_tc
+[5/10] linux-selftests corpus/build/linux-selftests/xdp_synproxy_kern.bpf.o:syncookie_tc
+[6/10] suricata corpus/build/suricata/xdp_lb.bpf.o:xdp_loadfilter
+[7/10] tracee corpus/build/tracee/tracee.bpf.o:cgroup_skb_egress
+[8/10] xdp-tools corpus/build/xdp-tools/xdp_forward.bpf.o:xdp_fwd_fib_direct
+[9/10] xdp-tutorial corpus/build/xdp-tutorial/packet02-rewriting/xdp_prog_kern.bpf.o:xdp_vlan_swap_func
+[10/10] xdp-tutorial corpus/build/xdp-tutorial/packet03-redirecting/xdp_prog_kern.bpf.o:xdp_icmp_echo_func
+Wrote /home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_smokecheck/full_without_cmov.json
+Wrote /home/yunwei37/workspace/bpf-benchmark/corpus/results/post_cmov_fix_corpus_ablation_smokecheck/full_without_cmov.md
+mode=vm targets=10 compile_pairs=9 measured_pairs=9 applied=4
