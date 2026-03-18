@@ -13,6 +13,8 @@ from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
+import yaml
+
 from benchmark_catalog import CONFIG_PATH, ROOT_DIR, SuiteSpec, load_suite
 try:
     from results_layout import maybe_refresh_latest_alias, refresh_latest_alias, smoke_output_path
@@ -160,6 +162,22 @@ def _git_rev_parse(repo_dir: Path, short: bool = False) -> str:
         return "unknown"
 
 
+def _git_is_dirty(repo_dir: Path) -> bool:
+    try:
+        completed = subprocess.run(
+            ["git", "status", "--porcelain"],
+            cwd=repo_dir,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError:
+        return False
+    if completed.returncode != 0:
+        return False
+    return bool(completed.stdout.strip())
+
+
 def _read_cpu_model() -> str:
     try:
         for line in Path("/proc/cpuinfo").read_text().splitlines():
@@ -210,6 +228,20 @@ def _hash_policy_files(policy_dir: Path) -> str:
         return "unknown"
 
 
+def _read_policy_payload(policy_file: Path | None) -> tuple[object | None, str | None]:
+    if policy_file is None:
+        return None, None
+    try:
+        raw = policy_file.read_bytes()
+    except OSError as exc:
+        raise RuntimeError(f"failed to read policy file {policy_file}: {exc}") from exc
+    try:
+        payload = yaml.safe_load(raw.decode("utf-8"))
+    except (UnicodeDecodeError, yaml.YAMLError) as exc:
+        raise RuntimeError(f"failed to parse policy file {policy_file}: {exc}") from exc
+    return payload, hashlib.sha256(raw).hexdigest()
+
+
 def collect_provenance(
     args: argparse.Namespace,
     iterations: int,
@@ -225,6 +257,10 @@ def collect_provenance(
     scanner_dir = ROOT_DIR / "scanner"
     scanner_commit = _git_rev_parse(scanner_dir) if scanner_dir.is_dir() else "unknown"
 
+    # repo commit / dirty status
+    repo_git_sha = _git_rev_parse(ROOT_DIR)
+    repo_dirty = _git_is_dirty(ROOT_DIR)
+
     # policy files hash
     default_policy_dir = ROOT_DIR / "micro" / "policies"
     effective_policy_dir = policy_dir if (policy_dir and policy_dir.is_dir()) else default_policy_dir
@@ -235,6 +271,8 @@ def collect_provenance(
     return {
         "kernel_commit": kernel_commit,
         "scanner_commit": scanner_commit,
+        "repo_git_sha": repo_git_sha,
+        "repo_dirty": repo_dirty,
         "policy_files_hash": policy_files_hash,
         "policy_dir": str(effective_policy_dir),
         "params": {
@@ -457,6 +495,7 @@ def main(argv: list[str] | None = None) -> int:
 
     for benchmark in benchmarks:
         memory_file = resolve_memory_file(benchmark, args.regenerate_inputs)
+        policy_content, policy_sha256 = _read_policy_payload(benchmark.policy_file)
         benchmark_record = {
             "name": benchmark.name,
             "description": benchmark.description,
@@ -470,6 +509,8 @@ def main(argv: list[str] | None = None) -> int:
             "input": str(memory_file) if memory_file else None,
             "policy": dict(benchmark.policy) if benchmark.policy is not None else None,
             "policy_file": str(benchmark.policy_file) if benchmark.policy_file else None,
+            "policy_content": policy_content,
+            "policy_sha256": policy_sha256,
             "runs": [],
         }
 
