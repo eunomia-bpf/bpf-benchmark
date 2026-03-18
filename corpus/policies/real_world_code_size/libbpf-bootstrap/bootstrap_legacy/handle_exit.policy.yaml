@@ -4,11 +4,9 @@
 # Section: tp/sched/sched_process_exit
 # Total scanner sites: 1
 # Family site totals: cmov=0, wide=0, rotate=0, extract=1, lea=0, zero-ext=0, endian=0, branch-flip=0
-# Selection model: explicit site allowlist; keep every discovered site except CMOV.
+# Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
+# Excluded extract sites from allowlist: 1
 
 version: 3
 program: 'handle_exit'
-sites:
-  - insn: 87
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
+sites: []

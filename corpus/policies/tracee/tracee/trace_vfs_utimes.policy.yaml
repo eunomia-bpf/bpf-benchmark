@@ -4,8 +4,9 @@
 # Section: kprobe/vfs_utimes
 # Total scanner sites: 21
 # Family site totals: cmov=9, wide=0, rotate=0, extract=1, lea=0, zero-ext=0, endian=0, branch-flip=11
-# Selection model: explicit site allowlist; keep every discovered site except CMOV.
-# Excluded CMOV sites from allowlist: 9
+# Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
+# Excluded cmov sites from allowlist: 9
+# Excluded extract sites from allowlist: 1
 
 version: 3
 program: 'trace_vfs_utimes'
@@ -28,9 +29,6 @@ sites:
   - insn: 997
     family: branch-flip
     pattern_kind: 'branch-flip'
-  - insn: 3118
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
   - insn: 3394
     family: branch-flip
     pattern_kind: 'branch-flip'

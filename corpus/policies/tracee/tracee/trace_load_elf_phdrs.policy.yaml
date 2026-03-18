@@ -4,8 +4,9 @@
 # Section: kprobe/load_elf_phdrs
 # Total scanner sites: 20
 # Family site totals: cmov=7, wide=0, rotate=0, extract=1, lea=0, zero-ext=0, endian=0, branch-flip=12
-# Selection model: explicit site allowlist; keep every discovered site except CMOV.
-# Excluded CMOV sites from allowlist: 7
+# Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
+# Excluded cmov sites from allowlist: 7
+# Excluded extract sites from allowlist: 1
 
 version: 3
 program: 'trace_load_elf_phdrs'
@@ -25,9 +26,6 @@ sites:
   - insn: 474
     family: branch-flip
     pattern_kind: 'branch-flip'
-  - insn: 2614
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
   - insn: 2701
     family: branch-flip
     pattern_kind: 'branch-flip'

@@ -4,8 +4,8 @@
 # Section: uprobe/lkm_seeker_modtree_loop_tail
 # Total scanner sites: 195
 # Family site totals: cmov=110, wide=0, rotate=0, extract=0, lea=0, zero-ext=0, endian=0, branch-flip=85
-# Selection model: explicit site allowlist; keep every discovered site except CMOV.
-# Excluded CMOV sites from allowlist: 110
+# Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
+# Excluded cmov sites from allowlist: 110
 
 version: 3
 program: 'lkm_seeker_modtree_loop'

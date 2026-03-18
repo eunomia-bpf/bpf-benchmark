@@ -4,8 +4,9 @@
 # Section: tc_packet_hook2
 # Total scanner sites: 557
 # Family site totals: cmov=57, wide=472, rotate=0, extract=9, lea=0, zero-ext=0, endian=19, branch-flip=0
-# Selection model: explicit site allowlist; keep every discovered site except CMOV.
-# Excluded CMOV sites from allowlist: 57
+# Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
+# Excluded cmov sites from allowlist: 57
+# Excluded extract sites from allowlist: 9
 
 version: 3
 program: 'tc_packet_func_slow'
@@ -298,9 +299,6 @@ sites:
   - insn: 3028
     family: wide
     pattern_kind: 'wide-load-2'
-  - insn: 3048
-    family: extract
-    pattern_kind: 'bitfield-extract-64-mask-shift'
   - insn: 3073
     family: wide
     pattern_kind: 'wide-load-2'
@@ -334,21 +332,12 @@ sites:
   - insn: 3553
     family: wide
     pattern_kind: 'wide-load-2'
-  - insn: 3782
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
-  - insn: 3915
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
   - insn: 3981
     family: wide
     pattern_kind: 'wide-load-2'
   - insn: 4001
     family: wide
     pattern_kind: 'wide-load-2'
-  - insn: 4021
-    family: extract
-    pattern_kind: 'bitfield-extract-64-mask-shift'
   - insn: 4047
     family: wide
     pattern_kind: 'wide-load-2'
@@ -529,9 +518,6 @@ sites:
   - insn: 8779
     family: wide
     pattern_kind: 'wide-load-2'
-  - insn: 8847
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
   - insn: 8864
     family: wide
     pattern_kind: 'wide-load-2'
@@ -604,12 +590,6 @@ sites:
   - insn: 9336
     family: wide
     pattern_kind: 'wide-load-2'
-  - insn: 9449
-    family: extract
-    pattern_kind: 'bitfield-extract-64-mask-shift'
-  - insn: 9452
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
   - insn: 9482
     family: wide
     pattern_kind: 'wide-load-2'
@@ -1315,12 +1295,6 @@ sites:
   - insn: 15199
     family: wide
     pattern_kind: 'wide-load-2'
-  - insn: 15241
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
-  - insn: 15244
-    family: extract
-    pattern_kind: 'bitfield-extract-64-mask-shift'
   - insn: 15314
     family: wide
     pattern_kind: 'wide-load-2'

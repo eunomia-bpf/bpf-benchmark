@@ -4,15 +4,13 @@
 # Section: raw_tracepoint/exec_test
 # Total scanner sites: 101
 # Family site totals: cmov=40, wide=0, rotate=0, extract=1, lea=0, zero-ext=0, endian=0, branch-flip=60
-# Selection model: explicit site allowlist; keep every discovered site except CMOV.
-# Excluded CMOV sites from allowlist: 40
+# Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
+# Excluded cmov sites from allowlist: 40
+# Excluded extract sites from allowlist: 1
 
 version: 3
 program: 'tracepoint__exec_test'
 sites:
-  - insn: 1848
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
   - insn: 2199
     family: branch-flip
     pattern_kind: 'branch-flip'

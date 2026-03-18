@@ -4,8 +4,9 @@
 # Section: lsm
 # Total scanner sites: 544
 # Family site totals: cmov=523, wide=6, rotate=0, extract=2, lea=0, zero-ext=0, endian=0, branch-flip=13
-# Selection model: explicit site allowlist; keep every discovered site except CMOV.
-# Excluded CMOV sites from allowlist: 523
+# Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
+# Excluded cmov sites from allowlist: 523
+# Excluded extract sites from allowlist: 2
 
 version: 3
 program: 'generic_lsm_process_filter'
@@ -22,9 +23,6 @@ sites:
   - insn: 322
     family: branch-flip
     pattern_kind: 'branch-flip'
-  - insn: 1691
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
   - insn: 1709
     family: wide
     pattern_kind: 'wide-load-2'
@@ -70,6 +68,3 @@ sites:
   - insn: 2133
     family: wide
     pattern_kind: 'wide-load-2'
-  - insn: 2221
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'

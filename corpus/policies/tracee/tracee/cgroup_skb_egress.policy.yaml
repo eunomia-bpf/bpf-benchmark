@@ -4,8 +4,9 @@
 # Section: cgroup_skb/egress
 # Total scanner sites: 123
 # Family site totals: cmov=13, wide=107, rotate=0, extract=1, lea=0, zero-ext=0, endian=2, branch-flip=0
-# Selection model: explicit site allowlist; keep every discovered site except CMOV.
-# Excluded CMOV sites from allowlist: 13
+# Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
+# Excluded cmov sites from allowlist: 13
+# Excluded extract sites from allowlist: 1
 
 version: 3
 program: 'cgroup_skb_egress'
@@ -28,9 +29,6 @@ sites:
   - insn: 509
     family: wide
     pattern_kind: 'wide-load-2'
-  - insn: 522
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
   - insn: 597
     family: wide
     pattern_kind: 'wide-load-2'

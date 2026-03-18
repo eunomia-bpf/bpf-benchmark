@@ -4,15 +4,13 @@
 # Section: uprobe
 # Total scanner sites: 132
 # Family site totals: cmov=60, wide=20, rotate=0, extract=21, lea=0, zero-ext=0, endian=0, branch-flip=31
-# Selection model: explicit site allowlist; keep every discovered site except CMOV.
-# Excluded CMOV sites from allowlist: 60
+# Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
+# Excluded cmov sites from allowlist: 60
+# Excluded extract sites from allowlist: 21
 
 version: 3
 program: 'generic_usdt_process_filter'
 sites:
-  - insn: 224
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
   - insn: 239
     family: wide
     pattern_kind: 'wide-load-2'
@@ -22,9 +20,6 @@ sites:
   - insn: 262
     family: wide
     pattern_kind: 'wide-load-2'
-  - insn: 294
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
   - insn: 359
     family: branch-flip
     pattern_kind: 'branch-flip'
@@ -46,9 +41,6 @@ sites:
   - insn: 489
     family: branch-flip
     pattern_kind: 'branch-flip'
-  - insn: 529
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
   - insn: 575
     family: branch-flip
     pattern_kind: 'branch-flip'
@@ -73,9 +65,6 @@ sites:
   - insn: 732
     family: branch-flip
     pattern_kind: 'branch-flip'
-  - insn: 775
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
   - insn: 825
     family: branch-flip
     pattern_kind: 'branch-flip'
@@ -100,9 +89,6 @@ sites:
   - insn: 977
     family: branch-flip
     pattern_kind: 'branch-flip'
-  - insn: 1019
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
   - insn: 1049
     family: branch-flip
     pattern_kind: 'branch-flip'
@@ -136,18 +122,6 @@ sites:
   - insn: 1284
     family: wide
     pattern_kind: 'wide-load-2'
-  - insn: 1317
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
-  - insn: 1354
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
-  - insn: 1397
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
-  - insn: 1435
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
   - insn: 1472
     family: wide
     pattern_kind: 'wide-load-2'
@@ -160,18 +134,6 @@ sites:
   - insn: 1519
     family: wide
     pattern_kind: 'wide-load-2'
-  - insn: 1552
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
-  - insn: 1593
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
-  - insn: 1636
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
-  - insn: 1675
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
   - insn: 1709
     family: wide
     pattern_kind: 'wide-load-2'
@@ -184,18 +146,6 @@ sites:
   - insn: 1756
     family: wide
     pattern_kind: 'wide-load-2'
-  - insn: 1789
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
-  - insn: 1830
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
-  - insn: 1873
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
-  - insn: 1912
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
   - insn: 1946
     family: wide
     pattern_kind: 'wide-load-2'
@@ -208,18 +158,6 @@ sites:
   - insn: 1992
     family: wide
     pattern_kind: 'wide-load-2'
-  - insn: 2026
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
-  - insn: 2063
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
-  - insn: 2103
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
-  - insn: 2141
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
   - insn: 2206
     family: wide
     pattern_kind: 'wide-load-2'

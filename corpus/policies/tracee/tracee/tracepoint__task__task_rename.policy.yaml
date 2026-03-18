@@ -4,8 +4,8 @@
 # Section: raw_tracepoint/task_rename
 # Total scanner sites: 16
 # Family site totals: cmov=5, wide=0, rotate=0, extract=0, lea=0, zero-ext=0, endian=0, branch-flip=11
-# Selection model: explicit site allowlist; keep every discovered site except CMOV.
-# Excluded CMOV sites from allowlist: 5
+# Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
+# Excluded cmov sites from allowlist: 5
 
 version: 3
 program: 'tracepoint__task__task_rename'

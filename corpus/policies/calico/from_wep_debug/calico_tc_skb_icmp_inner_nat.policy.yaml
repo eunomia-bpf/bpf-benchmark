@@ -4,8 +4,8 @@
 # Section: tc
 # Total scanner sites: 34
 # Family site totals: cmov=7, wide=2, rotate=0, extract=0, lea=0, zero-ext=0, endian=25, branch-flip=0
-# Selection model: explicit site allowlist; keep every discovered site except CMOV.
-# Excluded CMOV sites from allowlist: 7
+# Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
+# Excluded cmov sites from allowlist: 7
 
 version: 3
 program: 'calico_tc_skb_icmp_inner_nat'

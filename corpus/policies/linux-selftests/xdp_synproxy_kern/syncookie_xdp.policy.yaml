@@ -4,8 +4,9 @@
 # Section: xdp
 # Total scanner sites: 23
 # Family site totals: cmov=3, wide=2, rotate=0, extract=8, lea=0, zero-ext=0, endian=10, branch-flip=0
-# Selection model: explicit site allowlist; keep every discovered site except CMOV.
-# Excluded CMOV sites from allowlist: 3
+# Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
+# Excluded cmov sites from allowlist: 3
+# Excluded extract sites from allowlist: 8
 
 version: 3
 program: 'syncookie_xdp'
@@ -13,18 +14,9 @@ sites:
   - insn: 6
     family: endian
     pattern_kind: 'endian-load-swap-16'
-  - insn: 47
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
-  - insn: 187
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
   - insn: 519
     family: endian
     pattern_kind: 'endian-swap-store-32'
-  - insn: 576
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
   - insn: 585
     family: wide
     pattern_kind: 'wide-load-2'
@@ -40,15 +32,6 @@ sites:
   - insn: 670
     family: endian
     pattern_kind: 'endian-swap-store-32'
-  - insn: 709
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
-  - insn: 737
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
-  - insn: 741
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
   - insn: 750
     family: wide
     pattern_kind: 'wide-load-2'
@@ -64,9 +47,3 @@ sites:
   - insn: 863
     family: endian
     pattern_kind: 'endian-swap-store-32'
-  - insn: 899
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
-  - insn: 1027
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'

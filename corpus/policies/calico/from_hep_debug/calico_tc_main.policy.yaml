@@ -4,8 +4,9 @@
 # Section: tc
 # Total scanner sites: 86
 # Family site totals: cmov=20, wide=12, rotate=0, extract=1, lea=0, zero-ext=0, endian=53, branch-flip=0
-# Selection model: explicit site allowlist; keep every discovered site except CMOV.
-# Excluded CMOV sites from allowlist: 20
+# Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
+# Excluded cmov sites from allowlist: 20
+# Excluded extract sites from allowlist: 1
 
 version: 3
 program: 'calico_tc_main'
@@ -97,9 +98,6 @@ sites:
   - insn: 3552
     family: endian
     pattern_kind: 'endian-load-swap-16'
-  - insn: 4196
-    family: extract
-    pattern_kind: 'bitfield-extract-64-mask-shift'
   - insn: 4371
     family: endian
     pattern_kind: 'endian-load-swap-32'

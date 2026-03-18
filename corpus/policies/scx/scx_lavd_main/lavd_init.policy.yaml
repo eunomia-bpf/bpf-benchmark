@@ -4,8 +4,9 @@
 # Section: struct_ops.s/lavd_init
 # Total scanner sites: 7
 # Family site totals: cmov=1, wide=0, rotate=0, extract=1, lea=0, zero-ext=0, endian=0, branch-flip=5
-# Selection model: explicit site allowlist; keep every discovered site except CMOV.
-# Excluded CMOV sites from allowlist: 1
+# Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
+# Excluded cmov sites from allowlist: 1
+# Excluded extract sites from allowlist: 1
 
 version: 3
 program: 'lavd_init'
@@ -19,9 +20,6 @@ sites:
   - insn: 387
     family: branch-flip
     pattern_kind: 'branch-flip'
-  - insn: 550
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
   - insn: 554
     family: branch-flip
     pattern_kind: 'branch-flip'

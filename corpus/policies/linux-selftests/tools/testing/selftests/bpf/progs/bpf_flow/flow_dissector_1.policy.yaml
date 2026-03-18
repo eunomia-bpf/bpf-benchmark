@@ -4,18 +4,10 @@
 # Section: flow_dissector
 # Total scanner sites: 4
 # Family site totals: cmov=1, wide=0, rotate=0, extract=3, lea=0, zero-ext=0, endian=0, branch-flip=0
-# Selection model: explicit site allowlist; keep every discovered site except CMOV.
-# Excluded CMOV sites from allowlist: 1
+# Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
+# Excluded cmov sites from allowlist: 1
+# Excluded extract sites from allowlist: 3
 
 version: 3
 program: 'flow_dissector_1'
-sites:
-  - insn: 230
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
-  - insn: 425
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
-  - insn: 429
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
+sites: []

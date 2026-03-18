@@ -4,7 +4,7 @@
 # Section: raw_tp
 # Total scanner sites: 16
 # Family site totals: cmov=0, wide=14, rotate=0, extract=0, lea=2, zero-ext=0, endian=0, branch-flip=0
-# Selection model: explicit site allowlist; keep every discovered site except CMOV.
+# Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
 
 version: 3
 program: 'generic_rawtp_actions'

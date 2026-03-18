@@ -4,14 +4,9 @@
 # Section: xdp
 # Total scanner sites: 2
 # Family site totals: cmov=0, wide=0, rotate=0, extract=2, lea=0, zero-ext=0, endian=0, branch-flip=0
-# Selection model: explicit site allowlist; keep every discovered site except CMOV.
+# Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
+# Excluded extract sites from allowlist: 2
 
 version: 3
 program: 'cpumap_l4_hash'
-sites:
-  - insn: 72
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
-  - insn: 105
-    family: extract
-    pattern_kind: 'bitfield-extract-64-shift-mask'
+sites: []

@@ -4,8 +4,8 @@
 # Section: kretprobe/__x64_sys_socket
 # Total scanner sites: 2
 # Family site totals: cmov=2, wide=0, rotate=0, extract=0, lea=0, zero-ext=0, endian=0, branch-flip=0
-# Selection model: explicit site allowlist; keep every discovered site except CMOV.
-# Excluded CMOV sites from allowlist: 2
+# Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
+# Excluded cmov sites from allowlist: 2
 
 version: 3
 program: 'kretprobe__socket'
