@@ -39,6 +39,7 @@ except ImportError:
     from micro.orchestrator.environment import read_optional_text, read_required_text
     from micro.orchestrator.inventory import ProgramInventoryEntry, discover_object_programs
     from micro.orchestrator.results import UnifiedResultRecord, float_summary, parse_runner_sample
+from e2e.common.recompile import apply_recompile as apply_recompile_by_id
 
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -49,7 +50,6 @@ DEFAULT_OUTPUT_JSON = ROOT_DIR / "docs" / "tmp" / "tracee-e2e-results.json"
 DEFAULT_OUTPUT_MD = ROOT_DIR / "docs" / "tmp" / "tracee-e2e-results.md"
 DEFAULT_PACKET_PATH = ROOT_DIR / "micro" / "generated-inputs" / "corpus_dummy_packet_64.bin"
 TRACEE_EVENTS = ("execve", "open", "security_file_open", "connect", "module_load")
-RECOMPILE_ERROR_PATTERN = re.compile(r"BPF_PROG_JIT_RECOMPILE:\s*(?P<message>.+)")
 TRACEE_STATS_PATTERN = re.compile(
     r"EventCount[:=]\s*(?P<events>\d+).*?LostEvCount[:=]\s*(?P<lost>\d+)(?:.*?LostWrCount[:=]\s*(?P<lost_writes>\d+))?",
     re.IGNORECASE,
@@ -1052,28 +1052,21 @@ def recompile_programs(
                 }
             )
             continue
-        command = [str(scanner_binary), "apply", "--prog-fd", str(handle.prog_fd), "--all"]
-        if mode == "v5":
-            command.append("--v5")
-        completed = run_command(command, capture_output=True, check=False, pass_fds=(handle.prog_fd,))
-        error_match = RECOMPILE_ERROR_PATTERN.search(completed.stderr or "")
-        error_message = None
-        if error_match:
-            error_message = error_match.group("message").strip()
-        elif completed.returncode != 0:
-            error_message = tail_text(completed.stderr or completed.stdout)
+        result = apply_recompile_by_id([handle.prog_id], scanner_binary, blind_apply=True).get(int(handle.prog_id), {})
+        error_message = str(result.get("error") or "") or None
+        applied_ok = bool(result.get("applied"))
 
         detail = {
             "program": name,
             "prog_id": handle.prog_id,
             "attempted": True,
-            "applied": completed.returncode == 0,
-            "stdout_tail": tail_text(completed.stdout),
-            "stderr_tail": tail_text(completed.stderr),
+            "applied": applied_ok,
+            "stdout_tail": tail_text(str(result.get("stdout_tail") or "")),
+            "stderr_tail": tail_text(str(result.get("stderr_tail") or "")),
             "error": error_message,
         }
         recompile_details.append(detail)
-        if completed.returncode == 0:
+        if applied_ok:
             applied += 1
         else:
             if error_message and "Invalid argument" in error_message:

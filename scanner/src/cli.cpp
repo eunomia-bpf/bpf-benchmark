@@ -127,7 +127,7 @@ struct InputBundle {
     std::string program_name;
 };
 
-// Cost-model parameters (used by enumerate --recompile and optionally apply)
+// Cost-model parameters (used by enumerate --recompile)
 struct CostModelOptions {
     // Rule 1: Skip same-size forms (ENDIAN_FUSION 32-bit MOVBE=5B=LDX+BSWAP32,
     //         BRANCH_FLIP body swap does not change code size).
@@ -173,8 +173,7 @@ struct CommandOptions {
     bool enumerate_recompile = false;
     std::string enumerate_policy_dir;
     uint32_t enumerate_prog_id_filter = 0; // 0 = all
-    // cost-model options (effective when enumerate --recompile is used,
-    // or when apply is invoked without an explicit --config)
+    // cost-model options (effective when enumerate --recompile is used)
     CostModelOptions cost_model = {};
 };
 
@@ -439,31 +438,23 @@ InputBundle load_input(const CommandOptions &options)
 {
     InputBundle input;
 
-    if (options.prog_fd >= 0) {
-        const mini_bpf_prog_info info = fetch_prog_info(options.prog_fd);
-        input.xlated = fetch_xlated(options.prog_fd, info);
-        input.insn_cnt = info.xlated_prog_len / 8;
-        std::memcpy(input.prog_tag, info.tag, sizeof(input.prog_tag));
-        input.program_name.assign(info.name, strnlen(info.name, sizeof(info.name)));
-    } else {
-        const auto data = read_file(options.xlated_path);
-        if (data_is_elf_object(data)) {
-            if (!try_load_object_xlated(options.xlated_path, options.program_name, input)) {
-                input.xlated = read_object_program(options.xlated_path,
-                                                  options.program_name,
-                                                  &input.program_name);
-                input.insn_cnt = static_cast<uint32_t>(input.xlated.size() / 8);
-            }
-        } else {
-            input.xlated = data;
+    const auto data = read_file(options.xlated_path);
+    if (data_is_elf_object(data)) {
+        if (!try_load_object_xlated(options.xlated_path, options.program_name, input)) {
+            input.xlated = read_object_program(options.xlated_path,
+                                              options.program_name,
+                                              &input.program_name);
             input.insn_cnt = static_cast<uint32_t>(input.xlated.size() / 8);
-            input.program_name = options.program_name.empty()
-                                     ? std::filesystem::path(options.xlated_path).filename().string()
-                                     : options.program_name;
         }
-        if (input.xlated.size() % 8 != 0) {
-            die("offline input size (%zu) is not a multiple of 8", input.xlated.size());
-        }
+    } else {
+        input.xlated = data;
+        input.insn_cnt = static_cast<uint32_t>(input.xlated.size() / 8);
+        input.program_name = options.program_name.empty()
+                                 ? std::filesystem::path(options.xlated_path).filename().string()
+                                 : options.program_name;
+    }
+    if (input.xlated.size() % 8 != 0) {
+        die("offline input size (%zu) is not a multiple of 8", input.xlated.size());
     }
 
     if (options.has_prog_tag) {
@@ -481,64 +472,6 @@ InputBundle load_input(const CommandOptions &options)
 int sys_memfd_create(const char *name, unsigned int flags)
 {
     return static_cast<int>(syscall(__NR_memfd_create, name, flags));
-}
-
-void apply_policy_blob(int prog_fd, const std::vector<uint8_t> &blob)
-{
-    constexpr uint32_t kRecompileLogSize = 16 * 1024;
-    int memfd = sys_memfd_create("bpf-jit-policy", MFD_CLOEXEC | MFD_ALLOW_SEALING);
-    std::vector<char> log_buf(kRecompileLogSize, '\0');
-    if (memfd < 0) {
-        die("memfd_create: %s", strerror(errno));
-    }
-
-    size_t offset = 0;
-    while (offset < blob.size()) {
-        const ssize_t rc = write(memfd, blob.data() + offset, blob.size() - offset);
-        if (rc < 0) {
-            if (errno == EINTR) {
-                continue;
-            }
-            close(memfd);
-            die("write(memfd): %s", strerror(errno));
-        }
-        offset += static_cast<size_t>(rc);
-    }
-
-    const int seals = F_SEAL_WRITE | F_SEAL_GROW | F_SEAL_SHRINK;
-    if (fcntl(memfd, F_ADD_SEALS, seals) != 0) {
-        close(memfd);
-        die("fcntl(F_ADD_SEALS): %s", strerror(errno));
-    }
-
-    struct {
-        uint32_t prog_fd;
-        int32_t policy_fd;
-        uint32_t flags;
-        uint32_t log_level;
-        uint32_t log_size;
-        uint64_t log_buf;
-    } __attribute__((aligned(8))) attr = {};
-    attr.prog_fd = static_cast<uint32_t>(prog_fd);
-    attr.policy_fd = memfd;
-    attr.flags = 0;
-    attr.log_level = 1;
-    attr.log_size = static_cast<uint32_t>(log_buf.size());
-    attr.log_buf = ptr_to_u64(log_buf.data());
-
-    alignas(8) char attr_buf[256] = {};
-    std::memcpy(attr_buf, &attr, sizeof(attr));
-    const int rc = static_cast<int>(syscall(__NR_bpf, BPF_PROG_JIT_RECOMPILE,
-                                            attr_buf, sizeof(attr_buf)));
-    close(memfd);
-    if (rc != 0) {
-        const std::string kernel_log(log_buf.data());
-        if (!kernel_log.empty()) {
-            die("BPF_PROG_JIT_RECOMPILE: %s\n%s", strerror(errno),
-                kernel_log.c_str());
-        }
-        die("BPF_PROG_JIT_RECOMPILE: %s", strerror(errno));
-    }
 }
 
 // -----------------------------------------------------------------------
@@ -1012,10 +945,10 @@ void print_usage(const char *prog)
 {
     std::fprintf(stderr,
         "Usage:\n"
-        "  %s scan  (<file> | --prog-fd <fd> | --xlated <file>) [family flags] [--json] [--per-site] [--output <blob>]\n"
-        "  %s generate-policy (<file> | --prog-fd <fd> | --xlated <file>) [family flags] [--program-name <name>] [--output <yaml>|-]\n"
-        "  %s compile-policy (<file> | --prog-fd <fd> | --xlated <file>) --config <policy-v3.{yaml,json}> [family flags] [--output <blob>|-]\n"
-        "  %s apply (<file> | --prog-fd <fd> | --xlated <file>) [family flags] [--config <policy-v3.{yaml,json}>] [--program-name <name>] [--output <blob>|-]\n"
+        "  %s scan  (<file> | --xlated <file>) [family flags] [--json] [--per-site] [--output <blob>]\n"
+        "  %s generate-policy (<file> | --xlated <file>) [family flags] [--program-name <name>] [--output <yaml>|-]\n"
+        "  %s compile-policy (<file> | --xlated <file>) --config <policy-v3.{yaml,json}> [family flags] [--output <blob>|-]\n"
+        "  %s apply (<file> | --xlated <file>) [family flags] [--config <policy-v3.{yaml,json}>] [--program-name <name>] [--output <blob>|-]\n"
         "  %s dump  --prog-fd <fd> [--output <file>]\n"
         "  %s enumerate [family flags] [--recompile] [--policy-dir <dir>] [--prog-id <id>] [--json]\n"
         "\n"
@@ -1117,6 +1050,12 @@ CommandOptions parse_args(int argc, char **argv)
             print_usage(argv[0]);
             std::exit(0);
         } else if (arg == "--prog-fd") {
+            if (options.subcommand != "dump") {
+                if (options.subcommand == "enumerate") {
+                    die("enumerate does not accept --prog-fd; use --prog-id");
+                }
+                die("--prog-fd is only valid with dump");
+            }
             options.prog_fd = std::atoi(need_next());
         } else if (arg == "--xlated") {
             options.xlated_path = need_next();
@@ -1211,7 +1150,6 @@ CommandOptions parse_args(int argc, char **argv)
                     options.subcommand == "generate-policy" ||
                     options.subcommand == "compile-policy" ||
                     options.subcommand == "apply") &&
-                   options.prog_fd < 0 &&
                    options.xlated_path.empty()) {
             options.xlated_path = arg;
         } else {
@@ -1239,10 +1177,7 @@ CommandOptions parse_args(int argc, char **argv)
     }
 
     if (options.subcommand == "enumerate") {
-        // enumerate does not take a positional file argument or --prog-fd
-        if (options.prog_fd >= 0) {
-            die("enumerate does not accept --prog-fd; use scan --prog-fd instead");
-        }
+        // enumerate does not take a positional file argument
         if (!options.xlated_path.empty()) {
             die("enumerate does not accept a positional file argument");
         }
@@ -1263,18 +1198,17 @@ CommandOptions parse_args(int argc, char **argv)
         options.subcommand == "generate-policy" ||
         options.subcommand == "compile-policy" ||
         options.subcommand == "apply";
-    if (requires_input &&
-        ((options.prog_fd < 0) == options.xlated_path.empty())) {
+    if (requires_input && options.xlated_path.empty()) {
         if (options.subcommand == "scan") {
-            die("scan requires exactly one of --prog-fd or --xlated");
+            die("scan requires an input file or --xlated");
         }
         if (options.subcommand == "generate-policy") {
-            die("generate-policy requires exactly one of --prog-fd or --xlated");
+            die("generate-policy requires an input file or --xlated");
         }
         if (options.subcommand == "compile-policy") {
-            die("compile-policy requires exactly one of --prog-fd or --xlated");
+            die("compile-policy requires an input file or --xlated");
         }
-        die("apply requires exactly one of --prog-fd or --xlated");
+        die("apply requires an input file or --xlated");
     }
 
     if (options.subcommand == "scan" && !options.config_path.empty()) {
@@ -1298,11 +1232,6 @@ CommandOptions parse_args(int argc, char **argv)
     if (options.subcommand == "scan" && options.per_site_output &&
         !options.json_output) {
         die("scan --per-site requires --json");
-    }
-    if ((options.subcommand == "scan" || options.subcommand == "apply") &&
-        options.prog_fd >= 0 &&
-        options.output_path == "-") {
-        die("%s does not support --output -", options.subcommand.c_str());
     }
     if ((options.subcommand == "scan" || options.subcommand == "generate-policy") &&
         !options.config_path.empty()) {
@@ -1465,37 +1394,16 @@ void run_apply(const CommandOptions &options)
             discovered.rules, config);
         print_policy_warnings(filter_result);
     }
-    const auto selected_summary =
-        bpf_jit_scanner::summarize_rules(filter_result.rules);
     const auto blob = bpf_jit_scanner::build_policy_blob_v5(
         input.insn_cnt, input.prog_tag, filter_result.rules);
-
-    const bool live_apply = options.prog_fd >= 0;
-    if (!live_apply) {
-        if (options.output_path.empty() || options.output_path == "-") {
-            write_stdout(blob.data(), static_cast<uint32_t>(blob.size()));
-            return;
-        }
-        write_file(options.output_path, blob.data(), static_cast<uint32_t>(blob.size()));
-        std::printf("Wrote %zu-byte filtered v5 policy blob (%zu/%zu rules) to %s\n",
-                    blob.size(), filter_result.rules.size(),
-                    discovered.rules.size(), options.output_path.c_str());
+    if (options.output_path.empty() || options.output_path == "-") {
+        write_stdout(blob.data(), static_cast<uint32_t>(blob.size()));
         return;
     }
-
-    print_summary(stdout, selected_summary);
-    if (!options.config_path.empty()) {
-        std::printf("Policy filter kept %zu of %zu v5 rule(s)\n",
-                    filter_result.rules.size(), discovered.rules.size());
-    }
-    apply_policy_blob(options.prog_fd, blob);
-    std::printf("Applied %zu v5 rule(s) via BPF_PROG_JIT_RECOMPILE\n",
-                filter_result.rules.size());
-
-    if (!options.output_path.empty()) {
-        write_file(options.output_path, blob.data(), static_cast<uint32_t>(blob.size()));
-        std::printf("Saved applied v5 blob to %s\n", options.output_path.c_str());
-    }
+    write_file(options.output_path, blob.data(), static_cast<uint32_t>(blob.size()));
+    std::printf("Wrote %zu-byte filtered v5 policy blob (%zu/%zu rules) to %s\n",
+                blob.size(), filter_result.rules.size(),
+                discovered.rules.size(), options.output_path.c_str());
 }
 
 void run_dump(const CommandOptions &options)

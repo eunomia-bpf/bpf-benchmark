@@ -1,9 +1,6 @@
 from __future__ import annotations
 
-import ctypes
-import ctypes.util
 import json
-import os
 import re
 import tempfile
 from dataclasses import dataclass
@@ -14,12 +11,6 @@ from typing import Any, Iterable, Mapping
 from . import run_command
 from .metrics import sample_bpf_stats
 
-# ---------------------------------------------------------------------------
-# Feature flag: prefer scanner enumerate --prog-id over scan --prog-fd.
-# Set to False to force the legacy scan/apply --prog-fd path.
-# ---------------------------------------------------------------------------
-_USE_ENUMERATE_PATH = True
-
 
 @dataclass(frozen=True, slots=True)
 class PolicyTarget:
@@ -27,50 +18,6 @@ class PolicyTarget:
     object_path: Path | str | None = None
     program_name: str | None = None
     policy_file: Path | str | None = None
-
-
-@lru_cache(maxsize=1)
-def _libbpf() -> ctypes.CDLL:
-    path = ctypes.util.find_library("bpf") or "libbpf.so.1"
-    lib = ctypes.CDLL(path, use_errno=True)
-    lib.bpf_prog_get_fd_by_id.argtypes = [ctypes.c_uint32]
-    lib.bpf_prog_get_fd_by_id.restype = ctypes.c_int
-    return lib
-
-
-def _prog_fd_by_id(prog_id: int) -> int:
-    fd = int(_libbpf().bpf_prog_get_fd_by_id(int(prog_id)))
-    if fd < 0:
-        err = ctypes.get_errno()
-        proc_fd = _dup_prog_fd_from_proc(prog_id)
-        if proc_fd is not None:
-            return proc_fd
-        raise OSError(err, f"bpf_prog_get_fd_by_id({prog_id}) failed")
-    return fd
-
-
-def _dup_prog_fd_from_proc(prog_id: int) -> int | None:
-    wanted = f"prog_id:\t{int(prog_id)}"
-    alt_wanted = f"prog_id: {int(prog_id)}"
-    for proc_dir in Path("/proc").iterdir():
-        if not proc_dir.name.isdigit():
-            continue
-        fdinfo_dir = proc_dir / "fdinfo"
-        if not fdinfo_dir.exists():
-            continue
-        for entry in fdinfo_dir.iterdir():
-            try:
-                text = entry.read_text()
-            except OSError:
-                continue
-            if wanted not in text and alt_wanted not in text:
-                continue
-            fd_path = proc_dir / "fd" / entry.name
-            try:
-                return os.open(fd_path, os.O_RDONLY | os.O_CLOEXEC)
-            except OSError:
-                continue
-    return None
 
 
 def _scanner_counts(stdout: str) -> dict[str, int]:
@@ -213,32 +160,6 @@ def _counts_from_family_counts(family_counts: Mapping[str, Any] | None) -> dict[
     return counts
 
 
-def _scan_live_manifest(scanner_binary: str | Path, fd: int, program_name: str) -> dict[str, Any]:
-    completed = run_command(
-        [
-            str(scanner_binary),
-            "scan",
-            "--prog-fd",
-            str(fd),
-            "--all",
-            "--json",
-            "--v5",
-            "--program-name",
-            program_name,
-        ],
-        check=False,
-        timeout=60,
-        pass_fds=(fd,),
-    )
-    if completed.returncode != 0:
-        detail = (completed.stderr or completed.stdout or "").strip()
-        raise RuntimeError(detail or "scanner scan failed")
-    payload = _scanner_json_payload(completed.stdout or "")
-    if payload is None:
-        raise RuntimeError("scanner scan did not return a JSON manifest")
-    return payload
-
-
 def _write_live_remapped_policy(
     policy_path: str,
     live_manifest: Mapping[str, Any],
@@ -272,12 +193,6 @@ def _write_live_remapped_policy(
         "remapped_family_counts": summary.remapped_family_counts,
         "dropped_family_counts": summary.dropped_family_counts,
     }
-
-
-def _take_prog_fd(prog_id: int, prog_fds: dict[int, int] | None = None) -> int:
-    if prog_fds and int(prog_id) in prog_fds:
-        return os.dup(int(prog_fds[int(prog_id)]))
-    return _prog_fd_by_id(int(prog_id))
 
 
 def _normalize_policy_path(value: Path | str | None) -> str | None:
@@ -454,84 +369,28 @@ def scan_programs(
     stats = sample_bpf_stats(list(prog_ids), prog_fds=prog_fds)
     for prog_id in prog_ids:
         program_name = str(stats.get(int(prog_id), {}).get("name", f"id-{prog_id}"))
-        if _USE_ENUMERATE_PATH:
-            # Prefer enumerate --prog-id path: no caller-held fd required.
-            try:
-                record = _enumerate_scan_one(scanner_binary, int(prog_id))
-                # Use the name reported by enumerate if available.
-                enum_name = str(record.get("name") or "").strip()
-                if enum_name:
-                    program_name = enum_name
-                results[int(prog_id)] = {
-                    "program_name": program_name,
-                    "sites": _scan_counts_from_enumerate(record),
-                    "enumerate_record": record,
-                    "error": str(record.get("error") or ""),
-                    "stdout_tail": "",
-                    "stderr_tail": "",
-                }
-            except Exception as exc:
-                # Fall back to legacy scan --prog-fd path.
-                results[int(prog_id)] = _scan_one_legacy(
-                    scanner_binary, int(prog_id), program_name, prog_fds,
-                    fallback_error=str(exc),
-                )
-        else:
-            results[int(prog_id)] = _scan_one_legacy(
-                scanner_binary, int(prog_id), program_name, prog_fds,
-            )
+        try:
+            record = _enumerate_scan_one(scanner_binary, int(prog_id))
+            enum_name = str(record.get("name") or "").strip()
+            if enum_name:
+                program_name = enum_name
+            results[int(prog_id)] = {
+                "program_name": program_name,
+                "sites": _scan_counts_from_enumerate(record),
+                "enumerate_record": record,
+                "error": str(record.get("error") or ""),
+                "stdout_tail": "",
+                "stderr_tail": "",
+            }
+        except Exception as exc:
+            results[int(prog_id)] = {
+                "program_name": program_name,
+                "sites": _scan_counts_from_enumerate({}),
+                "error": str(exc),
+                "stdout_tail": "",
+                "stderr_tail": "",
+            }
     return results
-
-
-def _scan_one_legacy(
-    scanner_binary: str | Path,
-    prog_id: int,
-    program_name: str,
-    prog_fds: dict[int, int] | None,
-    *,
-    fallback_error: str = "",
-) -> dict[str, object]:
-    """Legacy scan path using scan --prog-fd."""
-    try:
-        fd = _take_prog_fd(prog_id, prog_fds)
-    except OSError as exc:
-        return {
-            "program_name": program_name,
-            "sites": _scanner_counts(""),
-            "error": str(exc),
-            "stdout_tail": "",
-            "stderr_tail": "",
-        }
-    try:
-        os.set_inheritable(fd, True)
-        completed = run_command(
-            [
-                str(scanner_binary),
-                "scan",
-                "--prog-fd",
-                str(fd),
-                "--all",
-                "--json",
-                "--v5",
-                "--program-name",
-                program_name,
-            ],
-            check=False,
-            timeout=60,
-            pass_fds=(fd,),
-        )
-        error = "" if completed.returncode == 0 else (completed.stderr or completed.stdout or "").strip()
-        if error and fallback_error:
-            error = f"enumerate failed ({fallback_error}), scan also failed: {error}"
-        return {
-            "program_name": program_name,
-            "sites": _scanner_counts(completed.stdout or ""),
-            "error": error,
-            "stdout_tail": completed.stdout[-4000:] if completed.stdout else "",
-            "stderr_tail": completed.stderr[-4000:] if completed.stderr else "",
-        }
-    finally:
-        os.close(fd)
 
 
 def apply_recompile(
@@ -569,26 +428,13 @@ def apply_recompile(
                 "stderr_tail": "",
             }
             continue
-        if _USE_ENUMERATE_PATH:
-            result = _apply_one_enumerate(
-                scanner_binary,
-                int(prog_id),
-                program_name=program_name,
-                selected_policy=selected_policy,
-                blind_apply=blind_apply,
-                prog_fds=prog_fds,
-            )
-            results[int(prog_id)] = result
-        else:
-            result = _apply_one_legacy(
-                scanner_binary,
-                int(prog_id),
-                program_name=program_name,
-                selected_policy=selected_policy,
-                blind_apply=blind_apply,
-                prog_fds=prog_fds,
-            )
-            results[int(prog_id)] = result
+        results[int(prog_id)] = _apply_one_enumerate(
+            scanner_binary,
+            int(prog_id),
+            program_name=program_name,
+            selected_policy=selected_policy,
+            blind_apply=blind_apply,
+        )
     return results
 
 
@@ -599,68 +445,26 @@ def _apply_one_enumerate(
     program_name: str,
     selected_policy: str | None,
     blind_apply: bool,
-    prog_fds: dict[int, int] | None,
 ) -> dict[str, object]:
-    """Apply recompile using enumerate --prog-id --recompile path.
-
-    For policy-file mode:
-      1. Scan via enumerate --prog-id --json to get live manifest.
-      2. Remap static policy to live site addresses.
-      3. Write remapped policy as <program_name>.policy.yaml into a temp directory.
-      4. Call enumerate --prog-id --recompile --policy-dir <tmpdir>.
-
-    For blind_apply mode:
-      Call enumerate --prog-id --recompile directly (no policy dir).
-
-    Falls back to legacy _apply_one_legacy on any error.
-    """
+    """Apply recompile using enumerate --prog-id --recompile."""
     policy_mode = "policy-file" if selected_policy else "blind-apply-v5"
+    scan_record: dict[str, Any] | None = None
     live_manifest: dict[str, Any] | None = None
     remap_summary: dict[str, Any] | None = None
     temp_policy_dir: tempfile.TemporaryDirectory | None = None  # type: ignore[type-arg]
     policy_dir_path: str | None = None
     try:
         if selected_policy is not None:
-            # Step 1: get live manifest from enumerate --json.
-            # enumerate --json now includes a per-site "sites" array with
-            # {insn, family, pattern_kind} entries, so we can build the live
-            # manifest directly without a fallback to scan --prog-fd.
             scan_record = _enumerate_scan_one(scanner_binary, prog_id)
             enum_name = str(scan_record.get("name") or "").strip()
             if enum_name:
                 program_name = enum_name
-            # Extract per-site data from enumerate record.
             enum_sites = scan_record.get("sites")
-            if isinstance(enum_sites, list) and enum_sites:
-                # Build a live manifest compatible with remap_policy_v3_to_live.
-                live_manifest = {"sites": enum_sites}
-            else:
-                # Old scanner binary without per-site output: fall back to
-                # legacy _scan_live_manifest via scan --prog-fd.
-                fd: int | None = None
-                try:
-                    fd = _take_prog_fd(prog_id, prog_fds)
-                    os.set_inheritable(fd, True)
-                    live_manifest = _scan_live_manifest(scanner_binary, fd, program_name)
-                except OSError:
-                    live_manifest = None
-                finally:
-                    if fd is not None:
-                        try:
-                            os.close(fd)
-                        except OSError:
-                            pass
-            if live_manifest is None:
-                # Cannot remap policy without live manifest; fall back to legacy path.
-                return _apply_one_legacy(
-                    scanner_binary,
-                    prog_id,
-                    program_name=program_name,
-                    selected_policy=selected_policy,
-                    blind_apply=blind_apply,
-                    prog_fds=prog_fds,
+            if not isinstance(enum_sites, list):
+                raise RuntimeError(
+                    f"enumerate --prog-id {prog_id} --json did not return per-site data"
                 )
-            # Step 2+3: remap policy and write to temp policy dir.
+            live_manifest = {"sites": enum_sites}
             temp_dir_obj = tempfile.TemporaryDirectory(prefix="e2e-enumerate-policy-dir-")
             temp_policy_dir = temp_dir_obj
             policy_dir_path = temp_dir_obj.name
@@ -669,24 +473,17 @@ def _apply_one_enumerate(
                 live_manifest,
                 program_name=program_name,
             )
-            # Rename the temp policy file to <program_name>.policy.yaml inside the dir.
             dest_path = Path(policy_dir_path) / f"{program_name}.policy.yaml"
             try:
                 import shutil as _shutil
+
                 _shutil.move(str(_temp_path), str(dest_path))
             except OSError:
                 try:
                     _temp_path.unlink(missing_ok=True)
                 except OSError:
                     pass
-                return _apply_one_legacy(
-                    scanner_binary,
-                    prog_id,
-                    program_name=program_name,
-                    selected_policy=selected_policy,
-                    blind_apply=blind_apply,
-                    prog_fds=prog_fds,
-                )
+                raise
             if int(remap_summary.get("remapped_sites", 0) or 0) <= 0:
                 return {
                     "program_name": program_name,
@@ -703,24 +500,11 @@ def _apply_one_enumerate(
                     ),
                     "stderr_tail": "",
                 }
-        # Step 4 / blind apply: call enumerate --recompile [--policy-dir <dir>]
-        try:
-            record = _enumerate_apply_one(
-                scanner_binary,
-                prog_id,
-                policy_dir=policy_dir_path,
-            )
-        except Exception as exc:
-            # Fall back to legacy path on enumerate failure.
-            return _apply_one_legacy(
-                scanner_binary,
-                prog_id,
-                program_name=program_name,
-                selected_policy=selected_policy,
-                blind_apply=blind_apply,
-                prog_fds=prog_fds,
-                fallback_error=str(exc),
-            )
+        record = _enumerate_apply_one(
+            scanner_binary,
+            prog_id,
+            policy_dir=policy_dir_path,
+        )
         enum_name = str(record.get("name") or "").strip()
         if enum_name:
             program_name = enum_name
@@ -743,131 +527,29 @@ def _apply_one_enumerate(
             "stderr_tail": "",
         }
     except Exception as exc:
-        return _apply_one_legacy(
-            scanner_binary,
-            prog_id,
-            program_name=program_name,
-            selected_policy=selected_policy,
-            blind_apply=blind_apply,
-            prog_fds=prog_fds,
-            fallback_error=str(exc),
-        )
+        if remap_summary is not None:
+            failure_counts = _counts_from_family_counts(remap_summary.get("remapped_family_counts"))
+        elif scan_record is not None:
+            failure_counts = _scan_counts_from_enumerate(scan_record)
+        else:
+            failure_counts = _scanner_counts("")
+        return {
+            "program_name": program_name,
+            "counts": failure_counts,
+            "applied": False,
+            "policy_file": selected_policy,
+            "policy_remap": remap_summary,
+            "policy_mode": policy_mode,
+            "error": str(exc),
+            "stdout_tail": "",
+            "stderr_tail": "",
+        }
     finally:
         if temp_policy_dir is not None:
             try:
                 temp_policy_dir.cleanup()
             except Exception:
                 pass
-
-
-def _apply_one_legacy(
-    scanner_binary: str | Path,
-    prog_id: int,
-    *,
-    program_name: str,
-    selected_policy: str | None,
-    blind_apply: bool,
-    prog_fds: dict[int, int] | None,
-    fallback_error: str = "",
-) -> dict[str, object]:
-    """Legacy apply path using apply --prog-fd (original implementation)."""
-    policy_mode = "policy-file" if selected_policy else "blind-apply-v5"
-    live_manifest: dict[str, Any] | None = None
-    remap_summary: dict[str, Any] | None = None
-    effective_policy = selected_policy
-    temp_policy_path: Path | None = None
-    try:
-        fd = _take_prog_fd(prog_id, prog_fds)
-    except OSError as exc:
-        return {
-            "program_name": program_name,
-            "counts": _scanner_counts(""),
-            "applied": False,
-            "policy_file": selected_policy,
-            "policy_mode": policy_mode,
-            "error": str(exc),
-            "stdout_tail": "",
-            "stderr_tail": "",
-        }
-    try:
-        os.set_inheritable(fd, True)
-        if selected_policy is not None:
-            live_manifest = _scan_live_manifest(scanner_binary, fd, program_name)
-            temp_policy_path, remap_summary = _write_live_remapped_policy(
-                selected_policy,
-                live_manifest,
-                program_name=program_name,
-            )
-            effective_policy = str(temp_policy_path)
-            if int(remap_summary.get("remapped_sites", 0) or 0) <= 0:
-                return {
-                    "program_name": program_name,
-                    "counts": _counts_from_family_counts(remap_summary.get("remapped_family_counts")),
-                    "applied": False,
-                    "noop": True,
-                    "policy_file": selected_policy,
-                    "policy_remap": remap_summary,
-                    "policy_mode": "policy-file",
-                    "error": "",
-                    "stdout_tail": (
-                        "Accepted 0 v5 site(s)\n"
-                        "Skipped BPF_PROG_JIT_RECOMPILE because policy filtering left no live sites.\n"
-                    ),
-                    "stderr_tail": "",
-                }
-        command = [
-            str(scanner_binary),
-            "apply",
-            "--prog-fd",
-            str(fd),
-            "--v5",
-            "--program-name",
-            program_name,
-        ]
-        if effective_policy is not None:
-            command.extend(["--config", effective_policy])
-        else:
-            command.append("--all")
-        completed = run_command(
-            command,
-            check=False,
-            timeout=60,
-            pass_fds=(fd,),
-        )
-        error = "" if completed.returncode == 0 else (completed.stderr or completed.stdout or "").strip()
-        if error and fallback_error:
-            error = f"enumerate failed ({fallback_error}), apply also failed: {error}"
-        return {
-            "program_name": program_name,
-            "counts": _scanner_counts(completed.stdout or ""),
-            "applied": completed.returncode == 0,
-            "policy_file": selected_policy,
-            "policy_remap": remap_summary,
-            "policy_mode": policy_mode,
-            "error": error,
-            "stdout_tail": completed.stdout[-4000:] if completed.stdout else "",
-            "stderr_tail": completed.stderr[-4000:] if completed.stderr else "",
-        }
-    except Exception as exc:
-        fallback_counts = _scanner_counts(json.dumps(live_manifest)) if live_manifest else _scanner_counts("")
-        err_msg = str(exc)
-        if fallback_error:
-            err_msg = f"enumerate failed ({fallback_error}), legacy apply failed: {err_msg}"
-        return {
-            "program_name": program_name,
-            "counts": fallback_counts,
-            "applied": False,
-            "policy_file": selected_policy,
-            "policy_remap": remap_summary,
-            "policy_mode": policy_mode,
-            "error": err_msg,
-            "stdout_tail": "",
-            "stderr_tail": "",
-        }
-    finally:
-        if temp_policy_path is not None:
-            temp_policy_path.unlink(missing_ok=True)
-        os.close(fd)
 
 
 __all__ = [

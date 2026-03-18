@@ -25,14 +25,14 @@ The binary is produced at `scanner/build/bpf-jit-scanner`.
 # falls back to raw ELF instructions if loading fails)
 bpf-jit-scanner scan prog.bpf.o --all
 
-# Scan a live program by fd
-bpf-jit-scanner scan --prog-fd 5 --all
-
 # Offline scan from raw xlated dump, write v5 blob
 bpf-jit-scanner scan --xlated dump.bin --all --output policy.blob
 
 # Emit a JSON site manifest (prog metadata + per-site entries)
 bpf-jit-scanner scan prog.bpf.o --all --json
+
+# Scan a single live program by id
+sudo bpf-jit-scanner enumerate --prog-id 42 --json
 ```
 
 ### `enumerate` — scan all live BPF programs in the kernel
@@ -56,15 +56,18 @@ sudo bpf-jit-scanner enumerate --recompile --prog-id 42
 
 `enumerate --recompile` applies a built-in cost model by default (see below).
 
-### `apply` — apply a policy to a live program
+### `apply` — compile filtered sites into a v5 blob
 
 ```bash
-# Apply all detected sites (all families)
-sudo bpf-jit-scanner apply --prog-fd 5 --all
+# Write a filtered blob from an object file
+bpf-jit-scanner apply prog.bpf.o --all --output policy.blob
 
-# Apply only sites listed in an explicit policy file
-sudo bpf-jit-scanner apply --prog-fd 5 --config policy.yaml
+# Apply an explicit policy to offline xlated input
+bpf-jit-scanner apply --xlated dump.bin --config policy.yaml --output policy.blob
 ```
+
+For live kernel programs, use `enumerate --recompile` and optionally
+`--prog-id <id>` / `--policy-dir <dir>`.
 
 ### `generate-policy` — emit a v3 policy YAML from detected sites
 
@@ -78,7 +81,7 @@ bpf-jit-scanner generate-policy --xlated dump.bin --all --output policy.yaml \
 ```
 
 The output is a version 3 policy file that can be edited, committed, and passed
-back to `compile-policy` or `apply --config`.
+back to `compile-policy`, `apply`, or `enumerate --recompile --policy-dir`.
 
 ### `compile-policy` — compile a v3 YAML into a binary blob
 

@@ -29,6 +29,7 @@ for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpu
         sys.path.insert(0, candidate_str)
 
 from directive_census import ProgramResult, analyze_object
+from e2e.common.recompile import apply_recompile as apply_recompile_by_id, scan_programs as scan_programs_by_id
 
 try:
     from orchestrator.commands import build_list_programs_command, build_runner_command
@@ -517,34 +518,6 @@ def markdown_table(headers: Sequence[str], rows: Sequence[Sequence[Any]]) -> lis
     return lines
 
 
-def scanner_counts_from_stdout(stdout: str) -> dict[str, int]:
-    counts = {
-        "cmov_sites": 0,
-        "wide_sites": 0,
-        "rotate_sites": 0,
-        "lea_sites": 0,
-        "total_sites": 0,
-    }
-    patterns = {
-        "cmov_sites": r"^\s*cmov:\s+(\d+)\s*$",
-        "wide_sites": r"^\s*wide:\s+(\d+)\s*$",
-        "rotate_sites": r"^\s*rotate:\s+(\d+)\s*$",
-        "lea_sites": r"^\s*lea:\s+(\d+)\s*$",
-    }
-    for line in stdout.splitlines():
-        for field, pattern in patterns.items():
-            match = re.match(pattern, line)
-            if match:
-                counts[field] = int(match.group(1))
-    counts["total_sites"] = (
-        counts["cmov_sites"] +
-        counts["wide_sites"] +
-        counts["rotate_sites"] +
-        counts["lea_sites"]
-    )
-    return counts
-
-
 def summarize_raw_scan(scan: ProgramResult) -> dict[str, Any]:
     return {
         "cmov_sites": scan.cmov,
@@ -815,53 +788,51 @@ def snapshot_from_info(info: BpfProgInfo) -> dict[str, Any]:
     }
 
 
-def scan_live_program(scanner: Path, fd: int, program_name: str) -> dict[str, Any]:
-    os.set_inheritable(fd, True)
-    result = run_command(
-        [str(scanner), "scan", "--prog-fd", str(fd), "--all", "--v5", "--program-name", program_name],
-        pass_fds=(fd,),
-        timeout_seconds=60,
-    )
-    counts = scanner_counts_from_stdout(result["stdout"]) if result["stdout"] else {
+def scan_live_program(scanner: Path, prog_id: int, program_name: str) -> dict[str, Any]:
+    del program_name
+    counts = {
         "cmov_sites": 0,
         "wide_sites": 0,
         "rotate_sites": 0,
         "lea_sites": 0,
         "total_sites": 0,
     }
+    result = scan_programs_by_id([prog_id], scanner).get(int(prog_id), {})
+    counts.update(result.get("sites") or {})
+    command = [str(scanner), "enumerate", "--prog-id", str(prog_id), "--all", "--json"]
     return {
-        "ok": result["ok"],
-        "error": result["error"],
+        "ok": not bool(result.get("error")),
+        "error": str(result.get("error") or ""),
         "counts": counts,
-        "stdout_tail": tail_text(result["stdout"]),
-        "stderr_tail": tail_text(result["stderr"]),
-        "command": result["command"],
+        "stdout_tail": tail_text(str(result.get("stdout_tail") or "")),
+        "stderr_tail": tail_text(str(result.get("stderr_tail") or "")),
+        "command": command,
     }
 
 
-def apply_live_recompile(scanner: Path, fd: int, program_name: str) -> dict[str, Any]:
-    os.set_inheritable(fd, True)
-    result = run_command(
-        [str(scanner), "apply", "--prog-fd", str(fd), "--all", "--v5", "--program-name", program_name],
-        pass_fds=(fd,),
-        timeout_seconds=60,
-    )
-    counts = scanner_counts_from_stdout(result["stdout"]) if result["stdout"] else {
+def apply_live_recompile(scanner: Path, prog_id: int, program_name: str) -> dict[str, Any]:
+    del program_name
+    counts = {
         "cmov_sites": 0,
         "wide_sites": 0,
         "rotate_sites": 0,
         "lea_sites": 0,
         "total_sites": 0,
     }
+    result = apply_recompile_by_id([prog_id], scanner, blind_apply=True).get(int(prog_id), {})
+    counts.update(result.get("counts") or {})
+    applied = bool(result.get("applied"))
+    error = str(result.get("error") or "")
+    command = [str(scanner), "enumerate", "--prog-id", str(prog_id), "--all", "--recompile", "--json"]
     return {
-        "ok": result["ok"],
-        "applied": result["ok"],
-        "error": result["error"],
+        "ok": applied and not error,
+        "applied": applied,
+        "error": error,
         "counts": counts,
-        "stdout_tail": tail_text(result["stdout"]),
-        "stderr_tail": tail_text(result["stderr"]),
-        "command": result["command"],
-        "returncode": result["returncode"],
+        "stdout_tail": tail_text(str(result.get("stdout_tail") or "")),
+        "stderr_tail": tail_text(str(result.get("stderr_tail") or "")),
+        "command": command,
+        "returncode": 0 if applied and not error else 1,
     }
 
 
@@ -1109,7 +1080,7 @@ def live_benchmark_with_process_tail(
         for item in programs:
             prog_id = int(item["id"])
             prog_fd = libbpf.prog_fd_by_id(prog_id)
-            scan = scan_live_program(scanner, prog_fd, str(item.get("name", "")))
+            scan = scan_live_program(scanner, prog_id, str(item.get("name", "")))
             info = libbpf.prog_info_by_fd(prog_fd)
             program_records.append(
                 {
@@ -1146,7 +1117,7 @@ def live_benchmark_with_process_tail(
                 continue
             eligible_programs += 1
             attempted_programs += 1
-            apply = apply_live_recompile(scanner, record["fd"], record["name"])
+            apply = apply_live_recompile(scanner, int(record["id"]), str(record["name"]))
             record["recompile"] = apply
             if apply["applied"]:
                 applied_programs += 1

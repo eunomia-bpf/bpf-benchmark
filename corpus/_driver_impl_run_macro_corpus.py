@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import argparse
-import ctypes
 import json
 import math
 import os
@@ -75,31 +74,6 @@ ZERO_DIRECTIVE_SCAN = {
     "branch_flip_sites": 0,
     "total_sites": 0,
 }
-
-
-class LibbpfHandle:
-    def __init__(self) -> None:
-        load_error: OSError | None = None
-        self.lib: ctypes.CDLL | None = None
-        for name in ("libbpf.so.1", "libbpf.so"):
-            try:
-                self.lib = ctypes.CDLL(name, use_errno=True)
-                break
-            except OSError as exc:
-                load_error = exc
-        if self.lib is None:
-            raise RuntimeError(f"unable to load libbpf: {load_error}")
-
-        self.lib.bpf_prog_get_fd_by_id.argtypes = [ctypes.c_uint]
-        self.lib.bpf_prog_get_fd_by_id.restype = ctypes.c_int
-
-    def prog_fd_by_id(self, prog_id: int) -> int:
-        assert self.lib is not None
-        fd = int(self.lib.bpf_prog_get_fd_by_id(int(prog_id)))
-        if fd < 0:
-            err = ctypes.get_errno()
-            raise OSError(err, f"bpf_prog_get_fd_by_id({prog_id}) failed")
-        return fd
 
 
 @dataclass(frozen=True)
@@ -688,13 +662,8 @@ def run_trigger_command(command_text: str, repeat: int, timeout_seconds: int) ->
 def _apply_one_v5_enumerate(
     scanner_binary: Path,
     prog_id: int,
-    program_name: str,
 ) -> tuple[str, str, str, str]:
-    """Try scanner enumerate --prog-id --recompile path.
-
-    Returns (stdout, stderr, command_str, error_text).
-    Raises RuntimeError on hard failure so the caller can fall back.
-    """
+    """Run scanner enumerate --prog-id --recompile for one program."""
     command = [
         str(scanner_binary),
         "enumerate",
@@ -713,10 +682,15 @@ def _apply_one_v5_enumerate(
             timeout=60,
         )
     except Exception as exc:
-        raise RuntimeError(str(exc)) from exc
+        return ("", "", command_str, str(exc))
     if completed.returncode != 0:
         detail = (completed.stderr or completed.stdout or "").strip()
-        raise RuntimeError(detail or f"enumerate --prog-id {prog_id} --recompile failed (rc={completed.returncode})")
+        return (
+            completed.stdout.strip()[-4000:],
+            completed.stderr.strip()[-4000:],
+            command_str,
+            detail or f"enumerate --prog-id {prog_id} --recompile failed (rc={completed.returncode})",
+        )
     return (
         completed.stdout.strip()[-4000:],
         completed.stderr.strip()[-4000:],
@@ -725,47 +699,7 @@ def _apply_one_v5_enumerate(
     )
 
 
-def _apply_one_v5_legacy(
-    scanner_binary: Path,
-    libbpf: LibbpfHandle,
-    prog_id: int,
-    program_name: str,
-) -> tuple[str, str, str, str]:
-    """Fall-back path: scanner apply --prog-fd <fd> --all --v5 --program-name <name>.
-
-    Returns (stdout, stderr, command_str, error_text).
-    """
-    try:
-        fd = libbpf.prog_fd_by_id(prog_id)
-    except OSError as exc:
-        return ("", "", "", str(exc))
-    os.set_inheritable(fd, True)
-    command = [
-        str(scanner_binary),
-        "apply",
-        "--prog-fd",
-        str(fd),
-        "--all",
-        "--v5",
-        "--program-name",
-        program_name,
-    ]
-    command_str = " ".join(command)
-    error_text = ""
-    stdout_text = ""
-    stderr_text = ""
-    try:
-        completed = run_text_command(command, pass_fds=(fd,))
-        stdout_text = completed.stdout.strip()[-4000:]
-        stderr_text = completed.stderr.strip()[-4000:]
-    except Exception as exc:
-        error_text = str(exc)
-    finally:
-        os.close(fd)
-    return (stdout_text, stderr_text, command_str, error_text)
-
-
-def apply_recompile_v5(scanner_binary: Path, libbpf: LibbpfHandle, attached: list[dict[str, Any]]) -> dict[str, Any]:
+def apply_recompile_v5(scanner_binary: Path, attached: list[dict[str, Any]]) -> dict[str, Any]:
     total_ns = 0
     details = []
     errors: list[str] = []
@@ -773,21 +707,9 @@ def apply_recompile_v5(scanner_binary: Path, libbpf: LibbpfHandle, attached: lis
         prog_id = int(entry["prog_id"])
         program_name = entry["program_name"]
         started_ns = time.perf_counter_ns()
-        error_text = ""
-        enumerate_attempted = False
-        # Prefer scanner enumerate --prog-id --recompile; fall back to legacy apply --prog-fd.
-        try:
-            stdout_text, stderr_text, command_str, error_text = _apply_one_v5_enumerate(
-                scanner_binary, prog_id, program_name
-            )
-            enumerate_attempted = True
-        except Exception as exc:
-            fallback_error = str(exc)
-            stdout_text, stderr_text, command_str, error_text = _apply_one_v5_legacy(
-                scanner_binary, libbpf, prog_id, program_name
-            )
-            if error_text:
-                error_text = f"enumerate failed ({fallback_error}), apply --prog-fd also failed: {error_text}"
+        stdout_text, stderr_text, command_str, error_text = _apply_one_v5_enumerate(
+            scanner_binary, prog_id
+        )
         wall_ns = time.perf_counter_ns() - started_ns
         total_ns += wall_ns
         if error_text:
@@ -796,7 +718,6 @@ def apply_recompile_v5(scanner_binary: Path, libbpf: LibbpfHandle, attached: lis
             {
                 "program_name": program_name,
                 "prog_id": entry["prog_id"],
-                "enumerate_attempted": enumerate_attempted,
                 "scanner_command": command_str,
                 "stdout": stdout_text,
                 "stderr": stderr_text,
@@ -819,7 +740,6 @@ def run_attach_trigger_sample(
     repeat: int,
     recompile_v5: bool,
     iteration_idx: int,
-    libbpf: LibbpfHandle | None,
 ) -> dict[str, Any]:
     if not spec.trigger:
         raise RuntimeError(f"{spec.name}: attach_trigger requires a trigger command")
@@ -853,11 +773,9 @@ def run_attach_trigger_sample(
         recompile_ns = 0
         apply_info = None
         if recompile_v5:
-            if libbpf is None:
-                raise RuntimeError("libbpf is required for recompile_v5 attach-trigger runs")
             recompile_record["policy_generated"] = True
             recompile_record["syscall_attempted"] = True
-            apply_info = apply_recompile_v5(suite.scanner_binary, libbpf, attached)
+            apply_info = apply_recompile_v5(suite.scanner_binary, attached)
             recompile_ns = int(apply_info["wall_ns"])
             recompile_record["applied"] = bool(apply_info["applied"])
             recompile_record["error"] = str(apply_info.get("error", ""))
@@ -917,7 +835,6 @@ def run_compile_only_loadall_sample(
     *,
     recompile_v5: bool,
     iteration_idx: int,
-    libbpf: LibbpfHandle | None,
 ) -> dict[str, Any]:
     pin_dir = unique_pin_dir(spec.name, "kernel_recompile_v5" if recompile_v5 else "kernel", iteration_idx)
     btf_path = detect_btf_path(spec.btf_path)
@@ -948,11 +865,9 @@ def run_compile_only_loadall_sample(
         recompile_ns = 0
         apply_info = None
         if recompile_v5:
-            if libbpf is None:
-                raise RuntimeError("libbpf is required for recompile_v5 bpftool loadall runs")
             recompile_record["policy_generated"] = True
             recompile_record["syscall_attempted"] = True
-            apply_info = apply_recompile_v5(suite.scanner_binary, libbpf, pinned)
+            apply_info = apply_recompile_v5(suite.scanner_binary, pinned)
             recompile_ns = int(apply_info["wall_ns"])
             recompile_record["applied"] = bool(apply_info["applied"])
             recompile_record["error"] = str(apply_info.get("error", ""))
@@ -1002,7 +917,6 @@ def execute_sample(
     *,
     repeat: int,
     iteration_idx: int,
-    libbpf: LibbpfHandle | None,
 ) -> dict[str, Any]:
     recompile_v5 = runtime.mode == "kernel-recompile-v5"
     if recompile_v5 and not spec.recompile_supported:
@@ -1017,7 +931,6 @@ def execute_sample(
             repeat=repeat,
             recompile_v5=recompile_v5,
             iteration_idx=iteration_idx,
-            libbpf=libbpf,
         )
 
     compile_only = spec.test_method == "compile_only"
@@ -1027,7 +940,6 @@ def execute_sample(
             spec,
             recompile_v5=recompile_v5,
             iteration_idx=iteration_idx,
-            libbpf=libbpf,
         )
 
     if len(selected) != 1:
@@ -1045,15 +957,6 @@ def execute_sample(
 
 def runtimes_require_recompile_support(runtimes: list[RuntimeSpec]) -> bool:
     return any(runtime.mode == "kernel-recompile-v5" for runtime in runtimes)
-
-
-def benchmarks_require_libbpf_for_recompile(programs: list[ProgramSpec]) -> bool:
-    for program in programs:
-        if program.test_method == "attach_trigger":
-            return True
-        if program.test_method == "compile_only" and program.compile_loader == "bpftool_loadall":
-            return True
-    return False
 
 
 def host_metadata() -> dict[str, Any]:
@@ -1094,9 +997,6 @@ def main(argv: list[str] | None = None) -> int:
     iterations = args.iterations if args.iterations is not None else suite.defaults_iterations
     warmups = args.warmups if args.warmups is not None else suite.defaults_warmups
     repeat = args.repeat if args.repeat is not None else suite.defaults_repeat
-
-    needs_libbpf = needs_recompile_support and benchmarks_require_libbpf_for_recompile(benchmarks)
-    libbpf = LibbpfHandle() if needs_libbpf else None
 
     results = {
         "suite_name": suite.suite_name,
@@ -1147,7 +1047,6 @@ def main(argv: list[str] | None = None) -> int:
                     runtime,
                     repeat=repeat,
                     iteration_idx=-1,
-                    libbpf=libbpf,
                 )
 
             samples = []
@@ -1158,7 +1057,6 @@ def main(argv: list[str] | None = None) -> int:
                     runtime,
                     repeat=repeat,
                     iteration_idx=iteration_idx,
-                    libbpf=libbpf,
                 )
                 sample["iteration_index"] = iteration_idx
                 samples.append(sample)

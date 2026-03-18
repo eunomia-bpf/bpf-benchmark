@@ -30,6 +30,7 @@ for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpu
         sys.path.insert(0, candidate_str)
 
 from benchmark_catalog import ROOT_DIR, load_suite
+from e2e.common.recompile import apply_recompile as apply_recompile_by_id, scan_programs as scan_programs_by_id
 from orchestrator.environment import sudo_available
 from run_corpus_perf import ensure_parent, markdown_table
 
@@ -562,52 +563,48 @@ def bpftool_autoattach_probe(
     }
 
 
-def scanner_counts(stdout: str) -> dict[str, int]:
-    counts = {}
-    patterns = {
-        "total_sites": r"Accepted\s+(\d+)\s+v5 site",
-        "cmov_sites": r"cmov:\s+(\d+)",
-        "wide_sites": r"wide:\s+(\d+)",
-        "rotate_sites": r"rotate:\s+(\d+)",
-        "lea_sites": r"lea:\s+(\d+)",
+def scan_loaded_program(scanner_binary: Path, prog_id: int, program_name: str, timeout_seconds: int) -> dict[str, Any]:
+    del program_name, timeout_seconds
+    counts = {
+        "total_sites": 0,
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
     }
-    for key, pattern in patterns.items():
-        match = re.search(pattern, stdout)
-        counts[key] = int(match.group(1)) if match else 0
-    return counts
-
-
-def scan_loaded_program(scanner_binary: Path, prog_fd: int, program_name: str, timeout_seconds: int) -> dict[str, Any]:
-    os.set_inheritable(prog_fd, True)
-    result = run_command(
-        [str(scanner_binary), "scan", "--prog-fd", str(prog_fd), "--all", "--v5", "--program-name", program_name],
-        timeout_seconds=timeout_seconds,
-        pass_fds=(prog_fd,),
-    )
+    result = scan_programs_by_id([prog_id], scanner_binary).get(int(prog_id), {})
+    counts.update(result.get("sites") or {})
+    command = [str(scanner_binary), "enumerate", "--prog-id", str(prog_id), "--all", "--json"]
     return {
-        "ok": result["returncode"] == 0 and not result["timed_out"],
-        "command": result["display_command"],
-        "counts": scanner_counts(result["stdout"]),
-        "stdout_tail": result["stdout"][-4000:],
-        "stderr_tail": result["stderr"][-4000:],
-        "error": "" if result["returncode"] == 0 and not result["timed_out"] else (result["stderr"] or result["stdout"]).strip(),
+        "ok": not bool(result.get("error")),
+        "command": shlex.join(command),
+        "counts": counts,
+        "stdout_tail": str(result.get("stdout_tail") or "")[-4000:],
+        "stderr_tail": str(result.get("stderr_tail") or "")[-4000:],
+        "error": str(result.get("error") or ""),
     }
 
 
-def apply_recompile_v5(scanner_binary: Path, prog_fd: int, program_name: str, timeout_seconds: int) -> dict[str, Any]:
-    os.set_inheritable(prog_fd, True)
-    result = run_command(
-        [str(scanner_binary), "apply", "--prog-fd", str(prog_fd), "--all", "--v5", "--program-name", program_name],
-        timeout_seconds=timeout_seconds,
-        pass_fds=(prog_fd,),
-    )
-    error_text = (result["stderr"] or result["stdout"]).strip() if result["returncode"] != 0 or result["timed_out"] else ""
+def apply_recompile_v5(scanner_binary: Path, prog_id: int, program_name: str, timeout_seconds: int) -> dict[str, Any]:
+    del program_name, timeout_seconds
+    counts = {
+        "total_sites": 0,
+        "cmov_sites": 0,
+        "wide_sites": 0,
+        "rotate_sites": 0,
+        "lea_sites": 0,
+    }
+    result = apply_recompile_by_id([prog_id], scanner_binary, blind_apply=True).get(int(prog_id), {})
+    counts.update(result.get("counts") or {})
+    applied = bool(result.get("applied"))
+    error_text = str(result.get("error") or "")
+    command = [str(scanner_binary), "enumerate", "--prog-id", str(prog_id), "--all", "--recompile", "--json"]
     return {
-        "ok": result["returncode"] == 0 and not result["timed_out"],
-        "command": result["display_command"],
-        "counts": scanner_counts(result["stdout"]),
-        "stdout_tail": result["stdout"][-4000:],
-        "stderr_tail": result["stderr"][-4000:],
+        "ok": applied and not error_text,
+        "command": shlex.join(command),
+        "counts": counts,
+        "stdout_tail": str(result.get("stdout_tail") or "")[-4000:],
+        "stderr_tail": str(result.get("stderr_tail") or "")[-4000:],
         "error": error_text,
     }
 
@@ -1024,7 +1021,7 @@ def benchmark_manual_target(
                 timeout_seconds,
             )
 
-            scan = scan_loaded_program(scanner_binary, target_fd, spec.program_name, timeout_seconds)
+            scan = scan_loaded_program(scanner_binary, int(target_info.id), spec.program_name, timeout_seconds)
             measurement["directive_scan"] = scan
 
             link_ptr = loaded.attach(spec)
@@ -1037,7 +1034,7 @@ def benchmark_manual_target(
                             "error": measurement["error"],
                         }
                         return measurement
-                    apply = apply_recompile_v5(scanner_binary, target_fd, spec.program_name, timeout_seconds)
+                    apply = apply_recompile_v5(scanner_binary, int(target_info.id), spec.program_name, timeout_seconds)
                     measurement["recompile"] = apply
                     if not apply["ok"]:
                         measurement["error"] = apply["error"] or "BPF_PROG_JIT_RECOMPILE failed"
@@ -1259,9 +1256,9 @@ def daemon_measurement_for_programs(
         fd = libbpf.prog_fd_by_id(prog_id)
         fds[prog_id] = fd
         before[prog_id] = libbpf.get_prog_info(fd)
-        scan_cache[prog_id] = scan_loaded_program(scanner_binary, fd, str(info.get("name", f"id-{prog_id}")), timeout_seconds)
+        scan_cache[prog_id] = scan_loaded_program(scanner_binary, prog_id, str(info.get("name", f"id-{prog_id}")), timeout_seconds)
         if recompile_v5 and scan_cache[prog_id]["counts"]["total_sites"] > 0:
-            apply_cache[prog_id] = apply_recompile_v5(scanner_binary, fd, str(info.get("name", f"id-{prog_id}")), timeout_seconds)
+            apply_cache[prog_id] = apply_recompile_v5(scanner_binary, prog_id, str(info.get("name", f"id-{prog_id}")), timeout_seconds)
             if not apply_cache[prog_id]["ok"]:
                 for close_fd in fds.values():
                     os.close(close_fd)
