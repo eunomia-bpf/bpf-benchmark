@@ -7,10 +7,13 @@ SCANNER_DIR := $(ROOT_DIR)/scanner
 KERNEL_DIR := $(ROOT_DIR)/vendor/linux-framework
 KERNEL_TEST_DIR := $(ROOT_DIR)/tests/kernel
 
-# Result output directories (canonical locations)
+# Result directories
 MICRO_RESULTS_DIR := $(ROOT_DIR)/micro/results
+MICRO_RESULTS_DEV_DIR := $(MICRO_RESULTS_DIR)/dev
 CORPUS_RESULTS_DIR := $(ROOT_DIR)/corpus/results
+CORPUS_RESULTS_DEV_DIR := $(CORPUS_RESULTS_DIR)/dev
 E2E_RESULTS_DIR := $(ROOT_DIR)/e2e/results
+E2E_RESULTS_DEV_DIR := $(E2E_RESULTS_DIR)/dev
 # docs/tmp is for analysis reports (.md) only, NOT for JSON results
 TMP_DIR := $(ROOT_DIR)/docs/tmp
 
@@ -40,21 +43,22 @@ MICRO_RUNNER := $(MICRO_DIR)/build/runner/micro_exec
 KERNEL_SELFTEST := $(KERNEL_TEST_DIR)/build/test_recompile
 VMLINUX_PATH := $(KERNEL_DIR)/vmlinux
 
-# Canonical output file paths
-SMOKE_OUTPUT := $(MICRO_RESULTS_DIR)/smoke.latest.json
-VM_MICRO_SMOKE_OUTPUT := $(MICRO_RESULTS_DIR)/vm_micro_smoke.latest.json
-VM_MICRO_OUTPUT := $(MICRO_RESULTS_DIR)/vm_micro.latest.json
-VM_CORPUS_OUTPUT_JSON := $(CORPUS_RESULTS_DIR)/vm_corpus.latest.json
-VM_CORPUS_OUTPUT_MD := $(CORPUS_RESULTS_DIR)/vm_corpus.latest.md
-VM_TRACEE_OUTPUT_JSON := $(E2E_RESULTS_DIR)/tracee.latest.json
-VM_TRACEE_OUTPUT_MD := $(E2E_RESULTS_DIR)/tracee.latest.md
-VM_TETRAGON_OUTPUT_JSON := $(E2E_RESULTS_DIR)/tetragon.latest.json
-VM_TETRAGON_OUTPUT_MD := $(E2E_RESULTS_DIR)/tetragon.latest.md
-VM_BPFTRACE_OUTPUT_JSON := $(E2E_RESULTS_DIR)/bpftrace.latest.json
-VM_BPFTRACE_OUTPUT_MD := $(E2E_RESULTS_DIR)/bpftrace.latest.md
-VM_BPFTRACE_REPORT_MD := $(E2E_RESULTS_DIR)/bpftrace_report.latest.md
-VM_XDP_OUTPUT_JSON := $(E2E_RESULTS_DIR)/xdp_forwarding.latest.json
-VM_XDP_OUTPUT_MD := $(E2E_RESULTS_DIR)/xdp_forwarding.latest.md
+# Default Makefile outputs go to results/dev/. Promote manually to the top-level
+# results/ directory when a run becomes authoritative.
+SMOKE_OUTPUT := $(MICRO_RESULTS_DEV_DIR)/smoke.json
+VM_MICRO_SMOKE_OUTPUT := $(MICRO_RESULTS_DEV_DIR)/vm_micro_smoke.json
+VM_MICRO_OUTPUT := $(MICRO_RESULTS_DEV_DIR)/vm_micro.json
+VM_CORPUS_OUTPUT_JSON := $(CORPUS_RESULTS_DEV_DIR)/vm_corpus.json
+VM_CORPUS_OUTPUT_MD := $(CORPUS_RESULTS_DEV_DIR)/vm_corpus.md
+VM_TRACEE_OUTPUT_JSON := $(E2E_RESULTS_DEV_DIR)/tracee.json
+VM_TRACEE_OUTPUT_MD := $(E2E_RESULTS_DEV_DIR)/tracee.md
+VM_TETRAGON_OUTPUT_JSON := $(E2E_RESULTS_DEV_DIR)/tetragon.json
+VM_TETRAGON_OUTPUT_MD := $(E2E_RESULTS_DEV_DIR)/tetragon.md
+VM_BPFTRACE_OUTPUT_JSON := $(E2E_RESULTS_DEV_DIR)/bpftrace.json
+VM_BPFTRACE_OUTPUT_MD := $(E2E_RESULTS_DEV_DIR)/bpftrace.md
+VM_BPFTRACE_REPORT_MD := $(E2E_RESULTS_DEV_DIR)/bpftrace_report.md
+VM_XDP_OUTPUT_JSON := $(E2E_RESULTS_DEV_DIR)/xdp_forwarding.json
+VM_XDP_OUTPUT_MD := $(E2E_RESULTS_DEV_DIR)/xdp_forwarding.md
 
 # Build --bench flags from BENCH variable (space-separated list of benchmark names)
 # e.g. make vm-micro BENCH="simple bitcount" → --bench simple --bench bitcount
@@ -140,9 +144,10 @@ help:
 	@echo "                          baseline → micro/policies/variants/baseline/"
 	@echo ""
 	@echo "Results are written to:"
-	@echo "  micro/results/        - Micro benchmark results"
-	@echo "  corpus/results/       - Corpus benchmark results"
-	@echo "  e2e/results/          - E2E benchmark results"
+	@echo "  micro/results/dev/    - Default Makefile micro outputs"
+	@echo "  corpus/results/dev/   - Default Makefile corpus outputs"
+	@echo "  e2e/results/dev/      - Default Makefile E2E outputs"
+	@echo "  */results/            - Authoritative JSON promoted manually"
 	@echo "  docs/tmp/             - Analysis reports (.md only)"
 
 verify-build:
@@ -224,7 +229,7 @@ $(BZIMAGE_PATH): $(KERNEL_JIT_SOURCES)
 
 smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP)
 	@echo "=== Running make smoke ==="
-	mkdir -p "$(MICRO_RESULTS_DIR)"
+	mkdir -p "$(MICRO_RESULTS_DEV_DIR)"
 	$(VENV_ACTIVATE) python3 "$(MICRO_DIR)/driver.py" suite \
 		--runtime llvmbpf \
 		$(LOCAL_SMOKE_ARGS) \
@@ -249,7 +254,7 @@ vm-selftest: kernel-tests $(BZIMAGE_PATH)
 
 vm-micro-smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(BZIMAGE_PATH)
 	@echo "=== Running make vm-micro-smoke (POLICY=$(POLICY)) ==="
-	mkdir -p "$(MICRO_RESULTS_DIR)"
+	mkdir -p "$(MICRO_RESULTS_DEV_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
 		bash -lc 'cd "$(ROOT_DIR)" && $(VENV_ACTIVATE) python3 "$(MICRO_DIR)/driver.py" suite \
 			--runtime kernel \
@@ -263,7 +268,7 @@ vm-micro-smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(BZIMAGE_PATH)
 # To use a named policy set: make vm-micro POLICY=all-apply
 vm-micro: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(SCANNER_PATH) verify-build $(BZIMAGE_PATH)
 	@echo "=== Running make vm-micro (POLICY=$(POLICY)) ==="
-	mkdir -p "$(MICRO_RESULTS_DIR)"
+	mkdir -p "$(MICRO_RESULTS_DEV_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
 		bash -lc 'cd "$(ROOT_DIR)" && $(VENV_ACTIVATE) python3 "$(MICRO_DIR)/driver.py" suite \
 			--runtime llvmbpf \
@@ -276,7 +281,7 @@ vm-micro: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(SCANNER_PATH) verify-build $(BZIM
 # The corpus batch harness already manages one vng boot per target internally.
 vm-corpus: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(SCANNER_PATH) verify-build $(BZIMAGE_PATH)
 	@echo "=== Running make vm-corpus ==="
-	mkdir -p "$(CORPUS_RESULTS_DIR)"
+	mkdir -p "$(CORPUS_RESULTS_DEV_DIR)"
 	$(VENV_ACTIVATE) python3 "$(MICRO_DIR)/driver.py" corpus v5-vm-batch \
 		--skip-build \
 		--kernel-image "$(BZIMAGE_PATH)" \
@@ -290,7 +295,7 @@ vm-corpus: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(SCANNER_PATH) verify-build $(BZI
 
 vm-e2e: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(SCANNER_PATH) verify-build $(BZIMAGE_PATH)
 	@echo "=== Running make vm-e2e ==="
-	mkdir -p "$(E2E_RESULTS_DIR)"
+	mkdir -p "$(E2E_RESULTS_DEV_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
 		bash -lc 'cd "$(ROOT_DIR)" && $(VENV_ACTIVATE) python3 "$(ROOT_DIR)/e2e/run.py" tracee \
 			--output-json "$(VM_TRACEE_OUTPUT_JSON)" \

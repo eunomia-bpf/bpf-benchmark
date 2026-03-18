@@ -2,167 +2,128 @@
 
 Date: 2026-03-18
 
-## Summary
+## Final Outcome
 
-I updated the micro benchmark policy set as requested:
+This round focused on removing the remaining harmful sites from the 2026-03-18 R1 micro policy set, then rerunning the suite with a higher-quality VM configuration.
 
-- Kept the 6 regressor removals in place:
-  - `memcmp_prefix_64`: `sites: []`
-  - `branch_flip_dense`: `sites: []`
-  - `addr_calc_stride`: `sites: []`
-  - `multi_acc_8`: keep only `wide`
-  - `bpf_call_chain`: keep only `wide`
-  - `large_mixed_500`: removed `branch-flip`
-- Added scanner-driven rotate coverage:
-  - `rotate64_hash`: new rotate-only policy, 116 sites
-  - `large_mixed_1000`: new rotate-only policy, 7 sites
-  - `large_mixed_500`: switched to rotate-only, 7 sites
-- Tested but then cleared two unstable new rotate policies:
-  - `branch_fanout_32`: scanned 8 rotate sites, final policy `sites: []`
-  - `packet_rss_hash`: scanned 11 rotate sites, final policy `sites: []`
-- Updated `config/micro_pure_jit.yaml` to reference the new policy files.
+Final authoritative full-suite run:
 
-Final policy set in the repo now has 15 applied micro benchmarks.
+- Command: `make vm-micro ITERATIONS=10 WARMUPS=5 REPEAT=1000`
+- Result file saved as: `micro/results/vm_micro_authoritative_20260318.json`
+- VM-written file remained dated `20260314`, so I copied it manually as requested.
 
-## Final Policy State
+Headline numbers from `micro/results/vm_micro_authoritative_20260318.json`:
 
-| Benchmark | Final state |
-|---|---|
-| `memcmp_prefix_64` | cleared |
-| `branch_flip_dense` | cleared |
-| `addr_calc_stride` | cleared |
-| `multi_acc_8` | `wide` only |
-| `bpf_call_chain` | `wide` only |
-| `large_mixed_500` | rotate-only, 7 sites |
-| `large_mixed_1000` | rotate-only, 7 sites |
-| `rotate64_hash` | rotate-only, 116 sites |
-| `branch_fanout_32` | scanned, then cleared |
-| `packet_rss_hash` | scanned, then cleared |
-
-## Validation Runs
-
-All validation used Makefile as requested:
-
-- Affected subset:
-  - `make vm-micro BENCH='rotate_dense cmov_dense rotate64_hash memcmp_prefix_64 branch_flip_dense addr_calc_stride multi_acc_8 large_mixed_500 bpf_call_chain branch_fanout_32 large_mixed_1000 packet_rss_hash' ITERATIONS=3 WARMUPS=2 REPEAT=500`
-- Full suite:
-  - `make vm-micro ITERATIONS=3 WARMUPS=2 REPEAT=500`
-
-Important environment note:
-
-- The guest VM clock still reported 2026-03-14, so each Makefile run wrote `micro/results/vm_micro_authoritative_20260314.json`.
-- I saved distinct copies after each run:
-  - `micro/results/vm_micro_policy_iter_r1_subset_20260318.json`
-  - `micro/results/vm_micro_policy_iter_r2_subset_20260318.json`
-  - `micro/results/vm_micro_policy_iter_r3_subset_20260318.json`
-  - `micro/results/vm_micro_policy_improved_full_20260318.json`
-  - `micro/results/vm_micro_policy_improved_full_r2_20260318.json`
-- The pre-change authoritative baseline was recovered from git `HEAD` for comparison.
-
-## Main Findings
-
-### 1. `rotate64_hash` is the clearest positive addition
-
-`rotate64_hash` improved in every rerun I did:
-
-| Run | KR/K |
-|---|---|
-| old baseline | 1.011 |
-| subset r1 | 0.688 |
-| subset r2 | 0.753 |
-| subset r3 | 0.821 |
-| full r1 | 0.587 |
-| full r2 | 0.759 |
-
-This is the strongest evidence from the whole iteration. The new 116-site rotate-only policy should stay.
-
-### 2. `large_mixed_500` looks worth keeping
-
-`large_mixed_500` moved from a `branch-flip` regressor to roughly neutral/slightly positive rotate-only behavior:
-
-| Run | KR/K |
-|---|---|
-| old baseline | 1.025 |
-| subset r1 | 0.873 |
-| subset r2 | 0.869 |
-| subset r3 | 0.980 |
-| full r1 | 1.004 |
-| full r2 | 0.960 |
-
-The signal is not huge, but it is much better than the old `branch-flip=3` policy.
-
-### 3. `large_mixed_1000` is mildly promising but not yet stable
-
-| Run | KR/K |
-|---|---|
-| old baseline | 0.968 |
-| subset r1 | 0.866 |
-| subset r2 | 0.953 |
-| subset r3 | 0.865 |
-| full r1 | 0.955 |
-| full r2 | 1.049 |
-
-Most reruns were positive, but one full rerun regressed slightly. I left it enabled because the evidence is better than for the two unstable packet/fanout additions.
-
-### 4. `branch_fanout_32` and `packet_rss_hash` were too unstable, so I cleared them
-
-Before clearing:
-
-| Benchmark | old | subset r1 | subset r2 |
-|---|---:|---:|---:|
-| `branch_fanout_32` | 0.996 | 0.937 | 1.097 |
-| `packet_rss_hash` | 1.111 | 0.556 | 1.091 |
-
-These were not stable enough to keep. After clearing them, both remained noisy as non-applied benchmarks, which reinforces that the underlying VM variance is large.
-
-### 5. The full-suite geomean is not stable enough to claim a better headline number
-
-Baseline from the original authoritative file in git:
-
-- Overall: KR/K `0.948874` = `1.0539x`
-- Applied-only (old 16 applied benchmarks): KR/K `0.930777` = `1.0744x`
-
-Current final policy set, full rerun #1:
-
-- Overall: KR/K `0.979558` = `1.0209x`
-- Applied-only (current 15 applied benchmarks): KR/K `0.960984` = `1.0406x`
-
-Current final policy set, full rerun #2:
-
-- Overall: KR/K `1.078853` = `0.9269x`
-- Applied-only (current 15 applied benchmarks): KR/K `1.058271` = `0.9449x`
+- Overall geomean KR/K: `0.981669` = `1.0187x`
+- Applied-only geomean KR/K: `0.905682` = `1.1041x`
+- Non-applied geomean KR/K: `0.995192`
+- Applied benchmarks: `9 / 62`
 
 Interpretation:
 
-- I cannot honestly claim that the final policy set improved the full-suite headline geomean under the current VM setup.
-- The variance between full reruns is too large.
-- The targeted policy conclusions are stronger than the full-suite geomean conclusions.
+- Overall headline speedup is roughly flat versus R1 (`1.021x` -> `1.019x`), slightly lower.
+- Applied-only quality is much better (`1.041x` -> `1.104x`), because the loss-heavy applied set was cleaned up aggressively.
+- The biggest measurement improvement is noise: non-applied geomean is now `0.995`, much closer to the ideal `1.0`.
 
-## What I Recommend Keeping
+## Policy Changes
 
-Keep:
+Scanner-confirmed changes applied to the target regressors:
 
-- `rotate64_hash` rotate-only policy
-- `large_mixed_500` rotate-only policy
-- `large_mixed_1000` rotate-only policy, but mark as tentative
-- all 6 requested regressor removals / trims
+- `log2_fold`: cleared to `sites: []`
+- `switch_dispatch`: cleared to `sites: []`
+- `branch_dense`: cleared to `sites: []`
+- `multi_acc_8`: cleared to `sites: []`
+- `multi_acc_4`: cleared to `sites: []`
+- `binary_search`: cleared to `sites: []`
+- `cmov_select`: replaced the old CMOV policy with `rotate`-only (`4` sites)
 
-Keep cleared:
+`bounds_ladder` was kept unchanged, per request.
 
-- `branch_fanout_32`
-- `packet_rss_hash`
+Scanner outcome for rotate substitution:
 
-## Recommended Next Step
+- Only `cmov_select` had usable replacement `rotate` sites among the 7 target benchmarks.
+- The other 6 targets had no `rotate` fallback and were fully cleared.
 
-If we want a new authoritative number, rerun the final policy set with a more stable setup before replacing the headline result:
+## Authoritative Full Run
 
-- more iterations and warmups
-- pinned CPU / performance governor
-- ideally a fixed VM environment with lower timing variance
+Applied benchmarks in the 10x authoritative rerun:
 
-With the current data, the safest claim is:
+| Benchmark | Policy | KR/K | Notes |
+|---|---|---:|---|
+| `rotate_dense` | `256 rotate` | `0.7189` | biggest winner |
+| `rotate64_hash` | `116 rotate` | `0.7935` | strong win, keep |
+| `cmov_dense` | `26 rotate` | `0.8251` | strong win, keep |
+| `large_mixed_500` | `7 rotate` | `0.9410` | mild win |
+| `bounds_ladder` | `2 cmov + 2 wide` | `0.9615` | still positive |
+| `bpf_call_chain` | `2 wide` | `0.9763` | small positive |
+| `large_mixed_1000` | `7 rotate` | `0.9781` | small positive |
+| `cmov_select` | `4 rotate` | `0.9950` | effectively neutral; much better than old CMOV path |
+| `mixed_alu_mem` | `2 extract + 1 wide` | `1.0133` | only remaining applied regressor |
 
-- policy cleanup succeeded structurally
-- `rotate64_hash` is a clear win
-- `large_mixed_500` improved versus the old `branch-flip` policy
-- full-suite geomean remains dominated by VM noise, so the old March 14, 2026 headline should not be replaced yet
+Results for the 7 specifically targeted regressors:
+
+| Benchmark | Final state | KR/K |
+|---|---|---:|
+| `log2_fold` | cleared | `1.0083` |
+| `switch_dispatch` | cleared | `0.9861` |
+| `branch_dense` | cleared | `0.9720` |
+| `multi_acc_8` | cleared | `0.9511` |
+| `multi_acc_4` | cleared | `1.0631` |
+| `binary_search` | cleared | `0.9745` |
+| `cmov_select` | rotate-only | `0.9950` |
+
+Important note on the cleared rows:
+
+- `multi_acc_4` still shows `1.063x` despite `sites=0`, which is exactly why the non-applied noise check matters.
+- With non-applied geomean at `0.995`, the suite-level noise is now much cleaner, but individual short benchmarks can still drift a few percent.
+
+Largest non-applied deviations in the authoritative run:
+
+- `packet_parse_vlans_tcpopts`: `1.165x` (`20.5ns` vs `20.5ns`, effectively timer noise)
+- `memory_pair_sum`: `0.838x` (`11.5ns` vs `5.5ns`, sub-resolution noise)
+- `simple_packet`: `1.125x` (`7ns` vs `10ns`, sub-resolution noise)
+
+These outliers are still present, but they are no longer strong enough to distort the suite-level non-applied geomean.
+
+## Follow-up Iteration
+
+Because the authoritative 10x run still had one applied regressor (`mixed_alu_mem`), I tried one additional policy iteration as requested:
+
+- Changed `mixed_alu_mem` from `wide+extract` to `wide`-only
+- Reran full suite with `make vm-micro ITERATIONS=3 WARMUPS=3 REPEAT=1000`
+- Saved result as `micro/results/vm_micro_followup_mixed_alu_mem_wide_only_20260318.json`
+
+Follow-up result:
+
+- `mixed_alu_mem`: `1.0133` -> `1.0057`
+- But non-applied geomean worsened from `0.9952` -> `1.0112`
+- Other applied rows became clearly noisier (`rotate64_hash` `1.130x`, `cmov_dense` `0.446x`)
+
+Conclusion:
+
+- The wide-only trim may help `mixed_alu_mem` slightly.
+- The 3-iteration follow-up was too noisy to justify changing the final repo policy set.
+- I kept the final authoritative policy state aligned with the 10x rerun.
+
+## Files Produced
+
+- Authoritative full run: `micro/results/vm_micro_authoritative_20260318.json`
+- Subset validation run: `micro/results/vm_micro_policy_subset_r2_20260318.json`
+- Follow-up mixed_alu_mem test: `micro/results/vm_micro_followup_mixed_alu_mem_wide_only_20260318.json`
+
+## Final Recommendation
+
+Keep the current final policy set from the 10x authoritative rerun:
+
+- 6 harmful regressor benchmarks fully cleared
+- `cmov_select` switched to rotate-only
+- `bounds_ladder` unchanged
+- `mixed_alu_mem` kept unchanged for now
+
+The main result to quote is:
+
+- authoritative full-suite: `1.0187x` overall
+- authoritative applied-only: `1.1041x`
+- non-applied noise floor: `0.995x`
+
+That is the cleanest data point produced in this round.

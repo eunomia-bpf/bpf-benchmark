@@ -13,18 +13,10 @@ for candidate in (REPO_ROOT, MICRO_ROOT):
         sys.path.insert(0, candidate_str)
 
 try:
-    from _driver_impl_run_pass_ablation import *  # type: ignore[F403]
+    from _driver_impl_run_pass_ablation import main as run_pass_ablation_main
 except ImportError:
-    from micro._driver_impl_run_pass_ablation import *  # type: ignore[F403]
-
-
-def _main_through_driver() -> int:
-    try:
-        from driver import main as driver_main
-    except ImportError:
-        from micro.driver import main as driver_main
-    return driver_main(["ablation", "--", *sys.argv[1:]])
+    from micro._driver_impl_run_pass_ablation import main as run_pass_ablation_main
 
 
 if __name__ == "__main__":
-    raise SystemExit(_main_through_driver())
+    raise SystemExit(run_pass_ablation_main(sys.argv[1:]))

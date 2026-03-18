@@ -64,7 +64,7 @@ uint8_t regs(uint8_t dst, uint8_t src = 0)
 std::filesystem::path golden_policy_dir()
 {
     return std::filesystem::path(__FILE__).parent_path() /
-           "policy_v2_golden";
+           "policy_v3_golden";
 }
 
 std::string read_text_file(const std::filesystem::path &path)

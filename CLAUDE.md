@@ -36,7 +36,7 @@ make -C micro vendor_bpftool   # optional vendored bpftool
 **The Makefile is the single canonical entry point for running benchmarks.**
 
 ```bash
-# Full micro benchmark suite in VM (results → micro/results/vm_micro.latest.json)
+# Full micro benchmark suite in VM (results → micro/results/dev/vm_micro.json)
 make vm-micro
 
 # Run only specific benchmarks
@@ -48,7 +48,7 @@ make vm-micro ITERATIONS=10 WARMUPS=2 REPEAT=500
 # Quick smoke test (no VM needed)
 make smoke
 
-# Corpus benchmark in VM (results → corpus/results/vm_corpus.latest.json)
+# Corpus benchmark in VM (results → corpus/results/dev/vm_corpus.json)
 make vm-corpus
 
 # E2E benchmarks in VM (results → e2e/results/)
@@ -62,9 +62,10 @@ make help
 ```
 
 Results are written to:
-- `micro/results/` — micro benchmark results (JSON)
-- `corpus/results/` — corpus benchmark results (JSON)
-- `e2e/results/` — E2E benchmark results (JSON)
+- `micro/results/dev/` — default Makefile micro outputs
+- `corpus/results/dev/` — default Makefile corpus outputs
+- `e2e/results/dev/` — default Makefile E2E outputs
+- `*/results/` top-level — checked-in authoritative JSON only
 - `docs/tmp/` — analysis reports (.md) only, never JSON results
 
 For direct invocation (advanced use only):
@@ -76,7 +77,7 @@ python3 micro/run_micro.py --list
 python3 micro/run_micro.py --runtime llvmbpf --runtime kernel --perf-counters
 
 # Generate RQ-oriented markdown summary from results
-python3 micro/summarize_rq.py --results micro/results/vm_micro.latest.json --output docs/summary.md
+python3 micro/summarize_rq.py --results micro/results/dev/vm_micro.json --output docs/summary.md
 ```
 
 ### Clean
