@@ -799,7 +799,7 @@ static int create_memfd_from_blob(const char *name, const struct blob *blob,
 
 static int sys_prog_jit_recompile(int prog_fd, int policy_fd, __u32 flags,
 				  char *log_buf, __u32 log_size,
-				  __u32 log_level)
+				  bool log_enabled)
 {
 	union bpf_attr attr;
 	long rc;
@@ -808,7 +808,7 @@ static int sys_prog_jit_recompile(int prog_fd, int policy_fd, __u32 flags,
 	attr.jit_recompile.prog_fd = prog_fd;
 	attr.jit_recompile.policy_fd = policy_fd;
 	attr.jit_recompile.flags = flags;
-	attr.jit_recompile.log_level = log_level;
+	attr.jit_recompile.log_level = log_enabled ? 1 : 0;
 	attr.jit_recompile.log_size = log_size;
 	attr.jit_recompile.log_buf = ptr_to_u64(log_buf);
 
@@ -1466,55 +1466,6 @@ out:
 	return ok;
 }
 
-static bool test_recompile_count_increment(char *msg, size_t msg_len)
-{
-	struct loaded_program prog;
-	struct program_meta meta;
-	struct program_meta meta_after;
-	struct blob blob = {};
-	__u32 site = 0;
-	__u32 before;
-	__u32 after;
-	bool ok = false;
-	int rc;
-
-	if (load_meta_for_program(WIDE_OBJ, "test_wide", &prog, &meta, msg, msg_len))
-		return false;
-	before = meta.info.recompile_count;
-	if (!find_wide_site(&meta, &site)) {
-		set_msg(msg, msg_len, "wide site not found");
-		goto out;
-	}
-	if (build_wide_blob(&meta, site, &blob, msg, msg_len))
-		goto out;
-
-	rc = apply_blob(prog.prog_fd, &blob, true, NULL, 0);
-	if (rc) {
-		set_msg(msg, msg_len, "wide recompile failed: %s (%d)",
-			strerror(-rc), -rc);
-		goto out;
-	}
-	if (fetch_program_meta(prog.prog_fd, &meta_after, msg, msg_len))
-		goto out;
-	after = meta_after.info.recompile_count;
-	if (after != before + 1) {
-		set_msg(msg, msg_len, "recompile_count %u -> %u, expected %u",
-			before, after, before + 1);
-		goto out_after;
-	}
-
-	set_msg(msg, msg_len, "recompile_count %u -> %u", before, after);
-	ok = true;
-
-out_after:
-	free_program_meta(&meta_after);
-out:
-	free_blob(&blob);
-	free_program_meta(&meta);
-	unload_program(&prog);
-	return ok;
-}
-
 static bool build_valid_simple_blob_for_negative(const struct program_meta *meta,
 						 struct blob *blob,
 						 char *msg, size_t msg_len)
@@ -1867,18 +1818,14 @@ static bool test_repeated_recompile(char *msg, size_t msg_len)
 {
 	struct loaded_program prog;
 	struct program_meta meta;
-	struct program_meta meta_after;
 	struct blob blob = {};
 	__u32 site = 0;
-	__u32 before;
-	__u32 after;
 	bool ok = false;
 	int rc;
 
 	if (load_meta_for_program(ROTATE_OBJ, "test_rotate",
 				  &prog, &meta, msg, msg_len))
 		return false;
-	before = meta.info.recompile_count;
 	if (!find_rotate_site(&meta, &site)) {
 		set_msg(msg, msg_len, "rotate site not found");
 		goto out;
@@ -1898,20 +1845,9 @@ static bool test_repeated_recompile(char *msg, size_t msg_len)
 			strerror(-rc), -rc);
 		goto out;
 	}
-	if (fetch_program_meta(prog.prog_fd, &meta_after, msg, msg_len))
-		goto out;
-	after = meta_after.info.recompile_count;
-	if (after != before + 2) {
-		set_msg(msg, msg_len, "recompile_count %u -> %u, expected %u",
-			before, after, before + 2);
-		goto out_after;
-	}
-
-	set_msg(msg, msg_len, "rotate recompile_count %u -> %u", before, after);
+	set_msg(msg, msg_len, "rotate recompile succeeded twice");
 	ok = true;
 
-out_after:
-	free_program_meta(&meta_after);
 out:
 	free_blob(&blob);
 	free_program_meta(&meta);
@@ -2109,7 +2045,6 @@ int main(void)
 		{ "Wide Result Preserved After Recompile", test_wide_result_unchanged },
 		{ "Wide Stock Re-JIT Preserves Result", test_wide_zero_applied_jit_identity },
 		{ "Wide Site-Only JIT Diff", test_wide_site_only_jit_diff },
-		{ "Recompile Count Increments", test_recompile_count_increment },
 		{ "Wrong Magic Rejected", test_wrong_magic },
 		{ "Wrong Prog Tag Rejected", test_wrong_prog_tag },
 		{ "Wrong Insn Count Rejected", test_wrong_insn_cnt },
@@ -2120,7 +2055,7 @@ int main(void)
 		{ "Zero-Length Blob Rejected", test_zero_length_blob },
 		{ "Diamond CMOV Recompile Preserves Result", test_diamond_cmov },
 		{ "Rotate Recompile Preserves Result", test_rotate_preserved },
-		{ "Repeated Recompile Reaches Count Two", test_repeated_recompile },
+		{ "Repeated Recompile Succeeds", test_repeated_recompile },
 		{ "Concurrent Recompile Returns EBUSY", test_concurrent_recompile },
 		{ "Recompile After Attach Works", test_recompile_after_attach },
 	};

@@ -17,13 +17,6 @@ def read_optional_text(path: str | Path, default: str = "unknown") -> str:
         return default
 
 
-def resolve_path(value: str | Path, base_dir: str | Path) -> Path:
-    path = Path(value)
-    if path.is_absolute():
-        return path
-    return (Path(base_dir) / path).resolve()
-
-
 def sudo_available() -> bool:
     try:
         completed = subprocess.run(
@@ -105,7 +98,6 @@ __all__ = [
     "ensure_build_steps",
     "read_optional_text",
     "read_required_text",
-    "resolve_path",
     "sudo_available",
     "validate_publication_environment",
 ]

@@ -102,12 +102,6 @@ def maybe_prepend_sudo(command: Sequence[str], *, enabled: bool) -> list[str]:
     return ["sudo", "-n", *command]
 
 
-def maybe_prepend_taskset(command: Sequence[str], cpu: str | int | None) -> list[str]:
-    if cpu is None:
-        return list(command)
-    return ["taskset", "-c", str(cpu), *command]
-
-
 def build_list_programs_command(runner_binary: Path | str, program: Path | str) -> list[str]:
     return build_runner_command(runner_binary, "list-programs", program=program)
 
@@ -184,5 +178,4 @@ __all__ = [
     "build_micro_benchmark_command",
     "build_runner_command",
     "maybe_prepend_sudo",
-    "maybe_prepend_taskset",
 ]

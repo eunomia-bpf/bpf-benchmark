@@ -11,7 +11,8 @@
 > - 每次 context 压缩后 → 完整读取本文档恢复全局状态。
 > - 用 agent background 跑任务，不阻塞主对话。
 > - **构建+修改+运行不拆分**：一个 subagent 负责完整流程（改代码→构建→运行→发现 bug→修复→再运行），不要拆成多个 agent。
-> 上次更新：2026-03-19（#207 ✅ Tracee revert rerun：exec_storm +4.40%/file_io +4.69%/network +2.18%，13/15 applied 恢复，旧权威保持；#208 ✅ Corpus revert rerun：overall 0.900x，applied-only 1.023x，non-applied 0.826x（ultra-short 噪声主导），旧权威 1.046x 保持；#209 ✅ Trampoline regeneration 调研完成：~100 LOC 内核改动方案，待实施；#210 ✅ Kernel deep review：9 个问题（4×P1, 5×P2）+ 3 设计建议，计划 3 轮 codex 修复；#211 ✅ GitHub ARM64 KVM 调研：无 /dev/kvm，必须租机。revert 了 trampoline guard（ce3f7a7b0），force push jit-directive-v5。）
+> 上次更新：2026-03-19b（#212-#218 全部 ✅。内核 Phase A/B/C bug fix + 性能优化 + validator/emitter 统一 + DSL 删除 + tracepoints 删除 + stock choice 消除 + do_jit 短路 + 头文件清理。内核代码从 6758→5649 行（-16.4%）。selftest 20/20 全通过。用户态清理 ~21000 行 dead code。夜跑 vm-micro+e2e+corpus 进行中。）
+> 前次更新：2026-03-19（#207-#211；revert trampoline guard；Tracee/Corpus rerun；trampoline 调研；kernel deep review；GitHub ARM64 KVM 调研。）
 > 前次更新：2026-03-18b（#206 ✅ Tracee bpftool fix + rerun；trampoline guard 导致 corpus 0.934x → 已 revert。）
 > 前次更新：2026-03-18（#203 ✅ 删除 XDP forwarding E2E；#189 ✅ Micro policy 优化完成，applied-only 1.118x；#190 ✅ 结果目录整理 + result schema 升级；#191 ✅ Corpus/E2E 性能分析；#192 ✅ Katran E2E 可行性调研；#193 🔄 Corpus policy refresh；§8 合并入 §7。）
 > 前次更新：2026-03-14（#180-#183 新增；#170 ✅ enumerate per-site manifest 完成；#171 ❌ 暂不做；#173 ✅ corpus pipeline 切 enumerate；框架重构/P0修复/Opus review 归档。）（#179 ✅ Per-form ablation 完成。7 canonical forms × 19 targeted benchmarks，单独激活每个 form，其余 sites 清空。结果（geomean ratio，越低越好）：ROTATE **0.923x** (WIN, +7.7%)、ENDIAN **0.981x** (WIN)、BRANCH-FLIP **0.992x** (WIN)、LEA **0.999x** (neutral)、WIDE **1.007x** (LOSS)、EXTRACT **1.067x** (LOSS)、CMOV **1.068x** (LOSS, cond_select_dense 1.538x 主导)。ALL-combined reference（当前 policy）**0.988x** (WIN)。关键 insight：ROTATE 是最高价值 form，CMOV/EXTRACT 在 dense-site 场景严重回归（I-cache flush + 预测分支惩罚）。数据：`micro/results/per_form_ablation_20260313/`，报告：`docs/tmp/micro-per-form-ablation.md`。commit bb6308f。）
@@ -693,4 +694,10 @@ make clean
 | 215 | **Kernel cleanup：tracepoints 删除 + stock choice 消除（2026-03-19）** | ✅ | 删除 trace_bpf_jit_recompile_* + stock native choice 枚举。vm-selftest **20/20 全通过**（首次）。scanner 同步更新。报告：`docs/tmp/kernel_tracepoint_stock_cleanup_20260319.md`。 |
 | 216 | **Kernel deep review（2026-03-19）** | ✅ | 9.2/10 评分，无 blocking 问题。报告：`docs/tmp/kernel_post_fix_review_20260319.md`。 |
 | 217 | **Kernel 代码必要性审计（2026-03-19）** | ✅ | 6758 行中估计最小必要 2631 行。最大膨胀：通用 pattern DSL ~700 行冗余。报告：`docs/tmp/kernel_code_necessity_audit_20260319.md`。 |
-| 218 | **删除 DSL 层 + 简化 blob 格式（2026-03-19）** | 🔄 | 删除 pattern match/constraint check/binding extract ~900 行内核 + UAPI。blob 简化为 {site_start, site_len, form, choice}。scanner 同步简化。不保留旧版本兼容。CPU feature gating 移到 emitter。 |
+| 218 | **删除 DSL 层 + 简化 blob 格式（2026-03-19）** | ✅ | 删除 pattern match/constraint check/binding extract ~900 行。blob 简化为 {site_start, site_len, form, choice}。scanner 同步。selftest 20/20。报告：`docs/tmp/kernel_dsl_removal_20260319.md`。 |
+| 219 | **Tracepoints 删除 + stock choice 消除（2026-03-19）** | ✅ | 删 trace_bpf_jit_recompile_* + 5 个 stock native choice 枚举。selftest 20/20。报告：`docs/tmp/kernel_tracepoint_stock_cleanup_20260319.md`。 |
+| 220 | **do_jit 短路恢复 + 头文件残留清理（2026-03-19）** | ✅ | do_jit has_active_rules 短路重新加回。删除 bpf_jit_var_type/bpf_jit_var/present_mask/param_count。报告：`docs/tmp/kernel_dojit_shortcircuit_header_cleanup_20260319.md`。 |
+| 221 | **用户态 dead code 清理（2026-03-19）** | ✅ | 删除 47 个文件 ~21000 行。broken import 修复。文档更新。报告：`docs/tmp/userspace_cleanup_20260319.md`、`docs/tmp/userspace_fix_round2_20260319.md`。 |
+| 222 | **Kernel final review（2026-03-19）** | ✅ | 8.4/10。7/9 问题已修，2 个 ABI 留论文后。报告：`docs/tmp/kernel_final_review_20260319.md`。 |
+| 223 | **内核接口精简 + 用户态再查（2026-03-19）** | 🔄 | recompile_count 删除、BPF_F_RECOMPILE_ROLLBACK 简化、log_level→bool。夜跑验证进行中。 |
+| 224 | **完整验证 vm-micro+e2e+corpus（2026-03-19 夜跑）** | 🔄 | DSL 删除后完整验证。codex b8w04s588 进行中。 |
