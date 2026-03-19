@@ -108,32 +108,6 @@ def _scanner_counts(stdout: str) -> dict[str, int]:
     return counts
 
 
-def _scanner_json_payload(stdout: str) -> dict[str, Any] | None:
-    payload = None
-    stripped_stdout = stdout.strip()
-    if stripped_stdout.startswith("{"):
-        try:
-            candidate = json.loads(stripped_stdout)
-        except json.JSONDecodeError:
-            candidate = None
-        if isinstance(candidate, dict):
-            payload = candidate
-    for line in reversed(stdout.splitlines()):
-        if payload is not None:
-            break
-        text = line.strip()
-        if not text.startswith("{"):
-            continue
-        try:
-            candidate = json.loads(text)
-        except json.JSONDecodeError:
-            continue
-        if isinstance(candidate, dict):
-            payload = candidate
-            break
-    return payload
-
-
 def _counts_from_family_counts(family_counts: Mapping[str, Any] | None) -> dict[str, int]:
     raw = family_counts or {}
     counts = {

@@ -257,14 +257,6 @@ def candidate_id_for_allowlist(allowlist: list[str]) -> str:
     return "allow:" + ",".join(canonical_families(allowlist))
 
 
-def candidate_label(allowlist: list[str], skipped_families: list[str]) -> str:
-    if not allowlist:
-        return "stock"
-    if not skipped_families:
-        return "all-apply"
-    return "skip-" + "+".join(skipped_families)
-
-
 def program_key(object_path: str, program_name: str) -> str:
     return f"{object_path}:{program_name}"
 

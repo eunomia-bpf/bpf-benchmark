@@ -231,27 +231,6 @@ def parse_runner_sample(stdout: str) -> RunnerSample:
     return normalize_runner_sample(payload)
 
 
-def summarize_per_benchmark_samples(samples: Sequence[Mapping[str, object]]) -> dict[str, object]:
-    counter_summary = summarize_named_counters(samples, "perf_counters")
-    code_size_ratios = [
-        float(code_size.get("inflation_ratio"))
-        for sample in samples
-        for code_size in [sample.get("code_size")]
-        if isinstance(code_size, Mapping) and code_size.get("inflation_ratio") is not None
-    ]
-    return {
-        "sample_count": len(samples),
-        "compile_ns": summarize_optional_ns(samples, "compile_ns"),
-        "exec_ns": summarize_optional_ns(samples, "exec_ns"),
-        "wall_exec_ns": summarize_optional_ns(samples, "wall_exec_ns"),
-        "phases_ns": summarize_phase_timings(samples),
-        "perf_counters": counter_summary,
-        "perf_counters_meta": summarize_perf_counter_meta(samples),
-        "derived_perf_metrics": derive_perf_metrics(counter_summary),
-        "inflation_ratio": float_summary(code_size_ratios) if code_size_ratios else None,
-    }
-
-
 def geometric_mean(values: Sequence[float | int]) -> float | None:
     positive = [float(value) for value in values if float(value) > 0.0]
     if not positive:
@@ -439,7 +418,6 @@ __all__ = [
     "parse_runner_sample",
     "summarize_named_counters",
     "summarize_optional_ns",
-    "summarize_per_benchmark_samples",
     "summarize_perf_counter_meta",
     "summarize_phase_timings",
     "zero_directive_scan",

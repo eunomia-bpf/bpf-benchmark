@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from collections import Counter, defaultdict
 import re
-import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
@@ -409,43 +408,6 @@ def remap_policy_v3_to_live(
     return text, summary
 
 
-def generate_default_policy_v3(
-    scanner_binary: Path | str,
-    object_path: Path | str,
-    *,
-    program_name: str | None = None,
-    output_path: Path | str | None = None,
-    timeout_seconds: int = 60,
-) -> str:
-    command = [
-        str(Path(scanner_binary).resolve()),
-        "generate-policy",
-        str(Path(object_path).resolve()),
-    ]
-    if program_name:
-        command.extend(["--program-name", program_name])
-    if output_path is not None:
-        resolved_output = Path(output_path).resolve()
-        resolved_output.parent.mkdir(parents=True, exist_ok=True)
-        command.extend(["--output", str(resolved_output)])
-
-    completed = subprocess.run(
-        command,
-        cwd=ROOT_DIR,
-        capture_output=True,
-        text=True,
-        check=False,
-        timeout=timeout_seconds,
-    )
-    if completed.returncode != 0:
-        message = (completed.stderr or completed.stdout).strip()
-        raise RuntimeError(message or "scanner generate-policy failed")
-
-    if output_path is not None:
-        return Path(output_path).resolve().read_text()
-    return completed.stdout
-
-
 __all__ = [
     "CORPUS_DIR",
     "OBJECT_ROOT_NAMES",
@@ -455,7 +417,6 @@ __all__ = [
     "PolicySiteV3",
     "ROOT_DIR",
     "canonical_policy_family_name",
-    "generate_default_policy_v3",
     "object_policy_stem",
     "object_relative_path",
     "object_roots",

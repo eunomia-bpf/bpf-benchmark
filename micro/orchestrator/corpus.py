@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from .commands import build_runner_command
-from .results import normalize_directive_scan, parse_json_lines, parse_runner_sample
+from .results import normalize_directive_scan, parse_runner_sample
 
 
 def relpath(path: Path | str, root_dir: Path) -> str:
@@ -312,11 +312,6 @@ def directive_scan_from_record(record: Mapping[str, Any] | None) -> dict[str, in
     return normalize_directive_scan(scan)
 
 
-def parse_json_lines_payloads(stdout: str) -> list[dict[str, Any]]:
-    payloads = parse_json_lines(stdout)
-    return [dict(payload) for payload in payloads if isinstance(payload, Mapping)]
-
-
 def text_invocation_summary(result: Mapping[str, Any] | None) -> dict[str, Any] | None:
     if result is None:
         return None
@@ -402,7 +397,6 @@ __all__ = [
     "materialize_dummy_packet",
     "maybe_sudo_prefix",
     "normalize_section_root",
-    "parse_json_lines_payloads",
     "parse_runner_json",
     "parse_scanner_v5_output",
     "program_label",

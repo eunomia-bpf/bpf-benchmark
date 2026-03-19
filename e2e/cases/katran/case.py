@@ -18,7 +18,7 @@ import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Mapping, Sequence
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
@@ -495,10 +495,6 @@ class LibbpfMapApi:
             return
         err = ctypes.get_errno()
         raise RuntimeError(f"bpf_map_update_elem failed: {os.strerror(err)} (errno={err})")
-
-
-def ipv4_u32(address: str) -> int:
-    return int.from_bytes(socket.inet_aton(address), "big")
 
 
 def pack_u32(value: int) -> bytes:

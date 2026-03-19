@@ -1432,7 +1432,9 @@ def discover_corpus_bpf_objects(corpus_build_report: Path | None) -> tuple[list[
 def run_vm_mode(args: argparse.Namespace) -> int:
     guest_command = [
         "python3",
-        "corpus/run_corpus_tracing_exec.py",
+        "micro/driver.py",
+        "corpus",
+        "tracing-exec",
         "--guest",
         "--output-json",
         str(Path(args.output_json).resolve()),

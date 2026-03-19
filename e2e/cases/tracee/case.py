@@ -25,7 +25,6 @@ from e2e.common import (  # noqa: E402
     ROOT_DIR,
     authoritative_output_path,
     chown_to_invoking_user,
-    describe_command,
     ensure_root,
     resolve_bpftool_binary,
     run_command,

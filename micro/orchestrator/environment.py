@@ -24,12 +24,6 @@ def resolve_path(value: str | Path, base_dir: str | Path) -> Path:
     return (Path(base_dir) / path).resolve()
 
 
-def resolve_optional_path(value: str | Path | None, base_dir: str | Path) -> Path | None:
-    if value is None:
-        return None
-    return resolve_path(value, base_dir)
-
-
 def sudo_available() -> bool:
     try:
         completed = subprocess.run(
@@ -111,7 +105,6 @@ __all__ = [
     "ensure_build_steps",
     "read_optional_text",
     "read_required_text",
-    "resolve_optional_path",
     "resolve_path",
     "sudo_available",
     "validate_publication_environment",

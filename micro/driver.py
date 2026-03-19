@@ -108,14 +108,9 @@ def _census_entry(argv: list[str]) -> int:
     if not argv:
         return _run_python_script("corpus/directive_census.py", [])
     tool, *remaining = argv
-    script_map = {
-        "directive": "corpus/directive_census.py",
-        "cross-domain": "corpus/tmp/cross_domain_census.py",
-    }
-    script_name = script_map.get(tool)
-    if script_name is None:
-        raise SystemExit("unknown census mode: expected directive or cross-domain")
-    return _run_python_script(script_name, remaining)
+    if tool != "directive":
+        raise SystemExit("unknown census mode: expected directive")
+    return _run_python_script("corpus/directive_census.py", remaining)
 
 
 def build_parser() -> argparse.ArgumentParser:

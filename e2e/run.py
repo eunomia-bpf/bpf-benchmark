@@ -9,7 +9,6 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from e2e.common import (  # noqa: E402
-    DEFAULT_VENV_ACTIVATE,
     ROOT_DIR,
     prepare_bpftool_environment,
     tail_text,

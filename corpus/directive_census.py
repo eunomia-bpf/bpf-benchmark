@@ -6,7 +6,6 @@ import json
 import os
 import re
 import statistics
-import struct
 import subprocess
 import tempfile
 from collections import defaultdict
@@ -47,15 +46,6 @@ SCANNER_PATTERNS = {
     "endian": re.compile(r"^\s*endian:\s*(\d+)\s*$"),
     "bflip": re.compile(r"^\s*bflip:\s*(\d+)\s*$"),
 }
-
-
-@dataclass(frozen=True)
-class Insn:
-    code: int
-    regs: int
-    off: int
-    imm: int
-
 
 @dataclass(frozen=True)
 class SectionResult:
@@ -173,33 +163,6 @@ def parse_args() -> argparse.Namespace:
         help="Parallel object scans to run at once.",
     )
     return parser.parse_args()
-
-
-def parse_raw_insns(data: bytes) -> list[Insn]:
-    trailing = len(data) % INSN_SIZE
-    if trailing:
-        raise ValueError(f"section has {trailing} trailing byte(s), not a multiple of 8")
-    insns: list[Insn] = []
-    for offset in range(0, len(data), INSN_SIZE):
-        code, regs, off, imm = struct.unpack_from("<BBhi", data, offset)
-        insns.append(Insn(code=code, regs=regs, off=off, imm=imm))
-    return insns
-
-
-def scan_cmov(insns: list[Insn]) -> int:  # pragma: no cover - compatibility export only
-    return 0
-
-
-def scan_wide_mem(insns: list[Insn]) -> int:  # pragma: no cover - compatibility export only
-    return 0
-
-
-def scan_rotate(insns: list[Insn]) -> int:  # pragma: no cover - compatibility export only
-    return 0
-
-
-def scan_addr_calc(insns: list[Insn]) -> int:  # pragma: no cover - compatibility export only
-    return 0
 
 
 def is_code_section(section) -> bool:

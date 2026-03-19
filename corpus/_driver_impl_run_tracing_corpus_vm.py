@@ -456,7 +456,9 @@ def build_dry_run_markdown(payload: dict[str, Any], *, heading: str, lead_note: 
 def build_plan_markdown(payload: dict[str, Any]) -> str:
     command_preview = [
         "python3",
-        "corpus/run_tracing_corpus_vm.py",
+        "micro/driver.py",
+        "corpus",
+        "tracing-vm",
         "--kernel-image",
         payload["kernel_image"],
         "--output-json",
@@ -807,7 +809,7 @@ def main(argv: list[str] | None = None) -> int:
     discovery = discover_targets(args, runner)
     payload: dict[str, Any] = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "driver": "corpus/run_tracing_corpus_vm.py",
+        "driver": "micro/driver.py corpus tracing-vm",
         "mode": "dry-run" if args.dry_run else "vm",
         "kernel_image": str(kernel_image),
         "kernel_image_exists": kernel_image.exists(),
