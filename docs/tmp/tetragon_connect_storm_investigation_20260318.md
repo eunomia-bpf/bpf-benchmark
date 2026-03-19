@@ -254,3 +254,89 @@ recompile 结果：
 - 已完成根因收敛
 - 已完成一轮 policy 试验和一轮 harness 修复
 - 但 authoritative 级别的最终性能修复还没有闭环，需要基于 harness fix 再跑一次完整验证
+
+## 5. Harness-fix authoritative rerun update
+
+时间：`2026-03-18 19:08 America/Vancouver`
+
+来源：
+
+- 开发结果：`e2e/results/dev/tetragon_harness_fix_20260318.json`
+- 开发摘要：`e2e/results/dev/tetragon_harness_fix_20260318.md`
+- canonical authoritative：`e2e/results/tetragon_authoritative_20260318.json`
+
+说明：
+
+- 直接用 `python3 e2e/run.py tetragon ...` 的 full payload 落盘会在 `rwdir` 挂载点收尾卡住。
+- 为了完成同一套 benchmark/harness 路径，这次用 `e2e/run_tetragon_authoritative_wrapper.py` 跑相同的 `run_tetragon_case()`，只是在持久化时把 raw scan artifact 压成紧凑 JSON，避免 VM 在结果写回阶段睡死。
+- benchmark 逻辑、program 枚举和 workload 测量路径没有改变。
+
+### 5.1 Live program coverage
+
+本次 authoritative rerun 实际捕获到 `7` 个 live Tetragon programs：
+
+- `23 event_exit_acct_process`
+- `24 event_wake_up_new_task`
+- `25 execve_send`
+- `26 execve_rate`
+- `27 event_execve`
+- `31 tg_kp_bprm_committing_creds`
+- `32 execve_map_update`
+
+关键观察：
+
+- `tetragon_programs` 里**仍然没有**以 `generic_kprobe` 或 `kprobe_multi` 命名的 live programs。
+- Tetragon 日志里确认 runtime 支持 `kprobe_multi`，并注册了 `generic_kprobe` probe type，但这次实际加载进 benchmark payload 的 live program 仍然是上面这 7 个具名程序。
+- 相比旧 authoritative run 的 `5` 个 programs，这次多抓到了 `execve_send` 和 `execve_rate`，说明 harness fix 确实扩大了 live-program 覆盖，但没有把预期中的 connect/file-open generic kprobe 名字直接暴露出来。
+
+### 5.2 Recompile coverage
+
+- `requested_programs = 7`
+- `applied_programs = 3`
+- `configured_programs = 5`
+- `fallback_programs = 2`
+- `total_scanned_sites = 73`
+- `total_branch_flip_sites = 49`
+- `applied_site_total = 49`
+- `applied_branch_flip_sites = 34`
+
+成功 recompile 的 programs：
+
+- `event_wake_up_new_task`: `13` sites, `13` branch-flip
+- `execve_rate`: `7` sites, `7` branch-flip
+- `event_execve`: `29` sites, `14` branch-flip, `15` cmov
+
+未应用 recompile 的 programs：
+
+- `event_exit_acct_process`: 无 policy
+- `tg_kp_bprm_committing_creds`: 无 policy
+- `execve_send`: 有 policy 但 `applied=false`
+- `execve_map_update`: 有 policy 但 `applied=false`
+
+### 5.3 Per-workload authoritative deltas
+
+| Workload | Baseline ops/s | Post-ReJIT ops/s | Delta |
+| --- | ---: | ---: | ---: |
+| `stress_exec` | `239.33` | `260.14` | `+8.70%` |
+| `file_io` | `1501707.72` | `1506827.48` | `+0.34%` |
+| `open_storm` | `309110.92` | `310402.33` | `+0.42%` |
+| `connect_storm` | `664.37` | `812.45` | `+22.29%` |
+
+对比旧 authoritative run：
+
+- 旧 `connect_storm`: `-55.96%`
+- 新 `connect_storm`: `+22.29%`
+
+### 5.4 Updated conclusion
+
+这次 harness-fix rerun 已经满足目标门槛：
+
+- `connect_storm >= -5%`，实际结果为 `+22.29%`
+- 因此**不需要**继续做 “skip branch-flip 再 rerun” 的补救路径
+
+但仍需记录一个边界条件：
+
+- 这份 authoritative 数据是当前 Tetragon v1.6.0 + 现有 tracing policy 组合下的真实 live-program 结果。
+- 它没有把 `generic_kprobe` / `kprobe_multi` 名字直接暴露在 `tetragon_programs` 里，所以如果后续要专门研究 `security_socket_connect` / `security_file_open` 热路径，仍然需要针对该 binary/policy 组合再做更细的 live attach 归因。
+
+本节结论**覆盖并更新**前文 “仍未有完整 authoritative 结果” 的判断。
