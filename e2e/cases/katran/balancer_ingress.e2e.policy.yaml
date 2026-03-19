@@ -1,0 +1,15 @@
+version: 3
+program: balancer_ingress
+sites:
+  - insn: 120
+    family: wide
+    pattern_kind: wide-load-2
+  - insn: 125
+    family: wide
+    pattern_kind: wide-load-2
+  - insn: 266
+    family: wide
+    pattern_kind: wide-load-2
+  - insn: 271
+    family: wide
+    pattern_kind: wide-load-2

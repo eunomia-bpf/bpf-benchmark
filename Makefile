@@ -59,6 +59,8 @@ VM_BPFTRACE_OUTPUT_MD := $(E2E_RESULTS_DEV_DIR)/bpftrace.md
 VM_BPFTRACE_REPORT_MD := $(E2E_RESULTS_DEV_DIR)/bpftrace_report.md
 VM_SCX_OUTPUT_JSON := $(E2E_RESULTS_DEV_DIR)/scx.json
 VM_SCX_OUTPUT_MD := $(E2E_RESULTS_DEV_DIR)/scx.md
+VM_KATRAN_OUTPUT_JSON := $(E2E_RESULTS_DEV_DIR)/katran.json
+VM_KATRAN_OUTPUT_MD := $(E2E_RESULTS_DEV_DIR)/katran.md
 
 # Build --bench flags from BENCH variable (space-separated list of benchmark names)
 # e.g. make vm-micro BENCH="simple bitcount" → --bench simple --bench bitcount
@@ -125,7 +127,7 @@ help:
 	@echo "  make vm-micro-smoke   - Quick kernel+recompile smoke in VM"
 	@echo "  make vm-micro         - Full micro benchmark suite in VM"
 	@echo "  make vm-corpus        - Corpus benchmark in VM"
-	@echo "  make vm-e2e           - E2E benchmarks (tracee/tetragon/bpftrace/scx) in VM"
+	@echo "  make vm-e2e           - E2E benchmarks (tracee/tetragon/bpftrace/scx/katran) in VM"
 	@echo "  make vm-all           - All VM benchmarks"
 	@echo ""
 	@echo "Utility targets:"
@@ -314,6 +316,10 @@ vm-e2e: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(SCANNER_PATH) verify-build $(BZIMAG
 		bash -lc 'cd "$(ROOT_DIR)" && $(VENV_ACTIVATE) python3 "$(ROOT_DIR)/e2e/run.py" scx \
 			--output-json "$(VM_SCX_OUTPUT_JSON)" \
 			--output-md "$(VM_SCX_OUTPUT_MD)"'
+	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
+		bash -lc 'cd "$(ROOT_DIR)" && $(VENV_ACTIVATE) python3 "$(ROOT_DIR)/e2e/run.py" katran \
+			--output-json "$(VM_KATRAN_OUTPUT_JSON)" \
+			--output-md "$(VM_KATRAN_OUTPUT_MD)"'
 
 vm-all:
 	@echo "=== Running make vm-all ==="
@@ -343,4 +349,6 @@ clean:
 		"$(VM_BPFTRACE_OUTPUT_MD)" \
 		"$(VM_BPFTRACE_REPORT_MD)" \
 		"$(VM_SCX_OUTPUT_JSON)" \
-		"$(VM_SCX_OUTPUT_MD)"
+		"$(VM_SCX_OUTPUT_MD)" \
+		"$(VM_KATRAN_OUTPUT_JSON)" \
+		"$(VM_KATRAN_OUTPUT_MD)"

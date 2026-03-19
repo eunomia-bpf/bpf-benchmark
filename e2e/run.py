@@ -8,7 +8,14 @@ from pathlib import Path
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from e2e.common import DEFAULT_VENV_ACTIVATE, ROOT_DIR, tail_text, write_json, write_text  # noqa: E402
+from e2e.common import (  # noqa: E402
+    DEFAULT_VENV_ACTIVATE,
+    ROOT_DIR,
+    prepare_bpftool_environment,
+    tail_text,
+    write_json,
+    write_text,
+)
 from e2e.common.vm import run_in_vm, write_guest_script  # noqa: E402
 from e2e.cases.bpftrace.case import (  # noqa: E402
     DEFAULT_OUTPUT_JSON as DEFAULT_BPFTRACE_OUTPUT_JSON,
@@ -17,6 +24,15 @@ from e2e.cases.bpftrace.case import (  # noqa: E402
     build_markdown as build_bpftrace_markdown,
     build_report as build_bpftrace_report,
     run_case as run_bpftrace_case,
+)
+from e2e.cases.katran.case import (  # noqa: E402
+    DEFAULT_KATRAN_OBJECT as DEFAULT_KATRAN_CASE_OBJECT,
+    DEFAULT_OUTPUT_JSON as DEFAULT_KATRAN_OUTPUT_JSON,
+    DEFAULT_OUTPUT_MD as DEFAULT_KATRAN_OUTPUT_MD,
+    DEFAULT_POLICY_FILE as DEFAULT_KATRAN_POLICY_FILE,
+    DEFAULT_SETUP_SCRIPT as DEFAULT_KATRAN_SETUP_SCRIPT,
+    persist_results as persist_katran_results,
+    run_katran_case,
 )
 from e2e.cases.scx.case import (  # noqa: E402
     DEFAULT_OUTPUT_JSON as DEFAULT_SCX_OUTPUT_JSON,
@@ -44,7 +60,7 @@ from e2e.cases.tracee.case import (  # noqa: E402
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Unified entrypoint for repository end-to-end benchmarks.")
-    parser.add_argument("case", choices=("tracee", "tetragon", "bpftrace", "scx"))
+    parser.add_argument("case", choices=("tracee", "tetragon", "bpftrace", "scx", "katran"))
     parser.add_argument("--vm", action="store_true", help="Run the benchmark inside a virtme-ng guest.")
     parser.add_argument("--kernel", help="Kernel image used with --vm.")
     parser.add_argument("--smoke", action="store_true", help="Run the smoke-sized configuration.")
@@ -72,6 +88,15 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--scheduler-binary", default=str(ROOT_DIR / "corpus" / "repos" / "scx" / "target" / "release" / "scx_rusty"))
     parser.add_argument("--scheduler-object", default=str(ROOT_DIR / "corpus" / "build" / "scx" / "scx_rusty_main.bpf.o"))
     parser.add_argument("--scx-repo", default=str(ROOT_DIR / "corpus" / "repos" / "scx"))
+    parser.add_argument("--katran-object", default=str(DEFAULT_KATRAN_CASE_OBJECT))
+    parser.add_argument("--katran-policy", default=str(DEFAULT_KATRAN_POLICY_FILE))
+    parser.add_argument("--katran-server-binary", help="Explicit Katran server binary path.")
+    parser.add_argument("--katran-iface", default="katran0")
+    parser.add_argument("--katran-router-peer-iface")
+    parser.add_argument("--katran-packet-repeat", type=int)
+    parser.add_argument("--katran-samples", type=int)
+    parser.add_argument("--katran-skip-attach", action="store_true")
+    parser.add_argument("--kernel-config", default=str(ROOT_DIR / "vendor" / "linux-framework" / ".config"))
     parser.add_argument("--bpftool-binary", default="/usr/local/sbin/bpftool")
     parser.add_argument("--bpftool", help="Explicit bpftool path for Tetragon runs.")
     parser.add_argument("--scheduler-extra-arg", action="append", default=[])
@@ -176,6 +201,67 @@ def run_scx_vm(args: argparse.Namespace) -> int:
     return 0
 
 
+def run_katran_vm(args: argparse.Namespace) -> int:
+    if not args.kernel:
+        raise SystemExit("--kernel is required with --vm")
+
+    katran_iface = args.katran_iface if args.katran_iface != "katran0" else "eth0"
+    router_peer_iface = args.katran_router_peer_iface or "eth1"
+    guest_command = [
+        "python3",
+        "e2e/run.py",
+        "katran",
+        "--output-json",
+        str(Path(args.output_json).resolve()),
+        "--output-md",
+        str(Path(args.output_md).resolve()),
+        "--setup-script",
+        str(Path(args.setup_script).resolve()),
+        "--katran-object",
+        str(Path(args.katran_object).resolve()),
+        "--katran-policy",
+        str(Path(args.katran_policy).resolve()),
+        "--katran-iface",
+        str(katran_iface),
+        "--katran-router-peer-iface",
+        str(router_peer_iface),
+        "--runner",
+        str(Path(args.runner).resolve()),
+        "--scanner",
+        str(Path(args.scanner).resolve()),
+        "--kernel-config",
+        str(Path(args.kernel_config).resolve()),
+        "--skip-setup",
+    ]
+    if args.smoke:
+        guest_command.append("--smoke")
+    if args.duration is not None:
+        guest_command.extend(["--duration", str(int(args.duration))])
+    if args.katran_server_binary:
+        guest_command.extend(["--katran-server-binary", str(Path(args.katran_server_binary).resolve())])
+    if args.katran_packet_repeat is not None:
+        guest_command.extend(["--katran-packet-repeat", str(int(args.katran_packet_repeat))])
+    if args.katran_samples is not None:
+        guest_command.extend(["--katran-samples", str(int(args.katran_samples))])
+    if args.katran_skip_attach:
+        guest_command.append("--katran-skip-attach")
+
+    guest_script = write_guest_script(
+        [
+            ["bash", str(Path(args.setup_script).resolve())],
+            guest_command,
+        ]
+    )
+    completed = run_in_vm(args.kernel, guest_script, args.cpus, args.mem, args.timeout, networks=("loop",))
+    sys.stdout.write(completed.stdout)
+    sys.stderr.write(completed.stderr)
+    if completed.returncode != 0:
+        raise SystemExit(
+            f"vng run failed with exit {completed.returncode}: {tail_text(completed.stderr or completed.stdout)}"
+        )
+    return 0
+
+
 def persist_bpftrace_results(args: argparse.Namespace, payload: dict[str, object]) -> None:
     write_json(Path(args.output_json).resolve(), payload)
     write_text(Path(args.output_md).resolve(), build_bpftrace_markdown(payload) + "\n")
@@ -183,6 +269,15 @@ def persist_bpftrace_results(args: argparse.Namespace, payload: dict[str, object
 
 
 def apply_case_defaults(args: argparse.Namespace) -> None:
+    if args.case == "katran":
+        if args.output_json == str(DEFAULT_OUTPUT_JSON):
+            args.output_json = str(DEFAULT_KATRAN_OUTPUT_JSON)
+        if args.output_md == str(DEFAULT_OUTPUT_MD):
+            args.output_md = str(DEFAULT_KATRAN_OUTPUT_MD)
+        if args.setup_script == str(DEFAULT_TRACEE_SETUP_SCRIPT):
+            args.setup_script = str(DEFAULT_KATRAN_SETUP_SCRIPT)
+        return
+
     if args.case == "scx":
         if args.output_json == str(DEFAULT_OUTPUT_JSON):
             args.output_json = str(DEFAULT_SCX_OUTPUT_JSON)
@@ -211,10 +306,13 @@ def apply_case_defaults(args: argparse.Namespace) -> None:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    prepare_bpftool_environment()
     apply_case_defaults(args)
     if args.vm:
         if args.case == "tracee":
             return run_tracee_vm(args)
+        if args.case == "katran":
+            return run_katran_vm(args)
         if args.case == "scx":
             return run_scx_vm(args)
         if args.case in {"tetragon", "bpftrace"}:
@@ -236,6 +334,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.case == "scx":
         payload = run_scx_case(args)
         persist_scx_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve())
+        return 0
+    if args.case == "katran":
+        payload = run_katran_case(args)
+        persist_katran_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve())
         return 0
     raise SystemExit(f"unsupported e2e case: {args.case}")
 
