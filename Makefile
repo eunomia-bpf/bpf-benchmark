@@ -81,14 +81,17 @@ POLICY_DIR_FLAG := $(if $(filter-out default,$(POLICY)),--policy-dir "$(POLICY_D
 
 MICRO_ARGS := --iterations $(ITERATIONS) --warmups $(WARMUPS) --repeat $(REPEAT) $(BENCH_FLAGS)
 LOCAL_SMOKE_ARGS := --bench simple --iterations 1 --warmups 0 --repeat 10
-VM_SMOKE_ARGS := --bench simple --bench load_byte_recompose --iterations 1 --warmups 0 --repeat 10
+VM_SMOKE_ARGS := --bench simple --bench load_byte_recompose --bench cmov_dense --iterations 1 --warmups 0 --repeat 10
 VENV_ACTIVATE := $(if $(VENV),source "$(VENV)/bin/activate" &&,)
 
 # File-based dependency sources (for proper incremental rebuilds)
 MICRO_RUNNER_SOURCES := $(wildcard \
 	$(MICRO_DIR)/runner/src/*.cpp \
 	$(MICRO_DIR)/runner/src/*.h \
-	$(MICRO_DIR)/runner/CMakeLists.txt)
+	$(MICRO_DIR)/runner/CMakeLists.txt \
+	$(SCANNER_DIR)/src/*.cpp \
+	$(SCANNER_DIR)/include/bpf_jit_scanner/*.hpp \
+	$(SCANNER_DIR)/CMakeLists.txt)
 MICRO_BPF_SOURCES := $(wildcard \
 	$(MICRO_DIR)/programs/*.bpf.c \
 	$(MICRO_DIR)/programs/common.h)
