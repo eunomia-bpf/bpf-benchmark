@@ -1,0 +1,1278 @@
+{
+  "generated_at": "2026-03-13T22:07:01.040174+00:00",
+  "programs": [
+    {
+      "applied_families_compile": [],
+      "applied_families_run": [],
+      "baseline_compile": {
+        "duration_seconds": 0.793126945,
+        "error": null,
+        "ok": true,
+        "returncode": 0,
+        "sample": {
+          "code_size": {
+            "bpf_bytecode_bytes": 54776,
+            "inflation_ratio": 0.60574,
+            "native_code_bytes": 33180
+          },
+          "compile_ns": 299278942,
+          "directive_scan": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "performed": false,
+            "rotate_sites": 0,
+            "total_sites": 0,
+            "wide_sites": 0,
+            "zero_ext_sites": 0
+          },
+          "disabled_passes": [],
+          "exec_ns": 0,
+          "jited_prog_len": 33180,
+          "no_cmov": false,
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "collected": false,
+            "error": "",
+            "include_kernel": false,
+            "requested": false,
+            "scope": "full_repeat_raw"
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 2555862,
+            "object_load_ns": 283490920,
+            "object_open_ns": 15788022
+          },
+          "recompile": {
+            "applied": false,
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "endian_sites": 0,
+            "error": "",
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "mode": "none",
+            "policy_bytes": 0,
+            "policy_generated": false,
+            "requested": false,
+            "requested_families": [],
+            "rotate_sites": 0,
+            "skipped_families": [],
+            "syscall_attempted": false,
+            "total_sites": 0,
+            "wide_sites": 0,
+            "zero_ext_sites": 0
+          },
+          "result": 0,
+          "retval": 0,
+          "timing_source": "unknown",
+          "timing_source_wall": "unavailable",
+          "wall_exec_ns": null,
+          "xlated_prog_len": 54776
+        },
+        "stderr_tail": "libbpf: map 'cali_state6': created successfully, fd=15\nlibbpf: map 'cali_jump_ing2': created successfully, fd=16\nlibbpf: map 'cali_v4_srmsg': created successfully, fd=17\nlibbpf: map 'cali_v4_ct_nats': created successfully, fd=18\nlibbpf: map 'cali_iface4': created successfully, fd=19\nlibbpf: map 'cali_profiling2': created successfully, fd=20\nlibbpf: map 'cali_v4_fsafes2': created successfully, fd=21\nlibbpf: map 'cali_rule_ctrs2': created successfully, fd=22\nlibbpf: map 'cali_qos': created successfully, fd=23\nlibbpf: map 'cali_v4_frags2': created successfully, fd=24\nlibbpf: map 'cali_v4_frgtmp2': created successfully, fd=25\nlibbpf: map 'cali_v4_frgfwd3': created successfully, fd=26\nlibbpf: map '.rodata.str1.1': created successfully, fd=27\nlibbpf: prog 'calico_tc_skb_accepted_entrypoint': skipped loading\nlibbpf: prog 'calico_tc_skb_new_flow_entrypoint': skipped loading\nlibbpf: prog 'calico_tc_skb_icmp_inner_nat': skipped loading\nlibbpf: prog 'calico_tc_skb_send_tcp_rst': skipped loading\nlibbpf: prog 'calico_tc_skb_send_icmp_replies': skipped loading\nlibbpf: prog 'calico_tc_skb_drop': skipped loading\nlibbpf: prog 'calico_tc_skb_ipv4_frag': skipped loading",
+        "stdout_tail": "{\"compile_ns\":299278942,\"exec_ns\":0,\"timing_source\":\"unknown\",\"timing_source_wall\":\"unavailable\",\"no_cmov\":false,\"disabled_passes\":[],\"wall_exec_ns\":null,\"result\":0,\"retval\":0,\"jited_prog_len\":33180,\"xlated_prog_len\":54776,\"code_size\":{\"bpf_bytecode_bytes\":54776,\"native_code_bytes\":33180,\"inflation_ratio\":0.60574},\"phases_ns\":{\"memory_prepare_ns\":2555862,\"object_open_ns\":15788022,\"object_load_ns\":283490920},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":false,\"scope\":\"full_repeat_raw\",\"error\":\"\"},\"directive_scan\":{\"performed\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":0,\"extract_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0,\"total_sites\":0},\"recompile\":{\"requested\":false,\"mode\":\"none\",\"requested_families\":[],\"skipped_families\":[],\"policy_generated\":false,\"policy_bytes\":0,\"syscall_attempted\":false,\"applied\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":0,\"extract_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0,\"total_sites\":0,\"error\":\"\"}}",
+        "timed_out": false
+      },
+      "baseline_run": {
+        "duration_seconds": 0.22961569100000023,
+        "error": null,
+        "ok": true,
+        "returncode": 0,
+        "sample": {
+          "code_size": {
+            "bpf_bytecode_bytes": 54776,
+            "inflation_ratio": 0.60574,
+            "native_code_bytes": 33180
+          },
+          "compile_ns": 183708466,
+          "directive_scan": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "performed": false,
+            "rotate_sites": 0,
+            "total_sites": 0,
+            "wide_sites": 0,
+            "zero_ext_sites": 0
+          },
+          "disabled_passes": [],
+          "exec_cycles": 1393,
+          "exec_ns": 355,
+          "jited_prog_len": 33180,
+          "no_cmov": false,
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "collected": false,
+            "error": "",
+            "include_kernel": true,
+            "requested": false,
+            "scope": "full_repeat_raw"
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 700688,
+            "object_load_ns": 170671662,
+            "object_open_ns": 13036804,
+            "packet_prepare_ns": 2822,
+            "prog_run_wall_ns": 75634,
+            "result_extract_ns": 29
+          },
+          "recompile": {
+            "applied": false,
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "endian_sites": 0,
+            "error": "",
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "mode": "none",
+            "policy_bytes": 0,
+            "policy_generated": false,
+            "requested": false,
+            "requested_families": [],
+            "rotate_sites": 0,
+            "skipped_families": [],
+            "syscall_attempted": false,
+            "total_sites": 0,
+            "wide_sites": 0,
+            "zero_ext_sites": 0
+          },
+          "result": 0,
+          "retval": 2,
+          "timing_source": "ktime",
+          "timing_source_wall": "rdtsc",
+          "tsc_freq_hz": 3685733189,
+          "wall_exec_ns": 378,
+          "xlated_prog_len": 54776
+        },
+        "stderr_tail": "libbpf: map 'cali_state6': created successfully, fd=15\nlibbpf: map 'cali_jump_ing2': created successfully, fd=16\nlibbpf: map 'cali_v4_srmsg': created successfully, fd=17\nlibbpf: map 'cali_v4_ct_nats': created successfully, fd=18\nlibbpf: map 'cali_iface4': created successfully, fd=19\nlibbpf: map 'cali_profiling2': created successfully, fd=20\nlibbpf: map 'cali_v4_fsafes2': created successfully, fd=21\nlibbpf: map 'cali_rule_ctrs2': created successfully, fd=22\nlibbpf: map 'cali_qos': created successfully, fd=23\nlibbpf: map 'cali_v4_frags2': created successfully, fd=24\nlibbpf: map 'cali_v4_frgtmp2': created successfully, fd=25\nlibbpf: map 'cali_v4_frgfwd3': created successfully, fd=26\nlibbpf: map '.rodata.str1.1': created successfully, fd=27\nlibbpf: prog 'calico_tc_skb_accepted_entrypoint': skipped loading\nlibbpf: prog 'calico_tc_skb_new_flow_entrypoint': skipped loading\nlibbpf: prog 'calico_tc_skb_icmp_inner_nat': skipped loading\nlibbpf: prog 'calico_tc_skb_send_tcp_rst': skipped loading\nlibbpf: prog 'calico_tc_skb_send_icmp_replies': skipped loading\nlibbpf: prog 'calico_tc_skb_drop': skipped loading\nlibbpf: prog 'calico_tc_skb_ipv4_frag': skipped loading",
+        "stdout_tail": "{\"compile_ns\":183708466,\"exec_ns\":355,\"timing_source\":\"ktime\",\"timing_source_wall\":\"rdtsc\",\"no_cmov\":false,\"disabled_passes\":[],\"wall_exec_ns\":378,\"exec_cycles\":1393,\"tsc_freq_hz\":3685733189,\"result\":0,\"retval\":2,\"jited_prog_len\":33180,\"xlated_prog_len\":54776,\"code_size\":{\"bpf_bytecode_bytes\":54776,\"native_code_bytes\":33180,\"inflation_ratio\":0.60574},\"phases_ns\":{\"memory_prepare_ns\":700688,\"object_open_ns\":13036804,\"object_load_ns\":170671662,\"packet_prepare_ns\":2822,\"prog_run_wall_ns\":75634,\"result_extract_ns\":29},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":true,\"scope\":\"full_repeat_raw\",\"error\":\"\"},\"directive_scan\":{\"performed\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":0,\"extract_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0,\"total_sites\":0},\"recompile\":{\"requested\":false,\"mode\":\"none\",\"requested_families\":[],\"skipped_families\":[],\"policy_generated\":false,\"policy_bytes\":0,\"syscall_attempted\":false,\"applied\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":0,\"extract_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0,\"total_sites\":0,\"error\":\"\"}}",
+        "timed_out": false
+      },
+      "can_test_run": true,
+      "directive_scan": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 8,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 16,
+        "wide_sites": 8,
+        "zero_ext_sites": 0
+      },
+      "eligible_families": [
+        "cmov",
+        "wide",
+        "extract",
+        "endian",
+        "branch-flip"
+      ],
+      "execution_mode": "vm",
+      "guest_invocation": {
+        "duration_seconds": 8.416795954923145,
+        "error": null,
+        "ok": true,
+        "returncode": 0,
+        "stderr_tail": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/modules.order not found: kernel modules not enabled or kernel not compiled properly, kernel modules disabled",
+        "stdout_tail": "\"wall_exec_ns\": 287, \"xlated_prog_len\": 54776}, \"stderr_tail\": \"recompile-policy: policy site endian insn 3890 pattern_kind endian-load-swap-32 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 3922 pattern_kind endian-load-swap-32 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 4350 pattern_kind endian-load-swap-32 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 4532 pattern_kind endian-load-swap-32 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 4930 pattern_kind endian-load-swap-32 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 4966 pattern_kind endian-load-swap-32 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 5071 pattern_kind endian-load-swap-32 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 5123 pattern_kind endian-load-swap-16 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 5171 pattern_kind endian-swap-store-16 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 5235 pattern_kind endian-load-swap-32 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 5635 pattern_kind endian-load-swap-16 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 5638 pattern_kind endian-load-swap-16 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 5703 pattern_kind endian-load-swap-16 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 5718 pattern_kind endian-load-swap-16 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 5737 pattern_kind endian-load-swap-32 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 5756 pattern_kind endian-load-swap-32 was not found in the live program; skipping\\nrecompile-policy: policy site wide insn 6048 pattern_kind wide-load-2 was not found in the live program; skipping\\nrecompile-policy: policy site wide insn 6053 pattern_kind wide-load-2 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 6280 pattern_kind endian-load-swap-32 was not found in the live program; skipping\\nrecompile-policy: policy selected 0 of 63 eligible rules\", \"stdout_tail\": \"{\\\"compile_ns\\\":164607821,\\\"exec_ns\\\":280,\\\"timing_source\\\":\\\"ktime\\\",\\\"timing_source_wall\\\":\\\"rdtsc\\\",\\\"no_cmov\\\":false,\\\"disabled_passes\\\":[],\\\"wall_exec_ns\\\":287,\\\"exec_cycles\\\":1056,\\\"tsc_freq_hz\\\":3685694439,\\\"result\\\":0,\\\"retval\\\":2,\\\"jited_prog_len\\\":33180,\\\"xlated_prog_len\\\":54776,\\\"code_size\\\":{\\\"bpf_bytecode_bytes\\\":54776,\\\"native_code_bytes\\\":33180,\\\"inflation_ratio\\\":0.60574},\\\"phases_ns\\\":{\\\"memory_prepare_ns\\\":965022,\\\"object_open_ns\\\":14755709,\\\"object_load_ns\\\":149852112,\\\"packet_prepare_ns\\\":227,\\\"prog_run_wall_ns\\\":57366,\\\"result_extract_ns\\\":32},\\\"perf_counters\\\":{},\\\"perf_counters_meta\\\":{\\\"requested\\\":false,\\\"collected\\\":false,\\\"include_kernel\\\":true,\\\"scope\\\":\\\"full_repeat_raw\\\",\\\"error\\\":\\\"\\\"},\\\"directive_scan\\\":{\\\"performed\\\":true,\\\"cmov_sites\\\":16,\\\"wide_sites\\\":8,\\\"rotate_sites\\\":0,\\\"lea_sites\\\":0,\\\"bitfield_sites\\\":1,\\\"extract_sites\\\":1,\\\"zero_ext_sites\\\":0,\\\"endian_sites\\\":36,\\\"branch_flip_sites\\\":2,\\\"total_sites\\\":63},\\\"recompile\\\":{\\\"requested\\\":true,\\\"mode\\\":\\\"policy-file\\\",\\\"requested_families\\\":[\\\"wide\\\",\\\"extract\\\",\\\"endian\\\"],\\\"skipped_families\\\":[\\\"cmov\\\",\\\"rotate\\\",\\\"lea\\\",\\\"zero-ext\\\",\\\"branch-flip\\\"],\\\"policy_generated\\\":false,\\\"policy_bytes\\\":0,\\\"syscall_attempted\\\":false,\\\"applied\\\":false,\\\"cmov_sites\\\":0,\\\"wide_sites\\\":0,\\\"rotate_sites\\\":0,\\\"lea_sites\\\":0,\\\"bitfield_sites\\\":0,\\\"extract_sites\\\":0,\\\"zero_ext_sites\\\":0,\\\"endian_sites\\\":0,\\\"branch_flip_sites\\\":0,\\\"total_sites\\\":0,\\\"error\\\":\\\"\\\"}}\", \"timed_out\": false}, \"v5_run_applied\": false}",
+        "timed_out": false
+      },
+      "input_size": 64,
+      "inventory_baseline_exec_ns": 381,
+      "inventory_recompile_exec_ns": 351,
+      "inventory_scan": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 8,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 16,
+        "wide_sites": 8,
+        "zero_ext_sites": 0
+      },
+      "inventory_speedup_ratio": 1.0854700854700854,
+      "io_mode": "packet",
+      "memory_path": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/corpus_dummy_packet_64.bin",
+      "object_path": "corpus/build/calico/from_nat_debug.bpf.o",
+      "policy_mode": "policy-file",
+      "policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/calico/from_nat_debug/calico_tc_main.policy.yaml",
+      "prog_type_name": "sched_cls",
+      "program_name": "calico_tc_main",
+      "record_error": null,
+      "requested_families_compile": [
+        "wide",
+        "extract",
+        "endian"
+      ],
+      "requested_families_run": [
+        "wide",
+        "extract",
+        "endian"
+      ],
+      "scan_source": "vm_scanner",
+      "scanner_cli": {
+        "duration_seconds": 0.12562857000000083,
+        "error": null,
+        "ok": true,
+        "returncode": 0,
+        "stderr_tail": "",
+        "stdout_tail": "Accepted 63 v5 site(s)\n  cmov:   16\n  wide:   8\n  rotate: 0\n  lea:    0\n  extract:1\n  zeroext:0\n  endian: 36\n  bflip:  2",
+        "timed_out": false
+      },
+      "scanner_counts": {
+        "bitfield_sites": 1,
+        "branch_flip_sites": 2,
+        "cmov_sites": 16,
+        "endian_sites": 36,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 63,
+        "wide_sites": 8,
+        "zero_ext_sites": 0
+      },
+      "section_name": "tc",
+      "section_root": "tc",
+      "size_delta_pct": 0.0,
+      "size_ratio": 1.0,
+      "source_name": "calico",
+      "speedup_ratio": 1.2678571428571428,
+      "strategy": "packet_test_run",
+      "v5_compile": {
+        "duration_seconds": 0.36427012299999983,
+        "error": null,
+        "ok": true,
+        "returncode": 0,
+        "sample": {
+          "code_size": {
+            "bpf_bytecode_bytes": 54776,
+            "inflation_ratio": 0.60574,
+            "native_code_bytes": 33180
+          },
+          "compile_ns": 219165897,
+          "directive_scan": {
+            "bitfield_sites": 1,
+            "branch_flip_sites": 2,
+            "cmov_sites": 16,
+            "endian_sites": 36,
+            "extract_sites": 1,
+            "lea_sites": 0,
+            "performed": true,
+            "rotate_sites": 0,
+            "total_sites": 63,
+            "wide_sites": 8,
+            "zero_ext_sites": 0
+          },
+          "disabled_passes": [],
+          "exec_ns": 0,
+          "jited_prog_len": 33180,
+          "no_cmov": false,
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "collected": false,
+            "error": "",
+            "include_kernel": false,
+            "requested": false,
+            "scope": "full_repeat_raw"
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 1313884,
+            "object_load_ns": 205438853,
+            "object_open_ns": 13727044
+          },
+          "recompile": {
+            "applied": false,
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "endian_sites": 0,
+            "error": "",
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "mode": "policy-file",
+            "policy_bytes": 0,
+            "policy_generated": false,
+            "requested": true,
+            "requested_families": [
+              "wide",
+              "extract",
+              "endian"
+            ],
+            "rotate_sites": 0,
+            "skipped_families": [
+              "cmov",
+              "rotate",
+              "lea",
+              "zero-ext",
+              "branch-flip"
+            ],
+            "syscall_attempted": false,
+            "total_sites": 0,
+            "wide_sites": 0,
+            "zero_ext_sites": 0
+          },
+          "result": 0,
+          "retval": 0,
+          "timing_source": "unknown",
+          "timing_source_wall": "unavailable",
+          "wall_exec_ns": null,
+          "xlated_prog_len": 54776
+        },
+        "stderr_tail": "recompile-policy: policy site endian insn 3890 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 3922 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 4350 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 4532 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 4930 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 4966 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 5071 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 5123 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 5171 pattern_kind endian-swap-store-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 5235 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 5635 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 5638 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 5703 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 5718 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 5737 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 5756 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site wide insn 6048 pattern_kind wide-load-2 was not found in the live program; skipping\nrecompile-policy: policy site wide insn 6053 pattern_kind wide-load-2 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 6280 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy selected 0 of 63 eligible rules",
+        "stdout_tail": "{\"compile_ns\":219165897,\"exec_ns\":0,\"timing_source\":\"unknown\",\"timing_source_wall\":\"unavailable\",\"no_cmov\":false,\"disabled_passes\":[],\"wall_exec_ns\":null,\"result\":0,\"retval\":0,\"jited_prog_len\":33180,\"xlated_prog_len\":54776,\"code_size\":{\"bpf_bytecode_bytes\":54776,\"native_code_bytes\":33180,\"inflation_ratio\":0.60574},\"phases_ns\":{\"memory_prepare_ns\":1313884,\"object_open_ns\":13727044,\"object_load_ns\":205438853},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":false,\"scope\":\"full_repeat_raw\",\"error\":\"\"},\"directive_scan\":{\"performed\":true,\"cmov_sites\":16,\"wide_sites\":8,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":1,\"extract_sites\":1,\"zero_ext_sites\":0,\"endian_sites\":36,\"branch_flip_sites\":2,\"total_sites\":63},\"recompile\":{\"requested\":true,\"mode\":\"policy-file\",\"requested_families\":[\"wide\",\"extract\",\"endian\"],\"skipped_families\":[\"cmov\",\"rotate\",\"lea\",\"zero-ext\",\"branch-flip\"],\"policy_generated\":false,\"policy_bytes\":0,\"syscall_attempted\":false,\"applied\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":0,\"extract_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0,\"total_sites\":0,\"error\":\"\"}}",
+        "timed_out": false
+      },
+      "v5_compile_applied": false,
+      "v5_run": {
+        "duration_seconds": 0.33347003700000055,
+        "error": null,
+        "ok": true,
+        "returncode": 0,
+        "sample": {
+          "code_size": {
+            "bpf_bytecode_bytes": 54776,
+            "inflation_ratio": 0.60574,
+            "native_code_bytes": 33180
+          },
+          "compile_ns": 164607821,
+          "directive_scan": {
+            "bitfield_sites": 1,
+            "branch_flip_sites": 2,
+            "cmov_sites": 16,
+            "endian_sites": 36,
+            "extract_sites": 1,
+            "lea_sites": 0,
+            "performed": true,
+            "rotate_sites": 0,
+            "total_sites": 63,
+            "wide_sites": 8,
+            "zero_ext_sites": 0
+          },
+          "disabled_passes": [],
+          "exec_cycles": 1056,
+          "exec_ns": 280,
+          "jited_prog_len": 33180,
+          "no_cmov": false,
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "collected": false,
+            "error": "",
+            "include_kernel": true,
+            "requested": false,
+            "scope": "full_repeat_raw"
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 965022,
+            "object_load_ns": 149852112,
+            "object_open_ns": 14755709,
+            "packet_prepare_ns": 227,
+            "prog_run_wall_ns": 57366,
+            "result_extract_ns": 32
+          },
+          "recompile": {
+            "applied": false,
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "endian_sites": 0,
+            "error": "",
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "mode": "policy-file",
+            "policy_bytes": 0,
+            "policy_generated": false,
+            "requested": true,
+            "requested_families": [
+              "wide",
+              "extract",
+              "endian"
+            ],
+            "rotate_sites": 0,
+            "skipped_families": [
+              "cmov",
+              "rotate",
+              "lea",
+              "zero-ext",
+              "branch-flip"
+            ],
+            "syscall_attempted": false,
+            "total_sites": 0,
+            "wide_sites": 0,
+            "zero_ext_sites": 0
+          },
+          "result": 0,
+          "retval": 2,
+          "timing_source": "ktime",
+          "timing_source_wall": "rdtsc",
+          "tsc_freq_hz": 3685694439,
+          "wall_exec_ns": 287,
+          "xlated_prog_len": 54776
+        },
+        "stderr_tail": "recompile-policy: policy site endian insn 3890 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 3922 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 4350 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 4532 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 4930 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 4966 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 5071 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 5123 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 5171 pattern_kind endian-swap-store-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 5235 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 5635 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 5638 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 5703 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 5718 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 5737 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 5756 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site wide insn 6048 pattern_kind wide-load-2 was not found in the live program; skipping\nrecompile-policy: policy site wide insn 6053 pattern_kind wide-load-2 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 6280 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy selected 0 of 63 eligible rules",
+        "stdout_tail": "{\"compile_ns\":164607821,\"exec_ns\":280,\"timing_source\":\"ktime\",\"timing_source_wall\":\"rdtsc\",\"no_cmov\":false,\"disabled_passes\":[],\"wall_exec_ns\":287,\"exec_cycles\":1056,\"tsc_freq_hz\":3685694439,\"result\":0,\"retval\":2,\"jited_prog_len\":33180,\"xlated_prog_len\":54776,\"code_size\":{\"bpf_bytecode_bytes\":54776,\"native_code_bytes\":33180,\"inflation_ratio\":0.60574},\"phases_ns\":{\"memory_prepare_ns\":965022,\"object_open_ns\":14755709,\"object_load_ns\":149852112,\"packet_prepare_ns\":227,\"prog_run_wall_ns\":57366,\"result_extract_ns\":32},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":true,\"scope\":\"full_repeat_raw\",\"error\":\"\"},\"directive_scan\":{\"performed\":true,\"cmov_sites\":16,\"wide_sites\":8,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":1,\"extract_sites\":1,\"zero_ext_sites\":0,\"endian_sites\":36,\"branch_flip_sites\":2,\"total_sites\":63},\"recompile\":{\"requested\":true,\"mode\":\"policy-file\",\"requested_families\":[\"wide\",\"extract\",\"endian\"],\"skipped_families\":[\"cmov\",\"rotate\",\"lea\",\"zero-ext\",\"branch-flip\"],\"policy_generated\":false,\"policy_bytes\":0,\"syscall_attempted\":false,\"applied\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":0,\"extract_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0,\"total_sites\":0,\"error\":\"\"}}",
+        "timed_out": false
+      },
+      "v5_run_applied": false
+    },
+    {
+      "applied_families_compile": [
+        "wide",
+        "extract",
+        "endian"
+      ],
+      "applied_families_run": [
+        "wide",
+        "extract",
+        "endian"
+      ],
+      "baseline_compile": {
+        "duration_seconds": 0.7609971770000001,
+        "error": null,
+        "ok": true,
+        "returncode": 0,
+        "sample": {
+          "code_size": {
+            "bpf_bytecode_bytes": 36472,
+            "inflation_ratio": 0.60918,
+            "native_code_bytes": 22218
+          },
+          "compile_ns": 244294506,
+          "directive_scan": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "performed": false,
+            "rotate_sites": 0,
+            "total_sites": 0,
+            "wide_sites": 0,
+            "zero_ext_sites": 0
+          },
+          "disabled_passes": [],
+          "exec_ns": 0,
+          "jited_prog_len": 22218,
+          "no_cmov": false,
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "collected": false,
+            "error": "",
+            "include_kernel": false,
+            "requested": false,
+            "scope": "full_repeat_raw"
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 2810028,
+            "object_load_ns": 224328666,
+            "object_open_ns": 19965840
+          },
+          "recompile": {
+            "applied": false,
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "endian_sites": 0,
+            "error": "",
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "mode": "none",
+            "policy_bytes": 0,
+            "policy_generated": false,
+            "requested": false,
+            "requested_families": [],
+            "rotate_sites": 0,
+            "skipped_families": [],
+            "syscall_attempted": false,
+            "total_sites": 0,
+            "wide_sites": 0,
+            "zero_ext_sites": 0
+          },
+          "result": 0,
+          "retval": 0,
+          "timing_source": "unknown",
+          "timing_source_wall": "unavailable",
+          "wall_exec_ns": null,
+          "xlated_prog_len": 36472
+        },
+        "stderr_tail": "libbpf: map 'cali_jump_egr2': created successfully, fd=16\nlibbpf: map 'cali_v4_srmsg': created successfully, fd=17\nlibbpf: map 'cali_v4_ct_nats': created successfully, fd=18\nlibbpf: map 'cali_iface4': created successfully, fd=19\nlibbpf: map 'cali_profiling2': created successfully, fd=20\nlibbpf: map 'cali_v4_fsafes2': created successfully, fd=21\nlibbpf: map 'cali_rule_ctrs2': created successfully, fd=22\nlibbpf: map 'cali_qos': created successfully, fd=23\nlibbpf: map 'cali_v4_frags2': created successfully, fd=24\nlibbpf: map 'cali_v4_frgtmp2': created successfully, fd=25\nlibbpf: map 'cali_v4_frgfwd3': created successfully, fd=26\nlibbpf: map '.rodata.str1.1': created successfully, fd=27\nlibbpf: prog 'calico_tc_main': skipped loading\nlibbpf: prog 'calico_tc_skb_accepted_entrypoint': skipped loading\nlibbpf: prog 'calico_tc_skb_new_flow_entrypoint': skipped loading\nlibbpf: prog 'calico_tc_skb_icmp_inner_nat': skipped loading\nlibbpf: prog 'calico_tc_skb_send_tcp_rst': skipped loading\nlibbpf: prog 'calico_tc_skb_send_icmp_replies': skipped loading\nlibbpf: prog 'calico_tc_skb_drop': skipped loading\nlibbpf: prog 'calico_tc_skb_ipv4_frag': skipped loading",
+        "stdout_tail": "{\"compile_ns\":244294506,\"exec_ns\":0,\"timing_source\":\"unknown\",\"timing_source_wall\":\"unavailable\",\"no_cmov\":false,\"disabled_passes\":[],\"wall_exec_ns\":null,\"result\":0,\"retval\":0,\"jited_prog_len\":22218,\"xlated_prog_len\":36472,\"code_size\":{\"bpf_bytecode_bytes\":36472,\"native_code_bytes\":22218,\"inflation_ratio\":0.60918},\"phases_ns\":{\"memory_prepare_ns\":2810028,\"object_open_ns\":19965840,\"object_load_ns\":224328666},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":false,\"scope\":\"full_repeat_raw\",\"error\":\"\"},\"directive_scan\":{\"performed\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":0,\"extract_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0,\"total_sites\":0},\"recompile\":{\"requested\":false,\"mode\":\"none\",\"requested_families\":[],\"skipped_families\":[],\"policy_generated\":false,\"policy_bytes\":0,\"syscall_attempted\":false,\"applied\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":0,\"extract_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0,\"total_sites\":0,\"error\":\"\"}}",
+        "timed_out": false
+      },
+      "baseline_run": {
+        "duration_seconds": 0.1819445420000001,
+        "error": null,
+        "ok": true,
+        "returncode": 0,
+        "sample": {
+          "code_size": {
+            "bpf_bytecode_bytes": 36472,
+            "inflation_ratio": 0.60918,
+            "native_code_bytes": 22218
+          },
+          "compile_ns": 126764385,
+          "directive_scan": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "performed": false,
+            "rotate_sites": 0,
+            "total_sites": 0,
+            "wide_sites": 0,
+            "zero_ext_sites": 0
+          },
+          "disabled_passes": [],
+          "exec_cycles": 708,
+          "exec_ns": 166,
+          "jited_prog_len": 22218,
+          "no_cmov": false,
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "collected": false,
+            "error": "",
+            "include_kernel": true,
+            "requested": false,
+            "scope": "full_repeat_raw"
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 2176561,
+            "object_load_ns": 108715095,
+            "object_open_ns": 18049290,
+            "packet_prepare_ns": 2015,
+            "prog_run_wall_ns": 38547,
+            "result_extract_ns": 39
+          },
+          "recompile": {
+            "applied": false,
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "endian_sites": 0,
+            "error": "",
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "mode": "none",
+            "policy_bytes": 0,
+            "policy_generated": false,
+            "requested": false,
+            "requested_families": [],
+            "rotate_sites": 0,
+            "skipped_families": [],
+            "syscall_attempted": false,
+            "total_sites": 0,
+            "wide_sites": 0,
+            "zero_ext_sites": 0
+          },
+          "result": 0,
+          "retval": 2,
+          "timing_source": "ktime",
+          "timing_source_wall": "rdtsc",
+          "tsc_freq_hz": 3685990021,
+          "wall_exec_ns": 192,
+          "xlated_prog_len": 36472
+        },
+        "stderr_tail": "libbpf: map 'cali_jump_egr2': created successfully, fd=16\nlibbpf: map 'cali_v4_srmsg': created successfully, fd=17\nlibbpf: map 'cali_v4_ct_nats': created successfully, fd=18\nlibbpf: map 'cali_iface4': created successfully, fd=19\nlibbpf: map 'cali_profiling2': created successfully, fd=20\nlibbpf: map 'cali_v4_fsafes2': created successfully, fd=21\nlibbpf: map 'cali_rule_ctrs2': created successfully, fd=22\nlibbpf: map 'cali_qos': created successfully, fd=23\nlibbpf: map 'cali_v4_frags2': created successfully, fd=24\nlibbpf: map 'cali_v4_frgtmp2': created successfully, fd=25\nlibbpf: map 'cali_v4_frgfwd3': created successfully, fd=26\nlibbpf: map '.rodata.str1.1': created successfully, fd=27\nlibbpf: prog 'calico_tc_main': skipped loading\nlibbpf: prog 'calico_tc_skb_accepted_entrypoint': skipped loading\nlibbpf: prog 'calico_tc_skb_new_flow_entrypoint': skipped loading\nlibbpf: prog 'calico_tc_skb_icmp_inner_nat': skipped loading\nlibbpf: prog 'calico_tc_skb_send_tcp_rst': skipped loading\nlibbpf: prog 'calico_tc_skb_send_icmp_replies': skipped loading\nlibbpf: prog 'calico_tc_skb_drop': skipped loading\nlibbpf: prog 'calico_tc_skb_ipv4_frag': skipped loading",
+        "stdout_tail": "{\"compile_ns\":126764385,\"exec_ns\":166,\"timing_source\":\"ktime\",\"timing_source_wall\":\"rdtsc\",\"no_cmov\":false,\"disabled_passes\":[],\"wall_exec_ns\":192,\"exec_cycles\":708,\"tsc_freq_hz\":3685990021,\"result\":0,\"retval\":2,\"jited_prog_len\":22218,\"xlated_prog_len\":36472,\"code_size\":{\"bpf_bytecode_bytes\":36472,\"native_code_bytes\":22218,\"inflation_ratio\":0.60918},\"phases_ns\":{\"memory_prepare_ns\":2176561,\"object_open_ns\":18049290,\"object_load_ns\":108715095,\"packet_prepare_ns\":2015,\"prog_run_wall_ns\":38547,\"result_extract_ns\":39},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":true,\"scope\":\"full_repeat_raw\",\"error\":\"\"},\"directive_scan\":{\"performed\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":0,\"extract_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0,\"total_sites\":0},\"recompile\":{\"requested\":false,\"mode\":\"none\",\"requested_families\":[],\"skipped_families\":[],\"policy_generated\":false,\"policy_bytes\":0,\"syscall_attempted\":false,\"applied\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":0,\"extract_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0,\"total_sites\":0,\"error\":\"\"}}",
+        "timed_out": false
+      },
+      "can_test_run": true,
+      "directive_scan": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 6,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 10,
+        "wide_sites": 4,
+        "zero_ext_sites": 0
+      },
+      "eligible_families": [
+        "cmov",
+        "wide",
+        "extract",
+        "endian",
+        "branch-flip"
+      ],
+      "execution_mode": "vm",
+      "guest_invocation": {
+        "duration_seconds": 8.183553447946906,
+        "error": null,
+        "ok": true,
+        "returncode": 0,
+        "stderr_tail": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/modules.order not found: kernel modules not enabled or kernel not compiled properly, kernel modules disabled",
+        "stdout_tail": " \"wall_exec_ns\": 172, \"xlated_prog_len\": 36472}, \"stderr_tail\": \"recompile-policy: policy site endian insn 885 pattern_kind endian-load-swap-16 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 1819 pattern_kind endian-load-swap-32 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 1840 pattern_kind endian-load-swap-32 was not found in the live program; skipping\\nrecompile-policy: policy site extract insn 2025 pattern_kind bitfield-extract-64-mask-shift was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 2500 pattern_kind endian-load-swap-32 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 2663 pattern_kind endian-load-swap-32 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 3061 pattern_kind endian-load-swap-16 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 3109 pattern_kind endian-swap-store-16 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 3224 pattern_kind endian-load-swap-32 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 3565 pattern_kind endian-load-swap-32 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 3699 pattern_kind endian-load-swap-16 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 3702 pattern_kind endian-load-swap-16 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 3763 pattern_kind endian-load-swap-16 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 3776 pattern_kind endian-load-swap-16 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 3793 pattern_kind endian-load-swap-32 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 3812 pattern_kind endian-load-swap-32 was not found in the live program; skipping\\nrecompile-policy: policy site wide insn 4100 pattern_kind wide-load-2 was not found in the live program; skipping\\nrecompile-policy: policy site wide insn 4105 pattern_kind wide-load-2 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 4332 pattern_kind endian-load-swap-32 was not found in the live program; skipping\\nrecompile-policy: kept 6 of 47 eligible rules\", \"stdout_tail\": \"{\\\"compile_ns\\\":124695410,\\\"exec_ns\\\":168,\\\"timing_source\\\":\\\"ktime\\\",\\\"timing_source_wall\\\":\\\"rdtsc\\\",\\\"no_cmov\\\":false,\\\"disabled_passes\\\":[],\\\"wall_exec_ns\\\":172,\\\"exec_cycles\\\":634,\\\"tsc_freq_hz\\\":3686175755,\\\"result\\\":0,\\\"retval\\\":2,\\\"jited_prog_len\\\":22184,\\\"xlated_prog_len\\\":36472,\\\"code_size\\\":{\\\"bpf_bytecode_bytes\\\":36472,\\\"native_code_bytes\\\":22184,\\\"inflation_ratio\\\":0.608247},\\\"phases_ns\\\":{\\\"memory_prepare_ns\\\":1675822,\\\"object_open_ns\\\":13843008,\\\"object_load_ns\\\":106587554,\\\"packet_prepare_ns\\\":415,\\\"prog_run_wall_ns\\\":34464,\\\"result_extract_ns\\\":38},\\\"perf_counters\\\":{},\\\"perf_counters_meta\\\":{\\\"requested\\\":false,\\\"collected\\\":false,\\\"include_kernel\\\":true,\\\"scope\\\":\\\"full_repeat_raw\\\",\\\"error\\\":\\\"\\\"},\\\"directive_scan\\\":{\\\"performed\\\":true,\\\"cmov_sites\\\":18,\\\"wide_sites\\\":4,\\\"rotate_sites\\\":0,\\\"lea_sites\\\":0,\\\"bitfield_sites\\\":1,\\\"extract_sites\\\":1,\\\"zero_ext_sites\\\":0,\\\"endian_sites\\\":22,\\\"branch_flip_sites\\\":2,\\\"total_sites\\\":47},\\\"recompile\\\":{\\\"requested\\\":true,\\\"mode\\\":\\\"policy-file\\\",\\\"requested_families\\\":[\\\"wide\\\",\\\"extract\\\",\\\"endian\\\"],\\\"skipped_families\\\":[\\\"cmov\\\",\\\"rotate\\\",\\\"lea\\\",\\\"zero-ext\\\",\\\"branch-flip\\\"],\\\"policy_generated\\\":true,\\\"policy_bytes\\\":712,\\\"syscall_attempted\\\":true,\\\"applied\\\":true,\\\"cmov_sites\\\":0,\\\"wide_sites\\\":2,\\\"rotate_sites\\\":0,\\\"lea_sites\\\":0,\\\"bitfield_sites\\\":0,\\\"extract_sites\\\":0,\\\"zero_ext_sites\\\":0,\\\"endian_sites\\\":4,\\\"branch_flip_sites\\\":0,\\\"total_sites\\\":6,\\\"error\\\":\\\"\\\"}}\", \"timed_out\": false}, \"v5_run_applied\": true}",
+        "timed_out": false
+      },
+      "input_size": 64,
+      "inventory_baseline_exec_ns": 182,
+      "inventory_recompile_exec_ns": 112,
+      "inventory_scan": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 6,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 10,
+        "wide_sites": 4,
+        "zero_ext_sites": 0
+      },
+      "inventory_speedup_ratio": 1.625,
+      "io_mode": "packet",
+      "memory_path": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/corpus_dummy_packet_64.bin",
+      "object_path": "corpus/build/calico/to_hep_debug.bpf.o",
+      "policy_mode": "policy-file",
+      "policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/calico/to_hep_debug/calico_tc_host_ct_conflict.policy.yaml",
+      "prog_type_name": "sched_cls",
+      "program_name": "calico_tc_host_ct_conflict",
+      "record_error": null,
+      "requested_families_compile": [
+        "wide",
+        "extract",
+        "endian"
+      ],
+      "requested_families_run": [
+        "wide",
+        "extract",
+        "endian"
+      ],
+      "scan_source": "vm_scanner",
+      "scanner_cli": {
+        "duration_seconds": 0.0857003719999998,
+        "error": null,
+        "ok": true,
+        "returncode": 0,
+        "stderr_tail": "",
+        "stdout_tail": "Accepted 47 v5 site(s)\n  cmov:   18\n  wide:   4\n  rotate: 0\n  lea:    0\n  extract:1\n  zeroext:0\n  endian: 22\n  bflip:  2",
+        "timed_out": false
+      },
+      "scanner_counts": {
+        "bitfield_sites": 1,
+        "branch_flip_sites": 2,
+        "cmov_sites": 18,
+        "endian_sites": 22,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 47,
+        "wide_sites": 4,
+        "zero_ext_sites": 0
+      },
+      "section_name": "tc",
+      "section_root": "tc",
+      "size_delta_pct": -0.15302907552434963,
+      "size_ratio": 1.0015326361341508,
+      "source_name": "calico",
+      "speedup_ratio": 0.9880952380952381,
+      "strategy": "packet_test_run",
+      "v5_compile": {
+        "duration_seconds": 0.3042942789999996,
+        "error": null,
+        "ok": true,
+        "returncode": 0,
+        "sample": {
+          "code_size": {
+            "bpf_bytecode_bytes": 36472,
+            "inflation_ratio": 0.608247,
+            "native_code_bytes": 22184
+          },
+          "compile_ns": 184958882,
+          "directive_scan": {
+            "bitfield_sites": 1,
+            "branch_flip_sites": 2,
+            "cmov_sites": 18,
+            "endian_sites": 22,
+            "extract_sites": 1,
+            "lea_sites": 0,
+            "performed": true,
+            "rotate_sites": 0,
+            "total_sites": 47,
+            "wide_sites": 4,
+            "zero_ext_sites": 0
+          },
+          "disabled_passes": [],
+          "exec_ns": 0,
+          "jited_prog_len": 22184,
+          "no_cmov": false,
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "collected": false,
+            "error": "",
+            "include_kernel": false,
+            "requested": false,
+            "scope": "full_repeat_raw"
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 2185816,
+            "object_load_ns": 156148244,
+            "object_open_ns": 22645284
+          },
+          "recompile": {
+            "applied": true,
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "endian_sites": 4,
+            "error": "",
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "mode": "policy-file",
+            "policy_bytes": 712,
+            "policy_generated": true,
+            "requested": true,
+            "requested_families": [
+              "wide",
+              "extract",
+              "endian"
+            ],
+            "rotate_sites": 0,
+            "skipped_families": [
+              "cmov",
+              "rotate",
+              "lea",
+              "zero-ext",
+              "branch-flip"
+            ],
+            "syscall_attempted": true,
+            "total_sites": 6,
+            "wide_sites": 2,
+            "zero_ext_sites": 0
+          },
+          "result": 0,
+          "retval": 0,
+          "timing_source": "unknown",
+          "timing_source_wall": "unavailable",
+          "wall_exec_ns": null,
+          "xlated_prog_len": 36472
+        },
+        "stderr_tail": "recompile-policy: policy site endian insn 885 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 1819 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 1840 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site extract insn 2025 pattern_kind bitfield-extract-64-mask-shift was not found in the live program; skipping\nrecompile-policy: policy site endian insn 2500 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 2663 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 3061 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 3109 pattern_kind endian-swap-store-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 3224 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 3565 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 3699 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 3702 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 3763 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 3776 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 3793 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 3812 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site wide insn 4100 pattern_kind wide-load-2 was not found in the live program; skipping\nrecompile-policy: policy site wide insn 4105 pattern_kind wide-load-2 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 4332 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: kept 6 of 47 eligible rules",
+        "stdout_tail": "{\"compile_ns\":184958882,\"exec_ns\":0,\"timing_source\":\"unknown\",\"timing_source_wall\":\"unavailable\",\"no_cmov\":false,\"disabled_passes\":[],\"wall_exec_ns\":null,\"result\":0,\"retval\":0,\"jited_prog_len\":22184,\"xlated_prog_len\":36472,\"code_size\":{\"bpf_bytecode_bytes\":36472,\"native_code_bytes\":22184,\"inflation_ratio\":0.608247},\"phases_ns\":{\"memory_prepare_ns\":2185816,\"object_open_ns\":22645284,\"object_load_ns\":156148244},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":false,\"scope\":\"full_repeat_raw\",\"error\":\"\"},\"directive_scan\":{\"performed\":true,\"cmov_sites\":18,\"wide_sites\":4,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":1,\"extract_sites\":1,\"zero_ext_sites\":0,\"endian_sites\":22,\"branch_flip_sites\":2,\"total_sites\":47},\"recompile\":{\"requested\":true,\"mode\":\"policy-file\",\"requested_families\":[\"wide\",\"extract\",\"endian\"],\"skipped_families\":[\"cmov\",\"rotate\",\"lea\",\"zero-ext\",\"branch-flip\"],\"policy_generated\":true,\"policy_bytes\":712,\"syscall_attempted\":true,\"applied\":true,\"cmov_sites\":0,\"wide_sites\":2,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":0,\"extract_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":4,\"branch_flip_sites\":0,\"total_sites\":6,\"error\":\"\"}}",
+        "timed_out": false
+      },
+      "v5_compile_applied": true,
+      "v5_run": {
+        "duration_seconds": 0.24380933800000015,
+        "error": null,
+        "ok": true,
+        "returncode": 0,
+        "sample": {
+          "code_size": {
+            "bpf_bytecode_bytes": 36472,
+            "inflation_ratio": 0.608247,
+            "native_code_bytes": 22184
+          },
+          "compile_ns": 124695410,
+          "directive_scan": {
+            "bitfield_sites": 1,
+            "branch_flip_sites": 2,
+            "cmov_sites": 18,
+            "endian_sites": 22,
+            "extract_sites": 1,
+            "lea_sites": 0,
+            "performed": true,
+            "rotate_sites": 0,
+            "total_sites": 47,
+            "wide_sites": 4,
+            "zero_ext_sites": 0
+          },
+          "disabled_passes": [],
+          "exec_cycles": 634,
+          "exec_ns": 168,
+          "jited_prog_len": 22184,
+          "no_cmov": false,
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "collected": false,
+            "error": "",
+            "include_kernel": true,
+            "requested": false,
+            "scope": "full_repeat_raw"
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 1675822,
+            "object_load_ns": 106587554,
+            "object_open_ns": 13843008,
+            "packet_prepare_ns": 415,
+            "prog_run_wall_ns": 34464,
+            "result_extract_ns": 38
+          },
+          "recompile": {
+            "applied": true,
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "endian_sites": 4,
+            "error": "",
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "mode": "policy-file",
+            "policy_bytes": 712,
+            "policy_generated": true,
+            "requested": true,
+            "requested_families": [
+              "wide",
+              "extract",
+              "endian"
+            ],
+            "rotate_sites": 0,
+            "skipped_families": [
+              "cmov",
+              "rotate",
+              "lea",
+              "zero-ext",
+              "branch-flip"
+            ],
+            "syscall_attempted": true,
+            "total_sites": 6,
+            "wide_sites": 2,
+            "zero_ext_sites": 0
+          },
+          "result": 0,
+          "retval": 2,
+          "timing_source": "ktime",
+          "timing_source_wall": "rdtsc",
+          "tsc_freq_hz": 3686175755,
+          "wall_exec_ns": 172,
+          "xlated_prog_len": 36472
+        },
+        "stderr_tail": "recompile-policy: policy site endian insn 885 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 1819 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 1840 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site extract insn 2025 pattern_kind bitfield-extract-64-mask-shift was not found in the live program; skipping\nrecompile-policy: policy site endian insn 2500 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 2663 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 3061 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 3109 pattern_kind endian-swap-store-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 3224 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 3565 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 3699 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 3702 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 3763 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 3776 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 3793 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 3812 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site wide insn 4100 pattern_kind wide-load-2 was not found in the live program; skipping\nrecompile-policy: policy site wide insn 4105 pattern_kind wide-load-2 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 4332 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: kept 6 of 47 eligible rules",
+        "stdout_tail": "{\"compile_ns\":124695410,\"exec_ns\":168,\"timing_source\":\"ktime\",\"timing_source_wall\":\"rdtsc\",\"no_cmov\":false,\"disabled_passes\":[],\"wall_exec_ns\":172,\"exec_cycles\":634,\"tsc_freq_hz\":3686175755,\"result\":0,\"retval\":2,\"jited_prog_len\":22184,\"xlated_prog_len\":36472,\"code_size\":{\"bpf_bytecode_bytes\":36472,\"native_code_bytes\":22184,\"inflation_ratio\":0.608247},\"phases_ns\":{\"memory_prepare_ns\":1675822,\"object_open_ns\":13843008,\"object_load_ns\":106587554,\"packet_prepare_ns\":415,\"prog_run_wall_ns\":34464,\"result_extract_ns\":38},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":true,\"scope\":\"full_repeat_raw\",\"error\":\"\"},\"directive_scan\":{\"performed\":true,\"cmov_sites\":18,\"wide_sites\":4,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":1,\"extract_sites\":1,\"zero_ext_sites\":0,\"endian_sites\":22,\"branch_flip_sites\":2,\"total_sites\":47},\"recompile\":{\"requested\":true,\"mode\":\"policy-file\",\"requested_families\":[\"wide\",\"extract\",\"endian\"],\"skipped_families\":[\"cmov\",\"rotate\",\"lea\",\"zero-ext\",\"branch-flip\"],\"policy_generated\":true,\"policy_bytes\":712,\"syscall_attempted\":true,\"applied\":true,\"cmov_sites\":0,\"wide_sites\":2,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":0,\"extract_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":4,\"branch_flip_sites\":0,\"total_sites\":6,\"error\":\"\"}}",
+        "timed_out": false
+      },
+      "v5_run_applied": true
+    },
+    {
+      "applied_families_compile": [],
+      "applied_families_run": [],
+      "baseline_compile": {
+        "duration_seconds": 0.6725776840000002,
+        "error": null,
+        "ok": true,
+        "returncode": 0,
+        "sample": {
+          "code_size": {
+            "bpf_bytecode_bytes": 7536,
+            "inflation_ratio": 0.587447,
+            "native_code_bytes": 4427
+          },
+          "compile_ns": 94238504,
+          "directive_scan": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "performed": false,
+            "rotate_sites": 0,
+            "total_sites": 0,
+            "wide_sites": 0,
+            "zero_ext_sites": 0
+          },
+          "disabled_passes": [],
+          "exec_ns": 0,
+          "jited_prog_len": 4427,
+          "no_cmov": false,
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "collected": false,
+            "error": "",
+            "include_kernel": false,
+            "requested": false,
+            "scope": "full_repeat_raw"
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 3437305,
+            "object_load_ns": 85136226,
+            "object_open_ns": 9102278
+          },
+          "recompile": {
+            "applied": false,
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "endian_sites": 0,
+            "error": "",
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "mode": "none",
+            "policy_bytes": 0,
+            "policy_generated": false,
+            "requested": false,
+            "requested_families": [],
+            "rotate_sites": 0,
+            "skipped_families": [],
+            "syscall_attempted": false,
+            "total_sites": 0,
+            "wide_sites": 0,
+            "zero_ext_sites": 0
+          },
+          "result": 0,
+          "retval": 0,
+          "timing_source": "unknown",
+          "timing_source_wall": "unavailable",
+          "wall_exec_ns": null,
+          "xlated_prog_len": 7536
+        },
+        "stderr_tail": "libbpf: prog 'calico_xdp_drop': found map 8 (cali_counters6, sec 7, off 320) for insn #23\nlibbpf: object 'xdp_debug': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'xdp_cali_jump3': created successfully, fd=4\nlibbpf: map 'cali_v4_arp2': created successfully, fd=5\nlibbpf: map 'cali_v4_ct4': created successfully, fd=6\nlibbpf: map 'cali_v4_nat_fe3': created successfully, fd=7\nlibbpf: map 'cali_v4_nat_be': created successfully, fd=8\nlibbpf: map 'cali_v4_nat_aff': created successfully, fd=9\nlibbpf: map 'cali_v4_mglv2': created successfully, fd=10\nlibbpf: map 'cali_perf_evnt': created successfully, fd=11\nlibbpf: map 'cali_counters6': created successfully, fd=12\nlibbpf: map 'cali_v4_routes': created successfully, fd=13\nlibbpf: map 'cali_v4_fsafes2': created successfully, fd=14\nlibbpf: map 'cali_state6': created successfully, fd=15\nlibbpf: map 'xdp_cali_progs3': created successfully, fd=16\nlibbpf: map 'cali_v4_ip_sets': created successfully, fd=17\nlibbpf: map '.rodata.str1.1': created successfully, fd=18\nlibbpf: prog 'calico_xdp_norm_pol_tail': skipped loading\nlibbpf: prog 'calico_xdp_accepted_entrypoint': skipped loading\nlibbpf: prog 'calico_xdp_drop': skipped loading",
+        "stdout_tail": "{\"compile_ns\":94238504,\"exec_ns\":0,\"timing_source\":\"unknown\",\"timing_source_wall\":\"unavailable\",\"no_cmov\":false,\"disabled_passes\":[],\"wall_exec_ns\":null,\"result\":0,\"retval\":0,\"jited_prog_len\":4427,\"xlated_prog_len\":7536,\"code_size\":{\"bpf_bytecode_bytes\":7536,\"native_code_bytes\":4427,\"inflation_ratio\":0.587447},\"phases_ns\":{\"memory_prepare_ns\":3437305,\"object_open_ns\":9102278,\"object_load_ns\":85136226},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":false,\"scope\":\"full_repeat_raw\",\"error\":\"\"},\"directive_scan\":{\"performed\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":0,\"extract_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0,\"total_sites\":0},\"recompile\":{\"requested\":false,\"mode\":\"none\",\"requested_families\":[],\"skipped_families\":[],\"policy_generated\":false,\"policy_bytes\":0,\"syscall_attempted\":false,\"applied\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":0,\"extract_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0,\"total_sites\":0,\"error\":\"\"}}",
+        "timed_out": false
+      },
+      "baseline_run": {
+        "duration_seconds": 0.11822533600000007,
+        "error": null,
+        "ok": true,
+        "returncode": 0,
+        "sample": {
+          "code_size": {
+            "bpf_bytecode_bytes": 7536,
+            "inflation_ratio": 0.587447,
+            "native_code_bytes": 4427
+          },
+          "compile_ns": 44946752,
+          "directive_scan": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "performed": false,
+            "rotate_sites": 0,
+            "total_sites": 0,
+            "wide_sites": 0,
+            "zero_ext_sites": 0
+          },
+          "disabled_passes": [],
+          "exec_cycles": 213282,
+          "exec_ns": 202,
+          "jited_prog_len": 4427,
+          "no_cmov": false,
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "collected": false,
+            "error": "",
+            "include_kernel": true,
+            "requested": false,
+            "scope": "full_repeat_raw"
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 783790,
+            "object_load_ns": 40438159,
+            "object_open_ns": 4508593,
+            "packet_prepare_ns": 1560,
+            "prog_run_wall_ns": 11576842,
+            "result_extract_ns": 675
+          },
+          "recompile": {
+            "applied": false,
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "endian_sites": 0,
+            "error": "",
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "mode": "none",
+            "policy_bytes": 0,
+            "policy_generated": false,
+            "requested": false,
+            "requested_families": [],
+            "rotate_sites": 0,
+            "skipped_families": [],
+            "syscall_attempted": false,
+            "total_sites": 0,
+            "wide_sites": 0,
+            "zero_ext_sites": 0
+          },
+          "result": 1225260573621485567,
+          "retval": 1,
+          "timing_source": "ktime",
+          "timing_source_wall": "rdtsc",
+          "tsc_freq_hz": 3685313968,
+          "wall_exec_ns": 57873,
+          "xlated_prog_len": 7536
+        },
+        "stderr_tail": "libbpf: prog 'calico_xdp_drop': found map 8 (cali_counters6, sec 7, off 320) for insn #23\nlibbpf: object 'xdp_debug': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...\nlibbpf: map 'xdp_cali_jump3': created successfully, fd=4\nlibbpf: map 'cali_v4_arp2': created successfully, fd=5\nlibbpf: map 'cali_v4_ct4': created successfully, fd=6\nlibbpf: map 'cali_v4_nat_fe3': created successfully, fd=7\nlibbpf: map 'cali_v4_nat_be': created successfully, fd=8\nlibbpf: map 'cali_v4_nat_aff': created successfully, fd=9\nlibbpf: map 'cali_v4_mglv2': created successfully, fd=10\nlibbpf: map 'cali_perf_evnt': created successfully, fd=11\nlibbpf: map 'cali_counters6': created successfully, fd=12\nlibbpf: map 'cali_v4_routes': created successfully, fd=13\nlibbpf: map 'cali_v4_fsafes2': created successfully, fd=14\nlibbpf: map 'cali_state6': created successfully, fd=15\nlibbpf: map 'xdp_cali_progs3': created successfully, fd=16\nlibbpf: map 'cali_v4_ip_sets': created successfully, fd=17\nlibbpf: map '.rodata.str1.1': created successfully, fd=18\nlibbpf: prog 'calico_xdp_norm_pol_tail': skipped loading\nlibbpf: prog 'calico_xdp_accepted_entrypoint': skipped loading\nlibbpf: prog 'calico_xdp_drop': skipped loading",
+        "stdout_tail": "{\"compile_ns\":44946752,\"exec_ns\":202,\"timing_source\":\"ktime\",\"timing_source_wall\":\"rdtsc\",\"no_cmov\":false,\"disabled_passes\":[],\"wall_exec_ns\":57873,\"exec_cycles\":213282,\"tsc_freq_hz\":3685313968,\"result\":1225260573621485567,\"retval\":1,\"jited_prog_len\":4427,\"xlated_prog_len\":7536,\"code_size\":{\"bpf_bytecode_bytes\":7536,\"native_code_bytes\":4427,\"inflation_ratio\":0.587447},\"phases_ns\":{\"memory_prepare_ns\":783790,\"object_open_ns\":4508593,\"object_load_ns\":40438159,\"packet_prepare_ns\":1560,\"prog_run_wall_ns\":11576842,\"result_extract_ns\":675},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":true,\"scope\":\"full_repeat_raw\",\"error\":\"\"},\"directive_scan\":{\"performed\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":0,\"extract_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0,\"total_sites\":0},\"recompile\":{\"requested\":false,\"mode\":\"none\",\"requested_families\":[],\"skipped_families\":[],\"policy_generated\":false,\"policy_bytes\":0,\"syscall_attempted\":false,\"applied\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":0,\"extract_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0,\"total_sites\":0,\"error\":\"\"}}",
+        "timed_out": false
+      },
+      "can_test_run": true,
+      "directive_scan": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 4,
+        "wide_sites": 4,
+        "zero_ext_sites": 0
+      },
+      "eligible_families": [
+        "wide",
+        "endian",
+        "branch-flip"
+      ],
+      "execution_mode": "vm",
+      "guest_invocation": {
+        "duration_seconds": 8.62356695404742,
+        "error": null,
+        "ok": true,
+        "returncode": 0,
+        "stderr_tail": "/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/modules.order not found: kernel modules not enabled or kernel not compiled properly, kernel modules disabled",
+        "stdout_tail": "73}, \"recompile\": {\"applied\": false, \"bitfield_sites\": 0, \"branch_flip_sites\": 0, \"cmov_sites\": 0, \"endian_sites\": 0, \"error\": \"\", \"extract_sites\": 0, \"lea_sites\": 0, \"mode\": \"policy-file\", \"policy_bytes\": 0, \"policy_generated\": false, \"requested\": true, \"requested_families\": [\"wide\", \"endian\"], \"rotate_sites\": 0, \"skipped_families\": [\"cmov\", \"rotate\", \"lea\", \"extract\", \"zero-ext\", \"branch-flip\"], \"syscall_attempted\": false, \"total_sites\": 0, \"wide_sites\": 0, \"zero_ext_sites\": 0}, \"result\": 1225260573621485567, \"retval\": 1, \"timing_source\": \"ktime\", \"timing_source_wall\": \"rdtsc\", \"tsc_freq_hz\": 3685905997, \"wall_exec_ns\": 39276, \"xlated_prog_len\": 7536}, \"stderr_tail\": \"libbpf: map 'cali_v4_routes': created successfully, fd=13\\nlibbpf: map 'cali_v4_fsafes2': created successfully, fd=14\\nlibbpf: map 'cali_state6': created successfully, fd=15\\nlibbpf: map 'xdp_cali_progs3': created successfully, fd=16\\nlibbpf: map 'cali_v4_ip_sets': created successfully, fd=17\\nlibbpf: map '.rodata.str1.1': created successfully, fd=18\\nlibbpf: prog 'calico_xdp_norm_pol_tail': skipped loading\\nlibbpf: prog 'calico_xdp_accepted_entrypoint': skipped loading\\nlibbpf: prog 'calico_xdp_drop': skipped loading\\nrecompile-policy: policy site endian insn 267 pattern_kind endian-load-swap-16 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 284 pattern_kind endian-load-swap-32 was not found in the live program; skipping\\nrecompile-policy: policy site wide insn 491 pattern_kind wide-load-2 was not found in the live program; skipping\\nrecompile-policy: policy site wide insn 501 pattern_kind wide-load-2 was not found in the live program; skipping\\nrecompile-policy: policy site wide insn 556 pattern_kind wide-load-2 was not found in the live program; skipping\\nrecompile-policy: policy site wide insn 566 pattern_kind wide-load-2 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 623 pattern_kind endian-load-swap-16 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 626 pattern_kind endian-load-swap-16 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 801 pattern_kind endian-load-swap-16 was not found in the live program; skipping\\nrecompile-policy: policy site endian insn 804 pattern_kind endian-load-swap-16 was not found in the live program; skipping\\nrecompile-policy: policy selected 0 of 12 eligible rules\", \"stdout_tail\": \"{\\\"compile_ns\\\":59066541,\\\"exec_ns\\\":171,\\\"timing_source\\\":\\\"ktime\\\",\\\"timing_source_wall\\\":\\\"rdtsc\\\",\\\"no_cmov\\\":false,\\\"disabled_passes\\\":[],\\\"wall_exec_ns\\\":39276,\\\"exec_cycles\\\":144767,\\\"tsc_freq_hz\\\":3685905997,\\\"result\\\":1225260573621485567,\\\"retval\\\":1,\\\"jited_prog_len\\\":4427,\\\"xlated_prog_len\\\":7536,\\\"code_size\\\":{\\\"bpf_bytecode_bytes\\\":7536,\\\"native_code_bytes\\\":4427,\\\"inflation_ratio\\\":0.587447},\\\"phases_ns\\\":{\\\"memory_prepare_ns\\\":769232,\\\"object_open_ns\\\":4998413,\\\"object_load_ns\\\":54068128,\\\"packet_prepare_ns\\\":219,\\\"prog_run_wall_ns\\\":7854698,\\\"result_extract_ns\\\":73},\\\"perf_counters\\\":{},\\\"perf_counters_meta\\\":{\\\"requested\\\":false,\\\"collected\\\":false,\\\"include_kernel\\\":true,\\\"scope\\\":\\\"full_repeat_raw\\\",\\\"error\\\":\\\"\\\"},\\\"directive_scan\\\":{\\\"performed\\\":true,\\\"cmov_sites\\\":0,\\\"wide_sites\\\":4,\\\"rotate_sites\\\":0,\\\"lea_sites\\\":0,\\\"bitfield_sites\\\":0,\\\"extract_sites\\\":0,\\\"zero_ext_sites\\\":0,\\\"endian_sites\\\":6,\\\"branch_flip_sites\\\":2,\\\"total_sites\\\":12},\\\"recompile\\\":{\\\"requested\\\":true,\\\"mode\\\":\\\"policy-file\\\",\\\"requested_families\\\":[\\\"wide\\\",\\\"endian\\\"],\\\"skipped_families\\\":[\\\"cmov\\\",\\\"rotate\\\",\\\"lea\\\",\\\"extract\\\",\\\"zero-ext\\\",\\\"branch-flip\\\"],\\\"policy_generated\\\":false,\\\"policy_bytes\\\":0,\\\"syscall_attempted\\\":false,\\\"applied\\\":false,\\\"cmov_sites\\\":0,\\\"wide_sites\\\":0,\\\"rotate_sites\\\":0,\\\"lea_sites\\\":0,\\\"bitfield_sites\\\":0,\\\"extract_sites\\\":0,\\\"zero_ext_sites\\\":0,\\\"endian_sites\\\":0,\\\"branch_flip_sites\\\":0,\\\"total_sites\\\":0,\\\"error\\\":\\\"\\\"}}\", \"timed_out\": false}, \"v5_run_applied\": false}",
+        "timed_out": false
+      },
+      "input_size": 64,
+      "inventory_baseline_exec_ns": 140,
+      "inventory_recompile_exec_ns": 140,
+      "inventory_scan": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 0,
+        "endian_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 4,
+        "wide_sites": 4,
+        "zero_ext_sites": 0
+      },
+      "inventory_speedup_ratio": 1.0,
+      "io_mode": "packet",
+      "memory_path": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/corpus_dummy_packet_64.bin",
+      "object_path": "corpus/build/calico/xdp_debug.bpf.o",
+      "policy_mode": "policy-file",
+      "policy_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/policies/calico/xdp_debug/calico_xdp_main.policy.yaml",
+      "prog_type_name": "xdp",
+      "program_name": "calico_xdp_main",
+      "record_error": null,
+      "requested_families_compile": [
+        "wide",
+        "endian"
+      ],
+      "requested_families_run": [
+        "wide",
+        "endian"
+      ],
+      "scan_source": "vm_scanner",
+      "scanner_cli": {
+        "duration_seconds": 0.039134784999999894,
+        "error": null,
+        "ok": true,
+        "returncode": 0,
+        "stderr_tail": "",
+        "stdout_tail": "Accepted 12 v5 site(s)\n  cmov:   0\n  wide:   4\n  rotate: 0\n  lea:    0\n  extract:0\n  zeroext:0\n  endian: 6\n  bflip:  2",
+        "timed_out": false
+      },
+      "scanner_counts": {
+        "bitfield_sites": 0,
+        "branch_flip_sites": 2,
+        "cmov_sites": 0,
+        "endian_sites": 6,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 12,
+        "wide_sites": 4,
+        "zero_ext_sites": 0
+      },
+      "section_name": "xdp",
+      "section_root": "xdp",
+      "size_delta_pct": 0.0,
+      "size_ratio": 1.0,
+      "source_name": "calico",
+      "speedup_ratio": 1.1812865497076024,
+      "strategy": "packet_test_run",
+      "v5_compile": {
+        "duration_seconds": 0.09745674900000001,
+        "error": null,
+        "ok": true,
+        "returncode": 0,
+        "sample": {
+          "code_size": {
+            "bpf_bytecode_bytes": 7536,
+            "inflation_ratio": 0.587447,
+            "native_code_bytes": 4427
+          },
+          "compile_ns": 47551092,
+          "directive_scan": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 2,
+            "cmov_sites": 0,
+            "endian_sites": 6,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "performed": true,
+            "rotate_sites": 0,
+            "total_sites": 12,
+            "wide_sites": 4,
+            "zero_ext_sites": 0
+          },
+          "disabled_passes": [],
+          "exec_ns": 0,
+          "jited_prog_len": 4427,
+          "no_cmov": false,
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "collected": false,
+            "error": "",
+            "include_kernel": false,
+            "requested": false,
+            "scope": "full_repeat_raw"
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 1046399,
+            "object_load_ns": 44490754,
+            "object_open_ns": 3060338
+          },
+          "recompile": {
+            "applied": false,
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "endian_sites": 0,
+            "error": "",
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "mode": "policy-file",
+            "policy_bytes": 0,
+            "policy_generated": false,
+            "requested": true,
+            "requested_families": [
+              "wide",
+              "endian"
+            ],
+            "rotate_sites": 0,
+            "skipped_families": [
+              "cmov",
+              "rotate",
+              "lea",
+              "extract",
+              "zero-ext",
+              "branch-flip"
+            ],
+            "syscall_attempted": false,
+            "total_sites": 0,
+            "wide_sites": 0,
+            "zero_ext_sites": 0
+          },
+          "result": 0,
+          "retval": 0,
+          "timing_source": "unknown",
+          "timing_source_wall": "unavailable",
+          "wall_exec_ns": null,
+          "xlated_prog_len": 7536
+        },
+        "stderr_tail": "libbpf: map 'cali_v4_routes': created successfully, fd=13\nlibbpf: map 'cali_v4_fsafes2': created successfully, fd=14\nlibbpf: map 'cali_state6': created successfully, fd=15\nlibbpf: map 'xdp_cali_progs3': created successfully, fd=16\nlibbpf: map 'cali_v4_ip_sets': created successfully, fd=17\nlibbpf: map '.rodata.str1.1': created successfully, fd=18\nlibbpf: prog 'calico_xdp_norm_pol_tail': skipped loading\nlibbpf: prog 'calico_xdp_accepted_entrypoint': skipped loading\nlibbpf: prog 'calico_xdp_drop': skipped loading\nrecompile-policy: policy site endian insn 267 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 284 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site wide insn 491 pattern_kind wide-load-2 was not found in the live program; skipping\nrecompile-policy: policy site wide insn 501 pattern_kind wide-load-2 was not found in the live program; skipping\nrecompile-policy: policy site wide insn 556 pattern_kind wide-load-2 was not found in the live program; skipping\nrecompile-policy: policy site wide insn 566 pattern_kind wide-load-2 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 623 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 626 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 801 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 804 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy selected 0 of 12 eligible rules",
+        "stdout_tail": "{\"compile_ns\":47551092,\"exec_ns\":0,\"timing_source\":\"unknown\",\"timing_source_wall\":\"unavailable\",\"no_cmov\":false,\"disabled_passes\":[],\"wall_exec_ns\":null,\"result\":0,\"retval\":0,\"jited_prog_len\":4427,\"xlated_prog_len\":7536,\"code_size\":{\"bpf_bytecode_bytes\":7536,\"native_code_bytes\":4427,\"inflation_ratio\":0.587447},\"phases_ns\":{\"memory_prepare_ns\":1046399,\"object_open_ns\":3060338,\"object_load_ns\":44490754},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":false,\"scope\":\"full_repeat_raw\",\"error\":\"\"},\"directive_scan\":{\"performed\":true,\"cmov_sites\":0,\"wide_sites\":4,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":0,\"extract_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":6,\"branch_flip_sites\":2,\"total_sites\":12},\"recompile\":{\"requested\":true,\"mode\":\"policy-file\",\"requested_families\":[\"wide\",\"endian\"],\"skipped_families\":[\"cmov\",\"rotate\",\"lea\",\"extract\",\"zero-ext\",\"branch-flip\"],\"policy_generated\":false,\"policy_bytes\":0,\"syscall_attempted\":false,\"applied\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":0,\"extract_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0,\"total_sites\":0,\"error\":\"\"}}",
+        "timed_out": false
+      },
+      "v5_compile_applied": false,
+      "v5_run": {
+        "duration_seconds": 0.15166714300000006,
+        "error": null,
+        "ok": true,
+        "returncode": 0,
+        "sample": {
+          "code_size": {
+            "bpf_bytecode_bytes": 7536,
+            "inflation_ratio": 0.587447,
+            "native_code_bytes": 4427
+          },
+          "compile_ns": 59066541,
+          "directive_scan": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 2,
+            "cmov_sites": 0,
+            "endian_sites": 6,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "performed": true,
+            "rotate_sites": 0,
+            "total_sites": 12,
+            "wide_sites": 4,
+            "zero_ext_sites": 0
+          },
+          "disabled_passes": [],
+          "exec_cycles": 144767,
+          "exec_ns": 171,
+          "jited_prog_len": 4427,
+          "no_cmov": false,
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "collected": false,
+            "error": "",
+            "include_kernel": true,
+            "requested": false,
+            "scope": "full_repeat_raw"
+          },
+          "phases_ns": {
+            "memory_prepare_ns": 769232,
+            "object_load_ns": 54068128,
+            "object_open_ns": 4998413,
+            "packet_prepare_ns": 219,
+            "prog_run_wall_ns": 7854698,
+            "result_extract_ns": 73
+          },
+          "recompile": {
+            "applied": false,
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "endian_sites": 0,
+            "error": "",
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "mode": "policy-file",
+            "policy_bytes": 0,
+            "policy_generated": false,
+            "requested": true,
+            "requested_families": [
+              "wide",
+              "endian"
+            ],
+            "rotate_sites": 0,
+            "skipped_families": [
+              "cmov",
+              "rotate",
+              "lea",
+              "extract",
+              "zero-ext",
+              "branch-flip"
+            ],
+            "syscall_attempted": false,
+            "total_sites": 0,
+            "wide_sites": 0,
+            "zero_ext_sites": 0
+          },
+          "result": 1225260573621485567,
+          "retval": 1,
+          "timing_source": "ktime",
+          "timing_source_wall": "rdtsc",
+          "tsc_freq_hz": 3685905997,
+          "wall_exec_ns": 39276,
+          "xlated_prog_len": 7536
+        },
+        "stderr_tail": "libbpf: map 'cali_v4_routes': created successfully, fd=13\nlibbpf: map 'cali_v4_fsafes2': created successfully, fd=14\nlibbpf: map 'cali_state6': created successfully, fd=15\nlibbpf: map 'xdp_cali_progs3': created successfully, fd=16\nlibbpf: map 'cali_v4_ip_sets': created successfully, fd=17\nlibbpf: map '.rodata.str1.1': created successfully, fd=18\nlibbpf: prog 'calico_xdp_norm_pol_tail': skipped loading\nlibbpf: prog 'calico_xdp_accepted_entrypoint': skipped loading\nlibbpf: prog 'calico_xdp_drop': skipped loading\nrecompile-policy: policy site endian insn 267 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 284 pattern_kind endian-load-swap-32 was not found in the live program; skipping\nrecompile-policy: policy site wide insn 491 pattern_kind wide-load-2 was not found in the live program; skipping\nrecompile-policy: policy site wide insn 501 pattern_kind wide-load-2 was not found in the live program; skipping\nrecompile-policy: policy site wide insn 556 pattern_kind wide-load-2 was not found in the live program; skipping\nrecompile-policy: policy site wide insn 566 pattern_kind wide-load-2 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 623 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 626 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 801 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy site endian insn 804 pattern_kind endian-load-swap-16 was not found in the live program; skipping\nrecompile-policy: policy selected 0 of 12 eligible rules",
+        "stdout_tail": "{\"compile_ns\":59066541,\"exec_ns\":171,\"timing_source\":\"ktime\",\"timing_source_wall\":\"rdtsc\",\"no_cmov\":false,\"disabled_passes\":[],\"wall_exec_ns\":39276,\"exec_cycles\":144767,\"tsc_freq_hz\":3685905997,\"result\":1225260573621485567,\"retval\":1,\"jited_prog_len\":4427,\"xlated_prog_len\":7536,\"code_size\":{\"bpf_bytecode_bytes\":7536,\"native_code_bytes\":4427,\"inflation_ratio\":0.587447},\"phases_ns\":{\"memory_prepare_ns\":769232,\"object_open_ns\":4998413,\"object_load_ns\":54068128,\"packet_prepare_ns\":219,\"prog_run_wall_ns\":7854698,\"result_extract_ns\":73},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":true,\"scope\":\"full_repeat_raw\",\"error\":\"\"},\"directive_scan\":{\"performed\":true,\"cmov_sites\":0,\"wide_sites\":4,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":0,\"extract_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":6,\"branch_flip_sites\":2,\"total_sites\":12},\"recompile\":{\"requested\":true,\"mode\":\"policy-file\",\"requested_families\":[\"wide\",\"endian\"],\"skipped_families\":[\"cmov\",\"rotate\",\"lea\",\"extract\",\"zero-ext\",\"branch-flip\"],\"policy_generated\":false,\"policy_bytes\":0,\"syscall_attempted\":false,\"applied\":false,\"cmov_sites\":0,\"wide_sites\":0,\"rotate_sites\":0,\"lea_sites\":0,\"bitfield_sites\":0,\"extract_sites\":0,\"zero_ext_sites\":0,\"endian_sites\":0,\"branch_flip_sites\":0,\"total_sites\":0,\"error\":\"\"}}",
+        "timed_out": false
+      },
+      "v5_run_applied": false
+    }
+  ],
+  "summary": {
+    "selected_programs": 3
+  }
+}
