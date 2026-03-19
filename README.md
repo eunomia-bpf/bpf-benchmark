@@ -6,7 +6,7 @@ Three-layer benchmarking pipeline:
 
 - `micro/`: isolated micro-benchmarks driven by `bpf_prog_test_run_opts`
 - `corpus/`: real-world program collection, measurement, and analysis
-- `e2e/`: end-to-end deployment benchmarks (Tracee, Tetragon, bpftrace, XDP)
+- `e2e/`: end-to-end deployment benchmarks (Tracee, Tetragon, bpftrace, scx)
 
 Legacy multi-runtime benchmarks live under `legacy/` and are not part of the active pipeline.
 
@@ -16,7 +16,7 @@ Legacy multi-runtime benchmarks live under `legacy/` and are not part of the act
 bpf-benchmark/
 ├── micro/                 # Isolated micro-benchmark suites + runner (micro_exec)
 ├── corpus/                # 23-project real-world corpus, fetch/build, and measurement
-├── e2e/                   # End-to-end workloads (tracee, tetragon, bpftrace, xdp)
+├── e2e/                   # End-to-end workloads (tracee, tetragon, bpftrace, scx)
 ├── scanner/               # Userspace BPF directive scanner (bpf-jit-scanner CLI)
 ├── config/                # YAML benchmark suite manifests (micro_pure_jit.yaml etc.)
 ├── docs/                  # Research plans, reports, and temporary experiment notes
