@@ -58,6 +58,7 @@ reference/papers/*.pdf
 # /tmp/ and tmp/ - the repo-root scratch directory (old layout, superseded by docs/tmp/)
 /tmp/
 tmp/
+/.worktrees/
 *.tmp
 *.tmp.md
 .tmp-*

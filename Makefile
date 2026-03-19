@@ -6,6 +6,18 @@ MICRO_DIR := $(ROOT_DIR)/micro
 SCANNER_DIR := $(ROOT_DIR)/scanner
 KERNEL_DIR := $(ROOT_DIR)/vendor/linux-framework
 KERNEL_TEST_DIR := $(ROOT_DIR)/tests/kernel
+ARM64_WORKTREE_DIR ?= $(ROOT_DIR)/.worktrees/linux-framework-arm64-src
+ARM64_BUILD_DIR ?= $(KERNEL_DIR)/build-arm64
+ARM64_BUILD_CONFIG := $(ARM64_BUILD_DIR)/.config
+ARM64_IMAGE := $(ARM64_BUILD_DIR)/arch/arm64/boot/Image
+ARM64_IMAGE_LINK := $(KERNEL_DIR)/arch/arm64/boot/Image
+ARM64_CONFIG_LINK := $(KERNEL_DIR)/.config.arm64
+ARM64_ROOTFS_DIR ?= $(HOME)/.cache/bpf-benchmark/arm64-rootfs
+ARM64_ROOTFS_RELEASE ?= noble
+ARM64_ROOTFS_MIRROR ?= http://ports.ubuntu.com/ubuntu-ports
+ARM64_QEMU ?= qemu-system-aarch64
+ARM64_SMOKE_SCRIPT := $(ROOT_DIR)/scripts/arm64_qemu_smoke.py
+CROSS_COMPILE_ARM64 ?= aarch64-linux-gnu-
 
 # Result directories
 MICRO_RESULTS_DIR := $(ROOT_DIR)/micro/results
@@ -105,9 +117,10 @@ KERNEL_JIT_SOURCES := \
 # Stamp file for BPF program objects (programs/ has no separate build dir)
 MICRO_BPF_STAMP := $(MICRO_DIR)/programs/.build.stamp
 
-.PHONY: all micro scanner kernel kernel-tests scanner-tests clean \
+.PHONY: all micro scanner kernel kernel-arm64 kernel-tests scanner-tests clean \
 	smoke check validate verify-build compare \
 	vm-selftest vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
+	vm-arm64-smoke arm64-worktree arm64-rootfs \
 	help
 
 help:
@@ -118,12 +131,14 @@ help:
 	@echo "  make micro            - Build micro_exec runner and BPF programs"
 	@echo "  make scanner          - Build bpf-jit-scanner"
 	@echo "  make kernel           - Build kernel bzImage"
+	@echo "  make kernel-arm64     - Cross-build ARM64 Image under vendor/linux-framework/build-arm64"
 	@echo "  make kernel-tests     - Build kernel recompile test binary"
 	@echo ""
 	@echo "Test/smoke targets:"
 	@echo "  make smoke            - Quick llvmbpf smoke test (no VM)"
 	@echo "  make check            - Build + scanner tests + smoke"
 	@echo "  make validate         - check + vm-selftest + vm-micro-smoke"
+	@echo "  make vm-arm64-smoke   - Boot ARM64 kernel in qemu-system-aarch64 and run uname/bpf_jit smoke"
 	@echo ""
 	@echo "Benchmark targets (require VM):"
 	@echo "  make vm-selftest      - Run kernel recompile selftests in VM"
@@ -143,6 +158,8 @@ help:
 	@echo "  REPEAT=N              - Repeat count (default: 200)"
 	@echo "  BENCH=\"name1 name2\"   - Run only specific benchmarks (vm-micro)"
 	@echo "  BZIMAGE=path          - Custom kernel image path"
+	@echo "  CROSS_COMPILE_ARM64=  - ARM64 cross-compiler prefix (default: aarch64-linux-gnu-)"
+	@echo "  ARM64_ROOTFS_DIR=     - ARM64 guest rootfs path (default: $$HOME/.cache/bpf-benchmark/arm64-rootfs)"
 	@echo "  POLICY=name           - Named policy set (default: default)"
 	@echo "                          default  → micro/policies/"
 	@echo "                          all-apply → micro/policies/variants/all-apply/"
@@ -202,6 +219,43 @@ kernel:
 	@echo "=== Running make kernel ==="
 	$(MAKE) -C "$(KERNEL_DIR)" -j"$(NPROC)" bzImage
 
+arm64-worktree:
+	@mkdir -p "$(dir $(ARM64_WORKTREE_DIR))"
+	@if [ ! -e "$(ARM64_WORKTREE_DIR)/.git" ]; then \
+		git -C "$(KERNEL_DIR)" worktree add --detach "$(ARM64_WORKTREE_DIR)" "$$(git -C "$(KERNEL_DIR)" rev-parse HEAD)"; \
+	else \
+		git -C "$(ARM64_WORKTREE_DIR)" checkout --detach "$$(git -C "$(KERNEL_DIR)" rev-parse HEAD)" >/dev/null; \
+	fi
+
+$(ARM64_BUILD_CONFIG): | arm64-worktree
+	@echo "=== Generating ARM64 kernel config ==="
+	mkdir -p "$(ARM64_BUILD_DIR)"
+	$(MAKE) -C "$(ARM64_WORKTREE_DIR)" O="$(ARM64_BUILD_DIR)" \
+		ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" defconfig
+	"$(ARM64_WORKTREE_DIR)/scripts/config" --file "$(ARM64_BUILD_CONFIG)" \
+		-e BPF -e BPF_SYSCALL -e BPF_JIT \
+		-e VIRTIO -e VIRTIO_BLK -e VIRTIO_NET \
+		-e NET_9P -e 9P_FS -e NET_9P_VIRTIO \
+		-e PCI -e VIRTIO_PCI -e VIRTIO_MMIO \
+		-e BLK_DEV_INITRD -e DEVTMPFS -e DEVTMPFS_MOUNT \
+		-e TMPFS -e TMPFS_POSIX_ACL \
+		-e SERIAL_AMBA_PL011 -e SERIAL_AMBA_PL011_CONSOLE
+	$(MAKE) -C "$(ARM64_WORKTREE_DIR)" O="$(ARM64_BUILD_DIR)" \
+		ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" olddefconfig
+	ln -sfn build-arm64/.config "$(ARM64_CONFIG_LINK)"
+
+$(ARM64_IMAGE): $(ARM64_BUILD_CONFIG) | arm64-worktree
+	@echo "=== Building ARM64 Image ==="
+	$(MAKE) -C "$(ARM64_WORKTREE_DIR)" O="$(ARM64_BUILD_DIR)" \
+		ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" Image -j"$(NPROC)"
+	ln -sfn ../../../build-arm64/arch/arm64/boot/Image "$(ARM64_IMAGE_LINK)"
+
+kernel-arm64: $(ARM64_IMAGE)
+	ln -sfn build-arm64/.config "$(ARM64_CONFIG_LINK)"
+	ln -sfn ../../../build-arm64/arch/arm64/boot/Image "$(ARM64_IMAGE_LINK)"
+	@echo "ARM64 config: $(ARM64_CONFIG_LINK)"
+	@echo "ARM64 Image:  $(ARM64_IMAGE_LINK)"
+
 kernel-tests:
 	@echo "=== Running make kernel-tests ==="
 	$(MAKE) -C "$(KERNEL_TEST_DIR)"
@@ -231,6 +285,16 @@ $(SCANNER_PATH): $(SCANNER_SOURCES)
 $(BZIMAGE_PATH): $(KERNEL_JIT_SOURCES)
 	@echo "=== Building bzImage (kernel sources changed) ==="
 	$(MAKE) -C "$(KERNEL_DIR)" -j"$(NPROC)" bzImage
+
+$(ARM64_ROOTFS_DIR)/bin/sh:
+	@echo "=== Preparing ARM64 rootfs ($(ARM64_ROOTFS_RELEASE)) ==="
+	sudo mkdir -p "$(dir $(ARM64_ROOTFS_DIR))"
+	sudo rm -rf "$(ARM64_ROOTFS_DIR)"
+	sudo qemu-debootstrap --arch=arm64 --variant=minbase "$(ARM64_ROOTFS_RELEASE)" \
+		"$(ARM64_ROOTFS_DIR)" "$(ARM64_ROOTFS_MIRROR)"
+
+arm64-rootfs: $(ARM64_ROOTFS_DIR)/bin/sh
+	@echo "ARM64 rootfs: $(ARM64_ROOTFS_DIR)"
 
 smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP)
 	@echo "=== Running make smoke ==="
@@ -331,6 +395,13 @@ vm-all:
 	$(MAKE) vm-corpus
 	$(MAKE) vm-e2e
 
+vm-arm64-smoke: $(ARM64_IMAGE) $(ARM64_ROOTFS_DIR)/bin/sh $(ARM64_SMOKE_SCRIPT)
+	@echo "=== Running make vm-arm64-smoke ==="
+	$(VENV_ACTIVATE) python3 "$(ARM64_SMOKE_SCRIPT)" \
+		--qemu "$(ARM64_QEMU)" \
+		--kernel "$(ARM64_IMAGE)" \
+		--rootfs "$(ARM64_ROOTFS_DIR)"
+
 clean:
 	@echo "=== Running make clean ==="
 	$(MAKE) -C "$(MICRO_DIR)" clean
@@ -354,4 +425,7 @@ clean:
 		"$(VM_SCX_OUTPUT_JSON)" \
 		"$(VM_SCX_OUTPUT_MD)" \
 		"$(VM_KATRAN_OUTPUT_JSON)" \
-		"$(VM_KATRAN_OUTPUT_MD)"
+		"$(VM_KATRAN_OUTPUT_MD)" \
+		"$(ARM64_CONFIG_LINK)" \
+		"$(ARM64_IMAGE_LINK)"
+	rm -rf "$(ARM64_BUILD_DIR)"
