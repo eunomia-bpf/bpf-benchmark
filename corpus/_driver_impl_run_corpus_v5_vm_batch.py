@@ -60,7 +60,6 @@ try:
         run_command as shared_run_command,
         run_text_command as shared_run_text_command,
         summarize_text,
-        text_invocation_summary,
         write_json_output,
     )
     from policy_utils import POLICY_DIR as DEFAULT_POLICY_DIR, resolve_policy_path
@@ -90,7 +89,6 @@ except ImportError:
         run_command as shared_run_command,
         run_text_command as shared_run_text_command,
         summarize_text,
-        text_invocation_summary,
         write_json_output,
     )
     from corpus.policy_utils import POLICY_DIR as DEFAULT_POLICY_DIR, resolve_policy_path

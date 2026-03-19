@@ -24,30 +24,57 @@ for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpu
         sys.path.insert(0, candidate_str)
 
 from directive_census import filter_bpf_paths
-from run_corpus_perf import (
-    DEFAULT_CONTEXT_PATH,
-    DEFAULT_PACKET_PATH,
-    DEFAULT_TIMEOUT_SECONDS,
-    ROOT_DIR,
-    compute_correctness,
-    compute_speedup_ratio,
-    directive_scan_from_record,
-    ensure_parent,
-    format_ns,
-    format_ratio,
-    geomean,
-    invocation_summary,
-    list_programs,
-    markdown_table,
-    materialize_dummy_context,
-    materialize_dummy_packet,
-    relpath,
-    run_command,
-    runner_binary_from_config,
-    summarize_failure_reason,
-    summarize_stderr,
-)
-from run_corpus_tracing import Libbpf, TRIGGERS, measure_attached_program
+
+try:
+    from _driver_impl_run_corpus_perf import (
+        DEFAULT_CONTEXT_PATH,
+        DEFAULT_PACKET_PATH,
+        DEFAULT_TIMEOUT_SECONDS,
+        ROOT_DIR,
+        compute_correctness,
+        compute_speedup_ratio,
+        directive_scan_from_record,
+        ensure_parent,
+        format_ns,
+        format_ratio,
+        geomean,
+        invocation_summary,
+        list_programs,
+        markdown_table,
+        materialize_dummy_context,
+        materialize_dummy_packet,
+        relpath,
+        run_command,
+        runner_binary_from_config,
+        summarize_failure_reason,
+        summarize_stderr,
+    )
+    from _driver_impl_run_corpus_tracing import Libbpf, TRIGGERS, measure_attached_program
+except ImportError:
+    from corpus._driver_impl_run_corpus_perf import (
+        DEFAULT_CONTEXT_PATH,
+        DEFAULT_PACKET_PATH,
+        DEFAULT_TIMEOUT_SECONDS,
+        ROOT_DIR,
+        compute_correctness,
+        compute_speedup_ratio,
+        directive_scan_from_record,
+        ensure_parent,
+        format_ns,
+        format_ratio,
+        geomean,
+        invocation_summary,
+        list_programs,
+        markdown_table,
+        materialize_dummy_context,
+        materialize_dummy_packet,
+        relpath,
+        run_command,
+        runner_binary_from_config,
+        summarize_failure_reason,
+        summarize_stderr,
+    )
+    from corpus._driver_impl_run_corpus_tracing import Libbpf, TRIGGERS, measure_attached_program
 
 
 DEFAULT_OUTPUT_JSON = ROOT_DIR / "docs" / "tmp" / "corpus-runnability-results.json"

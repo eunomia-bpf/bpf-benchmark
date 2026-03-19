@@ -4,33 +4,39 @@
 
 ## Directory Layout
 
-- `config/macro_corpus.yaml`: declarative macro/corpus suite consumed by `run_macro_corpus.py`
+- `config/macro_corpus.yaml`: declarative macro/corpus suite consumed by `python3 micro/driver.py corpus macro ...`
 - `config/corpus_manifest.yaml`: generated 23-project corpus snapshot and measured-summary manifest
 - `repos.yaml`: upstream repo harvest manifest used by `fetch_real_world_corpus.py`
 - `repos/`: shallow sparse checkouts of upstream projects
 - `build/`: compiled `.bpf.o` outputs under `corpus/build/<repo>/`
 - `results/`: committed JSON/Markdown outputs from corpus and supporting analyses
 - `inputs/`: reusable packet/context fixtures for macro and corpus runs
+- `run_corpus_runnability.py`: runnable-program inventory and feasibility report
+- `_driver_impl_run_*.py`: private corpus measurement backends dispatched by `python3 micro/driver.py corpus ...`
 - `tmp/`: archived one-off scripts that are no longer part of the supported top-level workflow
 
 `corpus/build/<repo>/` is also the object root consumed by the `e2e/` layer for cases such as `tracee`, `tetragon`, and `scx`.
 
-## Supported Scripts
+## Canonical Entry Points
 
-Core corpus pipeline and measurement entrypoints kept at the top level:
+Use `micro/driver.py corpus ...` for the active corpus measurement modes:
+
+- `python3 micro/driver.py corpus macro`
+- `python3 micro/driver.py corpus perf`
+- `python3 micro/driver.py corpus tracing`
+- `python3 micro/driver.py corpus tracing-exec`
+- `python3 micro/driver.py corpus tracing-vm`
+- `python3 micro/driver.py corpus v5-framework`
+- `python3 micro/driver.py corpus v5-production`
+- `python3 micro/driver.py corpus v5-vm-batch`
+- `python3 corpus/run_corpus_runnability.py`
+
+Top-level support scripts retained in `corpus/`:
 
 - `fetch_real_world_corpus.py`: fetches/refreshes upstream repos and regenerates `corpus/inventory.json`
 - `build_expanded_corpus.py`: compiles harvested `.bpf.c` sources into `corpus/build/`
 - `directive_census.py`: scanner-backed directive census over `micro/` objects plus the built corpus
-- `run_macro_corpus.py`: declarative macro/corpus suite runner
-- `run_corpus_perf.py`: packet-test-run stock vs recompile corpus measurements
-- `run_corpus_tracing.py`: tracing attach/trigger corpus measurements
-- `run_corpus_tracing_exec.py`: in-place stock vs recompile tracing measurements on the current kernel
-- `run_tracing_corpus_vm.py`: framework-kernel VM runner for the full tracing corpus attach/trigger stock vs recompile comparison
 - `run_corpus_runnability.py`: runnable-program inventory and feasibility report
-- `run_corpus_v5_framework.py`: 40-program framework-kernel corpus union runner
-- `run_production_corpus_v5_framework.py`: production-skewed framework-kernel corpus runner
-- `run_corpus_v5_vm_batch.py`: full packet corpus VM batch recompile harness
 
 Long-lived support scripts also kept at the top level:
 
@@ -41,7 +47,7 @@ Long-lived support scripts also kept at the top level:
 
 Private implementation modules retained at the top level:
 
-- `_driver_impl_run_*.py`: concrete implementations imported by `micro/driver.py` and the public `run_*.py` wrappers
+- `_driver_impl_run_*.py`: concrete implementations imported by `micro/driver.py`
 
 Archived one-off scripts moved under `corpus/tmp/`:
 
@@ -77,11 +83,11 @@ python3 corpus/directive_census.py --help
 Inspect the declarative macro suite:
 
 ```bash
-python3 corpus/run_macro_corpus.py --list
+python3 micro/driver.py corpus macro --list
 ```
 
 Inspect the corpus perf harness:
 
 ```bash
-python3 corpus/run_corpus_perf.py --help
+python3 micro/driver.py corpus perf --help
 ```

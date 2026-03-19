@@ -20,7 +20,7 @@ except ImportError:
     from micro.benchmark_catalog import BenchmarkSpec, ROOT_DIR, RuntimeSpec, SuiteSpec
 
 from .commands import build_runner_command, maybe_prepend_sudo
-from .benchmarks import resolve_memory_file, select_benchmarks
+from .benchmarks import resolve_memory_file
 
 try:
     import numpy as np

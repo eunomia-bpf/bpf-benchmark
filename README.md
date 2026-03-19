@@ -84,9 +84,9 @@ make kernel-tests     # kernel recompile self-tests
 
 ## Layer Notes
 
-`micro/` owns the isolated benchmark manifests (`config/micro_pure_jit.yaml`), the `micro_exec` C++ runner, input generators, and the Python orchestrator (`run_micro.py`).
+`micro/` owns the isolated benchmark manifests (`config/micro_pure_jit.yaml`), the `micro_exec` C++ runner, input generators, and the Python driver (`micro/driver.py`, with `_driver_impl_run_micro.py` as the suite backend).
 
-`corpus/` owns the 23-project real-world corpus, fetch/build tooling, declarative corpus config in `corpus/config/`, and the measurement scripts.
+`corpus/` owns the 23-project real-world corpus, fetch/build tooling, declarative corpus config in `corpus/config/`, and the measurement backends surfaced through `python3 micro/driver.py corpus ...` plus `corpus/run_corpus_runnability.py`.
 
 `e2e/` owns full deployment-style evaluation via `e2e/run.py` plus per-case assets under `e2e/cases/`.
 

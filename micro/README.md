@@ -4,23 +4,20 @@
 
 ## Current Suite
 
-- `config/micro_pure_jit.yaml` is the only active micro suite manifest.
-- The suite currently contains 56 benchmarks: 48 staged XDP cases, 5 packet-backed XDP controls, and 3 kernel-only non-XDP controls.
-- Program-type coverage is 53 XDP, 2 TC, and 1 cgroup_skb benchmarks.
+- `config/micro_pure_jit.yaml` is the active micro suite manifest.
+- The suite covers the active pure-JIT benchmark set across staged XDP cases, packet-backed XDP controls, and a small kernel-only non-XDP control subset.
 - The suite is designed to exercise the 8 canonical forms tracked in `docs/kernel-jit-optimization-plan.md`: `COND_SELECT`, `WIDE_MEM`, `ROTATE`, `ADDR_CALC`, `BITFIELD_EXTRACT`, `ZERO_EXT_ELIDE`, `ENDIAN_FUSION`, and `BRANCH_FLIP`.
 
 ## Directory Layout
 
-- `run_micro.py`: main pure-JIT runner
+- `driver.py`: unified benchmark driver; `suite` is the canonical micro entrypoint
+- `_driver_impl_run_micro.py`: pure-JIT suite backend used by `driver.py suite`
 - `benchmark_catalog.py`: suite YAML parser for micro manifests
 - `input_generators.py`: deterministic input generation for active benchmarks
-- `driver.py`: unified micro/corpus/e2e entrypoint
 - `_driver_impl_*.py`: active driver backends used by `driver.py`
 - `summarize_rq.py`, `generate_figures.py`: active reporting utilities
-- `archive/scripts/`: archived one-off analysis scripts, legacy compatibility wrappers, and superseded tooling
 - `orchestrator/`: shared Python helpers reused by `corpus/` and `e2e/`
 - `programs/*.bpf.c`: active pure-JIT benchmark sources
-- `programs/archive/runtime/*.bpf.c`: archived runtime-only benchmarks, preserved for history and excluded from the active build
 
 ## Build
 
@@ -36,7 +33,6 @@ make -C micro
 List the active suite:
 
 ```bash
-python3 micro/run_micro.py --list
 python3 micro/driver.py suite -- --list
 ```
 
@@ -61,7 +57,7 @@ Run inside the framework-kernel VM:
 Run a targeted smoke test directly:
 
 ```bash
-python3 micro/run_micro.py \
+python3 micro/driver.py suite -- \
   --bench simple \
   --runtime llvmbpf \
   --iterations 1 \
@@ -76,5 +72,3 @@ Results live under `micro/results/`.
 - `micro/results/dev/`: default working outputs for direct runs and Makefile targets
 - `micro/results/`: checked-in authoritative JSON plus `README.md`
 - `micro/results/archive/`: historical and intermediate artifacts
-
-Archived analysis scripts under `micro/archive/scripts/` continue to read and write `micro/results/`.

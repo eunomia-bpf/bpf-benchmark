@@ -71,10 +71,10 @@ Results are written to:
 For direct invocation (advanced use only):
 ```bash
 # List available benchmarks
-python3 micro/run_micro.py --list
+python3 micro/driver.py suite -- --list
 
 # Run with perf counters (direct invocation)
-python3 micro/run_micro.py --runtime llvmbpf --runtime kernel --perf-counters
+python3 micro/driver.py suite -- --runtime llvmbpf --runtime kernel --perf-counters
 
 # Generate RQ-oriented markdown summary from results
 python3 micro/summarize_rq.py --results micro/results/dev/vm_micro.json --output docs/summary.md
@@ -92,11 +92,12 @@ make -C micro clean
 Configured via YAML files in `config/`:
 - **`config/micro_pure_jit.yaml`** — Current default isolated JIT suite (62 benchmarks as of March 13, 2026): 48 staged XDP compute cases + 6 per-form dense variants, 5 packet-backed XDP controls, and 3 kernel-only non-XDP controls (2 TC + 1 cgroup_skb). The active suite is aligned with the 8 canonical forms tracked in `docs/kernel-jit-optimization-plan.md`.
 - **`corpus/config/macro_corpus.yaml`** — Macro/corpus layer entry point.
-- **`config/ablation/`** — Per-family ablation suite YAML files used for ablation experiments.
 
 ### Key components
 
-**`micro/run_micro.py`** — Main orchestrator. Loads suite YAML via `benchmark_catalog.py`, generates inputs via `input_generators.py`, invokes `micro_exec` for each benchmark×runtime pair, collects JSON samples, computes statistics (median/mean/p95/stdev), and attaches baseline adjustments.
+**`micro/driver.py`** — Unified benchmark driver. `suite` dispatches to the active micro backend or macro/corpus backend based on manifest kind; `corpus` dispatches the real-world measurement modes.
+
+**`micro/_driver_impl_run_micro.py`** — Main pure-JIT orchestrator. Loads suite YAML via `benchmark_catalog.py`, generates inputs via `input_generators.py`, invokes `micro_exec` for each benchmark×runtime pair, collects JSON samples, computes statistics (median/mean/p95/stdev), and attaches baseline adjustments.
 
 **`micro/benchmark_catalog.py`** — Parses suite YAML into typed dataclasses (`SuiteSpec`, `BenchmarkSpec`, `RuntimeSpec`). `CONFIG_PATH` defaults to `config/micro_pure_jit.yaml`. All paths in YAML are resolved relative to repo root.
 
@@ -112,8 +113,6 @@ Both paths output a single JSON line per sample with `compile_ns`, `exec_ns`, `r
 - `DEFINE_STAGED_INPUT_XDP_BENCH` — staged XDP pure-jit path
 - `DEFINE_PACKET_BACKED_XDP_BENCH` / `DEFINE_FIXED_PACKET_BACKED_XDP_BENCH` — packet-backed XDP controls
 - `DEFINE_MAP_BACKED_TC_BENCH` / `DEFINE_MAP_BACKED_CGROUP_SKB_BENCH` — kernel-only non-XDP controls
-
-Archived runtime-only programs live under `micro/programs/archive/runtime/` and are not part of the active suite.
 
 Programs define a `bench_*()` function taking `(const u8 *data, u32 len, u64 *out)` and an `input_map` with a program-specific value struct.
 
@@ -176,5 +175,5 @@ echo "implement feature X" | codex exec --dangerously-bypass-approvals-and-sandb
 
 ### Benchmark Program Design Rules
 - **Pure-JIT benchmarks** (`micro_pure_jit.yaml`): Must test ONLY JIT code generation quality. No map lookups or helper calls in the benchmark hot path. Allowed harness shapes are staged XDP, packet-backed XDP controls, and the small TC/cgroup_skb kernel-only control subset already in the suite.
-- **Archived runtime benchmarks**: Runtime-mechanism cases removed from the active comparison live under `micro/programs/archive/runtime/`. Keep them out of the active manifest unless the suite definition changes again.
+- **Runtime-mechanism cases**: Keep runtime-overhead experiments out of the active pure-JIT manifest unless the suite definition and methodology are updated together.
 - If a pure-JIT benchmark uses maps or helpers in its hot path, it is measuring runtime overhead, not JIT quality — this is a bug that must be fixed.
