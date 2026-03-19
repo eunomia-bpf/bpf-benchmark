@@ -11,7 +11,8 @@ Current top-level authoritative JSON:
 - `tracee_authoritative_20260313_postfix.json`
 - `bpftrace_authoritative_20260312.json`
 - `scx_authoritative_20260311.json`
-- `xdp_forwarding_authoritative_20260312.json`
 
 `tracee_authoritative_20260313_postfix.json` is the kept replacement for the older
 same-day `tracee_authoritative_20260313.json`, which now lives in `archive/`.
+
+The retired XDP dataplane E2E case was removed on 2026-03-18, so its checked-in artifacts are no longer kept under `e2e/results/`.

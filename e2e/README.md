@@ -2,9 +2,11 @@
 
 `e2e/` is the deployment-layer benchmark harness. The unified entrypoint is `python3 e2e/run.py <case>`.
 
+Active checked-in cases are `tracee`, `tetragon`, `bpftrace`, and `scx`. The former low-value XDP dataplane case was retired on 2026-03-18; a future `katran` case is the planned XDP replacement.
+
 ## Layout
 
-- `run.py`: unified dispatcher for `tracee`, `tetragon`, `bpftrace`, `scx`, and `xdp_forwarding`
+- `run.py`: unified dispatcher for `tracee`, `tetragon`, `bpftrace`, and `scx`
 - `cases/`: per-system case logic, setup scripts, configs, and assets
 - `common/`: shared helpers for agent lifecycle, workload generation, metrics, VM runs, and recompile
 - `results/`: JSON/Markdown outputs
@@ -21,7 +23,7 @@ python3 corpus/build_expanded_corpus.py --repo tracee --repo tetragon --repo scx
 ```
 
 - Most cases require root or passwordless `sudo -n`.
-- `tracee`, `tetragon`, `scx`, and `xdp_forwarding` consume objects from `corpus/build/`.
+- `tracee`, `tetragon`, and `scx` consume objects from `corpus/build/`.
 - `e2e` expects the standalone scanner CLI at `scanner/build/bpf-jit-scanner`; `make -C micro` does not produce that path.
 
 ## Case Notes
@@ -58,11 +60,3 @@ python3 corpus/build_expanded_corpus.py --repo tracee --repo tetragon --repo scx
 - Requires at least one workload generator in `PATH`: `hackbench`, `stress-ng`, or `sysbench`
 - Supports `--vm` and requires `--kernel` when enabled
 - Smoke example: `python3 e2e/run.py scx --smoke`
-
-### xdp_forwarding
-
-- Uses `corpus/build/xdp-tools/xdp_forward.bpf.o` with the `xdp_fwd_fib_full` program by default
-- Requires `ip`, `bpftool`, `iperf3`, and `scanner/build/bpf-jit-scanner`
-- Creates two traffic namespaces, two router-side veth interfaces, enables IPv4 forwarding, pins the XDP object under `/sys/fs/bpf`, and populates the `xdp_tx_ports` devmap before running UDP PPS traffic
-- Supports `--vm` and should be run inside the framework kernel guest for actual `BPF_PROG_JIT_RECOMPILE` measurements
-- Dry-run example: `python3 e2e/run.py xdp_forwarding --dry-run`
