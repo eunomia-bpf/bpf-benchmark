@@ -4,21 +4,13 @@
 # Section: tracepoint/sys_execve
 # Total scanner sites: 69
 # Family site totals: cmov=65, wide=0, rotate=0, extract=0, lea=0, zero-ext=0, endian=0, branch-flip=4
-# Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
+# Selection model: explicit site allowlist
 # Excluded cmov sites from allowlist: 65
+# 2026-03-18 diagnostic override: keep one branch-flip site for minimal paired Tetragon rerun
 
 version: 3
 program: 'event_execve'
 sites:
   - insn: 2460
-    family: branch-flip
-    pattern_kind: 'branch-flip'
-  - insn: 2469
-    family: branch-flip
-    pattern_kind: 'branch-flip'
-  - insn: 2485
-    family: branch-flip
-    pattern_kind: 'branch-flip'
-  - insn: 2560
     family: branch-flip
     pattern_kind: 'branch-flip'

@@ -428,7 +428,7 @@ class TetragonAgentSession:
 
         self.programs = [
             item
-            for item in find_bpf_programs(self.process.pid or 0)
+            for item in current_programs()
             if int(item.get("id", -1)) not in before_ids
         ]
         if not self.programs:
@@ -606,11 +606,15 @@ def resolve_tetragon_daemon_policy_files(
     return resolve_policy_files(targets)
 
 
-def current_prog_ids() -> list[int]:
+def current_programs() -> list[dict[str, object]]:
     payload = run_json_command([bpftool_binary(), "-j", "-p", "prog", "show"], timeout=30)
     if not isinstance(payload, list):
         return []
-    return [int(record["id"]) for record in payload if isinstance(record, dict) and "id" in record]
+    return [dict(record) for record in payload if isinstance(record, dict) and "id" in record]
+
+
+def current_prog_ids() -> list[int]:
+    return [int(record["id"]) for record in current_programs()]
 
 
 def git_sha() -> str:
