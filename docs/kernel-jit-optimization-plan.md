@@ -11,7 +11,8 @@
 > - 每次 context 压缩后 → 完整读取本文档恢复全局状态。
 > - 用 agent background 跑任务，不阻塞主对话。
 > - **构建+修改+运行不拆分**：一个 subagent 负责完整流程（改代码→构建→运行→发现 bug→修复→再运行），不要拆成多个 agent。
-> 上次更新：2026-03-19b（#212-#218 全部 ✅。内核 Phase A/B/C bug fix + 性能优化 + validator/emitter 统一 + DSL 删除 + tracepoints 删除 + stock choice 消除 + do_jit 短路 + 头文件清理。内核代码从 6758→5649 行（-16.4%）。selftest 20/20 全通过。用户态清理 ~21000 行 dead code。夜跑 vm-micro+e2e+corpus 进行中。）
+> 上次更新：2026-03-19c（#223 ✅ 接口精简：recompile_count 删除 + ROLLBACK flag 删除 + log_level→bool。#224 ✅ 完整验证：vm-micro 62/62 valid，overall 1.017x，applied-only **1.078x**（7/7 恢复，0 回归）。E2E tracee/tetragon/bpftrace/scx fresh results，katran DSR 超时阻塞。tools UAPI 已同步。P0 blob 依赖修复完成。param match dead code 确认已不存在。ARM64 交叉编译+QEMU boot 基本完成。内核最终 net +5702 行（从 6758 减 1056，-15.6%）。用户态清理 ~21000 行。）
+> 前次更新：2026-03-19b（#212-#222 全部 ✅。Phase A/B/C + DSL 删除 + tracepoints + stock choice + do_jit 短路 + 头文件清理。）
 > 前次更新：2026-03-19（#207-#211；revert trampoline guard；Tracee/Corpus rerun；trampoline 调研；kernel deep review；GitHub ARM64 KVM 调研。）
 > 前次更新：2026-03-18b（#206 ✅ Tracee bpftool fix + rerun；trampoline guard 导致 corpus 0.934x → 已 revert。）
 > 前次更新：2026-03-18（#203 ✅ 删除 XDP forwarding E2E；#189 ✅ Micro policy 优化完成，applied-only 1.118x；#190 ✅ 结果目录整理 + result schema 升级；#191 ✅ Corpus/E2E 性能分析；#192 ✅ Katran E2E 可行性调研；#193 🔄 Corpus policy refresh；§8 合并入 §7。）
@@ -76,6 +77,8 @@
 | Micro 62-bench applied-only (#189 R2, 9 benches) | 1.118x | 已被 #189 R3 取代 |
 | **Micro 62-bench overall (#189 R3, 干净环境 10iter/5warm/1000rep, 20260318) ← 当前权威** | **1.024x** | **✅ non-applied geomean 1.002（极干净）；7 applied, 5W/2L；数据：`micro/results/vm_micro_authoritative_20260318.json`** |
 | **Micro 62-bench applied-only (#189 R3, 7 benches, 20260318) ← 当前权威** | **1.110x** | **✅ rotate_dense +39.1%, rotate64_hash +34.1%, cmov_dense +15.0%；清掉 cmov_select/mixed_alu_mem** |
+| Micro 62-bench overall (#226, post-DSL-removal, 2warm/10iter/200rep, 20260319) | 1.017x | 7/7 applied 恢复，0 回归。默认参数，非权威 |
+| Micro 62-bench applied-only (#226, 7 benches, 20260319) | 1.078x | rotate_dense +24.5%, rotate64_hash +20.0%, cmov_dense +5.6%。参数不同导致略低于权威 1.110x |
 | Corpus v2 fixed (0.875x) | 已知无效 | dummy packet, early-exit，历史数据 |
 | **Corpus post-fix rerun (#173, fixed IPv4+TCP packet, build #38)** | **1.008x** | ✅ 正向！Calico 1.070x, Suricata 1.538x（已被 #175 取代） |
 | **Corpus Build #42 rerun (#175, BEXTR without-copy fix, ac593b2c1) ← 当前权威** | **1.046x** | **✅ 提升 3.8%！Calico 1.097x, xdp-tutorial 1.091x, linux-selftests 1.005x** |
@@ -699,5 +702,9 @@ make clean
 | 220 | **do_jit 短路恢复 + 头文件残留清理（2026-03-19）** | ✅ | do_jit has_active_rules 短路重新加回。删除 bpf_jit_var_type/bpf_jit_var/present_mask/param_count。报告：`docs/tmp/kernel_dojit_shortcircuit_header_cleanup_20260319.md`。 |
 | 221 | **用户态 dead code 清理（2026-03-19）** | ✅ | 删除 47 个文件 ~21000 行。broken import 修复。文档更新。报告：`docs/tmp/userspace_cleanup_20260319.md`、`docs/tmp/userspace_fix_round2_20260319.md`。 |
 | 222 | **Kernel final review（2026-03-19）** | ✅ | 8.4/10。7/9 问题已修，2 个 ABI 留论文后。报告：`docs/tmp/kernel_final_review_20260319.md`。 |
-| 223 | **内核接口精简 + 用户态再查（2026-03-19）** | 🔄 | recompile_count 删除、BPF_F_RECOMPILE_ROLLBACK 简化、log_level→bool。夜跑验证进行中。 |
-| 224 | **完整验证 vm-micro+e2e+corpus（2026-03-19 夜跑）** | 🔄 | DSL 删除后完整验证。codex b8w04s588 进行中。 |
+| 223 | **内核接口精简（2026-03-19）** | ✅ | recompile_count 删除、BPF_F_RECOMPILE_ROLLBACK 删除、log_level→bool。selftest 19/19。报告：`docs/tmp/kernel_interface_simplify_20260319.md`。 |
+| 224 | **夜跑验证（2026-03-19）** | ⚠️ | 首轮：build state 变化导致 micro 0 applied（旧 micro_exec blob 格式不兼容）。根因：Makefile 依赖缺失，已修。报告：`docs/tmp/full_validation_post_dsl_removal_20260319.md`。 |
+| 225 | **P0 micro_exec blob 依赖修复（2026-03-19）** | ✅ | Makefile 加 scanner→micro_exec 依赖。smoke cmov_dense applied=true 恢复。报告：`docs/tmp/micro_exec_blob_fix_20260319.md`。 |
+| 226 | **Tools UAPI 同步 + 完整验证（2026-03-19）** | ✅ | tools/include/uapi/linux/bpf.h 同步。vm-micro 62/62 valid，overall 1.017x，applied-only **1.078x**（7/7 恢复）。E2E：tracee/tetragon/bpftrace/scx 有 fresh results，katran DSR 超时阻塞。报告：`docs/tmp/full_validation_final_20260319.md`。 |
+| 227 | **ARM64 交叉编译 + QEMU（2026-03-19）** | ✅ | gcc-aarch64 + defconfig + Image 编译成功。qemu-system-aarch64 boot 成功（7.0.0-rc2 aarch64）。Makefile: make kernel-arm64 + make vm-arm64-smoke。报告：`docs/tmp/arm64_cross_compile_qemu_20260319.md`。 |
+| 228 | **Param match dead code 确认（2026-03-19）** | ✅ | 确认 8 form validator 均已无 match 步骤，param_matches_* helper 不存在。无需改动。报告：`docs/tmp/kernel_param_match_removal_20260319.md`。 |
