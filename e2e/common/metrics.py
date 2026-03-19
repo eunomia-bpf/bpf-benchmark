@@ -8,7 +8,7 @@ from contextlib import contextmanager
 from functools import lru_cache
 from pathlib import Path
 
-from . import run_json_command
+from . import resolve_bpftool_binary, run_json_command
 
 
 BPF_STATS_RUN_TIME = 0
@@ -113,7 +113,7 @@ def sample_bpf_stats(
     if not prog_ids:
         return {}
     wanted = {int(prog_id) for prog_id in prog_ids}
-    payload = run_json_command(["bpftool", "-j", "-p", "prog", "show"], timeout=30)
+    payload = run_json_command([resolve_bpftool_binary(), "-j", "-p", "prog", "show"], timeout=30)
     if not isinstance(payload, list):
         raise RuntimeError("bpftool prog show returned unexpected payload")
     stats: dict[int, dict[str, object]] = {}

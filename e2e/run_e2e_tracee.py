@@ -39,6 +39,7 @@ except ImportError:
     from micro.orchestrator.environment import read_optional_text, read_required_text
     from micro.orchestrator.inventory import ProgramInventoryEntry, discover_object_programs
     from micro.orchestrator.results import UnifiedResultRecord, float_summary, parse_runner_sample
+from e2e.common import resolve_bpftool_binary
 from e2e.common.recompile import apply_recompile as apply_recompile_by_id
 
 
@@ -908,7 +909,7 @@ class TraceeProcessSession:
 
 
 def bpftool_programs() -> dict[int, dict[str, object]]:
-    completed = run_command(["bpftool", "prog", "show", "--json"])
+    completed = run_command([resolve_bpftool_binary(), "prog", "show", "--json"])
     payload = json.loads(completed.stdout)
     if isinstance(payload, list):
         return {int(record["id"]): record for record in payload if isinstance(record, Mapping) and "id" in record}
@@ -1579,9 +1580,10 @@ def main() -> int:
     ensure_parent(output_json)
     ensure_parent(output_md)
     packet_path = materialize_dummy_packet(DEFAULT_PACKET_PATH)
+    bpftool_binary = resolve_bpftool_binary()
 
     tooling = {
-        "bpftool": which("bpftool"),
+        "bpftool": bpftool_binary,
         "stress-ng": which("stress-ng"),
         "fio": which("fio"),
         "wrk": which("wrk"),
@@ -1590,8 +1592,9 @@ def main() -> int:
         "dd": which("dd"),
     }
     install_result = maybe_install_tools(tooling)
+    bpftool_binary = resolve_bpftool_binary()
     tooling = {
-        "bpftool": which("bpftool"),
+        "bpftool": bpftool_binary,
         "stress-ng": which("stress-ng"),
         "fio": which("fio"),
         "wrk": which("wrk"),

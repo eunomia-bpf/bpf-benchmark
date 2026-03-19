@@ -13,6 +13,12 @@ from typing import Any, Sequence
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 RESULTS_DIR = ROOT_DIR / "e2e" / "results"
+DEFAULT_BPFTOOL_CANDIDATES = (
+    ROOT_DIR / "micro" / "build" / "vendor" / "bpftool" / "bpftool",
+    Path("/usr/local/sbin/bpftool"),
+)
+
+
 def _find_venv_activate() -> Path:
     """Search common locations for a virtualenv activate script."""
     candidates = [
@@ -104,8 +110,43 @@ def resolve_binary(tool: str, *, env_vars: Sequence[str] = ()) -> str:
     raise RuntimeError(f"{tool} is required")
 
 
+def _resolve_explicit_binary(candidate: str | Path) -> str | None:
+    candidate_text = str(candidate).strip()
+    if not candidate_text:
+        return None
+    resolved = which(candidate_text)
+    if resolved is not None:
+        return resolved
+    expanded = Path(candidate_text).expanduser()
+    if expanded.is_file() and os.access(expanded, os.X_OK):
+        return str(expanded.resolve())
+    return None
+
+
 def resolve_bpftool_binary() -> str:
-    return resolve_binary("bpftool", env_vars=BPFTOOL_ENV_VARS)
+    for env_var in BPFTOOL_ENV_VARS:
+        candidate = os.environ.get(env_var, "")
+        resolved = _resolve_explicit_binary(candidate)
+        if resolved is None and candidate.strip():
+            raise RuntimeError(f"{env_var} is set to {candidate!r}, but no executable was found")
+        if resolved is not None:
+            return resolved
+    for candidate in DEFAULT_BPFTOOL_CANDIDATES:
+        resolved = _resolve_explicit_binary(candidate)
+        if resolved is not None:
+            return resolved
+    return resolve_binary("bpftool")
+
+
+def prepare_bpftool_environment() -> str:
+    resolved = resolve_bpftool_binary()
+    os.environ["BPFTOOL_BIN"] = resolved
+    bpftool_dir = str(Path(resolved).resolve().parent)
+    current_path = os.environ.get("PATH", "")
+    path_entries = [entry for entry in current_path.split(os.pathsep) if entry]
+    if bpftool_dir not in path_entries:
+        os.environ["PATH"] = bpftool_dir if not current_path else f"{bpftool_dir}{os.pathsep}{current_path}"
+    return resolved
 
 
 def run_command(
@@ -219,6 +260,7 @@ __all__ = [
     "ensure_parent",
     "ensure_root",
     "latest_output_path",
+    "prepare_bpftool_environment",
     "result_date_stamp",
     "resolve_binary",
     "resolve_bpftool_binary",

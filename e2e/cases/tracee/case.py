@@ -27,6 +27,7 @@ from e2e.common import (  # noqa: E402
     chown_to_invoking_user,
     describe_command,
     ensure_root,
+    resolve_bpftool_binary,
     run_command,
     smoke_output_path,
     tail_text,
@@ -255,7 +256,7 @@ class TraceeAgentSession:
 
 
 def _current_prog_ids() -> list[int]:
-    payload = run_command(["bpftool", "-j", "-p", "prog", "show"], timeout=30).stdout
+    payload = run_command([resolve_bpftool_binary(), "-j", "-p", "prog", "show"], timeout=30).stdout
     parsed = json.loads(payload)
     if not isinstance(parsed, list):
         return []
