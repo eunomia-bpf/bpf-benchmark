@@ -77,8 +77,11 @@
 | Gap 恢复率 | pending | corpus 1.046x vs 0.609x pure-JIT gap |
 | E2E Tracee exec_storm (pre-fix, recompile=0/13, **无效**) | ~~+21.65%~~ | **无效** — recompile 0/13，已被最新数据取代 |
 | **E2E Tracee exec_storm (post-BEXTR-fix, recompile=11/13, #172, authoritative)** | **+6.28%** | app throughput; file_io **+7.00%**; network +1.44%; BPF ns -4.22% |
-| **E2E Tetragon (#200, 干净单 VM, 20260318)** | **stress_exec +7.94%, file_io +6.42%** | open_storm -6.36%, **connect_storm -55.96%**（严重回归，正在调查 #204）；app geomean 0.830x |
+| E2E Tetragon (#200, harness bug) | stress_exec +7.94%, connect_storm -55.96% | 已被 #204 取代（harness 漏掉了 connect 热路径 programs） |
+| **E2E Tetragon (#204, harness fix, 20260318) ← 当前权威** | **stress_exec +8.70%, connect_storm +22.29%** | **✅ 全 4 workload 正向！** file_io +0.34%, open_storm +0.42%。7 programs, 3 applied, 49 bflip sites。数据：`e2e/results/tetragon_authoritative_20260318.json` |
 | E2E XDP forwarding | +0.27% | **已删除 #203**（3 sites，无优化价值，将被 Katran 替换） |
+| **E2E Katran (#205, DSR live topo, 20260319) ← 当前权威** | **BPF exec avg_ns 603.7→351.8, -32.8%** | **✅ balancer_ingress DSR 拓扑跑通！** 4 wide sites applied, IPIP decap 前后各 30 包。standalone direct-map emulation（gRPC server 编译中）。数据：`e2e/results/katran_authoritative_20260319.json` |
+| E2E Tracee (20260313, authoritative) | exec_storm +6.28%, file_io +7.00% | 2026-03-18 rerun 已修复 guest bpftool wrapper 并成功跑通，但新结果仅 exec_storm +5.97%、file_io +1.68%、network +2.20%，未超过旧权威，因此旧权威保持 |
 | E2E bpftrace | 0.992x | 纯 CMOV sites 被 skip → 0 applied → 永远 neutral |
 | E2E scx | 无数据 | struct_ops EOPNOTSUPP，不支持 recompile |
 
@@ -669,6 +672,8 @@ make clean
 | 199 | **Corpus rerun（refreshed policy，2026-03-18）** | ⚠️ | 两轮 rerun：R1 overall 0.900x（40 stale miss），R2 remap 后 applied-only 1.077x 但 overall 0.881x（linux-selftests 0.559x 拖垮）。有价值信号：calico 1.066x，katran 1.049x，xdp-tutorial 1.228x。需要更稳定环境单独重跑。 |
 | 200 | **Tetragon rerun（2026-03-18）** | ⚠️ | 干净单 VM rerun：stress_exec **+7.94%**，file_io **+6.42%**，open_storm -6.36%，connect_storm **-55.96%**。connect_storm 严重回归，不是 CMOV（已 skip），可能是 branch-flip I-cache flush 或 recompile overhead。正在调查修复。 |
 | 201 | **Kernel WARN_ON 排查（2026-03-18）** | ✅ | bpf_jit_comp.c:893 WARN_ON(poke->tailcall_target_stable) 根因：recompile 复用了 live poke descriptor。当前场景（无并发 prog-array update）不导致 wrong code。正确修复需要 shadow poke-table（live/staged 分离），不是简单补丁。暂不修。报告：`docs/tmp/kernel_warn_on_investigation_20260318.md`。 |
-| 202 | **Katran E2E 完整设计（2026-03-18）** | ✅ | 984 行设计方案。用 Katran 官方 C++ gRPC server 加载，DSR L3 routed 拓扑，shared mode xdp_root，Go gRPC client 配 VIP/real，wrk 做数据面流量。host 编译 VM 运行。硬 blocker：CONFIG_NET_IPIP 没开。工程量 5-7 天。报告：`docs/tmp/e2e_design_katran_20260318.md`。 |
-| 203 | **XDP forwarding E2E 删除（2026-03-18）** | ✅ | 已完成：删除 `e2e/cases/xdp_forwarding/`、顶层 `e2e/results/xdp_forwarding_authoritative_20260312.json` 及相关 archive artifacts；`e2e/run.py`、`Makefile`、`README.md`、`e2e/README.md`、`e2e/results/README.md` 与本计划文档已移除 active 引用并标注 retired。保留 `docs/tmp/` 和本计划中的历史记录；后续 XDP 类 replacement 目标转向 Katran。 |
-| 204 | **Tetragon connect_storm 回归调查+修复（2026-03-18）** | 🔄 | 排查 branch-flip/endian 是否是主因，修改 policy 后重跑验证。目标：connect_storm >= -5%。 |
+| 202 | **Katran E2E 完整设计（2026-03-18）** | ✅ | 984 行设计方案，已更新 packet generator 部署：host/VM2 跑 wrk/nping，VM1 只跑 Katran+real+recompile（避免争 CPU）。用 `vng --network bridge=virbr0` 建 host-guest 桥接。Katran 官方 C++ gRPC server 加载，DSR 拓扑，Go gRPC client 配 VIP/real。硬 blocker：CONFIG_NET_IPIP 没开。工程量 5-7 天。报告：`docs/tmp/e2e_design_katran_20260318.md`。 |
+| 203 | **XDP forwarding E2E 删除（2026-03-18）** | ✅ | 已删除 `e2e/cases/xdp_forwarding/` + 结果 + 文档引用。commit `431fdc5`。 |
+| 204 | **Tetragon connect_storm 回归调查+修复（2026-03-18）** | ✅ | 根因确认：旧 harness 按 owner PID 查找 programs，漏掉了 connect 热路径。修复后 harness 用 bpftool prog show 全量 diff。**最终结果：stress_exec +8.70%，file_io +0.34%，open_storm +0.42%，connect_storm +22.29%**。7 programs，3 applied，49 branch-flip sites。数据：`e2e/results/tetragon_authoritative_20260318.json`。报告：`docs/tmp/tetragon_connect_storm_investigation_20260318.md`。 |
+| 205 | **Katran E2E MVP 实现（2026-03-18）** | 🔄 | 创建 e2e/cases/katran/，注册到 e2e/run.py，第一版用 standalone bpftool load 做 smoke。 |
+| 206 | **Sequential rerun round 2（2026-03-18）** | ✅ | 顺序完成 Tracee rerun + Corpus rerun。Tracee 修复 guest bpftool wrapper，并新增 trampoline-attached program recompile guard；rerun 成功但 `file_io` 只有 +1.68%，未替换旧 authoritative。Corpus clean rerun overall `0.934x`，低于旧 authoritative `1.046x`，同样不替换。报告：`docs/tmp/sequential_rerun_round2_20260318.md`。 |
