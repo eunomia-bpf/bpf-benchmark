@@ -18,6 +18,122 @@ struct bpf_insn_raw {
     int32_t imm;
 };
 
+constexpr uint8_t BPF_JIT_MAX_PATTERN_VARS = 15;
+
+constexpr uint8_t BPF_JIT_PATTERN_F_EXPECT_IMM = (1U << 0);
+constexpr uint8_t BPF_JIT_PATTERN_F_EXPECT_DST_REG = (1U << 1);
+constexpr uint8_t BPF_JIT_PATTERN_F_EXPECT_SRC_REG = (1U << 2);
+constexpr uint8_t BPF_JIT_PATTERN_F_EXPECT_OFF = (1U << 3);
+
+constexpr uint8_t BPF_JIT_CSTR_EQUAL = 1;
+constexpr uint8_t BPF_JIT_CSTR_SUM_CONST = 2;
+constexpr uint8_t BPF_JIT_CSTR_IMM_RANGE = 3;
+constexpr uint8_t BPF_JIT_CSTR_NOT_ZERO = 4;
+constexpr uint8_t BPF_JIT_CSTR_MASK_BITS = 5;
+constexpr uint8_t BPF_JIT_CSTR_DIFF_CONST = 6;
+constexpr uint8_t BPF_JIT_CSTR_NOT_EQUAL = 7;
+
+constexpr uint8_t BPF_JIT_BIND_SOURCE_REG = 0;
+constexpr uint8_t BPF_JIT_BIND_SOURCE_IMM = 1;
+constexpr uint8_t BPF_JIT_BIND_SOURCE_CONST = 2;
+
+constexpr uint8_t BPF_JIT_ROT_PARAM_DST_REG = 0;
+constexpr uint8_t BPF_JIT_ROT_PARAM_SRC_REG = 1;
+constexpr uint8_t BPF_JIT_ROT_PARAM_AMOUNT = 2;
+constexpr uint8_t BPF_JIT_ROT_PARAM_WIDTH = 3;
+
+constexpr uint8_t BPF_JIT_WMEM_PARAM_DST_REG = 0;
+constexpr uint8_t BPF_JIT_WMEM_PARAM_BASE_REG = 1;
+constexpr uint8_t BPF_JIT_WMEM_PARAM_BASE_OFF = 2;
+constexpr uint8_t BPF_JIT_WMEM_PARAM_WIDTH = 3;
+
+constexpr uint32_t BPF_JIT_WMEM_WIDTH_MASK = 0xffU;
+constexpr uint32_t BPF_JIT_WMEM_F_BIG_ENDIAN = (1U << 8);
+
+constexpr uint8_t BPF_JIT_ACALC_PARAM_DST_REG = 0;
+constexpr uint8_t BPF_JIT_ACALC_PARAM_BASE_REG = 1;
+constexpr uint8_t BPF_JIT_ACALC_PARAM_INDEX_REG = 2;
+constexpr uint8_t BPF_JIT_ACALC_PARAM_SCALE = 3;
+
+constexpr uint8_t BPF_JIT_BFX_PARAM_DST_REG = 0;
+constexpr uint8_t BPF_JIT_BFX_PARAM_SRC_REG = 1;
+constexpr uint8_t BPF_JIT_BFX_PARAM_SHIFT = 2;
+constexpr uint8_t BPF_JIT_BFX_PARAM_MASK = 3;
+constexpr uint8_t BPF_JIT_BFX_PARAM_WIDTH = 4;
+constexpr uint8_t BPF_JIT_BFX_PARAM_ORDER = 5;
+
+constexpr uint8_t BPF_JIT_BFX_ORDER_SHIFT_MASK = 0;
+constexpr uint8_t BPF_JIT_BFX_ORDER_MASK_SHIFT = 1;
+
+constexpr uint8_t BPF_JIT_ZEXT_PARAM_DST_REG = 0;
+
+constexpr uint8_t BPF_JIT_ENDIAN_PARAM_DATA_REG = 0;
+constexpr uint8_t BPF_JIT_ENDIAN_PARAM_BASE_REG = 1;
+constexpr uint8_t BPF_JIT_ENDIAN_PARAM_OFFSET = 2;
+constexpr uint8_t BPF_JIT_ENDIAN_PARAM_WIDTH = 3;
+constexpr uint8_t BPF_JIT_ENDIAN_PARAM_DIRECTION = 4;
+
+constexpr uint8_t BPF_JIT_BFLIP_PARAM_COND_OP = 0;
+constexpr uint8_t BPF_JIT_BFLIP_PARAM_BODY_A_START = 1;
+constexpr uint8_t BPF_JIT_BFLIP_PARAM_BODY_A_LEN = 2;
+constexpr uint8_t BPF_JIT_BFLIP_PARAM_BODY_B_START = 3;
+constexpr uint8_t BPF_JIT_BFLIP_PARAM_BODY_B_LEN = 4;
+constexpr uint8_t BPF_JIT_BFLIP_PARAM_JOIN_TARGET = 5;
+
+constexpr uint8_t BPF_JIT_SEL_PARAM_DST_REG = 0;
+constexpr uint8_t BPF_JIT_SEL_PARAM_COND_OP = 1;
+constexpr uint8_t BPF_JIT_SEL_PARAM_COND_A = 2;
+constexpr uint8_t BPF_JIT_SEL_PARAM_COND_B = 3;
+constexpr uint8_t BPF_JIT_SEL_PARAM_TRUE_VAL = 4;
+constexpr uint8_t BPF_JIT_SEL_PARAM_FALSE_VAL = 5;
+constexpr uint8_t BPF_JIT_SEL_PARAM_WIDTH = 6;
+
+struct __attribute__((packed)) V5PatternInsn {
+    uint8_t opcode = 0;
+    uint8_t dst_binding = 0;
+    uint8_t src_binding = 0;
+    uint8_t imm_binding = 0;
+    uint8_t off_binding = 0;
+    uint8_t flags = 0;
+    uint8_t expected_dst_reg = 0;
+    uint8_t expected_src_reg = 0;
+    int16_t expected_off = 0;
+    uint16_t reserved = 0;
+    int32_t expected_imm = 0;
+};
+static_assert(sizeof(V5PatternInsn) == 16, "V5PatternInsn must match kernel ABI");
+
+struct __attribute__((packed)) V5PatternConstraint {
+    uint8_t type = 0;
+    uint8_t var_a = 0;
+    uint8_t var_b = 0;
+    uint8_t reserved = 0;
+    int32_t constant = 0;
+    int32_t constant_hi = 0;
+    uint32_t reserved2 = 0;
+};
+static_assert(sizeof(V5PatternConstraint) == 16,
+              "V5PatternConstraint must match kernel ABI");
+
+struct __attribute__((packed)) V5Binding {
+    uint8_t canonical_param = 0;
+    uint8_t source_var = 0;
+    uint8_t source_type = 0;
+    uint8_t reserved = 0;
+    int32_t inline_const = 0;
+};
+static_assert(sizeof(V5Binding) == 8, "V5Binding must match kernel ABI");
+
+struct V5PatternDesc {
+    V5Family family = V5Family::Cmov;
+    uint16_t canonical_form = 0;
+    uint16_t native_choice = 0;
+    uint32_t cpu_features_required = 0;
+    std::vector<V5PatternInsn> pattern;
+    std::vector<V5PatternConstraint> constraints;
+    std::vector<V5Binding> bindings;
+};
+
 struct V5PatternVar {
     bool bound = false;
     uint8_t type = 0;
@@ -71,17 +187,6 @@ V5PatternInsn make_pattern_insn(uint8_t opcode,
     insn.expected_off = expected_off;
     insn.expected_imm = expected_imm;
     return insn;
-}
-
-V5PatternInsn make_exact_pattern_insn(const bpf_insn_raw &insn)
-{
-    return make_pattern_insn(
-        insn.code, 0, 0, 0, 0,
-        BPF_JIT_PATTERN_F_EXPECT_IMM |
-            BPF_JIT_PATTERN_F_EXPECT_DST_REG |
-            BPF_JIT_PATTERN_F_EXPECT_SRC_REG |
-            BPF_JIT_PATTERN_F_EXPECT_OFF,
-        raw_dst_reg(insn), raw_src_reg(insn), insn.off, insn.imm);
 }
 
 V5PatternConstraint make_constraint(uint8_t type,
@@ -138,18 +243,102 @@ V5PatternDesc make_v5_desc(V5Family family,
     return desc;
 }
 
+std::optional<int32_t> binding_const(const std::vector<V5Binding> &bindings,
+                                     uint8_t canonical_param)
+{
+    for (const auto &binding : bindings) {
+        if (binding.canonical_param == canonical_param &&
+            binding.source_type == BPF_JIT_BIND_SOURCE_CONST) {
+            return binding.inline_const;
+        }
+    }
+    return std::nullopt;
+}
+
+std::string pattern_kind_for_desc(V5Family family,
+                                  const std::vector<V5Binding> &bindings)
+{
+    switch (family) {
+    case V5Family::Cmov: {
+        const auto width = binding_const(bindings, BPF_JIT_SEL_PARAM_WIDTH);
+        return width.has_value() ? "cond-select-" + std::to_string(*width)
+                                 : "cond-select";
+    }
+    case V5Family::WideMem: {
+        const auto encoded_width =
+            binding_const(bindings, BPF_JIT_WMEM_PARAM_WIDTH);
+        if (!encoded_width.has_value()) {
+            return "wide-load";
+        }
+        const bool big_endian =
+            (*encoded_width &
+             static_cast<int32_t>(BPF_JIT_WMEM_F_BIG_ENDIAN)) != 0;
+        const int32_t width =
+            *encoded_width & static_cast<int32_t>(BPF_JIT_WMEM_WIDTH_MASK);
+        return "wide-load-" + std::to_string(width) +
+               (big_endian ? "-be" : "");
+    }
+    case V5Family::Rotate: {
+        const auto width = binding_const(bindings, BPF_JIT_ROT_PARAM_WIDTH);
+        return width.has_value() ? "rotate-" + std::to_string(*width)
+                                 : "rotate";
+    }
+    case V5Family::AddrCalc: {
+        const auto scale = binding_const(bindings, BPF_JIT_ACALC_PARAM_SCALE);
+        return scale.has_value() ? "addr-calc-scale-" + std::to_string(*scale)
+                                 : "addr-calc";
+    }
+    case V5Family::BitfieldExtract: {
+        std::string kind = "bitfield-extract";
+        if (const auto width = binding_const(bindings, BPF_JIT_BFX_PARAM_WIDTH);
+            width.has_value()) {
+            kind += "-" + std::to_string(*width);
+        }
+        if (const auto order = binding_const(bindings, BPF_JIT_BFX_PARAM_ORDER);
+            order.has_value()) {
+            if (*order == BPF_JIT_BFX_ORDER_MASK_SHIFT) {
+                kind += "-mask-shift";
+            } else if (*order == BPF_JIT_BFX_ORDER_SHIFT_MASK) {
+                kind += "-shift-mask";
+            }
+        }
+        return kind;
+    }
+    case V5Family::ZeroExtElide:
+        return "zero-ext-elide";
+    case V5Family::EndianFusion: {
+        std::string kind = "endian";
+        if (const auto direction =
+                binding_const(bindings, BPF_JIT_ENDIAN_PARAM_DIRECTION);
+            direction.has_value()) {
+            kind += (*direction == BPF_JIT_ENDIAN_SWAP_STORE)
+                        ? "-swap-store"
+                        : "-load-swap";
+        } else {
+            kind += "-fusion";
+        }
+        if (const auto width = binding_const(bindings, BPF_JIT_ENDIAN_PARAM_WIDTH);
+            width.has_value()) {
+            kind += "-" + std::to_string(*width);
+        }
+        return kind;
+    }
+    case V5Family::BranchFlip:
+        return "branch-flip";
+    default:
+        return "pattern";
+    }
+}
+
 V5PolicyRule make_v5_policy_rule(uint32_t site_start, const V5PatternDesc &desc)
 {
     V5PolicyRule rule;
     rule.family = desc.family;
     rule.site_start = site_start;
+    rule.site_len = static_cast<uint16_t>(desc.pattern.size());
     rule.canonical_form = desc.canonical_form;
     rule.native_choice = desc.native_choice;
-    rule.priority = 0;
-    rule.cpu_features_required = desc.cpu_features_required;
-    rule.pattern = desc.pattern;
-    rule.constraints = desc.constraints;
-    rule.bindings = desc.bindings;
+    rule.pattern_kind = pattern_kind_for_desc(desc.family, desc.bindings);
     return rule;
 }
 
@@ -481,25 +670,10 @@ bool build_branch_flip_rule(const std::vector<bpf_insn_raw> &insns,
 
     out.family = V5Family::BranchFlip;
     out.site_start = idx;
+    out.site_len = static_cast<uint16_t>(join_target - static_cast<int32_t>(idx));
     out.canonical_form = BPF_JIT_CF_BRANCH_FLIP;
     out.native_choice = BPF_JIT_BFLIP_FLIPPED;
-    out.priority = 0;
-    out.cpu_features_required = 0;
-    out.pattern.reserve(static_cast<size_t>(join_target - static_cast<int32_t>(idx)));
-    for (uint32_t pos = idx; pos < static_cast<uint32_t>(join_target); ++pos) {
-        out.pattern.push_back(make_exact_pattern_insn(insns[pos]));
-    }
-    out.bindings = {
-        make_const_binding(BPF_JIT_BFLIP_PARAM_COND_OP, raw_op(jcc)),
-        make_const_binding(BPF_JIT_BFLIP_PARAM_BODY_A_START,
-                           static_cast<int32_t>(idx + 1)),
-        make_const_binding(BPF_JIT_BFLIP_PARAM_BODY_A_LEN,
-                           static_cast<int32_t>(body_a_len)),
-        make_const_binding(BPF_JIT_BFLIP_PARAM_BODY_B_START, body_b_start),
-        make_const_binding(BPF_JIT_BFLIP_PARAM_BODY_B_LEN,
-                           static_cast<int32_t>(body_b_len)),
-        make_const_binding(BPF_JIT_BFLIP_PARAM_JOIN_TARGET, join_target),
-    };
+    out.pattern_kind = "branch-flip";
 
     if (rule) {
         *rule = std::move(out);
@@ -1809,12 +1983,7 @@ std::vector<uint8_t> build_policy_blob_v5(uint32_t insn_cnt,
     } hdr = {};
 
     uint32_t total_len = sizeof(hdr);
-    for (const auto &rule : rules) {
-        total_len += static_cast<uint32_t>(sizeof(V5RuleWire) +
-            rule.pattern.size() * sizeof(V5PatternInsn) +
-            rule.constraints.size() * sizeof(V5PatternConstraint) +
-            rule.bindings.size() * sizeof(V5Binding));
-    }
+    total_len += static_cast<uint32_t>(rules.size() * sizeof(V5RuleWire));
 
     hdr.magic = BPF_JIT_POLICY_MAGIC;
     hdr.version = BPF_JIT_POLICY_VERSION_2;
@@ -1835,33 +2004,11 @@ std::vector<uint8_t> build_policy_blob_v5(uint32_t insn_cnt,
     for (const auto &rule : rules) {
         V5RuleWire wire_rule = {};
         wire_rule.site_start = rule.site_start;
-        wire_rule.cpu_features_required = rule.cpu_features_required;
-        wire_rule.site_len = static_cast<uint16_t>(rule.pattern.size());
-        wire_rule.rule_kind = BPF_JIT_RK_PATTERN;
+        wire_rule.site_len = rule.site_len;
         wire_rule.canonical_form = rule.canonical_form;
         wire_rule.native_choice = rule.native_choice;
-        wire_rule.priority = rule.priority;
-        wire_rule.pattern_count = static_cast<uint16_t>(rule.pattern.size());
-        wire_rule.constraint_count = static_cast<uint16_t>(rule.constraints.size());
-        wire_rule.binding_count = static_cast<uint16_t>(rule.bindings.size());
-        wire_rule.rule_len = static_cast<uint16_t>(sizeof(wire_rule) +
-            rule.pattern.size() * sizeof(V5PatternInsn) +
-            rule.constraints.size() * sizeof(V5PatternConstraint) +
-            rule.bindings.size() * sizeof(V5Binding));
 
         append_blob_bytes(blob, &wire_rule, sizeof(wire_rule));
-        if (!rule.pattern.empty()) {
-            append_blob_bytes(blob, rule.pattern.data(),
-                              rule.pattern.size() * sizeof(V5PatternInsn));
-        }
-        if (!rule.constraints.empty()) {
-            append_blob_bytes(blob, rule.constraints.data(),
-                              rule.constraints.size() * sizeof(V5PatternConstraint));
-        }
-        if (!rule.bindings.empty()) {
-            append_blob_bytes(blob, rule.bindings.data(),
-                              rule.bindings.size() * sizeof(V5Binding));
-        }
     }
 
     return blob;

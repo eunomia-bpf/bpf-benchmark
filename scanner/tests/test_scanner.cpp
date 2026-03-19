@@ -77,33 +77,6 @@ std::string read_text_file(const std::filesystem::path &path)
                        std::istreambuf_iterator<char>());
 }
 
-int32_t binding_const_or(const bpf_jit_scanner::V5PolicyRule &rule,
-                         uint8_t canonical_param,
-                         int32_t fallback)
-{
-    for (const auto &binding : rule.bindings) {
-        if (binding.canonical_param == canonical_param &&
-            binding.source_type == BPF_JIT_BIND_SOURCE_CONST) {
-            return binding.inline_const;
-        }
-    }
-    return fallback;
-}
-
-bool set_binding_const(bpf_jit_scanner::V5PolicyRule *rule,
-                       uint8_t canonical_param,
-                       int32_t value)
-{
-    for (auto &binding : rule->bindings) {
-        if (binding.canonical_param == canonical_param &&
-            binding.source_type == BPF_JIT_BIND_SOURCE_CONST) {
-            binding.inline_const = value;
-            return true;
-        }
-    }
-    return false;
-}
-
 constexpr uint8_t BPF_JMP_JA = 0x05;
 constexpr uint8_t BPF_JEQ_K = 0x15;
 constexpr uint8_t BPF_JEQ_X = 0x1d;
@@ -159,16 +132,16 @@ void test_v5_cmov_scan_and_blob()
              static_cast<uint16_t>(BPF_JIT_CF_COND_SELECT));
     CHECK_EQ(diamond_summary.rules[0].native_choice,
              static_cast<uint16_t>(BPF_JIT_SEL_CMOVCC));
-    CHECK_EQ(diamond_summary.rules[0].pattern.size(), 4u);
-    CHECK_EQ(diamond_summary.rules[0].bindings.size(), 7u);
+    CHECK_EQ(diamond_summary.rules[0].site_len, 4u);
+    CHECK(diamond_summary.rules[0].pattern_kind == "cond-select-64");
 
     auto compact_summary = bpf_jit_scanner::scan_v5_builtin(
         compact.data(), static_cast<uint32_t>(compact.size()),
         V5ScanOptions {.scan_cmov = true});
     CHECK_EQ(compact_summary.rules.size(), 1u);
     CHECK_EQ(compact_summary.cmov_sites, 1u);
-    CHECK_EQ(compact_summary.rules[0].pattern.size(), 3u);
-    CHECK_EQ(compact_summary.rules[0].bindings.size(), 7u);
+    CHECK_EQ(compact_summary.rules[0].site_len, 3u);
+    CHECK(compact_summary.rules[0].pattern_kind == "cond-select-64");
 
     uint8_t tag[8] = {0xde, 0xad, 0xbe, 0xef, 0x12, 0x34, 0x56, 0x78};
     auto blob = bpf_jit_scanner::build_policy_blob_v5(
@@ -182,8 +155,9 @@ void test_v5_cmov_scan_and_blob()
     std::memcpy(&wire_rule, blob.data() + 32, sizeof(wire_rule));
     CHECK_EQ(version, static_cast<uint16_t>(BPF_JIT_POLICY_VERSION_2));
     CHECK_EQ(rule_cnt, 1u);
-    CHECK_EQ(wire_rule.rule_kind, static_cast<uint16_t>(BPF_JIT_RK_PATTERN));
+    CHECK_EQ(wire_rule.site_len, 4u);
     CHECK_EQ(wire_rule.canonical_form, static_cast<uint16_t>(BPF_JIT_CF_COND_SELECT));
+    CHECK_EQ(wire_rule.native_choice, static_cast<uint16_t>(BPF_JIT_SEL_CMOVCC));
 }
 
 void test_v5_cmov_broadening_scan()
@@ -218,19 +192,19 @@ void test_v5_cmov_broadening_scan()
         guarded_update.data(), static_cast<uint32_t>(guarded_update.size()),
         V5ScanOptions {.scan_cmov = true});
     CHECK_EQ(guarded_summary.cmov_sites, 1u);
-    CHECK_EQ(guarded_summary.rules[0].pattern.size(), 4u);
+    CHECK_EQ(guarded_summary.rules[0].site_len, 4u);
 
     auto jset_summary = bpf_jit_scanner::scan_v5_builtin(
         jset_guarded.data(), static_cast<uint32_t>(jset_guarded.size()),
         V5ScanOptions {.scan_cmov = true});
     CHECK_EQ(jset_summary.cmov_sites, 1u);
-    CHECK_EQ(jset_summary.rules[0].pattern.size(), 4u);
+    CHECK_EQ(jset_summary.rules[0].site_len, 4u);
 
     auto switch_summary = bpf_jit_scanner::scan_v5_builtin(
         switch_chain.data(), static_cast<uint32_t>(switch_chain.size()),
         V5ScanOptions {.scan_cmov = true});
     CHECK_EQ(switch_summary.cmov_sites, 1u);
-    CHECK_EQ(switch_summary.rules[0].pattern.size(), 6u);
+    CHECK_EQ(switch_summary.rules[0].site_len, 6u);
 }
 
 void test_v5_rotate_scan()
@@ -256,7 +230,8 @@ void test_v5_rotate_scan()
              static_cast<uint16_t>(BPF_JIT_CF_ROTATE));
     CHECK_EQ(summary.rules[0].native_choice,
              static_cast<uint16_t>(BPF_JIT_ROT_ROR));
-    CHECK_EQ(summary.rules[0].bindings.size(), 4u);
+    CHECK_EQ(summary.rules[0].site_len, 6u);
+    CHECK(summary.rules[0].pattern_kind == "rotate-32");
 
     auto rorx_summary = bpf_jit_scanner::scan_v5_builtin(
         masked_rotate.data(), static_cast<uint32_t>(masked_rotate.size()),
@@ -264,8 +239,7 @@ void test_v5_rotate_scan()
     CHECK_EQ(rorx_summary.rules.size(), 1u);
     CHECK_EQ(rorx_summary.rules[0].native_choice,
              static_cast<uint16_t>(BPF_JIT_ROT_RORX));
-    CHECK_EQ(rorx_summary.rules[0].cpu_features_required,
-             static_cast<uint32_t>(BPF_JIT_X86_BMI2));
+    CHECK(rorx_summary.rules[0].pattern_kind == "rotate-32");
 }
 
 void test_v5_wide_scan_variants()
@@ -286,8 +260,8 @@ void test_v5_wide_scan_variants()
         V5ScanOptions {.scan_wide = true});
     CHECK_EQ(wide3_summary.rules.size(), 1u);
     CHECK_EQ(wide3_summary.wide_sites, 1u);
-    CHECK_EQ(wide3_summary.rules[0].pattern.size(), 7u);
-    CHECK_EQ(wide3_summary.rules[0].bindings.back().inline_const, 3);
+    CHECK_EQ(wide3_summary.rules[0].site_len, 7u);
+    CHECK(wide3_summary.rules[0].pattern_kind == "wide-load-3");
 
     auto packet_be = encode({
         {BPF_LDXB, regs(1, 2), 0x22, 0},
@@ -306,9 +280,8 @@ void test_v5_wide_scan_variants()
         V5ScanOptions {.scan_wide = true});
     CHECK_EQ(packet_summary.rules.size(), 1u);
     CHECK_EQ(packet_summary.wide_sites, 1u);
-    CHECK_EQ(packet_summary.rules[0].pattern.size(), 10u);
-    CHECK_EQ(packet_summary.rules[0].bindings.back().inline_const,
-             static_cast<int32_t>(4 | BPF_JIT_WMEM_F_BIG_ENDIAN));
+    CHECK_EQ(packet_summary.rules[0].site_len, 10u);
+    CHECK(packet_summary.rules[0].pattern_kind == "wide-load-4-be");
 }
 
 void test_v5_lea_scan()
@@ -356,16 +329,18 @@ void test_v5_bitfield_extract_scan()
              static_cast<uint16_t>(BPF_JIT_CF_BITFIELD_EXTRACT));
     CHECK_EQ(extract_summary.rules[0].native_choice,
              static_cast<uint16_t>(BPF_JIT_BFX_EXTRACT));
-    CHECK_EQ(extract_summary.rules[0].pattern.size(), 3u);
-    CHECK_EQ(extract_summary.rules[0].bindings.size(), 6u);
+    CHECK_EQ(extract_summary.rules[0].site_len, 3u);
+    CHECK(extract_summary.rules[0].pattern_kind ==
+          "bitfield-extract-64-shift-mask");
 
     auto mask_shift_summary = bpf_jit_scanner::scan_v5_builtin(
         mask_then_shift.data(), static_cast<uint32_t>(mask_then_shift.size()),
         V5ScanOptions {.scan_extract = true});
     CHECK_EQ(mask_shift_summary.rules.size(), 1u);
     CHECK_EQ(mask_shift_summary.bitfield_sites, 1u);
-    CHECK_EQ(mask_shift_summary.rules[0].pattern.size(), 2u);
-    CHECK_EQ(mask_shift_summary.rules[0].bindings.size(), 6u);
+    CHECK_EQ(mask_shift_summary.rules[0].site_len, 2u);
+    CHECK(mask_shift_summary.rules[0].pattern_kind ==
+          "bitfield-extract-32-mask-shift");
 }
 
 void test_v5_zero_ext_elide_scan()
@@ -394,24 +369,24 @@ void test_v5_zero_ext_elide_scan()
              static_cast<uint16_t>(BPF_JIT_CF_ZERO_EXT_ELIDE));
     CHECK_EQ(zext_summary.rules[0].native_choice,
              static_cast<uint16_t>(BPF_JIT_ZEXT_ELIDE));
-    CHECK_EQ(zext_summary.rules[0].pattern.size(), 2u);
-    CHECK_EQ(zext_summary.rules[0].bindings.size(), 1u);
+    CHECK_EQ(zext_summary.rules[0].site_len, 2u);
+    CHECK(zext_summary.rules[0].pattern_kind == "zero-ext-elide");
 
     auto mov_summary = bpf_jit_scanner::scan_v5_builtin(
         self_mov.data(), static_cast<uint32_t>(self_mov.size()),
         V5ScanOptions {.scan_zero_ext = true});
     CHECK_EQ(mov_summary.rules.size(), 1u);
     CHECK_EQ(mov_summary.zero_ext_sites, 1u);
-    CHECK_EQ(mov_summary.rules[0].pattern.size(), 2u);
-    CHECK_EQ(mov_summary.rules[0].bindings.size(), 1u);
+    CHECK_EQ(mov_summary.rules[0].site_len, 2u);
+    CHECK(mov_summary.rules[0].pattern_kind == "zero-ext-elide");
 
     auto and_summary = bpf_jit_scanner::scan_v5_builtin(
         and_mask.data(), static_cast<uint32_t>(and_mask.size()),
         V5ScanOptions {.scan_zero_ext = true});
     CHECK_EQ(and_summary.rules.size(), 1u);
     CHECK_EQ(and_summary.zero_ext_sites, 1u);
-    CHECK_EQ(and_summary.rules[0].pattern.size(), 2u);
-    CHECK_EQ(and_summary.rules[0].bindings.size(), 1u);
+    CHECK_EQ(and_summary.rules[0].site_len, 2u);
+    CHECK(and_summary.rules[0].pattern_kind == "zero-ext-elide");
 }
 
 void test_v5_endian_fusion_scan()
@@ -436,16 +411,16 @@ void test_v5_endian_fusion_scan()
              static_cast<uint16_t>(BPF_JIT_CF_ENDIAN_FUSION));
     CHECK_EQ(load_summary.rules[0].native_choice,
              static_cast<uint16_t>(BPF_JIT_ENDIAN_MOVBE));
-    CHECK_EQ(load_summary.rules[0].cpu_features_required,
-             static_cast<uint32_t>(BPF_JIT_X86_MOVBE));
-    CHECK_EQ(load_summary.rules[0].bindings.size(), 5u);
+    CHECK_EQ(load_summary.rules[0].site_len, 2u);
+    CHECK(load_summary.rules[0].pattern_kind == "endian-load-swap-32");
 
     auto store_summary = bpf_jit_scanner::scan_v5_builtin(
         swap_store.data(), static_cast<uint32_t>(swap_store.size()),
         V5ScanOptions {.scan_endian = true});
     CHECK_EQ(store_summary.rules.size(), 1u);
     CHECK_EQ(store_summary.endian_sites, 1u);
-    CHECK_EQ(store_summary.rules[0].bindings.size(), 5u);
+    CHECK_EQ(store_summary.rules[0].site_len, 2u);
+    CHECK(store_summary.rules[0].pattern_kind == "endian-swap-store-16");
 }
 
 void test_v5_branch_flip_scan()
@@ -470,15 +445,14 @@ void test_v5_branch_flip_scan()
              static_cast<uint16_t>(BPF_JIT_CF_BRANCH_FLIP));
     CHECK_EQ(summary.rules[0].native_choice,
              static_cast<uint16_t>(BPF_JIT_BFLIP_FLIPPED));
-    CHECK_EQ(summary.rules[0].pattern.size(), 6u);
-    CHECK_EQ(summary.rules[0].bindings.size(), 6u);
+    CHECK_EQ(summary.rules[0].site_len, 6u);
+    CHECK(summary.rules[0].pattern_kind == "branch-flip");
 }
 
 void test_v5_abi_limits()
 {
-    CHECK_EQ(BPF_JIT_MAX_PATTERN_LEN, 64);
-    CHECK_EQ(BPF_JIT_MAX_BINDINGS, 16);
-    CHECK_EQ(BPF_JIT_MAX_CANONICAL_PARAMS, 16);
+    CHECK_EQ(sizeof(bpf_jit_scanner::V5RuleWire), 12u);
+    CHECK_EQ(static_cast<unsigned int>(BPF_JIT_POLICY_VERSION_2), 2u);
 }
 
 void test_v5_policy_filter()
@@ -578,8 +552,7 @@ void test_v5_policy_filter()
     }
     CHECK(found_rotate_rule);
     if (found_rotate_rule) {
-        CHECK(set_binding_const(
-            &rotate64_variant, BPF_JIT_ROT_PARAM_WIDTH, 64));
+        rotate64_variant.pattern_kind = "rotate-64";
         std::vector<bpf_jit_scanner::V5PolicyRule> colliding_rules = summary.rules;
         colliding_rules.push_back(rotate64_variant);
 
@@ -599,9 +572,7 @@ void test_v5_policy_filter()
         CHECK_EQ(rotate64_only_result.unmatched_site_count, 0u);
         CHECK_EQ(rotate64_only_result.warnings.size(), 0u);
         if (!rotate64_only_result.rules.empty()) {
-            CHECK_EQ(binding_const_or(rotate64_only_result.rules[0],
-                                      BPF_JIT_ROT_PARAM_WIDTH, -1),
-                     64);
+            CHECK(rotate64_only_result.rules[0].pattern_kind == "rotate-64");
         }
 
         auto distinct_rotate_sites = bpf_jit_scanner::parse_policy_config_text(
@@ -625,10 +596,8 @@ void test_v5_policy_filter()
         bool saw_rotate64 = false;
         bool saw_rotate32 = false;
         for (const auto &rule : distinct_rotate_result.rules) {
-            const auto width =
-                binding_const_or(rule, BPF_JIT_ROT_PARAM_WIDTH, -1);
-            saw_rotate64 = saw_rotate64 || width == 64;
-            saw_rotate32 = saw_rotate32 || width == 32;
+            saw_rotate64 = saw_rotate64 || rule.pattern_kind == "rotate-64";
+            saw_rotate32 = saw_rotate32 || rule.pattern_kind == "rotate-32";
         }
         CHECK(saw_rotate64);
         CHECK(saw_rotate32);

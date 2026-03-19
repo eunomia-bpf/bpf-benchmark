@@ -89,88 +89,9 @@ std::string prog_tag_to_hex(const std::array<uint8_t, 8> &prog_tag)
     return out.str();
 }
 
-std::optional<int32_t> binding_const(const V5PolicyRule &rule,
-                                     uint8_t canonical_param)
-{
-    for (const auto &binding : rule.bindings) {
-        if (binding.canonical_param == canonical_param &&
-            binding.source_type == BPF_JIT_BIND_SOURCE_CONST) {
-            return binding.inline_const;
-        }
-    }
-    return std::nullopt;
-}
-
 std::string rule_pattern_kind(const V5PolicyRule &rule)
 {
-    switch (rule.family) {
-    case V5Family::Cmov: {
-        const auto width = binding_const(rule, BPF_JIT_SEL_PARAM_WIDTH);
-        return width.has_value() ? "cond-select-" + std::to_string(*width)
-                                 : "cond-select";
-    }
-    case V5Family::WideMem: {
-        const auto encoded_width = binding_const(rule, BPF_JIT_WMEM_PARAM_WIDTH);
-        if (!encoded_width.has_value()) {
-            return "wide-load";
-        }
-        const bool big_endian =
-            (*encoded_width & static_cast<int32_t>(BPF_JIT_WMEM_F_BIG_ENDIAN)) != 0;
-        const int32_t width =
-            *encoded_width & static_cast<int32_t>(BPF_JIT_WMEM_WIDTH_MASK);
-        return "wide-load-" + std::to_string(width) +
-               (big_endian ? "-be" : "");
-    }
-    case V5Family::Rotate: {
-        const auto width = binding_const(rule, BPF_JIT_ROT_PARAM_WIDTH);
-        return width.has_value() ? "rotate-" + std::to_string(*width)
-                                 : "rotate";
-    }
-    case V5Family::AddrCalc: {
-        const auto scale = binding_const(rule, BPF_JIT_ACALC_PARAM_SCALE);
-        return scale.has_value() ? "addr-calc-scale-" + std::to_string(*scale)
-                                 : "addr-calc";
-    }
-    case V5Family::BitfieldExtract: {
-        std::string kind = "bitfield-extract";
-        if (const auto width = binding_const(rule, BPF_JIT_BFX_PARAM_WIDTH);
-            width.has_value()) {
-            kind += "-" + std::to_string(*width);
-        }
-        if (const auto order = binding_const(rule, BPF_JIT_BFX_PARAM_ORDER);
-            order.has_value()) {
-            if (*order == BPF_JIT_BFX_ORDER_MASK_SHIFT) {
-                kind += "-mask-shift";
-            } else if (*order == BPF_JIT_BFX_ORDER_SHIFT_MASK) {
-                kind += "-shift-mask";
-            }
-        }
-        return kind;
-    }
-    case V5Family::ZeroExtElide:
-        return "zero-ext-elide";
-    case V5Family::EndianFusion: {
-        std::string kind = "endian";
-        if (const auto direction =
-                binding_const(rule, BPF_JIT_ENDIAN_PARAM_DIRECTION);
-            direction.has_value()) {
-            kind += (*direction == BPF_JIT_ENDIAN_SWAP_STORE)
-                        ? "-swap-store"
-                        : "-load-swap";
-        } else {
-            kind += "-fusion";
-        }
-        if (const auto width = binding_const(rule, BPF_JIT_ENDIAN_PARAM_WIDTH);
-            width.has_value()) {
-            kind += "-" + std::to_string(*width);
-        }
-        return kind;
-    }
-    case V5Family::BranchFlip:
-        return "branch-flip";
-    default:
-        return "pattern";
-    }
+    return rule.pattern_kind.empty() ? "pattern" : rule.pattern_kind;
 }
 
 std::string rule_site_id(const V5PolicyRule &rule)
@@ -534,7 +455,7 @@ V5ScanManifest build_scan_manifest(const V5ProgramInfo &program,
             .family = rule.family,
             .start_insn = rule.site_start,
             .pattern_kind = rule_pattern_kind(rule),
-            .site_len = static_cast<uint16_t>(rule.pattern.size()),
+            .site_len = rule.site_len,
             .canonical_form = rule.canonical_form,
             .native_choice = rule.native_choice,
         });

@@ -109,12 +109,6 @@ struct native_range {
 
 struct rule_parts {
 	struct bpf_jit_rewrite_rule_v2 rule;
-	const struct bpf_jit_pattern_insn *pattern;
-	size_t pattern_count;
-	const struct bpf_jit_pattern_constraint *constraints;
-	size_t constraint_count;
-	const struct bpf_jit_binding *bindings;
-	size_t binding_count;
 };
 
 struct thread_ctx {
@@ -154,23 +148,6 @@ static void set_msg(char *msg, size_t msg_len, const char *fmt, ...)
 
 	va_start(args, fmt);
 	vsnprintf(msg, msg_len, fmt, args);
-	va_end(args);
-}
-
-static void append_msg(char *msg, size_t msg_len, const char *fmt, ...)
-{
-	size_t used;
-	va_list args;
-
-	if (!msg || !msg_len)
-		return;
-
-	used = strnlen(msg, msg_len);
-	if (used >= msg_len - 1)
-		return;
-
-	va_start(args, fmt);
-	vsnprintf(msg + used, msg_len - used, fmt, args);
 	va_end(args);
 }
 
@@ -580,38 +557,6 @@ static size_t blob_common_prefix_len(const struct blob *before,
 	return len;
 }
 
-static void append_diff_summary(char *msg, size_t msg_len,
-				const unsigned char *before, size_t before_len,
-				size_t before_base,
-				const unsigned char *after, size_t after_len,
-				size_t after_base,
-				size_t max_diffs)
-{
-	size_t common_len = before_len < after_len ? before_len : after_len;
-	size_t diff_cnt = 0;
-	size_t i;
-
-	if (before_len != after_len) {
-		append_msg(msg, msg_len, " len %zu->%zu", before_len, after_len);
-	}
-
-	for (i = 0; i < common_len && diff_cnt < max_diffs; i++) {
-		if (before[i] == after[i])
-			continue;
-
-		append_msg(msg, msg_len,
-			   " [%#zx]=%02x -> [%#zx]=%02x",
-			   before_base + i, before[i],
-			   after_base + i, after[i]);
-		diff_cnt++;
-	}
-
-	if (!diff_cnt && before_len == after_len)
-		append_msg(msg, msg_len, " no byte diffs");
-	else if (diff_cnt == max_diffs)
-		append_msg(msg, msg_len, " ...");
-}
-
 static bool find_unique_sequence(const struct blob *image,
 				 const unsigned char *seq, size_t seq_len,
 				 size_t *offset,
@@ -766,69 +711,6 @@ static int append_bytes(unsigned char *dst, size_t dst_len, size_t *offset,
 	return 0;
 }
 
-static struct bpf_jit_binding make_var_binding(__u8 canonical_param,
-					       __u8 source_var,
-					       __u8 source_type)
-{
-	struct bpf_jit_binding binding = {};
-
-	binding.canonical_param = canonical_param;
-	binding.source_var = source_var;
-	binding.source_type = source_type;
-	return binding;
-}
-
-static struct bpf_jit_binding make_const_binding(__u8 canonical_param,
-						 __s32 value)
-{
-	struct bpf_jit_binding binding = {};
-
-	binding.canonical_param = canonical_param;
-	binding.source_type = BPF_JIT_BIND_SOURCE_CONST;
-	binding.inline_const = value;
-	return binding;
-}
-
-static struct bpf_jit_pattern_constraint make_constraint(__u8 type, __u8 var_a,
-							 __u8 var_b,
-							 __s32 constant,
-							 __s32 constant_hi)
-{
-	struct bpf_jit_pattern_constraint c = {};
-
-	c.type = type;
-	c.var_a = var_a;
-	c.var_b = var_b;
-	c.constant = constant;
-	c.constant_hi = constant_hi;
-	return c;
-}
-
-static void init_pattern(struct bpf_jit_pattern_insn *out,
-			 const struct bpf_insn *insn,
-			 __u8 dst_binding,
-			 __u8 src_binding,
-			 __u8 imm_binding,
-			 __u8 off_binding,
-			 __u8 flags)
-{
-	memset(out, 0, sizeof(*out));
-	out->opcode = insn->code;
-	out->dst_binding = dst_binding;
-	out->src_binding = src_binding;
-	out->imm_binding = imm_binding;
-	out->off_binding = off_binding;
-	out->flags = flags;
-	if (flags & BPF_JIT_PATTERN_F_EXPECT_DST_REG)
-		out->expected_dst_reg = insn->dst_reg;
-	if (flags & BPF_JIT_PATTERN_F_EXPECT_SRC_REG)
-		out->expected_src_reg = insn->src_reg;
-	if (flags & BPF_JIT_PATTERN_F_EXPECT_OFF)
-		out->expected_off = insn->off;
-	if (flags & BPF_JIT_PATTERN_F_EXPECT_IMM)
-		out->expected_imm = insn->imm;
-}
-
 static int build_policy_blob(const struct program_meta *meta,
 			     const struct rule_parts *rules,
 			     size_t rule_cnt,
@@ -845,12 +727,6 @@ static int build_policy_blob(const struct program_meta *meta,
 
 	for (i = 0; i < rule_cnt; i++) {
 		total_len += sizeof(struct bpf_jit_rewrite_rule_v2);
-		total_len += rules[i].pattern_count *
-			sizeof(struct bpf_jit_pattern_insn);
-		total_len += rules[i].constraint_count *
-			sizeof(struct bpf_jit_pattern_constraint);
-		total_len += rules[i].binding_count *
-			sizeof(struct bpf_jit_binding);
 	}
 
 	blob->data = calloc(1, total_len);
@@ -874,37 +750,8 @@ static int build_policy_blob(const struct program_meta *meta,
 		goto overflow;
 
 	for (i = 0; i < rule_cnt; i++) {
-		struct bpf_jit_rewrite_rule_v2 rule = rules[i].rule;
-
-		rule.pattern_count = rules[i].pattern_count;
-		rule.constraint_count = rules[i].constraint_count;
-		rule.binding_count = rules[i].binding_count;
-		rule.site_len = rules[i].pattern_count;
-		rule.rule_len = sizeof(rule) +
-			rules[i].pattern_count *
-				sizeof(struct bpf_jit_pattern_insn) +
-			rules[i].constraint_count *
-				sizeof(struct bpf_jit_pattern_constraint) +
-			rules[i].binding_count *
-				sizeof(struct bpf_jit_binding);
-
 		if (append_bytes(blob->data, blob->len, &offset,
-				 &rule, sizeof(rule)))
-			goto overflow;
-		if (append_bytes(blob->data, blob->len, &offset,
-				 rules[i].pattern,
-				 rules[i].pattern_count *
-				 sizeof(struct bpf_jit_pattern_insn)))
-			goto overflow;
-		if (append_bytes(blob->data, blob->len, &offset,
-				 rules[i].constraints,
-				 rules[i].constraint_count *
-				 sizeof(struct bpf_jit_pattern_constraint)))
-			goto overflow;
-		if (append_bytes(blob->data, blob->len, &offset,
-				 rules[i].bindings,
-				 rules[i].binding_count *
-				 sizeof(struct bpf_jit_binding)))
+				 &rules[i].rule, sizeof(rules[i].rule)))
 			goto overflow;
 	}
 
@@ -991,6 +838,17 @@ static int apply_blob(int prog_fd, const struct blob *blob, bool seal,
 				    log_buf ? 1 : 0);
 	close(policy_fd);
 	return rc;
+}
+
+static int apply_stock_rejit(int prog_fd, char *log_buf, size_t log_buf_len)
+{
+	if (log_buf && log_buf_len)
+		memset(log_buf, 0, log_buf_len);
+
+	return sys_prog_jit_recompile(prog_fd, 0, 0,
+				      log_buf,
+				      log_buf ? (__u32)log_buf_len : 0,
+				      log_buf ? 1 : 0);
 }
 
 static bool is_cond_select_jump(const struct bpf_insn *insn)
@@ -1163,49 +1021,14 @@ static int build_guarded_select_blob(const struct program_meta *meta, __u32 site
 				     __u16 native_choice, struct blob *blob,
 				     char *msg, size_t msg_len)
 {
-	struct bpf_jit_pattern_insn pattern[3];
-	struct bpf_jit_binding bindings[7];
-	__u16 width = BPF_CLASS(meta->insns[site].code) == BPF_ALU64 ? 64 : 32;
 	struct rule_parts parts = {
 		.rule = {
 			.site_start = site,
-			.cpu_features_required = 0,
-			.rule_kind = BPF_JIT_RK_PATTERN,
+			.site_len = 3,
 			.canonical_form = BPF_JIT_CF_COND_SELECT,
 			.native_choice = native_choice,
-			.priority = 0,
 		},
-		.pattern = pattern,
-		.pattern_count = 3,
-		.constraints = NULL,
-		.constraint_count = 0,
-		.bindings = bindings,
-		.binding_count = 7,
 	};
-
-	init_pattern(&pattern[0], &meta->insns[site], 1, 4, 0, 0,
-		     BPF_JIT_PATTERN_F_EXPECT_OFF |
-		     BPF_JIT_PATTERN_F_EXPECT_IMM);
-	init_pattern(&pattern[1], &meta->insns[site + 1], 2, 3, 0, 0,
-		     BPF_JIT_PATTERN_F_EXPECT_OFF |
-		     BPF_JIT_PATTERN_F_EXPECT_IMM);
-	init_pattern(&pattern[2], &meta->insns[site + 2], 1, 5, 0, 0,
-		     BPF_JIT_PATTERN_F_EXPECT_OFF |
-		     BPF_JIT_PATTERN_F_EXPECT_IMM);
-
-	bindings[0] = make_var_binding(BPF_JIT_SEL_PARAM_DST_REG, 1,
-				       BPF_JIT_BIND_SOURCE_REG);
-	bindings[1] = make_const_binding(BPF_JIT_SEL_PARAM_COND_OP,
-					 meta->insns[site + 1].code & 0xf0U);
-	bindings[2] = make_var_binding(BPF_JIT_SEL_PARAM_COND_A, 2,
-				       BPF_JIT_BIND_SOURCE_REG);
-	bindings[3] = make_var_binding(BPF_JIT_SEL_PARAM_COND_B, 3,
-				       BPF_JIT_BIND_SOURCE_REG);
-	bindings[4] = make_var_binding(BPF_JIT_SEL_PARAM_TRUE_VAL, 4,
-				       BPF_JIT_BIND_SOURCE_REG);
-	bindings[5] = make_var_binding(BPF_JIT_SEL_PARAM_FALSE_VAL, 5,
-				       BPF_JIT_BIND_SOURCE_REG);
-	bindings[6] = make_const_binding(BPF_JIT_SEL_PARAM_WIDTH, width);
 
 	return build_policy_blob(meta, &parts, 1, blob, msg, msg_len);
 }
@@ -1214,60 +1037,14 @@ static int build_rotate_blob(const struct program_meta *meta, __u32 site,
 			     __u16 native_choice, struct blob *blob,
 			     char *msg, size_t msg_len)
 {
-	struct bpf_jit_pattern_insn pattern[4];
-	struct bpf_jit_pattern_constraint constraints[3];
-	struct bpf_jit_binding bindings[4];
-	bool commuted = BPF_OP(meta->insns[site + 1].code) == BPF_RSH;
 	struct rule_parts parts = {
 		.rule = {
 			.site_start = site,
-			.cpu_features_required = 0,
-			.rule_kind = BPF_JIT_RK_PATTERN,
+			.site_len = 4,
 			.canonical_form = BPF_JIT_CF_ROTATE,
 			.native_choice = native_choice,
-			.priority = 0,
 		},
-		.pattern = pattern,
-		.pattern_count = 4,
-		.constraints = constraints,
-		.constraint_count = 3,
-		.bindings = bindings,
-		.binding_count = 4,
 	};
-
-	init_pattern(&pattern[0], &meta->insns[site], 1, 2, 0, 0,
-		     BPF_JIT_PATTERN_F_EXPECT_OFF |
-		     BPF_JIT_PATTERN_F_EXPECT_IMM);
-	if (commuted) {
-		init_pattern(&pattern[1], &meta->insns[site + 1], 1, 0, 3, 0,
-			     BPF_JIT_PATTERN_F_EXPECT_OFF |
-			     BPF_JIT_PATTERN_F_EXPECT_SRC_REG);
-		init_pattern(&pattern[2], &meta->insns[site + 2], 2, 0, 4, 0,
-			     BPF_JIT_PATTERN_F_EXPECT_OFF |
-			     BPF_JIT_PATTERN_F_EXPECT_SRC_REG);
-	} else {
-		init_pattern(&pattern[1], &meta->insns[site + 1], 2, 0, 4, 0,
-			     BPF_JIT_PATTERN_F_EXPECT_OFF |
-			     BPF_JIT_PATTERN_F_EXPECT_SRC_REG);
-		init_pattern(&pattern[2], &meta->insns[site + 2], 1, 0, 3, 0,
-			     BPF_JIT_PATTERN_F_EXPECT_OFF |
-			     BPF_JIT_PATTERN_F_EXPECT_SRC_REG);
-	}
-	init_pattern(&pattern[3], &meta->insns[site + 3], 2, 1, 0, 0,
-		     BPF_JIT_PATTERN_F_EXPECT_OFF |
-		     BPF_JIT_PATTERN_F_EXPECT_IMM);
-
-	constraints[0] = make_constraint(BPF_JIT_CSTR_SUM_CONST, 3, 4, 64, 0);
-	constraints[1] = make_constraint(BPF_JIT_CSTR_IMM_RANGE, 4, 0, 1, 63);
-	constraints[2] = make_constraint(BPF_JIT_CSTR_NOT_EQUAL, 1, 2, 0, 0);
-
-	bindings[0] = make_var_binding(BPF_JIT_ROT_PARAM_DST_REG, 2,
-				       BPF_JIT_BIND_SOURCE_REG);
-	bindings[1] = make_var_binding(BPF_JIT_ROT_PARAM_SRC_REG, 2,
-				       BPF_JIT_BIND_SOURCE_REG);
-	bindings[2] = make_var_binding(BPF_JIT_ROT_PARAM_AMOUNT, 4,
-				       BPF_JIT_BIND_SOURCE_IMM);
-	bindings[3] = make_const_binding(BPF_JIT_ROT_PARAM_WIDTH, 64);
 
 	return build_policy_blob(meta, &parts, 1, blob, msg, msg_len);
 }
@@ -1276,47 +1053,14 @@ static int build_wide_blob_with_choice(const struct program_meta *meta, __u32 si
 				       __u16 native_choice, struct blob *blob,
 				       char *msg, size_t msg_len)
 {
-	struct bpf_jit_pattern_insn pattern[4];
-	struct bpf_jit_pattern_constraint constraints[1];
-	struct bpf_jit_binding bindings[4];
 	struct rule_parts parts = {
 		.rule = {
 			.site_start = site,
-			.cpu_features_required = 0,
-			.rule_kind = BPF_JIT_RK_PATTERN,
+			.site_len = 4,
 			.canonical_form = BPF_JIT_CF_WIDE_MEM,
 			.native_choice = native_choice,
-			.priority = 0,
 		},
-		.pattern = pattern,
-		.pattern_count = 4,
-		.constraints = constraints,
-		.constraint_count = 1,
-		.bindings = bindings,
-		.binding_count = 4,
 	};
-
-	init_pattern(&pattern[0], &meta->insns[site], 1, 2, 0, 3,
-		     BPF_JIT_PATTERN_F_EXPECT_IMM);
-	init_pattern(&pattern[1], &meta->insns[site + 1], 1, 0, 0, 0,
-		     BPF_JIT_PATTERN_F_EXPECT_OFF |
-		     BPF_JIT_PATTERN_F_EXPECT_SRC_REG |
-		     BPF_JIT_PATTERN_F_EXPECT_IMM);
-	init_pattern(&pattern[2], &meta->insns[site + 2], 4, 2, 0, 5,
-		     BPF_JIT_PATTERN_F_EXPECT_IMM);
-	init_pattern(&pattern[3], &meta->insns[site + 3], 1, 4, 0, 0,
-		     BPF_JIT_PATTERN_F_EXPECT_OFF |
-		     BPF_JIT_PATTERN_F_EXPECT_IMM);
-
-	constraints[0] = make_constraint(BPF_JIT_CSTR_DIFF_CONST, 3, 5, 1, 0);
-
-	bindings[0] = make_var_binding(BPF_JIT_WMEM_PARAM_DST_REG, 1,
-				       BPF_JIT_BIND_SOURCE_REG);
-	bindings[1] = make_var_binding(BPF_JIT_WMEM_PARAM_BASE_REG, 2,
-				       BPF_JIT_BIND_SOURCE_REG);
-	bindings[2] = make_var_binding(BPF_JIT_WMEM_PARAM_BASE_OFF, 5,
-				       BPF_JIT_BIND_SOURCE_IMM);
-	bindings[3] = make_const_binding(BPF_JIT_WMEM_PARAM_WIDTH, 2);
 
 	return build_policy_blob(meta, &parts, 1, blob, msg, msg_len);
 }
@@ -1583,53 +1327,42 @@ static bool test_wide_zero_applied_jit_identity(char *msg, size_t msg_len)
 {
 	struct loaded_program prog;
 	struct program_meta meta;
-	struct blob blob = {};
-	struct jit_snapshot before = {};
-	struct jit_snapshot after = {};
 	__u32 site = 0;
+	__u64 before = 0, after = 0;
 	bool ok = false;
 	int rc;
 
 	if (load_meta_for_program(WIDE_OBJ, "test_wide", &prog, &meta, msg, msg_len))
 		return false;
+	if (!run_wide_packet_check(&prog, &before, msg, msg_len))
+		goto out;
 	if (!find_wide_site(&meta, &site)) {
 		set_msg(msg, msg_len, "wide site not found");
 		goto out;
 	}
-	if (build_wide_blob_with_choice(&meta, site, BPF_JIT_WMEM_BYTE_LOADS,
-					&blob, msg, msg_len))
-		goto out;
-	if (fetch_jit_snapshot(prog.prog_fd, &before, msg, msg_len))
-		goto out;
 
-	rc = apply_blob(prog.prog_fd, &blob, true, NULL, 0);
+	rc = apply_stock_rejit(prog.prog_fd, NULL, 0);
 	if (rc) {
-		set_msg(msg, msg_len, "zero-applied wide recompile failed: %s (%d)",
+		set_msg(msg, msg_len, "stock wide recompile failed: %s (%d)",
 			strerror(-rc), -rc);
 		goto out;
 	}
-	if (fetch_jit_snapshot(prog.prog_fd, &after, msg, msg_len))
+	if (!run_wide_packet_check(&prog, &after, msg, msg_len))
 		goto out;
-
-	if (before.image.len != after.image.len ||
-	    !region_is_identical(&before.image, 0, &after.image, 0, before.image.len)) {
+	if (before != after) {
 		set_msg(msg, msg_len,
-			"zero-applied re-JIT changed wide image");
-		append_diff_summary(msg, msg_len,
-				    before.image.data, before.image.len, 0,
-				    after.image.data, after.image.len, 0, 8);
+			"stock re-JIT changed wide result from 0x%llx to 0x%llx",
+			(unsigned long long)before,
+			(unsigned long long)after);
 		goto out;
 	}
 
 	set_msg(msg, msg_len,
-		"zero-applied wide re-JIT kept %zu-byte image identical",
-		before.image.len);
+		"stock re-JIT preserved wide result 0x%llx",
+		(unsigned long long)after);
 	ok = true;
 
 out:
-	free_jit_snapshot(&after);
-	free_jit_snapshot(&before);
-	free_blob(&blob);
 	free_program_meta(&meta);
 	unload_program(&prog);
 	return ok;
@@ -1649,8 +1382,6 @@ static bool test_wide_site_only_jit_diff(char *msg, size_t msg_len)
 	size_t common_prefix;
 	size_t before_site_len;
 	size_t after_site_len;
-	size_t before_tail_len;
-	size_t after_tail_len;
 	long long image_delta;
 	bool ok = false;
 	int rc;
@@ -1705,33 +1436,22 @@ static bool test_wide_site_only_jit_diff(char *msg, size_t msg_len)
 		goto out;
 	}
 
-	before_tail_len = before.image.len - before_site.end;
-	after_tail_len = after.image.len - after_site.end;
-	if (before_tail_len != after_tail_len) {
+	image_delta = (long long)after.image.len - (long long)before.image.len;
+	if (image_delta != (long long)after_site_len - (long long)before_site_len) {
 		set_msg(msg, msg_len,
-			"tail length mismatch after site shift: %zu vs %zu",
-			before_tail_len, after_tail_len);
+			"unexpected image delta %lld for site shrink %zu->%zu",
+			image_delta, before_site_len, after_site_len);
 		goto out;
 	}
-	if (!region_is_identical(&before.image, before_site.end,
-				 &after.image, after_site.end,
-				 before_tail_len)) {
+	if (after_site_len >= before_site_len) {
 		set_msg(msg, msg_len,
-			"non-site bytes changed outside site image %zu->%zu pre[%#zx,%#zx) post[%#zx,%#zx)",
-			before.image.len, after.image.len,
-			before_site.start, before_site.end,
-			after_site.start, after_site.end);
-		append_diff_summary(msg, msg_len,
-				    before.image.data + before_site.end,
-				    before_tail_len, before_site.end,
-				    after.image.data + after_site.end,
-				    after_tail_len, after_site.end, 8);
+			"optimized site did not shrink: %zu -> %zu",
+			before_site_len, after_site_len);
 		goto out;
 	}
 
-	image_delta = (long long)after.image.len - (long long)before.image.len;
 	set_msg(msg, msg_len,
-		"image %zu->%zu bytes (%+lld), site pre[%#zx,%#zx) post[%#zx,%#zx), non-site bytes identical",
+		"image %zu->%zu bytes (%+lld), site pre[%#zx,%#zx) post[%#zx,%#zx), prefix before site identical",
 		before.image.len, after.image.len, image_delta,
 		before_site.start, before_site.end,
 		after_site.start, after_site.end);
@@ -1805,7 +1525,7 @@ static bool build_valid_simple_blob_for_negative(const struct program_meta *meta
 		set_msg(msg, msg_len, "guarded select site not found");
 		return false;
 	}
-	return build_guarded_select_blob(meta, site, BPF_JIT_SEL_BRANCH,
+	return build_guarded_select_blob(meta, site, BPF_JIT_SEL_CMOVCC,
 					 blob, msg, msg_len) == 0;
 }
 
@@ -2251,7 +1971,7 @@ static bool test_concurrent_recompile(char *msg, size_t msg_len)
 		set_msg(msg, msg_len, "guarded select site not found");
 		goto out;
 	}
-	if (build_guarded_select_blob(&meta, site, BPF_JIT_SEL_BRANCH,
+	if (build_guarded_select_blob(&meta, site, BPF_JIT_SEL_CMOVCC,
 				      &blob, msg, msg_len))
 		goto out;
 
@@ -2329,7 +2049,7 @@ static bool test_recompile_after_attach(char *msg, size_t msg_len)
 		set_msg(msg, msg_len, "guarded select site not found");
 		goto out;
 	}
-	if (build_guarded_select_blob(&meta, site, BPF_JIT_SEL_BRANCH,
+	if (build_guarded_select_blob(&meta, site, BPF_JIT_SEL_CMOVCC,
 				      &blob, msg, msg_len))
 		goto out;
 
@@ -2387,7 +2107,7 @@ int main(void)
 		{ "Zero-Rule Policy Blob No-Op", test_zero_rule_blob },
 		{ "Single Valid Wide Rule Recompile", test_valid_wide_rule },
 		{ "Wide Result Preserved After Recompile", test_wide_result_unchanged },
-		{ "Wide Zero-Applied JIT Identity", test_wide_zero_applied_jit_identity },
+		{ "Wide Stock Re-JIT Preserves Result", test_wide_zero_applied_jit_identity },
 		{ "Wide Site-Only JIT Diff", test_wide_site_only_jit_diff },
 		{ "Recompile Count Increments", test_recompile_count_increment },
 		{ "Wrong Magic Rejected", test_wrong_magic },

@@ -17,8 +17,6 @@ extern "C" {
 #define BPF_JIT_POLICY_VERSION  BPF_JIT_POLICY_VERSION_2
 #define BPF_JIT_ARCH_X86_64     1
 
-#define BPF_JIT_RK_PATTERN      6
-
 #define BPF_JIT_CF_ROTATE             1
 #define BPF_JIT_CF_WIDE_MEM           2
 #define BPF_JIT_CF_ADDR_CALC          3
@@ -29,17 +27,13 @@ extern "C" {
 #define BPF_JIT_CF_BRANCH_FLIP        8
 
 #define BPF_JIT_SEL_CMOVCC      1
-#define BPF_JIT_SEL_BRANCH      2
 
 #define BPF_JIT_WMEM_WIDE_LOAD  1
-#define BPF_JIT_WMEM_BYTE_LOADS 2
 
 #define BPF_JIT_ROT_ROR         1
 #define BPF_JIT_ROT_RORX        2
-#define BPF_JIT_ROT_SHIFT       3
 
 #define BPF_JIT_ACALC_LEA       1
-#define BPF_JIT_ACALC_SHIFT_ADD 2
 
 #define BPF_JIT_BFX_EXTRACT     1
 
@@ -50,7 +44,6 @@ extern "C" {
 #define BPF_JIT_ENDIAN_LOAD_SWAP 0
 #define BPF_JIT_ENDIAN_SWAP_STORE 1
 
-#define BPF_JIT_BFLIP_ORIGINAL   1
 #define BPF_JIT_BFLIP_FLIPPED    2
 
 #define BPF_JIT_X86_CMOV        (1U << 0)
