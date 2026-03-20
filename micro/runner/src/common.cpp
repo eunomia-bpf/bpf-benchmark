@@ -4,7 +4,9 @@
 #include <cctype>
 #include <cstdlib>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
 #include <string_view>
 
@@ -135,23 +137,24 @@ void append_skip_families(std::vector<std::string> &families,
     }
 }
 
-void print_json_string_array(const std::vector<std::string> &values)
+void print_json_string_array(std::ostream &out,
+                             const std::vector<std::string> &values)
 {
-    std::cout << "[";
+    out << "[";
     for (size_t index = 0; index < values.size(); ++index) {
         if (index != 0) {
-            std::cout << ",";
+            out << ",";
         }
-        std::cout << "\"" << json_escape(values[index]) << "\"";
+        out << "\"" << json_escape(values[index]) << "\"";
     }
-    std::cout << "]";
+    out << "]";
 }
 
 std::string usage_text()
 {
     return
-        "usage: micro_exec <run-llvmbpf|run-kernel|list-programs> [--program <path>|<path>] [--program-name <name>] "
-        "[--memory|--input <path>] [--btf-custom-path <path>] [--directive-blob <path>] [--policy <yaml-or-json>] [--policy-file <path>] [--policy-blob <path>] "
+        "usage: micro_exec <run-llvmbpf|run-kernel|run-kernel-paired|list-programs> [--program <path>|<path>] [--program-name <name>] "
+        "[--memory|--input <path>] [--btf-custom-path <path>] [--directive-blob <path>] [--policy <yaml-or-json|path>] [--policy-file <path>] [--policy-blob <path>] "
         "[--manual-load] [--recompile-cmov] [--recompile-wide|--recompile-wide-mem] [--recompile-rotate] [--recompile-rotate-rorx] [--recompile-lea] [--recompile-extract|--recompile-bitfield-extract] [--recompile-all] [--recompile-v5] [--skip-families cmov,wide,rotate,lea,extract,zero-ext,endian,branch-flip] "
         "[--io-mode map|staged|packet|context] [--raw-packet] [--repeat N] [--warmup N] [--adaptive-repeat|--no-adaptive-repeat] [--target-window-ns N] [--input-size|--kernel-input-size N] "
         "[--opt-level 0|1|2|3] [--no-cmov] [--llvm-target-cpu <cpu>] [--llvm-target-features <csv>] [--llvm-disable-pass <name>] [--llvm-log-passes] "
@@ -411,53 +414,63 @@ cli_options parse_args(int argc, char **argv)
     if (options.program.empty()) {
         fail("--program is required");
     }
+    const bool is_kernel_command =
+        options.command == "run-kernel" ||
+        options.command == "run-kernel-paired";
+    if (options.command == "run-kernel-paired" && options.policy.has_value()) {
+        if (options.policy_file.has_value()) {
+            fail("--policy cannot be combined with --policy-file for run-kernel-paired");
+        }
+        options.policy_file = std::filesystem::path(*options.policy);
+        options.policy.reset();
+    }
     if (options.perf_scope != "full_repeat_raw" && options.perf_scope != "full_repeat_avg") {
         fail("--perf-scope must be one of full_repeat_raw or full_repeat_avg");
     }
     if (options.target_window_ns == 0) {
         fail("--target-window-ns must be >= 1");
     }
-    if (options.directive_blob.has_value() && options.command != "run-kernel") {
-        fail("--directive-blob is only valid with run-kernel");
+    if (options.directive_blob.has_value() && !is_kernel_command) {
+        fail("--directive-blob is only valid with run-kernel or run-kernel-paired");
     }
-    if (options.policy.has_value() && options.command != "run-kernel") {
-        fail("--policy is only valid with run-kernel");
+    if (options.policy.has_value() && !is_kernel_command) {
+        fail("--policy is only valid with run-kernel or run-kernel-paired");
     }
-    if (options.policy_file.has_value() && options.command != "run-kernel") {
-        fail("--policy-file is only valid with run-kernel");
+    if (options.policy_file.has_value() && !is_kernel_command) {
+        fail("--policy-file is only valid with run-kernel or run-kernel-paired");
     }
-    if (options.policy_blob.has_value() && options.command != "run-kernel") {
-        fail("--policy-blob is only valid with run-kernel");
+    if (options.policy_blob.has_value() && !is_kernel_command) {
+        fail("--policy-blob is only valid with run-kernel or run-kernel-paired");
     }
-    if (options.manual_load && options.command != "run-kernel") {
-        fail("--manual-load is only valid with run-kernel");
+    if (options.manual_load && !is_kernel_command) {
+        fail("--manual-load is only valid with run-kernel or run-kernel-paired");
     }
-    if (options.recompile_cmov && options.command != "run-kernel") {
-        fail("--recompile-cmov is only valid with run-kernel");
+    if (options.recompile_cmov && !is_kernel_command) {
+        fail("--recompile-cmov is only valid with run-kernel or run-kernel-paired");
     }
-    if (options.recompile_wide && options.command != "run-kernel") {
-        fail("--recompile-wide is only valid with run-kernel");
+    if (options.recompile_wide && !is_kernel_command) {
+        fail("--recompile-wide is only valid with run-kernel or run-kernel-paired");
     }
-    if (options.recompile_rotate && options.command != "run-kernel") {
-        fail("--recompile-rotate is only valid with run-kernel");
+    if (options.recompile_rotate && !is_kernel_command) {
+        fail("--recompile-rotate is only valid with run-kernel or run-kernel-paired");
     }
-    if (options.recompile_lea && options.command != "run-kernel") {
-        fail("--recompile-lea is only valid with run-kernel");
+    if (options.recompile_lea && !is_kernel_command) {
+        fail("--recompile-lea is only valid with run-kernel or run-kernel-paired");
     }
-    if (options.recompile_extract && options.command != "run-kernel") {
-        fail("--recompile-extract is only valid with run-kernel");
+    if (options.recompile_extract && !is_kernel_command) {
+        fail("--recompile-extract is only valid with run-kernel or run-kernel-paired");
     }
-    if (options.recompile_rotate_rorx && options.command != "run-kernel") {
-        fail("--recompile-rotate-rorx is only valid with run-kernel");
+    if (options.recompile_rotate_rorx && !is_kernel_command) {
+        fail("--recompile-rotate-rorx is only valid with run-kernel or run-kernel-paired");
     }
-    if (options.recompile_all && options.command != "run-kernel") {
-        fail("--recompile-all is only valid with run-kernel");
+    if (options.recompile_all && !is_kernel_command) {
+        fail("--recompile-all is only valid with run-kernel or run-kernel-paired");
     }
-    if (options.recompile_v5 && options.command != "run-kernel") {
-        fail("--recompile-v5 is only valid with run-kernel");
+    if (options.recompile_v5 && !is_kernel_command) {
+        fail("--recompile-v5 is only valid with run-kernel or run-kernel-paired");
     }
-    if (!options.skip_families.empty() && options.command != "run-kernel") {
-        fail("--skip-families is only valid with run-kernel");
+    if (!options.skip_families.empty() && !is_kernel_command) {
+        fail("--skip-families is only valid with run-kernel or run-kernel-paired");
     }
     if (options.recompile_v5 &&
         !(options.recompile_cmov || options.recompile_rotate ||
@@ -489,6 +502,19 @@ cli_options parse_args(int argc, char **argv)
           options.recompile_all)) {
         fail("--skip-families requires an auto-scan recompile family or --recompile-all");
     }
+    if (options.command == "run-kernel-paired") {
+        if (options.compile_only) {
+            fail("--compile-only is not supported with run-kernel-paired");
+        }
+        if (!(options.policy.has_value() || options.policy_file.has_value() ||
+              options.policy_blob.has_value() ||
+              options.recompile_cmov || options.recompile_rotate ||
+              options.recompile_rotate_rorx || options.recompile_wide ||
+              options.recompile_lea || options.recompile_extract ||
+              options.recompile_all || options.recompile_v5)) {
+            fail("run-kernel-paired requires a policy or recompile request");
+        }
+    }
     if (options.command != "list-programs") {
         if (options.io_mode != "map" &&
             options.io_mode != "staged" &&
@@ -503,7 +529,7 @@ cli_options parse_args(int argc, char **argv)
     return options;
 }
 
-void print_json(const sample_result &sample)
+void print_sample_json(std::ostream &out, const sample_result &sample)
 {
     const double inflation_ratio = sample.code_size.bpf_bytecode_bytes == 0
         ? 0.0
@@ -528,7 +554,7 @@ void print_json(const sample_result &sample)
         sample.recompile.endian_sites +
         sample.recompile.branch_flip_sites;
 
-    std::cout
+    out
         << "{"
         << "\"compile_ns\":" << sample.compile_ns << ","
         << "\"exec_ns\":" << sample.exec_ns << ","
@@ -537,48 +563,48 @@ void print_json(const sample_result &sample)
         << ",\"no_cmov\":" << (sample.no_cmov ? "true" : "false");
 
     if (sample.opt_level.has_value()) {
-        std::cout << ",\"opt_level\":" << *sample.opt_level;
+        out << ",\"opt_level\":" << *sample.opt_level;
     }
-    std::cout << ",\"disabled_passes\":[";
+    out << ",\"disabled_passes\":[";
     for (size_t index = 0; index < sample.disabled_passes.size(); ++index) {
         if (index != 0) {
-            std::cout << ",";
+            out << ",";
         }
-        std::cout << "\"" << json_escape(sample.disabled_passes[index]) << "\"";
+        out << "\"" << json_escape(sample.disabled_passes[index]) << "\"";
     }
-    std::cout << "]";
+    out << "]";
 
-    std::cout << ",\"wall_exec_ns\":";
+    out << ",\"wall_exec_ns\":";
     if (sample.wall_exec_ns.has_value()) {
-        std::cout << *sample.wall_exec_ns;
+        out << *sample.wall_exec_ns;
     } else {
-        std::cout << "null";
+        out << "null";
     }
     if (sample.exec_cycles.has_value()) {
-        std::cout << ",\"exec_cycles\":" << *sample.exec_cycles;
+        out << ",\"exec_cycles\":" << *sample.exec_cycles;
     }
     if (sample.tsc_freq_hz.has_value()) {
-        std::cout << ",\"tsc_freq_hz\":" << *sample.tsc_freq_hz;
+        out << ",\"tsc_freq_hz\":" << *sample.tsc_freq_hz;
     }
 
-    std::cout
+    out
         << ",\"result\":" << sample.result << ","
         << "\"retval\":" << sample.retval;
 
     if (sample.jited_prog_len.has_value()) {
-        std::cout << ",\"jited_prog_len\":" << *sample.jited_prog_len;
+        out << ",\"jited_prog_len\":" << *sample.jited_prog_len;
     }
     if (sample.xlated_prog_len.has_value()) {
-        std::cout << ",\"xlated_prog_len\":" << *sample.xlated_prog_len;
+        out << ",\"xlated_prog_len\":" << *sample.xlated_prog_len;
     }
     if (sample.native_code_size.has_value()) {
-        std::cout << ",\"native_code_size\":" << *sample.native_code_size;
+        out << ",\"native_code_size\":" << *sample.native_code_size;
     }
     if (sample.bpf_insn_count.has_value()) {
-        std::cout << ",\"bpf_insn_count\":" << *sample.bpf_insn_count;
+        out << ",\"bpf_insn_count\":" << *sample.bpf_insn_count;
     }
 
-    std::cout
+    out
         << ",\"code_size\":{"
         << "\"bpf_bytecode_bytes\":" << sample.code_size.bpf_bytecode_bytes << ","
         << "\"native_code_bytes\":" << sample.code_size.native_code_bytes << ","
@@ -588,25 +614,25 @@ void print_json(const sample_result &sample)
 
     for (size_t index = 0; index < sample.phases_ns.size(); ++index) {
         if (index != 0) {
-            std::cout << ",";
+            out << ",";
         }
         const auto &phase = sample.phases_ns[index];
-        std::cout << "\"" << phase.name << "\":" << phase.ns;
+        out << "\"" << phase.name << "\":" << phase.ns;
     }
 
-    std::cout
+    out
         << "},"
         << "\"perf_counters\":{";
 
     for (size_t index = 0; index < sample.perf_counters.counters.size(); ++index) {
         if (index != 0) {
-            std::cout << ",";
+            out << ",";
         }
         const auto &counter = sample.perf_counters.counters[index];
-        std::cout << "\"" << json_escape(counter.name) << "\":" << counter.value;
+        out << "\"" << json_escape(counter.name) << "\":" << counter.value;
     }
 
-    std::cout
+    out
         << "},"
         << "\"perf_counters_meta\":{"
         << "\"requested\":" << (sample.perf_counters.requested ? "true" : "false") << ","
@@ -632,10 +658,10 @@ void print_json(const sample_result &sample)
         << "\"requested\":" << (sample.recompile.requested ? "true" : "false") << ","
         << "\"mode\":\"" << json_escape(sample.recompile.mode) << "\","
         << "\"requested_families\":";
-    print_json_string_array(sample.recompile.requested_families);
-    std::cout << ",\"skipped_families\":";
-    print_json_string_array(sample.recompile.skipped_families);
-    std::cout
+    print_json_string_array(out, sample.recompile.requested_families);
+    out << ",\"skipped_families\":";
+    print_json_string_array(out, sample.recompile.skipped_families);
+    out
         << ",\"policy_generated\":" << (sample.recompile.policy_generated ? "true" : "false") << ","
         << "\"policy_bytes\":" << sample.recompile.policy_bytes << ","
         << "\"syscall_attempted\":" << (sample.recompile.syscall_attempted ? "true" : "false") << ","
@@ -652,7 +678,34 @@ void print_json(const sample_result &sample)
         << "\"total_sites\":" << total_recompile_sites << ","
         << "\"error\":\"" << json_escape(sample.recompile.error) << "\""
         << "}"
-        << "}\n";
+        << "}";
+}
+
+void print_json(const sample_result &sample)
+{
+    print_sample_json(std::cout, sample);
+    std::cout << "\n";
+}
+
+void print_paired_json(const paired_sample_result &sample)
+{
+    std::ostringstream stock_json;
+    std::ostringstream recompile_json;
+    print_sample_json(stock_json, sample.stock);
+    print_sample_json(recompile_json, sample.recompile);
+
+    std::cout << std::setprecision(17)
+              << "{"
+              << "\"format\":\"kernel-paired-v1\","
+              << "\"stock\":" << stock_json.str() << ","
+              << "\"recompile\":" << recompile_json.str() << ","
+              << "\"ratio\":";
+    if (sample.ratio.has_value()) {
+        std::cout << *sample.ratio;
+    } else {
+        std::cout << "null";
+    }
+    std::cout << "}\n";
 }
 
 void print_program_inventory(const std::vector<program_descriptor> &programs)

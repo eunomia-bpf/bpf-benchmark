@@ -19,6 +19,10 @@ int main(int argc, char **argv)
             print_json(run_kernel(options));
             return 0;
         }
+        if (options.command == "run-kernel-paired") {
+            print_paired_json(run_kernel_paired(options));
+            return 0;
+        }
         fail("unknown command: " + options.command);
     } catch (const std::exception &error) {
         std::cerr << error.what() << "\n";

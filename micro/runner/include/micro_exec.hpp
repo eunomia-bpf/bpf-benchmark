@@ -163,6 +163,12 @@ struct sample_result {
     recompile_summary recompile;
 };
 
+struct paired_sample_result {
+    sample_result stock;
+    sample_result recompile;
+    std::optional<double> ratio;
+};
+
 [[noreturn]] void fail(const std::string &message);
 cli_options parse_args(int argc, char **argv);
 std::vector<uint8_t> read_binary_file(const std::filesystem::path &path);
@@ -175,7 +181,9 @@ program_image load_program_image(
     const std::optional<std::string> &program_name = std::nullopt);
 sample_result run_llvmbpf(const cli_options &options);
 sample_result run_kernel(const cli_options &options);
+paired_sample_result run_kernel_paired(const cli_options &options);
 void print_json(const sample_result &sample);
+void print_paired_json(const paired_sample_result &sample);
 void print_program_inventory(const std::vector<program_descriptor> &programs);
 perf_counter_capture measure_perf_counters(
     const perf_counter_options &options,

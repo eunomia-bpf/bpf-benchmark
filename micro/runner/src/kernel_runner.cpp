@@ -770,13 +770,14 @@ std::string trim_log_buffer(const std::vector<char> &buffer)
     return std::string(buffer.data(), length);
 }
 
-scoped_fd build_sealed_directive_memfd(const std::filesystem::path &path)
+scoped_fd build_sealed_memfd_from_blob(const char *name,
+                                       const std::vector<uint8_t> &blob,
+                                       std::string_view description)
 {
-    const auto blob = read_binary_file(path);
-
-    scoped_fd memfd(sys_memfd_create("bpf-jit-directives", MFD_CLOEXEC | MFD_ALLOW_SEALING));
+    scoped_fd memfd(sys_memfd_create(name, MFD_CLOEXEC | MFD_ALLOW_SEALING));
     if (memfd.get() < 0) {
-        fail("memfd_create failed for directive blob: " + std::string(strerror(errno)));
+        fail("memfd_create failed for " + std::string(description) + ": " +
+             std::string(strerror(errno)));
     }
 
     if (!blob.empty()) {
@@ -785,10 +786,18 @@ scoped_fd build_sealed_directive_memfd(const std::filesystem::path &path)
 
     const int seals = F_SEAL_WRITE | F_SEAL_GROW | F_SEAL_SHRINK;
     if (fcntl(memfd.get(), F_ADD_SEALS, seals) != 0) {
-        fail("unable to seal directive memfd: " + std::string(strerror(errno)));
+        fail("unable to seal " + std::string(description) +
+             " memfd: " + std::string(strerror(errno)));
     }
 
     return memfd;
+}
+
+scoped_fd build_sealed_directive_memfd(const std::filesystem::path &path)
+{
+    const auto blob = read_binary_file(path);
+    return build_sealed_memfd_from_blob("bpf-jit-directives", blob,
+                                        "directive blob");
 }
 
 std::unordered_map<uint32_t, int> create_kernel_maps(bpf_object *object, const program_image &image)
@@ -1536,4 +1545,35 @@ sample_result run_kernel(const cli_options &options)
     };
     sample.perf_counters = std::move(perf_counters);
     return sample;
+}
+
+paired_sample_result run_kernel_paired(const cli_options &options)
+{
+    cli_options stock_options = options;
+    stock_options.command = "run-kernel";
+    stock_options.directive_blob.reset();
+    stock_options.policy.reset();
+    stock_options.policy_file.reset();
+    stock_options.policy_blob.reset();
+    stock_options.recompile_cmov = false;
+    stock_options.recompile_wide = false;
+    stock_options.recompile_rotate = false;
+    stock_options.recompile_rotate_rorx = false;
+    stock_options.recompile_lea = false;
+    stock_options.recompile_extract = false;
+    stock_options.recompile_all = false;
+    stock_options.recompile_v5 = false;
+    stock_options.skip_families.clear();
+
+    cli_options recompile_options = options;
+    recompile_options.command = "run-kernel";
+
+    paired_sample_result paired {};
+    paired.stock = run_kernel(stock_options);
+    paired.recompile = run_kernel(recompile_options);
+    if (paired.recompile.exec_ns != 0) {
+        paired.ratio = static_cast<double>(paired.stock.exec_ns) /
+                       static_cast<double>(paired.recompile.exec_ns);
+    }
+    return paired;
 }
