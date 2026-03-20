@@ -439,6 +439,37 @@ def run_runtime(
     }
 
 
+def maybe_retry_llvmbpf_timeout(
+    run: dict[str, Any],
+    runner: Path,
+    object_path: Path,
+    program_name: str,
+    repeat: int,
+    iterations: int,
+    timeout_seconds: int,
+    io_mode: str,
+    input_file: Path | None = None,
+) -> dict[str, Any]:
+    if run["runtime"] != "llvmbpf":
+        return run
+    if run["status"] != "timeout" or io_mode != "context" or repeat <= 1:
+        return run
+
+    retry_run = run_runtime(
+        "llvmbpf",
+        runner,
+        object_path,
+        program_name,
+        1,
+        iterations,
+        timeout_seconds,
+        io_mode,
+        input_file=input_file,
+    )
+    retry_run["retry_after_timeout"] = {"initial_repeat": repeat, "retry_repeat": 1}
+    return retry_run
+
+
 def maybe_reclassify_kernel_run(program: dict[str, Any], run: dict[str, Any]) -> dict[str, Any]:
     if run["runtime"] != "kernel" or run["status"] != "error":
         return run
@@ -720,6 +751,17 @@ def main() -> int:
         )
         llvmbpf_run = run_runtime(
             "llvmbpf",
+            runner_path,
+            object_path,
+            program["program_name"],
+            args.repeat,
+            args.iterations,
+            args.timeout_seconds,
+            io_mode,
+            input_file=input_file,
+        )
+        llvmbpf_run = maybe_retry_llvmbpf_timeout(
+            llvmbpf_run,
             runner_path,
             object_path,
             program["program_name"],
