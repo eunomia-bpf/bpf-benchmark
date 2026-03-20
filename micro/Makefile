@@ -9,10 +9,8 @@ LIBBPF_A := $(LIBBPF_OBJDIR)/libbpf.a
 LIBBPF_HEADER := $(LIBBPF_PREFIX)/include/bpf/bpf.h
 
 BPFTOOL_BUILD_DIR := $(BUILD_DIR)/vendor/bpftool/
-BPFTOOL_BIN := $(BPFTOOL_BUILD_DIR)bpftool
 
 RUNNER_BUILD_DIR := $(BUILD_DIR)/runner
-RUNNER_BIN := $(RUNNER_BUILD_DIR)/micro_exec
 TOOLS_BUILD_DIR := $(BUILD_DIR)/tools
 DIRECTIVE_HINT_BIN := $(TOOLS_BUILD_DIR)/directive_hint
 MICRO_EXEC_ENABLE_LLVMBPF ?= ON
@@ -75,7 +73,9 @@ vendor_bpftool: | $(BPFTOOL_BUILD_DIR)
 clean:
 	$(MAKE) -C $(ROOT_DIR)/programs clean
 	rm -f $(ROOT_DIR)/generated-inputs/*.mem
-	rm -f $(ROOT_DIR)/results/*.json
+	@if [ -d "$(ROOT_DIR)/results/dev" ]; then \
+		find "$(ROOT_DIR)/results/dev" -maxdepth 1 -type f ! -name '.gitkeep' -delete; \
+	fi
 	rm -rf $(ROOT_DIR)/__pycache__
 	@if [ -d "$(BUILD_DIR)" ]; then \
 		rm -rf "$(LIBBPF_BUILD_DIR)" "$(BPFTOOL_BUILD_DIR)" "$(RUNNER_BUILD_DIR)"; \

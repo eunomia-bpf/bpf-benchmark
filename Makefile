@@ -59,7 +59,6 @@ ARM64_KERNEL_MAKEFLAGS := $(filter-out B,$(MAKEFLAGS))
 BZIMAGE_PATH := $(if $(filter /%,$(BZIMAGE)),$(BZIMAGE),$(ROOT_DIR)/$(BZIMAGE))
 SCANNER_PATH := $(if $(filter /%,$(SCANNER)),$(SCANNER),$(ROOT_DIR)/$(SCANNER))
 SCANNER_BUILD_DIR := $(abspath $(dir $(SCANNER_PATH)))
-SCANNER_TEST_PATH := $(SCANNER_BUILD_DIR)/test_scanner
 MICRO_RUNNER := $(MICRO_DIR)/build/runner/micro_exec
 KERNEL_SELFTEST := $(KERNEL_TEST_DIR)/build/test_recompile
 KERNEL_SELFTEST_ARM64 := $(KERNEL_TEST_DIR)/build-arm64/test_recompile
@@ -335,6 +334,7 @@ smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP)
 		--runtime llvmbpf \
 		$(LOCAL_SMOKE_ARGS) \
 		--output "$(SMOKE_OUTPUT)"
+	@python3 -c 'import json, pathlib; payload = json.loads(pathlib.Path("$(SMOKE_OUTPUT)").read_text()); bench = payload["benchmarks"][0]; run = bench["runs"][0]; result = next(iter(run["result_distribution"]), "?"); print("SMOKE OK: {} {} exec {:.0f} ns, compile {:.3f} ms, result {}".format(bench["name"], run["runtime"], float(run["exec_ns"]["median"]), float(run["compile_ns"]["median"]) / 1e6, result))'
 
 check:
 	@echo "=== Running make check ==="

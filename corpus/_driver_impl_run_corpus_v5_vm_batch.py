@@ -54,7 +54,6 @@ try:
         markdown_table,
         normalize_directive_scan as shared_normalize_directive_scan,
         parse_scanner_v5_output,
-        relpath as shared_relpath,
         require_minimum,
         run_command as shared_run_command,
         run_text_command as shared_run_text_command,
@@ -82,7 +81,6 @@ except ImportError:
         markdown_table,
         normalize_directive_scan as shared_normalize_directive_scan,
         parse_scanner_v5_output,
-        relpath as shared_relpath,
         require_minimum,
         run_command as shared_run_command,
         run_text_command as shared_run_text_command,
@@ -221,24 +219,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help=argparse.SUPPRESS,
     )
     return parser.parse_args(argv)
-
-
-def relpath(path: Path | str) -> str:
-    return shared_relpath(path, ROOT_DIR)
-
-
-def zero_scan() -> dict[str, int]:
-    return {
-        "cmov_sites": 0,
-        "wide_sites": 0,
-        "rotate_sites": 0,
-        "lea_sites": 0,
-        "bitfield_sites": 0,
-        "zero_ext_sites": 0,
-        "endian_sites": 0,
-        "branch_flip_sites": 0,
-        "total_sites": 0,
-    }
 
 
 def canonical_family_name(value: str) -> str:

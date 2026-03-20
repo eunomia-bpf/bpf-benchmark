@@ -16,13 +16,22 @@ from typing import Any
 
 from run_real_world_code_size import DEFAULT_RUNNER, ensure_runner_binary
 try:
-    from results_layout import authoritative_output_path, latest_output_path, maybe_refresh_latest_alias, smoke_output_path
+    from results_layout import authoritative_candidates, authoritative_output_path, maybe_refresh_latest_alias, smoke_output_path
 except ImportError:
-    from corpus.results_layout import authoritative_output_path, latest_output_path, maybe_refresh_latest_alias, smoke_output_path
+    from corpus.results_layout import authoritative_candidates, authoritative_output_path, maybe_refresh_latest_alias, smoke_output_path
 
 
 ROOT = Path(__file__).resolve().parent
-DEFAULT_INPUT = latest_output_path(ROOT / "results", "real_world_code_size")
+
+
+def first_existing_path(candidates: tuple[Path, ...]) -> Path:
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return candidates[0]
+
+
+DEFAULT_INPUT = first_existing_path(authoritative_candidates(ROOT / "results", "real_world_code_size"))
 DEFAULT_OUTPUT = authoritative_output_path(ROOT / "results", "real_world_exec_time")
 DEFAULT_REPORT = ROOT / "results" / "real_world_exec_time.md"
 DEFAULT_REPEAT = 1000
@@ -65,7 +74,11 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Compare exec_ns across stock kernel and kernel-recompile for real-world BPF programs."
     )
-    parser.add_argument("--input", default=str(DEFAULT_INPUT), help="Path to real_world_code_size.latest.json.")
+    parser.add_argument(
+        "--input",
+        default=str(DEFAULT_INPUT),
+        help="Path to the real_world_code_size results JSON. Defaults to the newest existing authoritative file.",
+    )
     parser.add_argument("--output", default=str(DEFAULT_OUTPUT), help="Path to output JSON payload.")
     parser.add_argument("--report", default=str(DEFAULT_REPORT), help="Path to Markdown report.")
     parser.add_argument("--runner", default=str(DEFAULT_RUNNER), help="Path to micro/build/runner/micro_exec.")
@@ -692,7 +705,7 @@ def render_report(payload: dict[str, Any]) -> str:
             "",
             "## Notes",
             "",
-            "- Inputs come from the subset of programs that already compiled successfully on the selected runtimes in `real_world_code_size.latest.json`.",
+            "- Inputs come from the subset of programs that already compiled successfully on the selected runtimes in the real_world_code_size results JSON.",
             "- Packet mode is used only for XDP and skb-backed program types; all other program types use `io-mode=context` with a zero-filled context buffer.",
             "- Selected kernel runtimes are attempted independently so one unsupported test_run path does not suppress coverage from the others.",
             "- `BPF_PROG_TEST_RUN` cases that report `ENOTSUP` are recorded as `skipped` instead of hard failures.",
@@ -709,6 +722,8 @@ def render_report(payload: dict[str, Any]) -> str:
 def main() -> int:
     args = parse_args()
     input_path = Path(args.input).resolve()
+    if not input_path.exists():
+        raise SystemExit(f"input results not found: {input_path}")
     if args.output == str(DEFAULT_OUTPUT) and args.max_programs is not None:
         output_path = smoke_output_path(ROOT / "results", "real_world_exec_time")
     else:

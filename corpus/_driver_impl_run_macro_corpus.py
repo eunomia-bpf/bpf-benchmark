@@ -24,9 +24,9 @@ for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpu
         sys.path.insert(0, candidate_str)
 
 try:
-    from results_layout import maybe_refresh_latest_alias, refresh_latest_alias
+    from results_layout import authoritative_output_path, maybe_refresh_latest_alias, refresh_latest_alias
 except ImportError:
-    from corpus.results_layout import maybe_refresh_latest_alias, refresh_latest_alias
+    from corpus.results_layout import authoritative_output_path, maybe_refresh_latest_alias, refresh_latest_alias
 
 try:
     from orchestrator.catalog import load_catalog
@@ -59,7 +59,7 @@ DEFAULT_BTF_CANDIDATES = (
     ROOT_DIR / "vendor" / "linux-framework" / "vmlinux",
     ROOT_DIR / "vendor" / "linux" / "vmlinux",
 )
-DEFAULT_OUTPUT = ROOT_DIR / "corpus" / "results" / "macro_corpus.latest.json"
+DEFAULT_OUTPUT = authoritative_output_path(ROOT_DIR / "corpus" / "results", "macro_corpus")
 DEFAULT_RUNNER = ROOT_DIR / "micro" / "build" / "runner" / "micro_exec"
 DEFAULT_SCANNER = ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"
 DEFAULT_BPFTOOL = "bpftool"

@@ -116,7 +116,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         parser,
         help_text=(
             "Optional expanded corpus build JSON report. When omitted, "
-            "corpus/results/expanded_corpus_build.latest.json is used if present."
+            "the newest existing expanded_corpus_build authoritative JSON is used if present."
         ),
     )
     add_repeat_argument(parser, tracing_exec_impl.DEFAULT_REPEAT, help_text="Measurement workload iterations per phase.")

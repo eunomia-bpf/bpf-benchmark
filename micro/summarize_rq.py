@@ -22,9 +22,9 @@ except ModuleNotFoundError:
     )
     from micro.orchestrator.reporting import render_corpus_summary_markdown, render_rq_summary_markdown
 try:
-    from results_layout import latest_output_path
+    from results_layout import authoritative_candidates
 except ImportError:
-    from micro.results_layout import latest_output_path
+    from micro.results_layout import authoritative_candidates
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -44,7 +44,7 @@ def default_results_candidates() -> tuple[Path, ...]:
     if DEFAULT_MICRO_MANIFEST.exists():
         manifest = load_manifest(DEFAULT_MICRO_MANIFEST)
         candidates.append(manifest.defaults.output)
-    candidates.append(latest_output_path(RESULTS_DIR, "pure_jit"))
+    candidates.extend(authoritative_candidates(RESULTS_DIR, "pure_jit"))
     return tuple(candidates)
 
 

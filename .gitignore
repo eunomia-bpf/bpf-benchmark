@@ -6,7 +6,7 @@ wasm-wasmtime.exe
 *.llvmbpf.bin
 *.directive.bin
 *.policy.bin
-
+.cache/
 # Python
 venv/
 .venv/
@@ -32,6 +32,7 @@ build/
 micro/build/
 micro/build-arm64/
 scanner/build/
+scanner/build-arm64/
 corpus/build/
 tests/kernel/build-arm64/
 

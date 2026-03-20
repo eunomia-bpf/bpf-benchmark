@@ -65,12 +65,16 @@
 #define SIMPLE_OBJ TEST_KERNEL_ROOT "/build/progs/test_simple.bpf.o"
 #define DIAMOND_OBJ TEST_KERNEL_ROOT "/build/progs/test_diamond.bpf.o"
 #define ROTATE_OBJ TEST_KERNEL_ROOT "/build/progs/test_rotate.bpf.o"
+#define SUBPROG_ROTATE_OBJ TEST_KERNEL_ROOT "/build/progs/test_subprog_rotate.bpf.o"
 #define WIDE_OBJ TEST_KERNEL_ROOT "/build/progs/test_wide.bpf.o"
 #define ADDR_CALC_OBJ TEST_KERNEL_ROOT "/build/progs/test_addr_calc.bpf.o"
 #define BITFIELD_EXTRACT_OBJ TEST_KERNEL_ROOT "/build/progs/test_bitfield_extract.bpf.o"
+#define BITFIELD_EXTRACT_BOUNDARY_OBJ TEST_KERNEL_ROOT "/build/progs/test_bitfield_extract_boundary.bpf.o"
 #define ZERO_EXT_ELIDE_OBJ TEST_KERNEL_ROOT "/build/progs/test_zero_ext_elide.bpf.o"
 #define ENDIAN_FUSION_OBJ TEST_KERNEL_ROOT "/build/progs/test_endian_fusion.bpf.o"
 #define BRANCH_FLIP_OBJ TEST_KERNEL_ROOT "/build/progs/test_branch_flip.bpf.o"
+#define ROTATE_MASKED_LOW_OBJ TEST_KERNEL_ROOT "/build/progs/test_rotate_masked_low.bpf.o"
+#define TRAMPOLINE_FENTRY_OBJ TEST_KERNEL_ROOT "/build/progs/test_trampoline_fentry.bpf.o"
 
 #define LOG_BUF_SIZE 4096
 
@@ -84,6 +88,7 @@ struct loaded_program {
 	const char *prog_name;
 	struct bpf_object *obj;
 	struct bpf_program *prog;
+	struct bpf_link *link;
 	int prog_fd;
 	int result_map_fd;
 	int attached_ifindex;
@@ -221,6 +226,8 @@ static void unload_program(struct loaded_program *prog)
 
 	if (prog->attached_ifindex > 0)
 		bpf_xdp_detach(prog->attached_ifindex, prog->attached_flags, NULL);
+	if (prog->link)
+		bpf_link__destroy(prog->link);
 	if (prog->obj)
 		bpf_object__close(prog->obj);
 	memset(prog, 0, sizeof(*prog));
@@ -266,8 +273,12 @@ static int raise_memlock_limit(void)
 	return setrlimit(RLIMIT_MEMLOCK, &limit);
 }
 
-static int load_program(const char *obj_path, const char *prog_name,
-			struct loaded_program *out, char *msg, size_t msg_len)
+static int load_program_with_attach_target(const char *obj_path,
+					   const char *prog_name,
+					   int attach_prog_fd,
+					   const char *attach_func_name,
+					   struct loaded_program *out,
+					   char *msg, size_t msg_len)
 {
 	struct bpf_object_open_opts open_opts = {
 		.sz = sizeof(open_opts),
@@ -299,6 +310,19 @@ static int load_program(const char *obj_path, const char *prog_name,
 		return -1;
 	}
 
+	if (attach_prog_fd >= 0) {
+		err = bpf_program__set_attach_target(prog, attach_prog_fd,
+						     attach_func_name);
+		if (err) {
+			bpf_object__close(obj);
+			set_msg(msg, msg_len,
+				"bpf_program__set_attach_target(%s -> %s): %s",
+				prog_name, attach_func_name ?: "<auto>",
+				strerror(-err));
+			return -1;
+		}
+	}
+
 	err = bpf_object__load(obj);
 	if (err) {
 		bpf_object__close(obj);
@@ -325,6 +349,13 @@ static int load_program(const char *obj_path, const char *prog_name,
 	}
 
 	return 0;
+}
+
+static int load_program(const char *obj_path, const char *prog_name,
+			struct loaded_program *out, char *msg, size_t msg_len)
+{
+	return load_program_with_attach_target(obj_path, prog_name, -1, NULL,
+					       out, msg, msg_len);
 }
 
 static int fetch_program_meta(int prog_fd, struct program_meta *meta,
@@ -1019,6 +1050,55 @@ static bool find_rotate_site(const struct program_meta *meta, __u32 *site)
 	return false;
 }
 
+static bool find_low_masked_rotate_site(const struct program_meta *meta,
+					__u32 *site, __u16 *site_len)
+{
+	__u32 i;
+
+	for (i = 0; i + 4 < meta->insn_cnt; i++) {
+		const struct bpf_insn *mov = &meta->insns[i];
+		const struct bpf_insn *and_insn = &meta->insns[i + 1];
+		const struct bpf_insn *rsh = &meta->insns[i + 2];
+		const struct bpf_insn *lsh = &meta->insns[i + 3];
+		const struct bpf_insn *ior = &meta->insns[i + 4];
+		__u32 rot_amount;
+		__u32 low_mask;
+
+		if (mov->code != (BPF_ALU64 | BPF_MOV | BPF_X) ||
+		    mov->off != 0 || mov->imm != 0 ||
+		    mov->dst_reg == mov->src_reg)
+			continue;
+		if (and_insn->code != (BPF_ALU64 | BPF_AND | BPF_K) ||
+		    and_insn->off != 0 || and_insn->dst_reg != mov->dst_reg)
+			continue;
+		if (rsh->code != (BPF_ALU64 | BPF_RSH | BPF_K) ||
+		    rsh->off != 0 || rsh->dst_reg != mov->dst_reg)
+			continue;
+		if (lsh->code != (BPF_ALU64 | BPF_LSH | BPF_K) ||
+		    lsh->off != 0 || lsh->dst_reg != mov->src_reg)
+			continue;
+		if (ior->code != (BPF_ALU64 | BPF_OR | BPF_X) ||
+		    ior->off != 0 || ior->imm != 0 ||
+		    ior->dst_reg != mov->src_reg || ior->src_reg != mov->dst_reg)
+			continue;
+		if ((unsigned int)lsh->imm == 0 || (unsigned int)lsh->imm >= 32)
+			continue;
+		if ((unsigned int)rsh->imm != 32U - (unsigned int)lsh->imm)
+			continue;
+
+		rot_amount = (__u32)lsh->imm;
+		low_mask = (1U << (32 - rot_amount)) - 1;
+		if ((__u32)and_insn->imm != low_mask)
+			continue;
+
+		*site = i;
+		*site_len = 5;
+		return true;
+	}
+
+	return false;
+}
+
 static bool find_wide_site(const struct program_meta *meta, __u32 *site)
 {
 	__u32 i;
@@ -1381,20 +1461,29 @@ static int build_guarded_select_blob(const struct program_meta *meta, __u32 site
 	return build_policy_blob(meta, &parts, 1, blob, msg, msg_len);
 }
 
-static int build_rotate_blob(const struct program_meta *meta, __u32 site,
-			     __u16 native_choice, struct blob *blob,
-			     char *msg, size_t msg_len)
+static int build_rotate_blob_with_len(const struct program_meta *meta, __u32 site,
+				      __u16 site_len, __u16 native_choice,
+				      struct blob *blob, char *msg,
+				      size_t msg_len)
 {
 	struct rule_parts parts = {
 		.rule = {
 			.site_start = site,
-			.site_len = 4,
+			.site_len = site_len,
 			.canonical_form = BPF_JIT_CF_ROTATE,
 			.native_choice = native_choice,
 		},
 	};
 
 	return build_policy_blob(meta, &parts, 1, blob, msg, msg_len);
+}
+
+static int build_rotate_blob(const struct program_meta *meta, __u32 site,
+			     __u16 native_choice, struct blob *blob,
+			     char *msg, size_t msg_len)
+{
+	return build_rotate_blob_with_len(meta, site, 4, native_choice, blob,
+					  msg, msg_len);
 }
 
 static int build_wide_blob_with_choice(const struct program_meta *meta, __u32 site,
@@ -2298,6 +2387,99 @@ out:
 	return ok;
 }
 
+static bool test_subprog_rotate_preserved(char *msg, size_t msg_len)
+{
+	struct loaded_program prog;
+	struct program_meta meta;
+	struct blob blob = {};
+	__u32 site = 0;
+	__u64 before = 0, after = 0;
+	bool ok = false;
+	int rc;
+
+	if (load_meta_for_program(SUBPROG_ROTATE_OBJ, "test_subprog_rotate",
+				  &prog, &meta, msg, msg_len))
+		return false;
+	if (!run_ctx_only_packet_check(&prog, &before, msg, msg_len))
+		goto out;
+	if (!find_rotate_site(&meta, &site)) {
+		set_msg(msg, msg_len, "subprog rotate site not found");
+		goto out;
+	}
+	if (build_rotate_blob(&meta, site, BPF_JIT_ROT_ROR, &blob, msg, msg_len))
+		goto out;
+
+	rc = apply_blob(prog.prog_fd, &blob, true, NULL, 0);
+	if (rc) {
+		set_msg(msg, msg_len, "subprog rotate recompile failed: %s (%d)",
+			strerror(-rc), -rc);
+		goto out;
+	}
+	if (!run_ctx_only_packet_check(&prog, &after, msg, msg_len))
+		goto out;
+	if (before != after) {
+		set_msg(msg, msg_len,
+			"subprog rotate result changed from 0x%llx to 0x%llx",
+			(unsigned long long)before,
+			(unsigned long long)after);
+		goto out;
+	}
+
+	set_msg(msg, msg_len, "subprog rotate site_start=%u preserved 0x%llx",
+		site, (unsigned long long)after);
+	ok = true;
+
+out:
+	free_blob(&blob);
+	free_program_meta(&meta);
+	unload_program(&prog);
+	return ok;
+}
+
+static bool test_rotate_low_mask_rejected(char *msg, size_t msg_len)
+{
+	struct loaded_program prog;
+	struct program_meta meta;
+	struct blob blob = {};
+	char log_buf[LOG_BUF_SIZE] = {};
+	__u32 site = 0;
+	__u16 site_len = 0;
+	bool ok = false;
+	int rc;
+
+	if (load_meta_for_program(ROTATE_MASKED_LOW_OBJ, "test_rotate_masked_low",
+				  &prog, &meta, msg, msg_len))
+		return false;
+	if (!find_low_masked_rotate_site(&meta, &site, &site_len)) {
+		set_msg(msg, msg_len, "low-mask rotate site not found");
+		goto out;
+	}
+	if (build_rotate_blob_with_len(&meta, site, site_len, BPF_JIT_ROT_ROR,
+				       &blob, msg, msg_len))
+		goto out;
+
+	rc = apply_blob(prog.prog_fd, &blob, true, log_buf, sizeof(log_buf));
+	if (rc != -EINVAL) {
+		set_msg(msg, msg_len,
+			"low-mask rotate: expected EINVAL, got %s (%d)%s%s",
+			strerror(-rc), -rc,
+			log_buf[0] ? ": " : "",
+			log_buf[0] ? log_buf : "");
+		goto out;
+	}
+
+	set_msg(msg, msg_len,
+		"low-mask masked rotate site_start=%u rejected with EINVAL",
+		site);
+	ok = true;
+
+out:
+	free_blob(&blob);
+	free_program_meta(&meta);
+	unload_program(&prog);
+	return ok;
+}
+
 static bool test_addr_calc_preserved(char *msg, size_t msg_len)
 {
 	struct loaded_program prog;
@@ -2397,6 +2579,60 @@ static bool test_bitfield_extract_preserved(char *msg, size_t msg_len)
 
 	set_msg(msg, msg_len,
 		"bitfield_extract site_start=%u site_len=%u preserved 0x%llx",
+		site, site_len, (unsigned long long)after);
+	ok = true;
+
+out:
+	free_blob(&blob);
+	free_program_meta(&meta);
+	unload_program(&prog);
+	return ok;
+}
+
+static bool test_bitfield_extract_boundary_preserved(char *msg, size_t msg_len)
+{
+	struct loaded_program prog;
+	struct program_meta meta;
+	struct blob blob = {};
+	__u32 site = 0;
+	__u16 site_len = 0;
+	__u64 before = 0, after = 0;
+	bool ok = false;
+	int rc;
+
+	if (load_meta_for_program(BITFIELD_EXTRACT_BOUNDARY_OBJ,
+				  "test_bitfield_extract_boundary",
+				  &prog, &meta, msg, msg_len))
+		return false;
+	if (!run_ctx_only_packet_check(&prog, &before, msg, msg_len))
+		goto out;
+	if (!find_bitfield_extract_site(&meta, &site, &site_len)) {
+		set_msg(msg, msg_len, "bitfield_extract boundary site not found");
+		goto out;
+	}
+	if (build_bitfield_extract_blob(&meta, site, site_len, &blob,
+					msg, msg_len))
+		goto out;
+
+	rc = apply_blob(prog.prog_fd, &blob, true, NULL, 0);
+	if (rc) {
+		set_msg(msg, msg_len,
+			"bitfield_extract boundary recompile failed: %s (%d)",
+			strerror(-rc), -rc);
+		goto out;
+	}
+	if (!run_ctx_only_packet_check(&prog, &after, msg, msg_len))
+		goto out;
+	if (before != after) {
+		set_msg(msg, msg_len,
+			"bitfield_extract boundary result changed from 0x%llx to 0x%llx",
+			(unsigned long long)before,
+			(unsigned long long)after);
+		goto out;
+	}
+
+	set_msg(msg, msg_len,
+		"bitfield_extract boundary site_start=%u site_len=%u preserved 0x%llx",
 		site, site_len, (unsigned long long)after);
 	ok = true;
 
@@ -2737,57 +2973,119 @@ out:
 
 static bool test_recompile_after_attach(char *msg, size_t msg_len)
 {
-	struct loaded_program prog;
-	struct program_meta meta;
-	struct blob blob = {};
-	__u32 site = 0;
-	unsigned int ifindex;
+	struct loaded_program target;
+	struct loaded_program tracing;
+	__u64 target_result = 0;
+	__u64 counter = 0;
 	int rc;
 	bool ok = false;
 
-	if (load_meta_for_program(SIMPLE_OBJ, "test_simple",
-				  &prog, &meta, msg, msg_len))
+	if (load_program(SIMPLE_OBJ, "test_simple", &target, msg, msg_len))
 		return false;
-	if (!find_guarded_select_site(&meta, &site)) {
-		set_msg(msg, msg_len, "guarded select site not found");
-		goto out;
-	}
-	if (build_guarded_select_blob(&meta, site, BPF_JIT_SEL_CMOVCC,
-				      &blob, msg, msg_len))
+	if (load_program_with_attach_target(TRAMPOLINE_FENTRY_OBJ,
+					    "test_simple_fentry",
+					    target.prog_fd, "test_simple",
+					    &tracing, msg, msg_len))
 		goto out;
 
-	ifindex = if_nametoindex("lo");
-	if (!ifindex) {
-		set_msg(msg, msg_len, "if_nametoindex(lo): %s", strerror(errno));
-		goto out;
-	}
-
-	rc = bpf_xdp_attach(ifindex, prog.prog_fd,
-			    XDP_FLAGS_SKB_MODE | XDP_FLAGS_UPDATE_IF_NOEXIST,
-			    NULL);
+	tracing.link = bpf_program__attach_trace(tracing.prog);
+	rc = libbpf_get_error(tracing.link);
 	if (rc) {
-		set_msg(msg, msg_len, "bpf_xdp_attach(lo): %s", strerror(errno));
+		tracing.link = NULL;
+		set_msg(msg, msg_len, "bpf_program__attach_trace(fentry): %s",
+			strerror(-rc));
 		goto out;
 	}
-	prog.attached_ifindex = ifindex;
-	prog.attached_flags = XDP_FLAGS_SKB_MODE;
 
-	rc = apply_blob(prog.prog_fd, &blob, true, NULL, 0);
+	if (reset_result_map(tracing.result_map_fd)) {
+		set_msg(msg, msg_len, "bpf_map_update_elem(fentry result_map): %s",
+			strerror(errno));
+		goto out;
+	}
+	if (!run_simple_packet_check(&target, &target_result, msg, msg_len))
+		goto out;
+	if (target_result != 0x44) {
+		set_msg(msg, msg_len, "unexpected target result 0x%llx",
+			(unsigned long long)target_result);
+		goto out;
+	}
+	if (read_result_map(tracing.result_map_fd, &counter)) {
+		set_msg(msg, msg_len, "bpf_map_lookup_elem(fentry result_map): %s",
+			strerror(errno));
+		goto out;
+	}
+	if (counter != 1) {
+		set_msg(msg, msg_len, "expected fentry hit count 1, got %llu",
+			(unsigned long long)counter);
+		goto out;
+	}
+
+	rc = apply_stock_rejit(tracing.prog_fd, NULL, 0);
 	if (rc) {
 		set_msg(msg, msg_len,
-			"recompile while attached failed: %s (%d)",
+			"recompile of attached fentry program failed: %s (%d)",
 			strerror(-rc), -rc);
 		goto out;
 	}
 
-	set_msg(msg, msg_len, "attached XDP program recompiled on ifindex %u",
-		ifindex);
+	if (reset_result_map(tracing.result_map_fd)) {
+		set_msg(msg, msg_len, "bpf_map_update_elem(fentry result_map): %s",
+			strerror(errno));
+		goto out;
+	}
+	if (!run_simple_packet_check(&target, &target_result, msg, msg_len))
+		goto out;
+	if (read_result_map(tracing.result_map_fd, &counter)) {
+		set_msg(msg, msg_len, "bpf_map_lookup_elem(fentry result_map): %s",
+			strerror(errno));
+		goto out;
+	}
+	if (counter != 1) {
+		set_msg(msg, msg_len,
+			"attached fentry stopped firing after recompile (count=%llu)",
+			(unsigned long long)counter);
+		goto out;
+	}
+
+	rc = apply_stock_rejit(target.prog_fd, NULL, 0);
+	if (rc) {
+		set_msg(msg, msg_len,
+			"recompile of target program with fentry attached failed: %s (%d)",
+			strerror(-rc), -rc);
+		goto out;
+	}
+
+	if (reset_result_map(tracing.result_map_fd)) {
+		set_msg(msg, msg_len, "bpf_map_update_elem(fentry result_map): %s",
+			strerror(errno));
+		goto out;
+	}
+	if (!run_simple_packet_check(&target, &target_result, msg, msg_len))
+		goto out;
+	if (target_result != 0x44) {
+		set_msg(msg, msg_len, "unexpected target result after recompile 0x%llx",
+			(unsigned long long)target_result);
+		goto out;
+	}
+	if (read_result_map(tracing.result_map_fd, &counter)) {
+		set_msg(msg, msg_len, "bpf_map_lookup_elem(fentry result_map): %s",
+			strerror(errno));
+		goto out;
+	}
+	if (counter != 1) {
+		set_msg(msg, msg_len,
+			"fentry stopped firing after target recompile (count=%llu)",
+			(unsigned long long)counter);
+		goto out;
+	}
+
+	set_msg(msg, msg_len,
+		"fentry attach survived recompile of both attached and target programs");
 	ok = true;
 
 out:
-	free_blob(&blob);
-	free_program_meta(&meta);
-	unload_program(&prog);
+	unload_program(&tracing);
+	unload_program(&target);
 	return ok;
 }
 
@@ -2820,10 +3118,13 @@ int main(void)
 		{ "Truncated Header Rejected", test_truncated_header },
 		{ "Site Start Out Of Bounds Rejected", test_site_out_of_bounds },
 		{ "Zero-Length Blob Rejected", test_zero_length_blob },
-		{ "Diamond CMOV Recompile Preserves Result", test_diamond_cmov },
-		{ "Rotate Recompile Preserves Result", test_rotate_preserved },
-		{ "Addr Calc Recompile Preserves Result", test_addr_calc_preserved },
+			{ "Diamond CMOV Recompile Preserves Result", test_diamond_cmov },
+			{ "Rotate Recompile Preserves Result", test_rotate_preserved },
+			{ "Subprog Rotate Recompile Preserves Result", test_subprog_rotate_preserved },
+			{ "Rotate Low-Mask Rejected", test_rotate_low_mask_rejected },
+			{ "Addr Calc Recompile Preserves Result", test_addr_calc_preserved },
 		{ "Bitfield Extract Recompile Preserves Result", test_bitfield_extract_preserved },
+		{ "Bitfield Extract Boundary Preserved", test_bitfield_extract_boundary_preserved },
 		{ "Zero Ext Elide Recompile Preserves Result", test_zero_ext_elide_preserved },
 		{ "Endian Fusion Recompile Preserves Result", test_endian_fusion_preserved },
 		{ "Branch Flip Recompile Preserves Result", test_branch_flip_preserved },

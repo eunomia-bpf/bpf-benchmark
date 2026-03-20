@@ -8,6 +8,11 @@ from typing import Any, Iterable, Mapping
 
 from elftools.elf.elffile import ELFFile
 
+try:
+    from results_layout import authoritative_candidates
+except ImportError:
+    from micro.results_layout import authoritative_candidates
+
 from .commands import build_list_programs_command
 from .results import normalize_directive_scan, parse_last_json_line
 
@@ -120,9 +125,10 @@ def collect_corpus_object_paths(
 ) -> tuple[list[Path], str]:
     report_path = corpus_build_report
     if report_path is None:
-        candidate = repo_root / "corpus" / "results" / "expanded_corpus_build.latest.json"
-        if candidate.exists():
-            report_path = candidate
+        for candidate in authoritative_candidates(repo_root / "corpus" / "results", "expanded_corpus_build"):
+            if candidate.exists():
+                report_path = candidate
+                break
 
     if report_path is not None and report_path.exists():
         return load_corpus_paths_from_build_report(report_path.resolve())

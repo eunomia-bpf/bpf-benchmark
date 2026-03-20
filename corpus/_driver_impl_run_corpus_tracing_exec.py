@@ -27,9 +27,9 @@ for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpu
         sys.path.insert(0, candidate_str)
 
 try:
-    from results_layout import authoritative_output_path, smoke_output_path
+    from results_layout import authoritative_candidates, authoritative_output_path, smoke_output_path
 except ImportError:
-    from corpus.results_layout import authoritative_output_path, smoke_output_path
+    from corpus.results_layout import authoritative_candidates, authoritative_output_path, smoke_output_path
 
 from e2e.common import ensure_root, resolve_bpftool_binary, write_json, write_text
 from e2e.common.recompile import apply_recompile, scan_programs
@@ -274,7 +274,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         parser,
         help_text=(
             "Optional expanded corpus build JSON report. When omitted, "
-            "corpus/results/expanded_corpus_build.latest.json is used if present."
+            "the newest existing expanded_corpus_build authoritative JSON is used if present."
         ),
     )
     add_repeat_argument(parser, DEFAULT_REPEAT, help_text="Measurement workload iterations per phase.")
@@ -1401,9 +1401,10 @@ def apply_filters(
 def discover_corpus_bpf_objects(corpus_build_report: Path | None) -> tuple[list[Path], list[str], str]:
     report_path = corpus_build_report
     if report_path is None:
-        candidate = ROOT_DIR / "corpus" / "results" / "expanded_corpus_build.latest.json"
-        if candidate.exists():
-            report_path = candidate
+        for candidate in authoritative_candidates(ROOT_DIR / "corpus" / "results", "expanded_corpus_build"):
+            if candidate.exists():
+                report_path = candidate
+                break
 
     if report_path is not None and report_path.exists():
         payload = json.loads(report_path.read_text())

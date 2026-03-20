@@ -31,14 +31,12 @@ try:
         markdown_table as orchestrator_markdown_table,
         materialize_dummy_context as orchestrator_materialize_dummy_context,
         materialize_dummy_packet as orchestrator_materialize_dummy_packet,
-        normalize_section_root as orchestrator_normalize_section_root,
         relpath as orchestrator_relpath,
         run_command as orchestrator_run_command,
         summarize_failure_reason as orchestrator_summarize_failure_reason,
         summarize_stderr as orchestrator_summarize_stderr,
     )
     from orchestrator.inventory import discover_corpus_objects, discover_object_programs
-    from orchestrator.results import parse_runner_sample
 except ImportError:
     from micro.orchestrator.corpus import (
         build_kernel_command as orchestrator_build_kernel_command,
@@ -51,14 +49,12 @@ except ImportError:
         markdown_table as orchestrator_markdown_table,
         materialize_dummy_context as orchestrator_materialize_dummy_context,
         materialize_dummy_packet as orchestrator_materialize_dummy_packet,
-        normalize_section_root as orchestrator_normalize_section_root,
         relpath as orchestrator_relpath,
         run_command as orchestrator_run_command,
         summarize_failure_reason as orchestrator_summarize_failure_reason,
         summarize_stderr as orchestrator_summarize_stderr,
     )
     from micro.orchestrator.inventory import discover_corpus_objects, discover_object_programs
-    from micro.orchestrator.results import parse_runner_sample
 try:
     from common import (
         add_corpus_build_report_argument,
@@ -130,7 +126,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         parser,
         help_text=(
             "Optional expanded corpus build JSON report. When omitted, "
-            "corpus/directive_census.py will use corpus/results/expanded_corpus_build.latest.json if present."
+            "the newest existing expanded_corpus_build authoritative JSON is used if present."
         ),
     )
     add_max_programs_argument(parser, help_text="Stop after processing this many discovered programs.")
@@ -155,18 +151,6 @@ def materialize_dummy_context(path: Path, size: int = 64) -> Path:
 
 def run_command(command: list[str], timeout_seconds: int) -> dict[str, Any]:
     return orchestrator_run_command(command, timeout_seconds, cwd=ROOT_DIR)
-
-
-def parse_runner_json(stdout: str) -> dict[str, Any]:
-    return dict(parse_runner_sample(stdout))
-
-
-def extract_error(stderr: str, stdout: str, returncode: int | None) -> str:
-    for text in (stderr, stdout):
-        lines = [line.strip() for line in text.splitlines() if line.strip()]
-        if lines:
-            return f"{lines[-1]} (exit={returncode})"
-    return f"command failed (exit={returncode})"
 
 
 def summarize_stderr(stderr: str, max_lines: int = 20, max_chars: int = 4000) -> str:
@@ -219,16 +203,8 @@ def list_programs(runner: Path, object_path: Path, timeout_seconds: int) -> dict
         }
 
 
-def normalize_section_root(section_name: str) -> str:
-    return orchestrator_normalize_section_root(section_name)
-
-
 def infer_program_kind(section_name: str) -> str:
     return orchestrator_infer_program_kind(section_name)
-
-
-def program_label(program: dict[str, Any]) -> str:
-    return f"{program['object_path']}:{program['program_name']}"
 
 
 def build_kernel_command(
