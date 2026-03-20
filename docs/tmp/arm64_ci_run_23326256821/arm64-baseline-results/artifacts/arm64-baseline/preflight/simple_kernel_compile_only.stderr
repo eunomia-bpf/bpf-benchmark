@@ -1,0 +1,11 @@
+libbpf: loading object from micro/programs/simple.bpf.o
+libbpf: elf: section(3) xdp, size 192, link 0, flags 6, type=1
+libbpf: sec 'xdp': found program 'simple_xdp' at insn offset 0 (0 bytes), code size 24 insns (192 bytes)
+libbpf: elf: section(4) license, size 4, link 0, flags 3, type=1
+libbpf: license of micro/programs/simple.bpf.o is GPL
+libbpf: elf: section(14) .BTF, size 834, link 0, flags 0, type=1
+libbpf: elf: section(16) .BTF.ext, size 176, link 0, flags 0, type=1
+libbpf: elf: section(24) .symtab, size 336, link 1, flags 0, type=2
+libbpf: looking for externs among 14 symbols...
+libbpf: collected 0 externs total
+libbpf: object 'simple': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...

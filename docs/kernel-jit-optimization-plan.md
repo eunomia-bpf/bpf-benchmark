@@ -728,24 +728,13 @@ make clean
 | 239 | **ARM64 JIT gap 分析（2026-03-19）** | ✅ | 逐 form 分析 ARM64 kernel BPF JIT 现状。**有 gap 值得移植**：ROTATE（无 idiom 识别）、WIDE_MEM（byte load 未合并）、BITFIELD_EXTRACT（有 `ubfx` 但未用）、COND_SELECT（有 `csel` 但 stock 用 branch+mov）。**无需移植**：ZERO_EXT_ELIDE（w-reg 自动零扩展）、ENDIAN_FUSION（stock 已用 `rev`）。**PARTIAL**：ADDR_CALC、BRANCH_FLIP。ARM64 独有机会：cbz/cbnz/tbz/tbnz、bfxil/ubfiz/bfi、cset/csinc/csinv、ldp/stp。建议第一波 4 form，跑 ARM64 pure-JIT 后再决定第二波。报告：`docs/tmp/arm64_jit_gap_analysis_20260319.md`。 |
 | 240 | **rotate_dense 回归 debug（2026-03-19）** | ✅ | 结论：非代码 bug，旧 bzImage provenance 问题。简化后新 bzImage 两轮 targeted rerun 均正（+17.5%/+7.0%）。P0/P1/P2 全部审计通过：overlap 正确、trampoline guard 正确、reserved flags 正确、body normalization 正确。报告：`docs/tmp/rotate_dense_regression_debug_20260319.md`。 |
 | 241 | **Kernel 代码简化实施（2026-03-19, 重启）** | ✅ | 归入 #235（同一轮完成）。 |
-| 242 | **Post-simplification kernel review（2026-03-19）** | 🔄 | codex 执行中：完整审查 P0/P1/P2 + 简化后代码。关注 rotate_dense 性能下降根因 + dead code + 性能问题。 |
-| 243 | **ARM64 CI baseline 调研（2026-03-19）** | 🔄 | 调研 GitHub Actions `ubuntu-24.04-arm` 能否跑 micro/corpus baseline（llvmbpf vs kernel）。检查 micro_exec ARM64 编译、kernel runtime 支持、corpus 兼容性。 |
-
-**待执行队列（串行化）：**
-
-| 顺序 | 任务 | 依赖 | 资源 |
-|:---:|------|------|------|
-| ✅ | #242 review 完成（8/10，无 P0） | — | — |
-| 2 | Commit + push 简化后内核代码 | #242 无 P0 ✅ | kernel git |
-| 3 | 权威 micro rerun（5w/10i/1000r） | #2 | VM（独占） |
-| 4 | Corpus clean rerun | #3 完成 | VM（独占） |
-| 5 | E2E rerun（tracee + tetragon） | #4 完成 | VM（独占） |
-
-**可并行任务（不占 VM / 不改内核）：**
-
-| 任务 | 依赖 | 资源 |
-|------|------|------|
-| ARM64 CI workflow 实施 | #243 调研 | GitHub only |
-| P1 masked ROTATE fix + P2 dead code cleanup | #2 push 后 | kernel（串行） |
-| Trampoline regeneration 实现（#209 方案已调研，~100 LOC） | #2 push 后 | kernel（串行） |
-| ARM64 emitter 第一波 4 form（ROTATE/WIDE_MEM/BITFIELD_EXTRACT/COND_SELECT） | #239 分析 + ARM64 CI | kernel（大工程） |
+| 242 | **Post-simplification kernel review（2026-03-19）** | ✅ | 8/10，无 P0。P1：masked ROTATE validator 过于宽松（接受 low-mask 非 rotate 序列）。P2：scanner masked-rotate 范围 > kernel 接受范围；trampoline dead code。验证全绿。commit `3769f8b69` + `830b25e`。报告：`docs/tmp/kernel_post_simplification_review_20260319.md`。 |
+| 243 | **ARM64 CI baseline（2026-03-19）** | ✅ | GitHub Actions `ubuntu-24.04-arm` 首次成功运行。**Micro**: llvmbpf exec geomean **0.590x**（54/62 wins），和 x86 0.609x 接近。**Corpus code-size**: geomean 0.310x（24 programs）。Corpus exec: 仅 1/24 valid（packet context 限制）。4 次迭代修复（bpftool/pyelftools/submodule）。Run: `23326256821`。报告：`docs/tmp/arm64_ci_first_run_20260319.md`。 |
+| 244 | **权威 micro rerun post-simplification（2026-03-19）** | ✅ | 5warm/10iter/1000rep。overall 1.004x，applied-only **1.152x**（历史最高），7 applied，0 regressions。cmov_dense +68.4%，rotate_dense +25.7%。报告：`docs/tmp/micro_authoritative_post_simplification_20260319.md`。 |
+| 245 | **Corpus clean rerun（2026-03-19）** | 🔄 | `make vm-corpus` 执行中。 |
+| 246 | **E2E rerun tracee+tetragon（待做）** | ⏳ | 等 #245 完成后串行执行。 |
+| 247 | **P1 masked ROTATE fix + P2 cleanup（待做）** | ⏳ | review P1：收紧 masked rotate 只接受 high-mask；P2：删 trampoline dead code、对齐 scanner。 |
+| 248 | **Trampoline regeneration 实现（待做）** | ⏳ | #209 方案已调研（~100 LOC）。让 fentry/fexit/LSM 等程序也能 recompile。 |
+| 249 | **ARM64 emitter 设计（2026-03-19）** | ✅ | 4 form 具体设计：ROTATE→`extr`，WIDE_MEM→exact-width `ldr`+`rev*`，BITFIELD_EXTRACT→`ubfx`，COND_SELECT→`csel`。staged recompile integration 设计。估算 ~700 LOC。报告：`docs/tmp/arm64_emitter_design_20260319.md`。 |
+| 250 | **Kernel 架构拆分 + arch callback（待做）** | ⏳ | 1) jit_directives.c 拆为 jit_directives.c（编排）+ jit_validators.c（8 form validator）+ jit_policy.c（policy 解析）；2) CPU feature/native choice 改为 arch callback `bpf_jit_form_supported()`，x86/ARM64 各自实现；3) 去掉控制面的 x86 硬编码。**ARM64 emitter 的硬性前提。** 依赖 #245 corpus 完成释放 VM。 |
+| 251 | **ARM64 emitter 实现（待做）** | ⏳ | 依赖 #249 设计 + #250 arch 拆分。~700 LOC。 |

@@ -1,0 +1,3982 @@
+{
+  "suite": "micro_staged_codegen",
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/config/micro_pure_jit.yaml",
+  "generated_at": "2026-03-20T01:08:20.640972+00:00",
+  "provenance": {
+    "kernel_commit": "unknown",
+    "scanner_commit": "unknown",
+    "repo_git_sha": "unknown",
+    "repo_dirty": false,
+    "policy_files_hash": "667ed0873980368f",
+    "policy_dir": "/home/yunwei37/workspace/bpf-benchmark/micro/policies",
+    "params": {
+      "iterations": 5,
+      "warmups": 3,
+      "repeat": 500
+    },
+    "cpu_model": "Intel(R) Core(TM) Ultra 9 285K",
+    "environment": "vm",
+    "timestamp": "2026-03-20T01:08:21.538428+00:00"
+  },
+  "host": {
+    "hostname": "virtme-ng",
+    "platform": "Linux-7.0.0-rc2-gb50fd62797d7-dirty-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "cpu_affinity": null,
+    "git_sha": "unknown",
+    "kernel_version": "7.0.0-rc2-gb50fd62797d7-dirty",
+    "kernel_cmdline": "virtme_hostname=virtme-ng nr_open=1048576 virtme_initmount0=home/yunwei37/workspace/bpf-benchmark virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp console=ttyS0 earlyprintk=serial,ttyS0,115200 quiet loglevel=0 panic=-1 virtme.exec=`YmFzaCAtbGMgJ2NkIC9ob21lL3l1bndlaTM3L3dvcmtzcGFjZS9icGYtYmVuY2htYXJrICYmIHNvdXJjZSAvaG9tZS95dW53ZWkzNy93b3Jrc3BhY2UvLnZlbnYvYmluL2FjdGl2YXRlICYmIHB5dGhvbjMgbWljcm8vZHJpdmVyLnB5IHN1aXRlIC0tcnVudGltZSBrZXJuZWwgLS1ydW50aW1lIGtlcm5lbC1yZWNvbXBpbGUgLS1iZW5jaCByb3RhdGVfZGVuc2UgLS1iZW5jaCByb3RhdGU2NF9oYXNoIC0taXRlcmF0aW9ucyA1IC0td2FybXVwcyAzIC0tcmVwZWF0IDUwMCAtLW91dHB1dCBkb2NzL3RtcC9yb3RhdGVfZGVuc2VfZGVidWcvYmVuY2gvY3VycmVudF81XzNfNTAwLmpzb24n` virtme_chdir=home/yunwei37/workspace/bpf-benchmark rootfstype=9p rootflags=version=9p2000.L,trans=virtio,access=any raid=noautodetect ro quiet loglevel=1 init=/home/yunwei37/.local/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init",
+    "cpu_governor": "unknown",
+    "turbo_state": "unknown",
+    "perf_event_paranoid": "2"
+  },
+  "toolchains": {
+    "llvmbpf": {
+      "root": "/home/yunwei37/workspace/bpf-benchmark/vendor/llvmbpf"
+    },
+    "libbpf": {
+      "root": "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf"
+    },
+    "bpftool": {
+      "root": "/home/yunwei37/workspace/bpf-benchmark/vendor/bpftool"
+    }
+  },
+  "build": {
+    "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/micro/build/runner/micro_exec",
+    "bpftool_binary": "/home/yunwei37/workspace/bpf-benchmark/micro/build/vendor/bpftool/bpftool"
+  },
+  "defaults": {
+    "iterations": 5,
+    "warmups": 3,
+    "repeat": 500,
+    "blind_apply": false,
+    "perf_counters": false,
+    "perf_scope": "full_repeat_raw",
+    "shuffle_seed": null,
+    "runtime_order_seed": 0
+  },
+  "iteration_runtime_orders": {
+    "rotate_dense": [
+      [
+        "kernel",
+        "kernel-recompile"
+      ],
+      [
+        "kernel-recompile",
+        "kernel"
+      ],
+      [
+        "kernel",
+        "kernel-recompile"
+      ],
+      [
+        "kernel-recompile",
+        "kernel"
+      ],
+      [
+        "kernel",
+        "kernel-recompile"
+      ]
+    ],
+    "rotate64_hash": [
+      [
+        "kernel",
+        "kernel-recompile"
+      ],
+      [
+        "kernel-recompile",
+        "kernel"
+      ],
+      [
+        "kernel",
+        "kernel-recompile"
+      ],
+      [
+        "kernel-recompile",
+        "kernel"
+      ],
+      [
+        "kernel",
+        "kernel-recompile"
+      ]
+    ]
+  },
+  "benchmarks": [
+    {
+      "name": "rotate_dense",
+      "description": "Pure register-resident ARX rounds over native-loaded seed words",
+      "category": "alu-mix",
+      "family": "rotate-canonical",
+      "level": "canonical-dense",
+      "hypothesis": "Isolates ROTATE lowering by keeping the hot path entirely in registers after seed loads",
+      "io_mode": "staged",
+      "tags": [
+        "compute",
+        "rotate",
+        "canonical",
+        "pure-jit"
+      ],
+      "expected_result": 14870098989209412331,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/rotate_dense.mem",
+      "policy": null,
+      "policy_file": "/home/yunwei37/workspace/bpf-benchmark/micro/policies/rotate_dense.yaml",
+      "policy_content": {
+        "version": 3,
+        "program": "rotate_dense_xdp",
+        "sites": [
+          {
+            "insn": 24,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 42,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 52,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 62,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 79,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 88,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 99,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 108,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 119,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 128,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 139,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 148,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 159,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 168,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 179,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 188,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 199,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 208,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 219,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 228,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 239,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 248,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 259,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 268,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 279,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 288,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 299,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 308,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 319,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 328,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 339,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 348,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 387,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 396,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 406,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 415,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 426,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 435,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 446,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 455,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 466,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 475,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 486,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 495,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 506,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 515,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 526,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 535,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 546,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 555,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 566,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 575,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 586,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 595,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 606,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 615,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 626,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 635,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 646,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 655,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 666,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 675,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 686,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 695,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 727,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 736,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 746,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 755,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 766,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 775,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 786,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 795,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 806,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 815,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 826,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 835,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 846,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 855,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 866,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 875,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 886,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 895,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 906,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 915,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 926,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 935,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 946,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 955,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 966,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 975,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 986,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 995,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1006,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1015,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1026,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1035,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1064,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1073,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1083,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1092,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1103,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1112,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1123,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1132,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1143,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1152,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1163,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1172,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1183,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1192,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1203,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1212,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1223,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1232,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1243,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1252,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1263,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1272,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1283,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1292,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1303,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1312,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1323,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1332,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1343,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1352,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1363,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1372,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1405,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1414,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1424,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1433,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1444,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1453,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1464,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1473,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1484,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1493,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1504,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1513,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1524,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1533,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1544,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1553,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1564,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1573,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1584,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1593,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1604,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1613,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1624,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1633,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1644,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1653,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1664,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1673,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1684,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1693,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1704,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1713,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1745,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1754,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1764,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1773,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1784,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1793,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1804,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1813,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1824,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1833,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1844,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1853,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1864,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1873,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1884,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1893,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1904,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1913,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1924,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1933,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1944,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1953,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1964,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1973,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1984,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 1993,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2004,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2013,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2024,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2033,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2044,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2053,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2084,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2093,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2103,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2112,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2123,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2132,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2143,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2152,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2163,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2172,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2183,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2192,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2203,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2212,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2223,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2232,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2243,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2252,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2263,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2272,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2283,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2292,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2303,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2312,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2323,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2332,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2343,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2352,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2363,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2372,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2383,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2392,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2424,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2433,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2443,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2452,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2463,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2472,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2483,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2492,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2503,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2512,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2523,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2532,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2543,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2552,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2563,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2572,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2583,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2592,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2603,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2612,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2623,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2632,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2643,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2652,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2663,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2672,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2683,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2692,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2703,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2712,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2723,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 2732,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          }
+        ]
+      },
+      "policy_sha256": "2af299d39439f01bcc68998b7fade6433bc55d7c935f2895fbf38f94da544384",
+      "runs": [
+        {
+          "runtime": "kernel",
+          "label": "kernel eBPF",
+          "mode": "kernel",
+          "repeat": 500,
+          "artifacts": {
+            "program_object": "/home/yunwei37/workspace/bpf-benchmark/micro/programs/rotate_dense.bpf.o",
+            "policy_file": null
+          },
+          "samples": [
+            {
+              "compile_ns": 5028453,
+              "exec_ns": 248,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "no_cmov": false,
+              "disabled_passes": [],
+              "wall_exec_ns": 35060,
+              "exec_cycles": 129237,
+              "tsc_freq_hz": 3686224349,
+              "result": 14870098989209412331,
+              "retval": 2,
+              "jited_prog_len": 10198,
+              "xlated_prog_len": 22368,
+              "code_size": {
+                "bpf_bytecode_bytes": 22368,
+                "native_code_bytes": 10198,
+                "inflation_ratio": 0.455919
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 858703,
+                "object_open_ns": 3300320,
+                "object_load_ns": 1728133,
+                "input_stage_ns": 390,
+                "prog_run_wall_ns": 17529873,
+                "result_extract_ns": 192
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": true,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "directive_scan": {
+                "performed": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0
+              },
+              "recompile": {
+                "requested": false,
+                "mode": "none",
+                "requested_families": [],
+                "skipped_families": [],
+                "policy_generated": false,
+                "policy_bytes": 0,
+                "syscall_attempted": false,
+                "applied": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0,
+                "error": ""
+              },
+              "iteration_index": 0
+            },
+            {
+              "compile_ns": 4783862,
+              "exec_ns": 265,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "no_cmov": false,
+              "disabled_passes": [],
+              "wall_exec_ns": 32586,
+              "exec_cycles": 120117,
+              "tsc_freq_hz": 3686138798,
+              "result": 14870098989209412331,
+              "retval": 2,
+              "jited_prog_len": 10198,
+              "xlated_prog_len": 22368,
+              "code_size": {
+                "bpf_bytecode_bytes": 22368,
+                "native_code_bytes": 10198,
+                "inflation_ratio": 0.455919
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 868753,
+                "object_open_ns": 3259211,
+                "object_load_ns": 1524651,
+                "input_stage_ns": 386,
+                "prog_run_wall_ns": 16292676,
+                "result_extract_ns": 101
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": true,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "directive_scan": {
+                "performed": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0
+              },
+              "recompile": {
+                "requested": false,
+                "mode": "none",
+                "requested_families": [],
+                "skipped_families": [],
+                "policy_generated": false,
+                "policy_bytes": 0,
+                "syscall_attempted": false,
+                "applied": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0,
+                "error": ""
+              },
+              "iteration_index": 1
+            },
+            {
+              "compile_ns": 4818454,
+              "exec_ns": 232,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "no_cmov": false,
+              "disabled_passes": [],
+              "wall_exec_ns": 32810,
+              "exec_cycles": 120944,
+              "tsc_freq_hz": 3686216817,
+              "result": 14870098989209412331,
+              "retval": 2,
+              "jited_prog_len": 10198,
+              "xlated_prog_len": 22368,
+              "code_size": {
+                "bpf_bytecode_bytes": 22368,
+                "native_code_bytes": 10198,
+                "inflation_ratio": 0.455919
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 834402,
+                "object_open_ns": 3241001,
+                "object_load_ns": 1577453,
+                "input_stage_ns": 611,
+                "prog_run_wall_ns": 16404726,
+                "result_extract_ns": 113
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": true,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "directive_scan": {
+                "performed": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0
+              },
+              "recompile": {
+                "requested": false,
+                "mode": "none",
+                "requested_families": [],
+                "skipped_families": [],
+                "policy_generated": false,
+                "policy_bytes": 0,
+                "syscall_attempted": false,
+                "applied": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0,
+                "error": ""
+              },
+              "iteration_index": 2
+            },
+            {
+              "compile_ns": 4871557,
+              "exec_ns": 305,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "no_cmov": false,
+              "disabled_passes": [],
+              "wall_exec_ns": 39662,
+              "exec_cycles": 146206,
+              "tsc_freq_hz": 3686282126,
+              "result": 14870098989209412331,
+              "retval": 2,
+              "jited_prog_len": 10198,
+              "xlated_prog_len": 22368,
+              "code_size": {
+                "bpf_bytecode_bytes": 22368,
+                "native_code_bytes": 10198,
+                "inflation_ratio": 0.455919
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 846685,
+                "object_open_ns": 3335602,
+                "object_load_ns": 1535955,
+                "input_stage_ns": 610,
+                "prog_run_wall_ns": 19831190,
+                "result_extract_ns": 133
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": true,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "directive_scan": {
+                "performed": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0
+              },
+              "recompile": {
+                "requested": false,
+                "mode": "none",
+                "requested_families": [],
+                "skipped_families": [],
+                "policy_generated": false,
+                "policy_bytes": 0,
+                "syscall_attempted": false,
+                "applied": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0,
+                "error": ""
+              },
+              "iteration_index": 3
+            },
+            {
+              "compile_ns": 6292536,
+              "exec_ns": 172,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "no_cmov": false,
+              "disabled_passes": [],
+              "wall_exec_ns": 31671,
+              "exec_cycles": 116748,
+              "tsc_freq_hz": 3686307263,
+              "result": 14870098989209412331,
+              "retval": 2,
+              "jited_prog_len": 10198,
+              "xlated_prog_len": 22368,
+              "code_size": {
+                "bpf_bytecode_bytes": 22368,
+                "native_code_bytes": 10198,
+                "inflation_ratio": 0.455919
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 969897,
+                "object_open_ns": 4164576,
+                "object_load_ns": 2127960,
+                "input_stage_ns": 475,
+                "prog_run_wall_ns": 15836034,
+                "result_extract_ns": 242
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": true,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "directive_scan": {
+                "performed": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0
+              },
+              "recompile": {
+                "requested": false,
+                "mode": "none",
+                "requested_families": [],
+                "skipped_families": [],
+                "policy_generated": false,
+                "policy_bytes": 0,
+                "syscall_attempted": false,
+                "applied": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0,
+                "error": ""
+              },
+              "iteration_index": 4
+            }
+          ],
+          "compile_ns": {
+            "count": 5,
+            "mean": 5158972.4,
+            "median": 4871557,
+            "min": 4783862,
+            "max": 6292536,
+            "p95": 6292536,
+            "stdev": 640560.2926550318
+          },
+          "exec_ns": {
+            "count": 5,
+            "mean": 244.4,
+            "median": 248,
+            "min": 172,
+            "max": 305,
+            "p95": 305,
+            "stdev": 48.747307617959784
+          },
+          "timing_source": "ktime",
+          "phases_ns": {
+            "memory_prepare_ns": {
+              "count": 5,
+              "mean": 875688,
+              "median": 858703,
+              "min": 834402,
+              "max": 969897,
+              "p95": 969897,
+              "stdev": 54216.2981399505
+            },
+            "object_open_ns": {
+              "count": 5,
+              "mean": 3460142,
+              "median": 3300320,
+              "min": 3241001,
+              "max": 4164576,
+              "p95": 4164576,
+              "stdev": 395498.60564924876
+            },
+            "object_load_ns": {
+              "count": 5,
+              "mean": 1698830.4,
+              "median": 1577453,
+              "min": 1524651,
+              "max": 2127960,
+              "p95": 2127960,
+              "stdev": 253283.5310986484
+            },
+            "input_stage_ns": {
+              "count": 5,
+              "mean": 494.4,
+              "median": 475,
+              "min": 386,
+              "max": 611,
+              "p95": 611,
+              "stdev": 111.7868507473039
+            },
+            "prog_run_wall_ns": {
+              "count": 5,
+              "mean": 17178899.8,
+              "median": 16404726,
+              "min": 15836034,
+              "max": 19831190,
+              "p95": 19831190,
+              "stdev": 1608248.4062821888
+            },
+            "result_extract_ns": {
+              "count": 5,
+              "mean": 156.2,
+              "median": 133,
+              "min": 101,
+              "max": 242,
+              "p95": 242,
+              "stdev": 59.36076145064179
+            }
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected_samples": 0,
+            "include_kernel": null,
+            "scope": "full_repeat_raw",
+            "hardware_counters_observed": false,
+            "software_counters_observed": false,
+            "errors": {}
+          },
+          "derived_metrics": {},
+          "result_distribution": {
+            "14870098989209412331": 5
+          },
+          "wall_exec_ns": {
+            "count": 5,
+            "mean": 34357.8,
+            "median": 32810,
+            "min": 31671,
+            "max": 39662,
+            "p95": 39662,
+            "stdev": 3216.421800697166
+          }
+        },
+        {
+          "runtime": "kernel-recompile",
+          "label": "kernel eBPF + manifest recompile policy",
+          "mode": "kernel-recompile",
+          "repeat": 500,
+          "artifacts": {
+            "program_object": "/home/yunwei37/workspace/bpf-benchmark/micro/programs/rotate_dense.bpf.o",
+            "policy_file": "/home/yunwei37/workspace/bpf-benchmark/micro/policies/rotate_dense.yaml"
+          },
+          "samples": [
+            {
+              "compile_ns": 14119030,
+              "exec_ns": 203,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "no_cmov": false,
+              "disabled_passes": [],
+              "wall_exec_ns": 35140,
+              "exec_cycles": 129537,
+              "tsc_freq_hz": 3686295137,
+              "result": 14870098989209412331,
+              "retval": 2,
+              "jited_prog_len": 7638,
+              "xlated_prog_len": 22368,
+              "code_size": {
+                "bpf_bytecode_bytes": 22368,
+                "native_code_bytes": 7638,
+                "inflation_ratio": 0.34147
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 885967,
+                "object_open_ns": 3295440,
+                "object_load_ns": 1646321,
+                "input_stage_ns": 284,
+                "prog_run_wall_ns": 17570216,
+                "result_extract_ns": 112
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": true,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "directive_scan": {
+                "performed": true,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 256,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 256
+              },
+              "recompile": {
+                "requested": true,
+                "mode": "policy-file",
+                "requested_families": [
+                  "rotate"
+                ],
+                "skipped_families": [
+                  "cmov",
+                  "wide",
+                  "lea",
+                  "extract",
+                  "zero-ext",
+                  "endian",
+                  "branch-flip"
+                ],
+                "policy_generated": true,
+                "policy_bytes": 3104,
+                "syscall_attempted": true,
+                "applied": true,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 256,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 256,
+                "error": ""
+              },
+              "iteration_index": 0
+            },
+            {
+              "compile_ns": 13434984,
+              "exec_ns": 196,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "no_cmov": false,
+              "disabled_passes": [],
+              "wall_exec_ns": 32671,
+              "exec_cycles": 120432,
+              "tsc_freq_hz": 3686176102,
+              "result": 14870098989209412331,
+              "retval": 2,
+              "jited_prog_len": 7638,
+              "xlated_prog_len": 22368,
+              "code_size": {
+                "bpf_bytecode_bytes": 22368,
+                "native_code_bytes": 7638,
+                "inflation_ratio": 0.34147
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 844516,
+                "object_open_ns": 3339891,
+                "object_load_ns": 1572604,
+                "input_stage_ns": 257,
+                "prog_run_wall_ns": 16335954,
+                "result_extract_ns": 192
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": true,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "directive_scan": {
+                "performed": true,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 256,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 256
+              },
+              "recompile": {
+                "requested": true,
+                "mode": "policy-file",
+                "requested_families": [
+                  "rotate"
+                ],
+                "skipped_families": [
+                  "cmov",
+                  "wide",
+                  "lea",
+                  "extract",
+                  "zero-ext",
+                  "endian",
+                  "branch-flip"
+                ],
+                "policy_generated": true,
+                "policy_bytes": 3104,
+                "syscall_attempted": true,
+                "applied": true,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 256,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 256,
+                "error": ""
+              },
+              "iteration_index": 1
+            },
+            {
+              "compile_ns": 14479785,
+              "exec_ns": 180,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "no_cmov": false,
+              "disabled_passes": [],
+              "wall_exec_ns": 34439,
+              "exec_cycles": 126948,
+              "tsc_freq_hz": 3686195498,
+              "result": 14870098989209412331,
+              "retval": 2,
+              "jited_prog_len": 7638,
+              "xlated_prog_len": 22368,
+              "code_size": {
+                "bpf_bytecode_bytes": 22368,
+                "native_code_bytes": 7638,
+                "inflation_ratio": 0.34147
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 868430,
+                "object_open_ns": 4717614,
+                "object_load_ns": 1679292,
+                "input_stage_ns": 262,
+                "prog_run_wall_ns": 17219474,
+                "result_extract_ns": 190
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": true,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "directive_scan": {
+                "performed": true,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 256,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 256
+              },
+              "recompile": {
+                "requested": true,
+                "mode": "policy-file",
+                "requested_families": [
+                  "rotate"
+                ],
+                "skipped_families": [
+                  "cmov",
+                  "wide",
+                  "lea",
+                  "extract",
+                  "zero-ext",
+                  "endian",
+                  "branch-flip"
+                ],
+                "policy_generated": true,
+                "policy_bytes": 3104,
+                "syscall_attempted": true,
+                "applied": true,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 256,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 256,
+                "error": ""
+              },
+              "iteration_index": 2
+            },
+            {
+              "compile_ns": 14056800,
+              "exec_ns": 154,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "no_cmov": false,
+              "disabled_passes": [],
+              "wall_exec_ns": 32853,
+              "exec_cycles": 121102,
+              "tsc_freq_hz": 3686211930,
+              "result": 14870098989209412331,
+              "retval": 2,
+              "jited_prog_len": 7638,
+              "xlated_prog_len": 22368,
+              "code_size": {
+                "bpf_bytecode_bytes": 22368,
+                "native_code_bytes": 7638,
+                "inflation_ratio": 0.34147
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 858960,
+                "object_open_ns": 3407854,
+                "object_load_ns": 1532054,
+                "input_stage_ns": 276,
+                "prog_run_wall_ns": 16426151,
+                "result_extract_ns": 106
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": true,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "directive_scan": {
+                "performed": true,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 256,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 256
+              },
+              "recompile": {
+                "requested": true,
+                "mode": "policy-file",
+                "requested_families": [
+                  "rotate"
+                ],
+                "skipped_families": [
+                  "cmov",
+                  "wide",
+                  "lea",
+                  "extract",
+                  "zero-ext",
+                  "endian",
+                  "branch-flip"
+                ],
+                "policy_generated": true,
+                "policy_bytes": 3104,
+                "syscall_attempted": true,
+                "applied": true,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 256,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 256,
+                "error": ""
+              },
+              "iteration_index": 3
+            },
+            {
+              "compile_ns": 16051190,
+              "exec_ns": 139,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "no_cmov": false,
+              "disabled_passes": [],
+              "wall_exec_ns": 34291,
+              "exec_cycles": 126402,
+              "tsc_freq_hz": 3686161742,
+              "result": 14870098989209412331,
+              "retval": 2,
+              "jited_prog_len": 7638,
+              "xlated_prog_len": 22368,
+              "code_size": {
+                "bpf_bytecode_bytes": 22368,
+                "native_code_bytes": 7638,
+                "inflation_ratio": 0.34147
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 1854733,
+                "object_open_ns": 4637540,
+                "object_load_ns": 2334832,
+                "input_stage_ns": 301,
+                "prog_run_wall_ns": 17145132,
+                "result_extract_ns": 149
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": true,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "directive_scan": {
+                "performed": true,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 256,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 256
+              },
+              "recompile": {
+                "requested": true,
+                "mode": "policy-file",
+                "requested_families": [
+                  "rotate"
+                ],
+                "skipped_families": [
+                  "cmov",
+                  "wide",
+                  "lea",
+                  "extract",
+                  "zero-ext",
+                  "endian",
+                  "branch-flip"
+                ],
+                "policy_generated": true,
+                "policy_bytes": 3104,
+                "syscall_attempted": true,
+                "applied": true,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 256,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 256,
+                "error": ""
+              },
+              "iteration_index": 4
+            }
+          ],
+          "compile_ns": {
+            "count": 5,
+            "mean": 14428357.8,
+            "median": 14119030,
+            "min": 13434984,
+            "max": 16051190,
+            "p95": 16051190,
+            "stdev": 981931.705794349
+          },
+          "exec_ns": {
+            "count": 5,
+            "mean": 174.4,
+            "median": 180,
+            "min": 139,
+            "max": 203,
+            "p95": 203,
+            "stdev": 27.31849190566712
+          },
+          "timing_source": "ktime",
+          "phases_ns": {
+            "memory_prepare_ns": {
+              "count": 5,
+              "mean": 1062521.2,
+              "median": 868430,
+              "min": 844516,
+              "max": 1854733,
+              "p95": 1854733,
+              "stdev": 443115.6014198778
+            },
+            "object_open_ns": {
+              "count": 5,
+              "mean": 3879667.8,
+              "median": 3407854,
+              "min": 3295440,
+              "max": 4717614,
+              "p95": 4717614,
+              "stdev": 730036.5544972388
+            },
+            "object_load_ns": {
+              "count": 5,
+              "mean": 1753020.6,
+              "median": 1646321,
+              "min": 1532054,
+              "max": 2334832,
+              "p95": 2334832,
+              "stdev": 330417.01081330545
+            },
+            "input_stage_ns": {
+              "count": 5,
+              "mean": 276,
+              "median": 276,
+              "min": 257,
+              "max": 301,
+              "p95": 301,
+              "stdev": 17.649362594722792
+            },
+            "prog_run_wall_ns": {
+              "count": 5,
+              "mean": 16939385.4,
+              "median": 17145132,
+              "min": 16335954,
+              "max": 17570216,
+              "p95": 17570216,
+              "stdev": 535319.4226364293
+            },
+            "result_extract_ns": {
+              "count": 5,
+              "mean": 149.8,
+              "median": 149,
+              "min": 106,
+              "max": 192,
+              "p95": 192,
+              "stdev": 41.06336566819627
+            }
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected_samples": 0,
+            "include_kernel": null,
+            "scope": "full_repeat_raw",
+            "hardware_counters_observed": false,
+            "software_counters_observed": false,
+            "errors": {}
+          },
+          "derived_metrics": {},
+          "result_distribution": {
+            "14870098989209412331": 5
+          },
+          "wall_exec_ns": {
+            "count": 5,
+            "mean": 33878.8,
+            "median": 34291,
+            "min": 32671,
+            "max": 35140,
+            "p95": 35140,
+            "stdev": 1070.6779160886806
+          }
+        }
+      ]
+    },
+    {
+      "name": "rotate64_hash",
+      "description": "SipHash-like hash using 64-bit rotations for ROTATE directive coverage",
+      "category": "alu-mix",
+      "family": "rotate-hash",
+      "level": "siphash-64",
+      "hypothesis": "Dense 64-bit rotations should exercise the 4-insn rotate JIT directive pattern",
+      "io_mode": "staged",
+      "tags": [
+        "compute",
+        "rotate",
+        "hash",
+        "pure-jit"
+      ],
+      "expected_result": 2666935177028490406,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/rotate64_hash.mem",
+      "policy": null,
+      "policy_file": "/home/yunwei37/workspace/bpf-benchmark/micro/policies/rotate64_hash.yaml",
+      "policy_content": {
+        "version": 3,
+        "program": "rotate64_hash_xdp",
+        "sites": [
+          {
+            "insn": 122,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 204,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 212,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 250,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 257,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 263,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 271,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 276,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 288,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 293,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 297,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 305,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 313,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 318,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 323,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 331,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 336,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 341,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 349,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 354,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 365,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 370,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 374,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 383,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 391,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 396,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 401,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 409,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 414,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 419,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 427,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 432,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 443,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 448,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 452,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 461,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 469,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 474,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 479,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 487,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 492,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 497,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 505,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 510,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 521,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 526,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 530,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 539,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 547,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 552,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 557,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 565,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 570,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 575,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 583,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 588,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 599,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 604,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 608,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 617,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 625,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 630,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 635,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 643,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 648,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 653,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 661,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 666,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 677,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 682,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 686,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 695,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 703,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 708,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 713,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 721,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 726,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 731,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 739,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 744,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 755,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 760,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 764,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 773,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 781,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 786,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 791,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 799,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 804,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 809,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 817,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 822,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 826,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 837,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 842,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 850,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 855,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 860,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 867,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 872,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 876,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 884,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 889,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 894,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 901,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 906,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 910,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 918,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 923,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 928,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 935,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 939,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 945,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 952,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 957,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          },
+          {
+            "insn": 961,
+            "family": "rotate",
+            "pattern_kind": "rotate-64"
+          }
+        ]
+      },
+      "policy_sha256": "62bf3e17d690fe549ba53b0e14742fa5e977377ab84e6a262f372fcf71d62ed4",
+      "runs": [
+        {
+          "runtime": "kernel",
+          "label": "kernel eBPF",
+          "mode": "kernel",
+          "repeat": 500,
+          "artifacts": {
+            "program_object": "/home/yunwei37/workspace/bpf-benchmark/micro/programs/rotate64_hash.bpf.o",
+            "policy_file": null
+          },
+          "samples": [
+            {
+              "compile_ns": 4971597,
+              "exec_ns": 40,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "no_cmov": false,
+              "disabled_passes": [],
+              "wall_exec_ns": 32774,
+              "exec_cycles": 120814,
+              "tsc_freq_hz": 3686293077,
+              "result": 2666935177028490406,
+              "retval": 2,
+              "jited_prog_len": 3530,
+              "xlated_prog_len": 7936,
+              "code_size": {
+                "bpf_bytecode_bytes": 7936,
+                "native_code_bytes": 3530,
+                "inflation_ratio": 0.444808
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 991555,
+                "object_open_ns": 3437613,
+                "object_load_ns": 1533984,
+                "input_stage_ns": 482,
+                "prog_run_wall_ns": 16387709,
+                "result_extract_ns": 155
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": true,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "directive_scan": {
+                "performed": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0
+              },
+              "recompile": {
+                "requested": false,
+                "mode": "none",
+                "requested_families": [],
+                "skipped_families": [],
+                "policy_generated": false,
+                "policy_bytes": 0,
+                "syscall_attempted": false,
+                "applied": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0,
+                "error": ""
+              },
+              "iteration_index": 0
+            },
+            {
+              "compile_ns": 5537882,
+              "exec_ns": 101,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "no_cmov": false,
+              "disabled_passes": [],
+              "wall_exec_ns": 36636,
+              "exec_cycles": 135049,
+              "tsc_freq_hz": 3686188960,
+              "result": 2666935177028490406,
+              "retval": 2,
+              "jited_prog_len": 3530,
+              "xlated_prog_len": 7936,
+              "code_size": {
+                "bpf_bytecode_bytes": 7936,
+                "native_code_bytes": 3530,
+                "inflation_ratio": 0.444808
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 1167802,
+                "object_open_ns": 3890289,
+                "object_load_ns": 1647593,
+                "input_stage_ns": 580,
+                "prog_run_wall_ns": 18318465,
+                "result_extract_ns": 287
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": true,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "directive_scan": {
+                "performed": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0
+              },
+              "recompile": {
+                "requested": false,
+                "mode": "none",
+                "requested_families": [],
+                "skipped_families": [],
+                "policy_generated": false,
+                "policy_bytes": 0,
+                "syscall_attempted": false,
+                "applied": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0,
+                "error": ""
+              },
+              "iteration_index": 1
+            },
+            {
+              "compile_ns": 4285199,
+              "exec_ns": 93,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "no_cmov": false,
+              "disabled_passes": [],
+              "wall_exec_ns": 33423,
+              "exec_cycles": 123191,
+              "tsc_freq_hz": 3685825694,
+              "result": 2666935177028490406,
+              "retval": 2,
+              "jited_prog_len": 3530,
+              "xlated_prog_len": 7936,
+              "code_size": {
+                "bpf_bytecode_bytes": 7936,
+                "native_code_bytes": 3530,
+                "inflation_ratio": 0.444808
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 856176,
+                "object_open_ns": 2943749,
+                "object_load_ns": 1341450,
+                "input_stage_ns": 588,
+                "prog_run_wall_ns": 16713495,
+                "result_extract_ns": 330
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": true,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "directive_scan": {
+                "performed": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0
+              },
+              "recompile": {
+                "requested": false,
+                "mode": "none",
+                "requested_families": [],
+                "skipped_families": [],
+                "policy_generated": false,
+                "policy_bytes": 0,
+                "syscall_attempted": false,
+                "applied": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0,
+                "error": ""
+              },
+              "iteration_index": 2
+            },
+            {
+              "compile_ns": 6874751,
+              "exec_ns": 44,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "no_cmov": false,
+              "disabled_passes": [],
+              "wall_exec_ns": 33052,
+              "exec_cycles": 121833,
+              "tsc_freq_hz": 3686142955,
+              "result": 2666935177028490406,
+              "retval": 2,
+              "jited_prog_len": 3530,
+              "xlated_prog_len": 7936,
+              "code_size": {
+                "bpf_bytecode_bytes": 7936,
+                "native_code_bytes": 3530,
+                "inflation_ratio": 0.444808
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 1378770,
+                "object_open_ns": 5086627,
+                "object_load_ns": 1788124,
+                "input_stage_ns": 779,
+                "prog_run_wall_ns": 17319287,
+                "result_extract_ns": 240
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": true,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "directive_scan": {
+                "performed": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0
+              },
+              "recompile": {
+                "requested": false,
+                "mode": "none",
+                "requested_families": [],
+                "skipped_families": [],
+                "policy_generated": false,
+                "policy_bytes": 0,
+                "syscall_attempted": false,
+                "applied": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0,
+                "error": ""
+              },
+              "iteration_index": 3
+            },
+            {
+              "compile_ns": 4402166,
+              "exec_ns": 111,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "no_cmov": false,
+              "disabled_passes": [],
+              "wall_exec_ns": 31818,
+              "exec_cycles": 117285,
+              "tsc_freq_hz": 3686137501,
+              "result": 2666935177028490406,
+              "retval": 2,
+              "jited_prog_len": 3530,
+              "xlated_prog_len": 7936,
+              "code_size": {
+                "bpf_bytecode_bytes": 7936,
+                "native_code_bytes": 3530,
+                "inflation_ratio": 0.444808
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 878573,
+                "object_open_ns": 2945479,
+                "object_load_ns": 1456687,
+                "input_stage_ns": 368,
+                "prog_run_wall_ns": 16417877,
+                "result_extract_ns": 193
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": true,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "directive_scan": {
+                "performed": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0
+              },
+              "recompile": {
+                "requested": false,
+                "mode": "none",
+                "requested_families": [],
+                "skipped_families": [],
+                "policy_generated": false,
+                "policy_bytes": 0,
+                "syscall_attempted": false,
+                "applied": false,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 0,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 0,
+                "error": ""
+              },
+              "iteration_index": 4
+            }
+          ],
+          "compile_ns": {
+            "count": 5,
+            "mean": 5214319,
+            "median": 4971597,
+            "min": 4285199,
+            "max": 6874751,
+            "p95": 6874751,
+            "stdev": 1053980.2987587103
+          },
+          "exec_ns": {
+            "count": 5,
+            "mean": 77.8,
+            "median": 93,
+            "min": 40,
+            "max": 111,
+            "p95": 111,
+            "stdev": 33.327166096144445
+          },
+          "timing_source": "ktime",
+          "phases_ns": {
+            "memory_prepare_ns": {
+              "count": 5,
+              "mean": 1054575.2,
+              "median": 991555,
+              "min": 856176,
+              "max": 1378770,
+              "p95": 1378770,
+              "stdev": 219221.99887260402
+            },
+            "object_open_ns": {
+              "count": 5,
+              "mean": 3660751.4,
+              "median": 3437613,
+              "min": 2943749,
+              "max": 5086627,
+              "p95": 5086627,
+              "stdev": 889003.1678586978
+            },
+            "object_load_ns": {
+              "count": 5,
+              "mean": 1553567.6,
+              "median": 1533984,
+              "min": 1341450,
+              "max": 1788124,
+              "p95": 1788124,
+              "stdev": 172206.7978486912
+            },
+            "input_stage_ns": {
+              "count": 5,
+              "mean": 559.4,
+              "median": 580,
+              "min": 368,
+              "max": 779,
+              "p95": 779,
+              "stdev": 151.73265963529408
+            },
+            "prog_run_wall_ns": {
+              "count": 5,
+              "mean": 17031366.6,
+              "median": 16713495,
+              "min": 16387709,
+              "max": 18318465,
+              "p95": 18318465,
+              "stdev": 811052.9263635019
+            },
+            "result_extract_ns": {
+              "count": 5,
+              "mean": 241,
+              "median": 240,
+              "min": 155,
+              "max": 330,
+              "p95": 330,
+              "stdev": 70.24599632719291
+            }
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected_samples": 0,
+            "include_kernel": null,
+            "scope": "full_repeat_raw",
+            "hardware_counters_observed": false,
+            "software_counters_observed": false,
+            "errors": {}
+          },
+          "derived_metrics": {},
+          "result_distribution": {
+            "2666935177028490406": 5
+          },
+          "wall_exec_ns": {
+            "count": 5,
+            "mean": 33540.6,
+            "median": 33052,
+            "min": 31818,
+            "max": 36636,
+            "p95": 36636,
+            "stdev": 1829.5550825268967
+          }
+        },
+        {
+          "runtime": "kernel-recompile",
+          "label": "kernel eBPF + manifest recompile policy",
+          "mode": "kernel-recompile",
+          "repeat": 500,
+          "artifacts": {
+            "program_object": "/home/yunwei37/workspace/bpf-benchmark/micro/programs/rotate64_hash.bpf.o",
+            "policy_file": "/home/yunwei37/workspace/bpf-benchmark/micro/policies/rotate64_hash.yaml"
+          },
+          "samples": [
+            {
+              "compile_ns": 18267519,
+              "exec_ns": 78,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "no_cmov": false,
+              "disabled_passes": [],
+              "wall_exec_ns": 26555,
+              "exec_cycles": 97888,
+              "tsc_freq_hz": 3686212781,
+              "result": 2666935177028490406,
+              "retval": 2,
+              "jited_prog_len": 2370,
+              "xlated_prog_len": 7936,
+              "code_size": {
+                "bpf_bytecode_bytes": 7936,
+                "native_code_bytes": 2370,
+                "inflation_ratio": 0.298639
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 860883,
+                "object_open_ns": 3020841,
+                "object_load_ns": 1353704,
+                "input_stage_ns": 662,
+                "prog_run_wall_ns": 17154915,
+                "result_extract_ns": 229
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": true,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "directive_scan": {
+                "performed": true,
+                "cmov_sites": 0,
+                "wide_sites": 7,
+                "rotate_sites": 116,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 123
+              },
+              "recompile": {
+                "requested": true,
+                "mode": "policy-file",
+                "requested_families": [
+                  "rotate"
+                ],
+                "skipped_families": [
+                  "cmov",
+                  "wide",
+                  "lea",
+                  "extract",
+                  "zero-ext",
+                  "endian",
+                  "branch-flip"
+                ],
+                "policy_generated": true,
+                "policy_bytes": 1424,
+                "syscall_attempted": true,
+                "applied": true,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 116,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 116,
+                "error": ""
+              },
+              "iteration_index": 0
+            },
+            {
+              "compile_ns": 15452627,
+              "exec_ns": 75,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "no_cmov": false,
+              "disabled_passes": [],
+              "wall_exec_ns": 24995,
+              "exec_cycles": 92135,
+              "tsc_freq_hz": 3686173225,
+              "result": 2666935177028490406,
+              "retval": 2,
+              "jited_prog_len": 2370,
+              "xlated_prog_len": 7936,
+              "code_size": {
+                "bpf_bytecode_bytes": 7936,
+                "native_code_bytes": 2370,
+                "inflation_ratio": 0.298639
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 928798,
+                "object_open_ns": 3338332,
+                "object_load_ns": 1415793,
+                "input_stage_ns": 605,
+                "prog_run_wall_ns": 17121376,
+                "result_extract_ns": 178
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": true,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "directive_scan": {
+                "performed": true,
+                "cmov_sites": 0,
+                "wide_sites": 7,
+                "rotate_sites": 116,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 123
+              },
+              "recompile": {
+                "requested": true,
+                "mode": "policy-file",
+                "requested_families": [
+                  "rotate"
+                ],
+                "skipped_families": [
+                  "cmov",
+                  "wide",
+                  "lea",
+                  "extract",
+                  "zero-ext",
+                  "endian",
+                  "branch-flip"
+                ],
+                "policy_generated": true,
+                "policy_bytes": 1424,
+                "syscall_attempted": true,
+                "applied": true,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 116,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 116,
+                "error": ""
+              },
+              "iteration_index": 1
+            },
+            {
+              "compile_ns": 20506382,
+              "exec_ns": 64,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "no_cmov": false,
+              "disabled_passes": [],
+              "wall_exec_ns": 28208,
+              "exec_cycles": 103973,
+              "tsc_freq_hz": 3685960503,
+              "result": 2666935177028490406,
+              "retval": 2,
+              "jited_prog_len": 2370,
+              "xlated_prog_len": 7936,
+              "code_size": {
+                "bpf_bytecode_bytes": 7936,
+                "native_code_bytes": 2370,
+                "inflation_ratio": 0.298639
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 867007,
+                "object_open_ns": 3209093,
+                "object_load_ns": 1767041,
+                "input_stage_ns": 474,
+                "prog_run_wall_ns": 16416549,
+                "result_extract_ns": 204
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": true,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "directive_scan": {
+                "performed": true,
+                "cmov_sites": 0,
+                "wide_sites": 7,
+                "rotate_sites": 116,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 123
+              },
+              "recompile": {
+                "requested": true,
+                "mode": "policy-file",
+                "requested_families": [
+                  "rotate"
+                ],
+                "skipped_families": [
+                  "cmov",
+                  "wide",
+                  "lea",
+                  "extract",
+                  "zero-ext",
+                  "endian",
+                  "branch-flip"
+                ],
+                "policy_generated": true,
+                "policy_bytes": 1424,
+                "syscall_attempted": true,
+                "applied": true,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 116,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 116,
+                "error": ""
+              },
+              "iteration_index": 2
+            },
+            {
+              "compile_ns": 21179202,
+              "exec_ns": 77,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "no_cmov": false,
+              "disabled_passes": [],
+              "wall_exec_ns": 26500,
+              "exec_cycles": 97684,
+              "tsc_freq_hz": 3686147207,
+              "result": 2666935177028490406,
+              "retval": 2,
+              "jited_prog_len": 2370,
+              "xlated_prog_len": 7936,
+              "code_size": {
+                "bpf_bytecode_bytes": 7936,
+                "native_code_bytes": 2370,
+                "inflation_ratio": 0.298639
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 898531,
+                "object_open_ns": 2955003,
+                "object_load_ns": 1327518,
+                "input_stage_ns": 431,
+                "prog_run_wall_ns": 16166073,
+                "result_extract_ns": 325
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": true,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "directive_scan": {
+                "performed": true,
+                "cmov_sites": 0,
+                "wide_sites": 7,
+                "rotate_sites": 116,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 123
+              },
+              "recompile": {
+                "requested": true,
+                "mode": "policy-file",
+                "requested_families": [
+                  "rotate"
+                ],
+                "skipped_families": [
+                  "cmov",
+                  "wide",
+                  "lea",
+                  "extract",
+                  "zero-ext",
+                  "endian",
+                  "branch-flip"
+                ],
+                "policy_generated": true,
+                "policy_bytes": 1424,
+                "syscall_attempted": true,
+                "applied": true,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 116,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 116,
+                "error": ""
+              },
+              "iteration_index": 3
+            },
+            {
+              "compile_ns": 17431385,
+              "exec_ns": 28,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "no_cmov": false,
+              "disabled_passes": [],
+              "wall_exec_ns": 25142,
+              "exec_cycles": 92671,
+              "tsc_freq_hz": 3685949204,
+              "result": 2666935177028490406,
+              "retval": 2,
+              "jited_prog_len": 2370,
+              "xlated_prog_len": 7936,
+              "code_size": {
+                "bpf_bytecode_bytes": 7936,
+                "native_code_bytes": 2370,
+                "inflation_ratio": 0.298639
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 882981,
+                "object_open_ns": 2964498,
+                "object_load_ns": 1325132,
+                "input_stage_ns": 513,
+                "prog_run_wall_ns": 15913876,
+                "result_extract_ns": 229
+              },
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "requested": false,
+                "collected": false,
+                "include_kernel": true,
+                "scope": "full_repeat_raw",
+                "error": ""
+              },
+              "directive_scan": {
+                "performed": true,
+                "cmov_sites": 0,
+                "wide_sites": 7,
+                "rotate_sites": 116,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 123
+              },
+              "recompile": {
+                "requested": true,
+                "mode": "policy-file",
+                "requested_families": [
+                  "rotate"
+                ],
+                "skipped_families": [
+                  "cmov",
+                  "wide",
+                  "lea",
+                  "extract",
+                  "zero-ext",
+                  "endian",
+                  "branch-flip"
+                ],
+                "policy_generated": true,
+                "policy_bytes": 1424,
+                "syscall_attempted": true,
+                "applied": true,
+                "cmov_sites": 0,
+                "wide_sites": 0,
+                "rotate_sites": 116,
+                "lea_sites": 0,
+                "bitfield_sites": 0,
+                "extract_sites": 0,
+                "zero_ext_sites": 0,
+                "endian_sites": 0,
+                "branch_flip_sites": 0,
+                "total_sites": 116,
+                "error": ""
+              },
+              "iteration_index": 4
+            }
+          ],
+          "compile_ns": {
+            "count": 5,
+            "mean": 18567423,
+            "median": 18267519,
+            "min": 15452627,
+            "max": 21179202,
+            "p95": 21179202,
+            "stdev": 2327199.5196371754
+          },
+          "exec_ns": {
+            "count": 5,
+            "mean": 64.4,
+            "median": 75,
+            "min": 28,
+            "max": 78,
+            "p95": 78,
+            "stdev": 21.10213259365034
+          },
+          "timing_source": "ktime",
+          "phases_ns": {
+            "memory_prepare_ns": {
+              "count": 5,
+              "mean": 887640,
+              "median": 882981,
+              "min": 860883,
+              "max": 928798,
+              "p95": 928798,
+              "stdev": 27276.17487845391
+            },
+            "object_open_ns": {
+              "count": 5,
+              "mean": 3097553.4,
+              "median": 3020841,
+              "min": 2955003,
+              "max": 3338332,
+              "p95": 3338332,
+              "stdev": 169059.57892796255
+            },
+            "object_load_ns": {
+              "count": 5,
+              "mean": 1437837.6,
+              "median": 1353704,
+              "min": 1325132,
+              "max": 1767041,
+              "p95": 1767041,
+              "stdev": 187624.80647904743
+            },
+            "input_stage_ns": {
+              "count": 5,
+              "mean": 537,
+              "median": 513,
+              "min": 431,
+              "max": 662,
+              "p95": 662,
+              "stdev": 94.90785004413492
+            },
+            "prog_run_wall_ns": {
+              "count": 5,
+              "mean": 16554557.8,
+              "median": 16416549,
+              "min": 15913876,
+              "max": 17154915,
+              "p95": 17154915,
+              "stdev": 561727.6201600736
+            },
+            "result_extract_ns": {
+              "count": 5,
+              "mean": 233,
+              "median": 229,
+              "min": 178,
+              "max": 325,
+              "p95": 325,
+              "stdev": 55.59226564909907
+            }
+          },
+          "perf_counters": {},
+          "perf_counters_meta": {
+            "requested": false,
+            "collected_samples": 0,
+            "include_kernel": null,
+            "scope": "full_repeat_raw",
+            "hardware_counters_observed": false,
+            "software_counters_observed": false,
+            "errors": {}
+          },
+          "derived_metrics": {},
+          "result_distribution": {
+            "2666935177028490406": 5
+          },
+          "wall_exec_ns": {
+            "count": 5,
+            "mean": 26280,
+            "median": 26500,
+            "min": 24995,
+            "max": 28208,
+            "p95": 28208,
+            "stdev": 1302.6394359146357
+          }
+        }
+      ]
+    }
+  ]
+}
