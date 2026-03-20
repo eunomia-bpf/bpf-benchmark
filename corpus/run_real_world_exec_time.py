@@ -365,6 +365,46 @@ def program_type_label(program: dict[str, Any]) -> str:
     return f"prog_type={prog_type}" if prog_type else "unknown"
 
 
+def exec_time_skip_reason(program: dict[str, Any]) -> str | None:
+    section_name = str(program.get("section_name", "")).strip().lower()
+    prog_type_name = str(program.get("prog_type_name", "")).strip().lower()
+    if prog_type_name == "tracing" and section_name.startswith("iter/"):
+        return (
+            "exec-time skipped: iter/* programs require a nested iterator context "
+            "that the generic harness cannot synthesize"
+        )
+    return None
+
+
+def skipped_run(
+    runtime: str,
+    runner: Path,
+    object_path: Path,
+    program_name: str,
+    repeat: int,
+    iterations: int,
+    io_mode: str,
+    reason: str,
+    input_file: Path | None = None,
+) -> dict[str, Any]:
+    return {
+        "runtime": runtime,
+        "command": build_command(runtime, runner, object_path, program_name, repeat, io_mode, input_file=input_file),
+        "status": "skipped",
+        "repeat": repeat,
+        "iterations_requested": iterations,
+        "iterations_completed": 0,
+        "io_mode": io_mode,
+        "input_path": str(input_file) if input_file is not None else None,
+        "timing_source": None,
+        "exec_ns_samples": [],
+        "median_exec_ns": None,
+        "error": reason,
+        "stdout_excerpt": "",
+        "stderr_excerpt": "",
+    }
+
+
 def run_runtime(
     runtime: str,
     runner: Path,
@@ -500,10 +540,17 @@ def compute_summary(program_records: list[dict[str, Any]]) -> dict[str, Any]:
     runtime_status = {"kernel": Counter(), "llvmbpf": Counter()}
     failure_breakdown = {"kernel": Counter(), "llvmbpf": Counter()}
     skip_breakdown = {"kernel": Counter(), "llvmbpf": Counter()}
+    program_skip_breakdown = Counter()
     ratios: list[float] = []
     any_runtime_exec_ok = 0
+    exec_time_eligible = 0
 
     for record in program_records:
+        if record.get("exec_skip_reason"):
+            program_skip_breakdown[str(record["exec_skip_reason"])] += 1
+            continue
+
+        exec_time_eligible += 1
         runs = {run["runtime"]: run for run in record["runs"]}
         for runtime, run in runs.items():
             runtime_status[runtime][run["status"]] += 1
@@ -526,6 +573,8 @@ def compute_summary(program_records: list[dict[str, Any]]) -> dict[str, Any]:
     return {
         "programs": {
             "paired_from_code_size": len(program_records),
+            "exec_time_eligible": exec_time_eligible,
+            "exec_time_skipped": len(program_records) - exec_time_eligible,
             "kernel_test_run_ok": runtime_status["kernel"].get("ok", 0),
             "llvmbpf_run_ok": runtime_status["llvmbpf"].get("ok", 0),
             "any_runtime_exec_ok": any_runtime_exec_ok,
@@ -534,6 +583,7 @@ def compute_summary(program_records: list[dict[str, Any]]) -> dict[str, Any]:
         "runtime_status": {runtime: dict(counter) for runtime, counter in runtime_status.items()},
         "runtime_failure_breakdown": {runtime: dict(counter) for runtime, counter in failure_breakdown.items()},
         "runtime_skip_breakdown": {runtime: dict(counter) for runtime, counter in skip_breakdown.items()},
+        "program_skip_breakdown": dict(program_skip_breakdown),
         "llvmbpf_over_kernel_exec_ratio": {
             "paired_programs": len(ratios),
             "geomean": geomean(ratios),
@@ -570,6 +620,8 @@ def render_report(payload: dict[str, Any]) -> str:
         "| Metric | Value |",
         "| --- | ---: |",
         f"| Programs paired in code-size input | {summary['programs']['paired_from_code_size']} |",
+        f"| Programs eligible for exec-time | {summary['programs']['exec_time_eligible']} |",
+        f"| Programs skipped before exec-time | {summary['programs']['exec_time_skipped']} |",
         f"| Kernel `BPF_PROG_TEST_RUN` succeeded | {summary['programs']['kernel_test_run_ok']} |",
         f"| llvmbpf runs completed | {summary['programs']['llvmbpf_run_ok']} |",
         f"| Programs with any runtime exec data | {summary['programs']['any_runtime_exec_ok']} |",
@@ -587,6 +639,20 @@ def render_report(payload: dict[str, Any]) -> str:
             f"| {runtime} | {counter.get('ok', 0)} | {counter.get('error', 0)} | "
             f"{counter.get('timeout', 0)} | {counter.get('skipped', 0)} |"
         )
+
+    program_skips = summary.get("program_skip_breakdown", {})
+    if program_skips:
+        lines.extend(
+            [
+                "",
+                "## Program Skips",
+                "",
+                "| Skip reason | Count |",
+                "| --- | ---: |",
+            ]
+        )
+        for reason, count in sorted(program_skips.items(), key=lambda item: (-item[1], item[0])):
+            lines.append(f"| {reason} | {count} |")
 
     for runtime in ("kernel", "llvmbpf"):
         failures = summary["runtime_failure_breakdown"].get(runtime, {})
@@ -633,6 +699,7 @@ def render_report(payload: dict[str, Any]) -> str:
                 "io_mode": record["exec_io_mode"],
                 "kernel_status": runs["kernel"]["status"],
                 "llvmbpf_status": runs["llvmbpf"]["status"],
+                "exec_skip_reason": str(record.get("exec_skip_reason", "")) or "-",
             }
         )
     coverage_rows.sort(key=lambda row: (row["repo"], row["artifact"], row["program"]))
@@ -642,14 +709,15 @@ def render_report(payload: dict[str, Any]) -> str:
                 "",
                 "## Program Coverage",
                 "",
-                "| Repo | Artifact | Program | Section | Type | I/O mode | kernel | llvmbpf |",
-                "| --- | --- | --- | --- | --- | --- | --- | --- |",
+                "| Repo | Artifact | Program | Section | Type | I/O mode | kernel | llvmbpf | Exec skip |",
+                "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
             ]
         )
         for row in coverage_rows:
             lines.append(
                 f"| {row['repo']} | `{row['artifact']}` | `{row['program']}` | `{row['section']}` | "
-                f"`{row['prog_type']}` | `{row['io_mode']}` | `{row['kernel_status']}` | `{row['llvmbpf_status']}` |"
+                f"`{row['prog_type']}` | `{row['io_mode']}` | `{row['kernel_status']}` | `{row['llvmbpf_status']}` | "
+                f"`{row.get('exec_skip_reason', '-')}` |"
             )
 
     paired_rows = []
@@ -701,6 +769,7 @@ def render_report(payload: dict[str, Any]) -> str:
             "- Packet mode is used only for XDP and skb-backed program types; all other program types use `io-mode=context` with a zero-filled context buffer.",
             "- Kernel and llvmbpf exec runs are attempted independently so kernel `ENOTSUP` does not suppress userspace exec-time coverage.",
             "- Kernel `BPF_PROG_TEST_RUN` cases that report `ENOTSUP` are recorded as `skipped` instead of hard failures.",
+            "- `iter/*` programs are skipped before exec-time because they need nested iterator contexts, not a flat synthetic buffer.",
             "- `--program-name` uses the libbpf program name stored in the code-size results; section names are reported alongside the measurements.",
         ]
     )
@@ -735,6 +804,40 @@ def main() -> int:
         object_path = Path(program["object_path"])
         io_mode = resolve_exec_io_mode(program)
         input_file = packet_file if io_mode == "packet" else context_file
+        skip_reason = exec_time_skip_reason(program)
+        if skip_reason is not None:
+            program_records.append(
+                {
+                    **program,
+                    "exec_io_mode": io_mode,
+                    "exec_skip_reason": skip_reason,
+                    "runs": [
+                        skipped_run(
+                            "kernel",
+                            runner_path,
+                            object_path,
+                            program["program_name"],
+                            args.repeat,
+                            args.iterations,
+                            io_mode,
+                            skip_reason,
+                            input_file=input_file,
+                        ),
+                        skipped_run(
+                            "llvmbpf",
+                            runner_path,
+                            object_path,
+                            program["program_name"],
+                            args.repeat,
+                            args.iterations,
+                            io_mode,
+                            skip_reason,
+                            input_file=input_file,
+                        ),
+                    ],
+                }
+            )
+            continue
         kernel_run = maybe_reclassify_kernel_run(
             program,
             run_runtime(
