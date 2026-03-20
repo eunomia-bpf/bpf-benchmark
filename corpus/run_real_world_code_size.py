@@ -889,6 +889,10 @@ def main() -> int:
                 "name": str(program["name"]),
                 "section_name": str(program["section_name"]),
                 "insn_count": int(program["insn_count"]),
+                "prog_type": int(program.get("prog_type", 0)),
+                "expected_attach_type": int(program.get("expected_attach_type", 0)),
+                "prog_type_name": str(program.get("prog_type_name", "")),
+                "attach_type_name": str(program.get("attach_type_name", "")),
                 "runs": [],
             }
             for runtime in runtimes:
