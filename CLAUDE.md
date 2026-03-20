@@ -156,6 +156,7 @@ Sonnet subagent is available for code writing and analysis tasks.
 - **Claude 只给高层次要求** — 不自己调研代码再给详细变更指令，让 codex 自己读代码、设计方案、实现
 - **Codex 必须测试验证** — 每个 codex prompt 必须要求写完代码后实际跑通（sudo / VM vng 等方式），不能只写不测
 - **构建+修改+运行不拆分** — 一个 subagent 负责完整流程（改代码→构建→运行→发现 bug→修复→再运行），不要拆成多个 agent，这样发现问题能立刻修
+- **⚠️ 同一时间只能一个 agent 改内核代码，也只能一个 agent 跑测试** — 多个 agent 同时改 vendor/linux-framework 会产生 git 冲突；多个 agent 同时跑 VM benchmark/selftest 会竞争资源、结果不可靠。调度时必须串行化内核改动和测试任务。
 
 ### Usage (Sonnet Agent)
 
