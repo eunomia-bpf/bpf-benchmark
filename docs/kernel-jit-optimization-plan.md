@@ -14,7 +14,7 @@
 > - **⚠️ 同一时间只能有一个 agent 修改内核代码（vendor/linux-framework），也只能有一个 agent 跑测试（VM benchmark / selftest）。** 多个 agent 同时改内核代码会产生 git 冲突；多个 agent 同时跑 VM 测试会竞争资源、结果不可靠。调度时必须串行化内核改动和测试任务。
 > - **⚠️ codex 默认不要 commit/push，除非 prompt 明确要求。** 改完代码就停，由 Claude 统一 commit。
 > - **⚠️ 如果需要 commit，必须在 main 分支直接做，不要开新分支。** 开分支导致合并冲突。
-> 上次更新：2026-03-20（#1-#270）。当前状态：#1-#265 ✅，#266 ⚠️ AWS profile flow 已跑通但 direct benchmark path 仍有 AL2023 glibc mismatch，#267-#270 ✅。vm-selftest **27/27**，vm-micro-smoke ✅，scanner-tests ✅。权威数据：micro applied-only **1.110x**，corpus **1.046x**，Tracee **+6.28%/+7.00%**，Tetragon **+8.70%/+22.29%**。Katran：旧 **+24.4%** regression 已确认是 harness artifact；修复后 smoke **1.0418x**，full authoritative rerun 仍受 VM sustained-traffic timeout 阻塞。AWS ARM64：`t4g.micro/us-east-1` one-shot install + smoke/extra benchmark 已成功并确认实例终止。Active E2E：tracee/tetragon/bpftrace/scx/katran。详见各任务条目和 `docs/tmp/` 报告。
+> 上次更新：2026-03-20b（#256 全量 rerun 完成）。**权威数据 2026-03-20**：micro overall **1.057x** / applied-only **1.193x**（7 applied，rotate64_hash 2.294x）；corpus overall **0.983x** / applied-only **0.947x**（93 measured，same-image 93/150 partial）；Tracee exec_storm **+8.1%** BPF **-3.8%**；Tetragon stress_exec **+20.3%** connect_storm **+32.2%**；Katran smoke **1.042x**（harness fix 后翻正）。Pure-JIT gap **0.581x**（timing fix 后）。vm-selftest **27/27**。#1-#270 全部 ✅。⚠️ Corpus 主要问题：57/150 rows 缺 stock_exec_ns（same-image 不完整）。详见 `docs/tmp/full_rerun_authoritative_20260320.md`。
 
 ---
 
@@ -322,6 +322,57 @@
 每新增 directive 只需：~50-100 LOC validator + ~50-100 LOC emitter (per arch)。
 Transport/blob/remap/CPU gating/fail-closed 全部通用。
 
+### 4.4 Kernel 三层安全模型
+
+对齐 kernel verifier/JIT 原则（§1.4 #11）：Validator 是唯一安全门，Emitter 无条件信任。
+
+```
+syscall BPF_PROG_JIT_RECOMPILE(prog_fd, policy_fd)
+    │
+    ▼
+Layer 0: Interface — jit_policy.c (432 行)
+    解析不受信的用户态 policy blob → 结构化 rules
+    职责：blob 格式/版本/size 校验、rule 排序、overlap 检测
+    信任：无（输入全部不可信）
+    │
+    ├─ Layer 0.5: bpf_jit_arch_form_supported()
+    │  架构能力声明。不支持的 form 在此直接拒绝
+    │  x86: 8/8 forms    arm64: 4/8 forms
+    │
+    ▼
+Layer 1: Validation — jit_validators.c (1599 行)
+    唯一安全门。每个 rule 对 live program 做语义校验
+    职责：site 形状匹配、canonical params 提取、
+          params 边界检查（lsb+width≤64 等架构无关约束）
+    输出：填充 canonical_params，供 emitter 消费
+    信任：Layer 0 的 rule 结构（但 site 内容从 live xlated program 读）
+    │
+    ▼
+Layer 2: Emission — arch/*/net/bpf_jit_comp.c
+    机械编码。无条件信任 validator 的 canonical_params
+    职责：把 params 翻译为目标架构 native 指令
+    不做：params 校验、fallback、raw insn 读取
+    -EINVAL 仅用于"此架构无合适指令"（不应发生，
+           因为 Layer 0.5 已拒绝不支持的 form）
+    │
+    ▼
+Orchestration — jit_directives.c (727 行)
+    串联上述三层 + 生命周期管理
+    职责：snapshot → per-rule iterate(validate→emit) →
+          commit/abort → synchronize_rcu → trampoline regen → ksym
+```
+
+**文件布局（`vendor/linux-framework/`）：**
+
+| 文件 | 职责 | 行数 |
+|------|------|------|
+| `kernel/bpf/jit_directives.c` | Orchestration：syscall 入口、recompile 生命周期、logging、ksym | ~727 |
+| `kernel/bpf/jit_validators.c` | Layer 1：8 form 共享 validators、shape parser、params 提取 | ~1599 |
+| `kernel/bpf/jit_policy.c` | Layer 0：policy blob 解析、rule 排序、overlap 检测 | ~432 |
+| `arch/x86/net/bpf_jit_comp.c` | Layer 2 (x86)：8 form emitters、staged commit/abort、arch override | ~2100 added |
+| `arch/arm64/net/bpf_jit_comp.c` | Layer 2 (arm64)：4 form emitters、staged commit/abort、arch override | ~900 added |
+| `include/linux/bpf_jit_directives.h` | 共享类型：canonical_params、form metadata、arch callback 声明 | ~272 |
+
 ---
 
 ## 5. 评估计划
@@ -362,6 +413,105 @@ Transport/blob/remap/CPU gating/fail-closed 全部通用。
 1. Modern wide OoO x86 core ✅
 2. Smaller-core / Atom-like x86 ❌
 3. arm64 系统 🔄（CI 有，性能数据有限）
+
+### 5.6 Benchmark Framework 架构
+
+#### 设计原则
+
+- **Runner 只测量**：micro_exec 是唯一的 BPF 执行/计时工具，输出标准化 JSON，每个 measurement 一行
+- **Orchestrator 统一调度**：一个 Python 调度层，通过 mode 区分 micro/corpus/e2e
+- **Makefile 是唯一入口**：所有 benchmark 从 `make vm-*` 触发，不用一次性脚本
+- **Same-image paired measurement**：recompile 模式下 load→measure stock→recompile→measure recompile，消除 layout 噪声
+
+#### 三层评估模型
+
+```
+┌──────────────────────────────────────────────┐
+│  Configuration                                │
+│  config/micro_pure_jit.yaml — 62 micro 定义   │
+│  corpus/config/ — corpus target 发现           │
+│  e2e/cases/*/config.yaml — E2E case 定义       │
+│  micro/policies/ + corpus/policies/ — 优化策略  │
+└──────────────────┬───────────────────────────┘
+                   ▼
+┌──────────────────────────────────────────────┐
+│  Runner: micro_exec (C++)                     │
+│  子命令：run-llvmbpf | run-kernel             │
+│  输入：.bpf.o + .mem + repeat/warmup params   │
+│  输出：JSON lines, 每行一个 measurement        │
+│    {"phase":"stock","exec_ns":N,...}           │
+│    {"phase":"recompile","exec_ns":N,...}       │
+│  不做：target 发现、policy 选择、结果聚合       │
+└──────────────────┬───────────────────────────┘
+                   ▼
+┌──────────────────────────────────────────────┐
+│  Orchestrator: micro/driver.py (Python)       │
+│                                               │
+│  ┌────────┐ ┌──────────┐ ┌─────────┐         │
+│  │ micro  │ │  corpus   │ │   e2e   │         │
+│  │ mode   │ │  mode     │ │  mode   │         │
+│  ├────────┤ ├──────────┤ ├─────────┤         │
+│  │YAML    │ │target    │ │daemon   │         │
+│  │manifest│ │discovery │ │setup    │         │
+│  │input   │ │io-mode   │ │workload │         │
+│  │gen     │ │selection │ │trigger  │         │
+│  └────────┘ └──────────┘ └─────────┘         │
+│                                               │
+│  共享：VM boot、micro_exec 调用、JSON 收集、    │
+│       统计聚合（median/geomean/CI）、报告输出    │
+└──────────────────┬───────────────────────────┘
+                   ▼
+┌──────────────────────────────────────────────┐
+│  Scanner: scanner/ (C++)                      │
+│  子命令：enumerate | scan | apply | policy     │
+│  职责：pattern matching、policy 编译、blob 生成  │
+│  不做：测量、调度、结果分析                      │
+└──────────────────────────────────────────────┘
+```
+
+#### 目录布局（理想）
+
+依赖方向：`runner/` 是共享基础，`micro/`、`corpus/`、`e2e/` 各自只依赖 `runner/`，互不依赖。
+
+```
+runner/                     # 共享基础设施（不依赖 micro/corpus/e2e）
+  src/                      # C++ micro_exec 源码
+  include/                  # C++ headers
+  CMakeLists.txt
+  libs/                     # Python 共享库
+    commands.py             #   micro_exec CLI 调用构建
+    results.py              #   JSON result 解析/聚合
+    statistics.py           #   median/geomean/CI/Wilcoxon
+    environment.py          #   CPU/governor/turbo/VM 检测
+    vm.py                   #   vng boot/rwdir/exec helpers
+    recompile.py            #   scanner enumerate → apply 共享
+    policy.py               #   policy YAML v3 解析
+
+micro/                      # Micro 评估层（只依赖 runner/）
+  programs/                 #   BPF .bpf.c 源码 (62 个)
+  policies/                 #   Per-benchmark policy YAML
+  generated-inputs/         #   输入数据 (gitignored)
+  input_generators.py       #   二进制输入生成器
+  catalog.py                #   micro YAML manifest 加载
+  driver.py                 #   micro 调度 (import runner.libs)
+
+corpus/                     # Corpus 评估层（只依赖 runner/）
+  build/                    #   .bpf.o 收集 (gitignored)
+  policies/                 #   Per-program policy YAML (580 个)
+  config/                   #   Corpus manifest
+  driver.py                 #   corpus 调度 (import runner.libs)
+  discovery.py              #   Target 发现 + io-mode 选择
+
+e2e/                        # E2E 评估层（只依赖 runner/）
+  cases/                    #   Per-case: tracee/, tetragon/, katran/, ...
+  driver.py                 #   E2E 调度 (import runner.libs)
+
+scanner/                    # Scanner + policy compiler（独立）
+config/                     # Suite manifest YAML
+scripts/                    # 辅助脚本 (aws_arm64.sh 等)
+```
+
+详细设计文档见 `docs/tmp/benchmark-framework-design.md`。
 
 ---
 
@@ -732,7 +882,7 @@ make clean
 | 253 | **ARM64 CI corpus exec fix（2026-03-19）** | ✅ | 修复 io-mode：packet 给 XDP/TC，context 给 non-packet。覆盖率 1/24→12/23（52%）。已合并到 main。注意：ARM64 CI 跑的是 **stock host kernel**，只能做 llvmbpf vs kernel characterization，不能跑 kernel-recompile（需要 custom kernel）。 |
 | 254 | **Repetition 机制调查 + timing fix（2026-03-19）** | ✅ | 调查确认：kernel runner 已用 `opts.repeat`，但 llvmbpf runner 逐次计时（timer overhead 膨胀 ultra-short 数据）。**修复**：1) llvmbpf 改为批量计时（`simple` 11ns→4ns，和 kernel 4ns 一致）；2) context-mode 对 sk_lookup/netfilter 启用 kernel repeat（402ns→2ns）。**之前所有 llvmbpf characterization 数据 ultra-short 部分偏高需要重测。** 报告：`docs/tmp/repetition_investigation_20260319.md`、`docs/tmp/timing_fix_20260319.md`。 |
 | 255 | **Corpus llvmbpf 删除（2026-03-19）** | ✅ | corpus 全路径删除 llvmbpf。报告：`docs/tmp/corpus_llvmbpf_removal_20260319.md`。 |
-| 256 | **全量 rerun post-timing-fix（2026-03-19）** | ⚠️ | Step 1 完成：pure-JIT geomean **0.614x**（vs 旧 0.609x，+0.85%）。Step 2-4 codex 被 kill，待所有 cleanup 完成后重跑。 |
+| 256 | **全量 rerun post-all-fixes（2026-03-20）** | ✅ | **权威 rerun 完成**（10iter/5warm/1000rep）。Micro：overall **1.057x**，applied-only **1.193x**（7 applied，rotate64_hash 2.294x，rotate_dense 1.349x；regressions: cmov_dense 0.943x, bpf_call_chain 0.990x）。Pure-JIT gap **0.581x** raw / **0.652x** adjusted。Corpus：overall **0.983x**，applied-only **0.947x**（93 measured，26 applied）；same-image 93/150 partial（57 rows 缺 stock_exec_ns）。E2E：Tracee exec_storm **+8.1%** / BPF **-3.8%**；Tetragon stress_exec **+20.3%** / connect_storm **+32.2%**；bpftrace 0 applied；scx 0 applied。数据：`micro/results/vm_micro_authoritative_20260320.json`、`corpus/results/corpus_authoritative_20260320.json`。报告：`docs/tmp/full_rerun_authoritative_20260320.md`。 |
 | 257 | **Branch 合并清理（2026-03-19）** | ✅ | ARM64 CI 分支合并到 main，旧分支已删。 |
 | 258 | **Paired measurement 实现（2026-03-19）** | ✅ | 归入 #262（方案改为修改现有 run-kernel --recompile，不加新子命令）。 |
 | 259 | **Benchmark framework review（2026-03-19）** | ✅ | 结论：micro applied-only 可靠；corpus overall 不可靠；旧 llvmbpf 数据全部失效。报告：`docs/tmp/benchmark_framework_review_20260319.md`。 |
