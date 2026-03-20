@@ -1,43 +1,107 @@
-name: ARM64 Benchmark
+name: ARM64 Baseline Benchmark
 
 on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  benchmark:
-    if: github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip ci]')
-    timeout-minutes: 60
+  baseline:
+    timeout-minutes: 120
     runs-on: ubuntu-24.04-arm
     env:
-      RESULT_PREFIX: arm64
+      MICRO_OUTPUT: micro/results/arm64_pure_jit.json
+      MICRO_LLVMBPF_FALLBACK: micro/results/arm64_pure_jit_llvmbpf_only.json
+      MICRO_KERNEL_FALLBACK: micro/results/arm64_pure_jit_kernel_only.json
+      CORPUS_RESULTS_DIR: corpus/results/arm64
+      CORPUS_CODE_SIZE_OUTPUT: corpus/results/arm64/real_world_code_size_libbpf_bootstrap_arm64.json
+      CORPUS_CODE_SIZE_REPORT: corpus/results/arm64/real_world_code_size_libbpf_bootstrap_arm64.md
+      CORPUS_EXEC_OUTPUT: corpus/results/arm64/real_world_exec_time_libbpf_bootstrap_arm64.json
+      CORPUS_EXEC_REPORT: corpus/results/arm64/real_world_exec_time_libbpf_bootstrap_arm64.md
+      PREFLIGHT_DIR: artifacts/arm64-baseline/preflight
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: main
-
-      - name: Update required submodules
-        run: |
-          git submodule sync -- vendor/llvmbpf vendor/libbpf vendor/bpftool
-          git submodule update --init --depth 1 \
-            vendor/llvmbpf \
-            vendor/libbpf \
-            vendor/bpftool
+          submodules: recursive
 
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang llvm cmake pkg-config libbpf-dev libelf-dev zlib1g-dev libzstd-dev python3-yaml
+          sudo apt-get install -y \
+            bpftool \
+            build-essential \
+            clang \
+            cmake \
+            libbpf-dev \
+            libelf-dev \
+            libyaml-cpp-dev \
+            llvm \
+            llvm-dev \
+            pkg-config \
+            python3-yaml \
+            zlib1g-dev \
+            libzstd-dev
 
-      - name: Build benchmark suite
-        run: make -C micro
+      - name: Record runner environment
+        run: |
+          mkdir -p "${PREFLIGHT_DIR}"
+          {
+            echo "date=$(date -u --iso-8601=seconds)"
+            echo "uname=$(uname -a)"
+            echo "machine=$(uname -m)"
+            echo "clang=$(clang --version | head -n 1)"
+            echo "cmake=$(cmake --version | head -n 1)"
+            echo "python=$(python3 --version)"
+            echo "bpftool=$(bpftool version | head -n 1)"
+            if [ -e /sys/kernel/btf/vmlinux ]; then
+              echo "kernel_btf=/sys/kernel/btf/vmlinux"
+            else
+              echo "kernel_btf=missing"
+            fi
+            if [ -r /proc/sys/net/core/bpf_jit_enable ]; then
+              echo "bpf_jit_enable=$(cat /proc/sys/net/core/bpf_jit_enable)"
+            else
+              echo "bpf_jit_enable=unavailable"
+            fi
+          } | tee "${PREFLIGHT_DIR}/environment.txt"
 
-      - name: Run pure JIT characterization with both runtimes
-        id: pure_jit_full
+      - name: Build micro runner and BPF programs
+        run: |
+          make -C micro micro_exec
+          make -C micro programs
+
+      - name: Preflight compile-only backend checks
+        run: |
+          mkdir -p "${PREFLIGHT_DIR}"
+          micro/build/runner/micro_exec list-programs \
+            --program micro/programs/simple.bpf.o \
+            > "${PREFLIGHT_DIR}/simple_program_inventory.json"
+
+          micro/build/runner/micro_exec run-llvmbpf \
+            --program micro/programs/simple.bpf.o \
+            --program-name simple_xdp \
+            --io-mode staged \
+            --input-size 64 \
+            --repeat 1 \
+            --compile-only \
+            > "${PREFLIGHT_DIR}/simple_llvmbpf_compile_only.json"
+
+          sudo -n micro/build/runner/micro_exec run-kernel \
+            --program micro/programs/simple.bpf.o \
+            --program-name simple_xdp \
+            --io-mode packet \
+            --raw-packet \
+            --input-size 64 \
+            --repeat 1 \
+            --compile-only \
+            > "${PREFLIGHT_DIR}/simple_kernel_compile_only.json" \
+            2> "${PREFLIGHT_DIR}/simple_kernel_compile_only.stderr"
+
+      - name: Run micro pure-JIT baseline with llvmbpf and kernel
+        id: micro_full
         continue-on-error: true
         run: |
           mkdir -p micro/results
@@ -48,14 +112,30 @@ jobs:
             --warmups 1 \
             --repeat 200 \
             --suite config/micro_pure_jit.yaml \
-            --output "micro/results/${RESULT_PREFIX}_pure_jit.json"
+            --output "${MICRO_OUTPUT}"
 
-      - name: Fallback pure JIT characterization to kernel-only
+      - name: Fallback micro llvmbpf-only run
         if: always()
         continue-on-error: true
         run: |
-          if [ -s "micro/results/${RESULT_PREFIX}_pure_jit.json" ]; then
-            echo "Combined pure JIT run produced output; skipping fallback."
+          if [ -s "${MICRO_OUTPUT}" ]; then
+            echo "Combined micro result exists; skipping llvmbpf-only fallback."
+            exit 0
+          fi
+          python3 micro/driver.py suite \
+            --runtime llvmbpf \
+            --iterations 5 \
+            --warmups 1 \
+            --repeat 200 \
+            --suite config/micro_pure_jit.yaml \
+            --output "${MICRO_LLVMBPF_FALLBACK}"
+
+      - name: Fallback micro kernel-only run
+        if: always()
+        continue-on-error: true
+        run: |
+          if [ -s "${MICRO_OUTPUT}" ]; then
+            echo "Combined micro result exists; skipping kernel-only fallback."
             exit 0
           fi
           python3 micro/driver.py suite \
@@ -64,28 +144,88 @@ jobs:
             --warmups 1 \
             --repeat 200 \
             --suite config/micro_pure_jit.yaml \
-            --output "micro/results/${RESULT_PREFIX}_pure_jit.json"
+            --output "${MICRO_KERNEL_FALLBACK}"
 
-      - name: Upload benchmark artifacts
+      - name: Fetch minimal corpus inputs
+        run: |
+          python3 corpus/fetch_real_world_corpus.py --repo libbpf-bootstrap
+
+      - name: Run corpus code-size baseline
+        id: corpus_code_size
+        continue-on-error: true
+        run: |
+          mkdir -p "${CORPUS_RESULTS_DIR}"
+          python3 corpus/run_real_world_code_size.py \
+            --repo libbpf-bootstrap \
+            --runtime llvmbpf \
+            --runtime kernel \
+            --output "${CORPUS_CODE_SIZE_OUTPUT}" \
+            --report "${CORPUS_CODE_SIZE_REPORT}"
+
+      - name: Run corpus exec-time baseline
+        if: always()
+        id: corpus_exec
+        continue-on-error: true
+        run: |
+          if [ ! -s "${CORPUS_CODE_SIZE_OUTPUT}" ]; then
+            echo "Corpus code-size output missing; skipping exec-time baseline."
+            exit 0
+          fi
+          python3 corpus/run_real_world_exec_time.py \
+            --input "${CORPUS_CODE_SIZE_OUTPUT}" \
+            --output "${CORPUS_EXEC_OUTPUT}" \
+            --report "${CORPUS_EXEC_REPORT}" \
+            --iterations 5 \
+            --repeat 200
+
+      - name: Summarize outputs
+        if: always()
+        run: |
+          {
+            echo "## ARM64 baseline summary"
+            echo
+            echo "- Runner: \`$(uname -a)\`"
+            if [ -r /proc/sys/net/core/bpf_jit_enable ]; then
+              echo "- Host bpf_jit_enable: \`$(cat /proc/sys/net/core/bpf_jit_enable)\`"
+            fi
+            if [ -s "${MICRO_OUTPUT}" ]; then
+              echo "- Micro baseline: combined llvmbpf+kernel result present"
+            else
+              echo "- Micro baseline: combined result missing"
+            fi
+            if [ -s "${MICRO_LLVMBPF_FALLBACK}" ]; then
+              echo "- Micro fallback: llvmbpf-only result present"
+            fi
+            if [ -s "${MICRO_KERNEL_FALLBACK}" ]; then
+              echo "- Micro fallback: kernel-only result present"
+            fi
+            if [ -s "${CORPUS_CODE_SIZE_OUTPUT}" ]; then
+              echo "- Corpus code-size baseline: present"
+            else
+              echo "- Corpus code-size baseline: missing"
+            fi
+            if [ -s "${CORPUS_EXEC_OUTPUT}" ]; then
+              echo "- Corpus exec-time baseline: present"
+            else
+              echo "- Corpus exec-time baseline: missing"
+            fi
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Validate required outputs
+        if: always()
+        run: |
+          test -s "${MICRO_OUTPUT}" \
+            || test -s "${MICRO_LLVMBPF_FALLBACK}" \
+            || test -s "${MICRO_KERNEL_FALLBACK}"
+
+      - name: Upload ARM64 baseline artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: arm64-benchmark-results
-          path: micro/results/arm64_*.json
+          name: arm64-baseline-results
+          path: |
+            micro/results/arm64*.json
+            corpus/results/arm64/*.json
+            corpus/results/arm64/*.md
+            artifacts/arm64-baseline/**
           if-no-files-found: warn
-
-      - name: Commit and push benchmark results
-        if: always()
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add micro/results/
-          git commit -m "CI: ARM64 benchmark results [skip ci]" || true
-          for attempt in 1 2 3; do
-            git pull --rebase origin main || true
-            if git push origin HEAD:main; then
-              exit 0
-            fi
-            sleep $((attempt * 5))
-          done
-          exit 1
