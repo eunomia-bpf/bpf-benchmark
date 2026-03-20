@@ -267,8 +267,21 @@ std::optional<uint8_t> binding_source_var(const std::vector<V5Binding> &bindings
     return std::nullopt;
 }
 
-bool rotate_mask_is_high(const V5PatternDesc &desc,
-                         const std::vector<V5PatternVar> &vars)
+bool rotate_mask_matches_kernel(int64_t rot_amount, int64_t mask)
+{
+    if (rot_amount <= 0 || rot_amount >= 32) {
+        return false;
+    }
+
+    // Mirror bpf_jit_rotate_mask_matches() in the kernel validator:
+    // masked 32-bit rotates keep the high bits, while low masks are shifts.
+    const uint32_t high_mask =
+        ~((1U << (32 - static_cast<uint32_t>(rot_amount))) - 1U);
+    return static_cast<uint32_t>(mask) == high_mask;
+}
+
+bool rotate_mask_matches_desc(const V5PatternDesc &desc,
+                              const std::vector<V5PatternVar> &vars)
 {
     if (desc.family != V5Family::Rotate || desc.pattern.size() < 5 ||
         desc.pattern[1].opcode != 0x57) {
@@ -288,13 +301,7 @@ bool rotate_mask_is_high(const V5PatternDesc &desc,
     }
 
     const int64_t rot_amount = vars[*amount_var].value;
-    if (rot_amount <= 0 || rot_amount >= 32) {
-        return false;
-    }
-
-    const uint32_t high_mask =
-        ~((1U << (32 - static_cast<uint32_t>(rot_amount))) - 1U);
-    return static_cast<uint32_t>(vars[mask_var].value) == high_mask;
+    return rotate_mask_matches_kernel(rot_amount, vars[mask_var].value);
 }
 
 std::string pattern_kind_for_desc(V5Family family,
@@ -527,7 +534,7 @@ bool match_v5_pattern_at(const std::vector<bpf_insn_raw> &insns,
     }
 
     return check_v5_constraints(desc.constraints, vars) &&
-           rotate_mask_is_high(desc, vars);
+           rotate_mask_matches_desc(desc, vars);
 }
 
 bool raw_is_cond_jump(const bpf_insn_raw &insn)
