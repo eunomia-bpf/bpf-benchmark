@@ -741,13 +741,15 @@ make clean
 | 250 | **Kernel 架构拆分 + arch callback（2026-03-19）** | ✅ | jit_directives.c 拆为 3 文件：`jit_directives.c`（727 行，编排）+ `jit_validators.c`（1599 行，validator）+ `jit_policy.c`（432 行，policy）。`bpf_jit_arch_form_supported()` arch callback 已加（x86 override + weak default）。验证全绿。报告：`docs/tmp/kernel_arch_split_20260319.md`。 |
 | 251 | **ARM64 emitter 实现（2026-03-19）** | ✅ | 4 form emitter（COND_SELECT/ROTATE/WIDE_MEM/BITFIELD_EXTRACT）+ staged recompile commit/abort + arch override。**x86 selftest 24/24 + ARM64 selftest 24/24 全通过。** test_recompile.c 改为 arch-aware。jit_policy.c 修复接受 ARM64 arch_id。报告：`docs/tmp/arm64_emitter_implementation_20260319.md`。 |
 | 252 | **Selftest 扩展 5 form（2026-03-19）** | ✅ | 5 个新 BPF 测试程序 + 5 个 test_recompile.c 用例。**vm-selftest 24/24 全通过**（19 旧 + 5 新）。8 个 canonical form 全部有 selftest 覆盖。报告：`docs/tmp/selftest_expansion_20260319.md`、`docs/tmp/selftest_5form_validation_20260319.md`。 |
-| 253 | **ARM64 CI corpus exec fix（2026-03-19）** | 🔄 | 23/24 因 packet context 失败。修 harness 支持 non-packet program types。codex 执行中（GitHub only）。 |
+| 253 | **ARM64 CI corpus exec fix（2026-03-19）** | ✅ | 修复 io-mode：packet 给 XDP/TC，context 给 non-packet。覆盖率 1/24→12/23（52%）。已合并到 main。注意：ARM64 CI 跑的是 **stock host kernel**，只能做 llvmbpf vs kernel characterization，不能跑 kernel-recompile（需要 custom kernel）。 |
 | 254 | **Repetition 机制调查 + timing fix（2026-03-19）** | ✅ | 调查确认：kernel runner 已用 `opts.repeat`，但 llvmbpf runner 逐次计时（timer overhead 膨胀 ultra-short 数据）。**修复**：1) llvmbpf 改为批量计时（`simple` 11ns→4ns，和 kernel 4ns 一致）；2) context-mode 对 sk_lookup/netfilter 启用 kernel repeat（402ns→2ns）。**之前所有 llvmbpf characterization 数据 ultra-short 部分偏高需要重测。** 报告：`docs/tmp/repetition_investigation_20260319.md`、`docs/tmp/timing_fix_20260319.md`。 |
 | 255 | **Corpus llvmbpf 删除（2026-03-19）** | ✅ | corpus 全路径删除 llvmbpf。报告：`docs/tmp/corpus_llvmbpf_removal_20260319.md`。 |
-| 256 | **全量 rerun post-timing-fix（2026-03-19）** | 🔄 | 串行：pure-JIT → micro BpfReJIT → corpus → E2E。codex 执行中。 |
-| 257 | **Branch 合并清理（2026-03-19）** | 🔄 | 合并 arm64-ci-corpus-exec-fix 分支到 main。codex 执行中。 |
-| 258 | **Paired measurement 实现（2026-03-19）** | 🔄 | `micro_exec run-kernel-paired` 子命令 + corpus driver 更新。codex 执行中。 |
-| 259 | **Benchmark framework review（2026-03-19）** | ✅ | 结论：micro applied-only 可靠；corpus overall 不可靠（分别加载+固定顺序+单 sample）；旧 llvmbpf 数据全部失效。建议 applied-only 为主指标 + same-image before/after。报告：`docs/tmp/benchmark_framework_review_20260319.md`。 |
-| 260 | **ARM64 micro eval（待做）** | ⏳ | ARM64 QEMU 里跑 micro benchmark（kernel + kernel-recompile）。依赖 #256 x86 rerun 完成后串行。 |
-| 261 | **Benchmark cleanup（2026-03-19）** | 🔄 | 1) 删 adaptive-repeat 逻辑；2) applied-only 作为主指标；3) dead code 清理。codex 执行中。 |
-| 262 | **Same-image paired measurement 改造（待做）** | ⏳ | 修改现有 `run-kernel --recompile` 为 load→measure stock→recompile→measure recompile 单次流程。替换 #258 的新子命令方案，删掉 run-kernel-paired 作为 dead code。依赖 #258 完成后提取逻辑。 |
+| 256 | **全量 rerun post-timing-fix（2026-03-19）** | ⚠️ | Step 1 完成：pure-JIT geomean **0.614x**（vs 旧 0.609x，+0.85%）。Step 2-4 codex 被 kill，待所有 cleanup 完成后重跑。 |
+| 257 | **Branch 合并清理（2026-03-19）** | ✅ | ARM64 CI 分支合并到 main，旧分支已删。 |
+| 258 | **Paired measurement 实现（2026-03-19）** | ✅ | 归入 #262（方案改为修改现有 run-kernel --recompile，不加新子命令）。 |
+| 259 | **Benchmark framework review（2026-03-19）** | ✅ | 结论：micro applied-only 可靠；corpus overall 不可靠；旧 llvmbpf 数据全部失效。报告：`docs/tmp/benchmark_framework_review_20260319.md`。 |
+| 260 | **ARM64 micro eval（2026-03-19）** | 🔄 | ARM64 QEMU 里跑 micro smoke（kernel + kernel-recompile）。codex 执行中。 |
+| 261 | **Benchmark cleanup（待做）** | ⏳ | 1) 删 adaptive-repeat；2) applied-only 主指标；3) dead code 清理。等 #262 完成后派。 |
+| 262 | **Same-image paired measurement 改造（2026-03-19）** | 🔄 | 修改 `run-kernel --recompile` 为 same-image 流程 + 删 run-kernel-paired dead code + 改 corpus driver。codex 执行中。 |
+| 263 | **Trampoline regeneration + P1 ROTATE fix（2026-03-19）** | 🔄 | 合并执行：trampoline regen ~100 LOC + masked ROTATE 收紧 + P2 dead code。codex 执行中。 |
+| 264 | **ARM64 emitter review（2026-03-19）** | 🔄 | ~900 行 ARM64 内核代码深度 review。codex 执行中。 |

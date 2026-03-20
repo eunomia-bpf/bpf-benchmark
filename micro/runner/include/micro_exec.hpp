@@ -61,8 +61,6 @@ struct cli_options {
     bool raw_packet = false;
     uint32_t repeat = 1;
     uint32_t warmup_repeat = 5;
-    bool adaptive_repeat = true;
-    uint64_t target_window_ns = 100000;
     uint32_t input_size = 0;
     int opt_level = 3;
     bool no_cmov = false;
@@ -142,6 +140,7 @@ struct recompile_summary {
 struct sample_result {
     uint64_t compile_ns = 0;
     uint64_t exec_ns = 0;
+    std::optional<uint64_t> stock_exec_ns;
     std::string timing_source = "unknown";
     std::string timing_source_wall = "unavailable";
     std::optional<int> opt_level;
@@ -163,12 +162,6 @@ struct sample_result {
     recompile_summary recompile;
 };
 
-struct paired_sample_result {
-    sample_result stock;
-    sample_result recompile;
-    std::optional<double> ratio;
-};
-
 [[noreturn]] void fail(const std::string &message);
 cli_options parse_args(int argc, char **argv);
 std::vector<uint8_t> read_binary_file(const std::filesystem::path &path);
@@ -181,9 +174,7 @@ program_image load_program_image(
     const std::optional<std::string> &program_name = std::nullopt);
 sample_result run_llvmbpf(const cli_options &options);
 sample_result run_kernel(const cli_options &options);
-paired_sample_result run_kernel_paired(const cli_options &options);
 void print_json(const sample_result &sample);
-void print_paired_json(const paired_sample_result &sample);
 void print_program_inventory(const std::vector<program_descriptor> &programs);
 perf_counter_capture measure_perf_counters(
     const perf_counter_options &options,

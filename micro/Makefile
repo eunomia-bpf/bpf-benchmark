@@ -15,6 +15,7 @@ RUNNER_BUILD_DIR := $(BUILD_DIR)/runner
 RUNNER_BIN := $(RUNNER_BUILD_DIR)/micro_exec
 TOOLS_BUILD_DIR := $(BUILD_DIR)/tools
 DIRECTIVE_HINT_BIN := $(TOOLS_BUILD_DIR)/directive_hint
+MICRO_EXEC_ENABLE_LLVMBPF ?= ON
 
 .PHONY: all deps programs micro_exec directive_hint vendor_libbpf vendor_bpftool clean
 
@@ -52,7 +53,8 @@ micro_exec: $(LIBBPF_A) $(LIBBPF_HEADER) | $(RUNNER_BUILD_DIR)
 		-DCMAKE_BUILD_TYPE=Release \
 		-DMICRO_REPO_ROOT=$(REPO_ROOT) \
 		-DMICRO_LIBBPF_PREFIX=$(LIBBPF_PREFIX) \
-		-DMICRO_LIBBPF_LIBRARY=$(LIBBPF_A)
+		-DMICRO_LIBBPF_LIBRARY=$(LIBBPF_A) \
+		-DMICRO_EXEC_ENABLE_LLVMBPF=$(MICRO_EXEC_ENABLE_LLVMBPF)
 	cmake --build $(RUNNER_BUILD_DIR) --target micro_exec -j
 
 directive_hint: $(LIBBPF_A) $(LIBBPF_HEADER) | $(TOOLS_BUILD_DIR)

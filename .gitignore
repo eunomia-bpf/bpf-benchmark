@@ -30,8 +30,10 @@ Thumbs.db
 *.so
 build/
 micro/build/
+micro/build-arm64/
 scanner/build/
 corpus/build/
+tests/kernel/build-arm64/
 
 # BPF build artifacts
 *.bpf.o

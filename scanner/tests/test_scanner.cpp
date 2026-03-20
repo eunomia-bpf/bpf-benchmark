@@ -213,7 +213,15 @@ void test_v5_rotate_scan()
 
     auto masked_rotate = encode({
         {BPF_MOV64_X, regs(3, 5), 0, 0},
-        {BPF_AND64_X, regs(3, 4), 0, 0},
+        {BPF_AND64_K, regs(3, 0), 0, static_cast<int32_t>(0xf0000000U)},
+        {BPF_RSH64_K, regs(3, 0), 0, 28},
+        {BPF_MOV64_X, regs(7, 5), 0, 0},
+        {BPF_LSH64_K, regs(7, 0), 0, 4},
+        {BPF_OR64_X, regs(7, 3), 0, 0},
+    });
+    auto masked_rotate_low_mask = encode({
+        {BPF_MOV64_X, regs(3, 5), 0, 0},
+        {BPF_AND64_K, regs(3, 0), 0, 0x0fffffff},
         {BPF_RSH64_K, regs(3, 0), 0, 28},
         {BPF_MOV64_X, regs(7, 5), 0, 0},
         {BPF_LSH64_K, regs(7, 0), 0, 4},
@@ -240,6 +248,13 @@ void test_v5_rotate_scan()
     CHECK_EQ(rorx_summary.rules[0].native_choice,
              static_cast<uint16_t>(BPF_JIT_ROT_RORX));
     CHECK(rorx_summary.rules[0].pattern_kind == "rotate-32");
+
+    auto low_mask_summary = bpf_jit_scanner::scan_v5_builtin(
+        masked_rotate_low_mask.data(),
+        static_cast<uint32_t>(masked_rotate_low_mask.size()),
+        V5ScanOptions {.scan_rotate = true});
+    CHECK_EQ(low_mask_summary.rules.size(), 0u);
+    CHECK_EQ(low_mask_summary.rotate_sites, 0u);
 }
 
 void test_v5_wide_scan_variants()

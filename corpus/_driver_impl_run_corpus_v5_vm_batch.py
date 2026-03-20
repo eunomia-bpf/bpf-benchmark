@@ -325,6 +325,22 @@ def invocation_summary(result: dict[str, Any] | None) -> dict[str, Any] | None:
     }
 
 
+def paired_stock_invocation_summary(result: dict[str, Any] | None) -> dict[str, Any] | None:
+    summary = invocation_summary(result)
+    if not summary or not summary.get("ok"):
+        return None
+
+    sample = dict(summary.get("sample") or {})
+    stock_exec_ns = sample.get("stock_exec_ns")
+    if stock_exec_ns is None:
+        return None
+
+    sample["exec_ns"] = stock_exec_ns
+    sample.pop("stock_exec_ns", None)
+    summary["sample"] = sample
+    return summary
+
+
 def text_invocation_summary(result: dict[str, Any] | None) -> dict[str, Any] | None:
     if result is None:
         return None
@@ -556,7 +572,6 @@ def run_target_locally(
                 scan_source = f"{execution_mode}_runner_scan"
 
         v5_compile_raw = None
-        baseline_run_raw = None
         v5_run_raw = None
         if enable_recompile:
             v5_compile_raw = run_command(
@@ -574,26 +589,6 @@ def run_target_locally(
                     recompile_all=recompile_all,
                     skip_families=skip_families,
                     policy_file=active_policy_path,
-                    use_sudo=use_sudo,
-                ),
-                timeout_seconds,
-            )
-        if enable_exec and target.get("can_test_run") and baseline_compile_raw["ok"]:
-            baseline_run_raw = run_command(
-                build_runner_command(
-                    runner=runner,
-                    object_path=object_path,
-                    program_name=target["program_name"],
-                    io_mode=target["io_mode"],
-                    memory_path=memory_path,
-                    input_size=int(target["input_size"]),
-                    repeat=repeat,
-                    btf_custom_path=btf_custom_path,
-                    compile_only=False,
-                    recompile_v5=False,
-                    recompile_all=False,
-                    skip_families=[],
-                    policy_file=None,
                     use_sudo=use_sudo,
                 ),
                 timeout_seconds,
@@ -627,8 +622,17 @@ def run_target_locally(
     record["eligible_families"] = families_from_scan(scanner_counts)
     record["baseline_compile"] = invocation_summary(baseline_compile_raw)
     record["v5_compile"] = invocation_summary(v5_compile_raw)
-    record["baseline_run"] = invocation_summary(baseline_run_raw)
     record["v5_run"] = invocation_summary(v5_run_raw)
+    record["baseline_run"] = paired_stock_invocation_summary(v5_run_raw)
+    if (
+        enable_exec
+        and enable_recompile
+        and target.get("can_test_run")
+        and v5_run_raw
+        and v5_run_raw.get("ok")
+        and record["baseline_run"] is None
+    ):
+        record["record_error"] = "paired stock_exec_ns missing from run-kernel output"
     record["v5_compile_applied"] = bool((((record["v5_compile"] or {}).get("sample") or {}).get("recompile") or {}).get("applied"))
     record["v5_run_applied"] = bool((((record["v5_run"] or {}).get("sample") or {}).get("recompile") or {}).get("applied"))
     record["requested_families_compile"] = list(recompile_metadata(record["v5_compile"]).get("requested_families") or [])

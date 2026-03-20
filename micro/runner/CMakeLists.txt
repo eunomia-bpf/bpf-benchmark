@@ -24,13 +24,16 @@ set(MICRO_LIBBPF_PREFIX "${MICRO_LIBBPF_PREFIX}" CACHE PATH "libbpf prefix")
 set(MICRO_LIBBPF_LIBRARY "${MICRO_LIBBPF_LIBRARY}" CACHE FILEPATH "libbpf static library")
 set(MICRO_LLVMBPF_ROOT "${MICRO_REPO_ROOT}/vendor/llvmbpf")
 set(MICRO_SCANNER_ROOT "${MICRO_REPO_ROOT}/scanner")
+option(MICRO_EXEC_ENABLE_LLVMBPF "Build llvmbpf support into micro_exec" ON)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBELF REQUIRED IMPORTED_TARGET libelf)
 pkg_check_modules(ZLIB REQUIRED IMPORTED_TARGET zlib)
 pkg_check_modules(LIBZSTD REQUIRED IMPORTED_TARGET libzstd)
 
-add_subdirectory("${MICRO_LLVMBPF_ROOT}" "${CMAKE_BINARY_DIR}/llvmbpf")
+if(MICRO_EXEC_ENABLE_LLVMBPF)
+    add_subdirectory("${MICRO_LLVMBPF_ROOT}" "${CMAKE_BINARY_DIR}/llvmbpf")
+endif()
 
 if(NOT EXISTS "${MICRO_SCANNER_ROOT}/CMakeLists.txt")
     message(FATAL_ERROR "scanner/ was not found at ${MICRO_SCANNER_ROOT}")
@@ -46,14 +49,19 @@ set_target_properties(vendor_libbpf PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "${MICRO_LIBBPF_PREFIX}/include;${MICRO_REPO_ROOT}/vendor/libbpf/include;${MICRO_REPO_ROOT}/vendor/libbpf/include/uapi"
 )
 
-add_executable(micro_exec
+set(MICRO_EXEC_SOURCES
     src/common.cpp
     src/elf_program_loader.cpp
     src/kernel_runner.cpp
-    src/llvmbpf_runner.cpp
     src/main.cpp
     src/perf_counters.cpp
 )
+
+if(MICRO_EXEC_ENABLE_LLVMBPF)
+    list(APPEND MICRO_EXEC_SOURCES src/llvmbpf_runner.cpp)
+endif()
+
+add_executable(micro_exec ${MICRO_EXEC_SOURCES})
 
 target_include_directories(micro_exec
     PRIVATE
@@ -61,16 +69,29 @@ target_include_directories(micro_exec
         "${MICRO_LIBBPF_PREFIX}/include"
         "${MICRO_REPO_ROOT}/vendor/libbpf/include"
         "${MICRO_REPO_ROOT}/vendor/libbpf/include/uapi"
-        "${MICRO_REPO_ROOT}/vendor/llvmbpf/include"
 )
+
+if(MICRO_EXEC_ENABLE_LLVMBPF)
+    target_include_directories(micro_exec
+        PRIVATE
+            "${MICRO_REPO_ROOT}/vendor/llvmbpf/include"
+    )
+endif()
 
 target_link_libraries(micro_exec
     PRIVATE
-        llvmbpf_vm
-        spdlog::spdlog
         bpf_jit_scanner::scanner
         vendor_libbpf
         PkgConfig::LIBELF
         PkgConfig::ZLIB
         PkgConfig::LIBZSTD
+)
+
+if(MICRO_EXEC_ENABLE_LLVMBPF)
+    target_link_libraries(micro_exec PRIVATE llvmbpf_vm spdlog::spdlog)
+endif()
+
+target_compile_definitions(micro_exec
+    PRIVATE
+        MICRO_EXEC_ENABLE_LLVMBPF=$<BOOL:${MICRO_EXEC_ENABLE_LLVMBPF}>
 )

@@ -29,8 +29,11 @@ RUN dpkg --add-architecture arm64 \
         > /etc/apt/sources.list.d/ubuntu-arm64.sources \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
+        cmake \
         gcc-aarch64-linux-gnu \
+        g++-aarch64-linux-gnu \
         libelf-dev:arm64 \
+        libyaml-cpp-dev:arm64 \
         zlib1g-dev:arm64 \
         libzstd-dev:arm64 \
         make \

@@ -16,7 +16,6 @@
 #include <cstring>
 #include <fcntl.h>
 #include <fstream>
-#include <limits>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -198,9 +197,6 @@ uint64_t detect_tsc_freq_hz()
     return calibrate_tsc_freq_hz();
 }
 
-constexpr uint32_t kAdaptiveProbeRepeat = 10;
-constexpr uint64_t kAdaptiveRepeatThresholdNs = 50;
-
 struct kernel_test_run_context {
     int program_fd = -1;
     bpf_test_run_opts *test_opts = nullptr;
@@ -223,12 +219,10 @@ struct kernel_test_run_measurement {
     std::chrono::steady_clock::time_point wall_end {};
 };
 
-uint32_t clamp_repeat_count(uint64_t repeat)
-{
-    const uint64_t max_repeat =
-        static_cast<uint64_t>(std::numeric_limits<uint32_t>::max());
-    return static_cast<uint32_t>(std::min(std::max<uint64_t>(repeat, 1u), max_repeat));
-}
+struct kernel_run_pass_result {
+    kernel_test_run_measurement measurement {};
+    perf_counter_capture perf_counters {};
+};
 
 void reset_kernel_test_run_state(kernel_test_run_context &context)
 {
@@ -302,6 +296,44 @@ kernel_test_run_measurement execute_kernel_test_run(
     return measurement;
 }
 
+kernel_run_pass_result execute_kernel_measurement_pass(
+    kernel_test_run_context &context,
+    const cli_options &options,
+    uint32_t warmup_repeat,
+    bool collect_perf_counters)
+{
+    for (uint32_t warmup_index = 0; warmup_index < warmup_repeat;
+         ++warmup_index) {
+        static_cast<void>(execute_kernel_test_run(context));
+    }
+
+    kernel_run_pass_result result {};
+    if (!collect_perf_counters) {
+        result.measurement = execute_kernel_test_run(context);
+        return result;
+    }
+
+    const perf_counter_options perf_options = {
+        .enabled = options.perf_counters,
+        .include_kernel = true,
+        .scope = options.perf_scope,
+    };
+    result.perf_counters = measure_perf_counters(
+        perf_options,
+        [&]() {
+            result.measurement = execute_kernel_test_run(context);
+        });
+
+    if (options.perf_scope == "full_repeat_avg") {
+        const uint32_t repeat = context.effective_repeat;
+        for (auto &counter : result.perf_counters.counters) {
+            counter.value /= repeat;
+        }
+    }
+
+    return result;
+}
+
 bool context_mode_supports_kernel_repeat(uint32_t prog_type)
 {
     switch (prog_type) {
@@ -311,39 +343,6 @@ bool context_mode_supports_kernel_repeat(uint32_t prog_type)
     default:
         return false;
     }
-}
-
-uint32_t resolve_kernel_repeat(const cli_options &options,
-                               bool kernel_repeat_supported,
-                               const kernel_test_run_context &base_context)
-{
-    if (!kernel_repeat_supported) {
-        return 1u;
-    }
-
-    if (!options.adaptive_repeat) {
-        return options.repeat;
-    }
-
-    bpf_test_run_opts probe_opts = *base_context.test_opts;
-    probe_opts.repeat = kAdaptiveProbeRepeat;
-
-    kernel_test_run_context probe_context = base_context;
-    probe_context.test_opts = &probe_opts;
-    probe_context.effective_repeat = kAdaptiveProbeRepeat;
-
-    const auto probe = execute_kernel_test_run(probe_context);
-    const uint64_t threshold_ns =
-        kAdaptiveRepeatThresholdNs * static_cast<uint64_t>(kAdaptiveProbeRepeat);
-    if (probe.exec_ns >= threshold_ns) {
-        return options.repeat;
-    }
-
-    const uint64_t probe_avg_ns = std::max<uint64_t>(probe.exec_ns, 1u);
-    const uint64_t target_repeat =
-        (options.target_window_ns + probe_avg_ns - 1) / probe_avg_ns;
-    return clamp_repeat_count(
-        std::max<uint64_t>(options.repeat, target_repeat));
 }
 
 struct object_deleter {
@@ -800,6 +799,81 @@ scoped_fd build_sealed_directive_memfd(const std::filesystem::path &path)
                                         "directive blob");
 }
 
+void apply_recompile_policy(
+    int program_fd,
+    const std::vector<uint8_t> &policy_data,
+    recompile_summary &recompile,
+    std::chrono::steady_clock::time_point &recompile_start,
+    std::chrono::steady_clock::time_point &recompile_end)
+{
+    if (policy_data.empty()) {
+        return;
+    }
+
+    recompile.policy_generated = true;
+    recompile.policy_bytes = policy_data.size();
+
+    scoped_fd policy_memfd = build_sealed_memfd_from_blob(
+        "bpf-jit-policy", policy_data, "policy blob");
+
+    recompile_start = std::chrono::steady_clock::now();
+    recompile.syscall_attempted = true;
+
+    struct {
+        __u32 prog_fd;
+        __s32 policy_fd;
+        __u32 flags;
+    } __attribute__((aligned(8))) recompile_attr = {};
+    recompile_attr.prog_fd = static_cast<__u32>(program_fd);
+    recompile_attr.policy_fd = policy_memfd.get();
+    recompile_attr.flags = 0;
+
+    alignas(8) char attr_buf[256] = {};
+    static_assert(sizeof(recompile_attr) <= sizeof(attr_buf));
+    std::memcpy(attr_buf, &recompile_attr, sizeof(recompile_attr));
+
+    const int rc = static_cast<int>(syscall(__NR_bpf, BPF_PROG_JIT_RECOMPILE,
+                                            attr_buf, sizeof(attr_buf)));
+    recompile_end = std::chrono::steady_clock::now();
+    if (rc != 0) {
+        recompile.error =
+            "BPF_PROG_JIT_RECOMPILE failed: " + std::string(strerror(errno)) +
+            " (errno=" + std::to_string(errno) + ")";
+        fprintf(stderr, "BPF_PROG_JIT_RECOMPILE failed: %s (errno=%d)\n",
+                strerror(errno), errno);
+        return;
+    }
+
+    recompile.applied = true;
+}
+
+uint64_t read_kernel_test_run_result(std::string_view effective_io_mode,
+                                     bool result_from_skb_context,
+                                     const std::vector<uint8_t> &packet_out,
+                                     const __sk_buff &context_out,
+                                     int result_fd,
+                                     uint32_t key,
+                                     uint32_t retval)
+{
+    if (effective_io_mode == "packet" || effective_io_mode == "staged") {
+        if (result_from_skb_context) {
+            return read_skb_result(context_out);
+        }
+        return read_u64_result(packet_out.data(), packet_out.size());
+    }
+
+    if (effective_io_mode == "context") {
+        return retval;
+    }
+
+    uint64_t result = 0;
+    if (bpf_map_lookup_elem(result_fd, &key, &result) != 0) {
+        fail("bpf_map_lookup_elem(result_map) failed: " +
+             std::string(strerror(errno)));
+    }
+    return result;
+}
+
 std::unordered_map<uint32_t, int> create_kernel_maps(bpf_object *object, const program_image &image)
 {
     std::unordered_map<uint32_t, int> map_fds;
@@ -996,6 +1070,7 @@ sample_result run_kernel(const cli_options &options)
     const auto object_load_end = std::chrono::steady_clock::now();
     const std::string effective_io_mode =
         resolve_effective_io_mode(options.io_mode, object.get());
+    const auto program_info = load_prog_info(program_fd);
 
     /* v4 post-load re-JIT: apply policy blob via BPF_PROG_JIT_RECOMPILE */
     std::chrono::steady_clock::time_point recompile_start {};
@@ -1069,14 +1144,13 @@ sample_result run_kernel(const cli_options &options)
         recompile.mode = "policy-blob";
     } else if (do_recompile_cmov || do_recompile_wide || do_recompile_rotate ||
                do_recompile_lea || do_recompile_extract ||
-               do_recompile_zero_ext || do_recompile_endian ||
-               do_recompile_branch_flip) {
+        do_recompile_zero_ext || do_recompile_endian ||
+        do_recompile_branch_flip) {
         recompile.mode = "auto-scan-v5";
     }
+    std::vector<uint8_t> policy_data;
     if (recompile.requested) {
-        auto pre_info = load_prog_info(program_fd);
-
-        std::vector<uint8_t> policy_data;
+        const auto &pre_info = program_info;
 
         if (do_recompile_cmov || do_recompile_wide || do_recompile_rotate ||
             do_recompile_lea || do_recompile_extract ||
@@ -1253,83 +1327,45 @@ sample_result run_kernel(const cli_options &options)
                 std::memcpy(policy_data.data() + 20, pre_info.tag, 8);
             }
         }
-
-        if (!policy_data.empty()) {
-            recompile.policy_generated = true;
-            recompile.policy_bytes = policy_data.size();
-            /* Build a sealed memfd from the policy data */
-            scoped_fd patched_memfd(sys_memfd_create("bpf-jit-policy", MFD_CLOEXEC | MFD_ALLOW_SEALING));
-            if (patched_memfd.get() < 0) {
-                fail("memfd_create failed for policy blob: " + std::string(strerror(errno)));
-            }
-            write_full_or_fail(patched_memfd.get(), policy_data.data(), policy_data.size());
-            const int seals = F_SEAL_WRITE | F_SEAL_GROW | F_SEAL_SHRINK;
-            if (fcntl(patched_memfd.get(), F_ADD_SEALS, seals) != 0) {
-                fail("unable to seal policy memfd: " + std::string(strerror(errno)));
-            }
-
-            recompile_start = std::chrono::steady_clock::now();
-            recompile.syscall_attempted = true;
-
-            /*
-             * BPF_PROG_JIT_RECOMPILE syscall.
-             * Use raw struct since host bpf.h doesn't have jit_recompile member.
-             */
-            struct {
-                __u32 prog_fd;
-                __s32 policy_fd;
-                __u32 flags;
-            } __attribute__((aligned(8))) recompile_attr = {};
-            recompile_attr.prog_fd = static_cast<__u32>(program_fd);
-            recompile_attr.policy_fd = patched_memfd.get();
-            recompile_attr.flags = 0;
-
-            /* Pad to sizeof(union bpf_attr) */
-            alignas(8) char attr_buf[256] = {};
-            static_assert(sizeof(recompile_attr) <= sizeof(attr_buf));
-            std::memcpy(attr_buf, &recompile_attr, sizeof(recompile_attr));
-
-            const int rc = static_cast<int>(syscall(__NR_bpf, BPF_PROG_JIT_RECOMPILE,
-                                                    attr_buf, sizeof(attr_buf)));
-            recompile_end = std::chrono::steady_clock::now();
-            if (rc != 0) {
-                recompile.error =
-                    "BPF_PROG_JIT_RECOMPILE failed: " + std::string(strerror(errno)) +
-                    " (errno=" + std::to_string(errno) + ")";
-                fprintf(stderr, "BPF_PROG_JIT_RECOMPILE failed: %s (errno=%d)\n",
-                        strerror(errno), errno);
-                /* Non-fatal: continue with stock JIT */
-            } else {
-                recompile.applied = true;
-            }
-        }
     }
 
-    const auto program_info = load_prog_info(program_fd);
     const auto packet_kind = resolve_packet_context_kind(program_info.type);
-    if (options.dump_jit) {
-        const auto jited_program = load_jited_program(program_fd, program_info.jited_prog_len);
-        const auto dump_path = std::filesystem::path(benchmark_name_for_program(options.program) + ".kernel.bin");
-        write_binary_file(dump_path, jited_program.data(), jited_program.size());
-    }
-    if (options.dump_xlated.has_value()) {
-        const auto xlated_program = load_xlated_program(program_fd, program_info.xlated_prog_len);
-        write_binary_file(*options.dump_xlated, xlated_program.data(), xlated_program.size());
+    const bool measure_same_image_pair =
+        recompile.requested && !options.compile_only;
+    if (options.compile_only && recompile.requested) {
+        apply_recompile_policy(program_fd, policy_data, recompile,
+                               recompile_start, recompile_end);
     }
 
-    sample_result sample;
-    sample.compile_ns = elapsed_ns(object_open_start, object_open_end) +
-                        elapsed_ns(object_load_start, object_load_end) +
-                        elapsed_ns(recompile_start, recompile_end);
-    sample.jited_prog_len = program_info.jited_prog_len;
-    sample.xlated_prog_len = program_info.xlated_prog_len;
-    sample.code_size = {
-        .bpf_bytecode_bytes = program_info.xlated_prog_len,
-        .native_code_bytes = program_info.jited_prog_len,
-    };
-    sample.directive_scan = directive_scan;
-    sample.recompile = recompile;
     if (options.compile_only) {
+        const auto final_program_info = load_prog_info(program_fd);
+        if (options.dump_jit) {
+            const auto jited_program =
+                load_jited_program(program_fd, final_program_info.jited_prog_len);
+            const auto dump_path = std::filesystem::path(
+                benchmark_name_for_program(options.program) + ".kernel.bin");
+            write_binary_file(dump_path, jited_program.data(),
+                              jited_program.size());
+        }
+        if (options.dump_xlated.has_value()) {
+            const auto xlated_program = load_xlated_program(
+                program_fd, final_program_info.xlated_prog_len);
+            write_binary_file(*options.dump_xlated, xlated_program.data(),
+                              xlated_program.size());
+        }
+
+        sample_result sample;
+        sample.compile_ns = elapsed_ns(object_open_start, object_open_end) +
+                            elapsed_ns(object_load_start, object_load_end) +
+                            elapsed_ns(recompile_start, recompile_end);
+        sample.jited_prog_len = final_program_info.jited_prog_len;
+        sample.xlated_prog_len = final_program_info.xlated_prog_len;
+        sample.code_size = {
+            .bpf_bytecode_bytes = final_program_info.xlated_prog_len,
+            .native_code_bytes = final_program_info.jited_prog_len,
+        };
+        sample.directive_scan = directive_scan;
+        sample.recompile = recompile;
         sample.phases_ns = {
             {"memory_prepare_ns", elapsed_ns(memory_prepare_start, memory_prepare_end)},
             {"object_open_ns", elapsed_ns(object_open_start, object_open_end)},
@@ -1472,66 +1508,74 @@ sample_result run_kernel(const cli_options &options)
         .reset_result_map = effective_io_mode == "map",
     };
 
-    const uint32_t effective_repeat =
-        resolve_kernel_repeat(options, kernel_repeat_supported, run_context);
+    const uint32_t effective_repeat = requested_repeat;
     run_context.effective_repeat = effective_repeat;
     test_opts.repeat = kernel_repeat_supported ? effective_repeat : 0u;
 
-    if (recompile.applied) {
-        for (uint32_t warmup_index = 0; warmup_index < options.warmup_repeat;
-             ++warmup_index) {
-            static_cast<void>(execute_kernel_test_run(run_context));
-        }
+    std::optional<uint64_t> stock_exec_ns;
+    if (measure_same_image_pair) {
+        const auto stock_pass = execute_kernel_measurement_pass(
+            run_context, options, options.warmup_repeat, false);
+        stock_exec_ns = stock_pass.measurement.exec_ns;
+        apply_recompile_policy(program_fd, policy_data, recompile,
+                               recompile_start, recompile_end);
     }
 
-    kernel_test_run_measurement run_measurement {};
-    const perf_counter_options perf_options = {
-        .enabled = options.perf_counters,
-        .include_kernel = true,
-        .scope = options.perf_scope,
-    };
-    auto perf_counters = measure_perf_counters(
-        perf_options,
-        [&]() {
-            run_measurement = execute_kernel_test_run(run_context);
-        });
-    if (options.perf_scope == "full_repeat_avg") {
-        const uint32_t repeat = effective_repeat;
-        for (auto &counter : perf_counters.counters) {
-            counter.value /= repeat;
-        }
+    auto run_pass = execute_kernel_measurement_pass(
+        run_context,
+        options,
+        measure_same_image_pair ? options.warmup_repeat : 0u,
+        true);
+    const auto &run_measurement = run_pass.measurement;
+
+    result_read_start = std::chrono::steady_clock::now();
+    result = read_kernel_test_run_result(effective_io_mode,
+                                         result_from_skb_context,
+                                         packet_out,
+                                         context_out,
+                                         result_fd,
+                                         key,
+                                         run_measurement.retval);
+    result_read_end = std::chrono::steady_clock::now();
+
+    const auto final_program_info = load_prog_info(program_fd);
+    if (options.dump_jit) {
+        const auto jited_program =
+            load_jited_program(program_fd, final_program_info.jited_prog_len);
+        const auto dump_path = std::filesystem::path(
+            benchmark_name_for_program(options.program) + ".kernel.bin");
+        write_binary_file(dump_path, jited_program.data(), jited_program.size());
+    }
+    if (options.dump_xlated.has_value()) {
+        const auto xlated_program = load_xlated_program(
+            program_fd, final_program_info.xlated_prog_len);
+        write_binary_file(*options.dump_xlated, xlated_program.data(),
+                          xlated_program.size());
     }
 
-    if (effective_io_mode == "packet" || effective_io_mode == "staged") {
-        result_read_start = std::chrono::steady_clock::now();
-        if (result_from_skb_context) {
-            result = read_skb_result(context_out);
-        } else {
-            result = read_u64_result(packet_out.data(), packet_out.size());
-        }
-        result_read_end = std::chrono::steady_clock::now();
-    } else if (effective_io_mode == "context") {
-        result_read_start = std::chrono::steady_clock::now();
-        result = run_measurement.retval;
-        result_read_end = std::chrono::steady_clock::now();
-    } else {
-        result_read_start = std::chrono::steady_clock::now();
-        if (bpf_map_lookup_elem(result_fd, &key, &result) != 0) {
-            fail("bpf_map_lookup_elem(result_map) failed: " + std::string(strerror(errno)));
-        }
-        result_read_end = std::chrono::steady_clock::now();
-    }
-
+    sample_result sample;
+    sample.compile_ns = elapsed_ns(object_open_start, object_open_end) +
+                        elapsed_ns(object_load_start, object_load_end) +
+                        elapsed_ns(recompile_start, recompile_end);
     sample.exec_ns = run_measurement.exec_ns;
+    sample.stock_exec_ns = stock_exec_ns;
+    sample.timing_source = "ktime";
+    sample.timing_source_wall =
+        run_measurement.wall_exec_ns.has_value() ? "rdtsc" : "unavailable";
     sample.wall_exec_ns = run_measurement.wall_exec_ns;
     sample.exec_cycles = run_measurement.exec_cycles;
     sample.tsc_freq_hz = tsc_freq_hz > 0 ? std::optional<uint64_t>(tsc_freq_hz)
                                          : std::nullopt;
-    sample.timing_source = "ktime";
-    sample.timing_source_wall =
-        sample.wall_exec_ns.has_value() ? "rdtsc" : "unavailable";
     sample.result = result;
     sample.retval = run_measurement.retval;
+    sample.jited_prog_len = final_program_info.jited_prog_len;
+    sample.xlated_prog_len = final_program_info.xlated_prog_len;
+    sample.code_size = {
+        .bpf_bytecode_bytes = final_program_info.xlated_prog_len,
+        .native_code_bytes = final_program_info.jited_prog_len,
+    };
+    sample.directive_scan = directive_scan;
+    sample.recompile = recompile;
     sample.phases_ns = {
         {"memory_prepare_ns", elapsed_ns(memory_prepare_start, memory_prepare_end)},
         {"object_open_ns", elapsed_ns(object_open_start, object_open_end)},
@@ -1543,37 +1587,6 @@ sample_result run_kernel(const cli_options &options)
         {result_phase_name(effective_io_mode),
          elapsed_ns(result_read_start, result_read_end)},
     };
-    sample.perf_counters = std::move(perf_counters);
+    sample.perf_counters = std::move(run_pass.perf_counters);
     return sample;
-}
-
-paired_sample_result run_kernel_paired(const cli_options &options)
-{
-    cli_options stock_options = options;
-    stock_options.command = "run-kernel";
-    stock_options.directive_blob.reset();
-    stock_options.policy.reset();
-    stock_options.policy_file.reset();
-    stock_options.policy_blob.reset();
-    stock_options.recompile_cmov = false;
-    stock_options.recompile_wide = false;
-    stock_options.recompile_rotate = false;
-    stock_options.recompile_rotate_rorx = false;
-    stock_options.recompile_lea = false;
-    stock_options.recompile_extract = false;
-    stock_options.recompile_all = false;
-    stock_options.recompile_v5 = false;
-    stock_options.skip_families.clear();
-
-    cli_options recompile_options = options;
-    recompile_options.command = "run-kernel";
-
-    paired_sample_result paired {};
-    paired.stock = run_kernel(stock_options);
-    paired.recompile = run_kernel(recompile_options);
-    if (paired.recompile.exec_ns != 0) {
-        paired.ratio = static_cast<double>(paired.stock.exec_ns) /
-                       static_cast<double>(paired.recompile.exec_ns);
-    }
-    return paired;
 }

@@ -4,9 +4,7 @@
 #include <cctype>
 #include <cstdlib>
 #include <fstream>
-#include <iomanip>
 #include <iostream>
-#include <sstream>
 #include <stdexcept>
 #include <string_view>
 
@@ -153,10 +151,14 @@ void print_json_string_array(std::ostream &out,
 std::string usage_text()
 {
     return
-        "usage: micro_exec <run-llvmbpf|run-kernel|run-kernel-paired|list-programs> [--program <path>|<path>] [--program-name <name>] "
+        "usage: micro_exec <"
+#if MICRO_EXEC_ENABLE_LLVMBPF
+        "run-llvmbpf|"
+#endif
+        "run-kernel|list-programs> [--program <path>|<path>] [--program-name <name>] "
         "[--memory|--input <path>] [--btf-custom-path <path>] [--directive-blob <path>] [--policy <yaml-or-json|path>] [--policy-file <path>] [--policy-blob <path>] "
         "[--manual-load] [--recompile-cmov] [--recompile-wide|--recompile-wide-mem] [--recompile-rotate] [--recompile-rotate-rorx] [--recompile-lea] [--recompile-extract|--recompile-bitfield-extract] [--recompile-all] [--recompile-v5] [--skip-families cmov,wide,rotate,lea,extract,zero-ext,endian,branch-flip] "
-        "[--io-mode map|staged|packet|context] [--raw-packet] [--repeat N] [--warmup N] [--adaptive-repeat|--no-adaptive-repeat] [--target-window-ns N] [--input-size|--kernel-input-size N] "
+        "[--io-mode map|staged|packet|context] [--raw-packet] [--repeat N] [--warmup N] [--input-size|--kernel-input-size N] "
         "[--opt-level 0|1|2|3] [--no-cmov] [--llvm-target-cpu <cpu>] [--llvm-target-features <csv>] [--llvm-disable-pass <name>] [--llvm-log-passes] "
         "[--perf-counters] [--perf-scope full_repeat_raw|full_repeat_avg] "
         "[--dump-jit] [--dump-xlated <path>] [--compile-only]";
@@ -343,18 +345,6 @@ cli_options parse_args(int argc, char **argv)
             options.warmup_repeat = static_cast<uint32_t>(std::stoul(argv[++index]));
             continue;
         }
-        if (current == "--adaptive-repeat") {
-            options.adaptive_repeat = true;
-            continue;
-        }
-        if (current == "--no-adaptive-repeat") {
-            options.adaptive_repeat = false;
-            continue;
-        }
-        if (current == "--target-window-ns" && index + 1 < argc) {
-            options.target_window_ns = std::stoull(argv[++index]);
-            continue;
-        }
         if ((current == "--input-size" || current == "--kernel-input-size") &&
             index + 1 < argc) {
             options.input_size = static_cast<uint32_t>(std::stoul(argv[++index]));
@@ -414,63 +404,51 @@ cli_options parse_args(int argc, char **argv)
     if (options.program.empty()) {
         fail("--program is required");
     }
-    const bool is_kernel_command =
-        options.command == "run-kernel" ||
-        options.command == "run-kernel-paired";
-    if (options.command == "run-kernel-paired" && options.policy.has_value()) {
-        if (options.policy_file.has_value()) {
-            fail("--policy cannot be combined with --policy-file for run-kernel-paired");
-        }
-        options.policy_file = std::filesystem::path(*options.policy);
-        options.policy.reset();
-    }
+    const bool is_kernel_command = options.command == "run-kernel";
     if (options.perf_scope != "full_repeat_raw" && options.perf_scope != "full_repeat_avg") {
         fail("--perf-scope must be one of full_repeat_raw or full_repeat_avg");
     }
-    if (options.target_window_ns == 0) {
-        fail("--target-window-ns must be >= 1");
-    }
     if (options.directive_blob.has_value() && !is_kernel_command) {
-        fail("--directive-blob is only valid with run-kernel or run-kernel-paired");
+        fail("--directive-blob is only valid with run-kernel");
     }
     if (options.policy.has_value() && !is_kernel_command) {
-        fail("--policy is only valid with run-kernel or run-kernel-paired");
+        fail("--policy is only valid with run-kernel");
     }
     if (options.policy_file.has_value() && !is_kernel_command) {
-        fail("--policy-file is only valid with run-kernel or run-kernel-paired");
+        fail("--policy-file is only valid with run-kernel");
     }
     if (options.policy_blob.has_value() && !is_kernel_command) {
-        fail("--policy-blob is only valid with run-kernel or run-kernel-paired");
+        fail("--policy-blob is only valid with run-kernel");
     }
     if (options.manual_load && !is_kernel_command) {
-        fail("--manual-load is only valid with run-kernel or run-kernel-paired");
+        fail("--manual-load is only valid with run-kernel");
     }
     if (options.recompile_cmov && !is_kernel_command) {
-        fail("--recompile-cmov is only valid with run-kernel or run-kernel-paired");
+        fail("--recompile-cmov is only valid with run-kernel");
     }
     if (options.recompile_wide && !is_kernel_command) {
-        fail("--recompile-wide is only valid with run-kernel or run-kernel-paired");
+        fail("--recompile-wide is only valid with run-kernel");
     }
     if (options.recompile_rotate && !is_kernel_command) {
-        fail("--recompile-rotate is only valid with run-kernel or run-kernel-paired");
+        fail("--recompile-rotate is only valid with run-kernel");
     }
     if (options.recompile_lea && !is_kernel_command) {
-        fail("--recompile-lea is only valid with run-kernel or run-kernel-paired");
+        fail("--recompile-lea is only valid with run-kernel");
     }
     if (options.recompile_extract && !is_kernel_command) {
-        fail("--recompile-extract is only valid with run-kernel or run-kernel-paired");
+        fail("--recompile-extract is only valid with run-kernel");
     }
     if (options.recompile_rotate_rorx && !is_kernel_command) {
-        fail("--recompile-rotate-rorx is only valid with run-kernel or run-kernel-paired");
+        fail("--recompile-rotate-rorx is only valid with run-kernel");
     }
     if (options.recompile_all && !is_kernel_command) {
-        fail("--recompile-all is only valid with run-kernel or run-kernel-paired");
+        fail("--recompile-all is only valid with run-kernel");
     }
     if (options.recompile_v5 && !is_kernel_command) {
-        fail("--recompile-v5 is only valid with run-kernel or run-kernel-paired");
+        fail("--recompile-v5 is only valid with run-kernel");
     }
     if (!options.skip_families.empty() && !is_kernel_command) {
-        fail("--skip-families is only valid with run-kernel or run-kernel-paired");
+        fail("--skip-families is only valid with run-kernel");
     }
     if (options.recompile_v5 &&
         !(options.recompile_cmov || options.recompile_rotate ||
@@ -501,19 +479,6 @@ cli_options parse_args(int argc, char **argv)
           options.recompile_lea || options.recompile_extract ||
           options.recompile_all)) {
         fail("--skip-families requires an auto-scan recompile family or --recompile-all");
-    }
-    if (options.command == "run-kernel-paired") {
-        if (options.compile_only) {
-            fail("--compile-only is not supported with run-kernel-paired");
-        }
-        if (!(options.policy.has_value() || options.policy_file.has_value() ||
-              options.policy_blob.has_value() ||
-              options.recompile_cmov || options.recompile_rotate ||
-              options.recompile_rotate_rorx || options.recompile_wide ||
-              options.recompile_lea || options.recompile_extract ||
-              options.recompile_all || options.recompile_v5)) {
-            fail("run-kernel-paired requires a policy or recompile request");
-        }
     }
     if (options.command != "list-programs") {
         if (options.io_mode != "map" &&
@@ -557,8 +522,12 @@ void print_sample_json(std::ostream &out, const sample_result &sample)
     out
         << "{"
         << "\"compile_ns\":" << sample.compile_ns << ","
-        << "\"exec_ns\":" << sample.exec_ns << ","
-        << "\"timing_source\":\"" << json_escape(sample.timing_source) << "\""
+        << "\"exec_ns\":" << sample.exec_ns;
+    if (sample.stock_exec_ns.has_value()) {
+        out << ",\"stock_exec_ns\":" << *sample.stock_exec_ns;
+    }
+    out
+        << ",\"timing_source\":\"" << json_escape(sample.timing_source) << "\""
         << ",\"timing_source_wall\":\"" << json_escape(sample.timing_source_wall) << "\""
         << ",\"no_cmov\":" << (sample.no_cmov ? "true" : "false");
 
@@ -685,27 +654,6 @@ void print_json(const sample_result &sample)
 {
     print_sample_json(std::cout, sample);
     std::cout << "\n";
-}
-
-void print_paired_json(const paired_sample_result &sample)
-{
-    std::ostringstream stock_json;
-    std::ostringstream recompile_json;
-    print_sample_json(stock_json, sample.stock);
-    print_sample_json(recompile_json, sample.recompile);
-
-    std::cout << std::setprecision(17)
-              << "{"
-              << "\"format\":\"kernel-paired-v1\","
-              << "\"stock\":" << stock_json.str() << ","
-              << "\"recompile\":" << recompile_json.str() << ","
-              << "\"ratio\":";
-    if (sample.ratio.has_value()) {
-        std::cout << *sample.ratio;
-    } else {
-        std::cout << "null";
-    }
-    std::cout << "}\n";
 }
 
 void print_program_inventory(const std::vector<program_descriptor> &programs)

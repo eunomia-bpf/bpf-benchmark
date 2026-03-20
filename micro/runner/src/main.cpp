@@ -12,15 +12,15 @@ int main(int argc, char **argv)
             return 0;
         }
         if (options.command == "run-llvmbpf") {
+#if MICRO_EXEC_ENABLE_LLVMBPF
             print_json(run_llvmbpf(options));
             return 0;
+#else
+            fail("run-llvmbpf is unavailable in this micro_exec build");
+#endif
         }
         if (options.command == "run-kernel") {
             print_json(run_kernel(options));
-            return 0;
-        }
-        if (options.command == "run-kernel-paired") {
-            print_paired_json(run_kernel_paired(options));
             return 0;
         }
         fail("unknown command: " + options.command);

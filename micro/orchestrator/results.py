@@ -69,6 +69,7 @@ class RecompileSummary(TypedDict, total=False):
 class RunnerSample(TypedDict, total=False):
     compile_ns: int
     exec_ns: int
+    stock_exec_ns: int | None
     timing_source: str
     timing_source_wall: str
     opt_level: int

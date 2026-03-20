@@ -16,6 +16,7 @@ extern "C" {
 #define BPF_JIT_POLICY_VERSION_2 2
 #define BPF_JIT_POLICY_VERSION  BPF_JIT_POLICY_VERSION_2
 #define BPF_JIT_ARCH_X86_64     1
+#define BPF_JIT_ARCH_ARM64      2
 
 #define BPF_JIT_CF_ROTATE             1
 #define BPF_JIT_CF_WIDE_MEM           2

@@ -255,6 +255,48 @@ std::optional<int32_t> binding_const(const std::vector<V5Binding> &bindings,
     return std::nullopt;
 }
 
+std::optional<uint8_t> binding_source_var(const std::vector<V5Binding> &bindings,
+                                          uint8_t canonical_param)
+{
+    for (const auto &binding : bindings) {
+        if (binding.canonical_param == canonical_param &&
+            binding.source_type != BPF_JIT_BIND_SOURCE_CONST) {
+            return binding.source_var;
+        }
+    }
+    return std::nullopt;
+}
+
+bool rotate_mask_is_high(const V5PatternDesc &desc,
+                         const std::vector<V5PatternVar> &vars)
+{
+    if (desc.family != V5Family::Rotate || desc.pattern.size() < 5 ||
+        desc.pattern[1].opcode != 0x57) {
+        return true;
+    }
+
+    const auto width = binding_const(desc.bindings, BPF_JIT_ROT_PARAM_WIDTH);
+    const auto amount_var =
+        binding_source_var(desc.bindings, BPF_JIT_ROT_PARAM_AMOUNT);
+    const uint8_t mask_var = desc.pattern[1].imm_binding;
+    if (!width.has_value() || *width != 32 || !amount_var.has_value() ||
+        mask_var == 0) {
+        return true;
+    }
+    if (!vars[mask_var].bound || !vars[*amount_var].bound) {
+        return false;
+    }
+
+    const int64_t rot_amount = vars[*amount_var].value;
+    if (rot_amount <= 0 || rot_amount >= 32) {
+        return false;
+    }
+
+    const uint32_t high_mask =
+        ~((1U << (32 - static_cast<uint32_t>(rot_amount))) - 1U);
+    return static_cast<uint32_t>(vars[mask_var].value) == high_mask;
+}
+
 std::string pattern_kind_for_desc(V5Family family,
                                   const std::vector<V5Binding> &bindings)
 {
@@ -484,7 +526,8 @@ bool match_v5_pattern_at(const std::vector<bpf_insn_raw> &insns,
         }
     }
 
-    return check_v5_constraints(desc.constraints, vars);
+    return check_v5_constraints(desc.constraints, vars) &&
+           rotate_mask_is_high(desc, vars);
 }
 
 bool raw_is_cond_jump(const bpf_insn_raw &insn)
@@ -1369,7 +1412,6 @@ std::vector<V5PatternDesc> build_v5_rotate_descriptors(bool use_rorx)
     constexpr uint8_t kOr64X = 0x4f;
     constexpr uint8_t kOr32X = 0x4c;
     constexpr uint8_t kAnd64K = 0x57;
-    constexpr uint8_t kAnd64X = 0x5f;
     const uint16_t native_choice = use_rorx ? BPF_JIT_ROT_RORX : BPF_JIT_ROT_ROR;
     const uint32_t cpu_features = use_rorx ? BPF_JIT_X86_BMI2 : 0;
     const uint8_t zero_off_imm = BPF_JIT_PATTERN_F_EXPECT_OFF |
@@ -1446,12 +1488,10 @@ std::vector<V5PatternDesc> build_v5_rotate_descriptors(bool use_rorx)
                             });
     };
 
-    auto rotate5_masked = [&](uint8_t and_opcode, bool lsh_first) {
+    auto rotate5_masked = [&](bool lsh_first) {
         std::vector<V5PatternInsn> pattern = {
             make_pattern_insn(kMov64X, 1, 2, 0, 0, zero_off_imm, 0, 0, 0, 0),
-            make_pattern_insn(and_opcode, 1, and_opcode == kAnd64X ? 7 : 0,
-                              and_opcode == kAnd64K ? 3 : 0, 0,
-                              and_opcode == kAnd64X ? zero_off_imm : zero_off,
+            make_pattern_insn(kAnd64K, 1, 0, 3, 0, zero_off,
                               0, 0, 0, 0),
         };
 
@@ -1473,10 +1513,8 @@ std::vector<V5PatternDesc> build_v5_rotate_descriptors(bool use_rorx)
             make_constraint(BPF_JIT_CSTR_SUM_CONST, 4, 5, 32),
             make_constraint(BPF_JIT_CSTR_IMM_RANGE, 4, 0, 1, 31),
             make_constraint(BPF_JIT_CSTR_NOT_EQUAL, 1, 2),
+            make_constraint(BPF_JIT_CSTR_NOT_ZERO, 3),
         };
-        if (and_opcode == kAnd64K) {
-            constraints.push_back(make_constraint(BPF_JIT_CSTR_NOT_ZERO, 3));
-        }
 
         return make_v5_desc(V5Family::Rotate, BPF_JIT_CF_ROTATE, native_choice,
                             cpu_features, std::move(pattern),
@@ -1492,12 +1530,10 @@ std::vector<V5PatternDesc> build_v5_rotate_descriptors(bool use_rorx)
                             });
     };
 
-    auto rotate6_masked = [&](uint8_t and_opcode) {
+    auto rotate6_masked = [&]() {
         std::vector<V5PatternInsn> pattern = {
             make_pattern_insn(kMov64X, 1, 2, 0, 0, zero_off_imm, 0, 0, 0, 0),
-            make_pattern_insn(and_opcode, 1, and_opcode == kAnd64X ? 7 : 0,
-                              and_opcode == kAnd64K ? 3 : 0, 0,
-                              and_opcode == kAnd64X ? zero_off_imm : zero_off,
+            make_pattern_insn(kAnd64K, 1, 0, 3, 0, zero_off,
                               0, 0, 0, 0),
             make_pattern_insn(kRsh64K, 1, 0, 4, 0, zero_off, 0, 0, 0, 0),
             make_pattern_insn(kMov64X, 5, 2, 0, 0, zero_off_imm, 0, 0, 0, 0),
@@ -1510,10 +1546,8 @@ std::vector<V5PatternDesc> build_v5_rotate_descriptors(bool use_rorx)
             make_constraint(BPF_JIT_CSTR_IMM_RANGE, 6, 0, 1, 31),
             make_constraint(BPF_JIT_CSTR_NOT_EQUAL, 1, 2),
             make_constraint(BPF_JIT_CSTR_NOT_EQUAL, 1, 5),
+            make_constraint(BPF_JIT_CSTR_NOT_ZERO, 3),
         };
-        if (and_opcode == kAnd64K) {
-            constraints.push_back(make_constraint(BPF_JIT_CSTR_NOT_ZERO, 3));
-        }
 
         return make_v5_desc(V5Family::Rotate, BPF_JIT_CF_ROTATE, native_choice,
                             cpu_features, std::move(pattern),
@@ -1530,12 +1564,9 @@ std::vector<V5PatternDesc> build_v5_rotate_descriptors(bool use_rorx)
     };
 
     std::vector<V5PatternDesc> descs;
-    descs.push_back(rotate6_masked(kAnd64X));
-    descs.push_back(rotate6_masked(kAnd64K));
-    descs.push_back(rotate5_masked(kAnd64X, false));
-    descs.push_back(rotate5_masked(kAnd64K, false));
-    descs.push_back(rotate5_masked(kAnd64X, true));
-    descs.push_back(rotate5_masked(kAnd64K, true));
+    descs.push_back(rotate6_masked());
+    descs.push_back(rotate5_masked(false));
+    descs.push_back(rotate5_masked(true));
     descs.push_back(rotate5_two_copy());
     descs.push_back(rotate4(kMov64X, kLsh64K, kRsh64K, kOr64X, 64, true));
     descs.push_back(rotate4(kMov64X, kLsh64K, kRsh64K, kOr64X, 64, false));
@@ -1970,6 +2001,11 @@ std::vector<uint8_t> build_policy_blob_v5(uint32_t insn_cnt,
                                           const uint8_t prog_tag[8],
                                           const std::vector<V5PolicyRule> &rules)
 {
+    uint16_t native_arch_id = BPF_JIT_ARCH_X86_64;
+#if defined(__aarch64__)
+    native_arch_id = BPF_JIT_ARCH_ARM64;
+#endif
+
     struct __attribute__((packed)) policy_hdr_v5 {
         uint32_t magic;
         uint16_t version;
@@ -1994,7 +2030,7 @@ std::vector<uint8_t> build_policy_blob_v5(uint32_t insn_cnt,
     if (prog_tag != nullptr) {
         std::memcpy(hdr.prog_tag, prog_tag, sizeof(hdr.prog_tag));
     }
-    hdr.arch_id = BPF_JIT_ARCH_X86_64;
+    hdr.arch_id = native_arch_id;
     hdr.flags = 0;
 
     std::vector<uint8_t> blob;
