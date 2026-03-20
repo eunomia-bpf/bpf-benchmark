@@ -8,6 +8,7 @@ import errno
 import json
 import os
 import platform
+import re
 import shutil
 import socket
 import statistics
@@ -15,6 +16,7 @@ import struct
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -39,7 +41,7 @@ from runner.libs import (  # noqa: E402
     write_json,
     write_text,
 )
-from runner.libs.metrics import compute_delta, enable_bpf_stats, sample_bpf_stats  # noqa: E402
+from runner.libs.metrics import compute_delta, enable_bpf_stats, sample_bpf_stats, sample_total_cpu_usage  # noqa: E402
 from runner.libs.recompile import PolicyTarget, apply_recompile, resolve_policy_files, scan_programs  # noqa: E402
 
 try:  # noqa: E402
@@ -61,16 +63,36 @@ DEFAULT_PROGRAM_NAME = "balancer_ingress"
 DEFAULT_INTERFACE = "katran0"
 DEFAULT_DURATION_S = 10
 DEFAULT_SMOKE_DURATION_S = 3
-DEFAULT_PACKET_REPEAT = 25
-DEFAULT_SMOKE_PACKET_REPEAT = 25
+DEFAULT_WRK_CONNECTIONS = 32
+DEFAULT_SMOKE_WRK_CONNECTIONS = 8
+DEFAULT_WRK_THREADS = 1
+DEFAULT_SMOKE_WRK_THREADS = 1
+DEFAULT_PACKET_REPEAT = 8
+DEFAULT_SMOKE_PACKET_REPEAT = 4
 DEFAULT_SAMPLE_COUNT = 3
 DEFAULT_SMOKE_SAMPLE_COUNT = 1
+DEFAULT_WARMUP_DURATION_S = 2
+DEFAULT_SMOKE_WARMUP_DURATION_S = 1
 DEFAULT_WARMUP_PACKET_COUNT = 100
 DEFAULT_SMOKE_WARMUP_PACKET_COUNT = 100
 DEFAULT_MIN_MEASUREMENT_REQUESTS = 1000
 DEFAULT_SMOKE_MIN_MEASUREMENT_REQUESTS = 100
 REQUEST_FAILURE_PREVIEW_LIMIT = 5
 WARMUP_MAX_ATTEMPT_FACTOR = 3
+WRK_OUTPUT_PREVIEW_LINES = 40
+WRK_SOCKET_ERRORS_RE = re.compile(
+    r"Socket errors:\s*connect\s+(\d+),\s*read\s+(\d+),\s*write\s+(\d+),\s*timeout\s+(\d+)",
+    re.IGNORECASE,
+)
+WRK_REQUESTS_RE = re.compile(r"(\d+)\s+requests in\s+([0-9.]+)([a-zA-Z]+)", re.IGNORECASE)
+WRK_REQUESTS_PER_SEC_RE = re.compile(r"Requests/sec:\s*([0-9.]+)", re.IGNORECASE)
+WRK_TRANSFER_PER_SEC_RE = re.compile(r"Transfer/sec:\s*([0-9.]+[A-Za-z/]+)", re.IGNORECASE)
+WRK_NON_2XX_RE = re.compile(r"Non-2xx or 3xx responses:\s*(\d+)", re.IGNORECASE)
+WRK_LATENCY_AVG_RE = re.compile(
+    r"Latency\s+([0-9.]+(?:us|ms|s))\s+([0-9.]+(?:us|ms|s))\s+([0-9.]+(?:us|ms|s))",
+    re.IGNORECASE,
+)
+WRK_LATENCY_DIST_RE = re.compile(r"(50|75|90|99)%\s+([0-9.]+(?:us|ms|s))", re.IGNORECASE)
 
 TCP_PROTO = socket.IPPROTO_TCP
 F_LRU_BYPASS = 1 << 1
@@ -150,9 +172,11 @@ HASH_LIKE_MAP_TYPES = {
 class PhaseSample:
     index: int
     phase: str
+    driver: str
     measurement_duration_s: float
     measurement_batches: int
     warmup_request_count: int
+    warmup_duration_s: float
     request_latencies_ms: list[float]
     request_failure_preview: list[dict[str, object]]
     request_summary: dict[str, object]
@@ -160,6 +184,7 @@ class PhaseSample:
     http_success_count: int
     ipip_rx_packets_delta: int
     ipip_rx_bytes_delta: int
+    system_cpu: dict[str, object]
     bpf: dict[str, object]
     state_reset: dict[str, object]
 
@@ -205,6 +230,19 @@ def summarize_numbers(values: Sequence[float | int | None]) -> dict[str, float |
         "min": min(filtered),
         "max": max(filtered),
     }
+
+
+def percentile(values: Sequence[float], pct: float) -> float | None:
+    if not values:
+        return None
+    if len(values) == 1:
+        return float(values[0])
+    ordered = sorted(float(value) for value in values)
+    rank = max(0.0, min(1.0, float(pct) / 100.0)) * (len(ordered) - 1)
+    lower = int(rank)
+    upper = min(len(ordered) - 1, lower + 1)
+    weight = rank - lower
+    return ordered[lower] * (1.0 - weight) + ordered[upper] * weight
 
 
 def percent_delta(before: object, after: object) -> float | None:
@@ -257,34 +295,210 @@ def summarize_request_records(records: Sequence[Mapping[str, object]]) -> dict[s
     return {
         "request_count": len(records),
         "success_count": success_count,
-        "latency_ms": summarize_numbers(latencies),
+        "ops_per_sec": None,
+        "latency_ms": {
+            **summarize_numbers(latencies),
+            "p50": percentile(latencies, 50.0),
+            "p90": percentile(latencies, 90.0),
+            "p99": percentile(latencies, 99.0),
+        },
         "latencies_ms": latencies,
         "failure_preview": failures,
     }
 
 
+def wrk_binary() -> str | None:
+    return which("wrk")
+
+
+def parse_wrk_duration(value: str) -> float:
+    text = value.strip().lower()
+    if text.endswith("us"):
+        return float(text[:-2]) / 1_000_000.0
+    if text.endswith("ms"):
+        return float(text[:-2]) / 1_000.0
+    if text.endswith("s"):
+        return float(text[:-1])
+    raise ValueError(f"unsupported wrk duration token: {value}")
+
+
+def parse_wrk_latency_ms(value: str) -> float:
+    text = value.strip().lower()
+    if text.endswith("us"):
+        return float(text[:-2]) / 1000.0
+    if text.endswith("ms"):
+        return float(text[:-2])
+    if text.endswith("s"):
+        return float(text[:-1]) * 1000.0
+    raise ValueError(f"unsupported wrk latency token: {value}")
+
+
+def parse_wrk_output(stdout: str, stderr: str) -> dict[str, object]:
+    requests = 0
+    duration_s = 0.0
+    match = WRK_REQUESTS_RE.search(stdout)
+    if match:
+        requests = int(match.group(1))
+        duration_s = parse_wrk_duration(match.group(2) + match.group(3))
+
+    requests_per_sec = None
+    match = WRK_REQUESTS_PER_SEC_RE.search(stdout)
+    if match:
+        requests_per_sec = float(match.group(1))
+
+    transfer_per_sec = None
+    match = WRK_TRANSFER_PER_SEC_RE.search(stdout)
+    if match:
+        transfer_per_sec = match.group(1)
+
+    latency: dict[str, float | None] = {
+        "mean": None,
+        "stdev": None,
+        "max": None,
+        "p50": None,
+        "p75": None,
+        "p90": None,
+        "p99": None,
+    }
+    match = WRK_LATENCY_AVG_RE.search(stdout)
+    if match:
+        latency["mean"] = parse_wrk_latency_ms(match.group(1))
+        latency["stdev"] = parse_wrk_latency_ms(match.group(2))
+        latency["max"] = parse_wrk_latency_ms(match.group(3))
+    for pct_match in WRK_LATENCY_DIST_RE.finditer(stdout):
+        key = f"p{pct_match.group(1)}"
+        latency[key] = parse_wrk_latency_ms(pct_match.group(2))
+
+    socket_errors = {"connect": 0, "read": 0, "write": 0, "timeout": 0}
+    match = WRK_SOCKET_ERRORS_RE.search(stdout)
+    if match:
+        socket_errors = {
+            "connect": int(match.group(1)),
+            "read": int(match.group(2)),
+            "write": int(match.group(3)),
+            "timeout": int(match.group(4)),
+        }
+    non2xx = 0
+    match = WRK_NON_2XX_RE.search(stdout)
+    if match:
+        non2xx = int(match.group(1))
+
+    total_failures = int(non2xx) + sum(socket_errors.values())
+    success_count = max(0, requests - total_failures)
+    failure_preview: list[dict[str, object]] = []
+    if non2xx > 0:
+        failure_preview.append({"kind": "non_2xx", "count": non2xx})
+    if sum(socket_errors.values()) > 0:
+        failure_preview.append({"kind": "socket_errors", **socket_errors})
+
+    return {
+        "driver": "wrk",
+        "request_count": requests,
+        "success_count": success_count,
+        "ops_per_sec": requests_per_sec,
+        "duration_s": duration_s,
+        "latency_ms": latency,
+        "socket_errors": socket_errors,
+        "non_2xx": non2xx,
+        "transfer_per_sec": transfer_per_sec,
+        "failure_preview": failure_preview[:REQUEST_FAILURE_PREVIEW_LIMIT],
+        "stdout_tail": tail_text(stdout, max_lines=WRK_OUTPUT_PREVIEW_LINES, max_chars=8000),
+        "stderr_tail": tail_text(stderr, max_lines=WRK_OUTPUT_PREVIEW_LINES, max_chars=8000),
+    }
+
+
+def format_wrk_duration_arg(duration_s: int | float) -> str:
+    value = max(1.0, float(duration_s))
+    if value.is_integer():
+        return f"{int(value)}s"
+    return f"{str(value).rstrip('0').rstrip('.')}s"
+
+
+def run_wrk(
+    *,
+    namespace: str,
+    duration_s: int | float,
+    connections: int,
+    threads: int,
+) -> dict[str, object]:
+    binary = wrk_binary()
+    if binary is None:
+        raise RuntimeError("wrk is not installed")
+    command = [
+        "ip",
+        "netns",
+        "exec",
+        namespace,
+        binary,
+        f"-t{max(1, int(threads))}",
+        f"-c{max(1, int(connections))}",
+        f"-d{format_wrk_duration_arg(duration_s)}",
+        "--latency",
+        "--timeout",
+        format_wrk_duration_arg(HTTP_TIMEOUT_S),
+        f"http://{VIP_IP}:{VIP_PORT}/",
+    ]
+    completed = run_command(
+        command,
+        check=False,
+        timeout=max(30, int(float(duration_s) * 4) + 10),
+    )
+    parsed = parse_wrk_output(completed.stdout or "", completed.stderr or "")
+    parsed["returncode"] = completed.returncode
+    if completed.returncode != 0:
+        detail = parsed.get("stderr_tail") or parsed.get("stdout_tail") or "wrk failed"
+        raise RuntimeError(str(detail))
+    return parsed
+
+
 def build_phase_summary(samples: Sequence[Mapping[str, object]]) -> dict[str, object]:
-    latencies: list[float | int | None] = []
-    for sample in samples:
-        latencies.extend(extract_request_latencies(sample))
     total_requests = sum(int(sample.get("http_request_count", 0) or 0) for sample in samples)
     total_successes = sum(int(sample.get("http_success_count", 0) or 0) for sample in samples)
+    packet_pps = []
+    event_rates = []
+    for sample in samples:
+        duration = float(sample.get("measurement_duration_s", 0.0) or 0.0)
+        if duration > 0:
+            packet_pps.append(float(sample.get("ipip_rx_packets_delta", 0) or 0) / duration)
+            event_rates.append(
+                float(((sample.get("bpf") or {}).get("summary", {}).get("total_events", 0) or 0)) / duration
+            )
     return {
         "http_requests": total_requests,
         "http_successes": total_successes,
         "http_all_succeeded": total_requests > 0 and total_requests == total_successes,
-        "latency_ms": summarize_numbers(latencies),
+        "app_throughput_rps": summarize_numbers(
+            [((sample.get("request_summary") or {}).get("ops_per_sec")) for sample in samples]
+        ),
+        "latency_ms_p50": summarize_numbers(
+            [(((sample.get("request_summary") or {}).get("latency_ms") or {}).get("p50")) for sample in samples]
+        ),
+        "latency_ms_p90": summarize_numbers(
+            [(((sample.get("request_summary") or {}).get("latency_ms") or {}).get("p90")) for sample in samples]
+        ),
+        "latency_ms_p99": summarize_numbers(
+            [(((sample.get("request_summary") or {}).get("latency_ms") or {}).get("p99")) for sample in samples]
+        ),
+        "latency_ms_mean": summarize_numbers(
+            [(((sample.get("request_summary") or {}).get("latency_ms") or {}).get("mean")) for sample in samples]
+        ),
         "measurement_duration_s": summarize_numbers([sample.get("measurement_duration_s") for sample in samples]),
         "measurement_batches": summarize_numbers([sample.get("measurement_batches") for sample in samples]),
         "warmup_http_requests": summarize_numbers([sample.get("warmup_request_count") for sample in samples]),
+        "warmup_duration_s": summarize_numbers([sample.get("warmup_duration_s") for sample in samples]),
         "ipip_rx_packets_delta": summarize_numbers(
             [sample.get("ipip_rx_packets_delta") for sample in samples]
         ),
+        "packet_pps": summarize_numbers(packet_pps),
         "bpf_avg_ns_per_run": summarize_numbers(
             [((sample.get("bpf") or {}).get("summary", {}).get("avg_ns_per_run")) for sample in samples]
         ),
         "events": summarize_numbers(
             [((sample.get("bpf") or {}).get("summary", {}).get("total_events")) for sample in samples]
+        ),
+        "events_per_sec": summarize_numbers(event_rates),
+        "system_cpu_busy_pct": summarize_numbers(
+            [((sample.get("system_cpu") or {}).get("busy_pct")) for sample in samples]
         ),
     }
 
@@ -295,8 +509,14 @@ def compare_phase_summaries(
 ) -> dict[str, object]:
     if not post_summary:
         return {"comparable": False, "reason": "recompile did not apply successfully"}
-    baseline_latency = (baseline_summary.get("latency_ms") or {}).get("median")
-    post_latency = (post_summary.get("latency_ms") or {}).get("median")
+    baseline_throughput = (baseline_summary.get("app_throughput_rps") or {}).get("median")
+    post_throughput = (post_summary.get("app_throughput_rps") or {}).get("median")
+    baseline_p99 = (baseline_summary.get("latency_ms_p99") or {}).get("median")
+    post_p99 = (post_summary.get("latency_ms_p99") or {}).get("median")
+    baseline_pps = (baseline_summary.get("packet_pps") or {}).get("median")
+    post_pps = (post_summary.get("packet_pps") or {}).get("median")
+    baseline_cpu = (baseline_summary.get("system_cpu_busy_pct") or {}).get("median")
+    post_cpu = (post_summary.get("system_cpu_busy_pct") or {}).get("median")
     baseline_bpf = (baseline_summary.get("bpf_avg_ns_per_run") or {}).get("median")
     post_bpf = (post_summary.get("bpf_avg_ns_per_run") or {}).get("median")
     baseline_events = (baseline_summary.get("events") or {}).get("median")
@@ -304,11 +524,14 @@ def compare_phase_summaries(
     return {
         "comparable": True,
         "aggregation": "paired_cycle_median",
+        "app_throughput_rps_delta_pct": percent_delta(baseline_throughput, post_throughput),
+        "latency_ms_p99_delta_pct": percent_delta(baseline_p99, post_p99),
+        "packet_pps_delta_pct": percent_delta(baseline_pps, post_pps),
+        "system_cpu_busy_pct_delta_pct": percent_delta(baseline_cpu, post_cpu),
         "http_successes_delta_pct": percent_delta(
             baseline_summary.get("http_successes"),
             post_summary.get("http_successes"),
         ),
-        "latency_ms_delta_pct": percent_delta(baseline_latency, post_latency),
         "bpf_avg_ns_per_run_delta_pct": percent_delta(baseline_bpf, post_bpf),
         "bpf_speedup_ratio": speedup_ratio(baseline_bpf, post_bpf),
         "events_delta_pct": percent_delta(baseline_events, post_events),
@@ -330,9 +553,12 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         f"- Smoke: `{payload['smoke']}`",
         f"- Paired cycles: `{payload['sample_count']}`",
         f"- Timed duration per phase: `{payload['duration_s']}s`",
-        f"- Request batch size: `{payload['packet_repeat']}`",
-        f"- Warmup requests per phase: `{payload['warmup_packet_count']}`",
-        f"- Minimum requests per phase: `{payload['min_measurement_requests']}`",
+        f"- Traffic driver: `{payload.get('traffic_driver')}`",
+        f"- Workload model: `{payload.get('workload_model')}`",
+        f"- Client concurrency: `{payload.get('client_concurrency')}`",
+        f"- wrk threads: `{payload.get('wrk_threads')}`",
+        f"- wrk connections: `{payload.get('wrk_connections')}`",
+        f"- Warmup duration per phase: `{payload.get('warmup_duration_s')}`",
         f"- Control plane: `{payload.get('control_plane_mode')}`",
         f"- Interface: `{((payload.get('live_program') or {}).get('iface'))}`",
         f"- Attach mode: `{((payload.get('live_program') or {}).get('attach_mode'))}`",
@@ -346,7 +572,10 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         "## Baseline",
         "",
         f"- HTTP successes: `{((payload['baseline'].get('summary') or {}).get('http_successes'))}` / `{((payload['baseline'].get('summary') or {}).get('http_requests'))}`",
-        f"- ipip rx packets delta: `{((payload['baseline'].get('summary') or {}).get('ipip_rx_packets_delta'))}`",
+        f"- App throughput median req/s: `{(((payload['baseline'].get('summary') or {}).get('app_throughput_rps') or {}).get('median'))}`",
+        f"- Packet PPS median: `{(((payload['baseline'].get('summary') or {}).get('packet_pps') or {}).get('median'))}`",
+        f"- Latency p99 median (ms): `{(((payload['baseline'].get('summary') or {}).get('latency_ms_p99') or {}).get('median'))}`",
+        f"- System CPU busy median (%): `{(((payload['baseline'].get('summary') or {}).get('system_cpu_busy_pct') or {}).get('median'))}`",
         f"- bpf avg ns/run: `{((payload['baseline'].get('summary') or {}).get('bpf_avg_ns_per_run'))}`",
         f"- total events: `{((payload['baseline'].get('summary') or {}).get('events'))}`",
         "",
@@ -364,7 +593,10 @@ def build_markdown(payload: Mapping[str, object]) -> str:
                 "## Post-ReJIT",
                 "",
                 f"- HTTP successes: `{((payload['post_rejit'].get('summary') or {}).get('http_successes'))}` / `{((payload['post_rejit'].get('summary') or {}).get('http_requests'))}`",
-                f"- ipip rx packets delta: `{((payload['post_rejit'].get('summary') or {}).get('ipip_rx_packets_delta'))}`",
+                f"- App throughput median req/s: `{(((payload['post_rejit'].get('summary') or {}).get('app_throughput_rps') or {}).get('median'))}`",
+                f"- Packet PPS median: `{(((payload['post_rejit'].get('summary') or {}).get('packet_pps') or {}).get('median'))}`",
+                f"- Latency p99 median (ms): `{(((payload['post_rejit'].get('summary') or {}).get('latency_ms_p99') or {}).get('median'))}`",
+                f"- System CPU busy median (%): `{(((payload['post_rejit'].get('summary') or {}).get('system_cpu_busy_pct') or {}).get('median'))}`",
                 f"- bpf avg ns/run: `{((payload['post_rejit'].get('summary') or {}).get('bpf_avg_ns_per_run'))}`",
                 f"- total events: `{((payload['post_rejit'].get('summary') or {}).get('events'))}`",
             ]
@@ -375,6 +607,10 @@ def build_markdown(payload: Mapping[str, object]) -> str:
                 "",
                 "## Comparison",
                 "",
+                f"- Median throughput delta: `{payload['comparison'].get('app_throughput_rps_delta_pct')}`",
+                f"- Median latency p99 delta: `{payload['comparison'].get('latency_ms_p99_delta_pct')}`",
+                f"- Median packet PPS delta: `{payload['comparison'].get('packet_pps_delta_pct')}`",
+                f"- Median system CPU delta: `{payload['comparison'].get('system_cpu_busy_pct_delta_pct')}`",
                 f"- Median BPF delta: `{payload['comparison'].get('bpf_avg_ns_per_run_delta_pct')}`",
                 f"- Median BPF speedup ratio (stock/reJIT): `{payload['comparison'].get('bpf_speedup_ratio')}`",
             ]
@@ -830,7 +1066,7 @@ class KatranDsrTopology:
         for namespace in (ROUTER_NS, CLIENT_NS, REAL_NS):
             ns_command(namespace, ["ip", "link", "set", "lo", "up"], timeout=15)
 
-        run_command(["ip", "addr", "add", f"{LB_IP}/24", "dev", self.iface], timeout=15)
+        run_command(["ip", "addr", "replace", f"{LB_IP}/24", "dev", self.iface], timeout=15)
         run_command(["ip", "link", "set", "dev", self.iface, "up"], timeout=15)
 
         ns_command(ROUTER_NS, ["ip", "addr", "add", f"{ROUTER_LB_IP}/24", "dev", ROUTER_LB_IFACE], timeout=15)
@@ -1260,6 +1496,129 @@ for index in range(count):
 print(json.dumps(results))
 """
 
+PARALLEL_CLIENT_REQUEST_SCRIPT = """
+import json
+import socket
+import statistics
+import sys
+import threading
+import time
+
+host = sys.argv[1]
+port = int(sys.argv[2])
+duration_s = float(sys.argv[3])
+concurrency = max(1, int(sys.argv[4]))
+timeout = float(sys.argv[5])
+preview_limit = max(1, int(sys.argv[6]))
+payload = b"GET / HTTP/1.0\\r\\nHost: katran\\r\\nConnection: close\\r\\n\\r\\n"
+
+latencies = []
+failure_preview = []
+request_count = 0
+success_count = 0
+bytes_total = 0
+lock = threading.Lock()
+
+def percentile(values, pct):
+    if not values:
+        return None
+    if len(values) == 1:
+        return float(values[0])
+    ordered = sorted(float(value) for value in values)
+    rank = max(0.0, min(1.0, float(pct) / 100.0)) * (len(ordered) - 1)
+    lower = int(rank)
+    upper = min(len(ordered) - 1, lower + 1)
+    weight = rank - lower
+    return ordered[lower] * (1.0 - weight) + ordered[upper] * weight
+
+def worker(worker_id, deadline):
+    global request_count, success_count, bytes_total
+    local_latencies = []
+    local_failures = []
+    local_requests = 0
+    local_successes = 0
+    local_bytes = 0
+    while time.monotonic() < deadline:
+        started = time.monotonic()
+        local_requests += 1
+        try:
+            with socket.create_connection((host, port), timeout=timeout) as sock:
+                sock.settimeout(timeout)
+                sock.sendall(payload)
+                chunks = []
+                while True:
+                    chunk = sock.recv(4096)
+                    if not chunk:
+                        break
+                    chunks.append(chunk)
+            data = b"".join(chunks)
+            text = data.decode("latin1", "replace")
+            if text.startswith("HTTP/1.0 200 OK") or text.startswith("HTTP/1.1 200 OK"):
+                local_successes += 1
+                local_bytes += len(data)
+                local_latencies.append((time.monotonic() - started) * 1000.0)
+            elif len(local_failures) < preview_limit:
+                local_failures.append(
+                    {
+                        "worker": worker_id,
+                        "error": "non-200 response",
+                        "snippet": text[:200],
+                    }
+                )
+        except Exception as exc:
+            if len(local_failures) < preview_limit:
+                local_failures.append(
+                    {
+                        "worker": worker_id,
+                        "error": str(exc),
+                        "snippet": "",
+                    }
+                )
+    with lock:
+        request_count += local_requests
+        success_count += local_successes
+        bytes_total += local_bytes
+        latencies.extend(local_latencies)
+        for item in local_failures:
+            if len(failure_preview) >= preview_limit:
+                break
+            failure_preview.append(item)
+
+started = time.monotonic()
+deadline = started + max(0.0, duration_s)
+threads = [threading.Thread(target=worker, args=(index, deadline), daemon=True) for index in range(concurrency)]
+for thread in threads:
+    thread.start()
+for thread in threads:
+    thread.join()
+elapsed = max(0.000001, time.monotonic() - started)
+latency_summary = {
+    "count": len(latencies),
+    "mean": statistics.mean(latencies) if latencies else None,
+    "median": statistics.median(latencies) if latencies else None,
+    "min": min(latencies) if latencies else None,
+    "max": max(latencies) if latencies else None,
+    "p50": percentile(latencies, 50.0),
+    "p90": percentile(latencies, 90.0),
+    "p99": percentile(latencies, 99.0),
+}
+print(
+    json.dumps(
+        {
+            "driver": "python_parallel",
+            "request_count": request_count,
+            "success_count": success_count,
+            "ops_per_sec": (success_count / elapsed) if elapsed > 0 else None,
+            "duration_s": elapsed,
+            "bytes_total": bytes_total,
+            "latency_ms": latency_summary,
+            "failure_preview": failure_preview,
+            "concurrency": concurrency,
+        }
+    )
+)
+"""
+
 
 def perform_http_requests(iterations: int) -> list[dict[str, object]]:
     payload = run_json_command(
@@ -1285,6 +1644,34 @@ def perform_http_requests(iterations: int) -> list[dict[str, object]]:
         if isinstance(item, dict):
             requests.append(dict(item))
     return requests
+
+
+def run_parallel_http_load(
+    *,
+    duration_s: int | float,
+    concurrency: int,
+) -> dict[str, object]:
+    payload = run_json_command(
+        [
+            "ip",
+            "netns",
+            "exec",
+            CLIENT_NS,
+            "python3",
+            "-c",
+            PARALLEL_CLIENT_REQUEST_SCRIPT,
+            VIP_IP,
+            str(VIP_PORT),
+            str(max(0.0, float(duration_s))),
+            str(max(1, int(concurrency))),
+            str(HTTP_TIMEOUT_S),
+            str(REQUEST_FAILURE_PREVIEW_LIMIT),
+        ],
+        timeout=max(30, int(float(duration_s) * 4) + 10),
+    )
+    if not isinstance(payload, Mapping):
+        raise RuntimeError("parallel client payload is not a JSON object")
+    return dict(payload)
 
 
 def run_warmup_requests(iterations: int, *, batch_size: int) -> dict[str, object]:
@@ -1318,6 +1705,37 @@ def run_warmup_requests(iterations: int, *, batch_size: int) -> dict[str, object
     return summary
 
 
+def run_warmup_wrk(
+    *,
+    duration_s: int | float,
+    connections: int,
+    threads: int,
+) -> dict[str, object]:
+    if float(duration_s) <= 0:
+        return {
+            "driver": "wrk",
+            "request_count": 0,
+            "success_count": 0,
+            "ops_per_sec": None,
+            "duration_s": 0.0,
+            "latency_ms": {},
+            "failure_preview": [],
+            "stdout_tail": "",
+            "stderr_tail": "",
+        }
+    summary = run_wrk(
+        namespace=CLIENT_NS,
+        duration_s=duration_s,
+        connections=connections,
+        threads=threads,
+    )
+    if int(summary.get("request_count", 0) or 0) <= 0:
+        raise RuntimeError("Katran wrk warmup produced zero requests")
+    if int(summary.get("success_count", 0) or 0) != int(summary.get("request_count", 0) or 0):
+        raise RuntimeError(f"Katran wrk warmup failed: {summary.get('failure_preview')}")
+    return summary
+
+
 def execute_http_measurement_loop(
     *,
     batch_size: int,
@@ -1346,26 +1764,63 @@ def measure_phase(
     duration_s: int,
     minimum_requests: int,
     warmup_request_count: int,
+    warmup_duration_s: int | float,
+    use_wrk_driver: bool,
+    wrk_connections: int,
+    wrk_threads: int,
 ) -> dict[str, object]:
     state_reset = reset_katran_state(session)
-    warmup = run_warmup_requests(warmup_request_count, batch_size=traffic_iterations)
+    if use_wrk_driver:
+        warmup = run_warmup_wrk(
+            duration_s=warmup_duration_s,
+            connections=wrk_connections,
+            threads=wrk_threads,
+        )
+    else:
+        warmup = run_parallel_http_load(
+            duration_s=warmup_duration_s,
+            concurrency=traffic_iterations,
+        )
+        if int(warmup.get("request_count", 0) or 0) <= 0:
+            raise RuntimeError("Katran parallel warmup produced zero requests")
+        if int(warmup.get("success_count", 0) or 0) != int(warmup.get("request_count", 0) or 0):
+            raise RuntimeError(f"Katran parallel warmup failed: {warmup.get('failure_preview')}")
     before = sample_bpf_stats([session.prog_id])
     ipip_before = link_stats(REAL_NS, "ipip0")
-    requests, measurement_batches, measurement_duration_s = execute_http_measurement_loop(
-        batch_size=traffic_iterations,
-        duration_s=duration_s,
-        minimum_requests=minimum_requests,
+    system_cpu_holder: dict[str, object] = {}
+    cpu_thread = threading.Thread(
+        target=lambda: system_cpu_holder.update(sample_total_cpu_usage(duration_s)),
+        daemon=True,
     )
-    request_summary = summarize_request_records(requests)
-    request_latencies = list(request_summary.pop("latencies_ms", []))
+    cpu_thread.start()
+    request_latencies: list[float] = []
+    if use_wrk_driver:
+        request_summary = run_wrk(
+            namespace=CLIENT_NS,
+            duration_s=duration_s,
+            connections=wrk_connections,
+            threads=wrk_threads,
+        )
+        measurement_batches = 1
+        measurement_duration_s = float(request_summary.get("duration_s") or 0.0)
+    else:
+        request_summary = run_parallel_http_load(
+            duration_s=duration_s,
+            concurrency=traffic_iterations,
+        )
+        measurement_batches = 1
+        measurement_duration_s = float(request_summary.get("duration_s") or 0.0)
+    cpu_thread.join()
     after = sample_bpf_stats([session.prog_id])
     ipip_after = link_stats(REAL_NS, "ipip0")
     sample = PhaseSample(
         index=index,
         phase=phase_name,
+        driver="wrk" if use_wrk_driver else "serial_python",
         measurement_duration_s=measurement_duration_s,
         measurement_batches=measurement_batches,
         warmup_request_count=warmup_request_count,
+        warmup_duration_s=float(warmup_duration_s),
         request_latencies_ms=request_latencies,
         request_failure_preview=list(request_summary.get("failure_preview") or []),
         request_summary=request_summary,
@@ -1373,6 +1828,7 @@ def measure_phase(
         http_success_count=int(request_summary.get("success_count", 0) or 0),
         ipip_rx_packets_delta=max(0, ipip_after["rx_packets"] - ipip_before["rx_packets"]),
         ipip_rx_bytes_delta=max(0, ipip_after["rx_bytes"] - ipip_before["rx_bytes"]),
+        system_cpu=dict(system_cpu_holder),
         bpf=compute_delta(before, after),
         state_reset=state_reset,
     )
@@ -1385,10 +1841,12 @@ def measure_phase(
     return {
         "index": sample.index,
         "phase": sample.phase,
+        "driver": sample.driver,
         "measurement_duration_s": sample.measurement_duration_s,
         "measurement_batches": sample.measurement_batches,
         "warmup": warmup,
         "warmup_request_count": sample.warmup_request_count,
+        "warmup_duration_s": sample.warmup_duration_s,
         "request_summary": sample.request_summary,
         "request_failure_preview": sample.request_failure_preview,
         "request_latencies_ms": sample.request_latencies_ms,
@@ -1398,6 +1856,7 @@ def measure_phase(
         "ipip_after": ipip_after,
         "ipip_rx_packets_delta": sample.ipip_rx_packets_delta,
         "ipip_rx_bytes_delta": sample.ipip_rx_bytes_delta,
+        "system_cpu": sample.system_cpu,
         "bpf": sample.bpf,
         "state_reset": sample.state_reset,
     }
@@ -1415,21 +1874,48 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         raise RuntimeError("--katran-skip-attach is incompatible with the live DSR topology case")
 
     duration_s = int(args.duration or (DEFAULT_SMOKE_DURATION_S if args.smoke else DEFAULT_DURATION_S))
+    wrk_connections = max(
+        1,
+        int(
+            args.katran_wrk_connections
+            or (DEFAULT_SMOKE_WRK_CONNECTIONS if args.smoke else DEFAULT_WRK_CONNECTIONS)
+        ),
+    )
+    wrk_threads = max(
+        1,
+        int(
+            args.katran_wrk_threads
+            or (DEFAULT_SMOKE_WRK_THREADS if args.smoke else DEFAULT_WRK_THREADS)
+        ),
+    )
+    warmup_duration_s = float(
+        args.katran_warmup_duration
+        or (DEFAULT_SMOKE_WARMUP_DURATION_S if args.smoke else DEFAULT_WARMUP_DURATION_S)
+    )
     traffic_iterations = max(
         1,
         int(
-        args.katran_packet_repeat
-        or (DEFAULT_SMOKE_PACKET_REPEAT if args.smoke else DEFAULT_PACKET_REPEAT)
+            args.katran_packet_repeat
+            or (DEFAULT_SMOKE_PACKET_REPEAT if args.smoke else DEFAULT_PACKET_REPEAT)
         ),
     )
     sample_count = max(
         1,
         int(args.katran_samples or (DEFAULT_SMOKE_SAMPLE_COUNT if args.smoke else DEFAULT_SAMPLE_COUNT)),
     )
-    warmup_request_count = DEFAULT_SMOKE_WARMUP_PACKET_COUNT if args.smoke else DEFAULT_WARMUP_PACKET_COUNT
-    minimum_requests = max(
-        traffic_iterations,
-        DEFAULT_SMOKE_MIN_MEASUREMENT_REQUESTS if args.smoke else DEFAULT_MIN_MEASUREMENT_REQUESTS,
+    use_wrk_driver = bool(args.katran_use_wrk and wrk_binary() is not None)
+    warmup_request_count = (
+        0
+        if use_wrk_driver
+        else (DEFAULT_SMOKE_WARMUP_PACKET_COUNT if args.smoke else DEFAULT_WARMUP_PACKET_COUNT)
+    )
+    minimum_requests = (
+        0
+        if use_wrk_driver
+        else max(
+            traffic_iterations,
+            DEFAULT_SMOKE_MIN_MEASUREMENT_REQUESTS if args.smoke else DEFAULT_MIN_MEASUREMENT_REQUESTS,
+        )
     )
     runner_binary = Path(args.runner).resolve()
     scanner_binary = Path(args.scanner).resolve()
@@ -1470,6 +1956,16 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
     if server_binary is None:
         limitations.append(
             "Katran userspace server binary is not present; this case is running in standalone_direct_map_emulation via bpftool and pinned maps, not the official Katran userspace server path."
+        )
+    if bool(args.katran_use_wrk) and not use_wrk_driver:
+        limitations.append("wrk was requested but is unavailable; falling back to the built-in parallel Python HTTP client.")
+    if not use_wrk_driver:
+        limitations.append(
+            "Traffic generator uses a built-in parallel Python short-flow client, so application throughput includes guest-side client overhead."
+        )
+    else:
+        limitations.append(
+            "Traffic generator uses wrk against an HTTP/1.0 server, so the measured req/s is a short-flow connection-churn metric rather than bulk keep-alive throughput."
         )
     limitations.append(
         "Phase order remains stock then recompile inside each same-image cycle; reverse-order randomization would require an explicit stock restore path or a second live load."
@@ -1517,6 +2013,10 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
                             duration_s=duration_s,
                             minimum_requests=minimum_requests,
                             warmup_request_count=warmup_request_count,
+                            warmup_duration_s=warmup_duration_s,
+                            use_wrk_driver=use_wrk_driver,
+                            wrk_connections=wrk_connections,
+                            wrk_threads=wrk_threads,
                         )
                         baseline_phase = {
                             "samples": [baseline_sample],
@@ -1538,6 +2038,10 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
                                 duration_s=duration_s,
                                 minimum_requests=minimum_requests,
                                 warmup_request_count=warmup_request_count,
+                                warmup_duration_s=warmup_duration_s,
+                                use_wrk_driver=use_wrk_driver,
+                                wrk_connections=wrk_connections,
+                                wrk_threads=wrk_threads,
                             )
                             if applied > 0
                             else None
@@ -1617,13 +2121,19 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
 
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "mode": "katran_dsr_direct_map_emulation_same_image_paired",
+        "mode": "katran_dsr_direct_map_connection_churn_same_image_paired",
         "control_plane_mode": "bpftool_direct_map",
+        "traffic_driver": "wrk" if use_wrk_driver else "python_parallel",
+        "workload_model": "http_short_flow_connection_churn",
         "smoke": bool(args.smoke),
         "duration_s": duration_s,
         "packet_repeat": traffic_iterations,
+        "client_concurrency": traffic_iterations,
+        "wrk_connections": wrk_connections if use_wrk_driver else None,
+        "wrk_threads": wrk_threads if use_wrk_driver else None,
         "sample_count": sample_count,
         "warmup_packet_count": warmup_request_count,
+        "warmup_duration_s": warmup_duration_s,
         "min_measurement_requests": minimum_requests,
         "same_image_measurement": True,
         "state_reset_strategy": "reset mutable stats/fallback maps before each phase warmup",
@@ -1676,6 +2186,10 @@ def build_case_parser() -> argparse.ArgumentParser:
     parser.add_argument("--katran-iface", default=DEFAULT_INTERFACE)
     parser.add_argument("--katran-router-peer-iface")
     parser.add_argument("--katran-packet-repeat", type=int)
+    parser.add_argument("--katran-use-wrk", action="store_true")
+    parser.add_argument("--katran-wrk-connections", type=int)
+    parser.add_argument("--katran-wrk-threads", type=int)
+    parser.add_argument("--katran-warmup-duration", type=float)
     parser.add_argument("--katran-samples", type=int)
     parser.add_argument("--katran-skip-attach", action="store_true")
     parser.add_argument("--kernel-config", default=str(DEFAULT_KERNEL_CONFIG))

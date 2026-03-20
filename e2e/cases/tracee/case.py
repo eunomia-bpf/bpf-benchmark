@@ -56,13 +56,7 @@ except ModuleNotFoundError:  # noqa: E402
     sys.path.insert(0, str(ROOT_DIR / "micro"))
     from runner.libs.inventory import ProgramInventoryEntry, discover_object_programs
 
-try:  # noqa: E402
-    from e2e.run_e2e_tracee import Libbpf as ManualLibbpf
-    from e2e.run_e2e_tracee import ManualTraceeSession
-except ModuleNotFoundError:  # noqa: E402
-    sys.path.insert(0, str(ROOT_DIR / "e2e"))
-    from run_e2e_tracee import Libbpf as ManualLibbpf
-    from run_e2e_tracee import ManualTraceeSession
+from e2e.cases.tracee.manual import Libbpf as ManualLibbpf, ManualTraceeSession  # noqa: E402
 
 
 DEFAULT_CONFIG = Path(__file__).with_name("config.yaml")

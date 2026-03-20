@@ -580,7 +580,7 @@ authoritative `31`-case run 中，`10/31` 个 benchmark 出现 llvmbpf 代码更
 - [x] JIT dump / code-size 采集 — `--dump-jit` flag + `code_size` JSON 字段（RQ1.1 已关闭）
 - [x] rdtsc 精确测量修正 — 消除 harness 开销，llvmbpf exec_ns 现在公平
 - [x] LLVM 优化级别消融 — `--opt-level 0/1/2/3`，发现 O1=O2=O3
-- [x] 指令级 JIT 分析 — `micro/dump_all_jit.sh` + `micro/jit-dumps/report.md`，byte-recompose / BMI / cmov / prologue / 依赖链
+- [x] 指令级 JIT 分析 — 历史产物归档于 `micro/jit-dumps/report.md`，覆盖 byte-recompose / BMI / cmov / prologue / 依赖链
 - [x] BCF 数据集获取 — 1588 个程序已下载到 `corpus/bcf/`
 - [x] llvmbpf dummy helper 注册 — 注册 helper 3-220 为 no-op stub，解锁 Cilium/collected/inspektor-gadget 编译
 - [x] ELF loader relocation 修复 — 跳过越界 relocation 而非 crash，支持带子程序的 ELF

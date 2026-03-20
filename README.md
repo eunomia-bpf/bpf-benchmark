@@ -8,7 +8,7 @@ Three-layer benchmarking pipeline:
 - `corpus/`: real-world program collection, measurement, and analysis
 - `e2e/`: end-to-end deployment benchmarks (Tracee, Tetragon, bpftrace, scx, katran)
 
-Legacy multi-runtime benchmarks live under `legacy/` and are not part of the active pipeline.
+The historical multi-runtime userspace benchmark layer has been removed; the active tree is `micro/`, `corpus/`, and `e2e/`.
 
 ## Repository Layout
 
@@ -24,7 +24,6 @@ bpf-benchmark/
 ├── docker/                # Container definitions for cross-build helpers
 ├── tests/                 # Userspace/kernel self-tests
 ├── docs/                  # Research plans, reports, and temporary experiment notes
-├── legacy/                # Inactive historical benchmark code
 └── vendor/                # Vendored kernel (linux-framework) + tooling dependencies
 ```
 
@@ -90,12 +89,10 @@ make kernel-tests     # kernel recompile self-tests
 
 `runner/` owns the shared `micro_exec` C++ runner plus shared Python libraries in `runner/libs/`.
 
-`micro/` owns the isolated benchmark manifests (`config/micro_pure_jit.yaml`), input generators, and the Python driver (`micro/driver.py`, with `_driver_impl_run_micro.py` as the suite backend).
+`micro/` owns the isolated benchmark manifests (`config/micro_pure_jit.yaml`), input generators, and the Python suite driver (`micro/driver.py`).
 
 `corpus/` owns the 23-project real-world corpus, fetch/build tooling, declarative corpus config in `corpus/config/`, and the measurement entrypoints surfaced through `python3 corpus/driver.py ...`.
 
 `e2e/` owns full deployment-style evaluation via `e2e/run.py` plus per-case assets under `e2e/cases/`.
 
 `scanner/` is the userspace front end for BpfReJIT: it scans live BPF programs via `BPF_PROG_GET_NEXT_ID`, identifies optimization sites, and triggers `BPF_PROG_JIT_RECOMPILE`. See `scanner/README.md`.
-
-`legacy/` contains the old multi-runtime userspace benchmark. Preserved for history, not part of the active workflow.

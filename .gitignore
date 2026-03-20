@@ -1,6 +1,5 @@
 output*
 dump*
-!micro/dump_all_jit.sh
 wasm-wasmtime.exe
 *.kernel.bin
 *.llvmbpf.bin
@@ -29,6 +28,7 @@ Thumbs.db
 *.a
 *.so
 build/
+/build-arm64/
 micro/build/
 micro/build-arm64/
 scanner/build/
@@ -61,6 +61,7 @@ reference/papers/*.pdf
 # /tmp/ and tmp/ - the repo-root scratch directory (old layout, superseded by docs/tmp/)
 /tmp/
 tmp/
+/live-xlated-test.*/
 /.worktrees/
 *.tmp
 *.tmp.md

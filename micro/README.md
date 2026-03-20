@@ -10,11 +10,9 @@
 
 ## Directory Layout
 
-- `driver.py`: unified benchmark driver; `suite` is the canonical micro entrypoint
-- `_driver_impl_run_micro.py`: pure-JIT suite backend used by `driver.py suite`
+- `driver.py`: consolidated micro suite driver; `python3 micro/driver.py suite ...` is the canonical entrypoint
 - `benchmark_catalog.py`: suite YAML parser for micro manifests
 - `input_generators.py`: deterministic input generation for active benchmarks
-- `_driver_impl_*.py`: active driver backends used by `driver.py`
 - `summarize_rq.py`, `generate_figures.py`: active reporting utilities
 - `../runner/`: shared C++ runner plus reusable Python libs for `micro/`, `corpus/`, and `e2e/`
 - `programs/*.bpf.c`: active pure-JIT benchmark sources

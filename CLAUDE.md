@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-eBPF benchmarking suite comparing **llvmbpf** (userspace LLVM JIT) against **kernel eBPF** across micro-benchmarks. The main active development area is `micro/`, which runs declarative YAML-driven benchmark suites. A legacy `legacy/user_bpf_benchmark/` directory compares multiple userspace runtimes (ubpf, rbpf, wasmtime, native) but is not part of the active pipeline.
+eBPF benchmarking suite comparing **llvmbpf** (userspace LLVM JIT) against **kernel eBPF** across micro-benchmarks. The main active development areas are `micro/`, `corpus/`, and `e2e/`; the old multi-runtime userspace benchmark layer has been removed.
 
 ## Build & Run
 
@@ -96,9 +96,7 @@ Configured via YAML files in `config/`:
 
 ### Key components
 
-**`micro/driver.py`** — Unified benchmark driver. `suite` dispatches to the active micro backend or macro/corpus backend based on manifest kind; `corpus` dispatches the real-world measurement modes.
-
-**`micro/_driver_impl_run_micro.py`** — Main pure-JIT orchestrator. Loads suite YAML via `benchmark_catalog.py`, generates inputs via `input_generators.py`, invokes `micro_exec` for each benchmark×runtime pair, collects JSON samples, computes statistics (median/mean/p95/stdev), and attaches baseline adjustments.
+**`micro/driver.py`** — Main pure-JIT suite orchestrator. Loads suite YAML via `benchmark_catalog.py`, generates inputs via `input_generators.py`, invokes `micro_exec` for each benchmark×runtime pair, collects JSON samples, computes summaries, and attaches baseline adjustments.
 
 **`micro/benchmark_catalog.py`** — Parses suite YAML into typed dataclasses (`SuiteSpec`, `BenchmarkSpec`, `RuntimeSpec`). `CONFIG_PATH` defaults to `config/micro_pure_jit.yaml`. All paths in YAML are resolved relative to repo root.
 

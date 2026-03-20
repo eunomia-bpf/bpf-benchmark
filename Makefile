@@ -58,8 +58,8 @@ TMP_DIR := $(ROOT_DIR)/docs/tmp
 
 BZIMAGE ?= vendor/linux-framework/arch/x86/boot/bzImage
 SCANNER ?= scanner/build/bpf-jit-scanner
-ITERATIONS ?= 10
-WARMUPS ?= 2
+ITERATIONS ?= 3
+WARMUPS ?= 1
 REPEAT ?= 200
 # Auto-detect virtualenv: check common locations before falling back to system Python.
 # Override with: make VENV=/path/to/venv ...

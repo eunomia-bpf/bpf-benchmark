@@ -93,6 +93,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--katran-iface", default="katran0")
     parser.add_argument("--katran-router-peer-iface")
     parser.add_argument("--katran-packet-repeat", type=int)
+    parser.add_argument("--katran-use-wrk", action="store_true")
+    parser.add_argument("--katran-wrk-connections", type=int)
+    parser.add_argument("--katran-wrk-threads", type=int)
+    parser.add_argument("--katran-warmup-duration", type=float)
     parser.add_argument("--katran-samples", type=int)
     parser.add_argument("--katran-skip-attach", action="store_true")
     parser.add_argument("--kernel-config", default=str(ROOT_DIR / "vendor" / "linux-framework" / ".config"))
@@ -239,6 +243,14 @@ def run_katran_vm(args: argparse.Namespace) -> int:
         guest_command.extend(["--katran-server-binary", str(Path(args.katran_server_binary).resolve())])
     if args.katran_packet_repeat is not None:
         guest_command.extend(["--katran-packet-repeat", str(int(args.katran_packet_repeat))])
+    if args.katran_use_wrk:
+        guest_command.append("--katran-use-wrk")
+    if args.katran_wrk_connections is not None:
+        guest_command.extend(["--katran-wrk-connections", str(int(args.katran_wrk_connections))])
+    if args.katran_wrk_threads is not None:
+        guest_command.extend(["--katran-wrk-threads", str(int(args.katran_wrk_threads))])
+    if args.katran_warmup_duration is not None:
+        guest_command.extend(["--katran-warmup-duration", str(float(args.katran_warmup_duration))])
     if args.katran_samples is not None:
         guest_command.extend(["--katran-samples", str(int(args.katran_samples))])
     if args.katran_skip_attach:

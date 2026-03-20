@@ -200,6 +200,69 @@ def run_text_command(
     return completed
 
 
+def kernel_btf_unsupported(error_text: str) -> bool:
+    haystack = error_text.lower()
+    if "kernel_btf" not in haystack:
+        return False
+    needles = (
+        "expected no more arguments",
+        "unknown option",
+        "unrecognized option",
+        "invalid argument",
+    )
+    return any(needle in haystack for needle in needles)
+
+
+def run_bpftool_loadall(
+    suite: SuiteSpec,
+    spec: ProgramSpec,
+    pin_dir: Path,
+    *,
+    suffix_args: tuple[str, ...] = (),
+    timeout_seconds: int = 180,
+) -> tuple[list[str], list[dict[str, Any]]]:
+    btf_path = detect_btf_path(spec.btf_path)
+    base_command = [suite.bpftool_binary, "prog", "loadall", str(spec.source), str(pin_dir)]
+    commands: list[tuple[list[str], bool]] = []
+    if btf_path is not None:
+        commands.append(([*base_command, "kernel_btf", str(btf_path), *suffix_args], True))
+    commands.append(([*base_command, *suffix_args], False))
+
+    attempts: list[dict[str, Any]] = []
+    for index, (command, used_kernel_btf) in enumerate(commands):
+        try:
+            run_text_command(command, timeout_seconds=timeout_seconds)
+            attempts.append(
+                {
+                    "command": command,
+                    "used_kernel_btf": used_kernel_btf,
+                    "fallback_retry": index > 0,
+                    "ok": True,
+                    "error": "",
+                }
+            )
+            return command, attempts
+        except RuntimeError as exc:
+            error_text = str(exc)
+            attempts.append(
+                {
+                    "command": command,
+                    "used_kernel_btf": used_kernel_btf,
+                    "fallback_retry": index > 0,
+                    "ok": False,
+                    "error": error_text,
+                }
+            )
+            should_retry = (
+                used_kernel_btf
+                and index + 1 < len(commands)
+                and kernel_btf_unsupported(error_text)
+            )
+            if not should_retry:
+                raise
+    raise RuntimeError("bpftool prog loadall failed without an actionable error")
+
+
 def maybe_build_runner(suite: SuiteSpec, skip_build: bool) -> None:
     if suite.runner_binary.exists():
         return
@@ -688,11 +751,6 @@ def run_attach_trigger_sample(
         raise RuntimeError(f"{spec.name}: attach_trigger requires a trigger command")
 
     pin_dir = unique_pin_dir(spec.name, "kernel_recompile_v5" if recompile_v5 else "kernel", iteration_idx)
-    btf_path = detect_btf_path(spec.btf_path)
-    load_command = [suite.bpftool_binary, "prog", "loadall", str(spec.source), str(pin_dir)]
-    if btf_path is not None:
-        load_command.extend(["kernel_btf", str(btf_path)])
-    load_command.append("autoattach")
 
     started_ns = time.perf_counter_ns()
     recompile_record = {
@@ -704,8 +762,14 @@ def run_attach_trigger_sample(
         "applied": False,
         "error": "",
     }
+    load_attempts: list[dict[str, Any]] = []
     try:
-        run_text_command(load_command)
+        load_command, load_attempts = run_bpftool_loadall(
+            suite,
+            spec,
+            pin_dir,
+            suffix_args=("autoattach",),
+        )
         load_ns = time.perf_counter_ns() - started_ns
         attached = attached_programs_for_pin_dir(suite.bpftool_binary, pin_dir)
         if spec.program_names:
@@ -760,6 +824,7 @@ def run_attach_trigger_sample(
             },
             "effective_repeat": max(1, repeat),
             "bpftool_command": load_command,
+            "bpftool_attempts": load_attempts,
         }
         if apply_info is not None:
             sample["phases_ns"]["recompile_apply_ns"] = recompile_ns
@@ -780,10 +845,6 @@ def run_compile_only_loadall_sample(
     iteration_idx: int,
 ) -> dict[str, Any]:
     pin_dir = unique_pin_dir(spec.name, "kernel_recompile_v5" if recompile_v5 else "kernel", iteration_idx)
-    btf_path = detect_btf_path(spec.btf_path)
-    load_command = [suite.bpftool_binary, "prog", "loadall", str(spec.source), str(pin_dir)]
-    if btf_path is not None:
-        load_command.extend(["kernel_btf", str(btf_path)])
 
     recompile_record = {
         "requested": recompile_v5,
@@ -796,8 +857,9 @@ def run_compile_only_loadall_sample(
     }
 
     started_ns = time.perf_counter_ns()
+    load_attempts: list[dict[str, Any]] = []
     try:
-        run_text_command(load_command)
+        load_command, load_attempts = run_bpftool_loadall(suite, spec, pin_dir)
         load_ns = time.perf_counter_ns() - started_ns
         pinned = pinned_programs_for_pin_dir(suite.bpftool_binary, pin_dir)
         if spec.program_names:
@@ -844,6 +906,7 @@ def run_compile_only_loadall_sample(
             "pinned_programs": pinned,
             "effective_repeat": 1,
             "bpftool_command": load_command,
+            "bpftool_attempts": load_attempts,
         }
         if apply_info is not None:
             sample["phases_ns"]["recompile_apply_ns"] = recompile_ns

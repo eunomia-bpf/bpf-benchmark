@@ -1,10 +1,10 @@
 # Core dependency — required for benchmark orchestration (benchmark_catalog.py, policy_utils.py, etc.)
 pyyaml>=6.0
 
-# Required for corpus ELF analysis (directive_census.py, analyze_bytecode.py, generate_default_policies.py)
+# Required for corpus ELF analysis helpers (directive_census.py, generate_default_policies.py, runner/libs/inventory.py)
 pyelftools>=0.29
 
-# Required for figure generation and rigorous statistical tests (generate_figures.py, _driver_impl_run_rigorous.py)
+# Required for figure generation and statistical analysis (generate_figures.py)
 matplotlib>=3.7
 numpy>=1.24
 scipy>=1.10

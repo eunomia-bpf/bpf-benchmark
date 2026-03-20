@@ -33,11 +33,6 @@ Top-level support scripts retained in `corpus/`:
 - `build_expanded_corpus.py`: compiles harvested `.bpf.c` sources into `corpus/build/`
 - `directive_census.py`: scanner-backed directive census over `micro/` objects plus the built corpus
 
-Long-lived support scripts also kept at the top level:
-
-- `fetch_bcf_dataset.py`: refreshes the BCF object dataset under `corpus/bcf/`
-- `analyze_bytecode.py`: extracts static bytecode features from the BCF dataset
-
 There is no checked-in scratch directory under `corpus/` anymore. Keep any local scratch work untracked, or promote reusable scripts back to the top level.
 
 ## Config Notes
