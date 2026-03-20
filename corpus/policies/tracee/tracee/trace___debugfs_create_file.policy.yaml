@@ -3,7 +3,7 @@
 # Program: trace___debugfs_create_file
 # Section: kprobe/__debugfs_create_file
 # Total scanner sites: 18
-# Family site totals: cmov=7, wide=0, rotate=0, extract=0, lea=0, zero-ext=0, endian=0, branch-flip=11
+# Family site totals: cmov=7, wide=0, rotate=0, extract=0, lea=0, endian=0, branch-flip=11
 # Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
 # Excluded cmov sites from allowlist: 7
 

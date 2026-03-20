@@ -388,52 +388,6 @@ void test_v5_bitfield_extract_scan()
           "bitfield-extract-32-mask-shift");
 }
 
-void test_v5_zero_ext_elide_scan()
-{
-    using bpf_jit_scanner::V5ScanOptions;
-
-    auto zext_reg = encode({
-        {BPF_ADD32_K, regs(3, 0), 0, 7},
-        {BPF_MOV32_X, regs(3, 3), 0, 1},
-    });
-    auto self_mov = encode({
-        {BPF_ADD32_K, regs(5, 0), 0, 7},
-        {BPF_MOV64_X, regs(5, 5), 0, 0},
-    });
-    auto and_mask = encode({
-        {BPF_NEG32, regs(4, 0), 0, 0},
-        {BPF_AND64_K, regs(4, 0), 0, -1},
-    });
-
-    auto zext_summary = bpf_jit_scanner::scan_v5_builtin(
-        zext_reg.data(), static_cast<uint32_t>(zext_reg.size()),
-        V5ScanOptions {.scan_zero_ext = true});
-    CHECK_EQ(zext_summary.rules.size(), 1u);
-    CHECK_EQ(zext_summary.zero_ext_sites, 1u);
-    CHECK_EQ(zext_summary.rules[0].canonical_form,
-             static_cast<uint16_t>(BPF_JIT_CF_ZERO_EXT_ELIDE));
-    CHECK_EQ(zext_summary.rules[0].native_choice,
-             static_cast<uint16_t>(BPF_JIT_ZEXT_ELIDE));
-    CHECK_EQ(zext_summary.rules[0].site_len, 2u);
-    CHECK(zext_summary.rules[0].pattern_kind == "zero-ext-elide");
-
-    auto mov_summary = bpf_jit_scanner::scan_v5_builtin(
-        self_mov.data(), static_cast<uint32_t>(self_mov.size()),
-        V5ScanOptions {.scan_zero_ext = true});
-    CHECK_EQ(mov_summary.rules.size(), 1u);
-    CHECK_EQ(mov_summary.zero_ext_sites, 1u);
-    CHECK_EQ(mov_summary.rules[0].site_len, 2u);
-    CHECK(mov_summary.rules[0].pattern_kind == "zero-ext-elide");
-
-    auto and_summary = bpf_jit_scanner::scan_v5_builtin(
-        and_mask.data(), static_cast<uint32_t>(and_mask.size()),
-        V5ScanOptions {.scan_zero_ext = true});
-    CHECK_EQ(and_summary.rules.size(), 1u);
-    CHECK_EQ(and_summary.zero_ext_sites, 1u);
-    CHECK_EQ(and_summary.rules[0].site_len, 2u);
-    CHECK(and_summary.rules[0].pattern_kind == "zero-ext-elide");
-}
-
 void test_v5_endian_fusion_scan()
 {
     using bpf_jit_scanner::V5ScanOptions;
@@ -948,7 +902,6 @@ int main()
     test_v5_wide_scan_variants();
     test_v5_lea_scan();
     test_v5_bitfield_extract_scan();
-    test_v5_zero_ext_elide_scan();
     test_v5_endian_fusion_scan();
     test_v5_branch_flip_scan();
     test_v5_abi_limits();

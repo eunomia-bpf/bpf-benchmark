@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Mapping, Sequence
@@ -21,10 +22,14 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 from scipy.stats import linregress, wilcoxon
 
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 try:
-    from orchestrator.catalog import DEFAULT_MICRO_MANIFEST, ManifestSpec, load_manifest, load_manifest_from_results
+    from runner.libs.catalog import DEFAULT_MICRO_MANIFEST, ManifestSpec, load_manifest, load_manifest_from_results
 except ModuleNotFoundError:
-    from micro.orchestrator.catalog import DEFAULT_MICRO_MANIFEST, ManifestSpec, load_manifest, load_manifest_from_results
+    from runner.libs.catalog import DEFAULT_MICRO_MANIFEST, ManifestSpec, load_manifest, load_manifest_from_results
 try:
     from results_layout import authoritative_candidates, latest_output_path
 except ImportError:

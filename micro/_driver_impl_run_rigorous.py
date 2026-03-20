@@ -18,15 +18,19 @@ from itertools import combinations
 from pathlib import Path
 from typing import Callable
 
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 from benchmark_catalog import CONFIG_PATH, ROOT_DIR, BenchmarkSpec, RuntimeSpec, SuiteSpec, load_suite
 try:
-    from orchestrator.benchmarks import resolve_memory_file, select_benchmarks
-    from orchestrator.commands import build_runner_command
-    from orchestrator.environment import validate_publication_environment
+    from runner.libs.benchmarks import resolve_memory_file, select_benchmarks
+    from runner.libs.commands import build_runner_command
+    from runner.libs.environment import validate_publication_environment
 except ImportError:
-    from micro.orchestrator.benchmarks import resolve_memory_file, select_benchmarks
-    from micro.orchestrator.commands import build_runner_command
-    from micro.orchestrator.environment import validate_publication_environment
+    from runner.libs.benchmarks import resolve_memory_file, select_benchmarks
+    from runner.libs.commands import build_runner_command
+    from runner.libs.environment import validate_publication_environment
 
 try:
     import numpy as np

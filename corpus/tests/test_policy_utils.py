@@ -8,7 +8,7 @@ ROOT_DIR = Path(__file__).resolve().parents[2]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from corpus.policy_utils import parse_policy_v3, remap_policy_v3_to_live
+from runner.libs.policy import parse_policy_v3, remap_policy_v3_to_live
 
 GOLDEN_DIR = ROOT_DIR / "scanner" / "tests" / "policy_v3_golden"
 

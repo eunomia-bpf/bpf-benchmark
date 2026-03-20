@@ -8,14 +8,14 @@ from pathlib import Path
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from e2e.common import (  # noqa: E402
+from runner.libs import (  # noqa: E402
     ROOT_DIR,
     prepare_bpftool_environment,
     tail_text,
     write_json,
     write_text,
 )
-from e2e.common.vm import run_in_vm, write_guest_script  # noqa: E402
+from runner.libs.vm import run_in_vm, write_guest_script  # noqa: E402
 from e2e.cases.bpftrace.case import (  # noqa: E402
     DEFAULT_OUTPUT_JSON as DEFAULT_BPFTRACE_OUTPUT_JSON,
     DEFAULT_OUTPUT_MD as DEFAULT_BPFTRACE_OUTPUT_MD,
@@ -75,7 +75,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--tracee-object", default=str(ROOT_DIR / "corpus" / "build" / "tracee" / "tracee.bpf.o"))
     parser.add_argument("--execve-object", default=str(DEFAULT_TETRAGON_EXECVE_OBJECT))
     parser.add_argument("--kprobe-object", default=str(DEFAULT_TETRAGON_KPROBE_OBJECT))
-    parser.add_argument("--runner", default=str(ROOT_DIR / "micro" / "build" / "runner" / "micro_exec"))
+    parser.add_argument("--runner", default=str(ROOT_DIR / "runner" / "build" / "micro_exec"))
     parser.add_argument("--scanner", default=str(ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"))
     parser.add_argument("--load-timeout", type=int, default=20)
     parser.add_argument("--attach-timeout", type=int, default=20)

@@ -3,7 +3,7 @@
 # Program: trace_security_socket_listen
 # Section: kprobe/security_socket_listen
 # Total scanner sites: 24
-# Family site totals: cmov=13, wide=0, rotate=0, extract=0, lea=0, zero-ext=0, endian=1, branch-flip=10
+# Family site totals: cmov=13, wide=0, rotate=0, extract=0, lea=0, endian=1, branch-flip=10
 # Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
 # Excluded cmov sites from allowlist: 13
 

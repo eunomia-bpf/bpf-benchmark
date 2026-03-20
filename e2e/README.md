@@ -2,29 +2,28 @@
 
 `e2e/` is the deployment-layer benchmark harness. The unified entrypoint is `python3 e2e/run.py <case>`.
 
-Active checked-in cases are `tracee`, `tetragon`, `bpftrace`, and `scx`. The former low-value XDP dataplane case was retired on 2026-03-18; a future `katran` case is the planned XDP replacement.
+Active checked-in cases are `tracee`, `tetragon`, `bpftrace`, `scx`, and `katran`. The former low-value XDP dataplane case was retired on 2026-03-18; `katran` is the current XDP replacement.
 
 ## Layout
 
-- `run.py`: unified dispatcher for `tracee`, `tetragon`, `bpftrace`, and `scx`
+- `run.py`: unified dispatcher for `tracee`, `tetragon`, `bpftrace`, `scx`, and `katran`
 - `cases/`: per-system case logic, setup scripts, configs, and assets
-- `common/`: shared helpers for agent lifecycle, workload generation, metrics, VM runs, and recompile
+- `../runner/libs/`: shared helpers for agent lifecycle, workload generation, metrics, VM runs, and recompile
 - `results/`: JSON/Markdown outputs
-- `run_e2e_*.py`: legacy case-specific wrappers still used by some fallback paths
+- `run_e2e_tracee.py`: legacy standalone Tracee harness still imported by the active Tracee manual-fallback path
 
 ## Shared Prerequisites
 
 ```bash
 source /home/yunwei37/workspace/.venv/bin/activate
-make -C micro
-cmake -S scanner -B scanner/build -DCMAKE_BUILD_TYPE=Release
-cmake --build scanner/build --target bpf-jit-scanner -j
-python3 corpus/build_expanded_corpus.py --repo tracee --repo tetragon --repo scx
+make micro
+make scanner
+python3 corpus/build_expanded_corpus.py --repo tracee --repo tetragon --repo scx --repo katran
 ```
 
 - Most cases require root or passwordless `sudo -n`.
-- `tracee`, `tetragon`, and `scx` consume objects from `corpus/build/`.
-- `e2e` expects the standalone scanner CLI at `scanner/build/bpf-jit-scanner`; `make -C micro` does not produce that path.
+- `tracee`, `tetragon`, `scx`, and `katran` consume objects from `corpus/build/`.
+- `e2e` expects the standalone scanner CLI at `scanner/build/bpf-jit-scanner`; `make micro` does not produce that path.
 
 ## Case Notes
 
@@ -60,3 +59,10 @@ python3 corpus/build_expanded_corpus.py --repo tracee --repo tetragon --repo scx
 - Requires at least one workload generator in `PATH`: `hackbench`, `stress-ng`, or `sysbench`
 - Supports `--vm` and requires `--kernel` when enabled
 - Smoke example: `python3 e2e/run.py scx --smoke`
+
+### Katran
+
+- Setup helper: `e2e/cases/katran/setup.sh`
+- Uses `corpus/build/katran/balancer.bpf.o` plus the live DSR topology helper assets in the case directory
+- Supports `--vm` and requires `--kernel` when enabled
+- Smoke example: `python3 e2e/run.py katran --smoke`

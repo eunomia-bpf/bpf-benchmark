@@ -3,7 +3,7 @@
 # Program: generic_kprobe_process_filter
 # Section: kprobe
 # Total scanner sites: 132
-# Family site totals: cmov=60, wide=20, rotate=0, extract=21, lea=0, zero-ext=0, endian=0, branch-flip=31
+# Family site totals: cmov=60, wide=20, rotate=0, extract=21, lea=0, endian=0, branch-flip=31
 # Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
 # Excluded cmov sites from allowlist: 60
 # Excluded extract sites from allowlist: 21

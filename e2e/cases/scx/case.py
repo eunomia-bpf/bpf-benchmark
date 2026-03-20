@@ -19,7 +19,7 @@ from typing import Any, Mapping, Sequence
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from e2e.common import (  # noqa: E402
+from runner.libs import (  # noqa: E402
     RESULTS_DIR,
     ROOT_DIR,
     authoritative_output_path,
@@ -32,11 +32,11 @@ from e2e.common import (  # noqa: E402
     write_json,
     write_text,
 )
-from e2e.common.agent import find_bpf_programs, start_agent, stop_agent, wait_healthy  # noqa: E402
-from e2e.common.metrics import sample_cpu_usage, sample_total_cpu_usage  # noqa: E402
-from e2e.common.recompile import apply_recompile, scan_programs  # noqa: E402
-from e2e.common.vm import run_in_vm, write_guest_script  # noqa: E402
-from e2e.common.workload import WorkloadResult  # noqa: E402
+from runner.libs.agent import find_bpf_programs, start_agent, stop_agent, wait_healthy  # noqa: E402
+from runner.libs.metrics import sample_cpu_usage, sample_total_cpu_usage  # noqa: E402
+from runner.libs.recompile import apply_recompile, scan_programs  # noqa: E402
+from runner.libs.vm import run_in_vm, write_guest_script  # noqa: E402
+from runner.libs.workload import WorkloadResult  # noqa: E402
 
 
 DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "scx")

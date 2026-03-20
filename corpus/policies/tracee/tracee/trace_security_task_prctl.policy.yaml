@@ -3,7 +3,7 @@
 # Program: trace_security_task_prctl
 # Section: kprobe/security_task_prctl
 # Total scanner sites: 78
-# Family site totals: cmov=62, wide=0, rotate=0, extract=2, lea=0, zero-ext=0, endian=0, branch-flip=14
+# Family site totals: cmov=62, wide=0, rotate=0, extract=2, lea=0, endian=0, branch-flip=14
 # Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
 # Excluded cmov sites from allowlist: 62
 # Excluded extract sites from allowlist: 2

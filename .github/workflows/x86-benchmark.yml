@@ -30,7 +30,7 @@ jobs:
           sudo apt-get install -y clang llvm cmake pkg-config libbpf-dev libelf-dev zlib1g-dev libzstd-dev python3-yaml
 
       - name: Build benchmark suite
-        run: make -C micro
+        run: make micro
 
       - name: Run pure JIT characterization with both runtimes
         id: pure_jit_full

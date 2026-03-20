@@ -30,22 +30,22 @@ for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpu
         sys.path.insert(0, candidate_str)
 
 try:
-    from orchestrator.commands import build_runner_command
-    from orchestrator.environment import read_optional_text, read_required_text
-    from orchestrator.inventory import ProgramInventoryEntry, discover_object_programs
-    from orchestrator.results import UnifiedResultRecord, float_summary, parse_runner_sample
+    from runner.libs.commands import build_runner_command
+    from runner.libs.environment import read_optional_text, read_required_text
+    from runner.libs.inventory import ProgramInventoryEntry, discover_object_programs
+    from runner.libs.results import UnifiedResultRecord, float_summary, parse_runner_sample
 except ImportError:
-    from micro.orchestrator.commands import build_runner_command
-    from micro.orchestrator.environment import read_optional_text, read_required_text
-    from micro.orchestrator.inventory import ProgramInventoryEntry, discover_object_programs
-    from micro.orchestrator.results import UnifiedResultRecord, float_summary, parse_runner_sample
-from e2e.common import resolve_bpftool_binary
-from e2e.common.recompile import apply_recompile as apply_recompile_by_id
+    from runner.libs.commands import build_runner_command
+    from runner.libs.environment import read_optional_text, read_required_text
+    from runner.libs.inventory import ProgramInventoryEntry, discover_object_programs
+    from runner.libs.results import UnifiedResultRecord, float_summary, parse_runner_sample
+from runner.libs import resolve_bpftool_binary
+from runner.libs.recompile import apply_recompile as apply_recompile_by_id
 
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_OBJECT = ROOT_DIR / "corpus" / "build" / "tracee" / "tracee.bpf.o"
-DEFAULT_RUNNER = ROOT_DIR / "micro" / "build" / "runner" / "micro_exec"
+DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
 DEFAULT_SCANNER = ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"
 DEFAULT_OUTPUT_JSON = ROOT_DIR / "docs" / "tmp" / "tracee-e2e-results.json"
 DEFAULT_OUTPUT_MD = ROOT_DIR / "docs" / "tmp" / "tracee-e2e-results.md"

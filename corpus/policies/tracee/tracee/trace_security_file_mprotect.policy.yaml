@@ -3,7 +3,7 @@
 # Program: trace_security_file_mprotect
 # Section: kprobe/security_file_mprotect
 # Total scanner sites: 46
-# Family site totals: cmov=24, wide=0, rotate=0, extract=0, lea=0, zero-ext=0, endian=0, branch-flip=22
+# Family site totals: cmov=24, wide=0, rotate=0, extract=0, lea=0, endian=0, branch-flip=22
 # Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
 # Excluded cmov sites from allowlist: 24
 

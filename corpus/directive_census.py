@@ -7,15 +7,21 @@ import os
 import re
 import statistics
 import subprocess
+import sys
 import tempfile
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 try:
-    from common import build_scanner_command
+    from runner.libs.commands import build_scanner_command
 except ImportError:
-    from corpus.common import build_scanner_command
+    from runner.libs.commands import build_scanner_command
 
 try:
     from elftools.elf.elffile import ELFFile
@@ -31,18 +37,16 @@ FAMILY_FIELDS = (
     ("ROTATE", "rotate"),
     ("ADDR_CALC", "lea"),
     ("BITFIELD_EXTRACT", "extract"),
-    ("ZERO_EXT_ELIDE", "zeroext"),
     ("ENDIAN_FUSION", "endian"),
     ("BRANCH_FLIP", "bflip"),
 )
-NEW_FAMILY_LABELS = {"ZERO_EXT_ELIDE", "ENDIAN_FUSION", "BRANCH_FLIP"}
+NEW_FAMILY_LABELS = {"ENDIAN_FUSION", "BRANCH_FLIP"}
 SCANNER_PATTERNS = {
     "cmov": re.compile(r"^\s*cmov:\s*(\d+)\s*$"),
     "wide": re.compile(r"^\s*wide:\s*(\d+)\s*$"),
     "rotate": re.compile(r"^\s*rotate:\s*(\d+)\s*$"),
     "lea": re.compile(r"^\s*lea:\s*(\d+)\s*$"),
     "extract": re.compile(r"^\s*extract:\s*(\d+)\s*$"),
-    "zeroext": re.compile(r"^\s*zeroext:\s*(\d+)\s*$"),
     "endian": re.compile(r"^\s*endian:\s*(\d+)\s*$"),
     "bflip": re.compile(r"^\s*bflip:\s*(\d+)\s*$"),
 }
@@ -56,7 +60,6 @@ class SectionResult:
     rotate: int
     lea: int
     extract: int
-    zeroext: int
     endian: int
     bflip: int
 
@@ -68,7 +71,6 @@ class SectionResult:
             + self.rotate
             + self.lea
             + self.extract
-            + self.zeroext
             + self.endian
             + self.bflip
         )
@@ -86,7 +88,6 @@ class ProgramResult:
     rotate: int
     lea: int
     extract: int
-    zeroext: int
     endian: int
     bflip: int
     sections: tuple[SectionResult, ...]
@@ -99,7 +100,6 @@ class ProgramResult:
             + self.rotate
             + self.lea
             + self.extract
-            + self.zeroext
             + self.endian
             + self.bflip
         )
@@ -288,7 +288,6 @@ def analyze_section(section, scanner: Path) -> SectionResult:
         rotate=counts["rotate"],
         lea=counts["lea"],
         extract=counts["extract"],
-        zeroext=counts["zeroext"],
         endian=counts["endian"],
         bflip=counts["bflip"],
     )
@@ -315,7 +314,6 @@ def analyze_object(path: Path, source: str, repo_root: Path, scanner: Path) -> P
         rotate=sum(section.rotate for section in section_results),
         lea=sum(section.lea for section in section_results),
         extract=sum(section.extract for section in section_results),
-        zeroext=sum(section.zeroext for section in section_results),
         endian=sum(section.endian for section in section_results),
         bflip=sum(section.bflip for section in section_results),
         sections=tuple(section_results),
@@ -466,7 +464,6 @@ def project_summary_rows(results: list[ProgramResult]) -> list[list[object]]:
                 totals["ROTATE"],
                 totals["ADDR_CALC"],
                 totals["BITFIELD_EXTRACT"],
-                totals["ZERO_EXT_ELIDE"],
                 totals["ENDIAN_FUSION"],
                 totals["BRANCH_FLIP"],
             ]
@@ -487,7 +484,6 @@ def top_rows(results: list[ProgramResult], top_n: int) -> list[list[object]]:
                 item.rotate,
                 item.lea,
                 item.extract,
-                item.zeroext,
                 item.endian,
                 item.bflip,
                 item.total,
@@ -552,9 +548,8 @@ def build_json_payload(
                     "ROTATE": row[6],
                     "ADDR_CALC": row[7],
                     "BITFIELD_EXTRACT": row[8],
-                    "ZERO_EXT_ELIDE": row[9],
-                    "ENDIAN_FUSION": row[10],
-                    "BRANCH_FLIP": row[11],
+                    "ENDIAN_FUSION": row[9],
+                    "BRANCH_FLIP": row[10],
                 },
             }
             for row in project_summary_rows(all_results)
@@ -569,10 +564,9 @@ def build_json_payload(
                 "rotate": row[5],
                 "lea": row[6],
                 "extract": row[7],
-                "zeroext": row[8],
-                "endian": row[9],
-                "bflip": row[10],
-                "total": row[11],
+                "endian": row[8],
+                "bflip": row[9],
+                "total": row[10],
             }
             for row in top_rows(corpus_results, top_n)
         ],
@@ -601,7 +595,7 @@ def render_report(
     project_rows = project_summary_rows(all_results)
 
     lines: list[str] = [
-        "# Scanner-backed 8-Family Directive Census",
+        "# Scanner-backed 7-Family Directive Census",
         "",
         f"- Repository root: `{repo_root}`",
         f"- Scanner CLI: `{scanner}`",
@@ -639,7 +633,6 @@ def render_report(
                 "ROTATE",
                 "LEA",
                 "EXTRACT",
-                "ZEROEXT",
                 "ENDIAN",
                 "BFLIP",
             ],
@@ -658,7 +651,6 @@ def render_report(
                 "ROTATE",
                 "LEA",
                 "EXTRACT",
-                "ZEROEXT",
                 "ENDIAN",
                 "BFLIP",
                 "Total",

@@ -14,11 +14,11 @@ toolchains:
 
 build:
   commands:
-    micro_exec: [make, -C, micro, micro_exec]
+    micro_exec: [make, -C, runner, micro_exec]
     programs: [make, -C, micro, programs]
-    bpftool: [make, -C, micro, vendor_bpftool]
-  runner_binary: micro/build/runner/micro_exec
-  bpftool_binary: micro/build/vendor/bpftool/bpftool
+    bpftool: [make, -C, runner, vendor_bpftool]
+  runner_binary: runner/build/micro_exec
+  bpftool_binary: runner/build/vendor/bpftool/bpftool
 
 defaults:
   iterations: 10

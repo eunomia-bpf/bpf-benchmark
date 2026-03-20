@@ -26,9 +26,12 @@ AWS_REGION_VALUE="${AWS_REGION:-${AWS_DEFAULT_REGION:-}}"
 
 ARM64_BUILD_DIR="${ARM64_BUILD_DIR:-$ROOT_DIR/vendor/linux-framework/build-arm64}"
 ARM64_WORKTREE_DIR="${ARM64_WORKTREE_DIR:-$ROOT_DIR/.worktrees/linux-framework-arm64-src}"
-MICRO_RUNNER_ARM64="${MICRO_RUNNER_ARM64:-$ROOT_DIR/micro/build-arm64/runner/micro_exec}"
-MICRO_LIB_DIR_ARM64="${MICRO_LIB_DIR_ARM64:-$ROOT_DIR/micro/build-arm64/lib}"
+RUNNER_ARM64_STAGE_DIR="${RUNNER_ARM64_STAGE_DIR:-$CACHE_DIR/runner-arm64}"
+MICRO_RUNNER_ARM64="${MICRO_RUNNER_ARM64:-$RUNNER_ARM64_STAGE_DIR/build/micro_exec}"
+MICRO_LIB_DIR_ARM64="${MICRO_LIB_DIR_ARM64:-$RUNNER_ARM64_STAGE_DIR/lib}"
 CROSS_COMPILE_PREFIX="${CROSS_COMPILE_ARM64:-aarch64-linux-gnu-}"
+ARM64_CROSSBUILD_IMAGE="${ARM64_CROSSBUILD_IMAGE:-bpf-benchmark-arm64-crossbuild:latest}"
+DOCKER_BIN="${DOCKER:-docker}"
 
 STATE_INSTANCE_ID=""
 STATE_INSTANCE_IP=""
@@ -453,7 +456,64 @@ EOF
     log "Setup verification log: ${verify_log}"
 }
 
+ensure_arm64_runner_artifacts() {
+    if [[ -x "$MICRO_RUNNER_ARM64" && -d "$MICRO_LIB_DIR_ARM64" ]]; then
+        return
+    fi
+
+    log "Cross-building ARM64 micro_exec bundle"
+    make -C "$ROOT_DIR" arm64-crossbuild-image >/dev/null
+    rm -rf "$RUNNER_ARM64_STAGE_DIR"
+    mkdir -p "$RUNNER_ARM64_STAGE_DIR/build" "$MICRO_LIB_DIR_ARM64"
+
+    "$DOCKER_BIN" run --rm \
+        --user "$(id -u):$(id -g)" \
+        -e PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig \
+        -e PKG_CONFIG_SYSROOT_DIR=/ \
+        -v "$ROOT_DIR":/workspace \
+        -v "$RUNNER_ARM64_STAGE_DIR":/out \
+        -w /workspace \
+        "$ARM64_CROSSBUILD_IMAGE" \
+        bash -lc '
+            set -euo pipefail
+            build_dir=/tmp/runner-build-arm64
+            rm -rf "$build_dir"
+            make -C /workspace/runner \
+                BUILD_DIR="$build_dir" \
+                MICRO_EXEC_ENABLE_LLVMBPF=OFF \
+                CC=aarch64-linux-gnu-gcc \
+                CXX=aarch64-linux-gnu-g++ \
+                AR=aarch64-linux-gnu-ar \
+                micro_exec >/dev/null
+            cp "$build_dir/micro_exec" /out/build/micro_exec
+            mkdir -p /out/lib
+            copy_lib() {
+                local pattern="$1"
+                local matches=()
+                shopt -s nullglob
+                matches=(/usr/lib/aarch64-linux-gnu/$pattern /lib/aarch64-linux-gnu/$pattern)
+                shopt -u nullglob
+                if (( ${#matches[@]} == 0 )); then
+                    echo "missing runtime library: $pattern" >&2
+                    exit 1
+                fi
+                cp -L "${matches[0]}" /out/lib/
+            }
+            copy_lib "libyaml-cpp.so.0*"
+            copy_lib "libelf.so.1"
+            copy_lib "libz.so.1"
+            copy_lib "libzstd.so.1"
+            copy_lib "libstdc++.so.6"
+            copy_lib "libgcc_s.so.1"
+        '
+
+    file "$MICRO_RUNNER_ARM64" | grep -F "ARM aarch64" >/dev/null \
+        || die "cross-built micro_exec is not an ARM64 binary"
+}
+
 ensure_micro_bundle() {
+    ensure_arm64_runner_artifacts
+
     if [[ ! -x "$MICRO_RUNNER_ARM64" ]]; then
         if [[ -f "$MICRO_BUNDLE_TAR" ]]; then
             log "Reusing existing micro bundle ${MICRO_BUNDLE_TAR}"
@@ -469,19 +529,19 @@ ensure_micro_bundle() {
     fi
 
     rm -rf "$MICRO_BUNDLE_DIR"
-    mkdir -p "$MICRO_BUNDLE_DIR/micro/build/runner" \
-             "$MICRO_BUNDLE_DIR/micro/build/lib" \
+    mkdir -p "$MICRO_BUNDLE_DIR/runner/build" \
+             "$MICRO_BUNDLE_DIR/runner/lib" \
              "$MICRO_BUNDLE_DIR/micro/programs" \
              "$MICRO_BUNDLE_DIR/micro/generated-inputs" \
              "$MICRO_BUNDLE_DIR/micro/policies"
 
-    cp "$MICRO_RUNNER_ARM64" "$MICRO_BUNDLE_DIR/micro/build/runner/micro_exec.real"
-    cp -a "$MICRO_LIB_DIR_ARM64/." "$MICRO_BUNDLE_DIR/micro/build/lib/"
+    cp "$MICRO_RUNNER_ARM64" "$MICRO_BUNDLE_DIR/runner/build/micro_exec.real"
+    cp -a "$MICRO_LIB_DIR_ARM64/." "$MICRO_BUNDLE_DIR/runner/lib/"
     cp -a "$ROOT_DIR/micro/programs/." "$MICRO_BUNDLE_DIR/micro/programs/"
     cp -a "$ROOT_DIR/micro/generated-inputs/." "$MICRO_BUNDLE_DIR/micro/generated-inputs/"
     cp -a "$ROOT_DIR/micro/policies/." "$MICRO_BUNDLE_DIR/micro/policies/"
 
-    cat >"$MICRO_BUNDLE_DIR/micro/build/runner/micro_exec" <<'EOF'
+    cat >"$MICRO_BUNDLE_DIR/runner/build/micro_exec" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -489,7 +549,7 @@ LIB_DIR="$(cd "$SCRIPT_DIR/../lib" && pwd)"
 export LD_LIBRARY_PATH="$LIB_DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 exec "$SCRIPT_DIR/micro_exec.real" "$@"
 EOF
-    chmod +x "$MICRO_BUNDLE_DIR/micro/build/runner/micro_exec"
+    chmod +x "$MICRO_BUNDLE_DIR/runner/build/micro_exec"
 
     tar -C "$MICRO_BUNDLE_DIR" -czf "$MICRO_BUNDLE_TAR" .
 }
@@ -531,10 +591,10 @@ run_series() {
     shift
     local warmup_index iteration_index
     for ((warmup_index = 0; warmup_index < warmups; warmup_index++)); do
-        sudo -n "$root/micro/build/runner/micro_exec" run-kernel "$@" >/dev/null
+        sudo -n "$root/runner/build/micro_exec" run-kernel "$@" >/dev/null
     done
     for ((iteration_index = 1; iteration_index <= iterations; iteration_index++)); do
-        sudo -n "$root/micro/build/runner/micro_exec" run-kernel "$@" \
+        sudo -n "$root/runner/build/micro_exec" run-kernel "$@" \
             > "$root/results/$name.iter${iteration_index}.json"
     done
 }

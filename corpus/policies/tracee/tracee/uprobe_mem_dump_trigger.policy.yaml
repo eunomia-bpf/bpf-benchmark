@@ -3,7 +3,7 @@
 # Program: uprobe_mem_dump_trigger
 # Section: uprobe/trigger_mem_dump_event
 # Total scanner sites: 16
-# Family site totals: cmov=6, wide=0, rotate=0, extract=0, lea=0, zero-ext=0, endian=0, branch-flip=10
+# Family site totals: cmov=6, wide=0, rotate=0, extract=0, lea=0, endian=0, branch-flip=10
 # Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
 # Excluded cmov sites from allowlist: 6
 

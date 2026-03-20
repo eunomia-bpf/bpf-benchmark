@@ -3,7 +3,7 @@
 # Program: xdp_hashfilter
 # Section: xdp
 # Total scanner sites: 3
-# Family site totals: cmov=1, wide=0, rotate=0, extract=2, lea=0, zero-ext=0, endian=0, branch-flip=0
+# Family site totals: cmov=1, wide=0, rotate=0, extract=2, lea=0, endian=0, branch-flip=0
 # Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
 # Excluded cmov sites from allowlist: 1
 # Excluded extract sites from allowlist: 2

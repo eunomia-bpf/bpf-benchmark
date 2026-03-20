@@ -3,7 +3,7 @@
 # Program: tracepoint__sched__sched_process_fork
 # Section: raw_tracepoint/sched_process_fork
 # Total scanner sites: 48
-# Family site totals: cmov=28, wide=0, rotate=0, extract=0, lea=0, zero-ext=0, endian=0, branch-flip=20
+# Family site totals: cmov=28, wide=0, rotate=0, extract=0, lea=0, endian=0, branch-flip=20
 # Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
 # Excluded cmov sites from allowlist: 28
 

@@ -157,7 +157,6 @@ struct CommandOptions {
         .scan_rotate = false,
         .scan_lea = false,
         .scan_extract = false,
-        .scan_zero_ext = false,
         .scan_endian = false,
         .scan_branch_flip = false,
         .use_rorx = false,
@@ -960,7 +959,6 @@ void print_usage(const char *prog)
         "  --lea        Address-calculation sites\n"
         "  --bitfield-extract, --extract\n"
         "               Bitfield extract sites\n"
-        "  --zero-ext   Redundant zero-extension sites\n"
         "  --endian     Endian fusion sites\n"
         "  --branch-flip Branch flip sites\n"
         "  --rorx       Prefer RORX for rotate sites\n"
@@ -1010,7 +1008,6 @@ void enable_all_families(CommandOptions &options)
     options.scan_options.scan_rotate = true;
     options.scan_options.scan_lea = true;
     options.scan_options.scan_extract = true;
-    options.scan_options.scan_zero_ext = true;
     options.scan_options.scan_endian = true;
     options.scan_options.scan_branch_flip = true;
 }
@@ -1087,7 +1084,6 @@ CommandOptions parse_args(int argc, char **argv)
             options.scan_options.scan_rotate = false;
             options.scan_options.scan_lea = false;
             options.scan_options.scan_extract = false;
-            options.scan_options.scan_zero_ext = false;
             options.scan_options.scan_endian = false;
             options.scan_options.scan_branch_flip = false;
         } else if (arg == "--cmov") {
@@ -1104,9 +1100,6 @@ CommandOptions parse_args(int argc, char **argv)
             options.families_explicit = true;
         } else if (arg == "--bitfield-extract" || arg == "--extract") {
             options.scan_options.scan_extract = true;
-            options.families_explicit = true;
-        } else if (arg == "--zero-ext") {
-            options.scan_options.scan_zero_ext = true;
             options.families_explicit = true;
         } else if (arg == "--endian") {
             options.scan_options.scan_endian = true;
@@ -1257,8 +1250,6 @@ void print_summary(FILE *stream, const bpf_jit_scanner::V5ScanSummary &summary)
                  static_cast<unsigned long long>(summary.lea_sites));
     std::fprintf(stream, "  extract:%llu\n",
                  static_cast<unsigned long long>(summary.bitfield_sites));
-    std::fprintf(stream, "  zeroext:%llu\n",
-                 static_cast<unsigned long long>(summary.zero_ext_sites));
     std::fprintf(stream, "  endian: %llu\n",
                  static_cast<unsigned long long>(summary.endian_sites));
     std::fprintf(stream, "  bflip:  %llu\n",

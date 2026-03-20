@@ -16,9 +16,14 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 from benchmark_catalog import CONFIG_PATH, ROOT_DIR, BenchmarkSpec, load_suite
+from runner.libs.results import parse_command_samples
 try:
-    from orchestrator.rigorous import (
+    from runner.libs.rigorous import (
         DEFAULT_BOOTSTRAP_SAMPLES,
         DEFAULT_HEAVY_PROCESS_SAMPLE_SECONDS,
         DEFAULT_HEAVY_PROCESS_THRESHOLD,
@@ -51,7 +56,7 @@ try:
         wilcoxon_signed_rank,
     )
 except ImportError:
-    from micro.orchestrator.rigorous import (
+    from runner.libs.rigorous import (
         DEFAULT_BOOTSTRAP_SAMPLES,
         DEFAULT_HEAVY_PROCESS_SAMPLE_SECONDS,
         DEFAULT_HEAVY_PROCESS_THRESHOLD,
@@ -345,13 +350,7 @@ def apply_host_preflight(
 
 
 def parse_json_lines(stdout: str) -> list[dict[str, Any]]:
-    samples: list[dict[str, Any]] = []
-    for line in stdout.splitlines():
-        candidate = line.strip()
-        if not candidate.startswith("{") or not candidate.endswith("}"):
-            continue
-        samples.append(json.loads(candidate))
-    return samples
+    return [dict(sample) for sample in parse_command_samples(stdout)]
 
 
 def summarize_stderr(stderr: str, max_lines: int = 20) -> str:

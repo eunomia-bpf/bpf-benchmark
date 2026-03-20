@@ -17,7 +17,7 @@ eBPF benchmarking suite comparing **llvmbpf** (userspace LLVM JIT) against **ker
 ### Initial setup
 ```bash
 git submodule update --init --recursive
-make -C micro          # builds both micro_exec runner and BPF programs
+make micro             # builds runner/build/micro_exec and micro BPF programs
 
 # e2e/corpus recompile paths expect the standalone scanner CLI
 cmake -S scanner -B scanner/build -DCMAKE_BUILD_TYPE=Release
@@ -26,9 +26,9 @@ cmake --build scanner/build --target bpf-jit-scanner -j
 
 ### Build individual targets
 ```bash
-make -C micro micro_exec       # C++ runner binary → micro/build/runner/micro_exec
-make -C micro programs         # BPF .bpf.c → .bpf.o via clang
-make -C micro vendor_bpftool   # optional vendored bpftool
+make runner                   # C++ runner binary → runner/build/micro_exec
+make -C micro programs        # BPF .bpf.c → .bpf.o via clang
+make -C runner vendor_bpftool # optional vendored bpftool
 ```
 
 ### Run benchmarks
@@ -83,6 +83,7 @@ python3 micro/summarize_rq.py --results micro/results/dev/vm_micro.json --output
 ### Clean
 ```bash
 make -C micro clean
+make -C runner clean
 ```
 
 ## Architecture
@@ -103,7 +104,7 @@ Configured via YAML files in `config/`:
 
 **`micro/input_generators.py`** — Deterministic binary input generators (one per benchmark). Outputs `.mem` files to `micro/generated-inputs/`. Each generator produces a fixed binary layout matching the corresponding BPF program's `input_map` value type.
 
-**`micro/runner/`** — C++20 CMake project producing `micro_exec` binary. Two subcommands:
+**`runner/`** — C++20 CMake project producing `micro_exec` plus shared Python helpers in `runner/libs/`. Two subcommands:
 - `run-llvmbpf` — Loads ELF, extracts BPF bytecode, JIT-compiles via `llvmbpf_vm`, executes in userspace with emulated maps
 - `run-kernel` — Loads ELF via libbpf, runs via `bpf_prog_test_run_opts` in kernel
 

@@ -3,7 +3,7 @@
 # Program: trace_process_vm_writev
 # Section: kprobe/process_vm_writev
 # Total scanner sites: 5
-# Family site totals: cmov=0, wide=0, rotate=0, extract=0, lea=0, zero-ext=0, endian=0, branch-flip=5
+# Family site totals: cmov=0, wide=0, rotate=0, extract=0, lea=0, endian=0, branch-flip=5
 # Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
 
 version: 3

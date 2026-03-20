@@ -3,7 +3,7 @@
 # Program: generic_sleepable_preload
 # Section: uprobe.s/generic_uprobe
 # Total scanner sites: 20
-# Family site totals: cmov=0, wide=20, rotate=0, extract=0, lea=0, zero-ext=0, endian=0, branch-flip=0
+# Family site totals: cmov=0, wide=20, rotate=0, extract=0, lea=0, endian=0, branch-flip=0
 # Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
 
 version: 3

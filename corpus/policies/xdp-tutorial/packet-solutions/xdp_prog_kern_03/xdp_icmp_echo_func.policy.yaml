@@ -3,7 +3,7 @@
 # Program: xdp_icmp_echo_func
 # Section: xdp_icmp_echo
 # Total scanner sites: 4
-# Family site totals: cmov=2, wide=2, rotate=0, extract=0, lea=0, zero-ext=0, endian=0, branch-flip=0
+# Family site totals: cmov=2, wide=2, rotate=0, extract=0, lea=0, endian=0, branch-flip=0
 # Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
 # Excluded cmov sites from allowlist: 2
 

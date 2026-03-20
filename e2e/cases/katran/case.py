@@ -24,7 +24,7 @@ from typing import Mapping, Sequence
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from e2e.common import (  # noqa: E402
+from runner.libs import (  # noqa: E402
     RESULTS_DIR,
     ROOT_DIR,
     authoritative_output_path,
@@ -39,14 +39,14 @@ from e2e.common import (  # noqa: E402
     write_json,
     write_text,
 )
-from e2e.common.metrics import compute_delta, enable_bpf_stats, sample_bpf_stats  # noqa: E402
-from e2e.common.recompile import PolicyTarget, apply_recompile, resolve_policy_files, scan_programs  # noqa: E402
+from runner.libs.metrics import compute_delta, enable_bpf_stats, sample_bpf_stats  # noqa: E402
+from runner.libs.recompile import PolicyTarget, apply_recompile, resolve_policy_files, scan_programs  # noqa: E402
 
 try:  # noqa: E402
-    from micro.orchestrator.inventory import discover_object_programs
+    from runner.libs.inventory import discover_object_programs
 except ModuleNotFoundError:  # noqa: E402
     sys.path.insert(0, str(ROOT_DIR / "micro"))
-    from orchestrator.inventory import discover_object_programs
+    from runner.libs.inventory import discover_object_programs
 
 
 DEFAULT_SETUP_SCRIPT = Path(__file__).with_name("setup.sh")
@@ -54,7 +54,7 @@ DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "katran")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "katran-e2e-real.md"
 DEFAULT_KATRAN_OBJECT = ROOT_DIR / "corpus" / "build" / "katran" / "balancer.bpf.o"
 DEFAULT_POLICY_FILE = Path(__file__).with_name("balancer_ingress.e2e.policy.yaml")
-DEFAULT_RUNNER = ROOT_DIR / "micro" / "build" / "runner" / "micro_exec"
+DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
 DEFAULT_SCANNER = ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"
 DEFAULT_KERNEL_CONFIG = ROOT_DIR / "vendor" / "linux-framework" / ".config"
 DEFAULT_PROGRAM_NAME = "balancer_ingress"
@@ -394,7 +394,7 @@ def persist_results(payload: Mapping[str, object], output_json: Path, output_md:
 
 def ensure_artifacts(runner_binary: Path, scanner_binary: Path) -> None:
     if not runner_binary.exists():
-        run_command(["make", "-C", "micro", "micro_exec", "programs"], timeout=1800)
+        run_command(["make", "runner"], timeout=1800)
     if not scanner_binary.exists():
         run_command(
             ["cmake", "-S", "scanner", "-B", "scanner/build", "-DCMAKE_BUILD_TYPE=Release"],

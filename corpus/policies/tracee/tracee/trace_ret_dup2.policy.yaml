@@ -3,7 +3,7 @@
 # Program: trace_ret_dup2
 # Section: kretprobe/dup2
 # Total scanner sites: 45
-# Family site totals: cmov=29, wide=0, rotate=0, extract=5, lea=0, zero-ext=0, endian=0, branch-flip=11
+# Family site totals: cmov=29, wide=0, rotate=0, extract=5, lea=0, endian=0, branch-flip=11
 # Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
 # Excluded cmov sites from allowlist: 29
 # Excluded extract sites from allowlist: 5

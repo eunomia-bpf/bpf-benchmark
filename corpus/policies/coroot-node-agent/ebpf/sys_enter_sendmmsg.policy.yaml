@@ -3,7 +3,7 @@
 # Program: sys_enter_sendmmsg
 # Section: tracepoint/syscalls/sys_enter_sendmmsg
 # Total scanner sites: 161
-# Family site totals: cmov=153, wide=2, rotate=0, extract=0, lea=0, zero-ext=0, endian=6, branch-flip=0
+# Family site totals: cmov=153, wide=2, rotate=0, extract=0, lea=0, endian=6, branch-flip=0
 # Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
 # Excluded cmov sites from allowlist: 153
 

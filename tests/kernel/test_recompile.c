@@ -70,13 +70,17 @@
 #define ADDR_CALC_OBJ TEST_KERNEL_ROOT "/build/progs/test_addr_calc.bpf.o"
 #define BITFIELD_EXTRACT_OBJ TEST_KERNEL_ROOT "/build/progs/test_bitfield_extract.bpf.o"
 #define BITFIELD_EXTRACT_BOUNDARY_OBJ TEST_KERNEL_ROOT "/build/progs/test_bitfield_extract_boundary.bpf.o"
-#define ZERO_EXT_ELIDE_OBJ TEST_KERNEL_ROOT "/build/progs/test_zero_ext_elide.bpf.o"
 #define ENDIAN_FUSION_OBJ TEST_KERNEL_ROOT "/build/progs/test_endian_fusion.bpf.o"
 #define BRANCH_FLIP_OBJ TEST_KERNEL_ROOT "/build/progs/test_branch_flip.bpf.o"
 #define ROTATE_MASKED_LOW_OBJ TEST_KERNEL_ROOT "/build/progs/test_rotate_masked_low.bpf.o"
+#define INTERIOR_EDGE_OBJ TEST_KERNEL_ROOT "/build/progs/test_interior_edge.bpf.o"
+#define CROSS_SUBPROG_BOUNDARY_OBJ TEST_KERNEL_ROOT "/build/progs/test_cross_subprog_boundary.bpf.o"
+#define ZERO_APPLIED_NOOP_SELECT_OBJ TEST_KERNEL_ROOT "/build/progs/test_zero_applied_noop_select.bpf.o"
+#define STRUCT_OPS_TCP_OBJ TEST_KERNEL_ROOT "/build/progs/test_struct_ops_tcp.bpf.o"
 #define TRAMPOLINE_FENTRY_OBJ TEST_KERNEL_ROOT "/build/progs/test_trampoline_fentry.bpf.o"
 
 #define LOG_BUF_SIZE 4096
+#define BPF_JIT_HARDEN_SYSCTL "/proc/sys/net/core/bpf_jit_harden"
 
 struct blob {
 	unsigned char *data;
@@ -93,6 +97,18 @@ struct loaded_program {
 	int result_map_fd;
 	int attached_ifindex;
 	__u32 attached_flags;
+};
+
+struct loaded_struct_ops_program {
+	const char *obj_path;
+	const char *prog_name;
+	const char *map_name;
+	struct bpf_object *obj;
+	struct bpf_program *prog;
+	struct bpf_map *map;
+	struct bpf_link *link;
+	int prog_fd;
+	int map_fd;
 };
 
 struct program_meta {
@@ -169,6 +185,52 @@ static bool native_jit_arch_is_arm64(void)
 	return native_jit_arch_id() == BPF_JIT_ARCH_ARM64;
 }
 
+#if defined(__x86_64__)
+static bool x86_cpu_has_cmov(void)
+{
+	__builtin_cpu_init();
+	return __builtin_cpu_supports("cmov");
+}
+
+static bool x86_cpu_has_bmi1(void)
+{
+	__builtin_cpu_init();
+	return __builtin_cpu_supports("bmi");
+}
+
+static bool x86_cpu_has_bmi2(void)
+{
+	__builtin_cpu_init();
+	return __builtin_cpu_supports("bmi2");
+}
+
+static bool x86_cpu_has_movbe(void)
+{
+	__builtin_cpu_init();
+	return __builtin_cpu_supports("movbe");
+}
+#else
+static bool x86_cpu_has_cmov(void)
+{
+	return false;
+}
+
+static bool x86_cpu_has_bmi1(void)
+{
+	return false;
+}
+
+static bool x86_cpu_has_bmi2(void)
+{
+	return false;
+}
+
+static bool x86_cpu_has_movbe(void)
+{
+	return false;
+}
+#endif
+
 static int libbpf_silent(enum libbpf_print_level level, const char *fmt, va_list args)
 {
 	(void)level;
@@ -233,6 +295,20 @@ static void unload_program(struct loaded_program *prog)
 	memset(prog, 0, sizeof(*prog));
 	prog->prog_fd = -1;
 	prog->result_map_fd = -1;
+}
+
+static void unload_struct_ops_program(struct loaded_struct_ops_program *prog)
+{
+	if (!prog)
+		return;
+
+	if (prog->link)
+		bpf_link__destroy(prog->link);
+	if (prog->obj)
+		bpf_object__close(prog->obj);
+	memset(prog, 0, sizeof(*prog));
+	prog->prog_fd = -1;
+	prog->map_fd = -1;
 }
 
 static uint64_t ptr_to_u64(const void *ptr)
@@ -356,6 +432,83 @@ static int load_program(const char *obj_path, const char *prog_name,
 {
 	return load_program_with_attach_target(obj_path, prog_name, -1, NULL,
 					       out, msg, msg_len);
+}
+
+static int load_struct_ops_program(const char *obj_path,
+				   const char *prog_name,
+				   const char *map_name,
+				   struct loaded_struct_ops_program *out,
+				   char *msg, size_t msg_len)
+{
+	struct bpf_object_open_opts open_opts = {
+		.sz = sizeof(open_opts),
+	};
+	struct bpf_object *obj;
+	struct bpf_program *prog;
+	struct bpf_map *map;
+	int err;
+
+	memset(out, 0, sizeof(*out));
+	out->prog_fd = -1;
+	out->map_fd = -1;
+	out->obj_path = obj_path;
+	out->prog_name = prog_name;
+	out->map_name = map_name;
+
+	obj = bpf_object__open_file(obj_path, &open_opts);
+	err = libbpf_get_error(obj);
+	if (err) {
+		set_msg(msg, msg_len, "bpf_object__open_file(%s): %s",
+			obj_path, strerror(-err));
+		return -1;
+	}
+
+	prog = bpf_object__find_program_by_name(obj, prog_name);
+	if (!prog) {
+		bpf_object__close(obj);
+		set_msg(msg, msg_len, "unable to find program %s in %s",
+			prog_name, obj_path);
+		return -1;
+	}
+
+	err = bpf_object__load(obj);
+	if (err) {
+		bpf_object__close(obj);
+		set_msg(msg, msg_len, "bpf_object__load(%s): %s",
+			obj_path, strerror(-err));
+		return -1;
+	}
+
+	map = bpf_object__find_map_by_name(obj, map_name);
+	if (!map) {
+		bpf_object__close(obj);
+		set_msg(msg, msg_len, "unable to find struct_ops map %s in %s",
+			map_name, obj_path);
+		return -1;
+	}
+
+	out->link = bpf_map__attach_struct_ops(map);
+	err = libbpf_get_error(out->link);
+	if (err) {
+		out->link = NULL;
+		bpf_object__close(obj);
+		set_msg(msg, msg_len, "bpf_map__attach_struct_ops(%s): %s",
+			map_name, strerror(-err));
+		return -1;
+	}
+
+	out->obj = obj;
+	out->prog = prog;
+	out->map = map;
+	out->prog_fd = bpf_program__fd(prog);
+	out->map_fd = bpf_map__fd(map);
+	if (out->prog_fd < 0 || out->map_fd < 0) {
+		unload_struct_ops_program(out);
+		set_msg(msg, msg_len, "unable to obtain fds from %s", obj_path);
+		return -1;
+	}
+
+	return 0;
 }
 
 static int fetch_program_meta(int prog_fd, struct program_meta *meta,
@@ -827,6 +980,93 @@ overflow:
 	return -1;
 }
 
+static struct bpf_jit_policy_hdr *policy_blob_hdr(const struct blob *blob)
+{
+	return (struct bpf_jit_policy_hdr *)blob->data;
+}
+
+static struct bpf_jit_rewrite_rule_v2 *policy_blob_rule(const struct blob *blob,
+							size_t idx)
+{
+	return (struct bpf_jit_rewrite_rule_v2 *)
+		(blob->data + sizeof(struct bpf_jit_policy_hdr) +
+		 idx * sizeof(struct bpf_jit_rewrite_rule_v2));
+}
+
+static bool log_contains(const char *log_buf, const char *needle)
+{
+	return log_buf && needle && strstr(log_buf, needle) != NULL;
+}
+
+static int read_int_file(const char *path, int *value,
+			 char *msg, size_t msg_len)
+{
+	char buf[64];
+	char *end = NULL;
+	long parsed;
+	ssize_t nread;
+	int fd;
+
+	fd = open(path, O_RDONLY);
+	if (fd < 0) {
+		set_msg(msg, msg_len, "open(%s): %s", path, strerror(errno));
+		return -1;
+	}
+
+	nread = read(fd, buf, sizeof(buf) - 1);
+	close(fd);
+	if (nread < 0) {
+		set_msg(msg, msg_len, "read(%s): %s", path, strerror(errno));
+		return -1;
+	}
+	buf[nread] = '\0';
+
+	errno = 0;
+	parsed = strtol(buf, &end, 10);
+	if (errno || end == buf) {
+		set_msg(msg, msg_len, "unable to parse integer from %s", path);
+		return -1;
+	}
+
+	*value = (int)parsed;
+	return 0;
+}
+
+static int write_int_file(const char *path, int value,
+			  char *msg, size_t msg_len)
+{
+	char buf[32];
+	size_t len;
+	size_t written = 0;
+	int fd;
+
+	snprintf(buf, sizeof(buf), "%d\n", value);
+	len = strlen(buf);
+
+	fd = open(path, O_WRONLY);
+	if (fd < 0) {
+		set_msg(msg, msg_len, "open(%s): %s", path, strerror(errno));
+		return -1;
+	}
+
+	while (written < len) {
+		ssize_t rc = write(fd, buf + written, len - written);
+
+		if (rc < 0) {
+			if (errno == EINTR)
+				continue;
+			close(fd);
+			set_msg(msg, msg_len, "write(%s): %s",
+				path, strerror(errno));
+			return -1;
+		}
+		written += rc;
+	}
+
+	close(fd);
+	return 0;
+}
+
 static int create_memfd_from_blob(const char *name, const struct blob *blob,
 				  bool seal)
 {
@@ -1161,6 +1401,29 @@ static bool find_addr_calc_site(const struct program_meta *meta, __u32 *site)
 	return false;
 }
 
+static bool find_cross_subprog_site_len(const struct program_meta *meta,
+					__u32 site, __u16 *site_len)
+{
+	__u32 i;
+	__u32 len;
+
+	for (i = site; i < meta->insn_cnt; i++) {
+		if (meta->insns[i].code != (BPF_JMP | BPF_EXIT))
+			continue;
+		if (i + 1 >= meta->insn_cnt)
+			return false;
+
+		len = i + 2 - site;
+		if (len > UINT16_MAX)
+			return false;
+
+		*site_len = (__u16)len;
+		return true;
+	}
+
+	return false;
+}
+
 static bool find_bitfield_extract_site(const struct program_meta *meta,
 				       __u32 *site, __u16 *site_len)
 {
@@ -1237,48 +1500,6 @@ static bool find_bitfield_extract_site(const struct program_meta *meta,
 
 		*site = i;
 		*site_len = 2;
-		return true;
-	}
-
-	return false;
-}
-
-static bool is_zero_ext_tail(const struct bpf_insn *insn, __u8 dst_reg)
-{
-	if (insn->code == (BPF_ALU | BPF_MOV | BPF_X))
-		return insn->dst_reg == dst_reg &&
-		       insn->src_reg == dst_reg &&
-		       insn->off == 0 &&
-		       insn->imm == 1;
-
-	if (insn->code == (BPF_ALU64 | BPF_MOV | BPF_X))
-		return insn->dst_reg == dst_reg &&
-		       insn->src_reg == dst_reg &&
-		       insn->off == 0 &&
-		       insn->imm == 0;
-
-	if (insn->code == (BPF_ALU64 | BPF_AND | BPF_K))
-		return insn->dst_reg == dst_reg &&
-		       insn->off == 0 &&
-		       insn->imm == -1;
-
-	return false;
-}
-
-static bool find_zero_ext_elide_site(const struct program_meta *meta, __u32 *site)
-{
-	__u32 i;
-
-	for (i = 0; i + 1 < meta->insn_cnt; i++) {
-		const struct bpf_insn *alu32 = &meta->insns[i];
-		const struct bpf_insn *tail = &meta->insns[i + 1];
-
-		if (BPF_CLASS(alu32->code) != BPF_ALU || BPF_OP(alu32->code) == BPF_END)
-			continue;
-		if (!is_zero_ext_tail(tail, alu32->dst_reg))
-			continue;
-
-		*site = i;
 		return true;
 	}
 
@@ -1540,21 +1761,6 @@ static int build_bitfield_extract_blob(const struct program_meta *meta, __u32 si
 	return build_policy_blob(meta, &parts, 1, blob, msg, msg_len);
 }
 
-static int build_zero_ext_elide_blob(const struct program_meta *meta, __u32 site,
-				     struct blob *blob, char *msg, size_t msg_len)
-{
-	struct rule_parts parts = {
-		.rule = {
-			.site_start = site,
-			.site_len = 2,
-			.canonical_form = BPF_JIT_CF_ZERO_EXT_ELIDE,
-			.native_choice = BPF_JIT_ZEXT_ELIDE,
-		},
-	};
-
-	return build_policy_blob(meta, &parts, 1, blob, msg, msg_len);
-}
-
 static int build_endian_fusion_blob(const struct program_meta *meta, __u32 site,
 				    struct blob *blob, char *msg, size_t msg_len)
 {
@@ -1690,6 +1896,24 @@ static bool run_ctx_only_packet_check(const struct loaded_program *prog,
 	return true;
 }
 
+static bool run_noop_select_packet_check(const struct loaded_program *prog,
+					 __u64 *result,
+					 char *msg, size_t msg_len)
+{
+	static const unsigned char packet[] = { 9, 1 };
+	__u32 retval = 0;
+
+	if (run_program_and_read_result(prog->prog_fd, prog->result_map_fd,
+					packet, sizeof(packet),
+					&retval, result, msg, msg_len))
+		return false;
+	if (retval != XDP_PASS) {
+		set_msg(msg, msg_len, "unexpected XDP retval %u", retval);
+		return false;
+	}
+	return true;
+}
+
 static bool run_addr_calc_packet_check(const struct loaded_program *prog,
 				       __u64 *result,
 				       char *msg, size_t msg_len)
@@ -1700,13 +1924,6 @@ static bool run_addr_calc_packet_check(const struct loaded_program *prog,
 static bool run_bitfield_extract_packet_check(const struct loaded_program *prog,
 					      __u64 *result,
 					      char *msg, size_t msg_len)
-{
-	return run_ctx_only_packet_check(prog, result, msg, msg_len);
-}
-
-static bool run_zero_ext_elide_packet_check(const struct loaded_program *prog,
-					    __u64 *result,
-					    char *msg, size_t msg_len)
 {
 	return run_ctx_only_packet_check(prog, result, msg, msg_len);
 }
@@ -1801,6 +2018,95 @@ static bool test_zero_rule_blob(char *msg, size_t msg_len)
 		log_buf[0] ? log_buf : "");
 
 out:
+	free_blob(&blob);
+	free_program_meta(&meta);
+	unload_program(&prog);
+	return ok;
+}
+
+static bool test_zero_applied_policy_returns_success(char *msg, size_t msg_len)
+{
+	struct loaded_program prog;
+	struct program_meta meta;
+	struct blob blob = {};
+	struct jit_snapshot before = {};
+	struct jit_snapshot after = {};
+	char log_buf[LOG_BUF_SIZE] = {};
+	__u32 site = 0;
+	__u64 before_result = 0;
+	__u64 after_result = 0;
+	bool ok = false;
+	int rc;
+
+	if (load_meta_for_program(ZERO_APPLIED_NOOP_SELECT_OBJ,
+				  "test_zero_applied_noop_select",
+				  &prog, &meta, msg, msg_len))
+		return false;
+	if (!run_noop_select_packet_check(&prog, &before_result, msg, msg_len))
+		goto out;
+	if (!find_guarded_select_site(&meta, &site)) {
+		set_msg(msg, msg_len, "noop-select site not found");
+		goto out;
+	}
+	if (build_guarded_select_blob(&meta, site, BPF_JIT_SEL_CMOVCC,
+				      &blob, msg, msg_len))
+		goto out;
+	if (fetch_jit_snapshot(prog.prog_fd, &before, msg, msg_len))
+		goto out;
+
+	rc = apply_blob(prog.prog_fd, &blob, true, log_buf, sizeof(log_buf));
+	if (rc) {
+		set_msg(msg, msg_len,
+			"zero-applied policy: expected success, got %s (%d)%s%s",
+			strerror(-rc), -rc,
+			log_buf[0] ? ": " : "",
+			log_buf[0] ? log_buf : "");
+		goto out;
+	}
+	if (fetch_jit_snapshot(prog.prog_fd, &after, msg, msg_len))
+		goto out;
+	if (!run_noop_select_packet_check(&prog, &after_result, msg, msg_len))
+		goto out;
+	if (before_result != after_result) {
+		set_msg(msg, msg_len,
+			"zero-applied policy changed result from 0x%llx to 0x%llx",
+			(unsigned long long)before_result,
+			(unsigned long long)after_result);
+		goto out;
+	}
+
+	if (log_contains(log_buf, "no rules applied; kept the pre-recompile image")) {
+		if (before.image.len != after.image.len ||
+		    memcmp(before.image.data, after.image.data, before.image.len)) {
+			set_msg(msg, msg_len,
+				"zero-applied policy changed JIT image (%zu -> %zu bytes)",
+				before.image.len, after.image.len);
+			goto out;
+		}
+		set_msg(msg, msg_len,
+			"zero-applied policy restored original image and preserved 0x%llx",
+			(unsigned long long)after_result);
+		ok = true;
+		goto out;
+	}
+
+	if (log_contains(log_buf, "applied successfully")) {
+		set_msg(msg, msg_len,
+			"zero-applied candidate preserved 0x%llx but applied on this kernel",
+			(unsigned long long)after_result);
+		ok = true;
+		goto out;
+	}
+
+	set_msg(msg, msg_len,
+		"zero-applied policy: expected no-rules-applied or applied log, got%s%s",
+		log_buf[0] ? ": " : "",
+		log_buf[0] ? log_buf : "");
+	goto out;
+
+out:
+	free_jit_snapshot(&after);
+	free_jit_snapshot(&before);
 	free_blob(&blob);
 	free_program_meta(&meta);
 	unload_program(&prog);
@@ -2053,9 +2359,11 @@ static bool build_valid_simple_blob_for_negative(const struct program_meta *meta
 					 blob, msg, msg_len) == 0;
 }
 
-static bool expect_einval_with_mutated_blob(void (*mutate)(struct blob *, const struct program_meta *),
-					    const char *what,
-					    char *msg, size_t msg_len)
+static bool expect_einval_with_mutated_blob_and_log(
+	void (*mutate)(struct blob *, const struct program_meta *),
+	const char *what,
+	const char *expected_log,
+	char *msg, size_t msg_len)
 {
 	struct loaded_program prog;
 	struct program_meta meta;
@@ -2079,6 +2387,14 @@ static bool expect_einval_with_mutated_blob(void (*mutate)(struct blob *, const 
 			log_buf[0] ? log_buf : "");
 		goto out;
 	}
+	if (expected_log && !log_contains(log_buf, expected_log)) {
+		set_msg(msg, msg_len,
+			"%s: expected log substring \"%s\", got%s%s",
+			what, expected_log,
+			log_buf[0] ? ": " : "",
+			log_buf[0] ? log_buf : "");
+		goto out;
+	}
 
 	set_msg(msg, msg_len, "%s rejected with EINVAL", what);
 	ok = true;
@@ -2090,9 +2406,18 @@ out:
 	return ok;
 }
 
+static bool expect_einval_with_mutated_blob(
+	void (*mutate)(struct blob *, const struct program_meta *),
+	const char *what,
+	char *msg, size_t msg_len)
+{
+	return expect_einval_with_mutated_blob_and_log(mutate, what, NULL,
+						       msg, msg_len);
+}
+
 static void mutate_wrong_magic(struct blob *blob, const struct program_meta *meta)
 {
-	struct bpf_jit_policy_hdr *hdr = (struct bpf_jit_policy_hdr *)blob->data;
+	struct bpf_jit_policy_hdr *hdr = policy_blob_hdr(blob);
 
 	(void)meta;
 	hdr->magic ^= 1U;
@@ -2100,7 +2425,7 @@ static void mutate_wrong_magic(struct blob *blob, const struct program_meta *met
 
 static void mutate_wrong_tag(struct blob *blob, const struct program_meta *meta)
 {
-	struct bpf_jit_policy_hdr *hdr = (struct bpf_jit_policy_hdr *)blob->data;
+	struct bpf_jit_policy_hdr *hdr = policy_blob_hdr(blob);
 
 	(void)meta;
 	hdr->prog_tag[0] ^= 0xff;
@@ -2108,7 +2433,7 @@ static void mutate_wrong_tag(struct blob *blob, const struct program_meta *meta)
 
 static void mutate_wrong_insn_cnt(struct blob *blob, const struct program_meta *meta)
 {
-	struct bpf_jit_policy_hdr *hdr = (struct bpf_jit_policy_hdr *)blob->data;
+	struct bpf_jit_policy_hdr *hdr = policy_blob_hdr(blob);
 
 	(void)meta;
 	hdr->insn_cnt += 1;
@@ -2116,7 +2441,7 @@ static void mutate_wrong_insn_cnt(struct blob *blob, const struct program_meta *
 
 static void mutate_wrong_arch(struct blob *blob, const struct program_meta *meta)
 {
-	struct bpf_jit_policy_hdr *hdr = (struct bpf_jit_policy_hdr *)blob->data;
+	struct bpf_jit_policy_hdr *hdr = policy_blob_hdr(blob);
 
 	(void)meta;
 	hdr->arch_id = non_native_jit_arch_id();
@@ -2124,11 +2449,26 @@ static void mutate_wrong_arch(struct blob *blob, const struct program_meta *meta
 
 static void mutate_bad_site_start(struct blob *blob, const struct program_meta *meta)
 {
-	struct bpf_jit_rewrite_rule_v2 *rule;
-
-	rule = (struct bpf_jit_rewrite_rule_v2 *)
-		(blob->data + sizeof(struct bpf_jit_policy_hdr));
+	struct bpf_jit_rewrite_rule_v2 *rule = policy_blob_rule(blob, 0);
 	rule->site_start = meta->insn_cnt + 1;
+}
+
+static void mutate_invalid_native_choice(struct blob *blob,
+					 const struct program_meta *meta)
+{
+	struct bpf_jit_rewrite_rule_v2 *rule = policy_blob_rule(blob, 0);
+
+	(void)meta;
+	rule->native_choice = 0xffffu;
+}
+
+static void mutate_reserved_flags(struct blob *blob,
+				  const struct program_meta *meta)
+{
+	struct bpf_jit_policy_hdr *hdr = policy_blob_hdr(blob);
+
+	(void)meta;
+	hdr->flags = 1;
 }
 
 static bool test_wrong_magic(char *msg, size_t msg_len)
@@ -2153,6 +2493,24 @@ static bool test_wrong_arch_id(char *msg, size_t msg_len)
 {
 	return expect_einval_with_mutated_blob(mutate_wrong_arch,
 					       "wrong arch_id", msg, msg_len);
+}
+
+static bool test_invalid_native_choice(char *msg, size_t msg_len)
+{
+	return expect_einval_with_mutated_blob_and_log(
+		mutate_invalid_native_choice,
+		"invalid native_choice",
+		"native choice",
+		msg, msg_len);
+}
+
+static bool test_reserved_flags(char *msg, size_t msg_len)
+{
+	return expect_einval_with_mutated_blob_and_log(
+		mutate_reserved_flags,
+		"reserved policy flags",
+		"unsupported flags",
+		msg, msg_len);
 }
 
 static bool test_non_sealed_memfd(char *msg, size_t msg_len)
@@ -2285,6 +2643,372 @@ out:
 		close(policy_fd);
 	free_program_meta(&meta);
 	unload_program(&prog);
+	return ok;
+}
+
+static bool test_overlapping_rules_rejected(char *msg, size_t msg_len)
+{
+	struct loaded_program prog;
+	struct program_meta meta;
+	struct rule_parts rules[2];
+	struct blob blob = {};
+	char log_buf[LOG_BUF_SIZE] = {};
+	__u32 site = 0;
+	bool ok = false;
+	int rc;
+
+	memset(rules, 0, sizeof(rules));
+
+	if (load_meta_for_program(SIMPLE_OBJ, "test_simple",
+				  &prog, &meta, msg, msg_len))
+		return false;
+	if (!find_guarded_select_site(&meta, &site)) {
+		set_msg(msg, msg_len, "guarded select site not found");
+		goto out;
+	}
+
+	rules[0].rule.site_start = site;
+	rules[0].rule.site_len = 3;
+	rules[0].rule.canonical_form = BPF_JIT_CF_COND_SELECT;
+	rules[0].rule.native_choice = BPF_JIT_SEL_CMOVCC;
+	rules[1].rule = rules[0].rule;
+
+	if (build_policy_blob(&meta, rules, 2, &blob, msg, msg_len))
+		goto out;
+
+	rc = apply_blob(prog.prog_fd, &blob, true, log_buf, sizeof(log_buf));
+	if (rc != -EINVAL) {
+		set_msg(msg, msg_len,
+			"overlapping rules: expected EINVAL, got %s (%d)%s%s",
+			strerror(-rc), -rc,
+			log_buf[0] ? ": " : "",
+			log_buf[0] ? log_buf : "");
+		goto out;
+	}
+	if (!log_contains(log_buf, "overlapping rules")) {
+		set_msg(msg, msg_len,
+			"overlapping rules: expected overlap log, got%s%s",
+			log_buf[0] ? ": " : "",
+			log_buf[0] ? log_buf : "");
+		goto out;
+	}
+
+	set_msg(msg, msg_len,
+		"overlapping rules at site_start=%u rejected with EINVAL",
+		site);
+	ok = true;
+
+out:
+	free_blob(&blob);
+	free_program_meta(&meta);
+	unload_program(&prog);
+	return ok;
+}
+
+static bool test_cross_subprog_rule_rejected(char *msg, size_t msg_len)
+{
+	struct loaded_program prog;
+	struct program_meta meta;
+	struct blob blob = {};
+	char log_buf[LOG_BUF_SIZE] = {};
+	__u32 site = 0;
+	__u16 cross_len = 0;
+	bool ok = false;
+	int rc;
+
+	if (load_meta_for_program(CROSS_SUBPROG_BOUNDARY_OBJ,
+				  "test_cross_subprog_boundary",
+				  &prog, &meta, msg, msg_len))
+		return false;
+	if (!find_rotate_site(&meta, &site)) {
+		set_msg(msg, msg_len, "cross-subprog rotate site not found");
+		goto out;
+	}
+	if (!find_cross_subprog_site_len(&meta, site, &cross_len)) {
+		set_msg(msg, msg_len,
+			"unable to derive cross-subprog site length from xlated program");
+		goto out;
+	}
+	if (build_rotate_blob_with_len(&meta, site, cross_len, BPF_JIT_ROT_ROR,
+				       &blob, msg, msg_len))
+		goto out;
+
+	rc = apply_blob(prog.prog_fd, &blob, true, log_buf, sizeof(log_buf));
+	if (rc != -EINVAL) {
+		set_msg(msg, msg_len,
+			"cross-subprog rule: expected EINVAL, got %s (%d)%s%s",
+			strerror(-rc), -rc,
+			log_buf[0] ? ": " : "",
+			log_buf[0] ? log_buf : "");
+		goto out;
+	}
+	if (!log_contains(log_buf, "crosses subprog boundary")) {
+		set_msg(msg, msg_len,
+			"cross-subprog rule: expected boundary log, got%s%s",
+			log_buf[0] ? ": " : "",
+			log_buf[0] ? log_buf : "");
+		goto out;
+	}
+
+	set_msg(msg, msg_len,
+		"cross-subprog rotate rule site_start=%u site_len=%u rejected",
+		site, cross_len);
+	ok = true;
+
+out:
+	free_blob(&blob);
+	free_program_meta(&meta);
+	unload_program(&prog);
+	return ok;
+}
+
+static bool test_unsupported_arch_form(char *msg, size_t msg_len)
+{
+	struct loaded_program prog;
+	struct program_meta meta;
+	struct blob blob = {};
+	char log_buf[LOG_BUF_SIZE] = {};
+	const char *case_desc = NULL;
+	const char *expected_log = NULL;
+	__u32 site = 0;
+	__u16 site_len = 0;
+	bool ok = false;
+	int rc;
+
+	if (native_jit_arch_is_arm64()) {
+		if (load_meta_for_program(ADDR_CALC_OBJ, "test_addr_calc",
+					  &prog, &meta, msg, msg_len))
+			return false;
+		if (!find_addr_calc_site(&meta, &site)) {
+			set_msg(msg, msg_len, "addr_calc site not found");
+			goto out;
+		}
+		if (build_addr_calc_blob(&meta, site, &blob, msg, msg_len))
+			goto out;
+		case_desc = "ADDR_CALC on arm64";
+		expected_log = "unsupported on this CPU";
+	} else if (!x86_cpu_has_movbe()) {
+		if (load_meta_for_program(ENDIAN_FUSION_OBJ, "test_endian_fusion",
+					  &prog, &meta, msg, msg_len))
+			return false;
+		if (!find_endian_fusion_site(&meta, &site)) {
+			set_msg(msg, msg_len, "endian_fusion site not found");
+			goto out;
+		}
+		if (build_endian_fusion_blob(&meta, site, &blob, msg, msg_len))
+			goto out;
+		case_desc = "ENDIAN_FUSION without MOVBE";
+		expected_log = "unsupported on this CPU";
+	} else if (!x86_cpu_has_bmi1()) {
+		if (load_meta_for_program(BITFIELD_EXTRACT_OBJ,
+					  "test_bitfield_extract",
+					  &prog, &meta, msg, msg_len))
+			return false;
+		if (!find_bitfield_extract_site(&meta, &site, &site_len)) {
+			set_msg(msg, msg_len, "bitfield_extract site not found");
+			goto out;
+		}
+		if (build_bitfield_extract_blob(&meta, site, site_len, &blob,
+						msg, msg_len))
+			goto out;
+		case_desc = "BITFIELD_EXTRACT without BMI1";
+		expected_log = "unsupported on this CPU";
+	} else if (!x86_cpu_has_bmi2()) {
+		if (load_meta_for_program(ROTATE_OBJ, "test_rotate",
+					  &prog, &meta, msg, msg_len))
+			return false;
+		if (!find_rotate_site(&meta, &site)) {
+			set_msg(msg, msg_len, "rotate site not found");
+			goto out;
+		}
+		if (build_rotate_blob(&meta, site, BPF_JIT_ROT_RORX,
+				      &blob, msg, msg_len))
+			goto out;
+		case_desc = "ROTATE RORX without BMI2";
+		expected_log = "unsupported on this CPU";
+	} else if (!x86_cpu_has_cmov()) {
+		if (load_meta_for_program(SIMPLE_OBJ, "test_simple",
+					  &prog, &meta, msg, msg_len))
+			return false;
+		if (!build_valid_simple_blob_for_negative(&meta, &blob,
+							 msg, msg_len))
+			goto out;
+		case_desc = "COND_SELECT without CMOV";
+		expected_log = "unsupported on this CPU";
+	} else {
+		if (load_meta_for_program(SIMPLE_OBJ, "test_simple",
+					  &prog, &meta, msg, msg_len))
+			return false;
+		if (!build_valid_simple_blob_for_negative(&meta, &blob,
+							 msg, msg_len))
+			goto out;
+		policy_blob_rule(&blob, 0)->canonical_form = 0xffffu;
+		case_desc = "made-up form id on fully featured x86";
+		expected_log = "invalid rule header";
+	}
+
+	rc = apply_blob(prog.prog_fd, &blob, true, log_buf, sizeof(log_buf));
+	if (rc != -EINVAL) {
+		set_msg(msg, msg_len,
+			"%s: expected EINVAL, got %s (%d)%s%s",
+			case_desc, strerror(-rc), -rc,
+			log_buf[0] ? ": " : "",
+			log_buf[0] ? log_buf : "");
+		goto out;
+	}
+	if (expected_log && !log_contains(log_buf, expected_log)) {
+		set_msg(msg, msg_len,
+			"%s: expected log substring \"%s\", got%s%s",
+			case_desc, expected_log,
+			log_buf[0] ? ": " : "",
+			log_buf[0] ? log_buf : "");
+		goto out;
+	}
+
+	set_msg(msg, msg_len, "%s rejected with EINVAL", case_desc);
+	ok = true;
+
+out:
+	free_blob(&blob);
+	free_program_meta(&meta);
+	unload_program(&prog);
+	return ok;
+}
+
+static bool test_interior_edge_rejected(char *msg, size_t msg_len)
+{
+	struct loaded_program prog;
+	struct program_meta meta;
+	struct blob blob = {};
+	char log_buf[LOG_BUF_SIZE] = {};
+	__u32 site = 0;
+	bool ok = false;
+	int rc;
+
+	if (load_meta_for_program(INTERIOR_EDGE_OBJ, "test_interior_edge",
+				  &prog, &meta, msg, msg_len))
+		return false;
+	if (!find_guarded_select_site(&meta, &site)) {
+		set_msg(msg, msg_len, "interior-edge select site not found");
+		goto out;
+	}
+	if (build_guarded_select_blob(&meta, site, BPF_JIT_SEL_CMOVCC,
+				      &blob, msg, msg_len))
+		goto out;
+
+	rc = apply_blob(prog.prog_fd, &blob, true, log_buf, sizeof(log_buf));
+	if (rc != -EINVAL) {
+		set_msg(msg, msg_len,
+			"interior edge: expected EINVAL, got %s (%d)%s%s",
+			strerror(-rc), -rc,
+			log_buf[0] ? ": " : "",
+			log_buf[0] ? log_buf : "");
+		goto out;
+	}
+	if (!log_contains(log_buf, "interior control-flow edge detected")) {
+		set_msg(msg, msg_len,
+			"interior edge: expected validator log, got%s%s",
+			log_buf[0] ? ": " : "",
+			log_buf[0] ? log_buf : "");
+		goto out;
+	}
+
+	set_msg(msg, msg_len,
+		"interior-edge guarded select site_start=%u rejected",
+		site);
+	ok = true;
+
+out:
+	free_blob(&blob);
+	free_program_meta(&meta);
+	unload_program(&prog);
+	return ok;
+}
+
+static bool test_blinded_program_rejected(char *msg, size_t msg_len)
+{
+	struct loaded_program prog;
+	char log_buf[LOG_BUF_SIZE] = {};
+	char restore_msg[128] = {};
+	int original_harden = 0;
+	int rc;
+	bool ok = false;
+
+	if (read_int_file(BPF_JIT_HARDEN_SYSCTL, &original_harden,
+			  msg, msg_len))
+		return false;
+	if (write_int_file(BPF_JIT_HARDEN_SYSCTL, 2, msg, msg_len))
+		return false;
+	if (load_program(SIMPLE_OBJ, "test_simple", &prog, msg, msg_len))
+		goto out_restore;
+
+	rc = apply_stock_rejit(prog.prog_fd, log_buf, sizeof(log_buf));
+	if (rc != -EOPNOTSUPP) {
+		set_msg(msg, msg_len,
+			"blinded program: expected EOPNOTSUPP, got %s (%d)%s%s",
+			strerror(-rc), -rc,
+			log_buf[0] ? ": " : "",
+			log_buf[0] ? log_buf : "");
+		goto out;
+	}
+	if (!log_contains(log_buf, "blinded programs are not supported")) {
+		set_msg(msg, msg_len,
+			"blinded program: expected rejection log, got%s%s",
+			log_buf[0] ? ": " : "",
+			log_buf[0] ? log_buf : "");
+		goto out;
+	}
+
+	set_msg(msg, msg_len, "blinded program rejected with EOPNOTSUPP");
+	ok = true;
+
+out:
+	unload_program(&prog);
+out_restore:
+	if (write_int_file(BPF_JIT_HARDEN_SYSCTL, original_harden,
+			   restore_msg, sizeof(restore_msg))) {
+		set_msg(msg, msg_len,
+			"failed to restore %s to %d: %s",
+			BPF_JIT_HARDEN_SYSCTL, original_harden, restore_msg);
+		ok = false;
+	}
+	return ok;
+}
+
+static bool test_struct_ops_program_rejected(char *msg, size_t msg_len)
+{
+	struct loaded_struct_ops_program prog;
+	char log_buf[LOG_BUF_SIZE] = {};
+	bool ok = false;
+	int rc;
+
+	if (load_struct_ops_program(STRUCT_OPS_TCP_OBJ, "rejit_cc_init",
+				    "rejit_cc", &prog, msg, msg_len))
+		return false;
+
+	rc = apply_stock_rejit(prog.prog_fd, log_buf, sizeof(log_buf));
+	if (rc != -EOPNOTSUPP) {
+		set_msg(msg, msg_len,
+			"struct_ops program: expected EOPNOTSUPP, got %s (%d)%s%s",
+			strerror(-rc), -rc,
+			log_buf[0] ? ": " : "",
+			log_buf[0] ? log_buf : "");
+		goto out;
+	}
+	if (!log_contains(log_buf,
+			  "live struct_ops programs are not supported")) {
+		set_msg(msg, msg_len,
+			"struct_ops program: expected rejection log, got%s%s",
+			log_buf[0] ? ": " : "",
+			log_buf[0] ? log_buf : "");
+		goto out;
+	}
+
+	set_msg(msg, msg_len, "live struct_ops program rejected with EOPNOTSUPP");
+	ok = true;
+
+out:
+	unload_struct_ops_program(&prog);
 	return ok;
 }
 
@@ -2643,63 +3367,6 @@ out:
 	return ok;
 }
 
-static bool test_zero_ext_elide_preserved(char *msg, size_t msg_len)
-{
-	struct loaded_program prog;
-	struct program_meta meta;
-	struct blob blob = {};
-	__u32 site = 0;
-	__u64 before = 0, after = 0;
-	bool ok = false;
-	int rc;
-
-	if (load_meta_for_program(ZERO_EXT_ELIDE_OBJ, "test_zero_ext_elide",
-				  &prog, &meta, msg, msg_len))
-		return false;
-	if (!run_zero_ext_elide_packet_check(&prog, &before, msg, msg_len))
-		goto out;
-	if (!find_zero_ext_elide_site(&meta, &site)) {
-		set_msg(msg, msg_len, "zero_ext_elide site not found");
-		goto out;
-	}
-	if (build_zero_ext_elide_blob(&meta, site, &blob, msg, msg_len))
-		goto out;
-
-	rc = apply_blob(prog.prog_fd, &blob, true, NULL, 0);
-	if (rc) {
-		if (native_jit_arch_is_arm64() &&
-		    (rc == -EINVAL || rc == -EOPNOTSUPP)) {
-			set_msg(msg, msg_len,
-				"ARM64 zero_ext_elide unsupported in first wave: %s (%d)",
-				strerror(-rc), -rc);
-			ok = true;
-			goto out;
-		}
-		set_msg(msg, msg_len, "zero_ext_elide recompile failed: %s (%d)",
-			strerror(-rc), -rc);
-		goto out;
-	}
-	if (!run_zero_ext_elide_packet_check(&prog, &after, msg, msg_len))
-		goto out;
-	if (before != after) {
-		set_msg(msg, msg_len,
-			"zero_ext_elide result changed from 0x%llx to 0x%llx",
-			(unsigned long long)before,
-			(unsigned long long)after);
-		goto out;
-	}
-
-	set_msg(msg, msg_len, "zero_ext_elide site_start=%u preserved 0x%llx",
-		site, (unsigned long long)after);
-	ok = true;
-
-out:
-	free_blob(&blob);
-	free_program_meta(&meta);
-	unload_program(&prog);
-	return ok;
-}
-
 static bool test_endian_fusion_preserved(char *msg, size_t msg_len)
 {
 	struct loaded_program prog;
@@ -2893,6 +3560,7 @@ static bool test_concurrent_recompile(char *msg, size_t msg_len)
 	struct program_meta meta;
 	struct blob blob = {};
 	__u32 site = 0;
+	__u64 result = 0;
 	pthread_t t1, t2;
 	pthread_barrier_t barrier;
 	struct thread_ctx ctx1;
@@ -2958,8 +3626,23 @@ static bool test_concurrent_recompile(char *msg, size_t msg_len)
 			success_total, ebusy_total);
 		goto out;
 	}
+	if (apply_blob(prog.prog_fd, &blob, true, NULL, 0)) {
+		set_msg(msg, msg_len,
+			"follow-up recompile failed after concurrency");
+		goto out;
+	}
+	if (!run_simple_packet_check(&prog, &result, msg, msg_len))
+		goto out;
+	if (result != 0x44) {
+		set_msg(msg, msg_len,
+			"post-concurrency result mismatch: expected 0x44 got 0x%llx",
+			(unsigned long long)result);
+		goto out;
+	}
 
-	set_msg(msg, msg_len, "success=%u ebusy=%u", success_total, ebusy_total);
+	set_msg(msg, msg_len,
+		"success=%u ebusy=%u follow-up result=0x%llx",
+		success_total, ebusy_total, (unsigned long long)result);
 	ok = true;
 
 out:
@@ -3106,6 +3789,7 @@ int main(void)
 	static const struct test_case tests[] = {
 		{ "Load Simple Program And Verify Tag", test_load_tag },
 		{ "Zero-Rule Policy Blob No-Op", test_zero_rule_blob },
+		{ "Zero-Applied Policy Returns Success", test_zero_applied_policy_returns_success },
 		{ "Single Valid Wide Rule Recompile", test_valid_wide_rule },
 		{ "Wide Result Preserved After Recompile", test_wide_result_unchanged },
 		{ "Wide Stock Re-JIT Preserves Result", test_wide_zero_applied_jit_identity },
@@ -3114,10 +3798,18 @@ int main(void)
 		{ "Wrong Prog Tag Rejected", test_wrong_prog_tag },
 		{ "Wrong Insn Count Rejected", test_wrong_insn_cnt },
 		{ "Wrong Arch Id Rejected", test_wrong_arch_id },
+		{ "Invalid Native Choice Rejected", test_invalid_native_choice },
+		{ "Reserved Policy Flags Rejected", test_reserved_flags },
 		{ "Non-Sealed Memfd Rejected", test_non_sealed_memfd },
 		{ "Truncated Header Rejected", test_truncated_header },
 		{ "Site Start Out Of Bounds Rejected", test_site_out_of_bounds },
 		{ "Zero-Length Blob Rejected", test_zero_length_blob },
+		{ "Overlapping Rules Rejected", test_overlapping_rules_rejected },
+		{ "Cross-Subprog Rule Rejected", test_cross_subprog_rule_rejected },
+		{ "Unsupported Arch Form Rejected", test_unsupported_arch_form },
+		{ "Interior Edge Rejected", test_interior_edge_rejected },
+		{ "Blinded Program Rejected", test_blinded_program_rejected },
+		{ "Struct Ops Program Rejected", test_struct_ops_program_rejected },
 			{ "Diamond CMOV Recompile Preserves Result", test_diamond_cmov },
 			{ "Rotate Recompile Preserves Result", test_rotate_preserved },
 			{ "Subprog Rotate Recompile Preserves Result", test_subprog_rotate_preserved },
@@ -3125,7 +3817,6 @@ int main(void)
 			{ "Addr Calc Recompile Preserves Result", test_addr_calc_preserved },
 		{ "Bitfield Extract Recompile Preserves Result", test_bitfield_extract_preserved },
 		{ "Bitfield Extract Boundary Preserved", test_bitfield_extract_boundary_preserved },
-		{ "Zero Ext Elide Recompile Preserves Result", test_zero_ext_elide_preserved },
 		{ "Endian Fusion Recompile Preserves Result", test_endian_fusion_preserved },
 		{ "Branch Flip Recompile Preserves Result", test_branch_flip_preserved },
 		{ "Repeated Recompile Succeeds", test_repeated_recompile },

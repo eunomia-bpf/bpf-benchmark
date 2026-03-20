@@ -14,21 +14,25 @@ from pathlib import Path
 
 import yaml
 
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 from benchmark_catalog import CONFIG_PATH, ROOT_DIR, RuntimeSpec, SuiteSpec, load_suite
 try:
     from results_layout import maybe_refresh_latest_alias, refresh_latest_alias, smoke_output_path
 except ImportError:
     from micro.results_layout import maybe_refresh_latest_alias, refresh_latest_alias, smoke_output_path
 try:
-    from orchestrator.benchmarks import resolve_memory_file, select_benchmarks
-    from orchestrator.commands import build_micro_benchmark_command
-    from orchestrator.environment import (
+    from runner.libs.benchmarks import resolve_memory_file, select_benchmarks
+    from runner.libs.commands import build_micro_benchmark_command
+    from runner.libs.environment import (
         ensure_build_steps,
         read_optional_text,
         read_required_text,
         validate_publication_environment,
     )
-    from orchestrator.results import (
+    from runner.libs.results import (
         derive_perf_metrics,
         ns_summary,
         parse_runner_sample,
@@ -38,15 +42,15 @@ try:
         summarize_phase_timings,
     )
 except ImportError:
-    from micro.orchestrator.benchmarks import resolve_memory_file, select_benchmarks
-    from micro.orchestrator.commands import build_micro_benchmark_command
-    from micro.orchestrator.environment import (
+    from runner.libs.benchmarks import resolve_memory_file, select_benchmarks
+    from runner.libs.commands import build_micro_benchmark_command
+    from runner.libs.environment import (
         ensure_build_steps,
         read_optional_text,
         read_required_text,
         validate_publication_environment,
     )
-    from micro.orchestrator.results import (
+    from runner.libs.results import (
         derive_perf_metrics,
         ns_summary,
         parse_runner_sample,

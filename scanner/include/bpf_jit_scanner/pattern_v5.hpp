@@ -18,7 +18,6 @@ enum class V5Family {
     Rotate,
     AddrCalc,
     BitfieldExtract,
-    ZeroExtElide,
     EndianFusion,
     BranchFlip,
 };
@@ -46,7 +45,6 @@ struct V5ScanOptions {
     bool scan_rotate = false;
     bool scan_lea = false;
     bool scan_extract = false;
-    bool scan_zero_ext = false;
     bool scan_endian = false;
     bool scan_branch_flip = false;
     bool use_rorx = false;
@@ -59,7 +57,6 @@ struct V5ScanSummary {
     uint64_t rotate_sites = 0;
     uint64_t lea_sites = 0;
     uint64_t bitfield_sites = 0;
-    uint64_t zero_ext_sites = 0;
     uint64_t endian_sites = 0;
     uint64_t branch_flip_sites = 0;
 };

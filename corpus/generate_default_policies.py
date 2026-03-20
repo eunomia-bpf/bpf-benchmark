@@ -19,7 +19,7 @@ for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpu
     if candidate_str not in sys.path:
         sys.path.insert(0, candidate_str)
 
-from policy_utils import (
+from runner.libs.policy import (
     POLICY_DIR,
     ROOT_DIR,
     canonical_policy_family_name,
@@ -30,9 +30,9 @@ from policy_utils import (
 )
 
 try:
-    from orchestrator.inventory import discover_object_programs
+    from runner.libs.inventory import discover_object_programs
 except ImportError:
-    from micro.orchestrator.inventory import discover_object_programs
+    from runner.libs.inventory import discover_object_programs
 
 try:
     from elftools.elf.elffile import ELFFile
@@ -41,7 +41,7 @@ except ImportError as exc:  # pragma: no cover - runtime dependency failure
 
 
 DEFAULT_SCANNER = ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"
-DEFAULT_RUNNER = ROOT_DIR / "micro" / "build" / "runner" / "micro_exec"
+DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
 DEFAULT_TIMEOUT_SECONDS = 180
 DEFAULT_WORKERS = max(1, min(8, os.cpu_count() or 1))
 SHF_EXECINSTR = 0x4
@@ -51,7 +51,6 @@ POLICY_FAMILY_KEYS = (
     "rotate",
     "extract",
     "lea",
-    "zero-ext",
     "endian",
     "branch-flip",
 )
@@ -61,7 +60,6 @@ SCANNER_SUMMARY_FIELDS = (
     ("rotate", "rotate_sites"),
     ("extract", "extract_sites"),
     ("lea", "lea_sites"),
-    ("zero-ext", "zero_ext_sites"),
     ("endian", "endian_sites"),
     ("branch-flip", "branch_flip_sites"),
 )

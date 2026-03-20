@@ -18,7 +18,7 @@ from typing import Any
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_OUTPUT_JSON = ROOT_DIR / "docs" / "tmp" / "code-size-by-progtype.json"
 DEFAULT_OUTPUT_MD = ROOT_DIR / "docs" / "tmp" / "code-size-by-progtype.md"
-DEFAULT_RUNNER = ROOT_DIR / "micro" / "build" / "runner" / "micro_exec"
+DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
 DEFAULT_PACKET_PATH = ROOT_DIR / "micro" / "generated-inputs" / "corpus_dummy_packet_64.bin"
 DEFAULT_CONTEXT_PATH = ROOT_DIR / "micro" / "generated-inputs" / "corpus_dummy_context_64.bin"
 DEFAULT_TIMEOUT_SECONDS = 180

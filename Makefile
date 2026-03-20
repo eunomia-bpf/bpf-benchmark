@@ -3,6 +3,7 @@ SHELL := /bin/bash
 
 ROOT_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 MICRO_DIR := $(ROOT_DIR)/micro
+RUNNER_DIR := $(ROOT_DIR)/runner
 SCANNER_DIR := $(ROOT_DIR)/scanner
 KERNEL_DIR := $(ROOT_DIR)/vendor/linux-framework
 KERNEL_TEST_DIR := $(ROOT_DIR)/tests/kernel
@@ -78,7 +79,7 @@ ARM64_KERNEL_MAKEFLAGS := $(filter-out B,$(MAKEFLAGS))
 BZIMAGE_PATH := $(if $(filter /%,$(BZIMAGE)),$(BZIMAGE),$(ROOT_DIR)/$(BZIMAGE))
 SCANNER_PATH := $(if $(filter /%,$(SCANNER)),$(SCANNER),$(ROOT_DIR)/$(SCANNER))
 SCANNER_BUILD_DIR := $(abspath $(dir $(SCANNER_PATH)))
-MICRO_RUNNER := $(MICRO_DIR)/build/runner/micro_exec
+MICRO_RUNNER := $(RUNNER_DIR)/build/micro_exec
 KERNEL_SELFTEST := $(KERNEL_TEST_DIR)/build/test_recompile
 KERNEL_SELFTEST_ARM64 := $(KERNEL_TEST_DIR)/build-arm64/test_recompile
 KERNEL_SELFTEST_ARM64_LIB_DIR := $(KERNEL_TEST_DIR)/build-arm64/lib
@@ -130,9 +131,9 @@ VENV_ACTIVATE := $(if $(VENV),source "$(VENV)/bin/activate" &&,)
 
 # File-based dependency sources (for proper incremental rebuilds)
 MICRO_RUNNER_SOURCES := $(wildcard \
-	$(MICRO_DIR)/runner/src/*.cpp \
-	$(MICRO_DIR)/runner/src/*.h \
-	$(MICRO_DIR)/runner/CMakeLists.txt \
+	$(RUNNER_DIR)/src/*.cpp \
+	$(RUNNER_DIR)/include/*.hpp \
+	$(RUNNER_DIR)/CMakeLists.txt \
 	$(SCANNER_DIR)/src/*.cpp \
 	$(SCANNER_DIR)/include/bpf_jit_scanner/*.hpp \
 	$(SCANNER_DIR)/CMakeLists.txt)
@@ -149,7 +150,7 @@ KERNEL_JIT_SOURCES := \
 # Stamp file for BPF program objects (programs/ has no separate build dir)
 MICRO_BPF_STAMP := $(MICRO_DIR)/programs/.build.stamp
 
-.PHONY: all micro scanner kernel kernel-arm64 kernel-tests kernel-test-progs \
+.PHONY: all runner micro scanner kernel kernel-arm64 kernel-tests kernel-test-progs \
 	arm64-crossbuild-image selftest-arm64 scanner-tests clean \
 	smoke check validate verify-build compare \
 	vm-selftest vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
@@ -162,6 +163,7 @@ help:
 	@echo ""
 	@echo "Build targets:"
 	@echo "  make all              - Build micro runner, scanner, and kernel tests"
+	@echo "  make runner           - Build micro_exec runner"
 	@echo "  make micro            - Build micro_exec runner and BPF programs"
 	@echo "  make scanner          - Build bpf-jit-scanner"
 	@echo "  make kernel           - Build kernel bzImage"
@@ -260,7 +262,12 @@ all:
 # PHONY build targets (for manual invocation / forced rebuild)
 micro:
 	@echo "=== Running make micro ==="
-	$(MAKE) -C "$(MICRO_DIR)" micro_exec programs
+	$(MAKE) runner
+	$(MAKE) -C "$(MICRO_DIR)" programs
+
+runner:
+	@echo "=== Running make runner ==="
+	$(MAKE) -C "$(RUNNER_DIR)" micro_exec
 
 scanner:
 	@echo "=== Running make scanner ==="
@@ -326,7 +333,7 @@ scanner-tests: scanner
 # File-based targets for incremental rebuilds (used by vm-* targets)
 $(MICRO_RUNNER): $(MICRO_RUNNER_SOURCES)
 	@echo "=== Building micro_exec (sources changed) ==="
-	$(MAKE) -C "$(MICRO_DIR)" micro_exec
+	$(MAKE) -C "$(RUNNER_DIR)" micro_exec
 
 $(MICRO_BPF_STAMP): $(MICRO_BPF_SOURCES)
 	@echo "=== Building BPF programs (sources changed) ==="
@@ -416,10 +423,10 @@ vm-micro: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(SCANNER_PATH) verify-build $(BZIM
 			--output "$(VM_MICRO_OUTPUT)"'
 
 # The corpus batch harness already manages one vng boot per target internally.
-vm-corpus: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(SCANNER_PATH) verify-build $(BZIMAGE_PATH)
+vm-corpus: $(MICRO_RUNNER) $(SCANNER_PATH) verify-build $(BZIMAGE_PATH)
 	@echo "=== Running make vm-corpus ==="
 	mkdir -p "$(CORPUS_RESULTS_DEV_DIR)"
-	$(VENV_ACTIVATE) python3 "$(MICRO_DIR)/driver.py" corpus v5-vm-batch \
+	$(VENV_ACTIVATE) python3 "$(ROOT_DIR)/corpus/driver.py" packet \
 		--skip-build \
 		--kernel-image "$(BZIMAGE_PATH)" \
 		--runner "$(MICRO_RUNNER)" \
@@ -430,7 +437,7 @@ vm-corpus: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(SCANNER_PATH) verify-build $(BZI
 		--output-json "$(VM_CORPUS_OUTPUT_JSON)" \
 		--output-md "$(VM_CORPUS_OUTPUT_MD)"
 
-vm-e2e: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(SCANNER_PATH) verify-build $(BZIMAGE_PATH)
+vm-e2e: $(MICRO_RUNNER) $(SCANNER_PATH) verify-build $(BZIMAGE_PATH)
 	@echo "=== Running make vm-e2e ==="
 	mkdir -p "$(E2E_RESULTS_DEV_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \

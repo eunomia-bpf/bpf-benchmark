@@ -17,7 +17,7 @@ from typing import Any, Mapping, Sequence
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from e2e.common import (  # noqa: E402
+from runner.libs import (  # noqa: E402
     RESULTS_DIR,
     ROOT_DIR,
     authoritative_output_path,
@@ -29,16 +29,16 @@ from e2e.common import (  # noqa: E402
     write_json,
     write_text,
 )
-from e2e.common.agent import find_bpf_programs, start_agent, stop_agent  # noqa: E402
-from e2e.common.metrics import (  # noqa: E402
+from runner.libs.agent import find_bpf_programs, start_agent, stop_agent  # noqa: E402
+from runner.libs.metrics import (  # noqa: E402
     compute_delta,
     enable_bpf_stats,
     sample_bpf_stats,
     sample_cpu_usage,
     sample_total_cpu_usage,
 )
-from e2e.common.recompile import PolicyTarget, apply_recompile, resolve_policy_files, scan_programs  # noqa: E402
-from e2e.common.workload import (  # noqa: E402
+from runner.libs.recompile import PolicyTarget, apply_recompile, resolve_policy_files, scan_programs  # noqa: E402
+from runner.libs.workload import (  # noqa: E402
     WorkloadResult,
     run_dd_read_load,
     run_exec_storm,
@@ -52,7 +52,7 @@ DEFAULT_SCRIPT_DIR = Path(__file__).with_name("scripts")
 DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "bpftrace")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "bpftrace-real-e2e.md"
 DEFAULT_REPORT_MD = ROOT_DIR / "docs" / "tmp" / "bpftrace-real-e2e-report.md"
-DEFAULT_RUNNER = ROOT_DIR / "micro" / "build" / "runner" / "micro_exec"
+DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
 DEFAULT_SCANNER = ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"
 DEFAULT_DURATION_S = 30
 BPFTRACE_POLICY_OBJECT_DIR = ROOT_DIR / "corpus" / "build" / "bpftrace"
@@ -162,7 +162,7 @@ def host_metadata() -> dict[str, object]:
 
 def ensure_artifacts(runner_binary: Path, scanner_binary: Path, *, skip_build: bool) -> None:
     if not skip_build or not runner_binary.exists():
-        run_command(["make", "-C", "micro", "micro_exec", "programs"], timeout=1800)
+        run_command(["make", "runner"], timeout=1800)
     if not scanner_binary.exists():
         run_command(
             ["cmake", "-S", "scanner", "-B", "scanner/build", "-DCMAKE_BUILD_TYPE=Release"],
@@ -283,7 +283,7 @@ def resolve_bpftrace_policy_files(
     if not unresolved:
         return resolved
 
-    from corpus.policy_utils import parse_policy_v3, program_policy_dir
+    from runner.libs.policy import parse_policy_v3, program_policy_dir
 
     policy_dir = program_policy_dir(object_hint)
     if not policy_dir.exists():

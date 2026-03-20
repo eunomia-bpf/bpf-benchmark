@@ -141,9 +141,6 @@ std::optional<V5Family> parse_policy_family_name(std::string value)
     if (value == "extract") {
         return V5Family::BitfieldExtract;
     }
-    if (value == "zero-ext") {
-        return V5Family::ZeroExtElide;
-    }
     if (value == "endian") {
         return V5Family::EndianFusion;
     }
@@ -428,9 +425,6 @@ V5ScanSummary summarize_rules(const std::vector<V5PolicyRule> &rules)
         case V5Family::BitfieldExtract:
             summary.bitfield_sites++;
             break;
-        case V5Family::ZeroExtElide:
-            summary.zero_ext_sites++;
-            break;
         case V5Family::EndianFusion:
             summary.endian_sites++;
             break;
@@ -481,7 +475,6 @@ std::string scan_manifest_to_json(const V5ScanManifest &manifest)
         << "\"lea_sites\":" << manifest.summary.lea_sites << ","
         << "\"extract_sites\":" << manifest.summary.bitfield_sites << ","
         << "\"bitfield_sites\":" << manifest.summary.bitfield_sites << ","
-        << "\"zero_ext_sites\":" << manifest.summary.zero_ext_sites << ","
         << "\"endian_sites\":" << manifest.summary.endian_sites << ","
         << "\"branch_flip_sites\":" << manifest.summary.branch_flip_sites
         << "},"

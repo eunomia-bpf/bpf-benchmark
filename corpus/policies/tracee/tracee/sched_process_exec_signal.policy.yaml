@@ -3,7 +3,7 @@
 # Program: sched_process_exec_signal
 # Section: raw_tracepoint/sched_process_exec
 # Total scanner sites: 20
-# Family site totals: cmov=18, wide=0, rotate=0, extract=1, lea=0, zero-ext=0, endian=0, branch-flip=1
+# Family site totals: cmov=18, wide=0, rotate=0, extract=1, lea=0, endian=0, branch-flip=1
 # Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
 # Excluded cmov sites from allowlist: 18
 # Excluded extract sites from allowlist: 1

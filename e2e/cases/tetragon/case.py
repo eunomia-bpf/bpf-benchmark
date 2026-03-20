@@ -21,7 +21,7 @@ from typing import Any, Mapping, Sequence
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from e2e.common import (  # noqa: E402
+from runner.libs import (  # noqa: E402
     RESULTS_DIR,
     ROOT_DIR,
     authoritative_output_path,
@@ -36,10 +36,10 @@ from e2e.common import (  # noqa: E402
     write_json,
     write_text,
 )
-from e2e.common.agent import find_bpf_programs, start_agent, stop_agent, wait_healthy  # noqa: E402
-from e2e.common.metrics import compute_delta, sample_bpf_stats, sample_cpu_usage, sample_total_cpu_usage  # noqa: E402
-from e2e.common.recompile import PolicyTarget, apply_recompile, resolve_policy_files, scan_programs  # noqa: E402
-from e2e.common.workload import (  # noqa: E402
+from runner.libs.agent import find_bpf_programs, start_agent, stop_agent, wait_healthy  # noqa: E402
+from runner.libs.metrics import compute_delta, sample_bpf_stats, sample_cpu_usage, sample_total_cpu_usage  # noqa: E402
+from runner.libs.recompile import PolicyTarget, apply_recompile, resolve_policy_files, scan_programs  # noqa: E402
+from runner.libs.workload import (  # noqa: E402
     WorkloadResult,
     run_connect_storm,
     run_exec_storm,
@@ -47,10 +47,10 @@ from e2e.common.workload import (  # noqa: E402
     run_open_storm,
 )
 try:  # noqa: E402
-    from micro.orchestrator.inventory import discover_object_programs
+    from runner.libs.inventory import discover_object_programs
 except ModuleNotFoundError:  # noqa: E402
     sys.path.insert(0, str(ROOT_DIR / "micro"))
-    from orchestrator.inventory import discover_object_programs
+    from runner.libs.inventory import discover_object_programs
 
 
 DEFAULT_SETUP_SCRIPT = Path(__file__).with_name("setup.sh")
@@ -60,7 +60,7 @@ DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "tetragon-real-e2e.md"
 DEFAULT_EXECVE_OBJECT = ROOT_DIR / "corpus" / "build" / "tetragon" / "bpf_execve_event.bpf.o"
 DEFAULT_KPROBE_OBJECT = ROOT_DIR / "corpus" / "build" / "tetragon" / "bpf_generic_kprobe.bpf.o"
 DEFAULT_SCANNER = ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"
-DEFAULT_RUNNER = ROOT_DIR / "micro" / "build" / "runner" / "micro_exec"
+DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
 DEFAULT_BPFTOOL = "/usr/local/sbin/bpftool"
 DEFAULT_DURATION_S = 30
 DEFAULT_SMOKE_DURATION_S = 8
@@ -135,10 +135,6 @@ def bpftool_binary() -> str:
         if Path(DEFAULT_BPFTOOL).exists():
             return DEFAULT_BPFTOOL
         return "bpftool"
-
-
-def decode_c_string(value: bytes | None) -> str:
-    return value.decode("utf-8", "replace") if value else ""
 
 
 def libbpf_error_string(err: int) -> str:
@@ -489,27 +485,6 @@ def build_manual_targets(execve_object: Path, kprobe_object: Path) -> tuple[Manu
     )
 
 
-def write_tetragon_policy(path: Path) -> None:
-    policy = """
-apiVersion: cilium.io/v1alpha1
-kind: TracingPolicy
-metadata:
-  name: bpf-benchmark-tetragon-e2e
-spec:
-  tracepoints:
-    - subsystem: syscalls
-      event: sys_enter_execve
-  kprobes:
-    - call: security_bprm_check
-      syscall: false
-    - call: security_file_open
-      syscall: false
-    - call: security_socket_connect
-      syscall: false
-""".strip()
-    path.write_text(policy + "\n")
-
-
 def write_tetragon_policies(directory: Path) -> list[Path]:
     directory.mkdir(parents=True, exist_ok=True)
     tracepoint_path = directory / "tetragon-e2e-tracepoint.yaml"
@@ -660,7 +635,7 @@ def speedup_ratio(before_avg_ns: object, after_avg_ns: object) -> float | None:
 
 def ensure_artifacts(runner_binary: Path, scanner_binary: Path) -> None:
     if not runner_binary.exists():
-        run_command(["make", "-C", "micro", "micro_exec", "programs"], timeout=1800)
+        run_command(["make", "runner"], timeout=1800)
     if not scanner_binary.exists():
         run_command(
             ["cmake", "-S", "scanner", "-B", "scanner/build", "-DCMAKE_BUILD_TYPE=Release"],

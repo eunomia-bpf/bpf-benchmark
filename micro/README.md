@@ -6,7 +6,7 @@
 
 - `config/micro_pure_jit.yaml` is the active micro suite manifest.
 - The suite covers the active pure-JIT benchmark set across staged XDP cases, packet-backed XDP controls, and a small kernel-only non-XDP control subset.
-- The suite is designed to exercise the 8 canonical forms tracked in `docs/kernel-jit-optimization-plan.md`: `COND_SELECT`, `WIDE_MEM`, `ROTATE`, `ADDR_CALC`, `BITFIELD_EXTRACT`, `ZERO_EXT_ELIDE`, `ENDIAN_FUSION`, and `BRANCH_FLIP`.
+- The suite is designed to exercise the active canonical forms tracked in `docs/kernel-jit-optimization-plan.md`: `COND_SELECT`, `WIDE_MEM`, `ROTATE`, `ADDR_CALC`, `BITFIELD_EXTRACT`, `ENDIAN_FUSION`, and `BRANCH_FLIP`.
 
 ## Directory Layout
 
@@ -16,17 +16,17 @@
 - `input_generators.py`: deterministic input generation for active benchmarks
 - `_driver_impl_*.py`: active driver backends used by `driver.py`
 - `summarize_rq.py`, `generate_figures.py`: active reporting utilities
-- `orchestrator/`: shared Python helpers reused by `corpus/` and `e2e/`
+- `../runner/`: shared C++ runner plus reusable Python libs for `micro/`, `corpus/`, and `e2e/`
 - `programs/*.bpf.c`: active pure-JIT benchmark sources
 
 ## Build
 
 ```bash
 git submodule update --init --recursive
-make -C micro
+make micro
 ```
 
-`make -C micro` builds `micro_exec`, the active benchmark `.bpf.o` objects, and `micro/build/tools/directive_hint`.
+`make micro` builds `runner/build/micro_exec` plus the active benchmark `.bpf.o` objects.
 
 ## Usage
 

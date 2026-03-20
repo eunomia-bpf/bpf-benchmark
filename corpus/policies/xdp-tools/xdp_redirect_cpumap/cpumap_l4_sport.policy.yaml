@@ -3,7 +3,7 @@
 # Program: cpumap_l4_sport
 # Section: xdp
 # Total scanner sites: 1
-# Family site totals: cmov=0, wide=0, rotate=0, extract=0, lea=0, zero-ext=0, endian=1, branch-flip=0
+# Family site totals: cmov=0, wide=0, rotate=0, extract=0, lea=0, endian=1, branch-flip=0
 # Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
 
 version: 3

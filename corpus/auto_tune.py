@@ -21,7 +21,7 @@ for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpu
         sys.path.insert(0, candidate_str)
 
 from generate_default_policies import DEFAULT_WORKERS, discover_object_paths
-from policy_utils import (
+from runner.libs.policy import (
     POLICY_DIR,
     ROOT_DIR,
     object_relative_path,
@@ -32,11 +32,11 @@ from policy_utils import (
 )
 
 try:
-    from orchestrator.inventory import discover_object_programs, load_packet_test_run_targets
+    from runner.libs.inventory import discover_object_programs, load_packet_test_run_targets
 except ImportError:
-    from micro.orchestrator.inventory import discover_object_programs, load_packet_test_run_targets
+    from runner.libs.inventory import discover_object_programs, load_packet_test_run_targets
 
-from _driver_impl_run_corpus_v5_vm_batch import (
+from corpus.modes import (
     DEFAULT_BTF_PATH,
     DEFAULT_HOST_BTF_PATH,
     DEFAULT_INVENTORY_JSON,
@@ -59,7 +59,6 @@ FAMILY_ORDER = (
     "rotate",
     "lea",
     "extract",
-    "zero-ext",
     "endian",
     "branch-flip",
 )

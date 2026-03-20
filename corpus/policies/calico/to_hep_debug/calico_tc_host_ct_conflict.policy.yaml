@@ -3,7 +3,7 @@
 # Program: calico_tc_host_ct_conflict
 # Section: tc
 # Total scanner sites: 45
-# Family site totals: cmov=18, wide=4, rotate=0, extract=1, lea=0, zero-ext=0, endian=22, branch-flip=0
+# Family site totals: cmov=18, wide=4, rotate=0, extract=1, lea=0, endian=22, branch-flip=0
 # Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
 # Excluded cmov sites from allowlist: 18
 # Excluded extract sites from allowlist: 1

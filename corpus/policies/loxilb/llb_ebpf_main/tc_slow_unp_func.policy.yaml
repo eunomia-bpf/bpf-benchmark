@@ -3,7 +3,7 @@
 # Program: tc_slow_unp_func
 # Section: tc_packet_hook6
 # Total scanner sites: 178
-# Family site totals: cmov=0, wide=175, rotate=0, extract=1, lea=0, zero-ext=0, endian=2, branch-flip=0
+# Family site totals: cmov=0, wide=175, rotate=0, extract=1, lea=0, endian=2, branch-flip=0
 # Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
 # Excluded extract sites from allowlist: 1
 

@@ -3,7 +3,7 @@
 # Program: trace_set_fs_pwd
 # Section: kprobe/set_fs_pwd
 # Total scanner sites: 18
-# Family site totals: cmov=6, wide=0, rotate=0, extract=0, lea=0, zero-ext=0, endian=0, branch-flip=12
+# Family site totals: cmov=6, wide=0, rotate=0, extract=0, lea=0, endian=0, branch-flip=12
 # Selection model: explicit site allowlist; keep every discovered site except skipped families: cmov, extract
 # Excluded cmov sites from allowlist: 6
 

@@ -99,7 +99,7 @@ bpf-jit-scanner compile-policy --xlated dump.bin --config policy.yaml > policy.b
 sudo bpf-jit-scanner dump --prog-fd 5 --output dump.bin
 ```
 
-## The 8 Canonical Optimization Forms
+## The 7 Canonical Optimization Forms
 
 | Flag | Form | What it does |
 |---|---|---|
@@ -108,11 +108,10 @@ sudo bpf-jit-scanner dump --prog-fd 5 --output dump.bin
 | `--lea` | ADDR\_CALC | Replaces `shift + add` address calculations with `LEA` |
 | `--cmov` | COND\_SELECT | Replaces if-then-else branch pairs with `CMOVcc` |
 | `--bitfield-extract` | BITFIELD\_EXTRACT | Replaces `and + shift` bit-field extraction with `BEXTR` |
-| `--zero-ext` | ZERO\_EXT\_ELIDE | Removes redundant 32-bit zero-extension `mov r32, r32` |
 | `--endian` | ENDIAN\_FUSION | Replaces `ldx + bswap` or `bswap + stx` pairs with `MOVBE` |
 | `--branch-flip` | BRANCH\_FLIP | Inverts a branch condition to eliminate a unconditional jump |
 
-Use `--all` to enable all eight families at once.  Use individual flags to
+Use `--all` to enable all seven families at once.  Use individual flags to
 restrict scanning to a subset.  `--rorx` additionally prefers the BMI2 `RORX`
 variant over `ROR` where available.
 
@@ -123,7 +122,7 @@ version: 3
 program: my-prog-name   # matched against BPF program name
 sites:
   - insn: 12            # instruction index in the xlated stream
-    family: wide        # one of: rotate wide lea cmov extract zero-ext endian branch-flip
+    family: wide        # one of: rotate wide lea cmov extract endian branch-flip
     pattern_kind: wide-load-4
   - insn: 44
     family: rotate
@@ -154,7 +153,6 @@ Three default rules guard against net-negative rewrites when using
 --rotate             ROTATE idioms
 --lea                ADDR_CALC / LEA sites
 --bitfield-extract   BITFIELD_EXTRACT sites (alias: --extract)
---zero-ext           ZERO_EXT_ELIDE sites
 --endian             ENDIAN_FUSION sites
 --branch-flip        BRANCH_FLIP sites
 --rorx               Prefer RORX (BMI2) over ROR for rotate sites

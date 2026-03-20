@@ -12,7 +12,7 @@ defaults:
   output: corpus/results/dev/macro_corpus.json
 
 build:
-  runner_binary: micro/build/runner/micro_exec
+  runner_binary: runner/build/micro_exec
   scanner_binary: scanner/build/bpf-jit-scanner
   bpftool_binary: bpftool
 

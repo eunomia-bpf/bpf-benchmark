@@ -3,31 +3,35 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 try:
-    from orchestrator.catalog import (
+    from runner.libs.catalog import (
         DEFAULT_MACRO_MANIFEST,
         DEFAULT_MICRO_MANIFEST,
         load_manifest,
         load_manifest_from_results,
     )
-    from orchestrator.reporting import render_corpus_summary_markdown, render_rq_summary_markdown
+    from runner.libs.reporting import render_corpus_summary_markdown, render_rq_summary_markdown
 except ModuleNotFoundError:
-    from micro.orchestrator.catalog import (
+    from runner.libs.catalog import (
         DEFAULT_MACRO_MANIFEST,
         DEFAULT_MICRO_MANIFEST,
         load_manifest,
         load_manifest_from_results,
     )
-    from micro.orchestrator.reporting import render_corpus_summary_markdown, render_rq_summary_markdown
+    from runner.libs.reporting import render_corpus_summary_markdown, render_rq_summary_markdown
 try:
     from results_layout import authoritative_candidates
 except ImportError:
     from micro.results_layout import authoritative_candidates
 
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
 MICRO_DIR = REPO_ROOT / "micro"
 RESULTS_DIR = MICRO_DIR / "results"
 

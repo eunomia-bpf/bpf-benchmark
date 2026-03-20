@@ -6,7 +6,7 @@ Three-layer benchmarking pipeline:
 
 - `micro/`: isolated micro-benchmarks driven by `bpf_prog_test_run_opts`
 - `corpus/`: real-world program collection, measurement, and analysis
-- `e2e/`: end-to-end deployment benchmarks (Tracee, Tetragon, bpftrace, scx)
+- `e2e/`: end-to-end deployment benchmarks (Tracee, Tetragon, bpftrace, scx, katran)
 
 Legacy multi-runtime benchmarks live under `legacy/` and are not part of the active pipeline.
 
@@ -14,11 +14,15 @@ Legacy multi-runtime benchmarks live under `legacy/` and are not part of the act
 
 ```text
 bpf-benchmark/
-├── micro/                 # Isolated micro-benchmark suites + runner (micro_exec)
+├── runner/                # Shared C++ runner (micro_exec) + reusable Python libs
+├── micro/                 # Isolated micro-benchmark suites, drivers, and inputs
 ├── corpus/                # 23-project real-world corpus, fetch/build, and measurement
-├── e2e/                   # End-to-end workloads (tracee, tetragon, bpftrace, scx)
+├── e2e/                   # End-to-end workloads (tracee, tetragon, bpftrace, scx, katran)
 ├── scanner/               # Userspace BPF directive scanner (bpf-jit-scanner CLI)
 ├── config/                # YAML benchmark suite manifests (micro_pure_jit.yaml etc.)
+├── scripts/               # Operator helpers (AWS ARM64, QEMU smoke)
+├── docker/                # Container definitions for cross-build helpers
+├── tests/                 # Userspace/kernel self-tests
 ├── docs/                  # Research plans, reports, and temporary experiment notes
 ├── legacy/                # Inactive historical benchmark code
 └── vendor/                # Vendored kernel (linux-framework) + tooling dependencies
@@ -84,9 +88,11 @@ make kernel-tests     # kernel recompile self-tests
 
 ## Layer Notes
 
-`micro/` owns the isolated benchmark manifests (`config/micro_pure_jit.yaml`), the `micro_exec` C++ runner, input generators, and the Python driver (`micro/driver.py`, with `_driver_impl_run_micro.py` as the suite backend).
+`runner/` owns the shared `micro_exec` C++ runner plus shared Python libraries in `runner/libs/`.
 
-`corpus/` owns the 23-project real-world corpus, fetch/build tooling, declarative corpus config in `corpus/config/`, and the measurement backends surfaced through `python3 micro/driver.py corpus ...` plus `corpus/run_corpus_runnability.py`.
+`micro/` owns the isolated benchmark manifests (`config/micro_pure_jit.yaml`), input generators, and the Python driver (`micro/driver.py`, with `_driver_impl_run_micro.py` as the suite backend).
+
+`corpus/` owns the 23-project real-world corpus, fetch/build tooling, declarative corpus config in `corpus/config/`, and the measurement entrypoints surfaced through `python3 corpus/driver.py ...`.
 
 `e2e/` owns full deployment-style evaluation via `e2e/run.py` plus per-case assets under `e2e/cases/`.
 

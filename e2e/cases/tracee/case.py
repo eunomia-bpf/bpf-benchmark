@@ -20,7 +20,7 @@ import yaml
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from e2e.common import (  # noqa: E402
+from runner.libs import (  # noqa: E402
     RESULTS_DIR,
     ROOT_DIR,
     authoritative_output_path,
@@ -34,16 +34,16 @@ from e2e.common import (  # noqa: E402
     write_json,
     write_text,
 )
-from e2e.common.agent import find_bpf_programs, start_agent, stop_agent, wait_healthy  # noqa: E402
-from e2e.common.metrics import (  # noqa: E402
+from runner.libs.agent import find_bpf_programs, start_agent, stop_agent, wait_healthy  # noqa: E402
+from runner.libs.metrics import (  # noqa: E402
     compute_delta,
     enable_bpf_stats,
     sample_bpf_stats,
     sample_cpu_usage,
     sample_total_cpu_usage,
 )
-from e2e.common.recompile import PolicyTarget, apply_recompile, resolve_policy_files, scan_programs  # noqa: E402
-from e2e.common.workload import (  # noqa: E402
+from runner.libs.recompile import PolicyTarget, apply_recompile, resolve_policy_files, scan_programs  # noqa: E402
+from runner.libs.workload import (  # noqa: E402
     WorkloadResult,
     run_exec_storm,
     run_file_io,
@@ -51,10 +51,10 @@ from e2e.common.workload import (  # noqa: E402
     run_scheduler_load,
 )
 try:  # noqa: E402
-    from micro.orchestrator.inventory import ProgramInventoryEntry, discover_object_programs
+    from runner.libs.inventory import ProgramInventoryEntry, discover_object_programs
 except ModuleNotFoundError:  # noqa: E402
     sys.path.insert(0, str(ROOT_DIR / "micro"))
-    from orchestrator.inventory import ProgramInventoryEntry, discover_object_programs
+    from runner.libs.inventory import ProgramInventoryEntry, discover_object_programs
 
 try:  # noqa: E402
     from e2e.run_e2e_tracee import Libbpf as ManualLibbpf
@@ -70,7 +70,7 @@ DEFAULT_SETUP_SCRIPT = Path(__file__).with_name("setup.sh")
 DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "tracee")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "tracee-e2e-real.md"
 DEFAULT_TRACEE_OBJECT = ROOT_DIR / "corpus" / "build" / "tracee" / "tracee.bpf.o"
-DEFAULT_RUNNER = ROOT_DIR / "micro" / "build" / "runner" / "micro_exec"
+DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
 DEFAULT_SCANNER = ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"
 TRACEE_STATS_PATTERN = re.compile(
     r"EventCount[:=]\s*(?P<events>\d+).*?LostEvCount[:=]\s*(?P<lost>\d+)(?:.*?LostWrCount[:=]\s*(?P<lost_writes>\d+))?",
@@ -300,7 +300,7 @@ def summarize_numbers(values: Sequence[float | int | None]) -> dict[str, float |
 
 def ensure_artifacts(runner_binary: Path, scanner_binary: Path) -> None:
     if not runner_binary.exists():
-        run_command(["make", "-C", "micro", "micro_exec", "programs"], timeout=1800)
+        run_command(["make", "runner"], timeout=1800)
     if not scanner_binary.exists():
         run_command(
             ["cmake", "-S", "scanner", "-B", "scanner/build", "-DCMAKE_BUILD_TYPE=Release"],
@@ -709,7 +709,7 @@ def run_manual_fallback(
     selected = select_manual_programs(inventory)
     workloads = list(config.get("workloads") or [])
     limitations = [
-        "Tracee daemon was unavailable, so this result uses manual BPF program loading from corpus/build/tracee/tracee.bpf.o.",
+        "Tracee daemon was unavailable, so this result uses manual BPF program loading with corpus/build/tracee/tracee.bpf.o.",
         "Agent event counts and drop counters are unavailable in manual fallback mode; events_total is estimated from BPF run_cnt deltas.",
         "Agent CPU is unavailable in manual fallback mode; only host busy CPU is reported.",
     ]
