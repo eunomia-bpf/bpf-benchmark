@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import ctypes
 import ctypes.util
+import errno
 import json
 import os
 import platform
@@ -60,10 +61,16 @@ DEFAULT_PROGRAM_NAME = "balancer_ingress"
 DEFAULT_INTERFACE = "katran0"
 DEFAULT_DURATION_S = 10
 DEFAULT_SMOKE_DURATION_S = 3
-DEFAULT_PACKET_REPEAT = 5
-DEFAULT_SMOKE_PACKET_REPEAT = 2
-DEFAULT_SAMPLE_COUNT = 1
+DEFAULT_PACKET_REPEAT = 25
+DEFAULT_SMOKE_PACKET_REPEAT = 25
+DEFAULT_SAMPLE_COUNT = 3
 DEFAULT_SMOKE_SAMPLE_COUNT = 1
+DEFAULT_WARMUP_PACKET_COUNT = 100
+DEFAULT_SMOKE_WARMUP_PACKET_COUNT = 100
+DEFAULT_MIN_MEASUREMENT_REQUESTS = 1000
+DEFAULT_SMOKE_MIN_MEASUREMENT_REQUESTS = 100
+REQUEST_FAILURE_PREVIEW_LIMIT = 5
+WARMUP_MAX_ATTEMPT_FACTOR = 3
 
 TCP_PROTO = socket.IPPROTO_TCP
 F_LRU_BYPASS = 1 << 1
@@ -104,16 +111,57 @@ TOPOLOGY_SETTLE_S = 1.0
 
 HTTP_PAYLOAD = b"GET / HTTP/1.0\r\nHost: katran\r\nConnection: close\r\n\r\n"
 
+STATE_RESET_MAPS = (
+    "fallback_cache",
+    "reals_stats",
+    "lru_miss_stats",
+    "vip_miss_stats",
+    "stats",
+    "quic_stats_map",
+    "stable_rt_stats",
+    "decap_vip_stats",
+    "tpr_stats_map",
+    "server_id_stats",
+    "vip_to_down_reals_map",
+)
+
+PERCPU_MAP_TYPES = {
+    "percpu_array",
+    "percpu_hash",
+    "lru_percpu_hash",
+}
+
+ARRAY_MAP_TYPES = {
+    "array",
+    "percpu_array",
+}
+
+HASH_LIKE_MAP_TYPES = {
+    "hash",
+    "lru_hash",
+    "percpu_hash",
+    "lru_percpu_hash",
+    "lpm_trie",
+    "hash_of_maps",
+}
+
 
 @dataclass(frozen=True, slots=True)
 class PhaseSample:
     index: int
-    requests: list[dict[str, object]]
+    phase: str
+    measurement_duration_s: float
+    measurement_batches: int
+    warmup_request_count: int
+    request_latencies_ms: list[float]
+    request_failure_preview: list[dict[str, object]]
+    request_summary: dict[str, object]
     http_request_count: int
     http_success_count: int
     ipip_rx_packets_delta: int
     ipip_rx_bytes_delta: int
     bpf: dict[str, object]
+    state_reset: dict[str, object]
 
 
 def relpath(path: Path) -> str:
@@ -165,12 +213,60 @@ def percent_delta(before: object, after: object) -> float | None:
     return ((float(after) - float(before)) / float(before)) * 100.0
 
 
+def speedup_ratio(before: object, after: object) -> float | None:
+    if before in (None, 0) or after in (None, 0):
+        return None
+    return float(before) / float(after)
+
+
+def extract_request_latencies(sample: Mapping[str, object]) -> list[float]:
+    latencies = sample.get("request_latencies_ms")
+    if isinstance(latencies, list):
+        return [float(value) for value in latencies if value is not None]
+    extracted: list[float] = []
+    for request in sample.get("requests") or []:
+        if not isinstance(request, Mapping):
+            continue
+        latency = request.get("latency_ms")
+        if latency is not None:
+            extracted.append(float(latency))
+    return extracted
+
+
+def summarize_request_records(records: Sequence[Mapping[str, object]]) -> dict[str, object]:
+    latencies: list[float] = []
+    failures: list[dict[str, object]] = []
+    success_count = 0
+    for record in records:
+        if bool(record.get("ok")):
+            success_count += 1
+        latency = record.get("latency_ms")
+        if latency is not None:
+            latencies.append(float(latency))
+        if len(failures) >= REQUEST_FAILURE_PREVIEW_LIMIT:
+            continue
+        if bool(record.get("ok")) and not record.get("error"):
+            continue
+        failures.append(
+            {
+                "index": int(record.get("index", -1) or -1),
+                "error": str(record.get("error") or ""),
+                "snippet": str(record.get("snippet") or "")[:200],
+            }
+        )
+    return {
+        "request_count": len(records),
+        "success_count": success_count,
+        "latency_ms": summarize_numbers(latencies),
+        "latencies_ms": latencies,
+        "failure_preview": failures,
+    }
+
+
 def build_phase_summary(samples: Sequence[Mapping[str, object]]) -> dict[str, object]:
     latencies: list[float | int | None] = []
     for sample in samples:
-        for request in sample.get("requests") or []:
-            if isinstance(request, Mapping):
-                latencies.append(request.get("latency_ms"))
+        latencies.extend(extract_request_latencies(sample))
     total_requests = sum(int(sample.get("http_request_count", 0) or 0) for sample in samples)
     total_successes = sum(int(sample.get("http_success_count", 0) or 0) for sample in samples)
     return {
@@ -178,6 +274,9 @@ def build_phase_summary(samples: Sequence[Mapping[str, object]]) -> dict[str, ob
         "http_successes": total_successes,
         "http_all_succeeded": total_requests > 0 and total_requests == total_successes,
         "latency_ms": summarize_numbers(latencies),
+        "measurement_duration_s": summarize_numbers([sample.get("measurement_duration_s") for sample in samples]),
+        "measurement_batches": summarize_numbers([sample.get("measurement_batches") for sample in samples]),
+        "warmup_http_requests": summarize_numbers([sample.get("warmup_request_count") for sample in samples]),
         "ipip_rx_packets_delta": summarize_numbers(
             [sample.get("ipip_rx_packets_delta") for sample in samples]
         ),
@@ -190,30 +289,36 @@ def build_phase_summary(samples: Sequence[Mapping[str, object]]) -> dict[str, ob
     }
 
 
-def compare_phases(baseline: Mapping[str, object], post: Mapping[str, object] | None) -> dict[str, object]:
-    if not post:
+def compare_phase_summaries(
+    baseline_summary: Mapping[str, object],
+    post_summary: Mapping[str, object] | None,
+) -> dict[str, object]:
+    if not post_summary:
         return {"comparable": False, "reason": "recompile did not apply successfully"}
-    baseline_summary = baseline.get("summary") or {}
-    post_summary = post.get("summary") or {}
+    baseline_latency = (baseline_summary.get("latency_ms") or {}).get("median")
+    post_latency = (post_summary.get("latency_ms") or {}).get("median")
+    baseline_bpf = (baseline_summary.get("bpf_avg_ns_per_run") or {}).get("median")
+    post_bpf = (post_summary.get("bpf_avg_ns_per_run") or {}).get("median")
+    baseline_events = (baseline_summary.get("events") or {}).get("median")
+    post_events = (post_summary.get("events") or {}).get("median")
     return {
         "comparable": True,
+        "aggregation": "paired_cycle_median",
         "http_successes_delta_pct": percent_delta(
             baseline_summary.get("http_successes"),
             post_summary.get("http_successes"),
         ),
-        "latency_ms_delta_pct": percent_delta(
-            (baseline_summary.get("latency_ms") or {}).get("mean"),
-            (post_summary.get("latency_ms") or {}).get("mean"),
-        ),
-        "bpf_avg_ns_per_run_delta_pct": percent_delta(
-            (baseline_summary.get("bpf_avg_ns_per_run") or {}).get("mean"),
-            (post_summary.get("bpf_avg_ns_per_run") or {}).get("mean"),
-        ),
-        "events_delta_pct": percent_delta(
-            (baseline_summary.get("events") or {}).get("mean"),
-            (post_summary.get("events") or {}).get("mean"),
-        ),
+        "latency_ms_delta_pct": percent_delta(baseline_latency, post_latency),
+        "bpf_avg_ns_per_run_delta_pct": percent_delta(baseline_bpf, post_bpf),
+        "bpf_speedup_ratio": speedup_ratio(baseline_bpf, post_bpf),
+        "events_delta_pct": percent_delta(baseline_events, post_events),
     }
+
+
+def compare_phases(baseline: Mapping[str, object], post: Mapping[str, object] | None) -> dict[str, object]:
+    if not post:
+        return {"comparable": False, "reason": "recompile did not apply successfully"}
+    return compare_phase_summaries(baseline.get("summary") or {}, post.get("summary") or {})
 
 
 def build_markdown(payload: Mapping[str, object]) -> str:
@@ -223,8 +328,11 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         f"- Generated: {payload['generated_at']}",
         f"- Mode: `{payload['mode']}`",
         f"- Smoke: `{payload['smoke']}`",
-        f"- Traffic rounds: `{payload['sample_count']}`",
-        f"- Requests per round: `{payload['packet_repeat']}`",
+        f"- Paired cycles: `{payload['sample_count']}`",
+        f"- Timed duration per phase: `{payload['duration_s']}s`",
+        f"- Request batch size: `{payload['packet_repeat']}`",
+        f"- Warmup requests per phase: `{payload['warmup_packet_count']}`",
+        f"- Minimum requests per phase: `{payload['min_measurement_requests']}`",
         f"- Control plane: `{payload.get('control_plane_mode')}`",
         f"- Interface: `{((payload.get('live_program') or {}).get('iface'))}`",
         f"- Attach mode: `{((payload.get('live_program') or {}).get('attach_mode'))}`",
@@ -244,8 +352,8 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         "",
         "## Recompile",
         "",
-        f"- Applied programs: `{payload['recompile_summary']['applied_programs']}` / `{payload['recompile_summary']['requested_programs']}`",
-        f"- Applied successfully: `{payload['recompile_summary']['applied']}`",
+        f"- Applied cycles: `{payload['recompile_summary']['applied_cycles']}` / `{payload['recompile_summary']['requested_cycles']}`",
+        f"- Applied successfully on all cycles: `{payload['recompile_summary']['all_cycles_applied']}`",
     ]
     if payload["recompile_summary"].get("errors"):
         lines.append(f"- Errors: `{payload['recompile_summary']['errors']}`")
@@ -259,6 +367,16 @@ def build_markdown(payload: Mapping[str, object]) -> str:
                 f"- ipip rx packets delta: `{((payload['post_rejit'].get('summary') or {}).get('ipip_rx_packets_delta'))}`",
                 f"- bpf avg ns/run: `{((payload['post_rejit'].get('summary') or {}).get('bpf_avg_ns_per_run'))}`",
                 f"- total events: `{((payload['post_rejit'].get('summary') or {}).get('events'))}`",
+            ]
+        )
+    if payload.get("comparison", {}).get("comparable"):
+        lines.extend(
+            [
+                "",
+                "## Comparison",
+                "",
+                f"- Median BPF delta: `{payload['comparison'].get('bpf_avg_ns_per_run_delta_pct')}`",
+                f"- Median BPF speedup ratio (stock/reJIT): `{payload['comparison'].get('bpf_speedup_ratio')}`",
             ]
         )
     if payload.get("limitations"):
@@ -486,6 +604,17 @@ class LibbpfMapApi:
             ctypes.c_uint64,
         ]
         self.lib.bpf_map_update_elem.restype = ctypes.c_int
+        self.lib.bpf_map_delete_elem.argtypes = [
+            ctypes.c_int,
+            ctypes.c_void_p,
+        ]
+        self.lib.bpf_map_delete_elem.restype = ctypes.c_int
+        self.lib.bpf_map_get_next_key.argtypes = [
+            ctypes.c_int,
+            ctypes.c_void_p,
+            ctypes.c_void_p,
+        ]
+        self.lib.bpf_map_get_next_key.restype = ctypes.c_int
 
     def obj_get(self, path: Path) -> int:
         fd = int(self.lib.bpf_obj_get(os.fsencode(str(path))))
@@ -510,6 +639,31 @@ class LibbpfMapApi:
         err = ctypes.get_errno()
         raise RuntimeError(f"bpf_map_update_elem failed: {os.strerror(err)} (errno={err})")
 
+    def delete(self, fd: int, key: bytes) -> None:
+        key_buf = (ctypes.c_ubyte * len(key)).from_buffer_copy(key)
+        rc = int(self.lib.bpf_map_delete_elem(int(fd), ctypes.byref(key_buf)))
+        if rc == 0:
+            return
+        err = ctypes.get_errno()
+        if err == errno.ENOENT:
+            return
+        raise RuntimeError(f"bpf_map_delete_elem failed: {os.strerror(err)} (errno={err})")
+
+    def next_key(self, fd: int, key: bytes | None, key_size: int) -> bytes | None:
+        next_key = (ctypes.c_ubyte * key_size)()
+        if key is None:
+            current_key_ptr = None
+        else:
+            current_key = (ctypes.c_ubyte * len(key)).from_buffer_copy(key)
+            current_key_ptr = ctypes.byref(current_key)
+        rc = int(self.lib.bpf_map_get_next_key(int(fd), current_key_ptr, ctypes.byref(next_key)))
+        if rc == 0:
+            return bytes(next_key)
+        err = ctypes.get_errno()
+        if err == errno.ENOENT:
+            return None
+        raise RuntimeError(f"bpf_map_get_next_key failed: {os.strerror(err)} (errno={err})")
+
 
 def pack_u32(value: int) -> bytes:
     return struct.pack("=I", int(value))
@@ -533,6 +687,105 @@ def pack_vip_meta(flags: int, vip_num: int) -> bytes:
 
 def pack_real_definition(address: str, flags: int = 0) -> bytes:
     return socket.inet_aton(address) + (b"\x00" * 12) + bytes([int(flags) & 0xFF]) + (b"\x00" * 3)
+
+
+def possible_cpu_count() -> int:
+    possible = Path("/sys/devices/system/cpu/possible")
+    if not possible.exists():
+        return max(1, os.cpu_count() or 1)
+    count = 0
+    for chunk in possible.read_text().strip().split(","):
+        chunk = chunk.strip()
+        if not chunk:
+            continue
+        if "-" in chunk:
+            start_text, end_text = chunk.split("-", 1)
+            count += int(end_text) - int(start_text) + 1
+        else:
+            count += 1
+    return max(1, count)
+
+
+def zero_map_value_bytes(map_type: str, value_size: int) -> bytes:
+    if map_type in PERCPU_MAP_TYPES:
+        stride = ((int(value_size) + 7) // 8) * 8
+        return bytes(stride * possible_cpu_count())
+    return bytes(max(0, int(value_size)))
+
+
+def map_info_from_path(path: Path) -> dict[str, object]:
+    payload = run_json_command([bpftool_binary(), "-j", "map", "show", "pinned", str(path)], timeout=30)
+    if isinstance(payload, list):
+        if not payload:
+            raise RuntimeError(f"bpftool map show pinned returned no records for {path}")
+        payload = payload[0]
+    if not isinstance(payload, Mapping):
+        raise RuntimeError(f"unexpected map payload for {path}: {type(payload)}")
+    return dict(payload)
+
+
+def int_field(payload: Mapping[str, object], *names: str) -> int:
+    for name in names:
+        value = payload.get(name)
+        if value is None:
+            continue
+        if isinstance(value, int):
+            return int(value)
+        if isinstance(value, str) and value.isdigit():
+            return int(value)
+    return 0
+
+
+def reset_katran_state(session: KatranDirectSession) -> dict[str, object]:
+    api = LibbpfMapApi()
+    reset_records: list[dict[str, object]] = []
+    for map_name in STATE_RESET_MAPS:
+        map_path = session.map_path(map_name)
+        if not map_path.exists():
+            continue
+        info = map_info_from_path(map_path)
+        map_type = str(info.get("type") or "").lower()
+        key_size = int_field(info, "bytes_key", "key_size", "key")
+        value_size = int_field(info, "bytes_value", "value_size", "value")
+        max_entries = int_field(info, "max_entries")
+        cleared_entries = 0
+        action = "noop"
+        fd = api.obj_get(map_path)
+        try:
+            if map_type in ARRAY_MAP_TYPES:
+                zero_value = zero_map_value_bytes(map_type, value_size)
+                if key_size != 4:
+                    raise RuntimeError(f"unsupported array key size for {map_name}: {key_size}")
+                for entry_index in range(max_entries):
+                    api.update(fd, pack_u32(entry_index), zero_value)
+                    cleared_entries += 1
+                action = "zero-array"
+            elif map_type in HASH_LIKE_MAP_TYPES:
+                key = api.next_key(fd, None, key_size)
+                while key is not None:
+                    next_key = api.next_key(fd, key, key_size)
+                    api.delete(fd, key)
+                    cleared_entries += 1
+                    key = next_key
+                action = "clear-keys"
+            else:
+                action = f"skipped-{map_type or 'unknown'}"
+        finally:
+            os.close(fd)
+        reset_records.append(
+            {
+                "name": map_name,
+                "type": map_type,
+                "max_entries": max_entries,
+                "cleared_entries": cleared_entries,
+                "action": action,
+            }
+        )
+    return {
+        "strategy": "reset mutable stats/fallback maps before each phase",
+        "map_count": len(reset_records),
+        "maps": reset_records,
+    }
 
 
 class KatranDsrTopology:
@@ -1034,50 +1287,119 @@ def perform_http_requests(iterations: int) -> list[dict[str, object]]:
     return requests
 
 
+def run_warmup_requests(iterations: int, *, batch_size: int) -> dict[str, object]:
+    if iterations <= 0:
+        return {
+            "request_count": 0,
+            "success_count": 0,
+            "latency_ms": summarize_numbers([]),
+            "failure_preview": [],
+        }
+    records: list[dict[str, object]] = []
+    requested = max(0, int(iterations))
+    success_count = 0
+    attempted = 0
+    attempt_budget = max(requested, requested * WARMUP_MAX_ATTEMPT_FACTOR)
+    while success_count < requested and attempted < attempt_budget:
+        current_batch = min(max(1, int(batch_size)), requested - success_count)
+        batch_records = perform_http_requests(current_batch)
+        records.extend(batch_records)
+        attempted += len(batch_records)
+        success_count += sum(1 for record in batch_records if bool(record.get("ok")))
+        if success_count < requested and any(not bool(record.get("ok")) for record in batch_records):
+            time.sleep(0.2)
+    summary = summarize_request_records(records)
+    summary["requested_request_count"] = requested
+    summary["attempted_request_count"] = attempted
+    summary["completed_warmup_requests"] = min(requested, int(summary["success_count"] or 0))
+    if int(summary["success_count"] or 0) < requested:
+        raise RuntimeError(f"Katran warmup validation failed: {summary['failure_preview']}")
+    summary.pop("latencies_ms", None)
+    return summary
+
+
+def execute_http_measurement_loop(
+    *,
+    batch_size: int,
+    duration_s: int | float,
+    minimum_requests: int,
+) -> tuple[list[dict[str, object]], int, float]:
+    records: list[dict[str, object]] = []
+    batches = 0
+    started = time.monotonic()
+    requested_duration = max(0.0, float(duration_s))
+    request_target = max(1, int(minimum_requests), int(batch_size))
+    while True:
+        records.extend(perform_http_requests(batch_size))
+        batches += 1
+        elapsed = time.monotonic() - started
+        if elapsed >= requested_duration and len(records) >= request_target:
+            return records, batches, elapsed
+
+
 def measure_phase(
     *,
+    index: int,
+    phase_name: str,
     session: KatranDirectSession,
     traffic_iterations: int,
-    sample_count: int,
+    duration_s: int,
+    minimum_requests: int,
+    warmup_request_count: int,
 ) -> dict[str, object]:
-    samples: list[dict[str, object]] = []
-    for index in range(max(1, int(sample_count))):
-        before = sample_bpf_stats([session.prog_id])
-        ipip_before = link_stats(REAL_NS, "ipip0")
-        requests = perform_http_requests(traffic_iterations)
-        after = sample_bpf_stats([session.prog_id])
-        ipip_after = link_stats(REAL_NS, "ipip0")
-        sample = PhaseSample(
-            index=index,
-            requests=requests,
-            http_request_count=len(requests),
-            http_success_count=sum(1 for request in requests if bool(request.get("ok"))),
-            ipip_rx_packets_delta=max(0, ipip_after["rx_packets"] - ipip_before["rx_packets"]),
-            ipip_rx_bytes_delta=max(0, ipip_after["rx_bytes"] - ipip_before["rx_bytes"]),
-            bpf=compute_delta(before, after),
-        )
-        if sample.http_request_count == 0 or sample.http_success_count != sample.http_request_count:
-            raise RuntimeError(f"live DSR request validation failed: {requests}")
-        if sample.ipip_rx_packets_delta <= 0:
-            raise RuntimeError(f"ipip decap path did not receive packets: before={ipip_before} after={ipip_after}")
-        if int(sample.bpf.get("summary", {}).get("total_events", 0) or 0) <= 0:
-            raise RuntimeError(f"attached XDP program did not record runtime events: {sample.bpf}")
-        samples.append(
-            {
-                "index": sample.index,
-                "requests": sample.requests,
-                "http_request_count": sample.http_request_count,
-                "http_success_count": sample.http_success_count,
-                "ipip_before": ipip_before,
-                "ipip_after": ipip_after,
-                "ipip_rx_packets_delta": sample.ipip_rx_packets_delta,
-                "ipip_rx_bytes_delta": sample.ipip_rx_bytes_delta,
-                "bpf": sample.bpf,
-            }
-        )
+    state_reset = reset_katran_state(session)
+    warmup = run_warmup_requests(warmup_request_count, batch_size=traffic_iterations)
+    before = sample_bpf_stats([session.prog_id])
+    ipip_before = link_stats(REAL_NS, "ipip0")
+    requests, measurement_batches, measurement_duration_s = execute_http_measurement_loop(
+        batch_size=traffic_iterations,
+        duration_s=duration_s,
+        minimum_requests=minimum_requests,
+    )
+    request_summary = summarize_request_records(requests)
+    request_latencies = list(request_summary.pop("latencies_ms", []))
+    after = sample_bpf_stats([session.prog_id])
+    ipip_after = link_stats(REAL_NS, "ipip0")
+    sample = PhaseSample(
+        index=index,
+        phase=phase_name,
+        measurement_duration_s=measurement_duration_s,
+        measurement_batches=measurement_batches,
+        warmup_request_count=warmup_request_count,
+        request_latencies_ms=request_latencies,
+        request_failure_preview=list(request_summary.get("failure_preview") or []),
+        request_summary=request_summary,
+        http_request_count=int(request_summary.get("request_count", 0) or 0),
+        http_success_count=int(request_summary.get("success_count", 0) or 0),
+        ipip_rx_packets_delta=max(0, ipip_after["rx_packets"] - ipip_before["rx_packets"]),
+        ipip_rx_bytes_delta=max(0, ipip_after["rx_bytes"] - ipip_before["rx_bytes"]),
+        bpf=compute_delta(before, after),
+        state_reset=state_reset,
+    )
+    if sample.http_request_count == 0 or sample.http_success_count != sample.http_request_count:
+        raise RuntimeError(f"live DSR request validation failed: {sample.request_failure_preview}")
+    if sample.ipip_rx_packets_delta <= 0:
+        raise RuntimeError(f"ipip decap path did not receive packets: before={ipip_before} after={ipip_after}")
+    if int(sample.bpf.get("summary", {}).get("total_events", 0) or 0) <= 0:
+        raise RuntimeError(f"attached XDP program did not record runtime events: {sample.bpf}")
     return {
-        "samples": samples,
-        "summary": build_phase_summary(samples),
+        "index": sample.index,
+        "phase": sample.phase,
+        "measurement_duration_s": sample.measurement_duration_s,
+        "measurement_batches": sample.measurement_batches,
+        "warmup": warmup,
+        "warmup_request_count": sample.warmup_request_count,
+        "request_summary": sample.request_summary,
+        "request_failure_preview": sample.request_failure_preview,
+        "request_latencies_ms": sample.request_latencies_ms,
+        "http_request_count": sample.http_request_count,
+        "http_success_count": sample.http_success_count,
+        "ipip_before": ipip_before,
+        "ipip_after": ipip_after,
+        "ipip_rx_packets_delta": sample.ipip_rx_packets_delta,
+        "ipip_rx_bytes_delta": sample.ipip_rx_bytes_delta,
+        "bpf": sample.bpf,
+        "state_reset": sample.state_reset,
     }
 
 
@@ -1093,11 +1415,22 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         raise RuntimeError("--katran-skip-attach is incompatible with the live DSR topology case")
 
     duration_s = int(args.duration or (DEFAULT_SMOKE_DURATION_S if args.smoke else DEFAULT_DURATION_S))
-    traffic_iterations = int(
+    traffic_iterations = max(
+        1,
+        int(
         args.katran_packet_repeat
         or (DEFAULT_SMOKE_PACKET_REPEAT if args.smoke else DEFAULT_PACKET_REPEAT)
+        ),
     )
-    sample_count = int(args.katran_samples or (DEFAULT_SMOKE_SAMPLE_COUNT if args.smoke else DEFAULT_SAMPLE_COUNT))
+    sample_count = max(
+        1,
+        int(args.katran_samples or (DEFAULT_SMOKE_SAMPLE_COUNT if args.smoke else DEFAULT_SAMPLE_COUNT)),
+    )
+    warmup_request_count = DEFAULT_SMOKE_WARMUP_PACKET_COUNT if args.smoke else DEFAULT_WARMUP_PACKET_COUNT
+    minimum_requests = max(
+        traffic_iterations,
+        DEFAULT_SMOKE_MIN_MEASUREMENT_REQUESTS if args.smoke else DEFAULT_MIN_MEASUREMENT_REQUESTS,
+    )
     runner_binary = Path(args.runner).resolve()
     scanner_binary = Path(args.scanner).resolve()
     katran_object = Path(args.katran_object).resolve()
@@ -1138,72 +1471,162 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         limitations.append(
             "Katran userspace server binary is not present; this case is running in standalone_direct_map_emulation via bpftool and pinned maps, not the official Katran userspace server path."
         )
+    limitations.append(
+        "Phase order remains stock then recompile inside each same-image cycle; reverse-order randomization would require an explicit stock restore path or a second live load."
+    )
 
     with enable_bpf_stats():
-        with KatranDsrTopology(
-            args.katran_iface,
-            router_peer_iface=args.katran_router_peer_iface,
-        ) as topology:
-            with NamespaceHttpServer(REAL_NS, VIP_IP, VIP_PORT) as http_server:
-                with KatranDirectSession(
-                    object_path=katran_object,
-                    program_name=DEFAULT_PROGRAM_NAME,
-                    iface=args.katran_iface,
-                    attach=True,
-                    bpftool=resolved_bpftool,
-                ) as session:
-                    if session.attach_error:
-                        raise RuntimeError(f"failed to attach Katran XDP program: {session.attach_error}")
-                    map_config = configure_katran_maps(session)
-                    time.sleep(TOPOLOGY_SETTLE_S)
-                    prog_ids = [session.prog_id]
-                    policy_files = resolve_policy_files(
-                        [
-                            PolicyTarget(
-                                prog_id=session.prog_id,
-                                object_path=katran_object,
-                                program_name=DEFAULT_PROGRAM_NAME,
-                                policy_file=policy_file,
-                            )
-                        ]
-                    )
-                    baseline = measure_phase(
-                        session=session,
-                        traffic_iterations=traffic_iterations,
-                        sample_count=sample_count,
-                    )
-                    scan_results = scan_programs(prog_ids, scanner_binary)
-                    recompile_results = apply_recompile(
-                        prog_ids,
-                        scanner_binary,
-                        policy_files=policy_files,
-                    )
-                    applied = sum(1 for record in recompile_results.values() if record.get("applied"))
-                    if applied == 0:
-                        limitations.append(
-                            "BPF_PROG_JIT_RECOMPILE did not apply on this kernel for balancer_ingress; post-ReJIT measurement was skipped."
+        cycle_results: list[dict[str, object]] = []
+        session_metadata: dict[str, object] = {}
+        topology_metadata: dict[str, object] = {}
+        server_metadata: dict[str, object] = {}
+        map_config: dict[str, object] = {}
+        for cycle_index in range(sample_count):
+            with KatranDsrTopology(
+                args.katran_iface,
+                router_peer_iface=args.katran_router_peer_iface,
+            ) as topology:
+                with NamespaceHttpServer(REAL_NS, VIP_IP, VIP_PORT) as http_server:
+                    with KatranDirectSession(
+                        object_path=katran_object,
+                        program_name=DEFAULT_PROGRAM_NAME,
+                        iface=args.katran_iface,
+                        attach=True,
+                        bpftool=resolved_bpftool,
+                    ) as session:
+                        if session.attach_error:
+                            raise RuntimeError(f"failed to attach Katran XDP program: {session.attach_error}")
+                        map_config = configure_katran_maps(session)
+                        time.sleep(TOPOLOGY_SETTLE_S)
+                        prog_ids = [session.prog_id]
+                        policy_files = resolve_policy_files(
+                            [
+                                PolicyTarget(
+                                    prog_id=session.prog_id,
+                                    object_path=katran_object,
+                                    program_name=DEFAULT_PROGRAM_NAME,
+                                    policy_file=policy_file,
+                                )
+                            ]
                         )
-                    post = (
-                        measure_phase(
+                        baseline_sample = measure_phase(
+                            index=cycle_index,
+                            phase_name="stock",
                             session=session,
                             traffic_iterations=traffic_iterations,
-                            sample_count=sample_count,
-                    )
-                        if applied > 0
-                        else None
-                    )
-                    session_metadata = session.metadata()
-                    topology_metadata = topology.metadata()
-            server_metadata = http_server.metadata()
+                            duration_s=duration_s,
+                            minimum_requests=minimum_requests,
+                            warmup_request_count=warmup_request_count,
+                        )
+                        baseline_phase = {
+                            "samples": [baseline_sample],
+                            "summary": build_phase_summary([baseline_sample]),
+                        }
+                        scan_results = scan_programs(prog_ids, scanner_binary)
+                        recompile_results = apply_recompile(
+                            prog_ids,
+                            scanner_binary,
+                            policy_files=policy_files,
+                        )
+                        applied = sum(1 for record in recompile_results.values() if record.get("applied"))
+                        post_sample = (
+                            measure_phase(
+                                index=cycle_index,
+                                phase_name="recompile",
+                                session=session,
+                                traffic_iterations=traffic_iterations,
+                                duration_s=duration_s,
+                                minimum_requests=minimum_requests,
+                                warmup_request_count=warmup_request_count,
+                            )
+                            if applied > 0
+                            else None
+                        )
+                        post_phase = (
+                            {
+                                "samples": [post_sample],
+                                "summary": build_phase_summary([post_sample]),
+                            }
+                            if post_sample is not None
+                            else None
+                        )
+                        cycle_results.append(
+                            {
+                                "cycle_index": cycle_index,
+                                "topology": topology.metadata(),
+                                "http_server": http_server.metadata(),
+                                "live_program": session.metadata(),
+                                "policy_matches": {str(key): value for key, value in policy_files.items()},
+                                "scan_results": {str(key): value for key, value in scan_results.items()},
+                                "recompile_results": {str(key): value for key, value in recompile_results.items()},
+                                "recompile_summary": {
+                                    "requested_programs": 1,
+                                    "applied_programs": applied,
+                                    "applied": applied > 0,
+                                    "errors": sorted(
+                                        {
+                                            record.get("error", "")
+                                            for record in recompile_results.values()
+                                            if record.get("error")
+                                        }
+                                    ),
+                                },
+                                "baseline": baseline_phase,
+                                "post_rejit": post_phase,
+                                "comparison": compare_phases(baseline_phase, post_phase),
+                            }
+                        )
+                        if not session_metadata:
+                            session_metadata = session.metadata()
+                        if not topology_metadata:
+                            topology_metadata = topology.metadata()
+                        if not server_metadata:
+                            server_metadata = http_server.metadata()
+
+    baseline_samples = [
+        sample
+        for cycle in cycle_results
+        for sample in (cycle.get("baseline") or {}).get("samples") or []
+    ]
+    post_samples = [
+        sample
+        for cycle in cycle_results
+        for sample in (cycle.get("post_rejit") or {}).get("samples") or []
+    ]
+    baseline = {
+        "samples": baseline_samples,
+        "summary": build_phase_summary(baseline_samples),
+    }
+    post = (
+        {
+            "samples": post_samples,
+            "summary": build_phase_summary(post_samples),
+        }
+        if post_samples
+        else None
+    )
+    applied_cycles = sum(1 for cycle in cycle_results if (cycle.get("recompile_summary") or {}).get("applied"))
+    if applied_cycles == 0:
+        limitations.append(
+            "BPF_PROG_JIT_RECOMPILE did not apply on this kernel for balancer_ingress; post-ReJIT measurement was skipped."
+        )
+    elif applied_cycles != sample_count:
+        limitations.append(
+            f"BPF_PROG_JIT_RECOMPILE applied on {applied_cycles}/{sample_count} cycles; top-level post-ReJIT summary includes only successful cycles."
+        )
 
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "mode": "katran_dsr_direct_map_emulation",
+        "mode": "katran_dsr_direct_map_emulation_same_image_paired",
         "control_plane_mode": "bpftool_direct_map",
         "smoke": bool(args.smoke),
         "duration_s": duration_s,
         "packet_repeat": traffic_iterations,
         "sample_count": sample_count,
+        "warmup_packet_count": warmup_request_count,
+        "min_measurement_requests": minimum_requests,
+        "same_image_measurement": True,
+        "state_reset_strategy": "reset mutable stats/fallback maps before each phase warmup",
         "katran_object": relpath(katran_object),
         "katran_policy": relpath(policy_file),
         "katran_server_binary": server_binary,
@@ -1216,14 +1639,24 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         "live_program": session_metadata,
         "http_server": server_metadata,
         "baseline": baseline,
-        "policy_matches": {str(key): value for key, value in policy_files.items()},
-        "scan_results": {str(key): value for key, value in scan_results.items()},
-        "recompile_results": {str(key): value for key, value in recompile_results.items()},
+        "paired_cycles": cycle_results,
+        "policy_matches": {str(cycle["cycle_index"]): cycle["policy_matches"] for cycle in cycle_results},
+        "scan_results": {str(cycle["cycle_index"]): cycle["scan_results"] for cycle in cycle_results},
+        "recompile_results": {str(cycle["cycle_index"]): cycle["recompile_results"] for cycle in cycle_results},
         "recompile_summary": {
-            "requested_programs": 1,
-            "applied_programs": applied,
-            "applied": applied > 0,
-            "errors": sorted({record.get("error", "") for record in recompile_results.values() if record.get("error")}),
+            "requested_programs_per_cycle": 1,
+            "requested_cycles": sample_count,
+            "applied_cycles": applied_cycles,
+            "applied": applied_cycles > 0,
+            "all_cycles_applied": applied_cycles == sample_count,
+            "errors": sorted(
+                {
+                    error
+                    for cycle in cycle_results
+                    for error in ((cycle.get("recompile_summary") or {}).get("errors") or [])
+                    if error
+                }
+            ),
         },
         "post_rejit": post,
         "comparison": compare_phases(baseline, post),

@@ -25,6 +25,25 @@ ARM64_CROSSBUILD_IMAGE ?= bpf-benchmark-arm64-crossbuild:latest
 ARM64_CROSSBUILD_STAMP := $(ROOT_DIR)/.cache/arm64-crossbuild-image.stamp
 ARM64_REPO_GUEST_MOUNT ?= /mnt
 ARM64_SELFTEST_GUEST_ROOT ?= $(ARM64_REPO_GUEST_MOUNT)/tests/kernel
+AWS_ARM64_SCRIPT := $(ROOT_DIR)/scripts/aws_arm64.sh
+AWS_ARM64_CACHE_DIR ?= $(ROOT_DIR)/.cache/aws-arm64
+AWS_ARM64_NAME_TAG ?= bpf-benchmark-arm64
+AWS_ARM64_INSTANCE_TYPE ?= t4g.micro
+AWS_ARM64_REMOTE_USER ?= ec2-user
+AWS_ARM64_REMOTE_STAGE_DIR ?= /home/$(AWS_ARM64_REMOTE_USER)/bpf-benchmark-arm64
+AWS_ARM64_REMOTE_KERNEL_STAGE_DIR ?= /home/$(AWS_ARM64_REMOTE_USER)/codex-kernel-stage
+AWS_ARM64_AMI_PARAM ?= /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-arm64
+AWS_ARM64_BENCH_ITERATIONS ?= 1
+AWS_ARM64_BENCH_WARMUPS ?= 0
+AWS_ARM64_BENCH_REPEAT ?= 10
+
+export AWS_REGION AWS_DEFAULT_REGION AWS_PROFILE
+export AWS_ARM64_CACHE_DIR AWS_ARM64_NAME_TAG AWS_ARM64_INSTANCE_TYPE
+export AWS_ARM64_REMOTE_USER AWS_ARM64_REMOTE_STAGE_DIR AWS_ARM64_REMOTE_KERNEL_STAGE_DIR
+export AWS_ARM64_KEY_NAME AWS_ARM64_KEY_PATH AWS_ARM64_SECURITY_GROUP_ID AWS_ARM64_SUBNET_ID
+export AWS_ARM64_AMI_PARAM AWS_ARM64_AMI_ID
+export AWS_ARM64_BENCH_ITERATIONS AWS_ARM64_BENCH_WARMUPS AWS_ARM64_BENCH_REPEAT
+export CROSS_COMPILE_ARM64 ARM64_BUILD_DIR ARM64_WORKTREE_DIR
 
 # Result directories
 MICRO_RESULTS_DIR := $(ROOT_DIR)/micro/results
@@ -135,6 +154,7 @@ MICRO_BPF_STAMP := $(MICRO_DIR)/programs/.build.stamp
 	smoke check validate verify-build compare \
 	vm-selftest vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 	vm-arm64-smoke vm-arm64-selftest arm64-worktree arm64-rootfs \
+	aws-arm64-launch aws-arm64-setup aws-arm64-benchmark aws-arm64-terminate aws-arm64 \
 	help
 
 help:
@@ -156,6 +176,13 @@ help:
 	@echo "  make validate         - check + vm-selftest + vm-micro-smoke"
 	@echo "  make vm-arm64-smoke   - Boot ARM64 kernel in qemu-system-aarch64 and run uname/bpf_jit smoke"
 	@echo "  make vm-arm64-selftest - Boot ARM64 QEMU and run the ARM64 test_recompile selftest"
+	@echo ""
+	@echo "AWS ARM64 targets (require configured AWS CLI + EC2 networking/key vars):"
+	@echo "  make aws-arm64-launch - Launch or reuse tagged $(AWS_ARM64_INSTANCE_TYPE) instance and record state"
+	@echo "  make aws-arm64-setup INSTANCE_IP=x - Upload/install ARM64 kernel + modules, reboot, verify"
+	@echo "  make aws-arm64-benchmark INSTANCE_IP=x - Upload ARM64 micro bundle and run bare-metal smoke"
+	@echo "  make aws-arm64-terminate INSTANCE_ID=i-xxx - Terminate instance and clear cached state"
+	@echo "  make aws-arm64       - Full lifecycle: launch -> build artifacts -> setup -> benchmark -> terminate"
 	@echo ""
 	@echo "Benchmark targets (require VM):"
 	@echo "  make vm-selftest      - Run kernel recompile selftests in VM"
@@ -182,6 +209,12 @@ help:
 	@echo "                          default  → micro/policies/"
 	@echo "                          all-apply → micro/policies/variants/all-apply/"
 	@echo "                          baseline → micro/policies/variants/baseline/"
+	@echo "  AWS_ARM64_KEY_NAME=   - EC2 key pair name for launch"
+	@echo "  AWS_ARM64_KEY_PATH=   - Local SSH private key for setup/benchmark"
+	@echo "  AWS_ARM64_SECURITY_GROUP_ID= / AWS_ARM64_SUBNET_ID= - Required for launch"
+	@echo "  AWS_REGION=           - AWS region for EC2/SSM/STS"
+	@echo "  AWS_ARM64_INSTANCE_TYPE= - EC2 instance type (default: $(AWS_ARM64_INSTANCE_TYPE))"
+	@echo "  AWS_ARM64_BENCH_ITERATIONS/WARMUPS/REPEAT - Remote smoke params (default: 1/0/10)"
 	@echo ""
 	@echo "Results are written to:"
 	@echo "  micro/results/dev/    - Default Makefile micro outputs"
@@ -189,6 +222,9 @@ help:
 	@echo "  e2e/results/dev/      - Default Makefile E2E outputs"
 	@echo "  */results/            - Authoritative JSON promoted manually"
 	@echo "  docs/tmp/             - Analysis reports (.md only)"
+	@echo "  $(AWS_ARM64_CACHE_DIR)/results/ - AWS ARM64 smoke JSON/log bundles"
+	@echo ""
+	@echo "See docs/tmp/aws_arm64_benchmark_20260319.md for the current AWS ARM64 workflow/state."
 
 verify-build:
 	@test -f "$(BZIMAGE_PATH)" || (echo "ERROR: bzImage not found at $(BZIMAGE_PATH). Run: make kernel" && exit 1)
@@ -478,6 +514,34 @@ vm-arm64-selftest: $(ARM64_IMAGE) $(ARM64_ROOTFS_DIR)/bin/sh $(ARM64_SMOKE_SCRIP
 		--command 'cp -a "$(ARM64_REPO_GUEST_MOUNT)/tests/kernel/build-arm64/lib/." /tmp/selftest/lib/' \
 		--command 'chmod +x /tmp/selftest/test_recompile' \
 		--command 'LD_LIBRARY_PATH=/tmp/selftest/lib /tmp/selftest/test_recompile'
+
+aws-arm64-launch:
+	@echo "=== Running make aws-arm64-launch ==="
+	@test -x "$(AWS_ARM64_SCRIPT)" || (echo "ERROR: missing executable $(AWS_ARM64_SCRIPT)" && exit 1)
+	"$(AWS_ARM64_SCRIPT)" launch
+
+aws-arm64-setup:
+	@echo "=== Running make aws-arm64-setup ==="
+	@test -n "$(INSTANCE_IP)" || (echo "ERROR: INSTANCE_IP= required. Usage: make aws-arm64-setup INSTANCE_IP=1.2.3.4" && exit 1)
+	@test -x "$(AWS_ARM64_SCRIPT)" || (echo "ERROR: missing executable $(AWS_ARM64_SCRIPT)" && exit 1)
+	"$(AWS_ARM64_SCRIPT)" setup "$(INSTANCE_IP)"
+
+aws-arm64-benchmark:
+	@echo "=== Running make aws-arm64-benchmark ==="
+	@test -n "$(INSTANCE_IP)" || (echo "ERROR: INSTANCE_IP= required. Usage: make aws-arm64-benchmark INSTANCE_IP=1.2.3.4" && exit 1)
+	@test -x "$(AWS_ARM64_SCRIPT)" || (echo "ERROR: missing executable $(AWS_ARM64_SCRIPT)" && exit 1)
+	"$(AWS_ARM64_SCRIPT)" benchmark "$(INSTANCE_IP)"
+
+aws-arm64-terminate:
+	@echo "=== Running make aws-arm64-terminate ==="
+	@test -n "$(INSTANCE_ID)" || (echo "ERROR: INSTANCE_ID= required. Usage: make aws-arm64-terminate INSTANCE_ID=i-0123456789abcdef0" && exit 1)
+	@test -x "$(AWS_ARM64_SCRIPT)" || (echo "ERROR: missing executable $(AWS_ARM64_SCRIPT)" && exit 1)
+	"$(AWS_ARM64_SCRIPT)" terminate "$(INSTANCE_ID)"
+
+aws-arm64:
+	@echo "=== Running make aws-arm64 ==="
+	@test -x "$(AWS_ARM64_SCRIPT)" || (echo "ERROR: missing executable $(AWS_ARM64_SCRIPT)" && exit 1)
+	"$(AWS_ARM64_SCRIPT)" full
 
 clean:
 	@echo "=== Running make clean ==="

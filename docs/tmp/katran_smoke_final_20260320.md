@@ -1,6 +1,6 @@
 # Katran Real End-to-End Benchmark
 
-- Generated: 2026-03-20T16:18:57.186555+00:00
+- Generated: 2026-03-20T16:55:36.810923+00:00
 - Mode: `katran_dsr_direct_map_emulation_same_image_paired`
 - Smoke: `True`
 - Paired cycles: `1`
@@ -20,10 +20,10 @@
 
 ## Baseline
 
-- HTTP successes: `200` / `200`
-- ipip rx packets delta: `{'count': 1, 'mean': 1200.0, 'median': 1200.0, 'min': 1200.0, 'max': 1200.0}`
-- bpf avg ns/run: `{'count': 1, 'mean': 346.75083333333333, 'median': 346.75083333333333, 'min': 346.75083333333333, 'max': 346.75083333333333}`
-- total events: `{'count': 1, 'mean': 1200.0, 'median': 1200.0, 'min': 1200.0, 'max': 1200.0}`
+- HTTP successes: `250` / `250`
+- ipip rx packets delta: `{'count': 1, 'mean': 1500.0, 'median': 1500.0, 'min': 1500.0, 'max': 1500.0}`
+- bpf avg ns/run: `{'count': 1, 'mean': 255.81933333333333, 'median': 255.81933333333333, 'min': 255.81933333333333, 'max': 255.81933333333333}`
+- total events: `{'count': 1, 'mean': 1500.0, 'median': 1500.0, 'min': 1500.0, 'max': 1500.0}`
 
 ## Recompile
 
@@ -34,13 +34,13 @@
 
 - HTTP successes: `250` / `250`
 - ipip rx packets delta: `{'count': 1, 'mean': 1500.0, 'median': 1500.0, 'min': 1500.0, 'max': 1500.0}`
-- bpf avg ns/run: `{'count': 1, 'mean': 318.48333333333335, 'median': 318.48333333333335, 'min': 318.48333333333335, 'max': 318.48333333333335}`
+- bpf avg ns/run: `{'count': 1, 'mean': 245.556, 'median': 245.556, 'min': 245.556, 'max': 245.556}`
 - total events: `{'count': 1, 'mean': 1500.0, 'median': 1500.0, 'min': 1500.0, 'max': 1500.0}`
 
 ## Comparison
 
-- Median BPF delta: `-8.15210730087166`
-- Median BPF speedup ratio (stock/reJIT): `1.0887566068344758`
+- Median BPF delta: `-4.0119459305916365`
+- Median BPF speedup ratio (stock/reJIT): `1.0417963044410778`
 
 ## Limitations
 
