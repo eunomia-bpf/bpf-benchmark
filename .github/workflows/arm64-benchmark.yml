@@ -11,6 +11,7 @@ jobs:
     timeout-minutes: 120
     runs-on: ubuntu-24.04-arm
     env:
+      BPFTOOL_BIN: micro/build/vendor/bpftool/bpftool
       MICRO_OUTPUT: micro/results/arm64_pure_jit.json
       MICRO_LLVMBPF_FALLBACK: micro/results/arm64_pure_jit_llvmbpf_only.json
       MICRO_KERNEL_FALLBACK: micro/results/arm64_pure_jit_kernel_only.json
@@ -38,11 +39,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            bpftool \
+            binutils-dev \
             build-essential \
             clang \
             cmake \
             libbpf-dev \
+            libcap-dev \
             libelf-dev \
             libyaml-cpp-dev \
             llvm \
@@ -51,6 +53,12 @@ jobs:
             python3-yaml \
             zlib1g-dev \
             libzstd-dev
+
+      - name: Build micro runner, BPF programs, and vendored bpftool
+        run: |
+          make -C micro micro_exec
+          make -C micro programs
+          make -C micro vendor_bpftool
 
       - name: Record runner environment
         run: |
@@ -62,7 +70,7 @@ jobs:
             echo "clang=$(clang --version | head -n 1)"
             echo "cmake=$(cmake --version | head -n 1)"
             echo "python=$(python3 --version)"
-            echo "bpftool=$(bpftool version | head -n 1)"
+            echo "bpftool=$("${BPFTOOL_BIN}" version | head -n 1)"
             if [ -e /sys/kernel/btf/vmlinux ]; then
               echo "kernel_btf=/sys/kernel/btf/vmlinux"
             else
@@ -74,11 +82,6 @@ jobs:
               echo "bpf_jit_enable=unavailable"
             fi
           } | tee "${PREFLIGHT_DIR}/environment.txt"
-
-      - name: Build micro runner and BPF programs
-        run: |
-          make -C micro micro_exec
-          make -C micro programs
 
       - name: Preflight compile-only backend checks
         run: |
@@ -163,6 +166,7 @@ jobs:
         run: |
           mkdir -p "${CORPUS_RESULTS_DIR}"
           python3 corpus/run_real_world_code_size.py \
+            --bpftool "${BPFTOOL_BIN}" \
             --repo libbpf-bootstrap \
             --runtime llvmbpf \
             --runtime kernel \
