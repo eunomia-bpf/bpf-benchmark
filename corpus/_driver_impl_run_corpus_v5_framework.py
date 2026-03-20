@@ -30,7 +30,6 @@ try:
         directive_scan_from_record,
         ensure_parent,
         execution_plan,
-        extract_error,
         format_ns,
         format_pct,
         format_ratio,
@@ -41,10 +40,8 @@ try:
         materialize_dummy_packet,
         normalize_directive_scan,
         normalize_section_root,
-        parse_runner_json,
         require_minimum,
         run_command as shared_run_command,
-        summarize_stderr,
     )
     from policy_utils import POLICY_DIR as DEFAULT_POLICY_DIR, resolve_policy_path
 except ImportError:
@@ -60,7 +57,6 @@ except ImportError:
         directive_scan_from_record,
         ensure_parent,
         execution_plan,
-        extract_error,
         format_ns,
         format_pct,
         format_ratio,
@@ -71,10 +67,8 @@ except ImportError:
         materialize_dummy_packet,
         normalize_directive_scan,
         normalize_section_root,
-        parse_runner_json,
         require_minimum,
         run_command as shared_run_command,
-        summarize_stderr,
     )
     from corpus.policy_utils import POLICY_DIR as DEFAULT_POLICY_DIR, resolve_policy_path
 

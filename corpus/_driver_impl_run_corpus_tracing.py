@@ -36,7 +36,6 @@ try:
         markdown_table,
         normalize_section_root,
         run_command as orchestrator_run_command,
-        summarize_failure_reason,
         summarize_stderr,
     )
     from orchestrator.inventory import discover_corpus_objects, discover_object_programs
@@ -50,7 +49,6 @@ except ImportError:
         markdown_table,
         normalize_section_root,
         run_command as orchestrator_run_command,
-        summarize_failure_reason,
         summarize_stderr,
     )
     from micro.orchestrator.inventory import discover_corpus_objects, discover_object_programs

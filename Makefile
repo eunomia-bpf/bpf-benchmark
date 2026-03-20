@@ -18,6 +18,13 @@ ARM64_ROOTFS_MIRROR ?= http://ports.ubuntu.com/ubuntu-ports
 ARM64_QEMU ?= qemu-system-aarch64
 ARM64_SMOKE_SCRIPT := $(ROOT_DIR)/scripts/arm64_qemu_smoke.py
 CROSS_COMPILE_ARM64 ?= aarch64-linux-gnu-
+DOCKER ?= docker
+ARM64_CROSSBUILD_DOCKERFILE := $(ROOT_DIR)/docker/arm64-crossbuild.Dockerfile
+ARM64_CROSSBUILD_CONTEXT := $(ROOT_DIR)/docker
+ARM64_CROSSBUILD_IMAGE ?= bpf-benchmark-arm64-crossbuild:latest
+ARM64_CROSSBUILD_STAMP := $(ROOT_DIR)/.cache/arm64-crossbuild-image.stamp
+ARM64_REPO_GUEST_MOUNT ?= /mnt
+ARM64_SELFTEST_GUEST_ROOT ?= $(ARM64_REPO_GUEST_MOUNT)/tests/kernel
 
 # Result directories
 MICRO_RESULTS_DIR := $(ROOT_DIR)/micro/results
@@ -46,6 +53,8 @@ BENCH ?=
 
 VNG ?= vng
 NPROC ?= $(shell nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
+# Prevent top-level `make -B` from leaking into recursive kernel submakes.
+ARM64_KERNEL_MAKEFLAGS := $(filter-out B,$(MAKEFLAGS))
 
 BZIMAGE_PATH := $(if $(filter /%,$(BZIMAGE)),$(BZIMAGE),$(ROOT_DIR)/$(BZIMAGE))
 SCANNER_PATH := $(if $(filter /%,$(SCANNER)),$(SCANNER),$(ROOT_DIR)/$(SCANNER))
@@ -53,6 +62,11 @@ SCANNER_BUILD_DIR := $(abspath $(dir $(SCANNER_PATH)))
 SCANNER_TEST_PATH := $(SCANNER_BUILD_DIR)/test_scanner
 MICRO_RUNNER := $(MICRO_DIR)/build/runner/micro_exec
 KERNEL_SELFTEST := $(KERNEL_TEST_DIR)/build/test_recompile
+KERNEL_SELFTEST_ARM64 := $(KERNEL_TEST_DIR)/build-arm64/test_recompile
+KERNEL_SELFTEST_ARM64_LIB_DIR := $(KERNEL_TEST_DIR)/build-arm64/lib
+KERNEL_TEST_BPF_BUILD_DIR := $(KERNEL_TEST_DIR)/build
+KERNEL_TEST_BPF_SRCS := $(wildcard $(KERNEL_TEST_DIR)/progs/*.bpf.c)
+KERNEL_TEST_BPF_OBJS := $(patsubst $(KERNEL_TEST_DIR)/progs/%.bpf.c,$(KERNEL_TEST_BPF_BUILD_DIR)/progs/%.bpf.o,$(KERNEL_TEST_BPF_SRCS))
 VMLINUX_PATH := $(KERNEL_DIR)/vmlinux
 
 # Default Makefile outputs go to results/dev/. Promote manually to the top-level
@@ -117,10 +131,11 @@ KERNEL_JIT_SOURCES := \
 # Stamp file for BPF program objects (programs/ has no separate build dir)
 MICRO_BPF_STAMP := $(MICRO_DIR)/programs/.build.stamp
 
-.PHONY: all micro scanner kernel kernel-arm64 kernel-tests scanner-tests clean \
+.PHONY: all micro scanner kernel kernel-arm64 kernel-tests kernel-test-progs \
+	arm64-crossbuild-image selftest-arm64 scanner-tests clean \
 	smoke check validate verify-build compare \
 	vm-selftest vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
-	vm-arm64-smoke arm64-worktree arm64-rootfs \
+	vm-arm64-smoke vm-arm64-selftest arm64-worktree arm64-rootfs \
 	help
 
 help:
@@ -133,12 +148,15 @@ help:
 	@echo "  make kernel           - Build kernel bzImage"
 	@echo "  make kernel-arm64     - Cross-build ARM64 Image under vendor/linux-framework/build-arm64"
 	@echo "  make kernel-tests     - Build kernel recompile test binary"
+	@echo "  make arm64-crossbuild-image - Build the Docker image for ARM64 userspace cross-builds"
+	@echo "  make selftest-arm64   - Cross-build the ARM64 kernel selftest binary via Docker"
 	@echo ""
 	@echo "Test/smoke targets:"
 	@echo "  make smoke            - Quick llvmbpf smoke test (no VM)"
 	@echo "  make check            - Build + scanner tests + smoke"
 	@echo "  make validate         - check + vm-selftest + vm-micro-smoke"
 	@echo "  make vm-arm64-smoke   - Boot ARM64 kernel in qemu-system-aarch64 and run uname/bpf_jit smoke"
+	@echo "  make vm-arm64-selftest - Boot ARM64 QEMU and run the ARM64 test_recompile selftest"
 	@echo ""
 	@echo "Benchmark targets (require VM):"
 	@echo "  make vm-selftest      - Run kernel recompile selftests in VM"
@@ -160,6 +178,7 @@ help:
 	@echo "  BZIMAGE=path          - Custom kernel image path"
 	@echo "  CROSS_COMPILE_ARM64=  - ARM64 cross-compiler prefix (default: aarch64-linux-gnu-)"
 	@echo "  ARM64_ROOTFS_DIR=     - ARM64 guest rootfs path (default: $$HOME/.cache/bpf-benchmark/arm64-rootfs)"
+	@echo "  DOCKER=cmd            - Container engine command (default: docker)"
 	@echo "  POLICY=name           - Named policy set (default: default)"
 	@echo "                          default  → micro/policies/"
 	@echo "                          all-apply → micro/policies/variants/all-apply/"
@@ -230,7 +249,7 @@ arm64-worktree:
 $(ARM64_BUILD_CONFIG): | arm64-worktree
 	@echo "=== Generating ARM64 kernel config ==="
 	mkdir -p "$(ARM64_BUILD_DIR)"
-	$(MAKE) -C "$(ARM64_WORKTREE_DIR)" O="$(ARM64_BUILD_DIR)" \
+	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(ARM64_WORKTREE_DIR)" O="$(ARM64_BUILD_DIR)" \
 		ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" defconfig
 	"$(ARM64_WORKTREE_DIR)/scripts/config" --file "$(ARM64_BUILD_CONFIG)" \
 		-e BPF -e BPF_SYSCALL -e BPF_JIT \
@@ -240,13 +259,13 @@ $(ARM64_BUILD_CONFIG): | arm64-worktree
 		-e BLK_DEV_INITRD -e DEVTMPFS -e DEVTMPFS_MOUNT \
 		-e TMPFS -e TMPFS_POSIX_ACL \
 		-e SERIAL_AMBA_PL011 -e SERIAL_AMBA_PL011_CONSOLE
-	$(MAKE) -C "$(ARM64_WORKTREE_DIR)" O="$(ARM64_BUILD_DIR)" \
+	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(ARM64_WORKTREE_DIR)" O="$(ARM64_BUILD_DIR)" \
 		ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" olddefconfig
 	ln -sfn build-arm64/.config "$(ARM64_CONFIG_LINK)"
 
 $(ARM64_IMAGE): $(ARM64_BUILD_CONFIG) | arm64-worktree
 	@echo "=== Building ARM64 Image ==="
-	$(MAKE) -C "$(ARM64_WORKTREE_DIR)" O="$(ARM64_BUILD_DIR)" \
+	MAKEFLAGS="$(ARM64_KERNEL_MAKEFLAGS)" $(MAKE) -C "$(ARM64_WORKTREE_DIR)" O="$(ARM64_BUILD_DIR)" \
 		ARCH=arm64 CROSS_COMPILE="$(CROSS_COMPILE_ARM64)" Image -j"$(NPROC)"
 	ln -sfn ../../../build-arm64/arch/arm64/boot/Image "$(ARM64_IMAGE_LINK)"
 
@@ -259,6 +278,10 @@ kernel-arm64: $(ARM64_IMAGE)
 kernel-tests:
 	@echo "=== Running make kernel-tests ==="
 	$(MAKE) -C "$(KERNEL_TEST_DIR)"
+
+kernel-test-progs:
+	@echo "=== Building kernel test BPF objects ==="
+	$(MAKE) -C "$(KERNEL_TEST_DIR)" BPF_BUILD_DIR="$(KERNEL_TEST_BPF_BUILD_DIR)" $(KERNEL_TEST_BPF_OBJS)
 
 scanner-tests: scanner
 	@echo "=== Running scanner tests ==="
@@ -295,6 +318,15 @@ $(ARM64_ROOTFS_DIR)/bin/sh:
 
 arm64-rootfs: $(ARM64_ROOTFS_DIR)/bin/sh
 	@echo "ARM64 rootfs: $(ARM64_ROOTFS_DIR)"
+
+$(ARM64_CROSSBUILD_STAMP): $(ARM64_CROSSBUILD_DOCKERFILE)
+	@echo "=== Building ARM64 crossbuild image ($(ARM64_CROSSBUILD_IMAGE)) ==="
+	mkdir -p "$(dir $(ARM64_CROSSBUILD_STAMP))"
+	$(DOCKER) build -f "$(ARM64_CROSSBUILD_DOCKERFILE)" -t "$(ARM64_CROSSBUILD_IMAGE)" "$(ARM64_CROSSBUILD_CONTEXT)"
+	touch "$@"
+
+arm64-crossbuild-image: $(ARM64_CROSSBUILD_STAMP)
+	@echo "ARM64 crossbuild image: $(ARM64_CROSSBUILD_IMAGE)"
 
 smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP)
 	@echo "=== Running make smoke ==="
@@ -395,12 +427,57 @@ vm-all:
 	$(MAKE) vm-corpus
 	$(MAKE) vm-e2e
 
+selftest-arm64: arm64-crossbuild-image kernel-test-progs
+	@echo "=== Running make selftest-arm64 ==="
+	mkdir -p "$(dir $(KERNEL_SELFTEST_ARM64))" "$(KERNEL_SELFTEST_ARM64_LIB_DIR)"
+	$(DOCKER) run --rm \
+		--user "$$(id -u):$$(id -g)" \
+		-e PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig \
+		-e PKG_CONFIG_SYSROOT_DIR=/ \
+		-v "$(ROOT_DIR)":/workspace \
+		-w /workspace \
+		"$(ARM64_CROSSBUILD_IMAGE)" \
+		bash -lc 'set -eu -o pipefail; \
+			make -C "/workspace/tests/kernel" \
+				RUNNER_BUILD_DIR="/workspace/tests/kernel/build-arm64" \
+				BPF_BUILD_DIR="/workspace/tests/kernel/build" \
+				LIBBPF_BUILD_DIR="/workspace/tests/kernel/build-arm64/vendor/libbpf" \
+				TEST_KERNEL_ROOT="$(ARM64_SELFTEST_GUEST_ROOT)" \
+				CC=aarch64-linux-gnu-gcc \
+				AR=aarch64-linux-gnu-ar \
+				CFLAGS="-O2 -g -Wall -Wextra -no-pie" \
+				CROSS_COMPILE=aarch64-linux-gnu- \
+				PKG_CONFIG=pkg-config \
+				"/workspace/tests/kernel/build-arm64/test_recompile"; \
+			cp -L /usr/lib/aarch64-linux-gnu/libelf.so.1 "/workspace/tests/kernel/build-arm64/lib/libelf.so.1"; \
+			cp -L /usr/lib/aarch64-linux-gnu/libz.so.1 "/workspace/tests/kernel/build-arm64/lib/libz.so.1" 2>/dev/null || \
+				cp -L /lib/aarch64-linux-gnu/libz.so.1 "/workspace/tests/kernel/build-arm64/lib/libz.so.1"; \
+			cp -L /usr/lib/aarch64-linux-gnu/libzstd.so.1 "/workspace/tests/kernel/build-arm64/lib/libzstd.so.1" 2>/dev/null || \
+				cp -L /lib/aarch64-linux-gnu/libzstd.so.1 "/workspace/tests/kernel/build-arm64/lib/libzstd.so.1";'
+	file "$(KERNEL_SELFTEST_ARM64)"
+	file "$(KERNEL_SELFTEST_ARM64)" | grep -F "ELF 64-bit LSB executable, ARM aarch64"
+
 vm-arm64-smoke: $(ARM64_IMAGE) $(ARM64_ROOTFS_DIR)/bin/sh $(ARM64_SMOKE_SCRIPT)
 	@echo "=== Running make vm-arm64-smoke ==="
 	$(VENV_ACTIVATE) python3 "$(ARM64_SMOKE_SCRIPT)" \
 		--qemu "$(ARM64_QEMU)" \
 		--kernel "$(ARM64_IMAGE)" \
 		--rootfs "$(ARM64_ROOTFS_DIR)"
+
+vm-arm64-selftest: $(ARM64_IMAGE) $(ARM64_ROOTFS_DIR)/bin/sh $(ARM64_SMOKE_SCRIPT) selftest-arm64
+	@echo "=== Running make vm-arm64-selftest ==="
+	$(VENV_ACTIVATE) python3 "$(ARM64_SMOKE_SCRIPT)" \
+		--qemu "$(ARM64_QEMU)" \
+		--kernel "$(ARM64_IMAGE)" \
+		--rootfs "$(ARM64_ROOTFS_DIR)" \
+		--host-share "$(ROOT_DIR)" \
+		--guest-mount "$(ARM64_REPO_GUEST_MOUNT)" \
+		--command 'mount -t tmpfs tmpfs /tmp' \
+		--command 'mkdir -p /tmp/selftest /tmp/selftest/lib' \
+		--command 'cp "$(ARM64_REPO_GUEST_MOUNT)/tests/kernel/build-arm64/test_recompile" /tmp/selftest/test_recompile' \
+		--command 'cp -a "$(ARM64_REPO_GUEST_MOUNT)/tests/kernel/build-arm64/lib/." /tmp/selftest/lib/' \
+		--command 'chmod +x /tmp/selftest/test_recompile' \
+		--command 'LD_LIBRARY_PATH=/tmp/selftest/lib /tmp/selftest/test_recompile'
 
 clean:
 	@echo "=== Running make clean ==="
@@ -429,3 +506,4 @@ clean:
 		"$(ARM64_CONFIG_LINK)" \
 		"$(ARM64_IMAGE_LINK)"
 	rm -rf "$(ARM64_BUILD_DIR)"
+	rm -rf "$(dir $(KERNEL_SELFTEST_ARM64))"

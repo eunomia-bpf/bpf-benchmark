@@ -1,10 +1,11 @@
 # Katran Real End-to-End Benchmark
 
-- Generated: 2026-03-19T02:45:14.891387+00:00
-- Mode: `katran_dsr_live_topology`
+- Generated: 2026-03-19T22:46:37.497424+00:00
+- Mode: `katran_dsr_direct_map_emulation`
 - Smoke: `False`
 - Traffic rounds: `1`
 - Requests per round: `5`
+- Control plane: `bpftool_direct_map`
 - Interface: `eth0`
 - Attach mode: `xdp`
 
@@ -18,7 +19,7 @@
 
 - HTTP successes: `5` / `5`
 - ipip rx packets delta: `{'count': 1, 'mean': 30.0, 'median': 30.0, 'min': 30.0, 'max': 30.0}`
-- bpf avg ns/run: `{'count': 1, 'mean': 603.7, 'median': 603.7, 'min': 603.7, 'max': 603.7}`
+- bpf avg ns/run: `{'count': 1, 'mean': 407.6, 'median': 407.6, 'min': 407.6, 'max': 407.6}`
 - total events: `{'count': 1, 'mean': 30.0, 'median': 30.0, 'min': 30.0, 'max': 30.0}`
 
 ## Recompile
@@ -30,9 +31,5 @@
 
 - HTTP successes: `5` / `5`
 - ipip rx packets delta: `{'count': 1, 'mean': 30.0, 'median': 30.0, 'min': 30.0, 'max': 30.0}`
-- bpf avg ns/run: `{'count': 1, 'mean': 351.8, 'median': 351.8, 'min': 351.8, 'max': 351.8}`
+- bpf avg ns/run: `{'count': 1, 'mean': 507.03333333333336, 'median': 507.03333333333336, 'min': 507.03333333333336, 'max': 507.03333333333336}`
 - total events: `{'count': 1, 'mean': 30.0, 'median': 30.0, 'min': 30.0, 'max': 30.0}`
-
-## Limitations
-
-- Katran userspace server binary is not present; this case provisions the dataplane directly through pinned maps.

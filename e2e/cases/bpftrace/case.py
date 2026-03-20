@@ -723,7 +723,7 @@ def build_report(payload: Mapping[str, object]) -> str:
         "",
         "## Outcome",
         "",
-        f"- This benchmark treats `bpftrace` itself as the tracing agent and measures application throughput plus bpftrace CPU while tracing is active.",
+        "- This benchmark treats `bpftrace` itself as the tracing agent and measures application throughput plus bpftrace CPU while tracing is active.",
         f"- Scripts with detected sites: `{payload['summary']['scripts_with_sites']}`; aggregate site count: `{payload['summary']['site_totals']['total_sites']}`.",
         f"- Geomean BPF speedup across scripts with both baseline and ReJIT data: `{format_ratio(payload['summary']['speedup_geomean'])}`.",
         "",

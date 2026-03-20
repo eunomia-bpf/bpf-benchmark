@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+REPO_ROOT=$(cd -- "${SCRIPT_DIR}/../../.." && pwd)
+
 find_binary() {
   local name="$1"
   shift
@@ -30,12 +33,12 @@ require_tool bpftool
 require_tool ip
 
 katran_server_bin="$(find_binary katran_server_grpc \
-  "$(pwd)/e2e/cases/katran/bin/katran_server_grpc" \
+  "${REPO_ROOT}/e2e/cases/katran/bin/katran_server_grpc" \
   /usr/local/bin/katran_server_grpc \
   /usr/local/sbin/katran_server_grpc \
   /opt/katran/bin/katran_server_grpc \
-  "$(pwd)/third_party/katran-src/build/example_grpc/katran_server_grpc" \
-  "$(pwd)/tmp/katran-src/build/example_grpc/katran_server_grpc" || true)"
+  "${REPO_ROOT}/third_party/katran-src/build/example_grpc/katran_server_grpc" \
+  "${REPO_ROOT}/tmp/katran-src/build/example_grpc/katran_server_grpc" || true)"
 
 echo "KATRAN_SERVER_BINARY=${katran_server_bin}"
 echo "BPFTOOL_BINARY=$(command -v bpftool)"

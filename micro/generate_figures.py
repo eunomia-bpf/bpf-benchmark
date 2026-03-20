@@ -404,8 +404,6 @@ def build_benchmark_records(
         llvmbpf_run = get_run(benchmark, "llvmbpf")
         kernel_run = get_run(benchmark, "kernel")
 
-        llvmbpf_exec = extract_metric_samples(llvmbpf_run, "exec_ns")
-        kernel_exec = extract_metric_samples(kernel_run, "exec_ns")
         llvmbpf_exec_median = extract_metric_center(llvmbpf_run, "exec_ns", center="median")
         kernel_exec_median = extract_metric_center(kernel_run, "exec_ns", center="median")
         llvmbpf_compile_median = extract_metric_center(llvmbpf_run, "compile_ns", center="median")

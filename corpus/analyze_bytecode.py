@@ -119,10 +119,8 @@ def parse_section_bytecode(data: bytes) -> tuple[dict[str, Any], Counter[int]]:
     while idx < raw_insn_count:
         offset = idx * INSN_SIZE
         code, regs, _off, imm = struct.unpack_from("<BBhi", data, offset)
-        dst_reg = regs & 0x0F
         src_reg = (regs >> 4) & 0x0F
         op_class = code & 0x07
-        del dst_reg  # Parsed for completeness, but not currently emitted.
 
         if op_class == BPF_ALU:
             metrics["alu_count"] += 1

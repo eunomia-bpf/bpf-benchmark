@@ -336,7 +336,7 @@ def run_with_btf_fallback(
     return last_result
 
 
-def discover_programs(runner: Path, object_path: Path, timeout_seconds: int) -> dict[str, Any]:
+def discover_programs(runner: Path, object_path: Path, timeout_seconds: int, scanner: Path) -> dict[str, Any]:
     start = time.monotonic()
     try:
         completed = subprocess.run(
@@ -374,7 +374,7 @@ def discover_programs(runner: Path, object_path: Path, timeout_seconds: int) -> 
     if not ok and error is None:
         error = extract_error(stderr, stdout, returncode)
 
-    fallback_scan = analyze_object(object_path, "production-corpus", ROOT_DIR)
+    fallback_scan = analyze_object(object_path, "production-corpus", ROOT_DIR, scanner)
     return {
         "ok": ok,
         "duration_seconds": time.monotonic() - start,
@@ -990,7 +990,7 @@ def main(argv: list[str] | None = None) -> int:
         relpath = object_path.relative_to(ROOT_DIR).as_posix()
         source = infer_source(relpath)
 
-        discovery = discover_programs(runner, object_path, args.timeout)
+        discovery = discover_programs(runner, object_path, args.timeout, scanner)
         object_record = {
             "object_path": relpath,
             "source": source,

@@ -29,10 +29,10 @@ except ImportError:
 
 try:
     from orchestrator.inventory import load_packet_test_run_targets
-    from orchestrator.results import normalize_directive_scan, parse_json_lines as parse_json_payload_lines, parse_runner_sample
+    from orchestrator.results import parse_json_lines as parse_json_payload_lines
 except ImportError:
     from micro.orchestrator.inventory import load_packet_test_run_targets
-    from micro.orchestrator.results import normalize_directive_scan, parse_json_lines as parse_json_payload_lines, parse_runner_sample
+    from micro.orchestrator.results import parse_json_lines as parse_json_payload_lines
 
 try:
     from common import (
@@ -49,7 +49,6 @@ try:
         directive_scan_from_record,
         ensure_parent,
         format_ns,
-        format_pct,
         format_ratio,
         geomean,
         markdown_table,
@@ -78,7 +77,6 @@ except ImportError:
         directive_scan_from_record,
         ensure_parent,
         format_ns,
-        format_pct,
         format_ratio,
         geomean,
         markdown_table,
@@ -1052,7 +1050,7 @@ def build_markdown(data: dict[str, Any]) -> str:
         f"- Inventory: `{data['inventory_json']}`",
         f"- Runner: `{data['runner_binary']}`",
         f"- Scanner: `{data['scanner_binary']}`",
-        f"- Requested mode: `strict-vm`",
+        "- Requested mode: `strict-vm`",
         f"- Effective mode: `{summary['effective_mode']}`",
         f"- Repeat: {data['repeat']}",
         f"- Skip families: `{', '.join(data.get('skip_families') or []) or 'none'}`",

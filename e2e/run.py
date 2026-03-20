@@ -230,7 +230,6 @@ def run_katran_vm(args: argparse.Namespace) -> int:
         str(Path(args.scanner).resolve()),
         "--kernel-config",
         str(Path(args.kernel_config).resolve()),
-        "--skip-setup",
     ]
     if args.smoke:
         guest_command.append("--smoke")
@@ -244,13 +243,10 @@ def run_katran_vm(args: argparse.Namespace) -> int:
         guest_command.extend(["--katran-samples", str(int(args.katran_samples))])
     if args.katran_skip_attach:
         guest_command.append("--katran-skip-attach")
+    if args.skip_setup:
+        guest_command.append("--skip-setup")
 
-    guest_script = write_guest_script(
-        [
-            ["bash", str(Path(args.setup_script).resolve())],
-            guest_command,
-        ]
-    )
+    guest_script = write_guest_script([guest_command])
     completed = run_in_vm(args.kernel, guest_script, args.cpus, args.mem, args.timeout, networks=("loop",))
     sys.stdout.write(completed.stdout)
     sys.stderr.write(completed.stderr)

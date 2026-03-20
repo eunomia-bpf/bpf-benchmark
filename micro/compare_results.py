@@ -146,7 +146,7 @@ def compare(old_path: Path, new_path: Path) -> int:
         rows.append(BenchRow(name=name, old_ratio=old_ratio, new_ratio=new_ratio))
 
     # Print header
-    print(f"\nComparing results:")
+    print("\nComparing results:")
     print(f"  OLD: {_provenance_summary(old_path)}")
     print(f"       {old_path}")
     print(f"  NEW: {_provenance_summary(new_path)}")

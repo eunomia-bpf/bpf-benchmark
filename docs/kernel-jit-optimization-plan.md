@@ -11,7 +11,9 @@
 > - 每次 context 压缩后 → 完整读取本文档恢复全局状态。
 > - 用 agent background 跑任务，不阻塞主对话。
 > - **构建+修改+运行不拆分**：一个 subagent 负责完整流程（改代码→构建→运行→发现 bug→修复→再运行），不要拆成多个 agent。
-> 上次更新：2026-03-19c（#223 ✅ 接口精简：recompile_count 删除 + ROLLBACK flag 删除 + log_level→bool。#224 ✅ 完整验证：vm-micro 62/62 valid，overall 1.017x，applied-only **1.078x**（7/7 恢复，0 回归）。E2E tracee/tetragon/bpftrace/scx fresh results，katran DSR 超时阻塞。tools UAPI 已同步。P0 blob 依赖修复完成。param match dead code 确认已不存在。ARM64 交叉编译+QEMU boot 基本完成。内核最终 net +5702 行（从 6758 减 1056，-15.6%）。用户态清理 ~21000 行。）
+> 上次更新：2026-03-19e（#205 ✅ Katran E2E gRPC setup fix：不再在 benchmark 路径内编译 `katran_server_grpc`；`setup.sh` 直接发现 checked-in bundle，Katran VM path 不再 out-of-band setup + `--skip-setup`，payload 能正确记录 server binary。VM smoke + authoritative rerun 均通过；latest rerun 5/5 HTTP、30 IPIP decap packets、1/1 recompile apply，但 BPF avg_ns `407.6→507.0`（未复现旧 `603.7→351.8` 正向结果）。报告：`docs/tmp/katran_e2e_grpc_fix_20260319.md`。）
+> 前次更新：2026-03-19d（#227 ✅ ARM64 端到端验证完成：`make -B kernel-arm64` + `make vm-arm64-smoke` 在 `cc0f4f6d3` 上通过；修复 Makefile 递归 ARM64 kernel submake 的 `MAKEFLAGS=-B` 泄漏；QEMU guest `bpf_jit_enable=1`。注意：当前 ARM64 路径仍是 smoke，不跑 `test_recompile` selftests。报告：`docs/tmp/arm64_e2e_verification_20260319.md`。）
+> 前次更新：2026-03-19c（#223 ✅ 接口精简：recompile_count 删除 + ROLLBACK flag 删除 + log_level→bool。#224 ✅ 完整验证：vm-micro 62/62 valid，overall 1.017x，applied-only **1.078x**（7/7 恢复，0 回归）。E2E tracee/tetragon/bpftrace/scx fresh results，katran DSR 超时阻塞。tools UAPI 已同步。P0 blob 依赖修复完成。param match dead code 确认已不存在。ARM64 交叉编译+QEMU boot 基本完成。内核最终 net +5702 行（从 6758 减 1056，-15.6%）。用户态清理 ~21000 行。）
 > 前次更新：2026-03-19b（#212-#222 全部 ✅。Phase A/B/C + DSL 删除 + tracepoints + stock choice + do_jit 短路 + 头文件清理。）
 > 前次更新：2026-03-19（#207-#211；revert trampoline guard；Tracee/Corpus rerun；trampoline 调研；kernel deep review；GitHub ARM64 KVM 调研。）
 > 前次更新：2026-03-18b（#206 ✅ Tracee bpftool fix + rerun；trampoline guard 导致 corpus 0.934x → 已 revert。）
@@ -89,7 +91,7 @@
 | E2E Tetragon (#200, harness bug) | stress_exec +7.94%, connect_storm -55.96% | 已被 #204 取代（harness 漏掉了 connect 热路径 programs） |
 | **E2E Tetragon (#204, harness fix, 20260318) ← 当前权威** | **stress_exec +8.70%, connect_storm +22.29%** | **✅ 全 4 workload 正向！** file_io +0.34%, open_storm +0.42%。7 programs, 3 applied, 49 bflip sites。数据：`e2e/results/tetragon_authoritative_20260318.json` |
 | E2E XDP forwarding | +0.27% | **已删除 #203**（3 sites，无优化价值，将被 Katran 替换） |
-| **E2E Katran (#205, DSR live topo, 20260319) ← 当前权威** | **BPF exec avg_ns 603.7→351.8, -32.8%** | **✅ balancer_ingress DSR 拓扑跑通！** 4 wide sites applied, IPIP decap 前后各 30 包。standalone direct-map emulation（gRPC server 编译中）。数据：`e2e/results/katran_authoritative_20260319.json` |
+| **E2E Katran (#205, DSR direct-map, 20260319) ← 当前实现已验证** | **功能 OK；latest rerun BPF avg_ns 407.6→507.0 (+24.4%)** | **✅ gRPC compile 已移出 benchmark 路径。** setup 直接发现 checked-in `katran_server_grpc` bundle，VM rerun 5/5 HTTP、30 IPIP decap packets、4 wide sites applied。旧 bring-up 结果 `603.7→351.8` 仍保留作历史 datapath proof，但当前 rerun 未复现。报告：`docs/tmp/katran_e2e_grpc_fix_20260319.md`，结果：`e2e/results/katran_authoritative_20260319.json` |
 | E2E Tracee (20260313, authoritative) | exec_storm +6.28%, file_io +7.00% | 2026-03-18 rerun 已修复 guest bpftool wrapper 并成功跑通，但新结果仅 exec_storm +5.97%、file_io +1.68%、network +2.20%，未超过旧权威，因此旧权威保持 |
 | E2E bpftrace | 0.992x | 纯 CMOV sites 被 skip → 0 applied → 永远 neutral |
 | E2E scx | 无数据 | struct_ops EOPNOTSUPP，不支持 recompile |
@@ -706,5 +708,5 @@ make clean
 | 224 | **夜跑验证（2026-03-19）** | ⚠️ | 首轮：build state 变化导致 micro 0 applied（旧 micro_exec blob 格式不兼容）。根因：Makefile 依赖缺失，已修。报告：`docs/tmp/full_validation_post_dsl_removal_20260319.md`。 |
 | 225 | **P0 micro_exec blob 依赖修复（2026-03-19）** | ✅ | Makefile 加 scanner→micro_exec 依赖。smoke cmov_dense applied=true 恢复。报告：`docs/tmp/micro_exec_blob_fix_20260319.md`。 |
 | 226 | **Tools UAPI 同步 + 完整验证（2026-03-19）** | ✅ | tools/include/uapi/linux/bpf.h 同步。vm-micro 62/62 valid，overall 1.017x，applied-only **1.078x**（7/7 恢复）。E2E：tracee/tetragon/bpftrace/scx 有 fresh results，katran DSR 超时阻塞。报告：`docs/tmp/full_validation_final_20260319.md`。 |
-| 227 | **ARM64 交叉编译 + QEMU（2026-03-19）** | ✅ | gcc-aarch64 + defconfig + Image 编译成功。qemu-system-aarch64 boot 成功（7.0.0-rc2 aarch64）。Makefile: make kernel-arm64 + make vm-arm64-smoke。报告：`docs/tmp/arm64_cross_compile_qemu_20260319.md`。 |
+| 227 | **ARM64 交叉编译 + QEMU（2026-03-19）** | ✅ | 端到端复核完成：`make -B kernel-arm64` + `make vm-arm64-smoke` 在 `cc0f4f6d3` 上通过，guest `bpf_jit_enable=1`。修复了 ARM64 递归 kernel submake 的 `MAKEFLAGS=-B` 泄漏。注意：当前 ARM64 target 仍是 smoke，不跑 `test_recompile` selftests。报告：`docs/tmp/arm64_cross_compile_qemu_20260319.md`、`docs/tmp/arm64_e2e_verification_20260319.md`。 |
 | 228 | **Param match dead code 确认（2026-03-19）** | ✅ | 确认 8 form validator 均已无 match 步骤，param_matches_* helper 不存在。无需改动。报告：`docs/tmp/kernel_param_match_removal_20260319.md`。 |

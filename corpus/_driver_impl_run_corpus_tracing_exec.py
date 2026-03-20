@@ -37,11 +37,9 @@ from e2e.common.vm import run_in_vm, write_guest_script
 from directive_census import filter_bpf_paths
 
 try:
-    from _driver_impl_run_corpus_perf import format_ns, markdown_table, runner_binary_from_config
+    from _driver_impl_run_corpus_perf import markdown_table, runner_binary_from_config
     from _driver_impl_run_corpus_tracing import (
-        BPF_OBJ_NAME_LEN,
         BPF_STATS_RUN_TIME,
-        BPF_TAG_SIZE,
         BpfProgInfo,
         decode_c_string,
         generic_syscall_mix,
@@ -57,14 +55,11 @@ try:
     )
 except ImportError:
     from corpus._driver_impl_run_corpus_perf import (
-        format_ns,
         markdown_table,
         runner_binary_from_config,
     )
     from corpus._driver_impl_run_corpus_tracing import (
-        BPF_OBJ_NAME_LEN,
         BPF_STATS_RUN_TIME,
-        BPF_TAG_SIZE,
         BpfProgInfo,
         decode_c_string,
         generic_syscall_mix,

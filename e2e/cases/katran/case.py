@@ -303,6 +303,17 @@ def run_setup_script(setup_script: Path) -> dict[str, object]:
     }
 
 
+def katran_server_candidates() -> tuple[Path, ...]:
+    return (
+        ROOT_DIR / "e2e" / "cases" / "katran" / "bin" / "katran_server_grpc",
+        Path("/usr/local/bin/katran_server_grpc"),
+        Path("/usr/local/sbin/katran_server_grpc"),
+        Path("/opt/katran/bin/katran_server_grpc"),
+        ROOT_DIR / "third_party" / "katran-src" / "build" / "example_grpc" / "katran_server_grpc",
+        ROOT_DIR / "tmp" / "katran-src" / "build" / "example_grpc" / "katran_server_grpc",
+    )
+
+
 def resolve_katran_server_binary(explicit: str | None, setup_result: Mapping[str, object]) -> str | None:
     if explicit:
         candidate = Path(explicit).expanduser().resolve()
@@ -311,6 +322,9 @@ def resolve_katran_server_binary(explicit: str | None, setup_result: Mapping[str
     scripted = str(setup_result.get("katran_server_binary") or "").strip()
     if scripted and Path(scripted).exists():
         return scripted
+    for candidate in katran_server_candidates():
+        if candidate.is_file() and os.access(candidate, os.X_OK):
+            return str(candidate.resolve())
     for candidate in ("katran_server_grpc", "katran_server"):
         resolved = which(candidate)
         if resolved:

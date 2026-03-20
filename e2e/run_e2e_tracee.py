@@ -1502,7 +1502,7 @@ def build_markdown_report(payload: Mapping[str, object]) -> str:
         lines.append(f"- Workload-throughput speedup: `{comparison.get('workload_ops_per_sec_speedup')}`")
         lines.append(f"- Avg BPF ns/run ratio: `{comparison.get('average_ns_per_run_ratio')}`")
     else:
-        lines.append(f"- Comparable: `False`")
+        lines.append("- Comparable: `False`")
         lines.append(f"- Reason: `{comparison.get('reason', 'unknown')}`")
     lines.append("")
 

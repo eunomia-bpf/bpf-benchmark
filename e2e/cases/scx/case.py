@@ -700,7 +700,7 @@ def build_markdown(payload: Mapping[str, object]) -> str:
                 f"agent_cpu_delta={workload.get('agent_cpu_delta_pct')}%"
             )
     else:
-        lines.append(f"- Comparable: `False`")
+        lines.append("- Comparable: `False`")
         lines.append(f"- Reason: `{comparison.get('reason', 'unknown')}`")
     limitations = payload.get("limitations") or []
     if limitations:

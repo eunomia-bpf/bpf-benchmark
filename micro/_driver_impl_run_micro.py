@@ -14,7 +14,7 @@ from pathlib import Path
 
 import yaml
 
-from benchmark_catalog import CONFIG_PATH, ROOT_DIR, SuiteSpec, load_suite
+from benchmark_catalog import CONFIG_PATH, ROOT_DIR, RuntimeSpec, SuiteSpec, load_suite
 try:
     from results_layout import maybe_refresh_latest_alias, refresh_latest_alias, smoke_output_path
 except ImportError:

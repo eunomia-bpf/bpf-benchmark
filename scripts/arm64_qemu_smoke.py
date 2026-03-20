@@ -2,6 +2,7 @@
 
 import argparse
 import os
+import re
 import select
 import subprocess
 import sys
@@ -41,6 +42,14 @@ def stream_until(proc: subprocess.Popen[bytes], markers: tuple[bytes, ...], time
     return bytes(buffer)
 
 
+def normalize_output(output: bytes) -> str:
+    return output.decode("utf-8", errors="ignore").replace("\r", "")
+
+
+def shell_printf_literal(text: str) -> str:
+    return "".join(f"\\{ord(ch):03o}" if ch == "_" else ch for ch in text)
+
+
 def smoke_complete(output: str) -> bool:
     if "GNU/Linux" not in output:
         return False
@@ -49,11 +58,59 @@ def smoke_complete(output: str) -> bool:
     return any(line.replace("#", " ").strip() in {"0", "1", "2"} for line in output.splitlines())
 
 
+def run_guest_command(proc: subprocess.Popen[bytes], command: str, timeout: int, command_id: int) -> tuple[int, str]:
+    if proc.stdin is None:
+        raise RuntimeError("QEMU guest stdin is unavailable")
+
+    rc_marker = f"__ARM64_QEMU_CMD_{command_id}_RC="
+    done_marker_text = f"__ARM64_QEMU_CMD_{command_id}_DONE__"
+    wrapped = "\n".join(
+        (
+            f"{{ {command}; }}",
+            "rc=$?",
+            f"printf '{shell_printf_literal(rc_marker)}%d\\137\\137\\n{shell_printf_literal(done_marker_text)}\\n' \"$rc\"",
+        )
+    ) + "\n"
+    done_marker = done_marker_text.encode()
+
+    proc.stdin.write(wrapped.encode())
+    proc.stdin.flush()
+
+    output = stream_until(proc, (done_marker,), timeout)
+    normalized = normalize_output(output)
+    match = re.search(rf"{re.escape(rc_marker)}(\d+)__", normalized)
+    if not match:
+        if proc.poll() is not None:
+            raise RuntimeError(f"QEMU exited while running guest command: {command}")
+        raise RuntimeError(f"Timed out waiting for guest command completion: {command}")
+
+    return int(match.group(1)), normalized
+
+
+def run_guest_commands(
+    proc: subprocess.Popen[bytes], commands: list[str], timeout: int, start_id: int = 1
+) -> tuple[str, int]:
+    output_parts: list[str] = []
+    command_id = start_id
+
+    for command in commands:
+        rc, output = run_guest_command(proc, command, timeout, command_id)
+        output_parts.append(output)
+        if rc != 0:
+            raise RuntimeError(f"Guest command failed with exit {rc}: {command}")
+        command_id += 1
+
+    return "".join(output_parts), command_id
+
+
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Boot an ARM64 kernel under QEMU and run a simple smoke test.")
+    parser = argparse.ArgumentParser(description="Boot an ARM64 kernel under QEMU and run guest smoke commands.")
     parser.add_argument("--qemu", default="qemu-system-aarch64")
     parser.add_argument("--kernel", required=True)
     parser.add_argument("--rootfs", required=True)
+    parser.add_argument("--host-share")
+    parser.add_argument("--guest-mount", default="/mnt")
+    parser.add_argument("--command", action="append", default=[])
     parser.add_argument("--memory-mb", type=int, default=2048)
     parser.add_argument("--cpus", type=int, default=2)
     parser.add_argument("--timeout", type=int, default=180)
@@ -64,6 +121,9 @@ def main() -> int:
         return 1
     if not os.path.exists(os.path.join(args.rootfs, "bin", "sh")):
         print(f"ARM64 rootfs missing /bin/sh: {args.rootfs}", file=sys.stderr)
+        return 1
+    if args.host_share and not os.path.isdir(args.host_share):
+        print(f"host share path not found: {args.host_share}", file=sys.stderr)
         return 1
 
     cmd = [
@@ -93,6 +153,15 @@ def main() -> int:
         "-device",
         "virtio-9p-pci,fsdev=rootfs,mount_tag=/dev/root",
     ]
+    if args.host_share:
+        cmd.extend(
+            [
+                "-fsdev",
+                f"local,id=hostshare,path={os.path.abspath(args.host_share)},security_model=none,readonly=on",
+                "-device",
+                "virtio-9p-pci,fsdev=hostshare,mount_tag=hostshare",
+            ]
+        )
 
     proc = subprocess.Popen(
         cmd,
@@ -110,52 +179,36 @@ def main() -> int:
             print("Timed out waiting for the ARM64 guest shell.", file=sys.stderr)
             return 1
 
-        commands = b"\n".join(
-            (
-                b"mount -t proc proc /proc",
-                b"mount -t sysfs sysfs /sys",
-                b"uname -a",
-                b"cat /proc/version",
-                b"cat /proc/sys/net/core/bpf_jit_enable",
-            )
-        ) + b"\n"
-
-        assert proc.stdin is not None
-        proc.stdin.write(commands)
-        proc.stdin.flush()
-
-        deadline = time.time() + args.timeout
-        smoke_buffer = bytearray()
-        normalized = ""
-
-        while time.time() < deadline:
-            smoke_output = stream_until(proc, tuple(), 1)
-            if smoke_output:
-                smoke_buffer.extend(smoke_output)
-                normalized = smoke_buffer.decode("utf-8", errors="ignore").replace("\r", "")
-                if smoke_complete(normalized):
-                    break
-            if proc.poll() is not None:
-                break
-
-        if not smoke_complete(normalized):
+        smoke_output, next_command_id = run_guest_commands(
+            proc,
+            [
+                "mount -t proc proc /proc",
+                "mount -t sysfs sysfs /sys",
+                "uname -a",
+                "cat /proc/version",
+                "cat /proc/sys/net/core/bpf_jit_enable",
+            ],
+            args.timeout,
+        )
+        if not smoke_complete(smoke_output):
             print("ARM64 smoke commands did not finish before timeout.", file=sys.stderr)
             return 1
-        if "GNU/Linux" not in normalized:
-            print("uname -a output missing from ARM64 smoke output.", file=sys.stderr)
-            return 1
-        if "Linux version" not in normalized:
-            print("/proc/version output missing from ARM64 smoke output.", file=sys.stderr)
-            return 1
 
-        bpf_jit_lines = [
-            line.replace("#", " ").strip()
-            for line in normalized.splitlines()
-            if line.replace("#", " ").strip() in {"0", "1", "2"}
-        ]
-        if not bpf_jit_lines:
-            print("/proc/sys/net/core/bpf_jit_enable output missing from ARM64 smoke output.", file=sys.stderr)
-            return 1
+        if args.host_share:
+            _, next_command_id = run_guest_commands(
+                proc,
+                [
+                    f"mount -t 9p -o trans=virtio,version=9p2000.L,cache=loose hostshare {args.guest_mount}",
+                ],
+                args.timeout,
+                next_command_id,
+            )
+
+        if args.command:
+            run_guest_commands(proc, args.command, args.timeout, next_command_id)
+    except RuntimeError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
     finally:
         if proc.poll() is None:
             proc.terminate()
