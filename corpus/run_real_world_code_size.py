@@ -52,6 +52,9 @@ BCF_PROFILE_DIRS = {
     "bcf-bpf-examples": ROOT / "bcf" / "bpf-examples",
     "bcf-calico": ROOT / "bcf" / "calico",
 }
+SUPPORTED_RUNTIMES = ("kernel", "kernel-recompile")
+PAIR_RUNTIME_SET = frozenset(SUPPORTED_RUNTIMES)
+PAIR_RATIO_KEY = "kernel_recompile_over_kernel_native_code_ratio"
 
 
 @dataclass(frozen=True)
@@ -102,8 +105,8 @@ def parse_args() -> argparse.Namespace:
         "--runtime",
         action="append",
         dest="runtimes",
-        choices=["llvmbpf", "kernel"],
-        help="Restrict the inspect phase to a subset of runtimes. Defaults to both.",
+        choices=list(SUPPORTED_RUNTIMES),
+        help="Restrict the inspect phase to a subset of kernel runtimes. Defaults to stock kernel and kernel-recompile.",
     )
     parser.add_argument("--max-sources", type=int, help="Limit the number of input artifacts processed per run.")
     parser.add_argument(
@@ -324,10 +327,9 @@ def build_command_for_runtime(
     object_path: Path,
     program_name: str,
 ) -> list[str]:
-    subcommand = "run-llvmbpf" if runtime == "llvmbpf" else "run-kernel"
     command = [
         str(runner),
-        subcommand,
+        "run-kernel",
         "--program",
         str(object_path),
         "--program-name",
@@ -336,9 +338,9 @@ def build_command_for_runtime(
         "--io-mode",
         "packet",
     ]
-    if runtime == "kernel":
-        return ["sudo", "-n", *command]
-    return command
+    if runtime == "kernel-recompile":
+        command.extend(["--recompile-v5", "--recompile-all"])
+    return ["sudo", "-n", *command]
 
 
 def compile_source(
@@ -577,6 +579,8 @@ def compute_summary(source_records: list[dict[str, Any]], runtimes: list[str]) -
     runtime_status: dict[str, Counter[str]] = {runtime: Counter() for runtime in runtimes}
     runtime_failures: dict[str, Counter[str]] = {runtime: Counter() for runtime in runtimes}
     program_rows: list[dict[str, Any]] = []
+    selected_runtime_ok = 0
+    pair_mode = set(runtimes) == PAIR_RUNTIME_SET
 
     for source in source_records:
         if source["build"]["status"] != "ok":
@@ -594,22 +598,21 @@ def compute_summary(source_records: list[dict[str, Any]], runtimes: list[str]) -
                     runtime_failures[runtime][summarize_error(runtime_run["error"])] += 1
 
     paired_ratios: list[float] = []
-    paired_programs = 0
     for program in program_rows:
         runs_by_runtime = {run["runtime"]: run for run in program["runs"]}
         if not all(runtime in runs_by_runtime and runs_by_runtime[runtime]["status"] == "ok" for runtime in runtimes):
             continue
-        if set(runtimes) != {"llvmbpf", "kernel"}:
+        selected_runtime_ok += 1
+        if not pair_mode:
             continue
-        ll_sample = runs_by_runtime["llvmbpf"]["sample"]
+        recompile_sample = runs_by_runtime["kernel-recompile"]["sample"]
         kernel_sample = runs_by_runtime["kernel"]["sample"]
-        if not ll_sample or not kernel_sample:
+        if not recompile_sample or not kernel_sample:
             continue
         kernel_size = float(kernel_sample["code_size"]["native_code_bytes"])
         if kernel_size == 0.0:
             continue
-        paired_programs += 1
-        paired_ratios.append(float(ll_sample["code_size"]["native_code_bytes"]) / kernel_size)
+        paired_ratios.append(float(recompile_sample["code_size"]["native_code_bytes"]) / kernel_size)
 
     return {
         "source_files": {
@@ -621,11 +624,11 @@ def compute_summary(source_records: list[dict[str, Any]], runtimes: list[str]) -
         },
         "programs": {
             "discovered": len(program_rows),
-            "paired_across_runtimes": paired_programs,
+            "selected_runtime_ok": selected_runtime_ok,
         },
         "runtime_status": {runtime: dict(counter) for runtime, counter in runtime_status.items()},
-        "llvmbpf_over_kernel_native_code_ratio": {
-            "paired_programs": paired_programs,
+        PAIR_RATIO_KEY: {
+            "paired_programs": len(paired_ratios),
             "geomean": geomean(paired_ratios),
             "min": min(paired_ratios) if paired_ratios else None,
             "median": sorted(paired_ratios)[len(paired_ratios) // 2] if paired_ratios else None,
@@ -649,7 +652,9 @@ def render_report(
     runtimes: list[str],
 ) -> str:
     summary = payload["summary"]
-    ratio_summary = summary["llvmbpf_over_kernel_native_code_ratio"]
+    ratio_summary = summary[PAIR_RATIO_KEY]
+    pair_mode = set(runtimes) == PAIR_RUNTIME_SET
+    selected_runtime_label = "Programs with both runtimes ok" if pair_mode else "Programs with selected runtimes ok"
     lines = [
         "# Real-World Code-Size Validation",
         "",
@@ -667,12 +672,12 @@ def render_report(
         f"| Artifact prepare/build succeeded | {summary['source_files']['build_ok']} |",
         f"| Program inventories succeeded | {summary['source_files']['program_inventory_ok']} |",
         f"| Programs discovered | {summary['programs']['discovered']} |",
-        f"| Programs with both runtimes ok | {summary['programs']['paired_across_runtimes']} |",
+        f"| {selected_runtime_label} | {summary['programs']['selected_runtime_ok']} |",
     ]
 
-    if set(runtimes) == {"llvmbpf", "kernel"}:
+    if pair_mode:
         lines.append(
-            f"| Geomean native code-size ratio (llvmbpf/kernel) | {format_ratio(ratio_summary['geomean'])} |"
+            f"| Geomean native code-size ratio (kernel-recompile/kernel) | {format_ratio(ratio_summary['geomean'])} |"
         )
 
     lines.extend(
@@ -727,13 +732,13 @@ def render_report(
             continue
         for program in source["programs"]:
             runs_by_runtime = {run["runtime"]: run for run in program["runs"]}
-            ll_run = runs_by_runtime.get("llvmbpf")
+            recompile_run = runs_by_runtime.get("kernel-recompile")
             kernel_run = runs_by_runtime.get("kernel")
-            if ll_run is None or kernel_run is None:
+            if recompile_run is None or kernel_run is None:
                 continue
-            if ll_run["status"] != "ok" or kernel_run["status"] != "ok":
+            if recompile_run["status"] != "ok" or kernel_run["status"] != "ok":
                 continue
-            ll_size = int(ll_run["sample"]["code_size"]["native_code_bytes"])
+            recompile_size = int(recompile_run["sample"]["code_size"]["native_code_bytes"])
             kernel_size = int(kernel_run["sample"]["code_size"]["native_code_bytes"])
             if kernel_size == 0:
                 continue
@@ -744,27 +749,27 @@ def render_report(
                     "program": program["name"],
                     "section": program["section_name"],
                     "insn_count": program["insn_count"],
-                    "llvmbpf_native": ll_size,
+                    "recompile_native": recompile_size,
                     "kernel_native": kernel_size,
-                    "ratio": ll_size / kernel_size,
+                    "ratio": recompile_size / kernel_size,
                 }
             )
 
-    if paired_rows:
+    if pair_mode and paired_rows:
         paired_rows.sort(key=lambda row: (row["ratio"], row["repo"], row["source"], row["program"]))
         lines.extend(
             [
                 "",
                 "## Program-Level Results",
                 "",
-                "| Repo | Artifact | Program | Section | BPF insns | llvmbpf native B | kernel native B | L/K ratio |",
+                "| Repo | Artifact | Program | Section | BPF insns | kernel-recompile native B | kernel native B | R/K ratio |",
                 "| --- | --- | --- | --- | ---: | ---: | ---: | ---: |",
             ]
         )
         for row in paired_rows:
             lines.append(
                 f"| {row['repo']} | `{row['source']}` | `{row['program']}` | `{row['section']}` | "
-                f"{row['insn_count']} | {row['llvmbpf_native']} | {row['kernel_native']} | {row['ratio']:.3f}x |"
+                f"{row['insn_count']} | {row['recompile_native']} | {row['kernel_native']} | {row['ratio']:.3f}x |"
             )
 
     lines.extend(
@@ -773,11 +778,15 @@ def render_report(
             "## Notes",
             "",
             "- Each row is a single program selected from either a source-built or prebuilt real BPF object, not a handcrafted micro benchmark.",
-            "- `micro_exec list-programs` enumerates every libbpf-visible program in the object, and both runtimes are invoked with `--program-name` so multi-program objects are measured per program.",
+            "- `micro_exec list-programs` enumerates every libbpf-visible program in the object, and every selected runtime is invoked with `--program-name` so multi-program objects are measured per program.",
             "- `libbpf-bootstrap` inputs are compiled from source; the integrated BCF inputs are scanned directly from prebuilt objects under `corpus/bcf/`.",
             "- The curated default set keeps the run focused on corpora that are already loadable by the current tooling: `libbpf-bootstrap`, `bcf/cilium`, `bcf/inspektor-gadget`, and `bcf/collected`.",
         ]
     )
+    if pair_mode:
+        lines.append(
+            "- `kernel-recompile` uses the existing `micro_exec run-kernel --compile-only --recompile-v5 --recompile-all` path."
+        )
     return "\n".join(lines) + "\n"
 
 
@@ -820,7 +829,7 @@ def main() -> int:
         for profile in source_profiles:
             ensure_vmlinux_header(bpftool_binary, build_root / profile.name / "vmlinux.h")
 
-    runtimes = args.runtimes or ["llvmbpf", "kernel"]
+    runtimes = args.runtimes or list(SUPPORTED_RUNTIMES)
     selected_sources = load_repo_sources(inventory, source_profiles, max_sources=None)
     selected_objects = load_prebuilt_objects(object_profiles, max_sources=None)
     selected_artifacts = [*selected_sources, *selected_objects]
@@ -907,9 +916,12 @@ def main() -> int:
                 if runtime_outcome["status"] == "ok":
                     sample = runtime_outcome["sample"]
                     native_bytes = sample["code_size"]["native_code_bytes"]
-                    print(f"    {runtime:8} ok native={native_bytes}B")
+                    print(f"    {runtime:17} ok native={native_bytes}B")
                 else:
-                    print(f"    {runtime:8} {runtime_outcome['status']} {summarize_error(runtime_outcome['error'])}")
+                    print(
+                        f"    {runtime:17} {runtime_outcome['status']} "
+                        f"{summarize_error(runtime_outcome['error'])}"
+                    )
             source_record["programs"].append(program_record)
 
         source_records.append(source_record)
@@ -944,7 +956,7 @@ def main() -> int:
     payload["summary"] = compute_summary(source_records, runtimes)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(json.dumps(payload, indent=2))
+    output_path.write_text(json.dumps(payload, indent=2) + "\n")
     maybe_refresh_latest_alias(output_path)
     report_path.write_text(render_report(payload, source_records, runtimes))
 

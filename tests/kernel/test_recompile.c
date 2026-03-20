@@ -66,6 +66,11 @@
 #define DIAMOND_OBJ TEST_KERNEL_ROOT "/build/progs/test_diamond.bpf.o"
 #define ROTATE_OBJ TEST_KERNEL_ROOT "/build/progs/test_rotate.bpf.o"
 #define WIDE_OBJ TEST_KERNEL_ROOT "/build/progs/test_wide.bpf.o"
+#define ADDR_CALC_OBJ TEST_KERNEL_ROOT "/build/progs/test_addr_calc.bpf.o"
+#define BITFIELD_EXTRACT_OBJ TEST_KERNEL_ROOT "/build/progs/test_bitfield_extract.bpf.o"
+#define ZERO_EXT_ELIDE_OBJ TEST_KERNEL_ROOT "/build/progs/test_zero_ext_elide.bpf.o"
+#define ENDIAN_FUSION_OBJ TEST_KERNEL_ROOT "/build/progs/test_endian_fusion.bpf.o"
+#define BRANCH_FLIP_OBJ TEST_KERNEL_ROOT "/build/progs/test_branch_flip.bpf.o"
 
 #define LOG_BUF_SIZE 4096
 
@@ -1017,6 +1022,321 @@ static bool find_wide_site(const struct program_meta *meta, __u32 *site)
 	return false;
 }
 
+static bool find_addr_calc_site(const struct program_meta *meta, __u32 *site)
+{
+	__u32 i;
+
+	for (i = 0; i + 2 < meta->insn_cnt; i++) {
+		const struct bpf_insn *mov = &meta->insns[i];
+		const struct bpf_insn *lsh = &meta->insns[i + 1];
+		const struct bpf_insn *add = &meta->insns[i + 2];
+
+		if (mov->code != (BPF_ALU64 | BPF_MOV | BPF_X))
+			continue;
+		if (mov->off != 0 || mov->imm != 0)
+			continue;
+		if (lsh->code != (BPF_ALU64 | BPF_LSH | BPF_K))
+			continue;
+		if (lsh->dst_reg != mov->dst_reg || lsh->off != 0)
+			continue;
+		if (lsh->imm < 1 || lsh->imm > 3)
+			continue;
+		if (add->code != (BPF_ALU64 | BPF_ADD | BPF_X))
+			continue;
+		if (add->dst_reg != mov->dst_reg || add->off != 0 || add->imm != 0)
+			continue;
+
+		*site = i;
+		return true;
+	}
+
+	return false;
+}
+
+static bool find_bitfield_extract_site(const struct program_meta *meta,
+				       __u32 *site, __u16 *site_len)
+{
+	__u32 i;
+
+	for (i = 0; i + 2 < meta->insn_cnt; i++) {
+		const struct bpf_insn *mov = &meta->insns[i];
+		const struct bpf_insn *first = &meta->insns[i + 1];
+		const struct bpf_insn *second = &meta->insns[i + 2];
+		__u8 mov_opcode;
+		__u8 rsh_opcode;
+		__u8 and_opcode;
+
+		switch (first->code) {
+		case BPF_ALU64 | BPF_RSH | BPF_K:
+		case BPF_ALU64 | BPF_AND | BPF_K:
+			mov_opcode = BPF_ALU64 | BPF_MOV | BPF_X;
+			rsh_opcode = BPF_ALU64 | BPF_RSH | BPF_K;
+			and_opcode = BPF_ALU64 | BPF_AND | BPF_K;
+			break;
+		case BPF_ALU | BPF_RSH | BPF_K:
+		case BPF_ALU | BPF_AND | BPF_K:
+			mov_opcode = BPF_ALU | BPF_MOV | BPF_X;
+			rsh_opcode = BPF_ALU | BPF_RSH | BPF_K;
+			and_opcode = BPF_ALU | BPF_AND | BPF_K;
+			break;
+		default:
+			continue;
+		}
+
+		if (mov->code != mov_opcode || mov->off != 0 || mov->imm != 0)
+			continue;
+		if (first->dst_reg != mov->dst_reg || second->dst_reg != mov->dst_reg)
+			continue;
+		if (first->off != 0 || second->off != 0)
+			continue;
+		if (!((first->code == rsh_opcode && second->code == and_opcode) ||
+		      (first->code == and_opcode && second->code == rsh_opcode)))
+			continue;
+
+		*site = i;
+		*site_len = 3;
+		return true;
+	}
+
+	for (i = 0; i + 1 < meta->insn_cnt; i++) {
+		const struct bpf_insn *first = &meta->insns[i];
+		const struct bpf_insn *second = &meta->insns[i + 1];
+		__u8 rsh_opcode;
+		__u8 and_opcode;
+
+		switch (first->code) {
+		case BPF_ALU64 | BPF_RSH | BPF_K:
+		case BPF_ALU64 | BPF_AND | BPF_K:
+			rsh_opcode = BPF_ALU64 | BPF_RSH | BPF_K;
+			and_opcode = BPF_ALU64 | BPF_AND | BPF_K;
+			break;
+		case BPF_ALU | BPF_RSH | BPF_K:
+		case BPF_ALU | BPF_AND | BPF_K:
+			rsh_opcode = BPF_ALU | BPF_RSH | BPF_K;
+			and_opcode = BPF_ALU | BPF_AND | BPF_K;
+			break;
+		default:
+			continue;
+		}
+
+		if (second->dst_reg != first->dst_reg)
+			continue;
+		if (first->off != 0 || second->off != 0)
+			continue;
+		if (!((first->code == rsh_opcode && second->code == and_opcode) ||
+		      (first->code == and_opcode && second->code == rsh_opcode)))
+			continue;
+
+		*site = i;
+		*site_len = 2;
+		return true;
+	}
+
+	return false;
+}
+
+static bool is_zero_ext_tail(const struct bpf_insn *insn, __u8 dst_reg)
+{
+	if (insn->code == (BPF_ALU | BPF_MOV | BPF_X))
+		return insn->dst_reg == dst_reg &&
+		       insn->src_reg == dst_reg &&
+		       insn->off == 0 &&
+		       insn->imm == 1;
+
+	if (insn->code == (BPF_ALU64 | BPF_MOV | BPF_X))
+		return insn->dst_reg == dst_reg &&
+		       insn->src_reg == dst_reg &&
+		       insn->off == 0 &&
+		       insn->imm == 0;
+
+	if (insn->code == (BPF_ALU64 | BPF_AND | BPF_K))
+		return insn->dst_reg == dst_reg &&
+		       insn->off == 0 &&
+		       insn->imm == -1;
+
+	return false;
+}
+
+static bool find_zero_ext_elide_site(const struct program_meta *meta, __u32 *site)
+{
+	__u32 i;
+
+	for (i = 0; i + 1 < meta->insn_cnt; i++) {
+		const struct bpf_insn *alu32 = &meta->insns[i];
+		const struct bpf_insn *tail = &meta->insns[i + 1];
+
+		if (BPF_CLASS(alu32->code) != BPF_ALU || BPF_OP(alu32->code) == BPF_END)
+			continue;
+		if (!is_zero_ext_tail(tail, alu32->dst_reg))
+			continue;
+
+		*site = i;
+		return true;
+	}
+
+	return false;
+}
+
+static int endian_width_from_mem_code(__u8 code)
+{
+	switch (code) {
+	case BPF_LDX | BPF_MEM | BPF_H:
+	case BPF_STX | BPF_MEM | BPF_H:
+		return 16;
+	case BPF_LDX | BPF_MEM | BPF_W:
+	case BPF_STX | BPF_MEM | BPF_W:
+		return 32;
+	case BPF_LDX | BPF_MEM | BPF_DW:
+	case BPF_STX | BPF_MEM | BPF_DW:
+		return 64;
+	default:
+		return -1;
+	}
+}
+
+static bool is_endian_swap(const struct bpf_insn *insn, int width)
+{
+	if (insn->off != 0 || insn->src_reg != 0 || insn->imm != width)
+		return false;
+
+	if (insn->code == (BPF_ALU64 | BPF_END | BPF_FROM_LE))
+		return width == 16 || width == 32 || width == 64;
+
+	if (insn->code == (BPF_ALU | BPF_END | BPF_FROM_BE))
+		return width == 16 || width == 32;
+
+	return false;
+}
+
+static bool find_endian_fusion_site(const struct program_meta *meta, __u32 *site)
+{
+	__u32 i;
+
+	for (i = 0; i + 1 < meta->insn_cnt; i++) {
+		const struct bpf_insn *first = &meta->insns[i];
+		const struct bpf_insn *second = &meta->insns[i + 1];
+		int width;
+
+		width = endian_width_from_mem_code(first->code);
+		if (width > 0 && BPF_CLASS(first->code) == BPF_LDX) {
+			if (first->imm == 0 && first->dst_reg == second->dst_reg &&
+			    is_endian_swap(second, width)) {
+				*site = i;
+				return true;
+			}
+		}
+
+		width = endian_width_from_mem_code(second->code);
+		if (width > 0 && BPF_CLASS(second->code) == BPF_STX) {
+			if (second->imm == 0 && first->dst_reg == second->src_reg &&
+			    is_endian_swap(first, width)) {
+				*site = i;
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+static bool branch_flip_body_linear(const struct bpf_insn *insns, __u32 start,
+				    __u32 len)
+{
+	__u32 i;
+
+	if (!len)
+		return false;
+
+	for (i = start; i < start + len; i++) {
+		__u8 cls = BPF_CLASS(insns[i].code);
+		__u8 op = BPF_OP(insns[i].code);
+
+		if ((cls == BPF_JMP || cls == BPF_JMP32) &&
+		    op != BPF_CALL && op != BPF_EXIT)
+			return false;
+		if (cls == BPF_STX || cls == BPF_ST)
+			return false;
+		if (insns[i].code == (BPF_LD | BPF_IMM | BPF_DW))
+			return false;
+	}
+
+	return true;
+}
+
+static bool branch_flip_cond_op_valid(__u8 op)
+{
+	switch (op) {
+	case BPF_JEQ:
+	case BPF_JNE:
+	case BPF_JGT:
+	case BPF_JLT:
+	case BPF_JGE:
+	case BPF_JLE:
+	case BPF_JSGT:
+	case BPF_JSLT:
+	case BPF_JSGE:
+	case BPF_JSLE:
+	case BPF_JSET:
+		return true;
+	default:
+		return false;
+	}
+}
+
+static bool find_branch_flip_site(const struct program_meta *meta, __u32 *site,
+				  __u16 *site_len)
+{
+	__u32 i;
+
+	for (i = 0; i + 3 < meta->insn_cnt; i++) {
+		const struct bpf_insn *jcc = &meta->insns[i];
+		const struct bpf_insn *ja;
+		__u32 body_a_start;
+		__u32 body_b_start;
+		__u32 ja_idx;
+		__u32 body_a_len;
+		__u32 body_b_len;
+		__u32 join_target;
+
+		if ((BPF_CLASS(jcc->code) != BPF_JMP &&
+		     BPF_CLASS(jcc->code) != BPF_JMP32) ||
+		    !branch_flip_cond_op_valid(BPF_OP(jcc->code)))
+			continue;
+
+		body_a_start = i + 1;
+		body_b_start = body_a_start + jcc->off;
+		if (body_b_start <= body_a_start || body_b_start > meta->insn_cnt)
+			continue;
+
+		ja_idx = body_b_start - 1;
+		if (ja_idx <= i || ja_idx >= meta->insn_cnt)
+			continue;
+		ja = &meta->insns[ja_idx];
+		if (ja->code != (BPF_JMP | BPF_JA))
+			continue;
+
+		body_a_len = ja_idx - body_a_start;
+		if (!body_a_len || body_a_len > 16)
+			continue;
+
+		join_target = ja_idx + 1 + ja->off;
+		if (join_target <= body_b_start || join_target > meta->insn_cnt)
+			continue;
+		body_b_len = join_target - body_b_start;
+		if (!body_b_len || body_b_len > 16)
+			continue;
+		if (!branch_flip_body_linear(meta->insns, body_a_start, body_a_len) ||
+		    !branch_flip_body_linear(meta->insns, body_b_start, body_b_len))
+			continue;
+
+		*site = i;
+		*site_len = join_target - i;
+		return true;
+	}
+
+	return false;
+}
+
 static int build_guarded_select_blob(const struct program_meta *meta, __u32 site,
 				     __u16 native_choice, struct blob *blob,
 				     char *msg, size_t msg_len)
@@ -1070,6 +1390,83 @@ static int build_wide_blob(const struct program_meta *meta, __u32 site,
 {
 	return build_wide_blob_with_choice(meta, site, BPF_JIT_WMEM_WIDE_LOAD,
 					   blob, msg, msg_len);
+}
+
+static int build_addr_calc_blob(const struct program_meta *meta, __u32 site,
+				struct blob *blob, char *msg, size_t msg_len)
+{
+	struct rule_parts parts = {
+		.rule = {
+			.site_start = site,
+			.site_len = 3,
+			.canonical_form = BPF_JIT_CF_ADDR_CALC,
+			.native_choice = BPF_JIT_ACALC_LEA,
+		},
+	};
+
+	return build_policy_blob(meta, &parts, 1, blob, msg, msg_len);
+}
+
+static int build_bitfield_extract_blob(const struct program_meta *meta, __u32 site,
+				       __u16 site_len, struct blob *blob,
+				       char *msg, size_t msg_len)
+{
+	struct rule_parts parts = {
+		.rule = {
+			.site_start = site,
+			.site_len = site_len,
+			.canonical_form = BPF_JIT_CF_BITFIELD_EXTRACT,
+			.native_choice = BPF_JIT_BFX_EXTRACT,
+		},
+	};
+
+	return build_policy_blob(meta, &parts, 1, blob, msg, msg_len);
+}
+
+static int build_zero_ext_elide_blob(const struct program_meta *meta, __u32 site,
+				     struct blob *blob, char *msg, size_t msg_len)
+{
+	struct rule_parts parts = {
+		.rule = {
+			.site_start = site,
+			.site_len = 2,
+			.canonical_form = BPF_JIT_CF_ZERO_EXT_ELIDE,
+			.native_choice = BPF_JIT_ZEXT_ELIDE,
+		},
+	};
+
+	return build_policy_blob(meta, &parts, 1, blob, msg, msg_len);
+}
+
+static int build_endian_fusion_blob(const struct program_meta *meta, __u32 site,
+				    struct blob *blob, char *msg, size_t msg_len)
+{
+	struct rule_parts parts = {
+		.rule = {
+			.site_start = site,
+			.site_len = 2,
+			.canonical_form = BPF_JIT_CF_ENDIAN_FUSION,
+			.native_choice = BPF_JIT_ENDIAN_MOVBE,
+		},
+	};
+
+	return build_policy_blob(meta, &parts, 1, blob, msg, msg_len);
+}
+
+static int build_branch_flip_blob(const struct program_meta *meta, __u32 site,
+				  __u16 site_len, struct blob *blob,
+				  char *msg, size_t msg_len)
+{
+	struct rule_parts parts = {
+		.rule = {
+			.site_start = site,
+			.site_len = site_len,
+			.canonical_form = BPF_JIT_CF_BRANCH_FLIP,
+			.native_choice = BPF_JIT_BFLIP_FLIPPED,
+		},
+	};
+
+	return build_policy_blob(meta, &parts, 1, blob, msg, msg_len);
 }
 
 static int load_meta_for_program(const char *obj_path, const char *prog_name,
@@ -1156,6 +1553,59 @@ static bool run_wide_packet_check(const struct loaded_program *prog,
 		return false;
 	}
 	return true;
+}
+
+static bool run_ctx_only_packet_check(const struct loaded_program *prog,
+				      __u64 *result,
+				      char *msg, size_t msg_len)
+{
+	static const unsigned char packet[] = { 0 };
+	__u32 retval = 0;
+
+	if (run_program_and_read_result(prog->prog_fd, prog->result_map_fd,
+					packet, sizeof(packet),
+					&retval, result, msg, msg_len))
+		return false;
+	if (retval != XDP_PASS) {
+		set_msg(msg, msg_len, "unexpected XDP retval %u", retval);
+		return false;
+	}
+	return true;
+}
+
+static bool run_addr_calc_packet_check(const struct loaded_program *prog,
+				       __u64 *result,
+				       char *msg, size_t msg_len)
+{
+	return run_ctx_only_packet_check(prog, result, msg, msg_len);
+}
+
+static bool run_bitfield_extract_packet_check(const struct loaded_program *prog,
+					      __u64 *result,
+					      char *msg, size_t msg_len)
+{
+	return run_ctx_only_packet_check(prog, result, msg, msg_len);
+}
+
+static bool run_zero_ext_elide_packet_check(const struct loaded_program *prog,
+					    __u64 *result,
+					    char *msg, size_t msg_len)
+{
+	return run_ctx_only_packet_check(prog, result, msg, msg_len);
+}
+
+static bool run_endian_fusion_packet_check(const struct loaded_program *prog,
+					   __u64 *result,
+					   char *msg, size_t msg_len)
+{
+	return run_ctx_only_packet_check(prog, result, msg, msg_len);
+}
+
+static bool run_branch_flip_packet_check(const struct loaded_program *prog,
+					 __u64 *result,
+					 char *msg, size_t msg_len)
+{
+	return run_ctx_only_packet_check(prog, result, msg, msg_len);
 }
 
 static bool test_load_tag(char *msg, size_t msg_len)
@@ -1814,6 +2264,257 @@ out:
 	return ok;
 }
 
+static bool test_addr_calc_preserved(char *msg, size_t msg_len)
+{
+	struct loaded_program prog;
+	struct program_meta meta;
+	struct blob blob = {};
+	__u32 site = 0;
+	__u64 before = 0, after = 0;
+	bool ok = false;
+	int rc;
+
+	if (load_meta_for_program(ADDR_CALC_OBJ, "test_addr_calc",
+				  &prog, &meta, msg, msg_len))
+		return false;
+	if (!run_addr_calc_packet_check(&prog, &before, msg, msg_len))
+		goto out;
+	if (!find_addr_calc_site(&meta, &site)) {
+		set_msg(msg, msg_len, "addr_calc site not found");
+		goto out;
+	}
+	if (build_addr_calc_blob(&meta, site, &blob, msg, msg_len))
+		goto out;
+
+	rc = apply_blob(prog.prog_fd, &blob, true, NULL, 0);
+	if (rc) {
+		set_msg(msg, msg_len, "addr_calc recompile failed: %s (%d)",
+			strerror(-rc), -rc);
+		goto out;
+	}
+	if (!run_addr_calc_packet_check(&prog, &after, msg, msg_len))
+		goto out;
+	if (before != after) {
+		set_msg(msg, msg_len,
+			"addr_calc result changed from 0x%llx to 0x%llx",
+			(unsigned long long)before,
+			(unsigned long long)after);
+		goto out;
+	}
+
+	set_msg(msg, msg_len, "addr_calc site_start=%u preserved 0x%llx",
+		site, (unsigned long long)after);
+	ok = true;
+
+out:
+	free_blob(&blob);
+	free_program_meta(&meta);
+	unload_program(&prog);
+	return ok;
+}
+
+static bool test_bitfield_extract_preserved(char *msg, size_t msg_len)
+{
+	struct loaded_program prog;
+	struct program_meta meta;
+	struct blob blob = {};
+	__u32 site = 0;
+	__u16 site_len = 0;
+	__u64 before = 0, after = 0;
+	bool ok = false;
+	int rc;
+
+	if (load_meta_for_program(BITFIELD_EXTRACT_OBJ, "test_bitfield_extract",
+				  &prog, &meta, msg, msg_len))
+		return false;
+	if (!run_bitfield_extract_packet_check(&prog, &before, msg, msg_len))
+		goto out;
+	if (!find_bitfield_extract_site(&meta, &site, &site_len)) {
+		set_msg(msg, msg_len, "bitfield_extract site not found");
+		goto out;
+	}
+	if (build_bitfield_extract_blob(&meta, site, site_len, &blob,
+					msg, msg_len))
+		goto out;
+
+	rc = apply_blob(prog.prog_fd, &blob, true, NULL, 0);
+	if (rc) {
+		set_msg(msg, msg_len, "bitfield_extract recompile failed: %s (%d)",
+			strerror(-rc), -rc);
+		goto out;
+	}
+	if (!run_bitfield_extract_packet_check(&prog, &after, msg, msg_len))
+		goto out;
+	if (before != after) {
+		set_msg(msg, msg_len,
+			"bitfield_extract result changed from 0x%llx to 0x%llx",
+			(unsigned long long)before,
+			(unsigned long long)after);
+		goto out;
+	}
+
+	set_msg(msg, msg_len,
+		"bitfield_extract site_start=%u site_len=%u preserved 0x%llx",
+		site, site_len, (unsigned long long)after);
+	ok = true;
+
+out:
+	free_blob(&blob);
+	free_program_meta(&meta);
+	unload_program(&prog);
+	return ok;
+}
+
+static bool test_zero_ext_elide_preserved(char *msg, size_t msg_len)
+{
+	struct loaded_program prog;
+	struct program_meta meta;
+	struct blob blob = {};
+	__u32 site = 0;
+	__u64 before = 0, after = 0;
+	bool ok = false;
+	int rc;
+
+	if (load_meta_for_program(ZERO_EXT_ELIDE_OBJ, "test_zero_ext_elide",
+				  &prog, &meta, msg, msg_len))
+		return false;
+	if (!run_zero_ext_elide_packet_check(&prog, &before, msg, msg_len))
+		goto out;
+	if (!find_zero_ext_elide_site(&meta, &site)) {
+		set_msg(msg, msg_len, "zero_ext_elide site not found");
+		goto out;
+	}
+	if (build_zero_ext_elide_blob(&meta, site, &blob, msg, msg_len))
+		goto out;
+
+	rc = apply_blob(prog.prog_fd, &blob, true, NULL, 0);
+	if (rc) {
+		set_msg(msg, msg_len, "zero_ext_elide recompile failed: %s (%d)",
+			strerror(-rc), -rc);
+		goto out;
+	}
+	if (!run_zero_ext_elide_packet_check(&prog, &after, msg, msg_len))
+		goto out;
+	if (before != after) {
+		set_msg(msg, msg_len,
+			"zero_ext_elide result changed from 0x%llx to 0x%llx",
+			(unsigned long long)before,
+			(unsigned long long)after);
+		goto out;
+	}
+
+	set_msg(msg, msg_len, "zero_ext_elide site_start=%u preserved 0x%llx",
+		site, (unsigned long long)after);
+	ok = true;
+
+out:
+	free_blob(&blob);
+	free_program_meta(&meta);
+	unload_program(&prog);
+	return ok;
+}
+
+static bool test_endian_fusion_preserved(char *msg, size_t msg_len)
+{
+	struct loaded_program prog;
+	struct program_meta meta;
+	struct blob blob = {};
+	__u32 site = 0;
+	__u64 before = 0, after = 0;
+	bool ok = false;
+	int rc;
+
+	if (load_meta_for_program(ENDIAN_FUSION_OBJ, "test_endian_fusion",
+				  &prog, &meta, msg, msg_len))
+		return false;
+	if (!run_endian_fusion_packet_check(&prog, &before, msg, msg_len))
+		goto out;
+	if (!find_endian_fusion_site(&meta, &site)) {
+		set_msg(msg, msg_len, "endian_fusion site not found");
+		goto out;
+	}
+	if (build_endian_fusion_blob(&meta, site, &blob, msg, msg_len))
+		goto out;
+
+	rc = apply_blob(prog.prog_fd, &blob, true, NULL, 0);
+	if (rc) {
+		set_msg(msg, msg_len, "endian_fusion recompile failed: %s (%d)",
+			strerror(-rc), -rc);
+		goto out;
+	}
+	if (!run_endian_fusion_packet_check(&prog, &after, msg, msg_len))
+		goto out;
+	if (before != after) {
+		set_msg(msg, msg_len,
+			"endian_fusion result changed from 0x%llx to 0x%llx",
+			(unsigned long long)before,
+			(unsigned long long)after);
+		goto out;
+	}
+
+	set_msg(msg, msg_len, "endian_fusion site_start=%u preserved 0x%llx",
+		site, (unsigned long long)after);
+	ok = true;
+
+out:
+	free_blob(&blob);
+	free_program_meta(&meta);
+	unload_program(&prog);
+	return ok;
+}
+
+static bool test_branch_flip_preserved(char *msg, size_t msg_len)
+{
+	struct loaded_program prog;
+	struct program_meta meta;
+	struct blob blob = {};
+	__u32 site = 0;
+	__u16 site_len = 0;
+	__u64 before = 0, after = 0;
+	bool ok = false;
+	int rc;
+
+	if (load_meta_for_program(BRANCH_FLIP_OBJ, "test_branch_flip",
+				  &prog, &meta, msg, msg_len))
+		return false;
+	if (!run_branch_flip_packet_check(&prog, &before, msg, msg_len))
+		goto out;
+	if (!find_branch_flip_site(&meta, &site, &site_len)) {
+		set_msg(msg, msg_len, "branch_flip site not found");
+		goto out;
+	}
+	if (build_branch_flip_blob(&meta, site, site_len, &blob,
+				   msg, msg_len))
+		goto out;
+
+	rc = apply_blob(prog.prog_fd, &blob, true, NULL, 0);
+	if (rc) {
+		set_msg(msg, msg_len, "branch_flip recompile failed: %s (%d)",
+			strerror(-rc), -rc);
+		goto out;
+	}
+	if (!run_branch_flip_packet_check(&prog, &after, msg, msg_len))
+		goto out;
+	if (before != after) {
+		set_msg(msg, msg_len,
+			"branch_flip result changed from 0x%llx to 0x%llx",
+			(unsigned long long)before,
+			(unsigned long long)after);
+		goto out;
+	}
+
+	set_msg(msg, msg_len,
+		"branch_flip site_start=%u site_len=%u preserved 0x%llx",
+		site, site_len, (unsigned long long)after);
+	ok = true;
+
+out:
+	free_blob(&blob);
+	free_program_meta(&meta);
+	unload_program(&prog);
+	return ok;
+}
+
 static bool test_repeated_recompile(char *msg, size_t msg_len)
 {
 	struct loaded_program prog;
@@ -2055,6 +2756,11 @@ int main(void)
 		{ "Zero-Length Blob Rejected", test_zero_length_blob },
 		{ "Diamond CMOV Recompile Preserves Result", test_diamond_cmov },
 		{ "Rotate Recompile Preserves Result", test_rotate_preserved },
+		{ "Addr Calc Recompile Preserves Result", test_addr_calc_preserved },
+		{ "Bitfield Extract Recompile Preserves Result", test_bitfield_extract_preserved },
+		{ "Zero Ext Elide Recompile Preserves Result", test_zero_ext_elide_preserved },
+		{ "Endian Fusion Recompile Preserves Result", test_endian_fusion_preserved },
+		{ "Branch Flip Recompile Preserves Result", test_branch_flip_preserved },
 		{ "Repeated Recompile Succeeds", test_repeated_recompile },
 		{ "Concurrent Recompile Returns EBUSY", test_concurrent_recompile },
 		{ "Recompile After Attach Works", test_recompile_after_attach },

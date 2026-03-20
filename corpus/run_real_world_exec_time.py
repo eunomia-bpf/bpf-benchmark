@@ -29,6 +29,9 @@ DEFAULT_REPEAT = 1000
 DEFAULT_ITERATIONS = 10
 DEFAULT_TIMEOUT_SECONDS = 60
 DEFAULT_CONTEXT_SIZE = 256
+SUPPORTED_RUNTIMES = ("kernel", "kernel-recompile")
+PAIR_RUNTIME_SET = frozenset(SUPPORTED_RUNTIMES)
+PAIR_RATIO_KEY = "kernel_recompile_over_kernel_exec_ratio"
 
 PACKET_CONTEXT_PROG_TYPES = {
     3,  # BPF_PROG_TYPE_SCHED_CLS
@@ -60,7 +63,7 @@ KERNEL_UNSUPPORTED_ERROR_SNIPPETS = (
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Compare exec_ns across llvmbpf and kernel for real-world BPF programs."
+        description="Compare exec_ns across stock kernel and kernel-recompile for real-world BPF programs."
     )
     parser.add_argument("--input", default=str(DEFAULT_INPUT), help="Path to real_world_code_size.latest.json.")
     parser.add_argument("--output", default=str(DEFAULT_OUTPUT), help="Path to output JSON payload.")
@@ -81,6 +84,13 @@ def parse_args() -> argparse.Namespace:
         help="Zero-filled context input size to materialize for io-mode=context.",
     )
     parser.add_argument("--max-programs", type=int, help="Limit the number of paired programs processed.")
+    parser.add_argument(
+        "--runtime",
+        action="append",
+        dest="runtimes",
+        choices=list(SUPPORTED_RUNTIMES),
+        help="Restrict execution to a subset of kernel runtimes. Defaults to stock kernel and kernel-recompile.",
+    )
     return parser.parse_args()
 
 
@@ -225,7 +235,7 @@ def build_command(
 ) -> list[str]:
     command = [
         str(runner),
-        "run-llvmbpf" if runtime == "llvmbpf" else "run-kernel",
+        "run-kernel",
         "--program",
         str(object_path),
         "--program-name",
@@ -235,13 +245,15 @@ def build_command(
         "--io-mode",
         io_mode,
     ]
+    if runtime == "kernel-recompile":
+        command.extend(["--recompile-v5", "--recompile-all"])
     if io_mode == "packet":
         command.append("--raw-packet")
     if input_file is not None:
         command.extend(["--memory", str(input_file)])
     elif io_mode == "packet":
         command.extend(["--input-size", "64"])
-    return ["sudo", "-n", *command] if runtime == "kernel" else command
+    return ["sudo", "-n", *command]
 
 
 def list_object_programs(runner: Path, object_path: Path, timeout_seconds: int) -> dict[str, Any]:
@@ -270,7 +282,11 @@ def list_object_programs(runner: Path, object_path: Path, timeout_seconds: int) 
     return {"command": command, "programs": programs, **outcome}
 
 
-def load_paired_programs(payload: dict[str, Any], max_programs: int | None) -> list[dict[str, Any]]:
+def load_paired_programs(
+    payload: dict[str, Any],
+    runtimes: list[str],
+    max_programs: int | None,
+) -> list[dict[str, Any]]:
     programs: list[dict[str, Any]] = []
     for source in payload.get("sources", []):
         object_path = source.get("build", {}).get("object_path")
@@ -278,7 +294,7 @@ def load_paired_programs(payload: dict[str, Any], max_programs: int | None) -> l
             continue
         for program in source.get("programs", []):
             runs = {run["runtime"]: run for run in program.get("runs", [])}
-            if runs.get("llvmbpf", {}).get("status") != "ok" or runs.get("kernel", {}).get("status") != "ok":
+            if not all(runs.get(runtime, {}).get("status") == "ok" for runtime in runtimes):
                 continue
             programs.append(
                 {
@@ -295,8 +311,7 @@ def load_paired_programs(payload: dict[str, Any], max_programs: int | None) -> l
                     "prog_type_name": str(program.get("prog_type_name", "")),
                     "attach_type_name": str(program.get("attach_type_name", "")),
                     "code_size": {
-                        "llvmbpf_native_code_bytes": runs["llvmbpf"]["sample"]["code_size"]["native_code_bytes"],
-                        "kernel_native_code_bytes": runs["kernel"]["sample"]["code_size"]["native_code_bytes"],
+                        runtime: runs[runtime]["sample"]["code_size"]["native_code_bytes"] for runtime in runtimes
                     },
                 }
             )
@@ -439,16 +454,17 @@ def run_runtime(
     }
 
 
-def maybe_reclassify_kernel_run(program: dict[str, Any], run: dict[str, Any]) -> dict[str, Any]:
-    if run["runtime"] != "kernel" or run["status"] != "error":
+def maybe_reclassify_runtime_run(program: dict[str, Any], run: dict[str, Any]) -> dict[str, Any]:
+    if run["status"] != "error":
         return run
 
+    runtime = str(run["runtime"])
     error_text = str(run.get("error", ""))
     if any(snippet in error_text for snippet in KERNEL_UNSUPPORTED_ERROR_SNIPPETS):
         reclassified = dict(run)
         reclassified["status"] = "skipped"
         reclassified["error"] = (
-            f"kernel test_run unsupported for {program_type_label(program)} with io-mode {run['io_mode']}: "
+            f"{runtime} test_run unsupported for {program_type_label(program)} with io-mode {run['io_mode']}: "
             f"{error_text}"
         )
         return reclassified
@@ -457,7 +473,7 @@ def maybe_reclassify_kernel_run(program: dict[str, Any], run: dict[str, Any]) ->
         reclassified = dict(run)
         reclassified["status"] = "skipped"
         reclassified["error"] = (
-            f"kernel test_run unsupported for socket_filter with io-mode {run['io_mode']}: "
+            f"{runtime} test_run unsupported for socket_filter with io-mode {run['io_mode']}: "
             f"{error_text}"
         )
         return reclassified
@@ -465,16 +481,19 @@ def maybe_reclassify_kernel_run(program: dict[str, Any], run: dict[str, Any]) ->
     return run
 
 
-def compute_summary(program_records: list[dict[str, Any]]) -> dict[str, Any]:
-    runtime_status = {"kernel": Counter(), "llvmbpf": Counter()}
-    failure_breakdown = {"kernel": Counter(), "llvmbpf": Counter()}
-    skip_breakdown = {"kernel": Counter(), "llvmbpf": Counter()}
+def compute_summary(program_records: list[dict[str, Any]], runtimes: list[str]) -> dict[str, Any]:
+    runtime_status = {runtime: Counter() for runtime in runtimes}
+    failure_breakdown = {runtime: Counter() for runtime in runtimes}
+    skip_breakdown = {runtime: Counter() for runtime in runtimes}
     ratios: list[float] = []
     any_runtime_exec_ok = 0
+    selected_runtime_exec_ok = 0
+    pair_mode = set(runtimes) == PAIR_RUNTIME_SET
 
     for record in program_records:
         runs = {run["runtime"]: run for run in record["runs"]}
-        for runtime, run in runs.items():
+        for runtime in runtimes:
+            run = runs[runtime]
             runtime_status[runtime][run["status"]] += 1
             if run["status"] in {"error", "timeout"}:
                 failure_breakdown[runtime][summarize_error(run["error"])] += 1
@@ -482,28 +501,26 @@ def compute_summary(program_records: list[dict[str, Any]]) -> dict[str, Any]:
                 skip_breakdown[runtime][summarize_error(run["error"])] += 1
         if any(run["status"] == "ok" for run in runs.values()):
             any_runtime_exec_ok += 1
+        if all(runs[runtime]["status"] == "ok" for runtime in runtimes):
+            selected_runtime_exec_ok += 1
+        if not pair_mode:
+            continue
         kernel_run = runs["kernel"]
-        llvmbpf_run = runs["llvmbpf"]
-        if (
-            kernel_run["status"] == "ok"
-            and llvmbpf_run["status"] == "ok"
-            and float(kernel_run["median_exec_ns"]) > 0.0
-        ):
-            ratios.append(float(llvmbpf_run["median_exec_ns"]) / float(kernel_run["median_exec_ns"]))
+        recompile_run = runs["kernel-recompile"]
+        if kernel_run["status"] == "ok" and recompile_run["status"] == "ok" and float(kernel_run["median_exec_ns"]) > 0.0:
+            ratios.append(float(recompile_run["median_exec_ns"]) / float(kernel_run["median_exec_ns"]))
 
     median_ratio = statistics.median(ratios) if ratios else None
     return {
         "programs": {
             "paired_from_code_size": len(program_records),
-            "kernel_test_run_ok": runtime_status["kernel"].get("ok", 0),
-            "llvmbpf_run_ok": runtime_status["llvmbpf"].get("ok", 0),
             "any_runtime_exec_ok": any_runtime_exec_ok,
-            "paired_exec_ok": len(ratios),
+            "selected_runtime_exec_ok": selected_runtime_exec_ok,
         },
         "runtime_status": {runtime: dict(counter) for runtime, counter in runtime_status.items()},
         "runtime_failure_breakdown": {runtime: dict(counter) for runtime, counter in failure_breakdown.items()},
         "runtime_skip_breakdown": {runtime: dict(counter) for runtime, counter in skip_breakdown.items()},
-        "llvmbpf_over_kernel_exec_ratio": {
+        PAIR_RATIO_KEY: {
             "paired_programs": len(ratios),
             "geomean": geomean(ratios),
             "min": min(ratios) if ratios else None,
@@ -521,13 +538,17 @@ def format_float(value: float | None, suffix: str = "") -> str:
 
 def render_report(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
-    ratio = summary["llvmbpf_over_kernel_exec_ratio"]
+    runtimes = list(payload["runtimes"])
+    pair_mode = set(runtimes) == PAIR_RUNTIME_SET
+    ratio = summary[PAIR_RATIO_KEY]
+    selected_runtime_label = "Programs with both runtimes ok" if pair_mode else "Programs with selected runtimes ok"
     lines = [
         "# Real-World Execution-Time Validation",
         "",
         f"- Generated at: `{payload['generated_at']}`",
         f"- Input: `{payload['code_size_input']}`",
         f"- Runner: `{payload['runner_binary']}`",
+        f"- Runtimes: {', '.join(f'`{runtime}`' for runtime in runtimes)}",
         f"- Iterations per program: `{payload['iterations']}`",
         f"- Repeat count per invocation: `{payload['repeat']}`",
         f"- I/O mode strategy: `{payload['io_mode_strategy']}`",
@@ -539,25 +560,28 @@ def render_report(payload: dict[str, Any]) -> str:
         "| Metric | Value |",
         "| --- | ---: |",
         f"| Programs paired in code-size input | {summary['programs']['paired_from_code_size']} |",
-        f"| Kernel `BPF_PROG_TEST_RUN` succeeded | {summary['programs']['kernel_test_run_ok']} |",
-        f"| llvmbpf runs completed | {summary['programs']['llvmbpf_run_ok']} |",
         f"| Programs with any runtime exec data | {summary['programs']['any_runtime_exec_ok']} |",
-        f"| Programs with both runtimes ok | {summary['programs']['paired_exec_ok']} |",
-        f"| Geomean exec ratio (llvmbpf/kernel) | {format_float(ratio['geomean'], 'x')} |",
-        "",
-        "## Runtime Status",
-        "",
-        "| Runtime | ok | error | timeout | skipped |",
-        "| --- | ---: | ---: | ---: | ---: |",
+        f"| {selected_runtime_label} | {summary['programs']['selected_runtime_exec_ok']} |",
     ]
-    for runtime in ("kernel", "llvmbpf"):
+    if pair_mode:
+        lines.append(f"| Geomean exec ratio (kernel-recompile/kernel) | {format_float(ratio['geomean'], 'x')} |")
+    lines.extend(
+        [
+            "",
+            "## Runtime Status",
+            "",
+            "| Runtime | ok | error | timeout | skipped |",
+            "| --- | ---: | ---: | ---: | ---: |",
+        ]
+    )
+    for runtime in runtimes:
         counter = summary["runtime_status"].get(runtime, {})
         lines.append(
             f"| {runtime} | {counter.get('ok', 0)} | {counter.get('error', 0)} | "
             f"{counter.get('timeout', 0)} | {counter.get('skipped', 0)} |"
         )
 
-    for runtime in ("kernel", "llvmbpf"):
+    for runtime in runtimes:
         failures = summary["runtime_failure_breakdown"].get(runtime, {})
         if not failures:
             continue
@@ -573,7 +597,7 @@ def render_report(payload: dict[str, Any]) -> str:
         for error, count in sorted(failures.items(), key=lambda item: (-item[1], item[0])):
             lines.append(f"| {error} | {count} |")
 
-    for runtime in ("kernel", "llvmbpf"):
+    for runtime in runtimes:
         skips = summary["runtime_skip_breakdown"].get(runtime, {})
         if not skips:
             continue
@@ -592,43 +616,45 @@ def render_report(payload: dict[str, Any]) -> str:
     coverage_rows = []
     for record in payload["programs"]:
         runs = {run["runtime"]: run for run in record["runs"]}
-        coverage_rows.append(
-            {
-                "repo": record["repo"],
-                "artifact": record["relative_path"],
-                "program": record["program_name"],
-                "section": record["section_name"],
-                "prog_type": program_type_label(record),
-                "io_mode": record["exec_io_mode"],
-                "kernel_status": runs["kernel"]["status"],
-                "llvmbpf_status": runs["llvmbpf"]["status"],
-            }
-        )
+        row = {
+            "repo": record["repo"],
+            "artifact": record["relative_path"],
+            "program": record["program_name"],
+            "section": record["section_name"],
+            "prog_type": program_type_label(record),
+            "io_mode": record["exec_io_mode"],
+        }
+        for runtime in runtimes:
+            row[f"{runtime}_status"] = runs[runtime]["status"]
+        coverage_rows.append(row)
     coverage_rows.sort(key=lambda row: (row["repo"], row["artifact"], row["program"]))
     if coverage_rows:
+        header = ["Repo", "Artifact", "Program", "Section", "Type", "I/O mode", *runtimes]
+        separator = ["---", "---", "---", "---", "---", "---", *(["---"] * len(runtimes))]
         lines.extend(
             [
                 "",
                 "## Program Coverage",
                 "",
-                "| Repo | Artifact | Program | Section | Type | I/O mode | kernel | llvmbpf |",
-                "| --- | --- | --- | --- | --- | --- | --- | --- |",
+                "| " + " | ".join(header) + " |",
+                "| " + " | ".join(separator) + " |",
             ]
         )
         for row in coverage_rows:
+            runtime_cells = [f"`{row[f'{runtime}_status']}`" for runtime in runtimes]
             lines.append(
                 f"| {row['repo']} | `{row['artifact']}` | `{row['program']}` | `{row['section']}` | "
-                f"`{row['prog_type']}` | `{row['io_mode']}` | `{row['kernel_status']}` | `{row['llvmbpf_status']}` |"
+                f"`{row['prog_type']}` | `{row['io_mode']}` | " + " | ".join(runtime_cells) + " |"
             )
 
     paired_rows = []
     for record in payload["programs"]:
         runs = {run["runtime"]: run for run in record["runs"]}
-        if (
-            runs["kernel"]["status"] != "ok"
-            or runs["llvmbpf"]["status"] != "ok"
-            or float(runs["kernel"]["median_exec_ns"]) <= 0.0
-        ):
+        if not pair_mode:
+            continue
+        if runs["kernel"]["status"] != "ok" or runs["kernel-recompile"]["status"] != "ok":
+            continue
+        if float(runs["kernel"]["median_exec_ns"]) <= 0.0:
             continue
         paired_rows.append(
             {
@@ -638,19 +664,19 @@ def render_report(payload: dict[str, Any]) -> str:
                 "section": record["section_name"],
                 "prog_type": program_type_label(record),
                 "io_mode": record["exec_io_mode"],
-                "llvmbpf": runs["llvmbpf"]["median_exec_ns"],
+                "kernel_recompile": runs["kernel-recompile"]["median_exec_ns"],
                 "kernel": runs["kernel"]["median_exec_ns"],
-                "ratio": float(runs["llvmbpf"]["median_exec_ns"]) / float(runs["kernel"]["median_exec_ns"]),
+                "ratio": float(runs["kernel-recompile"]["median_exec_ns"]) / float(runs["kernel"]["median_exec_ns"]),
             }
         )
     paired_rows.sort(key=lambda row: (row["ratio"], row["repo"], row["artifact"], row["program"]))
-    if paired_rows:
+    if pair_mode and paired_rows:
         lines.extend(
             [
                 "",
                 "## Program-Level Results",
                 "",
-                "| Repo | Artifact | Program | Section | Type | I/O mode | llvmbpf median ns | kernel median ns | L/K ratio |",
+                "| Repo | Artifact | Program | Section | Type | I/O mode | kernel-recompile median ns | kernel median ns | R/K ratio |",
                 "| --- | --- | --- | --- | --- | --- | ---: | ---: | ---: |",
             ]
         )
@@ -658,7 +684,7 @@ def render_report(payload: dict[str, Any]) -> str:
             lines.append(
                 f"| {row['repo']} | `{row['artifact']}` | `{row['program']}` | `{row['section']}` | "
                 f"`{row['prog_type']}` | `{row['io_mode']}` | "
-                f"{row['llvmbpf']:.1f} | {row['kernel']:.1f} | {row['ratio']:.3f}x |"
+                f"{row['kernel_recompile']:.1f} | {row['kernel']:.1f} | {row['ratio']:.3f}x |"
             )
 
     lines.extend(
@@ -666,13 +692,17 @@ def render_report(payload: dict[str, Any]) -> str:
             "",
             "## Notes",
             "",
-            "- Inputs come from the subset of programs that already compiled successfully on both runtimes in `real_world_code_size.latest.json`.",
+            "- Inputs come from the subset of programs that already compiled successfully on the selected runtimes in `real_world_code_size.latest.json`.",
             "- Packet mode is used only for XDP and skb-backed program types; all other program types use `io-mode=context` with a zero-filled context buffer.",
-            "- Kernel and llvmbpf exec runs are attempted independently so kernel `ENOTSUP` does not suppress userspace exec-time coverage.",
-            "- Kernel `BPF_PROG_TEST_RUN` cases that report `ENOTSUP` are recorded as `skipped` instead of hard failures.",
+            "- Selected kernel runtimes are attempted independently so one unsupported test_run path does not suppress coverage from the others.",
+            "- `BPF_PROG_TEST_RUN` cases that report `ENOTSUP` are recorded as `skipped` instead of hard failures.",
             "- `--program-name` uses the libbpf program name stored in the code-size results; section names are reported alongside the measurements.",
         ]
     )
+    if pair_mode:
+        lines.append(
+            "- `kernel-recompile` uses the existing `micro_exec run-kernel --recompile-v5 --recompile-all` path."
+        )
     return "\n".join(lines) + "\n"
 
 
@@ -694,8 +724,9 @@ def main() -> int:
     packet_file.write_bytes(generate_valid_packet())
     context_file.write_bytes(b"\x00" * args.context_size)
 
+    runtimes = args.runtimes or list(SUPPORTED_RUNTIMES)
     code_size_payload = json.loads(input_path.read_text())
-    paired_programs = load_paired_programs(code_size_payload, args.max_programs)
+    paired_programs = load_paired_programs(code_size_payload, runtimes, args.max_programs)
     inventory_cache = build_program_inventory_cache(paired_programs, runner_path, args.timeout_seconds)
     program_records: list[dict[str, Any]] = []
 
@@ -704,38 +735,31 @@ def main() -> int:
         object_path = Path(program["object_path"])
         io_mode = resolve_exec_io_mode(program)
         input_file = packet_file if io_mode == "packet" else context_file
-        kernel_run = maybe_reclassify_kernel_run(
-            program,
-            run_runtime(
-                "kernel",
-                runner_path,
-                object_path,
-                program["program_name"],
-                args.repeat,
-                args.iterations,
-                args.timeout_seconds,
-                io_mode,
-                input_file=input_file,
-            ),
-        )
-        llvmbpf_run = run_runtime(
-            "llvmbpf",
-            runner_path,
-            object_path,
-            program["program_name"],
-            args.repeat,
-            args.iterations,
-            args.timeout_seconds,
-            io_mode,
-            input_file=input_file,
-        )
-        program_records.append({**program, "exec_io_mode": io_mode, "runs": [kernel_run, llvmbpf_run]})
+        runs = [
+            maybe_reclassify_runtime_run(
+                program,
+                run_runtime(
+                    runtime,
+                    runner_path,
+                    object_path,
+                    program["program_name"],
+                    args.repeat,
+                    args.iterations,
+                    args.timeout_seconds,
+                    io_mode,
+                    input_file=input_file,
+                ),
+            )
+            for runtime in runtimes
+        ]
+        program_records.append({**program, "exec_io_mode": io_mode, "runs": runs})
 
     payload = {
         "dataset": "real_world_exec_time",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "code_size_input": str(input_path),
         "runner_binary": str(runner_path),
+        "runtimes": runtimes,
         "repeat": args.repeat,
         "iterations": args.iterations,
         "io_mode_strategy": "per-program: packet for XDP/skb-backed types, context otherwise",
@@ -745,7 +769,7 @@ def main() -> int:
         "host": {"platform": platform.platform(), "python": platform.python_version()},
         "programs": program_records,
     }
-    payload["summary"] = compute_summary(program_records)
+    payload["summary"] = compute_summary(program_records, runtimes)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(payload, indent=2) + "\n")

@@ -743,6 +743,7 @@ sample_result run_llvmbpf(const cli_options &options)
     uint64_t total_exec_cycles = 0;
     uint64_t total_exec_ns = 0;
     const auto tsc_freq_hz = detect_tsc_freq_hz();
+    const bool use_tsc_timing = tsc_freq_hz.has_value();
     const uint32_t repeat = options.repeat > 0 ? options.repeat : 1;
     active_map_state =
         ((effective_io_mode == "map" && has_input_map) || has_result_map)
@@ -755,44 +756,40 @@ sample_result run_llvmbpf(const cli_options &options)
         .include_kernel = false,
         .scope = options.perf_scope,
     };
-    const auto run_map_repeat = [&](uint8_t *ctx, size_t ctx_size) {
+    const auto run_timed_repeat = [&](auto &&exec_once) {
+        const uint64_t measure_start =
+            use_tsc_timing ? rdtsc_start() : monotonic_now_ns();
         for (uint32_t index = 0; index < repeat; ++index) {
-            const uint64_t measure_start = tsc_freq_hz.has_value() ? rdtsc_start() : monotonic_now_ns();
+            exec_once();
+        }
+        const uint64_t measure_end =
+            use_tsc_timing ? rdtsc_end() : monotonic_now_ns();
+        if (use_tsc_timing) {
+            total_exec_cycles += measure_end - measure_start;
+        } else {
+            total_exec_ns += measure_end - measure_start;
+        }
+    };
+    const auto run_map_repeat = [&](uint8_t *ctx, size_t ctx_size) {
+        run_timed_repeat([&]() {
             if (vm.exec(ctx, ctx_size, retval) < 0) {
                 fail("llvmbpf exec failed: " + vm.get_error_message());
             }
-            if (tsc_freq_hz.has_value()) {
-                total_exec_cycles += rdtsc_end() - measure_start;
-            } else {
-                total_exec_ns += monotonic_now_ns() - measure_start;
-            }
-        }
+        });
     };
     const auto run_packet_repeat = [&](xdp_md_ctx &ctx) {
-        for (uint32_t index = 0; index < repeat; ++index) {
-            const uint64_t measure_start = tsc_freq_hz.has_value() ? rdtsc_start() : monotonic_now_ns();
+        run_timed_repeat([&]() {
             if (vm.exec(&ctx, sizeof(ctx), retval) < 0) {
                 fail("llvmbpf exec failed: " + vm.get_error_message());
             }
-            if (tsc_freq_hz.has_value()) {
-                total_exec_cycles += rdtsc_end() - measure_start;
-            } else {
-                total_exec_ns += monotonic_now_ns() - measure_start;
-            }
-        }
+        });
     };
     const auto run_skb_repeat = [&](sk_buff_ctx &ctx) {
-        for (uint32_t index = 0; index < repeat; ++index) {
-            const uint64_t measure_start = tsc_freq_hz.has_value() ? rdtsc_start() : monotonic_now_ns();
+        run_timed_repeat([&]() {
             if (vm.exec(&ctx, sizeof(ctx), retval) < 0) {
                 fail("llvmbpf exec failed: " + vm.get_error_message());
             }
-            if (tsc_freq_hz.has_value()) {
-                total_exec_cycles += rdtsc_end() - measure_start;
-            } else {
-                total_exec_ns += monotonic_now_ns() - measure_start;
-            }
-        }
+        });
     };
     const auto run_packet_context = [&](lowmem_buffer &packet_buffer)
         -> std::optional<uint64_t> {

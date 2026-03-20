@@ -55,9 +55,13 @@ endef
 
 CLANG_SYS_INCLUDES := $(call get_sys_includes,$(CLANG))
 
-.PHONY: all clean run
+.PHONY: all clean run progs runner
 
 all: $(RUNNER) $(BPF_OBJS)
+
+progs: $(BPF_OBJS)
+
+runner: $(RUNNER)
 
 run: all
 	sudo $(RUNNER)

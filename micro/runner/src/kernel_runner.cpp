@@ -302,11 +302,22 @@ kernel_test_run_measurement execute_kernel_test_run(
     return measurement;
 }
 
+bool context_mode_supports_kernel_repeat(uint32_t prog_type)
+{
+    switch (prog_type) {
+    case BPF_PROG_TYPE_SK_LOOKUP:
+    case BPF_PROG_TYPE_NETFILTER:
+        return true;
+    default:
+        return false;
+    }
+}
+
 uint32_t resolve_kernel_repeat(const cli_options &options,
-                               std::string_view effective_io_mode,
+                               bool kernel_repeat_supported,
                                const kernel_test_run_context &base_context)
 {
-    if (effective_io_mode == "context") {
+    if (!kernel_repeat_supported) {
         return 1u;
     }
 
@@ -1411,10 +1422,18 @@ sample_result run_kernel(const cli_options &options)
 
     bpf_test_run_opts test_opts = {};
     test_opts.sz = sizeof(test_opts);
+    const bool kernel_repeat_supported =
+        effective_io_mode != "context" ||
+        context_mode_supports_kernel_repeat(program_info.type);
     const uint32_t requested_repeat =
-        effective_io_mode == "context" ? 1u : options.repeat;
-    test_opts.repeat =
-        effective_io_mode == "context" ? 0u : requested_repeat;
+        kernel_repeat_supported ? options.repeat : 1u;
+    /*
+     * Keep repeat=0 on unsupported context paths: raw_tp/syscall reject a
+     * non-zero repeat outright, while tracing/struct_ops do not batch the
+     * timed execution path. sk_lookup and netfilter do support kernel-side
+     * batching, so let them use repeat like packet-backed runs do.
+     */
+    test_opts.repeat = kernel_repeat_supported ? requested_repeat : 0u;
     if (!packet.empty()) {
         test_opts.data_in = packet.data();
         test_opts.data_size_in = packet.size();
@@ -1445,10 +1464,9 @@ sample_result run_kernel(const cli_options &options)
     };
 
     const uint32_t effective_repeat =
-        resolve_kernel_repeat(options, effective_io_mode, run_context);
+        resolve_kernel_repeat(options, kernel_repeat_supported, run_context);
     run_context.effective_repeat = effective_repeat;
-    test_opts.repeat =
-        effective_io_mode == "context" ? 0u : effective_repeat;
+    test_opts.repeat = kernel_repeat_supported ? effective_repeat : 0u;
 
     if (recompile.applied) {
         for (uint32_t warmup_index = 0; warmup_index < options.warmup_repeat;

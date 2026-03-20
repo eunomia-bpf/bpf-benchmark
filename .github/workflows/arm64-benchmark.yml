@@ -161,7 +161,7 @@ jobs:
         run: |
           python3 corpus/fetch_real_world_corpus.py --repo libbpf-bootstrap
 
-      - name: Run corpus code-size baseline
+      - name: Run corpus code-size baseline (kernel-only)
         id: corpus_code_size
         continue-on-error: true
         run: |
@@ -169,12 +169,11 @@ jobs:
           python3 corpus/run_real_world_code_size.py \
             --bpftool "${BPFTOOL_BIN}" \
             --repo libbpf-bootstrap \
-            --runtime llvmbpf \
             --runtime kernel \
             --output "${CORPUS_CODE_SIZE_OUTPUT}" \
             --report "${CORPUS_CODE_SIZE_REPORT}"
 
-      - name: Run corpus exec-time baseline
+      - name: Run corpus exec-time baseline (kernel-only)
         if: always()
         id: corpus_exec
         continue-on-error: true
@@ -187,6 +186,7 @@ jobs:
             --input "${CORPUS_CODE_SIZE_OUTPUT}" \
             --output "${CORPUS_EXEC_OUTPUT}" \
             --report "${CORPUS_EXEC_REPORT}" \
+            --runtime kernel \
             --iterations 5 \
             --repeat 200 \
             --context-size 256
@@ -223,7 +223,7 @@ jobs:
               echo "- Corpus exec-time baseline: missing"
             fi
             if [ -s "${CORPUS_EXEC_OUTPUT}" ]; then
-              python3 -c 'import json, os; from pathlib import Path; path = Path(os.environ["CORPUS_EXEC_OUTPUT"]); payload = json.loads(path.read_text()); summary = payload.get("summary", {}); programs = summary.get("programs", {}); runtime_status = summary.get("runtime_status", {}); kernel_status = runtime_status.get("kernel", {}); llvmbpf_status = runtime_status.get("llvmbpf", {}); print(f"- Corpus exec-time any-runtime ok: `{programs.get(\"any_runtime_exec_ok\", 0)}/{programs.get(\"paired_from_code_size\", 0)}`"); print(f"- Corpus exec-time paired ok: `{programs.get(\"paired_exec_ok\", 0)}/{programs.get(\"paired_from_code_size\", 0)}`"); print(f"- Corpus exec-time kernel ok/skipped: `{kernel_status.get(\"ok\", 0)}/{kernel_status.get(\"skipped\", 0)}`"); print(f"- Corpus exec-time llvmbpf ok/error: `{llvmbpf_status.get(\"ok\", 0)}/{llvmbpf_status.get(\"error\", 0)}`")'
+              python3 -c 'import json, os; from pathlib import Path; path = Path(os.environ["CORPUS_EXEC_OUTPUT"]); payload = json.loads(path.read_text()); runtimes = payload.get("runtimes", []); summary = payload.get("summary", {}); programs = summary.get("programs", {}); runtime_status = summary.get("runtime_status", {}); print(f"- Corpus exec-time any-runtime ok: `{programs.get(\"any_runtime_exec_ok\", 0)}/{programs.get(\"paired_from_code_size\", 0)}`"); print(f"- Corpus exec-time selected-runtime ok: `{programs.get(\"selected_runtime_exec_ok\", 0)}/{programs.get(\"paired_from_code_size\", 0)}`"); [print(f"- Corpus exec-time {runtime} ok/skipped/error: `{runtime_status.get(runtime, {}).get(\"ok\", 0)}/{runtime_status.get(runtime, {}).get(\"skipped\", 0)}/{runtime_status.get(runtime, {}).get(\"error\", 0)}`") for runtime in runtimes]'
             fi
           } >> "${GITHUB_STEP_SUMMARY}"
 

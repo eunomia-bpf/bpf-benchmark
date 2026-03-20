@@ -42,8 +42,8 @@ Long-lived support scripts also kept at the top level:
 
 - `fetch_bcf_dataset.py`: refreshes the BCF object dataset under `corpus/bcf/`
 - `analyze_bytecode.py`: extracts static bytecode features from the BCF dataset
-- `run_real_world_code_size.py`: compiles curated external programs and compares native code size
-- `run_real_world_exec_time.py`: measures exec-time deltas from `real_world_code_size.json`
+- `run_real_world_code_size.py`: compiles curated external programs and compares stock kernel vs kernel-recompile native code size
+- `run_real_world_exec_time.py`: measures stock kernel vs kernel-recompile exec-time deltas from `real_world_code_size.json`
 
 Private implementation modules retained at the top level:
 
