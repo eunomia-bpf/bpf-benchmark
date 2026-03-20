@@ -223,24 +223,7 @@ jobs:
               echo "- Corpus exec-time baseline: missing"
             fi
             if [ -s "${CORPUS_EXEC_OUTPUT}" ]; then
-              python3 - <<'PY'
-import json
-import os
-from pathlib import Path
-
-path = Path(os.environ["CORPUS_EXEC_OUTPUT"])
-payload = json.loads(path.read_text())
-summary = payload.get("summary", {})
-programs = summary.get("programs", {})
-runtime_status = summary.get("runtime_status", {})
-kernel_status = runtime_status.get("kernel", {})
-llvmbpf_status = runtime_status.get("llvmbpf", {})
-
-print(f"- Corpus exec-time any-runtime ok: `{programs.get('any_runtime_exec_ok', 0)}/{programs.get('paired_from_code_size', 0)}`")
-print(f"- Corpus exec-time paired ok: `{programs.get('paired_exec_ok', 0)}/{programs.get('paired_from_code_size', 0)}`")
-print(f"- Corpus exec-time kernel ok/skipped: `{kernel_status.get('ok', 0)}/{kernel_status.get('skipped', 0)}`")
-print(f"- Corpus exec-time llvmbpf ok/error: `{llvmbpf_status.get('ok', 0)}/{llvmbpf_status.get('error', 0)}`")
-PY
+              python3 -c 'import json, os; from pathlib import Path; path = Path(os.environ["CORPUS_EXEC_OUTPUT"]); payload = json.loads(path.read_text()); summary = payload.get("summary", {}); programs = summary.get("programs", {}); runtime_status = summary.get("runtime_status", {}); kernel_status = runtime_status.get("kernel", {}); llvmbpf_status = runtime_status.get("llvmbpf", {}); print(f"- Corpus exec-time any-runtime ok: `{programs.get(\"any_runtime_exec_ok\", 0)}/{programs.get(\"paired_from_code_size\", 0)}`"); print(f"- Corpus exec-time paired ok: `{programs.get(\"paired_exec_ok\", 0)}/{programs.get(\"paired_from_code_size\", 0)}`"); print(f"- Corpus exec-time kernel ok/skipped: `{kernel_status.get(\"ok\", 0)}/{kernel_status.get(\"skipped\", 0)}`"); print(f"- Corpus exec-time llvmbpf ok/error: `{llvmbpf_status.get(\"ok\", 0)}/{llvmbpf_status.get(\"error\", 0)}`")'
             fi
           } >> "${GITHUB_STEP_SUMMARY}"
 
