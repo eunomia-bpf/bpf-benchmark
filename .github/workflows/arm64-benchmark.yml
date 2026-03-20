@@ -25,7 +25,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          submodules: recursive
+
+      - name: Update required submodules
+        run: |
+          git submodule sync -- vendor/llvmbpf vendor/libbpf vendor/bpftool
+          git submodule update --init --depth 1 \
+            vendor/llvmbpf \
+            vendor/libbpf \
+            vendor/bpftool
 
       - name: Install dependencies
         run: |
