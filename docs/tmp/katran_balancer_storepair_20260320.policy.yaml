@@ -1,0 +1,12 @@
+# Investigation policy: only the 2 object-level endian-swap-store-16 sites.
+# The E2E live path remaps by family + pattern_kind order onto the two live
+# endian-swap-store-16 sites for balancer_ingress.
+version: 3
+program: 'balancer_ingress'
+sites:
+  - insn: 1462
+    family: endian
+    pattern_kind: 'endian-swap-store-16'
+  - insn: 2161
+    family: endian
+    pattern_kind: 'endian-swap-store-16'

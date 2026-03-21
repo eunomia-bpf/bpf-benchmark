@@ -1,0 +1,185 @@
+# Generated for Katran coverage analysis 2026-03-20
+
+version: 3
+program: 'balancer_ingress'
+sites:
+  - insn: 120
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 125
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 266
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 271
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 15
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 370
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 481
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 567
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 614
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 644
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 676
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 723
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 874
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 922
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 952
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 979
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1019
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1131
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1179
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1200
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1243
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1270
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1284
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1307
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1408
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1440
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1495
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1512
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1528
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1543
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1582
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1618
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1739
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1763
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1779
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1810
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1862
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1909
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1953
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1980
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1996
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2048
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2068
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2110
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2136
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2150
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2172
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2278
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2307
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2362
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2379
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2399
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2414
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2457
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2480
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2606
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2626
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2643
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2691
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2734
+    family: branch-flip
+    pattern_kind: 'branch-flip'

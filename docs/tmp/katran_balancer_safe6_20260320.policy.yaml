@@ -1,0 +1,23 @@
+# Generated for Katran coverage analysis 2026-03-20
+
+version: 3
+program: 'balancer_ingress'
+sites:
+  - insn: 120
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 125
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 266
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 271
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 381
+    family: endian
+    pattern_kind: 'endian-load-swap-32'
+  - insn: 734
+    family: endian
+    pattern_kind: 'endian-load-swap-32'
