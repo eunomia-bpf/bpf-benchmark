@@ -43,7 +43,7 @@ from runner.libs import (  # noqa: E402
 )
 from runner.libs.corpus import materialize_katran_packet  # noqa: E402
 from runner.libs.metrics import compute_delta, enable_bpf_stats, sample_bpf_stats, sample_total_cpu_usage  # noqa: E402
-from runner.libs.recompile import PolicyTarget, apply_recompile, resolve_policy_files, scan_programs  # noqa: E402
+from runner.libs.recompile import apply_daemon_rejit, scan_programs  # noqa: E402
 
 try:  # noqa: E402
     from runner.libs.inventory import discover_object_programs
@@ -56,7 +56,6 @@ DEFAULT_SETUP_SCRIPT = Path(__file__).with_name("setup.sh")
 DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "katran")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "katran-e2e-real.md"
 DEFAULT_KATRAN_OBJECT = ROOT_DIR / "corpus" / "build" / "katran" / "balancer.bpf.o"
-DEFAULT_POLICY_FILE = Path(__file__).with_name("balancer_ingress.e2e.policy.yaml")
 DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
 DEFAULT_DAEMON = ROOT_DIR / "daemon" / "build" / "bpfrejit-daemon"
 DEFAULT_KATRAN_TEST_PACKET = ROOT_DIR / "corpus" / "inputs" / "katran_vip_packet_64.bin"
@@ -583,13 +582,7 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         f"- bpf avg ns/run: `{((payload['baseline'].get('summary') or {}).get('bpf_avg_ns_per_run'))}`",
         f"- total events: `{((payload['baseline'].get('summary') or {}).get('events'))}`",
         "",
-        "## Recompile",
-        "",
-        f"- Applied cycles: `{payload['recompile_summary']['applied_cycles']}` / `{payload['recompile_summary']['requested_cycles']}`",
-        f"- Applied successfully on all cycles: `{payload['recompile_summary']['all_cycles_applied']}`",
     ]
-    if payload["recompile_summary"].get("errors"):
-        lines.append(f"- Errors: `{payload['recompile_summary']['errors']}`")
     if payload.get("post_rejit"):
         lines.extend(
             [
@@ -2020,14 +2013,11 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
     runner_binary = Path(args.runner).resolve()
     scanner_binary = Path(args.scanner).resolve()
     katran_object = Path(args.katran_object).resolve()
-    policy_file = Path(args.katran_policy).resolve()
     setup_script = Path(args.setup_script).resolve()
 
     ensure_artifacts(runner_binary, scanner_binary)
     if not katran_object.exists():
         raise RuntimeError(f"Katran object not found: {katran_object}")
-    if not policy_file.exists():
-        raise RuntimeError(f"Katran policy not found: {policy_file}")
 
     setup_result = {
         "returncode": 0,
@@ -2097,16 +2087,6 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
                         cycle_test_run = run_katran_prog_test_run(session)
                         time.sleep(TOPOLOGY_SETTLE_S)
                         prog_ids = [session.prog_id]
-                        policy_files = resolve_policy_files(
-                            [
-                                PolicyTarget(
-                                    prog_id=session.prog_id,
-                                    object_path=katran_object,
-                                    program_name=DEFAULT_PROGRAM_NAME,
-                                    policy_file=policy_file,
-                                )
-                            ]
-                        )
                         baseline_sample = measure_phase(
                             index=cycle_index,
                             phase_name="stock",
@@ -2125,16 +2105,11 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
                             "summary": build_phase_summary([baseline_sample]),
                         }
                         scan_results = scan_programs(prog_ids, scanner_binary)
-                        recompile_results = apply_recompile(
-                            prog_ids,
-                            scanner_binary,
-                            policy_files=policy_files,
-                        )
-                        applied = sum(1 for record in recompile_results.values() if record.get("applied"))
-                        post_sample = (
-                            measure_phase(
+                        rejit_result = apply_daemon_rejit(scanner_binary, prog_ids)
+                        if rejit_result["applied"]:
+                            post_rejit_sample = measure_phase(
                                 index=cycle_index,
-                                phase_name="recompile",
+                                phase_name="post_rejit",
                                 session=session,
                                 traffic_iterations=traffic_iterations,
                                 duration_s=duration_s,
@@ -2145,42 +2120,24 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
                                 wrk_connections=wrk_connections,
                                 wrk_threads=wrk_threads,
                             )
-                            if applied > 0
-                            else None
-                        )
-                        post_phase = (
-                            {
-                                "samples": [post_sample],
-                                "summary": build_phase_summary([post_sample]),
+                            post_rejit_phase: dict[str, object] | None = {
+                                "samples": [post_rejit_sample],
+                                "summary": build_phase_summary([post_rejit_sample]),
                             }
-                            if post_sample is not None
-                            else None
-                        )
+                        else:
+                            post_rejit_phase = None
                         cycle_results.append(
                             {
                                 "cycle_index": cycle_index,
                                 "topology": topology.metadata(),
                                 "http_server": http_server.metadata(),
                                 "live_program": session.metadata(),
-                                "policy_matches": {str(key): value for key, value in policy_files.items()},
                                 "scan_results": {str(key): value for key, value in scan_results.items()},
-                                "recompile_results": {str(key): value for key, value in recompile_results.items()},
-                                "recompile_summary": {
-                                    "requested_programs": 1,
-                                    "applied_programs": applied,
-                                    "applied": applied > 0,
-                                    "errors": sorted(
-                                        {
-                                            record.get("error", "")
-                                            for record in recompile_results.values()
-                                            if record.get("error")
-                                        }
-                                    ),
-                                },
                                 "test_run_validation": cycle_test_run,
                                 "baseline": baseline_phase,
-                                "post_rejit": post_phase,
-                                "comparison": compare_phases(baseline_phase, post_phase),
+                                "rejit_result": rejit_result,
+                                "post_rejit": post_rejit_phase,
+                                "comparison": compare_phases(baseline_phase, post_rejit_phase),
                             }
                         )
                         if not session_metadata:
@@ -2197,32 +2154,21 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         for cycle in cycle_results
         for sample in (cycle.get("baseline") or {}).get("samples") or []
     ]
-    post_samples = [
-        sample
-        for cycle in cycle_results
-        for sample in (cycle.get("post_rejit") or {}).get("samples") or []
-    ]
     baseline = {
         "samples": baseline_samples,
         "summary": build_phase_summary(baseline_samples),
     }
-    post = (
-        {
-            "samples": post_samples,
-            "summary": build_phase_summary(post_samples),
+    post_rejit_samples = [
+        sample
+        for cycle in cycle_results
+        for sample in (cycle.get("post_rejit") or {}).get("samples") or []
+    ]
+    post_rejit: dict[str, object] | None = None
+    if post_rejit_samples:
+        post_rejit = {
+            "samples": post_rejit_samples,
+            "summary": build_phase_summary(post_rejit_samples),
         }
-        if post_samples
-        else None
-    )
-    applied_cycles = sum(1 for cycle in cycle_results if (cycle.get("recompile_summary") or {}).get("applied"))
-    if applied_cycles == 0:
-        limitations.append(
-            "BPF_PROG_JIT_RECOMPILE did not apply on this kernel for balancer_ingress; post-ReJIT measurement was skipped."
-        )
-    elif applied_cycles != sample_count:
-        limitations.append(
-            f"BPF_PROG_JIT_RECOMPILE applied on {applied_cycles}/{sample_count} cycles; top-level post-ReJIT summary includes only successful cycles."
-        )
 
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -2243,7 +2189,6 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         "same_image_measurement": True,
         "state_reset_strategy": "reset mutable stats/fallback maps before each phase warmup",
         "katran_object": relpath(katran_object),
-        "katran_policy": relpath(policy_file),
         "katran_server_binary": server_binary,
         "setup": setup_result,
         "host": host_metadata(),
@@ -2256,26 +2201,9 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         "http_server": server_metadata,
         "baseline": baseline,
         "paired_cycles": cycle_results,
-        "policy_matches": {str(cycle["cycle_index"]): cycle["policy_matches"] for cycle in cycle_results},
         "scan_results": {str(cycle["cycle_index"]): cycle["scan_results"] for cycle in cycle_results},
-        "recompile_results": {str(cycle["cycle_index"]): cycle["recompile_results"] for cycle in cycle_results},
-        "recompile_summary": {
-            "requested_programs_per_cycle": 1,
-            "requested_cycles": sample_count,
-            "applied_cycles": applied_cycles,
-            "applied": applied_cycles > 0,
-            "all_cycles_applied": applied_cycles == sample_count,
-            "errors": sorted(
-                {
-                    error
-                    for cycle in cycle_results
-                    for error in ((cycle.get("recompile_summary") or {}).get("errors") or [])
-                    if error
-                }
-            ),
-        },
-        "post_rejit": post,
-        "comparison": compare_phases(baseline, post),
+        "post_rejit": post_rejit,
+        "comparison": compare_phases(baseline, post_rejit),
         "limitations": limitations,
     }
     return payload
@@ -2287,7 +2215,6 @@ def build_case_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON))
     parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD))
     parser.add_argument("--katran-object", default=str(DEFAULT_KATRAN_OBJECT))
-    parser.add_argument("--katran-policy", default=str(DEFAULT_POLICY_FILE))
     parser.add_argument("--katran-server-binary")
     parser.add_argument("--katran-iface", default=DEFAULT_INTERFACE)
     parser.add_argument("--katran-router-peer-iface")

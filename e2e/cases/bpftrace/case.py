@@ -37,7 +37,7 @@ from runner.libs.metrics import (  # noqa: E402
     sample_cpu_usage,
     sample_total_cpu_usage,
 )
-from runner.libs.recompile import PolicyTarget, apply_recompile, resolve_policy_files, scan_programs  # noqa: E402
+from runner.libs.recompile import apply_daemon_rejit, scan_programs  # noqa: E402
 from runner.libs.workload import (  # noqa: E402
     WorkloadResult,
     run_dd_read_load,
@@ -55,7 +55,6 @@ DEFAULT_REPORT_MD = ROOT_DIR / "docs" / "tmp" / "bpftrace-real-e2e-report.md"
 DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
 DEFAULT_DAEMON = ROOT_DIR / "daemon" / "build" / "bpfrejit-daemon"
 DEFAULT_DURATION_S = 30
-BPFTRACE_POLICY_OBJECT_DIR = ROOT_DIR / "corpus" / "build" / "bpftrace"
 MIN_BPFTRACE_VERSION = (0, 16, 0)
 
 
@@ -260,72 +259,6 @@ def aggregate_site_totals(records: Mapping[int, Mapping[str, object]]) -> dict[s
     return totals
 
 
-def resolve_bpftrace_policy_files(
-    spec: ScriptSpec,
-    programs: Sequence[Mapping[str, object]],
-) -> dict[int, str]:
-    object_hint = BPFTRACE_POLICY_OBJECT_DIR / f"{spec.name}.bpf.o"
-    targets = [
-        PolicyTarget(
-            prog_id=int(program.get("id", 0)),
-            object_path=object_hint,
-            program_name=str(program.get("name", "")).strip() or None,
-        )
-        for program in programs
-        if int(program.get("id", 0) or 0) > 0
-    ]
-    resolved = resolve_policy_files(targets)
-    unresolved = [
-        program
-        for program in programs
-        if int(program.get("id", 0) or 0) > 0 and int(program.get("id", 0)) not in resolved
-    ]
-    if not unresolved:
-        return resolved
-
-    from runner.libs.policy import parse_policy_v3, program_policy_dir
-
-    policy_dir = program_policy_dir(object_hint)
-    if not policy_dir.exists():
-        return resolved
-
-    candidates: list[tuple[Path, str | None]] = []
-    for candidate in sorted(policy_dir.glob("*.policy.yaml")):
-        try:
-            document = parse_policy_v3(candidate)
-        except Exception:
-            continue
-        candidates.append((candidate.resolve(), document.program))
-    if not candidates:
-        return resolved
-
-    if len(candidates) == 1:
-        only_policy = str(candidates[0][0])
-        for program in unresolved:
-            prog_id = int(program.get("id", 0) or 0)
-            if prog_id > 0:
-                resolved[prog_id] = only_policy
-        return resolved
-
-    for program in unresolved:
-        prog_id = int(program.get("id", 0) or 0)
-        if prog_id <= 0:
-            continue
-        live_name = str(program.get("name", "")).strip()
-        if not live_name:
-            continue
-        matches = sorted(
-            {
-                str(candidate_path)
-                for candidate_path, candidate_program in candidates
-                if candidate_program and candidate_program.rsplit(":", 1)[-1] == live_name
-            }
-        )
-        if len(matches) == 1:
-            resolved[prog_id] = matches[0]
-    return resolved
-
-
 def run_named_workload(kind: str, duration_s: int) -> WorkloadResult:
     if kind == "open_latency":
         return run_file_open_load(duration_s)
@@ -429,21 +362,19 @@ def run_phase(
     duration_s: int,
     attach_timeout: int,
     scanner_binary: Path,
-    apply_rejit: bool,
-) -> dict[str, object]:
+) -> tuple[dict[str, object], dict[str, object] | None]:
+    """Run baseline then daemon-apply then rejit measurement for one bpftrace script.
+
+    Returns (baseline, rejit) where rejit is None if apply failed or was skipped.
+    """
     process = start_agent("bpftrace", ["-q", str(spec.script_path)])
-    result: dict[str, object] = {
-        "phase": "rejit" if apply_rejit else "baseline",
+    baseline: dict[str, object] = {
+        "phase": "baseline",
         "status": "error",
         "reason": "",
         "programs": [],
         "prog_ids": [],
         "scan_results": {},
-        "policy_matches": {},
-        "policy_summary": {
-            "configured_programs": 0,
-            "fallback_programs": 0,
-        },
         "site_totals": {
             "total_sites": 0,
             "cmov_sites": 0,
@@ -451,77 +382,23 @@ def run_phase(
             "rotate_sites": 0,
             "lea_sites": 0,
         },
-        "recompile_results": {},
-        "recompile_summary": {
-            "eligible_programs": 0,
-            "applied_programs": 0,
-            "noop_programs": 0,
-            "errors": [],
-        },
         "measurement": None,
         "process": {},
     }
+    rejit: dict[str, object] | None = None
     try:
         programs = wait_for_attached_programs(process, expected_count=spec.expected_programs, timeout_s=attach_timeout)
         if not programs:
-            result["status"] = "skipped"
-            result["reason"] = "bpftrace did not attach any programs"
-            return result
+            baseline["status"] = "skipped"
+            baseline["reason"] = "bpftrace did not attach any programs"
+            return baseline, None
 
         prog_ids = [int(program["id"]) for program in programs]
-        result["programs"] = programs
-        result["prog_ids"] = prog_ids
+        baseline["programs"] = programs
+        baseline["prog_ids"] = prog_ids
         scan_results = scan_programs(prog_ids, scanner_binary)
-        result["scan_results"] = {str(key): value for key, value in scan_results.items()}
-        result["site_totals"] = aggregate_site_totals(scan_results)
-        eligible_prog_ids = [
-            int(prog_id)
-            for prog_id, record in scan_results.items()
-            if int((record.get("sites") or {}).get("total_sites", 0) or 0) > 0
-        ]
-        eligible_programs = [
-            program
-            for program in programs
-            if int(program.get("id", 0) or 0) in set(eligible_prog_ids)
-        ]
-        policy_files = resolve_bpftrace_policy_files(spec, eligible_programs)
-        result["policy_matches"] = {str(prog_id): path for prog_id, path in policy_files.items()}
-        result["policy_summary"] = {
-            "configured_programs": len(policy_files),
-            "fallback_programs": max(0, len(eligible_prog_ids) - len(policy_files)),
-        }
-
-        if apply_rejit:
-            result["recompile_summary"]["eligible_programs"] = len(eligible_prog_ids)
-            if not eligible_prog_ids:
-                result["status"] = "skipped"
-                result["reason"] = "no eligible directive sites"
-                return result
-
-            recompile_results = apply_recompile(
-                eligible_prog_ids,
-                scanner_binary,
-                policy_files=policy_files,
-            )
-            applied_programs = sum(1 for record in recompile_results.values() if record.get("applied"))
-            noop_programs = sum(1 for record in recompile_results.values() if record.get("noop"))
-            errors = sorted({str(record.get("error", "")).strip() for record in recompile_results.values() if record.get("error")})
-            result["recompile_results"] = {str(key): value for key, value in recompile_results.items()}
-            result["recompile_summary"] = {
-                "eligible_programs": len(eligible_prog_ids),
-                "applied_programs": applied_programs,
-                "noop_programs": noop_programs,
-                "errors": errors,
-            }
-            if applied_programs <= 0:
-                result["status"] = "skipped"
-                result["reason"] = (
-                    "policy filtered all live sites"
-                    if noop_programs == len(eligible_prog_ids)
-                    else "BPF_PROG_JIT_RECOMPILE did not apply"
-                )
-                return result
-            time.sleep(0.5)
+        baseline["scan_results"] = {str(key): value for key, value in scan_results.items()}
+        baseline["site_totals"] = aggregate_site_totals(scan_results)
 
         measurement = measure_workload(
             spec.workload_kind,
@@ -530,20 +407,45 @@ def run_phase(
             agent_pid=int(process.pid or 0),
             initial_stats=sample_bpf_stats(prog_ids),
         )
-        result["measurement"] = measurement
-        result["status"] = "ok"
-        return result
+        baseline["measurement"] = measurement
+        baseline["status"] = "ok"
+
+        rejit_apply = apply_daemon_rejit(scanner_binary, prog_ids)
+        if rejit_apply["applied"]:
+            rejit = {
+                "phase": "post_rejit",
+                "status": "ok",
+                "reason": "",
+                "programs": programs,
+                "prog_ids": prog_ids,
+                "scan_results": baseline["scan_results"],
+                "site_totals": baseline["site_totals"],
+                "rejit_result": rejit_apply,
+                "measurement": measure_workload(
+                    spec.workload_kind,
+                    duration_s,
+                    prog_ids,
+                    agent_pid=int(process.pid or 0),
+                    initial_stats=sample_bpf_stats(prog_ids),
+                ),
+                "process": {},
+            }
+
+        return baseline, rejit
     except Exception as exc:
-        result["status"] = "error"
-        result["reason"] = str(exc)
-        return result
+        baseline["status"] = "error"
+        baseline["reason"] = str(exc)
+        return baseline, rejit
     finally:
         stop_agent(process, timeout=8)
-        result["process"] = finalize_process_output(process)
-        if result["status"] != "ok" and not result["reason"]:
-            stderr_tail = str(result["process"].get("stderr_tail") or "")
-            stdout_tail = str(result["process"].get("stdout_tail") or "")
-            result["reason"] = stderr_tail or stdout_tail or "unknown failure"
+        process_output = finalize_process_output(process)
+        baseline["process"] = process_output
+        if rejit is not None:
+            rejit["process"] = process_output
+        if baseline["status"] != "ok" and not baseline["reason"]:
+            stderr_tail = str(process_output.get("stderr_tail") or "")
+            stdout_tail = str(process_output.get("stdout_tail") or "")
+            baseline["reason"] = stderr_tail or stdout_tail or "unknown failure"
 
 
 def summarize_script(spec: ScriptSpec, baseline: Mapping[str, object], rejit: Mapping[str, object] | None) -> dict[str, object]:
@@ -785,22 +687,12 @@ def run_case(args: argparse.Namespace) -> dict[str, object]:
     records: list[dict[str, object]] = []
     with enable_bpf_stats():
         for spec in scripts:
-            baseline = run_phase(
+            baseline, rejit = run_phase(
                 spec,
                 duration_s=duration_s,
                 attach_timeout=int(args.attach_timeout),
                 scanner_binary=scanner_binary,
-                apply_rejit=False,
             )
-            rejit = None
-            if baseline.get("status") == "ok":
-                rejit = run_phase(
-                    spec,
-                    duration_s=duration_s,
-                    attach_timeout=int(args.attach_timeout),
-                    scanner_binary=scanner_binary,
-                    apply_rejit=True,
-                )
             summary = summarize_script(spec, baseline, rejit)
             records.append(
                 {

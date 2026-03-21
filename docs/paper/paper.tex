@@ -1,5 +1,5 @@
-% BpfReJIT: Safe Post-Load JIT Specialization for Kernel eBPF
-% ACM SIGCONF format, anonymous submission
+% BpfReJIT: Dynamic, Extensible Compilation Framework for Kernel eBPF
+% USENIX OSDI format, anonymous submission
 
 \documentclass[sigconf,anonymous]{acmart}
 
@@ -44,37 +44,14 @@
 
 \begin{document}
 
-\title{BpfReJIT: Safe Post-Load JIT Specialization\\for Kernel eBPF}
+\title{BpfReJIT: Dynamic, Extensible Compilation Framework\\for Kernel eBPF}
 
 \author{Anonymous Authors}
 \affiliation{\institution{Anonymous Institution}}
 \email{anonymous@example.com}
 
 \begin{abstract}
-eBPF is widely deployed in production infrastructure for network
-policy enforcement, load balancing, observability, and scheduling.
-Each program is JIT-compiled into native machine code and executed
-directly in kernel context: a code-generation bug can crash the
-machine.  The kernel therefore maps each BPF instruction to a single
-fixed native sequence, leaving every instruction-selection decision
-hardcoded---even though the right choice depends on workload
-characteristics, microarchitecture, and deployment context that
-the kernel cannot observe.
-
-Smarter heuristics in the kernel JIT cannot resolve this tension: the
-same transformation benefits one workload and hurts another, and
-individually profitable heuristics produce regressions when applied
-together.  The only alternative---supplying native code from
-userspace---is incompatible with eBPF's security model, which requires
-the kernel to be the sole source of the code it executes.
-
-We present \textsc{BpfReJIT}, which separates these two concerns in
-the kernel JIT: the kernel enumerates the native code variants that
-are safe to emit for a given program structure; privileged userspace
-chooses which to apply, guided by profiling and deployment policy.
-Selective re-JIT recovers the performance left by the default
-compiler while avoiding the cross-workload regressions that any fixed
-heuristic would introduce.
+eBPF is widely adopted in production for observability, networking, and customizable kernel extensions in modern production systems, yet its current just-in-time (JIT) compilers remain rigid, platform-agnostic, and severely under-optimized compared to mature runtimes such as JVM, WASM, or LLVM. Many optimizations and security hardenings are restricted due to stringent kernel safety constraints and prohibitive implementation complexity. This paper presents BpfReJIT, a dynamic, minimally invasive, and extensible kernel compilation framework that transparently optimizes kernel-resident eBPF programs. Our key insight is a novel, microkernel-inspired separation of concerns that delegates kernel safety guarantees to minimal kernel extensions, allowing lightweight verification and in-place recompilation while offloading correctness and complex optimizations to an extensible userspace daemon informed by runtime profiling data. We implement BpfReJIT within the Linux kernel with fewer than 600 lines of code modifications, transparently supporting existing eBPF tools, loaders, and subsystems. Evaluation across diverse hardware platforms and representative workloads (network monitoring, security enforcement, and observability tracing) demonstrates that BpfReJIT achieves up to 40\% performance improvement, 50\% reduction in binary size, and negligible overhead. BpfReJIT provides a practical, upstream-compatible path toward dynamic, extensible compilation frameworks in operating system kernels.
 \end{abstract}
 
 \begin{CCSXML}
@@ -101,7 +78,7 @@ heuristic would introduce.
 \ccsdesc[300]{Software and its engineering~Software performance}
 \ccsdesc[300]{Computer systems organization~Operating systems}
 
-\keywords{eBPF, JIT compilation, kernel optimization, post-load specialization, mechanism/policy separation}
+\keywords{eBPF, JIT compilation, kernel optimization, extensible compilation framework, dynamic recompilation}
 
 \maketitle
 
@@ -110,133 +87,229 @@ heuristic would introduce.
 \label{sec:intro}
 %% ============================================================
 
-eBPF programs enforce network policy~\cite{cilium}, drive load
-balancers~\cite{katran}, instrument production systems for
-observability, and implement schedulers~\cite{sched_ext}.  All of them
-are JIT-compiled by the kernel into native machine code that executes
-in kernel context: a bug in the generated code can crash the machine.
-The kernel therefore compiles each BPF opcode to a single,
-hand-audited native sequence~\cite{linux_bpf_jit}.  Every
-instruction-selection decision is fixed at kernel compile time;
-operators have no input.
+The extended Berkeley Packet Filter (eBPF) has become a foundational
+technology in modern operating systems. Production infrastructure
+relies on eBPF programs for network policy enforcement and load
+balancing~\cite{cilium,katran}, observability and
+tracing~\cite{bcc,tracee}, security enforcement via BPF
+LSM~\cite{krsi}, and CPU scheduling via
+\texttt{sched\_ext}~\cite{sched_ext}. Each eBPF program is verified
+for safety by the kernel's BPF verifier, then JIT-compiled into native
+machine code that runs directly in kernel context.
 
-The design bundles two concerns into a single fixed mechanism.
-Safety is one: the kernel must certify that the generated code is
-correct before it runs in kernel context.  Optimization is the other:
-the kernel also makes every instruction-selection decision, with no
-knowledge of the workload, the target microarchitecture, or the
-operator's deployment constraints.  The result is a measurable code
-quality gap.  The kernel JIT misses target-specific
-instruction-selection opportunities---conditional moves, wide-load
-fusion, rotate idioms---that the BPF instruction set has no opcodes to
-express; bytecode optimizers~\cite{k2,merlin,epso} operating before
-JIT compilation cannot introduce them either (\S\ref{sec:motivation}).
+Despite this widespread adoption, the kernel's JIT compilers remain
+rigid, platform-agnostic, and severely under-optimized compared to
+mature userspace runtimes. The JVM employs tiered JIT compilation
+with profile-guided optimization (PGO), dynamic recompilation, and
+deoptimization~\cite{jvm_hotspot}. LLVM provides an extensible pass
+infrastructure where new optimization passes can be registered as
+plugins~\cite{llvm}. WebAssembly runtimes leverage similar multi-tier
+compilation strategies~\cite{wasmtime}. The kernel BPF JIT, by
+contrast, maps each BPF opcode to a single fixed native sequence with
+no intermediate representation, no instruction selection, and no
+peephole optimization~\cite{linux_bpf_jit}. Our experiments show that
+for identical BPF source code, an LLVM-based userspace JIT achieves
+\textbf{30--40\% faster execution} and \textbf{50\% smaller binary
+size} compared to the kernel JIT (\S\ref{sec:characterization}).
 
-The obvious response is to add smarter heuristics to the kernel
-compiler.  We show this approach is structurally limited.  Backend
-optimization choices are workload-dependent: the same transformation
-improves one program and degrades another, depending on branch
-predictability and input distribution.  Heuristics that are
-individually profitable interact unpredictably when composed,
-producing regressions that no individual optimization causes in
-isolation.  No fixed policy is correct across the programs a
-production JIT must serve (\S\ref{sec:policy_sensitivity}).
+The root cause of this gap is not a lack of known optimizations but
+the prohibitive cost of implementing them. Realizing an LLVM-pass-like
+compilation framework inside the kernel would require tens of
+thousands of lines of kernel code---code that must be formally
+auditable, safe against all adversarial inputs, and accepted through a
+multi-month upstream review process. Even simple peephole
+optimizations face lengthy review cycles, and static or fixed
+optimizations can be harmful on certain workloads (e.g., conditional
+moves degrade performance on branches that hardware can predict
+accurately). Furthermore, many optimizations and security hardenings
+are simply not attempted due to the stringent kernel safety constraints
+and the sheer implementation complexity involved.
 
-Operators therefore need a mechanism to supply workload-specific
-optimization choices.  eBPF's security model, however, requires the
-kernel to be the sole generator of the native code it executes:
-admitting arbitrary machine code from userspace would bypass the
-verifier and violate kernel integrity.
+\textsc{BpfReJIT} addresses this challenge through three key insights:
 
-These two requirements are separable.  Whether a native code
-alternative is \emph{safe} depends on program structure and CPU
-microarchitecture---properties the kernel can determine after
-verification.  Whether it is \emph{beneficial} depends on workload
-behavior and deployment policy---properties the operator observes but
-the kernel cannot.  Splitting the question along this boundary lets
-the kernel retain full control over safety while allowing operators
-to drive optimization choices.
+\textbf{Insight 1: The kernel needs an LLVM-pass-like extensible
+compilation framework.} Mature userspace runtimes achieve high
+performance through extensible compilation frameworks: LLVM has its
+pass infrastructure; JVM HotSpot performs runtime-guided dynamic
+recompilation. The kernel BPF JIT has \emph{none} of these
+capabilities. We need a minimal, dynamic, extensible compilation
+framework---analogous to LLVM's pass infrastructure but designed for
+the OS kernel---to bring the same extensible, runtime-guided
+optimization capabilities to kernel-resident eBPF programs.
 
-We present \textsc{BpfReJIT}, a kernel/userspace interface that
-operationalizes this separation.  After a program passes verification,
-the kernel enumerates a bounded set of safe native code alternatives
-for recognized instruction patterns; privileged userspace selects from
-these alternatives per program and per call site, guided by profiling
-and deployment policy.  The safety half of the interface is small and
-stable across kernel versions; the policy half evolves without kernel
-upgrades.
+\textbf{Insight 2: Microkernel-inspired separation of ``what can be
+optimized'' from ``how to optimize.''} Analogous to how microkernels
+separate mechanism from policy, \textsc{BpfReJIT} splits JIT
+compilation into two concerns. The \emph{kernel component} (minimal,
+${\sim}$600~lines) defines \emph{what can be optimized} through
+lightweight kernel extensions that specify platform-specific
+instruction capabilities with verification semantics and native
+emission callbacks. The \emph{userspace daemon} (full-featured)
+defines \emph{how to optimize} through compilation passes guided by
+static analysis, platform capabilities, and runtime profiling
+data---analogous to JVM's dynamic recompilation with PGO. New
+optimizations require only a new kernel module plus a daemon update,
+with zero changes to the core kernel source.
+
+\textbf{Insight 3: Safety $\neq$ Correctness, aligned with the kernel
+eBPF security model.} Unlike JVM or LLVM compilation frameworks that
+must simultaneously guarantee both safety and correctness,
+\textsc{BpfReJIT} \emph{separates} the two, aligning with the
+existing kernel eBPF security model. The kernel component guarantees
+\emph{safety}: the BPF verifier provides identical safety guarantees
+for recompiled bytecode as for freshly loaded programs via
+\texttt{BPF\_PROG\_LOAD}, ensuring the kernel cannot crash, leak
+information, or be exploited. The userspace daemon is responsible for
+\emph{correctness}: ensuring that compilation transformations preserve
+program semantics. If the daemon has a bug, program behavior may
+change, but kernel safety is never compromised (fail-safe). This
+separation is possible precisely because BPF has a mandatory
+verifier---a property absent from native kernel code, where mechanisms
+like livepatch must fully trust the patch author.
+
+\textsc{BpfReJIT} realizes these insights through a three-component
+architecture: (1)~\emph{kernel syscall extensions} that allow
+retrieving the original BPF bytecode of loaded programs and
+atomically re-verifying, re-JIT-compiling, and in-place replacing the
+native code of a running program; (2)~\emph{kinsn}, a platform-specific
+instruction extension mechanism implemented via inline kfuncs that
+allows kernel modules to define new instructions with verification
+semantics and native emission callbacks, gracefully degrading to
+function calls when modules are not loaded; and (3)~a \emph{userspace
+daemon} that discovers, analyzes, and transparently optimizes
+kernel-resident eBPF programs using compilation passes informed by
+runtime profiling. The same framework supports four use cases:
+performance optimization (wide-load fusion, conditional moves, rotate
+idioms, constant propagation, PGO), security hardening (Spectre
+mitigation injection, bounds-check insertion), malicious program
+neutralization (live hot-patching of vulnerable BPF programs), and
+runtime observability (transparent tracing insertion without
+application changes).
 
 \textbf{Contributions.}
 \begin{itemize}
-  \item A measurement and root-cause analysis of the kernel JIT code
-    quality gap, attributing it to native instruction-selection
-    opportunities that are absent from the BPF ISA and unreachable by
-    bytecode optimizers (\S\ref{sec:motivation}).
-  \item A demonstration that no fixed kernel heuristic can close this
-    gap: workload-dependence and heuristic composition produce
-    regressions that isolate testing misses
-    (\S\ref{sec:policy_sensitivity}, \S\ref{sec:eval_fixed}).
-  \item \textsc{BpfReJIT}: a kernel/userspace co-design that decouples
-    safety determination from optimization selection, covering four
-    instruction-pattern families and supporting declarative extension
-    without kernel recompilation
+  \item A characterization of the kernel JIT code quality gap,
+    identifying a 30--40\% execution-time deficit and 50\% code-size
+    inflation rooted in the absence of platform-specific instruction
+    selection, runtime-guided optimization, and an extensible
+    compilation framework (\S\ref{sec:characterization}).
+  \item \textsc{BpfReJIT}: a dynamic, minimally invasive, and
+    extensible kernel compilation framework based on a
+    microkernel-inspired separation of concerns, implemented with
+    fewer than 600 lines of kernel modifications while transparently
+    supporting all existing eBPF tools, loaders, and subsystems
     (\S\ref{sec:design}, \S\ref{sec:implementation}).
-  \item An evaluation on production eBPF programs showing that
-    \textsc{BpfReJIT} captures the available performance gains without
-    introducing any of the regressions produced by fixed heuristics
-    (\S\ref{sec:evaluation}).
+  \item A novel \emph{kinsn} mechanism for platform-specific
+    instruction extensions, implemented via inline kfuncs that reuse
+    the existing kfunc verifier, BTF type system, and module
+    lifecycle management with zero verifier modifications
+    (\S\ref{sec:kinsn}).
+  \item An evaluation across micro-benchmarks, a production BPF
+    program corpus, and end-to-end workloads demonstrating up to 40\%
+    performance improvement, 50\% code-size reduction, and negligible
+    recompilation overhead (\S\ref{sec:evaluation}).
 \end{itemize}
 
 %% ============================================================
-\section{Background and Motivation}
-\label{sec:motivation}
+\section{Background}
+\label{sec:background}
 %% ============================================================
 
-\subsection{The eBPF Compilation Pipeline}
+\subsection{eBPF Architecture}
 
-An eBPF program goes through three kernel stages: verification (memory
-safety, termination), JIT compilation, and execution.  The JIT-compiled
-native code runs directly in kernel context, so a code-generation bug
-can crash or compromise the kernel.  To keep this safe, the JIT maps
-each BPF opcode to a single hand-audited native
-sequence~\cite{linux_bpf_jit}---no intermediate representation, no
-instruction selection, no peephole optimizer.
+eBPF extends the original Berkeley Packet Filter~\cite{ebpf_sosp}
+with a register-based instruction set, a rich type system, and a
+general-purpose execution environment inside the Linux
+kernel~\cite{bpf_lwn}. An eBPF program is compiled from C (or Rust)
+into BPF bytecode by Clang/LLVM, producing an ELF object file. At
+load time, the kernel subjects the bytecode to a static verifier
+(\texttt{bpf\_check()}) that enforces memory safety, bounded
+execution, and type correctness. Programs that pass verification are
+JIT-compiled into native machine code and attached to kernel hooks
+(XDP, TC, tracepoints, kprobes, LSM, \texttt{sched\_ext}, etc.).
 
-The price of this simplicity is that safety and optimization are
-inseparable.  The same fixed mapping that guarantees correctness also
-locks in every code-generation decision.  Three consequences follow:
-(1)~multi-byte values decomposed by the verifier into byte loads are
-reconstructed with shift-or chains instead of single wide loads;
-(2)~every BPF conditional jump becomes an x86 \texttt{jcc}---there is no
-analysis to identify select patterns amenable to \texttt{cmov};
-(3)~callee-saved registers are unconditionally saved regardless of usage
-(partially addressed in kernel 7.0-rc2 via \texttt{detect\_reg\_usage()}).
+The eBPF runtime provides three mechanisms for programs to interact
+with kernel state: \emph{maps} (shared key-value data structures),
+\emph{helper functions} (kernel-provided utility functions callable
+from BPF), and \emph{kfuncs} (typed kernel functions exposed via BTF
+that can be called like regular functions). Kfuncs are a recent
+extension that allows kernel modules to export functions to BPF
+programs with full type information, verified by the existing
+\texttt{check\_kfunc\_call()} path without additional verifier
+changes.
 
-\subsection{Why Bytecode Optimizers Cannot Help}
+\subsection{Current JIT Limitations}
 
-K2~\cite{k2}, Merlin~\cite{merlin}, and EPSO~\cite{epso} optimize BPF
-\emph{bytecode}---the input to the JIT, not its output.  Merlin lifts
-BPF to LLVM IR where \texttt{select} exists, but must lower back to BPF
-bytecode before the kernel JIT runs; the BPF ISA has no \texttt{select}
-opcode.  The kernel JIT translates BPF opcodes 1:1; no bytecode rewrite
-can introduce an x86 \texttt{cmov}, fuse shifts into a \texttt{lea}, or
-replace byte-load chains with a wide \texttt{mov}.  These are native
-instruction selection decisions absent from the BPF ISA
+The kernel JIT compiler maps each BPF instruction to a single,
+hand-audited native instruction sequence~\cite{linux_bpf_jit}. This
+one-to-one mapping ensures that the generated code is safe and
+auditable, but it also means that every instruction-selection decision
+is fixed at kernel compile time. Three categories of optimization
+opportunities are systematically missed:
+
+\textbf{Absent platform-specific instructions.} The BPF instruction
+set has no opcodes for conditional moves (\texttt{cmov}), bit-field
+extraction (\texttt{bextr}), rotate (\texttt{rorx}), or
+load-effective-address (\texttt{lea}). The kernel JIT therefore cannot
+emit these instructions even when the BPF bytecode contains idioms
+(e.g., shift-or pairs for rotation, branch-over-move diamonds for
+conditional selection) that map directly to them.
+
+\textbf{No runtime-guided optimization.} The kernel JIT performs a
+single compilation pass with no feedback from runtime behavior. There
+is no profile-guided optimization, no dynamic recompilation based on
+hot-path information, no constant propagation from frozen map values,
+and no workload-adaptive branch layout. Mature runtimes like JVM
+HotSpot~\cite{jvm_hotspot} routinely employ all of these techniques.
+
+\textbf{No extensible compilation framework.} Adding a new
+optimization to the kernel JIT requires modifying core kernel source
+files, passing multi-month upstream review, and waiting for the next
+kernel release cycle. There is no plugin or pass infrastructure that
+would allow new optimizations to be developed, tested, and deployed
+independently of the kernel release schedule.
+
+\subsection{Why Existing Approaches Fall Short}
+
+Several systems have addressed BPF optimization, but none provides a
+post-load, transparent, runtime-guided compilation framework
 (Table~\ref{tab:existing_work}).
+
+K2~\cite{k2} applies stochastic superoptimization to BPF bytecode.
+Merlin~\cite{merlin} lifts BPF to LLVM IR for optimization.
+EPSO~\cite{epso} uses evolutionary program synthesis at the bytecode
+level. All three operate \emph{before} JIT compilation: they optimize
+the bytecode input to the JIT, not its native output. Since the BPF
+ISA lacks opcodes for \texttt{cmov}, \texttt{rorx}, or wide-load
+fusion, no bytecode rewrite can introduce these native instructions.
+Moreover, all three require the original \texttt{.bpf.o} file, cannot
+optimize programs already loaded by third-party tools, and do not
+support runtime profiling feedback.
+
+ePass~\cite{epass} proposes in-kernel optimization passes at load
+time, but requires source modifications and does not support post-load
+re-optimization. BCF~\cite{bcf} offloads verification to userspace
+via certificates, addressing verifier scalability rather than JIT
+optimization. Neither system provides a runtime-guided, transparent
+optimization framework.
 
 \begin{table}[t]
   \centering
-  \caption{Comparison with BPF optimization systems.}
+  \caption{Comparison with BPF optimization and verification systems.
+  \textsc{BpfReJIT} is the only system that operates post-load,
+  transparently, and with runtime profiling support.}
   \label{tab:existing_work}
   \small
-  \begin{tabular}{lcccc}
+  \begin{tabular}{lccccc}
     \toprule
-    System & Layer & Backend? & Post-load? & Selective? \\
+    System & Timing & Transparent? & PGO? & Backend? & Safety \\
     \midrule
-    K2~\cite{k2}          & BPF bytecode & No  & No  & No  \\
-    Merlin~\cite{merlin}  & LLVM IR+BPF  & No  & No  & No  \\
-    EPSO~\cite{epso}      & BPF bytecode & No  & No  & No  \\
-    \textbf{BpfReJIT}     & \textbf{JIT backend} & \textbf{Yes} & \textbf{Yes} & \textbf{Yes} \\
+    K2~\cite{k2}          & pre-load  & No  & No  & No  & SMT solver \\
+    Merlin~\cite{merlin}  & pre-load  & No  & No  & No  & compiler \\
+    EPSO~\cite{epso}      & pre-load  & No  & No  & No  & compiler \\
+    ePass~\cite{epass}    & load-time & No  & No  & No  & in-kernel \\
+    BCF~\cite{bcf}        & load-time & No  & No  & No  & certificate \\
+    \textbf{BpfReJIT}     & \textbf{post-load} & \textbf{Yes} & \textbf{Yes} & \textbf{Yes} & \textbf{verifier} \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -296,12 +369,12 @@ magnitudes. We validate both directions in the kernel JIT via BpfReJIT: forcing
 CMOV on predictable-branch \texttt{log2\_fold} degrades performance by
 34.5\% (383.5$\to$590.0\,ns, $p{=}0.002$), while applying it to
 unpredictable-branch \texttt{cmov\_select} yields a modest improvement
-(744$\to$723\,ns, \S\ref{sec:eval_rejit}).
+(744$\to$723\,ns, \S\ref{sec:evaluation}).
 
 \begin{table}[t]
   \centering
   \caption{Cmov ablation in llvmbpf: profitability depends on workload.
-  Validated in the kernel JIT via BpfReJIT re-JIT (\S\ref{sec:eval_rejit}).}
+  Validated in the kernel JIT via BpfReJIT re-JIT (\S\ref{sec:evaluation}).}
   \label{tab:cmov_ablation}
   \begin{tabular}{lrrr}
     \toprule
@@ -331,19 +404,12 @@ additively (each program's native code shrinks by exactly the sum of the
 individual deltas), execution-time effects \emph{do not}.
 Table~\ref{tab:fixed_preview} previews the key finding: the fixed-all
 kernel regresses \texttt{log2\_fold} by 28.3\% and
-\texttt{stride\_load\_16} by 14.2\%.\footnote{Table~\ref{tab:fixed_preview} and Table~\ref{tab:per_directive} report
-results from two separate experimental environments (different VM
-configurations and measurement days). The directional findings are
-consistent (LEA hurts \texttt{stride\_load\_16}; CMOV hurts
-\texttt{log2\_fold}), but absolute magnitudes differ due to
-microarchitectural variability. We report both for transparency.}
-The full per-directive isolation
-analysis appears in \S\ref{sec:eval_fixed}.
+\texttt{stride\_load\_16} by 14.2\%.
 
 \begin{table}[t]
   \centering
   \caption{Fixed-all kernel baseline: code size composes additively,
-  execution time does not. Full isolation in Table~\ref{tab:per_directive}.}
+  execution time does not.}
   \label{tab:fixed_preview}
   \small
   \begin{tabular}{lrrr}
@@ -370,719 +436,265 @@ per program and per site.
 \label{sec:design}
 %% ============================================================
 
-\textsc{BpfReJIT} separates safety from optimization in the kernel JIT
-by establishing a new kernel/userspace interface for post-load
-specialization.  The kernel enforces which native code variants are safe
-to emit for a given BPF pattern on the current CPU.  Privileged
-userspace decides which safe variants to apply, based on workload
-profile and deployment constraints.
+% TODO: Rewrite Design section for v2 architecture.
+% The v2 design is based on three components:
+%   Component 1: Kernel syscall extensions (BPF_PROG_GET_ORIGINAL + BPF_PROG_REJIT)
+%   Component 2: kinsn -- platform-specific instruction extensions via inline kfuncs
+%   Component 3: Userspace daemon (discovery, analysis, rewriting, profiling)
+% See plan doc §4 for full architecture diagram and details.
+% Key differences from v1:
+%   - REJIT accepts complete new BPF bytecode (not a policy blob / patch)
+%   - Kernel runs full bpf_check() + JIT on new bytecode (full re-verification)
+%   - kinsn via KF_INLINE_EMIT reuses existing kfunc verifier (zero verifier changes)
+%   - ~600 LOC kernel changes (down from ~6400 in v1)
+%   - Daemon is Rust, zero libbpf dependency, raw BPF syscall only
+
+\textsc{BpfReJIT} introduces a dynamic, extensible compilation
+framework for kernel eBPF through a three-component architecture that
+embodies a microkernel-inspired separation of concerns.
 
 \subsection{Architecture Overview}
+\label{sec:architecture}
 
-Figure~\ref{fig:architecture} shows the two-plane architecture.
-The interface is \texttt{BPF\_PROG\_JIT\_RECOMPILE}, a new BPF syscall
-subcommand. Userspace submits a \emph{policy blob}---a compact binary
-specification of per-site native instruction choices---via a sealed
-memfd. The kernel validates and applies the blob, re-JITting the program
-without re-verification.
+\textit{[TODO: Full v2 architecture description with three-component
+diagram. See plan doc \S4.1--4.4 for the authoritative design.]}
 
-\begin{figure}[t]
-  \centering
-  \small
-  \begin{tabular}{|p{0.42\linewidth}|}
-    \hline
-    \textbf{Userspace Policy Plane} \\
-    \hline
-    Pattern scanning on xlated bytecode \\
-    CPU + workload policy selection \\
-    Selective per-site/per-family application \\
-    Fleet-level A/B rollout \\
-    Policy blob generation \\
-    \hline
-    \multicolumn{1}{c}{$\downarrow$ \texttt{BPF\_PROG\_JIT\_RECOMPILE}} \\
-    \hline
-    \textbf{Kernel Legality Plane} \\
-    \hline
-    Digest binding (prog\_tag SHA-256) \\
-    Pattern matching + variable binding \\
-    CPU feature gating (e.g., BMI2) \\
-    Structural constraint validation \\
-    Canonical-parameter extraction \\
-    Parameterized arch-specific emitters \\
-    Fail-closed fallback per rule \\
-    \hline
-  \end{tabular}
-  \caption{Two-plane architecture of \textsc{BpfReJIT}. Userspace controls
-    \emph{what} to optimize; the kernel controls \emph{how} safely.}
-  \label{fig:architecture}
-\end{figure}
+\subsection{Component 1: Kernel Syscall Extensions}
+\label{sec:syscall}
 
-\textbf{Core invariants.}
-(I1)~The verified BPF bytecode (\texttt{xlated\_prog\_len}) is never
-modified; policy affects only native code emission.
-(I2)~No new side effects: the re-JIT'd code computes the same function.
-(I3)~Fail-closed: if a rule's pattern match or constraint check fails,
-that site falls back silently to stock JIT emission; a malformed policy
-blob cannot crash or silently miscompile a program.
+\textit{[TODO: BPF\_PROG\_GET\_ORIGINAL and BPF\_PROG\_REJIT syscall
+extensions. REJIT accepts complete new BPF bytecode, runs full
+bpf\_check() + JIT, atomically swaps JIT image on the same struct
+bpf\_prog. Fail-safe: verification failure changes nothing.]}
 
-\textbf{Design alternatives considered.}
-We considered three alternatives and rejected each:
-(1)~\emph{Load-time hints}: hints at program load time cannot adapt to
-post-deployment workload changes without program restart.
-(2)~\emph{Kernel plugins/heuristics}: any fixed heuristic chosen by
-kernel maintainers cannot accommodate deployment-specific workload
-distributions (\S\ref{sec:policy_sensitivity}).
-(3)~\emph{Native code upload}: allowing userspace to upload arbitrary
-machine code would bypass all kernel safety guarantees and is
-architecturally unacceptable.
+\subsection{Component 2: kinsn --- Platform-Specific Instruction Extensions}
+\label{sec:kinsn}
 
-\subsection{Worked Example: Conditional Select}
-\label{sec:worked_example}
+\textit{[TODO: kinsn mechanism via inline kfuncs (KF\_INLINE\_EMIT).
+Kernel modules register kinsn with verification semantics + JIT emit
+callbacks. Reuses kfunc verifier, BTF type system, module lifecycle.
+Graceful degradation to function call when module not loaded.]}
 
-To make the mechanism/policy separation concrete, we trace a single
-\textsc{Cond\_Select} optimization from policy request to native
-emission.
+\subsection{Component 3: Userspace Daemon}
+\label{sec:daemon}
 
-\textbf{Stock behavior.} Consider a BPF ``select diamond'': a
-conditional branch over two moves that assign different values to the
-same register, followed by a merge. The stock JIT emits an x86
-\texttt{cmp} + \texttt{jcc} + two \texttt{mov}s + a target label---five
-instructions.
+\textit{[TODO: Daemon workflow: enumerate live programs via
+BPF\_PROG\_GET\_NEXT\_ID, retrieve original bytecode via
+BPF\_PROG\_GET\_ORIGINAL, analyze + rewrite bytecode (may insert kinsn
+calls), submit via BPF\_PROG\_REJIT. Compilation passes informed by
+runtime profiling. Rust implementation, zero libbpf dependency.]}
 
-\textbf{Policy request.} The userspace scanner identifies this 4-instruction
-diamond pattern starting at xlated instruction offset 42. It generates a
-policy rule: \texttt{\{site\_offset=42, site\_len=4,
-family=COND\_SELECT, choice=CMOVCC\}}.
-
-\textbf{Kernel validation.} The kernel (1)~verifies the digest matches
-the loaded program; (2)~checks that instructions 42--45 form a valid
-diamond: straight-line after the branch, no interior edges from outside,
-no helper calls or stores; (3)~binds variables: condition code, true
-register, false register, destination; (4)~confirms x86 supports
-\texttt{cmov} (always true on modern x86).
-
-\textbf{Emission.} The emitter replaces the 5-instruction sequence with
-\texttt{cmp} + \texttt{cmovcc}---two instructions. If any validation step
-fails, the kernel silently falls back to stock emission.
-
-\textbf{Policy sensitivity.} Whether this replacement is
-\emph{profitable} depends on branch predictability: beneficial for
-data-dependent conditions (hash lookups, packet classification),
-harmful for monotone-threshold conditions where the branch predictor
-achieves near-perfect accuracy. This decision requires workload context
-that the kernel does not have.
-
-\subsection{The BPF\_PROG\_JIT\_RECOMPILE Interface}
-
-\begin{lstlisting}[language=C,caption=Core syscall interface.]
-union bpf_attr {
-    struct { /* BPF_PROG_JIT_RECOMPILE */
-        __u32 prog_fd;    /* loaded program */
-        __u32 policy_fd;  /* sealed memfd; 0=revert */
-        __u32 flags;
-        __u32 log_level;
-        __aligned_u64 log_buf;
-        __u32 log_size;
-    } jit_recompile;
-};
-\end{lstlisting}
-
-When \texttt{policy\_fd == 0}, the kernel reverts to stock JIT, giving
-operators a one-call undo. The interface enables an iterative loop:
-load $\to$ run $\to$ profile $\to$ generate policy $\to$ re-JIT $\to$
-measure $\to$ refine---all without program restart or re-verification.
-
-\subsection{Rule Families: Policy-Sensitive and Substrate}
-\label{sec:families}
-
-We define four rule families organized by profitability characteristics
-(Table~\ref{tab:rule_families}).
-
-\begin{table}[t]
-  \centering
-  \caption{Rule families in \textsc{BpfReJIT}. \textsc{Cond\_Select} is
-  policy-sensitive; the other three are substrate optimizations that
-  benefit from framework infrastructure.}
-  \label{tab:rule_families}
-  \small
-  \begin{tabular}{llp{3.5cm}}
-    \toprule
-    Family & Type & Addresses \\
-    \midrule
-    \textsc{Cond\_Select} & Policy-sensitive & Absent cmov; profitability depends on branch predictability \\
-    \textsc{Wide\_Mem}    & Substrate & Byte-load recomposition \\
-    \textsc{Rotate}       & Substrate & Hash/checksum rotate idioms \\
-    \textsc{Addr\_Calc}   & Substrate & Address computation fusion \\
-    \bottomrule
-  \end{tabular}
-\end{table}
-
-Each family defines: (1)~the BPF instruction pattern it matches,
-(2)~the set of legal native variants, (3)~structural constraints
-(straight-line, no side effects, no interior branch edges), and
-(4)~CPU feature requirements (e.g., BMI2 for \texttt{rorx}).
-
-\textbf{Why substrate families need the framework.}
-One might argue that substrate families could simply be hardcoded as
-unconditional kernel peepholes. Three observations argue against this.
-First, \emph{update frequency}: the ROTATE family required three rounds
-of pattern expansion (4-insn, 5-insn, 6-insn masked) as we discovered
-new Clang emission patterns; updating a userspace descriptor takes 32
-LOC, while each kernel pattern required ${\sim}$200 LOC.
-Second, \emph{combination effects}: the per-directive isolation
-experiment (\S\ref{sec:eval_fixed}) shows that LEA-only helps
-\texttt{stride\_load\_4} ($-$11.9\%) but hurts \texttt{stride\_load\_16}
-(+141.4\%), and fixed-all combines differently than the sum of parts.
-Selective per-site application avoids these regressions.
-Third, \emph{shared infrastructure}: all families share the same
-validation pipeline, digest binding, policy blob format, and
-fail-closed semantics---duplicating this per peephole would be
-wasteful.
-
-\subsection{Security Model and Trust Boundary}
+\subsection{Security Model}
 \label{sec:security}
 
-\textbf{Trusted computing base (TCB).}
-The following components are trusted: the verified xlated bytecode, the
-kernel's canonical-form emitters, CPU feature detection (\texttt{CPUID}),
-and the \texttt{prog\_tag} digest computation.
-
-\textbf{Untrusted input.} The policy blob content is untrusted. Every
-field---site offset, rule kind, native choice, pattern descriptors---is
-validated before use.
-
-\textbf{Safety invariants.}
-\begin{enumerate}
-  \item \emph{Bytecode unchanged}: \texttt{xlated\_prog\_len} is identical
-    before and after re-JIT; verified by comparing stored program length.
-  \item \emph{No new side effects}: canonical emitters produce
-    instruction sequences that compute the same function as the stock
-    emission; they cannot introduce memory writes, helper calls, or
-    new control flow.
-  \item \emph{Bounded control-flow forms}: each canonical form has a
-    fixed set of legal native instruction templates; the emitter
-    selects from this set, not from arbitrary code.
-  \item \emph{Fail-closed}: digest mismatch rejects the entire blob;
-    individual rule failures fall back to stock emission.
-\end{enumerate}
-
-\textbf{Digest binding.} The policy blob carries \texttt{prog\_tag}
-(SHA-256 of xlated bytecode). Tag mismatch rejects the entire blob.
-The blob is passed via a sealed memfd (\texttt{F\_SEAL\_WRITE} +
-\texttt{F\_SEAL\_SHRINK}), preventing TOCTOU attacks.
-
-\textbf{CPU feature gating.} Each rule declares required CPU features;
-the kernel checks CPUID before applying. A \texttt{rorx} request on a
-CPU without BMI2 is silently rejected.
-
-\textbf{Privilege.} \texttt{BPF\_PROG\_JIT\_RECOMPILE} requires
-\texttt{CAP\_BPF}, the same privilege as \texttt{BPF\_PROG\_LOAD}.
-
-\textbf{Known limitation: concurrent execution.} The current prototype
-does not implement RCU-protected hot-swap of JIT images. Re-JIT should
-be performed during a quiescent period (e.g., before attaching the
-program to a hook). Full RCU protection is an engineering task, not a
-design challenge: the kernel already supports atomic JIT image
-replacement for \texttt{bpf\_prog\_realloc\_jit\_image()}.
-
-\subsection{Declarative Pattern Extension}
-\label{sec:v5}
-
-A key question for any extensible framework is whether the kernel
-component remains small and stable as the optimization catalog grows.
-We address this through a \emph{declarative pattern extension}
-mechanism.
-
-\textbf{Problem.} The initial v4 design uses a closed \texttt{rule\_kind}
-enum: each optimization has a hardcoded kernel validator. Adding ROTATE
-support required 670 kernel LOC (validators for four pattern widths,
-x86 emitters, CPU feature gating) plus 348 userspace LOC---1{,}018 LOC
-total across 3 kernel files.
-
-\textbf{Solution.} v5 moves pattern descriptions into the policy blob.
-The kernel retains a small fixed set of \emph{canonical forms}
-(e.g., \textsc{CF\_Rotate}, \textsc{CF\_Select}), each with a
-parameterized emitter. A new pattern variant that maps to an existing
-canonical form requires only a userspace descriptor edit---no kernel
-changes. The pipeline is:
-
-\begin{center}
-\small
-pattern descriptor $\to$ variable bindings $\to$ canonical parameters
-$\to$ parameterized emitter
-\end{center}
-
-\textbf{Worked example.} When we discovered that Clang emits a 5-instruction
-``two-copy'' rotate pattern (in addition to the original 4-instruction
-pattern), we added support by writing a 32-LOC descriptor in the
-userspace scanner. This descriptor specifies: (1)~5 BPF opcodes with
-wildcard registers, (2)~3 constraints (shift amounts sum to 64, same
-source register, same destination), and (3)~canonical bindings mapping
-matched variables to \textsc{CF\_Rotate} parameters (source, destination,
-shift amount, width). The kernel's existing rotate emitter handles the
-rest. Zero kernel files were touched.
-
-\textbf{Why this matters.} The kernel legality plane remains stable at
-${\sim}$4 canonical forms even as the userspace pattern catalog grows.
-This is the property that makes the framework maintainable: kernel
-maintainers review and accept a small set of canonical emitters; pattern
-variants are maintained by the optimization policy owner (e.g., the
-Cilium team). Section~\ref{sec:eval_extensibility} quantifies the cost
-reduction.
+\textit{[TODO: Safety/correctness separation. Kernel verifier guarantees
+safety (identical to BPF\_PROG\_LOAD). Daemon responsible for
+correctness (semantic preservation). Fail-safe: verify failure changes
+nothing. Privilege: CAP\_BPF required.]}
 
 %% ============================================================
 \section{Implementation}
 \label{sec:implementation}
 %% ============================================================
 
-\textsc{BpfReJIT} modifies the Linux kernel (based on v7.0-rc2) in
-approximately 1{,}800 LOC across 7 files, plus a userspace
-scanner/blob-builder (${\sim}$1{,}200 LOC).
+% TODO: Rewrite for v2 implementation.
+% v2 kernel changes: ~600 LOC across 6 files (bpf.h, btf.h, uapi/linux/bpf.h,
+%   syscall.c, verifier.c, bpf_jit_comp.c).
+% Key implementation details:
+%   - BPF_PROG_GET_ORIGINAL: exports saved original bytecode
+%   - BPF_PROG_REJIT: accepts new bytecode, runs bpf_check() + JIT, atomic image swap
+%   - KF_INLINE_EMIT: new kfunc flag, JIT calls module emit callback instead of CALL
+%   - Daemon: Rust, raw BPF syscall, zero libbpf dependency
 
-\textbf{Kernel components.}
-(1)~\texttt{BPF\_PROG\_JIT\_RECOMPILE} plumbing and policy blob parsing
-(${\sim}$350 LOC); (2)~a generic per-rule validator checking structural
-constraints, pattern matching, and CPU features (${\sim}$150 LOC);
-(3)~four canonical-form validators and x86 emitters (${\sim}$640 LOC);
-(4)~rule dispatch in the JIT main loop (${\sim}$120 LOC);
-(5)~re-JIT image installation (${\sim}$80 LOC).
-
-\textbf{Rule dispatch.} We instrument \texttt{do\_jit()} to check for
-applicable rules before each BPF instruction:
-
-\begin{lstlisting}[language=C,caption=Rule dispatch in do\_jit().]
-for (i = 1; i <= insn_cnt; i++, insn++) {
-    rule = bpf_jit_lookup_rule(ruleset, i-1);
-    if (rule) {
-        int len = bpf_jit_emit_rule_x86(
-            prog, &ctx, rule, addrs, i-1);
-        if (len >= 0) {
-            i    += rule->site_len - 1;
-            insn += rule->site_len - 1;
-            continue;
-        }
-        /* fallback to stock emission */
-    }
-    /* stock switch-case ... */
-}
-\end{lstlisting}
-
-Rule lookup is O($\log n$) via sorted-array binary search on site offset;
-with typical rule counts under 200, lookup completes in under 8 comparisons.
-Failed emission falls through to stock processing without side effects.
-
-\textbf{Validation pipeline.} Each rule passes through four layers:
-(1)~structural (bounds, subprogram containment, known canonical form,
-CPU features); (2)~pattern (straight-line, no helpers/stores/atomics,
-opcode matching, variable binding); (3)~canonical-parameter extraction
-(binding table maps matched variables to emitter parameters);
-(4)~form-specific checks (e.g., ROTATE verifies shift amounts sum to
-operand width).
+\textit{[TODO: Full v2 implementation description. \textsc{BpfReJIT}
+modifies the Linux kernel (v7.0-rc2) in approximately 600 lines of
+code across 6 files. The userspace daemon is implemented in Rust with
+zero libbpf dependency, interacting with the kernel exclusively through
+raw BPF syscalls. See plan doc \S4.5 for file layout.]}
 
 %% ============================================================
 \section{Evaluation}
 \label{sec:evaluation}
 %% ============================================================
 
-We evaluate \textsc{BpfReJIT} along four axes: (1)~whether a fixed
-kernel baseline suffices (it does not), (2)~effectiveness of selective
-re-JIT, (3)~compatibility and safety on production programs, and
-(4)~extensibility cost.
+% TODO: Rewrite evaluation for v2 architecture.
+% Key evaluation axes:
+%   1. Characterization gap (llvmbpf vs kernel, already measured)
+%   2. BpfReJIT micro improvement (recompile/stock)
+%   3. Production corpus (Cilium, Katran, Calico, etc.)
+%   4. End-to-end workloads (Tracee, Tetragon, Katran)
+%   5. Recompilation overhead
+%   6. kinsn extensibility cost
 
-\textbf{Setup.} Microbenchmark re-JIT experiments use a rigorous
-configuration: 5 warmups, 10 measured iterations, 1{,}000 repeats per
-iteration, single guest vCPU pinned to host CPU~23, host governor
-\texttt{performance}, turbo disabled. The guest runs our modified
-kernel~7.0-rc2 inside QEMU/KVM. We report median \texttt{exec\_ns} and
-paired Wilcoxon signed-rank $p$-values with BH correction.
+\textit{[TODO: Update evaluation setup for v2. The evaluation should
+cover: (1) characterization gap quantification, (2) micro-benchmark
+improvement via REJIT, (3) production corpus coverage and performance,
+(4) end-to-end workload evaluation, (5) recompilation overhead, and
+(6) extensibility cost of the kinsn mechanism.]}
 
-\subsection{RQ1: Can a Fixed Kernel Heuristic Close the Gap?}
-\label{sec:eval_fixed}
+\subsection{RQ1: Micro-Benchmark Evaluation}
+\label{sec:eval_micro}
 
-To test whether \textsc{BpfReJIT}'s policy plane is necessary, we built
-six kernel variants from a common source tree: \texttt{stock} (no
-optimizations), four single-directive builds
-(\texttt{CMOV-only}, \texttt{ROTATE-only}, \texttt{WIDE-only},
-\texttt{LEA-only}), and \texttt{fixed-all} (all four unconditionally
-enabled). Each was tested on six benchmark programs across three
-same-day repetitions; we report the median of three runs.
+\textit{[TODO: Replace with v2 micro-benchmark results. Key data points
+from plan doc: micro 1.057x overall, applied-only 1.193x; gap 0.609x
+(characterization). Use BPF\_PROG\_REJIT with daemon-generated
+optimized bytecode.]}
 
-\begin{table*}[t]
-  \centering
-  \caption{Per-directive isolation: execution-time delta vs.\ same-day stock.
-  Code-size effects compose additively; execution-time effects do not.
-  CMOV-only changes codegen for \texttt{log2\_fold} only and hurts it.
-  LEA-only helps \texttt{stride\_load\_4} but hurts \texttt{stride\_load\_16}.
-  Fixed-all combines all regressions.}
-  \label{tab:per_directive}
-  \small
-  \begin{tabular}{lrrrrrr}
-    \toprule
-    Program & Stock (ns) & ROTATE-only & WIDE-only & LEA-only & CMOV-only & fixed-all \\
-    \midrule
-    \texttt{rotate64\_hash}      & 307 & $-$12.1\%  & $-$0.3\%  & +60.6\%\rlap{$^\dagger$} & +16.9\%\rlap{$^\dagger$} & $-$52.8\% \\
-    \texttt{pkt\_rss\_hash}      & 183 & +2.7\%     & $-$3.3\%  & $-$15.3\%  & +20.8\%\rlap{$^\dagger$} & +0.5\%    \\
-    \texttt{load\_byte\_recomp}  & 487 & +2.9\%\rlap{$^\dagger$} & \textbf{$-$14.2\%} & +3.9\%\rlap{$^\dagger$}  & $-$7.6\%\rlap{$^\dagger$} & +9.0\% \\
-    \texttt{stride\_load\_4}     & 616 & +5.8\%\rlap{$^\dagger$} & +2.3\%   & \textbf{$-$11.9\%} & $-$0.5\%\rlap{$^\dagger$} & $-$10.7\% \\
-    \texttt{stride\_load\_16}    & 261 & +131.4\%\rlap{$^\dagger$}& +14.9\% & \textbf{+141.4\%}  & +119.9\%\rlap{$^\dagger$} & +110.7\% \\
-    \texttt{log2\_fold}          & 948 & +2.0\%\rlap{$^\dagger$} & $-$2.3\% & +19.1\%\rlap{$^\dagger$} & \textbf{+19.7\%} & +10.4\% \\
-    \bottomrule
-    \multicolumn{7}{l}{\footnotesize Bold = directive changed codegen for that program.
-    $\dagger$ = codegen unchanged; delta is measurement noise.} \\
-    \multicolumn{7}{l}{\footnotesize \texttt{stride\_load\_16} shows large $\dagger$ deltas across all builds (119--131\%), indicating a} \\
-    \multicolumn{7}{l}{\footnotesize systematic timing artifact (likely thermal/frequency drift between same-day VM boots).}
-  \end{tabular}
-\end{table*}
+\subsection{RQ2: Production Corpus Evaluation}
+\label{sec:eval_corpus}
 
-Table~\ref{tab:per_directive} presents the per-directive isolation
-results. Three findings emerge.
+\textit{[TODO: Replace with v2 corpus results. 560 objects, 8 transform
+families, 16535 total sites. Exec geomean and code-size results.]}
 
-\textbf{Finding 1: CMOV is policy-sensitive.}
-\texttt{CMOV-only} changes native code for exactly one program
-(\texttt{log2\_fold}: 648$\to$682 bytes) and degrades it by 19.7\%.
-The other five programs retain identical \texttt{jited\_prog\_len},
-confirming that their timing deltas under CMOV-only are noise.
+\subsection{RQ3: End-to-End Workload Evaluation}
+\label{sec:eval_e2e}
 
-\textbf{Finding 2: LEA has program-dependent profitability.}
-\texttt{LEA-only} changes native code for both stride benchmarks
-(517$\to$511 bytes). It helps \texttt{stride\_load\_4} ($-$11.9\%) but
-\emph{hurts} \texttt{stride\_load\_16} (+141.4\%) despite reducing code
-size by the same amount. The regression likely stems from instruction
-alignment or decode-pipeline effects that differ between the two access
-patterns.
+\textit{[TODO: End-to-end evaluation on Tracee, Tetragon, Katran with
+the daemon transparently optimizing live programs.]}
 
-\textbf{Finding 3: Combination effects are non-additive.}
-The \texttt{fixed-all} build produces code sizes that are the exact sum
-of individual deltas, but execution times diverge sharply. For
-\texttt{rotate64\_hash}, fixed-all is $-$52.8\% (much better than
-individual isolations suggest); for \texttt{stride\_load\_16}, fixed-all
-is +110.7\% (the LEA regression persists and compounds).
+\subsection{RQ4: Recompilation Overhead and Safety}
+\label{sec:eval_overhead}
 
-\textbf{Takeaway.} A fixed kernel heuristic that unconditionally applies
-all four optimizations would degrade 2 of 6 tested programs. Selective
-per-site application---the capability \textsc{BpfReJIT} provides---avoids
-these regressions while capturing the gains.
+\textit{[TODO: Recompilation overhead (scanner latency, syscall
+latency). Safety validation: verifier accepts all rewritten programs,
+result correctness preserved.]}
 
-\subsection{RQ2: How Effective Is Selective Re-JIT?}
-\label{sec:eval_rejit}
-
-Table~\ref{tab:per_family} presents per-family results under
-\textsc{BpfReJIT}'s selective policy (10$\times$1000 pinned configuration).
-
-\begin{table*}[t]
-  \centering
-  \caption{Per-family re-JIT results under selective policy
-  (rigorous pinned 10$\times$1000 configuration).
-  Speedup = stock median / re-JIT median; values $<$1 indicate policy hurts.}
-  \label{tab:per_family}
-  \small
-  \begin{tabular}{llrrrrrl}
-    \toprule
-    Policy & Benchmark & Stock (ns) & Re-JIT (ns) & Speedup & Code $\Delta$ & $p$ & Interpretation \\
-    \midrule
-    \textsc{Rotate}+\textsc{Wide} & \texttt{rotate64\_hash} & 68.0  & 57.0  & 1.193$\times$ & $-$35.0\% & 0.002 & Combined optimization \\
-    \textsc{Rotate}        & \texttt{pkt\_rss\_hash}   & 21.0  & 17.0  & 1.235$\times$ & $-$15.3\% & 0.002 & Pure rotate gain \\
-    \textsc{Addr\_Calc}    & \texttt{stride\_load\_16} & 293.0 & 281.0 & 1.052$\times$ & $-$1.2\%  & 0.012 & Modest but significant \\
-    \textsc{Wide\_Mem}     & \texttt{load\_byte\_recomp} & 223.0 & 226.0 & 0.978$\times$ & $-$2.8\% & 0.164 & Code-size win only \\
-    \textsc{Cond\_Select}  & \texttt{log2\_fold}       & 383.5 & 590.0 & 0.655$\times$ & +5.3\% & 0.002 & Policy-sensitivity demo \\
-    \bottomrule
-  \end{tabular}
-\end{table*}
-
-\textbf{ROTATE} delivers the strongest gains: \texttt{pkt\_rss\_hash}
-improves from 21.0\,ns to 17.0\,ns (1.235$\times$, $p{=}0.002$) with
-15.3\% code reduction; \texttt{rotate64\_hash} under combined
-ROTATE+WIDE policy improves 1.193$\times$ with 35.0\% code reduction.
-
-\textbf{ADDR\_CALC illustrates the core thesis.}
-On \texttt{stride\_load\_16}, the LEA-only kernel-fixed baseline
-\emph{regresses} by 141\% (Table~\ref{tab:per_directive}),
-while \textsc{BpfReJIT}'s selective application \emph{improves}
-performance by 5.2\% ($p{=}0.012$). Both apply the same legal
-transformation; the only difference is \emph{where}: \textsc{BpfReJIT}
-applies LEA only at sites the userspace scanner identifies as
-profitable, whereas the kernel-fixed baseline applies it at every
-eligible site. Unconditional application turns a win into a 2.4$\times$
-regression; selective policy avoids it.
-
-\textbf{WIDE\_MEM} shows code-size reduction ($-$2.8\%) but the runtime
-difference is not statistically significant ($p{=}0.164$). We report
-this honestly as a limitation.
-
-\textbf{COND\_SELECT} demonstrates bidirectional policy sensitivity
-in the kernel JIT. On predictable-branch \texttt{log2\_fold}, forcing
-CMOV produces a 34.5\% regression ($p{=}0.002$). On
-unpredictable-branch \texttt{cmov\_select}, applying CMOV yields a
-modest 2.8\% improvement (744$\to$723\,ns median, $n{=}10$), consistent
-with the 5.5$\times$ benefit observed in the llvmbpf reference
-(Table~\ref{tab:cmov_ablation}). The kernel-side benefit is smaller
-because the kernel JIT already partially optimizes the conditional
-sequence; the key evidence is the \emph{sign reversal}: the same
-transformation helps one workload and hurts another.
-
-\textbf{Takeaway.} Selective re-JIT achieves statistically significant
-speedups for ROTATE (1.24$\times$) while avoiding the regressions that
-the fixed-all kernel baseline incurs.
-
-\subsection{RQ3: Is the Framework Safe and Compatible?}
-\label{sec:eval_safety}
-
-We validate safety through structural properties and production
-compatibility.
-
-\textbf{Bytecode invariant.} Re-JIT preserves verified bytecode exactly.
-For every re-JIT'd program, \texttt{xlated\_prog\_len} is identical
-before and after. For example, \texttt{log2\_fold} remains 1{,}112 bytes
-while JIT output changes from 648 to 682; \texttt{rotate64\_hash}
-remains 7{,}984 while JIT bytes shrink from 3{,}559 to 2{,}313.
-
-\textbf{Result correctness.} All 12 kernel-fixed-baseline runs and all
-re-JIT experiments return the same observable program output as stock.
-For example, \texttt{log2\_fold} returns 9 under stock, CMOV, and
-fixed-all; \texttt{rotate64\_hash} returns the same 64-bit hash under
-all configurations.
-
-\textbf{Production corpus.} We test compatibility on production BPF
-programs from Calico (8 objects, 61 programs) and Suricata (1 program):
-\begin{itemize}
-  \item 60 baseline compiles succeed. \textbf{60/60 v5 recompiles
-    succeed} with zero syscall failures.
-  \item 45 programs have optimization sites applied (197 CMOV + 108
-    WIDE + 10 ROTATE sites across the corpus).
-  \item Code-size geomean ratio: 1.001$\times$ (negligible overall
-    change); largest reduction: \texttt{calico\_tc\_maglev} at $-$4.4\%
-    (10 ROTATE sites).
-\end{itemize}
-
-Note: loxilb objects (18 programs) fail to load due to non-standard ELF
-section names that libbpf rejects. Cilium objects (the highest-value
-target, with 408 CMOV sites in \texttt{bpf\_xdp.bpf.o} alone) fail at
-\texttt{bpf\_object\_\_open\_file()} because they require Cilium's
-custom BTF generation and runtime map pinning infrastructure.
-Both failures are libbpf environment issues, not \textsc{BpfReJIT}
-limitations; we expect them to be resolvable with dedicated per-project
-loading shims. End-to-end throughput evaluation on a production
-deployment is future work.
-
-\textbf{Zero overhead.} Programs with no matching policy incur no
-overhead: rule lookup returns null immediately, and programs that never
-receive a recompile call follow the identical code path as stock JIT.
-
-\textbf{Takeaway.} \textsc{BpfReJIT} preserves bytecode invariant,
-maintains result correctness, and achieves 100\% recompile success on
-60 production programs. The framework validates compatibility and
-safety; end-to-end deployment evaluation with throughput measurement
-remains future work.
-
-\subsection{RQ4: How Extensible Is the Framework?}
+\subsection{RQ5: Extensibility via kinsn}
 \label{sec:eval_extensibility}
 
-Table~\ref{tab:extensibility} quantifies extension cost across three
-scenarios.
-
-\begin{table}[t]
-  \centering
-  \caption{Extension cost: v4 closed-enum vs.\ v5 declarative patterns.}
-  \label{tab:extensibility}
-  \small
-  \begin{tabular}{lrrrr}
-    \toprule
-    Scenario & Kernel & Userspace & Total & Kernel files \\
-    \midrule
-    v4: add ROTATE          & 670 & 348 & 1{,}018 & 3 \\
-    v4: add WIDE\_MEM       & 179 & 98  & 277     & 3 \\
-    v5: new variant, same form & 0 & 32 & 32      & 0 \\
-    v5: new canonical form  & 111 & 55  & 166     & 3 \\
-    \bottomrule
-  \end{tabular}
-\end{table}
-
-Under v4, adding ROTATE required 670 kernel LOC (validators for four
-pattern widths plus x86 emitters) and 348 userspace LOC across 3 kernel
-files.
-
-Under v5, adding a new ROTATE \emph{variant} that maps to the existing
-\textsc{CF\_Rotate} canonical form requires \textbf{0 kernel LOC} and
-\textbf{32 userspace LOC}---a single pattern descriptor. Even a new
-canonical form costs only 166 LOC because the validation pipeline is
-shared.
-
-\textbf{Connection to thesis.} The 31.8$\times$ cost reduction
-(1{,}018 $\to$ 32 LOC for same-form variants) demonstrates that the
-kernel legality plane can remain stable at ${\sim}$4 canonical forms
-while the userspace pattern catalog grows with new compiler emission
-patterns, new CPU variants, and new workload-specific heuristics. This
-is the property that makes mechanism/policy separation maintainable in
-practice.
-
-\textbf{Takeaway.} Declarative patterns reduce same-form extension cost
-by 31.8$\times$ with zero kernel files touched, keeping the kernel
-component small and stable.
-
-\subsection{Cross-Domain Directive Coverage}
-\label{sec:eval_census}
-
-To assess generality beyond networking, we scanned all 514 compiled BPF
-objects in our corpus across five program domains.
-
-\begin{table}[t]
-  \centering
-  \caption{Cross-domain directive site census (514 objects, 444{,}610 insns).
-  CMOV appears in all four non-trivial domains.}
-  \label{tab:cross_domain}
-  \small
-  \begin{tabular}{lrrrrrr}
-    \toprule
-    Domain & Objs & CMOV & WIDE & ROT & Total & w/ Sites \\
-    \midrule
-    Networking  & 61  & 1{,}051 & 1{,}864 & 30    & 2{,}945 & 39 (64\%) \\
-    Tracing     & 57  & 109     & 0       & 0     & 109     & 20 (35\%) \\
-    Security    & 6   & 3       & 0       & 0     & 3       & 2 (33\%)  \\
-    Testing     & 361 & 74      & 6       & 1{,}810 & 1{,}890 & 37 (10\%) \\
-    Examples    & 29  & 0       & 0       & 0     & 0       & 0 (0\%)   \\
-    \midrule
-    \textbf{Total} & \textbf{514} & \textbf{1{,}237} & \textbf{1{,}870} & \textbf{1{,}840} & \textbf{4{,}947} & \textbf{98 (19\%)} \\
-    \bottomrule
-  \end{tabular}
-\end{table}
-
-CMOV is the most cross-cutting family, appearing in networking (Cilium,
-Calico, Katran), tracing (20 of 57 BCC tools including \texttt{biostacks},
-\texttt{cpudist}, \texttt{runqlat}, programs using histogram binning
-patterns), and security (systemd LSM/cgroup programs). WIDE and ROTATE
-are concentrated in networking and testing respectively.
-ADDR\_CALC (LEA) sites are absent from the census because the
-multi-instruction address computation pattern requires post-verifier
-context that the bytecode-level scanner does not currently detect;
-LEA sites are identified only during JIT lowering.
-
-\textbf{Takeaway.} Directive sites are not limited to networking: 35\%
-of production tracing tools contain CMOV candidates. The policy-sensitive
-family that motivates mechanism/policy separation is present across BPF
-program domains.
+\textit{[TODO: Cost of adding a new kinsn (kernel module LOC) vs.
+adding a new in-tree JIT optimization. Demonstrate that new
+optimizations require only a module + daemon update, zero core kernel
+changes.]}
 
 %% ============================================================
 \section{Discussion}
 \label{sec:discussion}
 %% ============================================================
 
-\textbf{Two categories of evidence.}
-Our evidence for mechanism/policy separation comes in two forms.
-\textsc{Cond\_Select} provides the strongest policy-sensitivity
-evidence: the same legal optimization produces a 34.5\% degradation or
-a 5.5$\times$ improvement depending on branch predictability, and branch
-predictability depends on runtime input distributions that the kernel
-cannot observe. The other three families are substrate optimizations
-where the framework's value lies in selective composition, rapid
-update, and shared infrastructure. We are transparent that only CMOV
-currently demonstrates clear bidirectional policy sensitivity.
+\textit{[TODO: Update discussion for v2 architecture. Key discussion
+points to cover:]}
 
-\textbf{Scope of claims.} Our results are from a single x86
-microarchitecture (Intel Arrow Lake-S). We conjecture that policy
-sensitivity increases on architectures with different branch predictor
-designs (e.g., ARM64's \texttt{csel}), but we have not validated this.
-The per-directive isolation experiment uses six benchmarks chosen for
-directive coverage; a broader program set may reveal additional
-interaction effects.
+\textbf{LLVM as upper bound.} llvmbpf serves as an upper bound
+reference, not a direct competitor. Running LLVM -O3 inside the kernel
+is impractical; \textsc{BpfReJIT} captures a substantial portion of the
+available headroom through a kernel-compatible framework.
 
-\textbf{LLVM as upper bound.} llvmbpf serves as an upper bound reference,
-not a direct competitor. Running LLVM -O3 in the kernel is impractical;
-\textsc{BpfReJIT} captures a portion of the available headroom in a
-kernel-compatible way.
+\textbf{Complementarity with bytecode optimizers.} K2, Merlin, and
+EPSO optimize BPF bytecode \emph{before} loading; \textsc{BpfReJIT}
+optimizes programs \emph{after} loading, transparently and guided by
+runtime data. A deployment could use both layers without interference,
+as bytecode optimizations compose with post-load recompilation.
 
-\textbf{Complementarity with bytecode optimizers.} K2, Merlin, and EPSO
-optimize BPF bytecode \emph{before} JIT; \textsc{BpfReJIT} optimizes
-native code \emph{after}. A deployment could use both layers without
-interference.
+\textbf{Why userspace, not kernel.} Implementing all optimizations
+in-kernel is infeasible for multiple reasons: the upstream review cycle
+is measured in months to years; optimization algorithms require rapid
+iteration that conflicts with kernel stability; workload-adaptive
+decisions require runtime profiling data that the kernel JIT does not
+collect; and fleet management capabilities (A/B testing, gradual
+rollout, per-deployment customization) belong in userspace.
 
 \textbf{Limitations.}
-(1)~\textsc{Wide\_Mem} does not show a statistically significant latency
-win ($p{=}0.164$), though it reduces code size.
-(2)~Cilium and loxilb programs fail to load in our test environment due
-to BTF/section compatibility issues unrelated to \textsc{BpfReJIT}.
-(3)~The re-JIT installation path is not yet RCU-protected for
-concurrent execution; re-JIT should occur before program attachment.
-(4)~End-to-end deployment evaluation with throughput measurement is
-future work; the 60/60 result validates compatibility, not performance
-impact on production workloads.
+\textit{[TODO: Update limitations for v2. Include discussion of
+prototype maturity, architecture coverage (x86 only so far), and
+end-to-end deployment scope.]}
 
 %% ============================================================
 \section{Related Work}
 \label{sec:related}
 %% ============================================================
 
-\textbf{BPF-level optimization.}
+\textbf{BPF bytecode optimization.}
 K2~\cite{k2} applies stochastic superoptimization to BPF bytecode.
 Merlin~\cite{merlin} lifts BPF to LLVM IR for optimization.
-EPSO~\cite{epso} uses evolutionary synthesis at the bytecode level.
-All three operate above the JIT and cannot influence native instruction
-selection. \textsc{BpfReJIT} operates at the JIT backend, supports
-post-load re-optimization without re-verification, and enables per-site
-selective application. The systems are complementary.
+EPSO~\cite{epso} uses evolutionary program synthesis at the bytecode
+level. All three operate \emph{before} program loading: they require
+the original \texttt{.bpf.o} file, cannot optimize programs already
+loaded by third-party tools, and do not support runtime profiling
+feedback. Since the BPF ISA lacks opcodes for conditional moves,
+rotate, or wide-load fusion, no bytecode rewrite can introduce these
+native instructions. \textsc{BpfReJIT} operates \emph{post-load} and
+transparently, and is complementary to bytecode optimizers.
+
+\textbf{BPF verification and extensibility.}
+ePass~\cite{epass} proposes in-kernel optimization passes at BPF load
+time but requires source modifications and does not support post-load
+re-optimization. BCF~\cite{bcf} offloads BPF verification to userspace
+via cryptographic certificates, addressing verifier scalability rather
+than JIT code quality. \textsc{BpfReJIT} is orthogonal: BCF offloads
+verification; \textsc{BpfReJIT} offloads optimization.
 
 \textbf{Superoptimization.}
 Massalin's superoptimizer~\cite{superoptimizer} and
 STOKE~\cite{stoke} find optimal native sequences.
 Bansal and Aiken~\cite{credal} automate peephole rule generation.
-Our problem is not finding better sequences but deciding which
-\emph{known-legal variant} to emit for a given workload.
+These systems discover better instruction sequences;
+\textsc{BpfReJIT} provides a framework to \emph{deploy} such
+sequences to kernel-resident programs transparently and safely.
 
 \textbf{Feedback-directed and adaptive JIT compilation.}
 Profile-guided optimization~\cite{feedback_directed} and adaptive JIT
-techniques~\cite{jit_survey} (e.g., HotSpot, V8, Graal) use runtime
-feedback to guide compilation. These systems have full control over
-their compiler backend. \textsc{BpfReJIT} applies the same principle to
-a constrained setting: the kernel BPF JIT, where the compiler is part of
-the kernel and cannot be replaced, but can be steered through a safe
-interface.
+techniques~\cite{jit_survey} (e.g., JVM HotSpot~\cite{jvm_hotspot},
+V8, Graal) use runtime feedback to guide multi-tier compilation. These
+systems have full control over their compiler backend.
+\textsc{BpfReJIT} brings the same principle---runtime-guided dynamic
+recompilation---to a much more constrained setting: the kernel BPF JIT,
+where the compiler is part of the trusted computing base and cannot be
+replaced, but can be extended through a minimal, safe interface.
 
-\textbf{Auto-tuning frameworks.}
+\textbf{Auto-tuning and algorithm/schedule separation.}
 Halide~\cite{halide} separates algorithm from schedule; TVM and XLA
-auto-tune compilation parameters for deep learning workloads. Our
-mechanism/policy separation borrows the principle of externalizing
-optimization decisions, but operates at a much narrower scope (per-site
-instruction selection) with much stronger safety constraints (kernel
-TCB, no arbitrary code).
+auto-tune compilation parameters for deep learning workloads.
+\textsc{BpfReJIT}'s microkernel-inspired separation of ``what can be
+optimized'' from ``how to optimize'' draws on the same principle of
+externalizing optimization decisions, applied to OS kernel compilation
+with much stronger safety constraints.
 
-\textbf{Compiler backend design.}
-LLVM's TableGen-based instruction selection~\cite{llvm} describes
-target-specific lowering patterns. Our canonical forms are a
-safety-restricted subset of instruction selection, constrained to
-pre-verified equivalence-preserving lowerings.
+\textbf{Compiler extensibility.}
+LLVM's pass infrastructure~\cite{llvm} allows new optimization passes
+to be registered as plugins. \textsc{BpfReJIT}'s kinsn mechanism
+provides an analogous extensibility model for the kernel JIT: new
+platform-specific instructions can be added via kernel modules without
+modifying core kernel source, similar to how LLVM passes extend the
+compiler without modifying the pass manager.
 
 \textbf{Kernel live patching.}
-Linux live patching (kpatch, livepatch) modifies running kernel code,
-but operates at function granularity and requires source-level changes.
-\textsc{BpfReJIT} modifies JIT output at instruction granularity for
-already-verified BPF programs, with a different safety model
-(bytecode-invariant, fail-closed).
+Linux live patching (kpatch, livepatch) modifies running kernel code
+at function granularity but must fully trust the patch author---there
+is no verification step. \textsc{BpfReJIT} operates at BPF bytecode
+granularity with full verifier re-validation, providing a fundamentally
+stronger safety guarantee: the kernel verifier ensures that no
+recompiled program can violate kernel safety invariants, regardless of
+daemon behavior.
 
 %% ============================================================
 \section{Conclusion}
 \label{sec:conclusion}
 %% ============================================================
 
-We characterized the performance gap between the Linux kernel eBPF JIT
-and LLVM~-O3: a 15\% execution-time gap and 2$\times$ code-size gap
-rooted in three backend lowering deficiencies. We showed that these
-deficiencies cannot be fully addressed by fixed kernel heuristics: CMOV
-is policy-sensitive (34.5\% degradation on predictable branches,
-$p{=}0.002$), and a fixed-all baseline produces combination regressions
-on 2 of 6 tested programs.
+We presented \textsc{BpfReJIT}, a dynamic, minimally invasive, and
+extensible compilation framework that brings runtime-guided optimization
+to kernel-resident eBPF programs. Our key insight is a
+microkernel-inspired separation of concerns: the kernel defines
+\emph{what can be optimized} through minimal extensions (${\sim}$600
+lines of code), while a userspace daemon defines \emph{how to optimize}
+through compilation passes informed by runtime profiling---analogous to
+how JVM HotSpot and LLVM achieve high performance through extensible,
+feedback-directed compilation.
 
-\textsc{BpfReJIT} separates mechanism (kernel safety) from policy
-(userspace profitability) via \texttt{BPF\_PROG\_JIT\_RECOMPILE}. Four
-rule families cover the identified gaps, with selective application
-avoiding the regressions that fixed heuristics cannot. Evaluation shows
-ROTATE achieves 1.24$\times$ speedup ($p{=}0.002$), 60/60 production
-programs recompile successfully, and declarative patterns reduce
-extension cost by 31.8$\times$.
+\textsc{BpfReJIT} is fully transparent to existing eBPF tools, loaders,
+and subsystems. The BPF verifier provides identical safety guarantees
+for recompiled programs as for freshly loaded ones, ensuring that
+kernel safety is never compromised regardless of daemon behavior. The
+kinsn mechanism enables platform-specific instruction extensions via
+kernel modules with zero verifier modifications, providing an
+LLVM-pass-like extensibility model for the OS kernel.
 
-When profitability depends on deployment context---runtime data
-distributions, workload mix, microarchitecture---backend optimization
-policy should be externalized from the kernel. \textsc{BpfReJIT}
-demonstrates that this externalization is feasible, safe, and
-practical.
+\textit{[TODO: Add final evaluation summary numbers for v2 once
+evaluation is complete.]}
+
+\textsc{BpfReJIT} provides a practical, upstream-compatible path toward
+dynamic, extensible compilation frameworks in operating system kernels.
 
 \begin{acks}
 Anonymized for submission.
@@ -1116,73 +728,7 @@ Anonymized for submission.
   \end{tabular}
 \end{table}
 
-\section{Policy Blob Binary Format}
-\label{appendix:blob}
-
-The policy blob is a flat binary structure:
-(1)~\texttt{bpf\_jit\_policy\_hdr} (32 bytes) containing magic, version,
-rule count, program instruction count, \texttt{prog\_tag} digest, and
-architecture ID;
-(2)~array of \texttt{bpf\_jit\_rewrite\_rule} (variable-length in v5)
-each specifying site offset, site length, canonical form, native choice,
-CPU feature requirements, and (in v5) inline pattern descriptors with
-constraint arrays and canonical binding tables;
-(3)~rule-specific payload data referenced by offset/length fields.
-
-The blob is sealed via \texttt{F\_SEAL\_WRITE} and
-\texttt{F\_SEAL\_SHRINK} before submission, preventing TOCTOU
-modification between digest validation and rule application.
-
-\section{Production Corpus Details}
-\label{appendix:corpus}
-
-\begin{table}[h]
-  \centering
-  \caption{Directive site census across production corpus.}
-  \label{tab:census}
-  \small
-  \begin{tabular}{lrrrrr}
-    \toprule
-    Project & Progs & CMOV & WIDE & ROTATE & Total \\
-    \midrule
-    Calico    & 60 & 196 & 108   & 10 & 314  \\
-    Suricata  & 1  & 1   & 0     & 0  & 1    \\
-    \midrule
-    \textbf{Tested} & \textbf{61} & \textbf{197} & \textbf{108} & \textbf{10} & \textbf{315} \\
-    \midrule
-    \multicolumn{6}{l}{\textit{Inventory-only (load failures):}} \\
-    loxilb    & 18 & 98  & 1{,}729 & 0  & 1{,}827\\
-    \bottomrule
-  \end{tabular}
-\end{table}
-
-Calico programs loaded and recompiled successfully (60/60).
-loxilb objects failed at \texttt{bpf\_object\_\_load()} due to
-non-standard ELF section names; site counts are from scanner inventory
-only, not validated via recompile.
-
-\section{Interaction Effects: Code Size vs.\ Execution Time}
-\label{appendix:interaction}
-
-\begin{table}[h]
-  \centering
-  \caption{Code-size composition is exactly additive; execution-time
-  composition is not. $\sum$individual = sum of per-directive deltas.}
-  \label{tab:interaction}
-  \small
-  \begin{tabular}{lrrrr}
-    \toprule
-    Program & fixed-all & $\sum$individual & fixed-all & $\sum$individual \\
-            & exec $\Delta$ & exec $\Delta$ & code $\Delta$ & code $\Delta$ \\
-    \midrule
-    \texttt{rotate64\_hash}  & $-$162\,ns & +200\,ns & $-$1178 & $-$1178 \\
-    \texttt{pkt\_rss\_hash}  & +1\,ns     & +9\,ns   & $-$151  & $-$151  \\
-    \texttt{load\_byte\_rec} & +44\,ns    & $-$73\,ns & $-$12  & $-$12   \\
-    \texttt{stride\_load\_4} & $-$66\,ns  & $-$26\,ns & $-$30  & $-$30   \\
-    \texttt{stride\_load\_16}& +289\,ns   & +1064\,ns & $-$30  & $-$30   \\
-    \texttt{log2\_fold}      & +99\,ns    & +365\,ns  & $-$2   & $-$2    \\
-    \bottomrule
-  \end{tabular}
-\end{table}
+% v1 appendices (Policy Blob, Production Corpus, Interaction Effects) removed.
+% TODO: Add v2 appendices as needed (kinsn API details, daemon architecture, etc.).
 
 \end{document}

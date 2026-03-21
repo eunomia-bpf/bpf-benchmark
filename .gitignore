@@ -49,10 +49,19 @@ module/x86/*.mod.c
 module/x86/modules.order
 module/x86/Module.symvers
 module/x86/.*.cmd
+module/arm64/*.ko
+module/arm64/*.mod
+module/arm64/*.mod.c
+module/arm64/*.mod.o
+module/arm64/*.o
+module/arm64/modules.order
+module/arm64/Module.symvers
+module/arm64/.*.cmd
 
 # Test build artifacts and binary data
 tests/hold_bpf_prog
 tests/lbr_input.bin
+tests/test_live_policy_discovery
 
 # BPF build artifacts
 *.bpf.o

@@ -500,7 +500,8 @@ vm-micro: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(DAEMON_PATH) verify-build $(BZIMA
 		bash -lc 'cd "$(ROOT_DIR)" && $(VENV_ACTIVATE) python3 "$(MICRO_DIR)/driver.py" suite \
 			--runtime llvmbpf \
 			--runtime kernel \
-			--runtime kernel-recompile \
+			--runtime kernel-rejit \
+			--daemon-path "$(DAEMON_PATH)" \
 			$(MICRO_ARGS) \
 			$(POLICY_DIR_FLAG) \
 			--output "$(VM_MICRO_OUTPUT)"'

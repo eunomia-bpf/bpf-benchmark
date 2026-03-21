@@ -89,8 +89,42 @@ def scan_programs(
     return results
 
 
+def apply_daemon_rejit(daemon_binary: Path | str, prog_ids: list[int] | None = None) -> dict[str, object]:
+    """Call daemon apply-all or apply <prog_id> to optimize live BPF programs.
+
+    Returns: {"applied": bool, "output": str, "exit_code": int}
+    """
+    if prog_ids:
+        outputs = []
+        last_rc = 0
+        for pid in prog_ids:
+            result = subprocess.run(
+                [str(daemon_binary), "apply", str(pid)],
+                capture_output=True,
+                text=True,
+            )
+            outputs.append(result.stdout + result.stderr)
+            last_rc = result.returncode
+        return {
+            "applied": last_rc == 0,
+            "output": "\n".join(outputs),
+            "exit_code": last_rc,
+        }
+    result = subprocess.run(
+        [str(daemon_binary), "apply-all"],
+        capture_output=True,
+        text=True,
+    )
+    return {
+        "applied": result.returncode == 0,
+        "output": result.stdout + result.stderr,
+        "exit_code": result.returncode,
+    }
+
+
 __all__ = [
     "RejitTarget",
+    "apply_daemon_rejit",
     "enumerate_program_record",
     "scan_programs",
 ]

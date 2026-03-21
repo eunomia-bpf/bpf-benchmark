@@ -1187,15 +1187,19 @@ std::vector<sample_result> run_kernel(const cli_options &options)
         rejit.requested && !options.compile_only;
     if (options.compile_only && rejit.requested) {
         if (options.daemon_path.has_value()) {
+            const auto pre_info = load_prog_info(program_fd);
             const std::string cmd = options.daemon_path->string() +
                 " apply " + std::to_string(program_info.id);
             rejit_start = std::chrono::steady_clock::now();
             const int ret = std::system(cmd.c_str());
             rejit_end = std::chrono::steady_clock::now();
             rejit.syscall_attempted = true;
-            rejit.applied = (ret == 0);
             if (ret != 0) {
+                rejit.applied = false;
                 rejit.error = "daemon apply failed with exit code " + std::to_string(ret);
+            } else {
+                const auto post_info = load_prog_info(program_fd);
+                rejit.applied = (post_info.jited_prog_len != pre_info.jited_prog_len);
             }
         } else {
             apply_rejit(program_fd, rejit_insns.data(),
@@ -1466,16 +1470,27 @@ std::vector<sample_result> run_kernel(const cli_options &options)
             stock_result_read_end,
             false);
         if (options.daemon_path.has_value()) {
+            const auto pre_info = load_prog_info(program_fd);
             const std::string cmd = options.daemon_path->string() +
                 " apply " + std::to_string(program_info.id);
             rejit_start = std::chrono::steady_clock::now();
             const int ret = std::system(cmd.c_str());
             rejit_end = std::chrono::steady_clock::now();
             rejit.syscall_attempted = true;
-            rejit.applied = (ret == 0);
             if (ret != 0) {
+                rejit.applied = false;
                 rejit.error = "daemon apply failed with exit code " + std::to_string(ret);
                 fprintf(stderr, "daemon apply failed: exit code %d\n", ret);
+            } else {
+                /* Check if the daemon actually changed the program by comparing
+                 * jited_prog_len before and after. */
+                const auto post_info = load_prog_info(program_fd);
+                rejit.applied = (post_info.jited_prog_len != pre_info.jited_prog_len);
+                if (!rejit.applied) {
+                    fprintf(stderr, "daemon: command succeeded but program unchanged "
+                            "(jited_prog_len %u -> %u)\n",
+                            pre_info.jited_prog_len, post_info.jited_prog_len);
+                }
             }
         } else {
             apply_rejit(program_fd, rejit_insns.data(),

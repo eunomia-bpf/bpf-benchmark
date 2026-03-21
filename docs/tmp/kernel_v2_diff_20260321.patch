@@ -1,0 +1,1253 @@
+diff --git a/arch/x86/net/bpf_jit_comp.c b/arch/x86/net/bpf_jit_comp.c
+index e9b78040d..d8f25aad2 100644
+--- a/arch/x86/net/bpf_jit_comp.c
++++ b/arch/x86/net/bpf_jit_comp.c
+@@ -576,6 +576,28 @@ static int emit_call(u8 **pprog, void *func, void *ip)
+ 	return emit_patch(pprog, func, ip, 0xE8);
+ }
+ 
++static int emit_inline_kfunc_call(u8 **pprog, struct bpf_prog *bpf_prog,
++				  const struct bpf_insn *insn, bool emit)
++{
++	const struct bpf_kfunc_inline_ops *ops;
++	u8 *prog = *pprog;
++	u32 off = 0;
++	int ret;
++
++	ops = bpf_jit_find_kfunc_inline_ops(bpf_prog, insn);
++	if (!ops)
++		return -ENOENT;
++
++	ret = ops->emit_x86(prog, &off, emit, insn, bpf_prog);
++	if (ret < 0)
++		return ret;
++	if (ret != off || ret > ops->max_emit_bytes)
++		return -EFAULT;
++
++	*pprog = prog + off;
++	return 0;
++}
++
+ static int emit_rsb_call(u8 **pprog, void *func, void *ip)
+ {
+ 	OPTIMIZER_HIDE_VAR(func);
+@@ -2443,6 +2465,9 @@ st:			if (is_imm8(insn->off))
+ 			u8 *ip = image + addrs[i - 1];
+ 
+ 			func = (u8 *) __bpf_call_base + imm32;
++			if (src_reg == BPF_PSEUDO_KFUNC_CALL &&
++			    !emit_inline_kfunc_call(&prog, bpf_prog, insn, !!rw_image))
++				break;
+ 			if (src_reg == BPF_PSEUDO_CALL && tail_call_reachable) {
+ 				LOAD_TAIL_CALL_CNT_PTR(stack_depth);
+ 				ip += 7;
+diff --git a/include/linux/bpf.h b/include/linux/bpf.h
+index 05b34a635..cdbb9153f 100644
+--- a/include/linux/bpf.h
++++ b/include/linux/bpf.h
+@@ -965,6 +965,14 @@ struct bpf_func_proto {
+ 	bool (*allowed)(const struct bpf_prog *prog);
+ };
+ 
++struct bpf_kfunc_inline_ops {
++	/* Returns emitted byte count, or negative error to fall back to CALL. */
++	int (*emit_x86)(u8 *image, u32 *off, bool emit,
++			const struct bpf_insn *insn,
++			struct bpf_prog *prog);
++	int max_emit_bytes;
++};
++
+ /* bpf_context is intentionally undefined structure. Pointer to bpf_context is
+  * the first argument to eBPF programs.
+  * For socket filters: 'struct bpf_context *' == 'struct sk_buff *'
+@@ -1675,6 +1683,7 @@ struct bpf_prog_aux {
+ 	struct btf *attach_btf;
+ 	struct bpf_ctx_arg_aux *ctx_arg_info;
+ 	void __percpu *priv_stack_ptr;
++	struct mutex rejit_mutex; /* serializes BPF_PROG_REJIT on this prog */
+ 	struct mutex dst_mutex; /* protects dst_* pointers below, *after* prog becomes visible */
+ 	struct bpf_prog *dst_prog;
+ 	struct bpf_trampoline *dst_trampoline;
+@@ -1724,6 +1733,8 @@ struct bpf_prog_aux {
+ 	struct user_struct *user;
+ 	u64 load_time; /* ns since boottime */
+ 	u32 verified_insns;
++	struct bpf_insn *orig_insns;
++	u32 orig_prog_len;
+ 	int cgroup_atype; /* enum cgroup_bpf_attach_type */
+ 	struct bpf_map *cgroup_storage[MAX_BPF_CGROUP_STORAGE_TYPE];
+ 	char name[BPF_OBJ_NAME_LEN];
+@@ -3032,10 +3043,16 @@ const struct bpf_func_proto *bpf_base_func_proto(enum bpf_func_id func_id,
+ 						 const struct bpf_prog *prog);
+ void bpf_task_storage_free(struct task_struct *task);
+ void bpf_cgrp_storage_free(struct cgroup *cgroup);
++int bpf_register_kfunc_inline_ops(const char *func_name,
++				  struct bpf_kfunc_inline_ops *ops);
++void bpf_unregister_kfunc_inline_ops(const char *func_name);
+ bool bpf_prog_has_kfunc_call(const struct bpf_prog *prog);
+ const struct btf_func_model *
+ bpf_jit_find_kfunc_model(const struct bpf_prog *prog,
+ 			 const struct bpf_insn *insn);
++const struct bpf_kfunc_inline_ops *
++bpf_jit_find_kfunc_inline_ops(const struct bpf_prog *prog,
++			      const struct bpf_insn *insn);
+ int bpf_get_kfunc_addr(const struct bpf_prog *prog, u32 func_id,
+ 		       u16 btf_fd_idx, u8 **func_addr);
+ 
+@@ -3315,6 +3332,17 @@ static inline void bpf_task_storage_free(struct task_struct *task)
+ {
+ }
+ 
++static inline int
++bpf_register_kfunc_inline_ops(const char *func_name,
++			      struct bpf_kfunc_inline_ops *ops)
++{
++	return -EOPNOTSUPP;
++}
++
++static inline void bpf_unregister_kfunc_inline_ops(const char *func_name)
++{
++}
++
+ static inline bool bpf_prog_has_kfunc_call(const struct bpf_prog *prog)
+ {
+ 	return false;
+@@ -3327,6 +3355,13 @@ bpf_jit_find_kfunc_model(const struct bpf_prog *prog,
+ 	return NULL;
+ }
+ 
++static inline const struct bpf_kfunc_inline_ops *
++bpf_jit_find_kfunc_inline_ops(const struct bpf_prog *prog,
++			      const struct bpf_insn *insn)
++{
++	return NULL;
++}
++
+ static inline int
+ bpf_get_kfunc_addr(const struct bpf_prog *prog, u32 func_id,
+ 		   u16 btf_fd_idx, u8 **func_addr)
+diff --git a/include/linux/btf.h b/include/linux/btf.h
+index 48108471c..842d25bcf 100644
+--- a/include/linux/btf.h
++++ b/include/linux/btf.h
+@@ -79,6 +79,7 @@
+ #define KF_ARENA_ARG1   (1 << 14) /* kfunc takes an arena pointer as its first argument */
+ #define KF_ARENA_ARG2   (1 << 15) /* kfunc takes an arena pointer as its second argument */
+ #define KF_IMPLICIT_ARGS (1 << 16) /* kfunc has implicit arguments supplied by the verifier */
++#define KF_INLINE_EMIT  (1 << 17) /* kfunc may be inlined by an architecture JIT */
+ 
+ /*
+  * Tag marking a kernel function as a kfunc. This is meant to minimize the
+diff --git a/include/uapi/linux/bpf.h b/include/uapi/linux/bpf.h
+index c8d400b76..1ec34d340 100644
+--- a/include/uapi/linux/bpf.h
++++ b/include/uapi/linux/bpf.h
+@@ -993,6 +993,7 @@ enum bpf_cmd {
+ 	BPF_TOKEN_CREATE,
+ 	BPF_PROG_STREAM_READ_BY_FD,
+ 	BPF_PROG_ASSOC_STRUCT_OPS,
++	BPF_PROG_REJIT,
+ 	__MAX_BPF_CMD,
+ };
+ 
+@@ -1922,6 +1923,17 @@ union bpf_attr {
+ 		__u32		flags;
+ 	} prog_assoc_struct_ops;
+ 
++	struct {
++		__u32		prog_fd;
++		__u32		insn_cnt;
++		__aligned_u64	insns;
++		__u32		log_level;
++		__u32		log_size;
++		__aligned_u64	log_buf;
++		__aligned_u64	fd_array;
++		__u32		fd_array_cnt;
++	} rejit;
++
+ } __attribute__((aligned(8)));
+ 
+ /* The description below is an attempt at providing documentation to eBPF
+@@ -6696,6 +6708,8 @@ struct bpf_prog_info {
+ 	__u32 verified_insns;
+ 	__u32 attach_btf_obj_id;
+ 	__u32 attach_btf_id;
++	__u32 orig_prog_len;
++	__aligned_u64 orig_prog_insns;
+ } __attribute__((aligned(8)));
+ 
+ struct bpf_map_info {
+diff --git a/kernel/bpf/core.c b/kernel/bpf/core.c
+index 3ece2da55..c649c9eed 100644
+--- a/kernel/bpf/core.c
++++ b/kernel/bpf/core.c
+@@ -138,6 +138,7 @@ struct bpf_prog *bpf_prog_alloc_no_stats(unsigned int size, gfp_t gfp_extra_flag
+ 	mutex_init(&fp->aux->used_maps_mutex);
+ 	mutex_init(&fp->aux->ext_mutex);
+ 	mutex_init(&fp->aux->dst_mutex);
++	mutex_init(&fp->aux->rejit_mutex);
+ 	mutex_init(&fp->aux->st_ops_assoc_mutex);
+ 
+ #ifdef CONFIG_BPF_SYSCALL
+@@ -652,6 +653,7 @@ static void __bpf_ksym_del(struct bpf_ksym *ksym)
+ 
+ 	latch_tree_erase(&ksym->tnode, &bpf_tree, &bpf_tree_ops);
+ 	list_del_rcu(&ksym->lnode);
++	INIT_LIST_HEAD_RCU(&ksym->lnode);
+ }
+ 
+ void bpf_ksym_del(struct bpf_ksym *ksym)
+diff --git a/kernel/bpf/syscall.c b/kernel/bpf/syscall.c
+index 274039e36..c2a909e00 100644
+--- a/kernel/bpf/syscall.c
++++ b/kernel/bpf/syscall.c
+@@ -2380,6 +2380,7 @@ static void __bpf_prog_put_noref(struct bpf_prog *prog, bool deferred)
+ 	module_put(prog->aux->mod);
+ 	kvfree(prog->aux->jited_linfo);
+ 	kvfree(prog->aux->linfo);
++	kvfree(prog->aux->orig_insns);
+ 	kfree(prog->aux->kfunc_tab);
+ 	kfree(prog->aux->ctx_arg_info);
+ 	if (prog->aux->attach_btf)
+@@ -3020,6 +3021,13 @@ static int bpf_prog_load(union bpf_attr *attr, bpfptr_t uattr, u32 uattr_size)
+ 			     make_bpfptr(attr->insns, uattr.is_kernel),
+ 			     bpf_prog_insn_size(prog)) != 0)
+ 		goto free_prog;
++	prog->aux->orig_insns = kvmemdup(prog->insns, bpf_prog_insn_size(prog),
++					 GFP_USER);
++	if (!prog->aux->orig_insns) {
++		err = -ENOMEM;
++		goto free_prog;
++	}
++	prog->aux->orig_prog_len = bpf_prog_insn_size(prog);
+ 	/* copy eBPF program license from user space */
+ 	if (strncpy_from_bpfptr(license,
+ 				make_bpfptr(attr->license, uattr.is_kernel),
+@@ -3139,12 +3147,240 @@ static int bpf_prog_load(union bpf_attr *attr, bpfptr_t uattr, u32 uattr_size)
+ 	free_uid(prog->aux->user);
+ 	if (prog->aux->attach_btf)
+ 		btf_put(prog->aux->attach_btf);
++	kvfree(prog->aux->orig_insns);
+ 	bpf_prog_free(prog);
+ put_token:
+ 	bpf_token_put(token);
+ 	return err;
+ }
+ 
++#define BPF_PROG_REJIT_LOAD_ATTR_SIZE offsetofend(union bpf_attr, keyring_id)
++
++static bool bpf_prog_rejit_supported(const struct bpf_prog *prog)
++{
++	const struct bpf_prog_aux *aux = prog->aux;
++
++	if (!prog->jited || prog->is_func)
++		return false;
++
++	if (bpf_prog_is_offloaded(aux) || bpf_prog_is_dev_bound(aux))
++		return false;
++
++	if (aux->dst_prog || aux->dst_trampoline || aux->func_cnt ||
++	    aux->real_func_cnt || aux->poke_tab || aux->size_poke_tab ||
++	    rcu_access_pointer(aux->st_ops_assoc))
++		return false;
++
++	return true;
++}
++
++static void bpf_prog_rejit_swap(struct bpf_prog *prog, struct bpf_prog *tmp)
++{
++	bool old_jited = prog->jited;
++	u32 old_jited_len = prog->jited_len;
++	bpf_func_t old_bpf_func = prog->bpf_func;
++
++	swap(prog->aux->orig_insns, tmp->aux->orig_insns);
++	swap(prog->aux->orig_prog_len, tmp->aux->orig_prog_len);
++	swap(prog->aux->used_btfs, tmp->aux->used_btfs);
++	swap(prog->aux->used_btf_cnt, tmp->aux->used_btf_cnt);
++	swap(prog->aux->btf, tmp->aux->btf);
++	swap(prog->aux->func_info, tmp->aux->func_info);
++	swap(prog->aux->func_info_aux, tmp->aux->func_info_aux);
++	swap(prog->aux->func_info_cnt, tmp->aux->func_info_cnt);
++	swap(prog->aux->linfo, tmp->aux->linfo);
++	swap(prog->aux->jited_linfo, tmp->aux->jited_linfo);
++	swap(prog->aux->nr_linfo, tmp->aux->nr_linfo);
++	swap(prog->aux->linfo_idx, tmp->aux->linfo_idx);
++	swap(prog->aux->num_exentries, tmp->aux->num_exentries);
++	swap(prog->aux->extable, tmp->aux->extable);
++	swap(prog->aux->priv_stack_ptr, tmp->aux->priv_stack_ptr);
++	swap(prog->aux->jit_data, tmp->aux->jit_data);
++	swap(prog->aux->used_maps, tmp->aux->used_maps);
++	swap(prog->aux->used_map_cnt, tmp->aux->used_map_cnt);
++	swap(prog->aux->kfunc_tab, tmp->aux->kfunc_tab);
++	swap(prog->aux->kfunc_btf_tab, tmp->aux->kfunc_btf_tab);
++
++#ifdef CONFIG_SECURITY
++	swap(prog->aux->security, tmp->aux->security);
++#endif
++
++	bpf_prog_kallsyms_del(prog);
++
++	memcpy(prog->digest, tmp->digest, sizeof(prog->digest));
++	prog->jited = tmp->jited;
++	prog->jited_len = tmp->jited_len;
++	prog->gpl_compatible = tmp->gpl_compatible;
++	prog->cb_access = tmp->cb_access;
++	prog->dst_needed = tmp->dst_needed;
++	prog->blinding_requested = tmp->blinding_requested;
++	prog->blinded = tmp->blinded;
++	prog->kprobe_override = tmp->kprobe_override;
++	prog->enforce_expected_attach_type = tmp->enforce_expected_attach_type;
++	prog->call_get_stack = tmp->call_get_stack;
++	prog->call_get_func_ip = tmp->call_get_func_ip;
++	prog->call_session_cookie = tmp->call_session_cookie;
++	prog->tstamp_type_access = tmp->tstamp_type_access;
++
++	prog->aux->max_ctx_offset = tmp->aux->max_ctx_offset;
++	prog->aux->max_pkt_offset = tmp->aux->max_pkt_offset;
++	prog->aux->max_tp_access = tmp->aux->max_tp_access;
++	prog->aux->stack_depth = tmp->aux->stack_depth;
++	prog->aux->max_rdonly_access = tmp->aux->max_rdonly_access;
++	prog->aux->max_rdwr_access = tmp->aux->max_rdwr_access;
++	prog->aux->verifier_zext = tmp->aux->verifier_zext;
++	prog->aux->changes_pkt_data = tmp->aux->changes_pkt_data;
++	prog->aux->kprobe_write_ctx = tmp->aux->kprobe_write_ctx;
++	prog->aux->verified_insns = tmp->aux->verified_insns;
++	prog->aux->load_time = ktime_get_boottime_ns();
++
++	/* Publish the replacement image after metadata and xlated insns are in place. */
++	smp_wmb();
++	WRITE_ONCE(prog->bpf_func, tmp->bpf_func);
++	tmp->jited = old_jited;
++	tmp->jited_len = old_jited_len;
++	WRITE_ONCE(tmp->bpf_func, old_bpf_func);
++
++	bpf_prog_kallsyms_add(prog);
++}
++
++/* last field in 'union bpf_attr' used by this command */
++#define BPF_PROG_REJIT_LAST_FIELD rejit.fd_array_cnt
++
++static int bpf_prog_rejit(union bpf_attr *attr)
++{
++	union bpf_attr load_attr = {};
++	bpfptr_t load_uattr = KERNEL_BPFPTR(&load_attr);
++	struct bpf_prog *prog, *tmp = NULL;
++	int err;
++
++	if (CHECK_ATTR(BPF_PROG_REJIT))
++		return -EINVAL;
++
++	if (!capable(CAP_BPF) || !capable(CAP_SYS_ADMIN))
++		return -EPERM;
++
++	if (!attr->rejit.insns || !attr->rejit.insn_cnt ||
++	    attr->rejit.insn_cnt > BPF_COMPLEXITY_LIMIT_INSNS)
++		return -E2BIG;
++
++	prog = bpf_prog_get(attr->rejit.prog_fd);
++	if (IS_ERR(prog))
++		return PTR_ERR(prog);
++
++	err = -EOPNOTSUPP;
++	if (!bpf_prog_rejit_supported(prog))
++		goto out_put_prog;
++
++	mutex_lock(&prog->aux->rejit_mutex);
++
++	load_attr.prog_type = prog->type;
++	load_attr.expected_attach_type = prog->expected_attach_type;
++	load_attr.insn_cnt = attr->rejit.insn_cnt;
++	load_attr.insns = attr->rejit.insns;
++	load_attr.log_level = attr->rejit.log_level;
++	load_attr.log_size = attr->rejit.log_size;
++	load_attr.log_buf = attr->rejit.log_buf;
++	load_attr.prog_flags = (prog->sleepable ? BPF_F_SLEEPABLE : 0) |
++			       (prog->aux->xdp_has_frags ? BPF_F_XDP_HAS_FRAGS : 0);
++	load_attr.fd_array = attr->rejit.fd_array;
++	load_attr.fd_array_cnt = attr->rejit.fd_array_cnt;
++
++	tmp = bpf_prog_alloc(bpf_prog_size(attr->rejit.insn_cnt), GFP_USER);
++	err = -ENOMEM;
++	if (!tmp)
++		goto out_unlock;
++
++	tmp->expected_attach_type = prog->expected_attach_type;
++	tmp->sleepable = prog->sleepable;
++	tmp->aux->dev_bound = prog->aux->dev_bound;
++	tmp->aux->xdp_has_frags = prog->aux->xdp_has_frags;
++	tmp->aux->user = get_current_user();
++	tmp->len = attr->rejit.insn_cnt;
++
++	/* Propagate attach_btf info so the verifier can resolve tracing targets. */
++	if (prog->aux->attach_btf) {
++		btf_get(prog->aux->attach_btf);
++		tmp->aux->attach_btf = prog->aux->attach_btf;
++	}
++	tmp->aux->attach_btf_id = prog->aux->attach_btf_id;
++
++	err = -EFAULT;
++	if (copy_from_bpfptr(tmp->insns, make_bpfptr(attr->rejit.insns, false),
++			     bpf_prog_insn_size(tmp)) != 0)
++		goto free_tmp;
++
++	tmp->aux->orig_insns = kvmemdup(tmp->insns, bpf_prog_insn_size(tmp),
++					GFP_USER);
++	if (!tmp->aux->orig_insns) {
++		err = -ENOMEM;
++		goto free_tmp;
++	}
++	tmp->aux->orig_prog_len = bpf_prog_insn_size(tmp);
++	tmp->gpl_compatible = prog->gpl_compatible;
++	tmp->orig_prog = NULL;
++	tmp->jited = 0;
++
++	atomic64_set(&tmp->aux->refcnt, 1);
++
++	err = find_prog_type(prog->type, tmp);
++	if (err < 0)
++		goto free_tmp;
++
++	tmp->aux->load_time = ktime_get_boottime_ns();
++	memcpy(tmp->aux->name, prog->aux->name, sizeof(tmp->aux->name));
++
++	err = security_bpf_prog_load(tmp, &load_attr, NULL, true);
++	if (err)
++		goto free_tmp_sec;
++
++	err = bpf_check(&tmp, &load_attr, load_uattr,
++			BPF_PROG_REJIT_LOAD_ATTR_SIZE);
++	if (err < 0)
++		goto free_tmp_noref;
++
++	tmp = bpf_prog_select_runtime(tmp, &err);
++	if (err < 0)
++		goto free_tmp_noref;
++
++	err = bpf_prog_mark_insn_arrays_ready(tmp);
++	if (err < 0)
++		goto free_tmp_noref;
++
++	err = -EOPNOTSUPP;
++	if (!bpf_prog_rejit_supported(tmp) || !tmp->jited)
++		goto free_tmp_noref;
++
++	bpf_prog_rejit_swap(prog, tmp);
++	if (prog->sleepable)
++		synchronize_rcu_tasks_trace();
++	else
++		synchronize_rcu();
++
++	__bpf_prog_put_noref(tmp, tmp->aux->real_func_cnt);
++	mutex_unlock(&prog->aux->rejit_mutex);
++	bpf_prog_put(prog);
++	return 0;
++
++free_tmp_noref:
++	__bpf_prog_put_noref(tmp, tmp->aux->real_func_cnt);
++	goto out_unlock;
++free_tmp_sec:
++	security_bpf_prog_free(tmp);
++free_tmp:
++	if (tmp->aux->attach_btf)
++		btf_put(tmp->aux->attach_btf);
++	tmp->aux->attach_btf = NULL;
++	free_uid(tmp->aux->user);
++	kvfree(tmp->aux->orig_insns);
++	bpf_prog_free(tmp);
++out_unlock:
++	mutex_unlock(&prog->aux->rejit_mutex);
++out_put_prog:
++	bpf_prog_put(prog);
++	return err;
++}
++
+ #define BPF_OBJ_LAST_FIELD path_fd
+ 
+ static int bpf_obj_pin(const union bpf_attr *attr)
+@@ -5054,6 +5290,7 @@ static int bpf_prog_get_info_by_fd(struct file *file,
+ 	if (!bpf_capable()) {
+ 		info.jited_prog_len = 0;
+ 		info.xlated_prog_len = 0;
++		info.orig_prog_len = 0;
+ 		info.nr_jited_ksyms = 0;
+ 		info.nr_jited_func_lens = 0;
+ 		info.nr_func_info = 0;
+@@ -5083,6 +5320,19 @@ static int bpf_prog_get_info_by_fd(struct file *file,
+ 		}
+ 	}
+ 
++	ulen = info.orig_prog_len;
++	info.orig_prog_len = prog->aux->orig_prog_len;
++	if (info.orig_prog_len && ulen) {
++		if (bpf_dump_raw_ok(file->f_cred)) {
++			uinsns = u64_to_user_ptr(info.orig_prog_insns);
++			ulen = min_t(u32, info.orig_prog_len, ulen);
++			if (copy_to_user(uinsns, prog->aux->orig_insns, ulen))
++				return -EFAULT;
++		} else {
++			info.orig_prog_insns = 0;
++		}
++	}
++
+ 	if (bpf_prog_is_offloaded(prog->aux)) {
+ 		err = bpf_prog_offload_info_fill(&info, prog);
+ 		if (err)
+@@ -6328,6 +6578,9 @@ static int __sys_bpf(enum bpf_cmd cmd, bpfptr_t uattr, unsigned int size)
+ 	case BPF_PROG_ASSOC_STRUCT_OPS:
+ 		err = prog_assoc_struct_ops(&attr);
+ 		break;
++	case BPF_PROG_REJIT:
++		err = bpf_prog_rejit(&attr);
++		break;
+ 	default:
+ 		err = -EINVAL;
+ 		break;
+diff --git a/kernel/bpf/verifier.c b/kernel/bpf/verifier.c
+index 159b25f82..c4ab5ea0c 100644
+--- a/kernel/bpf/verifier.c
++++ b/kernel/bpf/verifier.c
+@@ -3172,6 +3172,7 @@ static int bpf_find_exception_callback_insn_off(struct bpf_verifier_env *env)
+ 
+ struct bpf_kfunc_desc {
+ 	struct btf_func_model func_model;
++	const struct bpf_kfunc_inline_ops *inline_ops;
+ 	u32 func_id;
+ 	s32 imm;
+ 	u16 offset;
+@@ -3199,6 +3200,98 @@ struct bpf_kfunc_btf_tab {
+ 	u32 nr_descs;
+ };
+ 
++struct bpf_kfunc_inline_desc {
++	struct list_head list;
++	struct bpf_kfunc_inline_ops *ops;
++	char *func_name;
++};
++
++static DEFINE_MUTEX(bpf_kfunc_inline_mutex);
++static LIST_HEAD(bpf_kfunc_inline_list);
++
++static struct bpf_kfunc_inline_desc *
++__bpf_kfunc_inline_find(const char *func_name)
++{
++	struct bpf_kfunc_inline_desc *desc;
++
++	list_for_each_entry(desc, &bpf_kfunc_inline_list, list) {
++		if (!strcmp(desc->func_name, func_name))
++			return desc;
++	}
++
++	return NULL;
++}
++
++static const struct bpf_kfunc_inline_ops *
++bpf_kfunc_inline_lookup(const char *func_name)
++{
++	struct bpf_kfunc_inline_desc *desc;
++	const struct bpf_kfunc_inline_ops *ops = NULL;
++
++	mutex_lock(&bpf_kfunc_inline_mutex);
++	desc = __bpf_kfunc_inline_find(func_name);
++	if (desc)
++		ops = desc->ops;
++	mutex_unlock(&bpf_kfunc_inline_mutex);
++
++	return ops;
++}
++
++int bpf_register_kfunc_inline_ops(const char *func_name,
++				  struct bpf_kfunc_inline_ops *ops)
++{
++	struct bpf_kfunc_inline_desc *desc;
++
++	if (!func_name || !ops || !ops->emit_x86 || ops->max_emit_bytes <= 0)
++		return -EINVAL;
++
++	desc = kzalloc(sizeof(*desc), GFP_KERNEL);
++	if (!desc)
++		return -ENOMEM;
++
++	desc->func_name = kstrdup(func_name, GFP_KERNEL);
++	if (!desc->func_name) {
++		kfree(desc);
++		return -ENOMEM;
++	}
++
++	desc->ops = ops;
++
++	mutex_lock(&bpf_kfunc_inline_mutex);
++	if (__bpf_kfunc_inline_find(func_name)) {
++		mutex_unlock(&bpf_kfunc_inline_mutex);
++		kfree(desc->func_name);
++		kfree(desc);
++		return -EEXIST;
++	}
++	list_add_tail(&desc->list, &bpf_kfunc_inline_list);
++	mutex_unlock(&bpf_kfunc_inline_mutex);
++
++	return 0;
++}
++EXPORT_SYMBOL_GPL(bpf_register_kfunc_inline_ops);
++
++void bpf_unregister_kfunc_inline_ops(const char *func_name)
++{
++	struct bpf_kfunc_inline_desc *desc;
++
++	if (!func_name)
++		return;
++
++	mutex_lock(&bpf_kfunc_inline_mutex);
++	desc = __bpf_kfunc_inline_find(func_name);
++	if (desc)
++		list_del(&desc->list);
++	mutex_unlock(&bpf_kfunc_inline_mutex);
++
++	if (!desc)
++		return;
++
++	kfree(desc->func_name);
++	kfree(desc);
++}
++EXPORT_SYMBOL_GPL(bpf_unregister_kfunc_inline_ops);
++
+ static int specialize_kfunc(struct bpf_verifier_env *env, struct bpf_kfunc_desc *desc,
+ 			    int insn_idx);
+ 
+@@ -3519,6 +3612,8 @@ static int add_kfunc_call(struct bpf_verifier_env *env, u32 func_id, s16 offset)
+ 	desc->offset = offset;
+ 	desc->addr = addr;
+ 	desc->func_model = func_model;
++	desc->inline_ops = kfunc.flags && (*kfunc.flags & KF_INLINE_EMIT) ?
++			       bpf_kfunc_inline_lookup(kfunc.name) : NULL;
+ 	sort(tab->descs, tab->nr_descs, sizeof(tab->descs[0]),
+ 	     kfunc_desc_cmp_by_id_off, NULL);
+ 	return 0;
+@@ -3598,6 +3693,26 @@ bpf_jit_find_kfunc_model(const struct bpf_prog *prog,
+ 	return res ? &res->func_model : NULL;
+ }
+ 
++const struct bpf_kfunc_inline_ops *
++bpf_jit_find_kfunc_inline_ops(const struct bpf_prog *prog,
++			      const struct bpf_insn *insn)
++{
++	const struct bpf_kfunc_desc desc = {
++		.imm = insn->imm,
++		.offset = insn->off,
++	};
++	const struct bpf_kfunc_desc *res;
++	struct bpf_kfunc_desc_tab *tab;
++
++	tab = prog->aux->kfunc_tab;
++	if (!tab)
++		return NULL;
++	res = bsearch(&desc, tab->descs, tab->nr_descs,
++		      sizeof(tab->descs[0]), kfunc_desc_cmp_by_imm_off);
++
++	return res ? res->inline_ops : NULL;
++}
++
+ static int add_kfunc_in_insns(struct bpf_verifier_env *env,
+ 			      struct bpf_insn *insn, int cnt)
+ {
+diff --git a/tools/include/uapi/linux/bpf.h b/tools/include/uapi/linux/bpf.h
+index 5e38b4887..94761bd31 100644
+--- a/tools/include/uapi/linux/bpf.h
++++ b/tools/include/uapi/linux/bpf.h
+@@ -993,6 +993,7 @@ enum bpf_cmd {
+ 	BPF_TOKEN_CREATE,
+ 	BPF_PROG_STREAM_READ_BY_FD,
+ 	BPF_PROG_ASSOC_STRUCT_OPS,
++	BPF_PROG_REJIT,
+ 	__MAX_BPF_CMD,
+ };
+ 
+@@ -1922,6 +1923,17 @@ union bpf_attr {
+ 		__u32		flags;
+ 	} prog_assoc_struct_ops;
+ 
++	struct {
++		__u32		prog_fd;
++		__u32		insn_cnt;
++		__aligned_u64	insns;
++		__u32		log_level;
++		__u32		log_size;
++		__aligned_u64	log_buf;
++		__aligned_u64	fd_array;
++		__u32		fd_array_cnt;
++	} rejit;
++
+ } __attribute__((aligned(8)));
+ 
+ /* The description below is an attempt at providing documentation to eBPF
+diff --git a/tools/testing/selftests/bpf/Makefile b/tools/testing/selftests/bpf/Makefile
+index d5acbeba0..bd365fc2b 100644
+--- a/tools/testing/selftests/bpf/Makefile
++++ b/tools/testing/selftests/bpf/Makefile
+@@ -121,7 +121,8 @@ TEST_PROGS_EXTENDED := \
+ 	test_bpftool.py
+ 
+ TEST_KMODS := bpf_testmod.ko bpf_test_no_cfi.ko bpf_test_modorder_x.ko \
+-	bpf_test_modorder_y.ko bpf_test_rqspinlock.ko
++	bpf_test_modorder_y.ko bpf_test_rqspinlock.ko \
++	bpf_test_inline_kfunc.ko
+ TEST_KMOD_TARGETS = $(addprefix $(OUTPUT)/,$(TEST_KMODS))
+ 
+ # Compile but not part of 'make run_tests'
+diff --git a/tools/testing/selftests/bpf/get_original_poc.c b/tools/testing/selftests/bpf/get_original_poc.c
+new file mode 100644
+index 000000000..d2bfaabf5
+--- /dev/null
++++ b/tools/testing/selftests/bpf/get_original_poc.c
+@@ -0,0 +1,103 @@
++// SPDX-License-Identifier: GPL-2.0
++#include <errno.h>
++#include <linux/bpf.h>
++#include <linux/unistd.h>
++#include <stdint.h>
++#include <stdio.h>
++#include <string.h>
++#include <sys/syscall.h>
++#include <unistd.h>
++
++#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
++#define ptr_to_u64(ptr) ((__u64)(uintptr_t)(ptr))
++
++static int sys_bpf(enum bpf_cmd cmd, union bpf_attr *attr, unsigned int size)
++{
++	return syscall(__NR_bpf, cmd, attr, size);
++}
++
++static int load_test_prog(char *log_buf, size_t log_buf_sz)
++{
++	static struct bpf_insn insns[] = {
++		{
++			.code = BPF_ALU64 | BPF_MOV | BPF_K,
++			.dst_reg = BPF_REG_0,
++			.imm = XDP_PASS,
++		},
++		{
++			.code = BPF_JMP | BPF_EXIT,
++		},
++	};
++	static const char license[] = "GPL";
++	union bpf_attr attr;
++
++	memset(&attr, 0, sizeof(attr));
++	attr.prog_type = BPF_PROG_TYPE_XDP;
++	attr.insn_cnt = ARRAY_SIZE(insns);
++	attr.insns = ptr_to_u64(insns);
++	attr.license = ptr_to_u64(license);
++	attr.log_level = 1;
++	attr.log_buf = ptr_to_u64(log_buf);
++	attr.log_size = log_buf_sz;
++
++	return sys_bpf(BPF_PROG_LOAD, &attr, sizeof(attr));
++}
++
++int main(void)
++{
++	static struct bpf_insn expected[] = {
++		{
++			.code = BPF_ALU64 | BPF_MOV | BPF_K,
++			.dst_reg = BPF_REG_0,
++			.imm = XDP_PASS,
++		},
++		{
++			.code = BPF_JMP | BPF_EXIT,
++		},
++	};
++	struct bpf_insn got[ARRAY_SIZE(expected)];
++	struct bpf_prog_info info;
++	char log_buf[65536];
++	union bpf_attr attr;
++	int prog_fd;
++
++	memset(log_buf, 0, sizeof(log_buf));
++	prog_fd = load_test_prog(log_buf, sizeof(log_buf));
++	if (prog_fd < 0) {
++		fprintf(stderr, "BPF_PROG_LOAD failed: %s\n%s\n",
++			strerror(errno), log_buf);
++		return 1;
++	}
++
++	memset(&info, 0, sizeof(info));
++	memset(got, 0, sizeof(got));
++	info.orig_prog_len = sizeof(got);
++	info.orig_prog_insns = ptr_to_u64(got);
++
++	memset(&attr, 0, sizeof(attr));
++	attr.info.bpf_fd = prog_fd;
++	attr.info.info_len = sizeof(info);
++	attr.info.info = ptr_to_u64(&info);
++
++	if (sys_bpf(BPF_OBJ_GET_INFO_BY_FD, &attr, sizeof(attr)) < 0) {
++		fprintf(stderr, "BPF_OBJ_GET_INFO_BY_FD failed: %s\n",
++			strerror(errno));
++		close(prog_fd);
++		return 1;
++	}
++
++	close(prog_fd);
++
++	if (info.orig_prog_len != sizeof(expected)) {
++		fprintf(stderr, "unexpected orig_prog_len %u\n", info.orig_prog_len);
++		return 1;
++	}
++
++	if (memcmp(got, expected, sizeof(expected)) != 0) {
++		fprintf(stderr, "original insns mismatch\n");
++		return 1;
++	}
++
++	printf("orig_prog_len=%u bytes, original insns match\n", info.orig_prog_len);
++	return 0;
++}
+diff --git a/tools/testing/selftests/bpf/prog_tests/inline_kfunc.c b/tools/testing/selftests/bpf/prog_tests/inline_kfunc.c
+new file mode 100644
+index 000000000..60ecaeddb
+--- /dev/null
++++ b/tools/testing/selftests/bpf/prog_tests/inline_kfunc.c
+@@ -0,0 +1,97 @@
++// SPDX-License-Identifier: GPL-2.0
++#include <test_progs.h>
++#include <testing_helpers.h>
++
++#include "test_inline_kfunc.skel.h"
++
++static int get_jited_program(int prog_fd, __u8 **buf, __u32 *len)
++{
++	struct bpf_prog_info info = {};
++	__u32 info_len = sizeof(info);
++	__u32 jited_len;
++	int err;
++
++	err = bpf_prog_get_info_by_fd(prog_fd, &info, &info_len);
++	if (err)
++		return err;
++	if (!info.jited_prog_len)
++		return -ENOENT;
++	jited_len = info.jited_prog_len;
++
++	*buf = calloc(jited_len, 1);
++	if (!*buf)
++		return -ENOMEM;
++
++	memset(&info, 0, sizeof(info));
++	info.jited_prog_len = jited_len;
++	info.jited_prog_insns = ptr_to_u64(*buf);
++	*len = jited_len;
++	info_len = sizeof(info);
++	err = bpf_prog_get_info_by_fd(prog_fd, &info, &info_len);
++	if (err) {
++		free(*buf);
++		*buf = NULL;
++		*len = 0;
++	}
++
++	return err;
++}
++
++static bool find_bytes(const __u8 *haystack, __u32 haystack_len,
++		       const __u8 *needle, __u32 needle_len)
++{
++	__u32 i;
++
++	if (!needle_len || haystack_len < needle_len)
++		return false;
++
++	for (i = 0; i <= haystack_len - needle_len; i++) {
++		if (!memcmp(haystack + i, needle, needle_len))
++			return true;
++	}
++
++	return false;
++}
++
++void test_inline_kfunc(void)
++{
++	static const __u8 inline_seq[] = {
++		0x48, 0x89, 0xf8,
++		0x48, 0x83, 0xc0, 0x2a,
++	};
++	struct test_inline_kfunc *skel = NULL;
++	__u8 pkt[64] = {};
++	__u8 *jited = NULL;
++	__u32 jited_len = 0;
++	int err, prog_fd;
++	DECLARE_LIBBPF_OPTS(bpf_test_run_opts, opts,
++			    .data_in = pkt,
++			    .data_size_in = sizeof(pkt));
++
++	err = load_module("bpf_test_inline_kfunc.ko",
++			  env_verbosity > VERBOSE_NONE);
++	if (!ASSERT_OK(err, "load bpf_test_inline_kfunc.ko"))
++		return;
++
++	skel = test_inline_kfunc__open_and_load();
++	if (!ASSERT_OK_PTR(skel, "test_inline_kfunc__open_and_load"))
++		goto cleanup;
++
++	prog_fd = bpf_program__fd(skel->progs.inline_kfunc);
++	err = bpf_prog_test_run_opts(prog_fd, &opts);
++	if (!ASSERT_OK(err, "bpf_prog_test_run_opts"))
++		goto cleanup;
++	if (!ASSERT_EQ(opts.retval, XDP_PASS, "retval"))
++		goto cleanup;
++
++	err = get_jited_program(prog_fd, &jited, &jited_len);
++	if (!ASSERT_OK(err, "get_jited_program"))
++		goto cleanup;
++	ASSERT_TRUE(find_bytes(jited, jited_len, inline_seq, sizeof(inline_seq)),
++		    "inline sequence present");
++
++cleanup:
++	free(jited);
++	test_inline_kfunc__destroy(skel);
++	unload_module("bpf_test_inline_kfunc", env_verbosity > VERBOSE_NONE);
++}
+diff --git a/tools/testing/selftests/bpf/progs/test_inline_kfunc.c b/tools/testing/selftests/bpf/progs/test_inline_kfunc.c
+new file mode 100644
+index 000000000..6953f00ad
+--- /dev/null
++++ b/tools/testing/selftests/bpf/progs/test_inline_kfunc.c
+@@ -0,0 +1,13 @@
++// SPDX-License-Identifier: GPL-2.0
++#include "vmlinux.h"
++#include <bpf/bpf_helpers.h>
++
++extern __u64 bpf_test_add42(__u64 val) __ksym;
++
++SEC("xdp")
++int inline_kfunc(struct xdp_md *ctx)
++{
++	return bpf_test_add42(100) == 142 ? XDP_PASS : XDP_DROP;
++}
++
++char _license[] SEC("license") = "GPL";
+diff --git a/tools/testing/selftests/bpf/rejit_poc.c b/tools/testing/selftests/bpf/rejit_poc.c
+new file mode 100644
+index 000000000..57db4362a
+--- /dev/null
++++ b/tools/testing/selftests/bpf/rejit_poc.c
+@@ -0,0 +1,221 @@
++// SPDX-License-Identifier: GPL-2.0
++#include <errno.h>
++#include <linux/bpf.h>
++#include <linux/unistd.h>
++#include <stdint.h>
++#include <stdio.h>
++#include <string.h>
++#include <sys/syscall.h>
++#include <unistd.h>
++
++#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
++#define ptr_to_u64(ptr) ((__u64)(uintptr_t)(ptr))
++
++static int sys_bpf(enum bpf_cmd cmd, union bpf_attr *attr, unsigned int size)
++{
++	return syscall(__NR_bpf, cmd, attr, size);
++}
++
++static int load_xdp_prog(const struct bpf_insn *insns, __u32 insn_cnt,
++			 char *log_buf, size_t log_buf_sz)
++{
++	static const char license[] = "GPL";
++	union bpf_attr attr;
++
++	memset(&attr, 0, sizeof(attr));
++	attr.prog_type = BPF_PROG_TYPE_XDP;
++	attr.insn_cnt = insn_cnt;
++	attr.insns = ptr_to_u64(insns);
++	attr.license = ptr_to_u64(license);
++	attr.log_level = 1;
++	attr.log_buf = ptr_to_u64(log_buf);
++	attr.log_size = log_buf_sz;
++
++	return sys_bpf(BPF_PROG_LOAD, &attr, sizeof(attr));
++}
++
++static int rejit_xdp_prog(int prog_fd, const struct bpf_insn *insns,
++			  __u32 insn_cnt, char *log_buf, size_t log_buf_sz)
++{
++	union bpf_attr attr;
++
++	memset(&attr, 0, sizeof(attr));
++	attr.rejit.prog_fd = prog_fd;
++	attr.rejit.insn_cnt = insn_cnt;
++	attr.rejit.insns = ptr_to_u64(insns);
++	attr.rejit.log_level = 1;
++	attr.rejit.log_buf = ptr_to_u64(log_buf);
++	attr.rejit.log_size = log_buf_sz;
++
++	return sys_bpf(BPF_PROG_REJIT, &attr, sizeof(attr));
++}
++
++static int test_run_xdp_prog(int prog_fd, __u32 *retval)
++{
++	unsigned char data[64] = {};
++	union bpf_attr attr;
++
++	memset(&attr, 0, sizeof(attr));
++	attr.test.prog_fd = prog_fd;
++	attr.test.data_in = ptr_to_u64(data);
++	attr.test.data_size_in = sizeof(data);
++	attr.test.repeat = 1;
++
++	if (sys_bpf(BPF_PROG_TEST_RUN, &attr, sizeof(attr)) < 0)
++		return -1;
++
++	*retval = attr.test.retval;
++	return 0;
++}
++
++/* Test 1: same-length rejit (2 insns -> 2 insns) */
++static int test_same_length(void)
++{
++	static const struct bpf_insn prog_a[] = {
++		{
++			.code = BPF_ALU64 | BPF_MOV | BPF_K,
++			.dst_reg = BPF_REG_0,
++			.imm = XDP_PASS,
++		},
++		{
++			.code = BPF_JMP | BPF_EXIT,
++		},
++	};
++	static const struct bpf_insn prog_b[] = {
++		{
++			.code = BPF_ALU64 | BPF_MOV | BPF_K,
++			.dst_reg = BPF_REG_0,
++			.imm = XDP_DROP,
++		},
++		{
++			.code = BPF_JMP | BPF_EXIT,
++		},
++	};
++	char log_buf[65536];
++	__u32 retval = 0;
++	int prog_fd;
++
++	memset(log_buf, 0, sizeof(log_buf));
++	prog_fd = load_xdp_prog(prog_a, ARRAY_SIZE(prog_a), log_buf, sizeof(log_buf));
++	if (prog_fd < 0) {
++		fprintf(stderr, "test_same_length: BPF_PROG_LOAD failed: %s\n%s\n",
++			strerror(errno), log_buf);
++		return 1;
++	}
++
++	if (test_run_xdp_prog(prog_fd, &retval) < 0 || retval != XDP_PASS) {
++		fprintf(stderr, "test_same_length: pre-rejit run failed\n");
++		close(prog_fd);
++		return 1;
++	}
++
++	memset(log_buf, 0, sizeof(log_buf));
++	if (rejit_xdp_prog(prog_fd, prog_b, ARRAY_SIZE(prog_b),
++			   log_buf, sizeof(log_buf)) < 0) {
++		fprintf(stderr, "test_same_length: BPF_PROG_REJIT failed: %s\n%s\n",
++			strerror(errno), log_buf);
++		close(prog_fd);
++		return 1;
++	}
++
++	if (test_run_xdp_prog(prog_fd, &retval) < 0 || retval != XDP_DROP) {
++		fprintf(stderr, "test_same_length: post-rejit run failed (retval=%u)\n",
++			retval);
++		close(prog_fd);
++		return 1;
++	}
++
++	close(prog_fd);
++	printf("test_same_length: PASS (XDP_PASS -> XDP_DROP)\n");
++	return 0;
++}
++
++/* Test 2: different-length rejit (2 insns -> 4 insns) */
++static int test_different_length(void)
++{
++	/* Original: 2 insns, returns XDP_PASS */
++	static const struct bpf_insn prog_short[] = {
++		{
++			.code = BPF_ALU64 | BPF_MOV | BPF_K,
++			.dst_reg = BPF_REG_0,
++			.imm = XDP_PASS,
++		},
++		{
++			.code = BPF_JMP | BPF_EXIT,
++		},
++	};
++	/* Replacement: 4 insns, returns XDP_TX (3) via r0 = 1 + 2 */
++	static const struct bpf_insn prog_long[] = {
++		{
++			.code = BPF_ALU64 | BPF_MOV | BPF_K,
++			.dst_reg = BPF_REG_0,
++			.imm = 1,
++		},
++		{
++			.code = BPF_ALU64 | BPF_MOV | BPF_K,
++			.dst_reg = BPF_REG_1,
++			.imm = 2,
++		},
++		{
++			.code = BPF_ALU64 | BPF_ADD | BPF_X,
++			.dst_reg = BPF_REG_0,
++			.src_reg = BPF_REG_1,
++		},
++		{
++			.code = BPF_JMP | BPF_EXIT,
++		},
++	};
++	char log_buf[65536];
++	__u32 retval = 0;
++	int prog_fd;
++
++	memset(log_buf, 0, sizeof(log_buf));
++	prog_fd = load_xdp_prog(prog_short, ARRAY_SIZE(prog_short),
++				log_buf, sizeof(log_buf));
++	if (prog_fd < 0) {
++		fprintf(stderr, "test_different_length: BPF_PROG_LOAD failed: %s\n%s\n",
++			strerror(errno), log_buf);
++		return 1;
++	}
++
++	if (test_run_xdp_prog(prog_fd, &retval) < 0 || retval != XDP_PASS) {
++		fprintf(stderr, "test_different_length: pre-rejit run failed\n");
++		close(prog_fd);
++		return 1;
++	}
++
++	memset(log_buf, 0, sizeof(log_buf));
++	if (rejit_xdp_prog(prog_fd, prog_long, ARRAY_SIZE(prog_long),
++			   log_buf, sizeof(log_buf)) < 0) {
++		fprintf(stderr, "test_different_length: BPF_PROG_REJIT failed: %s\n%s\n",
++			strerror(errno), log_buf);
++		close(prog_fd);
++		return 1;
++	}
++
++	if (test_run_xdp_prog(prog_fd, &retval) < 0 || retval != XDP_TX) {
++		fprintf(stderr, "test_different_length: post-rejit run failed (retval=%u, expected=%u)\n",
++			retval, XDP_TX);
++		close(prog_fd);
++		return 1;
++	}
++
++	close(prog_fd);
++	printf("test_different_length: PASS (2 insns -> 4 insns, XDP_PASS -> XDP_TX)\n");
++	return 0;
++}
++
++int main(void)
++{
++	int ret = 0;
++
++	ret |= test_same_length();
++	ret |= test_different_length();
++
++	if (ret)
++		fprintf(stderr, "SOME TESTS FAILED\n");
++	else
++		printf("ALL TESTS PASSED\n");
++
++	return ret;
++}
+diff --git a/tools/testing/selftests/bpf/test_kmods/Makefile b/tools/testing/selftests/bpf/test_kmods/Makefile
+index 63c4d3f6a..1249d45f4 100644
+--- a/tools/testing/selftests/bpf/test_kmods/Makefile
++++ b/tools/testing/selftests/bpf/test_kmods/Makefile
+@@ -8,7 +8,8 @@ Q = @
+ endif
+ 
+ MODULES = bpf_testmod.ko bpf_test_no_cfi.ko bpf_test_modorder_x.ko \
+-	bpf_test_modorder_y.ko bpf_test_rqspinlock.ko
++	bpf_test_modorder_y.ko bpf_test_rqspinlock.ko \
++	bpf_test_inline_kfunc.ko
+ 
+ $(foreach m,$(MODULES),$(eval obj-m += $(m:.ko=.o)))
+ 
+diff --git a/tools/testing/selftests/bpf/test_kmods/bpf_test_inline_kfunc.c b/tools/testing/selftests/bpf/test_kmods/bpf_test_inline_kfunc.c
+new file mode 100644
+index 000000000..1b1111064
+--- /dev/null
++++ b/tools/testing/selftests/bpf/test_kmods/bpf_test_inline_kfunc.c
+@@ -0,0 +1,80 @@
++// SPDX-License-Identifier: GPL-2.0
++#include <linux/bpf.h>
++#include <linux/btf.h>
++#include <linux/init.h>
++#include <linux/module.h>
++#include <linux/string.h>
++
++__bpf_kfunc_start_defs();
++
++__bpf_kfunc u64 bpf_test_add42(u64 val)
++{
++	return val + 42;
++}
++
++__bpf_kfunc_end_defs();
++
++BTF_KFUNCS_START(bpf_test_inline_kfunc_ids)
++BTF_ID_FLAGS(func, bpf_test_add42, KF_INLINE_EMIT);
++BTF_KFUNCS_END(bpf_test_inline_kfunc_ids)
++
++static const struct btf_kfunc_id_set bpf_test_inline_kfunc_set = {
++	.owner = THIS_MODULE,
++	.set = &bpf_test_inline_kfunc_ids,
++};
++
++static int emit_add42_x86(u8 *image, u32 *off, bool emit,
++			  const struct bpf_insn *insn,
++			  struct bpf_prog *prog)
++{
++	static const u8 insns[] = {
++		0x48, 0x89, 0xf8,	/* mov rax, rdi */
++		0x48, 0x83, 0xc0, 0x2a,	/* add rax, 42 */
++	};
++
++	if (!off)
++		return -EINVAL;
++	if (emit && !image)
++		return -EINVAL;
++
++	(void)insn;
++	(void)prog;
++
++	if (emit)
++		memcpy(image + *off, insns, sizeof(insns));
++
++	*off += sizeof(insns);
++	return sizeof(insns);
++}
++
++static struct bpf_kfunc_inline_ops add42_ops = {
++	.emit_x86 = emit_add42_x86,
++	.max_emit_bytes = 16,
++};
++
++static int __init bpf_test_inline_kfunc_init(void)
++{
++	int ret;
++
++	ret = bpf_register_kfunc_inline_ops("bpf_test_add42", &add42_ops);
++	if (ret)
++		return ret;
++
++	ret = register_btf_kfunc_id_set(BPF_PROG_TYPE_XDP,
++					&bpf_test_inline_kfunc_set);
++	if (ret)
++		bpf_unregister_kfunc_inline_ops("bpf_test_add42");
++
++	return ret;
++}
++
++static void __exit bpf_test_inline_kfunc_exit(void)
++{
++	bpf_unregister_kfunc_inline_ops("bpf_test_add42");
++}
++
++module_init(bpf_test_inline_kfunc_init);
++module_exit(bpf_test_inline_kfunc_exit);
++
++MODULE_DESCRIPTION("BPF selftest inline kfunc module");
++MODULE_LICENSE("GPL");

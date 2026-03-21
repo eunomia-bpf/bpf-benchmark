@@ -34,7 +34,7 @@ from runner.libs import (  # noqa: E402
 )
 from runner.libs.agent import find_bpf_programs, start_agent, stop_agent, wait_healthy  # noqa: E402
 from runner.libs.metrics import sample_cpu_usage, sample_total_cpu_usage  # noqa: E402
-from runner.libs.recompile import apply_recompile, scan_programs  # noqa: E402
+from runner.libs.recompile import apply_daemon_rejit, scan_programs  # noqa: E402
 from runner.libs.vm import run_in_vm, write_guest_script  # noqa: E402
 from runner.libs.workload import WorkloadResult  # noqa: E402
 
@@ -654,7 +654,7 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         f"- runtime counters exposed via bpftool: `{preflight.get('runtime_counters_available')}`"
     )
     lines.extend(["", "## Loaded Programs", ""])
-    site_totals = ((payload.get("recompile_summary") or {}).get("site_totals") or {})
+    site_totals = ((payload.get("scan_summary") or {}).get("site_totals") or {})
     lines.append(
         f"- Programs: `{len(payload.get('scheduler_programs') or [])}`; "
         f"sites total=`{site_totals.get('total_sites')}`, "
@@ -671,14 +671,6 @@ def build_markdown(payload: Mapping[str, object]) -> str:
             f"ctx/s={workload.get('context_switches_per_sec')}, "
             f"agent_cpu={((workload.get('agent_cpu') or {}).get('total_pct'))}"
         )
-    lines.extend(["", "## Recompile", ""])
-    recompile_summary = payload.get("recompile_summary") or {}
-    lines.append(
-        f"- Applied programs: `{recompile_summary.get('applied_programs')}` / `{recompile_summary.get('requested_programs')}`"
-    )
-    lines.append(f"- Site-bearing programs: `{recompile_summary.get('site_bearing_programs')}`")
-    if recompile_summary.get("errors"):
-        lines.append(f"- Errors: `{recompile_summary.get('errors')}`")
     post = payload.get("post_rejit")
     if post:
         lines.extend(["", "## Post-ReJIT", ""])
@@ -736,9 +728,9 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         )
 
     baseline: dict[str, object] | None = None
-    post: dict[str, object] | None = None
+    post_rejit: dict[str, object] | None = None
+    rejit_result: dict[str, object] | None = None
     scan_results: dict[int, dict[str, object]] = {}
-    recompile_results: dict[int, dict[str, object]] = {}
     scheduler_programs: list[dict[str, object]] = []
     scheduler_snapshot: dict[str, object] = {}
     scheduler_ops: list[str] = []
@@ -765,31 +757,25 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
             prog_ids = [int(program["id"]) for program in scheduler_programs]
             baseline = run_phase(workloads, duration_s, agent_pid=session.pid)
             scan_results = scan_programs(prog_ids, scanner_binary)
-            recompile_results = apply_recompile(prog_ids, scanner_binary)
-            applied = sum(1 for record in recompile_results.values() if record.get("applied"))
-            if applied == 0:
-                limitations.append(
-                    "BPF_PROG_JIT_RECOMPILE did not apply to any loaded scx_rusty struct_ops program on this kernel, so post-ReJIT workload measurement was skipped."
-                )
+            rejit_result = apply_daemon_rejit(scanner_binary, prog_ids)
+            if rejit_result["applied"]:
+                post_rejit = run_phase(workloads, duration_s, agent_pid=session.pid)
             else:
-                post = run_phase(workloads, duration_s, agent_pid=session.pid)
+                post_rejit = None
             scheduler_snapshot = session.collector_snapshot()
     except Exception as exc:
         loader_error = str(exc)
         limitations.append(f"scx_rusty userspace loader failed: {loader_error}")
 
     mode = "scx_rusty_loader" if baseline is not None else "probe_only"
-    recompile_summary = {
-        "requested_programs": len(recompile_results),
+    scan_summary = {
+        "scanned_programs": len(scan_results),
         "site_bearing_programs": sum(
             1
             for record in scan_results.values()
             if int(((record.get("sites") or {}).get("total_sites", 0) or 0)) > 0
         ),
-        "applied_programs": sum(1 for record in recompile_results.values() if record.get("applied")),
-        "applied": any(record.get("applied") for record in recompile_results.values()),
         "site_totals": aggregate_sites(scan_results),
-        "errors": sorted({record.get("error", "") for record in recompile_results.values() if record.get("error")}),
     }
 
     payload = {
@@ -812,10 +798,10 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
         },
         "baseline": baseline,
         "scan_results": {str(key): value for key, value in scan_results.items()},
-        "recompile_results": {str(key): value for key, value in recompile_results.items()},
-        "recompile_summary": recompile_summary,
-        "post_rejit": post,
-        "comparison": compare_phases(baseline, post),
+        "scan_summary": scan_summary,
+        "rejit_result": rejit_result if baseline is not None else None,
+        "post_rejit": post_rejit,
+        "comparison": compare_phases(baseline, post_rejit),
         "limitations": limitations,
     }
     return payload

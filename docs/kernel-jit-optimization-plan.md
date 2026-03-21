@@ -159,6 +159,7 @@ BpfReJIT 的设计基于三个层次的 insight：
 7. **Mandatory Falsification**：如果 fixed kernel heuristics 在所有测试硬件和 workload 上恢复相同收益，正确结论是"用 kernel peepholes"，不是发布 userspace-guided interface
 8. **Daemon 零 libbpf 依赖**：daemon 只通过 raw BPF syscall（`GET_NEXT_ID`、`GET_INFO_BY_FD` + `orig_prog_insns`、`REJIT`）与内核交互，不需要 libbpf。Rust 实现。
 9. **Daemon 统一命名**：用户态组件统一叫 daemon（目录 `daemon/`），不叫 scanner/optimizer/rewriter。C++ scanner 已废弃删除。
+10. **Daemon 两种运行模式**：(1) **一次性模式**（`apply-all`）— 扫描所有 live 程序，优化一次，退出。用于 benchmark（确定性 paired measurement）。(2) **常驻模式**（`watch`，待实现）— 后台持续运行，watch 新加载的程序，自动优化。用于 production 部署。当前 benchmark 和 e2e 评估用模式 1；论文需说明模式 2 是 production 目标。
 
 
 ---
@@ -587,6 +588,24 @@ make clean
 | **309** | **scanner→daemon 重命名 + 死代码清单（2026-03-21）** | ✅ | `git mv scanner daemon`，全部引用更新，编译通过。产出死代码清单：daemon/ C++ 中 v1 policy blob/JIT_RECOMPILE 路径、runner/ 中 directive_blob 路径、corpus/ 中 v1 enumerate 路径。daemon/ C++ 将被 Rust 重写取代。 |
 | **310** | **Runner v1 死代码清理（2026-03-21）** | ✅ | 删除 32 行 v1 残留：`BPF_F_JIT_DIRECTIVES_FD`、`--directive-blob`、`build_sealed_directive_memfd()`、`jit_directives_fd/flags` 结构体字段。5 文件，0 errors 0 warnings。 |
 | **311** | **Daemon Rust POC 实现（2026-03-21）** | ✅ | **1,834 行 Rust，21 tests all pass。** 删除全部 C++ 代码，Rust 重写。6 个模块：bpf.rs（raw syscall wrapper，零 libbpf）、insn.rs（BpfInsn repr(C)）、matcher.rs（WIDE_MEM 2-8 byte LE 检测）、emit.rs（byte-ladder→wide load）、rewriter.rs（site 应用 + addr_map + branch fixup）、main.rs（CLI: enumerate/rewrite/apply/apply-all）。依赖：libc + clap + anyhow。 |
-| 310 | **Rewriter 实现 — kinsn 注入（ROTATE/SELECT/EXTRACT）** | 待定 | 依赖 #307 #308 #309。注入 kfunc call + 参数 MOV + NOP padding。 |
-| 311 | **VM 集成测试：micro + rejit 全量跑通** | 待定 | 依赖 #305 #306。v2 kernel VM 中 `make vm-micro` rejit 模式，57 个 benchmark 通过。 |
-| 312 | **全量评估：stock vs rejit vs llvmbpf** | 待定 | 依赖 #309 #310 #311。 |
+| **312** | **VM 冒烟测试 + bug 修复（2026-03-21）** | ✅ | **20/20 PASS。** 修复 3 个 bug：(1) BPF_PROG_REJIT cmd 号统一为 39；(2) ksym list_del_rcu 后加 INIT_LIST_HEAD_RCU；(3) daemon orig_prog_len bytes÷8=insns。kinsn 模块加载/卸载成功。 |
+| **313** | **Matcher Variant B 修复（2026-03-21）** | ✅ | 旧 C++ scanner 有 low-first + high-first 两种 variant，Rust daemon 只有 low-first。添加 `match_wide_mem_high_first()`，**27 tests all pass**。 |
+| **314** | **daemon-apply 集成 + --daemon-path（2026-03-21）** | ✅ | micro_exec 新增 `--daemon-path`，fork/exec daemon apply <prog_id>。~50 行改动。driver.py + Makefile 适配。 |
+| **315** | **⚠️ 首个 v2 端到端性能结果（2026-03-21）** | ✅ | **load_byte_recompose**: 1 WIDE_MEM site，83→74 insns，368→330B jited (-10.3%)，exec 317→125 ns (**2.5x**)。**load_word32**: 2 sites，68→50 insns，308→232B (-24.7%)。**simple**: no-op 基线，5→5 ns。VM ktime 单次测量。 |
+| **316** | **Paper tex v2 更新（2026-03-21）** | ✅ | Abstract 一字不差替换，Title 更新，Introduction/Background 全部重写（v2 三 insights + 三组件），Design/Eval 用 v2 占位符。+463/-866 行。删除全部 v1 内容。新增 7 bib 条目。 |
+| **317** | **corpus/ 死代码清理（2026-03-21）** | ✅ | 净删 ~329 行。删除 `apply_recompile_v5()`、`_apply_one_v5_enumerate()`、`build_kernel_command()` 等 v1 路径。所有 import 验证通过。 |
+| **318** | **driver.py --daemon-path 适配（2026-03-21）** | ✅ | micro/driver.py 新增 `--daemon-path` 参数，Makefile `vm-micro` 自动传 DAEMON_PATH。+10 行。 |
+| **319** | **Makefile cmake→cargo（2026-03-21）** | ✅ | daemon target 从 cmake 改为 cargo build。CLAUDE.md 同步更新。 |
+| **320** | **Commit push（2026-03-21）** | ✅ | 3 commits：`698334f`（主 #305-#311）、`56d6d19`（清理）、`c48cb43`（补全）。kernel submodule `4bcbc8e21`。 |
+| **321** | **Daemon pass 框架设计（2026-03-21）** | ✅ | BpfPass/Analysis/AnalysisCache/PassManager 框架。线性 insn+annotation IR。6 分析 + 6 pass。渐进迁移路径。报告：`docs/tmp/daemon_pass_framework_design_20260321.md`。 |
+| **322** | **Kernel code review by codex（2026-03-21）** | ✅ | 发现 3 Critical（旧 image UAF、attachment 缓存不同步、KERNEL_BPFPTR 伪装）+ 4 Major。报告：`docs/tmp/kernel_v2_review_20260321.md`。 |
+| **323** | **ARM64 inline kfunc + kinsn 模块（2026-03-21）** | ✅ | 内核 `bpf.h` +emit_arm64（+12）、`arm64/bpf_jit_comp.c` +dispatch（+44）。`module/arm64/` 3 模块（ROR 4B、CSEL 8B、LSR+AND 20B）。交叉编译通过。+613 行。 |
+| **324** | **e2e v2 daemon 集成（2026-03-21）** | ✅ | 5 case 全部接入 baseline→daemon apply-all→post_rejit 流程。净减 314 行。 |
+| **325** | **Attachment sync 调研（2026-03-21）** | 🔄 | 调研 REJIT 后各 backend（XDP/TC/cgroup/LSM/trampoline 等）的 bpf_func 缓存更新方案。4 候选方案对比。codex 进行中。 |
+| **326** | **Verifier log parser POC（2026-03-21）** | 🔄 | 解析 verifier log level 2 提取 per-insn 寄存器状态，用于 daemon Analysis。codex 进行中。 |
+| **327** | **Daemon profiling 调研 + POC（2026-03-21）** | 🔄 | 调研 bpf_stats/perf/kprobe 等数据源获取运行时 profile。codex 进行中。 |
+| 328 | Daemon pass 框架实现 | 待定 | 依赖 #321 设计。重构 ad-hoc matcher 为 pass 框架。 |
+| 329 | kinsn pass（ROTATE/SELECT/EXTRACT） | 待定 | 依赖 #307 #328。 |
+| 330 | 内核 Critical issue 修复 | 待定 | 依赖 #322 #325。修复 attachment sync + KERNEL_BPFPTR + image lifecycle。 |
+| 331 | VM 全量 micro suite rejit | 待定 | `make vm-micro` 跑全部 57 个 benchmark。 |
+| 332 | 全量评估：stock vs rejit vs llvmbpf | 待定 | 三方对比。 |

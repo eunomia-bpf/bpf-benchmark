@@ -62,7 +62,7 @@ struct AttrGetInfoByFd {
 struct AttrRejit {
     prog_fd: u32,
     insn_cnt: u32,
-    insns: u64,    // __aligned_u64
+    insns: u64, // __aligned_u64
     log_level: u32,
     log_size: u32,
     log_buf: u64,  // __aligned_u64
@@ -135,7 +135,11 @@ impl Default for BpfProgInfo {
 impl BpfProgInfo {
     /// Returns the program name as a string (truncated at first NUL byte).
     pub fn name_str(&self) -> &str {
-        let end = self.name.iter().position(|&b| b == 0).unwrap_or(self.name.len());
+        let end = self
+            .name
+            .iter()
+            .position(|&b| b == 0)
+            .unwrap_or(self.name.len());
         std::str::from_utf8(&self.name[..end]).unwrap_or("<invalid-utf8>")
     }
 }
@@ -144,7 +148,14 @@ impl BpfProgInfo {
 
 /// Issue the bpf(2) syscall. Returns the raw return value (>= 0 on success).
 unsafe fn sys_bpf(cmd: u32, attr: *mut u8, size: u32) -> libc::c_long {
-    unsafe { libc::syscall(SYS_BPF, cmd as libc::c_long, attr as libc::c_long, size as libc::c_long) }
+    unsafe {
+        libc::syscall(
+            SYS_BPF,
+            cmd as libc::c_long,
+            attr as libc::c_long,
+            size as libc::c_long,
+        )
+    }
 }
 
 fn bpf_err(context: &str) -> anyhow::Error {
@@ -219,7 +230,15 @@ pub fn bpf_prog_get_info(fd: RawFd, fetch_orig: bool) -> Result<(BpfProgInfo, Ve
         // orig_prog_len is in bytes; divide by sizeof(BpfInsn) = 8 to get insn count.
         let orig_bytes = info.orig_prog_len as usize;
         let insn_count = orig_bytes / std::mem::size_of::<BpfInsn>();
-        orig_insns.resize(insn_count, BpfInsn { code: 0, regs: 0, off: 0, imm: 0 });
+        orig_insns.resize(
+            insn_count,
+            BpfInsn {
+                code: 0,
+                regs: 0,
+                off: 0,
+                imm: 0,
+            },
+        );
 
         // Reset info and point orig_prog_insns to our buffer.
         info = BpfProgInfo::default();
@@ -251,11 +270,7 @@ pub fn bpf_prog_get_info(fd: RawFd, fetch_orig: bool) -> Result<(BpfProgInfo, Ve
 ///
 /// The kernel will run bpf_check() + JIT on the new instructions and
 /// atomically replace the program image in-place.
-pub fn bpf_prog_rejit(
-    prog_fd: RawFd,
-    insns: &[BpfInsn],
-    fd_array: &[RawFd],
-) -> Result<()> {
+pub fn bpf_prog_rejit(prog_fd: RawFd, insns: &[BpfInsn], fd_array: &[RawFd]) -> Result<()> {
     let mut attr: AttrRejit = zeroed_attr();
     attr.prog_fd = prog_fd as u32;
     attr.insn_cnt = insns.len() as u32;
@@ -292,8 +307,7 @@ pub fn iter_prog_ids() -> impl Iterator<Item = u32> {
 
 /// Convenience: get the original BPF instructions for a program by ID.
 pub fn get_orig_insns_by_id(prog_id: u32) -> Result<(BpfProgInfo, Vec<BpfInsn>)> {
-    let fd = bpf_prog_get_fd_by_id(prog_id)
-        .with_context(|| format!("open prog {}", prog_id))?;
+    let fd = bpf_prog_get_fd_by_id(prog_id).with_context(|| format!("open prog {}", prog_id))?;
     use std::os::unix::io::AsRawFd;
     bpf_prog_get_info(fd.as_raw_fd(), true)
         .with_context(|| format!("get info for prog {}", prog_id))

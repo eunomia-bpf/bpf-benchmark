@@ -99,6 +99,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         action="store_true",
         help="Enable REJIT same-bytecode mode for kernel-rejit runtimes.",
     )
+    parser.add_argument(
+        "--daemon-path",
+        default=None,
+        help=(
+            "Path to bpfrejit-daemon binary. When set, passed to micro_exec for "
+            "kernel-rejit runtimes so the daemon can apply in-place JIT optimizations."
+        ),
+    )
     parser.add_argument("--output", help="Override JSON output path.")
     parser.add_argument("--cpu", help="Pin child processes to a specific CPU via taskset.")
     parser.add_argument(
@@ -522,6 +530,7 @@ def main(argv: list[str] | None = None) -> int:
         for runtime in runtimes:
             repeat = args.repeat if args.repeat is not None else runtime.default_repeat
             is_rejit_runtime = runtime.mode in {"kernel-rejit", "kernel_rejit"}
+            daemon_path = getattr(args, "daemon_path", None)
             command = build_micro_benchmark_command(
                 suite.build.runner_binary,
                 runtime_mode=runtime.mode,
@@ -534,6 +543,7 @@ def main(argv: list[str] | None = None) -> int:
                 perf_scope=args.perf_scope,
                 require_sudo=runtime.require_sudo,
                 rejit=is_rejit_runtime,
+                daemon_path=daemon_path if is_rejit_runtime else None,
             )
 
             for _ in range(warmups):

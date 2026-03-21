@@ -188,10 +188,22 @@ mod tests {
             old_len: 10,
             family: Family::WideMem,
             bindings: vec![
-                Binding { name: "dst_reg", value: 0 },
-                Binding { name: "base_reg", value: 6 },
-                Binding { name: "base_off", value: 10 },
-                Binding { name: "width", value: 4 },
+                Binding {
+                    name: "dst_reg",
+                    value: 0,
+                },
+                Binding {
+                    name: "base_reg",
+                    value: 6,
+                },
+                Binding {
+                    name: "base_off",
+                    value: 10,
+                },
+                Binding {
+                    name: "width",
+                    value: 4,
+                },
             ],
         }
     }
@@ -200,7 +212,12 @@ mod tests {
     fn test_rewrite_wide_mem() {
         // Program: wide_mem_4 + exit
         let mut insns = wide_mem_4_insns(0, 6, 10);
-        insns.push(BpfInsn { code: BPF_JMP | BPF_EXIT, regs: 0, off: 0, imm: 0 });
+        insns.push(BpfInsn {
+            code: BPF_JMP | BPF_EXIT,
+            regs: 0,
+            off: 0,
+            imm: 0,
+        });
 
         let sites = vec![make_wide_mem_site(0)];
         let result = rewrite(&insns, &sites).unwrap();
@@ -222,7 +239,12 @@ mod tests {
     fn test_rewrite_no_sites() {
         let insns = vec![
             BpfInsn::mov64_imm(0, 42),
-            BpfInsn { code: BPF_JMP | BPF_EXIT, regs: 0, off: 0, imm: 0 },
+            BpfInsn {
+                code: BPF_JMP | BPF_EXIT,
+                regs: 0,
+                off: 0,
+                imm: 0,
+            },
         ];
         let result = rewrite(&insns, &[]).unwrap();
         assert!(!result.has_transforms);
@@ -251,14 +273,17 @@ mod tests {
         // So the ja at new_pc=3 should have off = 5 - (3+1) = 1 (unchanged in this case).
 
         let mut insns = Vec::new();
-        insns.push(BpfInsn::mov64_imm(0, 0));        // 0
-        insns.extend(wide_mem_4_insns(0, 6, 10));     // 1..10
-        insns.push(BpfInsn::mov64_imm(0, 1));         // 11
-        insns.push(BpfInsn::ja(1));                    // 12: ja +1 → 14
-        insns.push(BpfInsn::mov64_imm(0, 2));         // 13
-        insns.push(BpfInsn {                           // 14: exit
+        insns.push(BpfInsn::mov64_imm(0, 0)); // 0
+        insns.extend(wide_mem_4_insns(0, 6, 10)); // 1..10
+        insns.push(BpfInsn::mov64_imm(0, 1)); // 11
+        insns.push(BpfInsn::ja(1)); // 12: ja +1 → 14
+        insns.push(BpfInsn::mov64_imm(0, 2)); // 13
+        insns.push(BpfInsn {
+            // 14: exit
             code: BPF_JMP | BPF_EXIT,
-            regs: 0, off: 0, imm: 0,
+            regs: 0,
+            off: 0,
+            imm: 0,
         });
 
         let sites = vec![RewriteSite {
@@ -266,10 +291,22 @@ mod tests {
             old_len: 10,
             family: Family::WideMem,
             bindings: vec![
-                Binding { name: "dst_reg", value: 0 },
-                Binding { name: "base_reg", value: 6 },
-                Binding { name: "base_off", value: 10 },
-                Binding { name: "width", value: 4 },
+                Binding {
+                    name: "dst_reg",
+                    value: 0,
+                },
+                Binding {
+                    name: "base_reg",
+                    value: 6,
+                },
+                Binding {
+                    name: "base_off",
+                    value: 10,
+                },
+                Binding {
+                    name: "width",
+                    value: 4,
+                },
             ],
         }];
 
@@ -279,7 +316,10 @@ mod tests {
         // Verify the ja instruction is at new_pc=3 and offset is still 1.
         let ja_insn = &result.new_insns[3];
         assert!(ja_insn.is_ja());
-        assert_eq!(ja_insn.off, 1, "ja offset should be 1 (skip one insn to exit)");
+        assert_eq!(
+            ja_insn.off, 1,
+            "ja offset should be 1 (skip one insn to exit)"
+        );
     }
 
     #[test]
@@ -297,11 +337,14 @@ mod tests {
         // ja at new_pc=0: off = 2 - (0+1) = 1
 
         let mut insns = Vec::new();
-        insns.push(BpfInsn::ja(10));                   // 0: ja +10 → pc 11
-        insns.extend(wide_mem_4_insns(0, 6, 0));       // 1..10
-        insns.push(BpfInsn {                           // 11: exit
+        insns.push(BpfInsn::ja(10)); // 0: ja +10 → pc 11
+        insns.extend(wide_mem_4_insns(0, 6, 0)); // 1..10
+        insns.push(BpfInsn {
+            // 11: exit
             code: BPF_JMP | BPF_EXIT,
-            regs: 0, off: 0, imm: 0,
+            regs: 0,
+            off: 0,
+            imm: 0,
         });
 
         let sites = vec![RewriteSite {
@@ -309,10 +352,22 @@ mod tests {
             old_len: 10,
             family: Family::WideMem,
             bindings: vec![
-                Binding { name: "dst_reg", value: 0 },
-                Binding { name: "base_reg", value: 6 },
-                Binding { name: "base_off", value: 0 },
-                Binding { name: "width", value: 4 },
+                Binding {
+                    name: "dst_reg",
+                    value: 0,
+                },
+                Binding {
+                    name: "base_reg",
+                    value: 6,
+                },
+                Binding {
+                    name: "base_off",
+                    value: 0,
+                },
+                Binding {
+                    name: "width",
+                    value: 4,
+                },
             ],
         }];
 
@@ -340,12 +395,15 @@ mod tests {
         //   3: exit
 
         let mut insns = Vec::new();
-        insns.push(BpfInsn::mov64_imm(0, 0));         // 0
-        insns.extend(wide_mem_4_insns(0, 6, 0));       // 1..10
-        insns.push(BpfInsn::ja(-12));                   // 11: ja -12 → pc 0
-        insns.push(BpfInsn {                           // 12: exit
+        insns.push(BpfInsn::mov64_imm(0, 0)); // 0
+        insns.extend(wide_mem_4_insns(0, 6, 0)); // 1..10
+        insns.push(BpfInsn::ja(-12)); // 11: ja -12 → pc 0
+        insns.push(BpfInsn {
+            // 12: exit
             code: BPF_JMP | BPF_EXIT,
-            regs: 0, off: 0, imm: 0,
+            regs: 0,
+            off: 0,
+            imm: 0,
         });
 
         let sites = vec![RewriteSite {
@@ -353,10 +411,22 @@ mod tests {
             old_len: 10,
             family: Family::WideMem,
             bindings: vec![
-                Binding { name: "dst_reg", value: 0 },
-                Binding { name: "base_reg", value: 6 },
-                Binding { name: "base_off", value: 0 },
-                Binding { name: "width", value: 4 },
+                Binding {
+                    name: "dst_reg",
+                    value: 0,
+                },
+                Binding {
+                    name: "base_reg",
+                    value: 6,
+                },
+                Binding {
+                    name: "base_off",
+                    value: 0,
+                },
+                Binding {
+                    name: "width",
+                    value: 4,
+                },
             ],
         }];
 
@@ -409,17 +479,34 @@ mod tests {
             imm: 0,
         });
         insns.extend(wide_mem_4_insns(0, 6, 0));
-        insns.push(BpfInsn { code: BPF_JMP | BPF_EXIT, regs: 0, off: 0, imm: 0 });
+        insns.push(BpfInsn {
+            code: BPF_JMP | BPF_EXIT,
+            regs: 0,
+            off: 0,
+            imm: 0,
+        });
 
         let sites = vec![RewriteSite {
             start_pc: 1,
             old_len: 10,
             family: Family::WideMem,
             bindings: vec![
-                Binding { name: "dst_reg", value: 0 },
-                Binding { name: "base_reg", value: 6 },
-                Binding { name: "base_off", value: 0 },
-                Binding { name: "width", value: 4 },
+                Binding {
+                    name: "dst_reg",
+                    value: 0,
+                },
+                Binding {
+                    name: "base_reg",
+                    value: 6,
+                },
+                Binding {
+                    name: "base_off",
+                    value: 0,
+                },
+                Binding {
+                    name: "width",
+                    value: 4,
+                },
             ],
         }];
 

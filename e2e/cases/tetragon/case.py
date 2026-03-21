@@ -38,7 +38,7 @@ from runner.libs import (  # noqa: E402
 )
 from runner.libs.agent import find_bpf_programs, start_agent, stop_agent, wait_healthy  # noqa: E402
 from runner.libs.metrics import compute_delta, sample_bpf_stats, sample_cpu_usage, sample_total_cpu_usage  # noqa: E402
-from runner.libs.recompile import PolicyTarget, apply_recompile, resolve_policy_files, scan_programs  # noqa: E402
+from runner.libs.recompile import apply_daemon_rejit, scan_programs  # noqa: E402
 from runner.libs.workload import (  # noqa: E402
     WorkloadResult,
     run_connect_storm,
@@ -523,63 +523,6 @@ spec:
     return [tracepoint_path, kprobe_path]
 
 
-def build_policy_summary(policy_files: Mapping[int, str], prog_ids: Sequence[int]) -> dict[str, int]:
-    return {
-        "configured_programs": len(policy_files),
-        "fallback_programs": max(0, len(prog_ids) - len(policy_files)),
-    }
-
-
-def resolve_manual_policy_files(opened: Sequence[ManualProgramSession]) -> dict[int, str]:
-    return resolve_policy_files(
-        PolicyTarget(
-            prog_id=int(session.prog_id or 0),
-            object_path=session.spec.object_path,
-            program_name=session.spec.program_name,
-        )
-        for session in opened
-        if int(session.prog_id or 0) > 0
-    )
-
-
-def build_tetragon_program_object_index(runner_binary: Path, object_dir: Path) -> dict[str, list[Path]]:
-    index: dict[str, list[Path]] = {}
-    for object_path in sorted(object_dir.glob("*.bpf.o")):
-        try:
-            inventory = discover_object_programs(runner_binary, object_path)
-        except Exception:
-            continue
-        for entry in inventory:
-            index.setdefault(entry.name, []).append(object_path.resolve())
-    return index
-
-
-def resolve_tetragon_daemon_policy_files(
-    programs: Sequence[Mapping[str, object]],
-    *,
-    runner_binary: Path,
-    object_dir: Path,
-) -> dict[int, str]:
-    object_index = build_tetragon_program_object_index(runner_binary, object_dir)
-    targets: list[PolicyTarget] = []
-    for program in programs:
-        prog_id = int(program.get("id", 0) or 0)
-        program_name = str(program.get("name", "")).strip()
-        if prog_id <= 0 or not program_name:
-            continue
-        candidates = object_index.get(program_name, [])
-        if len(candidates) != 1:
-            continue
-        targets.append(
-            PolicyTarget(
-                prog_id=prog_id,
-                object_path=candidates[0],
-                program_name=program_name,
-            )
-        )
-    return resolve_policy_files(targets)
-
-
 def current_programs() -> list[dict[str, object]]:
     payload = run_json_command([bpftool_binary(), "-j", "-p", "prog", "show"], timeout=30)
     if not isinstance(payload, list):
@@ -925,11 +868,6 @@ def build_markdown(payload: Mapping[str, object]) -> str:
     lines.extend(
         [
             "",
-            "## Recompile",
-            "",
-            f"- Applied programs: `{payload['recompile_summary']['applied_programs']}` / `{payload['recompile_summary']['requested_programs']}`",
-            f"- Applied successfully: `{payload['recompile_summary']['applied']}`",
-            "",
             "## Per-Program",
             "",
         ]
@@ -1011,12 +949,13 @@ def manual_fallback_payload(
 
         prog_ids = [int(session.prog_id or 0) for session in opened if session.prog_id]
         programs = [session.metadata() for session in opened]
-        policy_files = resolve_manual_policy_files(opened)
         baseline = run_phase(DEFAULT_WORKLOADS, duration_s, prog_ids, agent_pid=os.getpid())
         scan_results = scan_programs(prog_ids, scanner_binary)
-        recompile_results = apply_recompile(prog_ids, scanner_binary, policy_files=policy_files)
-        applied = sum(1 for record in recompile_results.values() if record.get("applied"))
-        post = run_phase(DEFAULT_WORKLOADS, duration_s, prog_ids, agent_pid=os.getpid()) if applied > 0 else None
+        rejit_result = apply_daemon_rejit(scanner_binary, prog_ids)
+        if rejit_result["applied"]:
+            post_rejit = run_phase(DEFAULT_WORKLOADS, duration_s, prog_ids, agent_pid=os.getpid())
+        else:
+            post_rejit = None
 
     if manual_failures:
         limitations.append(f"Some manual fallback targets failed to load: {manual_failures}")
@@ -1026,8 +965,6 @@ def manual_fallback_payload(
     limitations.append(
         "Manual fallback uses directly loaded Tetragon BPF objects; agent CPU therefore reflects the benchmark controller process rather than a real Tetragon daemon."
     )
-    if applied == 0:
-        limitations.append("BPF_PROG_JIT_RECOMPILE did not apply to any manual-fallback program; post-ReJIT measurement was skipped.")
 
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -1040,19 +977,11 @@ def manual_fallback_payload(
         "tetragon_programs": programs,
         "manual_failures": manual_failures,
         "baseline": baseline,
-        "policy_matches": {str(key): value for key, value in policy_files.items()},
-        "policy_summary": build_policy_summary(policy_files, prog_ids),
         "scan_results": {str(key): value for key, value in scan_results.items()},
-        "recompile_results": {str(key): value for key, value in recompile_results.items()},
-        "recompile_summary": {
-            "requested_programs": len(prog_ids),
-            "applied_programs": applied,
-            "applied": applied > 0,
-            "errors": sorted({record.get("error", "") for record in recompile_results.values() if record.get("error")}),
-        },
-        "post_rejit": post,
-        "programs": build_program_summary(scan_results, baseline, post),
-        "comparison": compare_phases(baseline, post),
+        "rejit_result": rejit_result,
+        "post_rejit": post_rejit,
+        "programs": build_program_summary(scan_results, baseline, post_rejit),
+        "comparison": compare_phases(baseline, post_rejit),
         "limitations": limitations,
     }
     return payload
@@ -1062,8 +991,6 @@ def daemon_payload(
     *,
     libbpf: Libbpf,
     scanner_binary: Path,
-    runner_binary: Path,
-    object_dir: Path,
     tetragon_binary: str,
     duration_s: int,
     smoke: bool,
@@ -1077,21 +1004,16 @@ def daemon_payload(
         command = [tetragon_binary, "--tracing-policy-dir", str(policy_dir)]
         with TetragonAgentSession(command, load_timeout) as session:
             prog_ids = [int(program["id"]) for program in session.programs]
-            policy_files = resolve_tetragon_daemon_policy_files(
-                session.programs,
-                runner_binary=runner_binary,
-                object_dir=object_dir,
-            )
             baseline = run_phase(DEFAULT_WORKLOADS, duration_s, prog_ids, agent_pid=session.pid)
             scan_results = scan_programs(prog_ids, scanner_binary)
-            recompile_results = apply_recompile(prog_ids, scanner_binary, policy_files=policy_files)
-            applied = sum(1 for record in recompile_results.values() if record.get("applied"))
+            rejit_result = apply_daemon_rejit(scanner_binary, prog_ids)
+            if rejit_result["applied"]:
+                post_rejit = run_phase(DEFAULT_WORKLOADS, duration_s, prog_ids, agent_pid=session.pid)
+            else:
+                post_rejit = None
             limitations.append(
                 "events_total and events_per_sec are derived from aggregate BPF run_cnt deltas, so a single application operation can increment multiple program counters."
             )
-            if applied == 0:
-                limitations.append("BPF_PROG_JIT_RECOMPILE did not apply to any Tetragon-owned program; post-ReJIT measurement was skipped.")
-            post = run_phase(DEFAULT_WORKLOADS, duration_s, prog_ids, agent_pid=session.pid) if applied > 0 else None
             payload = {
                 "generated_at": datetime.now(timezone.utc).isoformat(),
                 "mode": "tetragon_daemon",
@@ -1106,19 +1028,11 @@ def daemon_payload(
                 "tetragon_programs": session.programs,
                 "agent_logs": session.collector_snapshot(),
                 "baseline": baseline,
-                "policy_matches": {str(key): value for key, value in policy_files.items()},
-                "policy_summary": build_policy_summary(policy_files, prog_ids),
                 "scan_results": {str(key): value for key, value in scan_results.items()},
-                "recompile_results": {str(key): value for key, value in recompile_results.items()},
-                "recompile_summary": {
-                    "requested_programs": len(prog_ids),
-                    "applied_programs": applied,
-                    "applied": applied > 0,
-                    "errors": sorted({record.get("error", "") for record in recompile_results.values() if record.get("error")}),
-                },
-                "post_rejit": post,
-                "programs": build_program_summary(scan_results, baseline, post),
-                "comparison": compare_phases(baseline, post),
+                "rejit_result": rejit_result,
+                "post_rejit": post_rejit,
+                "programs": build_program_summary(scan_results, baseline, post_rejit),
+                "comparison": compare_phases(baseline, post_rejit),
                 "limitations": limitations,
             }
             return payload
@@ -1161,8 +1075,6 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
                 return daemon_payload(
                     libbpf=libbpf,
                     scanner_binary=scanner_binary,
-                    runner_binary=runner_binary,
-                    object_dir=execve_object.parent,
                     tetragon_binary=tetragon_binary,
                     duration_s=duration_s,
                     smoke=bool(args.smoke),

@@ -24,13 +24,17 @@ pub fn emit_site(site: &RewriteSite) -> Result<Vec<BpfInsn>> {
 /// Input: 10 insns (for width=4) doing byte loads + shifts + ORs.
 /// Output: 1 insn `LDX_MEM(size, dst, base, off)` where size matches width.
 fn emit_wide_mem(site: &RewriteSite) -> Result<Vec<BpfInsn>> {
-    let dst = site.get_binding("dst_reg")
+    let dst = site
+        .get_binding("dst_reg")
         .ok_or_else(|| anyhow::anyhow!("missing dst_reg binding"))? as u8;
-    let base = site.get_binding("base_reg")
+    let base = site
+        .get_binding("base_reg")
         .ok_or_else(|| anyhow::anyhow!("missing base_reg binding"))? as u8;
-    let off = site.get_binding("base_off")
+    let off = site
+        .get_binding("base_off")
         .ok_or_else(|| anyhow::anyhow!("missing base_off binding"))? as i16;
-    let width = site.get_binding("width")
+    let width = site
+        .get_binding("width")
         .ok_or_else(|| anyhow::anyhow!("missing width binding"))?;
 
     let size = match width {
@@ -40,7 +44,10 @@ fn emit_wide_mem(site: &RewriteSite) -> Result<Vec<BpfInsn>> {
         // For widths 3, 5, 6, 7: the POC doesn't handle non-power-of-2 widths.
         // In a real implementation we would emit a smaller wide load + remaining bytes,
         // but for the POC we bail.
-        _ => bail!("WIDE_MEM: unsupported width {} (POC supports 2, 4, 8)", width),
+        _ => bail!(
+            "WIDE_MEM: unsupported width {} (POC supports 2, 4, 8)",
+            width
+        ),
     };
 
     Ok(vec![BpfInsn::ldx_mem(size, dst, base, off)])
@@ -58,10 +65,22 @@ mod tests {
             old_len: 10,
             family: Family::WideMem,
             bindings: vec![
-                Binding { name: "dst_reg", value: 0 },
-                Binding { name: "base_reg", value: 6 },
-                Binding { name: "base_off", value: 10 },
-                Binding { name: "width", value: 4 },
+                Binding {
+                    name: "dst_reg",
+                    value: 0,
+                },
+                Binding {
+                    name: "base_reg",
+                    value: 6,
+                },
+                Binding {
+                    name: "base_off",
+                    value: 10,
+                },
+                Binding {
+                    name: "width",
+                    value: 4,
+                },
             ],
         };
         let result = emit_site(&site).unwrap();
@@ -79,10 +98,22 @@ mod tests {
             old_len: 4,
             family: Family::WideMem,
             bindings: vec![
-                Binding { name: "dst_reg", value: 1 },
-                Binding { name: "base_reg", value: 7 },
-                Binding { name: "base_off", value: 0 },
-                Binding { name: "width", value: 2 },
+                Binding {
+                    name: "dst_reg",
+                    value: 1,
+                },
+                Binding {
+                    name: "base_reg",
+                    value: 7,
+                },
+                Binding {
+                    name: "base_off",
+                    value: 0,
+                },
+                Binding {
+                    name: "width",
+                    value: 2,
+                },
             ],
         };
         let result = emit_site(&site).unwrap();
@@ -100,10 +131,22 @@ mod tests {
             old_len: 22,
             family: Family::WideMem,
             bindings: vec![
-                Binding { name: "dst_reg", value: 3 },
-                Binding { name: "base_reg", value: 10 },
-                Binding { name: "base_off", value: -8 },
-                Binding { name: "width", value: 8 },
+                Binding {
+                    name: "dst_reg",
+                    value: 3,
+                },
+                Binding {
+                    name: "base_reg",
+                    value: 10,
+                },
+                Binding {
+                    name: "base_off",
+                    value: -8,
+                },
+                Binding {
+                    name: "width",
+                    value: 8,
+                },
             ],
         };
         let result = emit_site(&site).unwrap();
@@ -121,10 +164,22 @@ mod tests {
             old_len: 7,
             family: Family::WideMem,
             bindings: vec![
-                Binding { name: "dst_reg", value: 0 },
-                Binding { name: "base_reg", value: 6 },
-                Binding { name: "base_off", value: 0 },
-                Binding { name: "width", value: 3 },
+                Binding {
+                    name: "dst_reg",
+                    value: 0,
+                },
+                Binding {
+                    name: "base_reg",
+                    value: 6,
+                },
+                Binding {
+                    name: "base_off",
+                    value: 0,
+                },
+                Binding {
+                    name: "width",
+                    value: 3,
+                },
             ],
         };
         assert!(emit_site(&site).is_err());

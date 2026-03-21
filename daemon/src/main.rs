@@ -8,9 +8,11 @@ mod bpf;
 mod emit;
 mod insn;
 mod matcher;
+mod profiler;
 mod rewriter;
 
 use std::os::unix::io::AsRawFd;
+use std::time::Duration;
 
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
@@ -43,6 +45,21 @@ enum Command {
 
     /// Apply rewrites to all live BPF programs that have optimization sites.
     ApplyAll,
+
+    /// Poll runtime BPF stats for one live program.
+    Profile {
+        /// BPF program ID.
+        #[arg(value_name = "PROG_ID")]
+        prog_id: u32,
+
+        /// Poll interval in milliseconds.
+        #[arg(long, default_value_t = 1000)]
+        interval_ms: u64,
+
+        /// Number of delta samples to collect.
+        #[arg(long, default_value_t = 5)]
+        samples: usize,
+    },
 }
 
 fn main() -> Result<()> {
@@ -52,13 +69,21 @@ fn main() -> Result<()> {
         Command::Rewrite { prog_id } => cmd_rewrite(prog_id),
         Command::Apply { prog_id } => cmd_apply(prog_id),
         Command::ApplyAll => cmd_apply_all(),
+        Command::Profile {
+            prog_id,
+            interval_ms,
+            samples,
+        } => cmd_profile(prog_id, interval_ms, samples),
     }
 }
 
 // ── Subcommand implementations ──────────────────────────────────────
 
 fn cmd_enumerate() -> Result<()> {
-    println!("{:>6}  {:>6}  {:>5}  {:<16}  sites", "ID", "type", "insns", "name");
+    println!(
+        "{:>6}  {:>6}  {:>5}  {:<16}  sites",
+        "ID", "type", "insns", "name"
+    );
     println!("{}", "-".repeat(60));
 
     for prog_id in bpf::iter_prog_ids() {
@@ -92,17 +117,16 @@ fn enumerate_one(prog_id: u32) -> Result<()> {
     let site_summary = if sites.is_empty() {
         "-".to_string()
     } else {
-        let wide_count = sites.iter().filter(|s| s.family == matcher::Family::WideMem).count();
+        let wide_count = sites
+            .iter()
+            .filter(|s| s.family == matcher::Family::WideMem)
+            .count();
         format!("wide_mem={}", wide_count)
     };
 
     println!(
         "{:>6}  {:>6}  {:>5}  {:<16}  {}",
-        prog_id,
-        info.prog_type,
-        insn_count,
-        name,
-        site_summary,
+        prog_id, info.prog_type, insn_count, name, site_summary,
     );
 
     Ok(())
@@ -112,19 +136,27 @@ fn cmd_rewrite(prog_id: u32) -> Result<()> {
     let (info, orig_insns) = bpf::get_orig_insns_by_id(prog_id)?;
 
     if orig_insns.is_empty() {
-        println!("prog {}: no original instructions available (orig_prog_len={})",
-                 prog_id, info.orig_prog_len);
+        println!(
+            "prog {}: no original instructions available (orig_prog_len={})",
+            prog_id, info.orig_prog_len
+        );
         return Ok(());
     }
 
-    println!("prog {} ({:?}): {} original instructions",
-             prog_id, info.name_str(), orig_insns.len());
+    println!(
+        "prog {} ({:?}): {} original instructions",
+        prog_id,
+        info.name_str(),
+        orig_insns.len()
+    );
 
     let sites = matcher::scan_all(&orig_insns);
     println!("  found {} rewrite sites", sites.len());
     for site in &sites {
-        println!("    pc={} len={} family={} bindings={:?}",
-                 site.start_pc, site.old_len, site.family, site.bindings);
+        println!(
+            "    pc={} len={} family={} bindings={:?}",
+            site.start_pc, site.old_len, site.family, site.bindings
+        );
     }
 
     if sites.is_empty() {
@@ -132,11 +164,14 @@ fn cmd_rewrite(prog_id: u32) -> Result<()> {
         return Ok(());
     }
 
-    let result = rewriter::rewrite(&orig_insns, &sites)
-        .context("rewrite failed")?;
+    let result = rewriter::rewrite(&orig_insns, &sites).context("rewrite failed")?;
 
-    println!("  rewrite: {} insns -> {} insns ({} sites applied)",
-             orig_insns.len(), result.new_insns.len(), result.sites_applied);
+    println!(
+        "  rewrite: {} insns -> {} insns ({} sites applied)",
+        orig_insns.len(),
+        result.new_insns.len(),
+        result.sites_applied
+    );
 
     // Print new instructions for inspection.
     for (i, insn) in result.new_insns.iter().enumerate() {
@@ -147,10 +182,9 @@ fn cmd_rewrite(prog_id: u32) -> Result<()> {
 }
 
 fn cmd_apply(prog_id: u32) -> Result<()> {
-    let fd = bpf::bpf_prog_get_fd_by_id(prog_id)
-        .context("open program")?;
-    let (info, orig_insns) = bpf::bpf_prog_get_info(fd.as_raw_fd(), true)
-        .context("get program info")?;
+    let fd = bpf::bpf_prog_get_fd_by_id(prog_id).context("open program")?;
+    let (info, orig_insns) =
+        bpf::bpf_prog_get_info(fd.as_raw_fd(), true).context("get program info")?;
 
     if orig_insns.is_empty() {
         println!("prog {}: no original instructions available", prog_id);
@@ -159,13 +193,21 @@ fn cmd_apply(prog_id: u32) -> Result<()> {
 
     let sites = matcher::scan_all(&orig_insns);
     if sites.is_empty() {
-        println!("prog {} ({}): no optimization sites found", prog_id, info.name_str());
+        println!(
+            "prog {} ({}): no optimization sites found",
+            prog_id,
+            info.name_str()
+        );
         return Ok(());
     }
 
     let result = rewriter::rewrite(&orig_insns, &sites)?;
     if !result.has_transforms {
-        println!("prog {} ({}): no transforms applied", prog_id, info.name_str());
+        println!(
+            "prog {} ({}): no transforms applied",
+            prog_id,
+            info.name_str()
+        );
         return Ok(());
     }
 
@@ -178,8 +220,7 @@ fn cmd_apply(prog_id: u32) -> Result<()> {
         result.new_insns.len(),
     );
 
-    bpf::bpf_prog_rejit(fd.as_raw_fd(), &result.new_insns, &[])
-        .context("BPF_PROG_REJIT failed")?;
+    bpf::bpf_prog_rejit(fd.as_raw_fd(), &result.new_insns, &[]).context("BPF_PROG_REJIT failed")?;
 
     println!("  REJIT successful");
     Ok(())
@@ -206,6 +247,54 @@ fn cmd_apply_all() -> Result<()> {
         "\napply-all: scanned {} programs, applied {}, errors {}",
         total, applied, errors
     );
+    Ok(())
+}
+
+fn cmd_profile(prog_id: u32, interval_ms: u64, samples: usize) -> Result<()> {
+    if !profiler::bpf_stats_enabled()? {
+        anyhow::bail!(
+            "kernel.bpf_stats_enabled=0; enable it first, e.g. `sudo sysctl kernel.bpf_stats_enabled=1`"
+        );
+    }
+
+    let interval = Duration::from_millis(interval_ms);
+    let mut poller = profiler::ProgStatsPoller::open(prog_id)?;
+    let baseline = poller.snapshot()?;
+
+    println!(
+        "prog {} baseline: run_cnt={} run_time_ns={} avg_ns={}",
+        prog_id,
+        baseline.stats.run_cnt,
+        baseline.stats.run_time_ns,
+        fmt_avg(baseline.stats.avg_ns),
+    );
+    println!(
+        "{:>6}  {:>10}  {:>14}  {:>14}  {:>12}",
+        "sample", "elapsed_ms", "delta_run_cnt", "delta_time_ns", "delta_avg_ns"
+    );
+    println!("{}", "-".repeat(68));
+
+    poller.poll_delta()?;
+    for (index, delta) in poller.collect_deltas(interval, samples)?.iter().enumerate() {
+        let pgo = profiler::PgoAnalysis::from_delta(delta);
+        println!(
+            "{:>6}  {:>10.3}  {:>14}  {:>14}  {:>12}",
+            index + 1,
+            delta.elapsed.as_secs_f64() * 1000.0,
+            pgo.delta_run_cnt,
+            pgo.delta_run_time_ns,
+            fmt_avg(pgo.delta_avg_ns),
+        );
+    }
+
+    let final_stats = poller.poll_stats()?;
+    println!(
+        "final totals: run_cnt={} run_time_ns={} avg_ns={}",
+        final_stats.run_cnt,
+        final_stats.run_time_ns,
+        fmt_avg(final_stats.avg_ns),
+    );
+
     Ok(())
 }
 
@@ -240,4 +329,11 @@ fn try_apply_one(prog_id: u32) -> Result<bool> {
     bpf::bpf_prog_rejit(fd.as_raw_fd(), &result.new_insns, &[])?;
     println!("    REJIT ok");
     Ok(true)
+}
+
+fn fmt_avg(value: Option<f64>) -> String {
+    match value {
+        Some(avg) => format!("{avg:.2}"),
+        None => "-".to_string(),
+    }
 }

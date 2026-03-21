@@ -42,7 +42,7 @@ from runner.libs.metrics import (  # noqa: E402
     sample_cpu_usage,
     sample_total_cpu_usage,
 )
-from runner.libs.recompile import PolicyTarget, apply_recompile, resolve_policy_files, scan_programs  # noqa: E402
+from runner.libs.recompile import apply_daemon_rejit, scan_programs  # noqa: E402
 from runner.libs.workload import (  # noqa: E402
     WorkloadResult,
     run_exec_storm,
@@ -596,12 +596,6 @@ def build_markdown(payload: Mapping[str, object]) -> str:
             f"agent_cpu={((workload.get('agent_cpu') or {}).get('total_pct'))}, "
             f"bpf_avg_ns={((workload.get('bpf') or {}).get('summary', {}).get('avg_ns_per_run'))}"
         )
-    lines.extend(["", "## Recompile", ""])
-    recompile_summary = payload["recompile_summary"]
-    lines.append(f"- Applied programs: `{recompile_summary['applied_programs']}` / `{recompile_summary['requested_programs']}`")
-    lines.append(f"- Applied successfully: `{recompile_summary['applied']}`")
-    if recompile_summary.get("errors"):
-        lines.append(f"- Errors: `{recompile_summary['errors']}`")
     lines.append("")
     post = payload.get("post_rejit")
     if post:
@@ -642,25 +636,6 @@ def select_manual_programs(inventory: Sequence[ProgramInventoryEntry]) -> list[P
     if missing:
         raise RuntimeError(f"manual Tracee fallback is missing programs: {', '.join(missing)}")
     return [by_name[name] for name in MANUAL_PROGRAM_NAMES]
-
-
-def resolve_tracee_policy_files(tracee_object: Path, program_ids_by_name: Mapping[str, int]) -> dict[int, str]:
-    return resolve_policy_files(
-        PolicyTarget(
-            prog_id=int(prog_id),
-            object_path=tracee_object,
-            program_name=name,
-        )
-        for name, prog_id in program_ids_by_name.items()
-        if int(prog_id) > 0
-    )
-
-
-def build_policy_summary(policy_files: Mapping[int, str], prog_ids: Sequence[int]) -> dict[str, int]:
-    return {
-        "configured_programs": len(policy_files),
-        "fallback_programs": max(0, len(prog_ids) - len(policy_files)),
-    }
 
 
 def run_phase(
@@ -712,20 +687,13 @@ def run_manual_fallback(
         with ManualTraceeSession(ManualLibbpf(), tracee_object, selected) as session:
             prog_ids = [int(handle.prog_id) for handle in session.program_handles.values()]
             prog_fds = {int(handle.prog_id): int(handle.prog_fd) for handle in session.program_handles.values()}
-            policy_files = resolve_tracee_policy_files(
-                tracee_object,
-                {name: int(handle.prog_id) for name, handle in session.program_handles.items()},
-            )
             baseline = run_phase(workloads, duration_s, prog_ids, prog_fds=prog_fds, agent_pid=None, collector=None)
             scan_results = scan_programs(prog_ids, scanner_binary, prog_fds=prog_fds)
-            recompile_results = apply_recompile(
-                prog_ids,
-                scanner_binary,
-                prog_fds=prog_fds,
-                policy_files=policy_files,
-            )
-            applied = sum(1 for record in recompile_results.values() if record.get("applied"))
-            post = run_phase(workloads, duration_s, prog_ids, prog_fds=prog_fds, agent_pid=None, collector=None) if applied > 0 else None
+            rejit_result = apply_daemon_rejit(scanner_binary, prog_ids)
+            if rejit_result["applied"]:
+                post_rejit = run_phase(workloads, duration_s, prog_ids, prog_fds=prog_fds, agent_pid=None, collector=None)
+            else:
+                post_rejit = None
 
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -741,18 +709,10 @@ def run_manual_fallback(
         "host": host_metadata(),
         "config": dict(config),
         "baseline": baseline,
-        "policy_matches": {str(key): value for key, value in policy_files.items()},
-        "policy_summary": build_policy_summary(policy_files, prog_ids),
         "scan_results": {str(key): value for key, value in scan_results.items()},
-        "recompile_results": {str(key): value for key, value in recompile_results.items()},
-        "recompile_summary": {
-            "requested_programs": len(prog_ids),
-            "applied_programs": applied,
-            "applied": applied > 0,
-            "errors": sorted({record.get("error", "") for record in recompile_results.values() if record.get("error")}),
-        },
-        "post_rejit": post,
-        "comparison": compare_phases(baseline, post),
+        "rejit_result": rejit_result,
+        "post_rejit": post_rejit,
+        "comparison": compare_phases(baseline, post_rejit),
         "limitations": limitations,
     }
     return payload
@@ -799,14 +759,6 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
     with enable_bpf_stats():
         with TraceeAgentSession(commands, load_timeout=int(args.load_timeout)) as session:
             prog_ids = [int(program["id"]) for program in session.programs]
-            policy_files = resolve_tracee_policy_files(
-                tracee_object,
-                {
-                    str(program.get("name", "")).strip(): int(program.get("id", 0))
-                    for program in session.programs
-                    if int(program.get("id", 0) or 0) > 0 and str(program.get("name", "")).strip()
-                },
-            )
             baseline = run_phase(
                 workloads,
                 duration_s,
@@ -816,17 +768,9 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                 collector=session.collector,
             )
             scan_results = scan_programs(prog_ids, scanner_binary, prog_fds=session.program_fds)
-            recompile_results = apply_recompile(
-                prog_ids,
-                scanner_binary,
-                prog_fds=session.program_fds,
-                policy_files=policy_files,
-            )
-            applied = sum(1 for record in recompile_results.values() if record.get("applied"))
-            if applied == 0:
-                limitations.append("BPF_PROG_JIT_RECOMPILE did not apply on this kernel; post-ReJIT measurement was skipped.")
-            post = (
-                run_phase(
+            rejit_result = apply_daemon_rejit(scanner_binary, prog_ids)
+            if rejit_result["applied"]:
+                post_rejit = run_phase(
                     workloads,
                     duration_s,
                     prog_ids,
@@ -834,9 +778,8 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                     agent_pid=session.pid,
                     collector=session.collector,
                 )
-                if applied > 0
-                else None
-            )
+            else:
+                post_rejit = None
 
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -850,18 +793,10 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
         "host": host_metadata(),
         "config": dict(config),
         "baseline": baseline,
-        "policy_matches": {str(key): value for key, value in policy_files.items()},
-        "policy_summary": build_policy_summary(policy_files, prog_ids),
         "scan_results": {str(key): value for key, value in scan_results.items()},
-        "recompile_results": {str(key): value for key, value in recompile_results.items()},
-        "recompile_summary": {
-            "requested_programs": len(prog_ids),
-            "applied_programs": applied,
-            "applied": applied > 0,
-            "errors": sorted({record.get("error", "") for record in recompile_results.values() if record.get("error")}),
-        },
-        "post_rejit": post,
-        "comparison": compare_phases(baseline, post),
+        "rejit_result": rejit_result,
+        "post_rejit": post_rejit,
+        "comparison": compare_phases(baseline, post_rejit),
         "limitations": limitations,
     }
     return payload
