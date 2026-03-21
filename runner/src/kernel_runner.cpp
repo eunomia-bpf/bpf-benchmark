@@ -11,6 +11,7 @@
 #include <cerrno>
 #include <chrono>
 #include <cmath>
+#include <cstdlib>
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
@@ -1143,7 +1144,12 @@ std::vector<sample_result> run_kernel(const cli_options &options)
 
     if (options.rejit) {
         rejit.requested = true;
-        if (options.rejit_program.has_value()) {
+        if (options.daemon_path.has_value()) {
+            /* Daemon mode: daemon fetches bytecode and applies REJIT itself */
+            rejit.mode = "daemon";
+            fprintf(stderr, "rejit: mode=daemon daemon_path=%s prog_id=%u\n",
+                    options.daemon_path->string().c_str(), program_info.id);
+        } else if (options.rejit_program.has_value()) {
             /* Replacement mode: extract bytecode from a second ELF */
             rejit.mode = "replacement";
             auto replacement_image = load_program_image(
@@ -1170,17 +1176,32 @@ std::vector<sample_result> run_kernel(const cli_options &options)
             const bpf_insn *raw = bpf_program__insns(prog);
             rejit_insns.assign(raw, raw + cnt);
         }
-        fprintf(stderr, "rejit: mode=%s insn_cnt=%zu\n",
-                rejit.mode.c_str(), rejit_insns.size());
+        if (rejit.mode != "daemon") {
+            fprintf(stderr, "rejit: mode=%s insn_cnt=%zu\n",
+                    rejit.mode.c_str(), rejit_insns.size());
+        }
     }
 
     const auto packet_kind = resolve_packet_context_kind(program_info.type);
     const bool measure_same_image_pair =
         rejit.requested && !options.compile_only;
     if (options.compile_only && rejit.requested) {
-        apply_rejit(program_fd, rejit_insns.data(),
-                    static_cast<uint32_t>(rejit_insns.size()),
-                    rejit, rejit_start, rejit_end);
+        if (options.daemon_path.has_value()) {
+            const std::string cmd = options.daemon_path->string() +
+                " apply " + std::to_string(program_info.id);
+            rejit_start = std::chrono::steady_clock::now();
+            const int ret = std::system(cmd.c_str());
+            rejit_end = std::chrono::steady_clock::now();
+            rejit.syscall_attempted = true;
+            rejit.applied = (ret == 0);
+            if (ret != 0) {
+                rejit.error = "daemon apply failed with exit code " + std::to_string(ret);
+            }
+        } else {
+            apply_rejit(program_fd, rejit_insns.data(),
+                        static_cast<uint32_t>(rejit_insns.size()),
+                        rejit, rejit_start, rejit_end);
+        }
     }
 
     if (options.compile_only) {
@@ -1444,9 +1465,23 @@ std::vector<sample_result> run_kernel(const cli_options &options)
             stock_result_read_start,
             stock_result_read_end,
             false);
-        apply_rejit(program_fd, rejit_insns.data(),
-                    static_cast<uint32_t>(rejit_insns.size()),
-                    rejit, rejit_start, rejit_end);
+        if (options.daemon_path.has_value()) {
+            const std::string cmd = options.daemon_path->string() +
+                " apply " + std::to_string(program_info.id);
+            rejit_start = std::chrono::steady_clock::now();
+            const int ret = std::system(cmd.c_str());
+            rejit_end = std::chrono::steady_clock::now();
+            rejit.syscall_attempted = true;
+            rejit.applied = (ret == 0);
+            if (ret != 0) {
+                rejit.error = "daemon apply failed with exit code " + std::to_string(ret);
+                fprintf(stderr, "daemon apply failed: exit code %d\n", ret);
+            }
+        } else {
+            apply_rejit(program_fd, rejit_insns.data(),
+                        static_cast<uint32_t>(rejit_insns.size()),
+                        rejit, rejit_start, rejit_end);
+        }
     }
 
     auto run_pass = execute_kernel_measurement_pass(

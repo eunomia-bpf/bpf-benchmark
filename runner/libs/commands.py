@@ -38,6 +38,7 @@ def build_runner_command(
     manual_load: bool = False,
     rejit: bool = False,
     rejit_program: Path | str | None = None,
+    daemon_path: Path | str | None = None,
 ) -> list[str]:
     command = [
         str(runner_binary),
@@ -71,6 +72,7 @@ def build_runner_command(
     _append_bool_option(command, "--manual-load", manual_load)
     _append_bool_option(command, "--rejit", rejit)
     _append_path_option(command, "--rejit-program", rejit_program)
+    _append_path_option(command, "--daemon-path", daemon_path)
     return command
 
 
