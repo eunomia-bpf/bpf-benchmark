@@ -734,13 +734,13 @@ def main() -> int:
     results_dir.mkdir(parents=True, exist_ok=True)
 
     runner_binary = (REPO_ROOT / "runner" / "build" / "micro_exec").resolve()
-    scanner_binary = (REPO_ROOT / "scanner" / "build" / "bpf-jit-scanner").resolve()
+    scanner_binary = (REPO_ROOT / "daemon" / "build" / "bpfrejit-daemon").resolve()
     bpftool_binary = shutil.which("bpftool") or "bpftool"
 
     if not runner_binary.exists():
         raise SystemExit(f"missing runner binary: {runner_binary}")
     if not scanner_binary.exists():
-        raise SystemExit(f"missing scanner binary: {scanner_binary}")
+        raise SystemExit(f"missing daemon binary: {scanner_binary}")
 
     raw_llvmbpf_vs_kernel = run_llvmbpf_vs_kernel(
         iterations=args.iterations,

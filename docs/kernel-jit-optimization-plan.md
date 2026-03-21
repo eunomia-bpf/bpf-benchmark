@@ -14,6 +14,7 @@
 > - **⚠️ codex 默认不要 commit/push，除非 prompt 明确要求。** 改完代码就停，由 Claude 统一 commit。
 > - **⚠️ 如果需要 commit，必须在 main 分支直接做，不要开新分支。** 开分支导致合并冲突。
 > - **⚠️ 暂时性性能数据和实验计划只能出现在两个地方：(1) 开头摘要区域的权威数据行；(2) §7 任务追踪表格的条目。** §1-§6 的正文不得包含会过期的具体数字或待办计划。如果 §1-§6 需要引用性能数据，只引用任务编号（如"见 #256"），不内联数据本身。
+> - **⚠️ 禁止死代码和防御性编程**：替换子系统时（如 v1→v2）必须删除旧代码，不保留 `if v1 / else v2` 分支。内核代码中不保留"以防万一"的检查——只在有具体失败场景时才加 guard。每行内核代码都是审核负担，越少越好。
 > **v1 权威数据**（#256 rerun，native-level rewrite 架构）：micro **1.057x** / applied-only **1.193x**；corpus **0.983x**；Tracee **+8.1%**；Tetragon **+20.3%/+32.2%**；Katran BPF **1.108-1.168x**；gap **0.581x**。vm-selftest **35/35**。v1 代码保存在 `v1-native-rewrite` 分支。
 
 ---
@@ -156,6 +157,8 @@ BpfReJIT 的设计基于三个层次的 insight：
 5. **Fail-safe**：verify 失败 → 什么都不改，返回错误；daemon 可随时回滚
 6. **BPF_PROG_REJIT 接受完整的新 BPF bytecode**，不是 patch format — daemon 提交整段新程序，kernel 走标准 verify 路径
 7. **Mandatory Falsification**：如果 fixed kernel heuristics 在所有测试硬件和 workload 上恢复相同收益，正确结论是"用 kernel peepholes"，不是发布 userspace-guided interface
+8. **Daemon 零 libbpf 依赖**：daemon 只通过 raw BPF syscall（`GET_NEXT_ID`、`GET_INFO_BY_FD` + `orig_prog_insns`、`REJIT`）与内核交互，不需要 libbpf。Rust 实现。
+9. **Daemon 统一命名**：用户态组件统一叫 daemon（目录 `daemon/`），不叫 scanner/optimizer/rewriter。C++ scanner 已废弃删除。
 
 
 ---
@@ -399,9 +402,11 @@ Module 未加载：emit 普通 CALL bpf_rotate64()（优雅降级，程序仍然
 └──────────────────┬───────────────────────────┘
                    ▼
 ┌──────────────────────────────────────────────┐
-│  Scanner: scanner/ (C++)                      │
-│  子命令：enumerate | scan | apply | policy     │
-│  职责：pattern matching、policy 编译、blob 生成  │
+│  Daemon: daemon/ (Rust)                        │
+│  子命令：enumerate | rewrite | apply           │
+│  职责：pattern matching、bytecode rewrite、    │
+│         调用 BPF_PROG_REJIT syscall            │
+│  依赖：零 libbpf，仅 raw BPF syscall           │
 │  不做：测量、调度、结果分析                      │
 └──────────────────────────────────────────────┘
 ```
@@ -423,8 +428,7 @@ runner/                     # 共享基础设施（不依赖 micro/corpus/e2e）
     statistics.py           #   median/geomean/CI/Wilcoxon
     environment.py          #   CPU/governor/turbo/VM 检测
     vm.py                   #   vng boot/rwdir/exec helpers
-    recompile.py            #   scanner enumerate → apply 共享
-    policy.py               #   policy YAML v3 解析
+    rejit.py                #   REJIT 相关 Python helpers
 
 micro/                      # Micro 评估层（只依赖 runner/）
   programs/                 #   BPF .bpf.c 源码 (62 个)
@@ -445,7 +449,17 @@ e2e/                        # E2E 评估层（只依赖 runner/）
   cases/                    #   Per-case: tracee/, tetragon/, katran/, ...
   driver.py                 #   E2E 调度 (import runner.libs)
 
-scanner/                    # Scanner + policy compiler（独立）
+daemon/                     # BpfReJIT daemon（Rust，独立，零 libbpf 依赖）
+  Cargo.toml
+  src/
+    main.rs                 #   CLI: enumerate / rewrite / apply
+    bpf.rs                  #   BPF syscall wrappers
+    matcher.rs              #   pattern matching
+    rewriter.rs             #   bytecode rewrite + branch fixup
+    emit.rs                 #   per-transform emit logic
+
+module/                     # kinsn 内核模块（out-of-tree）
+  x86/                      #   x86 平台 kinsn (bpf_rotate, bpf_select, bpf_extract)
 micro/config/               # Active micro suite manifest YAML
 ```
 
@@ -494,9 +508,9 @@ VM 使用:   make -j$(nproc) bzImage && vng --run <worktree>/arch/x86/boot/bzIma
 
 | 命令 | 作用 |
 |------|------|
-| `make all` | 构建 micro_exec + BPF programs + scanner + kernel-tests |
+| `make all` | 构建 micro_exec + BPF programs + daemon + kernel-tests |
 | `make micro` | 只构建 micro_exec 和 BPF programs |
-| `make scanner` | 只构建 scanner CLI |
+| `make daemon` | 只构建 bpfrejit-daemon CLI |
 | `make kernel` | 编译 bzImage（vendor/linux-framework） |
 | `make kernel-tests` | 编译 kernel self-tests (test_recompile) |
 
@@ -505,8 +519,8 @@ VM 使用:   make -j$(nproc) bzImage && vng --run <worktree>/arch/x86/boot/bzIma
 | 命令 | 作用 |
 |------|------|
 | `make smoke` | 构建 + 本地 llvmbpf smoke test (simple, 1 iter, 10 repeat) |
-| `make scanner-tests` | 构建 + 运行 scanner unit tests (ctest) |
-| `make check` | = `all` + `scanner-tests` + `smoke`（完整本地验证） |
+| `make daemon-tests` | 构建 + 运行 daemon unit tests (ctest) |
+| `make check` | = `all` + `daemon-tests` + `smoke`（完整本地验证） |
 
 #### VM 目标（需要 bzImage + vng）
 
@@ -532,7 +546,7 @@ make vm-corpus REPEAT=100                                  # 快速 corpus
 
 ```bash
 # 改完代码后最小验证
-make check                    # 本地：编译 + scanner tests + smoke
+make check                    # 本地：编译 + daemon tests + smoke
 
 # 改完 kernel 后
 make kernel && make validate  # 重编 bzImage + 本地验证 + VM smoke
@@ -566,3 +580,13 @@ make clean
 | 304e | **POC 实现（2026-03-21）** | ✅ | **三个 Phase 全部完成。** Phase 1 Inline Kfunc ✅（kernel `a3173b119`）：KF_INLINE_EMIT + x86 JIT dispatch + test module。Phase 2 GET_ORIGINAL ✅（kernel `36e41e7a0`）：保存+导出原始 insns。Phase 3 REJIT ✅：VM 验证 "same prog_fd re-jitted from XDP_PASS to XDP_DROP"。**+200 行 kernel 核心改动**（+297 行 selftest）。Git：`rejit-v2` 分支，v1 保存在 `v1-native-rewrite` 分支。主仓库 commits: `e50365a`（v1 snapshot）、`ba3c76e`（switch to rejit-v2）、`f5eb9f1`（plan doc rewrite）。 |
 | 304f | **⚠️ REJIT 接口设计决策（2026-03-21）** | 📝 | **BPF_PROG_REJIT 接受完整的新 BPF bytecode，不是 patch。** daemon 提交整段新程序 `(prog_fd, new_insns, new_insn_cnt)` → kernel 对新 bytecode 做完整 `bpf_check()` + JIT → 原子替换同一 `struct bpf_prog` 的 image。理由：(1) daemon 有完全灵活性做任意变换；(2) kernel 走标准 verify 路径，零特殊 patch 逻辑；(3) map 引用在新 bytecode 中用 fd/BTF ID，kernel 正常 resolve。**不是 patch format** — 避免 kernel 内部 patch 应用+offset 调整的复杂度。 |
 | 304g | **调研全部完成（2026-03-21）** | ✅ | **(1)** Verifier-fixup 耦合度 → **结论 4C**：xlated 不能直接喂 verifier，需保存原始 bytecode。`vendor/linux-framework/docs/tmp/verifier_fixup_coupling_analysis_20260321.md`。**(2)** 安全 use case → 推荐"危险 helper 防火墙 + exfil sinkholing"。`docs/tmp/security_usecase_research_20260321.md`。**(3)** 用户态适配 → scanner matcher 可复用，输出改为 full-program rewrite；新增 `run-rejit` 子命令。`docs/tmp/userspace_v2_adaptation_research_20260321.md`。**(4)** 综合 related work → `docs/tmp/comprehensive_related_work_20260321.md`。**(5)** 设计 gap → identity-preserving swap 是核心难点。`docs/tmp/bpfrejit_v2_design_gaps_20260321.md`。 |
+| **305** | **内核 POC 修复（2026-03-21）** | ✅ | **内核代码 444 行**（vs stock 7.0-rc2），含 selftest 共 974 行。修复内容：(1) 去掉 14 项不必要防御检查；(2) UAPI 增加 `fd_array`/`fd_array_cnt` 支持 maps 和 module kfunc；(3) 去掉等长约束（只 swap JIT image，不拷贝 xlated insns）；(4) per-prog `rejit_mutex` 并发保护；(5) `attach_btf` 透传到 tmp；(6) swap 增加 `used_maps`/`kfunc_tab` 等字段；(7) sleepable 程序支持（`synchronize_rcu_tasks_trace`）。VM 测试通过：same-length PASS + different-length PASS（2→4 insns）+ inline_kfunc PASS。 |
+| **306** | **Runner v1→v2 替换（2026-03-21）** | ✅ | **净删除 1,121 行**（-1320/+199）。8 文件改动，0 errors 0 warnings。删除全部 v1 scanner/policy/directive 代码。新增 `--rejit`/`--rejit-program`，runtime `kernel-rejit`。`recompile.py` 601→20 行。⚠️ 已知问题：same-bytecode 模式读 xlated insns 而非 orig_prog_insns，需后续修正（4C 结论）。 |
+| **307** | **module/x86/ 真实 kinsn 模块（2026-03-21）** | ✅ | 创建 `module/x86/`：3 个模块编译通过零警告。`bpf_rotate.c`→ROL(9B)、`bpf_select.c`→CMOV(10B)、`bpf_extract.c`→BEXTR(12B)。每个含 kfunc fallback + KF_INLINE_EMIT + x86 emit 回调。 |
+| **308** | **Bytecode rewriter 架构设计（2026-03-21）** | ✅ | 6 阶段 pipeline（Parse→Match→Decide→Emit→BranchFixup→Validate）。C++ 实现在 daemon/ 中，复用 70-80% 现有 matcher。变换：WIDE_MEM(N→1)、ROTATE(4→4 kfunc)、SELECT(3→7 kfunc)、EXTRACT(2→5 kfunc)。总估计 2.1-3.2k LoC。报告：`docs/tmp/rewriter_architecture_design_20260321.md`。 |
+| **309** | **scanner→daemon 重命名 + 死代码清单（2026-03-21）** | ✅ | `git mv scanner daemon`，全部引用更新，编译通过。产出死代码清单：daemon/ C++ 中 v1 policy blob/JIT_RECOMPILE 路径、runner/ 中 directive_blob 路径、corpus/ 中 v1 enumerate 路径。daemon/ C++ 将被 Rust 重写取代。 |
+| **310** | **Runner v1 死代码清理（2026-03-21）** | ✅ | 删除 32 行 v1 残留：`BPF_F_JIT_DIRECTIVES_FD`、`--directive-blob`、`build_sealed_directive_memfd()`、`jit_directives_fd/flags` 结构体字段。5 文件，0 errors 0 warnings。 |
+| **311** | **Daemon Rust POC 实现（2026-03-21）** | ✅ | **1,834 行 Rust，21 tests all pass。** 删除全部 C++ 代码，Rust 重写。6 个模块：bpf.rs（raw syscall wrapper，零 libbpf）、insn.rs（BpfInsn repr(C)）、matcher.rs（WIDE_MEM 2-8 byte LE 检测）、emit.rs（byte-ladder→wide load）、rewriter.rs（site 应用 + addr_map + branch fixup）、main.rs（CLI: enumerate/rewrite/apply/apply-all）。依赖：libc + clap + anyhow。 |
+| 310 | **Rewriter 实现 — kinsn 注入（ROTATE/SELECT/EXTRACT）** | 待定 | 依赖 #307 #308 #309。注入 kfunc call + 参数 MOV + NOP padding。 |
+| 311 | **VM 集成测试：micro + rejit 全量跑通** | 待定 | 依赖 #305 #306。v2 kernel VM 中 `make vm-micro` rejit 模式，57 个 benchmark 通过。 |
+| 312 | **全量评估：stock vs rejit vs llvmbpf** | 待定 | 依赖 #309 #310 #311。 |

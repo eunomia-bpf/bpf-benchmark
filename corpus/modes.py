@@ -42,72 +42,34 @@ except ImportError:
     )
     from runner.libs.results import parse_runner_samples
 
-try:
-    from runner.libs.corpus import (
-        add_filter_argument,
-        add_max_programs_argument,
-        add_corpus_build_report_argument,
-        add_output_json_argument,
-        add_output_md_argument,
-        add_repeat_argument,
-        add_runner_argument,
-        add_scanner_argument,
-        add_timeout_argument,
-        build_run_kernel_command,
-        build_scanner_command,
-        directive_scan_from_record,
-        ensure_parent,
-        execution_plan,
-        format_ns,
-        format_ratio,
-        geomean,
-        infer_program_kind,
-        markdown_table,
-        materialize_dummy_context,
-        materialize_dummy_packet,
-        normalize_directive_scan as shared_normalize_directive_scan,
-        parse_scanner_v5_output,
-        require_minimum,
-        run_command as shared_run_command,
-        run_text_command as shared_run_text_command,
-        summarize_text,
-        write_json_output,
-        write_text_output,
-    )
-    from runner.libs.policy import POLICY_DIR as DEFAULT_POLICY_DIR, resolve_policy_path
-except ImportError:
-    from runner.libs.corpus import (
-        add_filter_argument,
-        add_max_programs_argument,
-        add_corpus_build_report_argument,
-        add_output_json_argument,
-        add_output_md_argument,
-        add_repeat_argument,
-        add_runner_argument,
-        add_scanner_argument,
-        add_timeout_argument,
-        build_run_kernel_command,
-        build_scanner_command,
-        directive_scan_from_record,
-        ensure_parent,
-        execution_plan,
-        format_ns,
-        format_ratio,
-        geomean,
-        infer_program_kind,
-        markdown_table,
-        materialize_dummy_context,
-        materialize_dummy_packet,
-        normalize_directive_scan as shared_normalize_directive_scan,
-        parse_scanner_v5_output,
-        require_minimum,
-        run_command as shared_run_command,
-        run_text_command as shared_run_text_command,
-        summarize_text,
-        write_json_output,
-        write_text_output,
-    )
-    from runner.libs.policy import POLICY_DIR as DEFAULT_POLICY_DIR, resolve_policy_path
+from runner.libs.corpus import (
+    add_filter_argument,
+    add_max_programs_argument,
+    add_corpus_build_report_argument,
+    add_output_json_argument,
+    add_output_md_argument,
+    add_repeat_argument,
+    add_runner_argument,
+    add_scanner_argument,
+    add_timeout_argument,
+    directive_scan_from_record,
+    ensure_parent,
+    execution_plan,
+    format_ns,
+    format_ratio,
+    geomean,
+    infer_program_kind,
+    markdown_table,
+    materialize_dummy_context,
+    materialize_dummy_packet,
+    require_minimum,
+    run_command as shared_run_command,
+    run_text_command as shared_run_text_command,
+    summarize_text,
+    write_json_output,
+    write_text_output,
+)
+from runner.libs.policy import POLICY_DIR as DEFAULT_POLICY_DIR, resolve_policy_path
 
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -116,7 +78,7 @@ DEFAULT_INVENTORY_JSON = ROOT_DIR / "docs" / "tmp" / "corpus-runnability-results
 DEFAULT_OUTPUT_JSON = authoritative_output_path(ROOT_DIR / "corpus" / "results", "corpus_v5_vm_batch")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "docs" / "tmp" / "corpus-batch-recompile-results.md"
 DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
-DEFAULT_SCANNER = ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"
+DEFAULT_DAEMON = ROOT_DIR / "daemon" / "build" / "bpfrejit-daemon"
 DEFAULT_KERNEL_TREE = ROOT_DIR / "vendor" / "linux-framework"
 DEFAULT_KERNEL_IMAGE = DEFAULT_KERNEL_TREE / "arch" / "x86" / "boot" / "bzImage"
 DEFAULT_BTF_PATH = DEFAULT_KERNEL_TREE / "vmlinux"
@@ -170,7 +132,7 @@ def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
     add_output_json_argument(parser, DEFAULT_OUTPUT_JSON)
     add_output_md_argument(parser, DEFAULT_OUTPUT_MD)
     add_runner_argument(parser, DEFAULT_RUNNER, help_text="Path to micro_exec.")
-    add_scanner_argument(parser, DEFAULT_SCANNER, help_text="Path to bpf-jit-scanner.")
+    add_scanner_argument(parser, DEFAULT_DAEMON, help_text="Path to bpfrejit-daemon.")
     parser.add_argument(
         "--kernel-tree",
         default=str(DEFAULT_KERNEL_TREE),
@@ -1471,7 +1433,7 @@ def parse_linear_mode_args(mode_name: str, argv: list[str] | None = None) -> arg
     add_output_json_argument(parser, default_output_json)
     add_output_md_argument(parser, default_output_md)
     add_runner_argument(parser, DEFAULT_RUNNER, help_text="Path to micro_exec.")
-    add_scanner_argument(parser, DEFAULT_SCANNER, help_text="Path to bpf-jit-scanner.")
+    add_scanner_argument(parser, DEFAULT_DAEMON, help_text="Path to bpfrejit-daemon.")
     add_repeat_argument(parser, DEFAULT_REPEAT, help_text="Repeat count passed to each micro_exec invocation.")
     add_timeout_argument(parser, DEFAULT_TIMEOUT_SECONDS, help_text="Per-target timeout in seconds.")
     add_filter_argument(

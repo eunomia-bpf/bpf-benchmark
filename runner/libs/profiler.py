@@ -13,7 +13,7 @@ from . import resolve_bpftool_binary, resolve_perf_binary, run_json_command, tai
 from .metrics import compute_delta, sample_bpf_stats
 from .recompile import scan_programs
 
-DEFAULT_SCANNER = Path(__file__).resolve().parents[2] / "scanner" / "build" / "bpf-jit-scanner"
+DEFAULT_DAEMON = Path(__file__).resolve().parents[2] / "daemon" / "build" / "bpfrejit-daemon"
 DEFAULT_PERF_EVENTS = ("cycles", "instructions", "branches", "branch-misses")
 
 
@@ -313,7 +313,7 @@ def profile_programs(
     after = sample_bpf_stats(selected_ids, prog_fds=prog_fds)
     delta = compute_delta(before, after)
     scan_results = (
-        scan_programs(selected_ids, scanner_binary or DEFAULT_SCANNER, prog_fds=prog_fds)
+        scan_programs(selected_ids, scanner_binary or DEFAULT_DAEMON, prog_fds=prog_fds)
         if include_sites
         else {}
     )
@@ -503,7 +503,7 @@ def render_profile_json(payload: Mapping[str, Any]) -> str:
 
 __all__ = [
     "DEFAULT_PERF_EVENTS",
-    "DEFAULT_SCANNER",
+    "DEFAULT_DAEMON",
     "collect_perf_stat_for_program",
     "list_live_programs",
     "profile_current_programs",

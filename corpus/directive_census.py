@@ -128,8 +128,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--scanner",
-        default=str(repo_root / "scanner" / "build" / "bpf-jit-scanner"),
-        help="Path to the built scanner CLI.",
+        default=str(repo_root / "daemon" / "build" / "bpfrejit-daemon"),
+        help="Path to the built daemon CLI.",
     )
     parser.add_argument(
         "--output",

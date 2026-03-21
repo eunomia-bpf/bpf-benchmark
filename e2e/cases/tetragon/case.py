@@ -59,7 +59,7 @@ DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "tetragon")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "tetragon-real-e2e.md"
 DEFAULT_EXECVE_OBJECT = ROOT_DIR / "corpus" / "build" / "tetragon" / "bpf_execve_event.bpf.o"
 DEFAULT_KPROBE_OBJECT = ROOT_DIR / "corpus" / "build" / "tetragon" / "bpf_generic_kprobe.bpf.o"
-DEFAULT_SCANNER = ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"
+DEFAULT_DAEMON = ROOT_DIR / "daemon" / "build" / "bpfrejit-daemon"
 DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
 DEFAULT_BPFTOOL = "/usr/local/sbin/bpftool"
 DEFAULT_DURATION_S = 30
@@ -638,11 +638,11 @@ def ensure_artifacts(runner_binary: Path, scanner_binary: Path) -> None:
         run_command(["make", "runner"], timeout=1800)
     if not scanner_binary.exists():
         run_command(
-            ["cmake", "-S", "scanner", "-B", "scanner/build", "-DCMAKE_BUILD_TYPE=Release"],
+            ["cmake", "-S", "daemon", "-B", "daemon/build", "-DCMAKE_BUILD_TYPE=Release"],
             timeout=600,
         )
         run_command(
-            ["cmake", "--build", "scanner/build", "--target", "bpf-jit-scanner", "-j"],
+            ["cmake", "--build", "daemon/build", "--target", "bpfrejit-daemon", "-j"],
             timeout=1800,
         )
 
@@ -1215,7 +1215,7 @@ def build_case_parser() -> argparse.ArgumentParser:
     parser.add_argument("--execve-object", default=str(DEFAULT_EXECVE_OBJECT))
     parser.add_argument("--kprobe-object", default=str(DEFAULT_KPROBE_OBJECT))
     parser.add_argument("--runner", default=str(DEFAULT_RUNNER))
-    parser.add_argument("--scanner", default=str(DEFAULT_SCANNER))
+    parser.add_argument("--scanner", default=str(DEFAULT_DAEMON))
     parser.add_argument("--bpftool", default=DEFAULT_BPFTOOL)
     parser.add_argument("--duration", type=int)
     parser.add_argument("--smoke", action="store_true")

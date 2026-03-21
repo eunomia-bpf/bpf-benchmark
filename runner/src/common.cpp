@@ -65,72 +65,6 @@ std::string lower_ascii(std::string_view input)
     return output;
 }
 
-std::optional<std::string> canonical_skip_family_name(std::string_view input)
-{
-    std::string normalized = lower_ascii(trim(input));
-    std::replace(normalized.begin(), normalized.end(), '_', '-');
-
-    if (normalized == "cmov" || normalized == "cond-select") {
-        return std::string("cmov");
-    }
-    if (normalized == "wide" || normalized == "wide-mem" ||
-        normalized == "wide-load") {
-        return std::string("wide");
-    }
-    if (normalized == "rotate") {
-        return std::string("rotate");
-    }
-    if (normalized == "lea" || normalized == "addr-calc" ||
-        normalized == "addrcalc") {
-        return std::string("lea");
-    }
-    if (normalized == "extract" || normalized == "bitfield" ||
-        normalized == "bitfield-extract" || normalized == "bit-extract") {
-        return std::string("extract");
-    }
-    if (normalized == "endian" || normalized == "endian-fusion") {
-        return std::string("endian");
-    }
-    if (normalized == "branch-flip" || normalized == "branchflip" ||
-        normalized == "bflip") {
-        return std::string("branch-flip");
-    }
-    return std::nullopt;
-}
-
-void append_unique(std::vector<std::string> &values, std::string value)
-{
-    if (std::find(values.begin(), values.end(), value) == values.end()) {
-        values.push_back(std::move(value));
-    }
-}
-
-void append_skip_families(std::vector<std::string> &families,
-                          std::string_view value)
-{
-    size_t start = 0;
-    while (start <= value.size()) {
-        const size_t comma = value.find(',', start);
-        const std::string token =
-            trim(value.substr(start, comma == std::string_view::npos
-                                         ? std::string_view::npos
-                                         : comma - start));
-        if (!token.empty()) {
-            const auto normalized = canonical_skip_family_name(token);
-            if (!normalized.has_value()) {
-                fail("unknown family in --skip-families: " + token +
-                     " (expected cmov, wide, rotate, lea, extract, endian, or branch-flip)");
-            }
-            append_unique(families, *normalized);
-        }
-
-        if (comma == std::string_view::npos) {
-            break;
-        }
-        start = comma + 1;
-    }
-}
-
 void print_json_string_array(std::ostream &out,
                              const std::vector<std::string> &values)
 {
@@ -152,8 +86,9 @@ std::string usage_text()
         "run-llvmbpf|"
 #endif
         "run-kernel|list-programs> [--program <path>|<path>] [--program-name <name>] "
-        "[--memory|--input <path>] [--btf-custom-path <path>] [--directive-blob <path>] [--policy <yaml-or-json|path>] [--policy-file <path>] [--policy-blob <path>] "
-        "[--manual-load] [--recompile-cmov] [--recompile-wide|--recompile-wide-mem] [--recompile-rotate] [--recompile-rotate-rorx] [--recompile-lea] [--recompile-extract|--recompile-bitfield-extract] [--recompile-all] [--recompile-v5] [--skip-families cmov,wide,rotate,lea,extract,endian,branch-flip] "
+        "[--memory|--input <path>] [--btf-custom-path <path>] "
+        "[--rejit] [--rejit-program <path>] "
+        "[--manual-load] "
         "[--io-mode map|staged|packet|context] [--raw-packet] [--repeat N] [--warmup N] [--input-size|--kernel-input-size N] "
         "[--opt-level 0|1|2|3] [--no-cmov] [--llvm-target-cpu <cpu>] [--llvm-target-features <csv>] [--llvm-disable-pass <name>] [--llvm-log-passes] "
         "[--perf-counters] [--perf-scope full_repeat_raw|full_repeat_avg] "
@@ -264,57 +199,13 @@ cli_options parse_args(int argc, char **argv)
             options.btf_custom_path = std::filesystem::path(argv[++index]);
             continue;
         }
-        if (current == "--directive-blob" && index + 1 < argc) {
-            options.directive_blob = std::filesystem::path(argv[++index]);
+        if (current == "--rejit") {
+            options.rejit = true;
             continue;
         }
-        if (current == "--policy" && index + 1 < argc) {
-            options.policy = std::string(argv[++index]);
-            continue;
-        }
-        if (current == "--policy-file" && index + 1 < argc) {
-            options.policy_file = std::filesystem::path(argv[++index]);
-            continue;
-        }
-        if (current == "--policy-blob" && index + 1 < argc) {
-            options.policy_blob = std::filesystem::path(argv[++index]);
-            continue;
-        }
-        if (current == "--recompile-cmov") {
-            options.recompile_cmov = true;
-            continue;
-        }
-        if (current == "--recompile-wide" || current == "--recompile-wide-mem") {
-            options.recompile_wide = true;
-            continue;
-        }
-        if (current == "--recompile-rotate") {
-            options.recompile_rotate = true;
-            continue;
-        }
-        if (current == "--recompile-rotate-rorx") {
-            options.recompile_rotate_rorx = true;
-            continue;
-        }
-        if (current == "--recompile-lea") {
-            options.recompile_lea = true;
-            continue;
-        }
-        if (current == "--recompile-extract" ||
-            current == "--recompile-bitfield-extract") {
-            options.recompile_extract = true;
-            continue;
-        }
-        if (current == "--recompile-all") {
-            options.recompile_all = true;
-            continue;
-        }
-        if (current == "--recompile-v5") {
-            options.recompile_v5 = true;
-            continue;
-        }
-        if (current == "--skip-families" && index + 1 < argc) {
-            append_skip_families(options.skip_families, argv[++index]);
+        if (current == "--rejit-program" && index + 1 < argc) {
+            options.rejit_program = std::filesystem::path(argv[++index]);
+            options.rejit = true;
             continue;
         }
         if (current == "--program-name" && index + 1 < argc) {
@@ -404,77 +295,11 @@ cli_options parse_args(int argc, char **argv)
     if (options.perf_scope != "full_repeat_raw" && options.perf_scope != "full_repeat_avg") {
         fail("--perf-scope must be one of full_repeat_raw or full_repeat_avg");
     }
-    if (options.directive_blob.has_value() && !is_kernel_command) {
-        fail("--directive-blob is only valid with run-kernel");
-    }
-    if (options.policy.has_value() && !is_kernel_command) {
-        fail("--policy is only valid with run-kernel");
-    }
-    if (options.policy_file.has_value() && !is_kernel_command) {
-        fail("--policy-file is only valid with run-kernel");
-    }
-    if (options.policy_blob.has_value() && !is_kernel_command) {
-        fail("--policy-blob is only valid with run-kernel");
-    }
     if (options.manual_load && !is_kernel_command) {
         fail("--manual-load is only valid with run-kernel");
     }
-    if (options.recompile_cmov && !is_kernel_command) {
-        fail("--recompile-cmov is only valid with run-kernel");
-    }
-    if (options.recompile_wide && !is_kernel_command) {
-        fail("--recompile-wide is only valid with run-kernel");
-    }
-    if (options.recompile_rotate && !is_kernel_command) {
-        fail("--recompile-rotate is only valid with run-kernel");
-    }
-    if (options.recompile_lea && !is_kernel_command) {
-        fail("--recompile-lea is only valid with run-kernel");
-    }
-    if (options.recompile_extract && !is_kernel_command) {
-        fail("--recompile-extract is only valid with run-kernel");
-    }
-    if (options.recompile_rotate_rorx && !is_kernel_command) {
-        fail("--recompile-rotate-rorx is only valid with run-kernel");
-    }
-    if (options.recompile_all && !is_kernel_command) {
-        fail("--recompile-all is only valid with run-kernel");
-    }
-    if (options.recompile_v5 && !is_kernel_command) {
-        fail("--recompile-v5 is only valid with run-kernel");
-    }
-    if (!options.skip_families.empty() && !is_kernel_command) {
-        fail("--skip-families is only valid with run-kernel");
-    }
-    if (options.recompile_v5 &&
-        !(options.recompile_cmov || options.recompile_rotate ||
-          options.recompile_rotate_rorx || options.recompile_wide ||
-          options.recompile_lea || options.recompile_extract ||
-          options.recompile_all)) {
-        fail("--recompile-v5 requires at least one recompile family or --recompile-all");
-    }
-    if ((options.policy.has_value() || options.policy_file.has_value()) &&
-        options.policy_blob.has_value()) {
-        fail("--policy/--policy-file cannot be used with --policy-blob");
-    }
-    if ((options.policy.has_value() || options.policy_file.has_value()) &&
-        (options.recompile_cmov || options.recompile_rotate ||
-         options.recompile_rotate_rorx || options.recompile_wide ||
-         options.recompile_lea || options.recompile_extract ||
-         options.recompile_all || options.recompile_v5)) {
-        fail("--policy/--policy-file cannot be combined with auto-scan recompile flags");
-    }
-    if (!options.skip_families.empty() &&
-        (options.policy.has_value() || options.policy_file.has_value() ||
-         options.policy_blob.has_value())) {
-        fail("--skip-families cannot be used with --policy, --policy-file, or --policy-blob");
-    }
-    if (!options.skip_families.empty() &&
-        !(options.recompile_cmov || options.recompile_rotate ||
-          options.recompile_rotate_rorx || options.recompile_wide ||
-          options.recompile_lea || options.recompile_extract ||
-          options.recompile_all)) {
-        fail("--skip-families requires an auto-scan recompile family or --recompile-all");
+    if (options.rejit && !is_kernel_command) {
+        fail("--rejit is only valid with run-kernel");
     }
     if (options.command != "list-programs") {
         if (options.io_mode != "map" &&
@@ -496,22 +321,6 @@ void print_sample_json(std::ostream &out, const sample_result &sample)
         ? 0.0
         : static_cast<double>(sample.code_size.native_code_bytes) /
               static_cast<double>(sample.code_size.bpf_bytecode_bytes);
-    const uint64_t total_directive_sites =
-        sample.directive_scan.cmov_sites +
-        sample.directive_scan.wide_sites +
-        sample.directive_scan.rotate_sites +
-        sample.directive_scan.lea_sites +
-        sample.directive_scan.bitfield_sites +
-        sample.directive_scan.endian_sites +
-        sample.directive_scan.branch_flip_sites;
-    const uint64_t total_recompile_sites =
-        sample.recompile.cmov_sites +
-        sample.recompile.wide_sites +
-        sample.recompile.rotate_sites +
-        sample.recompile.lea_sites +
-        sample.recompile.bitfield_sites +
-        sample.recompile.endian_sites +
-        sample.recompile.branch_flip_sites;
 
     out
         << "{"
@@ -604,40 +413,13 @@ void print_sample_json(std::ostream &out, const sample_result &sample)
         << "\"scope\":\"" << json_escape(sample.perf_counters.scope) << "\","
         << "\"error\":\"" << json_escape(sample.perf_counters.error) << "\""
         << "},"
-        << "\"directive_scan\":{"
-        << "\"performed\":" << (sample.directive_scan.performed ? "true" : "false") << ","
-        << "\"cmov_sites\":" << sample.directive_scan.cmov_sites << ","
-        << "\"wide_sites\":" << sample.directive_scan.wide_sites << ","
-        << "\"rotate_sites\":" << sample.directive_scan.rotate_sites << ","
-        << "\"lea_sites\":" << sample.directive_scan.lea_sites << ","
-        << "\"bitfield_sites\":" << sample.directive_scan.bitfield_sites << ","
-        << "\"extract_sites\":" << sample.directive_scan.bitfield_sites << ","
-        << "\"endian_sites\":" << sample.directive_scan.endian_sites << ","
-        << "\"branch_flip_sites\":" << sample.directive_scan.branch_flip_sites << ","
-        << "\"total_sites\":" << total_directive_sites
-        << "},"
-        << "\"recompile\":{"
-        << "\"requested\":" << (sample.recompile.requested ? "true" : "false") << ","
-        << "\"mode\":\"" << json_escape(sample.recompile.mode) << "\","
-        << "\"requested_families\":";
-    print_json_string_array(out, sample.recompile.requested_families);
-    out << ",\"skipped_families\":";
-    print_json_string_array(out, sample.recompile.skipped_families);
-    out
-        << ",\"policy_generated\":" << (sample.recompile.policy_generated ? "true" : "false") << ","
-        << "\"policy_bytes\":" << sample.recompile.policy_bytes << ","
-        << "\"syscall_attempted\":" << (sample.recompile.syscall_attempted ? "true" : "false") << ","
-        << "\"applied\":" << (sample.recompile.applied ? "true" : "false") << ","
-        << "\"cmov_sites\":" << sample.recompile.cmov_sites << ","
-        << "\"wide_sites\":" << sample.recompile.wide_sites << ","
-        << "\"rotate_sites\":" << sample.recompile.rotate_sites << ","
-        << "\"lea_sites\":" << sample.recompile.lea_sites << ","
-        << "\"bitfield_sites\":" << sample.recompile.bitfield_sites << ","
-        << "\"extract_sites\":" << sample.recompile.bitfield_sites << ","
-        << "\"endian_sites\":" << sample.recompile.endian_sites << ","
-        << "\"branch_flip_sites\":" << sample.recompile.branch_flip_sites << ","
-        << "\"total_sites\":" << total_recompile_sites << ","
-        << "\"error\":\"" << json_escape(sample.recompile.error) << "\""
+        << "\"rejit\":{"
+        << "\"requested\":" << (sample.rejit.requested ? "true" : "false") << ","
+        << "\"mode\":\"" << json_escape(sample.rejit.mode) << "\","
+        << "\"syscall_attempted\":" << (sample.rejit.syscall_attempted ? "true" : "false") << ","
+        << "\"applied\":" << (sample.rejit.applied ? "true" : "false") << ","
+        << "\"insn_cnt\":" << sample.rejit.insn_cnt << ","
+        << "\"error\":\"" << json_escape(sample.rejit.error) << "\""
         << "}"
         << "}";
 }

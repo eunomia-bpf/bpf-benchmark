@@ -2,9 +2,6 @@
 
 #include <arpa/inet.h>
 
-#include <bpf_jit_scanner/pattern_v5.hpp>
-#include <bpf_jit_scanner/policy_config.hpp>
-
 #include <bpf/bpf.h>
 #include <bpf/libbpf.h>
 #include <linux/bpf.h>
@@ -61,13 +58,9 @@
 #define F_SEAL_WRITE 0x0008
 #endif
 
-#ifndef BPF_F_JIT_DIRECTIVES_FD
-#define BPF_F_JIT_DIRECTIVES_FD (1U << 20)
-#endif
-
-/* v4 JIT recompile syscall subcommand (enum bpf_cmd value 39) */
-#ifndef BPF_PROG_JIT_RECOMPILE
-#define BPF_PROG_JIT_RECOMPILE 39
+/* v2 REJIT syscall subcommand */
+#ifndef BPF_PROG_REJIT
+#define BPF_PROG_REJIT 39
 #endif
 
 namespace {
@@ -608,8 +601,6 @@ class scoped_fd {
     int fd_ = -1;
 };
 
-// The vendored libbpf UAPI header in micro's build doesn't expose the
-// jit_directives tail fields yet, so issue BPF_PROG_LOAD with a local layout.
 struct prog_load_attr_with_directives {
     __u32 prog_type;
     __u32 insn_cnt;
@@ -645,8 +636,6 @@ struct prog_load_attr_with_directives {
     __aligned_u64 signature;
     __u32 signature_size;
     __s32 keyring_id;
-    __s32 jit_directives_fd;
-    __u32 jit_directives_flags;
 };
 
 int libbpf_log(enum libbpf_print_level, const char *fmt, va_list args)
@@ -659,73 +648,6 @@ std::string libbpf_error_string(int error_code)
     char buffer[256];
     libbpf_strerror(error_code, buffer, sizeof(buffer));
     return std::string(buffer);
-}
-
-bool has_skip_family(const cli_options &options, std::string_view family)
-{
-    return std::find(options.skip_families.begin(),
-                     options.skip_families.end(),
-                     family) != options.skip_families.end();
-}
-
-void append_recompile_family(std::vector<std::string> &families,
-                             bool enabled,
-                             std::string_view family)
-{
-    if (enabled) {
-        families.emplace_back(family);
-    }
-}
-
-void assign_directive_scan_summary(
-    directive_scan_summary &directive_scan,
-    const bpf_jit_scanner::V5ScanSummary &summary)
-{
-    directive_scan.performed = true;
-    directive_scan.cmov_sites = summary.cmov_sites;
-    directive_scan.wide_sites = summary.wide_sites;
-    directive_scan.rotate_sites = summary.rotate_sites;
-    directive_scan.lea_sites = summary.lea_sites;
-    directive_scan.bitfield_sites = summary.bitfield_sites;
-    directive_scan.endian_sites = summary.endian_sites;
-    directive_scan.branch_flip_sites = summary.branch_flip_sites;
-}
-
-void assign_recompile_site_summary(
-    recompile_summary &recompile,
-    const bpf_jit_scanner::V5ScanSummary &summary)
-{
-    recompile.cmov_sites = summary.cmov_sites;
-    recompile.wide_sites = summary.wide_sites;
-    recompile.rotate_sites = summary.rotate_sites;
-    recompile.lea_sites = summary.lea_sites;
-    recompile.bitfield_sites = summary.bitfield_sites;
-    recompile.endian_sites = summary.endian_sites;
-    recompile.branch_flip_sites = summary.branch_flip_sites;
-}
-
-void assign_policy_family_lists(
-    recompile_summary &recompile,
-    const bpf_jit_scanner::V5PolicyConfig &config)
-{
-    constexpr bpf_jit_scanner::V5Family families[] = {
-        bpf_jit_scanner::V5Family::Cmov,
-        bpf_jit_scanner::V5Family::WideMem,
-        bpf_jit_scanner::V5Family::Rotate,
-        bpf_jit_scanner::V5Family::AddrCalc,
-        bpf_jit_scanner::V5Family::BitfieldExtract,
-        bpf_jit_scanner::V5Family::EndianFusion,
-        bpf_jit_scanner::V5Family::BranchFlip,
-    };
-
-    recompile.requested_families.clear();
-    recompile.skipped_families.clear();
-    for (const auto family : families) {
-        auto &target = bpf_jit_scanner::v5_policy_allows_family(config, family)
-                           ? recompile.requested_families
-                           : recompile.skipped_families;
-        target.emplace_back(bpf_jit_scanner::v5_family_name(family));
-    }
 }
 
 bpf_program *find_program(bpf_object *object, const std::optional<std::string> &program_name)
@@ -834,6 +756,74 @@ std::vector<uint8_t> load_xlated_program(int program_fd, uint32_t xlated_prog_le
     return xlated;
 }
 
+/* ================================================================
+ * v2 REJIT: apply BPF_PROG_REJIT with provided bytecode
+ * ================================================================ */
+
+void apply_rejit(
+    int program_fd,
+    const bpf_insn *insns,
+    uint32_t insn_cnt,
+    rejit_summary &rejit,
+    std::chrono::steady_clock::time_point &rejit_start,
+    std::chrono::steady_clock::time_point &rejit_end)
+{
+    rejit.insn_cnt = insn_cnt;
+    rejit.syscall_attempted = true;
+
+    /*
+     * Build the bpf_attr for BPF_PROG_REJIT.
+     * Layout matches kernel's bpf_attr.rejit:
+     *   __u32 prog_fd;
+     *   __u32 insn_cnt;
+     *   __aligned_u64 insns;
+     *   __u32 log_level;
+     *   __u32 log_size;
+     *   __aligned_u64 log_buf;
+     *   __aligned_u64 fd_array;
+     *   __u32 fd_array_cnt;
+     */
+    struct {
+        __u32 prog_fd;
+        __u32 insn_cnt;
+        __aligned_u64 insns;
+        __u32 log_level;
+        __u32 log_size;
+        __aligned_u64 log_buf;
+        __aligned_u64 fd_array;
+        __u32 fd_array_cnt;
+    } __attribute__((aligned(8))) rejit_attr = {};
+
+    rejit_attr.prog_fd = static_cast<__u32>(program_fd);
+    rejit_attr.insn_cnt = insn_cnt;
+    rejit_attr.insns = ptr_to_u64(insns);
+    rejit_attr.log_level = 0;
+    rejit_attr.log_size = 0;
+    rejit_attr.log_buf = 0;
+    rejit_attr.fd_array = 0;
+    rejit_attr.fd_array_cnt = 0;
+
+    alignas(8) char attr_buf[256] = {};
+    static_assert(sizeof(rejit_attr) <= sizeof(attr_buf));
+    std::memcpy(attr_buf, &rejit_attr, sizeof(rejit_attr));
+
+    rejit_start = std::chrono::steady_clock::now();
+    const int rc = static_cast<int>(
+        syscall(__NR_bpf, BPF_PROG_REJIT, attr_buf, sizeof(attr_buf)));
+    rejit_end = std::chrono::steady_clock::now();
+
+    if (rc != 0) {
+        rejit.error = "BPF_PROG_REJIT failed: " +
+                      std::string(strerror(errno)) +
+                      " (errno=" + std::to_string(errno) + ")";
+        fprintf(stderr, "BPF_PROG_REJIT failed: %s (errno=%d)\n",
+                strerror(errno), errno);
+        return;
+    }
+
+    rejit.applied = true;
+}
+
 bool skb_payload_starts_after_l2(uint32_t prog_type)
 {
     return prog_type == BPF_PROG_TYPE_CGROUP_SKB;
@@ -929,61 +919,6 @@ scoped_fd build_sealed_memfd_from_blob(const char *name,
     return memfd;
 }
 
-scoped_fd build_sealed_directive_memfd(const std::filesystem::path &path)
-{
-    const auto blob = read_binary_file(path);
-    return build_sealed_memfd_from_blob("bpf-jit-directives", blob,
-                                        "directive blob");
-}
-
-void apply_recompile_policy(
-    int program_fd,
-    const std::vector<uint8_t> &policy_data,
-    recompile_summary &recompile,
-    std::chrono::steady_clock::time_point &recompile_start,
-    std::chrono::steady_clock::time_point &recompile_end)
-{
-    if (policy_data.empty()) {
-        return;
-    }
-
-    recompile.policy_generated = true;
-    recompile.policy_bytes = policy_data.size();
-
-    scoped_fd policy_memfd = build_sealed_memfd_from_blob(
-        "bpf-jit-policy", policy_data, "policy blob");
-
-    recompile_start = std::chrono::steady_clock::now();
-    recompile.syscall_attempted = true;
-
-    struct {
-        __u32 prog_fd;
-        __s32 policy_fd;
-        __u32 flags;
-    } __attribute__((aligned(8))) recompile_attr = {};
-    recompile_attr.prog_fd = static_cast<__u32>(program_fd);
-    recompile_attr.policy_fd = policy_memfd.get();
-    recompile_attr.flags = 0;
-
-    alignas(8) char attr_buf[256] = {};
-    static_assert(sizeof(recompile_attr) <= sizeof(attr_buf));
-    std::memcpy(attr_buf, &recompile_attr, sizeof(recompile_attr));
-
-    const int rc = static_cast<int>(syscall(__NR_bpf, BPF_PROG_JIT_RECOMPILE,
-                                            attr_buf, sizeof(attr_buf)));
-    recompile_end = std::chrono::steady_clock::now();
-    if (rc != 0) {
-        recompile.error =
-            "BPF_PROG_JIT_RECOMPILE failed: " + std::string(strerror(errno)) +
-            " (errno=" + std::to_string(errno) + ")";
-        fprintf(stderr, "BPF_PROG_JIT_RECOMPILE failed: %s (errno=%d)\n",
-                strerror(errno), errno);
-        return;
-    }
-
-    recompile.applied = true;
-}
-
 uint64_t read_kernel_test_run_result(std::string_view effective_io_mode,
                                      bool result_from_skb_context,
                                      const std::vector<uint8_t> &packet_out,
@@ -1076,7 +1011,7 @@ void relocate_map_fds(program_image &image, const std::unordered_map<uint32_t, i
     }
 }
 
-int manual_bpf_prog_load(program_image &image, int directive_memfd)
+int manual_bpf_prog_load(program_image &image)
 {
     if (image.prog_type == 0) {
         fail("unable to determine program type for manual BPF_PROG_LOAD");
@@ -1094,12 +1029,6 @@ int manual_bpf_prog_load(program_image &image, int directive_memfd)
     attr.insn_cnt = static_cast<__u32>(image.code.size() / sizeof(bpf_insn));
     attr.insns = ptr_to_u64(reinterpret_cast<bpf_insn *>(image.code.data()));
     attr.license = ptr_to_u64(image.license.c_str());
-    if (directive_memfd >= 0) {
-        attr.prog_flags |= BPF_F_JIT_DIRECTIVES_FD;
-        attr.jit_directives_fd = directive_memfd;
-        attr.jit_directives_flags = 0;
-    }
-
     std::vector<char> verifier_log(1U << 20, '\0');
     if (!image.program_name.empty()) {
         std::snprintf(attr.prog_name, sizeof(attr.prog_name), "%s", image.program_name.c_str());
@@ -1135,9 +1064,6 @@ int manual_bpf_prog_load(program_image &image, int directive_memfd)
     }
 
     std::string message = "manual BPF_PROG_LOAD failed: " + std::string(strerror(last_errno));
-    if (last_errno == E2BIG) {
-        message += " (kernel may not support jit_directives_fd on BPF_PROG_LOAD)";
-    }
     const auto verifier_text = trim_log_buffer(verifier_log);
     if (!verifier_text.empty()) {
         message += "\n" + verifier_text;
@@ -1151,11 +1077,7 @@ int manual_load_program(bpf_object *object, const cli_options &options)
     const auto map_fds = create_kernel_maps(object, image);
     relocate_map_fds(image, map_fds);
 
-    scoped_fd directive_memfd;
-    if (options.directive_blob.has_value()) {
-        directive_memfd = build_sealed_directive_memfd(*options.directive_blob);
-    }
-    return manual_bpf_prog_load(image, directive_memfd.get());
+    return manual_bpf_prog_load(image);
 }
 
 } // namespace
@@ -1188,8 +1110,9 @@ std::vector<sample_result> run_kernel(const cli_options &options)
 
     scoped_fd manual_program_fd;
     int program_fd = -1;
+    bpf_program *prog = nullptr;
     const auto object_load_start = std::chrono::steady_clock::now();
-    if (options.directive_blob.has_value() || options.manual_load) {
+    if (options.manual_load) {
         program_fd = manual_load_program(object.get(), options);
         manual_program_fd.reset(program_fd);
     } else {
@@ -1198,8 +1121,8 @@ std::vector<sample_result> run_kernel(const cli_options &options)
             fail("bpf_object__load failed: " + libbpf_error_string(-load_error));
         }
 
-        bpf_program *program = find_program(object.get(), options.program_name);
-        program_fd = bpf_program__fd(program);
+        prog = find_program(object.get(), options.program_name);
+        program_fd = bpf_program__fd(prog);
         if (program_fd < 0) {
             fail("unable to obtain program fd");
         }
@@ -1212,255 +1135,52 @@ std::vector<sample_result> run_kernel(const cli_options &options)
     }
     const auto program_info = load_prog_info(program_fd);
 
-    /* v4 post-load re-JIT: apply policy blob via BPF_PROG_JIT_RECOMPILE */
-    std::chrono::steady_clock::time_point recompile_start {};
-    std::chrono::steady_clock::time_point recompile_end {};
-    const bool want_recompile_cmov =
-        options.recompile_cmov || options.recompile_all;
-    const bool want_recompile_wide =
-        options.recompile_wide || options.recompile_all;
-    const bool want_recompile_rotate =
-        options.recompile_rotate || options.recompile_rotate_rorx ||
-        options.recompile_all;
-    const bool want_recompile_lea =
-        options.recompile_lea || options.recompile_all;
-    const bool want_recompile_extract =
-        options.recompile_extract || options.recompile_all;
-    const bool want_recompile_endian = options.recompile_all;
-    const bool want_recompile_branch_flip = options.recompile_all;
-    const bool skip_cmov = has_skip_family(options, "cmov");
-    const bool skip_wide = has_skip_family(options, "wide");
-    const bool skip_rotate = has_skip_family(options, "rotate");
-    const bool skip_lea = has_skip_family(options, "lea");
-    const bool skip_extract = has_skip_family(options, "extract");
-    const bool skip_endian = has_skip_family(options, "endian");
-    const bool skip_branch_flip = has_skip_family(options, "branch-flip");
-    const bool do_recompile_cmov = want_recompile_cmov && !skip_cmov;
-    const bool do_recompile_wide = want_recompile_wide && !skip_wide;
-    const bool do_recompile_rotate = want_recompile_rotate && !skip_rotate;
-    const bool do_recompile_lea = want_recompile_lea && !skip_lea;
-    const bool do_recompile_extract =
-        want_recompile_extract && !skip_extract;
-    const bool do_recompile_endian = want_recompile_endian && !skip_endian;
-    const bool do_recompile_branch_flip =
-        want_recompile_branch_flip && !skip_branch_flip;
-    const bool has_policy_config =
-        options.policy.has_value() || options.policy_file.has_value();
-    directive_scan_summary directive_scan {};
-    recompile_summary recompile {};
-    recompile.skipped_families = options.skip_families;
-    append_recompile_family(recompile.requested_families, do_recompile_cmov,
-                            "cmov");
-    append_recompile_family(recompile.requested_families, do_recompile_wide,
-                            "wide");
-    append_recompile_family(recompile.requested_families, do_recompile_rotate,
-                            "rotate");
-    append_recompile_family(recompile.requested_families, do_recompile_lea,
-                            "lea");
-    append_recompile_family(recompile.requested_families,
-                            do_recompile_extract, "extract");
-    append_recompile_family(recompile.requested_families,
-                            do_recompile_endian, "endian");
-    append_recompile_family(recompile.requested_families,
-                            do_recompile_branch_flip, "branch-flip");
-    recompile.requested =
-        do_recompile_cmov || do_recompile_wide || do_recompile_rotate ||
-        do_recompile_lea || do_recompile_extract ||
-        do_recompile_endian ||
-        do_recompile_branch_flip ||
-        has_policy_config ||
-        options.policy_blob.has_value();
-    if (options.policy.has_value()) {
-        recompile.mode = "policy-inline";
-    } else if (options.policy_file.has_value()) {
-        recompile.mode = "policy-file";
-    } else if (options.policy_blob.has_value()) {
-        recompile.mode = "policy-blob";
-    } else if (do_recompile_cmov || do_recompile_wide || do_recompile_rotate ||
-               do_recompile_lea || do_recompile_extract ||
-        do_recompile_endian ||
-        do_recompile_branch_flip) {
-        recompile.mode = "auto-scan-v5";
-    }
-    std::vector<uint8_t> policy_data;
-    if (recompile.requested) {
-        const auto &pre_info = program_info;
+    /* v2 REJIT: prepare bytecode for BPF_PROG_REJIT if requested */
+    std::chrono::steady_clock::time_point rejit_start {};
+    std::chrono::steady_clock::time_point rejit_end {};
+    rejit_summary rejit {};
+    std::vector<bpf_insn> rejit_insns;
 
-        if (do_recompile_cmov || do_recompile_wide || do_recompile_rotate ||
-            do_recompile_lea || do_recompile_extract ||
-            do_recompile_endian ||
-            do_recompile_branch_flip) {
-            /*
-             * Auto-scan the xlated BPF program for enabled pattern types
-             * and build the combined policy blob from post-verifier bytecode.
-             */
-            auto xlated = load_xlated_program(program_fd, pre_info.xlated_prog_len);
-
-            if (want_recompile_cmov && skip_cmov) {
-                fprintf(stderr, "recompile-cmov: skipped by --skip-families\n");
+    if (options.rejit) {
+        rejit.requested = true;
+        if (options.rejit_program.has_value()) {
+            /* Replacement mode: extract bytecode from a second ELF */
+            rejit.mode = "replacement";
+            auto replacement_image = load_program_image(
+                *options.rejit_program, options.program_name);
+            if (replacement_image.code.size() % sizeof(bpf_insn) != 0) {
+                fail("replacement program image does not contain aligned BPF instructions");
             }
-            if (want_recompile_wide && skip_wide) {
-                fprintf(stderr, "recompile-wide: skipped by --skip-families\n");
-            }
-            if (want_recompile_rotate && skip_rotate) {
-                fprintf(stderr, "recompile-rotate: skipped by --skip-families\n");
-            }
-            if (want_recompile_lea && skip_lea) {
-                fprintf(stderr, "recompile-lea: skipped by --skip-families\n");
-            }
-            if (want_recompile_extract && skip_extract) {
-                fprintf(stderr, "recompile-extract: skipped by --skip-families\n");
-            }
-            if (want_recompile_endian && skip_endian) {
-                fprintf(stderr, "recompile-endian: skipped by --skip-families\n");
-            }
-            if (want_recompile_branch_flip && skip_branch_flip) {
-                fprintf(stderr, "recompile-branch-flip: skipped by --skip-families\n");
-            }
-
-            /*
-             * Scan the full translated program, including subprogs.
-             * Kernel-side validators reject any directive site that would
-             * cross a subprog boundary, so userspace does not need to trim
-             * scanning to the main entry subprog.
-             */
-            uint32_t scan_len = static_cast<uint32_t>(xlated.size());
-            const auto summary = bpf_jit_scanner::scan_v5_builtin(
-                xlated.data(), scan_len,
-                bpf_jit_scanner::V5ScanOptions {
-                    .scan_cmov = do_recompile_cmov,
-                    .scan_wide = do_recompile_wide,
-                    .scan_rotate = do_recompile_rotate,
-                    .scan_lea = do_recompile_lea,
-                    .scan_extract = do_recompile_extract,
-                    .scan_endian = do_recompile_endian,
-                    .scan_branch_flip = do_recompile_branch_flip,
-                    .use_rorx = options.recompile_rotate_rorx,
-                });
-
-            assign_directive_scan_summary(directive_scan, summary);
-            assign_recompile_site_summary(recompile, summary);
-
-            auto print_v5_scan_status = [&](bool enabled,
-                                            uint64_t site_count,
-                                            const char *label,
-                                            const char *site_name) {
-                if (!enabled) {
-                    return;
-                }
-                if (site_count == 0) {
-                    fprintf(stderr, "%s: no %s sites found in xlated program (%u insns)\n",
-                            label, site_name, scan_len / 8);
-                    return;
-                }
-                fprintf(stderr, "%s: found %llu %s sites in xlated program (%u insns)\n",
-                        label,
-                        static_cast<unsigned long long>(site_count),
-                        site_name,
-                        scan_len / 8);
-            };
-
-            print_v5_scan_status(do_recompile_cmov, directive_scan.cmov_sites,
-                                 "recompile-cmov", "cmov");
-            print_v5_scan_status(do_recompile_wide, directive_scan.wide_sites,
-                                 "recompile-wide", "wide_load");
-            print_v5_scan_status(do_recompile_rotate, directive_scan.rotate_sites,
-                                 "recompile-rotate", "rotate");
-            print_v5_scan_status(do_recompile_lea, directive_scan.lea_sites,
-                                 "recompile-lea", "addr_calc");
-            print_v5_scan_status(do_recompile_extract,
-                                 directive_scan.bitfield_sites,
-                                 "recompile-extract", "bitfield_extract");
-            print_v5_scan_status(do_recompile_endian,
-                                 directive_scan.endian_sites,
-                                 "recompile-endian", "endian_fusion");
-            print_v5_scan_status(do_recompile_branch_flip,
-                                 directive_scan.branch_flip_sites,
-                                 "recompile-branch-flip", "branch_flip");
-
-            if (!summary.rules.empty()) {
-                policy_data = bpf_jit_scanner::build_policy_blob_v5(
-                    pre_info.xlated_prog_len / 8,
-                    pre_info.tag,
-                    summary.rules);
-            }
-        } else if (has_policy_config) {
-            const auto policy_config = options.policy.has_value()
-                ? bpf_jit_scanner::parse_policy_config_text(
-                      *options.policy,
-                      "<micro-exec-inline-policy>")
-                : bpf_jit_scanner::load_policy_config_file(
-                      options.policy_file->string());
-            assign_policy_family_lists(recompile, policy_config);
-
-            auto xlated = load_xlated_program(program_fd, pre_info.xlated_prog_len);
-            const uint32_t scan_len = static_cast<uint32_t>(xlated.size());
-            const auto discovered = bpf_jit_scanner::scan_v5_builtin(
-                xlated.data(), scan_len,
-                bpf_jit_scanner::V5ScanOptions {
-                    .scan_cmov = true,
-                    .scan_wide = true,
-                    .scan_rotate = true,
-                    .scan_lea = true,
-                    .scan_extract = true,
-                    .scan_endian = true,
-                    .scan_branch_flip = true,
-                    .use_rorx = false,
-                });
-            assign_directive_scan_summary(directive_scan, discovered);
-
-            const auto selected_rules =
-                bpf_jit_scanner::filter_rules_by_policy_detailed(
-                    discovered.rules, policy_config);
-            for (const auto &warning : selected_rules.warnings) {
-                std::fprintf(stderr, "recompile-policy: %s\n", warning.c_str());
-            }
-            const auto selected_summary =
-                bpf_jit_scanner::summarize_rules(selected_rules.rules);
-            assign_recompile_site_summary(recompile, selected_summary);
-
-            if (selected_rules.rules.empty()) {
-                if (discovered.rules.empty()) {
-                    std::fprintf(
-                        stderr,
-                        "recompile-policy: no eligible sites found in xlated program (%u insns)\n",
-                        scan_len / 8);
-                } else {
-                    std::fprintf(
-                        stderr,
-                        "recompile-policy: policy selected 0 of %zu eligible rules\n",
-                        discovered.rules.size());
-                }
-            } else {
-                std::fprintf(
-                    stderr,
-                    "recompile-policy: kept %zu of %zu eligible rules\n",
-                    selected_rules.rules.size(), discovered.rules.size());
-                policy_data = bpf_jit_scanner::build_policy_blob_v5(
-                    pre_info.xlated_prog_len / 8,
-                    pre_info.tag,
-                    selected_rules.rules);
-            }
+            const size_t cnt = replacement_image.code.size() / sizeof(bpf_insn);
+            rejit_insns.resize(cnt);
+            std::memcpy(rejit_insns.data(), replacement_image.code.data(),
+                        replacement_image.code.size());
         } else {
-            /*
-             * Use explicit policy blob file, patching prog_tag and insn_cnt
-             * to match the kernel's view.
-             */
-            policy_data = read_binary_file(*options.policy_blob);
-            if (policy_data.size() >= 28) {
-                const uint32_t xlated_insn_cnt = pre_info.xlated_prog_len / 8;
-                std::memcpy(policy_data.data() + 16, &xlated_insn_cnt, sizeof(xlated_insn_cnt));
-                std::memcpy(policy_data.data() + 20, pre_info.tag, 8);
+            /* Same-bytecode mode: use original ELF insns from libbpf
+             * (not xlated insns from kernel, which cannot be re-verified) */
+            rejit.mode = "same-bytecode";
+            if (prog == nullptr) {
+                fail("same-bytecode REJIT requires a program loaded via bpf_object__load "
+                     "(not manual_load_program)");
             }
+            const size_t cnt = bpf_program__insn_cnt(prog);
+            if (cnt == 0) {
+                fail("bpf_program__insn_cnt returned 0 for REJIT");
+            }
+            const bpf_insn *raw = bpf_program__insns(prog);
+            rejit_insns.assign(raw, raw + cnt);
         }
+        fprintf(stderr, "rejit: mode=%s insn_cnt=%zu\n",
+                rejit.mode.c_str(), rejit_insns.size());
     }
 
     const auto packet_kind = resolve_packet_context_kind(program_info.type);
     const bool measure_same_image_pair =
-        recompile.requested && !options.compile_only;
-    if (options.compile_only && recompile.requested) {
-        apply_recompile_policy(program_fd, policy_data, recompile,
-                               recompile_start, recompile_end);
+        rejit.requested && !options.compile_only;
+    if (options.compile_only && rejit.requested) {
+        apply_rejit(program_fd, rejit_insns.data(),
+                    static_cast<uint32_t>(rejit_insns.size()),
+                    rejit, rejit_start, rejit_end);
     }
 
     if (options.compile_only) {
@@ -1483,15 +1203,14 @@ std::vector<sample_result> run_kernel(const cli_options &options)
         sample_result sample;
         sample.compile_ns = elapsed_ns(object_open_start, object_open_end) +
                             elapsed_ns(object_load_start, object_load_end) +
-                            elapsed_ns(recompile_start, recompile_end);
+                            elapsed_ns(rejit_start, rejit_end);
         sample.jited_prog_len = final_program_info.jited_prog_len;
         sample.xlated_prog_len = final_program_info.xlated_prog_len;
         sample.code_size = {
             .bpf_bytecode_bytes = final_program_info.xlated_prog_len,
             .native_code_bytes = final_program_info.jited_prog_len,
         };
-        sample.directive_scan = directive_scan;
-        sample.recompile = recompile;
+        sample.rejit = rejit;
         sample.phases_ns = {
             {"memory_prepare_ns", elapsed_ns(memory_prepare_start, memory_prepare_end)},
             {"object_open_ns", elapsed_ns(object_open_start, object_open_end)},
@@ -1647,11 +1366,11 @@ std::vector<sample_result> run_kernel(const cli_options &options)
             const kernel_test_run_measurement &measurement,
             uint64_t measured_result,
             const bpf_prog_info &measured_program_info,
-            const recompile_summary &measured_recompile,
+            const rejit_summary &measured_rejit,
             perf_counter_capture perf_counters,
             const std::chrono::steady_clock::time_point &measured_result_read_start,
             const std::chrono::steady_clock::time_point &measured_result_read_end,
-            bool include_recompile_apply_phase) {
+            bool include_rejit_apply_phase) {
             sample_result sample;
             sample.phase = std::move(phase);
             sample.compile_ns = compile_ns;
@@ -1672,19 +1391,18 @@ std::vector<sample_result> run_kernel(const cli_options &options)
                 .bpf_bytecode_bytes = measured_program_info.xlated_prog_len,
                 .native_code_bytes = measured_program_info.jited_prog_len,
             };
-            sample.directive_scan = directive_scan;
-            sample.recompile = measured_recompile;
+            sample.rejit = measured_rejit;
             sample.phases_ns = {
                 {"memory_prepare_ns",
                  elapsed_ns(memory_prepare_start, memory_prepare_end)},
                 {"object_open_ns", elapsed_ns(object_open_start, object_open_end)},
                 {"object_load_ns", elapsed_ns(object_load_start, object_load_end)},
             };
-            if (include_recompile_apply_phase &&
-                measured_recompile.syscall_attempted) {
+            if (include_rejit_apply_phase &&
+                measured_rejit.syscall_attempted) {
                 sample.phases_ns.push_back(
-                    {"recompile_apply_ns",
-                     elapsed_ns(recompile_start, recompile_end)});
+                    {"rejit_apply_ns",
+                     elapsed_ns(rejit_start, rejit_end)});
             }
             sample.phases_ns.push_back(
                 {prepare_phase_name(effective_io_mode),
@@ -1701,7 +1419,7 @@ std::vector<sample_result> run_kernel(const cli_options &options)
         };
     std::optional<sample_result> stock_sample;
     if (measure_same_image_pair) {
-        const recompile_summary stock_recompile = recompile;
+        const rejit_summary stock_rejit = rejit;
         auto stock_pass = execute_kernel_measurement_pass(
             run_context, options, options.warmup_repeat, options.perf_counters);
         const auto stock_result_read_start = std::chrono::steady_clock::now();
@@ -1721,13 +1439,14 @@ std::vector<sample_result> run_kernel(const cli_options &options)
             stock_pass.measurement,
             stock_result,
             stock_program_info,
-            stock_recompile,
+            stock_rejit,
             std::move(stock_pass.perf_counters),
             stock_result_read_start,
             stock_result_read_end,
             false);
-        apply_recompile_policy(program_fd, policy_data, recompile,
-                               recompile_start, recompile_end);
+        apply_rejit(program_fd, rejit_insns.data(),
+                    static_cast<uint32_t>(rejit_insns.size()),
+                    rejit, rejit_start, rejit_end);
     }
 
     auto run_pass = execute_kernel_measurement_pass(
@@ -1763,13 +1482,13 @@ std::vector<sample_result> run_kernel(const cli_options &options)
     }
 
     auto sample = build_measured_sample(
-        measure_same_image_pair ? std::optional<std::string>(std::string("recompile"))
+        measure_same_image_pair ? std::optional<std::string>(std::string("rejit"))
                                 : std::nullopt,
-        base_compile_ns + elapsed_ns(recompile_start, recompile_end),
+        base_compile_ns + elapsed_ns(rejit_start, rejit_end),
         run_measurement,
         result,
         final_program_info,
-        recompile,
+        rejit,
         std::move(run_pass.perf_counters),
         result_read_start,
         result_read_end,

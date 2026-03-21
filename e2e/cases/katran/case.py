@@ -58,7 +58,7 @@ DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "katran-e2e-real.md"
 DEFAULT_KATRAN_OBJECT = ROOT_DIR / "corpus" / "build" / "katran" / "balancer.bpf.o"
 DEFAULT_POLICY_FILE = Path(__file__).with_name("balancer_ingress.e2e.policy.yaml")
 DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
-DEFAULT_SCANNER = ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"
+DEFAULT_DAEMON = ROOT_DIR / "daemon" / "build" / "bpfrejit-daemon"
 DEFAULT_KATRAN_TEST_PACKET = ROOT_DIR / "corpus" / "inputs" / "katran_vip_packet_64.bin"
 DEFAULT_KERNEL_CONFIG = ROOT_DIR / "vendor" / "linux-framework" / ".config"
 DEFAULT_PROGRAM_NAME = "balancer_ingress"
@@ -637,11 +637,11 @@ def ensure_artifacts(runner_binary: Path, scanner_binary: Path) -> None:
         run_command(["make", "runner"], timeout=1800)
     if not scanner_binary.exists():
         run_command(
-            ["cmake", "-S", "scanner", "-B", "scanner/build", "-DCMAKE_BUILD_TYPE=Release"],
+            ["cmake", "-S", "daemon", "-B", "daemon/build", "-DCMAKE_BUILD_TYPE=Release"],
             timeout=600,
         )
         run_command(
-            ["cmake", "--build", "scanner/build", "--target", "bpf-jit-scanner", "-j"],
+            ["cmake", "--build", "daemon/build", "--target", "bpfrejit-daemon", "-j"],
             timeout=1800,
         )
 
@@ -2300,7 +2300,7 @@ def build_case_parser() -> argparse.ArgumentParser:
     parser.add_argument("--katran-skip-attach", action="store_true")
     parser.add_argument("--kernel-config", default=str(DEFAULT_KERNEL_CONFIG))
     parser.add_argument("--runner", default=str(DEFAULT_RUNNER))
-    parser.add_argument("--scanner", default=str(DEFAULT_SCANNER))
+    parser.add_argument("--scanner", default=str(DEFAULT_DAEMON))
     parser.add_argument("--duration", type=int)
     parser.add_argument("--smoke", action="store_true")
     parser.add_argument("--skip-setup", action="store_true")

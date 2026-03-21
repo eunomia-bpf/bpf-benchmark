@@ -35,6 +35,24 @@ scanner/build/
 scanner/build-arm64/
 corpus/build/
 tests/kernel/build-arm64/
+runner/build/
+daemon/build/
+daemon/build-arm64/
+
+# Rust cargo build artifacts
+daemon/target/
+
+# Kernel module build artifacts
+module/x86/*.ko
+module/x86/*.mod
+module/x86/*.mod.c
+module/x86/modules.order
+module/x86/Module.symvers
+module/x86/.*.cmd
+
+# Test build artifacts and binary data
+tests/hold_bpf_prog
+tests/lbr_input.bin
 
 # BPF build artifacts
 *.bpf.o

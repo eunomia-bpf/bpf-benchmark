@@ -57,10 +57,10 @@ jobs:
             zlib1g-dev \
             libzstd-dev
 
-      - name: Build micro runner, BPF programs, scanner, and vendored bpftool
+      - name: Build micro runner, BPF programs, daemon, and vendored bpftool
         run: |
           make micro
-          make scanner
+          make daemon
           make -C runner vendor_bpftool
 
       - name: Record runner environment
@@ -175,7 +175,7 @@ jobs:
           mkdir -p "${CORPUS_RESULTS_DIR}"
           python3 corpus/driver.py code-size \
             --runner runner/build/micro_exec \
-            --scanner scanner/build/bpf-jit-scanner \
+            --scanner daemon/build/bpfrejit-daemon \
             --corpus-build-report "${CORPUS_BUILD_REPORT}" \
             --filter libbpf-bootstrap \
             --use-policy \
@@ -194,7 +194,7 @@ jobs:
           fi
           python3 corpus/driver.py perf \
             --runner runner/build/micro_exec \
-            --scanner scanner/build/bpf-jit-scanner \
+            --scanner daemon/build/bpfrejit-daemon \
             --corpus-build-report "${CORPUS_BUILD_REPORT}" \
             --filter libbpf-bootstrap \
             --use-policy \

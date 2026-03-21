@@ -35,8 +35,6 @@ def _policy_mode_for_runtime(name: str, mode: str) -> str:
         return "recompile_v5"
     if "recompile" in text:
         return "recompile_v4"
-    if "directive" in text:
-        return "directive_blob"
     if "policy" in text:
         return "policy_blob"
     return "stock"

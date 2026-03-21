@@ -19,9 +19,8 @@ eBPF benchmarking suite comparing **llvmbpf** (userspace LLVM JIT) against **ker
 git submodule update --init --recursive
 make micro             # builds runner/build/micro_exec and micro BPF programs
 
-# e2e/corpus recompile paths expect the standalone scanner CLI
-cmake -S scanner -B scanner/build -DCMAKE_BUILD_TYPE=Release
-cmake --build scanner/build --target bpf-jit-scanner -j
+# e2e/corpus recompile paths expect the standalone daemon CLI
+cargo build --release --manifest-path daemon/Cargo.toml
 ```
 
 ### Build individual targets
@@ -132,48 +131,30 @@ Programs define a `bench_*()` function taking `(const u8 *data, u32 len, u64 *ou
 - llvmbpf does not support BPF-to-BPF internal subprogram calls (ELF loader limitation)
 - `--perf-counters` uses `perf_event_open`; kernel counters include kernel-mode, llvmbpf counters are user-mode only
 
-## Using Sonnet Subagent
+### Code Quality Rules
+- **No dead code**: When replacing a subsystem (e.g., v1→v2), delete the old code entirely. Do not keep `if v1 then ... else v2` branches or commented-out legacy paths. Dead code rots and confuses future readers.
+- **No unnecessary defensive checks**: Only validate at system boundaries (user input, external APIs). Trust internal invariants and kernel guarantees. If a check is "just in case" with no concrete failure scenario, remove it.
+- **Direct replacement over addition**: When an interface changes, modify the existing code path instead of adding a parallel one. One path that works beats two paths where one is dead.
+- **Minimize kernel LOC**: Every line of kernel code is a maintenance and review burden. Prefer the simplest implementation that passes all tests. Remove guards that exist only because the POC was too lazy to handle the general case.
 
-> **Note (2026-03-14)**: Codex quota exhausted (renews 2026-03-18). All subagent tasks are now delegated to Claude Sonnet via the Agent tool (`run_in_background: true`).
+## Subagent Workflow
 
-Sonnet subagent is available for code writing and analysis tasks.
-
-### Division of Labor (IMPORTANT)
-- **Codex handles**: ALL code implementation, benchmark runs, data analysis, analysis scripts, experiments, research, code review, CI fixes
-- **Claude Code handles**: scheduling/dispatching codex tasks, document writing (non-tmp), TODO/memory updates, architectural decisions, reviewing codex output
-- **Claude Code must NEVER**: write analysis code directly, run benchmarks directly, or manually analyze data — always delegate to codex
+### Division of Labor
+- **Subagent handles**: code implementation, benchmark runs, data analysis, research, code review, CI fixes
+- **Claude Code handles**: scheduling/dispatching, document writing (non-tmp), TODO/memory updates, architectural decisions
+- **Claude Code must NEVER**: write implementation code directly, run benchmarks directly — always delegate
 
 ### Workflow Rules
-- **Codex output goes to `docs/tmp/`** — codex writes analysis/review/design reports (.md) into `docs/tmp/`; JSON results go to `micro/results/`, `corpus/results/`, or `e2e/results/`
-- **Claude maintains non-tmp docs** — Claude directly edits `CLAUDE.md`, `docs/kernel-jit-optimization-plan.md`, and other non-tmp documents
-- **Codex runs in background** — use `run_in_background: true` for all codex tasks; Claude dispatches and moves on
-- **Review cycle** — when codex produces a new document, dispatch another codex to review it; iterate until quality is sufficient
-- **CI monitoring** — dispatch codex to fix CI issues, push fixes, and monitor until CI passes (long-running background task)
-- **Never ask for confirmation** — just keep going, do all work, iterate multiple rounds autonomously
-- **ALWAYS include `docs/kernel-jit-optimization-plan.md` as context** — every codex prompt MUST reference this doc as the single source of truth for JIT optimization design
-- **NEVER delete old entries in tracking docs** — when tasks/experiments/docs are superseded, keep at least one line with status (e.g. "归入 #32", "已被 v3 取代"). This applies to TODO tables, VM experiment matrix, reference doc lists in `docs/kernel-jit-optimization-plan.md`
-- **Claude 只给高层次要求** — 不自己调研代码再给详细变更指令，让 codex 自己读代码、设计方案、实现
-- **Codex 必须测试验证** — 每个 codex prompt 必须要求写完代码后实际跑通（sudo / VM vng 等方式），不能只写不测
-- **构建+修改+运行不拆分** — 一个 subagent 负责完整流程（改代码→构建→运行→发现 bug→修复→再运行），不要拆成多个 agent，这样发现问题能立刻修
-- **⚠️ 同一时间只能一个 agent 改内核代码，也只能一个 agent 跑测试** — 多个 agent 同时改 vendor/linux-framework 会产生 git 冲突；多个 agent 同时跑 VM benchmark/selftest 会竞争资源、结果不可靠。调度时必须串行化内核改动和测试任务。
-- **⚠️ codex 默认不要 commit/push** — 改完代码就停，由 Claude 统一 commit。除非 prompt 明确要求 commit。
-- **⚠️ 如果需要 commit，必须在 main 分支直接做，不开新分支** — 开分支导致合并冲突。
-
-### Usage (Sonnet Agent)
-
-When delegating coding/analysis tasks, use the Agent tool with `run_in_background: true`. Include `docs/kernel-jit-optimization-plan.md` as context in every prompt.
-
-### Legacy Codex CLI (quota exhausted, renews 2026-03-18)
-```bash
-# Non-interactive execution — no sandbox, no prompts
-codex exec --dangerously-bypass-approvals-and-sandbox "your prompt here"
-
-# With a specific working directory
-codex exec --dangerously-bypass-approvals-and-sandbox -C /path/to/dir "your prompt here"
-
-# Pipe prompt from stdin
-echo "implement feature X" | codex exec --dangerously-bypass-approvals-and-sandbox -
-```
+- **Subagent output goes to `docs/tmp/`** — reports (.md) into `docs/tmp/`; JSON results go to `*/results/`
+- **Never ask for confirmation** — just keep going, iterate autonomously
+- **ALWAYS include `docs/kernel-jit-optimization-plan.md` as context** — every prompt MUST reference this doc
+- **NEVER delete old entries in tracking docs** — mark superseded, keep row
+- **Claude 只给高层次要求** — 让 subagent 自己读代码、设计方案、实现
+- **Subagent 必须测试验证** — 写完代码后实际跑通，不能只写不测
+- **构建+修改+运行不拆分** — 一个 subagent 负责完整流程
+- **⚠️ 同一时间只能一个 agent 改内核代码，也只能一个 agent 跑测试**
+- **⚠️ 默认不 commit/push** — 改完代码就停，由 Claude 统一 commit
+- **⚠️ 如需 commit，在 main 直接做，不开分支**
 
 ### Benchmark Program Design Rules
 - **Pure-JIT benchmarks** (`micro_pure_jit.yaml`): Must test ONLY JIT code generation quality. No map lookups or helper calls in the benchmark hot path. Allowed harness shapes are staged XDP, packet-backed XDP controls, and the small TC/cgroup_skb kernel-only control subset already in the suite.

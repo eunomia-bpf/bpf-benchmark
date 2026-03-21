@@ -10,7 +10,7 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from runner.libs import ensure_root, write_json  # noqa: E402
-from runner.libs.profiler import DEFAULT_PERF_EVENTS, DEFAULT_SCANNER, profile_current_programs  # noqa: E402
+from runner.libs.profiler import DEFAULT_PERF_EVENTS, DEFAULT_DAEMON, profile_current_programs  # noqa: E402
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -34,8 +34,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--duration", type=float, default=30.0, help="Profiling window in seconds.")
     parser.add_argument(
         "--scanner",
-        default=str(DEFAULT_SCANNER),
-        help="Path to bpf-jit-scanner used for live enumerate.",
+        default=str(DEFAULT_DAEMON),
+        help="Path to bpfrejit-daemon used for live enumerate.",
     )
     parser.add_argument(
         "--output",

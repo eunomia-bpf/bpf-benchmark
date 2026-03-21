@@ -46,12 +46,12 @@ runtimes:
     repeat: 200
     sudo: true
 
-  - name: kernel-recompile
-    label: kernel eBPF + manifest recompile policy
-    mode: kernel-recompile
+  - name: kernel-rejit
+    label: kernel eBPF + REJIT
+    mode: kernel-rejit
     repeat: 200
     sudo: true
-    aliases: [kernel_recompile, recompile]
+    aliases: [kernel_rejit, rejit]
 
 benchmarks:
   - name: simple

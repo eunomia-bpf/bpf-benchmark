@@ -4,7 +4,7 @@ SHELL := /bin/bash
 ROOT_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 MICRO_DIR := $(ROOT_DIR)/micro
 RUNNER_DIR := $(ROOT_DIR)/runner
-SCANNER_DIR := $(ROOT_DIR)/scanner
+DAEMON_DIR := $(ROOT_DIR)/daemon
 KERNEL_DIR := $(ROOT_DIR)/vendor/linux-framework
 KERNEL_TEST_DIR := $(ROOT_DIR)/tests/kernel
 ARM64_WORKTREE_DIR ?= $(ROOT_DIR)/.worktrees/linux-framework-arm64-src
@@ -34,9 +34,9 @@ ARM64_CROSSBUILD_LIB_DIR := $(ARM64_CROSSBUILD_OUTPUT_DIR)/lib
 ARM64_CROSS_RUNNER_DIR := $(ARM64_CROSSBUILD_OUTPUT_DIR)/runner/build
 ARM64_CROSS_RUNNER := $(ARM64_CROSS_RUNNER_DIR)/micro_exec
 ARM64_CROSS_RUNNER_REAL := $(ARM64_CROSS_RUNNER_DIR)/micro_exec.real
-ARM64_CROSS_SCANNER_DIR := $(ARM64_CROSSBUILD_OUTPUT_DIR)/scanner/build
-ARM64_CROSS_SCANNER := $(ARM64_CROSS_SCANNER_DIR)/bpf-jit-scanner
-ARM64_CROSS_SCANNER_REAL := $(ARM64_CROSS_SCANNER_DIR)/bpf-jit-scanner.real
+ARM64_CROSS_DAEMON_DIR := $(ARM64_CROSSBUILD_OUTPUT_DIR)/daemon/build
+ARM64_CROSS_DAEMON := $(ARM64_CROSS_DAEMON_DIR)/bpfrejit-daemon
+ARM64_CROSS_DAEMON_REAL := $(ARM64_CROSS_DAEMON_DIR)/bpfrejit-daemon.real
 AWS_ARM64_NAME_TAG ?= bpf-benchmark-arm64
 AWS_ARM64_INSTANCE_TYPE ?= t4g.micro
 ARM64_CROSSBUILD_ENABLE_LLVMBPF ?= ON
@@ -69,7 +69,7 @@ E2E_RESULTS_DEV_DIR := $(E2E_RESULTS_DIR)/dev
 TMP_DIR := $(ROOT_DIR)/docs/tmp
 
 BZIMAGE ?= vendor/linux-framework/arch/x86/boot/bzImage
-SCANNER ?= scanner/build/bpf-jit-scanner
+DAEMON ?= daemon/target/release/bpfrejit-daemon
 ITERATIONS ?= 3
 WARMUPS ?= 1
 REPEAT ?= 200
@@ -89,8 +89,7 @@ NPROC ?= $(shell nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || e
 ARM64_KERNEL_MAKEFLAGS := $(filter-out B,$(MAKEFLAGS))
 
 BZIMAGE_PATH := $(if $(filter /%,$(BZIMAGE)),$(BZIMAGE),$(ROOT_DIR)/$(BZIMAGE))
-SCANNER_PATH := $(if $(filter /%,$(SCANNER)),$(SCANNER),$(ROOT_DIR)/$(SCANNER))
-SCANNER_BUILD_DIR := $(abspath $(dir $(SCANNER_PATH)))
+DAEMON_PATH := $(if $(filter /%,$(DAEMON)),$(DAEMON),$(ROOT_DIR)/$(DAEMON))
 MICRO_RUNNER := $(RUNNER_DIR)/build/micro_exec
 KERNEL_SELFTEST := $(KERNEL_TEST_DIR)/build/test_recompile
 KERNEL_SELFTEST_ARM64 := $(KERNEL_TEST_DIR)/build-arm64/test_recompile
@@ -146,25 +145,22 @@ VENV_ACTIVATE := $(if $(VENV),source "$(VENV)/bin/activate" &&,)
 MICRO_RUNNER_SOURCES := $(wildcard \
 	$(RUNNER_DIR)/src/*.cpp \
 	$(RUNNER_DIR)/include/*.hpp \
-	$(RUNNER_DIR)/CMakeLists.txt \
-	$(SCANNER_DIR)/src/*.cpp \
-	$(SCANNER_DIR)/include/bpf_jit_scanner/*.hpp \
-	$(SCANNER_DIR)/CMakeLists.txt)
+	$(RUNNER_DIR)/CMakeLists.txt)
 MICRO_BPF_SOURCES := $(wildcard \
 	$(MICRO_DIR)/programs/*.bpf.c \
 	$(MICRO_DIR)/programs/common.h)
-SCANNER_SOURCES := $(wildcard \
-	$(SCANNER_DIR)/src/*.cpp \
-	$(SCANNER_DIR)/include/bpf_jit_scanner/*.hpp \
-	$(SCANNER_DIR)/CMakeLists.txt)
+DAEMON_SOURCES := $(wildcard \
+	$(DAEMON_DIR)/src/*.rs \
+	$(DAEMON_DIR)/Cargo.toml \
+	$(DAEMON_DIR)/Cargo.lock)
 KERNEL_JIT_SOURCES := \
 	$(KERNEL_DIR)/arch/x86/net/bpf_jit_comp.c \
 	$(KERNEL_DIR)/kernel/bpf/jit_directives.c
 # Stamp file for BPF program objects (programs/ has no separate build dir)
 MICRO_BPF_STAMP := $(MICRO_DIR)/programs/.build.stamp
 
-.PHONY: all runner micro scanner kernel kernel-perf kernel-arm64 kernel-tests kernel-test-progs \
-	arm64-crossbuild-image selftest-arm64 scanner-tests clean \
+.PHONY: all runner micro daemon kernel kernel-perf kernel-arm64 kernel-tests kernel-test-progs \
+	arm64-crossbuild-image selftest-arm64 daemon-tests clean \
 	smoke check validate verify-build compare \
 	vm-selftest vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 	vm-arm64-smoke vm-arm64-selftest arm64-worktree arm64-rootfs \
@@ -176,21 +172,21 @@ help:
 	@echo "=== BPF Benchmark Suite ==="
 	@echo ""
 	@echo "Build targets:"
-	@echo "  make all              - Build micro runner, scanner, and kernel tests"
+	@echo "  make all              - Build micro runner, daemon, and kernel tests"
 	@echo "  make runner           - Build micro_exec runner"
 	@echo "  make micro            - Build micro_exec runner and BPF programs"
-	@echo "  make scanner          - Build bpf-jit-scanner"
+	@echo "  make daemon           - Build bpfrejit-daemon"
 	@echo "  make kernel           - Build kernel bzImage"
 	@echo "  make kernel-perf      - Build kernel-matched perf from vendor/linux-framework/tools/perf"
 	@echo "  make kernel-arm64     - Cross-build ARM64 Image under vendor/linux-framework/build-arm64"
 	@echo "  make kernel-tests     - Build kernel recompile test binary"
 	@echo "  make arm64-crossbuild-image - Build the Docker image for ARM64 userspace cross-builds"
-	@echo "  make cross-arm64      - Build AL2023-compatible ARM64 micro_exec + scanner via Docker"
+	@echo "  make cross-arm64      - Build AL2023-compatible ARM64 micro_exec + daemon via Docker"
 	@echo "  make selftest-arm64   - Cross-build the ARM64 kernel selftest binary via Docker"
 	@echo ""
 	@echo "Test/smoke targets:"
 	@echo "  make smoke            - Quick llvmbpf smoke test (no VM)"
-	@echo "  make check            - Build + scanner tests + smoke"
+	@echo "  make check            - Build + daemon tests + smoke"
 	@echo "  make validate         - check + vm-selftest + vm-micro-smoke"
 	@echo "  make vm-arm64-smoke   - Boot ARM64 kernel in qemu-system-aarch64 and run uname/bpf_jit smoke"
 	@echo "  make vm-arm64-selftest - Boot ARM64 QEMU and run the ARM64 test_recompile selftest"
@@ -211,7 +207,7 @@ help:
 	@echo "  make vm-all           - All VM benchmarks"
 	@echo ""
 	@echo "Utility targets:"
-	@echo "  make verify-build     - Verify bzImage, scanner, micro_exec artifacts exist"
+	@echo "  make verify-build     - Verify bzImage, daemon, micro_exec artifacts exist"
 	@echo "  make compare OLD=a.json NEW=b.json  - Compare two result JSON files"
 	@echo ""
 	@echo "Tunable parameters:"
@@ -248,17 +244,17 @@ help:
 verify-build:
 	@test -f "$(BZIMAGE_PATH)" || (echo "ERROR: bzImage not found at $(BZIMAGE_PATH). Run: make kernel" && exit 1)
 	@test -f "$(MICRO_RUNNER)" || (echo "ERROR: micro_exec not found. Run: make micro" && exit 1)
-	@test -f "$(SCANNER_PATH)" || (echo "ERROR: scanner not found. Run: make scanner" && exit 1)
+	@test -f "$(DAEMON_PATH)" || (echo "ERROR: daemon not found. Run: make daemon" && exit 1)
 	@# Check if kernel source is newer than bzImage (stale build detection)
 	@if [ "$$(find "$(KERNEL_DIR)/arch/x86/net/bpf_jit_comp.c" "$(KERNEL_DIR)/kernel/bpf/jit_directives.c" -newer "$(BZIMAGE_PATH)" 2>/dev/null | head -1)" ]; then \
 		echo "WARNING: kernel source is newer than bzImage — consider: make kernel"; \
 	fi
-	@# Check if scanner source is newer than binary
-	@if [ "$$(find "$(SCANNER_DIR)/src/" -name '*.cpp' -newer "$(SCANNER_PATH)" 2>/dev/null | head -1)" ]; then \
-		echo "WARNING: scanner source is newer than binary — consider: make scanner"; \
+	@# Check if daemon source is newer than binary
+	@if [ "$$(find "$(DAEMON_DIR)/src/" -name '*.rs' -newer "$(DAEMON_PATH)" 2>/dev/null | head -1)" ]; then \
+		echo "WARNING: daemon source is newer than binary — consider: make daemon"; \
 	fi
 	@echo "Kernel:     $$(cd "$(KERNEL_DIR)" && git rev-parse --short HEAD 2>/dev/null || echo 'n/a')"
-	@echo "Scanner:    $$(cd "$(SCANNER_DIR)" && git rev-parse --short HEAD 2>/dev/null || echo 'n/a')"
+	@echo "Daemon:     $$(ls -la "$(DAEMON_PATH)" 2>/dev/null | awk '{print $$6,$$7,$$8}' || echo 'not built')"
 	@echo "micro_exec: $$(ls -la "$(MICRO_RUNNER)" 2>/dev/null | awk '{print $$6,$$7,$$8}' || echo 'not built')"
 	@echo "bzImage:    $$(ls -lh "$(BZIMAGE_PATH)" | awk '{print $$5, $$6, $$7, $$8}')"
 	@echo "POLICY:     $(POLICY) (dir: $(POLICY_DIR))"
@@ -273,7 +269,7 @@ compare:
 all:
 	@echo "=== Running make all ==="
 	$(MAKE) micro
-	$(MAKE) scanner
+	$(MAKE) daemon
 	$(MAKE) kernel-tests
 
 # PHONY build targets (for manual invocation / forced rebuild)
@@ -286,12 +282,9 @@ runner:
 	@echo "=== Running make runner ==="
 	$(MAKE) -C "$(RUNNER_DIR)" micro_exec
 
-scanner:
-	@echo "=== Running make scanner ==="
-	cmake -S "$(SCANNER_DIR)" -B "$(SCANNER_BUILD_DIR)" \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DBPF_JIT_SCANNER_BUILD_TESTS=ON
-	cmake --build "$(SCANNER_BUILD_DIR)" --target bpf-jit-scanner -j"$(NPROC)"
+daemon:
+	@echo "=== Running make daemon ==="
+	cargo build --release --manifest-path "$(DAEMON_DIR)/Cargo.toml"
 
 kernel:
 	@echo "=== Running make kernel ==="
@@ -351,10 +344,9 @@ kernel-test-progs:
 	@echo "=== Building kernel test BPF objects ==="
 	$(MAKE) -C "$(KERNEL_TEST_DIR)" BPF_BUILD_DIR="$(KERNEL_TEST_BPF_BUILD_DIR)" $(KERNEL_TEST_BPF_OBJS)
 
-scanner-tests: scanner
-	@echo "=== Running scanner tests ==="
-	cmake --build "$(SCANNER_BUILD_DIR)" --target test_scanner -j"$(NPROC)"
-	ctest --test-dir "$(SCANNER_BUILD_DIR)" --output-on-failure
+daemon-tests:
+	@echo "=== Running daemon tests ==="
+	cargo test --manifest-path "$(DAEMON_DIR)/Cargo.toml"
 
 # File-based targets for incremental rebuilds (used by vm-* targets)
 $(MICRO_RUNNER): $(MICRO_RUNNER_SOURCES)
@@ -366,12 +358,9 @@ $(MICRO_BPF_STAMP): $(MICRO_BPF_SOURCES)
 	$(MAKE) -C "$(MICRO_DIR)" programs
 	touch "$@"
 
-$(SCANNER_PATH): $(SCANNER_SOURCES)
-	@echo "=== Building bpf-jit-scanner (sources changed) ==="
-	cmake -S "$(SCANNER_DIR)" -B "$(SCANNER_BUILD_DIR)" \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DBPF_JIT_SCANNER_BUILD_TESTS=ON
-	cmake --build "$(SCANNER_BUILD_DIR)" --target bpf-jit-scanner -j"$(NPROC)"
+$(DAEMON_PATH): $(DAEMON_SOURCES)
+	@echo "=== Building bpfrejit-daemon (sources changed) ==="
+	cargo build --release --manifest-path "$(DAEMON_DIR)/Cargo.toml"
 
 $(BZIMAGE_PATH): $(KERNEL_JIT_SOURCES)
 	@echo "=== Building bzImage (kernel sources changed) ==="
@@ -411,21 +400,21 @@ cross-arm64: arm64-crossbuild-image
 		bash -lc 'set -euo pipefail; \
 			build_root=/tmp/bpf-benchmark-arm64; \
 			runner_build="$$build_root/runner"; \
-			scanner_build="$$build_root/scanner"; \
+			daemon_build="$$build_root/daemon"; \
 			rm -rf "$$build_root"; \
-			mkdir -p /out/runner/build /out/scanner/build /out/lib; \
+			mkdir -p /out/runner/build /out/daemon/build /out/lib; \
 				export CMAKE_BUILD_PARALLEL_LEVEL="$(ARM64_CROSSBUILD_JOBS)"; \
 				make -C /workspace/runner \
 					BUILD_DIR="$$runner_build" \
 					MICRO_EXEC_ENABLE_LLVMBPF=$(ARM64_CROSSBUILD_ENABLE_LLVMBPF) \
 					micro_exec >/dev/null; \
-			cmake -S /workspace/scanner -B "$$scanner_build" \
+			cmake -S /workspace/daemon -B "$$daemon_build" \
 				-DCMAKE_BUILD_TYPE=Release \
-				-DBPF_JIT_SCANNER_BUILD_CLI=ON \
-				-DBPF_JIT_SCANNER_BUILD_TESTS=OFF >/dev/null; \
-			cmake --build "$$scanner_build" --target bpf-jit-scanner -j"$(ARM64_CROSSBUILD_JOBS)" >/dev/null; \
+				-DBPF_REJIT_DAEMON_BUILD_CLI=ON \
+				-DBPF_REJIT_DAEMON_BUILD_TESTS=OFF >/dev/null; \
+			cmake --build "$$daemon_build" --target bpfrejit-daemon -j"$(ARM64_CROSSBUILD_JOBS)" >/dev/null; \
 			cp "$$runner_build/micro_exec" /out/runner/build/micro_exec.real; \
-			cp "$$scanner_build/bpf-jit-scanner" /out/scanner/build/bpf-jit-scanner.real; \
+			cp "$$daemon_build/bpfrejit-daemon" /out/daemon/build/bpfrejit-daemon.real; \
 			copy_runtime_libs() { \
 				local binary="$$1"; \
 				local lib; \
@@ -437,7 +426,7 @@ cross-arm64: arm64-crossbuild-image
 				done < <(ldd "$$binary" | awk '\''/=> \// {print $$3} /^\// {print $$1}'\'' | sort -u); \
 			}; \
 			copy_runtime_libs /out/runner/build/micro_exec.real; \
-			copy_runtime_libs /out/scanner/build/bpf-jit-scanner.real; \
+			copy_runtime_libs /out/daemon/build/bpfrejit-daemon.real; \
 			printf '\''%s\n'\'' \
 				'\''#!/usr/bin/env bash'\'' \
 				'\''set -euo pipefail'\'' \
@@ -454,15 +443,15 @@ cross-arm64: arm64-crossbuild-image
 				'\''BUNDLE_ROOT="$$(cd "$$SCRIPT_DIR/../.." && pwd)"'\'' \
 				'\''LIB_DIR="$$BUNDLE_ROOT/lib"'\'' \
 				'\''export LD_LIBRARY_PATH="$$LIB_DIR$${LD_LIBRARY_PATH:+:$$LD_LIBRARY_PATH}"'\'' \
-				'\''exec "$$SCRIPT_DIR/bpf-jit-scanner.real" "$$@"'\'' \
-				> /out/scanner/build/bpf-jit-scanner; \
-			chmod +x /out/runner/build/micro_exec /out/scanner/build/bpf-jit-scanner; \
+				'\''exec "$$SCRIPT_DIR/bpfrejit-daemon.real" "$$@"'\'' \
+				> /out/daemon/build/bpfrejit-daemon; \
+			chmod +x /out/runner/build/micro_exec /out/daemon/build/bpfrejit-daemon; \
 			file /out/runner/build/micro_exec.real; \
-			file /out/scanner/build/bpf-jit-scanner.real'
+			file /out/daemon/build/bpfrejit-daemon.real'
 	file "$(ARM64_CROSS_RUNNER_REAL)" | grep -F "ARM aarch64"
-	file "$(ARM64_CROSS_SCANNER_REAL)" | grep -F "ARM aarch64"
-	@echo "ARM64 runner:  $(ARM64_CROSS_RUNNER)"
-	@echo "ARM64 scanner: $(ARM64_CROSS_SCANNER)"
+	file "$(ARM64_CROSS_DAEMON_REAL)" | grep -F "ARM aarch64"
+	@echo "ARM64 runner: $(ARM64_CROSS_RUNNER)"
+	@echo "ARM64 daemon: $(ARM64_CROSS_DAEMON)"
 
 smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP)
 	@echo "=== Running make smoke ==="
@@ -476,7 +465,7 @@ smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP)
 check:
 	@echo "=== Running make check ==="
 	$(MAKE) all
-	$(MAKE) scanner-tests
+	$(MAKE) daemon-tests
 	$(MAKE) smoke
 
 validate:
@@ -504,7 +493,7 @@ vm-micro-smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(BZIMAGE_PATH)
 # Run the full micro benchmark suite in a VM.
 # To run only specific benchmarks: make vm-micro BENCH="simple bitcount"
 # To use a named policy set: make vm-micro POLICY=all-apply
-vm-micro: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(SCANNER_PATH) verify-build $(BZIMAGE_PATH)
+vm-micro: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(DAEMON_PATH) verify-build $(BZIMAGE_PATH)
 	@echo "=== Running make vm-micro (POLICY=$(POLICY)) ==="
 	mkdir -p "$(MICRO_RESULTS_DEV_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
@@ -517,21 +506,21 @@ vm-micro: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(SCANNER_PATH) verify-build $(BZIM
 			--output "$(VM_MICRO_OUTPUT)"'
 
 # The corpus batch harness already manages one vng boot per target internally.
-vm-corpus: $(MICRO_RUNNER) $(SCANNER_PATH) verify-build $(BZIMAGE_PATH)
+vm-corpus: $(MICRO_RUNNER) $(DAEMON_PATH) verify-build $(BZIMAGE_PATH)
 	@echo "=== Running make vm-corpus ==="
 	mkdir -p "$(CORPUS_RESULTS_DEV_DIR)"
 	$(VENV_ACTIVATE) python3 "$(ROOT_DIR)/corpus/driver.py" packet \
 		--skip-build \
 		--kernel-image "$(BZIMAGE_PATH)" \
 		--runner "$(MICRO_RUNNER)" \
-		--scanner "$(SCANNER_PATH)" \
+		--scanner "$(DAEMON_PATH)" \
 		--btf-custom-path "$(VMLINUX_PATH)" \
 		--repeat "$(REPEAT)" \
 		--use-policy \
 		--output-json "$(VM_CORPUS_OUTPUT_JSON)" \
 		--output-md "$(VM_CORPUS_OUTPUT_MD)"
 
-vm-e2e: $(MICRO_RUNNER) $(SCANNER_PATH) verify-build $(BZIMAGE_PATH)
+vm-e2e: $(MICRO_RUNNER) $(DAEMON_PATH) verify-build $(BZIMAGE_PATH)
 	@echo "=== Running make vm-e2e ==="
 	mkdir -p "$(E2E_RESULTS_DEV_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
@@ -644,7 +633,7 @@ clean:
 	@echo "=== Running make clean ==="
 	$(MAKE) -C "$(MICRO_DIR)" clean
 	rm -f "$(MICRO_BPF_STAMP)"
-	rm -rf "$(SCANNER_BUILD_DIR)"
+	cargo clean --manifest-path "$(DAEMON_DIR)/Cargo.toml"
 	$(MAKE) -C "$(KERNEL_TEST_DIR)" clean
 	$(MAKE) -C "$(KERNEL_DIR)" clean
 	rm -f \

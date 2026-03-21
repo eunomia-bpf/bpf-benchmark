@@ -76,7 +76,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--execve-object", default=str(DEFAULT_TETRAGON_EXECVE_OBJECT))
     parser.add_argument("--kprobe-object", default=str(DEFAULT_TETRAGON_KPROBE_OBJECT))
     parser.add_argument("--runner", default=str(ROOT_DIR / "runner" / "build" / "micro_exec"))
-    parser.add_argument("--scanner", default=str(ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"))
+    parser.add_argument("--scanner", default=str(ROOT_DIR / "daemon" / "build" / "bpfrejit-daemon"))
     parser.add_argument("--load-timeout", type=int, default=20)
     parser.add_argument("--attach-timeout", type=int, default=20)
     parser.add_argument("--smoke-duration", type=int, default=5)

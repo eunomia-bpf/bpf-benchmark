@@ -15,13 +15,13 @@ if __package__ in {None, ""}:
 
 from runner.libs import ROOT_DIR, ensure_root, prepare_bpftool_environment, write_json  # noqa: E402
 from runner.libs.metrics import enable_bpf_stats  # noqa: E402
-from runner.libs.profiler import DEFAULT_SCANNER, profile_programs  # noqa: E402
+from runner.libs.profiler import DEFAULT_DAEMON, profile_programs  # noqa: E402
 from runner.libs.workload import WorkloadResult  # noqa: E402
 
 from e2e.cases.tracee.case import (  # noqa: E402
     DEFAULT_CONFIG as DEFAULT_TRACEE_CONFIG,
     DEFAULT_RUNNER as DEFAULT_TRACEE_RUNNER,
-    DEFAULT_SCANNER as DEFAULT_TRACEE_SCANNER,
+    DEFAULT_DAEMON as DEFAULT_TRACEE_SCANNER,
     DEFAULT_SETUP_SCRIPT as DEFAULT_TRACEE_SETUP_SCRIPT,
     DEFAULT_TRACEE_OBJECT,
     ManualLibbpf as TraceeManualLibbpf,
@@ -41,7 +41,7 @@ from e2e.cases.tetragon.case import (  # noqa: E402
     DEFAULT_KPROBE_OBJECT,
     DEFAULT_LOAD_TIMEOUT_S as DEFAULT_TETRAGON_LOAD_TIMEOUT_S,
     DEFAULT_RUNNER as DEFAULT_TETRAGON_RUNNER,
-    DEFAULT_SCANNER as DEFAULT_TETRAGON_SCANNER,
+    DEFAULT_DAEMON as DEFAULT_TETRAGON_SCANNER,
     DEFAULT_SETUP_SCRIPT as DEFAULT_TETRAGON_SETUP_SCRIPT,
     DEFAULT_SMOKE_DURATION_S as DEFAULT_TETRAGON_SMOKE_DURATION_S,
     DEFAULT_WORKLOADS as DEFAULT_TETRAGON_WORKLOADS,
@@ -62,7 +62,7 @@ from e2e.cases.katran.case import (  # noqa: E402
     DEFAULT_KATRAN_OBJECT,
     DEFAULT_PROGRAM_NAME as DEFAULT_KATRAN_PROGRAM_NAME,
     DEFAULT_RUNNER as DEFAULT_KATRAN_RUNNER,
-    DEFAULT_SCANNER as DEFAULT_KATRAN_SCANNER,
+    DEFAULT_DAEMON as DEFAULT_KATRAN_SCANNER,
     DEFAULT_SETUP_SCRIPT as DEFAULT_KATRAN_SETUP_SCRIPT,
     DEFAULT_SMOKE_DURATION_S as DEFAULT_KATRAN_SMOKE_DURATION_S,
     DEFAULT_SMOKE_MIN_MEASUREMENT_REQUESTS,
@@ -161,8 +161,8 @@ def add_common_profile_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--output-json", required=True, help="Output JSON path.")
     parser.add_argument(
         "--scanner",
-        default=str(DEFAULT_SCANNER),
-        help="Path to bpf-jit-scanner used for live enumerate.",
+        default=str(DEFAULT_DAEMON),
+        help="Path to bpfrejit-daemon used for live enumerate.",
     )
     parser.add_argument("--no-sites", action="store_true", help="Skip live enumerate site census collection.")
     parser.add_argument("--no-perf", action="store_true", help="Skip perf stat collection.")

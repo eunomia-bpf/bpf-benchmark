@@ -95,9 +95,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--warmups", type=int, help="Warmup runs per pair.")
     parser.add_argument("--repeat", type=int, help="Repeat count inside each helper sample.")
     parser.add_argument(
-        "--blind-apply",
+        "--rejit",
         action="store_true",
-        help="For `kernel-recompile`, ignore manifest policy and force blind all-apply auto-scan.",
+        help="Enable REJIT same-bytecode mode for kernel-rejit runtimes.",
     )
     parser.add_argument("--output", help="Override JSON output path.")
     parser.add_argument("--cpu", help="Pin child processes to a specific CPU via taskset.")
@@ -272,7 +272,7 @@ def collect_provenance(
     linux_dir = ROOT_DIR / "vendor" / "linux-framework"
     kernel_commit = _git_rev_parse(linux_dir) if linux_dir.is_dir() else "unknown"
 
-    scanner_dir = ROOT_DIR / "scanner"
+    scanner_dir = ROOT_DIR / "daemon"
     scanner_commit = _git_rev_parse(scanner_dir) if scanner_dir.is_dir() else "unknown"
 
     repo_git_sha = _git_rev_parse(ROOT_DIR)
@@ -349,10 +349,6 @@ def ensure_artifacts_built(suite: SuiteSpec, build_bpftool: bool) -> None:
         root_dir=ROOT_DIR,
         build_order=build_order,
     )
-
-
-def resolve_policy_inputs(benchmark) -> tuple[str | None, Path | None]:
-    return None, benchmark.policy_file
 
 
 def attach_baseline_adjustments(results: dict[str, object], baseline_benchmark: str | None) -> None:
@@ -435,8 +431,8 @@ def main(argv: list[str] | None = None) -> int:
 
     benchmarks = select_benchmarks(args.benches, suite)
     runtimes = select_runtimes(args.runtimes, suite)
-    if args.blind_apply and not any(runtime.mode in {"kernel-recompile", "kernel_recompile"} for runtime in runtimes):
-        raise SystemExit("--blind-apply requires --runtime kernel-recompile")
+    if args.rejit and not any(runtime.mode in {"kernel-rejit", "kernel_rejit"} for runtime in runtimes):
+        raise SystemExit("--rejit requires --runtime kernel-rejit")
     if args.shuffle_seed is not None:
         random.Random(args.shuffle_seed).shuffle(benchmarks)
     runtime_order_seed = args.shuffle_seed if args.shuffle_seed is not None else DEFAULT_RUNTIME_ORDER_SEED
@@ -483,7 +479,7 @@ def main(argv: list[str] | None = None) -> int:
             "iterations": iterations,
             "warmups": warmups,
             "repeat": args.repeat if args.repeat is not None else suite.defaults.repeat,
-            "blind_apply": args.blind_apply,
+            "rejit": args.rejit,
             "perf_counters": args.perf_counters,
             "perf_scope": args.perf_scope,
             "shuffle_seed": args.shuffle_seed,
@@ -525,14 +521,7 @@ def main(argv: list[str] | None = None) -> int:
         iteration_runtime_orders: list[list[str]] = []
         for runtime in runtimes:
             repeat = args.repeat if args.repeat is not None else runtime.default_repeat
-            inline_policy: str | None = None
-            policy_file: Path | None = None
-            if runtime.mode in {"kernel-recompile", "kernel_recompile"}:
-                if args.blind_apply:
-                    inline_policy = None
-                    policy_file = None
-                else:
-                    inline_policy, policy_file = resolve_policy_inputs(benchmark)
+            is_rejit_runtime = runtime.mode in {"kernel-rejit", "kernel_rejit"}
             command = build_micro_benchmark_command(
                 suite.build.runner_binary,
                 runtime_mode=runtime.mode,
@@ -541,12 +530,10 @@ def main(argv: list[str] | None = None) -> int:
                 repeat=repeat,
                 memory=memory_file,
                 input_size=benchmark.kernel_input_size,
-                policy=inline_policy,
-                policy_file=policy_file,
                 perf_counters=args.perf_counters,
                 perf_scope=args.perf_scope,
                 require_sudo=runtime.require_sudo,
-                blind_apply=bool(args.blind_apply and runtime.mode in {"kernel-recompile", "kernel_recompile"}),
+                rejit=is_rejit_runtime,
             )
 
             for _ in range(warmups):
@@ -555,7 +542,6 @@ def main(argv: list[str] | None = None) -> int:
             runtime_samples[runtime.name] = {
                 "repeat": repeat,
                 "command": command,
-                "policy_file": policy_file,
                 "samples": [],
             }
 
@@ -583,7 +569,6 @@ def main(argv: list[str] | None = None) -> int:
             sample_entry = runtime_samples[runtime.name]
             samples = sample_entry["samples"]
             repeat = sample_entry["repeat"]
-            runtime_policy_file = sample_entry["policy_file"]
             compile_values = [sample["compile_ns"] for sample in samples]
             exec_values = [sample["exec_ns"] for sample in samples]
             result_values = [sample["result"] for sample in samples]
@@ -598,7 +583,6 @@ def main(argv: list[str] | None = None) -> int:
                 "repeat": repeat,
                 "artifacts": {
                     "program_object": str(benchmark.program_object),
-                    "policy_file": str(runtime_policy_file) if runtime_policy_file is not None else None,
                 },
                 "samples": samples,
                 "compile_ns": ns_summary(compile_values),

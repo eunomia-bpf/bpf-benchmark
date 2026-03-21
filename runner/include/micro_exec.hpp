@@ -42,19 +42,8 @@ struct cli_options {
     std::filesystem::path program;
     std::optional<std::filesystem::path> memory;
     std::optional<std::filesystem::path> btf_custom_path;
-    std::optional<std::filesystem::path> directive_blob;
-    std::optional<std::string> policy;                 // inline YAML/JSON policy config
-    std::optional<std::filesystem::path> policy_file;  // policy config file
-    std::optional<std::filesystem::path> policy_blob;    // scanner-generated recompile policy
-    bool recompile_cmov = false;                        // auto-scan xlated for cmov
-    bool recompile_wide = false;                        // auto-scan xlated for wide_load
-    bool recompile_rotate = false;                      // auto-scan xlated for rotate
-    bool recompile_rotate_rorx = false;                 // rotate with RORX (BMI2)
-    bool recompile_lea = false;                         // auto-scan xlated for lea fusion
-    bool recompile_extract = false;                     // auto-scan xlated for bitfield extract
-    bool recompile_all = false;                         // auto-scan for all pattern types
-    bool recompile_v5 = false;                          // compatibility flag; scanner path is v5-only
-    std::vector<std::string> skip_families;             // skip selected auto-scan families
+    bool rejit = false;                                 // enable REJIT (same-bytecode by default)
+    std::optional<std::filesystem::path> rejit_program; // replacement ELF for REJIT
     std::optional<std::string> program_name;
     std::string io_mode = "map";
     bool manual_load = false;
@@ -105,33 +94,12 @@ struct code_size_summary {
     uint64_t native_code_bytes = 0;
 };
 
-struct directive_scan_summary {
-    bool performed = false;
-    uint64_t cmov_sites = 0;
-    uint64_t wide_sites = 0;
-    uint64_t rotate_sites = 0;
-    uint64_t lea_sites = 0;
-    uint64_t bitfield_sites = 0;
-    uint64_t endian_sites = 0;
-    uint64_t branch_flip_sites = 0;
-};
-
-struct recompile_summary {
+struct rejit_summary {
     bool requested = false;
-    std::string mode = "none";
-    std::vector<std::string> requested_families;
-    std::vector<std::string> skipped_families;
-    bool policy_generated = false;
-    uint64_t policy_bytes = 0;
+    std::string mode = "none";            // "same-bytecode" or "replacement"
     bool syscall_attempted = false;
     bool applied = false;
-    uint64_t cmov_sites = 0;
-    uint64_t wide_sites = 0;
-    uint64_t rotate_sites = 0;
-    uint64_t lea_sites = 0;
-    uint64_t bitfield_sites = 0;
-    uint64_t endian_sites = 0;
-    uint64_t branch_flip_sites = 0;
+    uint32_t insn_cnt = 0;                // number of BPF insns sent to REJIT
     std::string error;
 };
 
@@ -156,8 +124,7 @@ struct sample_result {
     std::vector<std::string> disabled_passes;
     std::vector<timing_phase> phases_ns;
     perf_counter_capture perf_counters;
-    directive_scan_summary directive_scan;
-    recompile_summary recompile;
+    rejit_summary rejit;
 };
 
 [[noreturn]] void fail(const std::string &message);

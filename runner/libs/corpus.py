@@ -4,14 +4,13 @@ import argparse
 import json
 import math
 import os
-import re
 import subprocess
 import time
 from pathlib import Path
 from typing import Any, Mapping
 
 from . import maybe_refresh_latest_alias
-from .commands import build_runner_command, build_scanner_command as base_build_scanner_command
+from .commands import build_runner_command
 from .results import normalize_directive_scan, parse_runner_sample
 
 
@@ -411,92 +410,6 @@ def maybe_sudo_prefix(enabled: bool) -> list[str]:
     return ["sudo", "-n"]
 
 
-def build_kernel_command(
-    runner: Path,
-    object_path: Path,
-    program_name: str,
-    io_mode: str,
-    memory_path: Path | None,
-    input_size: int,
-    repeat: int,
-    *,
-    compile_only: bool,
-    recompile_all: bool,
-    recompile_v5: bool = False,
-    skip_families: list[str] | tuple[str, ...] = (),
-    dump_xlated: Path | None = None,
-    btf_custom_path: Path | None = None,
-    use_sudo: bool = True,
-) -> list[str]:
-    command = build_runner_command(
-        runner,
-        "run-kernel",
-        program=object_path,
-        program_name=program_name,
-        io_mode=io_mode,
-        repeat=max(1, repeat),
-        memory=memory_path,
-        input_size=input_size,
-        raw_packet=(io_mode == "packet"),
-        compile_only=compile_only,
-        recompile_all=recompile_all,
-        recompile_v5=recompile_v5,
-        skip_families=skip_families,
-        dump_xlated=dump_xlated,
-        btf_custom_path=btf_custom_path,
-    )
-    return [*maybe_sudo_prefix(use_sudo), *command]
-
-
-def build_run_kernel_command(
-    *,
-    runner: Path | str,
-    object_path: Path | str,
-    program_name: str,
-    io_mode: str,
-    memory_path: Path | str | None,
-    input_size: int,
-    repeat: int,
-    compile_only: bool,
-    recompile_v5: bool,
-    recompile_all: bool | None = None,
-    skip_families: tuple[str, ...] | list[str] = (),
-    policy_file: Path | str | None = None,
-    dump_xlated: Path | str | None = None,
-    btf_custom_path: Path | str | None = None,
-    use_sudo: bool = False,
-) -> list[str]:
-    if recompile_all is None:
-        recompile_all = False
-        if policy_file is None:
-            recompile_v5 = False
-    return build_kernel_command(
-        Path(runner),
-        Path(object_path),
-        program_name,
-        io_mode,
-        Path(memory_path) if memory_path is not None else None,
-        input_size,
-        repeat,
-        compile_only=compile_only,
-        recompile_all=recompile_all,
-        recompile_v5=recompile_v5,
-        skip_families=skip_families,
-        dump_xlated=Path(dump_xlated) if dump_xlated is not None else None,
-        btf_custom_path=Path(btf_custom_path) if btf_custom_path is not None else None,
-        use_sudo=use_sudo,
-    )
-
-
-def build_scanner_command(
-    scanner: Path | str,
-    xlated_path: Path | str,
-    *,
-    json_output: bool = False,
-) -> list[str]:
-    return base_build_scanner_command(scanner, xlated_path, json_output=json_output)
-
-
 def invocation_summary(result: Mapping[str, Any] | None) -> dict[str, Any] | None:
     if result is None:
         return None
@@ -580,51 +493,6 @@ def program_label(record: Mapping[str, Any]) -> str:
     return f"{record['object_path']}:{record['program_name']}"
 
 
-def parse_scanner_v5_output(stdout: str) -> dict[str, int]:
-    counts = normalize_directive_scan({})
-    accepted = False
-    for line in stdout.splitlines():
-        stripped = line.strip()
-        if not stripped:
-            continue
-        if stripped.startswith("{") and stripped.endswith("}"):
-            try:
-                payload = json.loads(stripped)
-            except json.JSONDecodeError:
-                continue
-            if not isinstance(payload, Mapping):
-                continue
-            summary = payload.get("summary")
-            if isinstance(summary, Mapping):
-                accepted = True
-                counts = normalize_directive_scan(summary)
-                break
-    if accepted:
-        return counts
-
-    patterns = {
-        "cmov_sites": re.compile(r"^\s*cmov:\s+(\d+)\s*$"),
-        "wide_sites": re.compile(r"^\s*wide:\s+(\d+)\s*$"),
-        "rotate_sites": re.compile(r"^\s*rotate:\s+(\d+)\s*$"),
-        "lea_sites": re.compile(r"^\s*lea:\s+(\d+)\s*$"),
-        "bitfield_sites": re.compile(r"^\s*extract:\s*(\d+)\s*$"),
-        "endian_sites": re.compile(r"^\s*endian:\s*(\d+)\s*$"),
-        "branch_flip_sites": re.compile(r"^\s*bflip:\s*(\d+)\s*$"),
-    }
-    for line in stdout.splitlines():
-        stripped = line.strip()
-        if re.match(r"^Accepted\s+\d+\s+v5 site\(s\)\s*$", stripped):
-            accepted = True
-        for field, pattern in patterns.items():
-            match = pattern.match(stripped)
-            if match:
-                counts[field] = int(match.group(1))
-    counts["total_sites"] = sum(counts[field] for field in patterns)
-    if not accepted and counts["total_sites"] == 0:
-        raise RuntimeError("scanner did not emit a v5 summary")
-    return counts
-
-
 def markdown_table(headers: list[str], rows: list[list[Any]]) -> list[str]:
     lines = [
         "| " + " | ".join(headers) + " |",
@@ -683,9 +551,6 @@ __all__ = [
     "add_runner_argument",
     "add_scanner_argument",
     "add_timeout_argument",
-    "build_run_kernel_command",
-    "build_scanner_command",
-    "build_kernel_command",
     "directive_scan_from_record",
     "ensure_parent",
     "execution_plan",
@@ -703,7 +568,6 @@ __all__ = [
     "maybe_sudo_prefix",
     "normalize_section_root",
     "parse_runner_json",
-    "parse_scanner_v5_output",
     "program_label",
     "require_minimum",
     "relpath",

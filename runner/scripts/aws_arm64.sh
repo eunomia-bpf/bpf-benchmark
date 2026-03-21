@@ -31,13 +31,13 @@ ARM64_WORKTREE_DIR="${ARM64_WORKTREE_DIR:-$ROOT_DIR/.worktrees/linux-framework-a
 ARM64_CROSSBUILD_OUTPUT_DIR="${ARM64_CROSSBUILD_OUTPUT_DIR:-$CACHE_DIR/binaries}"
 ARM64_CROSS_RUNNER="${ARM64_CROSS_RUNNER:-$ARM64_CROSSBUILD_OUTPUT_DIR/runner/build/micro_exec}"
 ARM64_CROSS_RUNNER_REAL="${ARM64_CROSS_RUNNER_REAL:-$ARM64_CROSSBUILD_OUTPUT_DIR/runner/build/micro_exec.real}"
-ARM64_CROSS_SCANNER="${ARM64_CROSS_SCANNER:-$ARM64_CROSSBUILD_OUTPUT_DIR/scanner/build/bpf-jit-scanner}"
-ARM64_CROSS_SCANNER_REAL="${ARM64_CROSS_SCANNER_REAL:-$ARM64_CROSSBUILD_OUTPUT_DIR/scanner/build/bpf-jit-scanner.real}"
+ARM64_CROSS_DAEMON="${ARM64_CROSS_DAEMON:-$ARM64_CROSSBUILD_OUTPUT_DIR/daemon/build/bpfrejit-daemon}"
+ARM64_CROSS_DAEMON_REAL="${ARM64_CROSS_DAEMON_REAL:-$ARM64_CROSSBUILD_OUTPUT_DIR/daemon/build/bpfrejit-daemon.real}"
 ARM64_CROSS_LIB_DIR="${ARM64_CROSS_LIB_DIR:-$ARM64_CROSSBUILD_OUTPUT_DIR/lib}"
 CROSS_COMPILE_PREFIX="${CROSS_COMPILE_ARM64:-aarch64-linux-gnu-}"
-SCANNER_SMOKE_OBJECT="${SCANNER_SMOKE_OBJECT:-$ROOT_DIR/corpus/build/katran/balancer.bpf.o}"
-SCANNER_SMOKE_POLICY_DIR="${SCANNER_SMOKE_POLICY_DIR:-$ROOT_DIR/corpus/policies/katran/balancer}"
-SCANNER_SMOKE_PROGRAM="${SCANNER_SMOKE_PROGRAM:-balancer_ingress}"
+SMOKE_CORPUS_OBJECT="${SMOKE_CORPUS_OBJECT:-$ROOT_DIR/corpus/build/katran/balancer.bpf.o}"
+SMOKE_CORPUS_POLICY_DIR="${SMOKE_CORPUS_POLICY_DIR:-$ROOT_DIR/corpus/policies/katran/balancer}"
+SMOKE_CORPUS_PROGRAM="${SMOKE_CORPUS_PROGRAM:-balancer_ingress}"
 
 STATE_INSTANCE_ID=""
 STATE_INSTANCE_IP=""
@@ -555,8 +555,8 @@ ensure_cross_arm64_artifacts() {
 
     file "$ARM64_CROSS_RUNNER_REAL" | grep -F "ARM aarch64" >/dev/null \
         || die "cross-built micro_exec is not an ARM64 binary: ${ARM64_CROSS_RUNNER_REAL}"
-    file "$ARM64_CROSS_SCANNER_REAL" | grep -F "ARM aarch64" >/dev/null \
-        || die "cross-built scanner is not an ARM64 binary: ${ARM64_CROSS_SCANNER_REAL}"
+    file "$ARM64_CROSS_DAEMON_REAL" | grep -F "ARM aarch64" >/dev/null \
+        || die "cross-built daemon is not an ARM64 binary: ${ARM64_CROSS_DAEMON_REAL}"
 }
 
 ensure_benchmark_bundle() {
@@ -572,15 +572,15 @@ ensure_benchmark_bundle() {
     require_local_path "$ROOT_DIR/micro/policies/load_byte_recompose.yaml" "load_byte_recompose policy"
     require_local_path "$ROOT_DIR/runner/libs/__init__.py" "runner python helpers"
     require_local_path "$ROOT_DIR/runner/scripts/arm64_t4g_remote_benchmark.py" "ARM64 remote benchmark runner"
-    require_local_path "$SCANNER_SMOKE_OBJECT" "scanner smoke object"
-    require_local_path "$SCANNER_SMOKE_POLICY_DIR/${SCANNER_SMOKE_PROGRAM}.policy.yaml" "scanner smoke policy"
+    require_local_path "$SMOKE_CORPUS_OBJECT" "scanner smoke object"
+    require_local_path "$SMOKE_CORPUS_POLICY_DIR/${SMOKE_CORPUS_PROGRAM}.policy.yaml" "scanner smoke policy"
 
     rm -rf "$BENCHMARK_BUNDLE_DIR"
     mkdir -p \
         "$BENCHMARK_BUNDLE_DIR/runner/libs" \
         "$BENCHMARK_BUNDLE_DIR/runner/scripts" \
         "$BENCHMARK_BUNDLE_DIR/runner/build" \
-        "$BENCHMARK_BUNDLE_DIR/scanner/build" \
+        "$BENCHMARK_BUNDLE_DIR/daemon/build" \
         "$BENCHMARK_BUNDLE_DIR/lib" \
         "$BENCHMARK_BUNDLE_DIR/micro/programs" \
         "$BENCHMARK_BUNDLE_DIR/micro/generated-inputs" \
@@ -591,8 +591,8 @@ ensure_benchmark_bundle() {
 
     cp "$ARM64_CROSS_RUNNER" "$BENCHMARK_BUNDLE_DIR/runner/build/micro_exec"
     cp "$ARM64_CROSS_RUNNER_REAL" "$BENCHMARK_BUNDLE_DIR/runner/build/micro_exec.real"
-    cp "$ARM64_CROSS_SCANNER" "$BENCHMARK_BUNDLE_DIR/scanner/build/bpf-jit-scanner"
-    cp "$ARM64_CROSS_SCANNER_REAL" "$BENCHMARK_BUNDLE_DIR/scanner/build/bpf-jit-scanner.real"
+    cp "$ARM64_CROSS_DAEMON" "$BENCHMARK_BUNDLE_DIR/daemon/build/bpfrejit-daemon"
+    cp "$ARM64_CROSS_DAEMON_REAL" "$BENCHMARK_BUNDLE_DIR/daemon/build/bpfrejit-daemon.real"
     cp -a "$ARM64_CROSS_LIB_DIR/." "$BENCHMARK_BUNDLE_DIR/lib/"
 
     cp "$ROOT_DIR"/micro/*.py "$BENCHMARK_BUNDLE_DIR/micro/"
@@ -605,8 +605,8 @@ ensure_benchmark_bundle() {
     cp "$ROOT_DIR/runner/scripts/arm64_t4g_remote_benchmark.py" \
         "$BENCHMARK_BUNDLE_DIR/runner/scripts/"
 
-    cp "$SCANNER_SMOKE_OBJECT" "$BENCHMARK_BUNDLE_DIR/corpus/build/katran/balancer.bpf.o"
-    cp -a "$SCANNER_SMOKE_POLICY_DIR/." "$BENCHMARK_BUNDLE_DIR/corpus/policies/katran/balancer/"
+    cp "$SMOKE_CORPUS_OBJECT" "$BENCHMARK_BUNDLE_DIR/corpus/build/katran/balancer.bpf.o"
+    cp -a "$SMOKE_CORPUS_POLICY_DIR/." "$BENCHMARK_BUNDLE_DIR/corpus/policies/katran/balancer/"
 
     tar -C "$BENCHMARK_BUNDLE_DIR" -czf "$BENCHMARK_BUNDLE_TAR" .
 }

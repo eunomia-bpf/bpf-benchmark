@@ -60,12 +60,6 @@ except ImportError:
         summarize_optional_ns,
         summarize_phase_timings,
     )
-try:
-    import modes as corpus_modes
-except ImportError:
-    from corpus import modes as corpus_modes
-
-
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_SUITE = ROOT_DIR / "corpus" / "config" / "macro_corpus.yaml"
 DEFAULT_PACKET = ROOT_DIR / "corpus" / "inputs" / "macro_dummy_packet_64.bin"
@@ -78,9 +72,8 @@ DEFAULT_BTF_CANDIDATES = (
 )
 DEFAULT_OUTPUT = authoritative_output_path(ROOT_DIR / "corpus" / "results", "macro_corpus")
 DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
-DEFAULT_SCANNER = ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"
+DEFAULT_DAEMON = ROOT_DIR / "daemon" / "build" / "bpfrejit-daemon"
 DEFAULT_BPFTOOL = "bpftool"
-MODE_NAMES = ("packet", "tracing", "perf", "code-size")
 ZERO_DIRECTIVE_SCAN = {
     "cmov_sites": 0,
     "wide_sites": 0,
@@ -149,7 +142,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     add_repeat_argument(parser, help_text="Inner repeat count for test_run or trigger commands.")
     parser.add_argument("--output", help="Override JSON output path.")
     parser.add_argument("--seed", type=int, default=0, help="Seed used for runtime order shuffling.")
-    parser.add_argument("--skip-recompile", action="store_true", help="Only run baseline kernel mode.")
     parser.add_argument("--skip-build", action="store_true", help="Do not build micro_exec when missing.")
     parser.add_argument("--list", action="store_true", help="List configured benchmarks and runtimes.")
     parser.add_argument("--no-sudo-reexec", action="store_true", help="Do not automatically re-exec under sudo.")
@@ -332,7 +324,7 @@ def load_suite(path: Path, output_override: str | None) -> SuiteSpec:
     runner_binary = Path(manifest.build.runner_binary or DEFAULT_RUNNER)
     if not runner_binary.is_absolute():
         runner_binary = (ROOT_DIR / runner_binary).resolve()
-    scanner_binary = Path(manifest.build.scanner_binary or DEFAULT_SCANNER)
+    scanner_binary = Path(manifest.build.scanner_binary or DEFAULT_DAEMON)
     if not scanner_binary.is_absolute():
         scanner_binary = (ROOT_DIR / scanner_binary).resolve()
 
@@ -461,7 +453,6 @@ def build_runner_command(
     *,
     repeat: int,
     compile_only: bool,
-    recompile_v5: bool,
 ) -> list[str]:
     io_mode, input_path, input_size = default_io_plan(spec)
     btf_path = detect_btf_path(spec.btf_path)
@@ -488,8 +479,6 @@ def build_runner_command(
         command.extend(["--btf-custom-path", str(btf_path)])
     if compile_only:
         command.append("--compile-only")
-    if recompile_v5:
-        command.extend(["--recompile-v5", "--recompile-all"])
     return command
 
 
@@ -500,7 +489,6 @@ def run_micro_exec_sample(
     *,
     repeat: int,
     compile_only: bool,
-    recompile_v5: bool,
 ) -> dict[str, Any]:
     command = build_runner_command(
         suite,
@@ -508,7 +496,6 @@ def run_micro_exec_sample(
         program_name,
         repeat=repeat,
         compile_only=compile_only,
-        recompile_v5=recompile_v5,
     )
     started_ns = time.perf_counter_ns()
     completed = run_text_command(command)
@@ -671,103 +658,19 @@ def run_trigger_command(command_text: str, repeat: int, timeout_seconds: int) ->
     }
 
 
-def _apply_one_v5_enumerate(
-    scanner_binary: Path,
-    prog_id: int,
-) -> tuple[str, str, str, str]:
-    """Run scanner enumerate --prog-id --recompile for one program."""
-    command = [
-        str(scanner_binary),
-        "enumerate",
-        "--prog-id",
-        str(prog_id),
-        "--all",
-        "--recompile",
-        "--json",
-    ]
-    command_str = " ".join(command)
-    try:
-        completed = subprocess.run(
-            command,
-            capture_output=True,
-            text=True,
-            timeout=60,
-        )
-    except Exception as exc:
-        return ("", "", command_str, str(exc))
-    if completed.returncode != 0:
-        detail = (completed.stderr or completed.stdout or "").strip()
-        return (
-            completed.stdout.strip()[-4000:],
-            completed.stderr.strip()[-4000:],
-            command_str,
-            detail or f"enumerate --prog-id {prog_id} --recompile failed (rc={completed.returncode})",
-        )
-    return (
-        completed.stdout.strip()[-4000:],
-        completed.stderr.strip()[-4000:],
-        command_str,
-        "",
-    )
-
-
-def apply_recompile_v5(scanner_binary: Path, attached: list[dict[str, Any]]) -> dict[str, Any]:
-    total_ns = 0
-    details = []
-    errors: list[str] = []
-    for entry in attached:
-        prog_id = int(entry["prog_id"])
-        program_name = entry["program_name"]
-        started_ns = time.perf_counter_ns()
-        stdout_text, stderr_text, command_str, error_text = _apply_one_v5_enumerate(
-            scanner_binary, prog_id
-        )
-        wall_ns = time.perf_counter_ns() - started_ns
-        total_ns += wall_ns
-        if error_text:
-            errors.append(f"{program_name}: {error_text}")
-        details.append(
-            {
-                "program_name": program_name,
-                "prog_id": entry["prog_id"],
-                "scanner_command": command_str,
-                "stdout": stdout_text,
-                "stderr": stderr_text,
-                "wall_ns": wall_ns,
-                "error": error_text,
-            }
-        )
-    return {
-        "applied": len(attached) > 0 and not errors,
-        "wall_ns": total_ns,
-        "details": details,
-        "error": "; ".join(errors),
-    }
-
-
 def run_attach_trigger_sample(
     suite: SuiteSpec,
     spec: ProgramSpec,
     *,
     repeat: int,
-    recompile_v5: bool,
     iteration_idx: int,
 ) -> dict[str, Any]:
     if not spec.trigger:
         raise RuntimeError(f"{spec.name}: attach_trigger requires a trigger command")
 
-    pin_dir = unique_pin_dir(spec.name, "kernel_recompile_v5" if recompile_v5 else "kernel", iteration_idx)
+    pin_dir = unique_pin_dir(spec.name, "kernel", iteration_idx)
 
     started_ns = time.perf_counter_ns()
-    recompile_record = {
-        "requested": recompile_v5,
-        "mode": "auto-scan-v5" if recompile_v5 else "none",
-        "policy_generated": False,
-        "policy_bytes": 0,
-        "syscall_attempted": False,
-        "applied": False,
-        "error": "",
-    }
     load_attempts: list[dict[str, Any]] = []
     try:
         load_command, load_attempts = run_bpftool_loadall(
@@ -783,21 +686,11 @@ def run_attach_trigger_sample(
         if not attached:
             raise RuntimeError(f"{spec.name}: no attached programs found under {pin_dir}")
 
-        recompile_ns = 0
-        apply_info = None
-        if recompile_v5:
-            recompile_record["policy_generated"] = True
-            recompile_record["syscall_attempted"] = True
-            apply_info = apply_recompile_v5(suite.scanner_binary, attached)
-            recompile_ns = int(apply_info["wall_ns"])
-            recompile_record["applied"] = bool(apply_info["applied"])
-            recompile_record["error"] = str(apply_info.get("error", ""))
-
         infos = [program_info_by_id(suite.bpftool_binary, int(entry["prog_id"])) for entry in attached]
         code_size = aggregate_program_infos(infos)
         trigger = run_trigger_command(spec.trigger, repeat, spec.trigger_timeout_seconds)
         sample = {
-            "compile_ns": load_ns + recompile_ns,
+            "compile_ns": load_ns,
             "exec_ns": trigger["exec_ns"],
             "wall_exec_ns": trigger["wall_exec_ns"],
             "timing_source": "wall_clock",
@@ -817,10 +710,9 @@ def run_attach_trigger_sample(
                 "error": "",
             },
             "directive_scan": {
-                "performed": recompile_v5,
+                "performed": False,
                 **ZERO_DIRECTIVE_SCAN,
             },
-            "recompile": recompile_record,
             "attached_programs": attached,
             "trigger": {
                 "command": spec.trigger,
@@ -832,13 +724,7 @@ def run_attach_trigger_sample(
             "bpftool_command": load_command,
             "bpftool_attempts": load_attempts,
         }
-        if apply_info is not None:
-            sample["phases_ns"]["recompile_apply_ns"] = recompile_ns
-            sample["recompile"]["details"] = apply_info["details"]
         return sample
-    except Exception as exc:
-        recompile_record["error"] = str(exc)
-        raise
     finally:
         subprocess.run(["rm", "-rf", str(pin_dir)], cwd=ROOT_DIR, capture_output=True, text=True, check=False)
 
@@ -847,20 +733,9 @@ def run_compile_only_loadall_sample(
     suite: SuiteSpec,
     spec: ProgramSpec,
     *,
-    recompile_v5: bool,
     iteration_idx: int,
 ) -> dict[str, Any]:
-    pin_dir = unique_pin_dir(spec.name, "kernel_recompile_v5" if recompile_v5 else "kernel", iteration_idx)
-
-    recompile_record = {
-        "requested": recompile_v5,
-        "mode": "auto-scan-v5" if recompile_v5 else "none",
-        "policy_generated": False,
-        "policy_bytes": 0,
-        "syscall_attempted": False,
-        "applied": False,
-        "error": "",
-    }
+    pin_dir = unique_pin_dir(spec.name, "kernel", iteration_idx)
 
     started_ns = time.perf_counter_ns()
     load_attempts: list[dict[str, Any]] = []
@@ -873,20 +748,10 @@ def run_compile_only_loadall_sample(
         if not pinned:
             raise RuntimeError(f"{spec.name}: no pinned programs found under {pin_dir}")
 
-        recompile_ns = 0
-        apply_info = None
-        if recompile_v5:
-            recompile_record["policy_generated"] = True
-            recompile_record["syscall_attempted"] = True
-            apply_info = apply_recompile_v5(suite.scanner_binary, pinned)
-            recompile_ns = int(apply_info["wall_ns"])
-            recompile_record["applied"] = bool(apply_info["applied"])
-            recompile_record["error"] = str(apply_info.get("error", ""))
-
         infos = [program_info_by_id(suite.bpftool_binary, int(entry["prog_id"])) for entry in pinned]
         code_size = aggregate_program_infos(infos)
         sample = {
-            "compile_ns": load_ns + recompile_ns,
+            "compile_ns": load_ns,
             "exec_ns": 0,
             "wall_exec_ns": 0,
             "timing_source": "none",
@@ -905,18 +770,14 @@ def run_compile_only_loadall_sample(
                 "error": "",
             },
             "directive_scan": {
-                "performed": recompile_v5,
+                "performed": False,
                 **ZERO_DIRECTIVE_SCAN,
             },
-            "recompile": recompile_record,
             "pinned_programs": pinned,
             "effective_repeat": 1,
             "bpftool_command": load_command,
             "bpftool_attempts": load_attempts,
         }
-        if apply_info is not None:
-            sample["phases_ns"]["recompile_apply_ns"] = recompile_ns
-            sample["recompile"]["details"] = apply_info["details"]
         return sample
     finally:
         subprocess.run(["rm", "-rf", str(pin_dir)], cwd=ROOT_DIR, capture_output=True, text=True, check=False)
@@ -930,10 +791,6 @@ def execute_sample(
     repeat: int,
     iteration_idx: int,
 ) -> dict[str, Any]:
-    recompile_v5 = runtime.mode == "kernel-recompile-v5"
-    if recompile_v5 and not spec.recompile_supported:
-        raise RuntimeError(f"{spec.name}: runtime {runtime.name} disabled by config")
-
     inventory = discover_program_inventory(suite.runner_binary, spec.source)
     selected = choose_programs(spec, inventory)
     if spec.test_method == "attach_trigger":
@@ -941,7 +798,6 @@ def execute_sample(
             suite,
             spec,
             repeat=repeat,
-            recompile_v5=recompile_v5,
             iteration_idx=iteration_idx,
         )
 
@@ -950,7 +806,6 @@ def execute_sample(
         return run_compile_only_loadall_sample(
             suite,
             spec,
-            recompile_v5=recompile_v5,
             iteration_idx=iteration_idx,
         )
 
@@ -963,12 +818,7 @@ def execute_sample(
         program_name,
         repeat=repeat,
         compile_only=compile_only,
-        recompile_v5=recompile_v5,
     )
-
-
-def runtimes_require_recompile_support(runtimes: list[RuntimeSpec]) -> bool:
-    return any(runtime.mode == "kernel-recompile-v5" for runtime in runtimes)
 
 
 def host_metadata() -> dict[str, Any]:
@@ -993,17 +843,10 @@ def run_suite(argv: list[str] | None = None) -> int:
 
     benchmarks = select_programs(suite.programs, args.benches)
     runtimes = select_runtimes(suite.runtimes, args.runtimes)
-    if args.skip_recompile:
-        runtimes = [runtime for runtime in runtimes if runtime.mode != "kernel-recompile-v5"]
     if not runtimes:
         raise SystemExit("no runtimes selected")
 
     maybe_build_runner(suite, args.skip_build)
-
-    needs_recompile_support = runtimes_require_recompile_support(runtimes)
-    if needs_recompile_support and not suite.scanner_binary.exists():
-        raise SystemExit(f"scanner binary missing: {suite.scanner_binary}")
-
     maybe_reexec_as_root(args)
 
     iterations = args.iterations if args.iterations is not None else suite.defaults_iterations
@@ -1134,16 +977,6 @@ def run_suite(argv: list[str] | None = None) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     forwarded = list(argv or [])
-    if forwarded and forwarded[0] in MODE_NAMES:
-        return corpus_modes.main(forwarded)
-    if forwarded and forwarded[0] in {"-h", "--help"}:
-        print(
-            "usage: corpus/driver.py [packet|tracing|perf|code-size] [args...]\n"
-            "       corpus/driver.py [macro suite args...]\n"
-            "\n"
-            "When no explicit mode is given, the declarative macro corpus suite runs."
-        )
-        return 0
     return run_suite(forwarded)
 
 

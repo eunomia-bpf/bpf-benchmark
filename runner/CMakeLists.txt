@@ -23,7 +23,6 @@ set(MICRO_REPO_ROOT "${MICRO_REPO_ROOT}" CACHE PATH "Repository root")
 set(MICRO_LIBBPF_PREFIX "${MICRO_LIBBPF_PREFIX}" CACHE PATH "libbpf prefix")
 set(MICRO_LIBBPF_LIBRARY "${MICRO_LIBBPF_LIBRARY}" CACHE FILEPATH "libbpf static library")
 set(MICRO_LLVMBPF_ROOT "${MICRO_REPO_ROOT}/vendor/llvmbpf")
-set(MICRO_SCANNER_ROOT "${MICRO_REPO_ROOT}/scanner")
 option(MICRO_EXEC_ENABLE_LLVMBPF "Build llvmbpf support into micro_exec" ON)
 
 # llvmbpf is built as a static library, so the LLVM package's imported targets
@@ -60,14 +59,6 @@ if(MICRO_EXEC_ENABLE_LLVMBPF)
 
     add_subdirectory("${MICRO_LLVMBPF_ROOT}" "${CMAKE_BINARY_DIR}/llvmbpf")
 endif()
-
-if(NOT EXISTS "${MICRO_SCANNER_ROOT}/CMakeLists.txt")
-    message(FATAL_ERROR "scanner/ was not found at ${MICRO_SCANNER_ROOT}")
-endif()
-
-set(BPF_JIT_SCANNER_BUILD_CLI OFF CACHE BOOL "Build the bpf-jit-scanner CLI tool" FORCE)
-set(BPF_JIT_SCANNER_BUILD_TESTS OFF CACHE BOOL "Build scanner unit tests" FORCE)
-add_subdirectory("${MICRO_SCANNER_ROOT}" "${CMAKE_BINARY_DIR}/scanner")
 
 add_library(vendor_libbpf STATIC IMPORTED GLOBAL)
 set_target_properties(vendor_libbpf PROPERTIES
@@ -106,7 +97,6 @@ endif()
 
 target_link_libraries(micro_exec
     PRIVATE
-        bpf_jit_scanner::scanner
         vendor_libbpf
         PkgConfig::LIBELF
         PkgConfig::ZLIB

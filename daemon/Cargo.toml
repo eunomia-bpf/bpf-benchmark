@@ -1,0 +1,19 @@
+[package]
+name = "bpfrejit-daemon"
+version = "0.1.0"
+edition = "2021"
+description = "BpfReJIT userspace daemon — scans and optimizes live kernel BPF programs"
+
+[[bin]]
+name = "bpfrejit-daemon"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+libc = "0.2"
+thiserror = "2"
+
+[profile.release]
+opt-level = 3
+lto = true

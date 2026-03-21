@@ -44,7 +44,7 @@ DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "scx-e2e.md"
 DEFAULT_SCX_BINARY = ROOT_DIR / "corpus" / "repos" / "scx" / "target" / "release" / "scx_rusty"
 DEFAULT_SCX_REPO = ROOT_DIR / "corpus" / "repos" / "scx"
 DEFAULT_SCX_OBJECT = ROOT_DIR / "corpus" / "build" / "scx" / "scx_rusty_main.bpf.o"
-DEFAULT_SCANNER = ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"
+DEFAULT_DAEMON = ROOT_DIR / "daemon" / "build" / "bpfrejit-daemon"
 DEFAULT_KERNEL = ROOT_DIR / "vendor" / "linux-framework" / "arch" / "x86" / "boot" / "bzImage"
 DEFAULT_BPFTOOL = Path("/usr/local/sbin/bpftool")
 DEFAULT_LOAD_TIMEOUT = 20
@@ -309,11 +309,11 @@ def aggregate_sites(records: Mapping[int | str, Mapping[str, object]]) -> dict[s
 def ensure_artifacts(scanner_binary: Path, scheduler_binary: Path, scx_repo: Path) -> None:
     if not scanner_binary.exists():
         run_command(
-            ["cmake", "-S", "scanner", "-B", "scanner/build", "-DCMAKE_BUILD_TYPE=Release"],
+            ["cmake", "-S", "daemon", "-B", "daemon/build", "-DCMAKE_BUILD_TYPE=Release"],
             timeout=600,
         )
         run_command(
-            ["cmake", "--build", "scanner/build", "--target", "bpf-jit-scanner", "-j"],
+            ["cmake", "--build", "daemon/build", "--target", "bpfrejit-daemon", "-j"],
             timeout=1800,
         )
     if scheduler_binary.exists():
@@ -834,7 +834,7 @@ def build_case_parser() -> argparse.ArgumentParser:
     parser.add_argument("--scheduler-binary", default=str(DEFAULT_SCX_BINARY))
     parser.add_argument("--scheduler-object", default=str(DEFAULT_SCX_OBJECT))
     parser.add_argument("--scx-repo", default=str(DEFAULT_SCX_REPO))
-    parser.add_argument("--scanner", default=str(DEFAULT_SCANNER))
+    parser.add_argument("--scanner", default=str(DEFAULT_DAEMON))
     parser.add_argument("--bpftool-binary", default=str(DEFAULT_BPFTOOL))
     parser.add_argument("--duration", type=int)
     parser.add_argument("--smoke", action="store_true")

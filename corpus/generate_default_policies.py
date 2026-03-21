@@ -45,7 +45,7 @@ except ImportError as exc:  # pragma: no cover - runtime dependency failure
     raise SystemExit("pyelftools is required: pip install pyelftools") from exc
 
 
-DEFAULT_SCANNER = ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"
+DEFAULT_DAEMON = ROOT_DIR / "daemon" / "build" / "bpfrejit-daemon"
 DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
 DEFAULT_TIMEOUT_SECONDS = 180
 DEFAULT_WORKERS = max(1, min(8, os.cpu_count() or 1))
@@ -79,8 +79,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument(
         "--scanner",
-        default=str(DEFAULT_SCANNER),
-        help="Path to bpf-jit-scanner.",
+        default=str(DEFAULT_DAEMON),
+        help="Path to bpfrejit-daemon.",
     )
     parser.add_argument(
         "--runner",

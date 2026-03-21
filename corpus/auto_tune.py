@@ -43,7 +43,7 @@ from corpus.modes import (
     DEFAULT_INVENTORY_JSON,
     DEFAULT_REPEAT,
     DEFAULT_RUNNER,
-    DEFAULT_SCANNER,
+    DEFAULT_DAEMON,
     DEFAULT_TIMEOUT_SECONDS,
     DEFAULT_VNG,
     families_from_scan,
@@ -91,8 +91,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument(
         "--scanner",
-        default=str(DEFAULT_SCANNER),
-        help="Path to bpf-jit-scanner.",
+        default=str(DEFAULT_DAEMON),
+        help="Path to bpfrejit-daemon.",
     )
     parser.add_argument(
         "--kernel-image",

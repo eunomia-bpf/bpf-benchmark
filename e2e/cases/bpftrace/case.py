@@ -53,7 +53,7 @@ DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "bpftrace")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "bpftrace-real-e2e.md"
 DEFAULT_REPORT_MD = ROOT_DIR / "docs" / "tmp" / "bpftrace-real-e2e-report.md"
 DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
-DEFAULT_SCANNER = ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"
+DEFAULT_DAEMON = ROOT_DIR / "daemon" / "build" / "bpfrejit-daemon"
 DEFAULT_DURATION_S = 30
 BPFTRACE_POLICY_OBJECT_DIR = ROOT_DIR / "corpus" / "build" / "bpftrace"
 MIN_BPFTRACE_VERSION = (0, 16, 0)
@@ -113,7 +113,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD))
     parser.add_argument("--report-md", default=str(DEFAULT_REPORT_MD))
     parser.add_argument("--runner", default=str(DEFAULT_RUNNER))
-    parser.add_argument("--scanner", default=str(DEFAULT_SCANNER))
+    parser.add_argument("--scanner", default=str(DEFAULT_DAEMON))
     parser.add_argument("--duration", type=int, default=30)
     parser.add_argument("--smoke-duration", type=int, default=5)
     parser.add_argument("--attach-timeout", type=int, default=20)
@@ -165,17 +165,17 @@ def ensure_artifacts(runner_binary: Path, scanner_binary: Path, *, skip_build: b
         run_command(["make", "runner"], timeout=1800)
     if not scanner_binary.exists():
         run_command(
-            ["cmake", "-S", "scanner", "-B", "scanner/build", "-DCMAKE_BUILD_TYPE=Release"],
+            ["cmake", "-S", "daemon", "-B", "daemon/build", "-DCMAKE_BUILD_TYPE=Release"],
             timeout=600,
         )
         run_command(
-            ["cmake", "--build", "scanner/build", "--target", "bpf-jit-scanner", "-j"],
+            ["cmake", "--build", "daemon/build", "--target", "bpfrejit-daemon", "-j"],
             timeout=1800,
         )
     if not runner_binary.exists():
         raise RuntimeError(f"micro_exec not found: {runner_binary}")
     if not scanner_binary.exists():
-        raise RuntimeError(f"bpf-jit-scanner not found: {scanner_binary}")
+        raise RuntimeError(f"bpfrejit-daemon not found: {scanner_binary}")
 
 
 def ensure_required_tools() -> dict[str, object]:
