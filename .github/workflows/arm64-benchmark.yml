@@ -124,7 +124,7 @@ jobs:
             --iterations 5 \
             --warmups 1 \
             --repeat 200 \
-            --suite config/micro_pure_jit.yaml \
+            --suite micro/config/micro_pure_jit.yaml \
             --output "${MICRO_OUTPUT}"
 
       - name: Fallback micro llvmbpf-only run
@@ -140,7 +140,7 @@ jobs:
             --iterations 5 \
             --warmups 1 \
             --repeat 200 \
-            --suite config/micro_pure_jit.yaml \
+            --suite micro/config/micro_pure_jit.yaml \
             --output "${MICRO_LLVMBPF_FALLBACK}"
 
       - name: Fallback micro kernel-only run
@@ -156,7 +156,7 @@ jobs:
             --iterations 5 \
             --warmups 1 \
             --repeat 200 \
-            --suite config/micro_pure_jit.yaml \
+            --suite micro/config/micro_pure_jit.yaml \
             --output "${MICRO_KERNEL_FALLBACK}"
 
       - name: Fetch and build minimal corpus inputs

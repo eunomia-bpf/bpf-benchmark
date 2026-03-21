@@ -89,7 +89,7 @@ make kernel-tests     # kernel recompile self-tests
 
 `runner/` owns the shared `micro_exec` C++ runner plus shared Python libraries in `runner/libs/`.
 
-`micro/` owns the isolated benchmark manifests (`config/micro_pure_jit.yaml`), input generators, and the Python suite driver (`micro/driver.py`).
+`micro/` owns the isolated benchmark manifests (`micro/config/micro_pure_jit.yaml`), input generators, and the Python suite driver (`micro/driver.py`).
 
 `corpus/` owns the 23-project real-world corpus, fetch/build tooling, declarative corpus config in `corpus/config/`, and the measurement entrypoints surfaced through `python3 corpus/driver.py ...`.
 

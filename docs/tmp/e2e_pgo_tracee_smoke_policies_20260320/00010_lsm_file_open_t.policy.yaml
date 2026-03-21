@@ -1,0 +1,9 @@
+# Generated from profile: /home/yunwei37/workspace/bpf-benchmark/docs/tmp/e2e_profiler_tracee_smoke_20260320.json
+# Program id: 10
+# Program name: lsm_file_open_t
+# hot program admitted: run_cnt=3760, run_time_ns=372525
+# branch-sensitive families gated off due to missing/insufficient perf branch data
+
+version: 3
+program: 'lsm_file_open_t'
+sites: []

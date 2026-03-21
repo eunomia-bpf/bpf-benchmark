@@ -90,15 +90,15 @@ make -C runner clean
 
 ### Three-layer benchmark model
 
-Configured via YAML files in `config/`:
-- **`config/micro_pure_jit.yaml`** — Current default isolated JIT suite (62 benchmarks as of March 13, 2026): 48 staged XDP compute cases + 6 per-form dense variants, 5 packet-backed XDP controls, and 3 kernel-only non-XDP controls (2 TC + 1 cgroup_skb). The active suite is aligned with the 8 canonical forms tracked in `docs/kernel-jit-optimization-plan.md`.
+Configured via YAML files in `micro/config/` and `corpus/config/`:
+- **`micro/config/micro_pure_jit.yaml`** — Current default isolated JIT suite (62 benchmarks as of March 13, 2026): 48 staged XDP compute cases + 6 per-form dense variants, 5 packet-backed XDP controls, and 3 kernel-only non-XDP controls (2 TC + 1 cgroup_skb). The active suite is aligned with the 8 canonical forms tracked in `docs/kernel-jit-optimization-plan.md`.
 - **`corpus/config/macro_corpus.yaml`** — Macro/corpus layer entry point.
 
 ### Key components
 
 **`micro/driver.py`** — Main pure-JIT suite orchestrator. Loads suite YAML via `benchmark_catalog.py`, generates inputs via `input_generators.py`, invokes `micro_exec` for each benchmark×runtime pair, collects JSON samples, computes summaries, and attaches baseline adjustments.
 
-**`micro/benchmark_catalog.py`** — Parses suite YAML into typed dataclasses (`SuiteSpec`, `BenchmarkSpec`, `RuntimeSpec`). `CONFIG_PATH` defaults to `config/micro_pure_jit.yaml`. All paths in YAML are resolved relative to repo root.
+**`micro/benchmark_catalog.py`** — Parses suite YAML into typed dataclasses (`SuiteSpec`, `BenchmarkSpec`, `RuntimeSpec`). `CONFIG_PATH` defaults to `micro/config/micro_pure_jit.yaml`. All paths in YAML are resolved relative to repo root.
 
 **`micro/input_generators.py`** — Deterministic binary input generators (one per benchmark). Outputs `.mem` files to `micro/generated-inputs/`. Each generator produces a fixed binary layout matching the corresponding BPF program's `input_map` value type.
 
@@ -124,7 +124,7 @@ Programs define a `bench_*()` function taking `(const u8 *data, u32 len, u64 *ou
 
 1. Create `micro/programs/<name>.bpf.c` with input struct, `input_map`, `bench_*` function, and the appropriate `DEFINE_*_XDP_BENCH` macro
 2. Add a generator function in `micro/input_generators.py` and register it in `GENERATORS`
-3. Add the benchmark entry to `config/micro_pure_jit.yaml` with `name`, `base_name`, `kernel_input_size`, `input_generator`, `expected_result`, category/family/tags
+3. Add the benchmark entry to `micro/config/micro_pure_jit.yaml` with `name`, `base_name`, `kernel_input_size`, `input_generator`, `expected_result`, category/family/tags
 
 ### Constraints
 - Kernel runtime requires `sudo -n` without password prompt

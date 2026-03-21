@@ -9,16 +9,20 @@
 ## 1. 什么时候用哪种机器
 
 - `t4g.micro`
-  用途：最便宜的 smoke test / 自定义 kernel 能否启动的验证机。
-- `c7g.large`
-  用途：更像样的 ARM64 benchmark 起点，成本和稳定性比 `t4g.*` 更合适。
-- `c7g.xlarge`
-  用途：更稳的正式 benchmark 机器，适合多轮重复跑数。
+  用途：本仓库当前唯一允许的 ARM64 远端机型。既用于 custom kernel 启动验证，也用于 ARM64 benchmark smoke。
 
-结论很简单：
+当前规则非常明确：
 
-- `t4g.micro` 适合回答“这台 ARM64 EC2 能不能切到我的 custom kernel？”
-- `c7g.large` 或 `c7g.xlarge` 才适合后续正式性能结论。
+- ARM64 benchmark 只用 `t4g.micro`
+- 不用 `c7g.large`
+- 不用 `c7g.xlarge`
+- 不用任何其他更大 ARM64 机器
+
+原因也很明确：
+
+- 当前 pipeline 已经改成“本地 Docker 交叉编译 `micro_exec` + `scanner` -> `scp` 上传 -> `t4g.micro` 直接跑”
+- 远端机器不再承担编译负载，只负责装 custom kernel、接收预编译产物、执行 smoke、下载结果
+- 既然不再需要远端 native build，就没有理由为了编译速度去起大机器
 
 ---
 
@@ -362,17 +366,24 @@ sudo lsinitrd /boot/initramfs-<ver>.img | grep -E 'ena|nvme|xfs'
 
 ## 7. 推荐的最小验证流程
 
-如果目标只是回答“这台最小 AWS ARM64 机器能不能切到 custom kernel”，建议按这个顺序：
+如果目标是跑当前仓库的 ARM64 kernel + benchmark smoke，建议按这个顺序：
 
 1. 起一台 `t4g.micro`
 2. 先确认 stock kernel + SSH 正常
 3. 用远端 `/boot/config-$(uname -r)` 做 baseline config
-4. 本地编译 `vmlinuz.efi`
+4. 本地编译并准备 custom kernel 产物（`vmlinuz.efi` + modules）
 5. 远端新增 custom kernel entry
 6. 把持久默认项设回 stock
 7. `grub2-reboot` 一次性启动 custom
-8. 用 `uname -r` 和 `ip -brief addr show ens5` 验证
-9. 验证完成后立刻 `terminate-instances`
+8. 用 `uname -r` 和 `ip -brief addr show ens5` 验证 custom kernel 已启动且网络正常
+9. 在本机执行 `make cross-arm64`，用 `Amazon Linux 2023 ARM64` Docker 镜像本地构建 `micro_exec` 和 `scanner`
+   产物默认输出到 `.cache/aws-arm64/binaries/`
+10. 上传预编译 bundle（`micro_exec`、`scanner`、运行库、micro smoke 资产、scanner smoke 资产）
+11. 在 `t4g.micro` 上直接跑：
+   - micro smoke：`simple` + `load_byte_recompose`
+   - scanner smoke：`bpftool prog loadall -> scanner enumerate -> scanner enumerate --recompile`
+12. 下载结果
+13. 验证完成后立刻 `terminate-instances`
 
 ---
 
@@ -389,15 +400,17 @@ aws --profile <profile> --region <region> ec2 terminate-instances \
 
 - 验证失败的实例立刻终止
 - 验证成功但暂时不用的实例也尽快终止，避免持续计费
-- 如果后续还要跑 benchmark，再起 `c7g.large` 或 `c7g.xlarge`
+- ARM64 benchmark 也不要升级到大机器；仍然只用 `t4g.micro`
 
 ---
 
 ## 9. 本次实践沉淀出的结论
 
-- `t4g.micro` 足够做 custom kernel 启动验证
+- `t4g.micro` 足够做 custom kernel 启动验证和当前 ARM64 benchmark smoke
 - `Amazon Linux 2023 ARM64` 上优先用 `vmlinuz.efi`
 - `grubby --add-kernel` 后必须马上确认默认启动项
 - `olddefconfig` 跨内核版本时，云厂商专有驱动选项可能悄悄丢失
 - 对 AWS ARM64 而言，最关键的 network driver 是 `ENA`
+- ARM64 用户态 benchmark 路径应当是“本地 AL2023 ARM64 Docker 交叉编译 -> 上传 -> `t4g.micro` 运行”，不要在远端安装编译工具链
+- ARM64 benchmark 只用 `t4g.micro`，不要起 `c7g.*` 或其他大机器
 - 遇到“起了但连不上”的第一反应应该是 `get-console-output --latest`

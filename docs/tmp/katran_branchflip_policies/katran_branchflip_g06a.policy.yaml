@@ -1,0 +1,40 @@
+# Katran branch-flip profiling policy (2026-03-20).
+# Bisection candidate g06a derived from g06.
+# Branch-flip offsets: 2399, 2414, 2457, 2480, 2606
+
+version: 3
+program: 'balancer_ingress'
+sites:
+  - insn: 120
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 125
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 266
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 271
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 381
+    family: endian
+    pattern_kind: 'endian-load-swap-32'
+  - insn: 734
+    family: endian
+    pattern_kind: 'endian-load-swap-32'
+  - insn: 2399
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2414
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2457
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2480
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2606
+    family: branch-flip
+    pattern_kind: 'branch-flip'

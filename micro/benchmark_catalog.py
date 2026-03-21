@@ -9,7 +9,7 @@ import yaml
 MICRO_ROOT = Path(__file__).resolve().parent
 REPO_ROOT = MICRO_ROOT.parent
 ROOT_DIR = REPO_ROOT
-CONFIG_PATH = REPO_ROOT / "config" / "micro_pure_jit.yaml"
+CONFIG_PATH = REPO_ROOT / "micro" / "config" / "micro_pure_jit.yaml"
 
 
 def _manifest_root(path: Path) -> Path:

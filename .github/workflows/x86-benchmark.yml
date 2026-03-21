@@ -43,7 +43,7 @@ jobs:
             --iterations 5 \
             --warmups 1 \
             --repeat 200 \
-            --suite config/micro_pure_jit.yaml \
+            --suite micro/config/micro_pure_jit.yaml \
             --output "micro/results/${RESULT_PREFIX}_pure_jit.json"
 
       - name: Fallback pure JIT characterization to llvmbpf-only
@@ -59,7 +59,7 @@ jobs:
             --iterations 5 \
             --warmups 1 \
             --repeat 200 \
-            --suite config/micro_pure_jit.yaml \
+            --suite micro/config/micro_pure_jit.yaml \
             --output "micro/results/${RESULT_PREFIX}_pure_jit.json"
 
       - name: Upload benchmark artifacts

@@ -4,7 +4,7 @@
 
 ## Current Suite
 
-- `config/micro_pure_jit.yaml` is the active micro suite manifest.
+- `micro/config/micro_pure_jit.yaml` is the active micro suite manifest.
 - The suite covers the active pure-JIT benchmark set across staged XDP cases, packet-backed XDP controls, and a small kernel-only non-XDP control subset.
 - The suite is designed to exercise the active canonical forms tracked in `docs/kernel-jit-optimization-plan.md`: `COND_SELECT`, `WIDE_MEM`, `ROTATE`, `ADDR_CALC`, `BITFIELD_EXTRACT`, `ENDIAN_FUSION`, and `BRANCH_FLIP`.
 

@@ -8,7 +8,7 @@ import yaml
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_MICRO_MANIFEST = REPO_ROOT / "config" / "micro_pure_jit.yaml"
+DEFAULT_MICRO_MANIFEST = REPO_ROOT / "micro" / "config" / "micro_pure_jit.yaml"
 DEFAULT_MACRO_MANIFEST = REPO_ROOT / "corpus" / "config" / "macro_corpus.yaml"
 
 

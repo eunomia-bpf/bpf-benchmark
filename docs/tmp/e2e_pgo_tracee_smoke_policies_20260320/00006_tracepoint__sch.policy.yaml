@@ -1,0 +1,9 @@
+# Generated from profile: /home/yunwei37/workspace/bpf-benchmark/docs/tmp/e2e_profiler_tracee_smoke_20260320.json
+# Program id: 6
+# Program name: tracepoint__sch
+# cold program: run_cnt=423 (<1000) or run_time_ns=305269 (<0)
+# branch-sensitive families gated off due to missing/insufficient perf branch data
+
+version: 3
+program: 'tracepoint__sch'
+sites: []

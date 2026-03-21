@@ -17,17 +17,26 @@ ARM64_ROOTFS_DIR ?= $(HOME)/.cache/bpf-benchmark/arm64-rootfs
 ARM64_ROOTFS_RELEASE ?= noble
 ARM64_ROOTFS_MIRROR ?= http://ports.ubuntu.com/ubuntu-ports
 ARM64_QEMU ?= qemu-system-aarch64
-ARM64_SMOKE_SCRIPT := $(ROOT_DIR)/scripts/arm64_qemu_smoke.py
+ARM64_SMOKE_SCRIPT := $(ROOT_DIR)/runner/scripts/arm64_qemu_smoke.py
 CROSS_COMPILE_ARM64 ?= aarch64-linux-gnu-
 DOCKER ?= docker
-ARM64_CROSSBUILD_DOCKERFILE := $(ROOT_DIR)/docker/arm64-crossbuild.Dockerfile
-ARM64_CROSSBUILD_CONTEXT := $(ROOT_DIR)/docker
+ARM64_CROSSBUILD_DOCKERFILE := $(ROOT_DIR)/runner/docker/arm64-crossbuild.Dockerfile
+ARM64_CROSSBUILD_CONTEXT := $(ROOT_DIR)/runner/docker
 ARM64_CROSSBUILD_IMAGE ?= bpf-benchmark-arm64-crossbuild:latest
 ARM64_CROSSBUILD_STAMP := $(ROOT_DIR)/.cache/arm64-crossbuild-image.stamp
+ARM64_DOCKER_PLATFORM ?= linux/arm64
 ARM64_REPO_GUEST_MOUNT ?= /mnt
 ARM64_SELFTEST_GUEST_ROOT ?= $(ARM64_REPO_GUEST_MOUNT)/tests/kernel
-AWS_ARM64_SCRIPT := $(ROOT_DIR)/scripts/aws_arm64.sh
+AWS_ARM64_SCRIPT := $(ROOT_DIR)/runner/scripts/aws_arm64.sh
 AWS_ARM64_CACHE_DIR ?= $(ROOT_DIR)/.cache/aws-arm64
+ARM64_CROSSBUILD_OUTPUT_DIR ?= $(AWS_ARM64_CACHE_DIR)/binaries
+ARM64_CROSSBUILD_LIB_DIR := $(ARM64_CROSSBUILD_OUTPUT_DIR)/lib
+ARM64_CROSS_RUNNER_DIR := $(ARM64_CROSSBUILD_OUTPUT_DIR)/runner/build
+ARM64_CROSS_RUNNER := $(ARM64_CROSS_RUNNER_DIR)/micro_exec
+ARM64_CROSS_RUNNER_REAL := $(ARM64_CROSS_RUNNER_DIR)/micro_exec.real
+ARM64_CROSS_SCANNER_DIR := $(ARM64_CROSSBUILD_OUTPUT_DIR)/scanner/build
+ARM64_CROSS_SCANNER := $(ARM64_CROSS_SCANNER_DIR)/bpf-jit-scanner
+ARM64_CROSS_SCANNER_REAL := $(ARM64_CROSS_SCANNER_DIR)/bpf-jit-scanner.real
 AWS_ARM64_NAME_TAG ?= bpf-benchmark-arm64
 AWS_ARM64_INSTANCE_TYPE ?= t4g.micro
 AWS_ARM64_REMOTE_USER ?= ec2-user
@@ -37,6 +46,7 @@ AWS_ARM64_AMI_PARAM ?= /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-de
 AWS_ARM64_BENCH_ITERATIONS ?= 1
 AWS_ARM64_BENCH_WARMUPS ?= 0
 AWS_ARM64_BENCH_REPEAT ?= 10
+ARM64_CROSSBUILD_JOBS ?= 4
 
 export AWS_REGION AWS_DEFAULT_REGION AWS_PROFILE
 export AWS_ARM64_CACHE_DIR AWS_ARM64_NAME_TAG AWS_ARM64_INSTANCE_TYPE
@@ -45,6 +55,7 @@ export AWS_ARM64_KEY_NAME AWS_ARM64_KEY_PATH AWS_ARM64_SECURITY_GROUP_ID AWS_ARM
 export AWS_ARM64_AMI_PARAM AWS_ARM64_AMI_ID
 export AWS_ARM64_BENCH_ITERATIONS AWS_ARM64_BENCH_WARMUPS AWS_ARM64_BENCH_REPEAT
 export CROSS_COMPILE_ARM64 ARM64_BUILD_DIR ARM64_WORKTREE_DIR
+export ARM64_DOCKER_PLATFORM ARM64_CROSSBUILD_OUTPUT_DIR ARM64_CROSSBUILD_JOBS
 
 # Result directories
 MICRO_RESULTS_DIR := $(ROOT_DIR)/micro/results
@@ -155,6 +166,7 @@ MICRO_BPF_STAMP := $(MICRO_DIR)/programs/.build.stamp
 	smoke check validate verify-build compare \
 	vm-selftest vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 	vm-arm64-smoke vm-arm64-selftest arm64-worktree arm64-rootfs \
+	cross-arm64 \
 	aws-arm64-launch aws-arm64-setup aws-arm64-benchmark aws-arm64-terminate aws-arm64 \
 	help
 
@@ -170,6 +182,7 @@ help:
 	@echo "  make kernel-arm64     - Cross-build ARM64 Image under vendor/linux-framework/build-arm64"
 	@echo "  make kernel-tests     - Build kernel recompile test binary"
 	@echo "  make arm64-crossbuild-image - Build the Docker image for ARM64 userspace cross-builds"
+	@echo "  make cross-arm64      - Build AL2023-compatible ARM64 micro_exec + scanner via Docker"
 	@echo "  make selftest-arm64   - Cross-build the ARM64 kernel selftest binary via Docker"
 	@echo ""
 	@echo "Test/smoke targets:"
@@ -182,9 +195,9 @@ help:
 	@echo "AWS ARM64 targets (require configured AWS CLI + EC2 networking/key vars):"
 	@echo "  make aws-arm64-launch - Launch or reuse tagged $(AWS_ARM64_INSTANCE_TYPE) instance and record state"
 	@echo "  make aws-arm64-setup INSTANCE_IP=x - Upload/install ARM64 kernel + modules, reboot, verify"
-	@echo "  make aws-arm64-benchmark INSTANCE_IP=x - Upload ARM64 micro bundle and run bare-metal smoke"
+	@echo "  make aws-arm64-benchmark INSTANCE_IP=x - Build/upload ARM64 binaries and run bare-metal smoke"
 	@echo "  make aws-arm64-terminate INSTANCE_ID=i-xxx - Terminate instance and clear cached state"
-	@echo "  make aws-arm64       - Full lifecycle: launch -> build artifacts -> setup -> benchmark -> terminate"
+	@echo "  make aws-arm64       - Full lifecycle: local cross-build -> launch -> setup -> benchmark -> terminate"
 	@echo ""
 	@echo "Benchmark targets (require VM):"
 	@echo "  make vm-selftest      - Run kernel recompile selftests in VM"
@@ -207,6 +220,7 @@ help:
 	@echo "  CROSS_COMPILE_ARM64=  - ARM64 cross-compiler prefix (default: aarch64-linux-gnu-)"
 	@echo "  ARM64_ROOTFS_DIR=     - ARM64 guest rootfs path (default: $$HOME/.cache/bpf-benchmark/arm64-rootfs)"
 	@echo "  DOCKER=cmd            - Container engine command (default: docker)"
+	@echo "  ARM64_CROSSBUILD_OUTPUT_DIR= - Local ARM64 userspace artifact dir (default: $(ARM64_CROSSBUILD_OUTPUT_DIR))"
 	@echo "  POLICY=name           - Named policy set (default: default)"
 	@echo "                          default  → micro/policies/"
 	@echo "                          all-apply → micro/policies/variants/all-apply/"
@@ -364,11 +378,79 @@ arm64-rootfs: $(ARM64_ROOTFS_DIR)/bin/sh
 $(ARM64_CROSSBUILD_STAMP): $(ARM64_CROSSBUILD_DOCKERFILE)
 	@echo "=== Building ARM64 crossbuild image ($(ARM64_CROSSBUILD_IMAGE)) ==="
 	mkdir -p "$(dir $(ARM64_CROSSBUILD_STAMP))"
-	$(DOCKER) build -f "$(ARM64_CROSSBUILD_DOCKERFILE)" -t "$(ARM64_CROSSBUILD_IMAGE)" "$(ARM64_CROSSBUILD_CONTEXT)"
+	"$(DOCKER)" buildx build --load --platform "$(ARM64_DOCKER_PLATFORM)" \
+		-f "$(ARM64_CROSSBUILD_DOCKERFILE)" -t "$(ARM64_CROSSBUILD_IMAGE)" "$(ARM64_CROSSBUILD_CONTEXT)"
 	touch "$@"
 
 arm64-crossbuild-image: $(ARM64_CROSSBUILD_STAMP)
 	@echo "ARM64 crossbuild image: $(ARM64_CROSSBUILD_IMAGE)"
+
+cross-arm64: arm64-crossbuild-image
+	@echo "=== Running make cross-arm64 ==="
+	rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR)"
+	mkdir -p "$(ARM64_CROSSBUILD_OUTPUT_DIR)"
+	"$(DOCKER)" run --rm \
+		--platform "$(ARM64_DOCKER_PLATFORM)" \
+		--user "$$(id -u):$$(id -g)" \
+		-v "$(ROOT_DIR)":/workspace \
+		-v "$(ARM64_CROSSBUILD_OUTPUT_DIR)":/out \
+		-w /workspace \
+		"$(ARM64_CROSSBUILD_IMAGE)" \
+		bash -lc 'set -euo pipefail; \
+			build_root=/tmp/bpf-benchmark-arm64; \
+			runner_build="$$build_root/runner"; \
+			scanner_build="$$build_root/scanner"; \
+			rm -rf "$$build_root"; \
+			mkdir -p /out/runner/build /out/scanner/build /out/lib; \
+			export CMAKE_BUILD_PARALLEL_LEVEL="$(ARM64_CROSSBUILD_JOBS)"; \
+			make -C /workspace/runner \
+				BUILD_DIR="$$runner_build" \
+				MICRO_EXEC_ENABLE_LLVMBPF=OFF \
+				micro_exec >/dev/null; \
+			cmake -S /workspace/scanner -B "$$scanner_build" \
+				-DCMAKE_BUILD_TYPE=Release \
+				-DBPF_JIT_SCANNER_BUILD_CLI=ON \
+				-DBPF_JIT_SCANNER_BUILD_TESTS=OFF >/dev/null; \
+			cmake --build "$$scanner_build" --target bpf-jit-scanner -j"$(ARM64_CROSSBUILD_JOBS)" >/dev/null; \
+			cp "$$runner_build/micro_exec" /out/runner/build/micro_exec.real; \
+			cp "$$scanner_build/bpf-jit-scanner" /out/scanner/build/bpf-jit-scanner.real; \
+			copy_runtime_libs() { \
+				local binary="$$1"; \
+				local lib; \
+				while read -r lib; do \
+					case "$$(basename "$$lib")" in \
+						libyaml-cpp.so*|libelf.so*|libz.so*|libzstd.so*|libstdc++.so*|libgcc_s.so*|libbpf.so*) \
+							cp -L "$$lib" /out/lib/ ;; \
+					esac; \
+				done < <(ldd "$$binary" | awk '\''/=> \// {print $$3} /^\// {print $$1}'\'' | sort -u); \
+			}; \
+			copy_runtime_libs /out/runner/build/micro_exec.real; \
+			copy_runtime_libs /out/scanner/build/bpf-jit-scanner.real; \
+			printf '\''%s\n'\'' \
+				'\''#!/usr/bin/env bash'\'' \
+				'\''set -euo pipefail'\'' \
+				'\''SCRIPT_DIR="$$(cd "$$(dirname "$${BASH_SOURCE[0]}")" && pwd)"'\'' \
+				'\''BUNDLE_ROOT="$$(cd "$$SCRIPT_DIR/../.." && pwd)"'\'' \
+				'\''LIB_DIR="$$BUNDLE_ROOT/lib"'\'' \
+				'\''export LD_LIBRARY_PATH="$$LIB_DIR$${LD_LIBRARY_PATH:+:$$LD_LIBRARY_PATH}"'\'' \
+				'\''exec "$$SCRIPT_DIR/micro_exec.real" "$$@"'\'' \
+				> /out/runner/build/micro_exec; \
+			printf '\''%s\n'\'' \
+				'\''#!/usr/bin/env bash'\'' \
+				'\''set -euo pipefail'\'' \
+				'\''SCRIPT_DIR="$$(cd "$$(dirname "$${BASH_SOURCE[0]}")" && pwd)"'\'' \
+				'\''BUNDLE_ROOT="$$(cd "$$SCRIPT_DIR/../.." && pwd)"'\'' \
+				'\''LIB_DIR="$$BUNDLE_ROOT/lib"'\'' \
+				'\''export LD_LIBRARY_PATH="$$LIB_DIR$${LD_LIBRARY_PATH:+:$$LD_LIBRARY_PATH}"'\'' \
+				'\''exec "$$SCRIPT_DIR/bpf-jit-scanner.real" "$$@"'\'' \
+				> /out/scanner/build/bpf-jit-scanner; \
+			chmod +x /out/runner/build/micro_exec /out/scanner/build/bpf-jit-scanner; \
+			file /out/runner/build/micro_exec.real; \
+			file /out/scanner/build/bpf-jit-scanner.real'
+	file "$(ARM64_CROSS_RUNNER_REAL)" | grep -F "ARM aarch64"
+	file "$(ARM64_CROSS_SCANNER_REAL)" | grep -F "ARM aarch64"
+	@echo "ARM64 runner:  $(ARM64_CROSS_RUNNER)"
+	@echo "ARM64 scanner: $(ARM64_CROSS_SCANNER)"
 
 smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP)
 	@echo "=== Running make smoke ==="
@@ -473,10 +555,9 @@ vm-all:
 selftest-arm64: arm64-crossbuild-image kernel-test-progs
 	@echo "=== Running make selftest-arm64 ==="
 	mkdir -p "$(dir $(KERNEL_SELFTEST_ARM64))" "$(KERNEL_SELFTEST_ARM64_LIB_DIR)"
-	$(DOCKER) run --rm \
+	"$(DOCKER)" run --rm \
+		--platform "$(ARM64_DOCKER_PLATFORM)" \
 		--user "$$(id -u):$$(id -g)" \
-		-e PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig \
-		-e PKG_CONFIG_SYSROOT_DIR=/ \
 		-v "$(ROOT_DIR)":/workspace \
 		-w /workspace \
 		"$(ARM64_CROSSBUILD_IMAGE)" \
@@ -486,17 +567,14 @@ selftest-arm64: arm64-crossbuild-image kernel-test-progs
 				BPF_BUILD_DIR="/workspace/tests/kernel/build" \
 				LIBBPF_BUILD_DIR="/workspace/tests/kernel/build-arm64/vendor/libbpf" \
 				TEST_KERNEL_ROOT="$(ARM64_SELFTEST_GUEST_ROOT)" \
-				CC=aarch64-linux-gnu-gcc \
-				AR=aarch64-linux-gnu-ar \
+				CC=gcc \
+				AR=ar \
 				CFLAGS="-O2 -g -Wall -Wextra -no-pie" \
-				CROSS_COMPILE=aarch64-linux-gnu- \
 				PKG_CONFIG=pkg-config \
 				"/workspace/tests/kernel/build-arm64/test_recompile"; \
-			cp -L /usr/lib/aarch64-linux-gnu/libelf.so.1 "/workspace/tests/kernel/build-arm64/lib/libelf.so.1"; \
-			cp -L /usr/lib/aarch64-linux-gnu/libz.so.1 "/workspace/tests/kernel/build-arm64/lib/libz.so.1" 2>/dev/null || \
-				cp -L /lib/aarch64-linux-gnu/libz.so.1 "/workspace/tests/kernel/build-arm64/lib/libz.so.1"; \
-			cp -L /usr/lib/aarch64-linux-gnu/libzstd.so.1 "/workspace/tests/kernel/build-arm64/lib/libzstd.so.1" 2>/dev/null || \
-				cp -L /lib/aarch64-linux-gnu/libzstd.so.1 "/workspace/tests/kernel/build-arm64/lib/libzstd.so.1";'
+			cp -L /usr/lib64/libelf.so.1 "/workspace/tests/kernel/build-arm64/lib/libelf.so.1"; \
+			cp -L /usr/lib64/libz.so.1 "/workspace/tests/kernel/build-arm64/lib/libz.so.1"; \
+			cp -L /usr/lib64/libzstd.so.1 "/workspace/tests/kernel/build-arm64/lib/libzstd.so.1";'
 	file "$(KERNEL_SELFTEST_ARM64)"
 	file "$(KERNEL_SELFTEST_ARM64)" | grep -F "ELF 64-bit LSB executable, ARM aarch64"
 
@@ -533,7 +611,7 @@ aws-arm64-setup:
 	@test -x "$(AWS_ARM64_SCRIPT)" || (echo "ERROR: missing executable $(AWS_ARM64_SCRIPT)" && exit 1)
 	"$(AWS_ARM64_SCRIPT)" setup "$(INSTANCE_IP)"
 
-aws-arm64-benchmark:
+aws-arm64-benchmark: cross-arm64
 	@echo "=== Running make aws-arm64-benchmark ==="
 	@test -n "$(INSTANCE_IP)" || (echo "ERROR: INSTANCE_IP= required. Usage: make aws-arm64-benchmark INSTANCE_IP=1.2.3.4" && exit 1)
 	@test -x "$(AWS_ARM64_SCRIPT)" || (echo "ERROR: missing executable $(AWS_ARM64_SCRIPT)" && exit 1)
@@ -545,7 +623,7 @@ aws-arm64-terminate:
 	@test -x "$(AWS_ARM64_SCRIPT)" || (echo "ERROR: missing executable $(AWS_ARM64_SCRIPT)" && exit 1)
 	"$(AWS_ARM64_SCRIPT)" terminate "$(INSTANCE_ID)"
 
-aws-arm64:
+aws-arm64: cross-arm64
 	@echo "=== Running make aws-arm64 ==="
 	@test -x "$(AWS_ARM64_SCRIPT)" || (echo "ERROR: missing executable $(AWS_ARM64_SCRIPT)" && exit 1)
 	"$(AWS_ARM64_SCRIPT)" full
@@ -578,3 +656,4 @@ clean:
 		"$(ARM64_IMAGE_LINK)"
 	rm -rf "$(ARM64_BUILD_DIR)"
 	rm -rf "$(dir $(KERNEL_SELFTEST_ARM64))"
+	rm -rf "$(ARM64_CROSSBUILD_OUTPUT_DIR)"

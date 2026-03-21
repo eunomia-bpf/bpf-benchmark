@@ -1,0 +1,52 @@
+# Katran branch-flip profiling policy (2026-03-20).
+# Base safe6 plus branch-flip g04.
+# Branch-flip offsets: 1763, 1779, 1810, 1862, 1909, 1953, 1980, 1996, 2048
+
+version: 3
+program: 'balancer_ingress'
+sites:
+  - insn: 120
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 125
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 266
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 271
+    family: wide
+    pattern_kind: 'wide-load-2'
+  - insn: 381
+    family: endian
+    pattern_kind: 'endian-load-swap-32'
+  - insn: 734
+    family: endian
+    pattern_kind: 'endian-load-swap-32'
+  - insn: 1763
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1779
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1810
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1862
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1909
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1953
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1980
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 1996
+    family: branch-flip
+    pattern_kind: 'branch-flip'
+  - insn: 2048
+    family: branch-flip
+    pattern_kind: 'branch-flip'
