@@ -1,8 +1,7 @@
-# Kernel eBPF JIT 优化：计划与进度
+# BpfReJIT: Verifier-Guarded Post-Load Program Transformation for Kernel eBPF
 
-> 本文档是 kernel JIT 优化论文的单一 hub。
-> **论文核心方向：必须追求 net speedup，越多越好。架构贡献和 policy-sensitivity 是支撑论据，不是主卖点。Paper 必须展示真实程序上的可测量加速。**
-> **⚠️ Corpus exec geomean 0.875x 已确认无效（#162）**：dummy packet 导致 XDP/TC 程序 early-exit，优化 site 未被执行，测量值是噪声+布局效应。**必须修复 corpus packet 构造使 site 被实际执行**，而不是转向 code size。Code size 不是论文关注点。
+> 本文档是 BpfReJIT 论文的单一 hub。
+> **论文核心方向：在不扩大 kernel TCB 的前提下，让 deployed eBPF 从一次性静态编译，变成可在线、透明、runtime-guided specialization 的执行环境。Paper 必须展示真实程序上的可测量加速和安全加固能力。**
 > **编辑规则**：
 > - **⚠️ 未经用户明确同意，禁止修改内核代码（vendor/linux-framework）。** 所有内核改动必须先调研→用户确认→再实施。codex/agent prompt 必须包含此约束。
 > - 未经用户明确要求，禁止 git commit / git push。
@@ -15,105 +14,92 @@
 > - **⚠️ codex 默认不要 commit/push，除非 prompt 明确要求。** 改完代码就停，由 Claude 统一 commit。
 > - **⚠️ 如果需要 commit，必须在 main 分支直接做，不要开新分支。** 开分支导致合并冲突。
 > - **⚠️ 暂时性性能数据和实验计划只能出现在两个地方：(1) 开头摘要区域的权威数据行；(2) §7 任务追踪表格的条目。** §1-§6 的正文不得包含会过期的具体数字或待办计划。如果 §1-§6 需要引用性能数据，只引用任务编号（如"见 #256"），不内联数据本身。
-> 上次更新：2026-03-21a。**权威数据**（#256 rerun）：micro **1.057x** / applied-only **1.193x**；corpus **0.983x**；Tracee **+8.1%**；Tetragon **+20.3%/+32.2%**；Katran BPF **1.108-1.168x**（harness 升级后）；gap **0.581x**。vm-selftest **35/35**。vm-micro validation **62/62 valid, 1.100x**。**⚠️ 2026-03-21 重大架构探索**：考虑 BpfReJIT v2 — 从 native-level rewrite 转向 "verifier-guarded post-load program transformation framework"。核心方案：**Inline Kfunc**（复用 kfunc 验证 + JIT 内联展开）+ **BPF_PROG_REJIT**（bytecode patch→re-verify→image swap）+ **BPF_PROG_GET_ORIGINAL**（透明获取原始 bytecode）。9 个 codex 调研完成，2 个进行中。详见 #304/#304a/#304b。
+> **v1 权威数据**（#256 rerun，native-level rewrite 架构）：micro **1.057x** / applied-only **1.193x**；corpus **0.983x**；Tracee **+8.1%**；Tetragon **+20.3%/+32.2%**；Katran BPF **1.108-1.168x**；gap **0.581x**。vm-selftest **35/35**。v1 代码保存在 `v1-native-rewrite` 分支。
 
 ---
 
 ## 1. 论文定位与策略
 
-### 1.1 核心 Thesis：安全与优化的分离 → 实现 Net Speedup
+### 1.1 核心 Thesis
 
-> eBPF 程序由内核 JIT 编译为 native code 并在内核态执行——代码生成错误可导致内核崩溃。
-> JIT 因此必须保守，但优化决策取决于 workload/微架构/部署上下文，而内核没有这些信息。
-> **BpfReJIT 将安全（哪些 native code 变体可以安全生成）和优化（哪些变体应当应用）分离。**
-> 内核定义有界的 safe variant menu，特权用户态根据上下文选择变体。
+> eBPF 缺少一个关键能力：**程序加载后的安全变换**。
 >
-> **⚠️ 论文方向决定**：分离安全与优化是手段，不是目的。目的是**让真实 eBPF 程序跑得更快**。
-> Paper 必须展示：(1) characterization gap 存在且有意义；(2) BpfReJIT 能恢复显著部分的 gap（net speedup）；(3) 恢复需要 policy control（不能用 fixed heuristics）。
-> 当前 (2) 不够强（4.3% gap recovery，corpus 0.875x），**必须改进到 net positive 才能提交**。
+> 当前模型是 "compile once → verify → JIT → frozen"。程序一旦通过 verifier 并 JIT 编译，就再也不能被修改——即使硬件变了、workload 变了、安全要求变了。
+>
+> 实现 eBPF 全部编译优化 pass（如 LLVM 后端）需要数万到数十万行代码，既容易出错也很难上游。即使实现了简单的固定 peephole，静态策略在不同 workload/CPU 上可能有害。
+>
+> **BpfReJIT 将 safety 和 correctness 分离**：内核保证 safety（verifier），用户态负责 correctness（优化/加固策略）。这使得 post-load program transformation 成为可能，且不扩大内核 TCB。
+>
+> **核心 insight**：BPF verifier 的存在创造了独特机会——第三方程序变换可以在 post-load 阶段应用，安全由 verifier 保证，correctness 由用户态负责。这在没有强制验证的系统中不可能。
 
-#### 论文逻辑链条（Abstract → Conclusion）
+#### 论文逻辑链条
 
 1. eBPF 广泛部署（网络、追踪、安全、调度）
-2. Kernel JIT 编译为 native code，运行在内核态
-3. 代码生成 bug = 内核崩溃，JIT 必须保守
-4. 安全和优化耦合（所有 instruction selection 决策硬编码）
-5. Operator 无法影响，正确选择取决于内核没有的部署上下文
-6. Fixed heuristics 不行：policy-sensitivity（CMOV +28.3%）+ combination interference（LEA fixed-all +14.2%）
-7. Operator 不能直接提供 native code（安全约束）
-8. BpfReJIT 分离安全与优化
+2. Kernel JIT 保守：实现完整 LLVM 级优化需数万行、易出错、难上游
+3. 同一优化在不同 workload/CPU 上效果不同（可能有害）→ 需要 runtime adaptive
+4. 已有工作（K2/Merlin/EPSO）都是 compile-time pre-load → 不能做 post-load adaptation
+5. BPF verifier 提供独特机会：safety 由已验证的 checker 保证，correctness 可以分离到用户态
+6. BpfReJIT：verifier-guarded, modular, post-load program transformation framework
 
 #### 类比定位
 
-| 系统 | 耦合了什么 | 分离出什么 |
-|------|-----------|-----------|
-| Exokernel | 保护 + 资源管理 | 应用控制资源管理 |
-| sched_ext | 调度机制 + 调度策略 | BPF 程序定义调度策略 |
-| **BpfReJIT** | **JIT 安全 + JIT 优化策略** | **用户态定义优化策略** |
+| 系统 | 类比 | 关键差异 |
+|------|------|----------|
+| LLVM Pass | 编译时 IR 变换，可扩展 | 我们是 **运行时 post-load**，safety 由 verifier 保证 |
+| JVM HotSpot | 运行时分层编译 + PGO | 我们在 **OS 内核级别**，安全模型更强 |
+| Linux livepatch | 运行时内核代码替换 | 我们有 **verifier 安全保证**，livepatch 没有 |
+| K2/Merlin/EPSO | BPF bytecode 优化 | 他们是 **compile-time**，需要原始 .bpf.o，不 transparent |
+
 
 ### 1.2 论文叙事方向
 
 > 论文叙事以 net speedup 为中心。架构贡献和 policy-sensitivity 是支撑论据。Paper 必须展示真实程序上的可测量加速。
 > 如果当前数据不够，必须增加 canonical form 覆盖面、改进 policy tuning、或加更多有 sites 的 benchmark。
-> 当前权威性能数据见开头摘要行。历史数据演化见 §7 任务表（#60/#112/#139/#169/#189/#256 等）。
-> 根因分析见 #155/#157/#162。
+#### 与 existing work 的关键差异
 
-#### v1 性能改进 TODO 历史
+| 系统 | 时机 | 需要 .bpf.o? | Transparent? | Runtime PGO? | 安全保证 |
+|------|------|:---:|:---:|:---:|----------|
+| K2 (SIGCOMM'21) | pre-load | 是 | 否 | 否 | SMT solver |
+| Merlin (ASPLOS'24) | pre-load | 是 | 否 | 否 | 编译器正确性 |
+| EPSO/ePass | pre-load | 是 | 否 | 否 | 编译器正确性 |
+| BCF (SOSP'25) | load-time | 是 | 否 | 否 | certificate |
+| **BpfReJIT** | **post-load** | **否** | **是** | **是** | **kernel verifier** |
 
-> 已完成或已被 #304 架构探索搁置。详见 §7 任务表 #153-#189。
+### 1.2 四种用途
 
-**真正 novel 的部分**：
-1. **Safety/optimization 分离** — kernel 管安全，userspace 管优化策略
-2. **Fail-closed backend policy substrate** — digest binding、verifier remap、CPU gating、exact validators
-3. **部署控制权** — 优化 owner 是 Cilium/Katran 等 loader，不是 kernel maintainer
-4. **Policy-sensitive 证据** — 同一合法站点在不同 workload 下需要不同 lowering
+同一框架支持四种用途：
 
-**Go 条件（全部满足才提交）**：
-1. 原型实现多个 directive，展示框架泛化能力 ✅（8 families: COND_SELECT, WIDE_MEM, ROTATE, ADDR_CALC, BITFIELD_EXTRACT, ZERO_EXT_ELIDE, ENDIAN_FUSION, BRANCH_FLIP）
-2. Fixed kernel baseline 不能在所有场景下达到同等收益 ✅（CMOV +28.3%）
-3. 评估包含真实程序和至少一个端到端部署 ✅（Tracee daemon exec_storm **+6.28%** / file_io **+7.00%**（post-BEXTR-fix authoritative, recompile=11/13）; ~~+21.65%~~ **无效**（recompile=0/13）; Tetragon daemon +3.8% app, bpftrace 5/5 attach）
-4. 与 characterization 深度整合 ✅（已合并）
-5. **真实程序上可测量的 net speedup** 🔴（当前不足，必须改进）
+| 用途 | 说明 |
+|------|------|
+| **性能优化** | wide load 合并、rotate、cmov、硬件特化 lowering、PGO |
+| **安全加固** | 插入 bounds check、speculation barrier、收紧权限 |
+| **恶意程序阻断** | 检测恶意 BPF prog → 替换为 no-op/安全版本 → 在线热修复 |
+| **运行时可观测** | 给 hot path 插入 tracing，不改应用代码 |
 
-**与 existing work 的关键差异**：
-
-| 系统 | 优化层 | 能解决 backend 差距? | 部署可控? |
-|------|--------|:---:|:---:|
-| K2 (SIGCOMM'21) | BPF bytecode | ❌ | ❌ |
-| Merlin (ASPLOS'24) | LLVM IR + BPF | ❌ | ❌ |
-| EPSO (ASE'25) | BPF bytecode | ❌ | ❌ |
-| **BpfReJIT** | **Backend lowering** | **✅** | **✅** |
-
-### 1.3 Why Userspace — 5 个独立理由
+### 1.3 Why Userspace
 
 | 理由 | 说明 |
 |------|------|
-| **可更新性** | userspace policy DB 可以每周更新，kernel heuristic 只能等升级 |
-| **上游接受成本** | kernel patch 审核周期长（月~年级），peephole 优化逐个上游化不现实；BpfReJIT 让优化以 userspace policy 形式即时部署，无需等待 kernel release cycle |
-| **算法迭代** | 优化 pattern 需要反复实验和迭代（不同 pattern 识别、不同 emission 策略）；kernel 代码一旦合入很难改，userspace scanner/policy 可以快速迭代而不影响 kernel 稳定性 |
+| **可更新性** | userspace daemon 可随时更新优化策略，无需等 kernel release cycle |
+| **上游接受成本** | kernel patch 审核周期长（月~年级），优化逐个上游不现实；BpfReJIT 让优化以 userspace daemon 形式即时部署 |
+| **算法迭代** | 优化 pattern 需要反复实验和迭代；kernel 代码一旦合入很难改，userspace 可以快速迭代而不影响 kernel 稳定性 |
 | **程序级组合** | 局部有利的变换可能全局有害（I-cache cliff），userspace 做全局预算 |
-| **Workload 适应** | 分支可预测性取决于运行时数据分布，不是 ISA 特性 |
-| **Fleet A/B testing** | 5% 机器先上新 policy，看效果再推广，无需改 kernel |
-| **所有权** | service owner 已经拥有 BPF 性能调优（Cilium/Katran），kernel maintainer 不应维护每个 service 的 heuristic |
-| **覆盖面** | kernel JIT 中有数十个可优化点（prologue NOP、零偏移编码、div/mod save/restore、endian fusion 等），不可能全部逐一 patch 上游；BpfReJIT 提供统一的参数化基础设施，一次性覆盖所有 backend lowering 决策 |
+| **Workload 适应** | 分支可预测性、hot path 等取决于运行时数据分布，不是静态信息 |
+| **Fleet 管理** | A/B testing、gradual rollout、per-deployment customization |
+| **所有权** | service owner 控制优化策略（Cilium/Katran），不是 kernel maintainer |
+| **覆盖面** | kernel JIT 中有数十个可优化点，不可能全部逐一 patch 上游；统一框架一次性覆盖 |
+| **安全管理** | 同一框架可做安全加固、恶意程序阻断，不需要单独系统 |
 
 ### 1.4 核心设计约束
 
-> **⚠️ 约束 0（最高优先级）：系统必须在真实程序上产生可测量的 net speedup。**
-> 如果 canonical form 不够多、覆盖面不够广、policy 不够精、导致整体没有加速，那系统的实际价值就不足以支撑论文。
-> 所有设计决策必须服务于"让真实程序跑得更快"这个目标。
+1. **Safety/correctness 分离**：kernel verifier 保证 safety（内核不崩溃），correctness 由用户态 daemon 负责
+2. **Kernel 改动最小化**：核心内核接口只加一次，新优化/新 arch 全部以 module 方式部署
+3. **完全透明**：不需要 .bpf.o，不需要改应用/loader，不需要 detach/reattach
+4. **零运行时开销**：变换后的程序和原始加载路径完全一样快
+5. **Fail-safe**：verify 失败 → 什么都不改，返回错误；daemon 可随时回滚
+6. **BPF_PROG_REJIT 接受完整的新 BPF bytecode**，不是 patch format — daemon 提交整段新程序，kernel 走标准 verify 路径
+7. **Mandatory Falsification**：如果 fixed kernel heuristics 在所有测试硬件和 workload 上恢复相同收益，正确结论是"用 kernel peepholes"，不是发布 userspace-guided interface
 
-1. **xlated_prog_len 不变量**：所有 directive 只改 native code emission，不改 BPF 指令。如果 xlated 变了说明优化在错误的层。
-2. **正确 directive 判断标准**：用户态能不能做同样的事？如果能 → 错误的层（POC v1 wide_load 教训：BPF 指令重写 = 错误层）。
-3. **Kernel 改动最小化**：参数化 validator 模板，每个 directive ~50-100 LOC。
-4. **Fail-closed**：任何验证失败 fallback 到标准 emission。
-5. **安全模型**：内核从不执行用户态代码——只在自己预定义的安全变体间切换。
-6. **Mandatory Falsification**：如果 fixed kernel heuristics 在所有测试硬件和 workload 上恢复相同收益，正确结论是"用 kernel peepholes"，不是发布 userspace-guided interface。
-7. **Pipeline placement**：directive rewrites 发生在 `do_check()` 之后、`convert_ctx_accesses()` 之前。
-8. **Constant blinding 兼容**：constant blinding 是独立的第二次 BPF 重写，会打乱 insn offset——当前设计在 blinding 发生时直接 drop directive set。
-9. **JIT convergence loop**：x86 JIT 是 convergence loop + final image pass，directive 必须跨 pass 确定性一致。
-10. **Net speedup 驱动**：每新增一个 canonical form，必须验证它在 corpus 上 net positive。只有安全贡献没有性能贡献的 form 不够。
-11. **Validator = 唯一安全门，Emitter = 无条件信任**：对齐内核 verifier/JIT 模型。Validator 负责全部语义正确性（site 形状 + params 范围 + 架构无关约束如 `lsb+width<=64`）；Emitter 只做机械编码，不重复校验 params。`bpf_jit_arch_form_supported()` 声明架构能力，Validator 保证 params 合法，Emitter 直接 emit。Emitter 返回 -EINVAL 仅用于"此架构无合适指令"，不是"params 不合法"。冗余的 emitter-side 校验和 dead fallback 应删除。
 
 ### 1.5 设计方向决策
 
@@ -125,27 +111,6 @@
 | Post-load re-JIT | ✅ | 独立于 BPF_PROG_LOAD，运行中程序可反复 re-JIT |
 | v5 声明式 pattern | ✅ | 新 BPF pattern 只需改 userspace，新 canonical form 需改 kernel |
 
-#### 实现层次
-
-当前所有 directive 都是 **JIT lowering**：只改 native code emission，不改 BPF 指令（xlated_prog_len 不变量）。
-- `cmov_select`：JIT 在 diamond pattern 处选择 cmovcc vs jcc+mov
-- `wide_load`：JIT 将连续 byte-load 合并为 wide mov
-- `rotate_fusion`：JIT 将 shift+or 替换为 rorx/ror
-- `lea_fusion`：JIT 将 mov+shl+add 替换为 lea
-
-> `branch_reorder`、`subprog_inline` 等需要改 BPF 指令的变换属于 future scope（需 verifier-level 支持），当前不在实现范围内。
-
-#### 实现阶段
-
-| 阶段 | 内容 | 状态 |
-|------|------|:---:|
-| Phase 1 (POC v2) | 单个硬编码 JIT directive (cmov_select) | ✅ |
-| Phase 2 (v4→v5) | Post-load re-JIT + 通用 dispatch + 声明式 pattern | ✅ |
-| Phase 3 | 跨架构 + 自动化 + 端到端部署 | ❌ |
-
-> **⚠️ v4 已删除**：v4 legacy code 已在 `a99cd78ed` 中完全移除（-778 LOC）。
-> 只保留 v5 声明式路径（policy version 2, `BPF_JIT_RK_PATTERN`）。
-> v6 tier-1 改进已完成：通用 site/pattern 上限 24→64、`BPF_PROG_JIT_RECOMPILE` 新增 `log_level/log_size/log_buf`、tuple/binding 上限 12→16。报告：`docs/tmp/2026-03-11/v6-tier1-implementation.md`。
 
 ---
 
@@ -171,140 +136,127 @@
 
 ---
 
-## 3. Directive 分类体系
+## 3. 变换分类
 
-### 3.1 Policy-sensitive（撑论文 novelty）
+### 3.1 性能优化变换
 
-| Directive | Why userspace policy | 证据 | 状态 |
-|-----------|---------------------|------|:---:|
-| **`cmov_select`** | 依赖分支可预测性/依赖链深度/CPU 家族 | cmov ablation 混合结果；log2_fold +28% vs cmov_select -82% | ✅ v4+v5 |
-| **`branch_flip`** | 依赖 workload 热度/输入分布/code-size budget | branch_layout 差 44.6%；**2279 corpus sites** (tracee 1791) | ✅ 简单 if/else body swap 可用 pattern match（`BRANCH_FLIP`），通用 CFG relayout 仍 scope 外 |
-| **`subprog_inline`** | 依赖热度/code-size/I-cache | corpus 97.2% multi-function | future |
+| 变换 | 需要 Inline Kfunc? | 说明 |
+|------|:---:|------|
+| **WIDE_MEM** | 否 | byte load+shift+or → 已有 BPF wide load 指令。占 kernel surplus 50.7% |
+| **ROTATE** | 是 | shift+or → `bpf_rotate64()` kfunc → JIT emit RORX |
+| **COND_SELECT** | 是 | branch+mov → `bpf_select64()` kfunc → JIT emit CMOV。policy-sensitive：依赖分支可预测性 |
+| **BITFIELD_EXTRACT** | 是 | shift+and → `bpf_extract64()` kfunc → JIT emit BEXTR |
+| **BRANCH_FLIP** | 否 | if/else body 重排，用已有 BPF branch 指令。policy-sensitive：依赖 workload 热度 |
+| **ENDIAN_FUSION** | 可选 | load+bswap → combined kfunc → JIT emit MOVBE |
+| **ADDR_CALC** | 可选 | mov+shift+add → `bpf_lea()` kfunc → JIT emit LEA |
+| **Const propagation** | 否 | 利用 frozen map / runtime invariants 做常量折叠 |
+| **Subprog inline** | 否 | bytecode 层展开 subprogram call |
 
-### 3.2 Substrate（peephole，复用框架基础设施）
+### 3.2 安全加固变换
 
-| Directive | 状态 | 说明 |
-|-----------|:---:|------|
-| `wide_load` | ✅ v4+v5 | 50.7% surplus recovery，**2987 corpus sites**（per-section 8-fam census） |
-| `rotate_fusion` | ✅ v4+v5 | BMI2 依赖，**2685 corpus sites**，-28.4% exec |
-| `lea_fusion` | ✅ v4+v5 | 19 sites (11 objects)，stride_load_16 -12% |
-| `bitfield_extract` | ✅ v5 | **557 corpus sites** (46 objects)，Cilium 高频 |
-| `zero_ext_elide` | ✅ | 32-bit ALU + redundant zext → skip zext。**x86-64 上 corpus 0 sites**（verifier 不插 zext, `bpf_jit_needs_zext()=false`），形式为非 x86 架构准备（RISC-V/ARM）|
-| `endian_fusion` | ✅ | ldx+bswap → movbe（需 MOVBE CPU feature），纯 pattern match。**1386 corpus sites** (50 objects)，Calico 786 最多 |
-| `branch_flip` | ✅ | 第二个 policy-sensitive directive（if/else body swap, 哪个 body 先走取决于 workload），纯 pattern match。**2279 corpus sites** (27 objects)，tracee 1791 最多 |
-| `bounds_window` | ❌ | 冗余 bounds check，需 retained facts |
+| 变换 | 说明 |
+|------|------|
+| **危险 helper 防火墙** | 中和恶意 BPF 程序的 bpf_probe_read_kernel / bpf_send_signal 等 |
+| **Spectre 缓解注入** | 在缺少 speculation barrier 的位置插入 lfence |
+| **BPF 程序漏洞热修复** | verifier bug 发现后对 live 程序加额外检查 |
+| **权限收紧** | 收窄过度权限的 BPF 程序的访问范围 |
 
-### 3.3 不应做的方向
+### 3.3 不在范围内
 
-完整寄存器分配、指令调度、任意 native code 注入、target-independent replacement IR。
+完整寄存器分配、指令调度、任意 native code 注入。
 
 ---
 
 ## 4. 系统架构
 
-### 4.1 Control Plane vs Data Plane
+### 4.1 两套正交接口
 
 ```
-┌───────────────────────────────────────────┐
-│  Userspace Backend Policy Plane           │
-│  ┌─────────────────────────────────────┐  │
-│  │ Candidate discovery (pattern match) │  │
-│  │ Site feature extraction             │  │
-│  │ CPU + workload policy DB            │  │
-│  │ Fleet policy / A/B rollout          │  │
-│  │ Code-size budget management         │  │
-│  │ Directive blob generation           │  │
-│  └─────────────────────────────────────┘  │
-└──────────────────┬────────────────────────┘
-                   │ BPF_PROG_JIT_RECOMPILE(prog_fd, policy_fd)
-┌──────────────────▼────────────────────────┐
-│  Kernel Safety Plane                      │
-│  ┌─────────────────────────────────────┐  │
-│  │ Digest binding + CPU contract       │  │
-│  │ Post-verifier remap (orig_idx)      │  │
-│  │ Shared precondition checks          │  │
-│  │ Kind-specific validators            │  │
-│  │ Arch-specific emitters              │  │
-│  │ Fail-closed fallback + logging      │  │
-│  └─────────────────────────────────────┘  │
-└───────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│  Userspace Daemon                                            │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌────────────────┐  │
+│  │ Discovery│ │ Analyzer │ │ Rewriter │ │    Profiler     │  │
+│  │ (枚举    │ │ (pattern │ │ (bytecode│ │ (run_cnt/perf/ │  │
+│  │  live    │ │  match)  │ │  rewrite)│ │  branch miss)  │  │
+│  │  progs)  │ │          │ │          │ │                │  │
+│  └────┬─────┘ └────┬─────┘ └────┬─────┘ └───────┬────────┘  │
+│       │            │            │                │           │
+└───────┼────────────┼────────────┼────────────────┼───────────┘
+        │            │            │                │
+   GET_NEXT_ID  GET_ORIGINAL   REJIT         ENABLE_STATS
+        │            │            │                │
+┌───────▼────────────▼────────────▼────────────────▼───────────┐
+│  Kernel                                                      │
+│                                                              │
+│  BPF_PROG_GET_ORIGINAL  → 返回 load 时保存的原始 bytecode     │
+│                                                              │
+│  BPF_PROG_REJIT          → 接受完整新 BPF bytecode            │
+│    │  bpf_check()        → 完整 re-verify（标准路径）          │
+│    │  bpf_int_jit_compile() → re-JIT（含 Inline Kfunc 展开）  │
+│    │  image swap         → 原子替换 JIT image（同一 struct     │
+│    │                       bpf_prog，零 attach 变化）          │
+│    └  fail → 什么都不改，返回 verifier log                     │
+│                                                              │
+│  Inline Kfunc (kernel module)                                │
+│    register kfunc + KF_INLINE_EMIT                           │
+│    → verifier: check_kfunc_call()（零改动）                   │
+│    → JIT: emit 自定义 native 序列（而非 CALL）                 │
+│    → fallback: emit 普通 CALL（module 未加载时）               │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘
 ```
 
-### 4.2 Arch-neutral / Arch-specific 分离
+### 4.2 Daemon 完整工作流
 
 ```
-┌─────────────────────────────┐
-│  Arch-neutral (共享)         │
-│  - Directive blob 格式       │
-│  - orig_idx remap           │
-│  - CPU gating               │
-│  - Fail-closed + logging    │
-│  - Kind-specific validators │
-└──────────┬──────────────────┘
-    ┌──────┴──────┐
-┌───┴───┐   ┌────┴────┐
-│ x86   │   │ arm64   │
-│ cmovcc│   │  csel   │
-│ rorx  │   │  extr   │
-│ lea   │   │  add    │
-└───────┘   └─────────┘
+1. BPF_PROG_GET_NEXT_ID      → 枚举所有 live BPF 程序
+2. BPF_PROG_GET_ORIGINAL      → 拿原始 bytecode + map_ids + prog_type
+3. 分析 + 重写                 → 生成完整的新 BPF bytecode
+                                 （可含 inline kfunc 调用，如 bpf_rotate64）
+4. BPF_PROG_REJIT(prog_fd,   → kernel: re-verify → re-JIT → image swap
+     new_insns, new_insn_cnt)    失败 → 返回错误 + verifier log，原程序不受影响
 ```
 
-### 4.3 Validator 模板
-
-每新增 directive 只需：~50-100 LOC validator + ~50-100 LOC emitter (per arch)。
-Transport/blob/remap/CPU gating/fail-closed 全部通用。
-
-### 4.4 Kernel 三层安全模型
-
-对齐 kernel verifier/JIT 原则（§1.4 #11）：Validator 是唯一安全门，Emitter 无条件信任。
+### 4.3 安全模型
 
 ```
-syscall BPF_PROG_JIT_RECOMPILE(prog_fd, policy_fd)
-    │
-    ▼
-Layer 0: Interface — jit_policy.c (432 行)
-    解析不受信的用户态 policy blob → 结构化 rules
-    职责：blob 格式/版本/size 校验、rule 排序、overlap 检测
-    信任：无（输入全部不可信）
-    │
-    ├─ Layer 0.5: bpf_jit_arch_form_supported()
-    │  架构能力声明。不支持的 form 在此直接拒绝
-    │  x86: 8/8 forms    arm64: 4/8 forms
-    │
-    ▼
-Layer 1: Validation — jit_validators.c (1599 行)
-    唯一安全门。每个 rule 对 live program 做语义校验
-    职责：site 形状匹配、canonical params 提取、
-          params 边界检查（lsb+width≤64 等架构无关约束）
-    输出：填充 canonical_params，供 emitter 消费
-    信任：Layer 0 的 rule 结构（但 site 内容从 live xlated program 读）
-    │
-    ▼
-Layer 2: Emission — arch/*/net/bpf_jit_comp.c
-    机械编码。无条件信任 validator 的 canonical_params
-    职责：把 params 翻译为目标架构 native 指令
-    不做：params 校验、fallback、raw insn 读取
-    -EINVAL 仅用于"此架构无合适指令"（不应发生，
-           因为 Layer 0.5 已拒绝不支持的 form）
-    │
-    ▼
-Orchestration — jit_directives.c (727 行)
-    串联上述三层 + 生命周期管理
-    职责：snapshot → per-rule iterate(validate→emit) →
-          commit/abort → synchronize_rcu → trampoline regen → ksym
+Safety（kernel 保证）：
+  verifier 验证新 bytecode → 内核不会崩溃/信息泄露/提权
+  和 BPF_PROG_LOAD 完全相同的安全保证
+
+Correctness（daemon 负责）：
+  daemon 确保变换保持程序语义
+  手段：differential testing、gradual rollout、auto-rollback
+  daemon 有 bug → 程序行为可能变 → 但内核安全不受影响（fail-safe）
 ```
 
-**文件布局（`vendor/linux-framework/`）：**
+### 4.4 Inline Kfunc 机制
 
-| 文件 | 职责 | 行数 |
-|------|------|------|
-| `kernel/bpf/jit_directives.c` | Orchestration：syscall 入口、recompile 生命周期、logging、ksym | ~727 |
-| `kernel/bpf/jit_validators.c` | Layer 1：8 form 共享 validators、shape parser、params 提取 | ~1599 |
-| `kernel/bpf/jit_policy.c` | Layer 0：policy blob 解析、rule 排序、overlap 检测 | ~432 |
-| `arch/x86/net/bpf_jit_comp.c` | Layer 2 (x86)：8 form emitters、staged commit/abort、arch override | ~2100 added |
-| `arch/arm64/net/bpf_jit_comp.c` | Layer 2 (arm64)：4 form emitters、staged commit/abort、arch override | ~900 added |
-| `include/linux/bpf_jit_directives.h` | 共享类型：canonical_params、form metadata、arch callback 声明 | ~272 |
+```
+Kernel module（如 bpf_rotate.ko）注册：
+  1. kfunc 真实函数：bpf_rotate64(u64 val, u32 shift) → 真实内核函数
+  2. KF_INLINE_EMIT flag：标记为可内联
+  3. JIT emit 回调：emit_rotate_x86() → 产生 RORX native 指令
+
+BPF 程序调用：
+  extern u64 bpf_rotate64(u64 val, u32 shift) __ksym;
+  hash = bpf_rotate64(hash, 13);
+
+Verifier 看到：普通 kfunc call → check_kfunc_call()（零改动）
+JIT 看到：KF_INLINE_EMIT → 调 module emit 回调 → emit RORX（不是 CALL）
+Module 未加载：emit 普通 CALL bpf_rotate64()（优雅降级）
+```
+
+### 4.5 Kernel 文件布局（`vendor/linux-framework/` rejit-v2 分支）
+
+| 文件 | 职责 |
+|------|------|
+| `include/linux/bpf.h` | `bpf_kfunc_inline_ops` 结构体、注册 API |
+| `include/linux/btf.h` | `KF_INLINE_EMIT` flag |
+| `include/uapi/linux/bpf.h` | `BPF_PROG_REJIT` cmd、`orig_prog_insns` 字段 |
+| `kernel/bpf/syscall.c` | GET_ORIGINAL 导出、REJIT syscall 入口 |
+| `kernel/bpf/verifier.c` | inline kfunc 注册、load 时保存原始 bytecode |
+| `arch/x86/net/bpf_jit_comp.c` | JIT CALL case inline dispatch |
 
 ---
 
@@ -846,6 +798,6 @@ make clean
 | 304b | **关键发现汇总（2026-03-21）** | 📝 | **(1)** `struct bpf_prog` 不保留原始 bytecode — `insnsi` 被 verifier/fixup 原地改写，需在 load 时新增保存 pre-fixup baseline 到 `bpf_prog_aux`。**(2)** BPF opcode `BPF_ALU64` 的 `0xe0`/`0xf0` 是仅有干净空位，但 Inline Kfunc 不需要新 opcode。**(3)** xlated bytecode 不可逆（`convert_ctx_accesses()` + `do_misc_fixups()`），不能直接重新 PROG_LOAD。**(4)** 现有 `jit_directives.c` image swap 机制可复用。**(5)** re-verify 开销 ~ms 级（vs re-JIT ~30μs），但只发生一次。**(6)** Inline Kfunc 优于 kinsn — 零 verifier/interpreter 改动，复用 kfunc 注册/生命周期/BTF。**(7)** "interpreter 优雅降级"不成立 — kfunc 强制 JIT，降级是 "inline emit 失败 → fallback 普通 kfunc CALL"。**(8)** 常量参数编码（`RORX imm8`）需 v2 增强，v1 先做纯寄存器版。 |
 | 304c | **论文定位（2026-03-21）** | 📝 | 与 K2/Merlin/EPSO **不同赛道**（runtime post-load vs compile-time pre-load）。类比：K2 = GCC -O3，我们 = JVM HotSpot。两者正交可叠加。**新定位**："Verifier-guarded, modular, post-load program transformation infrastructure for eBPF — 给 eBPF 加上类似 JVM 分层编译的能力，在 OS 内核级别，且安全模型更强（kernel verifier vs JVM bytecode verifier）"。同一框架支持四种用途：**(1)** 性能优化；**(2)** 安全加固；**(3)** 恶意程序在线热修复；**(4)** 运行时可观测。 |
 | 304d | **Daemon 完整工作流（2026-03-21）** | 📝 | `BPF_PROG_GET_NEXT_ID` → `BPF_PROG_GET_ORIGINAL` → 用户态分析+重写（kinsn/kfunc 替换 or 安全加固 or PGO 决策）→ `BPF_PROG_REJIT`（kernel: patch orig bytecode → re-verify → re-JIT → image swap via RCU）。**完全透明**：不需要 .bpf.o，不需要改应用/loader，不需要 detach/reattach，零运行时开销。`freplace` 和 `bpf_link_update` 也可作为备选替换路径（freplace 有 ~3-5ns trampoline 开销，link_update 零开销但覆盖面有限）。 |
-| 304 | **⚠️ 重大架构探索：BpfReJIT v2 — Verifier-guarded post-load transformation framework（2026-03-21）** | 🔄 | **架构方向讨论**，考虑从当前 native-level rewrite 转向更通用的 post-load program transformation 框架。核心思路：(1) 不在 native code 层做优化，改为在 BPF bytecode 层做重写 + 让 kernel verifier 验证；(2) 新 BPF 指令通过 kernel module 注册（类似 kfunc）；(3) privileged daemon 自动发现、分析、重写 live BPF 程序，对应用完全透明。**最终收敛方案：Inline Kfunc** — 复用已有 kfunc 机制，新指令注册为 kfunc，verifier 零改动，JIT 时通过 `KF_INLINE_EMIT` flag 内联展开为自定义 native 序列（而非 emit CALL）。优雅降级：module 未加载时走普通函数调用。**两套正交接口**：(A) GET/SET — `BPF_PROG_GET_ORIGINAL` 拿原始 bytecode + `BPF_PROG_REJIT` 对同一 prog 做 bytecode patch→re-verify→re-JIT→image swap（零 attach 变化）；(B) Inline Kfunc — module 注册 JIT inline emit 回调（~150-200 LOC kernel 改动）。**9 个 codex 调研报告**：`docs/tmp/kinsn_feasibility_research_20260320.md`（kfunc 机制）、`docs/tmp/bpf_program_replacement_research_20260320.md`（热替换）、`docs/tmp/verifier_acceptance_research_20260320.md`（verifier 接受度）、`docs/tmp/architecture_comparison_osdi_20260320.md`（论文定位）、`docs/tmp/kinsn_minimal_implementation_20260321.md`（opcode 空间+最小改动）、`docs/tmp/userspace_framework_design_research_20260321.md`（用户态 framework）、`docs/tmp/bpf_prog_rewrite_kernel_research_20260321.md`（REJIT 内核实现）。进行中：`docs/tmp/transparent_replacement_feasibility_20260321.md`（4 路径零开销对比）、`docs/tmp/inline_kfunc_feasibility_20260321.md`（inline kfunc 详细可行性）。 |
-| 304a | **关键发现汇总（2026-03-21）** | 📝 | **(1) struct bpf_prog 不保留原始 bytecode** — `insnsi` 被 verifier/fixup 原地改写，需要在 load 时新增保存 pre-fixup baseline。**(2) BPF opcode 空间** — `BPF_ALU64` 的 `0xe0`/`0xf0` 是仅有的干净空位，但 Inline Kfunc 方案不需要新 opcode。**(3) xlated bytecode 不可逆** — `convert_ctx_accesses()` + `do_misc_fixups()` 不可逆，不能直接重新 PROG_LOAD。**(4) 现有 image swap 可复用** — `jit_directives.c` 的 snapshot/staged-image/RCU/trampoline-regen 机制可直接用于 REJIT。**(5) re-verify 开销 ~ms 级** — 比当前 re-JIT ~30μs 贵 2-3 个数量级，但只发生一次（变换时），不影响运行时。**(6) Inline Kfunc 优于 kinsn** — 零 verifier/interpreter 改动，复用 kfunc 注册/生命周期/BTF 类型系统，工具链天然支持（`__ksym`），优雅降级。**(7) 论文定位** — 与 K2/Merlin/EPSO 不同赛道（runtime vs compile-time），更类似 JVM HotSpot 给 BPF 加分层编译。 |
-| 304b | **新架构用途（2026-03-21）** | 📝 | 同一套 GET+REJIT+InlineKfunc 接口支持四种用途：**(1) 性能优化** — wide load 合并、rotate、cmov、硬件特化；**(2) 安全加固** — 插入 bounds check、speculation barrier；**(3) 恶意程序阻断** — 检测恶意 BPF prog → 替换为 no-op/安全版本 → 在线热修复；**(4) 运行时可观测** — 给 hot path 插入 tracing。 |
+| 304e | **POC 实现（2026-03-21）** | 🔄 | **Phase 1 Inline Kfunc ✅**（kernel `a3173b119`）：KF_INLINE_EMIT flag + x86 JIT inline dispatch + test module `bpf_test_add42`。**Phase 2 GET_ORIGINAL ✅**（kernel `36e41e7a0`）：load 时保存原始 insns + `bpf_prog_info.orig_prog_insns` 导出。两个 phase 合计 **+200 行 kernel 核心改动**（+297 行 selftest）。**Phase 3 REJIT 🔄**：codex 实现中。Git：`rejit-v2` 分支（stock 7.0-rc2 baseline），v1 代码保存在 `v1-native-rewrite` 分支。 |
+| 304f | **⚠️ REJIT 接口设计决策（2026-03-21）** | 📝 | **BPF_PROG_REJIT 接受完整的新 BPF bytecode，不是 patch。** daemon 提交整段新程序 `(prog_fd, new_insns, new_insn_cnt)` → kernel 对新 bytecode 做完整 `bpf_check()` + JIT → 原子替换同一 `struct bpf_prog` 的 image。理由：(1) daemon 有完全灵活性做任意变换；(2) kernel 走标准 verify 路径，零特殊 patch 逻辑；(3) map 引用在新 bytecode 中用 fd/BTF ID，kernel 正常 resolve。**不是 patch format** — 避免 kernel 内部 patch 应用+offset 调整的复杂度。 |
+| 304g | **调研进行中（2026-03-21）** | 🔄 | (1) Verifier-fixup 耦合度分析（能否让 verifier 直接接受 xlated bytecode）→ `docs/tmp/verifier_fixup_coupling_analysis_20260321.md`。(2) 安全 use case 深度调研 → `docs/tmp/security_usecase_research_20260321.md`。(3) 用户态 v2 适配调研（scanner 改造/daemon 架构/benchmark 适配）→ `docs/tmp/userspace_v2_adaptation_research_20260321.md`。(4) 综合 related work → `docs/tmp/comprehensive_related_work_20260321.md` ✅。(5) 设计 gap 分析 → `docs/tmp/bpfrejit_v2_design_gaps_20260321.md` ✅。 |
