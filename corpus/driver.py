@@ -33,6 +33,7 @@ try:
         ensure_parent,
         materialize_dummy_context,
         materialize_dummy_packet,
+        materialize_katran_packet,
     )
     from runner.libs.inventory import discover_object_programs
     from runner.libs.results import (
@@ -49,6 +50,7 @@ except ImportError:
         ensure_parent,
         materialize_dummy_context,
         materialize_dummy_packet,
+        materialize_katran_packet,
     )
     from runner.libs.inventory import discover_object_programs
     from runner.libs.results import (
@@ -67,6 +69,7 @@ except ImportError:
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_SUITE = ROOT_DIR / "corpus" / "config" / "macro_corpus.yaml"
 DEFAULT_PACKET = ROOT_DIR / "corpus" / "inputs" / "macro_dummy_packet_64.bin"
+DEFAULT_KATRAN_PACKET = ROOT_DIR / "corpus" / "inputs" / "katran_vip_packet_64.bin"
 DEFAULT_CONTEXT = ROOT_DIR / "corpus" / "inputs" / "macro_dummy_context_64.bin"
 DEFAULT_BTF_CANDIDATES = (
     Path("/sys/kernel/btf/vmlinux"),
@@ -436,7 +439,10 @@ def default_io_plan(spec: ProgramSpec) -> tuple[str, Path | None, int]:
         else:
             io_mode = "context"
 
-    if input_path is None:
+    if io_mode == "packet" and spec.family == "katran":
+        input_path = materialize_katran_packet(input_path or DEFAULT_KATRAN_PACKET)
+        input_size = max(input_size, int(input_path.stat().st_size))
+    elif input_path is None:
         if io_mode == "packet":
             input_path = materialize_dummy_packet(DEFAULT_PACKET)
         elif io_mode == "context":

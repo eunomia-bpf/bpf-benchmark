@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
-from . import resolve_bpftool_binary, run_json_command, tail_text, which
+from . import resolve_bpftool_binary, resolve_perf_binary, run_json_command, tail_text
 from .metrics import compute_delta, sample_bpf_stats
 from .recompile import scan_programs
 
@@ -117,9 +117,7 @@ def collect_perf_stat_for_program(
     events: Sequence[str] = DEFAULT_PERF_EVENTS,
     perf_binary: str | None = None,
 ) -> dict[str, Any]:
-    binary = perf_binary or which("perf")
-    if not binary:
-        raise RuntimeError("perf is not installed")
+    binary = perf_binary or resolve_perf_binary(required=True)
     command = [
         binary,
         "stat",
@@ -143,6 +141,7 @@ def collect_perf_stat_for_program(
     parsed = _parse_perf_stat_csv(completed.stderr or "", events)
     result: dict[str, Any] = {
         "prog_id": int(prog_id),
+        "perf_binary": binary,
         "command": command,
         "returncode": int(completed.returncode),
         "stdout_tail": tail_text(completed.stdout or "", max_lines=20, max_chars=4000),
@@ -268,15 +267,18 @@ def profile_programs(
     perf_requested = bool(collect_perf)
     perf_supported = False
     perf_error = ""
+    perf_binary = ""
     perf_futures_started = False
     perf_executor: ThreadPoolExecutor | None = None
     perf_futures: dict[Future[dict[str, Any]], int] = {}
     try:
         if collect_perf:
-            if not which("perf"):
+            resolved_perf = resolve_perf_binary()
+            if not resolved_perf:
                 perf_error = "perf is not installed"
                 collect_perf = False
             else:
+                perf_binary = resolved_perf
                 worker_count = max(1, min(int(perf_max_workers), len(selected_ids)))
                 perf_executor = ThreadPoolExecutor(max_workers=worker_count)
                 perf_futures = {
@@ -285,6 +287,7 @@ def profile_programs(
                         prog_id,
                         duration_s,
                         events=perf_events,
+                        perf_binary=perf_binary,
                     ): prog_id
                     for prog_id in selected_ids
                 }
@@ -450,6 +453,7 @@ def profile_programs(
             "requested": perf_requested,
             "supported": perf_supported,
             "events": list(perf_events),
+            "binary": perf_binary or None,
             "error": perf_error,
         },
         "programs": programs,

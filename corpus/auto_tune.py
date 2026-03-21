@@ -21,6 +21,7 @@ for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpu
         sys.path.insert(0, candidate_str)
 
 from generate_default_policies import DEFAULT_WORKERS, discover_object_paths
+from runner.libs.corpus import relpath as shared_relpath
 from runner.libs.policy import (
     POLICY_DIR,
     ROOT_DIR,
@@ -47,7 +48,6 @@ from corpus.modes import (
     DEFAULT_VNG,
     families_from_scan,
     format_ratio,
-    relpath,
     run_target_in_guest,
     run_target_locally,
 )
@@ -65,6 +65,10 @@ FAMILY_ORDER = (
 PHASES = {1, 2, 3, 4, 5}
 DEFAULT_OUTPUT_JSON = ROOT_DIR / "corpus" / "results" / "corpus_auto_tune.json"
 DEFAULT_OUTPUT_MD = ROOT_DIR / "docs" / "tmp" / "corpus-auto-tune.md"
+
+
+def relpath(path: Path | str) -> str:
+    return shared_relpath(path, ROOT_DIR)
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:

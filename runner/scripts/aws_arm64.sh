@@ -22,6 +22,8 @@ AWS_ARM64_AMI_PARAM="${AWS_ARM64_AMI_PARAM:-/aws/service/ami-amazon-linux-latest
 AWS_ARM64_BENCH_ITERATIONS="${AWS_ARM64_BENCH_ITERATIONS:-1}"
 AWS_ARM64_BENCH_WARMUPS="${AWS_ARM64_BENCH_WARMUPS:-0}"
 AWS_ARM64_BENCH_REPEAT="${AWS_ARM64_BENCH_REPEAT:-10}"
+AWS_ARM64_BENCH_CPU="${AWS_ARM64_BENCH_CPU:-0}"
+AWS_ARM64_REMOTE_RESULT_JSON="${AWS_ARM64_REMOTE_RESULT_JSON:-arm64_t4g_micro.json}"
 AWS_REGION_VALUE="${AWS_REGION:-${AWS_DEFAULT_REGION:-}}"
 
 ARM64_BUILD_DIR="${ARM64_BUILD_DIR:-$ROOT_DIR/vendor/linux-framework/build-arm64}"
@@ -441,10 +443,32 @@ ensure_remote_runtime_prereqs() {
     local ip="$1"
     ssh_bash "$ip" <<'EOF'
 set -euo pipefail
-sudo dnf -y install bpftool dracut grubby tar gzip elfutils-libelf zlib zstd >/dev/null
+sudo dnf -y install \
+    bpftool \
+    dracut \
+    elfutils-libelf \
+    grubby \
+    gzip \
+    ncurses-libs \
+    python3 \
+    python3.11 \
+    python3.11-pip \
+    tar \
+    util-linux \
+    zlib \
+    zstd >/dev/null
+if ! rpm -q python3.11-pyyaml >/dev/null 2>&1; then
+    if ! sudo dnf -y install python3.11-pyyaml >/dev/null 2>&1; then
+        sudo python3.11 -m pip install --quiet PyYAML >/dev/null
+    fi
+fi
 command -v bpftool >/dev/null
 command -v dracut >/dev/null
 command -v grubby >/dev/null
+command -v python3 >/dev/null
+command -v python3.11 >/dev/null
+python3.11 -c 'import yaml' >/dev/null
+command -v taskset >/dev/null
 EOF
 }
 
@@ -540,21 +564,27 @@ ensure_benchmark_bundle() {
     ensure_cross_arm64_artifacts
     make -C "$ROOT_DIR/micro" programs >/dev/null
 
+    require_local_path "$ROOT_DIR/micro/driver.py" "micro driver"
+    require_local_path "$ROOT_DIR/micro/benchmark_catalog.py" "micro benchmark catalog"
+    require_local_path "$ROOT_DIR/micro/results_layout.py" "micro results layout"
+    require_local_path "$ROOT_DIR/micro/config/micro_pure_jit.yaml" "micro suite manifest"
     require_local_path "$ROOT_DIR/micro/programs/simple.bpf.o" "simple micro object"
-    require_local_path "$ROOT_DIR/micro/programs/load_byte_recompose.bpf.o" "load_byte_recompose micro object"
-    require_local_path "$ROOT_DIR/micro/generated-inputs/simple.mem" "simple input"
-    require_local_path "$ROOT_DIR/micro/generated-inputs/load_byte_recompose.mem" "load_byte_recompose input"
     require_local_path "$ROOT_DIR/micro/policies/load_byte_recompose.yaml" "load_byte_recompose policy"
+    require_local_path "$ROOT_DIR/runner/libs/__init__.py" "runner python helpers"
+    require_local_path "$ROOT_DIR/runner/scripts/arm64_t4g_remote_benchmark.py" "ARM64 remote benchmark runner"
     require_local_path "$SCANNER_SMOKE_OBJECT" "scanner smoke object"
     require_local_path "$SCANNER_SMOKE_POLICY_DIR/${SCANNER_SMOKE_PROGRAM}.policy.yaml" "scanner smoke policy"
 
     rm -rf "$BENCHMARK_BUNDLE_DIR"
     mkdir -p \
+        "$BENCHMARK_BUNDLE_DIR/runner/libs" \
+        "$BENCHMARK_BUNDLE_DIR/runner/scripts" \
         "$BENCHMARK_BUNDLE_DIR/runner/build" \
         "$BENCHMARK_BUNDLE_DIR/scanner/build" \
         "$BENCHMARK_BUNDLE_DIR/lib" \
         "$BENCHMARK_BUNDLE_DIR/micro/programs" \
         "$BENCHMARK_BUNDLE_DIR/micro/generated-inputs" \
+        "$BENCHMARK_BUNDLE_DIR/micro/config" \
         "$BENCHMARK_BUNDLE_DIR/micro/policies" \
         "$BENCHMARK_BUNDLE_DIR/corpus/build/katran" \
         "$BENCHMARK_BUNDLE_DIR/corpus/policies/katran/balancer"
@@ -565,11 +595,15 @@ ensure_benchmark_bundle() {
     cp "$ARM64_CROSS_SCANNER_REAL" "$BENCHMARK_BUNDLE_DIR/scanner/build/bpf-jit-scanner.real"
     cp -a "$ARM64_CROSS_LIB_DIR/." "$BENCHMARK_BUNDLE_DIR/lib/"
 
-    cp "$ROOT_DIR/micro/programs/simple.bpf.o" "$BENCHMARK_BUNDLE_DIR/micro/programs/"
-    cp "$ROOT_DIR/micro/programs/load_byte_recompose.bpf.o" "$BENCHMARK_BUNDLE_DIR/micro/programs/"
-    cp "$ROOT_DIR/micro/generated-inputs/simple.mem" "$BENCHMARK_BUNDLE_DIR/micro/generated-inputs/"
-    cp "$ROOT_DIR/micro/generated-inputs/load_byte_recompose.mem" "$BENCHMARK_BUNDLE_DIR/micro/generated-inputs/"
-    cp "$ROOT_DIR/micro/policies/load_byte_recompose.yaml" "$BENCHMARK_BUNDLE_DIR/micro/policies/"
+    cp "$ROOT_DIR"/micro/*.py "$BENCHMARK_BUNDLE_DIR/micro/"
+    cp -a "$ROOT_DIR/micro/config/." "$BENCHMARK_BUNDLE_DIR/micro/config/"
+    cp -a "$ROOT_DIR/micro/programs/." "$BENCHMARK_BUNDLE_DIR/micro/programs/"
+    cp -a "$ROOT_DIR/micro/generated-inputs/." "$BENCHMARK_BUNDLE_DIR/micro/generated-inputs/"
+    cp -a "$ROOT_DIR/micro/policies/." "$BENCHMARK_BUNDLE_DIR/micro/policies/"
+
+    cp -a "$ROOT_DIR/runner/libs/." "$BENCHMARK_BUNDLE_DIR/runner/libs/"
+    cp "$ROOT_DIR/runner/scripts/arm64_t4g_remote_benchmark.py" \
+        "$BENCHMARK_BUNDLE_DIR/runner/scripts/"
 
     cp "$SCANNER_SMOKE_OBJECT" "$BENCHMARK_BUNDLE_DIR/corpus/build/katran/balancer.bpf.o"
     cp -a "$SCANNER_SMOKE_POLICY_DIR/." "$BENCHMARK_BUNDLE_DIR/corpus/policies/katran/balancer/"
@@ -581,6 +615,7 @@ benchmark_instance() {
     local ip="${1:-${STATE_INSTANCE_IP:-}}"
     [[ -n "$ip" ]] || die "benchmark requires an instance IP"
 
+    load_state
     ensure_benchmark_bundle
     wait_for_ssh "$ip"
 
@@ -598,111 +633,44 @@ mkdir -p "$root/results"
 EOF
     scp_to "$ip" "$BENCHMARK_BUNDLE_TAR" "$AWS_ARM64_REMOTE_STAGE_DIR/"
 
-    log "Running ARM64 micro + scanner smoke on ${ip}"
+    log "Running full ARM64 t4g benchmark suite on ${ip}"
     ssh_bash "$ip" "$AWS_ARM64_REMOTE_STAGE_DIR" \
         "$AWS_ARM64_BENCH_ITERATIONS" "$AWS_ARM64_BENCH_WARMUPS" "$AWS_ARM64_BENCH_REPEAT" \
-        "$SCANNER_SMOKE_PROGRAM" <<'EOF'
+        "$AWS_ARM64_BENCH_CPU" "$AWS_ARM64_REMOTE_RESULT_JSON" "$STATE_INSTANCE_ID" \
+        "$AWS_ARM64_INSTANCE_TYPE" "$AWS_ARM64_PROFILE" "$(resolve_region)" <<'EOF'
 set -euo pipefail
 root="$1"
 iterations="$2"
 warmups="$3"
 repeat="$4"
-scanner_program="$5"
+cpu="$5"
+result_json="$6"
+instance_id="$7"
+instance_type="$8"
+aws_profile="$9"
+aws_region="${10}"
 results_dir="$root/results"
-bpffs_root="/sys/fs/bpf/arm64-crossbuild-smoke"
-pin_dir="$bpffs_root/progs"
-map_dir="$bpffs_root/maps"
-load_object="$root/corpus/build/katran/balancer.bpf.o"
-policy_dir="$root/corpus/policies/katran/balancer"
-
-cleanup() {
-    sudo -n rm -rf "$bpffs_root" || true
-}
-trap cleanup EXIT
 
 cd "$root"
 tar -xzf benchmark-bundle.tar.gz
 mkdir -p "$results_dir"
-sudo -n mountpoint -q /sys/fs/bpf || sudo -n mount -t bpf bpf /sys/fs/bpf
 
-run_series() {
-    local name="$1"
-    shift
-    local warmup_index iteration_index
-    for ((warmup_index = 0; warmup_index < warmups; warmup_index++)); do
-        sudo -n "$root/runner/build/micro_exec" run-kernel "$@" >/dev/null
-    done
-    for ((iteration_index = 1; iteration_index <= iterations; iteration_index++)); do
-        sudo -n "$root/runner/build/micro_exec" run-kernel "$@" \
-            > "$results_dir/$name.iter${iteration_index}.json"
-    done
-}
+sudo -n env \
+    PATH="/usr/sbin:/usr/bin:/sbin:/bin:${PATH}" \
+    LD_LIBRARY_PATH="$root/lib" \
+    PYTHONPATH="$root" \
+    python3.11 "$root/runner/scripts/arm64_t4g_remote_benchmark.py" \
+        --output "$results_dir/$result_json" \
+        --iterations "$iterations" \
+        --warmups "$warmups" \
+        --repeat "$repeat" \
+        --cpu "$cpu" \
+        --instance-id "$instance_id" \
+        --instance-type "$instance_type" \
+        --aws-profile "$aws_profile" \
+        --aws-region "$aws_region"
 
-attempt_loadall() {
-    local label="$1"
-    shift
-    sudo -n bpftool "$@" >"$results_dir/$label.stdout" 2>"$results_dir/$label.stderr"
-}
-
-run_series simple.kernel \
-    --program "$root/micro/programs/simple.bpf.o" \
-    --memory "$root/micro/generated-inputs/simple.mem" \
-    --io-mode staged \
-    --input-size 64 \
-    --repeat "$repeat"
-
-run_series load_byte_recompose.kernel \
-    --program "$root/micro/programs/load_byte_recompose.bpf.o" \
-    --memory "$root/micro/generated-inputs/load_byte_recompose.mem" \
-    --io-mode staged \
-    --input-size 1032 \
-    --repeat "$repeat"
-
-run_series load_byte_recompose.kernel_recompile \
-    --program "$root/micro/programs/load_byte_recompose.bpf.o" \
-    --memory "$root/micro/generated-inputs/load_byte_recompose.mem" \
-    --policy-file "$root/micro/policies/load_byte_recompose.yaml" \
-    --io-mode staged \
-    --input-size 1032 \
-    --repeat "$repeat"
-
-uname -r > "$results_dir/uname.txt"
-ip -brief addr show ens5 > "$results_dir/network.txt" || ip -brief addr > "$results_dir/network.txt"
-sudo -n grubby --default-kernel > "$results_dir/default-kernel.txt" || true
-sudo -n grub2-editenv list > "$results_dir/grubenv.txt" || true
-sudo -n bpftool version > "$results_dir/bpftool-version.txt"
-
-sudo -n rm -rf "$bpffs_root"
-sudo -n mkdir -p "$pin_dir" "$map_dir"
-
-if [[ -r /sys/kernel/btf/vmlinux ]]; then
-    if ! attempt_loadall scanner.loadall.kernel_btf \
-        prog loadall "$load_object" "$pin_dir" kernel_btf /sys/kernel/btf/vmlinux type xdp pinmaps "$map_dir"; then
-        if grep -qi 'kernel_btf' "$results_dir/scanner.loadall.kernel_btf.stderr" && \
-           grep -Eqi 'expected no more arguments|unknown option|unrecognized option|invalid argument' \
-               "$results_dir/scanner.loadall.kernel_btf.stderr"; then
-            attempt_loadall scanner.loadall.fallback \
-                prog loadall "$load_object" "$pin_dir" type xdp pinmaps "$map_dir"
-        else
-            cat "$results_dir/scanner.loadall.kernel_btf.stderr" >&2
-            exit 1
-        fi
-    fi
-else
-    attempt_loadall scanner.loadall.no_btf \
-        prog loadall "$load_object" "$pin_dir" type xdp pinmaps "$map_dir"
-fi
-
-sudo -n test -e "$pin_dir/$scanner_program"
-sudo -n bpftool -j prog show pinned "$pin_dir/$scanner_program" > "$results_dir/scanner.prog.json"
-prog_id="$(sudo -n bpftool prog show pinned "$pin_dir/$scanner_program" | awk '/^[0-9]+:/ {sub(/:/,"",$1); print $1; exit}')"
-test -n "$prog_id"
-printf '%s\n' "$prog_id" > "$results_dir/scanner.prog_id.txt"
-
-sudo -n "$root/scanner/build/bpf-jit-scanner" enumerate --prog-id "$prog_id" --json \
-    > "$results_dir/scanner.enumerate.json"
-sudo -n "$root/scanner/build/bpf-jit-scanner" enumerate --prog-id "$prog_id" --recompile \
-    --policy-dir "$policy_dir" --json > "$results_dir/scanner.recompile.json"
+sudo -n chown -R "$(id -un):$(id -gn)" "$results_dir"
 
 tar -C "$root" -czf "$root/results.tar.gz" results
 EOF

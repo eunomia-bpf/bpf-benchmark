@@ -1,27 +1,35 @@
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import Sequence
+from typing import Protocol, TypeVar
 
-try:
-    from benchmark_catalog import BenchmarkSpec, SuiteSpec
-    from input_generators import materialize_input
-except ImportError:
-    from micro.benchmark_catalog import BenchmarkSpec, SuiteSpec
-    from micro.input_generators import materialize_input
+from .input_generators import materialize_input
+
+
+class BenchmarkLike(Protocol):
+    name: str
+    input_generator: str | None
+
+
+BenchmarkT = TypeVar("BenchmarkT", bound=BenchmarkLike)
+
+
+class SuiteLike(Protocol[BenchmarkT]):
+    benchmarks: Mapping[str, BenchmarkT]
 
 
 def select_benchmarks(
     names: Sequence[str] | None,
-    suite: SuiteSpec,
+    suite: SuiteLike[BenchmarkT],
     *,
     default_names: Sequence[str] | None = None,
-) -> list[BenchmarkSpec]:
+) -> list[BenchmarkT]:
     selected_names = list(names or default_names or ())
     if not selected_names:
         return list(suite.benchmarks.values())
 
-    selected: list[BenchmarkSpec] = []
+    selected: list[BenchmarkT] = []
     for name in selected_names:
         benchmark = suite.benchmarks.get(name)
         if benchmark is None:
@@ -30,7 +38,7 @@ def select_benchmarks(
     return selected
 
 
-def resolve_memory_file(benchmark: BenchmarkSpec, regenerate_inputs: bool) -> Path | None:
+def resolve_memory_file(benchmark: BenchmarkLike, regenerate_inputs: bool) -> Path | None:
     if benchmark.input_generator is None:
         return None
     path, _ = materialize_input(benchmark.input_generator, force=regenerate_inputs)

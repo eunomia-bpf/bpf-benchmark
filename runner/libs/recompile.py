@@ -11,6 +11,8 @@ from typing import Any, Iterable, Mapping
 from . import run_command
 from .metrics import sample_bpf_stats
 
+DEFAULT_LIVE_POLICY_SKIP_FAMILIES = frozenset({"cmov"})
+
 
 @dataclass(frozen=True, slots=True)
 class PolicyTarget:
@@ -162,6 +164,52 @@ def _write_live_remapped_policy(
     }
 
 
+def _write_generated_live_policy(
+    live_manifest: Mapping[str, Any],
+    *,
+    program_name: str,
+    comments: Iterable[str] = (),
+    skip_families: frozenset[str] = DEFAULT_LIVE_POLICY_SKIP_FAMILIES,
+) -> tuple[Path, dict[str, Any]]:
+    from .policy import render_manifest_policy_v3_text
+
+    text, summary = render_manifest_policy_v3_text(
+        program_name=program_name,
+        manifest=live_manifest,
+        comments=comments,
+        skip_families=skip_families,
+    )
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        encoding="utf-8",
+        prefix="e2e-live-policy-",
+        suffix=".policy.yaml",
+        delete=False,
+    ) as handle:
+        handle.write(text)
+        temp_path = Path(handle.name)
+    return temp_path, summary
+
+
+def _install_temp_policy(
+    temp_policy_path: Path,
+    policy_dir_path: str,
+    *,
+    program_name: str,
+) -> None:
+    dest_path = Path(policy_dir_path) / f"{program_name}.policy.yaml"
+    try:
+        import shutil as _shutil
+
+        _shutil.move(str(temp_policy_path), str(dest_path))
+    except OSError:
+        try:
+            temp_policy_path.unlink(missing_ok=True)
+        except OSError:
+            pass
+        raise
+
+
 def _normalize_policy_path(value: Path | str | None) -> str | None:
     if value is None:
         return None
@@ -188,7 +236,7 @@ def _requested_program_name(stats_name: str, policy_path: str | None) -> str:
 
 
 def resolve_policy_files(targets: Iterable[PolicyTarget]) -> dict[int, str]:
-    from .policy import resolve_policy_path
+    from .policy import resolve_live_policy_path, resolve_policy_path
 
     resolved: dict[int, str] = {}
     for target in targets:
@@ -197,18 +245,29 @@ def resolve_policy_files(targets: Iterable[PolicyTarget]) -> dict[int, str]:
         if explicit_policy is not None:
             resolved[prog_id] = explicit_policy
             continue
-        if target.object_path is None:
-            continue
-        policy_path = resolve_policy_path(
-            Path(target.object_path).resolve(),
+        live_policy_path = resolve_live_policy_path(
             program_name=target.program_name,
+            prog_id=prog_id,
         )
-        if policy_path is not None:
-            resolved[prog_id] = str(policy_path.resolve())
+        if live_policy_path is not None:
+            resolved[prog_id] = str(live_policy_path.resolve())
+            continue
+        if target.object_path is not None:
+            policy_path = resolve_policy_path(
+                Path(target.object_path).resolve(),
+                program_name=target.program_name,
+            )
+            if policy_path is not None:
+                resolved[prog_id] = str(policy_path.resolve())
     return resolved
 
 
-def _enumerate_scan_one(scanner_binary: str | Path, prog_id: int) -> dict[str, Any]:
+def enumerate_program_record(
+    scanner_binary: str | Path,
+    prog_id: int,
+    *,
+    timeout_seconds: int | float = 60,
+) -> dict[str, Any]:
     """Use scanner enumerate --prog-id <id> --json to scan a single live program.
 
     Returns the raw parsed JSON record from the enumerate output array, or raises
@@ -225,7 +284,7 @@ def _enumerate_scan_one(scanner_binary: str | Path, prog_id: int) -> dict[str, A
             "--json",
         ],
         check=False,
-        timeout=60,
+        timeout=timeout_seconds,
     )
     if completed.returncode != 0:
         detail = (completed.stderr or completed.stdout or "").strip()
@@ -335,7 +394,7 @@ def scan_programs(
     for prog_id in prog_ids:
         program_name = str(stats.get(int(prog_id), {}).get("name", f"id-{prog_id}"))
         try:
-            record = _enumerate_scan_one(scanner_binary, int(prog_id))
+            record = enumerate_program_record(scanner_binary, int(prog_id))
             enum_name = str(record.get("name") or "").strip()
             if enum_name:
                 program_name = enum_name
@@ -381,18 +440,6 @@ def apply_recompile(
         selected_policy = normalized_policy_files.get(int(prog_id), default_policy)
         stats_name = str(stats.get(int(prog_id), {}).get("name", f"id-{prog_id}"))
         program_name = _requested_program_name(stats_name, selected_policy)
-        if selected_policy is None and not blind_apply:
-            results[int(prog_id)] = {
-                "program_name": program_name,
-                "counts": _scanner_counts(""),
-                "applied": False,
-                "policy_file": None,
-                "policy_mode": "stock",
-                "error": "",
-                "stdout_tail": "",
-                "stderr_tail": "",
-            }
-            continue
         results[int(prog_id)] = _apply_one_enumerate(
             scanner_binary,
             int(prog_id),
@@ -412,15 +459,21 @@ def _apply_one_enumerate(
     blind_apply: bool,
 ) -> dict[str, object]:
     """Apply recompile using enumerate --prog-id --recompile."""
-    policy_mode = "policy-file" if selected_policy else "blind-apply-v5"
+    if blind_apply:
+        policy_mode = "blind-apply-v5"
+    elif selected_policy:
+        policy_mode = "policy-file"
+    else:
+        policy_mode = "live-auto-policy"
     scan_record: dict[str, Any] | None = None
     live_manifest: dict[str, Any] | None = None
     remap_summary: dict[str, Any] | None = None
+    generated_policy_summary: dict[str, Any] | None = None
     temp_policy_dir: tempfile.TemporaryDirectory | None = None  # type: ignore[type-arg]
     policy_dir_path: str | None = None
     try:
-        if selected_policy is not None:
-            scan_record = _enumerate_scan_one(scanner_binary, prog_id)
+        if not blind_apply:
+            scan_record = enumerate_program_record(scanner_binary, prog_id)
             enum_name = str(scan_record.get("name") or "").strip()
             if enum_name:
                 program_name = enum_name
@@ -429,33 +482,48 @@ def _apply_one_enumerate(
                 raise RuntimeError(
                     f"enumerate --prog-id {prog_id} --json did not return per-site data"
                 )
-            live_manifest = {"sites": enum_sites}
+            live_manifest = {
+                "summary": {"total_sites": int(scan_record.get("total_sites", 0) or 0)},
+                "sites": enum_sites,
+            }
             temp_dir_obj = tempfile.TemporaryDirectory(prefix="e2e-enumerate-policy-dir-")
             temp_policy_dir = temp_dir_obj
             policy_dir_path = temp_dir_obj.name
-            _temp_path, remap_summary = _write_live_remapped_policy(
-                selected_policy,
-                live_manifest,
-                program_name=program_name,
+            if selected_policy is not None:
+                temp_policy_path, remap_summary = _write_live_remapped_policy(
+                    selected_policy,
+                    live_manifest,
+                    program_name=program_name,
+                )
+                _install_temp_policy(temp_policy_path, policy_dir_path, program_name=program_name)
+            else:
+                temp_policy_path, generated_policy_summary = _write_generated_live_policy(
+                    live_manifest,
+                    program_name=program_name,
+                    comments=[
+                        "Auto-generated from live scanner enumerate output.",
+                        f"Program id: {prog_id}",
+                        "Selection model: keep every discovered live site except skipped families: cmov",
+                    ],
+                )
+                _install_temp_policy(temp_policy_path, policy_dir_path, program_name=program_name)
+            selected_site_count = int(
+                remap_summary.get("remapped_sites", 0)
+                if remap_summary is not None
+                else (generated_policy_summary or {}).get("explicit_sites", 0)
             )
-            dest_path = Path(policy_dir_path) / f"{program_name}.policy.yaml"
-            try:
-                import shutil as _shutil
-
-                _shutil.move(str(_temp_path), str(dest_path))
-            except OSError:
-                try:
-                    _temp_path.unlink(missing_ok=True)
-                except OSError:
-                    pass
-                raise
-            if int(remap_summary.get("remapped_sites", 0) or 0) <= 0:
+            if selected_site_count <= 0:
                 return {
                     "program_name": program_name,
-                    "counts": _counts_from_family_counts(remap_summary.get("remapped_family_counts")),
+                    "counts": _counts_from_family_counts(
+                        remap_summary.get("remapped_family_counts")
+                        if remap_summary is not None
+                        else (generated_policy_summary or {}).get("explicit_family_counts")
+                    ),
                     "applied": False,
                     "noop": True,
                     "policy_file": selected_policy,
+                    "policy_generation": generated_policy_summary,
                     "policy_remap": remap_summary,
                     "policy_mode": policy_mode,
                     "error": "",
@@ -482,6 +550,7 @@ def _apply_one_enumerate(
             "enumerate_record": record,
             "applied": applied,
             "policy_file": selected_policy,
+            "policy_generation": generated_policy_summary,
             "policy_remap": remap_summary,
             "policy_mode": policy_mode,
             "error": record_error,
@@ -494,6 +563,10 @@ def _apply_one_enumerate(
     except Exception as exc:
         if remap_summary is not None:
             failure_counts = _counts_from_family_counts(remap_summary.get("remapped_family_counts"))
+        elif generated_policy_summary is not None:
+            failure_counts = _counts_from_family_counts(
+                generated_policy_summary.get("explicit_family_counts")
+            )
         elif scan_record is not None:
             failure_counts = _scan_counts_from_enumerate(scan_record)
         else:
@@ -503,6 +576,7 @@ def _apply_one_enumerate(
             "counts": failure_counts,
             "applied": False,
             "policy_file": selected_policy,
+            "policy_generation": generated_policy_summary,
             "policy_remap": remap_summary,
             "policy_mode": policy_mode,
             "error": str(exc),
@@ -520,6 +594,7 @@ def _apply_one_enumerate(
 __all__ = [
     "PolicyTarget",
     "apply_recompile",
+    "enumerate_program_record",
     "resolve_policy_files",
     "scan_programs",
 ]

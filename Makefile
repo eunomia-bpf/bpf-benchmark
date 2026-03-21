@@ -39,6 +39,7 @@ ARM64_CROSS_SCANNER := $(ARM64_CROSS_SCANNER_DIR)/bpf-jit-scanner
 ARM64_CROSS_SCANNER_REAL := $(ARM64_CROSS_SCANNER_DIR)/bpf-jit-scanner.real
 AWS_ARM64_NAME_TAG ?= bpf-benchmark-arm64
 AWS_ARM64_INSTANCE_TYPE ?= t4g.micro
+ARM64_CROSSBUILD_ENABLE_LLVMBPF ?= ON
 AWS_ARM64_REMOTE_USER ?= ec2-user
 AWS_ARM64_REMOTE_STAGE_DIR ?= /home/$(AWS_ARM64_REMOTE_USER)/bpf-benchmark-arm64
 AWS_ARM64_REMOTE_KERNEL_STAGE_DIR ?= /home/$(AWS_ARM64_REMOTE_USER)/codex-kernel-stage
@@ -98,6 +99,7 @@ KERNEL_TEST_BPF_BUILD_DIR := $(KERNEL_TEST_DIR)/build
 KERNEL_TEST_BPF_SRCS := $(wildcard $(KERNEL_TEST_DIR)/progs/*.bpf.c)
 KERNEL_TEST_BPF_OBJS := $(patsubst $(KERNEL_TEST_DIR)/progs/%.bpf.c,$(KERNEL_TEST_BPF_BUILD_DIR)/progs/%.bpf.o,$(KERNEL_TEST_BPF_SRCS))
 VMLINUX_PATH := $(KERNEL_DIR)/vmlinux
+KERNEL_PERF_PATH := $(KERNEL_DIR)/tools/perf/perf
 
 # Default Makefile outputs go to results/dev/. Promote manually to the top-level
 # results/ directory when a run becomes authoritative.
@@ -161,7 +163,7 @@ KERNEL_JIT_SOURCES := \
 # Stamp file for BPF program objects (programs/ has no separate build dir)
 MICRO_BPF_STAMP := $(MICRO_DIR)/programs/.build.stamp
 
-.PHONY: all runner micro scanner kernel kernel-arm64 kernel-tests kernel-test-progs \
+.PHONY: all runner micro scanner kernel kernel-perf kernel-arm64 kernel-tests kernel-test-progs \
 	arm64-crossbuild-image selftest-arm64 scanner-tests clean \
 	smoke check validate verify-build compare \
 	vm-selftest vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
@@ -179,6 +181,7 @@ help:
 	@echo "  make micro            - Build micro_exec runner and BPF programs"
 	@echo "  make scanner          - Build bpf-jit-scanner"
 	@echo "  make kernel           - Build kernel bzImage"
+	@echo "  make kernel-perf      - Build kernel-matched perf from vendor/linux-framework/tools/perf"
 	@echo "  make kernel-arm64     - Cross-build ARM64 Image under vendor/linux-framework/build-arm64"
 	@echo "  make kernel-tests     - Build kernel recompile test binary"
 	@echo "  make arm64-crossbuild-image - Build the Docker image for ARM64 userspace cross-builds"
@@ -294,6 +297,15 @@ kernel:
 	@echo "=== Running make kernel ==="
 	$(MAKE) -C "$(KERNEL_DIR)" -j"$(NPROC)" bzImage
 
+kernel-perf:
+	@echo "=== Running make kernel-perf ==="
+	$(MAKE) -C "$(KERNEL_DIR)/tools/perf" \
+		ARCH=x86 \
+		NO_LIBPYTHON=1 \
+		NO_LIBPERF_TEST=1 \
+		perf -j"$(NPROC)"
+	@test -x "$(KERNEL_PERF_PATH)" || (echo "ERROR: perf not found at $(KERNEL_PERF_PATH)" && exit 1)
+
 arm64-worktree:
 	@mkdir -p "$(dir $(ARM64_WORKTREE_DIR))"
 	@if [ ! -e "$(ARM64_WORKTREE_DIR)/.git" ]; then \
@@ -402,11 +414,11 @@ cross-arm64: arm64-crossbuild-image
 			scanner_build="$$build_root/scanner"; \
 			rm -rf "$$build_root"; \
 			mkdir -p /out/runner/build /out/scanner/build /out/lib; \
-			export CMAKE_BUILD_PARALLEL_LEVEL="$(ARM64_CROSSBUILD_JOBS)"; \
-			make -C /workspace/runner \
-				BUILD_DIR="$$runner_build" \
-				MICRO_EXEC_ENABLE_LLVMBPF=OFF \
-				micro_exec >/dev/null; \
+				export CMAKE_BUILD_PARALLEL_LEVEL="$(ARM64_CROSSBUILD_JOBS)"; \
+				make -C /workspace/runner \
+					BUILD_DIR="$$runner_build" \
+					MICRO_EXEC_ENABLE_LLVMBPF=$(ARM64_CROSSBUILD_ENABLE_LLVMBPF) \
+					micro_exec >/dev/null; \
 			cmake -S /workspace/scanner -B "$$scanner_build" \
 				-DCMAKE_BUILD_TYPE=Release \
 				-DBPF_JIT_SCANNER_BUILD_CLI=ON \

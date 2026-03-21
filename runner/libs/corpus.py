@@ -126,9 +126,85 @@ def _ipv4_checksum(header: bytes | bytearray) -> int:
     return ~s & 0xFFFF
 
 
+def _checksum16(data: bytes | bytearray) -> int:
+    blob = bytes(data)
+    if len(blob) % 2:
+        blob += b"\x00"
+    total = 0
+    for i in range(0, len(blob), 2):
+        total += (blob[i] << 8) + blob[i + 1]
+    while total >> 16:
+        total = (total & 0xFFFF) + (total >> 16)
+    return ~total & 0xFFFF
+
+
+def _tcp_ipv4_checksum(src_ip: bytes, dst_ip: bytes, segment: bytes | bytearray) -> int:
+    pseudo_header = bytearray(12)
+    pseudo_header[0:4] = src_ip
+    pseudo_header[4:8] = dst_ip
+    pseudo_header[9] = 6
+    pseudo_header[10:12] = len(segment).to_bytes(2, "big")
+    return _checksum16(pseudo_header + bytes(segment))
+
+
 # Expected content of the canonical corpus dummy packet (version tag at bytes 0-5 of MAC dst).
 # Bumping this sentinel forces regeneration when the packet layout is updated.
 _CORPUS_PACKET_MAGIC = bytes.fromhex("ffffffffffff")  # broadcast dst MAC as version sentinel
+_KATRAN_PACKET_MAGIC = bytes.fromhex("02000000000a")  # Katran LB MAC as version sentinel
+
+# Keep these values in sync with e2e/cases/katran/case.py.
+_KATRAN_CLIENT_IP = bytes([10, 0, 0, 2])
+_KATRAN_VIP_IP = bytes([10, 100, 1, 1])
+_KATRAN_CLIENT_MAC = bytes.fromhex("02000000001c")
+_KATRAN_LB_MAC = bytes.fromhex("02000000000a")
+_KATRAN_SRC_PORT = 31337
+_KATRAN_DST_PORT = 8080
+_KATRAN_TCP_ACK = 0x10
+_KATRAN_PAYLOAD = b"KATRANVIP!"
+
+
+def _build_ipv4_tcp_packet(
+    *,
+    dst_mac: bytes,
+    src_mac: bytes,
+    src_ip: bytes,
+    dst_ip: bytes,
+    src_port: int,
+    dst_port: int,
+    payload: bytes,
+    tcp_flags: int,
+) -> bytearray:
+    ip_total_length = 20 + 20 + len(payload)
+    packet = bytearray(max(64, 14 + ip_total_length))
+
+    packet[0:6] = dst_mac
+    packet[6:12] = src_mac
+    packet[12:14] = bytes.fromhex("0800")
+
+    packet[14] = 0x45
+    packet[15] = 0x00
+    packet[16:18] = ip_total_length.to_bytes(2, "big")
+    packet[18:20] = (0).to_bytes(2, "big")
+    packet[20:22] = (0x4000).to_bytes(2, "big")
+    packet[22] = 64
+    packet[23] = 6
+    packet[24:26] = (0).to_bytes(2, "big")
+    packet[26:30] = src_ip
+    packet[30:34] = dst_ip
+    packet[24:26] = _ipv4_checksum(packet[14:34]).to_bytes(2, "big")
+
+    packet[34:36] = int(src_port).to_bytes(2, "big")
+    packet[36:38] = int(dst_port).to_bytes(2, "big")
+    packet[38:42] = (1).to_bytes(4, "big")
+    packet[42:46] = (0).to_bytes(4, "big")
+    packet[46] = 0x50
+    packet[47] = int(tcp_flags & 0xFF)
+    packet[48:50] = (8192).to_bytes(2, "big")
+    packet[50:52] = (0).to_bytes(2, "big")
+    packet[52:54] = (0).to_bytes(2, "big")
+    packet[54 : 54 + len(payload)] = payload
+    packet[50:52] = _tcp_ipv4_checksum(src_ip, dst_ip, packet[34 : 54 + len(payload)]).to_bytes(2, "big")
+    return packet
 
 
 def _build_corpus_packet() -> bytearray:
@@ -182,6 +258,19 @@ def _build_corpus_packet() -> bytearray:
     return packet
 
 
+def _build_katran_packet() -> bytearray:
+    return _build_ipv4_tcp_packet(
+        dst_mac=_KATRAN_LB_MAC,
+        src_mac=_KATRAN_CLIENT_MAC,
+        src_ip=_KATRAN_CLIENT_IP,
+        dst_ip=_KATRAN_VIP_IP,
+        src_port=_KATRAN_SRC_PORT,
+        dst_port=_KATRAN_DST_PORT,
+        payload=_KATRAN_PAYLOAD,
+        tcp_flags=_KATRAN_TCP_ACK,
+    )
+
+
 def materialize_dummy_packet(path: Path) -> Path:
     ensure_parent(path)
     # Regenerate if the file is absent, wrong size, or does not start with the
@@ -192,6 +281,18 @@ def materialize_dummy_packet(path: Path) -> Path:
             return path
 
     packet = _build_corpus_packet()
+    path.write_bytes(packet)
+    return path
+
+
+def materialize_katran_packet(path: Path) -> Path:
+    ensure_parent(path)
+    if path.exists() and path.stat().st_size == 64:
+        existing = path.read_bytes()
+        if existing[0:6] == _KATRAN_PACKET_MAGIC:
+            return path
+
+    packet = _build_katran_packet()
     path.write_bytes(packet)
     return path
 
@@ -598,6 +699,7 @@ __all__ = [
     "markdown_table",
     "materialize_dummy_context",
     "materialize_dummy_packet",
+    "materialize_katran_packet",
     "maybe_sudo_prefix",
     "normalize_section_root",
     "parse_runner_json",

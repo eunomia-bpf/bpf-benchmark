@@ -1,5 +1,7 @@
 #include "micro_exec.hpp"
 
+#include <arpa/inet.h>
+
 #include <bpf_jit_scanner/pattern_v5.hpp>
 #include <bpf_jit_scanner/policy_config.hpp>
 
@@ -8,6 +10,7 @@
 #include <linux/bpf.h>
 
 #include <algorithm>
+#include <array>
 #include <cerrno>
 #include <chrono>
 #include <cmath>
@@ -71,6 +74,12 @@ namespace {
 
 using clock_type = std::chrono::steady_clock;
 constexpr size_t kEthernetHeaderSize = 14;
+constexpr std::string_view kKatranBalancerProgramName = "balancer_ingress";
+constexpr uint32_t kKatranVipNum = 0;
+constexpr uint32_t kKatranRealNum = 1;
+constexpr uint32_t kKatranVipFlags = 1U << 1;
+constexpr uint32_t kKatranChRingSize = 65537;
+constexpr size_t kKatranEncapHeadroom = 64;
 
 #if defined(__x86_64__) || defined(__i386__)
 constexpr bool kHasTscMeasurement = true;
@@ -223,6 +232,137 @@ struct kernel_run_pass_result {
     kernel_test_run_measurement measurement {};
     perf_counter_capture perf_counters {};
 };
+
+bool katran_balancer_fixture_requested(const cli_options &options)
+{
+    return options.program_name.has_value() &&
+           *options.program_name == kKatranBalancerProgramName;
+}
+
+std::array<uint8_t, 4> parse_ipv4_address(std::string_view text)
+{
+    std::array<uint8_t, 4> address {};
+    const std::string rendered(text);
+    if (inet_pton(AF_INET, rendered.c_str(), address.data()) != 1) {
+        fail("unable to parse IPv4 address: " + rendered);
+    }
+    return address;
+}
+
+std::array<uint8_t, 6> parse_mac_address(std::string_view text)
+{
+    std::array<uint8_t, 6> mac {};
+    unsigned int octets[6] = {};
+    const std::string rendered(text);
+    if (std::sscanf(
+            rendered.c_str(),
+            "%2x:%2x:%2x:%2x:%2x:%2x",
+            &octets[0],
+            &octets[1],
+            &octets[2],
+            &octets[3],
+            &octets[4],
+            &octets[5]) != 6) {
+        fail("unable to parse MAC address: " + rendered);
+    }
+    for (size_t index = 0; index < mac.size(); ++index) {
+        mac[index] = static_cast<uint8_t>(octets[index] & 0xFFU);
+    }
+    return mac;
+}
+
+void update_map_elem_or_fail(
+    int fd,
+    const void *key,
+    const void *value,
+    std::string_view map_name)
+{
+    if (bpf_map_update_elem(fd, key, value, BPF_ANY) != 0) {
+        fail(
+            "bpf_map_update_elem(" + std::string(map_name) + ") failed: " +
+            std::string(strerror(errno)));
+    }
+}
+
+std::array<uint8_t, 8> build_katran_ctl_value()
+{
+    std::array<uint8_t, 8> value {};
+    const auto mac = parse_mac_address("02:00:00:00:00:0b");
+    std::copy(mac.begin(), mac.end(), value.begin());
+    return value;
+}
+
+std::array<uint8_t, 20> build_katran_vip_key()
+{
+    std::array<uint8_t, 20> key {};
+    const auto vip = parse_ipv4_address("10.100.1.1");
+    std::copy(vip.begin(), vip.end(), key.begin());
+    key[16] = static_cast<uint8_t>((8080U >> 8) & 0xFFU);
+    key[17] = static_cast<uint8_t>(8080U & 0xFFU);
+    key[18] = IPPROTO_TCP;
+    return key;
+}
+
+std::array<uint8_t, 8> build_katran_vip_value()
+{
+    std::array<uint8_t, 8> value {};
+    const uint32_t flags = kKatranVipFlags;
+    const uint32_t vip_num = kKatranVipNum;
+    std::memcpy(value.data(), &flags, sizeof(flags));
+    std::memcpy(value.data() + sizeof(flags), &vip_num, sizeof(vip_num));
+    return value;
+}
+
+std::array<uint8_t, 20> build_katran_real_value()
+{
+    std::array<uint8_t, 20> value {};
+    const auto real = parse_ipv4_address("10.200.0.2");
+    std::copy(real.begin(), real.end(), value.begin());
+    return value;
+}
+
+void initialize_katran_test_fixture(bpf_object *object)
+{
+    bpf_map *vip_map = bpf_object__find_map_by_name(object, "vip_map");
+    bpf_map *reals_map = bpf_object__find_map_by_name(object, "reals");
+    bpf_map *rings_map = bpf_object__find_map_by_name(object, "ch_rings");
+    bpf_map *ctl_array_map = bpf_object__find_map_by_name(object, "ctl_array");
+    if (vip_map == nullptr || reals_map == nullptr || rings_map == nullptr ||
+        ctl_array_map == nullptr) {
+        fail("Katran balancer fixture requires vip_map, reals, ch_rings, and ctl_array");
+    }
+
+    const int vip_fd = bpf_map__fd(vip_map);
+    const int reals_fd = bpf_map__fd(reals_map);
+    const int rings_fd = bpf_map__fd(rings_map);
+    const int ctl_fd = bpf_map__fd(ctl_array_map);
+    if (vip_fd < 0 || reals_fd < 0 || rings_fd < 0 || ctl_fd < 0) {
+        fail("unable to obtain Katran fixture map fd");
+    }
+
+    const uint32_t zero = 0;
+    const uint32_t real_num = kKatranRealNum;
+    const auto ctl_value = build_katran_ctl_value();
+    const auto vip_key = build_katran_vip_key();
+    const auto vip_value = build_katran_vip_value();
+    const auto real_value = build_katran_real_value();
+
+    update_map_elem_or_fail(ctl_fd, &zero, ctl_value.data(), "ctl_array");
+    update_map_elem_or_fail(vip_fd, vip_key.data(), vip_value.data(), "vip_map");
+    update_map_elem_or_fail(reals_fd, &real_num, real_value.data(), "reals");
+    for (uint32_t ring_pos = 0; ring_pos < kKatranChRingSize; ++ring_pos) {
+        const uint32_t key = (kKatranVipNum * kKatranChRingSize) + ring_pos;
+        update_map_elem_or_fail(rings_fd, &key, &real_num, "ch_rings");
+    }
+}
+
+size_t packet_output_capacity(const cli_options &options, size_t packet_size)
+{
+    if (katran_balancer_fixture_requested(options)) {
+        return std::max(packet_size + kKatranEncapHeadroom, static_cast<size_t>(128));
+    }
+    return packet_size;
+}
 
 void reset_kernel_test_run_state(kernel_test_run_context &context)
 {
@@ -1067,6 +1207,9 @@ std::vector<sample_result> run_kernel(const cli_options &options)
     const auto object_load_end = std::chrono::steady_clock::now();
     const std::string effective_io_mode =
         resolve_effective_io_mode(options.io_mode, object.get());
+    if (!options.compile_only && katran_balancer_fixture_requested(options)) {
+        initialize_katran_test_fixture(object.get());
+    }
     const auto program_info = load_prog_info(program_fd);
 
     /* v4 post-load re-JIT: apply policy blob via BPF_PROG_JIT_RECOMPILE */
@@ -1402,7 +1545,7 @@ std::vector<sample_result> run_kernel(const cli_options &options)
                 fail("bpf_map_update_elem(input_map) failed: " + std::string(strerror(errno)));
             }
             packet.assign(64, 0);
-            packet_out.assign(packet.size(), 0);
+            packet_out.assign(packet_output_capacity(options, packet.size()), 0);
         } else {
             if (packet_kind == packet_context_kind::none) {
                 fail("io-mode map without input_map requires an XDP or skb packet context");
@@ -1412,7 +1555,7 @@ std::vector<sample_result> run_kernel(const cli_options &options)
             } else {
                 packet = build_packet_input(input_bytes, program_info.type);
             }
-            packet_out.assign(packet.size(), 0);
+            packet_out.assign(packet_output_capacity(options, packet.size()), 0);
         }
         if (bpf_map_update_elem(result_fd, &key, &zero, BPF_ANY) != 0) {
             fail("bpf_map_update_elem(result_map) failed: " + std::string(strerror(errno)));
@@ -1428,7 +1571,7 @@ std::vector<sample_result> run_kernel(const cli_options &options)
         } else {
             packet = build_packet_input(input_bytes, program_info.type);
         }
-        packet_out.assign(packet.size(), 0);
+        packet_out.assign(packet_output_capacity(options, packet.size()), 0);
         exec_input_prepare_end = std::chrono::steady_clock::now();
     } else if (effective_io_mode == "context") {
         exec_input_prepare_start = std::chrono::steady_clock::now();
@@ -1444,7 +1587,7 @@ std::vector<sample_result> run_kernel(const cli_options &options)
         } else {
             packet = build_packet_input(input_bytes, program_info.type);
         }
-        packet_out.assign(packet.size(), 0);
+        packet_out.assign(packet_output_capacity(options, packet.size()), 0);
         exec_input_prepare_end = std::chrono::steady_clock::now();
     }
 

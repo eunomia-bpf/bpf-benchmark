@@ -10,7 +10,7 @@ import tempfile
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
@@ -23,11 +23,16 @@ from runner.libs.policy import (
     POLICY_DIR,
     ROOT_DIR,
     canonical_policy_family_name,
+    live_policy_dir,
+    live_policy_path_for_program,
     object_relative_path,
     object_roots,
+    policy_sites_from_manifest,
     policy_path_for_program,
-    render_policy_v3_text,
+    render_manifest_policy_v3_text,
 )
+from runner.libs.profiler import resolve_target_programs
+from runner.libs.recompile import enumerate_program_record
 
 try:
     from runner.libs.inventory import discover_object_programs
@@ -103,6 +108,35 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--max-objects",
         type=int,
         help="Optional cap for smoke testing.",
+    )
+    parser.add_argument(
+        "--live",
+        action="store_true",
+        help="Enumerate live programs via bpftool + scanner enumerate instead of offline corpus objects.",
+    )
+    parser.add_argument(
+        "--prog-id",
+        action="append",
+        dest="prog_ids",
+        type=int,
+        help="Only include these live BPF program ids in --live mode. Repeatable.",
+    )
+    parser.add_argument(
+        "--name-contains",
+        action="append",
+        dest="name_contains",
+        help="Only include live programs whose name contains this substring in --live mode. Repeatable.",
+    )
+    parser.add_argument(
+        "--type",
+        action="append",
+        dest="type_equals",
+        help="Only include live programs whose bpftool type matches this token in --live mode. Repeatable.",
+    )
+    parser.add_argument(
+        "--max-programs",
+        type=int,
+        help="Optional cap for --live mode smoke testing.",
     )
     parser.add_argument(
         "--workers",
@@ -387,34 +421,9 @@ def render_program_policy_text(
     manifest: dict[str, Any],
     skip_families: frozenset[str],
 ) -> str:
-    site_counts = Counter()
-    skipped_site_counts = Counter()
-    rendered_sites: list[dict[str, Any]] = []
-    for entry in manifest.get("sites") or []:
-        if not isinstance(entry, dict):
-            continue
-        family = canonical_policy_family_name(str(entry.get("family", "")))
-        site_counts[family] += 1
-        if family in skip_families:
-            skipped_site_counts[family] += 1
-            continue
-        pattern_kind = str(entry.get("pattern_kind", "")).strip()
-        insn = int(entry.get("insn", entry.get("start_insn", -1)))
-        if insn < 0 or not pattern_kind:
-            continue
-        rendered_sites.append(
-            {
-                "insn": insn,
-                "family": family,
-                "pattern_kind": pattern_kind,
-            }
-        )
-    rendered_sites.sort(
-        key=lambda item: (
-            int(item["insn"]),
-            str(item["family"]),
-            str(item["pattern_kind"]),
-        )
+    _sites, site_counts, skipped_site_counts = policy_sites_from_manifest(
+        manifest,
+        skip_families=skip_families,
     )
     skipped_families_list = [family for family in POLICY_FAMILY_KEYS if family in skip_families]
 
@@ -437,11 +446,13 @@ def render_program_policy_text(
             f"Excluded {family} sites from allowlist: {skipped_count}"
         )
 
-    return render_policy_v3_text(
+    rendered, _summary = render_manifest_policy_v3_text(
         program_name=program_name,
-        sites=rendered_sites,
+        manifest=manifest,
         comments=comments,
+        skip_families=skip_families,
     )
+    return rendered
 
 
 def write_policy_file(path: Path, text: str) -> None:
@@ -470,110 +481,292 @@ def prune_empty_policy_dirs(policy_dir: Path) -> None:
             continue
 
 
+def is_under(path: Path, root: Path) -> bool:
+    try:
+        path.resolve().relative_to(root.resolve())
+        return True
+    except ValueError:
+        return False
+
+
+def live_program_manifest_summary(
+    scanner: Path,
+    program: Mapping[str, Any],
+    *,
+    timeout_seconds: int,
+) -> dict[str, Any]:
+    prog_id = int(program.get("id", 0) or 0)
+    program_name = str(program.get("name", "")).strip() or f"id-{prog_id}"
+    program_type = str(program.get("type", "")).strip()
+    manifest = enumerate_program_record(scanner, prog_id, timeout_seconds=timeout_seconds)
+    enum_name = str(manifest.get("name") or "").strip()
+    if enum_name:
+        program_name = enum_name
+    sites, family_counts, skipped_counts = policy_sites_from_manifest(manifest, skip_families=frozenset())
+    live_total_sites = int(manifest.get("total_sites", 0) or 0)
+    if live_total_sites <= 0:
+        live_total_sites = len(sites)
+    return {
+        "prog_id": prog_id,
+        "program_name": program_name,
+        "program_type": program_type or str(manifest.get("type") or "").strip(),
+        "site_total": live_total_sites,
+        "family_totals": family_counts,
+        "skipped_family_totals": skipped_counts,
+        "manifest": manifest,
+    }
+
+
+def discover_live_program_summaries(
+    scanner: Path,
+    *,
+    prog_ids: list[int] | None,
+    name_contains: list[str] | None,
+    type_equals: list[str] | None,
+    max_programs: int | None,
+    timeout_seconds: int,
+) -> tuple[list[dict[str, Any]], list[str]]:
+    selected = resolve_target_programs(
+        prog_ids=prog_ids,
+        name_contains=name_contains,
+        type_equals=type_equals,
+    )
+    if max_programs is not None:
+        selected = selected[: max(0, int(max_programs))]
+    summaries: list[dict[str, Any]] = []
+    warnings: list[str] = []
+    for program in selected:
+        prog_id = int(program.get("id", 0) or 0)
+        if prog_id <= 0:
+            continue
+        try:
+            summaries.append(
+                live_program_manifest_summary(
+                    scanner,
+                    program,
+                    timeout_seconds=timeout_seconds,
+                )
+            )
+        except Exception as exc:
+            warnings.append(f"live enumerate failed for prog_id={prog_id}: {exc}")
+    summaries.sort(key=lambda item: (str(item["program_name"]), int(item["prog_id"])))
+    return summaries, warnings
+
+
+def render_live_program_policy_text(
+    *,
+    prog_id: int,
+    program_name: str,
+    program_type: str,
+    manifest: Mapping[str, Any],
+    skip_families: frozenset[str],
+) -> str:
+    _sites, site_counts, skipped_site_counts = policy_sites_from_manifest(
+        manifest,
+        skip_families=skip_families,
+    )
+    skipped_families_list = [family for family in POLICY_FAMILY_KEYS if family in skip_families]
+    comments = [
+        "Auto-generated by corpus/generate_default_policies.py --live.",
+        f"Live program id: {prog_id}",
+        f"Program: {program_name}",
+        f"Type: {program_type or 'unknown'}",
+        f"Total live scanner sites: {int(manifest.get('total_sites', 0) or 0)}",
+        "Family site totals: "
+        + ", ".join(f"{family}={site_counts.get(family, 0)}" for family in POLICY_FAMILY_KEYS),
+        "Selection model: explicit site allowlist; keep every discovered live site except skipped families: "
+        + ", ".join(skipped_families_list),
+    ]
+    for family in skipped_families_list:
+        skipped_count = skipped_site_counts.get(family, 0)
+        if skipped_count <= 0:
+            continue
+        comments.append(f"Excluded {family} sites from allowlist: {skipped_count}")
+    rendered, _summary = render_manifest_policy_v3_text(
+        program_name=program_name,
+        manifest=manifest,
+        comments=comments,
+        skip_families=skip_families,
+    )
+    return rendered
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
 
     scanner = Path(args.scanner).resolve()
-    runner = Path(args.runner).resolve()
     policy_dir = Path(args.policy_dir).resolve()
     skip_families = frozenset(parse_skip_families_arg(args.skip_families))
-    selected_roots = (
-        tuple(Path(item).resolve() for item in args.object_roots)
-        if args.object_roots
-        else object_roots()
-    )
-
-    if not selected_roots:
-        raise SystemExit(
-            "no corpus object roots found; expected corpus/build, corpus/expanded_corpus, or corpus/objects"
-        )
     if not scanner.exists():
         raise SystemExit(f"scanner not found: {scanner}")
-    if not runner.exists():
-        raise SystemExit(f"runner not found: {runner}")
 
-    object_paths = discover_object_paths(
-        selected_roots,
-        filters=args.filters,
-        max_objects=args.max_objects,
-    )
-    if not object_paths:
-        raise SystemExit("no corpus objects matched the selected roots/filters")
-
-    summaries: list[dict[str, Any]] = []
-    with ThreadPoolExecutor(max_workers=max(1, args.workers)) as executor:
-        future_to_path = {
-            executor.submit(
-                object_scan_summary,
-                scanner,
-                runner,
-                object_path,
-                timeout_seconds=args.timeout,
-            ): object_path
-            for object_path in object_paths
-        }
-        for future in as_completed(future_to_path):
-            object_path = future_to_path[future]
-            try:
-                summaries.append(future.result())
-            except Exception as exc:
-                raise SystemExit(f"failed to scan {object_path}: {exc}") from exc
-
-    summaries.sort(key=lambda item: item["relative_path"].as_posix())
-
+    planned_outputs: list[tuple[Path, str]] = []
     warning_count = 0
-    for summary in summaries:
-        for warning in summary.get("warnings") or []:
+    stale_root = policy_dir
+    summary_text = ""
+
+    if args.live:
+        summaries, warnings = discover_live_program_summaries(
+            scanner,
+            prog_ids=args.prog_ids,
+            name_contains=args.name_contains,
+            type_equals=args.type_equals,
+            max_programs=args.max_programs,
+            timeout_seconds=args.timeout,
+        )
+        if not summaries and not warnings:
+            raise SystemExit("no live BPF programs matched the requested filters")
+        for warning in warnings:
             print(f"warning: {warning}", file=sys.stderr)
             warning_count += 1
 
-    planned_outputs: list[tuple[Path, str]] = []
-    policy_positive_objects = 0
-    policy_positive_programs = 0
-    skipped_family_objects = Counter()
-    skipped_family_programs = Counter()
-    for summary in summaries:
-        programs = summary["programs"]
-        if not programs:
-            continue
-        policy_positive_objects += 1
-        object_path = Path(summary["object_path"]).resolve()
-        object_skipped_families: set[str] = set()
-        for program in programs:
-            manifest = program["manifest"]
-            summary_payload = manifest.get("summary") or {}
-            summary_counts = {
-                family_key: int(summary_payload.get(field, 0) or 0)
-                for family_key, field in SCANNER_SUMMARY_FIELDS
-            }
+        policy_positive_programs = 0
+        skipped_family_programs = Counter()
+        for summary in summaries:
+            if int(summary.get("site_total", 0) or 0) <= 0:
+                continue
+            manifest = summary["manifest"]
+            family_counts = summary["family_totals"]
             for family in skip_families:
-                if summary_counts.get(family, 0) <= 0:
-                    continue
-                object_skipped_families.add(family)
-                skipped_family_programs[family] += 1
-            policy_path = policy_path_for_program(object_path, program["program_name"], policy_dir)
-            text = render_program_policy_text(
-                object_path=object_path,
-                program_name=program["program_name"],
-                section_name=program["section_name"],
+                if int(family_counts.get(family, 0) or 0) > 0:
+                    skipped_family_programs[family] += 1
+            policy_path = live_policy_path_for_program(
+                str(summary["program_name"]),
+                prog_id=int(summary["prog_id"]),
+                policy_dir=policy_dir,
+            )
+            text = render_live_program_policy_text(
+                prog_id=int(summary["prog_id"]),
+                program_name=str(summary["program_name"]),
+                program_type=str(summary.get("program_type", "")),
                 manifest=manifest,
                 skip_families=skip_families,
             )
             planned_outputs.append((policy_path, text))
             policy_positive_programs += 1
-        for family in object_skipped_families:
-            skipped_family_objects[family] += 1
+        stale_root = live_policy_dir(policy_dir)
+        summary_text = (
+            "summary: "
+            f"mode=live "
+            f"enumerated_programs={len(summaries)} "
+            f"site_positive_programs={policy_positive_programs} "
+            f"policies={'planned' if args.dry_run else 'written'}={len(planned_outputs)} "
+            f"skip_families={','.join(skip_families) or 'none'} "
+            f"skip_programs="
+            f"{','.join(f'{family}:{skipped_family_programs.get(family, 0)}' for family in POLICY_FAMILY_KEYS if family in skip_families) or 'none'} "
+            f"stale_removed={{stale_removed}} "
+            f"warnings={warning_count}"
+        )
+    else:
+        runner = Path(args.runner).resolve()
+        selected_roots = (
+            tuple(Path(item).resolve() for item in args.object_roots)
+            if args.object_roots
+            else object_roots()
+        )
+        if not selected_roots:
+            raise SystemExit(
+                "no corpus object roots found; expected corpus/build, corpus/expanded_corpus, or corpus/objects"
+            )
+        if not runner.exists():
+            raise SystemExit(f"runner not found: {runner}")
+
+        object_paths = discover_object_paths(
+            selected_roots,
+            filters=args.filters,
+            max_objects=args.max_objects,
+        )
+        if not object_paths:
+            raise SystemExit("no corpus objects matched the selected roots/filters")
+
+        summaries: list[dict[str, Any]] = []
+        with ThreadPoolExecutor(max_workers=max(1, args.workers)) as executor:
+            future_to_path = {
+                executor.submit(
+                    object_scan_summary,
+                    scanner,
+                    runner,
+                    object_path,
+                    timeout_seconds=args.timeout,
+                ): object_path
+                for object_path in object_paths
+            }
+            for future in as_completed(future_to_path):
+                object_path = future_to_path[future]
+                try:
+                    summaries.append(future.result())
+                except Exception as exc:
+                    raise SystemExit(f"failed to scan {object_path}: {exc}") from exc
+
+        summaries.sort(key=lambda item: item["relative_path"].as_posix())
+        for summary in summaries:
+            for warning in summary.get("warnings") or []:
+                print(f"warning: {warning}", file=sys.stderr)
+                warning_count += 1
+
+        policy_positive_objects = 0
+        policy_positive_programs = 0
+        skipped_family_objects = Counter()
+        skipped_family_programs = Counter()
+        for summary in summaries:
+            programs = summary["programs"]
+            if not programs:
+                continue
+            policy_positive_objects += 1
+            object_path = Path(summary["object_path"]).resolve()
+            object_skipped_families: set[str] = set()
+            for program in programs:
+                manifest = program["manifest"]
+                summary_payload = manifest.get("summary") or {}
+                summary_counts = {
+                    family_key: int(summary_payload.get(field, 0) or 0)
+                    for family_key, field in SCANNER_SUMMARY_FIELDS
+                }
+                for family in skip_families:
+                    if summary_counts.get(family, 0) <= 0:
+                        continue
+                    object_skipped_families.add(family)
+                    skipped_family_programs[family] += 1
+                policy_path = policy_path_for_program(object_path, program["program_name"], policy_dir)
+                text = render_program_policy_text(
+                    object_path=object_path,
+                    program_name=program["program_name"],
+                    section_name=program["section_name"],
+                    manifest=manifest,
+                    skip_families=skip_families,
+                )
+                planned_outputs.append((policy_path, text))
+                policy_positive_programs += 1
+            for family in object_skipped_families:
+                skipped_family_objects[family] += 1
+        summary_text = (
+            "summary: "
+            f"mode=offline "
+            f"scanned_objects={len(summaries)} "
+            f"site_positive_objects={policy_positive_objects} "
+            f"site_positive_programs={policy_positive_programs} "
+            f"policies={'planned' if args.dry_run else 'written'}={len(planned_outputs)} "
+            f"skip_families={','.join(skip_families) or 'none'} "
+            f"skip_objects="
+            f"{','.join(f'{family}:{skipped_family_objects.get(family, 0)}' for family in POLICY_FAMILY_KEYS if family in skip_families) or 'none'} "
+            f"skip_programs="
+            f"{','.join(f'{family}:{skipped_family_programs.get(family, 0)}' for family in POLICY_FAMILY_KEYS if family in skip_families) or 'none'} "
+            f"stale_removed={{stale_removed}} "
+            f"warnings={warning_count}"
+        )
 
     planned_outputs.sort(key=lambda item: display_path(item[0]))
 
     stale_paths: list[Path] = []
-    if not args.dry_run and policy_dir.exists():
+    if not args.dry_run and stale_root.exists():
         planned_set = {path.resolve() for path, _ in planned_outputs}
-        stale_paths = [
-            path
-            for path in sorted(policy_dir.rglob("*.policy.yaml"))
-            if path.resolve() not in planned_set
-        ]
+        stale_paths = []
+        for path in sorted(stale_root.rglob("*.policy.yaml")):
+            if path.resolve() in planned_set:
+                continue
+            if not args.live and is_under(path, live_policy_dir(policy_dir)):
+                continue
+            stale_paths.append(path)
         for stale_path in stale_paths:
             stale_path.unlink()
 
@@ -586,22 +779,9 @@ def main(argv: list[str] | None = None) -> int:
     if not args.dry_run and stale_paths:
         for stale_path in stale_paths:
             print(f"removed stale {display_path(stale_path)}")
-        prune_empty_policy_dirs(policy_dir)
+        prune_empty_policy_dirs(stale_root)
 
-    print(
-        "summary: "
-        f"scanned_objects={len(summaries)} "
-        f"site_positive_objects={policy_positive_objects} "
-        f"site_positive_programs={policy_positive_programs} "
-        f"policies={'planned' if args.dry_run else 'written'}={len(planned_outputs)} "
-        f"skip_families={','.join(skip_families) or 'none'} "
-        f"skip_objects="
-        f"{','.join(f'{family}:{skipped_family_objects.get(family, 0)}' for family in POLICY_FAMILY_KEYS if family in skip_families) or 'none'} "
-        f"skip_programs="
-        f"{','.join(f'{family}:{skipped_family_programs.get(family, 0)}' for family in POLICY_FAMILY_KEYS if family in skip_families) or 'none'} "
-        f"stale_removed={(0 if args.dry_run else len(stale_paths))} "
-        f"warnings={warning_count}"
-    )
+    print(summary_text.format(stale_removed=(0 if args.dry_run else len(stale_paths))))
     return 0
 
 

@@ -41,6 +41,7 @@ from runner.libs import (  # noqa: E402
     write_json,
     write_text,
 )
+from runner.libs.corpus import materialize_katran_packet  # noqa: E402
 from runner.libs.metrics import compute_delta, enable_bpf_stats, sample_bpf_stats, sample_total_cpu_usage  # noqa: E402
 from runner.libs.recompile import PolicyTarget, apply_recompile, resolve_policy_files, scan_programs  # noqa: E402
 
@@ -58,6 +59,7 @@ DEFAULT_KATRAN_OBJECT = ROOT_DIR / "corpus" / "build" / "katran" / "balancer.bpf
 DEFAULT_POLICY_FILE = Path(__file__).with_name("balancer_ingress.e2e.policy.yaml")
 DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
 DEFAULT_SCANNER = ROOT_DIR / "scanner" / "build" / "bpf-jit-scanner"
+DEFAULT_KATRAN_TEST_PACKET = ROOT_DIR / "corpus" / "inputs" / "katran_vip_packet_64.bin"
 DEFAULT_KERNEL_CONFIG = ROOT_DIR / "vendor" / "linux-framework" / ".config"
 DEFAULT_PROGRAM_NAME = "balancer_ingress"
 DEFAULT_INTERFACE = "katran0"
@@ -95,6 +97,8 @@ WRK_LATENCY_AVG_RE = re.compile(
 WRK_LATENCY_DIST_RE = re.compile(r"(50|75|90|99)%\s+([0-9.]+(?:us|ms|s))", re.IGNORECASE)
 
 TCP_PROTO = socket.IPPROTO_TCP
+XDP_PASS = 2
+XDP_TX = 3
 F_LRU_BYPASS = 1 << 1
 CH_RING_SIZE = 65537
 VIP_NUM = 0
@@ -827,6 +831,26 @@ def link_stats(namespace: str | None, iface: str) -> dict[str, int]:
     }
 
 
+class BpfTestRunOpts(ctypes.Structure):
+    _fields_ = [
+        ("sz", ctypes.c_size_t),
+        ("data_in", ctypes.c_void_p),
+        ("data_out", ctypes.c_void_p),
+        ("data_size_in", ctypes.c_uint32),
+        ("data_size_out", ctypes.c_uint32),
+        ("ctx_in", ctypes.c_void_p),
+        ("ctx_out", ctypes.c_void_p),
+        ("ctx_size_in", ctypes.c_uint32),
+        ("ctx_size_out", ctypes.c_uint32),
+        ("retval", ctypes.c_uint32),
+        ("repeat", ctypes.c_int),
+        ("duration", ctypes.c_uint32),
+        ("flags", ctypes.c_uint32),
+        ("cpu", ctypes.c_uint32),
+        ("batch_size", ctypes.c_uint32),
+    ]
+
+
 class LibbpfMapApi:
     def __init__(self) -> None:
         path = ctypes.util.find_library("bpf") or "libbpf.so.1"
@@ -851,6 +875,8 @@ class LibbpfMapApi:
             ctypes.c_void_p,
         ]
         self.lib.bpf_map_get_next_key.restype = ctypes.c_int
+        self.lib.bpf_prog_test_run_opts.argtypes = [ctypes.c_int, ctypes.POINTER(BpfTestRunOpts)]
+        self.lib.bpf_prog_test_run_opts.restype = ctypes.c_int
 
     def obj_get(self, path: Path) -> int:
         fd = int(self.lib.bpf_obj_get(os.fsencode(str(path))))
@@ -900,6 +926,38 @@ class LibbpfMapApi:
             return None
         raise RuntimeError(f"bpf_map_get_next_key failed: {os.strerror(err)} (errno={err})")
 
+    def prog_test_run(
+        self,
+        prog_fd: int,
+        packet: bytes,
+        *,
+        repeat: int = 1,
+        data_out_size: int | None = None,
+    ) -> dict[str, object]:
+        in_buf = (ctypes.c_ubyte * len(packet)).from_buffer_copy(packet)
+        out_size = max(1, int(data_out_size or len(packet)))
+        out_buf = (ctypes.c_ubyte * out_size)()
+        opts = BpfTestRunOpts()
+        opts.sz = ctypes.sizeof(BpfTestRunOpts)
+        opts.data_in = ctypes.cast(in_buf, ctypes.c_void_p)
+        opts.data_size_in = len(packet)
+        opts.data_out = ctypes.cast(out_buf, ctypes.c_void_p)
+        opts.data_size_out = out_size
+        opts.repeat = max(1, int(repeat))
+        rc = int(self.lib.bpf_prog_test_run_opts(int(prog_fd), ctypes.byref(opts)))
+        if rc != 0:
+            err = ctypes.get_errno()
+            raise RuntimeError(f"bpf_prog_test_run_opts failed: {os.strerror(err)} (errno={err})")
+        output_size = max(0, int(opts.data_size_out))
+        return {
+            "retval": int(opts.retval),
+            "duration_ns": int(opts.duration),
+            "repeat": int(opts.repeat),
+            "data_size_in": len(packet),
+            "data_size_out": output_size,
+            "data_out_preview_hex": bytes(out_buf[: min(output_size, 32)]).hex(),
+        }
+
 
 def pack_u32(value: int) -> bytes:
     return struct.pack("=I", int(value))
@@ -923,6 +981,48 @@ def pack_vip_meta(flags: int, vip_num: int) -> bytes:
 
 def pack_real_definition(address: str, flags: int = 0) -> bytes:
     return socket.inet_aton(address) + (b"\x00" * 12) + bytes([int(flags) & 0xFF]) + (b"\x00" * 3)
+
+
+def xdp_action_name(retval: int) -> str:
+    return {
+        0: "XDP_ABORTED",
+        1: "XDP_DROP",
+        XDP_PASS: "XDP_PASS",
+        XDP_TX: "XDP_TX",
+        4: "XDP_REDIRECT",
+    }.get(int(retval), f"UNKNOWN({int(retval)})")
+
+
+def run_katran_prog_test_run(session: KatranDirectSession) -> dict[str, object]:
+    if session.pinned_prog is None:
+        raise RuntimeError("Katran pinned program path is unavailable")
+    api = LibbpfMapApi()
+    packet_path = materialize_katran_packet(DEFAULT_KATRAN_TEST_PACKET)
+    packet = packet_path.read_bytes()
+    prog_fd = api.obj_get(session.pinned_prog)
+    try:
+        result = api.prog_test_run(
+            prog_fd,
+            packet,
+            data_out_size=max(256, len(packet) + 64),
+        )
+    finally:
+        os.close(prog_fd)
+    result.update(
+        {
+            "packet_path": relpath(packet_path),
+            "expected_retval": XDP_TX,
+            "expected_action": xdp_action_name(XDP_TX),
+            "action": xdp_action_name(int(result["retval"])),
+            "ok": int(result["retval"]) == XDP_TX,
+        }
+    )
+    if not bool(result["ok"]):
+        raise RuntimeError(
+            "Katran BPF_PROG_TEST_RUN expected XDP_TX, "
+            f"got {result['action']} ({result['retval']})"
+        )
+    return result
 
 
 def possible_cpu_count() -> int:
@@ -1977,6 +2077,7 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         topology_metadata: dict[str, object] = {}
         server_metadata: dict[str, object] = {}
         map_config: dict[str, object] = {}
+        test_run_validation: dict[str, object] = {}
         for cycle_index in range(sample_count):
             with KatranDsrTopology(
                 args.katran_iface,
@@ -1993,6 +2094,7 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
                         if session.attach_error:
                             raise RuntimeError(f"failed to attach Katran XDP program: {session.attach_error}")
                         map_config = configure_katran_maps(session)
+                        cycle_test_run = run_katran_prog_test_run(session)
                         time.sleep(TOPOLOGY_SETTLE_S)
                         prog_ids = [session.prog_id]
                         policy_files = resolve_policy_files(
@@ -2075,6 +2177,7 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
                                         }
                                     ),
                                 },
+                                "test_run_validation": cycle_test_run,
                                 "baseline": baseline_phase,
                                 "post_rejit": post_phase,
                                 "comparison": compare_phases(baseline_phase, post_phase),
@@ -2086,6 +2189,8 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
                             topology_metadata = topology.metadata()
                         if not server_metadata:
                             server_metadata = http_server.metadata()
+                        if not test_run_validation:
+                            test_run_validation = cycle_test_run
 
     baseline_samples = [
         sample
@@ -2146,6 +2251,7 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         "object_inventory": object_inventory,
         "topology": topology_metadata,
         "map_configuration": map_config,
+        "test_run_validation": test_run_validation,
         "live_program": session_metadata,
         "http_server": server_metadata,
         "baseline": baseline,

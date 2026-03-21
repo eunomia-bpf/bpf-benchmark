@@ -26,12 +26,38 @@ set(MICRO_LLVMBPF_ROOT "${MICRO_REPO_ROOT}/vendor/llvmbpf")
 set(MICRO_SCANNER_ROOT "${MICRO_REPO_ROOT}/scanner")
 option(MICRO_EXEC_ENABLE_LLVMBPF "Build llvmbpf support into micro_exec" ON)
 
+# llvmbpf is built as a static library, so the LLVM package's imported targets
+# must remain visible when the top-level micro_exec target resolves its full
+# link closure.
+set(CMAKE_FIND_PACKAGE_TARGETS_GLOBAL TRUE)
+
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBELF REQUIRED IMPORTED_TARGET libelf)
 pkg_check_modules(ZLIB REQUIRED IMPORTED_TARGET zlib)
 pkg_check_modules(LIBZSTD REQUIRED IMPORTED_TARGET libzstd)
 
 if(MICRO_EXEC_ENABLE_LLVMBPF)
+    find_package(LLVM REQUIRED CONFIG)
+
+    if(NOT TARGET ZLIB::ZLIB)
+        add_library(ZLIB::ZLIB INTERFACE IMPORTED GLOBAL)
+        target_link_libraries(ZLIB::ZLIB INTERFACE PkgConfig::ZLIB)
+    endif()
+
+    find_library(MICRO_TERMINFO_LIBRARY
+        NAMES tinfo terminfo ncurses ncursesw curses
+        PATH_SUFFIXES lib64 lib
+        REQUIRED
+    )
+    mark_as_advanced(MICRO_TERMINFO_LIBRARY)
+
+    if(NOT TARGET Terminfo::terminfo)
+        add_library(Terminfo::terminfo UNKNOWN IMPORTED GLOBAL)
+        set_target_properties(Terminfo::terminfo PROPERTIES
+            IMPORTED_LOCATION "${MICRO_TERMINFO_LIBRARY}"
+        )
+    endif()
+
     add_subdirectory("${MICRO_LLVMBPF_ROOT}" "${CMAKE_BINARY_DIR}/llvmbpf")
 endif()
 

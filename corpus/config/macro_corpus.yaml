@@ -33,7 +33,7 @@ programs:
     program_name: balancer_ingress
     sections: [xdp]
     io_mode: packet
-    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    test_input: corpus/inputs/katran_vip_packet_64.bin
     input_size: 64
     category: networking
     family: katran

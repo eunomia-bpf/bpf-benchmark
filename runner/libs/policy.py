@@ -11,6 +11,7 @@ import yaml
 ROOT_DIR = Path(__file__).resolve().parents[2]
 CORPUS_DIR = ROOT_DIR / "corpus"
 POLICY_DIR = CORPUS_DIR / "policies"
+LIVE_POLICY_DIRNAME = "live"
 OBJECT_ROOT_NAMES = ("build", "expanded_corpus", "objects")
 PROGRAM_SAFE_CHARS = re.compile(r"[^A-Za-z0-9._-]+")
 CANONICAL_POLICY_FAMILIES = (
@@ -142,12 +143,55 @@ def program_policy_dir(object_path: Path, policy_dir: Path = POLICY_DIR) -> Path
     return policy_dir / relative.parent / object_policy_stem(object_path)
 
 
+def live_policy_dir(policy_dir: Path = POLICY_DIR) -> Path:
+    return policy_dir / LIVE_POLICY_DIRNAME
+
+
 def policy_path_for_program(
     object_path: Path,
     program_name: str,
     policy_dir: Path = POLICY_DIR,
 ) -> Path:
     return program_policy_dir(object_path, policy_dir) / f"{sanitize_program_name(program_name)}.policy.yaml"
+
+
+def live_policy_path_for_program(
+    program_name: str,
+    *,
+    prog_id: int | None = None,
+    policy_dir: Path = POLICY_DIR,
+) -> Path:
+    basename = sanitize_program_name(program_name)
+    if prog_id is not None and int(prog_id) > 0:
+        filename = f"{int(prog_id):05d}_{basename}.policy.yaml"
+    else:
+        filename = f"{basename}.policy.yaml"
+    return live_policy_dir(policy_dir) / filename
+
+
+def resolve_live_policy_path(
+    *,
+    program_name: str | None,
+    prog_id: int | None = None,
+    policy_dir: Path = POLICY_DIR,
+) -> Path | None:
+    if not program_name:
+        return None
+    if prog_id is not None and int(prog_id) > 0:
+        per_id = live_policy_path_for_program(program_name, prog_id=int(prog_id), policy_dir=policy_dir)
+        if per_id.exists():
+            return per_id
+    basename = sanitize_program_name(program_name)
+    exact = live_policy_path_for_program(program_name, policy_dir=policy_dir)
+    if exact.exists():
+        return exact
+    live_dir = live_policy_dir(policy_dir)
+    if not live_dir.exists():
+        return None
+    matches = sorted(live_dir.glob(f"*_{basename}.policy.yaml"))
+    if len(matches) == 1:
+        return matches[0]
+    return None
 
 
 def resolve_policy_path(
@@ -193,6 +237,84 @@ def _normalize_policy_site_v3(entry: Mapping[str, Any]) -> tuple[int, str, str]:
     if not pattern_kind:
         raise ValueError("policy site pattern_kind must be a non-empty string")
     return insn, family, pattern_kind
+
+
+def policy_sites_from_manifest(
+    manifest: Mapping[str, Any],
+    *,
+    skip_families: frozenset[str] = frozenset(),
+) -> tuple[list[dict[str, Any]], dict[str, int], dict[str, int]]:
+    site_counts: Counter[str] = Counter()
+    skipped_site_counts: Counter[str] = Counter()
+    rendered_sites: list[dict[str, Any]] = []
+    raw_sites = manifest.get("sites")
+    if not isinstance(raw_sites, Sequence) or isinstance(raw_sites, (str, bytes, bytearray)):
+        return rendered_sites, dict(site_counts), dict(skipped_site_counts)
+    for entry in raw_sites:
+        if not isinstance(entry, Mapping):
+            continue
+        family_value = entry.get("family")
+        if family_value is None:
+            continue
+        try:
+            family = canonical_policy_family_name(str(family_value))
+        except ValueError:
+            continue
+        site_counts[family] += 1
+        if family in skip_families:
+            skipped_site_counts[family] += 1
+            continue
+        pattern_kind = str(entry.get("pattern_kind", "")).strip()
+        insn = int(entry.get("insn", entry.get("start_insn", -1)))
+        if insn < 0 or not pattern_kind:
+            continue
+        rendered_sites.append(
+            {
+                "insn": insn,
+                "family": family,
+                "pattern_kind": pattern_kind,
+            }
+        )
+    rendered_sites.sort(
+        key=lambda item: (
+            int(item["insn"]),
+            POLICY_FAMILY_ORDER.get(str(item["family"]), len(POLICY_FAMILY_ORDER)),
+            str(item["pattern_kind"]),
+        )
+    )
+    return rendered_sites, dict(site_counts), dict(skipped_site_counts)
+
+
+def render_manifest_policy_v3_text(
+    *,
+    program_name: str | None,
+    manifest: Mapping[str, Any],
+    comments: Iterable[str] = (),
+    skip_families: frozenset[str] = frozenset(),
+) -> tuple[str, dict[str, Any]]:
+    sites, site_counts, skipped_site_counts = policy_sites_from_manifest(
+        manifest,
+        skip_families=skip_families,
+    )
+    explicit_family_counts: Counter[str] = Counter()
+    for site in sites:
+        explicit_family_counts[str(site["family"])] += 1
+    rendered = render_policy_v3_text(
+        program_name=program_name,
+        sites=sites,
+        comments=comments,
+    )
+    live_total_sites = int((manifest.get("summary") or {}).get("total_sites", 0) or 0)
+    if live_total_sites <= 0:
+        live_total_sites = sum(site_counts.values())
+    return rendered, {
+        "program_name": program_name,
+        "live_total_sites": live_total_sites,
+        "explicit_sites": len(sites),
+        "family_counts": site_counts,
+        "explicit_family_counts": dict(explicit_family_counts),
+        "skipped_family_counts": skipped_site_counts,
+    }
 
 
 def render_policy_v3_text(
@@ -405,6 +527,7 @@ def remap_policy_v3_to_live(
 
 __all__ = [
     "CORPUS_DIR",
+    "LIVE_POLICY_DIRNAME",
     "OBJECT_ROOT_NAMES",
     "POLICY_DIR",
     "PolicyDocumentV3",
@@ -412,14 +535,19 @@ __all__ = [
     "PolicySiteV3",
     "ROOT_DIR",
     "canonical_policy_family_name",
+    "live_policy_dir",
+    "live_policy_path_for_program",
     "object_policy_stem",
     "object_relative_path",
     "object_roots",
     "parse_policy_v3",
+    "policy_sites_from_manifest",
     "policy_path_for_program",
     "program_policy_dir",
     "remap_policy_v3_to_live",
+    "render_manifest_policy_v3_text",
     "render_policy_v3_text",
+    "resolve_live_policy_path",
     "resolve_policy_path",
     "sanitize_program_name",
 ]
