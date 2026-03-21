@@ -14,6 +14,7 @@
 > - **⚠️ 同一时间只能有一个 agent 修改内核代码（vendor/linux-framework），也只能有一个 agent 跑测试（VM benchmark / selftest）。** 多个 agent 同时改内核代码会产生 git 冲突；多个 agent 同时跑 VM 测试会竞争资源、结果不可靠。调度时必须串行化内核改动和测试任务。
 > - **⚠️ codex 默认不要 commit/push，除非 prompt 明确要求。** 改完代码就停，由 Claude 统一 commit。
 > - **⚠️ 如果需要 commit，必须在 main 分支直接做，不要开新分支。** 开分支导致合并冲突。
+> - **⚠️ 暂时性性能数据和实验计划只能出现在两个地方：(1) 开头摘要区域的权威数据行；(2) §7 任务追踪表格的条目。** §1-§6 的正文不得包含会过期的具体数字或待办计划。如果 §1-§6 需要引用性能数据，只引用任务编号（如"见 #256"），不内联数据本身。
 > 上次更新：2026-03-21a。**权威数据**（#256 rerun）：micro **1.057x** / applied-only **1.193x**；corpus **0.983x**；Tracee **+8.1%**；Tetragon **+20.3%/+32.2%**；Katran BPF **1.108-1.168x**（harness 升级后）；gap **0.581x**。vm-selftest **35/35**。vm-micro validation **62/62 valid, 1.100x**。**⚠️ 2026-03-21 重大架构探索**：考虑 BpfReJIT v2 — 从 native-level rewrite 转向 "verifier-guarded post-load program transformation framework"。核心方案：**Inline Kfunc**（复用 kfunc 验证 + JIT 内联展开）+ **BPF_PROG_REJIT**（bytecode patch→re-verify→image swap）+ **BPF_PROG_GET_ORIGINAL**（透明获取原始 bytecode）。9 个 codex 调研完成，2 个进行中。详见 #304/#304a/#304b。
 
 ---
@@ -50,84 +51,16 @@
 | sched_ext | 调度机制 + 调度策略 | BPF 程序定义调度策略 |
 | **BpfReJIT** | **JIT 安全 + JIT 优化策略** | **用户态定义优化策略** |
 
-### 1.2 论文叙事方向：必须追求 Net Speedup
+### 1.2 论文叙事方向
 
-> **⚠️ 核心方向决定（2026-03-13）：论文叙事必须以 net speedup 为中心，越多越好。**
-> 架构贡献和 policy-sensitivity 是支撑论据，不是主卖点。Paper 必须展示真实程序上的可测量加速。
+> 论文叙事以 net speedup 为中心。架构贡献和 policy-sensitivity 是支撑论据。Paper 必须展示真实程序上的可测量加速。
 > 如果当前数据不够，必须增加 canonical form 覆盖面、改进 policy tuning、或加更多有 sites 的 benchmark。
+> 当前权威性能数据见开头摘要行。历史数据演化见 §7 任务表（#60/#112/#139/#169/#189/#256 等）。
+> 根因分析见 #155/#157/#162。
 
-#### 当前性能现实与差距
+#### v1 性能改进 TODO 历史
 
-| 指标 | 当前值 | 问题 |
-|------|--------|------|
-| Micro overall (#169, post-BEXTR-fix) | 1.003x | 已被 #176 取代 |
-| Micro applied-only (#169) | 0.932x | 已被 #176 取代 |
-| **Micro 6-dense optimized (#173, policy-optimized)** | **1.125x** | **✅ 实测正向（VM，3 regressor 清空）** |
-| **Micro 62-bench overall (#173, policy-optimized)** | **0.995x** | R5 结果（VM噪声影响），已被 #174 取代 |
-| **Micro 6-dense optimized (#174, Build #40, endian restored)** | **1.075-1.100x** | **✅ Build #40 + 256 endian sites 恢复** |
-| **Micro 62-bench overall (#174, Build #40 R10 optimal policy)** | **1.006x** | **✅ up from 0.995x** |
-| **Micro 62-bench applied-only (#174, Build #40, 15 benches)** | **1.040x** | **✅ up from 0.993x** |
-| Micro 62-bench overall (vm-micro Makefile flow, 7de19ef03, 20260314) | 1.054x | 已被 #189 取代（non-applied 噪声膨胀，实际值偏高） |
-| Micro 62-bench applied-only (vm-micro 20260314, 16 benches) | 1.074x | 已被 #189 取代 |
-| Micro 62-bench overall (#189 R2, 10iter, 20260318) | 1.024x | 已被 #189 R3 取代（policy 状态中间态） |
-| Micro 62-bench applied-only (#189 R2, 9 benches) | 1.118x | 已被 #189 R3 取代 |
-| **Micro 62-bench overall (#189 R3, 干净环境 10iter/5warm/1000rep, 20260318) ← 当前权威** | **1.024x** | **✅ non-applied geomean 1.002（极干净）；7 applied, 5W/2L；数据：`micro/results/vm_micro_authoritative_20260318.json`** |
-| **Micro 62-bench applied-only (#189 R3, 7 benches, 20260318) ← 当前权威** | **1.110x** | **✅ rotate_dense +39.1%, rotate64_hash +34.1%, cmov_dense +15.0%；清掉 cmov_select/mixed_alu_mem** |
-| Micro 62-bench overall (#226, post-DSL-removal, 2warm/10iter/200rep, 20260319) | 1.017x | 7/7 applied 恢复，0 回归。默认参数，非权威 |
-| Micro 62-bench applied-only (#226, 7 benches, 20260319) | 1.078x | rotate_dense +24.5%, rotate64_hash +20.0%, cmov_dense +5.6%。参数不同导致略低于权威 1.110x |
-| Corpus v2 fixed (0.875x) | 已知无效 | dummy packet, early-exit，历史数据 |
-| **Corpus post-fix rerun (#173, fixed IPv4+TCP packet, build #38)** | **1.008x** | ✅ 正向！Calico 1.070x, Suricata 1.538x（已被 #175 取代） |
-| **Corpus Build #42 rerun (#175, BEXTR without-copy fix, ac593b2c1) ← 当前权威** | **1.046x** | **✅ 提升 3.8%！Calico 1.097x, xdp-tutorial 1.091x, linux-selftests 1.005x** |
-| Corpus clean rerun (#206, trampoline guard, 20260318) | 0.934x | ⚠️ 低于旧权威，未提升。trampoline guard 可能导致更多 tracing progs -EOPNOTSUPP |
-| Gap 恢复率 | pending | corpus 1.046x vs 0.609x pure-JIT gap |
-| E2E Tracee exec_storm (pre-fix, recompile=0/13, **无效**) | ~~+21.65%~~ | **无效** — recompile 0/13，已被最新数据取代 |
-| **E2E Tracee exec_storm (post-BEXTR-fix, recompile=11/13, #172, authoritative)** | **+6.28%** | app throughput; file_io **+7.00%**; network +1.44%; BPF ns -4.22% |
-| E2E Tetragon (#200, harness bug) | stress_exec +7.94%, connect_storm -55.96% | 已被 #204 取代（harness 漏掉了 connect 热路径 programs） |
-| **E2E Tetragon (#204, harness fix, 20260318) ← 当前权威** | **stress_exec +8.70%, connect_storm +22.29%** | **✅ 全 4 workload 正向！** file_io +0.34%, open_storm +0.42%。7 programs, 3 applied, 49 bflip sites。数据：`e2e/results/tetragon_authoritative_20260318.json` |
-| E2E XDP forwarding | +0.27% | **已删除 #203**（3 sites，无优化价值，将被 Katran 替换） |
-| **E2E Katran (#205, DSR direct-map, 20260319) ← 当前实现已验证** | **功能 OK；latest rerun BPF avg_ns 407.6→507.0 (+24.4%)** | **✅ gRPC compile 已移出 benchmark 路径。** setup 直接发现 checked-in `katran_server_grpc` bundle，VM rerun 5/5 HTTP、30 IPIP decap packets、4 wide sites applied。旧 bring-up 结果 `603.7→351.8` 仍保留作历史 datapath proof，但当前 rerun 未复现。报告：`docs/tmp/katran_e2e_grpc_fix_20260319.md`，结果：`e2e/results/katran_authoritative_20260319.json` |
-| E2E Tracee (20260313, authoritative) | exec_storm +6.28%, file_io +7.00% | 2026-03-18 rerun 已修复 guest bpftool wrapper 并成功跑通，但新结果仅 exec_storm +5.97%、file_io +1.68%、network +2.20%，未超过旧权威，因此旧权威保持 |
-| E2E bpftrace | 0.992x | 纯 CMOV sites 被 skip → 0 applied → 永远 neutral |
-| E2E scx | 无数据 | struct_ops EOPNOTSUPP，不支持 recompile |
-
-#### 性能不够强的根因分析（#113/#116/#125/#77 + #155/#157 更新）
-
-> **⚠️ 2026-03-13 重大更新**：#157 benchmark framework 审计和 #155 regressor root cause 分析表明，
-> 之前列出的根因大部分是表象。**真正的根因是 benchmark framework 的 construct validity 问题**。
-
-1. **~~覆盖面不够~~** → 仍然是问题，但不是主因
-2. **~~CMOV net-negative~~** → 已 cmov:skip，不再是主因
-3. **~~Non-CMOV regression~~** → **#155 发现 top-10 regressors 中 7/10 是 sub-ktime noise**，只有 3 个真实回归（全是 Calico + branch-flip）
-4. **~~Sub-ktime 噪声~~** → **#157 发现 ktime 精度被高估**（repeat=200 下步长仅 0.15-0.5ns），不是 corpus 0.875x 的主因
-
-**真正的根因（#157 发现，#162 确认）**：
-1. **Corpus construct validity**：所有 corpus 程序共用同一个 64B dummy packet，**没有证据表明该 packet 触发了被优化的 site**。**#162 分析确认**：94/156 程序 exec_ns < 100ns（noise-dominated），未优化程序中 88% 也有 >5% 偏差；Calico 同一程序 6 个 .bpf.o 代码变化一致（-0.4%）但 speedup 从 0.531x 到 1.037x，证明短 baseline 版本提前退出未执行到 site。**结论：corpus exec geomean 0.875x 无效，应以 code size 为主要 corpus 指标，或构造 path-targeted packet。**
-2. **Micro coverage + isolation**：只有 8/56 applied（非文档说的 11/56），family 混合严重（cmov_dense 的 policy 实际是 rotate=26），无 per-form 隔离 benchmark。**#154 已修复**：新增 6 个纯隔离 benchmark，覆盖全部 non-WIDE_MEM canonical forms。
-3. **Kernel emitter bugs**：#150 发现 RORX 指针 bug 和 same-site lookup bug，之前所有性能数据可能被污染。**已修复**，bzImage 已重建。
-4. **无 JIT image 验证**：不知道 re-JIT 是否只改了 site 字节。**#153 已验证**：zero-site identity 已修复，site-only diff 是 full-image recompile 的固有属性。
-
-#### 必须做的性能改进 TODO（按优先级，2026-03-13 晚更新）
-
-1. **P0：修复 benchmark framework**（#157 P0 items）
-   - ~~Micro 每个 canonical form 加 isolated benchmark~~ ✅ #154（6 个纯隔离 benchmark）
-   - ~~Corpus packet 构造修复~~ ✅ corpus.py/e2e 已换 valid IPv4+TCP packet with correct checksum
-   - ~~**P0：Authoritative 62-bench rerun per-form 结果与专门 rerun 严重矛盾**~~ ✅ #168 调查完成（`docs/tmp/2026-03-13/endian-bflip-perf-investigation.md`）：矛盾来自 2-iter 噪声（shared VM session），auth rerun 是 ground truth。endian/branch_flip **emitter 无 bug**（a7ce05b49 之后已正确），但 same-size 重编（MOVBE=5B=LDX+BSWAP32，branch_flip 体积等价）导致 I-cache flush 开销 > 微架构收益 → 持续回归（~0.75-0.78x）。这是固有属性，不是可修 bug。Endian/branch_flip 属 **policy-sensitive** directive（需有 branch misprediction 或 CPU model 证据才能开启）。VM 字节 dump 验证已取消——静态分析已足够定论，无需额外 VM dump。
-   - Corpus 每 target 多次 paired rerun + CI/bootstrap（降优先级）
-2. **~~P0：验证 JIT image 正确性~~** ✅ #153
-3. **~~P0：Post-cleanup 全量重跑~~** ✅ #160 — 62/62 valid, 17 applied, overall 1.0035x, applied-only 0.9417x。**但 per-form 数据疑似无效（见上）**
-4. **~~P1：Measurement 改进~~** ✅ #156
-5. **P0：框架解耦** — ✅ #163 scanner enumerate 已实现（197 live progs, 1920 sites），🔄 #108 E2E pipeline 切换中
-6. **P1：增加高回报 canonical form** — prologue 优化、更完整的 byte-recompose
-7. **P1：跑更多 E2E workload** — ✅ #172 Tracee 已完成有效 rerun（post-BEXTR-fix，11/13 applied，exec_storm +5.97% app / -7.11% BPF ns）。报告：`docs/tmp/active/tracee-e2e-post-fix-rerun.md`，数据：`e2e/results/tracee_authoritative_20260313_postfix.json`。旧 +21.65% 数据已作废（recompile 0/13）。需要更多 E2E workload（Tetragon 等）。
-8. **~~P1：#57 消融补全~~** ✅ byte-recompose **50.7%**，callee-saved ~0%（7.0-rc2 已上游化），BMI ~0%
-9. **~~P1：Corpus rerun（fixed packet + use-policy 路径）~~** ✅ #158/#173/#175 完成。旧结果（build #38，1.008x）已被 **#175 build #42 (BEXTR without-copy fix) 结果取代：1.046x exec geomean**（152 measured pairs，39 applied programs）。Calico 1.097x，xdp-tutorial 1.091x，linux-selftests 1.005x，katran 0.872x（regression）。数据：`corpus/results/corpus_post_fix_build39_20260313.json`（实际为 build #42/ac593b2c1），报告：`docs/tmp/active/corpus-post-fix-build39.md`。旧 0.875x 无效数据已取代。
-10. **~~P1：#170 BEXTR emitter 性能 bug 修复~~** ✅ #167/#173 修复（daca445b1）+ 验证。BEXTR fix 后 extract_dense 在 R2 测得 1.076x（vs 0.556x pre-fix）。报告：`docs/tmp/2026-03-13/cmov-bextr-regression-investigation.md`
-12. **~~P0：#171 dense policy 优化（2026-03-13）~~** ✅ #171/#173 已验证。VM 5轮迭代确认最优 policy：3 regressor 全部清空，6-dense geomean 1.097x（R1），62-bench 0.995x。分析报告：`docs/tmp/active/policy-iteration-rounds.md`，62-bench 数据：`micro/results/micro_62bench_policy_optimized_20260313.json`。
-13. **~~P1：提升 62-bench overall > 1.0x~~** ✅ #174 Build #40 + policy 迭代（R6-R11）达成：overall **1.006x**，applied-only **1.040x**。endian_swap_dense 恢复 256 sites 后从 0.695x→1.013-1.139x。数据：`micro/results/micro_62bench_build40_policy_optimized_20260313.json`，分析：`docs/tmp/active/policy-iteration-rounds.md`（R6-R11 节）。
-14. **~~P1：#174 Build #40 (ac593b2c1) BEXTR without-copy fix + policy R6-R11~~** ✅ 完成。Build #40 重编、R6-R11 迭代、endian 恢复全 256 sites、62-bench 跑完。
-11. **P2：不同微架构** — 当前只在一个 CPU 上测
-
-### 1.2b OSDI/SOSP Novelty
+> 已完成或已被 #304 架构探索搁置。详见 §7 任务表 #153-#189。
 
 **真正 novel 的部分**：
 1. **Safety/optimization 分离** — kernel 管安全，userspace 管优化策略

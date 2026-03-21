@@ -1,0 +1,809 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import json
+import math
+import os
+import platform
+import shutil
+import statistics
+import subprocess
+import sys
+from collections import Counter
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from micro.benchmark_catalog import load_suite as load_micro_suite
+from runner.libs.benchmarks import resolve_memory_file
+from runner.libs.recompile import apply_recompile
+
+
+ETHERNET_HEADER_SIZE = 14
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Run the ARM64 t4g micro benchmark bundle on the remote host.")
+    parser.add_argument("--output", required=True, help="Final JSON output path.")
+    parser.add_argument("--iterations", type=int, default=10)
+    parser.add_argument("--warmups", type=int, default=2)
+    parser.add_argument("--repeat", type=int, default=200)
+    parser.add_argument("--cpu", default="0")
+    parser.add_argument("--instance-id", required=True)
+    parser.add_argument("--instance-type", required=True)
+    parser.add_argument("--aws-profile", default="codex-ec2")
+    parser.add_argument("--aws-region", default="us-east-1")
+    return parser.parse_args()
+
+
+def run_command(
+    command: list[str],
+    *,
+    cwd: Path | None = None,
+    check: bool = True,
+    timeout: int = 300,
+) -> subprocess.CompletedProcess[str]:
+    completed = subprocess.run(
+        command,
+        cwd=cwd or REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=timeout,
+    )
+    if check and completed.returncode != 0:
+        detail = completed.stderr.strip() or completed.stdout.strip()
+        raise RuntimeError(f"command failed ({completed.returncode}): {' '.join(command)}\n{detail}")
+    return completed
+
+
+def run_json_command(
+    command: list[str],
+    *,
+    cwd: Path | None = None,
+    timeout: int = 300,
+    allow_empty: bool = False,
+) -> Any:
+    completed = run_command(command, cwd=cwd, timeout=timeout)
+    stdout = completed.stdout.strip()
+    if not stdout:
+        if allow_empty:
+            return None
+        detail = completed.stderr.strip() or completed.stdout.strip()
+        raise RuntimeError(f"command returned no JSON: {' '.join(command)}\n{detail}")
+    try:
+        return json.loads(stdout)
+    except json.JSONDecodeError as exc:
+        detail = completed.stderr.strip() or completed.stdout.strip()
+        raise RuntimeError(f"command returned non-JSON: {' '.join(command)}\n{detail}") from exc
+
+
+def maybe_read_text(path: str | Path) -> str | None:
+    try:
+        return Path(path).read_text().strip()
+    except OSError:
+        return None
+
+
+def sanitize_name(text: str) -> str:
+    return "".join(ch if ch.isalnum() else "_" for ch in text)
+
+
+def ns_summary(samples: list[int | float]) -> dict[str, float | int]:
+    ordered = [float(sample) for sample in samples]
+    if not ordered:
+        return {"count": 0, "min": 0, "max": 0, "mean": 0.0, "median": 0.0}
+    return {
+        "count": len(ordered),
+        "min": min(ordered),
+        "max": max(ordered),
+        "mean": statistics.fmean(ordered),
+        "median": statistics.median(ordered),
+    }
+
+
+def build_packet_input(input_bytes: bytes, prog_type_name: str) -> bytes:
+    prefix_offset = ETHERNET_HEADER_SIZE if prog_type_name == "cgroup_skb" else 0
+    packet = bytearray(prefix_offset + 8 + len(input_bytes))
+    if prefix_offset == ETHERNET_HEADER_SIZE:
+        packet[12] = 0x08
+        packet[13] = 0x00
+    packet[prefix_offset + 8 : prefix_offset + 8 + len(input_bytes)] = input_bytes
+    return bytes(packet)
+
+
+def ensure_bpffs_mounted() -> None:
+    if subprocess.run(["mountpoint", "-q", "/sys/fs/bpf"], check=False).returncode == 0:
+        return
+    run_command(["mount", "-t", "bpf", "bpf", "/sys/fs/bpf"])
+
+
+def runner_programs(runner_binary: Path, object_path: Path) -> list[dict[str, Any]]:
+    payload = run_json_command([str(runner_binary), "list-programs", "--program", str(object_path)])
+    if not isinstance(payload, list):
+        raise RuntimeError(f"list-programs returned non-list JSON for {object_path}")
+    programs = [record for record in payload if isinstance(record, dict)]
+    if not programs:
+        raise RuntimeError(f"no programs found in object: {object_path}")
+    return programs
+
+
+def bpftool_prog_show_pinned(bpftool_binary: str, pin_path: Path) -> dict[str, Any]:
+    payload = run_json_command([bpftool_binary, "-j", "-p", "prog", "show", "pinned", str(pin_path)])
+    if isinstance(payload, list):
+        if len(payload) != 1:
+            raise RuntimeError(f"unexpected pinned prog payload for {pin_path}")
+        payload = payload[0]
+    if not isinstance(payload, dict):
+        raise RuntimeError(f"unexpected pinned prog payload type for {pin_path}: {type(payload)}")
+    return payload
+
+
+def bpftool_prog_show_id(bpftool_binary: str, prog_id: int) -> dict[str, Any]:
+    payload = run_json_command([bpftool_binary, "-j", "-p", "prog", "show", "id", str(prog_id)])
+    if isinstance(payload, list):
+        if len(payload) != 1:
+            raise RuntimeError(f"unexpected prog payload for id {prog_id}")
+        payload = payload[0]
+    if not isinstance(payload, dict):
+        raise RuntimeError(f"unexpected prog payload type for id {prog_id}: {type(payload)}")
+    return payload
+
+
+def scanner_enumerate(scanner_binary: Path, prog_id: int) -> dict[str, Any]:
+    completed = subprocess.run(
+        [str(scanner_binary), "enumerate", "--prog-id", str(prog_id), "--json"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=120,
+    )
+    stdout = completed.stdout.strip()
+    stderr = completed.stderr.strip()
+    if completed.returncode != 0:
+        return {
+            "records": [],
+            "total_sites": 0,
+            "applied_sites": 0,
+            "recompile_ok": False,
+            "error": stderr or stdout or f"scanner enumerate failed (rc={completed.returncode})",
+        }
+    try:
+        payload = json.loads(stdout) if stdout else []
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(f"scanner enumerate returned non-JSON for prog_id={prog_id}: {stdout[:200]}") from exc
+    if not isinstance(payload, list):
+        raise RuntimeError(f"scanner enumerate returned non-list JSON for prog_id={prog_id}")
+    if not payload:
+        return {
+            "records": [],
+            "total_sites": 0,
+            "applied_sites": 0,
+            "recompile_ok": False,
+            "error": "",
+        }
+    record = payload[0]
+    if not isinstance(record, dict):
+        raise RuntimeError(f"scanner enumerate returned malformed record for prog_id={prog_id}")
+    return {
+        "records": payload,
+        "total_sites": int(record.get("total_sites", 0) or 0),
+        "applied_sites": int(record.get("applied_sites", 0) or 0),
+        "recompile_ok": bool(record.get("recompile_ok", False)),
+        "error": str(record.get("error", "") or ""),
+    }
+
+
+def recompile_summary_from_apply(result: dict[str, Any]) -> dict[str, Any]:
+    enumerate_record = result.get("enumerate_record")
+    counts = result.get("counts") or {}
+    if isinstance(enumerate_record, dict):
+        return {
+            "records": [enumerate_record],
+            "total_sites": int(enumerate_record.get("total_sites", 0) or 0),
+            "applied_sites": int(enumerate_record.get("applied_sites", 0) or 0),
+            "recompile_ok": bool(enumerate_record.get("recompile_ok", False)),
+            "error": str(result.get("error", "") or ""),
+        }
+    return {
+        "records": [],
+        "total_sites": int(counts.get("total_sites", 0) or 0),
+        "applied_sites": 0,
+        "recompile_ok": bool(result.get("applied", False)),
+        "error": str(result.get("error", "") or ""),
+    }
+
+
+def run_bpftool_samples(
+    bpftool_binary: str,
+    pin_path: Path,
+    packet_path: Path,
+    *,
+    repeat: int,
+    warmups: int,
+    iterations: int,
+) -> dict[str, Any]:
+    command = [
+        bpftool_binary,
+        "-j",
+        "-p",
+        "prog",
+        "run",
+        "pinned",
+        str(pin_path),
+        "data_in",
+        str(packet_path),
+        "repeat",
+        str(max(1, repeat)),
+    ]
+    for _ in range(max(0, warmups)):
+        run_json_command(command)
+
+    samples: list[dict[str, Any]] = []
+    for _ in range(max(1, iterations)):
+        payload = run_json_command(command)
+        if not isinstance(payload, dict):
+            raise RuntimeError(f"bpftool prog run returned non-dict JSON for {pin_path}")
+        duration = int(payload.get("duration", 0) or 0)
+        retval = int(payload.get("retval", 0) or 0)
+        samples.append({"duration": duration, "retval": retval, "raw": payload})
+
+    durations = [sample["duration"] for sample in samples]
+    retval_distribution = Counter(str(sample["retval"]) for sample in samples)
+    return {
+        "samples": samples,
+        "exec_ns": ns_summary(durations),
+        "retval_distribution": dict(retval_distribution),
+    }
+
+
+def run_llvmbpf_vs_kernel(
+    *,
+    iterations: int,
+    warmups: int,
+    repeat: int,
+    cpu: str,
+    results_dir: Path,
+) -> dict[str, Any]:
+    output_path = results_dir / "llvmbpf_vs_kernel.json"
+    run_command(
+        [
+            sys.executable,
+            str(REPO_ROOT / "micro" / "driver.py"),
+            "suite",
+            "--runtime",
+            "llvmbpf",
+            "--runtime",
+            "kernel",
+            "--iterations",
+            str(iterations),
+            "--warmups",
+            str(warmups),
+            "--repeat",
+            str(repeat),
+            "--cpu",
+            str(cpu),
+            "--regenerate-inputs",
+            "--output",
+            str(output_path),
+        ],
+        cwd=REPO_ROOT,
+        timeout=7200,
+    )
+    return json.loads(output_path.read_text())
+
+
+def run_scanner_stock_vs_recompile(
+    *,
+    runner_binary: Path,
+    scanner_binary: Path,
+    bpftool_binary: str,
+    iterations: int,
+    warmups: int,
+    repeat: int,
+    cpu: str,
+    results_dir: Path,
+) -> dict[str, Any]:
+    suite = load_micro_suite()
+    packet_dir = results_dir / "packets"
+    packet_dir.mkdir(parents=True, exist_ok=True)
+    benchmarks: list[dict[str, Any]] = []
+    ensure_bpffs_mounted()
+
+    for benchmark in suite.benchmarks.values():
+        object_path = benchmark.program_object.resolve()
+        input_path = resolve_memory_file(benchmark, regenerate_inputs=True)
+        if input_path is None:
+            raise RuntimeError(f"{benchmark.name}: missing generated input")
+        input_path = input_path.resolve()
+        input_bytes = input_path.read_bytes()
+
+        programs = runner_programs(runner_binary, object_path)
+        if len(programs) != 1:
+            raise RuntimeError(f"{benchmark.name}: expected exactly one program, found {len(programs)}")
+        program = programs[0]
+        program_name = str(program.get("name", "")).strip()
+        if not program_name:
+            raise RuntimeError(f"{benchmark.name}: empty program name from list-programs")
+
+        packet_path = packet_dir / f"{benchmark.name}.packet"
+        packet_path.write_bytes(build_packet_input(input_bytes, str(program.get("prog_type_name", ""))))
+
+        pin_dir = Path("/sys/fs/bpf") / f"arm64_t4g_micro_{sanitize_name(benchmark.name)}_{os.getpid()}"
+        try:
+            run_command(["rm", "-rf", str(pin_dir)], check=False)
+            run_command(["mkdir", "-p", str(pin_dir)])
+            run_command([bpftool_binary, "prog", "loadall", str(object_path), str(pin_dir)], timeout=120)
+
+            pin_path = pin_dir / program_name
+            if not pin_path.exists():
+                pinned_paths = sorted(pin_dir.iterdir())
+                if len(pinned_paths) != 1:
+                    raise RuntimeError(f"{benchmark.name}: expected one pinned path under {pin_dir}")
+                pin_path = pinned_paths[0]
+
+            load_info_before = bpftool_prog_show_pinned(bpftool_binary, pin_path)
+            prog_id = int(load_info_before.get("id", 0) or 0)
+            if prog_id <= 0:
+                raise RuntimeError(f"{benchmark.name}: invalid prog id from pinned program")
+
+            enumerate_before = scanner_enumerate(scanner_binary, prog_id)
+            stock = run_bpftool_samples(
+                bpftool_binary,
+                pin_path,
+                packet_path,
+                repeat=repeat,
+                warmups=warmups,
+                iterations=iterations,
+            )
+
+            if int(enumerate_before.get("total_sites", 0) or 0) > 0:
+                apply_result = apply_recompile([prog_id], scanner_binary)[prog_id]
+                recompile_apply = recompile_summary_from_apply(apply_result)
+            else:
+                recompile_apply = {
+                    "records": [],
+                    "total_sites": 0,
+                    "applied_sites": 0,
+                    "recompile_ok": False,
+                    "error": "",
+                }
+
+            load_info_after = bpftool_prog_show_id(bpftool_binary, prog_id)
+            recompile = run_bpftool_samples(
+                bpftool_binary,
+                pin_path,
+                packet_path,
+                repeat=repeat,
+                warmups=warmups,
+                iterations=iterations,
+            )
+
+            benchmarks.append(
+                {
+                    "name": benchmark.name,
+                    "description": benchmark.description,
+                    "category": benchmark.category,
+                    "family": benchmark.family,
+                    "level": benchmark.level,
+                    "io_mode": benchmark.io_mode,
+                    "program_object": str(object_path),
+                    "input": str(input_path),
+                    "packet_input": str(packet_path),
+                    "program": program,
+                    "load_info_before": load_info_before,
+                    "load_info_after": load_info_after,
+                    "enumerate_before": enumerate_before,
+                    "recompile_apply": recompile_apply,
+                    "stock": stock,
+                    "recompile": recompile,
+                }
+            )
+        finally:
+            run_command(["rm", "-rf", str(pin_dir)], check=False)
+
+    return {
+        "suite": suite.suite_name,
+        "method": "bpftool prog loadall/run pinned + scanner enumerate --recompile (live-auto-policy)",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "host": {
+            "hostname": platform.node(),
+            "platform": platform.platform(),
+            "python": platform.python_version(),
+            "cpu_affinity": str(cpu),
+            "kernel_version": platform.release(),
+            "kernel_cmdline": maybe_read_text("/proc/cmdline") or "",
+        },
+        "defaults": {
+            "iterations": iterations,
+            "warmups": warmups,
+            "repeat": repeat,
+            "cpu": str(cpu),
+        },
+        "benchmarks": benchmarks,
+    }
+
+
+def run_katran_smoke(
+    *,
+    scanner_binary: Path,
+    bpftool_binary: str,
+) -> dict[str, Any]:
+    ensure_bpffs_mounted()
+    object_path = (REPO_ROOT / "corpus" / "build" / "katran" / "balancer.bpf.o").resolve()
+    policy_dir = (REPO_ROOT / "corpus" / "policies" / "katran" / "balancer").resolve()
+    pin_root = Path("/sys/fs/bpf") / f"katran_t4g_{os.getpid()}"
+    pin_dir = pin_root / "progs"
+    map_dir = pin_root / "maps"
+    run_command(["rm", "-rf", str(pin_root)], check=False)
+    run_command(["mkdir", "-p", str(pin_dir), str(map_dir)])
+
+    with_kernel_btf = {
+        "returncode": 0,
+        "stdout": "",
+        "stderr": "",
+    }
+    without_kernel_btf = {
+        "returncode": 0,
+        "stdout": "",
+        "stderr": "",
+    }
+    enumerate_run = {
+        "returncode": 0,
+        "stdout": "",
+        "stderr": "",
+    }
+    recompile_run = {
+        "returncode": 0,
+        "stdout": "",
+        "stderr": "",
+    }
+
+    try:
+        attempt = subprocess.run(
+            [
+                bpftool_binary,
+                "prog",
+                "loadall",
+                str(object_path),
+                str(pin_dir),
+                "kernel_btf",
+                "/sys/kernel/btf/vmlinux",
+                "type",
+                "xdp",
+                "pinmaps",
+                str(map_dir),
+            ],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=180,
+        )
+        with_kernel_btf = {
+            "returncode": int(attempt.returncode),
+            "stdout": attempt.stdout,
+            "stderr": attempt.stderr,
+        }
+        used_fallback = attempt.returncode != 0
+        if used_fallback:
+            fallback = subprocess.run(
+                [
+                    bpftool_binary,
+                    "prog",
+                    "loadall",
+                    str(object_path),
+                    str(pin_dir),
+                    "type",
+                    "xdp",
+                    "pinmaps",
+                    str(map_dir),
+                ],
+                cwd=REPO_ROOT,
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=180,
+            )
+            without_kernel_btf = {
+                "returncode": int(fallback.returncode),
+                "stdout": fallback.stdout,
+                "stderr": fallback.stderr,
+            }
+            if fallback.returncode != 0:
+                detail = fallback.stderr.strip() or fallback.stdout.strip()
+                raise RuntimeError(f"katran fallback loadall failed ({fallback.returncode}): {detail}")
+
+        pinned_program = bpftool_prog_show_pinned(bpftool_binary, pin_dir / "balancer_ingress")
+        prog_id = int(pinned_program.get("id", 0) or 0)
+        enumerate_command = [str(scanner_binary), "enumerate", "--prog-id", str(prog_id), "--json"]
+        enumerate_completed = subprocess.run(
+            enumerate_command,
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=180,
+        )
+        enumerate_run = {
+            "returncode": int(enumerate_completed.returncode),
+            "stdout": enumerate_completed.stdout,
+            "stderr": enumerate_completed.stderr,
+        }
+        if enumerate_completed.returncode != 0:
+            detail = enumerate_completed.stderr.strip() or enumerate_completed.stdout.strip()
+            raise RuntimeError(f"katran enumerate failed ({enumerate_completed.returncode}): {detail}")
+        enumerate_payload = json.loads(enumerate_completed.stdout or "[]")
+
+        recompile_command = [
+            str(scanner_binary),
+            "enumerate",
+            "--prog-id",
+            str(prog_id),
+            "--recompile",
+            "--policy-dir",
+            str(policy_dir),
+            "--json",
+        ]
+        recompile_completed = subprocess.run(
+            recompile_command,
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=180,
+        )
+        recompile_run = {
+            "returncode": int(recompile_completed.returncode),
+            "stdout": recompile_completed.stdout,
+            "stderr": recompile_completed.stderr,
+        }
+        if recompile_completed.returncode != 0:
+            detail = recompile_completed.stderr.strip() or recompile_completed.stdout.strip()
+            raise RuntimeError(f"katran recompile failed ({recompile_completed.returncode}): {detail}")
+        recompile_payload = json.loads(recompile_completed.stdout or "[]")
+        if not isinstance(enumerate_payload, list) or not isinstance(recompile_payload, list):
+            raise RuntimeError("katran scanner payload was not a JSON array")
+
+        investigate_zero_sites = False
+        if enumerate_payload:
+            record = enumerate_payload[0]
+            if isinstance(record, dict) and int(record.get("total_sites", 0) or 0) == 0:
+                investigate_zero_sites = True
+        elif recompile_payload:
+            investigate_zero_sites = True
+
+        zero_site_diagnostics: dict[str, Any] | None = None
+        if investigate_zero_sites:
+            dump = subprocess.run(
+                [bpftool_binary, "prog", "dump", "jited", "pinned", str(pin_dir / "balancer_ingress")],
+                cwd=REPO_ROOT,
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=180,
+            )
+            zero_site_diagnostics = {
+                "bpftool_prog_dump_jited": {
+                    "returncode": int(dump.returncode),
+                    "stdout_head": dump.stdout.splitlines()[:80],
+                    "stderr": dump.stderr,
+                },
+                "scanner_enumerate_stdout_head": enumerate_completed.stdout.splitlines()[:80],
+                "scanner_enumerate_stderr": enumerate_completed.stderr,
+                "scanner_recompile_stdout_head": recompile_completed.stdout.splitlines()[:80],
+                "scanner_recompile_stderr": recompile_completed.stderr,
+            }
+
+        return {
+            "object": str(object_path),
+            "pin_dir": str(pin_dir),
+            "with_kernel_btf": with_kernel_btf,
+            "used_fallback": used_fallback,
+            "without_kernel_btf": without_kernel_btf,
+            "pinned_program": pinned_program,
+            "enumerate_run": enumerate_run,
+            "recompile_run": recompile_run,
+            "enumerate": enumerate_payload,
+            "recompile": recompile_payload,
+            "zero_site_diagnostics": zero_site_diagnostics,
+        }
+    finally:
+        run_command(["rm", "-rf", str(pin_root)], check=False)
+
+
+def summarize_llvmbpf_vs_kernel(raw: dict[str, Any]) -> dict[str, Any]:
+    ratios: list[tuple[str, float, float, float]] = []
+    llvmbpf_faster = 0
+    kernel_faster = 0
+    for benchmark in raw.get("benchmarks", []):
+        if not isinstance(benchmark, dict):
+            continue
+        runs = {run.get("runtime"): run for run in benchmark.get("runs", []) if isinstance(run, dict)}
+        llvmbpf_run = runs.get("llvmbpf")
+        kernel_run = runs.get("kernel")
+        if not isinstance(llvmbpf_run, dict) or not isinstance(kernel_run, dict):
+            continue
+        llvmbpf_exec = float((llvmbpf_run.get("exec_ns") or {}).get("median") or 0.0)
+        kernel_exec = float((kernel_run.get("exec_ns") or {}).get("median") or 0.0)
+        if llvmbpf_exec <= 0 or kernel_exec <= 0:
+            continue
+        ratio = llvmbpf_exec / kernel_exec
+        ratios.append((str(benchmark.get("name")), ratio, llvmbpf_exec, kernel_exec))
+        if math.isclose(ratio, 1.0, rel_tol=0.0, abs_tol=1e-12):
+            continue
+        if ratio < 1.0:
+            llvmbpf_faster += 1
+        else:
+            kernel_faster += 1
+
+    def record(item: tuple[str, float, float, float]) -> dict[str, Any]:
+        return {
+            "name": item[0],
+            "llvmbpf_over_kernel_ratio": item[1],
+            "llvmbpf_exec_ns": item[2],
+            "kernel_exec_ns": item[3],
+        }
+
+    sorted_by_ratio = sorted(ratios, key=lambda item: item[1])
+    return {
+        "benchmarks": len(ratios),
+        "llvmbpf_faster": llvmbpf_faster,
+        "kernel_faster": kernel_faster,
+        "median_ratio": statistics.median(item[1] for item in ratios) if ratios else None,
+        "geometric_mean_ratio": statistics.geometric_mean(item[1] for item in ratios) if ratios else None,
+        "largest_kernel_wins": [record(item) for item in sorted_by_ratio[:5]],
+        "largest_llvmbpf_wins": [record(item) for item in sorted_by_ratio[-5:][::-1]],
+    }
+
+
+def summarize_scanner(raw: dict[str, Any]) -> dict[str, Any]:
+    total_sites = 0
+    applied_sites = 0
+    deltas: list[tuple[str, float, float, float]] = []
+    benchmarks_with_sites = 0
+
+    for benchmark in raw.get("benchmarks", []):
+        if not isinstance(benchmark, dict):
+            continue
+        enumerate_before = benchmark.get("enumerate_before") or {}
+        recompile_apply = benchmark.get("recompile_apply") or {}
+        stock = benchmark.get("stock") or {}
+        recompile = benchmark.get("recompile") or {}
+        total = int(enumerate_before.get("total_sites", 0) or 0)
+        applied = int(recompile_apply.get("applied_sites", 0) or 0)
+        total_sites += total
+        applied_sites += applied
+        if total > 0:
+            benchmarks_with_sites += 1
+        stock_exec = float((stock.get("exec_ns") or {}).get("median") or 0.0)
+        recompile_exec = float((recompile.get("exec_ns") or {}).get("median") or 0.0)
+        if stock_exec > 0 and recompile_exec > 0:
+            deltas.append((str(benchmark.get("name")), recompile_exec - stock_exec, stock_exec, recompile_exec))
+
+    sorted_deltas = sorted(deltas, key=lambda item: abs(item[1]), reverse=True)
+    return {
+        "benchmarks": len(raw.get("benchmarks", [])),
+        "benchmarks_with_sites": benchmarks_with_sites,
+        "total_sites": total_sites,
+        "applied_sites": applied_sites,
+        "median_absolute_exec_delta_ns": statistics.median(abs(item[1]) for item in deltas) if deltas else None,
+        "max_absolute_exec_delta_ns": max((abs(item[1]) for item in deltas), default=None),
+        "largest_exec_deltas": [
+            {
+                "name": item[0],
+                "recompile_minus_stock_ns": item[1],
+                "stock_exec_ns": item[2],
+                "recompile_exec_ns": item[3],
+            }
+            for item in sorted_deltas[:10]
+        ],
+    }
+
+
+def summarize_katran(raw: dict[str, Any]) -> dict[str, Any]:
+    enumerate_records = raw.get("enumerate") if isinstance(raw.get("enumerate"), list) else []
+    recompile_records = raw.get("recompile") if isinstance(raw.get("recompile"), list) else []
+    enumerate_head = enumerate_records[0] if enumerate_records and isinstance(enumerate_records[0], dict) else {}
+    recompile_head = recompile_records[0] if recompile_records and isinstance(recompile_records[0], dict) else {}
+    return {
+        "used_kernel_btf_fallback": bool(raw.get("used_fallback", False)),
+        "loadall_with_kernel_btf_rc": int((raw.get("with_kernel_btf") or {}).get("returncode", 0) or 0),
+        "loadall_without_kernel_btf_rc": int((raw.get("without_kernel_btf") or {}).get("returncode", 0) or 0),
+        "pinned_program": raw.get("pinned_program"),
+        "enumerate_records": len(enumerate_records),
+        "recompile_records": len(recompile_records),
+        "total_sites": int(enumerate_head.get("total_sites", 0) or 0),
+        "applied_sites": int(recompile_head.get("applied_sites", 0) or 0),
+        "recompile_ok": bool(recompile_head.get("recompile_ok", False)),
+        "error": str(recompile_head.get("error", enumerate_head.get("error", "")) or ""),
+        "zero_site_diagnostics_present": raw.get("zero_site_diagnostics") is not None,
+    }
+
+
+def main() -> int:
+    args = parse_args()
+    output_path = Path(args.output).resolve()
+    results_dir = output_path.parent / f"{output_path.stem}_artifacts"
+    results_dir.mkdir(parents=True, exist_ok=True)
+
+    runner_binary = (REPO_ROOT / "runner" / "build" / "micro_exec").resolve()
+    scanner_binary = (REPO_ROOT / "scanner" / "build" / "bpf-jit-scanner").resolve()
+    bpftool_binary = shutil.which("bpftool") or "bpftool"
+
+    if not runner_binary.exists():
+        raise SystemExit(f"missing runner binary: {runner_binary}")
+    if not scanner_binary.exists():
+        raise SystemExit(f"missing scanner binary: {scanner_binary}")
+
+    raw_llvmbpf_vs_kernel = run_llvmbpf_vs_kernel(
+        iterations=args.iterations,
+        warmups=args.warmups,
+        repeat=args.repeat,
+        cpu=args.cpu,
+        results_dir=results_dir,
+    )
+    raw_scanner = run_scanner_stock_vs_recompile(
+        runner_binary=runner_binary,
+        scanner_binary=scanner_binary,
+        bpftool_binary=bpftool_binary,
+        iterations=args.iterations,
+        warmups=args.warmups,
+        repeat=args.repeat,
+        cpu=args.cpu,
+        results_dir=results_dir,
+    )
+    raw_katran = run_katran_smoke(
+        scanner_binary=scanner_binary,
+        bpftool_binary=bpftool_binary,
+    )
+
+    payload = {
+        "run_date": datetime.now(timezone.utc).isoformat(),
+        "aws": {
+            "profile": args.aws_profile,
+            "region": args.aws_region,
+            "instance_id": args.instance_id,
+            "instance_type": args.instance_type,
+        },
+        "kernel": {
+            "release": platform.release(),
+            "cmdline": maybe_read_text("/proc/cmdline") or "",
+            "cached_artifacts": ".cache/aws-arm64/",
+        },
+        "parameters": {
+            "iterations": args.iterations,
+            "warmups": args.warmups,
+            "repeat": args.repeat,
+            "cpu": str(args.cpu),
+        },
+        "notes": {
+            "cpu_governor": maybe_read_text("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor") or "unknown",
+            "turbo_state": maybe_read_text("/sys/devices/system/cpu/intel_pstate/no_turbo") or "unknown",
+            "perf_event_paranoid": maybe_read_text("/proc/sys/kernel/perf_event_paranoid") or "unknown",
+        },
+        "summary": {
+            "llvmbpf_vs_kernel": summarize_llvmbpf_vs_kernel(raw_llvmbpf_vs_kernel),
+            "scanner_stock_vs_recompile": summarize_scanner(raw_scanner),
+            "katran_smoke": summarize_katran(raw_katran),
+        },
+        "raw": {
+            "llvmbpf_vs_kernel": raw_llvmbpf_vs_kernel,
+            "scanner_stock_vs_recompile": raw_scanner,
+            "katran_smoke": raw_katran,
+        },
+    }
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
