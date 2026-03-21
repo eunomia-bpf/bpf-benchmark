@@ -100,6 +100,7 @@ def build_micro_benchmark_command(
     require_sudo: bool = False,
     rejit: bool = False,
     rejit_program: Path | str | None = None,
+    daemon_path: Path | str | None = None,
 ) -> list[str]:
     if runtime_mode == "llvmbpf":
         command = build_runner_command(
@@ -142,6 +143,7 @@ def build_micro_benchmark_command(
             perf_scope=perf_scope,
             rejit=rejit,
             rejit_program=rejit_program,
+            daemon_path=daemon_path,
         )
         return maybe_prepend_sudo(command, enabled=require_sudo)
 
