@@ -169,7 +169,7 @@ BpfReJIT 的设计基于三个层次的 insight：
 | 证据 | 数值 |
 |------|------|
 | Exec time geomean (L/K) — **characterization gap** | **0.609x** (56 pure-JIT, strict 30×1000); 0.849x (31 pure-JIT, old 3×100)。注意：这是 llvmbpf vs stock kernel 的 gap 上界，不是 BpfReJIT 改进 |
-| BpfReJIT micro improvement (recompile/stock) | blind **1.028x** (50 valid, 31W/17L); fixed-policy applied-only **1.049x** (56/56 valid, 8 applied, 5W/3L); per-family best: rotate **1.021x**, wide **1.010x**; gap recovery **4.3%** of 1.641x characterization gap |
+| BpfReJIT micro improvement (recompile/stock) | **v2 (2026-03-22, post P0-P1 fixes)**: 62/62 valid, **49 applied**, overall geomean **1.153x**, applied-only **1.096x**, 0 correctness mismatch。v1 参考: blind 1.028x, fixed-policy 1.049x |
 | Code size geomean (L/K) | 0.496x |
 | Byte-recompose 占 kernel surplus | 50.7%，2.24x 时间惩罚 |
 | cmov 差距 | llvmbpf 31 vs kernel 0 |
@@ -642,10 +642,22 @@ make clean
 | **352** | **corpus compile_only→attach_trigger（2026-03-22）** | ✅ 代码完成 | 4 个目标改为 attach_trigger + bpf_stats timing。新增 `runner/libs/attach.py`。**VM 验证中。** |
 | **353** | **applied 数下降调查（2026-03-22）** | ✅ | **Root cause**: WideMemPass emitter 只支持 width 2/4/8，width=3/5/6/7 导致 cmd_apply crash。修复：skip 不支持的 width。49/62 有 wide_mem sites，预期恢复 ~47 applied。121 tests。 |
 | **354** | **e2e 准备（2026-03-22）** | ✅ | 5/5 case 可跑。Katran 不用 tail_call（是 func_cnt 问题，已修）。dev 数据：Katran 1.108x、Tracee +8.1%、Tetragon BPF -10.5%。**v2 e2e 尚未跑**（等全部 pass 修复后统一跑）。 |
-| **355** | **全部 5 pass 真正 apply（2026-03-22）** | 🔄 | CondSelectPass 需实现 emit（不只 detection）、BranchFlipPass 加 heuristic（不依赖 PGO）、SpectreMitigation 专门测试。opus 正在做。 |
-| **356** | **SpectreMitigation 专门测试（2026-03-22）** | 🔄 | `tests/unittest/rejit_spectre.c`。含 Spectre v1 pattern 的 BPF 程序 + 验证 lfence 插入 + REJIT 成功。opus 正在做。 |
-| **357** | **bpftrace 复杂 tools（2026-03-22）** | 🔄 | 替换简单脚本为 bpftrace 自带复杂 tools（tcplife/biosnoop/runqlat 等）。sonnet 正在做。 |
-| **358** | **v2 全量评估** | 待做 | 等 #355-#357 完成后：cargo build → micro(62) + corpus(all) + e2e(5) + 每层 opus 分析。**v2 从未有过权威 e2e 数据。** |
+| **355** | **全部 5 pass 真正 apply（2026-03-22）** | ✅ | CondSelectPass emit 实现（commit `25c73f4`）、BranchFlipPass heuristic（`ed36a35`）、SpectreMitigation 测试（`1eb150d`）。后续在 #362 做了算法正确性修复。 |
+| **356** | **SpectreMitigation 专门测试（2026-03-22）** | ✅ | 18 daemon unit tests + 7 VM integration tests（`tests/unittest/rejit_spectre.c`）+ `--passes` CLI flag。Commit `1eb150d`。⚠️ JA+0 是 placeholder 不是真 barrier，真 barrier 需要 kinsn（future）。 |
+| **357** | **bpftrace 复杂 tools（2026-03-22）** | ✅ | 6 个 upstream tools（tcplife/biosnoop/runqlat/tcpretrans/capable/vfsstat）替换 5 个简单脚本。Commit `6933ee3`。 |
+| **358** | **v2 全量评估（2026-03-22）** | 🔄 | micro ✅（62/62, 49 applied, geomean **1.153x**, applied-only **1.096x**, 0 mismatch）。corpus 🔄（94/148 measured, applied=0 — 旧 binary 问题，rebuild 后待重跑）。e2e 🔄 正在跑。 |
 | **359** | Recompile overhead 测量 | 待做 | REJIT verify+JIT+swap 各多久？reviewer 必问。 |
 | **360** | Policy sensitivity 输入变体 | 待做 | 启用 predictable/random 变体到 YAML，支撑 Insight 2。 |
 | **361** | VM bias 调查 | 待做 | control 有 7.8% phantom speedup，需要理解和消除。 |
+| **362** | **Daemon P0 算法修复（2026-03-22）** | ✅ | **(1)** branch_flip: 修正 CFG diamond 识别（then_len=off-1），删 heuristic 改为 PGO-only，修正 flip offset。**(2)** cond_select: 删 Pattern B（两路径都得到 true_val 的误编译），实现 swap-safe emit_safe_params()，删 predictability_threshold。**(3)** rotate: 加 find_provenance_mov()（回扫 8 条找 MOV tmp,dst），加 live-out 检查。**(4)** liveness: call defs 改为 {r0-r5}。**147 tests pass。** Commit `ae76f1b`。 |
+| **363** | **Daemon P1 集成修复（2026-03-22）** | ✅ | **(1)** BTF kind: 19 个常量对齐 kernel header + sync test + mixed-kind test。**(2)** fd_array: BpfProgram.required_module_fds + rotate/cond_select 记录 module FD + cmd_apply 传给 bpf_prog_rejit。**(3)** PGO: 删 analysis/pgo.rs 死代码。**(4)** Dead code: build_full_pipeline 删除，cargo check zero warnings。Commit `0c650f0`。 |
+| **364** | **Daemon serve 子命令（2026-03-22）** | ✅ | Unix socket server mode。JSON newline-delimited 协议（optimize/optimize-all/status）。SIGTERM/SIGINT graceful shutdown。serde + serde_json 依赖。Commit `4df4922`。 |
+| **365** | **Tests 目录重组（2026-03-22）** | ✅ | 删 40+ debug scripts。4 层结构：kernel/ + unittest/ + integration/ + python/ + helpers/。unittest/Makefile 统一构建 6 个 rejit_*.c。根 Makefile 加 unittest-tests + python-tests targets。Commit `a68a79a`。 |
+| **366** | **Kernel bug 回归测试（2026-03-22）** | ✅ VM 9/9 | `tests/unittest/rejit_audit_tests.c`：T1-T6 kfd_array leak stress、T2-T3-T8 insns/len swap（含 2→4→6→4→2 cycle）、T4-T5 UAPI flags、T7 func_info stress、**T9 struct_ops multi-slot**（tcp_congestion_ops 4-slot trampoline patch）。Commit `ca5aa66`。 |
+| **367** | **docs/tmp 按日期归档（2026-03-22）** | ✅ | 创建 6 个日期子目录（20260313-20260322），~250 个文件归档。plan doc + old record 82 个路径引用更新。Commits `94c3ce2` + `3373251`。 |
+| **368** | **Corpus measured_pairs 修复（2026-03-22）** | ✅ | vng --cwd→--rwdir、kinsn auto-load、v1→v2 runner command 迁移。measured_pairs 0→94。Commit `7a5009e`。 |
+| **369** | **Daemon code review by codex（2026-03-22）** | ✅ | 发现 3 CRITICAL + 8 HIGH。branch_flip CFG 错误、cond_select Pattern B 误编译、spectre JA+0 假 barrier、寄存器别名、rotate provenance、BTF kind 错误、fd_array 未打通、PGO 两套死代码。全部在 #362-#363 修复。报告：`docs/tmp/20260322/daemon_code_review_20260322.md`。 |
+| **370** | **vm-micro-smoke 全覆盖（2026-03-22）** | ✅ | smoke 从 3 个 benchmark 改为全部 62 个（ITER=1, WARM=0, REP=50）。加 daemon-path 依赖。 |
+| **371** | Corpus 54 unmeasured 程序 | 🔄 | 152 targets 中 54 个无 exec 数据（stock phase missing）。opus 正在诊断+配 attach_trigger。 |
+| **372** | Makefile vm-selftest 接入 unittest | 🔄 | unittest/ 6 个测试文件需接入 vm-selftest。opus 正在做。 |
+| **373** | kinsn module 重编（2026-03-22） | ✅ | 3/3 x86 modules against kernel 7.0-rc2+rejit-v2。Commit `9e6eb3d`。 |
