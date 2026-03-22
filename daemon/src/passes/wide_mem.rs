@@ -39,6 +39,7 @@ pub struct Binding {
 
 /// A single rewrite site found by the scanner.
 #[derive(Clone, Debug)]
+#[allow(dead_code)]
 pub struct RewriteSite {
     /// Index of the first instruction in the matched pattern.
     pub start_pc: usize,

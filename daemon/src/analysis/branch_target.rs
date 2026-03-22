@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 //! Lightweight branch target analysis.
 
-use crate::insn::*;
 use crate::pass::{Analysis, BpfProgram};
 
 /// Lightweight analysis: for each instruction, whether it is a branch/call target.
@@ -51,6 +50,7 @@ impl Analysis for BranchTargetAnalysis {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::insn::*;
     use crate::pass::{AnalysisCache, BpfProgram, ProgMeta};
 
     fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {

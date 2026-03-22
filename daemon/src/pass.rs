@@ -16,6 +16,7 @@ use crate::insn::BpfInsn;
 
 /// Program provenance metadata, obtained from BPF_OBJ_GET_INFO_BY_FD.
 #[derive(Clone, Debug, Default)]
+#[allow(dead_code)]
 pub struct ProgMeta {
     pub prog_id: u32,
     pub prog_type: u32,
@@ -29,35 +30,9 @@ pub struct ProgMeta {
 /// Per-instruction annotation — populated by analysis passes, read by transform passes.
 #[derive(Clone, Debug, Default)]
 pub struct InsnAnnotation {
-    /// Whether this is a branch/call target.
-    pub is_branch_target: bool,
-    /// Whether this is a subprogram entry.
-    pub is_subprog_entry: bool,
-    /// Whether this is the second slot of LD_IMM64.
-    pub is_ldimm64_hi: bool,
-    /// Subprogram ID (-1 = main).
-    pub subprog_id: i32,
-    /// Verifier-provided register type information (optional).
-    pub verifier_state: Option<VerifierRegState>,
     /// PGO: branch taken/not-taken counts at this instruction.
+    /// Used by BranchFlipPass to decide whether to flip.
     pub branch_profile: Option<BranchProfile>,
-    /// Free-form key-value metadata.
-    pub metadata: HashMap<String, i64>,
-}
-
-/// Verifier-exported register state (per-insn).
-#[derive(Clone, Debug)]
-pub struct VerifierRegState {
-    pub regs: [RegInfo; 11], // r0-r10
-}
-
-#[derive(Clone, Debug, Default)]
-pub struct RegInfo {
-    pub reg_type: u32,
-    pub known_value: Option<i64>,
-    pub min_value: i64,
-    pub max_value: i64,
-    pub is_const: bool,
 }
 
 /// PGO branch statistics.
@@ -80,12 +55,17 @@ pub struct BpfProgram {
     /// Per-insn annotations (length synchronized with insns).
     pub annotations: Vec<InsnAnnotation>,
     /// Program metadata.
+    #[allow(dead_code)]
     pub meta: ProgMeta,
     /// Transform log: records what each pass did.
     pub transform_log: Vec<TransformEntry>,
+    /// Module FDs required by kfunc calls introduced during rewrite.
+    /// Used by cmd_apply to construct fd_array for BPF_PROG_REJIT.
+    pub required_module_fds: Vec<i32>,
 }
 
 #[derive(Clone, Debug)]
+#[allow(dead_code)]
 pub struct TransformEntry {
     pub pass_name: String,
     pub sites_applied: usize,
@@ -103,6 +83,7 @@ impl BpfProgram {
             annotations: vec![InsnAnnotation::default(); len],
             meta,
             transform_log: Vec::new(),
+            required_module_fds: Vec::new(),
         }
     }
 
@@ -119,6 +100,7 @@ impl BpfProgram {
     }
 
     /// Whether any transforms have been applied.
+    #[allow(dead_code)]
     pub fn has_transforms(&self) -> bool {
         self.transform_log.iter().any(|e| e.sites_applied > 0)
     }
@@ -178,11 +160,13 @@ impl AnalysisCache {
     }
 
     /// Invalidate a specific analysis result.
+    #[allow(dead_code)]
     pub fn invalidate<R: Any>(&mut self) {
         self.cache.remove(&TypeId::of::<R>());
     }
 
     /// Check whether a specific analysis result is currently cached.
+    #[allow(dead_code)]
     pub fn is_cached<R: Any>(&self) -> bool {
         self.cache.contains_key(&TypeId::of::<R>())
     }
@@ -192,6 +176,7 @@ impl AnalysisCache {
 
 /// Pass execution result.
 #[derive(Clone, Debug)]
+#[allow(dead_code)]
 pub struct PassResult {
     /// Pass name.
     pub pass_name: String,
@@ -213,6 +198,7 @@ pub struct SkipReason {
 
 /// Pass category.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[allow(dead_code)]
 pub enum PassCategory {
     /// Performance optimization.
     Optimization,
@@ -231,6 +217,7 @@ pub trait BpfPass: Send + Sync {
     fn name(&self) -> &str;
 
     /// Pass category.
+    #[allow(dead_code)]
     fn category(&self) -> PassCategory;
 
     /// Declare analyses this pass depends on (for PassManager ordering and precomputation).
@@ -261,6 +248,7 @@ pub struct PassContext {
     /// Available kinsn kfuncs and their BTF IDs.
     pub kfunc_registry: KfuncRegistry,
     /// CPU capabilities.
+    #[allow(dead_code)]
     pub platform: PlatformCapabilities,
     /// Policy configuration (which passes are enabled, parameters, etc.).
     pub policy: PolicyConfig,
@@ -269,6 +257,7 @@ pub struct PassContext {
 /// Available kfuncs and their BTF IDs.
 /// BTF ID = -1 means the kfunc is not available.
 #[derive(Clone, Debug, Default)]
+#[allow(dead_code)]
 pub struct KfuncRegistry {
     pub rotate64_btf_id: i32,
     pub select64_btf_id: i32,
@@ -281,6 +270,7 @@ pub struct KfuncRegistry {
 
 /// CPU platform capabilities.
 #[derive(Clone, Debug, Default)]
+#[allow(dead_code)]
 pub struct PlatformCapabilities {
     pub has_bmi1: bool,
     pub has_bmi2: bool,
@@ -291,6 +281,7 @@ pub struct PlatformCapabilities {
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[allow(dead_code)]
 pub enum Arch {
     #[default]
     X86_64,
@@ -299,6 +290,7 @@ pub enum Arch {
 
 /// Optimization policy configuration.
 #[derive(Clone, Debug, Default)]
+#[allow(dead_code)]
 pub struct PolicyConfig {
     /// Enabled pass name list (empty = all enabled).
     pub enabled_passes: Vec<String>,
@@ -382,6 +374,7 @@ impl PassManager {
     }
 
     /// Return the number of registered passes.
+    #[allow(dead_code)]
     pub fn pass_count(&self) -> usize {
         self.passes.len()
     }
@@ -456,6 +449,7 @@ impl PassManager {
 impl PassContext {
     /// Create a minimal PassContext suitable for testing.
     /// All kfuncs unavailable (btf_id = -1), no special CPU features.
+    #[allow(dead_code)]
     pub fn test_default() -> Self {
         Self {
             kfunc_registry: KfuncRegistry {

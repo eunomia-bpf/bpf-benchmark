@@ -21,10 +21,49 @@ const KNOWN_KFUNCS: &[(&str, &str)] = &[
     ("bpf_extract64", "bpf_extract"),
 ];
 
-// ── BTF constants ────────────────────────────────────────────────────
+// ── BTF constants (synced from vendor/linux-framework/include/uapi/linux/btf.h) ──
 
 const BTF_MAGIC: u16 = 0xEB9F;
+
+// BTF_KIND_* values from the kernel header.
+// All constants are kept for completeness/sync-test even if not all are used in match arms.
+#[allow(dead_code)]
+const BTF_KIND_INT: u32 = 1;
+#[allow(dead_code)]
+const BTF_KIND_PTR: u32 = 2;
+#[allow(dead_code)]
+const BTF_KIND_ARRAY: u32 = 3;
+#[allow(dead_code)]
+const BTF_KIND_STRUCT: u32 = 4;
+#[allow(dead_code)]
+const BTF_KIND_UNION: u32 = 5;
+#[allow(dead_code)]
+const BTF_KIND_ENUM: u32 = 6;
+#[allow(dead_code)]
+const BTF_KIND_FWD: u32 = 7;
+#[allow(dead_code)]
+const BTF_KIND_TYPEDEF: u32 = 8;
+#[allow(dead_code)]
+const BTF_KIND_VOLATILE: u32 = 9;
+#[allow(dead_code)]
+const BTF_KIND_CONST: u32 = 10;
+#[allow(dead_code)]
+const BTF_KIND_RESTRICT: u32 = 11;
 const BTF_KIND_FUNC: u32 = 12;
+#[allow(dead_code)]
+const BTF_KIND_FUNC_PROTO: u32 = 13;
+#[allow(dead_code)]
+const BTF_KIND_VAR: u32 = 14;
+#[allow(dead_code)]
+const BTF_KIND_DATASEC: u32 = 15;
+#[allow(dead_code)]
+const BTF_KIND_FLOAT: u32 = 16;
+#[allow(dead_code)]
+const BTF_KIND_DECL_TAG: u32 = 17;
+#[allow(dead_code)]
+const BTF_KIND_TYPE_TAG: u32 = 18;
+#[allow(dead_code)]
+const BTF_KIND_ENUM64: u32 = 19;
 
 /// Minimal BTF header (24 bytes).
 #[repr(C)]
@@ -120,17 +159,20 @@ fn find_func_btf_id(btf_data: &[u8], func_name: &str) -> Option<i32> {
 
         // Some BTF kinds have additional data after the base entry.
         // We need to skip those to correctly walk the type section.
+        // Kind constants from vendor/linux-framework/include/uapi/linux/btf.h.
         let vlen = (bt.info & 0xffff) as usize;
         let skip = match kind {
-            1 => 4,              // INT: u32 encoding data
-            2 | 3 => vlen * 12, // STRUCT/UNION: btf_member = 12 bytes each
-            4 => vlen * 8,      // ENUM: btf_enum = 8 bytes each
-            8 => vlen * 8,      // FUNC_PROTO: btf_param = 8 bytes each
-            11 => 4,            // VAR: u32 linkage
-            13 => vlen * 12,    // DATASEC: btf_var_secinfo = 12 bytes each
-            15 => 4,            // DECL_TAG: u32 component_idx
-            17 => vlen * 12,    // ENUM64: btf_enum64 = 12 bytes each
-            _ => 0,             // PTR/FWD/TYPEDEF/VOLATILE/CONST/RESTRICT/FUNC/FLOAT/TYPE_TAG
+            BTF_KIND_INT => 4,                 // u32 encoding data
+            BTF_KIND_ARRAY => 12,              // struct btf_array (3 * u32)
+            BTF_KIND_STRUCT | BTF_KIND_UNION => vlen * 12, // btf_member = 12 bytes each
+            BTF_KIND_ENUM => vlen * 8,         // btf_enum = 8 bytes each
+            BTF_KIND_FUNC_PROTO => vlen * 8,   // btf_param = 8 bytes each
+            BTF_KIND_VAR => 4,                 // u32 linkage
+            BTF_KIND_DATASEC => vlen * 12,     // btf_var_secinfo = 12 bytes each
+            BTF_KIND_DECL_TAG => 4,            // u32 component_idx
+            BTF_KIND_ENUM64 => vlen * 12,      // btf_enum64 = 12 bytes each
+            // PTR/FWD/TYPEDEF/VOLATILE/CONST/RESTRICT/FUNC/FLOAT/TYPE_TAG: no extra data
+            _ => 0,
         };
         offset += skip;
 
@@ -411,5 +453,110 @@ mod tests {
     #[test]
     fn test_btf_type_size() {
         assert_eq!(BTF_TYPE_SIZE, 12);
+    }
+
+    /// Sync test: verify our BTF_KIND_* constants match the kernel header values.
+    /// These must match vendor/linux-framework/include/uapi/linux/btf.h.
+    #[test]
+    fn test_btf_kind_constants_match_kernel() {
+        assert_eq!(BTF_KIND_INT, 1);
+        assert_eq!(BTF_KIND_PTR, 2);
+        assert_eq!(BTF_KIND_ARRAY, 3);
+        assert_eq!(BTF_KIND_STRUCT, 4);
+        assert_eq!(BTF_KIND_UNION, 5);
+        assert_eq!(BTF_KIND_ENUM, 6);
+        assert_eq!(BTF_KIND_FWD, 7);
+        assert_eq!(BTF_KIND_TYPEDEF, 8);
+        assert_eq!(BTF_KIND_VOLATILE, 9);
+        assert_eq!(BTF_KIND_CONST, 10);
+        assert_eq!(BTF_KIND_RESTRICT, 11);
+        assert_eq!(BTF_KIND_FUNC, 12);
+        assert_eq!(BTF_KIND_FUNC_PROTO, 13);
+        assert_eq!(BTF_KIND_VAR, 14);
+        assert_eq!(BTF_KIND_DATASEC, 15);
+        assert_eq!(BTF_KIND_FLOAT, 16);
+        assert_eq!(BTF_KIND_DECL_TAG, 17);
+        assert_eq!(BTF_KIND_TYPE_TAG, 18);
+        assert_eq!(BTF_KIND_ENUM64, 19);
+    }
+
+    /// Test BTF parsing with mixed kinds (not just FUNC).
+    #[test]
+    fn test_find_func_in_mixed_btf() {
+        // Build a BTF blob with: INT, PTR, STRUCT(1 member), FUNC_PROTO(1 param), FUNC
+        let mut str_section = vec![0u8]; // offset 0 = empty string
+        let func_name_off = str_section.len() as u32;
+        str_section.extend_from_slice(b"bpf_rotate64\0");
+
+        let mut type_section = Vec::new();
+
+        // Type 1: INT (kind=1, has 4 extra bytes)
+        let int_type = BtfType {
+            name_off: 0,
+            info: (BTF_KIND_INT << 24),
+            size_or_type: 4,
+        };
+        let bytes: [u8; BTF_TYPE_SIZE] = unsafe { std::mem::transmute(int_type) };
+        type_section.extend_from_slice(&bytes);
+        type_section.extend_from_slice(&[0u8; 4]); // INT extra data
+
+        // Type 2: PTR (kind=2, no extra data)
+        let ptr_type = BtfType {
+            name_off: 0,
+            info: (BTF_KIND_PTR << 24),
+            size_or_type: 1,
+        };
+        let bytes: [u8; BTF_TYPE_SIZE] = unsafe { std::mem::transmute(ptr_type) };
+        type_section.extend_from_slice(&bytes);
+
+        // Type 3: STRUCT (kind=4, 1 member = 12 extra bytes)
+        let struct_type = BtfType {
+            name_off: 0,
+            info: (BTF_KIND_STRUCT << 24) | 1, // vlen=1
+            size_or_type: 8,
+        };
+        let bytes: [u8; BTF_TYPE_SIZE] = unsafe { std::mem::transmute(struct_type) };
+        type_section.extend_from_slice(&bytes);
+        type_section.extend_from_slice(&[0u8; 12]); // btf_member
+
+        // Type 4: FUNC_PROTO (kind=13, 1 param = 8 extra bytes)
+        let proto_type = BtfType {
+            name_off: 0,
+            info: (BTF_KIND_FUNC_PROTO << 24) | 1, // vlen=1
+            size_or_type: 1, // return type
+        };
+        let bytes: [u8; BTF_TYPE_SIZE] = unsafe { std::mem::transmute(proto_type) };
+        type_section.extend_from_slice(&bytes);
+        type_section.extend_from_slice(&[0u8; 8]); // btf_param
+
+        // Type 5: FUNC (kind=12, no extra data) -- this is what we're looking for
+        let func_type = BtfType {
+            name_off: func_name_off,
+            info: (BTF_KIND_FUNC << 24),
+            size_or_type: 4, // proto type_id
+        };
+        let bytes: [u8; BTF_TYPE_SIZE] = unsafe { std::mem::transmute(func_type) };
+        type_section.extend_from_slice(&bytes);
+
+        let hdr = BtfHeader {
+            magic: BTF_MAGIC,
+            version: 1,
+            flags: 0,
+            hdr_len: BTF_HEADER_SIZE as u32,
+            type_off: 0,
+            type_len: type_section.len() as u32,
+            str_off: type_section.len() as u32,
+            str_len: str_section.len() as u32,
+        };
+        let hdr_bytes: [u8; BTF_HEADER_SIZE] = unsafe { std::mem::transmute(hdr) };
+
+        let mut blob = Vec::new();
+        blob.extend_from_slice(&hdr_bytes);
+        blob.extend_from_slice(&type_section);
+        blob.extend_from_slice(&str_section);
+
+        // The FUNC is type ID 5 (1-based).
+        assert_eq!(find_func_btf_id(&blob, "bpf_rotate64"), Some(5));
+        assert_eq!(find_func_btf_id(&blob, "unknown"), None);
     }
 }

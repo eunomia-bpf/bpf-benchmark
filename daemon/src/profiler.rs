@@ -38,6 +38,7 @@ pub struct ProgStatsSnapshot {
 }
 
 #[derive(Clone, Debug)]
+#[allow(dead_code)]
 pub struct ProgStatsDelta {
     pub prog_id: u32,
     pub elapsed: Duration,
@@ -71,6 +72,7 @@ impl ProgStatsDelta {
 }
 
 #[derive(Clone, Debug)]
+#[allow(dead_code)]
 pub struct PgoAnalysis {
     pub prog_id: u32,
     pub total: ProgStats,

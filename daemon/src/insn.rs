@@ -216,6 +216,7 @@ impl BpfInsn {
     }
 
     /// `stx_mem size, [dst + off], src`
+    #[allow(dead_code)]
     pub const fn stx_mem(size: u8, dst: u8, src: u8, off: i16) -> Self {
         Self {
             code: BPF_STX | size | BPF_MEM,
@@ -226,6 +227,7 @@ impl BpfInsn {
     }
 
     /// `alu64 op, dst, imm`  (e.g., LSH64_IMM, OR64_IMM)
+    #[allow(dead_code)]
     pub const fn alu64_imm(op: u8, dst: u8, imm: i32) -> Self {
         Self {
             code: BPF_ALU64 | op | BPF_K,
@@ -236,6 +238,7 @@ impl BpfInsn {
     }
 
     /// `alu64 op, dst, src` (e.g., OR64_REG)
+    #[allow(dead_code)]
     pub const fn alu64_reg(op: u8, dst: u8, src: u8) -> Self {
         Self {
             code: BPF_ALU64 | op | BPF_X,

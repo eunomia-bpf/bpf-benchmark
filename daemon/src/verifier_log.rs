@@ -8,6 +8,9 @@
 //!
 //! This module extracts per-PC register state summaries that can feed later
 //! optimization analyses (constant propagation, range checks, liveness, etc.).
+//!
+//! NOTE: This module is not yet wired into the production rewrite pipeline.
+//! It will be connected when verifier-state-guided optimizations are implemented.
 
 use std::collections::HashMap;
 

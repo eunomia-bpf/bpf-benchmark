@@ -4,9 +4,7 @@
 mod branch_target;
 mod cfg;
 mod liveness;
-mod pgo;
 
-pub use branch_target::{BranchTargetAnalysis, BranchTargetResult};
-pub use cfg::{BasicBlock, CFGAnalysis, CFGResult, SubprogRange};
-pub use liveness::{insn_use_def, LivenessAnalysis, LivenessResult};
-pub use pgo::{PGOAnalysis, PGOBranchProfile, PGOResult, ProfilingData};
+pub use branch_target::BranchTargetAnalysis;
+pub use cfg::CFGAnalysis;
+pub use liveness::LivenessAnalysis;

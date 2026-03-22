@@ -13,7 +13,7 @@ pub use cond_select::CondSelectPass;
 pub use branch_flip::BranchFlipPass;
 pub use spectre::SpectreMitigationPass;
 
-use crate::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis, PGOAnalysis};
+use crate::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis};
 use crate::insn::BpfInsn;
 use crate::pass::PassManager;
 
@@ -72,22 +72,13 @@ pub fn build_default_pipeline() -> PassManager {
     pm.register_analysis(BranchTargetAnalysis);
     pm.register_analysis(CFGAnalysis);
     pm.register_analysis(LivenessAnalysis);
-    pm.register_analysis(PGOAnalysis { profiling_data: None });
+
 
     pm.add_pass(WideMemPass);
     pm.add_pass(RotatePass);
-    pm.add_pass(CondSelectPass {
-        predictability_threshold: 0.8,
-    });
+    pm.add_pass(CondSelectPass);
     pm.add_pass(BranchFlipPass { min_bias: 0.7 });
 
-    pm
-}
-
-/// Build a pipeline with all passes (including security passes like Spectre mitigation).
-pub fn build_full_pipeline() -> PassManager {
-    let mut pm = build_default_pipeline();
-    pm.add_pass(SpectreMitigationPass);
     pm
 }
 
@@ -101,7 +92,7 @@ pub fn build_pipeline_with_passes(names: &[String]) -> PassManager {
     pm.register_analysis(BranchTargetAnalysis);
     pm.register_analysis(CFGAnalysis);
     pm.register_analysis(LivenessAnalysis);
-    pm.register_analysis(PGOAnalysis { profiling_data: None });
+
 
     let name_set: std::collections::HashSet<&str> = names.iter().map(|s| s.as_str()).collect();
 
@@ -112,9 +103,7 @@ pub fn build_pipeline_with_passes(names: &[String]) -> PassManager {
         pm.add_pass(RotatePass);
     }
     if name_set.contains("cond_select") {
-        pm.add_pass(CondSelectPass {
-            predictability_threshold: 0.8,
-        });
+        pm.add_pass(CondSelectPass);
     }
     if name_set.contains("branch_flip") {
         pm.add_pass(BranchFlipPass { min_bias: 0.7 });
