@@ -267,15 +267,32 @@ pub fn bpf_prog_get_info(fd: RawFd, fetch_orig: bool) -> Result<(BpfProgInfo, Ve
     Ok((info, orig_insns))
 }
 
+/// Result of a REJIT attempt, including any verifier log on failure.
+#[derive(Debug)]
+pub struct RejitResult {
+    /// Raw verifier log captured from the kernel (may be empty on success or
+    /// if the kernel didn't write anything).
+    pub verifier_log: String,
+}
+
 /// Submit new BPF bytecode to the kernel via BPF_PROG_REJIT.
 ///
 /// The kernel will run bpf_check() + JIT on the new instructions and
 /// atomically replace the program image in-place.
-pub fn bpf_prog_rejit(prog_fd: RawFd, insns: &[BpfInsn], fd_array: &[RawFd]) -> Result<()> {
+///
+/// Allocates a 64 KB log buffer so that on failure the verifier's diagnostic
+/// output is captured and returned as a structured error.
+pub fn bpf_prog_rejit(prog_fd: RawFd, insns: &[BpfInsn], fd_array: &[RawFd]) -> Result<RejitResult> {
+    const LOG_BUF_SIZE: usize = 64 * 1024;
+    let mut log_buf: Vec<u8> = vec![0u8; LOG_BUF_SIZE];
+
     let mut attr: AttrRejit = zeroed_attr();
     attr.prog_fd = prog_fd as u32;
     attr.insn_cnt = insns.len() as u32;
     attr.insns = insns.as_ptr() as u64;
+    attr.log_level = 1;
+    attr.log_size = LOG_BUF_SIZE as u32;
+    attr.log_buf = log_buf.as_mut_ptr() as u64;
     if !fd_array.is_empty() {
         attr.fd_array = fd_array.as_ptr() as u64;
         attr.fd_array_cnt = fd_array.len() as u32;
@@ -288,10 +305,24 @@ pub fn bpf_prog_rejit(prog_fd: RawFd, insns: &[BpfInsn], fd_array: &[RawFd]) -> 
             std::mem::size_of::<AttrRejit>() as u32,
         )
     };
+
+    // Extract the log as a string (NUL-terminated C string in the buffer).
+    let log_str = {
+        let nul_pos = log_buf.iter().position(|&b| b == 0).unwrap_or(log_buf.len());
+        String::from_utf8_lossy(&log_buf[..nul_pos]).into_owned()
+    };
+
     if ret < 0 {
-        bail!(bpf_err("BPF_PROG_REJIT"));
+        let os_err = std::io::Error::last_os_error();
+        if log_str.is_empty() {
+            bail!("BPF_PROG_REJIT: {}", os_err);
+        } else {
+            bail!("BPF_PROG_REJIT: {}\nverifier log:\n{}", os_err, log_str);
+        }
     }
-    Ok(())
+    Ok(RejitResult {
+        verifier_log: log_str,
+    })
 }
 
 /// Iterate over all live BPF program IDs in the kernel.

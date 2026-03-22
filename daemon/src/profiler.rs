@@ -83,7 +83,6 @@ impl ProgStatsDelta {
 /// Fields are populated from runtime polling and consumed by ProfilingData,
 /// HotnessRanking, and diagnostic output.
 #[derive(Clone, Debug)]
-#[allow(dead_code)]
 pub struct PgoAnalysis {
     pub prog_id: u32,
     pub total: ProgStats,
@@ -110,8 +109,7 @@ impl PgoAnalysis {
     }
 
     /// Hotness score: invocations per second during the observation window.
-    /// Returns 0.0 if no time elapsed. Used by HotnessRanking and tests.
-    #[allow(dead_code)]
+    /// Returns 0.0 if no time elapsed. Used by HotnessRanking and watch mode.
     pub fn hotness_score(&self, elapsed: Duration) -> f64 {
         let secs = elapsed.as_secs_f64();
         if secs <= 0.0 {
@@ -124,7 +122,6 @@ impl PgoAnalysis {
 /// Program hotness ranking — sorts programs by activity level.
 /// Used by the watch command and future multi-program PGO flows.
 #[derive(Clone, Debug)]
-#[allow(dead_code)]
 pub struct HotnessRanking {
     /// Programs ranked by descending hotness (most active first).
     pub ranked: Vec<PgoAnalysis>,
@@ -132,7 +129,6 @@ pub struct HotnessRanking {
     pub observation_window: Duration,
 }
 
-#[allow(dead_code)]
 impl HotnessRanking {
     /// Build a hotness ranking from a set of PGO analyses and their observation window.
     pub fn from_analyses(analyses: Vec<PgoAnalysis>, observation_window: Duration) -> Self {

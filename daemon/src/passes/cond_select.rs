@@ -114,6 +114,20 @@ impl BpfPass for CondSelectPass {
         analyses: &mut AnalysisCache,
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
+        // Check if platform has CMOV support.
+        if !ctx.platform.has_cmov {
+            return Ok(PassResult {
+                pass_name: self.name().into(),
+                changed: false,
+                sites_applied: 0,
+                sites_skipped: vec![SkipReason {
+                    pc: 0,
+                    reason: "platform lacks CMOV support".into(),
+                }],
+                diagnostics: vec![],
+            });
+        }
+
         // Check if bpf_select64 kfunc is available.
         if ctx.kfunc_registry.select64_btf_id < 0 {
             // Fall back to detection-only mode.
@@ -404,6 +418,7 @@ mod tests {
     fn ctx_with_select_kfunc(btf_id: i32) -> PassContext {
         let mut ctx = PassContext::test_default();
         ctx.kfunc_registry.select64_btf_id = btf_id;
+        ctx.platform.has_cmov = true;
         ctx
     }
 
@@ -522,7 +537,8 @@ mod tests {
         ]);
         let orig_insns = prog.insns.clone();
         let mut cache = AnalysisCache::new();
-        let ctx = PassContext::test_default(); // select64_btf_id = -1
+        let mut ctx = PassContext::test_default(); // select64_btf_id = -1
+        ctx.platform.has_cmov = true; // platform has CMOV, but kfunc is missing
 
         let pass = CondSelectPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();

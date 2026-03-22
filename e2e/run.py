@@ -57,7 +57,7 @@ from e2e.cases.tracee.case import (  # noqa: E402
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Unified entrypoint for repository end-to-end benchmarks.")
-    parser.add_argument("case", choices=("tracee", "tetragon", "bpftrace", "scx", "katran"))
+    parser.add_argument("case", choices=("tracee", "tetragon", "bpftrace", "scx", "katran", "all"))
     parser.add_argument("--smoke", action="store_true", help="Run the smoke-sized configuration.")
     parser.add_argument("--dry-run", action="store_true", help="Resolve the execution plan without running the live workload.")
     parser.add_argument("--duration", type=int, help="Override the per-workload duration in seconds.")
@@ -96,8 +96,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--katran-samples", type=int)
     parser.add_argument("--katran-skip-attach", action="store_true")
     parser.add_argument("--kernel-config", default=str(ROOT_DIR / "vendor" / "linux-framework" / ".config"))
-    parser.add_argument("--bpftool-binary", default="/usr/local/sbin/bpftool")
-    parser.add_argument("--bpftool", help="Explicit bpftool path for Tetragon runs.")
+    parser.add_argument("--bpftool", default="/usr/local/sbin/bpftool", help="Explicit bpftool path for Tetragon runs.")
     parser.add_argument("--scheduler-extra-arg", action="append", default=[])
     parser.add_argument("--skip-setup", action="store_true", help=argparse.SUPPRESS)
     return parser
@@ -133,8 +132,6 @@ def apply_case_defaults(args: argparse.Namespace) -> None:
             args.output_md = str(DEFAULT_TETRAGON_OUTPUT_MD)
         if args.setup_script == str(DEFAULT_TRACEE_SETUP_SCRIPT):
             args.setup_script = str(DEFAULT_TETRAGON_SETUP_SCRIPT)
-        if not args.bpftool:
-            args.bpftool = args.bpftool_binary
         return
 
     if args.case == "bpftrace":
@@ -144,12 +141,11 @@ def apply_case_defaults(args: argparse.Namespace) -> None:
             args.output_md = str(DEFAULT_BPFTRACE_OUTPUT_MD)
 
 
-def main(argv: list[str] | None = None) -> int:
-    parser = build_parser()
-    args = parser.parse_args(argv)
-    prepare_bpftool_environment()
-    apply_case_defaults(args)
+ALL_CASES = ("tracee", "tetragon", "bpftrace", "scx", "katran")
 
+
+def _run_single_case(args: argparse.Namespace) -> int:
+    """Run a single e2e case. Returns 0 on success."""
     if args.case == "tracee":
         payload = run_tracee_case(args)
         persist_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve())
@@ -171,6 +167,40 @@ def main(argv: list[str] | None = None) -> int:
         persist_katran_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve())
         return 0
     raise SystemExit(f"unsupported e2e case: {args.case}")
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    prepare_bpftool_environment()
+
+    if args.case == "all":
+        # Run all cases sequentially, each with its own default outputs.
+        failed: list[str] = []
+        for case_name in ALL_CASES:
+            print(f"\n{'='*60}")
+            print(f"  e2e: running {case_name}")
+            print(f"{'='*60}")
+            # Build a fresh args copy with case-specific defaults.
+            case_argv = [case_name] + [
+                a for a in (argv or sys.argv[1:]) if a != "all"
+            ]
+            case_args = parser.parse_args(case_argv)
+            apply_case_defaults(case_args)
+            try:
+                _run_single_case(case_args)
+                print(f"  e2e: {case_name} OK")
+            except Exception as exc:
+                print(f"  e2e: {case_name} FAILED: {exc}")
+                failed.append(case_name)
+        if failed:
+            print(f"\ne2e: FAILED cases: {', '.join(failed)}")
+            return 1
+        print("\ne2e: ALL PASSED")
+        return 0
+
+    apply_case_defaults(args)
+    return _run_single_case(args)
 
 
 if __name__ == "__main__":

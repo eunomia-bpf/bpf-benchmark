@@ -177,6 +177,20 @@ impl BpfPass for EndianFusionPass {
         analyses: &mut AnalysisCache,
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
+        // Check if platform has MOVBE support (x86) or REV (ARM64).
+        if !ctx.platform.has_movbe && ctx.platform.arch == crate::pass::Arch::X86_64 {
+            return Ok(PassResult {
+                pass_name: self.name().into(),
+                changed: false,
+                sites_applied: 0,
+                sites_skipped: vec![SkipReason {
+                    pc: 0,
+                    reason: "platform lacks MOVBE support".into(),
+                }],
+                diagnostics: vec![],
+            });
+        }
+
         // Check if any endian_load kfunc is available.
         if !any_endian_kfunc_available(ctx) {
             return Ok(PassResult {
@@ -379,6 +393,7 @@ mod tests {
         ctx.kfunc_registry.endian_load16_btf_id = btf_id16;
         ctx.kfunc_registry.endian_load32_btf_id = btf_id32;
         ctx.kfunc_registry.endian_load64_btf_id = btf_id64;
+        ctx.platform.has_movbe = true;
         ctx
     }
 
@@ -506,7 +521,8 @@ mod tests {
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
-        let ctx = PassContext::test_default(); // all btf_ids = -1
+        let mut ctx = PassContext::test_default(); // all btf_ids = -1
+        ctx.platform.has_movbe = true; // platform has MOVBE, but kfunc is missing
 
         let pass = EndianFusionPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();

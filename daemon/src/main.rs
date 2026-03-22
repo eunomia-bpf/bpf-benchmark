@@ -11,7 +11,6 @@ mod kfunc_discovery;
 mod pass;
 mod passes;
 mod profiler;
-#[allow(dead_code)]
 mod verifier_log;
 
 use std::collections::HashSet;
@@ -115,9 +114,19 @@ fn main() -> Result<()> {
     for line in &discovery.log {
         eprintln!("{}", line);
     }
+    let platform = pass::PlatformCapabilities::detect();
+    eprintln!(
+        "platform: arch={:?} bmi1={} bmi2={} cmov={} movbe={} rorx={}",
+        platform.arch,
+        platform.has_bmi1,
+        platform.has_bmi2,
+        platform.has_cmov,
+        platform.has_movbe,
+        platform.has_rorx,
+    );
     let ctx = pass::PassContext {
         kfunc_registry: discovery.registry,
-        platform: pass::PlatformCapabilities::default(),
+        platform,
         policy: pass::PolicyConfig::default(),
     };
     // Keep module FDs alive for the daemon's lifetime.
@@ -189,6 +198,58 @@ fn build_pipeline(pass_names: &Option<Vec<String>>) -> pass::PassManager {
         Some(names) if !names.is_empty() => passes::build_pipeline_with_passes(names),
         _ => passes::build_default_pipeline(),
     }
+}
+
+/// Rank program IDs by hotness using `HotnessRanking`.
+///
+/// Collects a quick stats snapshot for each program, builds a `HotnessRanking`,
+/// and returns IDs sorted hottest-first. Programs whose stats cannot be read
+/// are appended at the end (they'll still be processed).
+fn rank_programs_by_hotness(prog_ids: &[u32], observation_window: Duration) -> Vec<u32> {
+    use profiler::{HotnessRanking, PgoAnalysis, ProgStatsDelta, ProgStatsSnapshot};
+
+    if prog_ids.is_empty() {
+        return Vec::new();
+    }
+
+    // Collect before-snapshots for all programs.
+    let mut snapshots_before: Vec<(u32, ProgStatsSnapshot)> = Vec::new();
+    let mut unreadable: Vec<u32> = Vec::new();
+
+    for &pid in prog_ids {
+        match profiler::ProgStatsPoller::open(pid) {
+            Ok(poller) => match poller.snapshot() {
+                Ok(snap) => snapshots_before.push((pid, snap)),
+                Err(_) => unreadable.push(pid),
+            },
+            Err(_) => unreadable.push(pid),
+        }
+    }
+
+    // Brief sleep to observe activity.
+    std::thread::sleep(observation_window);
+
+    // Collect after-snapshots and compute analyses.
+    let mut analyses: Vec<PgoAnalysis> = Vec::new();
+    for (pid, before) in &snapshots_before {
+        match profiler::ProgStatsPoller::open(*pid) {
+            Ok(poller) => match poller.snapshot() {
+                Ok(after) => {
+                    let delta = ProgStatsDelta::from_snapshots(before, &after);
+                    analyses.push(PgoAnalysis::from_delta(&delta));
+                }
+                Err(_) => unreadable.push(*pid),
+            },
+            Err(_) => unreadable.push(*pid),
+        }
+    }
+
+    let ranking = HotnessRanking::from_analyses(analyses, observation_window);
+
+    // Return IDs in hotness order, then append unreadable ones.
+    let mut result: Vec<u32> = ranking.ranked.iter().map(|a| a.prog_id).collect();
+    result.extend(unreadable);
+    result
 }
 
 // ── Subcommand implementations ──────────────────────────────────────
@@ -371,11 +432,43 @@ fn cmd_apply(prog_id: u32, ctx: &pass::PassContext, pass_names: &Option<Vec<Stri
     }
 
     // Construct fd_array from module FDs required by kfunc passes.
+    // Validate that all required FDs are known to the registry.
     let fd_array: Vec<std::os::unix::io::RawFd> = program.required_module_fds.clone();
-    bpf::bpf_prog_rejit(fd.as_raw_fd(), &program.insns, &fd_array).context("BPF_PROG_REJIT failed")?;
-
-    println!("  REJIT successful");
-    Ok(())
+    let all_fds = ctx.kfunc_registry.all_module_fds();
+    for &fd_needed in &fd_array {
+        if !all_fds.contains(&fd_needed) {
+            eprintln!(
+                "  warning: required module fd {} not in registry ({:?})",
+                fd_needed, all_fds
+            );
+        }
+    }
+    match bpf::bpf_prog_rejit(fd.as_raw_fd(), &program.insns, &fd_array) {
+        Ok(result) => {
+            println!("  REJIT successful");
+            if !result.verifier_log.is_empty() {
+                eprintln!("  verifier log (success): {} bytes", result.verifier_log.len());
+            }
+            Ok(())
+        }
+        Err(e) => {
+            let err_msg = format!("{:#}", e);
+            // Parse verifier log from the error message for structured output.
+            if let Some(log_start) = err_msg.find("verifier log:\n") {
+                let log_text = &err_msg[log_start + "verifier log:\n".len()..];
+                let parsed = verifier_log::parse_verifier_log(log_text);
+                eprintln!("  REJIT failed for prog {} ({}):", prog_id, info.name_str());
+                eprintln!("  verifier rejected with {} state snapshots", parsed.len());
+                for vi in &parsed {
+                    let regs: Vec<String> = vi.regs.iter()
+                        .map(|(r, s)| format!("R{}={}", r, s.reg_type))
+                        .collect();
+                    eprintln!("    pc={}: {}", vi.pc, regs.join(" "));
+                }
+            }
+            Err(e).context("BPF_PROG_REJIT failed")
+        }
+    }
 }
 
 fn cmd_apply_all(ctx: &pass::PassContext, pass_names: &Option<Vec<String>>, pgo_config: &Option<PgoConfig>) -> Result<()> {
@@ -489,9 +582,37 @@ fn try_apply_one(prog_id: u32, ctx: &pass::PassContext, pass_names: &Option<Vec<
     );
 
     let fd_array: Vec<std::os::unix::io::RawFd> = program.required_module_fds.clone();
-    bpf::bpf_prog_rejit(fd.as_raw_fd(), &program.insns, &fd_array)?;
-    println!("    REJIT ok");
-    Ok(true)
+    // Validate required FDs are in registry.
+    let all_fds = ctx.kfunc_registry.all_module_fds();
+    for &fd_needed in &fd_array {
+        if !all_fds.contains(&fd_needed) {
+            eprintln!(
+                "    warning: required module fd {} not in registry ({:?})",
+                fd_needed, all_fds
+            );
+        }
+    }
+    match bpf::bpf_prog_rejit(fd.as_raw_fd(), &program.insns, &fd_array) {
+        Ok(_) => {
+            println!("    REJIT ok");
+            Ok(true)
+        }
+        Err(e) => {
+            let err_msg = format!("{:#}", e);
+            if let Some(log_start) = err_msg.find("verifier log:\n") {
+                let log_text = &err_msg[log_start + "verifier log:\n".len()..];
+                let parsed = verifier_log::parse_verifier_log(log_text);
+                eprintln!("    REJIT failed: verifier rejected with {} state snapshots", parsed.len());
+                for vi in &parsed {
+                    let regs: Vec<String> = vi.regs.iter()
+                        .map(|(r, s)| format!("R{}={}", r, s.reg_type))
+                        .collect();
+                    eprintln!("      pc={}: {}", vi.pc, regs.join(" "));
+                }
+            }
+            Err(e)
+        }
+    }
 }
 
 // ── Serve (Unix socket server) ──────────────────────────────────────
@@ -616,6 +737,7 @@ fn cmd_watch(interval_secs: u64, once: bool, ctx: &pass::PassContext, pass_names
 
     let mut optimized: HashSet<u32> = HashSet::new();
     let mut round: u32 = 0;
+    let observation_window = Duration::from_millis(200);
 
     println!(
         "watch: starting (interval={}s, once={})",
@@ -639,9 +761,12 @@ fn cmd_watch(interval_secs: u64, once: bool, ctx: &pass::PassContext, pass_names
             .collect();
         let new_count = new_ids.len();
 
+        // Collect stats for new programs and rank by hotness.
+        let ranked_ids = rank_programs_by_hotness(&new_ids, observation_window);
+
         let mut applied = 0u32;
         let mut errors = 0u32;
-        for prog_id in &new_ids {
+        for prog_id in &ranked_ids {
             optimized.insert(*prog_id);
             match try_apply_one(*prog_id, ctx, pass_names, pgo_config) {
                 Ok(true) => applied += 1,

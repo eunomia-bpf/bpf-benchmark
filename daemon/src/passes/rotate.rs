@@ -44,6 +44,20 @@ impl BpfPass for RotatePass {
             });
         }
 
+        // Prerequisite: RORX requires BMI2.
+        if !ctx.platform.has_rorx {
+            return Ok(PassResult {
+                pass_name: self.name().into(),
+                changed: false,
+                sites_applied: 0,
+                sites_skipped: vec![SkipReason {
+                    pc: 0,
+                    reason: "platform lacks RORX (BMI2) support".into(),
+                }],
+                diagnostics: vec![],
+            });
+        }
+
         let bt_analysis = BranchTargetAnalysis;
         let bt = analyses.get(&bt_analysis, program);
         let liveness_analysis = LivenessAnalysis;
@@ -370,6 +384,7 @@ mod tests {
     fn ctx_with_rotate_kfunc(btf_id: i32) -> PassContext {
         let mut ctx = PassContext::test_default();
         ctx.kfunc_registry.rotate64_btf_id = btf_id;
+        ctx.platform.has_rorx = true;
         ctx
     }
 

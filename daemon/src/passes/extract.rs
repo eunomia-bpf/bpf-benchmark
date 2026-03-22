@@ -108,6 +108,20 @@ impl BpfPass for ExtractPass {
         analyses: &mut AnalysisCache,
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
+        // Check if platform has BMI1 (BEXTR) support.
+        if !ctx.platform.has_bmi1 {
+            return Ok(PassResult {
+                pass_name: self.name().into(),
+                changed: false,
+                sites_applied: 0,
+                sites_skipped: vec![SkipReason {
+                    pc: 0,
+                    reason: "platform lacks BMI1 (BEXTR) support".into(),
+                }],
+                diagnostics: vec![],
+            });
+        }
+
         // Check if bpf_extract64 kfunc is available.
         if ctx.kfunc_registry.extract64_btf_id < 0 {
             return Ok(PassResult {
@@ -268,6 +282,7 @@ mod tests {
     fn ctx_with_extract_kfunc(btf_id: i32) -> PassContext {
         let mut ctx = PassContext::test_default();
         ctx.kfunc_registry.extract64_btf_id = btf_id;
+        ctx.platform.has_bmi1 = true;
         ctx
     }
 
@@ -400,7 +415,8 @@ mod tests {
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
-        let ctx = PassContext::test_default(); // extract64_btf_id = -1
+        let mut ctx = PassContext::test_default(); // extract64_btf_id = -1
+        ctx.platform.has_bmi1 = true; // platform has BMI1, but kfunc is missing
 
         let pass = ExtractPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();

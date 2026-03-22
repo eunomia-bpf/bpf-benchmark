@@ -1,0 +1,120 @@
+#!/bin/bash
+# Unified VM test runner: kernel selftests + unittest suite + upstream BPF selftests.
+# Usage: run_all_tests.sh <ROOT_DIR> [--skip-selftest] [--skip-unittest] [--skip-upstream]
+#
+# Environment variables:
+#   BPF_SELFTEST_FILTER  - space-separated test_progs -t filter (default: "verifier jit")
+set -eu -o pipefail
+
+ROOT_DIR="${1:?Usage: run_all_tests.sh <ROOT_DIR>}"
+shift
+
+# Parse flags
+SKIP_SELFTEST=0
+SKIP_UNITTEST=0
+SKIP_UPSTREAM=0
+for arg in "$@"; do
+    case "$arg" in
+        --skip-selftest) SKIP_SELFTEST=1 ;;
+        --skip-unittest) SKIP_UNITTEST=1 ;;
+        --skip-upstream) SKIP_UPSTREAM=1 ;;
+        *) echo "Unknown flag: $arg"; exit 1 ;;
+    esac
+done
+
+KERNEL_TEST_DIR="${ROOT_DIR}/tests/kernel"
+KERNEL_SELFTEST="${KERNEL_TEST_DIR}/build/test_recompile"
+UNITTEST_DIR="${ROOT_DIR}/tests/unittest"
+UNITTEST_BUILD_DIR="${UNITTEST_DIR}/build"
+UPSTREAM_BIN_DIR="${ROOT_DIR}/docs/tmp/bpf_selftests_bin"
+BPF_SELFTEST_FILTER="${BPF_SELFTEST_FILTER:-verifier jit}"
+
+cd "$ROOT_DIR"
+
+PASS=0
+FAIL=0
+
+run_section() {
+    echo ""
+    echo "========================================"
+    echo "  $1"
+    echo "========================================"
+}
+
+# --- Part 1: Kernel selftest (test_recompile) ---
+if [ "$SKIP_SELFTEST" -eq 0 ] && [ -f "$KERNEL_SELFTEST" ]; then
+    run_section "Kernel selftest (test_recompile)"
+    if sudo -n "$KERNEL_SELFTEST"; then
+        PASS=$((PASS + 1))
+    else
+        FAIL=$((FAIL + 1))
+        echo "FAIL: test_recompile"
+    fi
+else
+    [ "$SKIP_SELFTEST" -eq 0 ] && echo "SKIP: test_recompile not found at $KERNEL_SELFTEST"
+fi
+
+# --- Part 2: unittest suite ---
+if [ "$SKIP_UNITTEST" -eq 0 ]; then
+    run_section "Building tests/unittest/"
+    make -C "$UNITTEST_DIR" clean all
+
+    run_section "Running tests/unittest/ suite"
+    cd "$UNITTEST_DIR"
+    for t in rejit_poc rejit_safety_tests rejit_regression rejit_tail_call \
+             rejit_spectre rejit_prog_types rejit_audit_tests; do
+        echo "--- $t ---"
+        if sudo "${UNITTEST_BUILD_DIR}/$t" "${UNITTEST_BUILD_DIR}/progs"; then
+            PASS=$((PASS + 1))
+        else
+            FAIL=$((FAIL + 1))
+            echo "FAIL: $t"
+        fi
+    done
+    cd "$ROOT_DIR"
+fi
+
+# --- Part 3: upstream test_verifier ---
+if [ "$SKIP_UPSTREAM" -eq 0 ] && [ -f "${UPSTREAM_BIN_DIR}/test_verifier" ]; then
+    run_section "Upstream test_verifier"
+    cd "$UPSTREAM_BIN_DIR"
+    if sudo ./test_verifier 2>&1; then
+        PASS=$((PASS + 1))
+    else
+        FAIL=$((FAIL + 1))
+        echo "FAIL: test_verifier"
+    fi
+    cd "$ROOT_DIR"
+else
+    [ "$SKIP_UPSTREAM" -eq 0 ] && echo "SKIP: test_verifier not found at ${UPSTREAM_BIN_DIR}/test_verifier"
+fi
+
+# --- Part 4: upstream test_progs ---
+if [ "$SKIP_UPSTREAM" -eq 0 ] && [ -f "${UPSTREAM_BIN_DIR}/test_progs" ]; then
+    run_section "Upstream test_progs (filter: ${BPF_SELFTEST_FILTER})"
+    cd "$UPSTREAM_BIN_DIR"
+    FILTER_FLAGS=""
+    for t in $BPF_SELFTEST_FILTER; do
+        FILTER_FLAGS="$FILTER_FLAGS -t $t"
+    done
+    if sudo ./test_progs $FILTER_FLAGS 2>&1; then
+        PASS=$((PASS + 1))
+    else
+        FAIL=$((FAIL + 1))
+        echo "FAIL: test_progs"
+    fi
+    cd "$ROOT_DIR"
+else
+    [ "$SKIP_UPSTREAM" -eq 0 ] && echo "SKIP: test_progs not found at ${UPSTREAM_BIN_DIR}/test_progs"
+fi
+
+# --- Summary ---
+echo ""
+echo "========================================"
+echo "  RESULTS: ${PASS} passed, ${FAIL} failed"
+echo "========================================"
+
+if [ "$FAIL" -gt 0 ]; then
+    exit 1
+fi
+echo "vm-test: ALL PASSED"

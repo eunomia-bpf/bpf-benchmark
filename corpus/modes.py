@@ -80,7 +80,7 @@ from runner.libs.policy import POLICY_DIR as DEFAULT_POLICY_DIR, resolve_policy_
 ROOT_DIR = Path(__file__).resolve().parent.parent
 SELF_RELATIVE = Path(__file__).resolve().relative_to(ROOT_DIR)
 DEFAULT_INVENTORY_JSON = ROOT_DIR / "docs" / "tmp" / "corpus-runnability-results.json"
-DEFAULT_OUTPUT_JSON = authoritative_output_path(ROOT_DIR / "corpus" / "results", "corpus_v5_vm_batch")
+DEFAULT_OUTPUT_JSON = authoritative_output_path(ROOT_DIR / "corpus" / "results", "corpus_vm_batch")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "docs" / "tmp" / "corpus-batch-recompile-results.md"
 DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
 DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
@@ -367,17 +367,15 @@ def build_runner_command(
     repeat: int,
     btf_custom_path: Path | None,
     compile_only: bool,
-    recompile_v5: bool,
+    blind_apply: bool,
     skip_families: list[str],
     recompile_all: bool = False,
     policy_file: Path | None = None,
     dump_xlated: Path | None = None,
     use_sudo: bool = False,
-    daemon_path: Path | None = None,
+    daemon_socket: str | None = None,
 ) -> list[str]:
-    # Determine whether to enable rejit: v2 uses --rejit + --daemon-path
-    # instead of the old v1 --recompile-v5 / --recompile-all flags.
-    enable_rejit = recompile_v5 or (policy_file is not None)
+    enable_rejit = blind_apply or (policy_file is not None)
     command = _build_runner_command(
         runner,
         "run-kernel",
@@ -392,7 +390,7 @@ def build_runner_command(
         dump_xlated=dump_xlated,
         btf_custom_path=btf_custom_path,
         rejit=enable_rejit,
-        daemon_path=daemon_path if enable_rejit else None,
+        daemon_socket=daemon_socket if enable_rejit else None,
     )
     return maybe_prepend_sudo(command, enabled=use_sudo)
 
@@ -531,7 +529,6 @@ def run_target_locally(
         program_name=target["program_name"],
     ) if use_policy else None
     active_policy_path = None if blind_apply else policy_path
-    recompile_v5 = blind_apply
     recompile_all = blind_apply
     policy_mode = "blind-apply-v5" if blind_apply else ("policy-file" if active_policy_path is not None else "stock")
     inventory_scan = normalize_scan(target.get("inventory_scan"))
@@ -552,7 +549,7 @@ def run_target_locally(
                 repeat=repeat,
                 btf_custom_path=btf_custom_path,
                 compile_only=True,
-                recompile_v5=False,
+                blind_apply=False,
                 recompile_all=False,
                 skip_families=[],
                 policy_file=None,
@@ -581,12 +578,11 @@ def run_target_locally(
                     repeat=repeat,
                     btf_custom_path=btf_custom_path,
                     compile_only=True,
-                    recompile_v5=recompile_v5,
+                    blind_apply=blind_apply,
                     recompile_all=recompile_all,
                     skip_families=skip_families,
                     policy_file=active_policy_path,
                     use_sudo=use_sudo,
-                    daemon_path=daemon,
                 ),
                 timeout_seconds,
             )
@@ -602,12 +598,11 @@ def run_target_locally(
                     repeat=repeat,
                     btf_custom_path=btf_custom_path,
                     compile_only=False,
-                    recompile_v5=recompile_v5,
+                    blind_apply=blind_apply,
                     recompile_all=recompile_all,
                     skip_families=skip_families,
                     policy_file=active_policy_path,
                     use_sudo=use_sudo,
-                    daemon_path=daemon,
                 ),
                 timeout_seconds,
             )
@@ -1291,7 +1286,7 @@ def packet_main(argv: list[str] | None = None) -> int:
 
     inventory_json = Path(args.inventory_json).resolve()
     if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.max_programs is not None:
-        output_json = smoke_output_path(ROOT_DIR / "corpus" / "results", "corpus_v5_vm_batch")
+        output_json = smoke_output_path(ROOT_DIR / "corpus" / "results", "corpus_vm_batch")
     else:
         output_json = Path(args.output_json).resolve()
     output_md = Path(args.output_md).resolve()
