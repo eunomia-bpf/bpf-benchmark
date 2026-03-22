@@ -70,6 +70,8 @@ TMP_DIR := $(ROOT_DIR)/docs/tmp
 
 BZIMAGE ?= vendor/linux-framework/arch/x86/boot/bzImage
 DAEMON ?= daemon/target/release/bpfrejit-daemon
+KINSN_MODULE_DIR := $(ROOT_DIR)/module/x86
+KINSN_MODULES := $(KINSN_MODULE_DIR)/bpf_rotate.ko $(KINSN_MODULE_DIR)/bpf_select.ko $(KINSN_MODULE_DIR)/bpf_extract.ko
 ITERATIONS ?= 3
 WARMUPS ?= 1
 REPEAT ?= 100
@@ -136,6 +138,12 @@ endif
 # Pass --policy-dir only when a non-default policy is requested
 POLICY_DIR_FLAG := $(if $(filter-out default,$(POLICY)),--policy-dir "$(POLICY_DIR)",)
 
+# Shell snippet to load kinsn kernel modules inside VM (best-effort, ignores errors if already loaded or missing).
+LOAD_KINSN_MODULES := for ko in "$(KINSN_MODULE_DIR)/bpf_rotate.ko" "$(KINSN_MODULE_DIR)/bpf_select.ko" "$(KINSN_MODULE_DIR)/bpf_extract.ko"; do \
+		if [ -f "$$ko" ]; then sudo -n insmod "$$ko" 2>/dev/null || true; fi; \
+	done; \
+	echo "kinsn modules: $$(ls /sys/kernel/btf/bpf_rotate /sys/kernel/btf/bpf_select /sys/kernel/btf/bpf_extract 2>/dev/null | wc -l)/3 loaded";
+
 MICRO_ARGS := --iterations $(ITERATIONS) --warmups $(WARMUPS) --repeat $(REPEAT) $(BENCH_FLAGS)
 LOCAL_SMOKE_ARGS := --bench simple --iterations 1 --warmups 0 --repeat 10
 VM_SMOKE_ARGS := --bench simple --bench load_byte_recompose --bench cmov_dense --iterations 1 --warmups 0 --repeat 10
@@ -163,7 +171,7 @@ KERNEL_JIT_SOURCES := \
 MICRO_BPF_STAMP := $(MICRO_DIR)/programs/.build.stamp
 
 .PHONY: all runner micro daemon kernel kernel-perf kernel-arm64 kernel-tests kernel-test-progs \
-	arm64-crossbuild-image selftest-arm64 daemon-tests clean \
+	arm64-crossbuild-image selftest-arm64 daemon-tests clean kinsn-modules \
 	smoke check validate verify-build compare \
 	vm-selftest vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 	vm-arm64-smoke vm-arm64-selftest arm64-worktree arm64-rootfs \
@@ -288,6 +296,10 @@ runner:
 daemon:
 	@echo "=== Running make daemon ==="
 	cargo build --release --manifest-path "$(DAEMON_DIR)/Cargo.toml"
+
+kinsn-modules:
+	@echo "=== Running make kinsn-modules ==="
+	$(MAKE) -C "$(KINSN_MODULE_DIR)" KDIR="$(KERNEL_DIR)"
 
 kernel:
 	@echo "=== Running make kernel ==="
@@ -480,13 +492,14 @@ validate:
 vm-selftest: kernel-tests $(BZIMAGE_PATH)
 	@echo "=== Running make vm-selftest ==="
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
-		bash -lc 'cd "$(ROOT_DIR)" && sudo -n "$(KERNEL_SELFTEST)"'
+		bash -lc 'cd "$(ROOT_DIR)" && $(LOAD_KINSN_MODULES) sudo -n "$(KERNEL_SELFTEST)"'
 
 vm-micro-smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(BZIMAGE_PATH)
 	@echo "=== Running make vm-micro-smoke (POLICY=$(POLICY)) ==="
 	mkdir -p "$(MICRO_RESULTS_DEV_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
-		bash -lc 'cd "$(ROOT_DIR)" && $(VENV_ACTIVATE) python3 "$(MICRO_DIR)/driver.py" suite \
+		bash -lc 'cd "$(ROOT_DIR)" && $(LOAD_KINSN_MODULES) \
+			$(VENV_ACTIVATE) python3 "$(MICRO_DIR)/driver.py" suite \
 			--runtime kernel \
 			--runtime kernel-rejit \
 			$(VM_SMOKE_ARGS) \
@@ -500,7 +513,8 @@ vm-micro: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(DAEMON_PATH) verify-build $(BZIMA
 	@echo "=== Running make vm-micro (POLICY=$(POLICY)) ==="
 	mkdir -p "$(MICRO_RESULTS_DEV_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
-		bash -lc 'cd "$(ROOT_DIR)" && $(VENV_ACTIVATE) python3 "$(MICRO_DIR)/driver.py" suite \
+		bash -lc 'cd "$(ROOT_DIR)" && $(LOAD_KINSN_MODULES) \
+			$(VENV_ACTIVATE) python3 "$(MICRO_DIR)/driver.py" suite \
 			--runtime llvmbpf \
 			--runtime kernel \
 			--runtime kernel-rejit \
