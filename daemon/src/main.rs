@@ -14,7 +14,9 @@ mod passes;
 mod profiler;
 mod rewriter;
 
+use std::collections::HashSet;
 use std::os::unix::io::AsRawFd;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 
 use anyhow::{Context, Result};
@@ -49,6 +51,17 @@ enum Command {
     /// Apply rewrites to all live BPF programs that have optimization sites.
     ApplyAll,
 
+    /// Continuously watch for new BPF programs and apply rewrites (daemon mode).
+    Watch {
+        /// Polling interval in seconds.
+        #[arg(long, default_value_t = 5)]
+        interval: u64,
+
+        /// Run only one scan round then exit (useful for testing).
+        #[arg(long)]
+        once: bool,
+    },
+
     /// Poll runtime BPF stats for one live program.
     Profile {
         /// BPF program ID.
@@ -77,6 +90,7 @@ fn main() -> Result<()> {
             interval_ms,
             samples,
         } => cmd_profile(prog_id, interval_ms, samples),
+        Command::Watch { interval, once } => cmd_watch(interval, once),
     }
 }
 
@@ -353,6 +367,90 @@ fn try_apply_one(prog_id: u32) -> Result<bool> {
     bpf::bpf_prog_rejit(fd.as_raw_fd(), &program.insns, &[])?;
     println!("    REJIT ok");
     Ok(true)
+}
+
+fn cmd_watch(interval_secs: u64, once: bool) -> Result<()> {
+    // Register signal handlers for graceful shutdown.
+    unsafe {
+        libc::signal(libc::SIGTERM, handle_signal as libc::sighandler_t);
+        libc::signal(libc::SIGINT, handle_signal as libc::sighandler_t);
+    }
+
+    // Set of prog IDs that have already been attempted in this session.
+    let mut optimized: HashSet<u32> = HashSet::new();
+    let mut round: u32 = 0;
+
+    println!(
+        "watch: starting (interval={}s, once={})",
+        interval_secs, once
+    );
+
+    loop {
+        if SHUTDOWN_FLAG.load(Ordering::Relaxed) {
+            println!("watch: received shutdown signal, exiting");
+            break;
+        }
+
+        round += 1;
+        let ids: Vec<u32> = bpf::iter_prog_ids().collect();
+        let total = ids.len();
+
+        // Find newly seen prog IDs (not yet attempted).
+        let new_ids: Vec<u32> = ids
+            .iter()
+            .copied()
+            .filter(|id| !optimized.contains(id))
+            .collect();
+        let new_count = new_ids.len();
+
+        let mut applied = 0u32;
+        let mut errors = 0u32;
+        for prog_id in &new_ids {
+            // Mark as seen regardless of outcome so we don't retry transient failures
+            // infinitely.  The program may have exited by the time we reach it.
+            optimized.insert(*prog_id);
+            match try_apply_one(*prog_id) {
+                Ok(true) => applied += 1,
+                Ok(false) => {}
+                Err(e) => {
+                    eprintln!("  watch: prog {}: {:#}", prog_id, e);
+                    errors += 1;
+                }
+            }
+        }
+
+        println!(
+            "watch round {}: scanned {} progs, {} new, {} optimized, {} errors",
+            round, total, new_count, applied, errors
+        );
+
+        if once {
+            break;
+        }
+
+        // Sleep in small chunks so we can react to SIGINT promptly.
+        let steps = interval_secs.max(1) * 10; // 100 ms slices
+        for _ in 0..steps {
+            if SHUTDOWN_FLAG.load(Ordering::Relaxed) {
+                break;
+            }
+            std::thread::sleep(Duration::from_millis(100));
+        }
+
+        if SHUTDOWN_FLAG.load(Ordering::Relaxed) {
+            println!("watch: received shutdown signal, exiting");
+            break;
+        }
+    }
+
+    Ok(())
+}
+
+/// Global shutdown flag set by signal handler.
+static SHUTDOWN_FLAG: AtomicBool = AtomicBool::new(false);
+
+extern "C" fn handle_signal(_sig: libc::c_int) {
+    SHUTDOWN_FLAG.store(true, Ordering::Relaxed);
 }
 
 fn fmt_avg(value: Option<f64>) -> String {

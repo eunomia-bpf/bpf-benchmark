@@ -27,7 +27,7 @@ impl BpfPass for WideMemPass {
     }
 
     fn required_analyses(&self) -> Vec<&str> {
-        vec!["branch_targets"]
+        vec!["branch_targets", "liveness"]
     }
 
     fn run(
@@ -40,10 +40,14 @@ impl BpfPass for WideMemPass {
         let bt_analysis = BranchTargetAnalysis;
         let bt = analyses.get(&bt_analysis, program);
 
+        // Compute liveness to check scratch register safety.
+        let liveness_analysis = LivenessAnalysis;
+        let liveness = analyses.get(&liveness_analysis, program);
+
         // Scan for wide_mem sites using existing matcher.
         let raw_sites = crate::matcher::scan_wide_mem(&program.insns);
 
-        // Filter: skip sites with interior branch targets.
+        // Filter: skip sites with interior branch targets or live scratch regs.
         let mut safe_sites = Vec::new();
         let mut skipped = Vec::new();
 
@@ -56,9 +60,47 @@ impl BpfPass for WideMemPass {
                     pc: site.start_pc,
                     reason: "interior branch target".into(),
                 });
-            } else {
-                safe_sites.push(site.clone());
+                continue;
             }
+
+            // Collect scratch registers: registers written inside the byte
+            // ladder that are NOT the dst_reg. After replacement with a single
+            // wide load, these registers will no longer be written. If any of
+            // them is live after the site, the verifier may reject the program.
+            let dst_reg = site.get_binding("dst_reg").unwrap_or(-1) as u8;
+            let mut scratch_regs = std::collections::HashSet::new();
+            let site_end = site.start_pc + site.old_len;
+            for pc in site.start_pc..site_end {
+                if pc < program.insns.len() {
+                    let insn = &program.insns[pc];
+                    // Collect destination registers of ALU/LDX instructions
+                    let class = insn.class();
+                    if class == BPF_ALU64 || class == BPF_ALU || class == BPF_LDX {
+                        let dreg = insn.dst_reg();
+                        if dreg != dst_reg {
+                            scratch_regs.insert(dreg);
+                        }
+                    }
+                }
+            }
+
+            // Check if any scratch register is live after the site.
+            let last_insn_pc = if site_end > 0 { site_end - 1 } else { 0 };
+            let has_live_scratch = if last_insn_pc < liveness.live_out.len() {
+                scratch_regs.iter().any(|r| liveness.live_out[last_insn_pc].contains(r))
+            } else {
+                false
+            };
+
+            if has_live_scratch {
+                skipped.push(SkipReason {
+                    pc: site.start_pc,
+                    reason: "scratch register live after site".into(),
+                });
+                continue;
+            }
+
+            safe_sites.push(site.clone());
         }
 
         if safe_sites.is_empty() {
@@ -355,7 +397,18 @@ fn fixup_branches_inline(new_insns: &mut [BpfInsn], old_insns: &[BpfInsn], addr_
     let mut old_pc = 0;
     while old_pc < old_n {
         let insn = &old_insns[old_pc];
-        if insn.is_jmp_class() && !insn.is_call() && !insn.is_exit() {
+        if insn.is_call() && insn.src_reg() == 1 {
+            // BPF pseudo-call: fix up imm (pc-relative offset to target subprog).
+            let old_target = (old_pc as i64 + 1 + insn.imm as i64) as usize;
+            if old_target < old_n {
+                let new_pc = addr_map[old_pc];
+                let new_target = addr_map[old_target];
+                if new_pc < new_insns.len() && new_insns[new_pc].is_call() {
+                    let new_imm = new_target as i64 - (new_pc as i64 + 1);
+                    new_insns[new_pc].imm = new_imm as i32;
+                }
+            }
+        } else if insn.is_jmp_class() && !insn.is_call() && !insn.is_exit() {
             let new_pc = addr_map[old_pc];
             let old_target = (old_pc as i64 + 1 + insn.off as i64) as usize;
             if old_target <= old_n {
@@ -376,14 +429,18 @@ fn fixup_branches_inline(new_insns: &mut [BpfInsn], old_insns: &[BpfInsn], addr_
 
 // ── CondSelectPass ─────────────────────────────────────────────────
 
-/// COND_SELECT optimization: replace branch+mov diamond with bpf_select64()
-/// kfunc call. PGO-guided: highly predictable branches are skipped since
-/// CMOV is slower than a well-predicted branch.
+/// COND_SELECT detection pass: identifies branch+mov diamond patterns that
+/// could be replaced with a bpf_select64() kfunc call (CMOV).
+///
+/// Currently detection-only: `analyze()` returns a list of candidate sites,
+/// while `apply()` is a no-op (requires kfunc BTF ID to emit replacement).
+/// The `BpfPass::run()` implementation performs analysis and reports sites
+/// in diagnostics but does not modify the instruction stream.
 ///
 /// Pattern A (4-insn diamond):
 ///   Jcc r_cond, X, +2 ; MOV r_dst, val_false ; JA +1 ; MOV r_dst, val_true
 ///
-/// Pattern B (3-insn):
+/// Pattern B (3-insn / JCC +1):
 ///   Jcc r_cond, X, +1 ; MOV r_dst, val_false ; MOV r_dst, val_true
 pub struct CondSelectPass {
     /// Predictability threshold: skip if branch is more predictable than this
@@ -391,19 +448,44 @@ pub struct CondSelectPass {
     pub predictability_threshold: f64,
 }
 
-struct CondSelectSite {
-    start_pc: usize,
-    old_len: usize,
-    cond_reg: u8,
-    dst_reg: u8,
-    true_val: CondSelectValue,
-    false_val: CondSelectValue,
+/// A detected cond-select site.
+pub struct CondSelectSite {
+    pub start_pc: usize,
+    pub old_len: usize,
+    pub cond_reg: u8,
+    pub dst_reg: u8,
+    pub true_val: CondSelectValue,
+    pub false_val: CondSelectValue,
 }
 
-#[derive(Clone, Copy)]
-enum CondSelectValue {
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum CondSelectValue {
     Reg(u8),
     Imm(i32),
+}
+
+impl CondSelectPass {
+    /// Analyze the program and return all detected cond-select sites.
+    ///
+    /// This is the pure detection phase. Each returned `CondSelectSite`
+    /// describes a JCC+MOV pattern that could be lowered to a CMOV/kfunc.
+    pub fn analyze(&self, insns: &[BpfInsn]) -> Vec<CondSelectSite> {
+        scan_cond_select_sites(insns)
+    }
+
+    /// Apply cond-select rewrites to the program. Currently a no-op because
+    /// the bpf_select64 kfunc BTF ID is needed to emit replacement code.
+    ///
+    /// Returns the number of sites applied (always 0 for now).
+    pub fn apply(
+        &self,
+        _program: &mut BpfProgram,
+        _sites: &[CondSelectSite],
+        _ctx: &PassContext,
+    ) -> usize {
+        // No-op: kfunc emit requires BTF ID resolution at runtime.
+        0
+    }
 }
 
 impl BpfPass for CondSelectPass {
@@ -416,194 +498,33 @@ impl BpfPass for CondSelectPass {
     }
 
     fn required_analyses(&self) -> Vec<&str> {
-        vec!["branch_targets", "liveness"]
+        vec!["branch_targets"]
     }
 
     fn run(
         &self,
         program: &mut BpfProgram,
-        analyses: &mut AnalysisCache,
-        ctx: &PassContext,
+        _analyses: &mut AnalysisCache,
+        _ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
-        if ctx.kfunc_registry.select64_btf_id < 0 {
-            return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
-                sites_skipped: vec![SkipReason {
-                    pc: 0,
-                    reason: "bpf_select64 kfunc not available".into(),
-                }],
-                diagnostics: vec![],
-            });
-        }
-
-        let bt_analysis = BranchTargetAnalysis;
-        let bt = analyses.get(&bt_analysis, program);
-        let liveness_analysis = LivenessAnalysis;
-        let liveness = analyses.get(&liveness_analysis, program);
-
-        let sites = scan_cond_select_sites(&program.insns);
-        let mut safe_sites = Vec::new();
-        let mut skipped = Vec::new();
-
-        for site in sites {
-            // Interior branch target check:
-            // Skip sites where an EXTERNAL branch targets interior instructions.
-            // The pattern's own JCC (at start_pc) naturally targets within the site,
-            // so we exclude that self-referencing target from the check.
-            let own_jcc_target = {
-                let jcc = &program.insns[site.start_pc];
-                (site.start_pc as i64 + 1 + jcc.off as i64) as usize
-            };
-            let has_exterior_interior = (site.start_pc + 1..site.start_pc + site.old_len)
-                .any(|pc| {
-                    pc < bt.is_target.len()
-                        && bt.is_target[pc]
-                        && pc != own_jcc_target
-                });
-            if has_exterior_interior {
-                skipped.push(SkipReason {
-                    pc: site.start_pc,
-                    reason: "interior branch target from external source".into(),
-                });
-                continue;
-            }
-
-            // PGO: skip highly predictable branches (annotation-level)
-            if site.start_pc < program.annotations.len() {
-                if let Some(ref bp) = program.annotations[site.start_pc].branch_profile {
-                    let total = bp.taken_count + bp.not_taken_count;
-                    if total > 0 {
-                        let max_rate = (bp.taken_count as f64 / total as f64)
-                            .max(bp.not_taken_count as f64 / total as f64);
-                        if max_rate > (1.0 - self.predictability_threshold) {
-                            skipped.push(SkipReason {
-                                pc: site.start_pc,
-                                reason: format!(
-                                    "branch highly predictable ({:.1}%)",
-                                    max_rate * 100.0
-                                ),
-                            });
-                            continue;
-                        }
-                    }
-                }
-            }
-
-            // Caller-saved register conflict
-            let site_end = site.start_pc + site.old_len;
-            if site_end > 0 && site_end - 1 < liveness.live_out.len() {
-                let live_after = &liveness.live_out[site_end - 1];
-                let conflict = (1u8..=5).any(|r| live_after.contains(&r));
-                if conflict {
-                    skipped.push(SkipReason {
-                        pc: site.start_pc,
-                        reason: "caller-saved register conflict".into(),
-                    });
-                    continue;
-                }
-            }
-
-            safe_sites.push(site);
-        }
-
-        if safe_sites.is_empty() {
-            return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
-                sites_skipped: skipped,
-                diagnostics: vec![],
-            });
-        }
-
-        let btf_id = ctx.kfunc_registry.select64_btf_id;
-        let orig_len = program.insns.len();
-        let mut new_insns = Vec::with_capacity(orig_len);
-        let mut addr_map = vec![0usize; orig_len + 1];
-        let mut pc = 0;
-        let mut site_idx = 0;
-        let mut applied = 0;
-
-        while pc < orig_len {
-            let new_pc = new_insns.len();
-            addr_map[pc] = new_pc;
-
-            if site_idx < safe_sites.len() && pc == safe_sites[site_idx].start_pc {
-                let site = &safe_sites[site_idx];
-                let mut replacement = Vec::new();
-
-                // r1 = cond
-                if site.cond_reg != 1 {
-                    replacement.push(BpfInsn::mov64_reg(1, site.cond_reg));
-                }
-                // r2 = true_val
-                match site.true_val {
-                    CondSelectValue::Reg(r) => {
-                        if r != 2 {
-                            replacement.push(BpfInsn::mov64_reg(2, r));
-                        }
-                    }
-                    CondSelectValue::Imm(v) => {
-                        replacement.push(BpfInsn::mov64_imm(2, v));
-                    }
-                }
-                // r3 = false_val
-                match site.false_val {
-                    CondSelectValue::Reg(r) => {
-                        if r != 3 {
-                            replacement.push(BpfInsn::mov64_reg(3, r));
-                        }
-                    }
-                    CondSelectValue::Imm(v) => {
-                        replacement.push(BpfInsn::mov64_imm(3, v));
-                    }
-                }
-                // call bpf_select64
-                replacement.push(BpfInsn::call_kfunc(btf_id));
-                // dst = r0
-                if site.dst_reg != 0 {
-                    replacement.push(BpfInsn::mov64_reg(site.dst_reg, 0));
-                }
-
-                for j in 1..site.old_len {
-                    addr_map[pc + j] = new_pc;
-                }
-
-                new_insns.extend(replacement);
-                pc += site.old_len;
-                site_idx += 1;
-                applied += 1;
-            } else {
-                new_insns.push(program.insns[pc]);
-                if program.insns[pc].is_ldimm64() && pc + 1 < orig_len {
-                    pc += 1;
-                    addr_map[pc] = new_insns.len();
-                    new_insns.push(program.insns[pc]);
-                }
-                pc += 1;
-            }
-        }
-        addr_map[orig_len] = new_insns.len();
-
-        fixup_branches_inline(&mut new_insns, &program.insns, &addr_map);
-
-        program.insns = new_insns;
-        program.log_transform(TransformEntry {
-            pass_name: self.name().into(),
-            sites_applied: applied,
-            insns_before: orig_len,
-            insns_after: program.insns.len(),
-            details: vec![],
-        });
+        // Detection only — scan for sites and report them.
+        let sites = self.analyze(&program.insns);
+        let diagnostics: Vec<String> = sites
+            .iter()
+            .map(|s| {
+                format!(
+                    "cond_select site: pc={} len={} cond=r{} dst=r{}",
+                    s.start_pc, s.old_len, s.cond_reg, s.dst_reg
+                )
+            })
+            .collect();
 
         Ok(PassResult {
             pass_name: self.name().into(),
-            changed: applied > 0,
-            sites_applied: applied,
-            sites_skipped: skipped,
-            diagnostics: vec![],
+            changed: false,
+            sites_applied: 0,
+            sites_skipped: vec![],
+            diagnostics,
         })
     }
 }
@@ -697,13 +618,45 @@ fn extract_mov_value(insn: &BpfInsn) -> CondSelectValue {
 
 /// BRANCH_FLIP: PGO-guided reorder of if/else bodies.
 ///
-/// Handles the 4-insn diamond: Jcc +2 ; body1 ; JA +1 ; body2.
-/// If PGO shows the taken path (body2) is hot, flip the condition and
+/// Generalised pattern:
+///   pc:           Jcc +N          // conditional jump over then-body to JA
+///   pc+1..pc+N:   [then body: N insns]
+///   pc+N+1:       JA +M           // unconditional jump over else-body
+///   pc+N+2..pc+N+M+1: [else body: M insns]
+///
+/// After flip (inverted condition, bodies swapped):
+///   pc:           J!cc +M         // inverted, jump over else-body (now first)
+///   pc+1..pc+M:   [else body: M insns]
+///   pc+M+1:       JA +N           // jump over then-body (now second)
+///   pc+M+2..pc+M+N+1: [then body: N insns]
+///
+/// If PGO shows the taken path (else body) is hot, flip the condition and
 /// swap bodies so the hot path becomes the fall-through (favoured by
 /// the CPU static branch predictor).
+///
+/// Safety: skips sites where external branches target interior instructions,
+/// or where JSET is used (no simple inverse). Also adjusts internal branch
+/// offsets within relocated bodies via an address map.
 pub struct BranchFlipPass {
     /// Minimum taken rate to trigger a flip.
     pub min_bias: f64,
+}
+
+/// A detected branch-flip site.
+struct BranchFlipSite {
+    /// PC of the Jcc instruction.
+    pc: usize,
+    /// Number of instructions in the then-body.
+    then_len: usize,
+    /// Number of instructions in the else-body.
+    else_len: usize,
+}
+
+impl BranchFlipSite {
+    /// Total number of instructions in the site (Jcc + then + JA + else).
+    fn total_len(&self) -> usize {
+        1 + self.then_len + 1 + self.else_len
+    }
 }
 
 impl BpfPass for BranchFlipPass {
@@ -722,69 +675,166 @@ impl BpfPass for BranchFlipPass {
     fn run(
         &self,
         program: &mut BpfProgram,
-        _analyses: &mut AnalysisCache,
+        analyses: &mut AnalysisCache,
         _ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
+        let bt_analysis = BranchTargetAnalysis;
+        let bt = analyses.get(&bt_analysis, program);
+
         let n = program.insns.len();
-        let mut applied = 0;
-        let mut skipped = Vec::new();
         let orig_len = n;
 
-        let mut pc = 0;
-        while pc + 3 < n {
-            let jcc = &program.insns[pc];
-            if jcc.is_cond_jmp() && jcc.off == 2 {
-                let ja = &program.insns[pc + 2];
-                if ja.is_ja() && ja.off == 1 {
-                    // Check PGO annotation
-                    let should_flip =
-                        if let Some(ref bp) = program.annotations[pc].branch_profile {
-                            let total = bp.taken_count + bp.not_taken_count;
-                            if total > 0 {
-                                bp.taken_count as f64 / total as f64 >= self.min_bias
-                            } else {
-                                false
-                            }
-                        } else {
-                            false
-                        };
+        // Phase 1: scan for all candidate sites.
+        let sites = scan_branch_flip_sites(&program.insns);
 
-                    if should_flip {
-                        let then_insn = program.insns[pc + 1];
-                        let else_insn = program.insns[pc + 3];
+        // Phase 2: filter sites and collect safe ones to apply.
+        // We process sites in reverse order so that modifying later sites
+        // does not invalidate earlier site PCs.
+        let mut safe_sites: Vec<BranchFlipSite> = Vec::new();
+        let mut skipped = Vec::new();
 
-                        if let Some(new_op) = invert_jcc_op(bpf_op(jcc.code)) {
-                            program.insns[pc].code =
-                                (program.insns[pc].code & 0x0f) | new_op;
-                            program.insns[pc + 1] = else_insn;
-                            program.insns[pc + 3] = then_insn;
-                            applied += 1;
-                        } else {
-                            skipped.push(SkipReason {
-                                pc,
-                                reason: "cannot invert condition opcode".into(),
-                            });
-                        }
-                    } else {
-                        skipped.push(SkipReason {
-                            pc,
-                            reason: "branch not biased enough or no PGO data".into(),
-                        });
-                    }
-                }
+        for site in &sites {
+            // Safety check: no external branch targets interior instructions.
+            // The Jcc itself targets pc+1+N (the JA), which is inside the site,
+            // but that is the Jcc's own target -- we only worry about OTHER
+            // branches targeting the interior.
+            let jcc = &program.insns[site.pc];
+            let own_target = (site.pc as i64 + 1 + jcc.off as i64) as usize;
+            let site_end = site.pc + site.total_len();
+
+            let has_exterior_interior = (site.pc + 1..site_end).any(|pc_inner| {
+                pc_inner < bt.is_target.len()
+                    && bt.is_target[pc_inner]
+                    && pc_inner != own_target
+            });
+
+            if has_exterior_interior {
+                skipped.push(SkipReason {
+                    pc: site.pc,
+                    reason: "interior branch target from external source".into(),
+                });
+                continue;
             }
-            pc += 1;
-        }
 
-        if applied > 0 {
-            program.log_transform(TransformEntry {
-                pass_name: self.name().into(),
-                sites_applied: applied,
-                insns_before: orig_len,
-                insns_after: program.insns.len(),
-                details: vec![],
+            // Safety check: JSET cannot be inverted.
+            if invert_jcc_op(bpf_op(jcc.code)).is_none() {
+                skipped.push(SkipReason {
+                    pc: site.pc,
+                    reason: "cannot invert condition opcode".into(),
+                });
+                continue;
+            }
+
+            // PGO check.
+            let should_flip = if let Some(ref bp) = program.annotations[site.pc].branch_profile {
+                let total = bp.taken_count + bp.not_taken_count;
+                if total > 0 {
+                    bp.taken_count as f64 / total as f64 >= self.min_bias
+                } else {
+                    false
+                }
+            } else {
+                false
+            };
+
+            if !should_flip {
+                skipped.push(SkipReason {
+                    pc: site.pc,
+                    reason: "branch not biased enough or no PGO data".into(),
+                });
+                continue;
+            }
+
+            safe_sites.push(BranchFlipSite {
+                pc: site.pc,
+                then_len: site.then_len,
+                else_len: site.else_len,
             });
         }
+
+        if safe_sites.is_empty() {
+            return Ok(PassResult {
+                pass_name: self.name().into(),
+                changed: false,
+                sites_applied: 0,
+                sites_skipped: skipped,
+                diagnostics: vec![],
+            });
+        }
+
+        // Phase 3: apply rewrites.
+        // Build new instruction stream with an address map for branch fixup.
+        // Sort sites by PC (ascending) for sequential processing.
+        safe_sites.sort_by_key(|s| s.pc);
+
+        let mut new_insns: Vec<BpfInsn> = Vec::with_capacity(n);
+        let mut addr_map = vec![0usize; n + 1];
+        let mut pc = 0;
+        let mut site_idx = 0;
+        let mut applied = 0;
+
+        while pc < n {
+            let new_pc = new_insns.len();
+            addr_map[pc] = new_pc;
+
+            if site_idx < safe_sites.len() && pc == safe_sites[site_idx].pc {
+                let site = &safe_sites[site_idx];
+                let then_start = site.pc + 1;
+                let then_end = site.pc + 1 + site.then_len; // exclusive, = JA pc
+                let ja_pc = then_end;
+                let else_start = ja_pc + 1;
+                let else_end = else_start + site.else_len; // exclusive
+
+                // Emit inverted Jcc with new offset = else_len (jump over else body to JA)
+                let old_jcc = program.insns[site.pc];
+                let new_op = invert_jcc_op(bpf_op(old_jcc.code)).unwrap();
+                let mut new_jcc = old_jcc;
+                new_jcc.code = (old_jcc.code & 0x0f) | new_op;
+                new_jcc.off = site.else_len as i16;
+                new_insns.push(new_jcc);
+
+                // Emit else body (was at else_start..else_end)
+                for i in else_start..else_end {
+                    addr_map[i] = new_insns.len();
+                    new_insns.push(program.insns[i]);
+                }
+
+                // Emit JA with new offset = then_len (jump over then body)
+                addr_map[ja_pc] = new_insns.len();
+                new_insns.push(BpfInsn::ja(site.then_len as i16));
+
+                // Emit then body (was at then_start..then_end)
+                for i in then_start..then_end {
+                    addr_map[i] = new_insns.len();
+                    new_insns.push(program.insns[i]);
+                }
+
+                pc = else_end;
+                site_idx += 1;
+                applied += 1;
+            } else {
+                new_insns.push(program.insns[pc]);
+                if program.insns[pc].is_ldimm64() && pc + 1 < n {
+                    pc += 1;
+                    addr_map[pc] = new_insns.len();
+                    new_insns.push(program.insns[pc]);
+                }
+                pc += 1;
+            }
+        }
+        addr_map[n] = new_insns.len();
+
+        // Phase 4: fix up internal branches using the address map.
+        fixup_branches_inline(&mut new_insns, &program.insns, &addr_map);
+
+        program.insns = new_insns;
+        program.log_transform(TransformEntry {
+            pass_name: self.name().into(),
+            sites_applied: applied,
+            insns_before: orig_len,
+            insns_after: program.insns.len(),
+            details: vec![],
+        });
 
         Ok(PassResult {
             pass_name: self.name().into(),
@@ -794,6 +844,59 @@ impl BpfPass for BranchFlipPass {
             diagnostics: vec![],
         })
     }
+}
+
+/// Scan for branch-flip candidate sites.
+///
+/// Pattern: Jcc +N ; [N insns then-body] ; JA +M ; [M insns else-body]
+/// where N = jcc.off and JA is at pc+1+N with M = ja.off.
+fn scan_branch_flip_sites(insns: &[BpfInsn]) -> Vec<BranchFlipSite> {
+    let mut sites = Vec::new();
+    let n = insns.len();
+    let mut pc = 0;
+
+    while pc < n {
+        let jcc = &insns[pc];
+        if jcc.is_cond_jmp() && jcc.off > 0 {
+            let then_len = jcc.off as usize;
+            let ja_pc = pc + 1 + then_len;
+            if ja_pc < n && insns[ja_pc].is_ja() && insns[ja_pc].off > 0 {
+                let else_len = insns[ja_pc].off as usize;
+                let site_end = ja_pc + 1 + else_len;
+                if site_end <= n {
+                    // Verify no LD_IMM64 straddles a body boundary.
+                    let valid = !has_straddling_ldimm64(insns, pc + 1, pc + 1 + then_len)
+                        && !has_straddling_ldimm64(insns, ja_pc + 1, ja_pc + 1 + else_len);
+                    if valid {
+                        sites.push(BranchFlipSite {
+                            pc,
+                            then_len,
+                            else_len,
+                        });
+                        pc = site_end;
+                        continue;
+                    }
+                }
+            }
+        }
+        pc += 1;
+    }
+    sites
+}
+
+/// Check whether an LD_IMM64 instruction straddles the boundary of a range.
+/// LD_IMM64 occupies two instruction slots; if the first slot is at range_end-1
+/// and the second slot is at range_end, the body cannot be safely relocated.
+fn has_straddling_ldimm64(insns: &[BpfInsn], range_start: usize, range_end: usize) -> bool {
+    if range_end == 0 || range_start >= range_end {
+        return false;
+    }
+    // Check if the last instruction in the range is the first half of LD_IMM64
+    let last = range_end - 1;
+    if last < insns.len() && insns[last].is_ldimm64() {
+        return true;
+    }
+    false
 }
 
 /// Invert a conditional jump opcode.
@@ -1042,7 +1145,7 @@ mod tests {
 
         assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
-        // 10 insns replaced by 1 wide load, plus 1 exit = 2 insns.
+        // 10 insns replaced by 1 wide load, plus 1 exit = 2 insns (no NOP padding).
         assert_eq!(prog.insns.len(), 2);
         // First insn should be a wide load (LDX_MEM W).
         assert!(prog.insns[0].is_ldx_mem());
@@ -1085,7 +1188,7 @@ mod tests {
 
         assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
-        assert_eq!(prog.insns.len(), 2); // 1 wide load + exit
+        assert_eq!(prog.insns.len(), 2); // 1 wide load + exit (no NOP padding)
         // Should be LDX_MEM(H, r0, r6, 10).
         assert_eq!(bpf_size(prog.insns[0].code), BPF_H);
         assert_eq!(prog.insns[0].dst_reg(), 0);
@@ -1100,7 +1203,7 @@ mod tests {
         //   1-10: 4-byte byte ladder (10 insns)
         //   11: exit
         //
-        // After rewrite:
+        // After rewrite (no NOP padding, total = 3):
         //   0: ja +1         -> target is 2 (= exit)
         //   1: ldx_mem(W, ...)
         //   2: exit
@@ -1127,12 +1230,12 @@ mod tests {
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
         assert!(result.changed);
-        assert_eq!(prog.insns.len(), 3); // ja + ldx_mem + exit
+        assert_eq!(prog.insns.len(), 3); // No NOP padding: ja + wide_load + exit
 
-        // The ja should now point to exit at new_pc=2.
+        // The ja should now point to exit at pc=2.
         let ja = &prog.insns[0];
         assert!(ja.is_ja());
-        assert_eq!(ja.off, 1, "ja should jump over ldx_mem to exit");
+        assert_eq!(ja.off, 1, "ja should jump to exit at pc 2");
     }
 
     #[test]
@@ -1193,14 +1296,89 @@ mod tests {
 
         assert!(result.changed);
         assert_eq!(result.sites_applied, 2);
-        // 4 + 4 insns replaced by 1 + 1, plus exit = 3.
+        // No NOP padding: 4 + 4 insns become 1 + 1, plus exit = 3.
         assert_eq!(prog.insns.len(), 3);
+    }
+
+    #[test]
+    fn test_wide_mem_pass_skips_site_with_live_scratch_reg() {
+        // A byte ladder where a scratch register (r1) is used after the site.
+        // WideMemPass should skip this site because the wide load won't write
+        // to r1, leaving it uninitialized for the verifier.
+        //
+        // Layout:
+        //   0: ldx_mem(B, r0, r6, 0)      — byte 0 into dst=r0
+        //   1: ldx_mem(B, r1, r6, 1)      — byte 1 into scratch=r1
+        //   2: lsh64 r1, 8
+        //   3: or64 r0, r1                 — end of 2-byte ladder
+        //   4: mov64_reg r2, r1            — uses r1 after the site!
+        //   5: exit
+
+        let mut prog = make_program(vec![
+            BpfInsn::ldx_mem(BPF_B, 0, 6, 0), // 0
+            BpfInsn::ldx_mem(BPF_B, 1, 6, 1), // 1
+            BpfInsn::alu64_imm(BPF_LSH, 1, 8), // 2
+            BpfInsn::alu64_reg(BPF_OR, 0, 1), // 3
+            BpfInsn::mov64_reg(2, 1),          // 4: uses scratch r1!
+            exit_insn(),                       // 5
+        ]);
+        let mut cache = AnalysisCache::new();
+        let ctx = PassContext::test_default();
+
+        let pass = WideMemPass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        // Site should be skipped because r1 is live after the ladder.
+        assert!(!result.changed);
+        assert_eq!(result.sites_applied, 0);
+        assert!(!result.sites_skipped.is_empty());
+        assert!(
+            result.sites_skipped[0]
+                .reason
+                .contains("scratch register live"),
+            "skip reason should mention live scratch register"
+        );
+        // Program should be unchanged.
+        assert_eq!(prog.insns.len(), 6);
+    }
+
+    #[test]
+    fn test_wide_mem_pass_applies_when_scratch_dead() {
+        // Same byte ladder but scratch register r1 is NOT used after the site.
+        // WideMemPass should apply the transformation.
+        //
+        // Layout:
+        //   0: ldx_mem(B, r0, r6, 0)
+        //   1: ldx_mem(B, r1, r6, 1)
+        //   2: lsh64 r1, 8
+        //   3: or64 r0, r1
+        //   4: exit                       — r1 not used after site
+
+        let mut prog = make_program(vec![
+            BpfInsn::ldx_mem(BPF_B, 0, 6, 0),
+            BpfInsn::ldx_mem(BPF_B, 1, 6, 1),
+            BpfInsn::alu64_imm(BPF_LSH, 1, 8),
+            BpfInsn::alu64_reg(BPF_OR, 0, 1),
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let ctx = PassContext::test_default();
+
+        let pass = WideMemPass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        // Should apply: r1 is dead after the site.
+        assert!(result.changed);
+        assert_eq!(result.sites_applied, 1);
+        // 4 insns replaced by 1, plus exit = 2.
+        assert_eq!(prog.insns.len(), 2);
     }
 
     #[test]
     fn test_wide_mem_pass_integration_with_pass_manager() {
         let mut pm = PassManager::new();
         pm.register_analysis(BranchTargetAnalysis);
+        pm.register_analysis(LivenessAnalysis);
         pm.add_pass(WideMemPass);
 
         let mut prog = make_program(make_wide_mem_4byte_program());
@@ -1587,14 +1765,110 @@ mod tests {
         }
     }
 
-    fn ctx_with_select_kfunc(btf_id: i32) -> PassContext {
-        let mut ctx = PassContext::test_default();
-        ctx.kfunc_registry.select64_btf_id = btf_id;
-        ctx
+    fn jgt_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
+        BpfInsn {
+            code: BPF_JMP | BPF_JGT | BPF_K,
+            regs: BpfInsn::make_regs(dst, 0),
+            off,
+            imm,
+        }
     }
 
     #[test]
-    fn test_cond_select_no_kfunc() {
+    fn test_cond_select_analyze_4insn_diamond() {
+        // Pattern A: Jcc +2 ; MOV dst, false ; JA +1 ; MOV dst, true
+        let pass = CondSelectPass { predictability_threshold: 0.8 };
+        let insns = vec![
+            jne_imm(1, 0, 2),
+            BpfInsn::mov64_imm(0, 0),
+            BpfInsn::ja(1),
+            BpfInsn::mov64_imm(0, 1),
+            exit_insn(),
+        ];
+        let sites = pass.analyze(&insns);
+        assert_eq!(sites.len(), 1);
+        assert_eq!(sites[0].start_pc, 0);
+        assert_eq!(sites[0].old_len, 4);
+        assert_eq!(sites[0].cond_reg, 1);
+        assert_eq!(sites[0].dst_reg, 0);
+        assert_eq!(sites[0].true_val, CondSelectValue::Imm(1));
+        assert_eq!(sites[0].false_val, CondSelectValue::Imm(0));
+    }
+
+    #[test]
+    fn test_cond_select_analyze_3insn_pattern() {
+        // Pattern B: Jcc +1 ; MOV dst, false ; MOV dst, true
+        let pass = CondSelectPass { predictability_threshold: 0.8 };
+        let insns = vec![
+            jne_imm(1, 0, 1),
+            BpfInsn::mov64_imm(0, 0),
+            BpfInsn::mov64_imm(0, 1),
+            exit_insn(),
+        ];
+        let sites = pass.analyze(&insns);
+        assert_eq!(sites.len(), 1);
+        assert_eq!(sites[0].start_pc, 0);
+        assert_eq!(sites[0].old_len, 3);
+        assert_eq!(sites[0].cond_reg, 1);
+        assert_eq!(sites[0].dst_reg, 0);
+    }
+
+    #[test]
+    fn test_cond_select_analyze_no_match_different_dst() {
+        // MOVs target different registers — should not match.
+        let pass = CondSelectPass { predictability_threshold: 0.8 };
+        let insns = vec![
+            jne_imm(1, 0, 2),
+            BpfInsn::mov64_imm(0, 0),
+            BpfInsn::ja(1),
+            BpfInsn::mov64_imm(2, 1), // dst=2, not 0
+        ];
+        let sites = pass.analyze(&insns);
+        assert!(sites.is_empty());
+    }
+
+    #[test]
+    fn test_cond_select_analyze_reg_values() {
+        // MOV with register source values.
+        let pass = CondSelectPass { predictability_threshold: 0.8 };
+        let insns = vec![
+            jne_imm(1, 0, 1),
+            BpfInsn::mov64_reg(0, 3),  // false = r3
+            BpfInsn::mov64_reg(0, 4),  // true = r4
+            exit_insn(),
+        ];
+        let sites = pass.analyze(&insns);
+        assert_eq!(sites.len(), 1);
+        assert_eq!(sites[0].false_val, CondSelectValue::Reg(3));
+        assert_eq!(sites[0].true_val, CondSelectValue::Reg(4));
+    }
+
+    #[test]
+    fn test_cond_select_analyze_multiple_sites() {
+        // Two consecutive cond-select sites.
+        let pass = CondSelectPass { predictability_threshold: 0.8 };
+        let insns = vec![
+            // Site 1: JCC +1 ; MOV r0, 0 ; MOV r0, 1
+            jne_imm(1, 0, 1),
+            BpfInsn::mov64_imm(0, 0),
+            BpfInsn::mov64_imm(0, 1),
+            // Site 2: JCC +1 ; MOV r2, 10 ; MOV r2, 20
+            jgt_imm(3, 5, 1),
+            BpfInsn::mov64_imm(2, 10),
+            BpfInsn::mov64_imm(2, 20),
+            exit_insn(),
+        ];
+        let sites = pass.analyze(&insns);
+        assert_eq!(sites.len(), 2);
+        assert_eq!(sites[0].start_pc, 0);
+        assert_eq!(sites[0].dst_reg, 0);
+        assert_eq!(sites[1].start_pc, 3);
+        assert_eq!(sites[1].dst_reg, 2);
+    }
+
+    #[test]
+    fn test_cond_select_run_is_detection_only() {
+        // The pass should detect sites but NOT modify the program.
         let mut prog = make_program(vec![
             jne_imm(1, 0, 2),
             BpfInsn::mov64_imm(0, 0),
@@ -1602,81 +1876,50 @@ mod tests {
             BpfInsn::mov64_imm(0, 1),
             exit_insn(),
         ]);
+        let orig_insns = prog.insns.clone();
         let mut cache = AnalysisCache::new();
         let ctx = PassContext::test_default();
 
         let pass = CondSelectPass { predictability_threshold: 0.8 };
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        // Program must be unchanged.
         assert!(!result.changed);
-        assert!(result.sites_skipped[0].reason.contains("not available"));
+        assert_eq!(result.sites_applied, 0);
+        assert_eq!(prog.insns, orig_insns);
+        // But diagnostics should report the detected site.
+        assert_eq!(result.diagnostics.len(), 1);
+        assert!(result.diagnostics[0].contains("cond_select site"));
     }
 
     #[test]
-    fn test_cond_select_4insn_diamond() {
-        let mut prog = make_program(vec![
-            jne_imm(1, 0, 2),
-            BpfInsn::mov64_imm(0, 0),
-            BpfInsn::ja(1),
-            BpfInsn::mov64_imm(0, 1),
-            exit_insn(),
-        ]);
-        let mut cache = AnalysisCache::new();
-        let ctx = ctx_with_select_kfunc(77);
-
+    fn test_cond_select_apply_is_noop() {
+        // apply() should return 0 sites (no-op).
         let pass = CondSelectPass { predictability_threshold: 0.8 };
-        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-        assert!(result.changed);
-        assert_eq!(result.sites_applied, 1);
-    }
-
-    #[test]
-    fn test_cond_select_3insn_pattern() {
         let mut prog = make_program(vec![
             jne_imm(1, 0, 1),
             BpfInsn::mov64_imm(0, 0),
             BpfInsn::mov64_imm(0, 1),
             exit_insn(),
         ]);
-        let mut cache = AnalysisCache::new();
-        let ctx = ctx_with_select_kfunc(77);
+        let sites = pass.analyze(&prog.insns);
+        assert!(!sites.is_empty());
 
+        let ctx = PassContext::test_default();
+        let applied = pass.apply(&mut prog, &sites, &ctx);
+        assert_eq!(applied, 0);
+    }
+
+    #[test]
+    fn test_cond_select_analyze_no_sites_in_linear_program() {
+        // Linear program with no conditional branches — no sites.
         let pass = CondSelectPass { predictability_threshold: 0.8 };
-        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-        assert!(result.changed);
-        assert_eq!(result.sites_applied, 1);
-    }
-
-    #[test]
-    fn test_cond_select_skips_predictable_branch() {
-        let mut prog = make_program(vec![
-            jne_imm(1, 0, 2),
-            BpfInsn::mov64_imm(0, 0),
-            BpfInsn::ja(1),
-            BpfInsn::mov64_imm(0, 1),
+        let insns = vec![
+            BpfInsn::mov64_imm(0, 42),
+            BpfInsn::mov64_imm(1, 10),
             exit_insn(),
-        ]);
-        prog.annotations[0].branch_profile = Some(BranchProfile {
-            taken_count: 950,
-            not_taken_count: 50,
-        });
-
-        let mut cache = AnalysisCache::new();
-        let ctx = ctx_with_select_kfunc(77);
-
-        let pass = CondSelectPass { predictability_threshold: 0.1 };
-        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-        assert!(!result.changed);
-        assert!(result.sites_skipped.iter().any(|s| s.reason.contains("predictable")));
-    }
-
-    #[test]
-    fn test_cond_select_no_match_different_dst() {
-        let sites = scan_cond_select_sites(&[
-            jne_imm(1, 0, 2),
-            BpfInsn::mov64_imm(0, 0),
-            BpfInsn::ja(1),
-            BpfInsn::mov64_imm(2, 1), // different dst
-        ]);
+        ];
+        let sites = pass.analyze(&insns);
         assert!(sites.is_empty());
     }
 
@@ -1684,12 +1927,13 @@ mod tests {
 
     #[test]
     fn test_branch_flip_no_pgo() {
+        // Valid pattern but no PGO annotation → should not flip.
         let mut prog = make_program(vec![
-            jne_imm(1, 0, 2),
-            BpfInsn::mov64_imm(0, 10),
-            BpfInsn::ja(1),
-            BpfInsn::mov64_imm(0, 20),
-            exit_insn(),
+            jne_imm(1, 0, 1),             // 0: JCC +1
+            BpfInsn::mov64_imm(0, 10),    // 1: then body
+            BpfInsn::ja(1),               // 2: JA +1
+            BpfInsn::mov64_imm(0, 20),    // 3: else body
+            exit_insn(),                  // 4
         ]);
         let mut cache = AnalysisCache::new();
         let ctx = PassContext::test_default();
@@ -1697,16 +1941,19 @@ mod tests {
         let pass = BranchFlipPass { min_bias: 0.7 };
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert!(!result.changed);
+        assert_eq!(result.sites_applied, 0);
     }
 
     #[test]
     fn test_branch_flip_with_biased_pgo() {
+        // Generalized pattern: JCC +N ; [N then insns] ; JA +M ; [M else insns]
+        // Here: JCC +1 ; [1 then insn] ; JA +1 ; [1 else insn]
         let mut prog = make_program(vec![
-            jne_imm(1, 0, 2),
-            BpfInsn::mov64_imm(0, 10),
-            BpfInsn::ja(1),
-            BpfInsn::mov64_imm(0, 20),
-            exit_insn(),
+            jne_imm(1, 0, 1),             // 0: JCC +1 → skip 1 then-insn to JA at pc 2
+            BpfInsn::mov64_imm(0, 10),    // 1: then body (1 insn)
+            BpfInsn::ja(1),               // 2: JA +1 → skip 1 else-insn
+            BpfInsn::mov64_imm(0, 20),    // 3: else body (1 insn)
+            exit_insn(),                  // 4
         ]);
         prog.annotations[0].branch_profile = Some(BranchProfile {
             taken_count: 80,
@@ -1722,9 +1969,118 @@ mod tests {
         assert_eq!(result.sites_applied, 1);
         // Condition should be inverted (JNE -> JEQ)
         assert_eq!(bpf_op(prog.insns[0].code), BPF_JEQ);
-        // Bodies should be swapped
-        assert_eq!(prog.insns[1].imm, 20);
-        assert_eq!(prog.insns[3].imm, 10);
+        // Bodies should be swapped: else body (20) now first, then body (10) second
+        assert_eq!(prog.insns[1].imm, 20);  // else body (was at pc 3)
+        assert_eq!(prog.insns[3].imm, 10);  // then body (was at pc 1)
+    }
+
+    #[test]
+    fn test_branch_flip_asymmetric_bodies() {
+        // Larger pattern: then_len=2, else_len=3
+        //   0: JCC +2 (then_len=2)
+        //   1: mov r0, 1   (then body insn 1)
+        //   2: mov r1, 2   (then body insn 2)
+        //   3: JA +3       (else_len=3)
+        //   4: mov r0, 10  (else body insn 1)
+        //   5: mov r1, 20  (else body insn 2)
+        //   6: mov r2, 30  (else body insn 3)
+        //   7: exit
+        let mut prog = make_program(vec![
+            jeq_imm(1, 0, 2),             // 0: JCC +2
+            BpfInsn::mov64_imm(0, 1),     // 1: then[0]
+            BpfInsn::mov64_imm(1, 2),     // 2: then[1]
+            BpfInsn::ja(3),               // 3: JA +3
+            BpfInsn::mov64_imm(0, 10),    // 4: else[0]
+            BpfInsn::mov64_imm(1, 20),    // 5: else[1]
+            BpfInsn::mov64_imm(2, 30),    // 6: else[2]
+            exit_insn(),                  // 7
+        ]);
+        prog.annotations[0].branch_profile = Some(BranchProfile {
+            taken_count: 90,
+            not_taken_count: 10,
+        });
+
+        let mut cache = AnalysisCache::new();
+        let ctx = PassContext::test_default();
+
+        let pass = BranchFlipPass { min_bias: 0.7 };
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+        assert!(result.changed);
+        assert_eq!(result.sites_applied, 1);
+
+        // After flip:
+        //   0: J!cc +3 (inverted, jump over 3 else insns)
+        //   1: mov r0, 10  (else body, now first)
+        //   2: mov r1, 20
+        //   3: mov r2, 30
+        //   4: JA +2       (jump over 2 then insns)
+        //   5: mov r0, 1   (then body, now second)
+        //   6: mov r1, 2
+        //   7: exit
+        assert_eq!(bpf_op(prog.insns[0].code), BPF_JNE); // JEQ inverted → JNE
+        assert_eq!(prog.insns[0].off, 3);  // jump over 3 else insns
+        assert_eq!(prog.insns[1].imm, 10); // else body first
+        assert_eq!(prog.insns[2].imm, 20);
+        assert_eq!(prog.insns[3].imm, 30);
+        assert!(prog.insns[4].is_ja());
+        assert_eq!(prog.insns[4].off, 2);  // jump over 2 then insns
+        assert_eq!(prog.insns[5].imm, 1);  // then body second
+        assert_eq!(prog.insns[6].imm, 2);
+        assert_eq!(prog.insns.len(), 8);   // same total size
+    }
+
+    #[test]
+    fn test_branch_flip_skips_jset() {
+        // JSET has no simple inverse — should be skipped.
+        let mut prog = make_program(vec![
+            BpfInsn {
+                code: BPF_JMP | BPF_JSET | BPF_K,
+                regs: BpfInsn::make_regs(1, 0),
+                off: 1,
+                imm: 0xff,
+            },                                    // 0: JSET +1
+            BpfInsn::mov64_imm(0, 10),            // 1: then body
+            BpfInsn::ja(1),                       // 2: JA +1
+            BpfInsn::mov64_imm(0, 20),            // 3: else body
+            exit_insn(),                          // 4
+        ]);
+        prog.annotations[0].branch_profile = Some(BranchProfile {
+            taken_count: 90,
+            not_taken_count: 10,
+        });
+
+        let mut cache = AnalysisCache::new();
+        let ctx = PassContext::test_default();
+
+        let pass = BranchFlipPass { min_bias: 0.7 };
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+        assert!(!result.changed);
+        assert!(result.sites_skipped.iter().any(|s| s.reason.contains("cannot invert")));
+    }
+
+    #[test]
+    fn test_branch_flip_insufficient_bias() {
+        // PGO data shows only 60% bias, below the 70% threshold.
+        let mut prog = make_program(vec![
+            jne_imm(1, 0, 1),
+            BpfInsn::mov64_imm(0, 10),
+            BpfInsn::ja(1),
+            BpfInsn::mov64_imm(0, 20),
+            exit_insn(),
+        ]);
+        prog.annotations[0].branch_profile = Some(BranchProfile {
+            taken_count: 60,
+            not_taken_count: 40,
+        });
+
+        let mut cache = AnalysisCache::new();
+        let ctx = PassContext::test_default();
+
+        let pass = BranchFlipPass { min_bias: 0.7 };
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+        assert!(!result.changed);
+        assert_eq!(result.sites_applied, 0);
+        assert!(result.sites_skipped.iter().any(|s| s.reason.contains("not biased enough")));
     }
 
     #[test]
@@ -1738,6 +2094,50 @@ mod tests {
             assert_eq!(invert_jcc_op(b), Some(a));
         }
         assert_eq!(invert_jcc_op(BPF_JSET), None);
+    }
+
+    #[test]
+    fn test_branch_flip_scan_finds_sites() {
+        // Direct scanner test: verify site detection.
+        let insns = vec![
+            jne_imm(1, 0, 2),            // 0: JCC +2
+            BpfInsn::mov64_imm(0, 1),    // 1: then[0]
+            BpfInsn::mov64_imm(1, 2),    // 2: then[1]
+            BpfInsn::ja(1),              // 3: JA +1
+            BpfInsn::mov64_imm(0, 10),   // 4: else[0]
+            exit_insn(),                 // 5
+        ];
+        let sites = scan_branch_flip_sites(&insns);
+        assert_eq!(sites.len(), 1);
+        assert_eq!(sites[0].pc, 0);
+        assert_eq!(sites[0].then_len, 2);
+        assert_eq!(sites[0].else_len, 1);
+        assert_eq!(sites[0].total_len(), 5); // 1(jcc) + 2(then) + 1(ja) + 1(else)
+    }
+
+    #[test]
+    fn test_branch_flip_preserves_program_size() {
+        // Branch flip is a rearrangement — program size must not change.
+        let mut prog = make_program(vec![
+            jne_imm(1, 0, 1),
+            BpfInsn::mov64_imm(0, 10),
+            BpfInsn::ja(1),
+            BpfInsn::mov64_imm(0, 20),
+            exit_insn(),
+        ]);
+        prog.annotations[0].branch_profile = Some(BranchProfile {
+            taken_count: 80,
+            not_taken_count: 20,
+        });
+        let orig_len = prog.insns.len();
+
+        let mut cache = AnalysisCache::new();
+        let ctx = PassContext::test_default();
+
+        let pass = BranchFlipPass { min_bias: 0.7 };
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+        assert!(result.changed);
+        assert_eq!(prog.insns.len(), orig_len);
     }
 
     // ── SpectreMitigationPass tests ─────────────────────────────────
