@@ -69,6 +69,7 @@ tests/rejit_safety_tests
 tests/unittest/rejit_poc
 tests/unittest/rejit_safety_tests
 tests/unittest/rejit_prog_types
+tests/unittest/rejit_tail_call
 tests/unittest/progs/*.bpf.o
 
 # BPF build artifacts
@@ -107,6 +108,8 @@ docs/tmp/**/*.log
 docs/tmp/**/*.json
 docs/tmp/**/*.diff
 docs/tmp/bpf_selftest_vm_build/
+docs/tmp/bpf_selftests_bin/
+docs/tmp/*.sh
 
 # Keep checked-in reports and end-to-end results
 !docs/tmp/

@@ -4,7 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-eBPF benchmarking suite comparing **llvmbpf** (userspace LLVM JIT) against **kernel eBPF** across micro-benchmarks. The main active development areas are `micro/`, `corpus/`, and `e2e/`; the old multi-runtime userspace benchmark layer has been removed.
+**BpfReJIT** — a dynamic, extensible compilation framework for kernel eBPF (targeting OSDI '26). Three components:
+1. **Kernel syscall extensions** (~600 LOC): `BPF_PROG_GET_ORIGINAL` + `BPF_PROG_REJIT` — get/set BPF bytecode on live programs with full re-verification
+2. **kinsn (inline kfunc)**: platform-specific instruction extensions via `KF_INLINE_EMIT` — kernel modules define "what can be optimized"
+3. **Userspace daemon** (Rust, `daemon/`): compilation passes define "how to optimize" — transparent, zero-runtime-overhead
+
+The benchmarking suite (`micro/`, `corpus/`, `e2e/`) measures BpfReJIT improvements against stock kernel JIT and llvmbpf (userspace LLVM JIT).
+
+**Key branches**: `vendor/linux-framework` tracks `rejit-v2` (kernel changes). Main repo on `main`.
 
 ## Build & Run
 
@@ -41,7 +48,7 @@ make vm-micro
 # Run only specific benchmarks
 make vm-micro BENCH="simple bitcount"
 
-# Tune parameters
+# Tune parameters (defaults: ITERATIONS=3, WARMUPS=1, REPEAT=100)
 make vm-micro ITERATIONS=10 WARMUPS=2 REPEAT=500
 
 # Quick smoke test (no VM needed)
@@ -101,11 +108,14 @@ Configured via YAML files in `micro/config/` and `corpus/config/`:
 
 **`micro/input_generators.py`** — Deterministic binary input generators (one per benchmark). Outputs `.mem` files to `micro/generated-inputs/`. Each generator produces a fixed binary layout matching the corresponding BPF program's `input_map` value type.
 
-**`runner/`** — C++20 CMake project producing `micro_exec` plus shared Python helpers in `runner/libs/`. Two subcommands:
-- `run-llvmbpf` — Loads ELF, extracts BPF bytecode, JIT-compiles via `llvmbpf_vm`, executes in userspace with emulated maps
-- `run-kernel` — Loads ELF via libbpf, runs via `bpf_prog_test_run_opts` in kernel
+**`runner/`** — C++20 CMake project producing `micro_exec` plus shared Python helpers in `runner/libs/`. Three runtime modes:
+- `run-llvmbpf` — Loads ELF, JIT-compiles via `llvmbpf_vm`, executes in userspace
+- `run-kernel` — Loads ELF via libbpf, runs via `bpf_prog_test_run_opts` (stock kernel JIT)
+- `run-kernel --rejit --daemon-path <path>` — Same as run-kernel but applies daemon rewrite via `BPF_PROG_REJIT` before measuring
 
-Both paths output a single JSON line per sample with `compile_ns`, `exec_ns`, `result`, `phases_ns`, and optional `perf_counters`.
+All paths output a single JSON line per sample with `compile_ns`, `exec_ns`, `result`, `phases_ns`, and optional `perf_counters`. driver.py auto-compares `result` across runtimes for correctness verification.
+
+**`daemon/`** — BpfReJIT userspace daemon (Rust, zero libbpf dependency). LLVM-style pass framework with 5 passes: WideMemPass, RotatePass, CondSelectPass, BranchFlipPass, SpectreMitigationPass. Subcommands: `enumerate`, `rewrite`, `apply`, `apply-all`, `watch`, `profile`. See `daemon/README.md`.
 
 **`micro/programs/*.bpf.c`** — Active BPF benchmark programs. Each includes `common.h` and uses one of the active harness macros:
 - `DEFINE_STAGED_INPUT_XDP_BENCH` — staged XDP pure-jit path
@@ -115,9 +125,20 @@ Both paths output a single JSON line per sample with `compile_ns`, `exec_ns`, `r
 Programs define a `bench_*()` function taking `(const u8 *data, u32 len, u64 *out)` and an `input_map` with a program-specific value struct.
 
 ### Vendor submodules (`vendor/`)
+- `linux-framework` — Kernel 7.0-rc2 + BpfReJIT patches (~600 LOC), `rejit-v2` branch
 - `llvmbpf` — LLVM-based BPF JIT compiler (from eunomia-bpf)
 - `libbpf` — Kernel BPF library (built as static lib into `micro/build/vendor/libbpf/`)
 - `bpftool` — Optional BPF tooling
+
+### kinsn modules (`module/`)
+- `module/x86/` — 3 x86 kinsn: bpf_rotate (ROL), bpf_select (CMOV), bpf_extract (BEXTR)
+- `module/arm64/` — 3 ARM64 kinsn: ROR, CSEL, LSR+AND
+
+### Tests (`tests/`)
+- `tests/unittest/rejit_poc.c` — 6 basic REJIT functionality tests (VM-verified)
+- `tests/unittest/rejit_safety_tests.c` — 20 safety tests: 15 negative + 5 correctness (VM-verified)
+- `tests/unittest/rejit_prog_types.c` — 21 prog_type coverage tests (19 PASS, 2 SKIP)
+- `tests/kernel/` — Kernel selftest infrastructure
 
 ### Adding a new benchmark
 
@@ -130,6 +151,8 @@ Programs define a `bench_*()` function taking `(const u8 *data, u32 len, u64 *ou
 - llvmbpf allocates packet buffers in low 32-bit address space (MAP_32BIT) for XDP context compatibility
 - llvmbpf does not support BPF-to-BPF internal subprogram calls (ELF loader limitation)
 - `--perf-counters` uses `perf_event_open`; kernel counters include kernel-mode, llvmbpf counters are user-mode only
+- **Benchmark runs must complete within 20 minutes** — use appropriate ITERATIONS/REPEAT params
+- **REJIT known limitation**: poke_tab (tail_call) programs cannot be REJIT'd yet — blocks some Cilium programs
 
 ### Code Quality Rules
 - **No dead code**: When replacing a subsystem (e.g., v1→v2), delete the old code entirely. Do not keep `if v1 then ... else v2` branches or commented-out legacy paths. Dead code rots and confuses future readers.
@@ -142,7 +165,7 @@ Programs define a `bench_*()` function taking `(const u8 *data, u32 len, u64 *ou
 ### Division of Labor
 - **Subagent handles**: code implementation, benchmark runs, data analysis, research, code review, CI fixes
 - **Claude Code handles**: scheduling/dispatching, document writing (non-tmp), TODO/memory updates, architectural decisions
-- **Claude Code must NEVER**: write implementation code directly, run benchmarks directly — always delegate
+- **Claude Code must NEVER**: write implementation code directly, run benchmarks directly, make even small code edits — always delegate to subagent
 
 ### Workflow Rules
 - **Subagent output goes to `docs/tmp/`** — reports (.md) into `docs/tmp/`; JSON results go to `*/results/`
