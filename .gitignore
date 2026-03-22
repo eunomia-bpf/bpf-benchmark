@@ -6,6 +6,7 @@ wasm-wasmtime.exe
 *.directive.bin
 *.policy.bin
 .cache/
+check_katran2
 check_katran2/
 # Python
 venv/
@@ -101,9 +102,11 @@ tmp/
 *.tmp.md
 .tmp-*
 
-# Log files in docs/tmp
+# Log files and generated diffs in docs/tmp
 docs/tmp/**/*.log
 docs/tmp/**/*.json
+docs/tmp/**/*.diff
+docs/tmp/bpf_selftest_vm_build/
 
 # Keep checked-in reports and end-to-end results
 !docs/tmp/
