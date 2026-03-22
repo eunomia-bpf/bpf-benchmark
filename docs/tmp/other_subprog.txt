@@ -1,0 +1,18 @@
+
+=== bpf_call_chain ===
+Traceback (most recent call last):
+  File "/home/yunwei37/workspace/bpf-benchmark/tests/test_other_subprog.py", line 34, in <module>
+    r = subprocess.run(cmd_rejit, capture_output=True, text=True, timeout=30)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['sudo', '-n', '/home/yunwei37/workspace/bpf-benchmark/runner/build/micro_exec', 'run-kernel', '--program', '/home/yunwei37/workspace/bpf-benchmark/micro/programs/bpf_call_chain.bpf.o', '--io-mode', 'staged', '--repeat', '1', '--memory', '/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bpf_call_chain.mem', '--input-size', '64', '--rejit', '--daemon-path', '/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon']' timed out after 30 seconds
+DONE

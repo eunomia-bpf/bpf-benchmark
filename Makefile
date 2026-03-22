@@ -101,6 +101,7 @@ KERNEL_TEST_BPF_SRCS := $(wildcard $(KERNEL_TEST_DIR)/progs/*.bpf.c)
 KERNEL_TEST_BPF_OBJS := $(patsubst $(KERNEL_TEST_DIR)/progs/%.bpf.c,$(KERNEL_TEST_BPF_BUILD_DIR)/progs/%.bpf.o,$(KERNEL_TEST_BPF_SRCS))
 VMLINUX_PATH := $(KERNEL_DIR)/vmlinux
 KERNEL_PERF_PATH := $(KERNEL_DIR)/tools/perf/perf
+UPSTREAM_SELFTESTS_BIN_DIR ?= $(ROOT_DIR)/docs/tmp/bpf_selftests_bin
 
 # Default Makefile outputs go to results/dev/. Promote manually to the top-level
 # results/ directory when a run becomes authoritative.
@@ -173,7 +174,8 @@ MICRO_BPF_STAMP := $(MICRO_DIR)/programs/.build.stamp
 .PHONY: all runner micro daemon kernel kernel-perf kernel-arm64 kernel-tests kernel-test-progs \
 	arm64-crossbuild-image selftest-arm64 daemon-tests clean kinsn-modules \
 	smoke check validate verify-build compare \
-	vm-selftest vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
+	vm-selftest vm-upstream-test-verifier vm-upstream-test-progs \
+	vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 	vm-arm64-smoke vm-arm64-selftest arm64-worktree arm64-rootfs \
 	cross-arm64 \
 	aws-arm64-launch aws-arm64-setup aws-arm64-benchmark aws-arm64-terminate aws-arm64 \
@@ -211,6 +213,9 @@ help:
 	@echo ""
 	@echo "Benchmark targets (require VM):"
 	@echo "  make vm-selftest      - Run kernel recompile selftests in VM"
+	@echo "  make vm-upstream-test-verifier  - Run upstream BPF test_verifier in VM (526 tests, JIT/verifier)"
+	@echo "  make vm-upstream-test-progs [BPF_SELFTEST_FILTER=\"verifier jit xdp\"]"
+	@echo "                        - Run upstream test_progs in VM (filter: BPF_SELFTEST_FILTER)"
 	@echo "  make vm-micro-smoke   - Quick kernel+recompile smoke in VM"
 	@echo "  make vm-micro         - Full micro benchmark suite in VM"
 	@echo "  make vm-corpus        - Corpus benchmark in VM"
@@ -493,6 +498,26 @@ vm-selftest: kernel-tests $(BZIMAGE_PATH)
 	@echo "=== Running make vm-selftest ==="
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
 		bash -lc 'cd "$(ROOT_DIR)" && $(LOAD_KINSN_MODULES) sudo -n "$(KERNEL_SELFTEST)"'
+
+# Upstream BPF selftests (test_verifier and test_progs) for REJIT regression testing.
+# test_verifier: 526 tests, covers JIT, verifier, atomic ops.
+# test_progs: full upstream suite (422 test groups), run with -t filter for JIT/verifier subset.
+# Binaries must be pre-built; see docs/tmp/kernel_selftest_setup_20260322.md for build instructions.
+UPSTREAM_TEST_VERIFIER_BIN := $(UPSTREAM_SELFTESTS_BIN_DIR)/test_verifier
+UPSTREAM_TEST_PROGS_BIN    := $(UPSTREAM_SELFTESTS_BIN_DIR)/test_progs
+BPF_SELFTEST_FILTER ?= verifier jit
+
+vm-upstream-test-verifier: $(BZIMAGE_PATH)
+	@echo "=== Running upstream test_verifier in VM ==="
+	@test -f "$(UPSTREAM_TEST_VERIFIER_BIN)" || (echo "ERROR: test_verifier not found at $(UPSTREAM_TEST_VERIFIER_BIN). See docs/tmp/kernel_selftest_setup_20260322.md" && exit 1)
+	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -m 2G -- \
+		bash -c 'cd "$(UPSTREAM_SELFTESTS_BIN_DIR)" && sudo ./test_verifier 2>&1'
+
+vm-upstream-test-progs: $(BZIMAGE_PATH)
+	@echo "=== Running upstream test_progs (filter: $(BPF_SELFTEST_FILTER)) in VM ==="
+	@test -f "$(UPSTREAM_TEST_PROGS_BIN)" || (echo "ERROR: test_progs not found at $(UPSTREAM_TEST_PROGS_BIN). See docs/tmp/kernel_selftest_setup_20260322.md" && exit 1)
+	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -m 4G -- \
+		bash -c 'cd "$(UPSTREAM_SELFTESTS_BIN_DIR)" && sudo ./test_progs $(foreach t,$(BPF_SELFTEST_FILTER),-t $(t)) 2>&1'
 
 vm-micro-smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(BZIMAGE_PATH)
 	@echo "=== Running make vm-micro-smoke (POLICY=$(POLICY)) ==="

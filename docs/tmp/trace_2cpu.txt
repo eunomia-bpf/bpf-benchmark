@@ -1,0 +1,12 @@
+Starting driver.py main...
+[build] reusing existing artifacts
+[WARN] CPU governor is 'unknown', not 'performance'. Results may have frequency scaling noise.
+[WARN] Turbo boost is enabled. Consider disabling for stable measurements.
+[WARN] perf_event_paranoid=2. Some perf counters may not be available.
+[WARN] No CPU affinity set. Consider using --cpu for isolated measurements.
+[bench] (1/1) cmov_select
+  run_command starting: 100 --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/cmov_select.mem --input-size 3464 --rejit --daemon-path daemon/target/release/bpfrejit-daemon
+  run_command done: 0.58s rc=0
+  parse starting (stdout_len=1728)
+  parse done: 0.00s
+  run_command starting: 100 --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/cmov_select.mem --input-size 3464 --rejit --daemon-path daemon/target/release/bpfrejit-daemon

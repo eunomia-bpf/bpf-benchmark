@@ -1,0 +1,88 @@
+Starting bpf_call_chain with rejit in background...
+libbpf: loading object from /home/yunwei37/workspace/bpf-benchmark/micro/programs/bpf_call_chain.bpf.o
+libbpf: elf: section(2) .text, size 824, link 0, flags 6, type=1
+libbpf: sec '.text': found program 'sub_hash' at insn offset 0 (0 bytes), code size 17 insns (136 bytes)
+libbpf: sec '.text': found program 'sub_fold' at insn offset 17 (136 bytes), code size 73 insns (584 bytes)
+libbpf: sec '.text': found program 'sub_combine' at insn offset 90 (720 bytes), code size 13 insns (104 bytes)
+libbpf: elf: section(3) xdp, size 896, link 0, flags 6, type=1
+libbpf: sec 'xdp': found program 'bpf_call_chain_xdp' at insn offset 0 (0 bytes), code size 112 insns (896 bytes)
+libbpf: elf: section(4) .relxdp, size 48, link 26, flags 40, type=9
+libbpf: elf: section(5) license, size 4, link 0, flags 3, type=1
+libbpf: license of /home/yunwei37/workspace/bpf-benchmark/micro/programs/bpf_call_chain.bpf.o is GPL
+libbpf: elf: section(16) .BTF, size 1800, link 0, flags 0, type=1
+libbpf: elf: section(18) .BTF.ext, size 2168, link 0, flags 0, type=1
+libbpf: elf: section(26) .symtab, size 528, link 1, flags 0, type=2
+libbpf: looking for externs among 22 symbols...
+libbpf: collected 0 externs total
+libbpf: sec '.relxdp': collecting relocation for section(3) 'xdp'
+libbpf: sec '.relxdp': relo #0: insn #68 against '.text'
+libbpf: sec '.relxdp': relo #1: insn #73 against '.text'
+libbpf: sec '.relxdp': relo #2: insn #77 against '.text'
+libbpf: object 'bpf_call_chain': failed (-95) to create BPF token from '/sys/fs/bpf', skipping optional step...
+libbpf: prog 'bpf_call_chain_xdp': added 17 insns from sub-prog 'sub_hash'
+libbpf: prog 'bpf_call_chain_xdp': insn #68 relocated, imm 43 points to subprog 'sub_hash' (now at 112 offset)
+libbpf: prog 'bpf_call_chain_xdp': added 73 insns from sub-prog 'sub_fold'
+libbpf: prog 'bpf_call_chain_xdp': insn #73 relocated, imm 55 points to subprog 'sub_fold' (now at 129 offset)
+libbpf: prog 'bpf_call_chain_xdp': added 13 insns from sub-prog 'sub_combine'
+libbpf: prog 'bpf_call_chain_xdp': insn #77 relocated, imm 124 points to subprog 'sub_combine' (now at 202 offset)
+rejit: mode=daemon daemon_path=/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon prog_id=6
+kfunc discovery:
+  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)
+  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)
+  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)
+prog 6 (bpf_call_chain_): 4 passes, 2 sites applied (215 -> 209 insns)
+  wide_mem: 2 sites applied
+  REJIT successful
+=== Process state after 5s ===
+11
+Process still running, dumping stacks...
+[    8.795723]   .nr_switches                   : 1267
+[    8.795724]   .nr_uninterruptible            : 1
+[    8.795724]   .next_balance                  : 4294.894498
+[    8.795724]   .curr->pid                     : 0
+[    8.795725]   .clock                         : 8792.543245
+[    8.795725]   .clock_task                    : 8788.317207
+[    8.795726]   .avg_idle                      : 1000000
+[    8.795726]   .max_idle_balance_cost         : 500000
+
+[    8.795727] cfs_rq[23]:/
+[    8.795728]   .left_deadline                 : 0.000001
+[    8.795728]   .left_vruntime                 : 0.000001
+[    8.795729]   .zero_vruntime                 : 25.744731
+[    8.795729]   .avg_vruntime                  : 25.744731
+[    8.795730]   .right_vruntime                : 0.000001
+[    8.795730]   .spread                        : 0.000000
+[    8.795730]   .nr_queued                     : 0
+[    8.795731]   .h_nr_runnable                 : 0
+[    8.795731]   .h_nr_queued                   : 0
+[    8.795732]   .h_nr_idle                     : 0
+[    8.795732]   .load                          : 0
+[    8.795733]   .load_avg                      : 0
+[    8.795733]   .runnable_avg                  : 0
+[    8.795733]   .util_avg                      : 0
+[    8.795734]   .util_est                      : 0
+[    8.795734]   .removed.load_avg              : 0
+[    8.795735]   .removed.util_avg              : 0
+[    8.795735]   .removed.runnable_avg          : 0
+[    8.795736]   .tg_load_avg_contrib           : 0
+[    8.795736]   .tg_load_avg                   : 0
+
+[    8.795737] rt_rq[23]:
+[    8.795737]   .rt_nr_running                 : 0
+
+[    8.795738] dl_rq[23]:
+[    8.795738]   .dl_nr_running                 : 0
+[    8.795739]   .dl_bw->bw                     : 996147
+[    8.795739]   .dl_bw->total_bw               : 1258272
+
+[    8.795740] runnable tasks:
+[    8.795741]  S            task   PID       vruntime   eligible    deadline             slice          sum-exec      switches  prio         wait-time        sum-sleep       sum-block  node   group-id  group-path
+[    8.795741] -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+[    8.795742]  S        cpuhp/23   132         0.888468   E           1.888220           2.800000         0.114020        11     120         0.000000         0.000000         0.000000   0      0        /
+[    8.795745]  S    migration/23   133         2.055632   E           2.755317           0.700000         2.321476         6       0         0.000000         0.000000         0.000000   0      0        /
+[    8.795748]  S    ksoftirqd/23   134         7.659432   E          10.458855           2.800000         0.001865         4     120         0.000000         0.000000         0.000000   0      0        /
+[    8.795751]  I    kworker/23:0   135         0.872931   E           1.920488           2.800000         0.016764         4     120         0.000000         0.000000         0.000000   0      0        /
+[    8.795754]  I kworker/R-vfio-   170         0.911780   E           0.879507           2.800000         0.016308         2     100         0.000000         0.000000         0.000000   0      0        /
+[    8.795757]  I    kworker/23:1   201        25.744731   E          28.540505           2.800000         0.035815         8     120         0.000000         0.000000         0.000000   0      0        /
+
+[    8.795761] Showing busy workqueues and worker pools:
