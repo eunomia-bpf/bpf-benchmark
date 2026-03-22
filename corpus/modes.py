@@ -62,6 +62,7 @@ from runner.libs.corpus import (
     markdown_table,
     materialize_dummy_context,
     materialize_dummy_packet,
+    normalize_directive_scan as shared_normalize_directive_scan,
     require_minimum,
     run_command as shared_run_command,
     run_text_command as shared_run_text_command,
