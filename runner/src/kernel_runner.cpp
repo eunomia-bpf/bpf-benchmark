@@ -1283,8 +1283,30 @@ std::vector<sample_result> run_kernel(const cli_options &options)
     }
 
     const auto packet_kind = resolve_packet_context_kind(program_info.type);
+
+    /* Daemon-socket mode: apply optimization BEFORE any measurement.
+     * This avoids the CPU-frequency regression caused by the idle gap
+     * between stock and rejit measurement phases.  The separate
+     * 'kernel' runtime already provides the stock baseline, so
+     * in-process stock measurement is unnecessary. */
+    if (options.daemon_socket.has_value() && rejit.requested && !options.compile_only) {
+        rejit_start = std::chrono::steady_clock::now();
+        const auto sock_resp = daemon_socket_optimize(*options.daemon_socket, program_info.id);
+        rejit_end = std::chrono::steady_clock::now();
+        rejit.syscall_attempted = true;
+        if (!sock_resp.ok) {
+            rejit.applied = false;
+            rejit.error = "daemon socket optimize failed: " + sock_resp.error;
+            fprintf(stderr, "daemon socket optimize failed: %s\n", sock_resp.error.c_str());
+        } else {
+            rejit.applied = sock_resp.applied;
+        }
+    }
+    /* Only do in-process stock+rejit paired measurement for non-daemon
+     * modes (replacement, same-bytecode) where the REJIT is instant
+     * and does not introduce a frequency-scaling gap. */
     const bool measure_same_image_pair =
-        rejit.requested && !options.compile_only;
+        rejit.requested && !options.compile_only && !options.daemon_socket.has_value();
     if (options.compile_only && rejit.requested) {
         if (options.daemon_socket.has_value()) {
             rejit_start = std::chrono::steady_clock::now();
@@ -1565,27 +1587,9 @@ std::vector<sample_result> run_kernel(const cli_options &options)
             stock_result_read_start,
             stock_result_read_end,
             false);
-        fprintf(stderr, "DIAG: stock exec_ns=%lu repeat=%u warmup=%u\n",
-                (unsigned long)stock_pass.measurement.exec_ns,
-                run_context.effective_repeat,
-                options.warmup_repeat);
-        if (options.daemon_socket.has_value()) {
-            rejit_start = std::chrono::steady_clock::now();
-            const auto sock_resp = daemon_socket_optimize(*options.daemon_socket, program_info.id);
-            rejit_end = std::chrono::steady_clock::now();
-            rejit.syscall_attempted = true;
-            if (!sock_resp.ok) {
-                rejit.applied = false;
-                rejit.error = "daemon socket optimize failed: " + sock_resp.error;
-                fprintf(stderr, "daemon socket optimize failed: %s\n", sock_resp.error.c_str());
-            } else {
-                rejit.applied = sock_resp.applied;
-            }
-        } else {
-            apply_rejit(program_fd, rejit_insns.data(),
-                        static_cast<uint32_t>(rejit_insns.size()),
-                        rejit, rejit_start, rejit_end);
-        }
+        apply_rejit(program_fd, rejit_insns.data(),
+                    static_cast<uint32_t>(rejit_insns.size()),
+                    rejit, rejit_start, rejit_end);
     }
 
     auto run_pass = execute_kernel_measurement_pass(
@@ -1594,13 +1598,6 @@ std::vector<sample_result> run_kernel(const cli_options &options)
         measure_same_image_pair ? options.warmup_repeat : 0u,
         true);
     const auto &run_measurement = run_pass.measurement;
-    if (measure_same_image_pair) {
-        fprintf(stderr, "DIAG: rejit exec_ns=%lu repeat=%u warmup=%u applied=%s\n",
-                (unsigned long)run_measurement.exec_ns,
-                run_context.effective_repeat,
-                measure_same_image_pair ? options.warmup_repeat : 0u,
-                rejit.applied ? "true" : "false");
-    }
 
     result_read_start = std::chrono::steady_clock::now();
     result = read_kernel_test_run_result(effective_io_mode,

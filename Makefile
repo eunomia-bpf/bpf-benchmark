@@ -66,7 +66,6 @@ ITERATIONS ?= 3
 WARMUPS    ?= 1
 REPEAT     ?= 100
 BENCH      ?=
-POLICY     ?= default
 
 # Derived
 BZIMAGE_PATH := $(if $(filter /%,$(BZIMAGE)),$(BZIMAGE),$(ROOT_DIR)/$(BZIMAGE))
@@ -97,14 +96,6 @@ VENV_ACTIVATE := $(if $(VENV),source "$(VENV)/bin/activate" &&,)
 VNG ?= $(ROOT_DIR)/runner/scripts/vng-wrapper.sh
 VM_INIT := $(VENV_ACTIVATE) "$(ROOT_DIR)/module/load_all.sh" 2>/dev/null || true;
 
-# Policy
-ifeq ($(POLICY),default)
-  POLICY_DIR := $(ROOT_DIR)/micro/policies
-else
-  POLICY_DIR := $(ROOT_DIR)/micro/policies/variants/$(POLICY)
-endif
-POLICY_DIR_FLAG := $(if $(filter-out default,$(POLICY)),--policy-dir "$(POLICY_DIR)",)
-
 # Benchmark args
 BENCH_FLAGS      := $(foreach b,$(BENCH),--bench $(b))
 MICRO_ARGS       := --iterations $(ITERATIONS) --warmups $(WARMUPS) --repeat $(REPEAT) $(BENCH_FLAGS)
@@ -133,7 +124,7 @@ help:
 	@echo "VM x86: vm-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all validate"
 	@echo "ARM64:  vm-arm64-smoke vm-arm64-selftest"
 	@echo "AWS:    aws-arm64-launch aws-arm64-setup aws-arm64-benchmark aws-arm64-terminate aws-arm64"
-	@echo "Params: ITERATIONS=$(ITERATIONS) WARMUPS=$(WARMUPS) REPEAT=$(REPEAT) BENCH=\"...\" POLICY=$(POLICY)"
+	@echo "Params: ITERATIONS=$(ITERATIONS) WARMUPS=$(WARMUPS) REPEAT=$(REPEAT) BENCH=\"...\""
 
 # ── Build ──────────────────────────────────────────────────────────────────────
 all:
@@ -220,7 +211,7 @@ vm-micro-smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(DAEMON_PATH) $(BZIMAGE_PATH
 			"$(DAEMON_PATH)" serve --socket "$(DAEMON_SOCKET)" & DAEMON_PID=$$!; sleep 0.5; \
 			trap "kill $$DAEMON_PID 2>/dev/null; rm -f $(DAEMON_SOCKET)" EXIT; \
 			python3 "$(MICRO_DIR)/driver.py" suite --runtime kernel --runtime kernel-rejit \
-			--daemon-socket "$(DAEMON_SOCKET)" $(VM_SMOKE_ARGS) $(POLICY_DIR_FLAG) --output "$(VM_MICRO_SMOKE_OUTPUT)"'
+			--daemon-socket "$(DAEMON_SOCKET)" $(VM_SMOKE_ARGS) --output "$(VM_MICRO_SMOKE_OUTPUT)"'
 
 vm-micro: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(DAEMON_PATH) $(BZIMAGE_PATH) kinsn-modules
 	mkdir -p "$(MICRO_RESULTS_DEV_DIR)"
@@ -229,13 +220,13 @@ vm-micro: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(DAEMON_PATH) $(BZIMAGE_PATH) kins
 			"$(DAEMON_PATH)" serve --socket "$(DAEMON_SOCKET)" & DAEMON_PID=$$!; sleep 0.5; \
 			trap "kill $$DAEMON_PID 2>/dev/null; rm -f $(DAEMON_SOCKET)" EXIT; \
 			python3 "$(MICRO_DIR)/driver.py" suite --runtime llvmbpf --runtime kernel --runtime kernel-rejit \
-			--daemon-socket "$(DAEMON_SOCKET)" $(MICRO_ARGS) $(POLICY_DIR_FLAG) --output "$(VM_MICRO_OUTPUT)"'
+			--daemon-socket "$(DAEMON_SOCKET)" $(MICRO_ARGS) --output "$(VM_MICRO_OUTPUT)"'
 
 vm-corpus: $(MICRO_RUNNER) $(DAEMON_PATH) $(BZIMAGE_PATH) kinsn-modules
 	mkdir -p "$(CORPUS_RESULTS_DEV_DIR)"
 	$(VENV_ACTIVATE) python3 "$(ROOT_DIR)/corpus/driver.py" packet --skip-build \
 		--kernel-image "$(BZIMAGE_PATH)" --runner "$(MICRO_RUNNER)" --daemon "$(DAEMON_PATH)" \
-		--vng "$(VNG)" --btf-custom-path "$(VMLINUX_PATH)" --repeat "$(REPEAT)" --use-policy \
+		--vng "$(VNG)" --btf-custom-path "$(VMLINUX_PATH)" --repeat "$(REPEAT)" \
 		--output-json "$(VM_CORPUS_OUTPUT_JSON)" --output-md "$(VM_CORPUS_OUTPUT_MD)"
 
 vm-e2e: $(MICRO_RUNNER) $(DAEMON_PATH) $(BZIMAGE_PATH) kinsn-modules

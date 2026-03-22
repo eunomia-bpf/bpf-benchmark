@@ -1,6 +1,0 @@
-program: bpf_call_chain_xdp
-sites:
-- family: cmov
-  insn: 85
-  pattern_kind: cond-select-64
-version: 3

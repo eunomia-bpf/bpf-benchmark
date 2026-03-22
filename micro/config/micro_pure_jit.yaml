@@ -89,7 +89,6 @@ benchmarks:
     kernel_input_size: 16
     input_generator: memory_pair_sum
     expected_result: 2459565876494606865
-    policy_file: micro/policies/memory_pair_sum.yaml
     tags: [memory, baseline, pure-jit]
 
   - name: bitcount
@@ -102,7 +101,6 @@ benchmarks:
     kernel_input_size: 2056
     input_generator: bitcount
     expected_result: 3035568289764064166
-    policy_file: micro/policies/bitcount.yaml
     tags: [bitops, pure-jit]
 
   - name: log2_fold
@@ -115,7 +113,6 @@ benchmarks:
     kernel_input_size: 1032
     input_generator: log2_fold
     expected_result: 9
-    policy_file: micro/policies/log2_fold.yaml
     tags: [bitops, branch, pure-jit]
 
   - name: dep_chain_short
@@ -140,7 +137,6 @@ benchmarks:
     kernel_input_size: 2056
     input_generator: dep_chain_long
     expected_result: 11607914882895964593
-    policy_file: micro/policies/dep_chain_long.yaml
     tags: [compute, dep-chain, pure-jit]
 
   - name: binary_search
@@ -153,7 +149,6 @@ benchmarks:
     kernel_input_size: 392
     input_generator: binary_search
     expected_result: 126
-    policy_file: micro/policies/binary_search.yaml
     tags: [branch, search, pure-jit]
 
   - name: branch_layout
@@ -178,7 +173,6 @@ benchmarks:
     kernel_input_size: 516
     input_generator: switch_dispatch
     expected_result: 16
-    policy_file: micro/policies/switch_dispatch.yaml
     tags: [branch, dispatch, pure-jit]
 
   - name: branch_dense
@@ -191,7 +185,6 @@ benchmarks:
     kernel_input_size: 520
     input_generator: branch_dense
     expected_result: 15654347328787340782
-    policy_file: micro/policies/branch_dense.yaml
     tags: [branch, dense, pure-jit]
 
   - name: cmov_select
@@ -204,7 +197,6 @@ benchmarks:
     kernel_input_size: 3464
     input_generator: cmov_select
     expected_result: 4719383495603449331
-    policy_file: micro/policies/cmov_select.yaml
     tags: [branch, select, cmov, pure-jit]
 
   - name: cmov_dense
@@ -217,7 +209,6 @@ benchmarks:
     kernel_input_size: 1024
     input_generator: cmov_dense
     expected_result: 15544056576594566652
-    policy_file: micro/policies/cmov_dense.yaml
     tags: [branch, select, cmov, dense, pure-jit]
 
   - name: checksum
@@ -232,7 +223,6 @@ benchmarks:
     # The input is non-zero; the repeated XOR fold cancels because each 16-bit lane
     # receives the same checksum value eight times across the 32 rounds.
     expected_result: 0
-    policy_file: micro/policies/checksum.yaml
     tags: [alu, memory, pure-jit]
 
   - name: load_word32
@@ -257,7 +247,6 @@ benchmarks:
     kernel_input_size: 1032
     input_generator: load_byte
     expected_result: 133744
-    policy_file: micro/policies/load_byte.yaml
     tags: [memory, load-width, control, pure-jit]
 
   - name: load_byte_recompose
@@ -270,7 +259,6 @@ benchmarks:
     kernel_input_size: 1032
     input_generator: load_byte_recompose
     expected_result: 1253018829653002637
-    policy_file: micro/policies/load_byte_recompose.yaml
     tags: [memory, byte-recompose, causal-isolation, pure-jit]
 
   - name: load_native_u64
@@ -295,7 +283,6 @@ benchmarks:
     kernel_input_size: 3464
     input_generator: packet_parse
     expected_result: 2969312
-    policy_file: micro/policies/packet_parse.yaml
     tags: [memory, parse, bounds, pure-jit]
 
   - name: bounds_ladder
@@ -308,7 +295,6 @@ benchmarks:
     kernel_input_size: 1032
     input_generator: bounds_ladder
     expected_result: 8686050057216939920
-    policy_file: micro/policies/bounds_ladder.yaml
     tags: [bounds, verifier-like, pure-jit]
 
   - name: bounds_check_heavy
@@ -357,7 +343,6 @@ benchmarks:
     kernel_input_size: 1032
     input_generator: mixed_alu_mem
     expected_result: 5008154085265630854
-    policy_file: micro/policies/mixed_alu_mem.yaml
     tags: [alu, memory, mixed, pure-jit]
 
   - name: spill_pressure
@@ -382,7 +367,6 @@ benchmarks:
     kernel_input_size: 1032
     input_generator: multi_acc_4
     expected_result: 1366287837132792961
-    policy_file: micro/policies/multi_acc_4.yaml
     tags: [compute, ilp, pure-jit]
 
   - name: multi_acc_8
@@ -395,7 +379,6 @@ benchmarks:
     kernel_input_size: 1032
     input_generator: multi_acc_8
     expected_result: 6524869553103642107
-    policy_file: micro/policies/multi_acc_8.yaml
     tags: [compute, ilp, pure-jit]
 
   - name: fibonacci_iter
@@ -408,7 +391,6 @@ benchmarks:
     kernel_input_size: 16
     input_generator: fibonacci_iter
     expected_result: 3918857671957494287
-    policy_file: micro/policies/fibonacci_iter.yaml
     tags: [compute, loop, pure-jit]
 
   - name: fibonacci_iter_packet
@@ -458,7 +440,6 @@ benchmarks:
     kernel_input_size: 2064
     input_generator: nested_loop_2
     expected_result: 2067381267021326054
-    policy_file: micro/policies/nested_loop_2.yaml
     tags: [compute, loop, nested, pure-jit]
 
   - name: nested_loop_3
@@ -471,7 +452,6 @@ benchmarks:
     kernel_input_size: 2064
     input_generator: nested_loop_3
     expected_result: 1123355393214246525
-    policy_file: micro/policies/nested_loop_3.yaml
     tags: [compute, loop, nested, pure-jit]
 
   - name: code_clone_2
@@ -508,7 +488,6 @@ benchmarks:
     kernel_input_size: 264
     input_generator: large_mixed_500
     expected_result: 12101143943798384681
-    policy_file: micro/policies/large_mixed_500.yaml
     tags: [compute, memory, code-size, pure-jit]
 
   - name: large_mixed_1000
@@ -521,7 +500,6 @@ benchmarks:
     kernel_input_size: 264
     input_generator: large_mixed_1000
     expected_result: 4283793436325605125
-    policy_file: micro/policies/large_mixed_1000.yaml
     tags: [compute, memory, code-size, pure-jit]
 
   - name: bpf_call_chain
@@ -534,7 +512,6 @@ benchmarks:
     kernel_input_size: 64
     input_generator: bpf_call_chain
     expected_result: 17813494880153753973
-    policy_file: micro/policies/bpf_call_chain.yaml
     tags: [call, bpf-to-bpf, local-call, pure-jit]
 
   - name: memcmp_prefix_64
@@ -547,7 +524,6 @@ benchmarks:
     kernel_input_size: 196
     input_generator: memcmp_prefix_64
     expected_result: 9377358970524074984
-    policy_file: micro/policies/memcmp_prefix_64.yaml
     tags: [memory, compare, branch, pure-jit]
 
   - name: packet_parse_vlans_tcpopts
@@ -586,7 +562,6 @@ benchmarks:
     kernel_input_size: 54
     input_generator: packet_rss_hash
     expected_result: 11016707074064960918
-    policy_file: micro/policies/packet_rss_hash.yaml
     tags: [packet, hash, endian, pure-jit]
 
   - name: imm64_storm
@@ -623,7 +598,6 @@ benchmarks:
     kernel_input_size: 516
     input_generator: branch_fanout_32
     expected_result: 9589146199917278581
-    policy_file: micro/policies/branch_fanout_32.yaml
     tags: [branch, fanout, pure-jit]
 
   - name: deep_guard_tree_8
@@ -660,7 +634,6 @@ benchmarks:
     kernel_input_size: 64
     input_generator: rotate64_hash
     expected_result: 2666935177028490406
-    policy_file: micro/policies/rotate64_hash.yaml
     tags: [compute, rotate, hash, pure-jit]
 
   - name: packet_redundant_bounds
@@ -722,7 +695,6 @@ benchmarks:
     kernel_input_size: 1032
     input_generator: smallmul_strength_reduce
     expected_result: 4880578162264678397
-    policy_file: micro/policies/smallmul_strength_reduce.yaml
     tags: [alu, strength-reduce, lea-like, pure-jit]
 
   - name: cond_select_dense
@@ -735,7 +707,6 @@ benchmarks:
     kernel_input_size: 3328
     input_generator: cond_select_dense
     expected_result: 6523053130887371951
-    policy_file: micro/policies/cond_select_dense.yaml
     tags: [branch, select, cmov, canonical, pure-jit]
 
   - name: rotate_dense
@@ -748,7 +719,6 @@ benchmarks:
     kernel_input_size: 64
     input_generator: rotate_dense
     expected_result: 14870098989209412331
-    policy_file: micro/policies/rotate_dense.yaml
     tags: [compute, rotate, canonical, pure-jit]
 
   - name: addr_calc_stride
@@ -761,7 +731,6 @@ benchmarks:
     kernel_input_size: 2048
     input_generator: addr_calc_stride
     expected_result: 9302301800681049161
-    policy_file: micro/policies/addr_calc_stride.yaml
     tags: [memory, stride, lea, canonical, pure-jit]
 
   - name: extract_dense
@@ -774,7 +743,6 @@ benchmarks:
     kernel_input_size: 2048
     input_generator: extract_dense
     expected_result: 13503953896175652977
-    policy_file: micro/policies/extract_dense.yaml
     tags: [memory, fields, bitfield, canonical, pure-jit]
 
   - name: endian_swap_dense
@@ -787,7 +755,6 @@ benchmarks:
     kernel_input_size: 1024
     input_generator: endian_swap_dense
     expected_result: 4354686090269194327
-    policy_file: micro/policies/endian_swap_dense.yaml
     tags: [memory, endian, canonical, pure-jit]
 
   - name: branch_flip_dense
@@ -800,7 +767,6 @@ benchmarks:
     kernel_input_size: 2048
     input_generator: branch_flip_dense
     expected_result: 255429993929868791
-    policy_file: micro/policies/branch_flip_dense.yaml
     tags: [branch, branch-flip, canonical, pure-jit]
 
   # Kernel-only non-XDP breadth checks. These use skb program types with packet-fed
@@ -816,7 +782,6 @@ benchmarks:
     kernel_input_size: 2056
     input_generator: bitcount
     expected_result: 3035568289764064166
-    policy_file: micro/policies/tc_bitcount.yaml
     tags: [tc, pure-jit, non-xdp, kernel-only]
 
   - name: tc_checksum

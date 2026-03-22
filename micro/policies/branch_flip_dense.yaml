@@ -1,7 +1,0 @@
-# Cleared: bflip=255 sites caused -8.4% regression (dense full-image recompile I-cache flush > body-swap benefit)
-# Eligible live sites: branch-flip=255
-# Selected live sites: none
-
-version: 3
-program: 'branch_flip_dense_xdp'
-sites: []

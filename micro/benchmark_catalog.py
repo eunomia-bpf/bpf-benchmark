@@ -71,8 +71,6 @@ class BenchmarkSpec:
     input_generator: str | None = None
     tags: tuple[str, ...] = ()
     expected_result: int | None = None
-    policy: dict[str, str] | None = None
-    policy_file: Path | None = None
 
     @property
     def program_object(self) -> Path:
@@ -103,14 +101,6 @@ def _resolve_path(value: str | Path | None, base: Path) -> Path | None:
 
 def _load_commands(raw_commands: dict[str, list[str]]) -> dict[str, tuple[str, ...]]:
     return {name: tuple(command) for name, command in raw_commands.items()}
-
-
-def _reject_inline_policy(raw_policy: object, benchmark_name: str) -> None:
-    if raw_policy is None:
-        return
-    raise ValueError(
-        f"benchmark {benchmark_name}: inline 'policy' is no longer supported; use policy_file"
-    )
 
 
 def load_suite(path: Path = CONFIG_PATH) -> SuiteSpec:
@@ -165,7 +155,6 @@ def load_suite(path: Path = CONFIG_PATH) -> SuiteSpec:
     benchmarks: dict[str, BenchmarkSpec] = {}
     for benchmark_data in data["benchmarks"]:
         benchmark_name = benchmark_data["name"]
-        _reject_inline_policy(benchmark_data.get("policy"), benchmark_name)
         benchmarks[benchmark_name] = BenchmarkSpec(
             name=benchmark_name,
             description=benchmark_data["description"],
@@ -180,8 +169,6 @@ def load_suite(path: Path = CONFIG_PATH) -> SuiteSpec:
             input_generator=benchmark_data.get("input_generator"),
             tags=tuple(benchmark_data.get("tags", ())),
             expected_result=benchmark_data.get("expected_result"),
-            policy=None,
-            policy_file=_resolve_path(benchmark_data.get("policy_file"), root_dir),
         )
 
     return SuiteSpec(

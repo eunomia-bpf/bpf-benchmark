@@ -1,9 +1,0 @@
-program: mixed_alu_mem_xdp
-sites:
-- family: extract
-  insn: 73
-  pattern_kind: bitfield-extract-64-shift-mask
-- family: extract
-  insn: 228
-  pattern_kind: bitfield-extract-64-shift-mask
-version: 3

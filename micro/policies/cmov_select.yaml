@@ -1,7 +1,0 @@
-# Cleared in round 3: current live manifest has no cmov sites, and the rotate-only fallback regressed.
-# Eligible live sites: wide=6, rotate=4
-# Selected live sites: none
-
-version: 3
-program: 'cmov_select_xdp'
-sites: []

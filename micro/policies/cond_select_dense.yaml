@@ -1,5 +1,0 @@
-version: 3
-program: 'cond_select_dense_xdp'
-sites: []
-# Policy: skip all CMOV sites (104 sites)
-# Reason: predictable-branch benchmarks -> CMOV adds critical-path latency

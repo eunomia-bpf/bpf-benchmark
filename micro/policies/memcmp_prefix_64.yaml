@@ -1,7 +1,0 @@
-# Cleared: rotate=3 sites caused -17.6% regression (I-cache flush > benefit for 3 cold-path sites)
-# Eligible live sites: rotate=3, wide=1
-# Selected live sites: none
-
-version: 3
-program: 'memcmp_prefix_64_xdp'
-sites: []

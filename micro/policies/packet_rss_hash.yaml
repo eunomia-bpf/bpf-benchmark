@@ -1,7 +1,0 @@
-# Cleared after VM validation: rotate policy was unstable on this sub-30ns packet-backed benchmark.
-# Eligible live sites: wide=2, rotate=11
-# Selected live sites: none
-
-version: 3
-program: 'packet_rss_hash_xdp'
-sites: []

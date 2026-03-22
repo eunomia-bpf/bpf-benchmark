@@ -1,7 +1,0 @@
-# Cleared for policy iteration: the branch-flip+cmov+wide mix regressed in the latest authoritative run.
-# Eligible live sites: branch-flip=4, cmov=1, wide=2
-# Selected live sites: none
-
-version: 3
-program: 'branch_dense_xdp'
-sites: []

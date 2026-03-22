@@ -1,9 +1,0 @@
-program: multi_acc_8_xdp
-sites:
-- family: lea
-  insn: 155
-  pattern_kind: addr-calc
-- family: lea
-  insn: 158
-  pattern_kind: addr-calc
-version: 3

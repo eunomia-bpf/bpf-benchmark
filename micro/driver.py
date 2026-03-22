@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import platform
 import random
@@ -11,8 +10,6 @@ import sys
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
-
-import yaml
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
@@ -125,10 +122,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Build vendored bpftool in addition to the runner and program artifacts.",
     )
     parser.add_argument("--list", action="store_true", help="List benchmarks and runtimes.")
-    parser.add_argument(
-        "--policy-dir",
-        help="Override policy directory (for named policy sets under config/policies/).",
-    )
     raw_args = list(sys.argv[1:] if argv is None else argv)
     # Strip legacy positional "suite" subcommand for backward-compat with Makefile callers
     if raw_args and raw_args[0] == "suite":
@@ -232,38 +225,10 @@ def _detect_environment() -> str:
     return "bare-metal"
 
 
-def _hash_policy_files(policy_dir: Path) -> str:
-    try:
-        yaml_files = sorted(policy_dir.glob("**/*.yaml"))
-        if not yaml_files:
-            return "no-policies"
-        digest = hashlib.sha256()
-        for path in yaml_files:
-            digest.update(path.read_bytes())
-        return digest.hexdigest()[:16]
-    except OSError:
-        return "unknown"
-
-
-def _read_policy_payload(policy_file: Path | None) -> tuple[object | None, str | None]:
-    if policy_file is None:
-        return None, None
-    try:
-        raw = policy_file.read_bytes()
-    except OSError as exc:
-        raise RuntimeError(f"failed to read policy file {policy_file}: {exc}") from exc
-    try:
-        payload = yaml.safe_load(raw.decode("utf-8"))
-    except (UnicodeDecodeError, yaml.YAMLError) as exc:
-        raise RuntimeError(f"failed to parse policy file {policy_file}: {exc}") from exc
-    return payload, hashlib.sha256(raw).hexdigest()
-
-
 def collect_provenance(
     args: argparse.Namespace,
     iterations: int,
     warmups: int,
-    policy_dir: Path | None = None,
 ) -> dict[str, object]:
     linux_dir = ROOT_DIR / "vendor" / "linux-framework"
     kernel_commit = _git_rev_parse(linux_dir) if linux_dir.is_dir() else "unknown"
@@ -274,17 +239,11 @@ def collect_provenance(
     repo_git_sha = _git_rev_parse(ROOT_DIR)
     repo_dirty = _git_is_dirty(ROOT_DIR)
 
-    default_policy_dir = ROOT_DIR / "micro" / "policies"
-    effective_policy_dir = policy_dir if (policy_dir and policy_dir.is_dir()) else default_policy_dir
-    policy_files_hash = _hash_policy_files(effective_policy_dir)
-
     return {
         "kernel_commit": kernel_commit,
         "daemon_commit": daemon_commit,
         "repo_git_sha": repo_git_sha,
         "repo_dirty": repo_dirty,
-        "policy_files_hash": policy_files_hash,
-        "policy_dir": str(effective_policy_dir),
         "params": {
             "iterations": iterations,
             "warmups": warmups,
@@ -435,7 +394,6 @@ def main(argv: list[str] | None = None) -> int:
 
     iterations = args.iterations if args.iterations is not None else suite.defaults.iterations
     warmups = args.warmups if args.warmups is not None else suite.defaults.warmups
-    policy_dir = Path(args.policy_dir).resolve() if getattr(args, "policy_dir", None) else None
     if args.output:
         output_path = Path(args.output).resolve()
     else:
@@ -453,7 +411,7 @@ def main(argv: list[str] | None = None) -> int:
         "suite": suite.suite_name,
         "manifest": str(suite.manifest_path),
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "provenance": collect_provenance(args, iterations, warmups, policy_dir),
+        "provenance": collect_provenance(args, iterations, warmups),
         "host": {
             "hostname": platform.node(),
             "platform": platform.platform(),
@@ -493,7 +451,6 @@ def main(argv: list[str] | None = None) -> int:
 
     for bench_idx, benchmark in enumerate(benchmarks):
         memory_file = resolve_memory_file(benchmark, args.regenerate_inputs)
-        policy_content, policy_sha256 = _read_policy_payload(benchmark.policy_file)
         benchmark_record = {
             "name": benchmark.name,
             "description": benchmark.description,
@@ -505,10 +462,6 @@ def main(argv: list[str] | None = None) -> int:
             "tags": list(benchmark.tags),
             "expected_result": benchmark.expected_result,
             "input": str(memory_file) if memory_file else None,
-            "policy": dict(benchmark.policy) if benchmark.policy is not None else None,
-            "policy_file": str(benchmark.policy_file) if benchmark.policy_file else None,
-            "policy_content": policy_content,
-            "policy_sha256": policy_sha256,
             "runs": [],
         }
 

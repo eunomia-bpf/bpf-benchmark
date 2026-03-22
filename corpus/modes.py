@@ -73,7 +73,6 @@ from runner.libs.corpus import (
 from runner.libs.commands import (
     build_runner_command as _build_runner_command,
 )
-from runner.libs.policy import POLICY_DIR as DEFAULT_POLICY_DIR, resolve_policy_path
 
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -191,16 +190,6 @@ def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--force-host-fallback",
         action="store_true",
         help="Skip VM execution and run host compile-only + daemon fallback directly.",
-    )
-    parser.add_argument(
-        "--use-policy",
-        action="store_true",
-        help="Prefer per-program version 3 policy files under corpus/policies/ when present; otherwise keep stock JIT.",
-    )
-    parser.add_argument(
-        "--policy-dir",
-        default=str(DEFAULT_POLICY_DIR),
-        help="Policy directory searched when --use-policy is enabled.",
     )
     parser.add_argument(
         "--guest-info",
@@ -369,11 +358,10 @@ def build_runner_command(
     blind_apply: bool,
     skip_families: list[str],
     recompile_all: bool = False,
-    policy_file: Path | None = None,
     dump_xlated: Path | None = None,
     daemon_socket: str | None = None,
 ) -> list[str]:
-    enable_rejit = blind_apply or (policy_file is not None)
+    enable_rejit = blind_apply or (daemon_socket is not None)
     return _build_runner_command(
         runner,
         "run-kernel",
@@ -512,21 +500,13 @@ def run_target_locally(
     enable_recompile: bool,
     enable_exec: bool,
     skip_families: list[str],
-    use_policy: bool,
     blind_apply: bool,
-    policy_dir: Path,
 ) -> dict[str, Any]:
     record = build_empty_record(target, execution_mode)
     object_path = ROOT_DIR / target["object_path"]
     memory_path = Path(target["memory_path"]) if target.get("memory_path") else None
-    policy_path = resolve_policy_path(
-        object_path,
-        policy_dir,
-        program_name=target["program_name"],
-    ) if use_policy else None
-    active_policy_path = None if blind_apply else policy_path
     recompile_all = blind_apply
-    policy_mode = "blind-apply-v5" if blind_apply else ("policy-file" if active_policy_path is not None else "stock")
+    policy_mode = "blind-apply-v5" if blind_apply else "daemon-auto"
     inventory_scan = normalize_scan(target.get("inventory_scan"))
     daemon_result = None
     scan_source = "inventory"
@@ -548,7 +528,6 @@ def run_target_locally(
                 blind_apply=False,
                 recompile_all=False,
                 skip_families=[],
-                policy_file=None,
                 dump_xlated=xlated_path,
             ),
             timeout_seconds,
@@ -588,7 +567,6 @@ def run_target_locally(
                         blind_apply=blind_apply,
                         recompile_all=recompile_all,
                         skip_families=skip_families,
-                        policy_file=active_policy_path,
                         daemon_socket=daemon_socket,
                     ),
                     timeout_seconds,
@@ -608,7 +586,6 @@ def run_target_locally(
                             blind_apply=blind_apply,
                             recompile_all=recompile_all,
                             skip_families=skip_families,
-                            policy_file=active_policy_path,
                             daemon_socket=daemon_socket,
                         ),
                         timeout_seconds,
@@ -622,7 +599,7 @@ def run_target_locally(
                     daemon_proc.wait()
 
     record["daemon_cli"] = text_invocation_summary(daemon_result)
-    record["policy_path"] = str(active_policy_path) if active_policy_path is not None else None
+    record["policy_path"] = None
     record["policy_mode"] = policy_mode
     record["scan_source"] = scan_source
     record["daemon_counts"] = daemon_counts
@@ -688,7 +665,6 @@ def run_guest_target_mode(args: argparse.Namespace) -> int:
     runner = Path(args.runner).resolve()
     daemon = Path(args.daemon).resolve()
     btf_custom_path = Path(args.btf_custom_path).resolve() if args.btf_custom_path else None
-    policy_dir = Path(args.policy_dir).resolve()
     record = run_target_locally(
         target=target,
         runner=runner,
@@ -700,9 +676,7 @@ def run_guest_target_mode(args: argparse.Namespace) -> int:
         enable_recompile=True,
         enable_exec=bool(target.get("can_test_run")),
         skip_families=normalize_skip_families(args.skip_families),
-        use_policy=args.use_policy,
         blind_apply=args.blind_apply,
-        policy_dir=policy_dir,
     )
     print(json.dumps(record, sort_keys=True))
     return 0
@@ -775,9 +749,7 @@ def run_target_in_guest(
     timeout_seconds: int,
     vng_binary: str,
     skip_families: list[str],
-    use_policy: bool,
     blind_apply: bool,
-    policy_dir: Path,
 ) -> dict[str, Any]:
     handle = tempfile.NamedTemporaryFile(
         mode="w",
@@ -787,15 +759,10 @@ def run_target_in_guest(
         delete=False,
     )
     try:
-        policy_path = resolve_policy_path(
-            ROOT_DIR / str(target["object_path"]),
-            policy_dir,
-            program_name=str(target["program_name"]),
-        ) if use_policy and not blind_apply else None
         guest_target = {
             **target,
-            "policy_mode": "blind-apply-v5" if blind_apply else ("policy-file" if policy_path is not None else "stock"),
-            "policy_path": str(policy_path) if policy_path is not None else None,
+            "policy_mode": "blind-apply-v5" if blind_apply else "daemon-auto",
+            "policy_path": None,
         }
         with handle:
             json.dump(guest_target, handle)
@@ -817,15 +784,11 @@ def run_target_in_guest(
             str(repeat),
             "--timeout",
             str(timeout_seconds),
-            "--policy-dir",
-            str(policy_dir),
         ]
         if skip_families:
             guest_argv.extend(["--skip-families", ",".join(skip_families)])
         if blind_apply:
             guest_argv.append("--blind-apply")
-        if use_policy:
-            guest_argv.append("--use-policy")
         guest_exec = build_guest_exec(guest_argv)
         invocation = run_text_command(
             build_vng_command(
@@ -1272,8 +1235,7 @@ def build_markdown(data: dict[str, Any]) -> str:
             "",
             "- Target selection comes from the runnability inventory and keeps every packet-test-run target whose baseline run already succeeds; the current daemon pass determines whether v5 has any eligible families.",
             "- In strict VM mode, each target boots the framework v5 guest once and runs baseline compile-only, v5 compile-only, baseline test_run, and v5 test_run in that order.",
-            "- Default steady-state semantics are stock: without `--use-policy` or `--blind-apply`, the v5 lane does not request recompile.",
-            "- `--use-policy` only considers per-program version 3 policy files under `corpus/policies/`; if no match exists, the driver stays on stock JIT.",
+            "- Default steady-state semantics: the daemon is always started and tries to optimize each program; programs with no applicable sites stay on stock JIT.",
             "- `--blind-apply` forces the old debug/exploration path with `--recompile-v5 --recompile-all`.",
             "- `--skip-families` only applies together with `--blind-apply`; the family columns above report applied families, not just eligible sites.",
             "- Host fallback mode only does baseline compile-only plus offline daemon scan; it does not attempt recompile or runtime measurement.",
@@ -1287,8 +1249,6 @@ def packet_main(argv: list[str] | None = None) -> int:
     args = parse_packet_args(argv)
     require_minimum(args.repeat, 1, "--repeat")
     skip_families = normalize_skip_families(args.skip_families)
-    if args.use_policy and args.blind_apply:
-        raise SystemExit("--use-policy cannot be combined with --blind-apply")
     if skip_families and not args.blind_apply:
         raise SystemExit("--skip-families requires --blind-apply")
 
@@ -1308,7 +1268,6 @@ def packet_main(argv: list[str] | None = None) -> int:
     kernel_tree = Path(args.kernel_tree).resolve()
     kernel_image = Path(args.kernel_image).resolve()
     btf_custom_path = Path(args.btf_custom_path).resolve() if args.btf_custom_path else None
-    policy_dir = Path(args.policy_dir).resolve()
 
     if not inventory_json.exists():
         raise SystemExit(f"inventory JSON not found: {inventory_json}")
@@ -1384,9 +1343,7 @@ def packet_main(argv: list[str] | None = None) -> int:
                 timeout_seconds=args.timeout,
                 vng_binary=args.vng,
                 skip_families=skip_families,
-                use_policy=args.use_policy,
                 blind_apply=args.blind_apply,
-                policy_dir=policy_dir,
             )
         else:
             record = run_target_locally(
@@ -1400,9 +1357,7 @@ def packet_main(argv: list[str] | None = None) -> int:
                 enable_recompile=False,
                 enable_exec=False,
                 skip_families=[],
-                use_policy=args.use_policy,
                 blind_apply=False,
-                policy_dir=policy_dir,
             )
         records.append(record)
 
@@ -1423,9 +1378,7 @@ def packet_main(argv: list[str] | None = None) -> int:
         "kernel_build": text_invocation_summary(kernel_build),
         "guest_smoke": guest_smoke,
         "skip_families": skip_families,
-        "use_policy": args.use_policy,
         "blind_apply": args.blind_apply,
-        "policy_dir": str(policy_dir),
         "summary": summary,
         "programs": records,
     }
@@ -1500,16 +1453,6 @@ def parse_linear_mode_args(mode_name: str, argv: list[str] | None = None) -> arg
         "--blind-apply",
         action="store_true",
         help="Ignore per-program policies and force blind all-apply auto-scan recompile.",
-    )
-    parser.add_argument(
-        "--use-policy",
-        action="store_true",
-        help="Prefer per-program version 3 policy files under corpus/policies/ when present.",
-    )
-    parser.add_argument(
-        "--policy-dir",
-        default=str(DEFAULT_POLICY_DIR),
-        help="Policy directory searched when --use-policy is enabled.",
     )
     return parser.parse_args(argv)
 
@@ -1715,8 +1658,6 @@ def run_linear_mode(mode_name: str, argv: list[str] | None = None) -> int:
     args = parse_linear_mode_args(mode_name, argv)
     require_minimum(args.repeat, 1, "--repeat")
     skip_families = normalize_skip_families(args.skip_families)
-    if args.use_policy and args.blind_apply:
-        raise SystemExit("--use-policy cannot be combined with --blind-apply")
     if skip_families and not args.blind_apply:
         raise SystemExit("--skip-families requires --blind-apply")
 
@@ -1728,7 +1669,6 @@ def run_linear_mode(mode_name: str, argv: list[str] | None = None) -> int:
         raise SystemExit(f"daemon not found: {daemon}")
 
     btf_custom_path = Path(args.btf_custom_path).resolve() if args.btf_custom_path else None
-    policy_dir = Path(args.policy_dir).resolve()
     corpus_build_report = Path(args.corpus_build_report).resolve() if args.corpus_build_report else None
     targets, discovery_summary = discover_linear_targets(
         runner=runner,
@@ -1758,9 +1698,7 @@ def run_linear_mode(mode_name: str, argv: list[str] | None = None) -> int:
             enable_recompile=True,
             enable_exec=enable_exec,
             skip_families=skip_families,
-            use_policy=args.use_policy,
             blind_apply=args.blind_apply,
-            policy_dir=policy_dir,
         )
         records.append(record)
 
@@ -1777,9 +1715,7 @@ def run_linear_mode(mode_name: str, argv: list[str] | None = None) -> int:
         "repeat": args.repeat,
         "timeout_seconds": args.timeout,
         "skip_families": skip_families,
-        "use_policy": args.use_policy,
         "blind_apply": args.blind_apply,
-        "policy_dir": str(policy_dir),
         "corpus_build_report": str(corpus_build_report) if corpus_build_report is not None else None,
         "discovery": discovery_summary,
         "summary": summary,
