@@ -11,6 +11,7 @@ mod kfunc_discovery;
 mod pass;
 mod passes;
 mod profiler;
+#[allow(dead_code)]
 mod verifier_log;
 
 use std::collections::HashSet;
@@ -67,6 +68,13 @@ enum Command {
         once: bool,
     },
 
+    /// Run as a Unix socket server (persistent daemon mode).
+    Serve {
+        /// Unix socket path.
+        #[arg(long, default_value = "/var/run/bpfrejit.sock")]
+        socket: String,
+    },
+
     /// Poll runtime BPF stats for one live program.
     Profile {
         /// BPF program ID.
@@ -108,6 +116,7 @@ fn main() -> Result<()> {
         Command::Rewrite { prog_id } => cmd_rewrite(prog_id, &ctx, &pass_names),
         Command::Apply { prog_id } => cmd_apply(prog_id, &ctx, &pass_names),
         Command::ApplyAll => cmd_apply_all(&ctx, &pass_names),
+        Command::Serve { socket } => cmd_serve(&socket, &ctx, &pass_names),
         Command::Profile {
             prog_id,
             interval_ms,
@@ -302,7 +311,9 @@ fn cmd_apply(prog_id: u32, ctx: &pass::PassContext, pass_names: &Option<Vec<Stri
         }
     }
 
-    bpf::bpf_prog_rejit(fd.as_raw_fd(), &program.insns, &[]).context("BPF_PROG_REJIT failed")?;
+    // Construct fd_array from module FDs required by kfunc passes.
+    let fd_array: Vec<std::os::unix::io::RawFd> = program.required_module_fds.clone();
+    bpf::bpf_prog_rejit(fd.as_raw_fd(), &program.insns, &fd_array).context("BPF_PROG_REJIT failed")?;
 
     println!("  REJIT successful");
     Ok(())
@@ -416,9 +427,121 @@ fn try_apply_one(prog_id: u32, ctx: &pass::PassContext, pass_names: &Option<Vec<
         program.insns.len(),
     );
 
-    bpf::bpf_prog_rejit(fd.as_raw_fd(), &program.insns, &[])?;
+    let fd_array: Vec<std::os::unix::io::RawFd> = program.required_module_fds.clone();
+    bpf::bpf_prog_rejit(fd.as_raw_fd(), &program.insns, &fd_array)?;
     println!("    REJIT ok");
     Ok(true)
+}
+
+// ── Serve (Unix socket server) ──────────────────────────────────────
+
+fn cmd_serve(socket_path: &str, ctx: &pass::PassContext, pass_names: &Option<Vec<String>>) -> Result<()> {
+    use std::os::unix::net::UnixListener;
+
+    // Register signal handlers for graceful shutdown.
+    unsafe {
+        libc::signal(libc::SIGTERM, handle_signal as libc::sighandler_t);
+        libc::signal(libc::SIGINT, handle_signal as libc::sighandler_t);
+    }
+
+    // Remove stale socket file if it exists.
+    let _ = std::fs::remove_file(socket_path);
+
+    let listener = UnixListener::bind(socket_path)
+        .with_context(|| format!("bind unix socket at {}", socket_path))?;
+    listener.set_nonblocking(true)?;
+
+    println!("serve: listening on {}", socket_path);
+
+    while !SHUTDOWN_FLAG.load(Ordering::Relaxed) {
+        match listener.accept() {
+            Ok((stream, _addr)) => {
+                let _ = handle_client(stream, ctx, pass_names);
+            }
+            Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                std::thread::sleep(Duration::from_millis(100));
+                continue;
+            }
+            Err(e) => {
+                eprintln!("serve: accept error: {}", e);
+            }
+        }
+    }
+
+    println!("serve: shutting down");
+    let _ = std::fs::remove_file(socket_path);
+    Ok(())
+}
+
+fn handle_client(
+    stream: std::os::unix::net::UnixStream,
+    ctx: &pass::PassContext,
+    pass_names: &Option<Vec<String>>,
+) -> Result<()> {
+    use std::io::{BufRead, BufReader, Write};
+
+    let reader = BufReader::new(&stream);
+    let mut writer = &stream;
+
+    for line in reader.lines() {
+        let line = line?;
+        if line.is_empty() {
+            continue;
+        }
+
+        let response = match serde_json::from_str::<serde_json::Value>(&line) {
+            Ok(req) => process_request(&req, ctx, pass_names),
+            Err(e) => serde_json::json!({"status": "error", "message": format!("invalid JSON: {}", e)}),
+        };
+
+        let mut resp_str = serde_json::to_string(&response)?;
+        resp_str.push('\n');
+        writer.write_all(resp_str.as_bytes())?;
+        writer.flush()?;
+    }
+
+    Ok(())
+}
+
+fn process_request(
+    req: &serde_json::Value,
+    ctx: &pass::PassContext,
+    pass_names: &Option<Vec<String>>,
+) -> serde_json::Value {
+    let cmd = req.get("cmd").and_then(|v| v.as_str()).unwrap_or("");
+    match cmd {
+        "optimize" => {
+            let prog_id = match req.get("prog_id").and_then(|v| v.as_u64()) {
+                Some(id) => id as u32,
+                None => return serde_json::json!({"status": "error", "message": "missing prog_id"}),
+            };
+            match try_apply_one(prog_id, ctx, pass_names) {
+                Ok(true) => serde_json::json!({"status": "ok", "applied": true}),
+                Ok(false) => serde_json::json!({"status": "ok", "applied": false}),
+                Err(e) => serde_json::json!({"status": "error", "message": format!("{:#}", e)}),
+            }
+        }
+        "optimize-all" => {
+            let mut applied = 0u32;
+            let mut errors = 0u32;
+            let mut total = 0u32;
+            for prog_id in bpf::iter_prog_ids() {
+                total += 1;
+                match try_apply_one(prog_id, ctx, pass_names) {
+                    Ok(true) => applied += 1,
+                    Ok(false) => {}
+                    Err(_) => errors += 1,
+                }
+            }
+            serde_json::json!({"status": "ok", "total": total, "applied": applied, "errors": errors})
+        }
+        "status" => {
+            serde_json::json!({"status": "ok", "version": env!("CARGO_PKG_VERSION")})
+        }
+        _ => {
+            serde_json::json!({"status": "error", "message": format!("unknown command: {}", cmd)})
+        }
+    }
 }
 
 fn cmd_watch(interval_secs: u64, once: bool, ctx: &pass::PassContext, pass_names: &Option<Vec<String>>) -> Result<()> {
