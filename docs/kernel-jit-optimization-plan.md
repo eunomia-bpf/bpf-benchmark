@@ -632,5 +632,7 @@ make clean
 | **342** | **prog_type 覆盖测试（2026-03-22）** | ✅ VM 21/21 | `tests/unittest/rejit_prog_types.c`。.bpf.c + libbpf，覆盖 XDP/TC/socket/cgroup/kprobe/tracepoint/raw_tp/perf/fentry/fexit/freplace/LSM/struct_ops。含 kernel EXT REJIT fix。 |
 | **343** | **tail_call REJIT（2026-03-22）** | ✅ VM 2/2 | `tests/unittest/rejit_tail_call.c`。caller poke 更新 + target 两阶段 NOP/JMP。deadlock fix `f4be5f31b`。**BpfReJIT 零 prog_type 限制。** |
 | **344** | **Daemon 完整重构（2026-03-22）** | ✅ 111 tests | 删 matcher/emit/rewriter（-1622 行）→ passes/wide_mem。main.rs 走 PassManager。passes/ + analysis/ 拆模块。verifier_log 恢复。6,425 行 / 17 文件。 |
-| **345** | kfunc 发现 + VM module loading | 🔄 | opus 正在做。BTF 解析 + KfuncRegistry + module insmod。 |
-| **346** | 全量测试验证 | 待做 | 串行跑：daemon tests → unittest → micro → corpus → e2e。 |
+| **345** | **kfunc 发现 + VM module loading（2026-03-22）** | ✅ 119 tests | `kfunc_discovery.rs`（~130 行）：BTF parser + 扫描 `/sys/kernel/btf/` + KfuncRegistry 填充。Makefile 自动 insmod kinsn modules。Commits: `1c281ea` + `7f5d70a`。 |
+| **346** | **全量测试 + kernel bug fixes（2026-03-22）** | ✅ | **micro 62/62 完成，0 correctness mismatch，47 applied，geomean 0.887x（11.3% 加速）。** 发现并修复 4 个 kernel bug：**(1)** text_mutex 竞争（删 bpf_arch_text_invalidate）**(2)** kallsyms latch_tree 双重注册 **(3)** synchronize_rcu→expedited **(4)** XDP test_run 慢 sync。Kernel `b4bd737`，主仓库 `92d717c`。 |
+| **347** | **upstream BPF selftest（2026-03-22）** | ✅ | test_verifier **526 PASS / 1 FAIL**（CONFIG_IPV6 相关，非 REJIT 回归）。test_progs verifier+jit: 109 PASS。新增 `make vm-upstream-test-verifier` target。 |
+| **348** | kernel bug fix 审查 + 回归测试 | 🔄 | opus 审查 4 个 fix 正确性 + 补充 `tests/unittest/rejit_regression.c`。 |

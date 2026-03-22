@@ -68,7 +68,8 @@ struct AttrRejit {
     log_buf: u64,  // __aligned_u64
     fd_array: u64, // __aligned_u64
     fd_array_cnt: u32,
-    _pad: [u8; 128 - 40],
+    flags: u32,
+    _pad: [u8; 128 - 44],
 }
 
 // Safety: all-zeros is a valid representation for these C-compatible structs.
