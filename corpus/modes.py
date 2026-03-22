@@ -70,6 +70,10 @@ from runner.libs.corpus import (
     write_json_output,
     write_text_output,
 )
+from runner.libs.commands import (
+    build_runner_command as _build_runner_command,
+    maybe_prepend_sudo,
+)
 from runner.libs.policy import POLICY_DIR as DEFAULT_POLICY_DIR, resolve_policy_path
 
 
@@ -89,6 +93,44 @@ DEFAULT_VNG_MEMORY = "4G"
 DEFAULT_VNG_CPUS = "2"
 DEFAULT_REPEAT = 200
 DEFAULT_TIMEOUT_SECONDS = 240
+KINSN_MODULE_DIR = ROOT_DIR / "module" / "x86"
+KINSN_MODULE_NAMES = ["bpf_rotate.ko", "bpf_select.ko", "bpf_extract.ko"]
+
+
+def build_scanner_command(
+    scanner: Path | str,
+    xlated_path: Path | str,
+    *,
+    json_output: bool = False,
+) -> list[str]:
+    """Build a scanner command for the daemon.
+
+    The v2 daemon does not have a standalone 'scan' subcommand; this produces
+    a command that will fail gracefully, allowing the caller to fall back to
+    inventory-based or runner-based site counts.
+    """
+    command = [str(scanner), "scan", "--xlated", str(xlated_path), "--all"]
+    if json_output:
+        command.append("--json")
+    return command
+
+
+def parse_scanner_v5_output(stdout: str) -> dict[str, Any]:
+    """Parse scanner output for optimization site counts.
+
+    With the v2 daemon this path is not expected to succeed; the function
+    exists so that existing callers compile. If the scanner ever does produce
+    output, this returns a minimal dict compatible with normalize_scan().
+    """
+    import re
+    counts: dict[str, int] = {}
+    total = 0
+    for line in stdout.splitlines():
+        m = re.match(r"^\s*(\w+)\s*:\s*(\d+)", line)
+        if m:
+            counts[m.group(1)] = int(m.group(2))
+            total += int(m.group(2))
+    return {"total_sites": total, "families": counts}
 DEFAULT_BUILD_TIMEOUT_SECONDS = 3600
 DEFAULT_PERF_OUTPUT_JSON = authoritative_output_path(ROOT_DIR / "corpus" / "results", "corpus_perf")
 DEFAULT_PERF_OUTPUT_MD = ROOT_DIR / "docs" / "tmp" / "corpus-perf-results.md"
@@ -348,24 +390,28 @@ def build_runner_command(
     policy_file: Path | None = None,
     dump_xlated: Path | None = None,
     use_sudo: bool = False,
+    daemon_path: Path | None = None,
 ) -> list[str]:
-    return build_run_kernel_command(
-        runner=runner,
-        object_path=object_path,
+    # Determine whether to enable rejit: v2 uses --rejit + --daemon-path
+    # instead of the old v1 --recompile-v5 / --recompile-all flags.
+    enable_rejit = recompile_v5 or (policy_file is not None)
+    command = _build_runner_command(
+        runner,
+        "run-kernel",
+        program=object_path,
         program_name=program_name,
         io_mode=io_mode,
-        memory_path=memory_path,
+        repeat=max(1, repeat),
+        memory=memory_path,
         input_size=input_size,
-        repeat=repeat,
+        raw_packet=(io_mode == "packet"),
         compile_only=compile_only,
-        recompile_v5=recompile_v5,
-        recompile_all=recompile_all,
-        skip_families=skip_families,
-        policy_file=policy_file,
         dump_xlated=dump_xlated,
         btf_custom_path=btf_custom_path,
-        use_sudo=use_sudo,
+        rejit=enable_rejit,
+        daemon_path=daemon_path if enable_rejit else None,
     )
+    return maybe_prepend_sudo(command, enabled=use_sudo)
 
 
 def size_ratio(
@@ -510,7 +556,7 @@ def run_target_locally(
     scan_source = "inventory"
     scanner_counts = inventory_scan
 
-    with tempfile.TemporaryDirectory(prefix="corpus-v5-batch-", dir=ROOT_DIR) as tmpdir:
+    with tempfile.TemporaryDirectory(prefix="corpus-v5-batch-") as tmpdir:
         xlated_path = Path(tmpdir) / "program.xlated"
         baseline_compile_raw = run_command(
             build_runner_command(
@@ -566,6 +612,7 @@ def run_target_locally(
                     skip_families=skip_families,
                     policy_file=active_policy_path,
                     use_sudo=use_sudo,
+                    daemon_path=scanner,
                 ),
                 timeout_seconds,
             )
@@ -586,6 +633,7 @@ def run_target_locally(
                     skip_families=skip_families,
                     policy_file=active_policy_path,
                     use_sudo=use_sudo,
+                    daemon_path=scanner,
                 ),
                 timeout_seconds,
             )
@@ -683,7 +731,7 @@ def build_vng_command(*, vng_binary: str, kernel_image: Path, guest_exec: str) -
         vng_binary,
         "--run",
         str(kernel_image),
-        "--cwd",
+        "--rwdir",
         str(ROOT_DIR),
         "--disable-monitor",
         "--memory",
@@ -696,7 +744,18 @@ def build_vng_command(*, vng_binary: str, kernel_image: Path, guest_exec: str) -
 
 
 def build_guest_exec(argv: list[str]) -> str:
-    return " ".join(shlex.quote(part) for part in argv)
+    # Load kinsn kernel modules before running the guest command so the daemon
+    # can apply platform-specific rewrites (rotate, cond_select, extract).
+    load_snippets = []
+    for name in KINSN_MODULE_NAMES:
+        ko_path = KINSN_MODULE_DIR / name
+        load_snippets.append(
+            f'if [ -f {shlex.quote(str(ko_path))} ]; then '
+            f'insmod {shlex.quote(str(ko_path))} 2>/dev/null || true; fi'
+        )
+    kinsn_load = "; ".join(load_snippets) + "; " if load_snippets else ""
+    main_cmd = " ".join(shlex.quote(part) for part in argv)
+    return kinsn_load + main_cmd
 
 
 def load_targets(
@@ -1763,7 +1822,7 @@ def run_linear_mode(mode_name: str, argv: list[str] | None = None) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    forwarded = list(argv or [])
+    forwarded = list(argv if argv is not None else sys.argv[1:])
     if not forwarded or forwarded[0] in {"-h", "--help"}:
         raise SystemExit("corpus mode required: packet | tracing | perf | code-size")
     mode_name, *remaining = forwarded
