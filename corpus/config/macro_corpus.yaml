@@ -154,36 +154,36 @@ programs:
     tags: [selftests, networking, synproxy, tc]
 
   - name: systemd_sysctl_monitor
-    description: systemd cgroup/sysctl monitor compiled and JITed without runtime replay.
+    description: systemd cgroup/sysctl monitor attached to root cgroup and triggered via sysctl reads.
     source: corpus/build/systemd/sysctl-monitor.bpf.o
     prog_type: cgroup_sysctl
-    test_method: compile_only
-    program_name: sysctl_monitor
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [sysctl_monitor]
     sections: [cgroup/sysctl]
-    io_mode: context
-    test_input: corpus/inputs/macro_dummy_context_64.bin
-    input_size: 64
+    trigger: "for i in $(seq 200); do cat /proc/sys/kernel/hostname >/dev/null; done"
+    trigger_timeout_seconds: 30
     category: resource-control
     family: systemd
     level: production
-    hypothesis: Some cgroup hooks are loadable and optimizable even when test_run execution is not supported by the kernel.
-    tags: [systemd, cgroup, production, compile-only]
+    hypothesis: Cgroup sysctl hooks exercise a realistic attach-trigger path with bpf_stats measurement.
+    tags: [systemd, cgroup, production, attach]
 
   - name: datadog_oom_kill
-    description: Datadog OOM kill kprobe compiled in CO-RE mode and measured as compile-only.
+    description: Datadog OOM kill kprobe attached and triggered via controlled cgroup OOM.
     source: corpus/build/datadog-agent/oom-kill-kern.bpf.o
     prog_type: kprobe
-    test_method: compile_only
-    program_name: kprobe__oom_kill_process
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [kprobe__oom_kill_process]
     sections: [kprobe/oom_kill_process]
-    io_mode: context
-    test_input: corpus/inputs/macro_dummy_context_64.bin
-    input_size: 64
+    trigger: "echo +memory > /sys/fs/cgroup/cgroup.subtree_control 2>/dev/null; mkdir -p /sys/fs/cgroup/oom_bench 2>/dev/null; echo 2097152 > /sys/fs/cgroup/oom_bench/memory.max 2>/dev/null; (echo $BASHPID > /sys/fs/cgroup/oom_bench/cgroup.procs 2>/dev/null && exec head -c 8388608 /dev/zero) 2>/dev/null; rmdir /sys/fs/cgroup/oom_bench 2>/dev/null; true"
+    trigger_timeout_seconds: 30
     category: observability
     family: datadog-agent
     level: production
-    hypothesis: Production tracing probes are still useful compile-time JIT cases even when no safe synthetic trigger exists.
-    tags: [observability, datadog, kprobe, production, compile-only]
+    hypothesis: Production kprobe probes exercise attach-trigger with bpf_stats for accurate JIT measurement.
+    tags: [observability, datadog, kprobe, production, attach]
 
   - name: tracee_lsm_bpf
     description: Tracee LSM probe for BPF capability checks.
@@ -200,27 +200,31 @@ programs:
     tags: [security, observability, tracee, production, attach]
 
   - name: tetragon_execve
-    description: Tetragon execve tracepoint pipeline compiled and JITed via bpftool loadall.
+    description: Tetragon execve tracepoint pipeline loaded, attached, and triggered via execve syscalls.
     source: corpus/build/tetragon/bpf_execve_event.bpf.o
     prog_type: tracepoint
-    test_method: compile_only
+    test_method: attach_trigger
     compile_loader: bpftool_loadall
     program_names: [event_execve, execve_rate, execve_send]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
     category: security
     family: tetragon
     level: production
-    hypothesis: Production tracepoint pipelines still belong in the corpus even when autoattach is not yet stable for the full object.
-    tags: [security, observability, tetragon, production, compile-only]
+    hypothesis: Production tracepoint pipelines exercise a realistic live-attach path with bpf_stats execution measurement.
+    tags: [security, observability, tetragon, production, attach]
 
   - name: coroot_process_lifecycle
-    description: Coroot node agent process-lifecycle tracer compiled and JITed via bpftool loadall.
+    description: Coroot node agent process-lifecycle tracer loaded, selectively attached, and triggered via fork+exit.
     source: corpus/build/coroot-node-agent/ebpf.bpf.o
     prog_type: tracepoint
-    test_method: compile_only
+    test_method: attach_trigger
     compile_loader: bpftool_loadall
     program_names: [task_newtask, sched_process_exit, oom_mark_victim]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
     category: observability
     family: coroot-node-agent
     level: production
-    hypothesis: Large multi-fragment node agents still belong in the macro corpus even when autoattach is too brittle for the default suite.
-    tags: [observability, coroot, tracepoint, production, compile-only]
+    hypothesis: Large multi-fragment node agents exercise selective attach with bpf_stats for execution measurement on tracepoint programs.
+    tags: [observability, coroot, tracepoint, production, attach]

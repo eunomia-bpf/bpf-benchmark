@@ -60,6 +60,21 @@ except ImportError:
         summarize_optional_ns,
         summarize_phase_timings,
     )
+
+from runner.libs.attach import (
+    attach_cgroup_sysctl,
+    attach_kprobe,
+    attach_tracepoint,
+    bpf_obj_get,
+    detach_cgroup_sysctl,
+    managed_attachments,
+    parse_section_attach_info,
+)
+from runner.libs.metrics import (
+    enable_bpf_stats,
+    sample_bpf_stats,
+    compute_delta,
+)
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_SUITE = ROOT_DIR / "corpus" / "config" / "macro_corpus.yaml"
 DEFAULT_PACKET = ROOT_DIR / "corpus" / "inputs" / "macro_dummy_packet_64.bin"
@@ -801,6 +816,225 @@ def run_compile_only_loadall_sample(
         subprocess.run(["rm", "-rf", str(pin_dir)], cwd=ROOT_DIR, capture_output=True, text=True, check=False)
 
 
+def _attach_pinned_program(
+    pin_path: str,
+    section_name: str,
+    prog_fd: int,
+) -> int | None:
+    """Attach a single pinned program based on its section name.
+
+    Returns the attachment fd (perf_event fd or cgroup fd), or None if
+    the program type is not supported for manual attachment (e.g. uprobes).
+    """
+    info = parse_section_attach_info(section_name)
+    method = info["attach_method"]
+
+    if method == "tracepoint":
+        category = info["category"]
+        event = info["event"]
+        if not category or not event:
+            return None
+        return attach_tracepoint(prog_fd, category, event)
+
+    if method == "kprobe":
+        func_name = info["event"]
+        if not func_name:
+            return None
+        return attach_kprobe(prog_fd, func_name, is_return=False)
+
+    if method == "kretprobe":
+        func_name = info["event"]
+        if not func_name:
+            return None
+        return attach_kprobe(prog_fd, func_name, is_return=True)
+
+    if method == "cgroup_sysctl":
+        return attach_cgroup_sysctl(prog_fd)
+
+    # uprobes and unknown types: skip
+    return None
+
+
+def run_loadall_attach_trigger_sample(
+    suite: SuiteSpec,
+    spec: ProgramSpec,
+    *,
+    repeat: int,
+    iteration_idx: int,
+) -> dict[str, Any]:
+    """Load all programs via bpftool loadall, selectively attach chosen
+    programs, enable bpf_stats, run trigger, and measure execution time
+    via run_time_ns delta.
+
+    This is the general-purpose attach+trigger path for objects that cannot
+    use bpftool autoattach (e.g. objects mixing tracepoints with uprobes).
+    """
+    if not spec.trigger:
+        raise RuntimeError(f"{spec.name}: attach_trigger requires a trigger command")
+
+    pin_dir = unique_pin_dir(spec.name, "kernel", iteration_idx)
+
+    started_ns = time.perf_counter_ns()
+    load_attempts: list[dict[str, Any]] = []
+    attachment_fds: list[int] = []
+    prog_fds: list[int] = []
+    cgroup_detach_info: list[tuple[int, int]] = []  # (cgroup_fd, prog_fd) pairs
+
+    try:
+        load_command, load_attempts = run_bpftool_loadall(suite, spec, pin_dir)
+        load_ns = time.perf_counter_ns() - started_ns
+
+        # Discover pinned programs
+        pinned = pinned_programs_for_pin_dir(suite.bpftool_binary, pin_dir)
+        if spec.program_names:
+            pinned = [entry for entry in pinned if entry["program_name"] in spec.program_names]
+        if not pinned:
+            raise RuntimeError(f"{spec.name}: no pinned programs found under {pin_dir}")
+
+        # Get program info for code_size
+        infos = [program_info_by_id(suite.bpftool_binary, int(entry["prog_id"])) for entry in pinned]
+        code_size = aggregate_program_infos(infos)
+
+        # Get the section names for each pinned program from the object inventory
+        inventory = discover_program_inventory(suite.runner_binary, spec.source)
+        section_by_name = {str(p["name"]): str(p.get("section_name", "")) for p in inventory}
+
+        # Collect prog_ids for bpf_stats
+        prog_ids = [int(entry["prog_id"]) for entry in pinned]
+
+        # Open pinned program fds and attach
+        attached_programs: list[dict[str, Any]] = []
+        for entry in pinned:
+            prog_name = str(entry["program_name"])
+            pin_path = str(entry["pin_path"])
+            section_name = section_by_name.get(prog_name, "")
+
+            try:
+                prog_fd = bpf_obj_get(pin_path)
+                prog_fds.append(prog_fd)
+            except RuntimeError as exc:
+                print(f"  [warn] failed to open pinned program {prog_name}: {exc}")
+                continue
+
+            try:
+                attach_info = parse_section_attach_info(section_name)
+                attach_fd = _attach_pinned_program(pin_path, section_name, prog_fd)
+                if attach_fd is not None:
+                    attached_programs.append({
+                        "program_name": prog_name,
+                        "prog_id": int(entry["prog_id"]),
+                        "section_name": section_name,
+                        "attach_method": attach_info["attach_method"],
+                    })
+                    # Track cgroup attachments separately (need explicit detach + close)
+                    if attach_info["attach_method"] == "cgroup_sysctl":
+                        cgroup_detach_info.append((attach_fd, prog_fd))
+                    else:
+                        # perf_event fds: auto-detach on close
+                        attachment_fds.append(attach_fd)
+                else:
+                    print(f"  [info] skipping unsupported attach for {prog_name} ({section_name})")
+            except RuntimeError as exc:
+                print(f"  [warn] failed to attach {prog_name} ({section_name}): {exc}")
+
+        if not attached_programs:
+            raise RuntimeError(f"{spec.name}: no programs could be attached")
+
+        # Enable bpf_stats and measure
+        with enable_bpf_stats():
+            stats_before = sample_bpf_stats(prog_ids)
+            trigger = run_trigger_command(spec.trigger, repeat, spec.trigger_timeout_seconds)
+            stats_after = sample_bpf_stats(prog_ids)
+
+        delta = compute_delta(stats_before, stats_after)
+        summary = delta["summary"]
+        total_run_time_ns = int(summary.get("total_run_time_ns", 0) or 0)
+        total_events = int(summary.get("total_events", 0) or 0)
+        avg_ns = int(summary.get("avg_ns_per_run") or 0) if summary.get("avg_ns_per_run") is not None else 0
+
+        # Use bpf_stats run_time_ns as the authoritative exec timing
+        # Fall back to wall-clock trigger time if no events were recorded
+        if total_events > 0:
+            exec_ns = avg_ns
+            timing_source = "bpf_stats"
+        else:
+            exec_ns = trigger["exec_ns"]
+            timing_source = "wall_clock"
+
+        sample = {
+            "compile_ns": load_ns,
+            "exec_ns": exec_ns,
+            "wall_exec_ns": trigger["wall_exec_ns"],
+            "timing_source": timing_source,
+            "result": trigger["returncode"],
+            "retval": trigger["returncode"],
+            "code_size": code_size,
+            "phases_ns": {
+                "object_load_ns": load_ns,
+                "trigger_total_ns": trigger["wall_exec_ns"],
+            },
+            "perf_counters": {},
+            "perf_counters_meta": {
+                "requested": False,
+                "collected": False,
+                "include_kernel": False,
+                "scope": "full_repeat_raw",
+                "error": "",
+            },
+            "directive_scan": {
+                "performed": False,
+                **ZERO_DIRECTIVE_SCAN,
+            },
+            "bpf_stats": {
+                "total_run_time_ns": total_run_time_ns,
+                "total_events": total_events,
+                "avg_ns_per_run": avg_ns,
+                "program_deltas": {
+                    str(k): v for k, v in (delta.get("programs") or {}).items()
+                },
+            },
+            "attached_programs": attached_programs,
+            "trigger": {
+                "command": spec.trigger,
+                "returncodes": trigger["returncodes"],
+                "stdout_tail": trigger["stdout_tail"],
+                "stderr_tail": trigger["stderr_tail"],
+            },
+            "effective_repeat": max(1, repeat),
+            "bpftool_command": load_command,
+            "bpftool_attempts": load_attempts,
+        }
+        return sample
+    finally:
+        # Detach cgroup programs explicitly and close their fds
+        for cgroup_fd, prog_fd in cgroup_detach_info:
+            try:
+                detach_cgroup_sysctl(cgroup_fd, prog_fd)
+            except Exception:
+                pass
+            try:
+                os.close(cgroup_fd)
+            except OSError:
+                pass
+
+        # Close all perf_event attachment fds (auto-detach on close)
+        for fd in attachment_fds:
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+
+        # Close prog fds
+        for fd in prog_fds:
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+
+        # Remove pin directory
+        subprocess.run(["rm", "-rf", str(pin_dir)], cwd=ROOT_DIR, capture_output=True, text=True, check=False)
+
+
 def execute_sample(
     suite: SuiteSpec,
     spec: ProgramSpec,
@@ -813,6 +1047,13 @@ def execute_sample(
     inventory = discover_program_inventory(suite.runner_binary, spec.source)
     selected = choose_programs(spec, inventory)
     if spec.test_method == "attach_trigger":
+        if spec.compile_loader == "bpftool_loadall":
+            return run_loadall_attach_trigger_sample(
+                suite,
+                spec,
+                repeat=repeat,
+                iteration_idx=iteration_idx,
+            )
         return run_attach_trigger_sample(
             suite,
             spec,
