@@ -6,6 +6,7 @@ use crate::insn::*;
 use crate::pass::*;
 
 use super::fixup_branches_inline;
+use super::utils::{emit_kfunc_call, KfuncArg};
 
 /// COND_SELECT pass: replaces branch+mov diamond patterns with
 /// bpf_select64() kfunc calls (lowered to CMOV by the JIT).

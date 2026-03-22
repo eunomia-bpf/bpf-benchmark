@@ -5,7 +5,7 @@ use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
-use super::fixup_branches_inline;
+use super::utils::{emit_kfunc_call, fixup_all_branches, KfuncArg};
 
 /// ROTATE optimization pass: replaces shift+OR rotate patterns with
 /// bpf_rotate64() kfunc calls. JIT inlines the kfunc as a RORX instruction.
@@ -122,15 +122,16 @@ impl BpfPass for RotatePass {
 
             if site_idx < safe_sites.len() && pc == safe_sites[site_idx].start_pc {
                 let site = &safe_sites[site_idx];
-                // Emit: r1 = val_reg, r2 = shift, call kfunc, dst = r0.
-                if site.val_reg != 1 {
-                    new_insns.push(BpfInsn::mov64_reg(1, site.val_reg));
-                }
-                new_insns.push(BpfInsn::mov64_imm(2, site.shift_amount as i32));
-                new_insns.push(BpfInsn::call_kfunc(btf_id));
-                if site.dst_reg != 0 {
-                    new_insns.push(BpfInsn::mov64_reg(site.dst_reg, 0));
-                }
+                // Emit: bpf_rotate64(val_reg, shift_amount) -> dst_reg
+                let replacement = emit_kfunc_call(
+                    site.dst_reg,
+                    &[
+                        KfuncArg::Reg(site.val_reg),
+                        KfuncArg::Imm(site.shift_amount as i32),
+                    ],
+                    btf_id,
+                );
+                new_insns.extend_from_slice(&replacement);
 
                 // Map old PCs in the site range.
                 for j in 1..site.old_len {

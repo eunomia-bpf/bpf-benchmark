@@ -347,16 +347,29 @@ def paired_stock_invocation_summary(result: dict[str, Any] | None) -> dict[str, 
     if not summary or not summary.get("ok"):
         return None
 
+    all_samples = list(parse_runner_samples(str(result.get("stdout") or "")))
+
     stock_samples = [
         dict(sample)
-        for sample in parse_runner_samples(str(result.get("stdout") or ""))
+        for sample in all_samples
         if sample.get("phase") == "stock"
     ]
-    if not stock_samples:
-        return None
+    if stock_samples:
+        summary["sample"] = stock_samples[-1]
+        return summary
 
-    summary["sample"] = stock_samples[-1]
-    return summary
+    # Fallback: when no rejit was requested, the runner emits a single sample
+    # without a "phase" field.  Use it as the baseline measurement.
+    vanilla_samples = [
+        dict(sample)
+        for sample in all_samples
+        if sample.get("phase") is None and sample.get("exec_ns") is not None
+    ]
+    if vanilla_samples:
+        summary["sample"] = vanilla_samples[-1]
+        return summary
+
+    return None
 
 
 def text_invocation_summary(result: dict[str, Any] | None) -> dict[str, Any] | None:

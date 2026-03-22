@@ -24,6 +24,7 @@ pub const BPF_IMM: u8 = 0x00;
 pub const BPF_MEM: u8 = 0x60;
 
 // ── ALU/JMP operations ──────────────────────────────────────────────
+pub const BPF_AND: u8 = 0x50;
 pub const BPF_OR: u8 = 0x40;
 pub const BPF_LSH: u8 = 0x60;
 pub const BPF_RSH: u8 = 0x70;

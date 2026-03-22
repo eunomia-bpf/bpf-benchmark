@@ -1,67 +1,28 @@
 // SPDX-License-Identifier: MIT
 //! Concrete pass implementations and pipeline constructors.
 
+pub mod utils;
 mod wide_mem;
 mod rotate;
 mod cond_select;
 mod branch_flip;
 mod spectre;
+mod extract;
 
 pub use wide_mem::WideMemPass;
 pub use rotate::RotatePass;
 pub use cond_select::CondSelectPass;
 pub use branch_flip::BranchFlipPass;
 pub use spectre::SpectreMitigationPass;
+pub use extract::ExtractPass;
 
 use crate::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis};
-use crate::insn::BpfInsn;
 use crate::pass::PassManager;
 
-// ── Shared utility ──────────────────────────────────────────────────
-
-/// Fix up branch and pseudo-call offsets after rewriting using an address map.
-///
-/// For each instruction in the *original* stream that is a branch/jump,
-/// compute where it ended up in the new stream and adjust its offset
-/// so it still points to the correct target.
-pub(crate) fn fixup_branches_inline(
-    new_insns: &mut [BpfInsn],
-    old_insns: &[BpfInsn],
-    addr_map: &[usize],
-) {
-    let old_n = old_insns.len();
-    let mut old_pc = 0;
-    while old_pc < old_n {
-        let insn = &old_insns[old_pc];
-        if insn.is_call() && insn.src_reg() == 1 {
-            // BPF pseudo-call: fix up imm (pc-relative offset to target subprog).
-            let old_target = (old_pc as i64 + 1 + insn.imm as i64) as usize;
-            if old_target < old_n {
-                let new_pc = addr_map[old_pc];
-                let new_target = addr_map[old_target];
-                if new_pc < new_insns.len() && new_insns[new_pc].is_call() {
-                    let new_imm = new_target as i64 - (new_pc as i64 + 1);
-                    new_insns[new_pc].imm = new_imm as i32;
-                }
-            }
-        } else if insn.is_jmp_class() && !insn.is_call() && !insn.is_exit() {
-            let new_pc = addr_map[old_pc];
-            let old_target = (old_pc as i64 + 1 + insn.off as i64) as usize;
-            if old_target <= old_n {
-                let new_target = addr_map[old_target];
-                if new_pc < new_insns.len() && new_insns[new_pc].is_jmp_class() {
-                    let new_off = new_target as i64 - (new_pc as i64 + 1);
-                    new_insns[new_pc].off = new_off as i16;
-                }
-            }
-        }
-        old_pc = if insn.is_ldimm64() {
-            old_pc + 2
-        } else {
-            old_pc + 1
-        };
-    }
-}
+// ── Legacy alias ───────────────────────────────────────────────────
+// Re-export `fixup_all_branches` under the old name for backward compat
+// within this crate. New code should use `utils::fixup_all_branches` directly.
+pub(crate) use utils::fixup_all_branches as fixup_branches_inline;
 
 // ── Pipeline constructors ───────────────────────────────────────────
 
@@ -77,6 +38,7 @@ pub fn build_default_pipeline() -> PassManager {
     pm.add_pass(WideMemPass);
     pm.add_pass(RotatePass);
     pm.add_pass(CondSelectPass);
+    pm.add_pass(ExtractPass);
     pm.add_pass(BranchFlipPass { min_bias: 0.7 });
 
     pm
@@ -84,7 +46,7 @@ pub fn build_default_pipeline() -> PassManager {
 
 /// Build a pipeline containing only the named passes.
 ///
-/// Pass names: `wide_mem`, `rotate`, `cond_select`, `branch_flip`, `spectre_mitigation`.
+/// Pass names: `wide_mem`, `rotate`, `cond_select`, `extract`, `branch_flip`, `spectre_mitigation`.
 /// Unknown names are silently ignored.
 pub fn build_pipeline_with_passes(names: &[String]) -> PassManager {
     let mut pm = PassManager::new();
@@ -107,6 +69,9 @@ pub fn build_pipeline_with_passes(names: &[String]) -> PassManager {
     }
     if name_set.contains("branch_flip") {
         pm.add_pass(BranchFlipPass { min_bias: 0.7 });
+    }
+    if name_set.contains("extract") {
+        pm.add_pass(ExtractPass);
     }
     if name_set.contains("spectre_mitigation") {
         pm.add_pass(SpectreMitigationPass);

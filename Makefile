@@ -85,7 +85,9 @@ VENV ?= $(_VENV_FOUND)
 #   make vm-micro BENCH="simple bitcount"
 BENCH ?=
 
-VNG ?= vng
+# vng requires a real PTY (/proc/self/fd/{0,1,2} must be O_RDWR).
+# The wrapper auto-provides one via script(1) in non-interactive environments.
+VNG ?= $(ROOT_DIR)/runner/scripts/vng-wrapper.sh
 NPROC ?= $(shell nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
 # Prevent top-level `make -B` from leaking into recursive kernel submakes.
 ARM64_KERNEL_MAKEFLAGS := $(filter-out B,$(MAKEFLAGS))

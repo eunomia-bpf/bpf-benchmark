@@ -304,7 +304,9 @@ def materialize_dummy_context(path: Path, size: int = 64) -> Path:
     return path
 
 
-def summarize_text(text: str, max_lines: int = 20, max_chars: int = 4000) -> str:
+def summarize_text(text: str | bytes, max_lines: int = 20, max_chars: int = 4000) -> str:
+    if isinstance(text, bytes):
+        text = text.decode("utf-8", errors="replace")
     lines = [line.rstrip() for line in text.splitlines() if line.strip()]
     if len(lines) > max_lines:
         lines = lines[-max_lines:]
@@ -343,14 +345,21 @@ def run_command(
             timeout=timeout_seconds,
         )
     except subprocess.TimeoutExpired as exc:
+        # exc.stdout/stderr may be bytes even with text=True
+        raw_stdout = exc.stdout or ""
+        raw_stderr = exc.stderr or ""
+        if isinstance(raw_stdout, bytes):
+            raw_stdout = raw_stdout.decode("utf-8", errors="replace")
+        if isinstance(raw_stderr, bytes):
+            raw_stderr = raw_stderr.decode("utf-8", errors="replace")
         return {
             "ok": False,
             "command": command,
             "returncode": None,
             "timed_out": True,
             "duration_seconds": time.monotonic() - start,
-            "stdout": exc.stdout or "",
-            "stderr": exc.stderr or "",
+            "stdout": raw_stdout,
+            "stderr": raw_stderr,
             "sample": None,
             "error": f"timeout after {timeout_seconds}s",
         }

@@ -200,13 +200,15 @@ class ManualTraceeSession:
                 program_ptr = program_ptrs[name]
                 prog_fd = int(self.libbpf.lib.bpf_program__fd(program_ptr))
                 if prog_fd < 0:
-                    raise ManualTraceeLoadError(f"bpf_program__fd failed for {name}")
+                    import sys
+                    print(f"[manual] WARNING: bpf_program__fd failed for {name}, skipping", file=sys.stderr)
+                    continue
                 link_ptr = self.libbpf.lib.bpf_program__attach(program_ptr)
                 attach_error = self.libbpf.pointer_error(link_ptr)
                 if attach_error != 0:
-                    raise ManualTraceeLoadError(
-                        f"bpf_program__attach failed for {name}: errno={attach_error}"
-                    )
+                    import sys
+                    print(f"[manual] WARNING: bpf_program__attach failed for {name}: errno={attach_error}, skipping", file=sys.stderr)
+                    continue
                 info = self.libbpf.get_prog_info(prog_fd)
                 self.program_handles[name] = ProgramHandle(
                     name=name,
@@ -216,6 +218,8 @@ class ManualTraceeSession:
                     prog_id=int(info.id),
                     link_ptr=int(link_ptr),
                 )
+            if not self.program_handles:
+                raise ManualTraceeLoadError("no programs could be attached")
             return self
         except Exception:
             self.__exit__(None, None, None)

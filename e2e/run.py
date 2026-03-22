@@ -28,11 +28,11 @@ from e2e.cases.katran.case import (  # noqa: E402
     DEFAULT_KATRAN_OBJECT as DEFAULT_KATRAN_CASE_OBJECT,
     DEFAULT_OUTPUT_JSON as DEFAULT_KATRAN_OUTPUT_JSON,
     DEFAULT_OUTPUT_MD as DEFAULT_KATRAN_OUTPUT_MD,
-    DEFAULT_POLICY_FILE as DEFAULT_KATRAN_POLICY_FILE,
     DEFAULT_SETUP_SCRIPT as DEFAULT_KATRAN_SETUP_SCRIPT,
     persist_results as persist_katran_results,
     run_katran_case,
 )
+DEFAULT_KATRAN_POLICY_FILE = ROOT_DIR / "e2e" / "cases" / "katran" / "balancer_ingress.e2e.policy.yaml"
 from e2e.cases.scx.case import (  # noqa: E402
     DEFAULT_OUTPUT_JSON as DEFAULT_SCX_OUTPUT_JSON,
     DEFAULT_OUTPUT_MD as DEFAULT_SCX_OUTPUT_MD,
