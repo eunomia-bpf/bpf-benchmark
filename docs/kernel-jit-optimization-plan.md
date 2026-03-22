@@ -469,7 +469,7 @@ module/                     # kinsn 内核模块（out-of-tree）
 micro/config/               # Active micro suite manifest YAML
 ```
 
-详细设计文档见 `docs/tmp/benchmark-framework-design.md`。
+详细设计文档见 `docs/tmp/benchmark-framework-design_20260320.md`。
 
 ---
 

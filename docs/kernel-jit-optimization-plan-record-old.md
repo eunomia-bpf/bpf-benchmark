@@ -195,7 +195,7 @@
 | 176 | Prologue 优化 | ❌ | 占 gap 18.5%。 |
 | 177 | Cost model | ❌ | 跳过 same-size/dense 超阈值。 |
 | 178 | 更多 E2E 数据 | ❌ | 目标 ≥3 workload 正向。 |
-| 179 | Per-form ablation | ✅ | ROTATE **0.923x** win，CMOV **1.068x** loss。`docs/tmp/micro-per-form-ablation.md` |
+| 179 | Per-form ablation | ✅ | ROTATE **0.923x** win，CMOV **1.068x** loss。`docs/tmp/micro-per-form-ablation_20260313.md` |
 | 180 | 框架重构 Makefile | ✅ | file-based deps + provenance + POLICY=。 |
 | 181 | CI 修复 | ✅ | driver.py + requirements.txt。 |
 | 182 | Opus review | ✅ | 架构✅，方法学有 gap。`docs/tmp/deep-review-*.md` |
@@ -208,8 +208,8 @@
 | 192 | Katran E2E 可行性 | ✅ | 94 live sites。`docs/tmp/katran_e2e_feasibility_20260318.md` |
 | 193 | Corpus policy refresh | ✅ | 582 个 v3 policy，skip cmov+extract。 |
 | 194 | 项目卫生审计 | ✅ | `docs/tmp/project_hygiene_audit_20260318.md` |
-| 195 | 内核修改文档 | ✅ | 1017 行。`docs/tmp/kernel_modifications_analysis.md` |
-| 196 | Framework 设计文档 | ✅ | 800+ 行。`docs/tmp/benchmark_framework_analysis.md` |
+| 195 | 内核修改文档 | ✅ | 1017 行。`docs/tmp/kernel_modifications_analysis_20260318.md` |
+| 196 | Framework 设计文档 | ✅ | 800+ 行。`docs/tmp/benchmark_framework_analysis_20260318.md` |
 | 197 | Micro 第三轮 | ✅ 归入 #189 | |
 | 198 | prog_fd 残留清理 | ✅ | enumerate-only。 |
 | 199 | Corpus refreshed rerun | ⚠️ | applied-only **1.077x**，overall 0.881x。 |
