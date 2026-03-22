@@ -39,6 +39,7 @@ def build_runner_command(
     rejit: bool = False,
     rejit_program: Path | str | None = None,
     daemon_path: Path | str | None = None,
+    daemon_socket: str | None = None,
 ) -> list[str]:
     command = [
         str(runner_binary),
@@ -73,6 +74,8 @@ def build_runner_command(
     _append_bool_option(command, "--rejit", rejit)
     _append_path_option(command, "--rejit-program", rejit_program)
     _append_path_option(command, "--daemon-path", daemon_path)
+    if daemon_socket is not None:
+        command.extend(["--daemon-socket", daemon_socket])
     return command
 
 
@@ -101,6 +104,7 @@ def build_micro_benchmark_command(
     rejit: bool = False,
     rejit_program: Path | str | None = None,
     daemon_path: Path | str | None = None,
+    daemon_socket: str | None = None,
 ) -> list[str]:
     if runtime_mode == "llvmbpf":
         command = build_runner_command(
@@ -144,6 +148,7 @@ def build_micro_benchmark_command(
             rejit=rejit,
             rejit_program=rejit_program,
             daemon_path=daemon_path,
+            daemon_socket=daemon_socket,
         )
         return maybe_prepend_sudo(command, enabled=require_sudo)
 

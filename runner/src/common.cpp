@@ -87,7 +87,7 @@ std::string usage_text()
 #endif
         "run-kernel|list-programs> [--program <path>|<path>] [--program-name <name>] "
         "[--memory|--input <path>] [--btf-custom-path <path>] "
-        "[--rejit] [--rejit-program <path>] [--daemon-path <path>] "
+        "[--rejit] [--rejit-program <path>] [--daemon-path <path>] [--daemon-socket <path>] "
         "[--manual-load] "
         "[--io-mode map|staged|packet|context] [--raw-packet] [--repeat N] [--warmup N] [--input-size|--kernel-input-size N] "
         "[--opt-level 0|1|2|3] [--no-cmov] [--llvm-target-cpu <cpu>] [--llvm-target-features <csv>] [--llvm-disable-pass <name>] [--llvm-log-passes] "
@@ -210,6 +210,11 @@ cli_options parse_args(int argc, char **argv)
         }
         if (current == "--daemon-path" && index + 1 < argc) {
             options.daemon_path = std::filesystem::path(argv[++index]);
+            options.rejit = true;
+            continue;
+        }
+        if (current == "--daemon-socket" && index + 1 < argc) {
+            options.daemon_socket = std::string(argv[++index]);
             options.rejit = true;
             continue;
         }

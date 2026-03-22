@@ -70,8 +70,8 @@ TMP_DIR := $(ROOT_DIR)/docs/tmp
 
 BZIMAGE ?= vendor/linux-framework/arch/x86/boot/bzImage
 DAEMON ?= daemon/target/release/bpfrejit-daemon
+DAEMON_SOCKET ?= /tmp/bpfrejit.sock
 KINSN_MODULE_DIR := $(ROOT_DIR)/module/x86
-KINSN_MODULES := $(KINSN_MODULE_DIR)/bpf_rotate.ko $(KINSN_MODULE_DIR)/bpf_select.ko $(KINSN_MODULE_DIR)/bpf_extract.ko
 ITERATIONS ?= 3
 WARMUPS ?= 1
 REPEAT ?= 100
@@ -197,7 +197,8 @@ help:
 	@echo "  make runner           - Build micro_exec runner"
 	@echo "  make micro            - Build micro_exec runner and BPF programs"
 	@echo "  make daemon           - Build bpfrejit-daemon"
-	@echo "  make kernel           - Build kernel bzImage"
+	@echo "  make kernel           - Build kernel bzImage (auto-copies vendor/bpfrejit_defconfig if present)"
+	@echo "  make kinsn-modules    - Build kinsn out-of-tree kernel modules (depends on kernel)"
 	@echo "  make kernel-perf      - Build kernel-matched perf from vendor/linux-framework/tools/perf"
 	@echo "  make kernel-arm64     - Cross-build ARM64 Image under vendor/linux-framework/build-arm64"
 	@echo "  make kernel-tests     - Build kernel recompile test binary"
@@ -315,7 +316,7 @@ daemon:
 	@echo "=== Running make daemon ==="
 	cargo build --release --manifest-path "$(DAEMON_DIR)/Cargo.toml"
 
-kinsn-modules:
+kinsn-modules: $(BZIMAGE_PATH)
 	@echo "=== Running make kinsn-modules ==="
 	$(MAKE) -C "$(KINSN_MODULE_DIR)" KDIR="$(KERNEL_DIR)"
 
@@ -394,9 +395,16 @@ $(DAEMON_PATH): $(DAEMON_SOURCES)
 	@echo "=== Building bpfrejit-daemon (sources changed) ==="
 	cargo build --release --manifest-path "$(DAEMON_DIR)/Cargo.toml"
 
+DEFCONFIG_SRC := $(ROOT_DIR)/vendor/bpfrejit_defconfig
+
 $(BZIMAGE_PATH): $(KERNEL_JIT_SOURCES)
 	@echo "=== Building bzImage (kernel sources changed) ==="
-	$(MAKE) -C "$(KERNEL_DIR)" -j"$(NPROC)" bzImage
+	@if [ -f "$(DEFCONFIG_SRC)" ] && ! diff -q "$(DEFCONFIG_SRC)" "$(KERNEL_DIR)/.config" >/dev/null 2>&1; then \
+		echo "  Copying vendor/bpfrejit_defconfig → .config"; \
+		cp "$(DEFCONFIG_SRC)" "$(KERNEL_DIR)/.config"; \
+		$(MAKE) -C "$(KERNEL_DIR)" olddefconfig; \
+	fi
+	$(MAKE) -C "$(KERNEL_DIR)" -j"$(NPROC)" bzImage modules_prepare
 
 $(ARM64_ROOTFS_DIR)/bin/sh:
 	@echo "=== Preparing ARM64 rootfs ($(ARM64_ROOTFS_RELEASE)) ==="
@@ -554,15 +562,18 @@ vm-upstream-test-progs: $(BZIMAGE_PATH)
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -m 4G -- \
 		bash -c 'cd "$(UPSTREAM_SELFTESTS_BIN_DIR)" && sudo ./test_progs $(foreach t,$(BPF_SELFTEST_FILTER),-t $(t)) 2>&1'
 
-vm-micro-smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(DAEMON_PATH) $(BZIMAGE_PATH)
+vm-micro-smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(DAEMON_PATH) $(BZIMAGE_PATH) kinsn-modules
 	@echo "=== Running make vm-micro-smoke (POLICY=$(POLICY)) ==="
 	mkdir -p "$(MICRO_RESULTS_DEV_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
 		bash -lc 'cd "$(ROOT_DIR)" && $(VM_INIT) \
+			"$(DAEMON_PATH)" serve --socket "$(DAEMON_SOCKET)" & DAEMON_PID=$$!; \
+			sleep 0.5; \
+			trap "kill $$DAEMON_PID 2>/dev/null; rm -f $(DAEMON_SOCKET)" EXIT; \
 			python3 "$(MICRO_DIR)/driver.py" suite \
 			--runtime kernel \
 			--runtime kernel-rejit \
-			--daemon-path "$(DAEMON_PATH)" \
+			--daemon-socket "$(DAEMON_SOCKET)" \
 			$(VM_SMOKE_ARGS) \
 			$(POLICY_DIR_FLAG) \
 			--output "$(VM_MICRO_SMOKE_OUTPUT)"'
@@ -570,22 +581,25 @@ vm-micro-smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(DAEMON_PATH) $(BZIMAGE_PATH
 # Run the full micro benchmark suite in a VM.
 # To run only specific benchmarks: make vm-micro BENCH="simple bitcount"
 # To use a named policy set: make vm-micro POLICY=all-apply
-vm-micro: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(DAEMON_PATH) verify-build $(BZIMAGE_PATH)
+vm-micro: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(DAEMON_PATH) verify-build $(BZIMAGE_PATH) kinsn-modules
 	@echo "=== Running make vm-micro (POLICY=$(POLICY)) ==="
 	mkdir -p "$(MICRO_RESULTS_DEV_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
 		bash -lc 'cd "$(ROOT_DIR)" && $(VM_INIT) \
+			"$(DAEMON_PATH)" serve --socket "$(DAEMON_SOCKET)" & DAEMON_PID=$$!; \
+			sleep 0.5; \
+			trap "kill $$DAEMON_PID 2>/dev/null; rm -f $(DAEMON_SOCKET)" EXIT; \
 			python3 "$(MICRO_DIR)/driver.py" suite \
 			--runtime llvmbpf \
 			--runtime kernel \
 			--runtime kernel-rejit \
-			--daemon-path "$(DAEMON_PATH)" \
+			--daemon-socket "$(DAEMON_SOCKET)" \
 			$(MICRO_ARGS) \
 			$(POLICY_DIR_FLAG) \
 			--output "$(VM_MICRO_OUTPUT)"'
 
 # The corpus batch harness already manages one vng boot per target internally.
-vm-corpus: $(MICRO_RUNNER) $(DAEMON_PATH) verify-build $(BZIMAGE_PATH)
+vm-corpus: $(MICRO_RUNNER) $(DAEMON_PATH) verify-build $(BZIMAGE_PATH) kinsn-modules
 	@echo "=== Running make vm-corpus ==="
 	mkdir -p "$(CORPUS_RESULTS_DEV_DIR)"
 	$(VENV_ACTIVATE) python3 "$(ROOT_DIR)/corpus/driver.py" packet \
@@ -600,7 +614,7 @@ vm-corpus: $(MICRO_RUNNER) $(DAEMON_PATH) verify-build $(BZIMAGE_PATH)
 		--output-json "$(VM_CORPUS_OUTPUT_JSON)" \
 		--output-md "$(VM_CORPUS_OUTPUT_MD)"
 
-vm-e2e: $(MICRO_RUNNER) $(DAEMON_PATH) verify-build $(BZIMAGE_PATH)
+vm-e2e: $(MICRO_RUNNER) $(DAEMON_PATH) verify-build $(BZIMAGE_PATH) kinsn-modules
 	@echo "=== Running make vm-e2e ==="
 	mkdir -p "$(E2E_RESULTS_DEV_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \

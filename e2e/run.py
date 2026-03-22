@@ -11,11 +11,9 @@ if __package__ in {None, ""}:
 from runner.libs import (  # noqa: E402
     ROOT_DIR,
     prepare_bpftool_environment,
-    tail_text,
     write_json,
     write_text,
 )
-from runner.libs.vm import run_in_vm, write_guest_script  # noqa: E402
 from e2e.cases.bpftrace.case import (  # noqa: E402
     DEFAULT_OUTPUT_JSON as DEFAULT_BPFTRACE_OUTPUT_JSON,
     DEFAULT_OUTPUT_MD as DEFAULT_BPFTRACE_OUTPUT_MD,
@@ -60,8 +58,6 @@ from e2e.cases.tracee.case import (  # noqa: E402
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Unified entrypoint for repository end-to-end benchmarks.")
     parser.add_argument("case", choices=("tracee", "tetragon", "bpftrace", "scx", "katran"))
-    parser.add_argument("--vm", action="store_true", help="Run the benchmark inside a virtme-ng guest.")
-    parser.add_argument("--kernel", help="Kernel image used with --vm.")
     parser.add_argument("--smoke", action="store_true", help="Run the smoke-sized configuration.")
     parser.add_argument("--dry-run", action="store_true", help="Resolve the execution plan without running the live workload.")
     parser.add_argument("--duration", type=int, help="Override the per-workload duration in seconds.")
@@ -103,170 +99,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--bpftool-binary", default="/usr/local/sbin/bpftool")
     parser.add_argument("--bpftool", help="Explicit bpftool path for Tetragon runs.")
     parser.add_argument("--scheduler-extra-arg", action="append", default=[])
-    parser.add_argument("--cpus", type=int, default=2, help="Guest CPU count for --vm runs.")
-    parser.add_argument("--mem", default="4G", help="Guest memory size for --vm runs.")
-    parser.add_argument("--timeout", type=int, default=2400, help="VM timeout in seconds.")
     parser.add_argument("--skip-setup", action="store_true", help=argparse.SUPPRESS)
     return parser
-
-
-def run_tracee_vm(args: argparse.Namespace) -> int:
-    if not args.kernel:
-        raise SystemExit("--kernel is required with --vm")
-
-    guest_command = [
-        "python3",
-        "e2e/run.py",
-        "tracee",
-        "--output-json",
-        str(Path(args.output_json).resolve()),
-        "--output-md",
-        str(Path(args.output_md).resolve()),
-        "--config",
-        str(Path(args.config).resolve()),
-        "--setup-script",
-        str(Path(args.setup_script).resolve()),
-        "--tracee-object",
-        str(Path(args.tracee_object).resolve()),
-        "--runner",
-        str(Path(args.runner).resolve()),
-        "--daemon",
-        str(Path(args.daemon).resolve()),
-        "--load-timeout",
-        str(int(args.load_timeout)),
-        "--skip-setup",
-    ]
-    if args.smoke:
-        guest_command.append("--smoke")
-    if args.duration is not None:
-        guest_command.extend(["--duration", str(int(args.duration))])
-    if args.tracee_binary:
-        guest_command.extend(["--tracee-binary", str(Path(args.tracee_binary).resolve())])
-    for extra_arg in args.tracee_extra_arg or []:
-        guest_command.extend(["--tracee-extra-arg", extra_arg])
-
-    guest_script = write_guest_script(
-        [
-            ["bash", str(Path(args.setup_script).resolve())],
-            guest_command,
-        ]
-    )
-    completed = run_in_vm(args.kernel, guest_script, args.cpus, args.mem, args.timeout)
-    sys.stdout.write(completed.stdout)
-    sys.stderr.write(completed.stderr)
-    if completed.returncode != 0:
-        raise SystemExit(
-            f"vng run failed with exit {completed.returncode}: {tail_text(completed.stderr or completed.stdout)}"
-        )
-    return 0
-
-
-def run_scx_vm(args: argparse.Namespace) -> int:
-    if not args.kernel:
-        raise SystemExit("--kernel is required with --vm")
-
-    guest_command = [
-        "python3",
-        "e2e/run.py",
-        "scx",
-        "--output-json",
-        str(Path(args.output_json).resolve()),
-        "--output-md",
-        str(Path(args.output_md).resolve()),
-        "--scheduler-binary",
-        str(Path(args.scheduler_binary).resolve()),
-        "--scheduler-object",
-        str(Path(args.scheduler_object).resolve()),
-        "--scx-repo",
-        str(Path(args.scx_repo).resolve()),
-        "--daemon",
-        str(Path(args.daemon).resolve()),
-        "--bpftool-binary",
-        str(Path(args.bpftool_binary).resolve()),
-        "--load-timeout",
-        str(int(args.load_timeout)),
-    ]
-    if args.smoke:
-        guest_command.append("--smoke")
-    if args.duration is not None:
-        guest_command.extend(["--duration", str(int(args.duration))])
-    for extra_arg in args.scheduler_extra_arg or []:
-        guest_command.extend(["--scheduler-extra-arg", extra_arg])
-
-    guest_script = write_guest_script([guest_command])
-    completed = run_in_vm(args.kernel, guest_script, args.cpus, args.mem, args.timeout)
-    sys.stdout.write(completed.stdout)
-    sys.stderr.write(completed.stderr)
-    if completed.returncode != 0:
-        raise SystemExit(
-            f"vng run failed with exit {completed.returncode}: {tail_text(completed.stderr or completed.stdout)}"
-        )
-    return 0
-
-
-def run_katran_vm(args: argparse.Namespace) -> int:
-    if not args.kernel:
-        raise SystemExit("--kernel is required with --vm")
-
-    katran_iface = args.katran_iface if args.katran_iface != "katran0" else "eth0"
-    router_peer_iface = args.katran_router_peer_iface or "eth1"
-    guest_command = [
-        "python3",
-        "e2e/run.py",
-        "katran",
-        "--output-json",
-        str(Path(args.output_json).resolve()),
-        "--output-md",
-        str(Path(args.output_md).resolve()),
-        "--setup-script",
-        str(Path(args.setup_script).resolve()),
-        "--katran-object",
-        str(Path(args.katran_object).resolve()),
-        "--katran-policy",
-        str(Path(args.katran_policy).resolve()),
-        "--katran-iface",
-        str(katran_iface),
-        "--katran-router-peer-iface",
-        str(router_peer_iface),
-        "--runner",
-        str(Path(args.runner).resolve()),
-        "--daemon",
-        str(Path(args.daemon).resolve()),
-        "--kernel-config",
-        str(Path(args.kernel_config).resolve()),
-    ]
-    if args.smoke:
-        guest_command.append("--smoke")
-    if args.duration is not None:
-        guest_command.extend(["--duration", str(int(args.duration))])
-    if args.katran_server_binary:
-        guest_command.extend(["--katran-server-binary", str(Path(args.katran_server_binary).resolve())])
-    if args.katran_packet_repeat is not None:
-        guest_command.extend(["--katran-packet-repeat", str(int(args.katran_packet_repeat))])
-    if args.katran_use_wrk:
-        guest_command.append("--katran-use-wrk")
-    if args.katran_wrk_connections is not None:
-        guest_command.extend(["--katran-wrk-connections", str(int(args.katran_wrk_connections))])
-    if args.katran_wrk_threads is not None:
-        guest_command.extend(["--katran-wrk-threads", str(int(args.katran_wrk_threads))])
-    if args.katran_warmup_duration is not None:
-        guest_command.extend(["--katran-warmup-duration", str(float(args.katran_warmup_duration))])
-    if args.katran_samples is not None:
-        guest_command.extend(["--katran-samples", str(int(args.katran_samples))])
-    if args.katran_skip_attach:
-        guest_command.append("--katran-skip-attach")
-    if args.skip_setup:
-        guest_command.append("--skip-setup")
-
-    guest_script = write_guest_script([guest_command])
-    completed = run_in_vm(args.kernel, guest_script, args.cpus, args.mem, args.timeout, networks=("loop",))
-    sys.stdout.write(completed.stdout)
-    sys.stderr.write(completed.stderr)
-    if completed.returncode != 0:
-        raise SystemExit(
-            f"vng run failed with exit {completed.returncode}: {tail_text(completed.stderr or completed.stdout)}"
-        )
-    return 0
 
 
 def persist_bpftrace_results(args: argparse.Namespace, payload: dict[str, object]) -> None:
@@ -315,16 +149,6 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     prepare_bpftool_environment()
     apply_case_defaults(args)
-    if args.vm:
-        if args.case == "tracee":
-            return run_tracee_vm(args)
-        if args.case == "katran":
-            return run_katran_vm(args)
-        if args.case == "scx":
-            return run_scx_vm(args)
-        if args.case in {"tetragon", "bpftrace"}:
-            raise SystemExit(f"--vm is not yet supported for {args.case}")
-        raise SystemExit(f"unsupported e2e case: {args.case}")
 
     if args.case == "tracee":
         payload = run_tracee_case(args)

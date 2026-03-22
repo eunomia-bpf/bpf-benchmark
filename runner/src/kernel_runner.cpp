@@ -20,7 +20,9 @@
 #include <memory>
 #include <string>
 #include <string_view>
+#include <sys/socket.h>
 #include <sys/syscall.h>
+#include <sys/un.h>
 #include <thread>
 #include <unordered_map>
 #include <unistd.h>
@@ -655,6 +657,100 @@ std::string libbpf_error_string(int error_code)
     return std::string(buffer);
 }
 
+/* ================================================================
+ * Unix socket client for daemon serve mode
+ * ================================================================ */
+
+struct daemon_socket_response {
+    bool ok = false;
+    bool applied = false;
+    std::string error;
+};
+
+daemon_socket_response daemon_socket_optimize(const std::string &socket_path, uint32_t prog_id)
+{
+    daemon_socket_response response;
+
+    const int fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (fd < 0) {
+        response.error = "socket() failed: " + std::string(strerror(errno));
+        return response;
+    }
+
+    struct sockaddr_un addr = {};
+    addr.sun_family = AF_UNIX;
+    if (socket_path.size() >= sizeof(addr.sun_path)) {
+        close(fd);
+        response.error = "socket path too long";
+        return response;
+    }
+    std::strncpy(addr.sun_path, socket_path.c_str(), sizeof(addr.sun_path) - 1);
+
+    if (connect(fd, reinterpret_cast<struct sockaddr *>(&addr), sizeof(addr)) != 0) {
+        close(fd);
+        response.error = "connect() failed: " + std::string(strerror(errno));
+        return response;
+    }
+
+    /* Send JSON request line */
+    const std::string request =
+        "{\"cmd\":\"optimize\",\"prog_id\":" + std::to_string(prog_id) + "}\n";
+    const ssize_t written = write(fd, request.c_str(), request.size());
+    if (written < 0 || static_cast<size_t>(written) != request.size()) {
+        close(fd);
+        response.error = "write() failed: " + std::string(strerror(errno));
+        return response;
+    }
+
+    /* Read JSON response line */
+    std::string buf;
+    char ch;
+    while (true) {
+        const ssize_t n = read(fd, &ch, 1);
+        if (n <= 0) {
+            break;
+        }
+        if (ch == '\n') {
+            break;
+        }
+        buf.push_back(ch);
+    }
+    close(fd);
+
+    if (buf.empty()) {
+        response.error = "empty response from daemon";
+        return response;
+    }
+
+    /* Minimal JSON parsing: look for "status":"ok" and "applied":true */
+    if (buf.find("\"status\":\"ok\"") != std::string::npos ||
+        buf.find("\"status\": \"ok\"") != std::string::npos) {
+        response.ok = true;
+    }
+    if (buf.find("\"applied\":true") != std::string::npos ||
+        buf.find("\"applied\": true") != std::string::npos) {
+        response.applied = true;
+    }
+    if (!response.ok) {
+        /* Extract error message if present */
+        const auto msg_pos = buf.find("\"message\":");
+        if (msg_pos != std::string::npos) {
+            const auto quote_start = buf.find('"', msg_pos + 10);
+            if (quote_start != std::string::npos) {
+                const auto quote_end = buf.find('"', quote_start + 1);
+                if (quote_end != std::string::npos) {
+                    response.error = buf.substr(quote_start + 1, quote_end - quote_start - 1);
+                }
+            }
+        }
+        if (response.error.empty()) {
+            response.error = "daemon returned non-ok status: " + buf;
+        }
+    }
+
+    return response;
+}
+
 bpf_program *find_program(bpf_object *object, const std::optional<std::string> &program_name)
 {
     bpf_program *program = nullptr;
@@ -1148,8 +1244,13 @@ std::vector<sample_result> run_kernel(const cli_options &options)
 
     if (options.rejit) {
         rejit.requested = true;
-        if (options.daemon_path.has_value()) {
-            /* Daemon mode: daemon fetches bytecode and applies REJIT itself */
+        if (options.daemon_socket.has_value()) {
+            /* Socket daemon mode: connect to running daemon serve */
+            rejit.mode = "daemon";
+            fprintf(stderr, "rejit: mode=daemon-socket socket=%s prog_id=%u\n",
+                    options.daemon_socket->c_str(), program_info.id);
+        } else if (options.daemon_path.has_value()) {
+            /* Daemon mode (fork/exec fallback): daemon fetches bytecode and applies REJIT itself */
             rejit.mode = "daemon";
             fprintf(stderr, "rejit: mode=daemon daemon_path=%s prog_id=%u\n",
                     options.daemon_path->string().c_str(), program_info.id);
@@ -1190,7 +1291,20 @@ std::vector<sample_result> run_kernel(const cli_options &options)
     const bool measure_same_image_pair =
         rejit.requested && !options.compile_only;
     if (options.compile_only && rejit.requested) {
-        if (options.daemon_path.has_value()) {
+        if (options.daemon_socket.has_value()) {
+            const auto pre_info = load_prog_info(program_fd);
+            rejit_start = std::chrono::steady_clock::now();
+            const auto sock_resp = daemon_socket_optimize(*options.daemon_socket, program_info.id);
+            rejit_end = std::chrono::steady_clock::now();
+            rejit.syscall_attempted = true;
+            if (!sock_resp.ok) {
+                rejit.applied = false;
+                rejit.error = "daemon socket optimize failed: " + sock_resp.error;
+            } else {
+                const auto post_info = load_prog_info(program_fd);
+                rejit.applied = (post_info.jited_prog_len != pre_info.jited_prog_len);
+            }
+        } else if (options.daemon_path.has_value()) {
             const auto pre_info = load_prog_info(program_fd);
             const std::string cmd = options.daemon_path->string() +
                 " apply " + std::to_string(program_info.id);
@@ -1473,7 +1587,26 @@ std::vector<sample_result> run_kernel(const cli_options &options)
             stock_result_read_start,
             stock_result_read_end,
             false);
-        if (options.daemon_path.has_value()) {
+        if (options.daemon_socket.has_value()) {
+            const auto pre_info = load_prog_info(program_fd);
+            rejit_start = std::chrono::steady_clock::now();
+            const auto sock_resp = daemon_socket_optimize(*options.daemon_socket, program_info.id);
+            rejit_end = std::chrono::steady_clock::now();
+            rejit.syscall_attempted = true;
+            if (!sock_resp.ok) {
+                rejit.applied = false;
+                rejit.error = "daemon socket optimize failed: " + sock_resp.error;
+                fprintf(stderr, "daemon socket optimize failed: %s\n", sock_resp.error.c_str());
+            } else {
+                const auto post_info = load_prog_info(program_fd);
+                rejit.applied = (post_info.jited_prog_len != pre_info.jited_prog_len);
+                if (!rejit.applied) {
+                    fprintf(stderr, "daemon: socket optimize succeeded but program unchanged "
+                            "(jited_prog_len %u -> %u)\n",
+                            pre_info.jited_prog_len, post_info.jited_prog_len);
+                }
+            }
+        } else if (options.daemon_path.has_value()) {
             const auto pre_info = load_prog_info(program_fd);
             const std::string cmd = options.daemon_path->string() +
                 " apply " + std::to_string(program_info.id);

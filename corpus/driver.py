@@ -165,7 +165,17 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=None,
         help=(
             "Path to bpfrejit-daemon binary. When set, passed to micro_exec for "
-            "kernel-rejit runtimes so the daemon can apply in-place JIT optimizations."
+            "kernel-rejit runtimes so the daemon can apply in-place JIT optimizations. "
+            "Deprecated: prefer --daemon-socket for persistent daemon mode."
+        ),
+    )
+    parser.add_argument(
+        "--daemon-socket",
+        default=None,
+        help=(
+            "Path to a Unix socket for a running bpfrejit-daemon serve instance. "
+            "When set, micro_exec connects to the daemon over the socket instead of "
+            "forking a new process for each optimization."
         ),
     )
     return parser.parse_args(argv)
@@ -478,6 +488,7 @@ def build_runner_command(
     compile_only: bool,
     rejit: bool = False,
     daemon_path: str | None = None,
+    daemon_socket: str | None = None,
 ) -> list[str]:
     io_mode, input_path, input_size = default_io_plan(spec)
     btf_path = detect_btf_path(spec.btf_path)
@@ -506,7 +517,9 @@ def build_runner_command(
         command.append("--compile-only")
     if rejit:
         command.append("--rejit")
-    if daemon_path is not None:
+    if daemon_socket is not None:
+        command.extend(["--daemon-socket", str(daemon_socket)])
+    elif daemon_path is not None:
         command.extend(["--daemon-path", str(daemon_path)])
     return command
 
@@ -520,6 +533,7 @@ def run_micro_exec_sample(
     compile_only: bool,
     rejit: bool = False,
     daemon_path: str | None = None,
+    daemon_socket: str | None = None,
 ) -> dict[str, Any]:
     command = build_runner_command(
         suite,
@@ -529,6 +543,7 @@ def run_micro_exec_sample(
         compile_only=compile_only,
         rejit=rejit,
         daemon_path=daemon_path,
+        daemon_socket=daemon_socket,
     )
     started_ns = time.perf_counter_ns()
     completed = run_text_command(command)
@@ -1043,6 +1058,7 @@ def execute_sample(
     repeat: int,
     iteration_idx: int,
     daemon_path: str | None = None,
+    daemon_socket: str | None = None,
 ) -> dict[str, Any]:
     inventory = discover_program_inventory(suite.runner_binary, spec.source)
     selected = choose_programs(spec, inventory)
@@ -1081,6 +1097,7 @@ def execute_sample(
         compile_only=compile_only,
         rejit=is_rejit_runtime,
         daemon_path=daemon_path if is_rejit_runtime else None,
+        daemon_socket=daemon_socket if is_rejit_runtime else None,
     )
 
 
@@ -1131,6 +1148,7 @@ def run_suite(argv: list[str] | None = None) -> int:
     }
 
     daemon_path = getattr(args, "daemon_path", None)
+    daemon_socket = getattr(args, "daemon_socket", None)
 
     rng = random.Random(args.seed)
     for spec in benchmarks:
@@ -1168,6 +1186,7 @@ def run_suite(argv: list[str] | None = None) -> int:
                     repeat=repeat,
                     iteration_idx=-1,
                     daemon_path=daemon_path,
+                    daemon_socket=daemon_socket,
                 )
 
             samples = []
@@ -1179,6 +1198,7 @@ def run_suite(argv: list[str] | None = None) -> int:
                     repeat=repeat,
                     iteration_idx=iteration_idx,
                     daemon_path=daemon_path,
+                    daemon_socket=daemon_socket,
                 )
                 sample["iteration_index"] = iteration_idx
                 samples.append(sample)

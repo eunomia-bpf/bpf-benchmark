@@ -93,8 +93,6 @@ DEFAULT_VNG_MEMORY = "4G"
 DEFAULT_VNG_CPUS = "2"
 DEFAULT_REPEAT = 200
 DEFAULT_TIMEOUT_SECONDS = 240
-KINSN_MODULE_DIR = ROOT_DIR / "module" / "x86"
-KINSN_MODULE_NAMES = ["bpf_rotate.ko", "bpf_select.ko", "bpf_extract.ko"]
 
 
 DEFAULT_BUILD_TIMEOUT_SECONDS = 3600
@@ -722,14 +720,8 @@ def build_vng_command(*, vng_binary: str, kernel_image: Path, guest_exec: str) -
 def build_guest_exec(argv: list[str]) -> str:
     # Load kinsn kernel modules before running the guest command so the daemon
     # can apply platform-specific rewrites (rotate, cond_select, extract).
-    load_snippets = []
-    for name in KINSN_MODULE_NAMES:
-        ko_path = KINSN_MODULE_DIR / name
-        load_snippets.append(
-            f'if [ -f {shlex.quote(str(ko_path))} ]; then '
-            f'insmod {shlex.quote(str(ko_path))} 2>/dev/null || true; fi'
-        )
-    kinsn_load = "; ".join(load_snippets) + "; " if load_snippets else ""
+    load_script = ROOT_DIR / "module" / "load_all.sh"
+    kinsn_load = f"sudo -n {shlex.quote(str(load_script))} 2>/dev/null || true; "
     main_cmd = " ".join(shlex.quote(part) for part in argv)
     return kinsn_load + main_cmd
 

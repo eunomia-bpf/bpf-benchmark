@@ -45,6 +45,7 @@ struct cli_options {
     bool rejit = false;                                 // enable REJIT (same-bytecode by default)
     std::optional<std::filesystem::path> rejit_program; // replacement ELF for REJIT
     std::optional<std::filesystem::path> daemon_path;   // --daemon-path <path> for daemon-based REJIT
+    std::optional<std::string> daemon_socket;             // --daemon-socket <path> for Unix socket daemon
     std::optional<std::string> program_name;
     std::string io_mode = "map";
     bool manual_load = false;

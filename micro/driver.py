@@ -87,7 +87,17 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=None,
         help=(
             "Path to bpfrejit-daemon binary. When set, passed to micro_exec for "
-            "kernel-rejit runtimes so the daemon can apply in-place JIT optimizations."
+            "kernel-rejit runtimes so the daemon can apply in-place JIT optimizations. "
+            "Deprecated: prefer --daemon-socket for persistent daemon mode."
+        ),
+    )
+    parser.add_argument(
+        "--daemon-socket",
+        default=None,
+        help=(
+            "Path to a Unix socket for a running bpfrejit-daemon serve instance. "
+            "When set, micro_exec connects to the daemon over the socket instead of "
+            "forking a new process for each optimization."
         ),
     )
     parser.add_argument("--output", help="Override JSON output path.")
@@ -518,6 +528,7 @@ def main(argv: list[str] | None = None) -> int:
             repeat = args.repeat if args.repeat is not None else runtime.default_repeat
             is_rejit_runtime = runtime.mode in {"kernel-rejit", "kernel_rejit"}
             daemon_path = getattr(args, "daemon_path", None)
+            daemon_socket = getattr(args, "daemon_socket", None)
             command = build_micro_benchmark_command(
                 suite.build.runner_binary,
                 runtime_mode=runtime.mode,
@@ -531,6 +542,7 @@ def main(argv: list[str] | None = None) -> int:
                 require_sudo=runtime.require_sudo,
                 rejit=is_rejit_runtime,
                 daemon_path=daemon_path if is_rejit_runtime else None,
+                daemon_socket=daemon_socket if is_rejit_runtime else None,
             )
 
             for _ in range(warmups):
