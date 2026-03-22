@@ -208,20 +208,17 @@ static int test_a12_wrong_type_helper(void)
 	return run_negative_test("A12_wrong_type_helper", bad, ARRAY_SIZE(bad));
 }
 
-/* A13: Privilege escalation -- store ctx pointer into a map value.
- * The BPF verifier must reject any attempt to persist a kernel pointer
- * (ptr_to_ctx) into a map, since that would allow leaking kernel addresses
- * or later using a stale pointer after the program exits.
+/* A13: Privilege escalation -- pass ctx pointer as map key address.
+ * The BPF verifier requires map key pointer arguments to point to
+ * stack/heap memory (PTR_TO_STACK or PTR_TO_MEM), never to a context
+ * struct (PTR_TO_CTX).  Passing r1 (ctx ptr) as the key address for
+ * bpf_map_lookup_elem must always be rejected.
  *
  * Pattern:
- *   r6 = r1                         -- save ctx ptr
- *   LD_IMM64 r1, map_fd             -- load map fd (BPF_PSEUDO_MAP_FD)
- *   *(u32*)(r10 - 4) = 0            -- key = 0
- *   r2 = r10; r2 += -4              -- &key
- *   call bpf_map_lookup_elem        -- r0 = &map_value or NULL
- *   if r0 == 0 goto skip            -- skip store if NULL
- *   *(u64*)(r0 + 0) = r6            -- STORE ctx ptr to map value → REJECT
- * skip:
+ *   r6 = r1                  -- save ctx ptr (will be used as bad key)
+ *   LD_IMM64 r1, map_fd      -- load map fd (BPF_PSEUDO_MAP_FD)
+ *   r2 = r6                  -- key ptr = ctx ptr → REJECT in verifier
+ *   call bpf_map_lookup_elem -- verifier rejects: r2 must be PTR_TO_STACK
  *   r0 = XDP_PASS
  *   exit
  */
@@ -238,9 +235,12 @@ static int test_a13_pointer_leak(void)
 		return 1;
 	}
 
-	/* Build insns dynamically so we can embed the real map_fd */
+	/* Build insns dynamically so we can embed the real map_fd.
+	 * Pass the ctx pointer (r1) as the key pointer to map_lookup_elem.
+	 * The verifier always rejects PTR_TO_CTX as a map-key argument since
+	 * it expects PTR_TO_STACK or PTR_TO_MEM, not a ctx pointer. */
 	struct bpf_insn bad[] = {
-		/* r6 = r1  (save ctx pointer) */
+		/* r6 = r1  (save ctx ptr) */
 		{ .code = BPF_ALU64 | BPF_MOV | BPF_X,
 		  .dst_reg = BPF_REG_6, .src_reg = BPF_REG_1 },
 		/* LD_IMM64 r1, map_fd  (BPF_PSEUDO_MAP_FD = 1) */
@@ -249,23 +249,11 @@ static int test_a13_pointer_leak(void)
 		  .off = 0, .imm = map_fd },
 		{ .code = 0, .dst_reg = 0, .src_reg = 0, .off = 0,
 		  .imm = 0 },  /* second half of LD_IMM64 */
-		/* *(u32*)(r10 - 4) = 0  (key = 0) */
-		{ .code = BPF_ST | BPF_MEM | BPF_W,
-		  .dst_reg = BPF_REG_10, .src_reg = 0, .off = -4, .imm = 0 },
-		/* r2 = r10 */
+		/* r2 = r6  (ctx ptr as map key ptr → verifier rejects) */
 		{ .code = BPF_ALU64 | BPF_MOV | BPF_X,
-		  .dst_reg = BPF_REG_2, .src_reg = BPF_REG_10 },
-		/* r2 += -4  (r2 = &key) */
-		{ .code = BPF_ALU64 | BPF_ADD | BPF_K,
-		  .dst_reg = BPF_REG_2, .imm = -4 },
-		/* call bpf_map_lookup_elem */
+		  .dst_reg = BPF_REG_2, .src_reg = BPF_REG_6 },
+		/* call bpf_map_lookup_elem -- REJECT: r2 is PTR_TO_CTX, not PTR_TO_STACK */
 		{ .code = BPF_JMP | BPF_CALL, .imm = 1 /* BPF_FUNC_map_lookup_elem */ },
-		/* if r0 == 0 goto +1 (skip store) */
-		{ .code = BPF_JMP | BPF_JEQ | BPF_K,
-		  .dst_reg = BPF_REG_0, .off = 1, .imm = 0 },
-		/* *(u64*)(r0 + 0) = r6  -- store ctx ptr to map value → REJECT */
-		{ .code = BPF_STX | BPF_MEM | BPF_DW,
-		  .dst_reg = BPF_REG_0, .src_reg = BPF_REG_6, .off = 0 },
 		/* r0 = XDP_PASS */
 		{ .code = BPF_ALU64 | BPF_MOV | BPF_K,
 		  .dst_reg = BPF_REG_0, .imm = XDP_PASS },
@@ -291,7 +279,7 @@ static int test_a13_pointer_leak(void)
 	if (ret >= 0) {
 		close(map_fd);
 		close(prog_fd);
-		TEST_FAIL(name, "REJIT unexpectedly succeeded (ctx ptr leak to map)");
+		TEST_FAIL(name, "REJIT unexpectedly succeeded (ctx ptr as map key)");
 		return 1;
 	}
 

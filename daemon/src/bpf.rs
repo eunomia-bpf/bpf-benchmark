@@ -280,10 +280,42 @@ pub struct RejitResult {
 /// The kernel will run bpf_check() + JIT on the new instructions and
 /// atomically replace the program image in-place.
 ///
-/// Allocates a 64 KB log buffer so that on failure the verifier's diagnostic
-/// output is captured and returned as a structured error.
+/// First attempts with log_level=0 (fast, no verifier log). If that fails,
+/// retries with log_level=2 and a large buffer to capture diagnostics.
+/// This avoids ENOSPC errors from verifier log buffer overflow on the
+/// normal success path.
 pub fn bpf_prog_rejit(prog_fd: RawFd, insns: &[BpfInsn], fd_array: &[RawFd]) -> Result<RejitResult> {
-    const LOG_BUF_SIZE: usize = 64 * 1024;
+    // First attempt: no verifier log (fast path).
+    {
+        let mut attr: AttrRejit = zeroed_attr();
+        attr.prog_fd = prog_fd as u32;
+        attr.insn_cnt = insns.len() as u32;
+        attr.insns = insns.as_ptr() as u64;
+        attr.log_level = 0;
+        attr.log_size = 0;
+        attr.log_buf = 0;
+        if !fd_array.is_empty() {
+            attr.fd_array = fd_array.as_ptr() as u64;
+            attr.fd_array_cnt = fd_array.len() as u32;
+        }
+
+        let ret = unsafe {
+            sys_bpf(
+                BPF_PROG_REJIT,
+                &mut attr as *mut _ as *mut u8,
+                std::mem::size_of::<AttrRejit>() as u32,
+            )
+        };
+
+        if ret >= 0 {
+            return Ok(RejitResult {
+                verifier_log: String::new(),
+            });
+        }
+    }
+
+    // Fast path failed — retry with verbose verifier log to capture diagnostics.
+    const LOG_BUF_SIZE: usize = 16 * 1024 * 1024; // 16 MB
     let mut log_buf: Vec<u8> = vec![0u8; LOG_BUF_SIZE];
 
     let mut attr: AttrRejit = zeroed_attr();

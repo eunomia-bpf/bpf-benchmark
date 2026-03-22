@@ -561,44 +561,65 @@ def run_target_locally(
 
         v5_compile_raw = None
         v5_run_raw = None
+        daemon_proc = None
+        daemon_socket: str | None = None
         if enable_recompile:
-            v5_compile_raw = run_command(
-                build_runner_command(
-                    runner=runner,
-                    object_path=object_path,
-                    program_name=target["program_name"],
-                    io_mode=target["io_mode"],
-                    memory_path=memory_path,
-                    input_size=int(target["input_size"]),
-                    repeat=repeat,
-                    btf_custom_path=btf_custom_path,
-                    compile_only=True,
-                    blind_apply=blind_apply,
-                    recompile_all=recompile_all,
-                    skip_families=skip_families,
-                    policy_file=active_policy_path,
-                    ),
-                timeout_seconds,
+            daemon_socket = f"/tmp/bpfrejit-{os.getpid()}.sock"
+            daemon_proc = subprocess.Popen(
+                [str(daemon), "serve", "--socket", daemon_socket],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
             )
-        if enable_exec and enable_recompile and target.get("can_test_run") and v5_compile_raw and v5_compile_raw["ok"]:
-            v5_run_raw = run_command(
-                build_runner_command(
-                    runner=runner,
-                    object_path=object_path,
-                    program_name=target["program_name"],
-                    io_mode=target["io_mode"],
-                    memory_path=memory_path,
-                    input_size=int(target["input_size"]),
-                    repeat=repeat,
-                    btf_custom_path=btf_custom_path,
-                    compile_only=False,
-                    blind_apply=blind_apply,
-                    recompile_all=recompile_all,
-                    skip_families=skip_families,
-                    policy_file=active_policy_path,
+            # Wait briefly for the socket to appear before runner connects.
+            import time as _time
+            _time.sleep(0.5)
+            try:
+                v5_compile_raw = run_command(
+                    build_runner_command(
+                        runner=runner,
+                        object_path=object_path,
+                        program_name=target["program_name"],
+                        io_mode=target["io_mode"],
+                        memory_path=memory_path,
+                        input_size=int(target["input_size"]),
+                        repeat=repeat,
+                        btf_custom_path=btf_custom_path,
+                        compile_only=True,
+                        blind_apply=blind_apply,
+                        recompile_all=recompile_all,
+                        skip_families=skip_families,
+                        policy_file=active_policy_path,
+                        daemon_socket=daemon_socket,
                     ),
-                timeout_seconds,
-            )
+                    timeout_seconds,
+                )
+                if enable_exec and target.get("can_test_run") and v5_compile_raw and v5_compile_raw["ok"]:
+                    v5_run_raw = run_command(
+                        build_runner_command(
+                            runner=runner,
+                            object_path=object_path,
+                            program_name=target["program_name"],
+                            io_mode=target["io_mode"],
+                            memory_path=memory_path,
+                            input_size=int(target["input_size"]),
+                            repeat=repeat,
+                            btf_custom_path=btf_custom_path,
+                            compile_only=False,
+                            blind_apply=blind_apply,
+                            recompile_all=recompile_all,
+                            skip_families=skip_families,
+                            policy_file=active_policy_path,
+                            daemon_socket=daemon_socket,
+                        ),
+                        timeout_seconds,
+                    )
+            finally:
+                daemon_proc.terminate()
+                try:
+                    daemon_proc.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    daemon_proc.kill()
+                    daemon_proc.wait()
 
     record["daemon_cli"] = text_invocation_summary(daemon_result)
     record["policy_path"] = str(active_policy_path) if active_policy_path is not None else None

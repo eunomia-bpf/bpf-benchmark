@@ -33,13 +33,11 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <linux/bpf.h>
-#include <linux/btf.h>
 #include <linux/unistd.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <sys/syscall.h>
 #include <unistd.h>
 
@@ -234,129 +232,22 @@ static int get_original_insns(int prog_fd, struct bpf_insn **out_insns)
 }
 
 /*
- * Read an entire file into malloc'd buffer. Returns data pointer or NULL.
- * Caller must free. *out_size receives the number of bytes read.
- */
-static void *read_file_full(const char *path, size_t *out_size)
-{
-	int fd;
-	struct stat st;
-	void *data;
-	size_t total = 0;
-
-	fd = open(path, O_RDONLY);
-	if (fd < 0)
-		return NULL;
-
-	if (fstat(fd, &st) < 0 || st.st_size == 0) {
-		close(fd);
-		return NULL;
-	}
-
-	data = malloc(st.st_size);
-	if (!data) {
-		close(fd);
-		return NULL;
-	}
-
-	while (total < (size_t)st.st_size) {
-		ssize_t n = read(fd, (char *)data + total, st.st_size - total);
-		if (n <= 0)
-			break;
-		total += n;
-	}
-	close(fd);
-
-	if (total < (size_t)st.st_size) {
-		free(data);
-		return NULL;
-	}
-
-	*out_size = total;
-	return data;
-}
-
-/*
- * Find the BTF type ID for a kernel function by name in /sys/kernel/btf/vmlinux.
+ * Find the BTF type ID for a kernel function by name using libbpf.
  * Returns 0 on success and writes the ID to *btf_id_out, or -1 on failure.
  */
 static int find_kernel_btf_id(const char *func_name, __u32 *btf_id_out)
 {
-	size_t sz;
-	void *data;
-	const struct btf_header *hdr;
-	const char *strtab;
-	const void *type_section;
-	__u32 type_len, i;
-	const void *ptr;
+	int id;
 
-	data = read_file_full("/sys/kernel/btf/vmlinux", &sz);
-	if (!data)
+	/* Use libbpf to find the vmlinux BTF ID for a fentry/fexit attach.
+	 * libbpf_find_vmlinux_btf_id handles all BTF type encoding details
+	 * and correctly locates the function's BTF_KIND_FUNC entry. */
+	id = libbpf_find_vmlinux_btf_id(func_name, BPF_TRACE_FENTRY);
+	if (id < 0)
 		return -1;
 
-	hdr = data;
-	if (hdr->magic != 0xEB9F) {
-		free(data);
-		return -1;
-	}
-
-	strtab = (const char *)data + hdr->hdr_len + hdr->str_off;
-	type_section = (const char *)data + hdr->hdr_len + hdr->type_off;
-	type_len = hdr->type_len;
-
-	ptr = type_section;
-	for (i = 1; (const char *)ptr < (const char *)type_section + type_len; i++) {
-		const struct btf_type *t = ptr;
-		__u16 kind = BTF_INFO_KIND(t->info);
-		__u16 vlen = BTF_INFO_VLEN(t->info);
-
-		if (kind == BTF_KIND_FUNC) {
-			const char *name = strtab + t->name_off;
-			if (strcmp(name, func_name) == 0) {
-				*btf_id_out = i;
-				free(data);
-				return 0;
-			}
-		}
-
-		/* Advance past this type record's variable-length data */
-		ptr = (const char *)ptr + sizeof(struct btf_type);
-		switch (kind) {
-		case BTF_KIND_INT:
-			ptr = (const char *)ptr + 4;
-			break;
-		case BTF_KIND_ARRAY:
-			ptr = (const char *)ptr + sizeof(struct btf_array);
-			break;
-		case BTF_KIND_STRUCT:
-		case BTF_KIND_UNION:
-			ptr = (const char *)ptr + vlen * sizeof(struct btf_member);
-			break;
-		case BTF_KIND_ENUM:
-			ptr = (const char *)ptr + vlen * sizeof(struct btf_enum);
-			break;
-		case BTF_KIND_FUNC_PROTO:
-			ptr = (const char *)ptr + vlen * sizeof(struct btf_param);
-			break;
-		case BTF_KIND_VAR:
-			ptr = (const char *)ptr + sizeof(struct btf_var);
-			break;
-		case BTF_KIND_DATASEC:
-			ptr = (const char *)ptr + vlen * sizeof(struct btf_var_secinfo);
-			break;
-		case BTF_KIND_ENUM64:
-			ptr = (const char *)ptr + vlen * 8; /* sizeof(struct btf_enum64) */
-			break;
-		case BTF_KIND_DECL_TAG:
-			ptr = (const char *)ptr + 4;
-			break;
-		default:
-			break;
-		}
-	}
-
-	free(data);
-	return -1;
+	*btf_id_out = (__u32)id;
+	return 0;
 }
 
 /* ------------------------------------------------------------------ */

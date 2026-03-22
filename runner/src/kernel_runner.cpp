@@ -1287,7 +1287,6 @@ std::vector<sample_result> run_kernel(const cli_options &options)
         rejit.requested && !options.compile_only;
     if (options.compile_only && rejit.requested) {
         if (options.daemon_socket.has_value()) {
-            const auto pre_info = load_prog_info(program_fd);
             rejit_start = std::chrono::steady_clock::now();
             const auto sock_resp = daemon_socket_optimize(*options.daemon_socket, program_info.id);
             rejit_end = std::chrono::steady_clock::now();
@@ -1296,8 +1295,7 @@ std::vector<sample_result> run_kernel(const cli_options &options)
                 rejit.applied = false;
                 rejit.error = "daemon socket optimize failed: " + sock_resp.error;
             } else {
-                const auto post_info = load_prog_info(program_fd);
-                rejit.applied = (post_info.jited_prog_len != pre_info.jited_prog_len);
+                rejit.applied = sock_resp.applied;
             }
         } else {
             apply_rejit(program_fd, rejit_insns.data(),
@@ -1567,8 +1565,11 @@ std::vector<sample_result> run_kernel(const cli_options &options)
             stock_result_read_start,
             stock_result_read_end,
             false);
+        fprintf(stderr, "DIAG: stock exec_ns=%lu repeat=%u warmup=%u\n",
+                (unsigned long)stock_pass.measurement.exec_ns,
+                run_context.effective_repeat,
+                options.warmup_repeat);
         if (options.daemon_socket.has_value()) {
-            const auto pre_info = load_prog_info(program_fd);
             rejit_start = std::chrono::steady_clock::now();
             const auto sock_resp = daemon_socket_optimize(*options.daemon_socket, program_info.id);
             rejit_end = std::chrono::steady_clock::now();
@@ -1578,13 +1579,7 @@ std::vector<sample_result> run_kernel(const cli_options &options)
                 rejit.error = "daemon socket optimize failed: " + sock_resp.error;
                 fprintf(stderr, "daemon socket optimize failed: %s\n", sock_resp.error.c_str());
             } else {
-                const auto post_info = load_prog_info(program_fd);
-                rejit.applied = (post_info.jited_prog_len != pre_info.jited_prog_len);
-                if (!rejit.applied) {
-                    fprintf(stderr, "daemon: socket optimize succeeded but program unchanged "
-                            "(jited_prog_len %u -> %u)\n",
-                            pre_info.jited_prog_len, post_info.jited_prog_len);
-                }
+                rejit.applied = sock_resp.applied;
             }
         } else {
             apply_rejit(program_fd, rejit_insns.data(),
@@ -1599,6 +1594,13 @@ std::vector<sample_result> run_kernel(const cli_options &options)
         measure_same_image_pair ? options.warmup_repeat : 0u,
         true);
     const auto &run_measurement = run_pass.measurement;
+    if (measure_same_image_pair) {
+        fprintf(stderr, "DIAG: rejit exec_ns=%lu repeat=%u warmup=%u applied=%s\n",
+                (unsigned long)run_measurement.exec_ns,
+                run_context.effective_repeat,
+                measure_same_image_pair ? options.warmup_repeat : 0u,
+                rejit.applied ? "true" : "false");
+    }
 
     result_read_start = std::chrono::steady_clock::now();
     result = read_kernel_test_run_result(effective_io_mode,
