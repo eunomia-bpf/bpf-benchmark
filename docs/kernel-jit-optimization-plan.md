@@ -21,7 +21,7 @@
 
 ## 0. Abstract
 
-eBPF is widely adopted in production for observability, networking, and customizable kernel extensions in modern production systems, yet its current just-in-time (JIT) compilers remain rigid, platform-agnostic, and severely under-optimized compared to mature runtimes such as JVM, WASM, or LLVM. Many optimizations and security hardenings are restricted due to stringent kernel safety constraints and prohibitive implementation complexity. This paper presents BpfReJIT, a dynamic, minimally invasive, and extensible kernel compilation framework that transparently optimizes kernel-resident eBPF programs. Our key insight is a novel, microkernel-inspired separation of concerns that delegates kernel safety guarantees to minimal kernel extensions, allowing lightweight verification and in-place recompilation while offloading correctness and complex optimizations to an extensible userspace daemon informed by runtime profiling data. We implement BpfReJIT within the Linux kernel with fewer than 600 lines of code modifications, transparently supporting existing eBPF tools, loaders, and subsystems. Evaluation across diverse hardware platforms and representative workloads (network monitoring, security enforcement, and observability tracing) demonstrates that BpfReJIT achieves up to 40% performance improvement, 50% reduction in binary size, and negligible overhead. BpfReJIT provides a practical, upstream-compatible path toward dynamic, extensible compilation frameworks in operating system kernels.
+eBPF is widely adopted in production for observability, networking, and customizable kernel extensions in modern production systems, yet its current just-in-time (JIT) compilers remain rigid, platform-agnostic, and severely under-optimized compared to mature runtimes such as JVM, WASM, or LLVM. Many optimizations and security hardenings are restricted due to stringent kernel safety constraints and prohibitive implementation complexity. This paper presents BpfReJIT, a dynamic, minimally invasive, and extensible kernel compilation framework that transparently optimizes kernel-resident eBPF programs. Our key insight is a novel, microkernel-inspired separation of concerns that delegates kernel safety guarantees to minimal kernel extensions, allowing lightweight verification and in-place recompilation while offloading correctness and complex optimizations to an extensible userspace daemon informed by runtime profiling data. We implement BpfReJIT within the Linux kernel with fewer than 800 lines of code modifications, transparently supporting existing eBPF tools, loaders, and subsystems. Evaluation across diverse hardware platforms and representative workloads (network monitoring, security enforcement, and observability tracing) demonstrates that BpfReJIT achieves up to 40% performance improvement, 50% reduction in binary size, and negligible overhead. BpfReJIT provides a practical, upstream-compatible path toward dynamic, extensible compilation frameworks in operating system kernels.
 
 ---
 
@@ -63,7 +63,7 @@ BpfReJIT 的设计基于三个层次的 insight：
 
 > 类似微内核将机制与策略分离，BpfReJIT 将 JIT 编译分为两个关注点：
 >
-> - **内核组件**（最小化，~600 行）：通过轻量级内核模块为每个平台定义**"什么能被优化"**——平台特定的指令定义，包含验证语义和 native 发射回调（**kinsn**）。这是**机制**。
+> - **内核组件**（最小化，~700 行）：通过轻量级内核模块为每个平台定义**"什么能被优化"**——平台特定的指令定义，包含验证语义和 native 发射回调（**kinsn**）。这是**机制**。
 > - **用户态 daemon**（完整功能）：通过编译 pass 定义**"如何优化"**——基于静态分析、平台能力和运行时 profiling 数据（类似 JVM 的动态 JIT 重编译 + PGO）。这是**策略**。
 >
 > 新优化 = 新 module + daemon 更新，零内核改动。这是让 LLVM pass 基础设施成功的可扩展性模型，现在应用到 OS 内核。
@@ -79,7 +79,7 @@ BpfReJIT 的设计基于三个层次的 insight：
 
 ### 1.6 设计目标
 
-1. **可扩展（Extensible）**：最小内核改动（~600 行），支持大量 pass。新优化 = 新 module + daemon 更新，零内核改动。
+1. **可扩展（Extensible）**：最小内核改动（~700 行），支持大量 pass。新优化 = 新 module + daemon 更新，零内核改动。
 2. **透明（Transparent）**：对所有 eBPF 应用、loader 和其他 eBPF 工具/涉及的子系统完全透明。不需要 .bpf.o，不需要改应用。
 3. **安全（Safe）**：框架不影响内核安全模型。Verifier 验证所有变换。
 4. **零开销和更好性能（Zero overhead & better performance）**：特化后的程序运行在与原始加载完全相同的执行路径上，零稳态运行时开销。
@@ -151,7 +151,7 @@ BpfReJIT 的设计基于三个层次的 insight：
 ### 1.11 核心设计约束
 
 1. **Safety/correctness 分离**：kernel verifier 保证 safety（内核不崩溃），correctness 由用户态 daemon 负责
-2. **Kernel 改动最小化**：核心内核接口只加一次（~600 LOC），新优化/新 arch 全部以 module + daemon 方式部署
+2. **Kernel 改动最小化**：核心内核接口只加一次（~700 LOC），新优化/新 arch 全部以 module + daemon 方式部署
 3. **完全透明**：不需要 .bpf.o，不需要改应用/loader，不需要 detach/reattach
 4. **零运行时开销**：变换后的程序和原始加载路径完全一样快
 5. **Fail-safe**：verify 失败 → 什么都不改，返回错误；daemon 可随时回滚
@@ -601,11 +601,20 @@ make clean
 | **322** | **Kernel code review by codex（2026-03-21）** | ✅ | 发现 3 Critical（旧 image UAF、attachment 缓存不同步、KERNEL_BPFPTR 伪装）+ 4 Major。报告：`docs/tmp/kernel_v2_review_20260321.md`。 |
 | **323** | **ARM64 inline kfunc + kinsn 模块（2026-03-21）** | ✅ | 内核 `bpf.h` +emit_arm64（+12）、`arm64/bpf_jit_comp.c` +dispatch（+44）。`module/arm64/` 3 模块（ROR 4B、CSEL 8B、LSR+AND 20B）。交叉编译通过。+613 行。 |
 | **324** | **e2e v2 daemon 集成（2026-03-21）** | ✅ | 5 case 全部接入 baseline→daemon apply-all→post_rejit 流程。净减 314 行。 |
-| **325** | **Attachment sync 调研（2026-03-21）** | 🔄 | 调研 REJIT 后各 backend（XDP/TC/cgroup/LSM/trampoline 等）的 bpf_func 缓存更新方案。4 候选方案对比。codex 进行中。 |
-| **326** | **Verifier log parser POC（2026-03-21）** | 🔄 | 解析 verifier log level 2 提取 per-insn 寄存器状态，用于 daemon Analysis。codex 进行中。 |
-| **327** | **Daemon profiling 调研 + POC（2026-03-21）** | 🔄 | 调研 bpf_stats/perf/kprobe 等数据源获取运行时 profile。codex 进行中。 |
-| 328 | Daemon pass 框架实现 | 待定 | 依赖 #321 设计。重构 ad-hoc matcher 为 pass 框架。 |
-| 329 | kinsn pass（ROTATE/SELECT/EXTRACT） | 待定 | 依赖 #307 #328。 |
-| 330 | 内核 Critical issue 修复 | 待定 | 依赖 #322 #325。修复 attachment sync + KERNEL_BPFPTR + image lifecycle。 |
-| 331 | VM 全量 micro suite rejit | 待定 | `make vm-micro` 跑全部 57 个 benchmark。 |
-| 332 | 全量评估：stock vs rejit vs llvmbpf | 待定 | 三方对比。 |
+| **325** | **Attachment sync 调研（2026-03-21）** | ✅ | TC/cgroup/kprobe 只缓存 `prog*`，WRITE_ONCE 够用。XDP dispatcher 不会 UAF（indirect fallback）。**Trampoline/freplace 是真 UAF**（硬编码地址）。报告：`docs/tmp/rejit_attachment_sync_research_20260321.md`。 |
+| **325a** | **REJIT 安全性 VM 验证（2026-03-22）** | ✅ | **12/12 PASS，dmesg 干净。** XDP/TC/cgroup_skb REJIT + 正确性 + 运行中 REJIT + 并发 REJIT 全部通过。 |
+| **325b** | **XDP/trampoline 修复设计（2026-03-22）** | ✅ | Phase 0: KERNEL_BPFPTR fix + 拒绝 live trampoline（~10 行）。Phase 1: XDP dispatcher refresh（~31 行）。Phase 2: trampoline refresh（~75 行）。报告：`docs/tmp/rejit_xdp_trampoline_fix_design_20260321.md`。 |
+| **325c** | **内核 Phase 0-2 修复实现（2026-03-22）** | ✅ | +260 行 kernel（+459 行 selftest）。fd_array fix + XDP refresh + trampoline refresh + ARM64。**VM 6/6 PASS**（same-len + diff-len + fd_array + correctness + info + concurrent）。 |
+| **326** | **Verifier log parser（2026-03-21）** | ✅ | `verifier_log.rs` 433 行，33 tests。 |
+| **327** | **Daemon profiling（2026-03-21）** | ✅ | `profiler.rs` 249 行。bpf_stats polling。 |
+| **328** | **Daemon pass 框架实现（2026-03-22）** | ✅ | pass.rs + analysis.rs + passes.rs。WideMemPass + RotatePass + SpectreMitigationPass。**104 tests all pass。** |
+| **329** | kinsn pass（ROTATE/SELECT/EXTRACT） | 🔄 | RotatePass 在 #328 已实现。SELECT/EXTRACT 待做。 |
+| **330** | 内核 Critical issue 修复 | ✅ 归入 #325c | Phase 0-2 全部完成。 |
+| **331** | VM 全量 micro suite rejit | ✅ 归入 #338 | 见 #338。 |
+| **332** | 全量评估：stock vs rejit vs llvmbpf | 待定 | 依赖 #331。 |
+| **333** | **安全测试套件设计（2026-03-22）** | ✅ | 553 行设计文档。5 类测试：negative(20 case)/fuzz(100K+)/concurrent/privilege/differential。参考 Jitterbug/K2/BCF 方法论。报告：`docs/tmp/safety_eval_design_20260321.md`。 |
+| **334** | func_cnt 限制 + e2e 兼容性 | ✅ 调研完成 | **结论**：swap 路径不完整（缺 `aux->func[]`/`func_cnt`/`real_func_cnt`/kallsyms）。**E2E 兼容**：Tracee 12/13、Tetragon 7/7、Katran **0/1**（blocker）、bpftrace 7/7。**最小修复方案 A'**：layout match + swap multi-subprog JIT package，~50-90 行。报告：`docs/tmp/func_cnt_and_e2e_compat_20260322.md`。 |
+| **335** | perf/LBR 调研（2026-03-22） | ✅ | VM 无硬件 PMU（Arrow Lake 太新）。LBR 不可用。perf 软件采样可关联 BPF JIT 代码。bpf_stats 够用。 |
+| **336** | func_cnt 修复实现（方案 A'） | ✅ 编译通过 | **+55/-3 行 syscall.c**。(1) 移除 func_cnt/real_func_cnt gate；(2) 新增 `bpf_prog_rejit_subprog_layout_match()` 校验 real_func_cnt + per-subprog len；(3) swap func/func_cnt/real_func_cnt/bpf_exception_cb/exception_boundary；(4) `bpf_prog_kallsyms_del_all()` + subprog re-publish。`make bzImage` 通过。**待 VM 测试验证 Katran。** |
+| **337** | 安全 negative test suite 实现 | ✅ 编译通过 | **919 行 `tests/rejit_safety_tests.c`，20 个测试**（15 negative + 5 correctness）。覆盖：非法 bytecode/OOB/infinite loop/illegal helper/oversized/invalid fd/non-privileged/失败后原程序不变/identity transform/NOP insertion/多次 REJIT/roundtrip。`clang -O2` 编译通过。**待 VM 运行验证。** |
+| **338** | VM micro 冒烟（2026-03-22） | ✅ | 62 bench × 3 runtime。**正确性 62/62 全部通过**。性能数据非权威（低迭代+VM 噪声）。WIDE_MEM 改进可见（load_byte_recompose 0.68x, stride_load_4 0.60x）。 |
