@@ -69,8 +69,16 @@ tests/rejit_safety_tests
 tests/unittest/rejit_poc
 tests/unittest/rejit_safety_tests
 tests/unittest/rejit_prog_types
+tests/unittest/rejit_regression
 tests/unittest/rejit_tail_call
+tests/unittest/rejit_spectre
+tests/unittest/hold_bpf_prog
 tests/unittest/progs/*.bpf.o
+tests/unittest/build/
+tests/helpers/build/
+tests/kernel/build/
+tests/kernel/build-arm64/
+tests/integration/
 
 # BPF build artifacts
 *.bpf.o

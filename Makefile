@@ -172,7 +172,7 @@ KERNEL_JIT_SOURCES := \
 MICRO_BPF_STAMP := $(MICRO_DIR)/programs/.build.stamp
 
 .PHONY: all runner micro daemon kernel kernel-perf kernel-arm64 kernel-tests kernel-test-progs \
-	arm64-crossbuild-image selftest-arm64 daemon-tests clean kinsn-modules \
+	arm64-crossbuild-image selftest-arm64 daemon-tests unittest-tests python-tests clean kinsn-modules \
 	smoke check validate verify-build compare \
 	vm-selftest vm-upstream-test-verifier vm-upstream-test-progs \
 	vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
@@ -201,6 +201,8 @@ help:
 	@echo "  make smoke            - Quick llvmbpf smoke test (no VM)"
 	@echo "  make check            - Build + daemon tests + smoke"
 	@echo "  make validate         - check + vm-selftest + vm-micro-smoke"
+	@echo "  make unittest-tests   - Build+run tests/unittest/ (requires VM + REJIT kernel)"
+	@echo "  make python-tests     - Run Python unit tests (no VM needed)"
 	@echo "  make vm-arm64-smoke   - Boot ARM64 kernel in qemu-system-aarch64 and run uname/bpf_jit smoke"
 	@echo "  make vm-arm64-selftest - Boot ARM64 QEMU and run the ARM64 test_recompile selftest"
 	@echo ""
@@ -482,10 +484,19 @@ smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP)
 		--output "$(SMOKE_OUTPUT)"
 	@python3 -c 'import json, pathlib; payload = json.loads(pathlib.Path("$(SMOKE_OUTPUT)").read_text()); bench = payload["benchmarks"][0]; run = bench["runs"][0]; result = next(iter(run["result_distribution"]), "?"); print("SMOKE OK: {} {} exec {:.0f} ns, compile {:.3f} ms, result {}".format(bench["name"], run["runtime"], float(run["exec_ns"]["median"]), float(run["compile_ns"]["median"]) / 1e6, result))'
 
+unittest-tests:
+	@echo "=== Running make unittest-tests ==="
+	$(MAKE) -C tests/unittest run
+
+python-tests:
+	@echo "=== Running Python unit tests ==="
+	$(VENV_ACTIVATE) python3 -m pytest tests/python/ -v
+
 check:
 	@echo "=== Running make check ==="
 	$(MAKE) all
 	$(MAKE) daemon-tests
+	$(MAKE) python-tests
 	$(MAKE) smoke
 
 validate:
