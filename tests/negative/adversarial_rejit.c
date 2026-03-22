@@ -59,13 +59,19 @@ static int test_a02_stack_overflow(void)
 	return run_negative_test("A02_stack_overflow", bad, ARRAY_SIZE(bad));
 }
 
-/* A03: Read uninitialized stack memory */
+/* A03: Use uninitialized stack value as pointer dereference.
+ * We read an uninit stack slot into r2 (r2 becomes an undefined scalar),
+ * then try to dereference r2 as a pointer.  The verifier must reject
+ * scalar-as-pointer loads. */
 static int test_a03_uninit_stack_read(void)
 {
 	static const struct bpf_insn bad[] = {
-		/* r0 = *(u64*)(r10 - 8) -- never written */
+		/* r2 = *(u64*)(r10 - 8) -- uninit stack slot → r2 is undefined scalar */
 		{ .code = BPF_LDX | BPF_MEM | BPF_DW,
-		  .dst_reg = BPF_REG_0, .src_reg = BPF_REG_10, .off = -8 },
+		  .dst_reg = BPF_REG_2, .src_reg = BPF_REG_10, .off = -8 },
+		/* r0 = *(u64*)(r2 + 0) -- dereference scalar as pointer → verifier rejects */
+		{ .code = BPF_LDX | BPF_MEM | BPF_DW,
+		  .dst_reg = BPF_REG_0, .src_reg = BPF_REG_2, .off = 0 },
 		{ .code = BPF_JMP | BPF_EXIT },
 	};
 	return run_negative_test("A03_uninit_stack_read", bad, ARRAY_SIZE(bad));
@@ -202,23 +208,104 @@ static int test_a12_wrong_type_helper(void)
 	return run_negative_test("A12_wrong_type_helper", bad, ARRAY_SIZE(bad));
 }
 
-/* A13: Pointer leak to map value -- store ctx pointer to stack,
- * then try to treat it as map value */
+/* A13: Privilege escalation -- store ctx pointer into a map value.
+ * The BPF verifier must reject any attempt to persist a kernel pointer
+ * (ptr_to_ctx) into a map, since that would allow leaking kernel addresses
+ * or later using a stale pointer after the program exits.
+ *
+ * Pattern:
+ *   r6 = r1                         -- save ctx ptr
+ *   LD_IMM64 r1, map_fd             -- load map fd (BPF_PSEUDO_MAP_FD)
+ *   *(u32*)(r10 - 4) = 0            -- key = 0
+ *   r2 = r10; r2 += -4              -- &key
+ *   call bpf_map_lookup_elem        -- r0 = &map_value or NULL
+ *   if r0 == 0 goto skip            -- skip store if NULL
+ *   *(u64*)(r0 + 0) = r6            -- STORE ctx ptr to map value → REJECT
+ * skip:
+ *   r0 = XDP_PASS
+ *   exit
+ */
 static int test_a13_pointer_leak(void)
 {
-	static const struct bpf_insn bad[] = {
-		/* *(u64*)(r10 - 8) = r1  -- leak ctx ptr to stack */
-		{ .code = BPF_STX | BPF_MEM | BPF_DW,
-		  .dst_reg = BPF_REG_10, .src_reg = BPF_REG_1, .off = -8 },
-		/* r2 = *(u64*)(r10 - 8) -- load it back */
-		{ .code = BPF_LDX | BPF_MEM | BPF_DW,
-		  .dst_reg = BPF_REG_2, .src_reg = BPF_REG_10, .off = -8 },
-		/* r0 = r2  -- try to return the pointer as scalar */
+	const char *name = "A13_pointer_leak";
+	char log_buf[65536];
+	int map_fd, prog_fd, ret;
+
+	/* Create a simple array map (key=4, value=8) */
+	map_fd = neg_create_array_map();
+	if (map_fd < 0) {
+		TEST_FAIL(name, "cannot create array map");
+		return 1;
+	}
+
+	/* Build insns dynamically so we can embed the real map_fd */
+	struct bpf_insn bad[] = {
+		/* r6 = r1  (save ctx pointer) */
 		{ .code = BPF_ALU64 | BPF_MOV | BPF_X,
-		  .dst_reg = BPF_REG_0, .src_reg = BPF_REG_2 },
+		  .dst_reg = BPF_REG_6, .src_reg = BPF_REG_1 },
+		/* LD_IMM64 r1, map_fd  (BPF_PSEUDO_MAP_FD = 1) */
+		{ .code = BPF_LD | BPF_DW | BPF_IMM,
+		  .dst_reg = BPF_REG_1, .src_reg = 1 /* BPF_PSEUDO_MAP_FD */,
+		  .off = 0, .imm = map_fd },
+		{ .code = 0, .dst_reg = 0, .src_reg = 0, .off = 0,
+		  .imm = 0 },  /* second half of LD_IMM64 */
+		/* *(u32*)(r10 - 4) = 0  (key = 0) */
+		{ .code = BPF_ST | BPF_MEM | BPF_W,
+		  .dst_reg = BPF_REG_10, .src_reg = 0, .off = -4, .imm = 0 },
+		/* r2 = r10 */
+		{ .code = BPF_ALU64 | BPF_MOV | BPF_X,
+		  .dst_reg = BPF_REG_2, .src_reg = BPF_REG_10 },
+		/* r2 += -4  (r2 = &key) */
+		{ .code = BPF_ALU64 | BPF_ADD | BPF_K,
+		  .dst_reg = BPF_REG_2, .imm = -4 },
+		/* call bpf_map_lookup_elem */
+		{ .code = BPF_JMP | BPF_CALL, .imm = 1 /* BPF_FUNC_map_lookup_elem */ },
+		/* if r0 == 0 goto +1 (skip store) */
+		{ .code = BPF_JMP | BPF_JEQ | BPF_K,
+		  .dst_reg = BPF_REG_0, .off = 1, .imm = 0 },
+		/* *(u64*)(r0 + 0) = r6  -- store ctx ptr to map value → REJECT */
+		{ .code = BPF_STX | BPF_MEM | BPF_DW,
+		  .dst_reg = BPF_REG_0, .src_reg = BPF_REG_6, .off = 0 },
+		/* r0 = XDP_PASS */
+		{ .code = BPF_ALU64 | BPF_MOV | BPF_K,
+		  .dst_reg = BPF_REG_0, .imm = XDP_PASS },
 		{ .code = BPF_JMP | BPF_EXIT },
 	};
-	return run_negative_test("A13_pointer_leak", bad, ARRAY_SIZE(bad));
+
+	prog_fd = neg_load_good_prog();
+	if (prog_fd < 0) {
+		close(map_fd);
+		TEST_FAIL(name, "cannot load base prog");
+		return 1;
+	}
+
+	if (neg_verify_retval(prog_fd, XDP_PASS) < 0) {
+		close(map_fd);
+		close(prog_fd);
+		TEST_FAIL(name, "pre-rejit run failed");
+		return 1;
+	}
+
+	memset(log_buf, 0, sizeof(log_buf));
+	ret = neg_rejit_prog(prog_fd, bad, ARRAY_SIZE(bad), log_buf, sizeof(log_buf));
+	if (ret >= 0) {
+		close(map_fd);
+		close(prog_fd);
+		TEST_FAIL(name, "REJIT unexpectedly succeeded (ctx ptr leak to map)");
+		return 1;
+	}
+
+	if (neg_verify_retval(prog_fd, XDP_PASS) < 0) {
+		close(map_fd);
+		close(prog_fd);
+		TEST_FAIL(name, "original program changed after failed REJIT!");
+		return 1;
+	}
+
+	close(map_fd);
+	close(prog_fd);
+	TEST_PASS(name);
+	return 0;
 }
 
 /* ================================================================== */

@@ -108,9 +108,34 @@ impl BtfType {
 
 // ── BTF parsing ──────────────────────────────────────────────────────
 
-/// Parse a BTF blob and find the BTF type ID for a FUNC with the given name.
-/// Returns the 1-based type ID, or None if not found.
-fn find_func_btf_id(btf_data: &[u8], func_name: &str) -> Option<i32> {
+/// Read the vmlinux BTF string section length from `/sys/kernel/btf/vmlinux`.
+///
+/// Module (split) BTF uses `name_off` values that are offset by the vmlinux
+/// string section length (`start_str_off`). We need this base offset to
+/// correctly resolve module-local string references.
+fn get_vmlinux_str_len() -> Result<u32> {
+    let vmlinux_path = "/sys/kernel/btf/vmlinux";
+    let data = fs::read(vmlinux_path)
+        .with_context(|| "read vmlinux BTF header")?;
+    if data.len() < BTF_HEADER_SIZE {
+        bail!("vmlinux BTF too small ({} bytes)", data.len());
+    }
+    let hdr: BtfHeader =
+        unsafe { std::ptr::read_unaligned(data.as_ptr() as *const BtfHeader) };
+    if hdr.magic != BTF_MAGIC {
+        bail!("vmlinux BTF bad magic: 0x{:04x}", hdr.magic);
+    }
+    Ok(hdr.str_len)
+}
+
+/// Parse a (possibly split) BTF blob and find the BTF type ID for a FUNC
+/// with the given name. Returns the 1-based type ID, or None if not found.
+///
+/// `base_str_off` is the vmlinux string section length. For split module BTF,
+/// `name_off` values >= `base_str_off` reference the module's own string
+/// section at local offset `name_off - base_str_off`. For standalone BTF
+/// (base_str_off == 0), name_off indexes the local string section directly.
+fn find_func_btf_id(btf_data: &[u8], func_name: &str, base_str_off: u32) -> Option<i32> {
     if btf_data.len() < BTF_HEADER_SIZE {
         return None;
     }
@@ -134,6 +159,7 @@ fn find_func_btf_id(btf_data: &[u8], func_name: &str) -> Option<i32> {
 
     let type_section = &btf_data[type_start..type_end];
     let str_section = &btf_data[str_start..str_end];
+    let base_off = base_str_off as usize;
 
     // Walk the type section. BTF type IDs are 1-based.
     let mut offset = 0usize;
@@ -147,9 +173,17 @@ fn find_func_btf_id(btf_data: &[u8], func_name: &str) -> Option<i32> {
 
         if kind == BTF_KIND_FUNC {
             // Resolve name from string section.
-            let name_off = bt.name_off as usize;
-            if name_off < str_section.len() {
-                let name_bytes = &str_section[name_off..];
+            // For split BTF, name_off >= base_str_off means a module-local string
+            // at local offset (name_off - base_str_off).
+            // For standalone BTF (base_str_off == 0), name_off indexes directly.
+            let raw_off = bt.name_off as usize;
+            let local_off = if base_off > 0 && raw_off >= base_off {
+                raw_off - base_off
+            } else {
+                raw_off
+            };
+            if local_off < str_section.len() {
+                let name_bytes = &str_section[local_off..];
                 let nul_pos = name_bytes.iter().position(|&b| b == 0).unwrap_or(name_bytes.len());
                 if let Ok(name) = std::str::from_utf8(&name_bytes[..nul_pos]) {
                     if name == func_name {
@@ -246,6 +280,24 @@ pub fn discover_kfuncs() -> DiscoveryResult {
     let mut module_fds: Vec<OwnedFd> = Vec::new();
     let mut log: Vec<String> = Vec::new();
 
+    // Read vmlinux BTF string section length for split BTF resolution.
+    // Module BTF is "split BTF" whose name_off values are offset by the
+    // vmlinux string section length. Without this base offset, we cannot
+    // resolve module-local function names.
+    let base_str_off = match get_vmlinux_str_len() {
+        Ok(len) => {
+            log.push(format!("  vmlinux BTF str_len={} (split BTF base offset)", len));
+            len
+        }
+        Err(e) => {
+            log.push(format!(
+                "  WARNING: failed to read vmlinux BTF: {:#} (falling back to base_str_off=0)",
+                e
+            ));
+            0
+        }
+    };
+
     for &(kfunc_name, module_name) in KNOWN_KFUNCS {
         let btf_path = Path::new("/sys/kernel/btf").join(module_name);
         if !btf_path.exists() {
@@ -267,7 +319,7 @@ pub fn discover_kfuncs() -> DiscoveryResult {
             }
         };
 
-        let btf_id = match find_func_btf_id(&btf_data, kfunc_name) {
+        let btf_id = match find_func_btf_id(&btf_data, kfunc_name, base_str_off) {
             Some(id) => id,
             None => {
                 log.push(format!(
@@ -369,20 +421,20 @@ mod tests {
     #[test]
     fn test_find_func_btf_id_found() {
         let blob = build_btf_blob("bpf_rotate64");
-        let result = find_func_btf_id(&blob, "bpf_rotate64");
+        let result = find_func_btf_id(&blob, "bpf_rotate64", 0);
         assert_eq!(result, Some(1)); // First type is ID=1
     }
 
     #[test]
     fn test_find_func_btf_id_not_found() {
         let blob = build_btf_blob("bpf_rotate64");
-        let result = find_func_btf_id(&blob, "bpf_select64");
+        let result = find_func_btf_id(&blob, "bpf_select64", 0);
         assert_eq!(result, None);
     }
 
     #[test]
     fn test_find_func_btf_id_empty_data() {
-        let result = find_func_btf_id(&[], "bpf_rotate64");
+        let result = find_func_btf_id(&[], "bpf_rotate64", 0);
         assert_eq!(result, None);
     }
 
@@ -392,7 +444,7 @@ mod tests {
         // Corrupt magic.
         blob[0] = 0x00;
         blob[1] = 0x00;
-        let result = find_func_btf_id(&blob, "bpf_rotate64");
+        let result = find_func_btf_id(&blob, "bpf_rotate64", 0);
         assert_eq!(result, None);
     }
 
@@ -441,11 +493,11 @@ mod tests {
         blob.extend_from_slice(&str_section);
 
         // bpf_rotate64 is type ID 1.
-        assert_eq!(find_func_btf_id(&blob, "bpf_rotate64"), Some(1));
+        assert_eq!(find_func_btf_id(&blob, "bpf_rotate64", 0), Some(1));
         // bpf_select64 is type ID 2.
-        assert_eq!(find_func_btf_id(&blob, "bpf_select64"), Some(2));
+        assert_eq!(find_func_btf_id(&blob, "bpf_select64", 0), Some(2));
         // Unknown func not found.
-        assert_eq!(find_func_btf_id(&blob, "bpf_unknown"), None);
+        assert_eq!(find_func_btf_id(&blob, "bpf_unknown", 0), None);
     }
 
     #[test]
@@ -570,7 +622,57 @@ mod tests {
         blob.extend_from_slice(&str_section);
 
         // The FUNC is type ID 5 (1-based).
-        assert_eq!(find_func_btf_id(&blob, "bpf_rotate64"), Some(5));
-        assert_eq!(find_func_btf_id(&blob, "unknown"), None);
+        assert_eq!(find_func_btf_id(&blob, "bpf_rotate64", 0), Some(5));
+        assert_eq!(find_func_btf_id(&blob, "unknown", 0), None);
+    }
+
+    /// Test split BTF: name_off is offset by a base vmlinux string section length.
+    ///
+    /// Simulates what the kernel exposes in `/sys/kernel/btf/<module>`:
+    /// the FUNC's name_off = base_str_off + local_offset.
+    #[test]
+    fn test_find_func_split_btf() {
+        let base_str_off: u32 = 2_000_000; // Simulated vmlinux str_len
+
+        // Build a split BTF blob where name_off values are offset by base_str_off.
+        let mut str_section = vec![0u8]; // offset 0 = empty string
+        let local_name_off = str_section.len() as u32;
+        str_section.extend_from_slice(b"bpf_rotate64\0");
+
+        // The FUNC entry has name_off = base_str_off + local_name_off
+        let split_name_off = base_str_off + local_name_off;
+        let info: u32 = BTF_KIND_FUNC << 24;
+        let bt = BtfType {
+            name_off: split_name_off,
+            info,
+            size_or_type: 0,
+        };
+        let type_section: [u8; BTF_TYPE_SIZE] = unsafe { std::mem::transmute(bt) };
+
+        let hdr = BtfHeader {
+            magic: BTF_MAGIC,
+            version: 1,
+            flags: 0,
+            hdr_len: BTF_HEADER_SIZE as u32,
+            type_off: 0,
+            type_len: type_section.len() as u32,
+            str_off: type_section.len() as u32,
+            str_len: str_section.len() as u32,
+        };
+        let hdr_bytes: [u8; BTF_HEADER_SIZE] = unsafe { std::mem::transmute(hdr) };
+
+        let mut blob = Vec::new();
+        blob.extend_from_slice(&hdr_bytes);
+        blob.extend_from_slice(&type_section);
+        blob.extend_from_slice(&str_section);
+
+        // With base_str_off=0, the name_off is out of range -> not found.
+        assert_eq!(find_func_btf_id(&blob, "bpf_rotate64", 0), None);
+
+        // With the correct base_str_off, the name resolves correctly.
+        assert_eq!(find_func_btf_id(&blob, "bpf_rotate64", base_str_off), Some(1));
+
+        // Wrong func name still not found.
+        assert_eq!(find_func_btf_id(&blob, "bpf_select64", base_str_off), None);
     }
 }

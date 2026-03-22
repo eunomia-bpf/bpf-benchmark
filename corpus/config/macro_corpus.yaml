@@ -228,3 +228,408 @@ programs:
     level: production
     hypothesis: Large multi-fragment node agents exercise selective attach with bpf_stats for execution measurement on tracepoint programs.
     tags: [observability, coroot, tracepoint, production, attach]
+
+  # -----------------------------------------------------------------------
+  # BCC libbpf-tools: tracepoint programs
+  # -----------------------------------------------------------------------
+
+  - name: bcc_execsnoop
+    description: BCC execsnoop traces process execution via execve tracepoints.
+    source: corpus/build/bcc/libbpf-tools/execsnoop.bpf.o
+    prog_type: tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [tracepoint__syscalls__sys_enter_execve, tracepoint__syscalls__sys_exit_execve]
+    sections: [tracepoint/syscalls/sys_enter_execve, tracepoint/syscalls/sys_exit_execve]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: Syscall tracepoint pairs are the most common observability pattern; execsnoop is the canonical example.
+    tags: [observability, bcc, tracepoint, production, attach]
+
+  - name: bcc_opensnoop
+    description: BCC opensnoop traces file opens via openat tracepoints.
+    source: corpus/build/bcc/libbpf-tools/opensnoop.bpf.o
+    prog_type: tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [tracepoint__syscalls__sys_enter_openat, tracepoint__syscalls__sys_exit_openat]
+    sections: [tracepoint/syscalls/sys_enter_openat, tracepoint/syscalls/sys_exit_openat]
+    trigger: "for i in $(seq 200); do ls /tmp >/dev/null 2>&1; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: File-open tracepoints are high-frequency in production workloads.
+    tags: [observability, bcc, tracepoint, production, attach]
+
+  - name: bcc_sigsnoop
+    description: BCC sigsnoop traces signal delivery via kill/tkill/tgkill tracepoints.
+    source: corpus/build/bcc/libbpf-tools/sigsnoop.bpf.o
+    prog_type: tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [kill_entry, kill_exit, sig_trace]
+    sections: [tracepoint/syscalls/sys_enter_kill, tracepoint/syscalls/sys_exit_kill, tracepoint/signal/signal_generate]
+    trigger: "for i in $(seq 200); do kill -0 $$ 2>/dev/null; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: Signal tracing covers both syscall and kernel-internal tracepoint categories.
+    tags: [observability, bcc, tracepoint, production, attach]
+
+  - name: bcc_exitsnoop
+    description: BCC exitsnoop traces process exits via sched_process_exit tracepoint.
+    source: corpus/build/bcc/libbpf-tools/exitsnoop.bpf.o
+    prog_type: tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [sched_process_exit]
+    sections: [tracepoint/sched/sched_process_exit]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: Single-tracepoint programs are the simplest attach_trigger case.
+    tags: [observability, bcc, tracepoint, production, attach]
+
+  - name: bcc_futexctn
+    description: BCC futexctn traces futex contention via syscall tracepoints.
+    source: corpus/build/bcc/libbpf-tools/futexctn.bpf.o
+    prog_type: tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [futex_enter, futex_exit]
+    sections: [tracepoint/syscalls/sys_enter_futex, tracepoint/syscalls/sys_exit_futex]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: Futex tracepoints exercise the enter/exit pair pattern on a different syscall.
+    tags: [observability, bcc, tracepoint, production, attach]
+
+  - name: bcc_syscount
+    description: BCC syscount counts syscalls via raw_syscalls tracepoints.
+    source: corpus/build/bcc/libbpf-tools/syscount.bpf.o
+    prog_type: tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [sys_enter, sys_exit]
+    sections: [tracepoint/raw_syscalls/sys_enter, tracepoint/raw_syscalls/sys_exit]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: raw_syscalls tracepoints fire on every syscall, producing the highest event rates.
+    tags: [observability, bcc, tracepoint, production, attach]
+
+  - name: bcc_tcplife
+    description: BCC tcplife traces TCP connection lifetimes via inet_sock_set_state tracepoint.
+    source: corpus/build/bcc/libbpf-tools/tcplife.bpf.o
+    prog_type: tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [inet_sock_set_state]
+    sections: [tracepoint/sock/inet_sock_set_state]
+    trigger: "for i in $(seq 50); do curl -s --connect-timeout 1 http://127.0.0.1/ >/dev/null 2>&1 || true; done"
+    trigger_timeout_seconds: 30
+    category: networking
+    family: bcc
+    level: production
+    hypothesis: Sock tracepoints measure TCP-specific kernel paths distinct from syscall tracepoints.
+    tags: [networking, bcc, tracepoint, production, attach]
+
+  # -----------------------------------------------------------------------
+  # BCC libbpf-tools: kprobe programs
+  # -----------------------------------------------------------------------
+
+  - name: bcc_tcpconnect
+    description: BCC tcpconnect traces TCP connect calls via kprobe/kretprobe on tcp_v4_connect.
+    source: corpus/build/bcc/libbpf-tools/tcpconnect.bpf.o
+    prog_type: kprobe
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [tcp_v4_connect, tcp_v4_connect_ret]
+    sections: [kprobe/tcp_v4_connect, kretprobe/tcp_v4_connect]
+    trigger: "for i in $(seq 50); do curl -s --connect-timeout 1 http://127.0.0.1/ >/dev/null 2>&1 || true; done"
+    trigger_timeout_seconds: 30
+    category: networking
+    family: bcc
+    level: production
+    hypothesis: Kprobe/kretprobe pairs on networking functions are the second most common observability pattern.
+    tags: [networking, bcc, kprobe, production, attach]
+
+  - name: bcc_bindsnoop
+    description: BCC bindsnoop traces socket bind calls via kprobe on inet_bind.
+    source: corpus/build/bcc/libbpf-tools/bindsnoop.bpf.o
+    prog_type: kprobe
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [ipv4_bind_entry, ipv4_bind_exit]
+    sections: [kprobe/inet_bind, kretprobe/inet_bind]
+    trigger: "python3 -c \"import socket; [socket.socket(socket.AF_INET, socket.SOCK_STREAM).close() for _ in range(200)]\" 2>/dev/null || for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: networking
+    family: bcc
+    level: production
+    hypothesis: Kprobe pairs on socket operations complement TCP connect tracing.
+    tags: [networking, bcc, kprobe, production, attach]
+
+  - name: bcc_capable
+    description: BCC capable traces capability checks via kprobe on cap_capable.
+    source: corpus/build/bcc/libbpf-tools/capable.bpf.o
+    prog_type: kprobe
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [kprobe__cap_capable_entry, kprobe__cap_capable_exit]
+    sections: [kprobe/cap_capable, kretprobe/cap_capable]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: security
+    family: bcc
+    level: production
+    hypothesis: Security-critical kernel functions are high-frequency kprobe targets in production.
+    tags: [security, bcc, kprobe, production, attach]
+
+  - name: bcc_filelife
+    description: BCC filelife traces file creation/deletion via kprobes on VFS functions.
+    source: corpus/build/bcc/libbpf-tools/filelife.bpf.o
+    prog_type: kprobe
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [vfs_create, vfs_open, vfs_unlink, vfs_unlink_ret]
+    sections: [kprobe/vfs_create, kprobe/vfs_open, kprobe/vfs_unlink, kretprobe/vfs_unlink]
+    trigger: "for i in $(seq 200); do tmp=$(mktemp) && rm -f $tmp; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: VFS kprobes exercise multi-function kprobe attachment on filesystem operations.
+    tags: [observability, bcc, kprobe, production, attach]
+
+  - name: bcc_slabratetop
+    description: BCC slabratetop traces slab allocation via kprobe on kmem_cache_alloc.
+    source: corpus/build/bcc/libbpf-tools/slabratetop.bpf.o
+    prog_type: kprobe
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [kmem_cache_alloc]
+    sections: [kprobe/kmem_cache_alloc]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: Memory allocator kprobes fire at extremely high rates in the kernel.
+    tags: [observability, bcc, kprobe, production, attach]
+
+  # -----------------------------------------------------------------------
+  # BCC libbpf-tools: raw_tracepoint programs (from dual tp_btf/raw_tp objects)
+  # -----------------------------------------------------------------------
+
+  - name: bcc_biolatency
+    description: BCC biolatency traces block I/O latency via raw_tp on block_rq events.
+    source: corpus/build/bcc/libbpf-tools/biolatency.bpf.o
+    prog_type: raw_tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [block_rq_insert, block_rq_issue, block_rq_complete]
+    sections: [raw_tp/block_rq_insert, raw_tp/block_rq_issue, raw_tp/block_rq_complete]
+    trigger: "dd if=/dev/zero of=/tmp/_bio_bench bs=4k count=100 conv=fsync 2>/dev/null; rm -f /tmp/_bio_bench"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: Block I/O raw tracepoints exercise a distinct kernel subsystem from syscall/sched tracepoints.
+    tags: [observability, bcc, raw_tracepoint, production, attach]
+
+  - name: bcc_runqlat
+    description: BCC runqlat traces scheduler run queue latency via raw_tp on sched events.
+    source: corpus/build/bcc/libbpf-tools/runqlat.bpf.o
+    prog_type: raw_tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [handle_sched_wakeup, handle_sched_wakeup_new, handle_sched_switch]
+    sections: [raw_tp/sched_wakeup, raw_tp/sched_wakeup_new, raw_tp/sched_switch]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: Scheduler raw tracepoints fire at very high rates and exercise the raw_tp attach path.
+    tags: [observability, bcc, raw_tracepoint, production, attach]
+
+  - name: bcc_hardirqs
+    description: BCC hardirqs traces hardware interrupt latency via raw_tp on irq events.
+    source: corpus/build/bcc/libbpf-tools/hardirqs.bpf.o
+    prog_type: raw_tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [irq_handler_entry, irq_handler_exit]
+    sections: [raw_tp/irq_handler_entry, raw_tp/irq_handler_exit]
+    trigger: "for i in $(seq 200); do ls /tmp >/dev/null 2>&1; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: IRQ tracepoints measure interrupt-context BPF execution overhead.
+    tags: [observability, bcc, raw_tracepoint, production, attach]
+
+  - name: bcc_softirqs
+    description: BCC softirqs traces software interrupt latency via raw_tp on softirq events.
+    source: corpus/build/bcc/libbpf-tools/softirqs.bpf.o
+    prog_type: raw_tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [softirq_entry, softirq_exit]
+    sections: [raw_tp/softirq_entry, raw_tp/softirq_exit]
+    trigger: "for i in $(seq 200); do ls /tmp >/dev/null 2>&1; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: Softirq tracepoints complement hardirqs with a different interrupt execution context.
+    tags: [observability, bcc, raw_tracepoint, production, attach]
+
+  # -----------------------------------------------------------------------
+  # libbpf-bootstrap: tracepoint programs
+  # -----------------------------------------------------------------------
+
+  - name: libbpf_bootstrap
+    description: libbpf-bootstrap process exec/exit tracer via tp/sched tracepoints.
+    source: corpus/build/libbpf-bootstrap/examples/c/bootstrap.bpf.o
+    prog_type: tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [handle_exec, handle_exit]
+    sections: [tp/sched/sched_process_exec, tp/sched/sched_process_exit]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: libbpf-bootstrap
+    level: support
+    hypothesis: The canonical libbpf-bootstrap example provides a minimal tracepoint baseline.
+    tags: [observability, libbpf-bootstrap, tracepoint, support, attach]
+
+  - name: libbpf_minimal
+    description: libbpf-bootstrap minimal tracepoint on sys_enter_write.
+    source: corpus/build/libbpf-bootstrap/examples/c/minimal.bpf.o
+    prog_type: tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [handle_tp]
+    sections: [tp/syscalls/sys_enter_write]
+    trigger: "for i in $(seq 200); do echo test > /dev/null; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: libbpf-bootstrap
+    level: support
+    hypothesis: Single-tracepoint minimal program gives the lowest-overhead attach_trigger baseline.
+    tags: [observability, libbpf-bootstrap, tracepoint, support, attach]
+
+  # -----------------------------------------------------------------------
+  # libbpf-bootstrap: kprobe programs
+  # -----------------------------------------------------------------------
+
+  - name: libbpf_kprobe
+    description: libbpf-bootstrap kprobe/kretprobe on do_unlinkat.
+    source: corpus/build/libbpf-bootstrap/examples/c/kprobe.bpf.o
+    prog_type: kprobe
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [do_unlinkat, do_unlinkat_exit]
+    sections: [kprobe/do_unlinkat, kretprobe/do_unlinkat]
+    trigger: "for i in $(seq 200); do tmp=$(mktemp) && rm -f $tmp; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: libbpf-bootstrap
+    level: support
+    hypothesis: Minimal kprobe pair provides a clean kprobe attach baseline.
+    tags: [observability, libbpf-bootstrap, kprobe, support, attach]
+
+  # -----------------------------------------------------------------------
+  # libbpf-bootstrap: fentry/fexit programs
+  # -----------------------------------------------------------------------
+
+  - name: libbpf_fentry
+    description: libbpf-bootstrap fentry/fexit on do_unlinkat.
+    source: corpus/build/libbpf-bootstrap/examples/c/fentry.bpf.o
+    prog_type: tracing
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [do_unlinkat, do_unlinkat_exit]
+    sections: [fentry/do_unlinkat, fexit/do_unlinkat]
+    trigger: "for i in $(seq 200); do tmp=$(mktemp) && rm -f $tmp; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: libbpf-bootstrap
+    level: support
+    hypothesis: fentry/fexit pair compares directly to kprobe pair on the same function.
+    tags: [observability, libbpf-bootstrap, fentry, support, attach]
+
+  # -----------------------------------------------------------------------
+  # libbpf-bootstrap: perf_event program
+  # -----------------------------------------------------------------------
+
+  - name: libbpf_profile
+    description: libbpf-bootstrap CPU profiler via perf_event cpu-clock sampling.
+    source: corpus/build/libbpf-bootstrap/examples/c/profile.bpf.o
+    prog_type: perf_event
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [profile]
+    sections: [perf_event]
+    trigger: "dd if=/dev/urandom of=/dev/null bs=4k count=1000 2>/dev/null"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: libbpf-bootstrap
+    level: support
+    hypothesis: perf_event programs exercise timer-based sampling distinct from tracepoint/kprobe.
+    tags: [observability, libbpf-bootstrap, perf_event, support, attach]
+
+  # -----------------------------------------------------------------------
+  # libbpf-bootstrap: LSM program
+  # -----------------------------------------------------------------------
+
+  - name: libbpf_lsm
+    description: libbpf-bootstrap LSM hook on bpf operations.
+    source: corpus/build/libbpf-bootstrap/examples/c/lsm.bpf.o
+    prog_type: lsm
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [lsm_bpf]
+    sections: [lsm/bpf]
+    trigger: "for i in $(seq 200); do bpftool prog show >/dev/null 2>&1; done"
+    trigger_timeout_seconds: 30
+    category: security
+    family: libbpf-bootstrap
+    level: support
+    hypothesis: LSM BPF hooks exercise the BPF_LINK_CREATE LSM attach path.
+    tags: [security, libbpf-bootstrap, lsm, support, attach]
+
+  # -----------------------------------------------------------------------
+  # Tracee: raw_tracepoint + kprobe mixed program
+  # -----------------------------------------------------------------------
+
+  - name: tracee_syscall_hooks
+    description: Tracee full syscall tracing engine with raw_tracepoint and kprobe programs.
+    source: corpus/build/tracee/tracee.bpf.o
+    prog_type: raw_tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [tracepoint__raw_syscalls__sys_enter, sys_enter_init, sys_enter_submit, tracepoint__raw_syscalls__sys_exit, sys_exit_init, sys_exit_submit]
+    sections: [raw_tracepoint/sys_enter, raw_tracepoint/sys_enter_init, raw_tracepoint/sys_enter_submit, raw_tracepoint/sys_exit, raw_tracepoint/sys_exit_init, raw_tracepoint/sys_exit_submit]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: security
+    family: tracee
+    level: production
+    hypothesis: Large multi-program raw_tracepoint objects exercise the most complex attach_trigger path.
+    tags: [security, observability, tracee, raw_tracepoint, production, attach]
+

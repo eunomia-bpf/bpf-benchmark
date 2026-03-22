@@ -541,6 +541,7 @@ impl PassManager {
     }
 
     /// Add a pass to the end of the pipeline.
+    #[cfg_attr(not(test), allow(dead_code))]
     pub fn add_pass<P: BpfPass + 'static>(&mut self, pass: P) {
         self.passes.push(Box::new(pass));
     }

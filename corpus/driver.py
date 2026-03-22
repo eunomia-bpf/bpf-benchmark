@@ -914,7 +914,7 @@ def run_loadall_attach_trigger_sample(
     load_attempts: list[dict[str, Any]] = []
     attachment_fds: list[int] = []
     prog_fds: list[int] = []
-    cgroup_detach_info: list[tuple[int, int]] = []  # (cgroup_fd, prog_fd) pairs
+    cgroup_detach_info: list[tuple[int, int, str]] = []  # (cgroup_fd, prog_fd, type) tuples
 
     try:
         load_command, load_attempts = run_bpftool_loadall(suite, spec, pin_dir)
@@ -964,9 +964,12 @@ def run_loadall_attach_trigger_sample(
                     })
                     # Track cgroup attachments separately (need explicit detach + close)
                     if attach_info["attach_method"] == "cgroup_sysctl":
-                        cgroup_detach_info.append((attach_fd, prog_fd))
+                        cgroup_detach_info.append((attach_fd, prog_fd, "sysctl"))
+                    elif attach_info["attach_method"] == "cgroup_skb":
+                        egress = attach_info.get("category", "") == "egress"
+                        cgroup_detach_info.append((attach_fd, prog_fd, "skb_egress" if egress else "skb_ingress"))
                     else:
-                        # perf_event fds: auto-detach on close
+                        # perf_event / link / socket fds: auto-detach on close
                         attachment_fds.append(attach_fd)
                 else:
                     print(f"  [info] skipping unsupported attach for {prog_name} ({section_name})")
@@ -1043,9 +1046,14 @@ def run_loadall_attach_trigger_sample(
         return sample
     finally:
         # Detach cgroup programs explicitly and close their fds
-        for cgroup_fd, prog_fd in cgroup_detach_info:
+        for detach_entry in cgroup_detach_info:
+            cgroup_fd, prog_fd, detach_type = detach_entry
             try:
-                detach_cgroup_sysctl(cgroup_fd, prog_fd)
+                if detach_type == "sysctl":
+                    detach_cgroup_sysctl(cgroup_fd, prog_fd)
+                elif detach_type.startswith("skb"):
+                    egress = "egress" in detach_type
+                    detach_cgroup_skb(cgroup_fd, prog_fd, egress=egress)
             except Exception:
                 pass
             try:
