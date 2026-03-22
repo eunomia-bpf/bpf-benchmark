@@ -635,4 +635,17 @@ make clean
 | **345** | **kfunc 发现 + VM module loading（2026-03-22）** | ✅ 119 tests | `kfunc_discovery.rs`（~130 行）：BTF parser + 扫描 `/sys/kernel/btf/` + KfuncRegistry 填充。Makefile 自动 insmod kinsn modules。Commits: `1c281ea` + `7f5d70a`。 |
 | **346** | **全量测试 + kernel bug fixes（2026-03-22）** | ✅ | **micro 62/62 完成，0 correctness mismatch，47 applied，geomean 0.887x（11.3% 加速）。** 发现并修复 4 个 kernel bug：**(1)** text_mutex 竞争（删 bpf_arch_text_invalidate）**(2)** kallsyms latch_tree 双重注册 **(3)** synchronize_rcu→expedited **(4)** XDP test_run 慢 sync。Kernel `b4bd737`，主仓库 `92d717c`。 |
 | **347** | **upstream BPF selftest（2026-03-22）** | ✅ | test_verifier **526 PASS / 1 FAIL**（CONFIG_IPV6 相关，非 REJIT 回归）。test_progs verifier+jit: 109 PASS。新增 `make vm-upstream-test-verifier` target。 |
-| **348** | kernel bug fix 审查 + 回归测试 | 🔄 | opus 审查 4 个 fix 正确性 + 补充 `tests/unittest/rejit_regression.c`。 |
+| **348** | **kernel bug fix 审查 + 回归测试（2026-03-22）** | ✅ | 4 个 fix 全部正确。5 个回归测试 PASS（并发 REJIT 40/40 + latency 27μs + rapid kallsyms 20/20 + XDP test_run + 压力测试 78779 REJITs）。`tests/unittest/rejit_regression.c`。 |
+| **349** | **kernel 全面审计 + 修复（2026-03-22）** | ✅ | 发现 3 HIGH + 6 MED。修复：**(H1)** kfd_array 内存泄漏 **(H2)** EXT func_info 泄漏 **(H3)** struct_ops multi-slot **(M1)** expedited 范围限制 **(M4)** insns/len swap **(M6)** UAPI flags 字段。Kernel `8a6923893`。报告：`docs/tmp/kernel_full_audit_20260322.md`。 |
+| **350** | **kinsn module 重编（2026-03-22）** | ✅ | vermagic 不匹配修复。3/3 modules 加载成功。`/sys/kernel/btf/bpf_rotate` 等 BTF 确认。 |
+| **351** | **micro v2 with kinsn（2026-03-22）** | ✅ | 62/62 完成。**RotatePass 生效**（412 sites / 5 benchmarks）。但只 7/62 applied — **PassManager 路径和旧 matcher 覆盖率差异调查中**。Bias-adjusted applied geomean 0.967x。rotate64_hash **20.4% 真实加速**。报告：`docs/tmp/micro_analysis_v2_20260322.md`。 |
+| **352** | **corpus compile_only→attach_trigger（2026-03-22）** | ✅ 代码完成 | 4 个目标改为 attach_trigger + bpf_stats timing。新增 `runner/libs/attach.py`。**VM 验证中。** |
+| **353** | **applied 数下降调查（2026-03-22）** | ✅ | **Root cause**: WideMemPass emitter 只支持 width 2/4/8，width=3/5/6/7 导致 cmd_apply crash。修复：skip 不支持的 width。49/62 有 wide_mem sites，预期恢复 ~47 applied。121 tests。 |
+| **354** | **e2e 准备（2026-03-22）** | ✅ | 5/5 case 可跑。Katran 不用 tail_call（是 func_cnt 问题，已修）。dev 数据：Katran 1.108x、Tracee +8.1%、Tetragon BPF -10.5%。**v2 e2e 尚未跑**（等全部 pass 修复后统一跑）。 |
+| **355** | **全部 5 pass 真正 apply（2026-03-22）** | 🔄 | CondSelectPass 需实现 emit（不只 detection）、BranchFlipPass 加 heuristic（不依赖 PGO）、SpectreMitigation 专门测试。opus 正在做。 |
+| **356** | **SpectreMitigation 专门测试（2026-03-22）** | 🔄 | `tests/unittest/rejit_spectre.c`。含 Spectre v1 pattern 的 BPF 程序 + 验证 lfence 插入 + REJIT 成功。opus 正在做。 |
+| **357** | **bpftrace 复杂 tools（2026-03-22）** | 🔄 | 替换简单脚本为 bpftrace 自带复杂 tools（tcplife/biosnoop/runqlat 等）。sonnet 正在做。 |
+| **358** | **v2 全量评估** | 待做 | 等 #355-#357 完成后：cargo build → micro(62) + corpus(all) + e2e(5) + 每层 opus 分析。**v2 从未有过权威 e2e 数据。** |
+| **359** | Recompile overhead 测量 | 待做 | REJIT verify+JIT+swap 各多久？reviewer 必问。 |
+| **360** | Policy sensitivity 输入变体 | 待做 | 启用 predictable/random 变体到 YAML，支撑 Insight 2。 |
+| **361** | VM bias 调查 | 待做 | control 有 7.8% phantom speedup，需要理解和消除。 |
