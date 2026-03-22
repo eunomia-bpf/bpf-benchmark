@@ -72,7 +72,7 @@ BZIMAGE ?= vendor/linux-framework/arch/x86/boot/bzImage
 DAEMON ?= daemon/target/release/bpfrejit-daemon
 ITERATIONS ?= 3
 WARMUPS ?= 1
-REPEAT ?= 200
+REPEAT ?= 100
 # Auto-detect virtualenv: check common locations before falling back to system Python.
 # Override with: make VENV=/path/to/venv ...
 _VENV_CANDIDATES := $(HOME)/workspace/.venv $(HOME)/.venv .venv venv
@@ -155,7 +155,10 @@ DAEMON_SOURCES := $(wildcard \
 	$(DAEMON_DIR)/Cargo.lock)
 KERNEL_JIT_SOURCES := \
 	$(KERNEL_DIR)/arch/x86/net/bpf_jit_comp.c \
-	$(KERNEL_DIR)/kernel/bpf/jit_directives.c
+	$(KERNEL_DIR)/kernel/bpf/syscall.c \
+	$(KERNEL_DIR)/kernel/bpf/verifier.c \
+	$(KERNEL_DIR)/kernel/bpf/trampoline.c \
+	$(KERNEL_DIR)/kernel/bpf/dispatcher.c
 # Stamp file for BPF program objects (programs/ has no separate build dir)
 MICRO_BPF_STAMP := $(MICRO_DIR)/programs/.build.stamp
 
@@ -211,9 +214,9 @@ help:
 	@echo "  make compare OLD=a.json NEW=b.json  - Compare two result JSON files"
 	@echo ""
 	@echo "Tunable parameters:"
-	@echo "  ITERATIONS=N          - JIT iterations (default: 10)"
-	@echo "  WARMUPS=N             - Warmup iterations (default: 2)"
-	@echo "  REPEAT=N              - Repeat count (default: 200)"
+	@echo "  ITERATIONS=N          - JIT iterations (default: 3)"
+	@echo "  WARMUPS=N             - Warmup iterations (default: 1)"
+	@echo "  REPEAT=N              - Repeat count (default: 100)"
 	@echo "  BENCH=\"name1 name2\"   - Run only specific benchmarks (vm-micro)"
 	@echo "  BZIMAGE=path          - Custom kernel image path"
 	@echo "  CROSS_COMPILE_ARM64=  - ARM64 cross-compiler prefix (default: aarch64-linux-gnu-)"
@@ -246,7 +249,7 @@ verify-build:
 	@test -f "$(MICRO_RUNNER)" || (echo "ERROR: micro_exec not found. Run: make micro" && exit 1)
 	@test -f "$(DAEMON_PATH)" || (echo "ERROR: daemon not found. Run: make daemon" && exit 1)
 	@# Check if kernel source is newer than bzImage (stale build detection)
-	@if [ "$$(find "$(KERNEL_DIR)/arch/x86/net/bpf_jit_comp.c" "$(KERNEL_DIR)/kernel/bpf/jit_directives.c" -newer "$(BZIMAGE_PATH)" 2>/dev/null | head -1)" ]; then \
+	@if [ "$$(find "$(KERNEL_DIR)/arch/x86/net/bpf_jit_comp.c" "$(KERNEL_DIR)/kernel/bpf/syscall.c" "$(KERNEL_DIR)/kernel/bpf/verifier.c" "$(KERNEL_DIR)/kernel/bpf/trampoline.c" "$(KERNEL_DIR)/kernel/bpf/dispatcher.c" -newer "$(BZIMAGE_PATH)" 2>/dev/null | head -1)" ]; then \
 		echo "WARNING: kernel source is newer than bzImage — consider: make kernel"; \
 	fi
 	@# Check if daemon source is newer than binary
@@ -485,7 +488,7 @@ vm-micro-smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(BZIMAGE_PATH)
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
 		bash -lc 'cd "$(ROOT_DIR)" && $(VENV_ACTIVATE) python3 "$(MICRO_DIR)/driver.py" suite \
 			--runtime kernel \
-			--runtime kernel-recompile \
+			--runtime kernel-rejit \
 			$(VM_SMOKE_ARGS) \
 			$(POLICY_DIR_FLAG) \
 			--output "$(VM_MICRO_SMOKE_OUTPUT)"'

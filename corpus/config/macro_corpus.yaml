@@ -20,9 +20,9 @@ runtimes:
   - name: kernel
     label: kernel eBPF
     mode: kernel
-  - name: kernel_recompile_v5
-    label: kernel eBPF recompile v5
-    mode: kernel-recompile-v5
+  - name: kernel-rejit
+    label: kernel eBPF rejit v2
+    mode: kernel-rejit
 
 programs:
   - name: katran_balancer

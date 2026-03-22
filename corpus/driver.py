@@ -145,6 +145,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--skip-build", action="store_true", help="Do not build micro_exec when missing.")
     parser.add_argument("--list", action="store_true", help="List configured benchmarks and runtimes.")
     parser.add_argument("--no-sudo-reexec", action="store_true", help="Do not automatically re-exec under sudo.")
+    parser.add_argument(
+        "--daemon-path",
+        default=None,
+        help=(
+            "Path to bpfrejit-daemon binary. When set, passed to micro_exec for "
+            "kernel-rejit runtimes so the daemon can apply in-place JIT optimizations."
+        ),
+    )
     return parser.parse_args(argv)
 
 
@@ -453,6 +461,8 @@ def build_runner_command(
     *,
     repeat: int,
     compile_only: bool,
+    rejit: bool = False,
+    daemon_path: str | None = None,
 ) -> list[str]:
     io_mode, input_path, input_size = default_io_plan(spec)
     btf_path = detect_btf_path(spec.btf_path)
@@ -479,6 +489,10 @@ def build_runner_command(
         command.extend(["--btf-custom-path", str(btf_path)])
     if compile_only:
         command.append("--compile-only")
+    if rejit:
+        command.append("--rejit")
+    if daemon_path is not None:
+        command.extend(["--daemon-path", str(daemon_path)])
     return command
 
 
@@ -489,6 +503,8 @@ def run_micro_exec_sample(
     *,
     repeat: int,
     compile_only: bool,
+    rejit: bool = False,
+    daemon_path: str | None = None,
 ) -> dict[str, Any]:
     command = build_runner_command(
         suite,
@@ -496,6 +512,8 @@ def run_micro_exec_sample(
         program_name,
         repeat=repeat,
         compile_only=compile_only,
+        rejit=rejit,
+        daemon_path=daemon_path,
     )
     started_ns = time.perf_counter_ns()
     completed = run_text_command(command)
@@ -790,6 +808,7 @@ def execute_sample(
     *,
     repeat: int,
     iteration_idx: int,
+    daemon_path: str | None = None,
 ) -> dict[str, Any]:
     inventory = discover_program_inventory(suite.runner_binary, spec.source)
     selected = choose_programs(spec, inventory)
@@ -809,6 +828,7 @@ def execute_sample(
             iteration_idx=iteration_idx,
         )
 
+    is_rejit_runtime = runtime.mode in {"kernel-rejit", "kernel_rejit"}
     if len(selected) != 1:
         raise RuntimeError(f"{spec.name}: expected exactly one selected program, found {len(selected)}")
     program_name = str(selected[0]["name"])
@@ -818,6 +838,8 @@ def execute_sample(
         program_name,
         repeat=repeat,
         compile_only=compile_only,
+        rejit=is_rejit_runtime,
+        daemon_path=daemon_path if is_rejit_runtime else None,
     )
 
 
@@ -867,6 +889,8 @@ def run_suite(argv: list[str] | None = None) -> int:
         "benchmarks": [],
     }
 
+    daemon_path = getattr(args, "daemon_path", None)
+
     rng = random.Random(args.seed)
     for spec in benchmarks:
         inventory = discover_program_inventory(suite.runner_binary, spec.source)
@@ -902,6 +926,7 @@ def run_suite(argv: list[str] | None = None) -> int:
                     runtime,
                     repeat=repeat,
                     iteration_idx=-1,
+                    daemon_path=daemon_path,
                 )
 
             samples = []
@@ -912,6 +937,7 @@ def run_suite(argv: list[str] | None = None) -> int:
                     runtime,
                     repeat=repeat,
                     iteration_idx=iteration_idx,
+                    daemon_path=daemon_path,
                 )
                 sample["iteration_index"] = iteration_idx
                 samples.append(sample)
@@ -956,6 +982,28 @@ def run_suite(argv: list[str] | None = None) -> int:
                 f"exec median {run_record['exec_ns']['median']} ns"
             )
 
+        # Cross-runtime correctness check (kernel vs kernel-rejit)
+        runtime_results: dict[str, int | None] = {}
+        for run in benchmark_record["runs"]:
+            samples = run.get("samples", [])
+            if samples:
+                result_counts = Counter(sample.get("result") for sample in samples)
+                modal_result = result_counts.most_common(1)[0][0]
+                runtime_results[run["runtime"]] = modal_result
+            else:
+                runtime_results[run["runtime"]] = None
+
+        kernel_result = runtime_results.get("kernel")
+        rejit_result = runtime_results.get("kernel-rejit")
+        if kernel_result is not None and rejit_result is not None and kernel_result != rejit_result:
+            print(
+                f"  WARNING: correctness mismatch for {spec.name}: "
+                f"kernel={kernel_result}, kernel-rejit={rejit_result}"
+            )
+            benchmark_record["correctness_mismatch"] = True
+        else:
+            benchmark_record["correctness_mismatch"] = False
+
         results["benchmarks"].append(benchmark_record)
 
     output_path = suite.output_path
@@ -975,9 +1023,19 @@ def run_suite(argv: list[str] | None = None) -> int:
     return 0
 
 
+MODE_NAMES = {"packet", "tracing", "perf", "code-size"}
+
+
 def main(argv: list[str] | None = None) -> int:
-    forwarded = list(argv or [])
-    return run_suite(forwarded)
+    raw_args = list(argv if argv is not None else sys.argv[1:])
+
+    # Dispatch to corpus/modes.py when the first positional arg is a mode name.
+    if raw_args and raw_args[0] in MODE_NAMES:
+        from corpus.modes import main as modes_main  # noqa: F811
+
+        return modes_main(raw_args)
+
+    return run_suite(raw_args)
 
 
 if __name__ == "__main__":

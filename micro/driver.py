@@ -503,7 +503,7 @@ def main(argv: list[str] | None = None) -> int:
         strict=args.strict_env,
     )
 
-    for benchmark in benchmarks:
+    for bench_idx, benchmark in enumerate(benchmarks):
         memory_file = resolve_memory_file(benchmark, args.regenerate_inputs)
         policy_content, policy_sha256 = _read_policy_payload(benchmark.policy_file)
         benchmark_record = {
@@ -524,7 +524,7 @@ def main(argv: list[str] | None = None) -> int:
             "runs": [],
         }
 
-        print(f"[bench] {benchmark.name}")
+        print(f"[bench] ({bench_idx+1}/{len(benchmarks)}) {benchmark.name}", flush=True)
         runtime_samples: dict[str, dict[str, object]] = {}
         iteration_runtime_orders: list[list[str]] = []
         for runtime in runtimes:
@@ -614,6 +614,31 @@ def main(argv: list[str] | None = None) -> int:
                 f"exec median {format_ns(run_record['exec_ns']['median'])} | "
                 f"result {result_values[-1]}"
             )
+
+        # ── Cross-runtime correctness check ──────────────────────────
+        # Compare result values across runtimes for the same benchmark.
+        # If kernel-rejit produces a different result than kernel, flag it.
+        runtime_results: dict[str, int | None] = {}
+        for run in benchmark_record["runs"]:
+            samples = run.get("samples", [])
+            if samples:
+                # Use the most common result value across all iterations
+                result_counts = Counter(sample["result"] for sample in samples)
+                modal_result = result_counts.most_common(1)[0][0]
+                runtime_results[run["runtime"]] = modal_result
+            else:
+                runtime_results[run["runtime"]] = None
+
+        kernel_result = runtime_results.get("kernel")
+        rejit_result = runtime_results.get("kernel-rejit")
+        if kernel_result is not None and rejit_result is not None and kernel_result != rejit_result:
+            print(
+                f"  WARNING: correctness mismatch for {benchmark.name}: "
+                f"kernel={kernel_result}, kernel-rejit={rejit_result}"
+            )
+            benchmark_record["correctness_mismatch"] = True
+        else:
+            benchmark_record["correctness_mismatch"] = False
 
         results["benchmarks"].append(benchmark_record)
 
