@@ -1,0 +1,7 @@
+version: 3
+program: mixed-demo
+sites:
+  - insn: 0
+    family: cmov
+    pattern_kind: cond-select-64
+    action: apply

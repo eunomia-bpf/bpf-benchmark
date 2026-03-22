@@ -1,0 +1,9 @@
+version: 3
+program: mixed-demo
+sites:
+  - insn: 0
+    family: cmov
+    pattern_kind: cond-select-64
+  - insn: 4
+    family: rotate
+    pattern_kind: rotate-32
