@@ -423,26 +423,18 @@ static int test_neg_truncated_ld_imm64(void)
 	return run_negative_test("N12_truncated_ld_imm64", bad, ARRAY_SIZE(bad));
 }
 
-/* N13: Privilege escalation -- XDP program calling bpf_probe_read_kernel
- * (helper #113), which is not allowed for XDP prog type */
+/* N13: Privilege escalation -- XDP program calling bpf_override_return
+ * (helper #58), which is kprobe-only and must be rejected for XDP.
+ *
+ * Note: bpf_probe_read_kernel (#113) is available to all prog types via
+ * bpf_base_func_proto (no lockdown), so it would NOT be rejected for XDP.
+ * bpf_override_return is registered only in kprobe_prog_func_proto and is
+ * truly unavailable for XDP. */
 static int test_neg_wrong_helper_for_prog_type(void)
 {
 	static const struct bpf_insn bad[] = {
-		/* Set up arguments for bpf_probe_read_kernel(dst, size, src):
-		 * r1 = r10 - 8 (dst on stack)
-		 * r2 = 8 (size)
-		 * r3 = 0 (src = NULL, would fail anyway)
-		 */
-		{ .code = BPF_ALU64 | BPF_MOV | BPF_X,
-		  .dst_reg = BPF_REG_1, .src_reg = BPF_REG_10 },
-		{ .code = BPF_ALU64 | BPF_ADD | BPF_K,
-		  .dst_reg = BPF_REG_1, .imm = -8 },
-		{ .code = BPF_ALU64 | BPF_MOV | BPF_K,
-		  .dst_reg = BPF_REG_2, .imm = 8 },
-		{ .code = BPF_ALU64 | BPF_MOV | BPF_K,
-		  .dst_reg = BPF_REG_3, .imm = 0 },
-		/* call bpf_probe_read_kernel (#113) -- not allowed for XDP */
-		{ .code = BPF_JMP | BPF_CALL, .imm = 113 },
+		/* call bpf_override_return (#58) -- kprobe-only, not allowed for XDP */
+		{ .code = BPF_JMP | BPF_CALL, .imm = 58 },
 		{ .code = BPF_ALU64 | BPF_MOV | BPF_K,
 		  .dst_reg = BPF_REG_0, .imm = XDP_PASS },
 		{ .code = BPF_JMP | BPF_EXIT },
