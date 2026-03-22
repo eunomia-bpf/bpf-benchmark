@@ -398,6 +398,16 @@ impl BpfPass for WideMemPass {
                 continue;
             }
 
+            // Skip unsupported widths (only 2, 4, 8 can be emitted as a single wide load).
+            let width = site.get_binding("width").unwrap_or(0);
+            if width != 2 && width != 4 && width != 8 {
+                skipped.push(SkipReason {
+                    pc: site.start_pc,
+                    reason: format!("unsupported width {} (supports 2, 4, 8)", width),
+                });
+                continue;
+            }
+
             safe_sites.push(site.clone());
         }
 
@@ -1111,5 +1121,75 @@ mod tests {
         let jeq = &prog.insns[0];
         assert!(jeq.is_cond_jmp());
         assert_eq!(jeq.off, 1, "jeq should jump to exit at pc=2");
+    }
+
+    #[test]
+    fn test_wide_mem_pass_skips_unsupported_width_3() {
+        // Build a 3-byte low-first byte-ladder: LDX(B, dst, base, 0) + 2 more bytes.
+        // Width 3 is detected by the scanner but cannot be emitted as a single load.
+        let insns = vec![
+            BpfInsn::ldx_mem(BPF_B, 0, 6, 0),  // byte 0
+            BpfInsn::ldx_mem(BPF_B, 1, 6, 1),  // byte 1
+            BpfInsn::alu64_imm(BPF_LSH, 1, 8),
+            BpfInsn::alu64_reg(BPF_OR, 0, 1),
+            BpfInsn::ldx_mem(BPF_B, 1, 6, 2),  // byte 2
+            BpfInsn::alu64_imm(BPF_LSH, 1, 16),
+            BpfInsn::alu64_reg(BPF_OR, 0, 1),
+            exit_insn(),
+        ];
+
+        // Verify the scanner finds a width=3 site.
+        let sites = scan_wide_mem(&insns);
+        assert_eq!(sites.len(), 1);
+        assert_eq!(sites[0].get_binding("width"), Some(3));
+
+        // The pass should skip this site (unsupported width) without error.
+        let mut prog = make_program(insns);
+        let mut cache = AnalysisCache::new();
+        let ctx = PassContext::test_default();
+
+        let pass = WideMemPass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+        assert!(!result.changed, "width=3 should be skipped, not applied");
+        assert_eq!(result.sites_applied, 0);
+        assert!(result.sites_skipped.iter().any(|s| s.reason.contains("unsupported width")));
+    }
+
+    #[test]
+    fn test_wide_mem_pass_applies_width4_skips_width3_mixed() {
+        // Program with both a width=4 site (supported) and a width=3 site (unsupported).
+        // The pass should apply the width=4 site and skip the width=3 site.
+        let mut insns = Vec::new();
+        // Width=4 low-first: dst=0, base=6, off=0
+        insns.push(BpfInsn::ldx_mem(BPF_B, 0, 6, 0));
+        insns.push(BpfInsn::ldx_mem(BPF_B, 1, 6, 1));
+        insns.push(BpfInsn::alu64_imm(BPF_LSH, 1, 8));
+        insns.push(BpfInsn::alu64_reg(BPF_OR, 0, 1));
+        insns.push(BpfInsn::ldx_mem(BPF_B, 1, 6, 2));
+        insns.push(BpfInsn::alu64_imm(BPF_LSH, 1, 16));
+        insns.push(BpfInsn::alu64_reg(BPF_OR, 0, 1));
+        insns.push(BpfInsn::ldx_mem(BPF_B, 1, 6, 3));
+        insns.push(BpfInsn::alu64_imm(BPF_LSH, 1, 24));
+        insns.push(BpfInsn::alu64_reg(BPF_OR, 0, 1));
+        // Width=3 low-first: dst=2, base=7, off=0
+        insns.push(BpfInsn::ldx_mem(BPF_B, 2, 7, 0));
+        insns.push(BpfInsn::ldx_mem(BPF_B, 3, 7, 1));
+        insns.push(BpfInsn::alu64_imm(BPF_LSH, 3, 8));
+        insns.push(BpfInsn::alu64_reg(BPF_OR, 2, 3));
+        insns.push(BpfInsn::ldx_mem(BPF_B, 3, 7, 2));
+        insns.push(BpfInsn::alu64_imm(BPF_LSH, 3, 16));
+        insns.push(BpfInsn::alu64_reg(BPF_OR, 2, 3));
+        insns.push(exit_insn());
+
+        let mut prog = make_program(insns);
+        let mut cache = AnalysisCache::new();
+        let ctx = PassContext::test_default();
+
+        let pass = WideMemPass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+        assert!(result.changed, "width=4 site should be applied");
+        assert_eq!(result.sites_applied, 1);
+        // The width=3 site should be in sites_skipped.
+        assert!(result.sites_skipped.iter().any(|s| s.reason.contains("unsupported width 3")));
     }
 }
