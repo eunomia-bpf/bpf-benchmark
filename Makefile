@@ -513,15 +513,8 @@ validate:
 vm-selftest: kernel-tests $(BZIMAGE_PATH)
 	@echo "=== Running make vm-selftest ==="
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
-		bash -lc 'cd "$(ROOT_DIR)" && $(LOAD_KINSN_MODULES) sudo -n "$(KERNEL_SELFTEST)" && \
-			echo "=== Building tests/unittest/ inside VM ===" && \
-			$(MAKE) -C "$(UNITTEST_DIR)" clean all && \
-			echo "=== Running tests/unittest/ ===" && \
-			cd "$(UNITTEST_DIR)" && \
-			for t in rejit_poc rejit_safety_tests rejit_regression rejit_tail_call rejit_spectre rejit_prog_types rejit_audit_tests; do \
-				echo "=== $$t ==="; \
-				sudo "$(UNITTEST_BUILD_DIR)/$$t" "$(UNITTEST_BUILD_DIR)/progs" || exit 1; \
-			done'
+		"$(ROOT_DIR)/runner/scripts/vm-selftest.sh" \
+		"$(ROOT_DIR)" "$(KERNEL_SELFTEST)" "$(UNITTEST_DIR)" "$(KINSN_MODULE_DIR)"
 
 # Run tests/unittest/ suite in VM: builds test binaries + BPF objects inside
 # the REJIT-enabled kernel VM (depends on REJIT UAPI headers), then runs them.

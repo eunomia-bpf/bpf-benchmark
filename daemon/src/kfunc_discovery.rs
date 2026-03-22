@@ -4,6 +4,7 @@
 //! Scans loaded kernel modules for known kinsn kfuncs (bpf_rotate64, etc.)
 //! and populates a `KfuncRegistry` with their BTF type IDs and module FDs.
 
+use std::collections::HashMap;
 use std::fs;
 use std::os::unix::io::{FromRawFd, OwnedFd};
 use std::path::Path;
@@ -19,6 +20,9 @@ const KNOWN_KFUNCS: &[(&str, &str)] = &[
     ("bpf_rotate64", "bpf_rotate"),
     ("bpf_select64", "bpf_select"),
     ("bpf_extract64", "bpf_extract"),
+    ("bpf_endian_load16", "bpf_endian"),
+    ("bpf_endian_load32", "bpf_endian"),
+    ("bpf_endian_load64", "bpf_endian"),
 ];
 
 // ── BTF constants (synced from vendor/linux-framework/include/uapi/linux/btf.h) ──
@@ -231,7 +235,11 @@ pub fn discover_kfuncs() -> DiscoveryResult {
         extract64_btf_id: -1,
         lea64_btf_id: -1,
         movbe64_btf_id: -1,
+        endian_load16_btf_id: -1,
+        endian_load32_btf_id: -1,
+        endian_load64_btf_id: -1,
         module_fd: None,
+        kfunc_module_fds: HashMap::new(),
     };
     let mut module_fds: Vec<OwnedFd> = Vec::new();
     let mut log: Vec<String> = Vec::new();
@@ -287,13 +295,16 @@ pub fn discover_kfuncs() -> DiscoveryResult {
             "bpf_rotate64" => registry.rotate64_btf_id = btf_id,
             "bpf_select64" => registry.select64_btf_id = btf_id,
             "bpf_extract64" => registry.extract64_btf_id = btf_id,
+            "bpf_endian_load16" => registry.endian_load16_btf_id = btf_id,
+            "bpf_endian_load32" => registry.endian_load32_btf_id = btf_id,
+            "bpf_endian_load64" => registry.endian_load64_btf_id = btf_id,
             _ => {}
         }
 
-        // Store the first module FD for REJIT fd_array.
-        // All three kfuncs share the same module BTF convention, but
-        // each module has its own BTF fd. For now, store the first one
-        // found; the REJIT path may need multiple fds later.
+        // Store per-kfunc module FD for REJIT fd_array.
+        registry.kfunc_module_fds.insert(kfunc_name.to_string(), fd);
+
+        // Legacy: keep the first module FD for backward compat.
         if registry.module_fd.is_none() {
             registry.module_fd = Some(fd);
         }

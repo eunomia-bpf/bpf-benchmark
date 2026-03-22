@@ -169,7 +169,7 @@ BpfReJIT 的设计基于三个层次的 insight：
 | 证据 | 数值 |
 |------|------|
 | Exec time geomean (L/K) — **characterization gap** | **0.609x** (56 pure-JIT, strict 30×1000); 0.849x (31 pure-JIT, old 3×100)。注意：这是 llvmbpf vs stock kernel 的 gap 上界，不是 BpfReJIT 改进 |
-| BpfReJIT micro improvement (recompile/stock) | **v2 (2026-03-22, post P0-P1 fixes)**: 62/62 valid, **49 applied**, overall geomean **1.153x**, applied-only **1.096x**, 0 correctness mismatch。v1 参考: blind 1.028x, fixed-policy 1.049x |
+| BpfReJIT micro improvement (recompile/stock) | **v2 (2026-03-22, post P0-P2 fixes)**: 62/62 valid, **49 applied**, overall geomean **1.153x**, applied-only **1.096x**, 0 correctness mismatch。Daemon **187 tests**（6 pass + PGO + annotation remap）。v1 参考: blind 1.028x, fixed-policy 1.049x |
 | Code size geomean (L/K) | 0.496x |
 | Byte-recompose 占 kernel surplus | 50.7%，2.24x 时间惩罚 |
 | cmov 差距 | llvmbpf 31 vs kernel 0 |
@@ -661,3 +661,10 @@ make clean
 | **371** | Corpus 54 unmeasured 程序 | 🔄 | 152 targets 中 54 个无 exec 数据（stock phase missing）。opus 正在诊断+配 attach_trigger。 |
 | **372** | Makefile vm-selftest 接入 unittest | 🔄 | unittest/ 6 个测试文件需接入 vm-selftest。opus 正在做。 |
 | **373** | kinsn module 重编（2026-03-22） | ✅ | 3/3 x86 modules against kernel 7.0-rc2+rejit-v2。Commit `9e6eb3d`。 |
+| **374** | **Daemon post-fix review（2026-03-22）** | ✅ | Codex review 发现 5/11 修复完整、3/11 部分修复、3/11 未修复 + 1 新问题。报告：`docs/tmp/20260322/daemon_postfix_review_20260322.md`。 |
+| **375** | **Daemon 7 issues 全修复（2026-03-22）** | ✅ | **(1)** cond_select parallel-copy 算法（27 组合穷举测试）。**(2)** rotate dst 改写检查。**(3)** fd_array per-kfunc module_fd（HashMap）。**(4)** spectre→barrier_placeholder + Placeholder category。**(5)** InsnAnnotation remap（addr_map 重映射）。**(6)** PGO 闭环（ProfilingData→annotations→branch_flip）。**(7)** ExtractPass 已存在确认。**187 tests pass**（+17 new）。 |
+| **376** | 缺失 pass 站点覆盖分析（2026-03-22） | ✅ | ENDIAN_FUSION 1386 sites（最高）、BITFIELD_EXTRACT 542 sites、ADDR_CALC 较少。ENDIAN 需新 kinsn module + daemon pass。 |
+| **377** | **ExtractPass 验证+增强（2026-03-22）** | ✅ | pattern 正确（RSH+AND→bpf_extract64 kfunc）。+9 new edge case tests（width=1/32, shift=0, consecutive, non-matching masks）。**196 tests pass**，zero warnings。 |
+| **378** | E2E katran veth 修复 + 全量跑 | 🔄 | VM 缺 veth 模块导致 katran 失败。opus 修复中（modprobe veth）。 |
+| **379** | 全项目架构审查 + 论文差距分析 | 🔄 | Codex 全面 review：死代码、设计缺陷、组织问题、论文差距。报告→`docs/tmp/20260322/full_project_review_20260322.md`。 |
+| **380** | **ENDIAN_FUSION 实现（2026-03-22）** | ✅ | x86 bpf_endian.c（MOVBE 3 variants）+ arm64 bpf_endian.c（LDR+REV）+ daemon EndianFusionPass（LDX_MEM+ENDIAN_TO_BE→kfunc）。+22 tests。**218 tests pass**。 |

@@ -330,14 +330,20 @@ def run_command(command: list[str], timeout_seconds: int) -> dict[str, Any]:
 def invocation_summary(result: dict[str, Any] | None) -> dict[str, Any] | None:
     if result is None:
         return None
+    stderr = result.get("stderr") or ""
+    stdout = result.get("stdout") or ""
+    if isinstance(stderr, bytes):
+        stderr = stderr.decode("utf-8", errors="replace")
+    if isinstance(stdout, bytes):
+        stdout = stdout.decode("utf-8", errors="replace")
     return {
         "ok": result["ok"],
         "returncode": result["returncode"],
         "timed_out": result["timed_out"],
         "duration_seconds": result["duration_seconds"],
         "error": result["error"],
-        "stderr_tail": summarize_text(result["stderr"]),
-        "stdout_tail": summarize_text(result["stdout"]),
+        "stderr_tail": summarize_text(stderr),
+        "stdout_tail": summarize_text(stdout),
         "sample": result.get("sample"),
     }
 

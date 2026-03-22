@@ -323,7 +323,11 @@ void initialize_katran_test_fixture(bpf_object *object)
     bpf_map *ctl_array_map = bpf_object__find_map_by_name(object, "ctl_array");
     if (vip_map == nullptr || reals_map == nullptr || rings_map == nullptr ||
         ctl_array_map == nullptr) {
-        fail("Katran balancer fixture requires vip_map, reals, ch_rings, and ctl_array");
+        /* The object has a program named balancer_ingress but lacks the
+         * Katran-specific maps.  This happens for linux-selftest programs
+         * that reuse the name.  Skip fixture initialization silently. */
+        fprintf(stderr, "katran fixture: maps not found, skipping\n");
+        return;
     }
 
     const int vip_fd = bpf_map__fd(vip_map);

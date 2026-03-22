@@ -61,7 +61,7 @@ __bpf_kfunc u64 bpf_extract64(u64 val, u32 start, u32 len)
 		return 0;
 	if (start + len > 64)
 		len = 64 - start;
-	return (val >> start) & ((1ULL << len) - 1);
+	return (val >> start) & (len >= 64 ? ~0ULL : (1ULL << len) - 1);
 }
 
 __bpf_kfunc_end_defs();
@@ -209,7 +209,7 @@ static int __init bpf_extract_init(void)
 	if (ret)
 		return ret;
 
-	ret = register_btf_kfunc_id_set(BPF_PROG_TYPE_XDP,
+	ret = register_btf_kfunc_id_set(BPF_PROG_TYPE_UNSPEC,
 					 &bpf_extract_kfunc_set);
 	if (ret)
 		bpf_unregister_kfunc_inline_ops("bpf_extract64");

@@ -1125,6 +1125,9 @@ class KatranDsrTopology:
 
     def __enter__(self) -> "KatranDsrTopology":
         self.cleanup()
+        # Ensure required kernel modules are loaded (may not be built-in in VM guests).
+        for mod in ("veth", "ipip"):
+            run_command(["modprobe", mod], check=False, timeout=15)
         for namespace in (ROUTER_NS, CLIENT_NS, REAL_NS):
             run_command(["ip", "netns", "add", namespace], timeout=15)
 

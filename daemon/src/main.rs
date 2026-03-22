@@ -26,8 +26,8 @@ use clap::{Parser, Subcommand};
 #[command(name = "bpfrejit-daemon", version, about = "BpfReJIT userspace daemon")]
 struct Cli {
     /// Comma-separated list of passes to run (default: all optimization passes).
-    /// Available: wide_mem, rotate, cond_select, branch_flip, spectre_mitigation.
-    /// Example: --passes spectre_mitigation
+    /// Available: wide_mem, rotate, cond_select, extract, branch_flip, barrier_placeholder.
+    /// Example: --passes barrier_placeholder
     #[arg(long, value_delimiter = ',')]
     passes: Option<Vec<String>>,
 

@@ -5,8 +5,7 @@ use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
-use super::fixup_branches_inline;
-use super::utils::{emit_kfunc_call, KfuncArg};
+use super::utils::{emit_kfunc_call, fixup_all_branches, KfuncArg};
 
 /// COND_SELECT pass: replaces branch+mov diamond patterns with
 /// bpf_select64() kfunc calls (lowered to CMOV by the JIT).
@@ -93,14 +92,6 @@ fn kfunc_args_for_site(site: &CondSelectSite) -> (CondSelectValue, CondSelectVal
             (site.false_val, site.true_val)
         }
         _ => unreachable!("is_simple_zero_test should have filtered this"),
-    }
-}
-
-/// Emit a MOV instruction for a CondSelectValue into a target register.
-fn emit_mov_value(dst: u8, val: CondSelectValue) -> BpfInsn {
-    match val {
-        CondSelectValue::Reg(src) => BpfInsn::mov64_reg(dst, src),
-        CondSelectValue::Imm(imm) => BpfInsn::mov64_imm(dst, imm),
     }
 }
 
@@ -234,16 +225,26 @@ impl BpfPass for CondSelectPass {
                 let site = &safe_sites[site_idx];
                 let (a_val, b_val) = kfunc_args_for_site(site);
 
-                // Swap-safe parameter marshalling:
-                // We need to set r1=a, r2=b, r3=cond without aliasing issues.
-                // Collect source registers that are used as values.
-                emit_safe_params(&mut new_insns, a_val, b_val, site.cond_reg);
-                // Emit: call bpf_select64
-                new_insns.push(BpfInsn::call_kfunc(btf_id));
-                // Emit: dst = r0
-                if site.dst_reg != 0 {
-                    new_insns.push(BpfInsn::mov64_reg(site.dst_reg, 0));
-                }
+                // Convert CondSelectValue to KfuncArg for the shared
+                // swap-safe emit_kfunc_call helper.
+                let arg_a = match a_val {
+                    CondSelectValue::Reg(r) => KfuncArg::Reg(r),
+                    CondSelectValue::Imm(i) => KfuncArg::Imm(i),
+                };
+                let arg_b = match b_val {
+                    CondSelectValue::Reg(r) => KfuncArg::Reg(r),
+                    CondSelectValue::Imm(i) => KfuncArg::Imm(i),
+                };
+                let arg_cond = KfuncArg::Reg(site.cond_reg);
+
+                // Use the shared swap-safe emit_kfunc_call which handles
+                // parallel-copy correctly (breaks cycles via r0 scratch).
+                let replacement = emit_kfunc_call(
+                    site.dst_reg,
+                    &[arg_a, arg_b, arg_cond],
+                    btf_id,
+                );
+                new_insns.extend_from_slice(&replacement);
 
                 // Map old PCs in the site range.
                 for j in 1..site.old_len {
@@ -266,9 +267,10 @@ impl BpfPass for CondSelectPass {
         addr_map[orig_len] = new_insns.len();
 
         // Branch fixup.
-        fixup_branches_inline(&mut new_insns, &program.insns, &addr_map);
+        fixup_all_branches(&mut new_insns, &program.insns, &addr_map);
 
         program.insns = new_insns;
+        program.remap_annotations(&addr_map);
         program.log_transform(TransformEntry {
             pass_name: self.name().into(),
             sites_applied: applied,
@@ -279,7 +281,7 @@ impl BpfPass for CondSelectPass {
 
         // Record module FDs needed for the kfunc calls we emitted.
         if applied > 0 {
-            if let Some(fd) = ctx.kfunc_registry.module_fd {
+            if let Some(fd) = ctx.kfunc_registry.module_fd_for_pass(self.name()) {
                 if !program.required_module_fds.contains(&fd) {
                     program.required_module_fds.push(fd);
                 }
@@ -345,94 +347,6 @@ fn try_match_cond_select(insns: &[BpfInsn], pc: usize) -> Option<CondSelectSite>
     }
 
     None
-}
-
-/// Emit swap-safe parameter setup for bpf_select64 (r1=a, r2=b, r3=cond).
-///
-/// The challenge: if a_val or b_val is Reg(r) where r is one of {1,2,3},
-/// or if cond_reg is 1 or 2, writing one target register early can clobber
-/// a source value needed later.
-///
-/// Strategy: identify which source registers overlap with targets {1,2,3}.
-/// If there are conflicts, save the conflicting source values to a scratch
-/// register (r0, which we'll overwrite with the call return anyway) first.
-fn emit_safe_params(
-    out: &mut Vec<BpfInsn>,
-    a_val: CondSelectValue,
-    b_val: CondSelectValue,
-    cond_reg: u8,
-) {
-    // Collect (target_reg, source) triples.
-    // target 1 = a_val, target 2 = b_val, target 3 = cond_reg
-    // We need to set them without aliasing issues.
-
-    // For immediate values, they never alias — only register sources can conflict.
-    // Build a simple dependency-aware emission order.
-
-    // Represent each assignment as (dst, value).
-    struct Assignment {
-        dst: u8,
-        val: CondSelectValue,
-    }
-
-    let mut assignments = Vec::new();
-    assignments.push(Assignment { dst: 1, val: a_val });
-    assignments.push(Assignment { dst: 2, val: b_val });
-    if cond_reg != 3 {
-        assignments.push(Assignment { dst: 3, val: CondSelectValue::Reg(cond_reg) });
-    }
-
-    // Check for conflicts: a source register that equals a destination we haven't set yet.
-    // Simple approach: if any source reg is in {1,2,3} and that source would be clobbered
-    // before it's read, save it to r0 first.
-    //
-    // Since there are only 3 assignments max, we use a practical approach:
-    // First, emit assignments whose source doesn't conflict, then handle conflicting ones.
-
-    let mut emitted = [false; 4]; // indexed by target reg (1,2,3)
-
-    // Pass 1: emit assignments where the source register is NOT a target, or is IMM.
-    for _round in 0..3 {
-        for (i, asgn) in assignments.iter().enumerate() {
-            if emitted[asgn.dst as usize] {
-                continue;
-            }
-            let source_reg = match asgn.val {
-                CondSelectValue::Imm(_) => None,
-                CondSelectValue::Reg(r) => Some(r),
-            };
-            // Check if this source is a not-yet-emitted target of another assignment.
-            let conflicts = if let Some(src) = source_reg {
-                assignments.iter().enumerate().any(|(j, other)| {
-                    j != i && !emitted[other.dst as usize] && other.dst == src
-                })
-            } else {
-                false
-            };
-            if !conflicts {
-                out.push(emit_mov_value(asgn.dst, asgn.val));
-                emitted[asgn.dst as usize] = true;
-            }
-        }
-    }
-
-    // Pass 2: handle remaining conflicts by saving through r0.
-    for asgn in &assignments {
-        if emitted[asgn.dst as usize] {
-            continue;
-        }
-        // Save source to r0, then move from r0.
-        match asgn.val {
-            CondSelectValue::Reg(src) => {
-                out.push(BpfInsn::mov64_reg(0, src));
-                out.push(BpfInsn::mov64_reg(asgn.dst, 0));
-            }
-            CondSelectValue::Imm(imm) => {
-                out.push(BpfInsn::mov64_imm(asgn.dst, imm));
-            }
-        }
-        emitted[asgn.dst as usize] = true;
-    }
 }
 
 fn is_mov64(insn: &BpfInsn) -> bool {
@@ -641,18 +555,19 @@ mod tests {
         assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
 
-        // Verify kfunc call is present
+        // Verify kfunc call is present with correct BTF ID.
         let has_kfunc_call = prog.insns.iter().any(|i| i.is_call() && i.src_reg() == 2);
         assert!(has_kfunc_call, "expected a kfunc call in the output");
         let call_insn = prog.insns.iter().find(|i| i.is_call() && i.src_reg() == 2).unwrap();
         assert_eq!(call_insn.imm, 5555);
 
-        // Verify r1 = 1 (true_val = a), r2 = 0 (false_val = b)
-        assert_eq!(prog.insns[0].code, BPF_ALU64 | BPF_MOV | BPF_K);
-        assert_eq!(prog.insns[0].dst_reg(), 1);
-        assert_eq!(prog.insns[0].imm, 1); // a = true_val
-        assert_eq!(prog.insns[1].dst_reg(), 2);
-        assert_eq!(prog.insns[1].imm, 0); // b = false_val
+        // Verify semantics: r1=1 (true_val, a), r2=0 (false_val, b), r3=cond.
+        let mut initial = [0u64; 11];
+        initial[1] = 999; // original cond_reg value
+        let after = simulate_param_setup(&prog.insns, &initial);
+        assert_eq!(after[1], 1, "r1 should be true_val (a)");
+        assert_eq!(after[2], 0, "r2 should be false_val (b)");
+        assert_eq!(after[3], 999, "r3 should be original cond (r1)");
     }
 
     #[test]
@@ -696,11 +611,14 @@ mod tests {
         assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
 
-        // For JEQ: a = false_val = 0, b = true_val = 1
-        assert_eq!(prog.insns[0].dst_reg(), 1);
-        assert_eq!(prog.insns[0].imm, 0); // a = false_val (returned when cond!=0)
-        assert_eq!(prog.insns[1].dst_reg(), 2);
-        assert_eq!(prog.insns[1].imm, 1); // b = true_val (returned when cond==0)
+        // For JEQ: a = false_val = 0 (returned when cond!=0), b = true_val = 1
+        // Verify semantics using simulation.
+        let mut initial = [0u64; 11];
+        initial[1] = 999; // original cond_reg value
+        let after = simulate_param_setup(&prog.insns, &initial);
+        assert_eq!(after[1], 0, "r1 should be false_val (a) for JEQ");
+        assert_eq!(after[2], 1, "r2 should be true_val (b) for JEQ");
+        assert_eq!(after[3], 999, "r3 should be original cond");
     }
 
     #[test]
@@ -763,13 +681,15 @@ mod tests {
 
         assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
-        // r1 = r7 (true_val, a), r2 = r6 (false_val, b)
-        assert_eq!(prog.insns[0].code, BPF_ALU64 | BPF_MOV | BPF_X);
-        assert_eq!(prog.insns[0].dst_reg(), 1);
-        assert_eq!(prog.insns[0].src_reg(), 7); // a = true_val
-        assert_eq!(prog.insns[1].code, BPF_ALU64 | BPF_MOV | BPF_X);
-        assert_eq!(prog.insns[1].dst_reg(), 2);
-        assert_eq!(prog.insns[1].src_reg(), 6); // b = false_val
+        // Verify semantics: r1 = r7 (true_val, a), r2 = r6 (false_val, b), r3 = cond(r1)
+        let mut initial = [0u64; 11];
+        initial[1] = 100; // cond
+        initial[6] = 600; // false_val
+        initial[7] = 700; // true_val
+        let after = simulate_param_setup(&prog.insns, &initial);
+        assert_eq!(after[1], 700, "r1 should be true_val (r7)");
+        assert_eq!(after[2], 600, "r2 should be false_val (r6)");
+        assert_eq!(after[3], 100, "r3 should be original cond (r1)");
     }
 
     #[test]
@@ -858,5 +778,139 @@ mod tests {
         // the original value of r1 (cond_reg), even though r1 was overwritten.
         let has_kfunc_call = prog.insns.iter().any(|i| i.is_call() && i.src_reg() == 2);
         assert!(has_kfunc_call);
+    }
+
+    // ── Issue 1: Parallel-copy alias safety tests ─────────────────
+
+    /// Simulate the register moves produced by emit_kfunc_call to verify
+    /// that the semantics are correct: after executing all MOVs, r1/r2/r3
+    /// hold the expected values just before the CALL instruction.
+    fn simulate_param_setup(insns: &[BpfInsn], initial_regs: &[u64; 11]) -> [u64; 11] {
+        let mut regs = *initial_regs;
+        for insn in insns {
+            if insn.is_call() {
+                break; // Stop at the call instruction.
+            }
+            let dst = insn.dst_reg() as usize;
+            if insn.code == (BPF_ALU64 | BPF_MOV | BPF_X) {
+                let src = insn.src_reg() as usize;
+                regs[dst] = regs[src];
+            } else if insn.code == (BPF_ALU64 | BPF_MOV | BPF_K) {
+                regs[dst] = insn.imm as u64;
+            }
+        }
+        regs
+    }
+
+    #[test]
+    fn test_cond_select_alias_cond_reg_is_r2() {
+        // The bug from the review: cond_reg == r2 means we need r3 = old r2,
+        // but writing r2 = b_val first would clobber it.
+        // JNE r2, 0, +2 ; MOV r0, r6 (false) ; JA +1 ; MOV r0, r7 (true)
+        let mut prog = make_program(vec![
+            jne_imm(2, 0, 2),
+            BpfInsn::mov64_reg(0, 6),   // false_val = r6
+            BpfInsn::ja(1),
+            BpfInsn::mov64_reg(0, 7),   // true_val = r7
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let ctx = ctx_with_select_kfunc(5555);
+
+        let pass = CondSelectPass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+        assert!(result.changed);
+
+        // Simulate with known register values.
+        // r2=COND_VAL(200), r6=FALSE_VAL(600), r7=TRUE_VAL(700)
+        let mut initial = [0u64; 11];
+        initial[2] = 200; // cond
+        initial[6] = 600; // false_val
+        initial[7] = 700; // true_val
+        let after = simulate_param_setup(&prog.insns, &initial);
+
+        // For JNE: a=true_val=r7=700, b=false_val=r6=600, cond=r2=200
+        assert_eq!(after[1], 700, "r1 should be true_val (a)");
+        assert_eq!(after[2], 600, "r2 should be false_val (b)");
+        assert_eq!(after[3], 200, "r3 should be original cond (r2=200)");
+    }
+
+    #[test]
+    fn test_cond_select_alias_cycle_r1_r2() {
+        // Circular alias: true_val = Reg(2), false_val = Reg(1), cond = r3
+        // We need r1=r2, r2=r1 which is a swap cycle.
+        // JNE r3, 0, +2 ; MOV r0, r1 (false) ; JA +1 ; MOV r0, r2 (true)
+        let mut prog = make_program(vec![
+            jne_imm(3, 0, 2),
+            BpfInsn::mov64_reg(0, 1),   // false_val = r1
+            BpfInsn::ja(1),
+            BpfInsn::mov64_reg(0, 2),   // true_val = r2
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let ctx = ctx_with_select_kfunc(5555);
+
+        let pass = CondSelectPass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+        assert!(result.changed);
+
+        let mut initial = [0u64; 11];
+        initial[1] = 100; // false_val source
+        initial[2] = 200; // true_val source
+        initial[3] = 300; // cond
+        let after = simulate_param_setup(&prog.insns, &initial);
+
+        // For JNE: a=true_val=r2=200, b=false_val=r1=100, cond=r3=300
+        assert_eq!(after[1], 200, "r1 should be true_val (from r2)");
+        assert_eq!(after[2], 100, "r2 should be false_val (from r1)");
+        assert_eq!(after[3], 300, "r3 should be cond (r3 already there)");
+    }
+
+    #[test]
+    fn test_cond_select_alias_all_overlap_combinations() {
+        // Exhaustive test: for all (cond_reg, true_src, false_src) combinations
+        // among r1/r2/r3, verify the output semantics are correct.
+        let regs = [1u8, 2, 3];
+        for &cond_reg in &regs {
+            for &true_src in &regs {
+                for &false_src in &regs {
+                    // Build: JNE cond_reg, 0, +2 ; MOV r0, false_src ; JA +1 ; MOV r0, true_src
+                    let mut prog = make_program(vec![
+                        jne_imm(cond_reg, 0, 2),
+                        BpfInsn::mov64_reg(0, false_src),
+                        BpfInsn::ja(1),
+                        BpfInsn::mov64_reg(0, true_src),
+                        exit_insn(),
+                    ]);
+                    let mut cache = AnalysisCache::new();
+                    let ctx = ctx_with_select_kfunc(5555);
+
+                    let pass = CondSelectPass;
+                    let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+                    assert!(result.changed,
+                        "should transform: cond=r{} true=r{} false=r{}",
+                        cond_reg, true_src, false_src);
+
+                    // Simulate with distinct values.
+                    let mut initial = [0u64; 11];
+                    initial[1] = 100;
+                    initial[2] = 200;
+                    initial[3] = 300;
+                    let after = simulate_param_setup(&prog.insns, &initial);
+
+                    // Expected: r1=a=true_val (from true_src), r2=b=false_val (from false_src), r3=cond
+                    let expected_a = initial[true_src as usize];
+                    let expected_b = initial[false_src as usize];
+                    let expected_cond = initial[cond_reg as usize];
+
+                    assert_eq!(after[1], expected_a,
+                        "r1 wrong: cond=r{} true=r{} false=r{}", cond_reg, true_src, false_src);
+                    assert_eq!(after[2], expected_b,
+                        "r2 wrong: cond=r{} true=r{} false=r{}", cond_reg, true_src, false_src);
+                    assert_eq!(after[3], expected_cond,
+                        "r3 wrong: cond=r{} true=r{} false=r{}", cond_reg, true_src, false_src);
+                }
+            }
+        }
     }
 }

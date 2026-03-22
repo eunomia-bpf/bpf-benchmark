@@ -6,6 +6,7 @@ KDIR ?= $(CURDIR)/../../vendor/linux-framework
 obj-m += bpf_rotate.o
 obj-m += bpf_select.o
 obj-m += bpf_extract.o
+obj-m += bpf_endian.o
 
 all:
 	$(MAKE) -C $(KDIR) M=$(CURDIR) modules

@@ -4,11 +4,17 @@
 use crate::insn::*;
 use crate::pass::*;
 
-use super::fixup_branches_inline;
+use super::utils::fixup_all_branches as fixup_branches_inline;
 
-/// Spectre mitigation pass: inserts NOP (`JA +0`) barriers after conditional
-/// branches as speculation barrier placeholders. Avoids double-insertion if
-/// a NOP already follows. Performs branch fixup after insertion.
+/// Barrier placeholder pass: inserts NOP (`JA +0`) after conditional branches.
+///
+/// **WARNING**: This is a PLACEHOLDER, NOT a real speculation barrier. The
+/// inserted `JA +0` is a semantic NOP and does NOT prevent speculative
+/// execution on any real CPU. A real Spectre mitigation would require
+/// architecture-specific barrier instructions (e.g., LFENCE on x86).
+///
+/// This pass exists to mark branch sites for future barrier insertion and
+/// to measure the code-size overhead of barrier placement strategies.
 ///
 /// **Note on site count**: this pass only fires when the program contains
 /// conditional branches (`is_cond_jmp()`). Pure-compute micro benchmarks
@@ -16,18 +22,17 @@ use super::fixup_branches_inline;
 /// 0 sites. Programs with if/else logic (Cilium, Calico, Tracee) will have
 /// many conditional branches and thus many insertion sites.
 ///
-/// This pass is NOT in the default optimization pipeline by design -- it is
-/// a security pass, not a performance optimization. Enable it explicitly
-/// via policy or by adding it to a custom pipeline.
+/// This pass is NOT in the default optimization pipeline by design. Enable
+/// it explicitly via policy or by adding it to a custom pipeline.
 pub struct SpectreMitigationPass;
 
 impl BpfPass for SpectreMitigationPass {
     fn name(&self) -> &str {
-        "spectre_mitigation"
+        "barrier_placeholder"
     }
 
     fn category(&self) -> PassCategory {
-        PassCategory::Security
+        PassCategory::Placeholder
     }
 
     fn required_analyses(&self) -> Vec<&str> {
@@ -82,12 +87,13 @@ impl BpfPass for SpectreMitigationPass {
             fixup_branches_inline(&mut new_insns, &program.insns, &addr_map);
 
             program.insns = new_insns;
+            program.remap_annotations(&addr_map);
             program.log_transform(TransformEntry {
                 pass_name: self.name().into(),
                 sites_applied: insertions,
                 insns_before: orig_len,
                 insns_after: program.insns.len(),
-                details: vec![format!("inserted {} NOP barriers", insertions)],
+                details: vec![format!("inserted {} placeholder NOP barriers", insertions)],
             });
         }
 
@@ -533,5 +539,55 @@ mod tests {
         assert!(result.changed);
         assert_eq!(result.diagnostics.len(), 1);
         assert!(result.diagnostics[0].contains("speculation barriers inserted"));
+    }
+
+    // ── Issue 4: Naming and category tests ──────────────────────
+
+    #[test]
+    fn test_spectre_pass_name_is_barrier_placeholder() {
+        let pass = SpectreMitigationPass;
+        assert_eq!(pass.name(), "barrier_placeholder",
+            "pass name should be 'barrier_placeholder', not 'spectre_mitigation'");
+    }
+
+    #[test]
+    fn test_spectre_pass_category_is_placeholder() {
+        let pass = SpectreMitigationPass;
+        assert_eq!(pass.category(), PassCategory::Placeholder,
+            "category should be Placeholder, not Security");
+    }
+
+    #[test]
+    fn test_spectre_diagnostics_contain_placeholder() {
+        let mut prog = make_program(vec![
+            jeq_imm(1, 0, 1),
+            BpfInsn::mov64_imm(0, 1),
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let ctx = PassContext::test_default();
+
+        let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
+        assert!(result.changed);
+        assert!(!result.diagnostics.is_empty());
+        // Diagnostics should clearly indicate this is a placeholder.
+        let diag = &result.diagnostics[0];
+        assert!(diag.contains("placeholder") || diag.contains("NOP placeholder"),
+            "diagnostics should contain 'placeholder', got: {}", diag);
+    }
+
+    #[test]
+    fn test_spectre_pass_result_name() {
+        let mut prog = make_program(vec![
+            jeq_imm(1, 0, 1),
+            BpfInsn::mov64_imm(0, 1),
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let ctx = PassContext::test_default();
+
+        let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
+        assert_eq!(result.pass_name, "barrier_placeholder",
+            "PassResult should use the new name");
     }
 }

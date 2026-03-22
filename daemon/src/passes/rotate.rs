@@ -154,9 +154,10 @@ impl BpfPass for RotatePass {
         addr_map[orig_len] = new_insns.len();
 
         // Branch fixup.
-        fixup_branches_inline(&mut new_insns, &program.insns, &addr_map);
+        fixup_all_branches(&mut new_insns, &program.insns, &addr_map);
 
         program.insns = new_insns;
+        program.remap_annotations(&addr_map);
         program.log_transform(TransformEntry {
             pass_name: self.name().into(),
             sites_applied: applied,
@@ -167,7 +168,7 @@ impl BpfPass for RotatePass {
 
         // Record module FDs needed for the kfunc calls we emitted.
         if applied > 0 {
-            if let Some(fd) = ctx.kfunc_registry.module_fd {
+            if let Some(fd) = ctx.kfunc_registry.module_fd_for_pass(self.name()) {
                 if !program.required_module_fds.contains(&fd) {
                     program.required_module_fds.push(fd);
                 }
@@ -224,6 +225,12 @@ fn find_provenance_mov(insns: &[BpfInsn], shift_pc: usize, tmp: u8, dst: u8) -> 
         let insn = &insns[check_pc];
         // Must be MOV64_REG tmp, dst
         if insn.code == (BPF_ALU64 | BPF_MOV | BPF_X) && insn.dst_reg() == tmp && insn.src_reg() == dst {
+            // Found the MOV. Now verify that `dst` is NOT overwritten between
+            // (check_pc, shift_pc) -- if dst is written after the MOV, then
+            // tmp and dst no longer hold the same value at shift_pc.
+            if is_reg_written_in_range(insns, check_pc + 1, shift_pc, dst) {
+                return None; // dst was modified after the MOV
+            }
             return Some(check_pc);
         }
         // If tmp is written by any other instruction, the chain is broken.
@@ -250,6 +257,35 @@ fn find_provenance_mov(insns: &[BpfInsn], shift_pc: usize, tmp: u8, dst: u8) -> 
         }
     }
     None
+}
+
+/// Check if a register `reg` is written (as dst_reg) by any instruction in [start, end).
+fn is_reg_written_in_range(insns: &[BpfInsn], start: usize, end: usize, reg: u8) -> bool {
+    for pc in start..end {
+        if pc >= insns.len() {
+            break;
+        }
+        let insn = &insns[pc];
+        let class = bpf_class(insn.code);
+        match class {
+            BPF_ALU64 | BPF_ALU | BPF_LDX | BPF_LD => {
+                if insn.dst_reg() == reg {
+                    return true;
+                }
+            }
+            BPF_JMP | BPF_JMP32 => {
+                if insn.is_call() && reg <= 5 {
+                    // call clobbers r0-r5
+                    return true;
+                }
+            }
+            BPF_ST | BPF_STX => {
+                // Store instructions don't write to a register.
+            }
+            _ => {}
+        }
+    }
+    false
 }
 
 fn try_match_rotate(
@@ -520,5 +556,53 @@ mod tests {
 
         assert!(result.program_changed);
         assert_eq!(result.total_sites_applied, 1);
+    }
+
+    // ── Issue 2: dst overwrite between MOV and shift ─────────────
+
+    #[test]
+    fn test_rotate_pass_no_match_dst_overwritten_after_mov() {
+        // mov r3, r2; add r2, 1; rsh r2, 56; lsh r3, 8; or r2, r3
+        // The MOV r3, r2 establishes provenance, but then r2 is modified
+        // by ADD. At the RSH, r2 is a different value than what r3 holds.
+        // This should NOT match as a rotate.
+        let insns = vec![
+            BpfInsn::mov64_reg(3, 2),              // MOV r3, r2
+            BpfInsn::alu64_imm(BPF_OR, 2, 1),     // modifies r2 (any ALU op)
+            BpfInsn::alu64_imm(BPF_RSH, 2, 56),   // RSH r2, 56
+            BpfInsn::alu64_imm(BPF_LSH, 3, 8),    // LSH r3, 8
+            BpfInsn::alu64_reg(BPF_OR, 2, 3),     // OR r2, r3
+        ];
+        let sites = scan_rotate_sites(&insns);
+        assert!(sites.is_empty(), "should not match when dst is overwritten after MOV");
+    }
+
+    #[test]
+    fn test_rotate_pass_no_match_dst_overwritten_by_ldx() {
+        // mov r3, r2; ldx r2, [r6+0]; rsh r2, 56; lsh r3, 8; or r2, r3
+        let insns = vec![
+            BpfInsn::mov64_reg(3, 2),
+            BpfInsn::ldx_mem(BPF_DW, 2, 6, 0),    // overwrites r2
+            BpfInsn::alu64_imm(BPF_RSH, 2, 56),
+            BpfInsn::alu64_imm(BPF_LSH, 3, 8),
+            BpfInsn::alu64_reg(BPF_OR, 2, 3),
+        ];
+        let sites = scan_rotate_sites(&insns);
+        assert!(sites.is_empty(), "should not match when dst is overwritten by LDX");
+    }
+
+    #[test]
+    fn test_rotate_pass_match_dst_not_overwritten() {
+        // mov r3, r2; mov r5, r6; rsh r2, 56; lsh r3, 8; or r2, r3
+        // The MOV r5, r6 doesn't write r2 or r3, so the provenance holds.
+        let insns = vec![
+            BpfInsn::mov64_reg(3, 2),
+            BpfInsn::mov64_reg(5, 6),              // doesn't modify r2 or r3
+            BpfInsn::alu64_imm(BPF_RSH, 2, 56),
+            BpfInsn::alu64_imm(BPF_LSH, 3, 8),
+            BpfInsn::alu64_reg(BPF_OR, 2, 3),
+        ];
+        let sites = scan_rotate_sites(&insns);
+        assert_eq!(sites.len(), 1, "should match when dst is not overwritten");
     }
 }

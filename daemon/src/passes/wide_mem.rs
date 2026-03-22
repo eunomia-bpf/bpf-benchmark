@@ -468,6 +468,7 @@ impl BpfPass for WideMemPass {
         fixup_branches_inline(&mut new_insns, orig_insns, &addr_map);
 
         program.insns = new_insns;
+        program.remap_annotations(&addr_map);
         program.log_transform(TransformEntry {
             pass_name: self.name().into(),
             sites_applied: applied,

@@ -94,7 +94,7 @@ static int __init bpf_select_init(void)
 	if (ret)
 		return ret;
 
-	ret = register_btf_kfunc_id_set(BPF_PROG_TYPE_XDP,
+	ret = register_btf_kfunc_id_set(BPF_PROG_TYPE_UNSPEC,
 					 &bpf_select_kfunc_set);
 	if (ret)
 		bpf_unregister_kfunc_inline_ops("bpf_select64");

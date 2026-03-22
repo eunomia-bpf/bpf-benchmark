@@ -98,6 +98,11 @@ fn emit_mov_arg(dst: u8, val: KfuncArg) -> BpfInsn {
 /// Sets r1=args[0], r2=args[1], ..., rN=args[N-1] without aliasing issues.
 /// If a source register overlaps with a not-yet-written target, we reorder
 /// or break cycles through r0 as scratch.
+///
+/// An assignment `dst <- val` is safe to emit only when writing `dst` would
+/// NOT clobber a source register that another pending assignment still needs.
+/// In graph terms: emit assignments in topological order of the "must read
+/// before write" dependency graph. True cycles are broken via r0 scratch.
 fn emit_safe_kfunc_params(out: &mut Vec<BpfInsn>, args: &[KfuncArg]) {
     struct Assignment {
         dst: u8,
@@ -120,25 +125,26 @@ fn emit_safe_kfunc_params(out: &mut Vec<BpfInsn>, args: &[KfuncArg]) {
     let max_dst = args.len() as u8;
     let mut emitted = vec![false; (max_dst + 1) as usize];
 
-    // Pass 1: emit assignments whose source is not a pending target.
+    // Pass 1: topological emit — emit assignments that don't clobber
+    // any source needed by another pending assignment.
+    // An assignment i is safe to emit when:
+    //   its destination is NOT a register source of any other pending assignment.
     for _round in 0..assignments.len() {
         for i in 0..assignments.len() {
             let dst = assignments[i].dst;
             if emitted[dst as usize] {
                 continue;
             }
-            let source_reg = match assignments[i].val {
-                KfuncArg::Imm(_) => None,
-                KfuncArg::Reg(r) => Some(r),
-            };
-            let conflicts = if let Some(src) = source_reg {
-                assignments.iter().enumerate().any(|(j, other)| {
-                    j != i && !emitted[other.dst as usize] && other.dst == src
-                })
-            } else {
-                false
-            };
-            if !conflicts {
+
+            // Check: would writing `dst` clobber a source that another
+            // pending assignment still needs?
+            let dst_is_pending_source = assignments.iter().enumerate().any(|(j, other)| {
+                j != i
+                    && !emitted[other.dst as usize]
+                    && matches!(other.val, KfuncArg::Reg(r) if r == dst)
+            });
+
+            if !dst_is_pending_source {
                 out.push(emit_mov_arg(dst, assignments[i].val));
                 emitted[dst as usize] = true;
             }
@@ -146,20 +152,64 @@ fn emit_safe_kfunc_params(out: &mut Vec<BpfInsn>, args: &[KfuncArg]) {
     }
 
     // Pass 2: break remaining cycles via r0 as scratch.
-    for asgn in &assignments {
-        if emitted[asgn.dst as usize] {
+    // Any assignments still pending form true cycles (e.g., r1<-r2, r2<-r1).
+    // For each cycle, follow the chain backwards: save one source to r0,
+    // then emit the cycle in reverse order so each assignment reads its
+    // source before that source gets overwritten.
+    for i in 0..assignments.len() {
+        let dst = assignments[i].dst;
+        if emitted[dst as usize] {
             continue;
         }
-        match asgn.val {
+        match assignments[i].val {
             KfuncArg::Reg(src) => {
+                // Save source to r0 before the cycle unwinds.
                 out.push(BpfInsn::mov64_reg(0, src));
-                out.push(BpfInsn::mov64_reg(asgn.dst, 0));
+
+                // Follow the cycle: starting from `src`, find the chain
+                // of assignments back to `dst`, and emit them in reverse
+                // (so each reads its source before that source is written).
+                let mut chain = Vec::new();
+                let mut cur = src;
+                loop {
+                    // Find the assignment whose dst == cur
+                    let found = assignments.iter().position(|a| {
+                        !emitted[a.dst as usize] && a.dst == cur
+                    });
+                    match found {
+                        Some(idx) => {
+                            chain.push(idx);
+                            match assignments[idx].val {
+                                KfuncArg::Reg(next) => {
+                                    if next == src {
+                                        // We've completed the cycle back to the saved source.
+                                        break;
+                                    }
+                                    cur = next;
+                                }
+                                KfuncArg::Imm(_) => break,
+                            }
+                        }
+                        None => break,
+                    }
+                }
+
+                // Emit chain in order (each reads `cur` before it's overwritten
+                // by the next assignment, since we follow the dependency direction).
+                for &idx in &chain {
+                    out.push(emit_mov_arg(assignments[idx].dst, assignments[idx].val));
+                    emitted[assignments[idx].dst as usize] = true;
+                }
+
+                // Complete the original assignment from saved r0.
+                out.push(BpfInsn::mov64_reg(dst, 0));
+                emitted[dst as usize] = true;
             }
             KfuncArg::Imm(imm) => {
-                out.push(BpfInsn::mov64_imm(asgn.dst, imm));
+                out.push(BpfInsn::mov64_imm(dst, imm));
+                emitted[dst as usize] = true;
             }
         }
-        emitted[asgn.dst as usize] = true;
     }
 }
 

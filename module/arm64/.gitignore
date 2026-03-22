@@ -1,0 +1,17 @@
+# Kernel module build artifacts
+*.ko
+*.ko.cmd
+*.mod
+*.mod.c
+*.mod.o
+*.mod.cmd
+*.o
+*.o.cmd
+*.btf.raw
+.module-common.*
+..module-common.*
+modules.order
+.modules.order.cmd
+Module.symvers
+.Module.symvers.cmd
+.tmp_versions/

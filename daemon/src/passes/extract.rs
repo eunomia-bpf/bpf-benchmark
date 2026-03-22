@@ -223,6 +223,7 @@ impl BpfPass for ExtractPass {
         fixup_all_branches(&mut new_insns, &program.insns, &addr_map);
 
         program.insns = new_insns;
+        program.remap_annotations(&addr_map);
         program.log_transform(TransformEntry {
             pass_name: self.name().into(),
             sites_applied: applied,
@@ -233,7 +234,7 @@ impl BpfPass for ExtractPass {
 
         // Record module FDs needed for the kfunc calls we emitted.
         if applied > 0 {
-            if let Some(fd) = ctx.kfunc_registry.module_fd {
+            if let Some(fd) = ctx.kfunc_registry.module_fd_for_pass(self.name()) {
                 if !program.required_module_fds.contains(&fd) {
                     program.required_module_fds.push(fd);
                 }
@@ -295,6 +296,17 @@ mod tests {
         assert_eq!(contiguous_mask_len(0x5), None);  // 101
         assert_eq!(contiguous_mask_len(0xa), None);  // 1010
         assert_eq!(contiguous_mask_len(0x101), None); // 100000001
+        // Additional edge cases
+        assert_eq!(contiguous_mask_len(0x1f), Some(5));   // 11111
+        assert_eq!(contiguous_mask_len(0x3f), Some(6));   // 111111
+        assert_eq!(contiguous_mask_len(0x7f), Some(7));   // 1111111
+        assert_eq!(contiguous_mask_len(0x1ff), Some(9));  // 9 bits
+        assert_eq!(contiguous_mask_len(0xffffff), Some(24));
+        // Non-contiguous: gaps in the middle
+        assert_eq!(contiguous_mask_len(0x6), None);   // 110 — not from bit 0
+        assert_eq!(contiguous_mask_len(0xfe), None);  // 11111110 — not from bit 0
+        assert_eq!(contiguous_mask_len(0x10), None);  // single bit not at 0
+        assert_eq!(contiguous_mask_len(0x80), None);  // single high bit
     }
 
     // ── Pattern scanning tests ─────────────────────────────────────
@@ -542,6 +554,185 @@ mod tests {
 
         assert!(!result.changed);
         assert_eq!(result.sites_applied, 0);
+    }
+
+    // ── Edge case: width=1 (mask=1) ───────────────────────────────────
+
+    #[test]
+    fn test_scan_extract_width_1() {
+        let insns = vec![
+            BpfInsn::alu64_imm(BPF_RSH, 4, 3),  // RSH r4, 3
+            BpfInsn::alu64_imm(BPF_AND, 4, 0x1), // AND r4, 1 (width=1)
+            exit_insn(),
+        ];
+        let sites = scan_extract_sites(&insns);
+        assert_eq!(sites.len(), 1);
+        assert_eq!(sites[0].shift_amount, 3);
+        assert_eq!(sites[0].bit_len, 1);
+    }
+
+    #[test]
+    fn test_extract_pass_width_1() {
+        let mut prog = make_program(vec![
+            BpfInsn::alu64_imm(BPF_RSH, 4, 3),
+            BpfInsn::alu64_imm(BPF_AND, 4, 0x1),
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let ctx = ctx_with_extract_kfunc(7777);
+
+        let pass = ExtractPass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(result.changed);
+        assert_eq!(result.sites_applied, 1);
+        // Verify kfunc call with correct btf_id.
+        let call = prog.insns.iter().find(|i| i.is_call() && i.src_reg() == 2).unwrap();
+        assert_eq!(call.imm, 7777);
+        assert!(prog.insns.last().unwrap().is_exit());
+    }
+
+    // ── Edge case: width=32 (mask=0xFFFFFFFF) ─────────────────────────
+
+    #[test]
+    fn test_scan_extract_width_32() {
+        // 0xFFFFFFFF as i32 is -1.
+        let insns = vec![
+            BpfInsn::alu64_imm(BPF_RSH, 2, 16),
+            BpfInsn::alu64_imm(BPF_AND, 2, -1), // mask = 0xFFFFFFFF → width=32
+            exit_insn(),
+        ];
+        let sites = scan_extract_sites(&insns);
+        assert_eq!(sites.len(), 1);
+        assert_eq!(sites[0].shift_amount, 16);
+        assert_eq!(sites[0].bit_len, 32);
+    }
+
+    #[test]
+    fn test_extract_pass_width_32() {
+        let mut prog = make_program(vec![
+            BpfInsn::alu64_imm(BPF_RSH, 2, 16),
+            BpfInsn::alu64_imm(BPF_AND, 2, -1), // mask = 0xFFFFFFFF
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let ctx = ctx_with_extract_kfunc(7777);
+
+        let pass = ExtractPass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(result.changed);
+        assert_eq!(result.sites_applied, 1);
+        let call = prog.insns.iter().find(|i| i.is_call() && i.src_reg() == 2).unwrap();
+        assert_eq!(call.imm, 7777);
+    }
+
+    #[test]
+    fn test_scan_extract_width_32_shift_too_large() {
+        // shift=33 + width=32 = 65 > 64, should not match.
+        let insns = vec![
+            BpfInsn::alu64_imm(BPF_RSH, 2, 33),
+            BpfInsn::alu64_imm(BPF_AND, 2, -1), // mask = 0xFFFFFFFF → width=32
+            exit_insn(),
+        ];
+        let sites = scan_extract_sites(&insns);
+        assert!(sites.is_empty());
+    }
+
+    // ── Edge case: shift=0 ────────────────────────────────────────────
+
+    #[test]
+    fn test_scan_extract_shift_0() {
+        let insns = vec![
+            BpfInsn::alu64_imm(BPF_RSH, 5, 0),    // RSH r5, 0 (no-op shift)
+            BpfInsn::alu64_imm(BPF_AND, 5, 0xff),  // AND r5, 0xff
+            exit_insn(),
+        ];
+        let sites = scan_extract_sites(&insns);
+        assert_eq!(sites.len(), 1);
+        assert_eq!(sites[0].shift_amount, 0);
+        assert_eq!(sites[0].bit_len, 8);
+    }
+
+    #[test]
+    fn test_extract_pass_shift_0() {
+        let mut prog = make_program(vec![
+            BpfInsn::alu64_imm(BPF_RSH, 5, 0),
+            BpfInsn::alu64_imm(BPF_AND, 5, 0xff),
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let ctx = ctx_with_extract_kfunc(7777);
+
+        let pass = ExtractPass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(result.changed);
+        assert_eq!(result.sites_applied, 1);
+    }
+
+    // ── Edge case: two consecutive extract patterns (full pass) ───────
+
+    #[test]
+    fn test_extract_pass_two_consecutive_sites() {
+        let mut prog = make_program(vec![
+            BpfInsn::alu64_imm(BPF_RSH, 6, 8),
+            BpfInsn::alu64_imm(BPF_AND, 6, 0xff),
+            BpfInsn::alu64_imm(BPF_RSH, 7, 16),
+            BpfInsn::alu64_imm(BPF_AND, 7, 0xf),
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let ctx = ctx_with_extract_kfunc(7777);
+
+        let pass = ExtractPass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(result.changed);
+        assert_eq!(result.sites_applied, 2);
+        // Verify two kfunc calls exist.
+        let call_count = prog.insns.iter()
+            .filter(|i| i.is_call() && i.src_reg() == 2 && i.imm == 7777)
+            .count();
+        assert_eq!(call_count, 2);
+        assert!(prog.insns.last().unwrap().is_exit());
+    }
+
+    // ── Edge case: rsh+and but mask is NOT (1<<n)-1 ───────────────────
+
+    #[test]
+    fn test_scan_extract_non_power_of_two_minus_one_masks() {
+        // Mask = 0x6 = 0b110 — not contiguous from bit 0.
+        let insns_a = vec![
+            BpfInsn::alu64_imm(BPF_RSH, 2, 4),
+            BpfInsn::alu64_imm(BPF_AND, 2, 0x6),
+            exit_insn(),
+        ];
+        assert!(scan_extract_sites(&insns_a).is_empty());
+
+        // Mask = 0x10 = 0b10000 — single bit, not at position 0.
+        let insns_b = vec![
+            BpfInsn::alu64_imm(BPF_RSH, 2, 4),
+            BpfInsn::alu64_imm(BPF_AND, 2, 0x10),
+            exit_insn(),
+        ];
+        assert!(scan_extract_sites(&insns_b).is_empty());
+
+        // Mask = 0xfe = 0b11111110 — contiguous but not from bit 0.
+        let insns_c = vec![
+            BpfInsn::alu64_imm(BPF_RSH, 2, 4),
+            BpfInsn::alu64_imm(BPF_AND, 2, 0xfe_u32 as i32),
+            exit_insn(),
+        ];
+        assert!(scan_extract_sites(&insns_c).is_empty());
+
+        // Mask = 0x80 = 0b10000000 — single high bit.
+        let insns_d = vec![
+            BpfInsn::alu64_imm(BPF_RSH, 2, 4),
+            BpfInsn::alu64_imm(BPF_AND, 2, 0x80),
+            exit_insn(),
+        ];
+        assert!(scan_extract_sites(&insns_d).is_empty());
     }
 
     #[test]

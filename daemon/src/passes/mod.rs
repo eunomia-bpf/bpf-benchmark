@@ -8,6 +8,7 @@ mod cond_select;
 mod branch_flip;
 mod spectre;
 mod extract;
+mod endian;
 
 pub use wide_mem::WideMemPass;
 pub use rotate::RotatePass;
@@ -15,6 +16,7 @@ pub use cond_select::CondSelectPass;
 pub use branch_flip::BranchFlipPass;
 pub use spectre::SpectreMitigationPass;
 pub use extract::ExtractPass;
+pub use endian::EndianFusionPass;
 
 use crate::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis};
 use crate::pass::PassManager;
@@ -39,6 +41,7 @@ pub fn build_default_pipeline() -> PassManager {
     pm.add_pass(RotatePass);
     pm.add_pass(CondSelectPass);
     pm.add_pass(ExtractPass);
+    pm.add_pass(EndianFusionPass);
     pm.add_pass(BranchFlipPass { min_bias: 0.7 });
 
     pm
@@ -46,7 +49,8 @@ pub fn build_default_pipeline() -> PassManager {
 
 /// Build a pipeline containing only the named passes.
 ///
-/// Pass names: `wide_mem`, `rotate`, `cond_select`, `extract`, `branch_flip`, `spectre_mitigation`.
+/// Pass names: `wide_mem`, `rotate`, `cond_select`, `extract`, `endian_fusion`,
+/// `branch_flip`, `barrier_placeholder` (or legacy `spectre_mitigation`).
 /// Unknown names are silently ignored.
 pub fn build_pipeline_with_passes(names: &[String]) -> PassManager {
     let mut pm = PassManager::new();
@@ -73,7 +77,10 @@ pub fn build_pipeline_with_passes(names: &[String]) -> PassManager {
     if name_set.contains("extract") {
         pm.add_pass(ExtractPass);
     }
-    if name_set.contains("spectre_mitigation") {
+    if name_set.contains("endian_fusion") {
+        pm.add_pass(EndianFusionPass);
+    }
+    if name_set.contains("barrier_placeholder") || name_set.contains("spectre_mitigation") {
         pm.add_pass(SpectreMitigationPass);
     }
 

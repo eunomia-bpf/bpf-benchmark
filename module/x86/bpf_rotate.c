@@ -30,6 +30,8 @@ __bpf_kfunc_start_defs();
 __bpf_kfunc u64 bpf_rotate64(u64 val, u32 shift)
 {
 	shift &= 63;
+	if (shift == 0)
+		return val;
 	return (val << shift) | (val >> (64 - shift));
 }
 
@@ -93,7 +95,7 @@ static int __init bpf_rotate_init(void)
 	if (ret)
 		return ret;
 
-	ret = register_btf_kfunc_id_set(BPF_PROG_TYPE_XDP,
+	ret = register_btf_kfunc_id_set(BPF_PROG_TYPE_UNSPEC,
 					 &bpf_rotate_kfunc_set);
 	if (ret)
 		bpf_unregister_kfunc_inline_ops("bpf_rotate64");

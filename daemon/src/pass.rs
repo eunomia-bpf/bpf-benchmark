@@ -42,6 +42,18 @@ pub struct BranchProfile {
     pub not_taken_count: u64,
 }
 
+/// Profiling data that can be injected into the pass pipeline.
+///
+/// Maps instruction PCs to branch profiles. Consumed by PGO-guided passes
+/// like BranchFlipPass. When provided to `PassManager::run_with_profiling`,
+/// the data is injected into the program's annotations before pass execution.
+#[derive(Clone, Debug, Default)]
+#[allow(dead_code)]
+pub struct ProfilingData {
+    /// Per-PC branch profiles.
+    pub branch_profiles: HashMap<usize, BranchProfile>,
+}
+
 // ── Program IR ──────────────────────────────────────────────────────
 
 /// BPF program IR — linear instruction stream + per-insn annotations + metadata.
@@ -92,6 +104,48 @@ impl BpfProgram {
     pub fn sync_annotations(&mut self) {
         self.annotations
             .resize_with(self.insns.len(), InsnAnnotation::default);
+    }
+
+    /// Remap annotations using an address map (old_pc -> new_pc).
+    ///
+    /// After a transform pass changes instruction count, annotations from the
+    /// old program need to be remapped to their new positions. The addr_map
+    /// must have length >= old_annotations_len, where addr_map[old_pc] gives
+    /// the new_pc for that instruction. Annotations for old PCs that map to
+    /// valid new PCs are placed at the new location; all other positions get
+    /// default annotations.
+    pub fn remap_annotations(&mut self, addr_map: &[usize]) {
+        let new_len = self.insns.len();
+        let old_annotations = std::mem::take(&mut self.annotations);
+        let mut new_annotations = vec![InsnAnnotation::default(); new_len];
+
+        for (old_pc, ann) in old_annotations.into_iter().enumerate() {
+            // Skip default annotations (nothing to remap).
+            if ann.branch_profile.is_none() {
+                continue;
+            }
+            if old_pc < addr_map.len() {
+                let new_pc = addr_map[old_pc];
+                if new_pc < new_len {
+                    new_annotations[new_pc] = ann;
+                }
+            }
+        }
+
+        self.annotations = new_annotations;
+    }
+
+    /// Inject profiling data into annotations.
+    ///
+    /// For each PC in the profiling data that is within bounds, sets the
+    /// corresponding annotation's branch_profile.
+    #[allow(dead_code)]
+    pub fn inject_profiling(&mut self, data: &ProfilingData) {
+        for (&pc, profile) in &data.branch_profiles {
+            if pc < self.annotations.len() {
+                self.annotations[pc].branch_profile = Some(profile.clone());
+            }
+        }
     }
 
     /// Record a transform operation.
@@ -206,6 +260,8 @@ pub enum PassCategory {
     Security,
     /// Observability enhancement.
     Observability,
+    /// Placeholder / experimental pass (not production-ready).
+    Placeholder,
 }
 
 /// Transform pass trait.
@@ -264,8 +320,48 @@ pub struct KfuncRegistry {
     pub extract64_btf_id: i32,
     pub lea64_btf_id: i32,
     pub movbe64_btf_id: i32,
-    /// Module FD (when using module kfuncs, REJIT's fd_array needs it).
+    pub endian_load16_btf_id: i32,
+    pub endian_load32_btf_id: i32,
+    pub endian_load64_btf_id: i32,
+    /// Legacy single module FD (kept for backward compat; prefer per-kfunc FDs).
     pub module_fd: Option<i32>,
+    /// Per-kfunc module FDs: maps kfunc name (e.g., "bpf_rotate64") to its
+    /// owning module's BTF FD. This allows different kfuncs from different
+    /// modules to each contribute their correct FD to the REJIT fd_array.
+    pub kfunc_module_fds: HashMap<String, i32>,
+}
+
+impl KfuncRegistry {
+    /// Return the module FD for a given pass name. Looks up the per-kfunc
+    /// module FD first; falls back to the legacy single module_fd.
+    pub fn module_fd_for_pass(&self, pass_name: &str) -> Option<i32> {
+        // Map pass name -> kfunc name.
+        let kfunc_name = match pass_name {
+            "rotate" => "bpf_rotate64",
+            "cond_select" => "bpf_select64",
+            "extract" => "bpf_extract64",
+            "endian_fusion" => "bpf_endian_load32",
+            _ => return self.module_fd,
+        };
+        self.kfunc_module_fds
+            .get(kfunc_name)
+            .copied()
+            .or(self.module_fd)
+    }
+
+    /// Return all unique module FDs in the registry.
+    #[allow(dead_code)]
+    pub fn all_module_fds(&self) -> Vec<i32> {
+        let mut fds: Vec<i32> = self.kfunc_module_fds.values().copied().collect();
+        if let Some(fd) = self.module_fd {
+            if !fds.contains(&fd) {
+                fds.push(fd);
+            }
+        }
+        fds.sort();
+        fds.dedup();
+        fds
+    }
 }
 
 /// CPU platform capabilities.
@@ -442,6 +538,24 @@ impl PassManager {
             program_changed: any_changed,
         })
     }
+
+    /// Execute the pipeline with optional profiling data.
+    ///
+    /// If `profiling` is provided, injects branch profiles into the program's
+    /// annotations before running the pipeline. This enables PGO-guided passes
+    /// like BranchFlipPass to make data-driven decisions.
+    #[allow(dead_code)]
+    pub fn run_with_profiling(
+        &self,
+        program: &mut BpfProgram,
+        ctx: &PassContext,
+        profiling: Option<&ProfilingData>,
+    ) -> anyhow::Result<PipelineResult> {
+        if let Some(data) = profiling {
+            program.inject_profiling(data);
+        }
+        self.run(program, ctx)
+    }
 }
 
 // ── Helper: default PassContext for testing ──────────────────────────
@@ -458,7 +572,11 @@ impl PassContext {
                 extract64_btf_id: -1,
                 lea64_btf_id: -1,
                 movbe64_btf_id: -1,
+                endian_load16_btf_id: -1,
+                endian_load32_btf_id: -1,
+                endian_load64_btf_id: -1,
                 module_fd: None,
+                kfunc_module_fds: HashMap::new(),
             },
             platform: PlatformCapabilities::default(),
             policy: PolicyConfig::default(),
@@ -958,7 +1076,11 @@ mod tests {
                 extract64_btf_id: -1,
                 lea64_btf_id: -1,
                 movbe64_btf_id: -1,
+                endian_load16_btf_id: -1,
+                endian_load32_btf_id: -1,
+                endian_load64_btf_id: -1,
                 module_fd: Some(42),
+                kfunc_module_fds: HashMap::new(),
             },
             platform: PlatformCapabilities::default(),
             policy: PolicyConfig::default(),
@@ -977,4 +1099,217 @@ mod tests {
         pm.add_pass(AppendNopPass);
         assert_eq!(pm.pass_count(), 2);
     }
+
+    // ── Issue 3: Per-kfunc module FD tests ──────────────────────
+
+    #[test]
+    fn test_kfunc_registry_per_kfunc_module_fd() {
+        let mut reg = KfuncRegistry {
+            rotate64_btf_id: 10,
+            select64_btf_id: 20,
+            extract64_btf_id: 30,
+            lea64_btf_id: -1,
+            movbe64_btf_id: -1,
+            endian_load16_btf_id: -1,
+            endian_load32_btf_id: -1,
+            endian_load64_btf_id: -1,
+            module_fd: None,
+            kfunc_module_fds: HashMap::new(),
+        };
+        // Set different FDs for different kfuncs.
+        reg.kfunc_module_fds.insert("bpf_rotate64".to_string(), 100);
+        reg.kfunc_module_fds.insert("bpf_select64".to_string(), 200);
+        reg.kfunc_module_fds.insert("bpf_extract64".to_string(), 300);
+
+        // Each pass should get its own module FD.
+        assert_eq!(reg.module_fd_for_pass("rotate"), Some(100));
+        assert_eq!(reg.module_fd_for_pass("cond_select"), Some(200));
+        assert_eq!(reg.module_fd_for_pass("extract"), Some(300));
+    }
+
+    #[test]
+    fn test_kfunc_registry_per_kfunc_fallback_to_legacy() {
+        let mut reg = KfuncRegistry {
+            rotate64_btf_id: 10,
+            select64_btf_id: -1,
+            extract64_btf_id: -1,
+            lea64_btf_id: -1,
+            movbe64_btf_id: -1,
+            endian_load16_btf_id: -1,
+            endian_load32_btf_id: -1,
+            endian_load64_btf_id: -1,
+            module_fd: Some(42), // legacy
+            kfunc_module_fds: HashMap::new(),
+        };
+        // Only rotate has a per-kfunc FD.
+        reg.kfunc_module_fds.insert("bpf_rotate64".to_string(), 100);
+
+        assert_eq!(reg.module_fd_for_pass("rotate"), Some(100));
+        // cond_select has no per-kfunc FD, falls back to legacy.
+        assert_eq!(reg.module_fd_for_pass("cond_select"), Some(42));
+        // Unknown pass falls back to legacy.
+        assert_eq!(reg.module_fd_for_pass("unknown"), Some(42));
+    }
+
+    #[test]
+    fn test_kfunc_registry_all_module_fds() {
+        let mut reg = KfuncRegistry {
+            rotate64_btf_id: 10,
+            select64_btf_id: 20,
+            extract64_btf_id: -1,
+            lea64_btf_id: -1,
+            movbe64_btf_id: -1,
+            endian_load16_btf_id: -1,
+            endian_load32_btf_id: -1,
+            endian_load64_btf_id: -1,
+            module_fd: Some(100),
+            kfunc_module_fds: HashMap::new(),
+        };
+        reg.kfunc_module_fds.insert("bpf_rotate64".to_string(), 100);
+        reg.kfunc_module_fds.insert("bpf_select64".to_string(), 200);
+
+        let fds = reg.all_module_fds();
+        assert!(fds.contains(&100));
+        assert!(fds.contains(&200));
+        // 100 appears in both legacy and per-kfunc, but should be deduped.
+        assert_eq!(fds.len(), 2);
+    }
+
+    // ── Issue 5: Annotation remap tests ─────────────────────────
+
+    #[test]
+    fn test_remap_annotations_basic() {
+        let mut prog = make_program(vec![
+            BpfInsn::nop(),
+            BpfInsn::nop(),
+            BpfInsn::nop(),
+            exit_insn(),
+        ]);
+        // Set a branch profile on instruction 1.
+        prog.annotations[1].branch_profile = Some(BranchProfile {
+            taken_count: 100,
+            not_taken_count: 50,
+        });
+
+        // Simulate a transform that inserts an instruction before pc=1.
+        // addr_map: old_pc 0->0, 1->2, 2->3, 3->4, sentinel 4->5
+        let new_insns = vec![
+            BpfInsn::nop(),
+            BpfInsn::nop(), // inserted
+            BpfInsn::nop(),
+            BpfInsn::nop(),
+            exit_insn(),
+        ];
+        let addr_map = vec![0, 2, 3, 4, 5];
+        prog.insns = new_insns;
+        prog.remap_annotations(&addr_map);
+
+        // The profile should now be at new_pc=2 (remapped from old_pc=1).
+        assert!(prog.annotations[0].branch_profile.is_none());
+        assert!(prog.annotations[1].branch_profile.is_none());
+        assert!(prog.annotations[2].branch_profile.is_some());
+        assert_eq!(prog.annotations[2].branch_profile.as_ref().unwrap().taken_count, 100);
+        assert!(prog.annotations[3].branch_profile.is_none());
+        assert!(prog.annotations[4].branch_profile.is_none());
+    }
+
+    #[test]
+    fn test_remap_annotations_deleted_instruction() {
+        let mut prog = make_program(vec![
+            BpfInsn::nop(),
+            BpfInsn::nop(),
+            exit_insn(),
+        ]);
+        prog.annotations[0].branch_profile = Some(BranchProfile {
+            taken_count: 10,
+            not_taken_count: 5,
+        });
+
+        // Simulate a transform that removes instruction 0.
+        // addr_map: old_pc 0->0 (maps to first new insn), 1->0, 2->1, sentinel 3->2
+        // After rewrite, the program has 2 instructions.
+        prog.insns = vec![BpfInsn::nop(), exit_insn()];
+        // Both old pcs 0 and 1 map to new pc 0 — the annotation from old pc 0
+        // ends up at new pc 0.
+        let addr_map = vec![0, 0, 1, 2];
+        prog.remap_annotations(&addr_map);
+
+        assert!(prog.annotations[0].branch_profile.is_some());
+        assert_eq!(prog.annotations.len(), 2);
+    }
+
+    // ── Issue 6: PGO closedloop tests ───────────────────────────
+
+    #[test]
+    fn test_profiling_data_injection() {
+        let mut prog = make_program(vec![
+            BpfInsn::nop(),
+            BpfInsn::nop(),
+            exit_insn(),
+        ]);
+        assert!(prog.annotations[1].branch_profile.is_none());
+
+        let mut pdata = ProfilingData::default();
+        pdata.branch_profiles.insert(1, BranchProfile {
+            taken_count: 80,
+            not_taken_count: 20,
+        });
+        prog.inject_profiling(&pdata);
+
+        assert!(prog.annotations[0].branch_profile.is_none());
+        assert!(prog.annotations[1].branch_profile.is_some());
+        let bp = prog.annotations[1].branch_profile.as_ref().unwrap();
+        assert_eq!(bp.taken_count, 80);
+        assert_eq!(bp.not_taken_count, 20);
+    }
+
+    #[test]
+    fn test_run_with_profiling_enables_branch_flip() {
+        use crate::analysis::BranchTargetAnalysis;
+
+        let mut pm = PassManager::new();
+        pm.register_analysis(BranchTargetAnalysis);
+        pm.add_pass(BranchFlipPass { min_bias: 0.7 });
+
+        // A simple diamond that would be flipped if PGO says the branch is hot.
+        let jne = BpfInsn {
+            code: BPF_JMP | BPF_JNE | BPF_K,
+            regs: BpfInsn::make_regs(1, 0),
+            off: 2,
+            imm: 0,
+        };
+        let mut prog = make_program(vec![
+            jne,                             // pc=0
+            BpfInsn::mov64_imm(0, 10),      // then
+            BpfInsn::ja(1),                  // skip else
+            BpfInsn::mov64_imm(0, 20),      // else
+            exit_insn(),
+        ]);
+        let ctx = PassContext::test_default();
+
+        // Without profiling: no flip.
+        let result = pm.run_with_profiling(&mut prog, &ctx, None).unwrap();
+        assert!(!result.program_changed, "should not flip without PGO data");
+
+        // Reset the program.
+        let mut prog = make_program(vec![
+            jne,
+            BpfInsn::mov64_imm(0, 10),
+            BpfInsn::ja(1),
+            BpfInsn::mov64_imm(0, 20),
+            exit_insn(),
+        ]);
+
+        // With profiling data showing hot branch: should flip.
+        let mut pdata = ProfilingData::default();
+        pdata.branch_profiles.insert(0, BranchProfile {
+            taken_count: 90,
+            not_taken_count: 10,
+        });
+        let result = pm.run_with_profiling(&mut prog, &ctx, Some(&pdata)).unwrap();
+        assert!(result.program_changed, "should flip with PGO data showing hot branch");
+    }
+
+    // ── BranchFlipPass import for testing ───────────────────────
+    use crate::passes::BranchFlipPass;
 }
