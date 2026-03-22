@@ -1,7 +1,8 @@
 #!/bin/bash
 # BpfReJIT v2 comprehensive integration test
 set -e
-cd /home/yunwei37/workspace/bpf-benchmark
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$ROOT_DIR"
 
 PASS=0
 FAIL=0

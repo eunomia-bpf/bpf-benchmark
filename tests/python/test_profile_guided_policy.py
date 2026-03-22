@@ -4,7 +4,7 @@ import importlib.util
 from pathlib import Path
 import unittest
 
-ROOT_DIR = Path(__file__).resolve().parents[1]
+ROOT_DIR = Path(__file__).resolve().parents[2]
 SCRIPT_PATH = ROOT_DIR / "runner" / "scripts" / "profile_guided_policy.py"
 
 

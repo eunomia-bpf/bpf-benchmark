@@ -1,7 +1,8 @@
 #!/bin/bash
 # Test: daemon enumerate/rewrite/apply with a live BPF program
 set -e
-cd /home/yunwei37/workspace/bpf-benchmark
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$ROOT_DIR"
 
 PASS=0
 FAIL=0
@@ -25,7 +26,8 @@ echo "================================================================"
 
 # Hold a BPF program loaded in background
 echo "--- Loading load_byte_recompose.bpf.o and holding it ---"
-sudo ./tests/hold_bpf_prog micro/programs/load_byte_recompose.bpf.o 120 &
+HOLD_PROG="${ROOT_DIR}/tests/helpers/build/hold_bpf_prog"
+sudo "$HOLD_PROG" "${ROOT_DIR}/micro/programs/load_byte_recompose.bpf.o" 120 &
 BGPID=$!
 sleep 2
 

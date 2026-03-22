@@ -32,40 +32,47 @@ class PerfEventAttr(ctypes.Structure):
         ('sig_data', ctypes.c_uint64),
     ]
 
-lib = ctypes.CDLL(ctypes.util.find_library('c') or 'libc.so.6', use_errno=True)
-lib.syscall.restype = ctypes.c_long
-lib.ioctl.restype = ctypes.c_int
-lib.ioctl.argtypes = [ctypes.c_int, ctypes.c_ulong, ctypes.c_long]
+if __name__ == '__main__':
+    lib = ctypes.CDLL(ctypes.util.find_library('c') or 'libc.so.6', use_errno=True)
+    lib.syscall.restype = ctypes.c_long
+    lib.ioctl.restype = ctypes.c_int
+    lib.ioctl.argtypes = [ctypes.c_int, ctypes.c_ulong, ctypes.c_long]
 
-all_ok = True
-for cat, evt in [('task', 'task_newtask'), ('sched', 'sched_process_exit'), ('oom', 'mark_victim')]:
-    found = False
-    for base in ['/sys/kernel/debug/tracing/events', '/sys/kernel/tracing/events']:
-        p = pathlib.Path(f'{base}/{cat}/{evt}/id')
-        if p.exists():
-            tp_id = int(p.read_text().strip())
-            print(f'{cat}/{evt} id={tp_id}', end=' ')
-            
-            attr = PerfEventAttr()
-            ctypes.memset(ctypes.byref(attr), 0, ctypes.sizeof(attr))
-            attr.type = PERF_TYPE_TRACEPOINT
-            attr.size = ctypes.sizeof(attr)
-            attr.config = tp_id
-            attr.sample_period_or_freq = 1
-            attr.wakeup_events_or_watermark = 1
-            
-            pfd = lib.syscall(SYS_PERF_EVENT_OPEN, ctypes.byref(attr), ctypes.c_int(-1), ctypes.c_int(0), ctypes.c_int(-1), ctypes.c_ulong(0))
-            if pfd < 0:
-                err = ctypes.get_errno()
-                print(f'FAIL: {os.strerror(err)} (errno={err})')
-                all_ok = False
-            else:
-                print(f'OK (fd={pfd})')
-                os.close(pfd)
-            found = True
-            break
-    if not found:
-        print(f'{cat}/{evt}: NOT FOUND')
-        all_ok = False
+    all_ok = True
+    for cat, evt in [('task', 'task_newtask'), ('sched', 'sched_process_exit'), ('oom', 'mark_victim')]:
+        found = False
+        for base in ['/sys/kernel/debug/tracing/events', '/sys/kernel/tracing/events']:
+            p = pathlib.Path(f'{base}/{cat}/{evt}/id')
+            try:
+                exists = p.exists()
+                if exists:
+                    tp_id_text = p.read_text().strip()
+            except PermissionError:
+                exists = False
+            if exists:
+                tp_id = int(tp_id_text)
+                print(f'{cat}/{evt} id={tp_id}', end=' ')
 
-sys.exit(0 if all_ok else 1)
+                attr = PerfEventAttr()
+                ctypes.memset(ctypes.byref(attr), 0, ctypes.sizeof(attr))
+                attr.type = PERF_TYPE_TRACEPOINT
+                attr.size = ctypes.sizeof(attr)
+                attr.config = tp_id
+                attr.sample_period_or_freq = 1
+                attr.wakeup_events_or_watermark = 1
+
+                pfd = lib.syscall(SYS_PERF_EVENT_OPEN, ctypes.byref(attr), ctypes.c_int(-1), ctypes.c_int(0), ctypes.c_int(-1), ctypes.c_ulong(0))
+                if pfd < 0:
+                    err = ctypes.get_errno()
+                    print(f'FAIL: {os.strerror(err)} (errno={err})')
+                    all_ok = False
+                else:
+                    print(f'OK (fd={pfd})')
+                    os.close(pfd)
+                found = True
+                break
+        if not found:
+            print(f'{cat}/{evt}: NOT FOUND')
+            all_ok = False
+
+    sys.exit(0 if all_ok else 1)

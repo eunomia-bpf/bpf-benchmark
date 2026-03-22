@@ -94,6 +94,8 @@ BZIMAGE_PATH := $(if $(filter /%,$(BZIMAGE)),$(BZIMAGE),$(ROOT_DIR)/$(BZIMAGE))
 DAEMON_PATH := $(if $(filter /%,$(DAEMON)),$(DAEMON),$(ROOT_DIR)/$(DAEMON))
 MICRO_RUNNER := $(RUNNER_DIR)/build/micro_exec
 KERNEL_SELFTEST := $(KERNEL_TEST_DIR)/build/test_recompile
+UNITTEST_DIR := $(ROOT_DIR)/tests/unittest
+UNITTEST_BUILD_DIR := $(UNITTEST_DIR)/build
 KERNEL_SELFTEST_ARM64 := $(KERNEL_TEST_DIR)/build-arm64/test_recompile
 KERNEL_SELFTEST_ARM64_LIB_DIR := $(KERNEL_TEST_DIR)/build-arm64/lib
 KERNEL_TEST_BPF_BUILD_DIR := $(KERNEL_TEST_DIR)/build
@@ -147,7 +149,7 @@ LOAD_KINSN_MODULES := for ko in "$(KINSN_MODULE_DIR)/bpf_rotate.ko" "$(KINSN_MOD
 
 MICRO_ARGS := --iterations $(ITERATIONS) --warmups $(WARMUPS) --repeat $(REPEAT) $(BENCH_FLAGS)
 LOCAL_SMOKE_ARGS := --bench simple --iterations 1 --warmups 0 --repeat 10
-VM_SMOKE_ARGS := --bench simple --bench load_byte_recompose --bench cmov_dense --iterations 1 --warmups 0 --repeat 10
+VM_SMOKE_ARGS := --iterations 1 --warmups 0 --repeat 50
 VENV_ACTIVATE := $(if $(VENV),source "$(VENV)/bin/activate" &&,)
 
 # File-based dependency sources (for proper incremental rebuilds)
@@ -174,7 +176,7 @@ MICRO_BPF_STAMP := $(MICRO_DIR)/programs/.build.stamp
 .PHONY: all runner micro daemon kernel kernel-perf kernel-arm64 kernel-tests kernel-test-progs \
 	arm64-crossbuild-image selftest-arm64 daemon-tests unittest-tests python-tests clean kinsn-modules \
 	smoke check validate verify-build compare \
-	vm-selftest vm-upstream-test-verifier vm-upstream-test-progs \
+	vm-selftest vm-unittest vm-upstream-test-verifier vm-upstream-test-progs \
 	vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 	vm-arm64-smoke vm-arm64-selftest arm64-worktree arm64-rootfs \
 	cross-arm64 \
@@ -214,11 +216,12 @@ help:
 	@echo "  make aws-arm64       - Full lifecycle: local cross-build -> launch -> setup -> benchmark -> terminate"
 	@echo ""
 	@echo "Benchmark targets (require VM):"
-	@echo "  make vm-selftest      - Run kernel recompile selftests in VM"
+	@echo "  make vm-selftest      - Run kernel recompile selftests + build & run tests/unittest/ in single VM"
+	@echo "  make vm-unittest      - Build + run tests/unittest/ suite inside VM (7 test binaries)"
 	@echo "  make vm-upstream-test-verifier  - Run upstream BPF test_verifier in VM (526 tests, JIT/verifier)"
 	@echo "  make vm-upstream-test-progs [BPF_SELFTEST_FILTER=\"verifier jit xdp\"]"
 	@echo "                        - Run upstream test_progs in VM (filter: BPF_SELFTEST_FILTER)"
-	@echo "  make vm-micro-smoke   - Quick kernel+recompile smoke in VM"
+	@echo "  make vm-micro-smoke   - Quick full-coverage kernel+recompile smoke in VM (all benchmarks, minimal params)"
 	@echo "  make vm-micro         - Full micro benchmark suite in VM"
 	@echo "  make vm-corpus        - Corpus benchmark in VM"
 	@echo "  make vm-e2e           - E2E benchmarks (tracee/tetragon/bpftrace/scx/katran) in VM"
@@ -508,7 +511,28 @@ validate:
 vm-selftest: kernel-tests $(BZIMAGE_PATH)
 	@echo "=== Running make vm-selftest ==="
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
-		bash -lc 'cd "$(ROOT_DIR)" && $(LOAD_KINSN_MODULES) sudo -n "$(KERNEL_SELFTEST)"'
+		bash -lc 'cd "$(ROOT_DIR)" && $(LOAD_KINSN_MODULES) sudo -n "$(KERNEL_SELFTEST)" && \
+			echo "=== Building tests/unittest/ inside VM ===" && \
+			$(MAKE) -C "$(UNITTEST_DIR)" clean all && \
+			echo "=== Running tests/unittest/ ===" && \
+			cd "$(UNITTEST_DIR)" && \
+			for t in rejit_poc rejit_safety_tests rejit_regression rejit_tail_call rejit_spectre rejit_prog_types rejit_audit_tests; do \
+				echo "=== $$t ==="; \
+				sudo "$(UNITTEST_BUILD_DIR)/$$t" "$(UNITTEST_BUILD_DIR)/progs" || exit 1; \
+			done'
+
+# Run tests/unittest/ suite in VM: builds test binaries + BPF objects inside
+# the REJIT-enabled kernel VM (depends on REJIT UAPI headers), then runs them.
+vm-unittest: $(BZIMAGE_PATH)
+	@echo "=== Running make vm-unittest ==="
+	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
+		bash -lc 'cd "$(ROOT_DIR)" && \
+			$(MAKE) -C "$(UNITTEST_DIR)" clean all && \
+			cd "$(UNITTEST_DIR)" && \
+			for t in rejit_poc rejit_safety_tests rejit_regression rejit_tail_call rejit_spectre rejit_prog_types rejit_audit_tests; do \
+				echo "=== $$t ==="; \
+				sudo "$(UNITTEST_BUILD_DIR)/$$t" "$(UNITTEST_BUILD_DIR)/progs" || exit 1; \
+			done'
 
 # Upstream BPF selftests (test_verifier and test_progs) for REJIT regression testing.
 # test_verifier: 526 tests, covers JIT, verifier, atomic ops.
@@ -530,7 +554,7 @@ vm-upstream-test-progs: $(BZIMAGE_PATH)
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -m 4G -- \
 		bash -c 'cd "$(UPSTREAM_SELFTESTS_BIN_DIR)" && sudo ./test_progs $(foreach t,$(BPF_SELFTEST_FILTER),-t $(t)) 2>&1'
 
-vm-micro-smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(BZIMAGE_PATH)
+vm-micro-smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(DAEMON_PATH) $(BZIMAGE_PATH)
 	@echo "=== Running make vm-micro-smoke (POLICY=$(POLICY)) ==="
 	mkdir -p "$(MICRO_RESULTS_DEV_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
@@ -538,6 +562,7 @@ vm-micro-smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(BZIMAGE_PATH)
 			$(VENV_ACTIVATE) python3 "$(MICRO_DIR)/driver.py" suite \
 			--runtime kernel \
 			--runtime kernel-rejit \
+			--daemon-path "$(DAEMON_PATH)" \
 			$(VM_SMOKE_ARGS) \
 			$(POLICY_DIR_FLAG) \
 			--output "$(VM_MICRO_SMOKE_OUTPUT)"'
