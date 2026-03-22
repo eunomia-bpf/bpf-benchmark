@@ -48,7 +48,7 @@ __bpf_kfunc_end_defs();
 
 /* ---- BTF kfunc set ---- */
 
-KINSN_KFUNC_SET(bpf_extract, bpf_extract64);
+KINSN_KFUNC_SET(bpf_extract, bpf_extract64)
 
 /* ---- x86 JIT emit callback ---- */
 

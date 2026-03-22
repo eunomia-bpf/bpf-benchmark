@@ -32,7 +32,7 @@ __bpf_kfunc_end_defs();
 
 /* ---- BTF kfunc set ---- */
 
-KINSN_KFUNC_SET(bpf_select, bpf_select64);
+KINSN_KFUNC_SET(bpf_select, bpf_select64)
 
 /* ---- ARM64 JIT emit callback ---- */
 

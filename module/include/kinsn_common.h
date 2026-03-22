@@ -8,7 +8,7 @@
  * Usage for a single-kfunc module:
  *
  *   // Define the kfunc, emit callback, and ops struct as usual, then:
- *   KINSN_KFUNC_SET(bpf_rotate, bpf_rotate64);
+ *   KINSN_KFUNC_SET(bpf_rotate, bpf_rotate64)
  *   DEFINE_KINSN_MODULE(bpf_rotate, "bpf_rotate64", &rotate_ops,
  *                       "BpfReJIT kinsn: ROTATE (ROL) inline kfunc");
  *
@@ -52,7 +52,7 @@
 	static const struct btf_kfunc_id_set prefix##_kfunc_set = {	\
 		.owner = THIS_MODULE,					\
 		.set   = &prefix##_kfunc_ids,				\
-	}
+	};
 
 /*
  * For multi-kfunc modules, use START/ID/END triplet manually.

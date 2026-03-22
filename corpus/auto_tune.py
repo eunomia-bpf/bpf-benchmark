@@ -90,7 +90,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Path to micro_exec.",
     )
     parser.add_argument(
-        "--scanner",
+        "--daemon",
         default=str(DEFAULT_DAEMON),
         help="Path to bpfrejit-daemon.",
     )
@@ -382,7 +382,7 @@ def render_policy_text(
 
 
 def scan_program_manifest(
-    scanner: Path,
+    daemon: Path,
     object_path: Path,
     program_name: str,
     *,
@@ -390,7 +390,7 @@ def scan_program_manifest(
 ) -> dict[str, Any]:
     payload = run_json_command(
         [
-            str(scanner),
+            str(daemon),
             "scan",
             str(object_path),
             "--program-name",
@@ -399,17 +399,17 @@ def scan_program_manifest(
             "--json",
         ],
         timeout_seconds=timeout_seconds,
-        label=f"scanner:{relpath(object_path)}:{program_name}",
+        label=f"daemon:{relpath(object_path)}:{program_name}",
     )
     if not isinstance(payload, dict):
-        raise RuntimeError(f"scanner output for {relpath(object_path)}:{program_name} was not a JSON object")
+        raise RuntimeError(f"daemon output for {relpath(object_path)}:{program_name} was not a JSON object")
     return payload
 
 
 def census_object(
     *,
     runner: Path,
-    scanner: Path,
+    daemon: Path,
     object_path: Path,
     filters: list[str],
     timeout_seconds: int,
@@ -441,7 +441,7 @@ def census_object(
         if not record_matches_filters(record, filters):
             continue
         manifest = scan_program_manifest(
-            scanner,
+            daemon,
             object_path,
             entry.name,
             timeout_seconds=timeout_seconds,
@@ -476,7 +476,7 @@ def load_or_init_payload(args: argparse.Namespace, selected_phases: set[int]) ->
         "mode": "vm" if args.kernel_image else "host",
         "inventory_json": str(Path(args.inventory_json).resolve()),
         "runner_binary": str(Path(args.runner).resolve()),
-        "scanner_binary": str(Path(args.scanner).resolve()),
+        "daemon_binary": str(Path(args.daemon).resolve()),
         "kernel_image": str(Path(args.kernel_image).resolve()) if args.kernel_image else None,
         "btf_custom_path": None,
         "vng_binary": args.vng,
@@ -628,7 +628,7 @@ def build_markdown(payload: dict[str, Any]) -> str:
         f"- Generated: {payload.get('generated_at')}",
         f"- Mode: `{payload.get('mode')}`",
         f"- Runner: `{payload.get('runner_binary')}`",
-        f"- Scanner: `{payload.get('scanner_binary')}`",
+        f"- Daemon: `{payload.get('daemon_binary')}`",
         f"- Inventory: `{payload.get('inventory_json')}`",
         f"- Policy dir: `{payload.get('policy_dir')}`",
         f"- Repeat: {payload.get('repeat')}",
@@ -741,13 +741,13 @@ def measure_candidate(
         )
         target = dict(program["measurement_target"])
         runner = Path(args.runner).resolve()
-        scanner = Path(args.scanner).resolve()
+        daemon = Path(args.daemon).resolve()
         btf_custom_path = measurement_btf_path(args)
         if args.kernel_image:
             record = run_target_in_guest(
                 target=target,
                 runner=runner,
-                scanner=scanner,
+                daemon=daemon,
                 kernel_image=Path(args.kernel_image).resolve(),
                 btf_custom_path=btf_custom_path if btf_custom_path is not None else DEFAULT_BTF_PATH.resolve(),
                 repeat=args.repeat,
@@ -761,7 +761,7 @@ def measure_candidate(
             record = run_target_locally(
                 target=target,
                 runner=runner,
-                scanner=scanner,
+                daemon=daemon,
                 repeat=args.repeat,
                 timeout_seconds=args.timeout,
                 execution_mode="host",
@@ -826,7 +826,7 @@ def run_phase_1(
     filters: list[str],
 ) -> None:
     runner = Path(args.runner).resolve()
-    scanner = Path(args.scanner).resolve()
+    daemon = Path(args.daemon).resolve()
     selected_roots = (
         tuple(Path(item).resolve() for item in args.object_roots)
         if args.object_roots
@@ -854,7 +854,7 @@ def run_phase_1(
             executor.submit(
                 census_object,
                 runner=runner,
-                scanner=scanner,
+                daemon=daemon,
                 object_path=path,
                 filters=filters,
                 timeout_seconds=args.timeout,
@@ -1096,7 +1096,7 @@ def main(argv: list[str] | None = None) -> int:
     payload["mode"] = "vm" if args.kernel_image else "host"
     payload["inventory_json"] = str(inventory_json)
     payload["runner_binary"] = str(Path(args.runner).resolve())
-    payload["scanner_binary"] = str(Path(args.scanner).resolve())
+    payload["daemon_binary"] = str(Path(args.daemon).resolve())
     payload["kernel_image"] = str(Path(args.kernel_image).resolve()) if args.kernel_image else None
     payload["btf_custom_path"] = str(btf_path) if btf_path is not None else None
     payload["policy_dir"] = str(Path(args.policy_dir).resolve())

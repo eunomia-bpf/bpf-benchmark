@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import argparse
 import os
-import platform
 import re
 import statistics
 import sys
@@ -126,7 +125,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD))
     parser.add_argument("--report-md", default=str(DEFAULT_REPORT_MD))
     parser.add_argument("--runner", default=str(DEFAULT_RUNNER))
-    parser.add_argument("--scanner", default=str(DEFAULT_DAEMON))
+    parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
     parser.add_argument("--duration", type=int, default=30)
     parser.add_argument("--smoke-duration", type=int, default=5)
     parser.add_argument("--attach-timeout", type=int, default=20)
@@ -156,14 +155,14 @@ def version_at_least(version: tuple[int, int, int] | None, minimum: tuple[int, i
     return version is not None and version >= minimum
 
 
-def ensure_artifacts(runner_binary: Path, scanner_binary: Path, *, skip_build: bool) -> None:
+def ensure_artifacts(runner_binary: Path, daemon_binary: Path, *, skip_build: bool) -> None:
     if not skip_build or not runner_binary.exists():
         ensure_runner_binary(runner_binary)
-    ensure_daemon_binary(scanner_binary)
+    ensure_daemon_binary(daemon_binary)
     if not runner_binary.exists():
         raise RuntimeError(f"micro_exec not found: {runner_binary}")
-    if not scanner_binary.exists():
-        raise RuntimeError(f"bpfrejit-daemon not found: {scanner_binary}")
+    if not daemon_binary.exists():
+        raise RuntimeError(f"bpfrejit-daemon not found: {daemon_binary}")
 
 
 def ensure_required_tools() -> dict[str, object]:
@@ -342,7 +341,7 @@ def run_phase(
     *,
     duration_s: int,
     attach_timeout: int,
-    scanner_binary: Path,
+    daemon_binary: Path,
 ) -> tuple[dict[str, object], dict[str, object] | None]:
     """Run baseline then daemon-apply then rejit measurement for one bpftrace script.
 
@@ -377,7 +376,7 @@ def run_phase(
         prog_ids = [int(program["id"]) for program in programs]
         baseline["programs"] = programs
         baseline["prog_ids"] = prog_ids
-        scan_results = scan_programs(prog_ids, scanner_binary)
+        scan_results = scan_programs(prog_ids, daemon_binary)
         baseline["scan_results"] = {str(key): value for key, value in scan_results.items()}
         baseline["site_totals"] = aggregate_site_totals(scan_results)
 
@@ -391,7 +390,7 @@ def run_phase(
         baseline["measurement"] = measurement
         baseline["status"] = "ok"
 
-        rejit_apply = apply_daemon_rejit(scanner_binary, prog_ids)
+        rejit_apply = apply_daemon_rejit(daemon_binary, prog_ids)
         if rejit_apply["applied"]:
             rejit = {
                 "phase": "post_rejit",
@@ -507,7 +506,7 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         f"- Host kernel: `{payload['host']['kernel']}`",
         f"- bpftrace: `{payload['tool_versions']['bpftrace_version_text']}`",
         f"- bpftool: `{payload['tool_versions']['bpftool_version_text']}`",
-        f"- Scanner: `{payload['scanner']}`",
+        f"- Daemon: `{payload['daemon']}`",
         "",
         "## Summary",
         "",
@@ -656,8 +655,8 @@ def run_case(args: argparse.Namespace) -> dict[str, object]:
     ensure_root([str(Path(sys.argv[0]).resolve()), *sys.argv[1:]])
 
     runner_binary = Path(args.runner).resolve()
-    scanner_binary = Path(args.scanner).resolve()
-    ensure_artifacts(runner_binary, scanner_binary, skip_build=bool(args.skip_build))
+    daemon_binary = Path(args.daemon).resolve()
+    ensure_artifacts(runner_binary, daemon_binary, skip_build=bool(args.skip_build))
     tool_versions = ensure_required_tools()
 
     scripts = selected_scripts(args)
@@ -672,7 +671,7 @@ def run_case(args: argparse.Namespace) -> dict[str, object]:
                 spec,
                 duration_s=duration_s,
                 attach_timeout=int(args.attach_timeout),
-                scanner_binary=scanner_binary,
+                daemon_binary=daemon_binary,
             )
             summary = summarize_script(spec, baseline, rejit)
             records.append(
@@ -721,7 +720,7 @@ def run_case(args: argparse.Namespace) -> dict[str, object]:
         "duration_s": duration_s,
         "selected_scripts": [spec.name for spec in scripts],
         "runner": str(runner_binary),
-        "scanner": str(scanner_binary),
+        "daemon": str(daemon_binary),
         "host": host_metadata(),
         "tool_versions": tool_versions,
         "records": records,

@@ -119,11 +119,7 @@ impl BpfPass for BranchFlipPass {
             // Decision: PGO-only mode. No heuristic fallback.
             let should_flip = if let Some(ref bp) = program.annotations[site.pc].branch_profile {
                 let total = bp.taken_count + bp.not_taken_count;
-                if total > 0 && bp.taken_count as f64 / total as f64 >= self.min_bias {
-                    true
-                } else {
-                    false
-                }
+                total > 0 && bp.taken_count as f64 / total as f64 >= self.min_bias
             } else {
                 false
             };

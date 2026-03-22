@@ -27,7 +27,7 @@ __bpf_kfunc_end_defs();
 
 /* ---- BTF kfunc set ---- */
 
-KINSN_KFUNC_SET(bpf_barrier, bpf_speculation_barrier);
+KINSN_KFUNC_SET(bpf_barrier, bpf_speculation_barrier)
 
 /* ---- x86 JIT emit callback ---- */
 

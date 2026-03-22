@@ -1,7 +1,7 @@
 """BpfReJIT v2 REJIT helpers.
 
 This module provides the Python-side interface for the v2 REJIT syscall path.
-The v1 scanner/policy-blob recompile logic has been removed.
+The v1 daemon/policy-blob recompile logic has been removed.
 """
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ class RejitTarget:
 
 
 def enumerate_program_record(
-    scanner: Path | str,
+    daemon: Path | str,
     prog_id: int,
     *,
     timeout_seconds: int = 60,
@@ -30,7 +30,7 @@ def enumerate_program_record(
     Raises RuntimeError on non-zero exit or unparseable output.
     """
     command = [
-        str(scanner),
+        str(daemon),
         "enumerate",
         "--prog-id",
         str(prog_id),
@@ -69,7 +69,7 @@ def enumerate_program_record(
 
 def scan_programs(
     prog_ids: list[int],
-    scanner: Path | str,
+    daemon: Path | str,
     *,
     prog_fds: dict[int, int] | None = None,
     timeout_seconds: int = 60,
@@ -82,7 +82,7 @@ def scan_programs(
     results: dict[int, dict[str, Any]] = {}
     for prog_id in prog_ids:
         try:
-            record = enumerate_program_record(scanner, prog_id, timeout_seconds=timeout_seconds)
+            record = enumerate_program_record(daemon, prog_id, timeout_seconds=timeout_seconds)
             results[prog_id] = {"enumerate_record": record}
         except Exception:
             pass

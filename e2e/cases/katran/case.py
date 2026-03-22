@@ -7,11 +7,9 @@ import ctypes.util
 import errno
 import json
 import os
-import platform
 import re
 import shutil
 import socket
-import statistics
 import struct
 import subprocess
 import sys
@@ -30,7 +28,6 @@ from runner.libs import (  # noqa: E402
     RESULTS_DIR,
     ROOT_DIR,
     authoritative_output_path,
-    chown_to_invoking_user,
     ensure_root,
     resolve_bpftool_binary,
     run_command,
@@ -38,8 +35,6 @@ from runner.libs import (  # noqa: E402
     smoke_output_path,
     tail_text,
     which,
-    write_json,
-    write_text,
 )
 from runner.libs.corpus import materialize_katran_packet  # noqa: E402
 from runner.libs.metrics import compute_delta, enable_bpf_stats, sample_bpf_stats, sample_total_cpu_usage  # noqa: E402
@@ -570,9 +565,9 @@ def build_markdown(payload: Mapping[str, object]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def ensure_artifacts(runner_binary: Path, scanner_binary: Path) -> None:
+def ensure_artifacts(runner_binary: Path, daemon_binary: Path) -> None:
     ensure_runner_binary(runner_binary)
-    ensure_daemon_binary(scanner_binary)
+    ensure_daemon_binary(daemon_binary)
 
 
 def run_setup_script(setup_script: Path) -> dict[str, object]:
@@ -1950,11 +1945,11 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         )
     )
     runner_binary = Path(args.runner).resolve()
-    scanner_binary = Path(args.scanner).resolve()
+    daemon_binary = Path(args.daemon).resolve()
     katran_object = Path(args.katran_object).resolve()
     setup_script = Path(args.setup_script).resolve()
 
-    ensure_artifacts(runner_binary, scanner_binary)
+    ensure_artifacts(runner_binary, daemon_binary)
     if not katran_object.exists():
         raise RuntimeError(f"Katran object not found: {katran_object}")
 
@@ -2043,8 +2038,8 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
                             "samples": [baseline_sample],
                             "summary": build_phase_summary([baseline_sample]),
                         }
-                        scan_results = scan_programs(prog_ids, scanner_binary)
-                        rejit_result = apply_daemon_rejit(scanner_binary, prog_ids)
+                        scan_results = scan_programs(prog_ids, daemon_binary)
+                        rejit_result = apply_daemon_rejit(daemon_binary, prog_ids)
                         if rejit_result["applied"]:
                             post_rejit_sample = measure_phase(
                                 index=cycle_index,
@@ -2166,7 +2161,7 @@ def build_case_parser() -> argparse.ArgumentParser:
     parser.add_argument("--katran-skip-attach", action="store_true")
     parser.add_argument("--kernel-config", default=str(DEFAULT_KERNEL_CONFIG))
     parser.add_argument("--runner", default=str(DEFAULT_RUNNER))
-    parser.add_argument("--scanner", default=str(DEFAULT_DAEMON))
+    parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
     parser.add_argument("--duration", type=int)
     parser.add_argument("--smoke", action="store_true")
     parser.add_argument("--skip-setup", action="store_true")

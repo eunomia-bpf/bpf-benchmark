@@ -22,15 +22,12 @@ from runner.libs import (  # noqa: E402
     RESULTS_DIR,
     ROOT_DIR,
     authoritative_output_path,
-    chown_to_invoking_user,
     ensure_root,
     resolve_bpftool_binary,
     run_command,
     smoke_output_path,
     tail_text,
     which,
-    write_json,
-    write_text,
 )
 from runner.libs.agent import find_bpf_programs, start_agent, stop_agent, wait_healthy  # noqa: E402
 from runner.libs.metrics import (  # noqa: E402
@@ -263,9 +260,9 @@ def _current_prog_ids() -> list[int]:
     return [int(record["id"]) for record in parsed if isinstance(record, dict) and "id" in record]
 
 
-def ensure_artifacts(runner_binary: Path, scanner_binary: Path) -> None:
+def ensure_artifacts(runner_binary: Path, daemon_binary: Path) -> None:
     ensure_runner_binary(runner_binary)
-    ensure_daemon_binary(scanner_binary)
+    ensure_daemon_binary(daemon_binary)
 
 
 def load_config(path: Path) -> dict[str, object]:
@@ -626,7 +623,7 @@ def run_manual_fallback(
     duration_s: int,
     tracee_object: Path,
     runner_binary: Path,
-    scanner_binary: Path,
+    daemon_binary: Path,
     setup_result: Mapping[str, object],
     smoke: bool,
 ) -> dict[str, object]:
@@ -644,8 +641,8 @@ def run_manual_fallback(
             prog_ids = [int(handle.prog_id) for handle in session.program_handles.values()]
             prog_fds = {int(handle.prog_id): int(handle.prog_fd) for handle in session.program_handles.values()}
             baseline = run_phase(workloads, duration_s, prog_ids, prog_fds=prog_fds, agent_pid=None, collector=None)
-            scan_results = scan_programs(prog_ids, scanner_binary, prog_fds=prog_fds)
-            rejit_result = apply_daemon_rejit(scanner_binary, prog_ids)
+            scan_results = scan_programs(prog_ids, daemon_binary, prog_fds=prog_fds)
+            rejit_result = apply_daemon_rejit(daemon_binary, prog_ids)
             if rejit_result["applied"]:
                 post_rejit = run_phase(workloads, duration_s, prog_ids, prog_fds=prog_fds, agent_pid=None, collector=None)
             else:
@@ -682,9 +679,9 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
         duration_s = int(config.get("smoke_duration_s") or 10)
 
     runner_binary = Path(args.runner).resolve()
-    scanner_binary = Path(args.scanner).resolve()
+    daemon_binary = Path(args.daemon).resolve()
     tracee_object = Path(args.tracee_object).resolve()
-    ensure_artifacts(runner_binary, scanner_binary)
+    ensure_artifacts(runner_binary, daemon_binary)
 
     setup_result = {
         "returncode": 0,
@@ -702,7 +699,7 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
             duration_s=duration_s,
             tracee_object=tracee_object,
             runner_binary=runner_binary,
-            scanner_binary=scanner_binary,
+            daemon_binary=daemon_binary,
             setup_result=setup_result,
             smoke=bool(args.smoke),
         )
@@ -723,8 +720,8 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                 agent_pid=session.pid,
                 collector=session.collector,
             )
-            scan_results = scan_programs(prog_ids, scanner_binary, prog_fds=session.program_fds)
-            rejit_result = apply_daemon_rejit(scanner_binary, prog_ids)
+            scan_results = scan_programs(prog_ids, daemon_binary, prog_fds=session.program_fds)
+            rejit_result = apply_daemon_rejit(daemon_binary, prog_ids)
             if rejit_result["applied"]:
                 post_rejit = run_phase(
                     workloads,
@@ -767,7 +764,7 @@ def build_case_parser() -> argparse.ArgumentParser:
     parser.add_argument("--tracee-binary")
     parser.add_argument("--tracee-object", default=str(DEFAULT_TRACEE_OBJECT))
     parser.add_argument("--runner", default=str(DEFAULT_RUNNER))
-    parser.add_argument("--scanner", default=str(DEFAULT_DAEMON))
+    parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
     parser.add_argument("--duration", type=int)
     parser.add_argument("--smoke", action="store_true")
     parser.add_argument("--load-timeout", type=int, default=20)

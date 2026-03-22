@@ -76,7 +76,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--execve-object", default=str(DEFAULT_TETRAGON_EXECVE_OBJECT))
     parser.add_argument("--kprobe-object", default=str(DEFAULT_TETRAGON_KPROBE_OBJECT))
     parser.add_argument("--runner", default=str(ROOT_DIR / "runner" / "build" / "micro_exec"))
-    parser.add_argument("--scanner", default=str(ROOT_DIR / "daemon" / "build" / "bpfrejit-daemon"))
+    parser.add_argument("--daemon", default=str(ROOT_DIR / "daemon" / "build" / "bpfrejit-daemon"))
     parser.add_argument("--load-timeout", type=int, default=20)
     parser.add_argument("--attach-timeout", type=int, default=20)
     parser.add_argument("--smoke-duration", type=int, default=5)
@@ -130,8 +130,8 @@ def run_tracee_vm(args: argparse.Namespace) -> int:
         str(Path(args.tracee_object).resolve()),
         "--runner",
         str(Path(args.runner).resolve()),
-        "--scanner",
-        str(Path(args.scanner).resolve()),
+        "--daemon",
+        str(Path(args.daemon).resolve()),
         "--load-timeout",
         str(int(args.load_timeout)),
         "--skip-setup",
@@ -179,8 +179,8 @@ def run_scx_vm(args: argparse.Namespace) -> int:
         str(Path(args.scheduler_object).resolve()),
         "--scx-repo",
         str(Path(args.scx_repo).resolve()),
-        "--scanner",
-        str(Path(args.scanner).resolve()),
+        "--daemon",
+        str(Path(args.daemon).resolve()),
         "--bpftool-binary",
         str(Path(args.bpftool_binary).resolve()),
         "--load-timeout",
@@ -230,8 +230,8 @@ def run_katran_vm(args: argparse.Namespace) -> int:
         str(router_peer_iface),
         "--runner",
         str(Path(args.runner).resolve()),
-        "--scanner",
-        str(Path(args.scanner).resolve()),
+        "--daemon",
+        str(Path(args.daemon).resolve()),
         "--kernel-config",
         str(Path(args.kernel_config).resolve()),
     ]

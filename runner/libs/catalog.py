@@ -121,7 +121,7 @@ class CatalogTarget:
 class CatalogBuild:
     commands: Mapping[str, tuple[str, ...]]
     runner_binary: Path | None = None
-    scanner_binary: Path | None = None
+    daemon_binary: Path | None = None
     bpftool_binary: str | Path | None = None
 
 
@@ -361,7 +361,7 @@ def _load_macro_catalog(path: Path, data: Mapping[str, Any]) -> CatalogManifest:
         build=CatalogBuild(
             commands=_normalize_commands(build_data.get("commands")),
             runner_binary=_resolve_path(build_data.get("runner_binary"), root_dir),
-            scanner_binary=_resolve_path(build_data.get("scanner_binary"), root_dir),
+            daemon_binary=_resolve_path(build_data.get("daemon_binary"), root_dir),
             bpftool_binary=build_data.get("bpftool_binary"),
         ),
         runtimes=runtimes,

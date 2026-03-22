@@ -6,8 +6,6 @@ import ctypes
 import ctypes.util
 import json
 import os
-import platform
-import statistics
 import sys
 import tempfile
 import threading
@@ -25,7 +23,6 @@ from runner.libs import (  # noqa: E402
     RESULTS_DIR,
     ROOT_DIR,
     authoritative_output_path,
-    chown_to_invoking_user,
     ensure_root,
     resolve_bpftool_binary,
     run_command,
@@ -33,8 +30,6 @@ from runner.libs import (  # noqa: E402
     smoke_output_path,
     tail_text,
     which,
-    write_json,
-    write_text,
 )
 from runner.libs.agent import find_bpf_programs, start_agent, stop_agent, wait_healthy  # noqa: E402
 from runner.libs.metrics import compute_delta, sample_bpf_stats, sample_cpu_usage, sample_total_cpu_usage  # noqa: E402
@@ -544,9 +539,9 @@ def current_prog_ids() -> list[int]:
     return [int(record["id"]) for record in current_programs()]
 
 
-def ensure_artifacts(runner_binary: Path, scanner_binary: Path) -> None:
+def ensure_artifacts(runner_binary: Path, daemon_binary: Path) -> None:
     ensure_runner_binary(runner_binary)
-    ensure_daemon_binary(scanner_binary)
+    ensure_daemon_binary(daemon_binary)
 
 
 def run_setup_script(setup_script: Path) -> dict[str, object]:
@@ -886,7 +881,7 @@ def build_markdown(payload: Mapping[str, object]) -> str:
 def manual_fallback_payload(
     *,
     libbpf: Libbpf,
-    scanner_binary: Path,
+    daemon_binary: Path,
     execve_object: Path,
     kprobe_object: Path,
     duration_s: int,
@@ -909,8 +904,8 @@ def manual_fallback_payload(
         prog_ids = [int(session.prog_id or 0) for session in opened if session.prog_id]
         programs = [session.metadata() for session in opened]
         baseline = run_phase(DEFAULT_WORKLOADS, duration_s, prog_ids, agent_pid=os.getpid())
-        scan_results = scan_programs(prog_ids, scanner_binary)
-        rejit_result = apply_daemon_rejit(scanner_binary, prog_ids)
+        scan_results = scan_programs(prog_ids, daemon_binary)
+        rejit_result = apply_daemon_rejit(daemon_binary, prog_ids)
         if rejit_result["applied"]:
             post_rejit = run_phase(DEFAULT_WORKLOADS, duration_s, prog_ids, agent_pid=os.getpid())
         else:
@@ -949,7 +944,7 @@ def manual_fallback_payload(
 def daemon_payload(
     *,
     libbpf: Libbpf,
-    scanner_binary: Path,
+    daemon_binary: Path,
     tetragon_binary: str,
     duration_s: int,
     smoke: bool,
@@ -964,8 +959,8 @@ def daemon_payload(
         with TetragonAgentSession(command, load_timeout) as session:
             prog_ids = [int(program["id"]) for program in session.programs]
             baseline = run_phase(DEFAULT_WORKLOADS, duration_s, prog_ids, agent_pid=session.pid)
-            scan_results = scan_programs(prog_ids, scanner_binary)
-            rejit_result = apply_daemon_rejit(scanner_binary, prog_ids)
+            scan_results = scan_programs(prog_ids, daemon_binary)
+            rejit_result = apply_daemon_rejit(daemon_binary, prog_ids)
             if rejit_result["applied"]:
                 post_rejit = run_phase(DEFAULT_WORKLOADS, duration_s, prog_ids, agent_pid=session.pid)
             else:
@@ -1007,10 +1002,10 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
 
     duration_s = int(args.duration or (DEFAULT_SMOKE_DURATION_S if args.smoke else DEFAULT_DURATION_S))
     runner_binary = Path(args.runner).resolve()
-    scanner_binary = Path(args.scanner).resolve()
+    daemon_binary = Path(args.daemon).resolve()
     execve_object = Path(args.execve_object).resolve()
     kprobe_object = Path(args.kprobe_object).resolve()
-    ensure_artifacts(runner_binary, scanner_binary)
+    ensure_artifacts(runner_binary, daemon_binary)
 
     setup_result = {
         "returncode": 0,
@@ -1033,7 +1028,7 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
             try:
                 return daemon_payload(
                     libbpf=libbpf,
-                    scanner_binary=scanner_binary,
+                    daemon_binary=daemon_binary,
                     tetragon_binary=tetragon_binary,
                     duration_s=duration_s,
                     smoke=bool(args.smoke),
@@ -1046,7 +1041,7 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
                 return {
                     **manual_fallback_payload(
                         libbpf=libbpf,
-                        scanner_binary=scanner_binary,
+                        daemon_binary=daemon_binary,
                         execve_object=execve_object,
                         kprobe_object=kprobe_object,
                         duration_s=duration_s,
@@ -1060,7 +1055,7 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
         limitations.append("Tetragon binary was unavailable, so the benchmark used direct object loading as the fallback path.")
         return manual_fallback_payload(
             libbpf=libbpf,
-            scanner_binary=scanner_binary,
+            daemon_binary=daemon_binary,
             execve_object=execve_object,
             kprobe_object=kprobe_object,
             duration_s=duration_s,
@@ -1080,7 +1075,7 @@ def build_case_parser() -> argparse.ArgumentParser:
     parser.add_argument("--execve-object", default=str(DEFAULT_EXECVE_OBJECT))
     parser.add_argument("--kprobe-object", default=str(DEFAULT_KPROBE_OBJECT))
     parser.add_argument("--runner", default=str(DEFAULT_RUNNER))
-    parser.add_argument("--scanner", default=str(DEFAULT_DAEMON))
+    parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
     parser.add_argument("--bpftool", default=DEFAULT_BPFTOOL)
     parser.add_argument("--duration", type=int)
     parser.add_argument("--smoke", action="store_true")

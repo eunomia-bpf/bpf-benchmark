@@ -142,7 +142,7 @@ class SuiteSpec:
     defaults_repeat: int
     runner_binary: Path
     bpftool_binary: str
-    scanner_binary: Path
+    daemon_binary: Path
     runtimes: tuple[RuntimeSpec, ...]
     programs: tuple[ProgramSpec, ...]
 
@@ -347,9 +347,9 @@ def load_suite(path: Path, output_override: str | None) -> SuiteSpec:
     runner_binary = Path(manifest.build.runner_binary or DEFAULT_RUNNER)
     if not runner_binary.is_absolute():
         runner_binary = (ROOT_DIR / runner_binary).resolve()
-    scanner_binary = Path(manifest.build.scanner_binary or DEFAULT_DAEMON)
-    if not scanner_binary.is_absolute():
-        scanner_binary = (ROOT_DIR / scanner_binary).resolve()
+    daemon_binary = Path(manifest.build.daemon_binary or DEFAULT_DAEMON)
+    if not daemon_binary.is_absolute():
+        daemon_binary = (ROOT_DIR / daemon_binary).resolve()
 
     return SuiteSpec(
         suite_name=manifest.suite_name,
@@ -360,7 +360,7 @@ def load_suite(path: Path, output_override: str | None) -> SuiteSpec:
         defaults_repeat=int(manifest.defaults.repeat or 50),
         runner_binary=runner_binary,
         bpftool_binary=str(manifest.build.bpftool_binary or DEFAULT_BPFTOOL),
-        scanner_binary=scanner_binary,
+        daemon_binary=daemon_binary,
         runtimes=runtimes,
         programs=tuple(programs),
     )

@@ -35,7 +35,7 @@ __bpf_kfunc_end_defs();
 
 /* ---- BTF kfunc set ---- */
 
-KINSN_KFUNC_SET(bpf_rotate, bpf_rotate64);
+KINSN_KFUNC_SET(bpf_rotate, bpf_rotate64)
 
 /* ---- x86 JIT emit callback ---- */
 

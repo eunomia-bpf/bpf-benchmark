@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import platform
 import re
 import shlex
 import statistics
@@ -23,14 +22,11 @@ from runner.libs import (  # noqa: E402
     RESULTS_DIR,
     ROOT_DIR,
     authoritative_output_path,
-    chown_to_invoking_user,
     ensure_root,
     run_command,
     smoke_output_path,
     tail_text,
     which,
-    write_json,
-    write_text,
 )
 from runner.libs.agent import find_bpf_programs, start_agent, stop_agent, wait_healthy  # noqa: E402
 from runner.libs.metrics import sample_cpu_usage, sample_total_cpu_usage  # noqa: E402
@@ -260,8 +256,8 @@ def aggregate_sites(records: Mapping[int | str, Mapping[str, object]]) -> dict[s
     return totals
 
 
-def ensure_artifacts(scanner_binary: Path, scheduler_binary: Path, scx_repo: Path) -> None:
-    ensure_daemon_binary(scanner_binary)
+def ensure_artifacts(daemon_binary: Path, scheduler_binary: Path, scx_repo: Path) -> None:
+    ensure_daemon_binary(daemon_binary)
     if scheduler_binary.exists():
         return
     if not scx_repo.exists():
@@ -657,9 +653,9 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
     scheduler_binary = Path(args.scheduler_binary).resolve()
     scx_repo = Path(args.scx_repo).resolve()
     object_path = Path(args.scheduler_object).resolve()
-    scanner_binary = Path(args.scanner).resolve()
+    daemon_binary = Path(args.daemon).resolve()
     bpftool_binary = Path(args.bpftool_binary).resolve()
-    ensure_artifacts(scanner_binary, scheduler_binary, scx_repo)
+    ensure_artifacts(daemon_binary, scheduler_binary, scx_repo)
 
     workloads = workload_specs()
     if not workloads:
@@ -702,8 +698,8 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
                 )
             prog_ids = [int(program["id"]) for program in scheduler_programs]
             baseline = run_phase(workloads, duration_s, agent_pid=session.pid)
-            scan_results = scan_programs(prog_ids, scanner_binary)
-            rejit_result = apply_daemon_rejit(scanner_binary, prog_ids)
+            scan_results = scan_programs(prog_ids, daemon_binary)
+            rejit_result = apply_daemon_rejit(daemon_binary, prog_ids)
             if rejit_result["applied"]:
                 post_rejit = run_phase(workloads, duration_s, agent_pid=session.pid)
             else:
@@ -760,7 +756,7 @@ def build_case_parser() -> argparse.ArgumentParser:
     parser.add_argument("--scheduler-binary", default=str(DEFAULT_SCX_BINARY))
     parser.add_argument("--scheduler-object", default=str(DEFAULT_SCX_OBJECT))
     parser.add_argument("--scx-repo", default=str(DEFAULT_SCX_REPO))
-    parser.add_argument("--scanner", default=str(DEFAULT_DAEMON))
+    parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
     parser.add_argument("--bpftool-binary", default=str(DEFAULT_BPFTOOL))
     parser.add_argument("--duration", type=int)
     parser.add_argument("--smoke", action="store_true")
@@ -792,8 +788,8 @@ def run_scx_vm(args: argparse.Namespace) -> int:
         str(Path(args.scheduler_object).resolve()),
         "--scx-repo",
         str(Path(args.scx_repo).resolve()),
-        "--scanner",
-        str(Path(args.scanner).resolve()),
+        "--daemon",
+        str(Path(args.daemon).resolve()),
         "--bpftool-binary",
         str(Path(args.bpftool_binary).resolve()),
         "--load-timeout",

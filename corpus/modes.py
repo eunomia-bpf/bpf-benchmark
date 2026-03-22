@@ -1722,11 +1722,11 @@ def run_linear_mode(mode_name: str, argv: list[str] | None = None) -> int:
         raise SystemExit("--skip-families requires --blind-apply")
 
     runner = Path(args.runner).resolve()
-    scanner = Path(args.daemon).resolve()
+    daemon = Path(args.daemon).resolve()
     if not runner.exists():
         raise SystemExit(f"runner not found: {runner}")
-    if not scanner.exists():
-        raise SystemExit(f"scanner not found: {scanner}")
+    if not daemon.exists():
+        raise SystemExit(f"daemon not found: {daemon}")
 
     btf_custom_path = Path(args.btf_custom_path).resolve() if args.btf_custom_path else None
     policy_dir = Path(args.policy_dir).resolve()
@@ -1751,7 +1751,7 @@ def run_linear_mode(mode_name: str, argv: list[str] | None = None) -> int:
         record = run_target_locally(
             target=target,
             runner=runner,
-            scanner=scanner,
+            daemon=daemon,
             repeat=args.repeat,
             timeout_seconds=args.timeout,
             execution_mode=mode_name,

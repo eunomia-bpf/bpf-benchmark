@@ -250,7 +250,7 @@ def profile_programs(
     prog_ids: Sequence[int],
     *,
     duration_s: int | float,
-    scanner_binary: str | Path | None = None,
+    daemon_binary: str | Path | None = None,
     prog_fds: dict[int, int] | None = None,
     include_sites: bool = True,
     collect_perf: bool = True,
@@ -313,7 +313,7 @@ def profile_programs(
     after = sample_bpf_stats(selected_ids, prog_fds=prog_fds)
     delta = compute_delta(before, after)
     scan_results = (
-        scan_programs(selected_ids, scanner_binary or DEFAULT_DAEMON, prog_fds=prog_fds)
+        scan_programs(selected_ids, daemon_binary or DEFAULT_DAEMON, prog_fds=prog_fds)
         if include_sites
         else {}
     )
@@ -465,7 +465,7 @@ def profile_current_programs(
     *,
     prog_ids: Sequence[int] | None = None,
     duration_s: int | float,
-    scanner_binary: str | Path | None = None,
+    daemon_binary: str | Path | None = None,
     name_contains: Sequence[str] | None = None,
     type_equals: Sequence[str] | None = None,
     include_sites: bool = True,
@@ -485,7 +485,7 @@ def profile_current_programs(
     payload = profile_programs(
         [int(record["id"]) for record in targets],
         duration_s=duration_s,
-        scanner_binary=scanner_binary,
+        daemon_binary=daemon_binary,
         include_sites=include_sites,
         collect_perf=collect_perf,
         perf_events=perf_events,

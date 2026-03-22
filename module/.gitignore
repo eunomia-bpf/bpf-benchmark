@@ -7,8 +7,11 @@
 *.o
 *.o.cmd
 .*.cmd
+..*.cmd
 *.order
 *.symvers
+.module-common.*
+..module-common.*
 .tmp_versions/
 .cache.mk
 *.btf.raw

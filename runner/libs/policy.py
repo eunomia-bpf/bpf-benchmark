@@ -487,7 +487,7 @@ def remap_policy_v3_to_live(
 
     remap_comments = list(comments)
     remap_comments.append(
-        "Remapped onto live scanner sites by family + pattern_kind order."
+        "Remapped onto live daemon sites by family + pattern_kind order."
     )
     remap_comments.append(
         "Live site totals: "
