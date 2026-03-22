@@ -1,38 +1,43 @@
 // SPDX-License-Identifier: MIT
-//! Spectre mitigation pass.
+//! Speculation barrier pass: inserts real `bpf_speculation_barrier()` kfunc
+//! calls after conditional branches to prevent speculative execution.
+//!
+//! This pass targets Spectre v1 (bounds-check bypass) by inserting an
+//! architecture-specific speculation barrier (LFENCE on x86, DSB SY + ISB
+//! on ARM64) after every conditional branch instruction.
+//!
+//! The barrier is implemented as a `bpf_speculation_barrier()` kfunc with
+//! `KF_INLINE_EMIT`, meaning the kernel JIT emits the native barrier
+//! instruction inline — no function call overhead at runtime.
+//!
+//! If the kfunc is not available (module not loaded), the pass does nothing.
+//!
+//! **Note on site count**: this pass only fires when the program contains
+//! conditional branches (`is_cond_jmp()`). Pure-compute micro benchmarks
+//! (e.g., bitcount, rotate) that are straight-line code will correctly show
+//! 0 sites. Programs with if/else logic (Cilium, Calico, Tracee) will have
+//! many conditional branches and thus many insertion sites.
+//!
+//! This pass is NOT in the default optimization pipeline by design. Enable
+//! it explicitly via policy or by adding it to a custom pipeline.
 
 use crate::insn::*;
 use crate::pass::*;
 
 use super::utils::fixup_all_branches as fixup_branches_inline;
 
-/// Barrier placeholder pass: inserts NOP (`JA +0`) after conditional branches.
-///
-/// **WARNING**: This is a PLACEHOLDER, NOT a real speculation barrier. The
-/// inserted `JA +0` is a semantic NOP and does NOT prevent speculative
-/// execution on any real CPU. A real Spectre mitigation would require
-/// architecture-specific barrier instructions (e.g., LFENCE on x86).
-///
-/// This pass exists to mark branch sites for future barrier insertion and
-/// to measure the code-size overhead of barrier placement strategies.
-///
-/// **Note on site count**: this pass only fires when the program contains
-/// conditional branches (`is_cond_jmp()`). Pure-compute micro benchmarks
-/// (e.g., bitcount, rotate) that are straight-line code will correctly show
-/// 0 sites. Programs with if/else logic (Cilium, Calico, Tracee) will have
-/// many conditional branches and thus many insertion sites.
-///
-/// This pass is NOT in the default optimization pipeline by design. Enable
-/// it explicitly via policy or by adding it to a custom pipeline.
+/// Speculation barrier pass: inserts `bpf_speculation_barrier()` kfunc calls
+/// after conditional branches to prevent speculative execution past
+/// bounds-check branch sites.
 pub struct SpectreMitigationPass;
 
 impl BpfPass for SpectreMitigationPass {
     fn name(&self) -> &str {
-        "barrier_placeholder"
+        "speculation_barrier"
     }
 
     fn category(&self) -> PassCategory {
-        PassCategory::Placeholder
+        PassCategory::Security
     }
 
     fn required_analyses(&self) -> Vec<&str> {
@@ -43,12 +48,29 @@ impl BpfPass for SpectreMitigationPass {
         &self,
         program: &mut BpfProgram,
         _analyses: &mut AnalysisCache,
-        _ctx: &PassContext,
+        ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
+        let btf_id = ctx.kfunc_registry.speculation_barrier_btf_id;
+
+        // If the kfunc is not available, skip entirely — no placeholder.
+        if btf_id < 0 {
+            return Ok(PassResult {
+                pass_name: self.name().into(),
+                changed: false,
+                sites_applied: 0,
+                sites_skipped: vec![],
+                diagnostics: vec![
+                    "bpf_speculation_barrier kfunc not available (module not loaded)".into(),
+                ],
+            });
+        }
+
         let orig_len = program.insns.len();
         let mut new_insns: Vec<BpfInsn> = Vec::with_capacity(orig_len + orig_len / 4);
         let mut addr_map = vec![0usize; orig_len + 1];
         let mut insertions = 0usize;
+
+        let barrier_insn = BpfInsn::call_kfunc(btf_id);
 
         let mut pc = 0;
         while pc < orig_len {
@@ -58,15 +80,17 @@ impl BpfPass for SpectreMitigationPass {
             let insn = program.insns[pc];
             new_insns.push(insn);
 
-            // After a conditional jump, insert a NOP if one isn't already there
+            // After a conditional jump, insert a speculation barrier if one
+            // isn't already there.
             if insn.is_cond_jmp() {
                 let next_pc = pc + 1;
-                let already_has_nop = next_pc < orig_len
-                    && program.insns[next_pc].is_ja()
-                    && program.insns[next_pc].off == 0;
+                let already_has_barrier = next_pc < orig_len
+                    && program.insns[next_pc].is_call()
+                    && program.insns[next_pc].src_reg() == 2
+                    && program.insns[next_pc].imm == btf_id;
 
-                if !already_has_nop {
-                    new_insns.push(BpfInsn::nop());
+                if !already_has_barrier {
+                    new_insns.push(barrier_insn);
                     insertions += 1;
                 }
             }
@@ -88,12 +112,23 @@ impl BpfPass for SpectreMitigationPass {
 
             program.insns = new_insns;
             program.remap_annotations(&addr_map);
+
+            // Record module FD dependency for REJIT fd_array.
+            if let Some(fd) = ctx.kfunc_registry.module_fd_for_pass(self.name()) {
+                if !program.required_module_fds.contains(&fd) {
+                    program.required_module_fds.push(fd);
+                }
+            }
+
             program.log_transform(TransformEntry {
                 pass_name: self.name().into(),
                 sites_applied: insertions,
                 insns_before: orig_len,
                 insns_after: program.insns.len(),
-                details: vec![format!("inserted {} placeholder NOP barriers", insertions)],
+                details: vec![format!(
+                    "inserted {} bpf_speculation_barrier() calls (btf_id={})",
+                    insertions, btf_id
+                )],
             });
         }
 
@@ -104,7 +139,7 @@ impl BpfPass for SpectreMitigationPass {
             sites_skipped: vec![],
             diagnostics: if insertions > 0 {
                 vec![format!(
-                    "{} speculation barriers inserted (NOP placeholder)",
+                    "{} speculation barriers inserted (bpf_speculation_barrier kfunc)",
                     insertions
                 )]
             } else {
@@ -137,8 +172,16 @@ mod tests {
         }
     }
 
+    fn ctx_with_barrier(btf_id: i32) -> PassContext {
+        let mut ctx = PassContext::test_default();
+        ctx.kfunc_registry.speculation_barrier_btf_id = btf_id;
+        ctx
+    }
+
+    const TEST_BTF_ID: i32 = 777;
+
     #[test]
-    fn test_spectre_pass_inserts_fence_after_branch() {
+    fn test_spectre_pass_inserts_barrier_after_branch() {
         let mut prog = make_program(vec![
             jeq_imm(1, 0, 1),
             BpfInsn::mov64_imm(0, 1),
@@ -146,7 +189,7 @@ mod tests {
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
-        let ctx = PassContext::test_default();
+        let ctx = ctx_with_barrier(TEST_BTF_ID);
 
         let pass = SpectreMitigationPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
@@ -155,7 +198,30 @@ mod tests {
         assert_eq!(result.sites_applied, 1);
         assert_eq!(prog.insns.len(), 5);
         assert!(prog.insns[0].is_cond_jmp());
-        assert!(prog.insns[1].is_ja() && prog.insns[1].off == 0);
+        // Barrier is a kfunc call, not a NOP
+        assert!(prog.insns[1].is_call());
+        assert_eq!(prog.insns[1].src_reg(), 2); // kfunc call
+        assert_eq!(prog.insns[1].imm, TEST_BTF_ID);
+    }
+
+    #[test]
+    fn test_spectre_pass_no_change_when_kfunc_unavailable() {
+        let mut prog = make_program(vec![
+            jeq_imm(1, 0, 1),
+            BpfInsn::mov64_imm(0, 1),
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let ctx = PassContext::test_default(); // btf_id = -1
+
+        let pass = SpectreMitigationPass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(!result.changed);
+        assert_eq!(result.sites_applied, 0);
+        assert_eq!(prog.insns.len(), 3);
+        assert!(!result.diagnostics.is_empty());
+        assert!(result.diagnostics[0].contains("not available"));
     }
 
     #[test]
@@ -165,7 +231,7 @@ mod tests {
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
-        let ctx = PassContext::test_default();
+        let ctx = ctx_with_barrier(TEST_BTF_ID);
 
         let pass = SpectreMitigationPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
@@ -185,7 +251,7 @@ mod tests {
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
-        let ctx = PassContext::test_default();
+        let ctx = ctx_with_barrier(TEST_BTF_ID);
 
         let pass = SpectreMitigationPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
@@ -203,7 +269,7 @@ mod tests {
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
-        let ctx = PassContext::test_default();
+        let ctx = ctx_with_barrier(TEST_BTF_ID);
 
         let pass = SpectreMitigationPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
@@ -224,7 +290,7 @@ mod tests {
             BpfInsn::mov64_imm(0, 1),
             exit_insn(),
         ]);
-        let ctx = PassContext::test_default();
+        let ctx = ctx_with_barrier(TEST_BTF_ID);
 
         let result = pm.run(&mut prog, &ctx).unwrap();
 
@@ -233,32 +299,36 @@ mod tests {
     }
 
     #[test]
-    fn test_spectre_inserts_nop() {
+    fn test_spectre_inserts_kfunc_call() {
         let mut prog = make_program(vec![
             jeq_imm(1, 0, 1),
             BpfInsn::mov64_imm(0, 42),
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
-        let ctx = PassContext::test_default();
+        let ctx = ctx_with_barrier(TEST_BTF_ID);
 
         let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
         assert_eq!(prog.insns.len(), 4);
-        assert!(prog.insns[1].is_ja() && prog.insns[1].off == 0);
+        // Verify the inserted instruction is a kfunc call
+        assert!(prog.insns[1].is_call());
+        assert_eq!(prog.insns[1].src_reg(), 2);
+        assert_eq!(prog.insns[1].imm, TEST_BTF_ID);
     }
 
     #[test]
     fn test_spectre_no_double_insert() {
+        // If barrier kfunc call already present, don't insert again.
         let mut prog = make_program(vec![
             jeq_imm(1, 0, 1),
-            BpfInsn::nop(),
+            BpfInsn::call_kfunc(TEST_BTF_ID),
             BpfInsn::mov64_imm(0, 42),
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
-        let ctx = PassContext::test_default();
+        let ctx = ctx_with_barrier(TEST_BTF_ID);
 
         let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert!(!result.changed);
@@ -269,18 +339,18 @@ mod tests {
     fn test_spectre_no_jcc() {
         let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 0), exit_insn()]);
         let mut cache = AnalysisCache::new();
-        let ctx = PassContext::test_default();
+        let ctx = ctx_with_barrier(TEST_BTF_ID);
 
         let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert!(!result.changed);
     }
 
-    // ── Branch fixup tests ──────────────────────────────────────────
+    // -- Branch fixup tests --
 
     #[test]
     fn test_spectre_forward_branch_fixup() {
         // jeq r1, 0, +2  -> should skip mov r0,1 and mov r0,2 to reach exit
-        // After NOP insertion: jeq r1, 0, +3 (skip NOP + mov + mov)
+        // After barrier insertion: jeq r1, 0, +3 (skip barrier + mov + mov)
         let mut prog = make_program(vec![
             jeq_imm(1, 0, 2),       // pc=0: if r1==0, skip 2 insns to exit
             BpfInsn::mov64_imm(0, 1), // pc=1
@@ -288,12 +358,12 @@ mod tests {
             exit_insn(),             // pc=3: target of branch
         ]);
         let mut cache = AnalysisCache::new();
-        let ctx = PassContext::test_default();
+        let ctx = ctx_with_barrier(TEST_BTF_ID);
 
         let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
-        // New layout: [0] jeq  [1] nop  [2] mov  [3] mov  [4] exit
+        // New layout: [0] jeq  [1] barrier  [2] mov  [3] mov  [4] exit
         assert_eq!(prog.insns.len(), 5);
         // The branch at [0] should now have off=3 to reach exit at [4]
         assert_eq!(prog.insns[0].off, 3);
@@ -301,12 +371,6 @@ mod tests {
 
     #[test]
     fn test_spectre_chained_branches_fixup() {
-        // Two chained conditional branches, each jumping forward.
-        // jeq r1, 0, +1  -> jumps over mov r0,1 to reach jeq r2
-        // mov r0, 1
-        // jeq r2, 0, +1  -> jumps over mov r0,2 to reach exit
-        // mov r0, 2
-        // exit
         let mut prog = make_program(vec![
             jeq_imm(1, 0, 1),         // pc=0
             BpfInsn::mov64_imm(0, 1), // pc=1
@@ -315,26 +379,23 @@ mod tests {
             exit_insn(),               // pc=4
         ]);
         let mut cache = AnalysisCache::new();
-        let ctx = PassContext::test_default();
+        let ctx = ctx_with_barrier(TEST_BTF_ID);
 
         let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert!(result.changed);
         assert_eq!(result.sites_applied, 2);
-        // New layout: [0] jeq [1] nop [2] mov [3] jeq [4] nop [5] mov [6] exit
+        // New layout: [0] jeq [1] barrier [2] mov [3] jeq [4] barrier [5] mov [6] exit
         assert_eq!(prog.insns.len(), 7);
 
         // First branch: originally jumped +1 (to pc=2, which is now at new_pc=3)
-        // From new_pc=0, offset should be 3-1=2
         assert_eq!(prog.insns[0].off, 2);
 
         // Second branch: originally jumped +1 (to pc=4, which is now at new_pc=6)
-        // From new_pc=3, offset should be 6-4=2
         assert_eq!(prog.insns[3].off, 2);
     }
 
     #[test]
     fn test_spectre_jmp32_variant() {
-        // JMP32 conditional branch should also get a NOP
         let jne32_imm = BpfInsn {
             code: BPF_JMP32 | BPF_JNE | BPF_K,
             regs: BpfInsn::make_regs(1, 0),
@@ -348,20 +409,19 @@ mod tests {
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
-        let ctx = PassContext::test_default();
+        let ctx = ctx_with_barrier(TEST_BTF_ID);
 
         let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
         assert_eq!(prog.insns.len(), 5);
-        // NOP at position 1
-        assert!(prog.insns[1].is_ja() && prog.insns[1].off == 0);
+        // Barrier at position 1
+        assert!(prog.insns[1].is_call());
+        assert_eq!(prog.insns[1].imm, TEST_BTF_ID);
     }
 
     #[test]
     fn test_spectre_ldimm64_not_affected() {
-        // LDIMM64 is a 2-slot instruction; the pass should handle it without
-        // inserting a NOP after it (it's not a conditional branch).
         let ldimm64_lo = BpfInsn {
             code: BPF_LD | BPF_DW | BPF_IMM,
             regs: BpfInsn::make_regs(0, 0),
@@ -380,7 +440,7 @@ mod tests {
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
-        let ctx = PassContext::test_default();
+        let ctx = ctx_with_barrier(TEST_BTF_ID);
 
         let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert!(!result.changed);
@@ -389,10 +449,6 @@ mod tests {
 
     #[test]
     fn test_spectre_branch_around_ldimm64() {
-        // jeq r1, 0, +3 -> skip LDIMM64 (2 slots) + mov to reach exit
-        // LDIMM64 (2 slots)
-        // mov r0, 1
-        // exit
         let ldimm64_lo = BpfInsn {
             code: BPF_LD | BPF_DW | BPF_IMM,
             regs: BpfInsn::make_regs(2, 0),
@@ -413,12 +469,12 @@ mod tests {
             exit_insn(),               // pc=4
         ]);
         let mut cache = AnalysisCache::new();
-        let ctx = PassContext::test_default();
+        let ctx = ctx_with_barrier(TEST_BTF_ID);
 
         let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
-        // New layout: [0] jeq [1] nop [2] ldimm64_lo [3] ldimm64_hi [4] mov [5] exit
+        // New layout: [0] jeq [1] barrier [2] ldimm64_lo [3] ldimm64_hi [4] mov [5] exit
         assert_eq!(prog.insns.len(), 6);
         // Branch at [0] should target exit at [5]: off = 5 - 1 = 4
         assert_eq!(prog.insns[0].off, 4);
@@ -426,16 +482,6 @@ mod tests {
 
     #[test]
     fn test_spectre_realistic_spectre_v1_pattern() {
-        // Classic Spectre v1 pattern:
-        //   if (idx < ARRAY_SIZE) {    // JGE r1, imm, +N  (bounds check)
-        //     val = array[idx];         // LDX [r2 + r1*8]
-        //   }
-        //
-        // Simplified as BPF:
-        //   jge r1, 256, +2  -> skip load+use if out of bounds
-        //   ldx r0, [r6 + 0]  (simulated array access)
-        //   mov r0, r0
-        //   exit
         let jge_imm = BpfInsn {
             code: BPF_JMP | BPF_JGE | BPF_K,
             regs: BpfInsn::make_regs(1, 0),
@@ -449,23 +495,22 @@ mod tests {
             exit_insn(),                         // pc=3
         ]);
         let mut cache = AnalysisCache::new();
-        let ctx = PassContext::test_default();
+        let ctx = ctx_with_barrier(TEST_BTF_ID);
 
         let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
-        // NOP barrier inserted right after the conditional branch
         assert_eq!(prog.insns.len(), 5);
         assert!(prog.insns[0].is_cond_jmp());
-        assert!(prog.insns[1].is_ja() && prog.insns[1].off == 0);
+        // Barrier inserted right after the conditional branch
+        assert!(prog.insns[1].is_call());
+        assert_eq!(prog.insns[1].imm, TEST_BTF_ID);
         // Branch offset adjusted: originally +2 (to exit at pc=3), now +3 (exit at new_pc=4)
         assert_eq!(prog.insns[0].off, 3);
     }
 
     #[test]
     fn test_spectre_idempotent() {
-        // Running the pass twice should not insert more NOPs (second run finds
-        // NOPs already present).
         let mut prog = make_program(vec![
             jeq_imm(1, 0, 1),
             BpfInsn::mov64_imm(0, 1),
@@ -473,7 +518,7 @@ mod tests {
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
-        let ctx = PassContext::test_default();
+        let ctx = ctx_with_barrier(TEST_BTF_ID);
 
         // First run
         let r1 = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
@@ -489,7 +534,6 @@ mod tests {
 
     #[test]
     fn test_spectre_all_cond_jmp_opcodes() {
-        // Verify that all conditional jump opcodes trigger NOP insertion.
         let cond_opcodes: Vec<u8> = vec![
             BPF_JEQ, BPF_JGT, BPF_JGE, BPF_JSET, BPF_JNE,
             BPF_JLT, BPF_JLE, BPF_JSGT, BPF_JSGE, BPF_JSLT, BPF_JSLE,
@@ -508,12 +552,12 @@ mod tests {
                 exit_insn(),
             ]);
             let mut cache = AnalysisCache::new();
-            let ctx = PassContext::test_default();
+            let ctx = ctx_with_barrier(TEST_BTF_ID);
 
             let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
             assert!(
                 result.changed,
-                "expected NOP insertion for JMP opcode {:#x}",
+                "expected barrier insertion for JMP opcode {:#x}",
                 opcode
             );
             assert_eq!(
@@ -533,7 +577,7 @@ mod tests {
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
-        let ctx = PassContext::test_default();
+        let ctx = ctx_with_barrier(TEST_BTF_ID);
 
         let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert!(result.changed);
@@ -541,39 +585,39 @@ mod tests {
         assert!(result.diagnostics[0].contains("speculation barriers inserted"));
     }
 
-    // ── Issue 4: Naming and category tests ──────────────────────
+    // -- Naming and category tests --
 
     #[test]
-    fn test_spectre_pass_name_is_barrier_placeholder() {
+    fn test_spectre_pass_name_is_speculation_barrier() {
         let pass = SpectreMitigationPass;
-        assert_eq!(pass.name(), "barrier_placeholder",
-            "pass name should be 'barrier_placeholder', not 'spectre_mitigation'");
+        assert_eq!(pass.name(), "speculation_barrier");
     }
 
     #[test]
-    fn test_spectre_pass_category_is_placeholder() {
+    fn test_spectre_pass_category_is_security() {
         let pass = SpectreMitigationPass;
-        assert_eq!(pass.category(), PassCategory::Placeholder,
-            "category should be Placeholder, not Security");
+        assert_eq!(pass.category(), PassCategory::Security);
     }
 
     #[test]
-    fn test_spectre_diagnostics_contain_placeholder() {
+    fn test_spectre_diagnostics_contain_kfunc() {
         let mut prog = make_program(vec![
             jeq_imm(1, 0, 1),
             BpfInsn::mov64_imm(0, 1),
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
-        let ctx = PassContext::test_default();
+        let ctx = ctx_with_barrier(TEST_BTF_ID);
 
         let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert!(result.changed);
         assert!(!result.diagnostics.is_empty());
-        // Diagnostics should clearly indicate this is a placeholder.
         let diag = &result.diagnostics[0];
-        assert!(diag.contains("placeholder") || diag.contains("NOP placeholder"),
-            "diagnostics should contain 'placeholder', got: {}", diag);
+        assert!(
+            diag.contains("bpf_speculation_barrier") || diag.contains("kfunc"),
+            "diagnostics should mention kfunc, got: {}",
+            diag
+        );
     }
 
     #[test]
@@ -584,10 +628,27 @@ mod tests {
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
-        let ctx = PassContext::test_default();
+        let ctx = ctx_with_barrier(TEST_BTF_ID);
 
         let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
-        assert_eq!(result.pass_name, "barrier_placeholder",
-            "PassResult should use the new name");
+        assert_eq!(result.pass_name, "speculation_barrier");
+    }
+
+    #[test]
+    fn test_spectre_module_fd_recorded() {
+        let mut prog = make_program(vec![
+            jeq_imm(1, 0, 1),
+            BpfInsn::mov64_imm(0, 1),
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let mut ctx = ctx_with_barrier(TEST_BTF_ID);
+        ctx.kfunc_registry
+            .kfunc_module_fds
+            .insert("bpf_speculation_barrier".to_string(), 99);
+
+        let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
+        assert!(result.changed);
+        assert!(prog.required_module_fds.contains(&99));
     }
 }

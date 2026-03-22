@@ -23,6 +23,7 @@ const KNOWN_KFUNCS: &[(&str, &str)] = &[
     ("bpf_endian_load16", "bpf_endian"),
     ("bpf_endian_load32", "bpf_endian"),
     ("bpf_endian_load64", "bpf_endian"),
+    ("bpf_speculation_barrier", "bpf_barrier"),
 ];
 
 // ── BTF constants (synced from vendor/linux-framework/include/uapi/linux/btf.h) ──
@@ -238,6 +239,7 @@ pub fn discover_kfuncs() -> DiscoveryResult {
         endian_load16_btf_id: -1,
         endian_load32_btf_id: -1,
         endian_load64_btf_id: -1,
+        speculation_barrier_btf_id: -1,
         module_fd: None,
         kfunc_module_fds: HashMap::new(),
     };
@@ -298,6 +300,7 @@ pub fn discover_kfuncs() -> DiscoveryResult {
             "bpf_endian_load16" => registry.endian_load16_btf_id = btf_id,
             "bpf_endian_load32" => registry.endian_load32_btf_id = btf_id,
             "bpf_endian_load64" => registry.endian_load64_btf_id = btf_id,
+            "bpf_speculation_barrier" => registry.speculation_barrier_btf_id = btf_id,
             _ => {}
         }
 

@@ -45,6 +45,18 @@ from runner.libs.corpus import materialize_katran_packet  # noqa: E402
 from runner.libs.metrics import compute_delta, enable_bpf_stats, sample_bpf_stats, sample_total_cpu_usage  # noqa: E402
 from runner.libs.recompile import apply_daemon_rejit, scan_programs  # noqa: E402
 
+from e2e.case_common import (  # noqa: E402
+    git_sha,
+    host_metadata,
+    summarize_numbers,
+    percent_delta,
+    percentile,
+    speedup_ratio,
+    ensure_runner_binary,
+    ensure_daemon_binary,
+    persist_results,
+)
+
 try:  # noqa: E402
     from runner.libs.inventory import discover_object_programs
 except ModuleNotFoundError:  # noqa: E402
@@ -197,67 +209,6 @@ def relpath(path: Path) -> str:
         return path.resolve().relative_to(ROOT_DIR).as_posix()
     except ValueError:
         return str(path.resolve())
-
-
-def git_sha() -> str:
-    try:
-        return run_command(["git", "rev-parse", "HEAD"], timeout=15).stdout.strip()
-    except Exception:
-        return "unknown"
-
-
-def host_metadata() -> dict[str, object]:
-    return {
-        "hostname": platform.node(),
-        "platform": platform.platform(),
-        "kernel": platform.release(),
-        "python": sys.version.split()[0],
-        "git_sha": git_sha(),
-    }
-
-
-def summarize_numbers(values: Sequence[float | int | None]) -> dict[str, float | int | None]:
-    filtered = [float(value) for value in values if value is not None]
-    if not filtered:
-        return {
-            "count": 0,
-            "mean": None,
-            "median": None,
-            "min": None,
-            "max": None,
-        }
-    return {
-        "count": len(filtered),
-        "mean": statistics.mean(filtered),
-        "median": statistics.median(filtered),
-        "min": min(filtered),
-        "max": max(filtered),
-    }
-
-
-def percentile(values: Sequence[float], pct: float) -> float | None:
-    if not values:
-        return None
-    if len(values) == 1:
-        return float(values[0])
-    ordered = sorted(float(value) for value in values)
-    rank = max(0.0, min(1.0, float(pct) / 100.0)) * (len(ordered) - 1)
-    lower = int(rank)
-    upper = min(len(ordered) - 1, lower + 1)
-    weight = rank - lower
-    return ordered[lower] * (1.0 - weight) + ordered[upper] * weight
-
-
-def percent_delta(before: object, after: object) -> float | None:
-    if before in (None, 0) or after is None:
-        return None
-    return ((float(after) - float(before)) / float(before)) * 100.0
-
-
-def speedup_ratio(before: object, after: object) -> float | None:
-    if before in (None, 0) or after in (None, 0):
-        return None
-    return float(before) / float(after)
 
 
 def extract_request_latencies(sample: Mapping[str, object]) -> list[float]:
@@ -619,24 +570,9 @@ def build_markdown(payload: Mapping[str, object]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def persist_results(payload: Mapping[str, object], output_json: Path, output_md: Path) -> None:
-    write_json(output_json, payload)
-    write_text(output_md, build_markdown(payload))
-    chown_to_invoking_user(output_md)
-
-
 def ensure_artifacts(runner_binary: Path, scanner_binary: Path) -> None:
-    if not runner_binary.exists():
-        run_command(["make", "runner"], timeout=1800)
-    if not scanner_binary.exists():
-        run_command(
-            ["cmake", "-S", "daemon", "-B", "daemon/build", "-DCMAKE_BUILD_TYPE=Release"],
-            timeout=600,
-        )
-        run_command(
-            ["cmake", "--build", "daemon/build", "--target", "bpfrejit-daemon", "-j"],
-            timeout=1800,
-        )
+    ensure_runner_binary(runner_binary)
+    ensure_daemon_binary(scanner_binary)
 
 
 def run_setup_script(setup_script: Path) -> dict[str, object]:
@@ -2245,7 +2181,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         output_json = smoke_output_path(RESULTS_DIR, "katran")
     else:
         output_json = Path(args.output_json).resolve()
-    persist_results(payload, output_json, Path(args.output_md).resolve())
+    persist_results(payload, output_json, Path(args.output_md).resolve(), build_markdown)
     print(json.dumps(payload, indent=2, sort_keys=True))
     return 0
 

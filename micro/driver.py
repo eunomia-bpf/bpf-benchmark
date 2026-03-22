@@ -67,23 +67,6 @@ except ImportError:
 
 
 DEFAULT_RUNTIME_ORDER_SEED = 0
-REMOVED_SUBCOMMAND_HINTS = {
-    "rigorous": "micro rigorous mode was removed as unused consolidation dead code",
-    "corpus": "use corpus/driver.py for corpus workflows",
-    "census": "use corpus/directive_census.py directly",
-    "ablation": "the ablation driver was removed from the consolidated micro entrypoint",
-}
-
-
-def _normalize_argv(argv: list[str] | None) -> list[str]:
-    raw_args = list(sys.argv[1:] if argv is None else argv)
-    normalized = [arg for arg in raw_args if arg != "--"]
-    if normalized and normalized[0] == "suite":
-        return normalized[1:]
-    if normalized and normalized[0] in REMOVED_SUBCOMMAND_HINTS:
-        hint = REMOVED_SUBCOMMAND_HINTS[normalized[0]]
-        raise SystemExit(f"micro/driver.py only supports suite runs; {hint}")
-    return normalized
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -145,7 +128,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--policy-dir",
         help="Override policy directory (for named policy sets under config/policies/).",
     )
-    return parser.parse_args(_normalize_argv(argv))
+    return parser.parse_args(list(sys.argv[1:] if argv is None else argv))
 
 
 def format_ns(value: float | int | None) -> str:
@@ -280,8 +263,8 @@ def collect_provenance(
     linux_dir = ROOT_DIR / "vendor" / "linux-framework"
     kernel_commit = _git_rev_parse(linux_dir) if linux_dir.is_dir() else "unknown"
 
-    scanner_dir = ROOT_DIR / "daemon"
-    scanner_commit = _git_rev_parse(scanner_dir) if scanner_dir.is_dir() else "unknown"
+    daemon_dir = ROOT_DIR / "daemon"
+    daemon_commit = _git_rev_parse(daemon_dir) if daemon_dir.is_dir() else "unknown"
 
     repo_git_sha = _git_rev_parse(ROOT_DIR)
     repo_dirty = _git_is_dirty(ROOT_DIR)
@@ -292,7 +275,7 @@ def collect_provenance(
 
     return {
         "kernel_commit": kernel_commit,
-        "scanner_commit": scanner_commit,
+        "daemon_commit": daemon_commit,
         "repo_git_sha": repo_git_sha,
         "repo_dirty": repo_dirty,
         "policy_files_hash": policy_files_hash,

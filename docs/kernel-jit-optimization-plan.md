@@ -668,3 +668,4 @@ make clean
 | **378** | E2E katran veth 修复 + 全量跑 | 🔄 | VM 缺 veth 模块导致 katran 失败。opus 修复中（modprobe veth）。 |
 | **379** | 全项目架构审查 + 论文差距分析 | 🔄 | Codex 全面 review：死代码、设计缺陷、组织问题、论文差距。报告→`docs/tmp/20260322/full_project_review_20260322.md`。 |
 | **380** | **ENDIAN_FUSION 实现（2026-03-22）** | ✅ | x86 bpf_endian.c（MOVBE 3 variants）+ arm64 bpf_endian.c（LDR+REV）+ daemon EndianFusionPass（LDX_MEM+ENDIAN_TO_BE→kfunc）。+22 tests。**218 tests pass**。 |
+| **381** | **Module UB + cross-arch 修复（2026-03-22）** | ✅ | **(1)** extract len=64 UB fix。**(2)** rotate shift=0 UB fix。**(3)** ARM64 ROL/ROR 统一（NEG+AND+RORV 实现左旋）。**(4)** 全部 module 改 BPF_PROG_TYPE_UNSPEC（不限 XDP）。**(5)** build artifact gitignore。 |

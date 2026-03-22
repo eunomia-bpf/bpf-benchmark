@@ -56,13 +56,13 @@ def add_runner_argument(
     parser.add_argument("--runner", **kwargs)
 
 
-def add_scanner_argument(
+def add_daemon_argument(
     parser: argparse.ArgumentParser,
     default: Path | str,
     *,
     help_text: str,
 ) -> None:
-    parser.add_argument("--scanner", default=str(default), help=help_text)
+    parser.add_argument("--daemon", default=str(default), help=help_text)
 
 
 def add_repeat_argument(
@@ -558,7 +558,7 @@ __all__ = [
     "add_output_md_argument",
     "add_repeat_argument",
     "add_runner_argument",
-    "add_scanner_argument",
+    "add_daemon_argument",
     "add_timeout_argument",
     "directive_scan_from_record",
     "ensure_parent",

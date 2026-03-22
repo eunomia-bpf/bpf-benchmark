@@ -50,7 +50,7 @@ from runner.libs.corpus import (
     add_output_md_argument,
     add_repeat_argument,
     add_runner_argument,
-    add_scanner_argument,
+    add_daemon_argument,
     add_timeout_argument,
     directive_scan_from_record,
     ensure_parent,
@@ -97,40 +97,6 @@ KINSN_MODULE_DIR = ROOT_DIR / "module" / "x86"
 KINSN_MODULE_NAMES = ["bpf_rotate.ko", "bpf_select.ko", "bpf_extract.ko"]
 
 
-def build_scanner_command(
-    scanner: Path | str,
-    xlated_path: Path | str,
-    *,
-    json_output: bool = False,
-) -> list[str]:
-    """Build a scanner command for the daemon.
-
-    The v2 daemon does not have a standalone 'scan' subcommand; this produces
-    a command that will fail gracefully, allowing the caller to fall back to
-    inventory-based or runner-based site counts.
-    """
-    command = [str(scanner), "scan", "--xlated", str(xlated_path), "--all"]
-    if json_output:
-        command.append("--json")
-    return command
-
-
-def parse_scanner_v5_output(stdout: str) -> dict[str, Any]:
-    """Parse scanner output for optimization site counts.
-
-    With the v2 daemon this path is not expected to succeed; the function
-    exists so that existing callers compile. If the scanner ever does produce
-    output, this returns a minimal dict compatible with normalize_scan().
-    """
-    import re
-    counts: dict[str, int] = {}
-    total = 0
-    for line in stdout.splitlines():
-        m = re.match(r"^\s*(\w+)\s*:\s*(\d+)", line)
-        if m:
-            counts[m.group(1)] = int(m.group(2))
-            total += int(m.group(2))
-    return {"total_sites": total, "families": counts}
 DEFAULT_BUILD_TIMEOUT_SECONDS = 3600
 DEFAULT_PERF_OUTPUT_JSON = authoritative_output_path(ROOT_DIR / "corpus" / "results", "corpus_perf")
 DEFAULT_PERF_OUTPUT_MD = ROOT_DIR / "docs" / "tmp" / "corpus-perf-results.md"
@@ -175,7 +141,7 @@ def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
     add_output_json_argument(parser, DEFAULT_OUTPUT_JSON)
     add_output_md_argument(parser, DEFAULT_OUTPUT_MD)
     add_runner_argument(parser, DEFAULT_RUNNER, help_text="Path to micro_exec.")
-    add_scanner_argument(parser, DEFAULT_DAEMON, help_text="Path to bpfrejit-daemon.")
+    add_daemon_argument(parser, DEFAULT_DAEMON, help_text="Path to bpfrejit-daemon.")
     parser.add_argument(
         "--kernel-tree",
         default=str(DEFAULT_KERNEL_TREE),
@@ -227,7 +193,7 @@ def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--force-host-fallback",
         action="store_true",
-        help="Skip VM execution and run host compile-only + scanner fallback directly.",
+        help="Skip VM execution and run host compile-only + daemon fallback directly.",
     )
     parser.add_argument(
         "--use-policy",
@@ -520,8 +486,8 @@ def build_empty_record(target: dict[str, Any], execution_mode: str) -> dict[str,
         "policy_path": target.get("policy_path"),
         "policy_mode": str(target.get("policy_mode", "stock")),
         "scan_source": "inventory",
-        "scanner_counts": normalize_scan(target.get("inventory_scan")),
-        "scanner_cli": None,
+        "daemon_counts": normalize_scan(target.get("inventory_scan")),
+        "daemon_cli": None,
         "baseline_compile": None,
         "v5_compile": None,
         "baseline_run": None,
@@ -545,7 +511,7 @@ def run_target_locally(
     *,
     target: dict[str, Any],
     runner: Path,
-    scanner: Path,
+    daemon: Path,
     repeat: int,
     timeout_seconds: int,
     execution_mode: str,
@@ -571,9 +537,9 @@ def run_target_locally(
     recompile_all = blind_apply
     policy_mode = "blind-apply-v5" if blind_apply else ("policy-file" if active_policy_path is not None else "stock")
     inventory_scan = normalize_scan(target.get("inventory_scan"))
-    scanner_result = None
+    daemon_result = None
     scan_source = "inventory"
-    scanner_counts = inventory_scan
+    daemon_counts = inventory_scan
 
     with tempfile.TemporaryDirectory(prefix="corpus-v5-batch-") as tmpdir:
         xlated_path = Path(tmpdir) / "program.xlated"
@@ -597,19 +563,10 @@ def run_target_locally(
             ),
             timeout_seconds,
         )
-        if baseline_compile_raw["ok"] and scanner.exists() and xlated_path.exists():
-            scanner_result = run_text_command(build_scanner_command(scanner, xlated_path), timeout_seconds)
-            if scanner_result["ok"]:
-                try:
-                    scanner_counts = parse_scanner_v5_output(scanner_result["stdout"])
-                    scan_source = f"{execution_mode}_scanner"
-                except Exception as exc:
-                    scanner_result["ok"] = False
-                    scanner_result["error"] = str(exc)
-        elif baseline_compile_raw["ok"]:
+        if baseline_compile_raw["ok"]:
             baseline_scan = directive_scan_from_record(baseline_compile_raw)
             if baseline_scan["total_sites"] > 0:
-                scanner_counts = baseline_scan
+                daemon_counts = baseline_scan
                 scan_source = f"{execution_mode}_runner_scan"
 
         v5_compile_raw = None
@@ -631,7 +588,7 @@ def run_target_locally(
                     skip_families=skip_families,
                     policy_file=active_policy_path,
                     use_sudo=use_sudo,
-                    daemon_path=scanner,
+                    daemon_path=daemon,
                 ),
                 timeout_seconds,
             )
@@ -652,17 +609,17 @@ def run_target_locally(
                     skip_families=skip_families,
                     policy_file=active_policy_path,
                     use_sudo=use_sudo,
-                    daemon_path=scanner,
+                    daemon_path=daemon,
                 ),
                 timeout_seconds,
             )
 
-    record["scanner_cli"] = text_invocation_summary(scanner_result)
+    record["daemon_cli"] = text_invocation_summary(daemon_result)
     record["policy_path"] = str(active_policy_path) if active_policy_path is not None else None
     record["policy_mode"] = policy_mode
     record["scan_source"] = scan_source
-    record["scanner_counts"] = scanner_counts
-    record["eligible_families"] = families_from_scan(scanner_counts)
+    record["daemon_counts"] = daemon_counts
+    record["eligible_families"] = families_from_scan(daemon_counts)
     record["baseline_compile"] = invocation_summary(baseline_compile_raw)
     record["v5_compile"] = invocation_summary(v5_compile_raw)
     record["v5_run"] = invocation_summary(v5_run_raw)
@@ -722,13 +679,13 @@ def run_guest_target_mode(args: argparse.Namespace) -> int:
     target_path = Path(args.guest_target_json).resolve()
     target = json.loads(target_path.read_text())
     runner = Path(args.runner).resolve()
-    scanner = Path(args.scanner).resolve()
+    daemon = Path(args.daemon).resolve()
     btf_custom_path = Path(args.btf_custom_path).resolve() if args.btf_custom_path else None
     policy_dir = Path(args.policy_dir).resolve()
     record = run_target_locally(
         target=target,
         runner=runner,
-        scanner=scanner,
+        daemon=daemon,
         repeat=args.repeat,
         timeout_seconds=args.timeout,
         execution_mode="vm",
@@ -811,7 +768,7 @@ def run_target_in_guest(
     *,
     target: dict[str, Any],
     runner: Path,
-    scanner: Path,
+    daemon: Path,
     kernel_image: Path,
     btf_custom_path: Path,
     repeat: int,
@@ -852,8 +809,8 @@ def run_target_in_guest(
             str(target_path),
             "--runner",
             str(runner),
-            "--scanner",
-            str(scanner),
+            "--daemon",
+            str(daemon),
             "--btf-custom-path",
             str(btf_custom_path),
             "--repeat",
@@ -933,7 +890,7 @@ def build_summary(records: list[dict[str, Any]], effective_mode: str, fallback_r
     ]
     family_totals = Counter()
     for record in records:
-        scan = normalize_scan(record.get("scanner_counts"))
+        scan = normalize_scan(record.get("daemon_counts"))
         for _, field in FAMILY_FIELDS:
             family_totals[field] += scan[field]
 
@@ -980,7 +937,7 @@ def build_summary(records: list[dict[str, Any]], effective_mode: str, fallback_r
         source_exec = [item["speedup_ratio"] for item in source_measured if item.get("speedup_ratio") is not None]
         counts = Counter()
         for item in items:
-            scan = normalize_scan(item.get("scanner_counts"))
+            scan = normalize_scan(item.get("daemon_counts"))
             for _, field in FAMILY_FIELDS:
                 counts[field] += scan[field]
         source_row = {
@@ -1002,7 +959,7 @@ def build_summary(records: list[dict[str, Any]], effective_mode: str, fallback_r
 
     by_family: list[dict[str, Any]] = []
     for family_name, field in FAMILY_FIELDS:
-        items = [record for record in records if normalize_scan(record.get("scanner_counts"))[field] > 0]
+        items = [record for record in records if normalize_scan(record.get("daemon_counts"))[field] > 0]
         family_compile = [item for item in items if item in compile_pairs]
         family_measured = [item for item in items if item in measured_pairs]
         family_size = [item["size_ratio"] for item in family_compile if item.get("size_ratio") is not None]
@@ -1020,8 +977,8 @@ def build_summary(records: list[dict[str, Any]], effective_mode: str, fallback_r
                 "compile_pairs": len(family_compile),
                 "measured_pairs": len(family_measured),
                 "applied_programs": len(applied_items),
-                "total_sites": sum(normalize_scan(item.get("scanner_counts"))[field] for item in items),
-                "applied_sites": sum(normalize_scan(item.get("scanner_counts"))[field] for item in applied_items),
+                "total_sites": sum(normalize_scan(item.get("daemon_counts"))[field] for item in items),
+                "applied_sites": sum(normalize_scan(item.get("daemon_counts"))[field] for item in applied_items),
                 "code_size_ratio_geomean": geomean(family_size),
                 "exec_ratio_geomean": geomean(family_exec),
                 "wins": sum(1 for item in family_measured if (item.get("speedup_ratio") or 0) > 1.0),
@@ -1108,7 +1065,7 @@ def build_markdown(data: dict[str, Any]) -> str:
         f"- Generated: {data['generated_at']}",
         f"- Inventory: `{data['inventory_json']}`",
         f"- Runner: `{data['runner_binary']}`",
-        f"- Scanner: `{data['scanner_binary']}`",
+        f"- Daemon: `{data['daemon_binary']}`",
         "- Requested mode: `strict-vm`",
         f"- Effective mode: `{summary['effective_mode']}`",
         f"- Repeat: {data['repeat']}",
@@ -1270,7 +1227,7 @@ def build_markdown(data: dict[str, Any]) -> str:
                     program_label(record),
                     record["source_name"],
                     record["prog_type_name"],
-                    normalize_scan(record.get("scanner_counts"))["total_sites"],
+                    normalize_scan(record.get("daemon_counts"))["total_sites"],
                     ", ".join(record.get("applied_families_run") or record.get("applied_families_compile") or []),
                     format_ns(((record.get("baseline_compile") or {}).get("sample") or {}).get("jited_prog_len")),
                     format_ns(((record.get("v5_compile") or {}).get("sample") or {}).get("jited_prog_len")),
@@ -1313,13 +1270,13 @@ def build_markdown(data: dict[str, Any]) -> str:
             "",
             "## Notes",
             "",
-            "- Target selection comes from the runnability inventory and keeps every packet-test-run target whose baseline run already succeeds; the current scanner pass determines whether v5 has any eligible families.",
+            "- Target selection comes from the runnability inventory and keeps every packet-test-run target whose baseline run already succeeds; the current daemon pass determines whether v5 has any eligible families.",
             "- In strict VM mode, each target boots the framework v5 guest once and runs baseline compile-only, v5 compile-only, baseline test_run, and v5 test_run in that order.",
             "- Default steady-state semantics are stock: without `--use-policy` or `--blind-apply`, the v5 lane does not request recompile.",
             "- `--use-policy` only considers per-program version 3 policy files under `corpus/policies/`; if no match exists, the driver stays on stock JIT.",
             "- `--blind-apply` forces the old debug/exploration path with `--recompile-v5 --recompile-all`.",
             "- `--skip-families` only applies together with `--blind-apply`; the family columns above report applied families, not just eligible sites.",
-            "- Host fallback mode only does baseline compile-only plus offline scanner scan; it does not attempt recompile or runtime measurement.",
+            "- Host fallback mode only does baseline compile-only plus offline daemon scan; it does not attempt recompile or runtime measurement.",
             "- Family summaries are overlap-based: one program can contribute to multiple family rows, so those rows are not isolated causal attributions.",
         ]
     )
@@ -1347,7 +1304,7 @@ def packet_main(argv: list[str] | None = None) -> int:
         output_json = Path(args.output_json).resolve()
     output_md = Path(args.output_md).resolve()
     runner = Path(args.runner).resolve()
-    scanner = Path(args.scanner).resolve()
+    daemon = Path(args.daemon).resolve()
     kernel_tree = Path(args.kernel_tree).resolve()
     kernel_image = Path(args.kernel_image).resolve()
     btf_custom_path = Path(args.btf_custom_path).resolve() if args.btf_custom_path else None
@@ -1357,8 +1314,8 @@ def packet_main(argv: list[str] | None = None) -> int:
         raise SystemExit(f"inventory JSON not found: {inventory_json}")
     if not runner.exists():
         raise SystemExit(f"runner not found: {runner}")
-    if not scanner.exists():
-        raise SystemExit(f"scanner not found: {scanner}")
+    if not daemon.exists():
+        raise SystemExit(f"daemon not found: {daemon}")
 
     targets, inventory_summary = load_targets(
         inventory_json=inventory_json,
@@ -1420,7 +1377,7 @@ def packet_main(argv: list[str] | None = None) -> int:
             record = run_target_in_guest(
                 target=target,
                 runner=runner,
-                scanner=scanner,
+                daemon=daemon,
                 kernel_image=kernel_image,
                 btf_custom_path=btf_custom_path,
                 repeat=args.repeat,
@@ -1435,7 +1392,7 @@ def packet_main(argv: list[str] | None = None) -> int:
             record = run_target_locally(
                 target=target,
                 runner=runner,
-                scanner=scanner,
+                daemon=daemon,
                 repeat=args.repeat,
                 timeout_seconds=args.timeout,
                 execution_mode="host-fallback",
@@ -1457,7 +1414,7 @@ def packet_main(argv: list[str] | None = None) -> int:
         "inventory_json": str(inventory_json),
         "inventory_summary": inventory_summary,
         "runner_binary": str(runner),
-        "scanner_binary": str(scanner),
+        "daemon_binary": str(daemon),
         "kernel_tree": str(kernel_tree),
         "kernel_image": str(kernel_image),
         "btf_custom_path": str(btf_custom_path) if btf_custom_path is not None else None,
@@ -1512,7 +1469,7 @@ def parse_linear_mode_args(mode_name: str, argv: list[str] | None = None) -> arg
     add_output_json_argument(parser, default_output_json)
     add_output_md_argument(parser, default_output_md)
     add_runner_argument(parser, DEFAULT_RUNNER, help_text="Path to micro_exec.")
-    add_scanner_argument(parser, DEFAULT_DAEMON, help_text="Path to bpfrejit-daemon.")
+    add_daemon_argument(parser, DEFAULT_DAEMON, help_text="Path to bpfrejit-daemon.")
     add_repeat_argument(parser, DEFAULT_REPEAT, help_text="Repeat count passed to each micro_exec invocation.")
     add_timeout_argument(parser, DEFAULT_TIMEOUT_SECONDS, help_text="Per-target timeout in seconds.")
     add_filter_argument(
@@ -1702,7 +1659,7 @@ def build_linear_markdown(
         "",
         f"- Generated: `{payload['generated_at']}`",
         f"- Runner: `{payload['runner_binary']}`",
-        f"- Scanner: `{payload['scanner_binary']}`",
+        f"- Daemon: `{payload['daemon_binary']}`",
         f"- Targets attempted: `{summary['targets_attempted']}`",
         f"- Compile pairs: `{summary['compile_pairs']}`",
         f"- Measured pairs: `{summary['measured_pairs']}`",
@@ -1765,7 +1722,7 @@ def run_linear_mode(mode_name: str, argv: list[str] | None = None) -> int:
         raise SystemExit("--skip-families requires --blind-apply")
 
     runner = Path(args.runner).resolve()
-    scanner = Path(args.scanner).resolve()
+    scanner = Path(args.daemon).resolve()
     if not runner.exists():
         raise SystemExit(f"runner not found: {runner}")
     if not scanner.exists():
@@ -1817,7 +1774,7 @@ def run_linear_mode(mode_name: str, argv: list[str] | None = None) -> int:
         "mode": mode_name,
         "repo_root": str(ROOT_DIR),
         "runner_binary": str(runner),
-        "scanner_binary": str(scanner),
+        "daemon_binary": str(daemon),
         "btf_custom_path": str(btf_custom_path) if btf_custom_path is not None else None,
         "repeat": args.repeat,
         "timeout_seconds": args.timeout,

@@ -15,22 +15,9 @@
  * Emitted ARM64 sequence (2 instructions, 8 bytes):
  *   TST   X2, X2         ; set flags based on cond
  *   CSEL  X7, X0, X1, NE ; X7 = (cond != 0) ? X0(a) : X1(b)
- *
- * TST X2, X2 encoding (ANDS XZR, X2, X2):
- *   1 11 01010 00 0 Rm(00010) 000000 Rn(00010) Rd(11111)
- *   = 0xEA02005F
- *
- * CSEL X7, X0, X1, NE encoding:
- *   sf=1, op=0, S=0, cond=0001(NE), op2=00
- *   1 0 0 11010100 Rm(00001) cond(0001) 0 0 Rn(00000) Rd(00111)
- *   = 0x9A811007
  */
 
-#include <linux/bpf.h>
-#include <linux/btf.h>
-#include <linux/init.h>
-#include <linux/module.h>
-#include <linux/string.h>
+#include "kinsn_common.h"
 
 /* ---- kfunc fallback implementation ---- */
 
@@ -43,16 +30,9 @@ __bpf_kfunc u64 bpf_select64(u64 a, u64 b, u64 cond)
 
 __bpf_kfunc_end_defs();
 
-/* ---- BTF kfunc registration with KF_INLINE_EMIT ---- */
+/* ---- BTF kfunc set ---- */
 
-BTF_KFUNCS_START(bpf_select_kfunc_ids)
-BTF_ID_FLAGS(func, bpf_select64, KF_INLINE_EMIT);
-BTF_KFUNCS_END(bpf_select_kfunc_ids)
-
-static const struct btf_kfunc_id_set bpf_select_kfunc_set = {
-	.owner = THIS_MODULE,
-	.set = &bpf_select_kfunc_ids,
-};
+KINSN_KFUNC_SET(bpf_select, bpf_select64);
 
 /* ---- ARM64 JIT emit callback ---- */
 
@@ -102,8 +82,8 @@ static int emit_select_arm64(u32 *image, int *idx, bool emit,
 			     struct bpf_prog *prog)
 {
 	/*
-	 * TST   X2, X2          — set flags based on cond
-	 * CSEL  X7, X0, X1, NE  — X7 = (cond != 0) ? a : b
+	 * TST   X2, X2          -- set flags based on cond
+	 * CSEL  X7, X0, X1, NE  -- X7 = (cond != 0) ? a : b
 	 */
 	u32 tst_insn  = a64_tst(ARM64_BPF_R3, ARM64_BPF_R3);
 	u32 csel_insn = a64_csel(ARM64_BPF_R0, ARM64_BPF_R1, ARM64_BPF_R2,
@@ -131,31 +111,7 @@ static struct bpf_kfunc_inline_ops select_ops = {
 	.max_emit_bytes = 16,
 };
 
-/* ---- module init/exit ---- */
+/* ---- module definition ---- */
 
-static int __init bpf_select_init(void)
-{
-	int ret;
-
-	ret = bpf_register_kfunc_inline_ops("bpf_select64", &select_ops);
-	if (ret)
-		return ret;
-
-	ret = register_btf_kfunc_id_set(BPF_PROG_TYPE_UNSPEC,
-					 &bpf_select_kfunc_set);
-	if (ret)
-		bpf_unregister_kfunc_inline_ops("bpf_select64");
-
-	return ret;
-}
-
-static void __exit bpf_select_exit(void)
-{
-	bpf_unregister_kfunc_inline_ops("bpf_select64");
-}
-
-module_init(bpf_select_init);
-module_exit(bpf_select_exit);
-
-MODULE_DESCRIPTION("BpfReJIT kinsn: COND_SELECT (CSEL) inline kfunc for ARM64");
-MODULE_LICENSE("GPL");
+DEFINE_KINSN_MODULE(bpf_select, "bpf_select64", &select_ops,
+		    "BpfReJIT kinsn: COND_SELECT (CSEL) inline kfunc for ARM64");

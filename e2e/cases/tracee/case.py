@@ -4,9 +4,7 @@ import argparse
 import ctypes
 import json
 import os
-import platform
 import re
-import statistics
 import subprocess
 import sys
 import threading
@@ -49,6 +47,15 @@ from runner.libs.workload import (  # noqa: E402
     run_file_io,
     run_network_load,
     run_scheduler_load,
+)
+from e2e.case_common import (  # noqa: E402
+    git_sha,
+    host_metadata,
+    summarize_numbers,
+    percent_delta,
+    ensure_runner_binary,
+    ensure_daemon_binary,
+    persist_results,
 )
 try:  # noqa: E402
     from runner.libs.inventory import ProgramInventoryEntry, discover_object_programs
@@ -256,54 +263,9 @@ def _current_prog_ids() -> list[int]:
     return [int(record["id"]) for record in parsed if isinstance(record, dict) and "id" in record]
 
 
-def git_sha() -> str:
-    try:
-        return run_command(["git", "rev-parse", "HEAD"], timeout=15).stdout.strip()
-    except Exception:
-        return "unknown"
-
-
-def host_metadata() -> dict[str, object]:
-    return {
-        "hostname": platform.node(),
-        "platform": platform.platform(),
-        "kernel": platform.release(),
-        "python": sys.version.split()[0],
-        "git_sha": git_sha(),
-    }
-
-
-def summarize_numbers(values: Sequence[float | int | None]) -> dict[str, float | int | None]:
-    filtered = [float(value) for value in values if value is not None]
-    if not filtered:
-        return {
-            "count": 0,
-            "mean": None,
-            "median": None,
-            "min": None,
-            "max": None,
-        }
-    return {
-        "count": len(filtered),
-        "mean": statistics.mean(filtered),
-        "median": statistics.median(filtered),
-        "min": min(filtered),
-        "max": max(filtered),
-    }
-
-
 def ensure_artifacts(runner_binary: Path, scanner_binary: Path) -> None:
-    if not runner_binary.exists():
-        run_command(["make", "runner"], timeout=1800)
-    if not scanner_binary.exists():
-        run_command(
-            ["cmake", "-S", "daemon", "-B", "daemon/build", "-DCMAKE_BUILD_TYPE=Release"],
-            timeout=600,
-        )
-        run_command(
-            ["cmake", "--build", "daemon/build", "--target", "bpfrejit-daemon", "-j"],
-            timeout=1800,
-        )
+    ensure_runner_binary(runner_binary)
+    ensure_daemon_binary(scanner_binary)
 
 
 def load_config(path: Path) -> dict[str, object]:
@@ -564,12 +526,6 @@ def compare_phases(baseline: Mapping[str, object], post: Mapping[str, object] | 
     }
 
 
-def percent_delta(before: object, after: object) -> float | None:
-    if before in (None, 0) or after is None:
-        return None
-    return ((float(after) - float(before)) / float(before)) * 100.0
-
-
 def build_markdown(payload: Mapping[str, object]) -> str:
     lines = [
         "# Tracee Real End-to-End Benchmark",
@@ -802,12 +758,6 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
     return payload
 
 
-def persist_results(payload: Mapping[str, object], output_json: Path, output_md: Path) -> None:
-    write_json(output_json, payload)
-    write_text(output_md, build_markdown(payload))
-    chown_to_invoking_user(output_md)
-
-
 def build_case_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the Tracee real end-to-end benchmark.")
     parser.add_argument("--config", default=str(DEFAULT_CONFIG))
@@ -834,7 +784,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         output_json = smoke_output_path(RESULTS_DIR, "tracee")
     else:
         output_json = Path(args.output_json).resolve()
-    persist_results(payload, output_json, Path(args.output_md).resolve())
+    persist_results(payload, output_json, Path(args.output_md).resolve(), build_markdown)
     print(json.dumps(payload, indent=2, sort_keys=True))
     return 0
 

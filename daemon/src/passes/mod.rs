@@ -50,7 +50,7 @@ pub fn build_default_pipeline() -> PassManager {
 /// Build a pipeline containing only the named passes.
 ///
 /// Pass names: `wide_mem`, `rotate`, `cond_select`, `extract`, `endian_fusion`,
-/// `branch_flip`, `barrier_placeholder` (or legacy `spectre_mitigation`).
+/// `branch_flip`, `speculation_barrier` (or legacy `spectre_mitigation` / `barrier_placeholder`).
 /// Unknown names are silently ignored.
 pub fn build_pipeline_with_passes(names: &[String]) -> PassManager {
     let mut pm = PassManager::new();
@@ -80,7 +80,10 @@ pub fn build_pipeline_with_passes(names: &[String]) -> PassManager {
     if name_set.contains("endian_fusion") {
         pm.add_pass(EndianFusionPass);
     }
-    if name_set.contains("barrier_placeholder") || name_set.contains("spectre_mitigation") {
+    if name_set.contains("speculation_barrier")
+        || name_set.contains("barrier_placeholder")
+        || name_set.contains("spectre_mitigation")
+    {
         pm.add_pass(SpectreMitigationPass);
     }
 
@@ -148,7 +151,9 @@ mod tests {
         ];
 
         let mut prog = make_program(insns);
-        let ctx = PassContext::test_default();
+        // Provide a barrier btf_id so the spectre pass can fire.
+        let mut ctx = PassContext::test_default();
+        ctx.kfunc_registry.speculation_barrier_btf_id = 777;
 
         let result = pm.run(&mut prog, &ctx).unwrap();
 

@@ -25,11 +25,7 @@
  *   bpf_endian_load64:  48 0F 38 F0 07  movbe rax, [rdi]   (5 bytes)
  */
 
-#include <linux/bpf.h>
-#include <linux/btf.h>
-#include <linux/init.h>
-#include <linux/module.h>
-#include <linux/string.h>
+#include "kinsn_common.h"
 
 /* ---- kfunc fallback implementations ---- */
 
@@ -55,18 +51,13 @@ __bpf_kfunc u64 bpf_endian_load64(u64 addr)
 
 __bpf_kfunc_end_defs();
 
-/* ---- BTF kfunc registration with KF_INLINE_EMIT ---- */
+/* ---- BTF kfunc set ---- */
 
-BTF_KFUNCS_START(bpf_endian_kfunc_ids)
-BTF_ID_FLAGS(func, bpf_endian_load16, KF_INLINE_EMIT);
-BTF_ID_FLAGS(func, bpf_endian_load32, KF_INLINE_EMIT);
-BTF_ID_FLAGS(func, bpf_endian_load64, KF_INLINE_EMIT);
-BTF_KFUNCS_END(bpf_endian_kfunc_ids)
-
-static const struct btf_kfunc_id_set bpf_endian_kfunc_set = {
-	.owner = THIS_MODULE,
-	.set = &bpf_endian_kfunc_ids,
-};
+KINSN_KFUNC_SET_START(bpf_endian)
+KINSN_KFUNC_ID(bpf_endian_load16)
+KINSN_KFUNC_ID(bpf_endian_load32)
+KINSN_KFUNC_ID(bpf_endian_load64)
+KINSN_KFUNC_SET_END(bpf_endian)
 
 /* ---- x86 JIT emit callbacks ---- */
 
@@ -178,52 +169,13 @@ static struct bpf_kfunc_inline_ops endian_load64_ops = {
 	.max_emit_bytes = 16,
 };
 
-/* ---- module init/exit ---- */
+/* ---- module definition ---- */
 
-static int __init bpf_endian_init(void)
-{
-	int ret;
+static const struct kinsn_ops_entry endian_entries[] = {
+	{ "bpf_endian_load16", &endian_load16_ops },
+	{ "bpf_endian_load32", &endian_load32_ops },
+	{ "bpf_endian_load64", &endian_load64_ops },
+};
 
-	ret = bpf_register_kfunc_inline_ops("bpf_endian_load16",
-					      &endian_load16_ops);
-	if (ret)
-		return ret;
-
-	ret = bpf_register_kfunc_inline_ops("bpf_endian_load32",
-					      &endian_load32_ops);
-	if (ret)
-		goto err_unreg16;
-
-	ret = bpf_register_kfunc_inline_ops("bpf_endian_load64",
-					      &endian_load64_ops);
-	if (ret)
-		goto err_unreg32;
-
-	ret = register_btf_kfunc_id_set(BPF_PROG_TYPE_UNSPEC,
-					 &bpf_endian_kfunc_set);
-	if (ret)
-		goto err_unreg64;
-
-	return 0;
-
-err_unreg64:
-	bpf_unregister_kfunc_inline_ops("bpf_endian_load64");
-err_unreg32:
-	bpf_unregister_kfunc_inline_ops("bpf_endian_load32");
-err_unreg16:
-	bpf_unregister_kfunc_inline_ops("bpf_endian_load16");
-	return ret;
-}
-
-static void __exit bpf_endian_exit(void)
-{
-	bpf_unregister_kfunc_inline_ops("bpf_endian_load64");
-	bpf_unregister_kfunc_inline_ops("bpf_endian_load32");
-	bpf_unregister_kfunc_inline_ops("bpf_endian_load16");
-}
-
-module_init(bpf_endian_init);
-module_exit(bpf_endian_exit);
-
-MODULE_DESCRIPTION("BpfReJIT kinsn: ENDIAN_LOAD (MOVBE) inline kfunc");
-MODULE_LICENSE("GPL");
+DEFINE_KINSN_MODULE_MULTI(bpf_endian, endian_entries,
+			  "BpfReJIT kinsn: ENDIAN_LOAD (MOVBE) inline kfunc");

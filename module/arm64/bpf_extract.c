@@ -24,32 +24,9 @@
  *   AND   X7, X7, X10    ; X7 = (val >> start) & mask
  *
  * 5 instructions, 20 bytes.
- *
- * X10 is TMP_REG_1 in the ARM64 BPF JIT and is safe to clobber.
- *
- * ARM64 instruction encodings used:
- *
- * LSRV Xd, Xn, Xm (Data Processing 2-source, sf=1):
- *   1 00 11010110 Rm 001001 Rn Rd
- *
- * LSLV Xd, Xn, Xm (Data Processing 2-source, sf=1):
- *   1 00 11010110 Rm 001000 Rn Rd
- *
- * MOVZ Xd, #imm16 (Move wide immediate, sf=1):
- *   1 10 100101 hw(00) imm16 Rd
- *
- * SUB Xd, Xn, #imm12 (Add/subtract immediate, sf=1):
- *   1 1 0 100010 0 imm12 Rn Rd   (shift=0, op=1=SUB)
- *
- * AND Xd, Xn, Xm (Logical shifted register, sf=1):
- *   1 00 01010 00 0 Rm 000000 Rn Rd
  */
 
-#include <linux/bpf.h>
-#include <linux/btf.h>
-#include <linux/init.h>
-#include <linux/module.h>
-#include <linux/string.h>
+#include "kinsn_common.h"
 
 /* ---- kfunc fallback implementation ---- */
 
@@ -66,16 +43,9 @@ __bpf_kfunc u64 bpf_extract64(u64 val, u32 start, u32 len)
 
 __bpf_kfunc_end_defs();
 
-/* ---- BTF kfunc registration with KF_INLINE_EMIT ---- */
+/* ---- BTF kfunc set ---- */
 
-BTF_KFUNCS_START(bpf_extract_kfunc_ids)
-BTF_ID_FLAGS(func, bpf_extract64, KF_INLINE_EMIT);
-BTF_KFUNCS_END(bpf_extract_kfunc_ids)
-
-static const struct btf_kfunc_id_set bpf_extract_kfunc_set = {
-	.owner = THIS_MODULE,
-	.set = &bpf_extract_kfunc_ids,
-};
+KINSN_KFUNC_SET(bpf_extract, bpf_extract64);
 
 /* ---- ARM64 JIT emit callback ---- */
 
@@ -199,31 +169,7 @@ static struct bpf_kfunc_inline_ops extract_ops = {
 	.max_emit_bytes = 32,	/* 5 insns * 4 bytes = 20, round up */
 };
 
-/* ---- module init/exit ---- */
+/* ---- module definition ---- */
 
-static int __init bpf_extract_init(void)
-{
-	int ret;
-
-	ret = bpf_register_kfunc_inline_ops("bpf_extract64", &extract_ops);
-	if (ret)
-		return ret;
-
-	ret = register_btf_kfunc_id_set(BPF_PROG_TYPE_UNSPEC,
-					 &bpf_extract_kfunc_set);
-	if (ret)
-		bpf_unregister_kfunc_inline_ops("bpf_extract64");
-
-	return ret;
-}
-
-static void __exit bpf_extract_exit(void)
-{
-	bpf_unregister_kfunc_inline_ops("bpf_extract64");
-}
-
-module_init(bpf_extract_init);
-module_exit(bpf_extract_exit);
-
-MODULE_DESCRIPTION("BpfReJIT kinsn: BITFIELD_EXTRACT (UBFX/LSR+AND) inline kfunc for ARM64");
-MODULE_LICENSE("GPL");
+DEFINE_KINSN_MODULE(bpf_extract, "bpf_extract64", &extract_ops,
+		    "BpfReJIT kinsn: BITFIELD_EXTRACT (UBFX/LSR+AND) inline kfunc for ARM64");

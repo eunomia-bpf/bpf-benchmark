@@ -29,11 +29,7 @@
  *   C7 = ModRM: mod=11, reg=RAX(000), rm=RDI(111)
  */
 
-#include <linux/bpf.h>
-#include <linux/btf.h>
-#include <linux/init.h>
-#include <linux/module.h>
-#include <linux/string.h>
+#include "kinsn_common.h"
 
 /* ---- kfunc fallback implementation ---- */
 
@@ -50,16 +46,9 @@ __bpf_kfunc u64 bpf_extract64(u64 val, u32 start, u32 len)
 
 __bpf_kfunc_end_defs();
 
-/* ---- BTF kfunc registration with KF_INLINE_EMIT ---- */
+/* ---- BTF kfunc set ---- */
 
-BTF_KFUNCS_START(bpf_extract_kfunc_ids)
-BTF_ID_FLAGS(func, bpf_extract64, KF_INLINE_EMIT);
-BTF_KFUNCS_END(bpf_extract_kfunc_ids)
-
-static const struct btf_kfunc_id_set bpf_extract_kfunc_set = {
-	.owner = THIS_MODULE,
-	.set = &bpf_extract_kfunc_ids,
-};
+KINSN_KFUNC_SET(bpf_extract, bpf_extract64);
 
 /* ---- x86 JIT emit callback ---- */
 
@@ -79,11 +68,11 @@ static int emit_extract_x86(u8 *image, u32 *off, bool emit,
 	 * Total: 12 bytes
 	 */
 	static const u8 insns[] = {
-		/* mov eax, edx — move len into eax (32-bit clears upper) */
+		/* mov eax, edx -- move len into eax (32-bit clears upper) */
 		0x89, 0xD0,
-		/* shl eax, 8 — shift len to bits[15:8] */
+		/* shl eax, 8 -- shift len to bits[15:8] */
 		0xC1, 0xE0, 0x08,
-		/* or eax, esi — merge start into bits[7:0] */
+		/* or eax, esi -- merge start into bits[7:0] */
 		0x09, 0xF0,
 		/* VEX-encoded BEXTR rax, rdi, rax (BMI1, 64-bit) */
 		0xC4, 0xE2, 0xF8, 0xF7, 0xC7,
@@ -109,31 +98,7 @@ static struct bpf_kfunc_inline_ops extract_ops = {
 	.max_emit_bytes = 16,
 };
 
-/* ---- module init/exit ---- */
+/* ---- module definition ---- */
 
-static int __init bpf_extract_init(void)
-{
-	int ret;
-
-	ret = bpf_register_kfunc_inline_ops("bpf_extract64", &extract_ops);
-	if (ret)
-		return ret;
-
-	ret = register_btf_kfunc_id_set(BPF_PROG_TYPE_UNSPEC,
-					 &bpf_extract_kfunc_set);
-	if (ret)
-		bpf_unregister_kfunc_inline_ops("bpf_extract64");
-
-	return ret;
-}
-
-static void __exit bpf_extract_exit(void)
-{
-	bpf_unregister_kfunc_inline_ops("bpf_extract64");
-}
-
-module_init(bpf_extract_init);
-module_exit(bpf_extract_exit);
-
-MODULE_DESCRIPTION("BpfReJIT kinsn: BITFIELD_EXTRACT (BEXTR/BMI1) inline kfunc");
-MODULE_LICENSE("GPL");
+DEFINE_KINSN_MODULE(bpf_extract, "bpf_extract64", &extract_ops,
+		    "BpfReJIT kinsn: BITFIELD_EXTRACT (BEXTR/BMI1) inline kfunc");

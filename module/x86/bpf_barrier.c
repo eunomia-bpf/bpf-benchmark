@@ -11,11 +11,7 @@
  *   0F AE E8       lfence
  */
 
-#include <linux/bpf.h>
-#include <linux/btf.h>
-#include <linux/init.h>
-#include <linux/module.h>
-#include <linux/string.h>
+#include "kinsn_common.h"
 
 /* ---- kfunc fallback implementation ---- */
 
@@ -29,16 +25,9 @@ __bpf_kfunc void bpf_speculation_barrier(void)
 
 __bpf_kfunc_end_defs();
 
-/* ---- BTF kfunc registration with KF_INLINE_EMIT ---- */
+/* ---- BTF kfunc set ---- */
 
-BTF_KFUNCS_START(bpf_barrier_kfunc_ids)
-BTF_ID_FLAGS(func, bpf_speculation_barrier, KF_INLINE_EMIT);
-BTF_KFUNCS_END(bpf_barrier_kfunc_ids)
-
-static const struct btf_kfunc_id_set bpf_barrier_kfunc_set = {
-	.owner = THIS_MODULE,
-	.set = &bpf_barrier_kfunc_ids,
-};
+KINSN_KFUNC_SET(bpf_barrier, bpf_speculation_barrier);
 
 /* ---- x86 JIT emit callback ---- */
 
@@ -77,32 +66,7 @@ static struct bpf_kfunc_inline_ops barrier_ops = {
 	.max_emit_bytes = 4,
 };
 
-/* ---- module init/exit ---- */
+/* ---- module definition ---- */
 
-static int __init bpf_barrier_init(void)
-{
-	int ret;
-
-	ret = bpf_register_kfunc_inline_ops("bpf_speculation_barrier",
-					     &barrier_ops);
-	if (ret)
-		return ret;
-
-	ret = register_btf_kfunc_id_set(BPF_PROG_TYPE_UNSPEC,
-					 &bpf_barrier_kfunc_set);
-	if (ret)
-		bpf_unregister_kfunc_inline_ops("bpf_speculation_barrier");
-
-	return ret;
-}
-
-static void __exit bpf_barrier_exit(void)
-{
-	bpf_unregister_kfunc_inline_ops("bpf_speculation_barrier");
-}
-
-module_init(bpf_barrier_init);
-module_exit(bpf_barrier_exit);
-
-MODULE_DESCRIPTION("BpfReJIT kinsn: SPECULATION_BARRIER (LFENCE) inline kfunc");
-MODULE_LICENSE("GPL");
+DEFINE_KINSN_MODULE(bpf_barrier, "bpf_speculation_barrier", &barrier_ops,
+		    "BpfReJIT kinsn: SPECULATION_BARRIER (LFENCE) inline kfunc");

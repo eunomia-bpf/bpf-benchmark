@@ -18,27 +18,9 @@
  *   NEG   W10, W1         ; W10 = -shift (= 64-shift mod 64 for bottom 6 bits)
  *   AND   W10, W10, #63   ; W10 = (-shift) & 63  (clean modular negate)
  *   RORV  X7, X0, X10     ; X7 = ROR(val, (64-shift)&63) = ROL(val, shift)
- *
- * NEG Wd, Wm  = SUB Wd, WZR, Wm:
- *   sf=0, op=1, S=0, Rm, imm6=0, Rn=WZR(31), Rd
- *   0 1 0 01011 00 0 Rm 000000 11111 Rd
- *   = 0x4B0003E0 | (Rm << 16) | Rd
- *
- * AND Wd, Wn, #63 (logical immediate, sf=0):
- *   N=0, immr=0, imms=000101 (5) => mask = 0x3F
- *   0 00 100100 0 000000 000101 Rn Rd
- *   = 0x12000400 | (imms<<10) | (Rn<<5) | Rd
- *   With imms=5: 0x12001400 | (Rn<<5) | Rd
- *
- * RORV Xd, Xn, Xm (64-bit):
- *   1 00 11010110 Rm 001011 Rn Rd
  */
 
-#include <linux/bpf.h>
-#include <linux/btf.h>
-#include <linux/init.h>
-#include <linux/module.h>
-#include <linux/string.h>
+#include "kinsn_common.h"
 
 /* ---- kfunc fallback implementation ---- */
 
@@ -54,16 +36,9 @@ __bpf_kfunc u64 bpf_rotate64(u64 val, u32 shift)
 
 __bpf_kfunc_end_defs();
 
-/* ---- BTF kfunc registration with KF_INLINE_EMIT ---- */
+/* ---- BTF kfunc set ---- */
 
-BTF_KFUNCS_START(bpf_rotate_kfunc_ids)
-BTF_ID_FLAGS(func, bpf_rotate64, KF_INLINE_EMIT);
-BTF_KFUNCS_END(bpf_rotate_kfunc_ids)
-
-static const struct btf_kfunc_id_set bpf_rotate_kfunc_set = {
-	.owner = THIS_MODULE,
-	.set = &bpf_rotate_kfunc_ids,
-};
+KINSN_KFUNC_SET(bpf_rotate, bpf_rotate64);
 
 /* ---- ARM64 JIT emit callback ---- */
 
@@ -157,31 +132,7 @@ static struct bpf_kfunc_inline_ops rotate_ops = {
 	.max_emit_bytes = 16,
 };
 
-/* ---- module init/exit ---- */
+/* ---- module definition ---- */
 
-static int __init bpf_rotate_init(void)
-{
-	int ret;
-
-	ret = bpf_register_kfunc_inline_ops("bpf_rotate64", &rotate_ops);
-	if (ret)
-		return ret;
-
-	ret = register_btf_kfunc_id_set(BPF_PROG_TYPE_UNSPEC,
-					 &bpf_rotate_kfunc_set);
-	if (ret)
-		bpf_unregister_kfunc_inline_ops("bpf_rotate64");
-
-	return ret;
-}
-
-static void __exit bpf_rotate_exit(void)
-{
-	bpf_unregister_kfunc_inline_ops("bpf_rotate64");
-}
-
-module_init(bpf_rotate_init);
-module_exit(bpf_rotate_exit);
-
-MODULE_DESCRIPTION("BpfReJIT kinsn: ROTATE (ROL via RORV) inline kfunc for ARM64");
-MODULE_LICENSE("GPL");
+DEFINE_KINSN_MODULE(bpf_rotate, "bpf_rotate64", &rotate_ops,
+		    "BpfReJIT kinsn: ROTATE (ROL via RORV) inline kfunc for ARM64");

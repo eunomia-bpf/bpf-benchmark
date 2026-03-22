@@ -37,6 +37,15 @@ from runner.libs.metrics import sample_cpu_usage, sample_total_cpu_usage  # noqa
 from runner.libs.recompile import apply_daemon_rejit, scan_programs  # noqa: E402
 from runner.libs.vm import run_in_vm, write_guest_script  # noqa: E402
 from runner.libs.workload import WorkloadResult  # noqa: E402
+from e2e.case_common import (  # noqa: E402
+    git_sha,
+    host_metadata,
+    summarize_numbers,
+    percent_delta,
+    percentile,
+    ensure_daemon_binary,
+    persist_results,
+)
 
 
 DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "scx")
@@ -194,61 +203,6 @@ def preferred_path() -> str:
     return f"{prefix}:{current}" if current else prefix
 
 
-def git_sha() -> str:
-    try:
-        return run_command(["git", "rev-parse", "HEAD"], timeout=15).stdout.strip()
-    except Exception:
-        return "unknown"
-
-
-def host_metadata() -> dict[str, object]:
-    return {
-        "hostname": platform.node(),
-        "platform": platform.platform(),
-        "kernel": platform.release(),
-        "python": sys.version.split()[0],
-        "git_sha": git_sha(),
-    }
-
-
-def summarize_numbers(values: Sequence[float | int | None]) -> dict[str, float | int | None]:
-    filtered = [float(value) for value in values if value is not None]
-    if not filtered:
-        return {
-            "count": 0,
-            "mean": None,
-            "median": None,
-            "min": None,
-            "max": None,
-        }
-    return {
-        "count": len(filtered),
-        "mean": statistics.mean(filtered),
-        "median": statistics.median(filtered),
-        "min": min(filtered),
-        "max": max(filtered),
-    }
-
-
-def percentile(values: Sequence[float], pct: float) -> float | None:
-    items = sorted(float(value) for value in values)
-    if not items:
-        return None
-    if len(items) == 1:
-        return items[0]
-    rank = max(0.0, min(1.0, pct / 100.0)) * (len(items) - 1)
-    lower = int(rank)
-    upper = min(len(items) - 1, lower + 1)
-    weight = rank - lower
-    return items[lower] * (1.0 - weight) + items[upper] * weight
-
-
-def percent_delta(before: object, after: object) -> float | None:
-    if before in (None, 0) or after is None:
-        return None
-    return ((float(after) - float(before)) / float(before)) * 100.0
-
-
 def read_scx_state() -> str:
     path = Path("/sys/kernel/sched_ext/state")
     try:
@@ -307,15 +261,7 @@ def aggregate_sites(records: Mapping[int | str, Mapping[str, object]]) -> dict[s
 
 
 def ensure_artifacts(scanner_binary: Path, scheduler_binary: Path, scx_repo: Path) -> None:
-    if not scanner_binary.exists():
-        run_command(
-            ["cmake", "-S", "daemon", "-B", "daemon/build", "-DCMAKE_BUILD_TYPE=Release"],
-            timeout=600,
-        )
-        run_command(
-            ["cmake", "--build", "daemon/build", "--target", "bpfrejit-daemon", "-j"],
-            timeout=1800,
-        )
+    ensure_daemon_binary(scanner_binary)
     if scheduler_binary.exists():
         return
     if not scx_repo.exists():
@@ -807,12 +753,6 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
     return payload
 
 
-def persist_results(payload: Mapping[str, object], output_json: Path, output_md: Path) -> None:
-    write_json(output_json, payload)
-    write_text(output_md, build_markdown(payload))
-    chown_to_invoking_user(output_md)
-
-
 def build_case_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the scx_rusty end-to-end benchmark.")
     parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON))
@@ -887,7 +827,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         output_json = smoke_output_path(RESULTS_DIR, "scx")
     else:
         output_json = Path(args.output_json).resolve()
-    persist_results(payload, output_json, Path(args.output_md).resolve())
+    persist_results(payload, output_json, Path(args.output_md).resolve(), build_markdown)
     print(json.dumps(payload, indent=2, sort_keys=True))
     return 0
 

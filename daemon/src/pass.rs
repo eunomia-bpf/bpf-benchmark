@@ -15,6 +15,10 @@ use crate::insn::BpfInsn;
 // ── Program metadata ────────────────────────────────────────────────
 
 /// Program provenance metadata, obtained from BPF_OBJ_GET_INFO_BY_FD.
+///
+/// Fields are populated from kernel info and consumed by passes/profiler.
+/// The compiler flags them as "never read" because the binary writes but
+/// does not read them directly -- they flow through the pipeline.
 #[derive(Clone, Debug, Default)]
 #[allow(dead_code)]
 pub struct ProgMeta {
@@ -47,11 +51,17 @@ pub struct BranchProfile {
 /// Maps instruction PCs to branch profiles. Consumed by PGO-guided passes
 /// like BranchFlipPass. When provided to `PassManager::run_with_profiling`,
 /// the data is injected into the program's annotations before pass execution.
+///
+/// `program_hotness` provides program-level activity metrics from the profiler.
+/// `branch_profiles` provides per-PC branch taken/not-taken counts (when available).
 #[derive(Clone, Debug, Default)]
-#[allow(dead_code)]
 pub struct ProfilingData {
     /// Per-PC branch profiles.
     pub branch_profiles: HashMap<usize, BranchProfile>,
+    /// Program-level hotness from the profiler (run_cnt/run_time_ns deltas).
+    /// Future passes can use this to gate optimization on hot programs.
+    #[allow(dead_code)]
+    pub program_hotness: Option<crate::profiler::PgoAnalysis>,
 }
 
 // ── Program IR ──────────────────────────────────────────────────────
@@ -66,7 +76,7 @@ pub struct BpfProgram {
     pub insns: Vec<BpfInsn>,
     /// Per-insn annotations (length synchronized with insns).
     pub annotations: Vec<InsnAnnotation>,
-    /// Program metadata.
+    /// Program metadata (populated from kernel, read by passes/profiler).
     #[allow(dead_code)]
     pub meta: ProgMeta,
     /// Transform log: records what each pass did.
@@ -76,6 +86,9 @@ pub struct BpfProgram {
     pub required_module_fds: Vec<i32>,
 }
 
+/// Transform log entry. Fields are written by passes and consumed by
+/// `has_transforms()` and diagnostic output. The compiler flags them
+/// as unread because only `sites_applied` is read in the binary itself.
 #[derive(Clone, Debug)]
 #[allow(dead_code)]
 pub struct TransformEntry {
@@ -139,7 +152,6 @@ impl BpfProgram {
     ///
     /// For each PC in the profiling data that is within bounds, sets the
     /// corresponding annotation's branch_profile.
-    #[allow(dead_code)]
     pub fn inject_profiling(&mut self, data: &ProfilingData) {
         for (&pc, profile) in &data.branch_profiles {
             if pc < self.annotations.len() {
@@ -153,7 +165,7 @@ impl BpfProgram {
         self.transform_log.push(entry);
     }
 
-    /// Whether any transforms have been applied.
+    /// Whether any transforms have been applied (used by tests and diagnostic tools).
     #[allow(dead_code)]
     pub fn has_transforms(&self) -> bool {
         self.transform_log.iter().any(|e| e.sites_applied > 0)
@@ -230,7 +242,6 @@ impl AnalysisCache {
 
 /// Pass execution result.
 #[derive(Clone, Debug)]
-#[allow(dead_code)]
 pub struct PassResult {
     /// Pass name.
     pub pass_name: String,
@@ -240,7 +251,8 @@ pub struct PassResult {
     pub sites_applied: usize,
     /// Sites that were skipped (with reasons).
     pub sites_skipped: Vec<SkipReason>,
-    /// Diagnostic messages.
+    /// Diagnostic messages (read by tests and debug output).
+    #[allow(dead_code)]
     pub diagnostics: Vec<String>,
 }
 
@@ -250,7 +262,7 @@ pub struct SkipReason {
     pub reason: String,
 }
 
-/// Pass category.
+/// Pass category — used by the BpfPass trait and read by tests.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[allow(dead_code)]
 pub enum PassCategory {
@@ -323,6 +335,7 @@ pub struct KfuncRegistry {
     pub endian_load16_btf_id: i32,
     pub endian_load32_btf_id: i32,
     pub endian_load64_btf_id: i32,
+    pub speculation_barrier_btf_id: i32,
     /// Legacy single module FD (kept for backward compat; prefer per-kfunc FDs).
     pub module_fd: Option<i32>,
     /// Per-kfunc module FDs: maps kfunc name (e.g., "bpf_rotate64") to its
@@ -341,6 +354,7 @@ impl KfuncRegistry {
             "cond_select" => "bpf_select64",
             "extract" => "bpf_extract64",
             "endian_fusion" => "bpf_endian_load32",
+            "speculation_barrier" => "bpf_speculation_barrier",
             _ => return self.module_fd,
         };
         self.kfunc_module_fds
@@ -544,7 +558,6 @@ impl PassManager {
     /// If `profiling` is provided, injects branch profiles into the program's
     /// annotations before running the pipeline. This enables PGO-guided passes
     /// like BranchFlipPass to make data-driven decisions.
-    #[allow(dead_code)]
     pub fn run_with_profiling(
         &self,
         program: &mut BpfProgram,
@@ -575,6 +588,7 @@ impl PassContext {
                 endian_load16_btf_id: -1,
                 endian_load32_btf_id: -1,
                 endian_load64_btf_id: -1,
+                speculation_barrier_btf_id: -1,
                 module_fd: None,
                 kfunc_module_fds: HashMap::new(),
             },
@@ -1079,6 +1093,7 @@ mod tests {
                 endian_load16_btf_id: -1,
                 endian_load32_btf_id: -1,
                 endian_load64_btf_id: -1,
+                speculation_barrier_btf_id: -1,
                 module_fd: Some(42),
                 kfunc_module_fds: HashMap::new(),
             },
@@ -1113,6 +1128,7 @@ mod tests {
             endian_load16_btf_id: -1,
             endian_load32_btf_id: -1,
             endian_load64_btf_id: -1,
+            speculation_barrier_btf_id: -1,
             module_fd: None,
             kfunc_module_fds: HashMap::new(),
         };
@@ -1138,6 +1154,7 @@ mod tests {
             endian_load16_btf_id: -1,
             endian_load32_btf_id: -1,
             endian_load64_btf_id: -1,
+            speculation_barrier_btf_id: -1,
             module_fd: Some(42), // legacy
             kfunc_module_fds: HashMap::new(),
         };
@@ -1162,6 +1179,7 @@ mod tests {
             endian_load16_btf_id: -1,
             endian_load32_btf_id: -1,
             endian_load64_btf_id: -1,
+            speculation_barrier_btf_id: -1,
             module_fd: Some(100),
             kfunc_module_fds: HashMap::new(),
         };
