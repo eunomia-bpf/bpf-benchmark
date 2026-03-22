@@ -4,10 +4,13 @@
 //! Scans live kernel BPF programs for optimization sites and can apply
 //! bytecode rewrites via BPF_PROG_REJIT.
 
+mod analysis;
 mod bpf;
 mod emit;
 mod insn;
 mod matcher;
+mod pass;
+mod passes;
 mod profiler;
 mod rewriter;
 
@@ -191,18 +194,23 @@ fn cmd_apply(prog_id: u32) -> Result<()> {
         return Ok(());
     }
 
-    let sites = matcher::scan_all(&orig_insns);
-    if sites.is_empty() {
-        println!(
-            "prog {} ({}): no optimization sites found",
-            prog_id,
-            info.name_str()
-        );
-        return Ok(());
-    }
+    // Build PassManager pipeline and run
+    let pm = passes::build_default_pipeline();
+    let ctx = pass::PassContext::test_default();
 
-    let result = rewriter::rewrite(&orig_insns, &sites)?;
-    if !result.has_transforms {
+    let meta = pass::ProgMeta {
+        prog_id: info.id,
+        prog_type: info.prog_type,
+        prog_name: info.name_str().to_string(),
+        run_cnt: info.run_cnt,
+        run_time_ns: info.run_time_ns,
+        ..Default::default()
+    };
+    let mut program = pass::BpfProgram::new(orig_insns.clone(), meta);
+
+    let pipeline_result = pm.run(&mut program, &ctx)?;
+
+    if !pipeline_result.program_changed {
         println!(
             "prog {} ({}): no transforms applied",
             prog_id,
@@ -212,15 +220,22 @@ fn cmd_apply(prog_id: u32) -> Result<()> {
     }
 
     println!(
-        "prog {} ({}): applying {} sites ({} -> {} insns)",
+        "prog {} ({}): {} passes, {} sites applied ({} -> {} insns)",
         prog_id,
         info.name_str(),
-        result.sites_applied,
+        pipeline_result.pass_results.len(),
+        pipeline_result.total_sites_applied,
         orig_insns.len(),
-        result.new_insns.len(),
+        program.insns.len(),
     );
 
-    bpf::bpf_prog_rejit(fd.as_raw_fd(), &result.new_insns, &[]).context("BPF_PROG_REJIT failed")?;
+    for pr in &pipeline_result.pass_results {
+        if pr.sites_applied > 0 {
+            println!("  {}: {} sites applied", pr.pass_name, pr.sites_applied);
+        }
+    }
+
+    bpf::bpf_prog_rejit(fd.as_raw_fd(), &program.insns, &[]).context("BPF_PROG_REJIT failed")?;
 
     println!("  REJIT successful");
     Ok(())
@@ -298,7 +313,7 @@ fn cmd_profile(prog_id: u32, interval_ms: u64, samples: usize) -> Result<()> {
     Ok(())
 }
 
-/// Try to apply rewrites to a single program. Returns true if REJIT was called.
+/// Try to apply rewrites to a single program via PassManager. Returns true if REJIT was called.
 fn try_apply_one(prog_id: u32) -> Result<bool> {
     let fd = bpf::bpf_prog_get_fd_by_id(prog_id)?;
     let (info, orig_insns) = bpf::bpf_prog_get_info(fd.as_raw_fd(), true)?;
@@ -307,13 +322,22 @@ fn try_apply_one(prog_id: u32) -> Result<bool> {
         return Ok(false);
     }
 
-    let sites = matcher::scan_all(&orig_insns);
-    if sites.is_empty() {
-        return Ok(false);
-    }
+    let pm = passes::build_default_pipeline();
+    let ctx = pass::PassContext::test_default();
 
-    let result = rewriter::rewrite(&orig_insns, &sites)?;
-    if !result.has_transforms {
+    let meta = pass::ProgMeta {
+        prog_id: info.id,
+        prog_type: info.prog_type,
+        prog_name: info.name_str().to_string(),
+        run_cnt: info.run_cnt,
+        run_time_ns: info.run_time_ns,
+        ..Default::default()
+    };
+    let mut program = pass::BpfProgram::new(orig_insns.clone(), meta);
+
+    let pipeline_result = pm.run(&mut program, &ctx)?;
+
+    if !pipeline_result.program_changed {
         return Ok(false);
     }
 
@@ -321,12 +345,12 @@ fn try_apply_one(prog_id: u32) -> Result<bool> {
         "  prog {} ({}): {} sites, {} -> {} insns",
         prog_id,
         info.name_str(),
-        result.sites_applied,
+        pipeline_result.total_sites_applied,
         orig_insns.len(),
-        result.new_insns.len(),
+        program.insns.len(),
     );
 
-    bpf::bpf_prog_rejit(fd.as_raw_fd(), &result.new_insns, &[])?;
+    bpf::bpf_prog_rejit(fd.as_raw_fd(), &program.insns, &[])?;
     println!("    REJIT ok");
     Ok(true)
 }
