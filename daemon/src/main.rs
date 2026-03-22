@@ -24,6 +24,12 @@ use clap::{Parser, Subcommand};
 #[derive(Parser)]
 #[command(name = "bpfrejit-daemon", version, about = "BpfReJIT userspace daemon")]
 struct Cli {
+    /// Comma-separated list of passes to run (default: all optimization passes).
+    /// Available: wide_mem, rotate, cond_select, branch_flip, spectre_mitigation.
+    /// Example: --passes spectre_mitigation
+    #[arg(long, value_delimiter = ',')]
+    passes: Option<Vec<String>>,
+
     #[command(subcommand)]
     command: Command,
 }
@@ -94,23 +100,34 @@ fn main() -> Result<()> {
     // Keep module FDs alive for the daemon's lifetime.
     let _module_fds = discovery.module_fds;
 
+    // Determine which passes to use.
+    let pass_names = cli.passes;
+
     match cli.command {
-        Command::Enumerate => cmd_enumerate(&ctx),
-        Command::Rewrite { prog_id } => cmd_rewrite(prog_id, &ctx),
-        Command::Apply { prog_id } => cmd_apply(prog_id, &ctx),
-        Command::ApplyAll => cmd_apply_all(&ctx),
+        Command::Enumerate => cmd_enumerate(&ctx, &pass_names),
+        Command::Rewrite { prog_id } => cmd_rewrite(prog_id, &ctx, &pass_names),
+        Command::Apply { prog_id } => cmd_apply(prog_id, &ctx, &pass_names),
+        Command::ApplyAll => cmd_apply_all(&ctx, &pass_names),
         Command::Profile {
             prog_id,
             interval_ms,
             samples,
         } => cmd_profile(prog_id, interval_ms, samples),
-        Command::Watch { interval, once } => cmd_watch(interval, once, &ctx),
+        Command::Watch { interval, once } => cmd_watch(interval, once, &ctx, &pass_names),
+    }
+}
+
+/// Build the appropriate pipeline based on --passes flag.
+fn build_pipeline(pass_names: &Option<Vec<String>>) -> pass::PassManager {
+    match pass_names {
+        Some(names) if !names.is_empty() => passes::build_pipeline_with_passes(names),
+        _ => passes::build_default_pipeline(),
     }
 }
 
 // ── Subcommand implementations ──────────────────────────────────────
 
-fn cmd_enumerate(ctx: &pass::PassContext) -> Result<()> {
+fn cmd_enumerate(ctx: &pass::PassContext, pass_names: &Option<Vec<String>>) -> Result<()> {
     println!(
         "{:>6}  {:>6}  {:>5}  {:<16}  sites",
         "ID", "type", "insns", "name"
@@ -118,7 +135,7 @@ fn cmd_enumerate(ctx: &pass::PassContext) -> Result<()> {
     println!("{}", "-".repeat(60));
 
     for prog_id in bpf::iter_prog_ids() {
-        match enumerate_one(prog_id, ctx) {
+        match enumerate_one(prog_id, ctx, pass_names) {
             Ok(()) => {}
             Err(e) => {
                 eprintln!("  prog {}: {:#}", prog_id, e);
@@ -128,7 +145,7 @@ fn cmd_enumerate(ctx: &pass::PassContext) -> Result<()> {
     Ok(())
 }
 
-fn enumerate_one(prog_id: u32, ctx: &pass::PassContext) -> Result<()> {
+fn enumerate_one(prog_id: u32, ctx: &pass::PassContext, pass_names: &Option<Vec<String>>) -> Result<()> {
     let fd = bpf::bpf_prog_get_fd_by_id(prog_id)?;
     let (info, orig_insns) = bpf::bpf_prog_get_info(fd.as_raw_fd(), true)?;
 
@@ -150,7 +167,7 @@ fn enumerate_one(prog_id: u32, ctx: &pass::PassContext) -> Result<()> {
             ..Default::default()
         };
         let mut program = pass::BpfProgram::new(orig_insns, meta);
-        let pm = passes::build_default_pipeline();
+        let pm = build_pipeline(pass_names);
 
         match pm.run(&mut program, ctx) {
             Ok(result) if result.total_sites_applied > 0 => {
@@ -176,7 +193,7 @@ fn enumerate_one(prog_id: u32, ctx: &pass::PassContext) -> Result<()> {
     Ok(())
 }
 
-fn cmd_rewrite(prog_id: u32, ctx: &pass::PassContext) -> Result<()> {
+fn cmd_rewrite(prog_id: u32, ctx: &pass::PassContext, pass_names: &Option<Vec<String>>) -> Result<()> {
     let (info, orig_insns) = bpf::get_orig_insns_by_id(prog_id)?;
 
     if orig_insns.is_empty() {
@@ -203,7 +220,7 @@ fn cmd_rewrite(prog_id: u32, ctx: &pass::PassContext) -> Result<()> {
         ..Default::default()
     };
     let mut program = pass::BpfProgram::new(orig_insns.clone(), meta);
-    let pm = passes::build_default_pipeline();
+    let pm = build_pipeline(pass_names);
 
     let pipeline_result = pm.run(&mut program, ctx)?;
 
@@ -236,7 +253,7 @@ fn cmd_rewrite(prog_id: u32, ctx: &pass::PassContext) -> Result<()> {
     Ok(())
 }
 
-fn cmd_apply(prog_id: u32, ctx: &pass::PassContext) -> Result<()> {
+fn cmd_apply(prog_id: u32, ctx: &pass::PassContext, pass_names: &Option<Vec<String>>) -> Result<()> {
     let fd = bpf::bpf_prog_get_fd_by_id(prog_id).context("open program")?;
     let (info, orig_insns) =
         bpf::bpf_prog_get_info(fd.as_raw_fd(), true).context("get program info")?;
@@ -246,7 +263,7 @@ fn cmd_apply(prog_id: u32, ctx: &pass::PassContext) -> Result<()> {
         return Ok(());
     }
 
-    let pm = passes::build_default_pipeline();
+    let pm = build_pipeline(pass_names);
 
     let meta = pass::ProgMeta {
         prog_id: info.id,
@@ -291,14 +308,14 @@ fn cmd_apply(prog_id: u32, ctx: &pass::PassContext) -> Result<()> {
     Ok(())
 }
 
-fn cmd_apply_all(ctx: &pass::PassContext) -> Result<()> {
+fn cmd_apply_all(ctx: &pass::PassContext, pass_names: &Option<Vec<String>>) -> Result<()> {
     let mut total = 0u32;
     let mut applied = 0u32;
     let mut errors = 0u32;
 
     for prog_id in bpf::iter_prog_ids() {
         total += 1;
-        match try_apply_one(prog_id, ctx) {
+        match try_apply_one(prog_id, ctx, pass_names) {
             Ok(true) => applied += 1,
             Ok(false) => {}
             Err(e) => {
@@ -364,7 +381,7 @@ fn cmd_profile(prog_id: u32, interval_ms: u64, samples: usize) -> Result<()> {
 }
 
 /// Try to apply rewrites to a single program via PassManager. Returns true if REJIT was called.
-fn try_apply_one(prog_id: u32, ctx: &pass::PassContext) -> Result<bool> {
+fn try_apply_one(prog_id: u32, ctx: &pass::PassContext, pass_names: &Option<Vec<String>>) -> Result<bool> {
     let fd = bpf::bpf_prog_get_fd_by_id(prog_id)?;
     let (info, orig_insns) = bpf::bpf_prog_get_info(fd.as_raw_fd(), true)?;
 
@@ -372,7 +389,7 @@ fn try_apply_one(prog_id: u32, ctx: &pass::PassContext) -> Result<bool> {
         return Ok(false);
     }
 
-    let pm = passes::build_default_pipeline();
+    let pm = build_pipeline(pass_names);
 
     let meta = pass::ProgMeta {
         prog_id: info.id,
@@ -404,7 +421,7 @@ fn try_apply_one(prog_id: u32, ctx: &pass::PassContext) -> Result<bool> {
     Ok(true)
 }
 
-fn cmd_watch(interval_secs: u64, once: bool, ctx: &pass::PassContext) -> Result<()> {
+fn cmd_watch(interval_secs: u64, once: bool, ctx: &pass::PassContext, pass_names: &Option<Vec<String>>) -> Result<()> {
     // Register signal handlers for graceful shutdown.
     unsafe {
         libc::signal(libc::SIGTERM, handle_signal as libc::sighandler_t);
@@ -440,7 +457,7 @@ fn cmd_watch(interval_secs: u64, once: bool, ctx: &pass::PassContext) -> Result<
         let mut errors = 0u32;
         for prog_id in &new_ids {
             optimized.insert(*prog_id);
-            match try_apply_one(*prog_id, ctx) {
+            match try_apply_one(*prog_id, ctx, pass_names) {
                 Ok(true) => applied += 1,
                 Ok(false) => {}
                 Err(e) => {

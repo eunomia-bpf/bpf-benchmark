@@ -84,6 +84,48 @@ pub fn build_default_pipeline() -> PassManager {
     pm
 }
 
+/// Build a pipeline with all passes (including security passes like Spectre mitigation).
+pub fn build_full_pipeline() -> PassManager {
+    let mut pm = build_default_pipeline();
+    pm.add_pass(SpectreMitigationPass);
+    pm
+}
+
+/// Build a pipeline containing only the named passes.
+///
+/// Pass names: `wide_mem`, `rotate`, `cond_select`, `branch_flip`, `spectre_mitigation`.
+/// Unknown names are silently ignored.
+pub fn build_pipeline_with_passes(names: &[String]) -> PassManager {
+    let mut pm = PassManager::new();
+
+    pm.register_analysis(BranchTargetAnalysis);
+    pm.register_analysis(CFGAnalysis);
+    pm.register_analysis(LivenessAnalysis);
+    pm.register_analysis(PGOAnalysis { profiling_data: None });
+
+    let name_set: std::collections::HashSet<&str> = names.iter().map(|s| s.as_str()).collect();
+
+    if name_set.contains("wide_mem") {
+        pm.add_pass(WideMemPass);
+    }
+    if name_set.contains("rotate") {
+        pm.add_pass(RotatePass);
+    }
+    if name_set.contains("cond_select") {
+        pm.add_pass(CondSelectPass {
+            predictability_threshold: 0.8,
+        });
+    }
+    if name_set.contains("branch_flip") {
+        pm.add_pass(BranchFlipPass { min_bias: 0.7 });
+    }
+    if name_set.contains("spectre_mitigation") {
+        pm.add_pass(SpectreMitigationPass);
+    }
+
+    pm
+}
+
 // ── Cross-pass integration tests ────────────────────────────────────
 
 #[cfg(test)]
