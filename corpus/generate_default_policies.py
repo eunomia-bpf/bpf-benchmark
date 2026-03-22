@@ -73,12 +73,12 @@ SCANNER_SUMMARY_FIELDS = (
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Generate per-program version 3 corpus policy YAMLs from scanner "
+            "Generate per-program version 3 corpus policy YAMLs from daemon "
             "site manifests, keeping every discovered site except CMOV."
         )
     )
     parser.add_argument(
-        "--scanner",
+        "--daemon",
         default=str(DEFAULT_DAEMON),
         help="Path to bpfrejit-daemon.",
     )
@@ -112,7 +112,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--live",
         action="store_true",
-        help="Enumerate live programs via bpftool + scanner enumerate instead of offline corpus objects.",
+        help="Enumerate live programs via bpftool + daemon enumerate instead of offline corpus objects.",
     )
     parser.add_argument(
         "--prog-id",
@@ -142,7 +142,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--workers",
         type=int,
         default=DEFAULT_WORKERS,
-        help="Concurrent workers used for per-object inventory + scanner subprocesses.",
+        help="Concurrent workers used for per-object inventory + daemon subprocesses.",
     )
     parser.add_argument(
         "--timeout",
@@ -246,18 +246,18 @@ def discover_object_paths(
 
 
 def scan_program_manifest(
-    scanner: Path,
+    daemon: Path,
     object_path: Path,
     program_name: str,
     section_name: str,
     *,
     timeout_seconds: int,
 ) -> dict[str, Any]:
-    label = f"scanner:{object_relative_path(object_path).as_posix()}:{program_name}"
+    label = f"daemon:{object_relative_path(object_path).as_posix()}:{program_name}"
     try:
         payload = run_json_command(
             [
-                str(scanner),
+                str(daemon),
                 "scan",
                 str(object_path),
                 "--program-name",
@@ -270,7 +270,7 @@ def scan_program_manifest(
         )
     except RuntimeError:
         payload = scan_program_manifest_from_section(
-            scanner,
+            daemon,
             object_path,
             program_name,
             section_name,
@@ -279,7 +279,7 @@ def scan_program_manifest(
         )
     if not isinstance(payload, dict):
         raise RuntimeError(
-            f"scanner output for {object_relative_path(object_path).as_posix()}:{program_name} "
+            f"daemon output for {object_relative_path(object_path).as_posix()}:{program_name} "
             "was not a JSON object"
         )
     return payload
@@ -304,7 +304,7 @@ def load_executable_section_bytes(object_path: Path, section_name: str) -> bytes
 
 
 def scan_program_manifest_from_section(
-    scanner: Path,
+    daemon: Path,
     object_path: Path,
     program_name: str,
     section_name: str,
@@ -324,7 +324,7 @@ def scan_program_manifest_from_section(
     try:
         return run_json_command(
             [
-                str(scanner),
+                str(daemon),
                 "scan",
                 "--xlated",
                 str(tmp_path),
@@ -340,7 +340,7 @@ def scan_program_manifest_from_section(
         tmp_path.unlink(missing_ok=True)
 
 def object_scan_summary(
-    scanner: Path,
+    daemon: Path,
     runner: Path,
     object_path: Path,
     *,
@@ -371,7 +371,7 @@ def object_scan_summary(
     for entry in programs:
         try:
             manifest = scan_program_manifest(
-                scanner,
+                daemon,
                 object_path,
                 entry.name,
                 entry.section_name,
@@ -432,7 +432,7 @@ def render_program_policy_text(
         f"Object: {object_relative_path(object_path).as_posix()}",
         f"Program: {program_name}",
         f"Section: {section_name}",
-        f"Total scanner sites: {int((manifest.get('summary') or {}).get('total_sites', 0) or 0)}",
+        f"Total daemon sites: {int((manifest.get('summary') or {}).get('total_sites', 0) or 0)}",
         "Family site totals: "
         + ", ".join(f"{family}={site_counts.get(family, 0)}" for family in POLICY_FAMILY_KEYS),
         "Selection model: explicit site allowlist; keep every discovered site except skipped families: "
@@ -490,7 +490,7 @@ def is_under(path: Path, root: Path) -> bool:
 
 
 def live_program_manifest_summary(
-    scanner: Path,
+    daemon: Path,
     program: Mapping[str, Any],
     *,
     timeout_seconds: int,
@@ -498,7 +498,7 @@ def live_program_manifest_summary(
     prog_id = int(program.get("id", 0) or 0)
     program_name = str(program.get("name", "")).strip() or f"id-{prog_id}"
     program_type = str(program.get("type", "")).strip()
-    manifest = enumerate_program_record(scanner, prog_id, timeout_seconds=timeout_seconds)
+    manifest = enumerate_program_record(daemon, prog_id, timeout_seconds=timeout_seconds)
     enum_name = str(manifest.get("name") or "").strip()
     if enum_name:
         program_name = enum_name
@@ -518,7 +518,7 @@ def live_program_manifest_summary(
 
 
 def discover_live_program_summaries(
-    scanner: Path,
+    daemon: Path,
     *,
     prog_ids: list[int] | None,
     name_contains: list[str] | None,
@@ -542,7 +542,7 @@ def discover_live_program_summaries(
         try:
             summaries.append(
                 live_program_manifest_summary(
-                    scanner,
+                    daemon,
                     program,
                     timeout_seconds=timeout_seconds,
                 )
@@ -571,7 +571,7 @@ def render_live_program_policy_text(
         f"Live program id: {prog_id}",
         f"Program: {program_name}",
         f"Type: {program_type or 'unknown'}",
-        f"Total live scanner sites: {int(manifest.get('total_sites', 0) or 0)}",
+        f"Total live daemon sites: {int(manifest.get('total_sites', 0) or 0)}",
         "Family site totals: "
         + ", ".join(f"{family}={site_counts.get(family, 0)}" for family in POLICY_FAMILY_KEYS),
         "Selection model: explicit site allowlist; keep every discovered live site except skipped families: "
@@ -594,11 +594,11 @@ def render_live_program_policy_text(
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
 
-    scanner = Path(args.scanner).resolve()
+    daemon = Path(args.daemon).resolve()
     policy_dir = Path(args.policy_dir).resolve()
     skip_families = frozenset(parse_skip_families_arg(args.skip_families))
-    if not scanner.exists():
-        raise SystemExit(f"scanner not found: {scanner}")
+    if not daemon.exists():
+        raise SystemExit(f"daemon not found: {daemon}")
 
     planned_outputs: list[tuple[Path, str]] = []
     warning_count = 0
@@ -607,7 +607,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.live:
         summaries, warnings = discover_live_program_summaries(
-            scanner,
+            daemon,
             prog_ids=args.prog_ids,
             name_contains=args.name_contains,
             type_equals=args.type_equals,
@@ -684,7 +684,7 @@ def main(argv: list[str] | None = None) -> int:
             future_to_path = {
                 executor.submit(
                     object_scan_summary,
-                    scanner,
+                    daemon,
                     runner,
                     object_path,
                     timeout_seconds=args.timeout,

@@ -37,7 +37,7 @@ pub struct Binding {
     pub value: i64,
 }
 
-/// A single rewrite site found by the scanner.
+/// A single rewrite site found by the daemon.
 #[derive(Clone, Debug)]
 #[allow(dead_code)]
 pub struct RewriteSite {
@@ -1128,7 +1128,7 @@ mod tests {
     #[test]
     fn test_wide_mem_pass_skips_unsupported_width_3() {
         // Build a 3-byte low-first byte-ladder: LDX(B, dst, base, 0) + 2 more bytes.
-        // Width 3 is detected by the scanner but cannot be emitted as a single load.
+        // Width 3 is detected by the daemon but cannot be emitted as a single load.
         let insns = vec![
             BpfInsn::ldx_mem(BPF_B, 0, 6, 0),  // byte 0
             BpfInsn::ldx_mem(BPF_B, 1, 6, 1),  // byte 1
@@ -1140,7 +1140,7 @@ mod tests {
             exit_insn(),
         ];
 
-        // Verify the scanner finds a width=3 site.
+        // Verify the daemon finds a width=3 site.
         let sites = scan_wide_mem(&insns);
         assert_eq!(sites.len(), 1);
         assert_eq!(sites[0].get_binding("width"), Some(3));

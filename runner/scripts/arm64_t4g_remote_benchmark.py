@@ -155,9 +155,9 @@ def bpftool_prog_show_id(bpftool_binary: str, prog_id: int) -> dict[str, Any]:
     return payload
 
 
-def scanner_enumerate(scanner_binary: Path, prog_id: int) -> dict[str, Any]:
+def daemon_enumerate(daemon_binary: Path, prog_id: int) -> dict[str, Any]:
     completed = subprocess.run(
-        [str(scanner_binary), "enumerate", "--prog-id", str(prog_id), "--json"],
+        [str(daemon_binary), "enumerate", "--prog-id", str(prog_id), "--json"],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
@@ -172,14 +172,14 @@ def scanner_enumerate(scanner_binary: Path, prog_id: int) -> dict[str, Any]:
             "total_sites": 0,
             "applied_sites": 0,
             "recompile_ok": False,
-            "error": stderr or stdout or f"scanner enumerate failed (rc={completed.returncode})",
+            "error": stderr or stdout or f"daemon enumerate failed (rc={completed.returncode})",
         }
     try:
         payload = json.loads(stdout) if stdout else []
     except json.JSONDecodeError as exc:
-        raise RuntimeError(f"scanner enumerate returned non-JSON for prog_id={prog_id}: {stdout[:200]}") from exc
+        raise RuntimeError(f"daemon enumerate returned non-JSON for prog_id={prog_id}: {stdout[:200]}") from exc
     if not isinstance(payload, list):
-        raise RuntimeError(f"scanner enumerate returned non-list JSON for prog_id={prog_id}")
+        raise RuntimeError(f"daemon enumerate returned non-list JSON for prog_id={prog_id}")
     if not payload:
         return {
             "records": [],
@@ -190,7 +190,7 @@ def scanner_enumerate(scanner_binary: Path, prog_id: int) -> dict[str, Any]:
         }
     record = payload[0]
     if not isinstance(record, dict):
-        raise RuntimeError(f"scanner enumerate returned malformed record for prog_id={prog_id}")
+        raise RuntimeError(f"daemon enumerate returned malformed record for prog_id={prog_id}")
     return {
         "records": payload,
         "total_sites": int(record.get("total_sites", 0) or 0),
@@ -299,10 +299,10 @@ def run_llvmbpf_vs_kernel(
     return json.loads(output_path.read_text())
 
 
-def run_scanner_stock_vs_recompile(
+def run_daemon_stock_vs_recompile(
     *,
     runner_binary: Path,
-    scanner_binary: Path,
+    daemon_binary: Path,
     bpftool_binary: str,
     iterations: int,
     warmups: int,
@@ -353,7 +353,7 @@ def run_scanner_stock_vs_recompile(
             if prog_id <= 0:
                 raise RuntimeError(f"{benchmark.name}: invalid prog id from pinned program")
 
-            enumerate_before = scanner_enumerate(scanner_binary, prog_id)
+            enumerate_before = daemon_enumerate(daemon_binary, prog_id)
             stock = run_bpftool_samples(
                 bpftool_binary,
                 pin_path,
@@ -364,7 +364,7 @@ def run_scanner_stock_vs_recompile(
             )
 
             if int(enumerate_before.get("total_sites", 0) or 0) > 0:
-                apply_result = apply_recompile([prog_id], scanner_binary)[prog_id]
+                apply_result = apply_recompile([prog_id], daemon_binary)[prog_id]
                 recompile_apply = recompile_summary_from_apply(apply_result)
             else:
                 recompile_apply = {
@@ -410,7 +410,7 @@ def run_scanner_stock_vs_recompile(
 
     return {
         "suite": suite.suite_name,
-        "method": "bpftool prog loadall/run pinned + scanner enumerate --recompile (live-auto-policy)",
+        "method": "bpftool prog loadall/run pinned + daemon enumerate --recompile (live-auto-policy)",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "host": {
             "hostname": platform.node(),
@@ -432,7 +432,7 @@ def run_scanner_stock_vs_recompile(
 
 def run_katran_smoke(
     *,
-    scanner_binary: Path,
+    daemon_binary: Path,
     bpftool_binary: str,
 ) -> dict[str, Any]:
     ensure_bpffs_mounted()
@@ -522,7 +522,7 @@ def run_katran_smoke(
 
         pinned_program = bpftool_prog_show_pinned(bpftool_binary, pin_dir / "balancer_ingress")
         prog_id = int(pinned_program.get("id", 0) or 0)
-        enumerate_command = [str(scanner_binary), "enumerate", "--prog-id", str(prog_id), "--json"]
+        enumerate_command = [str(daemon_binary), "enumerate", "--prog-id", str(prog_id), "--json"]
         enumerate_completed = subprocess.run(
             enumerate_command,
             cwd=REPO_ROOT,
@@ -542,7 +542,7 @@ def run_katran_smoke(
         enumerate_payload = json.loads(enumerate_completed.stdout or "[]")
 
         recompile_command = [
-            str(scanner_binary),
+            str(daemon_binary),
             "enumerate",
             "--prog-id",
             str(prog_id),
@@ -569,7 +569,7 @@ def run_katran_smoke(
             raise RuntimeError(f"katran recompile failed ({recompile_completed.returncode}): {detail}")
         recompile_payload = json.loads(recompile_completed.stdout or "[]")
         if not isinstance(enumerate_payload, list) or not isinstance(recompile_payload, list):
-            raise RuntimeError("katran scanner payload was not a JSON array")
+            raise RuntimeError("katran daemon payload was not a JSON array")
 
         investigate_zero_sites = False
         if enumerate_payload:
@@ -595,10 +595,10 @@ def run_katran_smoke(
                     "stdout_head": dump.stdout.splitlines()[:80],
                     "stderr": dump.stderr,
                 },
-                "scanner_enumerate_stdout_head": enumerate_completed.stdout.splitlines()[:80],
-                "scanner_enumerate_stderr": enumerate_completed.stderr,
-                "scanner_recompile_stdout_head": recompile_completed.stdout.splitlines()[:80],
-                "scanner_recompile_stderr": recompile_completed.stderr,
+                "daemon_enumerate_stdout_head": enumerate_completed.stdout.splitlines()[:80],
+                "daemon_enumerate_stderr": enumerate_completed.stderr,
+                "daemon_recompile_stdout_head": recompile_completed.stdout.splitlines()[:80],
+                "daemon_recompile_stderr": recompile_completed.stderr,
             }
 
         return {
@@ -663,7 +663,7 @@ def summarize_llvmbpf_vs_kernel(raw: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def summarize_scanner(raw: dict[str, Any]) -> dict[str, Any]:
+def summarize_daemon(raw: dict[str, Any]) -> dict[str, Any]:
     total_sites = 0
     applied_sites = 0
     deltas: list[tuple[str, float, float, float]] = []
@@ -734,13 +734,13 @@ def main() -> int:
     results_dir.mkdir(parents=True, exist_ok=True)
 
     runner_binary = (REPO_ROOT / "runner" / "build" / "micro_exec").resolve()
-    scanner_binary = (REPO_ROOT / "daemon" / "build" / "bpfrejit-daemon").resolve()
+    daemon_binary = (REPO_ROOT / "daemon" / "build" / "bpfrejit-daemon").resolve()
     bpftool_binary = shutil.which("bpftool") or "bpftool"
 
     if not runner_binary.exists():
         raise SystemExit(f"missing runner binary: {runner_binary}")
-    if not scanner_binary.exists():
-        raise SystemExit(f"missing daemon binary: {scanner_binary}")
+    if not daemon_binary.exists():
+        raise SystemExit(f"missing daemon binary: {daemon_binary}")
 
     raw_llvmbpf_vs_kernel = run_llvmbpf_vs_kernel(
         iterations=args.iterations,
@@ -749,9 +749,9 @@ def main() -> int:
         cpu=args.cpu,
         results_dir=results_dir,
     )
-    raw_scanner = run_scanner_stock_vs_recompile(
+    raw_daemon = run_daemon_stock_vs_recompile(
         runner_binary=runner_binary,
-        scanner_binary=scanner_binary,
+        daemon_binary=daemon_binary,
         bpftool_binary=bpftool_binary,
         iterations=args.iterations,
         warmups=args.warmups,
@@ -760,7 +760,7 @@ def main() -> int:
         results_dir=results_dir,
     )
     raw_katran = run_katran_smoke(
-        scanner_binary=scanner_binary,
+        daemon_binary=daemon_binary,
         bpftool_binary=bpftool_binary,
     )
 
@@ -790,12 +790,12 @@ def main() -> int:
         },
         "summary": {
             "llvmbpf_vs_kernel": summarize_llvmbpf_vs_kernel(raw_llvmbpf_vs_kernel),
-            "scanner_stock_vs_recompile": summarize_scanner(raw_scanner),
+            "daemon_stock_vs_recompile": summarize_daemon(raw_daemon),
             "katran_smoke": summarize_katran(raw_katran),
         },
         "raw": {
             "llvmbpf_vs_kernel": raw_llvmbpf_vs_kernel,
-            "scanner_stock_vs_recompile": raw_scanner,
+            "daemon_stock_vs_recompile": raw_daemon,
             "katran_smoke": raw_katran,
         },
     }

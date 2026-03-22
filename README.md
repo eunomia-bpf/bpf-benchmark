@@ -18,7 +18,7 @@ bpf-benchmark/
 ├── micro/                 # Isolated micro-benchmark suites, drivers, and inputs
 ├── corpus/                # 23-project real-world corpus, fetch/build, and measurement
 ├── e2e/                   # End-to-end workloads (tracee, tetragon, bpftrace, scx, katran)
-├── scanner/               # Userspace BPF directive scanner (bpf-jit-scanner CLI)
+├── daemon/                # Userspace BPF daemon (bpfrejit-daemon CLI)
 ├── config/                # YAML benchmark suite manifests (micro_pure_jit.yaml etc.)
 ├── scripts/               # Operator helpers (AWS ARM64, QEMU smoke)
 ├── docker/                # Container definitions for cross-build helpers
@@ -41,7 +41,7 @@ bpf-benchmark/
 git submodule update --init --recursive
 source /home/yunwei37/workspace/.venv/bin/activate   # workspace venv (optional)
 
-# Build micro runner + BPF programs + scanner
+# Build micro runner + BPF programs + daemon
 make all
 
 # Quick smoke test (no VM required)
@@ -80,7 +80,7 @@ Results are written to:
 
 ```bash
 make micro            # micro_exec runner + BPF programs
-make scanner          # bpf-jit-scanner CLI
+make daemon           # bpfrejit-daemon CLI
 make kernel           # bzImage from vendor/linux-framework
 make kernel-tests     # kernel recompile self-tests
 ```
@@ -95,4 +95,4 @@ make kernel-tests     # kernel recompile self-tests
 
 `e2e/` owns full deployment-style evaluation via `e2e/run.py` plus per-case assets under `e2e/cases/`.
 
-`scanner/` is the userspace front end for BpfReJIT: it scans live BPF programs via `BPF_PROG_GET_NEXT_ID`, identifies optimization sites, and triggers `BPF_PROG_JIT_RECOMPILE`. See `scanner/README.md`.
+`daemon/` is the userspace front end for BpfReJIT: it scans live BPF programs via `BPF_PROG_GET_NEXT_ID`, identifies optimization sites, and triggers `BPF_PROG_REJIT`. See `daemon/README.md`.

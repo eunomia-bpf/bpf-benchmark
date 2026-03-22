@@ -128,7 +128,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--policy-dir",
         help="Override policy directory (for named policy sets under config/policies/).",
     )
-    return parser.parse_args(list(sys.argv[1:] if argv is None else argv))
+    raw_args = list(sys.argv[1:] if argv is None else argv)
+    # Strip legacy positional "suite" subcommand for backward-compat with Makefile callers
+    if raw_args and raw_args[0] == "suite":
+        raw_args = raw_args[1:]
+    return parser.parse_args(raw_args)
 
 
 def format_ns(value: float | int | None) -> str:

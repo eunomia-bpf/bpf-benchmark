@@ -18,10 +18,8 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-try:
-    from runner.libs.commands import build_scanner_command
-except ImportError:
-    from runner.libs.commands import build_scanner_command
+def _build_daemon_scan_command(daemon: Path | str, xlated_path: Path | str) -> list[str]:
+    return [str(daemon), "scan", "--xlated", str(xlated_path), "--all"]
 
 try:
     from elftools.elf.elffile import ELFFile
@@ -119,7 +117,7 @@ def parse_args() -> argparse.Namespace:
     script_dir = Path(__file__).resolve().parent
     repo_root = script_dir.parent
     parser = argparse.ArgumentParser(
-        description="Scanner-backed v5 directive census over micro + corpus .bpf.o files."
+        description="Daemon-backed v5 directive census over micro + corpus .bpf.o files."
     )
     parser.add_argument(
         "--repo-root",
@@ -127,7 +125,7 @@ def parse_args() -> argparse.Namespace:
         help="Repository root. Defaults to the parent of this script.",
     )
     parser.add_argument(
-        "--scanner",
+        "--daemon",
         default=str(repo_root / "daemon" / "build" / "bpfrejit-daemon"),
         help="Path to the built daemon CLI.",
     )
@@ -241,7 +239,7 @@ def collect_inputs(repo_root: Path, corpus_build_report: Path | None = None) -> 
     )
 
 
-def parse_scanner_output(stdout: str) -> dict[str, int]:
+def parse_daemon_output(stdout: str) -> dict[str, int]:
     counts = {field: 0 for _, field in FAMILY_FIELDS}
     accepted = False
     for line in stdout.splitlines():
@@ -253,11 +251,11 @@ def parse_scanner_output(stdout: str) -> dict[str, int]:
             if match:
                 counts[field] = int(match.group(1))
     if not accepted:
-        raise RuntimeError(f"scanner output missing acceptance summary:\n{stdout}")
+        raise RuntimeError(f"daemon output missing acceptance summary:\n{stdout}")
     return counts
 
 
-def analyze_section(section, scanner: Path) -> SectionResult:
+def analyze_section(section, daemon: Path) -> SectionResult:
     data = section.data()
     with tempfile.NamedTemporaryFile(
         prefix="bpf-jit-section-", suffix=".xlated", delete=False
@@ -266,7 +264,7 @@ def analyze_section(section, scanner: Path) -> SectionResult:
         temp_path = Path(handle.name)
     try:
         completed = subprocess.run(
-            build_scanner_command(scanner, temp_path),
+            _build_daemon_scan_command(daemon, temp_path),
             capture_output=True,
             text=True,
             check=False,
@@ -275,8 +273,8 @@ def analyze_section(section, scanner: Path) -> SectionResult:
             stderr = (completed.stderr or "").strip()
             stdout = (completed.stdout or "").strip()
             detail = stderr or stdout or f"exit={completed.returncode}"
-            raise RuntimeError(f"scanner failed on section {section.name}: {detail}")
-        counts = parse_scanner_output(completed.stdout or "")
+            raise RuntimeError(f"daemon failed on section {section.name}: {detail}")
+        counts = parse_daemon_output(completed.stdout or "")
     finally:
         temp_path.unlink(missing_ok=True)
 
@@ -293,11 +291,11 @@ def analyze_section(section, scanner: Path) -> SectionResult:
     )
 
 
-def analyze_object(path: Path, source: str, repo_root: Path, scanner: Path) -> ProgramResult:
+def analyze_object(path: Path, source: str, repo_root: Path, daemon: Path) -> ProgramResult:
     with path.open("rb") as handle:
         elf = ELFFile(handle)
         section_results = [
-            analyze_section(section, scanner)
+            analyze_section(section, daemon)
             for section in elf.iter_sections()
             if is_scannable_code_section(section)
         ]
@@ -321,13 +319,13 @@ def analyze_object(path: Path, source: str, repo_root: Path, scanner: Path) -> P
 
 
 def analyze_many(
-    paths: tuple[Path, ...], source: str, repo_root: Path, scanner: Path, workers: int
+    paths: tuple[Path, ...], source: str, repo_root: Path, daemon: Path, workers: int
 ) -> list[ProgramResult]:
     if not paths:
         return []
     with ThreadPoolExecutor(max_workers=max(1, workers)) as executor:
         futures = [
-            executor.submit(analyze_object, path, source, repo_root, scanner)
+            executor.submit(analyze_object, path, source, repo_root, daemon)
             for path in paths
         ]
         return [future.result() for future in futures]
@@ -504,13 +502,13 @@ def build_json_payload(
     micro_results: list[ProgramResult],
     corpus_results: list[ProgramResult],
     top_n: int,
-    scanner: Path,
+    daemon: Path,
 ) -> dict[str, object]:
     all_results = sort_results(micro_results + corpus_results)
     return {
         "metadata": {
             "repo_root": str(repo_root),
-            "scanner": str(scanner),
+            "daemon": str(daemon),
             "raw_micro_count": inputs.raw_micro_count,
             "raw_corpus_count": inputs.raw_corpus_count,
             "corpus_source": inputs.corpus_source,
@@ -519,7 +517,7 @@ def build_json_payload(
             "total_objects": len(all_results),
             "skipped_non_bpf_count": len(inputs.skipped_non_bpf),
             "skipped_non_bpf": list(inputs.skipped_non_bpf),
-            "method": "extract executable non-dot ELF sections, then run bpf-jit-scanner scan --xlated <section> --all --v5",
+            "method": "extract executable non-dot ELF sections, then run daemon scan --xlated <section> --all --v5",
         },
         "aggregate_summary": dataset_summary_dict(all_results),
         "micro_summary": dataset_summary_dict(micro_results),
@@ -580,7 +578,7 @@ def render_report(
     micro_results: list[ProgramResult],
     corpus_results: list[ProgramResult],
     top_n: int,
-    scanner: Path,
+    daemon: Path,
 ) -> str:
     all_results = sort_results(micro_results + corpus_results)
     corpus_totals = family_totals(corpus_results)
@@ -595,15 +593,15 @@ def render_report(
     project_rows = project_summary_rows(all_results)
 
     lines: list[str] = [
-        "# Scanner-backed 7-Family Directive Census",
+        "# Daemon-backed 7-Family Directive Census",
         "",
         f"- Repository root: `{repo_root}`",
-        f"- Scanner CLI: `{scanner}`",
+        f"- Daemon CLI: `{daemon}`",
         f"- Raw input set on disk: {inputs.raw_micro_count} micro paths + {inputs.raw_corpus_count} corpus paths",
         f"- Corpus source: {inputs.corpus_source}",
         f"- Actual `EM_BPF` objects scanned: {len(micro_results)} micro + {len(corpus_results)} corpus = {len(all_results)} total",
         f"- Skipped non-BPF `.bpf.o` artifacts: {len(inputs.skipped_non_bpf)}",
-        "- Method: extract each executable non-dot ELF section, then invoke `bpf-jit-scanner scan --xlated <section> --all --v5`.",
+        "- Method: extract each executable non-dot ELF section, then invoke `daemon scan --xlated <section> --all --v5`.",
         "",
         "## Aggregate Summary",
         "",
@@ -693,7 +691,7 @@ def render_report(
             + "."
         )
     lines.append(
-        "- These are raw scanner-backed candidate counts over ELF program sections, not live xlated acceptance counts."
+        "- These are raw daemon-backed candidate counts over ELF program sections, not live xlated acceptance counts."
     )
     return "\n".join(lines) + "\n"
 
@@ -701,25 +699,25 @@ def render_report(
 def main() -> int:
     args = parse_args()
     repo_root = Path(args.repo_root).resolve()
-    scanner = Path(args.scanner).resolve()
+    daemon = Path(args.daemon).resolve()
     default_output_md = repo_root / "docs" / "tmp" / "real-program-directive-census.md"
     output_md = Path(args.output_md or args.output or default_output_md).resolve()
     output_json = Path(args.output_json).resolve() if args.output_json else None
     corpus_build_report = Path(args.corpus_build_report).resolve() if args.corpus_build_report else None
-    if not scanner.exists():
-        raise SystemExit(f"scanner not found: {scanner}")
+    if not daemon.exists():
+        raise SystemExit(f"daemon not found: {daemon}")
 
     inputs = collect_inputs(repo_root, corpus_build_report)
-    micro_results = analyze_many(inputs.micro_paths, "micro", repo_root, scanner, args.workers)
-    corpus_results = analyze_many(inputs.corpus_paths, "corpus", repo_root, scanner, args.workers)
+    micro_results = analyze_many(inputs.micro_paths, "micro", repo_root, daemon, args.workers)
+    corpus_results = analyze_many(inputs.corpus_paths, "corpus", repo_root, daemon, args.workers)
 
-    report = render_report(repo_root, inputs, micro_results, corpus_results, args.top_n, scanner)
+    report = render_report(repo_root, inputs, micro_results, corpus_results, args.top_n, daemon)
     output_md.parent.mkdir(parents=True, exist_ok=True)
     output_md.write_text(report)
 
     if output_json is not None:
         payload = build_json_payload(
-            repo_root, inputs, micro_results, corpus_results, args.top_n, scanner
+            repo_root, inputs, micro_results, corpus_results, args.top_n, daemon
         )
         output_json.parent.mkdir(parents=True, exist_ok=True)
         output_json.write_text(json.dumps(payload, indent=2) + "\n")

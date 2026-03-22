@@ -25,7 +25,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--profile-json", required=True, help="Profile JSON produced by runner/scripts/bpf_profiler.py or runner/scripts/collect_e2e_profile.py.")
     parser.add_argument(
         "--census-json",
-        help="Optional external scanner enumerate JSON. When omitted, uses sites embedded in --profile-json.",
+        help="Optional external daemon enumerate JSON. When omitted, uses sites embedded in --profile-json.",
     )
     parser.add_argument("--output-dir", required=True, help="Directory where per-program YAMLs are written.")
     parser.add_argument(

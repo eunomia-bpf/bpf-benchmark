@@ -80,6 +80,8 @@ REPEAT ?= 100
 _VENV_CANDIDATES := $(HOME)/workspace/.venv $(HOME)/.venv .venv venv
 _VENV_FOUND := $(firstword $(foreach v,$(_VENV_CANDIDATES),$(if $(wildcard $(v)/bin/activate),$(v),)))
 VENV ?= $(_VENV_FOUND)
+# Python binary: prefer venv python, fall back to system python3.
+PYTHON := $(if $(VENV),$(VENV)/bin/python3,python3)
 # Optional: pass BENCH=name1 BENCH2=name2 ... via BENCH_FILTER env var, e.g.:
 #   make vm-micro BENCH=simple
 #   make vm-micro BENCH="simple bitcount"
@@ -143,16 +145,18 @@ endif
 # Pass --policy-dir only when a non-default policy is requested
 POLICY_DIR_FLAG := $(if $(filter-out default,$(POLICY)),--policy-dir "$(POLICY_DIR)",)
 
-# Shell snippet to load kinsn kernel modules inside VM (best-effort, ignores errors if already loaded or missing).
-LOAD_KINSN_MODULES := for ko in "$(KINSN_MODULE_DIR)/bpf_rotate.ko" "$(KINSN_MODULE_DIR)/bpf_select.ko" "$(KINSN_MODULE_DIR)/bpf_extract.ko"; do \
-		if [ -f "$$ko" ]; then sudo -n insmod "$$ko" 2>/dev/null || true; fi; \
-	done; \
-	echo "kinsn modules: $$(ls /sys/kernel/btf/bpf_rotate /sys/kernel/btf/bpf_select /sys/kernel/btf/bpf_extract 2>/dev/null | wc -l)/3 loaded";
+# Unified kinsn module loader script (works for x86_64 and aarch64).
+LOAD_KINSN_SCRIPT := $(ROOT_DIR)/module/load_all.sh
+# Shell snippet to load kinsn kernel modules inside VM (best-effort).
+LOAD_KINSN_MODULES := sudo -n "$(LOAD_KINSN_SCRIPT)" 2>/dev/null || true;
 
 MICRO_ARGS := --iterations $(ITERATIONS) --warmups $(WARMUPS) --repeat $(REPEAT) $(BENCH_FLAGS)
 LOCAL_SMOKE_ARGS := --bench simple --iterations 1 --warmups 0 --repeat 10
 VM_SMOKE_ARGS := --iterations 1 --warmups 0 --repeat 50
 VENV_ACTIVATE := $(if $(VENV),source "$(VENV)/bin/activate" &&,)
+# Unified VM init: activate venv + load kinsn modules.  Use at start of every
+# VM guest command:  bash -lc '$(VM_INIT) <actual command>'
+VM_INIT := $(VENV_ACTIVATE) $(LOAD_KINSN_MODULES)
 
 # File-based dependency sources (for proper incremental rebuilds)
 MICRO_RUNNER_SOURCES := $(wildcard \
@@ -239,6 +243,8 @@ help:
 	@echo "  REPEAT=N              - Repeat count (default: 100)"
 	@echo "  BENCH=\"name1 name2\"   - Run only specific benchmarks (vm-micro)"
 	@echo "  BZIMAGE=path          - Custom kernel image path"
+	@echo "  VENV=path             - Python venv path (auto-detected: $(VENV))"
+	@echo "  PYTHON=path           - Python binary (default: $(PYTHON))"
 	@echo "  CROSS_COMPILE_ARM64=  - ARM64 cross-compiler prefix (default: aarch64-linux-gnu-)"
 	@echo "  ARM64_ROOTFS_DIR=     - ARM64 guest rootfs path (default: $$HOME/.cache/bpf-benchmark/arm64-rootfs)"
 	@echo "  DOCKER=cmd            - Container engine command (default: docker)"
@@ -313,9 +319,8 @@ kinsn-modules:
 	@echo "=== Running make kinsn-modules ==="
 	$(MAKE) -C "$(KINSN_MODULE_DIR)" KDIR="$(KERNEL_DIR)"
 
-kernel:
-	@echo "=== Running make kernel ==="
-	$(MAKE) -C "$(KERNEL_DIR)" -j"$(NPROC)" bzImage
+kernel: $(BZIMAGE_PATH)
+	@echo "bzImage up-to-date: $(BZIMAGE_PATH)"
 
 kernel-perf:
 	@echo "=== Running make kernel-perf ==="
@@ -487,7 +492,7 @@ smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP)
 		--runtime llvmbpf \
 		$(LOCAL_SMOKE_ARGS) \
 		--output "$(SMOKE_OUTPUT)"
-	@python3 -c 'import json, pathlib; payload = json.loads(pathlib.Path("$(SMOKE_OUTPUT)").read_text()); bench = payload["benchmarks"][0]; run = bench["runs"][0]; result = next(iter(run["result_distribution"]), "?"); print("SMOKE OK: {} {} exec {:.0f} ns, compile {:.3f} ms, result {}".format(bench["name"], run["runtime"], float(run["exec_ns"]["median"]), float(run["compile_ns"]["median"]) / 1e6, result))'
+	@$(PYTHON) -c 'import json, pathlib; payload = json.loads(pathlib.Path("$(SMOKE_OUTPUT)").read_text()); bench = payload["benchmarks"][0]; run = bench["runs"][0]; result = next(iter(run["result_distribution"]), "?"); print("SMOKE OK: {} {} exec {:.0f} ns, compile {:.3f} ms, result {}".format(bench["name"], run["runtime"], float(run["exec_ns"]["median"]), float(run["compile_ns"]["median"]) / 1e6, result))'
 
 unittest-tests:
 	@echo "=== Running make unittest-tests ==="
@@ -495,7 +500,7 @@ unittest-tests:
 
 python-tests:
 	@echo "=== Running Python unit tests ==="
-	$(VENV_ACTIVATE) python3 -m pytest tests/python/ -v
+	$(PYTHON) -m pytest tests/python/ -v
 
 check:
 	@echo "=== Running make check ==="
@@ -553,8 +558,8 @@ vm-micro-smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(DAEMON_PATH) $(BZIMAGE_PATH
 	@echo "=== Running make vm-micro-smoke (POLICY=$(POLICY)) ==="
 	mkdir -p "$(MICRO_RESULTS_DEV_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
-		bash -lc 'cd "$(ROOT_DIR)" && $(LOAD_KINSN_MODULES) \
-			$(VENV_ACTIVATE) python3 "$(MICRO_DIR)/driver.py" suite \
+		bash -lc 'cd "$(ROOT_DIR)" && $(VM_INIT) \
+			python3 "$(MICRO_DIR)/driver.py" suite \
 			--runtime kernel \
 			--runtime kernel-rejit \
 			--daemon-path "$(DAEMON_PATH)" \
@@ -569,8 +574,8 @@ vm-micro: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(DAEMON_PATH) verify-build $(BZIMA
 	@echo "=== Running make vm-micro (POLICY=$(POLICY)) ==="
 	mkdir -p "$(MICRO_RESULTS_DEV_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
-		bash -lc 'cd "$(ROOT_DIR)" && $(LOAD_KINSN_MODULES) \
-			$(VENV_ACTIVATE) python3 "$(MICRO_DIR)/driver.py" suite \
+		bash -lc 'cd "$(ROOT_DIR)" && $(VM_INIT) \
+			python3 "$(MICRO_DIR)/driver.py" suite \
 			--runtime llvmbpf \
 			--runtime kernel \
 			--runtime kernel-rejit \
@@ -587,7 +592,8 @@ vm-corpus: $(MICRO_RUNNER) $(DAEMON_PATH) verify-build $(BZIMAGE_PATH)
 		--skip-build \
 		--kernel-image "$(BZIMAGE_PATH)" \
 		--runner "$(MICRO_RUNNER)" \
-		--scanner "$(DAEMON_PATH)" \
+		--daemon "$(DAEMON_PATH)" \
+		--vng "$(VNG)" \
 		--btf-custom-path "$(VMLINUX_PATH)" \
 		--repeat "$(REPEAT)" \
 		--use-policy \
@@ -598,25 +604,30 @@ vm-e2e: $(MICRO_RUNNER) $(DAEMON_PATH) verify-build $(BZIMAGE_PATH)
 	@echo "=== Running make vm-e2e ==="
 	mkdir -p "$(E2E_RESULTS_DEV_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
-		bash -lc 'cd "$(ROOT_DIR)" && $(VENV_ACTIVATE) python3 "$(ROOT_DIR)/e2e/run.py" tracee \
+		bash -lc 'cd "$(ROOT_DIR)" && $(VM_INIT) \
+			python3 "$(ROOT_DIR)/e2e/run.py" tracee \
 			--output-json "$(VM_TRACEE_OUTPUT_JSON)" \
 			--output-md "$(VM_TRACEE_OUTPUT_MD)"'
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
-		bash -lc 'cd "$(ROOT_DIR)" && $(VENV_ACTIVATE) python3 "$(ROOT_DIR)/e2e/run.py" tetragon \
+		bash -lc 'cd "$(ROOT_DIR)" && $(VM_INIT) \
+			python3 "$(ROOT_DIR)/e2e/run.py" tetragon \
 			--output-json "$(VM_TETRAGON_OUTPUT_JSON)" \
 			--output-md "$(VM_TETRAGON_OUTPUT_MD)"'
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
-		bash -lc 'cd "$(ROOT_DIR)" && $(VENV_ACTIVATE) python3 "$(ROOT_DIR)/e2e/run.py" bpftrace \
+		bash -lc 'cd "$(ROOT_DIR)" && $(VM_INIT) \
+			python3 "$(ROOT_DIR)/e2e/run.py" bpftrace \
 			--skip-build \
 			--output-json "$(VM_BPFTRACE_OUTPUT_JSON)" \
 			--output-md "$(VM_BPFTRACE_OUTPUT_MD)" \
 			--report-md "$(VM_BPFTRACE_REPORT_MD)"'
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
-		bash -lc 'cd "$(ROOT_DIR)" && $(VENV_ACTIVATE) python3 "$(ROOT_DIR)/e2e/run.py" scx \
+		bash -lc 'cd "$(ROOT_DIR)" && $(VM_INIT) \
+			python3 "$(ROOT_DIR)/e2e/run.py" scx \
 			--output-json "$(VM_SCX_OUTPUT_JSON)" \
 			--output-md "$(VM_SCX_OUTPUT_MD)"'
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
-		bash -lc 'cd "$(ROOT_DIR)" && $(VENV_ACTIVATE) python3 "$(ROOT_DIR)/e2e/run.py" katran \
+		bash -lc 'cd "$(ROOT_DIR)" && $(VM_INIT) \
+			python3 "$(ROOT_DIR)/e2e/run.py" katran \
 			--output-json "$(VM_KATRAN_OUTPUT_JSON)" \
 			--output-md "$(VM_KATRAN_OUTPUT_MD)"'
 

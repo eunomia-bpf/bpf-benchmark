@@ -20,7 +20,7 @@
 
 原因也很明确：
 
-- 当前 pipeline 已经改成“本地 Docker 交叉编译 `micro_exec` + `scanner` -> `scp` 上传 -> `t4g.micro` 直接跑”
+- 当前 pipeline 已经改成“本地 Docker 交叉编译 `micro_exec` + `daemon` -> `scp` 上传 -> `t4g.micro` 直接跑”
 - 远端机器不再承担编译负载，只负责装 custom kernel、接收预编译产物、执行 smoke、下载结果
 - 既然不再需要远端 native build，就没有理由为了编译速度去起大机器
 
@@ -376,12 +376,12 @@ sudo lsinitrd /boot/initramfs-<ver>.img | grep -E 'ena|nvme|xfs'
 6. 把持久默认项设回 stock
 7. `grub2-reboot` 一次性启动 custom
 8. 用 `uname -r` 和 `ip -brief addr show ens5` 验证 custom kernel 已启动且网络正常
-9. 在本机执行 `make cross-arm64`，用 `Amazon Linux 2023 ARM64` Docker 镜像本地构建 `micro_exec` 和 `scanner`
+9. 在本机执行 `make cross-arm64`，用 `Amazon Linux 2023 ARM64` Docker 镜像本地构建 `micro_exec` 和 `daemon`
    产物默认输出到 `.cache/aws-arm64/binaries/`
-10. 上传预编译 bundle（`micro_exec`、`scanner`、运行库、micro smoke 资产、scanner smoke 资产）
+10. 上传预编译 bundle（`micro_exec`、`daemon`、运行库、micro smoke 资产、daemon smoke 资产）
 11. 在 `t4g.micro` 上直接跑：
    - micro smoke：`simple` + `load_byte_recompose`
-   - scanner smoke：`bpftool prog loadall -> scanner enumerate -> scanner enumerate --recompile`
+   - daemon smoke：`bpftool prog loadall -> daemon enumerate -> daemon enumerate --recompile`
 12. 下载结果
 13. 验证完成后立刻 `terminate-instances`
 

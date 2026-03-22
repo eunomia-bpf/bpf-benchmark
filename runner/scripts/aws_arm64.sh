@@ -572,8 +572,8 @@ ensure_benchmark_bundle() {
     require_local_path "$ROOT_DIR/micro/policies/load_byte_recompose.yaml" "load_byte_recompose policy"
     require_local_path "$ROOT_DIR/runner/libs/__init__.py" "runner python helpers"
     require_local_path "$ROOT_DIR/runner/scripts/arm64_t4g_remote_benchmark.py" "ARM64 remote benchmark runner"
-    require_local_path "$SMOKE_CORPUS_OBJECT" "scanner smoke object"
-    require_local_path "$SMOKE_CORPUS_POLICY_DIR/${SMOKE_CORPUS_PROGRAM}.policy.yaml" "scanner smoke policy"
+    require_local_path "$SMOKE_CORPUS_OBJECT" "daemon smoke object"
+    require_local_path "$SMOKE_CORPUS_POLICY_DIR/${SMOKE_CORPUS_PROGRAM}.policy.yaml" "daemon smoke policy"
 
     rm -rf "$BENCHMARK_BUNDLE_DIR"
     mkdir -p \

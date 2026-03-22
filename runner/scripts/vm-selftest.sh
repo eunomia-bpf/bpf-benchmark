@@ -13,16 +13,22 @@ BUILD_DIR="${UNITTEST_DIR}/build"
 
 cd "$ROOT_DIR"
 
-# Load kinsn modules (best-effort).
-for ko in "${KINSN_MODULE_DIR}/bpf_rotate.ko" \
-          "${KINSN_MODULE_DIR}/bpf_select.ko" \
-          "${KINSN_MODULE_DIR}/bpf_extract.ko"; do
-    if [ -f "$ko" ]; then
-        sudo -n insmod "$ko" 2>/dev/null || true
-    fi
-done
-loaded=$(ls /sys/kernel/btf/bpf_rotate /sys/kernel/btf/bpf_select /sys/kernel/btf/bpf_extract 2>/dev/null | wc -l)
-echo "kinsn modules: ${loaded}/3 loaded"
+# Load kinsn modules via the unified loader (best-effort).
+LOAD_SCRIPT="${ROOT_DIR}/module/load_all.sh"
+if [ -x "$LOAD_SCRIPT" ]; then
+    sudo -n "$LOAD_SCRIPT" || true
+else
+    echo "WARN: module/load_all.sh not found, loading modules manually"
+    for ko in "${KINSN_MODULE_DIR}/bpf_rotate.ko" \
+              "${KINSN_MODULE_DIR}/bpf_select.ko" \
+              "${KINSN_MODULE_DIR}/bpf_extract.ko"; do
+        if [ -f "$ko" ]; then
+            sudo -n insmod "$ko" 2>/dev/null || true
+        fi
+    done
+    loaded=$(ls /sys/kernel/btf/bpf_rotate /sys/kernel/btf/bpf_select /sys/kernel/btf/bpf_extract 2>/dev/null | wc -l)
+    echo "kinsn modules: ${loaded}/3 loaded"
+fi
 
 # Part 1: kernel selftest (test_recompile).
 echo "=== Running kernel selftest ==="

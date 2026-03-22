@@ -13,7 +13,7 @@ defaults:
 
 build:
   runner_binary: runner/build/micro_exec
-  scanner_binary: daemon/build/bpfrejit-daemon
+  daemon_binary: daemon/build/bpfrejit-daemon
   bpftool_binary: bpftool
 
 runtimes:

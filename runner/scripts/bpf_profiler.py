@@ -33,7 +33,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--duration", type=float, default=30.0, help="Profiling window in seconds.")
     parser.add_argument(
-        "--scanner",
+        "--daemon",
         default=str(DEFAULT_DAEMON),
         help="Path to bpfrejit-daemon used for live enumerate.",
     )
@@ -55,7 +55,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--no-sites",
         action="store_true",
-        help="Skip scanner enumerate site census collection.",
+        help="Skip daemon enumerate site census collection.",
     )
     parser.add_argument(
         "--no-perf",
@@ -75,7 +75,7 @@ def main(argv: list[str] | None = None) -> int:
     payload = profile_current_programs(
         prog_ids=args.prog_ids,
         duration_s=float(args.duration),
-        scanner_binary=Path(args.scanner).resolve(),
+        daemon_binary=Path(args.daemon).resolve(),
         name_contains=args.name_contains,
         type_equals=args.types,
         include_sites=not bool(args.no_sites),

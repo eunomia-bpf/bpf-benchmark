@@ -138,7 +138,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--timeout",
         type=int,
         default=DEFAULT_TIMEOUT_SECONDS,
-        help="Timeout in seconds used for scanner, inventory, and per-candidate measurements.",
+        help="Timeout in seconds used for daemon, inventory, and per-candidate measurements.",
     )
     parser.add_argument(
         "--repeat",
@@ -836,8 +836,8 @@ def run_phase_1(
         raise SystemExit("no corpus object roots found")
     if not runner.exists():
         raise SystemExit(f"runner not found: {runner}")
-    if not scanner.exists():
-        raise SystemExit(f"scanner not found: {scanner}")
+    if not daemon.exists():
+        raise SystemExit(f"daemon not found: {daemon}")
 
     object_paths = discover_object_paths(
         selected_roots,

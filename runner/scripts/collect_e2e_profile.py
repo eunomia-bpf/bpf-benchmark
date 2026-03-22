@@ -160,7 +160,7 @@ def add_common_profile_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--duration", type=float, help="Profiling window in seconds.")
     parser.add_argument("--output-json", required=True, help="Output JSON path.")
     parser.add_argument(
-        "--scanner",
+        "--daemon",
         default=str(DEFAULT_DAEMON),
         help="Path to bpfrejit-daemon used for live enumerate.",
     )
@@ -221,7 +221,7 @@ def parse_csv_tokens(value: str) -> list[str]:
 
 def profiler_options(args: argparse.Namespace) -> dict[str, Any]:
     return {
-        "scanner_binary": Path(args.scanner).resolve(),
+        "daemon_binary": Path(args.daemon).resolve(),
         "include_sites": not bool(args.no_sites),
         "collect_perf": not bool(args.no_perf),
         "perf_events": parse_csv_tokens(args.perf_events),
@@ -231,11 +231,11 @@ def profiler_options(args: argparse.Namespace) -> dict[str, Any]:
 
 def run_tracee_collection(args: argparse.Namespace) -> dict[str, Any]:
     runner_binary = Path(args.runner).resolve()
-    scanner_binary = Path(args.scanner).resolve()
+    daemon_binary = Path(args.daemon).resolve()
     tracee_object = Path(args.tracee_object).resolve()
     config_path = Path(args.config).resolve()
     setup_script = Path(args.setup_script).resolve()
-    ensure_tracee_artifacts(runner_binary, scanner_binary)
+    ensure_tracee_artifacts(runner_binary, daemon_binary)
     config = load_tracee_config(config_path)
     setup_result = {"returncode": 0, "tracee_binary": None, "stdout_tail": "", "stderr_tail": ""}
     if not args.skip_setup:
@@ -331,11 +331,11 @@ def run_tracee_collection(args: argparse.Namespace) -> dict[str, Any]:
 
 def run_tetragon_collection(args: argparse.Namespace) -> dict[str, Any]:
     runner_binary = Path(args.runner).resolve()
-    scanner_binary = Path(args.scanner).resolve()
+    daemon_binary = Path(args.daemon).resolve()
     execve_object = Path(args.execve_object).resolve()
     kprobe_object = Path(args.kprobe_object).resolve()
     setup_script = Path(args.setup_script).resolve()
-    ensure_tetragon_artifacts(runner_binary, scanner_binary)
+    ensure_tetragon_artifacts(runner_binary, daemon_binary)
     setup_result = {
         "returncode": 0,
         "tetragon_binary": None,
@@ -451,10 +451,10 @@ def run_katran_collection(args: argparse.Namespace) -> dict[str, Any]:
         os.environ["BPFTOOL_BIN"] = resolved_bpftool
 
     runner_binary = Path(args.runner).resolve()
-    scanner_binary = Path(args.scanner).resolve()
+    daemon_binary = Path(args.daemon).resolve()
     katran_object = Path(args.katran_object).resolve()
     setup_script = Path(args.setup_script).resolve()
-    ensure_katran_artifacts(runner_binary, scanner_binary)
+    ensure_katran_artifacts(runner_binary, daemon_binary)
     duration_s = float(
         args.duration
         if args.duration is not None
