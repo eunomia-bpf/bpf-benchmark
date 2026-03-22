@@ -7,30 +7,29 @@ use crate::pass::*;
 
 use super::fixup_branches_inline;
 
-/// BRANCH_FLIP: PGO-guided and heuristic reorder of if/else bodies.
+/// BRANCH_FLIP: PGO-guided reorder of if/else bodies.
 ///
-/// Generalised pattern:
-///   pc:           Jcc +N          // conditional jump over then-body to JA
-///   pc+1..pc+N:   [then body: N insns]
-///   pc+N+1:       JA +M           // unconditional jump over else-body
-///   pc+N+2..pc+N+M+1: [else body: M insns]
+/// True if/else diamond in BPF bytecode:
+///   pc:             Jcc +N          // conditional jump; if taken, go to else_start
+///   pc+1..pc+N:     [then body: N-1 insns]
+///   pc+N:           JA +M           // unconditional jump over else-body
+///   pc+N+1..pc+N+M: [else body: M insns]
+///
+/// Where:
+///   - `N = jcc.off` (the Jcc offset)
+///   - then_len = N - 1 (instructions between Jcc and JA, exclusive)
+///   - else_start = pc + N + 1
+///   - else_len = M = ja.off
 ///
 /// After flip (inverted condition, bodies swapped):
-///   pc:           J!cc +M         // inverted, jump over else-body (now first)
-///   pc+1..pc+M:   [else body: M insns]
-///   pc+M+1:       JA +N           // jump over then-body (now second)
-///   pc+M+2..pc+M+N+1: [then body: N insns]
+///   pc:             J!cc +M         // inverted, jump over else-body (now first)
+///   pc+1..pc+M:     [else body: M insns]
+///   pc+M+1:         JA +(N-1)       // jump over then-body (now second)
+///   pc+M+2..pc+M+N: [then body: N-1 insns]
 ///
-/// Two triggering modes:
-///
-/// 1. **PGO mode** (preferred): If PGO data shows the taken path (else body) is
-///    hot (above `min_bias`), flip so the hot path becomes fall-through.
-///
-/// 2. **Heuristic mode** (fallback): If no PGO data is available, use a static
-///    heuristic: if the then-body is more than 2x longer than the else-body,
-///    flip to make the shorter body the fall-through. This is a classic compiler
-///    optimization (GCC/LLVM both do it) — shorter fall-through paths improve
-///    instruction cache utilization and reduce taken-branch overhead.
+/// **PGO-only mode**: branch_flip only fires when PGO profiler data (via
+/// `BranchProfile` annotation) shows the taken path is hot. Without profiler
+/// data, the pass skips all sites (no heuristic fallback).
 ///
 /// Safety: skips sites where external branches target interior instructions,
 /// or where JSET is used (no simple inverse). Also adjusts internal branch
@@ -44,9 +43,9 @@ pub struct BranchFlipPass {
 struct BranchFlipSite {
     /// PC of the Jcc instruction.
     pc: usize,
-    /// Number of instructions in the then-body.
+    /// Number of instructions in the then-body (N-1, between Jcc and JA).
     then_len: usize,
-    /// Number of instructions in the else-body.
+    /// Number of instructions in the else-body (M = ja.off).
     else_len: usize,
 }
 
@@ -117,29 +116,23 @@ impl BpfPass for BranchFlipPass {
                 continue;
             }
 
-            // Decision: PGO mode or heuristic mode.
-            let (should_flip, flip_reason) = if let Some(ref bp) = program.annotations[site.pc].branch_profile {
+            // Decision: PGO-only mode. No heuristic fallback.
+            let should_flip = if let Some(ref bp) = program.annotations[site.pc].branch_profile {
                 let total = bp.taken_count + bp.not_taken_count;
                 if total > 0 && bp.taken_count as f64 / total as f64 >= self.min_bias {
-                    (true, "pgo")
+                    true
                 } else {
-                    (false, "pgo_insufficient")
+                    false
                 }
             } else {
-                // Heuristic mode: if then-body is more than 2x the else-body,
-                // flip to make the shorter else-body the fall-through.
-                // This is a classic static branch layout heuristic from GCC/LLVM.
-                if site.then_len > 2 * site.else_len && site.else_len > 0 {
-                    (true, "heuristic")
-                } else {
-                    (false, "no_pgo_no_heuristic")
-                }
+                false
             };
 
             if !should_flip {
-                let reason = match flip_reason {
-                    "pgo_insufficient" => "branch not biased enough".to_string(),
-                    _ => "no PGO data and bodies not asymmetric enough".to_string(),
+                let reason = if program.annotations[site.pc].branch_profile.is_some() {
+                    "branch not biased enough".to_string()
+                } else {
+                    "no PGO data available (PGO-only mode)".to_string()
                 };
                 skipped.push(SkipReason {
                     pc: site.pc,
@@ -186,25 +179,29 @@ impl BpfPass for BranchFlipPass {
                 let else_start = ja_pc + 1;
                 let else_end = else_start + site.else_len;
 
-                // Emit inverted Jcc
+                // Emit inverted Jcc.
+                // New layout: [Jcc'] [else M insns] [JA] [then N-1 insns]
+                // Jcc' not-taken: fall through to else body (M insns) then JA
+                // Jcc' taken: skip else+JA to reach then body
+                // offset = else_len + 1 (skip M else insns + 1 JA insn)
                 let old_jcc = program.insns[site.pc];
                 let new_op = invert_jcc_op(bpf_op(old_jcc.code)).unwrap();
                 let mut new_jcc = old_jcc;
                 new_jcc.code = (old_jcc.code & 0x0f) | new_op;
-                new_jcc.off = site.else_len as i16;
+                new_jcc.off = (site.else_len + 1) as i16;
                 new_insns.push(new_jcc);
 
-                // Emit else body
+                // Emit else body (was after JA, now first)
                 for i in else_start..else_end {
                     addr_map[i] = new_insns.len();
                     new_insns.push(program.insns[i]);
                 }
 
-                // Emit JA
+                // Emit JA that skips over then body
                 addr_map[ja_pc] = new_insns.len();
                 new_insns.push(BpfInsn::ja(site.then_len as i16));
 
-                // Emit then body
+                // Emit then body (was first, now second)
                 for i in then_start..then_end {
                     addr_map[i] = new_insns.len();
                     new_insns.push(program.insns[i]);
@@ -225,8 +222,17 @@ impl BpfPass for BranchFlipPass {
         }
         addr_map[n] = new_insns.len();
 
-        // Phase 4: fix up internal branches.
+        // Phase 4: fix up internal branches (for instructions NOT part of rewritten sites).
         fixup_branches_inline(&mut new_insns, &program.insns, &addr_map);
+
+        // Restore the manually-set JCC and JA offsets that fixup may have overwritten.
+        for site in &safe_sites {
+            let new_jcc_pc = addr_map[site.pc];
+            new_insns[new_jcc_pc].off = (site.else_len + 1) as i16;
+            let old_ja_pc = site.pc + 1 + site.then_len;
+            let new_ja_pc = addr_map[old_ja_pc];
+            new_insns[new_ja_pc].off = site.then_len as i16;
+        }
 
         program.insns = new_insns;
         program.log_transform(TransformEntry {
@@ -247,7 +253,13 @@ impl BpfPass for BranchFlipPass {
     }
 }
 
-/// Scan for branch-flip candidate sites.
+/// Scan for branch-flip candidate sites with correct if/else diamond shape.
+///
+/// True diamond:
+///   pc:     Jcc +N          // N = jcc.off
+///   pc+1..pc+N-1: then body (N-1 insns)
+///   pc+N:   JA +M
+///   pc+N+1..pc+N+M: else body (M insns)
 fn scan_branch_flip_sites(insns: &[BpfInsn]) -> Vec<BranchFlipSite> {
     let mut sites = Vec::new();
     let n = insns.len();
@@ -255,10 +267,13 @@ fn scan_branch_flip_sites(insns: &[BpfInsn]) -> Vec<BranchFlipSite> {
 
     while pc < n {
         let jcc = &insns[pc];
-        if jcc.is_cond_jmp() && jcc.off > 0 {
-            let then_len = jcc.off as usize;
-            let ja_pc = pc + 1 + then_len;
+        if jcc.is_cond_jmp() && jcc.off > 1 {
+            let off = jcc.off as usize;
+            // The Jcc target is pc + 1 + off = pc + N + 1 (else_start).
+            // JA is at pc + off (the last instruction of the then block + JA).
+            let ja_pc = pc + off;
             if ja_pc < n && insns[ja_pc].is_ja() && insns[ja_pc].off > 0 {
+                let then_len = off - 1; // N-1 instructions between Jcc and JA
                 let else_len = insns[ja_pc].off as usize;
                 let site_end = ja_pc + 1 + else_len;
                 if site_end <= n {
@@ -340,10 +355,50 @@ mod tests {
         }
     }
 
+    // ── True diamond: Jcc +N ; [then N-1] ; JA +M ; [else M] ──
+    // Example: JNE +2 ; mov(then) ; JA +1 ; mov(else)
+    // then_len=1, else_len=1
+
     #[test]
-    fn test_branch_flip_no_pgo() {
+    fn test_scan_finds_diamond() {
+        // JNE r1, 0, +2 ; mov r0, 10 ; JA +1 ; mov r0, 20 ; exit
+        let insns = vec![
+            jne_imm(1, 0, 2),           // pc=0: Jcc +2 -> target pc=3 (else_start)
+            BpfInsn::mov64_imm(0, 10),  // pc=1: then body
+            BpfInsn::ja(1),             // pc=2: JA +1 -> skip else
+            BpfInsn::mov64_imm(0, 20),  // pc=3: else body
+            exit_insn(),                 // pc=4
+        ];
+        let sites = scan_branch_flip_sites(&insns);
+        assert_eq!(sites.len(), 1);
+        assert_eq!(sites[0].pc, 0);
+        assert_eq!(sites[0].then_len, 1);
+        assert_eq!(sites[0].else_len, 1);
+        assert_eq!(sites[0].total_len(), 4);
+    }
+
+    #[test]
+    fn test_scan_asymmetric_diamond() {
+        // JEQ r1, 0, +3 ; mov1 ; mov2 ; JA +1 ; mov3 ; exit
+        let insns = vec![
+            jeq_imm(1, 0, 3),           // Jcc +3 -> target pc=4 (else_start)
+            BpfInsn::mov64_imm(0, 1),   // then[0]
+            BpfInsn::mov64_imm(1, 2),   // then[1]
+            BpfInsn::ja(1),             // JA +1
+            BpfInsn::mov64_imm(0, 10),  // else[0]
+            exit_insn(),
+        ];
+        let sites = scan_branch_flip_sites(&insns);
+        assert_eq!(sites.len(), 1);
+        assert_eq!(sites[0].then_len, 2);
+        assert_eq!(sites[0].else_len, 1);
+    }
+
+    #[test]
+    fn test_branch_flip_no_pgo_skips() {
+        // Without PGO data, the pass should not flip.
         let mut prog = make_program(vec![
-            jne_imm(1, 0, 1),
+            jne_imm(1, 0, 2),
             BpfInsn::mov64_imm(0, 10),
             BpfInsn::ja(1),
             BpfInsn::mov64_imm(0, 20),
@@ -356,15 +411,16 @@ mod tests {
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert!(!result.changed);
         assert_eq!(result.sites_applied, 0);
+        assert!(result.sites_skipped.iter().any(|s| s.reason.contains("no PGO data")));
     }
 
     #[test]
     fn test_branch_flip_with_biased_pgo() {
         let mut prog = make_program(vec![
-            jne_imm(1, 0, 1),
-            BpfInsn::mov64_imm(0, 10),
-            BpfInsn::ja(1),
-            BpfInsn::mov64_imm(0, 20),
+            jne_imm(1, 0, 2),           // Jcc +2 -> else at pc=3
+            BpfInsn::mov64_imm(0, 10),  // then
+            BpfInsn::ja(1),             // skip else
+            BpfInsn::mov64_imm(0, 20),  // else
             exit_insn(),
         ]);
         prog.annotations[0].branch_profile = Some(BranchProfile {
@@ -379,21 +435,27 @@ mod tests {
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
-        assert_eq!(bpf_op(prog.insns[0].code), BPF_JEQ);
-        assert_eq!(prog.insns[1].imm, 20);
-        assert_eq!(prog.insns[3].imm, 10);
+        // After flip layout: [JEQ +2] [else: mov 20] [JA +1] [then: mov 10] [exit]
+        assert_eq!(bpf_op(prog.insns[0].code), BPF_JEQ); // inverted JNE -> JEQ
+        assert_eq!(prog.insns[0].off, 2); // skip else(1) + JA(1) = 2
+        assert_eq!(prog.insns[1].imm, 20); // else body first
+        assert!(prog.insns[2].is_ja());
+        assert_eq!(prog.insns[2].off, 1); // jump over then body (1 insn)
+        assert_eq!(prog.insns[3].imm, 10); // then body second
+        assert_eq!(prog.insns.len(), 5); // same size
     }
 
     #[test]
-    fn test_branch_flip_asymmetric_bodies() {
+    fn test_branch_flip_asymmetric_with_pgo() {
+        // then=2 insns, else=3 insns
         let mut prog = make_program(vec![
-            jeq_imm(1, 0, 2),
-            BpfInsn::mov64_imm(0, 1),
-            BpfInsn::mov64_imm(1, 2),
-            BpfInsn::ja(3),
-            BpfInsn::mov64_imm(0, 10),
-            BpfInsn::mov64_imm(1, 20),
-            BpfInsn::mov64_imm(2, 30),
+            jeq_imm(1, 0, 3),                // Jcc +3 -> else at pc=4
+            BpfInsn::mov64_imm(0, 1),        // then[0]
+            BpfInsn::mov64_imm(1, 2),        // then[1]
+            BpfInsn::ja(3),                  // JA +3 -> skip else
+            BpfInsn::mov64_imm(0, 10),       // else[0]
+            BpfInsn::mov64_imm(1, 20),       // else[1]
+            BpfInsn::mov64_imm(2, 30),       // else[2]
             exit_insn(),
         ]);
         prog.annotations[0].branch_profile = Some(BranchProfile {
@@ -408,16 +470,19 @@ mod tests {
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
-        assert_eq!(bpf_op(prog.insns[0].code), BPF_JNE);
-        assert_eq!(prog.insns[0].off, 3);
+        assert_eq!(bpf_op(prog.insns[0].code), BPF_JNE); // inverted JEQ -> JNE
+        assert_eq!(prog.insns[0].off, 4); // skip else(3) + JA(1) = 4
+        // Else body first
         assert_eq!(prog.insns[1].imm, 10);
         assert_eq!(prog.insns[2].imm, 20);
         assert_eq!(prog.insns[3].imm, 30);
+        // JA to skip then body
         assert!(prog.insns[4].is_ja());
-        assert_eq!(prog.insns[4].off, 2);
+        assert_eq!(prog.insns[4].off, 2); // jump over then body (2 insns)
+        // Then body second
         assert_eq!(prog.insns[5].imm, 1);
         assert_eq!(prog.insns[6].imm, 2);
-        assert_eq!(prog.insns.len(), 8);
+        assert_eq!(prog.insns.len(), 8); // same size
     }
 
     #[test]
@@ -426,7 +491,7 @@ mod tests {
             BpfInsn {
                 code: BPF_JMP | BPF_JSET | BPF_K,
                 regs: BpfInsn::make_regs(1, 0),
-                off: 1,
+                off: 2,
                 imm: 0xff,
             },
             BpfInsn::mov64_imm(0, 10),
@@ -451,7 +516,7 @@ mod tests {
     #[test]
     fn test_branch_flip_insufficient_bias() {
         let mut prog = make_program(vec![
-            jne_imm(1, 0, 1),
+            jne_imm(1, 0, 2),
             BpfInsn::mov64_imm(0, 10),
             BpfInsn::ja(1),
             BpfInsn::mov64_imm(0, 20),
@@ -486,27 +551,9 @@ mod tests {
     }
 
     #[test]
-    fn test_branch_flip_scan_finds_sites() {
-        let insns = vec![
-            jne_imm(1, 0, 2),
-            BpfInsn::mov64_imm(0, 1),
-            BpfInsn::mov64_imm(1, 2),
-            BpfInsn::ja(1),
-            BpfInsn::mov64_imm(0, 10),
-            exit_insn(),
-        ];
-        let sites = scan_branch_flip_sites(&insns);
-        assert_eq!(sites.len(), 1);
-        assert_eq!(sites[0].pc, 0);
-        assert_eq!(sites[0].then_len, 2);
-        assert_eq!(sites[0].else_len, 1);
-        assert_eq!(sites[0].total_len(), 5);
-    }
-
-    #[test]
     fn test_branch_flip_preserves_program_size() {
         let mut prog = make_program(vec![
-            jne_imm(1, 0, 1),
+            jne_imm(1, 0, 2),
             BpfInsn::mov64_imm(0, 10),
             BpfInsn::ja(1),
             BpfInsn::mov64_imm(0, 20),
@@ -527,20 +574,18 @@ mod tests {
         assert_eq!(prog.insns.len(), orig_len);
     }
 
-    // ── Heuristic mode tests ─────────────────────────────────────────
-
     #[test]
-    fn test_branch_flip_heuristic_long_then_short_else() {
-        // then_len=5, else_len=1 => 5 > 2*1 => heuristic should flip
+    fn test_branch_flip_no_heuristic_fallback() {
+        // Even with very asymmetric bodies, no PGO = no flip.
         let mut prog = make_program(vec![
-            jne_imm(1, 0, 5),           // Jcc +5
-            BpfInsn::mov64_imm(0, 1),   // then body (5 insns)
+            jne_imm(1, 0, 6),                // Jcc +6 -> else at pc=7
+            BpfInsn::mov64_imm(0, 1),
             BpfInsn::mov64_imm(1, 2),
             BpfInsn::mov64_imm(2, 3),
             BpfInsn::mov64_imm(3, 4),
             BpfInsn::mov64_imm(4, 5),
-            BpfInsn::ja(1),             // JA +1
-            BpfInsn::mov64_imm(0, 99),  // else body (1 insn)
+            BpfInsn::ja(1),                  // JA +1
+            BpfInsn::mov64_imm(0, 99),       // else
             exit_insn(),
         ]);
         // No PGO data at all
@@ -549,132 +594,7 @@ mod tests {
 
         let pass = BranchFlipPass { min_bias: 0.7 };
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(result.changed, "heuristic should flip when then_len > 2 * else_len");
-        assert_eq!(result.sites_applied, 1);
-        // After flip: inverted condition, else body first
-        assert_eq!(bpf_op(prog.insns[0].code), BPF_JEQ); // inverted JNE -> JEQ
-        assert_eq!(prog.insns[0].off, 1); // jump over else body (1 insn)
-        assert_eq!(prog.insns[1].imm, 99); // else body first
-        assert!(prog.insns[2].is_ja());
-        assert_eq!(prog.insns[2].off, 5); // jump over then body (5 insns)
-        assert_eq!(prog.insns.len(), 9); // same size
-    }
-
-    #[test]
-    fn test_branch_flip_heuristic_no_flip_symmetric() {
-        // then_len=1, else_len=1 => 1 > 2*1 is false => no flip
-        let mut prog = make_program(vec![
-            jne_imm(1, 0, 1),
-            BpfInsn::mov64_imm(0, 10),
-            BpfInsn::ja(1),
-            BpfInsn::mov64_imm(0, 20),
-            exit_insn(),
-        ]);
-        let mut cache = AnalysisCache::new();
-        let ctx = PassContext::test_default();
-
-        let pass = BranchFlipPass { min_bias: 0.7 };
-        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(!result.changed);
-        assert_eq!(result.sites_applied, 0);
-        assert!(result.sites_skipped.iter().any(|s| s.reason.contains("not asymmetric enough")));
-    }
-
-    #[test]
-    fn test_branch_flip_heuristic_no_flip_then_shorter() {
-        // then_len=1, else_len=5 => 1 > 2*5 is false => no flip
-        // (heuristic only flips when then is the long one)
-        let mut prog = make_program(vec![
-            jne_imm(1, 0, 1),
-            BpfInsn::mov64_imm(0, 10),
-            BpfInsn::ja(5),
-            BpfInsn::mov64_imm(0, 1),
-            BpfInsn::mov64_imm(1, 2),
-            BpfInsn::mov64_imm(2, 3),
-            BpfInsn::mov64_imm(3, 4),
-            BpfInsn::mov64_imm(4, 5),
-            exit_insn(),
-        ]);
-        let mut cache = AnalysisCache::new();
-        let ctx = PassContext::test_default();
-
-        let pass = BranchFlipPass { min_bias: 0.7 };
-        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(!result.changed);
-    }
-
-    #[test]
-    fn test_branch_flip_heuristic_exactly_2x() {
-        // then_len=2, else_len=1 => 2 > 2*1 is false (not strictly greater) => no flip
-        let mut prog = make_program(vec![
-            jne_imm(1, 0, 2),
-            BpfInsn::mov64_imm(0, 1),
-            BpfInsn::mov64_imm(1, 2),
-            BpfInsn::ja(1),
-            BpfInsn::mov64_imm(0, 99),
-            exit_insn(),
-        ]);
-        let mut cache = AnalysisCache::new();
-        let ctx = PassContext::test_default();
-
-        let pass = BranchFlipPass { min_bias: 0.7 };
-        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(!result.changed, "exactly 2x should not trigger heuristic (need >2x)");
-    }
-
-    #[test]
-    fn test_branch_flip_heuristic_3x() {
-        // then_len=3, else_len=1 => 3 > 2*1 => flip
-        let mut prog = make_program(vec![
-            jne_imm(1, 0, 3),
-            BpfInsn::mov64_imm(0, 1),
-            BpfInsn::mov64_imm(1, 2),
-            BpfInsn::mov64_imm(2, 3),
-            BpfInsn::ja(1),
-            BpfInsn::mov64_imm(0, 99),
-            exit_insn(),
-        ]);
-        let mut cache = AnalysisCache::new();
-        let ctx = PassContext::test_default();
-
-        let pass = BranchFlipPass { min_bias: 0.7 };
-        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        assert!(result.changed);
-        assert_eq!(result.sites_applied, 1);
-    }
-
-    #[test]
-    fn test_branch_flip_pgo_overrides_heuristic() {
-        // then_len=5, else_len=1 => heuristic would flip
-        // But PGO says bias is insufficient => should NOT flip
-        let mut prog = make_program(vec![
-            jne_imm(1, 0, 5),
-            BpfInsn::mov64_imm(0, 1),
-            BpfInsn::mov64_imm(1, 2),
-            BpfInsn::mov64_imm(2, 3),
-            BpfInsn::mov64_imm(3, 4),
-            BpfInsn::mov64_imm(4, 5),
-            BpfInsn::ja(1),
-            BpfInsn::mov64_imm(0, 99),
-            exit_insn(),
-        ]);
-        prog.annotations[0].branch_profile = Some(BranchProfile {
-            taken_count: 50,
-            not_taken_count: 50,
-        });
-        let mut cache = AnalysisCache::new();
-        let ctx = PassContext::test_default();
-
-        let pass = BranchFlipPass { min_bias: 0.7 };
-        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-
-        // PGO data present but insufficient => do NOT fall back to heuristic
-        assert!(!result.changed);
-        assert!(result.sites_skipped.iter().any(|s| s.reason.contains("not biased enough")));
+        assert!(!result.changed, "should NOT flip without PGO data");
+        assert!(result.sites_skipped.iter().any(|s| s.reason.contains("no PGO data")));
     }
 }

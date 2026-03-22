@@ -8,6 +8,7 @@ use crate::pass::{Analysis, BpfProgram};
 
 /// Per-instruction liveness: which registers are live before/after each insn.
 #[derive(Clone, Debug)]
+#[allow(dead_code)]
 pub struct LivenessResult {
     pub live_in: Vec<HashSet<u8>>,
     pub live_out: Vec<HashSet<u8>>,
@@ -92,10 +93,14 @@ pub fn insn_use_def(insn: &BpfInsn) -> (HashSet<u8>, HashSet<u8>) {
         }
         BPF_JMP | BPF_JMP32 => {
             if insn.is_call() {
+                // BPF calling convention: r1-r5 are arguments (used),
+                // r0 is return value (defined), r1-r5 are clobbered (defined).
                 for r in 1..=5 {
                     uses.insert(r);
                 }
-                defs.insert(0);
+                for r in 0..=5 {
+                    defs.insert(r);
+                }
             } else if insn.is_exit() {
                 uses.insert(0);
             } else {
@@ -219,7 +224,29 @@ mod tests {
         for r in 1..=5 {
             assert!(uses.contains(&r));
         }
-        assert!(defs.contains(&0));
+        // BPF calling convention: r0 = return value, r1-r5 = clobbered
+        for r in 0..=5 {
+            assert!(defs.contains(&r), "r{} should be in defs for call", r);
+        }
+    }
+
+    #[test]
+    fn liveness_call_clobbers_caller_saved() {
+        // After a call, r1-r5 are dead (clobbered).
+        // r6 is callee-saved, so it should remain live across the call.
+        let insns = vec![
+            BpfInsn::mov64_imm(6, 42),    // r6 = 42
+            BpfInsn::mov64_imm(1, 1),     // r1 = 1 (arg)
+            BpfInsn::call_kfunc(99),       // call; clobbers r0-r5
+            BpfInsn::mov64_reg(0, 6),     // r0 = r6 (use callee-saved)
+            exit_insn(),
+        ];
+        let prog = make_program(insns);
+        let liveness = LivenessAnalysis.run(&prog);
+        // r6 should be live across the call (live_out[2] should contain r6)
+        assert!(liveness.live_out[2].contains(&6));
+        // r1 should NOT be live after the call (it's clobbered)
+        assert!(!liveness.live_out[2].contains(&1));
     }
 
     #[test]

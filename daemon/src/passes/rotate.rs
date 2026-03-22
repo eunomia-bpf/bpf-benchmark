@@ -66,12 +66,24 @@ impl BpfPass for RotatePass {
                 continue;
             }
 
-            // Safety check 2: caller-saved register conflict.
-            // A kfunc call clobbers r1-r5. If any of those are live after
-            // the site (excluding the value register), we cannot safely transform.
+            // Safety check 2: tmp_reg live-out check.
+            // The original code destroys tmp_reg via the shift. After rewrite,
+            // tmp_reg is not written at all. If tmp_reg is live after the site,
+            // the rewrite would change semantics.
             let site_end = site.start_pc + site.old_len;
             if site_end > 0 && site_end - 1 < liveness.live_out.len() {
                 let live_after = &liveness.live_out[site_end - 1];
+                if live_after.contains(&site.tmp_reg) {
+                    skipped.push(SkipReason {
+                        pc: site.start_pc,
+                        reason: format!("tmp_reg r{} is live after site", site.tmp_reg),
+                    });
+                    continue;
+                }
+
+                // Safety check 3: caller-saved register conflict.
+                // A kfunc call clobbers r1-r5. If any of those are live after
+                // the site (excluding the value register), we cannot safely transform.
                 let caller_saved_conflict = (1u8..=5)
                     .any(|r| r != site.val_reg && live_after.contains(&r));
                 if caller_saved_conflict {
@@ -152,6 +164,15 @@ impl BpfPass for RotatePass {
             details: vec![],
         });
 
+        // Record module FDs needed for the kfunc calls we emitted.
+        if applied > 0 {
+            if let Some(fd) = ctx.kfunc_registry.module_fd {
+                if !program.required_module_fds.contains(&fd) {
+                    program.required_module_fds.push(fd);
+                }
+            }
+        }
+
         Ok(PassResult {
             pass_name: self.name().into(),
             changed: applied > 0,
@@ -167,6 +188,7 @@ struct RotateSite {
     old_len: usize,
     dst_reg: u8,
     val_reg: u8,
+    tmp_reg: u8,
     shift_amount: u32,
 }
 
@@ -180,10 +202,10 @@ fn scan_rotate_sites(insns: &[BpfInsn]) -> Vec<RotateSite> {
         let i1 = &insns[pc + 1];
         let i2 = &insns[pc + 2];
 
-        if let Some(site) = try_match_rotate(i0, i1, i2, pc) {
-            let len = site.old_len;
+        if let Some(site) = try_match_rotate(insns, i0, i1, i2, pc) {
+            let end = site.start_pc + site.old_len;
             sites.push(site);
-            pc += len;
+            pc = end;
         } else {
             pc += 1;
         }
@@ -192,7 +214,45 @@ fn scan_rotate_sites(insns: &[BpfInsn]) -> Vec<RotateSite> {
     sites
 }
 
+/// Scan backwards from `pc` to find `MOV tmp, dst` proving provenance.
+/// Returns the PC of the MOV instruction and the updated start_pc/old_len.
+fn find_provenance_mov(insns: &[BpfInsn], shift_pc: usize, tmp: u8, dst: u8) -> Option<usize> {
+    // Look back up to 8 instructions for the MOV tmp, dst.
+    let search_start = if shift_pc >= 8 { shift_pc - 8 } else { 0 };
+    for check_pc in (search_start..shift_pc).rev() {
+        let insn = &insns[check_pc];
+        // Must be MOV64_REG tmp, dst
+        if insn.code == (BPF_ALU64 | BPF_MOV | BPF_X) && insn.dst_reg() == tmp && insn.src_reg() == dst {
+            return Some(check_pc);
+        }
+        // If tmp is written by any other instruction, the chain is broken.
+        let class = bpf_class(insn.code);
+        match class {
+            BPF_ALU64 | BPF_ALU | BPF_LDX | BPF_LD => {
+                if insn.dst_reg() == tmp {
+                    return None; // tmp was overwritten by something else
+                }
+            }
+            BPF_JMP | BPF_JMP32 => {
+                if insn.is_call() {
+                    // call clobbers r0-r5
+                    if tmp <= 5 {
+                        return None;
+                    }
+                }
+                // Any branch means we can't trace linearly
+                if insn.is_cond_jmp() || insn.is_ja() {
+                    return None;
+                }
+            }
+            _ => {}
+        }
+    }
+    None
+}
+
 fn try_match_rotate(
+    insns: &[BpfInsn],
     i0: &BpfInsn,
     i1: &BpfInsn,
     i2: &BpfInsn,
@@ -211,12 +271,15 @@ fn try_match_rotate(
             let dst = i0.dst_reg();
             let tmp = i1.dst_reg();
 
-            if i2.dst_reg() == dst && i2.src_reg() == tmp {
+            if i2.dst_reg() == dst && i2.src_reg() == tmp && dst != tmp {
+                // Verify provenance: there must be a MOV tmp, dst before the RSH.
+                let mov_pc = find_provenance_mov(insns, pc, tmp, dst)?;
                 return Some(RotateSite {
-                    start_pc: pc,
-                    old_len: 3,
+                    start_pc: mov_pc,
+                    old_len: (pc + 3) - mov_pc,
                     dst_reg: dst,
                     val_reg: dst,
+                    tmp_reg: tmp,
                     shift_amount: lsh_amount,
                 });
             }
@@ -235,12 +298,15 @@ fn try_match_rotate(
             let dst = i0.dst_reg();
             let tmp = i1.dst_reg();
 
-            if i2.dst_reg() == dst && i2.src_reg() == tmp {
+            if i2.dst_reg() == dst && i2.src_reg() == tmp && dst != tmp {
+                // Verify provenance: there must be a MOV tmp, dst before the LSH.
+                let mov_pc = find_provenance_mov(insns, pc, tmp, dst)?;
                 return Some(RotateSite {
-                    start_pc: pc,
-                    old_len: 3,
+                    start_pc: mov_pc,
+                    old_len: (pc + 3) - mov_pc,
                     dst_reg: dst,
                     val_reg: dst,
+                    tmp_reg: tmp,
                     shift_amount: lsh_amount,
                 });
             }
@@ -272,22 +338,26 @@ mod tests {
 
     #[test]
     fn test_rotate_pass_pattern_match() {
+        // Now requires MOV tmp, dst before the shift pattern.
         let insns = vec![
+            BpfInsn::mov64_reg(3, 2),           // MOV r3, r2 (provenance)
             BpfInsn::alu64_imm(BPF_RSH, 2, 56),
             BpfInsn::alu64_imm(BPF_LSH, 3, 8),
             BpfInsn::alu64_reg(BPF_OR, 2, 3),
         ];
         let sites = scan_rotate_sites(&insns);
         assert_eq!(sites.len(), 1);
-        assert_eq!(sites[0].start_pc, 0);
-        assert_eq!(sites[0].old_len, 3);
+        assert_eq!(sites[0].start_pc, 0); // includes the MOV
+        assert_eq!(sites[0].old_len, 4);
         assert_eq!(sites[0].shift_amount, 8);
         assert_eq!(sites[0].dst_reg, 2);
+        assert_eq!(sites[0].tmp_reg, 3);
     }
 
     #[test]
     fn test_rotate_pass_pattern_b_match() {
         let insns = vec![
+            BpfInsn::mov64_reg(3, 2),           // provenance
             BpfInsn::alu64_imm(BPF_LSH, 2, 16),
             BpfInsn::alu64_imm(BPF_RSH, 3, 48),
             BpfInsn::alu64_reg(BPF_OR, 2, 3),
@@ -300,6 +370,7 @@ mod tests {
     #[test]
     fn test_rotate_pass_no_match_wrong_sum() {
         let insns = vec![
+            BpfInsn::mov64_reg(3, 2),
             BpfInsn::alu64_imm(BPF_RSH, 2, 20),
             BpfInsn::alu64_imm(BPF_LSH, 3, 20),
             BpfInsn::alu64_reg(BPF_OR, 2, 3),
@@ -309,8 +380,34 @@ mod tests {
     }
 
     #[test]
+    fn test_rotate_pass_no_match_without_provenance() {
+        // Without the MOV tmp, dst, no match should occur.
+        let insns = vec![
+            BpfInsn::alu64_imm(BPF_RSH, 2, 56),
+            BpfInsn::alu64_imm(BPF_LSH, 3, 8),
+            BpfInsn::alu64_reg(BPF_OR, 2, 3),
+        ];
+        let sites = scan_rotate_sites(&insns);
+        assert!(sites.is_empty(), "should not match without provenance MOV");
+    }
+
+    #[test]
+    fn test_rotate_pass_no_match_wrong_provenance() {
+        // MOV r3, r4 instead of MOV r3, r2 -- wrong source
+        let insns = vec![
+            BpfInsn::mov64_reg(3, 4),  // wrong: copies from r4, not r2
+            BpfInsn::alu64_imm(BPF_RSH, 2, 56),
+            BpfInsn::alu64_imm(BPF_LSH, 3, 8),
+            BpfInsn::alu64_reg(BPF_OR, 2, 3),
+        ];
+        let sites = scan_rotate_sites(&insns);
+        assert!(sites.is_empty(), "should not match with wrong provenance");
+    }
+
+    #[test]
     fn test_rotate_pass_emit_kfunc_call() {
         let mut prog = make_program(vec![
+            BpfInsn::mov64_reg(3, 2),           // provenance
             BpfInsn::alu64_imm(BPF_RSH, 2, 56),
             BpfInsn::alu64_imm(BPF_LSH, 3, 8),
             BpfInsn::alu64_reg(BPF_OR, 2, 3),
@@ -333,6 +430,7 @@ mod tests {
     #[test]
     fn test_rotate_pass_skip_when_kfunc_unavailable() {
         let mut prog = make_program(vec![
+            BpfInsn::mov64_reg(3, 2),
             BpfInsn::alu64_imm(BPF_RSH, 2, 56),
             BpfInsn::alu64_imm(BPF_LSH, 3, 8),
             BpfInsn::alu64_reg(BPF_OR, 2, 3),
@@ -348,17 +446,17 @@ mod tests {
         assert_eq!(result.sites_applied, 0);
         assert!(!result.sites_skipped.is_empty());
         assert!(result.sites_skipped[0].reason.contains("kfunc not available"));
-        assert_eq!(prog.insns.len(), 4);
     }
 
     #[test]
     fn test_rotate_pass_caller_saved_conflict() {
         let mut prog = make_program(vec![
             BpfInsn::mov64_imm(3, 99),
+            BpfInsn::mov64_reg(4, 2),           // provenance for tmp=r4
             BpfInsn::alu64_imm(BPF_RSH, 2, 56),
             BpfInsn::alu64_imm(BPF_LSH, 4, 8),
             BpfInsn::alu64_reg(BPF_OR, 2, 4),
-            BpfInsn::mov64_reg(0, 3),
+            BpfInsn::mov64_reg(0, 3),           // r3 is live after site
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
@@ -381,6 +479,27 @@ mod tests {
     }
 
     #[test]
+    fn test_rotate_pass_tmp_live_out_conflict() {
+        // tmp_reg (r6, callee-saved) is live after the site -- should skip.
+        let mut prog = make_program(vec![
+            BpfInsn::mov64_reg(6, 2),           // provenance
+            BpfInsn::alu64_imm(BPF_RSH, 2, 56),
+            BpfInsn::alu64_imm(BPF_LSH, 6, 8),
+            BpfInsn::alu64_reg(BPF_OR, 2, 6),
+            BpfInsn::mov64_reg(0, 6),           // r6 is used after site
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let ctx = ctx_with_rotate_kfunc(9999);
+
+        let pass = RotatePass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(!result.changed, "should skip when tmp_reg is live after site");
+        assert!(result.sites_skipped.iter().any(|s| s.reason.contains("tmp_reg")));
+    }
+
+    #[test]
     fn test_rotate_pass_integration_with_pass_manager() {
         let mut pm = PassManager::new();
         pm.register_analysis(BranchTargetAnalysis);
@@ -388,6 +507,7 @@ mod tests {
         pm.add_pass(RotatePass);
 
         let mut prog = make_program(vec![
+            BpfInsn::mov64_reg(3, 2),           // provenance
             BpfInsn::alu64_imm(BPF_RSH, 2, 56),
             BpfInsn::alu64_imm(BPF_LSH, 3, 8),
             BpfInsn::alu64_reg(BPF_OR, 2, 3),

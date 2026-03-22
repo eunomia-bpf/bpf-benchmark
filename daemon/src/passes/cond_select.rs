@@ -13,9 +13,6 @@ use super::fixup_branches_inline;
 /// Pattern A (4-insn diamond):
 ///   Jcc r_cond, X, +2 ; MOV r_dst, val_false ; JA +1 ; MOV r_dst, val_true
 ///
-/// Pattern B (3-insn / JCC +1):
-///   Jcc r_cond, X, +1 ; MOV r_dst, val_false ; MOV r_dst, val_true
-///
 /// Emit (when kfunc available):
 ///   MOV r1, <true_val>       // arg1 = a (returned when cond != 0)
 ///   MOV r2, <false_val>      // arg2 = b (returned when cond == 0)
@@ -31,11 +28,7 @@ use super::fixup_branches_inline;
 ///   - JNE reg, 0: cond = reg (direct)
 ///   - JEQ reg, 0: cond = reg (swap true/false values)
 /// Other JCC conditions are skipped (no simple mapping to a single register).
-pub struct CondSelectPass {
-    /// Predictability threshold: skip if branch is more predictable than this
-    /// (e.g., 0.8 means skip if >80% one direction).
-    pub predictability_threshold: f64,
-}
+pub struct CondSelectPass;
 
 /// A detected cond-select site.
 pub struct CondSelectSite {
@@ -51,8 +44,6 @@ pub struct CondSelectSite {
     pub jcc_imm: i32,
     /// The JCC source kind (BPF_K or BPF_X).
     pub jcc_src: u8,
-    /// The JCC src_reg (for BPF_X source).
-    pub jcc_src_reg: u8,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -242,14 +233,10 @@ impl BpfPass for CondSelectPass {
                 let site = &safe_sites[site_idx];
                 let (a_val, b_val) = kfunc_args_for_site(site);
 
-                // Emit: r1 = a (true_val or false_val depending on JCC direction)
-                new_insns.push(emit_mov_value(1, a_val));
-                // Emit: r2 = b
-                new_insns.push(emit_mov_value(2, b_val));
-                // Emit: r3 = cond_reg
-                if site.cond_reg != 3 {
-                    new_insns.push(BpfInsn::mov64_reg(3, site.cond_reg));
-                }
+                // Swap-safe parameter marshalling:
+                // We need to set r1=a, r2=b, r3=cond without aliasing issues.
+                // Collect source registers that are used as values.
+                emit_safe_params(&mut new_insns, a_val, b_val, site.cond_reg);
                 // Emit: call bpf_select64
                 new_insns.push(BpfInsn::call_kfunc(btf_id));
                 // Emit: dst = r0
@@ -288,6 +275,15 @@ impl BpfPass for CondSelectPass {
             insns_after: program.insns.len(),
             details: vec![],
         });
+
+        // Record module FDs needed for the kfunc calls we emitted.
+        if applied > 0 {
+            if let Some(fd) = ctx.kfunc_registry.module_fd {
+                if !program.required_module_fds.contains(&fd) {
+                    program.required_module_fds.push(fd);
+                }
+            }
+        }
 
         Ok(PassResult {
             pass_name: self.name().into(),
@@ -341,36 +337,6 @@ fn try_match_cond_select(insns: &[BpfInsn], pc: usize) -> Option<CondSelectSite>
                         jcc_op: bpf_op(jcc.code),
                         jcc_imm: jcc.imm,
                         jcc_src: bpf_src(jcc.code),
-                        jcc_src_reg: jcc.src_reg(),
-                    });
-                }
-            }
-        }
-    }
-
-    // Pattern B: 3-insn
-    //   Jcc +1 ; MOV dst, false_val ; MOV dst, true_val
-    if pc + 2 < n {
-        let jcc = &insns[pc];
-        if jcc.is_cond_jmp() && jcc.off == 1 {
-            let mov_false = &insns[pc + 1];
-            let mov_true = &insns[pc + 2];
-
-            if is_mov64(mov_false) && is_mov64(mov_true) {
-                let dst_f = mov_false.dst_reg();
-                let dst_t = mov_true.dst_reg();
-                if dst_f == dst_t {
-                    return Some(CondSelectSite {
-                        start_pc: pc,
-                        old_len: 3,
-                        cond_reg: jcc.dst_reg(),
-                        dst_reg: dst_f,
-                        true_val: extract_mov_value(mov_true),
-                        false_val: extract_mov_value(mov_false),
-                        jcc_op: bpf_op(jcc.code),
-                        jcc_imm: jcc.imm,
-                        jcc_src: bpf_src(jcc.code),
-                        jcc_src_reg: jcc.src_reg(),
                     });
                 }
             }
@@ -378,6 +344,94 @@ fn try_match_cond_select(insns: &[BpfInsn], pc: usize) -> Option<CondSelectSite>
     }
 
     None
+}
+
+/// Emit swap-safe parameter setup for bpf_select64 (r1=a, r2=b, r3=cond).
+///
+/// The challenge: if a_val or b_val is Reg(r) where r is one of {1,2,3},
+/// or if cond_reg is 1 or 2, writing one target register early can clobber
+/// a source value needed later.
+///
+/// Strategy: identify which source registers overlap with targets {1,2,3}.
+/// If there are conflicts, save the conflicting source values to a scratch
+/// register (r0, which we'll overwrite with the call return anyway) first.
+fn emit_safe_params(
+    out: &mut Vec<BpfInsn>,
+    a_val: CondSelectValue,
+    b_val: CondSelectValue,
+    cond_reg: u8,
+) {
+    // Collect (target_reg, source) triples.
+    // target 1 = a_val, target 2 = b_val, target 3 = cond_reg
+    // We need to set them without aliasing issues.
+
+    // For immediate values, they never alias — only register sources can conflict.
+    // Build a simple dependency-aware emission order.
+
+    // Represent each assignment as (dst, value).
+    struct Assignment {
+        dst: u8,
+        val: CondSelectValue,
+    }
+
+    let mut assignments = Vec::new();
+    assignments.push(Assignment { dst: 1, val: a_val });
+    assignments.push(Assignment { dst: 2, val: b_val });
+    if cond_reg != 3 {
+        assignments.push(Assignment { dst: 3, val: CondSelectValue::Reg(cond_reg) });
+    }
+
+    // Check for conflicts: a source register that equals a destination we haven't set yet.
+    // Simple approach: if any source reg is in {1,2,3} and that source would be clobbered
+    // before it's read, save it to r0 first.
+    //
+    // Since there are only 3 assignments max, we use a practical approach:
+    // First, emit assignments whose source doesn't conflict, then handle conflicting ones.
+
+    let mut emitted = [false; 4]; // indexed by target reg (1,2,3)
+
+    // Pass 1: emit assignments where the source register is NOT a target, or is IMM.
+    for _round in 0..3 {
+        for (i, asgn) in assignments.iter().enumerate() {
+            if emitted[asgn.dst as usize] {
+                continue;
+            }
+            let source_reg = match asgn.val {
+                CondSelectValue::Imm(_) => None,
+                CondSelectValue::Reg(r) => Some(r),
+            };
+            // Check if this source is a not-yet-emitted target of another assignment.
+            let conflicts = if let Some(src) = source_reg {
+                assignments.iter().enumerate().any(|(j, other)| {
+                    j != i && !emitted[other.dst as usize] && other.dst == src
+                })
+            } else {
+                false
+            };
+            if !conflicts {
+                out.push(emit_mov_value(asgn.dst, asgn.val));
+                emitted[asgn.dst as usize] = true;
+            }
+        }
+    }
+
+    // Pass 2: handle remaining conflicts by saving through r0.
+    for asgn in &assignments {
+        if emitted[asgn.dst as usize] {
+            continue;
+        }
+        // Save source to r0, then move from r0.
+        match asgn.val {
+            CondSelectValue::Reg(src) => {
+                out.push(BpfInsn::mov64_reg(0, src));
+                out.push(BpfInsn::mov64_reg(asgn.dst, 0));
+            }
+            CondSelectValue::Imm(imm) => {
+                out.push(BpfInsn::mov64_imm(asgn.dst, imm));
+            }
+        }
+        emitted[asgn.dst as usize] = true;
+    }
 }
 
 fn is_mov64(insn: &BpfInsn) -> bool {
@@ -442,7 +496,7 @@ mod tests {
 
     #[test]
     fn test_cond_select_analyze_4insn_diamond() {
-        let pass = CondSelectPass { predictability_threshold: 0.8 };
+        let pass = CondSelectPass;
         let insns = vec![
             jne_imm(1, 0, 2),
             BpfInsn::mov64_imm(0, 0),
@@ -461,8 +515,10 @@ mod tests {
     }
 
     #[test]
-    fn test_cond_select_analyze_3insn_pattern() {
-        let pass = CondSelectPass { predictability_threshold: 0.8 };
+    fn test_cond_select_pattern_b_removed() {
+        // Pattern B (Jcc +1 ; MOV false ; MOV true) is semantically wrong:
+        // both paths always reach MOV true. It should NOT be detected.
+        let pass = CondSelectPass;
         let insns = vec![
             jne_imm(1, 0, 1),
             BpfInsn::mov64_imm(0, 0),
@@ -470,16 +526,12 @@ mod tests {
             exit_insn(),
         ];
         let sites = pass.analyze(&insns);
-        assert_eq!(sites.len(), 1);
-        assert_eq!(sites[0].start_pc, 0);
-        assert_eq!(sites[0].old_len, 3);
-        assert_eq!(sites[0].cond_reg, 1);
-        assert_eq!(sites[0].dst_reg, 0);
+        assert!(sites.is_empty(), "Pattern B should not be matched");
     }
 
     #[test]
     fn test_cond_select_analyze_no_match_different_dst() {
-        let pass = CondSelectPass { predictability_threshold: 0.8 };
+        let pass = CondSelectPass;
         let insns = vec![
             jne_imm(1, 0, 2),
             BpfInsn::mov64_imm(0, 0),
@@ -491,12 +543,14 @@ mod tests {
     }
 
     #[test]
-    fn test_cond_select_analyze_reg_values() {
-        let pass = CondSelectPass { predictability_threshold: 0.8 };
+    fn test_cond_select_analyze_reg_values_4insn() {
+        // Pattern A with register values.
+        let pass = CondSelectPass;
         let insns = vec![
-            jne_imm(1, 0, 1),
-            BpfInsn::mov64_reg(0, 3),
-            BpfInsn::mov64_reg(0, 4),
+            jne_imm(1, 0, 2),
+            BpfInsn::mov64_reg(0, 3),  // false_val
+            BpfInsn::ja(1),
+            BpfInsn::mov64_reg(0, 4),  // true_val
             exit_insn(),
         ];
         let sites = pass.analyze(&insns);
@@ -507,13 +561,16 @@ mod tests {
 
     #[test]
     fn test_cond_select_analyze_multiple_sites() {
-        let pass = CondSelectPass { predictability_threshold: 0.8 };
+        // Two Pattern A sites (4-insn diamond).
+        let pass = CondSelectPass;
         let insns = vec![
-            jne_imm(1, 0, 1),
+            jne_imm(1, 0, 2),
             BpfInsn::mov64_imm(0, 0),
+            BpfInsn::ja(1),
             BpfInsn::mov64_imm(0, 1),
-            jgt_imm(3, 5, 1),
+            jne_imm(3, 0, 2),
             BpfInsn::mov64_imm(2, 10),
+            BpfInsn::ja(1),
             BpfInsn::mov64_imm(2, 20),
             exit_insn(),
         ];
@@ -521,13 +578,13 @@ mod tests {
         assert_eq!(sites.len(), 2);
         assert_eq!(sites[0].start_pc, 0);
         assert_eq!(sites[0].dst_reg, 0);
-        assert_eq!(sites[1].start_pc, 3);
+        assert_eq!(sites[1].start_pc, 4);
         assert_eq!(sites[1].dst_reg, 2);
     }
 
     #[test]
     fn test_cond_select_analyze_no_sites_in_linear_program() {
-        let pass = CondSelectPass { predictability_threshold: 0.8 };
+        let pass = CondSelectPass;
         let insns = vec![
             BpfInsn::mov64_imm(0, 42),
             BpfInsn::mov64_imm(1, 10),
@@ -552,7 +609,7 @@ mod tests {
         let mut cache = AnalysisCache::new();
         let ctx = PassContext::test_default(); // select64_btf_id = -1
 
-        let pass = CondSelectPass { predictability_threshold: 0.8 };
+        let pass = CondSelectPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
         assert!(!result.changed);
@@ -577,7 +634,7 @@ mod tests {
         let mut cache = AnalysisCache::new();
         let ctx = ctx_with_select_kfunc(5555);
 
-        let pass = CondSelectPass { predictability_threshold: 0.8 };
+        let pass = CondSelectPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
         assert!(result.changed);
@@ -598,8 +655,8 @@ mod tests {
     }
 
     #[test]
-    fn test_cond_select_emit_3insn_jne() {
-        // JNE r1, 0, +1 ; MOV r0, 0 ; MOV r0, 1 ; EXIT
+    fn test_cond_select_no_emit_3insn_pattern_b() {
+        // Pattern B (Jcc +1) is no longer matched; should not emit.
         let mut prog = make_program(vec![
             jne_imm(1, 0, 1),
             BpfInsn::mov64_imm(0, 0),
@@ -609,13 +666,11 @@ mod tests {
         let mut cache = AnalysisCache::new();
         let ctx = ctx_with_select_kfunc(7777);
 
-        let pass = CondSelectPass { predictability_threshold: 0.8 };
+        let pass = CondSelectPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
-        assert!(result.changed);
-        assert_eq!(result.sites_applied, 1);
-        let has_kfunc_call = prog.insns.iter().any(|i| i.is_call() && i.src_reg() == 2);
-        assert!(has_kfunc_call);
+        assert!(!result.changed, "Pattern B should not be transformed");
+        assert_eq!(result.sites_applied, 0);
     }
 
     #[test]
@@ -634,7 +689,7 @@ mod tests {
         let mut cache = AnalysisCache::new();
         let ctx = ctx_with_select_kfunc(5555);
 
-        let pass = CondSelectPass { predictability_threshold: 0.8 };
+        let pass = CondSelectPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
         assert!(result.changed);
@@ -660,7 +715,7 @@ mod tests {
         let mut cache = AnalysisCache::new();
         let ctx = ctx_with_select_kfunc(5555);
 
-        let pass = CondSelectPass { predictability_threshold: 0.8 };
+        let pass = CondSelectPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
         assert!(!result.changed);
@@ -670,17 +725,18 @@ mod tests {
 
     #[test]
     fn test_cond_select_skip_jgt() {
-        // JGT r1, 0, +1 — not JNE/JEQ, should be skipped
+        // JGT r1, 0, +2 — not JNE/JEQ, should be skipped
         let mut prog = make_program(vec![
-            jgt_imm(1, 0, 1),
+            jgt_imm(1, 0, 2),
             BpfInsn::mov64_imm(0, 0),
+            BpfInsn::ja(1),
             BpfInsn::mov64_imm(0, 1),
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
         let ctx = ctx_with_select_kfunc(5555);
 
-        let pass = CondSelectPass { predictability_threshold: 0.8 };
+        let pass = CondSelectPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
         assert!(!result.changed);
@@ -689,18 +745,19 @@ mod tests {
 
     #[test]
     fn test_cond_select_emit_with_reg_values() {
-        // JNE r1, 0, +1 ; MOV r0, r3 ; MOV r0, r4 ; EXIT
-        // true_val = Reg(4), false_val = Reg(3)
+        // Pattern A with register values.
+        // JNE r1, 0, +2 ; MOV r0, r6 ; JA +1 ; MOV r0, r7 ; EXIT
         let mut prog = make_program(vec![
-            jne_imm(1, 0, 1),
-            BpfInsn::mov64_reg(0, 6),
-            BpfInsn::mov64_reg(0, 7),
+            jne_imm(1, 0, 2),
+            BpfInsn::mov64_reg(0, 6),    // false_val
+            BpfInsn::ja(1),
+            BpfInsn::mov64_reg(0, 7),    // true_val
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
         let ctx = ctx_with_select_kfunc(8888);
 
-        let pass = CondSelectPass { predictability_threshold: 0.8 };
+        let pass = CondSelectPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
         assert!(result.changed);
@@ -716,11 +773,12 @@ mod tests {
 
     #[test]
     fn test_cond_select_caller_saved_conflict() {
-        // r3 is live after the site -> conflict
+        // Pattern A with r3 live after the site -> conflict
         let mut prog = make_program(vec![
             BpfInsn::mov64_imm(3, 99),
-            jne_imm(1, 0, 1),
+            jne_imm(1, 0, 2),
             BpfInsn::mov64_imm(0, 0),
+            BpfInsn::ja(1),
             BpfInsn::mov64_imm(0, 1),
             BpfInsn::mov64_reg(0, 3), // r3 is live-out of the site
             exit_insn(),
@@ -728,7 +786,7 @@ mod tests {
         let mut cache = AnalysisCache::new();
         let ctx = ctx_with_select_kfunc(5555);
 
-        let pass = CondSelectPass { predictability_threshold: 0.8 };
+        let pass = CondSelectPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
         assert!(!result.changed);
@@ -744,7 +802,7 @@ mod tests {
         let mut cache = AnalysisCache::new();
         let ctx = ctx_with_select_kfunc(5555);
 
-        let pass = CondSelectPass { predictability_threshold: 0.8 };
+        let pass = CondSelectPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
         assert!(!result.changed);
@@ -753,17 +811,18 @@ mod tests {
 
     #[test]
     fn test_cond_select_emit_cond_reg_is_r3() {
-        // When cond_reg == 3, we should NOT emit the extra MOV r3, r3
+        // Pattern A with cond_reg == 3, should NOT emit the extra MOV r3, r3
         let mut prog = make_program(vec![
-            jne_imm(3, 0, 1),
+            jne_imm(3, 0, 2),
             BpfInsn::mov64_imm(0, 0),
+            BpfInsn::ja(1),
             BpfInsn::mov64_imm(0, 1),
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
         let ctx = ctx_with_select_kfunc(5555);
 
-        let pass = CondSelectPass { predictability_threshold: 0.8 };
+        let pass = CondSelectPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
         assert!(result.changed);
@@ -774,5 +833,29 @@ mod tests {
                 && i.src_reg() == 3
         });
         assert!(!mov_r3_r3, "should not emit redundant mov r3, r3");
+    }
+
+    #[test]
+    fn test_cond_select_register_alias_safety() {
+        // Test case where cond_reg == 1, which would be clobbered by r1=a_val.
+        // Pattern A: JNE r1, 0, +2 ; MOV r0, 0 ; JA +1 ; MOV r0, 1
+        let mut prog = make_program(vec![
+            jne_imm(1, 0, 2),
+            BpfInsn::mov64_imm(0, 0),   // false_val
+            BpfInsn::ja(1),
+            BpfInsn::mov64_imm(0, 1),   // true_val
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let ctx = ctx_with_select_kfunc(5555);
+
+        let pass = CondSelectPass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(result.changed);
+        // The key check: the kfunc call should be present and r3 should have
+        // the original value of r1 (cond_reg), even though r1 was overwritten.
+        let has_kfunc_call = prog.insns.iter().any(|i| i.is_call() && i.src_reg() == 2);
+        assert!(has_kfunc_call);
     }
 }
