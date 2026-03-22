@@ -29,7 +29,7 @@ echo ""
 echo "=== TEST 1: daemon enumerate ==="
 
 # 1a: daemon runs without error
-OUTPUT=$(sudo ./daemon/target/release/bpfrejit-daemon enumerate 2>&1)
+OUTPUT=$(./daemon/target/release/bpfrejit-daemon enumerate 2>&1)
 if [ $? -eq 0 ]; then
     report "1a: daemon enumerate runs cleanly" "PASS"
 else
@@ -44,7 +44,7 @@ fi
 # BPF_PROG_GET_FD_BY_ID, and orig_prog_insns. Let's test via micro_exec --rejit.
 echo ""
 echo "--- micro_exec compile-only (verifies kernel loads BPF program) ---"
-CO_OUTPUT=$(sudo ./runner/build/micro_exec run-kernel \
+CO_OUTPUT=$(./runner/build/micro_exec run-kernel \
   --program micro/programs/load_byte_recompose.bpf.o \
   --io-mode staged \
   --compile-only 2>&1)
@@ -61,7 +61,7 @@ echo "=== TEST 2: BPF_PROG_REJIT syscall ==="
 
 # 2a: Same-bytecode REJIT (via micro_exec --rejit --compile-only)
 echo "--- same-bytecode REJIT ---"
-REJIT_OUTPUT=$(sudo ./runner/build/micro_exec run-kernel \
+REJIT_OUTPUT=$(./runner/build/micro_exec run-kernel \
   --program micro/programs/load_byte_recompose.bpf.o \
   --io-mode staged \
   --compile-only \
@@ -104,7 +104,7 @@ fi
 # 2c: REJIT for simple program (no wide_mem sites, still should work)
 echo ""
 echo "--- REJIT for simple.bpf.o ---"
-SIMPLE_REJIT=$(sudo ./runner/build/micro_exec run-kernel \
+SIMPLE_REJIT=$(./runner/build/micro_exec run-kernel \
   --program micro/programs/simple.bpf.o \
   --io-mode staged \
   --compile-only \
@@ -138,7 +138,7 @@ fi
 echo ""
 echo "=== TEST 3: daemon apply-all ==="
 
-APPLYALL=$(sudo ./daemon/target/release/bpfrejit-daemon apply-all 2>&1)
+APPLYALL=$(./daemon/target/release/bpfrejit-daemon apply-all 2>&1)
 echo "$APPLYALL"
 if echo "$APPLYALL" | grep -q "apply-all: scanned"; then
     report "3: daemon apply-all completes" "PASS"
@@ -152,7 +152,7 @@ echo "=== TEST 4: kinsn module loading ==="
 
 for MOD in bpf_rotate bpf_select bpf_extract; do
     if [ -f "module/x86/${MOD}.ko" ]; then
-        LOAD_OUT=$(sudo insmod "module/x86/${MOD}.ko" 2>&1)
+        LOAD_OUT=$(insmod "module/x86/${MOD}.ko" 2>&1)
         if [ $? -eq 0 ]; then
             report "4-load: insmod ${MOD}.ko" "PASS"
         else
@@ -183,7 +183,7 @@ dmesg | grep -i "bpf_rotate\|bpf_select\|bpf_extract\|kinsn\|inline_kfunc\|kfunc
 # Unload
 echo ""
 echo "--- Unloading modules ---"
-UNLOAD_OUT=$(sudo rmmod bpf_extract bpf_select bpf_rotate 2>&1)
+UNLOAD_OUT=$(rmmod bpf_extract bpf_select bpf_rotate 2>&1)
 if [ $? -eq 0 ]; then
     report "4-unload: rmmod all kinsn modules" "PASS"
 else
@@ -215,7 +215,7 @@ print('Input file: %d bytes' % len(data))
 
 # Run with REJIT and actual execution
 echo "--- run-kernel --rejit with execution ---"
-EXEC_OUTPUT=$(sudo ./runner/build/micro_exec run-kernel \
+EXEC_OUTPUT=$(./runner/build/micro_exec run-kernel \
   --program micro/programs/load_byte_recompose.bpf.o \
   --io-mode staged \
   --input /tmp/lbr_input.bin \

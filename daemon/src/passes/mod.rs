@@ -19,72 +19,136 @@ pub use extract::ExtractPass;
 pub use endian::EndianFusionPass;
 
 use crate::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis};
-use crate::pass::PassManager;
+use crate::pass::{BpfPass, PassManager};
 
 // ── Legacy alias ───────────────────────────────────────────────────
 // Re-export `fixup_all_branches` under the old name for backward compat
 // within this crate. New code should use `utils::fixup_all_branches` directly.
 pub(crate) use utils::fixup_all_branches as fixup_branches_inline;
 
+// ── Pass registry ───────────────────────────────────────────────────
+
+/// Entry in the pass registry. Defines the canonical name, description,
+/// legacy aliases, and a constructor for each pass.
+pub struct PassRegistryEntry {
+    /// Canonical pass name (matches `BpfPass::name()`).
+    pub name: &'static str,
+    /// Short description for help text.
+    pub description: &'static str,
+    /// Legacy aliases accepted on the CLI (e.g. "spectre_mitigation" for "speculation_barrier").
+    pub aliases: &'static [&'static str],
+    /// Constructor: returns a boxed pass instance.
+    pub make: fn() -> Box<dyn BpfPass>,
+}
+
+/// Canonical pass ordering and metadata. Both `build_default_pipeline()` and
+/// `build_pipeline_with_passes()` iterate this array in order, guaranteeing
+/// consistent pass sequencing regardless of which passes are selected.
+///
+/// `speculation_barrier` is excluded from the default pipeline but is available
+/// when explicitly requested via `--passes`.
+pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
+    PassRegistryEntry {
+        name: "wide_mem",
+        description: "Fuse byte-by-byte loads into wider memory accesses",
+        aliases: &[],
+        make: || Box::new(WideMemPass),
+    },
+    PassRegistryEntry {
+        name: "rotate",
+        description: "Replace shift+or patterns with rotate kfunc (ROL/ROR)",
+        aliases: &[],
+        make: || Box::new(RotatePass),
+    },
+    PassRegistryEntry {
+        name: "cond_select",
+        description: "Replace branch-over-mov with conditional select kfunc (CMOV/CSEL)",
+        aliases: &[],
+        make: || Box::new(CondSelectPass),
+    },
+    PassRegistryEntry {
+        name: "extract",
+        description: "Replace shift+mask with bit field extract kfunc (BEXTR)",
+        aliases: &[],
+        make: || Box::new(ExtractPass),
+    },
+    PassRegistryEntry {
+        name: "endian_fusion",
+        description: "Fuse endian swap patterns into endian load kfunc (MOVBE)",
+        aliases: &[],
+        make: || Box::new(EndianFusionPass),
+    },
+    PassRegistryEntry {
+        name: "branch_flip",
+        description: "Flip branch polarity using PGO data to improve branch prediction",
+        aliases: &[],
+        make: || Box::new(BranchFlipPass { min_bias: 0.7 }),
+    },
+    PassRegistryEntry {
+        name: "speculation_barrier",
+        description: "Insert speculation barrier kfunc after conditional branches",
+        aliases: &["spectre_mitigation", "barrier_placeholder"],
+        make: || Box::new(SpectreMitigationPass),
+    },
+];
+
+/// Returns whether a pass is included in the default pipeline.
+/// `speculation_barrier` is opt-in only.
+fn is_default_pass(name: &str) -> bool {
+    name != "speculation_barrier"
+}
+
+/// Generate the `--passes` help string dynamically from the registry.
+pub fn available_passes_help() -> String {
+    PASS_REGISTRY
+        .iter()
+        .map(|e| format!("  {:<24} {}", e.name, e.description))
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
 // ── Pipeline constructors ───────────────────────────────────────────
 
-/// Build the default optimization pipeline.
-pub fn build_default_pipeline() -> PassManager {
-    let mut pm = PassManager::new();
-
+/// Register standard analyses into a PassManager.
+fn register_standard_analyses(pm: &mut PassManager) {
     pm.register_analysis(BranchTargetAnalysis);
     pm.register_analysis(CFGAnalysis);
     pm.register_analysis(LivenessAnalysis);
+}
 
+/// Build the default optimization pipeline.
+///
+/// Includes all passes from `PASS_REGISTRY` except opt-in passes
+/// (currently `speculation_barrier`), in canonical order.
+pub fn build_default_pipeline() -> PassManager {
+    let mut pm = PassManager::new();
+    register_standard_analyses(&mut pm);
 
-    pm.add_pass(WideMemPass);
-    pm.add_pass(RotatePass);
-    pm.add_pass(CondSelectPass);
-    pm.add_pass(ExtractPass);
-    pm.add_pass(EndianFusionPass);
-    pm.add_pass(BranchFlipPass { min_bias: 0.7 });
+    for entry in PASS_REGISTRY {
+        if is_default_pass(entry.name) {
+            pm.add_pass_boxed((entry.make)());
+        }
+    }
 
     pm
 }
 
-/// Build a pipeline containing only the named passes.
+/// Build a pipeline containing only the named passes, in canonical order.
 ///
-/// Pass names: `wide_mem`, `rotate`, `cond_select`, `extract`, `endian_fusion`,
-/// `branch_flip`, `speculation_barrier` (or legacy `spectre_mitigation` / `barrier_placeholder`).
-/// Unknown names are silently ignored.
+/// Pass names are matched against `PASS_REGISTRY` entries by canonical name
+/// and legacy aliases. Unknown names are silently ignored.
 pub fn build_pipeline_with_passes(names: &[String]) -> PassManager {
     let mut pm = PassManager::new();
-
-    pm.register_analysis(BranchTargetAnalysis);
-    pm.register_analysis(CFGAnalysis);
-    pm.register_analysis(LivenessAnalysis);
-
+    register_standard_analyses(&mut pm);
 
     let name_set: std::collections::HashSet<&str> = names.iter().map(|s| s.as_str()).collect();
 
-    if name_set.contains("wide_mem") {
-        pm.add_pass(WideMemPass);
-    }
-    if name_set.contains("rotate") {
-        pm.add_pass(RotatePass);
-    }
-    if name_set.contains("cond_select") {
-        pm.add_pass(CondSelectPass);
-    }
-    if name_set.contains("branch_flip") {
-        pm.add_pass(BranchFlipPass { min_bias: 0.7 });
-    }
-    if name_set.contains("extract") {
-        pm.add_pass(ExtractPass);
-    }
-    if name_set.contains("endian_fusion") {
-        pm.add_pass(EndianFusionPass);
-    }
-    if name_set.contains("speculation_barrier")
-        || name_set.contains("barrier_placeholder")
-        || name_set.contains("spectre_mitigation")
-    {
-        pm.add_pass(SpectreMitigationPass);
+    for entry in PASS_REGISTRY {
+        let matched = name_set.contains(entry.name)
+            || entry.aliases.iter().any(|alias| name_set.contains(alias));
+        if matched {
+            pm.add_pass_boxed((entry.make)());
+        }
     }
 
     pm

@@ -72,7 +72,6 @@ from runner.libs.corpus import (
 )
 from runner.libs.commands import (
     build_runner_command as _build_runner_command,
-    maybe_prepend_sudo,
 )
 from runner.libs.policy import POLICY_DIR as DEFAULT_POLICY_DIR, resolve_policy_path
 
@@ -372,11 +371,10 @@ def build_runner_command(
     recompile_all: bool = False,
     policy_file: Path | None = None,
     dump_xlated: Path | None = None,
-    use_sudo: bool = False,
     daemon_socket: str | None = None,
 ) -> list[str]:
     enable_rejit = blind_apply or (policy_file is not None)
-    command = _build_runner_command(
+    return _build_runner_command(
         runner,
         "run-kernel",
         program=object_path,
@@ -392,7 +390,6 @@ def build_runner_command(
         rejit=enable_rejit,
         daemon_socket=daemon_socket if enable_rejit else None,
     )
-    return maybe_prepend_sudo(command, enabled=use_sudo)
 
 
 def size_ratio(
@@ -512,7 +509,6 @@ def run_target_locally(
     timeout_seconds: int,
     execution_mode: str,
     btf_custom_path: Path | None,
-    use_sudo: bool,
     enable_recompile: bool,
     enable_exec: bool,
     skip_families: list[str],
@@ -554,7 +550,6 @@ def run_target_locally(
                 skip_families=[],
                 policy_file=None,
                 dump_xlated=xlated_path,
-                use_sudo=use_sudo,
             ),
             timeout_seconds,
         )
@@ -582,8 +577,7 @@ def run_target_locally(
                     recompile_all=recompile_all,
                     skip_families=skip_families,
                     policy_file=active_policy_path,
-                    use_sudo=use_sudo,
-                ),
+                    ),
                 timeout_seconds,
             )
         if enable_exec and enable_recompile and target.get("can_test_run") and v5_compile_raw and v5_compile_raw["ok"]:
@@ -602,8 +596,7 @@ def run_target_locally(
                     recompile_all=recompile_all,
                     skip_families=skip_families,
                     policy_file=active_policy_path,
-                    use_sudo=use_sudo,
-                ),
+                    ),
                 timeout_seconds,
             )
 
@@ -683,7 +676,6 @@ def run_guest_target_mode(args: argparse.Namespace) -> int:
         timeout_seconds=args.timeout,
         execution_mode="vm",
         btf_custom_path=btf_custom_path,
-        use_sudo=False,
         enable_recompile=True,
         enable_exec=bool(target.get("can_test_run")),
         skip_families=normalize_skip_families(args.skip_families),
@@ -716,7 +708,7 @@ def build_guest_exec(argv: list[str]) -> str:
     # Load kinsn kernel modules before running the guest command so the daemon
     # can apply platform-specific rewrites (rotate, cond_select, extract).
     load_script = ROOT_DIR / "module" / "load_all.sh"
-    kinsn_load = f"sudo -n {shlex.quote(str(load_script))} 2>/dev/null || true; "
+    kinsn_load = f"{shlex.quote(str(load_script))} 2>/dev/null || true; "
     main_cmd = " ".join(shlex.quote(part) for part in argv)
     return kinsn_load + main_cmd
 
@@ -1384,7 +1376,6 @@ def packet_main(argv: list[str] | None = None) -> int:
                 timeout_seconds=args.timeout,
                 execution_mode="host-fallback",
                 btf_custom_path=host_btf_path,
-                use_sudo=True,
                 enable_recompile=False,
                 enable_exec=False,
                 skip_families=[],
@@ -1743,7 +1734,6 @@ def run_linear_mode(mode_name: str, argv: list[str] | None = None) -> int:
             timeout_seconds=args.timeout,
             execution_mode=mode_name,
             btf_custom_path=btf_custom_path,
-            use_sudo=True,
             enable_recompile=True,
             enable_exec=enable_exec,
             skip_families=skip_families,

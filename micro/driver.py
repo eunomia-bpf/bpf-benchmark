@@ -529,7 +529,6 @@ def main(argv: list[str] | None = None) -> int:
                 input_size=benchmark.kernel_input_size,
                 perf_counters=args.perf_counters,
                 perf_scope=args.perf_scope,
-                require_sudo=runtime.require_sudo,
                 rejit=is_rejit_runtime,
                 daemon_socket=daemon_socket if is_rejit_runtime else None,
             )

@@ -22,7 +22,6 @@ from runner.libs import (  # noqa: E402
     RESULTS_DIR,
     ROOT_DIR,
     authoritative_output_path,
-    ensure_root,
     run_command,
     smoke_output_path,
     tail_text,
@@ -49,7 +48,7 @@ DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "scx-e2e.md"
 DEFAULT_SCX_BINARY = ROOT_DIR / "corpus" / "repos" / "scx" / "target" / "release" / "scx_rusty"
 DEFAULT_SCX_REPO = ROOT_DIR / "corpus" / "repos" / "scx"
 DEFAULT_SCX_OBJECT = ROOT_DIR / "corpus" / "build" / "scx" / "scx_rusty_main.bpf.o"
-DEFAULT_DAEMON = ROOT_DIR / "daemon" / "build" / "bpfrejit-daemon"
+DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
 DEFAULT_KERNEL = ROOT_DIR / "vendor" / "linux-framework" / "arch" / "x86" / "boot" / "bzImage"
 DEFAULT_BPFTOOL = Path("/usr/local/sbin/bpftool")
 DEFAULT_LOAD_TIMEOUT = 20
@@ -646,7 +645,6 @@ def build_markdown(payload: Mapping[str, object]) -> str:
 
 
 def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
-    ensure_root([str(Path(sys.argv[0]).resolve()), *sys.argv[1:]])
     os.environ["PATH"] = preferred_path()
 
     duration_s = int(args.duration or (DEFAULT_SMOKE_DURATION_S if args.smoke else DEFAULT_DURATION_S))

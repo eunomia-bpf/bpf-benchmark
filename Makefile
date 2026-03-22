@@ -1,6 +1,8 @@
 SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c
 
+$(if $(wildcard vendor/linux-framework/Makefile),,$(error vendor/linux-framework not found. Run: git submodule update --init --recursive))
+
 ROOT_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 MICRO_DIR := $(ROOT_DIR)/micro
 RUNNER_DIR := $(ROOT_DIR)/runner
@@ -93,7 +95,7 @@ VENV_ACTIVATE := $(if $(VENV),source "$(VENV)/bin/activate" &&,)
 
 # VNG / VM
 VNG ?= $(ROOT_DIR)/runner/scripts/vng-wrapper.sh
-VM_INIT := $(VENV_ACTIVATE) sudo -n "$(ROOT_DIR)/module/load_all.sh" 2>/dev/null || true;
+VM_INIT := $(VENV_ACTIVATE) "$(ROOT_DIR)/module/load_all.sh" 2>/dev/null || true;
 
 # Policy
 ifeq ($(POLICY),default)
@@ -118,7 +120,7 @@ MICRO_BPF_STAMP      := $(MICRO_DIR)/programs/.build.stamp
 
 .PHONY: all runner micro daemon kernel kernel-arm64 kernel-tests kinsn-modules \
 	daemon-tests python-tests check smoke validate \
-	vm-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
+	vm-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 	arm64-worktree arm64-rootfs arm64-crossbuild-image cross-arm64 selftest-arm64 \
 	vm-arm64-smoke vm-arm64-selftest \
 	aws-arm64-launch aws-arm64-setup aws-arm64-benchmark aws-arm64-terminate aws-arm64 \
@@ -128,7 +130,7 @@ MICRO_BPF_STAMP      := $(MICRO_DIR)/programs/.build.stamp
 help:
 	@echo "Build:  all runner micro daemon kernel kinsn-modules kernel-tests kernel-arm64 cross-arm64"
 	@echo "Test:   smoke daemon-tests python-tests check"
-	@echo "VM x86: vm-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all validate"
+	@echo "VM x86: vm-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all validate"
 	@echo "ARM64:  vm-arm64-smoke vm-arm64-selftest"
 	@echo "AWS:    aws-arm64-launch aws-arm64-setup aws-arm64-benchmark aws-arm64-terminate aws-arm64"
 	@echo "Params: ITERATIONS=$(ITERATIONS) WARMUPS=$(WARMUPS) REPEAT=$(REPEAT) BENCH=\"...\" POLICY=$(POLICY)"
@@ -199,6 +201,18 @@ vm-test: kernel-tests $(BZIMAGE_PATH) kinsn-modules
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
 		bash -lc '$(VM_INIT) "$(ROOT_DIR)/runner/scripts/run_all_tests.sh" "$(ROOT_DIR)"'
 
+NEGATIVE_TEST_DIR := $(ROOT_DIR)/tests/negative
+FUZZ_ROUNDS ?= 1000
+
+vm-negative-test: $(BZIMAGE_PATH)
+	$(MAKE) -C "$(NEGATIVE_TEST_DIR)"
+	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
+		bash -lc '$(VM_INIT) \
+			echo "=== adversarial_rejit ===" && \
+			"$(NEGATIVE_TEST_DIR)/build/adversarial_rejit" && \
+			echo "=== fuzz_rejit ($(FUZZ_ROUNDS) rounds) ===" && \
+			"$(NEGATIVE_TEST_DIR)/build/fuzz_rejit" $(FUZZ_ROUNDS)'
+
 vm-micro-smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(DAEMON_PATH) $(BZIMAGE_PATH) kinsn-modules
 	mkdir -p "$(MICRO_RESULTS_DEV_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
@@ -224,7 +238,7 @@ vm-corpus: $(MICRO_RUNNER) $(DAEMON_PATH) $(BZIMAGE_PATH) kinsn-modules
 		--vng "$(VNG)" --btf-custom-path "$(VMLINUX_PATH)" --repeat "$(REPEAT)" --use-policy \
 		--output-json "$(VM_CORPUS_OUTPUT_JSON)" --output-md "$(VM_CORPUS_OUTPUT_MD)"
 
-vm-e2e: $(DAEMON_PATH) $(BZIMAGE_PATH) kinsn-modules
+vm-e2e: $(MICRO_RUNNER) $(DAEMON_PATH) $(BZIMAGE_PATH) kinsn-modules
 	mkdir -p "$(E2E_RESULTS_DEV_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
 		bash -lc 'cd "$(ROOT_DIR)" && $(VM_INIT) python3 "$(ROOT_DIR)/e2e/run.py" all'

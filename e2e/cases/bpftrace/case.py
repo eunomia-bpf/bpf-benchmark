@@ -20,7 +20,6 @@ from runner.libs import (  # noqa: E402
     RESULTS_DIR,
     ROOT_DIR,
     authoritative_output_path,
-    ensure_root,
     run_command,
     smoke_output_path,
     tail_text,
@@ -59,7 +58,7 @@ DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "bpftrace")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "bpftrace-real-e2e.md"
 DEFAULT_REPORT_MD = ROOT_DIR / "docs" / "tmp" / "bpftrace-real-e2e-report.md"
 DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
-DEFAULT_DAEMON = ROOT_DIR / "daemon" / "build" / "bpfrejit-daemon"
+DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
 DEFAULT_DURATION_S = 30
 MIN_BPFTRACE_VERSION = (0, 16, 0)
 
@@ -652,7 +651,6 @@ def build_report(payload: Mapping[str, object]) -> str:
 
 def run_case(args: argparse.Namespace) -> dict[str, object]:
     prepend_guest_tools_to_path()
-    ensure_root([str(Path(sys.argv[0]).resolve()), *sys.argv[1:]])
 
     runner_binary = Path(args.runner).resolve()
     daemon_binary = Path(args.daemon).resolve()

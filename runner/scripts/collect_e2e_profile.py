@@ -13,7 +13,7 @@ from typing import Any, Callable, Mapping, Sequence
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from runner.libs import ROOT_DIR, ensure_root, prepare_bpftool_environment, write_json  # noqa: E402
+from runner.libs import ROOT_DIR, prepare_bpftool_environment, write_json  # noqa: E402
 from runner.libs.metrics import enable_bpf_stats  # noqa: E402
 from runner.libs.profiler import DEFAULT_DAEMON, profile_programs  # noqa: E402
 from runner.libs.workload import WorkloadResult  # noqa: E402
@@ -554,7 +554,6 @@ def run_katran_collection(args: argparse.Namespace) -> dict[str, Any]:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    ensure_root([str(Path(sys.argv[0]).resolve()), *(argv or sys.argv[1:])])
     if args.case == "tracee":
         payload = run_tracee_collection(args)
     elif args.case == "tetragon":

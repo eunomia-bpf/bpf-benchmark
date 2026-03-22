@@ -62,10 +62,18 @@ except ImportError:
     )
 
 from runner.libs.attach import (
+    attach_cgroup_skb,
     attach_cgroup_sysctl,
+    attach_fentry,
+    attach_fexit,
     attach_kprobe,
+    attach_lsm,
+    attach_perf_event,
+    attach_raw_tracepoint,
+    attach_socket_filter,
     attach_tracepoint,
     bpf_obj_get,
+    detach_cgroup_skb,
     detach_cgroup_sysctl,
     managed_attachments,
     parse_section_attach_info,
@@ -159,7 +167,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--seed", type=int, default=0, help="Seed used for runtime order shuffling.")
     parser.add_argument("--skip-build", action="store_true", help="Do not build micro_exec when missing.")
     parser.add_argument("--list", action="store_true", help="List configured benchmarks and runtimes.")
-    parser.add_argument("--no-sudo-reexec", action="store_true", help="Do not automatically re-exec under sudo.")
     parser.add_argument(
         "--daemon-socket",
         default=None,
@@ -173,12 +180,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def maybe_reexec_as_root(args: argparse.Namespace) -> None:
-    if args.no_sudo_reexec or os.geteuid() == 0:
-        return
-    probe = subprocess.run(["sudo", "-n", "true"], capture_output=True, text=True)
-    if probe.returncode != 0:
-        raise SystemExit("macro corpus runner requires root or passwordless sudo")
-    os.execvp("sudo", ["sudo", "-n", sys.executable, *sys.argv])
+    """No-op: VM guests are already root, host does not run BPF operations."""
+    return
 
 
 def summarize_code_size(samples: list[dict[str, Any]]) -> dict[str, dict[str, float | int | None]]:
@@ -824,8 +827,9 @@ def _attach_pinned_program(
 ) -> int | None:
     """Attach a single pinned program based on its section name.
 
-    Returns the attachment fd (perf_event fd or cgroup fd), or None if
-    the program type is not supported for manual attachment (e.g. uprobes).
+    Returns the attachment fd (perf_event fd, link fd, or cgroup fd), or
+    None if the program type is not supported for manual attachment
+    (e.g. uprobes, struct_ops).
     """
     info = parse_section_attach_info(section_name)
     method = info["attach_method"]
@@ -849,10 +853,41 @@ def _attach_pinned_program(
             return None
         return attach_kprobe(prog_fd, func_name, is_return=True)
 
+    if method == "raw_tracepoint":
+        tp_name = info["event"]
+        if not tp_name:
+            return None
+        return attach_raw_tracepoint(prog_fd, tp_name)
+
+    if method == "tp_btf":
+        # tp_btf programs have BTF-encoded attach info; use link_create
+        # with BPF_TRACE_RAW_TP (the kernel resolves the target via BTF)
+        from runner.libs.attach import _bpf_link_create, BPF_TRACE_RAW_TP
+        return _bpf_link_create(prog_fd, 0, BPF_TRACE_RAW_TP)
+
+    if method == "fentry":
+        return attach_fentry(prog_fd)
+
+    if method == "fexit":
+        return attach_fexit(prog_fd)
+
+    if method == "lsm":
+        return attach_lsm(prog_fd)
+
+    if method == "perf_event":
+        return attach_perf_event(prog_fd)
+
     if method == "cgroup_sysctl":
         return attach_cgroup_sysctl(prog_fd)
 
-    # uprobes and unknown types: skip
+    if method == "cgroup_skb":
+        egress = info.get("category", "") == "egress"
+        return attach_cgroup_skb(prog_fd, egress=egress)
+
+    if method == "socket_filter":
+        return attach_socket_filter(prog_fd)
+
+    # uprobes, struct_ops, iter, syscall, and unknown types: skip
     return None
 
 

@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import Mapping, Sequence
 
 from runner.libs import (
-    chown_to_invoking_user,
     run_command,
     write_json,
     write_text,
@@ -134,4 +133,3 @@ def persist_results(
     """
     write_json(output_json, payload)
     write_text(output_md, build_markdown(payload))  # type: ignore[operator]
-    chown_to_invoking_user(output_md)

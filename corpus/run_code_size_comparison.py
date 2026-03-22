@@ -4,7 +4,6 @@ from __future__ import annotations
 import argparse
 import json
 import math
-import os
 import platform
 import statistics
 import subprocess
@@ -125,10 +124,6 @@ def relpath(path: Path | str) -> str:
             return candidate.relative_to(ROOT_DIR).as_posix()
         except Exception:
             return str(candidate)
-
-
-def maybe_sudo_prefix() -> list[str]:
-    return [] if os.geteuid() == 0 else ["sudo", "-n"]
 
 
 def trim_text(text: str, *, max_chars: int = 4000) -> str:
@@ -486,7 +481,7 @@ def build_runner_command(
     compile_only: bool,
     recompile_v5: bool,
 ) -> list[str]:
-    command = maybe_sudo_prefix() + [
+    command = [
         str(runner),
         "run-kernel",
         "--program",
@@ -1097,8 +1092,6 @@ def build_markdown(payload: dict[str, Any]) -> str:
 
 def build_vm_command(args: argparse.Namespace) -> str:
     guest_argv = [
-        "sudo",
-        "-n",
         "python3",
         "corpus/run_code_size_comparison.py",
         "--output-json",

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 import json
 import re
 import socket
@@ -113,13 +112,8 @@ def run_exec_storm(duration_s: int | float, rate: int) -> WorkloadResult:
         f"{max(1, int(duration_s))}s",
         "--metrics-brief",
     ]
-    sudo_user = os.environ.get("SUDO_USER")
     if stress_ng is None:
         return run_rapid_exec_storm(duration_s, iterations=max(1, int(rate)) * max(1, int(duration_s)) * 200)
-    if os.geteuid() == 0 and not sudo_user:
-        return run_rapid_exec_storm(duration_s, iterations=max(1, int(rate)) * max(1, int(duration_s)) * 200)
-    if os.geteuid() == 0 and sudo_user:
-        command = ["sudo", "-n", "-u", sudo_user, *command]
     start = time.monotonic()
     completed = run_command(command, check=False, timeout=float(duration_s) + 30)
     elapsed = time.monotonic() - start

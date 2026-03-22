@@ -290,7 +290,7 @@ pub fn bpf_prog_rejit(prog_fd: RawFd, insns: &[BpfInsn], fd_array: &[RawFd]) -> 
     attr.prog_fd = prog_fd as u32;
     attr.insn_cnt = insns.len() as u32;
     attr.insns = insns.as_ptr() as u64;
-    attr.log_level = 1;
+    attr.log_level = 2;
     attr.log_size = LOG_BUF_SIZE as u32;
     attr.log_buf = log_buf.as_mut_ptr() as u64;
     if !fd_array.is_empty() {

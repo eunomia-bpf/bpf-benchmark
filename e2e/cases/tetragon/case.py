@@ -23,7 +23,6 @@ from runner.libs import (  # noqa: E402
     RESULTS_DIR,
     ROOT_DIR,
     authoritative_output_path,
-    ensure_root,
     resolve_bpftool_binary,
     run_command,
     run_json_command,
@@ -64,7 +63,7 @@ DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "tetragon")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "tetragon-real-e2e.md"
 DEFAULT_EXECVE_OBJECT = ROOT_DIR / "corpus" / "build" / "tetragon" / "bpf_execve_event.bpf.o"
 DEFAULT_KPROBE_OBJECT = ROOT_DIR / "corpus" / "build" / "tetragon" / "bpf_generic_kprobe.bpf.o"
-DEFAULT_DAEMON = ROOT_DIR / "daemon" / "build" / "bpfrejit-daemon"
+DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
 DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
 DEFAULT_BPFTOOL = "/usr/local/sbin/bpftool"
 DEFAULT_DURATION_S = 30
@@ -993,8 +992,6 @@ def daemon_payload(
 
 
 def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
-    ensure_root([str(Path(sys.argv[0]).resolve()), *sys.argv[1:]])
-
     bpftool = str(Path(args.bpftool).resolve()) if Path(args.bpftool).exists() else str(args.bpftool)
     os.environ["BPFTOOL_BIN"] = bpftool
     if Path(bpftool).exists():

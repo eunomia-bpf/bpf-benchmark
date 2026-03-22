@@ -45,6 +45,54 @@ pub fn parse_verifier_log(log: &str) -> Vec<VerifierInsn> {
     log.lines().filter_map(parse_state_line).collect()
 }
 
+/// Extract the PC of the verifier failure from a REJIT error message.
+///
+/// Heuristics (in priority order):
+/// 1. Look for error lines like `R2 type=scalar expected=packet_ptr` at the end
+///    — they follow a state snapshot whose PC is the failure point.
+/// 2. Look for lines with `invalid` or `type=` that aren't state lines — extract
+///    the PC from the preceding state line.
+/// 3. Fall back to the last PC seen in any state snapshot (the verifier typically
+///    reports the state just before the error).
+///
+/// Returns `None` if no meaningful PC can be extracted.
+pub fn extract_failure_pc(verifier_log: &str) -> Option<usize> {
+    let lines: Vec<&str> = verifier_log.lines().collect();
+    if lines.is_empty() {
+        return None;
+    }
+
+    // Strategy 1: Look for common verifier error patterns and take the PC from
+    // the preceding state line.
+    let error_patterns = [
+        "invalid", "type=", "expected", "not allowed", "permission denied",
+        "R0 !read_ok", "unreachable", "back-edge", "loop detected",
+        "BPF_EXIT without", "jump out of range", "misaligned",
+    ];
+
+    let mut last_state_pc: Option<usize> = None;
+    for line in &lines {
+        let trimmed = line.trim();
+        // Try to parse as a state line to track the latest PC.
+        if let Some(vi) = parse_state_line(trimmed) {
+            last_state_pc = Some(vi.pc);
+            continue;
+        }
+        // Check if this is an error line.
+        let lower = trimmed.to_lowercase();
+        if error_patterns.iter().any(|pat| lower.contains(pat)) {
+            // If we have a preceding state PC, that's our failure point.
+            if let Some(pc) = last_state_pc {
+                return Some(pc);
+            }
+        }
+    }
+
+    // Strategy 2: Return the last state PC seen (the verifier typically emits
+    // the failing state last before the error summary).
+    last_state_pc
+}
+
 fn parse_state_line(line: &str) -> Option<VerifierInsn> {
     let trimmed = line.trim();
     if trimmed.is_empty() {
@@ -460,5 +508,62 @@ processed 4 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_stat
         assert_eq!(parsed[0].pc, 0);
         assert!(parsed[0].regs.contains_key(&1));
         assert_eq!(parsed[0].regs.get(&1).unwrap().reg_type, "ctx");
+    }
+
+    // ── extract_failure_pc tests ──────────────────────────────────
+
+    #[test]
+    fn extract_failure_pc_from_type_mismatch() {
+        // The verifier typically emits the state snapshot, then a separate error line.
+        let log = "\
+0: R1=ctx() R10=fp0
+0: (b7) r0 = 0                        ; R0=0
+5: R0=pkt(off=8,r=8) R1=ctx() R2=pkt(r=8)
+5: (71) r3 = *(u8 *)(r2 +0)           ; R2=pkt(r=8) R3=scalar(umax=255)
+R2 type=scalar expected=pkt_ptr
+";
+        let pc = extract_failure_pc(log);
+        assert_eq!(pc, Some(5), "should return the PC of the last state before the error line");
+    }
+
+    #[test]
+    fn extract_failure_pc_from_invalid_insn() {
+        let log = "\
+0: R1=ctx() R10=fp0
+3: R0=scalar R1=ctx()
+3: (85) call bpf_rotate64#12345 ; R1=scalar
+invalid func bpf_rotate64#12345
+";
+        let pc = extract_failure_pc(log);
+        assert_eq!(pc, Some(3));
+    }
+
+    #[test]
+    fn extract_failure_pc_last_state_fallback() {
+        // No error keyword, just state lines — should return the last PC.
+        let log = "\
+0: R1=ctx() R10=fp0
+4: R0=scalar R1=ctx()
+10: R0=0 R10=fp0
+";
+        let pc = extract_failure_pc(log);
+        assert_eq!(pc, Some(10));
+    }
+
+    #[test]
+    fn extract_failure_pc_empty_log() {
+        assert_eq!(extract_failure_pc(""), None);
+        assert_eq!(extract_failure_pc("processed 2 insns"), None);
+    }
+
+    #[test]
+    fn extract_failure_pc_jump_out_of_range() {
+        let log = "\
+0: R1=ctx() R10=fp0
+2: R0=scalar
+jump out of range from insn 2 to 99
+";
+        let pc = extract_failure_pc(log);
+        assert_eq!(pc, Some(2));
     }
 }

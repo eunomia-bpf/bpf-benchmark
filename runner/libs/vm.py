@@ -6,7 +6,7 @@ import tempfile
 from pathlib import Path
 from typing import Sequence
 
-from . import DEFAULT_VENV_ACTIVATE, ROOT_DIR, chown_to_invoking_user, which
+from . import DEFAULT_VENV_ACTIVATE, ROOT_DIR, which
 
 
 def write_guest_script(commands: Sequence[str | Sequence[str]]) -> Path:
@@ -36,7 +36,6 @@ def write_guest_script(commands: Sequence[str | Sequence[str]]) -> Path:
             handle.write(" ".join(shlex.quote(str(part)) for part in command) + "\n")
     script_path = Path(handle.name)
     script_path.chmod(0o755)
-    chown_to_invoking_user(script_path)
     return script_path
 
 

@@ -1,7 +1,8 @@
 """Low-level BPF program attachment helpers using perf_event_open + ioctl.
 
-Supports tracepoint, kprobe, and cgroup_sysctl attachment without requiring
-bpftool autoattach (which fails on partial-attach objects).
+Supports tracepoint, kprobe, raw_tracepoint, fentry/fexit, tp_btf,
+perf_event, lsm, cgroup_sysctl, and cgroup_skb attachment without
+requiring bpftool autoattach (which fails on partial-attach objects).
 """
 from __future__ import annotations
 
@@ -51,10 +52,19 @@ PERF_EVENT_IOC_SET_BPF = 0x40042408
 
 # BPF commands
 BPF_PROG_ATTACH = 8
+BPF_RAW_TRACEPOINT_OPEN = 18
 BPF_LINK_CREATE = 28
 
 # BPF attach types
+BPF_CGROUP_INET_INGRESS = 0
+BPF_CGROUP_INET_EGRESS = 1
 BPF_CGROUP_SYSCTL = 18
+BPF_TRACE_FENTRY = 24
+BPF_TRACE_FEXIT = 25
+BPF_LSM_MAC = 29
+BPF_TRACE_RAW_TP = 37
+BPF_LSM_CGROUP = 38
+BPF_PERF_EVENT = 41
 
 # perf_event_attr size (v5 structure, 120 bytes is typical)
 PERF_ATTR_SIZE = 120
@@ -302,6 +312,241 @@ def detach_cgroup_sysctl(cgroup_fd: int, prog_fd: int) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Raw tracepoint attachment
+# ---------------------------------------------------------------------------
+
+def attach_raw_tracepoint(prog_fd: int, tp_name: str) -> int:
+    """Attach a BPF program to a raw tracepoint via BPF_RAW_TRACEPOINT_OPEN.
+
+    Returns the fd (caller must close it to detach).
+    """
+    name_bytes = tp_name.encode("utf-8") + b"\0"
+    name_buf = ctypes.create_string_buffer(name_bytes)
+    name_ptr = ctypes.cast(name_buf, ctypes.c_void_p).value
+
+    # bpf_attr for BPF_RAW_TRACEPOINT_OPEN:
+    #   __aligned_u64 name;    /* offset 0 */
+    #   __u32 prog_fd;         /* offset 8 */
+    attr_size = 120
+    attr_buf = bytearray(attr_size)
+    struct.pack_into("QI", attr_buf, 0, name_ptr, prog_fd)
+
+    attr_array = (ctypes.c_ubyte * attr_size).from_buffer(attr_buf)
+    fd = libc().syscall(
+        SYS_BPF,
+        ctypes.c_int(BPF_RAW_TRACEPOINT_OPEN),
+        ctypes.byref(attr_array),
+        ctypes.c_uint32(attr_size),
+    )
+    if fd < 0:
+        err = ctypes.get_errno()
+        raise RuntimeError(
+            f"BPF_RAW_TRACEPOINT_OPEN({tp_name}) "
+            f"failed: {os.strerror(err)} (errno={err})"
+        )
+    return int(fd)
+
+
+# ---------------------------------------------------------------------------
+# BPF_LINK_CREATE-based attachment (fentry, fexit, tp_btf, lsm, perf_event)
+# ---------------------------------------------------------------------------
+
+def _bpf_link_create(
+    prog_fd: int,
+    target_fd: int,
+    attach_type: int,
+) -> int:
+    """Create a BPF link via BPF_LINK_CREATE syscall.
+
+    Returns the link fd (caller must close it to detach).
+    """
+    # bpf_attr for BPF_LINK_CREATE:
+    #   __u32 prog_fd;          /* offset 0 */
+    #   union { __u32 target_fd; __u32 target_ifindex; };  /* offset 4 */
+    #   __u32 attach_type;      /* offset 8 */
+    #   __u32 flags;            /* offset 12 */
+    # ... rest is union-specific
+    attr_size = 120
+    attr_buf = bytearray(attr_size)
+    struct.pack_into("IIII", attr_buf, 0, prog_fd, target_fd, attach_type, 0)
+
+    attr_array = (ctypes.c_ubyte * attr_size).from_buffer(attr_buf)
+    fd = libc().syscall(
+        SYS_BPF,
+        ctypes.c_int(BPF_LINK_CREATE),
+        ctypes.byref(attr_array),
+        ctypes.c_uint32(attr_size),
+    )
+    if fd < 0:
+        err = ctypes.get_errno()
+        raise RuntimeError(
+            f"BPF_LINK_CREATE(prog_fd={prog_fd}, target_fd={target_fd}, "
+            f"attach_type={attach_type}) "
+            f"failed: {os.strerror(err)} (errno={err})"
+        )
+    return int(fd)
+
+
+def attach_fentry(prog_fd: int) -> int:
+    """Attach a BPF fentry program via BPF_LINK_CREATE.
+
+    The target function is encoded in the program's BTF; target_fd=0.
+    Returns the link fd (caller must close it to detach).
+    """
+    return _bpf_link_create(prog_fd, 0, BPF_TRACE_FENTRY)
+
+
+def attach_fexit(prog_fd: int) -> int:
+    """Attach a BPF fexit program via BPF_LINK_CREATE.
+
+    The target function is encoded in the program's BTF; target_fd=0.
+    Returns the link fd (caller must close it to detach).
+    """
+    return _bpf_link_create(prog_fd, 0, BPF_TRACE_FEXIT)
+
+
+def attach_lsm(prog_fd: int) -> int:
+    """Attach a BPF LSM program via BPF_LINK_CREATE.
+
+    The LSM hook is encoded in the program's BTF; target_fd=0.
+    Returns the link fd (caller must close it to detach).
+    """
+    return _bpf_link_create(prog_fd, 0, BPF_LSM_MAC)
+
+
+def attach_perf_event(prog_fd: int, *, sample_freq: int = 49) -> int:
+    """Attach a BPF program to a software perf event (cpu-clock).
+
+    Uses perf_event_open to create a cpu-clock event on CPU 0, then
+    attaches the BPF program via ioctl.
+    Returns the perf_event fd (caller must close it to detach).
+    """
+    PERF_COUNT_SW_CPU_CLOCK = 0
+
+    attr = PerfEventAttr()
+    ctypes.memset(ctypes.byref(attr), 0, ctypes.sizeof(attr))
+    attr.type = PERF_TYPE_SOFTWARE
+    attr.size = ctypes.sizeof(attr)
+    attr.config = PERF_COUNT_SW_CPU_CLOCK
+    attr.sample_period_or_freq = sample_freq
+    # Set freq bit (bit 10 of flags)
+    attr.flags = 1 << 10
+
+    pfd = libc().syscall(
+        SYS_PERF_EVENT_OPEN,
+        ctypes.byref(attr),
+        ctypes.c_int(-1),   # pid = -1 (all processes)
+        ctypes.c_int(0),    # cpu = 0
+        ctypes.c_int(-1),   # group_fd
+        ctypes.c_ulong(0),  # flags
+    )
+    if pfd < 0:
+        err = ctypes.get_errno()
+        raise RuntimeError(
+            f"perf_event_open for cpu-clock "
+            f"failed: {os.strerror(err)} (errno={err})"
+        )
+
+    rc = libc().ioctl(pfd, PERF_EVENT_IOC_SET_BPF, prog_fd)
+    if rc < 0:
+        err = ctypes.get_errno()
+        os.close(pfd)
+        raise RuntimeError(
+            f"ioctl(SET_BPF) for perf_event "
+            f"failed: {os.strerror(err)} (errno={err})"
+        )
+
+    rc = libc().ioctl(pfd, PERF_EVENT_IOC_ENABLE, 0)
+    if rc < 0:
+        err = ctypes.get_errno()
+        os.close(pfd)
+        raise RuntimeError(
+            f"ioctl(ENABLE) for perf_event "
+            f"failed: {os.strerror(err)} (errno={err})"
+        )
+
+    return pfd
+
+
+def attach_cgroup_skb(
+    prog_fd: int,
+    *,
+    cgroup_path: str = "/sys/fs/cgroup",
+    egress: bool = False,
+) -> int:
+    """Attach a BPF cgroup/skb program to a cgroup via BPF_PROG_ATTACH.
+
+    Returns the cgroup fd used for attachment. Caller should detach and close.
+    """
+    attach_type = BPF_CGROUP_INET_EGRESS if egress else BPF_CGROUP_INET_INGRESS
+    cgroup_fd = os.open(cgroup_path, os.O_RDONLY | os.O_CLOEXEC)
+    try:
+        attr_size = 120
+        attr_buf = bytearray(attr_size)
+        struct.pack_into("III", attr_buf, 0, cgroup_fd, prog_fd, attach_type)
+
+        attr_array = (ctypes.c_ubyte * attr_size).from_buffer(attr_buf)
+        rc = libc().syscall(
+            SYS_BPF,
+            ctypes.c_int(BPF_PROG_ATTACH),
+            ctypes.byref(attr_array),
+            ctypes.c_uint32(attr_size),
+        )
+        if rc < 0:
+            err = ctypes.get_errno()
+            raise RuntimeError(
+                f"BPF_PROG_ATTACH(cgroup_skb, {'egress' if egress else 'ingress'}) "
+                f"to {cgroup_path} "
+                f"failed: {os.strerror(err)} (errno={err})"
+            )
+        return cgroup_fd
+    except Exception:
+        os.close(cgroup_fd)
+        raise
+
+
+def detach_cgroup_skb(
+    cgroup_fd: int,
+    prog_fd: int,
+    *,
+    egress: bool = False,
+) -> None:
+    """Detach a BPF cgroup/skb program."""
+    attach_type = BPF_CGROUP_INET_EGRESS if egress else BPF_CGROUP_INET_INGRESS
+    attr_size = 120
+    attr_buf = bytearray(attr_size)
+    struct.pack_into("III", attr_buf, 0, cgroup_fd, prog_fd, attach_type)
+    attr_array = (ctypes.c_ubyte * attr_size).from_buffer(attr_buf)
+    libc().syscall(
+        SYS_BPF,
+        ctypes.c_int(9),  # BPF_PROG_DETACH
+        ctypes.byref(attr_array),
+        ctypes.c_uint32(attr_size),
+    )
+
+
+def attach_socket_filter(prog_fd: int) -> int:
+    """Attach a BPF socket filter program to a dummy socket.
+
+    Creates a raw socket, attaches the BPF program via SO_ATTACH_BPF,
+    and returns the socket fd. Caller must close it to detach.
+    """
+    import socket as _socket
+    SO_ATTACH_BPF = 50
+    sock = _socket.socket(_socket.AF_PACKET, _socket.SOCK_RAW, _socket.htons(0x0003))
+    try:
+        sock.setsockopt(_socket.SOL_SOCKET, SO_ATTACH_BPF, struct.pack("i", prog_fd))
+        # Return the raw fd; caller takes ownership
+        fd = os.dup(sock.fileno())
+        return fd
+    except Exception:
+        sock.close()
+        raise
+    finally:
+        sock.close()
+
+
+# ---------------------------------------------------------------------------
 # Section name parsing
 # ---------------------------------------------------------------------------
 
@@ -319,9 +564,12 @@ def parse_section_attach_info(section_name: str) -> dict[str, str]:
     """Parse a BPF section name to determine attachment type and target.
 
     Returns a dict with keys:
-      - attach_method: "tracepoint", "kprobe", "kretprobe", "uprobe", "cgroup_sysctl", "unknown"
+      - attach_method: one of "tracepoint", "kprobe", "kretprobe",
+        "raw_tracepoint", "tp_btf", "fentry", "fexit", "lsm",
+        "perf_event", "cgroup_sysctl", "cgroup_skb", "socket_filter",
+        "struct_ops", "uprobe", "tracepoint_bare", "unknown"
       - category: tracepoint category (e.g., "sched") or empty
-      - event: tracepoint event name or kprobe function name
+      - event: tracepoint event name, kprobe function name, or fentry target
     """
     # Check aliases first
     if section_name in SECTION_TRACEPOINT_ALIASES:
@@ -334,6 +582,7 @@ def parse_section_attach_info(section_name: str) -> dict[str, str]:
 
     parts = section_name.split("/")
 
+    # --- tracepoint variants ---
     if parts[0] == "tracepoint" and len(parts) >= 3:
         return {
             "attach_method": "tracepoint",
@@ -341,21 +590,75 @@ def parse_section_attach_info(section_name: str) -> dict[str, str]:
             "event": parts[2],
         }
     if parts[0] == "tracepoint" and len(parts) == 2:
-        # e.g., tracepoint/sys_execve — try alias lookup (already done above),
-        # otherwise return with empty category (caller should skip)
         return {
             "attach_method": "tracepoint",
             "category": "",
             "event": parts[1],
         }
     if parts[0] == "tracepoint" and len(parts) == 1:
-        # Bare "tracepoint" section (e.g. Tetragon helper programs).
-        # Attach target is unknown; caller should skip.
         return {
             "attach_method": "tracepoint_bare",
             "category": "",
             "event": "",
         }
+
+    # "tp/category/event" is a libbpf shorthand for tracepoint
+    if parts[0] == "tp" and len(parts) >= 3:
+        return {
+            "attach_method": "tracepoint",
+            "category": parts[1],
+            "event": parts[2],
+        }
+    if parts[0] == "tp" and len(parts) == 2:
+        return {
+            "attach_method": "tracepoint",
+            "category": "",
+            "event": parts[1],
+        }
+
+    # --- raw_tracepoint / raw_tp ---
+    if parts[0] in ("raw_tracepoint", "raw_tp") and len(parts) >= 2:
+        return {
+            "attach_method": "raw_tracepoint",
+            "category": "",
+            "event": parts[1],
+        }
+    if parts[0] in ("raw_tracepoint", "raw_tp") and len(parts) == 1:
+        return {
+            "attach_method": "raw_tracepoint_bare",
+            "category": "",
+            "event": "",
+        }
+
+    # --- tp_btf (BTF-powered tracepoint, uses BPF_LINK_CREATE) ---
+    if parts[0] == "tp_btf" and len(parts) >= 2:
+        return {
+            "attach_method": "tp_btf",
+            "category": "",
+            "event": parts[1],
+        }
+
+    # --- fentry / fexit ---
+    if parts[0] == "fentry" and len(parts) >= 2:
+        return {
+            "attach_method": "fentry",
+            "category": "",
+            "event": parts[1],
+        }
+    if parts[0] == "fexit" and len(parts) >= 2:
+        return {
+            "attach_method": "fexit",
+            "category": "",
+            "event": parts[1],
+        }
+    if parts[0] == "fmod_ret" and len(parts) >= 2:
+        return {
+            "attach_method": "fentry",
+            "category": "",
+            "event": parts[1],
+        }
+
+    # --- kprobe / kretprobe ---
     if parts[0] == "kprobe" and len(parts) >= 2:
         return {
             "attach_method": "kprobe",
@@ -368,15 +671,120 @@ def parse_section_attach_info(section_name: str) -> dict[str, str]:
             "category": "",
             "event": parts[1],
         }
+    if parts[0] == "ksyscall" and len(parts) >= 2:
+        # ksyscall/<name> attaches to __x64_sys_<name> (or __arm64_sys_<name>)
+        syscall_name = parts[1]
+        if _MACHINE in ("x86_64", "amd64"):
+            func_name = f"__x64_sys_{syscall_name}"
+        elif _MACHINE == "aarch64":
+            func_name = f"__arm64_sys_{syscall_name}"
+        else:
+            func_name = f"__x64_sys_{syscall_name}"
+        return {
+            "attach_method": "kprobe",
+            "category": "",
+            "event": func_name,
+        }
+    if parts[0] == "kretsyscall" and len(parts) >= 2:
+        syscall_name = parts[1]
+        if _MACHINE in ("x86_64", "amd64"):
+            func_name = f"__x64_sys_{syscall_name}"
+        elif _MACHINE == "aarch64":
+            func_name = f"__arm64_sys_{syscall_name}"
+        else:
+            func_name = f"__x64_sys_{syscall_name}"
+        return {
+            "attach_method": "kretprobe",
+            "category": "",
+            "event": func_name,
+        }
+
+    # --- uprobe / uretprobe ---
     if parts[0] in ("uprobe", "uretprobe"):
         return {
             "attach_method": "uprobe",
             "category": "",
             "event": "/".join(parts[1:]) if len(parts) > 1 else "",
         }
-    if parts[0] in ("cgroup/sysctl", "cgroup") and "sysctl" in section_name:
+    if parts[0] in ("usdt",):
+        return {
+            "attach_method": "uprobe",
+            "category": "",
+            "event": "/".join(parts[1:]) if len(parts) > 1 else "",
+        }
+
+    # --- LSM ---
+    if parts[0] == "lsm" and len(parts) >= 2:
+        return {
+            "attach_method": "lsm",
+            "category": "",
+            "event": parts[1],
+        }
+    if parts[0] in ("lsm.s",) and len(parts) >= 2:
+        return {
+            "attach_method": "lsm",
+            "category": "",
+            "event": parts[1],
+        }
+
+    # --- perf_event ---
+    if parts[0] == "perf_event":
+        return {
+            "attach_method": "perf_event",
+            "category": "",
+            "event": "",
+        }
+
+    # --- cgroup types ---
+    if parts[0] == "cgroup" and "sysctl" in section_name:
         return {
             "attach_method": "cgroup_sysctl",
+            "category": "",
+            "event": "",
+        }
+    if parts[0] == "cgroup_skb" or (parts[0] == "cgroup" and len(parts) >= 2 and parts[1] in ("skb", "skb_egress", "skb_ingress")):
+        egress = "egress" in section_name
+        return {
+            "attach_method": "cgroup_skb",
+            "category": "egress" if egress else "ingress",
+            "event": "",
+        }
+    if parts[0] == "cgroup" and len(parts) >= 2:
+        # Other cgroup types (sock_addr, sock_ops, etc.) — return unknown for now
+        return {
+            "attach_method": "unknown",
+            "category": "",
+            "event": f"cgroup/{parts[1]}",
+        }
+
+    # --- socket_filter ---
+    if parts[0] in ("socket", "socket_filter", "sockfilter"):
+        return {
+            "attach_method": "socket_filter",
+            "category": "",
+            "event": "",
+        }
+
+    # --- struct_ops (compile_only) ---
+    if parts[0] in ("struct_ops", "struct_ops.s"):
+        return {
+            "attach_method": "struct_ops",
+            "category": "",
+            "event": "/".join(parts[1:]) if len(parts) > 1 else "",
+        }
+
+    # --- iter ---
+    if parts[0] == "iter" and len(parts) >= 2:
+        return {
+            "attach_method": "iter",
+            "category": "",
+            "event": parts[1],
+        }
+
+    # --- syscall (sched_ext helper) ---
+    if parts[0] == "syscall":
+        return {
+            "attach_method": "syscall",
             "category": "",
             "event": "",
         }
@@ -433,10 +841,18 @@ def managed_attachments(attachments: list[int]) -> Iterator[list[int]]:
 
 
 __all__ = [
+    "attach_cgroup_skb",
     "attach_cgroup_sysctl",
+    "attach_fentry",
+    "attach_fexit",
     "attach_kprobe",
+    "attach_lsm",
+    "attach_perf_event",
+    "attach_raw_tracepoint",
+    "attach_socket_filter",
     "attach_tracepoint",
     "bpf_obj_get",
+    "detach_cgroup_skb",
     "detach_cgroup_sysctl",
     "managed_attachments",
     "parse_section_attach_info",

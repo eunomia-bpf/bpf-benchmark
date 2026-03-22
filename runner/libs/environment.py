@@ -17,18 +17,6 @@ def read_optional_text(path: str | Path, default: str = "unknown") -> str:
         return default
 
 
-def sudo_available() -> bool:
-    try:
-        completed = subprocess.run(
-            ["sudo", "-n", "true"],
-            capture_output=True,
-            text=True,
-        )
-    except OSError:
-        return False
-    return completed.returncode == 0
-
-
 def ensure_build_steps(
     build_commands: Mapping[str, Sequence[str]],
     *,
@@ -83,11 +71,6 @@ def validate_publication_environment(
             "No CPU affinity set. Consider using --cpu for isolated measurements."
         )
 
-    if not sudo_available():
-        report_publication_issue(
-            "sudo -n is not available. Passwordless sudo is required for publication-grade runs."
-        )
-
     if strict_failures:
         for failure in strict_failures:
             print(f"[ERROR] {failure}", file=sys.stderr)
@@ -98,6 +81,5 @@ __all__ = [
     "ensure_build_steps",
     "read_optional_text",
     "read_required_text",
-    "sudo_available",
     "validate_publication_environment",
 ]

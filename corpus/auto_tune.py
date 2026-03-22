@@ -766,7 +766,6 @@ def measure_candidate(
                 timeout_seconds=args.timeout,
                 execution_mode="host",
                 btf_custom_path=btf_custom_path,
-                use_sudo=True,
                 enable_recompile=True,
                 enable_exec=True,
                 skip_families=[],

@@ -671,6 +671,13 @@ make clean
 | **381** | **Module UB + cross-arch 修复（2026-03-22）** | ✅ | **(1)** extract len=64 UB fix。**(2)** rotate shift=0 UB fix。**(3)** ARM64 ROL/ROR 统一（NEG+AND+RORV 实现左旋）。**(4)** 全部 module 改 BPF_PROG_TYPE_UNSPEC（不限 XDP）。**(5)** build artifact gitignore。 |
 | **382** | **真实 Spectre barrier（2026-03-22）** | ✅ | x86 bpf_barrier.c（LFENCE 3B）+ arm64 bpf_barrier.c（DSB SY+ISB 8B）。daemon SpeculationBarrierPass 替换 JA+0 placeholder。kfunc 不可用时 pass 不做任何事。**224 tests pass**。 |
 | **383** | **kinsn common header + module 简化（2026-03-22）** | ✅ | `module/include/kinsn_common.h`：DEFINE_KINSN_MODULE/DEFINE_KINSN_MODULE_MULTI 宏。10 个 module 文件全部简化（~300 行减少）。BPF_PROG_TYPE_UNSPEC 默认全 prog type。module/.gitignore 清理 artifact。 |
+| **398** | **Verifier differential correctness verification 调研（2026-03-22）** | 📝 | 结论：**可行，但只能做 heuristic differential checking，不是 sound correctness proof。** 三方案里 **B（每 pass 前后 temp `BPF_PROG_LOAD` + `log_level=2` 对比）最佳**；A 太晚，C 工程量过大。对 `wide_mem` 信号最强；`rotate/cond_select` 很弱；`branch_flip` false positive 最高。**最可信路线 = verifier-diff guardrail + 本地 peephole translation validation（SMT/bitvector）**。完整报告：`docs/tmp/20260322/verifier_differential_verification_research_20260322.md`。 |
+| **397** | Verifier-guided transform rollback | 🔄 | REJIT 失败→解析 log→归因到 pass→禁用→重试。opus 进行中。 |
+| **396** | Fuzz + adversarial negative tests | 🔄 | tests/negative/：10000 轮随机 bytecode fuzz + 15 种对抗性 pattern。opus 进行中。 |
+| **395** | Corpus 54 unmeasured 完整实现 | 待做 | 需要：新 attach 类型实现（kprobe/tracepoint/cgroup_sock_addr 等）+ 触发机制 + bpf_stats 测量 + YAML 配置。不只是改 config。 |
+| **394** | deprecated CLI 清理（2026-03-22） | ✅ | 删 --daemon-path（3处）、recompile_v5→blind_apply、recompile_v4 死分支、重复 --bpftool 合并。 |
+| **393** | sudo 全量清理 | 🔄 | VM 内已是 root，主机不跑 BPF。删除所有 sudo（除 AWS 脚本）。opus 进行中。 |
+| **392** | kernel 修改总结 | 🔄 | sonnet 进行中。 |
 | **391** | **5 dead code 接线（2026-03-22）** | ✅ | **(1)** verifier_log→bpf_prog_rejit（64KB log buffer + 结构化解析）。**(2)** HotnessRanking→watch（热度排序优先优化）。**(3)** PlatformCapabilities→PassContext（/proc/cpuinfo 检测 BMI1/CMOV/MOVBE/RORX，pass 开头检查）。**(4)** all_module_fds→cmd_apply（required⊆all 验证）。**(5)** AnalysisCache invalidate→PassManager（pass 修改后精确失效）。**229 tests pass**。 |
 | **390** | **Makefile 大重构（2026-03-22）** | ✅ | 759→335 行（56% 减少）。vm-test 合并 4 个 target。vm-e2e 收敛为 `e2e/run.py all`。inline shell 抽到 4 个脚本。删 verify-build/compare/kernel-perf 死 target。 |
 | **389** | **Makefile 全自动 pipeline（2026-03-22）** | ✅ | kernel 自动 defconfig + modules_prepare。kinsn-modules 加入所有 vm-* 依赖链。corpus load_all.sh（5/5 modules）。删 e2e/run.py --vm 死代码（~160 行）。删 KINSN_MODULES 死变量。 |

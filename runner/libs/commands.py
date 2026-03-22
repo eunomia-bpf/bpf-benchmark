@@ -77,12 +77,6 @@ def build_runner_command(
     return command
 
 
-def maybe_prepend_sudo(command: Sequence[str], *, enabled: bool) -> list[str]:
-    if not enabled:
-        return list(command)
-    return ["sudo", "-n", *command]
-
-
 def build_list_programs_command(runner_binary: Path | str, program: Path | str) -> list[str]:
     return build_runner_command(runner_binary, "list-programs", program=program)
 
@@ -98,13 +92,12 @@ def build_micro_benchmark_command(
     input_size: int | None = None,
     perf_counters: bool = False,
     perf_scope: str = "full_repeat_raw",
-    require_sudo: bool = False,
     rejit: bool = False,
     rejit_program: Path | str | None = None,
     daemon_socket: str | None = None,
 ) -> list[str]:
     if runtime_mode == "llvmbpf":
-        command = build_runner_command(
+        return build_runner_command(
             runner_binary,
             "run-llvmbpf",
             program=program,
@@ -115,10 +108,9 @@ def build_micro_benchmark_command(
             perf_counters=perf_counters,
             perf_scope=perf_scope,
         )
-        return maybe_prepend_sudo(command, enabled=perf_counters)
 
     if runtime_mode == "kernel":
-        command = build_runner_command(
+        return build_runner_command(
             runner_binary,
             "run-kernel",
             program=program,
@@ -129,10 +121,9 @@ def build_micro_benchmark_command(
             perf_counters=perf_counters,
             perf_scope=perf_scope,
         )
-        return maybe_prepend_sudo(command, enabled=require_sudo)
 
     if runtime_mode in {"kernel-rejit", "kernel_rejit"}:
-        command = build_runner_command(
+        return build_runner_command(
             runner_binary,
             "run-kernel",
             program=program,
@@ -146,7 +137,6 @@ def build_micro_benchmark_command(
             rejit_program=rejit_program,
             daemon_socket=daemon_socket,
         )
-        return maybe_prepend_sudo(command, enabled=require_sudo)
 
     raise RuntimeError(f"unsupported runtime mode: {runtime_mode}")
 
@@ -155,5 +145,4 @@ __all__ = [
     "build_list_programs_command",
     "build_micro_benchmark_command",
     "build_runner_command",
-    "maybe_prepend_sudo",
 ]

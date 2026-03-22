@@ -16,14 +16,14 @@ cd "$ROOT_DIR"
 # Load kinsn modules via the unified loader (best-effort).
 LOAD_SCRIPT="${ROOT_DIR}/module/load_all.sh"
 if [ -x "$LOAD_SCRIPT" ]; then
-    sudo -n "$LOAD_SCRIPT" || true
+    "$LOAD_SCRIPT" || true
 else
     echo "WARN: module/load_all.sh not found, loading modules manually"
     for ko in "${KINSN_MODULE_DIR}/bpf_rotate.ko" \
               "${KINSN_MODULE_DIR}/bpf_select.ko" \
               "${KINSN_MODULE_DIR}/bpf_extract.ko"; do
         if [ -f "$ko" ]; then
-            sudo -n insmod "$ko" 2>/dev/null || true
+            insmod "$ko" 2>/dev/null || true
         fi
     done
     loaded=$(ls /sys/kernel/btf/bpf_rotate /sys/kernel/btf/bpf_select /sys/kernel/btf/bpf_extract 2>/dev/null | wc -l)
@@ -32,7 +32,7 @@ fi
 
 # Part 1: kernel selftest (test_recompile).
 echo "=== Running kernel selftest ==="
-sudo -n "$KERNEL_SELFTEST"
+"$KERNEL_SELFTEST"
 
 # Part 2: build tests/unittest/ inside VM.
 echo "=== Building tests/unittest/ inside VM ==="
@@ -44,7 +44,7 @@ cd "$UNITTEST_DIR"
 for t in rejit_poc rejit_safety_tests rejit_regression rejit_tail_call \
          rejit_spectre rejit_prog_types rejit_audit_tests; do
     echo "=== $t ==="
-    sudo "${BUILD_DIR}/$t" "${BUILD_DIR}/progs" || exit 1
+    "${BUILD_DIR}/$t" "${BUILD_DIR}/progs" || exit 1
 done
 
 echo "=== vm-selftest: ALL PASSED ==="

@@ -28,7 +28,6 @@ from runner.libs import (  # noqa: E402
     RESULTS_DIR,
     ROOT_DIR,
     authoritative_output_path,
-    ensure_root,
     resolve_bpftool_binary,
     run_command,
     run_json_command,
@@ -64,7 +63,7 @@ DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "katran")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "katran-e2e-real.md"
 DEFAULT_KATRAN_OBJECT = ROOT_DIR / "corpus" / "build" / "katran" / "balancer.bpf.o"
 DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
-DEFAULT_DAEMON = ROOT_DIR / "daemon" / "build" / "bpfrejit-daemon"
+DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
 DEFAULT_KATRAN_TEST_PACKET = ROOT_DIR / "corpus" / "inputs" / "katran_vip_packet_64.bin"
 DEFAULT_KERNEL_CONFIG = ROOT_DIR / "vendor" / "linux-framework" / ".config"
 DEFAULT_PROGRAM_NAME = "balancer_ingress"
@@ -1890,7 +1889,6 @@ def measure_phase(
 
 
 def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
-    ensure_root([str(Path(sys.argv[0]).resolve()), *sys.argv[1:]])
     resolved_bpftool = bpftool_binary()
     if Path(resolved_bpftool).exists():
         sys_path = os.environ.get("PATH", "")

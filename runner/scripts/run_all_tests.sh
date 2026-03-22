@@ -12,11 +12,13 @@ shift
 # Parse flags
 SKIP_SELFTEST=0
 SKIP_UNITTEST=0
+SKIP_NEGATIVE=0
 SKIP_UPSTREAM=0
 for arg in "$@"; do
     case "$arg" in
         --skip-selftest) SKIP_SELFTEST=1 ;;
         --skip-unittest) SKIP_UNITTEST=1 ;;
+        --skip-negative) SKIP_NEGATIVE=1 ;;
         --skip-upstream) SKIP_UPSTREAM=1 ;;
         *) echo "Unknown flag: $arg"; exit 1 ;;
     esac
@@ -44,7 +46,7 @@ run_section() {
 # --- Part 1: Kernel selftest (test_recompile) ---
 if [ "$SKIP_SELFTEST" -eq 0 ] && [ -f "$KERNEL_SELFTEST" ]; then
     run_section "Kernel selftest (test_recompile)"
-    if sudo -n "$KERNEL_SELFTEST"; then
+    if "$KERNEL_SELFTEST"; then
         PASS=$((PASS + 1))
     else
         FAIL=$((FAIL + 1))
@@ -64,7 +66,7 @@ if [ "$SKIP_UNITTEST" -eq 0 ]; then
     for t in rejit_poc rejit_safety_tests rejit_regression rejit_tail_call \
              rejit_spectre rejit_prog_types rejit_audit_tests; do
         echo "--- $t ---"
-        if sudo "${UNITTEST_BUILD_DIR}/$t" "${UNITTEST_BUILD_DIR}/progs"; then
+        if "${UNITTEST_BUILD_DIR}/$t" "${UNITTEST_BUILD_DIR}/progs"; then
             PASS=$((PASS + 1))
         else
             FAIL=$((FAIL + 1))
@@ -74,11 +76,37 @@ if [ "$SKIP_UNITTEST" -eq 0 ]; then
     cd "$ROOT_DIR"
 fi
 
+# --- Part 2b: negative / adversarial tests ---
+NEGATIVE_DIR="${ROOT_DIR}/tests/negative"
+NEGATIVE_BUILD_DIR="${NEGATIVE_DIR}/build"
+
+if [ "$SKIP_NEGATIVE" -eq 0 ] && [ -d "$NEGATIVE_DIR" ]; then
+    run_section "Building tests/negative/"
+    make -C "$NEGATIVE_DIR" clean all
+
+    run_section "Running tests/negative/ adversarial suite"
+    echo "--- adversarial_rejit ---"
+    if "${NEGATIVE_BUILD_DIR}/adversarial_rejit"; then
+        PASS=$((PASS + 1))
+    else
+        FAIL=$((FAIL + 1))
+        echo "FAIL: adversarial_rejit"
+    fi
+
+    echo "--- fuzz_rejit (1000 rounds) ---"
+    if "${NEGATIVE_BUILD_DIR}/fuzz_rejit" 1000; then
+        PASS=$((PASS + 1))
+    else
+        FAIL=$((FAIL + 1))
+        echo "FAIL: fuzz_rejit"
+    fi
+fi
+
 # --- Part 3: upstream test_verifier ---
 if [ "$SKIP_UPSTREAM" -eq 0 ] && [ -f "${UPSTREAM_BIN_DIR}/test_verifier" ]; then
     run_section "Upstream test_verifier"
     cd "$UPSTREAM_BIN_DIR"
-    if sudo ./test_verifier 2>&1; then
+    if ./test_verifier 2>&1; then
         PASS=$((PASS + 1))
     else
         FAIL=$((FAIL + 1))
@@ -97,7 +125,7 @@ if [ "$SKIP_UPSTREAM" -eq 0 ] && [ -f "${UPSTREAM_BIN_DIR}/test_progs" ]; then
     for t in $BPF_SELFTEST_FILTER; do
         FILTER_FLAGS="$FILTER_FLAGS -t $t"
     done
-    if sudo ./test_progs $FILTER_FLAGS 2>&1; then
+    if ./test_progs $FILTER_FLAGS 2>&1; then
         PASS=$((PASS + 1))
     else
         FAIL=$((FAIL + 1))

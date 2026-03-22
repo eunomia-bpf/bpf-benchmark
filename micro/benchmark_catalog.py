@@ -53,7 +53,6 @@ class RuntimeSpec:
     label: str
     mode: str
     default_repeat: int
-    require_sudo: bool = False
     aliases: tuple[str, ...] = ()
 
 
@@ -157,7 +156,6 @@ def load_suite(path: Path = CONFIG_PATH) -> SuiteSpec:
             label=runtime_data["label"],
             mode=runtime_data["mode"],
             default_repeat=int(runtime_data.get("repeat", defaults.repeat)),
-            require_sudo=bool(runtime_data.get("sudo", False)),
             aliases=tuple(runtime_data.get("aliases", ())),
         )
         runtimes[runtime.name] = runtime

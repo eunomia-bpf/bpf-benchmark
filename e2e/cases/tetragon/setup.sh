@@ -1,22 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SUDO=""
-if [[ "${EUID}" -ne 0 ]]; then
-  if sudo -n true >/dev/null 2>&1; then
-    SUDO="sudo -n"
-  else
-    echo "passwordless sudo is required for tetragon setup" >&2
-    exit 1
-  fi
-fi
-
 apt_install() {
   if ! command -v apt-get >/dev/null 2>&1; then
     return 1
   fi
-  DEBIAN_FRONTEND=noninteractive ${SUDO} apt-get update -y >/dev/null 2>&1 || true
-  DEBIAN_FRONTEND=noninteractive ${SUDO} apt-get install -y "$@"
+  DEBIAN_FRONTEND=noninteractive apt-get update -y >/dev/null 2>&1 || true
+  DEBIAN_FRONTEND=noninteractive apt-get install -y "$@"
 }
 
 find_binary() {

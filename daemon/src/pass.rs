@@ -491,12 +491,27 @@ impl AnalysisRegistry {
 
 // ── PassManager ─────────────────────────────────────────────────────
 
+/// Records which pass is responsible for modifications at a given PC range.
+///
+/// After the pipeline runs, `transform_attribution` maps each modified PC range
+/// back to the pass that created it. Used by the rollback mechanism to attribute
+/// verifier failures to specific passes.
+#[derive(Clone, Debug)]
+pub struct TransformAttribution {
+    /// PC range (in the *new* instruction stream) that was produced by a pass.
+    pub pc_range: std::ops::Range<usize>,
+    /// Name of the pass that produced this range.
+    pub pass_name: String,
+}
+
 /// Pipeline execution result.
 #[derive(Clone, Debug)]
 pub struct PipelineResult {
     pub pass_results: Vec<PassResult>,
     pub total_sites_applied: usize,
     pub program_changed: bool,
+    /// Attribution of PC ranges to passes (populated for rollback support).
+    pub attribution: Vec<TransformAttribution>,
 }
 
 /// PassManager — manages and executes the pass pipeline.
@@ -530,10 +545,21 @@ impl PassManager {
         self.passes.push(Box::new(pass));
     }
 
+    /// Add a pre-boxed pass to the end of the pipeline.
+    pub fn add_pass_boxed(&mut self, pass: Box<dyn BpfPass>) {
+        self.passes.push(pass);
+    }
+
     /// Return the number of registered passes.
     #[allow(dead_code)]
     pub fn pass_count(&self) -> usize {
         self.passes.len()
+    }
+
+    /// Return the names of all registered passes in pipeline order.
+    #[allow(dead_code)]
+    pub fn pass_names(&self) -> Vec<&str> {
+        self.passes.iter().map(|p| p.name()).collect()
     }
 
     /// Execute the entire pipeline.
@@ -613,10 +639,27 @@ impl PassManager {
             pass_results.push(result);
         }
 
+        // Build attribution from pass results. Each pass that applied any sites
+        // gets a conservative attribution covering the entire final program range.
+        // This is sufficient for rollback: when the verifier rejects at some PC,
+        // all passes that made changes are candidates for disabling. The last
+        // matching pass (most recently applied) is preferred by the attribution
+        // lookup in attribute_verifier_failure().
+        let mut attribution = Vec::new();
+        for pr in &pass_results {
+            if pr.sites_applied > 0 {
+                attribution.push(TransformAttribution {
+                    pc_range: 0..program.insns.len(),
+                    pass_name: pr.pass_name.clone(),
+                });
+            }
+        }
+
         Ok(PipelineResult {
             pass_results,
             total_sites_applied: total_sites,
             program_changed: any_changed,
+            attribution,
         })
     }
 
@@ -1167,6 +1210,7 @@ mod tests {
             ],
             total_sites_applied: 2,
             program_changed: true,
+            attribution: vec![],
         };
 
         assert!(pr.program_changed);
@@ -1520,5 +1564,113 @@ mod tests {
         // Should have a skip reason about RORX.
         assert!(result.pass_results[0].sites_skipped.iter()
             .any(|s| s.reason.contains("RORX")));
+    }
+
+    // ── TransformAttribution tests ──────────────────────────────
+
+    #[test]
+    fn test_attribution_populated_after_transform() {
+        let mut pm = PassManager::new();
+        pm.add_pass(AppendNopPass);
+
+        let mut prog = make_program(vec![exit_insn()]);
+        let ctx = PassContext::test_default();
+
+        let result = pm.run(&mut prog, &ctx).unwrap();
+
+        assert!(result.program_changed);
+        assert!(!result.attribution.is_empty(), "attribution should be populated after transform");
+        assert_eq!(result.attribution[0].pass_name, "append_nop");
+    }
+
+    #[test]
+    fn test_attribution_empty_when_no_change() {
+        let mut pm = PassManager::new();
+        pm.add_pass(NoOpPass);
+
+        let mut prog = make_program(vec![exit_insn()]);
+        let ctx = PassContext::test_default();
+
+        let result = pm.run(&mut prog, &ctx).unwrap();
+
+        assert!(!result.program_changed);
+        assert!(result.attribution.is_empty(), "attribution should be empty when no changes");
+    }
+
+    #[test]
+    fn test_attribution_multiple_passes() {
+        let mut pm = PassManager::new();
+        pm.add_pass(RewriteMovImmPass { new_imm: 99 });
+        pm.add_pass(AppendNopPass);
+
+        let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
+        let ctx = PassContext::test_default();
+
+        let result = pm.run(&mut prog, &ctx).unwrap();
+
+        assert!(result.program_changed);
+        assert_eq!(result.attribution.len(), 2);
+        let names: Vec<&str> = result.attribution.iter().map(|a| a.pass_name.as_str()).collect();
+        assert!(names.contains(&"rewrite_mov_imm"));
+        assert!(names.contains(&"append_nop"));
+    }
+
+    #[test]
+    fn test_disabled_pass_not_in_attribution() {
+        let mut pm = PassManager::new();
+        pm.add_pass(RewriteMovImmPass { new_imm: 99 });
+        pm.add_pass(AppendNopPass);
+
+        let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
+        let mut ctx = PassContext::test_default();
+        ctx.policy.disabled_passes = vec!["rewrite_mov_imm".into()];
+
+        let result = pm.run(&mut prog, &ctx).unwrap();
+
+        assert!(result.program_changed);
+        // Only append_nop should appear in attribution.
+        assert_eq!(result.attribution.len(), 1);
+        assert_eq!(result.attribution[0].pass_name, "append_nop");
+    }
+
+    #[test]
+    fn test_pass_names_method() {
+        let mut pm = PassManager::new();
+        pm.add_pass(NoOpPass);
+        pm.add_pass(AppendNopPass);
+
+        let names = pm.pass_names();
+        assert_eq!(names, vec!["noop", "append_nop"]);
+    }
+
+    #[test]
+    fn test_rollback_via_disabled_passes_policy() {
+        // Simulate the rollback mechanism: run with all passes, then disable one
+        // and verify the disabled pass is skipped on the second run.
+        let mut pm = PassManager::new();
+        pm.add_pass(RewriteMovImmPass { new_imm: 99 });
+        pm.add_pass(AppendNopPass);
+
+        let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
+        let ctx = PassContext::test_default();
+
+        // First run: both passes fire.
+        let result1 = pm.run(&mut prog, &ctx).unwrap();
+        assert_eq!(result1.attribution.len(), 2);
+        assert_eq!(prog.insns[0].imm, 99);
+        assert_eq!(prog.insns.len(), 3); // 2 original + 1 NOP
+
+        // Second run: disable rewrite_mov_imm (simulating rollback).
+        let mut prog2 = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
+        let mut ctx2 = PassContext::test_default();
+        ctx2.policy.disabled_passes = vec!["rewrite_mov_imm".into()];
+
+        let result2 = pm.run(&mut prog2, &ctx2).unwrap();
+        assert_eq!(result2.attribution.len(), 1);
+        assert_eq!(result2.attribution[0].pass_name, "append_nop");
+        // The MOV immediate should NOT be rewritten.
+        assert_eq!(prog2.insns[0].imm, 42);
+        // But NOP should still be appended.
+        assert_eq!(prog2.insns.len(), 3);
     }
 }

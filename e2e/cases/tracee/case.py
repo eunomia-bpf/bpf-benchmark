@@ -22,7 +22,6 @@ from runner.libs import (  # noqa: E402
     RESULTS_DIR,
     ROOT_DIR,
     authoritative_output_path,
-    ensure_root,
     resolve_bpftool_binary,
     run_command,
     smoke_output_path,
@@ -69,7 +68,7 @@ DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "tracee")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "tracee-e2e-real.md"
 DEFAULT_TRACEE_OBJECT = ROOT_DIR / "corpus" / "build" / "tracee" / "tracee.bpf.o"
 DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
-DEFAULT_DAEMON = ROOT_DIR / "daemon" / "build" / "bpfrejit-daemon"
+DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
 TRACEE_STATS_PATTERN = re.compile(
     r"EventCount[:=]\s*(?P<events>\d+).*?LostEvCount[:=]\s*(?P<lost>\d+)(?:.*?LostWrCount[:=]\s*(?P<lost_writes>\d+))?",
     re.IGNORECASE,
@@ -672,7 +671,6 @@ def run_manual_fallback(
 
 
 def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
-    ensure_root([str(Path(sys.argv[0]).resolve()), *sys.argv[1:]])
     config = load_config(Path(args.config).resolve())
     duration_s = int(args.duration or config.get("measurement_duration_s") or 60)
     if args.smoke and not args.duration:

@@ -5,7 +5,6 @@ import os
 import re
 import shlex
 import subprocess
-import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Sequence
@@ -220,56 +219,15 @@ def run_json_command(
     return json.loads(payload)
 
 
-def chown_to_invoking_user(path: Path) -> None:
-    uid_raw = os.environ.get("SUDO_UID")
-    gid_raw = os.environ.get("SUDO_GID")
-    if not uid_raw or not gid_raw:
-        return
-    try:
-        os.chown(path, int(uid_raw), int(gid_raw))
-    except OSError:
-        return
-
-
 def write_json(path: Path, payload: Any) -> None:
     ensure_parent(path)
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
     maybe_refresh_latest_alias(path)
-    chown_to_invoking_user(path)
 
 
 def write_text(path: Path, text: str) -> None:
     ensure_parent(path)
     path.write_text(text)
-    chown_to_invoking_user(path)
-
-
-def sudo_available() -> bool:
-    try:
-        completed = subprocess.run(
-            ["sudo", "-n", "true"],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-    except OSError:
-        return False
-    return completed.returncode == 0
-
-
-def ensure_root(argv: Sequence[str] | None = None) -> None:
-    if os.geteuid() == 0:
-        return
-    if not sudo_available():
-        raise SystemExit("passwordless sudo is required for benchmarking")
-    script_argv = list(argv if argv is not None else sys.argv)
-    sudo_cmd = ["sudo", "-n"]
-    tmpdir = os.environ.get("TMPDIR", "").strip()
-    if tmpdir:
-        sudo_cmd.append(f"TMPDIR={tmpdir}")
-    sudo_cmd.append(sys.executable)
-    sudo_cmd.extend(script_argv)
-    os.execvp("sudo", sudo_cmd)
 
 
 __all__ = [
@@ -280,9 +238,7 @@ __all__ = [
     "ROOT_DIR",
     "authoritative_candidates",
     "authoritative_output_path",
-    "chown_to_invoking_user",
     "ensure_parent",
-    "ensure_root",
     "latest_output_path",
     "maybe_refresh_latest_alias",
     "prepare_bpftool_environment",
@@ -293,7 +249,6 @@ __all__ = [
     "run_command",
     "run_json_command",
     "smoke_output_path",
-    "sudo_available",
     "tail_text",
     "which",
     "write_json",

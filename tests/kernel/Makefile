@@ -64,7 +64,7 @@ progs: $(BPF_OBJS)
 runner: $(RUNNER)
 
 run: all
-	sudo $(RUNNER)
+	$(RUNNER)
 
 clean:
 	rm -rf "$(RUNNER_BUILD_DIR)" "$(BPF_BUILD_DIR)"

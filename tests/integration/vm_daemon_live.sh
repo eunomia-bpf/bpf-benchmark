@@ -27,7 +27,7 @@ echo "================================================================"
 # Hold a BPF program loaded in background
 echo "--- Loading load_byte_recompose.bpf.o and holding it ---"
 HOLD_PROG="${ROOT_DIR}/tests/helpers/build/hold_bpf_prog"
-sudo "$HOLD_PROG" "${ROOT_DIR}/micro/programs/load_byte_recompose.bpf.o" 120 &
+"$HOLD_PROG" "${ROOT_DIR}/micro/programs/load_byte_recompose.bpf.o" 120 &
 BGPID=$!
 sleep 2
 
@@ -42,7 +42,7 @@ fi
 # Test 1: daemon enumerate sees the live program
 echo ""
 echo "--- daemon enumerate ---"
-ENUM_OUTPUT=$(sudo ./daemon/target/release/bpfrejit-daemon enumerate 2>&1)
+ENUM_OUTPUT=$(./daemon/target/release/bpfrejit-daemon enumerate 2>&1)
 echo "$ENUM_OUTPUT"
 
 PROG_LINES=$(echo "$ENUM_OUTPUT" | grep -E "^\s+[0-9]+" || true)
@@ -62,7 +62,7 @@ if [ "$PROG_COUNT" -gt 0 ]; then
     # Test 2: daemon rewrite
     echo ""
     echo "--- daemon rewrite $PROG_ID ---"
-    REWRITE_OUTPUT=$(sudo ./daemon/target/release/bpfrejit-daemon rewrite "$PROG_ID" 2>&1)
+    REWRITE_OUTPUT=$(./daemon/target/release/bpfrejit-daemon rewrite "$PROG_ID" 2>&1)
     echo "$REWRITE_OUTPUT"
 
     if echo "$REWRITE_OUTPUT" | grep -qE "found [0-9]+ rewrite sites"; then
@@ -79,7 +79,7 @@ if [ "$PROG_COUNT" -gt 0 ]; then
     # Test 3: daemon apply
     echo ""
     echo "--- daemon apply $PROG_ID ---"
-    APPLY_OUTPUT=$(sudo ./daemon/target/release/bpfrejit-daemon apply "$PROG_ID" 2>&1)
+    APPLY_OUTPUT=$(./daemon/target/release/bpfrejit-daemon apply "$PROG_ID" 2>&1)
     APPLY_EXIT=$?
     echo "$APPLY_OUTPUT"
 
@@ -96,7 +96,7 @@ if [ "$PROG_COUNT" -gt 0 ]; then
     # Test 4: daemon apply-all
     echo ""
     echo "--- daemon apply-all ---"
-    APPLYALL_OUTPUT=$(sudo ./daemon/target/release/bpfrejit-daemon apply-all 2>&1)
+    APPLYALL_OUTPUT=$(./daemon/target/release/bpfrejit-daemon apply-all 2>&1)
     echo "$APPLYALL_OUTPUT"
 
     if echo "$APPLYALL_OUTPUT" | grep -q "apply-all:"; then

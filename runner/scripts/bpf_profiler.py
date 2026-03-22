@@ -9,7 +9,7 @@ from pathlib import Path
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from runner.libs import ensure_root, write_json  # noqa: E402
+from runner.libs import write_json  # noqa: E402
 from runner.libs.profiler import DEFAULT_PERF_EVENTS, DEFAULT_DAEMON, profile_current_programs  # noqa: E402
 
 
@@ -71,7 +71,6 @@ def parse_csv_tokens(value: str) -> list[str]:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    ensure_root([str(Path(sys.argv[0]).resolve()), *(argv or sys.argv[1:])])
     payload = profile_current_programs(
         prog_ids=args.prog_ids,
         duration_s=float(args.duration),

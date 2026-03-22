@@ -90,7 +90,7 @@ $(BUILD_DIR) $(BUILD_DIR)/progs:
 run: all
 	@for t in $(TESTS); do \
 	    echo "=== $$t ==="; \
-	    sudo $(BUILD_DIR)/$$t $(BUILD_DIR)/progs || exit 1; \
+	    $(BUILD_DIR)/$$t $(BUILD_DIR)/progs || exit 1; \
 	done
 
 clean:

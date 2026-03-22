@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import json
 import math
-import os
 import subprocess
 import time
 from pathlib import Path
@@ -413,12 +412,6 @@ def parse_runner_json(stdout: str) -> dict[str, Any]:
     return dict(parse_runner_sample(stdout))
 
 
-def maybe_sudo_prefix(enabled: bool) -> list[str]:
-    if not enabled or os.geteuid() == 0:
-        return []
-    return ["sudo", "-n"]
-
-
 def invocation_summary(result: Mapping[str, Any] | None) -> dict[str, Any] | None:
     if result is None:
         return None
@@ -574,7 +567,6 @@ __all__ = [
     "materialize_dummy_context",
     "materialize_dummy_packet",
     "materialize_katran_packet",
-    "maybe_sudo_prefix",
     "normalize_section_root",
     "parse_runner_json",
     "program_label",
