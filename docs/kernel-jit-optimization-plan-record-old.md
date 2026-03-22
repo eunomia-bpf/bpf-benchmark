@@ -195,7 +195,7 @@
 | 176 | Prologue 优化 | ❌ | 占 gap 18.5%。 |
 | 177 | Cost model | ❌ | 跳过 same-size/dense 超阈值。 |
 | 178 | 更多 E2E 数据 | ❌ | 目标 ≥3 workload 正向。 |
-| 179 | Per-form ablation | ✅ | ROTATE **0.923x** win，CMOV **1.068x** loss。`docs/tmp/micro-per-form-ablation_20260313.md` |
+| 179 | Per-form ablation | ✅ | ROTATE **0.923x** win，CMOV **1.068x** loss。`docs/tmp/20260313/micro-per-form-ablation_20260313.md` |
 | 180 | 框架重构 Makefile | ✅ | file-based deps + provenance + POLICY=。 |
 | 181 | CI 修复 | ✅ | driver.py + requirements.txt。 |
 | 182 | Opus review | ✅ | 架构✅，方法学有 gap。`docs/tmp/deep-review-*.md` |
@@ -204,96 +204,96 @@
 | 185-188 | P1 优化方向 | ❌ 已被 #304 搁置 | prologue / patch-site / wide 扩展 / native 分析。 |
 | 189 | Micro policy 优化 | ✅ | applied-only **1.110x**（7 applied）。`micro/results/vm_micro_authoritative_20260318.json` |
 | 190 | 结果目录 + schema | ✅ | authoritative naming，policy 内嵌。 |
-| 191 | Corpus+E2E 分析 | ✅ | stale policy 是主因。`docs/tmp/corpus_e2e_performance_analysis_20260318.md` |
-| 192 | Katran E2E 可行性 | ✅ | 94 live sites。`docs/tmp/katran_e2e_feasibility_20260318.md` |
+| 191 | Corpus+E2E 分析 | ✅ | stale policy 是主因。`docs/tmp/20260318/corpus_e2e_performance_analysis_20260318.md` |
+| 192 | Katran E2E 可行性 | ✅ | 94 live sites。`docs/tmp/20260318/katran_e2e_feasibility_20260318.md` |
 | 193 | Corpus policy refresh | ✅ | 582 个 v3 policy，skip cmov+extract。 |
-| 194 | 项目卫生审计 | ✅ | `docs/tmp/project_hygiene_audit_20260318.md` |
-| 195 | 内核修改文档 | ✅ | 1017 行。`docs/tmp/kernel_modifications_analysis_20260318.md` |
-| 196 | Framework 设计文档 | ✅ | 800+ 行。`docs/tmp/benchmark_framework_analysis_20260318.md` |
+| 194 | 项目卫生审计 | ✅ | `docs/tmp/20260318/project_hygiene_audit_20260318.md` |
+| 195 | 内核修改文档 | ✅ | 1017 行。`docs/tmp/20260318/kernel_modifications_analysis_20260318.md` |
+| 196 | Framework 设计文档 | ✅ | 800+ 行。`docs/tmp/20260318/benchmark_framework_analysis_20260318.md` |
 | 197 | Micro 第三轮 | ✅ 归入 #189 | |
 | 198 | prog_fd 残留清理 | ✅ | enumerate-only。 |
 | 199 | Corpus refreshed rerun | ⚠️ | applied-only **1.077x**，overall 0.881x。 |
 | 200 | **Tetragon rerun（2026-03-18）** | ⚠️ | connect_storm **-55.96%** 回归，见 #204 修复。 |
-| 201 | **Kernel WARN_ON 排查（2026-03-18）** | ✅ | tailcall poke descriptor 冲突，暂不修。报告：`docs/tmp/kernel_warn_on_investigation_20260318.md`。 |
-| 202 | **Katran E2E 完整设计（2026-03-18）** | ✅ | DSR 拓扑设计。报告：`docs/tmp/e2e_design_katran_20260318.md`。 |
+| 201 | **Kernel WARN_ON 排查（2026-03-18）** | ✅ | tailcall poke descriptor 冲突，暂不修。报告：`docs/tmp/20260318/kernel_warn_on_investigation_20260318.md`。 |
+| 202 | **Katran E2E 完整设计（2026-03-18）** | ✅ | DSR 拓扑设计。报告：`docs/tmp/20260318/e2e_design_katran_20260318.md`。 |
 | 203 | **XDP forwarding E2E 删除（2026-03-18）** | ✅ | 已删除 `e2e/cases/xdp_forwarding/` + 结果 + 文档引用。commit `431fdc5`。 |
-| 204 | **Tetragon connect_storm 修复（2026-03-18）** | ✅ | stress_exec **+8.70%**，connect_storm **+22.29%**。3 applied / 49 bflip sites。报告：`docs/tmp/tetragon_connect_storm_investigation_20260318.md`。 |
+| 204 | **Tetragon connect_storm 修复（2026-03-18）** | ✅ | stress_exec **+8.70%**，connect_storm **+22.29%**。3 applied / 49 bflip sites。报告：`docs/tmp/20260318/tetragon_connect_storm_investigation_20260318.md`。 |
 | 205 | **Katran E2E MVP 实现（2026-03-18）** | 🔄 | 创建 e2e/cases/katran/，注册到 e2e/run.py，第一版用 standalone bpftool load 做 smoke。 |
-| 206 | **Sequential rerun round 2（2026-03-18）** | ✅ | Tracee/Corpus rerun。trampoline guard 是 corpus 回归根因，已 revert。报告：`docs/tmp/sequential_rerun_round2_20260318.md`。 |
-| 207 | **Tracee revert rerun（2026-03-19）** | ✅ | exec_storm +4.40%，file_io +4.69%。旧权威保持。报告：`docs/tmp/tracee_revert_rerun_20260319.md`。 |
-| 208 | **Corpus revert rerun（2026-03-19）** | ✅ | applied-only **1.023x**。瓶颈是 non-applied ultra-short 噪声。报告：`docs/tmp/corpus_improvement_analysis_20260319.md`。 |
-| 209 | **Trampoline regeneration 调研（2026-03-19）** | ✅ | ~100 LOC 方案。已在 #248 实施。报告：`docs/tmp/trampoline_regeneration_research_20260319.md`。 |
-| 210 | **Kernel deep review（2026-03-19）** | ✅ | 9 个问题，3 轮修复见 #212-#214。报告：`docs/tmp/kernel_deep_review_20260319.md`。 |
-| 211 | **GitHub ARM64 KVM 调研（2026-03-19）** | ✅ | 无 KVM，ARM64 recompile 需租机。报告：`docs/tmp/github_arm64_kvm_research_20260319.md`。 |
-| 212-214 | **Kernel fix Phase A/B/C（2026-03-19）** | ✅ | 3 轮 kernel 修复。报告：`docs/tmp/kernel_fix_phase_{a,b,c1,c2}_20260319.md`。 |
+| 206 | **Sequential rerun round 2（2026-03-18）** | ✅ | Tracee/Corpus rerun。trampoline guard 是 corpus 回归根因，已 revert。报告：`docs/tmp/20260318/sequential_rerun_round2_20260318.md`。 |
+| 207 | **Tracee revert rerun（2026-03-19）** | ✅ | exec_storm +4.40%，file_io +4.69%。旧权威保持。报告：`docs/tmp/20260319/tracee_revert_rerun_20260319.md`。 |
+| 208 | **Corpus revert rerun（2026-03-19）** | ✅ | applied-only **1.023x**。瓶颈是 non-applied ultra-short 噪声。报告：`docs/tmp/20260319/corpus_improvement_analysis_20260319.md`。 |
+| 209 | **Trampoline regeneration 调研（2026-03-19）** | ✅ | ~100 LOC 方案。已在 #248 实施。报告：`docs/tmp/20260319/trampoline_regeneration_research_20260319.md`。 |
+| 210 | **Kernel deep review（2026-03-19）** | ✅ | 9 个问题，3 轮修复见 #212-#214。报告：`docs/tmp/20260319/kernel_deep_review_20260319.md`。 |
+| 211 | **GitHub ARM64 KVM 调研（2026-03-19）** | ✅ | 无 KVM，ARM64 recompile 需租机。报告：`docs/tmp/20260319/github_arm64_kvm_research_20260319.md`。 |
+| 212-214 | **Kernel fix Phase A/B/C（2026-03-19）** | ✅ | 3 轮 kernel 修复。报告：`docs/tmp/20260319/kernel_fix_phase_{a,b,c1,c2}_20260319.md`。 |
 | 215-216 | **Kernel cleanup + review（2026-03-19）** | ✅ | tracepoints 删除、stock choice 消除。9.2/10。selftest 20/20。 |
-| 217-220 | **Kernel DSL 删除 + 简化（2026-03-19）** | ✅ | DSL ~900 行删除，blob 简化，do_jit 短路恢复。报告：`docs/tmp/kernel_dsl_removal_20260319.md`。 |
-| 221 | **用户态 dead code 清理（2026-03-19）** | ✅ | -47 文件 / -21000 行。报告：`docs/tmp/userspace_cleanup_20260319.md`。 |
-| 222-223 | **Kernel review + 接口精简（2026-03-19）** | ✅ | 8.4/10。selftest 19/19。报告：`docs/tmp/kernel_final_review_20260319.md`。 |
-| 224-225 | **Build 依赖修复（2026-03-19）** | ✅ | Makefile blob 依赖修复。报告：`docs/tmp/micro_exec_blob_fix_20260319.md`。 |
-| 226 | **UAPI 同步 + 验证（2026-03-19）** | ✅ | vm-micro 62/62，applied-only **1.078x**。报告：`docs/tmp/full_validation_final_20260319.md`。 |
-| 227 | **ARM64 交叉编译 + QEMU（2026-03-19）** | ✅ | make kernel-arm64 + vm-arm64-smoke 通过。报告：`docs/tmp/arm64_cross_compile_qemu_20260319.md`。 |
+| 217-220 | **Kernel DSL 删除 + 简化（2026-03-19）** | ✅ | DSL ~900 行删除，blob 简化，do_jit 短路恢复。报告：`docs/tmp/20260319/kernel_dsl_removal_20260319.md`。 |
+| 221 | **用户态 dead code 清理（2026-03-19）** | ✅ | -47 文件 / -21000 行。报告：`docs/tmp/20260319/userspace_cleanup_20260319.md`。 |
+| 222-223 | **Kernel review + 接口精简（2026-03-19）** | ✅ | 8.4/10。selftest 19/19。报告：`docs/tmp/20260319/kernel_final_review_20260319.md`。 |
+| 224-225 | **Build 依赖修复（2026-03-19）** | ✅ | Makefile blob 依赖修复。报告：`docs/tmp/20260319/micro_exec_blob_fix_20260319.md`。 |
+| 226 | **UAPI 同步 + 验证（2026-03-19）** | ✅ | vm-micro 62/62，applied-only **1.078x**。报告：`docs/tmp/20260319/full_validation_final_20260319.md`。 |
+| 227 | **ARM64 交叉编译 + QEMU（2026-03-19）** | ✅ | make kernel-arm64 + vm-arm64-smoke 通过。报告：`docs/tmp/20260319/arm64_cross_compile_qemu_20260319.md`。 |
 | 228 | **Param match dead code 确认（2026-03-19）** | ✅ | 无需改动。 |
-| 229-230 | **Kernel 5k review + P0/P1/P2 fix（2026-03-19）** | ✅ | trampoline gate、param-only emitter、overlap 检测。selftest 19/19。报告：`docs/tmp/kernel_review_fixes_20260319.md`。 |
+| 229-230 | **Kernel 5k review + P0/P1/P2 fix（2026-03-19）** | ✅ | trampoline gate、param-only emitter、overlap 检测。selftest 19/19。报告：`docs/tmp/20260319/kernel_review_fixes_20260319.md`。 |
 | 231 | **Docker ARM64 交叉编译（2026-03-19）** | ✅ | Dockerfile + Makefile targets。ARM64 kernel 缺 recompile override。 |
 | 232 | **用户态 cleanup round 3（2026-03-19）** | ✅ | dead imports/locals 清理。 |
-| 233-235 | **Kernel LOC 分析 + 架构 review + 简化（2026-03-19）** | ✅ | 净减 **-447 LOC**。报告：`docs/tmp/kernel_simplification_20260319.md`。 |
-| 236 | **Micro rerun post-P0/P1/P2（2026-03-19）** | ✅ | rotate_dense 回归为旧 bzImage 问题，非代码 bug。报告：`docs/tmp/rotate_dense_regression_debug_20260319.md`。 |
-| 237 | **Scaleway RISC-V 调研（2026-03-19）** | ✅ | custom kernel 需特殊处理。报告：`docs/tmp/riscv_cloudv_scaleway_research_20260319.md`。 |
-| 238 | **LLVM vs kernel JIT 指令级对比（2026-03-19）** | ✅ | WIDE_MEM+ROTATE 是主因。8-form 未覆盖：load-width narrowing、store coalescing、regalloc。报告：`docs/tmp/llvm_vs_kernel_jit_disasm_analysis_20260319.md`。 |
-| 239 | **ARM64 JIT gap 分析（2026-03-19）** | ✅ | 4 form 值得移植（ROTATE/WIDE_MEM/EXTRACT/COND_SELECT）。报告：`docs/tmp/arm64_jit_gap_analysis_20260319.md`。 |
+| 233-235 | **Kernel LOC 分析 + 架构 review + 简化（2026-03-19）** | ✅ | 净减 **-447 LOC**。报告：`docs/tmp/20260319/kernel_simplification_20260319.md`。 |
+| 236 | **Micro rerun post-P0/P1/P2（2026-03-19）** | ✅ | rotate_dense 回归为旧 bzImage 问题，非代码 bug。报告：`docs/tmp/20260319/rotate_dense_regression_debug_20260319.md`。 |
+| 237 | **Scaleway RISC-V 调研（2026-03-19）** | ✅ | custom kernel 需特殊处理。报告：`docs/tmp/20260319/riscv_cloudv_scaleway_research_20260319.md`。 |
+| 238 | **LLVM vs kernel JIT 指令级对比（2026-03-19）** | ✅ | WIDE_MEM+ROTATE 是主因。8-form 未覆盖：load-width narrowing、store coalescing、regalloc。报告：`docs/tmp/20260319/llvm_vs_kernel_jit_disasm_analysis_20260319.md`。 |
+| 239 | **ARM64 JIT gap 分析（2026-03-19）** | ✅ | 4 form 值得移植（ROTATE/WIDE_MEM/EXTRACT/COND_SELECT）。报告：`docs/tmp/20260319/arm64_jit_gap_analysis_20260319.md`。 |
 | 240 | **rotate_dense 回归 debug（2026-03-19）** | ✅ | 归入 #236。 |
 | 241 | **Kernel 简化重启（2026-03-19）** | ✅ | 归入 #235。 |
 | 242 | **Post-simplification review（2026-03-19）** | ✅ | 8/10。P1 masked ROTATE 见 #247。 |
-| 243 | **ARM64 CI baseline（2026-03-19）** | ✅ | llvmbpf **0.590x**（54/62 wins）。报告：`docs/tmp/arm64_ci_first_run_20260319.md`。 |
-| 244 | **权威 micro rerun（2026-03-19）** | ✅ | applied-only **1.152x**。报告：`docs/tmp/micro_authoritative_post_simplification_20260319.md`。 |
-| 245 | **Corpus rerun（2026-03-19）** | ✅ | applied-only **1.062x**。报告：`docs/tmp/corpus_post_simplification_20260319.md`。 |
+| 243 | **ARM64 CI baseline（2026-03-19）** | ✅ | llvmbpf **0.590x**（54/62 wins）。报告：`docs/tmp/20260319/arm64_ci_first_run_20260319.md`。 |
+| 244 | **权威 micro rerun（2026-03-19）** | ✅ | applied-only **1.152x**。报告：`docs/tmp/20260319/micro_authoritative_post_simplification_20260319.md`。 |
+| 245 | **Corpus rerun（2026-03-19）** | ✅ | applied-only **1.062x**。报告：`docs/tmp/20260319/corpus_post_simplification_20260319.md`。 |
 | 246 | **E2E rerun（待做）** | ⏳ 已被 #304 架构转向搁置 | |
 | 247 | **ROTATE fix + cleanup（2026-03-19）** | ✅ | kernel-side 完成，scanner 待对齐（见 #268）。 |
-| 248 | **Trampoline regeneration（2026-03-19）** | ✅ | selftest 25/25。报告：`docs/tmp/trampoline_regen_rotate_fix_20260319.md`。 |
-| 249-251 | **ARM64 emitter 设计+实现（2026-03-19）** | ✅ | 4 form（ROTATE/WIDE_MEM/EXTRACT/COND_SELECT）+ arch callback 拆分。selftest 24/24（x86+ARM64）。报告：`docs/tmp/arm64_emitter_implementation_20260319.md`。 |
+| 248 | **Trampoline regeneration（2026-03-19）** | ✅ | selftest 25/25。报告：`docs/tmp/20260319/trampoline_regen_rotate_fix_20260319.md`。 |
+| 249-251 | **ARM64 emitter 设计+实现（2026-03-19）** | ✅ | 4 form（ROTATE/WIDE_MEM/EXTRACT/COND_SELECT）+ arch callback 拆分。selftest 24/24（x86+ARM64）。报告：`docs/tmp/20260319/arm64_emitter_implementation_20260319.md`。 |
 | 252 | **Selftest 扩展（2026-03-19）** | ✅ | +5 form，8/8 覆盖。selftest 24/24。 |
 | 253 | **ARM64 CI corpus fix（2026-03-19）** | ✅ | io-mode 修复，覆盖率 52%。 |
-| 254 | **Timing fix（2026-03-19）** | ✅ | llvmbpf 批量计时，ultra-short 修复。报告：`docs/tmp/timing_fix_20260319.md`。 |
-| 255 | **Corpus llvmbpf 删除（2026-03-19）** | ✅ | 报告：`docs/tmp/corpus_llvmbpf_removal_20260319.md`。 |
-| 256 | **权威 rerun（2026-03-20）** | ✅ | Micro **1.057x** / applied **1.193x**。Corpus applied **0.947x**。Tracee **+8.1%**。Tetragon **+20.3%/+32.2%**。Gap **0.581x**。报告：`docs/tmp/full_rerun_authoritative_20260320.md`。 |
+| 254 | **Timing fix（2026-03-19）** | ✅ | llvmbpf 批量计时，ultra-short 修复。报告：`docs/tmp/20260319/timing_fix_20260319.md`。 |
+| 255 | **Corpus llvmbpf 删除（2026-03-19）** | ✅ | 报告：`docs/tmp/20260319/corpus_llvmbpf_removal_20260319.md`。 |
+| 256 | **权威 rerun（2026-03-20）** | ✅ | Micro **1.057x** / applied **1.193x**。Corpus applied **0.947x**。Tracee **+8.1%**。Tetragon **+20.3%/+32.2%**。Gap **0.581x**。报告：`docs/tmp/20260320/full_rerun_authoritative_20260320.md`。 |
 | 257 | **Branch 合并（2026-03-19）** | ✅ | ARM64 CI 分支合并到 main。 |
 | 258 | **Paired measurement（2026-03-19）** | ✅ | 归入 #262。 |
-| 259 | **Framework review（2026-03-19）** | ✅ | micro applied-only 可靠；corpus overall 不可靠。报告：`docs/tmp/benchmark_framework_review_20260319.md`。 |
-| 260 | **ARM64 micro eval（2026-03-19）** | ✅ | smoke 通过，性能负向（QEMU 噪声）。报告：`docs/tmp/arm64_micro_eval_20260319.md`。 |
-| 261-262 | **Benchmark cleanup + same-image 改造（2026-03-19）** | ✅ | same-image paired measurement 落地。报告：`docs/tmp/same_image_measurement_20260319.md`。 |
-| 263 | **Trampoline regen + ROTATE fix 合并（2026-03-19）** | ✅ | selftest 25/25。报告：`docs/tmp/trampoline_regen_rotate_fix_20260319.md`。 |
-| 264-265 | **ARM64 emitter review + P0/P1 fix（2026-03-19）** | ✅ | subprog staging + EXTRACT width 校验。selftest 27/27。报告：`docs/tmp/arm64_p0p1_fix_20260319.md`。 |
-| 266 | **AWS ARM64 benchmark（2026-03-19）** | ⚠️ 已被 #304 搁置 | t4g.micro smoke 通过。glibc ABI 残留。报告：`docs/tmp/aws_arm64_benchmark_run_20260320.md`。 |
-| 267 | **Makefile 审计（2026-03-19）** | ✅ | defaults 统一 10/2/200。报告：`docs/tmp/makefile_benchmark_audit_20260319.md`。 |
-| 268 | **Scanner ROTATE 对齐（2026-03-19）** | ✅ | scanner-tests 0 FAIL。报告：`docs/tmp/scanner_rotate_align_20260319.md`。 |
-| 269 | **Validator/emitter boundary audit（2026-03-20）** | ✅ | “Validator=安全门，Emitter=信任”。selftest 27/27。报告：`docs/tmp/validator_emitter_boundary_audit_20260320.md`。 |
-| 270 | **Katran harness fix（2026-03-20）** | ✅ | same-image paired，1.042x。报告：`docs/tmp/katran_harness_fix_20260320.md`。 |
-| 271 | **Corpus 根因分析（2026-03-20）** | ✅ | applied-only 0.947x。报告：`docs/tmp/corpus_rootcause_20260320.md`。 |
-| 272 | **Selftest 扩展（2026-03-20）** | ✅ | +9 tests，selftest **36/36**。报告：`docs/tmp/selftest_negative_boundary_20260320.md`。 |
-| 273 | **Kernel quality audit（2026-03-20）** | ✅ | P0 buffer overflow + P1 alias bugs。见 #275 修复。报告：`docs/tmp/kernel_code_quality_audit_20260320.md`。 |
-| 274 | **Benchmark framework refactor（2026-03-20）** | ✅ | runner/ 顶层提取，corpus 8→1 driver。报告：`docs/tmp/benchmark_framework_refactor_20260320.md`。 |
-| 275 | **Kernel P0+P1 fix（2026-03-20）** | ✅ | BRANCH_FLIP/COND_SELECT/ADDR_CALC bugs。selftest 36/36。报告：`docs/tmp/kernel_p0p1_fix_20260320.md`。 |
-| 276-278 | **ZERO_EXT_ELIDE 分析+删除（2026-03-20）** | ✅ | 内核 **-118 LOC**。selftest 35/35。报告：`docs/tmp/zero_ext_elide_deletion_20260320.md`。 |
+| 259 | **Framework review（2026-03-19）** | ✅ | micro applied-only 可靠；corpus overall 不可靠。报告：`docs/tmp/20260319/benchmark_framework_review_20260319.md`。 |
+| 260 | **ARM64 micro eval（2026-03-19）** | ✅ | smoke 通过，性能负向（QEMU 噪声）。报告：`docs/tmp/20260319/arm64_micro_eval_20260319.md`。 |
+| 261-262 | **Benchmark cleanup + same-image 改造（2026-03-19）** | ✅ | same-image paired measurement 落地。报告：`docs/tmp/20260319/same_image_measurement_20260319.md`。 |
+| 263 | **Trampoline regen + ROTATE fix 合并（2026-03-19）** | ✅ | selftest 25/25。报告：`docs/tmp/20260319/trampoline_regen_rotate_fix_20260319.md`。 |
+| 264-265 | **ARM64 emitter review + P0/P1 fix（2026-03-19）** | ✅ | subprog staging + EXTRACT width 校验。selftest 27/27。报告：`docs/tmp/20260319/arm64_p0p1_fix_20260319.md`。 |
+| 266 | **AWS ARM64 benchmark（2026-03-19）** | ⚠️ 已被 #304 搁置 | t4g.micro smoke 通过。glibc ABI 残留。报告：`docs/tmp/20260320/aws_arm64_benchmark_run_20260320.md`。 |
+| 267 | **Makefile 审计（2026-03-19）** | ✅ | defaults 统一 10/2/200。报告：`docs/tmp/20260319/makefile_benchmark_audit_20260319.md`。 |
+| 268 | **Scanner ROTATE 对齐（2026-03-19）** | ✅ | scanner-tests 0 FAIL。报告：`docs/tmp/20260319/scanner_rotate_align_20260319.md`。 |
+| 269 | **Validator/emitter boundary audit（2026-03-20）** | ✅ | “Validator=安全门，Emitter=信任”。selftest 27/27。报告：`docs/tmp/20260320/validator_emitter_boundary_audit_20260320.md`。 |
+| 270 | **Katran harness fix（2026-03-20）** | ✅ | same-image paired，1.042x。报告：`docs/tmp/20260320/katran_harness_fix_20260320.md`。 |
+| 271 | **Corpus 根因分析（2026-03-20）** | ✅ | applied-only 0.947x。报告：`docs/tmp/20260320/corpus_rootcause_20260320.md`。 |
+| 272 | **Selftest 扩展（2026-03-20）** | ✅ | +9 tests，selftest **36/36**。报告：`docs/tmp/20260320/selftest_negative_boundary_20260320.md`。 |
+| 273 | **Kernel quality audit（2026-03-20）** | ✅ | P0 buffer overflow + P1 alias bugs。见 #275 修复。报告：`docs/tmp/20260320/kernel_code_quality_audit_20260320.md`。 |
+| 274 | **Benchmark framework refactor（2026-03-20）** | ✅ | runner/ 顶层提取，corpus 8→1 driver。报告：`docs/tmp/20260320/benchmark_framework_refactor_20260320.md`。 |
+| 275 | **Kernel P0+P1 fix（2026-03-20）** | ✅ | BRANCH_FLIP/COND_SELECT/ADDR_CALC bugs。selftest 36/36。报告：`docs/tmp/20260320/kernel_p0p1_fix_20260320.md`。 |
+| 276-278 | **ZERO_EXT_ELIDE 分析+删除（2026-03-20）** | ✅ | 内核 **-118 LOC**。selftest 35/35。报告：`docs/tmp/20260320/zero_ext_elide_deletion_20260320.md`。 |
 | 277 | **Post-refactor cleanup（2026-03-20）** | ✅ | py_compile 无错误。 |
-| 279 | **Cross-layer fix（2026-03-20）** | ✅ | 零跨层 import。报告：`docs/tmp/cross_layer_cleanup_20260320.md`。 |
+| 279 | **Cross-layer fix（2026-03-20）** | ✅ | 零跨层 import。报告：`docs/tmp/20260320/cross_layer_cleanup_20260320.md`。 |
 | 280 | **Trampoline leak fix（2026-03-20）** | ✅ | Double synchronize_rcu。selftest 35/35。 |
-| 281 | **ARM64 E2E smoke（2026-03-20）** | ✅ | Katran recompile 通过。Tetragon ❌。EC2 terminated。报告：`docs/tmp/arm64_e2e_smoke_20260320.md`。 |
-| 282 | **Katran harness 升级（2026-03-20）** | ✅ | BPF **1.108-1.168x**。报告：`docs/tmp/katran_e2e_quality_analysis_20260320.md`。 |
-| 283 | **ARM64 bpftool fix（2026-03-20）** | ✅ | kernel_btf fallback。Katran recompile 全通。报告：`docs/tmp/arm64_bpftool_fix_20260320.md`。 |
-| 284 | **Kernel 精简（2026-03-20）** | ✅ | **-137 LOC**。selftest 35/35。报告：`docs/tmp/kernel_low_risk_simplification_20260320.md`。 |
-| 285 | **用户态精简（2026-03-20）** | ✅ | **-32,329 行**。报告：`docs/tmp/userspace_consolidation_20260320.md`。 |
-| 286 | **Framework 清理（2026-03-20）** | ✅ | 删除散乱目录/脚本。报告：`docs/tmp/framework_cleanup_audit_20260320.md`。 |
-| 287-288 | **Kernel bloat review + emitter 成本（2026-03-20）** | ✅ | BRANCH_FLIP 反转不可行。per-form ~180-500 LOC。报告：`docs/tmp/kernel_bloat_review_20260320.md`。 |
-| 289 | **表驱动 validator（2026-03-20）** | ✅ | 边际成本 ~500→~80-150 LOC。selftest 35/35。报告：`docs/tmp/form_cost_reduction_design_20260320.md`。 |
-| 290 | **vm-micro 验证（2026-03-20）** | ✅ | 62/62 valid，applied-only **1.269x**。报告：`docs/tmp/vm_micro_validation_20260320.md`。 |
-| 291 | **ROTATE/WIDE_MEM 表驱动（2026-03-20）** | ✅ | **-66 行**。selftest 35/35。报告：`docs/tmp/rotate_wide_table_driven_20260320.md`。 |
-| 292 | **Katran endian bug（2026-03-20）** | ✅ | movbe store 副作用 bug。报告：`docs/tmp/katran_endian_store_bug_investigation_20260320.md`。 |
-| 293 | **PGO policy 设计（2026-03-20）** | ✅ | live enumerate 是关键。报告：`docs/tmp/pgo_policy_design_20260320.md`。 |
-| 294 | **Verifier 扩展调研（2026-03-20）** | ✅ | 方案 C 最划算（~50 行 liveness）。报告：`docs/tmp/verifier_extension_research_20260320.md`。 |
-| 295-296 | **Katran site coverage（2026-03-20）** | ✅ | 74 sites（bflip=56, cmov=8, wide=4, endian=4, extract=2）。safe6 policy，BPF 1.042x。报告：`docs/tmp/katran_site_coverage_analysis_20260320.md`。 |
-| 297/301 | **Tetragon 未 apply 调查（2026-03-20）** | ✅ | offline scan 看不到 live bflip sites。最多 5/7 可 apply。报告：`docs/tmp/tetragon_unapplied_investigation_20260320.md`。 |
+| 281 | **ARM64 E2E smoke（2026-03-20）** | ✅ | Katran recompile 通过。Tetragon ❌。EC2 terminated。报告：`docs/tmp/20260320/arm64_e2e_smoke_20260320.md`。 |
+| 282 | **Katran harness 升级（2026-03-20）** | ✅ | BPF **1.108-1.168x**。报告：`docs/tmp/20260320/katran_e2e_quality_analysis_20260320.md`。 |
+| 283 | **ARM64 bpftool fix（2026-03-20）** | ✅ | kernel_btf fallback。Katran recompile 全通。报告：`docs/tmp/20260320/arm64_bpftool_fix_20260320.md`。 |
+| 284 | **Kernel 精简（2026-03-20）** | ✅ | **-137 LOC**。selftest 35/35。报告：`docs/tmp/20260320/kernel_low_risk_simplification_20260320.md`。 |
+| 285 | **用户态精简（2026-03-20）** | ✅ | **-32,329 行**。报告：`docs/tmp/20260320/userspace_consolidation_20260320.md`。 |
+| 286 | **Framework 清理（2026-03-20）** | ✅ | 删除散乱目录/脚本。报告：`docs/tmp/20260320/framework_cleanup_audit_20260320.md`。 |
+| 287-288 | **Kernel bloat review + emitter 成本（2026-03-20）** | ✅ | BRANCH_FLIP 反转不可行。per-form ~180-500 LOC。报告：`docs/tmp/20260320/kernel_bloat_review_20260320.md`。 |
+| 289 | **表驱动 validator（2026-03-20）** | ✅ | 边际成本 ~500→~80-150 LOC。selftest 35/35。报告：`docs/tmp/20260320/form_cost_reduction_design_20260320.md`。 |
+| 290 | **vm-micro 验证（2026-03-20）** | ✅ | 62/62 valid，applied-only **1.269x**。报告：`docs/tmp/20260320/vm_micro_validation_20260320.md`。 |
+| 291 | **ROTATE/WIDE_MEM 表驱动（2026-03-20）** | ✅ | **-66 行**。selftest 35/35。报告：`docs/tmp/20260320/rotate_wide_table_driven_20260320.md`。 |
+| 292 | **Katran endian bug（2026-03-20）** | ✅ | movbe store 副作用 bug。报告：`docs/tmp/20260320/katran_endian_store_bug_investigation_20260320.md`。 |
+| 293 | **PGO policy 设计（2026-03-20）** | ✅ | live enumerate 是关键。报告：`docs/tmp/20260320/pgo_policy_design_20260320.md`。 |
+| 294 | **Verifier 扩展调研（2026-03-20）** | ✅ | 方案 C 最划算（~50 行 liveness）。报告：`docs/tmp/20260320/verifier_extension_research_20260320.md`。 |
+| 295-296 | **Katran site coverage（2026-03-20）** | ✅ | 74 sites（bflip=56, cmov=8, wide=4, endian=4, extract=2）。safe6 policy，BPF 1.042x。报告：`docs/tmp/20260320/katran_site_coverage_analysis_20260320.md`。 |
+| 297/301 | **Tetragon 未 apply 调查（2026-03-20）** | ✅ | offline scan 看不到 live bflip sites。最多 5/7 可 apply。报告：`docs/tmp/20260320/tetragon_unapplied_investigation_20260320.md`。 |
 | 298/300 | **ARM64 benchmark pipeline（2026-03-20）** | ⚠️ 已被 #304 搁置 | 改为 t4g.micro 交叉编译方案。 |
-| 299 | **x86 新优化调研（2026-03-20）** | ✅ | Top-5 新机会。报告：`docs/tmp/x86_new_optimization_opportunities_20260320.md`。 |
+| 299 | **x86 新优化调研（2026-03-20）** | ✅ | Top-5 新机会。报告：`docs/tmp/20260320/x86_new_optimization_opportunities_20260320.md`。 |
 | 302 | **E2E profiler（2026-03-20）** | 🔄 已被 #304 搁置 | PGO policy 设计。 |
-| 303 | **目录整理（2026-03-20）** | ✅ | runner/docker, runner/scripts, docs/reference。报告：`docs/tmp/directory_reorganization_20260320.md`。 |
+| 303 | **目录整理（2026-03-20）** | ✅ | runner/docker, runner/scripts, docs/reference。报告：`docs/tmp/20260320/directory_reorganization_20260320.md`。 |
