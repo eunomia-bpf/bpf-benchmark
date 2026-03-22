@@ -7,7 +7,7 @@ use crate::pass::*;
 
 use super::fixup_branches_inline;
 
-/// BRANCH_FLIP: PGO-guided reorder of if/else bodies.
+/// BRANCH_FLIP: PGO-guided and heuristic reorder of if/else bodies.
 ///
 /// Generalised pattern:
 ///   pc:           Jcc +N          // conditional jump over then-body to JA
@@ -21,15 +21,22 @@ use super::fixup_branches_inline;
 ///   pc+M+1:       JA +N           // jump over then-body (now second)
 ///   pc+M+2..pc+M+N+1: [then body: N insns]
 ///
-/// If PGO shows the taken path (else body) is hot, flip the condition and
-/// swap bodies so the hot path becomes the fall-through (favoured by
-/// the CPU static branch predictor).
+/// Two triggering modes:
+///
+/// 1. **PGO mode** (preferred): If PGO data shows the taken path (else body) is
+///    hot (above `min_bias`), flip so the hot path becomes fall-through.
+///
+/// 2. **Heuristic mode** (fallback): If no PGO data is available, use a static
+///    heuristic: if the then-body is more than 2x longer than the else-body,
+///    flip to make the shorter body the fall-through. This is a classic compiler
+///    optimization (GCC/LLVM both do it) — shorter fall-through paths improve
+///    instruction cache utilization and reduce taken-branch overhead.
 ///
 /// Safety: skips sites where external branches target interior instructions,
 /// or where JSET is used (no simple inverse). Also adjusts internal branch
 /// offsets within relocated bodies via an address map.
 pub struct BranchFlipPass {
-    /// Minimum taken rate to trigger a flip.
+    /// Minimum taken rate to trigger a PGO-guided flip.
     pub min_bias: f64,
 }
 
@@ -110,22 +117,33 @@ impl BpfPass for BranchFlipPass {
                 continue;
             }
 
-            // PGO check.
-            let should_flip = if let Some(ref bp) = program.annotations[site.pc].branch_profile {
+            // Decision: PGO mode or heuristic mode.
+            let (should_flip, flip_reason) = if let Some(ref bp) = program.annotations[site.pc].branch_profile {
                 let total = bp.taken_count + bp.not_taken_count;
-                if total > 0 {
-                    bp.taken_count as f64 / total as f64 >= self.min_bias
+                if total > 0 && bp.taken_count as f64 / total as f64 >= self.min_bias {
+                    (true, "pgo")
                 } else {
-                    false
+                    (false, "pgo_insufficient")
                 }
             } else {
-                false
+                // Heuristic mode: if then-body is more than 2x the else-body,
+                // flip to make the shorter else-body the fall-through.
+                // This is a classic static branch layout heuristic from GCC/LLVM.
+                if site.then_len > 2 * site.else_len && site.else_len > 0 {
+                    (true, "heuristic")
+                } else {
+                    (false, "no_pgo_no_heuristic")
+                }
             };
 
             if !should_flip {
+                let reason = match flip_reason {
+                    "pgo_insufficient" => "branch not biased enough".to_string(),
+                    _ => "no PGO data and bodies not asymmetric enough".to_string(),
+                };
                 skipped.push(SkipReason {
                     pc: site.pc,
-                    reason: "branch not biased enough or no PGO data".into(),
+                    reason,
                 });
                 continue;
             }
@@ -507,5 +525,156 @@ mod tests {
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert!(result.changed);
         assert_eq!(prog.insns.len(), orig_len);
+    }
+
+    // ── Heuristic mode tests ─────────────────────────────────────────
+
+    #[test]
+    fn test_branch_flip_heuristic_long_then_short_else() {
+        // then_len=5, else_len=1 => 5 > 2*1 => heuristic should flip
+        let mut prog = make_program(vec![
+            jne_imm(1, 0, 5),           // Jcc +5
+            BpfInsn::mov64_imm(0, 1),   // then body (5 insns)
+            BpfInsn::mov64_imm(1, 2),
+            BpfInsn::mov64_imm(2, 3),
+            BpfInsn::mov64_imm(3, 4),
+            BpfInsn::mov64_imm(4, 5),
+            BpfInsn::ja(1),             // JA +1
+            BpfInsn::mov64_imm(0, 99),  // else body (1 insn)
+            exit_insn(),
+        ]);
+        // No PGO data at all
+        let mut cache = AnalysisCache::new();
+        let ctx = PassContext::test_default();
+
+        let pass = BranchFlipPass { min_bias: 0.7 };
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(result.changed, "heuristic should flip when then_len > 2 * else_len");
+        assert_eq!(result.sites_applied, 1);
+        // After flip: inverted condition, else body first
+        assert_eq!(bpf_op(prog.insns[0].code), BPF_JEQ); // inverted JNE -> JEQ
+        assert_eq!(prog.insns[0].off, 1); // jump over else body (1 insn)
+        assert_eq!(prog.insns[1].imm, 99); // else body first
+        assert!(prog.insns[2].is_ja());
+        assert_eq!(prog.insns[2].off, 5); // jump over then body (5 insns)
+        assert_eq!(prog.insns.len(), 9); // same size
+    }
+
+    #[test]
+    fn test_branch_flip_heuristic_no_flip_symmetric() {
+        // then_len=1, else_len=1 => 1 > 2*1 is false => no flip
+        let mut prog = make_program(vec![
+            jne_imm(1, 0, 1),
+            BpfInsn::mov64_imm(0, 10),
+            BpfInsn::ja(1),
+            BpfInsn::mov64_imm(0, 20),
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let ctx = PassContext::test_default();
+
+        let pass = BranchFlipPass { min_bias: 0.7 };
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(!result.changed);
+        assert_eq!(result.sites_applied, 0);
+        assert!(result.sites_skipped.iter().any(|s| s.reason.contains("not asymmetric enough")));
+    }
+
+    #[test]
+    fn test_branch_flip_heuristic_no_flip_then_shorter() {
+        // then_len=1, else_len=5 => 1 > 2*5 is false => no flip
+        // (heuristic only flips when then is the long one)
+        let mut prog = make_program(vec![
+            jne_imm(1, 0, 1),
+            BpfInsn::mov64_imm(0, 10),
+            BpfInsn::ja(5),
+            BpfInsn::mov64_imm(0, 1),
+            BpfInsn::mov64_imm(1, 2),
+            BpfInsn::mov64_imm(2, 3),
+            BpfInsn::mov64_imm(3, 4),
+            BpfInsn::mov64_imm(4, 5),
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let ctx = PassContext::test_default();
+
+        let pass = BranchFlipPass { min_bias: 0.7 };
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(!result.changed);
+    }
+
+    #[test]
+    fn test_branch_flip_heuristic_exactly_2x() {
+        // then_len=2, else_len=1 => 2 > 2*1 is false (not strictly greater) => no flip
+        let mut prog = make_program(vec![
+            jne_imm(1, 0, 2),
+            BpfInsn::mov64_imm(0, 1),
+            BpfInsn::mov64_imm(1, 2),
+            BpfInsn::ja(1),
+            BpfInsn::mov64_imm(0, 99),
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let ctx = PassContext::test_default();
+
+        let pass = BranchFlipPass { min_bias: 0.7 };
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(!result.changed, "exactly 2x should not trigger heuristic (need >2x)");
+    }
+
+    #[test]
+    fn test_branch_flip_heuristic_3x() {
+        // then_len=3, else_len=1 => 3 > 2*1 => flip
+        let mut prog = make_program(vec![
+            jne_imm(1, 0, 3),
+            BpfInsn::mov64_imm(0, 1),
+            BpfInsn::mov64_imm(1, 2),
+            BpfInsn::mov64_imm(2, 3),
+            BpfInsn::ja(1),
+            BpfInsn::mov64_imm(0, 99),
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let ctx = PassContext::test_default();
+
+        let pass = BranchFlipPass { min_bias: 0.7 };
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(result.changed);
+        assert_eq!(result.sites_applied, 1);
+    }
+
+    #[test]
+    fn test_branch_flip_pgo_overrides_heuristic() {
+        // then_len=5, else_len=1 => heuristic would flip
+        // But PGO says bias is insufficient => should NOT flip
+        let mut prog = make_program(vec![
+            jne_imm(1, 0, 5),
+            BpfInsn::mov64_imm(0, 1),
+            BpfInsn::mov64_imm(1, 2),
+            BpfInsn::mov64_imm(2, 3),
+            BpfInsn::mov64_imm(3, 4),
+            BpfInsn::mov64_imm(4, 5),
+            BpfInsn::ja(1),
+            BpfInsn::mov64_imm(0, 99),
+            exit_insn(),
+        ]);
+        prog.annotations[0].branch_profile = Some(BranchProfile {
+            taken_count: 50,
+            not_taken_count: 50,
+        });
+        let mut cache = AnalysisCache::new();
+        let ctx = PassContext::test_default();
+
+        let pass = BranchFlipPass { min_bias: 0.7 };
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        // PGO data present but insufficient => do NOT fall back to heuristic
+        assert!(!result.changed);
+        assert!(result.sites_skipped.iter().any(|s| s.reason.contains("not biased enough")));
     }
 }
