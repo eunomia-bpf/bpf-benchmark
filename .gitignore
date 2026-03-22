@@ -6,6 +6,7 @@ wasm-wasmtime.exe
 *.directive.bin
 *.policy.bin
 .cache/
+check_katran2/
 # Python
 venv/
 .venv/
@@ -62,6 +63,12 @@ module/arm64/.*.cmd
 tests/hold_bpf_prog
 tests/lbr_input.bin
 tests/test_live_policy_discovery
+tests/rejit_poc
+tests/rejit_safety_tests
+tests/unittest/rejit_poc
+tests/unittest/rejit_safety_tests
+tests/unittest/rejit_prog_types
+tests/unittest/progs/*.bpf.o
 
 # BPF build artifacts
 *.bpf.o
