@@ -591,7 +591,7 @@ make clean
 | **312** | **VM 冒烟测试 + bug 修复（2026-03-21）** | ✅ | **20/20 PASS。** 修复 3 个 bug：(1) BPF_PROG_REJIT cmd 号统一为 39；(2) ksym list_del_rcu 后加 INIT_LIST_HEAD_RCU；(3) daemon orig_prog_len bytes÷8=insns。kinsn 模块加载/卸载成功。 |
 | **313** | **Matcher Variant B 修复（2026-03-21）** | ✅ | 旧 C++ scanner 有 low-first + high-first 两种 variant，Rust daemon 只有 low-first。添加 `match_wide_mem_high_first()`，**27 tests all pass**。 |
 | **314** | **daemon-apply 集成 + --daemon-path（2026-03-21）** | ✅ | micro_exec 新增 `--daemon-path`，fork/exec daemon apply <prog_id>。~50 行改动。driver.py + Makefile 适配。 |
-| **315** | **⚠️ 首个 v2 端到端性能结果（2026-03-21）** | ✅ | **load_byte_recompose**: 1 WIDE_MEM site，83→74 insns，368→330B jited (-10.3%)，exec 317→125 ns (**2.5x**)。**load_word32**: 2 sites，68→50 insns，308→232B (-24.7%)。**simple**: no-op 基线，5→5 ns。VM ktime 单次测量。 |
+| **315** | **⚠️ v2 WIDE_MEM 性能结果（2026-03-21）** | ✅ | **14 个 micro benchmark，10 个有 WIDE_MEM site（71%）。** 显著加速：bounds_ladder **2.78x**、load_byte **2.59x**、stride_load_16 **2.46x**、bitfield_extract **1.33x**、load_byte_recompose **1.17x**。Katran e2e：daemon 找到 4 site 但 REJIT 返回 EOPNOTSUPP（func_cnt>0 限制）。Commit `27cbc1b`。 |
 | **316** | **Paper tex v2 更新（2026-03-21）** | ✅ | Abstract 一字不差替换，Title 更新，Introduction/Background 全部重写（v2 三 insights + 三组件），Design/Eval 用 v2 占位符。+463/-866 行。删除全部 v1 内容。新增 7 bib 条目。 |
 | **317** | **corpus/ 死代码清理（2026-03-21）** | ✅ | 净删 ~329 行。删除 `apply_recompile_v5()`、`_apply_one_v5_enumerate()`、`build_kernel_command()` 等 v1 路径。所有 import 验证通过。 |
 | **318** | **driver.py --daemon-path 适配（2026-03-21）** | ✅ | micro/driver.py 新增 `--daemon-path` 参数，Makefile `vm-micro` 自动传 DAEMON_PATH。+10 行。 |

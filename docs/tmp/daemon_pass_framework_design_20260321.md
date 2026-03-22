@@ -2251,7 +2251,7 @@ loop {
 | Pass 排序 | 用户指定顺序 | 初期够用；未来可加 pass dependency DAG |
 | 安全 pass 优先 | 安全 pass 在优化 pass 之前 | 确保安全加固不被优化 undo |
 | Branch fixup | 每个 pass 自己做或用共用工具 | 避免全局 fixup 的复杂度 |
-| Verifier 信息 | 扩展 GET_INFO（推荐） | 最小内核改动，复用已有 syscall |
+| Verifier 信息 | 解析 verifier log (log_level=2) | 零内核改动；已实现 verifier_log.rs（433行，33 tests）；备用方案为扩展 GET_INFO |
 | PGO Phase 1 | run_cnt/run_time_ns only | 已有基础设施，零改动 |
 | PGO Phase 2 | perf branch record | 零运行时开销 |
 
