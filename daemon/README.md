@@ -43,6 +43,18 @@ sudo bpfrejit-daemon apply 42
 sudo bpfrejit-daemon apply-all
 ```
 
+### `watch` -- daemon mode: continuously apply rewrites to new programs
+
+Polls for newly-loaded BPF programs at a configurable interval and applies
+rewrites via the PassManager pipeline. Tracks already-optimized program IDs to
+avoid redundant work. Exits cleanly on SIGTERM/SIGINT.
+
+```bash
+sudo bpfrejit-daemon watch                  # default 5-second polling interval
+sudo bpfrejit-daemon watch --interval 10    # 10-second polling interval
+sudo bpfrejit-daemon watch --once           # one scan round then exit (useful for testing)
+```
+
 ### `profile <prog_id>` -- poll runtime BPF stats
 
 ```bash
@@ -62,15 +74,15 @@ sudo bpfrejit-daemon profile 42 --interval-ms 1000 --samples 5
 
 ## Pass Framework
 
-The daemon uses an LLVM-style pass pipeline defined in `pass.rs`:
+The daemon uses an LLVM-style pass pipeline defined in `pass.rs`. All subcommands (`enumerate`, `rewrite`, `apply`, `apply-all`, `watch`) run the same PassManager pipeline -- they differ only in whether they call `BPF_PROG_REJIT` afterward.
 
 - **`BpfProgram`** -- linear instruction stream (`Vec<BpfInsn>`) plus per-instruction `InsnAnnotation` (branch-target flags, PGO profile, verifier register state) and program metadata (`ProgMeta`).
 - **`BpfPass` trait** -- each transform implements `name()`, `category()`, `required_analyses()`, and `run(&mut BpfProgram, &mut AnalysisCache, &PassContext)`. Returns a `PassResult` describing sites applied/skipped.
-- **`Analysis` trait + `AnalysisCache`** -- read-only analyses produce typed, cached results indexed by `TypeId`. The cache is invalidated after any transform that sets `PassResult::changed = true`.
+- **`Analysis` trait + `AnalysisCache`** -- read-only analyses produce typed, cached results indexed by `TypeId`. The cache is invalidated after any transform that sets `PassResult::changed = true`. Concrete analyses live in `analysis/`: `BranchTargetAnalysis`, `CFGAnalysis`, `LivenessAnalysis`, `PGOAnalysis`.
 - **`PassManager`** -- executes passes in registration order, checks `PolicyConfig` (enabled/disabled pass lists), triggers required analyses, and accumulates a `PipelineResult`.
 - **`PassContext`** -- invariant per-pipeline context: `KfuncRegistry` (BTF IDs for inline kfuncs), `PlatformCapabilities` (BMI1/2, CMOV, MOVBE, RORX), and `PolicyConfig`.
 
-The default pipeline is built by `passes::build_default_pipeline()` and runs: `wide_mem` → `rotate` → `cond_select` → `branch_flip` → `spectre_mitigation`.
+The default pipeline is built by `passes::build_default_pipeline()` and runs: `wide_mem` → `rotate` → `cond_select` → `branch_flip` → `spectre_mitigation`. Each pass is a separate file under `passes/`.
 
 ## Layout
 
@@ -78,17 +90,25 @@ The default pipeline is built by `passes::build_default_pipeline()` and runs: `w
 daemon/
   Cargo.toml
   src/
-    main.rs           # CLI entry point (clap); subcommand dispatch
-    bpf.rs            # BPF syscall wrappers (zero libbpf)
-    insn.rs           # BPF instruction encoding/decoding
-    pass.rs           # Pass framework: BpfPass, Analysis, AnalysisCache, PassManager
-    analysis.rs       # Concrete analyses: BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis, PGOAnalysis
-    passes.rs         # Concrete passes: WideMemPass, RotatePass, CondSelectPass, BranchFlipPass, SpectreMitigationPass
-    matcher.rs        # Low-level pattern scanning (WIDE_MEM sites)
-    rewriter.rs       # Bytecode rewrite + branch fixup (used by WideMemPass)
-    emit.rs           # Per-transform instruction emission helpers
-    verifier_log.rs   # Verifier log parser (for register state extraction)
-    profiler.rs       # BPF runtime stats polling (bpf_stats_enabled)
+    main.rs              # CLI entry point (clap); all subcommands dispatch through PassManager
+    bpf.rs               # BPF syscall wrappers (zero libbpf)
+    insn.rs              # BPF instruction encoding/decoding
+    pass.rs              # Pass framework: BpfPass, Analysis, AnalysisCache, PassManager, PassContext
+    passes/
+      mod.rs             # build_default_pipeline(); re-exports all passes
+      wide_mem.rs        # WideMemPass — byte-ladder load merging
+      rotate.rs          # RotatePass — shift+OR → bpf_rotate64() kfunc
+      cond_select.rs     # CondSelectPass — JCC+MOV diamond detection (report-only)
+      branch_flip.rs     # BranchFlipPass — hot-path fall-through (PGO-gated)
+      spectre.rs         # SpectreMitigationPass — load fences / masking
+    analysis/
+      mod.rs             # re-exports all analyses
+      branch_target.rs   # BranchTargetAnalysis
+      cfg.rs             # CFGAnalysis
+      liveness.rs        # LivenessAnalysis
+      pgo.rs             # PGOAnalysis
+    verifier_log.rs      # Verifier log parser (register state extraction)
+    profiler.rs          # BPF runtime stats polling (bpf_stats_enabled)
 ```
 
 ## Dependencies

@@ -1,18 +1,16 @@
 // SPDX-License-Identifier: MIT
-//! bpfrejit-daemon — BpfReJIT userspace daemon (Rust POC).
+//! bpfrejit-daemon — BpfReJIT userspace daemon.
 //!
 //! Scans live kernel BPF programs for optimization sites and can apply
 //! bytecode rewrites via BPF_PROG_REJIT.
 
 mod analysis;
 mod bpf;
-mod emit;
 mod insn;
-mod matcher;
 mod pass;
 mod passes;
 mod profiler;
-mod rewriter;
+mod verifier_log;
 
 use std::collections::HashSet;
 use std::os::unix::io::AsRawFd;
@@ -122,23 +120,37 @@ fn enumerate_one(prog_id: u32) -> Result<()> {
     let insn_count = if !orig_insns.is_empty() {
         orig_insns.len()
     } else {
-        info.orig_prog_len as usize / 8 // orig_prog_len is in bytes
+        info.orig_prog_len as usize / 8
     };
 
-    let sites = if !orig_insns.is_empty() {
-        matcher::scan_all(&orig_insns)
+    // Run the pipeline in dry-run mode to count sites.
+    let site_summary = if !orig_insns.is_empty() {
+        let meta = pass::ProgMeta {
+            prog_id: info.id,
+            prog_type: info.prog_type,
+            prog_name: info.name_str().to_string(),
+            run_cnt: info.run_cnt,
+            run_time_ns: info.run_time_ns,
+            ..Default::default()
+        };
+        let mut program = pass::BpfProgram::new(orig_insns, meta);
+        let pm = passes::build_default_pipeline();
+        let ctx = pass::PassContext::test_default();
+
+        match pm.run(&mut program, &ctx) {
+            Ok(result) if result.total_sites_applied > 0 => {
+                let parts: Vec<String> = result
+                    .pass_results
+                    .iter()
+                    .filter(|pr| pr.sites_applied > 0)
+                    .map(|pr| format!("{}={}", pr.pass_name, pr.sites_applied))
+                    .collect();
+                parts.join(" ")
+            }
+            _ => "-".to_string(),
+        }
     } else {
-        Vec::new()
-    };
-
-    let site_summary = if sites.is_empty() {
         "-".to_string()
-    } else {
-        let wide_count = sites
-            .iter()
-            .filter(|s| s.family == matcher::Family::WideMem)
-            .count();
-        format!("wide_mem={}", wide_count)
     };
 
     println!(
@@ -167,31 +179,43 @@ fn cmd_rewrite(prog_id: u32) -> Result<()> {
         orig_insns.len()
     );
 
-    let sites = matcher::scan_all(&orig_insns);
-    println!("  found {} rewrite sites", sites.len());
-    for site in &sites {
-        println!(
-            "    pc={} len={} family={} bindings={:?}",
-            site.start_pc, site.old_len, site.family, site.bindings
-        );
+    let meta = pass::ProgMeta {
+        prog_id: info.id,
+        prog_type: info.prog_type,
+        prog_name: info.name_str().to_string(),
+        run_cnt: info.run_cnt,
+        run_time_ns: info.run_time_ns,
+        ..Default::default()
+    };
+    let mut program = pass::BpfProgram::new(orig_insns.clone(), meta);
+    let pm = passes::build_default_pipeline();
+    let ctx = pass::PassContext::test_default();
+
+    let pipeline_result = pm.run(&mut program, &ctx)?;
+
+    for pr in &pipeline_result.pass_results {
+        if pr.sites_applied > 0 {
+            println!("  {}: {} sites applied", pr.pass_name, pr.sites_applied);
+        }
+        for skip in &pr.sites_skipped {
+            println!("    skip pc={}: {}", skip.pc, skip.reason);
+        }
     }
 
-    if sites.is_empty() {
+    if !pipeline_result.program_changed {
         println!("  nothing to rewrite");
         return Ok(());
     }
 
-    let result = rewriter::rewrite(&orig_insns, &sites).context("rewrite failed")?;
-
     println!(
         "  rewrite: {} insns -> {} insns ({} sites applied)",
         orig_insns.len(),
-        result.new_insns.len(),
-        result.sites_applied
+        program.insns.len(),
+        pipeline_result.total_sites_applied
     );
 
     // Print new instructions for inspection.
-    for (i, insn) in result.new_insns.iter().enumerate() {
+    for (i, insn) in program.insns.iter().enumerate() {
         println!("    [{:>4}] {}", i, insn);
     }
 
@@ -208,7 +232,6 @@ fn cmd_apply(prog_id: u32) -> Result<()> {
         return Ok(());
     }
 
-    // Build PassManager pipeline and run
     let pm = passes::build_default_pipeline();
     let ctx = pass::PassContext::test_default();
 
@@ -376,7 +399,6 @@ fn cmd_watch(interval_secs: u64, once: bool) -> Result<()> {
         libc::signal(libc::SIGINT, handle_signal as libc::sighandler_t);
     }
 
-    // Set of prog IDs that have already been attempted in this session.
     let mut optimized: HashSet<u32> = HashSet::new();
     let mut round: u32 = 0;
 
@@ -395,7 +417,6 @@ fn cmd_watch(interval_secs: u64, once: bool) -> Result<()> {
         let ids: Vec<u32> = bpf::iter_prog_ids().collect();
         let total = ids.len();
 
-        // Find newly seen prog IDs (not yet attempted).
         let new_ids: Vec<u32> = ids
             .iter()
             .copied()
@@ -406,8 +427,6 @@ fn cmd_watch(interval_secs: u64, once: bool) -> Result<()> {
         let mut applied = 0u32;
         let mut errors = 0u32;
         for prog_id in &new_ids {
-            // Mark as seen regardless of outcome so we don't retry transient failures
-            // infinitely.  The program may have exited by the time we reach it.
             optimized.insert(*prog_id);
             match try_apply_one(*prog_id) {
                 Ok(true) => applied += 1,
@@ -428,8 +447,7 @@ fn cmd_watch(interval_secs: u64, once: bool) -> Result<()> {
             break;
         }
 
-        // Sleep in small chunks so we can react to SIGINT promptly.
-        let steps = interval_secs.max(1) * 10; // 100 ms slices
+        let steps = interval_secs.max(1) * 10;
         for _ in 0..steps {
             if SHUTDOWN_FLAG.load(Ordering::Relaxed) {
                 break;

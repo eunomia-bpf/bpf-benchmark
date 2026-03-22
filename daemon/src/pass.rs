@@ -312,7 +312,6 @@ pub struct PolicyConfig {
 
 /// Type-erased Analysis trait object wrapper.
 pub trait AnyAnalysis: Send + Sync {
-    fn name(&self) -> &str;
     fn run_and_cache(&self, program: &BpfProgram, cache: &mut AnalysisCache);
 }
 
@@ -321,10 +320,6 @@ impl<A: Analysis + 'static> AnyAnalysis for A
 where
     A::Result: 'static,
 {
-    fn name(&self) -> &str {
-        Analysis::name(self)
-    }
-
     fn run_and_cache(&self, program: &BpfProgram, cache: &mut AnalysisCache) {
         cache.get(self, program);
     }

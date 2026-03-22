@@ -90,9 +90,6 @@ impl PgoAnalysis {
         }
     }
 
-    pub fn is_hot(&self, min_run_cnt: u64, min_run_time_ns: u64) -> bool {
-        self.delta_run_cnt >= min_run_cnt && self.delta_run_time_ns >= min_run_time_ns
-    }
 }
 
 pub struct ProgStatsPoller {
@@ -154,18 +151,6 @@ impl ProgStatsPoller {
 
         Ok(deltas)
     }
-}
-
-pub fn poll_prog_stats(prog_id: u32) -> Result<ProgStats> {
-    ProgStatsPoller::open(prog_id)?.poll_stats()
-}
-
-pub fn collect_prog_stats_deltas(
-    prog_id: u32,
-    interval: Duration,
-    samples: usize,
-) -> Result<Vec<ProgStatsDelta>> {
-    ProgStatsPoller::open(prog_id)?.collect_deltas(interval, samples)
 }
 
 pub fn bpf_stats_enabled() -> Result<bool> {
@@ -232,7 +217,7 @@ mod tests {
     }
 
     #[test]
-    fn pgo_analysis_uses_delta_hotness() {
+    fn pgo_analysis_from_delta() {
         let start = Instant::now();
         let before = snapshot(9, start, 100, 20_000);
         let after = snapshot(9, start + Duration::from_secs(1), 160, 44_000);
@@ -243,7 +228,5 @@ mod tests {
         assert_eq!(analysis.delta_run_cnt, 60);
         assert_eq!(analysis.delta_run_time_ns, 24_000);
         assert_eq!(analysis.delta_avg_ns, Some(400.0));
-        assert!(analysis.is_hot(32, 10_000));
-        assert!(!analysis.is_hot(64, 10_000));
     }
 }
