@@ -19,7 +19,7 @@ The benchmarking suite (`micro/`, `corpus/`, `e2e/`) measures BpfReJIT improveme
 - clang/llvm (BPF programs compiled with `clang -target bpf`)
 - cmake, pkg-config, libelf-dev, zlib1g-dev, libzstd-dev
 - Python 3 with PyYAML (`pip install pyyaml`)
-- `sudo -n` access required for kernel eBPF runtime
+- VM environment (vng/virtme-ng) for kernel eBPF runtime — all BPF operations run inside VM, no host sudo needed
 
 ### Initial setup
 ```bash
@@ -111,11 +111,11 @@ Configured via YAML files in `micro/config/` and `corpus/config/`:
 **`runner/`** — C++20 CMake project producing `micro_exec` plus shared Python helpers in `runner/libs/`. Three runtime modes:
 - `run-llvmbpf` — Loads ELF, JIT-compiles via `llvmbpf_vm`, executes in userspace
 - `run-kernel` — Loads ELF via libbpf, runs via `bpf_prog_test_run_opts` (stock kernel JIT)
-- `run-kernel --rejit --daemon-path <path>` — Same as run-kernel but applies daemon rewrite via `BPF_PROG_REJIT` before measuring
+- `run-kernel --rejit --daemon-socket <path>` — Same as run-kernel but connects to daemon serve via Unix socket for `BPF_PROG_REJIT` before measuring
 
 All paths output a single JSON line per sample with `compile_ns`, `exec_ns`, `result`, `phases_ns`, and optional `perf_counters`. driver.py auto-compares `result` across runtimes for correctness verification.
 
-**`daemon/`** — BpfReJIT userspace daemon (Rust, zero libbpf dependency). LLVM-style pass framework with 5 passes: WideMemPass, RotatePass, CondSelectPass, BranchFlipPass, SpectreMitigationPass. Subcommands: `enumerate`, `rewrite`, `apply`, `apply-all`, `watch`, `profile`. See `daemon/README.md`.
+**`daemon/`** — BpfReJIT userspace daemon (Rust, zero libbpf dependency). LLVM-style pass framework with 7 passes: WideMemPass, RotatePass, CondSelectPass, ExtractPass, EndianFusionPass, BranchFlipPass, SpeculationBarrierPass. Subcommands: `enumerate`, `rewrite`, `apply`, `apply-all`, `watch`, `serve`, `profile`. See `daemon/README.md`.
 
 **`micro/programs/*.bpf.c`** — Active BPF benchmark programs. Each includes `common.h` and uses one of the active harness macros:
 - `DEFINE_STAGED_INPUT_XDP_BENCH` — staged XDP pure-jit path
@@ -153,6 +153,14 @@ Programs define a `bench_*()` function taking `(const u8 *data, u32 len, u64 *ou
 - `--perf-counters` uses `perf_event_open`; kernel counters include kernel-mode, llvmbpf counters are user-mode only
 - **Benchmark runs must complete within 20 minutes** — use appropriate ITERATIONS/REPEAT params
 - **REJIT known limitation**: poke_tab (tail_call) programs cannot be REJIT'd yet — blocks some Cilium programs
+
+### Build & Test Rules
+- **Makefile is the ONLY build/test entry point**: Agents must ONLY use `make <target>` to build and test. Never run raw `cargo build`, `make -C vendor/linux-framework`, `insmod`, `cp .config` etc. manually. If a `make` target doesn't do what's needed, fix the Makefile pipeline — don't work around it with manual commands.
+- **No sudo anywhere**: VM guest runs as root (vng). Host never runs BPF. All sudo has been removed (except AWS remote scripts). Do not re-add sudo.
+- **No manual kernel config**: `make kernel` auto-copies `vendor/bpfrejit_defconfig` and runs `olddefconfig`. To change kernel config, edit `vendor/bpfrejit_defconfig`, not `.config` directly.
+- **No manual module loading**: `module/load_all.sh` is called automatically by VM_INIT. Do not manually `insmod`.
+- **One agent per VM test**: VM tests (vm-test, vm-micro, vm-corpus, vm-e2e) must run serially, one agent at a time. Never parallel VM agents — they compete for kernel source tree and VM resources.
+- **Each test target = one agent**: Don't put vm-test + vm-micro + vm-corpus + vm-e2e in one agent. Dispatch separate agents serially so progress is visible and failures are isolated.
 
 ### Code Quality Rules
 - **No dead code**: When replacing a subsystem (e.g., v1→v2), delete the old code entirely. Do not keep `if v1 then ... else v2` branches or commented-out legacy paths. Dead code rots and confuses future readers.

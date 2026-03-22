@@ -15,6 +15,9 @@
 > - **⚠️ 如果需要 commit，必须在 main 分支直接做，不要开新分支。** 开分支导致合并冲突。
 > - **⚠️ 暂时性性能数据和实验计划只能出现在两个地方：(1) 开头摘要区域的权威数据行；(2) §7 任务追踪表格的条目。** §1-§6 的正文不得包含会过期的具体数字或待办计划。如果 §1-§6 需要引用性能数据，只引用任务编号（如"见 #256"），不内联数据本身。
 > - **⚠️ 禁止死代码和防御性编程**：替换子系统时（如 v1→v2）必须删除旧代码，不保留 `if v1 / else v2` 分支。内核代码中不保留"以防万一"的检查——只在有具体失败场景时才加 guard。每行内核代码都是审核负担，越少越好。
+> - **⚠️ Makefile 是唯一构建/测试入口**：Agent 只能用 `make <target>` 构建和测试。禁止手动 `cargo build`、`make -C vendor/linux-framework`、`insmod`、`cp .config` 等。如果 make target 不够用，修 Makefile pipeline，不要绕过它。
+> - **⚠️ 禁止 sudo**：VM 内已是 root（vng），主机不跑 BPF。不需要 sudo。
+> - **⚠️ VM 测试每个 target 一个 agent**：vm-test、vm-micro、vm-corpus、vm-e2e 分别用不同 agent 串行跑。不要一个 agent 跑所有。
 > **v1 权威数据**（#256 rerun，native-level rewrite 架构）：micro **1.057x** / applied-only **1.193x**；corpus **0.983x**；Tracee **+8.1%**；Tetragon **+20.3%/+32.2%**；Katran BPF **1.108-1.168x**；gap **0.581x**。vm-selftest **35/35**。v1 代码保存在 `v1-native-rewrite` 分支。
 
 ---
