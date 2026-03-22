@@ -69,39 +69,46 @@ class ScriptSpec:
 
 SCRIPTS: tuple[ScriptSpec, ...] = (
     ScriptSpec(
-        name="open_latency",
-        script_path=DEFAULT_SCRIPT_DIR / "open_latency.bt",
-        description="kprobe do_sys_openat2 latency histogram",
-        expected_programs=2,
-        workload_kind="open_latency",
-    ),
-    ScriptSpec(
-        name="exec_trace",
-        script_path=DEFAULT_SCRIPT_DIR / "exec_trace.bt",
-        description="tracepoint sched_process_exec counter",
-        expected_programs=1,
-        workload_kind="exec_trace",
-    ),
-    ScriptSpec(
-        name="scheduler_latency",
-        script_path=DEFAULT_SCRIPT_DIR / "scheduler_latency.bt",
-        description="tracepoint wakeup/switch run queue latency histogram",
-        expected_programs=2,
-        workload_kind="scheduler_latency",
-    ),
-    ScriptSpec(
-        name="vfs_read_count",
-        script_path=DEFAULT_SCRIPT_DIR / "vfs_read_count.bt",
-        description="kprobe vfs_read counter by comm",
-        expected_programs=1,
-        workload_kind="vfs_read_count",
-    ),
-    ScriptSpec(
-        name="tcp_connect",
-        script_path=DEFAULT_SCRIPT_DIR / "tcp_connect.bt",
-        description="kprobe tcp_v4_connect counter",
+        name="tcplife",
+        script_path=DEFAULT_SCRIPT_DIR / "tcplife.bt",
+        description="kprobe tcp_set_state: TCP session lifespan with IPv4/IPv6 struct field access, bswap, ntop, 3 maps",
         expected_programs=1,
         workload_kind="tcp_connect",
+    ),
+    ScriptSpec(
+        name="biosnoop",
+        script_path=DEFAULT_SCRIPT_DIR / "biosnoop.bt",
+        description="tracepoint block_io_start/done: per-I/O latency with tuple-keyed maps and bitwise ops (dev >> 20)",
+        expected_programs=2,
+        workload_kind="dd_read",
+    ),
+    ScriptSpec(
+        name="runqlat",
+        script_path=DEFAULT_SCRIPT_DIR / "runqlat.bt",
+        description="tracepoint sched_wakeup/wakeup_new/switch: run queue latency histogram, 3 probes",
+        expected_programs=3,
+        workload_kind="scheduler",
+    ),
+    ScriptSpec(
+        name="tcpretrans",
+        script_path=DEFAULT_SCRIPT_DIR / "tcpretrans.bt",
+        description="kprobe tcp_retransmit_skb: TCP retransmit tracing with 12-entry state string map, ntop/bswap",
+        expected_programs=1,
+        workload_kind="tcp_connect",
+    ),
+    ScriptSpec(
+        name="capable",
+        script_path=DEFAULT_SCRIPT_DIR / "capable.bt",
+        description="kprobe cap_capable: security capability checks with 41-entry string map lookup",
+        expected_programs=1,
+        workload_kind="exec_storm",
+    ),
+    ScriptSpec(
+        name="vfsstat",
+        script_path=DEFAULT_SCRIPT_DIR / "vfsstat.bt",
+        description="kprobe vfs_read*/write*/fsync/open/create: per-function counters with interval printing",
+        expected_programs=6,
+        workload_kind="dd_read",
     ),
 )
 
@@ -209,7 +216,7 @@ def ensure_required_tools() -> dict[str, object]:
 
 def selected_scripts(args: argparse.Namespace) -> list[ScriptSpec]:
     if args.smoke:
-        return [next(spec for spec in SCRIPTS if spec.name == "exec_trace")]
+        return [next(spec for spec in SCRIPTS if spec.name == "capable")]
     if not args.scripts:
         return list(SCRIPTS)
     wanted = {name.strip() for name in args.scripts if name and name.strip()}
@@ -260,16 +267,14 @@ def aggregate_site_totals(records: Mapping[int, Mapping[str, object]]) -> dict[s
 
 
 def run_named_workload(kind: str, duration_s: int) -> WorkloadResult:
-    if kind == "open_latency":
-        return run_file_open_load(duration_s)
-    if kind == "exec_trace":
-        return run_exec_storm(duration_s, rate=2)
-    if kind == "scheduler_latency":
-        return run_scheduler_load(duration_s)
-    if kind == "vfs_read_count":
-        return run_dd_read_load(duration_s)
     if kind == "tcp_connect":
         return run_tcp_connect_load(duration_s)
+    if kind == "dd_read":
+        return run_dd_read_load(duration_s)
+    if kind == "scheduler":
+        return run_scheduler_load(duration_s)
+    if kind == "exec_storm":
+        return run_exec_storm(duration_s, rate=2)
     raise RuntimeError(f"unsupported workload kind: {kind}")
 
 

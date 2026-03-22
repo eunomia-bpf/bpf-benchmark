@@ -1,4 +1,0 @@
-kprobe:tcp_v4_connect
-{
-  @connects = count();
-}

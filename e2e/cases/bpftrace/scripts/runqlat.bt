@@ -1,0 +1,71 @@
+#!/usr/bin/env bpftrace
+// runqlat.bt	CPU scheduler run queue latency as a histogram.
+// 		For Linux, uses bpftrace, eBPF.
+//
+// Example of usage:
+//
+// # ./runqlat.bt
+// Attaching 5 probes...
+// Tracing CPU scheduler... Hit Ctrl-C to end.
+//
+// @usecs:
+// [0]                    1 |                                                    |
+// [1]                   11 |@@                                                  |
+// [2, 4)                16 |@@@                                                 |
+// [4, 8)                43 |@@@@@@@@@@                                          |
+// [8, 16)              134 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@                     |
+// [16, 32)             220 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|
+// [32, 64)             117 |@@@@@@@@@@@@@@@@@@@@@@@@@@@                         |
+// [64, 128)             84 |@@@@@@@@@@@@@@@@@@@                                 |
+// [128, 256)            10 |@@                                                  |
+//
+// This is a bpftrace version of the bcc tool of the same name.
+// The bcc version provides options to customize the output.
+//
+// Copyright 2018 Netflix, Inc.
+//
+// 17-Sep-2018	Brendan Gregg	Created this.
+
+#ifndef BPFTRACE_HAVE_BTF
+#include <linux/sched.h>
+#else
+// With BTF providing types, full headers are not needed.
+// We only need to supply the preprocessor defines used in this script.
+// TASK_RUNNING is not arch-dependant and has not changed in the linux
+// git history (it is not part of the stable API though)
+#define TASK_RUNNING 0
+#endif
+
+BEGIN
+{
+  printf("Tracing CPU scheduler... Hit Ctrl-C to end.\n");
+}
+
+tracepoint:sched:sched_wakeup,
+tracepoint:sched:sched_wakeup_new
+{
+  @qtime[args.pid] = nsecs;
+}
+
+tracepoint:sched:sched_switch
+{
+  if (args.prev_state == TASK_RUNNING) {
+    @qtime[args.prev_pid] = nsecs;
+  }
+  // Ignore the idle task
+  if (args.next_pid == 0) {
+    return;
+  }
+
+  $ns = @qtime[args.next_pid];
+  if $ns {
+    @usecs = hist((nsecs - $ns) / 1000);
+    // Swallowing deletion failures as they are expected
+    $ignore = delete(@qtime, args.next_pid);
+  }
+}
+
+END
+{
+  clear(@qtime);
+}
