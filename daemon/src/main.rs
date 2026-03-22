@@ -7,6 +7,7 @@
 mod analysis;
 mod bpf;
 mod insn;
+mod kfunc_discovery;
 mod pass;
 mod passes;
 mod profiler;
@@ -78,23 +79,38 @@ enum Command {
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
+
+    // Discover available kinsn kfuncs from loaded kernel modules.
+    let discovery = kfunc_discovery::discover_kfuncs();
+    eprintln!("kfunc discovery:");
+    for line in &discovery.log {
+        eprintln!("{}", line);
+    }
+    let ctx = pass::PassContext {
+        kfunc_registry: discovery.registry,
+        platform: pass::PlatformCapabilities::default(),
+        policy: pass::PolicyConfig::default(),
+    };
+    // Keep module FDs alive for the daemon's lifetime.
+    let _module_fds = discovery.module_fds;
+
     match cli.command {
-        Command::Enumerate => cmd_enumerate(),
-        Command::Rewrite { prog_id } => cmd_rewrite(prog_id),
-        Command::Apply { prog_id } => cmd_apply(prog_id),
-        Command::ApplyAll => cmd_apply_all(),
+        Command::Enumerate => cmd_enumerate(&ctx),
+        Command::Rewrite { prog_id } => cmd_rewrite(prog_id, &ctx),
+        Command::Apply { prog_id } => cmd_apply(prog_id, &ctx),
+        Command::ApplyAll => cmd_apply_all(&ctx),
         Command::Profile {
             prog_id,
             interval_ms,
             samples,
         } => cmd_profile(prog_id, interval_ms, samples),
-        Command::Watch { interval, once } => cmd_watch(interval, once),
+        Command::Watch { interval, once } => cmd_watch(interval, once, &ctx),
     }
 }
 
 // ── Subcommand implementations ──────────────────────────────────────
 
-fn cmd_enumerate() -> Result<()> {
+fn cmd_enumerate(ctx: &pass::PassContext) -> Result<()> {
     println!(
         "{:>6}  {:>6}  {:>5}  {:<16}  sites",
         "ID", "type", "insns", "name"
@@ -102,7 +118,7 @@ fn cmd_enumerate() -> Result<()> {
     println!("{}", "-".repeat(60));
 
     for prog_id in bpf::iter_prog_ids() {
-        match enumerate_one(prog_id) {
+        match enumerate_one(prog_id, ctx) {
             Ok(()) => {}
             Err(e) => {
                 eprintln!("  prog {}: {:#}", prog_id, e);
@@ -112,7 +128,7 @@ fn cmd_enumerate() -> Result<()> {
     Ok(())
 }
 
-fn enumerate_one(prog_id: u32) -> Result<()> {
+fn enumerate_one(prog_id: u32, ctx: &pass::PassContext) -> Result<()> {
     let fd = bpf::bpf_prog_get_fd_by_id(prog_id)?;
     let (info, orig_insns) = bpf::bpf_prog_get_info(fd.as_raw_fd(), true)?;
 
@@ -135,9 +151,8 @@ fn enumerate_one(prog_id: u32) -> Result<()> {
         };
         let mut program = pass::BpfProgram::new(orig_insns, meta);
         let pm = passes::build_default_pipeline();
-        let ctx = pass::PassContext::test_default();
 
-        match pm.run(&mut program, &ctx) {
+        match pm.run(&mut program, ctx) {
             Ok(result) if result.total_sites_applied > 0 => {
                 let parts: Vec<String> = result
                     .pass_results
@@ -161,7 +176,7 @@ fn enumerate_one(prog_id: u32) -> Result<()> {
     Ok(())
 }
 
-fn cmd_rewrite(prog_id: u32) -> Result<()> {
+fn cmd_rewrite(prog_id: u32, ctx: &pass::PassContext) -> Result<()> {
     let (info, orig_insns) = bpf::get_orig_insns_by_id(prog_id)?;
 
     if orig_insns.is_empty() {
@@ -189,9 +204,8 @@ fn cmd_rewrite(prog_id: u32) -> Result<()> {
     };
     let mut program = pass::BpfProgram::new(orig_insns.clone(), meta);
     let pm = passes::build_default_pipeline();
-    let ctx = pass::PassContext::test_default();
 
-    let pipeline_result = pm.run(&mut program, &ctx)?;
+    let pipeline_result = pm.run(&mut program, ctx)?;
 
     for pr in &pipeline_result.pass_results {
         if pr.sites_applied > 0 {
@@ -222,7 +236,7 @@ fn cmd_rewrite(prog_id: u32) -> Result<()> {
     Ok(())
 }
 
-fn cmd_apply(prog_id: u32) -> Result<()> {
+fn cmd_apply(prog_id: u32, ctx: &pass::PassContext) -> Result<()> {
     let fd = bpf::bpf_prog_get_fd_by_id(prog_id).context("open program")?;
     let (info, orig_insns) =
         bpf::bpf_prog_get_info(fd.as_raw_fd(), true).context("get program info")?;
@@ -233,7 +247,6 @@ fn cmd_apply(prog_id: u32) -> Result<()> {
     }
 
     let pm = passes::build_default_pipeline();
-    let ctx = pass::PassContext::test_default();
 
     let meta = pass::ProgMeta {
         prog_id: info.id,
@@ -245,7 +258,7 @@ fn cmd_apply(prog_id: u32) -> Result<()> {
     };
     let mut program = pass::BpfProgram::new(orig_insns.clone(), meta);
 
-    let pipeline_result = pm.run(&mut program, &ctx)?;
+    let pipeline_result = pm.run(&mut program, ctx)?;
 
     if !pipeline_result.program_changed {
         println!(
@@ -278,14 +291,14 @@ fn cmd_apply(prog_id: u32) -> Result<()> {
     Ok(())
 }
 
-fn cmd_apply_all() -> Result<()> {
+fn cmd_apply_all(ctx: &pass::PassContext) -> Result<()> {
     let mut total = 0u32;
     let mut applied = 0u32;
     let mut errors = 0u32;
 
     for prog_id in bpf::iter_prog_ids() {
         total += 1;
-        match try_apply_one(prog_id) {
+        match try_apply_one(prog_id, ctx) {
             Ok(true) => applied += 1,
             Ok(false) => {}
             Err(e) => {
@@ -351,7 +364,7 @@ fn cmd_profile(prog_id: u32, interval_ms: u64, samples: usize) -> Result<()> {
 }
 
 /// Try to apply rewrites to a single program via PassManager. Returns true if REJIT was called.
-fn try_apply_one(prog_id: u32) -> Result<bool> {
+fn try_apply_one(prog_id: u32, ctx: &pass::PassContext) -> Result<bool> {
     let fd = bpf::bpf_prog_get_fd_by_id(prog_id)?;
     let (info, orig_insns) = bpf::bpf_prog_get_info(fd.as_raw_fd(), true)?;
 
@@ -360,7 +373,6 @@ fn try_apply_one(prog_id: u32) -> Result<bool> {
     }
 
     let pm = passes::build_default_pipeline();
-    let ctx = pass::PassContext::test_default();
 
     let meta = pass::ProgMeta {
         prog_id: info.id,
@@ -372,7 +384,7 @@ fn try_apply_one(prog_id: u32) -> Result<bool> {
     };
     let mut program = pass::BpfProgram::new(orig_insns.clone(), meta);
 
-    let pipeline_result = pm.run(&mut program, &ctx)?;
+    let pipeline_result = pm.run(&mut program, ctx)?;
 
     if !pipeline_result.program_changed {
         return Ok(false);
@@ -392,7 +404,7 @@ fn try_apply_one(prog_id: u32) -> Result<bool> {
     Ok(true)
 }
 
-fn cmd_watch(interval_secs: u64, once: bool) -> Result<()> {
+fn cmd_watch(interval_secs: u64, once: bool, ctx: &pass::PassContext) -> Result<()> {
     // Register signal handlers for graceful shutdown.
     unsafe {
         libc::signal(libc::SIGTERM, handle_signal as libc::sighandler_t);
@@ -428,7 +440,7 @@ fn cmd_watch(interval_secs: u64, once: bool) -> Result<()> {
         let mut errors = 0u32;
         for prog_id in &new_ids {
             optimized.insert(*prog_id);
-            match try_apply_one(*prog_id) {
+            match try_apply_one(*prog_id, ctx) {
                 Ok(true) => applied += 1,
                 Ok(false) => {}
                 Err(e) => {
