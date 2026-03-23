@@ -720,7 +720,7 @@ make clean
 | **428** | **Kernel code review（2026-03-23）** | ✅ | 2 CRITICAL（tools/uapi 头不同步、无 fd_array_cnt 上限）+ 3 HIGH（find_call_site x86 硬编码、text_invalidate 被删、无 try_module_get）。正确性全 PASS。报告：`docs/tmp/20260323/kernel_code_review_20260323.md`。 |
 | **429** | **Packed ABI 验证（2026-03-23）** | ✅ | rotate ✅ packed（-2/site），extract ✅ packed（0/site）。**endian ❌ offset!=0 走 legacy（+4.99/site 膨胀）**。unit tests 不覆盖 packed。 |
 | **430** | 修复 endian packed offset + 删 legacy ABI | 待做 | endian packed 支持 offset、unit tests 走 packed、删除 daemon 全部 legacy emit 路径。 |
-| **431** | Kernel CRITICAL/HIGH 修复 | 待做 | tools/uapi 同步、fd_array_cnt 上限、find_call_site 跨平台、text_invalidate 恢复。 |
+| **431** | Kernel CRITICAL/HIGH 修复（2026-03-23） | ✅ | tools/uapi 头同步（`BPF_PSEUDO_KINSN_SIDECAR`、REJIT `flags`、`orig_prog_*`）、`fd_array_cnt` 上限=64、`find_call_site()` 改为 x86/ARM64 架构相关扫描、恢复 `bpf_arch_text_invalidate()`、`kinsn_ops` 在 verifier/JIT 期间显式持有 module 引用。验证：`make kernel`、`make vm-selftest`、`make vm-micro-smoke` 全通过。 |
 | **432** | E2E 真实应用模式 + katran 修复 | 🔄 | e2e 应用自己加载 BPF → 延迟 daemon apply-all。katran DSR timeout 调查。 |
 | **433** | LFENCE/BPF_NOSPEC 消除 | 待做 | 安全屏障消除。调研报告：`docs/tmp/20260323/comprehensive_optimization_survey_20260323.md`。 |
 | **434** | 全面优化调研（2026-03-23） | ✅ | codex 调研。报告：`docs/tmp/20260323/comprehensive_optimization_survey_20260323.md`、`map_inlining_opportunity_analysis_20260323.md`、`simd_constprop_opportunity_analysis_20260323.md`。 |
@@ -730,7 +730,7 @@ make clean
 | **438** | Endian packed ABI offset 支持 | 待做 | endian_fusion offset!=0 时走 legacy（+4.99/site 膨胀）。需支持 packed ABI 携带 offset。 |
 | **439** | 删除 daemon legacy ABI 代码 | 待做 | 确保所有 kinsn pass 走 packed ABI 后，删除 daemon 中全部 legacy emit 路径。 |
 | **440** | Unit tests 覆盖 packed ABI | 待做 | 当前 daemon unit tests 全走 legacy（KfuncRegistry 默认 empty encodings）。需改为 packed。 |
-| **441** | Kernel CRITICAL/HIGH 修复 | 待做 | tools/uapi 头同步、fd_array_cnt 上限、find_call_site 跨平台、text_invalidate 恢复。见 #428。 |
+| **441** | Kernel CRITICAL/HIGH 修复（2026-03-23） | ✅ | 同 #431：修复 tools/uapi 头不同步、REJIT `fd_array_cnt` 无上限、`find_call_site()` x86 硬编码、`text_invalidate` 删除、`kinsn_ops` owner 引用问题。验证：`make kernel`、`make vm-selftest`、`make vm-micro-smoke` 全通过。见 #428。 |
 | **442** | 冗余 bounds check 消除 | 待做 | BPF packet access 中冗余的 bounds check 消除。见 #434 调研。 |
 | **443** | Dead code elimination pass | 待做 | 结合 const prop / map inline 做 DCE。见 #434 调研。 |
 | **444** | Helper call 内联/优化 | 待做 | bpf_probe_read_kernel 小 size → 直接 load 等。见 #434 调研。 |

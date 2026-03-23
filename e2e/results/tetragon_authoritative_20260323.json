@@ -2,12 +2,12 @@
   "agent_logs": {
     "stderr_tail": [
       "level=info msg=\"Starting tetragon\" version=v1.6.0",
-      "level=info msg=\"config settings\" config=\"map[bpf-dir:tetragon bpf-lib:/usr/local/lib/tetragon/bpf/ btf: cgroup-rate: cluster-name: config-dir: cpuprofile: cri-endpoint: data-cache-size:1024 debug:false disable-kprobe-multi:false enable-ancestors:[] enable-cgidmap:false enable-cgidmap-debug:false enable-cgtrackerid:true enable-compatibility-syscall64-size-type:false enable-cri:false enable-export-aggregation:false enable-k8s-api:false enable-msg-handling-latency:false enable-pid-set-filter:false enable-pod-annotations:false enable-pod-info:false enable-policy-filter:false enable-policy-filter-cgroup-map:false enable-policy-filter-debug:false enable-process-cred:false enable-process-ns:false enable-tracing-policy-crd:true event-cache-retries:15 event-cache-retry-delay:2 event-queue-size:10000 execve-map-entries:0 execve-map-size: export-aggregation-buffer-size:10000 export-aggregation-window-size:15s export-allowlist: export-denylist: export-file-compress:true export-file-max-backups:5 export-file-max-size-mb:10 export-file-perm:600 export-file-rotation-interval:0s export-filename:/var/log/tetragon/tetragon.log export-rate-limit:-1 expose-stack-addresses:false field-filters: force-large-progs:false force-small-progs:false generate-docs:false gops-address: health-server-address::6789 health-server-interval:10 k8s-controlplane-retry:1 k8s-kubeconfig-path: keep-sensors-on-exit:false kernel: log-format:text log-level:info memprofile: metrics-label-filter:namespace,workload,pod,binary metrics-server: netns-dir:/var/run/docker/netns/ pprof-address: process-cache-gc-interval:30s process-cache-size:65536 procfs:/proc/ rb-queue-size:65535 rb-size:0 rb-size-total:0 redaction-filters: release-pinned-bpf:true server-address:unix:///var/run/tetragon/tetragon.sock tracing-policy: tracing-policy-dir:/tmp/tetragon-policy-5n084swp use-perf-ring-buffer:false username-metadata:disabled verbose:0]\"",
-      "level=info msg=\"Tetragon pid file creation succeeded\" pid=18289 pidfile=/var/run/tetragon/tetragon.pid",
+      "level=info msg=\"config settings\" config=\"map[bpf-dir:tetragon bpf-lib:/usr/local/lib/tetragon/bpf/ btf: cgroup-rate: cluster-name: config-dir: cpuprofile: cri-endpoint: data-cache-size:1024 debug:false disable-kprobe-multi:false enable-ancestors:[] enable-cgidmap:false enable-cgidmap-debug:false enable-cgtrackerid:true enable-compatibility-syscall64-size-type:false enable-cri:false enable-export-aggregation:false enable-k8s-api:false enable-msg-handling-latency:false enable-pid-set-filter:false enable-pod-annotations:false enable-pod-info:false enable-policy-filter:false enable-policy-filter-cgroup-map:false enable-policy-filter-debug:false enable-process-cred:false enable-process-ns:false enable-tracing-policy-crd:true event-cache-retries:15 event-cache-retry-delay:2 event-queue-size:10000 execve-map-entries:0 execve-map-size: export-aggregation-buffer-size:10000 export-aggregation-window-size:15s export-allowlist: export-denylist: export-file-compress:true export-file-max-backups:5 export-file-max-size-mb:10 export-file-perm:600 export-file-rotation-interval:0s export-filename:/var/log/tetragon/tetragon.log export-rate-limit:-1 expose-stack-addresses:false field-filters: force-large-progs:false force-small-progs:false generate-docs:false gops-address: health-server-address::6789 health-server-interval:10 k8s-controlplane-retry:1 k8s-kubeconfig-path: keep-sensors-on-exit:false kernel: log-format:text log-level:info memprofile: metrics-label-filter:namespace,workload,pod,binary metrics-server: netns-dir:/var/run/docker/netns/ pprof-address: process-cache-gc-interval:30s process-cache-size:65536 procfs:/proc/ rb-queue-size:65535 rb-size:0 rb-size-total:0 redaction-filters: release-pinned-bpf:true server-address:unix:///var/run/tetragon/tetragon.sock tracing-policy: tracing-policy-dir:/tmp/tetragon-policy-gw_li5aq use-perf-ring-buffer:false username-metadata:disabled verbose:0]\"",
+      "level=info msg=\"Tetragon pid file creation succeeded\" pid=29700 pidfile=/var/run/tetragon/tetragon.pid",
       "level=info msg=\"BPF: successfully released pinned BPF programs and maps\" bpf-dir=/sys/fs/bpf/tetragon",
       "level=info msg=\"BPF detected features: override_return: false, buildid: true, kprobe_multi: true, uprobe_multi true, fmodret: true, fmodret_syscall: false, signal: true, large: true, link_pin: true, lsm: true, missed_stats_kprobe_multi: true, missed_stats_kprobe: true, batch_update: true, uprobe_refctroff: true, audit_loginuid: false probe_write_user: true uprobe_regs_change: true\"",
       "level=warn msg=\"Deployment mode is unknown, advanced Cgroups tracking will be disabled\" confmap-update=tg_conf_map",
-      "level=info msg=\"Updated TetragonConf map successfully\" confmap-update=tg_conf_map deployment.mode=unknown log.level=0 cgroup.fs.magic=Cgroupv2 cgroup.hierarchyID=0 NSPID=18289",
+      "level=info msg=\"Updated TetragonConf map successfully\" confmap-update=tg_conf_map deployment.mode=unknown log.level=0 cgroup.fs.magic=Cgroupv2 cgroup.hierarchyID=0 NSPID=29700",
       "level=info msg=\"Disabling Kubernetes API\"",
       "level=info msg=\"Configured redaction filters\" redactionFilters=\"\"",
       "level=info msg=\"Configured field filters\" fieldFilters=[]",
@@ -18,46 +18,50 @@
       "level=error msg=\"Failed to execute tetragon\" error=\"policy handler 'tracing' failed loading policy 'bpf-benchmark-tetragon-e2e-kprobes': validation failed: error in spec.kprobes[2]: kprobe spec pre-validation failed: validation error: call \\\"security_socket_connect\\\": not found\""
     ],
     "stdout_tail": [
-      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/249/loginuid failed: open /proc/249/loginuid: no such file or directory\"",
-      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/249/ns/user' readlink /proc/249/ns/user: no such file or directory\"",
-      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/25/loginuid failed: open /proc/25/loginuid: no such file or directory\"",
-      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/25/ns/user' readlink /proc/25/ns/user: no such file or directory\"",
-      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/250/loginuid failed: open /proc/250/loginuid: no such file or directory\"",
-      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/250/ns/user' readlink /proc/250/ns/user: no such file or directory\"",
-      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/251/loginuid failed: open /proc/251/loginuid: no such file or directory\"",
-      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/251/ns/user' readlink /proc/251/ns/user: no such file or directory\"",
-      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/252/loginuid failed: open /proc/252/loginuid: no such file or directory\"",
-      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/252/ns/user' readlink /proc/252/ns/user: no such file or directory\"",
-      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/253/loginuid failed: open /proc/253/loginuid: no such file or directory\"",
-      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/253/ns/user' readlink /proc/253/ns/user: no such file or directory\"",
-      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/254/loginuid failed: open /proc/254/loginuid: no such file or directory\"",
-      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/254/ns/user' readlink /proc/254/ns/user: no such file or directory\"",
-      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/255/loginuid failed: open /proc/255/loginuid: no such file or directory\"",
-      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/255/ns/user' readlink /proc/255/ns/user: no such file or directory\"",
-      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/26/loginuid failed: open /proc/26/loginuid: no such file or directory\"",
-      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/26/ns/user' readlink /proc/26/ns/user: no such file or directory\"",
-      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/27/loginuid failed: open /proc/27/loginuid: no such file or directory\"",
-      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/27/ns/user' readlink /proc/27/ns/user: no such file or directory\"",
-      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/274/loginuid failed: open /proc/274/loginuid: no such file or directory\"",
-      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/274/ns/user' readlink /proc/274/ns/user: no such file or directory\"",
-      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/275/loginuid failed: open /proc/275/loginuid: no such file or directory\"",
-      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/275/ns/user' readlink /proc/275/ns/user: no such file or directory\"",
-      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/276/loginuid failed: open /proc/276/loginuid: no such file or directory\"",
-      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/276/ns/user' readlink /proc/276/ns/user: no such file or directory\"",
-      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/28/loginuid failed: open /proc/28/loginuid: no such file or directory\"",
-      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/28/ns/user' readlink /proc/28/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/282/ns/user' readlink /proc/282/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/286/loginuid failed: open /proc/286/loginuid: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/286/ns/user' readlink /proc/286/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/287/loginuid failed: open /proc/287/loginuid: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/287/ns/user' readlink /proc/287/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/288/loginuid failed: open /proc/288/loginuid: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/288/ns/user' readlink /proc/288/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/289/loginuid failed: open /proc/289/loginuid: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/289/ns/user' readlink /proc/289/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/29/loginuid failed: open /proc/29/loginuid: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/29/ns/user' readlink /proc/29/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/290/loginuid failed: open /proc/290/loginuid: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/290/ns/user' readlink /proc/290/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/291/loginuid failed: open /proc/291/loginuid: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/291/ns/user' readlink /proc/291/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/292/loginuid failed: open /proc/292/loginuid: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/292/ns/user' readlink /proc/292/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/293/loginuid failed: open /proc/293/loginuid: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/293/ns/user' readlink /proc/293/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/294/loginuid failed: open /proc/294/loginuid: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/294/ns/user' readlink /proc/294/ns/user: no such file or directory\"",
       "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/295/loginuid failed: open /proc/295/loginuid: no such file or directory\"",
       "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/295/ns/user' readlink /proc/295/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/29678/loginuid failed: open /proc/29678/loginuid: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/29678/ns/user' readlink /proc/29678/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/29680/loginuid failed: open /proc/29680/loginuid: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/29680/ns/user' readlink /proc/29680/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/29700/loginuid failed: open /proc/29700/loginuid: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/29700/ns/user' readlink /proc/29700/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/29713/loginuid failed: open /proc/29713/loginuid: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/29713/ns/user' readlink /proc/29713/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/29717/loginuid failed: open /proc/29717/loginuid: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/29717/ns/user' readlink /proc/29717/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/29723/loginuid failed: open /proc/29723/loginuid: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/29723/ns/user' readlink /proc/29723/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/29724/loginuid failed: open /proc/29724/loginuid: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/29724/ns/user' readlink /proc/29724/ns/user: no such file or directory\"",
+      "level=warn msg=\"reading process exe error\" process=205 error=\"readlink /proc/205/exe: no such file or directory\"",
       "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/3/loginuid failed: open /proc/3/loginuid: no such file or directory\"",
       "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/3/ns/user' readlink /proc/3/ns/user: no such file or directory\"",
       "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/30/loginuid failed: open /proc/30/loginuid: no such file or directory\"",
       "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/30/ns/user' readlink /proc/30/ns/user: no such file or directory\"",
-      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/305/loginuid failed: open /proc/305/loginuid: no such file or directory\"",
-      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/305/ns/user' readlink /proc/305/ns/user: no such file or directory\"",
       "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/31/loginuid failed: open /proc/31/loginuid: no such file or directory\"",
       "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/31/ns/user' readlink /proc/31/ns/user: no such file or directory\"",
-      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/311/loginuid failed: open /proc/311/loginuid: no such file or directory\"",
-      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/311/ns/user' readlink /proc/311/ns/user: no such file or directory\"",
       "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/32/loginuid failed: open /proc/32/loginuid: no such file or directory\"",
       "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/32/ns/user' readlink /proc/32/ns/user: no such file or directory\"",
       "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/33/loginuid failed: open /proc/33/loginuid: no such file or directory\"",
@@ -70,12 +74,12 @@
       "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/36/ns/user' readlink /proc/36/ns/user: no such file or directory\"",
       "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/37/loginuid failed: open /proc/37/loginuid: no such file or directory\"",
       "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/37/ns/user' readlink /proc/37/ns/user: no such file or directory\"",
-      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/376/loginuid failed: open /proc/376/loginuid: no such file or directory\"",
-      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/376/ns/user' readlink /proc/376/ns/user: no such file or directory\"",
-      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/377/loginuid failed: open /proc/377/loginuid: no such file or directory\"",
-      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/377/ns/user' readlink /proc/377/ns/user: no such file or directory\"",
       "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/38/loginuid failed: open /proc/38/loginuid: no such file or directory\"",
       "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/38/ns/user' readlink /proc/38/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/383/loginuid failed: open /proc/383/loginuid: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/383/ns/user' readlink /proc/383/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/386/loginuid failed: open /proc/386/loginuid: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/386/ns/user' readlink /proc/386/ns/user: no such file or directory\"",
       "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/39/loginuid failed: open /proc/39/loginuid: no such file or directory\"",
       "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/39/ns/user' readlink /proc/39/ns/user: no such file or directory\"",
       "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/4/loginuid failed: open /proc/4/loginuid: no such file or directory\"",
@@ -84,8 +88,8 @@
       "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/40/ns/user' readlink /proc/40/ns/user: no such file or directory\"",
       "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/41/loginuid failed: open /proc/41/loginuid: no such file or directory\"",
       "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/41/ns/user' readlink /proc/41/ns/user: no such file or directory\"",
-      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/410/loginuid failed: open /proc/410/loginuid: no such file or directory\"",
-      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/410/ns/user' readlink /proc/410/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/418/loginuid failed: open /proc/418/loginuid: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/418/ns/user' readlink /proc/418/ns/user: no such file or directory\"",
       "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/42/loginuid failed: open /proc/42/loginuid: no such file or directory\"",
       "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/42/ns/user' readlink /proc/42/ns/user: no such file or directory\"",
       "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/43/loginuid failed: open /proc/43/loginuid: no such file or directory\"",
@@ -144,8 +148,6 @@
       "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/67/ns/user' readlink /proc/67/ns/user: no such file or directory\"",
       "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/68/loginuid failed: open /proc/68/loginuid: no such file or directory\"",
       "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/68/ns/user' readlink /proc/68/ns/user: no such file or directory\"",
-      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/69/loginuid failed: open /proc/69/loginuid: no such file or directory\"",
-      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/69/ns/user' readlink /proc/69/ns/user: no such file or directory\"",
       "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/7/loginuid failed: open /proc/7/loginuid: no such file or directory\"",
       "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/7/ns/user' readlink /proc/7/ns/user: no such file or directory\"",
       "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/70/loginuid failed: open /proc/70/loginuid: no such file or directory\"",
@@ -190,8 +192,8 @@
       "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/88/ns/user' readlink /proc/88/ns/user: no such file or directory\"",
       "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/89/loginuid failed: open /proc/89/loginuid: no such file or directory\"",
       "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/89/ns/user' readlink /proc/89/ns/user: no such file or directory\"",
-      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/9/loginuid failed: open /proc/9/loginuid: no such file or directory\"",
-      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/9/ns/user' readlink /proc/9/ns/user: no such file or directory\"",
+      "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/90/loginuid failed: open /proc/90/loginuid: no such file or directory\"",
+      "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/90/ns/user' readlink /proc/90/ns/user: no such file or directory\"",
       "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/91/loginuid failed: open /proc/91/loginuid: no such file or directory\"",
       "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/91/ns/user' readlink /proc/91/ns/user: no such file or directory\"",
       "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/92/loginuid failed: open /proc/92/loginuid: no such file or directory\"",
@@ -210,9 +212,7 @@
       "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/98/ns/user' readlink /proc/98/ns/user: no such file or directory\"",
       "level=warn msg=\"Reading process status error\" error=\"ReadFile /proc/99/loginuid failed: open /proc/99/loginuid: no such file or directory\"",
       "level=warn msg=\"Reading user namespace failed\" error=\"namespace '/proc/99/ns/user' readlink /proc/99/ns/user: no such file or directory\"",
-      "level=info msg=\"Read ProcFS /proc/ appended 244/301 entries\"",
-      "level=warn msg=\"Procfs execve event pods/ identifier error\" error=\"open /proc/18309/cgroup: no such file or directory\"",
-      "level=warn msg=\"Procfs execve event pods/ identifier error\" error=\"open /proc/18308/cgroup: no such file or directory\"",
+      "level=info msg=\"Read ProcFS /proc/ appended 242/299 entries\"",
       "level=info msg=\"Cgroup rate disabled (0/0s)\"",
       "level=info msg=\"Unloading sensor __base__\"",
       "level=info msg=\"Sensor unloaded\" sensor=__base__ maps-error=[]",
@@ -224,17 +224,17 @@
     "summary": {
       "agent_cpu_total_pct": {
         "count": 4,
-        "max": 0.06666611884005723,
-        "mean": 0.016666529710014307,
+        "max": 0.033333045013604956,
+        "mean": 0.008333261253401239,
         "median": 0.0,
         "min": 0.0
       },
       "app_throughput": {
         "count": 4,
-        "max": 1567175.1500199665,
-        "mean": 628856.9349163972,
-        "median": 469962.85566842934,
-        "min": 8326.878308763798
+        "max": 1526503.4770933718,
+        "mean": 674900.7014927142,
+        "median": 576854.1975322898,
+        "min": 19390.933812905336
       },
       "bpf_avg_ns_per_run": {
         "count": 0,
@@ -252,20 +252,20 @@
       },
       "system_cpu_busy_pct": {
         "count": 4,
-        "max": 4.1666666666666625,
-        "mean": 2.2408842369205315,
-        "median": 2.395657285567315,
-        "min": 0.005555709880833426
+        "max": 4.169328629760283,
+        "mean": 2.4493163161660254,
+        "median": 2.812579409272631,
+        "min": 0.002777816358556784
       }
     },
     "workloads": [
       {
         "agent_cpu": {
-          "sys_pct": 0.06666611884005723,
-          "total_pct": 0.06666611884005723,
+          "sys_pct": 0.033333045013604956,
+          "total_pct": 0.033333045013604956,
           "user_pct": 0.0
         },
-        "app_throughput": 387915.31156575726,
+        "app_throughput": 638443.241163636,
         "bpf": {
           "programs": {
             "168": {
@@ -275,7 +275,7 @@
               "id": 168,
               "name": "event_exit_acct",
               "run_cnt_delta": -6,
-              "run_time_ns_delta": -3604,
+              "run_time_ns_delta": -11587,
               "type": "kprobe"
             },
             "170": {
@@ -284,38 +284,38 @@
               "bytes_xlated": 11312,
               "id": 170,
               "name": "event_wake_up_n",
-              "run_cnt_delta": -10,
-              "run_time_ns_delta": -24844,
+              "run_cnt_delta": -9,
+              "run_time_ns_delta": -24255,
               "type": "kprobe"
             },
             "171": {
               "avg_ns_per_run": null,
-              "bytes_jited": 1393,
-              "bytes_xlated": 2352,
+              "bytes_jited": 5016,
+              "bytes_xlated": 8064,
               "id": 171,
-              "name": "execve_rate",
+              "name": "execve_send",
               "run_cnt_delta": 0,
               "run_time_ns_delta": 0,
               "type": "tracepoint"
             },
             "172": {
               "avg_ns_per_run": null,
-              "bytes_jited": 5016,
-              "bytes_xlated": 8064,
+              "bytes_jited": 11259,
+              "bytes_xlated": 20184,
               "id": 172,
-              "name": "execve_send",
-              "run_cnt_delta": 0,
-              "run_time_ns_delta": 0,
+              "name": "event_execve",
+              "run_cnt_delta": -7,
+              "run_time_ns_delta": -42828,
               "type": "tracepoint"
             },
             "173": {
               "avg_ns_per_run": null,
-              "bytes_jited": 11259,
-              "bytes_xlated": 20184,
+              "bytes_jited": 1393,
+              "bytes_xlated": 2352,
               "id": 173,
-              "name": "event_execve",
-              "run_cnt_delta": -7,
-              "run_time_ns_delta": -34580,
+              "name": "execve_rate",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
               "type": "tracepoint"
             },
             "174": {
@@ -324,8 +324,8 @@
               "bytes_xlated": 2560,
               "id": 174,
               "name": "tg_kp_bprm_comm",
-              "run_cnt_delta": -6,
-              "run_time_ns_delta": -4497,
+              "run_cnt_delta": -7,
+              "run_time_ns_delta": -6072,
               "type": "kprobe"
             },
             "175": {
@@ -347,18 +347,18 @@
           }
         },
         "description": "stress-ng execve workload",
-        "duration_s": 0.04722680300000093,
+        "duration_s": 0.04657265999998117,
         "events_per_sec": 0.0,
         "events_total": 0,
         "kind": "exec_storm",
         "metric": "bogo-ops/s",
         "name": "stress_exec",
-        "ops_per_sec": 387915.31156575726,
-        "ops_total": 18320.0,
+        "ops_per_sec": 638443.241163636,
+        "ops_total": 29734.0,
         "stderr_tail": "",
-        "stdout_tail": "stress-ng: info:  [18320] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [18320] setting to a 30 secs run per stressor\nstress-ng: info:  [18320] dispatching hogs:\nstress-ng: metrc: [18320] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [18320]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: warn:  [18320] metrics-check: all bogo-op counters are zero, data may be incorrect\nstress-ng: info:  [18320] skipped: 2: exec (2)\nstress-ng: info:  [18320] passed: 0\nstress-ng: info:  [18320] failed: 0\nstress-ng: info:  [18320] metrics untrustworthy: 0\nstress-ng: info:  [18320] successful run completed in 0.00 secs",
+        "stdout_tail": "stress-ng: info:  [29734] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [29734] setting to a 30 secs run per stressor\nstress-ng: info:  [29734] dispatching hogs:\nstress-ng: metrc: [29734] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [29734]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: warn:  [29734] metrics-check: all bogo-op counters are zero, data may be incorrect\nstress-ng: info:  [29734] skipped: 2: exec (2)\nstress-ng: info:  [29734] passed: 0\nstress-ng: info:  [29734] failed: 0\nstress-ng: info:  [29734] metrics untrustworthy: 0\nstress-ng: info:  [29734] successful run completed in 0.00 secs",
         "system_cpu": {
-          "busy_pct": 0.005555709880833426
+          "busy_pct": 0.002777816358556784
         }
       },
       {
@@ -367,7 +367,7 @@
           "total_pct": 0.0,
           "user_pct": 0.0
         },
-        "app_throughput": 1567175.1500199665,
+        "app_throughput": 1526503.4770933718,
         "bpf": {
           "programs": {},
           "summary": {
@@ -378,18 +378,18 @@
           }
         },
         "description": "fio or dd file workload",
-        "duration_s": 30.283136507999984,
+        "duration_s": 30.285124596000003,
         "events_per_sec": 0.0,
         "events_total": 0,
         "kind": "file_io",
         "metric": "ops/s",
         "name": "file_io",
-        "ops_per_sec": 1567175.1500199665,
-        "ops_total": 47458979.0,
+        "ops_per_sec": 1526503.4770933718,
+        "ops_total": 46230348.0,
         "stderr_tail": "",
-        "stdout_tail": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.010000,\n        \"500\" : 81.671243,\n        \"750\" : 18.079403,\n        \"1000\" : 0.142675\n      },\n      \"latency_us\" : {\n        \"2\" : 0.010152,\n        \"4\" : 0.067066,\n        \"10\" : 0.028094,\n        \"20\" : 0.010000,\n        \"50\" : 0.010000,\n        \"100\" : 0.010000,\n        \"250\" : 0.010000,\n        \"500\" : 0.000000,\n        \"750\" : 0.010000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}",
+        "stdout_tail": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.010000,\n        \"500\" : 78.851141,\n        \"750\" : 20.838638,\n        \"1000\" : 0.198616\n      },\n      \"latency_us\" : {\n        \"2\" : 0.012016,\n        \"4\" : 0.080265,\n        \"10\" : 0.018574,\n        \"20\" : 0.010000,\n        \"50\" : 0.010000,\n        \"100\" : 0.000000,\n        \"250\" : 0.010000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}",
         "system_cpu": {
-          "busy_pct": 4.154743714404773
+          "busy_pct": 4.154570583251149
         }
       },
       {
@@ -398,7 +398,7 @@
           "total_pct": 0.0,
           "user_pct": 0.0
         },
-        "app_throughput": 552010.3997711014,
+        "app_throughput": 515265.1539009436,
         "bpf": {
           "programs": {},
           "summary": {
@@ -409,18 +409,18 @@
           }
         },
         "description": "stress-ng open workload",
-        "duration_s": 30.00000182399998,
+        "duration_s": 30.000002684000037,
         "events_per_sec": 0.0,
         "events_total": 0,
         "kind": "open_storm",
         "metric": "bogo-ops/s",
         "name": "open_storm",
-        "ops_per_sec": 552010.3997711014,
-        "ops_total": 16560313.0,
+        "ops_per_sec": 515265.1539009436,
+        "ops_total": 15457956.0,
         "stderr_tail": "",
         "stdout_tail": "",
         "system_cpu": {
-          "busy_pct": 4.1666666666666625
+          "busy_pct": 4.169328629760283
         }
       },
       {
@@ -429,7 +429,7 @@
           "total_pct": 0.0,
           "user_pct": 0.0
         },
-        "app_throughput": 8326.878308763798,
+        "app_throughput": 19390.933812905336,
         "bpf": {
           "programs": {},
           "summary": {
@@ -440,18 +440,18 @@
           }
         },
         "description": "rapid loopback TCP connect storm",
-        "duration_s": 30.516718339999954,
+        "duration_s": 30.00030868099998,
         "events_per_sec": 0.0,
         "events_total": 0,
         "kind": "connect_storm",
         "metric": "ops/s",
         "name": "connect_storm",
-        "ops_per_sec": 8326.878308763798,
-        "ops_total": 254109.0,
-        "stderr_tail": "transient_connect_failures=26",
+        "ops_per_sec": 19390.933812905336,
+        "ops_total": 581734.0,
+        "stderr_tail": "transient_connect_failures=22",
         "stdout_tail": "",
         "system_cpu": {
-          "busy_pct": 0.6365708567298567
+          "busy_pct": 1.4705882352941124
         }
       }
     ]
@@ -461,7 +461,7 @@
     "reason": "recompile did not apply successfully"
   },
   "duration_s": 30,
-  "generated_at": "2026-03-23T08:42:37.476013+00:00",
+  "generated_at": "2026-03-23T11:04:41.088144+00:00",
   "host": {
     "git_sha": "unknown",
     "hostname": "virtme-ng",
@@ -473,10 +473,10 @@
     "events_total and events_per_sec are derived from aggregate BPF run_cnt deltas, so a single application operation can increment multiple program counters."
   ],
   "mode": "tetragon_daemon",
-  "policy_dir": "/tmp/tetragon-policy-5n084swp",
+  "policy_dir": "/tmp/tetragon-policy-gw_li5aq",
   "policy_paths": [
-    "/tmp/tetragon-policy-5n084swp/tetragon-e2e-tracepoint.yaml",
-    "/tmp/tetragon-policy-5n084swp/tetragon-e2e-kprobes.yaml"
+    "/tmp/tetragon-policy-gw_li5aq/tetragon-e2e-tracepoint.yaml",
+    "/tmp/tetragon-policy-gw_li5aq/tetragon-e2e-kprobes.yaml"
   ],
   "post_rejit": null,
   "programs": [
@@ -499,22 +499,11 @@
       "sites": 0,
       "speedup": null,
       "stock_avg_ns": null,
-      "stock_events": -10,
+      "stock_events": -9,
       "type": "kprobe"
     },
     {
       "id": 171,
-      "name": "execve_rate",
-      "rejit_avg_ns": null,
-      "rejit_events": null,
-      "sites": 0,
-      "speedup": null,
-      "stock_avg_ns": null,
-      "stock_events": 0,
-      "type": "tracepoint"
-    },
-    {
-      "id": 172,
       "name": "execve_send",
       "rejit_avg_ns": null,
       "rejit_events": null,
@@ -525,7 +514,7 @@
       "type": "tracepoint"
     },
     {
-      "id": 173,
+      "id": 172,
       "name": "event_execve",
       "rejit_avg_ns": null,
       "rejit_events": null,
@@ -536,6 +525,17 @@
       "type": "tracepoint"
     },
     {
+      "id": 173,
+      "name": "execve_rate",
+      "rejit_avg_ns": null,
+      "rejit_events": null,
+      "sites": 0,
+      "speedup": null,
+      "stock_avg_ns": null,
+      "stock_events": 0,
+      "type": "tracepoint"
+    },
+    {
       "id": 174,
       "name": "tg_kp_bprm_comm",
       "rejit_avg_ns": null,
@@ -543,7 +543,7 @@
       "sites": 0,
       "speedup": null,
       "stock_avg_ns": null,
-      "stock_events": -6,
+      "stock_events": -7,
       "type": "kprobe"
     },
     {
@@ -576,7 +576,7 @@
   "tetragon_launch_command": [
     "/usr/local/bin/tetragon",
     "--tracing-policy-dir",
-    "/tmp/tetragon-policy-5n084swp"
+    "/tmp/tetragon-policy-gw_li5aq"
   ],
   "tetragon_programs": [
     {
@@ -587,10 +587,10 @@
       "gpl_compatible": true,
       "id": 168,
       "jited": true,
-      "loaded_at": 1774255235,
+      "loaded_at": 1774263759,
       "map_ids": [
         395,
-        429,
+        438,
         394,
         401,
         402,
@@ -602,11 +602,11 @@
       "pids": [
         {
           "comm": "tetragon",
-          "pid": 18289
+          "pid": 29700
         }
       ],
       "run_cnt": 5,
-      "run_time_ns": 2800,
+      "run_time_ns": 8179,
       "tag": "c9e3afd0c0e59bd4",
       "type": "kprobe",
       "uid": 0
@@ -619,16 +619,16 @@
       "gpl_compatible": true,
       "id": 170,
       "jited": true,
-      "loaded_at": 1774255235,
+      "loaded_at": 1774263759,
       "map_ids": [
         395,
-        457,
+        471,
         397,
         394,
-        468,
-        470,
-        452,
-        475,
+        478,
+        456,
+        465,
+        485,
         401,
         402,
         406
@@ -638,53 +638,27 @@
       "pids": [
         {
           "comm": "tetragon",
-          "pid": 18289
+          "pid": 29700
         }
       ],
-      "run_cnt": 9,
-      "run_time_ns": 11251,
+      "run_cnt": 8,
+      "run_time_ns": 16180,
       "tag": "5378eb1bbecc0871",
       "type": "kprobe",
       "uid": 0
     },
     {
       "btf_id": 341,
-      "bytes_jited": 1393,
-      "bytes_memlock": 4096,
-      "bytes_xlated": 2352,
-      "gpl_compatible": true,
-      "id": 171,
-      "jited": true,
-      "loaded_at": 1774255235,
-      "map_ids": [
-        497,
-        524,
-        504,
-        525,
-        394,
-        401,
-        402,
-        406,
-        399
-      ],
-      "name": "execve_rate",
-      "orphaned": false,
-      "tag": "ced0e930cd488737",
-      "type": "tracepoint",
-      "uid": 0
-    },
-    {
-      "btf_id": 342,
       "bytes_jited": 5016,
       "bytes_memlock": 8192,
       "bytes_xlated": 8064,
       "gpl_compatible": true,
-      "id": 172,
+      "id": 171,
       "jited": true,
-      "loaded_at": 1774255235,
+      "loaded_at": 1774263759,
       "map_ids": [
+        511,
         497,
-        539,
         405,
         395,
         403,
@@ -700,28 +674,28 @@
       "uid": 0
     },
     {
-      "btf_id": 343,
+      "btf_id": 342,
       "bytes_jited": 11259,
       "bytes_memlock": 20480,
       "bytes_xlated": 20184,
       "gpl_compatible": true,
-      "id": 173,
+      "id": 172,
       "jited": true,
-      "loaded_at": 1774255235,
+      "loaded_at": 1774263759,
       "map_ids": [
-        497,
+        511,
         395,
         404,
         403,
         396,
         398,
         405,
-        514,
-        539,
+        498,
+        497,
         394,
-        538,
+        506,
         399,
-        528,
+        526,
         402,
         401,
         406
@@ -731,12 +705,38 @@
       "pids": [
         {
           "comm": "tetragon",
-          "pid": 18289
+          "pid": 29700
         }
       ],
       "run_cnt": 6,
-      "run_time_ns": 29820,
+      "run_time_ns": 37035,
       "tag": "cab9fcb0d6a8b89d",
+      "type": "tracepoint",
+      "uid": 0
+    },
+    {
+      "btf_id": 343,
+      "bytes_jited": 1393,
+      "bytes_memlock": 4096,
+      "bytes_xlated": 2352,
+      "gpl_compatible": true,
+      "id": 173,
+      "jited": true,
+      "loaded_at": 1774263759,
+      "map_ids": [
+        511,
+        499,
+        496,
+        507,
+        394,
+        401,
+        402,
+        406,
+        399
+      ],
+      "name": "execve_rate",
+      "orphaned": false,
+      "tag": "ced0e930cd488737",
       "type": "tracepoint",
       "uid": 0
     },
@@ -748,10 +748,10 @@
       "gpl_compatible": true,
       "id": 174,
       "jited": true,
-      "loaded_at": 1774255235,
+      "loaded_at": 1774263759,
       "map_ids": [
         395,
-        560,
+        557,
         396,
         398
       ],
@@ -760,11 +760,11 @@
       "pids": [
         {
           "comm": "tetragon",
-          "pid": 18289
+          "pid": 29700
         }
       ],
-      "run_cnt": 5,
-      "run_time_ns": 3403,
+      "run_cnt": 6,
+      "run_time_ns": 4721,
       "tag": "7fdc40def4ba18bb",
       "type": "kprobe",
       "uid": 0
@@ -777,7 +777,7 @@
       "gpl_compatible": true,
       "id": 175,
       "jited": true,
-      "loaded_at": 1774255235,
+      "loaded_at": 1774263759,
       "map_ids": [
         400,
         395
@@ -787,7 +787,7 @@
       "pids": [
         {
           "comm": "tetragon",
-          "pid": 18289
+          "pid": 29700
         }
       ],
       "tag": "0f8b2937e50fde70",

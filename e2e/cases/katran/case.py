@@ -1219,6 +1219,41 @@ class KatranDsrTopology:
         self.close()
 
 
+NAMESPACE_HTTP_SERVER_SCRIPT = """
+import http.server
+import socketserver
+import sys
+
+
+class Handler(http.server.BaseHTTPRequestHandler):
+    protocol_version = "HTTP/1.0"
+
+    def do_GET(self):
+        body = b"katran-ok\\n"
+        self.send_response(200)
+        self.send_header("Content-Type", "text/plain; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Connection", "close")
+        self.end_headers()
+        self.wfile.write(body)
+        self.wfile.flush()
+        self.close_connection = True
+
+    def log_message(self, fmt, *args):
+        pass
+
+
+class Server(socketserver.ThreadingMixIn, http.server.HTTPServer):
+    daemon_threads = True
+    allow_reuse_address = True
+    request_queue_size = 128
+
+
+server = Server((sys.argv[1], int(sys.argv[2])), Handler)
+server.serve_forever()
+"""
+
+
 class NamespaceHttpServer:
     def __init__(self, namespace: str, bind_ip: str, port: int) -> None:
         self.namespace = namespace
@@ -1237,11 +1272,10 @@ class NamespaceHttpServer:
                 self.namespace,
                 "python3",
                 "-u",
-                "-m",
-                "http.server",
-                str(self.port),
-                "--bind",
+                "-c",
+                NAMESPACE_HTTP_SERVER_SCRIPT,
                 self.bind_ip,
+                str(self.port),
             ],
             cwd=ROOT_DIR,
             stdout=subprocess.PIPE,
