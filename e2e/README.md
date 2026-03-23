@@ -17,13 +17,13 @@ Active checked-in cases are `tracee`, `tetragon`, `bpftrace`, `scx`, and `katran
 ```bash
 source /home/yunwei37/workspace/.venv/bin/activate
 make micro
-make scanner
+make daemon
 python3 corpus/build_expanded_corpus.py --repo tracee --repo tetragon --repo scx --repo katran
 ```
 
 - Most cases require root or passwordless `sudo -n`.
 - `tracee`, `tetragon`, `scx`, and `katran` consume objects from `corpus/build/`.
-- `e2e` expects the standalone scanner CLI at `scanner/build/bpf-jit-scanner`; `make micro` does not produce that path.
+- `e2e` expects the daemon CLI at `daemon/target/release/bpfrejit-daemon`; `make daemon` builds it.
 
 ## Case Notes
 
@@ -48,13 +48,13 @@ python3 corpus/build_expanded_corpus.py --repo tracee --repo tetragon --repo scx
 
 - No separate setup script; the case requires `bpftrace >= 0.16`, `bpftool`, and workload tools already in `PATH`
 - Scripts live under `e2e/cases/bpftrace/scripts/`
-- The case auto-builds `micro_exec` and the scanner CLI if they are missing
+- The case auto-builds `micro_exec` and the daemon CLI if they are missing
 - `--vm` is not supported in `e2e/run.py`
 - Smoke example: `python3 e2e/run.py bpftrace --smoke`
 
 ### scx
 
-- No setup script; the case auto-builds `scanner/build/bpf-jit-scanner` and `corpus/repos/scx/target/release/scx_rusty` if needed
+- No setup script; the case auto-builds `daemon/target/release/bpfrejit-daemon` and `corpus/repos/scx/target/release/scx_rusty` if needed
 - Uses `corpus/build/scx/scx_rusty_main.bpf.o`
 - Requires at least one workload generator in `PATH`: `hackbench`, `stress-ng`, or `sysbench`
 - Supports `--vm` and requires `--kernel` when enabled

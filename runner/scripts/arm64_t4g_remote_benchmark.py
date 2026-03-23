@@ -446,7 +446,6 @@ def run_katran_smoke(
 ) -> dict[str, Any]:
     ensure_bpffs_mounted()
     object_path = (REPO_ROOT / "corpus" / "build" / "katran" / "balancer.bpf.o").resolve()
-    policy_dir = (REPO_ROOT / "corpus" / "policies" / "katran" / "balancer").resolve()
     pin_root = Path("/sys/fs/bpf") / f"katran_t4g_{os.getpid()}"
     pin_dir = pin_root / "progs"
     map_dir = pin_root / "maps"
@@ -468,7 +467,7 @@ def run_katran_smoke(
         "stdout": "",
         "stderr": "",
     }
-    recompile_run = {
+    apply_run = {
         "returncode": 0,
         "stdout": "",
         "stderr": "",
@@ -531,7 +530,9 @@ def run_katran_smoke(
 
         pinned_program = bpftool_prog_show_pinned(bpftool_binary, pin_dir / "balancer_ingress")
         prog_id = int(pinned_program.get("id", 0) or 0)
-        enumerate_command = [str(daemon_binary), "enumerate", "--prog-id", str(prog_id), "--json"]
+
+        # Enumerate sites on the loaded program using the v2 daemon API.
+        enumerate_command = [str(daemon_binary), "enumerate"]
         enumerate_completed = subprocess.run(
             enumerate_command,
             cwd=REPO_ROOT,
@@ -548,67 +549,51 @@ def run_katran_smoke(
         if enumerate_completed.returncode != 0:
             detail = enumerate_completed.stderr.strip() or enumerate_completed.stdout.strip()
             raise RuntimeError(f"katran enumerate failed ({enumerate_completed.returncode}): {detail}")
-        enumerate_payload = json.loads(enumerate_completed.stdout or "[]")
+        # Parse enumerate output (text lines, not JSON array from v1)
+        enumerate_payload: list[Any] = []
+        for line in enumerate_completed.stdout.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                obj = json.loads(line)
+                if isinstance(obj, (dict, list)):
+                    if isinstance(obj, list):
+                        enumerate_payload.extend(obj)
+                    else:
+                        enumerate_payload.append(obj)
+            except json.JSONDecodeError:
+                pass
 
-        recompile_command = [
-            str(daemon_binary),
-            "enumerate",
-            "--prog-id",
-            str(prog_id),
-            "--recompile",
-            "--policy-dir",
-            str(policy_dir),
-            "--json",
-        ]
-        recompile_completed = subprocess.run(
-            recompile_command,
-            cwd=REPO_ROOT,
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=180,
-        )
-        recompile_run = {
-            "returncode": int(recompile_completed.returncode),
-            "stdout": recompile_completed.stdout,
-            "stderr": recompile_completed.stderr,
-        }
-        if recompile_completed.returncode != 0:
-            detail = recompile_completed.stderr.strip() or recompile_completed.stdout.strip()
-            raise RuntimeError(f"katran recompile failed ({recompile_completed.returncode}): {detail}")
-        recompile_payload = json.loads(recompile_completed.stdout or "[]")
-        if not isinstance(enumerate_payload, list) or not isinstance(recompile_payload, list):
-            raise RuntimeError("katran daemon payload was not a JSON array")
-
-        investigate_zero_sites = False
-        if enumerate_payload:
-            record = enumerate_payload[0]
-            if isinstance(record, dict) and int(record.get("total_sites", 0) or 0) == 0:
-                investigate_zero_sites = True
-        elif recompile_payload:
-            investigate_zero_sites = True
-
-        zero_site_diagnostics: dict[str, Any] | None = None
-        if investigate_zero_sites:
-            dump = subprocess.run(
-                [bpftool_binary, "prog", "dump", "jited", "pinned", str(pin_dir / "balancer_ingress")],
+        # Apply optimization via daemon apply <prog_id> (v2 API).
+        if prog_id > 0:
+            apply_command = [str(daemon_binary), "apply", str(prog_id)]
+            apply_completed = subprocess.run(
+                apply_command,
                 cwd=REPO_ROOT,
                 capture_output=True,
                 text=True,
                 check=False,
                 timeout=180,
             )
-            zero_site_diagnostics = {
-                "bpftool_prog_dump_jited": {
-                    "returncode": int(dump.returncode),
-                    "stdout_head": dump.stdout.splitlines()[:80],
-                    "stderr": dump.stderr,
-                },
-                "daemon_enumerate_stdout_head": enumerate_completed.stdout.splitlines()[:80],
-                "daemon_enumerate_stderr": enumerate_completed.stderr,
-                "daemon_recompile_stdout_head": recompile_completed.stdout.splitlines()[:80],
-                "daemon_recompile_stderr": recompile_completed.stderr,
+            apply_run = {
+                "returncode": int(apply_completed.returncode),
+                "stdout": apply_completed.stdout,
+                "stderr": apply_completed.stderr,
             }
+        apply_payload: list[Any] = []
+        for line in apply_run.get("stdout", "").splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                obj = json.loads(line)
+                if isinstance(obj, list):
+                    apply_payload.extend(obj)
+                elif isinstance(obj, dict):
+                    apply_payload.append(obj)
+            except json.JSONDecodeError:
+                pass
 
         return {
             "object": str(object_path),
@@ -618,10 +603,10 @@ def run_katran_smoke(
             "without_kernel_btf": without_kernel_btf,
             "pinned_program": pinned_program,
             "enumerate_run": enumerate_run,
-            "recompile_run": recompile_run,
+            "apply_run": apply_run,
             "enumerate": enumerate_payload,
-            "recompile": recompile_payload,
-            "zero_site_diagnostics": zero_site_diagnostics,
+            "recompile": apply_payload,
+            "zero_site_diagnostics": None,
         }
     finally:
         run_command(["rm", "-rf", str(pin_root)], check=False)

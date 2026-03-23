@@ -37,6 +37,12 @@ use super::utils::fixup_all_branches as fixup_branches_inline;
 pub struct BranchFlipPass {
     /// Minimum taken rate to trigger a PGO-guided flip.
     pub min_bias: f64,
+    /// Maximum branch miss rate (from PMU) to allow branch flipping.
+    /// If the program's branch miss rate exceeds this threshold, branches are
+    /// considered unpredictable and flipping is skipped to avoid CMOV-like
+    /// regression on misprediction-heavy workloads.
+    /// Default: 0.05 (5%).
+    pub max_branch_miss_rate: f64,
 }
 
 /// A detected branch-flip site.
@@ -75,6 +81,41 @@ impl BpfPass for BranchFlipPass {
         analyses: &mut AnalysisCache,
         _ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
+        // Phase 0: check program-level branch miss rate from PMU.
+        // If branch miss rate is above threshold, branches are unpredictable
+        // and reordering could regress performance (similar to CMOV on
+        // unpredictable branches).
+        // If PMU data is unavailable (None), skip entirely — conservative
+        // policy: no data means no potentially harmful optimization.
+        match program.branch_miss_rate {
+            None => {
+                return Ok(PassResult {
+                    pass_name: self.name().into(),
+                    changed: false,
+                    sites_applied: 0,
+                    sites_skipped: vec![],
+                    diagnostics: vec!["no PMU data available, skipping branch_flip".into()],
+                    ..Default::default()
+                });
+            }
+            Some(miss_rate) if miss_rate > self.max_branch_miss_rate => {
+                return Ok(PassResult {
+                    pass_name: self.name().into(),
+                    changed: false,
+                    sites_applied: 0,
+                    sites_skipped: vec![SkipReason {
+                        pc: 0,
+                        reason: format!(
+                            "program branch_miss_rate {:.1}% exceeds threshold {:.1}% (unpredictable branches)",
+                            miss_rate * 100.0,
+                            self.max_branch_miss_rate * 100.0,
+                        ),
+                    }],
+                    diagnostics: vec![], ..Default::default() });
+            }
+            Some(_) => { /* miss rate within threshold, proceed */ }
+        }
+
         let bt_analysis = BranchTargetAnalysis;
         let bt = analyses.get(&bt_analysis, program);
 
@@ -391,7 +432,7 @@ mod tests {
 
     #[test]
     fn test_branch_flip_no_pgo_skips() {
-        // Without PGO data, the pass should not flip.
+        // Without per-PC PGO data, the pass should not flip (but PMU data is present).
         let mut prog = make_program(vec![
             jne_imm(1, 0, 2),
             BpfInsn::mov64_imm(0, 10),
@@ -399,10 +440,12 @@ mod tests {
             BpfInsn::mov64_imm(0, 20),
             exit_insn(),
         ]);
+        // Provide PMU data so the pass proceeds past the PMU check.
+        prog.branch_miss_rate = Some(0.02);
         let mut cache = AnalysisCache::new();
         let ctx = PassContext::test_default();
 
-        let pass = BranchFlipPass { min_bias: 0.7 };
+        let pass = BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 };
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert!(!result.changed);
         assert_eq!(result.sites_applied, 0);
@@ -422,11 +465,12 @@ mod tests {
             taken_count: 80,
             not_taken_count: 20,
         });
+        prog.branch_miss_rate = Some(0.02);
 
         let mut cache = AnalysisCache::new();
         let ctx = PassContext::test_default();
 
-        let pass = BranchFlipPass { min_bias: 0.7 };
+        let pass = BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 };
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
@@ -457,11 +501,12 @@ mod tests {
             taken_count: 90,
             not_taken_count: 10,
         });
+        prog.branch_miss_rate = Some(0.02);
 
         let mut cache = AnalysisCache::new();
         let ctx = PassContext::test_default();
 
-        let pass = BranchFlipPass { min_bias: 0.7 };
+        let pass = BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 };
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
@@ -498,11 +543,12 @@ mod tests {
             taken_count: 90,
             not_taken_count: 10,
         });
+        prog.branch_miss_rate = Some(0.02);
 
         let mut cache = AnalysisCache::new();
         let ctx = PassContext::test_default();
 
-        let pass = BranchFlipPass { min_bias: 0.7 };
+        let pass = BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 };
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert!(!result.changed);
         assert!(result.sites_skipped.iter().any(|s| s.reason.contains("cannot invert")));
@@ -521,11 +567,12 @@ mod tests {
             taken_count: 60,
             not_taken_count: 40,
         });
+        prog.branch_miss_rate = Some(0.02);
 
         let mut cache = AnalysisCache::new();
         let ctx = PassContext::test_default();
 
-        let pass = BranchFlipPass { min_bias: 0.7 };
+        let pass = BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 };
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert!(!result.changed);
         assert_eq!(result.sites_applied, 0);
@@ -558,12 +605,13 @@ mod tests {
             taken_count: 80,
             not_taken_count: 20,
         });
+        prog.branch_miss_rate = Some(0.02);
         let orig_len = prog.insns.len();
 
         let mut cache = AnalysisCache::new();
         let ctx = PassContext::test_default();
 
-        let pass = BranchFlipPass { min_bias: 0.7 };
+        let pass = BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 };
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert!(result.changed);
         assert_eq!(prog.insns.len(), orig_len);
@@ -571,7 +619,7 @@ mod tests {
 
     #[test]
     fn test_branch_flip_no_heuristic_fallback() {
-        // Even with very asymmetric bodies, no PGO = no flip.
+        // Even with very asymmetric bodies, no per-PC PGO = no flip.
         let mut prog = make_program(vec![
             jne_imm(1, 0, 6),                // Jcc +6 -> else at pc=7
             BpfInsn::mov64_imm(0, 1),
@@ -583,13 +631,95 @@ mod tests {
             BpfInsn::mov64_imm(0, 99),       // else
             exit_insn(),
         ]);
-        // No PGO data at all
+        // PMU data present but no per-PC PGO data.
+        prog.branch_miss_rate = Some(0.02);
         let mut cache = AnalysisCache::new();
         let ctx = PassContext::test_default();
 
-        let pass = BranchFlipPass { min_bias: 0.7 };
+        let pass = BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 };
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert!(!result.changed, "should NOT flip without PGO data");
         assert!(result.sites_skipped.iter().any(|s| s.reason.contains("no PGO data")));
+    }
+
+    #[test]
+    fn test_branch_flip_skips_high_miss_rate() {
+        // With high branch miss rate from PMU, the pass should skip all sites
+        // even if per-PC PGO data says to flip.
+        let mut prog = make_program(vec![
+            jne_imm(1, 0, 2),
+            BpfInsn::mov64_imm(0, 10),
+            BpfInsn::ja(1),
+            BpfInsn::mov64_imm(0, 20),
+            exit_insn(),
+        ]);
+        prog.annotations[0].branch_profile = Some(BranchProfile {
+            taken_count: 80,
+            not_taken_count: 20,
+        });
+        // Simulate high branch miss rate (10% > 5% threshold).
+        prog.branch_miss_rate = Some(0.10);
+
+        let mut cache = AnalysisCache::new();
+        let ctx = PassContext::test_default();
+
+        let pass = BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 };
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+        assert!(!result.changed, "should NOT flip with high branch miss rate");
+        assert!(result.sites_skipped.iter().any(|s| s.reason.contains("branch_miss_rate")));
+    }
+
+    #[test]
+    fn test_branch_flip_allows_low_miss_rate() {
+        // With low branch miss rate from PMU, the pass should proceed normally.
+        let mut prog = make_program(vec![
+            jne_imm(1, 0, 2),
+            BpfInsn::mov64_imm(0, 10),
+            BpfInsn::ja(1),
+            BpfInsn::mov64_imm(0, 20),
+            exit_insn(),
+        ]);
+        prog.annotations[0].branch_profile = Some(BranchProfile {
+            taken_count: 80,
+            not_taken_count: 20,
+        });
+        // Low branch miss rate (2% < 5% threshold) — should allow flip.
+        prog.branch_miss_rate = Some(0.02);
+
+        let mut cache = AnalysisCache::new();
+        let ctx = PassContext::test_default();
+
+        let pass = BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 };
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+        assert!(result.changed, "should flip with low branch miss rate and biased PGO");
+        assert_eq!(result.sites_applied, 1);
+    }
+
+    #[test]
+    fn test_branch_flip_no_pmu_data_skips() {
+        // Without PMU data (branch_miss_rate = None), the pass should
+        // skip entirely — conservative policy: no data, no optimization.
+        let mut prog = make_program(vec![
+            jne_imm(1, 0, 2),
+            BpfInsn::mov64_imm(0, 10),
+            BpfInsn::ja(1),
+            BpfInsn::mov64_imm(0, 20),
+            exit_insn(),
+        ]);
+        prog.annotations[0].branch_profile = Some(BranchProfile {
+            taken_count: 80,
+            not_taken_count: 20,
+        });
+        // No PMU data.
+        assert!(prog.branch_miss_rate.is_none());
+
+        let mut cache = AnalysisCache::new();
+        let ctx = PassContext::test_default();
+
+        let pass = BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 };
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+        assert!(!result.changed, "should NOT flip when PMU data absent");
+        assert_eq!(result.sites_applied, 0);
+        assert!(result.diagnostics.iter().any(|d| d.contains("no PMU data available")));
     }
 }

@@ -208,7 +208,7 @@ vm-micro-smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(DAEMON_PATH) $(BZIMAGE_PATH
 	mkdir -p "$(MICRO_RESULTS_DEV_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
 		bash -lc 'cd "$(ROOT_DIR)" && $(VM_INIT) \
-			"$(DAEMON_PATH)" serve --socket "$(DAEMON_SOCKET)" & DAEMON_PID=$$!; sleep 0.5; \
+			"$(DAEMON_PATH)" --pgo serve --socket "$(DAEMON_SOCKET)" & DAEMON_PID=$$!; sleep 0.5; \
 			trap "kill $$DAEMON_PID 2>/dev/null; rm -f $(DAEMON_SOCKET)" EXIT; \
 			python3 "$(MICRO_DIR)/driver.py" suite --runtime kernel --runtime kernel-rejit \
 			--daemon-socket "$(DAEMON_SOCKET)" $(VM_SMOKE_ARGS) --output "$(VM_MICRO_SMOKE_OUTPUT)"'
@@ -217,7 +217,7 @@ vm-micro: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(DAEMON_PATH) $(BZIMAGE_PATH) kins
 	mkdir -p "$(MICRO_RESULTS_DEV_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
 		bash -lc 'cd "$(ROOT_DIR)" && $(VM_INIT) \
-			"$(DAEMON_PATH)" serve --socket "$(DAEMON_SOCKET)" & DAEMON_PID=$$!; sleep 0.5; \
+			"$(DAEMON_PATH)" --pgo serve --socket "$(DAEMON_SOCKET)" & DAEMON_PID=$$!; sleep 0.5; \
 			trap "kill $$DAEMON_PID 2>/dev/null; rm -f $(DAEMON_SOCKET)" EXIT; \
 			python3 "$(MICRO_DIR)/driver.py" suite --runtime llvmbpf --runtime kernel --runtime kernel-rejit \
 			--daemon-socket "$(DAEMON_SOCKET)" $(MICRO_ARGS) --output "$(VM_MICRO_OUTPUT)"'

@@ -126,7 +126,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--daemon",
-        default=str(repo_root / "daemon" / "build" / "bpfrejit-daemon"),
+        default=str(repo_root / "daemon" / "target" / "release" / "bpfrejit-daemon"),
         help="Path to the built daemon CLI.",
     )
     parser.add_argument(

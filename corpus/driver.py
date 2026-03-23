@@ -95,7 +95,7 @@ DEFAULT_BTF_CANDIDATES = (
 )
 DEFAULT_OUTPUT = authoritative_output_path(ROOT_DIR / "corpus" / "results", "macro_corpus")
 DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
-DEFAULT_DAEMON = ROOT_DIR / "daemon" / "build" / "bpfrejit-daemon"
+DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
 DEFAULT_BPFTOOL = "bpftool"
 ZERO_DIRECTIVE_SCAN = {
     "cmov_sites": 0,

@@ -179,7 +179,7 @@ def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--skip-families",
         action="append",
-        help="Comma-separated recompile families to skip from the auto-generated v5 policy blob. Supported: cmov, wide, rotate, lea, extract, endian, branch-flip.",
+        help="Comma-separated recompile families to exclude from daemon apply. Supported: cmov, wide, rotate, lea, extract, endian, branch-flip.",
     )
     parser.add_argument(
         "--blind-apply",

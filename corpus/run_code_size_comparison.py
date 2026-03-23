@@ -479,7 +479,6 @@ def build_runner_command(
     input_size: int,
     btf_custom_path: Path | None,
     compile_only: bool,
-    recompile_v5: bool,
 ) -> list[str]:
     command = [
         str(runner),
@@ -501,8 +500,6 @@ def build_runner_command(
         command.extend(["--input-size", str(input_size)])
     if btf_custom_path is not None:
         command.extend(["--btf-custom-path", str(btf_custom_path)])
-    if recompile_v5:
-        command.extend(["--recompile-v5", "--recompile-all"])
     if compile_only:
         command.append("--compile-only")
     return command
@@ -517,7 +514,6 @@ def run_with_btf_fallback(
     memory_path: Path | None,
     input_size: int,
     compile_only: bool,
-    recompile_v5: bool,
     timeout_seconds: int,
     preferred_btf_path: Path | None,
 ) -> dict[str, Any]:
@@ -543,7 +539,6 @@ def run_with_btf_fallback(
                 input_size=input_size,
                 btf_custom_path=btf_path,
                 compile_only=compile_only,
-                recompile_v5=recompile_v5,
             ),
             timeout_seconds=timeout_seconds,
         )
@@ -1068,7 +1063,7 @@ def build_markdown(payload: dict[str, Any]) -> str:
             "",
             "## Notes",
             "",
-            "- The harness enumerates programs with `micro_exec list-programs`, then runs `run-kernel --compile-only` once for stock and once for `--recompile-v5 --recompile-all`.",
+            "- The harness enumerates programs with `micro_exec list-programs`, then runs `run-kernel --compile-only` to measure stock kernel JIT compilation time.",
             "- Program-type grouping refines generic libbpf `prog_type_name` using section roots so `fentry`, `fexit`, `lsm`, `raw_tracepoint`, and `sched_cls` remain separate buckets.",
             "- When the older `corpus/expanded_corpus` and `corpus/objects` paths are absent, the harness falls back to the current canonical `corpus/build` tree from `corpus/config/corpus_manifest.yaml`.",
         ]
@@ -1198,28 +1193,11 @@ def main(argv: list[str] | None = None) -> int:
                 memory_path=plan["memory_path"],
                 input_size=plan["input_size"],
                 compile_only=True,
-                recompile_v5=False,
                 timeout_seconds=args.timeout,
                 preferred_btf_path=preferred_btf_path,
             )
             stock_compile = invocation_summary(baseline_raw)
             v5_compile = None
-            if not args.dry_run and stock_compile and stock_compile["ok"]:
-                v5_raw = run_with_btf_fallback(
-                    runner=runner,
-                    object_path=object_path,
-                    program_name=program["name"],
-                    io_mode=plan["io_mode"],
-                    memory_path=plan["memory_path"],
-                    input_size=plan["input_size"],
-                    compile_only=True,
-                    recompile_v5=True,
-                    timeout_seconds=args.timeout,
-                    preferred_btf_path=Path(stock_compile["btf_path_used"])
-                    if stock_compile.get("btf_path_used")
-                    else preferred_btf_path,
-                )
-                v5_compile = invocation_summary(v5_raw)
 
             record = {
                 "object_path": relpath(object_path),

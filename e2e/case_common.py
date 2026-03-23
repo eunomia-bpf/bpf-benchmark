@@ -103,15 +103,11 @@ def ensure_runner_binary(runner_binary: Path) -> None:
         run_command(["make", "runner"], timeout=1800)
 
 
-def ensure_daemon_binary(scanner_binary: Path) -> None:
+def ensure_daemon_binary(daemon_binary: Path) -> None:
     """Build the bpfrejit-daemon if it does not exist."""
-    if not scanner_binary.exists():
+    if not daemon_binary.exists():
         run_command(
-            ["cmake", "-S", "daemon", "-B", "daemon/build", "-DCMAKE_BUILD_TYPE=Release"],
-            timeout=600,
-        )
-        run_command(
-            ["cmake", "--build", "daemon/build", "--target", "bpfrejit-daemon", "-j"],
+            ["cargo", "build", "--release", "--manifest-path", "daemon/Cargo.toml"],
             timeout=1800,
         )
 

@@ -167,6 +167,10 @@ impl BpfProgram {
                 self.annotations[pc].branch_profile = Some(profile.clone());
             }
         }
+        // Propagate program-level PMU branch miss rate.
+        if data.branch_miss_rate.is_some() {
+            self.branch_miss_rate = data.branch_miss_rate;
+        }
     }
 
     /// Record a transform operation.
@@ -1515,7 +1519,7 @@ mod tests {
 
         let mut pm = PassManager::new();
         pm.register_analysis(BranchTargetAnalysis);
-        pm.add_pass(BranchFlipPass { min_bias: 0.7 });
+        pm.add_pass(BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 });
 
         // A simple diamond that would be flipped if PGO says the branch is hot.
         let jne = BpfInsn {
@@ -1546,12 +1550,13 @@ mod tests {
             exit_insn(),
         ]);
 
-        // With profiling data showing hot branch: should flip.
+        // With profiling data showing hot branch + PMU data: should flip.
         let mut pdata = ProfilingData::default();
         pdata.branch_profiles.insert(0, BranchProfile {
             taken_count: 90,
             not_taken_count: 10,
         });
+        pdata.branch_miss_rate = Some(0.02);
         let result = pm.run_with_profiling(&mut prog, &ctx, Some(&pdata)).unwrap();
         assert!(result.program_changed, "should flip with PGO data showing hot branch");
     }

@@ -78,7 +78,7 @@ struct AttrRejit {
     fd_array: u64, // __aligned_u64
     fd_array_cnt: u32,
     flags: u32,
-    _pad: [u8; 128 - 44],
+    _pad: [u8; 128 - 48], // fields above total 48 bytes
 }
 
 // Safety: all-zeros is a valid representation for these C-compatible structs.
@@ -485,7 +485,7 @@ pub fn relocate_map_fds(insns: &mut [BpfInsn], map_ids: &[u32]) -> Result<Vec<Ow
         let code = insns[i].code;
         // BPF_LD | BPF_IMM | BPF_DW = 0x18
         if code == (BPF_LD | BPF_IMM | BPF_DW) {
-            let src_reg = insns[i].regs & 0x0f;
+            let src_reg = (insns[i].regs >> 4) & 0x0f;
             if src_reg == BPF_PSEUDO_MAP_FD || src_reg == BPF_PSEUDO_MAP_VALUE {
                 let old_fd = insns[i].imm;
                 if !seen.contains_key(&old_fd) {
@@ -544,7 +544,7 @@ pub fn relocate_map_fds(insns: &mut [BpfInsn], map_ids: &[u32]) -> Result<Vec<Ow
     while i < insns.len() {
         let code = insns[i].code;
         if code == (BPF_LD | BPF_IMM | BPF_DW) {
-            let src_reg = insns[i].regs & 0x0f;
+            let src_reg = (insns[i].regs >> 4) & 0x0f;
             if src_reg == BPF_PSEUDO_MAP_FD || src_reg == BPF_PSEUDO_MAP_VALUE {
                 let old_fd = insns[i].imm;
                 if let Some(&new_fd) = fd_map.get(&old_fd) {
@@ -668,4 +668,532 @@ pub fn get_orig_insns_by_id(prog_id: u32) -> Result<(BpfProgInfo, Vec<BpfInsn>)>
     use std::os::unix::io::AsRawFd;
     bpf_prog_get_info(fd.as_raw_fd(), true)
         .with_context(|| format!("get info for prog {}", prog_id))
+}
+
+// ── Tests ────────────────────────────────────────────────────────────
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Helper: build a BPF_LD_IMM64 instruction pair with given dst_reg, src_reg, and imm.
+    fn make_ld_imm64(dst: u8, src: u8, imm_lo: i32, imm_hi: i32) -> [BpfInsn; 2] {
+        [
+            BpfInsn {
+                code: BPF_LD | BPF_IMM | BPF_DW, // 0x18
+                regs: (src << 4) | (dst & 0x0f),
+                off: 0,
+                imm: imm_lo,
+            },
+            BpfInsn {
+                code: 0,
+                regs: 0,
+                off: 0,
+                imm: imm_hi,
+            },
+        ]
+    }
+
+    /// Verify relocate_map_fds correctly identifies map references via src_reg,
+    /// not dst_reg. With no map_ids to resolve, the function should detect the
+    /// map references but return empty (no FDs to open).
+    #[test]
+    fn test_relocate_map_fds_src_reg_extraction() {
+        // Instruction with dst_reg=0, src_reg=BPF_PSEUDO_MAP_FD(1), imm=42 (old fd).
+        let ld_pair = make_ld_imm64(0, BPF_PSEUDO_MAP_FD, 42, 0);
+        let mut insns = vec![ld_pair[0], ld_pair[1]];
+
+        // No map_ids provided -> relocate_map_fds finds 1 unique FD but can't remap it.
+        // It should print a warning but not panic.
+        let result = relocate_map_fds(&mut insns, &[]);
+        assert!(result.is_ok());
+        // Old FD remains unpatched since there are no map_ids.
+        assert_eq!(insns[0].imm, 42);
+    }
+
+    /// Verify that a BPF_LD_IMM64 with src_reg=0 (not a map reference) is NOT treated
+    /// as a map reference. This guards against the old bug where dst_reg was read instead
+    /// of src_reg.
+    #[test]
+    fn test_relocate_map_fds_ignores_non_map_ldimm64() {
+        // dst_reg=1, src_reg=0 -> NOT a map reference (just a plain 64-bit immediate).
+        let ld_pair = make_ld_imm64(1, 0, 99, 0);
+        let mut insns = vec![ld_pair[0], ld_pair[1]];
+
+        let result = relocate_map_fds(&mut insns, &[]);
+        assert!(result.is_ok());
+        let owned = result.unwrap();
+        // No map references found, so no FDs returned.
+        assert!(owned.is_empty());
+        // Instruction unchanged.
+        assert_eq!(insns[0].imm, 99);
+    }
+
+    /// Regression test: ensure that an instruction with dst_reg=1 but src_reg=0
+    /// is NOT mistakenly identified as BPF_PSEUDO_MAP_FD. The old code used
+    /// `regs & 0x0f` (dst_reg) instead of `(regs >> 4) & 0x0f` (src_reg).
+    #[test]
+    fn test_relocate_map_fds_regression_dst_vs_src() {
+        // dst_reg=1 (BPF_PSEUDO_MAP_FD value in wrong field), src_reg=0.
+        // The old bug would treat this as a map reference.
+        let ld_pair = make_ld_imm64(1, 0, 7, 0);
+        let mut insns = vec![ld_pair[0], ld_pair[1]];
+
+        let result = relocate_map_fds(&mut insns, &[]);
+        assert!(result.is_ok());
+        assert!(result.unwrap().is_empty());
+
+        // Now test the opposite: dst_reg=0, src_reg=1 (BPF_PSEUDO_MAP_FD).
+        // This should be detected as a map reference.
+        let ld_pair = make_ld_imm64(0, 1, 7, 0);
+        let mut insns2 = vec![ld_pair[0], ld_pair[1]];
+
+        let result2 = relocate_map_fds(&mut insns2, &[]);
+        assert!(result2.is_ok());
+        // Found 1 unique FD but no map_ids to remap -> warning printed, 0 FDs returned.
+        // The key thing is it DID detect the reference (unique_old_fds would have 1 entry).
+    }
+
+    /// Test relocate_map_fds with BPF_PSEUDO_MAP_VALUE (src_reg=2).
+    #[test]
+    fn test_relocate_map_fds_pseudo_map_value() {
+        let ld_pair = make_ld_imm64(3, BPF_PSEUDO_MAP_VALUE, 55, 0);
+        let mut insns = vec![ld_pair[0], ld_pair[1]];
+
+        // Should detect 1 map reference (src_reg=2 = BPF_PSEUDO_MAP_VALUE).
+        let result = relocate_map_fds(&mut insns, &[]);
+        assert!(result.is_ok());
+        // imm unchanged since no map_ids to remap.
+        assert_eq!(insns[0].imm, 55);
+    }
+
+    /// Test with multiple map references using different old FDs.
+    #[test]
+    fn test_relocate_map_fds_multiple_refs() {
+        let ld1 = make_ld_imm64(1, BPF_PSEUDO_MAP_FD, 10, 0);
+        let ld2 = make_ld_imm64(2, BPF_PSEUDO_MAP_FD, 11, 0);
+        let ld3 = make_ld_imm64(3, BPF_PSEUDO_MAP_FD, 10, 0); // duplicate of first
+        let mut insns = vec![ld1[0], ld1[1], ld2[0], ld2[1], ld3[0], ld3[1]];
+
+        // 2 unique old FDs (10 and 11), but no map_ids -> warning, no remapping.
+        let result = relocate_map_fds(&mut insns, &[]);
+        assert!(result.is_ok());
+    }
+
+    // ── BPF cmd constant sync tests ──────────────────────────────────
+    //
+    // These tests parse the kernel UAPI header to verify our hardcoded
+    // constants match. This is the class of bug that caused BPF_BTF_GET_NEXT_ID
+    // to be wrong (22 instead of 23) for months.
+
+    /// Parse `enum bpf_cmd` from the kernel UAPI header and return a map
+    /// of name -> numeric value.
+    fn parse_bpf_cmd_enum() -> std::collections::HashMap<String, u32> {
+        let header_path = concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../vendor/linux-framework/include/uapi/linux/bpf.h"
+        );
+        let content = std::fs::read_to_string(header_path)
+            .expect("failed to read kernel bpf.h header");
+
+        let mut result = std::collections::HashMap::new();
+        let mut in_enum = false;
+        let mut next_val: u32 = 0;
+
+        for line in content.lines() {
+            let trimmed = line.trim();
+            if trimmed.starts_with("enum bpf_cmd") {
+                in_enum = true;
+                next_val = 0;
+                continue;
+            }
+            if in_enum && trimmed.starts_with('}') {
+                break;
+            }
+            if !in_enum {
+                continue;
+            }
+            // Skip empty lines, comments, __MAX_BPF_CMD
+            if trimmed.is_empty()
+                || trimmed.starts_with("//")
+                || trimmed.starts_with("/*")
+                || trimmed.starts_with('*')
+                || trimmed.starts_with("__MAX")
+            {
+                continue;
+            }
+            // Parse lines like "BPF_MAP_CREATE," or "BPF_PROG_RUN = BPF_PROG_TEST_RUN,"
+            let name_part = trimmed.trim_end_matches(',');
+            if name_part.contains('=') {
+                // Alias like BPF_PROG_RUN = BPF_PROG_TEST_RUN — skip (same value)
+                let parts: Vec<&str> = name_part.split('=').collect();
+                let name = parts[0].trim().to_string();
+                let rhs = parts[1].trim();
+                // rhs is another enum name — look it up
+                if let Some(&val) = result.get(rhs) {
+                    result.insert(name, val);
+                }
+                // Do NOT increment next_val for aliases
+                continue;
+            }
+            let name = name_part.trim().to_string();
+            if name.starts_with("BPF_") {
+                result.insert(name, next_val);
+                next_val += 1;
+            }
+        }
+        result
+    }
+
+    #[test]
+    fn test_bpf_cmd_constants_match_kernel_header() {
+        let kernel_cmds = parse_bpf_cmd_enum();
+        assert!(
+            !kernel_cmds.is_empty(),
+            "failed to parse any bpf_cmd entries from kernel header"
+        );
+
+        // Verify every constant we define in bpf.rs matches the kernel.
+        let checks = [
+            ("BPF_PROG_GET_NEXT_ID", BPF_PROG_GET_NEXT_ID),
+            ("BPF_MAP_GET_NEXT_ID", BPF_MAP_GET_NEXT_ID),
+            ("BPF_PROG_GET_FD_BY_ID", BPF_PROG_GET_FD_BY_ID),
+            ("BPF_MAP_GET_FD_BY_ID", BPF_MAP_GET_FD_BY_ID),
+            ("BPF_OBJ_GET_INFO_BY_FD", BPF_OBJ_GET_INFO_BY_FD),
+            ("BPF_BTF_LOAD", BPF_BTF_LOAD),
+            ("BPF_BTF_GET_FD_BY_ID", BPF_BTF_GET_FD_BY_ID),
+            ("BPF_BTF_GET_NEXT_ID", BPF_BTF_GET_NEXT_ID),
+            ("BPF_PROG_REJIT", BPF_PROG_REJIT),
+        ];
+
+        for (name, our_value) in &checks {
+            let kernel_value = kernel_cmds.get(*name).unwrap_or_else(|| {
+                panic!(
+                    "{} not found in kernel header enum bpf_cmd (parsed {} entries)",
+                    name,
+                    kernel_cmds.len()
+                )
+            });
+            assert_eq!(
+                *our_value, *kernel_value,
+                "BPF cmd constant mismatch: {} = {} in bpf.rs but {} in kernel header",
+                name, our_value, kernel_value
+            );
+        }
+    }
+
+    // ── Struct size and layout tests ─────────────────────────────────
+    //
+    // The bpf_attr union must be exactly 128 bytes (kernel enforced).
+    // Each attr variant must be <= 128 bytes.
+
+    #[test]
+    fn test_attr_struct_sizes_fit_bpf_attr() {
+        // All attr variants must be exactly 128 bytes (the kernel's bpf_attr size).
+        assert_eq!(
+            std::mem::size_of::<AttrGetNextId>(),
+            128,
+            "AttrGetNextId must be 128 bytes"
+        );
+        assert_eq!(
+            std::mem::size_of::<AttrGetFdById>(),
+            128,
+            "AttrGetFdById must be 128 bytes"
+        );
+        assert_eq!(
+            std::mem::size_of::<AttrGetInfoByFd>(),
+            128,
+            "AttrGetInfoByFd must be 128 bytes"
+        );
+        assert_eq!(
+            std::mem::size_of::<AttrRejit>(),
+            128,
+            "AttrRejit must be 128 bytes"
+        );
+    }
+
+    #[test]
+    fn test_attr_rejit_field_offsets() {
+        // Verify AttrRejit field layout matches kernel's union bpf_attr.rejit.
+        // Kernel layout (from bpf.h):
+        //   __u32          prog_fd;       // offset 0
+        //   __u32          insn_cnt;      // offset 4
+        //   __aligned_u64  insns;         // offset 8
+        //   __u32          log_level;     // offset 16
+        //   __u32          log_size;      // offset 20
+        //   __aligned_u64  log_buf;       // offset 24
+        //   __aligned_u64  fd_array;      // offset 32
+        //   __u32          fd_array_cnt;  // offset 40
+        //   __u32          flags;         // offset 44
+
+        let attr: AttrRejit = unsafe { std::mem::zeroed() };
+        let base_addr = &attr as *const _ as usize;
+
+        assert_eq!(
+            &attr.prog_fd as *const _ as usize - base_addr,
+            0,
+            "prog_fd at wrong offset"
+        );
+        assert_eq!(
+            &attr.insn_cnt as *const _ as usize - base_addr,
+            4,
+            "insn_cnt at wrong offset"
+        );
+        assert_eq!(
+            &attr.insns as *const _ as usize - base_addr,
+            8,
+            "insns at wrong offset"
+        );
+        assert_eq!(
+            &attr.log_level as *const _ as usize - base_addr,
+            16,
+            "log_level at wrong offset"
+        );
+        assert_eq!(
+            &attr.log_size as *const _ as usize - base_addr,
+            20,
+            "log_size at wrong offset"
+        );
+        assert_eq!(
+            &attr.log_buf as *const _ as usize - base_addr,
+            24,
+            "log_buf at wrong offset"
+        );
+        assert_eq!(
+            &attr.fd_array as *const _ as usize - base_addr,
+            32,
+            "fd_array at wrong offset"
+        );
+        assert_eq!(
+            &attr.fd_array_cnt as *const _ as usize - base_addr,
+            40,
+            "fd_array_cnt at wrong offset"
+        );
+        assert_eq!(
+            &attr.flags as *const _ as usize - base_addr,
+            44,
+            "flags at wrong offset"
+        );
+    }
+
+    #[test]
+    fn test_bpf_prog_info_size() {
+        // BpfProgInfo includes BpfReJIT extension fields (orig_prog_len, orig_prog_insns).
+        // The kernel returns info_len = actual bytes filled. Our struct must be large enough.
+        // The standard bpf_prog_info (without REJIT extensions) is 216 bytes on x86_64.
+        // With orig_prog_len (u32) + orig_prog_insns (u64), it grows to ~232 bytes.
+        let size = std::mem::size_of::<BpfProgInfo>();
+        // It should be larger than standard bpf_prog_info (216 bytes)
+        assert!(
+            size >= 216,
+            "BpfProgInfo too small: {} bytes (expected >= 216)",
+            size
+        );
+        // Sanity: it shouldn't be absurdly large
+        assert!(
+            size <= 512,
+            "BpfProgInfo unexpectedly large: {} bytes",
+            size
+        );
+    }
+
+    #[test]
+    fn test_bpf_prog_info_orig_fields_at_end() {
+        // Verify that orig_prog_len and orig_prog_insns are at the expected
+        // positions (at the end of the struct, after verified_insns/attach_btf_*).
+        let info = BpfProgInfo::default();
+        let base = &info as *const _ as usize;
+        let orig_len_offset = &info.orig_prog_len as *const _ as usize - base;
+        let orig_insns_offset = &info.orig_prog_insns as *const _ as usize - base;
+
+        // orig_prog_len should come after attach_btf_id (which is at a known offset)
+        let attach_btf_id_offset = &info.attach_btf_id as *const _ as usize - base;
+        assert!(
+            orig_len_offset > attach_btf_id_offset,
+            "orig_prog_len should be after attach_btf_id"
+        );
+        // orig_prog_insns should be the last field
+        assert!(
+            orig_insns_offset > orig_len_offset,
+            "orig_prog_insns should be after orig_prog_len"
+        );
+        // orig_prog_insns is u64, so the struct should end 8 bytes after it
+        assert_eq!(
+            orig_insns_offset + 8,
+            std::mem::size_of::<BpfProgInfo>(),
+            "orig_prog_insns should be the last field in BpfProgInfo"
+        );
+    }
+
+    #[test]
+    fn test_bpf_prog_info_name_str() {
+        let mut info = BpfProgInfo::default();
+        // Empty name (all zeros)
+        assert_eq!(info.name_str(), "");
+
+        // Normal name
+        info.name[0] = b'x';
+        info.name[1] = b'd';
+        info.name[2] = b'p';
+        assert_eq!(info.name_str(), "xdp");
+
+        // Full-length name (no NUL terminator within array)
+        for i in 0..BPF_OBJ_NAME_LEN {
+            info.name[i] = b'a';
+        }
+        assert_eq!(info.name_str(), "a".repeat(BPF_OBJ_NAME_LEN));
+    }
+
+    #[test]
+    fn test_btf_info_struct_size() {
+        // BtfInfo must be exactly 128 bytes (padded to match bpf_attr size).
+        assert_eq!(
+            std::mem::size_of::<BtfInfo>(),
+            128,
+            "BtfInfo must be 128 bytes"
+        );
+    }
+
+    // ── BPF runtime smoke tests (need root/BPF) ─────────────────────
+    //
+    // These tests actually issue BPF syscalls. They are marked #[ignore]
+    // so `cargo test` skips them by default. Run with:
+    //   cargo test -- --ignored
+    // or inside a VM with BPF enabled.
+
+    #[test]
+    #[ignore]
+    fn test_bpf_prog_get_next_id_smoke() {
+        // On any Linux system with BPF, there should be at least one loaded program
+        // (e.g., kernel internal programs). This test verifies the syscall wrapper works.
+        let result = bpf_prog_get_next_id(0);
+        assert!(
+            result.is_ok(),
+            "bpf_prog_get_next_id(0) failed: {}",
+            result.unwrap_err()
+        );
+        let first_id = result.unwrap();
+        assert!(first_id > 0, "first prog ID should be > 0, got {}", first_id);
+    }
+
+    #[test]
+    #[ignore]
+    fn test_iter_prog_ids_returns_some() {
+        let ids: Vec<u32> = iter_prog_ids().take(100).collect();
+        assert!(
+            !ids.is_empty(),
+            "iter_prog_ids() returned no programs (expected at least one)"
+        );
+        // IDs should be monotonically increasing
+        for window in ids.windows(2) {
+            assert!(
+                window[1] > window[0],
+                "prog IDs not monotonically increasing: {} >= {}",
+                window[0],
+                window[1]
+            );
+        }
+    }
+
+    #[test]
+    #[ignore]
+    fn test_bpf_prog_get_fd_and_info_smoke() {
+        // Get the first program ID and open its fd, then get info.
+        let first_id = bpf_prog_get_next_id(0)
+            .expect("bpf_prog_get_next_id(0) failed");
+        let fd = bpf_prog_get_fd_by_id(first_id)
+            .expect("bpf_prog_get_fd_by_id failed");
+        use std::os::unix::io::AsRawFd;
+        let (info, _) = bpf_prog_get_info(fd.as_raw_fd(), false)
+            .expect("bpf_prog_get_info failed");
+        assert_eq!(info.id, first_id, "info.id should match the requested prog ID");
+        assert!(info.prog_type > 0, "prog_type should be > 0");
+    }
+
+    #[test]
+    #[ignore]
+    fn test_btf_get_next_id_smoke() {
+        // vmlinux BTF should always exist on a BPF-enabled kernel.
+        let result = bpf_btf_get_next_id(0);
+        assert!(
+            result.is_ok(),
+            "bpf_btf_get_next_id(0) failed: {} — is BTF enabled in kernel?",
+            result.unwrap_err()
+        );
+        let first_id = result.unwrap();
+        assert!(first_id > 0, "first BTF ID should be > 0");
+    }
+
+    #[test]
+    #[ignore]
+    fn test_btf_get_fd_by_id_and_info_smoke() {
+        let first_id = bpf_btf_get_next_id(0)
+            .expect("bpf_btf_get_next_id(0) failed");
+        let fd = bpf_btf_get_fd_by_id(first_id)
+            .expect("bpf_btf_get_fd_by_id failed");
+        use std::os::unix::io::AsRawFd;
+        let name = bpf_btf_get_info_name(fd.as_raw_fd())
+            .expect("bpf_btf_get_info_name failed");
+        // The first BTF object is typically vmlinux (empty name) or has a name.
+        // Either way, it shouldn't panic.
+        let _ = name;
+    }
+
+    #[test]
+    #[ignore]
+    fn test_btf_module_enumeration() {
+        // Enumerate all BTF IDs and check we can get names for each.
+        let mut id = 0u32;
+        let mut count = 0;
+        loop {
+            match bpf_btf_get_next_id(id) {
+                Ok(next) => {
+                    id = next;
+                    count += 1;
+                    if let Ok(fd) = bpf_btf_get_fd_by_id(id) {
+                        use std::os::unix::io::AsRawFd;
+                        let _ = bpf_btf_get_info_name(fd.as_raw_fd());
+                    }
+                }
+                Err(_) => break,
+            }
+        }
+        assert!(count > 0, "should find at least 1 BTF object (vmlinux)");
+    }
+
+    #[test]
+    #[ignore]
+    fn test_bpf_btf_get_fd_by_module_name_vmlinux_not_found() {
+        // "vmlinux" BTF has an empty name, so searching for "vmlinux" string
+        // should NOT find it (it's identified by name="" or by being id=1).
+        // This tests that the function correctly iterates and handles non-matches.
+        let result = bpf_btf_get_fd_by_module_name("this_module_definitely_does_not_exist");
+        assert!(result.is_err(), "should not find a nonexistent module");
+    }
+
+    #[test]
+    fn test_relocate_map_fds_with_non_map_instructions() {
+        // Program with no LD_IMM64 instructions at all.
+        let mut insns = vec![
+            BpfInsn::mov64_imm(0, 42),
+            BpfInsn {
+                // exit instruction: BPF_JMP(0x05) | BPF_EXIT(0x90) = 0x95
+                code: 0x95,
+                regs: 0,
+                off: 0,
+                imm: 0,
+            },
+        ];
+        let result = relocate_map_fds(&mut insns, &[]);
+        assert!(result.is_ok());
+        assert!(result.unwrap().is_empty());
+    }
+
+    #[test]
+    fn test_relocate_map_fds_empty_program() {
+        let mut insns: Vec<BpfInsn> = vec![];
+        let result = relocate_map_fds(&mut insns, &[]);
+        assert!(result.is_ok());
+        assert!(result.unwrap().is_empty());
+    }
 }

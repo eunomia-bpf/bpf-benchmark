@@ -31,7 +31,7 @@ Top-level support scripts retained in `corpus/`:
 
 - `fetch_real_world_corpus.py`: fetches/refreshes upstream repos and regenerates `corpus/inventory.json`
 - `build_expanded_corpus.py`: compiles harvested `.bpf.c` sources into `corpus/build/`
-- `directive_census.py`: scanner-backed directive census over `micro/` objects plus the built corpus
+- `directive_census.py`: daemon-backed directive census over `micro/` objects plus the built corpus
 
 There is no checked-in scratch directory under `corpus/` anymore. Keep any local scratch work untracked, or promote reusable scripts back to the top level.
 

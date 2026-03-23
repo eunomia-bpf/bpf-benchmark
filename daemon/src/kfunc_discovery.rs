@@ -695,4 +695,80 @@ mod tests {
         // Wrong func name still not found.
         assert_eq!(find_func_btf_id(&blob, "bpf_select64", base_str_off), None);
     }
+
+    // ── Real BTF smoke tests (need /sys/kernel/btf/) ─────────────────
+    //
+    // These tests access the real vmlinux BTF. They are marked #[ignore]
+    // because CI environments may not have BTF enabled.
+
+    #[test]
+    #[ignore]
+    fn test_get_vmlinux_str_len_real() {
+        // On any kernel with CONFIG_DEBUG_INFO_BTF=y, /sys/kernel/btf/vmlinux exists.
+        if !Path::new("/sys/kernel/btf/vmlinux").exists() {
+            eprintln!("SKIP: /sys/kernel/btf/vmlinux not present");
+            return;
+        }
+        let str_len = get_vmlinux_str_len().expect("get_vmlinux_str_len failed");
+        // vmlinux BTF string section is typically > 100KB.
+        assert!(
+            str_len > 1000,
+            "vmlinux str_len suspiciously small: {}",
+            str_len
+        );
+    }
+
+    #[test]
+    #[ignore]
+    fn test_find_func_in_real_vmlinux_btf() {
+        // Parse the real vmlinux BTF and search for well-known kernel functions.
+        let vmlinux_path = "/sys/kernel/btf/vmlinux";
+        if !Path::new(vmlinux_path).exists() {
+            eprintln!("SKIP: /sys/kernel/btf/vmlinux not present");
+            return;
+        }
+        let data = fs::read(vmlinux_path).expect("read vmlinux BTF");
+        // vmlinux is base BTF, so base_str_off=0.
+        let result = find_func_btf_id(&data, "bpf_prog_run_xdp", 0);
+        // bpf_prog_run_xdp should exist in any BPF-enabled kernel.
+        // However, the name may vary between kernel versions, so just check
+        // that parsing completes without panic.
+        let _ = result;
+    }
+
+    #[test]
+    #[ignore]
+    fn test_discover_kfuncs_real() {
+        // Run the full discovery pipeline against the real kernel.
+        // Even without kinsn modules loaded, this validates that the BPF
+        // syscall chain (BTF_GET_NEXT_ID, BTF_GET_FD_BY_ID, GET_INFO_BY_FD)
+        // all work correctly.
+        let result = discover_kfuncs();
+        // Should always produce at least one log line about vmlinux.
+        assert!(
+            !result.log.is_empty(),
+            "discover_kfuncs() produced no log output"
+        );
+        // If kinsn modules are not loaded, all BTF IDs should be -1.
+        // If they are loaded, they should be > 0.
+        // Either way, the function should not panic or return garbage.
+        for &(kfunc_name, _) in KNOWN_KFUNCS {
+            let btf_id = match kfunc_name {
+                "bpf_rotate64" => result.registry.rotate64_btf_id,
+                "bpf_select64" => result.registry.select64_btf_id,
+                "bpf_extract64" => result.registry.extract64_btf_id,
+                "bpf_endian_load16" => result.registry.endian_load16_btf_id,
+                "bpf_endian_load32" => result.registry.endian_load32_btf_id,
+                "bpf_endian_load64" => result.registry.endian_load64_btf_id,
+                "bpf_speculation_barrier" => result.registry.speculation_barrier_btf_id,
+                _ => continue,
+            };
+            assert!(
+                btf_id == -1 || btf_id > 0,
+                "{} has invalid btf_id: {}",
+                kfunc_name,
+                btf_id
+            );
+        }
+    }
 }

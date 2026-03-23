@@ -82,7 +82,7 @@ pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
         name: "branch_flip",
         description: "Flip branch polarity using PGO data to improve branch prediction",
         aliases: &[],
-        make: || Box::new(BranchFlipPass { min_bias: 0.7 }),
+        make: || Box::new(BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 }),
     },
     PassRegistryEntry {
         name: "speculation_barrier",
