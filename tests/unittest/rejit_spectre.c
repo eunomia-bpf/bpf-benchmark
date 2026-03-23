@@ -1,20 +1,31 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * BpfReJIT Spectre Mitigation Pass — VM integration tests
+ * BpfReJIT REJIT correctness tests for branch-containing programs
  *
- * Validates the SpectreMitigationPass end-to-end:
+ * Validates that BPF_PROG_REJIT correctly handles programs where
+ * NOP instructions (JA+0) are inserted between conditional branches:
  *   1. Load XDP programs containing conditional branches
- *   2. Manually apply Spectre mitigation (insert NOP=JA+0 after each JCC)
- *   3. REJIT with the mitigated bytecode
- *   4. Verify the mitigated program produces correct results via TEST_RUN
- *   5. Verify bytecode structure (NOP barriers present)
+ *   2. Insert NOP (JA+0) instructions after each conditional jump,
+ *      adjusting forward branch offsets as needed
+ *   3. REJIT with the modified bytecode
+ *   4. Verify the program produces correct results via TEST_RUN
+ *   5. Verify program info (jited_prog_len) is updated after REJIT
+ *
+ * NOTE: This test uses a local NOP-insertion helper (insert JA+0 after each
+ * conditional branch) to construct modified programs for REJIT. This is NOT
+ * related to the daemon's SpectreMitigationPass, which inserts real
+ * bpf_speculation_barrier() kfunc calls (#382) rather than JA+0 NOPs.
+ * The purpose of these tests is to verify the REJIT syscall handles
+ * instruction-count changes and branch-offset fixups correctly.
  *
  * The tests cover:
  *   - Single conditional branch with NOP insertion
  *   - Multiple conditional branches
  *   - Forward branch offset fixup after NOP insertion
  *   - Idempotency (NOP already present -> no double insert)
- *   - Program correctness preserved after mitigation
+ *   - Program correctness preserved after REJIT
+ *   - Program info consistency after REJIT with changed insn count
+ *   - Stability under repeated TEST_RUN after REJIT
  *
  * Build (from repo root):
  *   clang -O2 -Wall -Wno-#warnings \
@@ -172,8 +183,13 @@ static int is_nop(const struct bpf_insn *insn)
 }
 
 /*
- * Apply Spectre mitigation in-place: insert NOP after each conditional branch.
- * This mirrors the daemon's SpectreMitigationPass logic.
+ * Insert NOP (JA+0) after each conditional branch, adjusting forward branch
+ * offsets as needed. This produces a semantically equivalent but longer
+ * program suitable for REJIT testing.
+ *
+ * NOTE: The daemon's SpectreMitigationPass uses bpf_speculation_barrier()
+ * kfunc calls (not JA+0 NOPs). This local helper is only used to construct
+ * test inputs for verifying REJIT correctness with changed insn counts.
  *
  * Returns the new instruction count. Output buffer must be large enough.
  */
@@ -934,7 +950,7 @@ static void test_spectre_repeated_run(void)
 
 int main(void)
 {
-	printf("=== BpfReJIT Spectre Mitigation Pass Tests ===\n\n");
+	printf("=== BpfReJIT REJIT correctness tests (branch programs with NOP insertions) ===\n\n");
 
 	test_single_branch_spectre();
 	test_multi_branch_spectre();

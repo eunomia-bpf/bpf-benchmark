@@ -62,6 +62,10 @@ pub struct ProfilingData {
     /// Future passes can use this to gate optimization on hot programs.
     #[allow(dead_code)]
     pub program_hotness: Option<crate::profiler::PgoAnalysis>,
+    /// Program-level branch miss rate from PMU hardware counters.
+    /// Computed as branch_misses / branch_instructions during the observation window.
+    /// None if PMU counters are unavailable (e.g., no hardware PMU in VM).
+    pub branch_miss_rate: Option<f64>,
 }
 
 // ── Program IR ──────────────────────────────────────────────────────
@@ -84,6 +88,10 @@ pub struct BpfProgram {
     /// Module FDs required by kfunc calls introduced during rewrite.
     /// Used by cmd_apply to construct fd_array for BPF_PROG_REJIT.
     pub required_module_fds: Vec<i32>,
+    /// Program-level branch miss rate from PMU hardware counters.
+    /// Set by `inject_profiling` when PMU data is available.
+    /// Consumed by BranchFlipPass to gate optimization.
+    pub branch_miss_rate: Option<f64>,
 }
 
 /// Transform log entry. Fields are written by passes and consumed by
@@ -109,6 +117,7 @@ impl BpfProgram {
             meta,
             transform_log: Vec::new(),
             required_module_fds: Vec::new(),
+            branch_miss_rate: None,
         }
     }
 

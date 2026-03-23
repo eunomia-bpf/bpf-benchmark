@@ -9,8 +9,9 @@ use anyhow::{bail, Context, Result};
 
 use crate::insn::BpfInsn;
 
-// ── bpf_cmd values (from include/uapi/linux/bpf.h) ─────────────────
+// ── bpf_cmd values (from vendor/linux-framework/include/uapi/linux/bpf.h) ───
 // The enum starts at 0. We only define the commands we actually use.
+// Note: BPF_MAP_FREEZE=22 sits between BTF_GET_FD_BY_ID and BTF_GET_NEXT_ID.
 const BPF_PROG_GET_NEXT_ID: u32 = 11;
 #[allow(dead_code)]
 const BPF_MAP_GET_NEXT_ID: u32 = 12;
@@ -20,10 +21,11 @@ const BPF_OBJ_GET_INFO_BY_FD: u32 = 15;
 #[allow(dead_code)]
 const BPF_BTF_LOAD: u32 = 18;
 const BPF_BTF_GET_FD_BY_ID: u32 = 19;
-const BPF_BTF_GET_NEXT_ID: u32 = 22;
+// BPF_TASK_FD_QUERY=20, BPF_MAP_LOOKUP_AND_DELETE_ELEM=21, BPF_MAP_FREEZE=22
+const BPF_BTF_GET_NEXT_ID: u32 = 23;
 // BPF_PROG_REJIT is the last entry before __MAX_BPF_CMD.
-// From the enum: BPF_TOKEN_CREATE=36, BPF_PROG_STREAM_READ_BY_FD=37,
-//                BPF_PROG_ASSOC_STRUCT_OPS=38, BPF_PROG_REJIT=39
+// BPF_TOKEN_CREATE=36, BPF_PROG_STREAM_READ_BY_FD=37,
+// BPF_PROG_ASSOC_STRUCT_OPS=38, BPF_PROG_REJIT=39
 const BPF_PROG_REJIT: u32 = 39;
 
 const BPF_OBJ_NAME_LEN: usize = 16;

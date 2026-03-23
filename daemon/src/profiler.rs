@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
-//! Runtime profiler helpers backed by `bpf_prog_info`.
+//! Runtime profiler helpers backed by `bpf_prog_info` and optional PMU counters.
 //!
 //! This is the PGO data source for the daemon:
 //! - **Program-level**: poll `run_cnt` / `run_time_ns`, compute deltas, rank
 //!   programs by hotness (run_cnt during observation window).
-//! - **Branch-level**: design interface for per-branch taken/not-taken counts.
-//!   In environments without hardware PMU (e.g., VMs), we use program-level
-//!   hotness as a proxy and synthesize uniform branch profiles for hot programs.
+//! - **Branch-level PMU**: use `perf_event_open` to collect hardware branch
+//!   miss/instruction counters during the observation window. When PMU is
+//!   unavailable (ENOENT/EACCES), falls back gracefully to bpf_stats only.
 //!
 //! The profiler produces [`crate::pass::ProfilingData`] that gets injected into
 //! the `BpfProgram` annotations before pass execution.
@@ -155,17 +155,35 @@ impl HotnessRanking {
 /// Polls `run_cnt`/`run_time_ns` twice with the given interval, computes the
 /// delta, and produces a [`ProfilingData`] suitable for injection.
 ///
-/// Currently, branch-level profiling is not available from `bpf_prog_info`,
-/// so the returned `ProfilingData` will have an empty `branch_profiles` map.
-/// The `program_hotness` field captures program-level activity.
+/// Also attempts to collect PMU branch miss/instruction counters via
+/// `perf_event_open`. If PMU is available, computes `branch_miss_rate`.
+/// Falls back gracefully if PMU is unavailable (VM without PMU passthrough).
 pub fn collect_program_profiling(
     prog_id: u32,
     interval: Duration,
 ) -> Result<(ProfilingData, PgoAnalysis)> {
     let mut poller = ProgStatsPoller::open(prog_id)?;
+
+    // Try to open PMU counters before the observation window.
+    let pmu = pmu::PmuCounters::open();
+
     // Take initial snapshot.
     poller.poll_delta()?;
+
+    // If PMU counters are available, reset and enable them for the observation window.
+    if let Some(ref pmu) = pmu {
+        pmu.reset_and_enable();
+    }
+
     thread::sleep(interval);
+
+    // Read PMU counters before disabling (captures the observation window).
+    let branch_miss_rate = pmu.as_ref().and_then(|p| {
+        let rate = p.read_branch_miss_rate();
+        p.disable();
+        rate
+    });
+
     let delta = poller
         .poll_delta()?
         .context("failed to compute stats delta")?;
@@ -173,8 +191,17 @@ pub fn collect_program_profiling(
 
     let profiling = ProfilingData {
         program_hotness: Some(analysis.clone()),
+        branch_miss_rate,
         ..Default::default()
     };
+
+    if let Some(rate) = branch_miss_rate {
+        eprintln!(
+            "  PMU: prog {} branch_miss_rate = {:.2}%",
+            prog_id,
+            rate * 100.0
+        );
+    }
 
     Ok((profiling, analysis))
 }
@@ -251,6 +278,204 @@ fn avg_ns(run_time_ns: u64, run_cnt: u64) -> Option<f64> {
         None
     } else {
         Some(run_time_ns as f64 / run_cnt as f64)
+    }
+}
+
+// ── PMU hardware performance counter support ────────────────────────
+
+/// PMU counter collection via `perf_event_open` syscall.
+///
+/// Opens hardware branch miss and branch instruction counters on the current
+/// CPU/thread. When PMU is unavailable (VM without passthrough, insufficient
+/// permissions), `open()` returns `None` and the profiler falls back to
+/// bpf_stats-only mode.
+pub(crate) mod pmu {
+    use std::os::unix::io::RawFd;
+
+    // perf_event_attr constants from <linux/perf_event.h>
+    const PERF_TYPE_HARDWARE: u32 = 0;
+    const PERF_COUNT_HW_BRANCH_INSTRUCTIONS: u64 = 4;
+    const PERF_COUNT_HW_BRANCH_MISSES: u64 = 5;
+
+    // ioctl commands for perf fds
+    const PERF_EVENT_IOC_RESET: libc::c_ulong = 0x2403;
+    const PERF_EVENT_IOC_ENABLE: libc::c_ulong = 0x2400;
+    const PERF_EVENT_IOC_DISABLE: libc::c_ulong = 0x2401;
+
+    /// Mirrors the kernel `struct perf_event_attr` (first 112 bytes).
+    /// We only fill the fields we need; the rest is zero-initialized.
+    #[repr(C)]
+    struct PerfEventAttr {
+        type_: u32,           // offset 0
+        size: u32,            // offset 4
+        config: u64,          // offset 8
+        sample_period_or_freq: u64, // offset 16
+        sample_type: u64,     // offset 24
+        read_format: u64,     // offset 32
+        flags: u64,           // offset 40 (bitfield: disabled, exclude_kernel, etc.)
+        wakeup_events_or_watermark: u32, // offset 48
+        bp_type: u32,         // offset 52
+        config1_or_bp_addr: u64, // offset 56
+        config2_or_bp_len: u64,  // offset 64
+        branch_sample_type: u64, // offset 72
+        sample_regs_user: u64,   // offset 80
+        sample_stack_user: u32,  // offset 88
+        clockid: i32,            // offset 92
+        sample_regs_intr: u64,   // offset 96
+        aux_watermark: u32,      // offset 104
+        sample_max_stack: u16,   // offset 108
+        _reserved: u16,          // offset 110
+    }
+
+    impl PerfEventAttr {
+        fn new(type_: u32, config: u64) -> Self {
+            let mut attr: Self = unsafe { std::mem::zeroed() };
+            attr.type_ = type_;
+            attr.size = std::mem::size_of::<Self>() as u32;
+            attr.config = config;
+            // flags bitfield: bit 0 = disabled, bit 5 = exclude_hv
+            // We start disabled and exclude hypervisor.
+            attr.flags = (1 << 0) | (1 << 5); // disabled=1, exclude_hv=1
+            attr
+        }
+    }
+
+    /// Holds two perf event fds: branch instructions and branch misses.
+    pub(crate) struct PmuCounters {
+        branch_insns_fd: RawFd,
+        branch_misses_fd: RawFd,
+    }
+
+    impl PmuCounters {
+        /// Try to open PMU hardware counters. Returns `None` if `perf_event_open`
+        /// fails (e.g., no PMU in VM, insufficient permissions).
+        pub(crate) fn open() -> Option<Self> {
+            let branch_insns_fd = perf_event_open_hw(PERF_COUNT_HW_BRANCH_INSTRUCTIONS)?;
+            let branch_misses_fd = match perf_event_open_hw(PERF_COUNT_HW_BRANCH_MISSES) {
+                Some(fd) => fd,
+                None => {
+                    // Clean up the first fd before returning None.
+                    unsafe { libc::close(branch_insns_fd); }
+                    return None;
+                }
+            };
+            Some(Self {
+                branch_insns_fd,
+                branch_misses_fd,
+            })
+        }
+
+        /// Reset counters to zero and enable them.
+        pub(crate) fn reset_and_enable(&self) {
+            unsafe {
+                libc::ioctl(self.branch_insns_fd, PERF_EVENT_IOC_RESET, 0);
+                libc::ioctl(self.branch_misses_fd, PERF_EVENT_IOC_RESET, 0);
+                libc::ioctl(self.branch_insns_fd, PERF_EVENT_IOC_ENABLE, 0);
+                libc::ioctl(self.branch_misses_fd, PERF_EVENT_IOC_ENABLE, 0);
+            }
+        }
+
+        /// Disable the counters (call after the observation window ends).
+        pub(crate) fn disable(&self) {
+            unsafe {
+                libc::ioctl(self.branch_insns_fd, PERF_EVENT_IOC_DISABLE, 0);
+                libc::ioctl(self.branch_misses_fd, PERF_EVENT_IOC_DISABLE, 0);
+            }
+        }
+
+        /// Read counters and compute branch miss rate.
+        /// Returns `None` if branch_instructions == 0 (no meaningful data).
+        pub(crate) fn read_branch_miss_rate(&self) -> Option<f64> {
+            let insns = read_counter(self.branch_insns_fd)?;
+            let misses = read_counter(self.branch_misses_fd)?;
+            if insns == 0 {
+                return None;
+            }
+            Some(misses as f64 / insns as f64)
+        }
+    }
+
+    impl Drop for PmuCounters {
+        fn drop(&mut self) {
+            unsafe {
+                libc::close(self.branch_insns_fd);
+                libc::close(self.branch_misses_fd);
+            }
+        }
+    }
+
+    /// Open a single hardware perf event counter on the current thread, any CPU.
+    fn perf_event_open_hw(config: u64) -> Option<RawFd> {
+        let attr = PerfEventAttr::new(PERF_TYPE_HARDWARE, config);
+        let fd = unsafe {
+            libc::syscall(
+                libc::SYS_perf_event_open,
+                &attr as *const PerfEventAttr as libc::c_long,
+                0 as libc::c_long,  // pid = 0 (current thread)
+                -1 as libc::c_long, // cpu = -1 (any CPU)
+                -1 as libc::c_long, // group_fd = -1 (no group)
+                0 as libc::c_long,  // flags = 0
+            )
+        };
+        if fd < 0 {
+            return None;
+        }
+        Some(fd as RawFd)
+    }
+
+    /// Read a u64 counter value from a perf event fd.
+    fn read_counter(fd: RawFd) -> Option<u64> {
+        let mut value: u64 = 0;
+        let ret = unsafe {
+            libc::read(
+                fd,
+                &mut value as *mut u64 as *mut libc::c_void,
+                std::mem::size_of::<u64>(),
+            )
+        };
+        if ret != std::mem::size_of::<u64>() as isize {
+            return None;
+        }
+        Some(value)
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn pmu_open_returns_some_or_none_gracefully() {
+            // This test verifies that open() doesn't panic regardless of
+            // whether PMU is available. In CI/VM without PMU it returns None.
+            let result = PmuCounters::open();
+            if let Some(ref pmu) = result {
+                // If PMU is available, verify basic operations don't panic.
+                pmu.reset_and_enable();
+                // Do a trivial computation so counters have something to count.
+                let mut sum = 0u64;
+                for i in 0..10000 {
+                    sum = sum.wrapping_add(i);
+                }
+                let _ = std::hint::black_box(sum);
+                let rate = pmu.read_branch_miss_rate();
+                pmu.disable();
+                // Rate should be Some with a value between 0.0 and 1.0.
+                if let Some(r) = rate {
+                    assert!(r >= 0.0 && r <= 1.0, "branch miss rate out of range: {}", r);
+                }
+            }
+            // If None, PMU is not available — that's fine, graceful fallback.
+        }
+
+        #[test]
+        fn perf_event_attr_layout_is_correct() {
+            let attr = PerfEventAttr::new(PERF_TYPE_HARDWARE, PERF_COUNT_HW_BRANCH_MISSES);
+            assert_eq!(attr.type_, 0);
+            assert_eq!(attr.config, 5);
+            assert_eq!(attr.size, std::mem::size_of::<PerfEventAttr>() as u32);
+            // disabled=1 (bit 0) and exclude_hv=1 (bit 5) => 0b100001 = 33
+            assert_eq!(attr.flags, 33);
+        }
     }
 }
 

@@ -21,7 +21,16 @@ if str(REPO_ROOT) not in sys.path:
 
 from micro.benchmark_catalog import load_suite as load_micro_suite
 from runner.libs.benchmarks import resolve_memory_file
-from runner.libs.recompile import apply_recompile
+from runner.libs.recompile import apply_daemon_rejit as _apply_daemon_rejit
+
+
+def apply_recompile(prog_ids: list[int], daemon_binary: Any) -> dict[int, dict[str, Any]]:
+    """Wrap apply_daemon_rejit to return a dict keyed by prog_id."""
+    results: dict[int, dict[str, Any]] = {}
+    for pid in prog_ids:
+        result = _apply_daemon_rejit(str(daemon_binary), [pid])
+        results[pid] = result
+    return results
 
 
 ETHERNET_HEADER_SIZE = 14

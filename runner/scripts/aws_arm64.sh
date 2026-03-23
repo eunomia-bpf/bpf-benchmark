@@ -36,8 +36,6 @@ ARM64_CROSS_DAEMON_REAL="${ARM64_CROSS_DAEMON_REAL:-$ARM64_CROSSBUILD_OUTPUT_DIR
 ARM64_CROSS_LIB_DIR="${ARM64_CROSS_LIB_DIR:-$ARM64_CROSSBUILD_OUTPUT_DIR/lib}"
 CROSS_COMPILE_PREFIX="${CROSS_COMPILE_ARM64:-aarch64-linux-gnu-}"
 SMOKE_CORPUS_OBJECT="${SMOKE_CORPUS_OBJECT:-$ROOT_DIR/corpus/build/katran/balancer.bpf.o}"
-SMOKE_CORPUS_POLICY_DIR="${SMOKE_CORPUS_POLICY_DIR:-$ROOT_DIR/corpus/policies/katran/balancer}"
-SMOKE_CORPUS_PROGRAM="${SMOKE_CORPUS_PROGRAM:-balancer_ingress}"
 
 STATE_INSTANCE_ID=""
 STATE_INSTANCE_IP=""
@@ -547,7 +545,7 @@ require_local_path() {
 
 ensure_cross_arm64_artifacts() {
     if [[ ! -x "$ARM64_CROSS_RUNNER" || ! -x "$ARM64_CROSS_RUNNER_REAL" || \
-          ! -x "$ARM64_CROSS_SCANNER" || ! -x "$ARM64_CROSS_SCANNER_REAL" || \
+          ! -x "$ARM64_CROSS_DAEMON" || ! -x "$ARM64_CROSS_DAEMON_REAL" || \
           ! -d "$ARM64_CROSS_LIB_DIR" ]]; then
         log "Building local AL2023-compatible ARM64 userspace artifacts"
         make -C "$ROOT_DIR" cross-arm64 >/dev/null
@@ -569,11 +567,9 @@ ensure_benchmark_bundle() {
     require_local_path "$ROOT_DIR/micro/results_layout.py" "micro results layout"
     require_local_path "$ROOT_DIR/micro/config/micro_pure_jit.yaml" "micro suite manifest"
     require_local_path "$ROOT_DIR/micro/programs/simple.bpf.o" "simple micro object"
-    require_local_path "$ROOT_DIR/micro/policies/load_byte_recompose.yaml" "load_byte_recompose policy"
     require_local_path "$ROOT_DIR/runner/libs/__init__.py" "runner python helpers"
     require_local_path "$ROOT_DIR/runner/scripts/arm64_t4g_remote_benchmark.py" "ARM64 remote benchmark runner"
     require_local_path "$SMOKE_CORPUS_OBJECT" "daemon smoke object"
-    require_local_path "$SMOKE_CORPUS_POLICY_DIR/${SMOKE_CORPUS_PROGRAM}.policy.yaml" "daemon smoke policy"
 
     rm -rf "$BENCHMARK_BUNDLE_DIR"
     mkdir -p \
@@ -585,9 +581,7 @@ ensure_benchmark_bundle() {
         "$BENCHMARK_BUNDLE_DIR/micro/programs" \
         "$BENCHMARK_BUNDLE_DIR/micro/generated-inputs" \
         "$BENCHMARK_BUNDLE_DIR/micro/config" \
-        "$BENCHMARK_BUNDLE_DIR/micro/policies" \
-        "$BENCHMARK_BUNDLE_DIR/corpus/build/katran" \
-        "$BENCHMARK_BUNDLE_DIR/corpus/policies/katran/balancer"
+        "$BENCHMARK_BUNDLE_DIR/corpus/build/katran"
 
     cp "$ARM64_CROSS_RUNNER" "$BENCHMARK_BUNDLE_DIR/runner/build/micro_exec"
     cp "$ARM64_CROSS_RUNNER_REAL" "$BENCHMARK_BUNDLE_DIR/runner/build/micro_exec.real"
@@ -599,14 +593,12 @@ ensure_benchmark_bundle() {
     cp -a "$ROOT_DIR/micro/config/." "$BENCHMARK_BUNDLE_DIR/micro/config/"
     cp -a "$ROOT_DIR/micro/programs/." "$BENCHMARK_BUNDLE_DIR/micro/programs/"
     cp -a "$ROOT_DIR/micro/generated-inputs/." "$BENCHMARK_BUNDLE_DIR/micro/generated-inputs/"
-    cp -a "$ROOT_DIR/micro/policies/." "$BENCHMARK_BUNDLE_DIR/micro/policies/"
 
     cp -a "$ROOT_DIR/runner/libs/." "$BENCHMARK_BUNDLE_DIR/runner/libs/"
     cp "$ROOT_DIR/runner/scripts/arm64_t4g_remote_benchmark.py" \
         "$BENCHMARK_BUNDLE_DIR/runner/scripts/"
 
     cp "$SMOKE_CORPUS_OBJECT" "$BENCHMARK_BUNDLE_DIR/corpus/build/katran/balancer.bpf.o"
-    cp -a "$SMOKE_CORPUS_POLICY_DIR/." "$BENCHMARK_BUNDLE_DIR/corpus/policies/katran/balancer/"
 
     tar -C "$BENCHMARK_BUNDLE_DIR" -czf "$BENCHMARK_BUNDLE_TAR" .
 }
