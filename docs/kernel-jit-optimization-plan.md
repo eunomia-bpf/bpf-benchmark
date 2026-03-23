@@ -204,6 +204,10 @@ BpfReJIT 的设计基于三个层次的 insight：
 | **ADDR_CALC** | 可选 | mov+shift+add → `bpf_lea()` kinsn → JIT emit LEA |
 | **Const propagation** | 否 | 利用 frozen map / runtime invariants 做常量折叠 |
 | **Subprog inline** | 否 | bytecode 层展开 subprogram call |
+| **SIMD kinsn** | 是（新 module） | memcpy/checksum/hash → AVX2/NEON SIMD 指令。不需改框架，只需新 kinsn module + daemon pass |
+| **Frozen map inlining** | 否 | `BPF_MAP_FREEZE` 后的只读 map → 读当前值 → 替换 `map_lookup_elem` 为常量 `MOV`。verifier 看到常量后自动 dead branch elimination |
+| **Dynamic map inlining + invalidation** | 否 | JVM deoptimization 模型：daemon 观察到 map 未被修改 → inline 当前值 → REJIT。map 被修改后 → 检测到 → 重新 REJIT（更新值或回退到 lookup）。**runtime-guided specialization，static compiler 不可能做到** |
+| **Verifier-assisted const propagation** | 否 | 用 `log_level=2` 获取 verifier 的 per-insn 寄存器状态（tnum/range）→ 识别运行时常量 → 替换为 `MOV reg, const` → 死代码消除 |
 
 ### 3.2 安全加固变换
 
@@ -708,4 +712,10 @@ make clean
 | **415** | **修复全部 14 个测试问题（2026-03-23）** | ✅ | 6 HIGH + 8 MEDIUM 全修。BpfProgInfo/BtfInfo field-by-field layout 验证、BTF_KIND 从 header 解析、真实 .bpf.o bytecode 测试 5 个 pass。**关键发现**：rotate scanner 不匹配 clang 反向 OR、cond_select 不匹配 Jcc+1 短 pattern、extract 全部 caller-saved conflict。 |
 | **416** | **Pass pattern matcher 修复 + caller-saved save/restore（2026-03-23）** | ✅ | **(1)** RotatePass: 支持反向 OR 操作数（256/256 匹配，17 applied）。**(2)** CondSelectPass: 支持 Jcc+1 短 pattern（104 detected）。**(3)** caller-saved save/restore in passes/utils.rs（endian 256 applied, extract 1 applied）。**(4)** BranchFlipPass 真实 bytecode 测试（256 flips verified）。**303 tests**。 |
 | **417** | **⚠️ kinsn operand-encoded ALU 设计（2026-03-23）** | ✅ 设计完成 | **核心 novelty**：kinsn 不是函数调用，是自定义 ALU 指令。dst_reg 编码操作数，off 编码常量，verifier 只 mark dst_reg modified + narrow_result 回调恢复精度。每个 kinsn 替换都是 N→1 指令，零开销。**关键**: 这是论文 kinsn 机制的核心贡献 — 如何让 verifier 正确建模平台特定内联指令。设计报告：`docs/tmp/20260323/kinsn_register_design_20260323.md`。 |
-| **418** | kfunc verifier 机制调研（2026-03-23） | 🔄 | 调研 verifier 为 kfunc 提供的所有扩展点（flag、参数验证、返回类型、bpf_fastcall 等），确定 KF_INLINE_EMIT 可复用哪些机制。 |
+| **418** | kfunc verifier 机制调研（2026-03-23） | ✅ | verifier 无现成机制让 kfunc 控制 clobber。KF_FASTCALL 只做 spill/fill NOP 消除。do_refine_retval_range() 和 bpf_res_spin_lock 是 range narrowing 先例。报告：`docs/tmp/20260323/kfunc_verifier_mechanisms_20260323.md`。 |
+| **419** | **⚠️ bpf_kinsn_ops 完整设计（2026-03-23）** | ✅ | codex 调研。独立 sidecar `struct bpf_kinsn_ops`（不扩展 btf_kfunc_id_set）。`model_call()` 返回声明式 `bpf_kinsn_effect`（input_mask + clobber_mask + result range/tnum + mem_accesses），不暴露 bpf_reg_state。packed ABI 用 sidecar pseudo-insn（不复用 off 字段）。endian_load 改 const void*。KF_KINSN 替代 KF_INLINE_EMIT。设计报告：`docs/tmp/20260323/kinsn_ops_design_20260323.md`。 |
+| **420** | **⚠️ kinsn_ops 完整实现（2026-03-23）** | ✅ | codex 实现两步。**第一步**：bpf_kinsn_ops + model_call + verifier 通用逻辑 + 5 module 迁移。**第二步**：packed ABI + sidecar pseudo-insn + daemon 适配。**结果**：53/62 applied, 1612 sites（rotate 701, extract 524, endian 256）。vm-selftest **70/70 PASS**（含 rejit_kinsn 9/9 + rejit_kinsn_packed 6/6）。Commit `8c1dd22`。Review：`docs/tmp/20260323/kinsn_implementation_review_20260323.md`。 |
+| **421** | SIMD kinsn module | 待做 | 新 kinsn module：bpf_memcpy_simd → AVX2/NEON，bpf_crc32 → SSE4.2。不需改框架，只需新 module + daemon pass。 |
+| **422** | Frozen map constant inlining | 待做 | BPF_MAP_FREEZE 后的只读 map → daemon 读值 → 替换 map_lookup_elem 为常量 MOV → verifier dead branch elimination。纯 bytecode rewrite，不需 kinsn。 |
+| **423** | **Dynamic map inlining + invalidation** | 待做 | JVM deoptimization 模型。daemon 观察 map 未修改 → inline 值 → REJIT。map 修改 → 检测 → 重新 REJIT。**runtime-guided specialization，论文核心 story**。 |
+| **424** | Verifier-assisted constant propagation | 待做 | 用 log_level=2 获取 per-insn verifier state → 识别常量 → 替换 → 死代码消除。 |
