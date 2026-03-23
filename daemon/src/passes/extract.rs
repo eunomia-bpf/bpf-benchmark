@@ -119,7 +119,7 @@ impl BpfPass for ExtractPass {
                     reason: "platform lacks BMI1 (BEXTR) support".into(),
                 }],
                 diagnostics: vec![],
-            });
+            ..Default::default() });
         }
 
         // Check if bpf_extract64 kfunc is available.
@@ -133,7 +133,7 @@ impl BpfPass for ExtractPass {
                     reason: "bpf_extract64 kfunc not available".into(),
                 }],
                 diagnostics: vec![],
-            });
+            ..Default::default() });
         }
 
         let bt_analysis = BranchTargetAnalysis;
@@ -182,8 +182,7 @@ impl BpfPass for ExtractPass {
                 changed: false,
                 sites_applied: 0,
                 sites_skipped: skipped,
-                diagnostics: vec![],
-            });
+                diagnostics: vec![], ..Default::default() });
         }
 
         // Build replacement instruction stream.
@@ -260,8 +259,7 @@ impl BpfPass for ExtractPass {
             changed: applied > 0,
             sites_applied: applied,
             sites_skipped: skipped,
-            diagnostics: vec![],
-        })
+            diagnostics: vec![], ..Default::default() })
     }
 }
 

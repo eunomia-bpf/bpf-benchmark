@@ -431,9 +431,10 @@ def summarize_failure_reason(record: dict[str, Any] | None) -> str:
     if error:
         return str(error)
     sample = record.get("sample") or {}
-    recompile = sample.get("recompile") or {}
-    if recompile.get("error"):
-        return str(recompile["error"])
+    # Check rejit (canonical) first, then recompile (legacy).
+    rejit = sample.get("rejit") or sample.get("recompile") or {}
+    if rejit.get("error"):
+        return str(rejit["error"])
     return "unknown"
 
 
@@ -444,7 +445,9 @@ def program_label(record: dict[str, Any]) -> str:
 def recompile_metadata(record: dict[str, Any] | None) -> dict[str, Any]:
     if not record or not record.get("ok"):
         return {}
-    return ((record.get("sample") or {}).get("recompile") or {})
+    sample = (record.get("sample") or {})
+    # Prefer rejit (canonical); fall back to recompile (legacy).
+    return sample.get("rejit") or sample.get("recompile") or {}
 
 
 def effective_applied_families(

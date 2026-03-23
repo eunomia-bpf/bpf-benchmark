@@ -418,8 +418,7 @@ impl BpfPass for WideMemPass {
                 changed: false,
                 sites_applied: 0,
                 sites_skipped: skipped,
-                diagnostics: vec![],
-            });
+                diagnostics: vec![], ..Default::default() });
         }
 
         // Apply rewrite: build new instruction stream with address map.
@@ -492,8 +491,7 @@ impl BpfPass for WideMemPass {
             changed: applied > 0,
             sites_applied: applied,
             sites_skipped: skipped,
-            diagnostics: vec![],
-        })
+            diagnostics: vec![], ..Default::default() })
     }
 }
 

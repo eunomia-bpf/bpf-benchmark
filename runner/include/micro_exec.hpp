@@ -97,11 +97,18 @@ struct code_size_summary {
 
 struct rejit_summary {
     bool requested = false;
-    std::string mode = "none";            // "same-bytecode" or "replacement"
+    std::string mode = "none";            // "same-bytecode", "replacement", or "daemon"
     bool syscall_attempted = false;
     bool applied = false;
     uint32_t insn_cnt = 0;                // number of BPF insns sent to REJIT
     std::string error;
+    /* Extended fields from daemon transform trace (P1) */
+    uint32_t total_sites_applied = 0;
+    std::vector<std::string> passes_applied;   // pass names that changed the program
+    int64_t insn_delta = 0;
+    uint32_t verifier_retries = 0;
+    std::vector<std::string> final_disabled_passes;
+    std::string daemon_response;               // raw daemon JSON response
 };
 
 struct sample_result {

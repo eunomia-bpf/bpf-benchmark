@@ -150,8 +150,7 @@ impl BpfPass for BranchFlipPass {
                 changed: false,
                 sites_applied: 0,
                 sites_skipped: skipped,
-                diagnostics: vec![],
-            });
+                diagnostics: vec![], ..Default::default() });
         }
 
         // Phase 3: apply rewrites.
@@ -245,8 +244,7 @@ impl BpfPass for BranchFlipPass {
             changed: applied > 0,
             sites_applied: applied,
             sites_skipped: skipped,
-            diagnostics: vec![],
-        })
+            diagnostics: vec![], ..Default::default() })
     }
 }
 

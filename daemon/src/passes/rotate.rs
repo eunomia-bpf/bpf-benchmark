@@ -41,7 +41,7 @@ impl BpfPass for RotatePass {
                     reason: "bpf_rotate64 kfunc not available".into(),
                 }],
                 diagnostics: vec![],
-            });
+            ..Default::default() });
         }
 
         // Prerequisite: RORX requires BMI2.
@@ -55,7 +55,7 @@ impl BpfPass for RotatePass {
                     reason: "platform lacks RORX (BMI2) support".into(),
                 }],
                 diagnostics: vec![],
-            });
+            ..Default::default() });
         }
 
         let bt_analysis = BranchTargetAnalysis;
@@ -118,8 +118,7 @@ impl BpfPass for RotatePass {
                 changed: false,
                 sites_applied: 0,
                 sites_skipped: skipped,
-                diagnostics: vec![],
-            });
+                diagnostics: vec![], ..Default::default() });
         }
 
         // Build replacement instruction stream.
@@ -194,8 +193,7 @@ impl BpfPass for RotatePass {
             changed: applied > 0,
             sites_applied: applied,
             sites_skipped: skipped,
-            diagnostics: vec![],
-        })
+            diagnostics: vec![], ..Default::default() })
     }
 }
 

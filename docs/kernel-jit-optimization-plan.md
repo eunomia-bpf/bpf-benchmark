@@ -668,19 +668,27 @@ make clean
 | **375** | **Daemon 7 issues 全修复（2026-03-22）** | ✅ | **(1)** cond_select parallel-copy 算法（27 组合穷举测试）。**(2)** rotate dst 改写检查。**(3)** fd_array per-kfunc module_fd（HashMap）。**(4)** spectre→barrier_placeholder + Placeholder category。**(5)** InsnAnnotation remap（addr_map 重映射）。**(6)** PGO 闭环（ProfilingData→annotations→branch_flip）。**(7)** ExtractPass 已存在确认。**187 tests pass**（+17 new）。 |
 | **376** | 缺失 pass 站点覆盖分析（2026-03-22） | ✅ | ENDIAN_FUSION 1386 sites（最高）、BITFIELD_EXTRACT 542 sites、ADDR_CALC 较少。ENDIAN 需新 kinsn module + daemon pass。 |
 | **377** | **ExtractPass 验证+增强（2026-03-22）** | ✅ | pattern 正确（RSH+AND→bpf_extract64 kfunc）。+9 new edge case tests（width=1/32, shift=0, consecutive, non-matching masks）。**196 tests pass**，zero warnings。 |
-| **378** | E2E katran veth 修复 + 全量跑 | 🔄 | VM 缺 veth 模块导致 katran 失败。opus 修复中（modprobe veth）。 |
-| **379** | 全项目架构审查 + 论文差距分析 | 🔄 | Codex 全面 review：死代码、设计缺陷、组织问题、论文差距。报告→`docs/tmp/20260322/full_project_review_20260322.md`。 |
+| **378** | E2E katran veth 修复 + 全量跑 | ✅ 归入 #404 | VM 缺 veth 模块导致 katran 失败。opus 修复中（modprobe veth）。 |
+| **379** | **全项目架构审查 + 论文差距分析（2026-03-22）** | ✅ | Codex 全面 review：死代码、设计缺陷、组织问题、论文差距。报告→`docs/tmp/20260322/full_project_review_20260322.md`。 |
 | **380** | **ENDIAN_FUSION 实现（2026-03-22）** | ✅ | x86 bpf_endian.c（MOVBE 3 variants）+ arm64 bpf_endian.c（LDR+REV）+ daemon EndianFusionPass（LDX_MEM+ENDIAN_TO_BE→kfunc）。+22 tests。**218 tests pass**。 |
 | **381** | **Module UB + cross-arch 修复（2026-03-22）** | ✅ | **(1)** extract len=64 UB fix。**(2)** rotate shift=0 UB fix。**(3)** ARM64 ROL/ROR 统一（NEG+AND+RORV 实现左旋）。**(4)** 全部 module 改 BPF_PROG_TYPE_UNSPEC（不限 XDP）。**(5)** build artifact gitignore。 |
 | **382** | **真实 Spectre barrier（2026-03-22）** | ✅ | x86 bpf_barrier.c（LFENCE 3B）+ arm64 bpf_barrier.c（DSB SY+ISB 8B）。daemon SpeculationBarrierPass 替换 JA+0 placeholder。kfunc 不可用时 pass 不做任何事。**224 tests pass**。 |
 | **383** | **kinsn common header + module 简化（2026-03-22）** | ✅ | `module/include/kinsn_common.h`：DEFINE_KINSN_MODULE/DEFINE_KINSN_MODULE_MULTI 宏。10 个 module 文件全部简化（~300 行减少）。BPF_PROG_TYPE_UNSPEC 默认全 prog type。module/.gitignore 清理 artifact。 |
+| **406** | Transform trace 可观测性设计 | 🔄 | daemon optimize 返回 per-site transform log（PC、原始指令、替换指令、insn delta）。runner 写入 JSON。codex 调研中。 |
+| **405** | Micro 回归分析（bounds_check_heavy/rotate64_hash） | 待做 | 两个 applied benchmark 0.87-0.88x 回归。需要 per-pass ablation 定位。依赖 #406 可观测性。 |
+| **404** | E2E 3 bug 修复 + 重跑 | ✅ | persist_results 签名 + scx bpftool + katran CONFIG_NET_IPIP。vm-e2e 重跑中。 |
+| **403** | Corpus applied=2 调查+修复 | 🔄 | 152 measured 但只 2 applied。opus 调查中。 |
+| **402** | CPU freq scaling bias 修复（2026-03-22） | ✅ | daemon socket idle gap 导致 CPU 降频。修复：daemon 调用移到测量前。geomean 0.654→1.059x。 |
+| **401** | Split BTF name_off 修复（2026-03-22） | ✅ | module BTF 用 split BTF，name_off 需减 vmlinux str_len。修复后 7/7 kfuncs 发现成功。241 tests。 |
+| **400** | Verifier log buffer ENOSPC 修复（2026-03-22） | ✅ | log_level=2 + 64KB buffer 对大程序溢出→ENOSPC→误判 verifier 拒绝。改为快速路径 log_level=0，失败时 16MB。 |
+| **399** | v1 policy 文件系统清理（2026-03-22） | ✅ | 删 runner/libs/policy.py (553行) + corpus/policies/ (582文件) + micro/policies/ (~40文件) + CLI 参数 + generate_default_policies.py + auto_tune.py。corpus rejit 改为 daemon_socket 触发。 |
 | **398** | **Verifier differential correctness verification 调研（2026-03-22）** | 📝 | 结论：**可行，但只能做 heuristic differential checking，不是 sound correctness proof。** 三方案里 **B（每 pass 前后 temp `BPF_PROG_LOAD` + `log_level=2` 对比）最佳**；A 太晚，C 工程量过大。对 `wide_mem` 信号最强；`rotate/cond_select` 很弱；`branch_flip` false positive 最高。**最可信路线 = verifier-diff guardrail + 本地 peephole translation validation（SMT/bitvector）**。完整报告：`docs/tmp/20260322/verifier_differential_verification_research_20260322.md`。 |
-| **397** | Verifier-guided transform rollback | 🔄 | REJIT 失败→解析 log→归因到 pass→禁用→重试。opus 进行中。 |
-| **396** | Fuzz + adversarial negative tests | 🔄 | tests/negative/：10000 轮随机 bytecode fuzz + 15 种对抗性 pattern。opus 进行中。 |
-| **395** | Corpus 54 unmeasured 完整实现 | 待做 | 需要：新 attach 类型实现（kprobe/tracepoint/cgroup_sock_addr 等）+ 触发机制 + bpf_stats 测量 + YAML 配置。不只是改 config。 |
+| **397** | **Verifier-guided transform rollback（2026-03-22）** | ✅ | TransformAttribution + extract_failure_pc + rollback loop + --no-rollback flag。**240 tests pass**。 |
+| **396** | **Fuzz + adversarial negative tests（2026-03-22）** | ✅ | tests/negative/: fuzz_rejit.c (10000轮) + adversarial_rejit.c (23 tests + 3 differential)。vm-negative-test target。 |
+| **395** | **Corpus 54 unmeasured 完整实现（2026-03-22）** | ✅ | 8 新 attach 类型 + 22 新程序。measured_pairs 91→152。 | 需要：新 attach 类型实现（kprobe/tracepoint/cgroup_sock_addr 等）+ 触发机制 + bpf_stats 测量 + YAML 配置。不只是改 config。 |
 | **394** | deprecated CLI 清理（2026-03-22） | ✅ | 删 --daemon-path（3处）、recompile_v5→blind_apply、recompile_v4 死分支、重复 --bpftool 合并。 |
-| **393** | sudo 全量清理 | 🔄 | VM 内已是 root，主机不跑 BPF。删除所有 sudo（除 AWS 脚本）。opus 进行中。 |
-| **392** | kernel 修改总结 | 🔄 | sonnet 进行中。 |
+| **393** | **sudo 全量清理（2026-03-22）** | ✅ | 29 文件，删除所有 sudo（除 AWS 脚本）。VM 内已是 root。 |
+| **392** | **kernel 修改总结（2026-03-22）** | ✅ | 22 文件，净增 ~1300 行。5 组件：GET_ORIGINAL + REJIT + kinsn + 传播 + bug fix。 |
 | **391** | **5 dead code 接线（2026-03-22）** | ✅ | **(1)** verifier_log→bpf_prog_rejit（64KB log buffer + 结构化解析）。**(2)** HotnessRanking→watch（热度排序优先优化）。**(3)** PlatformCapabilities→PassContext（/proc/cpuinfo 检测 BMI1/CMOV/MOVBE/RORX，pass 开头检查）。**(4)** all_module_fds→cmd_apply（required⊆all 验证）。**(5)** AnalysisCache invalidate→PassManager（pass 修改后精确失效）。**229 tests pass**。 |
 | **390** | **Makefile 大重构（2026-03-22）** | ✅ | 759→335 行（56% 减少）。vm-test 合并 4 个 target。vm-e2e 收敛为 `e2e/run.py all`。inline shell 抽到 4 个脚本。删 verify-build/compare/kernel-perf 死 target。 |
 | **389** | **Makefile 全自动 pipeline（2026-03-22）** | ✅ | kernel 自动 defconfig + modules_prepare。kinsn-modules 加入所有 vm-* 依赖链。corpus load_all.sh（5/5 modules）。删 e2e/run.py --vm 死代码（~160 行）。删 KINSN_MODULES 死变量。 |

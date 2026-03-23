@@ -1,0 +1,598 @@
+{
+  "baseline": {
+    "summary": {
+      "agent_cpu_total_pct": {
+        "count": 0,
+        "max": null,
+        "mean": null,
+        "median": null,
+        "min": null
+      },
+      "app_throughput": {
+        "count": 3,
+        "max": 1549997.3343521105,
+        "mean": 520615.87952484074,
+        "median": 7837.094558144813,
+        "min": 4013.2096642668357
+      },
+      "bpf_avg_ns_per_run": {
+        "count": 3,
+        "max": 715.0833333333334,
+        "mean": 351.58990979699524,
+        "median": 232.0855949895616,
+        "min": 107.60080106809079
+      },
+      "events_per_sec": {
+        "count": 3,
+        "max": 55323.203163236685,
+        "mean": 18447.2811061768,
+        "median": 15.841139398920077,
+        "min": 2.7990158947946044
+      },
+      "system_cpu_busy_pct": {
+        "count": 3,
+        "max": 5.242841786377406,
+        "mean": 3.134129758702235,
+        "median": 4.157464127460376,
+        "min": 0.002083362268923139
+      }
+    },
+    "workloads": [
+      {
+        "agent_cpu": {
+          "sys_pct": null,
+          "total_pct": null,
+          "user_pct": null
+        },
+        "app_throughput": 4013.2096642668357,
+        "bpf": {
+          "programs": {
+            "6": {
+              "avg_ns_per_run": 4165.0,
+              "bytes_jited": 20298,
+              "bytes_xlated": 34920,
+              "id": 6,
+              "name": "tracepoint__sch",
+              "run_cnt_delta": 2,
+              "run_time_ns_delta": 8330,
+              "type": "raw_tracepoint"
+            },
+            "8": {
+              "avg_ns_per_run": 124.14113980409617,
+              "bytes_jited": 22797,
+              "bytes_xlated": 36664,
+              "id": 8,
+              "name": "trace_security_",
+              "run_cnt_delta": 2246,
+              "run_time_ns_delta": 278821,
+              "type": "kprobe"
+            },
+            "10": {
+              "avg_ns_per_run": 87.44746215494212,
+              "bytes_jited": 7369,
+              "bytes_xlated": 13440,
+              "id": 10,
+              "name": "lsm_file_open_t",
+              "run_cnt_delta": 2246,
+              "run_time_ns_delta": 196407,
+              "type": "lsm"
+            }
+          },
+          "summary": {
+            "active_programs": 3,
+            "avg_ns_per_run": 107.60080106809079,
+            "total_events": 4494,
+            "total_run_time_ns": 483558
+          }
+        },
+        "command_template": "stress-ng --exec 4 --exec-method execve --timeout {duration}s --metrics-brief",
+        "drop_counters": {},
+        "duration_s": 0.08123173899999969,
+        "event_counts": {},
+        "events_per_sec": 55323.203163236685,
+        "events_total": 4494,
+        "kind": "exec_storm",
+        "metric": "bogo-ops/s",
+        "name": "exec_storm",
+        "ops_per_sec": 4013.2096642668357,
+        "ops_total": 326.0,
+        "stderr_tail": "",
+        "stdout_tail": "stress-ng: info:  [326] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [326] setting to a 1 min, 0 secs run per stressor\nstress-ng: info:  [326] dispatching hogs:\nstress-ng: metrc: [326] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [326]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: warn:  [326] metrics-check: all bogo-op counters are zero, data may be incorrect\nstress-ng: info:  [326] skipped: 4: exec (4)\nstress-ng: info:  [326] passed: 0\nstress-ng: info:  [326] failed: 0\nstress-ng: info:  [326] metrics untrustworthy: 0\nstress-ng: info:  [326] successful run completed in 0.00 secs",
+        "system_cpu": {
+          "busy_pct": 0.002083362268923139
+        }
+      },
+      {
+        "agent_cpu": {
+          "sys_pct": null,
+          "total_pct": null,
+          "user_pct": null
+        },
+        "app_throughput": 1549997.3343521105,
+        "bpf": {
+          "programs": {
+            "6": {
+              "avg_ns_per_run": 6184.5,
+              "bytes_jited": 20298,
+              "bytes_xlated": 34920,
+              "id": 6,
+              "name": "tracepoint__sch",
+              "run_cnt_delta": 2,
+              "run_time_ns_delta": 12369,
+              "type": "raw_tracepoint"
+            },
+            "8": {
+              "avg_ns_per_run": 319.4560669456067,
+              "bytes_jited": 22797,
+              "bytes_xlated": 36664,
+              "id": 8,
+              "name": "trace_security_",
+              "run_cnt_delta": 478,
+              "run_time_ns_delta": 152700,
+              "type": "kprobe"
+            },
+            "10": {
+              "avg_ns_per_run": 119.80962343096235,
+              "bytes_jited": 7369,
+              "bytes_xlated": 13440,
+              "id": 10,
+              "name": "lsm_file_open_t",
+              "run_cnt_delta": 478,
+              "run_time_ns_delta": 57269,
+              "type": "lsm"
+            }
+          },
+          "summary": {
+            "active_programs": 3,
+            "avg_ns_per_run": 232.0855949895616,
+            "total_events": 958,
+            "total_run_time_ns": 222338
+          }
+        },
+        "command_template": "fio --name=test --rw=randread --bs=4k --size=100M --runtime={duration} --time_based",
+        "drop_counters": {},
+        "duration_s": 60.475447875,
+        "event_counts": {},
+        "events_per_sec": 15.841139398920077,
+        "events_total": 958,
+        "kind": "file_io",
+        "metric": "IOPS",
+        "name": "file_io",
+        "ops_per_sec": 1549997.3343521105,
+        "ops_total": 93736783.0,
+        "stderr_tail": "",
+        "stdout_tail": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.010000,\n        \"500\" : 80.344843,\n        \"750\" : 19.468476,\n        \"1000\" : 0.094093\n      },\n      \"latency_us\" : {\n        \"2\" : 0.010000,\n        \"4\" : 0.061694,\n        \"10\" : 0.028039,\n        \"20\" : 0.010000,\n        \"50\" : 0.010000,\n        \"100\" : 0.010000,\n        \"250\" : 0.010000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.010000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}",
+        "system_cpu": {
+          "busy_pct": 4.157464127460376
+        }
+      },
+      {
+        "agent_cpu": {
+          "sys_pct": null,
+          "total_pct": null,
+          "user_pct": null
+        },
+        "app_throughput": 7837.094558144813,
+        "bpf": {
+          "programs": {
+            "6": {
+              "avg_ns_per_run": 3956.0,
+              "bytes_jited": 20298,
+              "bytes_xlated": 34920,
+              "id": 6,
+              "name": "tracepoint__sch",
+              "run_cnt_delta": 2,
+              "run_time_ns_delta": 7912,
+              "type": "raw_tracepoint"
+            },
+            "8": {
+              "avg_ns_per_run": 1039.7349397590363,
+              "bytes_jited": 22797,
+              "bytes_xlated": 36664,
+              "id": 8,
+              "name": "trace_security_",
+              "run_cnt_delta": 83,
+              "run_time_ns_delta": 86298,
+              "type": "kprobe"
+            },
+            "10": {
+              "avg_ns_per_run": 312.33734939759034,
+              "bytes_jited": 7369,
+              "bytes_xlated": 13440,
+              "id": 10,
+              "name": "lsm_file_open_t",
+              "run_cnt_delta": 83,
+              "run_time_ns_delta": 25924,
+              "type": "lsm"
+            }
+          },
+          "summary": {
+            "active_programs": 3,
+            "avg_ns_per_run": 715.0833333333334,
+            "total_events": 168,
+            "total_run_time_ns": 120134
+          }
+        },
+        "command_template": "wrk -t2 -c10 -d{duration}s http://127.0.0.1:{port}/",
+        "drop_counters": {},
+        "duration_s": 60.02109538299999,
+        "event_counts": {},
+        "events_per_sec": 2.7990158947946044,
+        "events_total": 168,
+        "kind": "network",
+        "metric": "req/s",
+        "name": "network",
+        "ops_per_sec": 7837.094558144813,
+        "ops_total": 470391.0,
+        "stderr_tail": "",
+        "stdout_tail": "Running 1m test @ http://127.0.0.1:42935/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     1.33ms    8.95ms 209.50ms   99.47%\n    Req/Sec     3.94k     1.07k    7.49k    62.83%\n  470391 requests in 1.00m, 69.53MB read\nRequests/sec:   7839.69\nTransfer/sec:      1.16MB",
+        "system_cpu": {
+          "busy_pct": 5.242841786377406
+        }
+      }
+    ]
+  },
+  "comparison": {
+    "comparable": true,
+    "programs": [
+      {
+        "baseline_avg_ns_per_run": 4768.5,
+        "delta_pct": -36.975289224424166,
+        "id": 6,
+        "name": "tracepoint__sch",
+        "post_avg_ns_per_run": 3005.3333333333335
+      },
+      {
+        "baseline_avg_ns_per_run": 184.4741717135732,
+        "delta_pct": 5.949645876254873,
+        "id": 8,
+        "name": "trace_security_",
+        "post_avg_ns_per_run": 195.44973166368516
+      },
+      {
+        "baseline_avg_ns_per_run": 99.60812255076594,
+        "delta_pct": -1.58319974100491,
+        "id": 10,
+        "name": "lsm_file_open_t",
+        "post_avg_ns_per_run": 98.03112701252236
+      }
+    ],
+    "workloads": [
+      {
+        "agent_cpu_delta_pct": null,
+        "app_throughput_delta_pct": 9643.06455892055,
+        "bpf_avg_ns_delta_pct": 10.833346803904217,
+        "events_per_sec_delta_pct": 95.0258308053985,
+        "lost_event_count_delta": 0,
+        "name": "exec_storm"
+      },
+      {
+        "agent_cpu_delta_pct": null,
+        "app_throughput_delta_pct": 1.0356604800315674,
+        "bpf_avg_ns_delta_pct": -23.052137006430975,
+        "events_per_sec_delta_pct": -0.13353691203096418,
+        "lost_event_count_delta": 0,
+        "name": "file_io"
+      },
+      {
+        "agent_cpu_delta_pct": null,
+        "app_throughput_delta_pct": -0.3471706029955227,
+        "bpf_avg_ns_delta_pct": 23.28260109544342,
+        "events_per_sec_delta_pct": -10.847809046399954,
+        "lost_event_count_delta": 0,
+        "name": "network"
+      }
+    ]
+  },
+  "config": {
+    "events": [
+      "execve",
+      "security_file_open",
+      "security_socket_connect",
+      "sched_process_exec"
+    ],
+    "measurement_duration_s": 60,
+    "smoke_duration_s": 10,
+    "workloads": [
+      {
+        "command": "stress-ng --exec 4 --exec-method execve --timeout {duration}s --metrics-brief",
+        "kind": "exec_storm",
+        "metric": "bogo-ops/s",
+        "name": "exec_storm",
+        "rate": 4
+      },
+      {
+        "command": "fio --name=test --rw=randread --bs=4k --size=100M --runtime={duration} --time_based",
+        "kind": "file_io",
+        "metric": "IOPS",
+        "name": "file_io"
+      },
+      {
+        "command": "wrk -t2 -c10 -d{duration}s http://127.0.0.1:{port}/",
+        "kind": "network",
+        "metric": "req/s",
+        "name": "network"
+      }
+    ]
+  },
+  "duration_s": 60,
+  "generated_at": "2026-03-23T01:12:28.464251+00:00",
+  "host": {
+    "git_sha": "unknown",
+    "hostname": "virtme-ng",
+    "kernel": "7.0.0-rc2+",
+    "platform": "Linux-7.0.0-rc2+-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "limitations": [
+    "Tracee daemon was unavailable, so this result uses manual BPF program loading with corpus/build/tracee/tracee.bpf.o.",
+    "Agent event counts and drop counters are unavailable in manual fallback mode; events_total is estimated from BPF run_cnt deltas.",
+    "Agent CPU is unavailable in manual fallback mode; only host busy CPU is reported."
+  ],
+  "mode": "manual_fallback",
+  "post_rejit": {
+    "summary": {
+      "agent_cpu_total_pct": {
+        "count": 0,
+        "max": null,
+        "mean": null,
+        "median": null,
+        "min": null
+      },
+      "app_throughput": {
+        "count": 3,
+        "max": 1566050.044185538,
+        "mean": 654956.5130432015,
+        "median": 391009.6084743565,
+        "min": 7809.8864697099725
+      },
+      "bpf_avg_ns_per_run": {
+        "count": 3,
+        "max": 881.5733333333334,
+        "mean": 393.138602668429,
+        "median": 178.58490566037736,
+        "min": 119.25756901157614
+      },
+      "events_per_sec": {
+        "count": 3,
+        "max": 107894.53659726084,
+        "mean": 35970.95065562891,
+        "median": 15.81998563053624,
+        "min": 2.4953839953489028
+      },
+      "system_cpu_busy_pct": {
+        "count": 3,
+        "max": 5.30503238942619,
+        "mean": 3.1576188447456577,
+        "median": 4.167129681075677,
+        "min": 0.0006944637351069538
+      }
+    },
+    "workloads": [
+      {
+        "agent_cpu": {
+          "sys_pct": null,
+          "total_pct": null,
+          "user_pct": null
+        },
+        "app_throughput": 391009.6084743565,
+        "bpf": {
+          "programs": {
+            "6": {
+              "avg_ns_per_run": 2905.5,
+              "bytes_jited": 20298,
+              "bytes_xlated": 34920,
+              "id": 6,
+              "name": "tracepoint__sch",
+              "run_cnt_delta": 2,
+              "run_time_ns_delta": 5811,
+              "type": "raw_tracepoint"
+            },
+            "8": {
+              "avg_ns_per_run": 142.897995545657,
+              "bytes_jited": 22797,
+              "bytes_xlated": 36664,
+              "id": 8,
+              "name": "trace_security_",
+              "run_cnt_delta": 2245,
+              "run_time_ns_delta": 320806,
+              "type": "kprobe"
+            },
+            "10": {
+              "avg_ns_per_run": 93.13496659242762,
+              "bytes_jited": 7369,
+              "bytes_xlated": 13440,
+              "id": 10,
+              "name": "lsm_file_open_t",
+              "run_cnt_delta": 2245,
+              "run_time_ns_delta": 209088,
+              "type": "lsm"
+            }
+          },
+          "summary": {
+            "active_programs": 3,
+            "avg_ns_per_run": 119.25756901157614,
+            "total_events": 4492,
+            "total_run_time_ns": 535705
+          }
+        },
+        "command_template": "stress-ng --exec 4 --exec-method execve --timeout {duration}s --metrics-brief",
+        "drop_counters": {},
+        "duration_s": 0.04163324800001078,
+        "event_counts": {},
+        "events_per_sec": 107894.53659726084,
+        "events_total": 4492,
+        "kind": "exec_storm",
+        "metric": "bogo-ops/s",
+        "name": "exec_storm",
+        "ops_per_sec": 391009.6084743565,
+        "ops_total": 16279.0,
+        "stderr_tail": "",
+        "stdout_tail": "stress-ng: info:  [16279] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [16279] setting to a 1 min, 0 secs run per stressor\nstress-ng: info:  [16279] dispatching hogs:\nstress-ng: metrc: [16279] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [16279]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: warn:  [16279] metrics-check: all bogo-op counters are zero, data may be incorrect\nstress-ng: info:  [16279] skipped: 4: exec (4)\nstress-ng: info:  [16279] passed: 0\nstress-ng: info:  [16279] failed: 0\nstress-ng: info:  [16279] metrics untrustworthy: 0\nstress-ng: info:  [16279] successful run completed in 0.00 secs",
+        "system_cpu": {
+          "busy_pct": 0.0006944637351069538
+        }
+      },
+      {
+        "agent_cpu": {
+          "sys_pct": null,
+          "total_pct": null,
+          "user_pct": null
+        },
+        "app_throughput": 1566050.044185538,
+        "bpf": {
+          "programs": {
+            "6": {
+              "avg_ns_per_run": 2358.5,
+              "bytes_jited": 20298,
+              "bytes_xlated": 34920,
+              "id": 6,
+              "name": "tracepoint__sch",
+              "run_cnt_delta": 2,
+              "run_time_ns_delta": 4717,
+              "type": "raw_tracepoint"
+            },
+            "8": {
+              "avg_ns_per_run": 241.26680672268907,
+              "bytes_jited": 22797,
+              "bytes_xlated": 36664,
+              "id": 8,
+              "name": "trace_security_",
+              "run_cnt_delta": 476,
+              "run_time_ns_delta": 114843,
+              "type": "kprobe"
+            },
+            "10": {
+              "avg_ns_per_run": 106.74369747899159,
+              "bytes_jited": 7369,
+              "bytes_xlated": 13440,
+              "id": 10,
+              "name": "lsm_file_open_t",
+              "run_cnt_delta": 476,
+              "run_time_ns_delta": 50810,
+              "type": "lsm"
+            }
+          },
+          "summary": {
+            "active_programs": 3,
+            "avg_ns_per_run": 178.58490566037736,
+            "total_events": 954,
+            "total_run_time_ns": 170370
+          }
+        },
+        "command_template": "fio --name=test --rw=randread --bs=4k --size=100M --runtime={duration} --time_based",
+        "drop_counters": {},
+        "duration_s": 60.303468175000035,
+        "event_counts": {},
+        "events_per_sec": 15.81998563053624,
+        "events_total": 954,
+        "kind": "file_io",
+        "metric": "IOPS",
+        "name": "file_io",
+        "ops_per_sec": 1566050.044185538,
+        "ops_total": 94438249.0,
+        "stderr_tail": "",
+        "stdout_tail": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.010000,\n        \"500\" : 81.367366,\n        \"750\" : 18.428603,\n        \"1000\" : 0.101108\n      },\n      \"latency_us\" : {\n        \"2\" : 0.010000,\n        \"4\" : 0.071977,\n        \"10\" : 0.022912,\n        \"20\" : 0.010000,\n        \"50\" : 0.010000,\n        \"100\" : 0.010000,\n        \"250\" : 0.010000,\n        \"500\" : 0.010000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.010000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}",
+        "system_cpu": {
+          "busy_pct": 4.167129681075677
+        }
+      },
+      {
+        "agent_cpu": {
+          "sys_pct": null,
+          "total_pct": null,
+          "user_pct": null
+        },
+        "app_throughput": 7809.8864697099725,
+        "bpf": {
+          "programs": {
+            "6": {
+              "avg_ns_per_run": 3752.0,
+              "bytes_jited": 20298,
+              "bytes_xlated": 34920,
+              "id": 6,
+              "name": "tracepoint__sch",
+              "run_cnt_delta": 2,
+              "run_time_ns_delta": 7504,
+              "type": "raw_tracepoint"
+            },
+            "8": {
+              "avg_ns_per_run": 1495.0405405405406,
+              "bytes_jited": 22797,
+              "bytes_xlated": 36664,
+              "id": 8,
+              "name": "trace_security_",
+              "run_cnt_delta": 74,
+              "run_time_ns_delta": 110633,
+              "type": "kprobe"
+            },
+            "10": {
+              "avg_ns_per_run": 190.52702702702703,
+              "bytes_jited": 7369,
+              "bytes_xlated": 13440,
+              "id": 10,
+              "name": "lsm_file_open_t",
+              "run_cnt_delta": 74,
+              "run_time_ns_delta": 14099,
+              "type": "lsm"
+            }
+          },
+          "summary": {
+            "active_programs": 3,
+            "avg_ns_per_run": 881.5733333333334,
+            "total_events": 150,
+            "total_run_time_ns": 132236
+          }
+        },
+        "command_template": "wrk -t2 -c10 -d{duration}s http://127.0.0.1:{port}/",
+        "drop_counters": {},
+        "duration_s": 60.11098904199997,
+        "event_counts": {},
+        "events_per_sec": 2.4953839953489028,
+        "events_total": 150,
+        "kind": "network",
+        "metric": "req/s",
+        "name": "network",
+        "ops_per_sec": 7809.8864697099725,
+        "ops_total": 469460.0,
+        "stderr_tail": "",
+        "stdout_tail": "Running 1m test @ http://127.0.0.1:40687/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     1.08ms    6.70ms 210.10ms   99.70%\n    Req/Sec     3.93k     1.09k    8.37k    63.28%\n  469460 requests in 1.00m, 69.40MB read\nRequests/sec:   7811.34\nTransfer/sec:      1.15MB",
+        "system_cpu": {
+          "busy_pct": 5.30503238942619
+        }
+      }
+    ]
+  },
+  "rejit_result": {
+    "applied": true,
+    "exit_code": 0,
+    "output": "prog 6 (tracepoint__sch): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317194 (split BTF base offset)\n  bpf_rotate64: found in 'bpf_rotate' btf_id=15 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=15 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=14 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=22 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=23 fd=7\n  bpf_endian_load64: found in 'bpf_endian' btf_id=24 fd=8\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=15 fd=9\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n\nprog 8 (trace_security_): 6 passes, 3 sites applied (4565 -> 4556 insns)\n  wide_mem: 3 sites applied\nkfunc discovery:\n  vmlinux BTF str_len=2317194 (split BTF base offset)\n  bpf_rotate64: found in 'bpf_rotate' btf_id=15 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=15 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=14 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=22 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=23 fd=7\n  bpf_endian_load64: found in 'bpf_endian' btf_id=24 fd=8\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=15 fd=9\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n  REJIT failed for prog 8 (trace_security_):\n  verifier rejected with 0 state snapshots\nError: BPF_PROG_REJIT failed\n\nCaused by:\n    BPF_PROG_REJIT: Bad file descriptor (os error 9)\n    verifier log:\n    func#0 @0\n    fd 51 is not pointing to valid bpf_map\n    processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n    \n\nprog 10 (lsm_file_open_t): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317194 (split BTF base offset)\n  bpf_rotate64: found in 'bpf_rotate' btf_id=15 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=15 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=14 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=22 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=23 fd=7\n  bpf_endian_load64: found in 'bpf_endian' btf_id=24 fd=8\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=15 fd=9\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n"
+  },
+  "scan_results": {},
+  "setup": {
+    "returncode": 1,
+    "stderr_tail": "    self.endheaders(body, encode_chunked=encode_chunked)\n  File \"/usr/lib/python3.12/http/client.py\", line 1351, in endheaders\n    self._send_output(message_body, encode_chunked=encode_chunked)\n  File \"/usr/lib/python3.12/http/client.py\", line 1111, in _send_output\n    self.send(msg)\n  File \"/usr/lib/python3.12/http/client.py\", line 1055, in send\n    self.connect()\n  File \"/usr/lib/python3.12/http/client.py\", line 1490, in connect\n    super().connect()\n  File \"/usr/lib/python3.12/http/client.py\", line 1021, in connect\n    self.sock = self._create_connection(\n                ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/socket.py\", line 828, in create_connection\n    for res in getaddrinfo(host, port, 0, SOCK_STREAM):\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/socket.py\", line 963, in getaddrinfo\n    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsocket.gaierror: [Errno -2] Name or service not known\nDuring handling of the above exception, another exception occurred:\nTraceback (most recent call last):\n  File \"<stdin>\", line 14, in <module>\n  File \"/usr/lib/python3.12/urllib/request.py\", line 215, in urlopen\n    return opener.open(url, data, timeout)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/urllib/request.py\", line 515, in open\n    response = self._open(req, data)\n               ^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/urllib/request.py\", line 532, in _open\n    result = self._call_chain(self.handle_open, protocol, protocol +\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/urllib/request.py\", line 492, in _call_chain\n    result = func(*args)\n             ^^^^^^^^^^^\n  File \"/usr/lib/python3.12/urllib/request.py\", line 1392, in https_open\n    return self.do_open(http.client.HTTPSConnection, req,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/urllib/request.py\", line 1347, in do_open\n    raise URLError(err)\nurllib.error.URLError: <urlopen error [Errno -2] Name or service not known>",
+    "stdout_tail": "",
+    "tracee_binary": null
+  },
+  "smoke": false,
+  "tracee_binary": null,
+  "tracee_programs": [
+    {
+      "name": "tracepoint__sched__sched_process_exec",
+      "section_name": "raw_tracepoint/sched_process_exec"
+    },
+    {
+      "name": "trace_security_file_open",
+      "section_name": "kprobe/security_file_open"
+    },
+    {
+      "name": "trace_security_socket_connect",
+      "section_name": "kprobe/security_socket_connect"
+    },
+    {
+      "name": "lsm_file_open_test",
+      "section_name": "lsm/file_open"
+    }
+  ]
+}

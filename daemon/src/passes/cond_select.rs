@@ -125,7 +125,7 @@ impl BpfPass for CondSelectPass {
                     reason: "platform lacks CMOV support".into(),
                 }],
                 diagnostics: vec![],
-            });
+            ..Default::default() });
         }
 
         // Check if bpf_select64 kfunc is available.
@@ -154,7 +154,7 @@ impl BpfPass for CondSelectPass {
                     vec![]
                 },
                 diagnostics,
-            });
+            ..Default::default() });
         }
 
         let bt_analysis = BranchTargetAnalysis;
@@ -219,8 +219,7 @@ impl BpfPass for CondSelectPass {
                 changed: false,
                 sites_applied: 0,
                 sites_skipped: skipped,
-                diagnostics: vec![],
-            });
+                diagnostics: vec![], ..Default::default() });
         }
 
         // Build replacement instruction stream.
@@ -307,8 +306,7 @@ impl BpfPass for CondSelectPass {
             changed: applied > 0,
             sites_applied: applied,
             sites_skipped: skipped,
-            diagnostics: vec![],
-        })
+            diagnostics: vec![], ..Default::default() })
     }
 }
 

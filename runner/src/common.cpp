@@ -424,8 +424,20 @@ void print_sample_json(std::ostream &out, const sample_result &sample)
         << "\"syscall_attempted\":" << (sample.rejit.syscall_attempted ? "true" : "false") << ","
         << "\"applied\":" << (sample.rejit.applied ? "true" : "false") << ","
         << "\"insn_cnt\":" << sample.rejit.insn_cnt << ","
-        << "\"error\":\"" << json_escape(sample.rejit.error) << "\""
-        << "}"
+        << "\"error\":\"" << json_escape(sample.rejit.error) << "\","
+        << "\"total_sites_applied\":" << sample.rejit.total_sites_applied << ","
+        << "\"passes_applied\":";
+    print_json_string_array(out, sample.rejit.passes_applied);
+    out << ","
+        << "\"insn_delta\":" << sample.rejit.insn_delta << ","
+        << "\"verifier_retries\":" << sample.rejit.verifier_retries << ","
+        << "\"final_disabled_passes\":";
+    print_json_string_array(out, sample.rejit.final_disabled_passes);
+    if (!sample.rejit.daemon_response.empty()) {
+        /* Embed daemon_response as pre-serialized JSON value (not re-escaped) */
+        out << ",\"daemon_response\":" << sample.rejit.daemon_response;
+    }
+    out << "}"
         << "}";
 }
 

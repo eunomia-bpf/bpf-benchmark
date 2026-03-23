@@ -107,8 +107,16 @@ fn process_request(
                 None => return serde_json::json!({"status": "error", "message": "missing prog_id"}),
             };
             match commands::try_apply_one(prog_id, ctx, pass_names, pgo_config, rollback_enabled) {
-                Ok(true) => serde_json::json!({"status": "ok", "applied": true}),
-                Ok(false) => serde_json::json!({"status": "ok", "applied": false}),
+                Ok(result) => {
+                    // Serialize the full structured OptimizeOneResult.
+                    match serde_json::to_value(&result) {
+                        Ok(v) => v,
+                        Err(e) => serde_json::json!({
+                            "status": "error",
+                            "message": format!("failed to serialize result: {}", e)
+                        }),
+                    }
+                }
                 Err(e) => serde_json::json!({"status": "error", "message": format!("{:#}", e)}),
             }
         }
@@ -119,8 +127,8 @@ fn process_request(
             for prog_id in bpf::iter_prog_ids() {
                 total += 1;
                 match commands::try_apply_one(prog_id, ctx, pass_names, pgo_config, rollback_enabled) {
-                    Ok(true) => applied += 1,
-                    Ok(false) => {}
+                    Ok(result) if result.summary.applied => applied += 1,
+                    Ok(_) => {}
                     Err(_) => errors += 1,
                 }
             }
@@ -185,11 +193,11 @@ pub(crate) fn cmd_watch(interval_secs: u64, once: bool, ctx: &pass::PassContext,
         let mut errors = 0u32;
         for prog_id in &ranked_ids {
             match commands::try_apply_one(*prog_id, ctx, pass_names, pgo_config, rollback_enabled) {
-                Ok(true) => {
+                Ok(result) if result.summary.applied => {
                     optimized.insert(*prog_id);
                     applied += 1;
                 }
-                Ok(false) => {
+                Ok(_) => {
                     no_op.insert(*prog_id);
                 }
                 Err(e) => {

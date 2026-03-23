@@ -239,7 +239,7 @@ impl AnalysisCache {
 // ── BpfPass trait ───────────────────────────────────────────────────
 
 /// Pass execution result.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct PassResult {
     /// Pass name.
     pub pass_name: String,
@@ -252,6 +252,43 @@ pub struct PassResult {
     /// Diagnostic messages (read by tests and debug output).
     #[allow(dead_code)]
     pub diagnostics: Vec<String>,
+    /// Instruction count before this pass ran.
+    pub insns_before: usize,
+    /// Instruction count after this pass ran.
+    pub insns_after: usize,
+}
+
+impl PassResult {
+    /// Construct a PassResult with insns_before/insns_after defaulting to 0.
+    ///
+    /// The PassManager overwrites insns_before/insns_after after each pass runs,
+    /// so passes themselves don't need to track those values.
+    pub fn new(
+        pass_name: String,
+        changed: bool,
+        sites_applied: usize,
+        sites_skipped: Vec<SkipReason>,
+        diagnostics: Vec<String>,
+    ) -> Self {
+        Self {
+            pass_name,
+            changed,
+            sites_applied,
+            sites_skipped,
+            diagnostics,
+            insns_before: 0,
+            insns_after: 0,
+        }
+    }
+
+    /// Aggregate skip reasons into a reason -> count map.
+    pub fn skip_reason_counts(&self) -> HashMap<String, usize> {
+        let mut counts: HashMap<String, usize> = HashMap::new();
+        for skip in &self.sites_skipped {
+            *counts.entry(skip.reason.clone()).or_insert(0) += 1;
+        }
+        counts
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -608,8 +645,15 @@ impl PassManager {
                 }
             }
 
+            // Record insn count before this pass runs.
+            let insns_before = program.insns.len();
+
             // Run the pass.
-            let result = pass.run(program, &mut cache, ctx)?;
+            let mut result = pass.run(program, &mut cache, ctx)?;
+
+            // Fill in insns_before/insns_after from the actual program state.
+            result.insns_before = insns_before;
+            result.insns_after = program.insns.len();
 
             if result.changed {
                 // Transform modified the program — invalidate cached analyses.
@@ -744,8 +788,7 @@ mod tests {
                 changed: false,
                 sites_applied: 0,
                 sites_skipped: vec![],
-                diagnostics: vec![],
-            })
+                diagnostics: vec![], ..Default::default() })
         }
     }
 
@@ -771,8 +814,7 @@ mod tests {
                 changed: true,
                 sites_applied: 1,
                 sites_skipped: vec![],
-                diagnostics: vec![],
-            })
+                diagnostics: vec![], ..Default::default() })
         }
     }
 
@@ -806,8 +848,7 @@ mod tests {
                 changed: applied > 0,
                 sites_applied: applied,
                 sites_skipped: vec![],
-                diagnostics: vec![],
-            })
+                diagnostics: vec![], ..Default::default() })
         }
     }
 
@@ -850,8 +891,7 @@ mod tests {
                 changed: false,
                 sites_applied: 0,
                 sites_skipped: vec![],
-                diagnostics: vec![format!("insn_count={}", count)],
-            })
+                diagnostics: vec![format!("insn_count={}", count)], ..Default::default() })
         }
     }
 
@@ -1133,7 +1173,7 @@ mod tests {
                 },
             ],
             diagnostics: vec!["applied 3 sites".into()],
-        };
+        ..Default::default() };
 
         assert_eq!(result.pass_name, "test_pass");
         assert!(result.changed);
@@ -1199,15 +1239,13 @@ mod tests {
                     changed: true,
                     sites_applied: 2,
                     sites_skipped: vec![],
-                    diagnostics: vec![],
-                },
+                    diagnostics: vec![], ..Default::default() },
                 PassResult {
                     pass_name: "b".into(),
                     changed: false,
                     sites_applied: 0,
                     sites_skipped: vec![],
-                    diagnostics: vec![],
-                },
+                    diagnostics: vec![], ..Default::default() },
             ],
             total_sites_applied: 2,
             program_changed: true,
@@ -1673,5 +1711,46 @@ mod tests {
         assert_eq!(prog2.insns[0].imm, 42);
         // But NOP should still be appended.
         assert_eq!(prog2.insns.len(), 3);
+    }
+
+    #[test]
+    fn test_pass_result_skip_reason_counts() {
+        let result = PassResult {
+            pass_name: "test".into(),
+            changed: false,
+            sites_applied: 0,
+            sites_skipped: vec![
+                SkipReason { pc: 0, reason: "kfunc_unavailable".into() },
+                SkipReason { pc: 5, reason: "subprog_unsupported".into() },
+                SkipReason { pc: 10, reason: "kfunc_unavailable".into() },
+                SkipReason { pc: 15, reason: "kfunc_unavailable".into() },
+                SkipReason { pc: 20, reason: "insufficient_bias".into() },
+            ],
+            diagnostics: vec![],
+            ..Default::default()
+        };
+
+        let counts = result.skip_reason_counts();
+        assert_eq!(counts["kfunc_unavailable"], 3);
+        assert_eq!(counts["subprog_unsupported"], 1);
+        assert_eq!(counts["insufficient_bias"], 1);
+        assert_eq!(counts.len(), 3);
+    }
+
+    #[test]
+    fn test_pass_result_insns_before_after_filled_by_pass_manager() {
+        let mut pm = PassManager::new();
+        pm.add_pass(AppendNopPass);
+
+        let mut prog = make_program(vec![exit_insn()]);
+        let ctx = PassContext::test_default();
+        let result = pm.run(&mut prog, &ctx).unwrap();
+
+        assert_eq!(result.pass_results.len(), 1);
+        let pr = &result.pass_results[0];
+        // Before append_nop: 1 instruction (exit).
+        assert_eq!(pr.insns_before, 1);
+        // After append_nop: 2 instructions (exit + NOP).
+        assert_eq!(pr.insns_after, 2);
     }
 }

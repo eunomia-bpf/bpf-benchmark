@@ -64,6 +64,22 @@ class RecompileSummary(TypedDict, total=False):
     error: str
 
 
+class RejitSummary(TypedDict, total=False):
+    """Canonical rejit summary — output by C++ runner, consumed by all drivers."""
+    requested: bool
+    mode: str
+    syscall_attempted: bool
+    applied: bool
+    insn_cnt: int
+    error: str
+    total_sites_applied: int
+    passes_applied: list[str]
+    insn_delta: int
+    verifier_retries: int
+    final_disabled_passes: list[str]
+    daemon_response: dict
+
+
 class RunnerSample(TypedDict, total=False):
     phase: str
     compile_ns: int
@@ -88,6 +104,7 @@ class RunnerSample(TypedDict, total=False):
     perf_counters_meta: PerfCounterMeta
     directive_scan: DirectiveScanSummary
     recompile: RecompileSummary
+    rejit: RejitSummary
 
 
 @dataclass(frozen=True, slots=True)
@@ -213,6 +230,23 @@ def normalize_directive_scan(scan: Mapping[str, object] | None) -> dict[str, int
     return normalized
 
 
+def _default_rejit() -> dict:
+    """Default rejit summary with all canonical fields."""
+    return {
+        "requested": False,
+        "mode": "none",
+        "syscall_attempted": False,
+        "applied": False,
+        "insn_cnt": 0,
+        "error": "",
+        "total_sites_applied": 0,
+        "passes_applied": [],
+        "insn_delta": 0,
+        "verifier_retries": 0,
+        "final_disabled_passes": [],
+    }
+
+
 def normalize_runner_sample(sample: Mapping[str, object]) -> RunnerSample:
     normalized: RunnerSample = dict(sample)
     normalized.setdefault("timing_source_wall", "unavailable")
@@ -234,19 +268,31 @@ def normalize_runner_sample(sample: Mapping[str, object]) -> RunnerSample:
         "directive_scan",
         {"performed": False, **zero_directive_scan()},
     )
-    normalized.setdefault(
-        "recompile",
-        {
-            "requested": False,
-            "mode": "none",
-            "policy_generated": False,
-            "policy_bytes": 0,
-            "syscall_attempted": False,
-            "applied": False,
-            **zero_directive_scan(),
-            "error": "",
-        },
-    )
+
+    # Unify rejit / recompile: `rejit` is the canonical field.
+    # If the sample has `rejit` (from C++ runner), use it.
+    # If it only has `recompile` (legacy), promote to `rejit`.
+    raw_rejit = sample.get("rejit") or sample.get("recompile") or {}
+    rejit_defaults = _default_rejit()
+    rejit_defaults.update(raw_rejit)
+    normalized["rejit"] = rejit_defaults
+
+    # Backward compat: also keep `recompile` pointing to the same data.
+    if "recompile" not in normalized:
+        normalized.setdefault(
+            "recompile",
+            {
+                "requested": False,
+                "mode": "none",
+                "policy_generated": False,
+                "policy_bytes": 0,
+                "syscall_attempted": False,
+                "applied": False,
+                **zero_directive_scan(),
+                "error": "",
+            },
+        )
+
     return normalized
 
 
@@ -262,6 +308,7 @@ __all__ = [
     "DirectiveScanSummary",
     "PerfCounterMeta",
     "RecompileSummary",
+    "RejitSummary",
     "RunnerSample",
     "collapse_command_samples",
     "SummaryStats",

@@ -61,8 +61,7 @@ impl BpfPass for SpectreMitigationPass {
                 sites_skipped: vec![],
                 diagnostics: vec![
                     "bpf_speculation_barrier kfunc not available (module not loaded)".into(),
-                ],
-            });
+                ], ..Default::default() });
         }
 
         let orig_len = program.insns.len();
@@ -145,7 +144,7 @@ impl BpfPass for SpectreMitigationPass {
             } else {
                 vec![]
             },
-        })
+        ..Default::default() })
     }
 }
 

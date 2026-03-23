@@ -6,7 +6,7 @@
 
 use std::collections::HashMap;
 use std::fs;
-use std::os::unix::io::{FromRawFd, OwnedFd};
+use std::os::unix::io::OwnedFd;
 use std::path::Path;
 
 use anyhow::{bail, Context, Result};
@@ -230,6 +230,10 @@ fn read_module_btf(module_name: &str) -> Result<Vec<u8>> {
 }
 
 /// Open a module BTF path as an FD, handling the C string correctly.
+/// Note: this returns a plain file FD, not a BPF BTF FD. The verifier
+/// cannot use these for kfunc resolution. Use bpf_btf_get_fd_by_module_name()
+/// instead for REJIT fd_array.
+#[allow(dead_code)]
 fn open_btf_path(path: &Path) -> Result<i32> {
     use std::ffi::CString;
     let c_path = CString::new(path.to_str().unwrap_or(""))
@@ -279,6 +283,8 @@ pub fn discover_kfuncs() -> DiscoveryResult {
     };
     let mut module_fds: Vec<OwnedFd> = Vec::new();
     let mut log: Vec<String> = Vec::new();
+    // Cache of module_name -> raw FD to avoid opening the same BTF twice.
+    let mut module_btf_fds: HashMap<String, i32> = HashMap::new();
 
     // Read vmlinux BTF string section length for split BTF resolution.
     // Module BTF is "split BTF" whose name_off values are offset by the
@@ -330,12 +336,28 @@ pub fn discover_kfuncs() -> DiscoveryResult {
             }
         };
 
-        // Open the module BTF fd.
-        let fd = match open_btf_path(&btf_path) {
-            Ok(fd) => fd,
-            Err(e) => {
-                log.push(format!("  {}: failed to open BTF fd: {:#}", kfunc_name, e));
-                continue;
+        // Get a proper BPF BTF FD via BPF_BTF_GET_FD_BY_ID.
+        // A regular open() of /sys/kernel/btf/<module> yields a plain file FD
+        // that the verifier cannot use. We need a BPF subsystem BTF FD.
+        let fd = if let Some(&existing_fd) = module_btf_fds.get(module_name) {
+            // Reuse FD already opened for this module.
+            existing_fd
+        } else {
+            match crate::bpf::bpf_btf_get_fd_by_module_name(module_name) {
+                Ok(owned) => {
+                    use std::os::unix::io::AsRawFd;
+                    let raw = owned.as_raw_fd();
+                    module_btf_fds.insert(module_name.to_string(), raw);
+                    module_fds.push(owned);
+                    raw
+                }
+                Err(e) => {
+                    log.push(format!(
+                        "  {}: failed to get BPF BTF fd for module '{}': {:#}",
+                        kfunc_name, module_name, e
+                    ));
+                    continue;
+                }
             }
         };
 
@@ -363,8 +385,6 @@ pub fn discover_kfuncs() -> DiscoveryResult {
         if registry.module_fd.is_none() {
             registry.module_fd = Some(fd);
         }
-
-        module_fds.push(unsafe { OwnedFd::from_raw_fd(fd) });
     }
 
     DiscoveryResult {

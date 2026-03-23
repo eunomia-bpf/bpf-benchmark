@@ -188,7 +188,7 @@ impl BpfPass for EndianFusionPass {
                     reason: "platform lacks MOVBE support".into(),
                 }],
                 diagnostics: vec![],
-            });
+            ..Default::default() });
         }
 
         // Check if any endian_load kfunc is available.
@@ -202,7 +202,7 @@ impl BpfPass for EndianFusionPass {
                     reason: "bpf_endian_loadXX kfuncs not available".into(),
                 }],
                 diagnostics: vec![],
-            });
+            ..Default::default() });
         }
 
         let bt_analysis = BranchTargetAnalysis;
@@ -276,8 +276,7 @@ impl BpfPass for EndianFusionPass {
                 changed: false,
                 sites_applied: 0,
                 sites_skipped: skipped,
-                diagnostics: vec![],
-            });
+                diagnostics: vec![], ..Default::default() });
         }
 
         // Build replacement instruction stream.
@@ -351,8 +350,7 @@ impl BpfPass for EndianFusionPass {
             changed: applied > 0,
             sites_applied: applied,
             sites_skipped: skipped,
-            diagnostics: vec![],
-        })
+            diagnostics: vec![], ..Default::default() })
     }
 }
 

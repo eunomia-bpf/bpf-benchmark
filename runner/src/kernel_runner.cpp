@@ -665,7 +665,151 @@ struct daemon_socket_response {
     bool ok = false;
     bool applied = false;
     std::string error;
+    /* Structured fields extracted from daemon's OptimizeOneResult */
+    uint32_t total_sites_applied = 0;
+    std::vector<std::string> passes_applied;    /* pass names that changed the program */
+    int64_t insn_delta = 0;
+    uint32_t verifier_retries = 0;
+    std::vector<std::string> final_disabled_passes;
+    /* Raw daemon JSON response — preserved verbatim for downstream embedding */
+    std::string raw_json;
 };
+
+/* ---- Minimal JSON helpers (no external library dependency) ---- */
+
+/* Extract a JSON string value for a given key from a flat/nested JSON string.
+ * Handles "key":"value" and "key": "value" patterns.
+ * Returns empty string if not found. */
+static std::string extract_json_string(const std::string &json, const std::string &key)
+{
+    const std::string pattern1 = "\"" + key + "\":\"";
+    const std::string pattern2 = "\"" + key + "\": \"";
+    auto pos = json.find(pattern1);
+    size_t val_start;
+    if (pos != std::string::npos) {
+        val_start = pos + pattern1.size();
+    } else {
+        pos = json.find(pattern2);
+        if (pos == std::string::npos) return {};
+        val_start = pos + pattern2.size();
+    }
+    auto val_end = json.find('"', val_start);
+    if (val_end == std::string::npos) return {};
+    return json.substr(val_start, val_end - val_start);
+}
+
+/* Extract a JSON integer value for a given key.  Returns 0 if not found. */
+static int64_t extract_json_int(const std::string &json, const std::string &key)
+{
+    const std::string pattern1 = "\"" + key + "\":";
+    const std::string pattern2 = "\"" + key + "\": ";
+    size_t val_start = std::string::npos;
+    auto pos = json.find(pattern1);
+    if (pos != std::string::npos) {
+        val_start = pos + pattern1.size();
+    } else {
+        pos = json.find(pattern2);
+        if (pos != std::string::npos) {
+            val_start = pos + pattern2.size();
+        }
+    }
+    if (val_start == std::string::npos) return 0;
+    /* Skip whitespace */
+    while (val_start < json.size() && json[val_start] == ' ') ++val_start;
+    if (val_start >= json.size()) return 0;
+    /* Handle negative numbers and parse digits */
+    try {
+        return std::stoll(json.substr(val_start));
+    } catch (...) {
+        return 0;
+    }
+}
+
+/* Check if a JSON boolean key is true. */
+static bool extract_json_bool(const std::string &json, const std::string &key)
+{
+    const std::string pat_true1 = "\"" + key + "\":true";
+    const std::string pat_true2 = "\"" + key + "\": true";
+    return json.find(pat_true1) != std::string::npos ||
+           json.find(pat_true2) != std::string::npos;
+}
+
+/* Extract pass names that changed from the "passes" array in the JSON.
+ * Looks for objects with "changed":true and extracts "pass_name". */
+static std::vector<std::string> extract_changed_passes(const std::string &json)
+{
+    std::vector<std::string> result;
+    /* Find "passes":[ section */
+    auto passes_pos = json.find("\"passes\":[");
+    if (passes_pos == std::string::npos) {
+        passes_pos = json.find("\"passes\": [");
+    }
+    if (passes_pos == std::string::npos) return result;
+
+    /* Walk through the passes array looking for changed:true entries */
+    size_t pos = passes_pos;
+    while (true) {
+        auto obj_start = json.find('{', pos + 1);
+        if (obj_start == std::string::npos) break;
+        /* Find matching } — handle nesting */
+        int depth = 1;
+        size_t obj_end = obj_start + 1;
+        while (obj_end < json.size() && depth > 0) {
+            if (json[obj_end] == '{') ++depth;
+            else if (json[obj_end] == '}') --depth;
+            ++obj_end;
+        }
+        if (depth != 0) break;
+
+        std::string pass_obj = json.substr(obj_start, obj_end - obj_start);
+        if (extract_json_bool(pass_obj, "changed")) {
+            std::string name = extract_json_string(pass_obj, "pass_name");
+            if (!name.empty()) {
+                result.push_back(name);
+            }
+        }
+        pos = obj_end;
+        /* Check if we've left the passes array */
+        auto next_bracket = json.find(']', passes_pos);
+        if (next_bracket != std::string::npos && pos > next_bracket) break;
+    }
+    return result;
+}
+
+/* Extract a JSON array of strings for a given key.
+ * Handles "key":["a","b"] patterns. */
+static std::vector<std::string> extract_json_string_array(const std::string &json, const std::string &key)
+{
+    std::vector<std::string> result;
+    const std::string pattern1 = "\"" + key + "\":[";
+    const std::string pattern2 = "\"" + key + "\": [";
+    size_t arr_start = std::string::npos;
+    auto pos = json.find(pattern1);
+    if (pos != std::string::npos) {
+        arr_start = pos + pattern1.size();
+    } else {
+        pos = json.find(pattern2);
+        if (pos != std::string::npos) {
+            arr_start = pos + pattern2.size();
+        }
+    }
+    if (arr_start == std::string::npos) return result;
+
+    auto arr_end = json.find(']', arr_start);
+    if (arr_end == std::string::npos) return result;
+
+    std::string arr_content = json.substr(arr_start, arr_end - arr_start);
+    size_t spos = 0;
+    while (true) {
+        auto q1 = arr_content.find('"', spos);
+        if (q1 == std::string::npos) break;
+        auto q2 = arr_content.find('"', q1 + 1);
+        if (q2 == std::string::npos) break;
+        result.push_back(arr_content.substr(q1 + 1, q2 - q1 - 1));
+        spos = q2 + 1;
+    }
+    return result;
+}
 
 daemon_socket_response daemon_socket_optimize(const std::string &socket_path, uint32_t prog_id)
 {
@@ -722,28 +866,66 @@ daemon_socket_response daemon_socket_optimize(const std::string &socket_path, ui
         return response;
     }
 
-    /* Minimal JSON parsing: look for "status":"ok" and "applied":true */
-    if (buf.find("\"status\":\"ok\"") != std::string::npos ||
-        buf.find("\"status\": \"ok\"") != std::string::npos) {
-        response.ok = true;
-    }
-    if (buf.find("\"applied\":true") != std::string::npos ||
-        buf.find("\"applied\": true") != std::string::npos) {
-        response.applied = true;
-    }
-    if (!response.ok) {
-        /* Extract error message if present */
-        const auto msg_pos = buf.find("\"message\":");
-        if (msg_pos != std::string::npos) {
-            const auto quote_start = buf.find('"', msg_pos + 10);
-            if (quote_start != std::string::npos) {
-                const auto quote_end = buf.find('"', quote_start + 1);
-                if (quote_end != std::string::npos) {
-                    response.error = buf.substr(quote_start + 1, quote_end - quote_start - 1);
+    /* Preserve raw JSON for downstream embedding */
+    response.raw_json = buf;
+
+    /* Structured JSON parsing of daemon's OptimizeOneResult */
+    const std::string status = extract_json_string(buf, "status");
+    response.ok = (status == "ok");
+
+    if (response.ok) {
+        /* Extract summary.applied (nested in "summary" object) */
+        auto summary_pos = buf.find("\"summary\":");
+        if (summary_pos != std::string::npos) {
+            /* Extract the summary sub-object */
+            auto brace = buf.find('{', summary_pos);
+            if (brace != std::string::npos) {
+                int depth = 1;
+                size_t end = brace + 1;
+                while (end < buf.size() && depth > 0) {
+                    if (buf[end] == '{') ++depth;
+                    else if (buf[end] == '}') --depth;
+                    ++end;
                 }
+                std::string summary = buf.substr(brace, end - brace);
+                response.applied = extract_json_bool(summary, "applied");
+                response.total_sites_applied = static_cast<uint32_t>(
+                    extract_json_int(summary, "total_sites_applied"));
+                response.verifier_retries = static_cast<uint32_t>(
+                    extract_json_int(summary, "verifier_retries"));
+                response.final_disabled_passes =
+                    extract_json_string_array(summary, "final_disabled_passes");
+            }
+        } else {
+            /* Fallback: check top-level applied for backward compat */
+            response.applied = extract_json_bool(buf, "applied");
+        }
+
+        /* Extract program.insn_delta */
+        auto prog_pos = buf.find("\"program\":");
+        if (prog_pos != std::string::npos) {
+            auto brace = buf.find('{', prog_pos);
+            if (brace != std::string::npos) {
+                int depth = 1;
+                size_t end = brace + 1;
+                while (end < buf.size() && depth > 0) {
+                    if (buf[end] == '{') ++depth;
+                    else if (buf[end] == '}') --depth;
+                    ++end;
+                }
+                std::string prog_obj = buf.substr(brace, end - brace);
+                response.insn_delta = extract_json_int(prog_obj, "insn_delta");
             }
         }
-        if (response.error.empty()) {
+
+        /* Extract pass names that changed */
+        response.passes_applied = extract_changed_passes(buf);
+    } else {
+        /* Extract error message */
+        std::string msg = extract_json_string(buf, "message");
+        if (!msg.empty()) {
+            response.error = msg;
+        } else {
             response.error = "daemon returned non-ok status: " + buf;
         }
     }
@@ -1289,17 +1471,30 @@ std::vector<sample_result> run_kernel(const cli_options &options)
      * between stock and rejit measurement phases.  The separate
      * 'kernel' runtime already provides the stock baseline, so
      * in-process stock measurement is unnecessary. */
+    /* Helper lambda: populate rejit_summary from daemon_socket_response */
+    auto populate_rejit_from_daemon = [](rejit_summary &r, const daemon_socket_response &resp) {
+        r.syscall_attempted = true;
+        if (!resp.ok) {
+            r.applied = false;
+            r.error = "daemon socket optimize failed: " + resp.error;
+        } else {
+            r.applied = resp.applied;
+            r.total_sites_applied = resp.total_sites_applied;
+            r.passes_applied = resp.passes_applied;
+            r.insn_delta = resp.insn_delta;
+            r.verifier_retries = resp.verifier_retries;
+            r.final_disabled_passes = resp.final_disabled_passes;
+        }
+        r.daemon_response = resp.raw_json;
+    };
+
     if (options.daemon_socket.has_value() && rejit.requested && !options.compile_only) {
         rejit_start = std::chrono::steady_clock::now();
         const auto sock_resp = daemon_socket_optimize(*options.daemon_socket, program_info.id);
         rejit_end = std::chrono::steady_clock::now();
-        rejit.syscall_attempted = true;
+        populate_rejit_from_daemon(rejit, sock_resp);
         if (!sock_resp.ok) {
-            rejit.applied = false;
-            rejit.error = "daemon socket optimize failed: " + sock_resp.error;
             fprintf(stderr, "daemon socket optimize failed: %s\n", sock_resp.error.c_str());
-        } else {
-            rejit.applied = sock_resp.applied;
         }
     }
     /* Only do in-process stock+rejit paired measurement for non-daemon
@@ -1312,13 +1507,7 @@ std::vector<sample_result> run_kernel(const cli_options &options)
             rejit_start = std::chrono::steady_clock::now();
             const auto sock_resp = daemon_socket_optimize(*options.daemon_socket, program_info.id);
             rejit_end = std::chrono::steady_clock::now();
-            rejit.syscall_attempted = true;
-            if (!sock_resp.ok) {
-                rejit.applied = false;
-                rejit.error = "daemon socket optimize failed: " + sock_resp.error;
-            } else {
-                rejit.applied = sock_resp.applied;
-            }
+            populate_rejit_from_daemon(rejit, sock_resp);
         } else {
             apply_rejit(program_fd, rejit_insns.data(),
                         static_cast<uint32_t>(rejit_insns.size()),
