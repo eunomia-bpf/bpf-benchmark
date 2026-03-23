@@ -25,8 +25,7 @@ use crate::insn::*;
 use crate::pass::*;
 
 use super::utils::{
-    emit_packed_kfunc_call_with_off,
-    ensure_module_fd_slot,
+    emit_packed_kfunc_call_with_off, ensure_module_fd_slot,
     fixup_all_branches as fixup_branches_inline,
 };
 
@@ -65,14 +64,29 @@ impl BpfPass for SpectreMitigationPass {
                 sites_skipped: vec![],
                 diagnostics: vec![
                     "bpf_speculation_barrier kfunc not available (module not loaded)".into(),
-                ], ..Default::default() });
+                ],
+                ..Default::default()
+            });
+        }
+
+        if !ctx.kfunc_registry.packed_supported_for_pass(self.name()) {
+            return Ok(PassResult {
+                pass_name: self.name().into(),
+                changed: false,
+                sites_applied: 0,
+                sites_skipped: vec![SkipReason {
+                    pc: 0,
+                    reason: "bpf_speculation_barrier packed ABI not available".into(),
+                }],
+                diagnostics: vec![],
+                ..Default::default()
+            });
         }
 
         let orig_len = program.insns.len();
         let mut new_insns: Vec<BpfInsn> = Vec::with_capacity(orig_len + orig_len / 4);
         let mut addr_map = vec![0usize; orig_len + 1];
         let mut insertions = 0usize;
-        let use_packed = ctx.kfunc_registry.packed_supported_for_pass(self.name());
 
         let mut barrier_insn = BpfInsn::call_kfunc(btf_id);
 
@@ -107,15 +121,11 @@ impl BpfPass for SpectreMitigationPass {
                             barrier_insn.off = ensure_module_fd_slot(program, fd);
                         }
                     }
-                    if use_packed {
-                        new_insns.extend_from_slice(&emit_packed_kfunc_call_with_off(
-                            0,
-                            btf_id,
-                            barrier_insn.off,
-                        ));
-                    } else {
-                        new_insns.push(barrier_insn);
-                    }
+                    new_insns.extend_from_slice(&emit_packed_kfunc_call_with_off(
+                        0,
+                        btf_id,
+                        barrier_insn.off,
+                    ));
                     insertions += 1;
                 }
             }
@@ -163,7 +173,8 @@ impl BpfPass for SpectreMitigationPass {
             } else {
                 vec![]
             },
-        ..Default::default() })
+            ..Default::default()
+        })
     }
 }
 
@@ -178,7 +189,12 @@ mod tests {
     }
 
     fn exit_insn() -> BpfInsn {
-        BpfInsn { code: BPF_JMP | BPF_EXIT, regs: 0, off: 0, imm: 0 }
+        BpfInsn {
+            code: BPF_JMP | BPF_EXIT,
+            regs: 0,
+            off: 0,
+            imm: 0,
+        }
     }
 
     fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
@@ -214,12 +230,12 @@ mod tests {
 
         assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
-        assert_eq!(prog.insns.len(), 5);
+        assert_eq!(prog.insns.len(), 6);
         assert!(prog.insns[0].is_cond_jmp());
-        // Barrier is a kfunc call, not a NOP
-        assert!(prog.insns[1].is_call());
-        assert_eq!(prog.insns[1].src_reg(), 2); // kfunc call
-        assert_eq!(prog.insns[1].imm, TEST_BTF_ID);
+        assert!(prog.insns[1].is_kinsn_sidecar());
+        assert!(prog.insns[2].is_call());
+        assert_eq!(prog.insns[2].src_reg(), 2);
+        assert_eq!(prog.insns[2].imm, TEST_BTF_ID);
     }
 
     #[test]
@@ -244,10 +260,7 @@ mod tests {
 
     #[test]
     fn test_spectre_pass_no_change_when_no_vulnerable_sites() {
-        let mut prog = make_program(vec![
-            BpfInsn::mov64_imm(0, 42),
-            exit_insn(),
-        ]);
+        let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
         let mut cache = AnalysisCache::new();
         let ctx = ctx_with_barrier(TEST_BTF_ID);
 
@@ -276,16 +289,12 @@ mod tests {
 
         assert!(result.changed);
         assert_eq!(result.sites_applied, 2);
-        assert_eq!(prog.insns.len(), 7);
+        assert_eq!(prog.insns.len(), 9);
     }
 
     #[test]
     fn test_spectre_pass_does_not_insert_after_unconditional_jump() {
-        let mut prog = make_program(vec![
-            BpfInsn::ja(1),
-            BpfInsn::mov64_imm(0, 42),
-            exit_insn(),
-        ]);
+        let mut prog = make_program(vec![BpfInsn::ja(1), BpfInsn::mov64_imm(0, 42), exit_insn()]);
         let mut cache = AnalysisCache::new();
         let ctx = ctx_with_barrier(TEST_BTF_ID);
 
@@ -326,14 +335,16 @@ mod tests {
         let mut cache = AnalysisCache::new();
         let ctx = ctx_with_barrier(TEST_BTF_ID);
 
-        let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
+        let result = SpectreMitigationPass
+            .run(&mut prog, &mut cache, &ctx)
+            .unwrap();
         assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
-        assert_eq!(prog.insns.len(), 4);
-        // Verify the inserted instruction is a kfunc call
-        assert!(prog.insns[1].is_call());
-        assert_eq!(prog.insns[1].src_reg(), 2);
-        assert_eq!(prog.insns[1].imm, TEST_BTF_ID);
+        assert_eq!(prog.insns.len(), 5);
+        assert!(prog.insns[1].is_kinsn_sidecar());
+        assert!(prog.insns[2].is_call());
+        assert_eq!(prog.insns[2].src_reg(), 2);
+        assert_eq!(prog.insns[2].imm, TEST_BTF_ID);
     }
 
     #[test]
@@ -348,7 +359,9 @@ mod tests {
         let mut cache = AnalysisCache::new();
         let ctx = ctx_with_barrier(TEST_BTF_ID);
 
-        let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
+        let result = SpectreMitigationPass
+            .run(&mut prog, &mut cache, &ctx)
+            .unwrap();
         assert!(!result.changed);
         assert_eq!(prog.insns.len(), 4);
     }
@@ -359,7 +372,9 @@ mod tests {
         let mut cache = AnalysisCache::new();
         let ctx = ctx_with_barrier(TEST_BTF_ID);
 
-        let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
+        let result = SpectreMitigationPass
+            .run(&mut prog, &mut cache, &ctx)
+            .unwrap();
         assert!(!result.changed);
     }
 
@@ -370,21 +385,22 @@ mod tests {
         // jeq r1, 0, +2  -> should skip mov r0,1 and mov r0,2 to reach exit
         // After barrier insertion: jeq r1, 0, +3 (skip barrier + mov + mov)
         let mut prog = make_program(vec![
-            jeq_imm(1, 0, 2),       // pc=0: if r1==0, skip 2 insns to exit
+            jeq_imm(1, 0, 2),         // pc=0: if r1==0, skip 2 insns to exit
             BpfInsn::mov64_imm(0, 1), // pc=1
             BpfInsn::mov64_imm(0, 2), // pc=2
-            exit_insn(),             // pc=3: target of branch
+            exit_insn(),              // pc=3: target of branch
         ]);
         let mut cache = AnalysisCache::new();
         let ctx = ctx_with_barrier(TEST_BTF_ID);
 
-        let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
+        let result = SpectreMitigationPass
+            .run(&mut prog, &mut cache, &ctx)
+            .unwrap();
         assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
-        // New layout: [0] jeq  [1] barrier  [2] mov  [3] mov  [4] exit
-        assert_eq!(prog.insns.len(), 5);
-        // The branch at [0] should now have off=3 to reach exit at [4]
-        assert_eq!(prog.insns[0].off, 3);
+        // New layout: [0] jeq [1] sidecar [2] call [3] mov [4] mov [5] exit
+        assert_eq!(prog.insns.len(), 6);
+        assert_eq!(prog.insns[0].off, 4);
     }
 
     #[test]
@@ -394,22 +410,24 @@ mod tests {
             BpfInsn::mov64_imm(0, 1), // pc=1
             jeq_imm(2, 0, 1),         // pc=2
             BpfInsn::mov64_imm(0, 2), // pc=3
-            exit_insn(),               // pc=4
+            exit_insn(),              // pc=4
         ]);
         let mut cache = AnalysisCache::new();
         let ctx = ctx_with_barrier(TEST_BTF_ID);
 
-        let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
+        let result = SpectreMitigationPass
+            .run(&mut prog, &mut cache, &ctx)
+            .unwrap();
         assert!(result.changed);
         assert_eq!(result.sites_applied, 2);
-        // New layout: [0] jeq [1] barrier [2] mov [3] jeq [4] barrier [5] mov [6] exit
-        assert_eq!(prog.insns.len(), 7);
+        // New layout: [0] jeq [1] sidecar [2] call [3] mov [4] jeq [5] sidecar [6] call [7] mov [8] exit
+        assert_eq!(prog.insns.len(), 9);
 
-        // First branch: originally jumped +1 (to pc=2, which is now at new_pc=3)
-        assert_eq!(prog.insns[0].off, 2);
+        // First branch: originally jumped +1 (to old pc=2, now new pc=4)
+        assert_eq!(prog.insns[0].off, 3);
 
-        // Second branch: originally jumped +1 (to pc=4, which is now at new_pc=6)
-        assert_eq!(prog.insns[3].off, 2);
+        // Second branch: originally jumped +1 (to old pc=4, now new pc=8)
+        assert_eq!(prog.insns[4].off, 3);
     }
 
     #[test]
@@ -429,13 +447,15 @@ mod tests {
         let mut cache = AnalysisCache::new();
         let ctx = ctx_with_barrier(TEST_BTF_ID);
 
-        let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
+        let result = SpectreMitigationPass
+            .run(&mut prog, &mut cache, &ctx)
+            .unwrap();
         assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
-        assert_eq!(prog.insns.len(), 5);
-        // Barrier at position 1
-        assert!(prog.insns[1].is_call());
-        assert_eq!(prog.insns[1].imm, TEST_BTF_ID);
+        assert_eq!(prog.insns.len(), 6);
+        assert!(prog.insns[1].is_kinsn_sidecar());
+        assert!(prog.insns[2].is_call());
+        assert_eq!(prog.insns[2].imm, TEST_BTF_ID);
     }
 
     #[test]
@@ -452,15 +472,13 @@ mod tests {
             off: 0,
             imm: 0,
         };
-        let mut prog = make_program(vec![
-            ldimm64_lo,
-            ldimm64_hi,
-            exit_insn(),
-        ]);
+        let mut prog = make_program(vec![ldimm64_lo, ldimm64_hi, exit_insn()]);
         let mut cache = AnalysisCache::new();
         let ctx = ctx_with_barrier(TEST_BTF_ID);
 
-        let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
+        let result = SpectreMitigationPass
+            .run(&mut prog, &mut cache, &ctx)
+            .unwrap();
         assert!(!result.changed);
         assert_eq!(prog.insns.len(), 3);
     }
@@ -481,21 +499,22 @@ mod tests {
         };
         let mut prog = make_program(vec![
             jeq_imm(1, 0, 3),         // pc=0: jump to pc=4 (exit)
-            ldimm64_lo,                // pc=1
-            ldimm64_hi,                // pc=2
+            ldimm64_lo,               // pc=1
+            ldimm64_hi,               // pc=2
             BpfInsn::mov64_imm(0, 1), // pc=3
-            exit_insn(),               // pc=4
+            exit_insn(),              // pc=4
         ]);
         let mut cache = AnalysisCache::new();
         let ctx = ctx_with_barrier(TEST_BTF_ID);
 
-        let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
+        let result = SpectreMitigationPass
+            .run(&mut prog, &mut cache, &ctx)
+            .unwrap();
         assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
-        // New layout: [0] jeq [1] barrier [2] ldimm64_lo [3] ldimm64_hi [4] mov [5] exit
-        assert_eq!(prog.insns.len(), 6);
-        // Branch at [0] should target exit at [5]: off = 5 - 1 = 4
-        assert_eq!(prog.insns[0].off, 4);
+        // New layout: [0] jeq [1] sidecar [2] call [3] ldimm64_lo [4] ldimm64_hi [5] mov [6] exit
+        assert_eq!(prog.insns.len(), 7);
+        assert_eq!(prog.insns[0].off, 5);
     }
 
     #[test]
@@ -507,24 +526,25 @@ mod tests {
             imm: 256,
         };
         let mut prog = make_program(vec![
-            jge_imm,                            // pc=0: bounds check
+            jge_imm,                           // pc=0: bounds check
             BpfInsn::ldx_mem(BPF_DW, 0, 6, 0), // pc=1: speculative load
-            BpfInsn::mov64_reg(0, 0),           // pc=2: use loaded value
-            exit_insn(),                         // pc=3
+            BpfInsn::mov64_reg(0, 0),          // pc=2: use loaded value
+            exit_insn(),                       // pc=3
         ]);
         let mut cache = AnalysisCache::new();
         let ctx = ctx_with_barrier(TEST_BTF_ID);
 
-        let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
+        let result = SpectreMitigationPass
+            .run(&mut prog, &mut cache, &ctx)
+            .unwrap();
         assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
-        assert_eq!(prog.insns.len(), 5);
+        assert_eq!(prog.insns.len(), 6);
         assert!(prog.insns[0].is_cond_jmp());
-        // Barrier inserted right after the conditional branch
-        assert!(prog.insns[1].is_call());
-        assert_eq!(prog.insns[1].imm, TEST_BTF_ID);
-        // Branch offset adjusted: originally +2 (to exit at pc=3), now +3 (exit at new_pc=4)
-        assert_eq!(prog.insns[0].off, 3);
+        assert!(prog.insns[1].is_kinsn_sidecar());
+        assert!(prog.insns[2].is_call());
+        assert_eq!(prog.insns[2].imm, TEST_BTF_ID);
+        assert_eq!(prog.insns[0].off, 4);
     }
 
     #[test]
@@ -539,13 +559,17 @@ mod tests {
         let ctx = ctx_with_barrier(TEST_BTF_ID);
 
         // First run
-        let r1 = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
+        let r1 = SpectreMitigationPass
+            .run(&mut prog, &mut cache, &ctx)
+            .unwrap();
         assert!(r1.changed);
         let len_after_first = prog.insns.len();
 
         // Second run on the already-mitigated program
         cache.invalidate_all();
-        let r2 = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
+        let r2 = SpectreMitigationPass
+            .run(&mut prog, &mut cache, &ctx)
+            .unwrap();
         assert!(!r2.changed);
         assert_eq!(prog.insns.len(), len_after_first);
     }
@@ -553,8 +577,8 @@ mod tests {
     #[test]
     fn test_spectre_all_cond_jmp_opcodes() {
         let cond_opcodes: Vec<u8> = vec![
-            BPF_JEQ, BPF_JGT, BPF_JGE, BPF_JSET, BPF_JNE,
-            BPF_JLT, BPF_JLE, BPF_JSGT, BPF_JSGE, BPF_JSLT, BPF_JSLE,
+            BPF_JEQ, BPF_JGT, BPF_JGE, BPF_JSET, BPF_JNE, BPF_JLT, BPF_JLE, BPF_JSGT, BPF_JSGE,
+            BPF_JSLT, BPF_JSLE,
         ];
 
         for opcode in &cond_opcodes {
@@ -564,15 +588,13 @@ mod tests {
                 off: 1,
                 imm: 0,
             };
-            let mut prog = make_program(vec![
-                insn,
-                BpfInsn::mov64_imm(0, 0),
-                exit_insn(),
-            ]);
+            let mut prog = make_program(vec![insn, BpfInsn::mov64_imm(0, 0), exit_insn()]);
             let mut cache = AnalysisCache::new();
             let ctx = ctx_with_barrier(TEST_BTF_ID);
 
-            let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
+            let result = SpectreMitigationPass
+                .run(&mut prog, &mut cache, &ctx)
+                .unwrap();
             assert!(
                 result.changed,
                 "expected barrier insertion for JMP opcode {:#x}",
@@ -597,7 +619,9 @@ mod tests {
         let mut cache = AnalysisCache::new();
         let ctx = ctx_with_barrier(TEST_BTF_ID);
 
-        let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
+        let result = SpectreMitigationPass
+            .run(&mut prog, &mut cache, &ctx)
+            .unwrap();
         assert!(result.changed);
         assert_eq!(result.diagnostics.len(), 1);
         assert!(result.diagnostics[0].contains("speculation barriers inserted"));
@@ -627,7 +651,9 @@ mod tests {
         let mut cache = AnalysisCache::new();
         let ctx = ctx_with_barrier(TEST_BTF_ID);
 
-        let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
+        let result = SpectreMitigationPass
+            .run(&mut prog, &mut cache, &ctx)
+            .unwrap();
         assert!(result.changed);
         assert!(!result.diagnostics.is_empty());
         let diag = &result.diagnostics[0];
@@ -648,7 +674,9 @@ mod tests {
         let mut cache = AnalysisCache::new();
         let ctx = ctx_with_barrier(TEST_BTF_ID);
 
-        let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
+        let result = SpectreMitigationPass
+            .run(&mut prog, &mut cache, &ctx)
+            .unwrap();
         assert_eq!(result.pass_name, "speculation_barrier");
     }
 
@@ -665,7 +693,9 @@ mod tests {
             .kfunc_module_fds
             .insert("bpf_speculation_barrier".to_string(), 99);
 
-        let result = SpectreMitigationPass.run(&mut prog, &mut cache, &ctx).unwrap();
+        let result = SpectreMitigationPass
+            .run(&mut prog, &mut cache, &ctx)
+            .unwrap();
         assert!(result.changed);
         assert!(prog.required_module_fds.contains(&99));
     }

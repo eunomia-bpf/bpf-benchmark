@@ -26,7 +26,13 @@ fn register_signal_handlers() {
 
 // ── Serve (Unix socket server) ──────────────────────────────────────
 
-pub(crate) fn cmd_serve(socket_path: &str, ctx: &pass::PassContext, pass_names: &Option<Vec<String>>, pgo_config: &Option<PgoConfig>, rollback_enabled: bool) -> Result<()> {
+pub(crate) fn cmd_serve(
+    socket_path: &str,
+    ctx: &pass::PassContext,
+    pass_names: &Option<Vec<String>>,
+    pgo_config: &Option<PgoConfig>,
+    rollback_enabled: bool,
+) -> Result<()> {
     use std::os::unix::net::UnixListener;
 
     register_signal_handlers();
@@ -80,7 +86,9 @@ fn handle_client(
 
         let response = match serde_json::from_str::<serde_json::Value>(&line) {
             Ok(req) => process_request(&req, ctx, pass_names, pgo_config, rollback_enabled),
-            Err(e) => serde_json::json!({"status": "error", "message": format!("invalid JSON: {}", e)}),
+            Err(e) => {
+                serde_json::json!({"status": "error", "message": format!("invalid JSON: {}", e)})
+            }
         };
 
         let mut resp_str = serde_json::to_string(&response)?;
@@ -126,7 +134,13 @@ fn process_request(
             let mut total = 0u32;
             for prog_id in bpf::iter_prog_ids() {
                 total += 1;
-                match commands::try_apply_one(prog_id, ctx, pass_names, pgo_config, rollback_enabled) {
+                match commands::try_apply_one(
+                    prog_id,
+                    ctx,
+                    pass_names,
+                    pgo_config,
+                    rollback_enabled,
+                ) {
                     Ok(result) if result.summary.applied => applied += 1,
                     Ok(_) => {}
                     Err(_) => errors += 1,
@@ -145,7 +159,14 @@ fn process_request(
 
 // ── Watch (polling daemon) ──────────────────────────────────────────
 
-pub(crate) fn cmd_watch(interval_secs: u64, once: bool, ctx: &pass::PassContext, pass_names: &Option<Vec<String>>, pgo_config: &Option<PgoConfig>, rollback_enabled: bool) -> Result<()> {
+pub(crate) fn cmd_watch(
+    interval_secs: u64,
+    once: bool,
+    ctx: &pass::PassContext,
+    pass_names: &Option<Vec<String>>,
+    pgo_config: &Option<PgoConfig>,
+    rollback_enabled: bool,
+) -> Result<()> {
     register_signal_handlers();
 
     // Programs that were successfully optimized — never revisited.
@@ -204,9 +225,15 @@ pub(crate) fn cmd_watch(interval_secs: u64, once: bool, ctx: &pass::PassContext,
                     let count = fail_count.entry(*prog_id).or_insert(0);
                     *count += 1;
                     if *count >= MAX_RETRIES {
-                        eprintln!("  watch: prog {}: giving up after {} attempts: {:#}", prog_id, count, e);
+                        eprintln!(
+                            "  watch: prog {}: giving up after {} attempts: {:#}",
+                            prog_id, count, e
+                        );
                     } else {
-                        eprintln!("  watch: prog {}: attempt {}/{} failed: {:#}", prog_id, count, MAX_RETRIES, e);
+                        eprintln!(
+                            "  watch: prog {}: attempt {}/{} failed: {:#}",
+                            prog_id, count, MAX_RETRIES, e
+                        );
                     }
                     errors += 1;
                 }

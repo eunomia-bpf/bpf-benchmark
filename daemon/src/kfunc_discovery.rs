@@ -11,7 +11,7 @@ use std::path::Path;
 
 use anyhow::{bail, Context, Result};
 
-use crate::insn::{BPF_KINSN_ENC_LEGACY_KFUNC, BPF_KINSN_ENC_PACKED_CALL};
+use crate::insn::BPF_KINSN_ENC_PACKED_CALL;
 use crate::pass::KfuncRegistry;
 
 // ── Known kfunc → module mapping ─────────────────────────────────────
@@ -114,15 +114,15 @@ fn btf_type_extra_bytes(bt: &BtfType) -> usize {
     let vlen = (bt.info & 0xffff) as usize;
 
     match kind {
-        BTF_KIND_INT => 4,                 // u32 encoding data
-        BTF_KIND_ARRAY => 12,              // struct btf_array (3 * u32)
+        BTF_KIND_INT => 4,                             // u32 encoding data
+        BTF_KIND_ARRAY => 12,                          // struct btf_array (3 * u32)
         BTF_KIND_STRUCT | BTF_KIND_UNION => vlen * 12, // btf_member = 12 bytes each
-        BTF_KIND_ENUM => vlen * 8,         // btf_enum = 8 bytes each
-        BTF_KIND_FUNC_PROTO => vlen * 8,   // btf_param = 8 bytes each
-        BTF_KIND_VAR => 4,                 // u32 linkage
-        BTF_KIND_DATASEC => vlen * 12,     // btf_var_secinfo = 12 bytes each
-        BTF_KIND_DECL_TAG => 4,            // u32 component_idx
-        BTF_KIND_ENUM64 => vlen * 12,      // btf_enum64 = 12 bytes each
+        BTF_KIND_ENUM => vlen * 8,                     // btf_enum = 8 bytes each
+        BTF_KIND_FUNC_PROTO => vlen * 8,               // btf_param = 8 bytes each
+        BTF_KIND_VAR => 4,                             // u32 linkage
+        BTF_KIND_DATASEC => vlen * 12,                 // btf_var_secinfo = 12 bytes each
+        BTF_KIND_DECL_TAG => 4,                        // u32 component_idx
+        BTF_KIND_ENUM64 => vlen * 12,                  // btf_enum64 = 12 bytes each
         // PTR/FWD/TYPEDEF/VOLATILE/CONST/RESTRICT/FUNC/FLOAT/TYPE_TAG: no extra data
         _ => 0,
     }
@@ -253,7 +253,10 @@ fn find_func_btf_id(
             };
             if local_off < str_section.len() {
                 let name_bytes = &str_section[local_off..];
-                let nul_pos = name_bytes.iter().position(|&b| b == 0).unwrap_or(name_bytes.len());
+                let nul_pos = name_bytes
+                    .iter()
+                    .position(|&b| b == 0)
+                    .unwrap_or(name_bytes.len());
                 if let Ok(name) = std::str::from_utf8(&name_bytes[..nul_pos]) {
                     if name == func_name {
                         return Some(type_id + type_id_bias as i32);
@@ -292,8 +295,7 @@ fn read_module_btf(module_name: &str) -> Result<Vec<u8>> {
 #[allow(dead_code)]
 fn open_btf_path(path: &Path) -> Result<i32> {
     use std::ffi::CString;
-    let c_path = CString::new(path.to_str().unwrap_or(""))
-        .context("invalid path for CString")?;
+    let c_path = CString::new(path.to_str().unwrap_or("")).context("invalid path for CString")?;
     let fd = unsafe { libc::open(c_path.as_ptr(), libc::O_RDONLY) };
     if fd < 0 {
         bail!(
@@ -385,7 +387,8 @@ pub fn discover_kfuncs() -> DiscoveryResult {
             }
         };
 
-        let btf_id = match find_func_btf_id(&btf_data, kfunc_name, base_str_off, base_type_id_bias) {
+        let btf_id = match find_func_btf_id(&btf_data, kfunc_name, base_str_off, base_type_id_bias)
+        {
             Some(id) => id,
             None => {
                 log.push(format!(
@@ -440,10 +443,9 @@ pub fn discover_kfuncs() -> DiscoveryResult {
 
         // Store per-kfunc module FD for REJIT fd_array.
         registry.kfunc_module_fds.insert(kfunc_name.to_string(), fd);
-        registry.kfunc_supported_encodings.insert(
-            kfunc_name.to_string(),
-            BPF_KINSN_ENC_LEGACY_KFUNC | BPF_KINSN_ENC_PACKED_CALL,
-        );
+        registry
+            .kfunc_supported_encodings
+            .insert(kfunc_name.to_string(), BPF_KINSN_ENC_PACKED_CALL);
 
         // Legacy: keep the first module FD for backward compat.
         if registry.module_fd.is_none() {
@@ -664,8 +666,8 @@ mod tests {
             env!("CARGO_MANIFEST_DIR"),
             "/../vendor/linux-framework/include/uapi/linux/btf.h"
         );
-        let content = std::fs::read_to_string(header_path)
-            .expect("failed to read kernel btf.h header");
+        let content =
+            std::fs::read_to_string(header_path).expect("failed to read kernel btf.h header");
 
         let mut result = std::collections::HashMap::new();
         let mut in_enum = false;
@@ -761,7 +763,7 @@ mod tests {
         let proto_type = BtfType {
             name_off: 0,
             info: (BTF_KIND_FUNC_PROTO << 24) | 1, // vlen=1
-            size_or_type: 1, // return type
+            size_or_type: 1,                       // return type
         };
         let bytes: [u8; BTF_TYPE_SIZE] = unsafe { std::mem::transmute(proto_type) };
         type_section.extend_from_slice(&bytes);
@@ -842,10 +844,16 @@ mod tests {
         assert_eq!(find_func_btf_id(&blob, "bpf_rotate64", 0, 0), None);
 
         // With the correct base_str_off, the name resolves correctly.
-        assert_eq!(find_func_btf_id(&blob, "bpf_rotate64", base_str_off, 0), Some(1));
+        assert_eq!(
+            find_func_btf_id(&blob, "bpf_rotate64", base_str_off, 0),
+            Some(1)
+        );
 
         // Wrong func name still not found.
-        assert_eq!(find_func_btf_id(&blob, "bpf_select64", base_str_off, 0), None);
+        assert_eq!(
+            find_func_btf_id(&blob, "bpf_select64", base_str_off, 0),
+            None
+        );
     }
 
     #[test]
@@ -931,7 +939,11 @@ mod tests {
             "bpf_prog_run_xdp should exist in vmlinux BTF (found None)"
         );
         let btf_id = result.unwrap();
-        assert!(btf_id > 0, "bpf_prog_run_xdp BTF ID should be positive, got {}", btf_id);
+        assert!(
+            btf_id > 0,
+            "bpf_prog_run_xdp BTF ID should be positive, got {}",
+            btf_id
+        );
         eprintln!("  bpf_prog_run_xdp: btf_id={}", btf_id);
     }
 

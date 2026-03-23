@@ -109,7 +109,10 @@ pub(crate) struct PgoConfig {
 ///
 /// When PGO is enabled, polls the program's runtime stats for the configured
 /// interval and returns a `ProfilingData` with program-level hotness information.
-pub(crate) fn collect_pgo_data(prog_id: u32, pgo_config: &Option<PgoConfig>) -> Option<pass::ProfilingData> {
+pub(crate) fn collect_pgo_data(
+    prog_id: u32,
+    pgo_config: &Option<PgoConfig>,
+) -> Option<pass::ProfilingData> {
     let config = pgo_config.as_ref()?;
     match profiler::collect_program_profiling(prog_id, config.interval) {
         Ok((profiling, analysis)) => {
@@ -123,7 +126,10 @@ pub(crate) fn collect_pgo_data(prog_id: u32, pgo_config: &Option<PgoConfig>) -> 
                         .map_or("-".to_string(), |v| format!("{:.2}", v)),
                 );
             } else {
-                eprintln!("  pgo: prog {} is cold (no activity during observation)", prog_id);
+                eprintln!(
+                    "  pgo: prog {} is cold (no activity during observation)",
+                    prog_id
+                );
             }
             Some(profiling)
         }
@@ -236,7 +242,10 @@ pub(crate) fn rank_programs_by_hotness(prog_ids: &[u32], observation_window: Dur
 
 // ── Subcommand implementations ──────────────────────────────────────
 
-pub(crate) fn cmd_enumerate(ctx: &pass::PassContext, pass_names: &Option<Vec<String>>) -> Result<()> {
+pub(crate) fn cmd_enumerate(
+    ctx: &pass::PassContext,
+    pass_names: &Option<Vec<String>>,
+) -> Result<()> {
     println!(
         "{:>6}  {:>6}  {:>5}  {:<16}  sites",
         "ID", "type", "insns", "name"
@@ -254,7 +263,11 @@ pub(crate) fn cmd_enumerate(ctx: &pass::PassContext, pass_names: &Option<Vec<Str
     Ok(())
 }
 
-fn enumerate_one(prog_id: u32, ctx: &pass::PassContext, pass_names: &Option<Vec<String>>) -> Result<()> {
+fn enumerate_one(
+    prog_id: u32,
+    ctx: &pass::PassContext,
+    pass_names: &Option<Vec<String>>,
+) -> Result<()> {
     let fd = bpf::bpf_prog_get_fd_by_id(prog_id)?;
     let (info, orig_insns) = bpf::bpf_prog_get_info(fd.as_raw_fd(), true)?;
 
@@ -302,7 +315,11 @@ fn enumerate_one(prog_id: u32, ctx: &pass::PassContext, pass_names: &Option<Vec<
     Ok(())
 }
 
-pub(crate) fn cmd_rewrite(prog_id: u32, ctx: &pass::PassContext, pass_names: &Option<Vec<String>>) -> Result<()> {
+pub(crate) fn cmd_rewrite(
+    prog_id: u32,
+    ctx: &pass::PassContext,
+    pass_names: &Option<Vec<String>>,
+) -> Result<()> {
     let (info, orig_insns) = bpf::get_orig_insns_by_id(prog_id)?;
 
     if orig_insns.is_empty() {
@@ -362,7 +379,13 @@ pub(crate) fn cmd_rewrite(prog_id: u32, ctx: &pass::PassContext, pass_names: &Op
     Ok(())
 }
 
-pub(crate) fn cmd_apply(prog_id: u32, ctx: &pass::PassContext, pass_names: &Option<Vec<String>>, pgo_config: &Option<PgoConfig>, rollback_enabled: bool) -> Result<()> {
+pub(crate) fn cmd_apply(
+    prog_id: u32,
+    ctx: &pass::PassContext,
+    pass_names: &Option<Vec<String>>,
+    pgo_config: &Option<PgoConfig>,
+    rollback_enabled: bool,
+) -> Result<()> {
     let fd = bpf::bpf_prog_get_fd_by_id(prog_id).context("open program")?;
     let (info, orig_insns) =
         bpf::bpf_prog_get_info(fd.as_raw_fd(), true).context("get program info")?;
@@ -403,7 +426,8 @@ pub(crate) fn cmd_apply(prog_id: u32, ctx: &pass::PassContext, pass_names: &Opti
             local_ctx.policy.disabled_passes.push(disabled.clone());
         }
 
-        let pipeline_result = pm.run_with_profiling(&mut program, &local_ctx, profiling.as_ref())?;
+        let pipeline_result =
+            pm.run_with_profiling(&mut program, &local_ctx, profiling.as_ref())?;
 
         if !pipeline_result.program_changed {
             if attempt == 0 {
@@ -443,8 +467,8 @@ pub(crate) fn cmd_apply(prog_id: u32, ctx: &pass::PassContext, pass_names: &Opti
         // Relocate stale map FDs in the rewritten bytecode.
         // The original bytecode contains FDs from the loading process which are
         // invalid in the daemon's process context.
-        let _map_fds_guard = bpf::relocate_map_fds(&mut program.insns, &map_ids)
-            .unwrap_or_else(|e| {
+        let _map_fds_guard =
+            bpf::relocate_map_fds(&mut program.insns, &map_ids).unwrap_or_else(|e| {
                 eprintln!("  warning: map FD relocation failed: {:#}", e);
                 Vec::new()
             });
@@ -467,11 +491,18 @@ pub(crate) fn cmd_apply(prog_id: u32, ctx: &pass::PassContext, pass_names: &Opti
                 } else {
                     println!(
                         "  REJIT successful (after disabling: {})",
-                        disabled_passes.iter().cloned().collect::<Vec<_>>().join(", ")
+                        disabled_passes
+                            .iter()
+                            .cloned()
+                            .collect::<Vec<_>>()
+                            .join(", ")
                     );
                 }
                 if !result.verifier_log.is_empty() {
-                    eprintln!("  verifier log (success): {} bytes", result.verifier_log.len());
+                    eprintln!(
+                        "  verifier log (success): {} bytes",
+                        result.verifier_log.len()
+                    );
                 }
                 return Ok(());
             }
@@ -538,11 +569,20 @@ pub(crate) fn cmd_apply(prog_id: u32, ctx: &pass::PassContext, pass_names: &Opti
         "prog {}: exhausted rollback retries ({} passes disabled: {})",
         prog_id,
         disabled_passes.len(),
-        disabled_passes.iter().cloned().collect::<Vec<_>>().join(", ")
+        disabled_passes
+            .iter()
+            .cloned()
+            .collect::<Vec<_>>()
+            .join(", ")
     )
 }
 
-pub(crate) fn cmd_apply_all(ctx: &pass::PassContext, pass_names: &Option<Vec<String>>, pgo_config: &Option<PgoConfig>, rollback_enabled: bool) -> Result<()> {
+pub(crate) fn cmd_apply_all(
+    ctx: &pass::PassContext,
+    pass_names: &Option<Vec<String>>,
+    pgo_config: &Option<PgoConfig>,
+    rollback_enabled: bool,
+) -> Result<()> {
     let mut total = 0u32;
     let mut applied = 0u32;
     let mut errors = 0u32;
@@ -618,7 +658,13 @@ pub(crate) fn cmd_profile(prog_id: u32, interval_ms: u64, samples: usize) -> Res
 ///
 /// Returns a structured `OptimizeOneResult` describing everything that happened:
 /// program info, per-pass details, rollback attempts, and timings.
-pub(crate) fn try_apply_one(prog_id: u32, ctx: &pass::PassContext, pass_names: &Option<Vec<String>>, pgo_config: &Option<PgoConfig>, rollback_enabled: bool) -> Result<OptimizeOneResult> {
+pub(crate) fn try_apply_one(
+    prog_id: u32,
+    ctx: &pass::PassContext,
+    pass_names: &Option<Vec<String>>,
+    pgo_config: &Option<PgoConfig>,
+    rollback_enabled: bool,
+) -> Result<OptimizeOneResult> {
     let total_start = Instant::now();
     let fd = bpf::bpf_prog_get_fd_by_id(prog_id)?;
     let (info, orig_insns) = bpf::bpf_prog_get_info(fd.as_raw_fd(), true)?;
@@ -631,7 +677,12 @@ pub(crate) fn try_apply_one(prog_id: u32, ctx: &pass::PassContext, pass_names: &
     };
 
     // Helper to build result for early-return (no orig insns or no changes).
-    let make_noop_result = |status: &str, applied: bool, final_count: usize, passes: Vec<PassDetail>, pipeline_ns: u64| -> OptimizeOneResult {
+    let make_noop_result = |status: &str,
+                            applied: bool,
+                            final_count: usize,
+                            passes: Vec<PassDetail>,
+                            pipeline_ns: u64|
+     -> OptimizeOneResult {
         let total_ns = total_start.elapsed().as_nanos() as u64;
         OptimizeOneResult {
             status: status.to_string(),
@@ -699,15 +750,26 @@ pub(crate) fn try_apply_one(prog_id: u32, ctx: &pass::PassContext, pass_names: &
         }
 
         let pipeline_start = Instant::now();
-        let pipeline_result = pm.run_with_profiling(&mut program, &local_ctx, profiling.as_ref())?;
+        let pipeline_result =
+            pm.run_with_profiling(&mut program, &local_ctx, profiling.as_ref())?;
         let pipeline_elapsed = pipeline_start.elapsed().as_nanos() as u64;
         total_pipeline_ns = pipeline_elapsed;
 
         // Build per-pass details from the latest pipeline run.
-        last_pass_details = pipeline_result.pass_results.iter().map(PassDetail::from).collect();
+        last_pass_details = pipeline_result
+            .pass_results
+            .iter()
+            .map(PassDetail::from)
+            .collect();
 
         if !pipeline_result.program_changed {
-            return Ok(make_noop_result("ok", false, orig_insn_count, last_pass_details, pipeline_elapsed));
+            return Ok(make_noop_result(
+                "ok",
+                false,
+                orig_insn_count,
+                last_pass_details,
+                pipeline_elapsed,
+            ));
         }
 
         let final_insn_count = program.insns.len();
@@ -724,8 +786,8 @@ pub(crate) fn try_apply_one(prog_id: u32, ctx: &pass::PassContext, pass_names: &
         }
 
         // Relocate stale map FDs in the rewritten bytecode.
-        let _map_fds_guard = bpf::relocate_map_fds(&mut program.insns, &map_ids)
-            .unwrap_or_else(|e| {
+        let _map_fds_guard =
+            bpf::relocate_map_fds(&mut program.insns, &map_ids).unwrap_or_else(|e| {
                 eprintln!("    warning: map FD relocation failed: {:#}", e);
                 Vec::new()
             });
@@ -752,7 +814,11 @@ pub(crate) fn try_apply_one(prog_id: u32, ctx: &pass::PassContext, pass_names: &
                 } else {
                     println!(
                         "    REJIT ok (after disabling: {})",
-                        disabled_passes.iter().cloned().collect::<Vec<_>>().join(", ")
+                        disabled_passes
+                            .iter()
+                            .cloned()
+                            .collect::<Vec<_>>()
+                            .join(", ")
                     );
                 }
 
@@ -816,15 +882,11 @@ pub(crate) fn try_apply_one(prog_id: u32, ctx: &pass::PassContext, pass_names: &
                             eprintln!(
                                 "    WARN: pass '{}' caused verifier rejection{} for prog {} ({})",
                                 failed_pass_name,
-                                failed_pc
-                                    .map_or(String::new(), |pc| format!(" at PC {}", pc)),
+                                failed_pc.map_or(String::new(), |pc| format!(" at PC {}", pc)),
                                 prog_id,
                                 info.name_str(),
                             );
-                            eprintln!(
-                                "          Disabling '{}', retrying...",
-                                failed_pass_name,
-                            );
+                            eprintln!("          Disabling '{}', retrying...", failed_pass_name,);
 
                             attempts.push(AttemptRecord {
                                 attempt,
@@ -934,15 +996,13 @@ mod tests {
                     diagnostics: vec![],
                 },
             ],
-            attempts: vec![
-                AttemptRecord {
-                    attempt: 0,
-                    disabled_passes: vec![],
-                    result: "applied".to_string(),
-                    failure_pc: None,
-                    attributed_pass: None,
-                },
-            ],
+            attempts: vec![AttemptRecord {
+                attempt: 0,
+                disabled_passes: vec![],
+                result: "applied".to_string(),
+                failure_pc: None,
+                attributed_pass: None,
+            }],
             timings_ns: TimingsNs {
                 pipeline_run_ns: 100_000,
                 rejit_syscall_ns: 50_000,
@@ -963,7 +1023,10 @@ mod tests {
         assert_eq!(parsed["passes"].as_array().unwrap().len(), 2);
         assert_eq!(parsed["passes"][0]["pass_name"], "wide_mem");
         assert_eq!(parsed["passes"][0]["changed"], true);
-        assert_eq!(parsed["passes"][0]["skip_reasons"]["subprog_unsupported"], 1);
+        assert_eq!(
+            parsed["passes"][0]["skip_reasons"]["subprog_unsupported"],
+            1
+        );
         assert_eq!(parsed["passes"][1]["changed"], false);
         assert_eq!(parsed["attempts"].as_array().unwrap().len(), 1);
         assert_eq!(parsed["attempts"][0]["result"], "applied");
@@ -1039,9 +1102,18 @@ mod tests {
             changed: true,
             sites_applied: 5,
             sites_skipped: vec![
-                pass::SkipReason { pc: 10, reason: "subprog_unsupported".to_string() },
-                pass::SkipReason { pc: 20, reason: "subprog_unsupported".to_string() },
-                pass::SkipReason { pc: 30, reason: "kfunc_unavailable".to_string() },
+                pass::SkipReason {
+                    pc: 10,
+                    reason: "subprog_unsupported".to_string(),
+                },
+                pass::SkipReason {
+                    pc: 20,
+                    reason: "subprog_unsupported".to_string(),
+                },
+                pass::SkipReason {
+                    pc: 30,
+                    reason: "kfunc_unavailable".to_string(),
+                },
             ],
             diagnostics: vec!["test".to_string()],
             insns_before: 100,
@@ -1205,10 +1277,17 @@ R2 invalid mem access 'scalar'
                         opt_result.status
                     );
                     assert_eq!(opt_result.program.prog_id, prog_id);
-                    assert!(opt_result.program.orig_insn_count > 0 || opt_result.program.orig_insn_count == 0);
+                    assert!(
+                        opt_result.program.orig_insn_count > 0
+                            || opt_result.program.orig_insn_count == 0
+                    );
                     // Verify JSON serialization works.
                     let json = serde_json::to_string(&opt_result);
-                    assert!(json.is_ok(), "JSON serialization failed: {:#}", json.unwrap_err());
+                    assert!(
+                        json.is_ok(),
+                        "JSON serialization failed: {:#}",
+                        json.unwrap_err()
+                    );
                     eprintln!(
                         "  try_apply_one(prog_id={}): status={} applied={}",
                         prog_id, opt_result.status, opt_result.summary.applied

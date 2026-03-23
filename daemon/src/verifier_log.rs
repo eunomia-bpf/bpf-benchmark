@@ -65,9 +65,18 @@ pub fn extract_failure_pc(verifier_log: &str) -> Option<usize> {
     // Strategy 1: Look for common verifier error patterns and take the PC from
     // the preceding state line.
     let error_patterns = [
-        "invalid", "type=", "expected", "not allowed", "permission denied",
-        "R0 !read_ok", "unreachable", "back-edge", "loop detected",
-        "BPF_EXIT without", "jump out of range", "misaligned",
+        "invalid",
+        "type=",
+        "expected",
+        "not allowed",
+        "permission denied",
+        "R0 !read_ok",
+        "unreachable",
+        "back-edge",
+        "loop detected",
+        "BPF_EXIT without",
+        "jump out of range",
+        "misaligned",
     ];
 
     let mut last_state_pc: Option<usize> = None;
@@ -503,7 +512,10 @@ processed 4 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_stat
         };
 
         let parsed = parse_verifier_log(log_text);
-        assert!(!parsed.is_empty(), "should parse at least one state from rejection log");
+        assert!(
+            !parsed.is_empty(),
+            "should parse at least one state from rejection log"
+        );
         // First state snapshot is at pc=0.
         assert_eq!(parsed[0].pc, 0);
         assert!(parsed[0].regs.contains_key(&1));
@@ -523,7 +535,11 @@ processed 4 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_stat
 R2 type=scalar expected=pkt_ptr
 ";
         let pc = extract_failure_pc(log);
-        assert_eq!(pc, Some(5), "should return the PC of the last state before the error line");
+        assert_eq!(
+            pc,
+            Some(5),
+            "should return the PC of the last state before the error line"
+        );
     }
 
     #[test]

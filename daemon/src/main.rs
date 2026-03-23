@@ -165,14 +165,27 @@ fn main() -> Result<()> {
     match cli.command {
         Command::Enumerate => commands::cmd_enumerate(&ctx, &pass_names),
         Command::Rewrite { prog_id } => commands::cmd_rewrite(prog_id, &ctx, &pass_names),
-        Command::Apply { prog_id } => commands::cmd_apply(prog_id, &ctx, &pass_names, &pgo_config, rollback_enabled),
-        Command::ApplyAll => commands::cmd_apply_all(&ctx, &pass_names, &pgo_config, rollback_enabled),
-        Command::Serve { socket } => server::cmd_serve(&socket, &ctx, &pass_names, &pgo_config, rollback_enabled),
+        Command::Apply { prog_id } => {
+            commands::cmd_apply(prog_id, &ctx, &pass_names, &pgo_config, rollback_enabled)
+        }
+        Command::ApplyAll => {
+            commands::cmd_apply_all(&ctx, &pass_names, &pgo_config, rollback_enabled)
+        }
+        Command::Serve { socket } => {
+            server::cmd_serve(&socket, &ctx, &pass_names, &pgo_config, rollback_enabled)
+        }
         Command::Profile {
             prog_id,
             interval_ms,
             samples,
         } => commands::cmd_profile(prog_id, interval_ms, samples),
-        Command::Watch { interval, once } => server::cmd_watch(interval, once, &ctx, &pass_names, &pgo_config, rollback_enabled),
+        Command::Watch { interval, once } => server::cmd_watch(
+            interval,
+            once,
+            &ctx,
+            &pass_names,
+            &pgo_config,
+            rollback_enabled,
+        ),
     }
 }

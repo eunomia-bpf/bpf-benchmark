@@ -306,25 +306,25 @@ pub(crate) mod pmu {
     /// We only fill the fields we need; the rest is zero-initialized.
     #[repr(C)]
     struct PerfEventAttr {
-        type_: u32,           // offset 0
-        size: u32,            // offset 4
-        config: u64,          // offset 8
-        sample_period_or_freq: u64, // offset 16
-        sample_type: u64,     // offset 24
-        read_format: u64,     // offset 32
-        flags: u64,           // offset 40 (bitfield: disabled, exclude_kernel, etc.)
+        type_: u32,                      // offset 0
+        size: u32,                       // offset 4
+        config: u64,                     // offset 8
+        sample_period_or_freq: u64,      // offset 16
+        sample_type: u64,                // offset 24
+        read_format: u64,                // offset 32
+        flags: u64,                      // offset 40 (bitfield: disabled, exclude_kernel, etc.)
         wakeup_events_or_watermark: u32, // offset 48
-        bp_type: u32,         // offset 52
-        config1_or_bp_addr: u64, // offset 56
-        config2_or_bp_len: u64,  // offset 64
-        branch_sample_type: u64, // offset 72
-        sample_regs_user: u64,   // offset 80
-        sample_stack_user: u32,  // offset 88
-        clockid: i32,            // offset 92
-        sample_regs_intr: u64,   // offset 96
-        aux_watermark: u32,      // offset 104
-        sample_max_stack: u16,   // offset 108
-        _reserved: u16,          // offset 110
+        bp_type: u32,                    // offset 52
+        config1_or_bp_addr: u64,         // offset 56
+        config2_or_bp_len: u64,          // offset 64
+        branch_sample_type: u64,         // offset 72
+        sample_regs_user: u64,           // offset 80
+        sample_stack_user: u32,          // offset 88
+        clockid: i32,                    // offset 92
+        sample_regs_intr: u64,           // offset 96
+        aux_watermark: u32,              // offset 104
+        sample_max_stack: u16,           // offset 108
+        _reserved: u16,                  // offset 110
     }
 
     impl PerfEventAttr {
@@ -355,7 +355,9 @@ pub(crate) mod pmu {
                 Some(fd) => fd,
                 None => {
                     // Clean up the first fd before returning None.
-                    unsafe { libc::close(branch_insns_fd); }
+                    unsafe {
+                        libc::close(branch_insns_fd);
+                    }
                     return None;
                 }
             };

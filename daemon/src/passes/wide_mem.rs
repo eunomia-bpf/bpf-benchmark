@@ -113,10 +113,22 @@ fn try_match_wide_mem_at(insns: &[BpfInsn], pc: usize) -> Option<RewriteSite> {
                     old_len: len_a,
                     family: Family::WideMem,
                     bindings: vec![
-                        Binding { name: "dst_reg", value: dst as i64 },
-                        Binding { name: "base_reg", value: base as i64 },
-                        Binding { name: "base_off", value: first_off },
-                        Binding { name: "width", value: width as i64 },
+                        Binding {
+                            name: "dst_reg",
+                            value: dst as i64,
+                        },
+                        Binding {
+                            name: "base_reg",
+                            value: base as i64,
+                        },
+                        Binding {
+                            name: "base_off",
+                            value: first_off,
+                        },
+                        Binding {
+                            name: "width",
+                            value: width as i64,
+                        },
                     ],
                 });
             }
@@ -133,10 +145,22 @@ fn try_match_wide_mem_at(insns: &[BpfInsn], pc: usize) -> Option<RewriteSite> {
                     old_len: len_b,
                     family: Family::WideMem,
                     bindings: vec![
-                        Binding { name: "dst_reg", value: dst as i64 },
-                        Binding { name: "base_reg", value: base as i64 },
-                        Binding { name: "base_off", value: base_off },
-                        Binding { name: "width", value: width as i64 },
+                        Binding {
+                            name: "dst_reg",
+                            value: dst as i64,
+                        },
+                        Binding {
+                            name: "base_reg",
+                            value: base as i64,
+                        },
+                        Binding {
+                            name: "base_off",
+                            value: base_off,
+                        },
+                        Binding {
+                            name: "width",
+                            value: width as i64,
+                        },
                     ],
                 });
             }
@@ -304,10 +328,7 @@ fn emit_wide_mem(site: &RewriteSite) -> anyhow::Result<Vec<BpfInsn>> {
         2 => BPF_H,
         4 => BPF_W,
         8 => BPF_DW,
-        _ => bail!(
-            "WIDE_MEM: unsupported width {} (supports 2, 4, 8)",
-            width
-        ),
+        _ => bail!("WIDE_MEM: unsupported width {} (supports 2, 4, 8)", width),
     };
 
     Ok(vec![BpfInsn::ldx_mem(size, dst, base, off)])
@@ -386,7 +407,9 @@ impl BpfPass for WideMemPass {
 
             let last_insn_pc = if site_end > 0 { site_end - 1 } else { 0 };
             let has_live_scratch = if last_insn_pc < liveness.live_out.len() {
-                scratch_regs.iter().any(|r| liveness.live_out[last_insn_pc].contains(r))
+                scratch_regs
+                    .iter()
+                    .any(|r| liveness.live_out[last_insn_pc].contains(r))
             } else {
                 false
             };
@@ -418,7 +441,9 @@ impl BpfPass for WideMemPass {
                 changed: false,
                 sites_applied: 0,
                 sites_skipped: skipped,
-                diagnostics: vec![], ..Default::default() });
+                diagnostics: vec![],
+                ..Default::default()
+            });
         }
 
         // Apply rewrite: build new instruction stream with address map.
@@ -491,7 +516,9 @@ impl BpfPass for WideMemPass {
             changed: applied > 0,
             sites_applied: applied,
             sites_skipped: skipped,
-            diagnostics: vec![], ..Default::default() })
+            diagnostics: vec![],
+            ..Default::default()
+        })
     }
 }
 
@@ -777,10 +804,22 @@ mod tests {
             old_len: 10,
             family: Family::WideMem,
             bindings: vec![
-                Binding { name: "dst_reg", value: 0 },
-                Binding { name: "base_reg", value: 6 },
-                Binding { name: "base_off", value: 10 },
-                Binding { name: "width", value: 4 },
+                Binding {
+                    name: "dst_reg",
+                    value: 0,
+                },
+                Binding {
+                    name: "base_reg",
+                    value: 6,
+                },
+                Binding {
+                    name: "base_off",
+                    value: 10,
+                },
+                Binding {
+                    name: "width",
+                    value: 4,
+                },
             ],
         };
         let result = emit_wide_mem(&site).unwrap();
@@ -798,10 +837,22 @@ mod tests {
             old_len: 4,
             family: Family::WideMem,
             bindings: vec![
-                Binding { name: "dst_reg", value: 1 },
-                Binding { name: "base_reg", value: 7 },
-                Binding { name: "base_off", value: 0 },
-                Binding { name: "width", value: 2 },
+                Binding {
+                    name: "dst_reg",
+                    value: 1,
+                },
+                Binding {
+                    name: "base_reg",
+                    value: 7,
+                },
+                Binding {
+                    name: "base_off",
+                    value: 0,
+                },
+                Binding {
+                    name: "width",
+                    value: 2,
+                },
             ],
         };
         let result = emit_wide_mem(&site).unwrap();
@@ -819,10 +870,22 @@ mod tests {
             old_len: 22,
             family: Family::WideMem,
             bindings: vec![
-                Binding { name: "dst_reg", value: 3 },
-                Binding { name: "base_reg", value: 10 },
-                Binding { name: "base_off", value: -8 },
-                Binding { name: "width", value: 8 },
+                Binding {
+                    name: "dst_reg",
+                    value: 3,
+                },
+                Binding {
+                    name: "base_reg",
+                    value: 10,
+                },
+                Binding {
+                    name: "base_off",
+                    value: -8,
+                },
+                Binding {
+                    name: "width",
+                    value: 8,
+                },
             ],
         };
         let result = emit_wide_mem(&site).unwrap();
@@ -840,10 +903,22 @@ mod tests {
             old_len: 7,
             family: Family::WideMem,
             bindings: vec![
-                Binding { name: "dst_reg", value: 0 },
-                Binding { name: "base_reg", value: 6 },
-                Binding { name: "base_off", value: 0 },
-                Binding { name: "width", value: 3 },
+                Binding {
+                    name: "dst_reg",
+                    value: 0,
+                },
+                Binding {
+                    name: "base_reg",
+                    value: 6,
+                },
+                Binding {
+                    name: "base_off",
+                    value: 0,
+                },
+                Binding {
+                    name: "width",
+                    value: 3,
+                },
             ],
         };
         assert!(emit_wide_mem(&site).is_err());
@@ -869,10 +944,7 @@ mod tests {
 
     #[test]
     fn test_wide_mem_pass_no_sites() {
-        let mut prog = make_program(vec![
-            BpfInsn::mov64_imm(0, 42),
-            exit_insn(),
-        ]);
+        let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
         let mut cache = AnalysisCache::new();
         let ctx = PassContext::test_default();
 
@@ -957,7 +1029,9 @@ mod tests {
         assert!(!result.changed);
         assert_eq!(result.sites_applied, 0);
         assert!(!result.sites_skipped.is_empty());
-        assert!(result.sites_skipped[0].reason.contains("interior branch target"));
+        assert!(result.sites_skipped[0]
+            .reason
+            .contains("interior branch target"));
     }
 
     #[test]
@@ -1003,11 +1077,9 @@ mod tests {
         assert!(!result.changed);
         assert_eq!(result.sites_applied, 0);
         assert!(!result.sites_skipped.is_empty());
-        assert!(
-            result.sites_skipped[0]
-                .reason
-                .contains("scratch register live"),
-        );
+        assert!(result.sites_skipped[0]
+            .reason
+            .contains("scratch register live"),);
         assert_eq!(prog.insns.len(), 6);
     }
 
@@ -1128,11 +1200,11 @@ mod tests {
         // Build a 3-byte low-first byte-ladder: LDX(B, dst, base, 0) + 2 more bytes.
         // Width 3 is detected by the daemon but cannot be emitted as a single load.
         let insns = vec![
-            BpfInsn::ldx_mem(BPF_B, 0, 6, 0),  // byte 0
-            BpfInsn::ldx_mem(BPF_B, 1, 6, 1),  // byte 1
+            BpfInsn::ldx_mem(BPF_B, 0, 6, 0), // byte 0
+            BpfInsn::ldx_mem(BPF_B, 1, 6, 1), // byte 1
             BpfInsn::alu64_imm(BPF_LSH, 1, 8),
             BpfInsn::alu64_reg(BPF_OR, 0, 1),
-            BpfInsn::ldx_mem(BPF_B, 1, 6, 2),  // byte 2
+            BpfInsn::ldx_mem(BPF_B, 1, 6, 2), // byte 2
             BpfInsn::alu64_imm(BPF_LSH, 1, 16),
             BpfInsn::alu64_reg(BPF_OR, 0, 1),
             exit_insn(),
@@ -1152,7 +1224,10 @@ mod tests {
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
         assert!(!result.changed, "width=3 should be skipped, not applied");
         assert_eq!(result.sites_applied, 0);
-        assert!(result.sites_skipped.iter().any(|s| s.reason.contains("unsupported width")));
+        assert!(result
+            .sites_skipped
+            .iter()
+            .any(|s| s.reason.contains("unsupported width")));
     }
 
     #[test]
@@ -1190,7 +1265,10 @@ mod tests {
         assert!(result.changed, "width=4 site should be applied");
         assert_eq!(result.sites_applied, 1);
         // The width=3 site should be in sites_skipped.
-        assert!(result.sites_skipped.iter().any(|s| s.reason.contains("unsupported width 3")));
+        assert!(result
+            .sites_skipped
+            .iter()
+            .any(|s| s.reason.contains("unsupported width 3")));
     }
 
     // ── MEDIUM #5: Real bytecode pattern test for wide_mem ──────────
@@ -1218,20 +1296,31 @@ mod tests {
 
         // Verify each site has sensible properties
         for site in &sites {
-            assert!(site.start_pc < insns.len(),
-                "wide_mem site start_pc {} out of range (insns.len()={})", site.start_pc, insns.len());
-            assert!(site.old_len >= 2,
-                "wide_mem site old_len should be >= 2, got {}", site.old_len);
+            assert!(
+                site.start_pc < insns.len(),
+                "wide_mem site start_pc {} out of range (insns.len()={})",
+                site.start_pc,
+                insns.len()
+            );
+            assert!(
+                site.old_len >= 2,
+                "wide_mem site old_len should be >= 2, got {}",
+                site.old_len
+            );
             // Width should be available in bindings
             if let Some(width) = site.get_binding("width") {
-                assert!(width >= 2 && width <= 8,
-                    "wide_mem site width should be 2-8, got {}", width);
+                assert!(
+                    width >= 2 && width <= 8,
+                    "wide_mem site width should be 2-8, got {}",
+                    width
+                );
             }
         }
 
         eprintln!(
             "  load_byte_recompose.bpf.o: found {} wide_mem sites in {} insns",
-            sites.len(), insns.len()
+            sites.len(),
+            insns.len()
         );
     }
 }

@@ -1,20 +1,11 @@
 // SPDX-License-Identifier: MIT
 //! COND_SELECT optimization pass.
 
-use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
+use crate::analysis::BranchTargetAnalysis;
 use crate::insn::*;
 use crate::pass::*;
 
-use super::utils::{
-    emit_kfunc_call_with_off,
-    emit_packed_kfunc_call_with_off,
-    emit_with_caller_save,
-    ensure_module_fd_slot,
-    fixup_all_branches,
-    plan_caller_saved,
-    CallerSavedPlan,
-    KfuncArg,
-};
+use super::utils::{emit_packed_kfunc_call_with_off, ensure_module_fd_slot, fixup_all_branches};
 
 /// COND_SELECT pass: replaces branch+mov diamond patterns with
 /// bpf_select64() kfunc calls (lowered to CMOV by the JIT).
@@ -58,9 +49,6 @@ pub struct CondSelectSite {
 /// A cond_select site that has passed safety checks, ready for transformation.
 struct SafeCondSelectSite {
     site: CondSelectSite,
-    use_packed: bool,
-    /// Caller-saved register save/restore plan.
-    caller_save_plan: CallerSavedPlan,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -131,7 +119,7 @@ impl BpfPass for CondSelectPass {
     }
 
     fn required_analyses(&self) -> Vec<&str> {
-        vec!["branch_targets", "liveness"]
+        vec!["branch_targets"]
     }
 
     fn run(
@@ -151,7 +139,8 @@ impl BpfPass for CondSelectPass {
                     reason: "platform lacks CMOV support".into(),
                 }],
                 diagnostics: vec![],
-            ..Default::default() });
+                ..Default::default()
+            });
         }
 
         // Check if bpf_select64 kfunc is available.
@@ -180,13 +169,26 @@ impl BpfPass for CondSelectPass {
                     vec![]
                 },
                 diagnostics,
-            ..Default::default() });
+                ..Default::default()
+            });
+        }
+
+        if !ctx.kfunc_registry.packed_supported_for_pass(self.name()) {
+            return Ok(PassResult {
+                pass_name: self.name().into(),
+                changed: false,
+                sites_applied: 0,
+                sites_skipped: vec![SkipReason {
+                    pc: 0,
+                    reason: "bpf_select64 packed ABI not available".into(),
+                }],
+                diagnostics: vec![],
+                ..Default::default()
+            });
         }
 
         let bt_analysis = BranchTargetAnalysis;
         let bt = analyses.get(&bt_analysis, program);
-        let liveness_analysis = LivenessAnalysis;
-        let liveness = analyses.get(&liveness_analysis, program);
 
         let sites = self.analyze(&program.insns);
         let btf_id = ctx.kfunc_registry.select64_btf_id;
@@ -208,7 +210,11 @@ impl BpfPass for CondSelectPass {
 
             // Safety check 2: interior branch target (excluding the JCC's own target).
             // For Pattern C (3-insn), the JCC is at start_pc+1, not start_pc.
-            let jcc_pc = if site.old_len == 3 { site.start_pc + 1 } else { site.start_pc };
+            let jcc_pc = if site.old_len == 3 {
+                site.start_pc + 1
+            } else {
+                site.start_pc
+            };
             let jcc = &program.insns[jcc_pc];
             let own_target = (jcc_pc as i64 + 1 + jcc.off as i64) as usize;
             let has_interior = (site.start_pc + 1..site.start_pc + site.old_len)
@@ -221,39 +227,15 @@ impl BpfPass for CondSelectPass {
                 continue;
             }
 
-            let use_packed = packed_supported_for_site(ctx, &site);
-
-            // Safety check 3: caller-saved register conflict.
-            // Packed kinsn emission does not use the legacy r1-rN ABI, so it
-            // only needs the kinsn clobber model and does not require extra
-            // save/restore scaffolding here.
-            let plan = if use_packed {
-                Some(CallerSavedPlan { saves: vec![] })
-            } else {
-                let site_end = site.start_pc + site.old_len;
-                if site_end > 0 && site_end - 1 < liveness.live_out.len() {
-                    let live_after = &liveness.live_out[site_end - 1];
-                    plan_caller_saved(live_after, site.dst_reg)
-                } else {
-                    Some(CallerSavedPlan { saves: vec![] })
-                }
-            };
-
-            match plan {
-                Some(p) => {
-                    safe_sites.push(SafeCondSelectSite {
-                        site,
-                        use_packed,
-                        caller_save_plan: p,
-                    });
-                }
-                None => {
-                    skipped.push(SkipReason {
-                        pc: site.start_pc,
-                        reason: "caller-saved register conflict (not enough free callee-saved regs)".into(),
-                    });
-                }
+            if !packed_supported_for_site(ctx, &site) {
+                skipped.push(SkipReason {
+                    pc: site.start_pc,
+                    reason: "packed ABI requires register true/false operands".into(),
+                });
+                continue;
             }
+
+            safe_sites.push(SafeCondSelectSite { site });
         }
 
         if safe_sites.is_empty() {
@@ -262,7 +244,9 @@ impl BpfPass for CondSelectPass {
                 changed: false,
                 sites_applied: 0,
                 sites_skipped: skipped,
-                diagnostics: vec![], ..Default::default() });
+                diagnostics: vec![],
+                ..Default::default()
+            });
         }
 
         let kfunc_off = ctx
@@ -288,46 +272,19 @@ impl BpfPass for CondSelectPass {
                 let site = &safe_site.site;
                 let (a_val, b_val) = kfunc_args_for_site(site);
 
-                let replacement = if safe_site.use_packed {
-                    let a_reg = match a_val {
-                        CondSelectValue::Reg(r) => r,
-                        CondSelectValue::Imm(_) => unreachable!("packed path requires register inputs"),
-                    };
-                    let b_reg = match b_val {
-                        CondSelectValue::Reg(r) => r,
-                        CondSelectValue::Imm(_) => unreachable!("packed path requires register inputs"),
-                    };
-                    let payload = (site.dst_reg as u64)
-                        | ((a_reg as u64) << 4)
-                        | ((b_reg as u64) << 8)
-                        | ((site.cond_reg as u64) << 12);
-                    emit_packed_kfunc_call_with_off(payload, btf_id, kfunc_off)
-                } else {
-                    // Convert CondSelectValue to KfuncArg for the shared
-                    // swap-safe emit_kfunc_call helper.
-                    let arg_a = match a_val {
-                        CondSelectValue::Reg(r) => KfuncArg::Reg(r),
-                        CondSelectValue::Imm(i) => KfuncArg::Imm(i),
-                    };
-                    let arg_b = match b_val {
-                        CondSelectValue::Reg(r) => KfuncArg::Reg(r),
-                        CondSelectValue::Imm(i) => KfuncArg::Imm(i),
-                    };
-                    let arg_cond = KfuncArg::Reg(site.cond_reg);
-
-                    let kfunc_insns = emit_kfunc_call_with_off(
-                        site.dst_reg,
-                        &[arg_a, arg_b, arg_cond],
-                        btf_id,
-                        kfunc_off,
-                    );
-
-                    if safe_site.caller_save_plan.saves.is_empty() {
-                        kfunc_insns
-                    } else {
-                        emit_with_caller_save(&kfunc_insns, &safe_site.caller_save_plan)
-                    }
+                let a_reg = match a_val {
+                    CondSelectValue::Reg(r) => r,
+                    CondSelectValue::Imm(_) => unreachable!("packed path requires register inputs"),
                 };
+                let b_reg = match b_val {
+                    CondSelectValue::Reg(r) => r,
+                    CondSelectValue::Imm(_) => unreachable!("packed path requires register inputs"),
+                };
+                let payload = (site.dst_reg as u64)
+                    | ((a_reg as u64) << 4)
+                    | ((b_reg as u64) << 8)
+                    | ((site.cond_reg as u64) << 12);
+                let replacement = emit_packed_kfunc_call_with_off(payload, btf_id, kfunc_off);
                 new_insns.extend_from_slice(&replacement);
 
                 // Map old PCs in the site range.
@@ -368,7 +325,9 @@ impl BpfPass for CondSelectPass {
             changed: applied > 0,
             sites_applied: applied,
             sites_skipped: skipped,
-            diagnostics: vec![], ..Default::default() })
+            diagnostics: vec![],
+            ..Default::default()
+        })
     }
 }
 
@@ -444,7 +403,11 @@ fn try_match_cond_select(insns: &[BpfInsn], pc: usize) -> Option<CondSelectSite>
                 // For BPF_X: jcc uses dst_reg and src_reg.
                 // For BPF_K: jcc uses dst_reg.
                 let jcc_cond_reg = jcc.dst_reg();
-                let jcc_src_used = if bpf_src(jcc.code) == BPF_X { Some(jcc.src_reg()) } else { None };
+                let jcc_src_used = if bpf_src(jcc.code) == BPF_X {
+                    Some(jcc.src_reg())
+                } else {
+                    None
+                };
                 let mov_true_dst = mov_true.dst_reg();
                 let cond_clobbered = mov_true_dst == jcc_cond_reg
                     || jcc_src_used.map_or(false, |s| mov_true_dst == s);
@@ -491,7 +454,12 @@ mod tests {
     }
 
     fn exit_insn() -> BpfInsn {
-        BpfInsn { code: BPF_JMP | BPF_EXIT, regs: 0, off: 0, imm: 0 }
+        BpfInsn {
+            code: BPF_JMP | BPF_EXIT,
+            regs: 0,
+            off: 0,
+            imm: 0,
+        }
     }
 
     fn jne_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
@@ -570,9 +538,9 @@ mod tests {
         // Pattern C: MOV dst, true_val ; JNE cond, 0, +1 ; MOV dst, false_val
         let pass = CondSelectPass;
         let insns = vec![
-            BpfInsn::mov64_imm(0, 42),   // true_val
-            jne_imm(1, 0, 1),              // if r1 != 0, skip next
-            BpfInsn::mov64_imm(0, 0),    // false_val
+            BpfInsn::mov64_imm(0, 42), // true_val
+            jne_imm(1, 0, 1),          // if r1 != 0, skip next
+            BpfInsn::mov64_imm(0, 0),  // false_val
             exit_insn(),
         ];
         let sites = pass.analyze(&insns);
@@ -589,9 +557,9 @@ mod tests {
     fn test_cond_select_short_pattern_c_with_reg_values() {
         let pass = CondSelectPass;
         let insns = vec![
-            BpfInsn::mov64_reg(0, 6),    // true_val = r6
+            BpfInsn::mov64_reg(0, 6), // true_val = r6
             jne_imm(1, 0, 1),
-            BpfInsn::mov64_reg(0, 7),    // false_val = r7
+            BpfInsn::mov64_reg(0, 7), // false_val = r7
             exit_insn(),
         ];
         let sites = pass.analyze(&insns);
@@ -607,22 +575,25 @@ mod tests {
         // This changes semantics -- the JCC tests the new r1, not the old one.
         let pass = CondSelectPass;
         let insns = vec![
-            BpfInsn::mov64_imm(1, 42),   // clobbers cond_reg r1
+            BpfInsn::mov64_imm(1, 42), // clobbers cond_reg r1
             jne_imm(1, 0, 1),
             BpfInsn::mov64_imm(1, 0),
             exit_insn(),
         ];
         let sites = pass.analyze(&insns);
-        assert!(sites.is_empty(), "should not match when MOV true clobbers cond_reg");
+        assert!(
+            sites.is_empty(),
+            "should not match when MOV true clobbers cond_reg"
+        );
     }
 
     #[test]
     fn test_cond_select_short_pattern_c_emit_jne() {
-        // Pattern C with JNE: should produce correct kfunc call
+        // Pattern C with register values should lower to a packed select call.
         let mut prog = make_program(vec![
-            BpfInsn::mov64_imm(0, 42),   // true_val
+            BpfInsn::mov64_reg(0, 7), // true_val
             jne_imm(1, 0, 1),
-            BpfInsn::mov64_imm(0, 0),    // false_val
+            BpfInsn::mov64_reg(0, 6), // false_val
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
@@ -656,9 +627,9 @@ mod tests {
         let pass = CondSelectPass;
         let insns = vec![
             jne_imm(1, 0, 2),
-            BpfInsn::mov64_reg(0, 3),  // false_val
+            BpfInsn::mov64_reg(0, 3), // false_val
             BpfInsn::ja(1),
-            BpfInsn::mov64_reg(0, 4),  // true_val
+            BpfInsn::mov64_reg(0, 4), // true_val
             exit_insn(),
         ];
         let sites = pass.analyze(&insns);
@@ -729,10 +700,7 @@ mod tests {
     }
 
     #[test]
-    fn test_cond_select_emit_4insn_diamond_jne() {
-        // JNE r1, 0, +2 ; MOV r0, 0 ; JA +1 ; MOV r0, 1 ; EXIT
-        // With JNE: if r1 != 0 -> true_val=1, false_val=0
-        // kfunc: a=true_val=1, b=false_val=0, cond=r1
+    fn test_cond_select_skip_immediate_values_without_legacy() {
         let mut prog = make_program(vec![
             jne_imm(1, 0, 2),
             BpfInsn::mov64_imm(0, 0),
@@ -746,22 +714,12 @@ mod tests {
         let pass = CondSelectPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
-        assert!(result.changed);
-        assert_eq!(result.sites_applied, 1);
-
-        // Verify kfunc call is present with correct BTF ID.
-        let has_kfunc_call = prog.insns.iter().any(|i| i.is_call() && i.src_reg() == 2);
-        assert!(has_kfunc_call, "expected a kfunc call in the output");
-        let call_insn = prog.insns.iter().find(|i| i.is_call() && i.src_reg() == 2).unwrap();
-        assert_eq!(call_insn.imm, 5555);
-
-        // Verify semantics: r1=1 (true_val, a), r2=0 (false_val, b), r3=cond.
-        let mut initial = [0u64; 11];
-        initial[1] = 999; // original cond_reg value
-        let after = simulate_param_setup(&prog.insns, &initial);
-        assert_eq!(after[1], 1, "r1 should be true_val (a)");
-        assert_eq!(after[2], 0, "r2 should be false_val (b)");
-        assert_eq!(after[3], 999, "r3 should be original cond (r1)");
+        assert!(!result.changed);
+        assert_eq!(result.sites_applied, 0);
+        assert!(result
+            .sites_skipped
+            .iter()
+            .any(|s| s.reason.contains("register true/false operands")));
     }
 
     #[test]
@@ -785,15 +743,12 @@ mod tests {
 
     #[test]
     fn test_cond_select_emit_jeq_swaps_args() {
-        // JEQ r1, 0, +2 ; MOV r0, 0 ; JA +1 ; MOV r0, 1 ; EXIT
-        // With JEQ: if r1 == 0 -> jumps to true_val=1
-        // So: true_val=1 is selected when cond==0
-        // kfunc: a=false_val=0 (returned when cond!=0), b=true_val=1 (returned when cond==0)
+        // JEQ with register values swaps a/b so cond==0 selects the original true path.
         let mut prog = make_program(vec![
             jeq_imm(1, 0, 2),
-            BpfInsn::mov64_imm(0, 0),
+            BpfInsn::mov64_reg(0, 6),
             BpfInsn::ja(1),
-            BpfInsn::mov64_imm(0, 1),
+            BpfInsn::mov64_reg(0, 7),
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
@@ -805,13 +760,13 @@ mod tests {
         assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
 
-        // For JEQ: a = false_val = 0 (returned when cond!=0), b = true_val = 1
-        // Verify semantics using simulation.
         let mut initial = [0u64; 11];
-        initial[1] = 999; // original cond_reg value
+        initial[1] = 999;
+        initial[6] = 600;
+        initial[7] = 700;
         let after = simulate_param_setup(&prog.insns, &initial);
-        assert_eq!(after[1], 0, "r1 should be false_val (a) for JEQ");
-        assert_eq!(after[2], 1, "r2 should be true_val (b) for JEQ");
+        assert_eq!(after[1], 600, "logical a should be false_val for JEQ");
+        assert_eq!(after[2], 700, "logical b should be true_val for JEQ");
         assert_eq!(after[3], 999, "r3 should be original cond");
     }
 
@@ -833,7 +788,10 @@ mod tests {
 
         assert!(!result.changed);
         assert_eq!(result.sites_applied, 0);
-        assert!(result.sites_skipped.iter().any(|s| s.reason.contains("not a simple zero test")));
+        assert!(result
+            .sites_skipped
+            .iter()
+            .any(|s| s.reason.contains("not a simple zero test")));
     }
 
     #[test]
@@ -862,9 +820,9 @@ mod tests {
         // JNE r1, 0, +2 ; MOV r0, r6 ; JA +1 ; MOV r0, r7 ; EXIT
         let mut prog = make_program(vec![
             jne_imm(1, 0, 2),
-            BpfInsn::mov64_reg(0, 6),    // false_val
+            BpfInsn::mov64_reg(0, 6), // false_val
             BpfInsn::ja(1),
-            BpfInsn::mov64_reg(0, 7),    // true_val
+            BpfInsn::mov64_reg(0, 7), // true_val
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
@@ -887,14 +845,13 @@ mod tests {
     }
 
     #[test]
-    fn test_cond_select_caller_saved_with_save_restore() {
-        // Pattern A with r3 live after the site -- can be saved to a free callee-saved reg.
+    fn test_cond_select_packed_keeps_live_regs() {
         let mut prog = make_program(vec![
             BpfInsn::mov64_imm(3, 99),
             jne_imm(1, 0, 2),
-            BpfInsn::mov64_imm(0, 0),
+            BpfInsn::mov64_reg(0, 6),
             BpfInsn::ja(1),
-            BpfInsn::mov64_imm(0, 1),
+            BpfInsn::mov64_reg(0, 7),
             BpfInsn::mov64_reg(0, 3), // r3 is live-out of the site
             exit_insn(),
         ]);
@@ -904,20 +861,21 @@ mod tests {
         let pass = CondSelectPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
-        // With save/restore, the site should be applied.
-        assert!(result.changed, "should apply with caller-saved save/restore");
+        assert!(
+            result.changed,
+            "packed ABI should apply without save/restore"
+        );
         assert_eq!(result.sites_applied, 1);
     }
 
     #[test]
-    fn test_cond_select_caller_saved_no_free_callee_regs() {
-        // All callee-saved regs (r6-r9) are live, so save/restore is impossible.
+    fn test_cond_select_packed_no_callee_saved_dependency() {
         let mut prog = make_program(vec![
             BpfInsn::mov64_imm(3, 99),
             jne_imm(1, 0, 2),
-            BpfInsn::mov64_imm(0, 0),
+            BpfInsn::mov64_reg(0, 6),
             BpfInsn::ja(1),
-            BpfInsn::mov64_imm(0, 1),
+            BpfInsn::mov64_reg(0, 7),
             BpfInsn::alu64_reg(BPF_OR, 0, 3),
             BpfInsn::alu64_reg(BPF_OR, 0, 6),
             BpfInsn::alu64_reg(BPF_OR, 0, 7),
@@ -931,16 +889,16 @@ mod tests {
         let pass = CondSelectPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
-        assert!(!result.changed, "should skip when no free callee-saved regs");
-        assert!(result.sites_skipped.iter().any(|s| s.reason.contains("caller-saved")));
+        assert!(
+            result.changed,
+            "packed ABI should not depend on free callee-saved regs"
+        );
+        assert_eq!(result.sites_applied, 1);
     }
 
     #[test]
     fn test_cond_select_no_sites_linear() {
-        let mut prog = make_program(vec![
-            BpfInsn::mov64_imm(0, 42),
-            exit_insn(),
-        ]);
+        let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
         let mut cache = AnalysisCache::new();
         let ctx = ctx_with_select_kfunc(5555);
 
@@ -953,12 +911,12 @@ mod tests {
 
     #[test]
     fn test_cond_select_emit_cond_reg_is_r3() {
-        // Pattern A with cond_reg == 3, should NOT emit the extra MOV r3, r3
+        // Packed lowering should preserve cond_reg == r3 without emitting any register setup MOVs.
         let mut prog = make_program(vec![
             jne_imm(3, 0, 2),
-            BpfInsn::mov64_imm(0, 0),
+            BpfInsn::mov64_reg(0, 6),
             BpfInsn::ja(1),
-            BpfInsn::mov64_imm(0, 1),
+            BpfInsn::mov64_reg(0, 7),
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
@@ -968,24 +926,17 @@ mod tests {
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
         assert!(result.changed);
-        // Verify no mov r3, r3 — the emitted sequence should be shorter
-        let mov_r3_r3 = prog.insns.iter().any(|i| {
-            i.code == (BPF_ALU64 | BPF_MOV | BPF_X)
-                && i.dst_reg() == 3
-                && i.src_reg() == 3
-        });
-        assert!(!mov_r3_r3, "should not emit redundant mov r3, r3");
+        assert!(prog.insns[0].is_kinsn_sidecar());
     }
 
     #[test]
     fn test_cond_select_register_alias_safety() {
-        // Test case where cond_reg == 1, which would be clobbered by r1=a_val.
-        // Pattern A: JNE r1, 0, +2 ; MOV r0, 0 ; JA +1 ; MOV r0, 1
+        // Packed lowering keeps cond as an operand reference instead of materializing it into r3.
         let mut prog = make_program(vec![
             jne_imm(1, 0, 2),
-            BpfInsn::mov64_imm(0, 0),   // false_val
+            BpfInsn::mov64_reg(0, 6), // false_val
             BpfInsn::ja(1),
-            BpfInsn::mov64_imm(0, 1),   // true_val
+            BpfInsn::mov64_reg(0, 7), // true_val
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
@@ -995,31 +946,33 @@ mod tests {
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
         assert!(result.changed);
-        // The key check: the kfunc call should be present and r3 should have
-        // the original value of r1 (cond_reg), even though r1 was overwritten.
-        let has_kfunc_call = prog.insns.iter().any(|i| i.is_call() && i.src_reg() == 2);
-        assert!(has_kfunc_call);
+        let mut initial = [0u64; 11];
+        initial[1] = 100;
+        initial[6] = 600;
+        initial[7] = 700;
+        let after = simulate_param_setup(&prog.insns, &initial);
+        assert_eq!(after[1], 700);
+        assert_eq!(after[2], 600);
+        assert_eq!(after[3], 100);
     }
 
     // ── Issue 1: Parallel-copy alias safety tests ─────────────────
 
-    /// Simulate the register moves produced by emit_kfunc_call to verify
-    /// that the semantics are correct: after executing all MOVs, r1/r2/r3
-    /// hold the expected values just before the CALL instruction.
+    /// Decode the packed sidecar payload and map its logical (a, b, cond)
+    /// operands back to the provided initial register values.
     fn simulate_param_setup(insns: &[BpfInsn], initial_regs: &[u64; 11]) -> [u64; 11] {
-        let mut regs = *initial_regs;
-        for insn in insns {
-            if insn.is_call() {
-                break; // Stop at the call instruction.
-            }
-            let dst = insn.dst_reg() as usize;
-            if insn.code == (BPF_ALU64 | BPF_MOV | BPF_X) {
-                let src = insn.src_reg() as usize;
-                regs[dst] = regs[src];
-            } else if insn.code == (BPF_ALU64 | BPF_MOV | BPF_K) {
-                regs[dst] = insn.imm as u64;
-            }
-        }
+        let sidecar = insns.iter().find(|insn| insn.is_kinsn_sidecar()).unwrap();
+        let payload = (sidecar.dst_reg() as u64)
+            | ((sidecar.off as u16 as u64) << 4)
+            | ((sidecar.imm as u32 as u64) << 20);
+        let a_reg = ((payload >> 4) & 0xf) as usize;
+        let b_reg = ((payload >> 8) & 0xf) as usize;
+        let cond_reg = ((payload >> 12) & 0xf) as usize;
+
+        let mut regs = [0u64; 11];
+        regs[1] = initial_regs[a_reg];
+        regs[2] = initial_regs[b_reg];
+        regs[3] = initial_regs[cond_reg];
         regs
     }
 
@@ -1030,9 +983,9 @@ mod tests {
         // JNE r2, 0, +2 ; MOV r0, r6 (false) ; JA +1 ; MOV r0, r7 (true)
         let mut prog = make_program(vec![
             jne_imm(2, 0, 2),
-            BpfInsn::mov64_reg(0, 6),   // false_val = r6
+            BpfInsn::mov64_reg(0, 6), // false_val = r6
             BpfInsn::ja(1),
-            BpfInsn::mov64_reg(0, 7),   // true_val = r7
+            BpfInsn::mov64_reg(0, 7), // true_val = r7
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
@@ -1063,9 +1016,9 @@ mod tests {
         // JNE r3, 0, +2 ; MOV r0, r1 (false) ; JA +1 ; MOV r0, r2 (true)
         let mut prog = make_program(vec![
             jne_imm(3, 0, 2),
-            BpfInsn::mov64_reg(0, 1),   // false_val = r1
+            BpfInsn::mov64_reg(0, 1), // false_val = r1
             BpfInsn::ja(1),
-            BpfInsn::mov64_reg(0, 2),   // true_val = r2
+            BpfInsn::mov64_reg(0, 2), // true_val = r2
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
@@ -1108,9 +1061,11 @@ mod tests {
 
                     let pass = CondSelectPass;
                     let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
-                    assert!(result.changed,
+                    assert!(
+                        result.changed,
                         "should transform: cond=r{} true=r{} false=r{}",
-                        cond_reg, true_src, false_src);
+                        cond_reg, true_src, false_src
+                    );
 
                     // Simulate with distinct values.
                     let mut initial = [0u64; 11];
@@ -1124,12 +1079,21 @@ mod tests {
                     let expected_b = initial[false_src as usize];
                     let expected_cond = initial[cond_reg as usize];
 
-                    assert_eq!(after[1], expected_a,
-                        "r1 wrong: cond=r{} true=r{} false=r{}", cond_reg, true_src, false_src);
-                    assert_eq!(after[2], expected_b,
-                        "r2 wrong: cond=r{} true=r{} false=r{}", cond_reg, true_src, false_src);
-                    assert_eq!(after[3], expected_cond,
-                        "r3 wrong: cond=r{} true=r{} false=r{}", cond_reg, true_src, false_src);
+                    assert_eq!(
+                        after[1], expected_a,
+                        "r1 wrong: cond=r{} true=r{} false=r{}",
+                        cond_reg, true_src, false_src
+                    );
+                    assert_eq!(
+                        after[2], expected_b,
+                        "r2 wrong: cond=r{} true=r{} false=r{}",
+                        cond_reg, true_src, false_src
+                    );
+                    assert_eq!(
+                        after[3], expected_cond,
+                        "r3 wrong: cond=r{} true=r{} false=r{}",
+                        cond_reg, true_src, false_src
+                    );
                 }
             }
         }
@@ -1158,7 +1122,8 @@ mod tests {
 
         eprintln!(
             "  cond_select_dense.bpf.o: {} insns, {} sites found",
-            insns.len(), sites.len()
+            insns.len(),
+            sites.len()
         );
         assert!(
             !sites.is_empty(),

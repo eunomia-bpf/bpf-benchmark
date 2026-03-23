@@ -235,10 +235,10 @@ mod tests {
         // After a call, r1-r5 are dead (clobbered).
         // r6 is callee-saved, so it should remain live across the call.
         let insns = vec![
-            BpfInsn::mov64_imm(6, 42),    // r6 = 42
-            BpfInsn::mov64_imm(1, 1),     // r1 = 1 (arg)
-            BpfInsn::call_kfunc(99),       // call; clobbers r0-r5
-            BpfInsn::mov64_reg(0, 6),     // r0 = r6 (use callee-saved)
+            BpfInsn::mov64_imm(6, 42), // r6 = 42
+            BpfInsn::mov64_imm(1, 1),  // r1 = 1 (arg)
+            BpfInsn::call_kfunc(99),   // call; clobbers r0-r5
+            BpfInsn::mov64_reg(0, 6),  // r0 = r6 (use callee-saved)
             exit_insn(),
         ];
         let prog = make_program(insns);

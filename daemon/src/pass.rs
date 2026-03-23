@@ -10,11 +10,7 @@
 use std::any::{Any, TypeId};
 use std::collections::HashMap;
 
-use crate::insn::{
-    BpfInsn,
-    BPF_KINSN_ENC_LEGACY_KFUNC,
-    BPF_KINSN_ENC_PACKED_CALL,
-};
+use crate::insn::{BpfInsn, BPF_KINSN_ENC_PACKED_CALL};
 
 // ── Program metadata ────────────────────────────────────────────────
 
@@ -393,8 +389,8 @@ pub struct KfuncRegistry {
     /// owning module's BTF FD. This allows different kfuncs from different
     /// modules to each contribute their correct FD to the REJIT fd_array.
     pub kfunc_module_fds: HashMap<String, i32>,
-    /// Per-kfunc supported kinsn encodings. Absent entry falls back to legacy
-    /// kfunc ABI for discovered kfuncs to preserve old test contexts.
+    /// Per-kfunc supported kinsn encodings.
+    /// Tests that only seed BTF IDs rely on the packed-only fallback below.
     pub kfunc_supported_encodings: HashMap<String, u32>,
 }
 
@@ -442,7 +438,7 @@ impl KfuncRegistry {
             .copied()
             .or_else(|| {
                 if self.btf_id_for_kfunc_name(kfunc_name) >= 0 {
-                    Some(BPF_KINSN_ENC_LEGACY_KFUNC)
+                    Some(BPF_KINSN_ENC_PACKED_CALL)
                 } else {
                     None
                 }
@@ -454,10 +450,6 @@ impl KfuncRegistry {
         Self::kfunc_name_for_pass(pass_name)
             .map(|name| self.supported_encodings_for_kfunc_name(name))
             .unwrap_or(0)
-    }
-
-    pub fn legacy_supported_for_pass(&self, pass_name: &str) -> bool {
-        (self.supported_encodings_for_pass(pass_name) & BPF_KINSN_ENC_LEGACY_KFUNC) != 0
     }
 
     pub fn packed_supported_for_pass(&self, pass_name: &str) -> bool {
@@ -698,10 +690,7 @@ impl PassManager {
                 continue;
             }
             if !ctx.policy.enabled_passes.is_empty()
-                && !ctx
-                    .policy
-                    .enabled_passes
-                    .contains(&pass.name().to_string())
+                && !ctx.policy.enabled_passes.contains(&pass.name().to_string())
             {
                 continue;
             }
@@ -730,11 +719,7 @@ impl PassManager {
                 // Transform modified the program — invalidate cached analyses.
                 // Use targeted invalidation for known analysis types, then
                 // clear any remaining entries.
-                use crate::analysis::{
-                    BranchTargetResult,
-                    CFGResult,
-                    LivenessResult,
-                };
+                use crate::analysis::{BranchTargetResult, CFGResult, LivenessResult};
                 if cache.is_cached::<BranchTargetResult>() {
                     cache.invalidate::<BranchTargetResult>();
                 }
@@ -860,7 +845,9 @@ mod tests {
                 changed: false,
                 sites_applied: 0,
                 sites_skipped: vec![],
-                diagnostics: vec![], ..Default::default() })
+                diagnostics: vec![],
+                ..Default::default()
+            })
         }
     }
 
@@ -886,7 +873,9 @@ mod tests {
                 changed: true,
                 sites_applied: 1,
                 sites_skipped: vec![],
-                diagnostics: vec![], ..Default::default() })
+                diagnostics: vec![],
+                ..Default::default()
+            })
         }
     }
 
@@ -920,7 +909,9 @@ mod tests {
                 changed: applied > 0,
                 sites_applied: applied,
                 sites_skipped: vec![],
-                diagnostics: vec![], ..Default::default() })
+                diagnostics: vec![],
+                ..Default::default()
+            })
         }
     }
 
@@ -963,7 +954,9 @@ mod tests {
                 changed: false,
                 sites_applied: 0,
                 sites_skipped: vec![],
-                diagnostics: vec![format!("insn_count={}", count)], ..Default::default() })
+                diagnostics: vec![format!("insn_count={}", count)],
+                ..Default::default()
+            })
         }
     }
 
@@ -1085,16 +1078,12 @@ mod tests {
     #[test]
     fn test_analysis_cache_targeted_invalidation_for_known_types() {
         use crate::analysis::{
-            BranchTargetAnalysis, BranchTargetResult,
-            CFGAnalysis, CFGResult,
-            LivenessAnalysis, LivenessResult,
+            BranchTargetAnalysis, BranchTargetResult, CFGAnalysis, CFGResult, LivenessAnalysis,
+            LivenessResult,
         };
 
         let mut cache = AnalysisCache::new();
-        let prog = make_program(vec![
-            BpfInsn::mov64_imm(0, 42),
-            exit_insn(),
-        ]);
+        let prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
 
         // Populate all three analyses.
         cache.get(&BranchTargetAnalysis, &prog);
@@ -1245,7 +1234,8 @@ mod tests {
                 },
             ],
             diagnostics: vec!["applied 3 sites".into()],
-        ..Default::default() };
+            ..Default::default()
+        };
 
         assert_eq!(result.pass_name, "test_pass");
         assert!(result.changed);
@@ -1311,13 +1301,17 @@ mod tests {
                     changed: true,
                     sites_applied: 2,
                     sites_skipped: vec![],
-                    diagnostics: vec![], ..Default::default() },
+                    diagnostics: vec![],
+                    ..Default::default()
+                },
                 PassResult {
                     pass_name: "b".into(),
                     changed: false,
                     sites_applied: 0,
                     sites_skipped: vec![],
-                    diagnostics: vec![], ..Default::default() },
+                    diagnostics: vec![],
+                    ..Default::default()
+                },
             ],
             total_sites_applied: 2,
             program_changed: true,
@@ -1395,7 +1389,8 @@ mod tests {
         // Set different FDs for different kfuncs.
         reg.kfunc_module_fds.insert("bpf_rotate64".to_string(), 100);
         reg.kfunc_module_fds.insert("bpf_select64".to_string(), 200);
-        reg.kfunc_module_fds.insert("bpf_extract64".to_string(), 300);
+        reg.kfunc_module_fds
+            .insert("bpf_extract64".to_string(), 300);
 
         // Each pass should get its own module FD.
         assert_eq!(reg.module_fd_for_pass("rotate"), Some(100));
@@ -1481,8 +1476,12 @@ mod tests {
         // Simulate a program that used rotate and select passes.
         let required: Vec<i32> = vec![100, 200];
         for fd in &required {
-            assert!(all_fds.contains(fd),
-                "required fd {} not in all_module_fds {:?}", fd, all_fds);
+            assert!(
+                all_fds.contains(fd),
+                "required fd {} not in all_module_fds {:?}",
+                fd,
+                all_fds
+            );
         }
 
         // An unknown FD should fail the subset check.
@@ -1522,18 +1521,21 @@ mod tests {
         assert!(prog.annotations[0].branch_profile.is_none());
         assert!(prog.annotations[1].branch_profile.is_none());
         assert!(prog.annotations[2].branch_profile.is_some());
-        assert_eq!(prog.annotations[2].branch_profile.as_ref().unwrap().taken_count, 100);
+        assert_eq!(
+            prog.annotations[2]
+                .branch_profile
+                .as_ref()
+                .unwrap()
+                .taken_count,
+            100
+        );
         assert!(prog.annotations[3].branch_profile.is_none());
         assert!(prog.annotations[4].branch_profile.is_none());
     }
 
     #[test]
     fn test_remap_annotations_deleted_instruction() {
-        let mut prog = make_program(vec![
-            BpfInsn::nop(),
-            BpfInsn::nop(),
-            exit_insn(),
-        ]);
+        let mut prog = make_program(vec![BpfInsn::nop(), BpfInsn::nop(), exit_insn()]);
         prog.annotations[0].branch_profile = Some(BranchProfile {
             taken_count: 10,
             not_taken_count: 5,
@@ -1556,18 +1558,17 @@ mod tests {
 
     #[test]
     fn test_profiling_data_injection() {
-        let mut prog = make_program(vec![
-            BpfInsn::nop(),
-            BpfInsn::nop(),
-            exit_insn(),
-        ]);
+        let mut prog = make_program(vec![BpfInsn::nop(), BpfInsn::nop(), exit_insn()]);
         assert!(prog.annotations[1].branch_profile.is_none());
 
         let mut pdata = ProfilingData::default();
-        pdata.branch_profiles.insert(1, BranchProfile {
-            taken_count: 80,
-            not_taken_count: 20,
-        });
+        pdata.branch_profiles.insert(
+            1,
+            BranchProfile {
+                taken_count: 80,
+                not_taken_count: 20,
+            },
+        );
         prog.inject_profiling(&pdata);
 
         assert!(prog.annotations[0].branch_profile.is_none());
@@ -1583,7 +1584,10 @@ mod tests {
 
         let mut pm = PassManager::new();
         pm.register_analysis(BranchTargetAnalysis);
-        pm.add_pass(BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 });
+        pm.add_pass(BranchFlipPass {
+            min_bias: 0.7,
+            max_branch_miss_rate: 0.05,
+        });
 
         // A simple diamond that would be flipped if PGO says the branch is hot.
         let jne = BpfInsn {
@@ -1593,10 +1597,10 @@ mod tests {
             imm: 0,
         };
         let mut prog = make_program(vec![
-            jne,                             // pc=0
-            BpfInsn::mov64_imm(0, 10),      // then
-            BpfInsn::ja(1),                  // skip else
-            BpfInsn::mov64_imm(0, 20),      // else
+            jne,                       // pc=0
+            BpfInsn::mov64_imm(0, 10), // then
+            BpfInsn::ja(1),            // skip else
+            BpfInsn::mov64_imm(0, 20), // else
             exit_insn(),
         ]);
         let ctx = PassContext::test_default();
@@ -1616,13 +1620,21 @@ mod tests {
 
         // With profiling data showing hot branch + PMU data: should flip.
         let mut pdata = ProfilingData::default();
-        pdata.branch_profiles.insert(0, BranchProfile {
-            taken_count: 90,
-            not_taken_count: 10,
-        });
+        pdata.branch_profiles.insert(
+            0,
+            BranchProfile {
+                taken_count: 90,
+                not_taken_count: 10,
+            },
+        );
         pdata.branch_miss_rate = Some(0.02);
-        let result = pm.run_with_profiling(&mut prog, &ctx, Some(&pdata)).unwrap();
-        assert!(result.program_changed, "should flip with PGO data showing hot branch");
+        let result = pm
+            .run_with_profiling(&mut prog, &ctx, Some(&pdata))
+            .unwrap();
+        assert!(
+            result.program_changed,
+            "should flip with PGO data showing hot branch"
+        );
     }
 
     // ── BranchFlipPass import for testing ───────────────────────
@@ -1685,7 +1697,9 @@ mod tests {
         assert!(!result.program_changed);
         assert_eq!(result.total_sites_applied, 0);
         // Should have a skip reason about CMOV.
-        assert!(result.pass_results[0].sites_skipped.iter()
+        assert!(result.pass_results[0]
+            .sites_skipped
+            .iter()
             .any(|s| s.reason.contains("CMOV")));
     }
 
@@ -1702,7 +1716,10 @@ mod tests {
         let result = pm.run(&mut prog, &ctx).unwrap();
 
         assert!(result.program_changed);
-        assert!(!result.attribution.is_empty(), "attribution should be populated after transform");
+        assert!(
+            !result.attribution.is_empty(),
+            "attribution should be populated after transform"
+        );
         assert_eq!(result.attribution[0].pass_name, "append_nop");
     }
 
@@ -1717,7 +1734,10 @@ mod tests {
         let result = pm.run(&mut prog, &ctx).unwrap();
 
         assert!(!result.program_changed);
-        assert!(result.attribution.is_empty(), "attribution should be empty when no changes");
+        assert!(
+            result.attribution.is_empty(),
+            "attribution should be empty when no changes"
+        );
     }
 
     #[test]
@@ -1733,7 +1753,11 @@ mod tests {
 
         assert!(result.program_changed);
         assert_eq!(result.attribution.len(), 2);
-        let names: Vec<&str> = result.attribution.iter().map(|a| a.pass_name.as_str()).collect();
+        let names: Vec<&str> = result
+            .attribution
+            .iter()
+            .map(|a| a.pass_name.as_str())
+            .collect();
         assert!(names.contains(&"rewrite_mov_imm"));
         assert!(names.contains(&"append_nop"));
     }
@@ -1804,11 +1828,26 @@ mod tests {
             changed: false,
             sites_applied: 0,
             sites_skipped: vec![
-                SkipReason { pc: 0, reason: "kfunc_unavailable".into() },
-                SkipReason { pc: 5, reason: "subprog_unsupported".into() },
-                SkipReason { pc: 10, reason: "kfunc_unavailable".into() },
-                SkipReason { pc: 15, reason: "kfunc_unavailable".into() },
-                SkipReason { pc: 20, reason: "insufficient_bias".into() },
+                SkipReason {
+                    pc: 0,
+                    reason: "kfunc_unavailable".into(),
+                },
+                SkipReason {
+                    pc: 5,
+                    reason: "subprog_unsupported".into(),
+                },
+                SkipReason {
+                    pc: 10,
+                    reason: "kfunc_unavailable".into(),
+                },
+                SkipReason {
+                    pc: 15,
+                    reason: "kfunc_unavailable".into(),
+                },
+                SkipReason {
+                    pc: 20,
+                    reason: "insufficient_bias".into(),
+                },
             ],
             diagnostics: vec![],
             ..Default::default()

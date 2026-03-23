@@ -1,22 +1,22 @@
 // SPDX-License-Identifier: MIT
 //! Concrete pass implementations and pipeline constructors.
 
+mod branch_flip;
+mod cond_select;
+mod endian;
+mod extract;
+mod rotate;
+mod spectre;
 pub mod utils;
 mod wide_mem;
-mod rotate;
-mod cond_select;
-mod branch_flip;
-mod spectre;
-mod extract;
-mod endian;
 
-pub use wide_mem::WideMemPass;
-pub use rotate::RotatePass;
-pub use cond_select::CondSelectPass;
 pub use branch_flip::BranchFlipPass;
-pub use spectre::SpectreMitigationPass;
-pub use extract::ExtractPass;
+pub use cond_select::CondSelectPass;
 pub use endian::EndianFusionPass;
+pub use extract::ExtractPass;
+pub use rotate::RotatePass;
+pub use spectre::SpectreMitigationPass;
+pub use wide_mem::WideMemPass;
 
 use crate::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis};
 use crate::pass::{BpfPass, PassManager};
@@ -82,7 +82,12 @@ pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
         name: "branch_flip",
         description: "Flip branch polarity using PGO data to improve branch prediction",
         aliases: &[],
-        make: || Box::new(BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 }),
+        make: || {
+            Box::new(BranchFlipPass {
+                min_bias: 0.7,
+                max_branch_miss_rate: 0.05,
+            })
+        },
     },
     PassRegistryEntry {
         name: "speculation_barrier",
@@ -167,7 +172,12 @@ mod tests {
     }
 
     fn exit_insn() -> BpfInsn {
-        BpfInsn { code: BPF_JMP | BPF_EXIT, regs: 0, off: 0, imm: 0 }
+        BpfInsn {
+            code: BPF_JMP | BPF_EXIT,
+            regs: 0,
+            off: 0,
+            imm: 0,
+        }
     }
 
     fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
@@ -276,10 +286,7 @@ mod tests {
         use crate::analysis::BranchTargetAnalysis;
         use crate::pass::Analysis;
 
-        let prog = make_program(vec![
-            BpfInsn::mov64_imm(0, 0),
-            BpfInsn::ja(-2),
-        ]);
+        let prog = make_program(vec![BpfInsn::mov64_imm(0, 0), BpfInsn::ja(-2)]);
 
         let bt = BranchTargetAnalysis;
         let result = bt.run(&prog);
@@ -376,7 +383,10 @@ mod tests {
 
         // After fixing the OR operand order and caller-saved save/restore,
         // the rotate pass should find and apply sites on real bytecode.
-        let rotate_result = result.pass_results.iter().find(|pr| pr.pass_name == "rotate");
+        let rotate_result = result
+            .pass_results
+            .iter()
+            .find(|pr| pr.pass_name == "rotate");
         let applied = rotate_result.map_or(0, |r| r.sites_applied);
         let skipped_count = rotate_result.map_or(0, |r| r.sites_skipped.len());
         eprintln!(
@@ -416,7 +426,10 @@ mod tests {
             prog.insns.last().map_or(false, |i| i.is_exit()),
             "bitfield_extract pipeline output should end with EXIT"
         );
-        let extract_result = result.pass_results.iter().find(|pr| pr.pass_name == "extract");
+        let extract_result = result
+            .pass_results
+            .iter()
+            .find(|pr| pr.pass_name == "extract");
         // The extract scanner should find sites, but safety checks (e.g., caller-saved
         // register conflict) may prevent some or all from being applied.
         let found_sites = extract_result.map_or(0, |r| r.sites_applied + r.sites_skipped.len());
@@ -459,7 +472,10 @@ mod tests {
             prog.insns.last().map_or(false, |i| i.is_exit()),
             "endian_swap_dense pipeline output should end with EXIT"
         );
-        let endian_result = result.pass_results.iter().find(|pr| pr.pass_name == "endian_fusion");
+        let endian_result = result
+            .pass_results
+            .iter()
+            .find(|pr| pr.pass_name == "endian_fusion");
         // The endian scanner should find sites; safety checks may skip some.
         let found_sites = endian_result.map_or(0, |r| r.sites_applied + r.sites_skipped.len());
         assert!(

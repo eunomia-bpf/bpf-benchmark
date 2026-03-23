@@ -1,20 +1,11 @@
 // SPDX-License-Identifier: MIT
 //! EXTRACT optimization pass.
 
-use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
+use crate::analysis::BranchTargetAnalysis;
 use crate::insn::*;
 use crate::pass::*;
 
-use super::utils::{
-    emit_kfunc_call_with_off,
-    emit_packed_kfunc_call_with_off,
-    emit_with_caller_save,
-    ensure_module_fd_slot,
-    fixup_all_branches,
-    plan_caller_saved,
-    CallerSavedPlan,
-    KfuncArg,
-};
+use super::utils::{emit_packed_kfunc_call_with_off, ensure_module_fd_slot, fixup_all_branches};
 
 /// EXTRACT optimization pass: replaces RSH+AND bitfield extraction patterns
 /// with bpf_extract64() kfunc calls.
@@ -44,8 +35,6 @@ struct ExtractSite {
 /// An extract site that has passed safety checks, ready for transformation.
 struct SafeExtractSite {
     site: ExtractSite,
-    /// Caller-saved register save/restore plan (empty saves vec if no saves needed).
-    caller_save_plan: CallerSavedPlan,
 }
 
 /// Check if a value is a contiguous bitmask of 1s starting from bit 0.
@@ -115,7 +104,7 @@ impl BpfPass for ExtractPass {
     }
 
     fn required_analyses(&self) -> Vec<&str> {
-        vec!["branch_targets", "liveness"]
+        vec!["branch_targets"]
     }
 
     fn run(
@@ -135,14 +124,26 @@ impl BpfPass for ExtractPass {
                     reason: "bpf_extract64 kfunc not available".into(),
                 }],
                 diagnostics: vec![],
-            ..Default::default() });
+                ..Default::default()
+            });
+        }
+
+        if !ctx.kfunc_registry.packed_supported_for_pass(self.name()) {
+            return Ok(PassResult {
+                pass_name: self.name().into(),
+                changed: false,
+                sites_applied: 0,
+                sites_skipped: vec![SkipReason {
+                    pc: 0,
+                    reason: "bpf_extract64 packed ABI not available".into(),
+                }],
+                diagnostics: vec![],
+                ..Default::default()
+            });
         }
 
         let bt_analysis = BranchTargetAnalysis;
         let bt = analyses.get(&bt_analysis, program);
-        let liveness_analysis = LivenessAnalysis;
-        let liveness = analyses.get(&liveness_analysis, program);
-        let use_packed = ctx.kfunc_registry.packed_supported_for_pass(self.name());
 
         let sites = scan_extract_sites(&program.insns);
         let btf_id = ctx.kfunc_registry.extract64_btf_id;
@@ -161,38 +162,7 @@ impl BpfPass for ExtractPass {
                 continue;
             }
 
-            if use_packed {
-                safe_sites.push(SafeExtractSite {
-                    site,
-                    caller_save_plan: CallerSavedPlan { saves: vec![] },
-                });
-            } else {
-                // Safety check 2: caller-saved register conflict.
-                // Try to plan save/restore for live caller-saved regs using
-                // free callee-saved regs. Only skip if no plan is possible.
-                let site_end = site.start_pc + site.old_len;
-                let plan = if site_end > 0 && site_end - 1 < liveness.live_out.len() {
-                    let live_after = &liveness.live_out[site_end - 1];
-                    plan_caller_saved(live_after, site.dst_reg)
-                } else {
-                    Some(CallerSavedPlan { saves: vec![] })
-                };
-
-                match plan {
-                    Some(p) => {
-                        safe_sites.push(SafeExtractSite {
-                            site,
-                            caller_save_plan: p,
-                        });
-                    }
-                    None => {
-                        skipped.push(SkipReason {
-                            pc: site.start_pc,
-                            reason: "caller-saved register conflict (not enough free callee-saved regs)".into(),
-                        });
-                    }
-                }
-            }
+            safe_sites.push(SafeExtractSite { site });
         }
 
         if safe_sites.is_empty() {
@@ -201,7 +171,9 @@ impl BpfPass for ExtractPass {
                 changed: false,
                 sites_applied: 0,
                 sites_skipped: skipped,
-                diagnostics: vec![], ..Default::default() });
+                diagnostics: vec![],
+                ..Default::default()
+            });
         }
 
         let kfunc_off = ctx
@@ -226,28 +198,10 @@ impl BpfPass for ExtractPass {
                 let safe_site = &safe_sites[site_idx];
                 let site = &safe_site.site;
 
-                let replacement = if use_packed {
-                    let payload = (site.dst_reg as u64)
-                        | ((site.shift_amount as u64) << 8)
-                        | ((site.bit_len as u64) << 16);
-                    emit_packed_kfunc_call_with_off(payload, btf_id, kfunc_off)
-                } else {
-                    let kfunc_insns = emit_kfunc_call_with_off(
-                        site.dst_reg,
-                        &[
-                            KfuncArg::Reg(site.dst_reg),
-                            KfuncArg::Imm(site.shift_amount as i32),
-                            KfuncArg::Imm(site.bit_len as i32),
-                        ],
-                        btf_id,
-                        kfunc_off,
-                    );
-                    if safe_site.caller_save_plan.saves.is_empty() {
-                        kfunc_insns
-                    } else {
-                        emit_with_caller_save(&kfunc_insns, &safe_site.caller_save_plan)
-                    }
-                };
+                let payload = (site.dst_reg as u64)
+                    | ((site.shift_amount as u64) << 8)
+                    | ((site.bit_len as u64) << 16);
+                let replacement = emit_packed_kfunc_call_with_off(payload, btf_id, kfunc_off);
                 new_insns.extend_from_slice(&replacement);
 
                 // Map old PCs in the site range.
@@ -288,7 +242,9 @@ impl BpfPass for ExtractPass {
             changed: applied > 0,
             sites_applied: applied,
             sites_skipped: skipped,
-            diagnostics: vec![], ..Default::default() })
+            diagnostics: vec![],
+            ..Default::default()
+        })
     }
 }
 
@@ -303,7 +259,12 @@ mod tests {
     }
 
     fn exit_insn() -> BpfInsn {
-        BpfInsn { code: BPF_JMP | BPF_EXIT, regs: 0, off: 0, imm: 0 }
+        BpfInsn {
+            code: BPF_JMP | BPF_EXIT,
+            regs: 0,
+            off: 0,
+            imm: 0,
+        }
     }
 
     fn ctx_with_extract_kfunc(btf_id: i32) -> PassContext {
@@ -335,20 +296,20 @@ mod tests {
         assert_eq!(contiguous_mask_len(0xffff), Some(16));
         assert_eq!(contiguous_mask_len(0xffffffff), Some(32));
         // Non-contiguous masks
-        assert_eq!(contiguous_mask_len(0x5), None);  // 101
-        assert_eq!(contiguous_mask_len(0xa), None);  // 1010
+        assert_eq!(contiguous_mask_len(0x5), None); // 101
+        assert_eq!(contiguous_mask_len(0xa), None); // 1010
         assert_eq!(contiguous_mask_len(0x101), None); // 100000001
-        // Additional edge cases
-        assert_eq!(contiguous_mask_len(0x1f), Some(5));   // 11111
-        assert_eq!(contiguous_mask_len(0x3f), Some(6));   // 111111
-        assert_eq!(contiguous_mask_len(0x7f), Some(7));   // 1111111
-        assert_eq!(contiguous_mask_len(0x1ff), Some(9));  // 9 bits
+                                                      // Additional edge cases
+        assert_eq!(contiguous_mask_len(0x1f), Some(5)); // 11111
+        assert_eq!(contiguous_mask_len(0x3f), Some(6)); // 111111
+        assert_eq!(contiguous_mask_len(0x7f), Some(7)); // 1111111
+        assert_eq!(contiguous_mask_len(0x1ff), Some(9)); // 9 bits
         assert_eq!(contiguous_mask_len(0xffffff), Some(24));
         // Non-contiguous: gaps in the middle
-        assert_eq!(contiguous_mask_len(0x6), None);   // 110 — not from bit 0
-        assert_eq!(contiguous_mask_len(0xfe), None);  // 11111110 — not from bit 0
-        assert_eq!(contiguous_mask_len(0x10), None);  // single bit not at 0
-        assert_eq!(contiguous_mask_len(0x80), None);  // single high bit
+        assert_eq!(contiguous_mask_len(0x6), None); // 110 — not from bit 0
+        assert_eq!(contiguous_mask_len(0xfe), None); // 11111110 — not from bit 0
+        assert_eq!(contiguous_mask_len(0x10), None); // single bit not at 0
+        assert_eq!(contiguous_mask_len(0x80), None); // single high bit
     }
 
     // ── Pattern scanning tests ─────────────────────────────────────
@@ -356,7 +317,7 @@ mod tests {
     #[test]
     fn test_scan_extract_basic() {
         let insns = vec![
-            BpfInsn::alu64_imm(BPF_RSH, 2, 8),   // RSH r2, 8
+            BpfInsn::alu64_imm(BPF_RSH, 2, 8),    // RSH r2, 8
             BpfInsn::alu64_imm(BPF_AND, 2, 0xff), // AND r2, 0xff
             exit_insn(),
         ];
@@ -373,7 +334,7 @@ mod tests {
     fn test_scan_extract_16bit_mask() {
         let insns = vec![
             BpfInsn::alu64_imm(BPF_RSH, 3, 16),     // RSH r3, 16
-            BpfInsn::alu64_imm(BPF_AND, 3, 0xffff),  // AND r3, 0xffff
+            BpfInsn::alu64_imm(BPF_AND, 3, 0xffff), // AND r3, 0xffff
             exit_insn(),
         ];
         let sites = scan_extract_sites(&insns);
@@ -450,7 +411,9 @@ mod tests {
 
         assert!(!result.changed);
         assert_eq!(result.sites_applied, 0);
-        assert!(result.sites_skipped[0].reason.contains("kfunc not available"));
+        assert!(result.sites_skipped[0]
+            .reason
+            .contains("kfunc not available"));
     }
 
     #[test]
@@ -472,7 +435,11 @@ mod tests {
         // Verify a kfunc call exists.
         let has_kfunc_call = prog.insns.iter().any(|i| i.is_call() && i.src_reg() == 2);
         assert!(has_kfunc_call, "expected a kfunc call in the output");
-        let call_insn = prog.insns.iter().find(|i| i.is_call() && i.src_reg() == 2).unwrap();
+        let call_insn = prog
+            .insns
+            .iter()
+            .find(|i| i.is_call() && i.src_reg() == 2)
+            .unwrap();
         assert_eq!(call_insn.imm, 7777);
 
         // Verify the last instruction is still EXIT.
@@ -483,10 +450,10 @@ mod tests {
     fn test_extract_pass_caller_saved_with_save_restore() {
         // r3 is live after the site, but can be saved to a free callee-saved reg.
         let mut prog = make_program(vec![
-            BpfInsn::mov64_imm(3, 99),            // r3 = 99
+            BpfInsn::mov64_imm(3, 99), // r3 = 99
             BpfInsn::alu64_imm(BPF_RSH, 2, 8),
             BpfInsn::alu64_imm(BPF_AND, 2, 0xff),
-            BpfInsn::mov64_reg(0, 3),              // uses r3 after site
+            BpfInsn::mov64_reg(0, 3), // uses r3 after site
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
@@ -495,16 +462,17 @@ mod tests {
         let pass = ExtractPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
-        // With save/restore, the site should be applied.
-        assert!(result.changed, "should apply with caller-saved save/restore");
+        assert!(
+            result.changed,
+            "packed ABI should apply without save/restore"
+        );
         assert_eq!(result.sites_applied, 1);
         let has_kfunc_call = prog.insns.iter().any(|i| i.is_call() && i.src_reg() == 2);
         assert!(has_kfunc_call);
     }
 
     #[test]
-    fn test_extract_pass_caller_saved_no_free_callee_regs() {
-        // All callee-saved regs (r6-r9) are live, so save/restore is impossible.
+    fn test_extract_pass_packed_no_callee_saved_dependency() {
         let mut prog = make_program(vec![
             BpfInsn::mov64_imm(3, 99),
             BpfInsn::alu64_imm(BPF_RSH, 2, 8),
@@ -522,17 +490,20 @@ mod tests {
         let pass = ExtractPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
-        assert!(!result.changed, "should skip when no free callee-saved regs");
-        assert!(result.sites_skipped.iter().any(|s| s.reason.contains("caller-saved")));
+        assert!(
+            result.changed,
+            "packed ABI should not depend on free callee-saved regs"
+        );
+        assert_eq!(result.sites_applied, 1);
     }
 
     #[test]
     fn test_extract_pass_interior_branch_target() {
         // A branch targets the AND instruction inside the site.
         let mut prog = make_program(vec![
-            jeq_imm(5, 0, 1),                      // if r5 == 0, jump to pc=2 (the AND)
-            BpfInsn::alu64_imm(BPF_RSH, 2, 8),     // pc=1
-            BpfInsn::alu64_imm(BPF_AND, 2, 0xff),  // pc=2 -- branch target
+            jeq_imm(5, 0, 1),                     // if r5 == 0, jump to pc=2 (the AND)
+            BpfInsn::alu64_imm(BPF_RSH, 2, 8),    // pc=1
+            BpfInsn::alu64_imm(BPF_AND, 2, 0xff), // pc=2 -- branch target
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
@@ -542,7 +513,10 @@ mod tests {
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
         assert!(!result.changed);
-        assert!(result.sites_skipped.iter().any(|s| s.reason.contains("interior branch")));
+        assert!(result
+            .sites_skipped
+            .iter()
+            .any(|s| s.reason.contains("interior branch")));
     }
 
     #[test]
@@ -550,10 +524,10 @@ mod tests {
         // Branch over a 2-insn extract site. After rewrite the site becomes
         // longer (kfunc call sequence), so branch offsets must be adjusted.
         let mut prog = make_program(vec![
-            jeq_imm(5, 0, 2),                      // if r5==0, skip 2 insns to exit
-            BpfInsn::alu64_imm(BPF_RSH, 2, 8),     // pc=1: site start
-            BpfInsn::alu64_imm(BPF_AND, 2, 0xff),  // pc=2: site end
-            exit_insn(),                             // pc=3: branch target
+            jeq_imm(5, 0, 2),                     // if r5==0, skip 2 insns to exit
+            BpfInsn::alu64_imm(BPF_RSH, 2, 8),    // pc=1: site start
+            BpfInsn::alu64_imm(BPF_AND, 2, 0xff), // pc=2: site end
+            exit_insn(),                          // pc=3: branch target
         ]);
         let mut cache = AnalysisCache::new();
         let ctx = ctx_with_extract_kfunc(7777);
@@ -610,10 +584,7 @@ mod tests {
 
     #[test]
     fn test_extract_pass_no_sites() {
-        let mut prog = make_program(vec![
-            BpfInsn::mov64_imm(0, 42),
-            exit_insn(),
-        ]);
+        let mut prog = make_program(vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
         let mut cache = AnalysisCache::new();
         let ctx = ctx_with_extract_kfunc(7777);
 
@@ -629,7 +600,7 @@ mod tests {
     #[test]
     fn test_scan_extract_width_1() {
         let insns = vec![
-            BpfInsn::alu64_imm(BPF_RSH, 4, 3),  // RSH r4, 3
+            BpfInsn::alu64_imm(BPF_RSH, 4, 3),   // RSH r4, 3
             BpfInsn::alu64_imm(BPF_AND, 4, 0x1), // AND r4, 1 (width=1)
             exit_insn(),
         ];
@@ -655,7 +626,11 @@ mod tests {
         assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
         // Verify kfunc call with correct btf_id.
-        let call = prog.insns.iter().find(|i| i.is_call() && i.src_reg() == 2).unwrap();
+        let call = prog
+            .insns
+            .iter()
+            .find(|i| i.is_call() && i.src_reg() == 2)
+            .unwrap();
         assert_eq!(call.imm, 7777);
         assert!(prog.insns.last().unwrap().is_exit());
     }
@@ -691,7 +666,11 @@ mod tests {
 
         assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
-        let call = prog.insns.iter().find(|i| i.is_call() && i.src_reg() == 2).unwrap();
+        let call = prog
+            .insns
+            .iter()
+            .find(|i| i.is_call() && i.src_reg() == 2)
+            .unwrap();
         assert_eq!(call.imm, 7777);
     }
 
@@ -713,7 +692,7 @@ mod tests {
     fn test_scan_extract_shift_0() {
         let insns = vec![
             BpfInsn::alu64_imm(BPF_RSH, 5, 0),    // RSH r5, 0 (no-op shift)
-            BpfInsn::alu64_imm(BPF_AND, 5, 0xff),  // AND r5, 0xff
+            BpfInsn::alu64_imm(BPF_AND, 5, 0xff), // AND r5, 0xff
             exit_insn(),
         ];
         let sites = scan_extract_sites(&insns);
@@ -759,7 +738,9 @@ mod tests {
         assert!(result.changed);
         assert_eq!(result.sites_applied, 2);
         // Verify two kfunc calls exist.
-        let call_count = prog.insns.iter()
+        let call_count = prog
+            .insns
+            .iter()
             .filter(|i| i.is_call() && i.src_reg() == 2 && i.imm == 7777)
             .count();
         assert_eq!(call_count, 2);
@@ -821,9 +802,13 @@ mod tests {
         assert!(result.changed);
         assert_eq!(result.sites_applied, 1);
         // Count: should not have a trailing MOV r0, r0.
-        let mov_r0_r0_count = prog.insns.iter().filter(|i| {
-            i.code == (BPF_ALU64 | BPF_MOV | BPF_X) && i.dst_reg() == 0 && i.src_reg() == 0
-        }).count();
+        let mov_r0_r0_count = prog
+            .insns
+            .iter()
+            .filter(|i| {
+                i.code == (BPF_ALU64 | BPF_MOV | BPF_X) && i.dst_reg() == 0 && i.src_reg() == 0
+            })
+            .count();
         assert_eq!(mov_r0_r0_count, 0, "should not emit redundant MOV r0, r0");
     }
 
@@ -851,23 +836,35 @@ mod tests {
 
         // Verify each site has sensible properties
         for site in &sites {
-            assert!(site.start_pc < insns.len(),
-                "extract site start_pc {} out of range (insns.len()={})", site.start_pc, insns.len());
-            assert!(site.old_len >= 2,
-                "extract site old_len should be >= 2, got {}", site.old_len);
+            assert!(
+                site.start_pc < insns.len(),
+                "extract site start_pc {} out of range (insns.len()={})",
+                site.start_pc,
+                insns.len()
+            );
+            assert!(
+                site.old_len >= 2,
+                "extract site old_len should be >= 2, got {}",
+                site.old_len
+            );
             // shift+bit_len should fit in 64 bits
             assert!(
                 (site.shift_amount as u64) + (site.bit_len as u64) <= 64,
                 "extract shift_amount({}) + bit_len({}) exceeds 64",
-                site.shift_amount, site.bit_len
+                site.shift_amount,
+                site.bit_len
             );
-            assert!(site.bit_len >= 1 && site.bit_len <= 32,
-                "extract bit_len should be 1-32, got {}", site.bit_len);
+            assert!(
+                site.bit_len >= 1 && site.bit_len <= 32,
+                "extract bit_len should be 1-32, got {}",
+                site.bit_len
+            );
         }
 
         eprintln!(
             "  bitfield_extract.bpf.o: found {} extract sites in {} insns",
-            sites.len(), insns.len()
+            sites.len(),
+            insns.len()
         );
     }
 }

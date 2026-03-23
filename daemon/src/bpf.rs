@@ -264,10 +264,10 @@ pub fn bpf_btf_get_next_id(start_id: u32) -> Result<u32> {
 /// BTF info structure for BPF_OBJ_GET_INFO_BY_FD on BTF objects.
 #[repr(C)]
 struct BtfInfo {
-    btf: u64,       // pointer to BTF data
+    btf: u64, // pointer to BTF data
     btf_size: u32,
     id: u32,
-    name: u64,       // pointer to name buffer
+    name: u64, // pointer to name buffer
     name_len: u32,
     kernel_btf: u32, // 1 if kernel/module BTF
     _pad: [u8; 128 - 32],
@@ -296,7 +296,10 @@ fn bpf_btf_get_info_name(btf_fd: RawFd) -> Result<String> {
         bail!(bpf_err("BPF_OBJ_GET_INFO_BY_FD (btf)"));
     }
 
-    let nul = name_buf.iter().position(|&b| b == 0).unwrap_or(name_buf.len());
+    let nul = name_buf
+        .iter()
+        .position(|&b| b == 0)
+        .unwrap_or(name_buf.len());
     Ok(String::from_utf8_lossy(&name_buf[..nul]).into_owned())
 }
 
@@ -577,7 +580,11 @@ pub struct RejitResult {
 /// retries with log_level=2 and a large buffer to capture diagnostics.
 /// This avoids ENOSPC errors from verifier log buffer overflow on the
 /// normal success path.
-pub fn bpf_prog_rejit(prog_fd: RawFd, insns: &[BpfInsn], fd_array: &[RawFd]) -> Result<RejitResult> {
+pub fn bpf_prog_rejit(
+    prog_fd: RawFd,
+    insns: &[BpfInsn],
+    fd_array: &[RawFd],
+) -> Result<RejitResult> {
     // First attempt: no verifier log (fast path).
     {
         let mut attr: AttrRejit = zeroed_attr();
@@ -633,7 +640,10 @@ pub fn bpf_prog_rejit(prog_fd: RawFd, insns: &[BpfInsn], fd_array: &[RawFd]) -> 
 
     // Extract the log as a string (NUL-terminated C string in the buffer).
     let log_str = {
-        let nul_pos = log_buf.iter().position(|&b| b == 0).unwrap_or(log_buf.len());
+        let nul_pos = log_buf
+            .iter()
+            .position(|&b| b == 0)
+            .unwrap_or(log_buf.len());
         String::from_utf8_lossy(&log_buf[..nul_pos]).into_owned()
     };
 
@@ -793,8 +803,8 @@ mod tests {
             env!("CARGO_MANIFEST_DIR"),
             "/../vendor/linux-framework/include/uapi/linux/bpf.h"
         );
-        let content = std::fs::read_to_string(header_path)
-            .expect("failed to read kernel bpf.h header");
+        let content =
+            std::fs::read_to_string(header_path).expect("failed to read kernel bpf.h header");
 
         let mut result = std::collections::HashMap::new();
         let mut in_enum = false;
@@ -1049,9 +1059,12 @@ mod tests {
             ($field:ident, $expected:expr) => {
                 let actual = &info.$field as *const _ as usize - base;
                 assert_eq!(
-                    actual, $expected,
+                    actual,
+                    $expected,
                     "BpfProgInfo.{} offset mismatch: got {} expected {}",
-                    stringify!($field), actual, $expected
+                    stringify!($field),
+                    actual,
+                    $expected
                 );
             };
         }
@@ -1134,8 +1147,8 @@ mod tests {
             env!("CARGO_MANIFEST_DIR"),
             "/../vendor/linux-framework/include/uapi/linux/bpf.h"
         );
-        let content = std::fs::read_to_string(header_path)
-            .expect("failed to read kernel bpf.h header");
+        let content =
+            std::fs::read_to_string(header_path).expect("failed to read kernel bpf.h header");
 
         // Find the struct bpf_prog_info definition and extract field names+types.
         let mut in_struct = false;
@@ -1153,8 +1166,11 @@ mod tests {
                 continue;
             }
             // Skip comments and empty lines
-            if trimmed.is_empty() || trimmed.starts_with("/*") || trimmed.starts_with("*")
-                || trimmed.starts_with("//") {
+            if trimmed.is_empty()
+                || trimmed.starts_with("/*")
+                || trimmed.starts_with("*")
+                || trimmed.starts_with("//")
+            {
                 continue;
             }
             // Parse field: e.g., "__u32 type;" or "__aligned_u64 jited_prog_insns;"
@@ -1247,24 +1263,46 @@ mod tests {
             ("type", &info.prog_type as *const _ as usize - base),
             ("id", &info.id as *const _ as usize - base),
             ("tag", &info.tag as *const _ as usize - base),
-            ("jited_prog_len", &info.jited_prog_len as *const _ as usize - base),
-            ("xlated_prog_len", &info.xlated_prog_len as *const _ as usize - base),
+            (
+                "jited_prog_len",
+                &info.jited_prog_len as *const _ as usize - base,
+            ),
+            (
+                "xlated_prog_len",
+                &info.xlated_prog_len as *const _ as usize - base,
+            ),
             ("nr_map_ids", &info.nr_map_ids as *const _ as usize - base),
             ("name", &info.name as *const _ as usize - base),
             ("btf_id", &info.btf_id as *const _ as usize - base),
             ("run_time_ns", &info.run_time_ns as *const _ as usize - base),
             ("run_cnt", &info.run_cnt as *const _ as usize - base),
-            ("verified_insns", &info.verified_insns as *const _ as usize - base),
-            ("attach_btf_obj_id", &info.attach_btf_obj_id as *const _ as usize - base),
-            ("attach_btf_id", &info.attach_btf_id as *const _ as usize - base),
-            ("orig_prog_len", &info.orig_prog_len as *const _ as usize - base),
-            ("orig_prog_insns", &info.orig_prog_insns as *const _ as usize - base),
+            (
+                "verified_insns",
+                &info.verified_insns as *const _ as usize - base,
+            ),
+            (
+                "attach_btf_obj_id",
+                &info.attach_btf_obj_id as *const _ as usize - base,
+            ),
+            (
+                "attach_btf_id",
+                &info.attach_btf_id as *const _ as usize - base,
+            ),
+            (
+                "orig_prog_len",
+                &info.orig_prog_len as *const _ as usize - base,
+            ),
+            (
+                "orig_prog_insns",
+                &info.orig_prog_insns as *const _ as usize - base,
+            ),
         ];
 
         for (rust_name, rust_offset) in &rust_offsets {
             // The kernel header uses "type" for prog_type; map it
             let kernel_name = *rust_name;
-            if let Some((_, kernel_offset)) = kernel_offsets.iter().find(|(n, _)| n == kernel_name) {
+            if let Some((_, kernel_offset)) = kernel_offsets.iter().find(|(n, _)| n == kernel_name)
+            {
                 assert_eq!(
                     *rust_offset, *kernel_offset,
                     "BpfProgInfo field '{}' offset mismatch: Rust={} kernel={}",
@@ -1320,27 +1358,33 @@ mod tests {
         let base = &info as *const _ as usize;
 
         assert_eq!(
-            &info.btf as *const _ as usize - base, 0,
+            &info.btf as *const _ as usize - base,
+            0,
             "BtfInfo.btf at wrong offset"
         );
         assert_eq!(
-            &info.btf_size as *const _ as usize - base, 8,
+            &info.btf_size as *const _ as usize - base,
+            8,
             "BtfInfo.btf_size at wrong offset"
         );
         assert_eq!(
-            &info.id as *const _ as usize - base, 12,
+            &info.id as *const _ as usize - base,
+            12,
             "BtfInfo.id at wrong offset"
         );
         assert_eq!(
-            &info.name as *const _ as usize - base, 16,
+            &info.name as *const _ as usize - base,
+            16,
             "BtfInfo.name at wrong offset"
         );
         assert_eq!(
-            &info.name_len as *const _ as usize - base, 24,
+            &info.name_len as *const _ as usize - base,
+            24,
             "BtfInfo.name_len at wrong offset"
         );
         assert_eq!(
-            &info.kernel_btf as *const _ as usize - base, 28,
+            &info.kernel_btf as *const _ as usize - base,
+            28,
             "BtfInfo.kernel_btf at wrong offset"
         );
     }
@@ -1352,8 +1396,8 @@ mod tests {
             env!("CARGO_MANIFEST_DIR"),
             "/../vendor/linux-framework/include/uapi/linux/bpf.h"
         );
-        let content = std::fs::read_to_string(header_path)
-            .expect("failed to read kernel bpf.h header");
+        let content =
+            std::fs::read_to_string(header_path).expect("failed to read kernel bpf.h header");
 
         // Find struct bpf_btf_info
         let mut in_struct = false;
@@ -1367,8 +1411,12 @@ mod tests {
             if in_struct && trimmed.starts_with('}') {
                 break;
             }
-            if !in_struct || trimmed.is_empty() || trimmed.starts_with("/*")
-                || trimmed.starts_with("*") || trimmed.starts_with("//") {
+            if !in_struct
+                || trimmed.is_empty()
+                || trimmed.starts_with("/*")
+                || trimmed.starts_with("*")
+                || trimmed.starts_with("//")
+            {
                 continue;
             }
             let clean = trimmed.trim_end_matches(';').trim();
@@ -1432,7 +1480,10 @@ mod tests {
             found_prog_with_maps = true;
             eprintln!(
                 "  testing relocate_map_fds on prog {} ({}) with {} maps, {} insns",
-                prog_id, info.name_str(), map_ids.len(), orig_insns.len()
+                prog_id,
+                info.name_str(),
+                map_ids.len(),
+                orig_insns.len()
             );
 
             // Run relocate_map_fds on the original instructions.
@@ -1441,21 +1492,24 @@ mod tests {
             assert!(
                 result.is_ok(),
                 "relocate_map_fds failed for prog {} ({}): {:#}",
-                prog_id, info.name_str(), result.unwrap_err()
+                prog_id,
+                info.name_str(),
+                result.unwrap_err()
             );
 
             let owned_fds = result.unwrap();
             // Each unique map reference in bytecode should have a corresponding FD.
             // owned_fds may be fewer if some map IDs couldn't be opened.
-            eprintln!(
-                "    relocated {} map FDs",
-                owned_fds.len()
-            );
+            eprintln!("    relocated {} map FDs", owned_fds.len());
 
             // Verify that the patched FDs are valid (non-negative).
             for owned in &owned_fds {
                 let raw = owned.as_raw_fd();
-                assert!(raw >= 0, "patched map FD should be non-negative, got {}", raw);
+                assert!(
+                    raw >= 0,
+                    "patched map FD should be non-negative, got {}",
+                    raw
+                );
             }
 
             break; // One successful test is enough
@@ -1485,7 +1539,11 @@ mod tests {
             result.unwrap_err()
         );
         let first_id = result.unwrap();
-        assert!(first_id > 0, "first prog ID should be > 0, got {}", first_id);
+        assert!(
+            first_id > 0,
+            "first prog ID should be > 0, got {}",
+            first_id
+        );
     }
 
     #[test]
@@ -1511,14 +1569,14 @@ mod tests {
     #[ignore]
     fn test_bpf_prog_get_fd_and_info_smoke() {
         // Get the first program ID and open its fd, then get info.
-        let first_id = bpf_prog_get_next_id(0)
-            .expect("bpf_prog_get_next_id(0) failed");
-        let fd = bpf_prog_get_fd_by_id(first_id)
-            .expect("bpf_prog_get_fd_by_id failed");
+        let first_id = bpf_prog_get_next_id(0).expect("bpf_prog_get_next_id(0) failed");
+        let fd = bpf_prog_get_fd_by_id(first_id).expect("bpf_prog_get_fd_by_id failed");
         use std::os::unix::io::AsRawFd;
-        let (info, _) = bpf_prog_get_info(fd.as_raw_fd(), false)
-            .expect("bpf_prog_get_info failed");
-        assert_eq!(info.id, first_id, "info.id should match the requested prog ID");
+        let (info, _) = bpf_prog_get_info(fd.as_raw_fd(), false).expect("bpf_prog_get_info failed");
+        assert_eq!(
+            info.id, first_id,
+            "info.id should match the requested prog ID"
+        );
         assert!(info.prog_type > 0, "prog_type should be > 0");
     }
 
@@ -1539,13 +1597,10 @@ mod tests {
     #[test]
     #[ignore]
     fn test_btf_get_fd_by_id_and_info_smoke() {
-        let first_id = bpf_btf_get_next_id(0)
-            .expect("bpf_btf_get_next_id(0) failed");
-        let fd = bpf_btf_get_fd_by_id(first_id)
-            .expect("bpf_btf_get_fd_by_id failed");
+        let first_id = bpf_btf_get_next_id(0).expect("bpf_btf_get_next_id(0) failed");
+        let fd = bpf_btf_get_fd_by_id(first_id).expect("bpf_btf_get_fd_by_id failed");
         use std::os::unix::io::AsRawFd;
-        let name = bpf_btf_get_info_name(fd.as_raw_fd())
-            .expect("bpf_btf_get_info_name failed");
+        let name = bpf_btf_get_info_name(fd.as_raw_fd()).expect("bpf_btf_get_info_name failed");
         // The first BTF object is typically vmlinux (empty name) or has a name.
         // Either way, it shouldn't panic.
         let _ = name;

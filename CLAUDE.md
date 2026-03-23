@@ -187,6 +187,15 @@ Programs define a `bench_*()` function taking `(const u8 *data, u32 len, u64 *ou
 - **⚠️ 默认不 commit/push** — 改完代码就停，由 Claude 统一 commit
 - **⚠️ 如需 commit，在 main 直接做，不开分支**
 
+### Codex Usage
+- **所有实现/调研/benchmark 任务用 codex，不用 Claude Code subagent**
+- **命令格式**：`codex exec --dangerously-bypass-approvals-and-sandbox "prompt"` — 跳过所有确认和沙箱限制
+- **不需要指定 model**（`-m`），用 codex 默认配置
+- codex 默认不 commit/push，改完代码就停
+- codex prompt 必须包含 `docs/kernel-jit-optimization-plan.md` 上下文引用
+- Python venv：`source /home/yunwei37/workspace/.venv/bin/activate`
+- VM 测试用 Makefile（`make vm-micro`, `make vm-corpus`, `make vm-e2e` 等）
+
 ### Benchmark Program Design Rules
 - **Pure-JIT benchmarks** (`micro_pure_jit.yaml`): Must test ONLY JIT code generation quality. No map lookups or helper calls in the benchmark hot path. Allowed harness shapes are staged XDP, packet-backed XDP controls, and the small TC/cgroup_skb kernel-only control subset already in the suite.
 - **Runtime-mechanism cases**: Keep runtime-overhead experiments out of the active pure-JIT manifest unless the suite definition and methodology are updated together.

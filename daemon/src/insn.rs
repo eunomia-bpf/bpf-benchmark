@@ -56,7 +56,6 @@ pub const BPF_PSEUDO_KFUNC_CALL: u8 = 2;
 pub const BPF_PSEUDO_KINSN_SIDECAR: u8 = 3;
 
 // ── kinsn encoding constants (synced with include/linux/bpf.h) ────
-pub const BPF_KINSN_ENC_LEGACY_KFUNC: u32 = 1 << 0;
 pub const BPF_KINSN_ENC_PACKED_CALL: u32 = 1 << 1;
 pub const BPF_KINSN_SIDECAR_PAYLOAD_BITS: u32 = 52;
 
@@ -339,8 +338,10 @@ pub fn load_bpf_insns_from_elf(path: &str) -> Option<Vec<BpfInsn>> {
 
     // Section header string table
     let shstr_off = e_shoff + e_shstrndx * e_shentsize;
-    let shstr_sh_offset = u64::from_le_bytes(data[shstr_off + 24..shstr_off + 32].try_into().ok()?) as usize;
-    let shstr_sh_size = u64::from_le_bytes(data[shstr_off + 32..shstr_off + 40].try_into().ok()?) as usize;
+    let shstr_sh_offset =
+        u64::from_le_bytes(data[shstr_off + 24..shstr_off + 32].try_into().ok()?) as usize;
+    let shstr_sh_size =
+        u64::from_le_bytes(data[shstr_off + 32..shstr_off + 40].try_into().ok()?) as usize;
     let shstrtab = &data[shstr_sh_offset..shstr_sh_offset + shstr_sh_size];
 
     // Find the first executable PROGBITS section with content
@@ -349,7 +350,8 @@ pub fn load_bpf_insns_from_elf(path: &str) -> Option<Vec<BpfInsn>> {
         let sh_name_idx = u32::from_le_bytes(data[sh_off..sh_off + 4].try_into().ok()?) as usize;
         let sh_type = u32::from_le_bytes(data[sh_off + 4..sh_off + 8].try_into().ok()?);
         let sh_flags = u64::from_le_bytes(data[sh_off + 8..sh_off + 16].try_into().ok()?);
-        let sh_offset = u64::from_le_bytes(data[sh_off + 24..sh_off + 32].try_into().ok()?) as usize;
+        let sh_offset =
+            u64::from_le_bytes(data[sh_off + 24..sh_off + 32].try_into().ok()?) as usize;
         let sh_size = u64::from_le_bytes(data[sh_off + 32..sh_off + 40].try_into().ok()?) as usize;
 
         // SHT_PROGBITS(1) + SHF_EXECINSTR(0x4) + has content
@@ -367,7 +369,12 @@ pub fn load_bpf_insns_from_elf(path: &str) -> Option<Vec<BpfInsn>> {
                 let regs = insn_data[off + 1];
                 let ioff = i16::from_le_bytes(insn_data[off + 2..off + 4].try_into().ok()?);
                 let imm = i32::from_le_bytes(insn_data[off + 4..off + 8].try_into().ok()?);
-                insns.push(BpfInsn { code, regs, off: ioff, imm });
+                insns.push(BpfInsn {
+                    code,
+                    regs,
+                    off: ioff,
+                    imm,
+                });
             }
             return Some(insns);
         }
