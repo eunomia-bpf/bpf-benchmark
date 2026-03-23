@@ -51,6 +51,15 @@ pub const BPF_JSLE: u8 = 0xd0;
 pub const BPF_CALL: u8 = 0x80;
 pub const BPF_EXIT: u8 = 0x90;
 
+// ── Pseudo source-register tags ────────────────────────────────────
+pub const BPF_PSEUDO_KFUNC_CALL: u8 = 2;
+pub const BPF_PSEUDO_KINSN_SIDECAR: u8 = 3;
+
+// ── kinsn encoding constants (synced with include/linux/bpf.h) ────
+pub const BPF_KINSN_ENC_LEGACY_KFUNC: u32 = 1 << 0;
+pub const BPF_KINSN_ENC_PACKED_CALL: u32 = 1 << 1;
+pub const BPF_KINSN_SIDECAR_PAYLOAD_BITS: u32 = 52;
+
 // ── Helper macros (as functions) ────────────────────────────────────
 #[inline]
 pub const fn bpf_class(code: u8) -> u8 {
@@ -193,7 +202,7 @@ impl BpfInsn {
     pub const fn call_kfunc_with_off(btf_id: i32, off: i16) -> Self {
         Self {
             code: BPF_JMP | BPF_CALL,
-            regs: Self::make_regs(0, 2), // src_reg = 2 for kfunc
+            regs: Self::make_regs(0, BPF_PSEUDO_KFUNC_CALL),
             off,
             imm: btf_id,
         }
@@ -221,6 +230,21 @@ impl BpfInsn {
             regs: Self::make_regs(dst, src),
             off,
             imm: 0,
+        }
+    }
+
+    /// kinsn sidecar metadata for the immediately following kfunc call.
+    ///
+    /// Payload layout matches `bpf_kinsn_sidecar_payload()` in the kernel:
+    /// bits [3:0]   = dst_reg field
+    /// bits [19:4]  = off field
+    /// bits [51:20] = imm field
+    pub const fn kinsn_sidecar(payload: u64) -> Self {
+        Self {
+            code: BPF_ALU64 | BPF_MOV | BPF_K,
+            regs: Self::make_regs((payload & 0xf) as u8, BPF_PSEUDO_KINSN_SIDECAR),
+            off: ((payload >> 4) & 0xffff) as u16 as i16,
+            imm: ((payload >> 20) & 0xffff_ffff) as u32 as i32,
         }
     }
 
@@ -260,6 +284,11 @@ impl BpfInsn {
     /// NOP — encoded as `ja +0`.
     pub const fn nop() -> Self {
         Self::ja(0)
+    }
+
+    #[inline]
+    pub const fn is_kinsn_sidecar(&self) -> bool {
+        self.code == (BPF_ALU64 | BPF_MOV | BPF_K) && self.src_reg() == BPF_PSEUDO_KINSN_SIDECAR
     }
 }
 

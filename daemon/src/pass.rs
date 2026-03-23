@@ -10,7 +10,11 @@
 use std::any::{Any, TypeId};
 use std::collections::HashMap;
 
-use crate::insn::BpfInsn;
+use crate::insn::{
+    BpfInsn,
+    BPF_KINSN_ENC_LEGACY_KFUNC,
+    BPF_KINSN_ENC_PACKED_CALL,
+};
 
 // ── Program metadata ────────────────────────────────────────────────
 
@@ -389,25 +393,79 @@ pub struct KfuncRegistry {
     /// owning module's BTF FD. This allows different kfuncs from different
     /// modules to each contribute their correct FD to the REJIT fd_array.
     pub kfunc_module_fds: HashMap<String, i32>,
+    /// Per-kfunc supported kinsn encodings. Absent entry falls back to legacy
+    /// kfunc ABI for discovered kfuncs to preserve old test contexts.
+    pub kfunc_supported_encodings: HashMap<String, u32>,
 }
 
 impl KfuncRegistry {
+    fn kfunc_name_for_pass(pass_name: &str) -> Option<&'static str> {
+        match pass_name {
+            "rotate" => Some("bpf_rotate64"),
+            "cond_select" => Some("bpf_select64"),
+            "extract" => Some("bpf_extract64"),
+            "endian_fusion" => Some("bpf_endian_load32"),
+            "speculation_barrier" => Some("bpf_speculation_barrier"),
+            _ => None,
+        }
+    }
+
+    fn btf_id_for_kfunc_name(&self, kfunc_name: &str) -> i32 {
+        match kfunc_name {
+            "bpf_rotate64" => self.rotate64_btf_id,
+            "bpf_select64" => self.select64_btf_id,
+            "bpf_extract64" => self.extract64_btf_id,
+            "bpf_endian_load16" => self.endian_load16_btf_id,
+            "bpf_endian_load32" => self.endian_load32_btf_id,
+            "bpf_endian_load64" => self.endian_load64_btf_id,
+            "bpf_speculation_barrier" => self.speculation_barrier_btf_id,
+            _ => -1,
+        }
+    }
+
     /// Return the module FD for a given pass name. Looks up the per-kfunc
     /// module FD first; falls back to the legacy single module_fd.
     pub fn module_fd_for_pass(&self, pass_name: &str) -> Option<i32> {
-        // Map pass name -> kfunc name.
-        let kfunc_name = match pass_name {
-            "rotate" => "bpf_rotate64",
-            "cond_select" => "bpf_select64",
-            "extract" => "bpf_extract64",
-            "endian_fusion" => "bpf_endian_load32",
-            "speculation_barrier" => "bpf_speculation_barrier",
-            _ => return self.module_fd,
+        let kfunc_name = match Self::kfunc_name_for_pass(pass_name) {
+            Some(name) => name,
+            None => return self.module_fd,
         };
         self.kfunc_module_fds
             .get(kfunc_name)
             .copied()
             .or(self.module_fd)
+    }
+
+    pub fn supported_encodings_for_kfunc_name(&self, kfunc_name: &str) -> u32 {
+        self.kfunc_supported_encodings
+            .get(kfunc_name)
+            .copied()
+            .or_else(|| {
+                if self.btf_id_for_kfunc_name(kfunc_name) >= 0 {
+                    Some(BPF_KINSN_ENC_LEGACY_KFUNC)
+                } else {
+                    None
+                }
+            })
+            .unwrap_or(0)
+    }
+
+    pub fn supported_encodings_for_pass(&self, pass_name: &str) -> u32 {
+        Self::kfunc_name_for_pass(pass_name)
+            .map(|name| self.supported_encodings_for_kfunc_name(name))
+            .unwrap_or(0)
+    }
+
+    pub fn legacy_supported_for_pass(&self, pass_name: &str) -> bool {
+        (self.supported_encodings_for_pass(pass_name) & BPF_KINSN_ENC_LEGACY_KFUNC) != 0
+    }
+
+    pub fn packed_supported_for_pass(&self, pass_name: &str) -> bool {
+        (self.supported_encodings_for_pass(pass_name) & BPF_KINSN_ENC_PACKED_CALL) != 0
+    }
+
+    pub fn packed_supported_for_kfunc_name(&self, kfunc_name: &str) -> bool {
+        (self.supported_encodings_for_kfunc_name(kfunc_name) & BPF_KINSN_ENC_PACKED_CALL) != 0
     }
 
     /// Return all unique module FDs in the registry.
@@ -759,6 +817,7 @@ impl PassContext {
                 speculation_barrier_btf_id: -1,
                 module_fd: None,
                 kfunc_module_fds: HashMap::new(),
+                kfunc_supported_encodings: HashMap::new(),
             },
             platform: PlatformCapabilities::default(),
             policy: PolicyConfig::default(),
@@ -1295,6 +1354,7 @@ mod tests {
                 speculation_barrier_btf_id: -1,
                 module_fd: Some(42),
                 kfunc_module_fds: HashMap::new(),
+                kfunc_supported_encodings: HashMap::new(),
             },
             platform: PlatformCapabilities::default(),
             policy: PolicyConfig::default(),
@@ -1330,6 +1390,7 @@ mod tests {
             speculation_barrier_btf_id: -1,
             module_fd: None,
             kfunc_module_fds: HashMap::new(),
+            kfunc_supported_encodings: HashMap::new(),
         };
         // Set different FDs for different kfuncs.
         reg.kfunc_module_fds.insert("bpf_rotate64".to_string(), 100);
@@ -1356,6 +1417,7 @@ mod tests {
             speculation_barrier_btf_id: -1,
             module_fd: Some(42), // legacy
             kfunc_module_fds: HashMap::new(),
+            kfunc_supported_encodings: HashMap::new(),
         };
         // Only rotate has a per-kfunc FD.
         reg.kfunc_module_fds.insert("bpf_rotate64".to_string(), 100);
@@ -1381,6 +1443,7 @@ mod tests {
             speculation_barrier_btf_id: -1,
             module_fd: Some(100),
             kfunc_module_fds: HashMap::new(),
+            kfunc_supported_encodings: HashMap::new(),
         };
         reg.kfunc_module_fds.insert("bpf_rotate64".to_string(), 100);
         reg.kfunc_module_fds.insert("bpf_select64".to_string(), 200);
@@ -1408,6 +1471,7 @@ mod tests {
             speculation_barrier_btf_id: -1,
             module_fd: None,
             kfunc_module_fds: HashMap::new(),
+            kfunc_supported_encodings: HashMap::new(),
         };
         reg.kfunc_module_fds.insert("bpf_rotate64".to_string(), 100);
         reg.kfunc_module_fds.insert("bpf_select64".to_string(), 200);
@@ -1588,35 +1652,41 @@ mod tests {
 
     #[test]
     fn test_pass_skips_without_platform_capability() {
-        // A pass that requires RORX (rotate) should skip when platform lacks it.
-        use crate::passes::RotatePass;
+        // A pass that requires CMOV (cond_select on x86) should skip when the
+        // platform capability is unavailable.
         use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
+        use crate::passes::CondSelectPass;
 
         let mut pm = PassManager::new();
         pm.register_analysis(BranchTargetAnalysis);
         pm.register_analysis(LivenessAnalysis);
-        pm.add_pass(RotatePass);
+        pm.add_pass(CondSelectPass);
 
-        // Context has rotate kfunc available but platform lacks RORX.
+        // Context has select kfunc available but platform lacks CMOV.
         let mut ctx = PassContext::test_default();
-        ctx.kfunc_registry.rotate64_btf_id = 1234;
-        // has_rorx is false by default.
+        ctx.kfunc_registry.select64_btf_id = 1234;
+        // has_cmov is false by default in test_default().
 
         let mut prog = make_program(vec![
-            BpfInsn::mov64_reg(3, 2),
-            BpfInsn::alu64_imm(BPF_RSH, 2, 56),
-            BpfInsn::alu64_imm(BPF_LSH, 3, 8),
-            BpfInsn::alu64_reg(BPF_OR, 2, 3),
+            BpfInsn {
+                code: crate::insn::BPF_JMP | crate::insn::BPF_JNE | crate::insn::BPF_K,
+                regs: BpfInsn::make_regs(1, 0),
+                off: 2,
+                imm: 0,
+            },
+            BpfInsn::mov64_reg(2, 4),
+            BpfInsn::ja(1),
+            BpfInsn::mov64_reg(2, 3),
             exit_insn(),
         ]);
 
         let result = pm.run(&mut prog, &ctx).unwrap();
-        // Should not apply anything because platform lacks RORX.
+        // Should not apply anything because platform lacks CMOV.
         assert!(!result.program_changed);
         assert_eq!(result.total_sites_applied, 0);
-        // Should have a skip reason about RORX.
+        // Should have a skip reason about CMOV.
         assert!(result.pass_results[0].sites_skipped.iter()
-            .any(|s| s.reason.contains("RORX")));
+            .any(|s| s.reason.contains("CMOV")));
     }
 
     // ── TransformAttribution tests ──────────────────────────────

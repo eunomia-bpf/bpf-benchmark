@@ -5,7 +5,16 @@ use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
-use super::utils::{emit_kfunc_call_with_off, emit_with_caller_save, ensure_module_fd_slot, fixup_all_branches, plan_caller_saved, CallerSavedPlan, KfuncArg};
+use super::utils::{
+    emit_kfunc_call_with_off,
+    emit_packed_kfunc_call_with_off,
+    emit_with_caller_save,
+    ensure_module_fd_slot,
+    fixup_all_branches,
+    plan_caller_saved,
+    CallerSavedPlan,
+    KfuncArg,
+};
 
 /// COND_SELECT pass: replaces branch+mov diamond patterns with
 /// bpf_select64() kfunc calls (lowered to CMOV by the JIT).
@@ -49,6 +58,7 @@ pub struct CondSelectSite {
 /// A cond_select site that has passed safety checks, ready for transformation.
 struct SafeCondSelectSite {
     site: CondSelectSite,
+    use_packed: bool,
     /// Caller-saved register save/restore plan.
     caller_save_plan: CallerSavedPlan,
 }
@@ -100,6 +110,15 @@ fn kfunc_args_for_site(site: &CondSelectSite) -> (CondSelectValue, CondSelectVal
         }
         _ => unreachable!("is_simple_zero_test should have filtered this"),
     }
+}
+
+fn packed_supported_for_site(ctx: &PassContext, site: &CondSelectSite) -> bool {
+    if !ctx.kfunc_registry.packed_supported_for_pass("cond_select") {
+        return false;
+    }
+
+    let (a_val, b_val) = kfunc_args_for_site(site);
+    matches!(a_val, CondSelectValue::Reg(_)) && matches!(b_val, CondSelectValue::Reg(_))
 }
 
 impl BpfPass for CondSelectPass {
@@ -202,21 +221,29 @@ impl BpfPass for CondSelectPass {
                 continue;
             }
 
+            let use_packed = packed_supported_for_site(ctx, &site);
+
             // Safety check 3: caller-saved register conflict.
-            // Try to plan save/restore for live caller-saved regs using
-            // free callee-saved regs. Only skip if no plan is possible.
-            let site_end = site.start_pc + site.old_len;
-            let plan = if site_end > 0 && site_end - 1 < liveness.live_out.len() {
-                let live_after = &liveness.live_out[site_end - 1];
-                plan_caller_saved(live_after, site.dst_reg)
-            } else {
+            // Packed kinsn emission does not use the legacy r1-rN ABI, so it
+            // only needs the kinsn clobber model and does not require extra
+            // save/restore scaffolding here.
+            let plan = if use_packed {
                 Some(CallerSavedPlan { saves: vec![] })
+            } else {
+                let site_end = site.start_pc + site.old_len;
+                if site_end > 0 && site_end - 1 < liveness.live_out.len() {
+                    let live_after = &liveness.live_out[site_end - 1];
+                    plan_caller_saved(live_after, site.dst_reg)
+                } else {
+                    Some(CallerSavedPlan { saves: vec![] })
+                }
             };
 
             match plan {
                 Some(p) => {
                     safe_sites.push(SafeCondSelectSite {
                         site,
+                        use_packed,
                         caller_save_plan: p,
                     });
                 }
@@ -261,32 +288,45 @@ impl BpfPass for CondSelectPass {
                 let site = &safe_site.site;
                 let (a_val, b_val) = kfunc_args_for_site(site);
 
-                // Convert CondSelectValue to KfuncArg for the shared
-                // swap-safe emit_kfunc_call helper.
-                let arg_a = match a_val {
-                    CondSelectValue::Reg(r) => KfuncArg::Reg(r),
-                    CondSelectValue::Imm(i) => KfuncArg::Imm(i),
-                };
-                let arg_b = match b_val {
-                    CondSelectValue::Reg(r) => KfuncArg::Reg(r),
-                    CondSelectValue::Imm(i) => KfuncArg::Imm(i),
-                };
-                let arg_cond = KfuncArg::Reg(site.cond_reg);
-
-                // Use the shared swap-safe emit_kfunc_call which handles
-                // parallel-copy correctly (breaks cycles via r0 scratch).
-                let kfunc_insns = emit_kfunc_call_with_off(
-                    site.dst_reg,
-                    &[arg_a, arg_b, arg_cond],
-                    btf_id,
-                    kfunc_off,
-                );
-
-                // Wrap with caller-saved register save/restore if needed.
-                let replacement = if safe_site.caller_save_plan.saves.is_empty() {
-                    kfunc_insns
+                let replacement = if safe_site.use_packed {
+                    let a_reg = match a_val {
+                        CondSelectValue::Reg(r) => r,
+                        CondSelectValue::Imm(_) => unreachable!("packed path requires register inputs"),
+                    };
+                    let b_reg = match b_val {
+                        CondSelectValue::Reg(r) => r,
+                        CondSelectValue::Imm(_) => unreachable!("packed path requires register inputs"),
+                    };
+                    let payload = (site.dst_reg as u64)
+                        | ((a_reg as u64) << 4)
+                        | ((b_reg as u64) << 8)
+                        | ((site.cond_reg as u64) << 12);
+                    emit_packed_kfunc_call_with_off(payload, btf_id, kfunc_off)
                 } else {
-                    emit_with_caller_save(&kfunc_insns, &safe_site.caller_save_plan)
+                    // Convert CondSelectValue to KfuncArg for the shared
+                    // swap-safe emit_kfunc_call helper.
+                    let arg_a = match a_val {
+                        CondSelectValue::Reg(r) => KfuncArg::Reg(r),
+                        CondSelectValue::Imm(i) => KfuncArg::Imm(i),
+                    };
+                    let arg_b = match b_val {
+                        CondSelectValue::Reg(r) => KfuncArg::Reg(r),
+                        CondSelectValue::Imm(i) => KfuncArg::Imm(i),
+                    };
+                    let arg_cond = KfuncArg::Reg(site.cond_reg);
+
+                    let kfunc_insns = emit_kfunc_call_with_off(
+                        site.dst_reg,
+                        &[arg_a, arg_b, arg_cond],
+                        btf_id,
+                        kfunc_off,
+                    );
+
+                    if safe_site.caller_save_plan.saves.is_empty() {
+                        kfunc_insns
+                    } else {
+                        emit_with_caller_save(&kfunc_insns, &safe_site.caller_save_plan)
+                    }
                 };
                 new_insns.extend_from_slice(&replacement);
 

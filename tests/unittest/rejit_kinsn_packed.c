@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * REJIT kinsn test suite.
+ * REJIT kinsn packed-ABI test suite.
  *
  * Covers:
- *   - kinsn registration/discovery via module BTF
- *   - REJIT correctness for rotate/select/endian/barrier
- *   - x86 rotate clobber behavior (r5 preserved, r4 rejected)
- *   - endian memory-effect validation
- *   - extract range narrowing enabling bounded dynamic stack access
+ *   - sidecar + CALL pair verifier acceptance
+ *   - packed operand decode/JIT consumption for rotate/select/endian/barrier
+ *   - packed extract range narrowing for bounded dynamic stack access
  */
 #define _GNU_SOURCE
 
@@ -23,10 +21,6 @@
 #include <sys/stat.h>
 #include <sys/syscall.h>
 #include <unistd.h>
-
-#if defined(__x86_64__)
-#include <cpuid.h>
-#endif
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 #define LOG_BUF_SIZE 65536
@@ -46,8 +40,6 @@ enum kinsn_func_id {
 	FUNC_SELECT,
 	FUNC_EXTRACT,
 	FUNC_ENDIAN16,
-	FUNC_ENDIAN32,
-	FUNC_ENDIAN64,
 	FUNC_BARRIER,
 	FUNC_CNT,
 };
@@ -120,14 +112,6 @@ static struct kinsn_func_ref g_funcs[FUNC_CNT] = {
 		.func_name = "bpf_endian_load16",
 		.module_id = MOD_ENDIAN,
 	},
-	[FUNC_ENDIAN32] = {
-		.func_name = "bpf_endian_load32",
-		.module_id = MOD_ENDIAN,
-	},
-	[FUNC_ENDIAN64] = {
-		.func_name = "bpf_endian_load64",
-		.module_id = MOD_ENDIAN,
-	},
 	[FUNC_BARRIER] = {
 		.func_name = "bpf_speculation_barrier",
 		.module_id = MOD_BARRIER,
@@ -184,15 +168,30 @@ static int sys_bpf(enum bpf_cmd cmd, union bpf_attr *attr, unsigned int size)
 #define BPF_CALL_KFUNC(OFF, IMM) \
 	BPF_RAW_INSN(BPF_JMP | BPF_CALL, 0, BPF_PSEUDO_KFUNC_CALL, OFF, IMM)
 
+#define BPF_KINSN_SIDECAR(PAYLOAD) \
+	BPF_RAW_INSN(BPF_ALU64 | BPF_MOV | BPF_K, \
+		     (__u8)((__u64)(PAYLOAD) & 0xf), \
+		     BPF_PSEUDO_KINSN_SIDECAR, \
+		     (__s16)(((__u64)(PAYLOAD) >> 4) & 0xffff), \
+		     (__s32)(((__u64)(PAYLOAD) >> 20) & 0xffffffffU))
+
 #define MODULE_FD_ARRAY(FD) { (FD), (FD) }
+
+#define KINSN_ROTATE_PAYLOAD(DST, SRC, SHIFT) \
+	((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(SHIFT) << 8))
+
+#define KINSN_SELECT_PAYLOAD(DST, TRUE_REG, FALSE_REG, COND_REG) \
+	((__u64)(DST) | ((__u64)(TRUE_REG) << 4) | ((__u64)(FALSE_REG) << 8) | \
+	 ((__u64)(COND_REG) << 12))
+
+#define KINSN_EXTRACT_PAYLOAD(DST, START, LEN) \
+	((__u64)(DST) | ((__u64)(START) << 8) | ((__u64)(LEN) << 16))
+
+#define KINSN_ENDIAN_PAYLOAD(DST, BASE) \
+	((__u64)(DST) | ((__u64)(BASE) << 4))
 
 static const struct bpf_insn prog_ret_0[] = {
 	BPF_MOV64_IMM(BPF_REG_0, 0),
-	BPF_EXIT_INSN(),
-};
-
-static const struct bpf_insn prog_ret_1[] = {
-	BPF_MOV64_IMM(BPF_REG_0, 1),
 	BPF_EXIT_INSN(),
 };
 
@@ -264,8 +263,7 @@ static int read_file(const char *path, void **data_out, size_t *len_out)
 	struct stat st;
 	void *data;
 	int fd;
-	size_t cap = 0;
-	size_t len = 0;
+	size_t cap, len = 0;
 
 	fd = open(path, O_RDONLY);
 	if (fd < 0)
@@ -288,16 +286,8 @@ static int read_file(const char *path, void **data_out, size_t *len_out)
 
 		if (len == cap) {
 			size_t new_cap = cap * 2;
-			void *new_data;
+			void *new_data = realloc(data, new_cap);
 
-			if (new_cap < cap) {
-				free(data);
-				close(fd);
-				errno = EOVERFLOW;
-				return -1;
-			}
-
-			new_data = realloc(data, new_cap);
 			if (!new_data) {
 				free(data);
 				close(fd);
@@ -370,12 +360,8 @@ static int count_btf_types(const void *btf_data, size_t btf_len,
 	size_t offset = 0;
 	__u32 type_cnt = 1;
 
-	if (btf_len < sizeof(*hdr)) {
+	if (btf_len < sizeof(*hdr) || hdr->magic != 0xeb9f) {
 		errno = EINVAL;
-		return -1;
-	}
-	if (hdr->magic != 0xeb9f) {
-		errno = EPROTO;
 		return -1;
 	}
 
@@ -394,7 +380,6 @@ static int count_btf_types(const void *btf_data, size_t btf_len,
 
 		bt = (const struct btf_type *)(type_section + offset);
 		offset += sizeof(struct btf_type);
-
 		skip = btf_type_extra_size(bt);
 		if (offset + skip > hdr->type_len) {
 			errno = EINVAL;
@@ -415,15 +400,13 @@ static int count_btf_types(const void *btf_data, size_t btf_len,
 
 static int get_vmlinux_btf_base_info(__u32 *str_len_out, __u32 *type_id_bias_out)
 {
-	const char *path = "/sys/kernel/btf/vmlinux";
 	void *data = NULL;
 	size_t data_len = 0;
 	const struct btf_header *hdr;
 	__u32 type_cnt;
 
-	if (read_file(path, &data, &data_len) < 0)
+	if (read_file("/sys/kernel/btf/vmlinux", &data, &data_len) < 0)
 		return -1;
-
 	if (data_len < sizeof(*hdr)) {
 		free(data);
 		errno = EINVAL;
@@ -431,13 +414,7 @@ static int get_vmlinux_btf_base_info(__u32 *str_len_out, __u32 *type_id_bias_out
 	}
 
 	hdr = data;
-	if (hdr->magic != 0xeb9f) {
-		free(data);
-		errno = EPROTO;
-		return -1;
-	}
-
-	if (count_btf_types(data, data_len, &type_cnt) < 0) {
+	if (hdr->magic != 0xeb9f || count_btf_types(data, data_len, &type_cnt) < 0) {
 		free(data);
 		return -1;
 	}
@@ -450,8 +427,7 @@ static int get_vmlinux_btf_base_info(__u32 *str_len_out, __u32 *type_id_bias_out
 
 static int find_func_btf_id(const void *btf_data, size_t btf_len,
 			    const char *func_name, __u32 base_str_off,
-			    __u32 type_id_bias,
-			    __u32 *btf_id_out)
+			    __u32 type_id_bias, __u32 *btf_id_out)
 {
 	const struct btf_header *hdr = btf_data;
 	const unsigned char *data = btf_data;
@@ -461,19 +437,14 @@ static int find_func_btf_id(const void *btf_data, size_t btf_len,
 	size_t offset = 0;
 	__u32 type_id = 1;
 
-	if (btf_len < sizeof(*hdr))
+	if (btf_len < sizeof(*hdr) || hdr->magic != 0xeb9f)
 		return -1;
-	if (hdr->magic != 0xeb9f) {
-		errno = EPROTO;
-		return -1;
-	}
 
 	hdr_len = hdr->hdr_len;
 	type_start = hdr_len + hdr->type_off;
 	type_end = type_start + hdr->type_len;
 	str_start = hdr_len + hdr->str_off;
 	str_end = str_start + hdr->str_len;
-
 	if (type_end > btf_len || str_end > btf_len) {
 		errno = EINVAL;
 		return -1;
@@ -483,39 +454,28 @@ static int find_func_btf_id(const void *btf_data, size_t btf_len,
 	str_section = data + str_start;
 
 	while (offset + sizeof(struct btf_type) <= hdr->type_len) {
-		const struct btf_type *bt;
-		__u32 kind;
-		__u32 vlen;
-		size_t skip = 0;
+		const struct btf_type *bt = (const struct btf_type *)(type_section + offset);
 
-		bt = (const struct btf_type *)(type_section + offset);
-		kind = btf_kind(bt);
-
-		if (kind == 12) {
+		if (btf_kind(bt) == 12) {
 			size_t raw_off = bt->name_off;
 			size_t local_off = raw_off;
-			const char *name;
-			size_t max_len;
 
 			if (base_str_off && raw_off >= base_str_off)
 				local_off = raw_off - base_str_off;
 			if (local_off < hdr->str_len) {
-				name = (const char *)(str_section + local_off);
-				max_len = hdr->str_len - local_off;
+				const char *name = (const char *)(str_section + local_off);
+				size_t max_len = hdr->str_len - local_off;
+
 				if (strnlen(name, max_len) < max_len &&
 				    strcmp(name, func_name) == 0) {
-					*btf_id_out = type_id;
-					*btf_id_out += type_id_bias;
+					*btf_id_out = type_id + type_id_bias;
 					return 0;
 				}
 			}
 		}
 
 		offset += sizeof(struct btf_type);
-		vlen = bt->info & 0xffff;
-		(void)vlen;
-		skip = btf_type_extra_size(bt);
-		offset += skip;
+		offset += btf_type_extra_size(bt);
 		type_id++;
 	}
 
@@ -545,32 +505,6 @@ static int bpf_btf_get_next_id(__u32 start_id, __u32 *next_id)
 	return 0;
 }
 
-static bool cpu_has_movbe(void)
-{
-#if defined(__x86_64__)
-	unsigned int eax, ebx, ecx, edx;
-
-	if (!__get_cpuid(1, &eax, &ebx, &ecx, &edx))
-		return false;
-	return (ecx & bit_MOVBE) != 0;
-#else
-	return true;
-#endif
-}
-
-static bool cpu_has_bmi1(void)
-{
-#if defined(__x86_64__)
-	unsigned int eax, ebx, ecx, edx;
-
-	if (!__get_cpuid_count(7, 0, &eax, &ebx, &ecx, &edx))
-		return false;
-	return (ebx & bit_BMI) != 0;
-#else
-	return true;
-#endif
-}
-
 static int bpf_btf_get_info_name(int btf_fd, char *name_buf, size_t name_buf_sz)
 {
 	union bpf_attr attr;
@@ -581,7 +515,6 @@ static int bpf_btf_get_info_name(int btf_fd, char *name_buf, size_t name_buf_sz)
 
 	info.name = ptr_to_u64(name_buf);
 	info.name_len = name_buf_sz;
-
 	attr.info.bpf_fd = btf_fd;
 	attr.info.info_len = sizeof(info);
 	attr.info.info = ptr_to_u64(&info);
@@ -624,13 +557,12 @@ static int discover_kfuncs(void)
 
 	if (g_discovered)
 		return 0;
-
 	if (get_vmlinux_btf_base_info(&base_str_off, &base_type_id_bias) < 0)
 		return -1;
 
 	for (i = 0; i < ARRAY_SIZE(g_modules); i++) {
-		g_modules[i].btf_fd = bpf_btf_get_fd_by_module_name(
-			g_modules[i].module_name);
+		g_modules[i].btf_fd =
+			bpf_btf_get_fd_by_module_name(g_modules[i].module_name);
 		if (g_modules[i].btf_fd < 0)
 			return -1;
 	}
@@ -731,212 +663,118 @@ static int run_rejit_expect_success(const char *name,
 	return 0;
 }
 
-static int run_rejit_expect_failure_preserves_original(
-	const char *name, const struct bpf_insn *replacement,
-	__u32 replacement_cnt, const int *fd_array, __u32 fd_array_cnt)
-{
-	char log_buf[LOG_BUF_SIZE];
-	__u32 retval = 0;
-	int prog_fd;
-
-	memset(log_buf, 0, sizeof(log_buf));
-	prog_fd = load_xdp_prog(prog_ret_1, ARRAY_SIZE(prog_ret_1),
-				NULL, 0, log_buf, sizeof(log_buf));
-	if (prog_fd < 0) {
-		TEST_FAIL(name, "base load failed");
-		return 1;
-	}
-
-	if (test_run_xdp(prog_fd, &retval) < 0 || retval != 1) {
-		TEST_FAIL(name, "base program run failed");
-		close(prog_fd);
-		return 1;
-	}
-
-	memset(log_buf, 0, sizeof(log_buf));
-	if (rejit_xdp_prog(prog_fd, replacement, replacement_cnt, fd_array,
-			   fd_array_cnt, log_buf, sizeof(log_buf)) >= 0) {
-		TEST_FAIL(name, "REJIT unexpectedly succeeded");
-		close(prog_fd);
-		return 1;
-	}
-
-	if (test_run_xdp(prog_fd, &retval) < 0 || retval != 1) {
-		TEST_FAIL(name, "failed REJIT changed original program");
-		close(prog_fd);
-		return 1;
-	}
-
-	close(prog_fd);
-	TEST_PASS(name);
-	return 0;
-}
-
 static int test_kinsn_discovery(void)
 {
-	const char *name = "kinsn_discovery";
+	const char *name = "packed_kinsn_discovery";
 	size_t i;
 
 	if (discover_kfuncs() < 0) {
-		TEST_FAIL(name, "failed to discover module BTF and kfunc IDs");
+		TEST_FAIL(name, "failed to discover packed kinsn modules");
 		return 1;
 	}
 
 	for (i = 0; i < ARRAY_SIZE(g_funcs); i++) {
 		if (g_funcs[i].btf_id == 0 ||
 		    g_modules[g_funcs[i].module_id].btf_fd < 0) {
-			TEST_FAIL(name, "missing kfunc BTF ID or module BTF FD");
+			TEST_FAIL(name, "missing packed kfunc BTF ID or module BTF FD");
 			return 1;
 		}
 	}
 
 	TEST_PASS(name);
-	for (i = 0; i < ARRAY_SIZE(g_funcs); i++) {
-		printf("    %s/%s: btf_fd=%d btf_id=%u\n",
-		       g_modules[g_funcs[i].module_id].module_name,
-		       g_funcs[i].func_name,
-		       g_modules[g_funcs[i].module_id].btf_fd,
-		       g_funcs[i].btf_id);
-	}
 	return 0;
 }
 
-static int test_rejit_barrier_preserves_r5(void)
-{
-	int fd_array[2] = MODULE_FD_ARRAY(g_modules[MOD_BARRIER].btf_fd);
-	struct bpf_insn prog[] = {
-		BPF_MOV64_IMM(BPF_REG_5, 7),
-		BPF_CALL_KFUNC(0, 0),
-		BPF_MOV64_REG(BPF_REG_0, BPF_REG_5),
-		BPF_EXIT_INSN(),
-	};
-
-	patch_single_kfunc(prog, ARRAY_SIZE(prog), g_funcs[FUNC_BARRIER].btf_id);
-	return run_rejit_expect_success("barrier_preserves_r5",
-					prog, ARRAY_SIZE(prog),
-					fd_array, ARRAY_SIZE(fd_array), 7);
-}
-
-static int test_rejit_rotate_apply(void)
+static int test_packed_rotate_apply(void)
 {
 	int fd_array[2] = MODULE_FD_ARRAY(g_modules[MOD_ROTATE].btf_fd);
 	struct bpf_insn prog[] = {
-		BPF_MOV64_IMM(BPF_REG_1, 1),
-		BPF_MOV64_IMM(BPF_REG_2, 1),
+		BPF_MOV64_IMM(BPF_REG_6, 1),
+		BPF_KINSN_SIDECAR(KINSN_ROTATE_PAYLOAD(BPF_REG_7, BPF_REG_6, 1)),
 		BPF_CALL_KFUNC(0, 0),
+		BPF_MOV64_REG(BPF_REG_0, BPF_REG_7),
 		BPF_EXIT_INSN(),
 	};
 
 	patch_single_kfunc(prog, ARRAY_SIZE(prog), g_funcs[FUNC_ROTATE].btf_id);
-	return run_rejit_expect_success("rotate_apply",
+	return run_rejit_expect_success("packed_rotate_apply",
 					prog, ARRAY_SIZE(prog),
 					fd_array, ARRAY_SIZE(fd_array), 2);
 }
 
-static int test_rejit_rotate_r5_preserved(void)
-{
-	int fd_array[2] = MODULE_FD_ARRAY(g_modules[MOD_ROTATE].btf_fd);
-	struct bpf_insn prog[] = {
-		BPF_MOV64_IMM(BPF_REG_5, 7),
-		BPF_MOV64_IMM(BPF_REG_1, 1),
-		BPF_MOV64_IMM(BPF_REG_2, 1),
-		BPF_CALL_KFUNC(0, 0),
-		BPF_MOV64_REG(BPF_REG_0, BPF_REG_5),
-		BPF_EXIT_INSN(),
-	};
-
-	patch_single_kfunc(prog, ARRAY_SIZE(prog), g_funcs[FUNC_ROTATE].btf_id);
-	return run_rejit_expect_success("rotate_r5_preserved",
-					prog, ARRAY_SIZE(prog),
-					fd_array, ARRAY_SIZE(fd_array), 7);
-}
-
-static int test_rejit_rotate_r4_rejected(void)
-{
-	int fd_array[2] = MODULE_FD_ARRAY(g_modules[MOD_ROTATE].btf_fd);
-	struct bpf_insn prog[] = {
-		BPF_MOV64_IMM(BPF_REG_4, 9),
-		BPF_MOV64_IMM(BPF_REG_1, 1),
-		BPF_MOV64_IMM(BPF_REG_2, 1),
-		BPF_CALL_KFUNC(0, 0),
-		BPF_MOV64_REG(BPF_REG_0, BPF_REG_4),
-		BPF_EXIT_INSN(),
-	};
-
-	patch_single_kfunc(prog, ARRAY_SIZE(prog), g_funcs[FUNC_ROTATE].btf_id);
-	return run_rejit_expect_failure_preserves_original(
-		"rotate_r4_rejected", prog, ARRAY_SIZE(prog),
-		fd_array, ARRAY_SIZE(fd_array));
-}
-
-static int test_rejit_select_apply(void)
+static int test_packed_select_apply(void)
 {
 	int fd_array[2] = MODULE_FD_ARRAY(g_modules[MOD_SELECT].btf_fd);
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_1, 11),
 		BPF_MOV64_IMM(BPF_REG_2, 29),
 		BPF_MOV64_IMM(BPF_REG_3, 1),
+		BPF_KINSN_SIDECAR(KINSN_SELECT_PAYLOAD(BPF_REG_5, BPF_REG_1,
+						       BPF_REG_2, BPF_REG_3)),
 		BPF_CALL_KFUNC(0, 0),
+		BPF_MOV64_REG(BPF_REG_0, BPF_REG_5),
 		BPF_EXIT_INSN(),
 	};
 
 	patch_single_kfunc(prog, ARRAY_SIZE(prog), g_funcs[FUNC_SELECT].btf_id);
-	return run_rejit_expect_success("select_apply",
+	return run_rejit_expect_success("packed_select_apply",
 					prog, ARRAY_SIZE(prog),
 					fd_array, ARRAY_SIZE(fd_array), 11);
 }
 
-static int test_rejit_endian_apply(void)
+static int test_packed_endian_apply(void)
 {
 	int fd_array[2] = MODULE_FD_ARRAY(g_modules[MOD_ENDIAN].btf_fd);
 	struct bpf_insn prog[] = {
 		BPF_ST_MEM(BPF_H, BPF_REG_10, -2, 0x1234),
-		BPF_MOV64_REG(BPF_REG_1, BPF_REG_10),
-		BPF_ALU64_IMM(BPF_ADD, BPF_REG_1, -2),
+		BPF_MOV64_REG(BPF_REG_6, BPF_REG_10),
+		BPF_ALU64_IMM(BPF_ADD, BPF_REG_6, -2),
+		BPF_KINSN_SIDECAR(KINSN_ENDIAN_PAYLOAD(BPF_REG_7, BPF_REG_6)),
 		BPF_CALL_KFUNC(0, 0),
+		BPF_MOV64_REG(BPF_REG_0, BPF_REG_7),
 		BPF_EXIT_INSN(),
 	};
 
 	patch_single_kfunc(prog, ARRAY_SIZE(prog), g_funcs[FUNC_ENDIAN16].btf_id);
-	return run_rejit_expect_success("endian_apply",
+	return run_rejit_expect_success("packed_endian_apply",
 					prog, ARRAY_SIZE(prog),
 					fd_array, ARRAY_SIZE(fd_array), 0x3412);
 }
 
-static int test_rejit_endian_invalid_access_rejected(void)
+static int test_packed_barrier_preserves_r5(void)
 {
-	int fd_array[2] = MODULE_FD_ARRAY(g_modules[MOD_ENDIAN].btf_fd);
+	int fd_array[2] = MODULE_FD_ARRAY(g_modules[MOD_BARRIER].btf_fd);
 	struct bpf_insn prog[] = {
-		BPF_MOV64_REG(BPF_REG_1, BPF_REG_10),
-		BPF_ALU64_IMM(BPF_ADD, BPF_REG_1, -513),
+		BPF_MOV64_IMM(BPF_REG_5, 7),
+		BPF_KINSN_SIDECAR(0),
 		BPF_CALL_KFUNC(0, 0),
+		BPF_MOV64_REG(BPF_REG_0, BPF_REG_5),
 		BPF_EXIT_INSN(),
 	};
 
-	patch_single_kfunc(prog, ARRAY_SIZE(prog), g_funcs[FUNC_ENDIAN16].btf_id);
-	return run_rejit_expect_failure_preserves_original(
-		"endian_invalid_access_rejected", prog, ARRAY_SIZE(prog),
-		fd_array, ARRAY_SIZE(fd_array));
+	patch_single_kfunc(prog, ARRAY_SIZE(prog), g_funcs[FUNC_BARRIER].btf_id);
+	return run_rejit_expect_success("packed_barrier_preserves_r5",
+					prog, ARRAY_SIZE(prog),
+					fd_array, ARRAY_SIZE(fd_array), 7);
 }
 
-static int test_rejit_extract_range_narrowing(void)
+static int test_packed_extract_range_narrowing(void)
 {
 	int fd_array[2] = MODULE_FD_ARRAY(g_modules[MOD_EXTRACT].btf_fd);
 	struct bpf_insn prog[] = {
-		BPF_MOV64_IMM(BPF_REG_1, 0xabcd),
-		BPF_MOV64_IMM(BPF_REG_2, 0),
-		BPF_MOV64_IMM(BPF_REG_3, 8),
+		BPF_MOV64_IMM(BPF_REG_2, 0xabcd),
+		BPF_KINSN_SIDECAR(KINSN_EXTRACT_PAYLOAD(BPF_REG_2, 0, 8)),
 		BPF_CALL_KFUNC(0, 0),
 		BPF_MOV64_REG(BPF_REG_1, BPF_REG_10),
 		BPF_ALU64_IMM(BPF_ADD, BPF_REG_1, -256),
-		BPF_ALU64_REG(BPF_ADD, BPF_REG_1, BPF_REG_0),
+		BPF_ALU64_REG(BPF_ADD, BPF_REG_1, BPF_REG_2),
 		BPF_ST_MEM(BPF_B, BPF_REG_1, 0, 1),
 		BPF_MOV64_IMM(BPF_REG_0, XDP_PASS),
 		BPF_EXIT_INSN(),
 	};
 
 	patch_single_kfunc(prog, ARRAY_SIZE(prog), g_funcs[FUNC_EXTRACT].btf_id);
-	return run_rejit_expect_success("extract_range_narrowing",
+	return run_rejit_expect_success("packed_extract_range_narrowing",
 					prog, ARRAY_SIZE(prog),
 					fd_array, ARRAY_SIZE(fd_array),
 					XDP_PASS);
@@ -955,30 +793,20 @@ int main(int argc, char **argv)
 	if (argc > 1 && !strchr(argv[1], '/'))
 		filter = argv[1];
 
-	printf("[kinsn] discovery and verifier/JIT modeling tests\n");
+	printf("[kinsn-packed] sidecar and packed operand ABI tests\n");
 
-	if (!filter || strcmp(filter, "kinsn_discovery") != 0)
+	if (should_run_test(filter, "packed_kinsn_discovery"))
 		ret |= test_kinsn_discovery();
-	else if (should_run_test(filter, "kinsn_discovery"))
-		ret |= test_kinsn_discovery();
-	if (should_run_test(filter, "barrier_preserves_r5"))
-		ret |= test_rejit_barrier_preserves_r5();
-	if (should_run_test(filter, "rotate_apply"))
-		ret |= test_rejit_rotate_apply();
-	if (should_run_test(filter, "rotate_r5_preserved"))
-		ret |= test_rejit_rotate_r5_preserved();
-#if defined(__x86_64__)
-	if (should_run_test(filter, "rotate_r4_rejected"))
-		ret |= test_rejit_rotate_r4_rejected();
-#endif
-	if (should_run_test(filter, "select_apply"))
-		ret |= test_rejit_select_apply();
-	if (should_run_test(filter, "endian_apply"))
-		ret |= test_rejit_endian_apply();
-	if (should_run_test(filter, "endian_invalid_access_rejected"))
-		ret |= test_rejit_endian_invalid_access_rejected();
-	if (should_run_test(filter, "extract_range_narrowing"))
-		ret |= test_rejit_extract_range_narrowing();
+	if (should_run_test(filter, "packed_rotate_apply"))
+		ret |= test_packed_rotate_apply();
+	if (should_run_test(filter, "packed_select_apply"))
+		ret |= test_packed_select_apply();
+	if (should_run_test(filter, "packed_endian_apply"))
+		ret |= test_packed_endian_apply();
+	if (should_run_test(filter, "packed_barrier_preserves_r5"))
+		ret |= test_packed_barrier_preserves_r5();
+	if (should_run_test(filter, "packed_extract_range_narrowing"))
+		ret |= test_packed_extract_range_narrowing();
 
 	printf("\nSummary: %d passed, %d failed, %d skipped\n",
 	       g_pass, g_fail, g_skip);

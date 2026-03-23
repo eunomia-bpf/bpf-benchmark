@@ -57,6 +57,122 @@ static __always_inline struct tnum kinsn_tnum_union(struct tnum a, struct tnum b
 	return t;
 }
 
+static __always_inline u8 kinsn_payload_reg(u64 payload, u8 shift)
+{
+	return (payload >> shift) & 0xf;
+}
+
+static __always_inline u8 kinsn_payload_u8(u64 payload, u8 shift)
+{
+	return (payload >> shift) & 0xff;
+}
+
+static __always_inline void
+kinsn_set_reg_operand(struct bpf_kinsn_call *call, u32 idx, u8 regno)
+{
+	call->operands[idx].kind = BPF_KINSN_OPERAND_REG;
+	call->operands[idx].regno = regno;
+}
+
+static __always_inline void
+kinsn_set_imm32_operand(struct bpf_kinsn_call *call, u32 idx, s32 imm32)
+{
+	call->operands[idx].kind = BPF_KINSN_OPERAND_IMM32;
+	call->operands[idx].imm32 = imm32;
+}
+
+static __always_inline bool
+kinsn_operand_is_reg(const struct bpf_kinsn_call *call, u32 idx)
+{
+	return idx < ARRAY_SIZE(call->operands) &&
+	       call->operands[idx].kind == BPF_KINSN_OPERAND_REG;
+}
+
+static __always_inline bool
+kinsn_operand_is_imm32(const struct bpf_kinsn_call *call, u32 idx)
+{
+	return idx < ARRAY_SIZE(call->operands) &&
+	       call->operands[idx].kind == BPF_KINSN_OPERAND_IMM32;
+}
+
+#ifdef CONFIG_X86_64
+static __always_inline u8 kinsn_x86_reg_code(u8 bpf_reg)
+{
+	switch (bpf_reg) {
+	case BPF_REG_0:
+	case BPF_REG_5:
+		return 0;
+	case BPF_REG_4:
+		return 1;
+	case BPF_REG_3:
+		return 2;
+	case BPF_REG_6:
+		return 3;
+	case BPF_REG_7:
+	case BPF_REG_10:
+		return 5;
+	case BPF_REG_2:
+	case BPF_REG_8:
+		return 6;
+	case BPF_REG_1:
+	case BPF_REG_9:
+		return 7;
+	default:
+		return 0xff;
+	}
+}
+
+static __always_inline bool kinsn_x86_reg_ext(u8 bpf_reg)
+{
+	switch (bpf_reg) {
+	case BPF_REG_5:
+	case BPF_REG_7:
+	case BPF_REG_8:
+	case BPF_REG_9:
+		return true;
+	default:
+		return false;
+	}
+}
+
+static __always_inline bool kinsn_x86_reg_valid(u8 bpf_reg)
+{
+	return kinsn_x86_reg_code(bpf_reg) != 0xff;
+}
+#endif
+
+#ifdef CONFIG_ARM64
+static __always_inline u8 kinsn_arm64_reg(u8 bpf_reg)
+{
+	switch (bpf_reg) {
+	case BPF_REG_0:
+		return 7;
+	case BPF_REG_1:
+		return 0;
+	case BPF_REG_2:
+		return 1;
+	case BPF_REG_3:
+		return 2;
+	case BPF_REG_4:
+		return 3;
+	case BPF_REG_5:
+		return 4;
+	case BPF_REG_6:
+		return 19;
+	case BPF_REG_7:
+		return 20;
+	case BPF_REG_8:
+		return 21;
+	case BPF_REG_9:
+		return 22;
+	case BPF_REG_10:
+		return 25;
+	default:
+		return 0xff;
+	}
+}
+#endif
+
 /* ---------- BTF kfunc set helpers ---------- */
 
 /*

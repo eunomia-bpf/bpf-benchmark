@@ -49,8 +49,7 @@ static inline uint64_t rdtsc_start()
 static inline uint64_t rdtsc_end()
 {
     unsigned int lo, hi;
-    asm volatile("rdtscp" : "=a"(lo), "=d"(hi) :: "ecx");
-    asm volatile("lfence");
+    asm volatile("rdtsc; lfence" : "=a"(lo), "=d"(hi) :: "memory");
     return (static_cast<uint64_t>(hi) << 32) | lo;
 }
 #else

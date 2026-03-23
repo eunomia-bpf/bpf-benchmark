@@ -19,6 +19,40 @@
 
 #include "kinsn_common.h"
 
+#define KINSN_SELECT_COND_NEZ 0
+
+static int decode_select_call(const struct bpf_insn *insn,
+			      struct bpf_kinsn_call *call)
+{
+	(void)insn;
+
+	if (call->encoding != BPF_KINSN_ENC_PACKED_CALL)
+		return 0;
+
+	call->dst_reg = kinsn_payload_reg(call->payload, 0);
+	call->nr_operands = 3;
+	kinsn_set_reg_operand(call, 0, kinsn_payload_reg(call->payload, 4));
+	kinsn_set_reg_operand(call, 1, kinsn_payload_reg(call->payload, 8));
+	kinsn_set_reg_operand(call, 2, kinsn_payload_reg(call->payload, 12));
+	call->reserved = kinsn_payload_reg(call->payload, 16);
+	return 0;
+}
+
+static int validate_select_call(const struct bpf_kinsn_call *call,
+				struct bpf_verifier_log *log)
+{
+	(void)log;
+
+	if (call->encoding != BPF_KINSN_ENC_PACKED_CALL)
+		return 0;
+	if (!kinsn_operand_is_reg(call, 0) || !kinsn_operand_is_reg(call, 1) ||
+	    !kinsn_operand_is_reg(call, 2))
+		return -EINVAL;
+	if (call->reserved != KINSN_SELECT_COND_NEZ)
+		return -EINVAL;
+	return 0;
+}
+
 /* ---- kfunc fallback implementation ---- */
 
 __bpf_kfunc_start_defs();
@@ -92,8 +126,21 @@ static int emit_select_arm64(u32 *image, int *idx, bool emit,
 	if (!idx)
 		return -EINVAL;
 
-	(void)call;
 	(void)prog;
+
+	if (call->encoding == BPF_KINSN_ENC_PACKED_CALL) {
+		u8 dst = kinsn_arm64_reg(call->dst_reg);
+		u8 true_reg = kinsn_arm64_reg(call->operands[0].regno);
+		u8 false_reg = kinsn_arm64_reg(call->operands[1].regno);
+		u8 cond_reg = kinsn_arm64_reg(call->operands[2].regno);
+
+		if (dst == 0xff || true_reg == 0xff ||
+		    false_reg == 0xff || cond_reg == 0xff)
+			return -EINVAL;
+
+		tst_insn = a64_tst(cond_reg, cond_reg);
+		csel_insn = a64_csel(dst, true_reg, false_reg, COND_NE);
+	}
 
 	if (emit) {
 		if (!image)
@@ -126,12 +173,18 @@ static int model_select_call(const struct bpf_kinsn_call *call,
 	const struct bpf_kinsn_scalar_state *false_val = &scalar_regs[1];
 	const struct bpf_kinsn_scalar_state *cond = &scalar_regs[2];
 
-	(void)call;
-
-	effect->input_mask = BIT(BPF_REG_1) | BIT(BPF_REG_2) | BIT(BPF_REG_3);
-	effect->clobber_mask = BIT(BPF_REG_0);
+	if (call->encoding == BPF_KINSN_ENC_PACKED_CALL) {
+		effect->input_mask = BIT(call->operands[0].regno) |
+				     BIT(call->operands[1].regno) |
+				     BIT(call->operands[2].regno);
+		effect->clobber_mask = BIT(call->dst_reg);
+		effect->result_reg = call->dst_reg;
+	} else {
+		effect->input_mask = BIT(BPF_REG_1) | BIT(BPF_REG_2) | BIT(BPF_REG_3);
+		effect->clobber_mask = BIT(BPF_REG_0);
+		effect->result_reg = BPF_REG_0;
+	}
 	effect->result_type = BPF_KINSN_RES_SCALAR;
-	effect->result_reg = BPF_REG_0;
 	effect->result_size = sizeof(u64);
 
 	if (tnum_is_const(cond->var_off)) {
@@ -148,7 +201,10 @@ static int model_select_call(const struct bpf_kinsn_call *call,
 static const struct bpf_kinsn_ops select_ops = {
 	.owner = THIS_MODULE,
 	.api_version = 1,
-	.supported_encodings = BPF_KINSN_ENC_LEGACY_KFUNC,
+	.supported_encodings = BPF_KINSN_ENC_LEGACY_KFUNC |
+			       BPF_KINSN_ENC_PACKED_CALL,
+	.decode_call = decode_select_call,
+	.validate_call = validate_select_call,
 	.model_call = model_select_call,
 	.emit_arm64 = emit_select_arm64,
 	.max_emit_bytes = 16,

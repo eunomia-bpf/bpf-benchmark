@@ -5,7 +5,16 @@ use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
-use super::utils::{emit_kfunc_call_with_off, emit_with_caller_save, ensure_module_fd_slot, fixup_all_branches, plan_caller_saved, CallerSavedPlan, KfuncArg};
+use super::utils::{
+    emit_kfunc_call_with_off,
+    emit_packed_kfunc_call_with_off,
+    emit_with_caller_save,
+    ensure_module_fd_slot,
+    fixup_all_branches,
+    plan_caller_saved,
+    CallerSavedPlan,
+    KfuncArg,
+};
 
 /// BPF ALU endian operation code.
 const BPF_END: u8 = 0xd0;
@@ -43,6 +52,7 @@ struct EndianFusionSite {
 /// An endian fusion site that has passed safety checks, ready for transformation.
 struct SafeEndianFusionSite {
     site: EndianFusionSite,
+    use_packed: bool,
     /// Caller-saved register save/restore plan.
     caller_save_plan: CallerSavedPlan,
 }
@@ -112,6 +122,15 @@ fn btf_id_for_size(ctx: &PassContext, size: u8) -> i32 {
         BPF_W => ctx.kfunc_registry.endian_load32_btf_id,
         BPF_DW => ctx.kfunc_registry.endian_load64_btf_id,
         _ => -1,
+    }
+}
+
+fn kfunc_name_for_size(size: u8) -> Option<&'static str> {
+    match size {
+        BPF_H => Some("bpf_endian_load16"),
+        BPF_W => Some("bpf_endian_load32"),
+        BPF_DW => Some("bpf_endian_load64"),
+        _ => None,
     }
 }
 
@@ -185,20 +204,6 @@ impl BpfPass for EndianFusionPass {
         analyses: &mut AnalysisCache,
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
-        // Check if platform has MOVBE support (x86) or REV (ARM64).
-        if !ctx.platform.has_movbe && ctx.platform.arch == crate::pass::Arch::X86_64 {
-            return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
-                sites_skipped: vec![SkipReason {
-                    pc: 0,
-                    reason: "platform lacks MOVBE support".into(),
-                }],
-                diagnostics: vec![],
-            ..Default::default() });
-        }
-
         // Check if any endian_load kfunc is available.
         if !any_endian_kfunc_available(ctx) {
             return Ok(PassResult {
@@ -252,21 +257,31 @@ impl BpfPass for EndianFusionPass {
                 continue;
             }
 
+            let use_packed = site.offset == 0
+                && kfunc_name_for_size(site.size)
+                    .map(|name| ctx.kfunc_registry.packed_supported_for_kfunc_name(name))
+                    .unwrap_or(false);
+
             // Safety check 2: caller-saved register conflict.
-            // Try to plan save/restore for live caller-saved regs using
-            // free callee-saved regs. Only skip if no plan is possible.
-            let site_end = site.start_pc + site.old_len;
-            let plan = if site_end > 0 && site_end - 1 < liveness.live_out.len() {
-                let live_after = &liveness.live_out[site_end - 1];
-                plan_caller_saved(live_after, site.dst_reg)
-            } else {
+            let plan = if use_packed {
                 Some(CallerSavedPlan { saves: vec![] })
+            } else {
+                // Try to plan save/restore for live caller-saved regs using
+                // free callee-saved regs. Only skip if no plan is possible.
+                let site_end = site.start_pc + site.old_len;
+                if site_end > 0 && site_end - 1 < liveness.live_out.len() {
+                    let live_after = &liveness.live_out[site_end - 1];
+                    plan_caller_saved(live_after, site.dst_reg)
+                } else {
+                    Some(CallerSavedPlan { saves: vec![] })
+                }
             };
 
             match plan {
                 Some(p) => {
                     safe_sites.push(SafeEndianFusionSite {
                         site,
+                        use_packed,
                         caller_save_plan: p,
                     });
                 }
@@ -311,19 +326,23 @@ impl BpfPass for EndianFusionPass {
                 let site = &safe_site.site;
                 let btf_id = btf_id_for_size(ctx, site.size);
 
-                let kfunc_insns = emit_endian_fusion_call(
-                    site.dst_reg,
-                    site.src_reg,
-                    site.offset,
-                    btf_id,
-                    kfunc_off,
-                );
-
-                // Wrap with caller-saved register save/restore if needed.
-                let replacement = if safe_site.caller_save_plan.saves.is_empty() {
-                    kfunc_insns
+                let replacement = if safe_site.use_packed {
+                    let payload = (site.dst_reg as u64) | ((site.src_reg as u64) << 4);
+                    emit_packed_kfunc_call_with_off(payload, btf_id, kfunc_off)
                 } else {
-                    emit_with_caller_save(&kfunc_insns, &safe_site.caller_save_plan)
+                    let kfunc_insns = emit_endian_fusion_call(
+                        site.dst_reg,
+                        site.src_reg,
+                        site.offset,
+                        btf_id,
+                        kfunc_off,
+                    );
+
+                    if safe_site.caller_save_plan.saves.is_empty() {
+                        kfunc_insns
+                    } else {
+                        emit_with_caller_save(&kfunc_insns, &safe_site.caller_save_plan)
+                    }
                 };
                 new_insns.extend_from_slice(&replacement);
 

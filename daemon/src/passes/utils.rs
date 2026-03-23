@@ -80,6 +80,20 @@ pub fn emit_kfunc_call(dst_reg: u8, args: &[KfuncArg], kfunc_btf_id: i32) -> Vec
     emit_kfunc_call_with_off(dst_reg, args, kfunc_btf_id, 0)
 }
 
+/// Emit a packed-ABI kinsn call using a sidecar pseudo-insn immediately
+/// before the kfunc CALL. The result register is part of `payload`, so no
+/// extra `mov dst, r0` is emitted here.
+pub fn emit_packed_kfunc_call_with_off(
+    payload: u64,
+    kfunc_btf_id: i32,
+    kfunc_off: i16,
+) -> Vec<BpfInsn> {
+    vec![
+        BpfInsn::kinsn_sidecar(payload),
+        BpfInsn::call_kfunc_with_off(kfunc_btf_id, kfunc_off),
+    ]
+}
+
 /// Emit a kfunc call sequence with an explicit module BTF slot encoded in
 /// `CALL.off`. `kfunc_off = 0` means vmlinux.
 pub fn emit_kfunc_call_with_off(

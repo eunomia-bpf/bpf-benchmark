@@ -21,6 +21,87 @@
 
 #include "kinsn_common.h"
 
+#define KINSN_SELECT_COND_NEZ 0
+
+static int decode_select_call(const struct bpf_insn *insn,
+			      struct bpf_kinsn_call *call)
+{
+	(void)insn;
+
+	if (call->encoding != BPF_KINSN_ENC_PACKED_CALL)
+		return 0;
+
+	call->dst_reg = kinsn_payload_reg(call->payload, 0);
+	call->nr_operands = 3;
+	kinsn_set_reg_operand(call, 0, kinsn_payload_reg(call->payload, 4));
+	kinsn_set_reg_operand(call, 1, kinsn_payload_reg(call->payload, 8));
+	kinsn_set_reg_operand(call, 2, kinsn_payload_reg(call->payload, 12));
+	call->reserved = kinsn_payload_reg(call->payload, 16);
+	return 0;
+}
+
+static int validate_select_call(const struct bpf_kinsn_call *call,
+				struct bpf_verifier_log *log)
+{
+	(void)log;
+
+	if (call->encoding != BPF_KINSN_ENC_PACKED_CALL)
+		return 0;
+	if (!kinsn_operand_is_reg(call, 0) || !kinsn_operand_is_reg(call, 1) ||
+	    !kinsn_operand_is_reg(call, 2))
+		return -EINVAL;
+	if (call->reserved != KINSN_SELECT_COND_NEZ)
+		return -EINVAL;
+	return 0;
+}
+
+static void emit_u8(u8 *buf, u32 *len, u8 byte)
+{
+	buf[(*len)++] = byte;
+}
+
+static void emit_rex_rr(u8 *buf, u32 *len, bool is64, u8 reg, u8 rm)
+{
+	u8 rex = 0x40;
+
+	if (is64)
+		rex |= 0x08;
+	if (kinsn_x86_reg_ext(reg))
+		rex |= 0x04;
+	if (kinsn_x86_reg_ext(rm))
+		rex |= 0x01;
+	if (rex != 0x40)
+		emit_u8(buf, len, rex);
+}
+
+static void emit_mov_rr(u8 *buf, u32 *len, u8 dst_reg, u8 src_reg)
+{
+	emit_rex_rr(buf, len, true, src_reg, dst_reg);
+	emit_u8(buf, len, 0x89);
+	emit_u8(buf, len, 0xC0 |
+		(kinsn_x86_reg_code(src_reg) << 3) |
+		kinsn_x86_reg_code(dst_reg));
+}
+
+static void emit_test_rr(u8 *buf, u32 *len, u8 reg)
+{
+	emit_rex_rr(buf, len, true, reg, reg);
+	emit_u8(buf, len, 0x85);
+	emit_u8(buf, len, 0xC0 |
+		(kinsn_x86_reg_code(reg) << 3) |
+		kinsn_x86_reg_code(reg));
+}
+
+static void emit_cmov_rr(u8 *buf, u32 *len, u8 dst_reg, u8 src_reg, u8 cc)
+{
+	emit_rex_rr(buf, len, true, dst_reg, src_reg);
+	emit_u8(buf, len, 0x0F);
+	emit_u8(buf, len, cc);
+	emit_u8(buf, len, 0xC0 |
+		(kinsn_x86_reg_code(dst_reg) << 3) |
+		kinsn_x86_reg_code(src_reg));
+}
+
 /* ---- kfunc fallback implementation ---- */
 
 __bpf_kfunc_start_defs();
@@ -42,6 +123,9 @@ static int emit_select_x86(u8 *image, u32 *off, bool emit,
 			   const struct bpf_kinsn_call *call,
 			   struct bpf_prog *prog)
 {
+	u8 buf[16];
+	u32 len = 0;
+
 	/*
 	 * mov  rax, rsi         48 89 F0
 	 * test rdx, rdx         48 85 D2
@@ -58,8 +142,34 @@ static int emit_select_x86(u8 *image, u32 *off, bool emit,
 	if (emit && !image)
 		return -EINVAL;
 
-	(void)call;
 	(void)prog;
+
+	if (call->encoding == BPF_KINSN_ENC_PACKED_CALL) {
+		u8 dst_reg = call->dst_reg;
+		u8 true_reg = call->operands[0].regno;
+		u8 false_reg = call->operands[1].regno;
+		u8 cond_reg = call->operands[2].regno;
+
+		if (!kinsn_x86_reg_valid(dst_reg) ||
+		    !kinsn_x86_reg_valid(true_reg) ||
+		    !kinsn_x86_reg_valid(false_reg) ||
+		    !kinsn_x86_reg_valid(cond_reg))
+			return -EINVAL;
+
+		if (dst_reg != false_reg && dst_reg != true_reg)
+			emit_mov_rr(buf, &len, dst_reg, false_reg);
+
+		emit_test_rr(buf, &len, cond_reg);
+		if (dst_reg == true_reg)
+			emit_cmov_rr(buf, &len, dst_reg, false_reg, 0x44);
+		else
+			emit_cmov_rr(buf, &len, dst_reg, true_reg, 0x45);
+
+		if (emit)
+			memcpy(image + *off, buf, len);
+		*off += len;
+		return len;
+	}
 
 	if (emit)
 		memcpy(image + *off, insns, sizeof(insns));
@@ -88,12 +198,18 @@ static int model_select_call(const struct bpf_kinsn_call *call,
 	const struct bpf_kinsn_scalar_state *false_val = &scalar_regs[1];
 	const struct bpf_kinsn_scalar_state *cond = &scalar_regs[2];
 
-	(void)call;
-
-	effect->input_mask = BIT(BPF_REG_1) | BIT(BPF_REG_2) | BIT(BPF_REG_3);
-	effect->clobber_mask = BIT(BPF_REG_0);
+	if (call->encoding == BPF_KINSN_ENC_PACKED_CALL) {
+		effect->input_mask = BIT(call->operands[0].regno) |
+				     BIT(call->operands[1].regno) |
+				     BIT(call->operands[2].regno);
+		effect->clobber_mask = BIT(call->dst_reg);
+		effect->result_reg = call->dst_reg;
+	} else {
+		effect->input_mask = BIT(BPF_REG_1) | BIT(BPF_REG_2) | BIT(BPF_REG_3);
+		effect->clobber_mask = BIT(BPF_REG_0);
+		effect->result_reg = BPF_REG_0;
+	}
 	effect->result_type = BPF_KINSN_RES_SCALAR;
-	effect->result_reg = BPF_REG_0;
 	effect->result_size = sizeof(u64);
 
 	if (tnum_is_const(cond->var_off)) {
@@ -110,7 +226,10 @@ static int model_select_call(const struct bpf_kinsn_call *call,
 static const struct bpf_kinsn_ops select_ops = {
 	.owner = THIS_MODULE,
 	.api_version = 1,
-	.supported_encodings = BPF_KINSN_ENC_LEGACY_KFUNC,
+	.supported_encodings = BPF_KINSN_ENC_LEGACY_KFUNC |
+			       BPF_KINSN_ENC_PACKED_CALL,
+	.decode_call = decode_select_call,
+	.validate_call = validate_select_call,
 	.model_call = model_select_call,
 	.emit_x86 = emit_select_x86,
 	.max_emit_bytes = 16,

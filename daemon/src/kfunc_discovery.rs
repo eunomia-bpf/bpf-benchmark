@@ -11,6 +11,7 @@ use std::path::Path;
 
 use anyhow::{bail, Context, Result};
 
+use crate::insn::{BPF_KINSN_ENC_LEGACY_KFUNC, BPF_KINSN_ENC_PACKED_CALL};
 use crate::pass::KfuncRegistry;
 
 // ── Known kfunc → module mapping ─────────────────────────────────────
@@ -108,24 +109,83 @@ impl BtfType {
 
 // ── BTF parsing ──────────────────────────────────────────────────────
 
-/// Read the vmlinux BTF string section length from `/sys/kernel/btf/vmlinux`.
+fn btf_type_extra_bytes(bt: &BtfType) -> usize {
+    let kind = bt.kind();
+    let vlen = (bt.info & 0xffff) as usize;
+
+    match kind {
+        BTF_KIND_INT => 4,                 // u32 encoding data
+        BTF_KIND_ARRAY => 12,              // struct btf_array (3 * u32)
+        BTF_KIND_STRUCT | BTF_KIND_UNION => vlen * 12, // btf_member = 12 bytes each
+        BTF_KIND_ENUM => vlen * 8,         // btf_enum = 8 bytes each
+        BTF_KIND_FUNC_PROTO => vlen * 8,   // btf_param = 8 bytes each
+        BTF_KIND_VAR => 4,                 // u32 linkage
+        BTF_KIND_DATASEC => vlen * 12,     // btf_var_secinfo = 12 bytes each
+        BTF_KIND_DECL_TAG => 4,            // u32 component_idx
+        BTF_KIND_ENUM64 => vlen * 12,      // btf_enum64 = 12 bytes each
+        // PTR/FWD/TYPEDEF/VOLATILE/CONST/RESTRICT/FUNC/FLOAT/TYPE_TAG: no extra data
+        _ => 0,
+    }
+}
+
+fn count_btf_types(btf_data: &[u8]) -> Result<u32> {
+    if btf_data.len() < BTF_HEADER_SIZE {
+        bail!("BTF too small ({} bytes)", btf_data.len());
+    }
+
+    let hdr: BtfHeader = unsafe { std::ptr::read_unaligned(btf_data.as_ptr() as *const BtfHeader) };
+    if hdr.magic != BTF_MAGIC {
+        bail!("BTF bad magic: 0x{:04x}", hdr.magic);
+    }
+
+    let hdr_len = hdr.hdr_len as usize;
+    let type_start = hdr_len + hdr.type_off as usize;
+    let type_end = type_start + hdr.type_len as usize;
+    if type_end > btf_data.len() {
+        bail!("BTF type section exceeds blob");
+    }
+
+    let type_section = &btf_data[type_start..type_end];
+    let mut offset = 0usize;
+    let mut type_cnt = 1u32; // type ID 0 is void
+
+    while offset + BTF_TYPE_SIZE <= type_section.len() {
+        let bt: BtfType =
+            unsafe { std::ptr::read_unaligned(type_section[offset..].as_ptr() as *const BtfType) };
+        let extra = btf_type_extra_bytes(&bt);
+
+        offset += BTF_TYPE_SIZE;
+        if offset + extra > type_section.len() {
+            bail!("BTF type section truncated");
+        }
+        offset += extra;
+        type_cnt += 1;
+    }
+
+    if offset != type_section.len() {
+        bail!("BTF type section has trailing bytes");
+    }
+
+    Ok(type_cnt)
+}
+
+/// Read vmlinux split-BTF base properties from `/sys/kernel/btf/vmlinux`.
 ///
-/// Module (split) BTF uses `name_off` values that are offset by the vmlinux
-/// string section length (`start_str_off`). We need this base offset to
-/// correctly resolve module-local string references.
-fn get_vmlinux_str_len() -> Result<u32> {
-    let vmlinux_path = "/sys/kernel/btf/vmlinux";
-    let data = fs::read(vmlinux_path)
-        .with_context(|| "read vmlinux BTF header")?;
+/// Module BTF uses vmlinux's string section as the base for `name_off`, and
+/// its type IDs are biased by `(btf__type_cnt(base_btf) - 1)`.
+fn get_vmlinux_base_info() -> Result<(u32, u32)> {
+    let data = fs::read("/sys/kernel/btf/vmlinux").with_context(|| "read vmlinux BTF")?;
     if data.len() < BTF_HEADER_SIZE {
         bail!("vmlinux BTF too small ({} bytes)", data.len());
     }
-    let hdr: BtfHeader =
-        unsafe { std::ptr::read_unaligned(data.as_ptr() as *const BtfHeader) };
+
+    let hdr: BtfHeader = unsafe { std::ptr::read_unaligned(data.as_ptr() as *const BtfHeader) };
     if hdr.magic != BTF_MAGIC {
         bail!("vmlinux BTF bad magic: 0x{:04x}", hdr.magic);
     }
-    Ok(hdr.str_len)
+
+    let type_cnt = count_btf_types(&data)?;
+    Ok((hdr.str_len, type_cnt.saturating_sub(1)))
 }
 
 /// Parse a (possibly split) BTF blob and find the BTF type ID for a FUNC
@@ -135,7 +195,16 @@ fn get_vmlinux_str_len() -> Result<u32> {
 /// `name_off` values >= `base_str_off` reference the module's own string
 /// section at local offset `name_off - base_str_off`. For standalone BTF
 /// (base_str_off == 0), name_off indexes the local string section directly.
-fn find_func_btf_id(btf_data: &[u8], func_name: &str, base_str_off: u32) -> Option<i32> {
+///
+/// `type_id_bias` is `btf__type_cnt(base_btf) - 1` for split BTF. This turns
+/// the module-local type order into the global type ID space expected by the
+/// verifier.
+fn find_func_btf_id(
+    btf_data: &[u8],
+    func_name: &str,
+    base_str_off: u32,
+    type_id_bias: u32,
+) -> Option<i32> {
     if btf_data.len() < BTF_HEADER_SIZE {
         return None;
     }
@@ -187,7 +256,7 @@ fn find_func_btf_id(btf_data: &[u8], func_name: &str, base_str_off: u32) -> Opti
                 let nul_pos = name_bytes.iter().position(|&b| b == 0).unwrap_or(name_bytes.len());
                 if let Ok(name) = std::str::from_utf8(&name_bytes[..nul_pos]) {
                     if name == func_name {
-                        return Some(type_id);
+                        return Some(type_id + type_id_bias as i32);
                     }
                 }
             }
@@ -199,20 +268,7 @@ fn find_func_btf_id(btf_data: &[u8], func_name: &str, base_str_off: u32) -> Opti
         // Some BTF kinds have additional data after the base entry.
         // We need to skip those to correctly walk the type section.
         // Kind constants from vendor/linux-framework/include/uapi/linux/btf.h.
-        let vlen = (bt.info & 0xffff) as usize;
-        let skip = match kind {
-            BTF_KIND_INT => 4,                 // u32 encoding data
-            BTF_KIND_ARRAY => 12,              // struct btf_array (3 * u32)
-            BTF_KIND_STRUCT | BTF_KIND_UNION => vlen * 12, // btf_member = 12 bytes each
-            BTF_KIND_ENUM => vlen * 8,         // btf_enum = 8 bytes each
-            BTF_KIND_FUNC_PROTO => vlen * 8,   // btf_param = 8 bytes each
-            BTF_KIND_VAR => 4,                 // u32 linkage
-            BTF_KIND_DATASEC => vlen * 12,     // btf_var_secinfo = 12 bytes each
-            BTF_KIND_DECL_TAG => 4,            // u32 component_idx
-            BTF_KIND_ENUM64 => vlen * 12,      // btf_enum64 = 12 bytes each
-            // PTR/FWD/TYPEDEF/VOLATILE/CONST/RESTRICT/FUNC/FLOAT/TYPE_TAG: no extra data
-            _ => 0,
-        };
+        let skip = btf_type_extra_bytes(&bt);
         offset += skip;
 
         type_id += 1;
@@ -280,6 +336,7 @@ pub fn discover_kfuncs() -> DiscoveryResult {
         speculation_barrier_btf_id: -1,
         module_fd: None,
         kfunc_module_fds: HashMap::new(),
+        kfunc_supported_encodings: HashMap::new(),
     };
     let mut module_fds: Vec<OwnedFd> = Vec::new();
     let mut log: Vec<String> = Vec::new();
@@ -290,17 +347,20 @@ pub fn discover_kfuncs() -> DiscoveryResult {
     // Module BTF is "split BTF" whose name_off values are offset by the
     // vmlinux string section length. Without this base offset, we cannot
     // resolve module-local function names.
-    let base_str_off = match get_vmlinux_str_len() {
-        Ok(len) => {
-            log.push(format!("  vmlinux BTF str_len={} (split BTF base offset)", len));
-            len
+    let (base_str_off, base_type_id_bias) = match get_vmlinux_base_info() {
+        Ok((str_len, type_id_bias)) => {
+            log.push(format!(
+                "  vmlinux BTF str_len={} split_type_id_bias={}",
+                str_len, type_id_bias
+            ));
+            (str_len, type_id_bias)
         }
         Err(e) => {
             log.push(format!(
-                "  WARNING: failed to read vmlinux BTF: {:#} (falling back to base_str_off=0)",
+                "  WARNING: failed to read vmlinux BTF: {:#} (falling back to split offsets=0)",
                 e
             ));
-            0
+            (0, 0)
         }
     };
 
@@ -325,7 +385,7 @@ pub fn discover_kfuncs() -> DiscoveryResult {
             }
         };
 
-        let btf_id = match find_func_btf_id(&btf_data, kfunc_name, base_str_off) {
+        let btf_id = match find_func_btf_id(&btf_data, kfunc_name, base_str_off, base_type_id_bias) {
             Some(id) => id,
             None => {
                 log.push(format!(
@@ -380,6 +440,10 @@ pub fn discover_kfuncs() -> DiscoveryResult {
 
         // Store per-kfunc module FD for REJIT fd_array.
         registry.kfunc_module_fds.insert(kfunc_name.to_string(), fd);
+        registry.kfunc_supported_encodings.insert(
+            kfunc_name.to_string(),
+            BPF_KINSN_ENC_LEGACY_KFUNC | BPF_KINSN_ENC_PACKED_CALL,
+        );
 
         // Legacy: keep the first module FD for backward compat.
         if registry.module_fd.is_none() {
@@ -441,20 +505,20 @@ mod tests {
     #[test]
     fn test_find_func_btf_id_found() {
         let blob = build_btf_blob("bpf_rotate64");
-        let result = find_func_btf_id(&blob, "bpf_rotate64", 0);
+        let result = find_func_btf_id(&blob, "bpf_rotate64", 0, 0);
         assert_eq!(result, Some(1)); // First type is ID=1
     }
 
     #[test]
     fn test_find_func_btf_id_not_found() {
         let blob = build_btf_blob("bpf_rotate64");
-        let result = find_func_btf_id(&blob, "bpf_select64", 0);
+        let result = find_func_btf_id(&blob, "bpf_select64", 0, 0);
         assert_eq!(result, None);
     }
 
     #[test]
     fn test_find_func_btf_id_empty_data() {
-        let result = find_func_btf_id(&[], "bpf_rotate64", 0);
+        let result = find_func_btf_id(&[], "bpf_rotate64", 0, 0);
         assert_eq!(result, None);
     }
 
@@ -464,7 +528,7 @@ mod tests {
         // Corrupt magic.
         blob[0] = 0x00;
         blob[1] = 0x00;
-        let result = find_func_btf_id(&blob, "bpf_rotate64", 0);
+        let result = find_func_btf_id(&blob, "bpf_rotate64", 0, 0);
         assert_eq!(result, None);
     }
 
@@ -513,11 +577,11 @@ mod tests {
         blob.extend_from_slice(&str_section);
 
         // bpf_rotate64 is type ID 1.
-        assert_eq!(find_func_btf_id(&blob, "bpf_rotate64", 0), Some(1));
+        assert_eq!(find_func_btf_id(&blob, "bpf_rotate64", 0, 0), Some(1));
         // bpf_select64 is type ID 2.
-        assert_eq!(find_func_btf_id(&blob, "bpf_select64", 0), Some(2));
+        assert_eq!(find_func_btf_id(&blob, "bpf_select64", 0, 0), Some(2));
         // Unknown func not found.
-        assert_eq!(find_func_btf_id(&blob, "bpf_unknown", 0), None);
+        assert_eq!(find_func_btf_id(&blob, "bpf_unknown", 0, 0), None);
     }
 
     #[test]
@@ -730,8 +794,8 @@ mod tests {
         blob.extend_from_slice(&str_section);
 
         // The FUNC is type ID 5 (1-based).
-        assert_eq!(find_func_btf_id(&blob, "bpf_rotate64", 0), Some(5));
-        assert_eq!(find_func_btf_id(&blob, "unknown", 0), None);
+        assert_eq!(find_func_btf_id(&blob, "bpf_rotate64", 0, 0), Some(5));
+        assert_eq!(find_func_btf_id(&blob, "unknown", 0, 0), None);
     }
 
     /// Test split BTF: name_off is offset by a base vmlinux string section length.
@@ -775,13 +839,53 @@ mod tests {
         blob.extend_from_slice(&str_section);
 
         // With base_str_off=0, the name_off is out of range -> not found.
-        assert_eq!(find_func_btf_id(&blob, "bpf_rotate64", 0), None);
+        assert_eq!(find_func_btf_id(&blob, "bpf_rotate64", 0, 0), None);
 
         // With the correct base_str_off, the name resolves correctly.
-        assert_eq!(find_func_btf_id(&blob, "bpf_rotate64", base_str_off), Some(1));
+        assert_eq!(find_func_btf_id(&blob, "bpf_rotate64", base_str_off, 0), Some(1));
 
         // Wrong func name still not found.
-        assert_eq!(find_func_btf_id(&blob, "bpf_select64", base_str_off), None);
+        assert_eq!(find_func_btf_id(&blob, "bpf_select64", base_str_off, 0), None);
+    }
+
+    #[test]
+    fn test_find_func_split_btf_type_id_bias() {
+        let base_str_off: u32 = 2_000_000;
+        let base_type_id_bias: u32 = 12345;
+
+        let mut str_section = vec![0u8];
+        let local_name_off = str_section.len() as u32;
+        str_section.extend_from_slice(b"bpf_rotate64\0");
+
+        let split_name_off = base_str_off + local_name_off;
+        let bt = BtfType {
+            name_off: split_name_off,
+            info: BTF_KIND_FUNC << 24,
+            size_or_type: 0,
+        };
+        let type_section: [u8; BTF_TYPE_SIZE] = unsafe { std::mem::transmute(bt) };
+
+        let hdr = BtfHeader {
+            magic: BTF_MAGIC,
+            version: 1,
+            flags: 0,
+            hdr_len: BTF_HEADER_SIZE as u32,
+            type_off: 0,
+            type_len: type_section.len() as u32,
+            str_off: type_section.len() as u32,
+            str_len: str_section.len() as u32,
+        };
+        let hdr_bytes: [u8; BTF_HEADER_SIZE] = unsafe { std::mem::transmute(hdr) };
+
+        let mut blob = Vec::new();
+        blob.extend_from_slice(&hdr_bytes);
+        blob.extend_from_slice(&type_section);
+        blob.extend_from_slice(&str_section);
+
+        assert_eq!(
+            find_func_btf_id(&blob, "bpf_rotate64", base_str_off, base_type_id_bias),
+            Some((base_type_id_bias + 1) as i32)
+        );
     }
 
     // ── Real BTF smoke tests (need /sys/kernel/btf/) ─────────────────
@@ -791,19 +895,21 @@ mod tests {
 
     #[test]
     #[ignore]
-    fn test_get_vmlinux_str_len_real() {
+    fn test_get_vmlinux_base_info_real() {
         // On any kernel with CONFIG_DEBUG_INFO_BTF=y, /sys/kernel/btf/vmlinux exists.
         if !Path::new("/sys/kernel/btf/vmlinux").exists() {
             eprintln!("SKIP: /sys/kernel/btf/vmlinux not present");
             return;
         }
-        let str_len = get_vmlinux_str_len().expect("get_vmlinux_str_len failed");
+        let (str_len, type_id_bias) =
+            get_vmlinux_base_info().expect("get_vmlinux_base_info failed");
         // vmlinux BTF string section is typically > 100KB.
         assert!(
             str_len > 1000,
             "vmlinux str_len suspiciously small: {}",
             str_len
         );
+        assert!(type_id_bias > 0, "vmlinux type_id_bias should be positive");
     }
 
     #[test]
@@ -819,7 +925,7 @@ mod tests {
         // vmlinux is base BTF, so base_str_off=0.
         // MEDIUM #3: Assert that the result is Some for a well-known kernel function.
         // bpf_prog_run_xdp should exist in any BPF-enabled kernel with XDP support.
-        let result = find_func_btf_id(&data, "bpf_prog_run_xdp", 0);
+        let result = find_func_btf_id(&data, "bpf_prog_run_xdp", 0, 0);
         assert!(
             result.is_some(),
             "bpf_prog_run_xdp should exist in vmlinux BTF (found None)"

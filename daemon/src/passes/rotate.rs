@@ -5,10 +5,19 @@ use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
-use super::utils::{emit_kfunc_call_with_off, emit_with_caller_save, ensure_module_fd_slot, fixup_all_branches, plan_caller_saved, CallerSavedPlan, KfuncArg};
+use super::utils::{
+    emit_kfunc_call_with_off,
+    emit_packed_kfunc_call_with_off,
+    emit_with_caller_save,
+    ensure_module_fd_slot,
+    fixup_all_branches,
+    plan_caller_saved,
+    CallerSavedPlan,
+    KfuncArg,
+};
 
 /// ROTATE optimization pass: replaces shift+OR rotate patterns with
-/// bpf_rotate64() kfunc calls. JIT inlines the kfunc as a RORX instruction.
+/// bpf_rotate64() kfunc calls. JIT inlines the kfunc as a native rotate.
 pub struct RotatePass;
 
 impl BpfPass for RotatePass {
@@ -44,24 +53,11 @@ impl BpfPass for RotatePass {
             ..Default::default() });
         }
 
-        // Prerequisite: RORX requires BMI2.
-        if !ctx.platform.has_rorx {
-            return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
-                sites_skipped: vec![SkipReason {
-                    pc: 0,
-                    reason: "platform lacks RORX (BMI2) support".into(),
-                }],
-                diagnostics: vec![],
-            ..Default::default() });
-        }
-
         let bt_analysis = BranchTargetAnalysis;
         let bt = analyses.get(&bt_analysis, program);
         let liveness_analysis = LivenessAnalysis;
         let liveness = analyses.get(&liveness_analysis, program);
+        let use_packed = ctx.kfunc_registry.packed_supported_for_pass(self.name());
 
         let sites = scan_rotate_sites(&program.insns);
         let mut safe_sites: Vec<SafeRotateSite> = Vec::new();
@@ -95,22 +91,29 @@ impl BpfPass for RotatePass {
                     continue;
                 }
 
-                // Safety check 3: caller-saved register conflict.
-                // Try to plan save/restore for live caller-saved regs using
-                // free callee-saved regs. Only skip if no plan is possible.
-                let plan = plan_caller_saved(live_after, site.dst_reg);
-                match plan {
-                    Some(p) => {
-                        safe_sites.push(SafeRotateSite {
-                            site,
-                            caller_save_plan: p,
-                        });
-                    }
-                    None => {
-                        skipped.push(SkipReason {
-                            pc: site.start_pc,
-                            reason: "caller-saved register conflict (not enough free callee-saved regs)".into(),
-                        });
+                if use_packed {
+                    safe_sites.push(SafeRotateSite {
+                        site,
+                        caller_save_plan: CallerSavedPlan { saves: vec![] },
+                    });
+                } else {
+                    // Safety check 3: caller-saved register conflict.
+                    // Try to plan save/restore for live caller-saved regs using
+                    // free callee-saved regs. Only skip if no plan is possible.
+                    let plan = plan_caller_saved(live_after, site.dst_reg);
+                    match plan {
+                        Some(p) => {
+                            safe_sites.push(SafeRotateSite {
+                                site,
+                                caller_save_plan: p,
+                            });
+                        }
+                        None => {
+                            skipped.push(SkipReason {
+                                pc: site.start_pc,
+                                reason: "caller-saved register conflict (not enough free callee-saved regs)".into(),
+                            });
+                        }
                     }
                 }
                 continue;
@@ -153,21 +156,26 @@ impl BpfPass for RotatePass {
                 let safe_site = &safe_sites[site_idx];
                 let site = &safe_site.site;
                 // Emit: bpf_rotate64(val_reg, shift_amount) -> dst_reg
-                let kfunc_insns = emit_kfunc_call_with_off(
-                    site.dst_reg,
-                    &[
-                        KfuncArg::Reg(site.val_reg),
-                        KfuncArg::Imm(site.shift_amount as i32),
-                    ],
-                    btf_id,
-                    kfunc_off,
-                );
-
-                // Wrap with caller-saved register save/restore if needed.
-                let replacement = if safe_site.caller_save_plan.saves.is_empty() {
-                    kfunc_insns
+                let replacement = if use_packed {
+                    let payload = (site.dst_reg as u64)
+                        | ((site.val_reg as u64) << 4)
+                        | ((site.shift_amount as u64) << 8);
+                    emit_packed_kfunc_call_with_off(payload, btf_id, kfunc_off)
                 } else {
-                    emit_with_caller_save(&kfunc_insns, &safe_site.caller_save_plan)
+                    let kfunc_insns = emit_kfunc_call_with_off(
+                        site.dst_reg,
+                        &[
+                            KfuncArg::Reg(site.val_reg),
+                            KfuncArg::Imm(site.shift_amount as i32),
+                        ],
+                        btf_id,
+                        kfunc_off,
+                    );
+                    if safe_site.caller_save_plan.saves.is_empty() {
+                        kfunc_insns
+                    } else {
+                        emit_with_caller_save(&kfunc_insns, &safe_site.caller_save_plan)
+                    }
                 };
                 new_insns.extend_from_slice(&replacement);
 

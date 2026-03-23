@@ -5,10 +5,19 @@ use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
-use super::utils::{emit_kfunc_call_with_off, emit_with_caller_save, ensure_module_fd_slot, fixup_all_branches, plan_caller_saved, CallerSavedPlan, KfuncArg};
+use super::utils::{
+    emit_kfunc_call_with_off,
+    emit_packed_kfunc_call_with_off,
+    emit_with_caller_save,
+    ensure_module_fd_slot,
+    fixup_all_branches,
+    plan_caller_saved,
+    CallerSavedPlan,
+    KfuncArg,
+};
 
 /// EXTRACT optimization pass: replaces RSH+AND bitfield extraction patterns
-/// with bpf_extract64() kfunc calls (lowered to BEXTR by the JIT).
+/// with bpf_extract64() kfunc calls.
 ///
 /// Pattern:
 ///   RSH64_IMM dst, shift
@@ -115,20 +124,6 @@ impl BpfPass for ExtractPass {
         analyses: &mut AnalysisCache,
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
-        // Check if platform has BMI1 (BEXTR) support.
-        if !ctx.platform.has_bmi1 {
-            return Ok(PassResult {
-                pass_name: self.name().into(),
-                changed: false,
-                sites_applied: 0,
-                sites_skipped: vec![SkipReason {
-                    pc: 0,
-                    reason: "platform lacks BMI1 (BEXTR) support".into(),
-                }],
-                diagnostics: vec![],
-            ..Default::default() });
-        }
-
         // Check if bpf_extract64 kfunc is available.
         if ctx.kfunc_registry.extract64_btf_id < 0 {
             return Ok(PassResult {
@@ -147,6 +142,7 @@ impl BpfPass for ExtractPass {
         let bt = analyses.get(&bt_analysis, program);
         let liveness_analysis = LivenessAnalysis;
         let liveness = analyses.get(&liveness_analysis, program);
+        let use_packed = ctx.kfunc_registry.packed_supported_for_pass(self.name());
 
         let sites = scan_extract_sites(&program.insns);
         let btf_id = ctx.kfunc_registry.extract64_btf_id;
@@ -165,29 +161,36 @@ impl BpfPass for ExtractPass {
                 continue;
             }
 
-            // Safety check 2: caller-saved register conflict.
-            // Try to plan save/restore for live caller-saved regs using
-            // free callee-saved regs. Only skip if no plan is possible.
-            let site_end = site.start_pc + site.old_len;
-            let plan = if site_end > 0 && site_end - 1 < liveness.live_out.len() {
-                let live_after = &liveness.live_out[site_end - 1];
-                plan_caller_saved(live_after, site.dst_reg)
+            if use_packed {
+                safe_sites.push(SafeExtractSite {
+                    site,
+                    caller_save_plan: CallerSavedPlan { saves: vec![] },
+                });
             } else {
-                Some(CallerSavedPlan { saves: vec![] })
-            };
+                // Safety check 2: caller-saved register conflict.
+                // Try to plan save/restore for live caller-saved regs using
+                // free callee-saved regs. Only skip if no plan is possible.
+                let site_end = site.start_pc + site.old_len;
+                let plan = if site_end > 0 && site_end - 1 < liveness.live_out.len() {
+                    let live_after = &liveness.live_out[site_end - 1];
+                    plan_caller_saved(live_after, site.dst_reg)
+                } else {
+                    Some(CallerSavedPlan { saves: vec![] })
+                };
 
-            match plan {
-                Some(p) => {
-                    safe_sites.push(SafeExtractSite {
-                        site,
-                        caller_save_plan: p,
-                    });
-                }
-                None => {
-                    skipped.push(SkipReason {
-                        pc: site.start_pc,
-                        reason: "caller-saved register conflict (not enough free callee-saved regs)".into(),
-                    });
+                match plan {
+                    Some(p) => {
+                        safe_sites.push(SafeExtractSite {
+                            site,
+                            caller_save_plan: p,
+                        });
+                    }
+                    None => {
+                        skipped.push(SkipReason {
+                            pc: site.start_pc,
+                            reason: "caller-saved register conflict (not enough free callee-saved regs)".into(),
+                        });
+                    }
                 }
             }
         }
@@ -223,23 +226,27 @@ impl BpfPass for ExtractPass {
                 let safe_site = &safe_sites[site_idx];
                 let site = &safe_site.site;
 
-                // Emit kfunc call: bpf_extract64(val, start, len)
-                let kfunc_insns = emit_kfunc_call_with_off(
-                    site.dst_reg,
-                    &[
-                        KfuncArg::Reg(site.dst_reg),
-                        KfuncArg::Imm(site.shift_amount as i32),
-                        KfuncArg::Imm(site.bit_len as i32),
-                    ],
-                    btf_id,
-                    kfunc_off,
-                );
-
-                // Wrap with caller-saved register save/restore if needed.
-                let replacement = if safe_site.caller_save_plan.saves.is_empty() {
-                    kfunc_insns
+                let replacement = if use_packed {
+                    let payload = (site.dst_reg as u64)
+                        | ((site.shift_amount as u64) << 8)
+                        | ((site.bit_len as u64) << 16);
+                    emit_packed_kfunc_call_with_off(payload, btf_id, kfunc_off)
                 } else {
-                    emit_with_caller_save(&kfunc_insns, &safe_site.caller_save_plan)
+                    let kfunc_insns = emit_kfunc_call_with_off(
+                        site.dst_reg,
+                        &[
+                            KfuncArg::Reg(site.dst_reg),
+                            KfuncArg::Imm(site.shift_amount as i32),
+                            KfuncArg::Imm(site.bit_len as i32),
+                        ],
+                        btf_id,
+                        kfunc_off,
+                    );
+                    if safe_site.caller_save_plan.saves.is_empty() {
+                        kfunc_insns
+                    } else {
+                        emit_with_caller_save(&kfunc_insns, &safe_site.caller_save_plan)
+                    }
                 };
                 new_insns.extend_from_slice(&replacement);
 

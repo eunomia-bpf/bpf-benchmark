@@ -24,8 +24,11 @@
 use crate::insn::*;
 use crate::pass::*;
 
-use super::utils::fixup_all_branches as fixup_branches_inline;
-use super::utils::ensure_module_fd_slot;
+use super::utils::{
+    emit_packed_kfunc_call_with_off,
+    ensure_module_fd_slot,
+    fixup_all_branches as fixup_branches_inline,
+};
 
 /// Speculation barrier pass: inserts `bpf_speculation_barrier()` kfunc calls
 /// after conditional branches to prevent speculative execution past
@@ -69,6 +72,7 @@ impl BpfPass for SpectreMitigationPass {
         let mut new_insns: Vec<BpfInsn> = Vec::with_capacity(orig_len + orig_len / 4);
         let mut addr_map = vec![0usize; orig_len + 1];
         let mut insertions = 0usize;
+        let use_packed = ctx.kfunc_registry.packed_supported_for_pass(self.name());
 
         let mut barrier_insn = BpfInsn::call_kfunc(btf_id);
 
@@ -84,10 +88,18 @@ impl BpfPass for SpectreMitigationPass {
             // isn't already there.
             if insn.is_cond_jmp() {
                 let next_pc = pc + 1;
-                let already_has_barrier = next_pc < orig_len
-                    && program.insns[next_pc].is_call()
-                    && program.insns[next_pc].src_reg() == 2
-                    && program.insns[next_pc].imm == btf_id;
+                let already_has_barrier = if next_pc >= orig_len {
+                    false
+                } else if program.insns[next_pc].is_kinsn_sidecar() {
+                    next_pc + 1 < orig_len
+                        && program.insns[next_pc + 1].is_call()
+                        && program.insns[next_pc + 1].src_reg() == BPF_PSEUDO_KFUNC_CALL
+                        && program.insns[next_pc + 1].imm == btf_id
+                } else {
+                    program.insns[next_pc].is_call()
+                        && program.insns[next_pc].src_reg() == BPF_PSEUDO_KFUNC_CALL
+                        && program.insns[next_pc].imm == btf_id
+                };
 
                 if !already_has_barrier {
                     if insertions == 0 {
@@ -95,7 +107,15 @@ impl BpfPass for SpectreMitigationPass {
                             barrier_insn.off = ensure_module_fd_slot(program, fd);
                         }
                     }
-                    new_insns.push(barrier_insn);
+                    if use_packed {
+                        new_insns.extend_from_slice(&emit_packed_kfunc_call_with_off(
+                            0,
+                            btf_id,
+                            barrier_insn.off,
+                        ));
+                    } else {
+                        new_insns.push(barrier_insn);
+                    }
                     insertions += 1;
                 }
             }

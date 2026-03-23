@@ -31,6 +31,32 @@ KINSN_KFUNC_SET(bpf_barrier, bpf_speculation_barrier)
 
 /* ---- x86 JIT emit callback ---- */
 
+static int decode_barrier_call(const struct bpf_insn *insn,
+			       struct bpf_kinsn_call *call)
+{
+	(void)insn;
+
+	if (call->encoding == BPF_KINSN_ENC_PACKED_CALL) {
+		call->nr_operands = 0;
+		call->dst_reg = BPF_REG_0;
+	}
+
+	return 0;
+}
+
+static int validate_barrier_call(const struct bpf_kinsn_call *call,
+				 struct bpf_verifier_log *log)
+{
+	(void)log;
+
+	if (call->encoding == BPF_KINSN_ENC_PACKED_CALL && call->payload) {
+		pr_warn("bpf_speculation_barrier packed payload must be zero\n");
+		return -EINVAL;
+	}
+
+	return 0;
+}
+
 static int emit_barrier_x86(u8 *image, u32 *off, bool emit,
 			    const struct bpf_kinsn_call *call,
 			    struct bpf_prog *prog)
@@ -75,7 +101,10 @@ static int model_barrier_call(const struct bpf_kinsn_call *call,
 static const struct bpf_kinsn_ops barrier_ops = {
 	.owner = THIS_MODULE,
 	.api_version = 1,
-	.supported_encodings = BPF_KINSN_ENC_LEGACY_KFUNC,
+	.supported_encodings = BPF_KINSN_ENC_LEGACY_KFUNC |
+			       BPF_KINSN_ENC_PACKED_CALL,
+	.decode_call = decode_barrier_call,
+	.validate_call = validate_barrier_call,
 	.model_call = model_barrier_call,
 	.emit_x86 = emit_barrier_x86,
 	.max_emit_bytes = 4,
