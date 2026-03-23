@@ -85,12 +85,12 @@ pub fn ensure_module_fd_slot(program: &mut BpfProgram, module_fd: i32) -> i16 {
 ///
 /// Yields `(pc, &BpfInsn)` for each logical instruction, advancing by 2
 /// for LDIMM64 and by 1 for everything else.
-#[allow(dead_code)]
+
 pub fn insn_iter_skip_ldimm64(insns: &[BpfInsn]) -> InsnIterSkipLdimm64<'_> {
     InsnIterSkipLdimm64 { insns, pc: 0 }
 }
 
-#[allow(dead_code)]
+
 pub struct InsnIterSkipLdimm64<'a> {
     insns: &'a [BpfInsn],
     pc: usize,

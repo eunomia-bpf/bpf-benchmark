@@ -8,7 +8,7 @@ use crate::pass::{Analysis, BpfProgram};
 
 /// Per-instruction liveness: which registers are live before/after each insn.
 #[derive(Clone, Debug)]
-#[allow(dead_code)]
+
 pub struct LivenessResult {
     pub live_in: Vec<HashSet<u8>>,
     pub live_out: Vec<HashSet<u8>>,

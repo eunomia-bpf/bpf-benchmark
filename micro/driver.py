@@ -21,47 +21,24 @@ try:
 except ImportError:
     from micro.benchmark_catalog import CONFIG_PATH, ROOT_DIR, RuntimeSpec, SuiteSpec, load_suite
 
-try:
-    from runner.libs import smoke_output_path
-except ImportError:
-    from runner.libs import smoke_output_path
-
-try:
-    from runner.libs.benchmarks import resolve_memory_file, select_benchmarks
-    from runner.libs.commands import build_micro_benchmark_command
-    from runner.libs.environment import (
-        require_existing_paths,
-        read_optional_text,
-        read_required_text,
-        validate_publication_environment,
-    )
-    from runner.libs.results import (
-        derive_perf_metrics,
-        ns_summary,
-        parse_runner_sample,
-        summarize_named_counters,
-        summarize_optional_ns,
-        summarize_perf_counter_meta,
-        summarize_phase_timings,
-    )
-except ImportError:
-    from runner.libs.benchmarks import resolve_memory_file, select_benchmarks
-    from runner.libs.commands import build_micro_benchmark_command
-    from runner.libs.environment import (
-        require_existing_paths,
-        read_optional_text,
-        read_required_text,
-        validate_publication_environment,
-    )
-    from runner.libs.results import (
-        derive_perf_metrics,
-        ns_summary,
-        parse_runner_sample,
-        summarize_named_counters,
-        summarize_optional_ns,
-        summarize_perf_counter_meta,
-        summarize_phase_timings,
-    )
+from runner.libs import smoke_output_path
+from runner.libs.benchmarks import resolve_memory_file, select_benchmarks
+from runner.libs.commands import build_micro_benchmark_command
+from runner.libs.environment import (
+    require_existing_paths,
+    read_optional_text,
+    read_required_text,
+    validate_publication_environment,
+)
+from runner.libs.results import (
+    derive_perf_metrics,
+    ns_summary,
+    parse_runner_sample,
+    summarize_named_counters,
+    summarize_optional_ns,
+    summarize_perf_counter_meta,
+    summarize_phase_timings,
+)
 
 from runner.libs.run_artifacts import (
     ArtifactSession,

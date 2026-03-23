@@ -7,15 +7,8 @@ from __future__ import annotations
 
 import json
 import subprocess
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
-
-
-@dataclass(frozen=True, slots=True)
-class RejitTarget:
-    prog_id: int
-    rejit_program: str | None = None  # optional replacement ELF path
 
 
 def enumerate_program_record(
@@ -123,7 +116,6 @@ def apply_daemon_rejit(daemon_binary: Path | str, prog_ids: list[int] | None = N
 
 
 __all__ = [
-    "RejitTarget",
     "apply_daemon_rejit",
     "enumerate_program_record",
     "scan_programs",

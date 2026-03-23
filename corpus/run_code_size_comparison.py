@@ -7,14 +7,19 @@ import math
 import platform
 import statistics
 import subprocess
+import sys
 import time
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-
 ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from runner.libs.corpus import ensure_parent, summarize_text  # noqa: E402
+
 DEFAULT_OUTPUT_JSON = ROOT_DIR / "docs" / "tmp" / "code-size-by-progtype.json"
 DEFAULT_OUTPUT_MD = ROOT_DIR / "docs" / "tmp" / "code-size-by-progtype.md"
 DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
@@ -111,9 +116,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def ensure_parent(path: Path) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-
 
 def relpath(path: Path | str) -> str:
     candidate = Path(path)
@@ -125,19 +127,6 @@ def relpath(path: Path | str) -> str:
         except Exception:
             return str(candidate)
 
-
-def trim_text(text: str, *, max_chars: int = 4000) -> str:
-    stripped = text.strip()
-    if len(stripped) <= max_chars:
-        return stripped
-    return stripped[-max_chars:]
-
-
-def summarize_stderr(stderr: str, *, max_lines: int = 20, max_chars: int = 4000) -> str:
-    lines = [line.rstrip() for line in stderr.splitlines() if line.strip()]
-    if len(lines) > max_lines:
-        lines = lines[-max_lines:]
-    return trim_text("\n".join(lines), max_chars=max_chars)
 
 
 def summarize_error(value: str | None) -> str:
@@ -574,7 +563,7 @@ def invocation_summary(result: dict[str, Any] | None) -> dict[str, Any] | None:
             "jited_prog_len": sample.get("jited_prog_len"),
             "xlated_prog_len": sample.get("xlated_prog_len"),
             "code_size": sample.get("code_size") or {},
-            "recompile": sample.get("recompile") or {},
+            "rejit": sample.get("rejit") or {},
         }
     return {
         "ok": result["ok"],
@@ -582,7 +571,7 @@ def invocation_summary(result: dict[str, Any] | None) -> dict[str, Any] | None:
         "timed_out": result["timed_out"],
         "duration_seconds": result["duration_seconds"],
         "error": result["error"],
-        "stderr_tail": summarize_stderr(result["stderr"]),
+        "stderr_tail": summarize_text(result["stderr"]),
         "sample": sample_summary,
         "btf_path_used": result.get("btf_path_used"),
         "btf_attempts": result.get("btf_attempts", []),
@@ -624,7 +613,7 @@ def discover_programs(runner: Path, object_path: Path, timeout_seconds: int) -> 
         "ok": result["ok"],
         "duration_seconds": result["duration_seconds"],
         "error": result["error"],
-        "stderr_tail": summarize_stderr(result["stderr"]),
+        "stderr_tail": summarize_text(result["stderr"]),
         "programs": programs,
     }
 
@@ -640,7 +629,7 @@ def recompile_jitted_len(record: dict[str, Any]) -> int | None:
 
 
 def recompile_meta(record: dict[str, Any]) -> dict[str, Any]:
-    return (((record.get("v5_compile") or {}).get("sample") or {}).get("recompile") or {})
+    return (((record.get("v5_compile") or {}).get("sample") or {}).get("rejit") or {})
 
 
 def is_loadable(record: dict[str, Any]) -> bool:

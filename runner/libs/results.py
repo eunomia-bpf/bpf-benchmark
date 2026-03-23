@@ -45,24 +45,6 @@ class DirectiveScanSummary(TypedDict, total=False):
     total_sites: int
 
 
-class RecompileSummary(TypedDict, total=False):
-    requested: bool
-    mode: str
-    policy_generated: bool
-    policy_bytes: int
-    syscall_attempted: bool
-    applied: bool
-    cmov_sites: int
-    wide_sites: int
-    rotate_sites: int
-    lea_sites: int
-    bitfield_sites: int
-    extract_sites: int
-    endian_sites: int
-    branch_flip_sites: int
-    total_sites: int
-    error: str
-
 
 class RejitSummary(TypedDict, total=False):
     """Canonical rejit summary — output by C++ runner, consumed by all drivers."""
@@ -103,7 +85,6 @@ class RunnerSample(TypedDict, total=False):
     perf_counters: dict[str, int]
     perf_counters_meta: PerfCounterMeta
     directive_scan: DirectiveScanSummary
-    recompile: RecompileSummary
     rejit: RejitSummary
 
 
@@ -277,22 +258,6 @@ def normalize_runner_sample(sample: Mapping[str, object]) -> RunnerSample:
     rejit_defaults.update(raw_rejit)
     normalized["rejit"] = rejit_defaults
 
-    # Backward compat: also keep `recompile` pointing to the same data.
-    if "recompile" not in normalized:
-        normalized.setdefault(
-            "recompile",
-            {
-                "requested": False,
-                "mode": "none",
-                "policy_generated": False,
-                "policy_bytes": 0,
-                "syscall_attempted": False,
-                "applied": False,
-                **zero_directive_scan(),
-                "error": "",
-            },
-        )
-
     return normalized
 
 
@@ -307,7 +272,6 @@ __all__ = [
     "CodeSizeSummary",
     "DirectiveScanSummary",
     "PerfCounterMeta",
-    "RecompileSummary",
     "RejitSummary",
     "RunnerSample",
     "collapse_command_samples",

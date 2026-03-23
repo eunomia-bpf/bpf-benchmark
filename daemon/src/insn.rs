@@ -59,8 +59,6 @@ pub const BPF_PSEUDO_KINSN_SIDECAR: u8 = 3;
 
 // ── kinsn encoding constants (synced with include/linux/bpf.h) ────
 pub const BPF_KINSN_ENC_PACKED_CALL: u32 = 1 << 1;
-#[allow(dead_code)]
-pub const BPF_KINSN_SIDECAR_PAYLOAD_BITS: u32 = 52;
 
 // ── Helper macros (as functions) ────────────────────────────────────
 #[inline]

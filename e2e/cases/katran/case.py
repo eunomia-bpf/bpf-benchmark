@@ -42,6 +42,7 @@ from runner.libs.recompile import apply_daemon_rejit, scan_programs  # noqa: E40
 from e2e.case_common import (  # noqa: E402
     git_sha,
     host_metadata,
+    relpath,
     summarize_numbers,
     percent_delta,
     percentile,
@@ -195,12 +196,6 @@ class PhaseSample:
     bpf: dict[str, object]
     state_reset: dict[str, object]
 
-
-def relpath(path: Path) -> str:
-    try:
-        return path.resolve().relative_to(ROOT_DIR).as_posix()
-    except ValueError:
-        return str(path.resolve())
 
 
 def extract_request_latencies(sample: Mapping[str, object]) -> list[float]:

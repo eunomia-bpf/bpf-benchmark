@@ -24,30 +24,17 @@ for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpu
 
 from runner.libs import authoritative_output_path, smoke_output_path
 
-try:
-    from runner.libs.inventory import (
-        discover_corpus_objects,
-        discover_object_programs,
-        load_packet_test_run_targets,
-    )
-    from runner.libs.results import parse_runner_samples
-    from runner.libs.run_artifacts import (
-        ArtifactSession,
-        derive_run_type,
-        repo_relative_path,
-    )
-except ImportError:
-    from runner.libs.inventory import (
-        discover_corpus_objects,
-        discover_object_programs,
-        load_packet_test_run_targets,
-    )
-    from runner.libs.results import parse_runner_samples
-    from runner.libs.run_artifacts import (
-        ArtifactSession,
-        derive_run_type,
-        repo_relative_path,
-    )
+from runner.libs.inventory import (
+    discover_corpus_objects,
+    discover_object_programs,
+    load_packet_test_run_targets,
+)
+from runner.libs.results import parse_runner_samples
+from runner.libs.run_artifacts import (
+    ArtifactSession,
+    derive_run_type,
+    repo_relative_path,
+)
 
 from runner.libs.corpus import (
     add_filter_argument,
@@ -341,7 +328,7 @@ def paired_stock_invocation_summary(result: dict[str, Any] | None) -> dict[str, 
         for sample in all_samples
         if sample.get("phase") is None
         and sample.get("exec_ns") is not None
-        and not ((sample.get("rejit") or sample.get("recompile") or {}).get("applied"))
+        and not (sample.get("rejit") or {}).get("applied")
     ]
     if vanilla_samples:
         summary["sample"] = vanilla_samples[-1]
@@ -451,8 +438,7 @@ def summarize_failure_reason(record: dict[str, Any] | None) -> str:
     if error:
         return str(error)
     sample = record.get("sample") or {}
-    # Check rejit (canonical) first, then recompile (legacy).
-    rejit = sample.get("rejit") or sample.get("recompile") or {}
+    rejit = sample.get("rejit") or {}
     if rejit.get("error"):
         return str(rejit["error"])
     return "unknown"
@@ -465,9 +451,7 @@ def program_label(record: dict[str, Any]) -> str:
 def recompile_metadata(record: dict[str, Any] | None) -> dict[str, Any]:
     if not record or not record.get("ok"):
         return {}
-    sample = (record.get("sample") or {})
-    # Prefer rejit (canonical); fall back to recompile (legacy).
-    return sample.get("rejit") or sample.get("recompile") or {}
+    return (record.get("sample") or {}).get("rejit") or {}
 
 
 def effective_applied_families(

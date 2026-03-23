@@ -746,3 +746,4 @@ make clean
 | **454** | 干净环境性能重跑 | 待做 | 串行跑 vm-micro/vm-corpus/vm-e2e strict params。不并行任何任务。 |
 | **455** | Recompile overhead 测量 | 待做 | REJIT verify+JIT+swap 各多久？reviewer 必问。#359 延续。 |
 | **456** | ARM64 QEMU 测试 | 待做 | vm-arm64-selftest + vm-arm64-micro-smoke。基础设施已有。 |
+| **457** | **WideMemPass packet pointer verifier 拒绝 bug** | 待做 | `wide_mem` 将 byte-ladder（BPF_B + shift + OR）合并为宽 load（BPF_H/W/DW），在 TC/XDP packet pointer 上触发 verifier 拒绝（tc_bitcount PC=11、tc_checksum PC=11、bitcount_xdp PC=111）。当前靠 rollback+retry 绕过但整个 pass 被禁，丢失全部 wide_mem 收益。**Root cause 待确认**：宽 load 可能触发 unaligned 或 pkt_ptr type 约束，需对比 before/after verifier log reg state。**修复方向**：(1) parse failure PC → 只 skip 触发拒绝的单个 site，其余保留；(2) scan 阶段检测 base_reg 是否来自 packet pointer；(3) 最小 guard：`base_off % width == 0`。 |

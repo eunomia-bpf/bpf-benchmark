@@ -10,22 +10,13 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-try:
-    from runner.libs.catalog import (
-        DEFAULT_MACRO_MANIFEST,
-        DEFAULT_MICRO_MANIFEST,
-        load_manifest,
-        load_manifest_from_results,
-    )
-    from runner.libs.reporting import render_corpus_summary_markdown, render_rq_summary_markdown
-except ModuleNotFoundError:
-    from runner.libs.catalog import (
-        DEFAULT_MACRO_MANIFEST,
-        DEFAULT_MICRO_MANIFEST,
-        load_manifest,
-        load_manifest_from_results,
-    )
-    from runner.libs.reporting import render_corpus_summary_markdown, render_rq_summary_markdown
+from runner.libs.catalog import (
+    DEFAULT_MACRO_MANIFEST,
+    DEFAULT_MICRO_MANIFEST,
+    load_manifest,
+    load_manifest_from_results,
+)
+from runner.libs.reporting import render_corpus_summary_markdown, render_rq_summary_markdown
 from runner.libs import authoritative_candidates
 
 

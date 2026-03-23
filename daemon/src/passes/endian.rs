@@ -190,9 +190,6 @@ impl BpfPass for EndianFusionPass {
         "endian_fusion"
     }
 
-    fn category(&self) -> PassCategory {
-        PassCategory::Optimization
-    }
 
     fn required_analyses(&self) -> Vec<&str> {
         vec!["branch_targets"]

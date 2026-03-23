@@ -46,6 +46,7 @@ from runner.libs.workload import (  # noqa: E402
 from e2e.case_common import (  # noqa: E402
     git_sha,
     host_metadata,
+    relpath,
     summarize_numbers,
     percent_delta,
     speedup_ratio,
@@ -102,12 +103,6 @@ DEFAULT_WORKLOADS = (
     ),
 )
 
-
-def relpath(path: Path) -> str:
-    try:
-        return path.resolve().relative_to(ROOT_DIR).as_posix()
-    except ValueError:
-        return str(path.resolve())
 
 
 def bpftool_binary() -> str:

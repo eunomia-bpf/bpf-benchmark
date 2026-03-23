@@ -39,7 +39,7 @@ pub struct Binding {
 
 /// A single rewrite site found by the daemon.
 #[derive(Clone, Debug)]
-#[allow(dead_code)]
+
 pub struct RewriteSite {
     /// Index of the first instruction in the matched pattern.
     pub start_pc: usize,
@@ -350,9 +350,6 @@ impl BpfPass for WideMemPass {
         "wide_mem"
     }
 
-    fn category(&self) -> PassCategory {
-        PassCategory::Optimization
-    }
 
     fn required_analyses(&self) -> Vec<&str> {
         vec!["branch_targets", "liveness"]

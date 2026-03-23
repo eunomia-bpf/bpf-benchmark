@@ -67,15 +67,6 @@ def authoritative_candidates(results_dir: Path, suite: str) -> tuple[Path, ...]:
     return (latest, *dated)
 
 
-def refresh_latest_alias(latest_path: Path, target_path: Path) -> None:
-    _ = (latest_path, target_path)
-    return
-
-
-def maybe_refresh_latest_alias(path: Path) -> None:
-    _ = path
-    return
-
 
 def tail_text(text: str, *, max_lines: int = 12, max_chars: int = 4000) -> str:
     lines = [line.rstrip() for line in text.splitlines() if line.strip()]
@@ -222,7 +213,6 @@ def run_json_command(
 def write_json(path: Path, payload: Any) -> None:
     ensure_parent(path)
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
-    maybe_refresh_latest_alias(path)
 
 
 def write_text(path: Path, text: str) -> None:
@@ -240,9 +230,7 @@ __all__ = [
     "authoritative_output_path",
     "ensure_parent",
     "latest_output_path",
-    "maybe_refresh_latest_alias",
     "prepare_bpftool_environment",
-    "refresh_latest_alias",
     "resolve_binary",
     "resolve_bpftool_binary",
     "result_date_stamp",

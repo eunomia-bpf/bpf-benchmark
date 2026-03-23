@@ -39,9 +39,6 @@ impl BpfPass for SpectreMitigationPass {
         "speculation_barrier"
     }
 
-    fn category(&self) -> PassCategory {
-        PassCategory::Security
-    }
 
     fn required_analyses(&self) -> Vec<&str> {
         vec!["branch_targets"]
@@ -638,7 +635,7 @@ mod tests {
     #[test]
     fn test_spectre_pass_category_is_security() {
         let pass = SpectreMitigationPass;
-        assert_eq!(pass.category(), PassCategory::Security);
+        assert_eq!(pass.category()::Security);
     }
 
     #[test]

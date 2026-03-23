@@ -16,9 +16,6 @@ impl BpfPass for RotatePass {
         "rotate"
     }
 
-    fn category(&self) -> PassCategory {
-        PassCategory::Optimization
-    }
 
     fn required_analyses(&self) -> Vec<&str> {
         vec!["branch_targets", "liveness"]

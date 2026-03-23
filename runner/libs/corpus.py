@@ -8,7 +8,7 @@ import time
 from pathlib import Path
 from typing import Any, Mapping
 
-from . import maybe_refresh_latest_alias
+from . import ensure_parent
 from .commands import build_runner_command
 from .results import normalize_directive_scan, parse_runner_sample
 
@@ -20,9 +20,6 @@ def relpath(path: Path | str, root_dir: Path) -> str:
     except ValueError:
         return str(candidate)
 
-
-def ensure_parent(path: Path) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
 
 
 def add_output_json_argument(
@@ -315,9 +312,6 @@ def summarize_text(text: str | bytes, max_lines: int = 20, max_chars: int = 4000
     return summary
 
 
-def summarize_stderr(stderr: str, max_lines: int = 20, max_chars: int = 4000) -> str:
-    return summarize_text(stderr, max_lines=max_lines, max_chars=max_chars)
-
 
 def extract_error(stderr: str, stdout: str, returncode: int | None) -> str:
     for text in (stderr, stdout):
@@ -400,7 +394,6 @@ def run_text_command(command: list[str], timeout_seconds: int, *, cwd: Path) -> 
 def write_json_output(path: Path, payload: Any) -> None:
     ensure_parent(path)
     path.write_text(json.dumps(payload, indent=2) + "\n")
-    maybe_refresh_latest_alias(path)
 
 
 def write_text_output(path: Path, text: str) -> None:
@@ -421,7 +414,7 @@ def invocation_summary(result: Mapping[str, Any] | None) -> dict[str, Any] | Non
         "timed_out": bool(result.get("timed_out")),
         "duration_seconds": result.get("duration_seconds"),
         "error": result.get("error"),
-        "stderr_tail": summarize_stderr(str(result.get("stderr", ""))),
+        "stderr_tail": summarize_text(str(result.get("stderr", ""))),
         "sample": result.get("sample"),
     }
 
@@ -537,9 +530,9 @@ def summarize_failure_reason(record: Mapping[str, Any] | None) -> str:
     if error:
         return str(error)
     sample = record.get("sample") or {}
-    recompile = sample.get("recompile") if isinstance(sample, Mapping) else {}
-    if isinstance(recompile, Mapping) and recompile.get("error"):
-        return str(recompile["error"])
+    rejit = sample.get("rejit") if isinstance(sample, Mapping) else {}
+    if isinstance(rejit, Mapping) and rejit.get("error"):
+        return str(rejit["error"])
     return "unknown"
 
 
@@ -575,7 +568,6 @@ __all__ = [
     "run_command",
     "run_text_command",
     "summarize_failure_reason",
-    "summarize_stderr",
     "summarize_text",
     "text_invocation_summary",
     "write_json_output",

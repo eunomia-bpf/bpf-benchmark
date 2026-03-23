@@ -339,7 +339,6 @@ def _load_macro_catalog(path: Path, data: Mapping[str, Any]) -> CatalogManifest:
                 transports=runtime_transports,
                 metadata={
                     "btf_path": _resolve_path(program.get("btf_path"), root_dir),
-                    "recompile_supported": bool(program.get("recompile_supported", True)),
                 },
             )
         )

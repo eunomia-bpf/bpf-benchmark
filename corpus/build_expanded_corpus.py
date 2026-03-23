@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from runner.libs import authoritative_output_path, maybe_refresh_latest_alias, smoke_output_path
+from runner.libs import authoritative_output_path, ensure_parent, smoke_output_path
 
 
 ROOT = Path(__file__).resolve().parent
@@ -73,9 +73,6 @@ def parse_args() -> argparse.Namespace:
     )
     return parser.parse_args()
 
-
-def ensure_parent(path: Path) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
 
 
 def trim_text(value: str | None, limit: int = 8000) -> str:
@@ -582,7 +579,6 @@ def main() -> int:
     ensure_parent(output_json)
     ensure_parent(output_md)
     output_json.write_text(json.dumps(payload, indent=2))
-    maybe_refresh_latest_alias(output_json)
     output_md.write_text(render_report(payload, records))
     print(f"[done] wrote {output_json}")
     print(f"[done] wrote {output_md}")

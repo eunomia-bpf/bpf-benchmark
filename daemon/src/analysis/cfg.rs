@@ -5,7 +5,7 @@ use crate::pass::{Analysis, BpfProgram};
 
 /// A single basic block in the CFG.
 #[derive(Clone, Debug)]
-#[allow(dead_code)]
+
 pub struct BasicBlock {
     pub start: usize,
     pub end: usize,
@@ -15,7 +15,7 @@ pub struct BasicBlock {
 
 /// Subprogram address range.
 #[derive(Clone, Debug)]
-#[allow(dead_code)]
+
 pub struct SubprogRange {
     pub start: usize,
     pub end: usize,
@@ -23,7 +23,7 @@ pub struct SubprogRange {
 
 /// Result of CFG analysis.
 #[derive(Clone, Debug)]
-#[allow(dead_code)]
+
 pub struct CFGResult {
     pub blocks: Vec<BasicBlock>,
     pub insn_to_block: Vec<usize>,

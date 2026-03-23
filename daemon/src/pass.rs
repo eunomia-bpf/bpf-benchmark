@@ -16,26 +16,7 @@ use crate::insn::{
     dump_bytecode_compact, BpfBytecodeDump, BpfInsn, BPF_KINSN_ENC_PACKED_CALL,
 };
 
-// ── Program metadata ────────────────────────────────────────────────
-
-/// Program provenance metadata, obtained from BPF_OBJ_GET_INFO_BY_FD.
-///
-/// Fields are populated from kernel info and consumed by passes/profiler.
-/// The compiler flags them as "never read" because the binary writes but
-/// does not read them directly -- they flow through the pipeline.
-#[derive(Clone, Debug, Default)]
-#[allow(dead_code)]
-pub struct ProgMeta {
-    pub prog_id: u32,
-    pub prog_type: u32,
-    pub prog_name: String,
-    pub map_ids: Vec<u32>,
-    pub btf_id: u32,
-    pub run_cnt: u64,
-    pub run_time_ns: u64,
-}
-
-/// Per-instruction annotation — populated by analysis passes, read by transform passes.
+// ── Per-instruction annotation — populated by analysis passes, read by transform passes.
 #[derive(Clone, Debug, Default)]
 pub struct InsnAnnotation {
     /// PGO: branch taken/not-taken counts at this instruction.
@@ -64,7 +45,7 @@ pub struct ProfilingData {
     pub branch_profiles: HashMap<usize, BranchProfile>,
     /// Program-level hotness from the profiler (run_cnt/run_time_ns deltas).
     /// Future passes can use this to gate optimization on hot programs.
-    #[allow(dead_code)]
+    #[cfg_attr(not(test), allow(dead_code))]
     pub program_hotness: Option<crate::profiler::PgoAnalysis>,
     /// Program-level branch miss rate from PMU hardware counters.
     /// Computed as branch_misses / branch_instructions during the observation window.
@@ -84,9 +65,6 @@ pub struct BpfProgram {
     pub insns: Vec<BpfInsn>,
     /// Per-insn annotations (length synchronized with insns).
     pub annotations: Vec<InsnAnnotation>,
-    /// Program metadata (populated from kernel, read by passes/profiler).
-    #[allow(dead_code)]
-    pub meta: ProgMeta,
     /// Transform log: records what each pass did.
     pub transform_log: Vec<TransformEntry>,
     /// Module FDs required by kfunc calls introduced during rewrite.
@@ -98,27 +76,19 @@ pub struct BpfProgram {
     pub branch_miss_rate: Option<f64>,
 }
 
-/// Transform log entry. Fields are written by passes and consumed by
-/// `has_transforms()` and diagnostic output. The compiler flags them
-/// as unread because only `sites_applied` is read in the binary itself.
+/// Transform log entry — records sites applied by each pass.
 #[derive(Clone, Debug)]
-#[allow(dead_code)]
 pub struct TransformEntry {
-    pub pass_name: String,
     pub sites_applied: usize,
-    pub insns_before: usize,
-    pub insns_after: usize,
-    pub details: Vec<String>,
 }
 
 impl BpfProgram {
-    /// Create from raw instructions and metadata. Annotations are default-initialized.
-    pub fn new(insns: Vec<BpfInsn>, meta: ProgMeta) -> Self {
+    /// Create from raw instructions. Annotations are default-initialized.
+    pub fn new(insns: Vec<BpfInsn>) -> Self {
         let len = insns.len();
         Self {
             insns,
             annotations: vec![InsnAnnotation::default(); len],
-            meta,
             transform_log: Vec::new(),
             required_module_fds: Vec::new(),
             branch_miss_rate: None,
@@ -269,7 +239,7 @@ pub struct PassResult {
     /// Sites that were skipped (with reasons).
     pub sites_skipped: Vec<SkipReason>,
     /// Diagnostic messages (read by tests and debug output).
-    #[allow(dead_code)]
+    #[cfg_attr(not(test), allow(dead_code))]
     pub diagnostics: Vec<String>,
     /// Instruction count before this pass ran.
     pub insns_before: usize,
@@ -294,20 +264,6 @@ pub struct SkipReason {
     pub reason: String,
 }
 
-/// Pass category — used by the BpfPass trait and read by tests.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-#[allow(dead_code)]
-pub enum PassCategory {
-    /// Performance optimization.
-    Optimization,
-    /// Security hardening.
-    Security,
-    /// Observability enhancement.
-    Observability,
-    /// Placeholder / experimental pass (not production-ready).
-    Placeholder,
-}
-
 /// Transform pass trait.
 ///
 /// Each optimization is a pass: scan the program, find rewrite sites, apply transforms.
@@ -315,10 +271,6 @@ pub enum PassCategory {
 pub trait BpfPass: Send + Sync {
     /// Pass name.
     fn name(&self) -> &str;
-
-    /// Pass category.
-    #[allow(dead_code)]
-    fn category(&self) -> PassCategory;
 
     /// Declare analyses this pass depends on (for PassManager ordering and precomputation).
     fn required_analyses(&self) -> Vec<&str> {
@@ -356,13 +308,11 @@ pub struct PassContext {
 /// Available kfuncs and their BTF IDs.
 /// BTF ID = -1 means the kfunc is not available.
 #[derive(Clone, Debug, Default)]
-#[allow(dead_code)]
+
 pub struct KfuncRegistry {
     pub rotate64_btf_id: i32,
     pub select64_btf_id: i32,
     pub extract64_btf_id: i32,
-    pub lea64_btf_id: i32,
-    pub movbe64_btf_id: i32,
     pub endian_load16_btf_id: i32,
     pub endian_load32_btf_id: i32,
     pub endian_load64_btf_id: i32,
@@ -523,23 +473,20 @@ impl PlatformCapabilities {
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-#[allow(dead_code)]
+
 pub enum Arch {
     #[default]
     X86_64,
-    Aarch64,
 }
 
 /// Optimization policy configuration.
 #[derive(Clone, Debug, Default)]
-#[allow(dead_code)]
+
 pub struct PolicyConfig {
     /// Enabled pass name list (empty = all enabled).
     pub enabled_passes: Vec<String>,
     /// Disabled pass name list.
     pub disabled_passes: Vec<String>,
-    /// Global parameters.
-    pub params: HashMap<String, String>,
 }
 
 // ── Type-erased analysis wrapper ────────────────────────────────────
@@ -793,15 +740,13 @@ impl PassManager {
 impl PassContext {
     /// Create a minimal PassContext suitable for testing.
     /// All kfuncs unavailable (btf_id = -1), no special CPU features.
-    #[allow(dead_code)]
+    #[cfg(test)]
     pub fn test_default() -> Self {
         Self {
             kfunc_registry: KfuncRegistry {
                 rotate64_btf_id: -1,
                 select64_btf_id: -1,
                 extract64_btf_id: -1,
-                lea64_btf_id: -1,
-                movbe64_btf_id: -1,
                 endian_load16_btf_id: -1,
                 endian_load32_btf_id: -1,
                 endian_load64_btf_id: -1,

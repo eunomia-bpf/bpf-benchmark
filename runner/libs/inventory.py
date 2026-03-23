@@ -184,7 +184,6 @@ def load_packet_test_run_targets(
                 "inventory_scan": inventory_scan,
                 "inventory_speedup_ratio": record.get("speedup_ratio"),
                 "inventory_baseline_exec_ns": ((record.get("baseline_run") or {}).get("sample") or {}).get("exec_ns"),
-                "inventory_recompile_exec_ns": ((record.get("recompile_run") or {}).get("sample") or {}).get("exec_ns"),
             }
         )
 

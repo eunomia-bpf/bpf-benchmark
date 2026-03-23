@@ -12,10 +12,22 @@ from pathlib import Path
 from typing import Mapping, Sequence
 
 from runner.libs import (
+    ROOT_DIR,
     run_command,
     write_json,
     write_text,
 )
+
+
+# ---------------------------------------------------------------------------
+# Path helpers
+# ---------------------------------------------------------------------------
+
+def relpath(path: Path) -> str:
+    try:
+        return path.resolve().relative_to(ROOT_DIR).as_posix()
+    except ValueError:
+        return str(path.resolve())
 
 
 # ---------------------------------------------------------------------------

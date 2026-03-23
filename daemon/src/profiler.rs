@@ -123,7 +123,7 @@ impl PgoAnalysis {
 /// Program hotness ranking — sorts programs by activity level.
 /// Used by the watch command and future multi-program PGO flows.
 #[derive(Clone, Debug)]
-#[allow(dead_code)]
+
 pub struct HotnessRanking {
     /// Programs ranked by descending hotness (most active first).
     pub ranked: Vec<PgoAnalysis>,

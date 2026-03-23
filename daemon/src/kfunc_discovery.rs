@@ -31,44 +31,34 @@ const KNOWN_KFUNCS: &[(&str, &str)] = &[
 
 const BTF_MAGIC: u16 = 0xEB9F;
 
-// BTF_KIND_* values from the kernel header.
-// All constants are kept for completeness/sync-test even if not all are used in match arms.
-#[allow(dead_code)]
+// BTF_KIND_* constants (from include/uapi/linux/btf.h).
+// Production code uses the subset matched in extra_bytes_for_kind(); tests validate all values.
 const BTF_KIND_INT: u32 = 1;
-#[allow(dead_code)]
+#[cfg_attr(not(test), allow(dead_code))]
 const BTF_KIND_PTR: u32 = 2;
-#[allow(dead_code)]
 const BTF_KIND_ARRAY: u32 = 3;
-#[allow(dead_code)]
 const BTF_KIND_STRUCT: u32 = 4;
-#[allow(dead_code)]
 const BTF_KIND_UNION: u32 = 5;
-#[allow(dead_code)]
 const BTF_KIND_ENUM: u32 = 6;
-#[allow(dead_code)]
+#[cfg_attr(not(test), allow(dead_code))]
 const BTF_KIND_FWD: u32 = 7;
-#[allow(dead_code)]
+#[cfg_attr(not(test), allow(dead_code))]
 const BTF_KIND_TYPEDEF: u32 = 8;
-#[allow(dead_code)]
+#[cfg_attr(not(test), allow(dead_code))]
 const BTF_KIND_VOLATILE: u32 = 9;
-#[allow(dead_code)]
+#[cfg_attr(not(test), allow(dead_code))]
 const BTF_KIND_CONST: u32 = 10;
-#[allow(dead_code)]
+#[cfg_attr(not(test), allow(dead_code))]
 const BTF_KIND_RESTRICT: u32 = 11;
 const BTF_KIND_FUNC: u32 = 12;
-#[allow(dead_code)]
 const BTF_KIND_FUNC_PROTO: u32 = 13;
-#[allow(dead_code)]
 const BTF_KIND_VAR: u32 = 14;
-#[allow(dead_code)]
 const BTF_KIND_DATASEC: u32 = 15;
-#[allow(dead_code)]
+#[cfg_attr(not(test), allow(dead_code))]
 const BTF_KIND_FLOAT: u32 = 16;
-#[allow(dead_code)]
 const BTF_KIND_DECL_TAG: u32 = 17;
-#[allow(dead_code)]
+#[cfg_attr(not(test), allow(dead_code))]
 const BTF_KIND_TYPE_TAG: u32 = 18;
-#[allow(dead_code)]
 const BTF_KIND_ENUM64: u32 = 19;
 
 /// Minimal BTF header (24 bytes).
@@ -288,24 +278,6 @@ fn read_module_btf(module_name: &str) -> Result<Vec<u8>> {
     fs::read(&path).with_context(|| format!("read BTF for module '{}'", module_name))
 }
 
-/// Open a module BTF path as an FD, handling the C string correctly.
-/// Note: this returns a plain file FD, not a BPF BTF FD. The verifier
-/// cannot use these for kfunc resolution. Use bpf_btf_get_fd_by_module_name()
-/// instead for REJIT fd_array.
-#[allow(dead_code)]
-fn open_btf_path(path: &Path) -> Result<i32> {
-    use std::ffi::CString;
-    let c_path = CString::new(path.to_str().unwrap_or("")).context("invalid path for CString")?;
-    let fd = unsafe { libc::open(c_path.as_ptr(), libc::O_RDONLY) };
-    if fd < 0 {
-        bail!(
-            "open({}): {}",
-            path.display(),
-            std::io::Error::last_os_error()
-        );
-    }
-    Ok(fd)
-}
 
 // ── Discovery entry point ────────────────────────────────────────────
 
