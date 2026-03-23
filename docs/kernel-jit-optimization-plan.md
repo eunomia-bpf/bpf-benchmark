@@ -289,36 +289,30 @@ Correctness（daemon 负责）：
   daemon 有 bug → 程序行为可能变 → 但内核安全不受影响（fail-safe）
 ```
 
-### 4.4 kinsn 机制（实现：inline kfunc）
+### 4.4 kinsn 机制
 
-**kinsn** 是 BpfReJIT 引入的平台特定指令扩展机制。Kernel module 注册一个 kinsn，定义验证语义和 native 发射回调。
+**kinsn** 是 BpfReJIT 引入的平台特定指令扩展机制。kinsn IS-A kfunc，额外绑定 `bpf_kinsn_ops`，定义**执行语义**（JIT emit）和**验证语义**（verifier modeling）。
 
-**实现**：kinsn 通过已有的 kfunc 基础设施实现（inline kfunc），复用 kfunc 的 verifier 验证、BTF 类型系统、module 生命周期管理。
+**核心设计**：module 同时定义 "emit 什么 native 指令" 和 "verifier 如何建模这条指令"。verifier 不需要 per-kinsn 特例代码。新增 kinsn = 新 module，零 verifier 改动。
 
-```
-Kernel module（如 bpf_rotate.ko）注册 kinsn：
-  1. kfunc 真实函数：bpf_rotate64(u64 val, u32 shift) → 真实内核函数（fallback）
-  2. KF_INLINE_EMIT flag：标记为可内联展开
-  3. JIT emit 回调：emit_rotate_x86() → 产生 RORX native 指令
+**`bpf_kinsn_ops`** 包含三类回调：`model_call`（返回声明式 `bpf_kinsn_effect`，含 clobber_mask/result range/tnum/mem_accesses）、`decode_call`/`validate_call`（编码解析和校验）、`emit_x86`/`emit_arm64`（JIT 发射）。
 
-BPF 程序使用 kinsn：
-  extern u64 bpf_rotate64(u64 val, u32 shift) __ksym;   // 标准 kfunc 声明
-  hash = bpf_rotate64(hash, 13);
+Packed（sidecar pseudo-insn + CALL pair，零 argument setup，N→1 指令替换）。
 
-Verifier 看到：普通 kfunc call → check_kfunc_call()（零 verifier 改动）
-JIT 看到：KF_INLINE_EMIT → 调 module emit 回调 → emit RORX（不是 CALL）
-Module 未加载：emit 普通 CALL bpf_rotate64()（优雅降级，程序仍然正确）
-```
+**安全模型**：module 提供声明式 effect，verifier core 负责应用（clobber/range/tnum/subreg_def/mem_access）。不暴露 `bpf_reg_state` 给 module。`KF_KINSN` flag 标记 kfunc 为 kinsn，与 KF_ACQUIRE/KF_RELEASE/KF_SLEEPABLE 互斥。
+
+详细设计文档：`docs/tmp/20260323/kinsn_ops_design_20260323.md`。实现审计：`docs/tmp/20260323/kinsn_implementation_review_20260323.md`。
 
 ### 4.5 Kernel 文件布局（`vendor/linux-framework/` rejit-v2 分支）
 
 | 文件 | 职责 | 组件 |
 |------|------|------|
-| `include/linux/bpf.h` | `bpf_kfunc_inline_ops` 结构体、注册 API、`bpf_tramp_user` | kinsn + syscall |
-| `include/linux/btf.h` | `KF_INLINE_EMIT` flag | kinsn |
+| `include/linux/bpf.h` | `bpf_kinsn_ops`/`bpf_kinsn_effect`/`bpf_kinsn_call` 结构体、注册 API、`bpf_tramp_user` | kinsn + syscall |
+| `include/linux/bpf_verifier.h` | kinsn verifier 辅助结构体 | kinsn |
+| `include/linux/btf.h` | `KF_KINSN` flag（替代 KF_INLINE_EMIT） | kinsn |
 | `include/uapi/linux/bpf.h` | `BPF_PROG_REJIT` cmd、`orig_prog_insns`、`fd_array` | syscall |
 | `kernel/bpf/syscall.c` | GET_ORIGINAL、REJIT 入口、swap、multi-subprog layout match | syscall |
-| `kernel/bpf/verifier.c` | kinsn 注册/查找、load 时保存原始 bytecode | kinsn + syscall |
+| `kernel/bpf/verifier.c` | kinsn 注册/查找、model_call verifier 通用流程、sidecar decode、load 时保存原始 bytecode | kinsn + syscall |
 | `kernel/bpf/trampoline.c` | REJIT 后 trampoline refresh（fentry/fexit/freplace） | syscall |
 | `kernel/bpf/dispatcher.c` | REJIT 后 XDP dispatcher refresh | syscall |
 | `kernel/bpf/core.c` | `bpf_tramp_user` 初始化 | syscall |
