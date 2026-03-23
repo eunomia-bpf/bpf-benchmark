@@ -100,6 +100,8 @@ docs/reference/papers/*.pdf
 !*/results/dev/
 */results/dev/*
 !*/results/dev/.gitkeep
+*/results/*/details/
+*/results/*/details/**
 
 # Temporary files and scratch results
 # /tmp/ and tmp/ - the repo-root scratch directory (old layout, superseded by docs/tmp/)

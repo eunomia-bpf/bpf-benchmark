@@ -10,6 +10,7 @@ import sys
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
@@ -61,6 +62,15 @@ except ImportError:
         summarize_perf_counter_meta,
         summarize_phase_timings,
     )
+
+from runner.libs.run_artifacts import (
+    derive_run_type,
+    extract_daemon_debug_details,
+    repo_relative_path,
+    result_root_for_output,
+    summarize_benchmark_results,
+    write_run_artifact,
+)
 
 
 DEFAULT_RUNTIME_ORDER_SEED = 0
@@ -382,6 +392,20 @@ def attach_baseline_adjustments(results: dict[str, object], baseline_benchmark: 
         }
 
 
+def build_run_metadata(
+    results: dict[str, Any],
+    *,
+    primary_output: Path,
+    run_type: str,
+    daemon_debug_entries: int,
+) -> dict[str, Any]:
+    metadata = summarize_benchmark_results(results)
+    metadata["run_type"] = run_type
+    metadata["primary_output_json"] = repo_relative_path(primary_output)
+    metadata["paper_summary"]["daemon_debug_entries"] = daemon_debug_entries
+    return metadata
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     suite_path = Path(args.suite)
@@ -625,7 +649,23 @@ def main(argv: list[str] | None = None) -> int:
         refresh_latest_alias(latest_alias_path, write_path)
     else:
         maybe_refresh_latest_alias(write_path)
+    run_type = derive_run_type(write_path, results["suite"])
+    artifact_details, daemon_debug_entries = extract_daemon_debug_details(results)
+    artifact_details["result.json"] = results
+    artifact_metadata = build_run_metadata(
+        results,
+        primary_output=write_path,
+        run_type=run_type,
+        daemon_debug_entries=daemon_debug_entries,
+    )
+    artifact_dir = write_run_artifact(
+        results_dir=result_root_for_output(write_path),
+        run_type=run_type,
+        metadata=artifact_metadata,
+        detail_payloads=artifact_details,
+    )
     print(f"[done] wrote {write_path}")
+    print(f"[done] wrote {artifact_dir / 'metadata.json'}")
     return 0
 
 

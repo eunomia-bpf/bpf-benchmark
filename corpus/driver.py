@@ -43,6 +43,14 @@ try:
         summarize_optional_ns,
         summarize_phase_timings,
     )
+    from runner.libs.run_artifacts import (
+        derive_run_type,
+        extract_daemon_debug_details,
+        repo_relative_path,
+        result_root_for_output,
+        summarize_benchmark_results,
+        write_run_artifact,
+    )
 except ImportError:
     from runner.libs.catalog import load_catalog
     from runner.libs.corpus import (
@@ -59,6 +67,14 @@ except ImportError:
         parse_runner_sample,
         summarize_optional_ns,
         summarize_phase_timings,
+    )
+    from runner.libs.run_artifacts import (
+        derive_run_type,
+        extract_daemon_debug_details,
+        repo_relative_path,
+        result_root_for_output,
+        summarize_benchmark_results,
+        write_run_artifact,
     )
 
 from runner.libs.attach import (
@@ -381,6 +397,20 @@ def list_suite(suite: SuiteSpec) -> None:
     print("--------")
     for runtime in suite.runtimes:
         print(f"{runtime.name:20} {runtime.label}")
+
+
+def build_run_metadata(
+    results: dict[str, Any],
+    *,
+    primary_output: Path,
+    run_type: str,
+    daemon_debug_entries: int,
+) -> dict[str, Any]:
+    metadata = summarize_benchmark_results(results)
+    metadata["run_type"] = run_type
+    metadata["primary_output_json"] = repo_relative_path(primary_output)
+    metadata["paper_summary"]["daemon_debug_entries"] = daemon_debug_entries
+    return metadata
 
 
 def select_programs(programs: tuple[ProgramSpec, ...], names: list[str] | None) -> list[ProgramSpec]:
@@ -1304,7 +1334,23 @@ def run_suite(argv: list[str] | None = None) -> int:
         refresh_latest_alias(latest_alias_path, output_path)
     else:
         maybe_refresh_latest_alias(output_path)
+    run_type = derive_run_type(output_path, suite.suite_name)
+    artifact_details, daemon_debug_entries = extract_daemon_debug_details(results)
+    artifact_details["result.json"] = results
+    artifact_metadata = build_run_metadata(
+        results,
+        primary_output=output_path,
+        run_type=run_type,
+        daemon_debug_entries=daemon_debug_entries,
+    )
+    artifact_dir = write_run_artifact(
+        results_dir=result_root_for_output(output_path),
+        run_type=run_type,
+        metadata=artifact_metadata,
+        detail_payloads=artifact_details,
+    )
     print(f"[done] wrote {output_path}")
+    print(f"[done] wrote {artifact_dir / 'metadata.json'}")
     return 0
 
 

@@ -6,6 +6,10 @@ results/
 results/*
 !results/README.md
 !results/*.json
+!results/*/
+!results/*/metadata.json
+results/*/details/
+results/*/details/**
 !results/dev/
 results/dev/*
 !results/dev/.gitkeep

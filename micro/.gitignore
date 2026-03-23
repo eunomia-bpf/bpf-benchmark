@@ -9,6 +9,8 @@ results/*.json
 !results/recompile_overhead_summary.json
 results/archive/*.json
 !results/archive/*.json
+results/*/details/
+results/*/details/**
 build/
 programs/*.bpf.o
 programs/*.bpf.d

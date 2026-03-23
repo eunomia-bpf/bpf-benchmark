@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 if __package__ in {None, ""}:
@@ -13,6 +14,12 @@ from runner.libs import (  # noqa: E402
     prepare_bpftool_environment,
     write_json,
     write_text,
+)
+from runner.libs.run_artifacts import (  # noqa: E402
+    derive_run_type,
+    repo_relative_path,
+    result_root_for_output,
+    write_run_artifact,
 )
 from e2e.cases.bpftrace.case import (  # noqa: E402
     DEFAULT_OUTPUT_JSON as DEFAULT_BPFTRACE_OUTPUT_JSON,
@@ -146,29 +153,79 @@ def _is_skipped_payload(payload: object) -> bool:
     return isinstance(payload, dict) and str(payload.get("status", "")).lower() == "skipped"
 
 
+def _trim_e2e_value(value: object) -> object:
+    if isinstance(value, dict):
+        return {key: _trim_e2e_value(inner) for key, inner in value.items()}
+    if isinstance(value, list):
+        return [_trim_e2e_value(item) for item in value]
+    if isinstance(value, str) and len(value) > 4096:
+        return value[:4096] + "\n...[truncated]"
+    return value
+
+
+def build_run_metadata(
+    args: argparse.Namespace,
+    payload: dict[str, object],
+    *,
+    primary_output_json: Path,
+) -> dict[str, object]:
+    metadata = {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "suite": "e2e",
+        "case": args.case,
+        "smoke": bool(args.smoke),
+        "dry_run": bool(args.dry_run),
+        "primary_output_json": repo_relative_path(primary_output_json),
+        "paper_summary": _trim_e2e_value(payload),
+    }
+    output_md = Path(args.output_md).resolve()
+    if output_md.exists():
+        metadata["primary_output_md"] = repo_relative_path(output_md)
+    report_md = Path(args.report_md).resolve()
+    if report_md.exists():
+        metadata["primary_report_md"] = repo_relative_path(report_md)
+    return metadata
+
+
 def _run_single_case(args: argparse.Namespace) -> dict[str, object]:
     """Run a single e2e case and persist its outputs."""
     if args.case == "tracee":
         payload = run_tracee_case(args)
         persist_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve(), build_tracee_markdown)
-        return payload
-    if args.case == "tetragon":
+    elif args.case == "tetragon":
         payload = run_tetragon_case(args)
         persist_tetragon_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve(), build_tetragon_markdown)
-        return payload
-    if args.case == "bpftrace":
+    elif args.case == "bpftrace":
         payload = run_bpftrace_case(args)
         persist_bpftrace_results(args, payload)
-        return payload
-    if args.case == "scx":
+    elif args.case == "scx":
         payload = run_scx_case(args)
         persist_scx_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve(), build_scx_markdown)
-        return payload
-    if args.case == "katran":
+    elif args.case == "katran":
         payload = run_katran_case(args)
         persist_katran_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve(), build_katran_markdown)
-        return payload
-    raise SystemExit(f"unsupported e2e case: {args.case}")
+    else:
+        raise SystemExit(f"unsupported e2e case: {args.case}")
+
+    output_json = Path(args.output_json).resolve()
+    detail_payloads: dict[str, object] = {"result.json": payload}
+    detail_texts: dict[str, str] = {}
+    output_md = Path(args.output_md).resolve()
+    if output_md.exists():
+        detail_texts["result.md"] = output_md.read_text()
+    report_md = Path(args.report_md).resolve()
+    if report_md.exists():
+        detail_texts["report.md"] = report_md.read_text()
+
+    artifact_dir = write_run_artifact(
+        results_dir=result_root_for_output(output_json),
+        run_type=derive_run_type(output_json, args.case),
+        metadata=build_run_metadata(args, payload, primary_output_json=output_json),
+        detail_payloads=detail_payloads,
+        detail_texts=detail_texts,
+    )
+    print(f"  e2e: wrote {artifact_dir / 'metadata.json'}")
+    return payload
 
 
 def main(argv: list[str] | None = None) -> int:
