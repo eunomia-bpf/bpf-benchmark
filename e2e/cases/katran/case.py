@@ -631,13 +631,13 @@ def read_kernel_config(path: Path) -> dict[str, object]:
             continue
         matches.append(line.strip())
         stripped = line.strip()
-        if stripped == "CONFIG_NET_IPIP=y":
+        if stripped in ("CONFIG_NET_IPIP=y", "CONFIG_NET_IPIP=m"):
             status["net_ipip_enabled"] = True
-        if stripped == "CONFIG_NET_IPGRE=y":
+        if stripped in ("CONFIG_NET_IPGRE=y", "CONFIG_NET_IPGRE=m"):
             status["net_ipgre_enabled"] = True
-        if stripped == "CONFIG_DUMMY=y":
+        if stripped in ("CONFIG_DUMMY=y", "CONFIG_DUMMY=m"):
             status["dummy_enabled"] = True
-        if stripped == "CONFIG_VETH=y":
+        if stripped in ("CONFIG_VETH=y", "CONFIG_VETH=m"):
             status["veth_enabled"] = True
     status["raw_matches"] = matches
     return status

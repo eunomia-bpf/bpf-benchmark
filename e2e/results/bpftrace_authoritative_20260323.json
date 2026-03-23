@@ -1,0 +1,419 @@
+{
+  "daemon": "/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon",
+  "duration_s": 30,
+  "generated_at": "2026-03-23T00:19:48.827598+00:00",
+  "host": {
+    "git_sha": "unknown",
+    "hostname": "virtme-ng",
+    "kernel": "7.0.0-rc2+",
+    "platform": "Linux-7.0.0-rc2+-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "records": [
+    {
+      "baseline": {
+        "measurement": null,
+        "phase": "baseline",
+        "process": {
+          "returncode": 1,
+          "stderr_tail": "                              ~~~~\n/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcplife.bt:93:16-57: ERROR: ntop() expects an integer or array argument, got none\n      $daddr = ntop(AF_INET, $sk.__sk_common.skc_daddr);\n               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcplife.bt:96:33-37: ERROR: Can not access field '__sk_common' on type 'struct sock *'. Try dereferencing it first, or using '->'\n      $saddr = ntop(AF_INET6, $sk.__sk_common.skc_v6_rcv_saddr.in6_u.u6_addr8);\n                                ~~~~\n/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcplife.bt:96:16-81: ERROR: ntop() expects an integer or array argument, got none\n      $saddr = ntop(AF_INET6, $sk.__sk_common.skc_v6_rcv_saddr.in6_u.u6_addr8);\n               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcplife.bt:97:33-37: ERROR: Can not access field '__sk_common' on type 'struct sock *'. Try dereferencing it first, or using '->'\n      $daddr = ntop(AF_INET6, $sk.__sk_common.skc_v6_daddr.in6_u.u6_addr8);\n                                ~~~~\n/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcplife.bt:97:16-77: ERROR: ntop() expects an integer or array argument, got none\n      $daddr = ntop(AF_INET6, $sk.__sk_common.skc_v6_daddr.in6_u.u6_addr8);\n               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcplife.bt:101:28-32: ERROR: Can not access field 'bytes_acked' on type 'struct tcp_sock *'. Try dereferencing it first, or using '->'\n    printf(\"%5d %5d %d\\n\", $tp.bytes_acked / 1024, $tp.bytes_received / 1024, $delta_ms);\n                           ~~~~\n/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcplife.bt:101:52-56: ERROR: Can not access field 'bytes_received' on type 'struct tcp_sock *'. Try dereferencing it first, or using '->'\n    printf(\"%5d %5d %d\\n\", $tp.bytes_acked / 1024, $tp.bytes_received / 1024, $delta_ms);\n                                                   ~~~~\n/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcplife.bt:104:15-34: ERROR: delete() should not be used in an assignment or as a map key\n    $ignore = delete(@birth, $sk);\n              ~~~~~~~~~~~~~~~~~~~\n/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcplife.bt:104:15-34: ERROR: delete() requires one argument (2 provided)\n    $ignore = delete(@birth, $sk);\n              ~~~~~~~~~~~~~~~~~~~\n/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcplife.bt:105:15-34: ERROR: delete() should not be used in an assignment or as a map key\n    $ignore = delete(@skpid, $sk);\n              ~~~~~~~~~~~~~~~~~~~\n/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcplife.bt:105:15-34: ERROR: delete() requires one argument (2 provided)\n    $ignore = delete(@skpid, $sk);\n              ~~~~~~~~~~~~~~~~~~~\n/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcplife.bt:106:15-35: ERROR: delete() should not be used in an assignment or as a map key\n    $ignore = delete(@skcomm, $sk);\n              ~~~~~~~~~~~~~~~~~~~~\n/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcplife.bt:106:15-35: ERROR: delete() requires one argument (2 provided)\n    $ignore = delete(@skcomm, $sk);\n              ~~~~~~~~~~~~~~~~~~~~",
+          "stdout_tail": ""
+        },
+        "prog_ids": [],
+        "programs": [],
+        "reason": "bpftrace did not attach any programs",
+        "scan_results": {},
+        "site_totals": {
+          "cmov_sites": 0,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 0,
+          "wide_sites": 0
+        },
+        "status": "skipped"
+      },
+      "description": "kprobe tcp_set_state: TCP session lifespan with IPv4/IPv6 struct field access, bswap, ntop, 3 maps",
+      "name": "tcplife",
+      "rejit": null,
+      "script_path": "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcplife.bt",
+      "script_text": "#!/usr/bin/env bpftrace\n// tcplife - Trace TCP session lifespans with connection details.\n//\n// See BPF Performance Tools, Chapter 10, for an explanation of this tool.\n//\n// Example of usage:\n//\n// # ./tcplife.bt\n// PID   COMM       LADDR           LPORT RADDR           RPORT TX_KB RX_KB MS\n// 20976 ssh        127.0.0.1       56766 127.0.0.1       22         6 10584 3059\n// 20977 sshd       127.0.0.1       22    127.0.0.1       56766  10584     6 3059\n// 14519 monitord   127.0.0.1       44832 127.0.0.1       44444      0     0 0\n// 4496  Chrome_IOT 7f00:6:5ea7::a00:0 42846 0:0:bb01::      443        0     3 12441\n//\n// The output begins with a localhost ssh connection, so both endpoints can be\n// seen: the ssh process (PID 20976) which received 10584 Kbytes, and the sshd\n// process (PID 20977) which transmitted 10584 Kbytes. This session lasted 3059\n// milliseconds. Other sessions can also be seen, including IPv6 connections.\n//\n// Copyright (c) 2019 Brendan Gregg.\n// This was originally created for the BPF Performance Tools book\n// published by Addison Wesley. ISBN-13: 9780136554820\n// When copying or porting, include this comment.\n//\n// 17-Apr-2019  Brendan Gregg   Created this.\n\n#ifndef BPFTRACE_HAVE_BTF\n#include <net/tcp_states.h>\n#include <net/sock.h>\n#include <linux/socket.h>\n#include <linux/tcp.h>\n#else\n// With BTF providing types, socket headers are not needed.\n// We only need to supply the preprocessor defines in this script.\n// AF_INET/AF_INET6 are part of the stable arch-independent Linux ABI\n#define AF_INET   2\n#define AF_INET6 10\n#endif\n\nBEGIN\n{\n  printf(\"%-5s %-10s %-15s %-5s %-15s %-5s \",\n         \"PID\", \"COMM\", \"LADDR\", \"LPORT\", \"RADDR\", \"RPORT\");\n  printf(\"%5s %5s %s\\n\", \"TX_KB\", \"RX_KB\", \"MS\");\n}\n\nkprobe:tcp_set_state\n{\n  $sk = (struct sock *)arg0;\n  $newstate = arg1;\n\n  // This tool includes PID and comm context. From TCP this is best\n  // effort, and may be wrong in some situations. It does this:\n  // - record timestamp on any state < TCP_FIN_WAIT1\n  // \tnote some state transitions may not be present via this kprobe\n  // - cache task context on:\n  // \tTCP_SYN_SENT: tracing from client\n  // \tTCP_LAST_ACK: client-closed from server\n  // - do output on TCP_CLOSE:\n  // \tfetch task context if cached, or use current task\n\n  // record first timestamp seen for this socket\n  if ($newstate < TCP_FIN_WAIT1 && @birth[$sk] == 0) {\n    @birth[$sk] = nsecs;\n  }\n\n  // record PID & comm on SYN_SENT\n  if ($newstate == TCP_SYN_SENT || $newstate == TCP_LAST_ACK) {\n    @skpid[$sk] = pid;\n    @skcomm[$sk] = comm;\n  }\n\n  // session ended: calculate lifespan and print\n  if ($newstate == TCP_CLOSE && @birth[$sk]) {\n    $delta_ms = (nsecs - @birth[$sk]) / 1e6;\n    $lport = $sk.__sk_common.skc_num;\n    $dport = $sk.__sk_common.skc_dport;\n    $dport = bswap($dport);\n    $tp = (struct tcp_sock *)$sk;\n    $pid = @skpid[$sk];\n    $comm = @skcomm[$sk];\n    if ($comm == \"\") {\n      // not cached, use current task\n      $pid = pid;\n      $comm = comm;\n    }\n\n    $family = $sk.__sk_common.skc_family;\n    $saddr = ntop(0);\n    $daddr = ntop(0);\n    if ($family == AF_INET) {\n      $saddr = ntop(AF_INET, $sk.__sk_common.skc_rcv_saddr);\n      $daddr = ntop(AF_INET, $sk.__sk_common.skc_daddr);\n    } else {\n      // AF_INET6\n      $saddr = ntop(AF_INET6, $sk.__sk_common.skc_v6_rcv_saddr.in6_u.u6_addr8);\n      $daddr = ntop(AF_INET6, $sk.__sk_common.skc_v6_daddr.in6_u.u6_addr8);\n    }\n    printf(\"%-5d %-10.10s %-15s %-5d %-15s %-6d \",\n           $pid, $comm, $saddr, $lport, $daddr, $dport);\n    printf(\"%5d %5d %d\\n\", $tp.bytes_acked / 1024, $tp.bytes_received / 1024, $delta_ms);\n\n    // Swallowing deletion failures as they are expected\n    $ignore = delete(@birth, $sk);\n    $ignore = delete(@skpid, $sk);\n    $ignore = delete(@skcomm, $sk);\n  }\n}\n\nEND\n{\n  clear(@birth);\n  clear(@skpid);\n  clear(@skcomm);\n}\n",
+      "summary": {
+        "avg_ns_delta_pct": null,
+        "baseline_status": "skipped",
+        "cpu_baseline": null,
+        "cpu_delta_pct": null,
+        "cpu_rejit": null,
+        "name": "tcplife",
+        "note": "bpftrace did not attach any programs",
+        "rejit_avg_ns": null,
+        "rejit_status": null,
+        "sites": 0,
+        "speedup": null,
+        "stock_avg_ns": null,
+        "workload_ops_baseline": null,
+        "workload_ops_delta_pct": null,
+        "workload_ops_rejit": null
+      }
+    },
+    {
+      "baseline": {
+        "measurement": null,
+        "phase": "baseline",
+        "process": {
+          "returncode": 1,
+          "stderr_tail": "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/biosnoop.bt:42:1-9: ERROR: Unknown function: has_key\n/has_key(@start, (args.dev,args.sector)) &&\n~~~~~~~~",
+          "stdout_tail": ""
+        },
+        "prog_ids": [],
+        "programs": [],
+        "reason": "bpftrace did not attach any programs",
+        "scan_results": {},
+        "site_totals": {
+          "cmov_sites": 0,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 0,
+          "wide_sites": 0
+        },
+        "status": "skipped"
+      },
+      "description": "tracepoint block_io_start/done: per-I/O latency with tuple-keyed maps and bitwise ops (dev >> 20)",
+      "name": "biosnoop",
+      "rejit": null,
+      "script_path": "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/biosnoop.bt",
+      "script_text": "#!/usr/bin/env bpftrace\n// biosnoop.bt   Block I/O tracing tool, showing per I/O latency.\n//               For Linux, uses bpftrace, eBPF.\n//\n// TODO: Add offset and size columns.\n//\n// Example of usage:\n//\n// # ./biosnoop.bt\n// Attaching 4 probes...\n// TIME(ms)     DISK ID        COMM             PID    LAT(ms)\n// \t\t\t\tMAJOR MINOR\n// 611          259   0        bash             4179        10\n// 611          259   0        cksum            4179         0\n// 627          259   0        cksum            4179        15\n// 641          259   0        cksum            4179        13\n// [...]\n//\n// This output shows the cksum process was issuing block I/O, which were\n// completing with around 12 milliseconds of latency. Each block I/O event is\n// printed out, with a completion time as the first column, measured from\n// program start.\n//\n// This is a bpftrace version of the bcc tool of the same name.\n// The bcc version provides more fields.\n\nBEGIN\n{\n  printf(\"%-12s %-14s %-16s %-6s %7s\\n\", \"TIME(ms)\", \"DISK ID\", \"COMM\", \"PID\", \"LAT(ms)\");\n  printf(\"             MAJOR MINOR\\n\");\n}\n\ntracepoint:block:block_io_start\n{\n  $key = (args.dev,args.sector);\n  @start[$key] = nsecs;\n  @iopid[$key] = pid;\n  @iocomm[$key] = comm;\n}\n\ntracepoint:block:block_io_done\n/has_key(@start, (args.dev,args.sector)) &&\n has_key(@iopid, (args.dev,args.sector)) && has_key(@iocomm, (args.dev,args.sector))/\n{\n  $key = (args.dev,args.sector);\n  $now = nsecs;\n  $major = args.dev >> 20;\n  $minor = args.dev & ((1 << 20) - 1);\n  printf(\"%-12u %-5d %-8d %-16s %-6d %7d\\n\", elapsed / 1e6,\n         $major, $minor, @iocomm[$key], @iopid[$key], ($now - @start[$key]) / 1e6);\n\n  delete(@start, $key);\n  delete(@iopid, $key);\n  delete(@iocomm, $key);\n}\n\nEND\n{\n  clear(@start);\n  clear(@iopid);\n  clear(@iocomm);\n}\n",
+      "summary": {
+        "avg_ns_delta_pct": null,
+        "baseline_status": "skipped",
+        "cpu_baseline": null,
+        "cpu_delta_pct": null,
+        "cpu_rejit": null,
+        "name": "biosnoop",
+        "note": "bpftrace did not attach any programs",
+        "rejit_avg_ns": null,
+        "rejit_status": null,
+        "sites": 0,
+        "speedup": null,
+        "stock_avg_ns": null,
+        "workload_ops_baseline": null,
+        "workload_ops_delta_pct": null,
+        "workload_ops_rejit": null
+      }
+    },
+    {
+      "baseline": {
+        "measurement": null,
+        "phase": "baseline",
+        "process": {
+          "returncode": 1,
+          "stderr_tail": "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/runqlat.bt:61:6-9: ERROR: syntax error, unexpected variable, expecting (\n  if $ns {\n     ~~~",
+          "stdout_tail": ""
+        },
+        "prog_ids": [],
+        "programs": [],
+        "reason": "bpftrace did not attach any programs",
+        "scan_results": {},
+        "site_totals": {
+          "cmov_sites": 0,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 0,
+          "wide_sites": 0
+        },
+        "status": "skipped"
+      },
+      "description": "tracepoint sched_wakeup/wakeup_new/switch: run queue latency histogram, 3 probes",
+      "name": "runqlat",
+      "rejit": null,
+      "script_path": "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/runqlat.bt",
+      "script_text": "#!/usr/bin/env bpftrace\n// runqlat.bt\tCPU scheduler run queue latency as a histogram.\n// \t\tFor Linux, uses bpftrace, eBPF.\n//\n// Example of usage:\n//\n// # ./runqlat.bt\n// Attaching 5 probes...\n// Tracing CPU scheduler... Hit Ctrl-C to end.\n//\n// @usecs:\n// [0]                    1 |                                                    |\n// [1]                   11 |@@                                                  |\n// [2, 4)                16 |@@@                                                 |\n// [4, 8)                43 |@@@@@@@@@@                                          |\n// [8, 16)              134 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@                     |\n// [16, 32)             220 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|\n// [32, 64)             117 |@@@@@@@@@@@@@@@@@@@@@@@@@@@                         |\n// [64, 128)             84 |@@@@@@@@@@@@@@@@@@@                                 |\n// [128, 256)            10 |@@                                                  |\n//\n// This is a bpftrace version of the bcc tool of the same name.\n// The bcc version provides options to customize the output.\n//\n// Copyright 2018 Netflix, Inc.\n//\n// 17-Sep-2018\tBrendan Gregg\tCreated this.\n\n#ifndef BPFTRACE_HAVE_BTF\n#include <linux/sched.h>\n#else\n// With BTF providing types, full headers are not needed.\n// We only need to supply the preprocessor defines used in this script.\n// TASK_RUNNING is not arch-dependant and has not changed in the linux\n// git history (it is not part of the stable API though)\n#define TASK_RUNNING 0\n#endif\n\nBEGIN\n{\n  printf(\"Tracing CPU scheduler... Hit Ctrl-C to end.\\n\");\n}\n\ntracepoint:sched:sched_wakeup,\ntracepoint:sched:sched_wakeup_new\n{\n  @qtime[args.pid] = nsecs;\n}\n\ntracepoint:sched:sched_switch\n{\n  if (args.prev_state == TASK_RUNNING) {\n    @qtime[args.prev_pid] = nsecs;\n  }\n  // Ignore the idle task\n  if (args.next_pid == 0) {\n    return;\n  }\n\n  $ns = @qtime[args.next_pid];\n  if $ns {\n    @usecs = hist((nsecs - $ns) / 1000);\n    // Swallowing deletion failures as they are expected\n    $ignore = delete(@qtime, args.next_pid);\n  }\n}\n\nEND\n{\n  clear(@qtime);\n}\n",
+      "summary": {
+        "avg_ns_delta_pct": null,
+        "baseline_status": "skipped",
+        "cpu_baseline": null,
+        "cpu_delta_pct": null,
+        "cpu_rejit": null,
+        "name": "runqlat",
+        "note": "bpftrace did not attach any programs",
+        "rejit_avg_ns": null,
+        "rejit_status": null,
+        "sites": 0,
+        "speedup": null,
+        "stock_avg_ns": null,
+        "workload_ops_baseline": null,
+        "workload_ops_delta_pct": null,
+        "workload_ops_rejit": null
+      }
+    },
+    {
+      "baseline": {
+        "measurement": null,
+        "phase": "baseline",
+        "process": {
+          "returncode": 1,
+          "stderr_tail": "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcpretrans.bt:67:18-22: ERROR: Can not access field '__sk_common' on type 'struct sock *'. Try dereferencing it first, or using '->'\n  $inet_family = $sk.__sk_common.skc_family;\n                 ~~~~\n/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcpretrans.bt:74:16-25: ERROR: Can not access field '__sk_common' on type 'struct sock *'. Try dereferencing it first, or using '->'\n      $daddr = ntop($sk.__sk_common.skc_daddr);\n               ~~~~~~~~~\n/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcpretrans.bt:74:16-47: ERROR: ntop() expects an integer or array argument, got none\n      $daddr = ntop($sk.__sk_common.skc_daddr);\n               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcpretrans.bt:75:16-25: ERROR: Can not access field '__sk_common' on type 'struct sock *'. Try dereferencing it first, or using '->'\n      $saddr = ntop($sk.__sk_common.skc_rcv_saddr);\n               ~~~~~~~~~\n/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcpretrans.bt:75:16-51: ERROR: ntop() expects an integer or array argument, got none\n      $saddr = ntop($sk.__sk_common.skc_rcv_saddr);\n               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcpretrans.bt:77:16-25: ERROR: Can not access field '__sk_common' on type 'struct sock *'. Try dereferencing it first, or using '->'\n      $daddr = ntop($sk.__sk_common.skc_v6_daddr.in6_u.u6_addr8);\n               ~~~~~~~~~\n/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcpretrans.bt:77:16-65: ERROR: ntop() expects an integer or array argument, got none\n      $daddr = ntop($sk.__sk_common.skc_v6_daddr.in6_u.u6_addr8);\n               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcpretrans.bt:78:16-25: ERROR: Can not access field '__sk_common' on type 'struct sock *'. Try dereferencing it first, or using '->'\n      $saddr = ntop($sk.__sk_common.skc_v6_rcv_saddr.in6_u.u6_addr8);\n               ~~~~~~~~~\n/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcpretrans.bt:78:16-69: ERROR: ntop() expects an integer or array argument, got none\n      $saddr = ntop($sk.__sk_common.skc_v6_rcv_saddr.in6_u.u6_addr8);\n               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcpretrans.bt:80:14-18: ERROR: Can not access field '__sk_common' on type 'struct sock *'. Try dereferencing it first, or using '->'\n    $lport = $sk.__sk_common.skc_num;\n             ~~~~\n/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcpretrans.bt:81:14-18: ERROR: Can not access field '__sk_common' on type 'struct sock *'. Try dereferencing it first, or using '->'\n    $dport = $sk.__sk_common.skc_dport;\n             ~~~~\n/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcpretrans.bt:84:14-27: ERROR: bswap() only supports integer arguments (none provided)\n    $dport = bswap($dport);\n             ~~~~~~~~~~~~~\n/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcpretrans.bt:86:14-18: ERROR: Can not access field '__sk_common' on type 'struct sock *'. Try dereferencing it first, or using '->'\n    $state = $sk.__sk_common.skc_state;\n             ~~~~",
+          "stdout_tail": ""
+        },
+        "prog_ids": [],
+        "programs": [],
+        "reason": "bpftrace did not attach any programs",
+        "scan_results": {},
+        "site_totals": {
+          "cmov_sites": 0,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 0,
+          "wide_sites": 0
+        },
+        "status": "skipped"
+      },
+      "description": "kprobe tcp_retransmit_skb: TCP retransmit tracing with 12-entry state string map, ntop/bswap",
+      "name": "tcpretrans",
+      "rejit": null,
+      "script_path": "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/tcpretrans.bt",
+      "script_text": "#!/usr/bin/env bpftrace\n// tcpretrans.bt Trace or count TCP retransmits\n//               For Linux, uses bpftrace and eBPF.\n//\n// This uses dynamic tracing of kernel functions, and will need to be updated\n// to match kernel changes.\n//\n// Example of usage:\n//\n// # ./tcpretrans.bt\n// TIME     PID               LADDR:LPORT           RADDR:RPORT  STATE\n// 01:55:05 0        10.153.223.157:22       69.53.245.40:34619  ESTABLISHED\n// 01:55:05 0        10.153.223.157:22       69.53.245.40:34619  ESTABLISHED\n// 01:55:17 0        10.153.223.157:22       69.53.245.40:22957  ESTABLISHED\n// [...]\n//\n// This output shows three TCP retransmits, the first two were for an IPv4\n// connection from 10.153.223.157 port 22 to 69.53.245.40 port 34619. The TCP\n// state was \"ESTABLISHED\" at the time of the retransmit.\n//\n// Retransmits are usually a sign of poor network health, and this tool is\n// useful for their investigation. Unlike using tcpdump, this tool has very\n// low overhead, as it only traces the retransmit function.\n//\n// This is a bpftrace version of the bcc tool of the same name.\n// It doesn't support tracking TLPs.\n//\n// Copyright (c) 2018 Dale Hamel.\n//\n// 23-Nov-2018  Dale Hamel      created this.\n\n#ifndef BPFTRACE_HAVE_BTF\n#include <linux/socket.h>\n#include <net/sock.h>\n#else\n// With BTF providing types, socket headers are not needed.\n// We only need to supply the preprocessor defines in this script.\n// AF_INET/AF_INET6 are part of the stable arch-independent Linux ABI\n#define AF_INET   2\n#define AF_INET6 10\n#endif\n\nBEGIN\n{\n  printf(\"Tracing tcp retransmits. Hit Ctrl-C to end.\\n\");\n  printf(\"%-8s %-8s %20s %21s %6s\\n\",\n         \"TIME\", \"PID\", \"LADDR:LPORT\", \"RADDR:RPORT\", \"STATE\");\n\n  // See include/net/tcp_states.h:\n  @tcp_states[(uint64)1] = \"ESTABLISHED\";\n  @tcp_states[2] = \"SYN_SENT\";\n  @tcp_states[3] = \"SYN_RECV\";\n  @tcp_states[4] = \"FIN_WAIT1\";\n  @tcp_states[5] = \"FIN_WAIT2\";\n  @tcp_states[6] = \"TIME_WAIT\";\n  @tcp_states[7] = \"CLOSE\";\n  @tcp_states[8] = \"CLOSE_WAIT\";\n  @tcp_states[9] = \"LAST_ACK\";\n  @tcp_states[10] = \"LISTEN\";\n  @tcp_states[11] = \"CLOSING\";\n  @tcp_states[12] = \"NEW_SYN_RECV\";\n}\n\nkprobe:tcp_retransmit_skb\n{\n  $sk = (struct sock *)arg0;\n  $inet_family = $sk.__sk_common.skc_family;\n\n  if ($inet_family == AF_INET || $inet_family == AF_INET6) {\n    // initialize variable type:\n    $daddr = ntop(0);\n    $saddr = ntop(0);\n    if ($inet_family == AF_INET) {\n      $daddr = ntop($sk.__sk_common.skc_daddr);\n      $saddr = ntop($sk.__sk_common.skc_rcv_saddr);\n    } else {\n      $daddr = ntop($sk.__sk_common.skc_v6_daddr.in6_u.u6_addr8);\n      $saddr = ntop($sk.__sk_common.skc_v6_rcv_saddr.in6_u.u6_addr8);\n    }\n    $lport = $sk.__sk_common.skc_num;\n    $dport = $sk.__sk_common.skc_dport;\n\n    // Destination port is big endian, it must be flipped\n    $dport = bswap($dport);\n\n    $state = $sk.__sk_common.skc_state;\n    $statestr = @tcp_states[$state];\n\n    time(\"%H:%M:%S \");\n    printf(\"%-8d %14s:%-6d %14s:%-6d %6s\\n\",\n           pid, $saddr, $lport, $daddr, $dport, $statestr);\n  }\n}\n\nEND\n{\n  clear(@tcp_states);\n}\n",
+      "summary": {
+        "avg_ns_delta_pct": null,
+        "baseline_status": "skipped",
+        "cpu_baseline": null,
+        "cpu_delta_pct": null,
+        "cpu_rejit": null,
+        "name": "tcpretrans",
+        "note": "bpftrace did not attach any programs",
+        "rejit_avg_ns": null,
+        "rejit_status": null,
+        "sites": 0,
+        "speedup": null,
+        "stock_avg_ns": null,
+        "workload_ops_baseline": null,
+        "workload_ops_delta_pct": null,
+        "workload_ops_rejit": null
+      }
+    },
+    {
+      "baseline": {
+        "measurement": {
+          "agent_cpu": {
+            "sys_pct": 0.0333331598709026,
+            "total_pct": 0.0666663197418052,
+            "user_pct": 0.0333331598709026
+          },
+          "bpf": {
+            "programs": {
+              "246": {
+                "avg_ns_per_run": 1055.820512820513,
+                "bytes_jited": 781,
+                "bytes_xlated": 1360,
+                "id": 246,
+                "name": "cap_capable",
+                "run_cnt_delta": 312,
+                "run_time_ns_delta": 329416,
+                "type": "kprobe"
+              }
+            },
+            "summary": {
+              "active_programs": 1,
+              "avg_ns_per_run": 1055.820512820513,
+              "total_events": 312,
+              "total_run_time_ns": 329416
+            }
+          },
+          "final_stats": {
+            "246": {
+              "bytes_jited": 781,
+              "bytes_xlated": 1360,
+              "id": 246,
+              "name": "cap_capable",
+              "run_cnt": 1044,
+              "run_time_ns": 792191,
+              "type": "kprobe"
+            }
+          },
+          "initial_stats": {
+            "246": {
+              "bytes_jited": 781,
+              "bytes_xlated": 1360,
+              "id": 246,
+              "name": "cap_capable",
+              "run_cnt": 732,
+              "run_time_ns": 462775,
+              "type": "kprobe"
+            }
+          },
+          "system_cpu": {
+            "busy_pct": 0.004166724537846278
+          },
+          "workload": {
+            "duration_s": 0.03952458100002332,
+            "ops_per_sec": 213892.210520714,
+            "ops_total": 8454.0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [8454] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [8454] setting to a 30 secs run per stressor\nstress-ng: info:  [8454] dispatching hogs:\nstress-ng: metrc: [8454] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [8454]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: warn:  [8454] metrics-check: all bogo-op counters are zero, data may be incorrect\nstress-ng: info:  [8454] skipped: 2: exec (2)\nstress-ng: info:  [8454] passed: 0\nstress-ng: info:  [8454] failed: 0\nstress-ng: info:  [8454] metrics untrustworthy: 0\nstress-ng: info:  [8454] successful run completed in 0.00 secs"
+          }
+        },
+        "phase": "baseline",
+        "process": {
+          "returncode": 0,
+          "stderr_tail": "",
+          "stdout_tail": "17:19:48  0      8455   bpftool          39   CAP_BPF              0\n17:19:48  0      8455   bpftool          39   CAP_BPF              0\n17:19:48  0      8455   bpftool          39   CAP_BPF              0\n17:19:48  0      8455   bpftool          39   CAP_BPF              0\n17:19:48  0      8455   bpftool          39   CAP_BPF              0\n17:19:48  0      8455   bpftool          39   CAP_BPF              0\n17:19:48  0      8455   bpftool          39   CAP_BPF              0\n17:19:48  0      8455   bpftool          39   CAP_BPF              0\n17:19:48  0      8455   bpftool          38   CAP_PERFMON          0\n17:19:48  0      8455   bpftool          39   CAP_BPF              0\n17:19:48  0      8455   bpftool          38   CAP_PERFMON          0\n17:19:48  0      8455   bpftool          38   CAP_PERFMON          0\n17:19:48  0      8455   bpftool          38   CAP_PERFMON          0\n17:19:48  0      8455   bpftool          38   CAP_PERFMON          0\n17:19:48  0      8455   bpftool          39   CAP_BPF              0\n17:19:48  0      8455   bpftool          39   CAP_BPF              0\n17:19:48  0      8455   bpftool          39   CAP_BPF              0\n17:19:48  0      8455   bpftool          38   CAP_PERFMON          0\n17:19:48  0      8455   bpftool          39   CAP_BPF              0\n17:19:48  0      8455   bpftool          38   CAP_PERFMON          0\n17:19:48  0      8455   bpftool          38   CAP_PERFMON          0\n17:19:48  0      8455   bpftool          38   CAP_PERFMON          0\n17:19:48  0      8455   bpftool          38   CAP_PERFMON          0\n17:19:48  0      8455   bpftool          38   CAP_PERFMON          0\n17:19:48  0      8455   bpftool          39   CAP_BPF              0\n17:19:48  0      8455   bpftool          39   CAP_BPF              0\n17:19:48  0      8455   bpftool          38   CAP_PERFMON          0\n17:19:48  0      8455   bpftool          39   CAP_BPF              0\n17:19:48  0      8455   bpftool          38   CAP_PERFMON          0\n17:19:48  0      8455   bpftool          39   CAP_BPF              0\n17:19:48  0      8455   bpftool          38   CAP_PERFMON          0\n17:19:48  0      8455   bpftool          39   CAP_BPF              0\n17:19:48  0      8455   bpftool          38   CAP_PERFMON          0\n17:19:48  0      8455   bpftool          39   CAP_BPF              0\n17:19:48  0      8455   bpftool          38   CAP_PERFMON          0\n17:19:48  0      8455   bpftool          39   CAP_BPF              0\n17:19:48  0      8455   bpftool          38   CAP_PERFMON          0\n17:19:48  0      8455   bpftool          39   CAP_BPF              0\n17:19:48  0      8455   bpftool          39   CAP_BPF              0\n17:19:48  0      8455   bpftool          38   CAP_PERFMON          0"
+        },
+        "prog_ids": [
+          246
+        ],
+        "programs": [
+          {
+            "btf_id": 508,
+            "bytes_jited": 781,
+            "bytes_memlock": 4096,
+            "bytes_xlated": 1360,
+            "gpl_compatible": true,
+            "id": 246,
+            "jited": true,
+            "loaded_at": 1774225157,
+            "map_ids": [
+              432,
+              433,
+              431
+            ],
+            "name": "cap_capable",
+            "orphaned": false,
+            "owner_fds": [
+              {
+                "fd": 9,
+                "pid": 8447
+              }
+            ],
+            "owner_pids": [
+              8447
+            ],
+            "pids": [
+              {
+                "comm": "bpftrace",
+                "pid": 8447
+              }
+            ],
+            "run_cnt": 470,
+            "run_time_ns": 291154,
+            "tag": "f54abfb1faedf876",
+            "type": "kprobe",
+            "uid": 0
+          }
+        ],
+        "reason": "",
+        "scan_results": {},
+        "site_totals": {
+          "cmov_sites": 0,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 0,
+          "wide_sites": 0
+        },
+        "status": "ok"
+      },
+      "description": "kprobe cap_capable: security capability checks with 41-entry string map lookup",
+      "name": "capable",
+      "rejit": null,
+      "script_path": "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/capable.bt",
+      "script_text": "#!/usr/bin/env bpftrace\n// capable\tTrace security capability checks (cap_capable()).\n// \t\tFor Linux, uses bpftrace and eBPF.\n//\n// Example of usage:\n//\n// # ./capable.bt\n// TIME      UID    PID    COMM             CAP  NAME                 AUDIT\n// 22:11:23  114    2676   snmpd            12   CAP_NET_ADMIN        1\n// 22:11:23  0      6990   run              24   CAP_SYS_RESOURCE     1\n// 22:11:23  0      7003   chmod            3    CAP_FOWNER           1\n// 22:11:23  0      7003   chmod            4    CAP_FSETID           1\n//\n// This can be useful for general debugging, and also security enforcement:\n// determining a whitelist of capabilities an application needs.\n//\n// This is a bpftrace version of the bcc tool of the same name.\n// The bcc version provides options to customize the output.\n//\n// Copyright 2018 Netflix, Inc.\n//\n// 08-Sep-2018\tBrendan Gregg\tCreated this.\n\nBEGIN\n{\n  printf(\"Tracing cap_capable syscalls... Hit Ctrl-C to end.\\n\");\n  printf(\"%-9s %-6s %-6s %-16s %-4s %-20s AUDIT\\n\",\n         \"TIME\", \"UID\", \"PID\", \"COMM\", \"CAP\", \"NAME\");\n  @cap[(uint64)0] = \"CAP_CHOWN\";\n  @cap[1] = \"CAP_DAC_OVERRIDE\";\n  @cap[2] = \"CAP_DAC_READ_SEARCH\";\n  @cap[3] = \"CAP_FOWNER\";\n  @cap[4] = \"CAP_FSETID\";\n  @cap[5] = \"CAP_KILL\";\n  @cap[6] = \"CAP_SETGID\";\n  @cap[7] = \"CAP_SETUID\";\n  @cap[8] = \"CAP_SETPCAP\";\n  @cap[9] = \"CAP_LINUX_IMMUTABLE\";\n  @cap[10] = \"CAP_NET_BIND_SERVICE\";\n  @cap[11] = \"CAP_NET_BROADCAST\";\n  @cap[12] = \"CAP_NET_ADMIN\";\n  @cap[13] = \"CAP_NET_RAW\";\n  @cap[14] = \"CAP_IPC_LOCK\";\n  @cap[15] = \"CAP_IPC_OWNER\";\n  @cap[16] = \"CAP_SYS_MODULE\";\n  @cap[17] = \"CAP_SYS_RAWIO\";\n  @cap[18] = \"CAP_SYS_CHROOT\";\n  @cap[19] = \"CAP_SYS_PTRACE\";\n  @cap[20] = \"CAP_SYS_PACCT\";\n  @cap[21] = \"CAP_SYS_ADMIN\";\n  @cap[22] = \"CAP_SYS_BOOT\";\n  @cap[23] = \"CAP_SYS_NICE\";\n  @cap[24] = \"CAP_SYS_RESOURCE\";\n  @cap[25] = \"CAP_SYS_TIME\";\n  @cap[26] = \"CAP_SYS_TTY_CONFIG\";\n  @cap[27] = \"CAP_MKNOD\";\n  @cap[28] = \"CAP_LEASE\";\n  @cap[29] = \"CAP_AUDIT_WRITE\";\n  @cap[30] = \"CAP_AUDIT_CONTROL\";\n  @cap[31] = \"CAP_SETFCAP\";\n  @cap[32] = \"CAP_MAC_OVERRIDE\";\n  @cap[33] = \"CAP_MAC_ADMIN\";\n  @cap[34] = \"CAP_SYSLOG\";\n  @cap[35] = \"CAP_WAKE_ALARM\";\n  @cap[36] = \"CAP_BLOCK_SUSPEND\";\n  @cap[37] = \"CAP_AUDIT_READ\";\n  @cap[38] = \"CAP_PERFMON\";\n  @cap[39] = \"CAP_BPF\";\n  @cap[40] = \"CAP_CHECKPOINT_RESTORE\";\n}\n\nkprobe:cap_capable\n{\n  $cap = arg2;\n  $audit = arg3;\n  time(\"%H:%M:%S  \");\n  printf(\"%-6d %-6d %-16s %-4d %-20s %d\\n\", uid, pid, comm, $cap, @cap[$cap], $audit);\n}\n\nEND\n{\n  clear(@cap);\n}\n",
+      "summary": {
+        "avg_ns_delta_pct": null,
+        "baseline_status": "ok",
+        "cpu_baseline": 0.0666663197418052,
+        "cpu_delta_pct": null,
+        "cpu_rejit": null,
+        "name": "capable",
+        "note": "",
+        "rejit_avg_ns": null,
+        "rejit_status": null,
+        "sites": 0,
+        "speedup": null,
+        "stock_avg_ns": 1055.820512820513,
+        "workload_ops_baseline": 213892.210520714,
+        "workload_ops_delta_pct": null,
+        "workload_ops_rejit": null
+      }
+    },
+    {
+      "baseline": {
+        "measurement": null,
+        "phase": "baseline",
+        "process": {
+          "returncode": 1,
+          "stderr_tail": "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/vfsstat.bt:40-42: ERROR: interval probe type requires 2 arguments, found 1",
+          "stdout_tail": ""
+        },
+        "prog_ids": [],
+        "programs": [],
+        "reason": "bpftrace did not attach any programs",
+        "scan_results": {},
+        "site_totals": {
+          "cmov_sites": 0,
+          "lea_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 0,
+          "wide_sites": 0
+        },
+        "status": "skipped"
+      },
+      "description": "kprobe vfs_read*/write*/fsync/open/create: per-function counters with interval printing",
+      "name": "vfsstat",
+      "rejit": null,
+      "script_path": "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/vfsstat.bt",
+      "script_text": "#!/usr/bin/env bpftrace\n// vfsstat\tCount some VFS calls, with per-second summaries.\n// \t\tFor Linux, uses bpftrace and eBPF.\n//\n// Written as a basic example of counting multiple events and printing a\n// per-second summary.\n//\n// Example of usage:\n//\n// # ./vfsstat.bt\n// Attaching 8 probes...\n// Tracing key VFS calls... Hit Ctrl-C to end.\n// 21:30:38\n// @[vfs_write]: 1274\n// @[vfs_open]: 8675\n// @[vfs_read]: 11515\n//\n// Each second, a timestamp is printed followed by common VFS functions and\n// the number of calls for that second.\n//\n// This is a bpftrace version of the bcc tool of the same name.\n// The bcc version provides command line options.\n//\n// Copyright 2018 Netflix, Inc.\n//\n// 06-Sep-2018\tBrendan Gregg\tCreated this.\n\nBEGIN\n{\n  printf(\"Tracing key VFS calls... Hit Ctrl-C to end.\\n\");\n}\n\nkprobe:vfs_read*,\nkprobe:vfs_write*,\nkprobe:vfs_fsync,\nkprobe:vfs_open,\nkprobe:vfs_create\n{\n  @[func] = count();\n}\n\ninterval:1s\n{\n  time();\n  print(@);\n  clear(@);\n}\n\nEND\n{\n  clear(@);\n}\n",
+      "summary": {
+        "avg_ns_delta_pct": null,
+        "baseline_status": "skipped",
+        "cpu_baseline": null,
+        "cpu_delta_pct": null,
+        "cpu_rejit": null,
+        "name": "vfsstat",
+        "note": "bpftrace did not attach any programs",
+        "rejit_avg_ns": null,
+        "rejit_status": null,
+        "sites": 0,
+        "speedup": null,
+        "stock_avg_ns": null,
+        "workload_ops_baseline": null,
+        "workload_ops_delta_pct": null,
+        "workload_ops_rejit": null
+      }
+    }
+  ],
+  "runner": "/home/yunwei37/workspace/bpf-benchmark/runner/build/micro_exec",
+  "selected_scripts": [
+    "tcplife",
+    "biosnoop",
+    "runqlat",
+    "tcpretrans",
+    "capable",
+    "vfsstat"
+  ],
+  "smoke": false,
+  "summary": {
+    "baseline_successes": 1,
+    "rejit_successes": 0,
+    "scripts_with_sites": 0,
+    "site_totals": {
+      "cmov_sites": 0,
+      "lea_sites": 0,
+      "rotate_sites": 0,
+      "total_sites": 0,
+      "wide_sites": 0
+    },
+    "speedup_geomean": null
+  },
+  "tool_versions": {
+    "bpftool_path": "/usr/local/sbin/bpftool",
+    "bpftool_version_text": "bpftool v7.7.0\nusing libbpf v1.7\nfeatures: llvm, skeletons",
+    "bpftrace_path": "/bin/bpftrace",
+    "bpftrace_version": [
+      0,
+      20,
+      2
+    ],
+    "bpftrace_version_text": "bpftrace v0.20.2",
+    "curl_path": "/bin/curl",
+    "fio_path": "/bin/fio",
+    "stress_ng_path": "/bin/stress-ng"
+  }
+}

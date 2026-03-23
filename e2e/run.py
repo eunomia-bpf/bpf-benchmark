@@ -27,6 +27,7 @@ from e2e.cases.katran.case import (  # noqa: E402
     DEFAULT_OUTPUT_JSON as DEFAULT_KATRAN_OUTPUT_JSON,
     DEFAULT_OUTPUT_MD as DEFAULT_KATRAN_OUTPUT_MD,
     DEFAULT_SETUP_SCRIPT as DEFAULT_KATRAN_SETUP_SCRIPT,
+    build_markdown as build_katran_markdown,
     persist_results as persist_katran_results,
     run_katran_case,
 )
@@ -34,6 +35,7 @@ DEFAULT_KATRAN_POLICY_FILE = ROOT_DIR / "e2e" / "cases" / "katran" / "balancer_i
 from e2e.cases.scx.case import (  # noqa: E402
     DEFAULT_OUTPUT_JSON as DEFAULT_SCX_OUTPUT_JSON,
     DEFAULT_OUTPUT_MD as DEFAULT_SCX_OUTPUT_MD,
+    build_markdown as build_scx_markdown,
     run_scx_case,
     persist_results as persist_scx_results,
 )
@@ -43,6 +45,7 @@ from e2e.cases.tetragon.case import (  # noqa: E402
     DEFAULT_OUTPUT_JSON as DEFAULT_TETRAGON_OUTPUT_JSON,
     DEFAULT_OUTPUT_MD as DEFAULT_TETRAGON_OUTPUT_MD,
     DEFAULT_SETUP_SCRIPT as DEFAULT_TETRAGON_SETUP_SCRIPT,
+    build_markdown as build_tetragon_markdown,
     persist_results as persist_tetragon_results,
     run_tetragon_case,
 )
@@ -50,6 +53,7 @@ from e2e.cases.tracee.case import (  # noqa: E402
     DEFAULT_OUTPUT_JSON,
     DEFAULT_OUTPUT_MD,
     DEFAULT_SETUP_SCRIPT as DEFAULT_TRACEE_SETUP_SCRIPT,
+    build_markdown as build_tracee_markdown,
     run_tracee_case,
     persist_results,
 )
@@ -148,11 +152,11 @@ def _run_single_case(args: argparse.Namespace) -> int:
     """Run a single e2e case. Returns 0 on success."""
     if args.case == "tracee":
         payload = run_tracee_case(args)
-        persist_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve())
+        persist_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve(), build_tracee_markdown)
         return 0
     if args.case == "tetragon":
         payload = run_tetragon_case(args)
-        persist_tetragon_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve())
+        persist_tetragon_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve(), build_tetragon_markdown)
         return 0
     if args.case == "bpftrace":
         payload = run_bpftrace_case(args)
@@ -160,11 +164,11 @@ def _run_single_case(args: argparse.Namespace) -> int:
         return 0
     if args.case == "scx":
         payload = run_scx_case(args)
-        persist_scx_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve())
+        persist_scx_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve(), build_scx_markdown)
         return 0
     if args.case == "katran":
         payload = run_katran_case(args)
-        persist_katran_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve())
+        persist_katran_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve(), build_katran_markdown)
         return 0
     raise SystemExit(f"unsupported e2e case: {args.case}")
 

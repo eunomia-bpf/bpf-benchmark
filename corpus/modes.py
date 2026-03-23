@@ -617,8 +617,8 @@ def run_target_locally(
         and record["baseline_run"] is None
     ):
         record["record_error"] = "stock phase missing from run-kernel output"
-    record["v5_compile_applied"] = bool((((record["v5_compile"] or {}).get("sample") or {}).get("recompile") or {}).get("applied"))
-    record["v5_run_applied"] = bool((((record["v5_run"] or {}).get("sample") or {}).get("recompile") or {}).get("applied"))
+    record["v5_compile_applied"] = bool((((record["v5_compile"] or {}).get("sample") or {}).get("rejit") or {}).get("applied"))
+    record["v5_run_applied"] = bool((((record["v5_run"] or {}).get("sample") or {}).get("rejit") or {}).get("applied"))
     record["requested_families_compile"] = list(recompile_metadata(record["v5_compile"]).get("requested_families") or [])
     record["requested_families_run"] = list(recompile_metadata(record["v5_run"]).get("requested_families") or [])
     record["applied_families_compile"] = effective_applied_families(
@@ -876,13 +876,13 @@ def build_summary(records: list[dict[str, Any]], effective_mode: str, fallback_r
         if v5_run and not v5_run.get("ok"):
             failure_reasons[summarize_failure_reason(v5_run)] += 1
         if v5_compile and v5_compile.get("ok"):
-            recompile = ((v5_compile.get("sample") or {}).get("recompile") or {})
-            if recompile.get("requested") and not recompile.get("applied") and recompile.get("error"):
-                recompile_failures[str(recompile["error"])] += 1
+            rejit = ((v5_compile.get("sample") or {}).get("rejit") or {})
+            if rejit.get("requested") and not rejit.get("applied") and rejit.get("error"):
+                recompile_failures[str(rejit["error"])] += 1
         if v5_run and v5_run.get("ok"):
-            recompile = ((v5_run.get("sample") or {}).get("recompile") or {})
-            if recompile.get("requested") and not recompile.get("applied") and recompile.get("error"):
-                recompile_failures[str(recompile["error"])] += 1
+            rejit = ((v5_run.get("sample") or {}).get("rejit") or {})
+            if rejit.get("requested") and not rejit.get("applied") and rejit.get("error"):
+                recompile_failures[str(rejit["error"])] += 1
 
     size_ratios = [record["size_ratio"] for record in compile_pairs if record.get("size_ratio") is not None]
     exec_ratios = [record["speedup_ratio"] for record in measured_pairs if record.get("speedup_ratio") is not None]

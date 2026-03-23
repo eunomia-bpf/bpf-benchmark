@@ -652,7 +652,7 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
     scx_repo = Path(args.scx_repo).resolve()
     object_path = Path(args.scheduler_object).resolve()
     daemon_binary = Path(args.daemon).resolve()
-    bpftool_binary = Path(args.bpftool_binary).resolve()
+    bpftool_binary = Path(args.bpftool).resolve()
     ensure_artifacts(daemon_binary, scheduler_binary, scx_repo)
 
     workloads = workload_specs()
@@ -755,7 +755,7 @@ def build_case_parser() -> argparse.ArgumentParser:
     parser.add_argument("--scheduler-object", default=str(DEFAULT_SCX_OBJECT))
     parser.add_argument("--scx-repo", default=str(DEFAULT_SCX_REPO))
     parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
-    parser.add_argument("--bpftool-binary", default=str(DEFAULT_BPFTOOL))
+    parser.add_argument("--bpftool", default=str(DEFAULT_BPFTOOL))
     parser.add_argument("--duration", type=int)
     parser.add_argument("--smoke", action="store_true")
     parser.add_argument("--load-timeout", type=int, default=DEFAULT_LOAD_TIMEOUT)
@@ -788,8 +788,8 @@ def run_scx_vm(args: argparse.Namespace) -> int:
         str(Path(args.scx_repo).resolve()),
         "--daemon",
         str(Path(args.daemon).resolve()),
-        "--bpftool-binary",
-        str(Path(args.bpftool_binary).resolve()),
+        "--bpftool",
+        str(Path(args.bpftool).resolve()),
         "--load-timeout",
         str(int(args.load_timeout)),
     ]
