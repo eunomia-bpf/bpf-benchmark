@@ -2,11 +2,10 @@
   "artifact_kind": "result_run",
   "artifact_version": 1,
   "case": "scx",
-  "completed_at": "2026-03-23T19:50:50.982399+00:00",
+  "completed_at": "2026-03-23T20:06:23.440720+00:00",
   "details_dir": "details",
-  "dry_run": true,
-  "generated_at": "2026-03-23T19:50:50.982429+00:00",
-  "last_updated_at": "2026-03-23T19:50:50.982399+00:00",
+  "generated_at": "2026-03-23T20:06:23.440728+00:00",
+  "last_updated_at": "2026-03-23T20:06:23.440720+00:00",
   "output_hint_json": "e2e/results/scx_authoritative_20260323.json",
   "output_hint_md": "e2e/results/scx-e2e.md",
   "output_hint_report_md": "docs/tmp/bpftrace-real-e2e-report.md",
@@ -16,10 +15,10 @@
       "comparable": false,
       "reason": "post-ReJIT measurements are unavailable"
     },
-    "duration_s": 30,
-    "generated_at": "2026-03-23T19:50:50.980787+00:00",
+    "duration_s": 10,
+    "generated_at": "2026-03-23T20:06:23.435877+00:00",
     "host": {
-      "git_sha": "ae19b7dfa8ca591eb10885da95f37a7e3c81a7a2",
+      "git_sha": "b686670021c5b80706a46ce61f2084886ab3c7fd",
       "hostname": "lab",
       "kernel": "6.15.11-061511-generic",
       "platform": "Linux-6.15.11-061511-generic-x86_64-with-glibc2.39",
@@ -27,7 +26,7 @@
     },
     "limitations": [
       "Raw `bpftool struct_ops register` returned success but did not leave sched_ext enabled, so the standalone bpftool path is not a usable end-to-end loader here.",
-      "scx_rusty userspace loader failed: scx_rusty did not become healthy: 12:50:50 [INFO] Running scx_rusty (build ID: 1.1.0-gf33d9a7 x86_64-unknown-linux-gnu)\n12:50:50 [INFO] NODE[00] mask= ffffff\n12:50:50 [INFO]  DOM[00] mask= ffffff\n12:50:50 [WARN] libbpf: Failed to bump RLIMIT_MEMLOCK (err = -EPERM), you might need to do it explicitly!\n12:50:50 [WARN] libbpf: Error in bpf_object__probe_loading(): -EPERM. Couldn't load trivial BPF program. Make sure your kernel supports BPF (CONFIG_BPF_SYSCALL=y) and/or that RLIMIT_MEMLOCK is set to big enough value.\n12:50:50 [WARN] libbpf: failed to load BPF skeleton 'bpf_bpf': -EPERM\nError: Failed to load BPF program\nCaused by:\n    Operation not permitted (os error 1)"
+      "scx_rusty userspace loader failed: scx_rusty did not become healthy: 13:06:22 [INFO] Running scx_rusty (build ID: 1.1.0-gf33d9a7 x86_64-unknown-linux-gnu)\n13:06:22 [INFO] NODE[00] mask= ffffff\n13:06:22 [INFO]  DOM[00] mask= ffffff\n13:06:22 [WARN] libbpf: Failed to bump RLIMIT_MEMLOCK (err = -EPERM), you might need to do it explicitly!\n13:06:22 [WARN] libbpf: Error in bpf_object__probe_loading(): -EPERM. Couldn't load trivial BPF program. Make sure your kernel supports BPF (CONFIG_BPF_SYSCALL=y) and/or that RLIMIT_MEMLOCK is set to big enough value.\n13:06:22 [WARN] libbpf: failed to load BPF skeleton 'bpf_bpf': -EPERM\nError: Failed to load BPF program\nCaused by:\n    Operation not permitted (os error 1)"
     ],
     "mode": "probe_only",
     "post_rejit": null,
@@ -49,7 +48,7 @@
         "struct_ops_program_count_after": 0,
         "usable": false
       },
-      "loader_error": "scx_rusty did not become healthy: 12:50:50 [INFO] Running scx_rusty (build ID: 1.1.0-gf33d9a7 x86_64-unknown-linux-gnu)\n12:50:50 [INFO] NODE[00] mask= ffffff\n12:50:50 [INFO]  DOM[00] mask= ffffff\n12:50:50 [WARN] libbpf: Failed to bump RLIMIT_MEMLOCK (err = -EPERM), you might need to do it explicitly!\n12:50:50 [WARN] libbpf: Error in bpf_object__probe_loading(): -EPERM. Couldn't load trivial BPF program. Make sure your kernel supports BPF (CONFIG_BPF_SYSCALL=y) and/or that RLIMIT_MEMLOCK is set to big enough value.\n12:50:50 [WARN] libbpf: failed to load BPF skeleton 'bpf_bpf': -EPERM\nError: Failed to load BPF program\nCaused by:\n    Operation not permitted (os error 1)",
+      "loader_error": "scx_rusty did not become healthy: 13:06:22 [INFO] Running scx_rusty (build ID: 1.1.0-gf33d9a7 x86_64-unknown-linux-gnu)\n13:06:22 [INFO] NODE[00] mask= ffffff\n13:06:22 [INFO]  DOM[00] mask= ffffff\n13:06:22 [WARN] libbpf: Failed to bump RLIMIT_MEMLOCK (err = -EPERM), you might need to do it explicitly!\n13:06:22 [WARN] libbpf: Error in bpf_object__probe_loading(): -EPERM. Couldn't load trivial BPF program. Make sure your kernel supports BPF (CONFIG_BPF_SYSCALL=y) and/or that RLIMIT_MEMLOCK is set to big enough value.\n13:06:22 [WARN] libbpf: failed to load BPF skeleton 'bpf_bpf': -EPERM\nError: Failed to load BPF program\nCaused by:\n    Operation not permitted (os error 1)",
       "runtime_counters_available": false,
       "state_before": "disabled"
     },
@@ -71,11 +70,11 @@
     "scheduler_ops": [],
     "scheduler_output": {},
     "scheduler_programs": [],
-    "smoke": false
+    "smoke": true
   },
   "run_type": "scx",
-  "smoke": false,
-  "started_at": "2026-03-23T19:50:50.460654+00:00",
+  "smoke": true,
+  "started_at": "2026-03-23T20:06:22.918241+00:00",
   "status": "completed",
   "suite": "e2e"
 }

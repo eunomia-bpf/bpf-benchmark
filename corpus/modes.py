@@ -90,7 +90,7 @@ from runner.libs.commands import (
 
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
-SELF_RELATIVE = Path(__file__).resolve().relative_to(ROOT_DIR)
+DRIVER_RELATIVE = Path(__file__).with_name("driver.py").resolve().relative_to(ROOT_DIR)
 DEFAULT_INVENTORY_JSON = ROOT_DIR / "docs" / "tmp" / "corpus-runnability-results.json"
 DEFAULT_OUTPUT_JSON = authoritative_output_path(ROOT_DIR / "corpus" / "results", "corpus_vm_batch")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "docs" / "tmp" / "corpus-batch-recompile-results.md"
@@ -107,7 +107,6 @@ DEFAULT_REPEAT = 200
 DEFAULT_TIMEOUT_SECONDS = 240
 
 
-DEFAULT_BUILD_TIMEOUT_SECONDS = 3600
 DEFAULT_PERF_OUTPUT_JSON = authoritative_output_path(ROOT_DIR / "corpus" / "results", "corpus_perf")
 DEFAULT_PERF_OUTPUT_MD = ROOT_DIR / "docs" / "tmp" / "corpus-perf-results.md"
 DEFAULT_TRACING_OUTPUT_JSON = authoritative_output_path(ROOT_DIR / "corpus" / "results", "corpus_tracing")
@@ -174,22 +173,11 @@ def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     add_repeat_argument(parser, DEFAULT_REPEAT, help_text="Repeat count passed to each micro_exec invocation.")
     add_timeout_argument(parser, DEFAULT_TIMEOUT_SECONDS, help_text="Per-target timeout in seconds.")
-    parser.add_argument(
-        "--build-timeout",
-        type=int,
-        default=DEFAULT_BUILD_TIMEOUT_SECONDS,
-        help="Kernel build timeout in seconds.",
-    )
     add_filter_argument(
         parser,
         help_text="Only include targets whose object path, program name, or source contains this substring. Repeatable.",
     )
     add_max_programs_argument(parser, help_text="Optional cap for smoke testing.")
-    parser.add_argument(
-        "--skip-build",
-        action="store_true",
-        help="Skip `make -C vendor/linux-framework bzImage` and use the existing image.",
-    )
     parser.add_argument(
         "--skip-families",
         action="append",
@@ -199,11 +187,6 @@ def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--blind-apply",
         action="store_true",
         help="Ignore per-program policies and force blind all-apply auto-scan recompile for debugging.",
-    )
-    parser.add_argument(
-        "--force-host-fallback",
-        action="store_true",
-        help="Skip VM execution and run host compile-only + daemon fallback directly.",
     )
     parser.add_argument(
         "--guest-info",
@@ -863,7 +846,7 @@ def run_target_in_guest(
         target_path = Path(handle.name)
         guest_argv = [
             "python3",
-            str(SELF_RELATIVE),
+            str(DRIVER_RELATIVE),
             "packet",
             "--guest-target-json",
             str(target_path),
@@ -902,7 +885,7 @@ def collect_guest_info(
     kernel_image: Path,
     timeout_seconds: int,
 ) -> dict[str, Any]:
-    guest_exec = build_guest_exec(["python3", str(SELF_RELATIVE), "packet", "--guest-info"])
+    guest_exec = build_guest_exec(["python3", str(DRIVER_RELATIVE), "packet", "--guest-info"])
     invocation = run_text_command(
         build_vng_command(
             vng_binary=vng_binary,
@@ -916,14 +899,6 @@ def collect_guest_info(
         "invocation": text_invocation_summary(invocation),
         "payload": payloads[-1] if invocation["ok"] and payloads else None,
     }
-
-
-def run_kernel_build(kernel_tree: Path, timeout_seconds: int) -> dict[str, Any]:
-    jobs = os.cpu_count() or 1
-    return run_text_command(
-        ["make", "-C", str(kernel_tree), f"-j{jobs}", "bzImage"],
-        timeout_seconds,
-    )
 
 
 def build_summary(records: list[dict[str, Any]], effective_mode: str, fallback_reason: str | None) -> dict[str, Any]:
@@ -1331,7 +1306,7 @@ def build_markdown(data: dict[str, Any]) -> str:
             "- Default steady-state semantics: the daemon is always started and tries to optimize each program; programs with no applicable sites stay on stock JIT.",
             "- `--blind-apply` forces the old debug/exploration path with `--recompile-v5 --recompile-all`.",
             "- `--skip-families` only applies together with `--blind-apply`; the family columns above report applied families, not just eligible sites.",
-            "- Host fallback mode only does baseline compile-only plus offline daemon scan; it does not attempt recompile or runtime measurement.",
+            "- The Make-driven `vm-corpus` path is strict VM-only: guest smoke or per-target VM failures fail the run instead of falling back to host execution.",
             "- Family summaries are overlap-based: one program can contribute to multiple family rows, so those rows are not isolated causal attributions.",
         ]
     )
@@ -1383,50 +1358,24 @@ def packet_main(argv: list[str] | None = None) -> int:
         max_programs=args.max_programs,
     )
 
-    kernel_build = None
-    guest_smoke: dict[str, Any] | None = None
+    if not kernel_image.exists():
+        raise SystemExit(f"kernel image missing: {kernel_image}")
+    if btf_custom_path is None or not btf_custom_path.exists():
+        raise SystemExit(f"btf path missing: {btf_custom_path}")
+
+    guest_smoke = collect_guest_info(
+        vng_binary=args.vng,
+        kernel_image=kernel_image,
+        timeout_seconds=args.timeout,
+    )
+    if not ((guest_smoke.get("invocation") or {}).get("ok") and guest_smoke.get("payload")):
+        smoke_error = (guest_smoke.get("invocation") or {}).get("error") or "guest smoke failed"
+        raise SystemExit(f"vm guest smoke failed: {smoke_error}")
+
     effective_mode = "vm"
     fallback_reason = None
 
-    if args.force_host_fallback:
-        effective_mode = "host-fallback"
-        fallback_reason = "forced by --force-host-fallback"
-    else:
-        if args.skip_build:
-            kernel_build = {
-                "ok": kernel_image.exists(),
-                "command": ["make", "-C", str(kernel_tree), f"-j{os.cpu_count() or 1}", "bzImage"],
-                "returncode": 0 if kernel_image.exists() else None,
-                "timed_out": False,
-                "duration_seconds": 0.0,
-                "stdout": "",
-                "stderr": "",
-                "error": None if kernel_image.exists() else "kernel image missing",
-            }
-        else:
-            kernel_build = run_kernel_build(kernel_tree, args.build_timeout)
-        if not kernel_build["ok"]:
-            effective_mode = "host-fallback"
-            fallback_reason = f"kernel build failed: {kernel_build['error']}"
-        elif not kernel_image.exists():
-            effective_mode = "host-fallback"
-            fallback_reason = f"kernel image missing after build: {kernel_image}"
-        elif btf_custom_path is None or not btf_custom_path.exists():
-            effective_mode = "host-fallback"
-            fallback_reason = f"btf path missing: {btf_custom_path}"
-        else:
-            guest_smoke = collect_guest_info(
-                vng_binary=args.vng,
-                kernel_image=kernel_image,
-                timeout_seconds=args.timeout,
-            )
-            if not ((guest_smoke.get("invocation") or {}).get("ok") and guest_smoke.get("payload")):
-                effective_mode = "host-fallback"
-                smoke_error = (guest_smoke.get("invocation") or {}).get("error") or "guest smoke failed"
-                fallback_reason = f"vm unavailable: {smoke_error}"
-
     records: list[dict[str, Any]] = []
-    host_btf_path = DEFAULT_HOST_BTF_PATH if DEFAULT_HOST_BTF_PATH.exists() else None
     result = {
         "generated_at": started_at,
         "repo_root": str(ROOT_DIR),
@@ -1440,7 +1389,6 @@ def packet_main(argv: list[str] | None = None) -> int:
         "vng_binary": args.vng,
         "repeat": args.repeat,
         "timeout_seconds": args.timeout,
-        "kernel_build": text_invocation_summary(kernel_build),
         "guest_smoke": guest_smoke,
         "skip_families": skip_families,
         "blind_apply": args.blind_apply,
@@ -1482,12 +1430,8 @@ def packet_main(argv: list[str] | None = None) -> int:
                 "vng_binary": args.vng,
                 "repeat": args.repeat,
                 "timeout_seconds": args.timeout,
-                "build_timeout_seconds": args.build_timeout,
-                "force_host_fallback": bool(args.force_host_fallback),
-                "skip_build": bool(args.skip_build),
                 "skip_families": skip_families,
                 "blind_apply": bool(args.blind_apply),
-                "kernel_build": text_invocation_summary(kernel_build),
                 "guest_smoke": guest_smoke,
                 "started_at": started_at,
                 "last_updated_at": updated_at,
@@ -1524,33 +1468,18 @@ def packet_main(argv: list[str] | None = None) -> int:
                 file=sys.stderr,
                 flush=True,
             )
-            if effective_mode == "vm":
-                record = run_target_in_guest(
-                    target=target,
-                    runner=runner,
-                    daemon=daemon,
-                    kernel_image=kernel_image,
-                    btf_custom_path=btf_custom_path,
-                    repeat=args.repeat,
-                    timeout_seconds=args.timeout,
-                    vng_binary=args.vng,
-                    skip_families=skip_families,
-                    blind_apply=args.blind_apply,
-                )
-            else:
-                record = run_target_locally(
-                    target=target,
-                    runner=runner,
-                    daemon=daemon,
-                    repeat=args.repeat,
-                    timeout_seconds=args.timeout,
-                    execution_mode="host-fallback",
-                    btf_custom_path=host_btf_path,
-                    enable_recompile=False,
-                    enable_exec=False,
-                    skip_families=[],
-                    blind_apply=False,
-                )
+            record = run_target_in_guest(
+                target=target,
+                runner=runner,
+                daemon=daemon,
+                kernel_image=kernel_image,
+                btf_custom_path=btf_custom_path,
+                repeat=args.repeat,
+                timeout_seconds=args.timeout,
+                vng_binary=args.vng,
+                skip_families=skip_families,
+                blind_apply=args.blind_apply,
+            )
             records.append(record)
             flush_artifact("running")
 

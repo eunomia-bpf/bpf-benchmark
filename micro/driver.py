@@ -22,15 +22,15 @@ except ImportError:
     from micro.benchmark_catalog import CONFIG_PATH, ROOT_DIR, RuntimeSpec, SuiteSpec, load_suite
 
 try:
-    from results_layout import smoke_output_path
+    from runner.libs import smoke_output_path
 except ImportError:
-    from micro.results_layout import smoke_output_path
+    from runner.libs import smoke_output_path
 
 try:
     from runner.libs.benchmarks import resolve_memory_file, select_benchmarks
     from runner.libs.commands import build_micro_benchmark_command
     from runner.libs.environment import (
-        ensure_build_steps,
+        require_existing_paths,
         read_optional_text,
         read_required_text,
         validate_publication_environment,
@@ -48,7 +48,7 @@ except ImportError:
     from runner.libs.benchmarks import resolve_memory_file, select_benchmarks
     from runner.libs.commands import build_micro_benchmark_command
     from runner.libs.environment import (
-        ensure_build_steps,
+        require_existing_paths,
         read_optional_text,
         read_required_text,
         validate_publication_environment,
@@ -64,13 +64,12 @@ except ImportError:
     )
 
 from runner.libs.run_artifacts import (
-    create_run_artifact_dir,
+    ArtifactSession,
     derive_run_type,
-    extract_daemon_debug_details,
+    externalize_sample_daemon_debug,
     repo_relative_path,
-    result_root_for_output,
+    sanitize_artifact_token,
     summarize_benchmark_results,
-    update_run_artifact,
 )
 
 
@@ -137,17 +136,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "Set to 0 to disable PGO warmup. Default: 10."
         ),
     )
-    parser.add_argument(
-        "--build-bpftool",
-        action="store_true",
-        help="Build vendored bpftool in addition to the runner and program artifacts.",
-    )
     parser.add_argument("--list", action="store_true", help="List benchmarks and runtimes.")
-    raw_args = list(sys.argv[1:] if argv is None else argv)
-    # Strip legacy positional "suite" subcommand for backward-compat with Makefile callers
-    if raw_args and raw_args[0] == "suite":
-        raw_args = raw_args[1:]
-    return parser.parse_args(raw_args)
+    return parser.parse_args(sys.argv[1:] if argv is None else argv)
 
 
 def format_ns(value: float | int | None) -> str:
@@ -304,27 +294,10 @@ def select_runtimes(names: list[str] | None, suite: SuiteSpec) -> list[RuntimeSp
     return selected
 
 
-def ensure_artifacts_built(suite: SuiteSpec, build_bpftool: bool) -> None:
-    build_order: list[str] = []
-    if not suite.build.runner_binary.exists():
-        build_order.append("micro_exec")
-
-    missing_program_objects = any(not benchmark.program_object.exists() for benchmark in suite.benchmarks.values())
-    if missing_program_objects:
-        build_order.append("programs")
-
-    if build_bpftool and not suite.build.bpftool_binary.exists():
-        build_order.append("bpftool")
-
-    if not build_order:
-        print("[build] reusing existing artifacts")
-        return
-
-    ensure_build_steps(
-        suite.build.commands,
-        root_dir=ROOT_DIR,
-        build_order=build_order,
-    )
+def require_suite_artifacts(suite: SuiteSpec) -> None:
+    required_paths = [suite.build.runner_binary]
+    required_paths.extend(benchmark.program_object for benchmark in suite.benchmarks.values())
+    require_existing_paths(required_paths)
 
 
 def attach_baseline_adjustments(results: dict[str, object], baseline_benchmark: str | None) -> None:
@@ -407,6 +380,25 @@ def build_run_metadata(
     return metadata
 
 
+def _live_sample_relative_path(
+    benchmark_name: str,
+    runtime_name: str,
+    *,
+    iteration_index: int | None,
+    sample_index: int,
+) -> str:
+    iter_suffix = (
+        f"iter{iteration_index:02d}"
+        if isinstance(iteration_index, int)
+        else f"sample{sample_index:02d}"
+    )
+    basename = (
+        f"{sanitize_artifact_token(benchmark_name)}__"
+        f"{sanitize_artifact_token(runtime_name)}__{iter_suffix}.json"
+    )
+    return f"live_samples/{basename}"
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     suite_path = Path(args.suite)
@@ -440,7 +432,7 @@ def main(argv: list[str] | None = None) -> int:
         if not authoritative_run:
             output_path = smoke_output_path(output_path.parent, "pure_jit")
 
-    ensure_artifacts_built(suite, args.build_bpftool)
+    require_suite_artifacts(suite)
 
     results = {
         "suite": suite.suite_name,
@@ -479,20 +471,50 @@ def main(argv: list[str] | None = None) -> int:
     }
 
     run_type = derive_run_type(output_path, results["suite"])
-    artifact_dir = create_run_artifact_dir(
-        results_dir=result_root_for_output(output_path),
-        run_type=run_type,
-        generated_at=str(results["generated_at"]),
-    )
     current_benchmark_name: str | None = None
     current_benchmark_index: int | None = None
     current_benchmark_record: dict[str, Any] | None = None
+    daemon_debug_index: list[dict[str, Any]] = []
+
+    def build_artifact_metadata(
+        status: str,
+        started_at: str,
+        updated_at: str,
+        error_message: str | None,
+    ) -> dict[str, Any]:
+        attach_baseline_adjustments(results, suite.analysis.baseline_benchmark)
+        artifact_metadata = build_run_metadata(
+            results,
+            output_hint=output_path,
+            run_type=run_type,
+            daemon_debug_entries=len(daemon_debug_index),
+        )
+        artifact_metadata["status"] = status
+        artifact_metadata["started_at"] = started_at
+        artifact_metadata["last_updated_at"] = updated_at
+        artifact_metadata["progress"] = {
+            "total_benchmarks": len(benchmarks),
+            "completed_benchmarks": len(results["benchmarks"]),
+            "current_benchmark_index": current_benchmark_index,
+            "current_benchmark": current_benchmark_name,
+        }
+        if error_message:
+            artifact_metadata["error_message"] = error_message
+        return artifact_metadata
+
+    session = ArtifactSession(
+        output_path=output_path,
+        run_type=run_type,
+        generated_at=str(results["generated_at"]),
+        metadata_builder=build_artifact_metadata,
+    )
+    artifact_dir = session.run_dir
 
     def flush_artifact(status: str, *, error_message: str | None = None) -> None:
-        attach_baseline_adjustments(results, suite.analysis.baseline_benchmark)
-        artifact_details, daemon_debug_entries = extract_daemon_debug_details(results)
-        artifact_details["result.json"] = results
-        artifact_details["progress.json"] = {
+        artifact_details: dict[str, object] = {
+            "daemon_debug/index.json": daemon_debug_index,
+        } if daemon_debug_index else {}
+        progress_payload = {
             "status": status,
             "total_benchmarks": len(benchmarks),
             "completed_benchmarks": len(results["benchmarks"]),
@@ -501,35 +523,19 @@ def main(argv: list[str] | None = None) -> int:
             "current_benchmark_record": current_benchmark_record,
         }
         if error_message:
-            artifact_details["progress.json"]["error_message"] = error_message
-
-        artifact_metadata = build_run_metadata(
-            results,
-            output_hint=output_path,
-            run_type=run_type,
-            daemon_debug_entries=daemon_debug_entries,
-        )
-        updated_at = datetime.now(timezone.utc).isoformat()
-        artifact_metadata["status"] = status
-        artifact_metadata["started_at"] = results["generated_at"]
-        artifact_metadata["last_updated_at"] = updated_at
-        artifact_metadata["progress"] = {
-            "total_benchmarks": len(benchmarks),
-            "completed_benchmarks": len(results["benchmarks"]),
-            "current_benchmark_index": current_benchmark_index,
-            "current_benchmark": current_benchmark_name,
-        }
-        if status == "completed":
-            artifact_metadata["completed_at"] = updated_at
-        if error_message:
-            artifact_metadata["error_message"] = error_message
-
-        update_run_artifact(
-            run_dir=artifact_dir,
-            run_type=run_type,
-            metadata=artifact_metadata,
+            progress_payload["error_message"] = error_message
+        session.write(
+            status=status,
+            progress_payload=progress_payload,
+            result_payload=results,
             detail_payloads=artifact_details,
+            error_message=error_message,
         )
+
+    def flush_sample_details(*, detail_payloads: dict[str, object]) -> None:
+        if not detail_payloads:
+            return
+        session.write(status="running", detail_payloads=detail_payloads)
 
     flush_artifact("running")
 
@@ -620,12 +626,33 @@ def main(argv: list[str] | None = None) -> int:
                     sample_entry = runtime_samples[runtime.name]
                     sample = parse_runner_sample(run_command(sample_entry["command"], args.cpu).stdout)
                     sample["iteration_index"] = iteration_idx
+                    sample_index = len(sample_entry["samples"])
+                    detail_payloads: dict[str, object] = {}
+                    live_sample_path = _live_sample_relative_path(
+                        benchmark.name,
+                        runtime.name,
+                        iteration_index=iteration_idx,
+                        sample_index=sample_index,
+                    )
+                    daemon_debug_detail = externalize_sample_daemon_debug(
+                        benchmark_name=benchmark.name,
+                        runtime_name=runtime.name,
+                        sample_index=sample_index,
+                        sample=sample,
+                    )
+                    detail_payloads[live_sample_path] = sample
+                    if daemon_debug_detail is not None:
+                        daemon_debug_path, daemon_debug_payload, daemon_debug_entry = daemon_debug_detail
+                        detail_payloads[daemon_debug_path] = daemon_debug_payload
+                        daemon_debug_index.append(daemon_debug_entry)
+                        detail_payloads["daemon_debug/index.json"] = daemon_debug_index
+                    sample_entry["samples"].append(sample)
+                    flush_sample_details(detail_payloads=detail_payloads)
                     if benchmark.expected_result is not None and sample["result"] != benchmark.expected_result:
                         raise RuntimeError(
                             f"{benchmark.name}/{runtime.name} result mismatch: "
                             f"{sample['result']} != {benchmark.expected_result}"
                         )
-                    sample_entry["samples"].append(sample)
 
             results["iteration_runtime_orders"][benchmark.name] = iteration_runtime_orders
             for runtime in runtimes:

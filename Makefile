@@ -239,7 +239,7 @@ vm-micro: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(DAEMON_PATH) $(BZIMAGE_PATH) kins
 
 vm-corpus: $(MICRO_RUNNER) $(DAEMON_PATH) $(BZIMAGE_PATH) kinsn-modules
 	mkdir -p "$(CORPUS_RESULTS_DIR)"
-	$(VENV_ACTIVATE) python3 "$(ROOT_DIR)/corpus/driver.py" packet --skip-build \
+	$(VENV_ACTIVATE) python3 "$(ROOT_DIR)/corpus/driver.py" packet \
 		--kernel-image "$(BZIMAGE_PATH)" --runner "$(MICRO_RUNNER)" --daemon "$(DAEMON_PATH)" \
 		--vng "$(VNG)" --btf-custom-path "$(VMLINUX_PATH)" --repeat "$(REPEAT)" \
 		--output-json "$(VM_CORPUS_OUTPUT_JSON)" --output-md "$(VM_CORPUS_OUTPUT_MD)"

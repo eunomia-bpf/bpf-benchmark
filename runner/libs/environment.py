@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import subprocess
 import sys
 from pathlib import Path
 from typing import Mapping, Sequence
@@ -17,18 +16,10 @@ def read_optional_text(path: str | Path, default: str = "unknown") -> str:
         return default
 
 
-def ensure_build_steps(
-    build_commands: Mapping[str, Sequence[str]],
-    *,
-    root_dir: str | Path,
-    build_order: Sequence[str],
-) -> None:
-    for step in build_order:
-        command = list(build_commands[step])
-        print(f"[build] {step}: {' '.join(command)}")
-        completed = subprocess.run(command, cwd=Path(root_dir), text=True)
-        if completed.returncode != 0:
-            raise RuntimeError(f"build step failed: {step}")
+def require_existing_paths(paths: Sequence[str | Path]) -> None:
+    missing = [str(Path(path)) for path in paths if not Path(path).exists()]
+    if missing:
+        raise SystemExit("missing required artifacts:\n" + "\n".join(missing))
 
 
 def validate_publication_environment(
@@ -78,8 +69,8 @@ def validate_publication_environment(
 
 
 __all__ = [
-    "ensure_build_steps",
     "read_optional_text",
     "read_required_text",
+    "require_existing_paths",
     "validate_publication_environment",
 ]

@@ -10,6 +10,7 @@ from runner.libs.run_artifacts import (
     artifact_timestamp,
     create_run_artifact_dir,
     derive_run_type,
+    externalize_sample_daemon_debug,
     repo_relative_path,
     result_root_for_output,
     update_run_artifact,
@@ -28,7 +29,7 @@ def test_result_root_for_output_uses_parent_of_dev_dir(tmp_path: Path) -> None:
     assert result_root_for_output(output) == tmp_path / "results"
 
 
-def test_write_run_artifact_replaces_previous_managed_runs(tmp_path: Path) -> None:
+def test_write_run_artifact_preserves_previous_metadata_and_prunes_old_details_by_default(tmp_path: Path) -> None:
     results_dir = tmp_path / "results"
     results_dir.mkdir()
 
@@ -39,6 +40,7 @@ def test_write_run_artifact_replaces_previous_managed_runs(tmp_path: Path) -> No
         detail_payloads={"result.json": {"ok": True}},
     )
     assert first_dir.is_dir()
+    assert (first_dir / "details" / "result.json").is_file()
 
     preserved_dir = results_dir / "archive"
     preserved_dir.mkdir()
@@ -49,13 +51,40 @@ def test_write_run_artifact_replaces_previous_managed_runs(tmp_path: Path) -> No
         metadata={"generated_at": "2026-03-23T10:11:13+00:00"},
     )
 
-    assert not first_dir.exists()
+    assert first_dir.exists()
+    assert not (first_dir / "details").exists()
     assert preserved_dir.exists()
     assert second_dir.is_dir()
 
     payload = json.loads((second_dir / "metadata.json").read_text())
     assert payload["artifact_kind"] == ARTIFACT_KIND
     assert payload["artifact_version"] == ARTIFACT_VERSION
+
+
+def test_write_run_artifact_can_explicitly_replace_previous_managed_runs(tmp_path: Path) -> None:
+    results_dir = tmp_path / "results"
+    results_dir.mkdir()
+
+    first_dir = write_run_artifact(
+        results_dir=results_dir,
+        run_type="vm_micro",
+        metadata={"generated_at": "2026-03-23T10:11:12+00:00"},
+    )
+    assert first_dir.is_dir()
+
+    preserved_dir = results_dir / "archive"
+    preserved_dir.mkdir()
+
+    second_dir = write_run_artifact(
+        results_dir=results_dir,
+        run_type="vm_micro",
+        metadata={"generated_at": "2026-03-23T10:11:13+00:00"},
+        clear_existing=True,
+    )
+
+    assert not first_dir.exists()
+    assert preserved_dir.exists()
+    assert second_dir.is_dir()
 
 
 def test_create_run_artifact_dir_can_skip_clear_existing(tmp_path: Path) -> None:
@@ -81,6 +110,33 @@ def test_create_run_artifact_dir_can_skip_clear_existing(tmp_path: Path) -> None
 
     assert first_dir.exists()
     assert second_dir.exists()
+
+
+def test_externalize_sample_daemon_debug_moves_large_payload_to_detail() -> None:
+    sample = {
+        "iteration_index": 2,
+        "result": 7,
+        "rejit": {
+            "applied": True,
+            "verifier_retries": 1,
+            "daemon_response": {"debug": {"verifier_log": {"log": "ok"}}},
+        },
+    }
+
+    detail = externalize_sample_daemon_debug(
+        benchmark_name="branch_dense",
+        runtime_name="kernel-rejit",
+        sample_index=2,
+        sample=sample,
+    )
+
+    assert detail is not None
+    relative_path, detail_payload, index_entry = detail
+    assert relative_path == "daemon_debug/branch_dense__kernel_rejit__iter02.json"
+    assert sample["rejit"]["daemon_debug_ref"] == "details/daemon_debug/branch_dense__kernel_rejit__iter02.json"
+    assert "daemon_response" not in sample["rejit"]
+    assert detail_payload["daemon_response"] == {"debug": {"verifier_log": {"log": "ok"}}}
+    assert index_entry["path"] == "details/daemon_debug/branch_dense__kernel_rejit__iter02.json"
 
 
 def test_repo_relative_path_returns_string() -> None:

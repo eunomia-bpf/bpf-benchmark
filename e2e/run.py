@@ -170,7 +170,7 @@ def build_run_metadata(
     return metadata
 
 
-def _run_single_case(args: argparse.Namespace, *, clear_existing: bool = True) -> dict[str, object]:
+def _run_single_case(args: argparse.Namespace, *, clear_existing: bool = False) -> dict[str, object]:
     """Run a single e2e case and persist its outputs progressively."""
     output_json = Path(args.output_json).resolve()
     run_type = derive_run_type(output_json, args.case)
@@ -276,7 +276,6 @@ def main(argv: list[str] | None = None) -> int:
     if args.case == "all":
         # Run all cases sequentially, each with its own default outputs.
         failed: list[str] = []
-        clear_existing = True
         for case_name in ALL_CASES:
             print(f"\n{'='*60}")
             print(f"  e2e: running {case_name}")
@@ -288,7 +287,7 @@ def main(argv: list[str] | None = None) -> int:
             case_args = parser.parse_args(case_argv)
             apply_case_defaults(case_args)
             try:
-                payload = _run_single_case(case_args, clear_existing=clear_existing)
+                payload = _run_single_case(case_args)
                 if _is_skipped_payload(payload):
                     print(f"  e2e: {case_name} SKIP")
                 else:
@@ -296,8 +295,6 @@ def main(argv: list[str] | None = None) -> int:
             except Exception as exc:
                 print(f"  e2e: {case_name} FAILED: {exc}")
                 failed.append(case_name)
-            finally:
-                clear_existing = False
         if failed:
             print(f"\ne2e: FAILED cases: {', '.join(failed)}")
             return 1
