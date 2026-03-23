@@ -1,10 +1,11 @@
 # Corpus Results
 
-Top-level `corpus/results/` keeps only checked-in authoritative JSON plus this README.
+Top-level `corpus/results/` stores one timestamped directory per run.
 
-- `archive/` stores intermediate runs, analysis notes, expansion artifacts, and historical snapshots.
-- `dev/` is the default output location for `make vm-corpus`.
-- `YYYYMMDD` in authoritative filenames comes from the payload `generated_at` date in UTC.
+- Each run lives under `corpus/results/<run_type>_<timestamp>/`.
+- `metadata.json` is always kept.
+- Older runs of the same type keep `metadata.json` but have `details/` pruned.
+- Large per-target details live under `details/`.
 
 Current top-level authoritative JSON:
 

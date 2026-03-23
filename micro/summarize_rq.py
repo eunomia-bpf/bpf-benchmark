@@ -26,10 +26,7 @@ except ModuleNotFoundError:
         load_manifest_from_results,
     )
     from runner.libs.reporting import render_corpus_summary_markdown, render_rq_summary_markdown
-try:
-    from results_layout import authoritative_candidates
-except ImportError:
-    from micro.results_layout import authoritative_candidates
+from runner.libs import authoritative_candidates
 
 
 MICRO_DIR = REPO_ROOT / "micro"

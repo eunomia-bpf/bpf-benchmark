@@ -175,7 +175,7 @@ $(KERNEL_SYMVERS_PATH): $(KERNEL_JIT_SOURCES)
 # ── Local tests ────────────────────────────────────────────────────────────────
 smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP)
 	mkdir -p "$(MICRO_RESULTS_DIR)"
-	$(VENV_ACTIVATE) python3 "$(MICRO_DIR)/driver.py" suite --runtime llvmbpf $(LOCAL_SMOKE_ARGS) --output "$(SMOKE_OUTPUT)"
+	$(VENV_ACTIVATE) python3 "$(MICRO_DIR)/driver.py" --runtime llvmbpf $(LOCAL_SMOKE_ARGS) --output "$(SMOKE_OUTPUT)"
 
 daemon-tests:
 	cargo test --manifest-path "$(DAEMON_DIR)/Cargo.toml"
@@ -225,7 +225,7 @@ vm-micro-smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(DAEMON_PATH) $(BZIMAGE_PATH
 		bash -lc 'cd "$(ROOT_DIR)" && $(VM_INIT) \
 			"$(DAEMON_PATH)" --pgo serve --socket "$(DAEMON_SOCKET)" & DAEMON_PID=$$!; sleep 0.5; \
 			trap "kill $$DAEMON_PID 2>/dev/null; rm -f $(DAEMON_SOCKET)" EXIT; \
-			python3 "$(MICRO_DIR)/driver.py" suite --runtime kernel --runtime kernel-rejit \
+			python3 "$(MICRO_DIR)/driver.py" --runtime kernel --runtime kernel-rejit \
 			--daemon-socket "$(DAEMON_SOCKET)" $(VM_SMOKE_ARGS) --output "$(VM_MICRO_SMOKE_OUTPUT)"'
 
 vm-micro: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(DAEMON_PATH) $(BZIMAGE_PATH) kinsn-modules
@@ -234,7 +234,7 @@ vm-micro: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(DAEMON_PATH) $(BZIMAGE_PATH) kins
 		bash -lc 'cd "$(ROOT_DIR)" && $(VM_INIT) \
 			"$(DAEMON_PATH)" --pgo serve --socket "$(DAEMON_SOCKET)" & DAEMON_PID=$$!; sleep 0.5; \
 			trap "kill $$DAEMON_PID 2>/dev/null; rm -f $(DAEMON_SOCKET)" EXIT; \
-			python3 "$(MICRO_DIR)/driver.py" suite --runtime llvmbpf --runtime kernel --runtime kernel-rejit \
+			python3 "$(MICRO_DIR)/driver.py" --runtime llvmbpf --runtime kernel --runtime kernel-rejit \
 			--daemon-socket "$(DAEMON_SOCKET)" $(MICRO_ARGS) --output "$(VM_MICRO_OUTPUT)"'
 
 vm-corpus: $(MICRO_RUNNER) $(DAEMON_PATH) $(BZIMAGE_PATH) kinsn-modules

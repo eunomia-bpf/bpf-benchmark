@@ -46,8 +46,6 @@ from e2e.case_common import (  # noqa: E402
     percent_delta,
     percentile,
     speedup_ratio,
-    ensure_runner_binary,
-    ensure_daemon_binary,
     persist_results,
 )
 
@@ -565,8 +563,10 @@ def build_markdown(payload: Mapping[str, object]) -> str:
 
 
 def ensure_artifacts(runner_binary: Path, daemon_binary: Path) -> None:
-    ensure_runner_binary(runner_binary)
-    ensure_daemon_binary(daemon_binary)
+    if not runner_binary.exists():
+        raise RuntimeError(f"micro_exec not found: {runner_binary}")
+    if not daemon_binary.exists():
+        raise RuntimeError(f"bpfrejit-daemon not found: {daemon_binary}")
 
 
 def run_setup_script(setup_script: Path) -> dict[str, object]:

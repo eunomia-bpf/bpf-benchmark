@@ -94,25 +94,6 @@ def speedup_ratio(before: object, after: object) -> float | None:
 
 
 # ---------------------------------------------------------------------------
-# Build artifact helpers
-# ---------------------------------------------------------------------------
-
-def ensure_runner_binary(runner_binary: Path) -> None:
-    """Build the micro_exec runner if it does not exist."""
-    if not runner_binary.exists():
-        run_command(["make", "runner"], timeout=1800)
-
-
-def ensure_daemon_binary(daemon_binary: Path) -> None:
-    """Build the bpfrejit-daemon if it does not exist."""
-    if not daemon_binary.exists():
-        run_command(
-            ["cargo", "build", "--release", "--manifest-path", "daemon/Cargo.toml"],
-            timeout=1800,
-        )
-
-
-# ---------------------------------------------------------------------------
 # Result persistence
 # ---------------------------------------------------------------------------
 

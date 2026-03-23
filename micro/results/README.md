@@ -1,10 +1,11 @@
 # Micro Results
 
-Top-level `micro/results/` keeps only checked-in authoritative JSON plus this README.
+Top-level `micro/results/` stores one timestamped directory per run.
 
-- `archive/` stores historical, intermediate, analysis, and auxiliary artifacts.
-- `dev/` is the default output location for `make smoke`, `make vm-micro-smoke`, and `make vm-micro`.
-- `YYYYMMDD` in authoritative filenames comes from the payload `generated_at` date in UTC.
+- Each run lives under `micro/results/<run_type>_<timestamp>/`.
+- `metadata.json` is always kept.
+- Older runs of the same type keep `metadata.json` but have `details/` pruned.
+- Large per-sample logs live under `details/`.
 
 Current top-level authoritative JSON:
 

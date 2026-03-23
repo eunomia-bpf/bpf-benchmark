@@ -38,7 +38,6 @@ from e2e.case_common import (  # noqa: E402
     summarize_numbers,
     percent_delta,
     percentile,
-    ensure_daemon_binary,
     persist_results,
 )
 
@@ -256,18 +255,12 @@ def aggregate_sites(records: Mapping[int | str, Mapping[str, object]]) -> dict[s
 
 
 def ensure_artifacts(daemon_binary: Path, scheduler_binary: Path, scx_repo: Path) -> None:
-    ensure_daemon_binary(daemon_binary)
-    if scheduler_binary.exists():
-        return
+    if not daemon_binary.exists():
+        raise RuntimeError(f"bpfrejit-daemon not found: {daemon_binary}")
+    if not scheduler_binary.exists():
+        raise RuntimeError(f"scx_rusty binary not found: {scheduler_binary}")
     if not scx_repo.exists():
         raise RuntimeError(f"scx repo missing: {scx_repo}")
-    run_command(
-        ["cargo", "build", "--release", "-p", "scx_rusty"],
-        cwd=scx_repo,
-        timeout=7200,
-    )
-    if not scheduler_binary.exists():
-        raise RuntimeError(f"scx_rusty binary missing after build: {scheduler_binary}")
 
 
 def workload_specs() -> list[dict[str, str]]:

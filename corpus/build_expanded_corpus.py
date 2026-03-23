@@ -16,10 +16,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-try:
-    from results_layout import authoritative_output_path, maybe_refresh_latest_alias, smoke_output_path
-except ImportError:
-    from corpus.results_layout import authoritative_output_path, maybe_refresh_latest_alias, smoke_output_path
+from runner.libs import authoritative_output_path, maybe_refresh_latest_alias, smoke_output_path
 
 
 ROOT = Path(__file__).resolve().parent

@@ -3,8 +3,10 @@ from __future__ import annotations
 
 import argparse
 import sys
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Callable
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -14,11 +16,9 @@ from runner.libs import (  # noqa: E402
     prepare_bpftool_environment,
 )
 from runner.libs.run_artifacts import (  # noqa: E402
-    create_run_artifact_dir,
+    ArtifactSession,
     derive_run_type,
     repo_relative_path,
-    result_root_for_output,
-    update_run_artifact,
 )
 from e2e.cases.bpftrace.case import (  # noqa: E402
     DEFAULT_OUTPUT_JSON as DEFAULT_BPFTRACE_OUTPUT_JSON,
@@ -58,6 +58,53 @@ from e2e.cases.tracee.case import (  # noqa: E402
     run_tracee_case,
 )
 
+@dataclass(frozen=True)
+class CaseSpec:
+    run_case: Callable[[argparse.Namespace], dict[str, object]]
+    build_markdown: Callable[[dict[str, object]], str]
+    default_output_json: Path
+    default_output_md: Path
+    default_setup_script: str | None = None
+    build_report: Callable[[dict[str, object]], str] | None = None
+
+
+CASE_SPECS: dict[str, CaseSpec] = {
+    "tracee": CaseSpec(
+        run_case=run_tracee_case,
+        build_markdown=build_tracee_markdown,
+        default_output_json=DEFAULT_OUTPUT_JSON,
+        default_output_md=DEFAULT_OUTPUT_MD,
+        default_setup_script=str(DEFAULT_TRACEE_SETUP_SCRIPT),
+    ),
+    "tetragon": CaseSpec(
+        run_case=run_tetragon_case,
+        build_markdown=build_tetragon_markdown,
+        default_output_json=DEFAULT_TETRAGON_OUTPUT_JSON,
+        default_output_md=DEFAULT_TETRAGON_OUTPUT_MD,
+        default_setup_script=str(DEFAULT_TETRAGON_SETUP_SCRIPT),
+    ),
+    "bpftrace": CaseSpec(
+        run_case=run_bpftrace_case,
+        build_markdown=build_bpftrace_markdown,
+        build_report=build_bpftrace_report,
+        default_output_json=DEFAULT_BPFTRACE_OUTPUT_JSON,
+        default_output_md=DEFAULT_BPFTRACE_OUTPUT_MD,
+    ),
+    "scx": CaseSpec(
+        run_case=run_scx_case,
+        build_markdown=build_scx_markdown,
+        default_output_json=DEFAULT_SCX_OUTPUT_JSON,
+        default_output_md=DEFAULT_SCX_OUTPUT_MD,
+    ),
+    "katran": CaseSpec(
+        run_case=run_katran_case,
+        build_markdown=build_katran_markdown,
+        default_output_json=DEFAULT_KATRAN_OUTPUT_JSON,
+        default_output_md=DEFAULT_KATRAN_OUTPUT_MD,
+        default_setup_script=str(DEFAULT_KATRAN_SETUP_SCRIPT),
+    ),
+}
+
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Unified entrypoint for repository end-to-end benchmarks.")
@@ -78,7 +125,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--smoke-duration", type=int, default=5)
     parser.add_argument("--tracee-extra-arg", action="append", default=[])
     parser.add_argument("--script", action="append", dest="scripts")
-    parser.add_argument("--skip-build", action="store_true")
     parser.add_argument("--scheduler-binary", default=str(ROOT_DIR / "corpus" / "repos" / "scx" / "target" / "release" / "scx_rusty"))
     parser.add_argument("--scheduler-object", default=str(ROOT_DIR / "corpus" / "build" / "scx" / "scx_rusty_main.bpf.o"))
     parser.add_argument("--scx-repo", default=str(ROOT_DIR / "corpus" / "repos" / "scx"))
@@ -102,36 +148,15 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def apply_case_defaults(args: argparse.Namespace) -> None:
-    if args.case == "katran":
-        if args.output_json == str(DEFAULT_OUTPUT_JSON):
-            args.output_json = str(DEFAULT_KATRAN_OUTPUT_JSON)
-        if args.output_md == str(DEFAULT_OUTPUT_MD):
-            args.output_md = str(DEFAULT_KATRAN_OUTPUT_MD)
-        if args.setup_script == str(DEFAULT_TRACEE_SETUP_SCRIPT):
-            args.setup_script = str(DEFAULT_KATRAN_SETUP_SCRIPT)
+    spec = CASE_SPECS.get(args.case)
+    if spec is None:
         return
-
-    if args.case == "scx":
-        if args.output_json == str(DEFAULT_OUTPUT_JSON):
-            args.output_json = str(DEFAULT_SCX_OUTPUT_JSON)
-        if args.output_md == str(DEFAULT_OUTPUT_MD):
-            args.output_md = str(DEFAULT_SCX_OUTPUT_MD)
-        return
-
-    if args.case == "tetragon":
-        if args.output_json == str(DEFAULT_OUTPUT_JSON):
-            args.output_json = str(DEFAULT_TETRAGON_OUTPUT_JSON)
-        if args.output_md == str(DEFAULT_OUTPUT_MD):
-            args.output_md = str(DEFAULT_TETRAGON_OUTPUT_MD)
-        if args.setup_script == str(DEFAULT_TRACEE_SETUP_SCRIPT):
-            args.setup_script = str(DEFAULT_TETRAGON_SETUP_SCRIPT)
-        return
-
-    if args.case == "bpftrace":
-        if args.output_json == str(DEFAULT_OUTPUT_JSON):
-            args.output_json = str(DEFAULT_BPFTRACE_OUTPUT_JSON)
-        if args.output_md == str(DEFAULT_OUTPUT_MD):
-            args.output_md = str(DEFAULT_BPFTRACE_OUTPUT_MD)
+    if args.output_json == str(DEFAULT_OUTPUT_JSON):
+        args.output_json = str(spec.default_output_json)
+    if args.output_md == str(DEFAULT_OUTPUT_MD):
+        args.output_md = str(spec.default_output_md)
+    if spec.default_setup_script is not None and args.setup_script == str(DEFAULT_TRACEE_SETUP_SCRIPT):
+        args.setup_script = spec.default_setup_script
 
 
 ALL_CASES = ("tracee", "tetragon", "bpftrace", "scx", "katran")
@@ -175,71 +200,57 @@ def _run_single_case(args: argparse.Namespace, *, clear_existing: bool = False) 
     output_json = Path(args.output_json).resolve()
     run_type = derive_run_type(output_json, args.case)
     started_at = datetime.now(timezone.utc).isoformat()
-    artifact_dir = create_run_artifact_dir(
-        results_dir=result_root_for_output(output_json),
-        run_type=run_type,
-        generated_at=started_at,
-        clear_existing=clear_existing,
-    )
+    spec = CASE_SPECS[args.case]
 
     progress_payload: dict[str, object] = {
         "case": args.case,
         "status": "running",
         "smoke": bool(args.smoke),
     }
-    running_metadata = build_run_metadata(args, progress_payload, primary_output_json=output_json)
-    running_metadata["status"] = "running"
-    running_metadata["started_at"] = started_at
-    running_metadata["last_updated_at"] = started_at
-    update_run_artifact(
-        run_dir=artifact_dir,
+    metadata_payload: dict[str, object] = progress_payload
+
+    def build_artifact_metadata(
+        status: str,
+        session_started_at: str,
+        updated_at: str,
+        error_message: str | None,
+    ) -> dict[str, object]:
+        metadata = build_run_metadata(args, metadata_payload, primary_output_json=output_json)
+        metadata["status"] = status
+        metadata["started_at"] = session_started_at
+        metadata["last_updated_at"] = updated_at
+        if error_message:
+            metadata["error_message"] = error_message
+        return metadata
+
+    session = ArtifactSession(
+        output_path=output_json,
         run_type=run_type,
-        metadata=running_metadata,
-        detail_payloads={"progress.json": progress_payload},
+        generated_at=started_at,
+        metadata_builder=build_artifact_metadata,
+        clear_existing=clear_existing,
     )
+    artifact_dir = session.run_dir
+    session.write(status="running", progress_payload=progress_payload)
 
     try:
-        if args.case == "tracee":
-            payload = run_tracee_case(args)
-            detail_texts = {"result.md": build_tracee_markdown(payload) + "\n"}
-        elif args.case == "tetragon":
-            payload = run_tetragon_case(args)
-            detail_texts = {"result.md": build_tetragon_markdown(payload) + "\n"}
-        elif args.case == "bpftrace":
-            payload = run_bpftrace_case(args)
-            detail_texts = {
-                "result.md": build_bpftrace_markdown(payload) + "\n",
-                "report.md": build_bpftrace_report(payload) + "\n",
-            }
-        elif args.case == "scx":
-            payload = run_scx_case(args)
-            detail_texts = {"result.md": build_scx_markdown(payload) + "\n"}
-        elif args.case == "katran":
-            payload = run_katran_case(args)
-            detail_texts = {"result.md": build_katran_markdown(payload) + "\n"}
-        else:
-            raise SystemExit(f"unsupported e2e case: {args.case}")
+        payload = spec.run_case(args)
+        detail_texts = {"result.md": spec.build_markdown(payload) + "\n"}
+        if spec.build_report is not None:
+            detail_texts["report.md"] = spec.build_report(payload) + "\n"
 
         completed_at = datetime.now(timezone.utc).isoformat()
-        detail_payloads: dict[str, object] = {
-            "result.json": payload,
-            "progress.json": {
-                "case": args.case,
-                "status": "completed",
-                "smoke": bool(args.smoke),
-                "completed_at": completed_at,
-            },
+        progress_payload = {
+            "case": args.case,
+            "status": "completed",
+            "smoke": bool(args.smoke),
+            "completed_at": completed_at,
         }
-        artifact_metadata = build_run_metadata(args, payload, primary_output_json=output_json)
-        artifact_metadata["status"] = "completed"
-        artifact_metadata["started_at"] = started_at
-        artifact_metadata["last_updated_at"] = completed_at
-        artifact_metadata["completed_at"] = completed_at
-        update_run_artifact(
-            run_dir=artifact_dir,
-            run_type=run_type,
-            metadata=artifact_metadata,
-            detail_payloads=detail_payloads,
+        metadata_payload = payload
+        session.write(
+            status="completed",
+            progress_payload=progress_payload,
+            result_payload=payload,
             detail_texts=detail_texts,
         )
     except Exception as exc:
@@ -251,16 +262,11 @@ def _run_single_case(args: argparse.Namespace, *, clear_existing: bool = False) 
             "error_message": str(exc),
             "failed_at": failed_at,
         }
-        artifact_metadata = build_run_metadata(args, error_payload, primary_output_json=output_json)
-        artifact_metadata["status"] = "error"
-        artifact_metadata["started_at"] = started_at
-        artifact_metadata["last_updated_at"] = failed_at
-        artifact_metadata["error_message"] = str(exc)
-        update_run_artifact(
-            run_dir=artifact_dir,
-            run_type=run_type,
-            metadata=artifact_metadata,
-            detail_payloads={"progress.json": error_payload},
+        metadata_payload = error_payload
+        session.write(
+            status="error",
+            progress_payload=error_payload,
+            error_message=str(exc),
         )
         raise
 

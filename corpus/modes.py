@@ -22,10 +22,7 @@ for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpu
     if candidate_str not in sys.path:
         sys.path.insert(0, candidate_str)
 
-try:
-    from results_layout import authoritative_output_path, smoke_output_path
-except ImportError:
-    from corpus.results_layout import authoritative_output_path, smoke_output_path
+from runner.libs import authoritative_output_path, smoke_output_path
 
 try:
     from runner.libs.inventory import (
@@ -35,11 +32,9 @@ try:
     )
     from runner.libs.results import parse_runner_samples
     from runner.libs.run_artifacts import (
-        create_run_artifact_dir,
+        ArtifactSession,
         derive_run_type,
         repo_relative_path,
-        result_root_for_output,
-        update_run_artifact,
     )
 except ImportError:
     from runner.libs.inventory import (
@@ -49,11 +44,9 @@ except ImportError:
     )
     from runner.libs.results import parse_runner_samples
     from runner.libs.run_artifacts import (
-        create_run_artifact_dir,
+        ArtifactSession,
         derive_run_type,
         repo_relative_path,
-        result_root_for_output,
-        update_run_artifact,
     )
 
 from runner.libs.corpus import (
@@ -139,7 +132,7 @@ def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
             "Run the inventory-derived packet-test-run corpus v5 recompile batch on "
-            "the framework kernel guest, with automatic host compile-only fallback."
+            "the framework kernel guest."
         )
     )
     parser.add_argument(
@@ -154,7 +147,7 @@ def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--kernel-tree",
         default=str(DEFAULT_KERNEL_TREE),
-        help="Framework kernel tree used for `make bzImage`.",
+        help="Framework kernel tree recorded in result metadata.",
     )
     parser.add_argument(
         "--kernel-image",
@@ -901,7 +894,7 @@ def collect_guest_info(
     }
 
 
-def build_summary(records: list[dict[str, Any]], effective_mode: str, fallback_reason: str | None) -> dict[str, Any]:
+def build_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
     compile_pairs = [
         record
         for record in records
@@ -1032,8 +1025,7 @@ def build_summary(records: list[dict[str, Any]], effective_mode: str, fallback_r
     )[:10]
 
     return {
-        "effective_mode": effective_mode,
-        "fallback_reason": fallback_reason,
+        "effective_mode": "vm",
         "targets_attempted": len(records),
         "compile_pairs": len(compile_pairs),
         "measured_pairs": len(measured_pairs),
@@ -1113,8 +1105,6 @@ def build_markdown(data: dict[str, Any]) -> str:
             for name, field in FAMILY_FIELDS
         ],
     ]
-    if summary.get("fallback_reason"):
-        lines.append(f"- Fallback reason: {summary['fallback_reason']}")
     if build_summary_data:
         lines.append(
             f"- Kernel build: {'ok' if build_summary_data.get('ok') else 'failed'} "
@@ -1346,11 +1336,6 @@ def packet_main(argv: list[str] | None = None) -> int:
 
     run_type = derive_run_type(output_json, "corpus_vm_batch")
     started_at = datetime.now(timezone.utc).isoformat()
-    artifact_dir = create_run_artifact_dir(
-        results_dir=result_root_for_output(output_json),
-        run_type=run_type,
-        generated_at=started_at,
-    )
 
     targets, inventory_summary = load_targets(
         inventory_json=inventory_json,
@@ -1372,9 +1357,6 @@ def packet_main(argv: list[str] | None = None) -> int:
         smoke_error = (guest_smoke.get("invocation") or {}).get("error") or "guest smoke failed"
         raise SystemExit(f"vm guest smoke failed: {smoke_error}")
 
-    effective_mode = "vm"
-    fallback_reason = None
-
     records: list[dict[str, Any]] = []
     result = {
         "generated_at": started_at,
@@ -1392,14 +1374,19 @@ def packet_main(argv: list[str] | None = None) -> int:
         "guest_smoke": guest_smoke,
         "skip_families": skip_families,
         "blind_apply": args.blind_apply,
-        "summary": build_summary(records, effective_mode, fallback_reason),
+        "summary": build_summary(records),
         "programs": records,
     }
     current_target: dict[str, Any] | None = None
     current_target_index: int | None = None
 
-    def flush_artifact(status: str, *, error_message: str | None = None, include_markdown: bool = False) -> None:
-        result["summary"] = build_summary(records, effective_mode, fallback_reason)
+    def build_artifact_metadata(
+        status: str,
+        session_started_at: str,
+        updated_at: str,
+        error_message: str | None,
+    ) -> dict[str, Any]:
+        result["summary"] = build_summary(records)
         progress = {
             "status": status,
             "total_programs": len(targets),
@@ -1410,7 +1397,6 @@ def packet_main(argv: list[str] | None = None) -> int:
         if error_message:
             progress["error_message"] = error_message
 
-        updated_at = datetime.now(timezone.utc).isoformat()
         metadata = build_corpus_artifact_metadata(
             generated_at=str(result["generated_at"]),
             run_type=run_type,
@@ -1433,27 +1419,41 @@ def packet_main(argv: list[str] | None = None) -> int:
                 "skip_families": skip_families,
                 "blind_apply": bool(args.blind_apply),
                 "guest_smoke": guest_smoke,
-                "started_at": started_at,
+                "started_at": session_started_at,
                 "last_updated_at": updated_at,
                 "status": status,
             },
         )
-        if status == "completed":
-            metadata["completed_at"] = updated_at
         if error_message:
             metadata["error_message"] = error_message
+        return metadata
 
-        detail_payloads = {
-            "result.json": result,
-            "progress.json": progress,
+    session = ArtifactSession(
+        output_path=output_json,
+        run_type=run_type,
+        generated_at=started_at,
+        metadata_builder=build_artifact_metadata,
+    )
+    artifact_dir = session.run_dir
+
+    def flush_artifact(status: str, *, error_message: str | None = None, include_markdown: bool = False) -> None:
+        result["summary"] = build_summary(records)
+        progress = {
+            "status": status,
+            "total_programs": len(targets),
+            "completed_programs": len(records),
+            "current_target_index": current_target_index,
+            "current_target": current_target,
         }
+        if error_message:
+            progress["error_message"] = error_message
         detail_texts = {"result.md": build_markdown(result)} if include_markdown else None
-        update_run_artifact(
-            run_dir=artifact_dir,
-            run_type=run_type,
-            metadata=metadata,
-            detail_payloads=detail_payloads,
+        session.write(
+            status=status,
+            progress_payload=progress,
+            result_payload=result,
             detail_texts=detail_texts,
+            error_message=error_message,
         )
 
     flush_artifact("running")
@@ -1773,11 +1773,6 @@ def run_linear_mode(mode_name: str, argv: list[str] | None = None) -> int:
     output_md = Path(args.output_md).resolve()
     run_type = derive_run_type(output_json, mode_name)
     started_at = datetime.now(timezone.utc).isoformat()
-    artifact_dir = create_run_artifact_dir(
-        results_dir=result_root_for_output(output_json),
-        run_type=run_type,
-        generated_at=started_at,
-    )
 
     btf_custom_path = Path(args.btf_custom_path).resolve() if args.btf_custom_path else None
     corpus_build_report = Path(args.corpus_build_report).resolve() if args.corpus_build_report else None
@@ -1811,7 +1806,12 @@ def run_linear_mode(mode_name: str, argv: list[str] | None = None) -> int:
     current_target: dict[str, Any] | None = None
     current_target_index: int | None = None
 
-    def flush_artifact(status: str, *, error_message: str | None = None, include_markdown: bool = False) -> None:
+    def build_artifact_metadata(
+        status: str,
+        session_started_at: str,
+        updated_at: str,
+        error_message: str | None,
+    ) -> dict[str, Any]:
         payload["summary"] = build_linear_summary(records, mode_name=mode_name, enable_exec=enable_exec)
         progress = {
             "status": status,
@@ -1823,7 +1823,6 @@ def run_linear_mode(mode_name: str, argv: list[str] | None = None) -> int:
         if error_message:
             progress["error_message"] = error_message
 
-        updated_at = datetime.now(timezone.utc).isoformat()
         metadata = build_corpus_artifact_metadata(
             generated_at=str(payload["generated_at"]),
             run_type=run_type,
@@ -1843,29 +1842,43 @@ def run_linear_mode(mode_name: str, argv: list[str] | None = None) -> int:
                 "corpus_build_report": repo_relative_path(corpus_build_report) if corpus_build_report is not None else None,
                 "discovery": discovery_summary,
                 "enable_exec": enable_exec,
-                "started_at": started_at,
+                "started_at": session_started_at,
                 "last_updated_at": updated_at,
                 "status": status,
             },
         )
-        if status == "completed":
-            metadata["completed_at"] = updated_at
         if error_message:
             metadata["error_message"] = error_message
+        return metadata
 
-        detail_payloads = {
-            "result.json": payload,
-            "progress.json": progress,
+    session = ArtifactSession(
+        output_path=output_json,
+        run_type=run_type,
+        generated_at=started_at,
+        metadata_builder=build_artifact_metadata,
+    )
+    artifact_dir = session.run_dir
+
+    def flush_artifact(status: str, *, error_message: str | None = None, include_markdown: bool = False) -> None:
+        payload["summary"] = build_linear_summary(records, mode_name=mode_name, enable_exec=enable_exec)
+        progress = {
+            "status": status,
+            "total_programs": len(targets),
+            "completed_programs": len(records),
+            "current_target_index": current_target_index,
+            "current_target": current_target,
         }
+        if error_message:
+            progress["error_message"] = error_message
         detail_texts = {
             "result.md": build_linear_markdown(payload, mode_name=mode_name, enable_exec=enable_exec)
         } if include_markdown else None
-        update_run_artifact(
-            run_dir=artifact_dir,
-            run_type=run_type,
-            metadata=metadata,
-            detail_payloads=detail_payloads,
+        session.write(
+            status=status,
+            progress_payload=progress,
+            result_payload=payload,
             detail_texts=detail_texts,
+            error_message=error_message,
         )
 
     flush_artifact("running")

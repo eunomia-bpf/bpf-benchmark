@@ -67,6 +67,6 @@ python3 micro/driver.py suite -- \
 
 Results live under `micro/results/`.
 
-- `micro/results/dev/`: default working outputs for direct runs and Makefile targets
-- `micro/results/`: checked-in authoritative JSON plus `README.md`
-- `micro/results/archive/`: historical and intermediate artifacts
+- Each run lives under `micro/results/<run_type>_<timestamp>/`
+- `metadata.json` is always kept
+- Older runs of the same type keep metadata and drop `details/`

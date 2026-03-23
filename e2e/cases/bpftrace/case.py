@@ -48,8 +48,6 @@ from e2e.case_common import (  # noqa: E402
     git_sha,
     host_metadata,
     percent_delta,
-    ensure_runner_binary,
-    ensure_daemon_binary,
 )
 
 
@@ -130,7 +128,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--attach-timeout", type=int, default=20)
     parser.add_argument("--script", action="append", dest="scripts")
     parser.add_argument("--smoke", action="store_true")
-    parser.add_argument("--skip-build", action="store_true")
     return parser.parse_args()
 
 
@@ -154,10 +151,7 @@ def version_at_least(version: tuple[int, int, int] | None, minimum: tuple[int, i
     return version is not None and version >= minimum
 
 
-def ensure_artifacts(runner_binary: Path, daemon_binary: Path, *, skip_build: bool) -> None:
-    if not skip_build or not runner_binary.exists():
-        ensure_runner_binary(runner_binary)
-    ensure_daemon_binary(daemon_binary)
+def ensure_artifacts(runner_binary: Path, daemon_binary: Path) -> None:
     if not runner_binary.exists():
         raise RuntimeError(f"micro_exec not found: {runner_binary}")
     if not daemon_binary.exists():
@@ -654,7 +648,7 @@ def run_case(args: argparse.Namespace) -> dict[str, object]:
 
     runner_binary = Path(args.runner).resolve()
     daemon_binary = Path(args.daemon).resolve()
-    ensure_artifacts(runner_binary, daemon_binary, skip_build=bool(args.skip_build))
+    ensure_artifacts(runner_binary, daemon_binary)
     tool_versions = ensure_required_tools()
 
     scripts = selected_scripts(args)

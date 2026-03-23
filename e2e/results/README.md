@@ -1,10 +1,11 @@
 # E2E Results
 
-Top-level `e2e/results/` keeps only checked-in authoritative JSON plus this README.
+Top-level `e2e/results/` stores one timestamped directory per run.
 
-- `archive/` stores superseded runs, analysis markdown, and historical artifacts.
-- `dev/` is the default output location for `make vm-e2e`.
-- `YYYYMMDD` in authoritative filenames comes from the payload `generated_at` date in UTC.
+- Each run lives under `e2e/results/<run_type>_<timestamp>/`.
+- `metadata.json` is always kept.
+- Older runs of the same type keep `metadata.json` but have `details/` pruned.
+- Per-case markdown and JSON details live under `details/`.
 
 Current top-level authoritative JSON:
 

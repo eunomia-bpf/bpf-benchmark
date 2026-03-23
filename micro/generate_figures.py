@@ -30,10 +30,7 @@ try:
     from runner.libs.catalog import DEFAULT_MICRO_MANIFEST, ManifestSpec, load_manifest, load_manifest_from_results
 except ModuleNotFoundError:
     from runner.libs.catalog import DEFAULT_MICRO_MANIFEST, ManifestSpec, load_manifest, load_manifest_from_results
-try:
-    from results_layout import authoritative_candidates, latest_output_path
-except ImportError:
-    from micro.results_layout import authoritative_candidates, latest_output_path
+from runner.libs import authoritative_candidates, latest_output_path
 
 
 plt.rcParams.update(

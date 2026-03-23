@@ -49,7 +49,6 @@ from e2e.case_common import (  # noqa: E402
     summarize_numbers,
     percent_delta,
     speedup_ratio,
-    ensure_daemon_binary,
     persist_results,
 )
 
@@ -276,7 +275,8 @@ def current_prog_ids() -> list[int]:
 
 
 def ensure_artifacts(daemon_binary: Path) -> None:
-    ensure_daemon_binary(daemon_binary)
+    if not daemon_binary.exists():
+        raise RuntimeError(f"bpfrejit-daemon not found: {daemon_binary}")
 
 
 def run_setup_script(setup_script: Path) -> dict[str, object]:
