@@ -1,6 +1,6 @@
 # bpftrace Real End-to-End Benchmark
 
-- Generated: `2026-03-23T01:15:36.363222+00:00`
+- Generated: `2026-03-23T08:43:42.948531+00:00`
 - Mode: `full`
 - Duration per phase: `30s`
 - Host kernel: `7.0.0-rc2+`
@@ -17,7 +17,7 @@ features: llvm, skeletons`
 - ReJIT successes: `1`
 - Eligible-site scripts: `0`
 - Aggregate sites: `0` (cmov=0, wide=0, rotate=0, lea=0)
-- Geomean speedup: `3.361x`
+- Geomean speedup: `4.721x`
 
 ## Per-Script
 
@@ -27,7 +27,7 @@ features: llvm, skeletons`
 | biosnoop | 0 | n/a | n/a | n/a | n/a | n/a | n/a | n/a | bpftrace did not attach any programs |
 | runqlat | 0 | n/a | n/a | n/a | n/a | n/a | n/a | n/a | bpftrace did not attach any programs |
 | tcpretrans | 0 | n/a | n/a | n/a | n/a | n/a | n/a | n/a | bpftrace did not attach any programs |
-| capable | 0 | 859.37 | 255.70 | 3.361x | 787421.45 | 794411.53 | 0.07 | 0.00 | ok |
+| capable | 0 | 1075.94 | 227.88 | 4.721x | 396930.35 | 463429.54 | 0.00 | 0.00 | ok |
 | vfsstat | 0 | n/a | n/a | n/a | n/a | n/a | n/a | n/a | bpftrace did not attach any programs |
 
 ## Comparison
@@ -36,7 +36,7 @@ features: llvm, skeletons`
 - biosnoop: avg_ns_delta=n/a%, ops_delta=n/a%, cpu_delta=n/a%
 - runqlat: avg_ns_delta=n/a%, ops_delta=n/a%, cpu_delta=n/a%
 - tcpretrans: avg_ns_delta=n/a%, ops_delta=n/a%, cpu_delta=n/a%
-- capable: avg_ns_delta=-70.25%, ops_delta=0.89%, cpu_delta=-100.00%
+- capable: avg_ns_delta=-78.82%, ops_delta=16.75%, cpu_delta=n/a%
 - vfsstat: avg_ns_delta=n/a%, ops_delta=n/a%, cpu_delta=n/a%
 
 ## Notes

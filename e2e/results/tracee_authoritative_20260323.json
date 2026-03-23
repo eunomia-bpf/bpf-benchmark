@@ -10,31 +10,31 @@
       },
       "app_throughput": {
         "count": 3,
-        "max": 1549997.3343521105,
-        "mean": 520615.87952484074,
-        "median": 7837.094558144813,
-        "min": 4013.2096642668357
+        "max": 1577123.0724232877,
+        "mean": 529989.5766078582,
+        "median": 7635.00013212228,
+        "min": 5210.657268164439
       },
       "bpf_avg_ns_per_run": {
         "count": 3,
-        "max": 715.0833333333334,
-        "mean": 351.58990979699524,
-        "median": 232.0855949895616,
-        "min": 107.60080106809079
+        "max": 577.172619047619,
+        "mean": 320.12032864440556,
+        "median": 289.24112734864303,
+        "min": 93.94723953695458
       },
       "events_per_sec": {
         "count": 3,
-        "max": 55323.203163236685,
-        "mean": 18447.2811061768,
-        "median": 15.841139398920077,
-        "min": 2.7990158947946044
+        "max": 56400.656502637736,
+        "mean": 18806.433134898994,
+        "median": 15.843891837587627,
+        "min": 2.799010221656046
       },
       "system_cpu_busy_pct": {
         "count": 3,
-        "max": 5.242841786377406,
-        "mean": 3.134129758702235,
-        "median": 4.157464127460376,
-        "min": 0.002083362268923139
+        "max": 5.213471856880714,
+        "mean": 3.1240794264355225,
+        "median": 4.157377504601179,
+        "min": 0.0013889178246739853
       }
     },
     "workloads": [
@@ -44,62 +44,62 @@
           "total_pct": null,
           "user_pct": null
         },
-        "app_throughput": 4013.2096642668357,
+        "app_throughput": 5210.657268164439,
         "bpf": {
           "programs": {
-            "6": {
-              "avg_ns_per_run": 4165.0,
+            "33": {
+              "avg_ns_per_run": 2763.0,
               "bytes_jited": 20298,
               "bytes_xlated": 34920,
-              "id": 6,
+              "id": 33,
               "name": "tracepoint__sch",
               "run_cnt_delta": 2,
-              "run_time_ns_delta": 8330,
+              "run_time_ns_delta": 5526,
               "type": "raw_tracepoint"
             },
-            "8": {
-              "avg_ns_per_run": 124.14113980409617,
+            "35": {
+              "avg_ns_per_run": 104.35055679287305,
               "bytes_jited": 22797,
               "bytes_xlated": 36664,
-              "id": 8,
+              "id": 35,
               "name": "trace_security_",
-              "run_cnt_delta": 2246,
-              "run_time_ns_delta": 278821,
+              "run_cnt_delta": 2245,
+              "run_time_ns_delta": 234267,
               "type": "kprobe"
             },
-            "10": {
-              "avg_ns_per_run": 87.44746215494212,
+            "37": {
+              "avg_ns_per_run": 81.16614699331849,
               "bytes_jited": 7369,
               "bytes_xlated": 13440,
-              "id": 10,
+              "id": 37,
               "name": "lsm_file_open_t",
-              "run_cnt_delta": 2246,
-              "run_time_ns_delta": 196407,
+              "run_cnt_delta": 2245,
+              "run_time_ns_delta": 182218,
               "type": "lsm"
             }
           },
           "summary": {
             "active_programs": 3,
-            "avg_ns_per_run": 107.60080106809079,
-            "total_events": 4494,
-            "total_run_time_ns": 483558
+            "avg_ns_per_run": 93.94723953695458,
+            "total_events": 4492,
+            "total_run_time_ns": 422011
           }
         },
         "command_template": "stress-ng --exec 4 --exec-method execve --timeout {duration}s --metrics-brief",
         "drop_counters": {},
-        "duration_s": 0.08123173899999969,
+        "duration_s": 0.07964446299999928,
         "event_counts": {},
-        "events_per_sec": 55323.203163236685,
-        "events_total": 4494,
+        "events_per_sec": 56400.656502637736,
+        "events_total": 4492,
         "kind": "exec_storm",
         "metric": "bogo-ops/s",
         "name": "exec_storm",
-        "ops_per_sec": 4013.2096642668357,
-        "ops_total": 326.0,
+        "ops_per_sec": 5210.657268164439,
+        "ops_total": 415.0,
         "stderr_tail": "",
-        "stdout_tail": "stress-ng: info:  [326] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [326] setting to a 1 min, 0 secs run per stressor\nstress-ng: info:  [326] dispatching hogs:\nstress-ng: metrc: [326] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [326]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: warn:  [326] metrics-check: all bogo-op counters are zero, data may be incorrect\nstress-ng: info:  [326] skipped: 4: exec (4)\nstress-ng: info:  [326] passed: 0\nstress-ng: info:  [326] failed: 0\nstress-ng: info:  [326] metrics untrustworthy: 0\nstress-ng: info:  [326] successful run completed in 0.00 secs",
+        "stdout_tail": "stress-ng: info:  [415] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [415] setting to a 1 min, 0 secs run per stressor\nstress-ng: info:  [415] dispatching hogs:\nstress-ng: metrc: [415] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [415]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: warn:  [415] metrics-check: all bogo-op counters are zero, data may be incorrect\nstress-ng: info:  [415] skipped: 4: exec (4)\nstress-ng: info:  [415] passed: 0\nstress-ng: info:  [415] failed: 0\nstress-ng: info:  [415] metrics untrustworthy: 0\nstress-ng: info:  [415] successful run completed in 0.00 secs",
         "system_cpu": {
-          "busy_pct": 0.002083362268923139
+          "busy_pct": 0.0013889178246739853
         }
       },
       {
@@ -108,62 +108,62 @@
           "total_pct": null,
           "user_pct": null
         },
-        "app_throughput": 1549997.3343521105,
+        "app_throughput": 1577123.0724232877,
         "bpf": {
           "programs": {
-            "6": {
-              "avg_ns_per_run": 6184.5,
+            "33": {
+              "avg_ns_per_run": 5247.0,
               "bytes_jited": 20298,
               "bytes_xlated": 34920,
-              "id": 6,
+              "id": 33,
               "name": "tracepoint__sch",
               "run_cnt_delta": 2,
-              "run_time_ns_delta": 12369,
+              "run_time_ns_delta": 10494,
               "type": "raw_tracepoint"
             },
-            "8": {
-              "avg_ns_per_run": 319.4560669456067,
+            "35": {
+              "avg_ns_per_run": 375.3326359832636,
               "bytes_jited": 22797,
               "bytes_xlated": 36664,
-              "id": 8,
+              "id": 35,
               "name": "trace_security_",
               "run_cnt_delta": 478,
-              "run_time_ns_delta": 152700,
+              "run_time_ns_delta": 179409,
               "type": "kprobe"
             },
-            "10": {
-              "avg_ns_per_run": 119.80962343096235,
+            "37": {
+              "avg_ns_per_run": 182.4058577405858,
               "bytes_jited": 7369,
               "bytes_xlated": 13440,
-              "id": 10,
+              "id": 37,
               "name": "lsm_file_open_t",
               "run_cnt_delta": 478,
-              "run_time_ns_delta": 57269,
+              "run_time_ns_delta": 87190,
               "type": "lsm"
             }
           },
           "summary": {
             "active_programs": 3,
-            "avg_ns_per_run": 232.0855949895616,
+            "avg_ns_per_run": 289.24112734864303,
             "total_events": 958,
-            "total_run_time_ns": 222338
+            "total_run_time_ns": 277093
           }
         },
         "command_template": "fio --name=test --rw=randread --bs=4k --size=100M --runtime={duration} --time_based",
         "drop_counters": {},
-        "duration_s": 60.475447875,
+        "duration_s": 60.46494193599999,
         "event_counts": {},
-        "events_per_sec": 15.841139398920077,
+        "events_per_sec": 15.843891837587627,
         "events_total": 958,
         "kind": "file_io",
         "metric": "IOPS",
         "name": "file_io",
-        "ops_per_sec": 1549997.3343521105,
-        "ops_total": 93736783.0,
+        "ops_per_sec": 1577123.0724232877,
+        "ops_total": 95360655.0,
         "stderr_tail": "",
-        "stdout_tail": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.010000,\n        \"500\" : 80.344843,\n        \"750\" : 19.468476,\n        \"1000\" : 0.094093\n      },\n      \"latency_us\" : {\n        \"2\" : 0.010000,\n        \"4\" : 0.061694,\n        \"10\" : 0.028039,\n        \"20\" : 0.010000,\n        \"50\" : 0.010000,\n        \"100\" : 0.010000,\n        \"250\" : 0.010000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.010000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}",
+        "stdout_tail": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.010000,\n        \"500\" : 82.950373,\n        \"750\" : 16.862921,\n        \"1000\" : 0.092981\n      },\n      \"latency_us\" : {\n        \"2\" : 0.010000,\n        \"4\" : 0.062538,\n        \"10\" : 0.026482,\n        \"20\" : 0.010000,\n        \"50\" : 0.010000,\n        \"100\" : 0.010000,\n        \"250\" : 0.010000,\n        \"500\" : 0.010000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}",
         "system_cpu": {
-          "busy_pct": 4.157464127460376
+          "busy_pct": 4.157377504601179
         }
       },
       {
@@ -172,62 +172,62 @@
           "total_pct": null,
           "user_pct": null
         },
-        "app_throughput": 7837.094558144813,
+        "app_throughput": 7635.00013212228,
         "bpf": {
           "programs": {
-            "6": {
-              "avg_ns_per_run": 3956.0,
+            "33": {
+              "avg_ns_per_run": 3704.0,
               "bytes_jited": 20298,
               "bytes_xlated": 34920,
-              "id": 6,
+              "id": 33,
               "name": "tracepoint__sch",
               "run_cnt_delta": 2,
-              "run_time_ns_delta": 7912,
+              "run_time_ns_delta": 7408,
               "type": "raw_tracepoint"
             },
-            "8": {
-              "avg_ns_per_run": 1039.7349397590363,
+            "35": {
+              "avg_ns_per_run": 838.5421686746988,
               "bytes_jited": 22797,
               "bytes_xlated": 36664,
-              "id": 8,
+              "id": 35,
               "name": "trace_security_",
               "run_cnt_delta": 83,
-              "run_time_ns_delta": 86298,
+              "run_time_ns_delta": 69599,
               "type": "kprobe"
             },
-            "10": {
-              "avg_ns_per_run": 312.33734939759034,
+            "37": {
+              "avg_ns_per_run": 240.4578313253012,
               "bytes_jited": 7369,
               "bytes_xlated": 13440,
-              "id": 10,
+              "id": 37,
               "name": "lsm_file_open_t",
               "run_cnt_delta": 83,
-              "run_time_ns_delta": 25924,
+              "run_time_ns_delta": 19958,
               "type": "lsm"
             }
           },
           "summary": {
             "active_programs": 3,
-            "avg_ns_per_run": 715.0833333333334,
+            "avg_ns_per_run": 577.172619047619,
             "total_events": 168,
-            "total_run_time_ns": 120134
+            "total_run_time_ns": 96965
           }
         },
         "command_template": "wrk -t2 -c10 -d{duration}s http://127.0.0.1:{port}/",
         "drop_counters": {},
-        "duration_s": 60.02109538299999,
+        "duration_s": 60.021217035999996,
         "event_counts": {},
-        "events_per_sec": 2.7990158947946044,
+        "events_per_sec": 2.799010221656046,
         "events_total": 168,
         "kind": "network",
         "metric": "req/s",
         "name": "network",
-        "ops_per_sec": 7837.094558144813,
-        "ops_total": 470391.0,
+        "ops_per_sec": 7635.00013212228,
+        "ops_total": 458262.0,
         "stderr_tail": "",
-        "stdout_tail": "Running 1m test @ http://127.0.0.1:42935/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     1.33ms    8.95ms 209.50ms   99.47%\n    Req/Sec     3.94k     1.07k    7.49k    62.83%\n  470391 requests in 1.00m, 69.53MB read\nRequests/sec:   7839.69\nTransfer/sec:      1.16MB",
+        "stdout_tail": "Running 1m test @ http://127.0.0.1:39115/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     1.42ms   10.47ms 417.01ms   99.48%\n    Req/Sec     3.84k     1.01k    6.83k    65.08%\n  458262 requests in 1.00m, 67.74MB read\nRequests/sec:   7637.62\nTransfer/sec:      1.13MB",
         "system_cpu": {
-          "busy_pct": 5.242841786377406
+          "busy_pct": 5.213471856880714
         }
       }
     ]
@@ -236,49 +236,49 @@
     "comparable": true,
     "programs": [
       {
-        "baseline_avg_ns_per_run": 4768.5,
-        "delta_pct": -36.975289224424166,
-        "id": 6,
+        "baseline_avg_ns_per_run": 3904.6666666666665,
+        "delta_pct": 12.446645040122942,
+        "id": 33,
         "name": "tracepoint__sch",
-        "post_avg_ns_per_run": 3005.3333333333335
+        "post_avg_ns_per_run": 4390.666666666667
       },
       {
-        "baseline_avg_ns_per_run": 184.4741717135732,
-        "delta_pct": 5.949645876254873,
-        "id": 8,
+        "baseline_avg_ns_per_run": 172.22915181753385,
+        "delta_pct": 12.26587350450384,
+        "id": 35,
         "name": "trace_security_",
-        "post_avg_ns_per_run": 195.44973166368516
+        "post_avg_ns_per_run": 193.35456171735242
       },
       {
-        "baseline_avg_ns_per_run": 99.60812255076594,
-        "delta_pct": -1.58319974100491,
-        "id": 10,
+        "baseline_avg_ns_per_run": 103.1240199572345,
+        "delta_pct": 3.02859337278933,
+        "id": 37,
         "name": "lsm_file_open_t",
-        "post_avg_ns_per_run": 98.03112701252236
+        "post_avg_ns_per_run": 106.24722719141324
       }
     ],
     "workloads": [
       {
         "agent_cpu_delta_pct": null,
-        "app_throughput_delta_pct": 9643.06455892055,
-        "bpf_avg_ns_delta_pct": 10.833346803904217,
-        "events_per_sec_delta_pct": 95.0258308053985,
+        "app_throughput_delta_pct": 2125.8442418127324,
+        "bpf_avg_ns_delta_pct": 34.134181336505456,
+        "events_per_sec_delta_pct": 115.06993256164935,
         "lost_event_count_delta": 0,
         "name": "exec_storm"
       },
       {
         "agent_cpu_delta_pct": null,
-        "app_throughput_delta_pct": 1.0356604800315674,
-        "bpf_avg_ns_delta_pct": -23.052137006430975,
-        "events_per_sec_delta_pct": -0.13353691203096418,
+        "app_throughput_delta_pct": -0.3699436387478103,
+        "bpf_avg_ns_delta_pct": -24.236789287668948,
+        "events_per_sec_delta_pct": -0.1248263229163807,
         "lost_event_count_delta": 0,
         "name": "file_io"
       },
       {
         "agent_cpu_delta_pct": null,
-        "app_throughput_delta_pct": -0.3471706029955227,
-        "bpf_avg_ns_delta_pct": 23.28260109544342,
-        "events_per_sec_delta_pct": -10.847809046399954,
+        "app_throughput_delta_pct": 2.0446391314506487,
+        "bpf_avg_ns_delta_pct": 2.3518176661682078,
+        "events_per_sec_delta_pct": -10.85310517844782,
         "lost_event_count_delta": 0,
         "name": "network"
       }
@@ -316,7 +316,7 @@
     ]
   },
   "duration_s": 60,
-  "generated_at": "2026-03-23T01:12:28.464251+00:00",
+  "generated_at": "2026-03-23T08:40:34.580785+00:00",
   "host": {
     "git_sha": "unknown",
     "hostname": "virtme-ng",
@@ -327,7 +327,8 @@
   "limitations": [
     "Tracee daemon was unavailable, so this result uses manual BPF program loading with corpus/build/tracee/tracee.bpf.o.",
     "Agent event counts and drop counters are unavailable in manual fallback mode; events_total is estimated from BPF run_cnt deltas.",
-    "Agent CPU is unavailable in manual fallback mode; only host busy CPU is reported."
+    "Agent CPU is unavailable in manual fallback mode; only host busy CPU is reported.",
+    "Tracee binary (/home/yunwei37/workspace/bpf-benchmark/e2e/cases/tracee/bin/tracee) was present but failed to start: failed to launch Tracee: Error: invalid output flag: format, use 'tracee man output' for more info"
   ],
   "mode": "manual_fallback",
   "post_rejit": {
@@ -341,31 +342,31 @@
       },
       "app_throughput": {
         "count": 3,
-        "max": 1566050.044185538,
-        "mean": 654956.5130432015,
-        "median": 391009.6084743565,
-        "min": 7809.8864697099725
+        "max": 1571288.6059416337,
+        "mean": 565020.2763460595,
+        "median": 115981.11476403479,
+        "min": 7791.108332509961
       },
       "bpf_avg_ns_per_run": {
         "count": 3,
-        "max": 881.5733333333334,
-        "mean": 393.138602668429,
-        "median": 178.58490566037736,
-        "min": 119.25756901157614
+        "max": 590.7466666666667,
+        "mean": 311.9667973625602,
+        "median": 219.13836477987422,
+        "min": 126.01536064113981
       },
       "events_per_sec": {
         "count": 3,
-        "max": 107894.53659726084,
-        "mean": 35970.95065562891,
-        "median": 15.81998563053624,
-        "min": 2.4953839953489028
+        "max": 121300.85390455047,
+        "mean": 40439.72441657961,
+        "median": 15.824114489999918,
+        "min": 2.49523069834421
       },
       "system_cpu_busy_pct": {
         "count": 3,
-        "max": 5.30503238942619,
-        "mean": 3.1576188447456577,
-        "median": 4.167129681075677,
-        "min": 0.0006944637351069538
+        "max": 5.2136042267185045,
+        "mean": 3.1280301865610594,
+        "median": 4.169097424785395,
+        "min": 0.001388908179278392
       }
     },
     "workloads": [
@@ -375,62 +376,62 @@
           "total_pct": null,
           "user_pct": null
         },
-        "app_throughput": 391009.6084743565,
+        "app_throughput": 115981.11476403479,
         "bpf": {
           "programs": {
-            "6": {
-              "avg_ns_per_run": 2905.5,
+            "33": {
+              "avg_ns_per_run": 3934.5,
               "bytes_jited": 20298,
               "bytes_xlated": 34920,
-              "id": 6,
+              "id": 33,
               "name": "tracepoint__sch",
               "run_cnt_delta": 2,
-              "run_time_ns_delta": 5811,
+              "run_time_ns_delta": 7869,
               "type": "raw_tracepoint"
             },
-            "8": {
-              "avg_ns_per_run": 142.897995545657,
-              "bytes_jited": 22797,
-              "bytes_xlated": 36664,
-              "id": 8,
+            "35": {
+              "avg_ns_per_run": 150.2846325167038,
+              "bytes_jited": 22755,
+              "bytes_xlated": 36592,
+              "id": 35,
               "name": "trace_security_",
               "run_cnt_delta": 2245,
-              "run_time_ns_delta": 320806,
+              "run_time_ns_delta": 337389,
               "type": "kprobe"
             },
-            "10": {
-              "avg_ns_per_run": 93.13496659242762,
+            "37": {
+              "avg_ns_per_run": 98.3532293986637,
               "bytes_jited": 7369,
               "bytes_xlated": 13440,
-              "id": 10,
+              "id": 37,
               "name": "lsm_file_open_t",
               "run_cnt_delta": 2245,
-              "run_time_ns_delta": 209088,
+              "run_time_ns_delta": 220803,
               "type": "lsm"
             }
           },
           "summary": {
             "active_programs": 3,
-            "avg_ns_per_run": 119.25756901157614,
+            "avg_ns_per_run": 126.01536064113981,
             "total_events": 4492,
-            "total_run_time_ns": 535705
+            "total_run_time_ns": 566061
           }
         },
         "command_template": "stress-ng --exec 4 --exec-method execve --timeout {duration}s --metrics-brief",
         "drop_counters": {},
-        "duration_s": 0.04163324800001078,
+        "duration_s": 0.03703189099999804,
         "event_counts": {},
-        "events_per_sec": 107894.53659726084,
+        "events_per_sec": 121300.85390455047,
         "events_total": 4492,
         "kind": "exec_storm",
         "metric": "bogo-ops/s",
         "name": "exec_storm",
-        "ops_per_sec": 391009.6084743565,
-        "ops_total": 16279.0,
+        "ops_per_sec": 115981.11476403479,
+        "ops_total": 4295.0,
         "stderr_tail": "",
-        "stdout_tail": "stress-ng: info:  [16279] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [16279] setting to a 1 min, 0 secs run per stressor\nstress-ng: info:  [16279] dispatching hogs:\nstress-ng: metrc: [16279] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [16279]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: warn:  [16279] metrics-check: all bogo-op counters are zero, data may be incorrect\nstress-ng: info:  [16279] skipped: 4: exec (4)\nstress-ng: info:  [16279] passed: 0\nstress-ng: info:  [16279] failed: 0\nstress-ng: info:  [16279] metrics untrustworthy: 0\nstress-ng: info:  [16279] successful run completed in 0.00 secs",
+        "stdout_tail": "stress-ng: info:  [4295] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [4295] setting to a 1 min, 0 secs run per stressor\nstress-ng: info:  [4295] dispatching hogs:\nstress-ng: metrc: [4295] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [4295]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: warn:  [4295] metrics-check: all bogo-op counters are zero, data may be incorrect\nstress-ng: info:  [4295] skipped: 4: exec (4)\nstress-ng: info:  [4295] passed: 0\nstress-ng: info:  [4295] failed: 0\nstress-ng: info:  [4295] metrics untrustworthy: 0\nstress-ng: info:  [4295] successful run completed in 0.00 secs",
         "system_cpu": {
-          "busy_pct": 0.0006944637351069538
+          "busy_pct": 0.001388908179278392
         }
       },
       {
@@ -439,62 +440,62 @@
           "total_pct": null,
           "user_pct": null
         },
-        "app_throughput": 1566050.044185538,
+        "app_throughput": 1571288.6059416337,
         "bpf": {
           "programs": {
-            "6": {
-              "avg_ns_per_run": 2358.5,
+            "33": {
+              "avg_ns_per_run": 5776.0,
               "bytes_jited": 20298,
               "bytes_xlated": 34920,
-              "id": 6,
+              "id": 33,
               "name": "tracepoint__sch",
               "run_cnt_delta": 2,
-              "run_time_ns_delta": 4717,
+              "run_time_ns_delta": 11552,
               "type": "raw_tracepoint"
             },
-            "8": {
-              "avg_ns_per_run": 241.26680672268907,
-              "bytes_jited": 22797,
-              "bytes_xlated": 36664,
-              "id": 8,
+            "35": {
+              "avg_ns_per_run": 289.8970588235294,
+              "bytes_jited": 22755,
+              "bytes_xlated": 36592,
+              "id": 35,
               "name": "trace_security_",
               "run_cnt_delta": 476,
-              "run_time_ns_delta": 114843,
+              "run_time_ns_delta": 137991,
               "type": "kprobe"
             },
-            "10": {
-              "avg_ns_per_run": 106.74369747899159,
+            "37": {
+              "avg_ns_per_run": 125.03151260504201,
               "bytes_jited": 7369,
               "bytes_xlated": 13440,
-              "id": 10,
+              "id": 37,
               "name": "lsm_file_open_t",
               "run_cnt_delta": 476,
-              "run_time_ns_delta": 50810,
+              "run_time_ns_delta": 59515,
               "type": "lsm"
             }
           },
           "summary": {
             "active_programs": 3,
-            "avg_ns_per_run": 178.58490566037736,
+            "avg_ns_per_run": 219.13836477987422,
             "total_events": 954,
-            "total_run_time_ns": 170370
+            "total_run_time_ns": 209058
           }
         },
         "command_template": "fio --name=test --rw=randread --bs=4k --size=100M --runtime={duration} --time_based",
         "drop_counters": {},
-        "duration_s": 60.303468175000035,
+        "duration_s": 60.28773367400004,
         "event_counts": {},
-        "events_per_sec": 15.81998563053624,
+        "events_per_sec": 15.824114489999918,
         "events_total": 954,
         "kind": "file_io",
         "metric": "IOPS",
         "name": "file_io",
-        "ops_per_sec": 1566050.044185538,
-        "ops_total": 94438249.0,
+        "ops_per_sec": 1571288.6059416337,
+        "ops_total": 94729429.0,
         "stderr_tail": "",
-        "stdout_tail": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.010000,\n        \"500\" : 81.367366,\n        \"750\" : 18.428603,\n        \"1000\" : 0.101108\n      },\n      \"latency_us\" : {\n        \"2\" : 0.010000,\n        \"4\" : 0.071977,\n        \"10\" : 0.022912,\n        \"20\" : 0.010000,\n        \"50\" : 0.010000,\n        \"100\" : 0.010000,\n        \"250\" : 0.010000,\n        \"500\" : 0.010000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.010000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}",
+        "stdout_tail": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.010000,\n        \"500\" : 81.476139,\n        \"750\" : 18.302760,\n        \"1000\" : 0.115976\n      },\n      \"latency_us\" : {\n        \"2\" : 0.010000,\n        \"4\" : 0.066673,\n        \"10\" : 0.028576,\n        \"20\" : 0.010000,\n        \"50\" : 0.010000,\n        \"100\" : 0.010000,\n        \"250\" : 0.010000,\n        \"500\" : 0.010000,\n        \"750\" : 0.010000,\n        \"1000\" : 0.000000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.010000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}",
         "system_cpu": {
-          "busy_pct": 4.167129681075677
+          "busy_pct": 4.169097424785395
         }
       },
       {
@@ -503,62 +504,62 @@
           "total_pct": null,
           "user_pct": null
         },
-        "app_throughput": 7809.8864697099725,
+        "app_throughput": 7791.108332509961,
         "bpf": {
           "programs": {
-            "6": {
-              "avg_ns_per_run": 3752.0,
+            "33": {
+              "avg_ns_per_run": 3461.5,
               "bytes_jited": 20298,
               "bytes_xlated": 34920,
-              "id": 6,
+              "id": 33,
               "name": "tracepoint__sch",
               "run_cnt_delta": 2,
-              "run_time_ns_delta": 7504,
+              "run_time_ns_delta": 6923,
               "type": "raw_tracepoint"
             },
-            "8": {
-              "avg_ns_per_run": 1495.0405405405406,
-              "bytes_jited": 22797,
-              "bytes_xlated": 36664,
-              "id": 8,
+            "35": {
+              "avg_ns_per_run": 879.0,
+              "bytes_jited": 22755,
+              "bytes_xlated": 36592,
+              "id": 35,
               "name": "trace_security_",
               "run_cnt_delta": 74,
-              "run_time_ns_delta": 110633,
+              "run_time_ns_delta": 65046,
               "type": "kprobe"
             },
-            "10": {
-              "avg_ns_per_run": 190.52702702702703,
+            "37": {
+              "avg_ns_per_run": 224.90540540540542,
               "bytes_jited": 7369,
               "bytes_xlated": 13440,
-              "id": 10,
+              "id": 37,
               "name": "lsm_file_open_t",
               "run_cnt_delta": 74,
-              "run_time_ns_delta": 14099,
+              "run_time_ns_delta": 16643,
               "type": "lsm"
             }
           },
           "summary": {
             "active_programs": 3,
-            "avg_ns_per_run": 881.5733333333334,
+            "avg_ns_per_run": 590.7466666666667,
             "total_events": 150,
-            "total_run_time_ns": 132236
+            "total_run_time_ns": 88612
           }
         },
         "command_template": "wrk -t2 -c10 -d{duration}s http://127.0.0.1:{port}/",
         "drop_counters": {},
-        "duration_s": 60.11098904199997,
+        "duration_s": 60.11468202100002,
         "event_counts": {},
-        "events_per_sec": 2.4953839953489028,
+        "events_per_sec": 2.49523069834421,
         "events_total": 150,
         "kind": "network",
         "metric": "req/s",
         "name": "network",
-        "ops_per_sec": 7809.8864697099725,
-        "ops_total": 469460.0,
+        "ops_per_sec": 7791.108332509961,
+        "ops_total": 468360.0,
         "stderr_tail": "",
-        "stdout_tail": "Running 1m test @ http://127.0.0.1:40687/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     1.08ms    6.70ms 210.10ms   99.70%\n    Req/Sec     3.93k     1.09k    8.37k    63.28%\n  469460 requests in 1.00m, 69.40MB read\nRequests/sec:   7811.34\nTransfer/sec:      1.15MB",
+        "stdout_tail": "Running 1m test @ http://127.0.0.1:45253/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     1.65ms   19.31ms 823.65ms   99.65%\n    Req/Sec     3.92k     1.15k    7.12k    63.20%\n  468360 requests in 1.00m, 69.23MB read\nRequests/sec:   7793.07\nTransfer/sec:      1.15MB",
         "system_cpu": {
-          "busy_pct": 5.30503238942619
+          "busy_pct": 5.2136042267185045
         }
       }
     ]
@@ -566,14 +567,14 @@
   "rejit_result": {
     "applied": true,
     "exit_code": 0,
-    "output": "prog 6 (tracepoint__sch): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317194 (split BTF base offset)\n  bpf_rotate64: found in 'bpf_rotate' btf_id=15 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=15 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=14 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=22 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=23 fd=7\n  bpf_endian_load64: found in 'bpf_endian' btf_id=24 fd=8\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=15 fd=9\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n\nprog 8 (trace_security_): 6 passes, 3 sites applied (4565 -> 4556 insns)\n  wide_mem: 3 sites applied\nkfunc discovery:\n  vmlinux BTF str_len=2317194 (split BTF base offset)\n  bpf_rotate64: found in 'bpf_rotate' btf_id=15 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=15 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=14 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=22 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=23 fd=7\n  bpf_endian_load64: found in 'bpf_endian' btf_id=24 fd=8\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=15 fd=9\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n  REJIT failed for prog 8 (trace_security_):\n  verifier rejected with 0 state snapshots\nError: BPF_PROG_REJIT failed\n\nCaused by:\n    BPF_PROG_REJIT: Bad file descriptor (os error 9)\n    verifier log:\n    func#0 @0\n    fd 51 is not pointing to valid bpf_map\n    processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n    \n\nprog 10 (lsm_file_open_t): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317194 (split BTF base offset)\n  bpf_rotate64: found in 'bpf_rotate' btf_id=15 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=15 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=14 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=22 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=23 fd=7\n  bpf_endian_load64: found in 'bpf_endian' btf_id=24 fd=8\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=15 fd=9\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n"
+    "output": "prog 33 (tracepoint__sch): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317604 split_type_id_bias=125495\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125520 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125521 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125519 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125532 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125533 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125520 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n\nprog 35 (trace_security_): 6 passes, 4 sites applied (4565 -> 4562 insns)\n  wide_mem: 3 sites applied\n  cond_select: 1 sites applied\n  REJIT successful\nkfunc discovery:\n  vmlinux BTF str_len=2317604 split_type_id_bias=125495\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125520 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125521 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125519 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125532 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125533 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125520 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n\nprog 37 (lsm_file_open_t): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317604 split_type_id_bias=125495\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125520 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125521 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125519 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125532 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125533 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125520 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n"
   },
   "scan_results": {},
   "setup": {
-    "returncode": 1,
-    "stderr_tail": "    self.endheaders(body, encode_chunked=encode_chunked)\n  File \"/usr/lib/python3.12/http/client.py\", line 1351, in endheaders\n    self._send_output(message_body, encode_chunked=encode_chunked)\n  File \"/usr/lib/python3.12/http/client.py\", line 1111, in _send_output\n    self.send(msg)\n  File \"/usr/lib/python3.12/http/client.py\", line 1055, in send\n    self.connect()\n  File \"/usr/lib/python3.12/http/client.py\", line 1490, in connect\n    super().connect()\n  File \"/usr/lib/python3.12/http/client.py\", line 1021, in connect\n    self.sock = self._create_connection(\n                ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/socket.py\", line 828, in create_connection\n    for res in getaddrinfo(host, port, 0, SOCK_STREAM):\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/socket.py\", line 963, in getaddrinfo\n    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsocket.gaierror: [Errno -2] Name or service not known\nDuring handling of the above exception, another exception occurred:\nTraceback (most recent call last):\n  File \"<stdin>\", line 14, in <module>\n  File \"/usr/lib/python3.12/urllib/request.py\", line 215, in urlopen\n    return opener.open(url, data, timeout)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/urllib/request.py\", line 515, in open\n    response = self._open(req, data)\n               ^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/urllib/request.py\", line 532, in _open\n    result = self._call_chain(self.handle_open, protocol, protocol +\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/urllib/request.py\", line 492, in _call_chain\n    result = func(*args)\n             ^^^^^^^^^^^\n  File \"/usr/lib/python3.12/urllib/request.py\", line 1392, in https_open\n    return self.do_open(http.client.HTTPSConnection, req,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/urllib/request.py\", line 1347, in do_open\n    raise URLError(err)\nurllib.error.URLError: <urlopen error [Errno -2] Name or service not known>",
-    "stdout_tail": "",
-    "tracee_binary": null
+    "returncode": 0,
+    "stderr_tail": "",
+    "stdout_tail": "TRACEE_BINARY=/home/yunwei37/workspace/bpf-benchmark/e2e/cases/tracee/bin/tracee\nTracee version: v0.24.1",
+    "tracee_binary": "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/tracee/bin/tracee"
   },
   "smoke": false,
   "tracee_binary": null,

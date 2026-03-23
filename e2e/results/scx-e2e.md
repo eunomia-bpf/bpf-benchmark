@@ -1,6 +1,6 @@
 # scx_rusty End-to-End Benchmark
 
-- Generated: 2026-03-23T01:18:38.241899+00:00
+- Generated: 2026-03-23T08:46:45.054949+00:00
 - Mode: `scx_rusty_loader`
 - Duration per workload: `30s`
 - Smoke: `False`
@@ -21,21 +21,21 @@
 
 ## Baseline
 
-- hackbench: throughput=6.5738368295320955 runs/s, lat_p50_ms=144.0, ctx/s=924659.221441538, agent_cpu=0.1999951876491297
-- stress-ng-cpu: throughput=11624.48 bogo-ops/s, lat_p50_ms=None, ctx/s=120.73708202412386, agent_cpu=0.29999635193436125
-- sysbench-cpu: throughput=17624.04 events/s, lat_p50_ms=0.23, ctx/s=113.09783113356384, agent_cpu=0.23333240699589985
+- hackbench: throughput=6.773842637085024 runs/s, lat_p50_ms=139.5, ctx/s=968359.0572591372, agent_cpu=0.19999952878777688
+- stress-ng-cpu: throughput=11606.3 bogo-ops/s, lat_p50_ms=None, ctx/s=120.32911166801237, agent_cpu=0.3666645796852133
+- sysbench-cpu: throughput=17619.38 events/s, lat_p50_ms=0.23, ctx/s=111.08352173622029, agent_cpu=0.2666658194338032
 
 ## Post-ReJIT
 
-- hackbench: throughput=6.518979315769334 runs/s, lat_p50_ms=145.0, ctx/s=910122.6181780116, agent_cpu=0.16666626765651082
-- stress-ng-cpu: throughput=11623.24 bogo-ops/s, lat_p50_ms=None, ctx/s=100.862983305679, agent_cpu=0.3333310115383948
-- sysbench-cpu: throughput=17625.07 events/s, lat_p50_ms=0.23, ctx/s=84.46834269734012, agent_cpu=0.26666548444079685
+- hackbench: throughput=6.8322647766907565 runs/s, lat_p50_ms=141.0, ctx/s=954185.9729608336, agent_cpu=0.19999951799449545
+- stress-ng-cpu: throughput=11599.18 bogo-ops/s, lat_p50_ms=None, ctx/s=96.87759213652535, agent_cpu=0.2999983069095559
+- sysbench-cpu: throughput=17619.8 events/s, lat_p50_ms=0.23, ctx/s=83.77778442192158, agent_cpu=0.2333324464367038
 
 ## Comparison
 
-- hackbench: throughput_delta=-0.8344824367456342%, ctx_delta=-1.5721038547437904%, lat_p50_delta=0.6944444444444444%, agent_cpu_delta=-16.664860982100695%
-- stress-ng-cpu: throughput_delta=-0.010667143820624937%, ctx_delta=-16.460641904923566%, lat_p50_delta=None%, agent_cpu_delta=11.111688321905696%
-- sysbench-cpu: throughput_delta=0.0058442899584819135%, ctx_delta=-25.313914642990355%, lat_p50_delta=0.0%, agent_cpu_delta=14.285661333568092%
+- hackbench: throughput_delta=0.8624667376517798%, ctx_delta=-1.4636187054850671%, lat_p50_delta=1.0752688172043012%, agent_cpu_delta=-5.396653432481764e-06%
+- stress-ng-cpu: throughput_delta=-0.06134599312441503%, ctx_delta=-19.489481145834176%, lat_p50_delta=None%, agent_cpu_delta=-18.181814243658696%
+- sysbench-cpu: throughput_delta=0.002383738814863257%, ctx_delta=-24.581267219038217%, lat_p50_delta=0.0%, agent_cpu_delta=-12.500054588126176%
 
 ## Limitations
 

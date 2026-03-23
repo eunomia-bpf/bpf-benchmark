@@ -246,6 +246,8 @@ vm-corpus: $(MICRO_RUNNER) $(DAEMON_PATH) $(BZIMAGE_PATH) kinsn-modules
 
 vm-e2e: $(MICRO_RUNNER) $(DAEMON_PATH) $(BZIMAGE_PATH) kinsn-modules
 	mkdir -p "$(E2E_RESULTS_DEV_DIR)"
+	@# Pre-download E2E tool binaries on the host so the VM guest can access them
+	bash "$(ROOT_DIR)/e2e/cases/tracee/setup.sh" || true
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
 		bash -lc 'cd "$(ROOT_DIR)" && $(VM_INIT) python3 "$(ROOT_DIR)/e2e/run.py" all'
 

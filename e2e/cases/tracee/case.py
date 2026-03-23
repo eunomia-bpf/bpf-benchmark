@@ -69,6 +69,7 @@ DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "tracee-e2e-real.md"
 DEFAULT_TRACEE_OBJECT = ROOT_DIR / "corpus" / "build" / "tracee" / "tracee.bpf.o"
 DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
 DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
+CACHED_TRACEE_BINARY = ROOT_DIR / "e2e" / "cases" / "tracee" / "bin" / "tracee"
 TRACEE_STATS_PATTERN = re.compile(
     r"EventCount[:=]\s*(?P<events>\d+).*?LostEvCount[:=]\s*(?P<lost>\d+)(?:.*?LostWrCount[:=]\s*(?P<lost_writes>\d+))?",
     re.IGNORECASE,
@@ -298,17 +299,30 @@ def resolve_tracee_binary(explicit: str | None, setup_result: Mapping[str, objec
         resolved = which(candidate)
         if resolved:
             return resolved
+    # Check the repo-local cached binary (shared into VM via --rwdir)
+    if CACHED_TRACEE_BINARY.exists():
+        return str(CACHED_TRACEE_BINARY)
     if Path("/tmp/tracee-bin/tracee").exists():
         return "/tmp/tracee-bin/tracee"
     return None
 
 
+def _ensure_empty_signatures_dir() -> Path:
+    """Ensure an empty signatures directory exists so tracee does not error out."""
+    sig_dir = ROOT_DIR / "e2e" / "cases" / "tracee" / "bin" / "signatures"
+    sig_dir.mkdir(parents=True, exist_ok=True)
+    return sig_dir
+
+
 def build_tracee_commands(binary: str, events: Sequence[str], extra_args: Sequence[str] = ()) -> list[list[str]]:
     event_text = ",".join(str(event) for event in events)
+    # Ensure empty signatures directory exists to prevent tracee startup errors.
+    sig_dir = _ensure_empty_signatures_dir()
+    sig_args = ["--signatures-dir", str(sig_dir)]
     candidates = [
-        [binary, "--events", event_text, "--output", "json", *extra_args],
-        [binary, "--events", event_text, "--output", "destinations.stdout.format=json", *extra_args],
-        [binary, "--events", event_text, "--output", "format:json", *extra_args],
+        [binary, "--events", event_text, "--output", "json", *sig_args, *extra_args],
+        [binary, "--events", event_text, "--output", "destinations.stdout.format=json", *sig_args, *extra_args],
+        [binary, "--events", event_text, "--output", "format:json", *sig_args, *extra_args],
     ]
     deduped: list[list[str]] = []
     seen: set[tuple[str, ...]] = set()
@@ -707,21 +721,11 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
     limitations: list[str] = []
     commands = build_tracee_commands(tracee_binary, events, args.tracee_extra_arg or [])
 
-    with enable_bpf_stats():
-        with TraceeAgentSession(commands, load_timeout=int(args.load_timeout)) as session:
-            prog_ids = [int(program["id"]) for program in session.programs]
-            baseline = run_phase(
-                workloads,
-                duration_s,
-                prog_ids,
-                prog_fds=session.program_fds,
-                agent_pid=session.pid,
-                collector=session.collector,
-            )
-            scan_results = scan_programs(prog_ids, daemon_binary, prog_fds=session.program_fds)
-            rejit_result = apply_daemon_rejit(daemon_binary, prog_ids)
-            if rejit_result["applied"]:
-                post_rejit = run_phase(
+    try:
+        with enable_bpf_stats():
+            with TraceeAgentSession(commands, load_timeout=int(args.load_timeout)) as session:
+                prog_ids = [int(program["id"]) for program in session.programs]
+                baseline = run_phase(
                     workloads,
                     duration_s,
                     prog_ids,
@@ -729,8 +733,36 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                     agent_pid=session.pid,
                     collector=session.collector,
                 )
-            else:
-                post_rejit = None
+                scan_results = scan_programs(prog_ids, daemon_binary, prog_fds=session.program_fds)
+                rejit_result = apply_daemon_rejit(daemon_binary, prog_ids)
+                if rejit_result["applied"]:
+                    post_rejit = run_phase(
+                        workloads,
+                        duration_s,
+                        prog_ids,
+                        prog_fds=session.program_fds,
+                        agent_pid=session.pid,
+                        collector=session.collector,
+                    )
+                else:
+                    post_rejit = None
+    except Exception as exc:
+        # Tracee binary exists but failed to start (e.g. kernel compatibility).
+        # Fall back to manual .bpf.o loading.
+        print(f"  [tracee] daemon mode failed ({exc}), falling back to manual mode")
+        fallback = run_manual_fallback(
+            config=config,
+            duration_s=duration_s,
+            tracee_object=tracee_object,
+            runner_binary=runner_binary,
+            daemon_binary=daemon_binary,
+            setup_result=setup_result,
+            smoke=bool(args.smoke),
+        )
+        fallback["limitations"] = list(fallback.get("limitations") or []) + [
+            f"Tracee binary ({tracee_binary}) was present but failed to start: {exc}"
+        ]
+        return fallback
 
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),

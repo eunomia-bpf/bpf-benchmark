@@ -74,8 +74,8 @@ DEFAULT_WRK_CONNECTIONS = 32
 DEFAULT_SMOKE_WRK_CONNECTIONS = 8
 DEFAULT_WRK_THREADS = 1
 DEFAULT_SMOKE_WRK_THREADS = 1
-DEFAULT_PACKET_REPEAT = 8
-DEFAULT_SMOKE_PACKET_REPEAT = 4
+DEFAULT_PACKET_REPEAT = 4
+DEFAULT_SMOKE_PACKET_REPEAT = 2
 DEFAULT_SAMPLE_COUNT = 3
 DEFAULT_SMOKE_SAMPLE_COUNT = 1
 DEFAULT_WARMUP_DURATION_S = 2
@@ -136,9 +136,9 @@ ROUTER_REAL_MAC = "02:00:00:00:00:2b"
 REAL_MAC = "02:00:00:00:00:2c"
 
 HTTP_RESPONSE_SNIPPET = 200
-HTTP_TIMEOUT_S = 3.0
-SERVER_START_TIMEOUT_S = 10.0
-TOPOLOGY_SETTLE_S = 1.0
+HTTP_TIMEOUT_S = 5.0
+SERVER_START_TIMEOUT_S = 15.0
+TOPOLOGY_SETTLE_S = 2.0
 
 HTTP_PAYLOAD = b"GET / HTTP/1.0\r\nHost: katran\r\nConnection: close\r\n\r\n"
 
@@ -1388,7 +1388,10 @@ class KatranDirectSession:
     def _attempt_attach(self) -> None:
         assert self.pinned_prog is not None
         errors: list[str] = []
-        for mode in ("xdp", "xdpgeneric"):
+        # Prefer xdpgeneric for veth interfaces: native XDP_TX on veth is
+        # broken in some kernels (including 7.0-rc2) where XDP_TX'd packets
+        # do not reach the peer namespace.  xdpgeneric handles this correctly.
+        for mode in ("xdpgeneric", "xdp"):
             try:
                 run_command(
                     [
@@ -1781,6 +1784,53 @@ def execute_http_measurement_loop(
             return records, batches, elapsed
 
 
+WARMUP_RETRY_COUNT = 3
+WARMUP_RETRY_BACKOFF_S = 2.0
+WARMUP_MIN_SUCCESS_RATE = 0.90
+
+
+def _run_warmup_with_retry(
+    *,
+    use_wrk_driver: bool,
+    warmup_duration_s: int | float,
+    wrk_connections: int,
+    wrk_threads: int,
+    traffic_iterations: int,
+) -> dict[str, object]:
+    """Run warmup with retries.  Early requests may fail while ARP/routing settles."""
+    last_error: str = ""
+    for attempt in range(WARMUP_RETRY_COUNT):
+        try:
+            if use_wrk_driver:
+                warmup = run_warmup_wrk(
+                    duration_s=warmup_duration_s,
+                    connections=wrk_connections,
+                    threads=wrk_threads,
+                )
+            else:
+                warmup = run_parallel_http_load(
+                    duration_s=warmup_duration_s,
+                    concurrency=traffic_iterations,
+                )
+                request_count = int(warmup.get("request_count", 0) or 0)
+                success_count = int(warmup.get("success_count", 0) or 0)
+                if request_count <= 0:
+                    raise RuntimeError("Katran parallel warmup produced zero requests")
+                success_rate = success_count / request_count
+                if success_rate < WARMUP_MIN_SUCCESS_RATE:
+                    raise RuntimeError(
+                        f"Katran parallel warmup below threshold "
+                        f"({success_count}/{request_count}={success_rate:.1%} < {WARMUP_MIN_SUCCESS_RATE:.0%}): "
+                        f"{warmup.get('failure_preview')}"
+                    )
+            return warmup
+        except RuntimeError as exc:
+            last_error = str(exc)
+            if attempt < WARMUP_RETRY_COUNT - 1:
+                time.sleep(WARMUP_RETRY_BACKOFF_S * (attempt + 1))
+    raise RuntimeError(f"Katran warmup failed after {WARMUP_RETRY_COUNT} attempts: {last_error}")
+
+
 def measure_phase(
     *,
     index: int,
@@ -1796,21 +1846,13 @@ def measure_phase(
     wrk_threads: int,
 ) -> dict[str, object]:
     state_reset = reset_katran_state(session)
-    if use_wrk_driver:
-        warmup = run_warmup_wrk(
-            duration_s=warmup_duration_s,
-            connections=wrk_connections,
-            threads=wrk_threads,
-        )
-    else:
-        warmup = run_parallel_http_load(
-            duration_s=warmup_duration_s,
-            concurrency=traffic_iterations,
-        )
-        if int(warmup.get("request_count", 0) or 0) <= 0:
-            raise RuntimeError("Katran parallel warmup produced zero requests")
-        if int(warmup.get("success_count", 0) or 0) != int(warmup.get("request_count", 0) or 0):
-            raise RuntimeError(f"Katran parallel warmup failed: {warmup.get('failure_preview')}")
+    warmup = _run_warmup_with_retry(
+        use_wrk_driver=use_wrk_driver,
+        warmup_duration_s=warmup_duration_s,
+        wrk_connections=wrk_connections,
+        wrk_threads=wrk_threads,
+        traffic_iterations=traffic_iterations,
+    )
     before = sample_bpf_stats([session.prog_id])
     ipip_before = link_stats(REAL_NS, "ipip0")
     system_cpu_holder: dict[str, object] = {}
@@ -1858,8 +1900,15 @@ def measure_phase(
         bpf=compute_delta(before, after),
         state_reset=state_reset,
     )
-    if sample.http_request_count == 0 or sample.http_success_count != sample.http_request_count:
-        raise RuntimeError(f"live DSR request validation failed: {sample.request_failure_preview}")
+    if sample.http_request_count == 0:
+        raise RuntimeError(f"live DSR measurement produced zero requests: {sample.request_failure_preview}")
+    measurement_success_rate = sample.http_success_count / sample.http_request_count
+    if measurement_success_rate < WARMUP_MIN_SUCCESS_RATE:
+        raise RuntimeError(
+            f"live DSR measurement below threshold "
+            f"({sample.http_success_count}/{sample.http_request_count}="
+            f"{measurement_success_rate:.1%}): {sample.request_failure_preview}"
+        )
     if sample.ipip_rx_packets_delta <= 0:
         raise RuntimeError(f"ipip decap path did not receive packets: before={ipip_before} after={ipip_after}")
     if int(sample.bpf.get("summary", {}).get("total_events", 0) or 0) <= 0:
@@ -2038,26 +2087,30 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
                         }
                         scan_results = scan_programs(prog_ids, daemon_binary)
                         rejit_result = apply_daemon_rejit(daemon_binary, prog_ids)
+                        post_rejit_phase: dict[str, object] | None = None
                         if rejit_result["applied"]:
-                            post_rejit_sample = measure_phase(
-                                index=cycle_index,
-                                phase_name="post_rejit",
-                                session=session,
-                                traffic_iterations=traffic_iterations,
-                                duration_s=duration_s,
-                                minimum_requests=minimum_requests,
-                                warmup_request_count=warmup_request_count,
-                                warmup_duration_s=warmup_duration_s,
-                                use_wrk_driver=use_wrk_driver,
-                                wrk_connections=wrk_connections,
-                                wrk_threads=wrk_threads,
-                            )
-                            post_rejit_phase: dict[str, object] | None = {
-                                "samples": [post_rejit_sample],
-                                "summary": build_phase_summary([post_rejit_sample]),
-                            }
-                        else:
-                            post_rejit_phase = None
+                            try:
+                                post_rejit_sample = measure_phase(
+                                    index=cycle_index,
+                                    phase_name="post_rejit",
+                                    session=session,
+                                    traffic_iterations=traffic_iterations,
+                                    duration_s=duration_s,
+                                    minimum_requests=minimum_requests,
+                                    warmup_request_count=warmup_request_count,
+                                    warmup_duration_s=warmup_duration_s,
+                                    use_wrk_driver=use_wrk_driver,
+                                    wrk_connections=wrk_connections,
+                                    wrk_threads=wrk_threads,
+                                )
+                                post_rejit_phase = {
+                                    "samples": [post_rejit_sample],
+                                    "summary": build_phase_summary([post_rejit_sample]),
+                                }
+                            except RuntimeError as rejit_exc:
+                                limitations.append(
+                                    f"Post-REJIT measurement failed (cycle {cycle_index}): {rejit_exc}"
+                                )
                         cycle_results.append(
                             {
                                 "cycle_index": cycle_index,

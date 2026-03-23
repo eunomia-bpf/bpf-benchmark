@@ -17,6 +17,7 @@
 > - **⚠️ 禁止死代码和防御性编程**：替换子系统时（如 v1→v2）必须删除旧代码，不保留 `if v1 / else v2` 分支。内核代码中不保留"以防万一"的检查——只在有具体失败场景时才加 guard。每行内核代码都是审核负担，越少越好。
 > - **⚠️ Makefile 是唯一构建/测试入口**：Agent 只能用 `make <target>` 构建和测试。禁止手动 `cargo build`、`make -C vendor/linux-framework`、`insmod`、`cp .config` 等。如果 make target 不够用，修 Makefile pipeline，不要绕过它。
 > - **⚠️ 禁止 sudo**：VM 内已是 root（vng），主机不跑 BPF。不需要 sudo。
+> - **⚠️ E2E 禁止 manual fallback**：E2E 测试必须用真实应用 binary 加载 BPF 程序，禁止手动加载 .bpf.o。如果应用不兼容当前 kernel，标记 SKIP 而不是 fallback。论文的 transparency 声明依赖此约束。
 > - **⚠️ VM 测试每个 target 一个 agent**：vm-test、vm-micro、vm-corpus、vm-e2e 分别用不同 agent 串行跑。不要一个 agent 跑所有。
 > **v1 权威数据**（#256 rerun，native-level rewrite 架构）：micro **1.057x** / applied-only **1.193x**；corpus **0.983x**；Tracee **+8.1%**；Tetragon **+20.3%/+32.2%**；Katran BPF **1.108-1.168x**；gap **0.581x**。vm-selftest **35/35**。v1 代码保存在 `v1-native-rewrite` 分支。
 
@@ -713,3 +714,24 @@ make clean
 | **422** | Frozen map constant inlining | 待做 | BPF_MAP_FREEZE 后的只读 map → daemon 读值 → 替换 map_lookup_elem 为常量 MOV → verifier dead branch elimination。纯 bytecode rewrite，不需 kinsn。 |
 | **423** | **Dynamic map inlining + invalidation** | 待做 | JVM deoptimization 模型。daemon 观察 map 未修改 → inline 值 → REJIT。map 修改 → 检测 → 重新 REJIT。**runtime-guided specialization，论文核心 story**。 |
 | **424** | Verifier-assisted constant propagation | 待做 | 用 log_level=2 获取 per-insn verifier state → 识别常量 → 替换 → 死代码消除。 |
+| **425** | **vm-micro 正确性验证（2026-03-23）** | ✅ | 53/62 applied, 0 mismatch。rotate 15, extract 4, endian 1, wide_mem 49。kinsn pass 生效。 |
+| **426** | **vm-corpus 正确性验证（2026-03-23）** | ✅ | 152 measured, **56 applied**（从 4 提升 14x）。0 error, 0 mismatch。wide_mem 35, endian 17, cond_select 12, extract 4。 |
+| **427** | vm-e2e 正确性验证（2026-03-23） | ✅ | 4/5 PASS（katran timeout 未修复）。tracee/tetragon/bpftrace/scx OK。 |
+| **428** | **Kernel code review（2026-03-23）** | ✅ | 2 CRITICAL（tools/uapi 头不同步、无 fd_array_cnt 上限）+ 3 HIGH（find_call_site x86 硬编码、text_invalidate 被删、无 try_module_get）。正确性全 PASS。报告：`docs/tmp/20260323/kernel_code_review_20260323.md`。 |
+| **429** | **Packed ABI 验证（2026-03-23）** | ✅ | rotate ✅ packed（-2/site），extract ✅ packed（0/site）。**endian ❌ offset!=0 走 legacy（+4.99/site 膨胀）**。unit tests 不覆盖 packed。 |
+| **430** | 修复 endian packed offset + 删 legacy ABI | 待做 | endian packed 支持 offset、unit tests 走 packed、删除 daemon 全部 legacy emit 路径。 |
+| **431** | Kernel CRITICAL/HIGH 修复 | 待做 | tools/uapi 同步、fd_array_cnt 上限、find_call_site 跨平台、text_invalidate 恢复。 |
+| **432** | E2E 真实应用模式 + katran 修复 | 🔄 | e2e 应用自己加载 BPF → 延迟 daemon apply-all。katran DSR timeout 调查。 |
+| **433** | LFENCE/BPF_NOSPEC 消除 | 待做 | 安全屏障消除。调研报告：`docs/tmp/20260323/comprehensive_optimization_survey_20260323.md`。 |
+| **434** | 全面优化调研（2026-03-23） | ✅ | codex 调研。报告：`docs/tmp/20260323/comprehensive_optimization_survey_20260323.md`、`map_inlining_opportunity_analysis_20260323.md`、`simd_constprop_opportunity_analysis_20260323.md`。 |
+| **435** | E2E 真实应用模式 + katran 修复（2026-03-23） | ✅ | tracee/tetragon 已有真实 binary 流程。katran 改 xdpgeneric + 降并发 + retry。**5/5 PASS**。但 tracee 走 manual fallback（需修为 SKIP）、katran post-REJIT 破坏程序（correctness bug）。 |
+| **436** | 删除 E2E manual fallback 路径 | 待做 | 所有 e2e case 禁止 manual .bpf.o fallback。不兼容 kernel 的应用标记 SKIP。 |
+| **437** | Katran post-REJIT correctness bug | 待做 | daemon 优化 katran 程序后程序不正确。需调查哪个 pass 导致。 |
+| **438** | Endian packed ABI offset 支持 | 待做 | endian_fusion offset!=0 时走 legacy（+4.99/site 膨胀）。需支持 packed ABI 携带 offset。 |
+| **439** | 删除 daemon legacy ABI 代码 | 待做 | 确保所有 kinsn pass 走 packed ABI 后，删除 daemon 中全部 legacy emit 路径。 |
+| **440** | Unit tests 覆盖 packed ABI | 待做 | 当前 daemon unit tests 全走 legacy（KfuncRegistry 默认 empty encodings）。需改为 packed。 |
+| **441** | Kernel CRITICAL/HIGH 修复 | 待做 | tools/uapi 头同步、fd_array_cnt 上限、find_call_site 跨平台、text_invalidate 恢复。见 #428。 |
+| **442** | 冗余 bounds check 消除 | 待做 | BPF packet access 中冗余的 bounds check 消除。见 #434 调研。 |
+| **443** | Dead code elimination pass | 待做 | 结合 const prop / map inline 做 DCE。见 #434 调研。 |
+| **444** | Helper call 内联/优化 | 待做 | bpf_probe_read_kernel 小 size → 直接 load 等。见 #434 调研。 |
+| **445** | Spill/fill 消除 | 待做 | BPF 程序冗余 spill/fill 消除，补充 KF_FASTCALL。见 #434 调研。 |

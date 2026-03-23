@@ -1,11 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+REPO_ROOT=$(cd -- "${SCRIPT_DIR}/../../.." && pwd)
+CACHED_BINARY="${REPO_ROOT}/e2e/cases/tracee/bin/tracee"
+
 tracee_bin=""
 if command -v tracee >/dev/null 2>&1; then
   tracee_bin="$(command -v tracee)"
 elif command -v tracee-ebpf >/dev/null 2>&1; then
   tracee_bin="$(command -v tracee-ebpf)"
+elif [[ -x "${CACHED_BINARY}" ]]; then
+  tracee_bin="${CACHED_BINARY}"
 elif [[ -x /tmp/tracee-bin/tracee ]]; then
   tracee_bin="/tmp/tracee-bin/tracee"
 fi
@@ -91,6 +97,10 @@ PY
         cp "${extract_dir}/dist/tracee" "${install_dir}/tracee"
         chmod +x "${install_dir}/tracee"
         tracee_bin="${install_dir}/tracee"
+        # Also cache inside the repo so the VM guest can access it
+        mkdir -p "$(dirname "${CACHED_BINARY}")"
+        cp "${install_dir}/tracee" "${CACHED_BINARY}"
+        chmod +x "${CACHED_BINARY}"
       fi
     fi
   fi
@@ -99,6 +109,12 @@ fi
 if [[ -n "${tracee_bin}" ]]; then
   if ! "${tracee_bin}" --version >/dev/null 2>&1; then
     "${tracee_bin}" version >/dev/null 2>&1 || true
+  fi
+  # Cache the binary inside the repo so the VM guest can access it via --rwdir
+  if [[ ! -x "${CACHED_BINARY}" ]] && [[ "${tracee_bin}" != "${CACHED_BINARY}" ]]; then
+    mkdir -p "$(dirname "${CACHED_BINARY}")"
+    cp "${tracee_bin}" "${CACHED_BINARY}" 2>/dev/null || true
+    chmod +x "${CACHED_BINARY}" 2>/dev/null || true
   fi
 fi
 

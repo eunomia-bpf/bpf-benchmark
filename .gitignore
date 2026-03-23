@@ -123,6 +123,11 @@ docs/tmp/*.sh
 !docs/tmp/
 !e2e/results/
 
+# Cached E2E tool binaries (downloaded by setup scripts)
+e2e/cases/tracee/bin/
+e2e/cases/tetragon/bin/
+e2e/cases/katran/bin/
+
 # Paper build artifacts
 docs/paper/*.aux
 docs/paper/*.bbl
