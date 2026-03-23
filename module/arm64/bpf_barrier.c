@@ -2,7 +2,7 @@
 /*
  * BpfReJIT kinsn: SPECULATION_BARRIER — speculation barrier for ARM64
  *
- * Registers a kfunc bpf_speculation_barrier(void) with KF_INLINE_EMIT.
+ * Registers a kfunc bpf_speculation_barrier(void) with KF_KINSN.
  * When inlined by the ARM64 JIT, emits a speculation barrier sequence.
  *
  * Strategy:
@@ -61,13 +61,13 @@ KINSN_KFUNC_SET(bpf_barrier, bpf_speculation_barrier)
 #define A64_ISB		0xD5033FDFU
 
 static int emit_barrier_arm64(u32 *image, int *idx, bool emit,
-			      const struct bpf_insn *insn,
+			      const struct bpf_kinsn_call *call,
 			      struct bpf_prog *prog)
 {
 	if (!idx)
 		return -EINVAL;
 
-	(void)insn;
+	(void)call;
 	(void)prog;
 
 	if (emit) {
@@ -81,7 +81,22 @@ static int emit_barrier_arm64(u32 *image, int *idx, bool emit,
 	return 2;	/* 2 instructions emitted */
 }
 
-static struct bpf_kfunc_inline_ops barrier_ops = {
+static int model_barrier_call(const struct bpf_kinsn_call *call,
+			      const struct bpf_kinsn_scalar_state *scalar_regs,
+			      struct bpf_kinsn_effect *effect)
+{
+	(void)call;
+	(void)scalar_regs;
+
+	effect->result_type = BPF_KINSN_RES_VOID;
+	return 0;
+}
+
+static const struct bpf_kinsn_ops barrier_ops = {
+	.owner = THIS_MODULE,
+	.api_version = 1,
+	.supported_encodings = BPF_KINSN_ENC_LEGACY_KFUNC,
+	.model_call = model_barrier_call,
 	.emit_arm64 = emit_barrier_arm64,
 	.max_emit_bytes = 8,
 };

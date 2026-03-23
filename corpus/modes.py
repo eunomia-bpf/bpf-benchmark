@@ -548,7 +548,7 @@ def run_target_locally(
         if enable_recompile:
             daemon_socket = f"/tmp/bpfrejit-{os.getpid()}.sock"
             daemon_proc = subprocess.Popen(
-                [str(daemon), "serve", "--socket", daemon_socket],
+                [str(daemon), "--pgo", "serve", "--socket", daemon_socket],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
@@ -556,6 +556,22 @@ def run_target_locally(
             import time as _time
             _time.sleep(0.5)
             try:
+                # PGO warmup: run the program once via kernel mode (no rejit)
+                # so the BPF subsystem has execution stats for daemon profiling.
+                _pgo_warmup_cmd = build_runner_command(
+                    runner=runner,
+                    object_path=object_path,
+                    program_name=target["program_name"],
+                    io_mode=target["io_mode"],
+                    memory_path=memory_path,
+                    input_size=int(target["input_size"]),
+                    repeat=10,
+                    btf_custom_path=btf_custom_path,
+                    compile_only=False,
+                    blind_apply=False,
+                    skip_families=[],
+                )
+                run_command(_pgo_warmup_cmd, timeout_seconds)
                 v5_compile_raw = run_command(
                     build_runner_command(
                         runner=runner,

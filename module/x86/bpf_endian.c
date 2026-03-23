@@ -2,7 +2,7 @@
 /*
  * BpfReJIT kinsn: ENDIAN_LOAD — fused load-and-byte-swap via MOVBE
  *
- * Registers three kfuncs with KF_INLINE_EMIT:
+ * Registers three kfuncs with KF_KINSN:
  *   bpf_endian_load16(void *addr) -> u64  (16-bit load + bswap)
  *   bpf_endian_load32(void *addr) -> u64  (32-bit load + bswap)
  *   bpf_endian_load64(void *addr) -> u64  (64-bit load + bswap)
@@ -31,21 +31,21 @@
 
 __bpf_kfunc_start_defs();
 
-__bpf_kfunc u64 bpf_endian_load16(u64 addr)
+__bpf_kfunc u64 bpf_endian_load16(const void *addr)
 {
-	u16 val = *(const u16 *)(unsigned long)addr;
+	u16 val = *(const u16 *)addr;
 	return __builtin_bswap16(val);
 }
 
-__bpf_kfunc u64 bpf_endian_load32(u64 addr)
+__bpf_kfunc u64 bpf_endian_load32(const void *addr)
 {
-	u32 val = *(const u32 *)(unsigned long)addr;
+	u32 val = *(const u32 *)addr;
 	return __builtin_bswap32(val);
 }
 
-__bpf_kfunc u64 bpf_endian_load64(u64 addr)
+__bpf_kfunc u64 bpf_endian_load64(const void *addr)
 {
-	u64 val = *(const u64 *)(unsigned long)addr;
+	u64 val = *(const u64 *)addr;
 	return __builtin_bswap64(val);
 }
 
@@ -70,8 +70,8 @@ KINSN_KFUNC_SET_END(bpf_endian)
  * Total: 9 bytes
  */
 static int emit_endian_load16_x86(u8 *image, u32 *off, bool emit,
-				   const struct bpf_insn *insn,
-				   struct bpf_prog *prog)
+				  const struct bpf_kinsn_call *call,
+				  struct bpf_prog *prog)
 {
 	static const u8 insns[] = {
 		0x66, 0x0F, 0x38, 0xF0, 0x07,	/* movbe ax, [rdi] */
@@ -83,7 +83,7 @@ static int emit_endian_load16_x86(u8 *image, u32 *off, bool emit,
 	if (emit && !image)
 		return -EINVAL;
 
-	(void)insn;
+	(void)call;
 	(void)prog;
 
 	if (emit)
@@ -102,8 +102,8 @@ static int emit_endian_load16_x86(u8 *image, u32 *off, bool emit,
  * Total: 4 bytes
  */
 static int emit_endian_load32_x86(u8 *image, u32 *off, bool emit,
-				   const struct bpf_insn *insn,
-				   struct bpf_prog *prog)
+				  const struct bpf_kinsn_call *call,
+				  struct bpf_prog *prog)
 {
 	static const u8 insns[] = {
 		0x0F, 0x38, 0xF0, 0x07,	/* movbe eax, [rdi] */
@@ -114,7 +114,7 @@ static int emit_endian_load32_x86(u8 *image, u32 *off, bool emit,
 	if (emit && !image)
 		return -EINVAL;
 
-	(void)insn;
+	(void)call;
 	(void)prog;
 
 	if (emit)
@@ -132,8 +132,8 @@ static int emit_endian_load32_x86(u8 *image, u32 *off, bool emit,
  * Total: 5 bytes
  */
 static int emit_endian_load64_x86(u8 *image, u32 *off, bool emit,
-				   const struct bpf_insn *insn,
-				   struct bpf_prog *prog)
+				  const struct bpf_kinsn_call *call,
+				  struct bpf_prog *prog)
 {
 	static const u8 insns[] = {
 		0x48, 0x0F, 0x38, 0xF0, 0x07,	/* movbe rax, [rdi] */
@@ -144,7 +144,7 @@ static int emit_endian_load64_x86(u8 *image, u32 *off, bool emit,
 	if (emit && !image)
 		return -EINVAL;
 
-	(void)insn;
+	(void)call;
 	(void)prog;
 
 	if (emit)
@@ -154,17 +154,85 @@ static int emit_endian_load64_x86(u8 *image, u32 *off, bool emit,
 	return sizeof(insns);
 }
 
-static struct bpf_kfunc_inline_ops endian_load16_ops = {
+static void model_endian_load(struct bpf_kinsn_effect *effect, u8 size)
+{
+	u64 umax;
+
+	effect->input_mask = BIT(BPF_REG_1);
+	effect->clobber_mask = BIT(BPF_REG_0);
+	effect->result_type = BPF_KINSN_RES_SCALAR;
+	effect->result_reg = BPF_REG_0;
+	effect->result_size = size == sizeof(u32) ? sizeof(u32) : sizeof(u64);
+	effect->nr_mem_accesses = 1;
+	effect->mem_accesses[0].base_reg = BPF_REG_1;
+	effect->mem_accesses[0].size = size;
+	effect->mem_accesses[0].access_type = BPF_READ;
+	effect->mem_accesses[0].flags = BPF_KINSN_MEM_RESULT;
+
+	umax = size == sizeof(u64) ? U64_MAX : ((1ULL << (size * 8)) - 1);
+	effect->umin_value = 0;
+	effect->umax_value = umax;
+	effect->smin_value = 0;
+	effect->smax_value = umax;
+	if (umax != U64_MAX) {
+		effect->flags |= BPF_KINSN_EFFECT_HAS_TNUM;
+		effect->result_tnum = kinsn_tnum_low_bits(umax);
+	}
+}
+
+static int model_endian_load16_call(const struct bpf_kinsn_call *call,
+				    const struct bpf_kinsn_scalar_state *scalar_regs,
+				    struct bpf_kinsn_effect *effect)
+{
+	(void)call;
+	(void)scalar_regs;
+	model_endian_load(effect, sizeof(u16));
+	return 0;
+}
+
+static int model_endian_load32_call(const struct bpf_kinsn_call *call,
+				    const struct bpf_kinsn_scalar_state *scalar_regs,
+				    struct bpf_kinsn_effect *effect)
+{
+	(void)call;
+	(void)scalar_regs;
+	model_endian_load(effect, sizeof(u32));
+	return 0;
+}
+
+static int model_endian_load64_call(const struct bpf_kinsn_call *call,
+				    const struct bpf_kinsn_scalar_state *scalar_regs,
+				    struct bpf_kinsn_effect *effect)
+{
+	(void)call;
+	(void)scalar_regs;
+	model_endian_load(effect, sizeof(u64));
+	return 0;
+}
+
+static const struct bpf_kinsn_ops endian_load16_ops = {
+	.owner = THIS_MODULE,
+	.api_version = 1,
+	.supported_encodings = BPF_KINSN_ENC_LEGACY_KFUNC,
+	.model_call = model_endian_load16_call,
 	.emit_x86 = emit_endian_load16_x86,
 	.max_emit_bytes = 16,
 };
 
-static struct bpf_kfunc_inline_ops endian_load32_ops = {
+static const struct bpf_kinsn_ops endian_load32_ops = {
+	.owner = THIS_MODULE,
+	.api_version = 1,
+	.supported_encodings = BPF_KINSN_ENC_LEGACY_KFUNC,
+	.model_call = model_endian_load32_call,
 	.emit_x86 = emit_endian_load32_x86,
 	.max_emit_bytes = 16,
 };
 
-static struct bpf_kfunc_inline_ops endian_load64_ops = {
+static const struct bpf_kinsn_ops endian_load64_ops = {
+	.owner = THIS_MODULE,
+	.api_version = 1,
+	.supported_encodings = BPF_KINSN_ENC_LEGACY_KFUNC,
+	.model_call = model_endian_load64_call,
 	.emit_x86 = emit_endian_load64_x86,
 	.max_emit_bytes = 16,
 };

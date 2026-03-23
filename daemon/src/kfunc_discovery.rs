@@ -541,29 +541,117 @@ mod tests {
         assert_eq!(BTF_TYPE_SIZE, 12);
     }
 
-    /// Sync test: verify our BTF_KIND_* constants match the kernel header values.
-    /// These must match vendor/linux-framework/include/uapi/linux/btf.h.
+    /// HIGH #4: Parse BTF_KIND constants from kernel header and verify.
+    ///
+    /// This replaces the old hardcoded assertions with values parsed directly
+    /// from vendor/linux-framework/include/uapi/linux/btf.h. If the kernel
+    /// changes BTF kind numbering, this test will catch the mismatch.
     #[test]
     fn test_btf_kind_constants_match_kernel() {
-        assert_eq!(BTF_KIND_INT, 1);
-        assert_eq!(BTF_KIND_PTR, 2);
-        assert_eq!(BTF_KIND_ARRAY, 3);
-        assert_eq!(BTF_KIND_STRUCT, 4);
-        assert_eq!(BTF_KIND_UNION, 5);
-        assert_eq!(BTF_KIND_ENUM, 6);
-        assert_eq!(BTF_KIND_FWD, 7);
-        assert_eq!(BTF_KIND_TYPEDEF, 8);
-        assert_eq!(BTF_KIND_VOLATILE, 9);
-        assert_eq!(BTF_KIND_CONST, 10);
-        assert_eq!(BTF_KIND_RESTRICT, 11);
-        assert_eq!(BTF_KIND_FUNC, 12);
-        assert_eq!(BTF_KIND_FUNC_PROTO, 13);
-        assert_eq!(BTF_KIND_VAR, 14);
-        assert_eq!(BTF_KIND_DATASEC, 15);
-        assert_eq!(BTF_KIND_FLOAT, 16);
-        assert_eq!(BTF_KIND_DECL_TAG, 17);
-        assert_eq!(BTF_KIND_TYPE_TAG, 18);
-        assert_eq!(BTF_KIND_ENUM64, 19);
+        let kernel_btf_kinds = parse_btf_kind_enum();
+        assert!(
+            !kernel_btf_kinds.is_empty(),
+            "failed to parse any BTF_KIND entries from kernel btf.h header"
+        );
+
+        // Verify every BTF_KIND_* constant we define matches the kernel header.
+        let checks: &[(&str, u32)] = &[
+            ("BTF_KIND_INT", BTF_KIND_INT),
+            ("BTF_KIND_PTR", BTF_KIND_PTR),
+            ("BTF_KIND_ARRAY", BTF_KIND_ARRAY),
+            ("BTF_KIND_STRUCT", BTF_KIND_STRUCT),
+            ("BTF_KIND_UNION", BTF_KIND_UNION),
+            ("BTF_KIND_ENUM", BTF_KIND_ENUM),
+            ("BTF_KIND_FWD", BTF_KIND_FWD),
+            ("BTF_KIND_TYPEDEF", BTF_KIND_TYPEDEF),
+            ("BTF_KIND_VOLATILE", BTF_KIND_VOLATILE),
+            ("BTF_KIND_CONST", BTF_KIND_CONST),
+            ("BTF_KIND_RESTRICT", BTF_KIND_RESTRICT),
+            ("BTF_KIND_FUNC", BTF_KIND_FUNC),
+            ("BTF_KIND_FUNC_PROTO", BTF_KIND_FUNC_PROTO),
+            ("BTF_KIND_VAR", BTF_KIND_VAR),
+            ("BTF_KIND_DATASEC", BTF_KIND_DATASEC),
+            ("BTF_KIND_FLOAT", BTF_KIND_FLOAT),
+            ("BTF_KIND_DECL_TAG", BTF_KIND_DECL_TAG),
+            ("BTF_KIND_TYPE_TAG", BTF_KIND_TYPE_TAG),
+            ("BTF_KIND_ENUM64", BTF_KIND_ENUM64),
+        ];
+
+        for (name, our_value) in checks {
+            let kernel_value = kernel_btf_kinds.get(*name).unwrap_or_else(|| {
+                panic!(
+                    "{} not found in kernel header btf.h enum (parsed {} entries)",
+                    name,
+                    kernel_btf_kinds.len()
+                )
+            });
+            assert_eq!(
+                *our_value, *kernel_value,
+                "BTF_KIND constant mismatch: {} = {} in kfunc_discovery.rs but {} in kernel header",
+                name, our_value, kernel_value
+            );
+        }
+    }
+
+    /// Parse the BTF_KIND enum from the kernel UAPI header and return a map
+    /// of name -> numeric value.
+    fn parse_btf_kind_enum() -> std::collections::HashMap<String, u32> {
+        let header_path = concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../vendor/linux-framework/include/uapi/linux/btf.h"
+        );
+        let content = std::fs::read_to_string(header_path)
+            .expect("failed to read kernel btf.h header");
+
+        let mut result = std::collections::HashMap::new();
+        let mut in_enum = false;
+
+        for line in content.lines() {
+            let trimmed = line.trim();
+            // The BTF_KIND enum starts with "enum {"
+            if trimmed == "enum {" && !in_enum {
+                in_enum = true;
+                continue;
+            }
+            if in_enum && (trimmed.starts_with('}') || trimmed.starts_with("};")) {
+                if !result.is_empty() {
+                    break;
+                }
+                in_enum = false;
+                continue;
+            }
+            if !in_enum {
+                continue;
+            }
+            // Skip comments, empty lines, NR_BTF_KINDS, BTF_KIND_MAX
+            if trimmed.is_empty()
+                || trimmed.starts_with("//")
+                || trimmed.starts_with("/*")
+                || trimmed.starts_with("*")
+                || trimmed.contains("NR_BTF_KINDS")
+                || trimmed.contains("BTF_KIND_MAX")
+            {
+                continue;
+            }
+            // Strip trailing inline comments: "BTF_KIND_INT = 1, /* Integer */"
+            let no_comment = if let Some(pos) = trimmed.find("/*") {
+                &trimmed[..pos]
+            } else {
+                trimmed
+            };
+            let clean = no_comment.trim().trim_end_matches(',').trim();
+            if clean.contains('=') {
+                let parts: Vec<&str> = clean.splitn(2, '=').collect();
+                let name = parts[0].trim().to_string();
+                let val_str = parts[1].trim();
+                if let Ok(val) = val_str.parse::<u32>() {
+                    if name.starts_with("BTF_KIND_") {
+                        result.insert(name, val);
+                    }
+                }
+            }
+        }
+        result
     }
 
     /// Test BTF parsing with mixed kinds (not just FUNC).
@@ -729,11 +817,16 @@ mod tests {
         }
         let data = fs::read(vmlinux_path).expect("read vmlinux BTF");
         // vmlinux is base BTF, so base_str_off=0.
+        // MEDIUM #3: Assert that the result is Some for a well-known kernel function.
+        // bpf_prog_run_xdp should exist in any BPF-enabled kernel with XDP support.
         let result = find_func_btf_id(&data, "bpf_prog_run_xdp", 0);
-        // bpf_prog_run_xdp should exist in any BPF-enabled kernel.
-        // However, the name may vary between kernel versions, so just check
-        // that parsing completes without panic.
-        let _ = result;
+        assert!(
+            result.is_some(),
+            "bpf_prog_run_xdp should exist in vmlinux BTF (found None)"
+        );
+        let btf_id = result.unwrap();
+        assert!(btf_id > 0, "bpf_prog_run_xdp BTF ID should be positive, got {}", btf_id);
+        eprintln!("  bpf_prog_run_xdp: btf_id={}", btf_id);
     }
 
     #[test]

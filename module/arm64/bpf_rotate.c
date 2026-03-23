@@ -2,7 +2,7 @@
 /*
  * BpfReJIT kinsn: ROTATE — 64-bit rotate LEFT via RORV instruction (ARM64)
  *
- * Registers a kfunc bpf_rotate64(u64 val, u32 shift) with KF_INLINE_EMIT.
+ * Registers a kfunc bpf_rotate64(u64 val, u32 shift) with KF_KINSN.
  * Semantics: rotate val LEFT by shift bits — same as x86 ROL.
  * When inlined by the ARM64 JIT, computes (64 - shift) & 63 and uses RORV.
  *
@@ -91,7 +91,7 @@ static inline u32 a64_rorv(u8 rd, u8 rn, u8 rm)
 }
 
 static int emit_rotate_arm64(u32 *image, int *idx, bool emit,
-			     const struct bpf_insn *insn,
+			     const struct bpf_kinsn_call *call,
 			     struct bpf_prog *prog)
 {
 	/*
@@ -107,7 +107,7 @@ static int emit_rotate_arm64(u32 *image, int *idx, bool emit,
 	if (!idx)
 		return -EINVAL;
 
-	(void)insn;
+	(void)call;
 	(void)prog;
 
 	insns[0] = a64_neg_w(ARM64_TMP, ARM64_BPF_R2);
@@ -127,7 +127,26 @@ static int emit_rotate_arm64(u32 *image, int *idx, bool emit,
 	return 3;	/* 3 instructions emitted */
 }
 
-static struct bpf_kfunc_inline_ops rotate_ops = {
+static int model_rotate_call(const struct bpf_kinsn_call *call,
+			     const struct bpf_kinsn_scalar_state *scalar_regs,
+			     struct bpf_kinsn_effect *effect)
+{
+	(void)call;
+	(void)scalar_regs;
+
+	effect->input_mask = BIT(BPF_REG_1) | BIT(BPF_REG_2);
+	effect->clobber_mask = BIT(BPF_REG_0);
+	effect->result_type = BPF_KINSN_RES_SCALAR;
+	effect->result_reg = BPF_REG_0;
+	effect->result_size = sizeof(u64);
+	return 0;
+}
+
+static const struct bpf_kinsn_ops rotate_ops = {
+	.owner = THIS_MODULE,
+	.api_version = 1,
+	.supported_encodings = BPF_KINSN_ENC_LEGACY_KFUNC,
+	.model_call = model_rotate_call,
 	.emit_arm64 = emit_rotate_arm64,
 	.max_emit_bytes = 16,
 };

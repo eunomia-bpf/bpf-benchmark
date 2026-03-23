@@ -1192,4 +1192,46 @@ mod tests {
         // The width=3 site should be in sites_skipped.
         assert!(result.sites_skipped.iter().any(|s| s.reason.contains("unsupported width 3")));
     }
+
+    // ── MEDIUM #5: Real bytecode pattern test for wide_mem ──────────
+
+    /// MEDIUM #5: Test wide_mem pattern scanning against real compiled BPF bytecode
+    /// from load_byte_recompose.bpf.o. Verifies that scan_wide_mem finds patterns
+    /// in real clang output, not just hand-constructed sequences.
+    #[test]
+    fn test_scan_wide_mem_real_bytecode() {
+        let path = crate::insn::micro_program_path("load_byte_recompose.bpf.o");
+        let insns = match crate::insn::load_bpf_insns_from_elf(&path) {
+            Some(i) if !i.is_empty() => i,
+            _ => {
+                eprintln!("SKIP: load_byte_recompose.bpf.o not found (run `make micro` first)");
+                return;
+            }
+        };
+
+        let sites = scan_wide_mem(&insns);
+        assert!(
+            !sites.is_empty(),
+            "load_byte_recompose.bpf.o should contain wide_mem patterns, found 0 sites in {} insns",
+            insns.len()
+        );
+
+        // Verify each site has sensible properties
+        for site in &sites {
+            assert!(site.start_pc < insns.len(),
+                "wide_mem site start_pc {} out of range (insns.len()={})", site.start_pc, insns.len());
+            assert!(site.old_len >= 2,
+                "wide_mem site old_len should be >= 2, got {}", site.old_len);
+            // Width should be available in bindings
+            if let Some(width) = site.get_binding("width") {
+                assert!(width >= 2 && width <= 8,
+                    "wide_mem site width should be 2-8, got {}", width);
+            }
+        }
+
+        eprintln!(
+            "  load_byte_recompose.bpf.o: found {} wide_mem sites in {} insns",
+            sites.len(), insns.len()
+        );
+    }
 }

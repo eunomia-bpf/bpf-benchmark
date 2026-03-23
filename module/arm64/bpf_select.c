@@ -2,7 +2,7 @@
 /*
  * BpfReJIT kinsn: COND_SELECT — branchless conditional select via CSEL (ARM64)
  *
- * Registers a kfunc bpf_select64(u64 a, u64 b, u64 cond) with KF_INLINE_EMIT.
+ * Registers a kfunc bpf_select64(u64 a, u64 b, u64 cond) with KF_KINSN.
  * Semantics: returns a if cond != 0, otherwise returns b.
  * When inlined by the ARM64 JIT, emits TST + CSEL instead of a BL.
  *
@@ -78,7 +78,7 @@ static inline u32 a64_csel(u8 rd, u8 rn, u8 rm, u8 cond)
 }
 
 static int emit_select_arm64(u32 *image, int *idx, bool emit,
-			     const struct bpf_insn *insn,
+			     const struct bpf_kinsn_call *call,
 			     struct bpf_prog *prog)
 {
 	/*
@@ -92,7 +92,7 @@ static int emit_select_arm64(u32 *image, int *idx, bool emit,
 	if (!idx)
 		return -EINVAL;
 
-	(void)insn;
+	(void)call;
 	(void)prog;
 
 	if (emit) {
@@ -106,7 +106,50 @@ static int emit_select_arm64(u32 *image, int *idx, bool emit,
 	return 2;	/* 2 instructions emitted */
 }
 
-static struct bpf_kfunc_inline_ops select_ops = {
+static void union_scalar_states(struct bpf_kinsn_effect *effect,
+				const struct bpf_kinsn_scalar_state *a,
+				const struct bpf_kinsn_scalar_state *b)
+{
+	effect->flags |= BPF_KINSN_EFFECT_HAS_TNUM;
+	effect->result_tnum = kinsn_tnum_union(a->var_off, b->var_off);
+	effect->umin_value = min(a->umin_value, b->umin_value);
+	effect->umax_value = max(a->umax_value, b->umax_value);
+	effect->smin_value = min(a->smin_value, b->smin_value);
+	effect->smax_value = max(a->smax_value, b->smax_value);
+}
+
+static int model_select_call(const struct bpf_kinsn_call *call,
+			     const struct bpf_kinsn_scalar_state *scalar_regs,
+			     struct bpf_kinsn_effect *effect)
+{
+	const struct bpf_kinsn_scalar_state *true_val = &scalar_regs[0];
+	const struct bpf_kinsn_scalar_state *false_val = &scalar_regs[1];
+	const struct bpf_kinsn_scalar_state *cond = &scalar_regs[2];
+
+	(void)call;
+
+	effect->input_mask = BIT(BPF_REG_1) | BIT(BPF_REG_2) | BIT(BPF_REG_3);
+	effect->clobber_mask = BIT(BPF_REG_0);
+	effect->result_type = BPF_KINSN_RES_SCALAR;
+	effect->result_reg = BPF_REG_0;
+	effect->result_size = sizeof(u64);
+
+	if (tnum_is_const(cond->var_off)) {
+		union_scalar_states(effect,
+				    cond->var_off.value ? true_val : false_val,
+				    cond->var_off.value ? true_val : false_val);
+		return 0;
+	}
+
+	union_scalar_states(effect, true_val, false_val);
+	return 0;
+}
+
+static const struct bpf_kinsn_ops select_ops = {
+	.owner = THIS_MODULE,
+	.api_version = 1,
+	.supported_encodings = BPF_KINSN_ENC_LEGACY_KFUNC,
+	.model_call = model_select_call,
 	.emit_arm64 = emit_select_arm64,
 	.max_emit_bytes = 16,
 };

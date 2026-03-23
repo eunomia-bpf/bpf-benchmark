@@ -64,7 +64,7 @@ if [ "$SKIP_UNITTEST" -eq 0 ]; then
     run_section "Running tests/unittest/ suite"
     cd "$UNITTEST_DIR"
     for t in rejit_poc rejit_safety_tests rejit_regression rejit_tail_call \
-             rejit_spectre rejit_prog_types rejit_audit_tests; do
+             rejit_spectre rejit_kinsn rejit_prog_types rejit_audit_tests; do
         echo "--- $t ---"
         if "${UNITTEST_BUILD_DIR}/$t" "${UNITTEST_BUILD_DIR}/progs"; then
             PASS=$((PASS + 1))

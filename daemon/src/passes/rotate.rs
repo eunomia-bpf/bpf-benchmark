@@ -5,7 +5,7 @@ use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
-use super::utils::{emit_kfunc_call, fixup_all_branches, KfuncArg};
+use super::utils::{emit_kfunc_call_with_off, emit_with_caller_save, ensure_module_fd_slot, fixup_all_branches, plan_caller_saved, CallerSavedPlan, KfuncArg};
 
 /// ROTATE optimization pass: replaces shift+OR rotate patterns with
 /// bpf_rotate64() kfunc calls. JIT inlines the kfunc as a RORX instruction.
@@ -64,7 +64,7 @@ impl BpfPass for RotatePass {
         let liveness = analyses.get(&liveness_analysis, program);
 
         let sites = scan_rotate_sites(&program.insns);
-        let mut safe_sites = Vec::new();
+        let mut safe_sites: Vec<SafeRotateSite> = Vec::new();
         let mut skipped = Vec::new();
         let btf_id = ctx.kfunc_registry.rotate64_btf_id;
 
@@ -96,20 +96,30 @@ impl BpfPass for RotatePass {
                 }
 
                 // Safety check 3: caller-saved register conflict.
-                // A kfunc call clobbers r1-r5. If any of those are live after
-                // the site (excluding the value register), we cannot safely transform.
-                let caller_saved_conflict = (1u8..=5)
-                    .any(|r| r != site.val_reg && live_after.contains(&r));
-                if caller_saved_conflict {
-                    skipped.push(SkipReason {
-                        pc: site.start_pc,
-                        reason: "caller-saved register conflict".into(),
-                    });
-                    continue;
+                // Try to plan save/restore for live caller-saved regs using
+                // free callee-saved regs. Only skip if no plan is possible.
+                let plan = plan_caller_saved(live_after, site.dst_reg);
+                match plan {
+                    Some(p) => {
+                        safe_sites.push(SafeRotateSite {
+                            site,
+                            caller_save_plan: p,
+                        });
+                    }
+                    None => {
+                        skipped.push(SkipReason {
+                            pc: site.start_pc,
+                            reason: "caller-saved register conflict (not enough free callee-saved regs)".into(),
+                        });
+                    }
                 }
+                continue;
             }
 
-            safe_sites.push(site);
+            safe_sites.push(SafeRotateSite {
+                site,
+                caller_save_plan: CallerSavedPlan { saves: vec![] },
+            });
         }
 
         if safe_sites.is_empty() {
@@ -120,6 +130,12 @@ impl BpfPass for RotatePass {
                 sites_skipped: skipped,
                 diagnostics: vec![], ..Default::default() });
         }
+
+        let kfunc_off = ctx
+            .kfunc_registry
+            .module_fd_for_pass(self.name())
+            .map(|fd| ensure_module_fd_slot(program, fd))
+            .unwrap_or(0);
 
         // Build replacement instruction stream.
         let orig_len = program.insns.len();
@@ -133,17 +149,26 @@ impl BpfPass for RotatePass {
             let new_pc = new_insns.len();
             addr_map[pc] = new_pc;
 
-            if site_idx < safe_sites.len() && pc == safe_sites[site_idx].start_pc {
-                let site = &safe_sites[site_idx];
+            if site_idx < safe_sites.len() && pc == safe_sites[site_idx].site.start_pc {
+                let safe_site = &safe_sites[site_idx];
+                let site = &safe_site.site;
                 // Emit: bpf_rotate64(val_reg, shift_amount) -> dst_reg
-                let replacement = emit_kfunc_call(
+                let kfunc_insns = emit_kfunc_call_with_off(
                     site.dst_reg,
                     &[
                         KfuncArg::Reg(site.val_reg),
                         KfuncArg::Imm(site.shift_amount as i32),
                     ],
                     btf_id,
+                    kfunc_off,
                 );
+
+                // Wrap with caller-saved register save/restore if needed.
+                let replacement = if safe_site.caller_save_plan.saves.is_empty() {
+                    kfunc_insns
+                } else {
+                    emit_with_caller_save(&kfunc_insns, &safe_site.caller_save_plan)
+                };
                 new_insns.extend_from_slice(&replacement);
 
                 // Map old PCs in the site range.
@@ -179,15 +204,6 @@ impl BpfPass for RotatePass {
             details: vec![],
         });
 
-        // Record module FDs needed for the kfunc calls we emitted.
-        if applied > 0 {
-            if let Some(fd) = ctx.kfunc_registry.module_fd_for_pass(self.name()) {
-                if !program.required_module_fds.contains(&fd) {
-                    program.required_module_fds.push(fd);
-                }
-            }
-        }
-
         Ok(PassResult {
             pass_name: self.name().into(),
             changed: applied > 0,
@@ -204,6 +220,13 @@ struct RotateSite {
     val_reg: u8,
     tmp_reg: u8,
     shift_amount: u32,
+}
+
+/// A rotate site that has passed safety checks, ready for transformation.
+struct SafeRotateSite {
+    site: RotateSite,
+    /// Caller-saved register save/restore plan.
+    caller_save_plan: CallerSavedPlan,
 }
 
 fn scan_rotate_sites(insns: &[BpfInsn]) -> Vec<RotateSite> {
@@ -307,57 +330,107 @@ fn try_match_rotate(
     i2: &BpfInsn,
     pc: usize,
 ) -> Option<RotateSite> {
-    // Pattern A: RSH64_IMM(dst, 64-S) ; LSH64_IMM(tmp, S) ; OR64_REG(dst, tmp)
+    let is_or = i2.code == (BPF_ALU64 | BPF_OR | BPF_X);
+    if !is_or {
+        return None;
+    }
+
+    // Pattern A: RSH64_IMM(rA, S_rsh) ; LSH64_IMM(rB, S_lsh) ; OR64_REG(or_dst, or_src)
+    // where S_rsh + S_lsh = 64.
+    //
+    // The two registers rA, rB hold copies of the same original value.
+    // One was copied from the other via `MOV tmp, orig` before the shifts.
+    // Either register could be the original or the copy — we try both.
     let is_rsh = i0.code == (BPF_ALU64 | BPF_RSH | BPF_K);
     let is_lsh = i1.code == (BPF_ALU64 | BPF_LSH | BPF_K);
-    let is_or = i2.code == (BPF_ALU64 | BPF_OR | BPF_X);
 
-    if is_rsh && is_lsh && is_or {
+    if is_rsh && is_lsh {
         let rsh_amount = i0.imm as u32;
         let lsh_amount = i1.imm as u32;
 
         if rsh_amount + lsh_amount == 64 {
-            let dst = i0.dst_reg();
-            let tmp = i1.dst_reg();
+            let rsh_reg = i0.dst_reg();
+            let lsh_reg = i1.dst_reg();
+            if rsh_reg != lsh_reg {
+                let or_dst = i2.dst_reg();
+                let or_src = i2.src_reg();
 
-            if i2.dst_reg() == dst && i2.src_reg() == tmp && dst != tmp {
-                // Verify provenance: there must be a MOV tmp, dst before the RSH.
-                let mov_pc = find_provenance_mov(insns, pc, tmp, dst)?;
-                return Some(RotateSite {
-                    start_pc: mov_pc,
-                    old_len: (pc + 3) - mov_pc,
-                    dst_reg: dst,
-                    val_reg: dst,
-                    tmp_reg: tmp,
-                    shift_amount: lsh_amount,
-                });
+                // The OR must combine exactly these two registers.
+                let or_uses_both = (or_dst == rsh_reg && or_src == lsh_reg)
+                    || (or_dst == lsh_reg && or_src == rsh_reg);
+                if or_uses_both {
+                    let result_reg = or_dst;
+                    // Try both provenance directions:
+                    // Case 1: rsh_reg is the copy (tmp), lsh_reg is the original (dst)
+                    //   => MOV rsh_reg, lsh_reg
+                    if let Some(mov_pc) = find_provenance_mov(insns, pc, rsh_reg, lsh_reg) {
+                        return Some(RotateSite {
+                            start_pc: mov_pc,
+                            old_len: (pc + 3) - mov_pc,
+                            dst_reg: result_reg,
+                            val_reg: lsh_reg,
+                            tmp_reg: rsh_reg,
+                            shift_amount: lsh_amount,
+                        });
+                    }
+                    // Case 2: lsh_reg is the copy (tmp), rsh_reg is the original (dst)
+                    //   => MOV lsh_reg, rsh_reg
+                    if let Some(mov_pc) = find_provenance_mov(insns, pc, lsh_reg, rsh_reg) {
+                        return Some(RotateSite {
+                            start_pc: mov_pc,
+                            old_len: (pc + 3) - mov_pc,
+                            dst_reg: result_reg,
+                            val_reg: rsh_reg,
+                            tmp_reg: lsh_reg,
+                            shift_amount: lsh_amount,
+                        });
+                    }
+                }
             }
         }
     }
 
-    // Pattern B: LSH64_IMM(dst, S) ; RSH64_IMM(tmp, 64-S) ; OR64_REG(dst, tmp)
+    // Pattern B: LSH64_IMM(rA, S_lsh) ; RSH64_IMM(rB, S_rsh) ; OR64_REG(or_dst, or_src)
     let is_lsh_first = i0.code == (BPF_ALU64 | BPF_LSH | BPF_K);
     let is_rsh_second = i1.code == (BPF_ALU64 | BPF_RSH | BPF_K);
 
-    if is_lsh_first && is_rsh_second && is_or {
+    if is_lsh_first && is_rsh_second {
         let lsh_amount = i0.imm as u32;
         let rsh_amount = i1.imm as u32;
 
         if lsh_amount + rsh_amount == 64 {
-            let dst = i0.dst_reg();
-            let tmp = i1.dst_reg();
+            let lsh_reg = i0.dst_reg();
+            let rsh_reg = i1.dst_reg();
+            if lsh_reg != rsh_reg {
+                let or_dst = i2.dst_reg();
+                let or_src = i2.src_reg();
 
-            if i2.dst_reg() == dst && i2.src_reg() == tmp && dst != tmp {
-                // Verify provenance: there must be a MOV tmp, dst before the LSH.
-                let mov_pc = find_provenance_mov(insns, pc, tmp, dst)?;
-                return Some(RotateSite {
-                    start_pc: mov_pc,
-                    old_len: (pc + 3) - mov_pc,
-                    dst_reg: dst,
-                    val_reg: dst,
-                    tmp_reg: tmp,
-                    shift_amount: lsh_amount,
-                });
+                let or_uses_both = (or_dst == lsh_reg && or_src == rsh_reg)
+                    || (or_dst == rsh_reg && or_src == lsh_reg);
+                if or_uses_both {
+                    let result_reg = or_dst;
+                    // Try both provenance directions:
+                    if let Some(mov_pc) = find_provenance_mov(insns, pc, rsh_reg, lsh_reg) {
+                        return Some(RotateSite {
+                            start_pc: mov_pc,
+                            old_len: (pc + 3) - mov_pc,
+                            dst_reg: result_reg,
+                            val_reg: lsh_reg,
+                            tmp_reg: rsh_reg,
+                            shift_amount: lsh_amount,
+                        });
+                    }
+                    if let Some(mov_pc) = find_provenance_mov(insns, pc, lsh_reg, rsh_reg) {
+                        return Some(RotateSite {
+                            start_pc: mov_pc,
+                            old_len: (pc + 3) - mov_pc,
+                            dst_reg: result_reg,
+                            val_reg: rsh_reg,
+                            tmp_reg: lsh_reg,
+                            shift_amount: lsh_amount,
+                        });
+                    }
+                }
             }
         }
     }
@@ -415,6 +488,42 @@ mod tests {
         let sites = scan_rotate_sites(&insns);
         assert_eq!(sites.len(), 1);
         assert_eq!(sites[0].shift_amount, 16);
+    }
+
+    #[test]
+    fn test_rotate_pass_pattern_or_reversed() {
+        // clang emits OR tmp, dst instead of OR dst, tmp.
+        // Result lands in tmp register (r3) instead of dst (r2).
+        let insns = vec![
+            BpfInsn::mov64_reg(3, 2),           // MOV r3, r2 (provenance: r3 is copy)
+            BpfInsn::alu64_imm(BPF_RSH, 3, 56), // RSH r3 (copy), 56
+            BpfInsn::alu64_imm(BPF_LSH, 2, 8),  // LSH r2 (orig), 8
+            BpfInsn::alu64_reg(BPF_OR, 2, 3),   // OR r2, r3 — result in r2
+        ];
+        let sites = scan_rotate_sites(&insns);
+        assert_eq!(sites.len(), 1);
+        assert_eq!(sites[0].shift_amount, 8);
+        assert_eq!(sites[0].dst_reg, 2); // result register
+        assert_eq!(sites[0].val_reg, 2); // original value register
+        assert_eq!(sites[0].tmp_reg, 3); // copy register
+    }
+
+    #[test]
+    fn test_rotate_pass_pattern_clang_style() {
+        // Exact pattern from clang: MOV r2,r3 ; RSH r2,51 ; LSH r3,13 ; OR r3,r2
+        // Here r3 is the original, r2 is the copy.
+        let insns = vec![
+            BpfInsn::mov64_reg(2, 3),            // MOV r2, r3 (provenance: r2 = copy of r3)
+            BpfInsn::alu64_imm(BPF_RSH, 2, 51),  // RSH r2 (copy), 51
+            BpfInsn::alu64_imm(BPF_LSH, 3, 13),  // LSH r3 (orig), 13
+            BpfInsn::alu64_reg(BPF_OR, 3, 2),    // OR r3, r2 — result in r3
+        ];
+        let sites = scan_rotate_sites(&insns);
+        assert_eq!(sites.len(), 1);
+        assert_eq!(sites[0].shift_amount, 13);
+        assert_eq!(sites[0].dst_reg, 3); // result register (r3, OR destination)
+        assert_eq!(sites[0].val_reg, 3); // original value
+        assert_eq!(sites[0].tmp_reg, 2); // copy register
     }
 
     #[test]
@@ -499,7 +608,8 @@ mod tests {
     }
 
     #[test]
-    fn test_rotate_pass_caller_saved_conflict() {
+    fn test_rotate_pass_caller_saved_with_save_restore() {
+        // r3 is live after the site, but can be saved to a free callee-saved reg.
         let mut prog = make_program(vec![
             BpfInsn::mov64_imm(3, 99),
             BpfInsn::mov64_reg(4, 2),           // provenance for tmp=r4
@@ -515,17 +625,53 @@ mod tests {
         let pass = RotatePass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
-        assert!(!result.changed);
-        assert_eq!(result.sites_applied, 0);
-        let has_conflict = result
-            .sites_skipped
-            .iter()
-            .any(|s| s.reason.contains("caller-saved"));
-        assert!(
-            has_conflict,
-            "expected caller-saved conflict skip reason, got: {:?}",
-            result.sites_skipped
-        );
+        // With save/restore, the site should be applied (r3 saved to a free callee-saved reg).
+        assert!(result.changed, "should apply with caller-saved save/restore");
+        assert_eq!(result.sites_applied, 1);
+        // The kfunc call should be present.
+        let has_kfunc_call = prog.insns.iter().any(|i| i.is_call() && i.src_reg() == 2);
+        assert!(has_kfunc_call, "expected a kfunc call in the output");
+        // r3 should be saved and restored: there should be a pair of MOV instructions
+        // involving r3 and a callee-saved register (r6-r9).
+        let has_save = prog.insns.iter().any(|i| {
+            i.code == (BPF_ALU64 | BPF_MOV | BPF_X)
+                && (6..=9).contains(&i.dst_reg())
+                && i.src_reg() == 3
+        });
+        let has_restore = prog.insns.iter().any(|i| {
+            i.code == (BPF_ALU64 | BPF_MOV | BPF_X)
+                && i.dst_reg() == 3
+                && (6..=9).contains(&i.src_reg())
+        });
+        assert!(has_save, "should have save MOV for r3");
+        assert!(has_restore, "should have restore MOV for r3");
+    }
+
+    #[test]
+    fn test_rotate_pass_caller_saved_no_free_callee_regs() {
+        // All callee-saved regs (r6-r9) are live, so save/restore is impossible.
+        let mut prog = make_program(vec![
+            BpfInsn::mov64_imm(3, 99),
+            BpfInsn::mov64_reg(4, 2),           // provenance for tmp=r4
+            BpfInsn::alu64_imm(BPF_RSH, 2, 56),
+            BpfInsn::alu64_imm(BPF_LSH, 4, 8),
+            BpfInsn::alu64_reg(BPF_OR, 2, 4),
+            // Use r3, r6, r7, r8, r9 after site to make them all live
+            BpfInsn::alu64_reg(BPF_OR, 0, 3),
+            BpfInsn::alu64_reg(BPF_OR, 0, 6),
+            BpfInsn::alu64_reg(BPF_OR, 0, 7),
+            BpfInsn::alu64_reg(BPF_OR, 0, 8),
+            BpfInsn::alu64_reg(BPF_OR, 0, 9),
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let ctx = ctx_with_rotate_kfunc(9999);
+
+        let pass = RotatePass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(!result.changed, "should skip when no free callee-saved regs");
+        assert!(result.sites_skipped.iter().any(|s| s.reason.contains("caller-saved")));
     }
 
     #[test]
@@ -617,5 +763,66 @@ mod tests {
         ];
         let sites = scan_rotate_sites(&insns);
         assert_eq!(sites.len(), 1, "should match when dst is not overwritten");
+    }
+
+    // ── MEDIUM #6: Real bytecode pattern test for rotate ────────────
+
+    /// MEDIUM #6: Test rotate pattern scanning against real compiled BPF bytecode
+    /// from rotate_dense.bpf.o. Verifies the scanner finds sites in real clang output.
+    ///
+    /// The scanner handles both OR operand orderings:
+    ///   OR dst, tmp (canonical) and OR tmp, dst (clang's actual output).
+    #[test]
+    fn test_scan_rotate_real_bytecode() {
+        let path = crate::insn::micro_program_path("rotate_dense.bpf.o");
+        let insns = match crate::insn::load_bpf_insns_from_elf(&path) {
+            Some(i) if !i.is_empty() => i,
+            _ => {
+                eprintln!("SKIP: rotate_dense.bpf.o not found (run `make micro` first)");
+                return;
+            }
+        };
+
+        let sites = scan_rotate_sites(&insns);
+
+        // Verify the scanner doesn't panic on real bytecode and returns valid sites
+        for site in &sites {
+            assert!(site.start_pc < insns.len(),
+                "rotate site start_pc {} out of range (insns.len()={})", site.start_pc, insns.len());
+            assert!(site.shift_amount > 0 && site.shift_amount < 64,
+                "rotate shift_amount should be 1-63, got {}", site.shift_amount);
+        }
+
+        // Count RSH+LSH pairs that sum to 64 in the bytecode to see how many
+        // potential rotate sites exist (regardless of OR direction).
+        let mut potential = 0;
+        for i in 0..insns.len().saturating_sub(2) {
+            let is_rsh = insns[i].code == (BPF_ALU64 | BPF_RSH | BPF_K);
+            let is_lsh = insns[i+1].code == (BPF_ALU64 | BPF_LSH | BPF_K);
+            let is_lsh_first = insns[i].code == (BPF_ALU64 | BPF_LSH | BPF_K);
+            let is_rsh_second = insns[i+1].code == (BPF_ALU64 | BPF_RSH | BPF_K);
+            if (is_rsh && is_lsh && insns[i].imm + insns[i+1].imm == 64)
+                || (is_lsh_first && is_rsh_second && insns[i].imm + insns[i+1].imm == 64) {
+                potential += 1;
+            }
+        }
+
+        eprintln!(
+            "  rotate_dense.bpf.o: {} insns, {} potential rotate pairs, {} matched by scanner",
+            insns.len(), potential, sites.len()
+        );
+        // There should be many potential rotate pairs in rotate_dense
+        assert!(potential > 0,
+            "rotate_dense.bpf.o should contain RSH+LSH pairs summing to 64");
+        // With the OR operand order fix, all potential pairs should be matched.
+        assert!(
+            !sites.is_empty(),
+            "rotate_dense.bpf.o should have matched rotate sites (got 0 from {} potential)",
+            potential
+        );
+        assert_eq!(
+            sites.len(), potential,
+            "all potential rotate pairs should be matched by the scanner"
+        );
     }
 }

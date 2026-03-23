@@ -47,7 +47,7 @@ CLANG_SYS_INCLUDES := $(call get_sys_includes,$(CLANG))
 
 # Tests that only need kernel UAPI headers
 SIMPLE_TESTS := rejit_poc rejit_safety_tests rejit_regression rejit_tail_call \
-                rejit_spectre
+                rejit_spectre rejit_kinsn
 
 # Tests that also need libbpf
 LIBBPF_TESTS := rejit_prog_types rejit_audit_tests

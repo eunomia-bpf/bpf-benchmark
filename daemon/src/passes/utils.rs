@@ -5,6 +5,7 @@
 //! helpers that are used by multiple passes.
 
 use crate::insn::*;
+use crate::pass::BpfProgram;
 
 // ── Branch fixup ───────────────────────────────────────────────────
 
@@ -76,13 +77,39 @@ pub enum KfuncArg {
 /// target registers {r1..rN}, the emission order is chosen to avoid aliasing.
 /// Unresolvable conflicts are broken via r0 as a scratch register.
 pub fn emit_kfunc_call(dst_reg: u8, args: &[KfuncArg], kfunc_btf_id: i32) -> Vec<BpfInsn> {
+    emit_kfunc_call_with_off(dst_reg, args, kfunc_btf_id, 0)
+}
+
+/// Emit a kfunc call sequence with an explicit module BTF slot encoded in
+/// `CALL.off`. `kfunc_off = 0` means vmlinux.
+pub fn emit_kfunc_call_with_off(
+    dst_reg: u8,
+    args: &[KfuncArg],
+    kfunc_btf_id: i32,
+    kfunc_off: i16,
+) -> Vec<BpfInsn> {
     let mut out = Vec::with_capacity(args.len() + 2);
     emit_safe_kfunc_params(&mut out, args);
-    out.push(BpfInsn::call_kfunc(kfunc_btf_id));
+    out.push(BpfInsn::call_kfunc_with_off(kfunc_btf_id, kfunc_off));
     if dst_reg != 0 {
         out.push(BpfInsn::mov64_reg(dst_reg, 0));
     }
     out
+}
+
+/// Ensure `module_fd` is present in the program's REJIT `fd_array` list and
+/// return the 1-based slot number to encode in `CALL.off`.
+pub fn ensure_module_fd_slot(program: &mut BpfProgram, module_fd: i32) -> i16 {
+    if let Some(idx) = program
+        .required_module_fds
+        .iter()
+        .position(|&fd| fd == module_fd)
+    {
+        return idx as i16 + 1;
+    }
+
+    program.required_module_fds.push(module_fd);
+    program.required_module_fds.len() as i16
 }
 
 /// Emit a MOV instruction for a KfuncArg value into a target register.
@@ -213,6 +240,85 @@ fn emit_safe_kfunc_params(out: &mut Vec<BpfInsn>, args: &[KfuncArg]) {
     }
 }
 
+// ── Caller-saved register save/restore ──────────────────────────────
+
+/// Information about which caller-saved registers need saving around a kfunc call.
+#[derive(Debug)]
+pub struct CallerSavedPlan {
+    /// Pairs of (caller_saved_reg, callee_saved_reg) for save/restore.
+    pub saves: Vec<(u8, u8)>,
+}
+
+/// Analyze which caller-saved registers (r1-r5) are live after a site and
+/// need saving, then find free callee-saved registers (r6-r9) to hold them.
+///
+/// `dst_reg` is the destination of the kfunc result -- it's being written,
+/// so it doesn't need saving even if it's in r1-r5.
+///
+/// Returns `Some(plan)` if we can save all live caller-saved regs (may be empty
+/// if none need saving). Returns `None` if there aren't enough free callee-saved
+/// registers.
+pub fn plan_caller_saved(
+    live_after: &std::collections::HashSet<u8>,
+    dst_reg: u8,
+) -> Option<CallerSavedPlan> {
+    // Which caller-saved regs (r1-r5) are live after the site and need saving?
+    let needs_save: Vec<u8> = (1u8..=5)
+        .filter(|&r| r != dst_reg && live_after.contains(&r))
+        .collect();
+
+    if needs_save.is_empty() {
+        return Some(CallerSavedPlan { saves: vec![] });
+    }
+
+    // Find free callee-saved regs (r6-r9) that are NOT live after the site.
+    // These can be used as scratch for save/restore.
+    let free_callee: Vec<u8> = (6u8..=9)
+        .filter(|r| !live_after.contains(r))
+        .collect();
+
+    if free_callee.len() < needs_save.len() {
+        return None; // Not enough free callee-saved regs
+    }
+
+    let saves: Vec<(u8, u8)> = needs_save
+        .iter()
+        .zip(free_callee.iter())
+        .map(|(&caller, &callee)| (caller, callee))
+        .collect();
+
+    Some(CallerSavedPlan { saves })
+}
+
+/// Wrap a kfunc call sequence with caller-saved register save/restore.
+///
+/// Emits:
+///   MOV callee_reg, caller_reg   (for each save pair)
+///   <kfunc_call_insns>
+///   MOV caller_reg, callee_reg   (for each save pair, in reverse)
+pub fn emit_with_caller_save(
+    kfunc_insns: &[BpfInsn],
+    plan: &CallerSavedPlan,
+) -> Vec<BpfInsn> {
+    let total = plan.saves.len() * 2 + kfunc_insns.len();
+    let mut out = Vec::with_capacity(total);
+
+    // Save: MOV callee, caller
+    for &(caller, callee) in &plan.saves {
+        out.push(BpfInsn::mov64_reg(callee, caller));
+    }
+
+    // Kfunc call sequence
+    out.extend_from_slice(kfunc_insns);
+
+    // Restore: MOV caller, callee (reverse order for cleanliness)
+    for &(caller, callee) in plan.saves.iter().rev() {
+        out.push(BpfInsn::mov64_reg(caller, callee));
+    }
+
+    out
+}
+
 // ── Instruction iterator ───────────────────────────────────────────
 
 /// Iterator over BPF instructions that automatically skips LDIMM64 second slots.
@@ -296,9 +402,20 @@ mod tests {
         // call
         assert!(insns[2].is_call());
         assert_eq!(insns[2].imm, 9999);
+        assert_eq!(insns[2].off, 0);
         // mov r2, r0
         assert_eq!(insns[3].dst_reg(), 2);
         assert_eq!(insns[3].src_reg(), 0);
+    }
+
+    #[test]
+    fn test_emit_kfunc_call_with_module_off() {
+        let insns = emit_kfunc_call_with_off(0, &[KfuncArg::Imm(1)], 1234, 2);
+
+        assert_eq!(insns.len(), 2);
+        assert!(insns[1].is_call());
+        assert_eq!(insns[1].imm, 1234);
+        assert_eq!(insns[1].off, 2);
     }
 
     #[test]
@@ -356,5 +473,90 @@ mod tests {
         let insns: Vec<BpfInsn> = vec![];
         let pcs: Vec<usize> = insn_iter_skip_ldimm64(&insns).map(|(pc, _)| pc).collect();
         assert!(pcs.is_empty());
+    }
+
+    // ── Caller-saved save/restore tests ──────────────────────────
+
+    #[test]
+    fn test_plan_caller_saved_no_conflict() {
+        use std::collections::HashSet;
+        let live_after: HashSet<u8> = [6, 7].into_iter().collect(); // only callee-saved live
+        let plan = plan_caller_saved(&live_after, 2).unwrap();
+        assert!(plan.saves.is_empty(), "no caller-saved regs need saving");
+    }
+
+    #[test]
+    fn test_plan_caller_saved_one_reg() {
+        use std::collections::HashSet;
+        let live_after: HashSet<u8> = [3, 6].into_iter().collect(); // r3 (caller-saved) is live
+        let plan = plan_caller_saved(&live_after, 2).unwrap(); // dst=r2, so r2 is excluded
+        assert_eq!(plan.saves.len(), 1);
+        assert_eq!(plan.saves[0].0, 3); // caller-saved r3
+        // Should use a free callee-saved reg (r7, r8, or r9; r6 is live)
+        assert!((7..=9).contains(&plan.saves[0].1));
+    }
+
+    #[test]
+    fn test_plan_caller_saved_multiple_regs() {
+        use std::collections::HashSet;
+        let live_after: HashSet<u8> = [1, 3, 5].into_iter().collect();
+        let plan = plan_caller_saved(&live_after, 2).unwrap();
+        assert_eq!(plan.saves.len(), 3); // r1, r3, r5 need saving
+        // Verify all saved regs are distinct callee-saved
+        let callee_regs: Vec<u8> = plan.saves.iter().map(|&(_, c)| c).collect();
+        for &r in &callee_regs {
+            assert!((6..=9).contains(&r), "save target should be callee-saved");
+        }
+        let unique: std::collections::HashSet<u8> = callee_regs.iter().copied().collect();
+        assert_eq!(unique.len(), callee_regs.len(), "callee-saved regs should be unique");
+    }
+
+    #[test]
+    fn test_plan_caller_saved_not_enough_free() {
+        use std::collections::HashSet;
+        // r1, r3 need saving but r6-r9 are all live
+        let live_after: HashSet<u8> = [1, 3, 6, 7, 8, 9].into_iter().collect();
+        let plan = plan_caller_saved(&live_after, 2);
+        assert!(plan.is_none(), "should return None when not enough free callee-saved regs");
+    }
+
+    #[test]
+    fn test_plan_caller_saved_dst_excluded() {
+        use std::collections::HashSet;
+        // r2 is live but it's the dst_reg, so it shouldn't be saved
+        let live_after: HashSet<u8> = [2].into_iter().collect();
+        let plan = plan_caller_saved(&live_after, 2).unwrap();
+        assert!(plan.saves.is_empty(), "dst_reg should be excluded from saves");
+    }
+
+    #[test]
+    fn test_emit_with_caller_save() {
+        let kfunc_insns = vec![
+            BpfInsn::mov64_imm(1, 42),
+            BpfInsn::call_kfunc(9999),
+        ];
+        let plan = CallerSavedPlan {
+            saves: vec![(3, 6), (5, 7)],
+        };
+        let result = emit_with_caller_save(&kfunc_insns, &plan);
+        // Expected: MOV r6,r3 ; MOV r7,r5 ; <kfunc> ; MOV r5,r7 ; MOV r3,r6
+        assert_eq!(result.len(), 6); // 2 saves + 2 kfunc + 2 restores
+
+        // Save r3 -> r6
+        assert_eq!(result[0].code, BPF_ALU64 | BPF_MOV | BPF_X);
+        assert_eq!(result[0].dst_reg(), 6);
+        assert_eq!(result[0].src_reg(), 3);
+        // Save r5 -> r7
+        assert_eq!(result[1].dst_reg(), 7);
+        assert_eq!(result[1].src_reg(), 5);
+        // Kfunc insns
+        assert_eq!(result[2].imm, 42);
+        assert!(result[3].is_call());
+        // Restore r5 <- r7 (reverse order)
+        assert_eq!(result[4].dst_reg(), 5);
+        assert_eq!(result[4].src_reg(), 7);
+        // Restore r3 <- r6
+        assert_eq!(result[5].dst_reg(), 3);
+        assert_eq!(result[5].src_reg(), 6);
     }
 }

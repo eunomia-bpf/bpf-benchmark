@@ -187,13 +187,21 @@ impl BpfInsn {
     }
 
     /// `call kfunc` (src_reg = BPF_PSEUDO_KFUNC_CALL = 2)
-    pub const fn call_kfunc(btf_id: i32) -> Self {
+    ///
+    /// `off = 0` means vmlinux BTF. For module kfuncs, `off` is the 1-based
+    /// slot in the load/REJIT `fd_array`.
+    pub const fn call_kfunc_with_off(btf_id: i32, off: i16) -> Self {
         Self {
             code: BPF_JMP | BPF_CALL,
             regs: Self::make_regs(0, 2), // src_reg = 2 for kfunc
-            off: 0,
+            off,
             imm: btf_id,
         }
+    }
+
+    /// `call kfunc` against vmlinux BTF.
+    pub const fn call_kfunc(btf_id: i32) -> Self {
+        Self::call_kfunc_with_off(btf_id, 0)
     }
 
     /// `ja +off` (unconditional jump, NOP when off=0)
@@ -273,6 +281,80 @@ impl fmt::Display for BpfInsn {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Debug::fmt(self, f)
     }
+}
+
+// ── Test helpers (available to all test modules) ────────────────────
+
+/// Load BPF instructions from a .bpf.o ELF file by parsing the ELF header
+/// and extracting the first executable PROGBITS section (typically "xdp", "tc",
+/// or "cgroup_skb"). Returns None if the file doesn't exist or isn't a valid
+/// BPF ELF.
+///
+/// This is available to all `#[cfg(test)]` modules in the crate for testing
+/// with real compiled BPF programs.
+#[cfg(test)]
+pub fn load_bpf_insns_from_elf(path: &str) -> Option<Vec<BpfInsn>> {
+    let data = std::fs::read(path).ok()?;
+    if data.len() < 64 || &data[..4] != b"\x7fELF" {
+        return None;
+    }
+    // ELF64 little-endian
+    if data[4] != 2 {
+        return None;
+    }
+
+    let e_shoff = u64::from_le_bytes(data[40..48].try_into().ok()?) as usize;
+    let e_shentsize = u16::from_le_bytes(data[58..60].try_into().ok()?) as usize;
+    let e_shnum = u16::from_le_bytes(data[60..62].try_into().ok()?) as usize;
+    let e_shstrndx = u16::from_le_bytes(data[62..64].try_into().ok()?) as usize;
+
+    // Section header string table
+    let shstr_off = e_shoff + e_shstrndx * e_shentsize;
+    let shstr_sh_offset = u64::from_le_bytes(data[shstr_off + 24..shstr_off + 32].try_into().ok()?) as usize;
+    let shstr_sh_size = u64::from_le_bytes(data[shstr_off + 32..shstr_off + 40].try_into().ok()?) as usize;
+    let shstrtab = &data[shstr_sh_offset..shstr_sh_offset + shstr_sh_size];
+
+    // Find the first executable PROGBITS section with content
+    for i in 0..e_shnum {
+        let sh_off = e_shoff + i * e_shentsize;
+        let sh_name_idx = u32::from_le_bytes(data[sh_off..sh_off + 4].try_into().ok()?) as usize;
+        let sh_type = u32::from_le_bytes(data[sh_off + 4..sh_off + 8].try_into().ok()?);
+        let sh_flags = u64::from_le_bytes(data[sh_off + 8..sh_off + 16].try_into().ok()?);
+        let sh_offset = u64::from_le_bytes(data[sh_off + 24..sh_off + 32].try_into().ok()?) as usize;
+        let sh_size = u64::from_le_bytes(data[sh_off + 32..sh_off + 40].try_into().ok()?) as usize;
+
+        // SHT_PROGBITS(1) + SHF_EXECINSTR(0x4) + has content
+        if sh_type == 1 && (sh_flags & 0x4) != 0 && sh_size >= 8 {
+            // Verify section name is not .text (which is empty for BPF ELFs)
+            let name_end = shstrtab[sh_name_idx..].iter().position(|&b| b == 0)?;
+            let _name = std::str::from_utf8(&shstrtab[sh_name_idx..sh_name_idx + name_end]).ok()?;
+
+            let insn_data = &data[sh_offset..sh_offset + sh_size];
+            let n_insns = insn_data.len() / 8;
+            let mut insns = Vec::with_capacity(n_insns);
+            for j in 0..n_insns {
+                let off = j * 8;
+                let code = insn_data[off];
+                let regs = insn_data[off + 1];
+                let ioff = i16::from_le_bytes(insn_data[off + 2..off + 4].try_into().ok()?);
+                let imm = i32::from_le_bytes(insn_data[off + 4..off + 8].try_into().ok()?);
+                insns.push(BpfInsn { code, regs, off: ioff, imm });
+            }
+            return Some(insns);
+        }
+    }
+    None
+}
+
+/// Return the path to a micro benchmark .bpf.o file relative to the daemon crate.
+/// Returns the absolute path. Tests should check if the file exists before using it.
+#[cfg(test)]
+pub fn micro_program_path(filename: &str) -> String {
+    format!(
+        "{}/../micro/programs/{}",
+        env!("CARGO_MANIFEST_DIR"),
+        filename
+    )
 }
 
 #[cfg(test)]

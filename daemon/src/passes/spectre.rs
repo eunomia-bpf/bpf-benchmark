@@ -25,6 +25,7 @@ use crate::insn::*;
 use crate::pass::*;
 
 use super::utils::fixup_all_branches as fixup_branches_inline;
+use super::utils::ensure_module_fd_slot;
 
 /// Speculation barrier pass: inserts `bpf_speculation_barrier()` kfunc calls
 /// after conditional branches to prevent speculative execution past
@@ -69,7 +70,7 @@ impl BpfPass for SpectreMitigationPass {
         let mut addr_map = vec![0usize; orig_len + 1];
         let mut insertions = 0usize;
 
-        let barrier_insn = BpfInsn::call_kfunc(btf_id);
+        let mut barrier_insn = BpfInsn::call_kfunc(btf_id);
 
         let mut pc = 0;
         while pc < orig_len {
@@ -89,6 +90,11 @@ impl BpfPass for SpectreMitigationPass {
                     && program.insns[next_pc].imm == btf_id;
 
                 if !already_has_barrier {
+                    if insertions == 0 {
+                        if let Some(fd) = ctx.kfunc_registry.module_fd_for_pass(self.name()) {
+                            barrier_insn.off = ensure_module_fd_slot(program, fd);
+                        }
+                    }
                     new_insns.push(barrier_insn);
                     insertions += 1;
                 }
@@ -111,13 +117,6 @@ impl BpfPass for SpectreMitigationPass {
 
             program.insns = new_insns;
             program.remap_annotations(&addr_map);
-
-            // Record module FD dependency for REJIT fd_array.
-            if let Some(fd) = ctx.kfunc_registry.module_fd_for_pass(self.name()) {
-                if !program.required_module_fds.contains(&fd) {
-                    program.required_module_fds.push(fd);
-                }
-            }
 
             program.log_transform(TransformEntry {
                 pass_name: self.name().into(),

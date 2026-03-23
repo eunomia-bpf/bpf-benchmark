@@ -5,7 +5,7 @@ use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
-use super::utils::{emit_kfunc_call, fixup_all_branches, KfuncArg};
+use super::utils::{emit_kfunc_call_with_off, emit_with_caller_save, ensure_module_fd_slot, fixup_all_branches, plan_caller_saved, CallerSavedPlan, KfuncArg};
 
 /// COND_SELECT pass: replaces branch+mov diamond patterns with
 /// bpf_select64() kfunc calls (lowered to CMOV by the JIT).
@@ -44,6 +44,13 @@ pub struct CondSelectSite {
     pub jcc_imm: i32,
     /// The JCC source kind (BPF_K or BPF_X).
     pub jcc_src: u8,
+}
+
+/// A cond_select site that has passed safety checks, ready for transformation.
+struct SafeCondSelectSite {
+    site: CondSelectSite,
+    /// Caller-saved register save/restore plan.
+    caller_save_plan: CallerSavedPlan,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -164,7 +171,7 @@ impl BpfPass for CondSelectPass {
 
         let sites = self.analyze(&program.insns);
         let btf_id = ctx.kfunc_registry.select64_btf_id;
-        let mut safe_sites = Vec::new();
+        let mut safe_sites: Vec<SafeCondSelectSite> = Vec::new();
         let mut skipped = Vec::new();
 
         for site in sites {
@@ -181,8 +188,10 @@ impl BpfPass for CondSelectPass {
             }
 
             // Safety check 2: interior branch target (excluding the JCC's own target).
-            let jcc = &program.insns[site.start_pc];
-            let own_target = (site.start_pc as i64 + 1 + jcc.off as i64) as usize;
+            // For Pattern C (3-insn), the JCC is at start_pc+1, not start_pc.
+            let jcc_pc = if site.old_len == 3 { site.start_pc + 1 } else { site.start_pc };
+            let jcc = &program.insns[jcc_pc];
+            let own_target = (jcc_pc as i64 + 1 + jcc.off as i64) as usize;
             let has_interior = (site.start_pc + 1..site.start_pc + site.old_len)
                 .any(|pc| pc < bt.is_target.len() && bt.is_target[pc] && pc != own_target);
             if has_interior {
@@ -194,23 +203,30 @@ impl BpfPass for CondSelectPass {
             }
 
             // Safety check 3: caller-saved register conflict.
-            // A kfunc call clobbers r1-r5. Check if any caller-saved reg
-            // (excluding the dst_reg which we're writing anyway) is live after the site.
+            // Try to plan save/restore for live caller-saved regs using
+            // free callee-saved regs. Only skip if no plan is possible.
             let site_end = site.start_pc + site.old_len;
-            if site_end > 0 && site_end - 1 < liveness.live_out.len() {
+            let plan = if site_end > 0 && site_end - 1 < liveness.live_out.len() {
                 let live_after = &liveness.live_out[site_end - 1];
-                let caller_saved_conflict = (1u8..=5)
-                    .any(|r| r != site.dst_reg && live_after.contains(&r));
-                if caller_saved_conflict {
+                plan_caller_saved(live_after, site.dst_reg)
+            } else {
+                Some(CallerSavedPlan { saves: vec![] })
+            };
+
+            match plan {
+                Some(p) => {
+                    safe_sites.push(SafeCondSelectSite {
+                        site,
+                        caller_save_plan: p,
+                    });
+                }
+                None => {
                     skipped.push(SkipReason {
                         pc: site.start_pc,
-                        reason: "caller-saved register conflict".into(),
+                        reason: "caller-saved register conflict (not enough free callee-saved regs)".into(),
                     });
-                    continue;
                 }
             }
-
-            safe_sites.push(site);
         }
 
         if safe_sites.is_empty() {
@@ -221,6 +237,12 @@ impl BpfPass for CondSelectPass {
                 sites_skipped: skipped,
                 diagnostics: vec![], ..Default::default() });
         }
+
+        let kfunc_off = ctx
+            .kfunc_registry
+            .module_fd_for_pass(self.name())
+            .map(|fd| ensure_module_fd_slot(program, fd))
+            .unwrap_or(0);
 
         // Build replacement instruction stream.
         let orig_len = program.insns.len();
@@ -234,8 +256,9 @@ impl BpfPass for CondSelectPass {
             let new_pc = new_insns.len();
             addr_map[pc] = new_pc;
 
-            if site_idx < safe_sites.len() && pc == safe_sites[site_idx].start_pc {
-                let site = &safe_sites[site_idx];
+            if site_idx < safe_sites.len() && pc == safe_sites[site_idx].site.start_pc {
+                let safe_site = &safe_sites[site_idx];
+                let site = &safe_site.site;
                 let (a_val, b_val) = kfunc_args_for_site(site);
 
                 // Convert CondSelectValue to KfuncArg for the shared
@@ -252,11 +275,19 @@ impl BpfPass for CondSelectPass {
 
                 // Use the shared swap-safe emit_kfunc_call which handles
                 // parallel-copy correctly (breaks cycles via r0 scratch).
-                let replacement = emit_kfunc_call(
+                let kfunc_insns = emit_kfunc_call_with_off(
                     site.dst_reg,
                     &[arg_a, arg_b, arg_cond],
                     btf_id,
+                    kfunc_off,
                 );
+
+                // Wrap with caller-saved register save/restore if needed.
+                let replacement = if safe_site.caller_save_plan.saves.is_empty() {
+                    kfunc_insns
+                } else {
+                    emit_with_caller_save(&kfunc_insns, &safe_site.caller_save_plan)
+                };
                 new_insns.extend_from_slice(&replacement);
 
                 // Map old PCs in the site range.
@@ -291,15 +322,6 @@ impl BpfPass for CondSelectPass {
             insns_after: program.insns.len(),
             details: vec![],
         });
-
-        // Record module FDs needed for the kfunc calls we emitted.
-        if applied > 0 {
-            if let Some(fd) = ctx.kfunc_registry.module_fd_for_pass(self.name()) {
-                if !program.required_module_fds.contains(&fd) {
-                    program.required_module_fds.push(fd);
-                }
-            }
-        }
 
         Ok(PassResult {
             pass_name: self.name().into(),
@@ -347,6 +369,52 @@ fn try_match_cond_select(insns: &[BpfInsn], pc: usize) -> Option<CondSelectSite>
                         old_len: 4,
                         cond_reg: jcc.dst_reg(),
                         dst_reg: dst_f,
+                        true_val: extract_mov_value(mov_true),
+                        false_val: extract_mov_value(mov_false),
+                        jcc_op: bpf_op(jcc.code),
+                        jcc_imm: jcc.imm,
+                        jcc_src: bpf_src(jcc.code),
+                    });
+                }
+            }
+        }
+    }
+
+    // Pattern C: 3-insn short conditional MOV (clang's common pattern)
+    //   MOV dst, true_val ; Jcc +1 ; MOV dst, false_val
+    //
+    // Semantics:
+    //   - dst is set to true_val unconditionally
+    //   - If Jcc taken (condition true): skip false MOV, dst = true_val
+    //   - If Jcc not taken (condition false): execute false MOV, dst = false_val
+    //
+    // The site starts at the MOV before the Jcc (pc-1 relative to the Jcc).
+    // We check pc as potential Jcc position.
+    if pc >= 1 && pc + 1 < n {
+        let mov_true = &insns[pc - 1];
+        let jcc = &insns[pc];
+        let mov_false = &insns[pc + 1];
+
+        if jcc.is_cond_jmp() && jcc.off == 1 && is_mov64(mov_true) && is_mov64(mov_false) {
+            let dst_t = mov_true.dst_reg();
+            let dst_f = mov_false.dst_reg();
+            if dst_t == dst_f {
+                // Ensure the MOV true_val doesn't also write a register
+                // used by the JCC condition (would change semantics).
+                // For BPF_X: jcc uses dst_reg and src_reg.
+                // For BPF_K: jcc uses dst_reg.
+                let jcc_cond_reg = jcc.dst_reg();
+                let jcc_src_used = if bpf_src(jcc.code) == BPF_X { Some(jcc.src_reg()) } else { None };
+                let mov_true_dst = mov_true.dst_reg();
+                let cond_clobbered = mov_true_dst == jcc_cond_reg
+                    || jcc_src_used.map_or(false, |s| mov_true_dst == s);
+
+                if !cond_clobbered {
+                    return Some(CondSelectSite {
+                        start_pc: pc - 1,
+                        old_len: 3,
+                        cond_reg: jcc_cond_reg,
+                        dst_reg: dst_t,
                         true_val: extract_mov_value(mov_true),
                         false_val: extract_mov_value(mov_false),
                         jcc_op: bpf_op(jcc.code),
@@ -455,6 +523,78 @@ mod tests {
         ];
         let sites = pass.analyze(&insns);
         assert!(sites.is_empty(), "Pattern B should not be matched");
+    }
+
+    #[test]
+    fn test_cond_select_analyze_short_pattern_c() {
+        // Pattern C: MOV dst, true_val ; JNE cond, 0, +1 ; MOV dst, false_val
+        let pass = CondSelectPass;
+        let insns = vec![
+            BpfInsn::mov64_imm(0, 42),   // true_val
+            jne_imm(1, 0, 1),              // if r1 != 0, skip next
+            BpfInsn::mov64_imm(0, 0),    // false_val
+            exit_insn(),
+        ];
+        let sites = pass.analyze(&insns);
+        assert_eq!(sites.len(), 1, "should detect Pattern C (short cond MOV)");
+        assert_eq!(sites[0].start_pc, 0); // starts at the MOV true
+        assert_eq!(sites[0].old_len, 3);
+        assert_eq!(sites[0].cond_reg, 1);
+        assert_eq!(sites[0].dst_reg, 0);
+        assert_eq!(sites[0].true_val, CondSelectValue::Imm(42));
+        assert_eq!(sites[0].false_val, CondSelectValue::Imm(0));
+    }
+
+    #[test]
+    fn test_cond_select_short_pattern_c_with_reg_values() {
+        let pass = CondSelectPass;
+        let insns = vec![
+            BpfInsn::mov64_reg(0, 6),    // true_val = r6
+            jne_imm(1, 0, 1),
+            BpfInsn::mov64_reg(0, 7),    // false_val = r7
+            exit_insn(),
+        ];
+        let sites = pass.analyze(&insns);
+        assert_eq!(sites.len(), 1);
+        assert_eq!(sites[0].true_val, CondSelectValue::Reg(6));
+        assert_eq!(sites[0].false_val, CondSelectValue::Reg(7));
+    }
+
+    #[test]
+    fn test_cond_select_short_pattern_c_no_match_cond_clobbered() {
+        // MOV r1, 42 ; JNE r1, 0, +1 ; MOV r1, 0
+        // The MOV true_val writes r1, which is also the JCC condition register.
+        // This changes semantics -- the JCC tests the new r1, not the old one.
+        let pass = CondSelectPass;
+        let insns = vec![
+            BpfInsn::mov64_imm(1, 42),   // clobbers cond_reg r1
+            jne_imm(1, 0, 1),
+            BpfInsn::mov64_imm(1, 0),
+            exit_insn(),
+        ];
+        let sites = pass.analyze(&insns);
+        assert!(sites.is_empty(), "should not match when MOV true clobbers cond_reg");
+    }
+
+    #[test]
+    fn test_cond_select_short_pattern_c_emit_jne() {
+        // Pattern C with JNE: should produce correct kfunc call
+        let mut prog = make_program(vec![
+            BpfInsn::mov64_imm(0, 42),   // true_val
+            jne_imm(1, 0, 1),
+            BpfInsn::mov64_imm(0, 0),    // false_val
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let ctx = ctx_with_select_kfunc(5555);
+
+        let pass = CondSelectPass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(result.changed);
+        assert_eq!(result.sites_applied, 1);
+        let has_kfunc_call = prog.insns.iter().any(|i| i.is_call() && i.src_reg() == 2);
+        assert!(has_kfunc_call);
     }
 
     #[test]
@@ -707,8 +847,8 @@ mod tests {
     }
 
     #[test]
-    fn test_cond_select_caller_saved_conflict() {
-        // Pattern A with r3 live after the site -> conflict
+    fn test_cond_select_caller_saved_with_save_restore() {
+        // Pattern A with r3 live after the site -- can be saved to a free callee-saved reg.
         let mut prog = make_program(vec![
             BpfInsn::mov64_imm(3, 99),
             jne_imm(1, 0, 2),
@@ -724,7 +864,34 @@ mod tests {
         let pass = CondSelectPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
-        assert!(!result.changed);
+        // With save/restore, the site should be applied.
+        assert!(result.changed, "should apply with caller-saved save/restore");
+        assert_eq!(result.sites_applied, 1);
+    }
+
+    #[test]
+    fn test_cond_select_caller_saved_no_free_callee_regs() {
+        // All callee-saved regs (r6-r9) are live, so save/restore is impossible.
+        let mut prog = make_program(vec![
+            BpfInsn::mov64_imm(3, 99),
+            jne_imm(1, 0, 2),
+            BpfInsn::mov64_imm(0, 0),
+            BpfInsn::ja(1),
+            BpfInsn::mov64_imm(0, 1),
+            BpfInsn::alu64_reg(BPF_OR, 0, 3),
+            BpfInsn::alu64_reg(BPF_OR, 0, 6),
+            BpfInsn::alu64_reg(BPF_OR, 0, 7),
+            BpfInsn::alu64_reg(BPF_OR, 0, 8),
+            BpfInsn::alu64_reg(BPF_OR, 0, 9),
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let ctx = ctx_with_select_kfunc(5555);
+
+        let pass = CondSelectPass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(!result.changed, "should skip when no free callee-saved regs");
         assert!(result.sites_skipped.iter().any(|s| s.reason.contains("caller-saved")));
     }
 
@@ -926,5 +1093,36 @@ mod tests {
                 }
             }
         }
+    }
+
+    /// Test cond_select pattern scanning against real compiled BPF bytecode
+    /// from cond_select_dense.bpf.o.
+    #[test]
+    fn test_scan_cond_select_real_bytecode() {
+        let path = crate::insn::micro_program_path("cond_select_dense.bpf.o");
+        let insns = match crate::insn::load_bpf_insns_from_elf(&path) {
+            Some(i) if !i.is_empty() => i,
+            _ => {
+                eprintln!("SKIP: cond_select_dense.bpf.o not found");
+                return;
+            }
+        };
+
+        let pass = CondSelectPass;
+        let sites = pass.analyze(&insns);
+
+        for site in &sites {
+            assert!(site.start_pc < insns.len());
+            assert!(site.old_len >= 2);
+        }
+
+        eprintln!(
+            "  cond_select_dense.bpf.o: {} insns, {} sites found",
+            insns.len(), sites.len()
+        );
+        assert!(
+            !sites.is_empty(),
+            "cond_select_dense.bpf.o should contain cond_select patterns"
+        );
     }
 }

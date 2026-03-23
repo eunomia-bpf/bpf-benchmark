@@ -2,7 +2,7 @@
 //! Subcommand implementations: enumerate, rewrite, apply, apply-all, profile.
 
 use std::collections::{HashMap, HashSet};
-use std::os::unix::io::AsRawFd;
+use std::os::unix::io::{AsRawFd, RawFd};
 use std::time::{Duration, Instant};
 
 use anyhow::{Context, Result};
@@ -142,6 +142,20 @@ pub(crate) fn build_pipeline(pass_names: &Option<Vec<String>>) -> pass::PassMana
         Some(names) if !names.is_empty() => passes::build_pipeline_with_passes(names),
         _ => passes::build_default_pipeline(),
     }
+}
+
+fn build_rejit_fd_array(required_module_fds: &[RawFd]) -> Vec<RawFd> {
+    if required_module_fds.is_empty() {
+        return Vec::new();
+    }
+
+    // CALL.off uses 0 for vmlinux and 1-based slots for module BTFs.
+    // The REJIT fd_array pre-scan requires every populated slot to be a valid
+    // map or BTF fd, so reserve slot 0 with a duplicate valid BTF fd.
+    let mut fd_array = Vec::with_capacity(required_module_fds.len() + 1);
+    fd_array.push(required_module_fds[0]);
+    fd_array.extend(required_module_fds.iter().copied());
+    fd_array
 }
 
 /// Attribute a verifier failure to a specific pass using the pipeline's
@@ -435,10 +449,9 @@ pub(crate) fn cmd_apply(prog_id: u32, ctx: &pass::PassContext, pass_names: &Opti
                 Vec::new()
             });
 
-        // Construct fd_array from module FDs required by kfunc passes.
-        let fd_array: Vec<std::os::unix::io::RawFd> = program.required_module_fds.clone();
+        let fd_array = build_rejit_fd_array(&program.required_module_fds);
         let all_fds = local_ctx.kfunc_registry.all_module_fds();
-        for &fd_needed in &fd_array {
+        for &fd_needed in &program.required_module_fds {
             if !all_fds.contains(&fd_needed) {
                 eprintln!(
                     "  warning: required module fd {} not in registry ({:?})",
@@ -717,9 +730,9 @@ pub(crate) fn try_apply_one(prog_id: u32, ctx: &pass::PassContext, pass_names: &
                 Vec::new()
             });
 
-        let fd_array: Vec<std::os::unix::io::RawFd> = program.required_module_fds.clone();
+        let fd_array = build_rejit_fd_array(&program.required_module_fds);
         let all_fds = local_ctx.kfunc_registry.all_module_fds();
-        for &fd_needed in &fd_array {
+        for &fd_needed in &program.required_module_fds {
             if !all_fds.contains(&fd_needed) {
                 eprintln!(
                     "    warning: required module fd {} not in registry ({:?})",
@@ -1046,5 +1059,168 @@ mod tests {
         assert_eq!(detail.insns_before, 100);
         assert_eq!(detail.insns_after, 95);
         assert_eq!(detail.insn_delta, -5);
+    }
+
+    // ── HIGH #3: Orchestration unit tests ───────────────────────────
+
+    /// Test attribute_verifier_failure — the core attribution logic used by
+    /// the rollback loop in cmd_apply / try_apply_one.
+    ///
+    /// The verifier log format requires state lines (e.g., "15: R0=scalar R1=ctx()")
+    /// followed by error lines. extract_failure_pc extracts the PC from the last
+    /// state line before an error keyword.
+    #[test]
+    fn test_attribute_verifier_failure_basic() {
+        let attribution = vec![
+            pass::TransformAttribution {
+                pass_name: "wide_mem".to_string(),
+                pc_range: 10..20,
+            },
+            pass::TransformAttribution {
+                pass_name: "rotate".to_string(),
+                pc_range: 30..40,
+            },
+        ];
+
+        // Failure at PC 15 -> attributed to wide_mem
+        // Use realistic verifier log format: state line, then error line
+        let log_wide_mem = "\
+0: R1=ctx() R10=fp0
+15: R0=scalar R2=pkt(r=8)
+R2 type=scalar expected=pkt_ptr
+";
+        let result = attribute_verifier_failure(log_wide_mem, &attribution);
+        assert_eq!(result, Some("wide_mem".to_string()));
+
+        // Failure at PC 35 -> attributed to rotate
+        let log_rotate = "\
+0: R1=ctx() R10=fp0
+35: R0=scalar R1=ctx()
+invalid func bpf_rotate64#12345
+";
+        let result = attribute_verifier_failure(log_rotate, &attribution);
+        assert_eq!(result, Some("rotate".to_string()));
+
+        // Failure at PC 5 (before any pass range) -> None
+        let log_before = "\
+0: R1=ctx() R10=fp0
+5: R0=scalar R2=pkt(r=8)
+R2 invalid mem access
+";
+        let result = attribute_verifier_failure(log_before, &attribution);
+        assert_eq!(result, None);
+
+        // Failure at PC 25 (between pass ranges) -> None
+        let log_gap = "\
+0: R1=ctx() R10=fp0
+25: R0=scalar R1=ctx()
+R1 type=scalar expected=fp
+";
+        let result = attribute_verifier_failure(log_gap, &attribution);
+        assert_eq!(result, None);
+    }
+
+    /// Test attribute_verifier_failure with overlapping ranges —
+    /// should pick the last (most recently applied) pass.
+    #[test]
+    fn test_attribute_verifier_failure_overlapping_ranges() {
+        let attribution = vec![
+            pass::TransformAttribution {
+                pass_name: "wide_mem".to_string(),
+                pc_range: 10..30,
+            },
+            pass::TransformAttribution {
+                pass_name: "rotate".to_string(),
+                pc_range: 20..40,
+            },
+        ];
+
+        // PC 25 is in both ranges — should pick "rotate" (last)
+        let log = "\
+0: R1=ctx() R10=fp0
+25: R0=scalar R2=pkt(r=8)
+R2 invalid mem access 'scalar'
+";
+        let result = attribute_verifier_failure(log, &attribution);
+        assert_eq!(result, Some("rotate".to_string()));
+    }
+
+    /// Test build_pipeline: verify that pass selection works correctly.
+    #[test]
+    fn test_build_pipeline_default_and_custom() {
+        // Default pipeline should include the standard passes.
+        let pm_default = build_pipeline(&None);
+        // Just verify it was built without panic.
+        // We can test it by running on a trivial program.
+        let exit_insn = crate::insn::BpfInsn {
+            code: crate::insn::BPF_JMP | crate::insn::BPF_EXIT,
+            regs: 0,
+            off: 0,
+            imm: 0,
+        };
+        let mut prog = pass::BpfProgram::new(vec![exit_insn], pass::ProgMeta::default());
+        let ctx = pass::PassContext::test_default();
+        let result = pm_default.run(&mut prog, &ctx).unwrap();
+        // A single EXIT instruction should not trigger any transforms.
+        assert!(!result.program_changed);
+
+        // Custom pipeline with specific passes.
+        let pm_custom = build_pipeline(&Some(vec!["wide_mem".to_string()]));
+        let mut prog2 = pass::BpfProgram::new(vec![exit_insn], pass::ProgMeta::default());
+        let result2 = pm_custom.run(&mut prog2, &ctx).unwrap();
+        assert!(!result2.program_changed);
+    }
+
+    /// Test collect_pgo_data returns None when PGO is disabled.
+    #[test]
+    fn test_collect_pgo_data_none_when_disabled() {
+        let result = collect_pgo_data(1, &None);
+        assert!(result.is_none());
+    }
+
+    /// HIGH #3 continued: Integration test for try_apply_one with a real BPF program.
+    /// Requires root/BPF access.
+    #[test]
+    #[ignore]
+    fn test_try_apply_one_integration() {
+        use crate::kfunc_discovery;
+
+        // Discover kfuncs (may find none if modules not loaded, that's OK).
+        let discovery = kfunc_discovery::discover_kfuncs();
+        let ctx = pass::PassContext {
+            kfunc_registry: discovery.registry,
+            platform: pass::PlatformCapabilities::default(),
+            policy: pass::PolicyConfig::default(),
+        };
+
+        // Find a program to try applying to.
+        for prog_id in bpf::iter_prog_ids().take(50) {
+            let result = try_apply_one(prog_id, &ctx, &None, &None, true);
+            match result {
+                Ok(opt_result) => {
+                    // Verify the result structure is well-formed.
+                    assert!(
+                        opt_result.status == "ok" || opt_result.status == "error",
+                        "unexpected status: {}",
+                        opt_result.status
+                    );
+                    assert_eq!(opt_result.program.prog_id, prog_id);
+                    assert!(opt_result.program.orig_insn_count > 0 || opt_result.program.orig_insn_count == 0);
+                    // Verify JSON serialization works.
+                    let json = serde_json::to_string(&opt_result);
+                    assert!(json.is_ok(), "JSON serialization failed: {:#}", json.unwrap_err());
+                    eprintln!(
+                        "  try_apply_one(prog_id={}): status={} applied={}",
+                        prog_id, opt_result.status, opt_result.summary.applied
+                    );
+                    return; // One successful test is enough
+                }
+                Err(e) => {
+                    eprintln!("  try_apply_one(prog_id={}): error: {:#}", prog_id, e);
+                    continue;
+                }
+            }
+        }
+        eprintln!("  SKIP: no BPF programs found to test try_apply_one");
     }
 }

@@ -3,7 +3,7 @@
  * BpfReJIT kinsn: BITFIELD_EXTRACT — bit-field extraction via UBFX (ARM64)
  *
  * Registers a kfunc bpf_extract64(u64 val, u32 start, u32 len) with
- * KF_INLINE_EMIT.  Extracts bits [start, start+len) from val.
+ * KF_KINSN.  Extracts bits [start, start+len) from val.
  *
  * BPF register -> ARM64 register mapping (from bpf_jit_comp.c bpf2a64[]):
  *   BPF_REG_0 = X7  (return value)
@@ -127,7 +127,7 @@ static inline u32 a64_and(u8 rd, u8 rn, u8 rm)
 }
 
 static int emit_extract_arm64(u32 *image, int *idx, bool emit,
-			      const struct bpf_insn *insn,
+			      const struct bpf_kinsn_call *call,
 			      struct bpf_prog *prog)
 {
 	/*
@@ -142,7 +142,7 @@ static int emit_extract_arm64(u32 *image, int *idx, bool emit,
 	if (!idx)
 		return -EINVAL;
 
-	(void)insn;
+	(void)call;
 	(void)prog;
 
 	insns[0] = a64_lsrv(ARM64_BPF_R0, ARM64_BPF_R1, ARM64_BPF_R2);
@@ -164,7 +164,63 @@ static int emit_extract_arm64(u32 *image, int *idx, bool emit,
 	return 5;	/* 5 instructions emitted */
 }
 
-static struct bpf_kfunc_inline_ops extract_ops = {
+static u64 extract_result_umax(const struct bpf_kinsn_scalar_state *start,
+			       const struct bpf_kinsn_scalar_state *len)
+{
+	u64 width;
+
+	if (tnum_is_const(start->var_off) &&
+	    start->var_off.value >= 64)
+		return 0;
+
+	if (tnum_is_const(len->var_off)) {
+		width = len->var_off.value;
+		if (!width || width > 64)
+			return 0;
+		if (tnum_is_const(start->var_off) && start->var_off.value + width > 64)
+			width = 64 - start->var_off.value;
+	} else {
+		width = min_t(u64, len->umax_value, 64);
+		if (!width)
+			return 0;
+	}
+
+	if (width >= 64)
+		return U64_MAX;
+	return (1ULL << width) - 1;
+}
+
+static int model_extract_call(const struct bpf_kinsn_call *call,
+			      const struct bpf_kinsn_scalar_state *scalar_regs,
+			      struct bpf_kinsn_effect *effect)
+{
+	u64 umax;
+
+	(void)call;
+
+	effect->input_mask = BIT(BPF_REG_1) | BIT(BPF_REG_2) | BIT(BPF_REG_3);
+	effect->clobber_mask = BIT(BPF_REG_0);
+	effect->result_type = BPF_KINSN_RES_SCALAR;
+	effect->result_reg = BPF_REG_0;
+	effect->result_size = sizeof(u64);
+
+	umax = extract_result_umax(&scalar_regs[1], &scalar_regs[2]);
+	effect->umin_value = 0;
+	effect->umax_value = umax;
+	effect->smin_value = 0;
+	effect->smax_value = umax;
+	if (umax != U64_MAX) {
+		effect->flags |= BPF_KINSN_EFFECT_HAS_TNUM;
+		effect->result_tnum = kinsn_tnum_low_bits(umax);
+	}
+	return 0;
+}
+
+static const struct bpf_kinsn_ops extract_ops = {
+	.owner = THIS_MODULE,
+	.api_version = 1,
+	.supported_encodings = BPF_KINSN_ENC_LEGACY_KFUNC,
+	.model_call = model_extract_call,
 	.emit_arm64 = emit_extract_arm64,
 	.max_emit_bytes = 32,	/* 5 insns * 4 bytes = 20, round up */
 };

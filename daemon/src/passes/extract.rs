@@ -5,7 +5,7 @@ use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
-use super::utils::{emit_kfunc_call, fixup_all_branches, KfuncArg};
+use super::utils::{emit_kfunc_call_with_off, emit_with_caller_save, ensure_module_fd_slot, fixup_all_branches, plan_caller_saved, CallerSavedPlan, KfuncArg};
 
 /// EXTRACT optimization pass: replaces RSH+AND bitfield extraction patterns
 /// with bpf_extract64() kfunc calls (lowered to BEXTR by the JIT).
@@ -30,6 +30,13 @@ struct ExtractSite {
     dst_reg: u8,
     shift_amount: u32,
     bit_len: u32,
+}
+
+/// An extract site that has passed safety checks, ready for transformation.
+struct SafeExtractSite {
+    site: ExtractSite,
+    /// Caller-saved register save/restore plan (empty saves vec if no saves needed).
+    caller_save_plan: CallerSavedPlan,
 }
 
 /// Check if a value is a contiguous bitmask of 1s starting from bit 0.
@@ -143,7 +150,7 @@ impl BpfPass for ExtractPass {
 
         let sites = scan_extract_sites(&program.insns);
         let btf_id = ctx.kfunc_registry.extract64_btf_id;
-        let mut safe_sites = Vec::new();
+        let mut safe_sites: Vec<SafeExtractSite> = Vec::new();
         let mut skipped = Vec::new();
 
         for site in sites {
@@ -159,21 +166,30 @@ impl BpfPass for ExtractPass {
             }
 
             // Safety check 2: caller-saved register conflict.
+            // Try to plan save/restore for live caller-saved regs using
+            // free callee-saved regs. Only skip if no plan is possible.
             let site_end = site.start_pc + site.old_len;
-            if site_end > 0 && site_end - 1 < liveness.live_out.len() {
+            let plan = if site_end > 0 && site_end - 1 < liveness.live_out.len() {
                 let live_after = &liveness.live_out[site_end - 1];
-                let caller_saved_conflict = (1u8..=5)
-                    .any(|r| r != site.dst_reg && live_after.contains(&r));
-                if caller_saved_conflict {
+                plan_caller_saved(live_after, site.dst_reg)
+            } else {
+                Some(CallerSavedPlan { saves: vec![] })
+            };
+
+            match plan {
+                Some(p) => {
+                    safe_sites.push(SafeExtractSite {
+                        site,
+                        caller_save_plan: p,
+                    });
+                }
+                None => {
                     skipped.push(SkipReason {
                         pc: site.start_pc,
-                        reason: "caller-saved register conflict".into(),
+                        reason: "caller-saved register conflict (not enough free callee-saved regs)".into(),
                     });
-                    continue;
                 }
             }
-
-            safe_sites.push(site);
         }
 
         if safe_sites.is_empty() {
@@ -184,6 +200,12 @@ impl BpfPass for ExtractPass {
                 sites_skipped: skipped,
                 diagnostics: vec![], ..Default::default() });
         }
+
+        let kfunc_off = ctx
+            .kfunc_registry
+            .module_fd_for_pass(self.name())
+            .map(|fd| ensure_module_fd_slot(program, fd))
+            .unwrap_or(0);
 
         // Build replacement instruction stream.
         let orig_len = program.insns.len();
@@ -197,11 +219,12 @@ impl BpfPass for ExtractPass {
             let new_pc = new_insns.len();
             addr_map[pc] = new_pc;
 
-            if site_idx < safe_sites.len() && pc == safe_sites[site_idx].start_pc {
-                let site = &safe_sites[site_idx];
+            if site_idx < safe_sites.len() && pc == safe_sites[site_idx].site.start_pc {
+                let safe_site = &safe_sites[site_idx];
+                let site = &safe_site.site;
 
                 // Emit kfunc call: bpf_extract64(val, start, len)
-                let replacement = emit_kfunc_call(
+                let kfunc_insns = emit_kfunc_call_with_off(
                     site.dst_reg,
                     &[
                         KfuncArg::Reg(site.dst_reg),
@@ -209,7 +232,15 @@ impl BpfPass for ExtractPass {
                         KfuncArg::Imm(site.bit_len as i32),
                     ],
                     btf_id,
+                    kfunc_off,
                 );
+
+                // Wrap with caller-saved register save/restore if needed.
+                let replacement = if safe_site.caller_save_plan.saves.is_empty() {
+                    kfunc_insns
+                } else {
+                    emit_with_caller_save(&kfunc_insns, &safe_site.caller_save_plan)
+                };
                 new_insns.extend_from_slice(&replacement);
 
                 // Map old PCs in the site range.
@@ -244,15 +275,6 @@ impl BpfPass for ExtractPass {
             insns_after: program.insns.len(),
             details: vec![],
         });
-
-        // Record module FDs needed for the kfunc calls we emitted.
-        if applied > 0 {
-            if let Some(fd) = ctx.kfunc_registry.module_fd_for_pass(self.name()) {
-                if !program.required_module_fds.contains(&fd) {
-                    program.required_module_fds.push(fd);
-                }
-            }
-        }
 
         Ok(PassResult {
             pass_name: self.name().into(),
@@ -451,9 +473,8 @@ mod tests {
     }
 
     #[test]
-    fn test_extract_pass_caller_saved_conflict() {
-        // r3 is live after the site (used in a later mov), so the pass
-        // should skip since kfunc call clobbers r1-r5.
+    fn test_extract_pass_caller_saved_with_save_restore() {
+        // r3 is live after the site, but can be saved to a free callee-saved reg.
         let mut prog = make_program(vec![
             BpfInsn::mov64_imm(3, 99),            // r3 = 99
             BpfInsn::alu64_imm(BPF_RSH, 2, 8),
@@ -467,8 +488,34 @@ mod tests {
         let pass = ExtractPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
-        assert!(!result.changed);
-        assert_eq!(result.sites_applied, 0);
+        // With save/restore, the site should be applied.
+        assert!(result.changed, "should apply with caller-saved save/restore");
+        assert_eq!(result.sites_applied, 1);
+        let has_kfunc_call = prog.insns.iter().any(|i| i.is_call() && i.src_reg() == 2);
+        assert!(has_kfunc_call);
+    }
+
+    #[test]
+    fn test_extract_pass_caller_saved_no_free_callee_regs() {
+        // All callee-saved regs (r6-r9) are live, so save/restore is impossible.
+        let mut prog = make_program(vec![
+            BpfInsn::mov64_imm(3, 99),
+            BpfInsn::alu64_imm(BPF_RSH, 2, 8),
+            BpfInsn::alu64_imm(BPF_AND, 2, 0xff),
+            BpfInsn::alu64_reg(BPF_OR, 0, 3),
+            BpfInsn::alu64_reg(BPF_OR, 0, 6),
+            BpfInsn::alu64_reg(BPF_OR, 0, 7),
+            BpfInsn::alu64_reg(BPF_OR, 0, 8),
+            BpfInsn::alu64_reg(BPF_OR, 0, 9),
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let ctx = ctx_with_extract_kfunc(7777);
+
+        let pass = ExtractPass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(!result.changed, "should skip when no free callee-saved regs");
         assert!(result.sites_skipped.iter().any(|s| s.reason.contains("caller-saved")));
     }
 
@@ -771,5 +818,49 @@ mod tests {
             i.code == (BPF_ALU64 | BPF_MOV | BPF_X) && i.dst_reg() == 0 && i.src_reg() == 0
         }).count();
         assert_eq!(mov_r0_r0_count, 0, "should not emit redundant MOV r0, r0");
+    }
+
+    // ── MEDIUM #8: Real bytecode pattern test for extract ───────────
+
+    /// MEDIUM #8: Test extract pattern scanning against real compiled BPF bytecode
+    /// from bitfield_extract.bpf.o.
+    #[test]
+    fn test_scan_extract_real_bytecode() {
+        let path = crate::insn::micro_program_path("bitfield_extract.bpf.o");
+        let insns = match crate::insn::load_bpf_insns_from_elf(&path) {
+            Some(i) if !i.is_empty() => i,
+            _ => {
+                eprintln!("SKIP: bitfield_extract.bpf.o not found (run `make micro` first)");
+                return;
+            }
+        };
+
+        let sites = scan_extract_sites(&insns);
+        assert!(
+            !sites.is_empty(),
+            "bitfield_extract.bpf.o should contain extract patterns, found 0 sites in {} insns",
+            insns.len()
+        );
+
+        // Verify each site has sensible properties
+        for site in &sites {
+            assert!(site.start_pc < insns.len(),
+                "extract site start_pc {} out of range (insns.len()={})", site.start_pc, insns.len());
+            assert!(site.old_len >= 2,
+                "extract site old_len should be >= 2, got {}", site.old_len);
+            // shift+bit_len should fit in 64 bits
+            assert!(
+                (site.shift_amount as u64) + (site.bit_len as u64) <= 64,
+                "extract shift_amount({}) + bit_len({}) exceeds 64",
+                site.shift_amount, site.bit_len
+            );
+            assert!(site.bit_len >= 1 && site.bit_len <= 32,
+                "extract bit_len should be 1-32, got {}", site.bit_len);
+        }
+
+        eprintln!(
+            "  bitfield_extract.bpf.o: found {} extract sites in {} insns",
+            sites.len(), insns.len()
+        );
     }
 }

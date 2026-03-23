@@ -117,6 +117,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Force regeneration of generated inputs.",
     )
     parser.add_argument(
+        "--pgo-warmup-repeat",
+        type=int,
+        default=10,
+        help=(
+            "Repeat count for the PGO warmup run before kernel-rejit optimization. "
+            "A short kernel-only execution lets the daemon collect PMU profiling data. "
+            "Set to 0 to disable PGO warmup. Default: 10."
+        ),
+    )
+    parser.add_argument(
         "--build-bpftool",
         action="store_true",
         help="Build vendored bpftool in addition to the runner and program artifacts.",
@@ -485,6 +495,23 @@ def main(argv: list[str] | None = None) -> int:
                 rejit=is_rejit_runtime,
                 daemon_socket=daemon_socket if is_rejit_runtime else None,
             )
+
+            # PGO warmup: before kernel-rejit optimization, run the BPF program
+            # via plain kernel mode to generate execution stats.  This lets the
+            # daemon's PGO profiler observe meaningful run_cnt / PMU data.
+            pgo_warmup_repeat = getattr(args, "pgo_warmup_repeat", 10)
+            if is_rejit_runtime and daemon_socket and pgo_warmup_repeat > 0:
+                pgo_warmup_cmd = build_micro_benchmark_command(
+                    suite.build.runner_binary,
+                    runtime_mode="kernel",
+                    program=benchmark.program_object,
+                    io_mode=benchmark.io_mode,
+                    repeat=pgo_warmup_repeat,
+                    memory=memory_file,
+                    input_size=benchmark.kernel_input_size,
+                )
+                print(f"  {runtime.name:10} PGO warmup (repeat={pgo_warmup_repeat})")
+                run_command(pgo_warmup_cmd, args.cpu)
 
             for _ in range(warmups):
                 parse_runner_sample(run_command(command, args.cpu).stdout)

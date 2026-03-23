@@ -722,4 +722,296 @@ mod tests {
         assert_eq!(result.sites_applied, 0);
         assert!(result.diagnostics.iter().any(|d| d.contains("no PMU data available")));
     }
+
+    // ── MEDIUM #4: Profiler -> pass integration test ────────────────
+
+    /// MEDIUM #4: Test the data flow from ProfilingData -> PassManager ->
+    /// BranchFlipPass. Constructs ProfilingData in the format that the profiler
+    /// module produces and runs it through the full pass pipeline via
+    /// run_with_profiling, verifying that the branch annotations reach the pass.
+    #[test]
+    fn test_profiler_to_pass_pipeline_integration() {
+        // Build a program with a biased branch
+        let insns = vec![
+            jne_imm(1, 0, 2),        // PC 0: biased branch
+            BpfInsn::mov64_imm(0, 10), // PC 1
+            BpfInsn::ja(1),           // PC 2
+            BpfInsn::mov64_imm(0, 20), // PC 3
+            exit_insn(),              // PC 4
+        ];
+        let mut prog = BpfProgram::new(insns, ProgMeta::default());
+
+        // Construct ProfilingData as the profiler module would
+        let mut branch_profiles = std::collections::HashMap::new();
+        branch_profiles.insert(0, BranchProfile {
+            taken_count: 90,
+            not_taken_count: 10,
+        });
+        let profiling = crate::pass::ProfilingData {
+            branch_profiles,
+            program_hotness: Some(crate::profiler::PgoAnalysis {
+                prog_id: 42,
+                total: crate::profiler::ProgStats {
+                    run_cnt: 10000,
+                    run_time_ns: 50_000_000,
+                    avg_ns: Some(5000.0),
+                },
+                delta_run_cnt: 1000,
+                delta_run_time_ns: 5_000_000,
+                delta_avg_ns: Some(5000.0),
+            }),
+            branch_miss_rate: Some(0.10), // 10% miss rate => high, should trigger
+        };
+
+        // Run via PassManager with profiling
+        let mut pm = PassManager::new();
+        pm.register_analysis(crate::analysis::BranchTargetAnalysis);
+        pm.register_analysis(crate::analysis::LivenessAnalysis);
+        pm.add_pass(BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 });
+        let ctx = PassContext::test_default();
+
+        let result = pm.run_with_profiling(&mut prog, &ctx, Some(&profiling)).unwrap();
+
+        // With high miss rate (0.10 > max_branch_miss_rate 0.05), the pass should skip.
+        // This tests that profiling data correctly flows through the pipeline.
+        assert!(!result.program_changed,
+            "should NOT flip when branch_miss_rate (0.10) exceeds max (0.05)");
+
+        // Now test with low miss rate (should flip)
+        let profiling_low_miss = crate::pass::ProfilingData {
+            branch_profiles: {
+                let mut m = std::collections::HashMap::new();
+                m.insert(0, BranchProfile {
+                    taken_count: 90,
+                    not_taken_count: 10,
+                });
+                m
+            },
+            program_hotness: None,
+            branch_miss_rate: Some(0.01), // 1% miss rate => low, should trigger
+        };
+
+        let mut prog2 = BpfProgram::new(vec![
+            jne_imm(1, 0, 2),
+            BpfInsn::mov64_imm(0, 10),
+            BpfInsn::ja(1),
+            BpfInsn::mov64_imm(0, 20),
+            exit_insn(),
+        ], ProgMeta::default());
+
+        let mut pm2 = PassManager::new();
+        pm2.register_analysis(crate::analysis::BranchTargetAnalysis);
+        pm2.register_analysis(crate::analysis::LivenessAnalysis);
+        pm2.add_pass(BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 });
+
+        let result2 = pm2.run_with_profiling(&mut prog2, &ctx, Some(&profiling_low_miss)).unwrap();
+
+        // With low miss rate and high bias, the branch should be flipped
+        assert!(result2.program_changed,
+            "should flip when branch_miss_rate (0.01) is below max (0.05) and bias (0.9) >= min (0.7)");
+        assert_eq!(result2.total_sites_applied, 1);
+    }
+
+    // ── Real bytecode tests ────────────────────────────────────────
+
+    /// Test branch_flip detection and flipping on real compiled bytecode.
+    /// Constructs PGO data to provide biased branch profiles for all
+    /// detected diamond sites, then verifies the pass applies flips.
+    #[test]
+    fn test_branch_flip_real_bytecode_with_mock_pgo() {
+        let path = crate::insn::micro_program_path("branch_flip_dense.bpf.o");
+        let insns = match crate::insn::load_bpf_insns_from_elf(&path) {
+            Some(i) if !i.is_empty() => i,
+            _ => {
+                eprintln!("SKIP: branch_flip_dense.bpf.o not found");
+                return;
+            }
+        };
+
+        let orig_len = insns.len();
+        // First, scan for diamond sites to know where to inject PGO data.
+        let sites = scan_branch_flip_sites(&insns);
+        eprintln!(
+            "  branch_flip_dense.bpf.o: {} insns, {} diamond sites detected",
+            insns.len(), sites.len()
+        );
+
+        if sites.is_empty() {
+            // If no diamonds found, just verify the scanner ran without panics.
+            return;
+        }
+
+        // Create a program and inject biased PGO data for all detected sites.
+        let mut prog = BpfProgram::new(insns, ProgMeta::default());
+        prog.branch_miss_rate = Some(0.01); // Low miss rate to allow flipping.
+
+        for site in &sites {
+            prog.annotations[site.pc].branch_profile = Some(BranchProfile {
+                taken_count: 90,
+                not_taken_count: 10,
+            });
+        }
+
+        let mut cache = AnalysisCache::new();
+        let ctx = PassContext::test_default();
+
+        let pass = BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 };
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        // Verify the pass applied some flips.
+        eprintln!(
+            "  branch_flip_dense.bpf.o: {} -> {} insns, {} applied, {} skipped",
+            orig_len,
+            prog.insns.len(),
+            result.sites_applied,
+            result.sites_skipped.len(),
+        );
+        assert!(
+            result.sites_applied > 0,
+            "should flip at least some sites with biased PGO data"
+        );
+        // Branch flip is size-preserving.
+        assert_eq!(
+            prog.insns.len(), orig_len,
+            "branch flip should preserve program size"
+        );
+        // Last instruction should still be EXIT.
+        assert!(
+            prog.insns.last().map_or(false, |i| i.is_exit()),
+            "output should end with EXIT"
+        );
+    }
+
+    /// Test that branch_flip skips all sites when PMU miss rate is high,
+    /// even with biased PGO data.
+    #[test]
+    fn test_branch_flip_real_bytecode_high_miss_rate() {
+        let path = crate::insn::micro_program_path("branch_flip_dense.bpf.o");
+        let insns = match crate::insn::load_bpf_insns_from_elf(&path) {
+            Some(i) if !i.is_empty() => i,
+            _ => {
+                eprintln!("SKIP: branch_flip_dense.bpf.o not found");
+                return;
+            }
+        };
+
+        let sites = scan_branch_flip_sites(&insns);
+        if sites.is_empty() {
+            return;
+        }
+
+        let mut prog = BpfProgram::new(insns, ProgMeta::default());
+        // High miss rate -- should prevent flipping.
+        prog.branch_miss_rate = Some(0.10);
+
+        for site in &sites {
+            prog.annotations[site.pc].branch_profile = Some(BranchProfile {
+                taken_count: 90,
+                not_taken_count: 10,
+            });
+        }
+
+        let mut cache = AnalysisCache::new();
+        let ctx = PassContext::test_default();
+
+        let pass = BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 };
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(!result.changed, "should NOT flip with high branch miss rate");
+        assert_eq!(result.sites_applied, 0);
+        assert!(
+            result.sites_skipped.iter().any(|s| s.reason.contains("branch_miss_rate")),
+            "should report branch_miss_rate as skip reason"
+        );
+    }
+
+    /// Test that branch_flip correctly handles multiple sequential diamonds
+    /// in a program, verifying that branch offsets are correctly adjusted
+    /// after flipping multiple sites.
+    #[test]
+    fn test_branch_flip_multiple_sites_correctness() {
+        // Build a program with two consecutive diamonds.
+        let mut prog = make_program(vec![
+            // Diamond 1: JNE r1, 0, +3 ; mov1 ; mov2 ; JA +2 ; mov3 ; mov4
+            jne_imm(1, 0, 3),           // pc=0: Jcc +3 -> else at pc=4
+            BpfInsn::mov64_imm(0, 1),   // pc=1: then[0]
+            BpfInsn::mov64_imm(2, 2),   // pc=2: then[1]
+            BpfInsn::ja(2),             // pc=3: JA +2
+            BpfInsn::mov64_imm(0, 10),  // pc=4: else[0]
+            BpfInsn::mov64_imm(2, 20),  // pc=5: else[1]
+            // Diamond 2: JEQ r3, 0, +2 ; mov5 ; JA +1 ; mov6
+            jeq_imm(3, 0, 2),           // pc=6: Jcc +2 -> else at pc=9
+            BpfInsn::mov64_imm(0, 100), // pc=7: then
+            BpfInsn::ja(1),             // pc=8: JA +1
+            BpfInsn::mov64_imm(0, 200), // pc=9: else
+            exit_insn(),                 // pc=10
+        ]);
+        // Inject biased PGO data for both diamonds.
+        prog.annotations[0].branch_profile = Some(BranchProfile {
+            taken_count: 80,
+            not_taken_count: 20,
+        });
+        prog.annotations[6].branch_profile = Some(BranchProfile {
+            taken_count: 85,
+            not_taken_count: 15,
+        });
+        prog.branch_miss_rate = Some(0.02);
+
+        let orig_len = prog.insns.len();
+
+        let mut cache = AnalysisCache::new();
+        let ctx = PassContext::test_default();
+
+        let pass = BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 };
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(result.changed);
+        assert_eq!(result.sites_applied, 2, "should flip both diamonds");
+        // Size should be preserved.
+        assert_eq!(prog.insns.len(), orig_len);
+        // Last instruction should still be EXIT.
+        assert!(prog.insns.last().unwrap().is_exit());
+        // First Jcc should be inverted: JNE -> JEQ
+        assert_eq!(bpf_op(prog.insns[0].code), BPF_JEQ);
+    }
+
+    /// Test correctness of a flipped diamond by verifying the instruction
+    /// layout matches expected output: inverted condition, swapped bodies.
+    #[test]
+    fn test_branch_flip_verifies_output_layout() {
+        // Diamond: JNE r1, 0, +3 ; mov A ; mov B ; JA +1 ; mov C
+        // then_len=2, else_len=1
+        let mut prog = make_program(vec![
+            jne_imm(1, 0, 3),           // pc=0: Jcc +3 -> else at pc=4
+            BpfInsn::mov64_imm(0, 1),   // pc=1: then[0]
+            BpfInsn::mov64_imm(2, 2),   // pc=2: then[1]
+            BpfInsn::ja(1),             // pc=3: JA +1
+            BpfInsn::mov64_imm(0, 99),  // pc=4: else[0]
+            exit_insn(),                 // pc=5
+        ]);
+        prog.annotations[0].branch_profile = Some(BranchProfile {
+            taken_count: 90,
+            not_taken_count: 10,
+        });
+        prog.branch_miss_rate = Some(0.02);
+
+        let mut cache = AnalysisCache::new();
+        let ctx = PassContext::test_default();
+
+        let pass = BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 };
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(result.changed);
+        assert_eq!(result.sites_applied, 1);
+
+        // After flip: [JEQ +2] [else: mov 99] [JA +2] [then: mov 1, mov 2] [exit]
+        assert_eq!(bpf_op(prog.insns[0].code), BPF_JEQ); // inverted
+        assert_eq!(prog.insns[0].off, 2); // skip else(1) + JA(1)
+        assert_eq!(prog.insns[1].imm, 99); // else body first
+        assert!(prog.insns[2].is_ja());
+        assert_eq!(prog.insns[2].off, 2); // skip then(2)
+        assert_eq!(prog.insns[3].imm, 1); // then body second
+        assert_eq!(prog.insns[4].imm, 2); // then body second
+        assert!(prog.insns[5].is_exit());
+    }
 }

@@ -3,7 +3,7 @@
  * kinsn_common.h — shared macros for BpfReJIT kinsn kernel modules
  *
  * Eliminates boilerplate: includes, BTF kfunc set declaration,
- * inline-ops registration, module init/exit, and MODULE_* metadata.
+ * kinsn-ops registration, module init/exit, and MODULE_* metadata.
  *
  * Usage for a single-kfunc module:
  *
@@ -38,6 +38,25 @@
 #include <linux/module.h>
 #include <linux/string.h>
 
+static __always_inline struct tnum kinsn_tnum_low_bits(u64 mask)
+{
+	struct tnum t = {
+		.value = 0,
+		.mask = mask,
+	};
+
+	return t;
+}
+
+static __always_inline struct tnum kinsn_tnum_union(struct tnum a, struct tnum b)
+{
+	struct tnum t;
+
+	t.mask = a.mask | b.mask | (a.value ^ b.value);
+	t.value = (a.value & b.value) & ~t.mask;
+	return t;
+}
+
 /* ---------- BTF kfunc set helpers ---------- */
 
 /*
@@ -46,7 +65,7 @@
  */
 #define KINSN_KFUNC_SET(prefix, kfunc_name)				\
 	BTF_KFUNCS_START(prefix##_kfunc_ids)				\
-	BTF_ID_FLAGS(func, kfunc_name, KF_INLINE_EMIT);		\
+	BTF_ID_FLAGS(func, kfunc_name, KF_KINSN);		\
 	BTF_KFUNCS_END(prefix##_kfunc_ids)				\
 									\
 	static const struct btf_kfunc_id_set prefix##_kfunc_set = {	\
@@ -61,7 +80,7 @@
 	BTF_KFUNCS_START(prefix##_kfunc_ids)
 
 #define KINSN_KFUNC_ID(kfunc_name)					\
-	BTF_ID_FLAGS(func, kfunc_name, KF_INLINE_EMIT);
+	BTF_ID_FLAGS(func, kfunc_name, KF_KINSN);
 
 #define KINSN_KFUNC_SET_END(prefix)					\
 	BTF_KFUNCS_END(prefix##_kfunc_ids)				\
@@ -78,7 +97,7 @@
  *
  * @prefix:     module prefix (e.g. bpf_rotate)
  * @kfunc_str:  kfunc name as a string literal (e.g. "bpf_rotate64")
- * @ops_ptr:    pointer to bpf_kfunc_inline_ops (e.g. &rotate_ops)
+ * @ops_ptr:    pointer to bpf_kinsn_ops (e.g. &rotate_ops)
  * @desc:       MODULE_DESCRIPTION string
  */
 #define DEFINE_KINSN_MODULE(prefix, kfunc_str, ops_ptr, desc)		\
@@ -87,21 +106,21 @@ static int __init prefix##_init(void)					\
 {									\
 	int ret;							\
 									\
-	ret = bpf_register_kfunc_inline_ops(kfunc_str, ops_ptr);	\
+	ret = bpf_register_kinsn_ops(kfunc_str, ops_ptr);		\
 	if (ret)							\
 		return ret;						\
 									\
 	ret = register_btf_kfunc_id_set(BPF_PROG_TYPE_UNSPEC,		\
 					&prefix##_kfunc_set);		\
 	if (ret)							\
-		bpf_unregister_kfunc_inline_ops(kfunc_str);		\
+		bpf_unregister_kinsn_ops(kfunc_str);			\
 									\
 	return ret;							\
 }									\
 									\
 static void __exit prefix##_exit(void)					\
 {									\
-	bpf_unregister_kfunc_inline_ops(kfunc_str);			\
+	bpf_unregister_kinsn_ops(kfunc_str);				\
 }									\
 									\
 module_init(prefix##_init);						\
@@ -118,7 +137,7 @@ MODULE_AUTHOR("BpfReJIT")
  */
 struct kinsn_ops_entry {
 	const char *kfunc_name;
-	struct bpf_kfunc_inline_ops *ops;
+	const struct bpf_kinsn_ops *ops;
 };
 
 /*
@@ -139,7 +158,7 @@ static int __init prefix##_init(void)					\
 	const int n = ARRAY_SIZE(entries);				\
 									\
 	for (i = 0; i < n; i++) {					\
-		ret = bpf_register_kfunc_inline_ops(			\
+		ret = bpf_register_kinsn_ops(			\
 			entries[i].kfunc_name, entries[i].ops);		\
 		if (ret)						\
 			goto err_unwind;				\
@@ -154,7 +173,7 @@ static int __init prefix##_init(void)					\
 									\
 err_unwind:								\
 	while (--i >= 0)						\
-		bpf_unregister_kfunc_inline_ops(			\
+		bpf_unregister_kinsn_ops(				\
 			entries[i].kfunc_name);				\
 	return ret;							\
 }									\
@@ -165,7 +184,7 @@ static void __exit prefix##_exit(void)					\
 	const int n = ARRAY_SIZE(entries);				\
 									\
 	for (i = n - 1; i >= 0; i--)					\
-		bpf_unregister_kfunc_inline_ops(			\
+		bpf_unregister_kinsn_ops(				\
 			entries[i].kfunc_name);				\
 }									\
 									\

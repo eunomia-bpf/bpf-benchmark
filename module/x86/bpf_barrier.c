@@ -2,7 +2,7 @@
 /*
  * BpfReJIT kinsn: SPECULATION_BARRIER — LFENCE instruction for Spectre v1
  *
- * Registers a kfunc bpf_speculation_barrier(void) with KF_INLINE_EMIT.
+ * Registers a kfunc bpf_speculation_barrier(void) with KF_KINSN.
  * When inlined by the x86 JIT, emits an LFENCE instruction instead of a
  * function call. LFENCE is the Intel-recommended Spectre v1 mitigation
  * that serializes speculative execution.
@@ -32,8 +32,8 @@ KINSN_KFUNC_SET(bpf_barrier, bpf_speculation_barrier)
 /* ---- x86 JIT emit callback ---- */
 
 static int emit_barrier_x86(u8 *image, u32 *off, bool emit,
-			     const struct bpf_insn *insn,
-			     struct bpf_prog *prog)
+			    const struct bpf_kinsn_call *call,
+			    struct bpf_prog *prog)
 {
 	/*
 	 * LFENCE: 0F AE E8 (3 bytes)
@@ -51,7 +51,7 @@ static int emit_barrier_x86(u8 *image, u32 *off, bool emit,
 	if (emit && !image)
 		return -EINVAL;
 
-	(void)insn;
+	(void)call;
 	(void)prog;
 
 	if (emit)
@@ -61,7 +61,22 @@ static int emit_barrier_x86(u8 *image, u32 *off, bool emit,
 	return sizeof(insns);
 }
 
-static struct bpf_kfunc_inline_ops barrier_ops = {
+static int model_barrier_call(const struct bpf_kinsn_call *call,
+			      const struct bpf_kinsn_scalar_state *scalar_regs,
+			      struct bpf_kinsn_effect *effect)
+{
+	(void)call;
+	(void)scalar_regs;
+
+	effect->result_type = BPF_KINSN_RES_VOID;
+	return 0;
+}
+
+static const struct bpf_kinsn_ops barrier_ops = {
+	.owner = THIS_MODULE,
+	.api_version = 1,
+	.supported_encodings = BPF_KINSN_ENC_LEGACY_KFUNC,
+	.model_call = model_barrier_call,
 	.emit_x86 = emit_barrier_x86,
 	.max_emit_bytes = 4,
 };

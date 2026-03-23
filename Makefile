@@ -72,6 +72,7 @@ BZIMAGE_PATH := $(if $(filter /%,$(BZIMAGE)),$(BZIMAGE),$(ROOT_DIR)/$(BZIMAGE))
 DAEMON_PATH  := $(if $(filter /%,$(DAEMON)),$(DAEMON),$(ROOT_DIR)/$(DAEMON))
 MICRO_RUNNER := $(RUNNER_DIR)/build/micro_exec
 VMLINUX_PATH := $(KERNEL_DIR)/vmlinux
+KERNEL_SYMVERS_PATH := $(KERNEL_DIR)/Module.symvers
 NPROC        ?= $(shell nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
 DEFCONFIG_SRC := $(ROOT_DIR)/vendor/bpfrejit_defconfig
 
@@ -111,7 +112,7 @@ MICRO_BPF_STAMP      := $(MICRO_DIR)/programs/.build.stamp
 
 .PHONY: all runner micro daemon kernel kernel-arm64 kernel-tests kinsn-modules \
 	daemon-tests python-tests check smoke validate \
-	vm-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
+	vm-test vm-selftest vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 	arm64-worktree arm64-rootfs arm64-crossbuild-image cross-arm64 selftest-arm64 \
 	vm-arm64-smoke vm-arm64-selftest \
 	aws-arm64-launch aws-arm64-setup aws-arm64-benchmark aws-arm64-terminate aws-arm64 \
@@ -121,7 +122,7 @@ MICRO_BPF_STAMP      := $(MICRO_DIR)/programs/.build.stamp
 help:
 	@echo "Build:  all runner micro daemon kernel kinsn-modules kernel-tests kernel-arm64 cross-arm64"
 	@echo "Test:   smoke daemon-tests python-tests check"
-	@echo "VM x86: vm-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all validate"
+	@echo "VM x86: vm-test vm-selftest vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all validate"
 	@echo "ARM64:  vm-arm64-smoke vm-arm64-selftest"
 	@echo "AWS:    aws-arm64-launch aws-arm64-setup aws-arm64-benchmark aws-arm64-terminate aws-arm64"
 	@echo "Params: ITERATIONS=$(ITERATIONS) WARMUPS=$(WARMUPS) REPEAT=$(REPEAT) BENCH=\"...\""
@@ -145,6 +146,7 @@ daemon:
 kernel: $(BZIMAGE_PATH)
 
 kinsn-modules: $(BZIMAGE_PATH)
+kinsn-modules: $(KERNEL_SYMVERS_PATH)
 	$(MAKE) -C "$(KINSN_MODULE_DIR)" KDIR="$(KERNEL_DIR)"
 
 kernel-tests:
@@ -164,6 +166,11 @@ $(BZIMAGE_PATH): $(KERNEL_JIT_SOURCES)
 	@if [ -f "$(DEFCONFIG_SRC)" ] && ! diff -q "$(DEFCONFIG_SRC)" "$(KERNEL_DIR)/.config" >/dev/null 2>&1; then \
 		cp "$(DEFCONFIG_SRC)" "$(KERNEL_DIR)/.config"; $(MAKE) -C "$(KERNEL_DIR)" olddefconfig; fi
 	$(MAKE) -C "$(KERNEL_DIR)" -j"$(NPROC)" bzImage modules_prepare
+
+$(KERNEL_SYMVERS_PATH): $(KERNEL_JIT_SOURCES)
+	@if [ -f "$(DEFCONFIG_SRC)" ] && ! diff -q "$(DEFCONFIG_SRC)" "$(KERNEL_DIR)/.config" >/dev/null 2>&1; then \
+		cp "$(DEFCONFIG_SRC)" "$(KERNEL_DIR)/.config"; $(MAKE) -C "$(KERNEL_DIR)" olddefconfig; fi
+	$(MAKE) -C "$(KERNEL_DIR)" -j"$(NPROC)" modules
 
 # ── Local tests ────────────────────────────────────────────────────────────────
 smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP)
@@ -191,6 +198,14 @@ validate:
 vm-test: kernel-tests $(BZIMAGE_PATH) kinsn-modules
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
 		bash -lc '$(VM_INIT) "$(ROOT_DIR)/runner/scripts/run_all_tests.sh" "$(ROOT_DIR)"'
+
+vm-selftest: kernel-tests $(BZIMAGE_PATH) kinsn-modules
+	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
+		bash -lc '$(VM_INIT) "$(ROOT_DIR)/runner/scripts/vm-selftest.sh" \
+			"$(ROOT_DIR)" \
+			"$(KERNEL_TEST_DIR)/build/test_recompile" \
+			"$(ROOT_DIR)/tests/unittest" \
+			"$(KINSN_MODULE_DIR)"'
 
 NEGATIVE_TEST_DIR := $(ROOT_DIR)/tests/negative
 FUZZ_ROUNDS ?= 1000

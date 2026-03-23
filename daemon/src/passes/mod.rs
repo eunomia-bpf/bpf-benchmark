@@ -298,4 +298,217 @@ mod tests {
         assert!(result.program_changed);
         assert!(result.total_sites_applied >= 1);
     }
+
+    // ── HIGH #6: Real BPF bytecode pipeline tests ────────────────────
+
+    /// Run the full default pipeline on real compiled BPF bytecode from
+    /// load_byte_recompose.bpf.o (contains wide_mem patterns).
+    /// Verifies: pipeline completes without panic, output is structurally valid.
+    #[test]
+    fn test_full_pipeline_real_bytecode_load_byte_recompose() {
+        let path = crate::insn::micro_program_path("load_byte_recompose.bpf.o");
+        let insns = match crate::insn::load_bpf_insns_from_elf(&path) {
+            Some(i) if !i.is_empty() => i,
+            _ => {
+                eprintln!("SKIP: {} not found or empty (run `make micro` first)", path);
+                return;
+            }
+        };
+        let orig_len = insns.len();
+        let mut prog = make_program(insns);
+        let ctx = PassContext::test_default();
+        let pm = build_default_pipeline();
+        let result = pm.run(&mut prog, &ctx).unwrap();
+
+        // Structural validity checks:
+        // 1. The program should still end with EXIT
+        assert!(
+            prog.insns.last().map_or(false, |i| i.is_exit()),
+            "real bytecode pipeline output should end with EXIT"
+        );
+        // 2. The program should have been modified (wide_mem patterns exist)
+        assert!(
+            result.program_changed,
+            "load_byte_recompose.bpf.o should contain wide_mem patterns (no changes detected)"
+        );
+        // 3. Instruction count should be reasonable (not wildly different)
+        assert!(
+            prog.insns.len() > 0 && prog.insns.len() <= orig_len + 20,
+            "instruction count changed unreasonably: {} -> {}",
+            orig_len,
+            prog.insns.len()
+        );
+        eprintln!(
+            "  load_byte_recompose.bpf.o: {} -> {} insns, {} sites",
+            orig_len,
+            prog.insns.len(),
+            result.total_sites_applied
+        );
+    }
+
+    /// Run the full pipeline on rotate_dense.bpf.o (contains rotate patterns).
+    /// Note: clang may emit OR with reversed operands, so the rotate scanner may
+    /// not match all patterns. This test verifies the pipeline completes without
+    /// error on real bytecode.
+    #[test]
+    fn test_full_pipeline_real_bytecode_rotate_dense() {
+        let path = crate::insn::micro_program_path("rotate_dense.bpf.o");
+        let insns = match crate::insn::load_bpf_insns_from_elf(&path) {
+            Some(i) if !i.is_empty() => i,
+            _ => {
+                eprintln!("SKIP: {} not found or empty (run `make micro` first)", path);
+                return;
+            }
+        };
+        let orig_len = insns.len();
+        let mut prog = make_program(insns);
+        // Provide a fake rotate kfunc btf_id and enable RORX so the pass can fire
+        let mut ctx = PassContext::test_default();
+        ctx.kfunc_registry.rotate64_btf_id = 9999;
+        ctx.platform.has_rorx = true;
+        let pm = build_default_pipeline();
+        let result = pm.run(&mut prog, &ctx).unwrap();
+
+        assert!(
+            prog.insns.last().map_or(false, |i| i.is_exit()),
+            "rotate_dense pipeline output should end with EXIT"
+        );
+
+        // After fixing the OR operand order and caller-saved save/restore,
+        // the rotate pass should find and apply sites on real bytecode.
+        let rotate_result = result.pass_results.iter().find(|pr| pr.pass_name == "rotate");
+        let applied = rotate_result.map_or(0, |r| r.sites_applied);
+        let skipped_count = rotate_result.map_or(0, |r| r.sites_skipped.len());
+        eprintln!(
+            "  rotate_dense.bpf.o: {} -> {} insns, {} sites applied, {} skipped",
+            orig_len,
+            prog.insns.len(),
+            applied,
+            skipped_count,
+        );
+        assert!(
+            applied + skipped_count > 0,
+            "rotate_dense.bpf.o should have rotate sites (found+skipped=0)"
+        );
+    }
+
+    /// Run the full pipeline on bitfield_extract.bpf.o (contains extract patterns).
+    #[test]
+    fn test_full_pipeline_real_bytecode_bitfield_extract() {
+        let path = crate::insn::micro_program_path("bitfield_extract.bpf.o");
+        let insns = match crate::insn::load_bpf_insns_from_elf(&path) {
+            Some(i) if !i.is_empty() => i,
+            _ => {
+                eprintln!("SKIP: {} not found or empty (run `make micro` first)", path);
+                return;
+            }
+        };
+        let orig_len = insns.len();
+        let mut prog = make_program(insns);
+        let mut ctx = PassContext::test_default();
+        ctx.kfunc_registry.extract64_btf_id = 9999;
+        ctx.platform.has_bmi1 = true;
+        ctx.platform.has_bmi2 = true;
+        let pm = build_default_pipeline();
+        let result = pm.run(&mut prog, &ctx).unwrap();
+
+        assert!(
+            prog.insns.last().map_or(false, |i| i.is_exit()),
+            "bitfield_extract pipeline output should end with EXIT"
+        );
+        let extract_result = result.pass_results.iter().find(|pr| pr.pass_name == "extract");
+        // The extract scanner should find sites, but safety checks (e.g., caller-saved
+        // register conflict) may prevent some or all from being applied.
+        let found_sites = extract_result.map_or(0, |r| r.sites_applied + r.sites_skipped.len());
+        assert!(
+            found_sites > 0,
+            "bitfield_extract.bpf.o should contain extract patterns (found+skipped={})",
+            found_sites
+        );
+        eprintln!(
+            "  bitfield_extract.bpf.o: {} -> {} insns, {} sites applied, {} skipped",
+            orig_len,
+            prog.insns.len(),
+            extract_result.map_or(0, |r| r.sites_applied),
+            extract_result.map_or(0, |r| r.sites_skipped.len()),
+        );
+    }
+
+    /// Run the full pipeline on endian_swap_dense.bpf.o (contains endian patterns).
+    #[test]
+    fn test_full_pipeline_real_bytecode_endian_swap_dense() {
+        let path = crate::insn::micro_program_path("endian_swap_dense.bpf.o");
+        let insns = match crate::insn::load_bpf_insns_from_elf(&path) {
+            Some(i) if !i.is_empty() => i,
+            _ => {
+                eprintln!("SKIP: {} not found or empty (run `make micro` first)", path);
+                return;
+            }
+        };
+        let orig_len = insns.len();
+        let mut prog = make_program(insns);
+        let mut ctx = PassContext::test_default();
+        ctx.kfunc_registry.endian_load16_btf_id = 9999;
+        ctx.kfunc_registry.endian_load32_btf_id = 9998;
+        ctx.kfunc_registry.endian_load64_btf_id = 9997;
+        ctx.platform.has_movbe = true;
+        let pm = build_default_pipeline();
+        let result = pm.run(&mut prog, &ctx).unwrap();
+
+        assert!(
+            prog.insns.last().map_or(false, |i| i.is_exit()),
+            "endian_swap_dense pipeline output should end with EXIT"
+        );
+        let endian_result = result.pass_results.iter().find(|pr| pr.pass_name == "endian_fusion");
+        // The endian scanner should find sites; safety checks may skip some.
+        let found_sites = endian_result.map_or(0, |r| r.sites_applied + r.sites_skipped.len());
+        assert!(
+            found_sites > 0,
+            "endian_swap_dense.bpf.o should contain endian patterns (found+skipped={})",
+            found_sites
+        );
+        eprintln!(
+            "  endian_swap_dense.bpf.o: {} -> {} insns, {} sites applied, {} skipped",
+            orig_len,
+            prog.insns.len(),
+            endian_result.map_or(0, |r| r.sites_applied),
+            endian_result.map_or(0, |r| r.sites_skipped.len()),
+        );
+    }
+
+    /// Run the full pipeline on cond_select_dense.bpf.o.
+    /// Note: clang may emit `Jcc +1; MOV` instead of the 4-insn diamond
+    /// (`Jcc +2; MOV; JA +1; MOV`) that the cond_select scanner matches.
+    /// This test verifies the pipeline completes without error on real bytecode.
+    #[test]
+    fn test_full_pipeline_real_bytecode_cmov_select() {
+        let path = crate::insn::micro_program_path("cond_select_dense.bpf.o");
+        let insns = match crate::insn::load_bpf_insns_from_elf(&path) {
+            Some(i) if !i.is_empty() => i,
+            _ => {
+                eprintln!("SKIP: {} not found or empty (run `make micro` first)", path);
+                return;
+            }
+        };
+        let orig_len = insns.len();
+        let mut prog = make_program(insns);
+        let mut ctx = PassContext::test_default();
+        ctx.kfunc_registry.select64_btf_id = 9999;
+        ctx.platform.has_cmov = true;
+        let pm = build_default_pipeline();
+        let result = pm.run(&mut prog, &ctx).unwrap();
+
+        assert!(
+            prog.insns.last().map_or(false, |i| i.is_exit()),
+            "cond_select_dense pipeline output should end with EXIT"
+        );
+        // The program has conditional branches but clang may not emit the exact
+        // 4-insn diamond pattern. Verify the pipeline ran without error.
+        eprintln!(
+            "  cond_select_dense.bpf.o: {} -> {} insns, {} total sites",
+            orig_len,
+            prog.insns.len(),
+            result.total_sites_applied
+        );
+    }
 }
