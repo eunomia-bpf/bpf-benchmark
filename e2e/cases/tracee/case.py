@@ -49,36 +49,20 @@ from e2e.case_common import (  # noqa: E402
     host_metadata,
     summarize_numbers,
     percent_delta,
-    ensure_runner_binary,
     ensure_daemon_binary,
     persist_results,
 )
-try:  # noqa: E402
-    from runner.libs.inventory import ProgramInventoryEntry, discover_object_programs
-except ModuleNotFoundError:  # noqa: E402
-    sys.path.insert(0, str(ROOT_DIR / "micro"))
-    from runner.libs.inventory import ProgramInventoryEntry, discover_object_programs
-
-from e2e.cases.tracee.manual import Libbpf as ManualLibbpf, ManualTraceeSession  # noqa: E402
 
 
 DEFAULT_CONFIG = Path(__file__).with_name("config.yaml")
 DEFAULT_SETUP_SCRIPT = Path(__file__).with_name("setup.sh")
 DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "tracee")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "tracee-e2e-real.md"
-DEFAULT_TRACEE_OBJECT = ROOT_DIR / "corpus" / "build" / "tracee" / "tracee.bpf.o"
-DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
 DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
 CACHED_TRACEE_BINARY = ROOT_DIR / "e2e" / "cases" / "tracee" / "bin" / "tracee"
 TRACEE_STATS_PATTERN = re.compile(
     r"EventCount[:=]\s*(?P<events>\d+).*?LostEvCount[:=]\s*(?P<lost>\d+)(?:.*?LostWrCount[:=]\s*(?P<lost_writes>\d+))?",
     re.IGNORECASE,
-)
-MANUAL_PROGRAM_NAMES = (
-    "tracepoint__sched__sched_process_exec",
-    "trace_security_file_open",
-    "trace_security_socket_connect",
-    "lsm_file_open_test",
 )
 SYS_PIDFD_GETFD = 438
 
@@ -260,8 +244,7 @@ def _current_prog_ids() -> list[int]:
     return [int(record["id"]) for record in parsed if isinstance(record, dict) and "id" in record]
 
 
-def ensure_artifacts(runner_binary: Path, daemon_binary: Path) -> None:
-    ensure_runner_binary(runner_binary)
+def ensure_artifacts(daemon_binary: Path) -> None:
     ensure_daemon_binary(daemon_binary)
 
 
@@ -551,9 +534,25 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         f"- Setup return code: `{payload['setup']['returncode']}`",
         f"- Setup tracee binary: `{payload['setup'].get('tracee_binary') or 'missing'}`",
         "",
-        "## Baseline",
-        "",
     ]
+    if payload.get("status") == "skipped":
+        lines.extend(
+            [
+                "## Result",
+                "",
+                "- Status: `SKIP`",
+                f"- Reason: `{payload.get('skip_reason', 'unknown')}`",
+            ]
+        )
+        limitations = payload.get("limitations") or []
+        if limitations:
+            lines.extend(["", "## Limitations", ""])
+            for limitation in limitations:
+                lines.append(f"- {limitation}")
+        lines.append("")
+        return "\n".join(lines)
+
+    lines.extend(["## Baseline", ""])
     baseline = payload["baseline"]
     for workload in baseline["workloads"]:
         lines.append(
@@ -596,14 +595,6 @@ def build_markdown(payload: Mapping[str, object]) -> str:
     return "\n".join(lines)
 
 
-def select_manual_programs(inventory: Sequence[ProgramInventoryEntry]) -> list[ProgramInventoryEntry]:
-    by_name = {entry.name: entry for entry in inventory}
-    missing = [name for name in MANUAL_PROGRAM_NAMES if name not in by_name]
-    if missing:
-        raise RuntimeError(f"manual Tracee fallback is missing programs: {', '.join(missing)}")
-    return [by_name[name] for name in MANUAL_PROGRAM_NAMES]
-
-
 def run_phase(
     workloads: Sequence[Mapping[str, object]],
     duration_s: int,
@@ -630,58 +621,35 @@ def run_phase(
     }
 
 
-def run_manual_fallback(
+def skip_payload(
     *,
     config: Mapping[str, object],
     duration_s: int,
-    tracee_object: Path,
-    runner_binary: Path,
-    daemon_binary: Path,
+    tracee_binary: str | None,
     setup_result: Mapping[str, object],
     smoke: bool,
+    reason: str,
+    limitations: Sequence[str],
 ) -> dict[str, object]:
-    inventory = discover_object_programs(runner_binary, tracee_object)
-    selected = select_manual_programs(inventory)
-    workloads = list(config.get("workloads") or [])
-    limitations = [
-        "Tracee daemon was unavailable, so this result uses manual BPF program loading with corpus/build/tracee/tracee.bpf.o.",
-        "Agent event counts and drop counters are unavailable in manual fallback mode; events_total is estimated from BPF run_cnt deltas.",
-        "Agent CPU is unavailable in manual fallback mode; only host busy CPU is reported.",
-    ]
-
-    with enable_bpf_stats():
-        with ManualTraceeSession(ManualLibbpf(), tracee_object, selected) as session:
-            prog_ids = [int(handle.prog_id) for handle in session.program_handles.values()]
-            prog_fds = {int(handle.prog_id): int(handle.prog_fd) for handle in session.program_handles.values()}
-            baseline = run_phase(workloads, duration_s, prog_ids, prog_fds=prog_fds, agent_pid=None, collector=None)
-            scan_results = scan_programs(prog_ids, daemon_binary, prog_fds=prog_fds)
-            rejit_result = apply_daemon_rejit(daemon_binary, prog_ids)
-            if rejit_result["applied"]:
-                post_rejit = run_phase(workloads, duration_s, prog_ids, prog_fds=prog_fds, agent_pid=None, collector=None)
-            else:
-                post_rejit = None
-
-    payload = {
+    return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "mode": "manual_fallback",
+        "status": "skipped",
+        "mode": "skipped",
+        "skip_reason": reason,
         "smoke": smoke,
         "duration_s": duration_s,
-        "tracee_binary": None,
-        "tracee_programs": [
-            {"name": entry.name, "section_name": entry.section_name}
-            for entry in selected
-        ],
+        "tracee_binary": tracee_binary,
+        "tracee_programs": [],
         "setup": dict(setup_result),
         "host": host_metadata(),
         "config": dict(config),
-        "baseline": baseline,
-        "scan_results": {str(key): value for key, value in scan_results.items()},
-        "rejit_result": rejit_result,
-        "post_rejit": post_rejit,
-        "comparison": compare_phases(baseline, post_rejit),
-        "limitations": limitations,
+        "baseline": None,
+        "scan_results": {},
+        "rejit_result": None,
+        "post_rejit": None,
+        "comparison": {"comparable": False, "reason": reason},
+        "limitations": list(limitations),
     }
-    return payload
 
 
 def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
@@ -690,10 +658,8 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
     if args.smoke and not args.duration:
         duration_s = int(config.get("smoke_duration_s") or 10)
 
-    runner_binary = Path(args.runner).resolve()
     daemon_binary = Path(args.daemon).resolve()
-    tracee_object = Path(args.tracee_object).resolve()
-    ensure_artifacts(runner_binary, daemon_binary)
+    ensure_artifacts(daemon_binary)
 
     setup_result = {
         "returncode": 0,
@@ -704,21 +670,24 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
     if not args.skip_setup:
         setup_result = run_setup_script(Path(args.setup_script).resolve())
 
+    limitations: list[str] = []
+    if setup_result["returncode"] != 0:
+        limitations.append("Setup script returned non-zero; only the real Tracee binary path was attempted.")
+
     tracee_binary = resolve_tracee_binary(args.tracee_binary, setup_result)
     if tracee_binary is None:
-        return run_manual_fallback(
+        return skip_payload(
             config=config,
             duration_s=duration_s,
-            tracee_object=tracee_object,
-            runner_binary=runner_binary,
-            daemon_binary=daemon_binary,
+            tracee_binary=None,
             setup_result=setup_result,
             smoke=bool(args.smoke),
+            reason="Tracee binary is unavailable in this environment; manual .bpf.o fallback is forbidden.",
+            limitations=limitations,
         )
 
     workloads = list(config.get("workloads") or [])
     events = list(config.get("events") or [])
-    limitations: list[str] = []
     commands = build_tracee_commands(tracee_binary, events, args.tracee_extra_arg or [])
 
     try:
@@ -747,25 +716,19 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                 else:
                     post_rejit = None
     except Exception as exc:
-        # Tracee binary exists but failed to start (e.g. kernel compatibility).
-        # Fall back to manual .bpf.o loading.
-        print(f"  [tracee] daemon mode failed ({exc}), falling back to manual mode")
-        fallback = run_manual_fallback(
+        return skip_payload(
             config=config,
             duration_s=duration_s,
-            tracee_object=tracee_object,
-            runner_binary=runner_binary,
-            daemon_binary=daemon_binary,
+            tracee_binary=tracee_binary,
             setup_result=setup_result,
             smoke=bool(args.smoke),
+            reason=f"Tracee binary could not run on this kernel: {exc}",
+            limitations=limitations,
         )
-        fallback["limitations"] = list(fallback.get("limitations") or []) + [
-            f"Tracee binary ({tracee_binary}) was present but failed to start: {exc}"
-        ]
-        return fallback
 
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "status": "ok",
         "mode": "tracee_daemon",
         "smoke": bool(args.smoke),
         "duration_s": duration_s,
@@ -792,8 +755,6 @@ def build_case_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON))
     parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD))
     parser.add_argument("--tracee-binary")
-    parser.add_argument("--tracee-object", default=str(DEFAULT_TRACEE_OBJECT))
-    parser.add_argument("--runner", default=str(DEFAULT_RUNNER))
     parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
     parser.add_argument("--duration", type=int)
     parser.add_argument("--smoke", action="store_true")

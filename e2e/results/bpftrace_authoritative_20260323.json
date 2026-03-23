@@ -1,7 +1,7 @@
 {
   "daemon": "/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon",
   "duration_s": 30,
-  "generated_at": "2026-03-23T11:05:46.668419+00:00",
+  "generated_at": "2026-03-23T12:05:40.833907+00:00",
   "host": {
     "git_sha": "unknown",
     "hostname": "virtme-ng",
@@ -194,106 +194,106 @@
       "baseline": {
         "measurement": {
           "agent_cpu": {
-            "sys_pct": 0.03333321223932887,
-            "total_pct": 0.03333321223932887,
+            "sys_pct": 0.03333328120674819,
+            "total_pct": 0.03333328120674819,
             "user_pct": 0.0
           },
           "bpf": {
             "programs": {
-              "273": {
-                "avg_ns_per_run": 837.9038461538462,
+              "154": {
+                "avg_ns_per_run": 850.9262820512821,
                 "bytes_jited": 781,
                 "bytes_xlated": 1360,
-                "id": 273,
+                "id": 154,
                 "name": "cap_capable",
                 "run_cnt_delta": 312,
-                "run_time_ns_delta": 261426,
+                "run_time_ns_delta": 265489,
                 "type": "kprobe"
               }
             },
             "summary": {
               "active_programs": 1,
-              "avg_ns_per_run": 837.9038461538462,
+              "avg_ns_per_run": 850.9262820512821,
               "total_events": 312,
-              "total_run_time_ns": 261426
+              "total_run_time_ns": 265489
             }
           },
           "final_stats": {
-            "273": {
+            "154": {
               "bytes_jited": 781,
               "bytes_xlated": 1360,
-              "id": 273,
+              "id": 154,
               "name": "cap_capable",
               "run_cnt": 1044,
-              "run_time_ns": 819017,
+              "run_time_ns": 747956,
               "type": "kprobe"
             }
           },
           "initial_stats": {
-            "273": {
+            "154": {
               "bytes_jited": 781,
               "bytes_xlated": 1360,
-              "id": 273,
+              "id": 154,
               "name": "cap_capable",
               "run_cnt": 732,
-              "run_time_ns": 557591,
+              "run_time_ns": 482467,
               "type": "kprobe"
             }
           },
           "system_cpu": {
-            "busy_pct": 0.0013888888888868856
+            "busy_pct": 0.001388908179278392
           },
           "workload": {
-            "duration_s": 0.044117510000035054,
-            "ops_per_sec": 675400.764911173,
-            "ops_total": 29797.0,
+            "duration_s": 0.03904539900000259,
+            "ops_per_sec": 13548.331264330656,
+            "ops_total": 529.0,
             "stderr": "",
-            "stdout": "stress-ng: info:  [29797] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [29797] setting to a 30 secs run per stressor\nstress-ng: info:  [29797] dispatching hogs:\nstress-ng: metrc: [29797] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [29797]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: warn:  [29797] metrics-check: all bogo-op counters are zero, data may be incorrect\nstress-ng: info:  [29797] skipped: 2: exec (2)\nstress-ng: info:  [29797] passed: 0\nstress-ng: info:  [29797] failed: 0\nstress-ng: info:  [29797] metrics untrustworthy: 0\nstress-ng: info:  [29797] successful run completed in 0.00 secs"
+            "stdout": "stress-ng: info:  [529] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [529] setting to a 30 secs run per stressor\nstress-ng: info:  [529] dispatching hogs:\nstress-ng: metrc: [529] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [529]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: warn:  [529] metrics-check: all bogo-op counters are zero, data may be incorrect\nstress-ng: info:  [529] skipped: 2: exec (2)\nstress-ng: info:  [529] passed: 0\nstress-ng: info:  [529] failed: 0\nstress-ng: info:  [529] metrics untrustworthy: 0\nstress-ng: info:  [529] successful run completed in 0.00 secs"
           }
         },
         "phase": "baseline",
         "process": {
           "returncode": 0,
           "stderr_tail": "",
-          "stdout_tail": "04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0"
+          "stdout_tail": "05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0"
         },
         "prog_ids": [
-          273
+          154
         ],
         "programs": [
           {
-            "btf_id": 531,
+            "btf_id": 389,
             "bytes_jited": 781,
             "bytes_memlock": 4096,
             "bytes_xlated": 1360,
             "gpl_compatible": true,
-            "id": 273,
+            "id": 154,
             "jited": true,
-            "loaded_at": 1774263884,
+            "loaded_at": 1774267478,
             "map_ids": [
-              661,
-              662,
-              660
+              506,
+              507,
+              505
             ],
             "name": "cap_capable",
             "orphaned": false,
             "owner_fds": [
               {
                 "fd": 9,
-                "pid": 29790
+                "pid": 522
               }
             ],
             "owner_pids": [
-              29790
+              522
             ],
             "pids": [
               {
                 "comm": "bpftrace",
-                "pid": 29790
+                "pid": 522
               }
             ],
             "run_cnt": 470,
-            "run_time_ns": 340380,
+            "run_time_ns": 295312,
             "tag": "f54abfb1faedf876",
             "type": "kprobe",
             "uid": 0
@@ -321,100 +321,100 @@
           },
           "bpf": {
             "programs": {
-              "273": {
-                "avg_ns_per_run": 249.88141025641025,
+              "154": {
+                "avg_ns_per_run": 190.17307692307693,
                 "bytes_jited": 709,
                 "bytes_xlated": 1216,
-                "id": 273,
+                "id": 154,
                 "name": "cap_capable",
                 "run_cnt_delta": 312,
-                "run_time_ns_delta": 77963,
+                "run_time_ns_delta": 59334,
                 "type": "kprobe"
               }
             },
             "summary": {
               "active_programs": 1,
-              "avg_ns_per_run": 249.88141025641025,
+              "avg_ns_per_run": 190.17307692307693,
               "total_events": 312,
-              "total_run_time_ns": 77963
+              "total_run_time_ns": 59334
             }
           },
           "final_stats": {
-            "273": {
+            "154": {
               "bytes_jited": 709,
               "bytes_xlated": 1216,
-              "id": 273,
+              "id": 154,
               "name": "cap_capable",
               "run_cnt": 1681,
-              "run_time_ns": 956803,
+              "run_time_ns": 843592,
               "type": "kprobe"
             }
           },
           "initial_stats": {
-            "273": {
+            "154": {
               "bytes_jited": 709,
               "bytes_xlated": 1216,
-              "id": 273,
+              "id": 154,
               "name": "cap_capable",
               "run_cnt": 1369,
-              "run_time_ns": 878840,
+              "run_time_ns": 784258,
               "type": "kprobe"
             }
           },
           "system_cpu": {
-            "busy_pct": 0.0027777391980676747
+            "busy_pct": 0.001388908179278392
           },
           "workload": {
-            "duration_s": 0.04113633000008576,
-            "ops_per_sec": 724493.4100814989,
-            "ops_total": 29803.0,
+            "duration_s": 0.03647428200000036,
+            "ops_per_sec": 14667.869267446986,
+            "ops_total": 535.0,
             "stderr": "",
-            "stdout": "stress-ng: info:  [29803] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [29803] setting to a 30 secs run per stressor\nstress-ng: info:  [29803] dispatching hogs:\nstress-ng: metrc: [29803] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [29803]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: warn:  [29803] metrics-check: all bogo-op counters are zero, data may be incorrect\nstress-ng: info:  [29803] skipped: 2: exec (2)\nstress-ng: info:  [29803] passed: 0\nstress-ng: info:  [29803] failed: 0\nstress-ng: info:  [29803] metrics untrustworthy: 0\nstress-ng: info:  [29803] successful run completed in 0.00 secs"
+            "stdout": "stress-ng: info:  [535] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [535] setting to a 30 secs run per stressor\nstress-ng: info:  [535] dispatching hogs:\nstress-ng: metrc: [535] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [535]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: warn:  [535] metrics-check: all bogo-op counters are zero, data may be incorrect\nstress-ng: info:  [535] skipped: 2: exec (2)\nstress-ng: info:  [535] passed: 0\nstress-ng: info:  [535] failed: 0\nstress-ng: info:  [535] metrics untrustworthy: 0\nstress-ng: info:  [535] successful run completed in 0.00 secs"
           }
         },
         "phase": "post_rejit",
         "process": {
           "returncode": 0,
           "stderr_tail": "",
-          "stdout_tail": "04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          39   CAP_BPF              0\n04:05:15  0      29798  bpftool          38   CAP_PERFMON          0"
+          "stdout_tail": "05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          39   CAP_BPF              0\n05:05:09  0      530    bpftool          38   CAP_PERFMON          0"
         },
         "prog_ids": [
-          273
+          154
         ],
         "programs": [
           {
-            "btf_id": 531,
+            "btf_id": 389,
             "bytes_jited": 781,
             "bytes_memlock": 4096,
             "bytes_xlated": 1360,
             "gpl_compatible": true,
-            "id": 273,
+            "id": 154,
             "jited": true,
-            "loaded_at": 1774263884,
+            "loaded_at": 1774267478,
             "map_ids": [
-              661,
-              662,
-              660
+              506,
+              507,
+              505
             ],
             "name": "cap_capable",
             "orphaned": false,
             "owner_fds": [
               {
                 "fd": 9,
-                "pid": 29790
+                "pid": 522
               }
             ],
             "owner_pids": [
-              29790
+              522
             ],
             "pids": [
               {
                 "comm": "bpftrace",
-                "pid": 29790
+                "pid": 522
               }
             ],
             "run_cnt": 470,
-            "run_time_ns": 340380,
+            "run_time_ns": 295312,
             "tag": "f54abfb1faedf876",
             "type": "kprobe",
             "uid": 0
@@ -424,7 +424,7 @@
         "rejit_result": {
           "applied": true,
           "exit_code": 0,
-          "output": "prog 273 (cap_capable): 6 passes, 6 sites applied (156 -> 138 insns)\n  wide_mem: 6 sites applied\n  REJIT successful\nkfunc discovery:\n  vmlinux BTF str_len=2317604 split_type_id_bias=125495\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125520 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125521 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125519 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125532 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125533 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125520 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n"
+          "output": "prog 154 (cap_capable): 6 passes, 6 sites applied (156 -> 138 insns)\n  wide_mem: 6 sites applied\n  REJIT successful\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n"
         },
         "scan_results": {},
         "site_totals": {
@@ -439,21 +439,21 @@
       "script_path": "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/bpftrace/scripts/capable.bt",
       "script_text": "#!/usr/bin/env bpftrace\n// capable\tTrace security capability checks (cap_capable()).\n// \t\tFor Linux, uses bpftrace and eBPF.\n//\n// Example of usage:\n//\n// # ./capable.bt\n// TIME      UID    PID    COMM             CAP  NAME                 AUDIT\n// 22:11:23  114    2676   snmpd            12   CAP_NET_ADMIN        1\n// 22:11:23  0      6990   run              24   CAP_SYS_RESOURCE     1\n// 22:11:23  0      7003   chmod            3    CAP_FOWNER           1\n// 22:11:23  0      7003   chmod            4    CAP_FSETID           1\n//\n// This can be useful for general debugging, and also security enforcement:\n// determining a whitelist of capabilities an application needs.\n//\n// This is a bpftrace version of the bcc tool of the same name.\n// The bcc version provides options to customize the output.\n//\n// Copyright 2018 Netflix, Inc.\n//\n// 08-Sep-2018\tBrendan Gregg\tCreated this.\n\nBEGIN\n{\n  printf(\"Tracing cap_capable syscalls... Hit Ctrl-C to end.\\n\");\n  printf(\"%-9s %-6s %-6s %-16s %-4s %-20s AUDIT\\n\",\n         \"TIME\", \"UID\", \"PID\", \"COMM\", \"CAP\", \"NAME\");\n  @cap[(uint64)0] = \"CAP_CHOWN\";\n  @cap[1] = \"CAP_DAC_OVERRIDE\";\n  @cap[2] = \"CAP_DAC_READ_SEARCH\";\n  @cap[3] = \"CAP_FOWNER\";\n  @cap[4] = \"CAP_FSETID\";\n  @cap[5] = \"CAP_KILL\";\n  @cap[6] = \"CAP_SETGID\";\n  @cap[7] = \"CAP_SETUID\";\n  @cap[8] = \"CAP_SETPCAP\";\n  @cap[9] = \"CAP_LINUX_IMMUTABLE\";\n  @cap[10] = \"CAP_NET_BIND_SERVICE\";\n  @cap[11] = \"CAP_NET_BROADCAST\";\n  @cap[12] = \"CAP_NET_ADMIN\";\n  @cap[13] = \"CAP_NET_RAW\";\n  @cap[14] = \"CAP_IPC_LOCK\";\n  @cap[15] = \"CAP_IPC_OWNER\";\n  @cap[16] = \"CAP_SYS_MODULE\";\n  @cap[17] = \"CAP_SYS_RAWIO\";\n  @cap[18] = \"CAP_SYS_CHROOT\";\n  @cap[19] = \"CAP_SYS_PTRACE\";\n  @cap[20] = \"CAP_SYS_PACCT\";\n  @cap[21] = \"CAP_SYS_ADMIN\";\n  @cap[22] = \"CAP_SYS_BOOT\";\n  @cap[23] = \"CAP_SYS_NICE\";\n  @cap[24] = \"CAP_SYS_RESOURCE\";\n  @cap[25] = \"CAP_SYS_TIME\";\n  @cap[26] = \"CAP_SYS_TTY_CONFIG\";\n  @cap[27] = \"CAP_MKNOD\";\n  @cap[28] = \"CAP_LEASE\";\n  @cap[29] = \"CAP_AUDIT_WRITE\";\n  @cap[30] = \"CAP_AUDIT_CONTROL\";\n  @cap[31] = \"CAP_SETFCAP\";\n  @cap[32] = \"CAP_MAC_OVERRIDE\";\n  @cap[33] = \"CAP_MAC_ADMIN\";\n  @cap[34] = \"CAP_SYSLOG\";\n  @cap[35] = \"CAP_WAKE_ALARM\";\n  @cap[36] = \"CAP_BLOCK_SUSPEND\";\n  @cap[37] = \"CAP_AUDIT_READ\";\n  @cap[38] = \"CAP_PERFMON\";\n  @cap[39] = \"CAP_BPF\";\n  @cap[40] = \"CAP_CHECKPOINT_RESTORE\";\n}\n\nkprobe:cap_capable\n{\n  $cap = arg2;\n  $audit = arg3;\n  time(\"%H:%M:%S  \");\n  printf(\"%-6d %-6d %-16s %-4d %-20s %d\\n\", uid, pid, comm, $cap, @cap[$cap], $audit);\n}\n\nEND\n{\n  clear(@cap);\n}\n",
       "summary": {
-        "avg_ns_delta_pct": -70.17779409852119,
+        "avg_ns_delta_pct": -77.65105145599253,
         "baseline_status": "ok",
-        "cpu_baseline": 0.03333321223932887,
+        "cpu_baseline": 0.03333328120674819,
         "cpu_delta_pct": -100.0,
         "cpu_rejit": 0.0,
         "name": "capable",
         "note": "",
-        "rejit_avg_ns": 249.88141025641025,
+        "rejit_avg_ns": 190.17307692307693,
         "rejit_status": "ok",
         "sites": 0,
-        "speedup": 3.3532060079781436,
-        "stock_avg_ns": 837.9038461538462,
-        "workload_ops_baseline": 675400.764911173,
-        "workload_ops_delta_pct": 7.268668873477278,
-        "workload_ops_rejit": 724493.4100814989
+        "speedup": 4.474483432770418,
+        "stock_avg_ns": 850.9262820512821,
+        "workload_ops_baseline": 13548.331264330656,
+        "workload_ops_delta_pct": 8.263290742408927,
+        "workload_ops_rejit": 14667.869267446986
       }
     },
     {
@@ -523,7 +523,7 @@
       "total_sites": 0,
       "wide_sites": 0
     },
-    "speedup_geomean": 3.3532060079781436
+    "speedup_geomean": 4.474483432770418
   },
   "tool_versions": {
     "bpftool_path": "/usr/local/sbin/bpftool",

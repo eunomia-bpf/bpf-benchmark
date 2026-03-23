@@ -2,15 +2,12 @@
 from __future__ import annotations
 
 import argparse
-import ctypes
-import ctypes.util
 import json
 import os
 import sys
 import tempfile
 import threading
 from collections import deque
-from contextlib import ExitStack
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -31,7 +28,13 @@ from runner.libs import (  # noqa: E402
     which,
 )
 from runner.libs.agent import find_bpf_programs, start_agent, stop_agent, wait_healthy  # noqa: E402
-from runner.libs.metrics import compute_delta, sample_bpf_stats, sample_cpu_usage, sample_total_cpu_usage  # noqa: E402
+from runner.libs.metrics import (  # noqa: E402
+    compute_delta,
+    enable_bpf_stats,
+    sample_bpf_stats,
+    sample_cpu_usage,
+    sample_total_cpu_usage,
+)
 from runner.libs.recompile import apply_daemon_rejit, scan_programs  # noqa: E402
 from runner.libs.workload import (  # noqa: E402
     WorkloadResult,
@@ -46,33 +49,20 @@ from e2e.case_common import (  # noqa: E402
     summarize_numbers,
     percent_delta,
     speedup_ratio,
-    ensure_runner_binary,
     ensure_daemon_binary,
     persist_results,
 )
-try:  # noqa: E402
-    from runner.libs.inventory import discover_object_programs
-except ModuleNotFoundError:  # noqa: E402
-    sys.path.insert(0, str(ROOT_DIR / "micro"))
-    from runner.libs.inventory import discover_object_programs
 
 
 DEFAULT_SETUP_SCRIPT = Path(__file__).with_name("setup.sh")
-DEFAULT_GUEST_SCRIPT = Path(__file__).with_name("guest_smoke.sh")
 DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "tetragon")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "tetragon-real-e2e.md"
-DEFAULT_EXECVE_OBJECT = ROOT_DIR / "corpus" / "build" / "tetragon" / "bpf_execve_event.bpf.o"
-DEFAULT_KPROBE_OBJECT = ROOT_DIR / "corpus" / "build" / "tetragon" / "bpf_generic_kprobe.bpf.o"
 DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
-DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
 DEFAULT_BPFTOOL = "/usr/local/sbin/bpftool"
 DEFAULT_DURATION_S = 30
 DEFAULT_SMOKE_DURATION_S = 8
 DEFAULT_LOAD_TIMEOUT_S = 20
 DEFAULT_TIMEOUT_S = 180
-BPF_STATS_RUN_TIME = 0
-BPF_TAG_SIZE = 8
-BPF_OBJ_NAME_LEN = 16
 
 
 @dataclass(frozen=True, slots=True)
@@ -82,17 +72,6 @@ class WorkloadSpec:
     metric: str
     description: str
     value: int = 0
-
-
-@dataclass(frozen=True, slots=True)
-class ManualAttachSpec:
-    target_id: str
-    object_path: Path
-    program_name: str
-    section_name: str
-    program_type: str
-    attach_kind: str
-    attach_target: str
 
 
 DEFAULT_WORKLOADS = (
@@ -139,229 +118,6 @@ def bpftool_binary() -> str:
         if Path(DEFAULT_BPFTOOL).exists():
             return DEFAULT_BPFTOOL
         return "bpftool"
-
-
-def libbpf_error_string(err: int) -> str:
-    code = -err if err < 0 else err
-    try:
-        return os.strerror(code)
-    except ValueError:
-        return f"error {err}"
-
-
-class BpfProgInfo(ctypes.Structure):
-    _fields_ = [
-        ("type", ctypes.c_uint32),
-        ("id", ctypes.c_uint32),
-        ("tag", ctypes.c_ubyte * BPF_TAG_SIZE),
-        ("jited_prog_len", ctypes.c_uint32),
-        ("xlated_prog_len", ctypes.c_uint32),
-        ("jited_prog_insns", ctypes.c_uint64),
-        ("xlated_prog_insns", ctypes.c_uint64),
-        ("load_time", ctypes.c_uint64),
-        ("created_by_uid", ctypes.c_uint32),
-        ("nr_map_ids", ctypes.c_uint32),
-        ("map_ids", ctypes.c_uint64),
-        ("name", ctypes.c_char * BPF_OBJ_NAME_LEN),
-        ("ifindex", ctypes.c_uint32),
-        ("gpl_compatible", ctypes.c_uint32, 1),
-        ("_bitfield_pad", ctypes.c_uint32, 31),
-        ("netns_dev", ctypes.c_uint64),
-        ("netns_ino", ctypes.c_uint64),
-        ("nr_jited_ksyms", ctypes.c_uint32),
-        ("nr_jited_func_lens", ctypes.c_uint32),
-        ("jited_ksyms", ctypes.c_uint64),
-        ("jited_func_lens", ctypes.c_uint64),
-        ("btf_id", ctypes.c_uint32),
-        ("func_info_rec_size", ctypes.c_uint32),
-        ("func_info", ctypes.c_uint64),
-        ("nr_func_info", ctypes.c_uint32),
-        ("nr_line_info", ctypes.c_uint32),
-        ("line_info", ctypes.c_uint64),
-        ("jited_line_info", ctypes.c_uint64),
-        ("nr_jited_line_info", ctypes.c_uint32),
-        ("line_info_rec_size", ctypes.c_uint32),
-        ("jited_line_info_rec_size", ctypes.c_uint32),
-        ("nr_prog_tags", ctypes.c_uint32),
-        ("prog_tags", ctypes.c_uint64),
-        ("run_time_ns", ctypes.c_uint64),
-        ("run_cnt", ctypes.c_uint64),
-        ("recursion_misses", ctypes.c_uint64),
-        ("verified_insns", ctypes.c_uint32),
-        ("attach_btf_obj_id", ctypes.c_uint32),
-        ("attach_btf_id", ctypes.c_uint32),
-    ]
-
-
-class Libbpf:
-    def __init__(self) -> None:
-        path = ctypes.util.find_library("bpf") or "libbpf.so.1"
-        self.lib = ctypes.CDLL(path, use_errno=True)
-        self.lib.bpf_object__open_file.argtypes = [ctypes.c_char_p, ctypes.c_void_p]
-        self.lib.bpf_object__open_file.restype = ctypes.c_void_p
-        self.lib.bpf_object__load.argtypes = [ctypes.c_void_p]
-        self.lib.bpf_object__load.restype = ctypes.c_int
-        self.lib.bpf_object__close.argtypes = [ctypes.c_void_p]
-        self.lib.bpf_object__close.restype = None
-        self.lib.bpf_object__find_program_by_name.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
-        self.lib.bpf_object__find_program_by_name.restype = ctypes.c_void_p
-        self.lib.bpf_program__fd.argtypes = [ctypes.c_void_p]
-        self.lib.bpf_program__fd.restype = ctypes.c_int
-        self.lib.bpf_program__attach_tracepoint.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]
-        self.lib.bpf_program__attach_tracepoint.restype = ctypes.c_void_p
-        self.lib.bpf_program__attach_kprobe.argtypes = [ctypes.c_void_p, ctypes.c_bool, ctypes.c_char_p]
-        self.lib.bpf_program__attach_kprobe.restype = ctypes.c_void_p
-        self.lib.bpf_link__destroy.argtypes = [ctypes.c_void_p]
-        self.lib.bpf_link__destroy.restype = ctypes.c_int
-        self.lib.libbpf_get_error.argtypes = [ctypes.c_void_p]
-        self.lib.libbpf_get_error.restype = ctypes.c_long
-        self.lib.bpf_enable_stats.argtypes = [ctypes.c_int]
-        self.lib.bpf_enable_stats.restype = ctypes.c_int
-        self.lib.bpf_prog_get_info_by_fd.argtypes = [
-            ctypes.c_int,
-            ctypes.POINTER(BpfProgInfo),
-            ctypes.POINTER(ctypes.c_uint32),
-        ]
-        self.lib.bpf_prog_get_info_by_fd.restype = ctypes.c_int
-
-    def pointer_error(self, ptr: ctypes.c_void_p | int | None) -> int:
-        return int(self.lib.libbpf_get_error(ctypes.c_void_p(ptr or 0)))
-
-    def get_prog_info(self, prog_fd: int) -> BpfProgInfo:
-        info = BpfProgInfo()
-        info_len = ctypes.c_uint32(ctypes.sizeof(info))
-        rc = self.lib.bpf_prog_get_info_by_fd(prog_fd, ctypes.byref(info), ctypes.byref(info_len))
-        if rc != 0:
-            err = ctypes.get_errno()
-            raise RuntimeError(f"bpf_prog_get_info_by_fd failed: {os.strerror(err)} (errno={err})")
-        return info
-
-
-class RuntimeStatsHandle:
-    def __init__(self, libbpf: Libbpf) -> None:
-        self.libbpf = libbpf
-        self.fd = -1
-
-    def __enter__(self) -> "RuntimeStatsHandle":
-        fd = int(self.libbpf.lib.bpf_enable_stats(BPF_STATS_RUN_TIME))
-        if fd < 0:
-            err = ctypes.get_errno()
-            raise RuntimeError(f"bpf_enable_stats failed: {os.strerror(err)} (errno={err})")
-        self.fd = fd
-        return self
-
-    def __exit__(self, exc_type, exc, tb) -> None:
-        if self.fd >= 0:
-            os.close(self.fd)
-            self.fd = -1
-
-
-class LoadedBpfObject:
-    def __init__(self, libbpf: Libbpf, object_path: Path) -> None:
-        self.libbpf = libbpf
-        self.object_path = object_path
-        self.object_ptr: int | None = None
-        self._program_cache: dict[str, ctypes.c_void_p] = {}
-
-    def __enter__(self) -> "LoadedBpfObject":
-        object_ptr = self.libbpf.lib.bpf_object__open_file(str(self.object_path).encode(), None)
-        open_error = self.libbpf.pointer_error(object_ptr)
-        if open_error != 0:
-            raise RuntimeError(f"bpf_object__open_file failed: {libbpf_error_string(open_error)}")
-        self.object_ptr = object_ptr
-        rc = self.libbpf.lib.bpf_object__load(self.object_ptr)
-        if rc != 0:
-            raise RuntimeError(f"bpf_object__load failed: {libbpf_error_string(rc)}")
-        return self
-
-    def __exit__(self, exc_type, exc, tb) -> None:
-        if self.object_ptr:
-            self.libbpf.lib.bpf_object__close(self.object_ptr)
-            self.object_ptr = None
-        self._program_cache.clear()
-
-    def find_program(self, program_name: str) -> ctypes.c_void_p:
-        cached = self._program_cache.get(program_name)
-        if cached is not None:
-            return cached
-        assert self.object_ptr is not None
-        prog_ptr = self.libbpf.lib.bpf_object__find_program_by_name(self.object_ptr, program_name.encode())
-        if not prog_ptr:
-            raise RuntimeError(f"program not found in {self.object_path.name}: {program_name}")
-        wrapped = ctypes.c_void_p(prog_ptr)
-        self._program_cache[program_name] = wrapped
-        return wrapped
-
-    def program_fd(self, program_name: str) -> int:
-        prog_ptr = self.find_program(program_name)
-        prog_fd = int(self.libbpf.lib.bpf_program__fd(prog_ptr))
-        if prog_fd < 0:
-            raise RuntimeError(f"bpf_program__fd failed for {program_name}")
-        return prog_fd
-
-    def attach(self, spec: ManualAttachSpec) -> ctypes.c_void_p:
-        prog_ptr = self.find_program(spec.program_name)
-        if spec.attach_kind == "tracepoint":
-            subsystem, event = spec.attach_target.split("/", 1)
-            link_ptr = self.libbpf.lib.bpf_program__attach_tracepoint(
-                prog_ptr,
-                subsystem.encode(),
-                event.encode(),
-            )
-        elif spec.attach_kind == "kprobe":
-            link_ptr = self.libbpf.lib.bpf_program__attach_kprobe(
-                prog_ptr,
-                False,
-                spec.attach_target.encode(),
-            )
-        else:
-            raise RuntimeError(f"unsupported attach kind {spec.attach_kind}")
-        attach_error = self.libbpf.pointer_error(link_ptr)
-        if attach_error != 0:
-            raise RuntimeError(f"{spec.program_name} attach failed: {libbpf_error_string(attach_error)}")
-        return ctypes.c_void_p(link_ptr)
-
-
-class ManualProgramSession:
-    def __init__(self, libbpf: Libbpf, spec: ManualAttachSpec) -> None:
-        self.libbpf = libbpf
-        self.spec = spec
-        self.loaded: LoadedBpfObject | None = None
-        self.link_ptr: ctypes.c_void_p | None = None
-        self.prog_fd: int | None = None
-        self.prog_id: int | None = None
-
-    def __enter__(self) -> "ManualProgramSession":
-        try:
-            self.loaded = LoadedBpfObject(self.libbpf, self.spec.object_path).__enter__()
-            self.prog_fd = self.loaded.program_fd(self.spec.program_name)
-            self.link_ptr = self.loaded.attach(self.spec)
-            info = self.libbpf.get_prog_info(self.prog_fd)
-            self.prog_id = int(info.id)
-            return self
-        except Exception:
-            self.__exit__(None, None, None)
-            raise
-
-    def metadata(self) -> dict[str, object]:
-        return {
-            "id": int(self.prog_id or 0),
-            "name": self.spec.program_name,
-            "type": self.spec.program_type,
-            "section_name": self.spec.section_name,
-            "attach_kind": self.spec.attach_kind,
-            "attach_target": self.spec.attach_target,
-            "target_id": self.spec.target_id,
-            "object_path": relpath(self.spec.object_path),
-        }
-
-    def __exit__(self, exc_type, exc, tb) -> None:
-        if self.link_ptr:
-            self.libbpf.lib.bpf_link__destroy(self.link_ptr)
-            self.link_ptr = None
-        if self.loaded is not None:
-            self.loaded.__exit__(exc_type, exc, tb)
-            self.loaded = None
 
 
 class ProcessOutputCollector:
@@ -455,40 +211,6 @@ class TetragonAgentSession:
 
     def __exit__(self, exc_type, exc, tb) -> None:
         self.close()
-
-
-def build_manual_targets(execve_object: Path, kprobe_object: Path) -> tuple[ManualAttachSpec, ...]:
-    return (
-        ManualAttachSpec(
-            target_id="execve-tracepoint",
-            object_path=execve_object,
-            program_name="event_execve",
-            section_name="tracepoint/sys_execve",
-            program_type="tracepoint",
-            attach_kind="tracepoint",
-            attach_target="syscalls/sys_enter_execve",
-        ),
-        ManualAttachSpec(
-            target_id="open-kprobe",
-            object_path=kprobe_object,
-            program_name="generic_kprobe_event",
-            section_name="kprobe/generic_kprobe",
-            program_type="kprobe",
-            attach_kind="kprobe",
-            attach_target="security_file_open",
-        ),
-        ManualAttachSpec(
-            target_id="connect-kprobe",
-            object_path=kprobe_object,
-            program_name="generic_kprobe_event",
-            section_name="kprobe/generic_kprobe",
-            program_type="kprobe",
-            attach_kind="kprobe",
-            attach_target="security_socket_connect",
-        ),
-    )
-
-
 def write_tetragon_policies(directory: Path) -> list[Path]:
     directory.mkdir(parents=True, exist_ok=True)
     tracepoint_path = directory / "tetragon-e2e-tracepoint.yaml"
@@ -538,8 +260,7 @@ def current_prog_ids() -> list[int]:
     return [int(record["id"]) for record in current_programs()]
 
 
-def ensure_artifacts(runner_binary: Path, daemon_binary: Path) -> None:
-    ensure_runner_binary(runner_binary)
+def ensure_artifacts(daemon_binary: Path) -> None:
     ensure_daemon_binary(daemon_binary)
 
 
@@ -778,9 +499,6 @@ def compare_phases(baseline: Mapping[str, object], post: Mapping[str, object] | 
 
 
 def build_markdown(payload: Mapping[str, object]) -> str:
-    baseline = payload["baseline"]
-    post = payload.get("post_rejit")
-    comparison = payload.get("comparison") or {}
     lines = [
         "# Tetragon Real End-to-End Benchmark",
         "",
@@ -795,9 +513,27 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         f"- Setup return code: `{payload['setup']['returncode']}`",
         f"- Setup tetragon binary: `{payload['setup'].get('tetragon_binary') or 'missing'}`",
     ]
-    fallback_reason = payload.get("fallback_reason")
-    if fallback_reason:
-        lines.append(f"- Fallback reason: `{fallback_reason}`")
+    if payload.get("status") == "skipped":
+        lines.extend(
+            [
+                "",
+                "## Result",
+                "",
+                "- Status: `SKIP`",
+                f"- Reason: `{payload.get('skip_reason', 'unknown')}`",
+            ]
+        )
+        limitations = payload.get("limitations") or []
+        if limitations:
+            lines.extend(["", "## Limitations", ""])
+            for limitation in limitations:
+                lines.append(f"- {limitation}")
+        lines.append("")
+        return "\n".join(lines)
+
+    baseline = payload["baseline"]
+    post = payload.get("post_rejit")
+    comparison = payload.get("comparison") or {}
     lines.extend(
         [
             "",
@@ -877,72 +613,38 @@ def build_markdown(payload: Mapping[str, object]) -> str:
     return "\n".join(lines)
 
 
-def manual_fallback_payload(
+def skip_payload(
     *,
-    libbpf: Libbpf,
-    daemon_binary: Path,
-    execve_object: Path,
-    kprobe_object: Path,
+    tetragon_binary: str | None,
     duration_s: int,
     smoke: bool,
     setup_result: Mapping[str, object],
-    limitations: list[str],
+    reason: str,
+    limitations: Sequence[str],
 ) -> dict[str, object]:
-    targets = build_manual_targets(execve_object, kprobe_object)
-    opened: list[ManualProgramSession] = []
-    manual_failures: list[dict[str, str]] = []
-    with ExitStack() as stack:
-        for spec in targets:
-            try:
-                opened.append(stack.enter_context(ManualProgramSession(libbpf, spec)))
-            except Exception as exc:
-                manual_failures.append({"target_id": spec.target_id, "error": str(exc)})
-        if not opened:
-            raise RuntimeError(f"manual fallback failed to load any targets: {manual_failures}")
-
-        prog_ids = [int(session.prog_id or 0) for session in opened if session.prog_id]
-        programs = [session.metadata() for session in opened]
-        baseline = run_phase(DEFAULT_WORKLOADS, duration_s, prog_ids, agent_pid=os.getpid())
-        scan_results = scan_programs(prog_ids, daemon_binary)
-        rejit_result = apply_daemon_rejit(daemon_binary, prog_ids)
-        if rejit_result["applied"]:
-            post_rejit = run_phase(DEFAULT_WORKLOADS, duration_s, prog_ids, agent_pid=os.getpid())
-        else:
-            post_rejit = None
-
-    if manual_failures:
-        limitations.append(f"Some manual fallback targets failed to load: {manual_failures}")
-    limitations.append(
-        "events_total and events_per_sec are derived from aggregate BPF run_cnt deltas, so a single application operation can increment multiple program counters."
-    )
-    limitations.append(
-        "Manual fallback uses directly loaded Tetragon BPF objects; agent CPU therefore reflects the benchmark controller process rather than a real Tetragon daemon."
-    )
-
-    payload = {
+    return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "mode": "manual_fallback",
+        "status": "skipped",
+        "mode": "skipped",
+        "skip_reason": reason,
         "smoke": smoke,
         "duration_s": duration_s,
-        "tetragon_binary": None,
+        "tetragon_binary": tetragon_binary,
         "setup": dict(setup_result),
         "host": host_metadata(),
-        "tetragon_programs": programs,
-        "manual_failures": manual_failures,
-        "baseline": baseline,
-        "scan_results": {str(key): value for key, value in scan_results.items()},
-        "rejit_result": rejit_result,
-        "post_rejit": post_rejit,
-        "programs": build_program_summary(scan_results, baseline, post_rejit),
-        "comparison": compare_phases(baseline, post_rejit),
-        "limitations": limitations,
+        "tetragon_programs": [],
+        "baseline": None,
+        "scan_results": {},
+        "rejit_result": None,
+        "post_rejit": None,
+        "programs": [],
+        "comparison": {"comparable": False, "reason": reason},
+        "limitations": list(limitations),
     }
-    return payload
 
 
 def daemon_payload(
     *,
-    libbpf: Libbpf,
     daemon_binary: Path,
     tetragon_binary: str,
     duration_s: int,
@@ -969,6 +671,7 @@ def daemon_payload(
             )
             payload = {
                 "generated_at": datetime.now(timezone.utc).isoformat(),
+                "status": "ok",
                 "mode": "tetragon_daemon",
                 "smoke": smoke,
                 "duration_s": duration_s,
@@ -998,11 +701,8 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
         os.environ["PATH"] = f"{Path(bpftool).parent}:{os.environ.get('PATH', '')}"
 
     duration_s = int(args.duration or (DEFAULT_SMOKE_DURATION_S if args.smoke else DEFAULT_DURATION_S))
-    runner_binary = Path(args.runner).resolve()
     daemon_binary = Path(args.daemon).resolve()
-    execve_object = Path(args.execve_object).resolve()
-    kprobe_object = Path(args.kprobe_object).resolve()
-    ensure_artifacts(runner_binary, daemon_binary)
+    ensure_artifacts(daemon_binary)
 
     setup_result = {
         "returncode": 0,
@@ -1014,69 +714,53 @@ def run_tetragon_case(args: argparse.Namespace) -> dict[str, object]:
     if not args.skip_setup:
         setup_result = run_setup_script(Path(args.setup_script).resolve())
 
-    tetragon_binary = None if args.force_direct else resolve_tetragon_binary(args.tetragon_binary, setup_result)
     limitations: list[str] = []
     if setup_result["returncode"] != 0:
-        limitations.append("Setup script returned non-zero; benchmark continued with whatever tools were already available.")
+        limitations.append("Setup script returned non-zero; only the real Tetragon binary path was attempted.")
 
-    libbpf = Libbpf()
-    with RuntimeStatsHandle(libbpf):
-        if tetragon_binary:
-            try:
-                return daemon_payload(
-                    libbpf=libbpf,
-                    daemon_binary=daemon_binary,
-                    tetragon_binary=tetragon_binary,
-                    duration_s=duration_s,
-                    smoke=bool(args.smoke),
-                    load_timeout=int(args.load_timeout),
-                    setup_result=setup_result,
-                    limitations=limitations,
-                )
-            except Exception as exc:
-                limitations.append(f"Daemon mode failed and manual fallback was used instead: {exc}")
-                return {
-                    **manual_fallback_payload(
-                        libbpf=libbpf,
-                        daemon_binary=daemon_binary,
-                        execve_object=execve_object,
-                        kprobe_object=kprobe_object,
-                        duration_s=duration_s,
-                        smoke=bool(args.smoke),
-                        setup_result=setup_result,
-                        limitations=limitations,
-                    ),
-                    "fallback_reason": str(exc),
-                }
-
-        limitations.append("Tetragon binary was unavailable, so the benchmark used direct object loading as the fallback path.")
-        return manual_fallback_payload(
-            libbpf=libbpf,
-            daemon_binary=daemon_binary,
-            execve_object=execve_object,
-            kprobe_object=kprobe_object,
+    tetragon_binary = resolve_tetragon_binary(args.tetragon_binary, setup_result)
+    if tetragon_binary is None:
+        return skip_payload(
+            tetragon_binary=None,
             duration_s=duration_s,
             smoke=bool(args.smoke),
             setup_result=setup_result,
+            reason="Tetragon binary is unavailable in this environment; manual .bpf.o fallback is forbidden.",
             limitations=limitations,
         )
+
+    with enable_bpf_stats():
+        try:
+            return daemon_payload(
+                daemon_binary=daemon_binary,
+                tetragon_binary=tetragon_binary,
+                duration_s=duration_s,
+                smoke=bool(args.smoke),
+                load_timeout=int(args.load_timeout),
+                setup_result=setup_result,
+                limitations=limitations,
+            )
+        except Exception as exc:
+            return skip_payload(
+                tetragon_binary=tetragon_binary,
+                duration_s=duration_s,
+                smoke=bool(args.smoke),
+                setup_result=setup_result,
+                reason=f"Tetragon binary could not run on this kernel: {exc}",
+                limitations=limitations,
+            )
 
 
 def build_case_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the Tetragon real end-to-end benchmark.")
     parser.add_argument("--setup-script", default=str(DEFAULT_SETUP_SCRIPT))
-    parser.add_argument("--guest-script", default=str(DEFAULT_GUEST_SCRIPT))
     parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON))
     parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD))
     parser.add_argument("--tetragon-binary")
-    parser.add_argument("--execve-object", default=str(DEFAULT_EXECVE_OBJECT))
-    parser.add_argument("--kprobe-object", default=str(DEFAULT_KPROBE_OBJECT))
-    parser.add_argument("--runner", default=str(DEFAULT_RUNNER))
     parser.add_argument("--daemon", default=str(DEFAULT_DAEMON))
     parser.add_argument("--bpftool", default=DEFAULT_BPFTOOL)
     parser.add_argument("--duration", type=int)
     parser.add_argument("--smoke", action="store_true")
-    parser.add_argument("--force-direct", action="store_true")
     parser.add_argument("--load-timeout", type=int, default=DEFAULT_LOAD_TIMEOUT_S)
     parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT_S)
     parser.add_argument("--skip-setup", action="store_true")

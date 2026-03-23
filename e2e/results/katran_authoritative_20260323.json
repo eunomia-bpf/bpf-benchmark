@@ -4,66 +4,66 @@
       {
         "bpf": {
           "programs": {
-            "403": {
-              "avg_ns_per_run": 237.20334427664696,
+            "284": {
+              "avg_ns_per_run": 237.00895935869855,
               "bytes_jited": 13654,
               "bytes_xlated": 23872,
-              "id": 403,
+              "id": 284,
               "name": "balancer_ingres",
-              "run_cnt_delta": 456900,
-              "run_time_ns_delta": 108378208,
+              "run_cnt_delta": 407172,
+              "run_time_ns_delta": 96503412,
               "type": "xdp"
             }
           },
           "summary": {
             "active_programs": 1,
-            "avg_ns_per_run": 237.20334427664696,
-            "total_events": 456900,
-            "total_run_time_ns": 108378208
+            "avg_ns_per_run": 237.00895935869855,
+            "total_events": 407172,
+            "total_run_time_ns": 96503412
           }
         },
         "driver": "serial_python",
-        "http_request_count": 76150,
-        "http_success_count": 76150,
+        "http_request_count": 67862,
+        "http_success_count": 67862,
         "index": 0,
         "ipip_after": {
-          "rx_bytes": 33649329,
-          "rx_packets": 544194,
+          "rx_bytes": 30267664,
+          "rx_packets": 489504,
           "tx_bytes": 0,
           "tx_packets": 0
         },
         "ipip_before": {
-          "rx_bytes": 5397679,
-          "rx_packets": 87294,
+          "rx_bytes": 5090862,
+          "rx_packets": 82332,
           "tx_bytes": 0,
           "tx_packets": 0
         },
-        "ipip_rx_bytes_delta": 28251650,
-        "ipip_rx_packets_delta": 456900,
+        "ipip_rx_bytes_delta": 25176802,
+        "ipip_rx_packets_delta": 407172,
         "measurement_batches": 1,
-        "measurement_duration_s": 10.001023241999974,
+        "measurement_duration_s": 10.000967113999991,
         "phase": "stock",
         "request_failure_preview": [],
         "request_latencies_ms": [],
         "request_summary": {
-          "bytes_total": 13859300,
+          "bytes_total": 12350884,
           "concurrency": 4,
           "driver": "python_parallel",
-          "duration_s": 10.001023241999974,
+          "duration_s": 10.000967113999991,
           "failure_preview": [],
           "latency_ms": {
-            "count": 76150,
-            "max": 5.433034000020598,
-            "mean": 0.5249837775178925,
-            "median": 0.5032700000242585,
-            "min": 0.14483600000403385,
-            "p50": 0.5032700000242585,
-            "p90": 0.7198089999747026,
-            "p99": 0.9596077700211935
+            "count": 67862,
+            "max": 8.523502000002736,
+            "mean": 0.5891067330022061,
+            "median": 0.5452455000067857,
+            "min": 0.1331849999814949,
+            "p50": 0.5452455000067857,
+            "p90": 0.8760218999668723,
+            "p99": 1.236712470004022
           },
-          "ops_per_sec": 7614.220880939754,
-          "request_count": 76150,
-          "success_count": 76150
+          "ops_per_sec": 6785.5437605631605,
+          "request_count": 67862,
+          "success_count": 67862
         },
         "state_reset": {
           "map_count": 11,
@@ -149,27 +149,27 @@
           "strategy": "reset mutable stats/fallback maps before each phase"
         },
         "system_cpu": {
-          "busy_pct": 6.145977445185091
+          "busy_pct": 5.9875485730998985
         },
         "warmup": {
-          "bytes_total": 2647918,
+          "bytes_total": 2497404,
           "concurrency": 4,
           "driver": "python_parallel",
-          "duration_s": 2.0004977289999033,
+          "duration_s": 2.000876330999972,
           "failure_preview": [],
           "latency_ms": {
-            "count": 14549,
-            "max": 7.616029000018898,
-            "mean": 0.5494778591653339,
-            "median": 0.5240240000148333,
-            "min": 0.15222100000755745,
-            "p50": 0.5240240000148333,
-            "p90": 0.7618735999812998,
-            "p99": 1.0083903600434503
+            "count": 13722,
+            "max": 6.15262199994504,
+            "mean": 0.5827618787349131,
+            "median": 0.5458364999810783,
+            "min": 0.17354400000613168,
+            "p50": 0.5458364999810783,
+            "p90": 0.8404139999811377,
+            "p99": 1.1617880399899139
           },
-          "ops_per_sec": 7272.690085618539,
-          "request_count": 14549,
-          "success_count": 14549
+          "ops_per_sec": 6857.995063164247,
+          "request_count": 13722,
+          "success_count": 13722
         },
         "warmup_duration_s": 2.0,
         "warmup_request_count": 100
@@ -177,66 +177,66 @@
       {
         "bpf": {
           "programs": {
-            "653": {
-              "avg_ns_per_run": 241.356968397409,
+            "534": {
+              "avg_ns_per_run": 230.31654993399349,
               "bytes_jited": 13654,
               "bytes_xlated": 23872,
-              "id": 653,
+              "id": 534,
               "name": "balancer_ingres",
-              "run_cnt_delta": 402467,
-              "run_time_ns_delta": 97138215,
+              "run_cnt_delta": 426473,
+              "run_time_ns_delta": 98223790,
               "type": "xdp"
             }
           },
           "summary": {
             "active_programs": 1,
-            "avg_ns_per_run": 241.356968397409,
-            "total_events": 402467,
-            "total_run_time_ns": 97138215
+            "avg_ns_per_run": 230.31654993399349,
+            "total_events": 426473,
+            "total_run_time_ns": 98223790
           }
         },
         "driver": "serial_python",
-        "http_request_count": 67078,
-        "http_success_count": 67078,
+        "http_request_count": 71079,
+        "http_success_count": 71079,
         "index": 1,
         "ipip_after": {
-          "rx_bytes": 29792732,
-          "rx_packets": 481823,
+          "rx_bytes": 31955662,
+          "rx_packets": 516803,
           "tx_bytes": 0,
           "tx_packets": 0
         },
         "ipip_before": {
-          "rx_bytes": 4906846,
-          "rx_packets": 79356,
+          "rx_bytes": 5585405,
+          "rx_packets": 90330,
           "tx_bytes": 0,
           "tx_packets": 0
         },
-        "ipip_rx_bytes_delta": 24885886,
-        "ipip_rx_packets_delta": 402467,
+        "ipip_rx_bytes_delta": 26370257,
+        "ipip_rx_packets_delta": 426473,
         "measurement_batches": 1,
-        "measurement_duration_s": 10.001395198999944,
+        "measurement_duration_s": 10.00146313099998,
         "phase": "stock",
         "request_failure_preview": [],
         "request_latencies_ms": [],
         "request_summary": {
-          "bytes_total": 12208196,
+          "bytes_total": 12936378,
           "concurrency": 4,
           "driver": "python_parallel",
-          "duration_s": 10.001395198999944,
+          "duration_s": 10.00146313099998,
           "failure_preview": [],
           "latency_ms": {
-            "count": 67078,
-            "max": 3.988404999972772,
-            "mean": 0.5960148620413895,
-            "median": 0.5526839999561162,
-            "min": 0.14526799998293427,
-            "p50": 0.5526839999561162,
-            "p90": 0.8790563000275142,
-            "p99": 1.2465403500061705
+            "count": 71079,
+            "max": 8.566998999981479,
+            "mean": 0.5624409645464356,
+            "median": 0.5264299999794275,
+            "min": 0.12173400000392576,
+            "p50": 0.5264299999794275,
+            "p90": 0.8202494000215667,
+            "p99": 1.111362500013229
           },
-          "ops_per_sec": 6706.864258969313,
-          "request_count": 67078,
-          "success_count": 67078
+          "ops_per_sec": 7106.860173256799,
+          "request_count": 71079,
+          "success_count": 71079
         },
         "state_reset": {
           "map_count": 11,
@@ -322,27 +322,27 @@
           "strategy": "reset mutable stats/fallback maps before each phase"
         },
         "system_cpu": {
-          "busy_pct": 6.176961602671116
+          "busy_pct": 5.765924434939407
         },
         "warmup": {
-          "bytes_total": 2407132,
+          "bytes_total": 2740010,
           "concurrency": 4,
           "driver": "python_parallel",
-          "duration_s": 2.00084606300004,
+          "duration_s": 2.000295460000018,
           "failure_preview": [],
           "latency_ms": {
-            "count": 13226,
-            "max": 7.880658999965817,
-            "mean": 0.6045415967787744,
-            "median": 0.5690019999633478,
-            "min": 0.1503330000787173,
-            "p50": 0.5690019999633478,
-            "p90": 0.8585980000361815,
-            "p99": 1.177889250016051
+            "count": 15055,
+            "max": 6.591850000006616,
+            "mean": 0.5310742702756894,
+            "median": 0.5087360000288754,
+            "min": 0.14773099997000827,
+            "p50": 0.5087360000288754,
+            "p90": 0.7425607999948625,
+            "p99": 0.9922670999821994
           },
-          "ops_per_sec": 6610.203675623663,
-          "request_count": 13226,
-          "success_count": 13226
+          "ops_per_sec": 7526.388126681977,
+          "request_count": 15055,
+          "success_count": 15055
         },
         "warmup_duration_s": 2.0,
         "warmup_request_count": 100
@@ -350,66 +350,66 @@
       {
         "bpf": {
           "programs": {
-            "903": {
-              "avg_ns_per_run": 230.38703051250107,
+            "784": {
+              "avg_ns_per_run": 218.81066429305153,
               "bytes_jited": 13654,
               "bytes_xlated": 23872,
-              "id": 903,
+              "id": 784,
               "name": "balancer_ingres",
-              "run_cnt_delta": 447882,
-              "run_time_ns_delta": 103186204,
+              "run_cnt_delta": 459496,
+              "run_time_ns_delta": 100542625,
               "type": "xdp"
             }
           },
           "summary": {
             "active_programs": 1,
-            "avg_ns_per_run": 230.38703051250107,
-            "total_events": 447882,
-            "total_run_time_ns": 103186204
+            "avg_ns_per_run": 218.81066429305153,
+            "total_events": 459496,
+            "total_run_time_ns": 100542625
           }
         },
         "driver": "serial_python",
-        "http_request_count": 74647,
-        "http_success_count": 74647,
+        "http_request_count": 76583,
+        "http_success_count": 76583,
         "index": 2,
         "ipip_after": {
-          "rx_bytes": 33520592,
-          "rx_packets": 542112,
+          "rx_bytes": 33348344,
+          "rx_packets": 539326,
           "tx_bytes": 0,
           "tx_packets": 0
         },
         "ipip_before": {
-          "rx_bytes": 5826555,
-          "rx_packets": 94230,
+          "rx_bytes": 4936155,
+          "rx_packets": 79830,
           "tx_bytes": 0,
           "tx_packets": 0
         },
-        "ipip_rx_bytes_delta": 27694037,
-        "ipip_rx_packets_delta": 447882,
+        "ipip_rx_bytes_delta": 28412189,
+        "ipip_rx_packets_delta": 459496,
         "measurement_batches": 1,
-        "measurement_duration_s": 10.001092780000022,
+        "measurement_duration_s": 10.00119713099997,
         "phase": "stock",
         "request_failure_preview": [],
         "request_latencies_ms": [],
         "request_summary": {
-          "bytes_total": 13585754,
+          "bytes_total": 13938106,
           "concurrency": 4,
           "driver": "python_parallel",
-          "duration_s": 10.001092780000022,
+          "duration_s": 10.00119713099997,
           "failure_preview": [],
           "latency_ms": {
-            "count": 74647,
-            "max": 4.903225000020939,
-            "mean": 0.5355618144330403,
-            "median": 0.5114779999075836,
-            "min": 0.13653500002419605,
-            "p50": 0.5114779999075836,
-            "p90": 0.7422086000133279,
-            "p99": 1.0024675399677108
+            "count": 76583,
+            "max": 8.045071000026383,
+            "mean": 0.5220134398626465,
+            "median": 0.4943050000179028,
+            "min": 0.14133399997717788,
+            "p50": 0.4943050000179028,
+            "p90": 0.7329050000066673,
+            "p99": 1.0348433199942517
           },
-          "ops_per_sec": 7463.884361644712,
-          "request_count": 74647,
-          "success_count": 74647
+          "ops_per_sec": 7657.383310905987,
+          "request_count": 76583,
+          "success_count": 76583
         },
         "state_reset": {
           "map_count": 11,
@@ -495,27 +495,27 @@
           "strategy": "reset mutable stats/fallback maps before each phase"
         },
         "system_cpu": {
-          "busy_pct": 5.925583739291119
+          "busy_pct": 6.110738817222316
         },
         "warmup": {
-          "bytes_total": 2858310,
+          "bytes_total": 2421510,
           "concurrency": 4,
           "driver": "python_parallel",
-          "duration_s": 2.0005356399999528,
+          "duration_s": 2.0003439500000013,
           "failure_preview": [],
           "latency_ms": {
-            "count": 15705,
-            "max": 5.967055999917648,
-            "mean": 0.5090284561603187,
-            "median": 0.4924109999819848,
-            "min": 0.11099099992861738,
-            "p50": 0.4924109999819848,
-            "p90": 0.6809737999901699,
-            "p99": 0.8908899599464346
+            "count": 13305,
+            "max": 5.908340000019052,
+            "mean": 0.6008211393461688,
+            "median": 0.5527380000103221,
+            "min": 0.1399980000087453,
+            "p50": 0.5527380000103221,
+            "p90": 0.89748820001887,
+            "p99": 1.3100995600098029
           },
-          "ops_per_sec": 7850.397506539984,
-          "request_count": 15705,
-          "success_count": 15705
+          "ops_per_sec": 6651.356133029018,
+          "request_count": 13305,
+          "success_count": 13305
         },
         "warmup_duration_s": 2.0,
         "warmup_request_count": 100
@@ -524,69 +524,69 @@
     "summary": {
       "app_throughput_rps": {
         "count": 3,
-        "max": 7614.220880939754,
-        "mean": 7261.656500517926,
-        "median": 7463.884361644712,
-        "min": 6706.864258969313
+        "max": 7657.383310905987,
+        "mean": 7183.262414908649,
+        "median": 7106.860173256799,
+        "min": 6785.5437605631605
       },
       "bpf_avg_ns_per_run": {
         "count": 3,
-        "max": 241.356968397409,
-        "mean": 236.31578106218566,
-        "median": 237.20334427664696,
-        "min": 230.38703051250107
+        "max": 237.00895935869855,
+        "mean": 228.71205786191453,
+        "median": 230.31654993399349,
+        "min": 218.81066429305153
       },
       "events": {
         "count": 3,
-        "max": 456900.0,
-        "mean": 435749.6666666667,
-        "median": 447882.0,
-        "min": 402467.0
+        "max": 459496.0,
+        "mean": 431047.0,
+        "median": 426473.0,
+        "min": 407172.0
       },
       "events_per_sec": {
         "count": 3,
-        "max": 45685.32528563853,
-        "mean": 43569.90567442424,
-        "median": 44783.30616986827,
-        "min": 40241.08556776592
+        "max": 45944.09988937568,
+        "mean": 43099.4745023082,
+        "median": 42641.06105416996,
+        "min": 40713.262563378965
       },
       "http_all_succeeded": true,
-      "http_requests": 217875,
-      "http_successes": 217875,
+      "http_requests": 215524,
+      "http_successes": 215524,
       "ipip_rx_packets_delta": {
         "count": 3,
-        "max": 456900.0,
-        "mean": 435749.6666666667,
-        "median": 447882.0,
-        "min": 402467.0
+        "max": 459496.0,
+        "mean": 431047.0,
+        "median": 426473.0,
+        "min": 407172.0
       },
       "latency_ms_mean": {
         "count": 3,
-        "max": 0.5960148620413895,
-        "mean": 0.5521868179974407,
-        "median": 0.5355618144330403,
-        "min": 0.5249837775178925
+        "max": 0.5891067330022061,
+        "mean": 0.5578537124704294,
+        "median": 0.5624409645464356,
+        "min": 0.5220134398626465
       },
       "latency_ms_p50": {
         "count": 3,
-        "max": 0.5526839999561162,
-        "mean": 0.5224773332959861,
-        "median": 0.5114779999075836,
-        "min": 0.5032700000242585
+        "max": 0.5452455000067857,
+        "mean": 0.521993500001372,
+        "median": 0.5264299999794275,
+        "min": 0.4943050000179028
       },
       "latency_ms_p90": {
         "count": 3,
-        "max": 0.8790563000275142,
-        "mean": 0.7803579666718482,
-        "median": 0.7422086000133279,
-        "min": 0.7198089999747026
+        "max": 0.8760218999668723,
+        "mean": 0.8097254333317021,
+        "median": 0.8202494000215667,
+        "min": 0.7329050000066673
       },
       "latency_ms_p99": {
         "count": 3,
-        "max": 1.2465403500061705,
-        "mean": 1.0695385533316917,
-        "median": 1.0024675399677108,
-        "min": 0.9596077700211935
+        "max": 1.236712470004022,
+        "mean": 1.1276394300038342,
+        "median": 1.111362500013229,
+        "min": 1.0348433199942517
       },
       "measurement_batches": {
         "count": 3,
@@ -597,24 +597,24 @@
       },
       "measurement_duration_s": {
         "count": 3,
-        "max": 10.001395198999944,
-        "mean": 10.00117040699998,
-        "median": 10.001092780000022,
-        "min": 10.001023241999974
+        "max": 10.00146313099998,
+        "mean": 10.001209125333313,
+        "median": 10.00119713099997,
+        "min": 10.000967113999991
       },
       "packet_pps": {
         "count": 3,
-        "max": 45685.32528563853,
-        "mean": 43569.90567442424,
-        "median": 44783.30616986827,
-        "min": 40241.08556776592
+        "max": 45944.09988937568,
+        "mean": 43099.4745023082,
+        "median": 42641.06105416996,
+        "min": 40713.262563378965
       },
       "system_cpu_busy_pct": {
         "count": 3,
-        "max": 6.176961602671116,
-        "mean": 6.082840929049109,
-        "median": 6.145977445185091,
-        "min": 5.925583739291119
+        "max": 6.110738817222316,
+        "mean": 5.954737275087207,
+        "median": 5.9875485730998985,
+        "min": 5.765924434939407
       },
       "warmup_duration_s": {
         "count": 3,
@@ -635,19 +635,19 @@
   "client_concurrency": 4,
   "comparison": {
     "aggregation": "paired_cycle_median",
-    "app_throughput_rps_delta_pct": -5.2926452487615565,
-    "bpf_avg_ns_per_run_delta_pct": 2.6888098806055627,
-    "bpf_speedup_ratio": 0.9738159407657777,
+    "app_throughput_rps_delta_pct": 5.964331913730671,
+    "bpf_avg_ns_per_run_delta_pct": -3.1223576986290773,
+    "bpf_speedup_ratio": 1.0322299100644494,
     "comparable": true,
-    "events_delta_pct": -5.2931352454441125,
-    "http_successes_delta_pct": -3.1077452667814116,
-    "latency_ms_p99_delta_pct": 8.148065327997877,
-    "packet_pps_delta_pct": -5.2928685224846195,
-    "system_cpu_busy_pct_delta_pct": -3.5829425888032103
+    "events_delta_pct": 5.966849015060743,
+    "http_successes_delta_pct": 4.582320298435441,
+    "latency_ms_p99_delta_pct": -8.88335354197709,
+    "packet_pps_delta_pct": 5.96458038041418,
+    "system_cpu_busy_pct_delta_pct": -1.1474171851297814
   },
   "control_plane_mode": "bpftool_direct_map",
   "duration_s": 10,
-  "generated_at": "2026-03-23T11:10:21.567485+00:00",
+  "generated_at": "2026-03-23T12:10:15.788556+00:00",
   "host": {
     "git_sha": "unknown",
     "hostname": "virtme-ng",
@@ -658,7 +658,7 @@
   "http_server": {
     "bind_ip": "10.100.1.1",
     "namespace": "katran-real",
-    "pid": 25511,
+    "pid": 435,
     "port": 8080,
     "stderr_tail": "",
     "stdout_tail": ""
@@ -696,7 +696,7 @@
       "xdp": [
         {
           "devname": "katran0",
-          "id": 403,
+          "id": 284,
           "ifindex": 4,
           "mode": "generic"
         }
@@ -704,7 +704,7 @@
     },
     "attach_mode": "xdpgeneric",
     "attached": true,
-    "bpffs_dir": "/sys/fs/bpf/katrane2e-o_b84tnv",
+    "bpffs_dir": "/sys/fs/bpf/katrane2e-yxjoygh1",
     "iface": "katran0",
     "ifindex": 4,
     "pinned_maps": [
@@ -726,31 +726,31 @@
       "vip_miss_stats",
       "vip_to_down_reals_map"
     ],
-    "pinned_prog": "/sys/fs/bpf/katrane2e-o_b84tnv/progs/balancer_ingress",
+    "pinned_prog": "/sys/fs/bpf/katrane2e-yxjoygh1/progs/balancer_ingress",
     "program": {
-      "btf_id": 666,
+      "btf_id": 524,
       "bytes_jited": 13654,
       "bytes_memlock": 24576,
       "bytes_xlated": 23872,
       "gpl_compatible": true,
-      "id": 403,
+      "id": 284,
       "jited": true,
-      "loaded_at": 1774264130,
+      "loaded_at": 1774267724,
       "map_ids": [
-        739,
-        741,
-        744,
-        742,
-        750,
-        755,
-        746,
-        757,
-        740,
-        747,
-        745,
-        749,
-        748,
-        753
+        584,
+        586,
+        589,
+        587,
+        595,
+        600,
+        591,
+        602,
+        585,
+        592,
+        590,
+        594,
+        593,
+        598
       ],
       "name": "balancer_ingress",
       "orphaned": false,
@@ -806,66 +806,66 @@
           {
             "bpf": {
               "programs": {
-                "403": {
-                  "avg_ns_per_run": 237.20334427664696,
+                "284": {
+                  "avg_ns_per_run": 237.00895935869855,
                   "bytes_jited": 13654,
                   "bytes_xlated": 23872,
-                  "id": 403,
+                  "id": 284,
                   "name": "balancer_ingres",
-                  "run_cnt_delta": 456900,
-                  "run_time_ns_delta": 108378208,
+                  "run_cnt_delta": 407172,
+                  "run_time_ns_delta": 96503412,
                   "type": "xdp"
                 }
               },
               "summary": {
                 "active_programs": 1,
-                "avg_ns_per_run": 237.20334427664696,
-                "total_events": 456900,
-                "total_run_time_ns": 108378208
+                "avg_ns_per_run": 237.00895935869855,
+                "total_events": 407172,
+                "total_run_time_ns": 96503412
               }
             },
             "driver": "serial_python",
-            "http_request_count": 76150,
-            "http_success_count": 76150,
+            "http_request_count": 67862,
+            "http_success_count": 67862,
             "index": 0,
             "ipip_after": {
-              "rx_bytes": 33649329,
-              "rx_packets": 544194,
+              "rx_bytes": 30267664,
+              "rx_packets": 489504,
               "tx_bytes": 0,
               "tx_packets": 0
             },
             "ipip_before": {
-              "rx_bytes": 5397679,
-              "rx_packets": 87294,
+              "rx_bytes": 5090862,
+              "rx_packets": 82332,
               "tx_bytes": 0,
               "tx_packets": 0
             },
-            "ipip_rx_bytes_delta": 28251650,
-            "ipip_rx_packets_delta": 456900,
+            "ipip_rx_bytes_delta": 25176802,
+            "ipip_rx_packets_delta": 407172,
             "measurement_batches": 1,
-            "measurement_duration_s": 10.001023241999974,
+            "measurement_duration_s": 10.000967113999991,
             "phase": "stock",
             "request_failure_preview": [],
             "request_latencies_ms": [],
             "request_summary": {
-              "bytes_total": 13859300,
+              "bytes_total": 12350884,
               "concurrency": 4,
               "driver": "python_parallel",
-              "duration_s": 10.001023241999974,
+              "duration_s": 10.000967113999991,
               "failure_preview": [],
               "latency_ms": {
-                "count": 76150,
-                "max": 5.433034000020598,
-                "mean": 0.5249837775178925,
-                "median": 0.5032700000242585,
-                "min": 0.14483600000403385,
-                "p50": 0.5032700000242585,
-                "p90": 0.7198089999747026,
-                "p99": 0.9596077700211935
+                "count": 67862,
+                "max": 8.523502000002736,
+                "mean": 0.5891067330022061,
+                "median": 0.5452455000067857,
+                "min": 0.1331849999814949,
+                "p50": 0.5452455000067857,
+                "p90": 0.8760218999668723,
+                "p99": 1.236712470004022
               },
-              "ops_per_sec": 7614.220880939754,
-              "request_count": 76150,
-              "success_count": 76150
+              "ops_per_sec": 6785.5437605631605,
+              "request_count": 67862,
+              "success_count": 67862
             },
             "state_reset": {
               "map_count": 11,
@@ -951,27 +951,27 @@
               "strategy": "reset mutable stats/fallback maps before each phase"
             },
             "system_cpu": {
-              "busy_pct": 6.145977445185091
+              "busy_pct": 5.9875485730998985
             },
             "warmup": {
-              "bytes_total": 2647918,
+              "bytes_total": 2497404,
               "concurrency": 4,
               "driver": "python_parallel",
-              "duration_s": 2.0004977289999033,
+              "duration_s": 2.000876330999972,
               "failure_preview": [],
               "latency_ms": {
-                "count": 14549,
-                "max": 7.616029000018898,
-                "mean": 0.5494778591653339,
-                "median": 0.5240240000148333,
-                "min": 0.15222100000755745,
-                "p50": 0.5240240000148333,
-                "p90": 0.7618735999812998,
-                "p99": 1.0083903600434503
+                "count": 13722,
+                "max": 6.15262199994504,
+                "mean": 0.5827618787349131,
+                "median": 0.5458364999810783,
+                "min": 0.17354400000613168,
+                "p50": 0.5458364999810783,
+                "p90": 0.8404139999811377,
+                "p99": 1.1617880399899139
               },
-              "ops_per_sec": 7272.690085618539,
-              "request_count": 14549,
-              "success_count": 14549
+              "ops_per_sec": 6857.995063164247,
+              "request_count": 13722,
+              "success_count": 13722
             },
             "warmup_duration_s": 2.0,
             "warmup_request_count": 100
@@ -980,69 +980,69 @@
         "summary": {
           "app_throughput_rps": {
             "count": 1,
-            "max": 7614.220880939754,
-            "mean": 7614.220880939754,
-            "median": 7614.220880939754,
-            "min": 7614.220880939754
+            "max": 6785.5437605631605,
+            "mean": 6785.5437605631605,
+            "median": 6785.5437605631605,
+            "min": 6785.5437605631605
           },
           "bpf_avg_ns_per_run": {
             "count": 1,
-            "max": 237.20334427664696,
-            "mean": 237.20334427664696,
-            "median": 237.20334427664696,
-            "min": 237.20334427664696
+            "max": 237.00895935869855,
+            "mean": 237.00895935869855,
+            "median": 237.00895935869855,
+            "min": 237.00895935869855
           },
           "events": {
             "count": 1,
-            "max": 456900.0,
-            "mean": 456900.0,
-            "median": 456900.0,
-            "min": 456900.0
+            "max": 407172.0,
+            "mean": 407172.0,
+            "median": 407172.0,
+            "min": 407172.0
           },
           "events_per_sec": {
             "count": 1,
-            "max": 45685.32528563853,
-            "mean": 45685.32528563853,
-            "median": 45685.32528563853,
-            "min": 45685.32528563853
+            "max": 40713.262563378965,
+            "mean": 40713.262563378965,
+            "median": 40713.262563378965,
+            "min": 40713.262563378965
           },
           "http_all_succeeded": true,
-          "http_requests": 76150,
-          "http_successes": 76150,
+          "http_requests": 67862,
+          "http_successes": 67862,
           "ipip_rx_packets_delta": {
             "count": 1,
-            "max": 456900.0,
-            "mean": 456900.0,
-            "median": 456900.0,
-            "min": 456900.0
+            "max": 407172.0,
+            "mean": 407172.0,
+            "median": 407172.0,
+            "min": 407172.0
           },
           "latency_ms_mean": {
             "count": 1,
-            "max": 0.5249837775178925,
-            "mean": 0.5249837775178925,
-            "median": 0.5249837775178925,
-            "min": 0.5249837775178925
+            "max": 0.5891067330022061,
+            "mean": 0.5891067330022061,
+            "median": 0.5891067330022061,
+            "min": 0.5891067330022061
           },
           "latency_ms_p50": {
             "count": 1,
-            "max": 0.5032700000242585,
-            "mean": 0.5032700000242585,
-            "median": 0.5032700000242585,
-            "min": 0.5032700000242585
+            "max": 0.5452455000067857,
+            "mean": 0.5452455000067857,
+            "median": 0.5452455000067857,
+            "min": 0.5452455000067857
           },
           "latency_ms_p90": {
             "count": 1,
-            "max": 0.7198089999747026,
-            "mean": 0.7198089999747026,
-            "median": 0.7198089999747026,
-            "min": 0.7198089999747026
+            "max": 0.8760218999668723,
+            "mean": 0.8760218999668723,
+            "median": 0.8760218999668723,
+            "min": 0.8760218999668723
           },
           "latency_ms_p99": {
             "count": 1,
-            "max": 0.9596077700211935,
-            "mean": 0.9596077700211935,
-            "median": 0.9596077700211935,
-            "min": 0.9596077700211935
+            "max": 1.236712470004022,
+            "mean": 1.236712470004022,
+            "median": 1.236712470004022,
+            "min": 1.236712470004022
           },
           "measurement_batches": {
             "count": 1,
@@ -1053,24 +1053,24 @@
           },
           "measurement_duration_s": {
             "count": 1,
-            "max": 10.001023241999974,
-            "mean": 10.001023241999974,
-            "median": 10.001023241999974,
-            "min": 10.001023241999974
+            "max": 10.000967113999991,
+            "mean": 10.000967113999991,
+            "median": 10.000967113999991,
+            "min": 10.000967113999991
           },
           "packet_pps": {
             "count": 1,
-            "max": 45685.32528563853,
-            "mean": 45685.32528563853,
-            "median": 45685.32528563853,
-            "min": 45685.32528563853
+            "max": 40713.262563378965,
+            "mean": 40713.262563378965,
+            "median": 40713.262563378965,
+            "min": 40713.262563378965
           },
           "system_cpu_busy_pct": {
             "count": 1,
-            "max": 6.145977445185091,
-            "mean": 6.145977445185091,
-            "median": 6.145977445185091,
-            "min": 6.145977445185091
+            "max": 5.9875485730998985,
+            "mean": 5.9875485730998985,
+            "median": 5.9875485730998985,
+            "min": 5.9875485730998985
           },
           "warmup_duration_s": {
             "count": 1,
@@ -1090,21 +1090,21 @@
       },
       "comparison": {
         "aggregation": "paired_cycle_median",
-        "app_throughput_rps_delta_pct": -7.162563955819699,
-        "bpf_avg_ns_per_run_delta_pct": 3.5373877349427096,
-        "bpf_speedup_ratio": 0.9658346824047901,
+        "app_throughput_rps_delta_pct": 13.545890914539955,
+        "bpf_avg_ns_per_run_delta_pct": -7.88084655902523,
+        "bpf_speedup_ratio": 1.0855505751480323,
         "comparable": true,
-        "events_delta_pct": -7.162398774348873,
-        "http_successes_delta_pct": -7.162179908076166,
-        "latency_ms_p99_delta_pct": 12.97837344442397,
-        "packet_pps_delta_pct": -7.162782821187022,
-        "system_cpu_busy_pct_delta_pct": -3.5829425888032103
+        "events_delta_pct": 13.54660929533465,
+        "http_successes_delta_pct": 13.54660929533465,
+        "latency_ms_p99_delta_pct": -18.55178593113648,
+        "packet_pps_delta_pct": 13.545890914539942,
+        "system_cpu_busy_pct_delta_pct": 2.5200805684730128
       },
       "cycle_index": 0,
       "http_server": {
         "bind_ip": "10.100.1.1",
         "namespace": "katran-real",
-        "pid": 25511,
+        "pid": 435,
         "port": 8080,
         "stderr_tail": "",
         "stdout_tail": ""
@@ -1118,7 +1118,7 @@
           "xdp": [
             {
               "devname": "katran0",
-              "id": 403,
+              "id": 284,
               "ifindex": 4,
               "mode": "generic"
             }
@@ -1126,7 +1126,7 @@
         },
         "attach_mode": "xdpgeneric",
         "attached": true,
-        "bpffs_dir": "/sys/fs/bpf/katrane2e-o_b84tnv",
+        "bpffs_dir": "/sys/fs/bpf/katrane2e-yxjoygh1",
         "iface": "katran0",
         "ifindex": 4,
         "pinned_maps": [
@@ -1148,31 +1148,31 @@
           "vip_miss_stats",
           "vip_to_down_reals_map"
         ],
-        "pinned_prog": "/sys/fs/bpf/katrane2e-o_b84tnv/progs/balancer_ingress",
+        "pinned_prog": "/sys/fs/bpf/katrane2e-yxjoygh1/progs/balancer_ingress",
         "program": {
-          "btf_id": 666,
+          "btf_id": 524,
           "bytes_jited": 13654,
           "bytes_memlock": 24576,
           "bytes_xlated": 23872,
           "gpl_compatible": true,
-          "id": 403,
+          "id": 284,
           "jited": true,
-          "loaded_at": 1774264130,
+          "loaded_at": 1774267724,
           "map_ids": [
-            739,
-            741,
-            744,
-            742,
-            750,
-            755,
-            746,
-            757,
-            740,
-            747,
-            745,
-            749,
-            748,
-            753
+            584,
+            586,
+            589,
+            587,
+            595,
+            600,
+            591,
+            602,
+            585,
+            592,
+            590,
+            594,
+            593,
+            598
           ],
           "name": "balancer_ingress",
           "orphaned": false,
@@ -1186,66 +1186,66 @@
           {
             "bpf": {
               "programs": {
-                "403": {
-                  "avg_ns_per_run": 245.594146283963,
+                "284": {
+                  "avg_ns_per_run": 218.33064694049705,
                   "bytes_jited": 13620,
                   "bytes_xlated": 23808,
-                  "id": 403,
+                  "id": 284,
                   "name": "balancer_ingres",
-                  "run_cnt_delta": 424175,
-                  "run_time_ns_delta": 104174897,
+                  "run_cnt_delta": 462330,
+                  "run_time_ns_delta": 100940808,
                   "type": "xdp"
                 }
               },
               "summary": {
                 "active_programs": 1,
-                "avg_ns_per_run": 245.594146283963,
-                "total_events": 424175,
-                "total_run_time_ns": 104174897
+                "avg_ns_per_run": 218.33064694049705,
+                "total_events": 462330,
+                "total_run_time_ns": 100940808
               }
             },
             "driver": "serial_python",
-            "http_request_count": 70696,
-            "http_success_count": 70696,
+            "http_request_count": 77055,
+            "http_success_count": 77055,
             "index": 0,
             "ipip_after": {
-              "rx_bytes": 65457333,
-              "rx_packets": 1058609,
+              "rx_bytes": 63774900,
+              "rx_packets": 1031400,
               "tx_bytes": 0,
               "tx_packets": 0
             },
             "ipip_before": {
-              "rx_bytes": 39229169,
-              "rx_packets": 634434,
+              "rx_bytes": 35187495,
+              "rx_packets": 569070,
               "tx_bytes": 0,
               "tx_packets": 0
             },
-            "ipip_rx_bytes_delta": 26228164,
-            "ipip_rx_packets_delta": 424175,
+            "ipip_rx_bytes_delta": 28587405,
+            "ipip_rx_packets_delta": 462330,
             "measurement_batches": 1,
-            "measurement_duration_s": 10.001064614000029,
+            "measurement_duration_s": 10.001030388000004,
             "phase": "post_rejit",
             "request_failure_preview": [],
             "request_latencies_ms": [],
             "request_summary": {
-              "bytes_total": 12866672,
+              "bytes_total": 14024010,
               "concurrency": 4,
               "driver": "python_parallel",
-              "duration_s": 10.001064614000029,
+              "duration_s": 10.001030388000004,
               "failure_preview": [],
               "latency_ms": {
-                "count": 70696,
-                "max": 5.507341999987148,
-                "mean": 0.5655011795433046,
-                "median": 0.5362750000585947,
-                "min": 0.15710100001342653,
-                "p50": 0.5362750000585947,
-                "p90": 0.7985084999972969,
-                "p99": 1.084149250016253
+                "count": 77055,
+                "max": 9.491362000005665,
+                "mean": 0.5188082812147214,
+                "median": 0.49179699999513105,
+                "min": 0.13248000004750793,
+                "p50": 0.49179699999513105,
+                "p90": 0.7236020000163991,
+                "p99": 1.0072802199852053
               },
-              "ops_per_sec": 7068.847440605066,
-              "request_count": 70696,
-              "success_count": 70696
+              "ops_per_sec": 7704.706116327418,
+              "request_count": 77055,
+              "success_count": 77055
             },
             "state_reset": {
               "map_count": 11,
@@ -1331,27 +1331,27 @@
               "strategy": "reset mutable stats/fallback maps before each phase"
             },
             "system_cpu": {
-              "busy_pct": 5.925770601803315
+              "busy_pct": 6.138439621218472
             },
             "warmup": {
-              "bytes_total": 2737280,
+              "bytes_total": 2413502,
               "concurrency": 4,
               "driver": "python_parallel",
-              "duration_s": 2.000429079000014,
+              "duration_s": 2.0006880909999722,
               "failure_preview": [],
               "latency_ms": {
-                "count": 15040,
-                "max": 4.836843000020963,
-                "mean": 0.5314525800536726,
-                "median": 0.5101389999708772,
-                "min": 0.18650799995612033,
-                "p50": 0.5101389999708772,
-                "p90": 0.7229159999269541,
-                "p99": 0.9573195299640247
+                "count": 13261,
+                "max": 4.78930499997432,
+                "mean": 0.6029846637508751,
+                "median": 0.5578920000175458,
+                "min": 0.1549780000118517,
+                "p50": 0.5578920000175458,
+                "p90": 0.9091239999747813,
+                "p99": 1.288916999988032
               },
-              "ops_per_sec": 7518.387009010227,
-              "request_count": 15040,
-              "success_count": 15040
+              "ops_per_sec": 6628.219590876839,
+              "request_count": 13261,
+              "success_count": 13261
             },
             "warmup_duration_s": 2.0,
             "warmup_request_count": 100
@@ -1360,69 +1360,69 @@
         "summary": {
           "app_throughput_rps": {
             "count": 1,
-            "max": 7068.847440605066,
-            "mean": 7068.847440605066,
-            "median": 7068.847440605066,
-            "min": 7068.847440605066
+            "max": 7704.706116327418,
+            "mean": 7704.706116327418,
+            "median": 7704.706116327418,
+            "min": 7704.706116327418
           },
           "bpf_avg_ns_per_run": {
             "count": 1,
-            "max": 245.594146283963,
-            "mean": 245.594146283963,
-            "median": 245.594146283963,
-            "min": 245.594146283963
+            "max": 218.33064694049705,
+            "mean": 218.33064694049705,
+            "median": 218.33064694049705,
+            "min": 218.33064694049705
           },
           "events": {
             "count": 1,
-            "max": 424175.0,
-            "mean": 424175.0,
-            "median": 424175.0,
-            "min": 424175.0
+            "max": 462330.0,
+            "mean": 462330.0,
+            "median": 462330.0,
+            "min": 462330.0
           },
           "events_per_sec": {
             "count": 1,
-            "max": 42412.9846542754,
-            "mean": 42412.9846542754,
-            "median": 42412.9846542754,
-            "min": 42412.9846542754
+            "max": 46228.23669796451,
+            "mean": 46228.23669796451,
+            "median": 46228.23669796451,
+            "min": 46228.23669796451
           },
           "http_all_succeeded": true,
-          "http_requests": 70696,
-          "http_successes": 70696,
+          "http_requests": 77055,
+          "http_successes": 77055,
           "ipip_rx_packets_delta": {
             "count": 1,
-            "max": 424175.0,
-            "mean": 424175.0,
-            "median": 424175.0,
-            "min": 424175.0
+            "max": 462330.0,
+            "mean": 462330.0,
+            "median": 462330.0,
+            "min": 462330.0
           },
           "latency_ms_mean": {
             "count": 1,
-            "max": 0.5655011795433046,
-            "mean": 0.5655011795433046,
-            "median": 0.5655011795433046,
-            "min": 0.5655011795433046
+            "max": 0.5188082812147214,
+            "mean": 0.5188082812147214,
+            "median": 0.5188082812147214,
+            "min": 0.5188082812147214
           },
           "latency_ms_p50": {
             "count": 1,
-            "max": 0.5362750000585947,
-            "mean": 0.5362750000585947,
-            "median": 0.5362750000585947,
-            "min": 0.5362750000585947
+            "max": 0.49179699999513105,
+            "mean": 0.49179699999513105,
+            "median": 0.49179699999513105,
+            "min": 0.49179699999513105
           },
           "latency_ms_p90": {
             "count": 1,
-            "max": 0.7985084999972969,
-            "mean": 0.7985084999972969,
-            "median": 0.7985084999972969,
-            "min": 0.7985084999972969
+            "max": 0.7236020000163991,
+            "mean": 0.7236020000163991,
+            "median": 0.7236020000163991,
+            "min": 0.7236020000163991
           },
           "latency_ms_p99": {
             "count": 1,
-            "max": 1.084149250016253,
-            "mean": 1.084149250016253,
-            "median": 1.084149250016253,
-            "min": 1.084149250016253
+            "max": 1.0072802199852053,
+            "mean": 1.0072802199852053,
+            "median": 1.0072802199852053,
+            "min": 1.0072802199852053
           },
           "measurement_batches": {
             "count": 1,
@@ -1433,24 +1433,24 @@
           },
           "measurement_duration_s": {
             "count": 1,
-            "max": 10.001064614000029,
-            "mean": 10.001064614000029,
-            "median": 10.001064614000029,
-            "min": 10.001064614000029
+            "max": 10.001030388000004,
+            "mean": 10.001030388000004,
+            "median": 10.001030388000004,
+            "min": 10.001030388000004
           },
           "packet_pps": {
             "count": 1,
-            "max": 42412.9846542754,
-            "mean": 42412.9846542754,
-            "median": 42412.9846542754,
-            "min": 42412.9846542754
+            "max": 46228.23669796451,
+            "mean": 46228.23669796451,
+            "median": 46228.23669796451,
+            "min": 46228.23669796451
           },
           "system_cpu_busy_pct": {
             "count": 1,
-            "max": 5.925770601803315,
-            "mean": 5.925770601803315,
-            "median": 5.925770601803315,
-            "min": 5.925770601803315
+            "max": 6.138439621218472,
+            "mean": 6.138439621218472,
+            "median": 6.138439621218472,
+            "min": 6.138439621218472
           },
           "warmup_duration_s": {
             "count": 1,
@@ -1471,7 +1471,7 @@
       "rejit_result": {
         "applied": true,
         "exit_code": 0,
-        "output": "prog 403 (balancer_ingres): 6 passes, 6 sites applied (2546 -> 2538 insns)\n  wide_mem: 4 sites applied\n  endian_fusion: 2 sites applied\n  REJIT successful\nkfunc discovery:\n  vmlinux BTF str_len=2317604 split_type_id_bias=125495\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125520 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125521 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125519 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125532 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125533 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125520 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n"
+        "output": "prog 284 (balancer_ingres): 6 passes, 6 sites applied (2546 -> 2538 insns)\n  wide_mem: 4 sites applied\n  endian_fusion: 2 sites applied\n  REJIT successful\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n"
       },
       "scan_results": {},
       "test_run_validation": {
@@ -1479,7 +1479,7 @@
         "data_out_preview_hex": "02000000000b02000000000a0800450000460000000040045a62ac1069780ac8",
         "data_size_in": 64,
         "data_size_out": 84,
-        "duration_ns": 3560,
+        "duration_ns": 3967,
         "expected_action": "XDP_TX",
         "expected_retval": 3,
         "ok": true,
@@ -1521,66 +1521,66 @@
           {
             "bpf": {
               "programs": {
-                "653": {
-                  "avg_ns_per_run": 241.356968397409,
+                "534": {
+                  "avg_ns_per_run": 230.31654993399349,
                   "bytes_jited": 13654,
                   "bytes_xlated": 23872,
-                  "id": 653,
+                  "id": 534,
                   "name": "balancer_ingres",
-                  "run_cnt_delta": 402467,
-                  "run_time_ns_delta": 97138215,
+                  "run_cnt_delta": 426473,
+                  "run_time_ns_delta": 98223790,
                   "type": "xdp"
                 }
               },
               "summary": {
                 "active_programs": 1,
-                "avg_ns_per_run": 241.356968397409,
-                "total_events": 402467,
-                "total_run_time_ns": 97138215
+                "avg_ns_per_run": 230.31654993399349,
+                "total_events": 426473,
+                "total_run_time_ns": 98223790
               }
             },
             "driver": "serial_python",
-            "http_request_count": 67078,
-            "http_success_count": 67078,
+            "http_request_count": 71079,
+            "http_success_count": 71079,
             "index": 1,
             "ipip_after": {
-              "rx_bytes": 29792732,
-              "rx_packets": 481823,
+              "rx_bytes": 31955662,
+              "rx_packets": 516803,
               "tx_bytes": 0,
               "tx_packets": 0
             },
             "ipip_before": {
-              "rx_bytes": 4906846,
-              "rx_packets": 79356,
+              "rx_bytes": 5585405,
+              "rx_packets": 90330,
               "tx_bytes": 0,
               "tx_packets": 0
             },
-            "ipip_rx_bytes_delta": 24885886,
-            "ipip_rx_packets_delta": 402467,
+            "ipip_rx_bytes_delta": 26370257,
+            "ipip_rx_packets_delta": 426473,
             "measurement_batches": 1,
-            "measurement_duration_s": 10.001395198999944,
+            "measurement_duration_s": 10.00146313099998,
             "phase": "stock",
             "request_failure_preview": [],
             "request_latencies_ms": [],
             "request_summary": {
-              "bytes_total": 12208196,
+              "bytes_total": 12936378,
               "concurrency": 4,
               "driver": "python_parallel",
-              "duration_s": 10.001395198999944,
+              "duration_s": 10.00146313099998,
               "failure_preview": [],
               "latency_ms": {
-                "count": 67078,
-                "max": 3.988404999972772,
-                "mean": 0.5960148620413895,
-                "median": 0.5526839999561162,
-                "min": 0.14526799998293427,
-                "p50": 0.5526839999561162,
-                "p90": 0.8790563000275142,
-                "p99": 1.2465403500061705
+                "count": 71079,
+                "max": 8.566998999981479,
+                "mean": 0.5624409645464356,
+                "median": 0.5264299999794275,
+                "min": 0.12173400000392576,
+                "p50": 0.5264299999794275,
+                "p90": 0.8202494000215667,
+                "p99": 1.111362500013229
               },
-              "ops_per_sec": 6706.864258969313,
-              "request_count": 67078,
-              "success_count": 67078
+              "ops_per_sec": 7106.860173256799,
+              "request_count": 71079,
+              "success_count": 71079
             },
             "state_reset": {
               "map_count": 11,
@@ -1666,27 +1666,27 @@
               "strategy": "reset mutable stats/fallback maps before each phase"
             },
             "system_cpu": {
-              "busy_pct": 6.176961602671116
+              "busy_pct": 5.765924434939407
             },
             "warmup": {
-              "bytes_total": 2407132,
+              "bytes_total": 2740010,
               "concurrency": 4,
               "driver": "python_parallel",
-              "duration_s": 2.00084606300004,
+              "duration_s": 2.000295460000018,
               "failure_preview": [],
               "latency_ms": {
-                "count": 13226,
-                "max": 7.880658999965817,
-                "mean": 0.6045415967787744,
-                "median": 0.5690019999633478,
-                "min": 0.1503330000787173,
-                "p50": 0.5690019999633478,
-                "p90": 0.8585980000361815,
-                "p99": 1.177889250016051
+                "count": 15055,
+                "max": 6.591850000006616,
+                "mean": 0.5310742702756894,
+                "median": 0.5087360000288754,
+                "min": 0.14773099997000827,
+                "p50": 0.5087360000288754,
+                "p90": 0.7425607999948625,
+                "p99": 0.9922670999821994
               },
-              "ops_per_sec": 6610.203675623663,
-              "request_count": 13226,
-              "success_count": 13226
+              "ops_per_sec": 7526.388126681977,
+              "request_count": 15055,
+              "success_count": 15055
             },
             "warmup_duration_s": 2.0,
             "warmup_request_count": 100
@@ -1695,69 +1695,69 @@
         "summary": {
           "app_throughput_rps": {
             "count": 1,
-            "max": 6706.864258969313,
-            "mean": 6706.864258969313,
-            "median": 6706.864258969313,
-            "min": 6706.864258969313
+            "max": 7106.860173256799,
+            "mean": 7106.860173256799,
+            "median": 7106.860173256799,
+            "min": 7106.860173256799
           },
           "bpf_avg_ns_per_run": {
             "count": 1,
-            "max": 241.356968397409,
-            "mean": 241.356968397409,
-            "median": 241.356968397409,
-            "min": 241.356968397409
+            "max": 230.31654993399349,
+            "mean": 230.31654993399349,
+            "median": 230.31654993399349,
+            "min": 230.31654993399349
           },
           "events": {
             "count": 1,
-            "max": 402467.0,
-            "mean": 402467.0,
-            "median": 402467.0,
-            "min": 402467.0
+            "max": 426473.0,
+            "mean": 426473.0,
+            "median": 426473.0,
+            "min": 426473.0
           },
           "events_per_sec": {
             "count": 1,
-            "max": 40241.08556776592,
-            "mean": 40241.08556776592,
-            "median": 40241.08556776592,
-            "min": 40241.08556776592
+            "max": 42641.06105416996,
+            "mean": 42641.06105416996,
+            "median": 42641.06105416996,
+            "min": 42641.06105416996
           },
           "http_all_succeeded": true,
-          "http_requests": 67078,
-          "http_successes": 67078,
+          "http_requests": 71079,
+          "http_successes": 71079,
           "ipip_rx_packets_delta": {
             "count": 1,
-            "max": 402467.0,
-            "mean": 402467.0,
-            "median": 402467.0,
-            "min": 402467.0
+            "max": 426473.0,
+            "mean": 426473.0,
+            "median": 426473.0,
+            "min": 426473.0
           },
           "latency_ms_mean": {
             "count": 1,
-            "max": 0.5960148620413895,
-            "mean": 0.5960148620413895,
-            "median": 0.5960148620413895,
-            "min": 0.5960148620413895
+            "max": 0.5624409645464356,
+            "mean": 0.5624409645464356,
+            "median": 0.5624409645464356,
+            "min": 0.5624409645464356
           },
           "latency_ms_p50": {
             "count": 1,
-            "max": 0.5526839999561162,
-            "mean": 0.5526839999561162,
-            "median": 0.5526839999561162,
-            "min": 0.5526839999561162
+            "max": 0.5264299999794275,
+            "mean": 0.5264299999794275,
+            "median": 0.5264299999794275,
+            "min": 0.5264299999794275
           },
           "latency_ms_p90": {
             "count": 1,
-            "max": 0.8790563000275142,
-            "mean": 0.8790563000275142,
-            "median": 0.8790563000275142,
-            "min": 0.8790563000275142
+            "max": 0.8202494000215667,
+            "mean": 0.8202494000215667,
+            "median": 0.8202494000215667,
+            "min": 0.8202494000215667
           },
           "latency_ms_p99": {
             "count": 1,
-            "max": 1.2465403500061705,
-            "mean": 1.2465403500061705,
-            "median": 1.2465403500061705,
-            "min": 1.2465403500061705
+            "max": 1.111362500013229,
+            "mean": 1.111362500013229,
+            "median": 1.111362500013229,
+            "min": 1.111362500013229
           },
           "measurement_batches": {
             "count": 1,
@@ -1768,24 +1768,24 @@
           },
           "measurement_duration_s": {
             "count": 1,
-            "max": 10.001395198999944,
-            "mean": 10.001395198999944,
-            "median": 10.001395198999944,
-            "min": 10.001395198999944
+            "max": 10.00146313099998,
+            "mean": 10.00146313099998,
+            "median": 10.00146313099998,
+            "min": 10.00146313099998
           },
           "packet_pps": {
             "count": 1,
-            "max": 40241.08556776592,
-            "mean": 40241.08556776592,
-            "median": 40241.08556776592,
-            "min": 40241.08556776592
+            "max": 42641.06105416996,
+            "mean": 42641.06105416996,
+            "median": 42641.06105416996,
+            "min": 42641.06105416996
           },
           "system_cpu_busy_pct": {
             "count": 1,
-            "max": 6.176961602671116,
-            "mean": 6.176961602671116,
-            "median": 6.176961602671116,
-            "min": 6.176961602671116
+            "max": 5.765924434939407,
+            "mean": 5.765924434939407,
+            "median": 5.765924434939407,
+            "min": 5.765924434939407
           },
           "warmup_duration_s": {
             "count": 1,
@@ -1805,21 +1805,21 @@
       },
       "comparison": {
         "aggregation": "paired_cycle_median",
-        "app_throughput_rps_delta_pct": 8.0923336571454,
-        "bpf_avg_ns_per_run_delta_pct": -2.7623764533172555,
-        "bpf_speedup_ratio": 1.0284085146526751,
+        "app_throughput_rps_delta_pct": 2.740884856846525,
+        "bpf_avg_ns_per_run_delta_pct": 0.701625428591076,
+        "bpf_speedup_ratio": 0.9930326305498554,
         "comparable": true,
-        "events_delta_pct": 8.089358879113071,
-        "http_successes_delta_pct": 8.089090312770207,
-        "latency_ms_p99_delta_pct": -16.394525853048854,
-        "packet_pps_delta_pct": 8.09260223154691,
-        "system_cpu_busy_pct_delta_pct": 3.4329952370265726
+        "events_delta_pct": 2.7380396883272797,
+        "http_successes_delta_pct": 2.7377987872648744,
+        "latency_ms_p99_delta_pct": 0.9009499618547513,
+        "packet_pps_delta_pct": 2.7411257651451963,
+        "system_cpu_busy_pct_delta_pct": 2.65216755075905
       },
       "cycle_index": 1,
       "http_server": {
         "bind_ip": "10.100.1.1",
         "namespace": "katran-real",
-        "pid": 7529,
+        "pid": 10376,
         "port": 8080,
         "stderr_tail": "",
         "stdout_tail": ""
@@ -1833,7 +1833,7 @@
           "xdp": [
             {
               "devname": "katran0",
-              "id": 653,
+              "id": 534,
               "ifindex": 10,
               "mode": "generic"
             }
@@ -1841,7 +1841,7 @@
         },
         "attach_mode": "xdpgeneric",
         "attached": true,
-        "bpffs_dir": "/sys/fs/bpf/katrane2e-ri3i65pd",
+        "bpffs_dir": "/sys/fs/bpf/katrane2e-w0emlytg",
         "iface": "katran0",
         "ifindex": 10,
         "pinned_maps": [
@@ -1863,31 +1863,31 @@
           "vip_miss_stats",
           "vip_to_down_reals_map"
         ],
-        "pinned_prog": "/sys/fs/bpf/katrane2e-ri3i65pd/progs/balancer_ingress",
+        "pinned_prog": "/sys/fs/bpf/katrane2e-w0emlytg/progs/balancer_ingress",
         "program": {
-          "btf_id": 974,
+          "btf_id": 832,
           "bytes_jited": 13654,
           "bytes_memlock": 24576,
           "bytes_xlated": 23872,
           "gpl_compatible": true,
-          "id": 653,
+          "id": 534,
           "jited": true,
-          "loaded_at": 1774264161,
+          "loaded_at": 1774267755,
           "map_ids": [
-            866,
-            868,
-            871,
-            869,
-            877,
-            882,
-            873,
-            884,
-            867,
-            874,
-            872,
-            876,
-            875,
-            880
+            711,
+            713,
+            716,
+            714,
+            722,
+            727,
+            718,
+            729,
+            712,
+            719,
+            717,
+            721,
+            720,
+            725
           ],
           "name": "balancer_ingress",
           "orphaned": false,
@@ -1901,66 +1901,66 @@
           {
             "bpf": {
               "programs": {
-                "653": {
-                  "avg_ns_per_run": 234.6897803339586,
+                "534": {
+                  "avg_ns_per_run": 231.93250941458405,
                   "bytes_jited": 13620,
                   "bytes_xlated": 23808,
-                  "id": 653,
+                  "id": 534,
                   "name": "balancer_ingres",
-                  "run_cnt_delta": 435024,
-                  "run_time_ns_delta": 102095687,
+                  "run_cnt_delta": 438150,
+                  "run_time_ns_delta": 101621229,
                   "type": "xdp"
                 }
               },
               "summary": {
                 "active_programs": 1,
-                "avg_ns_per_run": 234.6897803339586,
-                "total_events": 435024,
-                "total_run_time_ns": 102095687
+                "avg_ns_per_run": 231.93250941458405,
+                "total_events": 438150,
+                "total_run_time_ns": 101621229
               }
             },
             "driver": "serial_python",
-            "http_request_count": 72504,
-            "http_success_count": 72504,
+            "http_request_count": 73025,
+            "http_success_count": 73025,
             "index": 1,
             "ipip_after": {
-              "rx_bytes": 61714314,
-              "rx_packets": 998075,
+              "rx_bytes": 64132121,
+              "rx_packets": 1037177,
               "tx_bytes": 0,
               "tx_packets": 0
             },
             "ipip_before": {
-              "rx_bytes": 34815330,
-              "rx_packets": 563051,
+              "rx_bytes": 37039846,
+              "rx_packets": 599027,
               "tx_bytes": 0,
               "tx_packets": 0
             },
-            "ipip_rx_bytes_delta": 26898984,
-            "ipip_rx_packets_delta": 435024,
+            "ipip_rx_bytes_delta": 27092275,
+            "ipip_rx_packets_delta": 438150,
             "measurement_batches": 1,
-            "measurement_duration_s": 10.001095104000001,
+            "measurement_duration_s": 10.001162713000042,
             "phase": "post_rejit",
             "request_failure_preview": [],
             "request_latencies_ms": [],
             "request_summary": {
-              "bytes_total": 13195728,
+              "bytes_total": 13290550,
               "concurrency": 4,
               "driver": "python_parallel",
-              "duration_s": 10.001095104000001,
+              "duration_s": 10.001162713000042,
               "failure_preview": [],
               "latency_ms": {
-                "count": 72504,
-                "max": 6.367027999999664,
-                "mean": 0.5514013610284898,
-                "median": 0.5243895000148768,
-                "min": 0.12774300000728545,
-                "p50": 0.5243895000148768,
-                "p90": 0.7741409999312056,
-                "p99": 1.0421759700557232
+                "count": 73025,
+                "max": 10.385904999964168,
+                "mean": 0.5474141927011316,
+                "median": 0.5101990000184742,
+                "min": 0.15506600004755455,
+                "p50": 0.5101990000184742,
+                "p90": 0.7923148000259064,
+                "p99": 1.1213753200331662
               },
-              "ops_per_sec": 7249.606092736942,
-              "request_count": 72504,
-              "success_count": 72504
+              "ops_per_sec": 7301.651027542851,
+              "request_count": 73025,
+              "success_count": 73025
             },
             "state_reset": {
               "map_count": 11,
@@ -2046,27 +2046,27 @@
               "strategy": "reset mutable stats/fallback maps before each phase"
             },
             "system_cpu": {
-              "busy_pct": 6.389016400283776
+              "busy_pct": 5.918846411804157
             },
             "warmup": {
-              "bytes_total": 2463916,
+              "bytes_total": 2494128,
               "concurrency": 4,
               "driver": "python_parallel",
-              "duration_s": 2.0006120580000015,
+              "duration_s": 2.0006183090000036,
               "failure_preview": [],
               "latency_ms": {
-                "count": 13538,
-                "max": 6.664104000037696,
-                "mean": 0.5905648286299682,
-                "median": 0.5490164999741864,
-                "min": 0.14616800001476804,
-                "p50": 0.5490164999741864,
-                "p90": 0.8603071999459644,
-                "p99": 1.2264126699653841
+                "count": 13704,
+                "max": 8.898391000002448,
+                "mean": 0.5834307041007709,
+                "median": 0.5448844999875746,
+                "min": 0.17328499995983293,
+                "p50": 0.5448844999875746,
+                "p90": 0.8472440000218739,
+                "p99": 1.1563767299827519
               },
-              "ops_per_sec": 6766.929123447276,
-              "request_count": 13538,
-              "success_count": 13538
+              "ops_per_sec": 6849.882328053799,
+              "request_count": 13704,
+              "success_count": 13704
             },
             "warmup_duration_s": 2.0,
             "warmup_request_count": 100
@@ -2075,69 +2075,69 @@
         "summary": {
           "app_throughput_rps": {
             "count": 1,
-            "max": 7249.606092736942,
-            "mean": 7249.606092736942,
-            "median": 7249.606092736942,
-            "min": 7249.606092736942
+            "max": 7301.651027542851,
+            "mean": 7301.651027542851,
+            "median": 7301.651027542851,
+            "min": 7301.651027542851
           },
           "bpf_avg_ns_per_run": {
             "count": 1,
-            "max": 234.6897803339586,
-            "mean": 234.6897803339586,
-            "median": 234.6897803339586,
-            "min": 234.6897803339586
+            "max": 231.93250941458405,
+            "mean": 231.93250941458405,
+            "median": 231.93250941458405,
+            "min": 231.93250941458405
           },
           "events": {
             "count": 1,
-            "max": 435024.0,
-            "mean": 435024.0,
-            "median": 435024.0,
-            "min": 435024.0
+            "max": 438150.0,
+            "mean": 438150.0,
+            "median": 438150.0,
+            "min": 438150.0
           },
           "events_per_sec": {
             "count": 1,
-            "max": 43497.63655642165,
-            "mean": 43497.63655642165,
-            "median": 43497.63655642165,
-            "min": 43497.63655642165
+            "max": 43809.9061652571,
+            "mean": 43809.9061652571,
+            "median": 43809.9061652571,
+            "min": 43809.9061652571
           },
           "http_all_succeeded": true,
-          "http_requests": 72504,
-          "http_successes": 72504,
+          "http_requests": 73025,
+          "http_successes": 73025,
           "ipip_rx_packets_delta": {
             "count": 1,
-            "max": 435024.0,
-            "mean": 435024.0,
-            "median": 435024.0,
-            "min": 435024.0
+            "max": 438150.0,
+            "mean": 438150.0,
+            "median": 438150.0,
+            "min": 438150.0
           },
           "latency_ms_mean": {
             "count": 1,
-            "max": 0.5514013610284898,
-            "mean": 0.5514013610284898,
-            "median": 0.5514013610284898,
-            "min": 0.5514013610284898
+            "max": 0.5474141927011316,
+            "mean": 0.5474141927011316,
+            "median": 0.5474141927011316,
+            "min": 0.5474141927011316
           },
           "latency_ms_p50": {
             "count": 1,
-            "max": 0.5243895000148768,
-            "mean": 0.5243895000148768,
-            "median": 0.5243895000148768,
-            "min": 0.5243895000148768
+            "max": 0.5101990000184742,
+            "mean": 0.5101990000184742,
+            "median": 0.5101990000184742,
+            "min": 0.5101990000184742
           },
           "latency_ms_p90": {
             "count": 1,
-            "max": 0.7741409999312056,
-            "mean": 0.7741409999312056,
-            "median": 0.7741409999312056,
-            "min": 0.7741409999312056
+            "max": 0.7923148000259064,
+            "mean": 0.7923148000259064,
+            "median": 0.7923148000259064,
+            "min": 0.7923148000259064
           },
           "latency_ms_p99": {
             "count": 1,
-            "max": 1.0421759700557232,
-            "mean": 1.0421759700557232,
-            "median": 1.0421759700557232,
-            "min": 1.0421759700557232
+            "max": 1.1213753200331662,
+            "mean": 1.1213753200331662,
+            "median": 1.1213753200331662,
+            "min": 1.1213753200331662
           },
           "measurement_batches": {
             "count": 1,
@@ -2148,24 +2148,24 @@
           },
           "measurement_duration_s": {
             "count": 1,
-            "max": 10.001095104000001,
-            "mean": 10.001095104000001,
-            "median": 10.001095104000001,
-            "min": 10.001095104000001
+            "max": 10.001162713000042,
+            "mean": 10.001162713000042,
+            "median": 10.001162713000042,
+            "min": 10.001162713000042
           },
           "packet_pps": {
             "count": 1,
-            "max": 43497.63655642165,
-            "mean": 43497.63655642165,
-            "median": 43497.63655642165,
-            "min": 43497.63655642165
+            "max": 43809.9061652571,
+            "mean": 43809.9061652571,
+            "median": 43809.9061652571,
+            "min": 43809.9061652571
           },
           "system_cpu_busy_pct": {
             "count": 1,
-            "max": 6.389016400283776,
-            "mean": 6.389016400283776,
-            "median": 6.389016400283776,
-            "min": 6.389016400283776
+            "max": 5.918846411804157,
+            "mean": 5.918846411804157,
+            "median": 5.918846411804157,
+            "min": 5.918846411804157
           },
           "warmup_duration_s": {
             "count": 1,
@@ -2186,7 +2186,7 @@
       "rejit_result": {
         "applied": true,
         "exit_code": 0,
-        "output": "prog 653 (balancer_ingres): 6 passes, 6 sites applied (2546 -> 2538 insns)\n  wide_mem: 4 sites applied\n  endian_fusion: 2 sites applied\n  REJIT successful\nkfunc discovery:\n  vmlinux BTF str_len=2317604 split_type_id_bias=125495\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125520 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125521 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125519 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125532 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125533 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125520 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n"
+        "output": "prog 534 (balancer_ingres): 6 passes, 6 sites applied (2546 -> 2538 insns)\n  wide_mem: 4 sites applied\n  endian_fusion: 2 sites applied\n  REJIT successful\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n"
       },
       "scan_results": {},
       "test_run_validation": {
@@ -2194,7 +2194,7 @@
         "data_out_preview_hex": "02000000000b02000000000a0800450000460000000040045a62ac1069780ac8",
         "data_size_in": 64,
         "data_size_out": 84,
-        "duration_ns": 3716,
+        "duration_ns": 3805,
         "expected_action": "XDP_TX",
         "expected_retval": 3,
         "ok": true,
@@ -2236,66 +2236,66 @@
           {
             "bpf": {
               "programs": {
-                "903": {
-                  "avg_ns_per_run": 230.38703051250107,
+                "784": {
+                  "avg_ns_per_run": 218.81066429305153,
                   "bytes_jited": 13654,
                   "bytes_xlated": 23872,
-                  "id": 903,
+                  "id": 784,
                   "name": "balancer_ingres",
-                  "run_cnt_delta": 447882,
-                  "run_time_ns_delta": 103186204,
+                  "run_cnt_delta": 459496,
+                  "run_time_ns_delta": 100542625,
                   "type": "xdp"
                 }
               },
               "summary": {
                 "active_programs": 1,
-                "avg_ns_per_run": 230.38703051250107,
-                "total_events": 447882,
-                "total_run_time_ns": 103186204
+                "avg_ns_per_run": 218.81066429305153,
+                "total_events": 459496,
+                "total_run_time_ns": 100542625
               }
             },
             "driver": "serial_python",
-            "http_request_count": 74647,
-            "http_success_count": 74647,
+            "http_request_count": 76583,
+            "http_success_count": 76583,
             "index": 2,
             "ipip_after": {
-              "rx_bytes": 33520592,
-              "rx_packets": 542112,
+              "rx_bytes": 33348344,
+              "rx_packets": 539326,
               "tx_bytes": 0,
               "tx_packets": 0
             },
             "ipip_before": {
-              "rx_bytes": 5826555,
-              "rx_packets": 94230,
+              "rx_bytes": 4936155,
+              "rx_packets": 79830,
               "tx_bytes": 0,
               "tx_packets": 0
             },
-            "ipip_rx_bytes_delta": 27694037,
-            "ipip_rx_packets_delta": 447882,
+            "ipip_rx_bytes_delta": 28412189,
+            "ipip_rx_packets_delta": 459496,
             "measurement_batches": 1,
-            "measurement_duration_s": 10.001092780000022,
+            "measurement_duration_s": 10.00119713099997,
             "phase": "stock",
             "request_failure_preview": [],
             "request_latencies_ms": [],
             "request_summary": {
-              "bytes_total": 13585754,
+              "bytes_total": 13938106,
               "concurrency": 4,
               "driver": "python_parallel",
-              "duration_s": 10.001092780000022,
+              "duration_s": 10.00119713099997,
               "failure_preview": [],
               "latency_ms": {
-                "count": 74647,
-                "max": 4.903225000020939,
-                "mean": 0.5355618144330403,
-                "median": 0.5114779999075836,
-                "min": 0.13653500002419605,
-                "p50": 0.5114779999075836,
-                "p90": 0.7422086000133279,
-                "p99": 1.0024675399677108
+                "count": 76583,
+                "max": 8.045071000026383,
+                "mean": 0.5220134398626465,
+                "median": 0.4943050000179028,
+                "min": 0.14133399997717788,
+                "p50": 0.4943050000179028,
+                "p90": 0.7329050000066673,
+                "p99": 1.0348433199942517
               },
-              "ops_per_sec": 7463.884361644712,
-              "request_count": 74647,
-              "success_count": 74647
+              "ops_per_sec": 7657.383310905987,
+              "request_count": 76583,
+              "success_count": 76583
             },
             "state_reset": {
               "map_count": 11,
@@ -2381,27 +2381,27 @@
               "strategy": "reset mutable stats/fallback maps before each phase"
             },
             "system_cpu": {
-              "busy_pct": 5.925583739291119
+              "busy_pct": 6.110738817222316
             },
             "warmup": {
-              "bytes_total": 2858310,
+              "bytes_total": 2421510,
               "concurrency": 4,
               "driver": "python_parallel",
-              "duration_s": 2.0005356399999528,
+              "duration_s": 2.0003439500000013,
               "failure_preview": [],
               "latency_ms": {
-                "count": 15705,
-                "max": 5.967055999917648,
-                "mean": 0.5090284561603187,
-                "median": 0.4924109999819848,
-                "min": 0.11099099992861738,
-                "p50": 0.4924109999819848,
-                "p90": 0.6809737999901699,
-                "p99": 0.8908899599464346
+                "count": 13305,
+                "max": 5.908340000019052,
+                "mean": 0.6008211393461688,
+                "median": 0.5527380000103221,
+                "min": 0.1399980000087453,
+                "p50": 0.5527380000103221,
+                "p90": 0.89748820001887,
+                "p99": 1.3100995600098029
               },
-              "ops_per_sec": 7850.397506539984,
-              "request_count": 15705,
-              "success_count": 15705
+              "ops_per_sec": 6651.356133029018,
+              "request_count": 13305,
+              "success_count": 13305
             },
             "warmup_duration_s": 2.0,
             "warmup_request_count": 100
@@ -2410,69 +2410,69 @@
         "summary": {
           "app_throughput_rps": {
             "count": 1,
-            "max": 7463.884361644712,
-            "mean": 7463.884361644712,
-            "median": 7463.884361644712,
-            "min": 7463.884361644712
+            "max": 7657.383310905987,
+            "mean": 7657.383310905987,
+            "median": 7657.383310905987,
+            "min": 7657.383310905987
           },
           "bpf_avg_ns_per_run": {
             "count": 1,
-            "max": 230.38703051250107,
-            "mean": 230.38703051250107,
-            "median": 230.38703051250107,
-            "min": 230.38703051250107
+            "max": 218.81066429305153,
+            "mean": 218.81066429305153,
+            "median": 218.81066429305153,
+            "min": 218.81066429305153
           },
           "events": {
             "count": 1,
-            "max": 447882.0,
-            "mean": 447882.0,
-            "median": 447882.0,
-            "min": 447882.0
+            "max": 459496.0,
+            "mean": 459496.0,
+            "median": 459496.0,
+            "min": 459496.0
           },
           "events_per_sec": {
             "count": 1,
-            "max": 44783.30616986827,
-            "mean": 44783.30616986827,
-            "median": 44783.30616986827,
-            "min": 44783.30616986827
+            "max": 45944.09988937568,
+            "mean": 45944.09988937568,
+            "median": 45944.09988937568,
+            "min": 45944.09988937568
           },
           "http_all_succeeded": true,
-          "http_requests": 74647,
-          "http_successes": 74647,
+          "http_requests": 76583,
+          "http_successes": 76583,
           "ipip_rx_packets_delta": {
             "count": 1,
-            "max": 447882.0,
-            "mean": 447882.0,
-            "median": 447882.0,
-            "min": 447882.0
+            "max": 459496.0,
+            "mean": 459496.0,
+            "median": 459496.0,
+            "min": 459496.0
           },
           "latency_ms_mean": {
             "count": 1,
-            "max": 0.5355618144330403,
-            "mean": 0.5355618144330403,
-            "median": 0.5355618144330403,
-            "min": 0.5355618144330403
+            "max": 0.5220134398626465,
+            "mean": 0.5220134398626465,
+            "median": 0.5220134398626465,
+            "min": 0.5220134398626465
           },
           "latency_ms_p50": {
             "count": 1,
-            "max": 0.5114779999075836,
-            "mean": 0.5114779999075836,
-            "median": 0.5114779999075836,
-            "min": 0.5114779999075836
+            "max": 0.4943050000179028,
+            "mean": 0.4943050000179028,
+            "median": 0.4943050000179028,
+            "min": 0.4943050000179028
           },
           "latency_ms_p90": {
             "count": 1,
-            "max": 0.7422086000133279,
-            "mean": 0.7422086000133279,
-            "median": 0.7422086000133279,
-            "min": 0.7422086000133279
+            "max": 0.7329050000066673,
+            "mean": 0.7329050000066673,
+            "median": 0.7329050000066673,
+            "min": 0.7329050000066673
           },
           "latency_ms_p99": {
             "count": 1,
-            "max": 1.0024675399677108,
-            "mean": 1.0024675399677108,
-            "median": 1.0024675399677108,
-            "min": 1.0024675399677108
+            "max": 1.0348433199942517,
+            "mean": 1.0348433199942517,
+            "median": 1.0348433199942517,
+            "min": 1.0348433199942517
           },
           "measurement_batches": {
             "count": 1,
@@ -2483,24 +2483,24 @@
           },
           "measurement_duration_s": {
             "count": 1,
-            "max": 10.001092780000022,
-            "mean": 10.001092780000022,
-            "median": 10.001092780000022,
-            "min": 10.001092780000022
+            "max": 10.00119713099997,
+            "mean": 10.00119713099997,
+            "median": 10.00119713099997,
+            "min": 10.00119713099997
           },
           "packet_pps": {
             "count": 1,
-            "max": 44783.30616986827,
-            "mean": 44783.30616986827,
-            "median": 44783.30616986827,
-            "min": 44783.30616986827
+            "max": 45944.09988937568,
+            "mean": 45944.09988937568,
+            "median": 45944.09988937568,
+            "min": 45944.09988937568
           },
           "system_cpu_busy_pct": {
             "count": 1,
-            "max": 5.925583739291119,
-            "mean": 5.925583739291119,
-            "median": 5.925583739291119,
-            "min": 5.925583739291119
+            "max": 6.110738817222316,
+            "mean": 6.110738817222316,
+            "median": 6.110738817222316,
+            "min": 6.110738817222316
           },
           "warmup_duration_s": {
             "count": 1,
@@ -2520,21 +2520,21 @@
       },
       "comparison": {
         "aggregation": "paired_cycle_median",
-        "app_throughput_rps_delta_pct": -9.03364003971532,
-        "bpf_avg_ns_per_run_delta_pct": 5.7269980401380565,
-        "bpf_speedup_ratio": 0.9458322079856664,
+        "app_throughput_rps_delta_pct": -1.653912350071895,
+        "bpf_avg_ns_per_run_delta_pct": 1.971832189624241,
+        "bpf_speedup_ratio": 0.9806629718493488,
         "comparable": true,
-        "events_delta_pct": -9.033182847267806,
-        "http_successes_delta_pct": -9.033182847267806,
-        "latency_ms_p99_delta_pct": 16.376954215296596,
-        "packet_pps_delta_pct": -9.033640039715312,
-        "system_cpu_busy_pct_delta_pct": -0.27255388597067026
+        "events_delta_pct": -1.648762992496126,
+        "http_successes_delta_pct": -1.6491910737369913,
+        "latency_ms_p99_delta_pct": -2.145936448647742,
+        "packet_pps_delta_pct": -1.6534842893808404,
+        "system_cpu_busy_pct_delta_pct": -5.731461055978278
       },
       "cycle_index": 2,
       "http_server": {
         "bind_ip": "10.100.1.1",
         "namespace": "katran-real",
-        "pid": 11912,
+        "pid": 21264,
         "port": 8080,
         "stderr_tail": "",
         "stdout_tail": ""
@@ -2548,7 +2548,7 @@
           "xdp": [
             {
               "devname": "katran0",
-              "id": 903,
+              "id": 784,
               "ifindex": 16,
               "mode": "generic"
             }
@@ -2556,7 +2556,7 @@
         },
         "attach_mode": "xdpgeneric",
         "attached": true,
-        "bpffs_dir": "/sys/fs/bpf/katrane2e-ux7x1y5i",
+        "bpffs_dir": "/sys/fs/bpf/katrane2e-0iftkm7h",
         "iface": "katran0",
         "ifindex": 16,
         "pinned_maps": [
@@ -2578,31 +2578,31 @@
           "vip_miss_stats",
           "vip_to_down_reals_map"
         ],
-        "pinned_prog": "/sys/fs/bpf/katrane2e-ux7x1y5i/progs/balancer_ingress",
+        "pinned_prog": "/sys/fs/bpf/katrane2e-0iftkm7h/progs/balancer_ingress",
         "program": {
-          "btf_id": 1282,
+          "btf_id": 1140,
           "bytes_jited": 13654,
           "bytes_memlock": 24576,
           "bytes_xlated": 23872,
           "gpl_compatible": true,
-          "id": 903,
+          "id": 784,
           "jited": true,
-          "loaded_at": 1774264191,
+          "loaded_at": 1774267786,
           "map_ids": [
-            993,
-            995,
-            998,
-            996,
-            1004,
-            1009,
-            1000,
-            1011,
-            994,
-            1001,
-            999,
-            1003,
-            1002,
-            1007
+            838,
+            840,
+            843,
+            841,
+            849,
+            854,
+            845,
+            856,
+            839,
+            846,
+            844,
+            848,
+            847,
+            852
           ],
           "name": "balancer_ingress",
           "orphaned": false,
@@ -2616,66 +2616,66 @@
           {
             "bpf": {
               "programs": {
-                "903": {
-                  "avg_ns_per_run": 243.58129123468427,
+                "784": {
+                  "avg_ns_per_run": 223.12524340591256,
                   "bytes_jited": 13620,
                   "bytes_xlated": 23808,
-                  "id": 903,
+                  "id": 784,
                   "name": "balancer_ingres",
-                  "run_cnt_delta": 407424,
-                  "run_time_ns_delta": 99240864,
+                  "run_cnt_delta": 451920,
+                  "run_time_ns_delta": 100834760,
                   "type": "xdp"
                 }
               },
               "summary": {
                 "active_programs": 1,
-                "avg_ns_per_run": 243.58129123468427,
-                "total_events": 407424,
-                "total_run_time_ns": 99240864
+                "avg_ns_per_run": 223.12524340591256,
+                "total_events": 451920,
+                "total_run_time_ns": 100834760
               }
             },
             "driver": "serial_python",
-            "http_request_count": 67904,
-            "http_success_count": 67904,
+            "http_request_count": 75320,
+            "http_success_count": 75320,
             "index": 2,
             "ipip_after": {
-              "rx_bytes": 63850955,
-              "rx_packets": 1032630,
+              "rx_bytes": 66934232,
+              "rx_packets": 1082494,
               "tx_bytes": 0,
               "tx_packets": 0
             },
             "ipip_before": {
-              "rx_bytes": 38658571,
-              "rx_packets": 625206,
+              "rx_bytes": 38990512,
+              "rx_packets": 630574,
               "tx_bytes": 0,
               "tx_packets": 0
             },
-            "ipip_rx_bytes_delta": 25192384,
-            "ipip_rx_packets_delta": 407424,
+            "ipip_rx_bytes_delta": 27943720,
+            "ipip_rx_packets_delta": 451920,
             "measurement_batches": 1,
-            "measurement_duration_s": 10.001143045000049,
+            "measurement_duration_s": 10.001677255999994,
             "phase": "post_rejit",
             "request_failure_preview": [],
             "request_latencies_ms": [],
             "request_summary": {
-              "bytes_total": 12358528,
+              "bytes_total": 13708240,
               "concurrency": 4,
               "driver": "python_parallel",
-              "duration_s": 10.001143045000049,
+              "duration_s": 10.001677255999994,
               "failure_preview": [],
               "latency_ms": {
-                "count": 67904,
-                "max": 4.692429999977321,
-                "mean": 0.588776124999776,
-                "median": 0.5542774999867106,
-                "min": 0.12553700003081758,
-                "p50": 0.5542774999867106,
-                "p90": 0.8465364000016962,
-                "p99": 1.1666411900114328
+                "count": 75320,
+                "max": 5.015816000025097,
+                "mean": 0.5308084857939892,
+                "median": 0.5032294999978149,
+                "min": 0.1561750000291795,
+                "p50": 0.5032294999978149,
+                "p90": 0.7506574999808892,
+                "p99": 1.0126362400040987
               },
-              "ops_per_sec": 6789.623915433125,
-              "request_count": 67904,
-              "success_count": 67904
+              "ops_per_sec": 7530.736902634569,
+              "request_count": 75320,
+              "success_count": 75320
             },
             "state_reset": {
               "map_count": 11,
@@ -2761,27 +2761,27 @@
               "strategy": "reset mutable stats/fallback maps before each phase"
             },
             "system_cpu": {
-              "busy_pct": 5.9094333305432345
+              "busy_pct": 5.760504201680671
             },
             "warmup": {
-              "bytes_total": 2520518,
+              "bytes_total": 2767856,
               "concurrency": 4,
               "driver": "python_parallel",
-              "duration_s": 2.000497257999996,
+              "duration_s": 2.000379200999987,
               "failure_preview": [],
               "latency_ms": {
-                "count": 13849,
-                "max": 5.029578999938167,
-                "mean": 0.5772657946429749,
-                "median": 0.5444519999855402,
-                "min": 0.15948700001899851,
-                "p50": 0.5444519999855402,
-                "p90": 0.8197338000627497,
-                "p99": 1.1265897600333123
+                "count": 15208,
+                "max": 9.744569999952546,
+                "mean": 0.5256432207391277,
+                "median": 0.5003834999968149,
+                "min": 0.1097560000289377,
+                "p50": 0.5003834999968149,
+                "p90": 0.7312166999952299,
+                "p99": 0.9844357899748958
               },
-              "ops_per_sec": 6922.778796430637,
-              "request_count": 13849,
-              "success_count": 13849
+              "ops_per_sec": 7602.558551097482,
+              "request_count": 15208,
+              "success_count": 15208
             },
             "warmup_duration_s": 2.0,
             "warmup_request_count": 100
@@ -2790,69 +2790,69 @@
         "summary": {
           "app_throughput_rps": {
             "count": 1,
-            "max": 6789.623915433125,
-            "mean": 6789.623915433125,
-            "median": 6789.623915433125,
-            "min": 6789.623915433125
+            "max": 7530.736902634569,
+            "mean": 7530.736902634569,
+            "median": 7530.736902634569,
+            "min": 7530.736902634569
           },
           "bpf_avg_ns_per_run": {
             "count": 1,
-            "max": 243.58129123468427,
-            "mean": 243.58129123468427,
-            "median": 243.58129123468427,
-            "min": 243.58129123468427
+            "max": 223.12524340591256,
+            "mean": 223.12524340591256,
+            "median": 223.12524340591256,
+            "min": 223.12524340591256
           },
           "events": {
             "count": 1,
-            "max": 407424.0,
-            "mean": 407424.0,
-            "median": 407424.0,
-            "min": 407424.0
+            "max": 451920.0,
+            "mean": 451920.0,
+            "median": 451920.0,
+            "min": 451920.0
           },
           "events_per_sec": {
             "count": 1,
-            "max": 40737.743492598755,
-            "mean": 40737.743492598755,
-            "median": 40737.743492598755,
-            "min": 40737.743492598755
+            "max": 45184.42141580741,
+            "mean": 45184.42141580741,
+            "median": 45184.42141580741,
+            "min": 45184.42141580741
           },
           "http_all_succeeded": true,
-          "http_requests": 67904,
-          "http_successes": 67904,
+          "http_requests": 75320,
+          "http_successes": 75320,
           "ipip_rx_packets_delta": {
             "count": 1,
-            "max": 407424.0,
-            "mean": 407424.0,
-            "median": 407424.0,
-            "min": 407424.0
+            "max": 451920.0,
+            "mean": 451920.0,
+            "median": 451920.0,
+            "min": 451920.0
           },
           "latency_ms_mean": {
             "count": 1,
-            "max": 0.588776124999776,
-            "mean": 0.588776124999776,
-            "median": 0.588776124999776,
-            "min": 0.588776124999776
+            "max": 0.5308084857939892,
+            "mean": 0.5308084857939892,
+            "median": 0.5308084857939892,
+            "min": 0.5308084857939892
           },
           "latency_ms_p50": {
             "count": 1,
-            "max": 0.5542774999867106,
-            "mean": 0.5542774999867106,
-            "median": 0.5542774999867106,
-            "min": 0.5542774999867106
+            "max": 0.5032294999978149,
+            "mean": 0.5032294999978149,
+            "median": 0.5032294999978149,
+            "min": 0.5032294999978149
           },
           "latency_ms_p90": {
             "count": 1,
-            "max": 0.8465364000016962,
-            "mean": 0.8465364000016962,
-            "median": 0.8465364000016962,
-            "min": 0.8465364000016962
+            "max": 0.7506574999808892,
+            "mean": 0.7506574999808892,
+            "median": 0.7506574999808892,
+            "min": 0.7506574999808892
           },
           "latency_ms_p99": {
             "count": 1,
-            "max": 1.1666411900114328,
-            "mean": 1.1666411900114328,
-            "median": 1.1666411900114328,
-            "min": 1.1666411900114328
+            "max": 1.0126362400040987,
+            "mean": 1.0126362400040987,
+            "median": 1.0126362400040987,
+            "min": 1.0126362400040987
           },
           "measurement_batches": {
             "count": 1,
@@ -2863,24 +2863,24 @@
           },
           "measurement_duration_s": {
             "count": 1,
-            "max": 10.001143045000049,
-            "mean": 10.001143045000049,
-            "median": 10.001143045000049,
-            "min": 10.001143045000049
+            "max": 10.001677255999994,
+            "mean": 10.001677255999994,
+            "median": 10.001677255999994,
+            "min": 10.001677255999994
           },
           "packet_pps": {
             "count": 1,
-            "max": 40737.743492598755,
-            "mean": 40737.743492598755,
-            "median": 40737.743492598755,
-            "min": 40737.743492598755
+            "max": 45184.42141580741,
+            "mean": 45184.42141580741,
+            "median": 45184.42141580741,
+            "min": 45184.42141580741
           },
           "system_cpu_busy_pct": {
             "count": 1,
-            "max": 5.9094333305432345,
-            "mean": 5.9094333305432345,
-            "median": 5.9094333305432345,
-            "min": 5.9094333305432345
+            "max": 5.760504201680671,
+            "mean": 5.760504201680671,
+            "median": 5.760504201680671,
+            "min": 5.760504201680671
           },
           "warmup_duration_s": {
             "count": 1,
@@ -2901,7 +2901,7 @@
       "rejit_result": {
         "applied": true,
         "exit_code": 0,
-        "output": "prog 903 (balancer_ingres): 6 passes, 6 sites applied (2546 -> 2538 insns)\n  wide_mem: 4 sites applied\n  endian_fusion: 2 sites applied\n  REJIT successful\nkfunc discovery:\n  vmlinux BTF str_len=2317604 split_type_id_bias=125495\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125520 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125521 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125519 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125532 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125533 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125520 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n"
+        "output": "prog 784 (balancer_ingres): 6 passes, 6 sites applied (2546 -> 2538 insns)\n  wide_mem: 4 sites applied\n  endian_fusion: 2 sites applied\n  REJIT successful\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n"
       },
       "scan_results": {},
       "test_run_validation": {
@@ -2909,7 +2909,7 @@
         "data_out_preview_hex": "02000000000b02000000000a0800450000460000000040045a62ac1069780ac8",
         "data_size_in": 64,
         "data_size_out": 84,
-        "duration_ns": 2657,
+        "duration_ns": 3458,
         "expected_action": "XDP_TX",
         "expected_retval": 3,
         "ok": true,
@@ -2951,66 +2951,66 @@
       {
         "bpf": {
           "programs": {
-            "403": {
-              "avg_ns_per_run": 245.594146283963,
+            "284": {
+              "avg_ns_per_run": 218.33064694049705,
               "bytes_jited": 13620,
               "bytes_xlated": 23808,
-              "id": 403,
+              "id": 284,
               "name": "balancer_ingres",
-              "run_cnt_delta": 424175,
-              "run_time_ns_delta": 104174897,
+              "run_cnt_delta": 462330,
+              "run_time_ns_delta": 100940808,
               "type": "xdp"
             }
           },
           "summary": {
             "active_programs": 1,
-            "avg_ns_per_run": 245.594146283963,
-            "total_events": 424175,
-            "total_run_time_ns": 104174897
+            "avg_ns_per_run": 218.33064694049705,
+            "total_events": 462330,
+            "total_run_time_ns": 100940808
           }
         },
         "driver": "serial_python",
-        "http_request_count": 70696,
-        "http_success_count": 70696,
+        "http_request_count": 77055,
+        "http_success_count": 77055,
         "index": 0,
         "ipip_after": {
-          "rx_bytes": 65457333,
-          "rx_packets": 1058609,
+          "rx_bytes": 63774900,
+          "rx_packets": 1031400,
           "tx_bytes": 0,
           "tx_packets": 0
         },
         "ipip_before": {
-          "rx_bytes": 39229169,
-          "rx_packets": 634434,
+          "rx_bytes": 35187495,
+          "rx_packets": 569070,
           "tx_bytes": 0,
           "tx_packets": 0
         },
-        "ipip_rx_bytes_delta": 26228164,
-        "ipip_rx_packets_delta": 424175,
+        "ipip_rx_bytes_delta": 28587405,
+        "ipip_rx_packets_delta": 462330,
         "measurement_batches": 1,
-        "measurement_duration_s": 10.001064614000029,
+        "measurement_duration_s": 10.001030388000004,
         "phase": "post_rejit",
         "request_failure_preview": [],
         "request_latencies_ms": [],
         "request_summary": {
-          "bytes_total": 12866672,
+          "bytes_total": 14024010,
           "concurrency": 4,
           "driver": "python_parallel",
-          "duration_s": 10.001064614000029,
+          "duration_s": 10.001030388000004,
           "failure_preview": [],
           "latency_ms": {
-            "count": 70696,
-            "max": 5.507341999987148,
-            "mean": 0.5655011795433046,
-            "median": 0.5362750000585947,
-            "min": 0.15710100001342653,
-            "p50": 0.5362750000585947,
-            "p90": 0.7985084999972969,
-            "p99": 1.084149250016253
+            "count": 77055,
+            "max": 9.491362000005665,
+            "mean": 0.5188082812147214,
+            "median": 0.49179699999513105,
+            "min": 0.13248000004750793,
+            "p50": 0.49179699999513105,
+            "p90": 0.7236020000163991,
+            "p99": 1.0072802199852053
           },
-          "ops_per_sec": 7068.847440605066,
-          "request_count": 70696,
-          "success_count": 70696
+          "ops_per_sec": 7704.706116327418,
+          "request_count": 77055,
+          "success_count": 77055
         },
         "state_reset": {
           "map_count": 11,
@@ -3096,27 +3096,27 @@
           "strategy": "reset mutable stats/fallback maps before each phase"
         },
         "system_cpu": {
-          "busy_pct": 5.925770601803315
+          "busy_pct": 6.138439621218472
         },
         "warmup": {
-          "bytes_total": 2737280,
+          "bytes_total": 2413502,
           "concurrency": 4,
           "driver": "python_parallel",
-          "duration_s": 2.000429079000014,
+          "duration_s": 2.0006880909999722,
           "failure_preview": [],
           "latency_ms": {
-            "count": 15040,
-            "max": 4.836843000020963,
-            "mean": 0.5314525800536726,
-            "median": 0.5101389999708772,
-            "min": 0.18650799995612033,
-            "p50": 0.5101389999708772,
-            "p90": 0.7229159999269541,
-            "p99": 0.9573195299640247
+            "count": 13261,
+            "max": 4.78930499997432,
+            "mean": 0.6029846637508751,
+            "median": 0.5578920000175458,
+            "min": 0.1549780000118517,
+            "p50": 0.5578920000175458,
+            "p90": 0.9091239999747813,
+            "p99": 1.288916999988032
           },
-          "ops_per_sec": 7518.387009010227,
-          "request_count": 15040,
-          "success_count": 15040
+          "ops_per_sec": 6628.219590876839,
+          "request_count": 13261,
+          "success_count": 13261
         },
         "warmup_duration_s": 2.0,
         "warmup_request_count": 100
@@ -3124,66 +3124,66 @@
       {
         "bpf": {
           "programs": {
-            "653": {
-              "avg_ns_per_run": 234.6897803339586,
+            "534": {
+              "avg_ns_per_run": 231.93250941458405,
               "bytes_jited": 13620,
               "bytes_xlated": 23808,
-              "id": 653,
+              "id": 534,
               "name": "balancer_ingres",
-              "run_cnt_delta": 435024,
-              "run_time_ns_delta": 102095687,
+              "run_cnt_delta": 438150,
+              "run_time_ns_delta": 101621229,
               "type": "xdp"
             }
           },
           "summary": {
             "active_programs": 1,
-            "avg_ns_per_run": 234.6897803339586,
-            "total_events": 435024,
-            "total_run_time_ns": 102095687
+            "avg_ns_per_run": 231.93250941458405,
+            "total_events": 438150,
+            "total_run_time_ns": 101621229
           }
         },
         "driver": "serial_python",
-        "http_request_count": 72504,
-        "http_success_count": 72504,
+        "http_request_count": 73025,
+        "http_success_count": 73025,
         "index": 1,
         "ipip_after": {
-          "rx_bytes": 61714314,
-          "rx_packets": 998075,
+          "rx_bytes": 64132121,
+          "rx_packets": 1037177,
           "tx_bytes": 0,
           "tx_packets": 0
         },
         "ipip_before": {
-          "rx_bytes": 34815330,
-          "rx_packets": 563051,
+          "rx_bytes": 37039846,
+          "rx_packets": 599027,
           "tx_bytes": 0,
           "tx_packets": 0
         },
-        "ipip_rx_bytes_delta": 26898984,
-        "ipip_rx_packets_delta": 435024,
+        "ipip_rx_bytes_delta": 27092275,
+        "ipip_rx_packets_delta": 438150,
         "measurement_batches": 1,
-        "measurement_duration_s": 10.001095104000001,
+        "measurement_duration_s": 10.001162713000042,
         "phase": "post_rejit",
         "request_failure_preview": [],
         "request_latencies_ms": [],
         "request_summary": {
-          "bytes_total": 13195728,
+          "bytes_total": 13290550,
           "concurrency": 4,
           "driver": "python_parallel",
-          "duration_s": 10.001095104000001,
+          "duration_s": 10.001162713000042,
           "failure_preview": [],
           "latency_ms": {
-            "count": 72504,
-            "max": 6.367027999999664,
-            "mean": 0.5514013610284898,
-            "median": 0.5243895000148768,
-            "min": 0.12774300000728545,
-            "p50": 0.5243895000148768,
-            "p90": 0.7741409999312056,
-            "p99": 1.0421759700557232
+            "count": 73025,
+            "max": 10.385904999964168,
+            "mean": 0.5474141927011316,
+            "median": 0.5101990000184742,
+            "min": 0.15506600004755455,
+            "p50": 0.5101990000184742,
+            "p90": 0.7923148000259064,
+            "p99": 1.1213753200331662
           },
-          "ops_per_sec": 7249.606092736942,
-          "request_count": 72504,
-          "success_count": 72504
+          "ops_per_sec": 7301.651027542851,
+          "request_count": 73025,
+          "success_count": 73025
         },
         "state_reset": {
           "map_count": 11,
@@ -3269,27 +3269,27 @@
           "strategy": "reset mutable stats/fallback maps before each phase"
         },
         "system_cpu": {
-          "busy_pct": 6.389016400283776
+          "busy_pct": 5.918846411804157
         },
         "warmup": {
-          "bytes_total": 2463916,
+          "bytes_total": 2494128,
           "concurrency": 4,
           "driver": "python_parallel",
-          "duration_s": 2.0006120580000015,
+          "duration_s": 2.0006183090000036,
           "failure_preview": [],
           "latency_ms": {
-            "count": 13538,
-            "max": 6.664104000037696,
-            "mean": 0.5905648286299682,
-            "median": 0.5490164999741864,
-            "min": 0.14616800001476804,
-            "p50": 0.5490164999741864,
-            "p90": 0.8603071999459644,
-            "p99": 1.2264126699653841
+            "count": 13704,
+            "max": 8.898391000002448,
+            "mean": 0.5834307041007709,
+            "median": 0.5448844999875746,
+            "min": 0.17328499995983293,
+            "p50": 0.5448844999875746,
+            "p90": 0.8472440000218739,
+            "p99": 1.1563767299827519
           },
-          "ops_per_sec": 6766.929123447276,
-          "request_count": 13538,
-          "success_count": 13538
+          "ops_per_sec": 6849.882328053799,
+          "request_count": 13704,
+          "success_count": 13704
         },
         "warmup_duration_s": 2.0,
         "warmup_request_count": 100
@@ -3297,66 +3297,66 @@
       {
         "bpf": {
           "programs": {
-            "903": {
-              "avg_ns_per_run": 243.58129123468427,
+            "784": {
+              "avg_ns_per_run": 223.12524340591256,
               "bytes_jited": 13620,
               "bytes_xlated": 23808,
-              "id": 903,
+              "id": 784,
               "name": "balancer_ingres",
-              "run_cnt_delta": 407424,
-              "run_time_ns_delta": 99240864,
+              "run_cnt_delta": 451920,
+              "run_time_ns_delta": 100834760,
               "type": "xdp"
             }
           },
           "summary": {
             "active_programs": 1,
-            "avg_ns_per_run": 243.58129123468427,
-            "total_events": 407424,
-            "total_run_time_ns": 99240864
+            "avg_ns_per_run": 223.12524340591256,
+            "total_events": 451920,
+            "total_run_time_ns": 100834760
           }
         },
         "driver": "serial_python",
-        "http_request_count": 67904,
-        "http_success_count": 67904,
+        "http_request_count": 75320,
+        "http_success_count": 75320,
         "index": 2,
         "ipip_after": {
-          "rx_bytes": 63850955,
-          "rx_packets": 1032630,
+          "rx_bytes": 66934232,
+          "rx_packets": 1082494,
           "tx_bytes": 0,
           "tx_packets": 0
         },
         "ipip_before": {
-          "rx_bytes": 38658571,
-          "rx_packets": 625206,
+          "rx_bytes": 38990512,
+          "rx_packets": 630574,
           "tx_bytes": 0,
           "tx_packets": 0
         },
-        "ipip_rx_bytes_delta": 25192384,
-        "ipip_rx_packets_delta": 407424,
+        "ipip_rx_bytes_delta": 27943720,
+        "ipip_rx_packets_delta": 451920,
         "measurement_batches": 1,
-        "measurement_duration_s": 10.001143045000049,
+        "measurement_duration_s": 10.001677255999994,
         "phase": "post_rejit",
         "request_failure_preview": [],
         "request_latencies_ms": [],
         "request_summary": {
-          "bytes_total": 12358528,
+          "bytes_total": 13708240,
           "concurrency": 4,
           "driver": "python_parallel",
-          "duration_s": 10.001143045000049,
+          "duration_s": 10.001677255999994,
           "failure_preview": [],
           "latency_ms": {
-            "count": 67904,
-            "max": 4.692429999977321,
-            "mean": 0.588776124999776,
-            "median": 0.5542774999867106,
-            "min": 0.12553700003081758,
-            "p50": 0.5542774999867106,
-            "p90": 0.8465364000016962,
-            "p99": 1.1666411900114328
+            "count": 75320,
+            "max": 5.015816000025097,
+            "mean": 0.5308084857939892,
+            "median": 0.5032294999978149,
+            "min": 0.1561750000291795,
+            "p50": 0.5032294999978149,
+            "p90": 0.7506574999808892,
+            "p99": 1.0126362400040987
           },
-          "ops_per_sec": 6789.623915433125,
-          "request_count": 67904,
-          "success_count": 67904
+          "ops_per_sec": 7530.736902634569,
+          "request_count": 75320,
+          "success_count": 75320
         },
         "state_reset": {
           "map_count": 11,
@@ -3442,27 +3442,27 @@
           "strategy": "reset mutable stats/fallback maps before each phase"
         },
         "system_cpu": {
-          "busy_pct": 5.9094333305432345
+          "busy_pct": 5.760504201680671
         },
         "warmup": {
-          "bytes_total": 2520518,
+          "bytes_total": 2767856,
           "concurrency": 4,
           "driver": "python_parallel",
-          "duration_s": 2.000497257999996,
+          "duration_s": 2.000379200999987,
           "failure_preview": [],
           "latency_ms": {
-            "count": 13849,
-            "max": 5.029578999938167,
-            "mean": 0.5772657946429749,
-            "median": 0.5444519999855402,
-            "min": 0.15948700001899851,
-            "p50": 0.5444519999855402,
-            "p90": 0.8197338000627497,
-            "p99": 1.1265897600333123
+            "count": 15208,
+            "max": 9.744569999952546,
+            "mean": 0.5256432207391277,
+            "median": 0.5003834999968149,
+            "min": 0.1097560000289377,
+            "p50": 0.5003834999968149,
+            "p90": 0.7312166999952299,
+            "p99": 0.9844357899748958
           },
-          "ops_per_sec": 6922.778796430637,
-          "request_count": 13849,
-          "success_count": 13849
+          "ops_per_sec": 7602.558551097482,
+          "request_count": 15208,
+          "success_count": 15208
         },
         "warmup_duration_s": 2.0,
         "warmup_request_count": 100
@@ -3471,69 +3471,69 @@
     "summary": {
       "app_throughput_rps": {
         "count": 3,
-        "max": 7249.606092736942,
-        "mean": 7036.025816258378,
-        "median": 7068.847440605066,
-        "min": 6789.623915433125
+        "max": 7704.706116327418,
+        "mean": 7512.36468216828,
+        "median": 7530.736902634569,
+        "min": 7301.651027542851
       },
       "bpf_avg_ns_per_run": {
         "count": 3,
-        "max": 245.594146283963,
-        "mean": 241.28840595086862,
-        "median": 243.58129123468427,
-        "min": 234.6897803339586
+        "max": 231.93250941458405,
+        "mean": 224.4627999203312,
+        "median": 223.12524340591256,
+        "min": 218.33064694049705
       },
       "events": {
         "count": 3,
-        "max": 435024.0,
-        "mean": 422207.6666666667,
-        "median": 424175.0,
-        "min": 407424.0
+        "max": 462330.0,
+        "mean": 450800.0,
+        "median": 451920.0,
+        "min": 438150.0
       },
       "events_per_sec": {
         "count": 3,
-        "max": 43497.63655642165,
-        "mean": 42216.121567765265,
-        "median": 42412.9846542754,
-        "min": 40737.743492598755
+        "max": 46228.23669796451,
+        "mean": 45074.188093009674,
+        "median": 45184.42141580741,
+        "min": 43809.9061652571
       },
       "http_all_succeeded": true,
-      "http_requests": 211104,
-      "http_successes": 211104,
+      "http_requests": 225400,
+      "http_successes": 225400,
       "ipip_rx_packets_delta": {
         "count": 3,
-        "max": 435024.0,
-        "mean": 422207.6666666667,
-        "median": 424175.0,
-        "min": 407424.0
+        "max": 462330.0,
+        "mean": 450800.0,
+        "median": 451920.0,
+        "min": 438150.0
       },
       "latency_ms_mean": {
         "count": 3,
-        "max": 0.588776124999776,
-        "mean": 0.5685595551905235,
-        "median": 0.5655011795433046,
-        "min": 0.5514013610284898
+        "max": 0.5474141927011316,
+        "mean": 0.532343653236614,
+        "median": 0.5308084857939892,
+        "min": 0.5188082812147214
       },
       "latency_ms_p50": {
         "count": 3,
-        "max": 0.5542774999867106,
-        "mean": 0.5383140000200607,
-        "median": 0.5362750000585947,
-        "min": 0.5243895000148768
+        "max": 0.5101990000184742,
+        "mean": 0.5017418333371401,
+        "median": 0.5032294999978149,
+        "min": 0.49179699999513105
       },
       "latency_ms_p90": {
         "count": 3,
-        "max": 0.8465364000016962,
-        "mean": 0.8063952999767329,
-        "median": 0.7985084999972969,
-        "min": 0.7741409999312056
+        "max": 0.7923148000259064,
+        "mean": 0.7555247666743982,
+        "median": 0.7506574999808892,
+        "min": 0.7236020000163991
       },
       "latency_ms_p99": {
         "count": 3,
-        "max": 1.1666411900114328,
-        "mean": 1.097655470027803,
-        "median": 1.084149250016253,
-        "min": 1.0421759700557232
+        "max": 1.1213753200331662,
+        "mean": 1.0470972600074901,
+        "median": 1.0126362400040987,
+        "min": 1.0072802199852053
       },
       "measurement_batches": {
         "count": 3,
@@ -3544,24 +3544,24 @@
       },
       "measurement_duration_s": {
         "count": 3,
-        "max": 10.001143045000049,
-        "mean": 10.001100921000026,
-        "median": 10.001095104000001,
-        "min": 10.001064614000029
+        "max": 10.001677255999994,
+        "mean": 10.001290119000013,
+        "median": 10.001162713000042,
+        "min": 10.001030388000004
       },
       "packet_pps": {
         "count": 3,
-        "max": 43497.63655642165,
-        "mean": 42216.121567765265,
-        "median": 42412.9846542754,
-        "min": 40737.743492598755
+        "max": 46228.23669796451,
+        "mean": 45074.188093009674,
+        "median": 45184.42141580741,
+        "min": 43809.9061652571
       },
       "system_cpu_busy_pct": {
         "count": 3,
-        "max": 6.389016400283776,
-        "mean": 6.074740110876775,
-        "median": 5.925770601803315,
-        "min": 5.9094333305432345
+        "max": 6.138439621218472,
+        "mean": 5.939263411567767,
+        "median": 5.918846411804157,
+        "min": 5.760504201680671
       },
       "warmup_duration_s": {
         "count": 3,
@@ -3599,7 +3599,7 @@
     "data_out_preview_hex": "02000000000b02000000000a0800450000460000000040045a62ac1069780ac8",
     "data_size_in": 64,
     "data_size_out": 84,
-    "duration_ns": 3560,
+    "duration_ns": 3967,
     "expected_action": "XDP_TX",
     "expected_retval": 3,
     "ok": true,

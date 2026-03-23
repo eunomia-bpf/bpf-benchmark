@@ -40,8 +40,6 @@ from e2e.cases.scx.case import (  # noqa: E402
     persist_results as persist_scx_results,
 )
 from e2e.cases.tetragon.case import (  # noqa: E402
-    DEFAULT_EXECVE_OBJECT as DEFAULT_TETRAGON_EXECVE_OBJECT,
-    DEFAULT_KPROBE_OBJECT as DEFAULT_TETRAGON_KPROBE_OBJECT,
     DEFAULT_OUTPUT_JSON as DEFAULT_TETRAGON_OUTPUT_JSON,
     DEFAULT_OUTPUT_MD as DEFAULT_TETRAGON_OUTPUT_MD,
     DEFAULT_SETUP_SCRIPT as DEFAULT_TETRAGON_SETUP_SCRIPT,
@@ -72,9 +70,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--report-md", default=str(DEFAULT_BPFTRACE_REPORT_MD))
     parser.add_argument("--config", default=str(ROOT_DIR / "e2e" / "cases" / "tracee" / "config.yaml"))
     parser.add_argument("--setup-script", default=str(DEFAULT_TRACEE_SETUP_SCRIPT))
-    parser.add_argument("--tracee-object", default=str(ROOT_DIR / "corpus" / "build" / "tracee" / "tracee.bpf.o"))
-    parser.add_argument("--execve-object", default=str(DEFAULT_TETRAGON_EXECVE_OBJECT))
-    parser.add_argument("--kprobe-object", default=str(DEFAULT_TETRAGON_KPROBE_OBJECT))
     parser.add_argument("--runner", default=str(ROOT_DIR / "runner" / "build" / "micro_exec"))
     parser.add_argument("--daemon", default=str(ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"))
     parser.add_argument("--load-timeout", type=int, default=20)
@@ -83,7 +78,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--tracee-extra-arg", action="append", default=[])
     parser.add_argument("--script", action="append", dest="scripts")
     parser.add_argument("--skip-build", action="store_true")
-    parser.add_argument("--force-direct", action="store_true")
     parser.add_argument("--scheduler-binary", default=str(ROOT_DIR / "corpus" / "repos" / "scx" / "target" / "release" / "scx_rusty"))
     parser.add_argument("--scheduler-object", default=str(ROOT_DIR / "corpus" / "build" / "scx" / "scx_rusty_main.bpf.o"))
     parser.add_argument("--scx-repo", default=str(ROOT_DIR / "corpus" / "repos" / "scx"))
@@ -148,28 +142,32 @@ def apply_case_defaults(args: argparse.Namespace) -> None:
 ALL_CASES = ("tracee", "tetragon", "bpftrace", "scx", "katran")
 
 
-def _run_single_case(args: argparse.Namespace) -> int:
-    """Run a single e2e case. Returns 0 on success."""
+def _is_skipped_payload(payload: object) -> bool:
+    return isinstance(payload, dict) and str(payload.get("status", "")).lower() == "skipped"
+
+
+def _run_single_case(args: argparse.Namespace) -> dict[str, object]:
+    """Run a single e2e case and persist its outputs."""
     if args.case == "tracee":
         payload = run_tracee_case(args)
         persist_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve(), build_tracee_markdown)
-        return 0
+        return payload
     if args.case == "tetragon":
         payload = run_tetragon_case(args)
         persist_tetragon_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve(), build_tetragon_markdown)
-        return 0
+        return payload
     if args.case == "bpftrace":
         payload = run_bpftrace_case(args)
         persist_bpftrace_results(args, payload)
-        return 0
+        return payload
     if args.case == "scx":
         payload = run_scx_case(args)
         persist_scx_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve(), build_scx_markdown)
-        return 0
+        return payload
     if args.case == "katran":
         payload = run_katran_case(args)
         persist_katran_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve(), build_katran_markdown)
-        return 0
+        return payload
     raise SystemExit(f"unsupported e2e case: {args.case}")
 
 
@@ -192,8 +190,11 @@ def main(argv: list[str] | None = None) -> int:
             case_args = parser.parse_args(case_argv)
             apply_case_defaults(case_args)
             try:
-                _run_single_case(case_args)
-                print(f"  e2e: {case_name} OK")
+                payload = _run_single_case(case_args)
+                if _is_skipped_payload(payload):
+                    print(f"  e2e: {case_name} SKIP")
+                else:
+                    print(f"  e2e: {case_name} OK")
             except Exception as exc:
                 print(f"  e2e: {case_name} FAILED: {exc}")
                 failed.append(case_name)
@@ -204,7 +205,8 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     apply_case_defaults(args)
-    return _run_single_case(args)
+    _run_single_case(args)
+    return 0
 
 
 if __name__ == "__main__":
