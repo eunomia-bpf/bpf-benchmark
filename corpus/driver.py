@@ -22,9 +22,9 @@ for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpu
         sys.path.insert(0, candidate_str)
 
 try:
-    from results_layout import authoritative_output_path, maybe_refresh_latest_alias, refresh_latest_alias
+    from results_layout import authoritative_output_path
 except ImportError:
-    from corpus.results_layout import authoritative_output_path, maybe_refresh_latest_alias, refresh_latest_alias
+    from corpus.results_layout import authoritative_output_path
 
 try:
     from runner.libs.catalog import load_catalog
@@ -402,13 +402,13 @@ def list_suite(suite: SuiteSpec) -> None:
 def build_run_metadata(
     results: dict[str, Any],
     *,
-    primary_output: Path,
+    output_hint: Path,
     run_type: str,
     daemon_debug_entries: int,
 ) -> dict[str, Any]:
     metadata = summarize_benchmark_results(results)
     metadata["run_type"] = run_type
-    metadata["primary_output_json"] = repo_relative_path(primary_output)
+    metadata["output_hint"] = repo_relative_path(output_hint)
     metadata["paper_summary"]["daemon_debug_entries"] = daemon_debug_entries
     return metadata
 
@@ -1322,24 +1322,12 @@ def run_suite(argv: list[str] | None = None) -> int:
         results["benchmarks"].append(benchmark_record)
 
     output_path = suite.output_path
-    latest_alias_path: Path | None = None
-    if output_path.name.endswith(".latest.json"):
-        suite_name = output_path.name[: -len(".latest.json")]
-        output_path = output_path.parent / f"{suite_name}_authoritative_{results['generated_at'][:10].replace('-', '')}.json"
-        latest_alias_path = suite.output_path
-
-    ensure_parent(output_path)
-    output_path.write_text(json.dumps(results, indent=2) + "\n")
-    if latest_alias_path is not None:
-        refresh_latest_alias(latest_alias_path, output_path)
-    else:
-        maybe_refresh_latest_alias(output_path)
     run_type = derive_run_type(output_path, suite.suite_name)
     artifact_details, daemon_debug_entries = extract_daemon_debug_details(results)
     artifact_details["result.json"] = results
     artifact_metadata = build_run_metadata(
         results,
-        primary_output=output_path,
+        output_hint=output_path,
         run_type=run_type,
         daemon_debug_entries=daemon_debug_entries,
     )
@@ -1349,7 +1337,6 @@ def run_suite(argv: list[str] | None = None) -> int:
         metadata=artifact_metadata,
         detail_payloads=artifact_details,
     )
-    print(f"[done] wrote {output_path}")
     print(f"[done] wrote {artifact_dir / 'metadata.json'}")
     return 0
 

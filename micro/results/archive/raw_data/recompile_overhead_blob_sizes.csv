@@ -1,6 +1,0 @@
-label,object_path,program_name,insn_cnt,num_sites,blob_bytes,scan_elapsed_ms
-small-default,/home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tools/xdp_basic.bpf.o,tp_xdp_redirect_err,81,1,164,4.179793
-medium-katran,/home/yunwei37/workspace/bpf-benchmark/corpus/build/katran/balancer.bpf.o,balancer_ingress,2322,18,2248,44.767275
-large-tracee,/home/yunwei37/workspace/bpf-benchmark/corpus/build/tracee/tracee.bpf.o,cgroup_skb_egress,3602,123,16892,88.718558
-very-large-selftests,/home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_verif_scale2.bpf.o,balancer_ingress,14750,992,218272,151.221882
-calico-reference,/home/yunwei37/workspace/bpf-benchmark/corpus/build/calico/from_hep_debug.bpf.o,calico_tc_main,8829,86,9632,136.186497

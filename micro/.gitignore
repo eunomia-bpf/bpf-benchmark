@@ -1,14 +1,6 @@
 __pycache__/
 *.pyc
 generated-inputs/*.mem
-results/*.json
-!results/*_authoritative_*.json
-!results/*_smoke_*.json
-!results/*.latest.json
-!results/code-size-by-progtype.json
-!results/recompile_overhead_summary.json
-results/archive/*.json
-!results/archive/*.json
 results/*/details/
 results/*/details/**
 build/

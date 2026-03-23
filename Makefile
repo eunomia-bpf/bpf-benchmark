@@ -77,14 +77,14 @@ NPROC        ?= $(shell nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/nu
 DEFCONFIG_SRC := $(ROOT_DIR)/vendor/bpfrejit_defconfig
 
 # Results
-MICRO_RESULTS_DEV_DIR  := $(ROOT_DIR)/micro/results/dev
-CORPUS_RESULTS_DEV_DIR := $(ROOT_DIR)/corpus/results/dev
-E2E_RESULTS_DEV_DIR    := $(ROOT_DIR)/e2e/results/dev
-SMOKE_OUTPUT           := $(MICRO_RESULTS_DEV_DIR)/smoke.json
-VM_MICRO_SMOKE_OUTPUT  := $(MICRO_RESULTS_DEV_DIR)/vm_micro_smoke.json
-VM_MICRO_OUTPUT        := $(MICRO_RESULTS_DEV_DIR)/vm_micro.json
-VM_CORPUS_OUTPUT_JSON  := $(CORPUS_RESULTS_DEV_DIR)/vm_corpus.json
-VM_CORPUS_OUTPUT_MD    := $(CORPUS_RESULTS_DEV_DIR)/vm_corpus.md
+MICRO_RESULTS_DIR      := $(ROOT_DIR)/micro/results
+CORPUS_RESULTS_DIR     := $(ROOT_DIR)/corpus/results
+E2E_RESULTS_DIR        := $(ROOT_DIR)/e2e/results
+SMOKE_OUTPUT           := $(MICRO_RESULTS_DIR)/smoke.json
+VM_MICRO_SMOKE_OUTPUT  := $(MICRO_RESULTS_DIR)/vm_micro_smoke.json
+VM_MICRO_OUTPUT        := $(MICRO_RESULTS_DIR)/vm_micro.json
+VM_CORPUS_OUTPUT_JSON  := $(CORPUS_RESULTS_DIR)/vm_corpus.json
+VM_CORPUS_OUTPUT_MD    := $(CORPUS_RESULTS_DIR)/vm_corpus.md
 
 # Python / venv
 _VENV_CANDIDATES := $(HOME)/workspace/.venv $(HOME)/.venv .venv venv
@@ -174,7 +174,7 @@ $(KERNEL_SYMVERS_PATH): $(KERNEL_JIT_SOURCES)
 
 # ── Local tests ────────────────────────────────────────────────────────────────
 smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP)
-	mkdir -p "$(MICRO_RESULTS_DEV_DIR)"
+	mkdir -p "$(MICRO_RESULTS_DIR)"
 	$(VENV_ACTIVATE) python3 "$(MICRO_DIR)/driver.py" suite --runtime llvmbpf $(LOCAL_SMOKE_ARGS) --output "$(SMOKE_OUTPUT)"
 
 daemon-tests:
@@ -220,7 +220,7 @@ vm-negative-test: $(BZIMAGE_PATH)
 			"$(NEGATIVE_TEST_DIR)/build/fuzz_rejit" $(FUZZ_ROUNDS)'
 
 vm-micro-smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(DAEMON_PATH) $(BZIMAGE_PATH) kinsn-modules
-	mkdir -p "$(MICRO_RESULTS_DEV_DIR)"
+	mkdir -p "$(MICRO_RESULTS_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
 		bash -lc 'cd "$(ROOT_DIR)" && $(VM_INIT) \
 			"$(DAEMON_PATH)" --pgo serve --socket "$(DAEMON_SOCKET)" & DAEMON_PID=$$!; sleep 0.5; \
@@ -229,7 +229,7 @@ vm-micro-smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(DAEMON_PATH) $(BZIMAGE_PATH
 			--daemon-socket "$(DAEMON_SOCKET)" $(VM_SMOKE_ARGS) --output "$(VM_MICRO_SMOKE_OUTPUT)"'
 
 vm-micro: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(DAEMON_PATH) $(BZIMAGE_PATH) kinsn-modules
-	mkdir -p "$(MICRO_RESULTS_DEV_DIR)"
+	mkdir -p "$(MICRO_RESULTS_DIR)"
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
 		bash -lc 'cd "$(ROOT_DIR)" && $(VM_INIT) \
 			"$(DAEMON_PATH)" --pgo serve --socket "$(DAEMON_SOCKET)" & DAEMON_PID=$$!; sleep 0.5; \
@@ -238,14 +238,14 @@ vm-micro: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(DAEMON_PATH) $(BZIMAGE_PATH) kins
 			--daemon-socket "$(DAEMON_SOCKET)" $(MICRO_ARGS) --output "$(VM_MICRO_OUTPUT)"'
 
 vm-corpus: $(MICRO_RUNNER) $(DAEMON_PATH) $(BZIMAGE_PATH) kinsn-modules
-	mkdir -p "$(CORPUS_RESULTS_DEV_DIR)"
+	mkdir -p "$(CORPUS_RESULTS_DIR)"
 	$(VENV_ACTIVATE) python3 "$(ROOT_DIR)/corpus/driver.py" packet --skip-build \
 		--kernel-image "$(BZIMAGE_PATH)" --runner "$(MICRO_RUNNER)" --daemon "$(DAEMON_PATH)" \
 		--vng "$(VNG)" --btf-custom-path "$(VMLINUX_PATH)" --repeat "$(REPEAT)" \
 		--output-json "$(VM_CORPUS_OUTPUT_JSON)" --output-md "$(VM_CORPUS_OUTPUT_MD)"
 
 vm-e2e: $(MICRO_RUNNER) $(DAEMON_PATH) $(BZIMAGE_PATH) kinsn-modules
-	mkdir -p "$(E2E_RESULTS_DEV_DIR)"
+	mkdir -p "$(E2E_RESULTS_DIR)"
 	@# Pre-download E2E tool binaries on the host so the VM guest can access them
 	bash "$(ROOT_DIR)/e2e/cases/tracee/setup.sh" || true
 	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \

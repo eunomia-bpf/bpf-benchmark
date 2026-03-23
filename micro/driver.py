@@ -22,9 +22,9 @@ except ImportError:
     from micro.benchmark_catalog import CONFIG_PATH, ROOT_DIR, RuntimeSpec, SuiteSpec, load_suite
 
 try:
-    from results_layout import maybe_refresh_latest_alias, refresh_latest_alias, smoke_output_path
+    from results_layout import smoke_output_path
 except ImportError:
-    from micro.results_layout import maybe_refresh_latest_alias, refresh_latest_alias, smoke_output_path
+    from micro.results_layout import smoke_output_path
 
 try:
     from runner.libs.benchmarks import resolve_memory_file, select_benchmarks
@@ -395,13 +395,13 @@ def attach_baseline_adjustments(results: dict[str, object], baseline_benchmark: 
 def build_run_metadata(
     results: dict[str, Any],
     *,
-    primary_output: Path,
+    output_hint: Path,
     run_type: str,
     daemon_debug_entries: int,
 ) -> dict[str, Any]:
     metadata = summarize_benchmark_results(results)
     metadata["run_type"] = run_type
-    metadata["primary_output_json"] = repo_relative_path(primary_output)
+    metadata["output_hint"] = repo_relative_path(output_hint)
     metadata["paper_summary"]["daemon_debug_entries"] = daemon_debug_entries
     return metadata
 
@@ -635,36 +635,21 @@ def main(argv: list[str] | None = None) -> int:
 
     attach_baseline_adjustments(results, suite.analysis.baseline_benchmark)
 
-    write_path = output_path
-    latest_alias_path: Path | None = None
-    if output_path.name.endswith(".latest.json"):
-        suite_name = output_path.name[: -len(".latest.json")]
-        timestamp = results["generated_at"][:10].replace("-", "")
-        write_path = output_path.parent / f"{suite_name}_authoritative_{timestamp}.json"
-        latest_alias_path = output_path
-
-    write_path.parent.mkdir(parents=True, exist_ok=True)
-    write_path.write_text(json.dumps(results, indent=2) + "\n")
-    if latest_alias_path is not None:
-        refresh_latest_alias(latest_alias_path, write_path)
-    else:
-        maybe_refresh_latest_alias(write_path)
-    run_type = derive_run_type(write_path, results["suite"])
+    run_type = derive_run_type(output_path, results["suite"])
     artifact_details, daemon_debug_entries = extract_daemon_debug_details(results)
     artifact_details["result.json"] = results
     artifact_metadata = build_run_metadata(
         results,
-        primary_output=write_path,
+        output_hint=output_path,
         run_type=run_type,
         daemon_debug_entries=daemon_debug_entries,
     )
     artifact_dir = write_run_artifact(
-        results_dir=result_root_for_output(write_path),
+        results_dir=result_root_for_output(output_path),
         run_type=run_type,
         metadata=artifact_metadata,
         detail_payloads=artifact_details,
     )
-    print(f"[done] wrote {write_path}")
     print(f"[done] wrote {artifact_dir / 'metadata.json'}")
     return 0
 

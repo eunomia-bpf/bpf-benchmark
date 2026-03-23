@@ -12,8 +12,6 @@ if __package__ in {None, ""}:
 from runner.libs import (  # noqa: E402
     ROOT_DIR,
     prepare_bpftool_environment,
-    write_json,
-    write_text,
 )
 from runner.libs.run_artifacts import (  # noqa: E402
     derive_run_type,
@@ -35,7 +33,6 @@ from e2e.cases.katran.case import (  # noqa: E402
     DEFAULT_OUTPUT_MD as DEFAULT_KATRAN_OUTPUT_MD,
     DEFAULT_SETUP_SCRIPT as DEFAULT_KATRAN_SETUP_SCRIPT,
     build_markdown as build_katran_markdown,
-    persist_results as persist_katran_results,
     run_katran_case,
 )
 DEFAULT_KATRAN_POLICY_FILE = ROOT_DIR / "e2e" / "cases" / "katran" / "balancer_ingress.e2e.policy.yaml"
@@ -44,14 +41,12 @@ from e2e.cases.scx.case import (  # noqa: E402
     DEFAULT_OUTPUT_MD as DEFAULT_SCX_OUTPUT_MD,
     build_markdown as build_scx_markdown,
     run_scx_case,
-    persist_results as persist_scx_results,
 )
 from e2e.cases.tetragon.case import (  # noqa: E402
     DEFAULT_OUTPUT_JSON as DEFAULT_TETRAGON_OUTPUT_JSON,
     DEFAULT_OUTPUT_MD as DEFAULT_TETRAGON_OUTPUT_MD,
     DEFAULT_SETUP_SCRIPT as DEFAULT_TETRAGON_SETUP_SCRIPT,
     build_markdown as build_tetragon_markdown,
-    persist_results as persist_tetragon_results,
     run_tetragon_case,
 )
 from e2e.cases.tracee.case import (  # noqa: E402
@@ -60,7 +55,6 @@ from e2e.cases.tracee.case import (  # noqa: E402
     DEFAULT_SETUP_SCRIPT as DEFAULT_TRACEE_SETUP_SCRIPT,
     build_markdown as build_tracee_markdown,
     run_tracee_case,
-    persist_results,
 )
 
 
@@ -105,12 +99,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--scheduler-extra-arg", action="append", default=[])
     parser.add_argument("--skip-setup", action="store_true", help=argparse.SUPPRESS)
     return parser
-
-
-def persist_bpftrace_results(args: argparse.Namespace, payload: dict[str, object]) -> None:
-    write_json(Path(args.output_json).resolve(), payload)
-    write_text(Path(args.output_md).resolve(), build_bpftrace_markdown(payload) + "\n")
-    write_text(Path(args.report_md).resolve(), build_bpftrace_report(payload) + "\n")
 
 
 def apply_case_defaults(args: argparse.Namespace) -> None:
@@ -175,15 +163,11 @@ def build_run_metadata(
         "case": args.case,
         "smoke": bool(args.smoke),
         "dry_run": bool(args.dry_run),
-        "primary_output_json": repo_relative_path(primary_output_json),
+        "output_hint_json": repo_relative_path(primary_output_json),
         "paper_summary": _trim_e2e_value(payload),
     }
-    output_md = Path(args.output_md).resolve()
-    if output_md.exists():
-        metadata["primary_output_md"] = repo_relative_path(output_md)
-    report_md = Path(args.report_md).resolve()
-    if report_md.exists():
-        metadata["primary_report_md"] = repo_relative_path(report_md)
+    metadata["output_hint_md"] = repo_relative_path(Path(args.output_md).resolve())
+    metadata["output_hint_report_md"] = repo_relative_path(Path(args.report_md).resolve())
     return metadata
 
 
@@ -191,31 +175,27 @@ def _run_single_case(args: argparse.Namespace) -> dict[str, object]:
     """Run a single e2e case and persist its outputs."""
     if args.case == "tracee":
         payload = run_tracee_case(args)
-        persist_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve(), build_tracee_markdown)
+        detail_texts = {"result.md": build_tracee_markdown(payload) + "\n"}
     elif args.case == "tetragon":
         payload = run_tetragon_case(args)
-        persist_tetragon_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve(), build_tetragon_markdown)
+        detail_texts = {"result.md": build_tetragon_markdown(payload) + "\n"}
     elif args.case == "bpftrace":
         payload = run_bpftrace_case(args)
-        persist_bpftrace_results(args, payload)
+        detail_texts = {
+            "result.md": build_bpftrace_markdown(payload) + "\n",
+            "report.md": build_bpftrace_report(payload) + "\n",
+        }
     elif args.case == "scx":
         payload = run_scx_case(args)
-        persist_scx_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve(), build_scx_markdown)
+        detail_texts = {"result.md": build_scx_markdown(payload) + "\n"}
     elif args.case == "katran":
         payload = run_katran_case(args)
-        persist_katran_results(payload, Path(args.output_json).resolve(), Path(args.output_md).resolve(), build_katran_markdown)
+        detail_texts = {"result.md": build_katran_markdown(payload) + "\n"}
     else:
         raise SystemExit(f"unsupported e2e case: {args.case}")
 
     output_json = Path(args.output_json).resolve()
     detail_payloads: dict[str, object] = {"result.json": payload}
-    detail_texts: dict[str, str] = {}
-    output_md = Path(args.output_md).resolve()
-    if output_md.exists():
-        detail_texts["result.md"] = output_md.read_text()
-    report_md = Path(args.report_md).resolve()
-    if report_md.exists():
-        detail_texts["report.md"] = report_md.read_text()
 
     artifact_dir = write_run_artifact(
         results_dir=result_root_for_output(output_json),

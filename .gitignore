@@ -95,11 +95,7 @@ corpus/repos/
 corpus/inventory.json
 docs/reference/papers/*.pdf
 
-# Keep authoritative/archive results tracked, but ignore working outputs under results/dev.
-*/results/dev/
-!*/results/dev/
-*/results/dev/*
-!*/results/dev/.gitkeep
+# Keep generated per-run detail payloads ignored, but track metadata directories.
 */results/*/details/
 */results/*/details/**
 
