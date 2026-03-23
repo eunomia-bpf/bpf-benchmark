@@ -27,6 +27,7 @@ use super::utils::{emit_packed_kfunc_call_with_off, ensure_module_fd_slot, fixup
 /// the kfunc's `cond != 0` test:
 ///   - JNE reg, 0: cond = reg (direct)
 ///   - JEQ reg, 0: cond = reg (swap true/false values)
+///
 /// Other JCC conditions are skipped (no simple mapping to a single register).
 pub struct CondSelectPass;
 
@@ -410,7 +411,7 @@ fn try_match_cond_select(insns: &[BpfInsn], pc: usize) -> Option<CondSelectSite>
                 };
                 let mov_true_dst = mov_true.dst_reg();
                 let cond_clobbered = mov_true_dst == jcc_cond_reg
-                    || jcc_src_used.map_or(false, |s| mov_true_dst == s);
+                    || jcc_src_used.is_some_and(|s| mov_true_dst == s);
 
                 if !cond_clobbered {
                     return Some(CondSelectSite {

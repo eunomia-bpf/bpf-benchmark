@@ -226,7 +226,7 @@ fn scan_rotate_sites(insns: &[BpfInsn]) -> Vec<RotateSite> {
 /// Returns the PC of the MOV instruction and the updated start_pc/old_len.
 fn find_provenance_mov(insns: &[BpfInsn], shift_pc: usize, tmp: u8, dst: u8) -> Option<usize> {
     // Look back up to 8 instructions for the MOV tmp, dst.
-    let search_start = if shift_pc >= 8 { shift_pc - 8 } else { 0 };
+    let search_start = shift_pc.saturating_sub(8);
     for check_pc in (search_start..shift_pc).rev() {
         let insn = &insns[check_pc];
         // Must be MOV64_REG tmp, dst

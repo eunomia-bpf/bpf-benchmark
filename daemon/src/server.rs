@@ -116,8 +116,8 @@ fn process_request(
             };
             match commands::try_apply_one(prog_id, ctx, pass_names, pgo_config, rollback_enabled) {
                 Ok(result) => {
-                    commands::emit_debug_result(&result, ctx.debug.enabled);
-                    // Serialize the full structured OptimizeOneResult.
+                    // Debug data is embedded in the JSON response; no need to
+                    // duplicate to stderr in serve mode.
                     match serde_json::to_value(&result) {
                         Ok(v) => v,
                         Err(e) => serde_json::json!({
@@ -143,7 +143,6 @@ fn process_request(
                     rollback_enabled,
                 ) {
                     Ok(result) => {
-                        commands::emit_debug_result(&result, ctx.debug.enabled);
                         if result.summary.applied {
                             applied += 1;
                         }
@@ -220,7 +219,6 @@ pub(crate) fn cmd_watch(
         for prog_id in &ranked_ids {
             match commands::try_apply_one(*prog_id, ctx, pass_names, pgo_config, rollback_enabled) {
                 Ok(result) => {
-                    commands::emit_debug_result(&result, ctx.debug.enabled);
                     if result.summary.applied {
                         optimized.insert(*prog_id);
                         applied += 1;

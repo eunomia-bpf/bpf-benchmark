@@ -94,11 +94,11 @@ impl Analysis for CFGAnalysis {
         let mut insn_to_block = vec![0usize; n];
         let mut current_start = 0;
 
-        for i in 0..n {
-            if block_starts[i] && i > current_start {
+        for (i, &is_start) in block_starts.iter().enumerate() {
+            if is_start && i > current_start {
                 let bb_idx = blocks.len();
-                for j in current_start..i {
-                    insn_to_block[j] = bb_idx;
+                for slot in &mut insn_to_block[current_start..i] {
+                    *slot = bb_idx;
                 }
                 blocks.push(BasicBlock {
                     start: current_start,
@@ -112,8 +112,8 @@ impl Analysis for CFGAnalysis {
         // Last BB
         if n > 0 {
             let bb_idx = blocks.len();
-            for j in current_start..n {
-                insn_to_block[j] = bb_idx;
+            for slot in &mut insn_to_block[current_start..n] {
+                *slot = bb_idx;
             }
             blocks.push(BasicBlock {
                 start: current_start,
@@ -124,11 +124,10 @@ impl Analysis for CFGAnalysis {
         }
 
         // Pass 3: build CFG edges
-        let num_blocks = blocks.len();
         let mut edges: Vec<(usize, usize)> = Vec::new();
 
-        for bb_idx in 0..num_blocks {
-            let block_end = blocks[bb_idx].end;
+        for (bb_idx, block) in blocks.iter().enumerate() {
+            let block_end = block.end;
             if block_end == 0 {
                 continue;
             }

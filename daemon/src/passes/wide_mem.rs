@@ -106,32 +106,32 @@ fn try_match_wide_mem_at(insns: &[BpfInsn], pc: usize) -> Option<RewriteSite> {
     for width in (2u32..=8).rev() {
         // Variant A: low-byte-first
         let len_a = 1 + 3 * (width as usize - 1);
-        if pc + len_a <= n {
-            if match_wide_mem_low_first(insns, pc, dst, base, first_off, width) {
-                return Some(RewriteSite {
-                    start_pc: pc,
-                    old_len: len_a,
-                    family: Family::WideMem,
-                    bindings: vec![
-                        Binding {
-                            name: "dst_reg",
-                            value: dst as i64,
-                        },
-                        Binding {
-                            name: "base_reg",
-                            value: base as i64,
-                        },
-                        Binding {
-                            name: "base_off",
-                            value: first_off,
-                        },
-                        Binding {
-                            name: "width",
-                            value: width as i64,
-                        },
-                    ],
-                });
-            }
+        if pc + len_a <= n
+            && match_wide_mem_low_first(insns, pc, dst, base, first_off, width)
+        {
+            return Some(RewriteSite {
+                start_pc: pc,
+                old_len: len_a,
+                family: Family::WideMem,
+                bindings: vec![
+                    Binding {
+                        name: "dst_reg",
+                        value: dst as i64,
+                    },
+                    Binding {
+                        name: "base_reg",
+                        value: base as i64,
+                    },
+                    Binding {
+                        name: "base_off",
+                        value: first_off,
+                    },
+                    Binding {
+                        name: "width",
+                        value: width as i64,
+                    },
+                ],
+            });
         }
 
         // Variant B: high-byte-first

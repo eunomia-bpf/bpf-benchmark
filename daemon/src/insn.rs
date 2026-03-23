@@ -59,6 +59,7 @@ pub const BPF_PSEUDO_KINSN_SIDECAR: u8 = 3;
 
 // ── kinsn encoding constants (synced with include/linux/bpf.h) ────
 pub const BPF_KINSN_ENC_PACKED_CALL: u32 = 1 << 1;
+#[allow(dead_code)]
 pub const BPF_KINSN_SIDECAR_PAYLOAD_BITS: u32 = 52;
 
 // ── Helper macros (as functions) ────────────────────────────────────
@@ -197,6 +198,7 @@ impl BpfInsn {
     }
 
     /// `mov64 dst, imm`
+    #[cfg_attr(not(test), allow(dead_code))]
     pub const fn mov64_imm(dst: u8, imm: i32) -> Self {
         Self {
             code: BPF_ALU64 | BPF_MOV | BPF_K,
@@ -293,6 +295,7 @@ impl BpfInsn {
     }
 
     /// NOP — encoded as `ja +0`.
+    #[cfg_attr(not(test), allow(dead_code))]
     pub const fn nop() -> Self {
         Self::ja(0)
     }
@@ -318,9 +321,15 @@ pub struct BpfInsnDump {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct BpfBytecodeDump {
     pub insn_count: usize,
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
     pub insns: Vec<BpfInsnDump>,
+    /// Compact representation: all instruction bytes as a single hex string.
+    /// Used when full per-instruction dumps are too large.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub raw_hex_blob: Option<String>,
 }
 
+#[cfg_attr(not(test), allow(dead_code))]
 fn hex_bytes(bytes: &[u8]) -> String {
     let mut out = String::with_capacity(bytes.len().saturating_mul(3).saturating_sub(1));
     for (idx, byte) in bytes.iter().enumerate() {
@@ -333,6 +342,7 @@ fn hex_bytes(bytes: &[u8]) -> String {
     out
 }
 
+#[cfg_attr(not(test), allow(dead_code))]
 pub fn dump_bytecode(insns: &[BpfInsn]) -> BpfBytecodeDump {
     BpfBytecodeDump {
         insn_count: insns.len(),
@@ -353,6 +363,25 @@ pub fn dump_bytecode(insns: &[BpfInsn]) -> BpfBytecodeDump {
                 }
             })
             .collect(),
+        raw_hex_blob: None,
+    }
+}
+
+/// Compact bytecode dump — only insn_count + raw hex blob.
+/// Used in socket responses to keep JSON size manageable.
+pub fn dump_bytecode_compact(insns: &[BpfInsn]) -> BpfBytecodeDump {
+    let mut blob = String::with_capacity(insns.len() * 16);
+    for insn in insns {
+        let raw = insn.raw_bytes();
+        for byte in &raw {
+            use std::fmt::Write as _;
+            let _ = write!(blob, "{:02x}", byte);
+        }
+    }
+    BpfBytecodeDump {
+        insn_count: insns.len(),
+        insns: Vec::new(),
+        raw_hex_blob: Some(blob),
     }
 }
 

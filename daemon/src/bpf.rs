@@ -253,7 +253,7 @@ fn parse_bpf_insn_bytes(bytes: &[u8], field_name: &str) -> Result<Vec<BpfInsn>> 
     if bytes.is_empty() {
         return Ok(Vec::new());
     }
-    if bytes.len() % std::mem::size_of::<BpfInsn>() != 0 {
+    if !bytes.len().is_multiple_of(std::mem::size_of::<BpfInsn>()) {
         bail!(
             "{} length {} is not a multiple of {} bytes",
             field_name,
@@ -470,22 +470,15 @@ fn bpf_btf_get_info_name(btf_fd: RawFd) -> Result<String> {
 /// the verifier can use (unlike a plain open() of /sys/kernel/btf/).
 pub fn bpf_btf_get_fd_by_module_name(module_name: &str) -> Result<OwnedFd> {
     let mut id = 0u32;
-    loop {
-        match bpf_btf_get_next_id(id) {
-            Ok(next) => {
-                id = next;
-                match bpf_btf_get_fd_by_id(id) {
-                    Ok(fd) => {
-                        use std::os::unix::io::AsRawFd;
-                        match bpf_btf_get_info_name(fd.as_raw_fd()) {
-                            Ok(name) if name == module_name => return Ok(fd),
-                            _ => {} // not a match, continue
-                        }
-                    }
-                    Err(_) => continue, // can't open, skip
+    while let Ok(next) = bpf_btf_get_next_id(id) {
+        id = next;
+        if let Ok(fd) = bpf_btf_get_fd_by_id(id) {
+            use std::os::unix::io::AsRawFd;
+            if let Ok(name) = bpf_btf_get_info_name(fd.as_raw_fd()) {
+                if name == module_name {
+                    return Ok(fd);
                 }
             }
-            Err(_) => break,
         }
     }
     bail!("BTF object for module '{}' not found", module_name)
@@ -612,10 +605,10 @@ pub fn relocate_map_fds(insns: &mut [BpfInsn], map_ids: &[u32]) -> Result<Vec<Ow
             let src_reg = (insns[i].regs >> 4) & 0x0f;
             if src_reg == BPF_PSEUDO_MAP_FD || src_reg == BPF_PSEUDO_MAP_VALUE {
                 let old_fd = insns[i].imm;
-                if !seen.contains_key(&old_fd) {
+                if let std::collections::hash_map::Entry::Vacant(e) = seen.entry(old_fd) {
                     let idx = unique_old_fds.len();
                     unique_old_fds.push(old_fd);
-                    seen.insert(old_fd, idx);
+                    e.insert(idx);
                 }
             }
             i += 2; // BPF_LD_IMM64 is a 2-instruction wide instruction
@@ -762,22 +755,10 @@ pub fn bpf_prog_rejit(
     prog_fd: RawFd,
     insns: &[BpfInsn],
     fd_array: &[RawFd],
-    capture_verifier_log: bool,
 ) -> Result<RejitResult> {
     const LOG_BUF_SIZE: usize = 16 * 1024 * 1024; // 16 MB
-
-    if capture_verifier_log {
-        let mut log_buf = vec![0u8; LOG_BUF_SIZE];
-        return run_rejit_once(prog_fd, insns, fd_array, 2, Some(&mut log_buf));
-    }
-
-    match run_rejit_once(prog_fd, insns, fd_array, 0, None) {
-        Ok(result) => Ok(result),
-        Err(_) => {
-            let mut log_buf = vec![0u8; LOG_BUF_SIZE];
-            run_rejit_once(prog_fd, insns, fd_array, 2, Some(&mut log_buf))
-        }
-    }
+    let mut log_buf = vec![0u8; LOG_BUF_SIZE];
+    run_rejit_once(prog_fd, insns, fd_array, 2, Some(&mut log_buf))
 }
 
 /// Iterate over all live BPF program IDs in the kernel.

@@ -12,7 +12,9 @@ use std::collections::HashMap;
 
 use serde::Serialize;
 
-use crate::insn::{dump_bytecode, BpfBytecodeDump, BpfInsn, BPF_KINSN_ENC_PACKED_CALL};
+use crate::insn::{
+    dump_bytecode_compact, BpfBytecodeDump, BpfInsn, BPF_KINSN_ENC_PACKED_CALL,
+};
 
 // ── Program metadata ────────────────────────────────────────────────
 
@@ -241,11 +243,13 @@ impl AnalysisCache {
     }
 
     /// Invalidate a specific analysis result.
+    #[cfg_attr(not(test), allow(dead_code))]
     pub fn invalidate<R: Any>(&mut self) {
         self.cache.remove(&TypeId::of::<R>());
     }
 
     /// Check whether a specific analysis result is currently cached.
+    #[cfg_attr(not(test), allow(dead_code))]
     pub fn is_cached<R: Any>(&self) -> bool {
         self.cache.contains_key(&TypeId::of::<R>())
     }
@@ -274,28 +278,6 @@ pub struct PassResult {
 }
 
 impl PassResult {
-    /// Construct a PassResult with insns_before/insns_after defaulting to 0.
-    ///
-    /// The PassManager overwrites insns_before/insns_after after each pass runs,
-    /// so passes themselves don't need to track those values.
-    pub fn new(
-        pass_name: String,
-        changed: bool,
-        sites_applied: usize,
-        sites_skipped: Vec<SkipReason>,
-        diagnostics: Vec<String>,
-    ) -> Self {
-        Self {
-            pass_name,
-            changed,
-            sites_applied,
-            sites_skipped,
-            diagnostics,
-            insns_before: 0,
-            insns_after: 0,
-        }
-    }
-
     /// Aggregate skip reasons into a reason -> count map.
     pub fn skip_reason_counts(&self) -> HashMap<String, usize> {
         let mut counts: HashMap<String, usize> = HashMap::new();
@@ -369,13 +351,6 @@ pub struct PassContext {
     pub platform: PlatformCapabilities,
     /// Policy configuration (which passes are enabled, parameters, etc.).
     pub policy: PolicyConfig,
-    /// Debug logging configuration.
-    pub debug: DebugConfig,
-}
-
-#[derive(Clone, Debug, Default)]
-pub struct DebugConfig {
-    pub enabled: bool,
 }
 
 /// Available kfuncs and their BTF IDs.
@@ -548,6 +523,7 @@ impl PlatformCapabilities {
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[allow(dead_code)]
 pub enum Arch {
     #[default]
     X86_64,
@@ -617,8 +593,10 @@ pub struct TransformAttribution {
 pub struct PassDebugTrace {
     pub pass_name: String,
     pub changed: bool,
-    pub bytecode_before: BpfBytecodeDump,
-    pub bytecode_after: BpfBytecodeDump,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bytecode_before: Option<BpfBytecodeDump>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bytecode_after: Option<BpfBytecodeDump>,
 }
 
 /// Pipeline execution result.
@@ -728,7 +706,9 @@ impl PassManager {
 
             // Record insn count before this pass runs.
             let insns_before = program.insns.len();
-            let before_dump = ctx.debug.enabled.then(|| dump_bytecode(&program.insns));
+            // Capture compact bytecode dump before the pass runs (always enabled
+            // for debug logging -- no flag needed).
+            let before_dump = dump_bytecode_compact(&program.insns);
 
             // Run the pass.
             let mut result = pass.run(program, &mut cache, ctx)?;
@@ -736,32 +716,25 @@ impl PassManager {
             // Fill in insns_before/insns_after from the actual program state.
             result.insns_before = insns_before;
             result.insns_after = program.insns.len();
-            let after_dump = ctx.debug.enabled.then(|| dump_bytecode(&program.insns));
 
-            if let (Some(bytecode_before), Some(bytecode_after)) = (before_dump, after_dump) {
+            if result.changed {
                 debug_traces.push(PassDebugTrace {
                     pass_name: result.pass_name.clone(),
-                    changed: result.changed,
-                    bytecode_before,
-                    bytecode_after,
+                    changed: true,
+                    bytecode_before: Some(before_dump),
+                    bytecode_after: Some(dump_bytecode_compact(&program.insns)),
+                });
+            } else {
+                debug_traces.push(PassDebugTrace {
+                    pass_name: result.pass_name.clone(),
+                    changed: false,
+                    bytecode_before: None,
+                    bytecode_after: None,
                 });
             }
 
             if result.changed {
-                // Transform modified the program — invalidate cached analyses.
-                // Use targeted invalidation for known analysis types, then
-                // clear any remaining entries.
-                use crate::analysis::{BranchTargetResult, CFGResult, LivenessResult};
-                if cache.is_cached::<BranchTargetResult>() {
-                    cache.invalidate::<BranchTargetResult>();
-                }
-                if cache.is_cached::<CFGResult>() {
-                    cache.invalidate::<CFGResult>();
-                }
-                if cache.is_cached::<LivenessResult>() {
-                    cache.invalidate::<LivenessResult>();
-                }
-                // Clear any other cached analyses that might exist.
+                // Transform modified the program — invalidate all cached analyses.
                 cache.invalidate_all();
                 // Synchronize annotations.
                 program.sync_annotations();
@@ -839,7 +812,6 @@ impl PassContext {
             },
             platform: PlatformCapabilities::default(),
             policy: PolicyConfig::default(),
-            debug: DebugConfig::default(),
         }
     }
 }
@@ -1359,12 +1331,11 @@ mod tests {
     }
 
     #[test]
-    fn test_pass_manager_collects_debug_traces_when_enabled() {
+    fn test_pass_manager_collects_debug_traces() {
         let mut pm = PassManager::new();
         pm.add_pass(AppendNopPass);
 
-        let mut ctx = PassContext::test_default();
-        ctx.debug.enabled = true;
+        let ctx = PassContext::test_default();
 
         let mut prog = make_program(vec![exit_insn()]);
         let result = pm
@@ -1373,8 +1344,23 @@ mod tests {
 
         assert_eq!(result.debug_traces.len(), 1);
         assert_eq!(result.debug_traces[0].pass_name, "append_nop");
-        assert_eq!(result.debug_traces[0].bytecode_before.insn_count, 1);
-        assert_eq!(result.debug_traces[0].bytecode_after.insn_count, 2);
+        assert!(result.debug_traces[0].changed);
+        assert_eq!(
+            result.debug_traces[0]
+                .bytecode_before
+                .as_ref()
+                .unwrap()
+                .insn_count,
+            1
+        );
+        assert_eq!(
+            result.debug_traces[0]
+                .bytecode_after
+                .as_ref()
+                .unwrap()
+                .insn_count,
+            2
+        );
     }
 
     #[test]
@@ -1385,7 +1371,6 @@ mod tests {
         assert!(!ctx.platform.has_bmi1);
         assert!(ctx.policy.enabled_passes.is_empty());
         assert!(ctx.policy.disabled_passes.is_empty());
-        assert!(!ctx.debug.enabled);
     }
 
     #[test]
@@ -1407,7 +1392,6 @@ mod tests {
             },
             platform: PlatformCapabilities::default(),
             policy: PolicyConfig::default(),
-            debug: DebugConfig::default(),
         };
         assert!(ctx.kfunc_registry.rotate64_btf_id > 0);
         assert!(ctx.kfunc_registry.select64_btf_id < 0);

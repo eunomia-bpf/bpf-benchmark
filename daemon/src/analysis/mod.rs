@@ -5,6 +5,14 @@ mod branch_target;
 mod cfg;
 mod liveness;
 
-pub use branch_target::{BranchTargetAnalysis, BranchTargetResult};
-pub use cfg::{CFGAnalysis, CFGResult};
-pub use liveness::{LivenessAnalysis, LivenessResult};
+pub use branch_target::BranchTargetAnalysis;
+pub use cfg::CFGAnalysis;
+pub use liveness::LivenessAnalysis;
+
+// Result types are used by tests and analysis cache consumers.
+#[allow(unused_imports)]
+pub use branch_target::BranchTargetResult;
+#[allow(unused_imports)]
+pub use cfg::CFGResult;
+#[allow(unused_imports)]
+pub use liveness::LivenessResult;

@@ -196,11 +196,8 @@ fn sorted_strings(values: impl IntoIterator<Item = String>) -> Vec<String> {
     values
 }
 
-fn new_attempt_debug(
-    debug_enabled: bool,
-    pass_traces: Vec<pass::PassDebugTrace>,
-) -> Option<AttemptDebug> {
-    debug_enabled.then_some(AttemptDebug {
+fn new_attempt_debug(pass_traces: Vec<pass::PassDebugTrace>) -> Option<AttemptDebug> {
+    Some(AttemptDebug {
         pass_traces,
         pre_rejit_bytecode: None,
         verifier_log: None,
@@ -216,10 +213,7 @@ fn push_debug_warning(debug: &mut Option<AttemptDebug>, warning: impl Into<Strin
     }
 }
 
-pub(crate) fn emit_debug_result(result: &OptimizeOneResult, debug_enabled: bool) {
-    if !debug_enabled {
-        return;
-    }
+pub(crate) fn emit_debug_result(result: &OptimizeOneResult) {
     match serde_json::to_string(result) {
         Ok(json) => eprintln!("{}", json),
         Err(err) => eprintln!("debug-log: failed to serialize optimize result: {err}"),
@@ -449,7 +443,7 @@ pub(crate) fn cmd_apply(
     rollback_enabled: bool,
 ) -> Result<()> {
     let result = try_apply_one(prog_id, ctx, pass_names, pgo_config, rollback_enabled)?;
-    emit_debug_result(&result, ctx.debug.enabled);
+    emit_debug_result(&result);
 
     if result.program.orig_insn_count == 0 {
         println!("prog {}: no original instructions available", prog_id);
@@ -477,7 +471,7 @@ pub(crate) fn cmd_apply_all(
         total += 1;
         match try_apply_one(prog_id, ctx, pass_names, pgo_config, rollback_enabled) {
             Ok(result) => {
-                emit_debug_result(&result, ctx.debug.enabled);
+                emit_debug_result(&result);
                 if result.summary.applied {
                     applied += 1;
                 }
@@ -558,7 +552,6 @@ pub(crate) fn try_apply_one(
     let total_start = Instant::now();
     let fd = bpf::bpf_prog_get_fd_by_id(prog_id)?;
     let (info, orig_insns) = bpf::bpf_prog_get_info(fd.as_raw_fd(), true)?;
-    let debug_enabled = ctx.debug.enabled;
 
     let prog_name = info.name_str().to_string();
     let orig_insn_count = if !orig_insns.is_empty() {
@@ -673,7 +666,7 @@ pub(crate) fn try_apply_one(
             .map(PassDetail::from)
             .collect();
         let mut attempt_debug =
-            new_attempt_debug(debug_enabled, pipeline_result.debug_traces.clone());
+            new_attempt_debug(pipeline_result.debug_traces.clone());
         let disabled_passes_sorted = sorted_strings(disabled_passes.iter().cloned());
 
         if !pipeline_result.program_changed {
@@ -726,7 +719,7 @@ pub(crate) fn try_apply_one(
             });
 
         if let Some(debug) = attempt_debug.as_mut() {
-            debug.pre_rejit_bytecode = Some(insn::dump_bytecode(&program.insns));
+            debug.pre_rejit_bytecode = Some(insn::dump_bytecode_compact(&program.insns));
         }
 
         let fd_array = build_rejit_fd_array(&program.required_module_fds);
@@ -748,7 +741,7 @@ pub(crate) fn try_apply_one(
         }
 
         let rejit_start = Instant::now();
-        match bpf::bpf_prog_rejit(fd.as_raw_fd(), &program.insns, &fd_array, debug_enabled) {
+        match bpf::bpf_prog_rejit(fd.as_raw_fd(), &program.insns, &fd_array) {
             Ok(rejit_result) => {
                 let rejit_elapsed = rejit_start.elapsed().as_nanos() as u64;
                 total_rejit_ns += rejit_elapsed;
@@ -785,7 +778,7 @@ pub(crate) fn try_apply_one(
                     match bpf::bpf_prog_get_runtime_images(fd.as_raw_fd()) {
                         Ok(images) => {
                             debug.final_xlated_bytecode =
-                                Some(insn::dump_bytecode(&images.xlated_insns));
+                                Some(insn::dump_bytecode_compact(&images.xlated_insns));
                             debug.final_jited_machine_code =
                                 Some(bpf::dump_machine_code(&images.jited_prog_insns));
                         }
@@ -904,7 +897,7 @@ pub(crate) fn try_apply_one(
                     }
                 }
 
-                if debug_enabled {
+                {
                     let failure_result = make_result(
                         "error",
                         false,
@@ -918,7 +911,7 @@ pub(crate) fn try_apply_one(
                         disabled_passes_sorted,
                         Some(err_msg),
                     );
-                    emit_debug_result(&failure_result, true);
+                    emit_debug_result(&failure_result);
                 }
                 return Err(e);
             }
@@ -931,7 +924,7 @@ pub(crate) fn try_apply_one(
         disabled_passes.len()
     );
 
-    if debug_enabled {
+    {
         let failure_result = make_result(
             "error",
             false,
@@ -945,7 +938,7 @@ pub(crate) fn try_apply_one(
             sorted_strings(disabled_passes.iter().cloned()),
             Some(exhausted_msg.clone()),
         );
-        emit_debug_result(&failure_result, true);
+        emit_debug_result(&failure_result);
     }
 
     anyhow::bail!(exhausted_msg)
@@ -1283,7 +1276,6 @@ R2 invalid mem access 'scalar'
             kfunc_registry: discovery.registry,
             platform: pass::PlatformCapabilities::default(),
             policy: pass::PolicyConfig::default(),
-            debug: pass::DebugConfig::default(),
         };
 
         // Find a program to try applying to.

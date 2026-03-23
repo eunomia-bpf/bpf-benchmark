@@ -43,12 +43,6 @@ struct Cli {
     #[arg(long)]
     no_rollback: bool,
 
-    /// Enable structured debug logging for full bytecode/verifier/JIT dumps.
-    ///
-    /// Also available as `--verbose-log`.
-    #[arg(long, alias = "verbose-log")]
-    debug: bool,
-
     /// Enable PGO (Profile-Guided Optimization).
     ///
     /// When set, the daemon polls program runtime stats before optimization
@@ -153,7 +147,6 @@ fn main() -> Result<()> {
         kfunc_registry: discovery.registry,
         platform,
         policy: pass::PolicyConfig::default(),
-        debug: pass::DebugConfig { enabled: cli.debug },
     };
     // Keep module FDs alive for the daemon's lifetime.
     let _module_fds = discovery.module_fds;

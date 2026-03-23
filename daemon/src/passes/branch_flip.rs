@@ -228,9 +228,9 @@ impl BpfPass for BranchFlipPass {
                 new_insns.push(new_jcc);
 
                 // Emit else body (was after JA, now first)
-                for i in else_start..else_end {
-                    addr_map[i] = new_insns.len();
-                    new_insns.push(program.insns[i]);
+                for (i, &insn) in program.insns[else_start..else_end].iter().enumerate() {
+                    addr_map[else_start + i] = new_insns.len();
+                    new_insns.push(insn);
                 }
 
                 // Emit JA that skips over then body
@@ -238,9 +238,9 @@ impl BpfPass for BranchFlipPass {
                 new_insns.push(BpfInsn::ja(site.then_len as i16));
 
                 // Emit then body (was first, now second)
-                for i in then_start..then_end {
-                    addr_map[i] = new_insns.len();
-                    new_insns.push(program.insns[i]);
+                for (i, &insn) in program.insns[then_start..then_end].iter().enumerate() {
+                    addr_map[then_start + i] = new_insns.len();
+                    new_insns.push(insn);
                 }
 
                 pc = else_end;

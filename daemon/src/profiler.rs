@@ -85,6 +85,7 @@ impl ProgStatsDelta {
 #[derive(Clone, Debug)]
 pub struct PgoAnalysis {
     pub prog_id: u32,
+    #[allow(dead_code)]
     pub total: ProgStats,
     pub delta_run_cnt: u64,
     pub delta_run_time_ns: u64,
@@ -122,6 +123,7 @@ impl PgoAnalysis {
 /// Program hotness ranking — sorts programs by activity level.
 /// Used by the watch command and future multi-program PGO flows.
 #[derive(Clone, Debug)]
+#[allow(dead_code)]
 pub struct HotnessRanking {
     /// Programs ranked by descending hotness (most active first).
     pub ranked: Vec<PgoAnalysis>,
@@ -145,6 +147,7 @@ impl HotnessRanking {
     }
 
     /// Return only programs that are actively running.
+    #[allow(dead_code)]
     pub fn hot_programs(&self) -> Vec<&PgoAnalysis> {
         self.ranked.iter().filter(|a| a.is_hot()).collect()
     }

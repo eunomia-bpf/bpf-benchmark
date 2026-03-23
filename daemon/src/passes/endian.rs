@@ -84,12 +84,10 @@ fn scan_endian_fusion_sites(insns: &[BpfInsn]) -> Vec<EndianFusionSite> {
         let load_size = bpf_size(i0.code);
         let endian_size = i1.imm;
 
-        let sizes_match = match (load_size, endian_size) {
-            (BPF_H, 16) => true,
-            (BPF_W, 32) => true,
-            (BPF_DW, 64) => true,
-            _ => false,
-        };
+        let sizes_match = matches!(
+            (load_size, endian_size),
+            (BPF_H, 16) | (BPF_W, 32) | (BPF_DW, 64)
+        );
 
         if sizes_match {
             sites.push(EndianFusionSite {
