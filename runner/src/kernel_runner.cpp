@@ -745,11 +745,25 @@ static std::vector<std::string> extract_changed_passes(const std::string &json)
     }
     if (passes_pos == std::string::npos) return result;
 
+    /* Find the opening '[' of the passes array */
+    auto array_open = json.find('[', passes_pos);
+    if (array_open == std::string::npos) return result;
+
+    /* Find the matching ']' for the passes array, respecting nesting */
+    int arr_depth = 1;
+    size_t array_close = array_open + 1;
+    while (array_close < json.size() && arr_depth > 0) {
+        if (json[array_close] == '[') ++arr_depth;
+        else if (json[array_close] == ']') --arr_depth;
+        ++array_close;
+    }
+    /* array_close now points one past the matching ']' */
+
     /* Walk through the passes array looking for changed:true entries */
-    size_t pos = passes_pos;
+    size_t pos = array_open;
     while (true) {
         auto obj_start = json.find('{', pos + 1);
-        if (obj_start == std::string::npos) break;
+        if (obj_start == std::string::npos || obj_start >= array_close) break;
         /* Find matching } — handle nesting */
         int depth = 1;
         size_t obj_end = obj_start + 1;
@@ -768,9 +782,6 @@ static std::vector<std::string> extract_changed_passes(const std::string &json)
             }
         }
         pos = obj_end;
-        /* Check if we've left the passes array */
-        auto next_bracket = json.find(']', passes_pos);
-        if (next_bracket != std::string::npos && pos > next_bracket) break;
     }
     return result;
 }
