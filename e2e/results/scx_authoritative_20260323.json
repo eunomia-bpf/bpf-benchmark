@@ -3,53 +3,53 @@
     "summary": {
       "agent_cpu_total_pct": {
         "count": 3,
-        "max": 0.29999922989197714,
-        "mean": 0.25555412583156256,
-        "median": 0.2999991416324563,
-        "min": 0.16666400597025424
+        "max": 0.3333314321663985,
+        "mean": 0.2666650954345006,
+        "median": 0.2666643347492817,
+        "min": 0.19999951938782173
       },
       "context_switches_per_sec": {
         "count": 3,
-        "max": 917778.7334589735,
-        "mean": 306004.9395810073,
-        "median": 119.6372690436867,
-        "min": 116.44801500471395
+        "max": 926578.8764696561,
+        "mean": 308938.3182508259,
+        "median": 124.21938451389859,
+        "min": 111.85889830776259
       },
       "latency_ms_p50": {
         "count": 2,
-        "max": 144.0,
-        "mean": 72.115,
-        "median": 72.115,
+        "max": 142.0,
+        "mean": 71.115,
+        "median": 71.115,
         "min": 0.23
       },
       "latency_ms_p95": {
         "count": 2,
-        "max": 164.1,
-        "mean": 82.16499999999999,
-        "median": 82.16499999999999,
+        "max": 155.00000000000003,
+        "mean": 77.61500000000001,
+        "median": 77.61500000000001,
         "min": 0.23
       },
       "system_cpu_busy_pct": {
         "count": 3,
-        "max": 91.9047619047619,
-        "mean": 41.73237345014862,
-        "median": 16.653702983499088,
-        "min": 16.63865546218487
+        "max": 91.71881165792885,
+        "mean": 41.67633213099955,
+        "median": 16.659722222222218,
+        "min": 16.650462512847575
       },
       "throughput": {
         "count": 3,
-        "max": 17631.87,
-        "mean": 9741.910389664316,
-        "median": 11587.24,
-        "min": 6.621168992947409
+        "max": 17604.26,
+        "mean": 9735.762912371023,
+        "median": 11596.27,
+        "min": 6.758737113072927
       }
     },
     "workloads": [
       {
         "agent_cpu": {
-          "sys_pct": 0.1333312047762034,
-          "total_pct": 0.16666400597025424,
-          "user_pct": 0.03333280119405085
+          "sys_pct": 0.1333330129252145,
+          "total_pct": 0.19999951938782173,
+          "user_pct": 0.06666650646260724
         },
         "command": [
           "/bin/hackbench",
@@ -58,29 +58,29 @@
           "-l",
           "1000"
         ],
-        "context_switches_per_sec": 917778.7334589735,
-        "context_switches_total": 27583946,
-        "duration_s": 30.055115677000003,
-        "iterations": 199,
+        "context_switches_per_sec": 926578.8764696561,
+        "context_switches_total": 27829979,
+        "duration_s": 30.03519690199994,
+        "iterations": 203,
         "kind": "hackbench",
-        "latency_ms_p50": 144.0,
-        "latency_ms_p95": 164.1,
+        "latency_ms_p50": 142.0,
+        "latency_ms_p95": 155.00000000000003,
         "metric": "runs/s",
         "name": "hackbench",
-        "ops_per_sec": 6.621168992947409,
-        "ops_total": 199.0,
-        "processes_started": 32060,
+        "ops_per_sec": 6.758737113072927,
+        "ops_total": 203.0,
+        "processes_started": 32702,
         "stderr_tail": "",
-        "stdout_tail": "Time: 0.140\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.132\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.165\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.135\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.151\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.134\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.138\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.159\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.151\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.149\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.141\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.137\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.154\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.158",
+        "stdout_tail": "Time: 0.149\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.127\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.147\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.147\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.139\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.143\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.149\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.127\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.140\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.148\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.153\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.127\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.141\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.140",
         "system_cpu": {
-          "busy_pct": 91.9047619047619
+          "busy_pct": 91.71881165792885
         }
       },
       {
         "agent_cpu": {
-          "sys_pct": 0.1666662388288762,
-          "total_pct": 0.29999922989197714,
-          "user_pct": 0.13333299106310095
+          "sys_pct": 0.16666520921830105,
+          "total_pct": 0.2666643347492817,
+          "user_pct": 0.09999912553098063
         },
         "command": [
           "/bin/stress-ng",
@@ -90,29 +90,29 @@
           "30s",
           "--metrics-brief"
         ],
-        "context_switches_per_sec": 119.6372690436867,
-        "context_switches_total": 3594,
-        "duration_s": 30.040806085999975,
+        "context_switches_per_sec": 124.21938451389859,
+        "context_switches_total": 3732,
+        "duration_s": 30.043620121000004,
         "iterations": null,
         "kind": "stress_ng_cpu",
         "latency_ms_p50": null,
         "latency_ms_p95": null,
         "metric": "bogo-ops/s",
         "name": "stress-ng-cpu",
-        "ops_per_sec": 11587.24,
-        "ops_total": 347623.0,
+        "ops_per_sec": 11596.27,
+        "ops_total": 347895.0,
         "processes_started": 7,
         "stderr_tail": "",
-        "stdout_tail": "stress-ng: info:  [32633] setting to a 30 secs run per stressor\nstress-ng: info:  [32633] dispatching hogs: 4 cpu\nstress-ng: metrc: [32633] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [32633]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [32633] cpu              347623     30.00    119.88      0.00     11587.24        2899.74\nstress-ng: info:  [32633] skipped: 0\nstress-ng: info:  [32633] passed: 4: cpu (4)\nstress-ng: info:  [32633] failed: 0\nstress-ng: info:  [32633] metrics untrustworthy: 0\nstress-ng: info:  [32633] successful run completed in 30.00 secs",
+        "stdout_tail": "stress-ng: info:  [17336] setting to a 30 secs run per stressor\nstress-ng: info:  [17336] dispatching hogs: 4 cpu\nstress-ng: metrc: [17336] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [17336]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [17336] cpu              347895     30.00    119.95      0.00     11596.27        2900.22\nstress-ng: info:  [17336] skipped: 0\nstress-ng: info:  [17336] passed: 4: cpu (4)\nstress-ng: info:  [17336] failed: 0\nstress-ng: info:  [17336] metrics untrustworthy: 0\nstress-ng: info:  [17336] successful run completed in 30.01 secs",
         "system_cpu": {
-          "busy_pct": 16.63865546218487
+          "busy_pct": 16.650462512847575
         }
       },
       {
         "agent_cpu": {
-          "sys_pct": 0.16666618979580905,
-          "total_pct": 0.2999991416324563,
-          "user_pct": 0.13333295183664723
+          "sys_pct": 0.1999988592998391,
+          "total_pct": 0.3333314321663985,
+          "user_pct": 0.1333325728665594
         },
         "command": [
           "/bin/sysbench",
@@ -121,22 +121,22 @@
           "--time=30",
           "run"
         ],
-        "context_switches_per_sec": 116.44801500471395,
-        "context_switches_total": 3498,
-        "duration_s": 30.039155238999967,
+        "context_switches_per_sec": 111.85889830776259,
+        "context_switches_total": 3361,
+        "duration_s": 30.046782605999965,
         "iterations": null,
         "kind": "sysbench_cpu",
         "latency_ms_p50": 0.23,
         "latency_ms_p95": 0.23,
         "metric": "events/s",
         "name": "sysbench-cpu",
-        "ops_per_sec": 17631.87,
-        "ops_total": 528984.0,
+        "ops_per_sec": 17604.26,
+        "ops_total": 528182.0,
         "processes_started": 7,
         "stderr_tail": "",
-        "stdout_tail": "sysbench 1.0.20 (using system LuaJIT 2.1.0-beta3)\nRunning the test with following options:\nNumber of threads: 4\nInitializing random number generator from current time\nPrime numbers limit: 10000\nInitializing worker threads...\nThreads started!\nCPU speed:\n    events per second: 17631.87\nGeneral statistics:\n    total time:                          30.0005s\n    total number of events:              528984\nLatency (ms):\n         min:                                    0.13\n         avg:                                    0.23\n         max:                                    2.19\n         95th percentile:                        0.23\n         sum:                               119943.09\nThreads fairness:\n    events (avg/stddev):           132246.0000/10.32\n    execution time (avg/stddev):   29.9858/0.00",
+        "stdout_tail": "sysbench 1.0.20 (using system LuaJIT 2.1.0-beta3)\nRunning the test with following options:\nNumber of threads: 4\nInitializing random number generator from current time\nPrime numbers limit: 10000\nInitializing worker threads...\nThreads started!\nCPU speed:\n    events per second: 17604.26\nGeneral statistics:\n    total time:                          30.0003s\n    total number of events:              528182\nLatency (ms):\n         min:                                    0.13\n         avg:                                    0.23\n         max:                                    0.45\n         95th percentile:                        0.23\n         sum:                               119943.57\nThreads fairness:\n    events (avg/stddev):           132045.5000/109.83\n    execution time (avg/stddev):   29.9859/0.00",
         "system_cpu": {
-          "busy_pct": 16.653702983499088
+          "busy_pct": 16.659722222222218
         }
       }
     ]
@@ -145,30 +145,30 @@
     "comparable": true,
     "workloads": [
       {
-        "agent_cpu_delta_pct": 0.0011827117735925068,
-        "context_switches_delta_pct": 3.108142996157696,
-        "latency_p50_delta_pct": -1.3888888888888888,
+        "agent_cpu_delta_pct": -16.666672336097157,
+        "context_switches_delta_pct": 0.8359144578073883,
+        "latency_p50_delta_pct": 0.7042253521126761,
         "name": "hackbench",
-        "throughput_delta_pct": 1.2502672206128682
+        "throughput_delta_pct": -0.40289370894388987
       },
       {
-        "agent_cpu_delta_pct": -0.00024231545756042607,
-        "context_switches_delta_pct": -19.858814607901675,
+        "agent_cpu_delta_pct": -12.499533332008866,
+        "context_switches_delta_pct": -26.25148366041673,
         "latency_p50_delta_pct": null,
         "name": "stress-ng-cpu",
-        "throughput_delta_pct": 0.10131834673312869
+        "throughput_delta_pct": -0.14383935524095498
       },
       {
-        "agent_cpu_delta_pct": -11.11162134672237,
-        "context_switches_delta_pct": -25.895957625315013,
+        "agent_cpu_delta_pct": -10.000481539676885,
+        "context_switches_delta_pct": -22.31934659891807,
         "latency_p50_delta_pct": 0.0,
         "name": "sysbench-cpu",
-        "throughput_delta_pct": 0.021948891410852166
+        "throughput_delta_pct": 0.26362937152711824
       }
     ]
   },
   "duration_s": 30,
-  "generated_at": "2026-03-23T12:08:42.781607+00:00",
+  "generated_at": "2026-03-23T13:35:00.805205+00:00",
   "host": {
     "git_sha": "unknown",
     "hostname": "virtme-ng",
@@ -185,23 +185,23 @@
     "summary": {
       "agent_cpu_total_pct": {
         "count": 3,
-        "max": 0.29999850294747055,
-        "mean": 0.24444295101446203,
-        "median": 0.2666643729708404,
-        "min": 0.1666659771250752
+        "max": 0.29999668382665723,
+        "mean": 0.23333182532901905,
+        "median": 0.23333253734271553,
+        "min": 0.16666625481768438
       },
       "context_switches_per_sec": {
         "count": 3,
-        "max": 946304.6088832034,
-        "mean": 315495.5934317231,
-        "median": 95.87872558234442,
-        "min": 86.29268638357276
+        "max": 934324.2832610552,
+        "mean": 311500.9286457444,
+        "median": 91.60995308516227,
+        "min": 86.89272309272175
       },
       "latency_ms_p50": {
         "count": 2,
-        "max": 142.0,
-        "mean": 71.115,
-        "median": 71.115,
+        "max": 143.0,
+        "mean": 71.615,
+        "median": 71.615,
         "min": 0.23
       },
       "latency_ms_p95": {
@@ -213,25 +213,25 @@
       },
       "system_cpu_busy_pct": {
         "count": 3,
-        "max": 91.9527412342612,
-        "mean": 41.75438549005109,
-        "median": 16.65532328633933,
-        "min": 16.65509194955276
+        "max": 91.72226444838554,
+        "mean": 41.680801044906566,
+        "median": 16.661805353000826,
+        "min": 16.65833333333333
       },
       "throughput": {
         "count": 3,
-        "max": 17635.74,
-        "mean": 9747.141317099497,
-        "median": 11598.98,
-        "min": 6.703951298487613
+        "max": 17650.67,
+        "mean": 9745.663835528812,
+        "median": 11579.59,
+        "min": 6.7315065864403
       }
     },
     "workloads": [
       {
         "agent_cpu": {
-          "sys_pct": 0.13333278170006016,
-          "total_pct": 0.1666659771250752,
-          "user_pct": 0.03333319542501504
+          "sys_pct": 0.1333330038541475,
+          "total_pct": 0.16666625481768438,
+          "user_pct": 0.03333325096353688
         },
         "command": [
           "/bin/hackbench",
@@ -240,29 +240,29 @@
           "-l",
           "1000"
         ],
-        "context_switches_per_sec": 946304.6088832034,
-        "context_switches_total": 28513562,
-        "duration_s": 30.131483807999984,
+        "context_switches_per_sec": 934324.2832610552,
+        "context_switches_total": 28037335,
+        "duration_s": 30.00814117999994,
         "iterations": 202,
         "kind": "hackbench",
-        "latency_ms_p50": 142.0,
+        "latency_ms_p50": 143.0,
         "latency_ms_p95": 158.95,
         "metric": "runs/s",
         "name": "hackbench",
-        "ops_per_sec": 6.703951298487613,
+        "ops_per_sec": 6.7315065864403,
         "ops_total": 202.0,
-        "processes_started": 32524,
+        "processes_started": 32527,
         "stderr_tail": "",
-        "stdout_tail": "Time: 0.136\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.156\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.143\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.109\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.142\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.138\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.166\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.134\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.142\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.138\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.137\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.164\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.163\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.151",
+        "stdout_tail": "Time: 0.146\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.166\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.122\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.141\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.145\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.146\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.123\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.143\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.152\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.143\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.149\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.145\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.134\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.148",
         "system_cpu": {
-          "busy_pct": 91.9527412342612
+          "busy_pct": 91.72226444838554
         }
       },
       {
         "agent_cpu": {
-          "sys_pct": 0.19999900196498038,
-          "total_pct": 0.29999850294747055,
-          "user_pct": 0.09999950098249019
+          "sys_pct": 0.16666609810193966,
+          "total_pct": 0.23333253734271553,
+          "user_pct": 0.06666643924077587
         },
         "command": [
           "/bin/stress-ng",
@@ -272,29 +272,29 @@
           "30s",
           "--metrics-brief"
         ],
-        "context_switches_per_sec": 95.87872558234442,
-        "context_switches_total": 2880,
-        "duration_s": 30.03794619200005,
+        "context_switches_per_sec": 91.60995308516227,
+        "context_switches_total": 2752,
+        "duration_s": 30.04040398799998,
         "iterations": null,
         "kind": "stress_ng_cpu",
         "latency_ms_p50": null,
         "latency_ms_p95": null,
         "metric": "bogo-ops/s",
         "name": "stress-ng-cpu",
-        "ops_per_sec": 11598.98,
-        "ops_total": 347976.0,
+        "ops_per_sec": 11579.59,
+        "ops_total": 347393.0,
         "processes_started": 7,
         "stderr_tail": "",
-        "stdout_tail": "stress-ng: info:  [314] setting to a 30 secs run per stressor\nstress-ng: info:  [314] dispatching hogs: 4 cpu\nstress-ng: metrc: [314] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [314]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [314] cpu              347976     30.00    120.00      0.00     11598.98        2899.74\nstress-ng: info:  [314] skipped: 0\nstress-ng: info:  [314] passed: 4: cpu (4)\nstress-ng: info:  [314] failed: 0\nstress-ng: info:  [314] metrics untrustworthy: 0\nstress-ng: info:  [314] successful run completed in 30.00 secs",
+        "stdout_tail": "stress-ng: info:  [17495] setting to a 30 secs run per stressor\nstress-ng: info:  [17495] dispatching hogs: 4 cpu\nstress-ng: metrc: [17495] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [17495]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [17495] cpu              347393     30.00    120.00      0.00     11579.59        2894.90\nstress-ng: info:  [17495] skipped: 0\nstress-ng: info:  [17495] passed: 4: cpu (4)\nstress-ng: info:  [17495] failed: 0\nstress-ng: info:  [17495] metrics untrustworthy: 0\nstress-ng: info:  [17495] successful run completed in 30.01 secs",
         "system_cpu": {
-          "busy_pct": 16.65532328633933
+          "busy_pct": 16.65833333333333
         }
       },
       {
         "agent_cpu": {
-          "sys_pct": 0.16666523310677525,
-          "total_pct": 0.2666643729708404,
-          "user_pct": 0.09999913986406515
+          "sys_pct": 0.1666648243481429,
+          "total_pct": 0.29999668382665723,
+          "user_pct": 0.1333318594785143
         },
         "command": [
           "/bin/sysbench",
@@ -303,22 +303,22 @@
           "--time=30",
           "run"
         ],
-        "context_switches_per_sec": 86.29268638357276,
-        "context_switches_total": 2592,
-        "duration_s": 30.037308010999993,
+        "context_switches_per_sec": 86.89272309272175,
+        "context_switches_total": 2610,
+        "duration_s": 30.03703770700008,
         "iterations": null,
         "kind": "sysbench_cpu",
         "latency_ms_p50": 0.23,
         "latency_ms_p95": 0.23,
         "metric": "events/s",
         "name": "sysbench-cpu",
-        "ops_per_sec": 17635.74,
-        "ops_total": 529101.0,
+        "ops_per_sec": 17650.67,
+        "ops_total": 529602.0,
         "processes_started": 7,
         "stderr_tail": "",
-        "stdout_tail": "sysbench 1.0.20 (using system LuaJIT 2.1.0-beta3)\nRunning the test with following options:\nNumber of threads: 4\nInitializing random number generator from current time\nPrime numbers limit: 10000\nInitializing worker threads...\nThreads started!\nCPU speed:\n    events per second: 17635.74\nGeneral statistics:\n    total time:                          30.0003s\n    total number of events:              529101\nLatency (ms):\n         min:                                    0.13\n         avg:                                    0.23\n         max:                                    0.52\n         95th percentile:                        0.23\n         sum:                               119940.96\nThreads fairness:\n    events (avg/stddev):           132275.2500/70.40\n    execution time (avg/stddev):   29.9852/0.00",
+        "stdout_tail": "sysbench 1.0.20 (using system LuaJIT 2.1.0-beta3)\nRunning the test with following options:\nNumber of threads: 4\nInitializing random number generator from current time\nPrime numbers limit: 10000\nInitializing worker threads...\nThreads started!\nCPU speed:\n    events per second: 17650.67\nGeneral statistics:\n    total time:                          30.0005s\n    total number of events:              529602\nLatency (ms):\n         min:                                    0.13\n         avg:                                    0.23\n         max:                                    1.35\n         95th percentile:                        0.23\n         sum:                               119946.34\nThreads fairness:\n    events (avg/stddev):           132400.5000/73.40\n    execution time (avg/stddev):   29.9866/0.00",
         "system_cpu": {
-          "busy_pct": 16.65509194955276
+          "busy_pct": 16.661805353000826
         }
       }
     ]
@@ -336,9 +336,9 @@
       "before_state": "disabled",
       "bpftool": "/usr/local/sbin/bpftool",
       "returncode": 0,
-      "stderr_tail": "libbpf: struct_ops rusty: member sub_attach not found in kernel, skipping it as it's set to zero\nlibbpf: struct_ops rusty: member sub_detach not found in kernel, skipping it as it's set to zero\nlibbpf: struct_ops rusty: member sub_cgroup_id not found in kernel, skipping it as it's set to zero\nRegistered sched_ext_ops rusty map id 550 link id 29",
+      "stderr_tail": "libbpf: struct_ops rusty: member sub_attach not found in kernel, skipping it as it's set to zero\nlibbpf: struct_ops rusty: member sub_detach not found in kernel, skipping it as it's set to zero\nlibbpf: struct_ops rusty: member sub_cgroup_id not found in kernel, skipping it as it's set to zero\nRegistered sched_ext_ops rusty map id 960 link id 120",
       "stdout_tail": "",
-      "struct_ops_program_count_after": 0,
+      "struct_ops_program_count_after": 13,
       "usable": false
     },
     "loader_error": null,
@@ -348,7 +348,7 @@
   "rejit_result": {
     "applied": true,
     "exit_code": 0,
-    "output": "prog 246 (rusty_select_cp): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n\nprog 248 (rusty_enqueue): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n\nprog 249 (rusty_dispatch): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n\nprog 250 (rusty_runnable): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n\nprog 251 (rusty_running): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n\nprog 252 (rusty_stopping): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n\nprog 253 (rusty_quiescent): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n\nprog 254 (rusty_set_weigh): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n\nprog 255 (rusty_set_cpuma): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n\nprog 256 (rusty_init_task): 6 passes, 2 sites applied (2847 -> 2847 insns)\n  extract: 2 sites applied\nprog 256 (rusty_init_task): no transforms remain after disabling 1 passes\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n  WARN: pass 'extract' caused verifier rejection at PC 577 for prog 256 (rusty_init_task)\n        Disabling 'extract', retrying with 0 remaining passes...\n\nprog 257 (rusty_exit_task): 6 passes, 2 sites applied (276 -> 276 insns)\n  extract: 2 sites applied\nprog 257 (rusty_exit_task): no transforms remain after disabling 1 passes\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n  WARN: pass 'extract' caused verifier rejection at PC 90 for prog 257 (rusty_exit_task)\n        Disabling 'extract', retrying with 0 remaining passes...\n\nprog 258 (rusty_init): 6 passes, 2 sites applied (1547 -> 1547 insns)\n  extract: 2 sites applied\nprog 258 (rusty_init): no transforms remain after disabling 1 passes\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n  WARN: pass 'extract' caused verifier rejection at PC 1265 for prog 258 (rusty_init)\n        Disabling 'extract', retrying with 0 remaining passes...\n\nprog 259 (rusty_exit): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n"
+    "output": "prog 996 (rusty_select_cp): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n\nprog 998 (rusty_enqueue): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n\nprog 999 (rusty_dispatch): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n\nprog 1000 (rusty_runnable): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n\nprog 1001 (rusty_running): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n\nprog 1002 (rusty_stopping): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n\nprog 1003 (rusty_quiescent): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n\nprog 1004 (rusty_set_weigh): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n\nprog 1005 (rusty_set_cpuma): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n\n  prog 1006 (rusty_init_task): 2 sites, 2847 -> 2847 insns\nprog 1006 (rusty_init_task): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n    WARN: pass 'extract' caused verifier rejection at PC 577 for prog 1006 (rusty_init_task)\n          Disabling 'extract', retrying...\n\n  prog 1007 (rusty_exit_task): 2 sites, 276 -> 276 insns\nprog 1007 (rusty_exit_task): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n    WARN: pass 'extract' caused verifier rejection at PC 90 for prog 1007 (rusty_exit_task)\n          Disabling 'extract', retrying...\n\n  prog 1008 (rusty_init): 2 sites, 1547 -> 1547 insns\nprog 1008 (rusty_init): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n    WARN: pass 'extract' caused verifier rejection at PC 1265 for prog 1008 (rusty_init)\n          Disabling 'extract', retrying...\n\nprog 1009 (rusty_exit): no transforms applied\nkfunc discovery:\n  vmlinux BTF str_len=2317628 split_type_id_bias=125497\n  bpf_rotate64: found in 'bpf_rotate' btf_id=125522 fd=3\n  bpf_select64: found in 'bpf_select' btf_id=125523 fd=4\n  bpf_extract64: found in 'bpf_extract' btf_id=125521 fd=5\n  bpf_endian_load16: found in 'bpf_endian' btf_id=125534 fd=6\n  bpf_endian_load32: found in 'bpf_endian' btf_id=125535 fd=6\n  bpf_endian_load64: found in 'bpf_endian' btf_id=125536 fd=6\n  bpf_speculation_barrier: found in 'bpf_barrier' btf_id=125522 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true\n"
   },
   "scan_results": {},
   "scan_summary": {
@@ -369,18 +369,18 @@
   ],
   "scheduler_output": {
     "stderr_tail": [
-      "05:05:41 \u001b[0m\u001b[34m[INFO] \u001b[0mRunning scx_rusty (build ID: 1.1.0-gf33d9a7 x86_64-unknown-linux-gnu)",
-      "05:05:41 \u001b[0m\u001b[34m[INFO] \u001b[0mNODE[00] mask= ffffff",
-      "05:05:41 \u001b[0m\u001b[34m[INFO] \u001b[0m DOM[00] mask= ffffff",
-      "05:05:41 \u001b[0m\u001b[34m[INFO] \u001b[0mlibbpf: struct_ops rusty: member sub_attach not found in kernel, skipping it as it's set to zero",
+      "06:31:59 \u001b[0m\u001b[34m[INFO] \u001b[0mRunning scx_rusty (build ID: 1.1.0-gf33d9a7 x86_64-unknown-linux-gnu)",
+      "06:31:59 \u001b[0m\u001b[34m[INFO] \u001b[0mNODE[00] mask= ffffff",
+      "06:31:59 \u001b[0m\u001b[34m[INFO] \u001b[0m DOM[00] mask= ffffff",
+      "06:31:59 \u001b[0m\u001b[34m[INFO] \u001b[0mlibbpf: struct_ops rusty: member sub_attach not found in kernel, skipping it as it's set to zero",
       "",
-      "05:05:41 \u001b[0m\u001b[34m[INFO] \u001b[0mlibbpf: struct_ops rusty: member sub_detach not found in kernel, skipping it as it's set to zero",
+      "06:31:59 \u001b[0m\u001b[34m[INFO] \u001b[0mlibbpf: struct_ops rusty: member sub_detach not found in kernel, skipping it as it's set to zero",
       "",
-      "05:05:41 \u001b[0m\u001b[34m[INFO] \u001b[0mlibbpf: struct_ops rusty: member sub_cgroup_id not found in kernel, skipping it as it's set to zero",
+      "06:31:59 \u001b[0m\u001b[34m[INFO] \u001b[0mlibbpf: struct_ops rusty: member sub_cgroup_id not found in kernel, skipping it as it's set to zero",
       "",
-      "05:05:41 \u001b[0m\u001b[33m[WARN] \u001b[0mlibbpf: map 'rusty': BPF map skeleton link is uninitialized",
+      "06:31:59 \u001b[0m\u001b[33m[WARN] \u001b[0mlibbpf: map 'rusty': BPF map skeleton link is uninitialized",
       "",
-      "05:05:41 \u001b[0m\u001b[34m[INFO] \u001b[0mRusty scheduler started! Run `scx_rusty --monitor` for metrics."
+      "06:31:59 \u001b[0m\u001b[34m[INFO] \u001b[0mRusty scheduler started! Run `scx_rusty --monitor` for metrics."
     ],
     "stdout_tail": [
       "slice=20000us",
@@ -388,74 +388,139 @@
       "  kick_greedy_cpus=ffffff",
       "  NODE[00] load=  4.01 imbal=  +0.00 delta=  +0.00",
       "   DOM[00] load=  4.01 imbal=  +0.00 delta=  +0.00",
-      "###### Mon, 23 Mar 2026 05:08:27 -0700, load balance @  -338.8ms ######",
-      "cpu=  16.69 load=    4.00 mig=0 task_err=0 time_used= 0.6ms",
-      "tot=     28 sync_prev_idle=14.29 wsync= 3.57",
+      "###### Mon, 23 Mar 2026 06:34:45 -0700, load balance @  -231.4ms ######",
+      "cpu=  16.66 load=    4.02 mig=0 task_err=0 time_used= 0.7ms",
+      "tot=     32 sync_prev_idle= 0.00 wsync=15.62",
+      "prev_idle=62.50 greedy_idle= 0.00 pin= 0.00",
+      "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+      "dsq=21.88 greedy_local= 0.00 greedy_xnuma= 0.00",
+      "kick_greedy= 3.12 rep= 0.00",
+      "dl_clamp=18.75 dl_preset= 3.12",
+      "slice=20000us",
+      "direct_greedy_cpus=ffffff",
+      "  kick_greedy_cpus=ffffff",
+      "  NODE[00] load=  4.02 imbal=  +0.00 delta=  +0.00",
+      "   DOM[00] load=  4.02 imbal=  +0.00 delta=  +0.00",
+      "###### Mon, 23 Mar 2026 06:34:46 -0700, load balance @ -1232.9ms ######",
+      "cpu=  16.68 load=    4.02 mig=0 task_err=0 time_used= 0.8ms",
+      "tot=     30 sync_prev_idle= 0.00 wsync=16.67",
+      "prev_idle=66.67 greedy_idle= 0.00 pin= 0.00",
+      "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+      "dsq=16.67 greedy_local= 0.00 greedy_xnuma= 0.00",
+      "kick_greedy= 0.00 rep= 0.00",
+      "dl_clamp=13.33 dl_preset= 3.33",
+      "slice=20000us",
+      "direct_greedy_cpus=ffffff",
+      "  kick_greedy_cpus=ffffff",
+      "  NODE[00] load=  4.02 imbal=  +0.00 delta=  +0.00",
+      "   DOM[00] load=  4.02 imbal=  +0.00 delta=  +0.00",
+      "###### Mon, 23 Mar 2026 06:34:47 -0700, load balance @  -234.8ms ######",
+      "cpu=  16.67 load=    4.01 mig=0 task_err=0 time_used= 1.2ms",
+      "tot=     28 sync_prev_idle= 0.00 wsync=17.86",
       "prev_idle=71.43 greedy_idle= 0.00 pin= 0.00",
       "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
       "dsq=10.71 greedy_local= 0.00 greedy_xnuma= 0.00",
       "kick_greedy= 0.00 rep= 0.00",
-      "dl_clamp=10.71 dl_preset= 0.00",
+      "dl_clamp= 7.14 dl_preset= 3.57",
       "slice=20000us",
       "direct_greedy_cpus=ffffff",
       "  kick_greedy_cpus=ffffff",
-      "  NODE[00] load=  4.00 imbal=  +0.00 delta=  +0.00",
-      "   DOM[00] load=  4.00 imbal=  +0.00 delta=  +0.00",
-      "###### Mon, 23 Mar 2026 05:08:28 -0700, load balance @ -1340.3ms ######",
-      "cpu=  16.68 load=    4.00 mig=0 task_err=0 time_used= 0.7ms",
-      "tot=     25 sync_prev_idle=16.00 wsync= 4.00",
-      "prev_idle=80.00 greedy_idle= 0.00 pin= 0.00",
+      "  NODE[00] load=  4.01 imbal=  +0.00 delta=  +0.00",
+      "   DOM[00] load=  4.01 imbal=  +0.00 delta=  +0.00",
+      "###### Mon, 23 Mar 2026 06:34:48 -0700, load balance @ -1237.9ms ######",
+      "cpu=  16.67 load=    4.01 mig=0 task_err=0 time_used= 0.8ms",
+      "tot=     31 sync_prev_idle= 0.00 wsync=16.13",
+      "prev_idle=64.52 greedy_idle= 0.00 pin= 0.00",
+      "dir= 3.23 dir_greedy= 0.00 dir_greedy_far= 0.00",
+      "dsq=16.13 greedy_local= 0.00 greedy_xnuma= 0.00",
+      "kick_greedy= 0.00 rep= 0.00",
+      "dl_clamp=12.90 dl_preset= 3.23",
+      "slice=20000us",
+      "direct_greedy_cpus=ffffff",
+      "  kick_greedy_cpus=ffffff",
+      "  NODE[00] load=  4.01 imbal=  +0.00 delta=  +0.00",
+      "   DOM[00] load=  4.01 imbal=  +0.00 delta=  +0.00",
+      "###### Mon, 23 Mar 2026 06:34:49 -0700, load balance @  -241.2ms ######",
+      "cpu=  16.66 load=    4.02 mig=0 task_err=0 time_used= 0.9ms",
+      "tot=     30 sync_prev_idle= 0.00 wsync=16.67",
+      "prev_idle=66.67 greedy_idle= 0.00 pin= 0.00",
       "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
-      "dsq= 0.00 greedy_local= 0.00 greedy_xnuma= 0.00",
+      "dsq=16.67 greedy_local= 0.00 greedy_xnuma= 0.00",
       "kick_greedy= 0.00 rep= 0.00",
-      "dl_clamp= 0.00 dl_preset= 0.00",
+      "dl_clamp=13.33 dl_preset= 3.33",
       "slice=20000us",
       "direct_greedy_cpus=ffffff",
       "  kick_greedy_cpus=ffffff",
-      "  NODE[00] load=  4.00 imbal=  +0.00 delta=  +0.00",
-      "   DOM[00] load=  4.00 imbal=  +0.00 delta=  +0.00",
-      "###### Mon, 23 Mar 2026 05:08:29 -0700, load balance @  -342.0ms ######",
-      "cpu=  16.67 load=    4.00 mig=0 task_err=0 time_used= 1.3ms",
-      "tot=     25 sync_prev_idle=16.00 wsync= 4.00",
-      "prev_idle=80.00 greedy_idle= 0.00 pin= 0.00",
+      "  NODE[00] load=  4.02 imbal=  +0.00 delta=  +0.00",
+      "   DOM[00] load=  4.02 imbal=  +0.00 delta=  +0.00",
+      "###### Mon, 23 Mar 2026 06:34:50 -0700, load balance @ -1243.4ms ######",
+      "cpu=  16.74 load=    4.02 mig=0 task_err=0 time_used= 0.4ms",
+      "tot=     30 sync_prev_idle= 0.00 wsync=16.67",
+      "prev_idle=66.67 greedy_idle= 0.00 pin= 0.00",
       "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
-      "dsq= 0.00 greedy_local= 0.00 greedy_xnuma= 0.00",
+      "dsq=16.67 greedy_local= 0.00 greedy_xnuma= 0.00",
       "kick_greedy= 0.00 rep= 0.00",
-      "dl_clamp= 0.00 dl_preset= 0.00",
+      "dl_clamp=13.33 dl_preset= 3.33",
       "slice=20000us",
       "direct_greedy_cpus=ffffff",
       "  kick_greedy_cpus=ffffff",
-      "  NODE[00] load=  4.00 imbal=  +0.00 delta=  +0.00",
-      "   DOM[00] load=  4.00 imbal=  +0.00 delta=  +0.00",
-      "###### Mon, 23 Mar 2026 05:08:30 -0700, load balance @ -1344.2ms ######",
-      "cpu=  16.64 load=    4.00 mig=0 task_err=0 time_used= 0.8ms",
-      "tot=     27 sync_prev_idle=14.81 wsync= 3.70",
-      "prev_idle=74.07 greedy_idle= 0.00 pin= 0.00",
-      "dir= 3.70 dir_greedy= 0.00 dir_greedy_far= 0.00",
-      "dsq= 3.70 greedy_local= 0.00 greedy_xnuma= 0.00",
-      "kick_greedy= 0.00 rep= 0.00",
-      "dl_clamp= 3.70 dl_preset= 0.00",
-      "slice=20000us",
-      "direct_greedy_cpus=ffffff",
-      "  kick_greedy_cpus=ffffff",
-      "  NODE[00] load=  4.00 imbal=  +0.00 delta=  +0.00",
-      "   DOM[00] load=  4.00 imbal=  +0.00 delta=  +0.00",
-      "###### Mon, 23 Mar 2026 05:08:31 -0700, load balance @  -346.2ms ######",
-      "cpu=  16.68 load=    4.00 mig=0 task_err=0 time_used= 1.0ms",
-      "tot=     27 sync_prev_idle=14.81 wsync= 3.70",
-      "prev_idle=74.07 greedy_idle= 0.00 pin= 0.00",
+      "  NODE[00] load=  4.02 imbal=  +0.00 delta=  +0.00",
+      "   DOM[00] load=  4.02 imbal=  +0.00 delta=  +0.00",
+      "###### Mon, 23 Mar 2026 06:34:51 -0700, load balance @  -245.7ms ######",
+      "cpu=  16.67 load=    4.01 mig=0 task_err=0 time_used= 0.5ms",
+      "tot=     30 sync_prev_idle= 0.00 wsync=16.67",
+      "prev_idle=66.67 greedy_idle= 0.00 pin= 0.00",
       "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
-      "dsq= 7.41 greedy_local= 0.00 greedy_xnuma= 0.00",
+      "dsq=16.67 greedy_local= 0.00 greedy_xnuma= 0.00",
       "kick_greedy= 0.00 rep= 0.00",
-      "dl_clamp= 7.41 dl_preset= 0.00",
+      "dl_clamp=13.33 dl_preset= 3.33",
       "slice=20000us",
       "direct_greedy_cpus=ffffff",
       "  kick_greedy_cpus=ffffff",
-      "  NODE[00] load=  4.00 imbal=  +0.00 delta=  +0.00",
-      "   DOM[00] load=  4.00 imbal=  +0.00 delta=  +0.00",
-      "###### Mon, 23 Mar 2026 05:08:32 -0700, load balance @ -1348.9ms ######",
-      "cpu=  16.67 load=    4.00 mig=0 task_err=0 time_used= 0.7ms",
-      "tot=     28 sync_prev_idle=14.29 wsync= 3.57",
+      "  NODE[00] load=  4.01 imbal=  +0.00 delta=  +0.00",
+      "   DOM[00] load=  4.01 imbal=  +0.00 delta=  +0.00",
+      "###### Mon, 23 Mar 2026 06:34:52 -0700, load balance @ -1248.5ms ######",
+      "cpu=  16.67 load=    4.01 mig=0 task_err=0 time_used= 0.8ms",
+      "tot=     29 sync_prev_idle= 0.00 wsync=17.24",
+      "prev_idle=68.97 greedy_idle= 0.00 pin= 0.00",
+      "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+      "dsq=13.79 greedy_local= 0.00 greedy_xnuma= 0.00",
+      "kick_greedy= 0.00 rep= 0.00",
+      "dl_clamp=10.34 dl_preset= 3.45",
+      "slice=20000us",
+      "direct_greedy_cpus=ffffff",
+      "  kick_greedy_cpus=ffffff",
+      "  NODE[00] load=  4.01 imbal=  +0.00 delta=  +0.00",
+      "   DOM[00] load=  4.01 imbal=  +0.00 delta=  +0.00",
+      "###### Mon, 23 Mar 2026 06:34:53 -0700, load balance @  -250.6ms ######",
+      "cpu=  16.67 load=    4.01 mig=0 task_err=0 time_used= 0.9ms",
+      "tot=     26 sync_prev_idle= 0.00 wsync=19.23",
+      "prev_idle=76.92 greedy_idle= 0.00 pin= 0.00",
+      "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+      "dsq= 3.85 greedy_local= 0.00 greedy_xnuma= 0.00",
+      "kick_greedy= 0.00 rep= 0.00",
+      "dl_clamp= 0.00 dl_preset= 3.85",
+      "slice=20000us",
+      "direct_greedy_cpus=ffffff",
+      "  kick_greedy_cpus=ffffff",
+      "  NODE[00] load=  4.01 imbal=  +0.00 delta=  +0.00",
+      "   DOM[00] load=  4.01 imbal=  +0.00 delta=  +0.00",
+      "###### Mon, 23 Mar 2026 06:34:54 -0700, load balance @ -1253.0ms ######",
+      "cpu=  16.67 load=    4.01 mig=0 task_err=0 time_used= 0.7ms",
+      "tot=     28 sync_prev_idle= 0.00 wsync=17.86",
+      "prev_idle=71.43 greedy_idle= 0.00 pin= 0.00",
+      "dir= 3.57 dir_greedy= 0.00 dir_greedy_far= 0.00",
+      "dsq= 7.14 greedy_local= 0.00 greedy_xnuma= 0.00",
+      "kick_greedy= 0.00 rep= 0.00",
+      "dl_clamp= 3.57 dl_preset= 3.57",
+      "slice=20000us",
+      "direct_greedy_cpus=ffffff",
+      "  kick_greedy_cpus=ffffff",
+      "  NODE[00] load=  4.01 imbal=  +0.00 delta=  +0.00",
+      "   DOM[00] load=  4.01 imbal=  +0.00 delta=  +0.00",
+      "###### Mon, 23 Mar 2026 06:34:55 -0700, load balance @  -256.0ms ######",
+      "cpu=  16.66 load=    4.00 mig=0 task_err=0 time_used= 1.0ms",
+      "tot=     28 sync_prev_idle= 0.00 wsync=17.86",
       "prev_idle=71.43 greedy_idle= 0.00 pin= 0.00",
       "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
       "dsq=10.71 greedy_local= 0.00 greedy_xnuma= 0.00",
@@ -466,118 +531,53 @@
       "  kick_greedy_cpus=ffffff",
       "  NODE[00] load=  4.00 imbal=  +0.00 delta=  +0.00",
       "   DOM[00] load=  4.00 imbal=  +0.00 delta=  +0.00",
-      "###### Mon, 23 Mar 2026 05:08:33 -0700, load balance @  -351.3ms ######",
+      "###### Mon, 23 Mar 2026 06:34:56 -0700, load balance @ -1258.4ms ######",
+      "cpu=  16.67 load=    4.00 mig=0 task_err=0 time_used= 1.0ms",
+      "tot=     28 sync_prev_idle= 0.00 wsync=17.86",
+      "prev_idle=71.43 greedy_idle= 0.00 pin= 0.00",
+      "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+      "dsq=10.71 greedy_local= 0.00 greedy_xnuma= 0.00",
+      "kick_greedy= 0.00 rep= 0.00",
+      "dl_clamp= 7.14 dl_preset= 3.57",
+      "slice=20000us",
+      "direct_greedy_cpus=ffffff",
+      "  kick_greedy_cpus=ffffff",
+      "  NODE[00] load=  4.00 imbal=  +0.00 delta=  +0.00",
+      "   DOM[00] load=  4.00 imbal=  +0.00 delta=  +0.00",
+      "###### Mon, 23 Mar 2026 06:34:57 -0700, load balance @  -260.5ms ######",
+      "cpu=  16.67 load=    4.00 mig=0 task_err=0 time_used= 1.4ms",
+      "tot=     28 sync_prev_idle= 0.00 wsync=17.86",
+      "prev_idle=67.86 greedy_idle= 0.00 pin= 0.00",
+      "dir= 3.57 dir_greedy= 0.00 dir_greedy_far= 0.00",
+      "dsq=10.71 greedy_local= 0.00 greedy_xnuma= 0.00",
+      "kick_greedy= 0.00 rep= 0.00",
+      "dl_clamp= 7.14 dl_preset= 3.57",
+      "slice=20000us",
+      "direct_greedy_cpus=ffffff",
+      "  kick_greedy_cpus=ffffff",
+      "  NODE[00] load=  4.00 imbal=  +0.00 delta=  +0.00",
+      "   DOM[00] load=  4.00 imbal=  +0.00 delta=  +0.00",
+      "###### Mon, 23 Mar 2026 06:34:58 -0700, load balance @ -1262.5ms ######",
       "cpu=  16.67 load=    4.00 mig=0 task_err=0 time_used= 0.8ms",
-      "tot=     27 sync_prev_idle=14.81 wsync= 3.70",
-      "prev_idle=74.07 greedy_idle= 0.00 pin= 0.00",
+      "tot=     28 sync_prev_idle= 0.00 wsync=17.86",
+      "prev_idle=71.43 greedy_idle= 0.00 pin= 0.00",
       "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
-      "dsq= 7.41 greedy_local= 0.00 greedy_xnuma= 0.00",
+      "dsq=10.71 greedy_local= 0.00 greedy_xnuma= 0.00",
       "kick_greedy= 0.00 rep= 0.00",
-      "dl_clamp= 7.41 dl_preset= 0.00",
+      "dl_clamp= 3.57 dl_preset= 7.14",
       "slice=20000us",
       "direct_greedy_cpus=ffffff",
       "  kick_greedy_cpus=ffffff",
       "  NODE[00] load=  4.00 imbal=  +0.00 delta=  +0.00",
       "   DOM[00] load=  4.00 imbal=  +0.00 delta=  +0.00",
-      "###### Mon, 23 Mar 2026 05:08:34 -0700, load balance @ -1353.5ms ######",
-      "cpu=  16.67 load=    4.00 mig=0 task_err=0 time_used= 1.1ms",
-      "tot=     27 sync_prev_idle=14.81 wsync= 3.70",
-      "prev_idle=74.07 greedy_idle= 0.00 pin= 0.00",
-      "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
-      "dsq= 7.41 greedy_local= 0.00 greedy_xnuma= 0.00",
-      "kick_greedy= 0.00 rep= 0.00",
-      "dl_clamp= 7.41 dl_preset= 0.00",
-      "slice=20000us",
-      "direct_greedy_cpus=ffffff",
-      "  kick_greedy_cpus=ffffff",
-      "  NODE[00] load=  4.00 imbal=  +0.00 delta=  +0.00",
-      "   DOM[00] load=  4.00 imbal=  +0.00 delta=  +0.00",
-      "###### Mon, 23 Mar 2026 05:08:35 -0700, load balance @  -356.0ms ######",
-      "cpu=  16.67 load=    4.01 mig=0 task_err=0 time_used= 0.9ms",
-      "tot=     30 sync_prev_idle=13.33 wsync= 3.33",
-      "prev_idle=66.67 greedy_idle= 0.00 pin= 0.00",
-      "dir= 3.33 dir_greedy= 0.00 dir_greedy_far= 0.00",
-      "dsq=13.33 greedy_local= 0.00 greedy_xnuma= 0.00",
-      "kick_greedy= 0.00 rep= 0.00",
-      "dl_clamp=13.33 dl_preset= 0.00",
-      "slice=20000us",
-      "direct_greedy_cpus=ffffff",
-      "  kick_greedy_cpus=ffffff",
-      "  NODE[00] load=  4.01 imbal=  +0.00 delta=  +0.00",
-      "   DOM[00] load=  4.01 imbal=  +0.00 delta=  +0.00",
-      "###### Mon, 23 Mar 2026 05:08:36 -0700, load balance @ -1358.3ms ######",
-      "cpu=  16.67 load=    4.01 mig=0 task_err=0 time_used= 1.1ms",
-      "tot=     27 sync_prev_idle=14.81 wsync= 3.70",
-      "prev_idle=74.07 greedy_idle= 0.00 pin= 0.00",
-      "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
-      "dsq= 7.41 greedy_local= 0.00 greedy_xnuma= 0.00",
-      "kick_greedy= 0.00 rep= 0.00",
-      "dl_clamp= 7.41 dl_preset= 0.00",
-      "slice=20000us",
-      "direct_greedy_cpus=ffffff",
-      "  kick_greedy_cpus=ffffff",
-      "  NODE[00] load=  4.01 imbal=  +0.00 delta=  +0.00",
-      "   DOM[00] load=  4.01 imbal=  +0.00 delta=  +0.00",
-      "###### Mon, 23 Mar 2026 05:08:37 -0700, load balance @  -360.2ms ######",
-      "cpu=  16.67 load=    4.01 mig=0 task_err=0 time_used= 0.8ms",
-      "tot=     26 sync_prev_idle=15.38 wsync= 3.85",
-      "prev_idle=76.92 greedy_idle= 0.00 pin= 0.00",
-      "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
-      "dsq= 3.85 greedy_local= 0.00 greedy_xnuma= 0.00",
-      "kick_greedy= 0.00 rep= 0.00",
-      "dl_clamp= 3.85 dl_preset= 0.00",
-      "slice=20000us",
-      "direct_greedy_cpus=ffffff",
-      "  kick_greedy_cpus=ffffff",
-      "  NODE[00] load=  4.01 imbal=  +0.00 delta=  +0.00",
-      "   DOM[00] load=  4.01 imbal=  +0.00 delta=  +0.00",
-      "###### Mon, 23 Mar 2026 05:08:38 -0700, load balance @ -1362.0ms ######",
-      "cpu=  16.68 load=    4.01 mig=0 task_err=0 time_used= 0.8ms",
-      "tot=     27 sync_prev_idle=14.81 wsync= 3.70",
-      "prev_idle=74.07 greedy_idle= 0.00 pin= 0.00",
-      "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
-      "dsq= 7.41 greedy_local= 0.00 greedy_xnuma= 0.00",
-      "kick_greedy= 0.00 rep= 0.00",
-      "dl_clamp= 3.70 dl_preset= 3.70",
-      "slice=20000us",
-      "direct_greedy_cpus=ffffff",
-      "  kick_greedy_cpus=ffffff",
-      "  NODE[00] load=  4.01 imbal=  +0.00 delta=  +0.00",
-      "   DOM[00] load=  4.01 imbal=  +0.00 delta=  +0.00",
-      "###### Mon, 23 Mar 2026 05:08:39 -0700, load balance @  -364.6ms ######",
-      "cpu=  16.70 load=    4.00 mig=0 task_err=0 time_used= 1.1ms",
-      "tot=     29 sync_prev_idle=13.79 wsync= 3.45",
-      "prev_idle=68.97 greedy_idle= 0.00 pin= 0.00",
-      "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
-      "dsq=13.79 greedy_local= 0.00 greedy_xnuma= 0.00",
-      "kick_greedy= 0.00 rep= 0.00",
-      "dl_clamp=13.79 dl_preset= 0.00",
-      "slice=20000us",
-      "direct_greedy_cpus=ffffff",
-      "  kick_greedy_cpus=ffffff",
-      "  NODE[00] load=  4.00 imbal=  +0.00 delta=  +0.00",
-      "   DOM[00] load=  4.00 imbal=  +0.00 delta=  +0.00",
-      "###### Mon, 23 Mar 2026 05:08:40 -0700, load balance @ -1366.9ms ######",
+      "###### Mon, 23 Mar 2026 06:34:59 -0700, load balance @  -265.1ms ######",
       "cpu=  16.67 load=    4.00 mig=0 task_err=0 time_used= 0.7ms",
-      "tot=     26 sync_prev_idle=15.38 wsync= 3.85",
-      "prev_idle=76.92 greedy_idle= 0.00 pin= 0.00",
-      "dir= 3.85 dir_greedy= 0.00 dir_greedy_far= 0.00",
-      "dsq= 0.00 greedy_local= 0.00 greedy_xnuma= 0.00",
+      "tot=     27 sync_prev_idle= 0.00 wsync=18.52",
+      "prev_idle=74.07 greedy_idle= 0.00 pin= 0.00",
+      "dir= 3.70 dir_greedy= 0.00 dir_greedy_far= 0.00",
+      "dsq= 3.70 greedy_local= 0.00 greedy_xnuma= 0.00",
       "kick_greedy= 0.00 rep= 0.00",
-      "dl_clamp= 0.00 dl_preset= 0.00",
-      "slice=20000us",
-      "direct_greedy_cpus=ffffff",
-      "  kick_greedy_cpus=ffffff",
-      "  NODE[00] load=  4.00 imbal=  +0.00 delta=  +0.00",
-      "   DOM[00] load=  4.00 imbal=  +0.00 delta=  +0.00",
-      "###### Mon, 23 Mar 2026 05:08:41 -0700, load balance @  -369.1ms ######",
-      "cpu=  16.65 load=    4.00 mig=0 task_err=0 time_used= 0.7ms",
-      "tot=     25 sync_prev_idle=16.00 wsync= 4.00",
-      "prev_idle=80.00 greedy_idle= 0.00 pin= 0.00",
-      "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
-      "dsq= 0.00 greedy_local= 0.00 greedy_xnuma= 0.00",
-      "kick_greedy= 0.00 rep= 0.00",
-      "dl_clamp= 0.00 dl_preset= 0.00",
+      "dl_clamp= 0.00 dl_preset= 3.70",
       "slice=20000us",
       "direct_greedy_cpus=ffffff",
       "  kick_greedy_cpus=ffffff",
@@ -587,42 +587,42 @@
   },
   "scheduler_programs": [
     {
-      "btf_id": 491,
+      "btf_id": 1416,
       "bytes_jited": 3912,
       "bytes_memlock": 8192,
       "bytes_xlated": 6624,
       "gpl_compatible": true,
-      "id": 246,
+      "id": 996,
       "jited": true,
-      "loaded_at": 1774267541,
+      "loaded_at": 1774272719,
       "map_ids": [
-        566,
-        567,
-        557,
-        569,
-        562,
-        568,
-        561,
-        564,
-        571,
-        563,
-        559
+        976,
+        977,
+        967,
+        979,
+        972,
+        978,
+        971,
+        974,
+        981,
+        973,
+        969
       ],
       "name": "rusty_select_cpu",
       "orphaned": false,
       "owner_fds": [
         {
           "fd": 26,
-          "pid": 546
+          "pid": 17030
         }
       ],
       "owner_pids": [
-        546
+        17030
       ],
       "pids": [
         {
           "comm": "scx_rusty",
-          "pid": 546
+          "pid": 17030
         }
       ],
       "tag": "cac9e269f8bf9015",
@@ -630,42 +630,42 @@
       "uid": 0
     },
     {
-      "btf_id": 491,
+      "btf_id": 1416,
       "bytes_jited": 7799,
       "bytes_memlock": 20480,
       "bytes_xlated": 13064,
       "gpl_compatible": true,
-      "id": 248,
+      "id": 998,
       "jited": true,
-      "loaded_at": 1774267541,
+      "loaded_at": 1774272719,
       "map_ids": [
-        562,
-        567,
-        566,
-        569,
-        568,
-        561,
-        564,
-        571,
-        563,
-        557,
-        560
+        972,
+        977,
+        976,
+        979,
+        978,
+        971,
+        974,
+        981,
+        973,
+        967,
+        970
       ],
       "name": "rusty_enqueue",
       "orphaned": false,
       "owner_fds": [
         {
           "fd": 27,
-          "pid": 546
+          "pid": 17030
         }
       ],
       "owner_pids": [
-        546
+        17030
       ],
       "pids": [
         {
           "comm": "scx_rusty",
-          "pid": 546
+          "pid": 17030
         }
       ],
       "tag": "97c64b81e876223c",
@@ -673,36 +673,36 @@
       "uid": 0
     },
     {
-      "btf_id": 491,
+      "btf_id": 1416,
       "bytes_jited": 724,
       "bytes_memlock": 4096,
       "bytes_xlated": 1304,
       "gpl_compatible": true,
-      "id": 249,
+      "id": 999,
       "jited": true,
-      "loaded_at": 1774267541,
+      "loaded_at": 1774272719,
       "map_ids": [
-        567,
-        566,
-        568,
-        562,
-        571
+        977,
+        976,
+        978,
+        972,
+        981
       ],
       "name": "rusty_dispatch",
       "orphaned": false,
       "owner_fds": [
         {
           "fd": 28,
-          "pid": 546
+          "pid": 17030
         }
       ],
       "owner_pids": [
-        546
+        17030
       ],
       "pids": [
         {
           "comm": "scx_rusty",
-          "pid": 546
+          "pid": 17030
         }
       ],
       "tag": "a7a9bb9fe9edd478",
@@ -710,38 +710,38 @@
       "uid": 0
     },
     {
-      "btf_id": 491,
+      "btf_id": 1416,
       "bytes_jited": 2276,
       "bytes_memlock": 8192,
       "bytes_xlated": 3656,
       "gpl_compatible": true,
-      "id": 250,
+      "id": 1000,
       "jited": true,
-      "loaded_at": 1774267541,
+      "loaded_at": 1774272719,
       "map_ids": [
-        568,
-        567,
-        564,
-        566,
-        571,
-        563,
-        560
+        978,
+        977,
+        974,
+        976,
+        981,
+        973,
+        970
       ],
       "name": "rusty_runnable",
       "orphaned": false,
       "owner_fds": [
         {
           "fd": 29,
-          "pid": 546
+          "pid": 17030
         }
       ],
       "owner_pids": [
-        546
+        17030
       ],
       "pids": [
         {
           "comm": "scx_rusty",
-          "pid": 546
+          "pid": 17030
         }
       ],
       "tag": "6f5e5ab5fc9a4894",
@@ -749,38 +749,38 @@
       "uid": 0
     },
     {
-      "btf_id": 491,
+      "btf_id": 1416,
       "bytes_jited": 677,
       "bytes_memlock": 4096,
       "bytes_xlated": 952,
       "gpl_compatible": true,
-      "id": 251,
+      "id": 1001,
       "jited": true,
-      "loaded_at": 1774267541,
+      "loaded_at": 1774272719,
       "map_ids": [
-        568,
-        567,
-        557,
-        564,
-        566,
-        571,
-        563
+        978,
+        977,
+        967,
+        974,
+        976,
+        981,
+        973
       ],
       "name": "rusty_running",
       "orphaned": false,
       "owner_fds": [
         {
           "fd": 30,
-          "pid": 546
+          "pid": 17030
         }
       ],
       "owner_pids": [
-        546
+        17030
       ],
       "pids": [
         {
           "comm": "scx_rusty",
-          "pid": 546
+          "pid": 17030
         }
       ],
       "tag": "acf7c49c692040bb",
@@ -788,37 +788,37 @@
       "uid": 0
     },
     {
-      "btf_id": 491,
+      "btf_id": 1416,
       "bytes_jited": 1277,
       "bytes_memlock": 4096,
       "bytes_xlated": 1840,
       "gpl_compatible": true,
-      "id": 252,
+      "id": 1002,
       "jited": true,
-      "loaded_at": 1774267541,
+      "loaded_at": 1774272719,
       "map_ids": [
-        567,
-        568,
-        564,
-        566,
-        571,
-        563
+        977,
+        978,
+        974,
+        976,
+        981,
+        973
       ],
       "name": "rusty_stopping",
       "orphaned": false,
       "owner_fds": [
         {
           "fd": 31,
-          "pid": 546
+          "pid": 17030
         }
       ],
       "owner_pids": [
-        546
+        17030
       ],
       "pids": [
         {
           "comm": "scx_rusty",
-          "pid": 546
+          "pid": 17030
         }
       ],
       "tag": "8198ca9801ef584c",
@@ -826,38 +826,38 @@
       "uid": 0
     },
     {
-      "btf_id": 491,
+      "btf_id": 1416,
       "bytes_jited": 2373,
       "bytes_memlock": 8192,
       "bytes_xlated": 3808,
       "gpl_compatible": true,
-      "id": 253,
+      "id": 1003,
       "jited": true,
-      "loaded_at": 1774267541,
+      "loaded_at": 1774272719,
       "map_ids": [
-        568,
-        567,
-        564,
-        566,
-        571,
-        563,
-        560
+        978,
+        977,
+        974,
+        976,
+        981,
+        973,
+        970
       ],
       "name": "rusty_quiescent",
       "orphaned": false,
       "owner_fds": [
         {
           "fd": 32,
-          "pid": 546
+          "pid": 17030
         }
       ],
       "owner_pids": [
-        546
+        17030
       ],
       "pids": [
         {
           "comm": "scx_rusty",
-          "pid": 546
+          "pid": 17030
         }
       ],
       "tag": "ce92f49edd07ce6a",
@@ -865,37 +865,37 @@
       "uid": 0
     },
     {
-      "btf_id": 491,
+      "btf_id": 1416,
       "bytes_jited": 337,
       "bytes_memlock": 4096,
       "bytes_xlated": 392,
       "gpl_compatible": true,
-      "id": 254,
+      "id": 1004,
       "jited": true,
-      "loaded_at": 1774267541,
+      "loaded_at": 1774272719,
       "map_ids": [
-        568,
-        567,
-        564,
-        566,
-        571,
-        563
+        978,
+        977,
+        974,
+        976,
+        981,
+        973
       ],
       "name": "rusty_set_weight",
       "orphaned": false,
       "owner_fds": [
         {
           "fd": 33,
-          "pid": 546
+          "pid": 17030
         }
       ],
       "owner_pids": [
-        546
+        17030
       ],
       "pids": [
         {
           "comm": "scx_rusty",
-          "pid": 546
+          "pid": 17030
         }
       ],
       "tag": "f8ef23b239a5bcda",
@@ -903,41 +903,41 @@
       "uid": 0
     },
     {
-      "btf_id": 491,
+      "btf_id": 1416,
       "bytes_jited": 6202,
       "bytes_memlock": 20480,
       "bytes_xlated": 10360,
       "gpl_compatible": true,
-      "id": 255,
+      "id": 1005,
       "jited": true,
-      "loaded_at": 1774267541,
+      "loaded_at": 1774272719,
       "map_ids": [
-        568,
-        569,
-        564,
-        566,
-        567,
-        571,
-        563,
-        561,
-        557,
-        560
+        978,
+        979,
+        974,
+        976,
+        977,
+        981,
+        973,
+        971,
+        967,
+        970
       ],
       "name": "rusty_set_cpumask",
       "orphaned": false,
       "owner_fds": [
         {
           "fd": 34,
-          "pid": 546
+          "pid": 17030
         }
       ],
       "owner_pids": [
-        546
+        17030
       ],
       "pids": [
         {
           "comm": "scx_rusty",
-          "pid": 546
+          "pid": 17030
         }
       ],
       "tag": "6b940c1f056115d9",
@@ -945,41 +945,41 @@
       "uid": 0
     },
     {
-      "btf_id": 491,
+      "btf_id": 1416,
       "bytes_jited": 5448,
       "bytes_memlock": 24576,
       "bytes_xlated": 8848,
       "gpl_compatible": true,
-      "id": 256,
+      "id": 1006,
       "jited": true,
-      "loaded_at": 1774267541,
+      "loaded_at": 1774272719,
       "map_ids": [
-        567,
-        561,
-        568,
-        564,
-        566,
-        572,
-        563,
-        571,
-        557,
-        560
+        977,
+        971,
+        978,
+        974,
+        976,
+        982,
+        973,
+        981,
+        967,
+        970
       ],
       "name": "rusty_init_task",
       "orphaned": false,
       "owner_fds": [
         {
           "fd": 35,
-          "pid": 546
+          "pid": 17030
         }
       ],
       "owner_pids": [
-        546
+        17030
       ],
       "pids": [
         {
           "comm": "scx_rusty",
-          "pid": 546
+          "pid": 17030
         }
       ],
       "tag": "3a85e28d7084827e",
@@ -987,40 +987,40 @@
       "uid": 0
     },
     {
-      "btf_id": 491,
+      "btf_id": 1416,
       "bytes_jited": 1786,
       "bytes_memlock": 4096,
       "bytes_xlated": 2792,
       "gpl_compatible": true,
-      "id": 257,
+      "id": 1007,
       "jited": true,
-      "loaded_at": 1774267541,
+      "loaded_at": 1774272719,
       "map_ids": [
-        561,
-        562,
-        564,
-        566,
-        567,
-        571,
-        563,
-        572,
-        568
+        971,
+        972,
+        974,
+        976,
+        977,
+        981,
+        973,
+        982,
+        978
       ],
       "name": "rusty_exit_task",
       "orphaned": false,
       "owner_fds": [
         {
           "fd": 36,
-          "pid": 546
+          "pid": 17030
         }
       ],
       "owner_pids": [
-        546
+        17030
       ],
       "pids": [
         {
           "comm": "scx_rusty",
-          "pid": 546
+          "pid": 17030
         }
       ],
       "tag": "7928c59981b17ade",
@@ -1028,41 +1028,41 @@
       "uid": 0
     },
     {
-      "btf_id": 491,
+      "btf_id": 1416,
       "bytes_jited": 7731,
       "bytes_memlock": 16384,
       "bytes_xlated": 12816,
       "gpl_compatible": true,
-      "id": 258,
+      "id": 1008,
       "jited": true,
-      "loaded_at": 1774267541,
+      "loaded_at": 1774272719,
       "map_ids": [
-        569,
-        568,
-        567,
-        563,
-        572,
-        566,
-        571,
-        559,
-        558,
-        557
+        979,
+        978,
+        977,
+        973,
+        982,
+        976,
+        981,
+        969,
+        968,
+        967
       ],
       "name": "rusty_init",
       "orphaned": false,
       "owner_fds": [
         {
           "fd": 37,
-          "pid": 546
+          "pid": 17030
         }
       ],
       "owner_pids": [
-        546
+        17030
       ],
       "pids": [
         {
           "comm": "scx_rusty",
-          "pid": 546
+          "pid": 17030
         }
       ],
       "tag": "c53b15f2f71d08c2",
@@ -1070,35 +1070,35 @@
       "uid": 0
     },
     {
-      "btf_id": 491,
+      "btf_id": 1416,
       "bytes_jited": 167,
       "bytes_memlock": 4096,
       "bytes_xlated": 240,
       "gpl_compatible": true,
-      "id": 259,
+      "id": 1009,
       "jited": true,
-      "loaded_at": 1774267541,
+      "loaded_at": 1774272719,
       "map_ids": [
-        568,
-        567,
-        570,
-        571
+        978,
+        977,
+        980,
+        981
       ],
       "name": "rusty_exit",
       "orphaned": false,
       "owner_fds": [
         {
           "fd": 38,
-          "pid": 546
+          "pid": 17030
         }
       ],
       "owner_pids": [
-        546
+        17030
       ],
       "pids": [
         {
           "comm": "scx_rusty",
-          "pid": 546
+          "pid": 17030
         }
       ],
       "tag": "11ab5b228921e73d",

@@ -39,7 +39,7 @@ kprobe:vfs_create
   @[func] = count();
 }
 
-interval:1s
+interval:s:1
 {
   time();
   print(@);

@@ -73,8 +73,8 @@ kprobe:tcp_set_state
   // session ended: calculate lifespan and print
   if ($newstate == TCP_CLOSE && @birth[$sk]) {
     $delta_ms = (nsecs - @birth[$sk]) / 1e6;
-    $lport = $sk.__sk_common.skc_num;
-    $dport = $sk.__sk_common.skc_dport;
+    $lport = $sk->__sk_common.skc_num;
+    $dport = $sk->__sk_common.skc_dport;
     $dport = bswap($dport);
     $tp = (struct tcp_sock *)$sk;
     $pid = @skpid[$sk];
@@ -85,25 +85,21 @@ kprobe:tcp_set_state
       $comm = comm;
     }
 
-    $family = $sk.__sk_common.skc_family;
+    $family = $sk->__sk_common.skc_family;
     $saddr = ntop(0);
     $daddr = ntop(0);
     if ($family == AF_INET) {
-      $saddr = ntop(AF_INET, $sk.__sk_common.skc_rcv_saddr);
-      $daddr = ntop(AF_INET, $sk.__sk_common.skc_daddr);
-    } else {
-      // AF_INET6
-      $saddr = ntop(AF_INET6, $sk.__sk_common.skc_v6_rcv_saddr.in6_u.u6_addr8);
-      $daddr = ntop(AF_INET6, $sk.__sk_common.skc_v6_daddr.in6_u.u6_addr8);
+      $saddr = ntop(AF_INET, $sk->__sk_common.skc_rcv_saddr);
+      $daddr = ntop(AF_INET, $sk->__sk_common.skc_daddr);
     }
     printf("%-5d %-10.10s %-15s %-5d %-15s %-6d ",
            $pid, $comm, $saddr, $lport, $daddr, $dport);
-    printf("%5d %5d %d\n", $tp.bytes_acked / 1024, $tp.bytes_received / 1024, $delta_ms);
+    printf("%5d %5d %d\n", $tp->bytes_acked / 1024, $tp->bytes_received / 1024, $delta_ms);
 
     // Swallowing deletion failures as they are expected
-    $ignore = delete(@birth, $sk);
-    $ignore = delete(@skpid, $sk);
-    $ignore = delete(@skcomm, $sk);
+    delete(@birth[$sk]);
+    delete(@skpid[$sk]);
+    delete(@skcomm[$sk]);
   }
 }
 

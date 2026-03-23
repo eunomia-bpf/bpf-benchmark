@@ -10,7 +10,9 @@
 use std::any::{Any, TypeId};
 use std::collections::HashMap;
 
-use crate::insn::{BpfInsn, BPF_KINSN_ENC_PACKED_CALL};
+use serde::Serialize;
+
+use crate::insn::{dump_bytecode, BpfBytecodeDump, BpfInsn, BPF_KINSN_ENC_PACKED_CALL};
 
 // ── Program metadata ────────────────────────────────────────────────
 
@@ -367,6 +369,13 @@ pub struct PassContext {
     pub platform: PlatformCapabilities,
     /// Policy configuration (which passes are enabled, parameters, etc.).
     pub policy: PolicyConfig,
+    /// Debug logging configuration.
+    pub debug: DebugConfig,
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct DebugConfig {
+    pub enabled: bool,
 }
 
 /// Available kfuncs and their BTF IDs.
@@ -604,6 +613,14 @@ pub struct TransformAttribution {
     pub pass_name: String,
 }
 
+#[derive(Clone, Debug, Serialize)]
+pub struct PassDebugTrace {
+    pub pass_name: String,
+    pub changed: bool,
+    pub bytecode_before: BpfBytecodeDump,
+    pub bytecode_after: BpfBytecodeDump,
+}
+
 /// Pipeline execution result.
 #[derive(Clone, Debug)]
 pub struct PipelineResult {
@@ -612,6 +629,9 @@ pub struct PipelineResult {
     pub program_changed: bool,
     /// Attribution of PC ranges to passes (populated for rollback support).
     pub attribution: Vec<TransformAttribution>,
+    /// Full bytecode dumps around each executed pass, only populated when
+    /// debug logging is enabled.
+    pub debug_traces: Vec<PassDebugTrace>,
 }
 
 /// PassManager — manages and executes the pass pipeline.
@@ -678,6 +698,7 @@ impl PassManager {
         let mut pass_results = Vec::new();
         let mut total_sites = 0usize;
         let mut any_changed = false;
+        let mut debug_traces = Vec::new();
 
         for pass in &self.passes {
             // Check whether policy allows this pass.
@@ -707,6 +728,7 @@ impl PassManager {
 
             // Record insn count before this pass runs.
             let insns_before = program.insns.len();
+            let before_dump = ctx.debug.enabled.then(|| dump_bytecode(&program.insns));
 
             // Run the pass.
             let mut result = pass.run(program, &mut cache, ctx)?;
@@ -714,6 +736,16 @@ impl PassManager {
             // Fill in insns_before/insns_after from the actual program state.
             result.insns_before = insns_before;
             result.insns_after = program.insns.len();
+            let after_dump = ctx.debug.enabled.then(|| dump_bytecode(&program.insns));
+
+            if let (Some(bytecode_before), Some(bytecode_after)) = (before_dump, after_dump) {
+                debug_traces.push(PassDebugTrace {
+                    pass_name: result.pass_name.clone(),
+                    changed: result.changed,
+                    bytecode_before,
+                    bytecode_after,
+                });
+            }
 
             if result.changed {
                 // Transform modified the program — invalidate cached analyses.
@@ -761,6 +793,7 @@ impl PassManager {
             total_sites_applied: total_sites,
             program_changed: any_changed,
             attribution,
+            debug_traces,
         })
     }
 
@@ -806,6 +839,7 @@ impl PassContext {
             },
             platform: PlatformCapabilities::default(),
             policy: PolicyConfig::default(),
+            debug: DebugConfig::default(),
         }
     }
 }
@@ -1316,11 +1350,31 @@ mod tests {
             total_sites_applied: 2,
             program_changed: true,
             attribution: vec![],
+            debug_traces: vec![],
         };
 
         assert!(pr.program_changed);
         assert_eq!(pr.total_sites_applied, 2);
         assert_eq!(pr.pass_results.len(), 2);
+    }
+
+    #[test]
+    fn test_pass_manager_collects_debug_traces_when_enabled() {
+        let mut pm = PassManager::new();
+        pm.add_pass(AppendNopPass);
+
+        let mut ctx = PassContext::test_default();
+        ctx.debug.enabled = true;
+
+        let mut prog = make_program(vec![exit_insn()]);
+        let result = pm
+            .run(&mut prog, &ctx)
+            .expect("pass manager should succeed");
+
+        assert_eq!(result.debug_traces.len(), 1);
+        assert_eq!(result.debug_traces[0].pass_name, "append_nop");
+        assert_eq!(result.debug_traces[0].bytecode_before.insn_count, 1);
+        assert_eq!(result.debug_traces[0].bytecode_after.insn_count, 2);
     }
 
     #[test]
@@ -1331,6 +1385,7 @@ mod tests {
         assert!(!ctx.platform.has_bmi1);
         assert!(ctx.policy.enabled_passes.is_empty());
         assert!(ctx.policy.disabled_passes.is_empty());
+        assert!(!ctx.debug.enabled);
     }
 
     #[test]
@@ -1352,6 +1407,7 @@ mod tests {
             },
             platform: PlatformCapabilities::default(),
             policy: PolicyConfig::default(),
+            debug: DebugConfig::default(),
         };
         assert!(ctx.kfunc_registry.rotate64_btf_id > 0);
         assert!(ctx.kfunc_registry.select64_btf_id < 0);

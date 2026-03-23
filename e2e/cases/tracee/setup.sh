@@ -4,6 +4,112 @@ set -euo pipefail
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd -- "${SCRIPT_DIR}/../../.." && pwd)
 CACHED_BINARY="${REPO_ROOT}/e2e/cases/tracee/bin/tracee"
+PATCHED_SOURCE_TAG="v0.24.1"
+PATCHED_VERSION="v0.24.1-kernel7-patch1"
+
+tracee_version() {
+  local bin="$1"
+  local output=""
+  if [[ ! -x "${bin}" ]]; then
+    return 1
+  fi
+  output="$("${bin}" --version 2>/dev/null || "${bin}" version 2>/dev/null || true)"
+  awk '
+    match($0, /(v[0-9][^[:space:]]*)/, match_value) {
+      print match_value[1]
+      exit
+    }
+  ' <<<"${output}"
+}
+
+cache_tracee_binary() {
+  local source_bin="$1"
+  mkdir -p "$(dirname "${CACHED_BINARY}")"
+  mkdir -p /tmp/tracee-bin
+  if [[ "${source_bin}" != "${CACHED_BINARY}" ]]; then
+    cp "${source_bin}" "${CACHED_BINARY}"
+  fi
+  cp "${source_bin}" /tmp/tracee-bin/tracee
+  chmod +x "${CACHED_BINARY}" /tmp/tracee-bin/tracee
+}
+
+build_patched_tracee_binary() {
+  local build_root=""
+  local build_log=""
+  local jobs="1"
+
+  for tool in git make clang go pkg-config; do
+    if ! command -v "${tool}" >/dev/null 2>&1; then
+      return 1
+    fi
+  done
+
+  if command -v nproc >/dev/null 2>&1; then
+    jobs="$(nproc)"
+  fi
+
+  build_root=$(mktemp -d /tmp/tracee-src-XXXXXX)
+  build_log="${build_root}/build.log"
+  if ! git clone --branch "${PATCHED_SOURCE_TAG}" --depth=1 https://github.com/aquasecurity/tracee.git "${build_root}" >/dev/null 2>&1; then
+    return 1
+  fi
+
+  perl -0pi -e '
+    s@statfunc struct in6_addr get_sock_v6_rcv_saddr\(struct sock \*sock\)\n\{\n    return BPF_CORE_READ\(sock, sk_v6_rcv_saddr\);\n\}@statfunc struct in6_addr get_sock_v6_rcv_saddr(struct sock *sock)\n{\n    struct in6_addr addr = {};\n\n    if (bpf_core_field_exists(sock->sk_v6_rcv_saddr)) {\n        addr = BPF_CORE_READ(sock, sk_v6_rcv_saddr);\n    }\n\n    return addr;\n}@;
+    s@statfunc struct in6_addr get_ipv6_pinfo_saddr\(struct ipv6_pinfo \*np\)\n\{\n    return BPF_CORE_READ\(np, saddr\);\n\}@statfunc struct in6_addr get_ipv6_pinfo_saddr(struct ipv6_pinfo *np)\n{\n    struct in6_addr addr = {};\n\n    if (np != NULL && bpf_core_field_exists(np->saddr)) {\n        addr = BPF_CORE_READ(np, saddr);\n    }\n\n    return addr;\n}@;
+    s@statfunc struct in6_addr get_sock_v6_daddr\(struct sock \*sock\)\n\{\n    return BPF_CORE_READ\(sock, sk_v6_daddr\);\n\}@statfunc struct in6_addr get_sock_v6_daddr(struct sock *sock)\n{\n    struct in6_addr addr = {};\n\n    if (bpf_core_field_exists(sock->sk_v6_daddr)) {\n        addr = BPF_CORE_READ(sock, sk_v6_daddr);\n    }\n\n    return addr;\n}@;
+    s@statfunc struct ipv6_pinfo \*get_inet_pinet6\(struct inet_sock \*inet\)\n\{\n    struct ipv6_pinfo \*pinet6_own_impl;\n    bpf_core_read\(&pinet6_own_impl, sizeof\(struct ipv6_pinfo \*\), &inet->pinet6\);\n    return pinet6_own_impl;\n\}@statfunc struct ipv6_pinfo *get_inet_pinet6(struct inet_sock *inet)\n{\n    struct ipv6_pinfo *pinet6_own_impl = NULL;\n\n    if (bpf_core_field_exists(inet->pinet6)) {\n        bpf_core_read(&pinet6_own_impl, sizeof(struct ipv6_pinfo *), &inet->pinet6);\n    }\n\n    return pinet6_own_impl;\n}@;
+  ' "${build_root}/pkg/ebpf/c/common/network.h"
+
+  if ! make -C "${build_root}" -j"${jobs}" tracee RELEASE_VERSION="${PATCHED_VERSION}" >"${build_log}" 2>&1; then
+    tail -n 60 "${build_log}" >&2 || true
+    return 1
+  fi
+
+  cache_tracee_binary "${build_root}/dist/tracee"
+  printf '%s\n' "${CACHED_BINARY}"
+}
+
+select_tracee_binary() {
+  local candidate="${1:-}"
+  local version=""
+  local patched_version=""
+  local patched_binary=""
+
+  if [[ -n "${candidate}" ]] && [[ ! -x "${candidate}" ]]; then
+    candidate=""
+  fi
+
+  if [[ -n "${candidate}" ]]; then
+    version="$(tracee_version "${candidate}")"
+    if [[ "${version}" == "${PATCHED_VERSION}" ]]; then
+      printf '%s\n' "${candidate}"
+      return 0
+    fi
+    if [[ "${version}" != "${PATCHED_SOURCE_TAG}" ]]; then
+      printf '%s\n' "${candidate}"
+      return 0
+    fi
+  fi
+
+  if [[ -x "${CACHED_BINARY}" ]]; then
+    patched_version="$(tracee_version "${CACHED_BINARY}")"
+    if [[ "${patched_version}" == "${PATCHED_VERSION}" ]]; then
+      printf '%s\n' "${CACHED_BINARY}"
+      return 0
+    fi
+  fi
+
+  patched_binary="$(build_patched_tracee_binary || true)"
+  if [[ -n "${patched_binary}" ]]; then
+    printf '%s\n' "${patched_binary}"
+    return 0
+  fi
+
+  if [[ -n "${candidate}" ]]; then
+    printf '%s\n' "${candidate}"
+  fi
+}
 
 tracee_bin=""
 if command -v tracee >/dev/null 2>&1; then
@@ -42,6 +148,11 @@ if [[ "${#missing_pkgs[@]}" -gt 0 ]]; then
   done
 fi
 
+resolved_tracee_bin="$(select_tracee_binary "${tracee_bin}" || true)"
+if [[ -n "${resolved_tracee_bin}" ]]; then
+  tracee_bin="${resolved_tracee_bin}"
+fi
+
 if [[ -z "${tracee_bin}" ]]; then
   apt_candidate=""
   if command -v apt-cache >/dev/null 2>&1; then
@@ -53,6 +164,11 @@ if [[ -z "${tracee_bin}" ]]; then
       tracee_bin="$(command -v tracee)"
     fi
   fi
+fi
+
+resolved_tracee_bin="$(select_tracee_binary "${tracee_bin}" || true)"
+if [[ -n "${resolved_tracee_bin}" ]]; then
+  tracee_bin="${resolved_tracee_bin}"
 fi
 
 if [[ -z "${tracee_bin}" ]]; then
@@ -97,25 +213,22 @@ PY
         cp "${extract_dir}/dist/tracee" "${install_dir}/tracee"
         chmod +x "${install_dir}/tracee"
         tracee_bin="${install_dir}/tracee"
-        # Also cache inside the repo so the VM guest can access it
-        mkdir -p "$(dirname "${CACHED_BINARY}")"
-        cp "${install_dir}/tracee" "${CACHED_BINARY}"
-        chmod +x "${CACHED_BINARY}"
+        cache_tracee_binary "${install_dir}/tracee"
       fi
     fi
   fi
+fi
+
+resolved_tracee_bin="$(select_tracee_binary "${tracee_bin}" || true)"
+if [[ -n "${resolved_tracee_bin}" ]]; then
+  tracee_bin="${resolved_tracee_bin}"
 fi
 
 if [[ -n "${tracee_bin}" ]]; then
   if ! "${tracee_bin}" --version >/dev/null 2>&1; then
     "${tracee_bin}" version >/dev/null 2>&1 || true
   fi
-  # Cache the binary inside the repo so the VM guest can access it via --rwdir
-  if [[ ! -x "${CACHED_BINARY}" ]] && [[ "${tracee_bin}" != "${CACHED_BINARY}" ]]; then
-    mkdir -p "$(dirname "${CACHED_BINARY}")"
-    cp "${tracee_bin}" "${CACHED_BINARY}" 2>/dev/null || true
-    chmod +x "${CACHED_BINARY}" 2>/dev/null || true
-  fi
+  cache_tracee_binary "${tracee_bin}" 2>/dev/null || true
 fi
 
 echo "TRACEE_BINARY=${tracee_bin}"

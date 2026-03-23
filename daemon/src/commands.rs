@@ -5,10 +5,10 @@ use std::collections::{HashMap, HashSet};
 use std::os::unix::io::{AsRawFd, RawFd};
 use std::time::{Duration, Instant};
 
-use anyhow::{Context, Result};
+use anyhow::Result;
 use serde::Serialize;
 
-use crate::{bpf, pass, passes, profiler, verifier_log};
+use crate::{bpf, insn, pass, passes, profiler, verifier_log};
 
 // ── OptimizeOneResult — structured return from try_apply_one ────────
 
@@ -22,6 +22,8 @@ pub(crate) struct OptimizeOneResult {
     pub passes: Vec<PassDetail>,
     pub attempts: Vec<AttemptRecord>,
     pub timings_ns: TimingsNs,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error_message: Option<String>,
 }
 
 /// Program identity and size information.
@@ -87,6 +89,30 @@ pub(crate) struct AttemptRecord {
     pub failure_pc: Option<usize>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub attributed_pass: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub debug: Option<AttemptDebug>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub(crate) struct AttemptDebug {
+    pub pass_traces: Vec<pass::PassDebugTrace>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pre_rejit_bytecode: Option<insn::BpfBytecodeDump>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub verifier_log: Option<VerifierLogRecord>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub final_xlated_bytecode: Option<insn::BpfBytecodeDump>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub final_jited_machine_code: Option<bpf::MachineCodeDump>,
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub warnings: Vec<String>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub(crate) struct VerifierLogRecord {
+    pub source: String,
+    pub log_level: u32,
+    pub log: String,
 }
 
 /// Timing breakdown in nanoseconds.
@@ -162,6 +188,42 @@ fn build_rejit_fd_array(required_module_fds: &[RawFd]) -> Vec<RawFd> {
     fd_array.push(required_module_fds[0]);
     fd_array.extend(required_module_fds.iter().copied());
     fd_array
+}
+
+fn sorted_strings(values: impl IntoIterator<Item = String>) -> Vec<String> {
+    let mut values: Vec<String> = values.into_iter().collect();
+    values.sort();
+    values
+}
+
+fn new_attempt_debug(
+    debug_enabled: bool,
+    pass_traces: Vec<pass::PassDebugTrace>,
+) -> Option<AttemptDebug> {
+    debug_enabled.then_some(AttemptDebug {
+        pass_traces,
+        pre_rejit_bytecode: None,
+        verifier_log: None,
+        final_xlated_bytecode: None,
+        final_jited_machine_code: None,
+        warnings: Vec::new(),
+    })
+}
+
+fn push_debug_warning(debug: &mut Option<AttemptDebug>, warning: impl Into<String>) {
+    if let Some(debug) = debug.as_mut() {
+        debug.warnings.push(warning.into());
+    }
+}
+
+pub(crate) fn emit_debug_result(result: &OptimizeOneResult, debug_enabled: bool) {
+    if !debug_enabled {
+        return;
+    }
+    match serde_json::to_string(result) {
+        Ok(json) => eprintln!("{}", json),
+        Err(err) => eprintln!("debug-log: failed to serialize optimize result: {err}"),
+    }
 }
 
 /// Attribute a verifier failure to a specific pass using the pipeline's
@@ -386,195 +448,19 @@ pub(crate) fn cmd_apply(
     pgo_config: &Option<PgoConfig>,
     rollback_enabled: bool,
 ) -> Result<()> {
-    let fd = bpf::bpf_prog_get_fd_by_id(prog_id).context("open program")?;
-    let (info, orig_insns) =
-        bpf::bpf_prog_get_info(fd.as_raw_fd(), true).context("get program info")?;
+    let result = try_apply_one(prog_id, ctx, pass_names, pgo_config, rollback_enabled)?;
+    emit_debug_result(&result, ctx.debug.enabled);
 
-    if orig_insns.is_empty() {
+    if result.program.orig_insn_count == 0 {
         println!("prog {}: no original instructions available", prog_id);
-        return Ok(());
+    } else if !result.summary.applied {
+        println!(
+            "prog {} ({}): no transforms applied",
+            result.program.prog_id, result.program.prog_name
+        );
     }
 
-    // Fetch map IDs for FD relocation before REJIT.
-    let map_ids = bpf::bpf_prog_get_map_ids(fd.as_raw_fd()).unwrap_or_default();
-
-    // Collect PGO data once (reused across rollback retries).
-    let profiling = collect_pgo_data(prog_id, pgo_config);
-
-    let meta = pass::ProgMeta {
-        prog_id: info.id,
-        prog_type: info.prog_type,
-        prog_name: info.name_str().to_string(),
-        run_cnt: info.run_cnt,
-        run_time_ns: info.run_time_ns,
-        ..Default::default()
-    };
-
-    // Rollback loop: on verifier rejection, attribute the failure to a pass,
-    // disable it, and retry with the remaining passes.
-    let mut disabled_passes: HashSet<String> = HashSet::new();
-    let max_retries = 10; // safety bound
-
-    for attempt in 0..=max_retries {
-        // Build a fresh program from the original instructions each time.
-        let mut program = pass::BpfProgram::new(orig_insns.clone(), meta.clone());
-
-        // Build pipeline with disabled passes applied via policy.
-        let pm = build_pipeline(pass_names);
-        let mut local_ctx = ctx.clone();
-        for disabled in &disabled_passes {
-            local_ctx.policy.disabled_passes.push(disabled.clone());
-        }
-
-        let pipeline_result =
-            pm.run_with_profiling(&mut program, &local_ctx, profiling.as_ref())?;
-
-        if !pipeline_result.program_changed {
-            if attempt == 0 {
-                println!(
-                    "prog {} ({}): no transforms applied",
-                    prog_id,
-                    info.name_str()
-                );
-            } else {
-                println!(
-                    "prog {} ({}): no transforms remain after disabling {} passes",
-                    prog_id,
-                    info.name_str(),
-                    disabled_passes.len()
-                );
-            }
-            return Ok(());
-        }
-
-        if attempt == 0 {
-            println!(
-                "prog {} ({}): {} passes, {} sites applied ({} -> {} insns)",
-                prog_id,
-                info.name_str(),
-                pipeline_result.pass_results.len(),
-                pipeline_result.total_sites_applied,
-                orig_insns.len(),
-                program.insns.len(),
-            );
-            for pr in &pipeline_result.pass_results {
-                if pr.sites_applied > 0 {
-                    println!("  {}: {} sites applied", pr.pass_name, pr.sites_applied);
-                }
-            }
-        }
-
-        // Relocate stale map FDs in the rewritten bytecode.
-        // The original bytecode contains FDs from the loading process which are
-        // invalid in the daemon's process context.
-        let _map_fds_guard =
-            bpf::relocate_map_fds(&mut program.insns, &map_ids).unwrap_or_else(|e| {
-                eprintln!("  warning: map FD relocation failed: {:#}", e);
-                Vec::new()
-            });
-
-        let fd_array = build_rejit_fd_array(&program.required_module_fds);
-        let all_fds = local_ctx.kfunc_registry.all_module_fds();
-        for &fd_needed in &program.required_module_fds {
-            if !all_fds.contains(&fd_needed) {
-                eprintln!(
-                    "  warning: required module fd {} not in registry ({:?})",
-                    fd_needed, all_fds
-                );
-            }
-        }
-
-        match bpf::bpf_prog_rejit(fd.as_raw_fd(), &program.insns, &fd_array) {
-            Ok(result) => {
-                if disabled_passes.is_empty() {
-                    println!("  REJIT successful");
-                } else {
-                    println!(
-                        "  REJIT successful (after disabling: {})",
-                        disabled_passes
-                            .iter()
-                            .cloned()
-                            .collect::<Vec<_>>()
-                            .join(", ")
-                    );
-                }
-                if !result.verifier_log.is_empty() {
-                    eprintln!(
-                        "  verifier log (success): {} bytes",
-                        result.verifier_log.len()
-                    );
-                }
-                return Ok(());
-            }
-            Err(e) => {
-                let err_msg = format!("{:#}", e);
-
-                // Extract verifier log for attribution.
-                let log_text = err_msg
-                    .find("verifier log:\n")
-                    .map(|pos| &err_msg[pos + "verifier log:\n".len()..])
-                    .unwrap_or("");
-
-                // Attempt rollback if enabled.
-                if rollback_enabled && !log_text.is_empty() {
-                    if let Some(failed_pass) =
-                        attribute_verifier_failure(log_text, &pipeline_result.attribution)
-                    {
-                        // Don't disable the same pass twice (shouldn't happen, but safety).
-                        if !disabled_passes.contains(&failed_pass) {
-                            let failed_pc = verifier_log::extract_failure_pc(log_text);
-                            eprintln!(
-                                "  WARN: pass '{}' caused verifier rejection{} for prog {} ({})",
-                                failed_pass,
-                                failed_pc.map_or(String::new(), |pc| format!(" at PC {}", pc)),
-                                prog_id,
-                                info.name_str(),
-                            );
-                            eprintln!(
-                                "        Disabling '{}', retrying with {} remaining passes...",
-                                failed_pass,
-                                pipeline_result
-                                    .pass_results
-                                    .iter()
-                                    .filter(|pr| pr.sites_applied > 0)
-                                    .count()
-                                    .saturating_sub(1),
-                            );
-                            disabled_passes.insert(failed_pass);
-                            continue; // retry
-                        }
-                    }
-                }
-
-                // Cannot attribute or rollback disabled — report and fail.
-                if !log_text.is_empty() {
-                    let parsed = verifier_log::parse_verifier_log(log_text);
-                    eprintln!("  REJIT failed for prog {} ({}):", prog_id, info.name_str());
-                    eprintln!("  verifier rejected with {} state snapshots", parsed.len());
-                    for vi in &parsed {
-                        let regs: Vec<String> = vi
-                            .regs
-                            .iter()
-                            .map(|(r, s)| format!("R{}={}", r, s.reg_type))
-                            .collect();
-                        eprintln!("    pc={}: {}", vi.pc, regs.join(" "));
-                    }
-                }
-                return Err(e).context("BPF_PROG_REJIT failed");
-            }
-        }
-    }
-
-    anyhow::bail!(
-        "prog {}: exhausted rollback retries ({} passes disabled: {})",
-        prog_id,
-        disabled_passes.len(),
-        disabled_passes
-            .iter()
-            .cloned()
-            .collect::<Vec<_>>()
-            .join(", ")
-    )
+    Ok(())
 }
 
 pub(crate) fn cmd_apply_all(
@@ -590,8 +476,12 @@ pub(crate) fn cmd_apply_all(
     for prog_id in bpf::iter_prog_ids() {
         total += 1;
         match try_apply_one(prog_id, ctx, pass_names, pgo_config, rollback_enabled) {
-            Ok(result) if result.summary.applied => applied += 1,
-            Ok(_) => {}
+            Ok(result) => {
+                emit_debug_result(&result, ctx.debug.enabled);
+                if result.summary.applied {
+                    applied += 1;
+                }
+            }
             Err(e) => {
                 eprintln!("  prog {}: {:#}", prog_id, e);
                 errors += 1;
@@ -668,6 +558,7 @@ pub(crate) fn try_apply_one(
     let total_start = Instant::now();
     let fd = bpf::bpf_prog_get_fd_by_id(prog_id)?;
     let (info, orig_insns) = bpf::bpf_prog_get_info(fd.as_raw_fd(), true)?;
+    let debug_enabled = ctx.debug.enabled;
 
     let prog_name = info.name_str().to_string();
     let orig_insn_count = if !orig_insns.is_empty() {
@@ -676,14 +567,23 @@ pub(crate) fn try_apply_one(
         info.orig_prog_len as usize / 8
     };
 
-    // Helper to build result for early-return (no orig insns or no changes).
-    let make_noop_result = |status: &str,
-                            applied: bool,
-                            final_count: usize,
-                            passes: Vec<PassDetail>,
-                            pipeline_ns: u64|
+    let make_result = |status: &str,
+                       applied: bool,
+                       program_changed: bool,
+                       total_sites_applied: usize,
+                       final_count: usize,
+                       passes: Vec<PassDetail>,
+                       attempts: Vec<AttemptRecord>,
+                       pipeline_ns: u64,
+                       rejit_ns: u64,
+                       final_disabled_passes: Vec<String>,
+                       error_message: Option<String>|
      -> OptimizeOneResult {
         let total_ns = total_start.elapsed().as_nanos() as u64;
+        let verifier_retries = attempts
+            .iter()
+            .filter(|attempt| attempt.result == "verifier_rejected")
+            .count();
         OptimizeOneResult {
             status: status.to_string(),
             program: ProgramInfo {
@@ -696,25 +596,38 @@ pub(crate) fn try_apply_one(
             },
             summary: OptimizeSummary {
                 applied,
-                program_changed: false,
-                total_sites_applied: 0,
+                program_changed,
+                total_sites_applied,
                 passes_executed: passes.len(),
-                passes_changed: 0,
-                verifier_retries: 0,
-                final_disabled_passes: vec![],
+                passes_changed: passes.iter().filter(|pass| pass.changed).count(),
+                verifier_retries,
+                final_disabled_passes,
             },
             passes,
-            attempts: vec![],
+            attempts,
             timings_ns: TimingsNs {
                 pipeline_run_ns: pipeline_ns,
-                rejit_syscall_ns: 0,
+                rejit_syscall_ns: rejit_ns,
                 total_ns,
             },
+            error_message,
         }
     };
 
     if orig_insns.is_empty() {
-        return Ok(make_noop_result("ok", false, orig_insn_count, vec![], 0));
+        return Ok(make_result(
+            "ok",
+            false,
+            false,
+            0,
+            orig_insn_count,
+            vec![],
+            vec![],
+            0,
+            0,
+            vec![],
+            None,
+        ));
     }
 
     // Fetch map IDs for FD relocation before REJIT.
@@ -735,9 +648,7 @@ pub(crate) fn try_apply_one(
     let mut disabled_passes: HashSet<String> = HashSet::new();
     let max_retries = 10;
     let mut attempts: Vec<AttemptRecord> = Vec::new();
-    #[allow(unused_assignments)]
     let mut last_pass_details: Vec<PassDetail> = Vec::new();
-    #[allow(unused_assignments)]
     let mut total_pipeline_ns: u64 = 0;
     let mut total_rejit_ns: u64 = 0;
 
@@ -745,7 +656,7 @@ pub(crate) fn try_apply_one(
         let mut program = pass::BpfProgram::new(orig_insns.clone(), meta.clone());
         let pm = build_pipeline(pass_names);
         let mut local_ctx = ctx.clone();
-        for disabled in &disabled_passes {
+        for disabled in sorted_strings(disabled_passes.iter().cloned()) {
             local_ctx.policy.disabled_passes.push(disabled.clone());
         }
 
@@ -753,7 +664,7 @@ pub(crate) fn try_apply_one(
         let pipeline_result =
             pm.run_with_profiling(&mut program, &local_ctx, profiling.as_ref())?;
         let pipeline_elapsed = pipeline_start.elapsed().as_nanos() as u64;
-        total_pipeline_ns = pipeline_elapsed;
+        total_pipeline_ns += pipeline_elapsed;
 
         // Build per-pass details from the latest pipeline run.
         last_pass_details = pipeline_result
@@ -761,14 +672,32 @@ pub(crate) fn try_apply_one(
             .iter()
             .map(PassDetail::from)
             .collect();
+        let mut attempt_debug =
+            new_attempt_debug(debug_enabled, pipeline_result.debug_traces.clone());
+        let disabled_passes_sorted = sorted_strings(disabled_passes.iter().cloned());
 
         if !pipeline_result.program_changed {
-            return Ok(make_noop_result(
+            attempts.push(AttemptRecord {
+                attempt,
+                disabled_passes: disabled_passes_sorted.clone(),
+                result: "no_change".to_string(),
+                failure_pc: None,
+                attributed_pass: None,
+                debug: attempt_debug,
+            });
+
+            return Ok(make_result(
                 "ok",
                 false,
+                false,
+                0,
                 orig_insn_count,
                 last_pass_details,
-                pipeline_elapsed,
+                attempts,
+                total_pipeline_ns,
+                total_rejit_ns,
+                disabled_passes_sorted,
+                None,
             ));
         }
 
@@ -789,8 +718,16 @@ pub(crate) fn try_apply_one(
         let _map_fds_guard =
             bpf::relocate_map_fds(&mut program.insns, &map_ids).unwrap_or_else(|e| {
                 eprintln!("    warning: map FD relocation failed: {:#}", e);
+                push_debug_warning(
+                    &mut attempt_debug,
+                    format!("map FD relocation failed before REJIT: {e:#}"),
+                );
                 Vec::new()
             });
+
+        if let Some(debug) = attempt_debug.as_mut() {
+            debug.pre_rejit_bytecode = Some(insn::dump_bytecode(&program.insns));
+        }
 
         let fd_array = build_rejit_fd_array(&program.required_module_fds);
         let all_fds = local_ctx.kfunc_registry.all_module_fds();
@@ -800,14 +737,21 @@ pub(crate) fn try_apply_one(
                     "    warning: required module fd {} not in registry ({:?})",
                     fd_needed, all_fds
                 );
+                push_debug_warning(
+                    &mut attempt_debug,
+                    format!(
+                        "required module fd {fd_needed} missing from registry {:?}",
+                        all_fds
+                    ),
+                );
             }
         }
 
         let rejit_start = Instant::now();
-        match bpf::bpf_prog_rejit(fd.as_raw_fd(), &program.insns, &fd_array) {
-            Ok(_) => {
+        match bpf::bpf_prog_rejit(fd.as_raw_fd(), &program.insns, &fd_array, debug_enabled) {
+            Ok(rejit_result) => {
                 let rejit_elapsed = rejit_start.elapsed().as_nanos() as u64;
-                total_rejit_ns = rejit_elapsed;
+                total_rejit_ns += rejit_elapsed;
 
                 if disabled_passes.is_empty() {
                     println!("    REJIT ok");
@@ -822,44 +766,57 @@ pub(crate) fn try_apply_one(
                     );
                 }
 
+                if let Some(debug) = attempt_debug.as_mut() {
+                    if rejit_result.verifier_log.is_empty() {
+                        debug.warnings.push(
+                            "REJIT succeeded but the verifier log buffer was empty".to_string(),
+                        );
+                    } else {
+                        debug.verifier_log = Some(VerifierLogRecord {
+                            source: "BPF_PROG_REJIT".to_string(),
+                            log_level: 2,
+                            log: rejit_result.verifier_log.clone(),
+                        });
+                        debug.warnings.push(
+                            "verifier log captured from BPF_PROG_REJIT(log_level=2); daemon-only debug mode cannot reconstruct the full original BPF_PROG_LOAD attr for arbitrary live programs".to_string(),
+                        );
+                    }
+
+                    match bpf::bpf_prog_get_runtime_images(fd.as_raw_fd()) {
+                        Ok(images) => {
+                            debug.final_xlated_bytecode =
+                                Some(insn::dump_bytecode(&images.xlated_insns));
+                            debug.final_jited_machine_code =
+                                Some(bpf::dump_machine_code(&images.jited_prog_insns));
+                        }
+                        Err(err) => debug.warnings.push(format!(
+                            "failed to fetch final xlated/jited images: {err:#}"
+                        )),
+                    }
+                }
+
                 attempts.push(AttemptRecord {
                     attempt,
-                    disabled_passes: disabled_passes.iter().cloned().collect(),
+                    disabled_passes: disabled_passes_sorted.clone(),
                     result: "applied".to_string(),
                     failure_pc: None,
                     attributed_pass: None,
+                    debug: attempt_debug,
                 });
 
-                let total_ns = total_start.elapsed().as_nanos() as u64;
-                let passes_changed = last_pass_details.iter().filter(|p| p.changed).count();
-
-                return Ok(OptimizeOneResult {
-                    status: "ok".to_string(),
-                    program: ProgramInfo {
-                        prog_id,
-                        prog_name: prog_name.clone(),
-                        prog_type: info.prog_type,
-                        orig_insn_count,
-                        final_insn_count,
-                        insn_delta: final_insn_count as i64 - orig_insn_count as i64,
-                    },
-                    summary: OptimizeSummary {
-                        applied: true,
-                        program_changed: true,
-                        total_sites_applied: pipeline_result.total_sites_applied,
-                        passes_executed: last_pass_details.len(),
-                        passes_changed,
-                        verifier_retries: attempt,
-                        final_disabled_passes: disabled_passes.iter().cloned().collect(),
-                    },
-                    passes: last_pass_details,
+                return Ok(make_result(
+                    "ok",
+                    true,
+                    true,
+                    pipeline_result.total_sites_applied,
+                    final_insn_count,
+                    last_pass_details,
                     attempts,
-                    timings_ns: TimingsNs {
-                        pipeline_run_ns: total_pipeline_ns,
-                        rejit_syscall_ns: total_rejit_ns,
-                        total_ns,
-                    },
-                });
+                    total_pipeline_ns,
+                    total_rejit_ns,
+                    disabled_passes_sorted,
+                    None,
+                ));
             }
             Err(e) => {
                 let rejit_elapsed = rejit_start.elapsed().as_nanos() as u64;
@@ -870,6 +827,24 @@ pub(crate) fn try_apply_one(
                     .find("verifier log:\n")
                     .map(|pos| &err_msg[pos + "verifier log:\n".len()..])
                     .unwrap_or("");
+
+                if let Some(debug) = attempt_debug.as_mut() {
+                    if !log_text.is_empty() {
+                        debug.verifier_log = Some(VerifierLogRecord {
+                            source: "BPF_PROG_REJIT".to_string(),
+                            log_level: 2,
+                            log: log_text.to_string(),
+                        });
+                        debug.warnings.push(
+                            "verifier log captured from BPF_PROG_REJIT(log_level=2) failure path"
+                                .to_string(),
+                        );
+                    } else {
+                        debug
+                            .warnings
+                            .push("REJIT failed without returning a verifier log".to_string());
+                    }
+                }
 
                 let failed_pc = verifier_log::extract_failure_pc(log_text);
 
@@ -890,10 +865,11 @@ pub(crate) fn try_apply_one(
 
                             attempts.push(AttemptRecord {
                                 attempt,
-                                disabled_passes: disabled_passes.iter().cloned().collect(),
+                                disabled_passes: disabled_passes_sorted.clone(),
                                 result: "verifier_rejected".to_string(),
                                 failure_pc: failed_pc,
                                 attributed_pass: Some(failed_pass_name.clone()),
+                                debug: attempt_debug,
                             });
 
                             disabled_passes.insert(failed_pass_name.clone());
@@ -905,10 +881,11 @@ pub(crate) fn try_apply_one(
                 // Cannot attribute or rollback disabled — record final attempt and fail.
                 attempts.push(AttemptRecord {
                     attempt,
-                    disabled_passes: disabled_passes.iter().cloned().collect(),
+                    disabled_passes: disabled_passes_sorted.clone(),
                     result: "verifier_rejected".to_string(),
                     failure_pc: failed_pc,
                     attributed_pass: None,
+                    debug: attempt_debug,
                 });
 
                 if !log_text.is_empty() {
@@ -926,16 +903,52 @@ pub(crate) fn try_apply_one(
                         eprintln!("      pc={}: {}", vi.pc, regs.join(" "));
                     }
                 }
+
+                if debug_enabled {
+                    let failure_result = make_result(
+                        "error",
+                        false,
+                        true,
+                        pipeline_result.total_sites_applied,
+                        final_insn_count,
+                        last_pass_details.clone(),
+                        attempts.clone(),
+                        total_pipeline_ns,
+                        total_rejit_ns,
+                        disabled_passes_sorted,
+                        Some(err_msg),
+                    );
+                    emit_debug_result(&failure_result, true);
+                }
                 return Err(e);
             }
         }
     }
 
-    anyhow::bail!(
+    let exhausted_msg = format!(
         "prog {}: exhausted rollback retries ({} passes disabled)",
         prog_id,
         disabled_passes.len()
-    )
+    );
+
+    if debug_enabled {
+        let failure_result = make_result(
+            "error",
+            false,
+            true,
+            0,
+            orig_insn_count,
+            last_pass_details,
+            attempts,
+            total_pipeline_ns,
+            total_rejit_ns,
+            sorted_strings(disabled_passes.iter().cloned()),
+            Some(exhausted_msg.clone()),
+        );
+        emit_debug_result(&failure_result, true);
+    }
+
+    anyhow::bail!(exhausted_msg)
 }
 
 fn fmt_avg(value: Option<f64>) -> String {
@@ -1002,12 +1015,14 @@ mod tests {
                 result: "applied".to_string(),
                 failure_pc: None,
                 attributed_pass: None,
+                debug: None,
             }],
             timings_ns: TimingsNs {
                 pipeline_run_ns: 100_000,
                 rejit_syscall_ns: 50_000,
                 total_ns: 200_000,
             },
+            error_message: None,
         };
 
         let json = serde_json::to_string(&result).expect("serialization should succeed");
@@ -1033,9 +1048,11 @@ mod tests {
         // failure_pc and attributed_pass should be absent when None
         assert!(parsed["attempts"][0].get("failure_pc").is_none());
         assert!(parsed["attempts"][0].get("attributed_pass").is_none());
+        assert!(parsed["attempts"][0].get("debug").is_none());
         assert_eq!(parsed["timings_ns"]["pipeline_run_ns"], 100_000);
         assert_eq!(parsed["timings_ns"]["rejit_syscall_ns"], 50_000);
         assert_eq!(parsed["timings_ns"]["total_ns"], 200_000);
+        assert!(parsed.get("error_message").is_none());
     }
 
     #[test]
@@ -1067,6 +1084,7 @@ mod tests {
                     result: "verifier_rejected".to_string(),
                     failure_pc: Some(76),
                     attributed_pass: Some("branch_flip".to_string()),
+                    debug: None,
                 },
                 AttemptRecord {
                     attempt: 1,
@@ -1074,6 +1092,7 @@ mod tests {
                     result: "applied".to_string(),
                     failure_pc: None,
                     attributed_pass: None,
+                    debug: None,
                 },
             ],
             timings_ns: TimingsNs {
@@ -1081,6 +1100,7 @@ mod tests {
                 rejit_syscall_ns: 100_000,
                 total_ns: 400_000,
             },
+            error_message: None,
         };
 
         let json = serde_json::to_string(&result).expect("serialization should succeed");
@@ -1263,6 +1283,7 @@ R2 invalid mem access 'scalar'
             kfunc_registry: discovery.registry,
             platform: pass::PlatformCapabilities::default(),
             policy: pass::PolicyConfig::default(),
+            debug: pass::DebugConfig::default(),
         };
 
         // Find a program to try applying to.

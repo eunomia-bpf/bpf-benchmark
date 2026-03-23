@@ -116,6 +116,7 @@ fn process_request(
             };
             match commands::try_apply_one(prog_id, ctx, pass_names, pgo_config, rollback_enabled) {
                 Ok(result) => {
+                    commands::emit_debug_result(&result, ctx.debug.enabled);
                     // Serialize the full structured OptimizeOneResult.
                     match serde_json::to_value(&result) {
                         Ok(v) => v,
@@ -141,8 +142,12 @@ fn process_request(
                     pgo_config,
                     rollback_enabled,
                 ) {
-                    Ok(result) if result.summary.applied => applied += 1,
-                    Ok(_) => {}
+                    Ok(result) => {
+                        commands::emit_debug_result(&result, ctx.debug.enabled);
+                        if result.summary.applied {
+                            applied += 1;
+                        }
+                    }
                     Err(_) => errors += 1,
                 }
             }
@@ -214,12 +219,14 @@ pub(crate) fn cmd_watch(
         let mut errors = 0u32;
         for prog_id in &ranked_ids {
             match commands::try_apply_one(*prog_id, ctx, pass_names, pgo_config, rollback_enabled) {
-                Ok(result) if result.summary.applied => {
-                    optimized.insert(*prog_id);
-                    applied += 1;
-                }
-                Ok(_) => {
-                    no_op.insert(*prog_id);
+                Ok(result) => {
+                    commands::emit_debug_result(&result, ctx.debug.enabled);
+                    if result.summary.applied {
+                        optimized.insert(*prog_id);
+                        applied += 1;
+                    } else {
+                        no_op.insert(*prog_id);
+                    }
                 }
                 Err(e) => {
                     let count = fail_count.entry(*prog_id).or_insert(0);

@@ -5,6 +5,7 @@ import ctypes
 import json
 import os
 import re
+import shlex
 import subprocess
 import sys
 import threading
@@ -165,7 +166,7 @@ class TraceeAgentSession:
     def __enter__(self) -> "TraceeAgentSession":
         preexisting = sample_bpf_stats(_current_prog_ids())
         preexisting_ids = set(preexisting)
-        last_error = "Tracee never became healthy"
+        failures: list[str] = []
         for command in self.commands:
             self.collector = TraceeOutputCollector()
             proc = start_agent(command[0], command[1:], env={"HOME": os.environ.get("HOME", str(ROOT_DIR))})
@@ -204,9 +205,11 @@ class TraceeAgentSession:
                             break
                     return self
             snapshot = self.collector.snapshot()
-            last_error = tail_text("\n".join(snapshot.get("stderr_tail") or snapshot.get("stdout_tail") or []))
+            failures.append(_format_launch_failure(command, proc, snapshot))
             self.close()
-        raise RuntimeError(f"failed to launch Tracee: {last_error}")
+        if not failures:
+            failures.append("Tracee never became healthy")
+        raise RuntimeError(f"failed to launch Tracee: {' | '.join(failures)}")
 
     @property
     def pid(self) -> int | None:
@@ -299,23 +302,21 @@ def _ensure_empty_signatures_dir() -> Path:
 
 def build_tracee_commands(binary: str, events: Sequence[str], extra_args: Sequence[str] = ()) -> list[list[str]]:
     event_text = ",".join(str(event) for event in events)
-    # Ensure empty signatures directory exists to prevent tracee startup errors.
     sig_dir = _ensure_empty_signatures_dir()
-    sig_args = ["--signatures-dir", str(sig_dir)]
-    candidates = [
-        [binary, "--events", event_text, "--output", "json", *sig_args, *extra_args],
-        [binary, "--events", event_text, "--output", "destinations.stdout.format=json", *sig_args, *extra_args],
-        [binary, "--events", event_text, "--output", "format:json", *sig_args, *extra_args],
-    ]
-    deduped: list[list[str]] = []
-    seen: set[tuple[str, ...]] = set()
-    for command in candidates:
-        key = tuple(command)
-        if key in seen:
-            continue
-        deduped.append(command)
-        seen.add(key)
-    return deduped
+    return [[binary, "--events", event_text, "--output", "json", "--signatures-dir", str(sig_dir), *extra_args]]
+
+
+def _format_launch_failure(command: Sequence[str], proc: subprocess.Popen[str] | None, snapshot: Mapping[str, object]) -> str:
+    rendered = " ".join(shlex.quote(part) for part in command)
+    combined = "\n".join((snapshot.get("stderr_tail") or []) + (snapshot.get("stdout_tail") or []))
+    details = tail_text(combined, max_lines=40, max_chars=8000)
+    if proc is not None and proc.poll() is not None:
+        reason = f"command exited with code {proc.returncode}"
+    else:
+        reason = "command did not become healthy"
+    if details:
+        return f"{rendered}: {reason}: {details}"
+    return f"{rendered}: {reason}"
 
 
 def run_workload(spec: Mapping[str, object], duration_s: int) -> WorkloadResult:

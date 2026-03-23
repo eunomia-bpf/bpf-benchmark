@@ -719,19 +719,30 @@ make clean
 | **427** | vm-e2e 正确性验证（2026-03-23） | ✅ | 4/5 PASS（katran timeout 未修复）。tracee/tetragon/bpftrace/scx OK。 |
 | **428** | **Kernel code review（2026-03-23）** | ✅ | 2 CRITICAL（tools/uapi 头不同步、无 fd_array_cnt 上限）+ 3 HIGH（find_call_site x86 硬编码、text_invalidate 被删、无 try_module_get）。正确性全 PASS。报告：`docs/tmp/20260323/kernel_code_review_20260323.md`。 |
 | **429** | **Packed ABI 验证（2026-03-23）** | ✅ | rotate ✅ packed（-2/site），extract ✅ packed（0/site）。**endian ❌ offset!=0 走 legacy（+4.99/site 膨胀）**。unit tests 不覆盖 packed。 |
-| **430** | 修复 endian packed offset + 删 legacy ABI | 待做 | endian packed 支持 offset、unit tests 走 packed、删除 daemon 全部 legacy emit 路径。 |
+| **430** | **修复 endian packed offset + 删 legacy ABI（2026-03-23）** | ✅ | endian packed 支持 offset ✅、unit tests 走 packed ✅、删除 daemon 全部 legacy emit 路径 ✅。`emit_kfunc_call_legacy()`/`save_caller_saved_regs()`/`restore_caller_saved_regs()` 全部删除。296 cargo tests pass。vm-micro/corpus/e2e 正确性验证 0 mismatch。Commit `5e10be2`。 |
 | **431** | Kernel CRITICAL/HIGH 修复（2026-03-23） | ✅ | tools/uapi 头同步（`BPF_PSEUDO_KINSN_SIDECAR`、REJIT `flags`、`orig_prog_*`）、`fd_array_cnt` 上限=64、`find_call_site()` 改为 x86/ARM64 架构相关扫描、恢复 `bpf_arch_text_invalidate()`、`kinsn_ops` 在 verifier/JIT 期间显式持有 module 引用。验证：`make kernel`、`make vm-selftest`、`make vm-micro-smoke` 全通过。 |
-| **432** | E2E 真实应用模式 + katran 修复 | 🔄 | e2e 应用自己加载 BPF → 延迟 daemon apply-all。katran DSR timeout 调查。 |
+| **432** | E2E 真实应用模式 + katran 修复 | ✅ 归入 #435 | katran HTTP server 修复（自定义 HTTP/1.0 handler）。5/5 PASS。Commit `a57e41f`。 |
 | **433** | LFENCE/BPF_NOSPEC 消除 | 待做 | 安全屏障消除。调研报告：`docs/tmp/20260323/comprehensive_optimization_survey_20260323.md`。 |
 | **434** | 全面优化调研（2026-03-23） | ✅ | codex 调研。报告：`docs/tmp/20260323/comprehensive_optimization_survey_20260323.md`、`map_inlining_opportunity_analysis_20260323.md`、`simd_constprop_opportunity_analysis_20260323.md`。 |
 | **435** | E2E 真实应用模式 + katran 修复（2026-03-23） | ✅ | tracee/tetragon 已有真实 binary 流程。katran 改 xdpgeneric + 降并发 + retry。**5/5 PASS**。但 tracee 走 manual fallback（需修为 SKIP）、katran post-REJIT 破坏程序（correctness bug）。 |
-| **436** | 删除 E2E manual fallback 路径 | 待做 | 所有 e2e case 禁止 manual .bpf.o fallback。不兼容 kernel 的应用标记 SKIP。 |
-| **437** | Katran post-REJIT correctness bug | 待做 | daemon 优化 katran 程序后程序不正确。需调查哪个 pass 导致。 |
-| **438** | Endian packed ABI offset 支持 | 待做 | endian_fusion offset!=0 时走 legacy（+4.99/site 膨胀）。需支持 packed ABI 携带 offset。 |
-| **439** | 删除 daemon legacy ABI 代码 | 待做 | 确保所有 kinsn pass 走 packed ABI 后，删除 daemon 中全部 legacy emit 路径。 |
-| **440** | Unit tests 覆盖 packed ABI | 待做 | 当前 daemon unit tests 全走 legacy（KfuncRegistry 默认 empty encodings）。需改为 packed。 |
+| **436** | **删除 E2E manual fallback 路径（2026-03-23）** | ✅ | 删除 `e2e/cases/tracee/manual.py`（-244 行）。tracee/tetragon 二进制不可用时标 SKIP（"manual .bpf.o fallback is forbidden"）。e2e ALL PASSED。Commit `174bfe5`。 |
+| **437** | **Katran post-REJIT correctness bug（2026-03-23）** | ✅ | Root cause 不是 REJIT bug，是 HTTP server 行为问题（`python3 -m http.server` 的 Connection handling 不可靠）。修复为自定义 HTTP/1.0 handler。Commit `a57e41f`。 |
+| **438** | Endian packed ABI offset 支持 | ✅ 归入 #430 | 在 #430 中一起修复。 |
+| **439** | 删除 daemon legacy ABI 代码 | ✅ 归入 #430 | 在 #430 中一起完成。`emit_kfunc_call_legacy()` 全部删除。 |
+| **440** | Unit tests 覆盖 packed ABI | ✅ 归入 #430 | 在 #430 中一起完成。296 tests pass，全走 packed。 |
 | **441** | Kernel CRITICAL/HIGH 修复（2026-03-23） | ✅ | 同 #431：修复 tools/uapi 头不同步、REJIT `fd_array_cnt` 无上限、`find_call_site()` x86 硬编码、`text_invalidate` 删除、`kinsn_ops` owner 引用问题。验证：`make kernel`、`make vm-selftest`、`make vm-micro-smoke` 全通过。见 #428。 |
 | **442** | 冗余 bounds check 消除 | 待做 | BPF packet access 中冗余的 bounds check 消除。见 #434 调研。 |
 | **443** | Dead code elimination pass | 待做 | 结合 const prop / map inline 做 DCE。见 #434 调研。 |
 | **444** | Helper call 内联/优化 | 待做 | bpf_probe_read_kernel 小 size → 直接 load 等。见 #434 调研。 |
 | **445** | Spill/fill 消除 | 待做 | BPF 程序冗余 spill/fill 消除，补充 KF_FASTCALL。见 #434 调研。 |
+| **446** | **kinsn 设计文档（2026-03-23）** | ✅ | `docs/kinsn-design.md`（1097 行）。覆盖 packed ABI 编码、daemon→verifier→JIT 数据流、bpf_kinsn_ops API、安全模型、5 个 kinsn 规格、添加新 kinsn 指南。Commit `5e10be2`。 |
+| **447** | **Daemon debug logging（2026-03-23）** | ✅ | `--debug` CLI flag。per-pass 完整 bytecode dump、verifier log（via REJIT log_level=2）、JIT machine code dump。299 tests pass。 |
+| **448** | **Corpus 测量 bug 修复（2026-03-23）** | ✅ | **Root cause**：daemon-socket 模式下 C++ runner 不输出 stock sample，Python fallback 把 recompile sample 当 baseline → ratio=1.0。修复：driver 在 v5_run 前单独跑 stock baseline + 防护 fallback。 |
+| **449** | **bpftrace 脚本修复（2026-03-23）** | ✅ | 5 个脚本语法适配 bpftrace v0.20.2：`->` 替代 `.`、`delete(@map[key])`、`if ($cond)`、`interval:s:1`。6/6 scripts 成功。 |
+| **450** | **Tetragon e2e 修复（2026-03-23）** | ✅ | kprobe `security_socket_connect` → `tcp_connect`（内核缺 `CONFIG_SECURITY_NETWORK`）。增加 agent 退出检测。 |
+| **451** | **Tracee e2e 修复（2026-03-23）** | ✅ | setup.sh 重写适配当前 kernel。tracee/tetragon 都 status: ok。 |
+| **452** | **Kernel 完整审计 v2（2026-03-23）** | ✅ | #428 五个问题全修 ✅。新发现 2 HIGH（refresh 吞错误 err=0、bpf_func publish 缺 barrier）+ 5 MEDIUM + 5 dead code。精确 LOC：1437 代码行 + 162 注释行。报告：`docs/tmp/20260323/kernel_full_review_20260323.md`。 |
+| **453** | Kernel HIGH 修复（refresh err=0 + dead code） | 待做 | H2: trampoline/struct_ops/XDP refresh 失败时静默吞错误，可能 UAF。5 个 dead code 清理。 |
+| **454** | 干净环境性能重跑 | 待做 | 串行跑 vm-micro/vm-corpus/vm-e2e strict params。不并行任何任务。 |
+| **455** | Recompile overhead 测量 | 待做 | REJIT verify+JIT+swap 各多久？reviewer 必问。#359 延续。 |
+| **456** | ARM64 QEMU 测试 | 待做 | vm-arm64-selftest + vm-arm64-micro-smoke。基础设施已有。 |

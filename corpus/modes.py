@@ -318,10 +318,14 @@ def paired_stock_invocation_summary(result: dict[str, Any] | None) -> dict[str, 
 
     # Fallback: when no rejit was requested, the runner emits a single sample
     # without a "phase" field.  Use it as the baseline measurement.
+    # Guard: never treat a rejit-applied sample as stock baseline — that would
+    # make baseline == v5 and produce a meaningless 1.0 speedup ratio.
     vanilla_samples = [
         dict(sample)
         for sample in all_samples
-        if sample.get("phase") is None and sample.get("exec_ns") is not None
+        if sample.get("phase") is None
+        and sample.get("exec_ns") is not None
+        and not ((sample.get("rejit") or sample.get("recompile") or {}).get("applied"))
     ]
     if vanilla_samples:
         summary["sample"] = vanilla_samples[-1]
@@ -515,6 +519,8 @@ def run_target_locally(
     scan_source = "inventory"
     daemon_counts = inventory_scan
 
+    baseline_run_raw = None
+
     with tempfile.TemporaryDirectory(prefix="corpus-v5-batch-") as tmpdir:
         xlated_path = Path(tmpdir) / "program.xlated"
         baseline_compile_raw = run_command(
@@ -540,6 +546,28 @@ def run_target_locally(
             if baseline_scan["total_sites"] > 0:
                 daemon_counts = baseline_scan
                 scan_source = f"{execution_mode}_runner_scan"
+
+        # Run a dedicated stock baseline execution (no rejit, no daemon) so we
+        # have a true pre-recompile measurement.  The C++ runner in daemon-socket
+        # mode does not emit a "stock" phase, so we must measure it ourselves.
+        if enable_exec and target.get("can_test_run"):
+            baseline_run_raw = run_command(
+                build_runner_command(
+                    runner=runner,
+                    object_path=object_path,
+                    program_name=target["program_name"],
+                    io_mode=target["io_mode"],
+                    memory_path=memory_path,
+                    input_size=int(target["input_size"]),
+                    repeat=repeat,
+                    btf_custom_path=btf_custom_path,
+                    compile_only=False,
+                    blind_apply=False,
+                    recompile_all=False,
+                    skip_families=[],
+                ),
+                timeout_seconds,
+            )
 
         v5_compile_raw = None
         v5_run_raw = None
@@ -626,7 +654,13 @@ def run_target_locally(
     record["baseline_compile"] = invocation_summary(baseline_compile_raw)
     record["v5_compile"] = invocation_summary(v5_compile_raw)
     record["v5_run"] = invocation_summary(v5_run_raw)
-    record["baseline_run"] = paired_stock_invocation_summary(v5_run_raw)
+
+    # Use the dedicated stock baseline run if available; fall back to trying
+    # to extract a stock phase from the v5 run output (for non-daemon modes).
+    record["baseline_run"] = invocation_summary(baseline_run_raw) if (
+        baseline_run_raw and baseline_run_raw.get("ok")
+    ) else paired_stock_invocation_summary(v5_run_raw)
+
     if (
         enable_exec
         and enable_recompile

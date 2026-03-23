@@ -3,6 +3,8 @@
 
 use std::fmt;
 
+use serde::Serialize;
+
 // ── Instruction classes ──────────────────────────────────────────────
 pub const BPF_LD: u8 = 0x00;
 pub const BPF_LDX: u8 = 0x01;
@@ -116,6 +118,16 @@ impl BpfInsn {
     #[inline]
     pub const fn make_regs(dst: u8, src: u8) -> u8 {
         (dst & 0xf) | ((src & 0xf) << 4)
+    }
+
+    #[inline]
+    pub fn raw_bytes(&self) -> [u8; 8] {
+        let mut bytes = [0u8; 8];
+        bytes[0] = self.code;
+        bytes[1] = self.regs;
+        bytes[2..4].copy_from_slice(&self.off.to_le_bytes());
+        bytes[4..8].copy_from_slice(&self.imm.to_le_bytes());
+        bytes
     }
 
     // ── Classification helpers ──────────────────────────────────────
@@ -288,6 +300,59 @@ impl BpfInsn {
     #[inline]
     pub const fn is_kinsn_sidecar(&self) -> bool {
         self.code == (BPF_ALU64 | BPF_MOV | BPF_K) && self.src_reg() == BPF_PSEUDO_KINSN_SIDECAR
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct BpfInsnDump {
+    pub pc: usize,
+    pub raw_hex: String,
+    pub code: u8,
+    pub regs: u8,
+    pub dst_reg: u8,
+    pub src_reg: u8,
+    pub off: i16,
+    pub imm: i32,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct BpfBytecodeDump {
+    pub insn_count: usize,
+    pub insns: Vec<BpfInsnDump>,
+}
+
+fn hex_bytes(bytes: &[u8]) -> String {
+    let mut out = String::with_capacity(bytes.len().saturating_mul(3).saturating_sub(1));
+    for (idx, byte) in bytes.iter().enumerate() {
+        if idx > 0 {
+            out.push(' ');
+        }
+        use std::fmt::Write as _;
+        let _ = write!(out, "{:02x}", byte);
+    }
+    out
+}
+
+pub fn dump_bytecode(insns: &[BpfInsn]) -> BpfBytecodeDump {
+    BpfBytecodeDump {
+        insn_count: insns.len(),
+        insns: insns
+            .iter()
+            .enumerate()
+            .map(|(pc, insn)| {
+                let raw = insn.raw_bytes();
+                BpfInsnDump {
+                    pc,
+                    raw_hex: hex_bytes(&raw),
+                    code: insn.code,
+                    regs: insn.regs,
+                    dst_reg: insn.dst_reg(),
+                    src_reg: insn.src_reg(),
+                    off: insn.off,
+                    imm: insn.imm,
+                }
+            })
+            .collect(),
     }
 }
 
@@ -523,5 +588,24 @@ mod tests {
         };
         assert!(insn.is_cond_jmp());
         assert!(insn.is_jmp_class());
+    }
+
+    #[test]
+    fn test_dump_bytecode_formats_full_insn_dump() {
+        let dump = dump_bytecode(&[BpfInsn::mov64_imm(3, 42), BpfInsn::ja(5)]);
+
+        assert_eq!(dump.insn_count, 2);
+        assert_eq!(dump.insns[0].pc, 0);
+        assert_eq!(dump.insns[0].raw_hex, "b7 03 00 00 2a 00 00 00");
+        assert_eq!(dump.insns[0].code, BPF_ALU64 | BPF_MOV | BPF_K);
+        assert_eq!(dump.insns[0].regs, BpfInsn::make_regs(3, 0));
+        assert_eq!(dump.insns[0].dst_reg, 3);
+        assert_eq!(dump.insns[0].src_reg, 0);
+        assert_eq!(dump.insns[0].off, 0);
+        assert_eq!(dump.insns[0].imm, 42);
+
+        assert_eq!(dump.insns[1].pc, 1);
+        assert_eq!(dump.insns[1].raw_hex, "05 00 05 00 00 00 00 00");
+        assert_eq!(dump.insns[1].off, 5);
     }
 }

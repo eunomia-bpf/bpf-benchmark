@@ -1,6 +1,6 @@
 # Katran Real End-to-End Benchmark
 
-- Generated: 2026-03-23T12:10:15.788556+00:00
+- Generated: 2026-03-23T13:36:34.399606+00:00
 - Mode: `katran_dsr_direct_map_connection_churn_same_image_paired`
 - Smoke: `False`
 - Paired cycles: `3`
@@ -23,33 +23,33 @@
 
 ## Baseline
 
-- HTTP successes: `215524` / `215524`
-- App throughput median req/s: `7106.860173256799`
-- Packet PPS median: `42641.06105416996`
-- Latency p99 median (ms): `1.111362500013229`
-- System CPU busy median (%): `5.9875485730998985`
-- bpf avg ns/run: `{'count': 3, 'mean': 228.71205786191453, 'median': 230.31654993399349, 'min': 218.81066429305153, 'max': 237.00895935869855}`
-- total events: `{'count': 3, 'mean': 431047.0, 'median': 426473.0, 'min': 407172.0, 'max': 459496.0}`
+- HTTP successes: `220861` / `220861`
+- App throughput median req/s: `7089.755519785225`
+- Packet PPS median: `42538.53311871135`
+- Latency p99 median (ms): `1.1393599599546176`
+- System CPU busy median (%): `5.989255435238816`
+- bpf avg ns/run: `{'count': 3, 'mean': 217.46281043002705, 'median': 218.74632499847218, 'min': 212.47571984795735, 'max': 221.1663864436516}`
+- total events: `{'count': 3, 'mean': 441721.6666666667, 'median': 425442.0, 'min': 424067.0, 'max': 475656.0}`
 
 
 ## Post-ReJIT
 
-- HTTP successes: `225400` / `225400`
-- App throughput median req/s: `7530.736902634569`
-- Packet PPS median: `45184.42141580741`
-- Latency p99 median (ms): `1.0126362400040987`
-- System CPU busy median (%): `5.918846411804157`
-- bpf avg ns/run: `{'count': 3, 'mean': 224.4627999203312, 'median': 223.12524340591256, 'min': 218.33064694049705, 'max': 231.93250941458405}`
-- total events: `{'count': 3, 'mean': 450800.0, 'median': 451920.0, 'min': 438150.0, 'max': 462330.0}`
+- HTTP successes: `219415` / `219415`
+- App throughput median req/s: `6951.460721864845`
+- Packet PPS median: `41708.76433118907`
+- Latency p99 median (ms): `1.159665940022024`
+- System CPU busy median (%): `5.995042641683823`
+- bpf avg ns/run: `{'count': 3, 'mean': 225.9468462305276, 'median': 234.21763394462423, 'min': 205.37607943144155, 'max': 238.24682531551704}`
+- total events: `{'count': 3, 'mean': 438830.0, 'median': 417150.0, 'min': 409962.0, 'max': 489378.0}`
 
 ## Comparison
 
-- Median throughput delta: `5.964331913730671`
-- Median latency p99 delta: `-8.88335354197709`
-- Median packet PPS delta: `5.96458038041418`
-- Median system CPU delta: `-1.1474171851297814`
-- Median BPF delta: `-3.1223576986290773`
-- Median BPF speedup ratio (stock/reJIT): `1.0322299100644494`
+- Median throughput delta: `-1.9506285870428641`
+- Median latency p99 delta: `1.7822269327610194`
+- Median packet PPS delta: `-1.9506285870428557`
+- Median system CPU delta: `0.09662647565434418`
+- Median BPF delta: `7.072717197082104`
+- Median BPF speedup ratio (stock/reJIT): `0.9339447304389988`
 
 ## Limitations
 

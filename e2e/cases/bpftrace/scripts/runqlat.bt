@@ -58,10 +58,10 @@ tracepoint:sched:sched_switch
   }
 
   $ns = @qtime[args.next_pid];
-  if $ns {
+  if ($ns) {
     @usecs = hist((nsecs - $ns) / 1000);
     // Swallowing deletion failures as they are expected
-    $ignore = delete(@qtime, args.next_pid);
+    delete(@qtime[args.next_pid]);
   }
 }
 

@@ -32,26 +32,24 @@ BEGIN
 
 tracepoint:block:block_io_start
 {
-  $key = (args.dev,args.sector);
-  @start[$key] = nsecs;
-  @iopid[$key] = pid;
-  @iocomm[$key] = comm;
+  @start[args.dev, args.sector] = nsecs;
+  @iopid[args.dev, args.sector] = pid;
+  @iocomm[args.dev, args.sector] = comm;
 }
 
 tracepoint:block:block_io_done
-/has_key(@start, (args.dev,args.sector)) &&
- has_key(@iopid, (args.dev,args.sector)) && has_key(@iocomm, (args.dev,args.sector))/
+/@start[args.dev, args.sector]/
 {
-  $key = (args.dev,args.sector);
   $now = nsecs;
   $major = args.dev >> 20;
   $minor = args.dev & ((1 << 20) - 1);
   printf("%-12u %-5d %-8d %-16s %-6d %7d\n", elapsed / 1e6,
-         $major, $minor, @iocomm[$key], @iopid[$key], ($now - @start[$key]) / 1e6);
+         $major, $minor, @iocomm[args.dev, args.sector], @iopid[args.dev, args.sector],
+         ($now - @start[args.dev, args.sector]) / 1e6);
 
-  delete(@start, $key);
-  delete(@iopid, $key);
-  delete(@iocomm, $key);
+  delete(@start[args.dev, args.sector]);
+  delete(@iopid[args.dev, args.sector]);
+  delete(@iocomm[args.dev, args.sector]);
 }
 
 END

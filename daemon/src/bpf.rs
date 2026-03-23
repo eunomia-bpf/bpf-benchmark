@@ -6,6 +6,7 @@
 use std::os::unix::io::{FromRawFd, OwnedFd, RawFd};
 
 use anyhow::{bail, Context, Result};
+use serde::Serialize;
 
 use crate::insn::BpfInsn;
 
@@ -91,7 +92,7 @@ fn zeroed_attr<T>() -> T {
 /// Mirrors `struct bpf_prog_info` from the kernel UAPI header.
 /// We define the full struct so the kernel fills all fields.
 #[repr(C)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BpfProgInfo {
     pub prog_type: u32,
     pub id: u32,
@@ -154,6 +155,63 @@ impl BpfProgInfo {
     }
 }
 
+#[derive(Clone, Copy, Debug, Default)]
+struct ProgImageRequest {
+    fetch_orig: bool,
+    fetch_xlated: bool,
+    fetch_jited: bool,
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct BpfProgImages {
+    pub info: BpfProgInfo,
+    pub orig_insns: Vec<BpfInsn>,
+    pub xlated_insns: Vec<BpfInsn>,
+    pub jited_prog_insns: Vec<u8>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct MachineCodeLine {
+    pub offset: usize,
+    pub raw_hex: String,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct MachineCodeDump {
+    pub byte_len: usize,
+    pub bytes_per_line: usize,
+    pub lines: Vec<MachineCodeLine>,
+}
+
+fn hex_bytes(bytes: &[u8]) -> String {
+    let mut out = String::with_capacity(bytes.len().saturating_mul(3).saturating_sub(1));
+    for (idx, byte) in bytes.iter().enumerate() {
+        if idx > 0 {
+            out.push(' ');
+        }
+        use std::fmt::Write as _;
+        let _ = write!(out, "{:02x}", byte);
+    }
+    out
+}
+
+pub fn dump_machine_code(bytes: &[u8]) -> MachineCodeDump {
+    const BYTES_PER_LINE: usize = 16;
+
+    MachineCodeDump {
+        byte_len: bytes.len(),
+        bytes_per_line: BYTES_PER_LINE,
+        lines: bytes
+            .chunks(BYTES_PER_LINE)
+            .enumerate()
+            .map(|(idx, chunk)| MachineCodeLine {
+                offset: idx * BYTES_PER_LINE,
+                raw_hex: hex_bytes(chunk),
+            })
+            .collect(),
+    }
+}
+
 // ── Raw syscall helper ──────────────────────────────────────────────
 
 /// Issue the bpf(2) syscall. Returns the raw return value (>= 0 on success).
@@ -170,6 +228,108 @@ unsafe fn sys_bpf(cmd: u32, attr: *mut u8, size: u32) -> libc::c_long {
 
 fn bpf_err(context: &str) -> anyhow::Error {
     anyhow::anyhow!("{}: {}", context, std::io::Error::last_os_error())
+}
+
+fn bpf_obj_get_info_by_fd(fd: RawFd, info: &mut BpfProgInfo, context: &str) -> Result<()> {
+    let mut attr: AttrGetInfoByFd = zeroed_attr();
+    attr.bpf_fd = fd as u32;
+    attr.info_len = std::mem::size_of::<BpfProgInfo>() as u32;
+    attr.info = info as *mut _ as u64;
+
+    let ret = unsafe {
+        sys_bpf(
+            BPF_OBJ_GET_INFO_BY_FD,
+            &mut attr as *mut _ as *mut u8,
+            std::mem::size_of::<AttrGetInfoByFd>() as u32,
+        )
+    };
+    if ret < 0 {
+        bail!(bpf_err(context));
+    }
+    Ok(())
+}
+
+fn parse_bpf_insn_bytes(bytes: &[u8], field_name: &str) -> Result<Vec<BpfInsn>> {
+    if bytes.is_empty() {
+        return Ok(Vec::new());
+    }
+    if bytes.len() % std::mem::size_of::<BpfInsn>() != 0 {
+        bail!(
+            "{} length {} is not a multiple of {} bytes",
+            field_name,
+            bytes.len(),
+            std::mem::size_of::<BpfInsn>()
+        );
+    }
+
+    let mut insns = Vec::with_capacity(bytes.len() / std::mem::size_of::<BpfInsn>());
+    for chunk in bytes.chunks_exact(8) {
+        insns.push(BpfInsn {
+            code: chunk[0],
+            regs: chunk[1],
+            off: i16::from_le_bytes([chunk[2], chunk[3]]),
+            imm: i32::from_le_bytes([chunk[4], chunk[5], chunk[6], chunk[7]]),
+        });
+    }
+    Ok(insns)
+}
+
+fn bpf_prog_get_images(fd: RawFd, request: ProgImageRequest) -> Result<BpfProgImages> {
+    let mut info = BpfProgInfo::default();
+    bpf_obj_get_info_by_fd(fd, &mut info, "BPF_OBJ_GET_INFO_BY_FD (first pass)")?;
+
+    let need_second_pass = (request.fetch_orig && info.orig_prog_len > 0)
+        || (request.fetch_xlated && info.xlated_prog_len > 0)
+        || (request.fetch_jited && info.jited_prog_len > 0);
+    if !need_second_pass {
+        return Ok(BpfProgImages {
+            info,
+            ..Default::default()
+        });
+    }
+
+    let mut orig_bytes = if request.fetch_orig && info.orig_prog_len > 0 {
+        vec![0u8; info.orig_prog_len as usize]
+    } else {
+        Vec::new()
+    };
+    let mut xlated_bytes = if request.fetch_xlated && info.xlated_prog_len > 0 {
+        vec![0u8; info.xlated_prog_len as usize]
+    } else {
+        Vec::new()
+    };
+    let mut jited_bytes = if request.fetch_jited && info.jited_prog_len > 0 {
+        vec![0u8; info.jited_prog_len as usize]
+    } else {
+        Vec::new()
+    };
+
+    let mut second_info = BpfProgInfo::default();
+    if !orig_bytes.is_empty() {
+        second_info.orig_prog_len = orig_bytes.len() as u32;
+        second_info.orig_prog_insns = orig_bytes.as_mut_ptr() as u64;
+    }
+    if !xlated_bytes.is_empty() {
+        second_info.xlated_prog_len = xlated_bytes.len() as u32;
+        second_info.xlated_prog_insns = xlated_bytes.as_mut_ptr() as u64;
+    }
+    if !jited_bytes.is_empty() {
+        second_info.jited_prog_len = jited_bytes.len() as u32;
+        second_info.jited_prog_insns = jited_bytes.as_mut_ptr() as u64;
+    }
+
+    bpf_obj_get_info_by_fd(fd, &mut second_info, "BPF_OBJ_GET_INFO_BY_FD (images)")?;
+
+    orig_bytes.truncate(second_info.orig_prog_len as usize);
+    xlated_bytes.truncate(second_info.xlated_prog_len as usize);
+    jited_bytes.truncate(second_info.jited_prog_len as usize);
+
+    Ok(BpfProgImages {
+        info: second_info,
+        orig_insns: parse_bpf_insn_bytes(&orig_bytes, "orig_prog_insns")?,
+        xlated_insns: parse_bpf_insn_bytes(&xlated_bytes, "xlated_prog_insns")?,
+        jited_prog_insns: jited_bytes,
+    })
 }
 
 // ── Public API ──────────────────────────────────────────────────────
@@ -336,65 +496,26 @@ pub fn bpf_btf_get_fd_by_module_name(module_name: &str) -> Result<OwnedFd> {
 /// If `fetch_orig` is true, also allocates a buffer and retrieves the
 /// original (pre-verifier) BPF instructions via `orig_prog_insns`.
 pub fn bpf_prog_get_info(fd: RawFd, fetch_orig: bool) -> Result<(BpfProgInfo, Vec<BpfInsn>)> {
-    // First call: get info without instructions to learn sizes.
-    let mut info = BpfProgInfo::default();
-    let mut info_len = std::mem::size_of::<BpfProgInfo>() as u32;
-    let mut attr: AttrGetInfoByFd = zeroed_attr();
-    attr.bpf_fd = fd as u32;
-    attr.info_len = info_len;
-    attr.info = &mut info as *mut _ as u64;
+    let images = bpf_prog_get_images(
+        fd,
+        ProgImageRequest {
+            fetch_orig,
+            ..Default::default()
+        },
+    )?;
+    Ok((images.info, images.orig_insns))
+}
 
-    let ret = unsafe {
-        sys_bpf(
-            BPF_OBJ_GET_INFO_BY_FD,
-            &mut attr as *mut _ as *mut u8,
-            std::mem::size_of::<AttrGetInfoByFd>() as u32,
-        )
-    };
-    if ret < 0 {
-        bail!(bpf_err("BPF_OBJ_GET_INFO_BY_FD (first pass)"));
-    }
-
-    // If we need the original instructions, do a second call with the buffer allocated.
-    let mut orig_insns = Vec::new();
-    if fetch_orig && info.orig_prog_len > 0 {
-        // orig_prog_len is in bytes; divide by sizeof(BpfInsn) = 8 to get insn count.
-        let orig_bytes = info.orig_prog_len as usize;
-        let insn_count = orig_bytes / std::mem::size_of::<BpfInsn>();
-        orig_insns.resize(
-            insn_count,
-            BpfInsn {
-                code: 0,
-                regs: 0,
-                off: 0,
-                imm: 0,
-            },
-        );
-
-        // Reset info and point orig_prog_insns to our buffer.
-        info = BpfProgInfo::default();
-        info.orig_prog_len = orig_bytes as u32;
-        info.orig_prog_insns = orig_insns.as_mut_ptr() as u64;
-
-        info_len = std::mem::size_of::<BpfProgInfo>() as u32;
-        attr = zeroed_attr();
-        attr.bpf_fd = fd as u32;
-        attr.info_len = info_len;
-        attr.info = &mut info as *mut _ as u64;
-
-        let ret = unsafe {
-            sys_bpf(
-                BPF_OBJ_GET_INFO_BY_FD,
-                &mut attr as *mut _ as *mut u8,
-                std::mem::size_of::<AttrGetInfoByFd>() as u32,
-            )
-        };
-        if ret < 0 {
-            bail!(bpf_err("BPF_OBJ_GET_INFO_BY_FD (orig_prog_insns)"));
-        }
-    }
-
-    Ok((info, orig_insns))
+/// Retrieve the kernel-visible xlated BPF and final JIT image for a program fd.
+pub fn bpf_prog_get_runtime_images(fd: RawFd) -> Result<BpfProgImages> {
+    bpf_prog_get_images(
+        fd,
+        ProgImageRequest {
+            fetch_xlated: true,
+            fetch_jited: true,
+            ..Default::default()
+        },
+    )
 }
 
 /// Retrieve map IDs used by a loaded BPF program.
@@ -571,60 +692,30 @@ pub struct RejitResult {
     pub verifier_log: String,
 }
 
-/// Submit new BPF bytecode to the kernel via BPF_PROG_REJIT.
-///
-/// The kernel will run bpf_check() + JIT on the new instructions and
-/// atomically replace the program image in-place.
-///
-/// First attempts with log_level=0 (fast, no verifier log). If that fails,
-/// retries with log_level=2 and a large buffer to capture diagnostics.
-/// This avoids ENOSPC errors from verifier log buffer overflow on the
-/// normal success path.
-pub fn bpf_prog_rejit(
+fn extract_log_string(log_buf: &[u8]) -> String {
+    let nul_pos = log_buf
+        .iter()
+        .position(|&b| b == 0)
+        .unwrap_or(log_buf.len());
+    String::from_utf8_lossy(&log_buf[..nul_pos]).into_owned()
+}
+
+fn run_rejit_once(
     prog_fd: RawFd,
     insns: &[BpfInsn],
     fd_array: &[RawFd],
+    log_level: u32,
+    log_buf: Option<&mut [u8]>,
 ) -> Result<RejitResult> {
-    // First attempt: no verifier log (fast path).
-    {
-        let mut attr: AttrRejit = zeroed_attr();
-        attr.prog_fd = prog_fd as u32;
-        attr.insn_cnt = insns.len() as u32;
-        attr.insns = insns.as_ptr() as u64;
-        attr.log_level = 0;
-        attr.log_size = 0;
-        attr.log_buf = 0;
-        if !fd_array.is_empty() {
-            attr.fd_array = fd_array.as_ptr() as u64;
-            attr.fd_array_cnt = fd_array.len() as u32;
-        }
-
-        let ret = unsafe {
-            sys_bpf(
-                BPF_PROG_REJIT,
-                &mut attr as *mut _ as *mut u8,
-                std::mem::size_of::<AttrRejit>() as u32,
-            )
-        };
-
-        if ret >= 0 {
-            return Ok(RejitResult {
-                verifier_log: String::new(),
-            });
-        }
-    }
-
-    // Fast path failed — retry with verbose verifier log to capture diagnostics.
-    const LOG_BUF_SIZE: usize = 16 * 1024 * 1024; // 16 MB
-    let mut log_buf: Vec<u8> = vec![0u8; LOG_BUF_SIZE];
-
     let mut attr: AttrRejit = zeroed_attr();
     attr.prog_fd = prog_fd as u32;
     attr.insn_cnt = insns.len() as u32;
     attr.insns = insns.as_ptr() as u64;
-    attr.log_level = 2;
-    attr.log_size = LOG_BUF_SIZE as u32;
-    attr.log_buf = log_buf.as_mut_ptr() as u64;
+    attr.log_level = log_level;
+    if let Some(buf) = log_buf.as_ref() {
+        attr.log_size = buf.len() as u32;
+        attr.log_buf = buf.as_ptr() as u64;
+    }
     if !fd_array.is_empty() {
         attr.fd_array = fd_array.as_ptr() as u64;
         attr.fd_array_cnt = fd_array.len() as u32;
@@ -638,26 +729,55 @@ pub fn bpf_prog_rejit(
         )
     };
 
-    // Extract the log as a string (NUL-terminated C string in the buffer).
-    let log_str = {
-        let nul_pos = log_buf
-            .iter()
-            .position(|&b| b == 0)
-            .unwrap_or(log_buf.len());
-        String::from_utf8_lossy(&log_buf[..nul_pos]).into_owned()
-    };
+    let verifier_log = log_buf
+        .as_ref()
+        .map(|buf| extract_log_string(buf))
+        .unwrap_or_default();
 
     if ret < 0 {
         let os_err = std::io::Error::last_os_error();
-        if log_str.is_empty() {
+        if verifier_log.is_empty() {
             bail!("BPF_PROG_REJIT: {}", os_err);
         } else {
-            bail!("BPF_PROG_REJIT: {}\nverifier log:\n{}", os_err, log_str);
+            bail!(
+                "BPF_PROG_REJIT: {}\nverifier log:\n{}",
+                os_err,
+                verifier_log
+            );
         }
     }
-    Ok(RejitResult {
-        verifier_log: log_str,
-    })
+
+    Ok(RejitResult { verifier_log })
+}
+
+/// Submit new BPF bytecode to the kernel via BPF_PROG_REJIT.
+///
+/// The kernel will run bpf_check() + JIT on the new instructions and
+/// atomically replace the program image in-place.
+///
+/// When `capture_verifier_log` is false, first attempts with log_level=0
+/// (fast path) and only retries with log_level=2 on failure. When true,
+/// always uses log_level=2 so the success path also returns the verifier log.
+pub fn bpf_prog_rejit(
+    prog_fd: RawFd,
+    insns: &[BpfInsn],
+    fd_array: &[RawFd],
+    capture_verifier_log: bool,
+) -> Result<RejitResult> {
+    const LOG_BUF_SIZE: usize = 16 * 1024 * 1024; // 16 MB
+
+    if capture_verifier_log {
+        let mut log_buf = vec![0u8; LOG_BUF_SIZE];
+        return run_rejit_once(prog_fd, insns, fd_array, 2, Some(&mut log_buf));
+    }
+
+    match run_rejit_once(prog_fd, insns, fd_array, 0, None) {
+        Ok(result) => Ok(result),
+        Err(_) => {
+            let mut log_buf = vec![0u8; LOG_BUF_SIZE];
+            run_rejit_once(prog_fd, insns, fd_array, 2, Some(&mut log_buf))
+        }
+    }
 }
 
 /// Iterate over all live BPF program IDs in the kernel.
@@ -762,6 +882,22 @@ mod tests {
         assert!(result2.is_ok());
         // Found 1 unique FD but no map_ids to remap -> warning printed, 0 FDs returned.
         // The key thing is it DID detect the reference (unique_old_fds would have 1 entry).
+    }
+
+    #[test]
+    fn test_dump_machine_code_groups_bytes_into_lines() {
+        let bytes: Vec<u8> = (0..20u8).collect();
+        let dump = dump_machine_code(&bytes);
+
+        assert_eq!(dump.byte_len, 20);
+        assert_eq!(dump.bytes_per_line, 16);
+        assert_eq!(dump.lines.len(), 2);
+        assert_eq!(
+            dump.lines[0].raw_hex,
+            "00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f"
+        );
+        assert_eq!(dump.lines[1].offset, 16);
+        assert_eq!(dump.lines[1].raw_hex, "10 11 12 13");
     }
 
     /// Test relocate_map_fds with BPF_PSEUDO_MAP_VALUE (src_reg=2).

@@ -211,6 +211,21 @@ class TetragonAgentSession:
 
     def __exit__(self, exc_type, exc, tb) -> None:
         self.close()
+
+
+def describe_agent_exit(agent_name: str, process: Any | None, snapshot: Mapping[str, object]) -> str | None:
+    if process is None:
+        return f"{agent_name} process handle is unavailable"
+    returncode = process.poll()
+    if returncode is None:
+        return None
+    combined = "\n".join((snapshot.get("stderr_tail") or []) + (snapshot.get("stdout_tail") or []))
+    details = tail_text(combined, max_lines=40, max_chars=8000)
+    if details:
+        return f"{agent_name} exited with code {returncode}: {details}"
+    return f"{agent_name} exited with code {returncode}"
+
+
 def write_tetragon_policies(directory: Path) -> list[Path]:
     directory.mkdir(parents=True, exist_ok=True)
     tracepoint_path = directory / "tetragon-e2e-tracepoint.yaml"
@@ -241,7 +256,7 @@ spec:
       syscall: false
     - call: security_file_open
       syscall: false
-    - call: security_socket_connect
+    - call: tcp_connect
       syscall: false
 """.strip()
         + "\n"
@@ -660,12 +675,28 @@ def daemon_payload(
         with TetragonAgentSession(command, load_timeout) as session:
             prog_ids = [int(program["id"]) for program in session.programs]
             baseline = run_phase(DEFAULT_WORKLOADS, duration_s, prog_ids, agent_pid=session.pid)
-            scan_results = scan_programs(prog_ids, daemon_binary)
-            rejit_result = apply_daemon_rejit(daemon_binary, prog_ids)
-            if rejit_result["applied"]:
-                post_rejit = run_phase(DEFAULT_WORKLOADS, duration_s, prog_ids, agent_pid=session.pid)
+            agent_logs = session.collector_snapshot()
+            exit_reason = describe_agent_exit("Tetragon", session.process, agent_logs)
+            if exit_reason is None:
+                scan_results = scan_programs(prog_ids, daemon_binary)
+                rejit_result = apply_daemon_rejit(daemon_binary, prog_ids)
+                if rejit_result["applied"]:
+                    post_rejit = run_phase(DEFAULT_WORKLOADS, duration_s, prog_ids, agent_pid=session.pid)
+                else:
+                    post_rejit = None
+                comparison = compare_phases(baseline, post_rejit)
             else:
+                limitations.append(f"{exit_reason}; skipping scan and ReJIT after the baseline phase.")
+                scan_results = {}
+                rejit_result = {
+                    "applied": False,
+                    "reason": exit_reason,
+                }
                 post_rejit = None
+                comparison = {
+                    "comparable": False,
+                    "reason": exit_reason,
+                }
             limitations.append(
                 "events_total and events_per_sec are derived from aggregate BPF run_cnt deltas, so a single application operation can increment multiple program counters."
             )
@@ -688,7 +719,7 @@ def daemon_payload(
                 "rejit_result": rejit_result,
                 "post_rejit": post_rejit,
                 "programs": build_program_summary(scan_results, baseline, post_rejit),
-                "comparison": compare_phases(baseline, post_rejit),
+                "comparison": comparison,
                 "limitations": limitations,
             }
             return payload

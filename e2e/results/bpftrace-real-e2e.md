@@ -1,6 +1,6 @@
 # bpftrace Real End-to-End Benchmark
 
-- Generated: `2026-03-23T12:05:40.833907+00:00`
+- Generated: `2026-03-23T13:31:58.980303+00:00`
 - Mode: `full`
 - Duration per phase: `30s`
 - Host kernel: `7.0.0-rc2+`
@@ -13,31 +13,31 @@ features: llvm, skeletons`
 ## Summary
 
 - Scripts selected: `6`
-- Baseline successes: `1`
-- ReJIT successes: `1`
+- Baseline successes: `6`
+- ReJIT successes: `6`
 - Eligible-site scripts: `0`
 - Aggregate sites: `0` (cmov=0, wide=0, rotate=0, lea=0)
-- Geomean speedup: `4.474x`
+- Geomean speedup: `1.568x`
 
 ## Per-Script
 
 | Script | Sites | Stock ns | ReJIT ns | Speedup | Ops/s Stock | Ops/s ReJIT | CPU% Stock | CPU% ReJIT | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| tcplife | 0 | n/a | n/a | n/a | n/a | n/a | n/a | n/a | bpftrace did not attach any programs |
-| biosnoop | 0 | n/a | n/a | n/a | n/a | n/a | n/a | n/a | bpftrace did not attach any programs |
-| runqlat | 0 | n/a | n/a | n/a | n/a | n/a | n/a | n/a | bpftrace did not attach any programs |
-| tcpretrans | 0 | n/a | n/a | n/a | n/a | n/a | n/a | n/a | bpftrace did not attach any programs |
-| capable | 0 | 850.93 | 190.17 | 4.474x | 13548.33 | 14667.87 | 0.03 | 0.00 | ok |
-| vfsstat | 0 | n/a | n/a | n/a | n/a | n/a | n/a | n/a | bpftrace did not attach any programs |
+| tcplife | 0 | 1142.84 | 785.41 | 1.455x | 28.81 | 29.32 | 0.10 | 0.00 | ok |
+| biosnoop | 0 | n/a | n/a | n/a | 467148.37 | 504738.87 | 0.03 | 0.03 | ok |
+| runqlat | 0 | 189.02 | 189.30 | 0.999x | 81.90 | 82.28 | 0.00 | 0.00 | ok |
+| tcpretrans | 0 | n/a | n/a | n/a | 28.76 | 28.53 | 0.00 | 0.03 | ok |
+| capable | 0 | 982.65 | 235.54 | 4.172x | 261240.11 | 246274.22 | 0.00 | 0.00 | ok |
+| vfsstat | 0 | 25.13 | 25.22 | 0.997x | 444197.32 | 437419.99 | 0.07 | 0.00 | ok |
 
 ## Comparison
 
-- tcplife: avg_ns_delta=n/a%, ops_delta=n/a%, cpu_delta=n/a%
-- biosnoop: avg_ns_delta=n/a%, ops_delta=n/a%, cpu_delta=n/a%
-- runqlat: avg_ns_delta=n/a%, ops_delta=n/a%, cpu_delta=n/a%
-- tcpretrans: avg_ns_delta=n/a%, ops_delta=n/a%, cpu_delta=n/a%
-- capable: avg_ns_delta=-77.65%, ops_delta=8.26%, cpu_delta=-100.00%
-- vfsstat: avg_ns_delta=n/a%, ops_delta=n/a%, cpu_delta=n/a%
+- tcplife: avg_ns_delta=-31.28%, ops_delta=1.79%, cpu_delta=-100.00%
+- biosnoop: avg_ns_delta=n/a%, ops_delta=8.05%, cpu_delta=-0.00%
+- runqlat: avg_ns_delta=0.15%, ops_delta=0.47%, cpu_delta=n/a%
+- tcpretrans: avg_ns_delta=n/a%, ops_delta=-0.78%, cpu_delta=n/a%
+- capable: avg_ns_delta=-76.03%, ops_delta=-5.73%, cpu_delta=n/a%
+- vfsstat: avg_ns_delta=0.35%, ops_delta=-1.53%, cpu_delta=-100.00%
 
 ## Notes
 
