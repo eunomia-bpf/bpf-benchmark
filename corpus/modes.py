@@ -34,6 +34,13 @@ try:
         load_packet_test_run_targets,
     )
     from runner.libs.results import parse_runner_samples
+    from runner.libs.run_artifacts import (
+        create_run_artifact_dir,
+        derive_run_type,
+        repo_relative_path,
+        result_root_for_output,
+        update_run_artifact,
+    )
 except ImportError:
     from runner.libs.inventory import (
         discover_corpus_objects,
@@ -41,6 +48,13 @@ except ImportError:
         load_packet_test_run_targets,
     )
     from runner.libs.results import parse_runner_samples
+    from runner.libs.run_artifacts import (
+        create_run_artifact_dir,
+        derive_run_type,
+        repo_relative_path,
+        result_root_for_output,
+        update_run_artifact,
+    )
 
 from runner.libs.corpus import (
     add_filter_argument,
@@ -201,6 +215,32 @@ def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
         help=argparse.SUPPRESS,
     )
     return parser.parse_args(argv)
+
+
+def build_corpus_artifact_metadata(
+    *,
+    generated_at: str,
+    run_type: str,
+    mode_name: str,
+    output_json: Path,
+    output_md: Path,
+    summary: dict[str, Any],
+    progress: dict[str, Any],
+    extra_fields: dict[str, Any],
+) -> dict[str, Any]:
+    metadata = {
+        "generated_at": generated_at,
+        "suite": "corpus",
+        "mode": mode_name,
+        "run_type": run_type,
+        "output_hint_json": repo_relative_path(output_json),
+        "output_hint_md": repo_relative_path(output_md),
+        "summary": summary,
+        "paper_summary": summary,
+        "progress": progress,
+    }
+    metadata.update(extra_fields)
+    return metadata
 
 
 def canonical_family_name(value: str) -> str:
@@ -1329,6 +1369,14 @@ def packet_main(argv: list[str] | None = None) -> int:
     if not daemon.exists():
         raise SystemExit(f"daemon not found: {daemon}")
 
+    run_type = derive_run_type(output_json, "corpus_vm_batch")
+    started_at = datetime.now(timezone.utc).isoformat()
+    artifact_dir = create_run_artifact_dir(
+        results_dir=result_root_for_output(output_json),
+        run_type=run_type,
+        generated_at=started_at,
+    )
+
     targets, inventory_summary = load_targets(
         inventory_json=inventory_json,
         filters=args.filters,
@@ -1379,44 +1427,8 @@ def packet_main(argv: list[str] | None = None) -> int:
 
     records: list[dict[str, Any]] = []
     host_btf_path = DEFAULT_HOST_BTF_PATH if DEFAULT_HOST_BTF_PATH.exists() else None
-    for index, target in enumerate(targets, start=1):
-        print(
-            f"[{index}/{len(targets)}] {target['source_name']} {target['object_path']}:{target['program_name']}",
-            file=sys.stderr,
-            flush=True,
-        )
-        if effective_mode == "vm":
-            record = run_target_in_guest(
-                target=target,
-                runner=runner,
-                daemon=daemon,
-                kernel_image=kernel_image,
-                btf_custom_path=btf_custom_path,
-                repeat=args.repeat,
-                timeout_seconds=args.timeout,
-                vng_binary=args.vng,
-                skip_families=skip_families,
-                blind_apply=args.blind_apply,
-            )
-        else:
-            record = run_target_locally(
-                target=target,
-                runner=runner,
-                daemon=daemon,
-                repeat=args.repeat,
-                timeout_seconds=args.timeout,
-                execution_mode="host-fallback",
-                btf_custom_path=host_btf_path,
-                enable_recompile=False,
-                enable_exec=False,
-                skip_families=[],
-                blind_apply=False,
-            )
-        records.append(record)
-
-    summary = build_summary(records, effective_mode, fallback_reason)
     result = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": started_at,
         "repo_root": str(ROOT_DIR),
         "inventory_json": str(inventory_json),
         "inventory_summary": inventory_summary,
@@ -1432,17 +1444,124 @@ def packet_main(argv: list[str] | None = None) -> int:
         "guest_smoke": guest_smoke,
         "skip_families": skip_families,
         "blind_apply": args.blind_apply,
-        "summary": summary,
+        "summary": build_summary(records, effective_mode, fallback_reason),
         "programs": records,
     }
+    current_target: dict[str, Any] | None = None
+    current_target_index: int | None = None
 
-    ensure_parent(output_json)
-    ensure_parent(output_md)
-    write_json_output(output_json, result)
-    output_md.write_text(build_markdown(result))
+    def flush_artifact(status: str, *, error_message: str | None = None, include_markdown: bool = False) -> None:
+        result["summary"] = build_summary(records, effective_mode, fallback_reason)
+        progress = {
+            "status": status,
+            "total_programs": len(targets),
+            "completed_programs": len(records),
+            "current_target_index": current_target_index,
+            "current_target": current_target,
+        }
+        if error_message:
+            progress["error_message"] = error_message
 
-    print(f"Wrote {output_json}")
-    print(f"Wrote {output_md}")
+        updated_at = datetime.now(timezone.utc).isoformat()
+        metadata = build_corpus_artifact_metadata(
+            generated_at=str(result["generated_at"]),
+            run_type=run_type,
+            mode_name="packet",
+            output_json=output_json,
+            output_md=output_md,
+            summary=dict(result["summary"]),
+            progress=progress,
+            extra_fields={
+                "inventory_json": repo_relative_path(inventory_json),
+                "inventory_summary": inventory_summary,
+                "runner_binary": repo_relative_path(runner),
+                "daemon_binary": repo_relative_path(daemon),
+                "kernel_tree": repo_relative_path(kernel_tree),
+                "kernel_image": repo_relative_path(kernel_image),
+                "btf_custom_path": repo_relative_path(btf_custom_path) if btf_custom_path is not None else None,
+                "vng_binary": args.vng,
+                "repeat": args.repeat,
+                "timeout_seconds": args.timeout,
+                "build_timeout_seconds": args.build_timeout,
+                "force_host_fallback": bool(args.force_host_fallback),
+                "skip_build": bool(args.skip_build),
+                "skip_families": skip_families,
+                "blind_apply": bool(args.blind_apply),
+                "kernel_build": text_invocation_summary(kernel_build),
+                "guest_smoke": guest_smoke,
+                "started_at": started_at,
+                "last_updated_at": updated_at,
+                "status": status,
+            },
+        )
+        if status == "completed":
+            metadata["completed_at"] = updated_at
+        if error_message:
+            metadata["error_message"] = error_message
+
+        detail_payloads = {
+            "result.json": result,
+            "progress.json": progress,
+        }
+        detail_texts = {"result.md": build_markdown(result)} if include_markdown else None
+        update_run_artifact(
+            run_dir=artifact_dir,
+            run_type=run_type,
+            metadata=metadata,
+            detail_payloads=detail_payloads,
+            detail_texts=detail_texts,
+        )
+
+    flush_artifact("running")
+    try:
+        for index, target in enumerate(targets, start=1):
+            current_target_index = index
+            current_target = target
+            flush_artifact("running")
+
+            print(
+                f"[{index}/{len(targets)}] {target['source_name']} {target['object_path']}:{target['program_name']}",
+                file=sys.stderr,
+                flush=True,
+            )
+            if effective_mode == "vm":
+                record = run_target_in_guest(
+                    target=target,
+                    runner=runner,
+                    daemon=daemon,
+                    kernel_image=kernel_image,
+                    btf_custom_path=btf_custom_path,
+                    repeat=args.repeat,
+                    timeout_seconds=args.timeout,
+                    vng_binary=args.vng,
+                    skip_families=skip_families,
+                    blind_apply=args.blind_apply,
+                )
+            else:
+                record = run_target_locally(
+                    target=target,
+                    runner=runner,
+                    daemon=daemon,
+                    repeat=args.repeat,
+                    timeout_seconds=args.timeout,
+                    execution_mode="host-fallback",
+                    btf_custom_path=host_btf_path,
+                    enable_recompile=False,
+                    enable_exec=False,
+                    skip_families=[],
+                    blind_apply=False,
+                )
+            records.append(record)
+            flush_artifact("running")
+
+        current_target = None
+        current_target_index = None
+        flush_artifact("completed", include_markdown=True)
+    except Exception as exc:
+        flush_artifact("error", error_message=str(exc))
+        raise
+    summary = dict(result["summary"])
+    print(f"Wrote {artifact_dir / 'metadata.json'}")
     print(
         f"mode={summary['effective_mode']} "
         f"targets={summary['targets_attempted']} "
@@ -1721,6 +1840,16 @@ def run_linear_mode(mode_name: str, argv: list[str] | None = None) -> int:
     if not daemon.exists():
         raise SystemExit(f"daemon not found: {daemon}")
 
+    output_json = Path(args.output_json).resolve()
+    output_md = Path(args.output_md).resolve()
+    run_type = derive_run_type(output_json, mode_name)
+    started_at = datetime.now(timezone.utc).isoformat()
+    artifact_dir = create_run_artifact_dir(
+        results_dir=result_root_for_output(output_json),
+        run_type=run_type,
+        generated_at=started_at,
+    )
+
     btf_custom_path = Path(args.btf_custom_path).resolve() if args.btf_custom_path else None
     corpus_build_report = Path(args.corpus_build_report).resolve() if args.corpus_build_report else None
     targets, discovery_summary = discover_linear_targets(
@@ -1734,32 +1863,8 @@ def run_linear_mode(mode_name: str, argv: list[str] | None = None) -> int:
 
     enable_exec = mode_name == "perf"
     records: list[dict[str, Any]] = []
-    for index, target in enumerate(targets, start=1):
-        print(
-            f"[{index}/{len(targets)}] {target['source_name']} {target['object_path']}:{target['program_name']}",
-            file=sys.stderr,
-            flush=True,
-        )
-        record = run_target_locally(
-            target=target,
-            runner=runner,
-            daemon=daemon,
-            repeat=args.repeat,
-            timeout_seconds=args.timeout,
-            execution_mode=mode_name,
-            btf_custom_path=btf_custom_path,
-            enable_recompile=True,
-            enable_exec=enable_exec,
-            skip_families=skip_families,
-            blind_apply=args.blind_apply,
-        )
-        records.append(record)
-
-    summary = build_linear_summary(records, mode_name=mode_name, enable_exec=enable_exec)
-    output_json = Path(args.output_json).resolve()
-    output_md = Path(args.output_md).resolve()
     payload = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": started_at,
         "mode": mode_name,
         "repo_root": str(ROOT_DIR),
         "runner_binary": str(runner),
@@ -1771,30 +1876,103 @@ def run_linear_mode(mode_name: str, argv: list[str] | None = None) -> int:
         "blind_apply": args.blind_apply,
         "corpus_build_report": str(corpus_build_report) if corpus_build_report is not None else None,
         "discovery": discovery_summary,
-        "summary": summary,
+        "summary": build_linear_summary(records, mode_name=mode_name, enable_exec=enable_exec),
         "programs": records,
     }
+    current_target: dict[str, Any] | None = None
+    current_target_index: int | None = None
 
-    ensure_parent(output_json)
-    ensure_parent(output_md)
-    write_json_output(output_json, payload)
-    write_text_output(output_md, build_linear_markdown(payload, mode_name=mode_name, enable_exec=enable_exec))
-    print(f"Wrote {output_json}")
-    print(f"Wrote {output_md}")
+    def flush_artifact(status: str, *, error_message: str | None = None, include_markdown: bool = False) -> None:
+        payload["summary"] = build_linear_summary(records, mode_name=mode_name, enable_exec=enable_exec)
+        progress = {
+            "status": status,
+            "total_programs": len(targets),
+            "completed_programs": len(records),
+            "current_target_index": current_target_index,
+            "current_target": current_target,
+        }
+        if error_message:
+            progress["error_message"] = error_message
+
+        updated_at = datetime.now(timezone.utc).isoformat()
+        metadata = build_corpus_artifact_metadata(
+            generated_at=str(payload["generated_at"]),
+            run_type=run_type,
+            mode_name=mode_name,
+            output_json=output_json,
+            output_md=output_md,
+            summary=dict(payload["summary"]),
+            progress=progress,
+            extra_fields={
+                "runner_binary": repo_relative_path(runner),
+                "daemon_binary": repo_relative_path(daemon),
+                "btf_custom_path": repo_relative_path(btf_custom_path) if btf_custom_path is not None else None,
+                "repeat": args.repeat,
+                "timeout_seconds": args.timeout,
+                "skip_families": skip_families,
+                "blind_apply": bool(args.blind_apply),
+                "corpus_build_report": repo_relative_path(corpus_build_report) if corpus_build_report is not None else None,
+                "discovery": discovery_summary,
+                "enable_exec": enable_exec,
+                "started_at": started_at,
+                "last_updated_at": updated_at,
+                "status": status,
+            },
+        )
+        if status == "completed":
+            metadata["completed_at"] = updated_at
+        if error_message:
+            metadata["error_message"] = error_message
+
+        detail_payloads = {
+            "result.json": payload,
+            "progress.json": progress,
+        }
+        detail_texts = {
+            "result.md": build_linear_markdown(payload, mode_name=mode_name, enable_exec=enable_exec)
+        } if include_markdown else None
+        update_run_artifact(
+            run_dir=artifact_dir,
+            run_type=run_type,
+            metadata=metadata,
+            detail_payloads=detail_payloads,
+            detail_texts=detail_texts,
+        )
+
+    flush_artifact("running")
+    try:
+        for index, target in enumerate(targets, start=1):
+            current_target_index = index
+            current_target = target
+            flush_artifact("running")
+
+            print(
+                f"[{index}/{len(targets)}] {target['source_name']} {target['object_path']}:{target['program_name']}",
+                file=sys.stderr,
+                flush=True,
+            )
+            record = run_target_locally(
+                target=target,
+                runner=runner,
+                daemon=daemon,
+                repeat=args.repeat,
+                timeout_seconds=args.timeout,
+                execution_mode=mode_name,
+                btf_custom_path=btf_custom_path,
+                enable_recompile=True,
+                enable_exec=enable_exec,
+                skip_families=skip_families,
+                blind_apply=args.blind_apply,
+            )
+            records.append(record)
+            flush_artifact("running")
+
+        current_target = None
+        current_target_index = None
+        flush_artifact("completed", include_markdown=True)
+    except Exception as exc:
+        flush_artifact("error", error_message=str(exc))
+        raise
+
+    print(f"Wrote {artifact_dir / 'metadata.json'}")
     return 0
-
-
-def main(argv: list[str] | None = None) -> int:
-    forwarded = list(argv if argv is not None else sys.argv[1:])
-    if not forwarded or forwarded[0] in {"-h", "--help"}:
-        raise SystemExit("corpus mode required: packet | tracing | perf | code-size")
-    mode_name, *remaining = forwarded
-    if mode_name == "packet":
-        return packet_main(remaining)
-    if mode_name in {"tracing", "perf", "code-size"}:
-        return run_linear_mode(mode_name, remaining)
-    raise SystemExit(f"unknown corpus mode: {mode_name}\nAvailable modes: {' | '.join(MODE_NAMES)}")
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())

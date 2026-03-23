@@ -1,0 +1,81 @@
+{
+  "artifact_kind": "result_run",
+  "artifact_version": 1,
+  "case": "tracee",
+  "completed_at": "2026-03-23T19:50:50.262550+00:00",
+  "details_dir": "details",
+  "dry_run": true,
+  "generated_at": "2026-03-23T19:50:50.262559+00:00",
+  "last_updated_at": "2026-03-23T19:50:50.262550+00:00",
+  "output_hint_json": "e2e/results/tracee_authoritative_20260323.json",
+  "output_hint_md": "e2e/results/tracee-e2e-real.md",
+  "output_hint_report_md": "docs/tmp/bpftrace-real-e2e-report.md",
+  "paper_summary": {
+    "baseline": null,
+    "comparison": {
+      "comparable": false,
+      "reason": "Tracee binary could not run on this kernel: bpf_enable_stats failed: Operation not permitted (errno=1)"
+    },
+    "config": {
+      "events": [
+        "execve",
+        "security_file_open",
+        "security_socket_connect",
+        "sched_process_exec"
+      ],
+      "measurement_duration_s": 60,
+      "smoke_duration_s": 10,
+      "workloads": [
+        {
+          "command": "stress-ng --exec 4 --exec-method execve --timeout {duration}s --metrics-brief",
+          "kind": "exec_storm",
+          "metric": "bogo-ops/s",
+          "name": "exec_storm",
+          "rate": 4
+        },
+        {
+          "command": "fio --name=test --rw=randread --bs=4k --size=100M --runtime={duration} --time_based",
+          "kind": "file_io",
+          "metric": "IOPS",
+          "name": "file_io"
+        },
+        {
+          "command": "wrk -t2 -c10 -d{duration}s http://127.0.0.1:{port}/",
+          "kind": "network",
+          "metric": "req/s",
+          "name": "network"
+        }
+      ]
+    },
+    "duration_s": 60,
+    "generated_at": "2026-03-23T19:50:50.260895+00:00",
+    "host": {
+      "git_sha": "ae19b7dfa8ca591eb10885da95f37a7e3c81a7a2",
+      "hostname": "lab",
+      "kernel": "6.15.11-061511-generic",
+      "platform": "Linux-6.15.11-061511-generic-x86_64-with-glibc2.39",
+      "python": "3.12.3"
+    },
+    "limitations": [],
+    "mode": "skipped",
+    "post_rejit": null,
+    "rejit_result": null,
+    "scan_results": {},
+    "setup": {
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "TRACEE_BINARY=/home/yunwei37/workspace/bpf-benchmark/e2e/cases/tracee/bin/tracee\nTracee version: v0.24.1-kernel7-patch1",
+      "tracee_binary": "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/tracee/bin/tracee"
+    },
+    "skip_reason": "Tracee binary could not run on this kernel: bpf_enable_stats failed: Operation not permitted (errno=1)",
+    "smoke": false,
+    "status": "skipped",
+    "tracee_binary": "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/tracee/bin/tracee",
+    "tracee_programs": []
+  },
+  "run_type": "tracee",
+  "smoke": false,
+  "started_at": "2026-03-23T19:50:50.019790+00:00",
+  "status": "completed",
+  "suite": "e2e"
+}

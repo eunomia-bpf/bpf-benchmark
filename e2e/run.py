@@ -14,10 +14,11 @@ from runner.libs import (  # noqa: E402
     prepare_bpftool_environment,
 )
 from runner.libs.run_artifacts import (  # noqa: E402
+    create_run_artifact_dir,
     derive_run_type,
     repo_relative_path,
     result_root_for_output,
-    write_run_artifact,
+    update_run_artifact,
 )
 from e2e.cases.bpftrace.case import (  # noqa: E402
     DEFAULT_OUTPUT_JSON as DEFAULT_BPFTRACE_OUTPUT_JSON,
@@ -62,7 +63,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Unified entrypoint for repository end-to-end benchmarks.")
     parser.add_argument("case", choices=("tracee", "tetragon", "bpftrace", "scx", "katran", "all"))
     parser.add_argument("--smoke", action="store_true", help="Run the smoke-sized configuration.")
-    parser.add_argument("--dry-run", action="store_true", help="Resolve the execution plan without running the live workload.")
     parser.add_argument("--duration", type=int, help="Override the per-workload duration in seconds.")
     parser.add_argument("--tracee-binary", help="Explicit Tracee binary path.")
     parser.add_argument("--tetragon-binary", help="Explicit Tetragon binary path.")
@@ -162,7 +162,6 @@ def build_run_metadata(
         "suite": "e2e",
         "case": args.case,
         "smoke": bool(args.smoke),
-        "dry_run": bool(args.dry_run),
         "output_hint_json": repo_relative_path(primary_output_json),
         "paper_summary": _trim_e2e_value(payload),
     }
@@ -171,39 +170,100 @@ def build_run_metadata(
     return metadata
 
 
-def _run_single_case(args: argparse.Namespace) -> dict[str, object]:
-    """Run a single e2e case and persist its outputs."""
-    if args.case == "tracee":
-        payload = run_tracee_case(args)
-        detail_texts = {"result.md": build_tracee_markdown(payload) + "\n"}
-    elif args.case == "tetragon":
-        payload = run_tetragon_case(args)
-        detail_texts = {"result.md": build_tetragon_markdown(payload) + "\n"}
-    elif args.case == "bpftrace":
-        payload = run_bpftrace_case(args)
-        detail_texts = {
-            "result.md": build_bpftrace_markdown(payload) + "\n",
-            "report.md": build_bpftrace_report(payload) + "\n",
-        }
-    elif args.case == "scx":
-        payload = run_scx_case(args)
-        detail_texts = {"result.md": build_scx_markdown(payload) + "\n"}
-    elif args.case == "katran":
-        payload = run_katran_case(args)
-        detail_texts = {"result.md": build_katran_markdown(payload) + "\n"}
-    else:
-        raise SystemExit(f"unsupported e2e case: {args.case}")
-
+def _run_single_case(args: argparse.Namespace, *, clear_existing: bool = True) -> dict[str, object]:
+    """Run a single e2e case and persist its outputs progressively."""
     output_json = Path(args.output_json).resolve()
-    detail_payloads: dict[str, object] = {"result.json": payload}
-
-    artifact_dir = write_run_artifact(
+    run_type = derive_run_type(output_json, args.case)
+    started_at = datetime.now(timezone.utc).isoformat()
+    artifact_dir = create_run_artifact_dir(
         results_dir=result_root_for_output(output_json),
-        run_type=derive_run_type(output_json, args.case),
-        metadata=build_run_metadata(args, payload, primary_output_json=output_json),
-        detail_payloads=detail_payloads,
-        detail_texts=detail_texts,
+        run_type=run_type,
+        generated_at=started_at,
+        clear_existing=clear_existing,
     )
+
+    progress_payload: dict[str, object] = {
+        "case": args.case,
+        "status": "running",
+        "smoke": bool(args.smoke),
+    }
+    running_metadata = build_run_metadata(args, progress_payload, primary_output_json=output_json)
+    running_metadata["status"] = "running"
+    running_metadata["started_at"] = started_at
+    running_metadata["last_updated_at"] = started_at
+    update_run_artifact(
+        run_dir=artifact_dir,
+        run_type=run_type,
+        metadata=running_metadata,
+        detail_payloads={"progress.json": progress_payload},
+    )
+
+    try:
+        if args.case == "tracee":
+            payload = run_tracee_case(args)
+            detail_texts = {"result.md": build_tracee_markdown(payload) + "\n"}
+        elif args.case == "tetragon":
+            payload = run_tetragon_case(args)
+            detail_texts = {"result.md": build_tetragon_markdown(payload) + "\n"}
+        elif args.case == "bpftrace":
+            payload = run_bpftrace_case(args)
+            detail_texts = {
+                "result.md": build_bpftrace_markdown(payload) + "\n",
+                "report.md": build_bpftrace_report(payload) + "\n",
+            }
+        elif args.case == "scx":
+            payload = run_scx_case(args)
+            detail_texts = {"result.md": build_scx_markdown(payload) + "\n"}
+        elif args.case == "katran":
+            payload = run_katran_case(args)
+            detail_texts = {"result.md": build_katran_markdown(payload) + "\n"}
+        else:
+            raise SystemExit(f"unsupported e2e case: {args.case}")
+
+        completed_at = datetime.now(timezone.utc).isoformat()
+        detail_payloads: dict[str, object] = {
+            "result.json": payload,
+            "progress.json": {
+                "case": args.case,
+                "status": "completed",
+                "smoke": bool(args.smoke),
+                "completed_at": completed_at,
+            },
+        }
+        artifact_metadata = build_run_metadata(args, payload, primary_output_json=output_json)
+        artifact_metadata["status"] = "completed"
+        artifact_metadata["started_at"] = started_at
+        artifact_metadata["last_updated_at"] = completed_at
+        artifact_metadata["completed_at"] = completed_at
+        update_run_artifact(
+            run_dir=artifact_dir,
+            run_type=run_type,
+            metadata=artifact_metadata,
+            detail_payloads=detail_payloads,
+            detail_texts=detail_texts,
+        )
+    except Exception as exc:
+        failed_at = datetime.now(timezone.utc).isoformat()
+        error_payload = {
+            "case": args.case,
+            "status": "error",
+            "smoke": bool(args.smoke),
+            "error_message": str(exc),
+            "failed_at": failed_at,
+        }
+        artifact_metadata = build_run_metadata(args, error_payload, primary_output_json=output_json)
+        artifact_metadata["status"] = "error"
+        artifact_metadata["started_at"] = started_at
+        artifact_metadata["last_updated_at"] = failed_at
+        artifact_metadata["error_message"] = str(exc)
+        update_run_artifact(
+            run_dir=artifact_dir,
+            run_type=run_type,
+            metadata=artifact_metadata,
+            detail_payloads={"progress.json": error_payload},
+        )
+        raise
+
     print(f"  e2e: wrote {artifact_dir / 'metadata.json'}")
     return payload
 
@@ -216,6 +276,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.case == "all":
         # Run all cases sequentially, each with its own default outputs.
         failed: list[str] = []
+        clear_existing = True
         for case_name in ALL_CASES:
             print(f"\n{'='*60}")
             print(f"  e2e: running {case_name}")
@@ -227,7 +288,7 @@ def main(argv: list[str] | None = None) -> int:
             case_args = parser.parse_args(case_argv)
             apply_case_defaults(case_args)
             try:
-                payload = _run_single_case(case_args)
+                payload = _run_single_case(case_args, clear_existing=clear_existing)
                 if _is_skipped_payload(payload):
                     print(f"  e2e: {case_name} SKIP")
                 else:
@@ -235,6 +296,8 @@ def main(argv: list[str] | None = None) -> int:
             except Exception as exc:
                 print(f"  e2e: {case_name} FAILED: {exc}")
                 failed.append(case_name)
+            finally:
+                clear_existing = False
         if failed:
             print(f"\ne2e: FAILED cases: {', '.join(failed)}")
             return 1

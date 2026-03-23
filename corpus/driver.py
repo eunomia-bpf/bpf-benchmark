@@ -44,12 +44,13 @@ try:
         summarize_phase_timings,
     )
     from runner.libs.run_artifacts import (
+        create_run_artifact_dir,
         derive_run_type,
         extract_daemon_debug_details,
         repo_relative_path,
         result_root_for_output,
         summarize_benchmark_results,
-        write_run_artifact,
+        update_run_artifact,
     )
 except ImportError:
     from runner.libs.catalog import load_catalog
@@ -69,12 +70,13 @@ except ImportError:
         summarize_phase_timings,
     )
     from runner.libs.run_artifacts import (
+        create_run_artifact_dir,
         derive_run_type,
         extract_daemon_debug_details,
         repo_relative_path,
         result_root_for_output,
         summarize_benchmark_results,
-        write_run_artifact,
+        update_run_artifact,
     )
 
 from runner.libs.attach import (
@@ -1205,138 +1207,192 @@ def run_suite(argv: list[str] | None = None) -> int:
     }
 
     daemon_socket = getattr(args, "daemon_socket", None)
-
-    rng = random.Random(args.seed)
-    for spec in benchmarks:
-        inventory = discover_program_inventory(suite.runner_binary, spec.source)
-        selected_inventory = choose_programs(spec, inventory)
-        benchmark_record = {
-            "name": spec.name,
-            "description": spec.description,
-            "category": spec.category or spec.prog_type,
-            "family": spec.family,
-            "level": spec.level,
-            "hypothesis": spec.hypothesis,
-            "prog_type": spec.prog_type,
-            "test_method": spec.test_method,
-            "tags": list(spec.tags),
-            "artifacts": {
-                "program_object": str(spec.source),
-                "test_input": str(spec.test_input) if spec.test_input else None,
-            },
-            "program_inventory": inventory,
-            "selected_programs": selected_inventory,
-            "runs": [],
-        }
-
-        runtime_order = list(runtimes)
-        rng.shuffle(runtime_order)
-
-        for runtime in runtime_order:
-            print(f"[bench] {spec.name} [{runtime.name}]")
-            for _ in range(warmups):
-                execute_sample(
-                    suite,
-                    spec,
-                    runtime,
-                    repeat=repeat,
-                    iteration_idx=-1,
-                    daemon_socket=daemon_socket,
-                )
-
-            samples = []
-            for iteration_idx in range(iterations):
-                sample = execute_sample(
-                    suite,
-                    spec,
-                    runtime,
-                    repeat=repeat,
-                    iteration_idx=iteration_idx,
-                    daemon_socket=daemon_socket,
-                )
-                sample["iteration_index"] = iteration_idx
-                samples.append(sample)
-
-            compile_values = [int(sample["compile_ns"]) for sample in samples]
-            exec_values = [int(sample["exec_ns"]) for sample in samples]
-            result_values = [sample.get("result") for sample in samples]
-            run_record = {
-                "runtime": runtime.name,
-                "label": runtime.label,
-                "mode": runtime.mode,
-                "repeat": repeat,
-                "effective_repeat": max(1, repeat) if spec.test_method in {"bpf_prog_test_run", "attach_trigger"} else 1,
-                "artifacts": {
-                    "program_object": str(spec.source),
-                },
-                "samples": samples,
-                "compile_ns": ns_summary(compile_values),
-                "exec_ns": ns_summary(exec_values),
-                "timing_source": str(samples[0].get("timing_source", "unknown")) if samples else "unknown",
-                "phases_ns": summarize_phase_timings(samples),
-                "perf_counters": {},
-                "perf_counters_meta": {
-                    "requested": False,
-                    "collected_samples": 0,
-                    "include_kernel": False,
-                    "scope": "full_repeat_raw",
-                    "hardware_counters_observed": False,
-                    "software_counters_observed": False,
-                    "errors": {},
-                },
-                "derived_metrics": {},
-                "result_distribution": dict(Counter(str(value) for value in result_values)),
-                "code_size": summarize_code_size(samples),
-            }
-            wall_exec_summary = summarize_optional_ns(samples, "wall_exec_ns")
-            if wall_exec_summary is not None:
-                run_record["wall_exec_ns"] = wall_exec_summary
-            benchmark_record["runs"].append(run_record)
-            print(
-                f"  compile median {run_record['compile_ns']['median']} ns | "
-                f"exec median {run_record['exec_ns']['median']} ns"
-            )
-
-        # Cross-runtime correctness check (kernel vs kernel-rejit)
-        runtime_results: dict[str, int | None] = {}
-        for run in benchmark_record["runs"]:
-            samples = run.get("samples", [])
-            if samples:
-                result_counts = Counter(sample.get("result") for sample in samples)
-                modal_result = result_counts.most_common(1)[0][0]
-                runtime_results[run["runtime"]] = modal_result
-            else:
-                runtime_results[run["runtime"]] = None
-
-        kernel_result = runtime_results.get("kernel")
-        rejit_result = runtime_results.get("kernel-rejit")
-        if kernel_result is not None and rejit_result is not None and kernel_result != rejit_result:
-            print(
-                f"  WARNING: correctness mismatch for {spec.name}: "
-                f"kernel={kernel_result}, kernel-rejit={rejit_result}"
-            )
-            benchmark_record["correctness_mismatch"] = True
-        else:
-            benchmark_record["correctness_mismatch"] = False
-
-        results["benchmarks"].append(benchmark_record)
-
     output_path = suite.output_path
     run_type = derive_run_type(output_path, suite.suite_name)
-    artifact_details, daemon_debug_entries = extract_daemon_debug_details(results)
-    artifact_details["result.json"] = results
-    artifact_metadata = build_run_metadata(
-        results,
-        output_hint=output_path,
-        run_type=run_type,
-        daemon_debug_entries=daemon_debug_entries,
-    )
-    artifact_dir = write_run_artifact(
+    artifact_dir = create_run_artifact_dir(
         results_dir=result_root_for_output(output_path),
         run_type=run_type,
-        metadata=artifact_metadata,
-        detail_payloads=artifact_details,
+        generated_at=str(results["generated_at"]),
     )
+    current_benchmark_name: str | None = None
+    current_benchmark_index: int | None = None
+    current_benchmark_record: dict[str, Any] | None = None
+
+    def flush_artifact(status: str, *, error_message: str | None = None) -> None:
+        artifact_details, daemon_debug_entries = extract_daemon_debug_details(results)
+        artifact_details["result.json"] = results
+        artifact_details["progress.json"] = {
+            "status": status,
+            "total_benchmarks": len(benchmarks),
+            "completed_benchmarks": len(results["benchmarks"]),
+            "current_benchmark_index": current_benchmark_index,
+            "current_benchmark": current_benchmark_name,
+            "current_benchmark_record": current_benchmark_record,
+        }
+        if error_message:
+            artifact_details["progress.json"]["error_message"] = error_message
+
+        artifact_metadata = build_run_metadata(
+            results,
+            output_hint=output_path,
+            run_type=run_type,
+            daemon_debug_entries=daemon_debug_entries,
+        )
+        updated_at = datetime.now(timezone.utc).isoformat()
+        artifact_metadata["status"] = status
+        artifact_metadata["started_at"] = results["generated_at"]
+        artifact_metadata["last_updated_at"] = updated_at
+        artifact_metadata["progress"] = {
+            "total_benchmarks": len(benchmarks),
+            "completed_benchmarks": len(results["benchmarks"]),
+            "current_benchmark_index": current_benchmark_index,
+            "current_benchmark": current_benchmark_name,
+        }
+        if status == "completed":
+            artifact_metadata["completed_at"] = updated_at
+        if error_message:
+            artifact_metadata["error_message"] = error_message
+
+        update_run_artifact(
+            run_dir=artifact_dir,
+            run_type=run_type,
+            metadata=artifact_metadata,
+            detail_payloads=artifact_details,
+        )
+
+    rng = random.Random(args.seed)
+    flush_artifact("running")
+
+    try:
+        for bench_idx, spec in enumerate(benchmarks):
+            inventory = discover_program_inventory(suite.runner_binary, spec.source)
+            selected_inventory = choose_programs(spec, inventory)
+            benchmark_record = {
+                "name": spec.name,
+                "description": spec.description,
+                "category": spec.category or spec.prog_type,
+                "family": spec.family,
+                "level": spec.level,
+                "hypothesis": spec.hypothesis,
+                "prog_type": spec.prog_type,
+                "test_method": spec.test_method,
+                "tags": list(spec.tags),
+                "artifacts": {
+                    "program_object": str(spec.source),
+                    "test_input": str(spec.test_input) if spec.test_input else None,
+                },
+                "program_inventory": inventory,
+                "selected_programs": selected_inventory,
+                "runs": [],
+            }
+
+            current_benchmark_name = spec.name
+            current_benchmark_index = bench_idx + 1
+            current_benchmark_record = benchmark_record
+            flush_artifact("running")
+
+            runtime_order = list(runtimes)
+            rng.shuffle(runtime_order)
+
+            for runtime in runtime_order:
+                print(f"[bench] {spec.name} [{runtime.name}]")
+                for _ in range(warmups):
+                    execute_sample(
+                        suite,
+                        spec,
+                        runtime,
+                        repeat=repeat,
+                        iteration_idx=-1,
+                        daemon_socket=daemon_socket,
+                    )
+
+                samples = []
+                for iteration_idx in range(iterations):
+                    sample = execute_sample(
+                        suite,
+                        spec,
+                        runtime,
+                        repeat=repeat,
+                        iteration_idx=iteration_idx,
+                        daemon_socket=daemon_socket,
+                    )
+                    sample["iteration_index"] = iteration_idx
+                    samples.append(sample)
+
+                compile_values = [int(sample["compile_ns"]) for sample in samples]
+                exec_values = [int(sample["exec_ns"]) for sample in samples]
+                result_values = [sample.get("result") for sample in samples]
+                run_record = {
+                    "runtime": runtime.name,
+                    "label": runtime.label,
+                    "mode": runtime.mode,
+                    "repeat": repeat,
+                    "effective_repeat": max(1, repeat) if spec.test_method in {"bpf_prog_test_run", "attach_trigger"} else 1,
+                    "artifacts": {
+                        "program_object": str(spec.source),
+                    },
+                    "samples": samples,
+                    "compile_ns": ns_summary(compile_values),
+                    "exec_ns": ns_summary(exec_values),
+                    "timing_source": str(samples[0].get("timing_source", "unknown")) if samples else "unknown",
+                    "phases_ns": summarize_phase_timings(samples),
+                    "perf_counters": {},
+                    "perf_counters_meta": {
+                        "requested": False,
+                        "collected_samples": 0,
+                        "include_kernel": False,
+                        "scope": "full_repeat_raw",
+                        "hardware_counters_observed": False,
+                        "software_counters_observed": False,
+                        "errors": {},
+                    },
+                    "derived_metrics": {},
+                    "result_distribution": dict(Counter(str(value) for value in result_values)),
+                    "code_size": summarize_code_size(samples),
+                }
+                wall_exec_summary = summarize_optional_ns(samples, "wall_exec_ns")
+                if wall_exec_summary is not None:
+                    run_record["wall_exec_ns"] = wall_exec_summary
+                benchmark_record["runs"].append(run_record)
+                print(
+                    f"  compile median {run_record['compile_ns']['median']} ns | "
+                    f"exec median {run_record['exec_ns']['median']} ns"
+                )
+                flush_artifact("running")
+
+            # Cross-runtime correctness check (kernel vs kernel-rejit)
+            runtime_results: dict[str, int | None] = {}
+            for run in benchmark_record["runs"]:
+                samples = run.get("samples", [])
+                if samples:
+                    result_counts = Counter(sample.get("result") for sample in samples)
+                    modal_result = result_counts.most_common(1)[0][0]
+                    runtime_results[run["runtime"]] = modal_result
+                else:
+                    runtime_results[run["runtime"]] = None
+
+            kernel_result = runtime_results.get("kernel")
+            rejit_result = runtime_results.get("kernel-rejit")
+            if kernel_result is not None and rejit_result is not None and kernel_result != rejit_result:
+                print(
+                    f"  WARNING: correctness mismatch for {spec.name}: "
+                    f"kernel={kernel_result}, kernel-rejit={rejit_result}"
+                )
+                benchmark_record["correctness_mismatch"] = True
+            else:
+                benchmark_record["correctness_mismatch"] = False
+
+            results["benchmarks"].append(benchmark_record)
+            current_benchmark_record = None
+            flush_artifact("running")
+
+        current_benchmark_name = None
+        current_benchmark_index = None
+        flush_artifact("completed")
+    except Exception as exc:
+        flush_artifact("error", error_message=str(exc))
+        raise
+
     print(f"[done] wrote {artifact_dir / 'metadata.json'}")
     return 0
 
@@ -1347,11 +1403,13 @@ MODE_NAMES = {"packet", "tracing", "perf", "code-size"}
 def main(argv: list[str] | None = None) -> int:
     raw_args = list(argv if argv is not None else sys.argv[1:])
 
-    # Dispatch to corpus/modes.py when the first positional arg is a mode name.
     if raw_args and raw_args[0] in MODE_NAMES:
-        from corpus.modes import main as modes_main  # noqa: F811
+        from corpus.modes import packet_main, run_linear_mode  # noqa: F811
 
-        return modes_main(raw_args)
+        mode_name, *remaining = raw_args
+        if mode_name == "packet":
+            return packet_main(remaining)
+        return run_linear_mode(mode_name, remaining)
 
     return run_suite(raw_args)
 

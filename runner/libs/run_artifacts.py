@@ -244,12 +244,49 @@ def write_run_artifact(
     metadata: Mapping[str, Any],
     detail_payloads: Mapping[str, Any] | None = None,
     detail_texts: Mapping[str, str] | None = None,
+    clear_existing: bool = True,
+) -> Path:
+    run_dir = create_run_artifact_dir(
+        results_dir=results_dir,
+        run_type=run_type,
+        generated_at=str(metadata.get("generated_at", "")) or None,
+        clear_existing=clear_existing,
+    )
+    update_run_artifact(
+        run_dir=run_dir,
+        run_type=run_type,
+        metadata=metadata,
+        detail_payloads=detail_payloads,
+        detail_texts=detail_texts,
+    )
+    return run_dir
+
+
+def create_run_artifact_dir(
+    *,
+    results_dir: Path,
+    run_type: str,
+    generated_at: str | None = None,
+    clear_existing: bool = True,
 ) -> Path:
     results_dir = results_dir.resolve()
-    clear_previous_run_artifacts(results_dir)
+    if clear_existing:
+        clear_previous_run_artifacts(results_dir)
 
-    run_dir = results_dir / f"{sanitize_artifact_token(run_type)}_{artifact_timestamp(str(metadata.get('generated_at', '')) or None)}"
+    run_dir = results_dir / f"{sanitize_artifact_token(run_type)}_{artifact_timestamp(generated_at)}"
     run_dir.mkdir(parents=True, exist_ok=False)
+    return run_dir
+
+
+def update_run_artifact(
+    *,
+    run_dir: Path,
+    run_type: str,
+    metadata: Mapping[str, Any],
+    detail_payloads: Mapping[str, Any] | None = None,
+    detail_texts: Mapping[str, str] | None = None,
+) -> Path:
+    run_dir = run_dir.resolve()
 
     metadata_payload = {
         "artifact_kind": ARTIFACT_KIND,
