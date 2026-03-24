@@ -1,5 +1,75 @@
 # kinsn 核心设计
 
+===
+kinsn 实现的修改 v2 讨论
+
+依然使用sidecar来encode payload，但是第二条指令不通过kfunc，而是新增一个call类别 kinsn_call：
+
+第二条指令编码：
+(struct bpf_insn) {
+	.code = BPF_JMP|BPF_CALL,
+    .src = BPF_KINSN,    // for kfunc, it’s PSEUDO_KFUNC_CALL
+    .imm=btf_id_to_bpf_kinsn_struct,
+}
+
+对每个拓展指令，内核可以定义：
+
+struct bpf_kinsn {
+	u32 insn_cnt;  // 告诉verifier insn_buf应该多大
+
+	// 用payload里编码的src、dst寄存器来实例化kinsn对应的bpf指令序列
+	int instantiate_insn(u32 src, u32 dst, struct bpf_insn *insn_buf);
+	// emit native指令，若不支持则翻译实例化后的bpf指令序列
+	int jit_emit(…);
+}
+
+
+对于rotate，对应的bpf_kinsn定义可以为：
+struct bpf_kinsn rotate = {
+	.insn_cnt = 2;
+    …
+}
+
+static int rotate_instantiate_insn(..) {
+	insn_buf[0] = {BPF_MOV, DECODE_REG(imm, 0), …}
+	insn_buf[1] = {…}
+	return 0;
+}
+
+int jit_emit() {
+    ROL…
+}
+
+verifier看到kinsn，首先实例化指令序列（语义等价的bpf指令序列）；然后让verifier walk每条指令即可:
+	(1)把这个指令序列当作pseudo bpf call，复用已有check_func_call() logic
+    （2）r6~r9可以在指令序列里直接使用，e.g.，存临时值
+
+Jit看到kinsn调用会emit调用；如果架构不支持，就翻译实例化的bpf指令序列。
+[ThumbsUp][ThumbsUp][ThumbsUp]
+好耶，多谢！
+我仔细想想
+然后我们明天再讨论一下（？
+有一些细节我还没理清，核心就是把设计简化了一下：一个复杂指令对应多个bpf指令，就不需要“apply_clobber → apply_result → apply_subreg_def → verifier core”，直接让verifeir分析对应的bpf指令序列就行，后端也可以保持兼容
+感觉剩下的细节claude能搞出来，可以迅速迭代一个版本
+没问题
+“  3. validate_call() → module 检查编码合法性（shift 范围等）
+  4. collect_scalar_inputs() → 从 verifier state 提取操作数的 range/tnum（不暴露
+  bpf_reg_state）
+  5. model_call() → module 返回声明式 bpf_kinsn_effect
+  6. validate_effect() → 140 行严格检查（packed ABI 额外约束：所有寄存器必须来自
+  decode 的显式集合）
+  7. apply_clobber → apply_result → apply_subreg_def → verifier core
+”
+这些操作都简化为了 verifier分析一个实例化出来的指令序列
+好，我就是打算这样试试
+还有一个细节是，kinsn和kfunc不同，kinsn需要可以接受任意寄存器（例如rewrite前使用的那些寄存器），而kfunc只能r1~r5+r0；instantiate_insn()所以有两个核心功能：（1）解码sidecar到对应的指令序列，（2）如果需要临时寄存器，那么要找sidecar里没用到的寄存器，然后在指令序列里模拟spill/fill。这样verifier在walk的时候，可以正确的分析所有的side effect，后端生成的时候不会真正的去spill/fill
+好（这个确实
+instantiate_insn()正确处理了临时值后，就不需要” (1)把这个指令序列当作pseudo bpf call，复用已有check_func_call() logic（2）r6~r9可以在指令序列里直接使用，e.g.，存临时值“，直接让verifier walk这个指令序列即可。（纠正一下，担心误导agent
+这样的话，对verifier的修改其实就很小了：跳过sidecar，根据kinsn获取struct bpf_kinsn，然后复用现有检查逻辑 check对应的指令序列，复杂度都推到了kinsn自身的定义。
+（希望我没有confuse你，感觉很promising，希望agent可以迭代出来
+
+===
+
 本文是 BpfReJIT 中 `kinsn` 抽象的长期维护文档，面向 reviewer、维护者和后续贡献者。它描述当前代码中的真实机制，而不是一次性的设计报告。
 
 文中以当前实现为准，尤其以这些文件为准：

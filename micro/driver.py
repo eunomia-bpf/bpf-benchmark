@@ -7,7 +7,8 @@ import platform
 import random
 import subprocess
 import sys
-from collections import Counter
+import threading
+from collections import Counter, deque
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -23,7 +24,6 @@ except ImportError:
 
 from runner.libs import smoke_output_path
 from runner.libs.benchmarks import resolve_memory_file, select_benchmarks
-from runner.libs.commands import build_micro_benchmark_command
 from runner.libs.environment import (
     require_existing_paths,
     read_optional_text,
@@ -33,7 +33,6 @@ from runner.libs.environment import (
 from runner.libs.results import (
     derive_perf_metrics,
     ns_summary,
-    parse_runner_sample,
     summarize_named_counters,
     summarize_optional_ns,
     summarize_perf_counter_meta,
@@ -129,20 +128,144 @@ def format_ns(value: float | int | None) -> str:
     return f"{value} ns"
 
 
-def run_command(command: list[str], cpu: str | None) -> subprocess.CompletedProcess[str]:
-    full_command = command
-    if cpu is not None:
-        full_command = ["taskset", "-c", cpu, *command]
+def build_micro_exec_request(
+    *,
+    runtime_mode: str,
+    program: Path | str,
+    io_mode: str,
+    repeat: int,
+    memory: Path | str | None = None,
+    input_size: int | None = None,
+    perf_counters: bool = False,
+    perf_scope: str = "full_repeat_raw",
+    rejit: bool = False,
+    rejit_program: Path | str | None = None,
+    daemon_socket: str | None = None,
+) -> dict[str, Any]:
+    request: dict[str, Any] = {
+        "cmd": "run",
+        "runtime": runtime_mode,
+        "bpf_object": str(program),
+        "io_mode": io_mode,
+        "repeat": max(1, repeat),
+    }
+    if memory is not None:
+        request["memory_file"] = str(memory)
+    if input_size is not None and input_size > 0:
+        request["input_size"] = input_size
+    if perf_counters:
+        request["perf_counters"] = True
+        request["perf_scope"] = perf_scope
+    if rejit:
+        request["rejit"] = True
+    if rejit_program is not None:
+        request["rejit_program"] = str(rejit_program)
+    if daemon_socket is not None:
+        request["daemon_socket"] = daemon_socket
+    return request
 
-    completed = subprocess.run(
-        full_command,
-        capture_output=True,
-        text=True,
-    )
-    if completed.returncode != 0:
-        details = completed.stderr.strip() or completed.stdout.strip()
-        raise RuntimeError(f"command failed ({completed.returncode}): {' '.join(full_command)}\n{details}")
-    return completed
+
+class MicroExecSession:
+    def __init__(self, runner_binary: Path | str, cpu: str | None = None) -> None:
+        command = [str(runner_binary)]
+        if cpu is not None:
+            command = ["taskset", "-c", cpu, *command]
+
+        self._command = command
+        self._process = subprocess.Popen(
+            command,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            bufsize=1,
+        )
+        self._stderr_lines: deque[str] = deque(maxlen=200)
+        self._stderr_thread = threading.Thread(target=self._drain_stderr, daemon=True)
+        self._stderr_thread.start()
+
+    def __enter__(self) -> "MicroExecSession":
+        return self
+
+    def __exit__(self, exc_type: object, exc: object, tb: object) -> None:
+        self.close()
+
+    def _drain_stderr(self) -> None:
+        if self._process.stderr is None:
+            return
+        for line in self._process.stderr:
+            self._stderr_lines.append(line.rstrip())
+
+    def _stderr_tail(self) -> str:
+        return "\n".join(self._stderr_lines).strip()
+
+    def run(self, request: dict[str, Any]) -> dict[str, Any]:
+        if self._process.poll() is not None:
+            tail = self._stderr_tail()
+            raise RuntimeError(
+                f"micro_exec exited before request: {' '.join(self._command)}"
+                + (f"\n{tail}" if tail else "")
+            )
+
+        stdin = self._process.stdin
+        stdout = self._process.stdout
+        if stdin is None or stdout is None:
+            raise RuntimeError("micro_exec session pipes are unavailable")
+
+        payload = json.dumps(request, separators=(",", ":"))
+        try:
+            stdin.write(payload)
+            stdin.write("\n")
+            stdin.flush()
+        except BrokenPipeError as exc:
+            tail = self._stderr_tail()
+            raise RuntimeError(
+                f"micro_exec keep-alive pipe broke while sending request"
+                + (f"\n{tail}" if tail else "")
+            ) from exc
+
+        response_line = stdout.readline()
+        if not response_line:
+            tail = self._stderr_tail()
+            returncode = self._process.poll()
+            raise RuntimeError(
+                f"micro_exec produced no response (exit={returncode})"
+                + (f"\n{tail}" if tail else "")
+            )
+
+        try:
+            payload_obj = json.loads(response_line)
+        except json.JSONDecodeError as exc:
+            tail = self._stderr_tail()
+            raise RuntimeError(
+                f"unable to parse micro_exec response: {exc}"
+                + (f"\n{tail}" if tail else "")
+            ) from exc
+
+        if not isinstance(payload_obj, dict):
+            tail = self._stderr_tail()
+            raise RuntimeError(
+                f"micro_exec keep-alive response was not a JSON object: {payload_obj!r}"
+                + (f"\n{tail}" if tail else "")
+            )
+        return payload_obj
+
+    def close(self) -> None:
+        stdin = self._process.stdin
+        if self._process.poll() is None and stdin is not None:
+            try:
+                stdin.write('{"cmd":"exit"}\n')
+                stdin.flush()
+            except BrokenPipeError:
+                pass
+        if stdin is not None and not stdin.closed:
+            stdin.close()
+
+        try:
+            self._process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            self._process.kill()
+            self._process.wait(timeout=5)
 
 
 def read_git_sha() -> str:
@@ -523,182 +646,181 @@ def main(argv: list[str] | None = None) -> int:
             strict=args.strict_env,
         )
 
-        for bench_idx, benchmark in enumerate(benchmarks):
-            memory_file = resolve_memory_file(benchmark, args.regenerate_inputs)
-            benchmark_record = {
-                "name": benchmark.name,
-                "description": benchmark.description,
-                "category": benchmark.category,
-                "family": benchmark.family,
-                "level": benchmark.level,
-                "hypothesis": benchmark.hypothesis,
-                "io_mode": benchmark.io_mode,
-                "tags": list(benchmark.tags),
-                "expected_result": benchmark.expected_result,
-                "input": str(memory_file) if memory_file else None,
-                "runs": [],
-            }
-
-            current_benchmark_name = benchmark.name
-            current_benchmark_index = bench_idx + 1
-            current_benchmark_record = benchmark_record
-            flush_artifact("running")
-
-            print(f"[bench] ({bench_idx+1}/{len(benchmarks)}) {benchmark.name}", flush=True)
-            runtime_samples: dict[str, dict[str, object]] = {}
-            iteration_runtime_orders: list[list[str]] = []
-            for runtime in runtimes:
-                repeat = args.repeat if args.repeat is not None else runtime.default_repeat
-                is_rejit_runtime = runtime.mode in {"kernel-rejit", "kernel_rejit"}
-                daemon_socket = getattr(args, "daemon_socket", None)
-                command = build_micro_benchmark_command(
-                    suite.build.runner_binary,
-                    runtime_mode=runtime.mode,
-                    program=benchmark.program_object,
-                    io_mode=benchmark.io_mode,
-                    repeat=repeat,
-                    memory=memory_file,
-                    input_size=benchmark.kernel_input_size,
-                    perf_counters=args.perf_counters,
-                    perf_scope=args.perf_scope,
-                    rejit=is_rejit_runtime,
-                    daemon_socket=daemon_socket if is_rejit_runtime else None,
-                )
-
-                # PGO warmup: before kernel-rejit optimization, run the BPF program
-                # via plain kernel mode to generate execution stats.  This lets the
-                # daemon's PGO profiler observe meaningful run_cnt / PMU data.
-                pgo_warmup_repeat = getattr(args, "pgo_warmup_repeat", 10)
-                if is_rejit_runtime and daemon_socket and pgo_warmup_repeat > 0:
-                    pgo_warmup_cmd = build_micro_benchmark_command(
-                        suite.build.runner_binary,
-                        runtime_mode="kernel",
-                        program=benchmark.program_object,
-                        io_mode=benchmark.io_mode,
-                        repeat=pgo_warmup_repeat,
-                        memory=memory_file,
-                        input_size=benchmark.kernel_input_size,
-                    )
-                    print(f"  {runtime.name:10} PGO warmup (repeat={pgo_warmup_repeat})")
-                    run_command(pgo_warmup_cmd, args.cpu)
-
-                for _ in range(warmups):
-                    parse_runner_sample(run_command(command, args.cpu).stdout)
-
-                runtime_samples[runtime.name] = {
-                    "repeat": repeat,
-                    "command": command,
-                    "samples": [],
+        with MicroExecSession(suite.build.runner_binary, args.cpu) as runner_session:
+            for bench_idx, benchmark in enumerate(benchmarks):
+                memory_file = resolve_memory_file(benchmark, args.regenerate_inputs)
+                benchmark_record = {
+                    "name": benchmark.name,
+                    "description": benchmark.description,
+                    "category": benchmark.category,
+                    "family": benchmark.family,
+                    "level": benchmark.level,
+                    "hypothesis": benchmark.hypothesis,
+                    "io_mode": benchmark.io_mode,
+                    "tags": list(benchmark.tags),
+                    "expected_result": benchmark.expected_result,
+                    "input": str(memory_file) if memory_file else None,
+                    "runs": [],
                 }
 
-            for iteration_idx in range(iterations):
-                if len(runtimes) == 2:
-                    ordered = list(runtimes) if iteration_idx % 2 == 0 else list(reversed(runtimes))
-                else:
-                    rng = random.Random(runtime_order_seed + iteration_idx)
-                    ordered = list(runtimes)
-                    rng.shuffle(ordered)
-                iteration_runtime_orders.append([runtime.name for runtime in ordered])
-                for runtime in ordered:
-                    sample_entry = runtime_samples[runtime.name]
-                    sample = parse_runner_sample(run_command(sample_entry["command"], args.cpu).stdout)
-                    sample["iteration_index"] = iteration_idx
-                    sample_index = len(sample_entry["samples"])
-                    detail_payloads: dict[str, object] = {}
-                    live_sample_path = _live_sample_relative_path(
-                        benchmark.name,
-                        runtime.name,
-                        iteration_index=iteration_idx,
-                        sample_index=sample_index,
-                    )
-                    daemon_debug_detail = externalize_sample_daemon_debug(
-                        benchmark_name=benchmark.name,
-                        runtime_name=runtime.name,
-                        sample_index=sample_index,
-                        sample=sample,
-                    )
-                    detail_payloads[live_sample_path] = sample
-                    if daemon_debug_detail is not None:
-                        daemon_debug_path, daemon_debug_payload, daemon_debug_entry = daemon_debug_detail
-                        detail_payloads[daemon_debug_path] = daemon_debug_payload
-                        daemon_debug_index.append(daemon_debug_entry)
-                        detail_payloads["daemon_debug/index.json"] = daemon_debug_index
-                    sample_entry["samples"].append(sample)
-                    flush_sample_details(detail_payloads=detail_payloads)
-                    if benchmark.expected_result is not None and sample["result"] != benchmark.expected_result:
-                        raise RuntimeError(
-                            f"{benchmark.name}/{runtime.name} result mismatch: "
-                            f"{sample['result']} != {benchmark.expected_result}"
-                        )
-
-            results["iteration_runtime_orders"][benchmark.name] = iteration_runtime_orders
-            for runtime in runtimes:
-                sample_entry = runtime_samples[runtime.name]
-                samples = sample_entry["samples"]
-                repeat = sample_entry["repeat"]
-                compile_values = [sample["compile_ns"] for sample in samples]
-                exec_values = [sample["exec_ns"] for sample in samples]
-                result_values = [sample["result"] for sample in samples]
-                perf_counter_summary = summarize_named_counters(samples, "perf_counters")
-                wall_exec_summary = summarize_optional_ns(samples, "wall_exec_ns")
-                timing_source = str(samples[0].get("timing_source", "unknown")) if samples else "unknown"
-
-                run_record = {
-                    "runtime": runtime.name,
-                    "label": runtime.label,
-                    "mode": runtime.mode,
-                    "repeat": repeat,
-                    "artifacts": {
-                        "program_object": str(benchmark.program_object),
-                    },
-                    "samples": samples,
-                    "compile_ns": ns_summary(compile_values),
-                    "exec_ns": ns_summary(exec_values),
-                    "timing_source": timing_source,
-                    "phases_ns": summarize_phase_timings(samples),
-                    "perf_counters": perf_counter_summary,
-                    "perf_counters_meta": summarize_perf_counter_meta(samples),
-                    "derived_metrics": derive_perf_metrics(perf_counter_summary),
-                    "result_distribution": dict(Counter(str(value) for value in result_values)),
-                }
-                if wall_exec_summary is not None:
-                    run_record["wall_exec_ns"] = wall_exec_summary
-                benchmark_record["runs"].append(run_record)
-
-                print(
-                    f"  {runtime.name:10} "
-                    f"compile median {format_ns(run_record['compile_ns']['median'])} | "
-                    f"exec median {format_ns(run_record['exec_ns']['median'])} | "
-                    f"result {result_values[-1]}"
-                )
+                current_benchmark_name = benchmark.name
+                current_benchmark_index = bench_idx + 1
+                current_benchmark_record = benchmark_record
                 flush_artifact("running")
 
-            # Compare result values across runtimes for the same benchmark.
-            # If kernel-rejit produces a different result than kernel, flag it.
-            runtime_results: dict[str, int | None] = {}
-            for run in benchmark_record["runs"]:
-                samples = run.get("samples", [])
-                if samples:
-                    result_counts = Counter(sample["result"] for sample in samples)
-                    modal_result = result_counts.most_common(1)[0][0]
-                    runtime_results[run["runtime"]] = modal_result
+                print(f"[bench] ({bench_idx+1}/{len(benchmarks)}) {benchmark.name}", flush=True)
+                runtime_samples: dict[str, dict[str, object]] = {}
+                iteration_runtime_orders: list[list[str]] = []
+                for runtime in runtimes:
+                    repeat = args.repeat if args.repeat is not None else runtime.default_repeat
+                    is_rejit_runtime = runtime.mode in {"kernel-rejit", "kernel_rejit"}
+                    daemon_socket = getattr(args, "daemon_socket", None)
+                    request = build_micro_exec_request(
+                        runtime_mode=runtime.mode,
+                        program=benchmark.program_object,
+                        io_mode=benchmark.io_mode,
+                        repeat=repeat,
+                        memory=memory_file,
+                        input_size=benchmark.kernel_input_size,
+                        perf_counters=args.perf_counters,
+                        perf_scope=args.perf_scope,
+                        rejit=is_rejit_runtime,
+                        daemon_socket=daemon_socket if is_rejit_runtime else None,
+                    )
+
+                    # PGO warmup: before kernel-rejit optimization, run the BPF program
+                    # via plain kernel mode to generate execution stats.  This lets the
+                    # daemon's PGO profiler observe meaningful run_cnt / PMU data.
+                    pgo_warmup_repeat = getattr(args, "pgo_warmup_repeat", 10)
+                    if is_rejit_runtime and daemon_socket and pgo_warmup_repeat > 0:
+                        pgo_warmup_request = build_micro_exec_request(
+                            runtime_mode="kernel",
+                            program=benchmark.program_object,
+                            io_mode=benchmark.io_mode,
+                            repeat=pgo_warmup_repeat,
+                            memory=memory_file,
+                            input_size=benchmark.kernel_input_size,
+                        )
+                        print(f"  {runtime.name:10} PGO warmup (repeat={pgo_warmup_repeat})")
+                        runner_session.run(pgo_warmup_request)
+
+                    for _ in range(warmups):
+                        runner_session.run(request)
+
+                    runtime_samples[runtime.name] = {
+                        "repeat": repeat,
+                        "request": request,
+                        "samples": [],
+                    }
+
+                for iteration_idx in range(iterations):
+                    if len(runtimes) == 2:
+                        ordered = list(runtimes) if iteration_idx % 2 == 0 else list(reversed(runtimes))
+                    else:
+                        rng = random.Random(runtime_order_seed + iteration_idx)
+                        ordered = list(runtimes)
+                        rng.shuffle(ordered)
+                    iteration_runtime_orders.append([runtime.name for runtime in ordered])
+                    for runtime in ordered:
+                        sample_entry = runtime_samples[runtime.name]
+                        sample = runner_session.run(sample_entry["request"])
+                        sample["iteration_index"] = iteration_idx
+                        sample_index = len(sample_entry["samples"])
+                        detail_payloads: dict[str, object] = {}
+                        live_sample_path = _live_sample_relative_path(
+                            benchmark.name,
+                            runtime.name,
+                            iteration_index=iteration_idx,
+                            sample_index=sample_index,
+                        )
+                        daemon_debug_detail = externalize_sample_daemon_debug(
+                            benchmark_name=benchmark.name,
+                            runtime_name=runtime.name,
+                            sample_index=sample_index,
+                            sample=sample,
+                        )
+                        detail_payloads[live_sample_path] = sample
+                        if daemon_debug_detail is not None:
+                            daemon_debug_path, daemon_debug_payload, daemon_debug_entry = daemon_debug_detail
+                            detail_payloads[daemon_debug_path] = daemon_debug_payload
+                            daemon_debug_index.append(daemon_debug_entry)
+                            detail_payloads["daemon_debug/index.json"] = daemon_debug_index
+                        sample_entry["samples"].append(sample)
+                        flush_sample_details(detail_payloads=detail_payloads)
+                        if benchmark.expected_result is not None and sample["result"] != benchmark.expected_result:
+                            raise RuntimeError(
+                                f"{benchmark.name}/{runtime.name} result mismatch: "
+                                f"{sample['result']} != {benchmark.expected_result}"
+                            )
+
+                results["iteration_runtime_orders"][benchmark.name] = iteration_runtime_orders
+                for runtime in runtimes:
+                    sample_entry = runtime_samples[runtime.name]
+                    samples = sample_entry["samples"]
+                    repeat = sample_entry["repeat"]
+                    compile_values = [sample["compile_ns"] for sample in samples]
+                    exec_values = [sample["exec_ns"] for sample in samples]
+                    result_values = [sample["result"] for sample in samples]
+                    perf_counter_summary = summarize_named_counters(samples, "perf_counters")
+                    wall_exec_summary = summarize_optional_ns(samples, "wall_exec_ns")
+                    timing_source = str(samples[0].get("timing_source", "unknown")) if samples else "unknown"
+
+                    run_record = {
+                        "runtime": runtime.name,
+                        "label": runtime.label,
+                        "mode": runtime.mode,
+                        "repeat": repeat,
+                        "artifacts": {
+                            "program_object": str(benchmark.program_object),
+                        },
+                        "samples": samples,
+                        "compile_ns": ns_summary(compile_values),
+                        "exec_ns": ns_summary(exec_values),
+                        "timing_source": timing_source,
+                        "phases_ns": summarize_phase_timings(samples),
+                        "perf_counters": perf_counter_summary,
+                        "perf_counters_meta": summarize_perf_counter_meta(samples),
+                        "derived_metrics": derive_perf_metrics(perf_counter_summary),
+                        "result_distribution": dict(Counter(str(value) for value in result_values)),
+                    }
+                    if wall_exec_summary is not None:
+                        run_record["wall_exec_ns"] = wall_exec_summary
+                    benchmark_record["runs"].append(run_record)
+
+                    print(
+                        f"  {runtime.name:10} "
+                        f"compile median {format_ns(run_record['compile_ns']['median'])} | "
+                        f"exec median {format_ns(run_record['exec_ns']['median'])} | "
+                        f"result {result_values[-1]}"
+                    )
+                    flush_artifact("running")
+
+                # Compare result values across runtimes for the same benchmark.
+                # If kernel-rejit produces a different result than kernel, flag it.
+                runtime_results: dict[str, int | None] = {}
+                for run in benchmark_record["runs"]:
+                    samples = run.get("samples", [])
+                    if samples:
+                        result_counts = Counter(sample["result"] for sample in samples)
+                        modal_result = result_counts.most_common(1)[0][0]
+                        runtime_results[run["runtime"]] = modal_result
+                    else:
+                        runtime_results[run["runtime"]] = None
+
+                kernel_result = runtime_results.get("kernel")
+                rejit_result = runtime_results.get("kernel-rejit")
+                if kernel_result is not None and rejit_result is not None and kernel_result != rejit_result:
+                    print(
+                        f"  WARNING: correctness mismatch for {benchmark.name}: "
+                        f"kernel={kernel_result}, kernel-rejit={rejit_result}"
+                    )
+                    benchmark_record["correctness_mismatch"] = True
                 else:
-                    runtime_results[run["runtime"]] = None
+                    benchmark_record["correctness_mismatch"] = False
 
-            kernel_result = runtime_results.get("kernel")
-            rejit_result = runtime_results.get("kernel-rejit")
-            if kernel_result is not None and rejit_result is not None and kernel_result != rejit_result:
-                print(
-                    f"  WARNING: correctness mismatch for {benchmark.name}: "
-                    f"kernel={kernel_result}, kernel-rejit={rejit_result}"
-                )
-                benchmark_record["correctness_mismatch"] = True
-            else:
-                benchmark_record["correctness_mismatch"] = False
-
-            results["benchmarks"].append(benchmark_record)
-            current_benchmark_record = None
-            flush_artifact("running")
+                results["benchmarks"].append(benchmark_record)
+                current_benchmark_record = None
+                flush_artifact("running")
 
         current_benchmark_name = None
         current_benchmark_index = None

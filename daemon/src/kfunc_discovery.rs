@@ -302,8 +302,6 @@ pub fn discover_kfuncs() -> DiscoveryResult {
         rotate64_btf_id: -1,
         select64_btf_id: -1,
         extract64_btf_id: -1,
-        lea64_btf_id: -1,
-        movbe64_btf_id: -1,
         endian_load16_btf_id: -1,
         endian_load32_btf_id: -1,
         endian_load64_btf_id: -1,

@@ -5,15 +5,18 @@ import argparse
 import json
 import math
 import os
+import selectors
 import shlex
 import statistics
 import subprocess
 import sys
 import tempfile
+import time
+import traceback
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
@@ -59,10 +62,10 @@ from runner.libs.corpus import (
     normalize_directive_scan as shared_normalize_directive_scan,
     require_minimum,
     run_command as shared_run_command,
-    run_text_command as shared_run_text_command,
     summarize_text,
     write_json_output,
     write_text_output,
+    extract_error,
 )
 from runner.libs.commands import (
     build_runner_command as _build_runner_command,
@@ -177,6 +180,10 @@ def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--guest-target-json",
         help=argparse.SUPPRESS,
     )
+    parser.add_argument(
+        "--guest-result-json",
+        help=argparse.SUPPRESS,
+    )
     return parser.parse_args(argv)
 
 
@@ -259,25 +266,6 @@ def families_from_scan(scan: dict[str, Any] | None) -> list[str]:
     return [name for name, field in FAMILY_FIELDS if normalized[field] > 0]
 
 
-def parse_json_lines(stdout: str) -> list[dict[str, Any]]:
-    payloads: list[dict[str, Any]] = []
-    for line in stdout.splitlines():
-        text = line.strip()
-        if not text or not text.startswith("{"):
-            continue
-        try:
-            payload = json.loads(text)
-        except json.JSONDecodeError:
-            continue
-        if isinstance(payload, dict):
-            payloads.append(payload)
-    return payloads
-
-
-def run_text_command(command: list[str], timeout_seconds: int) -> dict[str, Any]:
-    return shared_run_text_command(command, timeout_seconds, cwd=ROOT_DIR)
-
-
 def run_command(command: list[str], timeout_seconds: int) -> dict[str, Any]:
     return shared_run_command(command, timeout_seconds, cwd=ROOT_DIR)
 
@@ -349,6 +337,66 @@ def text_invocation_summary(result: dict[str, Any] | None) -> dict[str, Any] | N
         "stderr_tail": summarize_text(result["stderr"]),
         "stdout_tail": summarize_text(result["stdout"]),
     }
+
+
+def batch_text_invocation_summary(result: dict[str, Any] | None) -> dict[str, Any] | None:
+    if result is None:
+        return None
+    return {
+        "ok": result["ok"],
+        "returncode": result["returncode"],
+        "timed_out": result["timed_out"],
+        "duration_seconds": result["duration_seconds"],
+        "error": result["error"],
+        "stderr_tail": summarize_text(result["stderr"]),
+        "stdout_tail": summarize_text(result.get("diagnostic_stdout", result["stdout"])),
+    }
+
+
+def start_daemon_server(daemon: Path, daemon_socket: str) -> subprocess.Popen[str]:
+    socket_path = Path(daemon_socket)
+    socket_path.unlink(missing_ok=True)
+    daemon_proc: subprocess.Popen[str] = subprocess.Popen(
+        [str(daemon), "--pgo", "serve", "--socket", daemon_socket],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        text=True,
+    )
+    time.sleep(0.5)
+    return daemon_proc
+
+
+def stop_daemon_server(daemon_proc: subprocess.Popen[str] | None, daemon_socket: str | None) -> None:
+    if daemon_proc is not None:
+        daemon_proc.terminate()
+        try:
+            daemon_proc.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            daemon_proc.kill()
+            daemon_proc.wait()
+    if daemon_socket:
+        Path(daemon_socket).unlink(missing_ok=True)
+
+
+def emit_guest_event(kind: str, **payload: Any) -> None:
+    print(json.dumps({"kind": kind, **payload}, sort_keys=True), flush=True)
+
+
+def parse_guest_event(line: str) -> dict[str, Any] | None:
+    text = line.strip()
+    if not text or not text.startswith("{"):
+        return None
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(payload, dict) or not isinstance(payload.get("kind"), str):
+        return None
+    return payload
+
+
+def packet_batch_timeout_seconds(target_count: int, per_target_timeout: int) -> int:
+    return max(1, target_count) * max(1, per_target_timeout) * 4 + 120
 
 
 def build_runner_command(
@@ -508,6 +556,7 @@ def run_target_locally(
     enable_exec: bool,
     skip_families: list[str],
     blind_apply: bool,
+    daemon_socket: str | None = None,
 ) -> dict[str, Any]:
     record = build_empty_record(target, execution_mode)
     object_path = ROOT_DIR / target["object_path"]
@@ -572,17 +621,11 @@ def run_target_locally(
         v5_compile_raw = None
         v5_run_raw = None
         daemon_proc = None
-        daemon_socket: str | None = None
+        active_daemon_socket = daemon_socket
         if enable_recompile:
-            daemon_socket = f"/tmp/bpfrejit-{os.getpid()}.sock"
-            daemon_proc = subprocess.Popen(
-                [str(daemon), "--pgo", "serve", "--socket", daemon_socket],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-            # Wait briefly for the socket to appear before runner connects.
-            import time as _time
-            _time.sleep(0.5)
+            if active_daemon_socket is None:
+                active_daemon_socket = f"/tmp/bpfrejit-{os.getpid()}.sock"
+                daemon_proc = start_daemon_server(daemon, active_daemon_socket)
             try:
                 # PGO warmup: run the program once via kernel mode (no rejit)
                 # so the BPF subsystem has execution stats for daemon profiling.
@@ -614,7 +657,7 @@ def run_target_locally(
                         blind_apply=blind_apply,
                         recompile_all=recompile_all,
                         skip_families=skip_families,
-                        daemon_socket=daemon_socket,
+                        daemon_socket=active_daemon_socket,
                     ),
                     timeout_seconds,
                 )
@@ -633,17 +676,12 @@ def run_target_locally(
                             blind_apply=blind_apply,
                             recompile_all=recompile_all,
                             skip_families=skip_families,
-                            daemon_socket=daemon_socket,
+                            daemon_socket=active_daemon_socket,
                         ),
                         timeout_seconds,
                     )
             finally:
-                daemon_proc.terminate()
-                try:
-                    daemon_proc.wait(timeout=5)
-                except subprocess.TimeoutExpired:
-                    daemon_proc.kill()
-                    daemon_proc.wait()
+                stop_daemon_server(daemon_proc, active_daemon_socket if daemon_proc is not None else None)
 
     record["daemon_cli"] = text_invocation_summary(daemon_result)
     record["policy_path"] = None
@@ -712,26 +750,105 @@ def run_guest_info_mode() -> int:
     return 0
 
 
-def run_guest_target_mode(args: argparse.Namespace) -> int:
+def load_guest_batch_targets(target_path: Path) -> list[dict[str, Any]]:
+    payload = json.loads(target_path.read_text())
+    if not isinstance(payload, dict):
+        raise SystemExit("--guest-target-json payload must be a JSON object")
+    targets = payload.get("targets")
+    if not isinstance(targets, list):
+        raise SystemExit("--guest-target-json payload missing targets list")
+    normalized_targets: list[dict[str, Any]] = []
+    for index, target in enumerate(targets, start=1):
+        if not isinstance(target, dict):
+            raise SystemExit(f"--guest-target-json target #{index} must be a JSON object")
+        normalized_targets.append(dict(target))
+    return normalized_targets
+
+
+def write_guest_batch_records(result_path: Path, records: list[dict[str, Any]]) -> None:
+    payload = {"records": records}
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        dir=result_path.parent,
+        prefix=f"{result_path.name}.",
+        suffix=".tmp",
+        delete=False,
+    ) as handle:
+        json.dump(payload, handle)
+        handle.write("\n")
+        temp_path = Path(handle.name)
+    temp_path.replace(result_path)
+
+
+def _strip_daemon_response(value: Any) -> Any:
+    if isinstance(value, dict):
+        sanitized: dict[str, Any] = {}
+        for key, item in value.items():
+            if key == "daemon_response":
+                continue
+            sanitized[key] = _strip_daemon_response(item)
+        return sanitized
+    if isinstance(value, list):
+        return [_strip_daemon_response(item) for item in value]
+    return value
+
+
+def sanitize_guest_batch_record(record: dict[str, Any]) -> dict[str, Any]:
+    return _strip_daemon_response(record)
+
+
+def run_guest_batch_mode(args: argparse.Namespace) -> int:
     target_path = Path(args.guest_target_json).resolve()
-    target = json.loads(target_path.read_text())
+    targets = load_guest_batch_targets(target_path)
     runner = Path(args.runner).resolve()
     daemon = Path(args.daemon).resolve()
     btf_custom_path = Path(args.btf_custom_path).resolve() if args.btf_custom_path else None
-    record = run_target_locally(
-        target=target,
-        runner=runner,
-        daemon=daemon,
-        repeat=args.repeat,
-        timeout_seconds=args.timeout,
-        execution_mode="vm",
-        btf_custom_path=btf_custom_path,
-        enable_recompile=True,
-        enable_exec=bool(target.get("can_test_run")),
-        skip_families=normalize_skip_families(args.skip_families),
-        blind_apply=args.blind_apply,
-    )
-    print(json.dumps(record, sort_keys=True))
+    guest_result_path = Path(args.guest_result_json).resolve() if args.guest_result_json else None
+    if btf_custom_path is None:
+        raise SystemExit("--btf-custom-path is required in guest batch mode")
+
+    emit_guest_event("guest_info", payload=guest_info_payload())
+    records: list[dict[str, Any]] = []
+    if guest_result_path is not None:
+        write_guest_batch_records(guest_result_path, records)
+
+    daemon_socket = f"/tmp/bpfrejit-{os.getpid()}.sock"
+    daemon_proc = start_daemon_server(daemon, daemon_socket)
+    skip_families = normalize_skip_families(args.skip_families)
+    try:
+        for index, target in enumerate(targets, start=1):
+            print(
+                f"[guest {index}/{len(targets)}] {target['source_name']} {target['object_path']}:{target['program_name']}",
+                file=sys.stderr,
+                flush=True,
+            )
+            try:
+                record = run_target_locally(
+                    target=target,
+                    runner=runner,
+                    daemon=daemon,
+                    repeat=args.repeat,
+                    timeout_seconds=args.timeout,
+                    execution_mode="vm",
+                    btf_custom_path=btf_custom_path,
+                    enable_recompile=True,
+                    enable_exec=bool(target.get("can_test_run")),
+                    skip_families=skip_families,
+                    blind_apply=args.blind_apply,
+                    daemon_socket=daemon_socket,
+                )
+            except Exception as exc:
+                print(traceback.format_exc(), file=sys.stderr, flush=True)
+                record = build_empty_record(target, "vm")
+                record["record_error"] = f"guest batch exception: {exc}"
+            records.append(sanitize_guest_batch_record(record))
+            if guest_result_path is not None:
+                write_guest_batch_records(guest_result_path, records)
+                emit_guest_event("program_progress", index=index, total=len(targets))
+            else:
+                emit_guest_event("program_record", index=index, total=len(targets), record=record)
+    finally:
+        stop_daemon_server(daemon_proc, daemon_socket)
     return 0
 
 
@@ -774,26 +891,9 @@ def load_targets(
     )
 
 
-def build_result_from_guest_run(
+def run_targets_in_guest_batch(
     *,
-    target: dict[str, Any],
-    invocation: dict[str, Any],
-) -> dict[str, Any]:
-    parsed = parse_json_lines(invocation["stdout"])
-    if invocation["ok"] and parsed:
-        record = parsed[-1]
-        record["guest_invocation"] = text_invocation_summary(invocation)
-        return record
-
-    record = build_empty_record(target, "vm")
-    record["record_error"] = invocation["error"] or "guest target failed"
-    record["guest_invocation"] = text_invocation_summary(invocation)
-    return record
-
-
-def run_target_in_guest(
-    *,
-    target: dict[str, Any],
+    targets: list[dict[str, Any]],
     runner: Path,
     daemon: Path,
     kernel_image: Path,
@@ -803,30 +903,50 @@ def run_target_in_guest(
     vng_binary: str,
     skip_families: list[str],
     blind_apply: bool,
+    on_guest_info: Callable[[dict[str, Any]], None] | None = None,
+    on_record: Callable[[int, dict[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
     handle = tempfile.NamedTemporaryFile(
         mode="w",
-        prefix="corpus-v5-vm-target-",
+        prefix="corpus-v5-vm-batch-",
+        suffix=".json",
+        dir=ROOT_DIR,
+        delete=False,
+    )
+    result_handle = tempfile.NamedTemporaryFile(
+        mode="w",
+        prefix="corpus-v5-vm-batch-result-",
         suffix=".json",
         dir=ROOT_DIR,
         delete=False,
     )
     try:
-        guest_target = {
-            **target,
-            "policy_mode": "blind-apply-v5" if blind_apply else "daemon-auto",
-            "policy_path": None,
+        guest_target_payload = {
+            "targets": [
+                {
+                    **target,
+                    "policy_mode": "blind-apply-v5" if blind_apply else "daemon-auto",
+                    "policy_path": None,
+                }
+                for target in targets
+            ],
         }
         with handle:
-            json.dump(guest_target, handle)
+            json.dump(guest_target_payload, handle)
             handle.write("\n")
         target_path = Path(handle.name)
+        with result_handle:
+            json.dump({"records": []}, result_handle)
+            result_handle.write("\n")
+        result_path = Path(result_handle.name)
         guest_argv = [
             "python3",
             str(DRIVER_RELATIVE),
             "packet",
             "--guest-target-json",
             str(target_path),
+            "--guest-result-json",
+            str(result_path),
             "--runner",
             str(runner),
             "--daemon",
@@ -843,39 +963,167 @@ def run_target_in_guest(
         if blind_apply:
             guest_argv.append("--blind-apply")
         guest_exec = build_guest_exec(guest_argv)
-        invocation = run_text_command(
-            build_vng_command(
-                vng_binary=vng_binary,
-                kernel_image=kernel_image,
-                guest_exec=guest_exec,
-            ),
-            (timeout_seconds * 4) + 120,
-        )
-        return build_result_from_guest_run(target=target, invocation=invocation)
-    finally:
-        Path(handle.name).unlink(missing_ok=True)
-
-
-def collect_guest_info(
-    *,
-    vng_binary: str,
-    kernel_image: Path,
-    timeout_seconds: int,
-) -> dict[str, Any]:
-    guest_exec = build_guest_exec(["python3", str(DRIVER_RELATIVE), "packet", "--guest-info"])
-    invocation = run_text_command(
-        build_vng_command(
+        command = build_vng_command(
             vng_binary=vng_binary,
             kernel_image=kernel_image,
             guest_exec=guest_exec,
-        ),
-        timeout_seconds,
-    )
-    payloads = parse_json_lines(invocation["stdout"])
-    return {
-        "invocation": text_invocation_summary(invocation),
-        "payload": payloads[-1] if invocation["ok"] and payloads else None,
-    }
+        )
+        timeout_limit = packet_batch_timeout_seconds(len(targets), timeout_seconds)
+        start = time.monotonic()
+        process = subprocess.Popen(
+            command,
+            cwd=ROOT_DIR,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            bufsize=1,
+        )
+        selector = selectors.DefaultSelector()
+        assert process.stdout is not None
+        assert process.stderr is not None
+        selector.register(process.stdout, selectors.EVENT_READ, data="stdout")
+        selector.register(process.stderr, selectors.EVENT_READ, data="stderr")
+
+        stdout_chunks: list[str] = []
+        stderr_chunks: list[str] = []
+        diagnostic_stdout_chunks: list[str] = []
+        guest_info: dict[str, Any] | None = None
+        emitted_records = 0
+        timed_out = False
+        guest_result_mtime_ns: int | None = None
+
+        def sync_guest_records() -> None:
+            nonlocal emitted_records, guest_result_mtime_ns
+            if not result_path.exists():
+                return
+            stat = result_path.stat()
+            if guest_result_mtime_ns == stat.st_mtime_ns:
+                return
+            guest_result_mtime_ns = stat.st_mtime_ns
+            try:
+                payload = json.loads(result_path.read_text())
+            except json.JSONDecodeError:
+                return
+            records_payload = payload.get("records")
+            if not isinstance(records_payload, list):
+                return
+            while emitted_records < len(records_payload):
+                record = records_payload[emitted_records]
+                emitted_records += 1
+                if isinstance(record, dict) and on_record is not None:
+                    on_record(emitted_records, record)
+
+        while selector.get_map():
+            remaining = timeout_limit - (time.monotonic() - start)
+            if remaining <= 0:
+                timed_out = True
+                process.kill()
+                break
+            ready = selector.select(timeout=min(1.0, remaining))
+            sync_guest_records()
+            if not ready:
+                continue
+            for key, _ in ready:
+                stream = key.fileobj
+                line = stream.readline()
+                if line == "":
+                    selector.unregister(stream)
+                    continue
+                if key.data == "stdout":
+                    stdout_chunks.append(line)
+                    event = parse_guest_event(line)
+                    if event is None:
+                        diagnostic_stdout_chunks.append(line)
+                        continue
+                    if event["kind"] == "guest_info":
+                        payload = event.get("payload")
+                        if isinstance(payload, dict):
+                            guest_info = payload
+                            if on_guest_info is not None:
+                                on_guest_info(payload)
+                        continue
+                    if event["kind"] == "program_record":
+                        record = event.get("record")
+                        if isinstance(record, dict):
+                            emitted_records += 1
+                            if on_record is not None:
+                                on_record(emitted_records, record)
+                        continue
+                    if event["kind"] == "program_progress":
+                        continue
+                    diagnostic_stdout_chunks.append(line)
+                else:
+                    stderr_chunks.append(line)
+        selector.close()
+
+        try:
+            process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.wait()
+
+        remaining_stdout = process.stdout.read() if process.stdout is not None else ""
+        remaining_stderr = process.stderr.read() if process.stderr is not None else ""
+        if remaining_stdout:
+            for line in remaining_stdout.splitlines(keepends=True):
+                stdout_chunks.append(line)
+                event = parse_guest_event(line)
+                if event is None:
+                    diagnostic_stdout_chunks.append(line)
+                    continue
+                if event["kind"] == "guest_info":
+                    payload = event.get("payload")
+                    if isinstance(payload, dict):
+                        guest_info = payload
+                        if on_guest_info is not None:
+                            on_guest_info(payload)
+                    continue
+                if event["kind"] == "program_record":
+                    record = event.get("record")
+                    if isinstance(record, dict):
+                        emitted_records += 1
+                        if on_record is not None:
+                            on_record(emitted_records, record)
+                    continue
+                if event["kind"] == "program_progress":
+                    continue
+                diagnostic_stdout_chunks.append(line)
+        if remaining_stderr:
+            stderr_chunks.append(remaining_stderr)
+        sync_guest_records()
+
+        stdout = "".join(stdout_chunks)
+        stderr = "".join(stderr_chunks)
+        ok = process.returncode == 0 and not timed_out and guest_info is not None and emitted_records == len(targets)
+        error = None
+        if timed_out:
+            error = f"timeout after {timeout_limit}s"
+        elif process.returncode != 0:
+            error = extract_error(stderr, stdout, process.returncode)
+        elif guest_info is None:
+            error = "guest batch missing guest_info"
+        elif emitted_records != len(targets):
+            error = f"guest batch emitted {emitted_records}/{len(targets)} records"
+
+        return {
+            "invocation": {
+                "ok": ok,
+                "command": command,
+                "returncode": process.returncode,
+                "timed_out": timed_out,
+                "duration_seconds": time.monotonic() - start,
+                "stdout": stdout,
+                "stderr": stderr,
+                "diagnostic_stdout": "".join(diagnostic_stdout_chunks),
+                "sample": None,
+                "error": error,
+            },
+            "guest_info": guest_info,
+            "records_emitted": emitted_records,
+        }
+    finally:
+        Path(handle.name).unlink(missing_ok=True)
+        Path(result_handle.name).unlink(missing_ok=True)
 
 
 def build_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
@@ -1276,11 +1524,11 @@ def build_markdown(data: dict[str, Any]) -> str:
             "## Notes",
             "",
             "- Target selection comes from the runnability inventory and keeps every packet-test-run target whose baseline run already succeeds; the current daemon pass determines whether v5 has any eligible families.",
-            "- In strict VM mode, each target boots the framework v5 guest once and runs baseline compile-only, v5 compile-only, baseline test_run, and v5 test_run in that order.",
+            "- In strict VM mode, the framework v5 guest boots once, keeps `daemon serve` alive for the full batch, and runs baseline compile-only, v5 compile-only, baseline test_run, and v5 test_run for each target in that order.",
             "- Default steady-state semantics: the daemon is always started and tries to optimize each program; programs with no applicable sites stay on stock JIT.",
             "- `--blind-apply` forces the old debug/exploration path with `--recompile-v5 --recompile-all`.",
             "- `--skip-families` only applies together with `--blind-apply`; the family columns above report applied families, not just eligible sites.",
-            "- The Make-driven `vm-corpus` path is strict VM-only: guest smoke or per-target VM failures fail the run instead of falling back to host execution.",
+            "- The Make-driven `vm-corpus` path is strict VM-only: guest batch failures fail the run instead of falling back to host execution.",
             "- Family summaries are overlap-based: one program can contribute to multiple family rows, so those rows are not isolated causal attributions.",
         ]
     )
@@ -1297,7 +1545,7 @@ def packet_main(argv: list[str] | None = None) -> int:
     if args.guest_info:
         return run_guest_info_mode()
     if args.guest_target_json:
-        return run_guest_target_mode(args)
+        return run_guest_batch_mode(args)
 
     inventory_json = Path(args.inventory_json).resolve()
     if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.max_programs is not None:
@@ -1332,15 +1580,7 @@ def packet_main(argv: list[str] | None = None) -> int:
     if btf_custom_path is None or not btf_custom_path.exists():
         raise SystemExit(f"btf path missing: {btf_custom_path}")
 
-    guest_smoke = collect_guest_info(
-        vng_binary=args.vng,
-        kernel_image=kernel_image,
-        timeout_seconds=args.timeout,
-    )
-    if not ((guest_smoke.get("invocation") or {}).get("ok") and guest_smoke.get("payload")):
-        smoke_error = (guest_smoke.get("invocation") or {}).get("error") or "guest smoke failed"
-        raise SystemExit(f"vm guest smoke failed: {smoke_error}")
-
+    guest_smoke: dict[str, Any] = {"invocation": None, "payload": None}
     records: list[dict[str, Any]] = []
     result = {
         "generated_at": started_at,
@@ -1442,30 +1682,42 @@ def packet_main(argv: list[str] | None = None) -> int:
 
     flush_artifact("running")
     try:
-        for index, target in enumerate(targets, start=1):
-            current_target_index = index
-            current_target = target
+        def handle_guest_info(payload: dict[str, Any]) -> None:
+            guest_smoke["payload"] = payload
             flush_artifact("running")
 
-            print(
-                f"[{index}/{len(targets)}] {target['source_name']} {target['object_path']}:{target['program_name']}",
-                file=sys.stderr,
-                flush=True,
-            )
-            record = run_target_in_guest(
-                target=target,
-                runner=runner,
-                daemon=daemon,
-                kernel_image=kernel_image,
-                btf_custom_path=btf_custom_path,
-                repeat=args.repeat,
-                timeout_seconds=args.timeout,
-                vng_binary=args.vng,
-                skip_families=skip_families,
-                blind_apply=args.blind_apply,
-            )
+        def handle_guest_record(index: int, record: dict[str, Any]) -> None:
+            nonlocal current_target_index, current_target
+            current_target_index = index
+            current_target = targets[index - 1] if index - 1 < len(targets) else None
             records.append(record)
             flush_artifact("running")
+
+        batch_result = run_targets_in_guest_batch(
+            targets=targets,
+            runner=runner,
+            daemon=daemon,
+            kernel_image=kernel_image,
+            btf_custom_path=btf_custom_path,
+            repeat=args.repeat,
+            timeout_seconds=args.timeout,
+            vng_binary=args.vng,
+            skip_families=skip_families,
+            blind_apply=args.blind_apply,
+            on_guest_info=handle_guest_info,
+            on_record=handle_guest_record,
+        )
+        guest_invocation = batch_text_invocation_summary(batch_result["invocation"])
+        guest_smoke["invocation"] = guest_invocation
+        for record in records:
+            record["guest_invocation"] = dict(guest_invocation) if guest_invocation is not None else None
+
+        if not guest_smoke.get("payload"):
+            smoke_error = (guest_smoke.get("invocation") or {}).get("error") or "guest smoke failed"
+            raise RuntimeError(f"vm guest smoke failed: {smoke_error}")
+        if not batch_result["invocation"]["ok"]:
+            batch_error = batch_result["invocation"]["error"] or "guest batch failed"
+            raise RuntimeError(f"vm guest batch failed: {batch_error}")
 
         current_target = None
         current_target_index = None

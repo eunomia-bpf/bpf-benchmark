@@ -3,6 +3,7 @@
 #include <arpa/inet.h>
 
 #include <bpf/bpf.h>
+#include <bpf/btf.h>
 #include <bpf/libbpf.h>
 #include <linux/bpf.h>
 
@@ -654,6 +655,47 @@ std::string libbpf_error_string(int error_code)
     char buffer[256];
     libbpf_strerror(error_code, buffer, sizeof(buffer));
     return std::string(buffer);
+}
+
+struct process_runtime_state {
+    process_runtime_state()
+    {
+        libbpf_set_print(libbpf_log);
+
+        struct btf *loaded_vmlinux_btf = btf__load_vmlinux_btf();
+        if (loaded_vmlinux_btf == nullptr) {
+            std::fprintf(stderr, "vmlinux btf preload returned null\n");
+            return;
+        }
+
+        const int load_error = libbpf_get_error(loaded_vmlinux_btf);
+        if (load_error != 0) {
+            std::fprintf(
+                stderr,
+                "vmlinux btf preload failed: %s\n",
+                libbpf_error_string(load_error).c_str());
+            return;
+        }
+
+        // Keep the parsed vmlinux BTF alive for the life of the process so
+        // subsequent object loads can reuse libbpf's in-process state.
+        vmlinux_btf = loaded_vmlinux_btf;
+    }
+
+    ~process_runtime_state()
+    {
+        if (vmlinux_btf != nullptr) {
+            btf__free(vmlinux_btf);
+        }
+    }
+
+    struct btf *vmlinux_btf = nullptr;
+};
+
+process_runtime_state &get_process_runtime_state()
+{
+    static process_runtime_state state;
+    return state;
 }
 
 /* ================================================================
@@ -1375,9 +1417,14 @@ int manual_load_program(bpf_object *object, const cli_options &options)
 
 } // namespace
 
+void initialize_micro_exec_process()
+{
+    (void)get_process_runtime_state();
+}
+
 std::vector<sample_result> run_kernel(const cli_options &options)
 {
-    libbpf_set_print(libbpf_log);
+    initialize_micro_exec_process();
 
     const auto memory_prepare_start = std::chrono::steady_clock::now();
     auto input_bytes = materialize_memory(options.memory, options.input_size);

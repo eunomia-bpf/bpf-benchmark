@@ -85,6 +85,7 @@ VM_MICRO_SMOKE_OUTPUT  := $(MICRO_RESULTS_DIR)/vm_micro_smoke.json
 VM_MICRO_OUTPUT        := $(MICRO_RESULTS_DIR)/vm_micro.json
 VM_CORPUS_OUTPUT_JSON  := $(CORPUS_RESULTS_DIR)/vm_corpus.json
 VM_CORPUS_OUTPUT_MD    := $(CORPUS_RESULTS_DIR)/vm_corpus.md
+VM_STATIC_OUTPUT       := $(ROOT_DIR)/daemon/tests/results/static_verify.json
 
 # Python / venv
 _VENV_CANDIDATES := $(HOME)/workspace/.venv $(HOME)/.venv .venv venv
@@ -102,6 +103,7 @@ BENCH_FLAGS      := $(foreach b,$(BENCH),--bench $(b))
 MICRO_ARGS       := --iterations $(ITERATIONS) --warmups $(WARMUPS) --repeat $(REPEAT) $(BENCH_FLAGS)
 LOCAL_SMOKE_ARGS := --bench simple --iterations 1 --warmups 0 --repeat 10
 VM_SMOKE_ARGS    := --iterations 1 --warmups 0 --repeat 50
+STATIC_VERIFY_ARGS ?=
 
 # Incremental rebuild sources
 MICRO_RUNNER_SOURCES := $(wildcard $(RUNNER_DIR)/src/*.cpp $(RUNNER_DIR)/include/*.hpp $(RUNNER_DIR)/CMakeLists.txt)
@@ -112,7 +114,7 @@ MICRO_BPF_STAMP      := $(MICRO_DIR)/programs/.build.stamp
 
 .PHONY: all runner micro daemon kernel kernel-arm64 kernel-tests kinsn-modules \
 	daemon-tests python-tests check smoke validate \
-	vm-test vm-selftest vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
+	vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 	arm64-worktree arm64-rootfs arm64-crossbuild-image cross-arm64 selftest-arm64 \
 	vm-arm64-smoke vm-arm64-selftest \
 	aws-arm64-launch aws-arm64-setup aws-arm64-benchmark aws-arm64-terminate aws-arm64 \
@@ -122,7 +124,7 @@ MICRO_BPF_STAMP      := $(MICRO_DIR)/programs/.build.stamp
 help:
 	@echo "Build:  all runner micro daemon kernel kinsn-modules kernel-tests kernel-arm64 cross-arm64"
 	@echo "Test:   smoke daemon-tests python-tests check"
-	@echo "VM x86: vm-test vm-selftest vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all validate"
+	@echo "VM x86: vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all validate"
 	@echo "ARM64:  vm-arm64-smoke vm-arm64-selftest"
 	@echo "AWS:    aws-arm64-launch aws-arm64-setup aws-arm64-benchmark aws-arm64-terminate aws-arm64"
 	@echo "Params: ITERATIONS=$(ITERATIONS) WARMUPS=$(WARMUPS) REPEAT=$(REPEAT) BENCH=\"...\""
@@ -206,6 +208,15 @@ vm-selftest: kernel-tests $(BZIMAGE_PATH) kinsn-modules
 			"$(KERNEL_TEST_DIR)/build/test_recompile" \
 			"$(ROOT_DIR)/tests/unittest" \
 			"$(KINSN_MODULE_DIR)"'
+
+vm-static-test: $(MICRO_BPF_STAMP) $(DAEMON_PATH) $(BZIMAGE_PATH) kinsn-modules
+	mkdir -p "$(ROOT_DIR)/daemon/tests/results"
+	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
+		bash -lc 'cd "$(ROOT_DIR)" && $(VM_INIT) \
+			python3 "$(ROOT_DIR)/daemon/tests/static_verify.py" \
+			--daemon-binary "$(DAEMON_PATH)" \
+			--output "$(VM_STATIC_OUTPUT)" \
+			$(STATIC_VERIFY_ARGS)'
 
 NEGATIVE_TEST_DIR := $(ROOT_DIR)/tests/negative
 FUZZ_ROUNDS ?= 1000

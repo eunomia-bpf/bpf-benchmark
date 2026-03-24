@@ -1,0 +1,65 @@
+# BCC libbpf-tools E2E benchmark configuration
+# Each tool is compiled from corpus/repos/bcc/libbpf-tools/ and run as a real
+# userspace binary that loads BPF programs into the kernel.
+#
+# workload_kind must be one of:
+#   tcp_connect  -- curl-based HTTP loopback connects
+#   dd_read      -- dd sequential reads from a temp file
+#   scheduler    -- hackbench or stress-ng --switch context-switch storm
+#   exec_storm   -- stress-ng --exec execve storm
+#   file_open    -- fio/stress-ng open-close file storm
+
+tools:
+  - name: tcplife
+    description: "TCP session lifespan tracking (IPv4/IPv6), struct field access, bswap, ntop, 3 maps"
+    expected_programs: 2
+    workload_kind: tcp_connect
+    # tcplife needs at least one TCP session to fire; spawn_timeout_s covers
+    # the time to see the first kernel attach acknowledgement in output.
+    spawn_timeout_s: 15
+
+  - name: biosnoop
+    description: "Block I/O per-request latency tracing with disk/sector maps"
+    expected_programs: 2
+    workload_kind: dd_read
+    spawn_timeout_s: 15
+
+  - name: runqlat
+    description: "Run-queue latency histogram via sched tracepoints (3 programs)"
+    expected_programs: 3
+    workload_kind: scheduler
+    spawn_timeout_s: 15
+
+  - name: execsnoop
+    description: "Process exec tracing via tracepoints, argv map lookups"
+    expected_programs: 2
+    workload_kind: exec_storm
+    spawn_timeout_s: 15
+
+  - name: opensnoop
+    description: "File open syscall tracing via tracepoints"
+    expected_programs: 2
+    workload_kind: file_open
+    spawn_timeout_s: 15
+
+  - name: capable
+    description: "Capability call tracing via kprobe cap_capable, 41-entry string map"
+    expected_programs: 1
+    workload_kind: exec_storm
+    spawn_timeout_s: 15
+
+  - name: vfsstat
+    description: "VFS operation counters (read/write/open/create/fsync) via kprobes"
+    expected_programs: 5
+    workload_kind: dd_read
+    spawn_timeout_s: 15
+
+  - name: tcpconnect
+    description: "TCP connect tracing via tracepoints, IPv4/IPv6 support"
+    expected_programs: 2
+    workload_kind: tcp_connect
+    spawn_timeout_s: 15
+
+measurement_duration_s: 30
+smoke_duration_s: 10
+attach_timeout_s: 20

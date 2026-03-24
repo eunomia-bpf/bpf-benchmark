@@ -264,6 +264,14 @@ pub struct SkipReason {
     pub reason: String,
 }
 
+/// High-level pass classification used by diagnostics and tests.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum PassCategory {
+    Optimization,
+    Security,
+    Observability,
+}
+
 /// Transform pass trait.
 ///
 /// Each optimization is a pass: scan the program, find rewrite sites, apply transforms.
@@ -271,6 +279,11 @@ pub struct SkipReason {
 pub trait BpfPass: Send + Sync {
     /// Pass name.
     fn name(&self) -> &str;
+
+    /// High-level classification for this pass.
+    fn category(&self) -> PassCategory {
+        PassCategory::Optimization
+    }
 
     /// Declare analyses this pass depends on (for PassManager ordering and precomputation).
     fn required_analyses(&self) -> Vec<&str> {

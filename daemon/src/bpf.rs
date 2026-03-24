@@ -14,9 +14,11 @@ use crate::insn::BpfInsn;
 // The enum starts at 0. We only define the commands we actually use.
 // Note: BPF_MAP_FREEZE=22 sits between BTF_GET_FD_BY_ID and BTF_GET_NEXT_ID.
 const BPF_PROG_GET_NEXT_ID: u32 = 11;
+const BPF_MAP_GET_NEXT_ID: u32 = 12;
 const BPF_PROG_GET_FD_BY_ID: u32 = 13;
 const BPF_MAP_GET_FD_BY_ID: u32 = 14;
 const BPF_OBJ_GET_INFO_BY_FD: u32 = 15;
+const BPF_BTF_LOAD: u32 = 18;
 const BPF_BTF_GET_FD_BY_ID: u32 = 19;
 // BPF_TASK_FD_QUERY=20, BPF_MAP_LOOKUP_AND_DELETE_ELEM=21, BPF_MAP_FREEZE=22
 const BPF_BTF_GET_NEXT_ID: u32 = 23;

@@ -540,7 +540,7 @@ VM 使用:   make -j$(nproc) bzImage && vng --run <worktree>/arch/x86/boot/bzIma
 | `make vm-selftest` | VM 中跑 kernel self-tests (rejit_poc + rejit_safety_tests) |
 | `make vm-micro-smoke` | VM 中跑 micro smoke (simple + load_byte_recompose + cmov_dense, kernel + kernel-rejit) |
 | `make vm-micro` | VM 中跑全量 micro suite (kernel + kernel-rejit, 默认 3iter/1warm/100rep) |
-| `make vm-corpus` | 跑 corpus batch (per-target VM boot, 用 policy, 默认 200 repeat) |
+| `make vm-corpus` | 跑 corpus batch（单 VM batch，daemon serve 常驻，用 policy，默认 200 repeat） |
 | `make vm-e2e` | 跑全部 E2E (tracee + tetragon + bpftrace + scx；`xdp_forwarding` 已退役) |
 | `make vm-all` | = `vm-selftest` + `vm-micro` + `vm-corpus` + `vm-e2e`（完整 VM 验证） |
 | `make validate` | = `check` + `vm-selftest` + `vm-micro-smoke`（最小 VM 验证） |
@@ -744,6 +744,19 @@ make clean
 | **452** | **Kernel 完整审计 v2（2026-03-23）** | ✅ | #428 五个问题全修 ✅。新发现 2 HIGH（refresh 吞错误 err=0、bpf_func publish 缺 barrier）+ 5 MEDIUM + 5 dead code。精确 LOC：1437 代码行 + 162 注释行。报告：`docs/tmp/20260323/kernel_full_review_20260323.md`。 |
 | **453** | Kernel HIGH 修复（refresh err=0 + dead code） | 待做 | H2: trampoline/struct_ops/XDP refresh 失败时静默吞错误，可能 UAF。5 个 dead code 清理。 |
 | **454** | 干净环境性能重跑 | 待做 | 串行跑 vm-micro/vm-corpus/vm-e2e strict params。不并行任何任务。 |
-| **455** | Recompile overhead 测量 | 待做 | REJIT verify+JIT+swap 各多久？reviewer 必问。#359 延续。 |
+| **455** | Recompile overhead 测量 | ✅ 数据已有 | daemon pipeline ~2-5ms + kernel REJIT syscall ~3-7ms，从 static_verify.json 和 micro results 可提取。不需额外基础设施，只需汇总分析。 |
 | **456** | ARM64 QEMU 测试 | 待做 | vm-arm64-selftest + vm-arm64-micro-smoke。基础设施已有。 |
 | **457** | **WideMemPass packet pointer verifier 拒绝 bug** | 待做 | `wide_mem` 将 byte-ladder（BPF_B + shift + OR）合并为宽 load（BPF_H/W/DW），在 TC/XDP packet pointer 上触发 verifier 拒绝（tc_bitcount PC=11、tc_checksum PC=11、bitcount_xdp PC=111）。当前靠 rollback+retry 绕过但整个 pass 被禁，丢失全部 wide_mem 收益。**Root cause 待确认**：宽 load 可能触发 unaligned 或 pkt_ptr type 约束，需对比 before/after verifier log reg state。**修复方向**：(1) parse failure PC → 只 skip 触发拒绝的单个 site，其余保留；(2) scan 阶段检测 base_reg 是否来自 packet pointer；(3) 最小 guard：`base_off % width == 0`。 |
+| **458** | **Corpus single-VM batch mode（2026-03-23）** | ✅ | `corpus/modes.py` 默认改为单 VM batch：一次 `vng --exec` 跑全部 target，guest 内 `daemon serve` 全程常驻，删除旧的 per-target VM 路径；`vm-corpus` 外部入口不变，JSON + markdown 输出格式保持兼容。 |
+| **459** | **micro_exec keep-alive 模式（2026-03-23）** | ✅ 代码完成 | `runner/src/main.cpp` 无参启动进入 stdin JSON-line keep-alive 模式，BTF 只加载一次。`micro/driver.py` 新增 `MicroExecSession` 复用单个长驻进程。预期 micro 时间 13.5min→3-4min。`make smoke` + llvmbpf 验证通过。 |
+| **460** | **Daemon 静态验证 pipeline（2026-03-23）** | ✅ VM 跑通 | `daemon/tests/static_verify.py` + `make vm-static-test`。130 个 .bpf.o → 342 个程序 → 48 applied → 340 verifier accepted → 2 error（xdp_synproxy）。micro 62/62 全部通过。结果：`daemon/tests/results/static_verify.json`。 |
+| **461** | **BCC libbpf-tools corpus 扩展（2026-03-23）** | ✅ | macro_corpus.yaml +34 条目（16→50），覆盖全部可行 BCC libbpf-tools .bpf.o。7 个合理跳过（uprobe/USDT/dummy section）。 |
+| **462** | **BCC e2e case（2026-03-23）** | ✅ 代码完成 | `e2e/cases/bcc/`：8 个代表性 tool（tcplife/biosnoop/runqlat/execsnoop/opensnoop/capable/vfsstat/tcpconnect），真实 binary 加载，已注册到 `e2e/run.py`。 |
+| **463** | **kinsn v2 instantiate 设计（2026-03-23）** | ✅ 设计完成 | `instantiate_insn()` 方案：kinsn 展开为等价 BPF 指令序列 → verifier 直接 walk → 极简。建议论文前做 compat-v2（保留 sidecar/fd_slot，只切 verifier 从 effect DSL 到 instruction instantiation）。报告：`docs/tmp/20260323/kinsn_v2_instantiate_design_20260323.md`。 |
+| **464** | **Paper submodule + 死代码清理（2026-03-23）** | ✅ pushed | `docs/paper` 替换为 `yunwei37/bpfrejit-paper` submodule。删除 `daemon/tests/policy_v3_golden/`（10 个孤立 v1 YAML）+ 9 个垃圾文件（temp corpus JSON + 空 debug artifacts）。Commits: `91a2be3` + `329ef17`。 |
+| **465** | **VM 管理设计文档（2026-03-23）** | ✅ | 分析现有 VM/ARM64/CI 管理现状 + 统一方案设计（config/machines.yaml、TARGET= 选择、vm_global lock）。报告：`docs/tmp/20260323/vm_management_design_20260323.md`。 |
+| **466** | **Benchmark 框架 review（2026-03-23）** | ✅ | 五大瓶颈识别：corpus per-VM 72%、micro subprocess 83%、PGO sleep 15%、corpus socket wait、correctness/perf 不分离。#458/#459 解决前两个。 |
+| **467** | 第三方 repo 统一管理 | 🔄 | repos.yaml 移到 runner/，扩展覆盖全部 25 个项目，加 make corpus-fetch/corpus-build targets。codex 进行中。 |
+| **468** | Corpus 补全缺失项目（macro_corpus.yaml） | 🔄 | cilium/KubeArmor/loxilb/scx/bpftrace/xdp-tools 等 10+ 项目的 .bpf.o 需加入 manifest。依赖 #467。 |
+| **469** | 构建错误修复 + 全量最小测试 | 🔄 | daemon kfunc_discovery.rs 字段不匹配 + runner 链接错误。codex 进行中。 |
+| **470** | VM/远端机器统一注册实现 | 待做 | 基于 #465 设计文档实现：`config/machines.yaml` 中心注册（本地 VM、AWS ARM64、CI runner）、`make vm-* TARGET=...` 统一入口、`vm_global` file lock 防并行冲突。MVP：config 注册 + 手动 TARGET 选择 + 基础 lock，不做自动调度。 |

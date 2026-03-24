@@ -5,8 +5,12 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <limits>
+#include <optional>
 #include <stdexcept>
 #include <string_view>
+#include <unordered_map>
+#include <variant>
 
 namespace {
 
@@ -81,7 +85,10 @@ void print_json_string_array(std::ostream &out,
 std::string usage_text()
 {
     return
-        "usage: micro_exec <"
+        "usage:\n"
+        "  micro_exec\n"
+        "    keep-alive mode: read JSON commands from stdin, emit one JSON result per line\n"
+        "  micro_exec <"
 #if MICRO_EXEC_ENABLE_LLVMBPF
         "run-llvmbpf|"
 #endif
@@ -93,6 +100,328 @@ std::string usage_text()
         "[--opt-level 0|1|2|3] [--no-cmov] [--llvm-target-cpu <cpu>] [--llvm-target-features <csv>] [--llvm-disable-pass <name>] [--llvm-log-passes] "
         "[--perf-counters] [--perf-scope full_repeat_raw|full_repeat_avg] "
         "[--dump-jit] [--dump-xlated <path>] [--compile-only]";
+}
+
+using json_field =
+    std::variant<std::monostate, std::string, int64_t, bool, std::vector<std::string>>;
+using json_object = std::unordered_map<std::string, json_field>;
+
+class json_reader {
+  public:
+    explicit json_reader(std::string_view text) : text_(text) {}
+
+    json_object parse_object()
+    {
+        skip_whitespace();
+        expect('{');
+        skip_whitespace();
+
+        json_object result;
+        if (consume('}')) {
+            return result;
+        }
+
+        while (true) {
+            const std::string key = parse_string();
+            skip_whitespace();
+            expect(':');
+            skip_whitespace();
+            result[key] = parse_value();
+            skip_whitespace();
+            if (consume('}')) {
+                break;
+            }
+            expect(',');
+            skip_whitespace();
+        }
+
+        skip_whitespace();
+        if (position_ != text_.size()) {
+            fail("unexpected trailing characters in keep-alive JSON command");
+        }
+
+        return result;
+    }
+
+  private:
+    bool consume(char expected)
+    {
+        if (position_ < text_.size() && text_[position_] == expected) {
+            ++position_;
+            return true;
+        }
+        return false;
+    }
+
+    void expect(char expected)
+    {
+        if (!consume(expected)) {
+            fail("malformed keep-alive JSON command");
+        }
+    }
+
+    void skip_whitespace()
+    {
+        while (position_ < text_.size() &&
+               std::isspace(static_cast<unsigned char>(text_[position_])) != 0) {
+            ++position_;
+        }
+    }
+
+    char peek() const
+    {
+        if (position_ >= text_.size()) {
+            return '\0';
+        }
+        return text_[position_];
+    }
+
+    std::string parse_string()
+    {
+        expect('"');
+        std::string value;
+        while (position_ < text_.size()) {
+            const char current = text_[position_++];
+            if (current == '"') {
+                return value;
+            }
+            if (current != '\\') {
+                value += current;
+                continue;
+            }
+
+            if (position_ >= text_.size()) {
+                fail("unterminated escape sequence in keep-alive JSON command");
+            }
+
+            const char escaped = text_[position_++];
+            switch (escaped) {
+            case '"':
+            case '\\':
+            case '/':
+                value += escaped;
+                break;
+            case 'b':
+                value += '\b';
+                break;
+            case 'f':
+                value += '\f';
+                break;
+            case 'n':
+                value += '\n';
+                break;
+            case 'r':
+                value += '\r';
+                break;
+            case 't':
+                value += '\t';
+                break;
+            default:
+                fail("unsupported escape sequence in keep-alive JSON command");
+            }
+        }
+
+        fail("unterminated string in keep-alive JSON command");
+    }
+
+    int64_t parse_integer()
+    {
+        const size_t start = position_;
+        if (peek() == '-') {
+            ++position_;
+        }
+        if (position_ >= text_.size() ||
+            std::isdigit(static_cast<unsigned char>(text_[position_])) == 0) {
+            fail("expected integer in keep-alive JSON command");
+        }
+        while (position_ < text_.size() &&
+               std::isdigit(static_cast<unsigned char>(text_[position_])) != 0) {
+            ++position_;
+        }
+
+        try {
+            return std::stoll(std::string(text_.substr(start, position_ - start)));
+        } catch (const std::exception &) {
+            fail("invalid integer literal in keep-alive JSON command");
+        }
+    }
+
+    void consume_literal(std::string_view literal)
+    {
+        if (text_.substr(position_, literal.size()) != literal) {
+            fail("malformed keep-alive JSON command");
+        }
+        position_ += literal.size();
+    }
+
+    std::vector<std::string> parse_string_array()
+    {
+        expect('[');
+        skip_whitespace();
+
+        std::vector<std::string> values;
+        if (consume(']')) {
+            return values;
+        }
+
+        while (true) {
+            skip_whitespace();
+            values.push_back(parse_string());
+            skip_whitespace();
+            if (consume(']')) {
+                break;
+            }
+            expect(',');
+            skip_whitespace();
+        }
+
+        return values;
+    }
+
+    json_field parse_value()
+    {
+        switch (peek()) {
+        case '"':
+            return parse_string();
+        case '[':
+            return parse_string_array();
+        case 't':
+            consume_literal("true");
+            return true;
+        case 'f':
+            consume_literal("false");
+            return false;
+        case 'n':
+            consume_literal("null");
+            return std::monostate {};
+        case '-':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            return parse_integer();
+        case '{':
+            fail("nested JSON objects are not supported in keep-alive commands");
+        default:
+            fail("unsupported JSON value in keep-alive command");
+        }
+    }
+
+    std::string_view text_;
+    size_t position_ = 0;
+};
+
+const json_field *find_field(
+    const json_object &fields,
+    std::initializer_list<std::string_view> names)
+{
+    for (const auto name : names) {
+        const auto iter = fields.find(std::string(name));
+        if (iter != fields.end()) {
+            return &iter->second;
+        }
+    }
+    return nullptr;
+}
+
+std::optional<std::string> get_optional_string_field(
+    const json_object &fields,
+    std::initializer_list<std::string_view> names)
+{
+    const json_field *field = find_field(fields, names);
+    if (field == nullptr || std::holds_alternative<std::monostate>(*field)) {
+        return std::nullopt;
+    }
+    if (!std::holds_alternative<std::string>(*field)) {
+        fail("keep-alive JSON field must be a string");
+    }
+    return std::get<std::string>(*field);
+}
+
+std::optional<std::vector<std::string>> get_optional_string_array_field(
+    const json_object &fields,
+    std::initializer_list<std::string_view> names)
+{
+    const json_field *field = find_field(fields, names);
+    if (field == nullptr || std::holds_alternative<std::monostate>(*field)) {
+        return std::nullopt;
+    }
+    if (!std::holds_alternative<std::vector<std::string>>(*field)) {
+        fail("keep-alive JSON field must be an array of strings");
+    }
+    return std::get<std::vector<std::string>>(*field);
+}
+
+std::optional<int64_t> get_optional_int_field(
+    const json_object &fields,
+    std::initializer_list<std::string_view> names)
+{
+    const json_field *field = find_field(fields, names);
+    if (field == nullptr || std::holds_alternative<std::monostate>(*field)) {
+        return std::nullopt;
+    }
+    if (!std::holds_alternative<int64_t>(*field)) {
+        fail("keep-alive JSON field must be an integer");
+    }
+    return std::get<int64_t>(*field);
+}
+
+std::optional<bool> get_optional_bool_field(
+    const json_object &fields,
+    std::initializer_list<std::string_view> names)
+{
+    const json_field *field = find_field(fields, names);
+    if (field == nullptr || std::holds_alternative<std::monostate>(*field)) {
+        return std::nullopt;
+    }
+    if (!std::holds_alternative<bool>(*field)) {
+        fail("keep-alive JSON field must be a boolean");
+    }
+    return std::get<bool>(*field);
+}
+
+uint32_t require_u32_value(int64_t value, std::string_view field_name)
+{
+    if (value < 0 || value > static_cast<int64_t>(std::numeric_limits<uint32_t>::max())) {
+        fail("keep-alive JSON field out of range for uint32_t: " + std::string(field_name));
+    }
+    return static_cast<uint32_t>(value);
+}
+
+void validate_cli_options(const cli_options &options)
+{
+    if (options.program.empty()) {
+        fail("--program is required");
+    }
+
+    const bool is_kernel_command = options.command == "run-kernel";
+    if (options.perf_scope != "full_repeat_raw" &&
+        options.perf_scope != "full_repeat_avg") {
+        fail("--perf-scope must be one of full_repeat_raw or full_repeat_avg");
+    }
+    if (options.manual_load && !is_kernel_command) {
+        fail("--manual-load is only valid with run-kernel");
+    }
+    if (options.rejit && !is_kernel_command) {
+        fail("--rejit is only valid with run-kernel");
+    }
+    if (options.command != "list-programs") {
+        if (options.io_mode != "map" &&
+            options.io_mode != "staged" &&
+            options.io_mode != "packet" &&
+            options.io_mode != "context") {
+            fail("--io-mode must be one of map, staged, packet, or context");
+        }
+        if (!options.compile_only && options.repeat == 0) {
+            fail("--repeat must be >= 1");
+        }
+    }
 }
 
 } // namespace
@@ -293,31 +622,163 @@ cli_options parse_args(int argc, char **argv)
         fail("unknown or incomplete argument: " + std::string(current));
     }
 
-    if (options.program.empty()) {
-        fail("--program is required");
-    }
-    const bool is_kernel_command = options.command == "run-kernel";
-    if (options.perf_scope != "full_repeat_raw" && options.perf_scope != "full_repeat_avg") {
-        fail("--perf-scope must be one of full_repeat_raw or full_repeat_avg");
-    }
-    if (options.manual_load && !is_kernel_command) {
-        fail("--manual-load is only valid with run-kernel");
-    }
-    if (options.rejit && !is_kernel_command) {
-        fail("--rejit is only valid with run-kernel");
-    }
-    if (options.command != "list-programs") {
-        if (options.io_mode != "map" &&
-            options.io_mode != "staged" &&
-            options.io_mode != "packet" &&
-            options.io_mode != "context") {
-            fail("--io-mode must be one of map, staged, packet, or context");
-        }
-        if (!options.compile_only && options.repeat == 0) {
-            fail("--repeat must be >= 1");
-        }
-    }
+    validate_cli_options(options);
     return options;
+}
+
+keep_alive_request parse_keep_alive_request(std::string_view json_line)
+{
+    const json_object fields = json_reader(json_line).parse_object();
+    keep_alive_request request;
+
+    const auto cmd = get_optional_string_field(fields, {"cmd"});
+    if (!cmd.has_value()) {
+        fail("keep-alive JSON command requires a string field named 'cmd'");
+    }
+    request.cmd = lower_ascii(*cmd);
+    if (request.cmd == "exit") {
+        return request;
+    }
+
+    cli_options options;
+    if (request.cmd == "list-programs") {
+        options.command = "list-programs";
+    } else if (request.cmd == "run") {
+        const auto runtime = get_optional_string_field(fields, {"runtime"});
+        if (!runtime.has_value()) {
+            fail("keep-alive run command requires a string field named 'runtime'");
+        }
+        const std::string runtime_name = lower_ascii(*runtime);
+        const bool runtime_implies_rejit =
+            runtime_name == "kernel-rejit" || runtime_name == "kernel_rejit";
+        if (runtime_name == "kernel" ||
+            runtime_implies_rejit) {
+            options.command = "run-kernel";
+            options.rejit = runtime_implies_rejit;
+        } else if (runtime_name == "llvmbpf") {
+            options.command = "run-llvmbpf";
+        } else {
+            fail("unsupported keep-alive runtime: " + *runtime);
+        }
+    } else {
+        fail("unsupported keep-alive command: " + request.cmd);
+    }
+
+    const auto program = get_optional_string_field(
+        fields,
+        {"bpf_object", "program", "bpf_obj"});
+    if (!program.has_value()) {
+        fail("keep-alive command requires a program path in 'bpf_object'");
+    }
+    options.program = std::filesystem::path(*program);
+
+    if (const auto memory = get_optional_string_field(
+            fields, {"memory_file", "memory", "input"});
+        memory.has_value()) {
+        options.memory = std::filesystem::path(*memory);
+    }
+    if (const auto btf_path = get_optional_string_field(fields, {"btf_custom_path"});
+        btf_path.has_value()) {
+        options.btf_custom_path = std::filesystem::path(*btf_path);
+    }
+    if (const auto program_name = get_optional_string_field(fields, {"program_name"});
+        program_name.has_value()) {
+        options.program_name = *program_name;
+    }
+    if (const auto io_mode = get_optional_string_field(fields, {"io_mode"});
+        io_mode.has_value()) {
+        options.io_mode = *io_mode;
+    }
+    if (const auto repeat = get_optional_int_field(fields, {"repeat"});
+        repeat.has_value()) {
+        options.repeat = require_u32_value(*repeat, "repeat");
+    }
+    if (const auto warmup = get_optional_int_field(
+            fields, {"warmup", "warmups", "warmup_repeat"});
+        warmup.has_value()) {
+        options.warmup_repeat = require_u32_value(*warmup, "warmup_repeat");
+    }
+    if (const auto input_size = get_optional_int_field(
+            fields, {"input_size", "kernel_input_size"});
+        input_size.has_value()) {
+        options.input_size = require_u32_value(*input_size, "input_size");
+    }
+    if (const auto opt_level = get_optional_int_field(fields, {"opt_level"});
+        opt_level.has_value()) {
+        if (*opt_level < 0 || *opt_level > 3) {
+            fail("--opt-level must be between 0 and 3");
+        }
+        options.opt_level = static_cast<int>(*opt_level);
+    }
+    if (const auto no_cmov = get_optional_bool_field(fields, {"no_cmov"});
+        no_cmov.has_value()) {
+        options.no_cmov = *no_cmov;
+    }
+    if (const auto raw_packet = get_optional_bool_field(fields, {"raw_packet"});
+        raw_packet.has_value()) {
+        options.raw_packet = *raw_packet;
+    }
+    if (const auto manual_load = get_optional_bool_field(fields, {"manual_load"});
+        manual_load.has_value()) {
+        options.manual_load = *manual_load;
+    }
+    if (const auto compile_only = get_optional_bool_field(fields, {"compile_only"});
+        compile_only.has_value()) {
+        options.compile_only = *compile_only;
+    }
+    if (const auto dump_jit = get_optional_bool_field(fields, {"dump_jit"});
+        dump_jit.has_value()) {
+        options.dump_jit = *dump_jit;
+    }
+    if (const auto dump_xlated = get_optional_string_field(fields, {"dump_xlated"});
+        dump_xlated.has_value()) {
+        options.dump_xlated = std::filesystem::path(*dump_xlated);
+    }
+    if (const auto target_cpu = get_optional_string_field(fields, {"llvm_target_cpu"});
+        target_cpu.has_value()) {
+        options.llvm_target_cpu = *target_cpu;
+    }
+    if (const auto target_features = get_optional_string_field(
+            fields, {"llvm_target_features"});
+        target_features.has_value()) {
+        options.llvm_target_features = *target_features;
+    }
+    if (const auto disabled_passes = get_optional_string_array_field(
+            fields, {"disabled_passes", "llvm_disable_passes"});
+        disabled_passes.has_value()) {
+        options.disabled_passes = *disabled_passes;
+    }
+    if (const auto log_passes = get_optional_bool_field(
+            fields, {"log_passes", "llvm_log_passes"});
+        log_passes.has_value()) {
+        options.log_passes = *log_passes;
+    }
+    if (const auto perf_counters = get_optional_bool_field(fields, {"perf_counters"});
+        perf_counters.has_value()) {
+        options.perf_counters = *perf_counters;
+    }
+    if (const auto perf_scope = get_optional_string_field(fields, {"perf_scope"});
+        perf_scope.has_value()) {
+        options.perf_scope = *perf_scope;
+    }
+    if (const auto rejit = get_optional_bool_field(fields, {"rejit"});
+        rejit.has_value()) {
+        options.rejit = *rejit;
+    }
+    if (const auto rejit_program = get_optional_string_field(fields, {"rejit_program"});
+        rejit_program.has_value()) {
+        options.rejit_program = std::filesystem::path(*rejit_program);
+        options.rejit = true;
+    }
+    if (const auto daemon_socket = get_optional_string_field(fields, {"daemon_socket"});
+        daemon_socket.has_value()) {
+        options.daemon_socket = *daemon_socket;
+        options.rejit = true;
+    }
+
+    validate_cli_options(options);
+    request.options = std::move(options);
+    return request;
 }
 
 void print_sample_json(std::ostream &out, const sample_result &sample)

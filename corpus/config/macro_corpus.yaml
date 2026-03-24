@@ -498,6 +498,574 @@ programs:
     tags: [observability, bcc, raw_tracepoint, production, attach]
 
   # -----------------------------------------------------------------------
+  # BCC libbpf-tools: block I/O tracepoint programs
+  # -----------------------------------------------------------------------
+
+  - name: bcc_biopattern
+    description: BCC biopattern traces block I/O pattern (sequential vs random) via block_rq_complete tracepoint.
+    source: corpus/build/bcc/libbpf-tools/biopattern.bpf.o
+    prog_type: tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [handle__block_rq_complete]
+    sections: [tracepoint/block/block_rq_complete]
+    trigger: "dd if=/dev/zero of=/tmp/_bio_bench bs=4k count=100 conv=fsync 2>/dev/null; rm -f /tmp/_bio_bench"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: Single block tracepoint exercises the minimal attach_trigger path for I/O tracing.
+    tags: [observability, bcc, tracepoint, production, attach]
+
+  - name: bcc_biosnoop
+    description: BCC biosnoop traces block I/O operations with per-request latency via tp_btf/block_rq events.
+    source: corpus/build/bcc/libbpf-tools/biosnoop.bpf.o
+    prog_type: raw_tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [block_rq_insert, block_rq_issue, block_rq_complete]
+    sections: [tp_btf/block_rq_insert, tp_btf/block_rq_issue, tp_btf/block_rq_complete]
+    trigger: "dd if=/dev/zero of=/tmp/_bio_bench bs=4k count=100 conv=fsync 2>/dev/null; rm -f /tmp/_bio_bench"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: Multi-stage block I/O tracing exercises complex per-request state tracking through multiple BTF tracepoints.
+    tags: [observability, bcc, raw_tracepoint, production, attach]
+
+  - name: bcc_biostacks
+    description: BCC biostacks traces block I/O with kernel stack traces via fentry/tp_btf on block I/O events.
+    source: corpus/build/bcc/libbpf-tools/biostacks.bpf.o
+    prog_type: tracing
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [blk_account_io_start, blk_account_io_done]
+    sections: [fentry/blk_account_io_start, fentry/blk_account_io_done]
+    trigger: "dd if=/dev/zero of=/tmp/_bio_bench bs=4k count=100 conv=fsync 2>/dev/null; rm -f /tmp/_bio_bench"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: fentry-based I/O tracing with stack collection exercises high-overhead tracing paths.
+    tags: [observability, bcc, fentry, production, attach]
+
+  - name: bcc_biotop
+    description: BCC biotop shows top block I/O processes via kprobe/tp_btf on block I/O accounting functions.
+    source: corpus/build/bcc/libbpf-tools/biotop.bpf.o
+    prog_type: kprobe
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [blk_mq_start_request, blk_account_io_start, blk_account_io_done]
+    sections: [kprobe/blk_mq_start_request, kprobe/blk_account_io_start, kprobe/blk_account_io_done]
+    trigger: "dd if=/dev/zero of=/tmp/_bio_bench bs=4k count=100 conv=fsync 2>/dev/null; rm -f /tmp/_bio_bench"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: Multiple kprobes on block I/O path exercise concurrent per-request state tracking.
+    tags: [observability, bcc, kprobe, production, attach]
+
+  - name: bcc_bitesize
+    description: BCC bitesize shows I/O request size distribution via tp_btf on block_rq_issue.
+    source: corpus/build/bcc/libbpf-tools/bitesize.bpf.o
+    prog_type: raw_tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [block_rq_issue]
+    sections: [tp_btf/block_rq_issue]
+    trigger: "dd if=/dev/zero of=/tmp/_bio_bench bs=4k count=100 conv=fsync 2>/dev/null; rm -f /tmp/_bio_bench"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: Single BTF tracepoint on block I/O provides a minimal histogram-building benchmark.
+    tags: [observability, bcc, raw_tracepoint, production, attach]
+
+  # -----------------------------------------------------------------------
+  # BCC libbpf-tools: memory and cache programs
+  # -----------------------------------------------------------------------
+
+  - name: bcc_cachestat
+    description: BCC cachestat counts page cache hits/misses via fentry/kprobe on page cache functions.
+    source: corpus/build/bcc/libbpf-tools/cachestat.bpf.o
+    prog_type: tracing
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [fentry_add_to_page_cache_lru, fentry_mark_page_accessed, fentry_mark_buffer_dirty]
+    sections: [fentry/add_to_page_cache_lru, fentry/mark_page_accessed, fentry/mark_buffer_dirty]
+    trigger: "for i in $(seq 200); do cat /proc/meminfo >/dev/null; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: Page cache fentry probes fire at very high rates and exercise high-frequency fentry attach paths.
+    tags: [observability, bcc, fentry, production, attach]
+
+  - name: bcc_drsnoop
+    description: BCC drsnoop traces direct memory reclaim latency via tp_btf on mm_vmscan events.
+    source: corpus/build/bcc/libbpf-tools/drsnoop.bpf.o
+    prog_type: raw_tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [direct_reclaim_begin_btf, direct_reclaim_end_btf]
+    sections: [tp_btf/mm_vmscan_direct_reclaim_begin, tp_btf/mm_vmscan_direct_reclaim_end]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: VM subsystem BTF tracepoints exercise a distinct kernel path from scheduler and I/O tracepoints.
+    tags: [observability, bcc, raw_tracepoint, production, attach]
+
+  - name: bcc_memleak
+    description: BCC memleak detects kernel memory leaks via tracepoints on kmalloc/kfree events.
+    source: corpus/build/bcc/libbpf-tools/memleak.bpf.o
+    prog_type: tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [memleak__kmalloc, memleak__kfree, memleak__kmem_cache_alloc, memleak__kmem_cache_free]
+    sections: [tracepoint/kmem/kmalloc, tracepoint/kmem/kfree, tracepoint/kmem/kmem_cache_alloc, tracepoint/kmem/kmem_cache_free]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: Kernel allocator tracepoints fire at extremely high rates and exercise the highest-frequency attach paths.
+    tags: [observability, bcc, tracepoint, production, attach]
+
+  - name: bcc_readahead
+    description: BCC readahead traces read-ahead efficiency via fentry/fexit on page cache functions.
+    source: corpus/build/bcc/libbpf-tools/readahead.bpf.o
+    prog_type: tracing
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [do_page_cache_ra, do_page_cache_ra_ret, folio_mark_accessed]
+    sections: [fentry/do_page_cache_ra, fexit/do_page_cache_ra, fentry/folio_mark_accessed]
+    trigger: "for i in $(seq 200); do cat /proc/meminfo >/dev/null; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: fentry/fexit pairs on page cache readahead exercise the tracing pair pattern on memory subsystem.
+    tags: [observability, bcc, fentry, production, attach]
+
+  # -----------------------------------------------------------------------
+  # BCC libbpf-tools: CPU and scheduler programs
+  # -----------------------------------------------------------------------
+
+  - name: bcc_cpudist
+    description: BCC cpudist traces CPU on/off-CPU time distribution via tp_btf on sched_switch.
+    source: corpus/build/bcc/libbpf-tools/cpudist.bpf.o
+    prog_type: raw_tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [sched_switch_btf]
+    sections: [tp_btf/sched_switch]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: Scheduler BTF tracepoints fire on every context switch, producing the highest event rates.
+    tags: [observability, bcc, raw_tracepoint, production, attach]
+
+  - name: bcc_cpufreq
+    description: BCC cpufreq samples CPU frequency distribution via perf_event and tp_btf on cpu_frequency.
+    source: corpus/build/bcc/libbpf-tools/cpufreq.bpf.o
+    prog_type: perf_event
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [do_sample]
+    sections: [perf_event]
+    trigger: "dd if=/dev/urandom of=/dev/null bs=4k count=1000 2>/dev/null"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: perf_event CPU frequency sampling exercises timer-based sampling on the scheduler.
+    tags: [observability, bcc, perf_event, production, attach]
+
+  - name: bcc_offcputime
+    description: BCC offcputime traces off-CPU time with stack traces via tp_btf on sched_switch.
+    source: corpus/build/bcc/libbpf-tools/offcputime.bpf.o
+    prog_type: raw_tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [sched_switch_btf]
+    sections: [tp_btf/sched_switch]
+    trigger: "for i in $(seq 200); do sleep 0.001; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: Off-CPU tracing via scheduler BTF tracepoints is the canonical latency profiling pattern.
+    tags: [observability, bcc, raw_tracepoint, production, attach]
+
+  - name: bcc_profile
+    description: BCC profile samples CPU stack traces via perf_event at fixed intervals.
+    source: corpus/build/bcc/libbpf-tools/profile.bpf.o
+    prog_type: perf_event
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [do_perf_event]
+    sections: [perf_event]
+    trigger: "dd if=/dev/urandom of=/dev/null bs=4k count=1000 2>/dev/null"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: CPU profiling via perf_event is a production staple; this exercises the perf_event BPF attach path.
+    tags: [observability, bcc, perf_event, production, attach]
+
+  - name: bcc_runqlen
+    description: BCC runqlen samples scheduler run queue length via perf_event.
+    source: corpus/build/bcc/libbpf-tools/runqlen.bpf.o
+    prog_type: perf_event
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [do_sample]
+    sections: [perf_event]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: Run queue length sampling via perf_event provides a scheduler load metric orthogonal to latency.
+    tags: [observability, bcc, perf_event, production, attach]
+
+  - name: bcc_runqslower
+    description: BCC runqslower traces scheduler wakeup and switch events to detect slow run-queue waits.
+    source: corpus/build/bcc/libbpf-tools/runqslower.bpf.o
+    prog_type: raw_tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [sched_wakeup, sched_wakeup_new, sched_switch]
+    sections: [raw_tp/sched_wakeup, raw_tp/sched_wakeup_new, raw_tp/sched_switch]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: Three-program scheduler tracing exercises multi-attach raw_tp with per-task state tracking.
+    tags: [observability, bcc, raw_tracepoint, production, attach]
+
+  - name: bcc_wakeuptime
+    description: BCC wakeuptime traces thread wakeup latency via tp_btf on sched_switch and sched_wakeup.
+    source: corpus/build/bcc/libbpf-tools/wakeuptime.bpf.o
+    prog_type: raw_tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [sched_switch, sched_wakeup]
+    sections: [tp_btf/sched_switch, tp_btf/sched_wakeup]
+    trigger: "for i in $(seq 200); do sleep 0.001; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: Wakeup latency tracking via two BTF tracepoints exercises cross-program state correlation.
+    tags: [observability, bcc, raw_tracepoint, production, attach]
+
+  # -----------------------------------------------------------------------
+  # BCC libbpf-tools: filesystem programs
+  # -----------------------------------------------------------------------
+
+  - name: bcc_filetop
+    description: BCC filetop shows top file read/write activity via kprobes on vfs_read and vfs_write.
+    source: corpus/build/bcc/libbpf-tools/filetop.bpf.o
+    prog_type: kprobe
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [vfs_read_entry, vfs_write_entry]
+    sections: [kprobe/vfs_read, kprobe/vfs_write]
+    trigger: "for i in $(seq 200); do cat /proc/meminfo >/dev/null; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: VFS kprobes on read/write fire at very high rates and exercise per-file accounting.
+    tags: [observability, bcc, kprobe, production, attach]
+
+  - name: bcc_vfsstat
+    description: BCC vfsstat counts VFS operation rates via kprobe on VFS functions.
+    source: corpus/build/bcc/libbpf-tools/vfsstat.bpf.o
+    prog_type: kprobe
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [kprobe_vfs_read, kprobe_vfs_write, kprobe_vfs_open, kprobe_vfs_create, kprobe_vfs_unlink]
+    sections: [kprobe/vfs_read, kprobe/vfs_write, kprobe/vfs_open, kprobe/vfs_create, kprobe/vfs_unlink]
+    trigger: "for i in $(seq 200); do tmp=$(mktemp) && cat /proc/meminfo > $tmp && rm -f $tmp; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: Five VFS kprobes cover the breadth of filesystem operations and exercise multi-probe attach.
+    tags: [observability, bcc, kprobe, production, attach]
+
+  - name: bcc_mountsnoop
+    description: BCC mountsnoop traces mount/umount syscalls via tracepoints on mount-related syscalls.
+    source: corpus/build/bcc/libbpf-tools/mountsnoop.bpf.o
+    prog_type: tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [mount_entry, mount_exit, umount_entry, umount_exit]
+    sections: [tracepoint/syscalls/sys_enter_mount, tracepoint/syscalls/sys_exit_mount, tracepoint/syscalls/sys_enter_umount, tracepoint/syscalls/sys_exit_umount]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: Mount syscall tracepoints exercise a low-frequency but important administrative operation path.
+    tags: [observability, bcc, tracepoint, production, attach]
+
+  - name: bcc_statsnoop
+    description: BCC statsnoop traces stat syscalls via tracepoints on newstat/statx syscall pairs.
+    source: corpus/build/bcc/libbpf-tools/statsnoop.bpf.o
+    prog_type: tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [handle_newstat_entry, handle_newstat_return, handle_statx_entry, handle_statx_return]
+    sections: [tracepoint/syscalls/sys_enter_newstat, tracepoint/syscalls/sys_exit_newstat, tracepoint/syscalls/sys_enter_statx, tracepoint/syscalls/sys_exit_statx]
+    trigger: "for i in $(seq 200); do ls /tmp >/dev/null 2>&1; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: Stat syscall tracepoints fire frequently during directory traversal and file lookup.
+    tags: [observability, bcc, tracepoint, production, attach]
+
+  - name: bcc_syncsnoop
+    description: BCC syncsnoop traces sync syscalls via tracepoints on sync/fsync/fdatasync/msync.
+    source: corpus/build/bcc/libbpf-tools/syncsnoop.bpf.o
+    prog_type: tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [tracepoint__syscalls__sys_enter_sync, tracepoint__syscalls__sys_enter_fsync, tracepoint__syscalls__sys_enter_msync, tracepoint__syscalls__sys_enter_syncfs]
+    sections: [tracepoint/syscalls/sys_enter_sync, tracepoint/syscalls/sys_enter_fsync, tracepoint/syscalls/sys_enter_msync, tracepoint/syscalls/sys_enter_syncfs]
+    trigger: "for i in $(seq 50); do dd if=/dev/zero of=/tmp/_sync_bench bs=4k count=1 conv=fsync 2>/dev/null; done; rm -f /tmp/_sync_bench"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: Sync syscall tracepoints fire infrequently but exercise important data durability paths.
+    tags: [observability, bcc, tracepoint, production, attach]
+
+  # -----------------------------------------------------------------------
+  # BCC libbpf-tools: networking programs (additional)
+  # -----------------------------------------------------------------------
+
+  - name: bcc_solisten
+    description: BCC solisten traces socket listen calls via kprobe/fexit on inet_listen.
+    source: corpus/build/bcc/libbpf-tools/solisten.bpf.o
+    prog_type: kprobe
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [inet_listen_entry, inet_listen_exit]
+    sections: [kprobe/inet_listen, kretprobe/inet_listen]
+    trigger: "python3 -c \"import socket; s=socket.socket(); s.bind(('127.0.0.1',0)); s.listen(1); s.close()\" 2>/dev/null || for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: networking
+    family: bcc
+    level: production
+    hypothesis: Socket listen kprobes exercise a low-frequency networking path distinct from connect/accept.
+    tags: [networking, bcc, kprobe, production, attach]
+
+  - name: bcc_tcpconnlat
+    description: BCC tcpconnlat measures TCP connection latency via kprobe/fentry on tcp_v4/v6_connect.
+    source: corpus/build/bcc/libbpf-tools/tcpconnlat.bpf.o
+    prog_type: kprobe
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [tcp_v4_connect, tcp_v6_connect, tcp_rcv_state_process, tcp_destroy_sock]
+    sections: [kprobe/tcp_v4_connect, kprobe/tcp_v6_connect, kprobe/tcp_rcv_state_process, tracepoint/tcp/tcp_destroy_sock]
+    trigger: "for i in $(seq 50); do curl -s --connect-timeout 1 http://127.0.0.1/ >/dev/null 2>&1 || true; done"
+    trigger_timeout_seconds: 30
+    category: networking
+    family: bcc
+    level: production
+    hypothesis: TCP connection latency tracing requires coordinated multi-probe state tracking across connect and state transitions.
+    tags: [networking, bcc, kprobe, production, attach]
+
+  - name: bcc_tcppktlat
+    description: BCC tcppktlat measures TCP packet receive latency via tp_btf on tcp_probe events.
+    source: corpus/build/bcc/libbpf-tools/tcppktlat.bpf.o
+    prog_type: raw_tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [tcp_probe_btf, tcp_rcv_space_adjust_btf, tcp_destroy_sock_btf]
+    sections: [tp_btf/tcp_probe, tp_btf/tcp_rcv_space_adjust, tp_btf/tcp_destroy_sock]
+    trigger: "for i in $(seq 50); do curl -s --connect-timeout 1 http://127.0.0.1/ >/dev/null 2>&1 || true; done"
+    trigger_timeout_seconds: 30
+    category: networking
+    family: bcc
+    level: production
+    hypothesis: TCP BTF tracepoints on packet events exercise the networking BTF tracepoint path.
+    tags: [networking, bcc, raw_tracepoint, production, attach]
+
+  - name: bcc_tcprtt
+    description: BCC tcprtt measures TCP round-trip time via fentry/kprobe on tcp_rcv_established.
+    source: corpus/build/bcc/libbpf-tools/tcprtt.bpf.o
+    prog_type: tracing
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [tcp_rcv]
+    sections: [fentry/tcp_rcv_established]
+    trigger: "for i in $(seq 50); do curl -s --connect-timeout 1 http://127.0.0.1/ >/dev/null 2>&1 || true; done"
+    trigger_timeout_seconds: 30
+    category: networking
+    family: bcc
+    level: production
+    hypothesis: fentry on TCP receive path measures RTT from the kernel's perspective on established connections.
+    tags: [networking, bcc, fentry, production, attach]
+
+  - name: bcc_tcpstates
+    description: BCC tcpstates traces TCP state machine transitions via inet_sock_set_state tracepoint.
+    source: corpus/build/bcc/libbpf-tools/tcpstates.bpf.o
+    prog_type: tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [handle_set_state]
+    sections: [tracepoint/sock/inet_sock_set_state]
+    trigger: "for i in $(seq 50); do curl -s --connect-timeout 1 http://127.0.0.1/ >/dev/null 2>&1 || true; done"
+    trigger_timeout_seconds: 30
+    category: networking
+    family: bcc
+    level: production
+    hypothesis: TCP state machine tracepoint provides fine-grained connection lifecycle visibility.
+    tags: [networking, bcc, tracepoint, production, attach]
+
+  - name: bcc_tcpsynbl
+    description: BCC tcpsynbl traces TCP SYN backlog via kprobe/fentry on tcp_v4/v6_syn_recv_sock.
+    source: corpus/build/bcc/libbpf-tools/tcpsynbl.bpf.o
+    prog_type: kprobe
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [tcp_v4_syn_recv_kprobe, tcp_v6_syn_recv_kprobe]
+    sections: [kprobe/tcp_v4_syn_recv_sock, kprobe/tcp_v6_syn_recv_sock]
+    trigger: "for i in $(seq 50); do curl -s --connect-timeout 1 http://127.0.0.1/ >/dev/null 2>&1 || true; done"
+    trigger_timeout_seconds: 30
+    category: networking
+    family: bcc
+    level: production
+    hypothesis: SYN backlog kprobes exercise the TCP server accept path distinct from client connect.
+    tags: [networking, bcc, kprobe, production, attach]
+
+  - name: bcc_tcptop
+    description: BCC tcptop shows top TCP I/O by process via kprobes on tcp_sendmsg and tcp_cleanup_rbuf.
+    source: corpus/build/bcc/libbpf-tools/tcptop.bpf.o
+    prog_type: kprobe
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [tcp_sendmsg, tcp_cleanup_rbuf]
+    sections: [kprobe/tcp_sendmsg, kprobe/tcp_cleanup_rbuf]
+    trigger: "for i in $(seq 50); do curl -s --connect-timeout 1 http://127.0.0.1/ >/dev/null 2>&1 || true; done"
+    trigger_timeout_seconds: 30
+    category: networking
+    family: bcc
+    level: production
+    hypothesis: TCP send/receive kprobes measure per-process network throughput from the kernel.
+    tags: [networking, bcc, kprobe, production, attach]
+
+  - name: bcc_tcptracer
+    description: BCC tcptracer traces TCP connect/accept/close events via kprobe/kretprobe on TCP functions.
+    source: corpus/build/bcc/libbpf-tools/tcptracer.bpf.o
+    prog_type: kprobe
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [tcp_v4_connect, tcp_v4_connect_ret, tcp_v6_connect, tcp_v6_connect_ret, entry_trace_close, enter_tcp_set_state, exit_inet_csk_accept]
+    sections: [kprobe/tcp_v4_connect, kretprobe/tcp_v4_connect, kprobe/tcp_v6_connect, kretprobe/tcp_v6_connect, kprobe/tcp_close, kprobe/tcp_set_state, kretprobe/inet_csk_accept]
+    trigger: "for i in $(seq 50); do curl -s --connect-timeout 1 http://127.0.0.1/ >/dev/null 2>&1 || true; done"
+    trigger_timeout_seconds: 30
+    category: networking
+    family: bcc
+    level: production
+    hypothesis: TCP lifecycle tracing across 7 kprobe/kretprobe hooks exercises the most complex multi-probe networking attach scenario.
+    tags: [networking, bcc, kprobe, production, attach]
+
+  # -----------------------------------------------------------------------
+  # BCC libbpf-tools: lock and kernel internals programs
+  # -----------------------------------------------------------------------
+
+  - name: bcc_klockstat
+    description: BCC klockstat traces kernel lock contention via fentry/fexit on mutex and rwlock functions.
+    source: corpus/build/bcc/libbpf-tools/klockstat.bpf.o
+    prog_type: tracing
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [mutex_lock, mutex_lock_exit, mutex_unlock, down_read, down_read_exit, up_read]
+    sections: [fentry/mutex_lock, fexit/mutex_lock, fentry/mutex_unlock, fentry/down_read, fexit/down_read, fentry/up_read]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: Lock contention tracing via fentry/fexit on mutex/rwlock exercises the highest-frequency kernel synchronization paths.
+    tags: [observability, bcc, fentry, production, attach]
+
+  - name: bcc_numamove
+    description: BCC numamove counts NUMA page migration events via fentry/kprobe on migrate_misplaced functions.
+    source: corpus/build/bcc/libbpf-tools/numamove.bpf.o
+    prog_type: tracing
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [fentry_migrate_misplaced_page, fentry_migrate_misplaced_folio]
+    sections: [fentry/migrate_misplaced_page, fentry/migrate_misplaced_folio]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: NUMA migration fentry probes exercise the memory management subsystem tracing path.
+    tags: [observability, bcc, fentry, production, attach]
+
+  - name: bcc_mdflush
+    description: BCC mdflush traces MD device flush requests via fentry/kprobe on md_flush_request.
+    source: corpus/build/bcc/libbpf-tools/mdflush.bpf.o
+    prog_type: tracing
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [md_flush_request]
+    sections: [fentry/md_flush_request]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: MD flush fentry probe exercises a storage-layer tracing path distinct from block I/O tracepoints.
+    tags: [observability, bcc, fentry, production, attach]
+
+  - name: bcc_oomkill
+    description: BCC oomkill traces OOM kill events via kprobe on oom_kill_process.
+    source: corpus/build/bcc/libbpf-tools/oomkill.bpf.o
+    prog_type: kprobe
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [oom_kill_process]
+    sections: [kprobe/oom_kill_process]
+    trigger: "echo +memory > /sys/fs/cgroup/cgroup.subtree_control 2>/dev/null; mkdir -p /sys/fs/cgroup/oom_bench 2>/dev/null; echo 2097152 > /sys/fs/cgroup/oom_bench/memory.max 2>/dev/null; (echo $BASHPID > /sys/fs/cgroup/oom_bench/cgroup.procs 2>/dev/null && exec head -c 8388608 /dev/zero) 2>/dev/null; rmdir /sys/fs/cgroup/oom_bench 2>/dev/null; true"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: OOM kill kprobe exercises a rare but critical kernel path that is always present in production monitoring.
+    tags: [observability, bcc, kprobe, production, attach]
+
+  - name: bcc_llcstat
+    description: BCC llcstat samples LLC cache reference and miss rates via perf_event.
+    source: corpus/build/bcc/libbpf-tools/llcstat.bpf.o
+    prog_type: perf_event
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [on_cache_miss, on_cache_ref]
+    sections: [perf_event]
+    trigger: "dd if=/dev/urandom of=/dev/null bs=4k count=1000 2>/dev/null"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bcc
+    level: production
+    hypothesis: LLC cache sampling via perf_event exercises hardware PMU-backed BPF programs.
+    tags: [observability, bcc, perf_event, production, attach]
+
+  # -----------------------------------------------------------------------
   # libbpf-bootstrap: tracepoint programs
   # -----------------------------------------------------------------------
 
@@ -633,3 +1201,945 @@ programs:
     hypothesis: Large multi-program raw_tracepoint objects exercise the most complex attach_trigger path.
     tags: [security, observability, tracee, raw_tracepoint, production, attach]
 
+  # -----------------------------------------------------------------------
+  # Cilium: production networking datapaths
+  # -----------------------------------------------------------------------
+
+  - name: cilium_bpf_lxc_cil_from_container
+    description: Cilium LXC TC ingress datapath entry program.
+    source: corpus/build/cilium/bpf_lxc.bpf.o
+    prog_type: sched_cls
+    test_method: bpf_prog_test_run
+    program_name: cil_from_container
+    sections: [tc/entry]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: cilium
+    level: production
+    tags: [networking, cilium, production, tc]
+
+  - name: cilium_bpf_overlay_cil_from_overlay
+    description: Cilium overlay TC ingress datapath entry program.
+    source: corpus/build/cilium/bpf_overlay.bpf.o
+    prog_type: sched_cls
+    test_method: bpf_prog_test_run
+    program_name: cil_from_overlay
+    sections: [tc/entry]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: cilium
+    level: production
+    tags: [networking, cilium, overlay, production, tc]
+
+  - name: cilium_bpf_xdp_cil_xdp_entry
+    description: Cilium XDP entry datapath program.
+    source: corpus/build/cilium/bpf_xdp.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: cil_xdp_entry
+    sections: [xdp/entry]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: cilium
+    level: production
+    tags: [networking, cilium, production, xdp]
+
+  # -----------------------------------------------------------------------
+  # KubeArmor: LSM and syscall-monitor security objects
+  # -----------------------------------------------------------------------
+
+  - name: kubearmor_enforcer_enforce_proc
+    description: KubeArmor LSM enforcement bundle for process, file, and capability checks.
+    source: corpus/build/KubeArmor/enforcer.bpf.o
+    prog_type: lsm
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [enforce_proc, enforce_file, enforce_cap]
+    sections: [lsm/bprm_check_security, lsm/file_open, lsm/capable]
+    trigger: "for i in $(seq 200); do /bin/true >/dev/null; cat /etc/hosts >/dev/null; done"
+    trigger_timeout_seconds: 30
+    category: security
+    family: kubearmor
+    level: production
+    tags: [security, kubearmor, lsm, production, attach]
+
+  - name: kubearmor_protectproc_enforce_file
+    description: KubeArmor protectproc file-open LSM policy.
+    source: corpus/build/KubeArmor/protectproc.bpf.o
+    prog_type: lsm
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [enforce_file]
+    sections: [lsm/file_open]
+    trigger: "for i in $(seq 200); do cat /etc/hosts >/dev/null; done"
+    trigger_timeout_seconds: 30
+    category: security
+    family: kubearmor
+    level: production
+    tags: [security, kubearmor, lsm, production, attach]
+
+  - name: kubearmor_system_monitor_execve
+    description: KubeArmor system-monitor kprobe bundle centered on exec and file-open activity.
+    source: corpus/build/KubeArmor/system_monitor.bpf.o
+    prog_type: kprobe
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [kprobe__execve, kretprobe__execve, kprobe__do_exit, kprobe__openat, kretprobe__openat]
+    sections: [kprobe/__x64_sys_execve, kretprobe/__x64_sys_execve, kprobe/do_exit, kprobe/__x64_sys_openat, kretprobe/__x64_sys_openat]
+    trigger: "for i in $(seq 200); do /bin/true >/dev/null; cat /etc/hosts >/dev/null; done"
+    trigger_timeout_seconds: 30
+    category: security
+    family: kubearmor
+    level: production
+    tags: [security, kubearmor, kprobe, production, attach]
+
+  # -----------------------------------------------------------------------
+  # Loxilb and NetBird: packet-path networking objects
+  # -----------------------------------------------------------------------
+
+  - name: loxilb_llb_ebpf_emain_tc_packet_func_fast
+    description: Loxilb fast-path TC datapath from the extended main object.
+    source: corpus/build/loxilb/llb_ebpf_emain.bpf.o
+    prog_type: sched_cls
+    test_method: bpf_prog_test_run
+    program_name: tc_packet_func_fast
+    sections: [tc_packet_hook0]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: loxilb
+    level: production
+    tags: [networking, loxilb, load-balancer, production, tc]
+
+  - name: loxilb_llb_ebpf_main_tc_packet_func
+    description: Loxilb main TC datapath program.
+    source: corpus/build/loxilb/llb_ebpf_main.bpf.o
+    prog_type: sched_cls
+    test_method: bpf_prog_test_run
+    program_name: tc_packet_func
+    sections: [tc_packet_hook1]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: loxilb
+    level: production
+    tags: [networking, loxilb, load-balancer, production, tc]
+
+  - name: loxilb_llb_xdp_main_xdp_packet_func
+    description: Loxilb XDP datapath program.
+    source: corpus/build/loxilb/llb_xdp_main.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: xdp_packet_func
+    sections: [xdp_packet_hook]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: loxilb
+    level: production
+    tags: [networking, loxilb, load-balancer, production, xdp]
+
+  - name: netbird_prog_nb_xdp_prog
+    description: NetBird userspace firewall XDP program.
+    source: corpus/build/netbird/prog.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: nb_xdp_prog
+    sections: [xdp]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: netbird
+    level: production
+    tags: [networking, netbird, firewall, production, xdp]
+
+  # -----------------------------------------------------------------------
+  # OpenTelemetry, scx, and Tubular: attach-trigger objects
+  # -----------------------------------------------------------------------
+
+  - name: opentelemetry_generic_probe_kprobe_generic
+    description: OpenTelemetry generic kprobe attachment object.
+    source: corpus/build/opentelemetry-ebpf-profiler/generic_probe.bpf.o
+    prog_type: kprobe
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [kprobe__generic]
+    sections: [kprobe/generic]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: opentelemetry-ebpf-profiler
+    level: production
+    tags: [observability, opentelemetry, kprobe, production, attach]
+
+  - name: opentelemetry_native_stack_trace_native_tracer_entry
+    description: OpenTelemetry native stack-trace perf-event entry program.
+    source: corpus/build/opentelemetry-ebpf-profiler/native_stack_trace.bpf.o
+    prog_type: perf_event
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [native_tracer_entry]
+    sections: [perf_event/native_tracer_entry]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: opentelemetry-ebpf-profiler
+    level: production
+    tags: [observability, opentelemetry, perf-event, production, attach]
+
+  - name: opentelemetry_sched_monitor_sched_process_free
+    description: OpenTelemetry scheduler free-path tracepoint monitor.
+    source: corpus/build/opentelemetry-ebpf-profiler/sched_monitor.bpf.o
+    prog_type: tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [tracepoint__sched_process_free, tracepoint__sched_process_free_pre616]
+    sections: [tracepoint/sched/sched_process_free/v2, tracepoint/sched/sched_process_free/v1]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: opentelemetry-ebpf-profiler
+    level: production
+    tags: [observability, opentelemetry, tracepoint, production, attach]
+
+  - name: scx_bpfland_bpfland_init
+    description: sched_ext bpfland struct_ops scheduler registration object.
+    source: corpus/build/scx/scx_bpfland_main.bpf.o
+    prog_type: struct_ops
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [bpfland_init, bpfland_exit]
+    sections: [struct_ops.s/bpfland_init, struct_ops/bpfland_exit]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: resource-control
+    family: scx
+    level: support
+    tags: [resource-control, scx, struct_ops, support, attach]
+
+  - name: scx_flash_flash_init
+    description: sched_ext flash struct_ops scheduler registration object.
+    source: corpus/build/scx/scx_flash_main.bpf.o
+    prog_type: struct_ops
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [flash_init, flash_exit]
+    sections: [struct_ops.s/flash_init, struct_ops/flash_exit]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: resource-control
+    family: scx
+    level: support
+    tags: [resource-control, scx, struct_ops, support, attach]
+
+  - name: scx_lavd_lavd_init
+    description: sched_ext lavd struct_ops scheduler registration object.
+    source: corpus/build/scx/scx_lavd_main.bpf.o
+    prog_type: struct_ops
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [lavd_init, lavd_exit]
+    sections: [struct_ops.s/lavd_init, struct_ops/lavd_exit]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: resource-control
+    family: scx
+    level: support
+    tags: [resource-control, scx, struct_ops, support, attach]
+
+  - name: scx_rusty_rusty_init
+    description: sched_ext rusty struct_ops scheduler registration object.
+    source: corpus/build/scx/scx_rusty_main.bpf.o
+    prog_type: struct_ops
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [rusty_init, rusty_exit]
+    sections: [struct_ops.s/rusty_init, struct_ops/rusty_exit]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: resource-control
+    family: scx
+    level: support
+    tags: [resource-control, scx, struct_ops, support, attach]
+
+  - name: tubular_dispatcher
+    description: Cloudflare Tubular socket-lookup dispatcher program.
+    source: corpus/build/tubular/inet-kern.bpf.o
+    prog_type: sk_lookup
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [dispatcher]
+    sections: [sk_lookup/dispatcher]
+    trigger: "for i in $(seq 50); do curl -s --connect-timeout 1 http://127.0.0.1/ >/dev/null 2>&1 || true; done"
+    trigger_timeout_seconds: 30
+    category: networking
+    family: tubular
+    level: production
+    tags: [networking, tubular, sk_lookup, production, attach]
+
+  # -----------------------------------------------------------------------
+  # xdp-tools: XDP and tp_btf sample objects
+  # -----------------------------------------------------------------------
+
+  - name: xdp_tools_xdp_basic_prog
+    description: xdp-tools basic XDP sample program.
+    source: corpus/build/xdp-tools/xdp_basic.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: xdp_basic_prog
+    sections: [xdp]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tools
+    level: support
+    tags: [networking, xdp-tools, xdp, support]
+
+  - name: xdp_tools_xdp_fwd_flow_full
+    description: xdp-tools flowtable forwarding sample.
+    source: corpus/build/xdp-tools/xdp_flowtable.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: xdp_fwd_flow_full
+    sections: [xdp]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tools
+    level: support
+    tags: [networking, xdp-tools, xdp, support]
+
+  - name: xdp_tools_xdp_fwd_flowtable_sample
+    description: xdp-tools flowtable sample datapath.
+    source: corpus/build/xdp-tools/xdp_flowtable_sample.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: xdp_fwd_flowtable_sample
+    sections: [xdp]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tools
+    level: support
+    tags: [networking, xdp-tools, xdp, support]
+
+  - name: xdp_tools_xdp_fwd_fib_direct
+    description: xdp-tools direct FIB forwarding sample.
+    source: corpus/build/xdp-tools/xdp_forward.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: xdp_fwd_fib_direct
+    sections: [xdp]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tools
+    level: support
+    tags: [networking, xdp-tools, xdp, support]
+
+  - name: xdp_tools_xdp_probe_prog
+    description: xdp-tools load-bytes probe program.
+    source: corpus/build/xdp-tools/xdp_load_bytes.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: xdp_probe_prog
+    sections: [xdp]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tools
+    level: support
+    tags: [networking, xdp-tools, xdp, support]
+
+  - name: xdp_tools_tp_xdp_exception
+    description: xdp-tools tp_btf XDP monitor bundle.
+    source: corpus/build/xdp-tools/xdp_monitor.bpf.o
+    prog_type: tracing
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [tp_xdp_exception, tp_xdp_devmap_xmit, tp_xdp_redirect_err]
+    sections: [tp_btf/xdp_exception, tp_btf/xdp_devmap_xmit, tp_btf/xdp_redirect_err]
+    trigger: "for i in $(seq 50); do ping -c 1 127.0.0.1 >/dev/null 2>&1 || true; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: xdp-tools
+    level: support
+    tags: [observability, xdp-tools, tracing, support, attach]
+
+  - name: xdp_tools_xdp_redirect_prog
+    description: xdp-tools basic redirect sample.
+    source: corpus/build/xdp-tools/xdp_redirect_basic.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: xdp_redirect_prog
+    sections: [xdp]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tools
+    level: support
+    tags: [networking, xdp-tools, xdp, support]
+
+  - name: xdp_tools_cpumap_no_touch
+    description: xdp-tools cpumap redirect sample.
+    source: corpus/build/xdp-tools/xdp_redirect_cpumap.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: cpumap_no_touch
+    sections: [xdp]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tools
+    level: support
+    tags: [networking, xdp-tools, xdp, support]
+
+  - name: xdp_tools_redir_devmap_general
+    description: xdp-tools devmap redirect sample.
+    source: corpus/build/xdp-tools/xdp_redirect_devmap.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: redir_devmap_general
+    sections: [xdp]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tools
+    level: support
+    tags: [networking, xdp-tools, xdp, support]
+
+  - name: xdp_tools_redir_multi_general
+    description: xdp-tools multi-destination devmap redirect sample.
+    source: corpus/build/xdp-tools/xdp_redirect_devmap_multi.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: redir_multi_general
+    sections: [xdp]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tools
+    level: support
+    tags: [networking, xdp-tools, xdp, support]
+
+  - name: xdp_tools_tp_xdp_cpumap_kthread
+    description: xdp-tools tp_btf cpumap sample.
+    source: corpus/build/xdp-tools/xdp_sample.bpf.o
+    prog_type: tracing
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [tp_xdp_cpumap_kthread]
+    sections: [tp_btf/xdp_cpumap_kthread]
+    trigger: "for i in $(seq 50); do ping -c 1 127.0.0.1 >/dev/null 2>&1 || true; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: xdp-tools
+    level: support
+    tags: [observability, xdp-tools, tracing, support, attach]
+
+  - name: xdp_tools_xdp_redirect_notouch
+    description: xdp-tools traffic generator redirect sample.
+    source: corpus/build/xdp-tools/xdp_trafficgen.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: xdp_redirect_notouch
+    sections: [xdp]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tools
+    level: support
+    tags: [networking, xdp-tools, xdp, support]
+
+  - name: xdp_tools_xdp_sock_prog
+    description: xdp-tools xdpsock AF_XDP sample program.
+    source: corpus/build/xdp-tools/xdpsock.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: xdp_sock_prog
+    sections: [xdp]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tools
+    level: support
+    tags: [networking, xdp-tools, xdp, support]
+
+  # -----------------------------------------------------------------------
+  # xdp-tutorial: packet and tracepoint tutorial objects
+  # -----------------------------------------------------------------------
+
+  - name: xdp_tutorial_advanced03_xdp_sock_prog
+    description: AF_XDP tutorial sample program.
+    source: corpus/build/xdp-tutorial/advanced03-AF_XDP/af_xdp_kern.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: xdp_sock_prog
+    sections: [xdp]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tutorial
+    level: support
+    tags: [networking, xdp-tutorial, xdp, support]
+
+  - name: xdp_tutorial_basic01_xdp_prog_simple
+    description: Basic XDP pass tutorial sample.
+    source: corpus/build/xdp-tutorial/basic01-xdp-pass/xdp_pass_kern.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: xdp_prog_simple
+    sections: [xdp]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tutorial
+    level: support
+    tags: [networking, xdp-tutorial, xdp, support]
+
+  - name: xdp_tutorial_basic02_xdp_pass_func
+    description: Basic named-program XDP tutorial sample.
+    source: corpus/build/xdp-tutorial/basic02-prog-by-name/xdp_prog_kern.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: xdp_pass_func
+    sections: [xdp]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tutorial
+    level: support
+    tags: [networking, xdp-tutorial, xdp, support]
+
+  - name: xdp_tutorial_basic03_xdp_stats1_func
+    description: Map-counter XDP tutorial sample.
+    source: corpus/build/xdp-tutorial/basic03-map-counter/xdp_prog_kern.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: xdp_stats1_func
+    sections: [xdp]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tutorial
+    level: support
+    tags: [networking, xdp-tutorial, xdp, support]
+
+  - name: xdp_tutorial_basic04_xdp_pass_func
+    description: Pinned-map XDP tutorial sample.
+    source: corpus/build/xdp-tutorial/basic04-pinning-maps/xdp_prog_kern.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: xdp_pass_func
+    sections: [xdp]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tutorial
+    level: support
+    tags: [networking, xdp-tutorial, xdp, support]
+
+  - name: xdp_tutorial_tailgrow_fail1
+    description: Tailgrow experiment failing sample 1.
+    source: corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_fail1.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: _xdp_fail1
+    sections: [xdp_fail1]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tutorial
+    level: support
+    tags: [networking, xdp-tutorial, xdp, support]
+
+  - name: xdp_tutorial_tailgrow_fail2
+    description: Tailgrow experiment failing sample 2.
+    source: corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_fail2.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: _xdp_fail2
+    sections: [xdp_fail2]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tutorial
+    level: support
+    tags: [networking, xdp-tutorial, xdp, support]
+
+  - name: xdp_tutorial_tailgrow_fail3
+    description: Tailgrow experiment failing sample 3.
+    source: corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_fail3.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: _xdp_fail3
+    sections: [xdp_fail3]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tutorial
+    level: support
+    tags: [networking, xdp-tutorial, xdp, support]
+
+  - name: xdp_tutorial_tailgrow_pass
+    description: Tailgrow experiment main pass sample.
+    source: corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_kern.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: tailgrow_pass
+    sections: [xdp_tailgrow]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tutorial
+    level: support
+    tags: [networking, xdp-tutorial, xdp, support]
+
+  - name: xdp_tutorial_end_loop
+    description: Tailgrow experiment end-loop sample.
+    source: corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_kern2.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: _xdp_end_loop
+    sections: [xdp_end_loop]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tutorial
+    level: support
+    tags: [networking, xdp-tutorial, xdp, support]
+
+  - name: xdp_tutorial_works1
+    description: Tailgrow experiment working sample.
+    source: corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_kern3.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: _xdp_works1
+    sections: [xdp_works1]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tutorial
+    level: support
+    tags: [networking, xdp-tutorial, xdp, support]
+
+  - name: xdp_tutorial_test1
+    description: Tailgrow experiment test sample.
+    source: corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_kern4.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: _xdp_test1
+    sections: [xdp_test1]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tutorial
+    level: support
+    tags: [networking, xdp-tutorial, xdp, support]
+
+  - name: xdp_tutorial_fix_port_egress
+    description: Packet-solutions TC reply tutorial sample.
+    source: corpus/build/xdp-tutorial/packet-solutions/tc_reply_kern_02.bpf.o
+    prog_type: sched_cls
+    test_method: bpf_prog_test_run
+    program_name: _fix_port_egress
+    sections: [tc]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tutorial
+    level: support
+    tags: [networking, xdp-tutorial, tc, support]
+
+  - name: xdp_tutorial_vlan_swap_solution
+    description: Packet-solutions VLAN swap tutorial sample.
+    source: corpus/build/xdp-tutorial/packet-solutions/xdp_prog_kern_02.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: xdp_vlan_swap_func
+    sections: [xdp_vlan_swap]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tutorial
+    level: support
+    tags: [networking, xdp-tutorial, xdp, support]
+
+  - name: xdp_tutorial_redirect_solution
+    description: Packet-solutions redirect tutorial sample.
+    source: corpus/build/xdp-tutorial/packet-solutions/xdp_prog_kern_03.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: xdp_redirect_func
+    sections: [xdp_redirect]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tutorial
+    level: support
+    tags: [networking, xdp-tutorial, xdp, support]
+
+  - name: xdp_tutorial_vlan01
+    description: VLAN tutorial sample 01.
+    source: corpus/build/xdp-tutorial/packet-solutions/xdp_vlan01_kern.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: xdp_vlan_01
+    sections: [xdp_vlan01]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tutorial
+    level: support
+    tags: [networking, xdp-tutorial, xdp, support]
+
+  - name: xdp_tutorial_vlan02
+    description: VLAN tutorial sample 02.
+    source: corpus/build/xdp-tutorial/packet-solutions/xdp_vlan02_kern.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: xdp_vlan_02
+    sections: [xdp_vlan02]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tutorial
+    level: support
+    tags: [networking, xdp-tutorial, xdp, support]
+
+  - name: xdp_tutorial_parser_func
+    description: Packet parsing tutorial sample.
+    source: corpus/build/xdp-tutorial/packet01-parsing/xdp_prog_kern.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: xdp_parser_func
+    sections: [xdp]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tutorial
+    level: support
+    tags: [networking, xdp-tutorial, xdp, support]
+
+  - name: xdp_tutorial_vlan_swap_func
+    description: Packet rewriting tutorial sample.
+    source: corpus/build/xdp-tutorial/packet02-rewriting/xdp_prog_kern.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: xdp_vlan_swap_func
+    sections: [xdp]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tutorial
+    level: support
+    tags: [networking, xdp-tutorial, xdp, support]
+
+  - name: xdp_tutorial_redirect_func
+    description: Packet redirecting tutorial sample.
+    source: corpus/build/xdp-tutorial/packet03-redirecting/xdp_prog_kern.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: xdp_redirect_func
+    sections: [xdp]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tutorial
+    level: support
+    tags: [networking, xdp-tutorial, xdp, support]
+
+  - name: xdp_tutorial_trace_xdp_exception
+    description: Tracing tutorial XDP exception tracepoint sample.
+    source: corpus/build/xdp-tutorial/tracing01-xdp-simple/trace_prog_kern.bpf.o
+    prog_type: tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [trace_xdp_exception]
+    sections: [tracepoint/xdp/xdp_exception]
+    trigger: "for i in $(seq 50); do ping -c 1 127.0.0.1 >/dev/null 2>&1 || true; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: xdp-tutorial
+    level: support
+    tags: [observability, xdp-tutorial, tracepoint, support, attach]
+
+  - name: xdp_tutorial_trace01_xdp_drop_func
+    description: Tracing tutorial paired XDP sample.
+    source: corpus/build/xdp-tutorial/tracing01-xdp-simple/xdp_prog_kern.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: xdp_drop_func
+    sections: [xdp]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tutorial
+    level: support
+    tags: [networking, xdp-tutorial, xdp, support]
+
+  - name: xdp_tutorial_trace_xdp_redirect_err
+    description: Tracing tutorial XDP monitor bundle.
+    source: corpus/build/xdp-tutorial/tracing02-xdp-monitor/trace_prog_kern.bpf.o
+    prog_type: tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: [trace_xdp_redirect_err, trace_xdp_exception, trace_xdp_devmap_xmit]
+    sections: [tracepoint/xdp/xdp_redirect_err, tracepoint/xdp/xdp_exception, tracepoint/xdp/xdp_devmap_xmit]
+    trigger: "for i in $(seq 50); do ping -c 1 127.0.0.1 >/dev/null 2>&1 || true; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: xdp-tutorial
+    level: support
+    tags: [observability, xdp-tutorial, tracepoint, support, attach]
+
+  - name: xdp_tutorial_trace03_xdp_prog_simple
+    description: Tracing debug-print XDP tutorial sample.
+    source: corpus/build/xdp-tutorial/tracing03-xdp-debug-print/xdp_prog_kern.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: xdp_prog_simple
+    sections: [xdp]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tutorial
+    level: support
+    tags: [networking, xdp-tutorial, xdp, support]
+
+  - name: xdp_tutorial_xdp_sample_prog
+    description: XDP tcpdump tutorial sample.
+    source: corpus/build/xdp-tutorial/tracing04-xdp-tcpdump/xdp_sample_pkts_kern.bpf.o
+    prog_type: xdp
+    test_method: bpf_prog_test_run
+    program_name: xdp_sample_prog
+    sections: [xdp]
+    io_mode: packet
+    test_input: corpus/inputs/macro_dummy_packet_64.bin
+    input_size: 64
+    category: networking
+    family: xdp-tutorial
+    level: support
+    tags: [networking, xdp-tutorial, xdp, support]
+
+  # -----------------------------------------------------------------------
+  # bpftrace: compact tracing objects with non-standard section naming
+  # -----------------------------------------------------------------------
+
+  - name: bpftrace_exec_trace
+    description: bpftrace sched_process_exec tracepoint script object.
+    source: corpus/build/bpftrace/exec_trace.bpf.o
+    prog_type: tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: ["tracepoint:sched:sched_process_exec"]
+    sections: ["s_tracepoint:sched:sched_process_exec_1"]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bpftrace
+    level: support
+    tags: [observability, bpftrace, tracepoint, support, attach]
+
+  - name: bpftrace_open_latency
+    description: bpftrace open-latency kprobe/kretprobe script object.
+    source: corpus/build/bpftrace/open_latency.bpf.o
+    prog_type: kprobe
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: ["kprobe:do_sys_openat2", "kretprobe:do_sys_openat2"]
+    sections: ["s_kprobe:do_sys_openat2_1", "s_kretprobe:do_sys_openat2_2"]
+    trigger: "for i in $(seq 200); do ls /tmp >/dev/null 2>&1; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bpftrace
+    level: support
+    tags: [observability, bpftrace, kprobe, support, attach]
+
+  - name: bpftrace_scheduler_latency
+    description: bpftrace scheduler-latency tracepoint script object.
+    source: corpus/build/bpftrace/scheduler_latency.bpf.o
+    prog_type: tracepoint
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: ["tracepoint:sched:sched_wakeup", "tracepoint:sched:sched_switch"]
+    sections: ["s_tracepoint:sched:sched_wakeup_1", "s_tracepoint:sched:sched_switch_2"]
+    trigger: "for i in $(seq 200); do /bin/true; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bpftrace
+    level: support
+    tags: [observability, bpftrace, tracepoint, support, attach]
+
+  - name: bpftrace_tcp_connect
+    description: bpftrace TCP connect kprobe script object.
+    source: corpus/build/bpftrace/tcp_connect.bpf.o
+    prog_type: kprobe
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: ["kprobe:tcp_v4_connect"]
+    sections: ["s_kprobe:tcp_v4_connect_1"]
+    trigger: "for i in $(seq 50); do curl -s --connect-timeout 1 http://127.0.0.1/ >/dev/null 2>&1 || true; done"
+    trigger_timeout_seconds: 30
+    category: networking
+    family: bpftrace
+    level: support
+    tags: [networking, bpftrace, kprobe, support, attach]
+
+  - name: bpftrace_vfs_read_count
+    description: bpftrace VFS read counter kprobe script object.
+    source: corpus/build/bpftrace/vfs_read_count.bpf.o
+    prog_type: kprobe
+    test_method: attach_trigger
+    compile_loader: bpftool_loadall
+    program_names: ["kprobe:vfs_read"]
+    sections: ["s_kprobe:vfs_read_1"]
+    trigger: "for i in $(seq 200); do head -c 4096 /etc/hosts >/dev/null; done"
+    trigger_timeout_seconds: 30
+    category: observability
+    family: bpftrace
+    level: support
+    tags: [observability, bpftrace, kprobe, support, attach]

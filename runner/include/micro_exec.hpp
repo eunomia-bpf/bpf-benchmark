@@ -7,6 +7,7 @@
 #include <functional>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <vector>
 
 struct map_spec {
@@ -63,6 +64,11 @@ struct cli_options {
     bool dump_jit = false;
     std::optional<std::filesystem::path> dump_xlated;
     bool compile_only = false;
+};
+
+struct keep_alive_request {
+    std::string cmd;
+    cli_options options;
 };
 
 struct timing_phase {
@@ -137,6 +143,7 @@ struct sample_result {
 
 [[noreturn]] void fail(const std::string &message);
 cli_options parse_args(int argc, char **argv);
+keep_alive_request parse_keep_alive_request(std::string_view json_line);
 std::vector<uint8_t> read_binary_file(const std::filesystem::path &path);
 void write_binary_file(const std::filesystem::path &path, const uint8_t *data, size_t size);
 std::string benchmark_name_for_program(const std::filesystem::path &program);
@@ -145,6 +152,7 @@ std::vector<program_descriptor> list_programs(const std::filesystem::path &path)
 program_image load_program_image(
     const std::filesystem::path &path,
     const std::optional<std::string> &program_name = std::nullopt);
+void initialize_micro_exec_process();
 sample_result run_llvmbpf(const cli_options &options);
 std::vector<sample_result> run_kernel(const cli_options &options);
 void print_json(const sample_result &sample);

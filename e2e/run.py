@@ -50,6 +50,15 @@ from e2e.cases.tetragon.case import (  # noqa: E402
     build_markdown as build_tetragon_markdown,
     run_tetragon_case,
 )
+from e2e.cases.bcc.case import (  # noqa: E402
+    DEFAULT_OUTPUT_JSON as DEFAULT_BCC_OUTPUT_JSON,
+    DEFAULT_OUTPUT_MD as DEFAULT_BCC_OUTPUT_MD,
+    DEFAULT_REPORT_MD as DEFAULT_BCC_REPORT_MD,
+    DEFAULT_SETUP_SCRIPT as DEFAULT_BCC_SETUP_SCRIPT,
+    build_markdown as build_bcc_markdown,
+    build_report as build_bcc_report,
+    run_bcc_case,
+)
 from e2e.cases.tracee.case import (  # noqa: E402
     DEFAULT_OUTPUT_JSON,
     DEFAULT_OUTPUT_MD,
@@ -103,12 +112,20 @@ CASE_SPECS: dict[str, CaseSpec] = {
         default_output_md=DEFAULT_KATRAN_OUTPUT_MD,
         default_setup_script=str(DEFAULT_KATRAN_SETUP_SCRIPT),
     ),
+    "bcc": CaseSpec(
+        run_case=run_bcc_case,
+        build_markdown=build_bcc_markdown,
+        build_report=build_bcc_report,
+        default_output_json=DEFAULT_BCC_OUTPUT_JSON,
+        default_output_md=DEFAULT_BCC_OUTPUT_MD,
+        default_setup_script=str(DEFAULT_BCC_SETUP_SCRIPT),
+    ),
 }
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Unified entrypoint for repository end-to-end benchmarks.")
-    parser.add_argument("case", choices=("tracee", "tetragon", "bpftrace", "scx", "katran", "all"))
+    parser.add_argument("case", choices=("tracee", "tetragon", "bpftrace", "scx", "katran", "bcc", "all"))
     parser.add_argument("--smoke", action="store_true", help="Run the smoke-sized configuration.")
     parser.add_argument("--duration", type=int, help="Override the per-workload duration in seconds.")
     parser.add_argument("--tracee-binary", help="Explicit Tracee binary path.")
@@ -144,6 +161,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--bpftool", default="/usr/local/sbin/bpftool", help="Explicit bpftool path for Tetragon runs.")
     parser.add_argument("--scheduler-extra-arg", action="append", default=[])
     parser.add_argument("--skip-setup", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--tools-dir", default="", help="Directory with compiled libbpf-tools binaries (bcc case).")
+    parser.add_argument("--tool", action="append", dest="tools", help="Select specific libbpf-tools by name (bcc case).")
     return parser
 
 
@@ -157,9 +176,15 @@ def apply_case_defaults(args: argparse.Namespace) -> None:
         args.output_md = str(spec.default_output_md)
     if spec.default_setup_script is not None and args.setup_script == str(DEFAULT_TRACEE_SETUP_SCRIPT):
         args.setup_script = spec.default_setup_script
+    # BCC case: fix report_md and config defaults
+    if args.case == "bcc":
+        if args.report_md == str(DEFAULT_BPFTRACE_REPORT_MD):
+            args.report_md = str(DEFAULT_BCC_REPORT_MD)
+        if args.config == str(ROOT_DIR / "e2e" / "cases" / "tracee" / "config.yaml"):
+            args.config = str(ROOT_DIR / "e2e" / "cases" / "bcc" / "config.yaml")
 
 
-ALL_CASES = ("tracee", "tetragon", "bpftrace", "scx", "katran")
+ALL_CASES = ("tracee", "tetragon", "bpftrace", "scx", "katran", "bcc")
 
 
 def _is_skipped_payload(payload: object) -> bool:
