@@ -16,7 +16,7 @@ import traceback
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, Mapping
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
@@ -26,6 +26,7 @@ for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpu
         sys.path.insert(0, candidate_str)
 
 from runner.libs import authoritative_output_path, smoke_output_path
+from runner.libs.batch_runner import run_batch_runner
 from runner.libs.machines import resolve_machine
 from runner.libs.vm import DEFAULT_VM_TARGET, build_vng_command as build_runner_vng_command
 
@@ -63,14 +64,10 @@ from runner.libs.corpus import (
     materialize_dummy_packet,
     normalize_directive_scan as shared_normalize_directive_scan,
     require_minimum,
-    run_command as shared_run_command,
     summarize_text,
     write_json_output,
     write_text_output,
     extract_error,
-)
-from runner.libs.commands import (
-    build_runner_command as _build_runner_command,
 )
 
 
@@ -269,10 +266,6 @@ def families_from_scan(scan: dict[str, Any] | None) -> list[str]:
     return [name for name, field in FAMILY_FIELDS if normalized[field] > 0]
 
 
-def run_command(command: list[str], timeout_seconds: int) -> dict[str, Any]:
-    return shared_run_command(command, timeout_seconds, cwd=ROOT_DIR)
-
-
 def invocation_summary(result: dict[str, Any] | None) -> dict[str, Any] | None:
     if result is None:
         return None
@@ -402,42 +395,6 @@ def packet_batch_timeout_seconds(target_count: int, per_target_timeout: int) -> 
     return max(1, target_count) * max(1, per_target_timeout) * 4 + 120
 
 
-def build_runner_command(
-    *,
-    runner: Path,
-    object_path: Path,
-    program_name: str,
-    io_mode: str,
-    memory_path: Path | None,
-    input_size: int,
-    repeat: int,
-    btf_custom_path: Path | None,
-    compile_only: bool,
-    blind_apply: bool,
-    skip_families: list[str],
-    recompile_all: bool = False,
-    dump_xlated: Path | None = None,
-    daemon_socket: str | None = None,
-) -> list[str]:
-    enable_rejit = blind_apply or (daemon_socket is not None)
-    return _build_runner_command(
-        runner,
-        "run-kernel",
-        program=object_path,
-        program_name=program_name,
-        io_mode=io_mode,
-        repeat=max(1, repeat),
-        memory=memory_path,
-        input_size=input_size,
-        raw_packet=(io_mode == "packet"),
-        compile_only=compile_only,
-        dump_xlated=dump_xlated,
-        btf_custom_path=btf_custom_path,
-        rejit=enable_rejit,
-        daemon_socket=daemon_socket if enable_rejit else None,
-    )
-
-
 def size_ratio(
     baseline_record: dict[str, Any] | None,
     v5_record: dict[str, Any] | None,
@@ -546,38 +503,110 @@ def build_empty_record(target: dict[str, Any], execution_mode: str) -> dict[str,
     }
 
 
-def run_target_locally(
+def corpus_batch_parallel_jobs() -> int:
+    return max(1, int(math.floor((os.cpu_count() or 1) * 0.8)))
+
+
+def build_test_run_batch_job(
     *,
-    target: dict[str, Any],
-    runner: Path,
-    daemon: Path,
+    job_id: str,
+    execution: str,
+    runtime: str,
+    object_path: Path,
+    program_name: str,
+    io_mode: str,
+    memory_path: Path | None,
+    input_size: int,
     repeat: int,
-    timeout_seconds: int,
-    execution_mode: str,
+    btf_custom_path: Path | None,
+    compile_only: bool,
+    daemon_socket: str | None = None,
+) -> dict[str, Any]:
+    job: dict[str, Any] = {
+        "id": job_id,
+        "type": "test_run",
+        "execution": execution,
+        "runtime": runtime,
+        "program": str(object_path),
+        "program_name": program_name,
+        "io_mode": io_mode,
+        "repeat": max(1, repeat),
+        "compile_only": compile_only,
+    }
+    if memory_path is not None:
+        job["memory"] = str(memory_path)
+    if input_size > 0:
+        job["input_size"] = int(input_size)
+    if btf_custom_path is not None:
+        job["btf_custom_path"] = str(btf_custom_path)
+    if daemon_socket is not None:
+        job["daemon_socket"] = daemon_socket
+    return job
+
+
+def batch_job_invocation_summary(job_result: Mapping[str, Any] | None) -> dict[str, Any] | None:
+    if not isinstance(job_result, Mapping):
+        return None
+    samples = job_result.get("samples")
+    last_sample = None
+    if isinstance(samples, list) and samples:
+        candidate = samples[-1]
+        if isinstance(candidate, dict):
+            last_sample = dict(candidate)
+    ok = bool(job_result.get("ok"))
+    error = str(job_result.get("error") or "") or None
+    return {
+        "ok": ok,
+        "returncode": 0 if ok else 2,
+        "timed_out": False,
+        "duration_seconds": float(job_result.get("wall_time_ns", 0) or 0) / 1_000_000_000.0,
+        "error": error,
+        "stderr_tail": summarize_text(error or ""),
+        "stdout_tail": "",
+        "sample": last_sample,
+    }
+
+
+def batch_job_result_map(batch_payload: Mapping[str, Any] | None) -> dict[str, dict[str, Any]]:
+    if not isinstance(batch_payload, Mapping):
+        return {}
+    jobs = batch_payload.get("jobs")
+    if not isinstance(jobs, list):
+        return {}
+    mapped: dict[str, dict[str, Any]] = {}
+    for item in jobs:
+        if not isinstance(item, dict):
+            continue
+        job_id = item.get("id")
+        if isinstance(job_id, str) and job_id:
+            mapped[job_id] = dict(item)
+    return mapped
+
+
+def build_target_batch_plan(
+    *,
+    targets: list[dict[str, Any]],
+    repeat: int,
     btf_custom_path: Path | None,
     enable_recompile: bool,
     enable_exec: bool,
-    skip_families: list[str],
-    blind_apply: bool,
-    daemon_socket: str | None = None,
-) -> dict[str, Any]:
-    record = build_empty_record(target, execution_mode)
-    object_path = ROOT_DIR / target["object_path"]
-    memory_path = Path(target["memory_path"]) if target.get("memory_path") else None
-    recompile_all = blind_apply
-    policy_mode = "blind-apply-v5" if blind_apply else "daemon-auto"
-    inventory_scan = normalize_scan(target.get("inventory_scan"))
-    daemon_result = None
-    scan_source = "inventory"
-    daemon_counts = inventory_scan
+    daemon_socket: str | None,
+) -> tuple[dict[str, Any], list[dict[str, str]]]:
+    jobs: list[dict[str, Any]] = []
+    job_refs: list[dict[str, str]] = []
 
-    baseline_run_raw = None
+    for index, target in enumerate(targets, start=1):
+        object_path = ROOT_DIR / target["object_path"]
+        memory_path = Path(target["memory_path"]) if target.get("memory_path") else None
+        prefix = f"target-{index:04d}"
+        refs: dict[str, str] = {}
 
-    with tempfile.TemporaryDirectory(prefix="corpus-v5-batch-") as tmpdir:
-        xlated_path = Path(tmpdir) / "program.xlated"
-        baseline_compile_raw = run_command(
-            build_runner_command(
-                runner=runner,
+        refs["baseline_compile"] = f"{prefix}:baseline-compile"
+        jobs.append(
+            build_test_run_batch_job(
+                job_id=refs["baseline_compile"],
+                execution="parallel",
+                runtime="kernel",
                 object_path=object_path,
                 program_name=target["program_name"],
                 io_mode=target["io_mode"],
@@ -586,26 +615,16 @@ def run_target_locally(
                 repeat=repeat,
                 btf_custom_path=btf_custom_path,
                 compile_only=True,
-                blind_apply=False,
-                recompile_all=False,
-                skip_families=[],
-                dump_xlated=xlated_path,
-            ),
-            timeout_seconds,
+            )
         )
-        if baseline_compile_raw["ok"]:
-            baseline_scan = directive_scan_from_record(baseline_compile_raw)
-            if baseline_scan["total_sites"] > 0:
-                daemon_counts = baseline_scan
-                scan_source = f"{execution_mode}_runner_scan"
 
-        # Run a dedicated stock baseline execution (no rejit, no daemon) so we
-        # have a true pre-recompile measurement.  The C++ runner in daemon-socket
-        # mode does not emit a "stock" phase, so we must measure it ourselves.
         if enable_exec and target.get("can_test_run"):
-            baseline_run_raw = run_command(
-                build_runner_command(
-                    runner=runner,
+            refs["baseline_run"] = f"{prefix}:baseline-run"
+            jobs.append(
+                build_test_run_batch_job(
+                    job_id=refs["baseline_run"],
+                    execution="serial",
+                    runtime="kernel",
                     object_path=object_path,
                     program_name=target["program_name"],
                     io_mode=target["io_mode"],
@@ -614,26 +633,16 @@ def run_target_locally(
                     repeat=repeat,
                     btf_custom_path=btf_custom_path,
                     compile_only=False,
-                    blind_apply=False,
-                    recompile_all=False,
-                    skip_families=[],
-                ),
-                timeout_seconds,
+                )
             )
 
-        v5_compile_raw = None
-        v5_run_raw = None
-        daemon_proc = None
-        active_daemon_socket = daemon_socket
-        if enable_recompile:
-            if active_daemon_socket is None:
-                active_daemon_socket = f"/tmp/bpfrejit-{os.getpid()}.sock"
-                daemon_proc = start_daemon_server(daemon, active_daemon_socket)
-            try:
-                # PGO warmup: run the program once via kernel mode (no rejit)
-                # so the BPF subsystem has execution stats for daemon profiling.
-                _pgo_warmup_cmd = build_runner_command(
-                    runner=runner,
+        if enable_recompile and target.get("can_test_run"):
+            refs["pgo_warmup"] = f"{prefix}:pgo-warmup"
+            jobs.append(
+                build_test_run_batch_job(
+                    job_id=refs["pgo_warmup"],
+                    execution="serial",
+                    runtime="kernel",
                     object_path=object_path,
                     program_name=target["program_name"],
                     io_mode=target["io_mode"],
@@ -642,13 +651,35 @@ def run_target_locally(
                     repeat=10,
                     btf_custom_path=btf_custom_path,
                     compile_only=False,
-                    blind_apply=False,
-                    skip_families=[],
                 )
-                run_command(_pgo_warmup_cmd, timeout_seconds)
-                v5_compile_raw = run_command(
-                    build_runner_command(
-                        runner=runner,
+            )
+
+        if enable_recompile:
+            refs["v5_compile"] = f"{prefix}:v5-compile"
+            jobs.append(
+                build_test_run_batch_job(
+                    job_id=refs["v5_compile"],
+                    execution="parallel",
+                    runtime="kernel-rejit",
+                    object_path=object_path,
+                    program_name=target["program_name"],
+                    io_mode=target["io_mode"],
+                    memory_path=memory_path,
+                    input_size=int(target["input_size"]),
+                    repeat=repeat,
+                    btf_custom_path=btf_custom_path,
+                    compile_only=True,
+                    daemon_socket=daemon_socket,
+                )
+            )
+
+            if enable_exec and target.get("can_test_run"):
+                refs["v5_run"] = f"{prefix}:v5-run"
+                jobs.append(
+                    build_test_run_batch_job(
+                        job_id=refs["v5_run"],
+                        execution="serial",
+                        runtime="kernel-rejit",
                         object_path=object_path,
                         program_name=target["program_name"],
                         io_mode=target["io_mode"],
@@ -656,51 +687,61 @@ def run_target_locally(
                         input_size=int(target["input_size"]),
                         repeat=repeat,
                         btf_custom_path=btf_custom_path,
-                        compile_only=True,
-                        blind_apply=blind_apply,
-                        recompile_all=recompile_all,
-                        skip_families=skip_families,
-                        daemon_socket=active_daemon_socket,
-                    ),
-                    timeout_seconds,
-                )
-                if enable_exec and target.get("can_test_run") and v5_compile_raw and v5_compile_raw["ok"]:
-                    v5_run_raw = run_command(
-                        build_runner_command(
-                            runner=runner,
-                            object_path=object_path,
-                            program_name=target["program_name"],
-                            io_mode=target["io_mode"],
-                            memory_path=memory_path,
-                            input_size=int(target["input_size"]),
-                            repeat=repeat,
-                            btf_custom_path=btf_custom_path,
-                            compile_only=False,
-                            blind_apply=blind_apply,
-                            recompile_all=recompile_all,
-                            skip_families=skip_families,
-                            daemon_socket=active_daemon_socket,
-                        ),
-                        timeout_seconds,
+                        compile_only=False,
+                        daemon_socket=daemon_socket,
                     )
-            finally:
-                stop_daemon_server(daemon_proc, active_daemon_socket if daemon_proc is not None else None)
+                )
 
-    record["daemon_cli"] = text_invocation_summary(daemon_result)
+        job_refs.append(refs)
+
+    return {
+        "schema_version": 1,
+        "scheduler": {
+            "max_parallel_jobs": corpus_batch_parallel_jobs(),
+        },
+        "jobs": jobs,
+    }, job_refs
+
+
+def build_record_from_batch_results(
+    *,
+    target: dict[str, Any],
+    execution_mode: str,
+    enable_recompile: bool,
+    enable_exec: bool,
+    skip_families: list[str],
+    blind_apply: bool,
+    job_refs: Mapping[str, str],
+    results_by_id: Mapping[str, dict[str, Any]],
+) -> dict[str, Any]:
+    record = build_empty_record(target, execution_mode)
+    recompile_all = blind_apply
+    policy_mode = "blind-apply-v5" if blind_apply else "daemon-auto"
+    inventory_scan = normalize_scan(target.get("inventory_scan"))
+    scan_source = "inventory"
+    daemon_counts = inventory_scan
+
+    baseline_compile_raw = batch_job_invocation_summary(results_by_id.get(job_refs.get("baseline_compile", "")))
+    baseline_run_raw = batch_job_invocation_summary(results_by_id.get(job_refs.get("baseline_run", "")))
+    v5_compile_raw = batch_job_invocation_summary(results_by_id.get(job_refs.get("v5_compile", "")))
+    v5_run_raw = batch_job_invocation_summary(results_by_id.get(job_refs.get("v5_run", "")))
+
+    if baseline_compile_raw and baseline_compile_raw.get("ok"):
+        baseline_scan = directive_scan_from_record(baseline_compile_raw)
+        if baseline_scan["total_sites"] > 0:
+            daemon_counts = baseline_scan
+            scan_source = f"{execution_mode}_runner_scan"
+
+    record["daemon_cli"] = None
     record["policy_path"] = None
     record["policy_mode"] = policy_mode
     record["scan_source"] = scan_source
     record["daemon_counts"] = daemon_counts
     record["eligible_families"] = families_from_scan(daemon_counts)
-    record["baseline_compile"] = invocation_summary(baseline_compile_raw)
-    record["v5_compile"] = invocation_summary(v5_compile_raw)
-    record["v5_run"] = invocation_summary(v5_run_raw)
-
-    # Use the dedicated stock baseline run if available; fall back to trying
-    # to extract a stock phase from the v5 run output (for non-daemon modes).
-    record["baseline_run"] = invocation_summary(baseline_run_raw) if (
-        baseline_run_raw and baseline_run_raw.get("ok")
-    ) else paired_stock_invocation_summary(v5_run_raw)
+    record["baseline_compile"] = baseline_compile_raw
+    record["v5_compile"] = v5_compile_raw
+    record["v5_run"] = v5_run_raw
+    record["baseline_run"] = baseline_run_raw
 
     if (
         enable_exec
@@ -710,7 +751,7 @@ def run_target_locally(
         and v5_run_raw.get("ok")
         and record["baseline_run"] is None
     ):
-        record["record_error"] = "stock phase missing from run-kernel output"
+        record["record_error"] = "stock phase missing from batch runner output"
     record["v5_compile_applied"] = bool((((record["v5_compile"] or {}).get("sample") or {}).get("rejit") or {}).get("applied"))
     record["v5_run_applied"] = bool((((record["v5_run"] or {}).get("sample") or {}).get("rejit") or {}).get("applied"))
     record["requested_families_compile"] = list(recompile_metadata(record["v5_compile"]).get("requested_families") or [])
@@ -729,6 +770,62 @@ def run_target_locally(
     record["size_delta_pct"] = size_delta_pct(record["baseline_compile"], record["v5_compile"])
     record["speedup_ratio"] = speedup_ratio(record["baseline_run"], record["v5_run"])
     return record
+
+
+def run_targets_locally_batch(
+    *,
+    targets: list[dict[str, Any]],
+    runner: Path,
+    daemon: Path,
+    repeat: int,
+    timeout_seconds: int,
+    execution_mode: str,
+    btf_custom_path: Path | None,
+    enable_recompile: bool,
+    enable_exec: bool,
+    skip_families: list[str],
+    blind_apply: bool,
+    daemon_socket: str | None = None,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    active_daemon_socket = daemon_socket
+    daemon_proc = None
+    if enable_recompile and active_daemon_socket is None:
+        active_daemon_socket = f"/tmp/bpfrejit-{os.getpid()}.sock"
+        daemon_proc = start_daemon_server(daemon, active_daemon_socket)
+
+    try:
+        spec_payload, job_refs = build_target_batch_plan(
+            targets=targets,
+            repeat=repeat,
+            btf_custom_path=btf_custom_path,
+            enable_recompile=enable_recompile,
+            enable_exec=enable_exec,
+            daemon_socket=active_daemon_socket,
+        )
+        batch_result = run_batch_runner(
+            runner,
+            spec_payload=spec_payload,
+            timeout_seconds=packet_batch_timeout_seconds(len(targets), timeout_seconds),
+            cwd=ROOT_DIR,
+        )
+    finally:
+        stop_daemon_server(daemon_proc, active_daemon_socket if daemon_proc is not None else None)
+
+    results_by_id = batch_job_result_map(batch_result.get("result"))
+    records = [
+        build_record_from_batch_results(
+            target=target,
+            execution_mode=execution_mode,
+            enable_recompile=enable_recompile,
+            enable_exec=enable_exec,
+            skip_families=skip_families,
+            blind_apply=blind_apply,
+            job_refs=refs,
+            results_by_id=results_by_id,
+        )
+        for target, refs in zip(targets, job_refs, strict=True)
+    ]
+    return records, batch_result
 
 
 def guest_info_payload() -> dict[str, Any]:
@@ -811,47 +908,40 @@ def run_guest_batch_mode(args: argparse.Namespace) -> int:
         raise SystemExit("--btf-custom-path is required in guest batch mode")
 
     emit_guest_event("guest_info", payload=guest_info_payload())
+    skip_families = normalize_skip_families(args.skip_families)
     records: list[dict[str, Any]] = []
     if guest_result_path is not None:
         write_guest_batch_records(guest_result_path, records)
 
-    daemon_socket = f"/tmp/bpfrejit-{os.getpid()}.sock"
-    daemon_proc = start_daemon_server(daemon, daemon_socket)
-    skip_families = normalize_skip_families(args.skip_families)
     try:
-        for index, target in enumerate(targets, start=1):
-            print(
-                f"[guest {index}/{len(targets)}] {target['source_name']} {target['object_path']}:{target['program_name']}",
-                file=sys.stderr,
-                flush=True,
-            )
-            try:
-                record = run_target_locally(
-                    target=target,
-                    runner=runner,
-                    daemon=daemon,
-                    repeat=args.repeat,
-                    timeout_seconds=args.timeout,
-                    execution_mode="vm",
-                    btf_custom_path=btf_custom_path,
-                    enable_recompile=True,
-                    enable_exec=bool(target.get("can_test_run")),
-                    skip_families=skip_families,
-                    blind_apply=args.blind_apply,
-                    daemon_socket=daemon_socket,
-                )
-            except Exception as exc:
-                print(traceback.format_exc(), file=sys.stderr, flush=True)
-                record = build_empty_record(target, "vm")
-                record["record_error"] = f"guest batch exception: {exc}"
-            records.append(sanitize_guest_batch_record(record))
-            if guest_result_path is not None:
-                write_guest_batch_records(guest_result_path, records)
-                emit_guest_event("program_progress", index=index, total=len(targets))
-            else:
-                emit_guest_event("program_record", index=index, total=len(targets), record=record)
-    finally:
-        stop_daemon_server(daemon_proc, daemon_socket)
+        built_records, _batch_result = run_targets_locally_batch(
+            targets=targets,
+            runner=runner,
+            daemon=daemon,
+            repeat=args.repeat,
+            timeout_seconds=args.timeout,
+            execution_mode="vm",
+            btf_custom_path=btf_custom_path,
+            enable_recompile=True,
+            enable_exec=True,
+            skip_families=skip_families,
+            blind_apply=args.blind_apply,
+        )
+    except Exception as exc:
+        print(traceback.format_exc(), file=sys.stderr, flush=True)
+        built_records = []
+        for target in targets:
+            record = build_empty_record(target, "vm")
+            record["record_error"] = f"guest batch exception: {exc}"
+            built_records.append(record)
+
+    for index, record in enumerate(built_records, start=1):
+        records.append(sanitize_guest_batch_record(record))
+        if guest_result_path is not None:
+            write_guest_batch_records(guest_result_path, records)
+            emit_guest_event("program_progress", index=index, total=len(targets))
+        else:
+            emit_guest_event("program_record", index=index, total=len(targets), record=record)
     return 0
 
 
@@ -2121,29 +2211,25 @@ def run_linear_mode(mode_name: str, argv: list[str] | None = None) -> int:
 
     flush_artifact("running")
     try:
-        for index, target in enumerate(targets, start=1):
+        built_records, batch_invocation = run_targets_locally_batch(
+            targets=targets,
+            runner=runner,
+            daemon=daemon,
+            repeat=args.repeat,
+            timeout_seconds=args.timeout,
+            execution_mode=mode_name,
+            btf_custom_path=btf_custom_path,
+            enable_recompile=True,
+            enable_exec=enable_exec,
+            skip_families=skip_families,
+            blind_apply=args.blind_apply,
+        )
+        if not batch_invocation["ok"]:
+            raise RuntimeError(batch_invocation["error"] or "corpus batch runner failed")
+
+        for index, (target, record) in enumerate(zip(targets, built_records, strict=True), start=1):
             current_target_index = index
             current_target = target
-            flush_artifact("running")
-
-            print(
-                f"[{index}/{len(targets)}] {target['source_name']} {target['object_path']}:{target['program_name']}",
-                file=sys.stderr,
-                flush=True,
-            )
-            record = run_target_locally(
-                target=target,
-                runner=runner,
-                daemon=daemon,
-                repeat=args.repeat,
-                timeout_seconds=args.timeout,
-                execution_mode=mode_name,
-                btf_custom_path=btf_custom_path,
-                enable_recompile=True,
-                enable_exec=enable_exec,
-                skip_families=skip_families,
-                blind_apply=args.blind_apply,
-            )
             records.append(record)
             flush_artifact("running")
 

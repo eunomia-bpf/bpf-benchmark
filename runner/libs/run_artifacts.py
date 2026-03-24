@@ -220,7 +220,7 @@ def summarize_benchmark_results(payload: Mapping[str, Any]) -> dict[str, Any]:
                     run_sites_applied += int(rejit.get("total_sites_applied", 0) or 0)
                     if isinstance(rejit.get("daemon_response"), Mapping) or isinstance(
                         rejit.get("daemon_debug_ref"), str
-                    ):
+                    ) or bool(rejit.get("daemon_debug_stripped")):
                         run_daemon_debug_entries += 1
                     for pass_name in rejit.get("passes_applied", []):
                         run_passes[str(pass_name)] += 1

@@ -894,6 +894,9 @@ void print_sample_json(std::ostream &out, const sample_result &sample)
         << "\"verifier_retries\":" << sample.rejit.verifier_retries << ","
         << "\"final_disabled_passes\":";
     print_json_string_array(out, sample.rejit.final_disabled_passes);
+    if (sample.rejit.daemon_debug_stripped) {
+        out << ",\"daemon_debug_stripped\":true";
+    }
     if (!sample.rejit.daemon_response.empty()) {
         /* Embed daemon_response as pre-serialized JSON value (not re-escaped) */
         out << ",\"daemon_response\":" << sample.rejit.daemon_response;
@@ -902,9 +905,26 @@ void print_sample_json(std::ostream &out, const sample_result &sample)
         << "}";
 }
 
+void print_json(std::ostream &out, const sample_result &sample)
+{
+    print_sample_json(out, sample);
+}
+
+void print_json(std::ostream &out, const std::vector<sample_result> &samples)
+{
+    out << "[";
+    for (size_t index = 0; index < samples.size(); ++index) {
+        if (index != 0) {
+            out << ",";
+        }
+        print_sample_json(out, samples[index]);
+    }
+    out << "]";
+}
+
 void print_json(const sample_result &sample)
 {
-    print_sample_json(std::cout, sample);
+    print_json(std::cout, sample);
     std::cout << "\n";
 }
 

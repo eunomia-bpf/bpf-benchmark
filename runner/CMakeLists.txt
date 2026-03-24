@@ -34,6 +34,7 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBELF REQUIRED IMPORTED_TARGET libelf)
 pkg_check_modules(ZLIB REQUIRED IMPORTED_TARGET zlib)
 pkg_check_modules(LIBZSTD REQUIRED IMPORTED_TARGET libzstd)
+pkg_check_modules(YAMLCPP REQUIRED IMPORTED_TARGET yaml-cpp)
 
 if(MICRO_EXEC_ENABLE_LLVMBPF)
     find_package(LLVM REQUIRED CONFIG)
@@ -67,6 +68,7 @@ set_target_properties(vendor_libbpf PROPERTIES
 )
 
 set(MICRO_EXEC_SOURCES
+    src/batch_runner.cpp
     src/common.cpp
     src/elf_program_loader.cpp
     src/kernel_runner.cpp
@@ -99,6 +101,7 @@ target_link_libraries(micro_exec
     PRIVATE
         vendor_libbpf
         PkgConfig::LIBELF
+        PkgConfig::YAMLCPP
         PkgConfig::ZLIB
         PkgConfig::LIBZSTD
 )

@@ -78,6 +78,9 @@ int main(int argc, char **argv)
 {
     try {
         if (argc > 1) {
+            if (std::string_view(argv[1]) == "run-batch") {
+                return run_batch_cli(argc, argv);
+            }
             const auto options = parse_args(argc, argv);
             return run_single_shot(options);
         }

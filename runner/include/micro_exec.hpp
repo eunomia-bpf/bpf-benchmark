@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <functional>
+#include <iosfwd>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -115,6 +116,7 @@ struct rejit_summary {
     uint32_t verifier_retries = 0;
     std::vector<std::string> final_disabled_passes;
     std::string daemon_response;               // raw daemon JSON response
+    bool daemon_debug_stripped = false;
 };
 
 struct sample_result {
@@ -141,9 +143,20 @@ struct sample_result {
     rejit_summary rejit;
 };
 
+struct paired_test_run_result {
+    std::string id;
+    bool ok = false;
+    std::string error;
+    std::optional<sample_result> baseline_compile;
+    std::optional<sample_result> baseline_run;
+    std::optional<sample_result> rejit_compile;
+    std::optional<sample_result> rejit_run;
+};
+
 [[noreturn]] void fail(const std::string &message);
 cli_options parse_args(int argc, char **argv);
 keep_alive_request parse_keep_alive_request(std::string_view json_line);
+int run_batch_cli(int argc, char **argv);
 std::vector<uint8_t> read_binary_file(const std::filesystem::path &path);
 void write_binary_file(const std::filesystem::path &path, const uint8_t *data, size_t size);
 std::string benchmark_name_for_program(const std::filesystem::path &program);
@@ -155,6 +168,11 @@ program_image load_program_image(
 void initialize_micro_exec_process();
 sample_result run_llvmbpf(const cli_options &options);
 std::vector<sample_result> run_kernel(const cli_options &options);
+paired_test_run_result run_kernel_paired(
+    const cli_options &options,
+    uint32_t pgo_warmup_repeat);
+void print_json(std::ostream &out, const sample_result &sample);
+void print_json(std::ostream &out, const std::vector<sample_result> &samples);
 void print_json(const sample_result &sample);
 void print_json(const std::vector<sample_result> &samples);
 void print_program_inventory(const std::vector<program_descriptor> &programs);
