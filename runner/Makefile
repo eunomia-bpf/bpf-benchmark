@@ -40,6 +40,9 @@ NEGATIVE_TEST_DIR := $(REPO_ROOT)/tests/negative
 MICRO_RESULTS_DIR := $(REPO_ROOT)/micro/results
 CORPUS_RESULTS_DIR := $(REPO_ROOT)/corpus/results
 E2E_RESULTS_DIR := $(REPO_ROOT)/e2e/results
+TRACEE_CACHED_BINARY := $(REPO_ROOT)/e2e/cases/tracee/bin/tracee
+TRACEE_SETUP_SCRIPT := $(REPO_ROOT)/e2e/cases/tracee/setup.sh
+TETRAGON_SETUP_SCRIPT := $(REPO_ROOT)/e2e/cases/tetragon/setup.sh
 VM_MICRO_SMOKE_OUTPUT ?= $(MICRO_RESULTS_DIR)/vm_micro_smoke.json
 VM_MICRO_OUTPUT ?= $(MICRO_RESULTS_DIR)/vm_micro.json
 VM_CORPUS_OUTPUT_JSON ?= $(CORPUS_RESULTS_DIR)/vm_corpus.json
@@ -68,7 +71,7 @@ VM_SMOKE_ARGS := --iterations 1 --warmups 0 --repeat 50
 
 .PHONY: all micro_exec directive_hint vendor_libbpf vendor_bpftool \
 	corpus-fetch corpus-build-objects corpus-build \
-	scx-artifacts e2e-prep \
+	scx-artifacts e2e-prep e2e-tracee-setup e2e-tetragon-setup \
 	kernel-image kernel-tests-build kinsn-modules-build micro-programs daemon-binary \
 	vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 	clean
@@ -94,6 +97,20 @@ e2e-prep:
 		$(PYTHON) "$(ROOT_DIR)/scripts/fetch_corpus_repos.py" --repo bcc --repo scx; \
 	fi
 	$(PYTHON) "$(ROOT_DIR)/scripts/build_scx_artifacts.py"
+
+e2e-tracee-setup:
+	@if [ -x "$(TRACEE_CACHED_BINARY)" ]; then \
+		echo "tracee setup: using cached $(TRACEE_CACHED_BINARY)"; \
+	else \
+		bash "$(TRACEE_SETUP_SCRIPT)" || true; \
+	fi
+
+e2e-tetragon-setup:
+	@if command -v tetragon >/dev/null 2>&1 && command -v tetra >/dev/null 2>&1 && command -v stress-ng >/dev/null 2>&1; then \
+		echo "tetragon setup: using cached system binaries"; \
+	else \
+		bash "$(TETRAGON_SETUP_SCRIPT)" || true; \
+	fi
 
 vendor_libbpf: $(LIBBPF_A) $(LIBBPF_HEADER)
 
@@ -225,10 +242,8 @@ vm-corpus: micro_exec daemon-binary kernel-image kinsn-modules-build
 		--output-json "$(VM_CORPUS_OUTPUT_JSON)" \
 		--output-md "$(VM_CORPUS_OUTPUT_MD)"
 
-vm-e2e: e2e-prep micro_exec daemon-binary kernel-image kinsn-modules-build
+vm-e2e: e2e-prep e2e-tracee-setup e2e-tetragon-setup micro_exec daemon-binary kernel-image kinsn-modules-build
 	mkdir -p "$(E2E_RESULTS_DIR)"
-	bash "$(REPO_ROOT)/e2e/cases/tracee/setup.sh" || true
-	bash "$(REPO_ROOT)/e2e/cases/tetragon/setup.sh" || true
 	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
 		--action vm-e2e \
 		--kernel-image "$(BZIMAGE_PATH)" \
