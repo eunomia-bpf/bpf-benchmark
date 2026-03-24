@@ -4,14 +4,21 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 import yaml
 
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-ROOT = Path(__file__).resolve().parent
-REPO_ROOT = ROOT.parent
-DEFAULT_CONFIG = ROOT / "config" / "macro_corpus.yaml"
+from runner.libs.repo_registry import load_repo_manifest  # noqa: E402
+
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+RUNNER_DIR = SCRIPT_DIR.parent
+REPO_ROOT = RUNNER_DIR.parent
+DEFAULT_CONFIG = REPO_ROOT / "corpus" / "config" / "macro_corpus.yaml"
 
 
 def run(command: list[str], cwd: Path | None = None) -> None:
@@ -32,11 +39,6 @@ def load_corpus_config(path: Path) -> dict[str, Path]:
         "local_repos": (REPO_ROOT / corpus["local_repos"]).resolve(),
         "inventory": (REPO_ROOT / corpus["inventory"]).resolve(),
     }
-
-
-def load_manifest(manifest_path: Path) -> list[dict[str, object]]:
-    data = yaml.safe_load(manifest_path.read_text())
-    return list(data["repos"])
 
 
 def ensure_repo(spec: dict[str, object], local_repos: Path) -> Path:
@@ -119,7 +121,7 @@ def harvest_repo(spec: dict[str, object], repo_dir: Path) -> dict[str, object]:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Fetch and inventory real-world eBPF testcase repos.")
+    parser = argparse.ArgumentParser(description="Fetch and inventory third-party BPF repos via runner control plane.")
     parser.add_argument("--config", default=str(DEFAULT_CONFIG), help="Path to macro corpus config.")
     parser.add_argument("--repo", action="append", dest="repos", help="Only fetch selected repo names.")
     return parser.parse_args()
@@ -135,7 +137,7 @@ def main() -> int:
     local_repos.mkdir(parents=True, exist_ok=True)
 
     selected = set(args.repos or [])
-    manifest = load_manifest(manifest_path)
+    manifest = load_repo_manifest(manifest_path)
     records = []
     for spec in manifest:
         name = str(spec["name"])

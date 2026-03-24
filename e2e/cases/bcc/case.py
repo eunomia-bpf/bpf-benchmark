@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """BCC libbpf-tools E2E benchmark case.
 
-Each tool from corpus/repos/bcc/libbpf-tools/ is started as a real userspace
+Each tool from runner/repos/bcc/libbpf-tools/ is started as a real userspace
 binary that loads BPF programs into the kernel.  The benchmark follows the same
 baseline → daemon-apply → post-rejit pattern used by the bpftrace case.
 """
@@ -66,7 +66,7 @@ DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "bcc-e2e.md"
 DEFAULT_REPORT_MD = ROOT_DIR / "docs" / "tmp" / "bcc-e2e-report.md"
 DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
 # libbpf-tools src dir; setup.sh may override this via BCC_TOOLS_DIR env var
-DEFAULT_TOOLS_DIR = ROOT_DIR / "corpus" / "repos" / "bcc" / "libbpf-tools"
+DEFAULT_TOOLS_DIR = ROOT_DIR / "runner" / "repos" / "bcc" / "libbpf-tools"
 
 
 # ---------------------------------------------------------------------------

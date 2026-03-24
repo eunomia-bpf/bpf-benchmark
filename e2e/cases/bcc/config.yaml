@@ -1,5 +1,5 @@
 # BCC libbpf-tools E2E benchmark configuration
-# Each tool is compiled from corpus/repos/bcc/libbpf-tools/ and run as a real
+# Each tool is compiled from runner/repos/bcc/libbpf-tools/ and run as a real
 # userspace binary that loads BPF programs into the kernel.
 #
 # workload_kind must be one of:

@@ -7,6 +7,7 @@ import os
 import platform
 import shutil
 import subprocess
+import sys
 import time
 from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -15,18 +16,24 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
 import yaml
-from runner.libs import authoritative_output_path, ensure_parent, smoke_output_path
+from runner.libs import authoritative_output_path, ensure_parent, smoke_output_path  # noqa: E402
+from runner.libs.repo_registry import DEFAULT_REPO_INVENTORY, DEFAULT_REPO_MANIFEST  # noqa: E402
 
 
-ROOT = Path(__file__).resolve().parent
-REPO_ROOT = ROOT.parent
-DEFAULT_CONFIG = ROOT / "config" / "macro_corpus.yaml"
-DEFAULT_MANIFEST = ROOT / "repos.yaml"
-DEFAULT_INVENTORY = ROOT / "inventory.json"
-DEFAULT_BUILD_ROOT = ROOT / "build"
-DEFAULT_OUTPUT_JSON = authoritative_output_path(ROOT / "results", "expanded_corpus_build")
-DEFAULT_OUTPUT_MD = ROOT / "results" / "expanded_corpus_build.md"
+SCRIPT_DIR = Path(__file__).resolve().parent
+RUNNER_DIR = SCRIPT_DIR.parent
+REPO_ROOT = RUNNER_DIR.parent
+CORPUS_DIR = REPO_ROOT / "corpus"
+DEFAULT_CONFIG = CORPUS_DIR / "config" / "macro_corpus.yaml"
+DEFAULT_MANIFEST = DEFAULT_REPO_MANIFEST
+DEFAULT_INVENTORY = DEFAULT_REPO_INVENTORY
+DEFAULT_BUILD_ROOT = CORPUS_DIR / "build"
+DEFAULT_OUTPUT_JSON = authoritative_output_path(CORPUS_DIR / "results", "expanded_corpus_build")
+DEFAULT_OUTPUT_MD = CORPUS_DIR / "results" / "expanded_corpus_build.md"
 DEFAULT_TIMEOUT_SECONDS = 90
 DEFAULT_MAX_WORKERS = min(8, (os.cpu_count() or 4))
 
@@ -55,8 +62,8 @@ def parse_args() -> argparse.Namespace:
         description="Compile the expanded real-world BPF corpus into corpus/build/<repo>/."
     )
     parser.add_argument("--config", default=str(DEFAULT_CONFIG), help="Macro corpus config path.")
-    parser.add_argument("--manifest", default=str(DEFAULT_MANIFEST), help="Corpus repo manifest path.")
-    parser.add_argument("--inventory", default=str(DEFAULT_INVENTORY), help="Fetched inventory.json path.")
+    parser.add_argument("--manifest", default=str(DEFAULT_MANIFEST), help="Runner repo manifest path.")
+    parser.add_argument("--inventory", default=str(DEFAULT_INVENTORY), help="Runner repo inventory.json path.")
     parser.add_argument("--build-root", default=str(DEFAULT_BUILD_ROOT), help="Build output root.")
     parser.add_argument("--output-json", default=str(DEFAULT_OUTPUT_JSON), help="Structured JSON output path.")
     parser.add_argument("--output-md", default=str(DEFAULT_OUTPUT_MD), help="Markdown summary output path.")

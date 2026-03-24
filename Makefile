@@ -62,6 +62,7 @@ export ARM64_DOCKER_PLATFORM ARM64_CROSSBUILD_OUTPUT_DIR ARM64_CROSSBUILD_JOBS
 BZIMAGE ?= vendor/linux-framework/arch/x86/boot/bzImage
 DAEMON  ?= daemon/target/release/bpfrejit-daemon
 DAEMON_SOCKET ?= /tmp/bpfrejit.sock
+REPOS ?=
 ITERATIONS ?= 3
 WARMUPS    ?= 1
 REPEAT     ?= 100
@@ -113,6 +114,7 @@ KERNEL_JIT_SOURCES   := $(addprefix $(KERNEL_DIR)/,arch/x86/net/bpf_jit_comp.c k
 MICRO_BPF_STAMP      := $(MICRO_DIR)/programs/.build.stamp
 
 .PHONY: all runner micro daemon kernel kernel-arm64 kernel-tests kinsn-modules \
+	corpus-fetch corpus-build-objects corpus-build \
 	daemon-tests python-tests check smoke validate \
 	vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 	arm64-worktree arm64-rootfs arm64-crossbuild-image cross-arm64 selftest-arm64 \
@@ -123,6 +125,7 @@ MICRO_BPF_STAMP      := $(MICRO_DIR)/programs/.build.stamp
 # ── Help ───────────────────────────────────────────────────────────────────────
 help:
 	@echo "Build:  all runner micro daemon kernel kinsn-modules kernel-tests kernel-arm64 cross-arm64"
+	@echo "Repos:  corpus-fetch corpus-build-objects corpus-build REPOS=\"tracee tetragon ...\""
 	@echo "Test:   smoke daemon-tests python-tests check"
 	@echo "VM x86: vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all validate"
 	@echo "ARM64:  vm-arm64-smoke vm-arm64-selftest"
@@ -137,6 +140,15 @@ all:
 
 runner:
 	$(MAKE) -C "$(RUNNER_DIR)" micro_exec
+
+corpus-fetch:
+	$(MAKE) -C "$(RUNNER_DIR)" corpus-fetch PYTHON="$(PYTHON)" REPOS="$(REPOS)"
+
+corpus-build-objects:
+	$(MAKE) -C "$(RUNNER_DIR)" corpus-build-objects PYTHON="$(PYTHON)" REPOS="$(REPOS)"
+
+corpus-build:
+	$(MAKE) -C "$(RUNNER_DIR)" corpus-build PYTHON="$(PYTHON)" REPOS="$(REPOS)"
 
 micro:
 	$(MAKE) runner

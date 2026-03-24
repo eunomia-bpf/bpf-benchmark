@@ -17,7 +17,7 @@ Active checked-in cases are `tracee`, `tetragon`, `bpftrace`, `scx`, and `katran
 source /home/yunwei37/workspace/.venv/bin/activate
 make micro
 make daemon
-python3 corpus/build_expanded_corpus.py --repo tracee --repo tetragon --repo scx --repo katran
+make corpus-build REPOS="tracee tetragon scx katran"
 ```
 
 - Most cases require root or passwordless `sudo -n`.
@@ -53,7 +53,7 @@ python3 corpus/build_expanded_corpus.py --repo tracee --repo tetragon --repo scx
 
 ### scx
 
-- No setup script; the case auto-builds `daemon/target/release/bpfrejit-daemon` and `corpus/repos/scx/target/release/scx_rusty` if needed
+- No setup script; the case auto-builds `daemon/target/release/bpfrejit-daemon` and `runner/repos/scx/target/release/scx_rusty` if needed
 - Uses `corpus/build/scx/scx_rusty_main.bpf.o`
 - Requires at least one workload generator in `PATH`: `hackbench`, `stress-ng`, or `sysbench`
 - Supports `--vm` and requires `--kernel` when enabled

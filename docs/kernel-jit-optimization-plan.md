@@ -756,7 +756,22 @@ make clean
 | **464** | **Paper submodule + 死代码清理（2026-03-23）** | ✅ pushed | `docs/paper` 替换为 `yunwei37/bpfrejit-paper` submodule。删除 `daemon/tests/policy_v3_golden/`（10 个孤立 v1 YAML）+ 9 个垃圾文件（temp corpus JSON + 空 debug artifacts）。Commits: `91a2be3` + `329ef17`。 |
 | **465** | **VM 管理设计文档（2026-03-23）** | ✅ | 分析现有 VM/ARM64/CI 管理现状 + 统一方案设计（config/machines.yaml、TARGET= 选择、vm_global lock）。报告：`docs/tmp/20260323/vm_management_design_20260323.md`。 |
 | **466** | **Benchmark 框架 review（2026-03-23）** | ✅ | 五大瓶颈识别：corpus per-VM 72%、micro subprocess 83%、PGO sleep 15%、corpus socket wait、correctness/perf 不分离。#458/#459 解决前两个。 |
-| **467** | 第三方 repo 统一管理 | 🔄 | repos.yaml 移到 runner/，扩展覆盖全部 25 个项目，加 make corpus-fetch/corpus-build targets。codex 进行中。 |
-| **468** | Corpus 补全缺失项目（macro_corpus.yaml） | 🔄 | cilium/KubeArmor/loxilb/scx/bpftrace/xdp-tools 等 10+ 项目的 .bpf.o 需加入 manifest。依赖 #467。 |
-| **469** | 构建错误修复 + 全量最小测试 | 🔄 | daemon kfunc_discovery.rs 字段不匹配 + runner 链接错误。codex 进行中。 |
-| **470** | VM/远端机器统一注册实现 | 待做 | 基于 #465 设计文档实现：`config/machines.yaml` 中心注册（本地 VM、AWS ARM64、CI runner）、`make vm-* TARGET=...` 统一入口、`vm_global` file lock 防并行冲突。MVP：config 注册 + 手动 TARGET 选择 + 基础 lock，不做自动调度。 |
+| **467** | **Runner 统一第三方 repo 控制面** | 🔄 | **父任务**：`runner/` 成为唯一第三方 BPF 项目注册中心和 fetch/build 入口。**第一批实现已落地**：`runner/repos.yaml`、`runner/scripts/fetch_corpus_repos.py`、`runner/scripts/build_corpus_objects.py`、`runner/libs/repo_registry.py`、`runner/Makefile` repo targets、根 `Makefile` 薄透传。验证：`make corpus-fetch REPOS='bcc'` ✅，`python3 runner/scripts/build_corpus_objects.py --repo bcc --max-sources 2` ✅。剩余消费层和旧路径清理见 #467d/#467f。 |
+| **467a** | `runner/repos.yaml` schema 收口 | ✅ | `corpus/repos.yaml` 已迁到 `runner/repos.yaml`。`corpus/config/macro_corpus.yaml` 已改为读取 `runner/repos.yaml` / `runner/repos` / `runner/inventory.json`。 |
+| **467b** | `runner/repos/` fetch 后端统一 | ✅ | fetch 入口已迁到 `runner/scripts/fetch_corpus_repos.py`，工作区目标改为 `runner/repos/`。`make corpus-fetch REPOS='bcc'` 实测通过，输出 `runner/inventory.json`。 |
+| **467c** | repo build/harvest 编排收口到 `runner/` | ✅ | build 入口已迁到 `runner/scripts/build_corpus_objects.py`，`runner/Makefile` 新增 `corpus-fetch` / `corpus-build-objects` / `corpus-build`。对象产物仍写入 `corpus/build/`，但 orchestration 已收口到 `runner/`。 |
+| **467d** | `corpus/` 和 `e2e/` 消费层迁移 | 🔄 | active 路径已开始迁移：`bcc` / `scx` e2e 默认 repo 路径改到 `runner/repos/`，`corpus` README / `e2e` README 同步更新。其余 case/配置和遗留硬编码路径继续清理。 |
+| **467e** | Make 入口统一 | ✅ | 根 `Makefile` 新增薄封装 `corpus-fetch` / `corpus-build-objects` / `corpus-build`，全部透传到 `runner/Makefile`。 |
+| **467f** | repo 控制面验证与旧路径清理 | 🔄 | 当前验证：repo manifest 解析 ✅、`make corpus-fetch REPOS='bcc'` ✅、`python3 runner/scripts/build_corpus_objects.py --repo bcc --max-sources 2` ✅、相关 Python 文件 `py_compile` ✅。遗留旧路径清理仍未完成。 |
+| **468** | Corpus 补全缺失项目（macro_corpus.yaml） | ✅ | +61 条目：cilium/KubeArmor/loxilb/scx/bpftrace/xdp-tools/xdp-tutorial/netbird/opentelemetry-ebpf-profiler/tubular。加上 #461 BCC +34 条目，macro_corpus.yaml 从原始 ~60 扩展到 ~155 条目。YAML 验证通过。 |
+| **469** | **Runner infra 收口后的构建修复、全量验证与跑速分析** | 待做 | **支撑任务**：在 #467 / #470 改动落地后统一修复构建与接线问题，并做完整验证，不接受只跑 smoke 收尾。最终验证至少覆盖 `make all`、`make check`、`make vm-static-test`、全量 `vm-micro`、全量 `vm-corpus`、全量 `vm-e2e`；同时分析 benchmark framework 自身运行这些任务时的性能瓶颈，必要时继续优化以缩短总评测时间。当前已知问题：daemon `kfunc_discovery.rs` 字段不匹配、runner keep-alive 相关链接/接线错误。实施清单见 #469a-#469c。 |
+| **469a** | Runner infra 收口后的本地构建验证 | 待做 | 目标至少包括 `make all`、`make check`，修完所有构建/链接/脚本接线错误后再进入 VM 验证。 |
+| **469b** | Runner infra 收口后的全量 VM 验证 | 待做 | 必须完整运行 `make vm-static-test`、全量 `make vm-micro`、全量 `make vm-corpus`、全量 `make vm-e2e`；不能只用 smoke 代替收尾验证。所有 VM 任务继续遵守串行执行约束。 |
+| **469c** | Benchmark 执行性能瓶颈分析与提速 | 待做 | 在全量验证过程中分析 benchmark framework 本身的耗时瓶颈（如 VM 启动、队列等待、subprocess 开销、socket wait、重复初始化、guest setup），必要时继续修 runner/micro/corpus/e2e 基础设施，目标是在不牺牲 correctness 的前提下更快跑完整套 micro / corpus / e2e / static checks。 |
+| **470** | **Runner 统一 VM/机器调度控制面** | 待做 | **父任务**：所有 VM/远端机器的注册、选择、排队、串行执行、guest 初始化和 VM 相关构建编排全部收口到 `runner/`。根 `Makefile` 不再包含实质 VM 逻辑，只保留薄入口；`micro/`、`corpus/`、`e2e/` 不再各自维护 VM 启动路径。实施清单见 #470a-#470f。 |
+| **470a** | `runner/machines.yaml` 机器注册中心 | 待做 | 在 `runner/` 引入唯一机器配置：本地 x86 vng、本地 ARM64 QEMU、AWS ARM64、CI runner；字段包含 arch、backend、能力、默认 target、kernel/rootfs/build profile、独占性。 |
+| **470b** | 自动排队 + 串行执行层 | 待做 | 在 `runner/` 实现 VM 队列/锁：提交 VM 任务后自动进入队列，按机器或全局独占策略串行启动；至少落地 file-backed queue + `vm_global` lock，禁止“文档规定串行、实现上并行”。 |
+| **470c** | VM backend adapter 收口 | 待做 | 将 `vng`、`qemu-system-aarch64`、AWS SSH、CI runner 的启动/上传/guest init/结果回收封装到 `runner/libs/` 或 `runner/scripts/`；VM 相关 shell 逻辑不得继续散落在根 `Makefile`、`corpus/`、`e2e/`。 |
+| **470d** | 根 `Makefile` 薄封装化 | 待做 | 根 `Makefile` 的 `vm-*` 目标只做参数透传到 `runner`（如 `TARGET=`、结果路径、benchmark 参数），不再内联 `vng` 命令、guest init、module load、queue/lock 逻辑。 |
+| **470e** | `micro/` / `corpus/` / `e2e/` VM 路径迁移 | 待做 | `micro/driver.py`、`corpus/modes.py`、`e2e/run.py` 改为消费 `runner` 的机器解析和执行接口；删除各自私有的 VM boot/profile/init 代码，统一由 `runner` 驱动。 |
+| **470f** | 调度控制面验证 | 待做 | 验证 `make vm-selftest`、`make vm-micro-smoke`、`make vm-corpus`、`make vm-e2e` 都经过 `runner` 调度；至少测试两个并发 VM 命令会自动排队并串行完成，而不是互相踩资源。 |

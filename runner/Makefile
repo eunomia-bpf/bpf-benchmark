@@ -11,10 +11,22 @@ BPFTOOL_BUILD_DIR := $(BUILD_DIR)/vendor/bpftool
 TOOLS_BUILD_DIR := $(BUILD_DIR)/tools
 DIRECTIVE_HINT_BIN := $(TOOLS_BUILD_DIR)/directive_hint
 MICRO_EXEC_ENABLE_LLVMBPF ?= ON
+PYTHON ?= python3
+REPOS ?=
+REPO_FLAGS := $(foreach repo,$(REPOS),--repo $(repo))
 
-.PHONY: all micro_exec directive_hint vendor_libbpf vendor_bpftool clean
+.PHONY: all micro_exec directive_hint vendor_libbpf vendor_bpftool \
+	corpus-fetch corpus-build-objects corpus-build clean
 
 all: micro_exec directive_hint
+
+corpus-fetch:
+	$(PYTHON) $(ROOT_DIR)/scripts/fetch_corpus_repos.py $(REPO_FLAGS)
+
+corpus-build-objects:
+	$(PYTHON) $(ROOT_DIR)/scripts/build_corpus_objects.py $(REPO_FLAGS)
+
+corpus-build: corpus-fetch corpus-build-objects
 
 vendor_libbpf: $(LIBBPF_A) $(LIBBPF_HEADER)
 

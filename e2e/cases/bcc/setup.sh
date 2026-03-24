@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # BCC libbpf-tools setup script.
-# Compiles the libbpf-tools binaries from corpus/repos/bcc/libbpf-tools/ and
+# Compiles the libbpf-tools binaries from runner/repos/bcc/libbpf-tools/ and
 # prints the output directory as BCC_TOOLS_DIR=<path>.
 #
 # The script is idempotent: if the binaries already exist in the output
@@ -9,7 +9,7 @@ set -euo pipefail
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd -- "${SCRIPT_DIR}/../../.." && pwd)
-LIBBPF_TOOLS_SRC="${REPO_ROOT}/corpus/repos/bcc/libbpf-tools"
+LIBBPF_TOOLS_SRC="${REPO_ROOT}/runner/repos/bcc/libbpf-tools"
 BUILD_OUTPUT="${LIBBPF_TOOLS_SRC}/.output"
 # Binaries we actually need — must match config.yaml tool names
 REQUIRED_TOOLS=(tcplife biosnoop runqlat execsnoop opensnoop capable vfsstat tcpconnect)

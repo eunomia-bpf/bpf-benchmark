@@ -1,6 +1,6 @@
 # Real-World Corpus
 
-`corpus/` owns the repository's real-world and external-program layers: repo harvesting, corpus builds, declarative suites, corpus measurements, and supporting analysis.
+`corpus/` owns the repository's real-world benchmark suites, corpus builds, declarative suites, corpus measurements, and supporting analysis. Third-party repo registration and fetch/build orchestration now live under `runner/`.
 
 ## Directory Layout
 
@@ -8,11 +8,15 @@
 - `modes.py`: consolidated packet, tracing, perf, and code-size corpus modes
 - `corpus/config/macro_corpus.yaml`: declarative macro/corpus suite consumed by `python3 corpus/driver.py --suite corpus/config/macro_corpus.yaml`
 - `corpus/config/corpus_manifest.yaml`: generated 23-project corpus snapshot and measured-summary manifest
-- `repos.yaml`: upstream repo harvest manifest used by `fetch_real_world_corpus.py`
-- `repos/`: shallow sparse checkouts of upstream projects
 - `build/`: compiled `.bpf.o` outputs under `corpus/build/<repo>/`
 - `results/`: committed JSON/Markdown outputs from corpus and supporting analyses
 - `inputs/`: reusable packet/context fixtures for macro and corpus runs
+
+Shared runner-owned inputs:
+
+- `runner/repos.yaml`: upstream repo harvest manifest
+- `runner/repos/`: shallow sparse checkouts of upstream projects
+- `runner/inventory.json`: harvested repo inventory used by corpus object builds
 
 `corpus/build/<repo>/` is also the object root consumed by the `e2e/` layer for cases such as `tracee`, `tetragon`, and `scx`.
 
@@ -29,9 +33,14 @@ Use `python3 corpus/driver.py --suite corpus/config/macro_corpus.yaml` for the d
 
 Top-level support scripts retained in `corpus/`:
 
-- `fetch_real_world_corpus.py`: fetches/refreshes upstream repos and regenerates `corpus/inventory.json`
-- `build_expanded_corpus.py`: compiles harvested `.bpf.c` sources into `corpus/build/`
+- `driver.py`: corpus measurement entrypoint
+- `modes.py`: corpus mode implementations
 - `directive_census.py`: daemon-backed directive census over `micro/` objects plus the built corpus
+
+Runner-owned repo control-plane scripts:
+
+- `runner/scripts/fetch_corpus_repos.py`: fetches/refreshes upstream repos and regenerates `runner/inventory.json`
+- `runner/scripts/build_corpus_objects.py`: compiles harvested `.bpf.c` sources into `corpus/build/`
 
 There is no checked-in scratch directory under `corpus/` anymore. Keep any local scratch work untracked, or promote reusable scripts back to the top level.
 
@@ -45,13 +54,13 @@ There is no checked-in scratch directory under `corpus/` anymore. Keep any local
 Fetch or refresh the upstream corpus working copies:
 
 ```bash
-python3 corpus/fetch_real_world_corpus.py
+make corpus-fetch
 ```
 
 Build the expanded corpus snapshot:
 
 ```bash
-python3 corpus/build_expanded_corpus.py
+make corpus-build
 ```
 
 Inspect directive-bearing sites across the built corpus:

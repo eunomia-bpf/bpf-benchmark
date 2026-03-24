@@ -44,8 +44,8 @@ from e2e.case_common import (  # noqa: E402
 
 DEFAULT_OUTPUT_JSON = authoritative_output_path(RESULTS_DIR, "scx")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "e2e" / "results" / "scx-e2e.md"
-DEFAULT_SCX_BINARY = ROOT_DIR / "corpus" / "repos" / "scx" / "target" / "release" / "scx_rusty"
-DEFAULT_SCX_REPO = ROOT_DIR / "corpus" / "repos" / "scx"
+DEFAULT_SCX_BINARY = ROOT_DIR / "runner" / "repos" / "scx" / "target" / "release" / "scx_rusty"
+DEFAULT_SCX_REPO = ROOT_DIR / "runner" / "repos" / "scx"
 DEFAULT_SCX_OBJECT = ROOT_DIR / "corpus" / "build" / "scx" / "scx_rusty_main.bpf.o"
 DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
 DEFAULT_KERNEL = ROOT_DIR / "vendor" / "linux-framework" / "arch" / "x86" / "boot" / "bzImage"

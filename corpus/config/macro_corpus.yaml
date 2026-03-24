@@ -1,9 +1,9 @@
 suite_name: macro_corpus
 
 corpus:
-  manifest: corpus/repos.yaml
-  local_repos: corpus/repos
-  inventory: corpus/inventory.json
+  manifest: runner/repos.yaml
+  local_repos: runner/repos
+  inventory: runner/inventory.json
 
 defaults:
   iterations: 3

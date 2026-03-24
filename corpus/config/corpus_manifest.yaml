@@ -887,7 +887,7 @@ projects:
     license: GPL-2.0 WITH Linux-syscall-note / mixed kernel licenses
     build:
       mode: mixed
-      repo_path: corpus/repos/linux-selftests
+      repo_path: runner/repos/linux-selftests
       instructions:
       - most objects remain prebuilt/promoted from prior corpus rounds
       - round-3 additions were compiled from tools/testing/selftests/bpf/progs/*.c with clang -target bpf and bpftool gen
@@ -3072,7 +3072,7 @@ projects:
     license: 'mixed: BSD-3-Clause plus AGPL-3.0 subtrees'
     build:
       mode: source-backed
-      repo_path: corpus/repos/netbird
+      repo_path: runner/repos/netbird
       instructions:
       - clang -target bpf compile client/firewall/uspfilter/ebpf/prog.c
       - include corpus/include/netbird_legacy_bpf_map_def.h for legacy map definitions
@@ -3157,7 +3157,7 @@ projects:
     license: GPL-2.0
     build:
       mode: source-backed
-      repo_path: corpus/repos/scx
+      repo_path: runner/repos/scx
       instructions:
       - cargo build --release -p scx_bpfland -p scx_rusty -p scx_lavd -p scx_flash
       - promote target/release/build/*/out/bpf.bpf.o into corpus/build/scx/
@@ -3285,7 +3285,7 @@ projects:
     license: LGPL-2.1-or-later project default; BPF sources include GPL-2.0-or-later pieces
     build:
       mode: source-backed
-      repo_path: corpus/repos/systemd
+      repo_path: runner/repos/systemd
       instructions:
       - generate vmlinux.h for the running kernel
       - clang -target bpf compile src/network/bpf/*.bpf.c and src/nsresourced/bpf/*.bpf.c
@@ -3369,7 +3369,7 @@ projects:
     license: Apache-2.0
     build:
       mode: source-backed
-      repo_path: corpus/repos/tetragon
+      repo_path: runner/repos/tetragon
       instructions:
       - make -C bpf -j$(nproc)
       - promote curated bpf/objs/*.o into corpus/build/tetragon/

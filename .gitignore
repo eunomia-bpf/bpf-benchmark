@@ -93,6 +93,8 @@ third-party/
 corpus/bcf/
 corpus/repos/
 corpus/inventory.json
+runner/repos/
+runner/inventory.json
 docs/reference/papers/*.pdf
 
 # Keep generated per-run detail payloads ignored, but track metadata directories.
