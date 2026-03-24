@@ -43,6 +43,7 @@ class RepoSpec:
     name: str
     repo_dir: Path
     compile_include_dirs: tuple[Path, ...]
+    forced_includes: tuple[Path, ...]
 
 
 @dataclass(frozen=True)
@@ -55,6 +56,7 @@ class WorkItem:
     temp_output_path: Path
     vmlinux_header: Path
     include_dirs: tuple[Path, ...]
+    forced_includes: tuple[Path, ...]
 
 
 def parse_args() -> argparse.Namespace:
@@ -158,18 +160,34 @@ def load_corpus_config(path: Path) -> dict[str, Path]:
     }
 
 
+def resolve_manifest_paths(repo_dir: Path, entries: list[str]) -> tuple[Path, ...]:
+    resolved: list[Path] = []
+    for value in entries:
+        raw_path = Path(value)
+        if raw_path.is_absolute():
+            resolved.append(raw_path.resolve())
+            continue
+        repo_relative = (repo_dir / raw_path).resolve()
+        root_relative = (REPO_ROOT / raw_path).resolve()
+        if repo_relative.exists() or not root_relative.exists():
+            resolved.append(repo_relative)
+        else:
+            resolved.append(root_relative)
+    return tuple(resolved)
+
+
 def load_manifest(path: Path, local_repos: Path) -> dict[str, RepoSpec]:
     data = yaml.safe_load(path.read_text())
     specs: dict[str, RepoSpec] = {}
     for entry in data["repos"]:
         repo_dir = (local_repos / str(entry["name"])).resolve()
-        include_dirs = tuple(
-            (repo_dir / rel).resolve() for rel in entry.get("compile_include_dirs", ["."])
-        )
+        include_dirs = resolve_manifest_paths(repo_dir, list(entry.get("compile_include_dirs", ["."])))
+        forced_includes = resolve_manifest_paths(repo_dir, list(entry.get("forced_includes", [])))
         specs[str(entry["name"])] = RepoSpec(
             name=str(entry["name"]),
             repo_dir=repo_dir,
             compile_include_dirs=include_dirs,
+            forced_includes=forced_includes,
         )
     return specs
 
@@ -284,6 +302,7 @@ def build_work_items(
         repo_build_root = (build_root / repo_name).resolve()
         vmlinux_header = repo_build_root / "vmlinux.h"
         include_dirs = tuple(path for path in spec.compile_include_dirs if path.exists())
+        forced_includes = tuple(path for path in spec.forced_includes if path.exists())
         for relative_path in repo.get("files", []):
             source_path = (spec.repo_dir / relative_path).resolve()
             object_rel = object_name_for_source(str(relative_path))
@@ -299,6 +318,7 @@ def build_work_items(
                     temp_output_path=temp_output_path,
                     vmlinux_header=vmlinux_header,
                     include_dirs=include_dirs,
+                    forced_includes=forced_includes,
                 )
             )
     items.sort(key=lambda item: (item.repo_name, item.relative_path))
@@ -321,6 +341,11 @@ def compile_source(
         for include_dir in (item.vmlinux_header.parent, *item.include_dirs)
         for flag in ("-I", str(include_dir))
     ]
+    forced_include_flags = [
+        flag
+        for include_path in item.forced_includes
+        for flag in ("-include", str(include_path))
+    ]
     clang_command = [
         clang,
         "-O2",
@@ -335,6 +360,7 @@ def compile_source(
         "-I",
         str(REPO_ROOT / "vendor" / "libbpf" / "src"),
         *include_flags,
+        *forced_include_flags,
         *sys_include_flags,
         "-c",
         str(item.source_path),
@@ -514,7 +540,7 @@ def main() -> int:
     inventory_path = Path(args.inventory).resolve()
     build_root = Path(args.build_root).resolve()
     if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.max_sources is not None:
-        output_json = smoke_output_path(ROOT / "results", "expanded_corpus_build")
+        output_json = smoke_output_path(CORPUS_DIR / "results", "expanded_corpus_build")
     else:
         output_json = Path(args.output_json).resolve()
     output_md = Path(args.output_md).resolve()

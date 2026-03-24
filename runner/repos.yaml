@@ -122,6 +122,47 @@ repos:
       - bpf/include
       - bpf/lib
 
+  - name: netbird
+    url: https://github.com/netbirdio/netbird.git
+    branch: main
+    sparse_paths:
+      - client/internal/ebpf/ebpf/src
+    harvest_globs:
+      - client/internal/ebpf/ebpf/src/prog.c
+    compile_include_dirs:
+      - .
+      - client/internal/ebpf/ebpf/src
+    forced_includes:
+      - /usr/include/linux/types.h
+      - corpus/include/netbird_legacy_bpf_map_def.h
+
+  - name: systemd
+    url: https://github.com/systemd/systemd.git
+    branch: main
+    sparse_paths:
+      - src/core/bpf
+      - src/network/bpf
+      - src/nsresourced/bpf
+      - src/shared
+    harvest_globs:
+      - src/core/bpf/**/*.bpf.c
+      - src/network/bpf/**/*.bpf.c
+      - src/nsresourced/bpf/**/*.bpf.c
+    compile_include_dirs:
+      - .
+      - src
+      - src/core
+      - src/core/bpf
+      - src/shared
+      - src/network/bpf/sysctl-monitor
+      - src/nsresourced/bpf/userns-restrict
+      - src/core/bpf/bind-iface
+      - src/core/bpf/restrict-fs
+      - src/core/bpf/restrict-ifaces
+      - src/core/bpf/socket-bind
+    forced_includes:
+      - /usr/include/linux/types.h
+
   - name: libbpf-bootstrap
     url: https://github.com/libbpf/libbpf-bootstrap.git
     branch: master
