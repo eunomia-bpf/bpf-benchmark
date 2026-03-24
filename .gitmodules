@@ -10,3 +10,6 @@
 [submodule "vendor/linux"]
 	path = vendor/linux
 	url = https://github.com/eunomia-bpf/linux.git
+[submodule "docs/paper"]
+	path = docs/paper
+	url = https://github.com/yunwei37/bpfrejit-paper
