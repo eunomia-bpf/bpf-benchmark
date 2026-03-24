@@ -146,6 +146,37 @@ def generate_branch_layout(output: Path) -> dict[str, int]:
     return {"count": count, "hot_threshold": hot_threshold}
 
 
+def generate_branch_layout_predictable(output: Path) -> dict[str, int]:
+    count = 432
+    hot_threshold = 900
+
+    blob = bytearray(struct.pack("<II", count, hot_threshold))
+    for index in range(count):
+        value = ((index * 37) + 11) % hot_threshold
+        blob.extend(struct.pack("<Q", value))
+
+    output.write_bytes(blob)
+    return {"count": count, "hot_threshold": hot_threshold, "distribution": "predictable"}
+
+
+def generate_branch_layout_random(output: Path) -> dict[str, int]:
+    count = 432
+    hot_threshold = 900
+    state = 0x1234_5678_9ABC_DEF0
+
+    blob = bytearray(struct.pack("<II", count, hot_threshold))
+    for index in range(count):
+        state = _lcg(state ^ ((index + 1) * 0x9E37_79B9_7F4A_7C15))
+        if state & 1:
+            value = state % hot_threshold
+        else:
+            value = hot_threshold + ((state >> 16) % 2048)
+        blob.extend(struct.pack("<Q", value))
+
+    output.write_bytes(blob)
+    return {"count": count, "hot_threshold": hot_threshold, "distribution": "random"}
+
+
 def generate_spill_pressure(output: Path) -> dict[str, int]:
     count = 64
     seed = 0x1020_3040
@@ -947,6 +978,34 @@ BRANCH_FANOUT_32_TAGS = [
 ]
 
 
+def generate_branch_fanout_32_predictable(output: Path) -> dict[str, int]:
+    count = 128
+    tag = BRANCH_FANOUT_32_TAGS[16]
+    blob = bytearray(struct.pack("<I", count))
+    for index in range(count):
+        value = (((index + 1) * 0x1F12_3BB5) ^ (index * 0x9E37_79B9)) & 0xFFFFFFFF
+        value = (value & ~63) | tag
+        blob.extend(struct.pack("<I", value))
+
+    output.write_bytes(blob)
+    return {"count": count, "fanout": 1, "distribution": "predictable"}
+
+
+def generate_branch_fanout_32_random(output: Path) -> dict[str, int]:
+    count = 128
+    state = 0x0BAD_F00D_CAFE_BEEF
+    blob = bytearray(struct.pack("<I", count))
+    for index in range(count):
+        state = _lcg(state ^ ((index + 3) * 0xA076_1D64_78BD_642F))
+        tag = BRANCH_FANOUT_32_TAGS[state % len(BRANCH_FANOUT_32_TAGS)]
+        value = (((index + 1) * 0x1F12_3BB5) ^ (index * 0x9E37_79B9) ^ (state >> 7)) & 0xFFFFFFFF
+        value = (value & ~63) | tag
+        blob.extend(struct.pack("<I", value))
+
+    output.write_bytes(blob)
+    return {"count": count, "fanout": len(BRANCH_FANOUT_32_TAGS), "distribution": "random"}
+
+
 def generate_deep_guard_tree_8(output: Path) -> dict[str, int]:
     record_count = 32
     record_size = 16
@@ -1075,6 +1134,8 @@ GENERATORS = {
     "hash_chain": generate_hash_chain,
     "packet_parse": generate_packet_parse,
     "branch_layout": generate_branch_layout,
+    "branch_layout_predictable": generate_branch_layout_predictable,
+    "branch_layout_random": generate_branch_layout_random,
     "spill_pressure": generate_spill_pressure,
     "bounds_ladder": generate_bounds_ladder,
     "memory_pair_sum": generate_memory_pair_sum,
@@ -1120,6 +1181,8 @@ GENERATORS = {
     "imm64_storm": generate_imm64_storm,
     "alu32_64_pingpong": generate_alu32_64_pingpong,
     "branch_fanout_32": generate_branch_fanout_32,
+    "branch_fanout_32_predictable": generate_branch_fanout_32_predictable,
+    "branch_fanout_32_random": generate_branch_fanout_32_random,
     "branch_flip_dense": generate_branch_flip_dense,
     "deep_guard_tree_8": generate_deep_guard_tree_8,
     "mega_basic_block_2048": generate_mega_basic_block_2048,
