@@ -555,6 +555,10 @@ def main() -> int:
 
     manifest = load_manifest(manifest_path, config["local_repos"])
     inventory = load_inventory(inventory_path)
+    inventory_repos = {str(repo["name"]) for repo in inventory["repos"]}
+    missing_selected = sorted(selected_repos - inventory_repos)
+    if missing_selected:
+        raise SystemExit(f"selected repos missing from inventory: {', '.join(missing_selected)}")
     work_items = build_work_items(
         inventory=inventory,
         manifest=manifest,
@@ -563,7 +567,31 @@ def main() -> int:
         max_sources=args.max_sources,
     )
     if not work_items:
-        raise SystemExit("no source files matched the selected repos")
+        payload = {
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "manifest": str(manifest_path),
+            "inventory": str(inventory_path),
+            "build_root": str(build_root),
+            "filters": {
+                "repos": sorted(selected_repos) if selected_repos else sorted(manifest.keys()),
+                "max_sources": args.max_sources,
+            },
+            "toolchain": {
+                "clang": clang_binary,
+                "bpftool": bpftool_binary,
+                "clang_sys_include_flags": [],
+            },
+            "summary": compute_summary([]),
+            "records": [],
+        }
+        ensure_parent(output_json)
+        ensure_parent(output_md)
+        output_json.write_text(json.dumps(payload, indent=2))
+        output_md.write_text(render_report(payload, []))
+        print("[skip] no source files matched the selected repos")
+        print(f"[done] wrote {output_json}")
+        print(f"[done] wrote {output_md}")
+        return 0
 
     sys_include_flags = clang_sys_include_flags(clang_binary)
     for header in sorted({item.vmlinux_header for item in work_items}):

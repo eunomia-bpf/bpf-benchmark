@@ -163,6 +163,69 @@ repos:
     forced_includes:
       - /usr/include/linux/types.h
 
+  - name: KubeArmor
+    url: https://github.com/kubearmor/KubeArmor.git
+    branch: main
+    harvest_globs: []
+    compile_include_dirs:
+      - .
+
+  - name: calico
+    url: https://github.com/projectcalico/calico.git
+    branch: master
+    harvest_globs: []
+    compile_include_dirs:
+      - .
+
+  - name: coroot-node-agent
+    url: https://github.com/coroot/coroot-node-agent.git
+    branch: main
+    harvest_globs: []
+    compile_include_dirs:
+      - .
+
+  - name: datadog-agent
+    url: https://github.com/DataDog/datadog-agent.git
+    branch: main
+    harvest_globs: []
+    compile_include_dirs:
+      - .
+
+  - name: loxilb
+    url: https://github.com/loxilb-io/loxilb-ebpf.git
+    branch: main
+    harvest_globs: []
+    compile_include_dirs:
+      - .
+
+  - name: opentelemetry-ebpf-profiler
+    url: https://github.com/open-telemetry/opentelemetry-ebpf-profiler.git
+    branch: main
+    harvest_globs: []
+    compile_include_dirs:
+      - .
+
+  - name: suricata
+    url: https://github.com/OISF/suricata.git
+    branch: main
+    harvest_globs: []
+    compile_include_dirs:
+      - .
+
+  - name: tracee
+    url: https://github.com/aquasecurity/tracee.git
+    branch: main
+    harvest_globs: []
+    compile_include_dirs:
+      - .
+
+  - name: tubular
+    url: https://github.com/cloudflare/tubular.git
+    branch: main
+    harvest_globs: []
+    compile_include_dirs:
+      - .
+
   - name: libbpf-bootstrap
     url: https://github.com/libbpf/libbpf-bootstrap.git
     branch: master
