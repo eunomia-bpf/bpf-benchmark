@@ -145,16 +145,7 @@ impl BpfPass for SpectreMitigationPass {
             program.insns = new_insns;
             program.remap_annotations(&addr_map);
 
-            program.log_transform(TransformEntry {
-                pass_name: self.name().into(),
-                sites_applied: insertions,
-                insns_before: orig_len,
-                insns_after: program.insns.len(),
-                details: vec![format!(
-                    "inserted {} bpf_speculation_barrier() calls (btf_id={})",
-                    insertions, btf_id
-                )],
-            });
+            program.log_transform(TransformEntry { sites_applied: insertions });
         }
 
         Ok(PassResult {
@@ -182,7 +173,7 @@ mod tests {
     use crate::pass::{AnalysisCache, PassContext, PassManager};
 
     fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
-        BpfProgram::new(insns, ProgMeta::default())
+        BpfProgram::new(insns)
     }
 
     fn exit_insn() -> BpfInsn {

@@ -165,10 +165,10 @@ pub fn build_pipeline_with_passes(names: &[String]) -> PassManager {
 mod tests {
     use super::*;
     use crate::insn::*;
-    use crate::pass::{BpfProgram, PassContext, ProgMeta};
+    use crate::pass::{BpfProgram, PassContext};
 
     fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
-        BpfProgram::new(insns, ProgMeta::default())
+        BpfProgram::new(insns)
     }
 
     fn exit_insn() -> BpfInsn {

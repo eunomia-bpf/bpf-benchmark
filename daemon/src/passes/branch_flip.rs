@@ -269,13 +269,7 @@ impl BpfPass for BranchFlipPass {
 
         program.insns = new_insns;
         program.remap_annotations(&addr_map);
-        program.log_transform(TransformEntry {
-            pass_name: self.name().into(),
-            sites_applied: applied,
-            insns_before: orig_len,
-            insns_after: program.insns.len(),
-            details: vec![],
-        });
+        program.log_transform(TransformEntry { sites_applied: applied });
 
         Ok(PassResult {
             pass_name: self.name().into(),
@@ -365,7 +359,7 @@ mod tests {
     use crate::pass::{AnalysisCache, BranchProfile, PassContext};
 
     fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
-        BpfProgram::new(insns, ProgMeta::default())
+        BpfProgram::new(insns)
     }
 
     fn exit_insn() -> BpfInsn {
@@ -800,7 +794,7 @@ mod tests {
             BpfInsn::mov64_imm(0, 20), // PC 3
             exit_insn(),               // PC 4
         ];
-        let mut prog = BpfProgram::new(insns, ProgMeta::default());
+        let mut prog = BpfProgram::new(insns);
 
         // Construct ProfilingData as the profiler module would
         let mut branch_profiles = std::collections::HashMap::new();
@@ -865,16 +859,13 @@ mod tests {
             branch_miss_rate: Some(0.01), // 1% miss rate => low, should trigger
         };
 
-        let mut prog2 = BpfProgram::new(
-            vec![
-                jne_imm(1, 0, 2),
-                BpfInsn::mov64_imm(0, 10),
-                BpfInsn::ja(1),
-                BpfInsn::mov64_imm(0, 20),
-                exit_insn(),
-            ],
-            ProgMeta::default(),
-        );
+        let mut prog2 = BpfProgram::new(vec![
+            jne_imm(1, 0, 2),
+            BpfInsn::mov64_imm(0, 10),
+            BpfInsn::ja(1),
+            BpfInsn::mov64_imm(0, 20),
+            exit_insn(),
+        ]);
 
         let mut pm2 = PassManager::new();
         pm2.register_analysis(crate::analysis::BranchTargetAnalysis);
@@ -925,7 +916,7 @@ mod tests {
         }
 
         // Create a program and inject biased PGO data for all detected sites.
-        let mut prog = BpfProgram::new(insns, ProgMeta::default());
+        let mut prog = BpfProgram::new(insns);
         prog.branch_miss_rate = Some(0.01); // Low miss rate to allow flipping.
 
         for site in &sites {
@@ -987,7 +978,7 @@ mod tests {
             return;
         }
 
-        let mut prog = BpfProgram::new(insns, ProgMeta::default());
+        let mut prog = BpfProgram::new(insns);
         // High miss rate -- should prevent flipping.
         prog.branch_miss_rate = Some(0.10);
 

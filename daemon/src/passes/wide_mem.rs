@@ -490,23 +490,7 @@ impl BpfPass for WideMemPass {
 
         program.insns = new_insns;
         program.remap_annotations(&addr_map);
-        program.log_transform(TransformEntry {
-            pass_name: self.name().into(),
-            sites_applied: applied,
-            insns_before: orig_len,
-            insns_after: program.insns.len(),
-            details: safe_sites
-                .iter()
-                .map(|s| {
-                    format!(
-                        "pc={} len={} width={}",
-                        s.start_pc,
-                        s.old_len,
-                        s.get_binding("width").unwrap_or(0)
-                    )
-                })
-                .collect(),
-        });
+        program.log_transform(TransformEntry { sites_applied: applied });
 
         Ok(PassResult {
             pass_name: self.name().into(),
@@ -530,7 +514,7 @@ mod tests {
     use crate::pass::{AnalysisCache, PassContext, PassManager};
 
     fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
-        BpfProgram::new(insns, ProgMeta::default())
+        BpfProgram::new(insns)
     }
 
     fn exit_insn() -> BpfInsn {

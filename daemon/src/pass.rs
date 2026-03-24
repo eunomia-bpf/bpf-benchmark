@@ -772,7 +772,7 @@ mod tests {
 
     /// Construct a minimal BPF program from instructions.
     fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
-        BpfProgram::new(insns, ProgMeta::default())
+        BpfProgram::new(insns)
     }
 
     /// A no-op pass that does not change the program.
@@ -953,23 +953,11 @@ mod tests {
     fn test_bpf_program_log_transform() {
         let mut prog = make_program(vec![exit_insn()]);
         assert!(!prog.has_transforms());
-        prog.log_transform(TransformEntry {
-            pass_name: "test".into(),
-            sites_applied: 0,
-            insns_before: 1,
-            insns_after: 1,
-            details: vec![],
-        });
+        prog.log_transform(TransformEntry { sites_applied: 0 });
         // sites_applied == 0, so has_transforms should be false
         assert!(!prog.has_transforms());
 
-        prog.log_transform(TransformEntry {
-            pass_name: "test2".into(),
-            sites_applied: 1,
-            insns_before: 1,
-            insns_after: 2,
-            details: vec!["added nop".into()],
-        });
+        prog.log_transform(TransformEntry { sites_applied: 1 });
         assert!(prog.has_transforms());
     }
 
@@ -1325,8 +1313,6 @@ mod tests {
                 rotate64_btf_id: 1234,
                 select64_btf_id: -1,
                 extract64_btf_id: -1,
-                lea64_btf_id: -1,
-                movbe64_btf_id: -1,
                 endian_load16_btf_id: -1,
                 endian_load32_btf_id: -1,
                 endian_load64_btf_id: -1,
@@ -1361,8 +1347,6 @@ mod tests {
             rotate64_btf_id: 10,
             select64_btf_id: 20,
             extract64_btf_id: 30,
-            lea64_btf_id: -1,
-            movbe64_btf_id: -1,
             endian_load16_btf_id: -1,
             endian_load32_btf_id: -1,
             endian_load64_btf_id: -1,
@@ -1389,8 +1373,6 @@ mod tests {
             rotate64_btf_id: 10,
             select64_btf_id: -1,
             extract64_btf_id: -1,
-            lea64_btf_id: -1,
-            movbe64_btf_id: -1,
             endian_load16_btf_id: -1,
             endian_load32_btf_id: -1,
             endian_load64_btf_id: -1,
@@ -1415,8 +1397,6 @@ mod tests {
             rotate64_btf_id: 10,
             select64_btf_id: 20,
             extract64_btf_id: -1,
-            lea64_btf_id: -1,
-            movbe64_btf_id: -1,
             endian_load16_btf_id: -1,
             endian_load32_btf_id: -1,
             endian_load64_btf_id: -1,
@@ -1443,8 +1423,6 @@ mod tests {
             rotate64_btf_id: 10,
             select64_btf_id: 20,
             extract64_btf_id: -1,
-            lea64_btf_id: -1,
-            movbe64_btf_id: -1,
             endian_load16_btf_id: -1,
             endian_load32_btf_id: -1,
             endian_load64_btf_id: -1,

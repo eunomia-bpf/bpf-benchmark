@@ -51,10 +51,10 @@ impl Analysis for BranchTargetAnalysis {
 mod tests {
     use super::*;
     use crate::insn::*;
-    use crate::pass::{AnalysisCache, BpfProgram, ProgMeta};
+    use crate::pass::{AnalysisCache, BpfProgram};
 
     fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
-        BpfProgram::new(insns, ProgMeta::default())
+        BpfProgram::new(insns)
     }
 
     fn exit_insn() -> BpfInsn {

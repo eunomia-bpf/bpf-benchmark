@@ -79,42 +79,34 @@ pub fn ensure_module_fd_slot(program: &mut BpfProgram, module_fd: i32) -> i16 {
     program.required_module_fds.push(module_fd);
     program.required_module_fds.len() as i16
 }
-// ── Instruction iterator ───────────────────────────────────────────
-
-/// Iterator over BPF instructions that automatically skips LDIMM64 second slots.
-///
-/// Yields `(pc, &BpfInsn)` for each logical instruction, advancing by 2
-/// for LDIMM64 and by 1 for everything else.
-
-pub fn insn_iter_skip_ldimm64(insns: &[BpfInsn]) -> InsnIterSkipLdimm64<'_> {
-    InsnIterSkipLdimm64 { insns, pc: 0 }
-}
-
-
-pub struct InsnIterSkipLdimm64<'a> {
-    insns: &'a [BpfInsn],
-    pc: usize,
-}
-
-impl<'a> Iterator for InsnIterSkipLdimm64<'a> {
-    type Item = (usize, &'a BpfInsn);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.pc >= self.insns.len() {
-            return None;
-        }
-        let pc = self.pc;
-        let insn = &self.insns[pc];
-        self.pc = if insn.is_ldimm64() { pc + 2 } else { pc + 1 };
-        Some((pc, insn))
-    }
-}
-
 // ── Tests ──────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Iterator over BPF instructions that skips LDIMM64 second slots.
+    fn insn_iter_skip_ldimm64(insns: &[BpfInsn]) -> InsnIterSkipLdimm64<'_> {
+        InsnIterSkipLdimm64 { insns, pc: 0 }
+    }
+
+    struct InsnIterSkipLdimm64<'a> {
+        insns: &'a [BpfInsn],
+        pc: usize,
+    }
+
+    impl<'a> Iterator for InsnIterSkipLdimm64<'a> {
+        type Item = (usize, &'a BpfInsn);
+        fn next(&mut self) -> Option<Self::Item> {
+            if self.pc >= self.insns.len() {
+                return None;
+            }
+            let pc = self.pc;
+            let insn = &self.insns[pc];
+            self.pc = if insn.is_ldimm64() { pc + 2 } else { pc + 1 };
+            Some((pc, insn))
+        }
+    }
 
     fn exit_insn() -> BpfInsn {
         BpfInsn {

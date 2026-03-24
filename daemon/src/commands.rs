@@ -336,15 +336,7 @@ fn enumerate_one(
 
     // Run the pipeline in dry-run mode to count sites.
     let site_summary = if !orig_insns.is_empty() {
-        let meta = pass::ProgMeta {
-            prog_id: info.id,
-            prog_type: info.prog_type,
-            prog_name: info.name_str().to_string(),
-            run_cnt: info.run_cnt,
-            run_time_ns: info.run_time_ns,
-            ..Default::default()
-        };
-        let mut program = pass::BpfProgram::new(orig_insns, meta);
+        let mut program = pass::BpfProgram::new(orig_insns);
         let pm = build_pipeline(pass_names);
 
         match pm.run(&mut program, ctx) {
@@ -393,15 +385,7 @@ pub(crate) fn cmd_rewrite(
         orig_insns.len()
     );
 
-    let meta = pass::ProgMeta {
-        prog_id: info.id,
-        prog_type: info.prog_type,
-        prog_name: info.name_str().to_string(),
-        run_cnt: info.run_cnt,
-        run_time_ns: info.run_time_ns,
-        ..Default::default()
-    };
-    let mut program = pass::BpfProgram::new(orig_insns.clone(), meta);
+    let mut program = pass::BpfProgram::new(orig_insns.clone());
     let pm = build_pipeline(pass_names);
 
     let pipeline_result = pm.run(&mut program, ctx)?;
@@ -629,15 +613,6 @@ pub(crate) fn try_apply_one(
     // Collect PGO data once (reused across rollback retries).
     let profiling = collect_pgo_data(prog_id, pgo_config);
 
-    let meta = pass::ProgMeta {
-        prog_id: info.id,
-        prog_type: info.prog_type,
-        prog_name: info.name_str().to_string(),
-        run_cnt: info.run_cnt,
-        run_time_ns: info.run_time_ns,
-        ..Default::default()
-    };
-
     let mut disabled_passes: HashSet<String> = HashSet::new();
     let max_retries = 10;
     let mut attempts: Vec<AttemptRecord> = Vec::new();
@@ -646,7 +621,7 @@ pub(crate) fn try_apply_one(
     let mut total_rejit_ns: u64 = 0;
 
     for attempt in 0..=max_retries {
-        let mut program = pass::BpfProgram::new(orig_insns.clone(), meta.clone());
+        let mut program = pass::BpfProgram::new(orig_insns.clone());
         let pm = build_pipeline(pass_names);
         let mut local_ctx = ctx.clone();
         for disabled in sorted_strings(disabled_passes.iter().cloned()) {
@@ -1243,7 +1218,7 @@ R2 invalid mem access 'scalar'
             off: 0,
             imm: 0,
         };
-        let mut prog = pass::BpfProgram::new(vec![exit_insn], pass::ProgMeta::default());
+        let mut prog = pass::BpfProgram::new(vec![exit_insn]);
         let ctx = pass::PassContext::test_default();
         let result = pm_default.run(&mut prog, &ctx).unwrap();
         // A single EXIT instruction should not trigger any transforms.
@@ -1251,7 +1226,7 @@ R2 invalid mem access 'scalar'
 
         // Custom pipeline with specific passes.
         let pm_custom = build_pipeline(&Some(vec!["wide_mem".to_string()]));
-        let mut prog2 = pass::BpfProgram::new(vec![exit_insn], pass::ProgMeta::default());
+        let mut prog2 = pass::BpfProgram::new(vec![exit_insn]);
         let result2 = pm_custom.run(&mut prog2, &ctx).unwrap();
         assert!(!result2.program_changed);
     }
