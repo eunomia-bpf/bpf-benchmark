@@ -1417,6 +1417,550 @@ int manual_load_program(bpf_object *object, const cli_options &options)
 
 } // namespace
 
+struct prepared_kernel_state {
+    cli_options options;
+    std::vector<uint8_t> input_bytes;
+    bpf_object_ptr object;
+    scoped_fd manual_program_fd;
+    bpf_program *prog = nullptr;
+    int program_fd = -1;
+    std::string effective_io_mode;
+    bpf_prog_info program_info = {};
+    rejit_summary prepared_rejit {};
+    std::vector<bpf_insn> rejit_insns;
+    uint64_t memory_prepare_ns = 0;
+    uint64_t object_open_ns = 0;
+    uint64_t object_load_ns = 0;
+    uint64_t rejit_apply_ns = 0;
+    bool rejit_applied = false;
+    bool katran_fixture_initialized = false;
+};
+
+namespace {
+
+void populate_rejit_from_daemon_summary(
+    rejit_summary &summary,
+    const daemon_socket_response &response)
+{
+    summary.syscall_attempted = true;
+    if (!response.ok) {
+        summary.applied = false;
+        summary.error = "daemon socket optimize failed: " + response.error;
+    } else {
+        summary.applied = response.applied;
+        summary.total_sites_applied = response.total_sites_applied;
+        summary.passes_applied = response.passes_applied;
+        summary.insn_delta = response.insn_delta;
+        summary.verifier_retries = response.verifier_retries;
+        summary.final_disabled_passes = response.final_disabled_passes;
+    }
+    summary.daemon_response = response.raw_json;
+}
+
+sample_result build_compile_only_sample(prepared_kernel_state &prepared)
+{
+    const auto final_program_info = load_prog_info(prepared.program_fd);
+    prepared.program_info = final_program_info;
+    if (prepared.options.dump_jit) {
+        const auto jited_program =
+            load_jited_program(prepared.program_fd, final_program_info.jited_prog_len);
+        const auto dump_path = std::filesystem::path(
+            benchmark_name_for_program(prepared.options.program) + ".kernel.bin");
+        write_binary_file(dump_path, jited_program.data(), jited_program.size());
+    }
+    if (prepared.options.dump_xlated.has_value()) {
+        const auto xlated_program = load_xlated_program(
+            prepared.program_fd, final_program_info.xlated_prog_len);
+        write_binary_file(
+            *prepared.options.dump_xlated,
+            xlated_program.data(),
+            xlated_program.size());
+    }
+
+    sample_result sample;
+    sample.compile_ns = prepared.memory_prepare_ns +
+                        prepared.object_open_ns +
+                        prepared.object_load_ns +
+                        prepared.rejit_apply_ns;
+    sample.jited_prog_len = final_program_info.jited_prog_len;
+    sample.xlated_prog_len = final_program_info.xlated_prog_len;
+    sample.code_size = {
+        .bpf_bytecode_bytes = final_program_info.xlated_prog_len,
+        .native_code_bytes = final_program_info.jited_prog_len,
+    };
+    sample.rejit = prepared.prepared_rejit;
+    sample.phases_ns = {
+        {"memory_prepare_ns", prepared.memory_prepare_ns},
+        {"object_open_ns", prepared.object_open_ns},
+        {"object_load_ns", prepared.object_load_ns},
+    };
+    return sample;
+}
+
+std::vector<sample_result> execute_prepared_kernel_run(
+    prepared_kernel_state &prepared,
+    const cli_options &options)
+{
+    if (katran_balancer_fixture_requested(options) &&
+        !prepared.katran_fixture_initialized) {
+        initialize_katran_test_fixture(prepared.object.get());
+        prepared.katran_fixture_initialized = true;
+    }
+
+    rejit_summary rejit = prepared.prepared_rejit;
+    uint64_t rejit_apply_ns = prepared.rejit_apply_ns;
+    const bool prepared_rejit_already_applied = prepared.rejit_applied;
+    const auto packet_kind = resolve_packet_context_kind(prepared.program_info.type);
+
+    if (options.daemon_socket.has_value() &&
+        rejit.requested &&
+        !prepared_rejit_already_applied) {
+        const auto rejit_start = std::chrono::steady_clock::now();
+        const auto socket_response =
+            daemon_socket_optimize(*options.daemon_socket, prepared.program_info.id);
+        const auto rejit_end = std::chrono::steady_clock::now();
+        rejit_apply_ns = elapsed_ns(rejit_start, rejit_end);
+        populate_rejit_from_daemon_summary(rejit, socket_response);
+        prepared.prepared_rejit = rejit;
+        prepared.rejit_apply_ns = rejit_apply_ns;
+        prepared.rejit_applied = true;
+        prepared.program_info = load_prog_info(prepared.program_fd);
+        if (!socket_response.ok) {
+            fprintf(stderr, "daemon socket optimize failed: %s\n", socket_response.error.c_str());
+        }
+    }
+
+    std::chrono::steady_clock::time_point exec_input_prepare_start {};
+    std::chrono::steady_clock::time_point exec_input_prepare_end {};
+    std::chrono::steady_clock::time_point result_read_start {};
+    std::chrono::steady_clock::time_point result_read_end {};
+
+    std::vector<uint8_t> input_bytes = prepared.input_bytes;
+    std::vector<uint8_t> packet;
+    std::vector<uint8_t> packet_out;
+    std::vector<uint8_t> context_in;
+    __sk_buff context_out = {};
+    int result_fd = -1;
+    uint32_t key = 0;
+    const bool result_from_skb_context =
+        packet_kind == packet_context_kind::skb &&
+        (prepared.effective_io_mode == "packet" || prepared.effective_io_mode == "staged");
+
+    if (prepared.effective_io_mode == "map") {
+        bpf_map *input_map = bpf_object__find_map_by_name(prepared.object.get(), "input_map");
+        bpf_map *result_map = bpf_object__find_map_by_name(prepared.object.get(), "result_map");
+        if (result_map == nullptr) {
+            fail("required result_map not found");
+        }
+
+        result_fd = bpf_map__fd(result_map);
+        if (result_fd < 0) {
+            fail("unable to obtain map fd");
+        }
+
+        uint64_t zero = 0;
+        exec_input_prepare_start = std::chrono::steady_clock::now();
+        if (input_map != nullptr) {
+            const uint32_t input_value_size = bpf_map__value_size(input_map);
+            if (input_bytes.size() < input_value_size) {
+                input_bytes.resize(input_value_size, 0);
+            }
+
+            const int input_fd = bpf_map__fd(input_map);
+            if (input_fd < 0) {
+                fail("unable to obtain input_map fd");
+            }
+
+            if (bpf_map_update_elem(input_fd, &key, input_bytes.data(), BPF_ANY) != 0) {
+                fail("bpf_map_update_elem(input_map) failed: " + std::string(strerror(errno)));
+            }
+            packet.assign(64, 0);
+            packet_out.assign(packet_output_capacity(options, packet.size()), 0);
+        } else {
+            if (packet_kind == packet_context_kind::none) {
+                fail("io-mode map without input_map requires an XDP or skb packet context");
+            }
+            if (options.raw_packet) {
+                packet = input_bytes;
+            } else {
+                packet = build_packet_input(input_bytes, prepared.program_info.type);
+            }
+            packet_out.assign(packet_output_capacity(options, packet.size()), 0);
+        }
+        if (bpf_map_update_elem(result_fd, &key, &zero, BPF_ANY) != 0) {
+            fail("bpf_map_update_elem(result_map) failed: " + std::string(strerror(errno)));
+        }
+        exec_input_prepare_end = std::chrono::steady_clock::now();
+    } else if (prepared.effective_io_mode == "staged") {
+        if (packet_kind == packet_context_kind::none) {
+            fail("io-mode staged requires an XDP or skb packet context");
+        }
+        exec_input_prepare_start = std::chrono::steady_clock::now();
+        if (options.raw_packet) {
+            packet = input_bytes;
+        } else {
+            packet = build_packet_input(input_bytes, prepared.program_info.type);
+        }
+        packet_out.assign(packet_output_capacity(options, packet.size()), 0);
+        exec_input_prepare_end = std::chrono::steady_clock::now();
+    } else if (prepared.effective_io_mode == "context") {
+        exec_input_prepare_start = std::chrono::steady_clock::now();
+        context_in = input_bytes;
+        exec_input_prepare_end = std::chrono::steady_clock::now();
+    } else {
+        exec_input_prepare_start = std::chrono::steady_clock::now();
+        if (packet_kind == packet_context_kind::none) {
+            fail("io-mode packet requires an XDP or skb packet context");
+        }
+        if (options.raw_packet) {
+            packet = input_bytes;
+        } else {
+            packet = build_packet_input(input_bytes, prepared.program_info.type);
+        }
+        packet_out.assign(packet_output_capacity(options, packet.size()), 0);
+        exec_input_prepare_end = std::chrono::steady_clock::now();
+    }
+
+    bpf_test_run_opts test_opts = {};
+    test_opts.sz = sizeof(test_opts);
+    const bool kernel_repeat_supported =
+        prepared.effective_io_mode != "context" ||
+        context_mode_supports_kernel_repeat(prepared.program_info.type);
+    const uint32_t requested_repeat = kernel_repeat_supported ? options.repeat : 1u;
+    test_opts.repeat = kernel_repeat_supported ? requested_repeat : 0u;
+    if (!packet.empty()) {
+        test_opts.data_in = packet.data();
+        test_opts.data_size_in = packet.size();
+        test_opts.data_out = packet_out.data();
+        test_opts.data_size_out = packet_out.size();
+    }
+    if (!context_in.empty()) {
+        test_opts.ctx_in = context_in.data();
+        test_opts.ctx_size_in = context_in.size();
+    }
+    if (result_from_skb_context) {
+        test_opts.ctx_out = &context_out;
+        test_opts.ctx_size_out = sizeof(context_out);
+    }
+
+    const uint64_t tsc_freq_hz = kHasTscMeasurement ? detect_tsc_freq_hz() : 0;
+    kernel_test_run_context run_context = {
+        .program_fd = prepared.program_fd,
+        .test_opts = &test_opts,
+        .effective_repeat = requested_repeat,
+        .tsc_freq_hz = tsc_freq_hz,
+        .packet_out = packet_out.empty() ? nullptr : &packet_out,
+        .context_out = result_from_skb_context ? &context_out : nullptr,
+        .context_out_size = static_cast<uint32_t>(sizeof(context_out)),
+        .result_fd = result_fd,
+        .result_key = key,
+        .reset_result_map = prepared.effective_io_mode == "map",
+    };
+
+    const uint64_t base_compile_ns =
+        prepared.memory_prepare_ns +
+        prepared.object_open_ns +
+        prepared.object_load_ns;
+    auto build_measured_sample =
+        [&](std::optional<std::string> phase,
+            uint64_t compile_ns,
+            const kernel_test_run_measurement &measurement,
+            uint64_t measured_result,
+            const bpf_prog_info &measured_program_info,
+            const rejit_summary &measured_rejit,
+            perf_counter_capture perf_counters,
+            const std::chrono::steady_clock::time_point &measured_result_read_start,
+            const std::chrono::steady_clock::time_point &measured_result_read_end,
+            bool include_rejit_apply_phase) {
+            sample_result sample;
+            sample.phase = std::move(phase);
+            sample.compile_ns = compile_ns;
+            sample.exec_ns = measurement.exec_ns;
+            sample.timing_source = "ktime";
+            sample.timing_source_wall =
+                measurement.wall_exec_ns.has_value() ? "rdtsc" : "unavailable";
+            sample.wall_exec_ns = measurement.wall_exec_ns;
+            sample.exec_cycles = measurement.exec_cycles;
+            sample.tsc_freq_hz = tsc_freq_hz > 0
+                                     ? std::optional<uint64_t>(tsc_freq_hz)
+                                     : std::nullopt;
+            sample.result = measured_result;
+            sample.retval = measurement.retval;
+            sample.jited_prog_len = measured_program_info.jited_prog_len;
+            sample.xlated_prog_len = measured_program_info.xlated_prog_len;
+            sample.code_size = {
+                .bpf_bytecode_bytes = measured_program_info.xlated_prog_len,
+                .native_code_bytes = measured_program_info.jited_prog_len,
+            };
+            sample.rejit = measured_rejit;
+            sample.phases_ns = {
+                {"memory_prepare_ns", prepared.memory_prepare_ns},
+                {"object_open_ns", prepared.object_open_ns},
+                {"object_load_ns", prepared.object_load_ns},
+            };
+            if (include_rejit_apply_phase &&
+                measured_rejit.syscall_attempted) {
+                sample.phases_ns.push_back({"rejit_apply_ns", rejit_apply_ns});
+            }
+            sample.phases_ns.push_back(
+                {prepare_phase_name(prepared.effective_io_mode),
+                 elapsed_ns(exec_input_prepare_start, exec_input_prepare_end)});
+            sample.phases_ns.push_back(
+                {"prog_run_wall_ns",
+                 elapsed_ns(measurement.wall_start, measurement.wall_end)});
+            sample.phases_ns.push_back(
+                {result_phase_name(prepared.effective_io_mode),
+                 elapsed_ns(measured_result_read_start, measured_result_read_end)});
+            sample.perf_counters = std::move(perf_counters);
+            return sample;
+        };
+
+    const bool measure_same_image_pair =
+        rejit.requested &&
+        !prepared_rejit_already_applied &&
+        !options.daemon_socket.has_value();
+    std::optional<sample_result> stock_sample;
+    if (measure_same_image_pair) {
+        const rejit_summary stock_rejit = rejit;
+        auto stock_pass = execute_kernel_measurement_pass(
+            run_context,
+            options,
+            options.warmup_repeat,
+            options.perf_counters);
+        const auto stock_result_read_start = std::chrono::steady_clock::now();
+        const uint64_t stock_result = read_kernel_test_run_result(
+            prepared.effective_io_mode,
+            result_from_skb_context,
+            packet_out,
+            context_out,
+            result_fd,
+            key,
+            stock_pass.measurement.retval);
+        const auto stock_result_read_end = std::chrono::steady_clock::now();
+        const auto stock_program_info = load_prog_info(prepared.program_fd);
+        stock_sample = build_measured_sample(
+            std::string("stock"),
+            base_compile_ns,
+            stock_pass.measurement,
+            stock_result,
+            stock_program_info,
+            stock_rejit,
+            std::move(stock_pass.perf_counters),
+            stock_result_read_start,
+            stock_result_read_end,
+            false);
+
+        auto rejit_start = std::chrono::steady_clock::now();
+        auto rejit_end = rejit_start;
+        apply_rejit(
+            prepared.program_fd,
+            prepared.rejit_insns.data(),
+            static_cast<uint32_t>(prepared.rejit_insns.size()),
+            rejit,
+            rejit_start,
+            rejit_end);
+        rejit_apply_ns = elapsed_ns(rejit_start, rejit_end);
+        prepared.prepared_rejit = rejit;
+        prepared.rejit_apply_ns = rejit_apply_ns;
+        prepared.rejit_applied = true;
+        prepared.program_info = load_prog_info(prepared.program_fd);
+    }
+
+    auto run_pass = execute_kernel_measurement_pass(
+        run_context,
+        options,
+        measure_same_image_pair ? options.warmup_repeat : 0u,
+        true);
+    const auto &run_measurement = run_pass.measurement;
+
+    const auto result_read_start_now = std::chrono::steady_clock::now();
+    const uint64_t result = read_kernel_test_run_result(
+        prepared.effective_io_mode,
+        result_from_skb_context,
+        packet_out,
+        context_out,
+        result_fd,
+        key,
+        run_measurement.retval);
+    const auto result_read_end_now = std::chrono::steady_clock::now();
+    result_read_start = result_read_start_now;
+    result_read_end = result_read_end_now;
+
+    const auto final_program_info = load_prog_info(prepared.program_fd);
+    prepared.program_info = final_program_info;
+    if (options.dump_jit) {
+        const auto jited_program =
+            load_jited_program(prepared.program_fd, final_program_info.jited_prog_len);
+        const auto dump_path = std::filesystem::path(
+            benchmark_name_for_program(options.program) + ".kernel.bin");
+        write_binary_file(dump_path, jited_program.data(), jited_program.size());
+    }
+    if (options.dump_xlated.has_value()) {
+        const auto xlated_program = load_xlated_program(
+            prepared.program_fd, final_program_info.xlated_prog_len);
+        write_binary_file(*options.dump_xlated, xlated_program.data(), xlated_program.size());
+    }
+
+    auto sample = build_measured_sample(
+        measure_same_image_pair ? std::optional<std::string>(std::string("rejit"))
+                                : std::nullopt,
+        base_compile_ns + rejit_apply_ns,
+        run_measurement,
+        result,
+        final_program_info,
+        rejit,
+        std::move(run_pass.perf_counters),
+        result_read_start,
+        result_read_end,
+        measure_same_image_pair);
+    if (stock_sample.has_value()) {
+        return {std::move(*stock_sample), std::move(sample)};
+    }
+    return {std::move(sample)};
+}
+
+} // namespace
+
+prepared_kernel_handle prepare_kernel(const cli_options &options)
+{
+    initialize_micro_exec_process();
+
+    auto prepared = std::make_shared<prepared_kernel_state>();
+    prepared->options = options;
+
+    const auto memory_prepare_start = std::chrono::steady_clock::now();
+    prepared->input_bytes = materialize_memory(options.memory, options.input_size);
+    const auto memory_prepare_end = std::chrono::steady_clock::now();
+    prepared->memory_prepare_ns = elapsed_ns(memory_prepare_start, memory_prepare_end);
+    if (options.input_size != 0 && prepared->input_bytes.size() < options.input_size) {
+        prepared->input_bytes.resize(options.input_size, 0);
+    }
+
+    const auto object_open_start = std::chrono::steady_clock::now();
+    bpf_object_open_opts open_opts = {};
+    open_opts.sz = sizeof(open_opts);
+    if (options.btf_custom_path.has_value()) {
+        open_opts.btf_custom_path = options.btf_custom_path->c_str();
+    }
+    bpf_object *raw_object = bpf_object__open_file(options.program.c_str(), &open_opts);
+    const int open_error = libbpf_get_error(raw_object);
+    if (open_error != 0) {
+        fail("bpf_object__open_file failed: " + libbpf_error_string(open_error));
+    }
+    const auto object_open_end = std::chrono::steady_clock::now();
+    prepared->object_open_ns = elapsed_ns(object_open_start, object_open_end);
+    prepared->object = bpf_object_ptr(raw_object);
+    configure_autoload(prepared->object.get(), options.program_name);
+
+    const auto object_load_start = std::chrono::steady_clock::now();
+    if (options.manual_load) {
+        prepared->program_fd = manual_load_program(prepared->object.get(), options);
+        prepared->manual_program_fd.reset(prepared->program_fd);
+    } else {
+        const int load_error = bpf_object__load(prepared->object.get());
+        if (load_error != 0) {
+            fail("bpf_object__load failed: " + libbpf_error_string(-load_error));
+        }
+
+        prepared->prog = find_program(prepared->object.get(), options.program_name);
+        prepared->program_fd = bpf_program__fd(prepared->prog);
+        if (prepared->program_fd < 0) {
+            fail("unable to obtain program fd");
+        }
+    }
+    const auto object_load_end = std::chrono::steady_clock::now();
+    prepared->object_load_ns = elapsed_ns(object_load_start, object_load_end);
+    prepared->effective_io_mode =
+        resolve_effective_io_mode(options.io_mode, prepared->object.get());
+    if (!options.compile_only && katran_balancer_fixture_requested(options)) {
+        initialize_katran_test_fixture(prepared->object.get());
+        prepared->katran_fixture_initialized = true;
+    }
+    prepared->program_info = load_prog_info(prepared->program_fd);
+
+    if (options.rejit) {
+        prepared->prepared_rejit.requested = true;
+        if (options.daemon_socket.has_value()) {
+            prepared->prepared_rejit.mode = "daemon";
+            fprintf(stderr, "rejit: mode=daemon-socket socket=%s prog_id=%u\n",
+                    options.daemon_socket->c_str(), prepared->program_info.id);
+        } else if (options.rejit_program.has_value()) {
+            prepared->prepared_rejit.mode = "replacement";
+            auto replacement_image = load_program_image(
+                *options.rejit_program, options.program_name);
+            if (replacement_image.code.size() % sizeof(bpf_insn) != 0) {
+                fail("replacement program image does not contain aligned BPF instructions");
+            }
+            const size_t cnt = replacement_image.code.size() / sizeof(bpf_insn);
+            prepared->rejit_insns.resize(cnt);
+            std::memcpy(
+                prepared->rejit_insns.data(),
+                replacement_image.code.data(),
+                replacement_image.code.size());
+        } else {
+            prepared->prepared_rejit.mode = "same-bytecode";
+            if (prepared->prog == nullptr) {
+                fail("same-bytecode REJIT requires a program loaded via bpf_object__load "
+                     "(not manual_load_program)");
+            }
+            const size_t cnt = bpf_program__insn_cnt(prepared->prog);
+            if (cnt == 0) {
+                fail("bpf_program__insn_cnt returned 0 for REJIT");
+            }
+            const bpf_insn *raw = bpf_program__insns(prepared->prog);
+            prepared->rejit_insns.assign(raw, raw + cnt);
+        }
+        if (prepared->prepared_rejit.mode != "daemon") {
+            fprintf(stderr, "rejit: mode=%s insn_cnt=%zu\n",
+                    prepared->prepared_rejit.mode.c_str(),
+                    prepared->rejit_insns.size());
+        }
+    }
+
+    if (options.compile_only && options.rejit) {
+        auto rejit_start = std::chrono::steady_clock::now();
+        if (options.daemon_socket.has_value()) {
+            const auto socket_response =
+                daemon_socket_optimize(*options.daemon_socket, prepared->program_info.id);
+            const auto rejit_end = std::chrono::steady_clock::now();
+            prepared->rejit_apply_ns = elapsed_ns(rejit_start, rejit_end);
+            populate_rejit_from_daemon_summary(prepared->prepared_rejit, socket_response);
+        } else {
+            auto rejit_end = rejit_start;
+            apply_rejit(
+                prepared->program_fd,
+                prepared->rejit_insns.data(),
+                static_cast<uint32_t>(prepared->rejit_insns.size()),
+                prepared->prepared_rejit,
+                rejit_start,
+                rejit_end);
+            prepared->rejit_apply_ns = elapsed_ns(rejit_start, rejit_end);
+        }
+        prepared->rejit_applied = true;
+        prepared->program_info = load_prog_info(prepared->program_fd);
+    }
+
+    return prepared;
+}
+
+sample_result summarize_prepared_kernel_compile(const prepared_kernel_handle &prepared)
+{
+    if (!prepared) {
+        fail("summarize_prepared_kernel_compile requires a prepared kernel handle");
+    }
+    return build_compile_only_sample(*prepared);
+}
+
+std::vector<sample_result> run_prepared_kernel(
+    const prepared_kernel_handle &prepared,
+    const cli_options &options)
+{
+    if (!prepared) {
+        fail("run_prepared_kernel requires a prepared kernel handle");
+    }
+    return execute_prepared_kernel_run(*prepared, options);
+}
+
 void initialize_micro_exec_process()
 {
     (void)get_process_runtime_state();

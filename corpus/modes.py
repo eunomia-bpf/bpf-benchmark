@@ -521,6 +521,9 @@ def build_test_run_batch_job(
     btf_custom_path: Path | None,
     compile_only: bool,
     daemon_socket: str | None = None,
+    prepared_key: str | None = None,
+    prepared_ref: str | None = None,
+    release_prepared: bool = True,
 ) -> dict[str, Any]:
     job: dict[str, Any] = {
         "id": job_id,
@@ -541,6 +544,11 @@ def build_test_run_batch_job(
         job["btf_custom_path"] = str(btf_custom_path)
     if daemon_socket is not None:
         job["daemon_socket"] = daemon_socket
+    if prepared_key is not None:
+        job["prepared_key"] = prepared_key
+    if prepared_ref is not None:
+        job["prepared_ref"] = prepared_ref
+        job["release_prepared"] = bool(release_prepared)
     return job
 
 
@@ -594,110 +602,160 @@ def build_target_batch_plan(
 ) -> tuple[dict[str, Any], list[dict[str, str]]]:
     jobs: list[dict[str, Any]] = []
     job_refs: list[dict[str, str]] = []
+    target_entries: list[dict[str, Any]] = []
+    parallel_jobs = corpus_batch_parallel_jobs()
 
     for index, target in enumerate(targets, start=1):
         object_path = ROOT_DIR / target["object_path"]
         memory_path = Path(target["memory_path"]) if target.get("memory_path") else None
         prefix = f"target-{index:04d}"
         refs: dict[str, str] = {}
-
-        refs["baseline_compile"] = f"{prefix}:baseline-compile"
-        jobs.append(
-            build_test_run_batch_job(
-                job_id=refs["baseline_compile"],
-                execution="parallel",
-                runtime="kernel",
-                object_path=object_path,
-                program_name=target["program_name"],
-                io_mode=target["io_mode"],
-                memory_path=memory_path,
-                input_size=int(target["input_size"]),
-                repeat=repeat,
-                btf_custom_path=btf_custom_path,
-                compile_only=True,
-            )
+        job_refs.append(refs)
+        target_entries.append(
+            {
+                "target": target,
+                "object_path": object_path,
+                "memory_path": memory_path,
+                "prefix": prefix,
+                "refs": refs,
+                "baseline_prepared_key": f"{prefix}:baseline-prepared",
+                "v5_prepared_key": f"{prefix}:v5-prepared",
+            }
         )
 
-        if enable_exec and target.get("can_test_run"):
-            refs["baseline_run"] = f"{prefix}:baseline-run"
-            jobs.append(
-                build_test_run_batch_job(
-                    job_id=refs["baseline_run"],
-                    execution="serial",
-                    runtime="kernel",
-                    object_path=object_path,
-                    program_name=target["program_name"],
-                    io_mode=target["io_mode"],
-                    memory_path=memory_path,
-                    input_size=int(target["input_size"]),
-                    repeat=repeat,
-                    btf_custom_path=btf_custom_path,
-                    compile_only=False,
-                )
-            )
+    for chunk_start in range(0, len(target_entries), parallel_jobs):
+        chunk = target_entries[chunk_start : chunk_start + parallel_jobs]
 
-        if enable_recompile and target.get("can_test_run"):
-            refs["pgo_warmup"] = f"{prefix}:pgo-warmup"
+        for entry in chunk:
+            target = entry["target"]
+            refs = entry["refs"]
+            refs["baseline_compile"] = f"{entry['prefix']}:baseline-compile"
             jobs.append(
                 build_test_run_batch_job(
-                    job_id=refs["pgo_warmup"],
-                    execution="serial",
-                    runtime="kernel",
-                    object_path=object_path,
-                    program_name=target["program_name"],
-                    io_mode=target["io_mode"],
-                    memory_path=memory_path,
-                    input_size=int(target["input_size"]),
-                    repeat=10,
-                    btf_custom_path=btf_custom_path,
-                    compile_only=False,
-                )
-            )
-
-        if enable_recompile:
-            refs["v5_compile"] = f"{prefix}:v5-compile"
-            jobs.append(
-                build_test_run_batch_job(
-                    job_id=refs["v5_compile"],
+                    job_id=refs["baseline_compile"],
                     execution="parallel",
-                    runtime="kernel-rejit",
-                    object_path=object_path,
+                    runtime="kernel",
+                    object_path=entry["object_path"],
                     program_name=target["program_name"],
                     io_mode=target["io_mode"],
-                    memory_path=memory_path,
+                    memory_path=entry["memory_path"],
                     input_size=int(target["input_size"]),
                     repeat=repeat,
                     btf_custom_path=btf_custom_path,
                     compile_only=True,
-                    daemon_socket=daemon_socket,
+                    prepared_key=(
+                        entry["baseline_prepared_key"]
+                        if enable_exec and target.get("can_test_run")
+                        else None
+                    ),
                 )
             )
 
-            if enable_exec and target.get("can_test_run"):
-                refs["v5_run"] = f"{prefix}:v5-run"
+        if enable_exec:
+            for entry in chunk:
+                target = entry["target"]
+                refs = entry["refs"]
+                if not target.get("can_test_run"):
+                    continue
+                refs["baseline_run"] = f"{entry['prefix']}:baseline-run"
+                jobs.append(
+                    build_test_run_batch_job(
+                        job_id=refs["baseline_run"],
+                        execution="serial",
+                        runtime="kernel",
+                        object_path=entry["object_path"],
+                        program_name=target["program_name"],
+                        io_mode=target["io_mode"],
+                        memory_path=entry["memory_path"],
+                        input_size=int(target["input_size"]),
+                        repeat=repeat,
+                        btf_custom_path=btf_custom_path,
+                        compile_only=False,
+                        prepared_ref=entry["baseline_prepared_key"],
+                        release_prepared=True,
+                    )
+                )
+
+        if enable_recompile and enable_exec:
+            for entry in chunk:
+                target = entry["target"]
+                refs = entry["refs"]
+                if not target.get("can_test_run"):
+                    continue
+                refs["pgo_warmup"] = f"{entry['prefix']}:pgo-warmup"
+                jobs.append(
+                    build_test_run_batch_job(
+                        job_id=refs["pgo_warmup"],
+                        execution="serial",
+                        runtime="kernel",
+                        object_path=entry["object_path"],
+                        program_name=target["program_name"],
+                        io_mode=target["io_mode"],
+                        memory_path=entry["memory_path"],
+                        input_size=int(target["input_size"]),
+                        repeat=10,
+                        btf_custom_path=btf_custom_path,
+                        compile_only=False,
+                    )
+                )
+
+        if enable_recompile:
+            for entry in chunk:
+                target = entry["target"]
+                refs = entry["refs"]
+                refs["v5_compile"] = f"{entry['prefix']}:v5-compile"
+                jobs.append(
+                    build_test_run_batch_job(
+                        job_id=refs["v5_compile"],
+                        execution="parallel",
+                        runtime="kernel-rejit",
+                        object_path=entry["object_path"],
+                        program_name=target["program_name"],
+                        io_mode=target["io_mode"],
+                        memory_path=entry["memory_path"],
+                        input_size=int(target["input_size"]),
+                        repeat=repeat,
+                        btf_custom_path=btf_custom_path,
+                        compile_only=True,
+                        daemon_socket=daemon_socket,
+                        prepared_key=(
+                            entry["v5_prepared_key"]
+                            if enable_exec and target.get("can_test_run")
+                            else None
+                        ),
+                    )
+                )
+
+        if enable_recompile and enable_exec:
+            for entry in chunk:
+                target = entry["target"]
+                refs = entry["refs"]
+                if not target.get("can_test_run"):
+                    continue
+                refs["v5_run"] = f"{entry['prefix']}:v5-run"
                 jobs.append(
                     build_test_run_batch_job(
                         job_id=refs["v5_run"],
                         execution="serial",
                         runtime="kernel-rejit",
-                        object_path=object_path,
+                        object_path=entry["object_path"],
                         program_name=target["program_name"],
                         io_mode=target["io_mode"],
-                        memory_path=memory_path,
+                        memory_path=entry["memory_path"],
                         input_size=int(target["input_size"]),
                         repeat=repeat,
                         btf_custom_path=btf_custom_path,
                         compile_only=False,
                         daemon_socket=daemon_socket,
+                        prepared_ref=entry["v5_prepared_key"],
+                        release_prepared=True,
                     )
                 )
-
-        job_refs.append(refs)
 
     return {
         "schema_version": 1,
         "scheduler": {
-            "max_parallel_jobs": corpus_batch_parallel_jobs(),
+            "max_parallel_jobs": parallel_jobs,
         },
         "jobs": jobs,
     }, job_refs

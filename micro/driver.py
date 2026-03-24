@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import platform
 import random
 import subprocess
@@ -132,6 +133,14 @@ def format_ns(value: float | int | None) -> str:
         return f"{value / 1_000:.3f} us"
     return f"{value} ns"
 
+
+def micro_batch_parallel_jobs() -> int:
+    return max(1, int((os.cpu_count() or 1) * 0.8))
+
+
+def runtime_supports_prepared_state(runtime_mode: str) -> bool:
+    return runtime_mode in {"kernel", "kernel-rejit", "kernel_rejit"}
+
 def build_micro_batch_job(
     *,
     job_id: str,
@@ -144,15 +153,20 @@ def build_micro_batch_job(
     perf_counters: bool = False,
     perf_scope: str = "full_repeat_raw",
     daemon_socket: str | None = None,
+    compile_only: bool = False,
+    prepared_key: str | None = None,
+    prepared_ref: str | None = None,
+    release_prepared: bool = True,
 ) -> dict[str, Any]:
     job: dict[str, Any] = {
         "id": job_id,
         "type": "test_run",
-        "execution": "serial",
+        "execution": "parallel" if compile_only else "serial",
         "runtime": runtime_mode,
         "program": str(program),
         "io_mode": io_mode,
         "repeat": max(1, repeat),
+        "compile_only": compile_only,
     }
     if memory is not None:
         job["memory"] = str(memory)
@@ -163,6 +177,11 @@ def build_micro_batch_job(
         job["perf_scope"] = perf_scope
     if daemon_socket is not None:
         job["daemon_socket"] = daemon_socket
+    if prepared_key is not None:
+        job["prepared_key"] = prepared_key
+    if prepared_ref is not None:
+        job["prepared_ref"] = prepared_ref
+        job["release_prepared"] = bool(release_prepared)
     return job
 
 
@@ -409,6 +428,8 @@ def build_micro_batch_plan(
     jobs: list[dict[str, Any]] = []
     plans: dict[str, dict[str, Any]] = {}
     memory_files: dict[str, Path | None] = {}
+    parallel_jobs = micro_batch_parallel_jobs()
+    measurement_entries: list[dict[str, Any]] = []
 
     for benchmark in benchmarks:
         memory_file = resolve_memory_file(benchmark, args.regenerate_inputs)
@@ -423,19 +444,6 @@ def build_micro_batch_plan(
             is_rejit_runtime = runtime.mode in {"kernel-rejit", "kernel_rejit"}
             daemon_socket = getattr(args, "daemon_socket", None)
             pgo_warmup_repeat = getattr(args, "pgo_warmup_repeat", 10)
-
-            if is_rejit_runtime and daemon_socket and pgo_warmup_repeat > 0:
-                jobs.append(
-                    build_micro_batch_job(
-                        job_id=f"{benchmark.name}::{runtime.name}::pgo",
-                        runtime_mode="kernel",
-                        program=benchmark.program_object,
-                        io_mode=benchmark.io_mode,
-                        repeat=pgo_warmup_repeat,
-                        memory=memory_file,
-                        input_size=benchmark.kernel_input_size,
-                    )
-                )
 
             for warmup_index in range(warmups):
                 jobs.append(
@@ -466,29 +474,93 @@ def build_micro_batch_plan(
                 repeat = args.repeat if args.repeat is not None else runtime.default_repeat
                 is_rejit_runtime = runtime.mode in {"kernel-rejit", "kernel_rejit"}
                 daemon_socket = getattr(args, "daemon_socket", None)
+                pgo_warmup_repeat = getattr(args, "pgo_warmup_repeat", 10)
                 job_id = f"{benchmark.name}::{runtime.name}::measure::{iteration_idx}"
-                jobs.append(
-                    build_micro_batch_job(
-                        job_id=job_id,
-                        runtime_mode=runtime.mode,
-                        program=benchmark.program_object,
-                        io_mode=benchmark.io_mode,
-                        repeat=repeat,
-                        memory=memory_file,
-                        input_size=benchmark.kernel_input_size,
-                        perf_counters=args.perf_counters,
-                        perf_scope=args.perf_scope,
-                        daemon_socket=daemon_socket if is_rejit_runtime else None,
-                    )
+                measurement_entries.append(
+                    {
+                        "job_id": job_id,
+                        "runtime_mode": runtime.mode,
+                        "program": benchmark.program_object,
+                        "io_mode": benchmark.io_mode,
+                        "repeat": repeat,
+                        "memory": memory_file,
+                        "input_size": benchmark.kernel_input_size,
+                        "daemon_socket": daemon_socket if is_rejit_runtime else None,
+                        "perf_counters": args.perf_counters,
+                        "perf_scope": args.perf_scope,
+                        "pgo_job": (
+                            build_micro_batch_job(
+                                job_id=f"{benchmark.name}::{runtime.name}::pgo",
+                                runtime_mode="kernel",
+                                program=benchmark.program_object,
+                                io_mode=benchmark.io_mode,
+                                repeat=pgo_warmup_repeat,
+                                memory=memory_file,
+                                input_size=benchmark.kernel_input_size,
+                            )
+                            if is_rejit_runtime
+                            and daemon_socket
+                            and pgo_warmup_repeat > 0
+                            and iteration_idx == 0
+                            else None
+                        ),
+                    }
                 )
                 bench_plan["measurement_job_ids"][runtime.name].append(job_id)
 
         plans[benchmark.name] = bench_plan
 
+    for window_start in range(0, len(measurement_entries), parallel_jobs):
+        window = measurement_entries[window_start : window_start + parallel_jobs]
+
+        for entry in window:
+            if entry["pgo_job"] is not None:
+                jobs.append(dict(entry["pgo_job"]))
+
+        for entry in window:
+            if not runtime_supports_prepared_state(entry["runtime_mode"]):
+                continue
+            jobs.append(
+                build_micro_batch_job(
+                    job_id=f"{entry['job_id']}::prepare",
+                    runtime_mode=entry["runtime_mode"],
+                    program=entry["program"],
+                    io_mode=entry["io_mode"],
+                    repeat=entry["repeat"],
+                    memory=entry["memory"],
+                    input_size=entry["input_size"],
+                    daemon_socket=entry["daemon_socket"],
+                    compile_only=True,
+                    prepared_key=f"{entry['job_id']}::prepared",
+                )
+            )
+
+        for entry in window:
+            jobs.append(
+                build_micro_batch_job(
+                    job_id=entry["job_id"],
+                    runtime_mode=entry["runtime_mode"],
+                    program=entry["program"],
+                    io_mode=entry["io_mode"],
+                    repeat=entry["repeat"],
+                    memory=entry["memory"],
+                    input_size=entry["input_size"],
+                    perf_counters=entry["perf_counters"],
+                    perf_scope=entry["perf_scope"],
+                    daemon_socket=entry["daemon_socket"],
+                    prepared_ref=(
+                        f"{entry['job_id']}::prepared"
+                        if runtime_supports_prepared_state(entry["runtime_mode"])
+                        else None
+                    ),
+                    release_prepared=True,
+                )
+            )
+
     return {
         "schema_version": 1,
         "retain_daemon_debug": bool(args.write_details),
-        "scheduler": {"max_parallel_jobs": 1},
+        "scheduler": {"max_parallel_jobs": parallel_jobs},
         "jobs": jobs,
     }, plans, memory_files
 

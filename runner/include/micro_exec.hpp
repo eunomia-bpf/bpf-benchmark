@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <functional>
 #include <iosfwd>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -153,6 +154,9 @@ struct paired_test_run_result {
     std::optional<sample_result> rejit_run;
 };
 
+struct prepared_kernel_state;
+using prepared_kernel_handle = std::shared_ptr<prepared_kernel_state>;
+
 [[noreturn]] void fail(const std::string &message);
 cli_options parse_args(int argc, char **argv);
 keep_alive_request parse_keep_alive_request(std::string_view json_line);
@@ -168,6 +172,11 @@ program_image load_program_image(
 void initialize_micro_exec_process();
 sample_result run_llvmbpf(const cli_options &options);
 std::vector<sample_result> run_kernel(const cli_options &options);
+prepared_kernel_handle prepare_kernel(const cli_options &options);
+sample_result summarize_prepared_kernel_compile(const prepared_kernel_handle &prepared);
+std::vector<sample_result> run_prepared_kernel(
+    const prepared_kernel_handle &prepared,
+    const cli_options &options);
 paired_test_run_result run_kernel_paired(
     const cli_options &options,
     uint32_t pgo_warmup_repeat);

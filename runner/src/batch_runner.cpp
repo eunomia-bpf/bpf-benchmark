@@ -23,9 +23,11 @@
 #include <sstream>
 #include <string>
 #include <string_view>
+#include <mutex>
 #include <sys/socket.h>
 #include <sys/syscall.h>
 #include <sys/un.h>
+#include <unordered_map>
 #include <unistd.h>
 #include <thread>
 #include <vector>
@@ -45,6 +47,9 @@ struct batch_job {
     std::string type = "test_run";
     std::string execution = "serial";
     std::string runtime;
+    std::string prepared_key;
+    std::string prepared_ref;
+    bool release_prepared = true;
     cli_options options;
     std::filesystem::path object_path;
     uint32_t object_index = 0;
@@ -124,6 +129,35 @@ struct batch_progress_state {
     size_t failed_jobs = 0;
     std::string last_completed_job;
     std::string error;
+};
+
+class prepared_kernel_store {
+  public:
+    void put(const std::string &key, prepared_kernel_handle handle)
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        prepared_.insert_or_assign(key, std::move(handle));
+    }
+
+    prepared_kernel_handle get(const std::string &key) const
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        const auto found = prepared_.find(key);
+        if (found == prepared_.end()) {
+            return {};
+        }
+        return found->second;
+    }
+
+    void erase(const std::string &key)
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        prepared_.erase(key);
+    }
+
+  private:
+    mutable std::mutex mutex_;
+    std::unordered_map<std::string, prepared_kernel_handle> prepared_;
 };
 
 std::string json_escape(std::string_view input)
@@ -881,6 +915,25 @@ void validate_batch_job(const batch_job &job)
         if (!job.options.compile_only && job.options.repeat == 0) {
             fail("batch job repeat must be >= 1 for job " + job.id);
         }
+        if (!job.prepared_key.empty() && !job.prepared_ref.empty()) {
+            fail("batch job cannot set both prepared_key and prepared_ref: " + job.id);
+        }
+        if (!job.prepared_key.empty()) {
+            if (job.options.command != "run-kernel") {
+                fail("prepared_key is only supported for run-kernel jobs: " + job.id);
+            }
+            if (!job.options.compile_only) {
+                fail("prepared_key requires compile_only=true: " + job.id);
+            }
+        }
+        if (!job.prepared_ref.empty()) {
+            if (job.options.command != "run-kernel") {
+                fail("prepared_ref is only supported for run-kernel jobs: " + job.id);
+            }
+            if (job.options.compile_only) {
+                fail("prepared_ref cannot be used with compile_only=true: " + job.id);
+            }
+        }
         return;
     }
     if (job.type == "static_verify_object") {
@@ -908,6 +961,9 @@ batch_job parse_job(const YAML::Node &node, size_t index)
         node,
         "execution",
         optional_bool(node, "compile_only", false) ? "parallel" : "serial");
+    job.prepared_key = optional_scalar_string(node, "prepared_key");
+    job.prepared_ref = optional_scalar_string(node, "prepared_ref");
+    job.release_prepared = optional_bool(node, "release_prepared", true);
 
     if (job.type == "static_verify_object") {
         job.object_path = std::filesystem::path(require_scalar_string(node["object"], "object"));
@@ -1264,7 +1320,9 @@ batch_job_result execute_static_verify_object_job(const batch_job &job)
     return result;
 }
 
-batch_job_result execute_job(const batch_job &job)
+batch_job_result execute_job(
+    const batch_job &job,
+    prepared_kernel_store &prepared_store)
 {
     batch_job_result result;
     result.id = job.id;
@@ -1282,7 +1340,22 @@ batch_job_result execute_job(const batch_job &job)
         if (job.options.command == "run-llvmbpf") {
             result.samples = {run_llvmbpf(job.options)};
         } else if (job.options.command == "run-kernel") {
-            result.samples = run_kernel(job.options);
+            if (!job.prepared_ref.empty()) {
+                auto prepared = prepared_store.get(job.prepared_ref);
+                if (!prepared) {
+                    fail("missing prepared kernel state for ref: " + job.prepared_ref);
+                }
+                result.samples = run_prepared_kernel(prepared, job.options);
+                if (job.release_prepared) {
+                    prepared_store.erase(job.prepared_ref);
+                }
+            } else if (!job.prepared_key.empty()) {
+                auto prepared = prepare_kernel(job.options);
+                result.samples = {summarize_prepared_kernel_compile(prepared)};
+                prepared_store.put(job.prepared_key, std::move(prepared));
+            } else {
+                result.samples = run_kernel(job.options);
+            }
         } else {
             fail("unsupported batch command: " + job.options.command);
         }
@@ -1303,7 +1376,8 @@ batch_job_result execute_job(const batch_job &job)
 
 std::vector<batch_job_result> execute_parallel_chunk(
     const std::vector<batch_job> &jobs,
-    size_t max_parallel_jobs)
+    size_t max_parallel_jobs,
+    prepared_kernel_store &prepared_store)
 {
     std::vector<batch_job_result> results(jobs.size());
     std::atomic<size_t> next_index {0};
@@ -1314,13 +1388,13 @@ std::vector<batch_job_result> execute_parallel_chunk(
     std::vector<std::thread> workers;
     workers.reserve(worker_count);
     for (size_t worker = 0; worker < worker_count; ++worker) {
-        workers.emplace_back([&jobs, &results, &next_index]() {
+        workers.emplace_back([&jobs, &results, &next_index, &prepared_store]() {
             while (true) {
                 const size_t index = next_index.fetch_add(1);
                 if (index >= jobs.size()) {
                     return;
                 }
-                results[index] = execute_job(jobs[index]);
+                results[index] = execute_job(jobs[index], prepared_store);
             }
         });
     }
@@ -1473,6 +1547,7 @@ int run_batch_cli(int argc, char **argv)
     const auto started_at = std::chrono::system_clock::now();
     std::vector<batch_job_result> results;
     results.reserve(spec.jobs.size());
+    prepared_kernel_store prepared_store;
 
     try {
         size_t index = 0;
@@ -1484,7 +1559,10 @@ int run_batch_cli(int argc, char **argv)
                     chunk.push_back(spec.jobs[index]);
                     ++index;
                 }
-                auto chunk_results = execute_parallel_chunk(chunk, spec.max_parallel_jobs);
+                auto chunk_results = execute_parallel_chunk(
+                    chunk,
+                    spec.max_parallel_jobs,
+                    prepared_store);
                 for (auto &result : chunk_results) {
                     progress.completed_jobs += 1;
                     progress.last_completed_job = result.id;
@@ -1501,7 +1579,7 @@ int run_batch_cli(int argc, char **argv)
                 continue;
             }
 
-            auto result = execute_job(job);
+            auto result = execute_job(job, prepared_store);
             progress.completed_jobs += 1;
             progress.last_completed_job = result.id;
             if (result.ok) {
