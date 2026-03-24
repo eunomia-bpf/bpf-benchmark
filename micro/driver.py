@@ -156,7 +156,7 @@ def build_micro_batch_job(
     compile_only: bool = False,
     prepared_key: str | None = None,
     prepared_ref: str | None = None,
-    release_prepared: bool = True,
+    prepared_group: str | None = None,
 ) -> dict[str, Any]:
     job: dict[str, Any] = {
         "id": job_id,
@@ -181,7 +181,8 @@ def build_micro_batch_job(
         job["prepared_key"] = prepared_key
     if prepared_ref is not None:
         job["prepared_ref"] = prepared_ref
-        job["release_prepared"] = bool(release_prepared)
+    if prepared_group is not None:
+        job["prepared_group"] = prepared_group
     return job
 
 
@@ -512,14 +513,19 @@ def build_micro_batch_plan(
 
     for window_start in range(0, len(measurement_entries), parallel_jobs):
         window = measurement_entries[window_start : window_start + parallel_jobs]
+        window_group = f"window-{window_start // parallel_jobs:04d}"
+        prepared_entries = [
+            entry for entry in window if runtime_supports_prepared_state(entry["runtime_mode"])
+        ]
+        direct_entries = [
+            entry for entry in window if not runtime_supports_prepared_state(entry["runtime_mode"])
+        ]
 
         for entry in window:
             if entry["pgo_job"] is not None:
                 jobs.append(dict(entry["pgo_job"]))
 
-        for entry in window:
-            if not runtime_supports_prepared_state(entry["runtime_mode"]):
-                continue
+        for entry in prepared_entries:
             jobs.append(
                 build_micro_batch_job(
                     job_id=f"{entry['job_id']}::prepare",
@@ -532,10 +538,11 @@ def build_micro_batch_plan(
                     daemon_socket=entry["daemon_socket"],
                     compile_only=True,
                     prepared_key=f"{entry['job_id']}::prepared",
+                    prepared_group=window_group,
                 )
             )
 
-        for entry in window:
+        for entry in prepared_entries:
             jobs.append(
                 build_micro_batch_job(
                     job_id=entry["job_id"],
@@ -548,12 +555,24 @@ def build_micro_batch_plan(
                     perf_counters=entry["perf_counters"],
                     perf_scope=entry["perf_scope"],
                     daemon_socket=entry["daemon_socket"],
-                    prepared_ref=(
-                        f"{entry['job_id']}::prepared"
-                        if runtime_supports_prepared_state(entry["runtime_mode"])
-                        else None
-                    ),
-                    release_prepared=True,
+                    prepared_ref=f"{entry['job_id']}::prepared",
+                    prepared_group=window_group,
+                )
+            )
+
+        for entry in direct_entries:
+            jobs.append(
+                build_micro_batch_job(
+                    job_id=entry["job_id"],
+                    runtime_mode=entry["runtime_mode"],
+                    program=entry["program"],
+                    io_mode=entry["io_mode"],
+                    repeat=entry["repeat"],
+                    memory=entry["memory"],
+                    input_size=entry["input_size"],
+                    perf_counters=entry["perf_counters"],
+                    perf_scope=entry["perf_scope"],
+                    daemon_socket=entry["daemon_socket"],
                 )
             )
 

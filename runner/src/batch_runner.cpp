@@ -49,6 +49,7 @@ struct batch_job {
     std::string runtime;
     std::string prepared_key;
     std::string prepared_ref;
+    std::string prepared_group;
     bool release_prepared = true;
     cli_options options;
     std::filesystem::path object_path;
@@ -133,10 +134,20 @@ struct batch_progress_state {
 
 class prepared_kernel_store {
   public:
-    void put(const std::string &key, prepared_kernel_handle handle)
+    void put(
+        const std::string &key,
+        prepared_kernel_handle handle,
+        const std::string &group = std::string())
     {
         std::lock_guard<std::mutex> lock(mutex_);
-        prepared_.insert_or_assign(key, std::move(handle));
+        erase_unlocked(key);
+        prepared_.insert_or_assign(key, stored_prepared {
+                .handle = std::move(handle),
+                .group = group,
+            });
+        if (!group.empty()) {
+            groups_[group].push_back(key);
+        }
     }
 
     prepared_kernel_handle get(const std::string &key) const
@@ -146,18 +157,70 @@ class prepared_kernel_store {
         if (found == prepared_.end()) {
             return {};
         }
-        return found->second;
+        return found->second.handle;
     }
 
     void erase(const std::string &key)
     {
         std::lock_guard<std::mutex> lock(mutex_);
-        prepared_.erase(key);
+        erase_unlocked(key);
+    }
+
+    void erase_group(const std::string &group)
+    {
+        if (group.empty()) {
+            return;
+        }
+        std::lock_guard<std::mutex> lock(mutex_);
+        const auto found = groups_.find(group);
+        if (found == groups_.end()) {
+            return;
+        }
+        const auto keys = found->second;
+        groups_.erase(found);
+        for (const auto &key : keys) {
+            prepared_.erase(key);
+        }
+    }
+
+    void clear()
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        prepared_.clear();
+        groups_.clear();
     }
 
   private:
+    struct stored_prepared {
+        prepared_kernel_handle handle;
+        std::string group;
+    };
+
+    void erase_unlocked(const std::string &key)
+    {
+        const auto found = prepared_.find(key);
+        if (found == prepared_.end()) {
+            return;
+        }
+        const std::string group = found->second.group;
+        if (!group.empty()) {
+            const auto group_found = groups_.find(group);
+            if (group_found != groups_.end()) {
+                auto &keys = group_found->second;
+                keys.erase(
+                    std::remove(keys.begin(), keys.end(), key),
+                    keys.end());
+                if (keys.empty()) {
+                    groups_.erase(group_found);
+                }
+            }
+        }
+        prepared_.erase(found);
+    }
+
     mutable std::mutex mutex_;
-    std::unordered_map<std::string, prepared_kernel_handle> prepared_;
+    std::unordered_map<std::string, stored_prepared> prepared_;
+    std::unordered_map<std::string, std::vector<std::string>> groups_;
 };
 
 std::string json_escape(std::string_view input)
@@ -934,6 +997,11 @@ void validate_batch_job(const batch_job &job)
                 fail("prepared_ref cannot be used with compile_only=true: " + job.id);
             }
         }
+        if (!job.prepared_group.empty() &&
+            job.prepared_key.empty() &&
+            job.prepared_ref.empty()) {
+            fail("prepared_group requires prepared_key or prepared_ref: " + job.id);
+        }
         return;
     }
     if (job.type == "static_verify_object") {
@@ -963,6 +1031,7 @@ batch_job parse_job(const YAML::Node &node, size_t index)
         optional_bool(node, "compile_only", false) ? "parallel" : "serial");
     job.prepared_key = optional_scalar_string(node, "prepared_key");
     job.prepared_ref = optional_scalar_string(node, "prepared_ref");
+    job.prepared_group = optional_scalar_string(node, "prepared_group");
     job.release_prepared = optional_bool(node, "release_prepared", true);
 
     if (job.type == "static_verify_object") {
@@ -1346,13 +1415,13 @@ batch_job_result execute_job(
                     fail("missing prepared kernel state for ref: " + job.prepared_ref);
                 }
                 result.samples = run_prepared_kernel(prepared, job.options);
-                if (job.release_prepared) {
+                if (job.release_prepared && job.prepared_group.empty()) {
                     prepared_store.erase(job.prepared_ref);
                 }
             } else if (!job.prepared_key.empty()) {
                 auto prepared = prepare_kernel(job.options);
                 result.samples = {summarize_prepared_kernel_compile(prepared)};
-                prepared_store.put(job.prepared_key, std::move(prepared));
+                prepared_store.put(job.prepared_key, std::move(prepared), job.prepared_group);
             } else {
                 result.samples = run_kernel(job.options);
             }
@@ -1403,6 +1472,38 @@ std::vector<batch_job_result> execute_parallel_chunk(
         worker.join();
     }
     return results;
+}
+
+std::string group_for_chunk(const std::vector<batch_job> &jobs)
+{
+    std::string group;
+    for (const auto &job : jobs) {
+        if (job.prepared_group.empty()) {
+            continue;
+        }
+        if (group.empty()) {
+            group = job.prepared_group;
+            continue;
+        }
+        if (group != job.prepared_group) {
+            fail("parallel chunk contains multiple prepared_group values");
+        }
+    }
+    return group;
+}
+
+void flush_prepared_group(
+    std::string &active_group,
+    const std::string &next_group,
+    prepared_kernel_store &prepared_store)
+{
+    if (!active_group.empty() && active_group != next_group) {
+        prepared_store.erase_group(active_group);
+        active_group.clear();
+    }
+    if (!next_group.empty()) {
+        active_group = next_group;
+    }
 }
 
 void write_progress_json(
@@ -1548,6 +1649,7 @@ int run_batch_cli(int argc, char **argv)
     std::vector<batch_job_result> results;
     results.reserve(spec.jobs.size());
     prepared_kernel_store prepared_store;
+    std::string active_prepared_group;
 
     try {
         size_t index = 0;
@@ -1559,6 +1661,10 @@ int run_batch_cli(int argc, char **argv)
                     chunk.push_back(spec.jobs[index]);
                     ++index;
                 }
+                flush_prepared_group(
+                    active_prepared_group,
+                    group_for_chunk(chunk),
+                    prepared_store);
                 auto chunk_results = execute_parallel_chunk(
                     chunk,
                     spec.max_parallel_jobs,
@@ -1579,6 +1685,10 @@ int run_batch_cli(int argc, char **argv)
                 continue;
             }
 
+            flush_prepared_group(
+                active_prepared_group,
+                job.prepared_group,
+                prepared_store);
             auto result = execute_job(job, prepared_store);
             progress.completed_jobs += 1;
             progress.last_completed_job = result.id;
@@ -1593,6 +1703,11 @@ int run_batch_cli(int argc, char **argv)
             }
             ++index;
         }
+
+        if (!active_prepared_group.empty()) {
+            prepared_store.erase_group(active_prepared_group);
+        }
+        prepared_store.clear();
 
         progress.status = progress.failed_jobs == 0 ? "completed" : "completed_with_errors";
         if (cli.progress_json_path.has_value()) {

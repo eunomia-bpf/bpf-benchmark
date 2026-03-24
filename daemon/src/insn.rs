@@ -56,6 +56,7 @@ pub const BPF_EXIT: u8 = 0x90;
 // ── Pseudo source-register tags ────────────────────────────────────
 pub const BPF_PSEUDO_KFUNC_CALL: u8 = 2;
 pub const BPF_PSEUDO_KINSN_SIDECAR: u8 = 3;
+pub const BPF_PSEUDO_KINSN_CALL: u8 = 4;
 
 // ── kinsn encoding constants (synced with include/linux/bpf.h) ────
 pub const BPF_KINSN_ENC_PACKED_CALL: u32 = 1 << 1;
@@ -222,6 +223,20 @@ impl BpfInsn {
     /// `call kfunc` against vmlinux BTF.
     pub const fn call_kfunc(btf_id: i32) -> Self {
         Self::call_kfunc_with_off(btf_id, 0)
+    }
+
+    /// `call kinsn` (src_reg = BPF_PSEUDO_KINSN_CALL = 4)
+    ///
+    /// `imm` is the BTF VAR id of the exported `struct bpf_kinsn` descriptor.
+    /// `off` is the 1-based slot in the load/REJIT `fd_array` when module BTF
+    /// is used, or 0 for vmlinux.
+    pub const fn call_kinsn_with_off(btf_id: i32, off: i16) -> Self {
+        Self {
+            code: BPF_JMP | BPF_CALL,
+            regs: Self::make_regs(0, BPF_PSEUDO_KINSN_CALL),
+            off,
+            imm: btf_id,
+        }
     }
 
     /// `ja +off` (unconditional jump, NOP when off=0)

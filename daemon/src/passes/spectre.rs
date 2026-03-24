@@ -25,7 +25,7 @@ use crate::insn::*;
 use crate::pass::*;
 
 use super::utils::{
-    emit_packed_kfunc_call_with_off, ensure_module_fd_slot,
+    emit_packed_kinsn_call_with_off, ensure_module_fd_slot,
     fixup_all_branches as fixup_branches_inline,
 };
 
@@ -88,7 +88,7 @@ impl BpfPass for SpectreMitigationPass {
         let mut addr_map = vec![0usize; orig_len + 1];
         let mut insertions = 0usize;
 
-        let mut barrier_insn = BpfInsn::call_kfunc(btf_id);
+        let mut barrier_insn = BpfInsn::call_kinsn_with_off(btf_id, 0);
 
         let mut pc = 0;
         while pc < orig_len {
@@ -107,11 +107,11 @@ impl BpfPass for SpectreMitigationPass {
                 } else if program.insns[next_pc].is_kinsn_sidecar() {
                     next_pc + 1 < orig_len
                         && program.insns[next_pc + 1].is_call()
-                        && program.insns[next_pc + 1].src_reg() == BPF_PSEUDO_KFUNC_CALL
+                        && program.insns[next_pc + 1].src_reg() == BPF_PSEUDO_KINSN_CALL
                         && program.insns[next_pc + 1].imm == btf_id
                 } else {
                     program.insns[next_pc].is_call()
-                        && program.insns[next_pc].src_reg() == BPF_PSEUDO_KFUNC_CALL
+                        && program.insns[next_pc].src_reg() == BPF_PSEUDO_KINSN_CALL
                         && program.insns[next_pc].imm == btf_id
                 };
 
@@ -121,7 +121,7 @@ impl BpfPass for SpectreMitigationPass {
                             barrier_insn.off = ensure_module_fd_slot(program, fd);
                         }
                     }
-                    new_insns.extend_from_slice(&emit_packed_kfunc_call_with_off(
+                    new_insns.extend_from_slice(&emit_packed_kinsn_call_with_off(
                         0,
                         btf_id,
                         barrier_insn.off,

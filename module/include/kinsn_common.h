@@ -34,6 +34,7 @@
 
 #include <linux/bpf.h>
 #include <linux/btf.h>
+#include <linux/filter.h>
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/string.h>
@@ -65,6 +66,14 @@ static __always_inline u8 kinsn_payload_reg(u64 payload, u8 shift)
 static __always_inline u8 kinsn_payload_u8(u64 payload, u8 shift)
 {
 	return (payload >> shift) & 0xff;
+}
+
+static __always_inline void
+kinsn_init_packed_call(struct bpf_kinsn_call *call, u64 payload)
+{
+	memset(call, 0, sizeof(*call));
+	call->encoding = BPF_KINSN_ENC_PACKED_CALL;
+	call->payload = payload;
 }
 
 static __always_inline void
@@ -302,6 +311,23 @@ static void __exit prefix##_exit(void)					\
 	for (i = n - 1; i >= 0; i--)					\
 		bpf_unregister_kinsn_ops(				\
 			entries[i].kfunc_name);				\
+}									\
+									\
+module_init(prefix##_init);						\
+module_exit(prefix##_exit);						\
+									\
+MODULE_DESCRIPTION(desc);						\
+MODULE_LICENSE("GPL");							\
+MODULE_AUTHOR("BpfReJIT")
+
+#define DEFINE_KINSN_V2_MODULE(prefix, desc)				\
+static int __init prefix##_init(void)					\
+{									\
+	return 0;							\
+}									\
+									\
+static void __exit prefix##_exit(void)					\
+{									\
 }									\
 									\
 module_init(prefix##_init);						\

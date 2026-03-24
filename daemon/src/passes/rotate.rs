@@ -5,7 +5,7 @@ use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
-use super::utils::{emit_packed_kfunc_call_with_off, ensure_module_fd_slot, fixup_all_branches};
+use super::utils::{emit_packed_kinsn_call_with_off, ensure_module_fd_slot, fixup_all_branches};
 
 /// ROTATE optimization pass: replaces shift+OR rotate patterns with
 /// bpf_rotate64() kfunc calls. JIT inlines the kfunc as a native rotate.
@@ -135,8 +135,9 @@ impl BpfPass for RotatePass {
                 // Emit: bpf_rotate64(val_reg, shift_amount) -> dst_reg
                 let payload = (site.dst_reg as u64)
                     | ((site.val_reg as u64) << 4)
-                    | ((site.shift_amount as u64) << 8);
-                let replacement = emit_packed_kfunc_call_with_off(payload, btf_id, kfunc_off);
+                    | ((site.shift_amount as u64) << 8)
+                    | ((site.tmp_reg as u64) << 16);
+                let replacement = emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off);
                 new_insns.extend_from_slice(&replacement);
 
                 // Map old PCs in the site range.

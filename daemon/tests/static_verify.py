@@ -512,9 +512,19 @@ def main(argv: Sequence[str] | None = None) -> int:
             runner_binary,
             spec_payload=batch_spec,
             cwd=ROOT_DIR,
+            capture_logs=True,
+            write_progress=True,
         )
         if not batch_result["ok"]:
-            raise RuntimeError(batch_result["error"] or "static verify batch runner failed")
+            raise RuntimeError(
+                (batch_result["error"] or "static verify batch runner failed")
+                + "\n"
+                + "batch runner stdout tail:\n"
+                + (str(batch_result.get("stdout") or "").strip() or "<empty>")
+                + "\n"
+                + "batch runner stderr tail:\n"
+                + (str(batch_result.get("stderr") or "").strip() or "<empty>")
+            )
         batch_jobs = batch_result_map(batch_result.get("result"))
         for index, entry in enumerate(objects, start=1):
             job_id = f"object-{index:04d}"

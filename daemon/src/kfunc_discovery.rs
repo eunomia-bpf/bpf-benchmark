@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-//! Kfunc auto-discovery via `/sys/kernel/btf/` module BTF scanning.
+//! kinsn descriptor auto-discovery via `/sys/kernel/btf/` module BTF scanning.
 //!
-//! Scans loaded kernel modules for known kinsn kfuncs (bpf_rotate64, etc.)
-//! and populates a `KfuncRegistry` with their BTF type IDs and module FDs.
+//! Scans loaded kernel modules for known kinsn descriptor variables and
+//! populates a `KfuncRegistry` with their BTF type IDs and module FDs.
 
 use std::collections::HashMap;
 use std::fs;
@@ -14,17 +14,22 @@ use anyhow::{bail, Context, Result};
 use crate::insn::BPF_KINSN_ENC_PACKED_CALL;
 use crate::pass::KfuncRegistry;
 
-// ── Known kfunc → module mapping ─────────────────────────────────────
+// ── Known kinsn descriptor → module mapping ──────────────────────────
 
-/// A kfunc we want to discover: (kfunc_name, module_name).
-const KNOWN_KFUNCS: &[(&str, &str)] = &[
-    ("bpf_rotate64", "bpf_rotate"),
-    ("bpf_select64", "bpf_select"),
-    ("bpf_extract64", "bpf_extract"),
-    ("bpf_endian_load16", "bpf_endian"),
-    ("bpf_endian_load32", "bpf_endian"),
-    ("bpf_endian_load64", "bpf_endian"),
-    ("bpf_speculation_barrier", "bpf_barrier"),
+/// A kinsn target we want to discover:
+/// (registry_key, descriptor_var_name, module_name).
+const KNOWN_KINSNS: &[(&str, &str, &str)] = &[
+    ("bpf_rotate64", "bpf_rotate64_desc", "bpf_rotate"),
+    ("bpf_select64", "bpf_select64_desc", "bpf_select"),
+    ("bpf_extract64", "bpf_extract64_desc", "bpf_extract"),
+    ("bpf_endian_load16", "bpf_endian_load16_desc", "bpf_endian"),
+    ("bpf_endian_load32", "bpf_endian_load32_desc", "bpf_endian"),
+    ("bpf_endian_load64", "bpf_endian_load64_desc", "bpf_endian"),
+    (
+        "bpf_speculation_barrier",
+        "bpf_speculation_barrier_desc",
+        "bpf_barrier",
+    ),
 ];
 
 // ── BTF constants (synced from vendor/linux-framework/include/uapi/linux/btf.h) ──
@@ -178,7 +183,7 @@ fn get_vmlinux_base_info() -> Result<(u32, u32)> {
     Ok((hdr.str_len, type_cnt.saturating_sub(1)))
 }
 
-/// Parse a (possibly split) BTF blob and find the BTF type ID for a FUNC
+/// Parse a (possibly split) BTF blob and find the BTF type ID for `kind`
 /// with the given name. Returns the 1-based type ID, or None if not found.
 ///
 /// `base_str_off` is the vmlinux string section length. For split module BTF,
@@ -189,9 +194,10 @@ fn get_vmlinux_base_info() -> Result<(u32, u32)> {
 /// `type_id_bias` is `btf__type_cnt(base_btf) - 1` for split BTF. This turns
 /// the module-local type order into the global type ID space expected by the
 /// verifier.
-fn find_func_btf_id(
+fn find_kind_btf_id(
     btf_data: &[u8],
-    func_name: &str,
+    type_name: &str,
+    kind_wanted: u32,
     base_str_off: u32,
     type_id_bias: u32,
 ) -> Option<i32> {
@@ -230,7 +236,7 @@ fn find_func_btf_id(
 
         let kind = bt.kind();
 
-        if kind == BTF_KIND_FUNC {
+        if kind == kind_wanted {
             // Resolve name from string section.
             // For split BTF, name_off >= base_str_off means a module-local string
             // at local offset (name_off - base_str_off).
@@ -248,7 +254,7 @@ fn find_func_btf_id(
                     .position(|&b| b == 0)
                     .unwrap_or(name_bytes.len());
                 if let Ok(name) = std::str::from_utf8(&name_bytes[..nul_pos]) {
-                    if name == func_name {
+                    if name == type_name {
                         return Some(type_id + type_id_bias as i32);
                     }
                 }
@@ -268,6 +274,36 @@ fn find_func_btf_id(
     }
 
     None
+}
+
+fn find_func_btf_id(
+    btf_data: &[u8],
+    func_name: &str,
+    base_str_off: u32,
+    type_id_bias: u32,
+) -> Option<i32> {
+    find_kind_btf_id(
+        btf_data,
+        func_name,
+        BTF_KIND_FUNC,
+        base_str_off,
+        type_id_bias,
+    )
+}
+
+fn find_var_btf_id(
+    btf_data: &[u8],
+    var_name: &str,
+    base_str_off: u32,
+    type_id_bias: u32,
+) -> Option<i32> {
+    find_kind_btf_id(
+        btf_data,
+        var_name,
+        BTF_KIND_VAR,
+        base_str_off,
+        type_id_bias,
+    )
 }
 
 // ── Module BTF file operations ───────────────────────────────────────
@@ -292,11 +328,7 @@ pub struct DiscoveryResult {
     pub log: Vec<String>,
 }
 
-/// Discover available kinsn kfuncs by scanning `/sys/kernel/btf/`.
-///
-/// For each known kfunc, checks whether the corresponding kernel module's
-/// BTF is present, parses it to find the FUNC type ID, and opens an FD
-/// for REJIT's fd_array.
+/// Discover available kinsn descriptors by scanning `/sys/kernel/btf/`.
 pub fn discover_kfuncs() -> DiscoveryResult {
     let mut registry = KfuncRegistry {
         rotate64_btf_id: -1,
@@ -336,12 +368,12 @@ pub fn discover_kfuncs() -> DiscoveryResult {
         }
     };
 
-    for &(kfunc_name, module_name) in KNOWN_KFUNCS {
+    for &(registry_key, desc_name, module_name) in KNOWN_KINSNS {
         let btf_path = Path::new("/sys/kernel/btf").join(module_name);
         if !btf_path.exists() {
             log.push(format!(
                 "  {}: module '{}' not loaded (no BTF at {})",
-                kfunc_name,
+                registry_key,
                 module_name,
                 btf_path.display()
             ));
@@ -352,18 +384,18 @@ pub fn discover_kfuncs() -> DiscoveryResult {
         let btf_data = match read_module_btf(module_name) {
             Ok(data) => data,
             Err(e) => {
-                log.push(format!("  {}: failed to read BTF: {:#}", kfunc_name, e));
+                log.push(format!("  {}: failed to read BTF: {:#}", registry_key, e));
                 continue;
             }
         };
 
-        let btf_id = match find_func_btf_id(&btf_data, kfunc_name, base_str_off, base_type_id_bias)
+        let btf_id = match find_var_btf_id(&btf_data, desc_name, base_str_off, base_type_id_bias)
         {
             Some(id) => id,
             None => {
                 log.push(format!(
-                    "  {}: BTF_KIND_FUNC not found in module '{}'",
-                    kfunc_name, module_name
+                    "  {}: BTF_KIND_VAR '{}' not found in module '{}'",
+                    registry_key, desc_name, module_name
                 ));
                 continue;
             }
@@ -387,7 +419,7 @@ pub fn discover_kfuncs() -> DiscoveryResult {
                 Err(e) => {
                     log.push(format!(
                         "  {}: failed to get BPF BTF fd for module '{}': {:#}",
-                        kfunc_name, module_name, e
+                        registry_key, module_name, e
                     ));
                     continue;
                 }
@@ -395,12 +427,12 @@ pub fn discover_kfuncs() -> DiscoveryResult {
         };
 
         log.push(format!(
-            "  {}: found in '{}' btf_id={} fd={}",
-            kfunc_name, module_name, btf_id, fd
+            "  {}: descriptor '{}' found in '{}' btf_id={} fd={}",
+            registry_key, desc_name, module_name, btf_id, fd
         ));
 
         // Assign to registry.
-        match kfunc_name {
+        match registry_key {
             "bpf_rotate64" => registry.rotate64_btf_id = btf_id,
             "bpf_select64" => registry.select64_btf_id = btf_id,
             "bpf_extract64" => registry.extract64_btf_id = btf_id,
@@ -411,11 +443,11 @@ pub fn discover_kfuncs() -> DiscoveryResult {
             _ => {}
         }
 
-        // Store per-kfunc module FD for REJIT fd_array.
-        registry.kfunc_module_fds.insert(kfunc_name.to_string(), fd);
+        // Store per-target module FD for REJIT fd_array.
+        registry.kfunc_module_fds.insert(registry_key.to_string(), fd);
         registry
             .kfunc_supported_encodings
-            .insert(kfunc_name.to_string(), BPF_KINSN_ENC_PACKED_CALL);
+            .insert(registry_key.to_string(), BPF_KINSN_ENC_PACKED_CALL);
 
         // Legacy: keep the first module FD for backward compat.
         if registry.module_fd.is_none() {
@@ -933,7 +965,7 @@ mod tests {
         // If kinsn modules are not loaded, all BTF IDs should be -1.
         // If they are loaded, they should be > 0.
         // Either way, the function should not panic or return garbage.
-        for &(kfunc_name, _) in KNOWN_KFUNCS {
+        for &(kfunc_name, _, _) in KNOWN_KINSNS {
             let btf_id = match kfunc_name {
                 "bpf_rotate64" => result.registry.rotate64_btf_id,
                 "bpf_select64" => result.registry.select64_btf_id,

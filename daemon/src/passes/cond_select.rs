@@ -5,7 +5,7 @@ use crate::analysis::BranchTargetAnalysis;
 use crate::insn::*;
 use crate::pass::*;
 
-use super::utils::{emit_packed_kfunc_call_with_off, ensure_module_fd_slot, fixup_all_branches};
+use super::utils::{emit_packed_kinsn_call_with_off, ensure_module_fd_slot, fixup_all_branches};
 
 /// COND_SELECT pass: replaces branch+mov diamond patterns with
 /// bpf_select64() kfunc calls (lowered to CMOV by the JIT).
@@ -282,7 +282,7 @@ impl BpfPass for CondSelectPass {
                     | ((a_reg as u64) << 4)
                     | ((b_reg as u64) << 8)
                     | ((site.cond_reg as u64) << 12);
-                let replacement = emit_packed_kfunc_call_with_off(payload, btf_id, kfunc_off);
+                let replacement = emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off);
                 new_insns.extend_from_slice(&replacement);
 
                 // Map old PCs in the site range.

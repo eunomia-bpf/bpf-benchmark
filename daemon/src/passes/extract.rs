@@ -5,7 +5,7 @@ use crate::analysis::BranchTargetAnalysis;
 use crate::insn::*;
 use crate::pass::*;
 
-use super::utils::{emit_packed_kfunc_call_with_off, ensure_module_fd_slot, fixup_all_branches};
+use super::utils::{emit_packed_kinsn_call_with_off, ensure_module_fd_slot, fixup_all_branches};
 
 /// EXTRACT optimization pass: replaces RSH+AND bitfield extraction patterns
 /// with bpf_extract64() kfunc calls.
@@ -198,7 +198,7 @@ impl BpfPass for ExtractPass {
                 let payload = (site.dst_reg as u64)
                     | ((site.shift_amount as u64) << 8)
                     | ((site.bit_len as u64) << 16);
-                let replacement = emit_packed_kfunc_call_with_off(payload, btf_id, kfunc_off);
+                let replacement = emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off);
                 new_insns.extend_from_slice(&replacement);
 
                 // Map old PCs in the site range.

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 //! Shared utilities for BPF rewrite passes.
 //!
-//! Contains branch fixup, kfunc call emission, and instruction iteration
+//! Contains branch fixup, kinsn call emission, and instruction iteration
 //! helpers that are used by multiple passes.
 
 use crate::insn::*;
@@ -49,19 +49,15 @@ pub fn fixup_all_branches(new_insns: &mut [BpfInsn], old_insns: &[BpfInsn], addr
     }
 }
 
-// ── Kfunc call emission ────────────────────────────────────────────
+// ── Kinsn call emission ────────────────────────────────────────────
 
 /// Emit a packed-ABI kinsn call using a sidecar pseudo-insn immediately
-/// before the kfunc CALL. The result register is part of `payload`, so no
+/// before the kinsn CALL. The result register is part of `payload`, so no
 /// extra `mov dst, r0` is emitted here.
-pub fn emit_packed_kfunc_call_with_off(
-    payload: u64,
-    kfunc_btf_id: i32,
-    kfunc_off: i16,
-) -> Vec<BpfInsn> {
+pub fn emit_packed_kinsn_call_with_off(payload: u64, kinsn_btf_id: i32, kinsn_off: i16) -> Vec<BpfInsn> {
     vec![
         BpfInsn::kinsn_sidecar(payload),
-        BpfInsn::call_kfunc_with_off(kfunc_btf_id, kfunc_off),
+        BpfInsn::call_kinsn_with_off(kinsn_btf_id, kinsn_off),
     ]
 }
 
@@ -136,9 +132,9 @@ mod tests {
     }
 
     #[test]
-    fn test_emit_packed_kfunc_call_with_module_off() {
+    fn test_emit_packed_kinsn_call_with_module_off() {
         let payload = 0x12345;
-        let insns = emit_packed_kfunc_call_with_off(payload, 1234, 2);
+        let insns = emit_packed_kinsn_call_with_off(payload, 1234, 2);
 
         assert_eq!(insns.len(), 2);
         assert!(insns[0].is_kinsn_sidecar());
@@ -151,9 +147,9 @@ mod tests {
     }
 
     #[test]
-    fn test_emit_packed_kfunc_call_wide_payload() {
+    fn test_emit_packed_kinsn_call_wide_payload() {
         let payload = 0xabcde12345;
-        let insns = emit_packed_kfunc_call_with_off(payload, 5555, 0);
+        let insns = emit_packed_kinsn_call_with_off(payload, 5555, 0);
 
         assert_eq!(insns.len(), 2);
         assert!(insns[0].is_kinsn_sidecar());

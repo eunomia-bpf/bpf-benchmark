@@ -5,7 +5,7 @@ use crate::analysis::BranchTargetAnalysis;
 use crate::insn::*;
 use crate::pass::*;
 
-use super::utils::{emit_packed_kfunc_call_with_off, ensure_module_fd_slot, fixup_all_branches};
+use super::utils::{emit_packed_kinsn_call_with_off, ensure_module_fd_slot, fixup_all_branches};
 
 /// BPF ALU endian operation code.
 const BPF_END: u8 = 0xd0;
@@ -162,7 +162,7 @@ fn emit_endian_fusion_call(
         src_reg
     } else if src_reg != dst_reg && src_reg != 10 {
         out.push(BpfInsn::alu64_imm(BPF_ADD, src_reg, offset as i32));
-        out.extend_from_slice(&emit_packed_kfunc_call_with_off(
+        out.extend_from_slice(&emit_packed_kinsn_call_with_off(
             endian_payload(dst_reg, src_reg),
             btf_id,
             kfunc_off,
@@ -177,7 +177,7 @@ fn emit_endian_fusion_call(
         dst_reg
     };
 
-    out.extend_from_slice(&emit_packed_kfunc_call_with_off(
+    out.extend_from_slice(&emit_packed_kinsn_call_with_off(
         endian_payload(dst_reg, base_reg),
         btf_id,
         kfunc_off,

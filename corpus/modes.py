@@ -523,7 +523,7 @@ def build_test_run_batch_job(
     daemon_socket: str | None = None,
     prepared_key: str | None = None,
     prepared_ref: str | None = None,
-    release_prepared: bool = True,
+    prepared_group: str | None = None,
 ) -> dict[str, Any]:
     job: dict[str, Any] = {
         "id": job_id,
@@ -548,7 +548,8 @@ def build_test_run_batch_job(
         job["prepared_key"] = prepared_key
     if prepared_ref is not None:
         job["prepared_ref"] = prepared_ref
-        job["release_prepared"] = bool(release_prepared)
+    if prepared_group is not None:
+        job["prepared_group"] = prepared_group
     return job
 
 
@@ -625,6 +626,8 @@ def build_target_batch_plan(
 
     for chunk_start in range(0, len(target_entries), parallel_jobs):
         chunk = target_entries[chunk_start : chunk_start + parallel_jobs]
+        baseline_group = f"chunk-{chunk_start // parallel_jobs:04d}:baseline"
+        v5_group = f"chunk-{chunk_start // parallel_jobs:04d}:v5"
 
         for entry in chunk:
             target = entry["target"]
@@ -645,6 +648,11 @@ def build_target_batch_plan(
                     compile_only=True,
                     prepared_key=(
                         entry["baseline_prepared_key"]
+                        if enable_exec and target.get("can_test_run")
+                        else None
+                    ),
+                    prepared_group=(
+                        baseline_group
                         if enable_exec and target.get("can_test_run")
                         else None
                     ),
@@ -672,7 +680,7 @@ def build_target_batch_plan(
                         btf_custom_path=btf_custom_path,
                         compile_only=False,
                         prepared_ref=entry["baseline_prepared_key"],
-                        release_prepared=True,
+                        prepared_group=baseline_group,
                     )
                 )
 
@@ -723,6 +731,11 @@ def build_target_batch_plan(
                             if enable_exec and target.get("can_test_run")
                             else None
                         ),
+                        prepared_group=(
+                            v5_group
+                            if enable_exec and target.get("can_test_run")
+                            else None
+                        ),
                     )
                 )
 
@@ -748,7 +761,7 @@ def build_target_batch_plan(
                         compile_only=False,
                         daemon_socket=daemon_socket,
                         prepared_ref=entry["v5_prepared_key"],
-                        release_prepared=True,
+                        prepared_group=v5_group,
                     )
                 )
 
