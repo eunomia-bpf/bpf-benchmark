@@ -72,21 +72,13 @@ BENCH      ?=
 BZIMAGE_PATH := $(if $(filter /%,$(BZIMAGE)),$(BZIMAGE),$(ROOT_DIR)/$(BZIMAGE))
 DAEMON_PATH  := $(if $(filter /%,$(DAEMON)),$(DAEMON),$(ROOT_DIR)/$(DAEMON))
 MICRO_RUNNER := $(RUNNER_DIR)/build/micro_exec
-VMLINUX_PATH := $(KERNEL_DIR)/vmlinux
 KERNEL_SYMVERS_PATH := $(KERNEL_DIR)/Module.symvers
 NPROC        ?= $(shell nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
 DEFCONFIG_SRC := $(ROOT_DIR)/vendor/bpfrejit_defconfig
 
 # Results
 MICRO_RESULTS_DIR      := $(ROOT_DIR)/micro/results
-CORPUS_RESULTS_DIR     := $(ROOT_DIR)/corpus/results
-E2E_RESULTS_DIR        := $(ROOT_DIR)/e2e/results
 SMOKE_OUTPUT           := $(MICRO_RESULTS_DIR)/smoke.json
-VM_MICRO_SMOKE_OUTPUT  := $(MICRO_RESULTS_DIR)/vm_micro_smoke.json
-VM_MICRO_OUTPUT        := $(MICRO_RESULTS_DIR)/vm_micro.json
-VM_CORPUS_OUTPUT_JSON  := $(CORPUS_RESULTS_DIR)/vm_corpus.json
-VM_CORPUS_OUTPUT_MD    := $(CORPUS_RESULTS_DIR)/vm_corpus.md
-VM_STATIC_OUTPUT       := $(ROOT_DIR)/daemon/tests/results/static_verify.json
 
 # Python / venv
 _VENV_CANDIDATES := $(HOME)/workspace/.venv $(HOME)/.venv .venv venv
@@ -95,16 +87,8 @@ VENV ?= $(_VENV_FOUND)
 PYTHON := $(if $(VENV),$(VENV)/bin/python3,python3)
 VENV_ACTIVATE := $(if $(VENV),source "$(VENV)/bin/activate" &&,)
 
-# VNG / VM
-VNG ?= $(ROOT_DIR)/runner/scripts/vng-wrapper.sh
-VM_INIT := $(VENV_ACTIVATE) "$(ROOT_DIR)/module/load_all.sh" 2>/dev/null || true;
-
 # Benchmark args
-BENCH_FLAGS      := $(foreach b,$(BENCH),--bench $(b))
-MICRO_ARGS       := --iterations $(ITERATIONS) --warmups $(WARMUPS) --repeat $(REPEAT) $(BENCH_FLAGS)
 LOCAL_SMOKE_ARGS := --bench simple --iterations 1 --warmups 0 --repeat 10
-VM_SMOKE_ARGS    := --iterations 1 --warmups 0 --repeat 50
-STATIC_VERIFY_ARGS ?=
 
 # Incremental rebuild sources
 MICRO_RUNNER_SOURCES := $(wildcard $(RUNNER_DIR)/src/*.cpp $(RUNNER_DIR)/include/*.hpp $(RUNNER_DIR)/CMakeLists.txt)
@@ -130,7 +114,7 @@ help:
 	@echo "VM x86: vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all validate"
 	@echo "ARM64:  vm-arm64-smoke vm-arm64-selftest"
 	@echo "AWS:    aws-arm64-launch aws-arm64-setup aws-arm64-benchmark aws-arm64-terminate aws-arm64"
-	@echo "Params: ITERATIONS=$(ITERATIONS) WARMUPS=$(WARMUPS) REPEAT=$(REPEAT) BENCH=\"...\""
+	@echo "Params: ITERATIONS=$(ITERATIONS) WARMUPS=$(WARMUPS) REPEAT=$(REPEAT) BENCH=\"...\" TARGET=\"x86|arm64|aws|...\""
 
 # ── Build ──────────────────────────────────────────────────────────────────────
 all:
@@ -209,70 +193,50 @@ validate:
 	$(MAKE) vm-micro-smoke
 
 # ── VM (x86) ──────────────────────────────────────────────────────────────────
-vm-test: kernel-tests $(BZIMAGE_PATH) kinsn-modules
-	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
-		bash -lc '$(VM_INIT) "$(ROOT_DIR)/runner/scripts/run_all_tests.sh" "$(ROOT_DIR)"'
+vm-test:
+	$(MAKE) -C "$(RUNNER_DIR)" vm-test \
+		PYTHON="$(PYTHON)" VENV="$(VENV)" \
+		BZIMAGE="$(BZIMAGE)" TARGET="$(TARGET)"
 
-vm-selftest: kernel-tests $(BZIMAGE_PATH) kinsn-modules
-	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
-		bash -lc '$(VM_INIT) "$(ROOT_DIR)/runner/scripts/vm-selftest.sh" \
-			"$(ROOT_DIR)" \
-			"$(KERNEL_TEST_DIR)/build/test_recompile" \
-			"$(ROOT_DIR)/tests/unittest" \
-			"$(KINSN_MODULE_DIR)"'
+vm-selftest:
+	$(MAKE) -C "$(RUNNER_DIR)" vm-selftest \
+		PYTHON="$(PYTHON)" VENV="$(VENV)" \
+		BZIMAGE="$(BZIMAGE)" TARGET="$(TARGET)"
 
-vm-static-test: $(MICRO_BPF_STAMP) $(DAEMON_PATH) $(BZIMAGE_PATH) kinsn-modules
-	mkdir -p "$(ROOT_DIR)/daemon/tests/results"
-	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
-		bash -lc 'cd "$(ROOT_DIR)" && $(VM_INIT) \
-			python3 "$(ROOT_DIR)/daemon/tests/static_verify.py" \
-			--daemon-binary "$(DAEMON_PATH)" \
-			--output "$(VM_STATIC_OUTPUT)" \
-			$(STATIC_VERIFY_ARGS)'
+vm-static-test:
+	$(MAKE) -C "$(RUNNER_DIR)" vm-static-test \
+		PYTHON="$(PYTHON)" VENV="$(VENV)" \
+		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" TARGET="$(TARGET)" \
+		STATIC_VERIFY_ARGS='$(STATIC_VERIFY_ARGS)'
 
 NEGATIVE_TEST_DIR := $(ROOT_DIR)/tests/negative
 FUZZ_ROUNDS ?= 1000
 
-vm-negative-test: $(BZIMAGE_PATH)
-	$(MAKE) -C "$(NEGATIVE_TEST_DIR)"
-	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
-		bash -lc '$(VM_INIT) \
-			echo "=== adversarial_rejit ===" && \
-			"$(NEGATIVE_TEST_DIR)/build/adversarial_rejit" && \
-			echo "=== fuzz_rejit ($(FUZZ_ROUNDS) rounds) ===" && \
-			"$(NEGATIVE_TEST_DIR)/build/fuzz_rejit" $(FUZZ_ROUNDS)'
+vm-negative-test:
+	$(MAKE) -C "$(RUNNER_DIR)" vm-negative-test \
+		PYTHON="$(PYTHON)" VENV="$(VENV)" \
+		BZIMAGE="$(BZIMAGE)" TARGET="$(TARGET)" FUZZ_ROUNDS="$(FUZZ_ROUNDS)"
 
-vm-micro-smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(DAEMON_PATH) $(BZIMAGE_PATH) kinsn-modules
-	mkdir -p "$(MICRO_RESULTS_DIR)"
-	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
-		bash -lc 'cd "$(ROOT_DIR)" && $(VM_INIT) \
-			"$(DAEMON_PATH)" --pgo serve --socket "$(DAEMON_SOCKET)" & DAEMON_PID=$$!; sleep 0.5; \
-			trap "kill $$DAEMON_PID 2>/dev/null; rm -f $(DAEMON_SOCKET)" EXIT; \
-			python3 "$(MICRO_DIR)/driver.py" --runtime kernel --runtime kernel-rejit \
-			--daemon-socket "$(DAEMON_SOCKET)" $(VM_SMOKE_ARGS) --output "$(VM_MICRO_SMOKE_OUTPUT)"'
+vm-micro-smoke:
+	$(MAKE) -C "$(RUNNER_DIR)" vm-micro-smoke \
+		PYTHON="$(PYTHON)" VENV="$(VENV)" \
+		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" DAEMON_SOCKET="$(DAEMON_SOCKET)" TARGET="$(TARGET)"
 
-vm-micro: $(MICRO_RUNNER) $(MICRO_BPF_STAMP) $(DAEMON_PATH) $(BZIMAGE_PATH) kinsn-modules
-	mkdir -p "$(MICRO_RESULTS_DIR)"
-	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
-		bash -lc 'cd "$(ROOT_DIR)" && $(VM_INIT) \
-			"$(DAEMON_PATH)" --pgo serve --socket "$(DAEMON_SOCKET)" & DAEMON_PID=$$!; sleep 0.5; \
-			trap "kill $$DAEMON_PID 2>/dev/null; rm -f $(DAEMON_SOCKET)" EXIT; \
-			python3 "$(MICRO_DIR)/driver.py" --runtime llvmbpf --runtime kernel --runtime kernel-rejit \
-			--daemon-socket "$(DAEMON_SOCKET)" $(MICRO_ARGS) --output "$(VM_MICRO_OUTPUT)"'
+vm-micro:
+	$(MAKE) -C "$(RUNNER_DIR)" vm-micro \
+		PYTHON="$(PYTHON)" VENV="$(VENV)" \
+		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" DAEMON_SOCKET="$(DAEMON_SOCKET)" TARGET="$(TARGET)" \
+		ITERATIONS="$(ITERATIONS)" WARMUPS="$(WARMUPS)" REPEAT="$(REPEAT)" BENCH="$(BENCH)"
 
-vm-corpus: $(MICRO_RUNNER) $(DAEMON_PATH) $(BZIMAGE_PATH) kinsn-modules
-	mkdir -p "$(CORPUS_RESULTS_DIR)"
-	$(VENV_ACTIVATE) python3 "$(ROOT_DIR)/corpus/driver.py" packet \
-		--kernel-image "$(BZIMAGE_PATH)" --runner "$(MICRO_RUNNER)" --daemon "$(DAEMON_PATH)" \
-		--vng "$(VNG)" --btf-custom-path "$(VMLINUX_PATH)" --repeat "$(REPEAT)" \
-		--output-json "$(VM_CORPUS_OUTPUT_JSON)" --output-md "$(VM_CORPUS_OUTPUT_MD)"
+vm-corpus:
+	$(MAKE) -C "$(RUNNER_DIR)" vm-corpus \
+		PYTHON="$(PYTHON)" VENV="$(VENV)" \
+		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" TARGET="$(TARGET)" REPEAT="$(REPEAT)"
 
-vm-e2e: $(MICRO_RUNNER) $(DAEMON_PATH) $(BZIMAGE_PATH) kinsn-modules
-	mkdir -p "$(E2E_RESULTS_DIR)"
-	@# Pre-download E2E tool binaries on the host so the VM guest can access them
-	bash "$(ROOT_DIR)/e2e/cases/tracee/setup.sh" || true
-	$(VNG) --run "$(BZIMAGE_PATH)" --rwdir "$(ROOT_DIR)" -- \
-		bash -lc 'cd "$(ROOT_DIR)" && $(VM_INIT) python3 "$(ROOT_DIR)/e2e/run.py" all'
+vm-e2e:
+	$(MAKE) -C "$(RUNNER_DIR)" vm-e2e \
+		PYTHON="$(PYTHON)" VENV="$(VENV)" \
+		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" TARGET="$(TARGET)"
 
 vm-all:
 	$(MAKE) vm-test
@@ -370,11 +334,11 @@ aws-arm64: cross-arm64
 
 # ── Clean ──────────────────────────────────────────────────────────────────────
 clean:
+	$(MAKE) -C "$(RUNNER_DIR)" clean
 	$(MAKE) -C "$(MICRO_DIR)" clean
 	rm -f "$(MICRO_BPF_STAMP)"
 	cargo clean --manifest-path "$(DAEMON_DIR)/Cargo.toml"
 	$(MAKE) -C "$(KERNEL_TEST_DIR)" clean
 	$(MAKE) -C "$(KERNEL_DIR)" clean
-	rm -f "$(SMOKE_OUTPUT)" "$(VM_MICRO_SMOKE_OUTPUT)" "$(VM_MICRO_OUTPUT)" \
-		"$(VM_CORPUS_OUTPUT_JSON)" "$(VM_CORPUS_OUTPUT_MD)" "$(ARM64_CONFIG_LINK)" "$(ARM64_IMAGE_LINK)"
+	rm -f "$(SMOKE_OUTPUT)" "$(ARM64_CONFIG_LINK)" "$(ARM64_IMAGE_LINK)"
 	rm -rf "$(ARM64_BUILD_DIR)" "$(KERNEL_TEST_DIR)/build-arm64" "$(ARM64_CROSSBUILD_OUTPUT_DIR)"
