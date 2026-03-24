@@ -424,12 +424,15 @@ mod tests {
         assert_eq!(result.sites_applied, 1);
 
         // Verify a kfunc call exists.
-        let has_kfunc_call = prog.insns.iter().any(|i| i.is_call() && i.src_reg() == 2);
+        let has_kfunc_call = prog
+            .insns
+            .iter()
+            .any(|i| i.is_call() && i.src_reg() == BPF_PSEUDO_KINSN_CALL);
         assert!(has_kfunc_call, "expected a kfunc call in the output");
         let call_insn = prog
             .insns
             .iter()
-            .find(|i| i.is_call() && i.src_reg() == 2)
+            .find(|i| i.is_call() && i.src_reg() == BPF_PSEUDO_KINSN_CALL)
             .unwrap();
         assert_eq!(call_insn.imm, 7777);
 
@@ -458,7 +461,10 @@ mod tests {
             "packed ABI should apply without save/restore"
         );
         assert_eq!(result.sites_applied, 1);
-        let has_kfunc_call = prog.insns.iter().any(|i| i.is_call() && i.src_reg() == 2);
+        let has_kfunc_call = prog
+            .insns
+            .iter()
+            .any(|i| i.is_call() && i.src_reg() == BPF_PSEUDO_KINSN_CALL);
         assert!(has_kfunc_call);
     }
 
@@ -620,7 +626,7 @@ mod tests {
         let call = prog
             .insns
             .iter()
-            .find(|i| i.is_call() && i.src_reg() == 2)
+            .find(|i| i.is_call() && i.src_reg() == BPF_PSEUDO_KINSN_CALL)
             .unwrap();
         assert_eq!(call.imm, 7777);
         assert!(prog.insns.last().unwrap().is_exit());
@@ -660,7 +666,7 @@ mod tests {
         let call = prog
             .insns
             .iter()
-            .find(|i| i.is_call() && i.src_reg() == 2)
+            .find(|i| i.is_call() && i.src_reg() == BPF_PSEUDO_KINSN_CALL)
             .unwrap();
         assert_eq!(call.imm, 7777);
     }
@@ -732,7 +738,9 @@ mod tests {
         let call_count = prog
             .insns
             .iter()
-            .filter(|i| i.is_call() && i.src_reg() == 2 && i.imm == 7777)
+            .filter(|i| {
+                i.is_call() && i.src_reg() == BPF_PSEUDO_KINSN_CALL && i.imm == 7777
+            })
             .count();
         assert_eq!(call_count, 2);
         assert!(prog.insns.last().unwrap().is_exit());

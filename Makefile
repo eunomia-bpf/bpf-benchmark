@@ -100,7 +100,7 @@ MICRO_BPF_STAMP      := $(MICRO_DIR)/programs/.build.stamp
 .PHONY: all runner micro daemon kernel kernel-arm64 kernel-tests kinsn-modules \
 	corpus-fetch corpus-build-objects corpus-build \
 	daemon-tests python-tests check smoke validate \
-	vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
+	vm-shell vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 	arm64-worktree arm64-rootfs arm64-crossbuild-image cross-arm64 selftest-arm64 \
 	vm-arm64-smoke vm-arm64-selftest \
 	aws-arm64-launch aws-arm64-setup aws-arm64-benchmark aws-arm64-terminate aws-arm64 \
@@ -111,7 +111,7 @@ help:
 	@echo "Build:  all runner micro daemon kernel kinsn-modules kernel-tests kernel-arm64 cross-arm64"
 	@echo "Repos:  corpus-fetch corpus-build-objects corpus-build REPOS=\"tracee tetragon ...\""
 	@echo "Test:   smoke daemon-tests python-tests check"
-	@echo "VM x86: vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all validate"
+	@echo "VM x86: vm-shell vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all validate"
 	@echo "ARM64:  vm-arm64-smoke vm-arm64-selftest"
 	@echo "AWS:    aws-arm64-launch aws-arm64-setup aws-arm64-benchmark aws-arm64-terminate aws-arm64"
 	@echo "Params: ITERATIONS=$(ITERATIONS) WARMUPS=$(WARMUPS) REPEAT=$(REPEAT) BENCH=\"...\" TARGET=\"x86|arm64|aws|...\""
@@ -193,6 +193,12 @@ validate:
 	$(MAKE) vm-micro-smoke
 
 # ── VM (x86) ──────────────────────────────────────────────────────────────────
+vm-shell:
+	$(MAKE) -C "$(RUNNER_DIR)" vm-shell \
+		PYTHON="$(PYTHON)" VENV="$(VENV)" \
+		BZIMAGE="$(BZIMAGE)" TARGET="$(TARGET)" \
+		VM_COMMAND='$(VM_COMMAND)'
+
 vm-test:
 	$(MAKE) -C "$(RUNNER_DIR)" vm-test \
 		PYTHON="$(PYTHON)" VENV="$(VENV)" \

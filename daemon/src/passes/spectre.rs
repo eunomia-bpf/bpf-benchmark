@@ -225,7 +225,7 @@ mod tests {
         assert!(prog.insns[0].is_cond_jmp());
         assert!(prog.insns[1].is_kinsn_sidecar());
         assert!(prog.insns[2].is_call());
-        assert_eq!(prog.insns[2].src_reg(), 2);
+        assert_eq!(prog.insns[2].src_reg(), BPF_PSEUDO_KINSN_CALL);
         assert_eq!(prog.insns[2].imm, TEST_BTF_ID);
     }
 
@@ -334,7 +334,7 @@ mod tests {
         assert_eq!(prog.insns.len(), 5);
         assert!(prog.insns[1].is_kinsn_sidecar());
         assert!(prog.insns[2].is_call());
-        assert_eq!(prog.insns[2].src_reg(), 2);
+        assert_eq!(prog.insns[2].src_reg(), BPF_PSEUDO_KINSN_CALL);
         assert_eq!(prog.insns[2].imm, TEST_BTF_ID);
     }
 
@@ -343,7 +343,8 @@ mod tests {
         // If barrier kfunc call already present, don't insert again.
         let mut prog = make_program(vec![
             jeq_imm(1, 0, 1),
-            BpfInsn::call_kfunc(TEST_BTF_ID),
+            BpfInsn::kinsn_sidecar(0),
+            BpfInsn::call_kinsn_with_off(TEST_BTF_ID, 0),
             BpfInsn::mov64_imm(0, 42),
             exit_insn(),
         ]);
@@ -354,7 +355,7 @@ mod tests {
             .run(&mut prog, &mut cache, &ctx)
             .unwrap();
         assert!(!result.changed);
-        assert_eq!(prog.insns.len(), 4);
+        assert_eq!(prog.insns.len(), 5);
     }
 
     #[test]

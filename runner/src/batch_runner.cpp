@@ -84,6 +84,8 @@ struct static_verify_program_record {
     std::string status;
     std::optional<std::string> prog_name;
     std::optional<uint32_t> prog_id;
+    std::optional<uint32_t> prog_type;
+    std::optional<std::string> prog_type_name;
     bool verifier_accepted = false;
     bool applied = false;
     bool program_changed = false;
@@ -845,6 +847,50 @@ std::optional<enum bpf_prog_type> prog_type_from_string_batch(const std::string 
     return std::nullopt;
 }
 
+std::string prog_type_name_from_enum_batch(enum bpf_prog_type prog_type)
+{
+    static const std::pair<enum bpf_prog_type, std::string_view> mapping[] = {
+        {BPF_PROG_TYPE_SOCKET_FILTER, "socket_filter"},
+        {BPF_PROG_TYPE_KPROBE, "kprobe"},
+        {BPF_PROG_TYPE_SCHED_CLS, "sched_cls"},
+        {BPF_PROG_TYPE_SCHED_ACT, "sched_act"},
+        {BPF_PROG_TYPE_TRACEPOINT, "tracepoint"},
+        {BPF_PROG_TYPE_XDP, "xdp"},
+        {BPF_PROG_TYPE_PERF_EVENT, "perf_event"},
+        {BPF_PROG_TYPE_CGROUP_SKB, "cgroup_skb"},
+        {BPF_PROG_TYPE_CGROUP_SOCK, "cgroup_sock"},
+        {BPF_PROG_TYPE_LWT_IN, "lwt_in"},
+        {BPF_PROG_TYPE_LWT_OUT, "lwt_out"},
+        {BPF_PROG_TYPE_LWT_XMIT, "lwt_xmit"},
+        {BPF_PROG_TYPE_SOCK_OPS, "sock_ops"},
+        {BPF_PROG_TYPE_SK_SKB, "sk_skb"},
+        {BPF_PROG_TYPE_CGROUP_DEVICE, "cgroup_device"},
+        {BPF_PROG_TYPE_SK_MSG, "sk_msg"},
+        {BPF_PROG_TYPE_RAW_TRACEPOINT, "raw_tracepoint"},
+        {BPF_PROG_TYPE_CGROUP_SOCK_ADDR, "cgroup_sock_addr"},
+        {BPF_PROG_TYPE_LWT_SEG6LOCAL, "lwt_seg6local"},
+        {BPF_PROG_TYPE_LIRC_MODE2, "lirc_mode2"},
+        {BPF_PROG_TYPE_SK_REUSEPORT, "sk_reuseport"},
+        {BPF_PROG_TYPE_FLOW_DISSECTOR, "flow_dissector"},
+        {BPF_PROG_TYPE_CGROUP_SYSCTL, "cgroup_sysctl"},
+        {BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE, "raw_tracepoint_writable"},
+        {BPF_PROG_TYPE_CGROUP_SOCKOPT, "cgroup_sockopt"},
+        {BPF_PROG_TYPE_TRACING, "tracing"},
+        {BPF_PROG_TYPE_STRUCT_OPS, "struct_ops"},
+        {BPF_PROG_TYPE_EXT, "ext"},
+        {BPF_PROG_TYPE_LSM, "lsm"},
+        {BPF_PROG_TYPE_SK_LOOKUP, "sk_lookup"},
+        {BPF_PROG_TYPE_SYSCALL, "syscall"},
+        {BPF_PROG_TYPE_NETFILTER, "netfilter"},
+    };
+    for (const auto &[value, name] : mapping) {
+        if (value == prog_type) {
+            return std::string(name);
+        }
+    }
+    return {};
+}
+
 std::string serialize_load_attempts_json(const std::vector<static_verify_attempt> &attempts)
 {
     std::ostringstream out;
@@ -878,6 +924,13 @@ std::string serialize_static_verify_record_json(const static_verify_program_reco
         out << "null";
     }
     print_optional_json_field(out, "prog_id", record.prog_id);
+    print_optional_json_field(out, "prog_type", record.prog_type);
+    out << ",\"prog_type_name\":";
+    if (record.prog_type_name.has_value()) {
+        out << "\"" << json_escape(*record.prog_type_name) << "\"";
+    } else {
+        out << "null";
+    }
     out
         << ",\"verifier_accepted\":"
         << (record.status == "skip_load" ? "null" : (record.verifier_accepted ? "true" : "false"))
@@ -1270,6 +1323,11 @@ static_verify_program_record execute_static_verify_program(
 
     const auto before_info = load_prog_info_batch(program_fd);
     record.prog_id = before_info.id;
+    record.prog_type = before_info.type;
+    const std::string prog_type_name = prog_type_name_from_enum_batch(static_cast<enum bpf_prog_type>(before_info.type));
+    if (!prog_type_name.empty()) {
+        record.prog_type_name = prog_type_name;
+    }
     std::string program_name = program_name_from_info_batch(before_info);
     if (program_name.empty()) {
         const char *fallback_name = bpf_program__name(program);

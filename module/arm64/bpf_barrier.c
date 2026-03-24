@@ -1,75 +1,17 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * BpfReJIT kinsn: SPECULATION_BARRIER — speculation barrier for ARM64
- *
- * Registers a kfunc bpf_speculation_barrier(void) with KF_KINSN.
- * When inlined by the ARM64 JIT, emits a speculation barrier sequence.
- *
- * Strategy:
- *   - Emit DSB SY + ISB for maximum compatibility across all ARMv8 cores.
- *   - ARMv8.5-SB adds a dedicated SB (Speculation Barrier) instruction,
- *     but DSB SY + ISB provides equivalent speculation serialization on
- *     all ARMv8.0+ implementations.
- *
- * BPF register mapping: irrelevant — no arguments, no return value.
- *
- * Emitted ARM64 sequence (2 instructions, 8 bytes):
- *   DSB SY    — Data Synchronization Barrier (full system)
- *   ISB       — Instruction Synchronization Barrier
- *
- * DSB SY encoding:
- *   1101010100 0 00 011 0011 CRm(1111) 1 opc(00) 11111
- *   = 0xD5033F9F
- *
- * ISB encoding:
- *   1101010100 0 00 011 0011 CRm(1111) 1 opc(10) 11111
- *   = 0xD5033FDF
+ * BpfReJIT kinsn: SPECULATION_BARRIER - DSB SY + ISB for ARM64
  */
 
 #include "kinsn_common.h"
 
-/* ---- kfunc fallback implementation ---- */
-
-__bpf_kfunc_start_defs();
-
-__bpf_kfunc void bpf_speculation_barrier(void)
+static int instantiate_barrier(u64 payload, struct bpf_insn *insn_buf)
 {
-	/* Fallback: DSB SY + ISB via inline asm when called as a real kfunc. */
-	asm volatile("dsb sy\nisb" ::: "memory");
-}
-
-__bpf_kfunc_end_defs();
-
-/* ---- BTF kfunc set ---- */
-
-KINSN_KFUNC_SET(bpf_barrier, bpf_speculation_barrier)
-
-/* ---- ARM64 JIT emit callback ---- */
-
-static int decode_barrier_call(const struct bpf_insn *insn,
-			       struct bpf_kinsn_call *call)
-{
-	(void)insn;
-
-	if (call->encoding == BPF_KINSN_ENC_PACKED_CALL) {
-		call->nr_operands = 0;
-		call->dst_reg = BPF_REG_0;
-	}
-
-	return 0;
-}
-
-static int validate_barrier_call(const struct bpf_kinsn_call *call,
-				 struct bpf_verifier_log *log)
-{
-	(void)log;
-
-	if (call->encoding == BPF_KINSN_ENC_PACKED_CALL && call->payload) {
-		pr_warn("bpf_speculation_barrier packed payload must be zero\n");
+	if (payload)
 		return -EINVAL;
-	}
 
-	return 0;
+	insn_buf[0] = BPF_JMP_A(0);
+	return 1;
 }
 
 /*
@@ -87,13 +29,13 @@ static int validate_barrier_call(const struct bpf_kinsn_call *call,
 #define A64_ISB		0xD5033FDFU
 
 static int emit_barrier_arm64(u32 *image, int *idx, bool emit,
-			      const struct bpf_kinsn_call *call,
-			      struct bpf_prog *prog)
+			      u64 payload, struct bpf_prog *prog)
 {
 	if (!idx)
 		return -EINVAL;
+	if (payload)
+		return -EINVAL;
 
-	(void)call;
 	(void)prog;
 
 	if (emit) {
@@ -107,30 +49,14 @@ static int emit_barrier_arm64(u32 *image, int *idx, bool emit,
 	return 2;	/* 2 instructions emitted */
 }
 
-static int model_barrier_call(const struct bpf_kinsn_call *call,
-			      const struct bpf_kinsn_scalar_state *scalar_regs,
-			      struct bpf_kinsn_effect *effect)
-{
-	(void)call;
-	(void)scalar_regs;
-
-	effect->result_type = BPF_KINSN_RES_VOID;
-	return 0;
-}
-
-static const struct bpf_kinsn_ops barrier_ops = {
+const struct bpf_kinsn bpf_speculation_barrier_desc = {
 	.owner = THIS_MODULE,
 	.api_version = 1,
-	.supported_encodings = BPF_KINSN_ENC_LEGACY_KFUNC |
-			       BPF_KINSN_ENC_PACKED_CALL,
-	.decode_call = decode_barrier_call,
-	.validate_call = validate_barrier_call,
-	.model_call = model_barrier_call,
-	.emit_arm64 = emit_barrier_arm64,
+	.max_insn_cnt = 1,
 	.max_emit_bytes = 8,
+	.instantiate_insn = instantiate_barrier,
+	.emit_arm64 = emit_barrier_arm64,
 };
 
-/* ---- module definition ---- */
-
-DEFINE_KINSN_MODULE(bpf_barrier, "bpf_speculation_barrier", &barrier_ops,
-		    "BpfReJIT kinsn: SPECULATION_BARRIER (DSB SY + ISB) inline kfunc for ARM64");
+DEFINE_KINSN_V2_MODULE(bpf_barrier,
+		       "BpfReJIT kinsn: SPECULATION_BARRIER (DSB SY + ISB)");

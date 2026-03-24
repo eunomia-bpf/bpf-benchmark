@@ -28,6 +28,7 @@ REPEAT ?= 100
 BENCH ?=
 STATIC_VERIFY_ARGS ?=
 FUZZ_ROUNDS ?= 1000
+VM_COMMAND ?= /bin/bash
 
 BZIMAGE_PATH := $(if $(filter /%,$(BZIMAGE)),$(BZIMAGE),$(REPO_ROOT)/$(BZIMAGE))
 DAEMON_PATH := $(if $(filter /%,$(DAEMON)),$(DAEMON),$(REPO_ROOT)/$(DAEMON))
@@ -75,7 +76,7 @@ VM_SMOKE_ARGS := --iterations 1 --warmups 0 --repeat 50
 	corpus-fetch corpus-build-objects corpus-build \
 	scx-artifacts e2e-prep e2e-tracee-setup e2e-tetragon-setup \
 	kernel-image kernel-tests-build kinsn-modules-build micro-programs daemon-binary \
-	vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
+	vm-shell vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 	clean
 
 all: micro_exec directive_hint
@@ -174,6 +175,15 @@ micro-programs:
 
 daemon-binary:
 	cargo build --release --manifest-path "$(REPO_ROOT)/daemon/Cargo.toml"
+
+vm-shell: kernel-image kinsn-modules-build
+	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
+		--action vm-test \
+		--kernel-image "$(BZIMAGE_PATH)" \
+		$(VM_CPU_FLAG) \
+		$(VM_MEM_FLAG) \
+		--timeout "$(VM_TEST_TIMEOUT)" \
+		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) $(VM_COMMAND)'
 
 vm-test: kernel-tests-build kernel-image kinsn-modules-build
 	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \

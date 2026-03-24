@@ -1,97 +1,37 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * BpfReJIT kinsn: ENDIAN_LOAD — fused load-and-byte-swap via REV (ARM64)
- *
- * Registers three kfuncs with KF_KINSN:
- *   bpf_endian_load16(void *addr) -> u64  (16-bit load + bswap)
- *   bpf_endian_load32(void *addr) -> u64  (32-bit load + bswap)
- *   bpf_endian_load64(void *addr) -> u64  (64-bit load + bswap)
- *
- * BPF register -> ARM64 register mapping (from bpf_jit_comp.c bpf2a64[]):
- *   BPF_REG_0 = X7  (return value)
- *   BPF_REG_1 = X0  (arg1 = addr)
- *
- * Emitted ARM64 sequences:
- *   bpf_endian_load16: LDRH W7, [X0]  +  REV16 W7, W7  +  AND X7, X7, #0xFFFF
- *   bpf_endian_load32: LDR  W7, [X0]  +  REV   W7, W7
- *   bpf_endian_load64: LDR  X7, [X0]  +  REV   X7, X7
+ * BpfReJIT kinsn: ENDIAN_LOAD - fused load-and-byte-swap via REV
  */
 
 #include "kinsn_common.h"
 
-static int decode_endian_call(const struct bpf_insn *insn,
-			      struct bpf_kinsn_call *call)
+static __always_inline int decode_endian_payload(u64 payload,
+						 u8 *dst_reg,
+						 u8 *base_reg)
 {
-	(void)insn;
+	*dst_reg = kinsn_payload_reg(payload, 0);
+	*base_reg = kinsn_payload_reg(payload, 4);
 
-	if (call->encoding != BPF_KINSN_ENC_PACKED_CALL)
-		return 0;
-
-	call->dst_reg = kinsn_payload_reg(call->payload, 0);
-	call->nr_operands = 1;
-	kinsn_set_reg_operand(call, 0, kinsn_payload_reg(call->payload, 4));
-	return 0;
-}
-
-static int validate_endian_call(const struct bpf_kinsn_call *call,
-				struct bpf_verifier_log *log)
-{
-	(void)log;
-
-	if (call->encoding != BPF_KINSN_ENC_PACKED_CALL)
-		return 0;
-	if (!kinsn_operand_is_reg(call, 0))
+	if (*dst_reg > BPF_REG_10 || *base_reg > BPF_REG_10)
 		return -EINVAL;
+
 	return 0;
 }
 
-/* ---- kfunc fallback implementations ---- */
-
-__bpf_kfunc_start_defs();
-
-__bpf_kfunc u64 bpf_endian_load16(const void *addr)
+static int instantiate_endian(u64 payload, struct bpf_insn *insn_buf, u8 size)
 {
-	u16 val = *(const u16 *)addr;
-	return __builtin_bswap16(val);
+	u8 dst_reg, base_reg;
+	int err;
+
+	err = decode_endian_payload(payload, &dst_reg, &base_reg);
+	if (err)
+		return err;
+
+	insn_buf[0] = BPF_LDX_MEM(size, dst_reg, base_reg, 0);
+	insn_buf[1] = BPF_BSWAP(dst_reg, size * 8);
+	return 2;
 }
 
-__bpf_kfunc u64 bpf_endian_load32(const void *addr)
-{
-	u32 val = *(const u32 *)addr;
-	return __builtin_bswap32(val);
-}
-
-__bpf_kfunc u64 bpf_endian_load64(const void *addr)
-{
-	u64 val = *(const u64 *)addr;
-	return __builtin_bswap64(val);
-}
-
-__bpf_kfunc_end_defs();
-
-/* ---- BTF kfunc set ---- */
-
-KINSN_KFUNC_SET_START(bpf_endian)
-KINSN_KFUNC_ID(bpf_endian_load16)
-KINSN_KFUNC_ID(bpf_endian_load32)
-KINSN_KFUNC_ID(bpf_endian_load64)
-KINSN_KFUNC_SET_END(bpf_endian)
-
-/* ---- ARM64 JIT emit callbacks ---- */
-
-/*
- * ARM64 register IDs matching bpf2a64[] in bpf_jit_comp.c:
- *   BPF_REG_0  -> X7   (return value)
- *   BPF_REG_1  -> X0   (arg1 = addr)
- */
-#define ARM64_BPF_R0	7	/* X7 */
-#define ARM64_BPF_R1	0	/* X0 */
-
-/*
- * LDRH Wt, [Xn]  (Load Register Halfword, unsigned offset=0)
- *   01 111 0 01 01 imm12(0) Rn Rt
- *   = 0x79400000 | (Rn << 5) | Rt
- */
 static inline u32 a64_ldrh(u8 rt, u8 rn)
 {
 	return 0x79400000U | ((u32)rn << 5) | (u32)rt;
@@ -159,30 +99,32 @@ static inline u32 a64_and_imm_0xffff(u8 rd, u8 rn)
 	return 0x92400000U | (0xFU << 10) | ((u32)rn << 5) | (u32)rd;
 }
 
-/*
- * bpf_endian_load16: LDRH W7, [X0] + REV16 W7, W7 + AND X7, X7, #0xFFFF
- * 3 instructions, 12 bytes.
- */
 static int emit_endian_load16_arm64(u32 *image, int *idx, bool emit,
-				    const struct bpf_kinsn_call *call,
-				    struct bpf_prog *prog)
+				    u64 payload, struct bpf_prog *prog)
 {
 	u32 insns[3];
-	u8 dst = call->encoding == BPF_KINSN_ENC_PACKED_CALL ?
-		 kinsn_arm64_reg(call->dst_reg) : ARM64_BPF_R0;
-	u8 base = call->encoding == BPF_KINSN_ENC_PACKED_CALL ?
-		  kinsn_arm64_reg(call->operands[0].regno) : ARM64_BPF_R1;
+	u8 dst_reg, base_reg;
+	int err;
 
 	if (!idx)
 		return -EINVAL;
-
-	(void)prog;
-	if (dst == 0xff || base == 0xff)
+	if (emit && !image)
 		return -EINVAL;
 
-	insns[0] = a64_ldrh(dst, base);
-	insns[1] = a64_rev16_w(dst, dst);
-	insns[2] = a64_and_imm_0xffff(dst, dst);
+	(void)prog;
+
+	err = decode_endian_payload(payload, &dst_reg, &base_reg);
+	if (err)
+		return err;
+
+	dst_reg = kinsn_arm64_reg(dst_reg);
+	base_reg = kinsn_arm64_reg(base_reg);
+	if (dst_reg == 0xff || base_reg == 0xff)
+		return -EINVAL;
+
+	insns[0] = a64_ldrh(dst_reg, base_reg);
+	insns[1] = a64_rev16_w(dst_reg, dst_reg);
+	insns[2] = a64_and_imm_0xffff(dst_reg, dst_reg);
 
 	if (emit) {
 		int i;
@@ -197,29 +139,31 @@ static int emit_endian_load16_arm64(u32 *image, int *idx, bool emit,
 	return 3;
 }
 
-/*
- * bpf_endian_load32: LDR W7, [X0] + REV W7, W7
- * 2 instructions, 8 bytes.
- */
 static int emit_endian_load32_arm64(u32 *image, int *idx, bool emit,
-				    const struct bpf_kinsn_call *call,
-				    struct bpf_prog *prog)
+				    u64 payload, struct bpf_prog *prog)
 {
 	u32 insns[2];
-	u8 dst = call->encoding == BPF_KINSN_ENC_PACKED_CALL ?
-		 kinsn_arm64_reg(call->dst_reg) : ARM64_BPF_R0;
-	u8 base = call->encoding == BPF_KINSN_ENC_PACKED_CALL ?
-		  kinsn_arm64_reg(call->operands[0].regno) : ARM64_BPF_R1;
+	u8 dst_reg, base_reg;
+	int err;
 
 	if (!idx)
 		return -EINVAL;
-
-	(void)prog;
-	if (dst == 0xff || base == 0xff)
+	if (emit && !image)
 		return -EINVAL;
 
-	insns[0] = a64_ldr_w(dst, base);
-	insns[1] = a64_rev_w(dst, dst);
+	(void)prog;
+
+	err = decode_endian_payload(payload, &dst_reg, &base_reg);
+	if (err)
+		return err;
+
+	dst_reg = kinsn_arm64_reg(dst_reg);
+	base_reg = kinsn_arm64_reg(base_reg);
+	if (dst_reg == 0xff || base_reg == 0xff)
+		return -EINVAL;
+
+	insns[0] = a64_ldr_w(dst_reg, base_reg);
+	insns[1] = a64_rev_w(dst_reg, dst_reg);
 
 	if (emit) {
 		int i;
@@ -234,29 +178,31 @@ static int emit_endian_load32_arm64(u32 *image, int *idx, bool emit,
 	return 2;
 }
 
-/*
- * bpf_endian_load64: LDR X7, [X0] + REV X7, X7
- * 2 instructions, 8 bytes.
- */
 static int emit_endian_load64_arm64(u32 *image, int *idx, bool emit,
-				    const struct bpf_kinsn_call *call,
-				    struct bpf_prog *prog)
+				    u64 payload, struct bpf_prog *prog)
 {
 	u32 insns[2];
-	u8 dst = call->encoding == BPF_KINSN_ENC_PACKED_CALL ?
-		 kinsn_arm64_reg(call->dst_reg) : ARM64_BPF_R0;
-	u8 base = call->encoding == BPF_KINSN_ENC_PACKED_CALL ?
-		  kinsn_arm64_reg(call->operands[0].regno) : ARM64_BPF_R1;
+	u8 dst_reg, base_reg;
+	int err;
 
 	if (!idx)
 		return -EINVAL;
-
-	(void)prog;
-	if (dst == 0xff || base == 0xff)
+	if (emit && !image)
 		return -EINVAL;
 
-	insns[0] = a64_ldr_x(dst, base);
-	insns[1] = a64_rev_x(dst, dst);
+	(void)prog;
+
+	err = decode_endian_payload(payload, &dst_reg, &base_reg);
+	if (err)
+		return err;
+
+	dst_reg = kinsn_arm64_reg(dst_reg);
+	base_reg = kinsn_arm64_reg(base_reg);
+	if (dst_reg == 0xff || base_reg == 0xff)
+		return -EINVAL;
+
+	insns[0] = a64_ldr_x(dst_reg, base_reg);
+	insns[1] = a64_rev_x(dst_reg, dst_reg);
 
 	if (emit) {
 		int i;
@@ -271,107 +217,46 @@ static int emit_endian_load64_arm64(u32 *image, int *idx, bool emit,
 	return 2;
 }
 
-static void model_endian_load(const struct bpf_kinsn_call *call,
-			      struct bpf_kinsn_effect *effect, u8 size)
+static int instantiate_endian16(u64 payload, struct bpf_insn *insn_buf)
 {
-	u8 result_reg = call->encoding == BPF_KINSN_ENC_PACKED_CALL ?
-			call->dst_reg : BPF_REG_0;
-	u8 base_reg = call->encoding == BPF_KINSN_ENC_PACKED_CALL ?
-		      call->operands[0].regno : BPF_REG_1;
-	u64 umax;
-
-	effect->input_mask = BIT(base_reg);
-	effect->clobber_mask = BIT(result_reg);
-	effect->result_type = BPF_KINSN_RES_SCALAR;
-	effect->result_reg = result_reg;
-	effect->result_size = size == sizeof(u32) ? sizeof(u32) : sizeof(u64);
-	effect->nr_mem_accesses = 1;
-	effect->mem_accesses[0].base_reg = base_reg;
-	effect->mem_accesses[0].size = size;
-	effect->mem_accesses[0].access_type = BPF_READ;
-	effect->mem_accesses[0].flags = BPF_KINSN_MEM_RESULT;
-
-	umax = size == sizeof(u64) ? U64_MAX : ((1ULL << (size * 8)) - 1);
-	effect->umin_value = 0;
-	effect->umax_value = umax;
-	effect->smin_value = 0;
-	effect->smax_value = umax;
-	if (umax != U64_MAX) {
-		effect->flags |= BPF_KINSN_EFFECT_HAS_TNUM;
-		effect->result_tnum = kinsn_tnum_low_bits(umax);
-	}
+	return instantiate_endian(payload, insn_buf, BPF_H);
 }
 
-static int model_endian_load16_call(const struct bpf_kinsn_call *call,
-				    const struct bpf_kinsn_scalar_state *scalar_regs,
-				    struct bpf_kinsn_effect *effect)
+static int instantiate_endian32(u64 payload, struct bpf_insn *insn_buf)
 {
-	(void)scalar_regs;
-	model_endian_load(call, effect, sizeof(u16));
-	return 0;
+	return instantiate_endian(payload, insn_buf, BPF_W);
 }
 
-static int model_endian_load32_call(const struct bpf_kinsn_call *call,
-				    const struct bpf_kinsn_scalar_state *scalar_regs,
-				    struct bpf_kinsn_effect *effect)
+static int instantiate_endian64(u64 payload, struct bpf_insn *insn_buf)
 {
-	(void)scalar_regs;
-	model_endian_load(call, effect, sizeof(u32));
-	return 0;
+	return instantiate_endian(payload, insn_buf, BPF_DW);
 }
 
-static int model_endian_load64_call(const struct bpf_kinsn_call *call,
-				    const struct bpf_kinsn_scalar_state *scalar_regs,
-				    struct bpf_kinsn_effect *effect)
-{
-	(void)scalar_regs;
-	model_endian_load(call, effect, sizeof(u64));
-	return 0;
-}
-
-static const struct bpf_kinsn_ops endian_load16_ops = {
+const struct bpf_kinsn bpf_endian_load16_desc = {
 	.owner = THIS_MODULE,
 	.api_version = 1,
-	.supported_encodings = BPF_KINSN_ENC_LEGACY_KFUNC |
-			       BPF_KINSN_ENC_PACKED_CALL,
-	.decode_call = decode_endian_call,
-	.validate_call = validate_endian_call,
-	.model_call = model_endian_load16_call,
+	.max_insn_cnt = 2,
+	.max_emit_bytes = 12,
+	.instantiate_insn = instantiate_endian16,
 	.emit_arm64 = emit_endian_load16_arm64,
-	.max_emit_bytes = 16,
 };
 
-static const struct bpf_kinsn_ops endian_load32_ops = {
+const struct bpf_kinsn bpf_endian_load32_desc = {
 	.owner = THIS_MODULE,
 	.api_version = 1,
-	.supported_encodings = BPF_KINSN_ENC_LEGACY_KFUNC |
-			       BPF_KINSN_ENC_PACKED_CALL,
-	.decode_call = decode_endian_call,
-	.validate_call = validate_endian_call,
-	.model_call = model_endian_load32_call,
+	.max_insn_cnt = 2,
+	.max_emit_bytes = 8,
+	.instantiate_insn = instantiate_endian32,
 	.emit_arm64 = emit_endian_load32_arm64,
-	.max_emit_bytes = 16,
 };
 
-static const struct bpf_kinsn_ops endian_load64_ops = {
+const struct bpf_kinsn bpf_endian_load64_desc = {
 	.owner = THIS_MODULE,
 	.api_version = 1,
-	.supported_encodings = BPF_KINSN_ENC_LEGACY_KFUNC |
-			       BPF_KINSN_ENC_PACKED_CALL,
-	.decode_call = decode_endian_call,
-	.validate_call = validate_endian_call,
-	.model_call = model_endian_load64_call,
+	.max_insn_cnt = 2,
+	.max_emit_bytes = 8,
+	.instantiate_insn = instantiate_endian64,
 	.emit_arm64 = emit_endian_load64_arm64,
-	.max_emit_bytes = 16,
 };
 
-/* ---- module definition ---- */
-
-static const struct kinsn_ops_entry endian_entries[] = {
-	{ "bpf_endian_load16", &endian_load16_ops },
-	{ "bpf_endian_load32", &endian_load32_ops },
-	{ "bpf_endian_load64", &endian_load64_ops },
-};
-
-DEFINE_KINSN_MODULE_MULTI(bpf_endian, endian_entries,
-			  "BpfReJIT kinsn: ENDIAN_LOAD (REV) inline kfunc for ARM64");
+DEFINE_KINSN_V2_MODULE(bpf_endian, "BpfReJIT kinsn: ENDIAN_LOAD (REV)");

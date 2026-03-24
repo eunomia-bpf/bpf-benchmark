@@ -164,11 +164,13 @@ fn count_btf_types(btf_data: &[u8]) -> Result<u32> {
     Ok(type_cnt)
 }
 
-/// Read vmlinux split-BTF base properties from `/sys/kernel/btf/vmlinux`.
+/// Read the vmlinux layout pieces needed to interpret split module BTF blobs.
 ///
-/// Module BTF uses vmlinux's string section as the base for `name_off`, and
-/// its type IDs are biased by `(btf__type_cnt(base_btf) - 1)`.
-fn get_vmlinux_base_info() -> Result<(u32, u32)> {
+/// For `/sys/kernel/btf/<module>`:
+/// - `name_off` values are biased by vmlinux's string-section length
+/// - local module type IDs must be shifted by vmlinux's type count to match
+///   the kernel-visible absolute BTF IDs accepted by the verifier
+fn get_vmlinux_layout() -> Result<(u32, u32)> {
     let data = fs::read("/sys/kernel/btf/vmlinux").with_context(|| "read vmlinux BTF")?;
     if data.len() < BTF_HEADER_SIZE {
         bail!("vmlinux BTF too small ({} bytes)", data.len());
@@ -179,8 +181,7 @@ fn get_vmlinux_base_info() -> Result<(u32, u32)> {
         bail!("vmlinux BTF bad magic: 0x{:04x}", hdr.magic);
     }
 
-    let type_cnt = count_btf_types(&data)?;
-    Ok((hdr.str_len, type_cnt.saturating_sub(1)))
+    Ok((hdr.str_len, count_btf_types(&data)?))
 }
 
 /// Parse a (possibly split) BTF blob and find the BTF type ID for `kind`
@@ -191,9 +192,6 @@ fn get_vmlinux_base_info() -> Result<(u32, u32)> {
 /// section at local offset `name_off - base_str_off`. For standalone BTF
 /// (base_str_off == 0), name_off indexes the local string section directly.
 ///
-/// `type_id_bias` is `btf__type_cnt(base_btf) - 1` for split BTF. This turns
-/// the module-local type order into the global type ID space expected by the
-/// verifier.
 fn find_kind_btf_id(
     btf_data: &[u8],
     type_name: &str,
@@ -347,21 +345,22 @@ pub fn discover_kfuncs() -> DiscoveryResult {
     // Cache of module_name -> raw FD to avoid opening the same BTF twice.
     let mut module_btf_fds: HashMap<String, i32> = HashMap::new();
 
-    // Read vmlinux BTF string section length for split BTF resolution.
-    // Module BTF is "split BTF" whose name_off values are offset by the
-    // vmlinux string section length. Without this base offset, we cannot
-    // resolve module-local function names.
-    let (base_str_off, base_type_id_bias) = match get_vmlinux_base_info() {
-        Ok((str_len, type_id_bias)) => {
+    // Module BTF blobs in /sys/kernel/btf/<module> are split BTF. Their
+    // `name_off` values are biased by vmlinux's string section, and their local
+    // type IDs must be shifted by the vmlinux type count to obtain the kernel-
+    // visible absolute IDs accepted by BPF_PSEUDO_KINSN_CALL.
+    let (base_str_off, type_id_bias) = match get_vmlinux_layout() {
+        Ok((str_len, type_cnt)) => {
+            let type_id_bias = type_cnt.saturating_sub(1);
             log.push(format!(
-                "  vmlinux BTF str_len={} split_type_id_bias={}",
-                str_len, type_id_bias
+                "  vmlinux BTF str_len={} type_cnt={} type_id_bias={}",
+                str_len, type_cnt, type_id_bias
             ));
             (str_len, type_id_bias)
         }
         Err(e) => {
             log.push(format!(
-                "  WARNING: failed to read vmlinux BTF: {:#} (falling back to split offsets=0)",
+                "  WARNING: failed to read vmlinux BTF: {:#} (falling back to split offsets/type bias=0)",
                 e
             ));
             (0, 0)
@@ -389,8 +388,7 @@ pub fn discover_kfuncs() -> DiscoveryResult {
             }
         };
 
-        let btf_id = match find_var_btf_id(&btf_data, desc_name, base_str_off, base_type_id_bias)
-        {
+        let btf_id = match find_var_btf_id(&btf_data, desc_name, base_str_off, type_id_bias) {
             Some(id) => id,
             None => {
                 log.push(format!(
@@ -911,15 +909,14 @@ mod tests {
             eprintln!("SKIP: /sys/kernel/btf/vmlinux not present");
             return;
         }
-        let (str_len, type_id_bias) =
-            get_vmlinux_base_info().expect("get_vmlinux_base_info failed");
+        let (str_len, type_cnt) = get_vmlinux_layout().expect("get_vmlinux_layout failed");
         // vmlinux BTF string section is typically > 100KB.
         assert!(
             str_len > 1000,
             "vmlinux str_len suspiciously small: {}",
             str_len
         );
-        assert!(type_id_bias > 0, "vmlinux type_id_bias should be positive");
+        assert!(type_cnt > 1000, "vmlinux type count suspiciously small: {}", type_cnt);
     }
 
     #[test]

@@ -10,7 +10,7 @@ static int instantiate_barrier(u64 payload, struct bpf_insn *insn_buf)
 	if (payload)
 		return -EINVAL;
 
-	insn_buf[0] = BPF_ST_NOSPEC();
+	insn_buf[0] = BPF_JMP_A(0);
 	return 1;
 }
 

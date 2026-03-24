@@ -1,166 +1,43 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * BpfReJIT kinsn: BITFIELD_EXTRACT — bit-field extraction via UBFX (ARM64)
- *
- * Registers a kfunc bpf_extract64(u64 val, u32 start, u32 len) with
- * KF_KINSN.  Extracts bits [start, start+len) from val.
- *
- * BPF register -> ARM64 register mapping (from bpf_jit_comp.c bpf2a64[]):
- *   BPF_REG_0 = X7  (return value)
- *   BPF_REG_1 = X0  (arg1 = val)
- *   BPF_REG_2 = X1  (arg2 = start)
- *   BPF_REG_3 = X2  (arg3 = len)
- *
- * ARM64 has UBFX Xd, Xn, #lsb, #width which extracts a bitfield using
- * immediate operands.  However, start and len come in registers at JIT
- * time (they are BPF program values, not compile-time constants), so we
- * cannot use UBFX directly.
- *
- * Instead we use a LSR + AND mask sequence via variable-shift instructions:
- *   LSR   X7, X0, X1     ; X7 = val >> start  (logical shift right)
- *   MOV   X10, #1         ; tmp = 1 (use TMP_REG_1 = X10)
- *   LSL   X10, X10, X2   ; tmp = 1 << len
- *   SUB   X10, X10, #1   ; tmp = (1 << len) - 1  (mask)
- *   AND   X7, X7, X10    ; X7 = (val >> start) & mask
- *
- * 5 instructions, 20 bytes.
+ * BpfReJIT kinsn: BITFIELD_EXTRACT - bit-field extraction via UBFM
  */
 
 #include "kinsn_common.h"
 
-static int decode_extract_call(const struct bpf_insn *insn,
-			       struct bpf_kinsn_call *call)
+static __always_inline int decode_extract_payload(u64 payload,
+						  u8 *dst_reg,
+						  u8 *start,
+						  u8 *bit_len)
 {
-	(void)insn;
+	*dst_reg = kinsn_payload_reg(payload, 0);
+	*start = kinsn_payload_u8(payload, 8);
+	*bit_len = kinsn_payload_u8(payload, 16);
 
-	if (call->encoding != BPF_KINSN_ENC_PACKED_CALL)
-		return 0;
+	if (*dst_reg > BPF_REG_10)
+		return -EINVAL;
+	if (*start >= 64 || !*bit_len || *bit_len > 32 || *start + *bit_len > 64)
+		return -EINVAL;
 
-	call->dst_reg = kinsn_payload_reg(call->payload, 0);
-	call->nr_operands = 3;
-	kinsn_set_reg_operand(call, 0, call->dst_reg);
-	kinsn_set_imm32_operand(call, 1, kinsn_payload_u8(call->payload, 8));
-	kinsn_set_imm32_operand(call, 2, kinsn_payload_u8(call->payload, 16));
 	return 0;
 }
 
-static int validate_extract_call(const struct bpf_kinsn_call *call,
-				 struct bpf_verifier_log *log)
+static int instantiate_extract(u64 payload, struct bpf_insn *insn_buf)
 {
-	u32 start, len;
+	u8 dst_reg, start, bit_len;
+	u32 mask;
+	int cnt = 0;
+	int err;
 
-	(void)log;
+	err = decode_extract_payload(payload, &dst_reg, &start, &bit_len);
+	if (err)
+		return err;
 
-	if (call->encoding != BPF_KINSN_ENC_PACKED_CALL)
-		return 0;
-	if (!kinsn_operand_is_reg(call, 0) ||
-	    !kinsn_operand_is_imm32(call, 1) ||
-	    !kinsn_operand_is_imm32(call, 2))
-		return -EINVAL;
-
-	start = call->operands[1].imm32;
-	len = call->operands[2].imm32;
-	if (start >= 64 || !len || len > 64 || start + len > 64)
-		return -EINVAL;
-	return 0;
-}
-
-/* ---- kfunc fallback implementation ---- */
-
-__bpf_kfunc_start_defs();
-
-__bpf_kfunc u64 bpf_extract64(u64 val, u32 start, u32 len)
-{
-	if (start >= 64 || len == 0 || len > 64)
-		return 0;
-	if (start + len > 64)
-		len = 64 - start;
-	return (val >> start) & (len >= 64 ? ~0ULL : (1ULL << len) - 1);
-}
-
-__bpf_kfunc_end_defs();
-
-/* ---- BTF kfunc set ---- */
-
-KINSN_KFUNC_SET(bpf_extract, bpf_extract64)
-
-/* ---- ARM64 JIT emit callback ---- */
-
-/*
- * ARM64 register IDs matching bpf2a64[] in bpf_jit_comp.c:
- *   BPF_REG_0  -> X7   (return value)
- *   BPF_REG_1  -> X0   (arg1 = val)
- *   BPF_REG_2  -> X1   (arg2 = start)
- *   BPF_REG_3  -> X2   (arg3 = len)
- *   TMP_REG_1  -> X10  (scratch)
- */
-#define ARM64_BPF_R0	7	/* X7 */
-#define ARM64_BPF_R1	0	/* X0 */
-#define ARM64_BPF_R2	1	/* X1 */
-#define ARM64_BPF_R3	2	/* X2 */
-#define ARM64_TMP	10	/* X10, TMP_REG_1 */
-
-/*
- * LSRV Xd, Xn, Xm  (64-bit logical shift right variable)
- *   1 00 11010110 Rm 001001 Rn Rd
- */
-static inline u32 a64_lsrv(u8 rd, u8 rn, u8 rm)
-{
-	return (1U << 31) |		/* sf=1 */
-	       (0x0D6U << 21) |	/* 00 11010110 */
-	       ((u32)rm << 16) |
-	       (0x09U << 10) |		/* 001001 */
-	       ((u32)rn << 5) |
-	       (u32)rd;
-}
-
-/*
- * LSLV Xd, Xn, Xm  (64-bit logical shift left variable)
- *   1 00 11010110 Rm 001000 Rn Rd
- */
-static inline u32 a64_lslv(u8 rd, u8 rn, u8 rm)
-{
-	return (1U << 31) |		/* sf=1 */
-	       (0x0D6U << 21) |	/* 00 11010110 */
-	       ((u32)rm << 16) |
-	       (0x08U << 10) |		/* 001000 */
-	       ((u32)rn << 5) |
-	       (u32)rd;
-}
-
-/*
- * MOVZ Xd, #imm16, LSL#0  (64-bit)
- *   1 10 100101 00 imm16 Rd
- */
-static inline u32 a64_movz(u8 rd, u16 imm16)
-{
-	return (0xD2800000U) |		/* 1 10 100101 00 ... */
-	       ((u32)imm16 << 5) |
-	       (u32)rd;
-}
-
-/*
- * SUB Xd, Xn, #imm12  (64-bit, immediate)
- *   1 1 0 10001 0 0 imm12 Rn Rd
- */
-static inline u32 a64_sub_i(u8 rd, u8 rn, u16 imm12)
-{
-	return (0xD1000000U) |		/* 1 1 0 10001 0 0 ... */
-	       ((u32)(imm12 & 0xFFF) << 10) |
-	       ((u32)rn << 5) |
-	       (u32)rd;
-}
-
-/*
- * AND Xd, Xn, Xm  (64-bit, logical shifted register, shift=LSL #0)
- *   1 00 01010 00 0 Rm 000000 Rn Rd
- */
-static inline u32 a64_and(u8 rd, u8 rn, u8 rm)
-{
-	return (0x8A000000U) |		/* 1 00 01010 00 0 ... */
-	       ((u32)rm << 16) |
-	       ((u32)rn << 5) |
-	       (u32)rd;
+	if (start)
+		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_RSH, dst_reg, start);
+	mask = bit_len == 32 ? U32_MAX : ((1U << bit_len) - 1);
+	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, dst_reg, mask);
+	return cnt;
 }
 
 static inline u32 a64_ubfm_x(u8 rd, u8 rn, u8 immr, u8 imms)
@@ -173,135 +50,41 @@ static inline u32 a64_ubfm_x(u8 rd, u8 rn, u8 immr, u8 imms)
 }
 
 static int emit_extract_arm64(u32 *image, int *idx, bool emit,
-			      const struct bpf_kinsn_call *call,
-			      struct bpf_prog *prog)
+			      u64 payload, struct bpf_prog *prog)
 {
-	/*
-	 * LSR  X7, X0, X1     ; val >> start
-	 * MOVZ X10, #1        ; tmp = 1
-	 * LSL  X10, X10, X2   ; tmp = 1 << len
-	 * SUB  X10, X10, #1   ; tmp = mask = (1 << len) - 1
-	 * AND  X7, X7, X10    ; result = (val >> start) & mask
-	 */
-	u32 insns[5];
-
-	if (!idx)
-		return -EINVAL;
+	u8 dst_reg, start, bit_len;
+	u32 insn;
+	int err;
 
 	(void)prog;
 
-	if (call->encoding == BPF_KINSN_ENC_PACKED_CALL) {
-		u8 dst = kinsn_arm64_reg(call->dst_reg);
-		u8 start = call->operands[1].imm32;
-		u8 bit_len = call->operands[2].imm32;
-		u32 insn;
+	if (!idx)
+		return -EINVAL;
+	if (emit && !image)
+		return -EINVAL;
 
-		if (dst == 0xff)
-			return -EINVAL;
+	err = decode_extract_payload(payload, &dst_reg, &start, &bit_len);
+	if (err)
+		return err;
 
-		insn = a64_ubfm_x(dst, dst, start, start + bit_len - 1);
-		if (emit) {
-			if (!image)
-				return -EINVAL;
-			image[*idx] = cpu_to_le32(insn);
-		}
+	dst_reg = kinsn_arm64_reg(dst_reg);
+	if (dst_reg == 0xff)
+		return -EINVAL;
 
-		*idx += 1;
-		return 1;
-	}
-
-	insns[0] = a64_lsrv(ARM64_BPF_R0, ARM64_BPF_R1, ARM64_BPF_R2);
-	insns[1] = a64_movz(ARM64_TMP, 1);
-	insns[2] = a64_lslv(ARM64_TMP, ARM64_TMP, ARM64_BPF_R3);
-	insns[3] = a64_sub_i(ARM64_TMP, ARM64_TMP, 1);
-	insns[4] = a64_and(ARM64_BPF_R0, ARM64_BPF_R0, ARM64_TMP);
-
-	if (emit) {
-		int i;
-
-		if (!image)
-			return -EINVAL;
-		for (i = 0; i < 5; i++)
-			image[*idx + i] = cpu_to_le32(insns[i]);
-	}
-
-	*idx += 5;
-	return 5;	/* 5 instructions emitted */
+	insn = a64_ubfm_x(dst_reg, dst_reg, start, start + bit_len - 1);
+	if (emit)
+		image[*idx] = cpu_to_le32(insn);
+	*idx += 1;
+	return 1;
 }
 
-static u64 extract_result_umax(const struct bpf_kinsn_scalar_state *start,
-			       const struct bpf_kinsn_scalar_state *len)
-{
-	u64 width;
-
-	if (tnum_is_const(start->var_off) &&
-	    start->var_off.value >= 64)
-		return 0;
-
-	if (tnum_is_const(len->var_off)) {
-		width = len->var_off.value;
-		if (!width || width > 64)
-			return 0;
-		if (tnum_is_const(start->var_off) && start->var_off.value + width > 64)
-			width = 64 - start->var_off.value;
-	} else {
-		width = min_t(u64, len->umax_value, 64);
-		if (!width)
-			return 0;
-	}
-
-	if (width >= 64)
-		return U64_MAX;
-	return (1ULL << width) - 1;
-}
-
-static int model_extract_call(const struct bpf_kinsn_call *call,
-			      const struct bpf_kinsn_scalar_state *scalar_regs,
-			      struct bpf_kinsn_effect *effect)
-{
-	u64 umax;
-
-	if (call->encoding == BPF_KINSN_ENC_PACKED_CALL) {
-		u32 bit_len = call->operands[2].imm32;
-
-		effect->input_mask = BIT(call->dst_reg);
-		effect->clobber_mask = BIT(call->dst_reg);
-		effect->result_reg = call->dst_reg;
-		effect->result_size = sizeof(u64);
-		umax = bit_len == 64 ? U64_MAX : ((1ULL << bit_len) - 1);
-	} else {
-		effect->input_mask = BIT(BPF_REG_1) | BIT(BPF_REG_2) | BIT(BPF_REG_3);
-		effect->clobber_mask = BIT(BPF_REG_0);
-		effect->result_reg = BPF_REG_0;
-		effect->result_size = sizeof(u64);
-		umax = extract_result_umax(&scalar_regs[1], &scalar_regs[2]);
-	}
-
-	effect->result_type = BPF_KINSN_RES_SCALAR;
-	effect->umin_value = 0;
-	effect->umax_value = umax;
-	effect->smin_value = 0;
-	effect->smax_value = umax;
-	if (umax != U64_MAX) {
-		effect->flags |= BPF_KINSN_EFFECT_HAS_TNUM;
-		effect->result_tnum = kinsn_tnum_low_bits(umax);
-	}
-	return 0;
-}
-
-static const struct bpf_kinsn_ops extract_ops = {
+const struct bpf_kinsn bpf_extract64_desc = {
 	.owner = THIS_MODULE,
 	.api_version = 1,
-	.supported_encodings = BPF_KINSN_ENC_LEGACY_KFUNC |
-			       BPF_KINSN_ENC_PACKED_CALL,
-	.decode_call = decode_extract_call,
-	.validate_call = validate_extract_call,
-	.model_call = model_extract_call,
+	.max_insn_cnt = 2,
+	.max_emit_bytes = 4,
+	.instantiate_insn = instantiate_extract,
 	.emit_arm64 = emit_extract_arm64,
-	.max_emit_bytes = 32,	/* 5 insns * 4 bytes = 20, round up */
 };
 
-/* ---- module definition ---- */
-
-DEFINE_KINSN_MODULE(bpf_extract, "bpf_extract64", &extract_ops,
-		    "BpfReJIT kinsn: BITFIELD_EXTRACT (UBFX/LSR+AND) inline kfunc for ARM64");
+DEFINE_KINSN_V2_MODULE(bpf_extract, "BpfReJIT kinsn: BITFIELD_EXTRACT");

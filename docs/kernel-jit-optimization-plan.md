@@ -209,6 +209,11 @@ BpfReJIT 的设计基于三个层次的 insight：
 | **Frozen map inlining** | 否 | `BPF_MAP_FREEZE` 后的只读 map → 读当前值 → 替换 `map_lookup_elem` 为常量 `MOV`。verifier 看到常量后自动 dead branch elimination |
 | **Dynamic map inlining + invalidation** | 否 | JVM deoptimization 模型：daemon 观察到 map 未被修改 → inline 当前值 → REJIT。map 被修改后 → 检测到 → 重新 REJIT（更新值或回退到 lookup）。**runtime-guided specialization，static compiler 不可能做到** |
 | **Verifier-assisted const propagation** | 否 | 用 `log_level=2` 获取 verifier 的 per-insn 寄存器状态（tnum/range）→ 识别运行时常量 → 替换为 `MOV reg, const` → 死代码消除 |
+| **Dead code elimination (DCE)** | 否 | const prop / map inlining 后的 unreachable block / dead store 消除。是 specialization 的乘数 |
+| **128-bit wide load-store** | 可选 | 连续相邻 64-bit load/store → ARM64 LDP/STP（一条指令 128-bit）。x86 受 FPU 限制，可能不可行。IPv6 地址、struct copy 场景 |
+| **Redundant bounds check elimination** | 否 | XDP/TC packet parser 中冗余的 bounds check 合并/消除。纯 bytecode rewrite |
+| **Helper call specialization** | 否/可选 | `probe_read_kernel` size=4/8 → direct load；`skb_load_bytes` → direct packet access。语义风险需谨慎 |
+| **Tail-call direct-target specialization** | 否 | runtime 观察 tail_call map 稳定 → inline target → deopt on change。最像 HotSpot inline cache |
 
 ### 3.2 安全加固变换
 
@@ -216,6 +221,7 @@ BpfReJIT 的设计基于三个层次的 insight：
 |------|------|
 | **危险 helper 防火墙** | 中和恶意 BPF 程序的 bpf_probe_read_kernel / bpf_send_signal 等 |
 | **Spectre 缓解注入** | 在缺少 speculation barrier 的位置插入 lfence |
+| **LFENCE/BPF_NOSPEC 消除** | daemon 重构 bytecode 使 speculative path 安全 → verifier 不再插 barrier → 减少 LFENCE 开销 |
 | **BPF 程序漏洞热修复** | verifier bug 发现后对 live 程序加额外检查 |
 | **权限收紧** | 收窄过度权限的 BPF 程序的访问范围 |
 
@@ -710,10 +716,10 @@ make clean
 | **418** | kfunc verifier 机制调研（2026-03-23） | ✅ | verifier 无现成机制让 kfunc 控制 clobber。KF_FASTCALL 只做 spill/fill NOP 消除。do_refine_retval_range() 和 bpf_res_spin_lock 是 range narrowing 先例。报告：`docs/tmp/20260323/kfunc_verifier_mechanisms_20260323.md`。 |
 | **419** | **⚠️ bpf_kinsn_ops 完整设计（2026-03-23）** | ✅ | codex 调研。独立 sidecar `struct bpf_kinsn_ops`（不扩展 btf_kfunc_id_set）。`model_call()` 返回声明式 `bpf_kinsn_effect`（input_mask + clobber_mask + result range/tnum + mem_accesses），不暴露 bpf_reg_state。packed ABI 用 sidecar pseudo-insn（不复用 off 字段）。endian_load 改 const void*。KF_KINSN 替代 KF_INLINE_EMIT。设计报告：`docs/tmp/20260323/kinsn_ops_design_20260323.md`。 |
 | **420** | **⚠️ kinsn_ops 完整实现（2026-03-23）** | ✅ | codex 实现两步。**第一步**：bpf_kinsn_ops + model_call + verifier 通用逻辑 + 5 module 迁移。**第二步**：packed ABI + sidecar pseudo-insn + daemon 适配。**结果**：53/62 applied, 1612 sites（rotate 701, extract 524, endian 256）。vm-selftest **70/70 PASS**（含 rejit_kinsn 9/9 + rejit_kinsn_packed 6/6）。Commit `8c1dd22`。Review：`docs/tmp/20260323/kinsn_implementation_review_20260323.md`。 |
-| **421** | SIMD kinsn module | 待做 | 新 kinsn module：bpf_memcpy_simd → AVX2/NEON，bpf_crc32 → SSE4.2。不需改框架，只需新 module + daemon pass。 |
-| **422** | Frozen map constant inlining | 待做 | BPF_MAP_FREEZE 后的只读 map → daemon 读值 → 替换 map_lookup_elem 为常量 MOV → verifier dead branch elimination。纯 bytecode rewrite，不需 kinsn。 |
-| **423** | **Dynamic map inlining + invalidation** | 待做 | JVM deoptimization 模型。daemon 观察 map 未修改 → inline 值 → REJIT。map 修改 → 检测 → 重新 REJIT。**runtime-guided specialization，论文核心 story**。 |
-| **424** | Verifier-assisted constant propagation | 待做 | 用 log_level=2 获取 per-insn verifier state → 识别常量 → 替换 → 死代码消除。 |
+| **421** | SIMD kinsn module | 🔄 调研中 | 新 kinsn module：bpf_memcpy_simd → AVX2/NEON，bpf_crc32 → SSE4.2。不需改框架，只需新 module + daemon pass。机会分析：`simd_constprop_opportunity_analysis_20260323.md`。**设计报告见 #472g**。 |
+| **422** | Frozen map constant inlining | ❌ 不做 | **调研结论（`map_inlining_opportunity_analysis_20260323.md`）：真实 workload 几乎无显式 BPF_MAP_FREEZE，hot-path frozen map lookup 接近零。价值在于引出 #423。** |
+| **423** | **Dynamic map inlining + invalidation** | 🔄 设计中 | JVM deoptimization 模型。daemon 观察 map 未修改 → inline 值 → REJIT。map 修改 → 检测 → 重新 REJIT。**runtime-guided specialization，论文核心 story**。corpus 11556 个 map_lookup_elem site。**设计报告见 #472a**。 |
+| **424** | Verifier-assisted constant propagation | 🔄 设计中 | 用 log_level=2 获取 per-insn verifier state → 识别常量 → 替换 → 死代码消除。23% verifier state 含精确常量，62.5% 条件分支和立即数比较。**设计报告见 #472b**。 |
 | **425** | **vm-micro 正确性验证（2026-03-23）** | ✅ | 53/62 applied, 0 mismatch。rotate 15, extract 4, endian 1, wide_mem 49。kinsn pass 生效。 |
 | **426** | **vm-corpus 正确性验证（2026-03-23）** | ✅ | 152 measured, **56 applied**（从 4 提升 14x）。0 error, 0 mismatch。wide_mem 35, endian 17, cond_select 12, extract 4。 |
 | **427** | vm-e2e 正确性验证（2026-03-23） | ✅ | 4/5 PASS（katran timeout 未修复）。tracee/tetragon/bpftrace/scx OK。 |
@@ -722,7 +728,7 @@ make clean
 | **430** | **修复 endian packed offset + 删 legacy ABI（2026-03-23）** | ✅ | endian packed 支持 offset ✅、unit tests 走 packed ✅、删除 daemon 全部 legacy emit 路径 ✅。`emit_kfunc_call_legacy()`/`save_caller_saved_regs()`/`restore_caller_saved_regs()` 全部删除。296 cargo tests pass。vm-micro/corpus/e2e 正确性验证 0 mismatch。Commit `5e10be2`。 |
 | **431** | Kernel CRITICAL/HIGH 修复（2026-03-23） | ✅ | tools/uapi 头同步（`BPF_PSEUDO_KINSN_SIDECAR`、REJIT `flags`、`orig_prog_*`）、`fd_array_cnt` 上限=64、`find_call_site()` 改为 x86/ARM64 架构相关扫描、恢复 `bpf_arch_text_invalidate()`、`kinsn_ops` 在 verifier/JIT 期间显式持有 module 引用。验证：`make kernel`、`make vm-selftest`、`make vm-micro-smoke` 全通过。 |
 | **432** | E2E 真实应用模式 + katran 修复 | ✅ 归入 #435 | katran HTTP server 修复（自定义 HTTP/1.0 handler）。5/5 PASS。Commit `a57e41f`。 |
-| **433** | LFENCE/BPF_NOSPEC 消除 | 待做 | 安全屏障消除。调研报告：`docs/tmp/20260323/comprehensive_optimization_survey_20260323.md`。 |
+| **433** | LFENCE/BPF_NOSPEC 消除 | 🔄 设计中 | 安全屏障消除。内核代码分析：`comprehensive_optimization_survey_20260323.md` §A。**设计报告见 #472c**。 |
 | **434** | 全面优化调研（2026-03-23） | ✅ | codex 调研。报告：`docs/tmp/20260323/comprehensive_optimization_survey_20260323.md`、`map_inlining_opportunity_analysis_20260323.md`、`simd_constprop_opportunity_analysis_20260323.md`。 |
 | **435** | E2E 真实应用模式 + katran 修复（2026-03-23） | ✅ | tracee/tetragon 已有真实 binary 流程。katran 改 xdpgeneric + 降并发 + retry。**5/5 PASS**。但 tracee 走 manual fallback（需修为 SKIP）、katran post-REJIT 破坏程序（correctness bug）。 |
 | **436** | **删除 E2E manual fallback 路径（2026-03-23）** | ✅ | 删除 `e2e/cases/tracee/manual.py`（-244 行）。tracee/tetragon 二进制不可用时标 SKIP（"manual .bpf.o fallback is forbidden"）。e2e ALL PASSED。Commit `174bfe5`。 |
@@ -731,10 +737,10 @@ make clean
 | **439** | 删除 daemon legacy ABI 代码 | ✅ 归入 #430 | 在 #430 中一起完成。`emit_kfunc_call_legacy()` 全部删除。 |
 | **440** | Unit tests 覆盖 packed ABI | ✅ 归入 #430 | 在 #430 中一起完成。296 tests pass，全走 packed。 |
 | **441** | Kernel CRITICAL/HIGH 修复（2026-03-23） | ✅ | 同 #431：修复 tools/uapi 头不同步、REJIT `fd_array_cnt` 无上限、`find_call_site()` x86 硬编码、`text_invalidate` 删除、`kinsn_ops` owner 引用问题。验证：`make kernel`、`make vm-selftest`、`make vm-micro-smoke` 全通过。见 #428。 |
-| **442** | 冗余 bounds check 消除 | 待做 | BPF packet access 中冗余的 bounds check 消除。见 #434 调研。 |
-| **443** | Dead code elimination pass | 待做 | 结合 const prop / map inline 做 DCE。见 #434 调研。 |
-| **444** | Helper call 内联/优化 | 待做 | bpf_probe_read_kernel 小 size → 直接 load 等。见 #434 调研。 |
-| **445** | Spill/fill 消除 | 待做 | BPF 程序冗余 spill/fill 消除，补充 KF_FASTCALL。见 #434 调研。 |
+| **442** | 冗余 bounds check 消除 | 🔄 调研中 | BPF packet access 中冗余的 bounds check 消除。从零调研。**调研报告见 #472d**。 |
+| **443** | Dead code elimination pass | 🔄 设计中 | 结合 const prop / map inline 做 DCE。和 #424 合并调研。**设计报告见 #472b**。 |
+| **444** | Helper call 内联/优化 | 🔄 调研中 | bpf_probe_read_kernel 小 size → 直接 load 等。corpus 25296 个 probe_read_kernel site。**调研报告见 #472h**。 |
+| **445** | Spill/fill 消除 | ❌ 低优先级 | BPF 程序冗余 spill/fill 消除。**调研结论（`comprehensive_optimization_survey_20260323.md`）：内核已有 KF_FASTCALL，增量收益低**。 |
 | **446** | **kinsn 设计文档（2026-03-23）** | ✅ | `docs/kinsn-design.md`（1097 行）。覆盖 packed ABI 编码、daemon→verifier→JIT 数据流、bpf_kinsn_ops API、安全模型、5 个 kinsn 规格、添加新 kinsn 指南。Commit `5e10be2`。 |
 | **447** | **Daemon debug logging（2026-03-23）** | ✅ | `--debug` CLI flag。per-pass 完整 bytecode dump、verifier log（via REJIT log_level=2）、JIT machine code dump。299 tests pass。 |
 | **448** | **Corpus 测量 bug 修复（2026-03-23）** | ✅ | **Root cause**：daemon-socket 模式下 C++ runner 不输出 stock sample，Python fallback 把 recompile sample 当 baseline → ratio=1.0。修复：driver 在 v5_run 前单独跑 stock baseline + 防护 fallback。 |
@@ -775,3 +781,13 @@ make clean
 | **470d** | 根 `Makefile` 薄封装化 | ✅ | 根 `Makefile` 的 `vm-test` / `vm-selftest` / `vm-static-test` / `vm-negative-test` / `vm-micro-smoke` / `vm-micro` / `vm-corpus` / `vm-e2e` 已改成薄透传到 `runner/Makefile`，不再内联 `vng` 命令、guest init、queue/lock 或 e2e 预下载逻辑。 |
 | **470e** | `micro/` / `corpus/` / `e2e/` VM 路径迁移 | 🔄 | `micro/driver.py`、`corpus/modes.py`、`daemon/tests/static_verify.py` 的执行热路径都已继续收口：Python 仍负责 YAML/control-plane 选择，但实际 job 执行改为一次调用 `runner/build/micro_exec run-batch` 的 C++ batch runner；`static_verify` 的旧 `bpftool/loadall/process_*` Python 调度代码已删除。`corpus/modes.py` 仍通过 `runner.libs.vm.build_vng_command()` 生成 VM 命令；`e2e/cases/scx/case.py` 已通过 `run_in_vm(..., action=\"vm-e2e\")` 接入 runner 调度语义。剩余待迁移的是 `e2e/run.py` 和其他 case 的具体执行循环。 |
 | **470f** | 调度控制面验证 | ✅ 主线已通 | 已完成基础验证：`py_compile` ✅、机器解析 ✅、命令生成 ✅、并发队列/锁串行化 ✅。端到端验证也已在 #469b 跑完：`make vm-static-test` / `make vm-micro` / `make vm-corpus` / `make vm-e2e` 全部通过；剩余工作已转为性能优化与个别 backend/case 的继续收口。 |
+| **471** | **用户态 benchmark 框架死代码清理（2026-03-24）** | ✅ | corpus/modes.py 删 3 函数 + 1 import（invocation_summary/paired_stock_invocation_summary/text_invocation_summary/parse_runner_samples import）、MODE_NAMES 常量。micro/benchmark_catalog.py 删 3 无用全局变量（DEFAULT_SUITE/AVAILABLE_BENCHMARKS/AVAILABLE_RUNTIMES）。micro/driver.py 删 read_git_sha()（和 _git_rev_parse 重复）。Commits `d3879ba`+`3b98b53`+`eeef9f4`。 |
+| **472** | **⚠️ 未实现优化深度调研（2026-03-24）** | 🔄 | **父任务**：8 份独立调研/设计报告，覆盖 plan §3 中所有已列出但未设计的优化。全部 codex 并行执行中。 |
+| **472a** | #423 Dynamic map inlining + invalidation 设计报告 | 🔄 codex 执行中 | 已有机会分析（`map_inlining_opportunity_analysis_20260323.md`），本轮做具体设计：稳定性检测、invalidation 机制、bytecode rewrite 算法、verifier 交互、daemon pass 设计、case study、break-even 模型。→ `docs/tmp/20260324/dynamic_map_inlining_design_20260324.md` |
+| **472b** | #424 Verifier const prop + #443 DCE 深度调研+设计 | 🔄 codex 执行中 | 已有统计（`simd_constprop_opportunity_analysis_20260323.md` Part 2），本轮做：log_level=2 格式精确解析、可利用常量状态分类、verifier 接受性验证、DCE 算法、pass 交互顺序、case study。→ `docs/tmp/20260324/verifier_constprop_dce_design_20260324.md` |
+| **472c** | #433 LFENCE/BPF_NOSPEC 消除设计报告 | 🔄 codex 执行中 | 已有内核代码分析（`comprehensive_optimization_survey_20260323.md` §A），本轮做：corpus NOSPEC 统计、安全判断算法、verifier 交互（pre-fixup bytecode → verifier 重新决定插不插）、safe-load 替代方案、case study。→ `docs/tmp/20260324/lfence_nospec_elimination_design_20260324.md` |
+| **472d** | #442 冗余 bounds check 消除从零调研 | 🔄 codex 执行中 | 从零开始：bounds check bytecode pattern、冗余定义（dominator 关系）、corpus XDP/TC 统计、消除算法（interval analysis）、verifier 接受性（合并 vs 删除）、case study。→ `docs/tmp/20260324/bounds_check_elimination_research_20260324.md` |
+| **472e** | 128-bit wide load-store 全新调研 | 🔄 codex 执行中 | 新课题：ARM64 LDP/STP、x86 MOVDQU/REP MOVSB、corpus 连续相邻 load/store 频率、和 wide_mem 关系、kinsn 设计、verifier 挑战。→ `docs/tmp/20260324/128bit_wide_loadstore_research_20260324.md` |
+| **472f** | ADDR_CALC (LEA) 从零调研 | 🔄 codex 执行中 | 从零开始：x86 LEA、BPF mov+shift+add pattern、corpus 频率统计、ARM64 等价、kinsn 设计、daemon pass 设计、预估影响。→ `docs/tmp/20260324/addr_calc_lea_research_20260324.md` |
+| **472g** | #421 SIMD kinsn 设计报告 | 🔄 codex 执行中 | 已有机会分析（`simd_constprop_opportunity_analysis_20260323.md` Part 1），本轮做：技术路线决策（rep movsb vs SSE2 vs AVX2）、kinsn module 设计、daemon pass、ARM64 设计、corpus case。→ `docs/tmp/20260324/simd_kinsn_design_20260324.md` |
+| **472h** | #444 Helper call 内联/特化调研 | 🔄 codex 执行中 | 逐 helper 安全性分析（probe_read_kernel/skb_load_bytes/skb_store_bytes）、verifier 交互、corpus 统计、kinsn vs bytecode 决策、风险评估、优先级排序。→ `docs/tmp/20260324/helper_call_inlining_research_20260324.md` |
