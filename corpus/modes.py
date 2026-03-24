@@ -35,7 +35,6 @@ from runner.libs.inventory import (
     discover_object_programs,
     load_packet_test_run_targets,
 )
-from runner.libs.results import parse_runner_samples
 from runner.libs.run_artifacts import (
     ArtifactSession,
     derive_run_type,
@@ -264,75 +263,6 @@ def normalize_scan(scan: dict[str, Any] | None) -> dict[str, int]:
 def families_from_scan(scan: dict[str, Any] | None) -> list[str]:
     normalized = normalize_scan(scan)
     return [name for name, field in FAMILY_FIELDS if normalized[field] > 0]
-
-
-def invocation_summary(result: dict[str, Any] | None) -> dict[str, Any] | None:
-    if result is None:
-        return None
-    stderr = result.get("stderr") or ""
-    stdout = result.get("stdout") or ""
-    if isinstance(stderr, bytes):
-        stderr = stderr.decode("utf-8", errors="replace")
-    if isinstance(stdout, bytes):
-        stdout = stdout.decode("utf-8", errors="replace")
-    return {
-        "ok": result["ok"],
-        "returncode": result["returncode"],
-        "timed_out": result["timed_out"],
-        "duration_seconds": result["duration_seconds"],
-        "error": result["error"],
-        "stderr_tail": summarize_text(stderr),
-        "stdout_tail": summarize_text(stdout),
-        "sample": result.get("sample"),
-    }
-
-
-def paired_stock_invocation_summary(result: dict[str, Any] | None) -> dict[str, Any] | None:
-    summary = invocation_summary(result)
-    if not summary or not summary.get("ok"):
-        return None
-
-    all_samples = list(parse_runner_samples(str(result.get("stdout") or "")))
-
-    stock_samples = [
-        dict(sample)
-        for sample in all_samples
-        if sample.get("phase") == "stock"
-    ]
-    if stock_samples:
-        summary["sample"] = stock_samples[-1]
-        return summary
-
-    # Fallback: when no rejit was requested, the runner emits a single sample
-    # without a "phase" field.  Use it as the baseline measurement.
-    # Guard: never treat a rejit-applied sample as stock baseline — that would
-    # make baseline == v5 and produce a meaningless 1.0 speedup ratio.
-    vanilla_samples = [
-        dict(sample)
-        for sample in all_samples
-        if sample.get("phase") is None
-        and sample.get("exec_ns") is not None
-        and not (sample.get("rejit") or {}).get("applied")
-    ]
-    if vanilla_samples:
-        summary["sample"] = vanilla_samples[-1]
-        return summary
-
-    return None
-
-
-def text_invocation_summary(result: dict[str, Any] | None) -> dict[str, Any] | None:
-    if result is None:
-        return None
-    return {
-        "ok": result["ok"],
-        "returncode": result["returncode"],
-        "timed_out": result["timed_out"],
-        "duration_seconds": result["duration_seconds"],
-        "error": result["error"],
-        "stderr_tail": summarize_text(result["stderr"]),
-        "stdout_tail": summarize_text(result["stdout"]),
-    }
 
 
 def batch_text_invocation_summary(result: dict[str, Any] | None) -> dict[str, Any] | None:
