@@ -53,7 +53,7 @@ make corpus-build REPOS="tracee tetragon scx katran"
 
 ### scx
 
-- No setup script; the case auto-builds `daemon/target/release/bpfrejit-daemon` and `runner/repos/scx/target/release/scx_rusty` if needed
+- `make vm-e2e` now prepares `runner/repos/scx` and `runner/repos/scx/target/release/scx_rusty` through the runner control plane before entering the VM
 - Uses `corpus/build/scx/scx_rusty_main.bpf.o`
 - Requires at least one workload generator in `PATH`: `hackbench`, `stress-ng`, or `sysbench`
 - Supports `--vm` and requires `--kernel` when enabled

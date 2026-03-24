@@ -68,6 +68,7 @@ VM_SMOKE_ARGS := --iterations 1 --warmups 0 --repeat 50
 
 .PHONY: all micro_exec directive_hint vendor_libbpf vendor_bpftool \
 	corpus-fetch corpus-build-objects corpus-build \
+	scx-artifacts e2e-prep \
 	kernel-image kernel-tests-build kinsn-modules-build micro-programs daemon-binary \
 	vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 	clean
@@ -81,6 +82,18 @@ corpus-build-objects:
 	$(PYTHON) $(ROOT_DIR)/scripts/build_corpus_objects.py $(REPO_FLAGS)
 
 corpus-build: corpus-fetch corpus-build-objects
+
+scx-artifacts:
+	@if [ ! -d "$(REPO_ROOT)/runner/repos/scx" ]; then \
+		$(PYTHON) "$(ROOT_DIR)/scripts/fetch_corpus_repos.py" --repo scx; \
+	fi
+	$(PYTHON) "$(ROOT_DIR)/scripts/build_scx_artifacts.py"
+
+e2e-prep:
+	@if [ ! -d "$(REPO_ROOT)/runner/repos/bcc" ] || [ ! -d "$(REPO_ROOT)/runner/repos/scx" ]; then \
+		$(PYTHON) "$(ROOT_DIR)/scripts/fetch_corpus_repos.py" --repo bcc --repo scx; \
+	fi
+	$(PYTHON) "$(ROOT_DIR)/scripts/build_scx_artifacts.py"
 
 vendor_libbpf: $(LIBBPF_A) $(LIBBPF_HEADER)
 
@@ -212,7 +225,7 @@ vm-corpus: micro_exec daemon-binary kernel-image kinsn-modules-build
 		--output-json "$(VM_CORPUS_OUTPUT_JSON)" \
 		--output-md "$(VM_CORPUS_OUTPUT_MD)"
 
-vm-e2e: micro_exec daemon-binary kernel-image kinsn-modules-build
+vm-e2e: e2e-prep micro_exec daemon-binary kernel-image kinsn-modules-build
 	mkdir -p "$(E2E_RESULTS_DIR)"
 	bash "$(REPO_ROOT)/e2e/cases/tracee/setup.sh" || true
 	bash "$(REPO_ROOT)/e2e/cases/tetragon/setup.sh" || true

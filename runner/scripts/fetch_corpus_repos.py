@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -19,6 +20,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 RUNNER_DIR = SCRIPT_DIR.parent
 REPO_ROOT = RUNNER_DIR.parent
 DEFAULT_CONFIG = REPO_ROOT / "corpus" / "config" / "macro_corpus.yaml"
+LEGACY_REPO_ROOT = REPO_ROOT / "corpus" / "repos"
 
 
 def run(command: list[str], cwd: Path | None = None) -> None:
@@ -41,6 +43,16 @@ def load_corpus_config(path: Path) -> dict[str, Path]:
     }
 
 
+def migrate_legacy_repo(name: str, destination: Path) -> bool:
+    legacy_repo = LEGACY_REPO_ROOT / name
+    if destination.exists() or not legacy_repo.exists():
+        return False
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.move(str(legacy_repo), str(destination))
+    print(f"[migrate] {legacy_repo} -> {destination}")
+    return True
+
+
 def ensure_repo(spec: dict[str, object], local_repos: Path) -> Path:
     name = str(spec["name"])
     url = str(spec["url"])
@@ -48,6 +60,8 @@ def ensure_repo(spec: dict[str, object], local_repos: Path) -> Path:
     sparse_paths = [str(path) for path in spec.get("sparse_paths", [])]
     repo_dir = local_repos / name
 
+    if not repo_dir.exists():
+        migrate_legacy_repo(name, repo_dir)
     if not repo_dir.exists():
         run(
             [
@@ -66,15 +80,16 @@ def ensure_repo(spec: dict[str, object], local_repos: Path) -> Path:
         )
     else:
         run(["git", "fetch", "--depth", "1", "origin", branch], cwd=repo_dir)
-        status = capture(["git", "status", "--porcelain"], cwd=repo_dir)
+        status = capture(["git", "status", "--porcelain", "--untracked-files=no"], cwd=repo_dir)
         if status.returncode != 0:
             raise SystemExit(status.returncode)
         if status.stdout.strip():
             run(["git", "checkout", branch], cwd=repo_dir)
             run(["git", "pull", "--ff-only", "--depth", "1", "origin", branch], cwd=repo_dir)
         else:
-            # Generated corpus clones are safe to realign when clean, which also
-            # handles force-pushed shallow branches that can't be fast-forwarded.
+            # Runner-managed third-party checkouts are disposable benchmark
+            # inputs; when tracked files are clean we can realign to origin even
+            # if untracked caches (for example __pycache__) are present.
             run(["git", "checkout", "-B", branch, f"origin/{branch}"], cwd=repo_dir)
 
     if sparse_paths:
