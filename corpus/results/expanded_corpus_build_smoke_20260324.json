@@ -1,0 +1,27 @@
+{
+  "generated_at": "2026-03-24T04:47:32.697095+00:00",
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/runner/repos.yaml",
+  "inventory": "/home/yunwei37/workspace/bpf-benchmark/runner/inventory.json",
+  "build_root": "/home/yunwei37/workspace/bpf-benchmark/corpus/build",
+  "filters": {
+    "repos": [
+      "tracee"
+    ],
+    "max_sources": 1
+  },
+  "toolchain": {
+    "clang": "/usr/bin/clang",
+    "bpftool": "/usr/local/sbin/bpftool",
+    "clang_sys_include_flags": []
+  },
+  "summary": {
+    "sources_total": 0,
+    "compiled_ok": 0,
+    "compiled_failed": 0,
+    "compiled_objects": [],
+    "per_repo": {},
+    "failure_stage_breakdown": {},
+    "failure_error_breakdown": {}
+  },
+  "records": []
+}
