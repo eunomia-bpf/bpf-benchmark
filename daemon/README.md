@@ -187,7 +187,7 @@ BTF kind constants are synced from `vendor/linux-framework/include/uapi/linux/bt
 and verified by a sync test (`test_btf_kind_constants_match_kernel`).
 
 When a pass emits a kfunc call, it records the module FD in
-`BpfProgram.required_module_fds`. The apply path constructs the appropriate
+`BpfProgram.required_btf_fds`. The apply path constructs the appropriate
 `fd_array` for `BPF_PROG_REJIT`.
 
 ## Profiler

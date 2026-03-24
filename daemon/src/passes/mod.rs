@@ -227,7 +227,7 @@ mod tests {
         let mut prog = make_program(insns);
         // Provide a barrier btf_id so the spectre pass can fire.
         let mut ctx = PassContext::test_default();
-        ctx.kfunc_registry.speculation_barrier_btf_id = 777;
+        ctx.kinsn_registry.speculation_barrier_btf_id = 777;
 
         let result = pm.run(&mut prog, &ctx).unwrap();
 
@@ -371,7 +371,7 @@ mod tests {
         let mut prog = make_program(insns);
         // Provide a fake rotate kfunc btf_id and enable RORX so the pass can fire
         let mut ctx = PassContext::test_default();
-        ctx.kfunc_registry.rotate64_btf_id = 9999;
+        ctx.kinsn_registry.rotate64_btf_id = 9999;
         ctx.platform.has_rorx = true;
         let pm = build_default_pipeline();
         let result = pm.run(&mut prog, &ctx).unwrap();
@@ -416,7 +416,7 @@ mod tests {
         let orig_len = insns.len();
         let mut prog = make_program(insns);
         let mut ctx = PassContext::test_default();
-        ctx.kfunc_registry.extract64_btf_id = 9999;
+        ctx.kinsn_registry.extract64_btf_id = 9999;
         ctx.platform.has_bmi1 = true;
         ctx.platform.has_bmi2 = true;
         let pm = build_default_pipeline();
@@ -461,9 +461,9 @@ mod tests {
         let orig_len = insns.len();
         let mut prog = make_program(insns);
         let mut ctx = PassContext::test_default();
-        ctx.kfunc_registry.endian_load16_btf_id = 9999;
-        ctx.kfunc_registry.endian_load32_btf_id = 9998;
-        ctx.kfunc_registry.endian_load64_btf_id = 9997;
+        ctx.kinsn_registry.endian_load16_btf_id = 9999;
+        ctx.kinsn_registry.endian_load32_btf_id = 9998;
+        ctx.kinsn_registry.endian_load64_btf_id = 9997;
         ctx.platform.has_movbe = true;
         let pm = build_default_pipeline();
         let result = pm.run(&mut prog, &ctx).unwrap();
@@ -509,7 +509,7 @@ mod tests {
         let orig_len = insns.len();
         let mut prog = make_program(insns);
         let mut ctx = PassContext::test_default();
-        ctx.kfunc_registry.select64_btf_id = 9999;
+        ctx.kinsn_registry.select64_btf_id = 9999;
         ctx.platform.has_cmov = true;
         let pm = build_default_pipeline();
         let result = pm.run(&mut prog, &ctx).unwrap();

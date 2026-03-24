@@ -5,7 +5,7 @@ use crate::analysis::BranchTargetAnalysis;
 use crate::insn::*;
 use crate::pass::*;
 
-use super::utils::{emit_packed_kinsn_call_with_off, ensure_module_fd_slot, fixup_all_branches};
+use super::utils::{emit_packed_kinsn_call_with_off, ensure_btf_fd_slot, fixup_all_branches};
 
 /// EXTRACT optimization pass: replaces RSH+AND bitfield extraction patterns
 /// with bpf_extract64() kfunc calls.
@@ -111,7 +111,7 @@ impl BpfPass for ExtractPass {
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
         // Check if bpf_extract64 kfunc is available.
-        if ctx.kfunc_registry.extract64_btf_id < 0 {
+        if ctx.kinsn_registry.extract64_btf_id < 0 {
             return Ok(PassResult {
                 pass_name: self.name().into(),
                 changed: false,
@@ -125,7 +125,7 @@ impl BpfPass for ExtractPass {
             });
         }
 
-        if !ctx.kfunc_registry.packed_supported_for_pass(self.name()) {
+        if !ctx.kinsn_registry.packed_supported_for_pass(self.name()) {
             return Ok(PassResult {
                 pass_name: self.name().into(),
                 changed: false,
@@ -143,7 +143,7 @@ impl BpfPass for ExtractPass {
         let bt = analyses.get(&bt_analysis, program);
 
         let sites = scan_extract_sites(&program.insns);
-        let btf_id = ctx.kfunc_registry.extract64_btf_id;
+        let btf_id = ctx.kinsn_registry.extract64_btf_id;
         let mut safe_sites: Vec<SafeExtractSite> = Vec::new();
         let mut skipped = Vec::new();
 
@@ -174,9 +174,9 @@ impl BpfPass for ExtractPass {
         }
 
         let kfunc_off = ctx
-            .kfunc_registry
-            .module_fd_for_pass(self.name())
-            .map(|fd| ensure_module_fd_slot(program, fd))
+            .kinsn_registry
+            .btf_fd_for_pass(self.name())
+            .map(|fd| ensure_btf_fd_slot(program, fd))
             .unwrap_or(0);
 
         // Build replacement instruction stream.
@@ -260,7 +260,7 @@ mod tests {
 
     fn ctx_with_extract_kfunc(btf_id: i32) -> PassContext {
         let mut ctx = PassContext::test_default();
-        ctx.kfunc_registry.extract64_btf_id = btf_id;
+        ctx.kinsn_registry.extract64_btf_id = btf_id;
         ctx.platform.has_bmi1 = true;
         ctx
     }
@@ -542,7 +542,7 @@ mod tests {
     }
 
     #[test]
-    fn test_extract_pass_records_module_fd() {
+    fn test_extract_pass_records_btf_fd() {
         let mut prog = make_program(vec![
             BpfInsn::alu64_imm(BPF_RSH, 2, 8),
             BpfInsn::alu64_imm(BPF_AND, 2, 0xff),
@@ -550,13 +550,15 @@ mod tests {
         ]);
         let mut cache = AnalysisCache::new();
         let mut ctx = ctx_with_extract_kfunc(7777);
-        ctx.kfunc_registry.module_fd = Some(42);
+        ctx.kinsn_registry
+            .target_btf_fds
+            .insert("bpf_extract64".to_string(), 42);
 
         let pass = ExtractPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
         assert!(result.changed);
-        assert!(prog.required_module_fds.contains(&42));
+        assert!(prog.required_btf_fds.contains(&42));
     }
 
     #[test]

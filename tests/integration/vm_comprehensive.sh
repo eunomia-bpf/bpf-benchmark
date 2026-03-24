@@ -178,7 +178,7 @@ done
 # dmesg for module registration
 echo ""
 echo "--- dmesg (module registration) ---"
-dmesg | grep -i "bpf_rotate\|bpf_select\|bpf_extract\|kinsn\|inline_kfunc\|kfunc" | tail -10
+dmesg | grep -i "bpf_rotate\|bpf_select\|bpf_extract\|kinsn" | tail -10
 
 # Unload
 echo ""

@@ -5,7 +5,7 @@ use crate::analysis::BranchTargetAnalysis;
 use crate::insn::*;
 use crate::pass::*;
 
-use super::utils::{emit_packed_kinsn_call_with_off, ensure_module_fd_slot, fixup_all_branches};
+use super::utils::{emit_packed_kinsn_call_with_off, ensure_btf_fd_slot, fixup_all_branches};
 
 /// COND_SELECT pass: replaces branch+mov diamond patterns with
 /// bpf_select64() kfunc calls (lowered to CMOV by the JIT).
@@ -102,7 +102,7 @@ fn kfunc_args_for_site(site: &CondSelectSite) -> (CondSelectValue, CondSelectVal
 }
 
 fn packed_supported_for_site(ctx: &PassContext, site: &CondSelectSite) -> bool {
-    if !ctx.kfunc_registry.packed_supported_for_pass("cond_select") {
+    if !ctx.kinsn_registry.packed_supported_for_pass("cond_select") {
         return false;
     }
 
@@ -142,7 +142,7 @@ impl BpfPass for CondSelectPass {
         }
 
         // Check if bpf_select64 kfunc is available.
-        if ctx.kfunc_registry.select64_btf_id < 0 {
+        if ctx.kinsn_registry.select64_btf_id < 0 {
             // Fall back to detection-only mode.
             let sites = self.analyze(&program.insns);
             let diagnostics: Vec<String> = sites
@@ -171,7 +171,7 @@ impl BpfPass for CondSelectPass {
             });
         }
 
-        if !ctx.kfunc_registry.packed_supported_for_pass(self.name()) {
+        if !ctx.kinsn_registry.packed_supported_for_pass(self.name()) {
             return Ok(PassResult {
                 pass_name: self.name().into(),
                 changed: false,
@@ -189,7 +189,7 @@ impl BpfPass for CondSelectPass {
         let bt = analyses.get(&bt_analysis, program);
 
         let sites = self.analyze(&program.insns);
-        let btf_id = ctx.kfunc_registry.select64_btf_id;
+        let btf_id = ctx.kinsn_registry.select64_btf_id;
         let mut safe_sites: Vec<SafeCondSelectSite> = Vec::new();
         let mut skipped = Vec::new();
 
@@ -248,9 +248,9 @@ impl BpfPass for CondSelectPass {
         }
 
         let kfunc_off = ctx
-            .kfunc_registry
-            .module_fd_for_pass(self.name())
-            .map(|fd| ensure_module_fd_slot(program, fd))
+            .kinsn_registry
+            .btf_fd_for_pass(self.name())
+            .map(|fd| ensure_btf_fd_slot(program, fd))
             .unwrap_or(0);
 
         // Build replacement instruction stream.
@@ -483,7 +483,7 @@ mod tests {
 
     fn ctx_with_select_kfunc(btf_id: i32) -> PassContext {
         let mut ctx = PassContext::test_default();
-        ctx.kfunc_registry.select64_btf_id = btf_id;
+        ctx.kinsn_registry.select64_btf_id = btf_id;
         ctx.platform.has_cmov = true;
         ctx
     }

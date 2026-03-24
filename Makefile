@@ -61,6 +61,7 @@ export ARM64_DOCKER_PLATFORM ARM64_CROSSBUILD_OUTPUT_DIR ARM64_CROSSBUILD_JOBS
 # Tunables
 BZIMAGE ?= vendor/linux-framework/arch/x86/boot/bzImage
 DAEMON  ?= daemon/target/release/bpfrejit-daemon
+DAEMON_ARGS ?=
 DAEMON_SOCKET ?= /tmp/bpfrejit.sock
 REPOS ?=
 ITERATIONS ?= 3
@@ -73,7 +74,10 @@ BZIMAGE_PATH := $(if $(filter /%,$(BZIMAGE)),$(BZIMAGE),$(ROOT_DIR)/$(BZIMAGE))
 DAEMON_PATH  := $(if $(filter /%,$(DAEMON)),$(DAEMON),$(ROOT_DIR)/$(DAEMON))
 MICRO_RUNNER := $(RUNNER_DIR)/build/micro_exec
 KERNEL_SYMVERS_PATH := $(KERNEL_DIR)/Module.symvers
+KERNEL_CONFIG_PATH := $(KERNEL_DIR)/.config
+KERNEL_CONFIG_STAMP := $(KERNEL_DIR)/.bpfrejit_config.stamp
 NPROC        ?= $(shell nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
+JOBS         ?= $(NPROC)
 DEFCONFIG_SRC := $(ROOT_DIR)/vendor/bpfrejit_defconfig
 
 # Results
@@ -94,10 +98,23 @@ LOCAL_SMOKE_ARGS := --bench simple --iterations 1 --warmups 0 --repeat 10
 MICRO_RUNNER_SOURCES := $(wildcard $(RUNNER_DIR)/src/*.cpp $(RUNNER_DIR)/include/*.hpp $(RUNNER_DIR)/CMakeLists.txt)
 MICRO_BPF_SOURCES    := $(wildcard $(MICRO_DIR)/programs/*.bpf.c $(MICRO_DIR)/programs/common.h)
 DAEMON_SOURCES       := $(wildcard $(DAEMON_DIR)/src/*.rs $(DAEMON_DIR)/Cargo.toml $(DAEMON_DIR)/Cargo.lock)
-KERNEL_JIT_SOURCES   := $(addprefix $(KERNEL_DIR)/,arch/x86/net/bpf_jit_comp.c kernel/bpf/syscall.c kernel/bpf/verifier.c kernel/bpf/trampoline.c kernel/bpf/dispatcher.c)
+VIRTME_HOSTFS_MODULES := \
+	fs/netfs/netfs.ko \
+	net/9p/9pnet.ko \
+	net/9p/9pnet_virtio.ko \
+	fs/9p/9p.ko \
+	fs/fuse/virtiofs.ko \
+	fs/overlayfs/overlay.ko
+VIRTME_HOSTFS_MODULE_ORDER := \
+	fs/netfs/netfs.o \
+	net/9p/9pnet.o \
+	net/9p/9pnet_virtio.o \
+	fs/9p/9p.o \
+	fs/fuse/virtiofs.o \
+	fs/overlayfs/overlay.o
 MICRO_BPF_STAMP      := $(MICRO_DIR)/programs/.build.stamp
 
-.PHONY: all runner micro daemon kernel kernel-arm64 kernel-tests kinsn-modules \
+.PHONY: all runner micro daemon kernel kernel-build kernel-arm64 kernel-tests kinsn-modules virtme-hostfs-modules upstream-selftests-build \
 	corpus-fetch corpus-build-objects corpus-build \
 	daemon-tests python-tests check smoke validate \
 	vm-shell vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
@@ -108,7 +125,7 @@ MICRO_BPF_STAMP      := $(MICRO_DIR)/programs/.build.stamp
 
 # ── Help ───────────────────────────────────────────────────────────────────────
 help:
-	@echo "Build:  all runner micro daemon kernel kinsn-modules kernel-tests kernel-arm64 cross-arm64"
+	@echo "Build:  all runner micro daemon kernel kinsn-modules kernel-tests upstream-selftests-build kernel-arm64 cross-arm64"
 	@echo "Repos:  corpus-fetch corpus-build-objects corpus-build REPOS=\"tracee tetragon ...\""
 	@echo "Test:   smoke daemon-tests python-tests check"
 	@echo "VM x86: vm-shell vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all validate"
@@ -123,20 +140,20 @@ all:
 	$(MAKE) kernel-tests
 
 runner:
-	$(MAKE) -C "$(RUNNER_DIR)" micro_exec
+	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" micro_exec
 
 corpus-fetch:
-	$(MAKE) -C "$(RUNNER_DIR)" corpus-fetch PYTHON="$(PYTHON)" REPOS="$(REPOS)"
+	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" REPOS="$(REPOS)" corpus-fetch
 
 corpus-build-objects:
-	$(MAKE) -C "$(RUNNER_DIR)" corpus-build-objects PYTHON="$(PYTHON)" REPOS="$(REPOS)"
+	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" REPOS="$(REPOS)" corpus-build-objects
 
 corpus-build:
-	$(MAKE) -C "$(RUNNER_DIR)" corpus-build PYTHON="$(PYTHON)" REPOS="$(REPOS)"
+	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" REPOS="$(REPOS)" corpus-build
 
 micro:
-	$(MAKE) runner
-	$(MAKE) -C "$(MICRO_DIR)" programs
+	$(MAKE) -j"$(JOBS)" runner
+	$(MAKE) -j"$(JOBS)" -C "$(MICRO_DIR)" JOBS="$(JOBS)" programs
 
 daemon:
 	cargo build --release --manifest-path "$(DAEMON_DIR)/Cargo.toml"
@@ -147,8 +164,16 @@ kinsn-modules: $(BZIMAGE_PATH)
 kinsn-modules: $(KERNEL_SYMVERS_PATH)
 	$(MAKE) -C "$(KINSN_MODULE_DIR)" KDIR="$(KERNEL_DIR)"
 
+virtme-hostfs-modules: $(BZIMAGE_PATH)
+	rm -rf "$(KERNEL_DIR)/.virtme_mods"
+	$(MAKE) -C "$(KERNEL_DIR)" -j"$(JOBS)" $(VIRTME_HOSTFS_MODULES)
+	@printf '%s\n' $(VIRTME_HOSTFS_MODULE_ORDER) > "$(KERNEL_DIR)/modules.order"
+
 kernel-tests:
-	$(MAKE) -C "$(KERNEL_TEST_DIR)"
+	$(MAKE) -j"$(JOBS)" -C "$(KERNEL_TEST_DIR)" JOBS="$(JOBS)"
+
+upstream-selftests-build: virtme-hostfs-modules
+	$(MAKE) -j"$(JOBS)" -C "$(KERNEL_TEST_DIR)" JOBS="$(JOBS)" upstream-selftests
 
 # Incremental rebuild rules
 $(MICRO_RUNNER): $(MICRO_RUNNER_SOURCES)
@@ -160,15 +185,31 @@ $(MICRO_BPF_STAMP): $(MICRO_BPF_SOURCES)
 $(DAEMON_PATH): $(DAEMON_SOURCES)
 	cargo build --release --manifest-path "$(DAEMON_DIR)/Cargo.toml"
 
-$(BZIMAGE_PATH): $(KERNEL_JIT_SOURCES)
-	@if [ -f "$(DEFCONFIG_SRC)" ] && ! diff -q "$(DEFCONFIG_SRC)" "$(KERNEL_DIR)/.config" >/dev/null 2>&1; then \
-		cp "$(DEFCONFIG_SRC)" "$(KERNEL_DIR)/.config"; $(MAKE) -C "$(KERNEL_DIR)" olddefconfig; fi
-	$(MAKE) -C "$(KERNEL_DIR)" -j"$(NPROC)" bzImage modules_prepare
+$(KERNEL_CONFIG_PATH):
+	cp "$(DEFCONFIG_SRC)" "$@"
 
-$(KERNEL_SYMVERS_PATH): $(KERNEL_JIT_SOURCES)
-	@if [ -f "$(DEFCONFIG_SRC)" ] && ! diff -q "$(DEFCONFIG_SRC)" "$(KERNEL_DIR)/.config" >/dev/null 2>&1; then \
-		cp "$(DEFCONFIG_SRC)" "$(KERNEL_DIR)/.config"; $(MAKE) -C "$(KERNEL_DIR)" olddefconfig; fi
-	$(MAKE) -C "$(KERNEL_DIR)" -j"$(NPROC)" modules
+$(KERNEL_CONFIG_STAMP): $(DEFCONFIG_SRC) $(KERNEL_CONFIG_PATH)
+	@if ! diff -q "$(DEFCONFIG_SRC)" "$(KERNEL_CONFIG_PATH)" >/dev/null 2>&1; then \
+		cp "$(DEFCONFIG_SRC)" "$(KERNEL_CONFIG_PATH)"; \
+	fi
+	"$(KERNEL_DIR)/scripts/config" --file "$(KERNEL_CONFIG_PATH)" \
+		--enable UNWINDER_ORC \
+		--disable UNWINDER_FRAME_POINTER \
+		--set-str SYSTEM_TRUSTED_KEYS "" \
+		--set-str SYSTEM_REVOCATION_KEYS ""
+	$(MAKE) -C "$(KERNEL_DIR)" olddefconfig
+	touch "$@"
+
+kernel-build: $(KERNEL_CONFIG_STAMP)
+	$(MAKE) -C "$(KERNEL_DIR)" -j"$(JOBS)" bzImage modules_prepare
+	@test -f "$(KERNEL_SYMVERS_PATH)"
+	@touch "$(KERNEL_SYMVERS_PATH)"
+
+$(BZIMAGE_PATH): kernel-build
+	@test -f "$@"
+
+$(KERNEL_SYMVERS_PATH): $(BZIMAGE_PATH)
+	@test -f "$@"
 
 # ── Local tests ────────────────────────────────────────────────────────────────
 smoke: $(MICRO_RUNNER) $(MICRO_BPF_STAMP)
@@ -212,7 +253,7 @@ vm-selftest:
 vm-static-test:
 	$(MAKE) -C "$(RUNNER_DIR)" vm-static-test \
 		PYTHON="$(PYTHON)" VENV="$(VENV)" \
-		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" TARGET="$(TARGET)" \
+		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" DAEMON_ARGS="$(DAEMON_ARGS)" TARGET="$(TARGET)" \
 		STATIC_VERIFY_ARGS='$(STATIC_VERIFY_ARGS)'
 
 NEGATIVE_TEST_DIR := $(ROOT_DIR)/tests/negative
@@ -226,23 +267,23 @@ vm-negative-test:
 vm-micro-smoke:
 	$(MAKE) -C "$(RUNNER_DIR)" vm-micro-smoke \
 		PYTHON="$(PYTHON)" VENV="$(VENV)" \
-		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" DAEMON_SOCKET="$(DAEMON_SOCKET)" TARGET="$(TARGET)"
+		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" DAEMON_ARGS="$(DAEMON_ARGS)" DAEMON_SOCKET="$(DAEMON_SOCKET)" TARGET="$(TARGET)"
 
 vm-micro:
 	$(MAKE) -C "$(RUNNER_DIR)" vm-micro \
 		PYTHON="$(PYTHON)" VENV="$(VENV)" \
-		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" DAEMON_SOCKET="$(DAEMON_SOCKET)" TARGET="$(TARGET)" \
+		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" DAEMON_ARGS="$(DAEMON_ARGS)" DAEMON_SOCKET="$(DAEMON_SOCKET)" TARGET="$(TARGET)" \
 		ITERATIONS="$(ITERATIONS)" WARMUPS="$(WARMUPS)" REPEAT="$(REPEAT)" BENCH="$(BENCH)"
 
 vm-corpus:
 	$(MAKE) -C "$(RUNNER_DIR)" vm-corpus \
 		PYTHON="$(PYTHON)" VENV="$(VENV)" \
-		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" TARGET="$(TARGET)" REPEAT="$(REPEAT)"
+		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" DAEMON_ARGS="$(DAEMON_ARGS)" TARGET="$(TARGET)" REPEAT="$(REPEAT)"
 
 vm-e2e:
 	$(MAKE) -C "$(RUNNER_DIR)" vm-e2e \
 		PYTHON="$(PYTHON)" VENV="$(VENV)" \
-		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" TARGET="$(TARGET)"
+		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" DAEMON_ARGS="$(DAEMON_ARGS)" TARGET="$(TARGET)"
 
 vm-all:
 	$(MAKE) vm-test

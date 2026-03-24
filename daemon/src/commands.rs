@@ -176,17 +176,17 @@ pub(crate) fn build_pipeline(pass_names: &Option<Vec<String>>) -> pass::PassMana
     }
 }
 
-fn build_rejit_fd_array(required_module_fds: &[RawFd]) -> Vec<RawFd> {
-    if required_module_fds.is_empty() {
+fn build_rejit_fd_array(required_btf_fds: &[RawFd]) -> Vec<RawFd> {
+    if required_btf_fds.is_empty() {
         return Vec::new();
     }
 
-    // CALL.off uses 0 for vmlinux and 1-based slots for module BTFs.
+    // CALL.off uses 0 for vmlinux and 1-based slots for descriptor BTFs.
     // The REJIT fd_array pre-scan requires every populated slot to be a valid
     // map or BTF fd, so reserve slot 0 with a duplicate valid BTF fd.
-    let mut fd_array = Vec::with_capacity(required_module_fds.len() + 1);
-    fd_array.push(required_module_fds[0]);
-    fd_array.extend(required_module_fds.iter().copied());
+    let mut fd_array = Vec::with_capacity(required_btf_fds.len() + 1);
+    fd_array.push(required_btf_fds[0]);
+    fd_array.extend(required_btf_fds.iter().copied());
     fd_array
 }
 
@@ -697,18 +697,18 @@ pub(crate) fn try_apply_one(
             debug.pre_rejit_bytecode = Some(insn::dump_bytecode_compact(&program.insns));
         }
 
-        let fd_array = build_rejit_fd_array(&program.required_module_fds);
-        let all_fds = local_ctx.kfunc_registry.all_module_fds();
-        for &fd_needed in &program.required_module_fds {
+        let fd_array = build_rejit_fd_array(&program.required_btf_fds);
+        let all_fds = local_ctx.kinsn_registry.all_btf_fds();
+        for &fd_needed in &program.required_btf_fds {
             if !all_fds.contains(&fd_needed) {
                 eprintln!(
-                    "    warning: required module fd {} not in registry ({:?})",
+                    "    warning: required descriptor BTF fd {} not in registry ({:?})",
                     fd_needed, all_fds
                 );
                 push_debug_warning(
                     &mut attempt_debug,
                     format!(
-                        "required module fd {fd_needed} missing from registry {:?}",
+                        "required descriptor BTF fd {fd_needed} missing from registry {:?}",
                         all_fds
                     ),
                 );
@@ -1246,9 +1246,9 @@ R2 invalid mem access 'scalar'
         use crate::kfunc_discovery;
 
         // Discover kfuncs (may find none if modules not loaded, that's OK).
-        let discovery = kfunc_discovery::discover_kfuncs();
+        let discovery = kfunc_discovery::discover_kinsns();
         let ctx = pass::PassContext {
-            kfunc_registry: discovery.registry,
+            kinsn_registry: discovery.registry,
             platform: pass::PlatformCapabilities::default(),
             policy: pass::PolicyConfig::default(),
         };

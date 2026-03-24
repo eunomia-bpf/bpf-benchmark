@@ -54,26 +54,30 @@ pub fn fixup_all_branches(new_insns: &mut [BpfInsn], old_insns: &[BpfInsn], addr
 /// Emit a packed-ABI kinsn call using a sidecar pseudo-insn immediately
 /// before the kinsn CALL. The result register is part of `payload`, so no
 /// extra `mov dst, r0` is emitted here.
-pub fn emit_packed_kinsn_call_with_off(payload: u64, kinsn_btf_id: i32, kinsn_off: i16) -> Vec<BpfInsn> {
+pub fn emit_packed_kinsn_call_with_off(
+    payload: u64,
+    kinsn_btf_id: i32,
+    kinsn_off: i16,
+) -> Vec<BpfInsn> {
     vec![
         BpfInsn::kinsn_sidecar(payload),
         BpfInsn::call_kinsn_with_off(kinsn_btf_id, kinsn_off),
     ]
 }
 
-/// Ensure `module_fd` is present in the program's REJIT `fd_array` list and
+/// Ensure `btf_fd` is present in the program's REJIT `fd_array` list and
 /// return the 1-based slot number to encode in `CALL.off`.
-pub fn ensure_module_fd_slot(program: &mut BpfProgram, module_fd: i32) -> i16 {
+pub fn ensure_btf_fd_slot(program: &mut BpfProgram, btf_fd: i32) -> i16 {
     if let Some(idx) = program
-        .required_module_fds
+        .required_btf_fds
         .iter()
-        .position(|&fd| fd == module_fd)
+        .position(|&fd| fd == btf_fd)
     {
         return idx as i16 + 1;
     }
 
-    program.required_module_fds.push(module_fd);
-    program.required_module_fds.len() as i16
+    program.required_btf_fds.push(btf_fd);
+    program.required_btf_fds.len() as i16
 }
 // ── Tests ──────────────────────────────────────────────────────────
 

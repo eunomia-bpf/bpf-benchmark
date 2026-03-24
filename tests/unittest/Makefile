@@ -4,7 +4,7 @@ BUILD_DIR ?= $(UNITTEST_DIR)/build
 
 CC ?= cc
 CLANG ?= clang
-CFLAGS ?= -O2 -g -Wall -Wno-\#warnings
+CFLAGS ?= -O2 -g -Wall -Wno-cpp
 # Use -I (not -isystem) so vendor REJIT headers override system linux/bpf.h
 INCLUDES := -I$(ROOT_DIR)/vendor/linux-framework/include/uapi
 
@@ -47,7 +47,7 @@ CLANG_SYS_INCLUDES := $(call get_sys_includes,$(CLANG))
 
 # Tests that only need kernel UAPI headers
 SIMPLE_TESTS := rejit_poc rejit_safety_tests rejit_regression rejit_tail_call \
-                rejit_spectre rejit_kinsn rejit_kinsn_packed
+                rejit_spectre rejit_kinsn
 
 # Tests that also need libbpf
 LIBBPF_TESTS := rejit_prog_types rejit_audit_tests

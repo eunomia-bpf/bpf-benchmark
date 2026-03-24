@@ -5,7 +5,7 @@ use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
-use super::utils::{emit_packed_kinsn_call_with_off, ensure_module_fd_slot, fixup_all_branches};
+use super::utils::{emit_packed_kinsn_call_with_off, ensure_btf_fd_slot, fixup_all_branches};
 
 /// ROTATE optimization pass: replaces shift+OR rotate patterns with
 /// bpf_rotate64() kfunc calls. JIT inlines the kfunc as a native rotate.
@@ -28,7 +28,7 @@ impl BpfPass for RotatePass {
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
         // Prerequisite: check if bpf_rotate64 kfunc is available.
-        if ctx.kfunc_registry.rotate64_btf_id < 0 {
+        if ctx.kinsn_registry.rotate64_btf_id < 0 {
             return Ok(PassResult {
                 pass_name: self.name().into(),
                 changed: false,
@@ -42,7 +42,7 @@ impl BpfPass for RotatePass {
             });
         }
 
-        if !ctx.kfunc_registry.packed_supported_for_pass(self.name()) {
+        if !ctx.kinsn_registry.packed_supported_for_pass(self.name()) {
             return Ok(PassResult {
                 pass_name: self.name().into(),
                 changed: false,
@@ -50,6 +50,27 @@ impl BpfPass for RotatePass {
                 sites_skipped: vec![SkipReason {
                     pc: 0,
                     reason: "bpf_rotate64 packed ABI not available".into(),
+                }],
+                diagnostics: vec![],
+                ..Default::default()
+            });
+        }
+
+        // Current rotate safety checks are intraprocedural. Until the daemon
+        // models BPF-to-BPF call edges precisely, skip programs with pseudo
+        // calls instead of rewriting across subprog boundaries unsafely.
+        if program
+            .insns
+            .iter()
+            .any(|insn| insn.is_call() && insn.src_reg() == BPF_PSEUDO_CALL)
+        {
+            return Ok(PassResult {
+                pass_name: self.name().into(),
+                changed: false,
+                sites_applied: 0,
+                sites_skipped: vec![SkipReason {
+                    pc: 0,
+                    reason: "subprog pseudo-calls not yet supported".into(),
                 }],
                 diagnostics: vec![],
                 ..Default::default()
@@ -64,7 +85,7 @@ impl BpfPass for RotatePass {
         let sites = scan_rotate_sites(&program.insns);
         let mut safe_sites: Vec<SafeRotateSite> = Vec::new();
         let mut skipped = Vec::new();
-        let btf_id = ctx.kfunc_registry.rotate64_btf_id;
+        let btf_id = ctx.kinsn_registry.rotate64_btf_id;
 
         for site in sites {
             // Safety check 1: interior branch target.
@@ -112,9 +133,9 @@ impl BpfPass for RotatePass {
         }
 
         let kfunc_off = ctx
-            .kfunc_registry
-            .module_fd_for_pass(self.name())
-            .map(|fd| ensure_module_fd_slot(program, fd))
+            .kinsn_registry
+            .btf_fd_for_pass(self.name())
+            .map(|fd| ensure_btf_fd_slot(program, fd))
             .unwrap_or(0);
 
         // Build replacement instruction stream.
@@ -425,7 +446,7 @@ mod tests {
 
     fn ctx_with_rotate_kfunc(btf_id: i32) -> PassContext {
         let mut ctx = PassContext::test_default();
-        ctx.kfunc_registry.rotate64_btf_id = btf_id;
+        ctx.kinsn_registry.rotate64_btf_id = btf_id;
         ctx.platform.has_rorx = true;
         ctx
     }
@@ -692,6 +713,38 @@ mod tests {
 
         assert!(result.program_changed);
         assert_eq!(result.total_sites_applied, 1);
+    }
+
+    #[test]
+    fn test_rotate_pass_skips_programs_with_pseudo_calls() {
+        let mut prog = make_program(vec![
+            BpfInsn::mov64_reg(3, 2),
+            BpfInsn::alu64_imm(BPF_RSH, 2, 56),
+            BpfInsn::alu64_imm(BPF_LSH, 3, 8),
+            BpfInsn::alu64_reg(BPF_OR, 2, 3),
+            BpfInsn {
+                code: BPF_JMP | BPF_CALL,
+                regs: BpfInsn::make_regs(0, BPF_PSEUDO_CALL),
+                off: 0,
+                imm: 1,
+            },
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+            BpfInsn::mov64_imm(0, 1),
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let ctx = ctx_with_rotate_kfunc(1234);
+
+        let pass = RotatePass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(!result.changed);
+        assert_eq!(result.sites_applied, 0);
+        assert!(result
+            .sites_skipped
+            .iter()
+            .any(|s| s.reason.contains("subprog pseudo-calls")));
     }
 
     // ── Issue 2: dst overwrite between MOV and shift ─────────────

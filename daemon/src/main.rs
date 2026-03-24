@@ -127,9 +127,9 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
-    // Discover available kinsn kfuncs from loaded kernel modules.
-    let discovery = kfunc_discovery::discover_kfuncs();
-    eprintln!("kfunc discovery:");
+    // Discover available kinsn targets from exported BTF descriptors.
+    let discovery = kfunc_discovery::discover_kinsns();
+    eprintln!("kinsn discovery:");
     for line in &discovery.log {
         eprintln!("{}", line);
     }
@@ -144,12 +144,12 @@ fn main() -> Result<()> {
         platform.has_rorx,
     );
     let ctx = pass::PassContext {
-        kfunc_registry: discovery.registry,
+        kinsn_registry: discovery.registry,
         platform,
         policy: pass::PolicyConfig::default(),
     };
-    // Keep module FDs alive for the daemon's lifetime.
-    let _module_fds = discovery.module_fds;
+    // Keep descriptor BTF FDs alive for the daemon's lifetime.
+    let _btf_fds = discovery.btf_fds;
 
     // Determine which passes to use.
     let pass_names = cli.passes;

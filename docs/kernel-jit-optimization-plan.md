@@ -194,36 +194,38 @@ BpfReJIT 的设计基于三个层次的 insight：
 
 ### 3.1 性能优化变换
 
-| 变换 | 需要 kinsn? | 说明 |
-|------|:---:|------|
-| **WIDE_MEM** | 否 | byte load+shift+or → 已有 BPF wide load 指令。占 kernel surplus 50.7% |
-| **ROTATE** | 是 | shift+or → `bpf_rotate64()` kinsn → JIT emit RORX |
-| **COND_SELECT** | 是 | branch+mov → `bpf_select64()` kinsn → JIT emit CMOV。policy-sensitive：依赖分支可预测性 |
-| **BITFIELD_EXTRACT** | 是 | shift+and → `bpf_extract64()` kinsn → JIT emit BEXTR |
-| **BRANCH_FLIP** | 否 | if/else body 重排，用已有 BPF branch 指令。policy-sensitive：依赖 workload 热度 |
-| **ENDIAN_FUSION** | 可选 | load+bswap → combined kinsn → JIT emit MOVBE |
-| **ADDR_CALC** | 可选 | mov+shift+add → `bpf_lea()` kinsn → JIT emit LEA |
-| **Const propagation** | 否 | 利用 frozen map / runtime invariants 做常量折叠 |
-| **Subprog inline** | 否 | bytecode 层展开 subprogram call |
-| **SIMD kinsn** | 是（新 module） | memcpy/checksum/hash → AVX2/NEON SIMD 指令。不需改框架，只需新 kinsn module + daemon pass |
-| **Frozen map inlining** | 否 | `BPF_MAP_FREEZE` 后的只读 map → 读当前值 → 替换 `map_lookup_elem` 为常量 `MOV`。verifier 看到常量后自动 dead branch elimination |
-| **Dynamic map inlining + invalidation** | 否 | JVM deoptimization 模型：daemon 观察到 map 未被修改 → inline 当前值 → REJIT。map 被修改后 → 检测到 → 重新 REJIT（更新值或回退到 lookup）。**runtime-guided specialization，static compiler 不可能做到** |
-| **Verifier-assisted const propagation** | 否 | 用 `log_level=2` 获取 verifier 的 per-insn 寄存器状态（tnum/range）→ 识别运行时常量 → 替换为 `MOV reg, const` → 死代码消除 |
-| **Dead code elimination (DCE)** | 否 | const prop / map inlining 后的 unreachable block / dead store 消除。是 specialization 的乘数 |
-| **128-bit wide load-store** | 可选 | 连续相邻 64-bit load/store → ARM64 LDP/STP（一条指令 128-bit）。x86 受 FPU 限制，可能不可行。IPv6 地址、struct copy 场景 |
-| **Redundant bounds check elimination** | 否 | XDP/TC packet parser 中冗余的 bounds check 合并/消除。纯 bytecode rewrite |
-| **Helper call specialization** | 否/可选 | `probe_read_kernel` size=4/8 → direct load；`skb_load_bytes` → direct packet access。语义风险需谨慎 |
-| **Tail-call direct-target specialization** | 否 | runtime 观察 tail_call map 稳定 → inline target → deopt on change。最像 HotSpot inline cache |
+| 变换 | kinsn? | 状态 | 说明 | Corpus 证据（2026-03-24） |
+|------|:---:|:---:|------|------|
+| **WIDE_MEM** | 否 | ✅ 已实现 | byte load+shift+or → 已有 BPF wide load 指令。占 kernel surplus 50.7% | 49/62 micro applied |
+| **ROTATE** | 是 | ✅ 已实现 | shift+or → `bpf_rotate64()` kinsn → JIT emit RORX | 701 sites, 15 applied |
+| **COND_SELECT** | 是 | ✅ 已实现 | branch+mov → `bpf_select64()` kinsn → JIT emit CMOV。policy-sensitive | 12 corpus applied |
+| **BITFIELD_EXTRACT** | 是 | ✅ 已实现 | shift+and → `bpf_extract64()` kinsn → JIT emit BEXTR | 524 sites, 4 applied |
+| **BRANCH_FLIP** | 否 | ✅ 已实现 | if/else body 重排。policy-sensitive：依赖 PGO | PGO-only |
+| **ENDIAN_FUSION** | 可选 | ✅ 已实现 | load+bswap → combined kinsn → JIT emit MOVBE | 256 sites, 17 corpus applied |
+| **Dynamic map inlining** | 否 | 🔄 设计完成 | JVM deopt 模型：map 稳定 → inline → invalidation → re-REJIT。**论文核心 story** | **11556 个 map_lookup site；Katran 22→2 条（-91%）；Tetragon 447→2（-99.6%）**。设计：`dynamic_map_inlining_design_20260324.md` |
+| **Verifier const prop** | 否 | 🔄 设计完成 | `log_level=2` → tnum/range 常量 → `MOV imm` → branch folding | **23% verifier state 含精确常量；62.5% 分支和立即数比较**。设计：`verifier_constprop_dce_design_20260324.md` |
+| **DCE** | 否 | 🔄 设计完成 | const prop / map inline 后的 unreachable block / dead store 消除。specialization 乘数 | **kernel 已有 `opt_remove_dead_code()`，daemon DCE 让更多条件变常量**。和 #424 同一份设计 |
+| **Bounds check merge** | 否 | 🔄 调研完成 | ~~冗余 check 删除~~ → **guard window merge / hoisting**。合并小窗口为大窗口 | **42 guard sites，严格冗余=0%，但 83.3% 可合并（ladder 结构）**。调研：`bounds_check_elimination_research_20260324.md` |
+| **128-bit LDP/STP** | 可选 | 🔄 调研完成 | ARM64 LDP/STP pair load/store。**仅 ARM64，x86 不做** | **ARM64 corpus store 对密度高，当前 JIT 完全没 LDP/STP**。调研：`128bit_wide_loadstore_research_20260324.md` |
+| **Bulk memory kinsn** | 是 | 🔄 设计完成 | ~~SIMD~~ → v1 用 `rep movsb/stosb` (x86) / `LDP/STP` (ARM64)，不碰 FPU | **corpus 有 40B/74B/360B/464B 连续 copy/zero run**。设计：`simd_kinsn_design_20260324.md` |
+| **ADDR_CALC (LEA)** | 可选 | ❌ 低优先级 | mov+shift+add → `bpf_lea()` kinsn → JIT emit LEA | **corpus 仅 14 个严格命中 site（全部 tetragon），ROI 很低**。调研：`addr_calc_lea_research_20260324.md` |
+| **Helper call specialization** | 否/可选 | 🔄 调研完成 | `skb_load_bytes → direct packet access` 优先（纯 bytecode）；`probe_read_kernel` 需 safe-load kinsn | **590 skb_load_bytes + 25296 probe_read_kernel site。结论：skb_load_bytes 最可行，probe_read 风险高**。调研：`helper_call_inlining_research_20260324.md` |
+| **Frozen map inlining** | 否 | ❌ 不做 | BPF_MAP_FREEZE 后只读 map → 常量 MOV | **调研结论：真实 workload 无显式 freeze，hot-path lookup ≈ 0** |
+| **Subprog inline** | 否 | 待调研 | bytecode 层展开 subprogram call | 无数据 |
+| **Const propagation** | 否 | ↗ 归入 #424 | 利用 frozen map / runtime invariants 做常量折叠 | 归入 verifier const prop |
+| **SIMD (FPU)** | 是 | Phase 2 | AVX2/NEON 仅在 ≥512B(x86)/≥1024B(ARM64) 时启用 | FPU context 开销高，phase 2 only |
+| **Tail-call specialization** | 否 | 待调研 | tail_call map 稳定 → inline target → deopt | 无数据，综合报告评为"最像 HotSpot" |
+| **Spill/fill 消除** | 否 | ❌ 不做 | 冗余 spill/fill 消除 | **内核已有 KF_FASTCALL，增量收益低** |
 
 ### 3.2 安全加固变换
 
-| 变换 | 说明 |
-|------|------|
-| **危险 helper 防火墙** | 中和恶意 BPF 程序的 bpf_probe_read_kernel / bpf_send_signal 等 |
-| **Spectre 缓解注入** | 在缺少 speculation barrier 的位置插入 lfence |
-| **LFENCE/BPF_NOSPEC 消除** | daemon 重构 bytecode 使 speculative path 安全 → verifier 不再插 barrier → 减少 LFENCE 开销 |
-| **BPF 程序漏洞热修复** | verifier bug 发现后对 live 程序加额外检查 |
-| **权限收紧** | 收窄过度权限的 BPF 程序的访问范围 |
+| 变换 | 状态 | 说明 | Corpus 证据（2026-03-24） |
+|------|:---:|------|------|
+| **Spectre 缓解注入** | ✅ 已实现 | 在缺少 speculation barrier 的位置插入 lfence kinsn | SpeculationBarrierPass + bpf_barrier kinsn |
+| **LFENCE/BPF_NOSPEC 消除** | ⏸ 降优先级 | daemon 重构 bytecode 使 speculative path 安全 → verifier 不再插 barrier | **corpus 861 程序实测 BPF_ST_NOSPEC = 0**。设计保留：`lfence_nospec_elimination_design_20260324.md` |
+| **危险 helper 防火墙** | 待做 | 中和恶意 BPF 程序的 bpf_probe_read_kernel / bpf_send_signal 等 | |
+| **BPF 程序漏洞热修复** | 待做 | verifier bug 发现后对 live 程序加额外检查 | |
+| **权限收紧** | 待做 | 收窄过度权限的 BPF 程序的访问范围 | |
 
 ### 3.3 不在范围内
 
@@ -739,7 +741,7 @@ make clean
 | **441** | Kernel CRITICAL/HIGH 修复（2026-03-23） | ✅ | 同 #431：修复 tools/uapi 头不同步、REJIT `fd_array_cnt` 无上限、`find_call_site()` x86 硬编码、`text_invalidate` 删除、`kinsn_ops` owner 引用问题。验证：`make kernel`、`make vm-selftest`、`make vm-micro-smoke` 全通过。见 #428。 |
 | **442** | 冗余 bounds check 消除 | 🔄 调研中 | BPF packet access 中冗余的 bounds check 消除。从零调研。**调研报告见 #472d**。 |
 | **443** | Dead code elimination pass | 🔄 设计中 | 结合 const prop / map inline 做 DCE。和 #424 合并调研。**设计报告见 #472b**。 |
-| **444** | Helper call 内联/优化 | 🔄 调研中 | bpf_probe_read_kernel 小 size → 直接 load 等。corpus 25296 个 probe_read_kernel site。**调研报告见 #472h**。 |
+| **444** | Helper call 内联/优化 | ✅ 调研完成 | **结论**：P0 是 `skb_load_bytes -> direct packet access`；`skb_store_bytes` 仅适合 `flags=0` 窄子集；`probe_read_kernel` 一般情形受 nofault/fault-handling 语义阻塞，不应直接改成 load；`ktime_get_ns` 不是纯 bytecode rewrite 题。报告：`docs/tmp/20260324/helper_call_inlining_research_20260324.md`。 |
 | **445** | Spill/fill 消除 | ❌ 低优先级 | BPF 程序冗余 spill/fill 消除。**调研结论（`comprehensive_optimization_survey_20260323.md`）：内核已有 KF_FASTCALL，增量收益低**。 |
 | **446** | **kinsn 设计文档（2026-03-23）** | ✅ | `docs/kinsn-design.md`（1097 行）。覆盖 packed ABI 编码、daemon→verifier→JIT 数据流、bpf_kinsn_ops API、安全模型、5 个 kinsn 规格、添加新 kinsn 指南。Commit `5e10be2`。 |
 | **447** | **Daemon debug logging（2026-03-23）** | ✅ | `--debug` CLI flag。per-pass 完整 bytecode dump、verifier log（via REJIT log_level=2）、JIT machine code dump。299 tests pass。 |
@@ -788,6 +790,7 @@ make clean
 | **472c** | #433 LFENCE/BPF_NOSPEC 消除设计报告 | 🔄 codex 执行中 | 已有内核代码分析（`comprehensive_optimization_survey_20260323.md` §A），本轮做：corpus NOSPEC 统计、安全判断算法、verifier 交互（pre-fixup bytecode → verifier 重新决定插不插）、safe-load 替代方案、case study。→ `docs/tmp/20260324/lfence_nospec_elimination_design_20260324.md` |
 | **472d** | #442 冗余 bounds check 消除从零调研 | 🔄 codex 执行中 | 从零开始：bounds check bytecode pattern、冗余定义（dominator 关系）、corpus XDP/TC 统计、消除算法（interval analysis）、verifier 接受性（合并 vs 删除）、case study。→ `docs/tmp/20260324/bounds_check_elimination_research_20260324.md` |
 | **472e** | 128-bit wide load-store 全新调研 | 🔄 codex 执行中 | 新课题：ARM64 LDP/STP、x86 MOVDQU/REP MOVSB、corpus 连续相邻 load/store 频率、和 wide_mem 关系、kinsn 设计、verifier 挑战。→ `docs/tmp/20260324/128bit_wide_loadstore_research_20260324.md` |
-| **472f** | ADDR_CALC (LEA) 从零调研 | 🔄 codex 执行中 | 从零开始：x86 LEA、BPF mov+shift+add pattern、corpus 频率统计、ARM64 等价、kinsn 设计、daemon pass 设计、预估影响。→ `docs/tmp/20260324/addr_calc_lea_research_20260324.md` |
+| **472f** | ADDR_CALC (LEA) 从零调研 | ✅ | 报告：`docs/tmp/20260324/addr_calc_lea_research_20260324.md`。**主结论**：strict `mov+shift+add` LEA pattern 在当前 `corpus/build` 里仅 **14 sites / 7 objects**，**100% 来自 tetragon**，且全是 `scale=4, disp=0`；x86 strict LEA **ROI 低，不建议第一波实现**。补充观察：ARM64 broader shifted-add（特别是 `shift=4`）覆盖远大于 x86 LEA，应视为 separate family。 |
 | **472g** | #421 SIMD kinsn 设计报告 | 🔄 codex 执行中 | 已有机会分析（`simd_constprop_opportunity_analysis_20260323.md` Part 1），本轮做：技术路线决策（rep movsb vs SSE2 vs AVX2）、kinsn module 设计、daemon pass、ARM64 设计、corpus case。→ `docs/tmp/20260324/simd_kinsn_design_20260324.md` |
-| **472h** | #444 Helper call 内联/特化调研 | 🔄 codex 执行中 | 逐 helper 安全性分析（probe_read_kernel/skb_load_bytes/skb_store_bytes）、verifier 交互、corpus 统计、kinsn vs bytecode 决策、风险评估、优先级排序。→ `docs/tmp/20260324/helper_call_inlining_research_20260324.md` |
+| **472h** | #444 Helper call 内联/特化调研 | ✅ | 报告：`docs/tmp/20260324/helper_call_inlining_research_20260324.md`。主结论：`skb_load_bytes` 是最适合先做的纯 bytecode helper specialization；`skb_store_bytes` 只适合 `flags=0` 窄子集；`probe_read_kernel` 必须保留 nofault/fault-handling 语义；`ktime_get_ns` 只能走新 intrinsic/helper-inline contract。 |
+| **473** | **Related Work 系统性文献整理 + 对比分析（2026-03-24）** | ✅ | codex 完成基于 primary sources 的全面 related-work survey，覆盖 K2/Merlin/EPSO/ePass/BCF、Jitterbug/Jitk/PREVAIL/Agni/VEP/BeeBox/VeriFence、bpftime/llvmbpf/uXDP/hXDP/eHDL/femto-containers，以及 HotSpot/V8/LLVM ORC/livepatch 等类比系统；输出逐篇分析、大对比表、按维度差异化分析与 BpfReJIT novelty 总结。报告：`docs/tmp/20260324/related_work_comprehensive_analysis_20260324.md`。 |

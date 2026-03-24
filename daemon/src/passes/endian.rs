@@ -5,7 +5,7 @@ use crate::analysis::BranchTargetAnalysis;
 use crate::insn::*;
 use crate::pass::*;
 
-use super::utils::{emit_packed_kinsn_call_with_off, ensure_module_fd_slot, fixup_all_branches};
+use super::utils::{emit_packed_kinsn_call_with_off, ensure_btf_fd_slot, fixup_all_branches};
 
 /// BPF ALU endian operation code.
 const BPF_END: u8 = 0xd0;
@@ -110,9 +110,9 @@ fn scan_endian_fusion_sites(insns: &[BpfInsn]) -> Vec<EndianFusionSite> {
 /// Select the appropriate BTF ID for a given load size.
 fn btf_id_for_size(ctx: &PassContext, size: u8) -> i32 {
     match size {
-        BPF_H => ctx.kfunc_registry.endian_load16_btf_id,
-        BPF_W => ctx.kfunc_registry.endian_load32_btf_id,
-        BPF_DW => ctx.kfunc_registry.endian_load64_btf_id,
+        BPF_H => ctx.kinsn_registry.endian_load16_btf_id,
+        BPF_W => ctx.kinsn_registry.endian_load32_btf_id,
+        BPF_DW => ctx.kinsn_registry.endian_load64_btf_id,
         _ => -1,
     }
 }
@@ -128,9 +128,9 @@ fn kfunc_name_for_size(size: u8) -> Option<&'static str> {
 
 /// Check if any of the three endian_load kfuncs are available.
 fn any_endian_kfunc_available(ctx: &PassContext) -> bool {
-    ctx.kfunc_registry.endian_load16_btf_id >= 0
-        || ctx.kfunc_registry.endian_load32_btf_id >= 0
-        || ctx.kfunc_registry.endian_load64_btf_id >= 0
+    ctx.kinsn_registry.endian_load16_btf_id >= 0
+        || ctx.kinsn_registry.endian_load32_btf_id >= 0
+        || ctx.kinsn_registry.endian_load64_btf_id >= 0
 }
 
 fn endian_payload(dst_reg: u8, base_reg: u8) -> u64 {
@@ -220,14 +220,14 @@ impl BpfPass for EndianFusionPass {
         let bt = analyses.get(&bt_analysis, program);
 
         if !ctx
-            .kfunc_registry
-            .packed_supported_for_kfunc_name("bpf_endian_load16")
+            .kinsn_registry
+            .packed_supported_for_target_name("bpf_endian_load16")
             && !ctx
-                .kfunc_registry
-                .packed_supported_for_kfunc_name("bpf_endian_load32")
+                .kinsn_registry
+                .packed_supported_for_target_name("bpf_endian_load32")
             && !ctx
-                .kfunc_registry
-                .packed_supported_for_kfunc_name("bpf_endian_load64")
+                .kinsn_registry
+                .packed_supported_for_target_name("bpf_endian_load64")
         {
             return Ok(PassResult {
                 pass_name: self.name().into(),
@@ -277,7 +277,7 @@ impl BpfPass for EndianFusionPass {
             }
 
             if !kfunc_name_for_size(site.size)
-                .map(|name| ctx.kfunc_registry.packed_supported_for_kfunc_name(name))
+                .map(|name| ctx.kinsn_registry.packed_supported_for_target_name(name))
                 .unwrap_or(false)
             {
                 skipped.push(SkipReason {
@@ -310,9 +310,9 @@ impl BpfPass for EndianFusionPass {
         }
 
         let kfunc_off = ctx
-            .kfunc_registry
-            .module_fd_for_pass(self.name())
-            .map(|fd| ensure_module_fd_slot(program, fd))
+            .kinsn_registry
+            .btf_fd_for_pass(self.name())
+            .map(|fd| ensure_btf_fd_slot(program, fd))
             .unwrap_or(0);
 
         // Build replacement instruction stream.
@@ -418,9 +418,9 @@ mod tests {
 
     fn ctx_with_endian_kfuncs(btf_id16: i32, btf_id32: i32, btf_id64: i32) -> PassContext {
         let mut ctx = PassContext::test_default();
-        ctx.kfunc_registry.endian_load16_btf_id = btf_id16;
-        ctx.kfunc_registry.endian_load32_btf_id = btf_id32;
-        ctx.kfunc_registry.endian_load64_btf_id = btf_id64;
+        ctx.kinsn_registry.endian_load16_btf_id = btf_id16;
+        ctx.kinsn_registry.endian_load32_btf_id = btf_id32;
+        ctx.kinsn_registry.endian_load64_btf_id = btf_id64;
         ctx.platform.has_movbe = true;
         ctx
     }
@@ -749,7 +749,7 @@ mod tests {
     }
 
     #[test]
-    fn test_endian_fusion_pass_records_module_fd() {
+    fn test_endian_fusion_pass_records_btf_fd() {
         let mut prog = make_program(vec![
             BpfInsn::ldx_mem(BPF_W, 2, 6, 0),
             endian_to_be(2, 32),
@@ -757,13 +757,15 @@ mod tests {
         ]);
         let mut cache = AnalysisCache::new();
         let mut ctx = ctx_with_endian32_kfunc(8888);
-        ctx.kfunc_registry.module_fd = Some(42);
+        ctx.kinsn_registry
+            .target_btf_fds
+            .insert("bpf_endian_load32".to_string(), 42);
 
         let pass = EndianFusionPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
         assert!(result.changed);
-        assert!(prog.required_module_fds.contains(&42));
+        assert!(prog.required_btf_fds.contains(&42));
     }
 
     #[test]

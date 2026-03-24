@@ -3,8 +3,10 @@
  * REJIT kinsn test suite.
  *
  * Covers:
- *   - kinsn registration/discovery via module BTF
+ *   - kinsn descriptor discovery via BTF transport
  *   - REJIT correctness for rotate/select/endian/barrier
+ *   - packed sidecar semantics on arbitrary architectural registers
+ *   - x86 native emit byte-pattern coverage for rotate
  *   - x86 rotate clobber behavior (r5 preserved, r4 rejected)
  *   - endian memory-effect validation
  *   - extract range narrowing enabling bounded dynamic stack access
@@ -23,10 +25,6 @@
 #include <sys/stat.h>
 #include <sys/syscall.h>
 #include <unistd.h>
-
-#if defined(__x86_64__)
-#include <cpuid.h>
-#endif
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 #define LOG_BUF_SIZE 65536
@@ -205,7 +203,7 @@ static int sys_bpf(enum bpf_cmd cmd, union bpf_attr *attr, unsigned int size)
 #define KINSN_ENDIAN_PAYLOAD(DST, BASE) \
 	((__u64)(DST) | ((__u64)(BASE) << 4))
 
-#define MODULE_FD_ARRAY(FD) { (FD), (FD) }
+#define BTF_FD_ARRAY(FD) { (FD), (FD) }
 
 static const struct bpf_insn prog_ret_0[] = {
 	BPF_MOV64_IMM(BPF_REG_0, 0),
@@ -278,6 +276,64 @@ static int test_run_xdp(int prog_fd, __u32 *retval)
 
 	*retval = attr.test.retval;
 	return 0;
+}
+
+static int get_jited_program(int prog_fd, __u8 **buf, __u32 *len)
+{
+	struct bpf_prog_info info = {};
+	union bpf_attr attr = {};
+	__u32 info_len = sizeof(info);
+	__u32 jited_len;
+
+	attr.info.bpf_fd = prog_fd;
+	attr.info.info_len = info_len;
+	attr.info.info = ptr_to_u64(&info);
+	if (sys_bpf(BPF_OBJ_GET_INFO_BY_FD, &attr, sizeof(attr)) < 0)
+		return -1;
+	if (!info.jited_prog_len) {
+		errno = ENOENT;
+		return -1;
+	}
+	jited_len = info.jited_prog_len;
+
+	*buf = calloc(jited_len, 1);
+	if (!*buf) {
+		errno = ENOMEM;
+		return -1;
+	}
+
+	memset(&info, 0, sizeof(info));
+	memset(&attr, 0, sizeof(attr));
+	attr.info.bpf_fd = prog_fd;
+	info.jited_prog_len = jited_len;
+	info.jited_prog_insns = ptr_to_u64(*buf);
+	*len = jited_len;
+	attr.info.info_len = sizeof(info);
+	attr.info.info = ptr_to_u64(&info);
+	if (sys_bpf(BPF_OBJ_GET_INFO_BY_FD, &attr, sizeof(attr)) < 0) {
+		free(*buf);
+		*buf = NULL;
+		*len = 0;
+		return -1;
+	}
+
+	return 0;
+}
+
+static bool find_bytes(const __u8 *haystack, __u32 haystack_len,
+		       const __u8 *needle, __u32 needle_len)
+{
+	__u32 i;
+
+	if (!needle_len || haystack_len < needle_len)
+		return false;
+
+	for (i = 0; i <= haystack_len - needle_len; i++) {
+		if (!memcmp(haystack + i, needle, needle_len))
+			return true;
+	}
+
+	return false;
 }
 
 static int read_file(const char *path, void **data_out, size_t *len_out)
@@ -562,32 +618,6 @@ static int bpf_btf_get_next_id(__u32 start_id, __u32 *next_id)
 	return 0;
 }
 
-static bool cpu_has_movbe(void)
-{
-#if defined(__x86_64__)
-	unsigned int eax, ebx, ecx, edx;
-
-	if (!__get_cpuid(1, &eax, &ebx, &ecx, &edx))
-		return false;
-	return (ecx & bit_MOVBE) != 0;
-#else
-	return true;
-#endif
-}
-
-static bool cpu_has_bmi1(void)
-{
-#if defined(__x86_64__)
-	unsigned int eax, ebx, ecx, edx;
-
-	if (!__get_cpuid_count(7, 0, &eax, &ebx, &ecx, &edx))
-		return false;
-	return (ebx & bit_BMI) != 0;
-#else
-	return true;
-#endif
-}
-
 static int bpf_btf_get_info_name(int btf_fd, char *name_buf, size_t name_buf_sz)
 {
 	union bpf_attr attr;
@@ -800,14 +830,14 @@ static int test_kinsn_discovery(void)
 	size_t i;
 
 	if (discover_kinsns() < 0) {
-		TEST_FAIL(name, "failed to discover module BTF and kinsn IDs");
+		TEST_FAIL(name, "failed to discover descriptor BTF and kinsn IDs");
 		return 1;
 	}
 
 	for (i = 0; i < ARRAY_SIZE(g_funcs); i++) {
 		if (g_funcs[i].btf_id == 0 ||
 		    g_modules[g_funcs[i].module_id].btf_fd < 0) {
-			TEST_FAIL(name, "missing kinsn BTF ID or module BTF FD");
+			TEST_FAIL(name, "missing kinsn BTF ID or descriptor BTF FD");
 			return 1;
 		}
 	}
@@ -825,7 +855,7 @@ static int test_kinsn_discovery(void)
 
 static int test_rejit_barrier_preserves_r5(void)
 {
-	int fd_array[2] = MODULE_FD_ARRAY(g_modules[MOD_BARRIER].btf_fd);
+	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_BARRIER].btf_fd);
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_5, 7),
 		BPF_KINSN_SIDECAR(0),
@@ -842,7 +872,7 @@ static int test_rejit_barrier_preserves_r5(void)
 
 static int test_rejit_rotate_apply(void)
 {
-	int fd_array[2] = MODULE_FD_ARRAY(g_modules[MOD_ROTATE].btf_fd);
+	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_ROTATE].btf_fd);
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_1, 1),
 		BPF_KINSN_SIDECAR(KINSN_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_1, 1,
@@ -857,9 +887,97 @@ static int test_rejit_rotate_apply(void)
 					fd_array, ARRAY_SIZE(fd_array), 2);
 }
 
+static int test_rejit_rotate_jit_emits_rol(void)
+{
+#if defined(__x86_64__)
+	static const __u8 rotate_seq[] = {
+		0x48, 0x89, 0xf8,
+		0x48, 0xc1, 0xc0, 0x01,
+	};
+	const char *name = "rotate_jit_emits_rol";
+	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_ROTATE].btf_fd);
+	struct bpf_insn prog[] = {
+		BPF_MOV64_IMM(BPF_REG_1, 1),
+		BPF_KINSN_SIDECAR(KINSN_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_1, 1,
+							      BPF_REG_6)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_EXIT_INSN(),
+	};
+	char log_buf[LOG_BUF_SIZE];
+	__u32 retval = 0;
+	__u8 *jited = NULL;
+	__u32 jited_len = 0;
+	int prog_fd;
+
+	patch_single_kinsn(prog, ARRAY_SIZE(prog), g_funcs[FUNC_ROTATE].btf_id);
+
+	memset(log_buf, 0, sizeof(log_buf));
+	prog_fd = load_xdp_prog(prog_ret_0, ARRAY_SIZE(prog_ret_0),
+				NULL, 0, log_buf, sizeof(log_buf));
+	if (prog_fd < 0) {
+		TEST_FAIL(name, "base load failed");
+		return 1;
+	}
+
+	memset(log_buf, 0, sizeof(log_buf));
+	if (rejit_xdp_prog(prog_fd, prog, ARRAY_SIZE(prog), fd_array,
+			   ARRAY_SIZE(fd_array), log_buf, sizeof(log_buf)) < 0) {
+		fprintf(stderr, "    verifier log:\n%s\n", log_buf);
+		TEST_FAIL(name, "REJIT failed");
+		close(prog_fd);
+		return 1;
+	}
+
+	if (test_run_xdp(prog_fd, &retval) < 0 || retval != 2) {
+		TEST_FAIL(name, "recompiled program returned wrong value");
+		close(prog_fd);
+		return 1;
+	}
+
+	if (get_jited_program(prog_fd, &jited, &jited_len) < 0) {
+		TEST_FAIL(name, "failed to fetch JIT image");
+		close(prog_fd);
+		return 1;
+	}
+
+	if (!find_bytes(jited, jited_len, rotate_seq, sizeof(rotate_seq))) {
+		TEST_FAIL(name, "ROL sequence not found in JIT image");
+		free(jited);
+		close(prog_fd);
+		return 1;
+	}
+
+	free(jited);
+	close(prog_fd);
+	TEST_PASS(name);
+	return 0;
+#else
+	TEST_SKIP("rotate_jit_emits_rol", "x86_64 only");
+	return 0;
+#endif
+}
+
+static int test_rejit_rotate_arbitrary_regs(void)
+{
+	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_ROTATE].btf_fd);
+	struct bpf_insn prog[] = {
+		BPF_MOV64_IMM(BPF_REG_6, 1),
+		BPF_KINSN_SIDECAR(KINSN_ROTATE_PAYLOAD(BPF_REG_7, BPF_REG_6, 1,
+							      BPF_REG_8)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_MOV64_REG(BPF_REG_0, BPF_REG_7),
+		BPF_EXIT_INSN(),
+	};
+
+	patch_single_kinsn(prog, ARRAY_SIZE(prog), g_funcs[FUNC_ROTATE].btf_id);
+	return run_rejit_expect_success("rotate_arbitrary_regs",
+					prog, ARRAY_SIZE(prog),
+					fd_array, ARRAY_SIZE(fd_array), 2);
+}
+
 static int test_rejit_rotate_r5_preserved(void)
 {
-	int fd_array[2] = MODULE_FD_ARRAY(g_modules[MOD_ROTATE].btf_fd);
+	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_ROTATE].btf_fd);
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_5, 7),
 		BPF_MOV64_IMM(BPF_REG_1, 1),
@@ -878,7 +996,7 @@ static int test_rejit_rotate_r5_preserved(void)
 
 static int test_rejit_rotate_invalid_tmp_rejected(void)
 {
-	int fd_array[2] = MODULE_FD_ARRAY(g_modules[MOD_ROTATE].btf_fd);
+	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_ROTATE].btf_fd);
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_1, 1),
 		BPF_KINSN_SIDECAR(KINSN_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_1, 1,
@@ -895,7 +1013,7 @@ static int test_rejit_rotate_invalid_tmp_rejected(void)
 
 static int test_rejit_select_apply(void)
 {
-	int fd_array[2] = MODULE_FD_ARRAY(g_modules[MOD_SELECT].btf_fd);
+	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_SELECT].btf_fd);
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_1, 11),
 		BPF_MOV64_IMM(BPF_REG_2, 29),
@@ -912,9 +1030,29 @@ static int test_rejit_select_apply(void)
 					fd_array, ARRAY_SIZE(fd_array), 11);
 }
 
+static int test_rejit_select_arbitrary_dst_reg(void)
+{
+	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_SELECT].btf_fd);
+	struct bpf_insn prog[] = {
+		BPF_MOV64_IMM(BPF_REG_1, 11),
+		BPF_MOV64_IMM(BPF_REG_2, 29),
+		BPF_MOV64_IMM(BPF_REG_3, 1),
+		BPF_KINSN_SIDECAR(KINSN_SELECT_PAYLOAD(BPF_REG_5, BPF_REG_1,
+							       BPF_REG_2, BPF_REG_3)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_MOV64_REG(BPF_REG_0, BPF_REG_5),
+		BPF_EXIT_INSN(),
+	};
+
+	patch_single_kinsn(prog, ARRAY_SIZE(prog), g_funcs[FUNC_SELECT].btf_id);
+	return run_rejit_expect_success("select_arbitrary_dst_reg",
+					prog, ARRAY_SIZE(prog),
+					fd_array, ARRAY_SIZE(fd_array), 11);
+}
+
 static int test_rejit_endian_apply(void)
 {
-	int fd_array[2] = MODULE_FD_ARRAY(g_modules[MOD_ENDIAN].btf_fd);
+	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_ENDIAN].btf_fd);
 	struct bpf_insn prog[] = {
 		BPF_ST_MEM(BPF_H, BPF_REG_10, -2, 0x1234),
 		BPF_MOV64_REG(BPF_REG_1, BPF_REG_10),
@@ -930,9 +1068,28 @@ static int test_rejit_endian_apply(void)
 					fd_array, ARRAY_SIZE(fd_array), 0x3412);
 }
 
+static int test_rejit_endian_arbitrary_regs(void)
+{
+	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_ENDIAN].btf_fd);
+	struct bpf_insn prog[] = {
+		BPF_ST_MEM(BPF_H, BPF_REG_10, -2, 0x1234),
+		BPF_MOV64_REG(BPF_REG_6, BPF_REG_10),
+		BPF_ALU64_IMM(BPF_ADD, BPF_REG_6, -2),
+		BPF_KINSN_SIDECAR(KINSN_ENDIAN_PAYLOAD(BPF_REG_7, BPF_REG_6)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_MOV64_REG(BPF_REG_0, BPF_REG_7),
+		BPF_EXIT_INSN(),
+	};
+
+	patch_single_kinsn(prog, ARRAY_SIZE(prog), g_funcs[FUNC_ENDIAN16].btf_id);
+	return run_rejit_expect_success("endian_arbitrary_regs",
+					prog, ARRAY_SIZE(prog),
+					fd_array, ARRAY_SIZE(fd_array), 0x3412);
+}
+
 static int test_rejit_endian_invalid_access_rejected(void)
 {
-	int fd_array[2] = MODULE_FD_ARRAY(g_modules[MOD_ENDIAN].btf_fd);
+	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_ENDIAN].btf_fd);
 	struct bpf_insn prog[] = {
 		BPF_MOV64_REG(BPF_REG_1, BPF_REG_10),
 		BPF_ALU64_IMM(BPF_ADD, BPF_REG_1, -513),
@@ -949,7 +1106,7 @@ static int test_rejit_endian_invalid_access_rejected(void)
 
 static int test_rejit_extract_range_narrowing(void)
 {
-	int fd_array[2] = MODULE_FD_ARRAY(g_modules[MOD_EXTRACT].btf_fd);
+	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_EXTRACT].btf_fd);
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_2, 0xabcd),
 		BPF_KINSN_SIDECAR(KINSN_EXTRACT_PAYLOAD(BPF_REG_2, 0, 8)),
@@ -992,6 +1149,10 @@ int main(int argc, char **argv)
 		ret |= test_rejit_barrier_preserves_r5();
 	if (should_run_test(filter, "rotate_apply"))
 		ret |= test_rejit_rotate_apply();
+	if (should_run_test(filter, "rotate_jit_emits_rol"))
+		ret |= test_rejit_rotate_jit_emits_rol();
+	if (should_run_test(filter, "rotate_arbitrary_regs"))
+		ret |= test_rejit_rotate_arbitrary_regs();
 	if (should_run_test(filter, "rotate_r5_preserved"))
 		ret |= test_rejit_rotate_r5_preserved();
 #if defined(__x86_64__)
@@ -1000,8 +1161,12 @@ int main(int argc, char **argv)
 #endif
 	if (should_run_test(filter, "select_apply"))
 		ret |= test_rejit_select_apply();
+	if (should_run_test(filter, "select_arbitrary_dst_reg"))
+		ret |= test_rejit_select_arbitrary_dst_reg();
 	if (should_run_test(filter, "endian_apply"))
 		ret |= test_rejit_endian_apply();
+	if (should_run_test(filter, "endian_arbitrary_regs"))
+		ret |= test_rejit_endian_arbitrary_regs();
 	if (should_run_test(filter, "endian_invalid_access_rejected"))
 		ret |= test_rejit_endian_invalid_access_rejected();
 	if (should_run_test(filter, "extract_range_narrowing"))

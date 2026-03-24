@@ -2,7 +2,7 @@
 //! kinsn descriptor auto-discovery via `/sys/kernel/btf/` module BTF scanning.
 //!
 //! Scans loaded kernel modules for known kinsn descriptor variables and
-//! populates a `KfuncRegistry` with their BTF type IDs and module FDs.
+//! populates a `KinsnRegistry` with their descriptor IDs and transport BTF FDs.
 
 use std::collections::HashMap;
 use std::fs;
@@ -12,7 +12,7 @@ use std::path::Path;
 use anyhow::{bail, Context, Result};
 
 use crate::insn::BPF_KINSN_ENC_PACKED_CALL;
-use crate::pass::KfuncRegistry;
+use crate::pass::KinsnRegistry;
 
 // ── Known kinsn descriptor → module mapping ──────────────────────────
 
@@ -315,20 +315,20 @@ fn read_module_btf(module_name: &str) -> Result<Vec<u8>> {
 
 // ── Discovery entry point ────────────────────────────────────────────
 
-/// Result of kfunc discovery.
+/// Result of kinsn discovery.
 #[derive(Debug)]
 pub struct DiscoveryResult {
-    pub registry: KfuncRegistry,
-    /// Module BTF FDs to keep alive for the daemon's lifetime.
+    pub registry: KinsnRegistry,
+    /// Descriptor BTF FDs to keep alive for the daemon's lifetime.
     /// When these are dropped, the FDs close and REJIT can no longer reference them.
-    pub module_fds: Vec<OwnedFd>,
+    pub btf_fds: Vec<OwnedFd>,
     /// Human-readable discovery log.
     pub log: Vec<String>,
 }
 
 /// Discover available kinsn descriptors by scanning `/sys/kernel/btf/`.
-pub fn discover_kfuncs() -> DiscoveryResult {
-    let mut registry = KfuncRegistry {
+pub fn discover_kinsns() -> DiscoveryResult {
+    let mut registry = KinsnRegistry {
         rotate64_btf_id: -1,
         select64_btf_id: -1,
         extract64_btf_id: -1,
@@ -336,11 +336,10 @@ pub fn discover_kfuncs() -> DiscoveryResult {
         endian_load32_btf_id: -1,
         endian_load64_btf_id: -1,
         speculation_barrier_btf_id: -1,
-        module_fd: None,
-        kfunc_module_fds: HashMap::new(),
-        kfunc_supported_encodings: HashMap::new(),
+        target_btf_fds: HashMap::new(),
+        target_supported_encodings: HashMap::new(),
     };
-    let mut module_fds: Vec<OwnedFd> = Vec::new();
+    let mut btf_fds: Vec<OwnedFd> = Vec::new();
     let mut log: Vec<String> = Vec::new();
     // Cache of module_name -> raw FD to avoid opening the same BTF twice.
     let mut module_btf_fds: HashMap<String, i32> = HashMap::new();
@@ -411,7 +410,7 @@ pub fn discover_kfuncs() -> DiscoveryResult {
                     use std::os::unix::io::AsRawFd;
                     let raw = owned.as_raw_fd();
                     module_btf_fds.insert(module_name.to_string(), raw);
-                    module_fds.push(owned);
+                    btf_fds.push(owned);
                     raw
                 }
                 Err(e) => {
@@ -441,21 +440,16 @@ pub fn discover_kfuncs() -> DiscoveryResult {
             _ => {}
         }
 
-        // Store per-target module FD for REJIT fd_array.
-        registry.kfunc_module_fds.insert(registry_key.to_string(), fd);
+        // Store per-target BTF FD for REJIT transport.
+        registry.target_btf_fds.insert(registry_key.to_string(), fd);
         registry
-            .kfunc_supported_encodings
+            .target_supported_encodings
             .insert(registry_key.to_string(), BPF_KINSN_ENC_PACKED_CALL);
-
-        // Legacy: keep the first module FD for backward compat.
-        if registry.module_fd.is_none() {
-            registry.module_fd = Some(fd);
-        }
     }
 
     DiscoveryResult {
         registry,
-        module_fds,
+        btf_fds,
         log,
     }
 }
@@ -587,10 +581,10 @@ mod tests {
     }
 
     #[test]
-    fn test_discover_kfuncs_no_modules_loaded() {
+    fn test_discover_kinsns_no_modules_loaded() {
         // On a host without kinsn modules, discovery should return all -1 IDs.
         // This test runs on any machine — if modules happen to be loaded, that's OK too.
-        let result = discover_kfuncs();
+        let result = discover_kinsns();
         // Just check the structure is valid.
         assert!(result.registry.rotate64_btf_id == -1 || result.registry.rotate64_btf_id > 0);
         assert!(result.registry.select64_btf_id == -1 || result.registry.select64_btf_id > 0);
@@ -948,16 +942,16 @@ mod tests {
 
     #[test]
     #[ignore]
-    fn test_discover_kfuncs_real() {
+    fn test_discover_kinsns_real() {
         // Run the full discovery pipeline against the real kernel.
         // Even without kinsn modules loaded, this validates that the BPF
         // syscall chain (BTF_GET_NEXT_ID, BTF_GET_FD_BY_ID, GET_INFO_BY_FD)
         // all work correctly.
-        let result = discover_kfuncs();
+        let result = discover_kinsns();
         // Should always produce at least one log line about vmlinux.
         assert!(
             !result.log.is_empty(),
-            "discover_kfuncs() produced no log output"
+            "discover_kinsns() produced no log output"
         );
         // If kinsn modules are not loaded, all BTF IDs should be -1.
         // If they are loaded, they should be > 0.

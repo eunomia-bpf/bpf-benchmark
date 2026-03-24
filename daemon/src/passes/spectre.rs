@@ -25,7 +25,7 @@ use crate::insn::*;
 use crate::pass::*;
 
 use super::utils::{
-    emit_packed_kinsn_call_with_off, ensure_module_fd_slot,
+    emit_packed_kinsn_call_with_off, ensure_btf_fd_slot,
     fixup_all_branches as fixup_branches_inline,
 };
 
@@ -53,7 +53,7 @@ impl BpfPass for SpectreMitigationPass {
         _analyses: &mut AnalysisCache,
         ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
-        let btf_id = ctx.kfunc_registry.speculation_barrier_btf_id;
+        let btf_id = ctx.kinsn_registry.speculation_barrier_btf_id;
 
         // If the kfunc is not available, skip entirely — no placeholder.
         if btf_id < 0 {
@@ -69,7 +69,7 @@ impl BpfPass for SpectreMitigationPass {
             });
         }
 
-        if !ctx.kfunc_registry.packed_supported_for_pass(self.name()) {
+        if !ctx.kinsn_registry.packed_supported_for_pass(self.name()) {
             return Ok(PassResult {
                 pass_name: self.name().into(),
                 changed: false,
@@ -117,8 +117,8 @@ impl BpfPass for SpectreMitigationPass {
 
                 if !already_has_barrier {
                     if insertions == 0 {
-                        if let Some(fd) = ctx.kfunc_registry.module_fd_for_pass(self.name()) {
-                            barrier_insn.off = ensure_module_fd_slot(program, fd);
+                        if let Some(fd) = ctx.kinsn_registry.btf_fd_for_pass(self.name()) {
+                            barrier_insn.off = ensure_btf_fd_slot(program, fd);
                         }
                     }
                     new_insns.extend_from_slice(&emit_packed_kinsn_call_with_off(
@@ -199,7 +199,7 @@ mod tests {
 
     fn ctx_with_barrier(btf_id: i32) -> PassContext {
         let mut ctx = PassContext::test_default();
-        ctx.kfunc_registry.speculation_barrier_btf_id = btf_id;
+        ctx.kinsn_registry.speculation_barrier_btf_id = btf_id;
         ctx
     }
 
@@ -673,7 +673,7 @@ mod tests {
     }
 
     #[test]
-    fn test_spectre_module_fd_recorded() {
+    fn test_spectre_records_btf_fd() {
         let mut prog = make_program(vec![
             jeq_imm(1, 0, 1),
             BpfInsn::mov64_imm(0, 1),
@@ -681,14 +681,14 @@ mod tests {
         ]);
         let mut cache = AnalysisCache::new();
         let mut ctx = ctx_with_barrier(TEST_BTF_ID);
-        ctx.kfunc_registry
-            .kfunc_module_fds
+        ctx.kinsn_registry
+            .target_btf_fds
             .insert("bpf_speculation_barrier".to_string(), 99);
 
         let result = SpectreMitigationPass
             .run(&mut prog, &mut cache, &ctx)
             .unwrap();
         assert!(result.changed);
-        assert!(prog.required_module_fds.contains(&99));
+        assert!(prog.required_btf_fds.contains(&99));
     }
 }

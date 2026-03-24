@@ -42,7 +42,7 @@ make -C "$UNITTEST_DIR" clean all
 echo "=== Running tests/unittest/ ==="
 cd "$UNITTEST_DIR"
 for t in rejit_poc rejit_safety_tests rejit_regression rejit_tail_call \
-         rejit_spectre rejit_kinsn rejit_kinsn_packed \
+         rejit_spectre rejit_kinsn \
          rejit_prog_types rejit_audit_tests; do
     echo "=== $t ==="
     "${BUILD_DIR}/$t" "${BUILD_DIR}/progs" || exit 1

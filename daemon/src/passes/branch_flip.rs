@@ -117,7 +117,6 @@ impl BpfPass for BranchFlipPass {
         let bt = analyses.get(&bt_analysis, program);
 
         let n = program.insns.len();
-        let orig_len = n;
 
         // Phase 1: scan for all candidate sites.
         let sites = scan_branch_flip_sites(&program.insns);

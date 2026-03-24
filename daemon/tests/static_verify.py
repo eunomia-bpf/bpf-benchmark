@@ -5,6 +5,7 @@ import argparse
 import json
 import os
 import re
+import shlex
 import socket
 import subprocess
 import sys
@@ -120,6 +121,7 @@ class DaemonServer:
     socket_path: Path
     log_path: Path
     timeout_seconds: int
+    extra_args: list[str] = field(default_factory=list)
     process: subprocess.Popen[str] | None = None
     log_file: Any | None = None
 
@@ -129,7 +131,7 @@ class DaemonServer:
             self.socket_path.unlink()
         self.log_file = self.log_path.open("w", encoding="utf-8")
         self.process = subprocess.Popen(
-            [str(self.binary), "serve", "--socket", str(self.socket_path)],
+            [str(self.binary), *self.extra_args, "serve", "--socket", str(self.socket_path)],
             cwd=ROOT_DIR,
             stdout=self.log_file,
             stderr=subprocess.STDOUT,
@@ -403,6 +405,11 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         help="Path to the daemon binary.",
     )
     parser.add_argument(
+        "--daemon-args",
+        default="",
+        help="Extra arguments passed to the daemon before `serve`.",
+    )
+    parser.add_argument(
         "--runner-binary",
         default=str(DEFAULT_RUNNER),
         help="Path to the runner batch binary.",
@@ -483,6 +490,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         socket_path=socket_path,
         log_path=daemon_log,
         timeout_seconds=15,
+        extra_args=shlex.split(args.daemon_args),
     )
 
     records: list[dict[str, object]] = []

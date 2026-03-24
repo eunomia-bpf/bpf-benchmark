@@ -67,9 +67,9 @@ pub struct BpfProgram {
     pub annotations: Vec<InsnAnnotation>,
     /// Transform log: records what each pass did.
     pub transform_log: Vec<TransformEntry>,
-    /// Module FDs required by kfunc calls introduced during rewrite.
-    /// Used by cmd_apply to construct fd_array for BPF_PROG_REJIT.
-    pub required_module_fds: Vec<i32>,
+    /// BTF FDs required by kinsn descriptor calls introduced during rewrite.
+    /// Used by cmd_apply to construct the REJIT transport fd_array.
+    pub required_btf_fds: Vec<i32>,
     /// Program-level branch miss rate from PMU hardware counters.
     /// Set by `inject_profiling` when PMU data is available.
     /// Consumed by BranchFlipPass to gate optimization.
@@ -90,7 +90,7 @@ impl BpfProgram {
             insns,
             annotations: vec![InsnAnnotation::default(); len],
             transform_log: Vec::new(),
-            required_module_fds: Vec::new(),
+            required_btf_fds: Vec::new(),
             branch_miss_rate: None,
         }
     }
@@ -310,19 +310,18 @@ pub trait BpfPass: Send + Sync {
 /// These values are invariant for the duration of a pipeline execution.
 #[derive(Clone, Debug)]
 pub struct PassContext {
-    /// Available kinsn kfuncs and their BTF IDs.
-    pub kfunc_registry: KfuncRegistry,
+    /// Available kinsn targets and their descriptor/BTF transport metadata.
+    pub kinsn_registry: KinsnRegistry,
     /// CPU capabilities (detected at startup, checked by kinsn passes).
     pub platform: PlatformCapabilities,
     /// Policy configuration (which passes are enabled, parameters, etc.).
     pub policy: PolicyConfig,
 }
 
-/// Available kfuncs and their BTF IDs.
-/// BTF ID = -1 means the kfunc is not available.
+/// Available kinsn targets and their descriptor/BTF transport metadata.
+/// BTF ID = -1 means the target is not available.
 #[derive(Clone, Debug, Default)]
-
-pub struct KfuncRegistry {
+pub struct KinsnRegistry {
     pub rotate64_btf_id: i32,
     pub select64_btf_id: i32,
     pub extract64_btf_id: i32,
@@ -330,19 +329,16 @@ pub struct KfuncRegistry {
     pub endian_load32_btf_id: i32,
     pub endian_load64_btf_id: i32,
     pub speculation_barrier_btf_id: i32,
-    /// Legacy single module FD (kept for backward compat; prefer per-kfunc FDs).
-    pub module_fd: Option<i32>,
-    /// Per-kfunc module FDs: maps kfunc name (e.g., "bpf_rotate64") to its
-    /// owning module's BTF FD. This allows different kfuncs from different
-    /// modules to each contribute their correct FD to the REJIT fd_array.
-    pub kfunc_module_fds: HashMap<String, i32>,
-    /// Per-kfunc supported kinsn encodings.
+    /// Per-target BTF FDs: maps target name (e.g., "bpf_rotate64") to the
+    /// owning BTF FD that must be present in the REJIT fd_array.
+    pub target_btf_fds: HashMap<String, i32>,
+    /// Per-target supported kinsn encodings.
     /// Tests that only seed BTF IDs rely on the packed-only fallback below.
-    pub kfunc_supported_encodings: HashMap<String, u32>,
+    pub target_supported_encodings: HashMap<String, u32>,
 }
 
-impl KfuncRegistry {
-    fn kfunc_name_for_pass(pass_name: &str) -> Option<&'static str> {
+impl KinsnRegistry {
+    fn target_name_for_pass(pass_name: &str) -> Option<&'static str> {
         match pass_name {
             "rotate" => Some("bpf_rotate64"),
             "cond_select" => Some("bpf_select64"),
@@ -353,8 +349,8 @@ impl KfuncRegistry {
         }
     }
 
-    fn btf_id_for_kfunc_name(&self, kfunc_name: &str) -> i32 {
-        match kfunc_name {
+    fn btf_id_for_target_name(&self, target_name: &str) -> i32 {
+        match target_name {
             "bpf_rotate64" => self.rotate64_btf_id,
             "bpf_select64" => self.select64_btf_id,
             "bpf_extract64" => self.extract64_btf_id,
@@ -366,25 +362,18 @@ impl KfuncRegistry {
         }
     }
 
-    /// Return the module FD for a given pass name. Looks up the per-kfunc
-    /// module FD first; falls back to the legacy single module_fd.
-    pub fn module_fd_for_pass(&self, pass_name: &str) -> Option<i32> {
-        let kfunc_name = match Self::kfunc_name_for_pass(pass_name) {
-            Some(name) => name,
-            None => return self.module_fd,
-        };
-        self.kfunc_module_fds
-            .get(kfunc_name)
-            .copied()
-            .or(self.module_fd)
+    /// Return the BTF FD required by a given pass's kinsn target.
+    pub fn btf_fd_for_pass(&self, pass_name: &str) -> Option<i32> {
+        let target_name = Self::target_name_for_pass(pass_name)?;
+        self.target_btf_fds.get(target_name).copied()
     }
 
-    pub fn supported_encodings_for_kfunc_name(&self, kfunc_name: &str) -> u32 {
-        self.kfunc_supported_encodings
-            .get(kfunc_name)
+    pub fn supported_encodings_for_target_name(&self, target_name: &str) -> u32 {
+        self.target_supported_encodings
+            .get(target_name)
             .copied()
             .or_else(|| {
-                if self.btf_id_for_kfunc_name(kfunc_name) >= 0 {
+                if self.btf_id_for_target_name(target_name) >= 0 {
                     Some(BPF_KINSN_ENC_PACKED_CALL)
                 } else {
                     None
@@ -394,8 +383,8 @@ impl KfuncRegistry {
     }
 
     pub fn supported_encodings_for_pass(&self, pass_name: &str) -> u32 {
-        Self::kfunc_name_for_pass(pass_name)
-            .map(|name| self.supported_encodings_for_kfunc_name(name))
+        Self::target_name_for_pass(pass_name)
+            .map(|name| self.supported_encodings_for_target_name(name))
             .unwrap_or(0)
     }
 
@@ -403,19 +392,14 @@ impl KfuncRegistry {
         (self.supported_encodings_for_pass(pass_name) & BPF_KINSN_ENC_PACKED_CALL) != 0
     }
 
-    pub fn packed_supported_for_kfunc_name(&self, kfunc_name: &str) -> bool {
-        (self.supported_encodings_for_kfunc_name(kfunc_name) & BPF_KINSN_ENC_PACKED_CALL) != 0
+    pub fn packed_supported_for_target_name(&self, target_name: &str) -> bool {
+        (self.supported_encodings_for_target_name(target_name) & BPF_KINSN_ENC_PACKED_CALL) != 0
     }
 
-    /// Return all unique module FDs in the registry.
-    /// Used by cmd_apply to validate that required_module_fds are a subset.
-    pub fn all_module_fds(&self) -> Vec<i32> {
-        let mut fds: Vec<i32> = self.kfunc_module_fds.values().copied().collect();
-        if let Some(fd) = self.module_fd {
-            if !fds.contains(&fd) {
-                fds.push(fd);
-            }
-        }
+    /// Return all unique BTF FDs in the registry.
+    /// Used by cmd_apply to validate that required_btf_fds are a subset.
+    pub fn all_btf_fds(&self) -> Vec<i32> {
+        let mut fds: Vec<i32> = self.target_btf_fds.values().copied().collect();
         fds.sort();
         fds.dedup();
         fds
@@ -752,11 +736,11 @@ impl PassManager {
 
 impl PassContext {
     /// Create a minimal PassContext suitable for testing.
-    /// All kfuncs unavailable (btf_id = -1), no special CPU features.
+    /// All kinsn targets unavailable (btf_id = -1), no special CPU features.
     #[cfg(test)]
     pub fn test_default() -> Self {
         Self {
-            kfunc_registry: KfuncRegistry {
+            kinsn_registry: KinsnRegistry {
                 rotate64_btf_id: -1,
                 select64_btf_id: -1,
                 extract64_btf_id: -1,
@@ -764,9 +748,8 @@ impl PassContext {
                 endian_load32_btf_id: -1,
                 endian_load64_btf_id: -1,
                 speculation_barrier_btf_id: -1,
-                module_fd: None,
-                kfunc_module_fds: HashMap::new(),
-                kfunc_supported_encodings: HashMap::new(),
+                target_btf_fds: HashMap::new(),
+                target_supported_encodings: HashMap::new(),
             },
             platform: PlatformCapabilities::default(),
             policy: PolicyConfig::default(),
@@ -1312,17 +1295,17 @@ mod tests {
     #[test]
     fn test_pass_context_test_default() {
         let ctx = PassContext::test_default();
-        assert_eq!(ctx.kfunc_registry.rotate64_btf_id, -1);
-        assert_eq!(ctx.kfunc_registry.select64_btf_id, -1);
+        assert_eq!(ctx.kinsn_registry.rotate64_btf_id, -1);
+        assert_eq!(ctx.kinsn_registry.select64_btf_id, -1);
         assert!(!ctx.platform.has_bmi1);
         assert!(ctx.policy.enabled_passes.is_empty());
         assert!(ctx.policy.disabled_passes.is_empty());
     }
 
     #[test]
-    fn test_kfunc_registry_with_available_kfuncs() {
+    fn test_kinsn_registry_with_available_targets() {
         let ctx = PassContext {
-            kfunc_registry: KfuncRegistry {
+            kinsn_registry: KinsnRegistry {
                 rotate64_btf_id: 1234,
                 select64_btf_id: -1,
                 extract64_btf_id: -1,
@@ -1330,16 +1313,15 @@ mod tests {
                 endian_load32_btf_id: -1,
                 endian_load64_btf_id: -1,
                 speculation_barrier_btf_id: -1,
-                module_fd: Some(42),
-                kfunc_module_fds: HashMap::new(),
-                kfunc_supported_encodings: HashMap::new(),
+                target_btf_fds: HashMap::from([("bpf_rotate64".to_string(), 42)]),
+                target_supported_encodings: HashMap::new(),
             },
             platform: PlatformCapabilities::default(),
             policy: PolicyConfig::default(),
         };
-        assert!(ctx.kfunc_registry.rotate64_btf_id > 0);
-        assert!(ctx.kfunc_registry.select64_btf_id < 0);
-        assert_eq!(ctx.kfunc_registry.module_fd, Some(42));
+        assert!(ctx.kinsn_registry.rotate64_btf_id > 0);
+        assert!(ctx.kinsn_registry.select64_btf_id < 0);
+        assert_eq!(ctx.kinsn_registry.btf_fd_for_pass("rotate"), Some(42));
     }
 
     #[test]
@@ -1352,11 +1334,11 @@ mod tests {
         assert_eq!(pm.pass_count(), 2);
     }
 
-    // ── Issue 3: Per-kfunc module FD tests ──────────────────────
+    // ── Issue 3: Per-target BTF FD tests ────────────────────────
 
     #[test]
-    fn test_kfunc_registry_per_kfunc_module_fd() {
-        let mut reg = KfuncRegistry {
+    fn test_kinsn_registry_per_target_btf_fd() {
+        let mut reg = KinsnRegistry {
             rotate64_btf_id: 10,
             select64_btf_id: 20,
             extract64_btf_id: 30,
@@ -1364,49 +1346,22 @@ mod tests {
             endian_load32_btf_id: -1,
             endian_load64_btf_id: -1,
             speculation_barrier_btf_id: -1,
-            module_fd: None,
-            kfunc_module_fds: HashMap::new(),
-            kfunc_supported_encodings: HashMap::new(),
+            target_btf_fds: HashMap::new(),
+            target_supported_encodings: HashMap::new(),
         };
-        // Set different FDs for different kfuncs.
-        reg.kfunc_module_fds.insert("bpf_rotate64".to_string(), 100);
-        reg.kfunc_module_fds.insert("bpf_select64".to_string(), 200);
-        reg.kfunc_module_fds
+        reg.target_btf_fds.insert("bpf_rotate64".to_string(), 100);
+        reg.target_btf_fds.insert("bpf_select64".to_string(), 200);
+        reg.target_btf_fds
             .insert("bpf_extract64".to_string(), 300);
 
-        // Each pass should get its own module FD.
-        assert_eq!(reg.module_fd_for_pass("rotate"), Some(100));
-        assert_eq!(reg.module_fd_for_pass("cond_select"), Some(200));
-        assert_eq!(reg.module_fd_for_pass("extract"), Some(300));
+        assert_eq!(reg.btf_fd_for_pass("rotate"), Some(100));
+        assert_eq!(reg.btf_fd_for_pass("cond_select"), Some(200));
+        assert_eq!(reg.btf_fd_for_pass("extract"), Some(300));
     }
 
     #[test]
-    fn test_kfunc_registry_per_kfunc_fallback_to_legacy() {
-        let mut reg = KfuncRegistry {
-            rotate64_btf_id: 10,
-            select64_btf_id: -1,
-            extract64_btf_id: -1,
-            endian_load16_btf_id: -1,
-            endian_load32_btf_id: -1,
-            endian_load64_btf_id: -1,
-            speculation_barrier_btf_id: -1,
-            module_fd: Some(42), // legacy
-            kfunc_module_fds: HashMap::new(),
-            kfunc_supported_encodings: HashMap::new(),
-        };
-        // Only rotate has a per-kfunc FD.
-        reg.kfunc_module_fds.insert("bpf_rotate64".to_string(), 100);
-
-        assert_eq!(reg.module_fd_for_pass("rotate"), Some(100));
-        // cond_select has no per-kfunc FD, falls back to legacy.
-        assert_eq!(reg.module_fd_for_pass("cond_select"), Some(42));
-        // Unknown pass falls back to legacy.
-        assert_eq!(reg.module_fd_for_pass("unknown"), Some(42));
-    }
-
-    #[test]
-    fn test_kfunc_registry_all_module_fds() {
-        let mut reg = KfuncRegistry {
+    fn test_kinsn_registry_all_btf_fds() {
+        let mut reg = KinsnRegistry {
             rotate64_btf_id: 10,
             select64_btf_id: 20,
             extract64_btf_id: -1,
@@ -1414,25 +1369,21 @@ mod tests {
             endian_load32_btf_id: -1,
             endian_load64_btf_id: -1,
             speculation_barrier_btf_id: -1,
-            module_fd: Some(100),
-            kfunc_module_fds: HashMap::new(),
-            kfunc_supported_encodings: HashMap::new(),
+            target_btf_fds: HashMap::new(),
+            target_supported_encodings: HashMap::new(),
         };
-        reg.kfunc_module_fds.insert("bpf_rotate64".to_string(), 100);
-        reg.kfunc_module_fds.insert("bpf_select64".to_string(), 200);
+        reg.target_btf_fds.insert("bpf_rotate64".to_string(), 100);
+        reg.target_btf_fds.insert("bpf_select64".to_string(), 200);
 
-        let fds = reg.all_module_fds();
+        let fds = reg.all_btf_fds();
         assert!(fds.contains(&100));
         assert!(fds.contains(&200));
-        // 100 appears in both legacy and per-kfunc, but should be deduped.
         assert_eq!(fds.len(), 2);
     }
 
     #[test]
-    fn test_required_module_fds_subset_of_all_module_fds() {
-        // Simulate what cmd_apply does: after running passes, required_module_fds
-        // should be a subset of registry.all_module_fds().
-        let mut reg = KfuncRegistry {
+    fn test_required_btf_fds_subset_of_all_btf_fds() {
+        let mut reg = KinsnRegistry {
             rotate64_btf_id: 10,
             select64_btf_id: 20,
             extract64_btf_id: -1,
@@ -1440,27 +1391,24 @@ mod tests {
             endian_load32_btf_id: -1,
             endian_load64_btf_id: -1,
             speculation_barrier_btf_id: -1,
-            module_fd: None,
-            kfunc_module_fds: HashMap::new(),
-            kfunc_supported_encodings: HashMap::new(),
+            target_btf_fds: HashMap::new(),
+            target_supported_encodings: HashMap::new(),
         };
-        reg.kfunc_module_fds.insert("bpf_rotate64".to_string(), 100);
-        reg.kfunc_module_fds.insert("bpf_select64".to_string(), 200);
+        reg.target_btf_fds.insert("bpf_rotate64".to_string(), 100);
+        reg.target_btf_fds.insert("bpf_select64".to_string(), 200);
 
-        let all_fds = reg.all_module_fds();
+        let all_fds = reg.all_btf_fds();
 
-        // Simulate a program that used rotate and select passes.
         let required: Vec<i32> = vec![100, 200];
         for fd in &required {
             assert!(
                 all_fds.contains(fd),
-                "required fd {} not in all_module_fds {:?}",
+                "required fd {} not in all_btf_fds {:?}",
                 fd,
                 all_fds
             );
         }
 
-        // An unknown FD should fail the subset check.
         assert!(!all_fds.contains(&999));
     }
 
@@ -1650,9 +1598,9 @@ mod tests {
         pm.register_analysis(LivenessAnalysis);
         pm.add_pass(CondSelectPass);
 
-        // Context has select kfunc available but platform lacks CMOV.
+        // Context has select kinsn available but platform lacks CMOV.
         let mut ctx = PassContext::test_default();
-        ctx.kfunc_registry.select64_btf_id = 1234;
+        ctx.kinsn_registry.select64_btf_id = 1234;
         // has_cmov is false by default in test_default().
 
         let mut prog = make_program(vec![

@@ -20,6 +20,7 @@ REPO_FLAGS := $(foreach repo,$(REPOS),--repo $(repo))
 
 BZIMAGE ?= vendor/linux-framework/arch/x86/boot/bzImage
 DAEMON ?= daemon/target/release/bpfrejit-daemon
+DAEMON_ARGS ?=
 DAEMON_SOCKET ?= /tmp/bpfrejit.sock
 TARGET ?=
 ITERATIONS ?= 3
@@ -67,6 +68,7 @@ VM_INIT := $(VENV_ACTIVATE) "$(REPO_ROOT)/module/load_all.sh" 2>/dev/null || tru
 TARGET_FLAG := $(if $(strip $(TARGET)),--target "$(TARGET)",)
 VM_CPU_FLAG := $(if $(strip $(VM_CPUS)),--cpus "$(VM_CPUS)",)
 VM_MEM_FLAG := $(if $(strip $(VM_MEM)),--mem "$(VM_MEM)",)
+JOBS ?= $(shell nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
 
 BENCH_FLAGS := $(foreach b,$(BENCH),--bench $(b))
 MICRO_ARGS := --iterations $(ITERATIONS) --warmups $(WARMUPS) --repeat $(REPEAT) $(BENCH_FLAGS)
@@ -75,7 +77,7 @@ VM_SMOKE_ARGS := --iterations 1 --warmups 0 --repeat 50
 .PHONY: all micro_exec directive_hint vendor_libbpf vendor_bpftool \
 	corpus-fetch corpus-build-objects corpus-build \
 	scx-artifacts e2e-prep e2e-tracee-setup e2e-tetragon-setup \
-	kernel-image kernel-tests-build kinsn-modules-build micro-programs daemon-binary \
+	kernel-image kernel-tests-build upstream-selftests-build kinsn-modules-build micro-programs daemon-binary \
 	vm-shell vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 	clean
 
@@ -122,6 +124,7 @@ $(LIBBPF_A) $(LIBBPF_HEADER) &:
 	mkdir -p $(LIBBPF_PREFIX)
 	mkdir -p $(LIBBPF_PREFIX)/include
 	$(MAKE) -C $(REPO_ROOT)/vendor/libbpf/src \
+		-j"$(JOBS)" \
 		BUILD_STATIC_ONLY=1 \
 		OBJDIR=$(LIBBPF_OBJDIR) \
 		DESTDIR= \
@@ -144,7 +147,7 @@ micro_exec: $(LIBBPF_A) $(LIBBPF_HEADER) | $(BUILD_DIR)
 		-DMICRO_LIBBPF_PREFIX=$(LIBBPF_PREFIX) \
 		-DMICRO_LIBBPF_LIBRARY=$(LIBBPF_A) \
 		-DMICRO_EXEC_ENABLE_LLVMBPF=$(MICRO_EXEC_ENABLE_LLVMBPF)
-	cmake --build $(BUILD_DIR) --target micro_exec -j
+	cmake --build $(BUILD_DIR) --target micro_exec -j "$(JOBS)"
 
 directive_hint: $(LIBBPF_A) $(LIBBPF_HEADER) | $(TOOLS_BUILD_DIR)
 	$(CXX) -O2 -g -Wall -Wextra -std=c++20 \
@@ -158,14 +161,19 @@ directive_hint: $(LIBBPF_A) $(LIBBPF_HEADER) | $(TOOLS_BUILD_DIR)
 
 vendor_bpftool: | $(BPFTOOL_BUILD_DIR)
 	$(MAKE) -C $(REPO_ROOT)/vendor/bpftool/src \
+		-j"$(JOBS)" \
 		OUTPUT=$(BPFTOOL_BUILD_DIR) \
 		BPF_DIR=$(REPO_ROOT)/vendor/libbpf/src
 
 kernel-image:
 	$(MAKE) -C "$(REPO_ROOT)" kernel BZIMAGE="$(BZIMAGE)"
+	$(MAKE) -C "$(REPO_ROOT)" virtme-hostfs-modules BZIMAGE="$(BZIMAGE)"
 
 kernel-tests-build:
 	$(MAKE) -C "$(REPO_ROOT)" kernel-tests
+
+upstream-selftests-build:
+	$(MAKE) -C "$(REPO_ROOT)" upstream-selftests-build BZIMAGE="$(BZIMAGE)"
 
 kinsn-modules-build:
 	$(MAKE) -C "$(REPO_ROOT)" kinsn-modules BZIMAGE="$(BZIMAGE)"
@@ -185,7 +193,11 @@ vm-shell: kernel-image kinsn-modules-build
 		--timeout "$(VM_TEST_TIMEOUT)" \
 		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) $(VM_COMMAND)'
 
-vm-test: kernel-tests-build kernel-image kinsn-modules-build
+vm-test:
+	$(MAKE) kernel-image BZIMAGE="$(BZIMAGE)"
+	$(MAKE) upstream-selftests-build BZIMAGE="$(BZIMAGE)"
+	$(MAKE) kernel-tests-build
+	$(MAKE) kinsn-modules-build BZIMAGE="$(BZIMAGE)"
 	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
 		--action vm-test \
 		--kernel-image "$(BZIMAGE_PATH)" \
@@ -211,7 +223,7 @@ vm-static-test: micro-programs daemon-binary kernel-image kinsn-modules-build
 		$(VM_CPU_FLAG) \
 		$(VM_MEM_FLAG) \
 		--timeout "$(VM_STATIC_TIMEOUT)" \
-		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) python3 "$(REPO_ROOT)/daemon/tests/static_verify.py" --daemon-binary "$(DAEMON_PATH)" --output "$(VM_STATIC_OUTPUT)" $(STATIC_VERIFY_ARGS)'
+		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) python3 "$(REPO_ROOT)/daemon/tests/static_verify.py" --daemon-binary "$(DAEMON_PATH)" --daemon-args "$(DAEMON_ARGS)" --output "$(VM_STATIC_OUTPUT)" $(STATIC_VERIFY_ARGS)'
 
 vm-negative-test: kernel-image kinsn-modules-build
 	$(MAKE) -C "$(NEGATIVE_TEST_DIR)"
@@ -231,7 +243,7 @@ vm-micro-smoke: micro_exec micro-programs daemon-binary kernel-image kinsn-modul
 		$(VM_CPU_FLAG) \
 		$(VM_MEM_FLAG) \
 		--timeout "$(VM_MICRO_TIMEOUT)" \
-		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) "$(DAEMON_PATH)" --pgo serve --socket "$(DAEMON_SOCKET)" & DAEMON_PID=$$!; sleep 0.5; trap "kill $$DAEMON_PID 2>/dev/null; rm -f $(DAEMON_SOCKET)" EXIT; python3 "$(REPO_ROOT)/micro/driver.py" --runtime kernel --runtime kernel-rejit --daemon-socket "$(DAEMON_SOCKET)" $(VM_SMOKE_ARGS) --output "$(VM_MICRO_SMOKE_OUTPUT)"'
+		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) "$(DAEMON_PATH)" $(DAEMON_ARGS) --pgo serve --socket "$(DAEMON_SOCKET)" & DAEMON_PID=$$!; sleep 0.5; trap "kill $$DAEMON_PID 2>/dev/null; rm -f $(DAEMON_SOCKET)" EXIT; python3 "$(REPO_ROOT)/micro/driver.py" --runtime kernel --runtime kernel-rejit --daemon-socket "$(DAEMON_SOCKET)" $(VM_SMOKE_ARGS) --output "$(VM_MICRO_SMOKE_OUTPUT)"'
 
 vm-micro: micro_exec micro-programs daemon-binary kernel-image kinsn-modules-build
 	mkdir -p "$(MICRO_RESULTS_DIR)"
@@ -241,7 +253,7 @@ vm-micro: micro_exec micro-programs daemon-binary kernel-image kinsn-modules-bui
 		$(VM_CPU_FLAG) \
 		$(VM_MEM_FLAG) \
 		--timeout "$(VM_MICRO_TIMEOUT)" \
-		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) "$(DAEMON_PATH)" --pgo serve --socket "$(DAEMON_SOCKET)" & DAEMON_PID=$$!; sleep 0.5; trap "kill $$DAEMON_PID 2>/dev/null; rm -f $(DAEMON_SOCKET)" EXIT; python3 "$(REPO_ROOT)/micro/driver.py" --runtime llvmbpf --runtime kernel --runtime kernel-rejit --daemon-socket "$(DAEMON_SOCKET)" $(MICRO_ARGS) --output "$(VM_MICRO_OUTPUT)"'
+		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) "$(DAEMON_PATH)" $(DAEMON_ARGS) --pgo serve --socket "$(DAEMON_SOCKET)" & DAEMON_PID=$$!; sleep 0.5; trap "kill $$DAEMON_PID 2>/dev/null; rm -f $(DAEMON_SOCKET)" EXIT; python3 "$(REPO_ROOT)/micro/driver.py" --runtime llvmbpf --runtime kernel --runtime kernel-rejit --daemon-socket "$(DAEMON_SOCKET)" $(MICRO_ARGS) --output "$(VM_MICRO_OUTPUT)"'
 
 vm-corpus: micro_exec daemon-binary kernel-image kinsn-modules-build
 	mkdir -p "$(CORPUS_RESULTS_DIR)"

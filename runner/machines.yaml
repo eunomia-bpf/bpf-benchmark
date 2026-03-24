@@ -25,6 +25,7 @@ targets:
     backend: vng
     arch: x86_64
     executable: runner/scripts/vng-wrapper.sh
+    memory: 16G
     lock_scope: vm_global
 
   local-arm64-qemu:

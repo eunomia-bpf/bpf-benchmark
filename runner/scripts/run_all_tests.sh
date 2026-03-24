@@ -28,7 +28,7 @@ KERNEL_TEST_DIR="${ROOT_DIR}/tests/kernel"
 KERNEL_SELFTEST="${KERNEL_TEST_DIR}/build/test_recompile"
 UNITTEST_DIR="${ROOT_DIR}/tests/unittest"
 UNITTEST_BUILD_DIR="${UNITTEST_DIR}/build"
-UPSTREAM_BIN_DIR="${ROOT_DIR}/docs/tmp/bpf_selftests_bin"
+UPSTREAM_BIN_DIR="${ROOT_DIR}/tests/kernel/build/upstream-bpf-selftests"
 BPF_SELFTEST_FILTER="${BPF_SELFTEST_FILTER:-verifier jit}"
 
 cd "$ROOT_DIR"

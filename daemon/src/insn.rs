@@ -54,6 +54,7 @@ pub const BPF_CALL: u8 = 0x80;
 pub const BPF_EXIT: u8 = 0x90;
 
 // ── Pseudo source-register tags ────────────────────────────────────
+pub const BPF_PSEUDO_CALL: u8 = 1;
 pub const BPF_PSEUDO_KFUNC_CALL: u8 = 2;
 pub const BPF_PSEUDO_KINSN_SIDECAR: u8 = 3;
 pub const BPF_PSEUDO_KINSN_CALL: u8 = 4;
