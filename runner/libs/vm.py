@@ -1,12 +1,18 @@
 from __future__ import annotations
 
+import os
 import shlex
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 from typing import Sequence
 
 from . import DEFAULT_VENV_ACTIVATE, ROOT_DIR, which
+from .machines import resolve_machine, resolve_machine_executable
+
+
+DEFAULT_VM_TARGET = os.environ.get("TARGET", "").strip() or "local-x86-vng"
 
 
 def write_guest_script(commands: Sequence[str | Sequence[str]]) -> Path:
@@ -39,6 +45,71 @@ def write_guest_script(commands: Sequence[str | Sequence[str]]) -> Path:
     return script_path
 
 
+def wrap_with_vm_lock(
+    command: Sequence[str],
+    *,
+    target: str | None = None,
+    action: str | None = None,
+) -> list[str]:
+    wrapper = ROOT_DIR / "runner" / "scripts" / "with_vm_lock.py"
+    locked = [sys.executable, str(wrapper)]
+    if target:
+        locked.extend(["--target", target])
+    if action:
+        locked.extend(["--action", action])
+    locked.append("--")
+    locked.extend(str(part) for part in command)
+    return locked
+
+
+def build_vng_command(
+    *,
+    kernel_path: str | Path,
+    guest_exec: str,
+    cpus: int | None = None,
+    mem: str | None = None,
+    target: str = DEFAULT_VM_TARGET,
+    action: str | None = None,
+    networks: Sequence[str] = (),
+    rwdirs: Sequence[str | Path] = (),
+) -> list[str]:
+    machine = resolve_machine(target=target, action=action)
+    if machine.backend != "vng":
+        raise ValueError(
+            f"machine target {machine.name} uses backend {machine.backend!r}; "
+            "runner.libs.vm.build_vng_command only supports vng targets"
+        )
+    vng_path = resolve_machine_executable(target=target, action=action)
+    kernel = Path(kernel_path).resolve()
+    resolved_cpus = max(1, int(cpus if cpus is not None else machine.cpus or 1))
+    resolved_mem = str(mem if mem is not None else machine.memory or "4G")
+
+    command = [
+        str(vng_path),
+        "--run",
+        str(kernel),
+        "--cwd",
+        str(ROOT_DIR),
+        "--disable-monitor",
+        "--cpus",
+        str(resolved_cpus),
+        "--mem",
+        resolved_mem,
+    ]
+    rwdir_values = [ROOT_DIR / "docs" / "tmp", ROOT_DIR]
+    rwdir_values.extend(Path(value).resolve() for value in rwdirs)
+    seen: set[Path] = set()
+    for rwdir in rwdir_values:
+        if rwdir in seen:
+            continue
+        seen.add(rwdir)
+        command.extend(["--rwdir", str(rwdir)])
+    for network in networks:
+        command.extend(["--network", str(network)])
+    command.extend(["--exec", guest_exec])
+    return wrap_with_vm_lock(command, target=target, action=action)
+
+
 def run_in_vm(
     kernel_path: str | Path,
     script_path: str | Path,
@@ -46,31 +117,21 @@ def run_in_vm(
     mem: str,
     timeout: int,
     *,
+    target: str = DEFAULT_VM_TARGET,
+    action: str | None = None,
     networks: Sequence[str] = (),
 ) -> subprocess.CompletedProcess[str]:
-    vng = which("vng") or str(Path.home() / ".local" / "bin" / "vng")
-    kernel = Path(kernel_path).resolve()
     script = Path(script_path).resolve()
     guest_path = f"./{script.relative_to(ROOT_DIR).as_posix()}"
-    command = [
-        vng,
-        "--run",
-        str(kernel),
-        "--cwd",
-        str(ROOT_DIR),
-        "--disable-monitor",
-        "--cpus",
-        str(max(1, int(cpus))),
-        "--mem",
-        str(mem),
-        "--rwdir",
-        str(ROOT_DIR / "docs" / "tmp"),
-        "--rwdir",
-        str(ROOT_DIR),
-    ]
-    for network in networks:
-        command.extend(["--network", str(network)])
-    command.extend(["--exec", guest_path])
+    command = build_vng_command(
+        kernel_path=kernel_path,
+        guest_exec=guest_path,
+        cpus=cpus,
+        mem=mem,
+        target=target,
+        action=action,
+        networks=networks,
+    )
     try:
         return subprocess.run(
             command,
@@ -85,6 +146,9 @@ def run_in_vm(
 
 
 __all__ = [
+    "DEFAULT_VM_TARGET",
+    "build_vng_command",
     "run_in_vm",
+    "wrap_with_vm_lock",
     "write_guest_script",
 ]

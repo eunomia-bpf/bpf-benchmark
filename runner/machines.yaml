@@ -1,0 +1,39 @@
+defaults:
+  target: local-x86-vng
+  lock_scope: vm_global
+
+aliases:
+  x86: local-x86-vng
+  arm64: local-arm64-qemu
+  aws: aws-arm64
+
+default_targets:
+  vm-test: local-x86-vng
+  vm-selftest: local-x86-vng
+  vm-static-test: local-x86-vng
+  vm-negative-test: local-x86-vng
+  vm-micro-smoke: local-x86-vng
+  vm-micro: local-x86-vng
+  vm-corpus: local-x86-vng
+  vm-e2e: local-x86-vng
+
+targets:
+  local-x86-vng:
+    backend: vng
+    arch: x86_64
+    executable: runner/scripts/vng-wrapper.sh
+    cpus: 2
+    memory: 4G
+    lock_scope: vm_global
+
+  local-arm64-qemu:
+    backend: qemu
+    arch: arm64
+    executable: qemu-system-aarch64
+    lock_scope: vm_global
+
+  aws-arm64:
+    backend: ssh
+    arch: arm64
+    executable: runner/scripts/aws_arm64.sh
+    lock_scope: vm_global

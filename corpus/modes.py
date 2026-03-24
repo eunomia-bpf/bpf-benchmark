@@ -26,6 +26,8 @@ for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpu
         sys.path.insert(0, candidate_str)
 
 from runner.libs import authoritative_output_path, smoke_output_path
+from runner.libs.machines import resolve_machine
+from runner.libs.vm import DEFAULT_VM_TARGET, build_vng_command as build_runner_vng_command
 
 from runner.libs.inventory import (
     discover_corpus_objects,
@@ -83,9 +85,10 @@ DEFAULT_KERNEL_TREE = ROOT_DIR / "vendor" / "linux-framework"
 DEFAULT_KERNEL_IMAGE = DEFAULT_KERNEL_TREE / "arch" / "x86" / "boot" / "bzImage"
 DEFAULT_BTF_PATH = DEFAULT_KERNEL_TREE / "vmlinux"
 DEFAULT_HOST_BTF_PATH = Path("/sys/kernel/btf/vmlinux")
-DEFAULT_VNG = str(ROOT_DIR / "runner" / "scripts" / "vng-wrapper.sh")
-DEFAULT_VNG_MEMORY = "4G"
-DEFAULT_VNG_CPUS = "2"
+DEFAULT_VNG_MACHINE = resolve_machine(target=DEFAULT_VM_TARGET, action="vm-corpus")
+DEFAULT_VNG = str(Path(DEFAULT_VNG_MACHINE.executable))
+DEFAULT_VNG_MEMORY = DEFAULT_VNG_MACHINE.memory or "4G"
+DEFAULT_VNG_CPUS = str(DEFAULT_VNG_MACHINE.cpus or 2)
 DEFAULT_REPEAT = 200
 DEFAULT_TIMEOUT_SECONDS = 240
 
@@ -853,20 +856,19 @@ def run_guest_batch_mode(args: argparse.Namespace) -> int:
 
 
 def build_vng_command(*, vng_binary: str, kernel_image: Path, guest_exec: str) -> list[str]:
-    return [
-        vng_binary,
-        "--run",
-        str(kernel_image),
-        "--rwdir",
-        str(ROOT_DIR),
-        "--disable-monitor",
-        "--memory",
-        DEFAULT_VNG_MEMORY,
-        "--cpus",
-        DEFAULT_VNG_CPUS,
-        "--exec",
-        guest_exec,
-    ]
+    command = build_runner_vng_command(
+        kernel_path=kernel_image,
+        guest_exec=guest_exec,
+        cpus=int(DEFAULT_VNG_CPUS),
+        mem=DEFAULT_VNG_MEMORY,
+        target=DEFAULT_VM_TARGET,
+        action="vm-corpus",
+    )
+    if vng_binary == DEFAULT_VNG:
+        return command
+    inner = command[command.index("--") + 1 :]
+    inner[0] = vng_binary
+    return command[: command.index("--") + 1] + inner
 
 
 def build_guest_exec(argv: list[str]) -> str:

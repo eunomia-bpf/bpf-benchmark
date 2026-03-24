@@ -794,7 +794,14 @@ def run_scx_vm(args: argparse.Namespace) -> int:
         guest_command.extend(["--scheduler-extra-arg", extra_arg])
 
     guest_script = write_guest_script([guest_command])
-    completed = run_in_vm(args.kernel, guest_script, args.cpus, args.mem, args.timeout)
+    completed = run_in_vm(
+        args.kernel,
+        guest_script,
+        args.cpus,
+        args.mem,
+        args.timeout,
+        action="vm-e2e",
+    )
     sys.stdout.write(completed.stdout)
     sys.stderr.write(completed.stderr)
     if completed.returncode != 0:
