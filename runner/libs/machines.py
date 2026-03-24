@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import math
 import os
 from pathlib import Path
 from typing import Any
@@ -25,6 +26,59 @@ class MachineSpec:
     cpus: int | None
     memory: str | None
     lock_scope: str
+
+
+def _host_cpu_count() -> int:
+    return max(1, os.cpu_count() or 1)
+
+
+def _host_total_memory_gib() -> int:
+    meminfo = Path("/proc/meminfo")
+    try:
+        for line in meminfo.read_text().splitlines():
+            if not line.startswith("MemTotal:"):
+                continue
+            parts = line.split()
+            if len(parts) < 2:
+                break
+            total_kib = int(parts[1])
+            return max(1, total_kib // (1024 * 1024))
+    except (OSError, ValueError):
+        pass
+
+    try:
+        page_size = os.sysconf("SC_PAGE_SIZE")
+        phys_pages = os.sysconf("SC_PHYS_PAGES")
+        total_bytes = int(page_size) * int(phys_pages)
+        return max(1, total_bytes // (1024 ** 3))
+    except (AttributeError, OSError, ValueError):
+        return 4
+
+
+def _resolve_cpu_count(entry: dict[str, Any], defaults: dict[str, Any]) -> int | None:
+    if entry.get("cpus") is not None:
+        return max(1, int(entry["cpus"]))
+
+    ratio_value = entry.get("cpus_auto_ratio", defaults.get("cpus_auto_ratio"))
+    if ratio_value is None:
+        return None
+
+    ratio = float(ratio_value)
+    return max(1, math.floor(_host_cpu_count() * ratio))
+
+
+def _resolve_memory(entry: dict[str, Any], defaults: dict[str, Any]) -> str | None:
+    if entry.get("memory") is not None:
+        return str(entry["memory"])
+
+    ratio_value = entry.get("memory_auto_ratio", defaults.get("memory_auto_ratio"))
+    if ratio_value is None:
+        return None
+
+    ratio = float(ratio_value)
+    minimum_gib = int(entry.get("memory_min_gib", defaults.get("memory_min_gib", 1)))
+    resolved_gib = max(minimum_gib, math.floor(_host_total_memory_gib() * ratio))
+    return f"{resolved_gib}G"
 
 
 def _load_config(path: Path = MACHINES_CONFIG) -> dict[str, Any]:
@@ -83,8 +137,8 @@ def resolve_machine(
         backend=str(entry.get("backend", "")).strip(),
         arch=str(entry.get("arch", "")).strip(),
         executable=executable,
-        cpus=int(entry["cpus"]) if entry.get("cpus") is not None else None,
-        memory=str(entry["memory"]) if entry.get("memory") is not None else None,
+        cpus=_resolve_cpu_count(entry, defaults),
+        memory=_resolve_memory(entry, defaults),
         lock_scope=lock_scope,
     )
 

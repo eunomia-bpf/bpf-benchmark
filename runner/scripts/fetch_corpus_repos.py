@@ -53,6 +53,49 @@ def migrate_legacy_repo(name: str, destination: Path) -> bool:
     return True
 
 
+def _git_head(path: Path) -> str | None:
+    completed = capture(["git", "rev-parse", "HEAD"], cwd=path)
+    if completed.returncode != 0:
+        return None
+    return completed.stdout.strip() or None
+
+
+def _git_clean(path: Path) -> bool:
+    completed = capture(["git", "status", "--porcelain"], cwd=path)
+    if completed.returncode != 0:
+        return False
+    return not completed.stdout.strip()
+
+
+def cleanup_legacy_repo(name: str, destination: Path) -> bool:
+    legacy_repo = LEGACY_REPO_ROOT / name
+    if not legacy_repo.exists() or not destination.exists():
+        return False
+
+    legacy_head = _git_head(legacy_repo)
+    destination_head = _git_head(destination)
+    if legacy_head is None or destination_head is None:
+        return False
+    if legacy_head != destination_head:
+        return False
+    if not _git_clean(legacy_repo):
+        return False
+
+    shutil.rmtree(legacy_repo)
+    print(f"[cleanup] removed legacy checkout {legacy_repo}")
+    return True
+
+
+def cleanup_legacy_root() -> None:
+    if not LEGACY_REPO_ROOT.exists():
+        return
+    try:
+        next(LEGACY_REPO_ROOT.iterdir())
+    except StopIteration:
+        LEGACY_REPO_ROOT.rmdir()
+        print(f"[cleanup] removed empty {LEGACY_REPO_ROOT}")
+
+
 def ensure_repo(spec: dict[str, object], local_repos: Path) -> Path:
     name = str(spec["name"])
     url = str(spec["url"])
@@ -97,6 +140,7 @@ def ensure_repo(spec: dict[str, object], local_repos: Path) -> Path:
     else:
         run(["git", "sparse-checkout", "disable"], cwd=repo_dir)
 
+    cleanup_legacy_repo(name, repo_dir)
     return repo_dir
 
 
@@ -169,6 +213,7 @@ def main() -> int:
         "total_bpf_c": sum(int(record["num_bpf_c"]) for record in records),
     }
     inventory_path.write_text(json.dumps(output, indent=2))
+    cleanup_legacy_root()
     print(f"[done] wrote {inventory_path}")
     return 0
 

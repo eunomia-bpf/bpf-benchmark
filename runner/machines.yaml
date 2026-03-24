@@ -1,6 +1,9 @@
 defaults:
   target: local-x86-vng
   lock_scope: vm_global
+  cpus_auto_ratio: 0.8
+  memory_auto_ratio: 0.8
+  memory_min_gib: 4
 
 aliases:
   x86: local-x86-vng
@@ -22,8 +25,6 @@ targets:
     backend: vng
     arch: x86_64
     executable: runner/scripts/vng-wrapper.sh
-    cpus: 2
-    memory: 4G
     lock_scope: vm_global
 
   local-arm64-qemu:

@@ -113,8 +113,8 @@ def build_vng_command(
 def run_in_vm(
     kernel_path: str | Path,
     script_path: str | Path,
-    cpus: int,
-    mem: str,
+    cpus: int | None,
+    mem: str | None,
     timeout: int,
     *,
     target: str = DEFAULT_VM_TARGET,

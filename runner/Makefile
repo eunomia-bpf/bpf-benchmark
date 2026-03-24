@@ -49,8 +49,8 @@ VM_CORPUS_OUTPUT_JSON ?= $(CORPUS_RESULTS_DIR)/vm_corpus.json
 VM_CORPUS_OUTPUT_MD ?= $(CORPUS_RESULTS_DIR)/vm_corpus.md
 VM_STATIC_OUTPUT ?= $(REPO_ROOT)/daemon/tests/results/static_verify.json
 
-VM_CPUS ?= 2
-VM_MEM ?= 4G
+VM_CPUS ?=
+VM_MEM ?=
 VM_TEST_TIMEOUT ?= 3600
 VM_SELFTEST_TIMEOUT ?= 3600
 VM_STATIC_TIMEOUT ?= 7200
@@ -64,6 +64,8 @@ VENV ?= $(_VENV_FOUND)
 VENV_ACTIVATE := $(if $(VENV),source "$(VENV)/bin/activate" &&,)
 VM_INIT := $(VENV_ACTIVATE) "$(REPO_ROOT)/module/load_all.sh" 2>/dev/null || true;
 TARGET_FLAG := $(if $(strip $(TARGET)),--target "$(TARGET)",)
+VM_CPU_FLAG := $(if $(strip $(VM_CPUS)),--cpus "$(VM_CPUS)",)
+VM_MEM_FLAG := $(if $(strip $(VM_MEM)),--mem "$(VM_MEM)",)
 
 BENCH_FLAGS := $(foreach b,$(BENCH),--bench $(b))
 MICRO_ARGS := --iterations $(ITERATIONS) --warmups $(WARMUPS) --repeat $(REPEAT) $(BENCH_FLAGS)
@@ -177,8 +179,8 @@ vm-test: kernel-tests-build kernel-image kinsn-modules-build
 	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
 		--action vm-test \
 		--kernel-image "$(BZIMAGE_PATH)" \
-		--cpus "$(VM_CPUS)" \
-		--mem "$(VM_MEM)" \
+		$(VM_CPU_FLAG) \
+		$(VM_MEM_FLAG) \
 		--timeout "$(VM_TEST_TIMEOUT)" \
 		--command '$(VM_INIT) "$(ROOT_DIR)/scripts/run_all_tests.sh" "$(REPO_ROOT)"'
 
@@ -186,8 +188,8 @@ vm-selftest: kernel-tests-build kernel-image kinsn-modules-build
 	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
 		--action vm-selftest \
 		--kernel-image "$(BZIMAGE_PATH)" \
-		--cpus "$(VM_CPUS)" \
-		--mem "$(VM_MEM)" \
+		$(VM_CPU_FLAG) \
+		$(VM_MEM_FLAG) \
 		--timeout "$(VM_SELFTEST_TIMEOUT)" \
 		--command '$(VM_INIT) "$(ROOT_DIR)/scripts/vm-selftest.sh" "$(REPO_ROOT)" "$(KERNEL_TEST_DIR)/build/test_recompile" "$(REPO_ROOT)/tests/unittest" "$(KINSN_MODULE_DIR)"'
 
@@ -196,8 +198,8 @@ vm-static-test: micro-programs daemon-binary kernel-image kinsn-modules-build
 	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
 		--action vm-static-test \
 		--kernel-image "$(BZIMAGE_PATH)" \
-		--cpus "$(VM_CPUS)" \
-		--mem "$(VM_MEM)" \
+		$(VM_CPU_FLAG) \
+		$(VM_MEM_FLAG) \
 		--timeout "$(VM_STATIC_TIMEOUT)" \
 		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) python3 "$(REPO_ROOT)/daemon/tests/static_verify.py" --daemon-binary "$(DAEMON_PATH)" --output "$(VM_STATIC_OUTPUT)" $(STATIC_VERIFY_ARGS)'
 
@@ -206,8 +208,8 @@ vm-negative-test: kernel-image kinsn-modules-build
 	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
 		--action vm-negative-test \
 		--kernel-image "$(BZIMAGE_PATH)" \
-		--cpus "$(VM_CPUS)" \
-		--mem "$(VM_MEM)" \
+		$(VM_CPU_FLAG) \
+		$(VM_MEM_FLAG) \
 		--timeout "$(VM_NEGATIVE_TIMEOUT)" \
 		--command '$(VM_INIT) echo "=== adversarial_rejit ===" && "$(NEGATIVE_TEST_DIR)/build/adversarial_rejit" && echo "=== fuzz_rejit ($(FUZZ_ROUNDS) rounds) ===" && "$(NEGATIVE_TEST_DIR)/build/fuzz_rejit" $(FUZZ_ROUNDS)'
 
@@ -216,8 +218,8 @@ vm-micro-smoke: micro_exec micro-programs daemon-binary kernel-image kinsn-modul
 	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
 		--action vm-micro-smoke \
 		--kernel-image "$(BZIMAGE_PATH)" \
-		--cpus "$(VM_CPUS)" \
-		--mem "$(VM_MEM)" \
+		$(VM_CPU_FLAG) \
+		$(VM_MEM_FLAG) \
 		--timeout "$(VM_MICRO_TIMEOUT)" \
 		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) "$(DAEMON_PATH)" --pgo serve --socket "$(DAEMON_SOCKET)" & DAEMON_PID=$$!; sleep 0.5; trap "kill $$DAEMON_PID 2>/dev/null; rm -f $(DAEMON_SOCKET)" EXIT; python3 "$(REPO_ROOT)/micro/driver.py" --runtime kernel --runtime kernel-rejit --daemon-socket "$(DAEMON_SOCKET)" $(VM_SMOKE_ARGS) --output "$(VM_MICRO_SMOKE_OUTPUT)"'
 
@@ -226,8 +228,8 @@ vm-micro: micro_exec micro-programs daemon-binary kernel-image kinsn-modules-bui
 	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
 		--action vm-micro \
 		--kernel-image "$(BZIMAGE_PATH)" \
-		--cpus "$(VM_CPUS)" \
-		--mem "$(VM_MEM)" \
+		$(VM_CPU_FLAG) \
+		$(VM_MEM_FLAG) \
 		--timeout "$(VM_MICRO_TIMEOUT)" \
 		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) "$(DAEMON_PATH)" --pgo serve --socket "$(DAEMON_SOCKET)" & DAEMON_PID=$$!; sleep 0.5; trap "kill $$DAEMON_PID 2>/dev/null; rm -f $(DAEMON_SOCKET)" EXIT; python3 "$(REPO_ROOT)/micro/driver.py" --runtime llvmbpf --runtime kernel --runtime kernel-rejit --daemon-socket "$(DAEMON_SOCKET)" $(MICRO_ARGS) --output "$(VM_MICRO_OUTPUT)"'
 
@@ -247,8 +249,8 @@ vm-e2e: e2e-prep e2e-tracee-setup e2e-tetragon-setup micro_exec daemon-binary ke
 	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
 		--action vm-e2e \
 		--kernel-image "$(BZIMAGE_PATH)" \
-		--cpus "$(VM_CPUS)" \
-		--mem "$(VM_MEM)" \
+		$(VM_CPU_FLAG) \
+		$(VM_MEM_FLAG) \
 		--timeout "$(VM_E2E_TIMEOUT)" \
 		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) python3 "$(REPO_ROOT)/e2e/run.py" all'
 
