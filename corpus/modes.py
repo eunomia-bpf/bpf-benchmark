@@ -95,8 +95,6 @@ DEFAULT_TRACING_OUTPUT_JSON = authoritative_output_path(ROOT_DIR / "corpus" / "r
 DEFAULT_TRACING_OUTPUT_MD = ROOT_DIR / "docs" / "tmp" / "corpus-tracing-results.md"
 DEFAULT_CODE_SIZE_OUTPUT_JSON = authoritative_output_path(ROOT_DIR / "corpus" / "results", "corpus_code_size")
 DEFAULT_CODE_SIZE_OUTPUT_MD = ROOT_DIR / "docs" / "tmp" / "corpus-code-size-results.md"
-MODE_NAMES = ("packet", "tracing", "perf", "code-size")
-
 FAMILY_FIELDS = (
     ("cmov", "cmov_sites"),
     ("wide", "wide_sites"),

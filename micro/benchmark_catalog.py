@@ -184,6 +184,3 @@ def load_suite(path: Path = CONFIG_PATH) -> SuiteSpec:
     )
 
 
-DEFAULT_SUITE = load_suite()
-AVAILABLE_BENCHMARKS = DEFAULT_SUITE.benchmarks
-AVAILABLE_RUNTIMES = DEFAULT_SUITE.runtimes

@@ -186,17 +186,6 @@ def build_micro_batch_job(
     return job
 
 
-def read_git_sha() -> str:
-    try:
-        return subprocess.check_output(
-            ["git", "rev-parse", "HEAD"],
-            cwd=ROOT_DIR,
-            stderr=subprocess.DEVNULL,
-        ).decode().strip()
-    except (FileNotFoundError, subprocess.CalledProcessError):
-        return "unknown"
-
-
 def _git_rev_parse(repo_dir: Path, short: bool = False) -> str:
     args = ["git", "rev-parse", "--short", "HEAD"] if short else ["git", "rev-parse", "HEAD"]
     try:
@@ -645,7 +634,7 @@ def main(argv: list[str] | None = None) -> int:
             "platform": platform.platform(),
             "python": sys.version.split()[0],
             "cpu_affinity": args.cpu,
-            "git_sha": read_git_sha(),
+            "git_sha": _git_rev_parse(ROOT_DIR),
             "kernel_version": platform.release(),
             "kernel_cmdline": read_required_text("/proc/cmdline"),
             "cpu_governor": read_optional_text("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"),
