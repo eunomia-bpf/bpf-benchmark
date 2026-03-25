@@ -5,6 +5,10 @@
 
 #include "kinsn_common.h"
 
+__bpf_kfunc_start_defs();
+__bpf_kfunc void bpf_extract64(void) {}
+__bpf_kfunc_end_defs();
+
 static __always_inline int decode_extract_payload(u64 payload,
 						  u8 *dst_reg,
 						  u8 *start,
@@ -126,5 +130,4 @@ const struct bpf_kinsn bpf_extract64_desc = {
 	.emit_x86 = emit_extract_x86,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_extract, "BpfReJIT kinsn: BITFIELD_EXTRACT",
-		       BPF_KINSN_DESC_ENTRY(bpf_extract64_desc));
+DEFINE_KINSN_V2_MODULE(bpf_extract, "BpfReJIT kinsn: BITFIELD_EXTRACT");

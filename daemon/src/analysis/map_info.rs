@@ -28,9 +28,11 @@ pub struct MapInfo {
 
 impl MapInfo {
     /// Returns whether this map is inlineable in v1.
+    /// Mutable map contents would invalidate the constant replacement.
     #[cfg_attr(not(test), allow(dead_code))]
     pub fn is_inlineable_v1(&self) -> bool {
-        matches!(
+        self.frozen
+            && matches!(
             self.map_type,
             BPF_MAP_TYPE_ARRAY | BPF_MAP_TYPE_HASH | BPF_MAP_TYPE_LRU_HASH
         )
@@ -195,7 +197,7 @@ mod tests {
             key_size: 4,
             value_size: 8,
             max_entries,
-            frozen: false,
+            frozen: true,
             map_id,
         }
     }
@@ -206,7 +208,7 @@ mod tests {
             key_size: 4,
             value_size: 8,
             max_entries: 16,
-            frozen: false,
+            frozen: true,
             map_id,
         }
     }
@@ -217,9 +219,25 @@ mod tests {
             key_size: 4,
             value_size: 8,
             max_entries: 16,
-            frozen: false,
+            frozen: true,
             map_id,
         }
+    }
+
+    #[test]
+    fn mutable_maps_are_not_inlineable_v1() {
+        let array = MapInfo {
+            frozen: false,
+            ..array_map(101, 4)
+        };
+        let hash = MapInfo {
+            frozen: false,
+            ..hash_map(202)
+        };
+
+        assert!(!array.is_inlineable_v1());
+        assert!(!hash.is_inlineable_v1());
+        assert!(hash.is_speculative_v1());
     }
 
     #[test]

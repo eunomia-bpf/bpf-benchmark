@@ -624,10 +624,7 @@ def stock_jitted_len(record: dict[str, Any]) -> int | None:
 
 
 def rejit_compile_result(record: dict[str, Any]) -> dict[str, Any] | None:
-    result = record.get("rejit_compile")
-    if result is not None:
-        return result
-    return record.get("v5_compile")
+    return record.get("rejit_compile")
 
 
 def rejit_jitted_len(record: dict[str, Any]) -> int | None:
@@ -637,12 +634,6 @@ def rejit_jitted_len(record: dict[str, Any]) -> int | None:
 
 def rejit_meta(record: dict[str, Any]) -> dict[str, Any]:
     return (((rejit_compile_result(record) or {}).get("sample") or {}).get("rejit") or {})
-
-
-def summary_value(summary: dict[str, Any], canonical_key: str, legacy_key: str) -> Any:
-    if canonical_key in summary:
-        return summary[canonical_key]
-    return summary.get(legacy_key)
 
 
 def is_loadable(record: dict[str, Any]) -> bool:
@@ -950,8 +941,8 @@ def build_markdown(payload: dict[str, Any]) -> str:
         summary_rows.extend(
             [
                 ["Programs with REJIT-detected sites", summary["site_positive_programs"]],
-                ["Programs with REJIT applied", summary_value(summary, "rejit_applied_programs", "recompile_applied_programs")],
-                ["Programs with REJIT failures", summary_value(summary, "rejit_failed_programs", "recompile_failed_programs")],
+                ["Programs with REJIT applied", summary["rejit_applied_programs"]],
+                ["Programs with REJIT failures", summary["rejit_failed_programs"]],
                 ["Overall geomean code-size ratio (rejit/stock)", format_ratio(summary["overall_ratio_geomean"])],
                 ["Overall median code-size delta", format_pct(summary["overall_delta_pct_median"])],
             ]
@@ -968,8 +959,8 @@ def build_markdown(payload: dict[str, Any]) -> str:
                 row["loadable_programs"],
                 row["compile_pairs"],
                 row["site_positive_programs"],
-                row.get("rejit_applied_programs", row.get("recompile_applied_programs")),
-                row.get("rejit_failed_programs", row.get("recompile_failed_programs")),
+                row["rejit_applied_programs"],
+                row["rejit_failed_programs"],
                 format_ratio(row["ratio_geomean"]) if ratios_enabled else "n/a",
                 format_pct(row["delta_pct_median"]) if ratios_enabled else "n/a",
             ]
@@ -983,7 +974,7 @@ def build_markdown(payload: dict[str, Any]) -> str:
                 "Compile Pairs",
                 "Site+",
                 "Applied",
-                "Recompile Failures",
+                "REJIT Failures",
                 "Geomean R/S",
                 "Median Delta",
             ],
@@ -1001,10 +992,10 @@ def build_markdown(payload: dict[str, Any]) -> str:
                         row["program"],
                         row["prog_type"],
                         row["stock_jited_len"],
-                        row.get("rejit_jited_len", row.get("v5_jited_len")),
-                        format_ratio(row.get("ratio_rejit_over_stock", row.get("ratio_recompile_over_stock"))),
+                        row["rejit_jited_len"],
+                        format_ratio(row["ratio_rejit_over_stock"]),
                         format_pct(row["delta_pct"]),
-                        "yes" if row.get("rejit_applied", row.get("recompile_applied")) else "no",
+                        "yes" if row["rejit_applied"] else "no",
                         row["site_count"],
                     ]
                     for row in payload["top_shrinks"]
@@ -1022,10 +1013,10 @@ def build_markdown(payload: dict[str, Any]) -> str:
                         row["program"],
                         row["prog_type"],
                         row["stock_jited_len"],
-                        row.get("rejit_jited_len", row.get("v5_jited_len")),
-                        format_ratio(row.get("ratio_rejit_over_stock", row.get("ratio_recompile_over_stock"))),
+                        row["rejit_jited_len"],
+                        format_ratio(row["ratio_rejit_over_stock"]),
                         format_pct(row["delta_pct"]),
-                        "yes" if row.get("rejit_applied", row.get("recompile_applied")) else "no",
+                        "yes" if row["rejit_applied"] else "no",
                         row["site_count"],
                     ]
                     for row in payload["top_growths"]
@@ -1051,7 +1042,7 @@ def build_markdown(payload: dict[str, Any]) -> str:
             )
         )
 
-    rejit_failure_reasons = summary_value(summary, "rejit_failure_reasons", "recompile_failure_reasons") or {}
+    rejit_failure_reasons = summary["rejit_failure_reasons"] or {}
     if rejit_failure_reasons:
         lines.extend(["", "## REJIT Failures", ""])
         lines.extend(

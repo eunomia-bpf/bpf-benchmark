@@ -813,6 +813,7 @@ mod tests {
         map_id: u32,
         map_type: u32,
         max_entries: u32,
+        frozen: bool,
         values: HashMap<Vec<u8>, Vec<u8>>,
     ) {
         let mut info = BpfMapInfo::default();
@@ -826,7 +827,7 @@ mod tests {
             map_id,
             MockMapState {
                 info,
-                frozen: false,
+                frozen,
                 values,
             },
         );
@@ -835,13 +836,19 @@ mod tests {
     fn install_array_map(map_id: u32, value: Vec<u8>) {
         let mut values = HashMap::new();
         values.insert(1u32.to_le_bytes().to_vec(), value);
-        install_map(map_id, 2, 8, values);
+        install_map(map_id, 2, 8, true, values);
     }
 
     fn install_hash_map(map_id: u32, value: Vec<u8>) {
         let mut values = HashMap::new();
         values.insert(1u32.to_le_bytes().to_vec(), value);
-        install_map(map_id, 1, 8, values);
+        install_map(map_id, 1, 8, true, values);
+    }
+
+    fn install_mutable_array_map(map_id: u32, value: Vec<u8>) {
+        let mut values = HashMap::new();
+        values.insert(1u32.to_le_bytes().to_vec(), value);
+        install_map(map_id, 2, 8, false, values);
     }
 
     fn run_map_inline_pass(program: &mut BpfProgram) -> PipelineResult {
@@ -1331,5 +1338,34 @@ mod tests {
                 exit_insn(),
             ]
         );
+    }
+
+    #[test]
+    fn map_inline_pass_skips_mutable_array_maps() {
+        install_mutable_array_map(111, vec![7, 0, 0, 0]);
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let original = vec![
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ];
+        let mut program = BpfProgram::new(original.clone());
+        program.set_map_ids(vec![111]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(!result.program_changed);
+        assert_eq!(program.insns, original);
+        assert!(result.pass_results[0]
+            .sites_skipped
+            .iter()
+            .any(|skip| skip.reason.contains("not inlineable")));
     }
 }

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-//! kinsn descriptor auto-discovery via `/sys/kernel/btf/` module BTF scanning.
+//! kinsn stub-function auto-discovery via `/sys/kernel/btf/` module BTF scanning.
 //!
-//! Scans loaded kernel modules for known kinsn descriptor variables and
-//! populates a `KinsnRegistry` with their descriptor IDs and transport BTF FDs.
+//! Scans loaded kernel modules for known kinsn stub functions and populates a
+//! `KinsnRegistry` with their BTF IDs and transport BTF FDs.
 
 use std::collections::HashMap;
 use std::fs;
@@ -14,22 +14,18 @@ use anyhow::{bail, Context, Result};
 use crate::insn::BPF_KINSN_ENC_PACKED_CALL;
 use crate::pass::KinsnRegistry;
 
-// ── Known kinsn descriptor → module mapping ──────────────────────────
+// ── Known kinsn function → module mapping ────────────────────────────
 
 /// A kinsn target we want to discover:
-/// (registry_key, descriptor_var_name, module_name).
+/// (registry_key, function_name, module_name).
 const KNOWN_KINSNS: &[(&str, &str, &str)] = &[
-    ("bpf_rotate64", "bpf_rotate64_desc", "bpf_rotate"),
-    ("bpf_select64", "bpf_select64_desc", "bpf_select"),
-    ("bpf_extract64", "bpf_extract64_desc", "bpf_extract"),
-    ("bpf_endian_load16", "bpf_endian_load16_desc", "bpf_endian"),
-    ("bpf_endian_load32", "bpf_endian_load32_desc", "bpf_endian"),
-    ("bpf_endian_load64", "bpf_endian_load64_desc", "bpf_endian"),
-    (
-        "bpf_speculation_barrier",
-        "bpf_speculation_barrier_desc",
-        "bpf_barrier",
-    ),
+    ("bpf_rotate64", "bpf_rotate64", "bpf_rotate"),
+    ("bpf_select64", "bpf_select64", "bpf_select"),
+    ("bpf_extract64", "bpf_extract64", "bpf_extract"),
+    ("bpf_endian_load16", "bpf_endian_load16", "bpf_endian"),
+    ("bpf_endian_load32", "bpf_endian_load32", "bpf_endian"),
+    ("bpf_endian_load64", "bpf_endian_load64", "bpf_endian"),
+    ("bpf_speculation_barrier", "bpf_speculation_barrier", "bpf_barrier"),
 ];
 
 // ── BTF constants (synced from vendor/linux-framework/include/uapi/linux/btf.h) ──
@@ -289,15 +285,6 @@ fn find_func_btf_id(
     )
 }
 
-fn find_var_btf_id(
-    btf_data: &[u8],
-    var_name: &str,
-    base_str_off: u32,
-    type_id_bias: u32,
-) -> Option<i32> {
-    find_kind_btf_id(btf_data, var_name, BTF_KIND_VAR, base_str_off, type_id_bias)
-}
-
 // ── Module BTF file operations ───────────────────────────────────────
 
 /// Read raw BTF data from `/sys/kernel/btf/<module>`.
@@ -312,14 +299,14 @@ fn read_module_btf(module_name: &str) -> Result<Vec<u8>> {
 #[derive(Debug)]
 pub struct DiscoveryResult {
     pub registry: KinsnRegistry,
-    /// Descriptor BTF FDs to keep alive for the daemon's lifetime.
+    /// Module BTF FDs to keep alive for the daemon's lifetime.
     /// When these are dropped, the FDs close and REJIT can no longer reference them.
     pub btf_fds: Vec<OwnedFd>,
     /// Human-readable discovery log.
     pub log: Vec<String>,
 }
 
-/// Discover available kinsn descriptors by scanning `/sys/kernel/btf/`.
+/// Discover available kinsn stub functions by scanning `/sys/kernel/btf/`.
 pub fn discover_kinsns() -> DiscoveryResult {
     let mut registry = KinsnRegistry {
         rotate64_btf_id: -1,
@@ -359,7 +346,7 @@ pub fn discover_kinsns() -> DiscoveryResult {
         }
     };
 
-    for &(registry_key, desc_name, module_name) in KNOWN_KINSNS {
+    for &(registry_key, func_name, module_name) in KNOWN_KINSNS {
         let btf_path = Path::new("/sys/kernel/btf").join(module_name);
         if !btf_path.exists() {
             log.push(format!(
@@ -380,12 +367,12 @@ pub fn discover_kinsns() -> DiscoveryResult {
             }
         };
 
-        let btf_id = match find_var_btf_id(&btf_data, desc_name, base_str_off, type_id_bias) {
+        let btf_id = match find_func_btf_id(&btf_data, func_name, base_str_off, type_id_bias) {
             Some(id) => id,
             None => {
                 log.push(format!(
-                    "  {}: BTF_KIND_VAR '{}' not found in module '{}'",
-                    registry_key, desc_name, module_name
+                    "  {}: BTF_KIND_FUNC '{}' not found in module '{}'",
+                    registry_key, func_name, module_name
                 ));
                 continue;
             }
@@ -417,8 +404,8 @@ pub fn discover_kinsns() -> DiscoveryResult {
         };
 
         log.push(format!(
-            "  {}: descriptor '{}' found in '{}' btf_id={} fd={}",
-            registry_key, desc_name, module_name, btf_id, fd
+            "  {}: function '{}' found in '{}' btf_id={} fd={}",
+            registry_key, func_name, module_name, btf_id, fd
         ));
 
         // Assign to registry.

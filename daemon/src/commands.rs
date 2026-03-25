@@ -754,13 +754,13 @@ pub(crate) fn try_apply_one(
         for &fd_needed in &program.required_btf_fds {
             if !all_fds.contains(&fd_needed) {
                 eprintln!(
-                    "    warning: required descriptor BTF fd {} not in registry ({:?})",
+                    "    warning: required kinsn BTF fd {} not in registry ({:?})",
                     fd_needed, all_fds
                 );
                 push_debug_warning(
                     &mut attempt_debug,
                     format!(
-                        "required descriptor BTF fd {fd_needed} missing from registry {:?}",
+                        "required kinsn BTF fd {fd_needed} missing from registry {:?}",
                         all_fds
                     ),
                 );

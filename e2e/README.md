@@ -8,7 +8,7 @@ Active checked-in cases are `tracee`, `tetragon`, `bpftrace`, `scx`, and `katran
 
 - `run.py`: unified dispatcher for `tracee`, `tetragon`, `bpftrace`, `scx`, and `katran`
 - `cases/`: per-system case logic, setup scripts, configs, and assets
-- `../runner/libs/`: shared helpers for agent lifecycle, workload generation, metrics, VM runs, and recompile
+- `../runner/libs/`: shared helpers for agent lifecycle, workload generation, metrics, VM runs, and REJIT
 - `results/`: JSON/Markdown outputs
 
 ## Shared Prerequisites

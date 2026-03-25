@@ -5,6 +5,12 @@
 
 #include "kinsn_common.h"
 
+__bpf_kfunc_start_defs();
+__bpf_kfunc void bpf_endian_load16(void) {}
+__bpf_kfunc void bpf_endian_load32(void) {}
+__bpf_kfunc void bpf_endian_load64(void) {}
+__bpf_kfunc_end_defs();
+
 static __always_inline int decode_endian_payload(u64 payload,
 						 u8 *dst_reg,
 						 u8 *base_reg,
@@ -243,7 +249,4 @@ const struct bpf_kinsn bpf_endian_load64_desc = {
 	.emit_x86 = emit_endian64_x86,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_endian, "BpfReJIT kinsn: ENDIAN_LOAD",
-		       BPF_KINSN_DESC_ENTRY(bpf_endian_load16_desc),
-		       BPF_KINSN_DESC_ENTRY(bpf_endian_load32_desc),
-		       BPF_KINSN_DESC_ENTRY(bpf_endian_load64_desc));
+DEFINE_KINSN_V2_MODULE(bpf_endian, "BpfReJIT kinsn: ENDIAN_LOAD");

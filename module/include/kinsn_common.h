@@ -120,28 +120,14 @@ static __always_inline u8 kinsn_arm64_reg(u8 bpf_reg)
 }
 #endif
 
-#define BPF_KINSN_DESC_ENTRY(sym)					\
-	{ .name = #sym, .desc = &(sym) }
-
-#define DEFINE_KINSN_V2_MODULE(prefix, desc, ...)			\
-static const struct bpf_kinsn_id prefix##_kinsns[] = {			\
-	__VA_ARGS__							\
-};									\
-									\
-static const struct bpf_kinsn_set prefix##_set = {			\
-	.owner = THIS_MODULE,						\
-	.cnt = ARRAY_SIZE(prefix##_kinsns),				\
-	.ids = prefix##_kinsns,						\
-};									\
-									\
+#define DEFINE_KINSN_V2_MODULE(prefix, desc)				\
 static int __init prefix##_init(void)					\
 {									\
-	return register_bpf_kinsn_set(&prefix##_set);			\
+	return 0;							\
 }									\
 									\
 static void __exit prefix##_exit(void)					\
 {									\
-	unregister_bpf_kinsn_set(&prefix##_set);			\
 }									\
 									\
 module_init(prefix##_init);						\

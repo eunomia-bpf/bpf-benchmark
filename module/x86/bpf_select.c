@@ -5,6 +5,10 @@
 
 #include "kinsn_common.h"
 
+__bpf_kfunc_start_defs();
+__bpf_kfunc void bpf_select64(void) {}
+__bpf_kfunc_end_defs();
+
 #define KINSN_SELECT_COND_NEZ 0
 
 static __always_inline int decode_select_payload(u64 payload,
@@ -144,5 +148,4 @@ const struct bpf_kinsn bpf_select64_desc = {
 	.emit_x86 = emit_select_x86,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_select, "BpfReJIT kinsn: COND_SELECT (CMOV)",
-		       BPF_KINSN_DESC_ENTRY(bpf_select64_desc));
+DEFINE_KINSN_V2_MODULE(bpf_select, "BpfReJIT kinsn: COND_SELECT (CMOV)");

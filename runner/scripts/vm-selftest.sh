@@ -1,6 +1,6 @@
 #!/bin/bash
 # Helper script for `make vm-selftest`.
-# Runs kernel recompile selftest + builds and runs tests/unittest/ suite.
+# Runs kernel REJIT selftest + builds and runs tests/unittest/ suite.
 #
 # Usage: vm-selftest.sh <ROOT_DIR> <KERNEL_SELFTEST> <UNITTEST_DIR> <KINSN_MODULE_DIR>
 set -eu

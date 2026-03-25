@@ -27,12 +27,6 @@ pub use wide_mem::WideMemPass;
 use crate::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis, MapInfoAnalysis};
 use crate::pass::{BpfPass, PassManager};
 
-// ── Legacy alias ───────────────────────────────────────────────────
-// Re-export `fixup_all_branches` under the old name for backward compat
-// within this crate. New code should use `utils::fixup_all_branches` directly.
-#[allow(unused_imports)]
-pub(crate) use utils::fixup_all_branches as fixup_branches_inline;
-
 // ── Pass registry ───────────────────────────────────────────────────
 
 /// Entry in the pass registry. Defines the canonical name, description,
@@ -42,7 +36,7 @@ pub struct PassRegistryEntry {
     pub name: &'static str,
     /// Short description for help text.
     pub description: &'static str,
-    /// Legacy aliases accepted on the CLI (e.g. "spectre_mitigation" for "speculation_barrier").
+    /// Additional CLI names accepted for this pass.
     pub aliases: &'static [&'static str],
     /// Constructor: returns a boxed pass instance.
     pub make: fn() -> Box<dyn BpfPass>,
@@ -117,7 +111,7 @@ pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
     PassRegistryEntry {
         name: "speculation_barrier",
         description: "Insert speculation barrier kfunc after conditional branches",
-        aliases: &["spectre_mitigation", "barrier_placeholder"],
+        aliases: &[],
         make: || Box::new(SpectreMitigationPass),
     },
 ];

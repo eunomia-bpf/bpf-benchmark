@@ -65,7 +65,7 @@ pub struct BpfProgram {
     pub annotations: Vec<InsnAnnotation>,
     /// Transform log: records what each pass did.
     pub transform_log: Vec<TransformEntry>,
-    /// BTF FDs required by kinsn descriptor calls introduced during rewrite.
+    /// BTF FDs required by kinsn function calls introduced during rewrite.
     /// Used by cmd_apply to construct the REJIT transport fd_array.
     pub required_btf_fds: Vec<i32>,
     /// Map IDs referenced by this program, in the kernel's `used_maps` order.

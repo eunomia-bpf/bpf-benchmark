@@ -3,7 +3,7 @@
  * REJIT kinsn test suite.
  *
  * Covers:
- *   - kinsn descriptor discovery via BTF transport
+ *   - kinsn function discovery via BTF transport
  *   - REJIT correctness for rotate/select/endian/barrier
  *   - packed sidecar semantics on arbitrary architectural registers
  *   - x86 native emit byte-pattern coverage for rotate
@@ -56,7 +56,7 @@ struct kinsn_module_ref {
 };
 
 struct kinsn_func_ref {
-	const char *desc_name;
+	const char *func_name;
 	enum kinsn_module_id module_id;
 	__u32 btf_id;
 };
@@ -103,31 +103,31 @@ static struct kinsn_module_ref g_modules[MOD_CNT] = {
 
 static struct kinsn_func_ref g_funcs[FUNC_CNT] = {
 	[FUNC_ROTATE] = {
-		.desc_name = "bpf_rotate64_desc",
+		.func_name = "bpf_rotate64",
 		.module_id = MOD_ROTATE,
 	},
 	[FUNC_SELECT] = {
-		.desc_name = "bpf_select64_desc",
+		.func_name = "bpf_select64",
 		.module_id = MOD_SELECT,
 	},
 	[FUNC_EXTRACT] = {
-		.desc_name = "bpf_extract64_desc",
+		.func_name = "bpf_extract64",
 		.module_id = MOD_EXTRACT,
 	},
 	[FUNC_ENDIAN16] = {
-		.desc_name = "bpf_endian_load16_desc",
+		.func_name = "bpf_endian_load16",
 		.module_id = MOD_ENDIAN,
 	},
 	[FUNC_ENDIAN32] = {
-		.desc_name = "bpf_endian_load32_desc",
+		.func_name = "bpf_endian_load32",
 		.module_id = MOD_ENDIAN,
 	},
 	[FUNC_ENDIAN64] = {
-		.desc_name = "bpf_endian_load64_desc",
+		.func_name = "bpf_endian_load64",
 		.module_id = MOD_ENDIAN,
 	},
 	[FUNC_BARRIER] = {
-		.desc_name = "bpf_speculation_barrier_desc",
+		.func_name = "bpf_speculation_barrier",
 		.module_id = MOD_BARRIER,
 	},
 };
@@ -529,9 +529,9 @@ static int get_vmlinux_btf_layout(__u32 *str_len_out, __u32 *type_cnt_out)
 	return 0;
 }
 
-static int find_var_btf_id(const void *btf_data, size_t btf_len,
-			   const char *desc_name, __u32 base_str_off,
-			   __u32 type_id_bias, __u32 *btf_id_out)
+static int find_func_btf_id(const void *btf_data, size_t btf_len,
+			    const char *func_name, __u32 base_str_off,
+			    __u32 type_id_bias, __u32 *btf_id_out)
 {
 	const struct btf_header *hdr = btf_data;
 	const unsigned char *data = btf_data;
@@ -571,7 +571,7 @@ static int find_var_btf_id(const void *btf_data, size_t btf_len,
 		bt = (const struct btf_type *)(type_section + offset);
 		kind = btf_kind(bt);
 
-		if (kind == 14) {
+		if (kind == 12) {
 			size_t raw_off = bt->name_off;
 			size_t local_off = raw_off;
 			const char *name;
@@ -583,7 +583,7 @@ static int find_var_btf_id(const void *btf_data, size_t btf_len,
 				name = (const char *)(str_section + local_off);
 				max_len = hdr->str_len - local_off;
 				if (strnlen(name, max_len) < max_len &&
-				    strcmp(name, desc_name) == 0) {
+				    strcmp(name, func_name) == 0) {
 					*btf_id_out = type_id + type_id_bias;
 					return 0;
 				}
@@ -702,9 +702,9 @@ static int discover_kinsns(void)
 			 g_modules[g_funcs[i].module_id].module_name);
 		if (read_file(path, &data, &data_len) < 0)
 			return -1;
-		if (find_var_btf_id(data, data_len, g_funcs[i].desc_name,
-				    base_str_off, type_id_bias,
-				    &g_funcs[i].btf_id) < 0) {
+		if (find_func_btf_id(data, data_len, g_funcs[i].func_name,
+				     base_str_off, type_id_bias,
+				     &g_funcs[i].btf_id) < 0) {
 			free(data);
 			return -1;
 		}
@@ -849,14 +849,14 @@ static int test_kinsn_discovery(void)
 	size_t i;
 
 	if (discover_kinsns() < 0) {
-		TEST_FAIL(name, "failed to discover descriptor BTF and kinsn IDs");
+		TEST_FAIL(name, "failed to discover kinsn function BTF and IDs");
 		return 1;
 	}
 
 	for (i = 0; i < ARRAY_SIZE(g_funcs); i++) {
 		if (g_funcs[i].btf_id == 0 ||
 		    g_modules[g_funcs[i].module_id].btf_fd < 0) {
-			TEST_FAIL(name, "missing kinsn BTF ID or descriptor BTF FD");
+			TEST_FAIL(name, "missing kinsn BTF ID or module BTF FD");
 			return 1;
 		}
 	}
@@ -865,7 +865,7 @@ static int test_kinsn_discovery(void)
 	for (i = 0; i < ARRAY_SIZE(g_funcs); i++) {
 		printf("    %s/%s: btf_fd=%d btf_id=%u\n",
 		       g_modules[g_funcs[i].module_id].module_name,
-		       g_funcs[i].desc_name,
+		       g_funcs[i].func_name,
 		       g_modules[g_funcs[i].module_id].btf_fd,
 		       g_funcs[i].btf_id);
 	}

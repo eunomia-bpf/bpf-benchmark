@@ -5,6 +5,10 @@
 
 #include "kinsn_common.h"
 
+__bpf_kfunc_start_defs();
+__bpf_kfunc void bpf_speculation_barrier(void) {}
+__bpf_kfunc_end_defs();
+
 static int instantiate_barrier(u64 payload, struct bpf_insn *insn_buf)
 {
 	if (payload)
@@ -45,5 +49,4 @@ const struct bpf_kinsn bpf_speculation_barrier_desc = {
 };
 
 DEFINE_KINSN_V2_MODULE(bpf_barrier,
-		       "BpfReJIT kinsn: SPECULATION_BARRIER (LFENCE)",
-		       BPF_KINSN_DESC_ENTRY(bpf_speculation_barrier_desc));
+		       "BpfReJIT kinsn: SPECULATION_BARRIER (LFENCE)");

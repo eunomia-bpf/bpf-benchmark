@@ -5,6 +5,10 @@
 
 #include "kinsn_common.h"
 
+__bpf_kfunc_start_defs();
+__bpf_kfunc void bpf_rotate64(void) {}
+__bpf_kfunc_end_defs();
+
 static __always_inline int decode_rotate_payload(u64 payload,
 						 u8 *dst_reg,
 						 u8 *src_reg,
@@ -124,5 +128,4 @@ const struct bpf_kinsn bpf_rotate64_desc = {
 	.emit_x86 = emit_rotate_x86,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_rotate, "BpfReJIT kinsn: ROTATE (ROL)",
-		       BPF_KINSN_DESC_ENTRY(bpf_rotate64_desc));
+DEFINE_KINSN_V2_MODULE(bpf_rotate, "BpfReJIT kinsn: ROTATE (ROL)");
