@@ -4,8 +4,11 @@
 //! Contains branch fixup, kinsn call emission, and instruction iteration
 //! helpers that are used by multiple passes.
 
+use std::collections::HashSet;
+
+use crate::analysis::{CFGAnalysis, CFGResult};
 use crate::insn::*;
-use crate::pass::BpfProgram;
+use crate::pass::{Analysis, BpfProgram};
 
 // ── Branch fixup ───────────────────────────────────────────────────
 
@@ -46,6 +49,174 @@ pub fn fixup_all_branches(new_insns: &mut [BpfInsn], old_insns: &[BpfInsn], addr
         } else {
             old_pc + 1
         };
+    }
+}
+
+/// Compose two address maps: `old -> mid` and `mid -> new`.
+pub fn compose_addr_maps(first: &[usize], second: &[usize]) -> Vec<usize> {
+    first.iter().map(|&pc| second[pc]).collect()
+}
+
+/// Remove all CFG-unreachable basic blocks from the instruction stream.
+pub fn eliminate_unreachable_blocks(insns: &[BpfInsn]) -> Option<(Vec<BpfInsn>, Vec<usize>)> {
+    if insns.is_empty() {
+        return None;
+    }
+
+    let cfg = CFGAnalysis.run(&BpfProgram::new(insns.to_vec()));
+    eliminate_unreachable_blocks_with_cfg(insns, &cfg)
+}
+
+/// Remove all CFG-unreachable basic blocks from the instruction stream using
+/// a caller-provided CFG.
+pub fn eliminate_unreachable_blocks_with_cfg(
+    insns: &[BpfInsn],
+    cfg: &CFGResult,
+) -> Option<(Vec<BpfInsn>, Vec<usize>)> {
+    if insns.is_empty() || cfg.blocks.is_empty() {
+        return None;
+    }
+
+    let mut reachable = vec![false; cfg.blocks.len()];
+    let mut worklist = Vec::new();
+    let mut entry_blocks = HashSet::new();
+
+    for subprog in &cfg.subprogs {
+        if subprog.start < insns.len() {
+            entry_blocks.insert(cfg.insn_to_block[subprog.start]);
+        }
+    }
+
+    for block_idx in entry_blocks {
+        reachable[block_idx] = true;
+        worklist.push(block_idx);
+    }
+
+    while let Some(block_idx) = worklist.pop() {
+        for &succ in &cfg.blocks[block_idx].succs {
+            if !reachable[succ] {
+                reachable[succ] = true;
+                worklist.push(succ);
+            }
+        }
+    }
+
+    let mut deleted = vec![false; insns.len()];
+    for (block_idx, block) in cfg.blocks.iter().enumerate() {
+        if reachable[block_idx] {
+            continue;
+        }
+        for slot in &mut deleted[block.start..block.end] {
+            *slot = true;
+        }
+    }
+
+    eliminate_marked_insns(insns, &deleted)
+}
+
+/// Remove all `ja +0` no-op instructions from the instruction stream.
+pub fn eliminate_nops(insns: &[BpfInsn]) -> Option<(Vec<BpfInsn>, Vec<usize>)> {
+    let mut deleted = vec![false; insns.len()];
+    let mut pc = 0usize;
+
+    while pc < insns.len() {
+        let insn = &insns[pc];
+        let width = insn_width(insn);
+        if insn.is_ja() && insn.off == 0 {
+            for slot in &mut deleted[pc..pc + width] {
+                *slot = true;
+            }
+        }
+        pc += width;
+    }
+
+    eliminate_marked_insns(insns, &deleted)
+}
+
+fn eliminate_marked_insns(
+    insns: &[BpfInsn],
+    deleted: &[bool],
+) -> Option<(Vec<BpfInsn>, Vec<usize>)> {
+    if insns.is_empty() || !deleted.iter().any(|&flag| flag) {
+        return None;
+    }
+
+    let orig_len = insns.len();
+    let mut new_insns = Vec::with_capacity(orig_len);
+    let mut addr_map = vec![0usize; orig_len + 1];
+    let mut pc = 0usize;
+
+    while pc < orig_len {
+        let insn = &insns[pc];
+        let width = insn_width(insn);
+        let new_pc = new_insns.len();
+
+        if deleted[pc] {
+            for j in 0..width {
+                addr_map[pc + j] = new_pc;
+            }
+            pc += width;
+            continue;
+        }
+
+        addr_map[pc] = new_pc;
+        new_insns.push(*insn);
+        if width == 2 && pc + 1 < orig_len {
+            addr_map[pc + 1] = new_insns.len();
+            new_insns.push(insns[pc + 1]);
+        }
+        pc += width;
+    }
+    addr_map[orig_len] = new_insns.len();
+
+    fixup_surviving_branches(&mut new_insns, insns, &addr_map, deleted);
+    Some((new_insns, addr_map))
+}
+
+fn fixup_surviving_branches(
+    new_insns: &mut [BpfInsn],
+    old_insns: &[BpfInsn],
+    addr_map: &[usize],
+    deleted: &[bool],
+) {
+    let old_n = old_insns.len();
+    let mut old_pc = 0usize;
+
+    while old_pc < old_n {
+        let insn = &old_insns[old_pc];
+        if !deleted[old_pc] {
+            if insn.is_call() && insn.src_reg() == 1 {
+                let old_target = (old_pc as i64 + 1 + insn.imm as i64) as usize;
+                if old_target < old_n {
+                    let new_pc = addr_map[old_pc];
+                    let new_target = addr_map[old_target];
+                    if new_pc < new_insns.len() && new_insns[new_pc].is_call() {
+                        let new_imm = new_target as i64 - (new_pc as i64 + 1);
+                        new_insns[new_pc].imm = new_imm as i32;
+                    }
+                }
+            } else if insn.is_jmp_class() && !insn.is_call() && !insn.is_exit() {
+                let old_target = (old_pc as i64 + 1 + insn.off as i64) as usize;
+                if old_target <= old_n {
+                    let new_pc = addr_map[old_pc];
+                    let new_target = addr_map[old_target];
+                    if new_pc < new_insns.len() && new_insns[new_pc].is_jmp_class() {
+                        let new_off = new_target as i64 - (new_pc as i64 + 1);
+                        new_insns[new_pc].off = new_off as i16;
+                    }
+                }
+            }
+        }
+
+        old_pc += insn_width(insn);
+    }
+}
+
+fn insn_width(insn: &BpfInsn) -> usize {
+    if insn.is_ldimm64() {
+        2
+    } else {
+        1
     }
 }
 

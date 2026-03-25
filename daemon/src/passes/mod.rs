@@ -4,6 +4,7 @@
 mod branch_flip;
 mod cond_select;
 mod const_prop;
+mod dce;
 mod endian;
 mod extract;
 mod map_inline;
@@ -15,6 +16,7 @@ mod wide_mem;
 pub use branch_flip::BranchFlipPass;
 pub use cond_select::CondSelectPass;
 pub use const_prop::ConstPropPass;
+pub use dce::DcePass;
 pub use endian::EndianFusionPass;
 pub use extract::ExtractPass;
 pub use map_inline::MapInlinePass;
@@ -64,6 +66,12 @@ pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
         description: "Fold register constants into MOV/LD_IMM64/JA rewrites",
         aliases: &[],
         make: || Box::new(ConstPropPass),
+    },
+    PassRegistryEntry {
+        name: "dce",
+        description: "Remove CFG-unreachable blocks and NOPs after simplification",
+        aliases: &[],
+        make: || Box::new(DcePass),
     },
     PassRegistryEntry {
         name: "wide_mem",
@@ -329,6 +337,7 @@ mod tests {
         let pm = build_default_pipeline();
         assert_eq!(pm.pass_names().first().copied(), Some("map_inline"));
         assert_eq!(pm.pass_names().get(1).copied(), Some("const_prop"));
+        assert_eq!(pm.pass_names().get(2).copied(), Some("dce"));
     }
 
     // ── HIGH #6: Real BPF bytecode pipeline tests ────────────────────
