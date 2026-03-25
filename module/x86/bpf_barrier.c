@@ -45,4 +45,5 @@ const struct bpf_kinsn bpf_speculation_barrier_desc = {
 };
 
 DEFINE_KINSN_V2_MODULE(bpf_barrier,
-		       "BpfReJIT kinsn: SPECULATION_BARRIER (LFENCE)");
+		       "BpfReJIT kinsn: SPECULATION_BARRIER (LFENCE)",
+		       BPF_KINSN_DESC_ENTRY(bpf_speculation_barrier_desc));

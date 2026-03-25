@@ -9,6 +9,7 @@
 #include <linux/bpf.h>
 #include <linux/filter.h>
 #include <linux/init.h>
+#include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/string.h>
 
@@ -119,14 +120,28 @@ static __always_inline u8 kinsn_arm64_reg(u8 bpf_reg)
 }
 #endif
 
-#define DEFINE_KINSN_V2_MODULE(prefix, desc)				\
+#define BPF_KINSN_DESC_ENTRY(sym)					\
+	{ .name = #sym, .desc = &(sym) }
+
+#define DEFINE_KINSN_V2_MODULE(prefix, desc, ...)			\
+static const struct bpf_kinsn_id prefix##_kinsns[] = {			\
+	__VA_ARGS__							\
+};									\
+									\
+static const struct bpf_kinsn_set prefix##_set = {			\
+	.owner = THIS_MODULE,						\
+	.cnt = ARRAY_SIZE(prefix##_kinsns),				\
+	.ids = prefix##_kinsns,						\
+};									\
+									\
 static int __init prefix##_init(void)					\
 {									\
-	return 0;							\
+	return register_bpf_kinsn_set(&prefix##_set);			\
 }									\
 									\
 static void __exit prefix##_exit(void)					\
 {									\
+	unregister_bpf_kinsn_set(&prefix##_set);			\
 }									\
 									\
 module_init(prefix##_init);						\

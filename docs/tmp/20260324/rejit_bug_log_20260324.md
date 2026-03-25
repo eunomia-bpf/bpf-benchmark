@@ -141,9 +141,100 @@ Only repo bugs are listed here. Command-line mistakes or one-off debugging misha
     - [`tests/unittest/rejit_kinsn.c`](/home/yunwei37/workspace/bpf-benchmark/tests/unittest/rejit_kinsn.c): `test_rejit_endian32_apply`
     - [`daemon/src/passes/mod.rs`](/home/yunwei37/workspace/bpf-benchmark/daemon/src/passes/mod.rs): `test_full_pipeline_real_bytecode_endian_swap_dense`
 
+### 12. Kinsn descriptor resolution relied on `kallsyms_lookup_name()` instead of explicit registration
+
+- Locations:
+  - `vendor/linux-framework/kernel/bpf/verifier.c`
+  - `vendor/linux-framework/kernel/bpf/btf.c`
+  - `vendor/linux-framework/include/linux/bpf.h`
+  - `module/include/kinsn_common.h`
+- Symptom:
+  - verifier resolved `BPF_PSEUDO_KINSN_CALL` descriptors by taking the BTF var name and calling `kallsyms_lookup_name()`
+  - this left kinsn descriptor lookup outside the normal BTF/module registration model and created an upstream acceptance blocker
+- Root cause:
+  - first-cut pure-v2 transport kept the BTF var identity but still recovered the runtime pointer through the global symbol table
+  - module-side `DEFINE_KINSN_V2_MODULE()` also registered no descriptor set, so the explicit registration path existed only partially
+- Fix:
+  - register kinsn descriptor sets explicitly with `register_bpf_kinsn_set()`
+  - resolve descriptor BTF var IDs against the owning module BTF at module init
+  - have verifier look up descriptors through the registered `btf->kinsn_tab` using `(module BTF, var_id)` instead of `kallsyms_lookup_name()`
+  - add `unregister_bpf_kinsn_set()` and make module exit paths unregister cleanly
+- Verification:
+  - covered by the VM correctness matrix because every kinsn-bearing module now depends on explicit registration before load/use
+
+### 13. VM e2e `katran` failed because the guest did not receive required net modules from `.virtme_mods`
+
+- Locations:
+  - `Makefile`
+  - `e2e/cases/katran/case.py`
+- Symptom:
+  - `vm-e2e` failed in the guest with:
+    - `ip link add katran0 type veth peer name rtlb0`
+    - `Error: Unknown device type.`
+- Root cause:
+  - the guest correctly ran `modprobe veth` / `modprobe ipip`
+  - but the repo’s hostfs module set only exposed the custom kinsn modules, not the dependent net modules required by the `katran` case
+- Fix:
+  - add the required guest-visible modules to the hostfs module bundle:
+    - `drivers/net/veth.ko`
+    - `net/ipv4/ip_tunnel.ko`
+    - `net/ipv4/tunnel4.ko`
+    - `net/ipv4/ipip.ko`
+- Verification:
+  - [`e2e/results/katran_20260325_015121/metadata.json`](/home/yunwei37/workspace/bpf-benchmark/e2e/results/katran_20260325_015121/metadata.json): `completed`
+  - later full `vm-e2e` rerun completed successfully
+
+### 14. Kinsn descriptor lookup still exposed a too-broad helper and unnecessarily rejected built-in descriptors
+
+- Locations:
+  - `vendor/linux-framework/kernel/bpf/btf.c`
+  - `vendor/linux-framework/kernel/bpf/verifier.c`
+  - `vendor/linux-framework/include/linux/bpf.h`
+  - `vendor/linux-framework/include/linux/btf.h`
+- Symptom:
+  - verifier lookup already used the registered per-BTF kinsn table, but it still called a generic `bpf_find_registered_kinsn()` helper and then open-coded `try_module_get()`
+  - `fetch_kinsn_desc_meta()` also rejected `owner == NULL`, which made built-in/vmlinux descriptors impossible even though registration already used `btf_get_module_btf(NULL)`
+- Root cause:
+  - the first registration-based cleanup stopped at replacing `kallsyms_lookup_name()`, but did not yet tighten the helper boundary around “lookup + lifetime acquisition”
+- Fix:
+  - replace the generic lookup helper with `btf_try_get_kinsn_desc()`
+  - make verifier use that narrower helper directly
+  - allow `owner == NULL` for built-in/vmlinux descriptors while still taking a module ref for module-backed descriptors
+  - stop exposing the old generic lookup helper through `include/linux/bpf.h`
+
+### 15. Branch diff still carried unrelated upstream churn in kernel runtime/test infrastructure
+
+- Locations:
+  - `vendor/linux-framework/net/bpf/test_run.c`
+  - `vendor/linux-framework/tools/testing/selftests/bpf/jit_disasm_helpers.c`
+  - `vendor/linux-framework/include/linux/btf.h`
+- Symptom:
+  - branch diff still contained:
+    - removal of `bpf_prog_change_xdp()` around repeated XDP `test_run`
+    - a selftest-only `normalize_movabs_imm_hex()` helper
+    - a cosmetic blank-line deletion in `include/linux/btf.h`
+- Root cause:
+  - earlier exploratory changes leaked into the branch and were not directly required for pure-v2 REJIT/kinsn semantics
+- Fix:
+  - restore the repeated-XDP `test_run` behavior
+  - restore the unrelated `btf.h` formatting line
+  - initially tried dropping the selftest disassembly normalization helper, but latest `vm-test` showed it is still needed to normalize LLVM `movabsq $-0x...` output back to the positive-hex form expected by unmodified upstream regexes
+  - keep the diff focused on REJIT/kinsn behavior, but preserve the normalization helper as a test-infra stability fix rather than a testcase semantic change
+
+### 16. Registration-helper cleanup introduced a compile regression in `fetch_kinsn_desc_meta()`
+
+- Location: `vendor/linux-framework/kernel/bpf/verifier.c`
+- Symptom:
+  - latest `make vm-test` kernel rebuild failed with:
+    - `kernel/bpf/verifier.c:3662:9: error: ‘err’ undeclared`
+- Root cause:
+  - while converting verifier-side kinsn lookup to `btf_try_get_kinsn_desc()`, the function body started using `err` without adding a local declaration
+- Fix:
+  - add `int err;` to `fetch_kinsn_desc_meta()`
+
 ## Open
 
-### 12. `proof lowering` still has a scaling issue beyond constant caps
+### 17. `proof lowering` still has a scaling issue beyond constant caps
 
 - Location: `vendor/linux-framework/kernel/bpf/verifier.c`
 - Symptom:

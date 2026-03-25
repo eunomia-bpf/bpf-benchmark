@@ -122,4 +122,5 @@ const struct bpf_kinsn bpf_extract64_desc = {
 	.emit_x86 = emit_extract_x86,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_extract, "BpfReJIT kinsn: BITFIELD_EXTRACT");
+DEFINE_KINSN_V2_MODULE(bpf_extract, "BpfReJIT kinsn: BITFIELD_EXTRACT",
+		       BPF_KINSN_DESC_ENTRY(bpf_extract64_desc));

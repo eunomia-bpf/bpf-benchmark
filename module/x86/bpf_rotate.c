@@ -124,4 +124,5 @@ const struct bpf_kinsn bpf_rotate64_desc = {
 	.emit_x86 = emit_rotate_x86,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_rotate, "BpfReJIT kinsn: ROTATE (ROL)");
+DEFINE_KINSN_V2_MODULE(bpf_rotate, "BpfReJIT kinsn: ROTATE (ROL)",
+		       BPF_KINSN_DESC_ENTRY(bpf_rotate64_desc));

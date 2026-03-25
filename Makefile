@@ -99,6 +99,10 @@ MICRO_RUNNER_SOURCES := $(wildcard $(RUNNER_DIR)/src/*.cpp $(RUNNER_DIR)/include
 MICRO_BPF_SOURCES    := $(wildcard $(MICRO_DIR)/programs/*.bpf.c $(MICRO_DIR)/programs/common.h)
 DAEMON_SOURCES       := $(wildcard $(DAEMON_DIR)/src/*.rs $(DAEMON_DIR)/Cargo.toml $(DAEMON_DIR)/Cargo.lock)
 VIRTME_HOSTFS_MODULES := \
+	drivers/net/veth.ko \
+	net/ipv4/ip_tunnel.ko \
+	net/ipv4/tunnel4.ko \
+	net/ipv4/ipip.ko \
 	fs/netfs/netfs.ko \
 	net/9p/9pnet.ko \
 	net/9p/9pnet_virtio.ko \
@@ -106,6 +110,10 @@ VIRTME_HOSTFS_MODULES := \
 	fs/fuse/virtiofs.ko \
 	fs/overlayfs/overlay.ko
 VIRTME_HOSTFS_MODULE_ORDER := \
+	drivers/net/veth.o \
+	net/ipv4/ip_tunnel.o \
+	net/ipv4/tunnel4.o \
+	net/ipv4/ipip.o \
 	fs/netfs/netfs.o \
 	net/9p/9pnet.o \
 	net/9p/9pnet_virtio.o \
@@ -209,6 +217,9 @@ $(KERNEL_CONFIG_STAMP): $(DEFCONFIG_SRC) $(KERNEL_CONFIG_PATH)
 
 kernel-build: $(KERNEL_CONFIG_STAMP)
 	$(MAKE) -C "$(KERNEL_DIR)" -j"$(JOBS)" bzImage modules_prepare
+	@if [ -f "$(KERNEL_DIR)/vmlinux.symvers" ]; then \
+		cp "$(KERNEL_DIR)/vmlinux.symvers" "$(KERNEL_SYMVERS_PATH)"; \
+	fi
 	@test -f "$(KERNEL_SYMVERS_PATH)"
 	@touch "$(KERNEL_SYMVERS_PATH)"
 

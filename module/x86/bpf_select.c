@@ -137,4 +137,5 @@ const struct bpf_kinsn bpf_select64_desc = {
 	.emit_x86 = emit_select_x86,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_select, "BpfReJIT kinsn: COND_SELECT (CMOV)");
+DEFINE_KINSN_V2_MODULE(bpf_select, "BpfReJIT kinsn: COND_SELECT (CMOV)",
+		       BPF_KINSN_DESC_ENTRY(bpf_select64_desc));

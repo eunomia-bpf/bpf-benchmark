@@ -1,0 +1,392 @@
+{
+  "artifact_kind": "result_run",
+  "artifact_version": 1,
+  "case": "bcc",
+  "completed_at": "2026-03-25T01:29:30.327871+00:00",
+  "details_dir": "details",
+  "generated_at": "2026-03-25T01:29:30.327874+00:00",
+  "last_updated_at": "2026-03-25T01:29:30.327871+00:00",
+  "output_hint_json": "e2e/results/bcc_authoritative_20260325.json",
+  "output_hint_md": "e2e/results/bcc-e2e.md",
+  "output_hint_report_md": "docs/tmp/bcc-e2e-report.md",
+  "paper_summary": {
+    "daemon": "/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon",
+    "duration_s": 30,
+    "generated_at": "2026-03-25T01:29:30.313782+00:00",
+    "host": {
+      "git_sha": "unknown",
+      "hostname": "virtme-ng",
+      "kernel": "7.0.0-rc2+",
+      "platform": "Linux-7.0.0-rc2+-x86_64-with-glibc2.39",
+      "python": "3.12.3"
+    },
+    "records": [
+      {
+        "baseline": {
+          "measurement": null,
+          "phase": "baseline",
+          "process": {},
+          "prog_ids": [],
+          "programs": [],
+          "reason": "binary 'tcplife' not found in /home/yunwei37/workspace/bpf-benchmark/runner/repos/bcc/libbpf-tools",
+          "scan_results": {},
+          "site_totals": {
+            "cmov_sites": 0,
+            "lea_sites": 0,
+            "rotate_sites": 0,
+            "total_sites": 0,
+            "wide_sites": 0
+          },
+          "status": "skipped"
+        },
+        "description": "TCP session lifespan tracking (IPv4/IPv6), struct field access, bswap, ntop, 3 maps",
+        "name": "tcplife",
+        "rejit": null,
+        "summary": {
+          "avg_ns_delta_pct": null,
+          "baseline_status": "skipped",
+          "cpu_baseline": null,
+          "cpu_delta_pct": null,
+          "cpu_rejit": null,
+          "description": "TCP session lifespan tracking (IPv4/IPv6), struct field access, bswap, ntop, 3 maps",
+          "name": "tcplife",
+          "note": "binary not found in /home/yunwei37/workspace/bpf-benchmark/runner/repos/bcc/libbpf-tools",
+          "rejit_avg_ns": null,
+          "rejit_status": null,
+          "sites": 0,
+          "speedup": null,
+          "stock_avg_ns": null,
+          "workload_kind": "tcp_connect",
+          "workload_ops_baseline": null,
+          "workload_ops_delta_pct": null,
+          "workload_ops_rejit": null
+        },
+        "tool_binary": null
+      },
+      {
+        "baseline": {
+          "measurement": null,
+          "phase": "baseline",
+          "process": {},
+          "prog_ids": [],
+          "programs": [],
+          "reason": "binary 'biosnoop' not found in /home/yunwei37/workspace/bpf-benchmark/runner/repos/bcc/libbpf-tools",
+          "scan_results": {},
+          "site_totals": {
+            "cmov_sites": 0,
+            "lea_sites": 0,
+            "rotate_sites": 0,
+            "total_sites": 0,
+            "wide_sites": 0
+          },
+          "status": "skipped"
+        },
+        "description": "Block I/O per-request latency tracing with disk/sector maps",
+        "name": "biosnoop",
+        "rejit": null,
+        "summary": {
+          "avg_ns_delta_pct": null,
+          "baseline_status": "skipped",
+          "cpu_baseline": null,
+          "cpu_delta_pct": null,
+          "cpu_rejit": null,
+          "description": "Block I/O per-request latency tracing with disk/sector maps",
+          "name": "biosnoop",
+          "note": "binary not found in /home/yunwei37/workspace/bpf-benchmark/runner/repos/bcc/libbpf-tools",
+          "rejit_avg_ns": null,
+          "rejit_status": null,
+          "sites": 0,
+          "speedup": null,
+          "stock_avg_ns": null,
+          "workload_kind": "dd_read",
+          "workload_ops_baseline": null,
+          "workload_ops_delta_pct": null,
+          "workload_ops_rejit": null
+        },
+        "tool_binary": null
+      },
+      {
+        "baseline": {
+          "measurement": null,
+          "phase": "baseline",
+          "process": {},
+          "prog_ids": [],
+          "programs": [],
+          "reason": "binary 'runqlat' not found in /home/yunwei37/workspace/bpf-benchmark/runner/repos/bcc/libbpf-tools",
+          "scan_results": {},
+          "site_totals": {
+            "cmov_sites": 0,
+            "lea_sites": 0,
+            "rotate_sites": 0,
+            "total_sites": 0,
+            "wide_sites": 0
+          },
+          "status": "skipped"
+        },
+        "description": "Run-queue latency histogram via sched tracepoints (3 programs)",
+        "name": "runqlat",
+        "rejit": null,
+        "summary": {
+          "avg_ns_delta_pct": null,
+          "baseline_status": "skipped",
+          "cpu_baseline": null,
+          "cpu_delta_pct": null,
+          "cpu_rejit": null,
+          "description": "Run-queue latency histogram via sched tracepoints (3 programs)",
+          "name": "runqlat",
+          "note": "binary not found in /home/yunwei37/workspace/bpf-benchmark/runner/repos/bcc/libbpf-tools",
+          "rejit_avg_ns": null,
+          "rejit_status": null,
+          "sites": 0,
+          "speedup": null,
+          "stock_avg_ns": null,
+          "workload_kind": "scheduler",
+          "workload_ops_baseline": null,
+          "workload_ops_delta_pct": null,
+          "workload_ops_rejit": null
+        },
+        "tool_binary": null
+      },
+      {
+        "baseline": {
+          "measurement": null,
+          "phase": "baseline",
+          "process": {},
+          "prog_ids": [],
+          "programs": [],
+          "reason": "binary 'execsnoop' not found in /home/yunwei37/workspace/bpf-benchmark/runner/repos/bcc/libbpf-tools",
+          "scan_results": {},
+          "site_totals": {
+            "cmov_sites": 0,
+            "lea_sites": 0,
+            "rotate_sites": 0,
+            "total_sites": 0,
+            "wide_sites": 0
+          },
+          "status": "skipped"
+        },
+        "description": "Process exec tracing via tracepoints, argv map lookups",
+        "name": "execsnoop",
+        "rejit": null,
+        "summary": {
+          "avg_ns_delta_pct": null,
+          "baseline_status": "skipped",
+          "cpu_baseline": null,
+          "cpu_delta_pct": null,
+          "cpu_rejit": null,
+          "description": "Process exec tracing via tracepoints, argv map lookups",
+          "name": "execsnoop",
+          "note": "binary not found in /home/yunwei37/workspace/bpf-benchmark/runner/repos/bcc/libbpf-tools",
+          "rejit_avg_ns": null,
+          "rejit_status": null,
+          "sites": 0,
+          "speedup": null,
+          "stock_avg_ns": null,
+          "workload_kind": "exec_storm",
+          "workload_ops_baseline": null,
+          "workload_ops_delta_pct": null,
+          "workload_ops_rejit": null
+        },
+        "tool_binary": null
+      },
+      {
+        "baseline": {
+          "measurement": null,
+          "phase": "baseline",
+          "process": {},
+          "prog_ids": [],
+          "programs": [],
+          "reason": "binary 'opensnoop' not found in /home/yunwei37/workspace/bpf-benchmark/runner/repos/bcc/libbpf-tools",
+          "scan_results": {},
+          "site_totals": {
+            "cmov_sites": 0,
+            "lea_sites": 0,
+            "rotate_sites": 0,
+            "total_sites": 0,
+            "wide_sites": 0
+          },
+          "status": "skipped"
+        },
+        "description": "File open syscall tracing via tracepoints",
+        "name": "opensnoop",
+        "rejit": null,
+        "summary": {
+          "avg_ns_delta_pct": null,
+          "baseline_status": "skipped",
+          "cpu_baseline": null,
+          "cpu_delta_pct": null,
+          "cpu_rejit": null,
+          "description": "File open syscall tracing via tracepoints",
+          "name": "opensnoop",
+          "note": "binary not found in /home/yunwei37/workspace/bpf-benchmark/runner/repos/bcc/libbpf-tools",
+          "rejit_avg_ns": null,
+          "rejit_status": null,
+          "sites": 0,
+          "speedup": null,
+          "stock_avg_ns": null,
+          "workload_kind": "file_open",
+          "workload_ops_baseline": null,
+          "workload_ops_delta_pct": null,
+          "workload_ops_rejit": null
+        },
+        "tool_binary": null
+      },
+      {
+        "baseline": {
+          "measurement": null,
+          "phase": "baseline",
+          "process": {},
+          "prog_ids": [],
+          "programs": [],
+          "reason": "binary 'capable' not found in /home/yunwei37/workspace/bpf-benchmark/runner/repos/bcc/libbpf-tools",
+          "scan_results": {},
+          "site_totals": {
+            "cmov_sites": 0,
+            "lea_sites": 0,
+            "rotate_sites": 0,
+            "total_sites": 0,
+            "wide_sites": 0
+          },
+          "status": "skipped"
+        },
+        "description": "Capability call tracing via kprobe cap_capable, 41-entry string map",
+        "name": "capable",
+        "rejit": null,
+        "summary": {
+          "avg_ns_delta_pct": null,
+          "baseline_status": "skipped",
+          "cpu_baseline": null,
+          "cpu_delta_pct": null,
+          "cpu_rejit": null,
+          "description": "Capability call tracing via kprobe cap_capable, 41-entry string map",
+          "name": "capable",
+          "note": "binary not found in /home/yunwei37/workspace/bpf-benchmark/runner/repos/bcc/libbpf-tools",
+          "rejit_avg_ns": null,
+          "rejit_status": null,
+          "sites": 0,
+          "speedup": null,
+          "stock_avg_ns": null,
+          "workload_kind": "exec_storm",
+          "workload_ops_baseline": null,
+          "workload_ops_delta_pct": null,
+          "workload_ops_rejit": null
+        },
+        "tool_binary": null
+      },
+      {
+        "baseline": {
+          "measurement": null,
+          "phase": "baseline",
+          "process": {},
+          "prog_ids": [],
+          "programs": [],
+          "reason": "binary 'vfsstat' not found in /home/yunwei37/workspace/bpf-benchmark/runner/repos/bcc/libbpf-tools",
+          "scan_results": {},
+          "site_totals": {
+            "cmov_sites": 0,
+            "lea_sites": 0,
+            "rotate_sites": 0,
+            "total_sites": 0,
+            "wide_sites": 0
+          },
+          "status": "skipped"
+        },
+        "description": "VFS operation counters (read/write/open/create/fsync) via kprobes",
+        "name": "vfsstat",
+        "rejit": null,
+        "summary": {
+          "avg_ns_delta_pct": null,
+          "baseline_status": "skipped",
+          "cpu_baseline": null,
+          "cpu_delta_pct": null,
+          "cpu_rejit": null,
+          "description": "VFS operation counters (read/write/open/create/fsync) via kprobes",
+          "name": "vfsstat",
+          "note": "binary not found in /home/yunwei37/workspace/bpf-benchmark/runner/repos/bcc/libbpf-tools",
+          "rejit_avg_ns": null,
+          "rejit_status": null,
+          "sites": 0,
+          "speedup": null,
+          "stock_avg_ns": null,
+          "workload_kind": "dd_read",
+          "workload_ops_baseline": null,
+          "workload_ops_delta_pct": null,
+          "workload_ops_rejit": null
+        },
+        "tool_binary": null
+      },
+      {
+        "baseline": {
+          "measurement": null,
+          "phase": "baseline",
+          "process": {},
+          "prog_ids": [],
+          "programs": [],
+          "reason": "binary 'tcpconnect' not found in /home/yunwei37/workspace/bpf-benchmark/runner/repos/bcc/libbpf-tools",
+          "scan_results": {},
+          "site_totals": {
+            "cmov_sites": 0,
+            "lea_sites": 0,
+            "rotate_sites": 0,
+            "total_sites": 0,
+            "wide_sites": 0
+          },
+          "status": "skipped"
+        },
+        "description": "TCP connect tracing via tracepoints, IPv4/IPv6 support",
+        "name": "tcpconnect",
+        "rejit": null,
+        "summary": {
+          "avg_ns_delta_pct": null,
+          "baseline_status": "skipped",
+          "cpu_baseline": null,
+          "cpu_delta_pct": null,
+          "cpu_rejit": null,
+          "description": "TCP connect tracing via tracepoints, IPv4/IPv6 support",
+          "name": "tcpconnect",
+          "note": "binary not found in /home/yunwei37/workspace/bpf-benchmark/runner/repos/bcc/libbpf-tools",
+          "rejit_avg_ns": null,
+          "rejit_status": null,
+          "sites": 0,
+          "speedup": null,
+          "stock_avg_ns": null,
+          "workload_kind": "tcp_connect",
+          "workload_ops_baseline": null,
+          "workload_ops_delta_pct": null,
+          "workload_ops_rejit": null
+        },
+        "tool_binary": null
+      }
+    ],
+    "selected_tools": [
+      "tcplife",
+      "biosnoop",
+      "runqlat",
+      "execsnoop",
+      "opensnoop",
+      "capable",
+      "vfsstat",
+      "tcpconnect"
+    ],
+    "smoke": false,
+    "summary": {
+      "baseline_successes": 0,
+      "rejit_successes": 0,
+      "site_totals": {
+        "cmov_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 0,
+        "wide_sites": 0
+      },
+      "speedup_geomean": null,
+      "tools_with_sites": 0
+    },
+    "tools_dir": "/home/yunwei37/workspace/bpf-benchmark/runner/repos/bcc/libbpf-tools"
+  },
+  "run_type": "bcc",
+  "smoke": false,
+  "started_at": "2026-03-25T01:29:30.056231+00:00",
+  "status": "completed",
+  "suite": "e2e"
+}

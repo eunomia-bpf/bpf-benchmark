@@ -95,4 +95,5 @@ const struct bpf_kinsn bpf_rotate64_desc = {
 	.emit_arm64 = emit_rotate_arm64,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_rotate, "BpfReJIT kinsn: ROTATE (EXTR)");
+DEFINE_KINSN_V2_MODULE(bpf_rotate, "BpfReJIT kinsn: ROTATE (EXTR)",
+		       BPF_KINSN_DESC_ENTRY(bpf_rotate64_desc));

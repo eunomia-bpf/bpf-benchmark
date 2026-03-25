@@ -105,4 +105,5 @@ const struct bpf_kinsn bpf_select64_desc = {
 	.emit_arm64 = emit_select_arm64,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_select, "BpfReJIT kinsn: COND_SELECT (CSEL)");
+DEFINE_KINSN_V2_MODULE(bpf_select, "BpfReJIT kinsn: COND_SELECT (CSEL)",
+		       BPF_KINSN_DESC_ENTRY(bpf_select64_desc));

@@ -1,0 +1,21 @@
+{
+  "artifact_kind": "result_run",
+  "artifact_version": 1,
+  "case": "bpftrace",
+  "details_dir": "details",
+  "generated_at": "2026-03-25T02:22:04.464472+00:00",
+  "last_updated_at": "2026-03-25T02:22:04.464462+00:00",
+  "output_hint_json": "e2e/results/bpftrace_authoritative_20260325.json",
+  "output_hint_md": "e2e/results/bpftrace-real-e2e.md",
+  "output_hint_report_md": "docs/tmp/bpftrace-real-e2e-report.md",
+  "paper_summary": {
+    "case": "bpftrace",
+    "smoke": false,
+    "status": "running"
+  },
+  "run_type": "bpftrace",
+  "smoke": false,
+  "started_at": "2026-03-25T02:22:04.201398+00:00",
+  "status": "running",
+  "suite": "e2e"
+}

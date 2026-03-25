@@ -243,4 +243,7 @@ const struct bpf_kinsn bpf_endian_load64_desc = {
 	.emit_x86 = emit_endian64_x86,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_endian, "BpfReJIT kinsn: ENDIAN_LOAD");
+DEFINE_KINSN_V2_MODULE(bpf_endian, "BpfReJIT kinsn: ENDIAN_LOAD",
+		       BPF_KINSN_DESC_ENTRY(bpf_endian_load16_desc),
+		       BPF_KINSN_DESC_ENTRY(bpf_endian_load32_desc),
+		       BPF_KINSN_DESC_ENTRY(bpf_endian_load64_desc));
