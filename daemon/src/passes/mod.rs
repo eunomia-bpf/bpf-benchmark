@@ -15,6 +15,7 @@ pub use branch_flip::BranchFlipPass;
 pub use cond_select::CondSelectPass;
 pub use endian::EndianFusionPass;
 pub use extract::ExtractPass;
+pub use map_inline::MapInlinePass;
 pub use rotate::RotatePass;
 pub use spectre::SpectreMitigationPass;
 pub use wide_mem::WideMemPass;
@@ -50,6 +51,12 @@ pub struct PassRegistryEntry {
 /// `speculation_barrier` is excluded from the default pipeline but is available
 /// when explicitly requested via `--passes`.
 pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
+    PassRegistryEntry {
+        name: "map_inline",
+        description: "Inline array map lookups with constant keys",
+        aliases: &[],
+        make: || Box::new(MapInlinePass),
+    },
     PassRegistryEntry {
         name: "wide_mem",
         description: "Fuse byte-by-byte loads into wider memory accesses",
@@ -307,6 +314,12 @@ mod tests {
         let result = pm.run(&mut prog, &ctx).unwrap();
         assert!(result.program_changed);
         assert!(result.total_sites_applied >= 1);
+    }
+
+    #[test]
+    fn test_default_pipeline_starts_with_map_inline() {
+        let pm = build_default_pipeline();
+        assert_eq!(pm.pass_names().first().copied(), Some("map_inline"));
     }
 
     // ── HIGH #6: Real BPF bytecode pipeline tests ────────────────────

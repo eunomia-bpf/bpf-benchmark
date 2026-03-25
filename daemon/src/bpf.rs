@@ -13,6 +13,7 @@ use crate::insn::BpfInsn;
 // ── bpf_cmd values (from vendor/linux-framework/include/uapi/linux/bpf.h) ───
 // The enum starts at 0. We only define the commands we actually use.
 // Note: BPF_MAP_FREEZE=22 sits between BTF_GET_FD_BY_ID and BTF_GET_NEXT_ID.
+const BPF_MAP_LOOKUP_ELEM: u32 = 1;
 const BPF_PROG_GET_NEXT_ID: u32 = 11;
 const BPF_MAP_GET_NEXT_ID: u32 = 12;
 const BPF_PROG_GET_FD_BY_ID: u32 = 13;
@@ -63,6 +64,17 @@ struct AttrGetInfoByFd {
     info_len: u32,
     info: u64, // pointer
     _pad: [u8; 128 - 16],
+}
+
+/// Attr for BPF_MAP_LOOKUP_ELEM.
+#[repr(C)]
+struct AttrMapElem {
+    map_fd: u32,
+    _pad0: u32,
+    key: u64,
+    value: u64,
+    flags: u64,
+    _pad: [u8; 128 - 32],
 }
 
 /// Attr for BPF_PROG_REJIT — matches `bpf_attr.rejit`.
@@ -181,6 +193,44 @@ impl Default for BpfMapInfo {
     fn default() -> Self {
         // Safety: all-zero is valid for this repr(C) struct.
         unsafe { std::mem::zeroed() }
+    }
+}
+
+#[cfg(test)]
+#[derive(Clone, Debug, Default)]
+pub struct MockMapState {
+    pub info: BpfMapInfo,
+    pub frozen: bool,
+    pub values: std::collections::HashMap<Vec<u8>, Vec<u8>>,
+}
+
+#[cfg(test)]
+fn mock_maps() -> &'static std::sync::Mutex<std::collections::HashMap<u32, MockMapState>> {
+    static MOCK_MAPS: std::sync::OnceLock<
+        std::sync::Mutex<std::collections::HashMap<u32, MockMapState>>,
+    > = std::sync::OnceLock::new();
+    MOCK_MAPS.get_or_init(|| std::sync::Mutex::new(std::collections::HashMap::new()))
+}
+
+#[cfg(test)]
+fn mock_map_state(map_id: u32) -> Option<MockMapState> {
+    mock_maps().lock().ok()?.get(&map_id).cloned()
+}
+
+/// Install a mock map for daemon unit tests.
+#[cfg(test)]
+pub fn install_mock_map(map_id: u32, state: MockMapState) {
+    if let Ok(mut maps) = mock_maps().lock() {
+        maps.insert(map_id, state);
+    }
+}
+
+/// Clear all mock maps installed for daemon unit tests.
+#[cfg(test)]
+#[allow(dead_code)]
+pub fn clear_mock_maps() {
+    if let Ok(mut maps) = mock_maps().lock() {
+        maps.clear();
     }
 }
 
@@ -455,10 +505,63 @@ pub fn bpf_map_get_info(fd: RawFd) -> Result<BpfMapInfo> {
 
 /// Retrieve `bpf_map_info` and a best-effort frozen bit for a map ID.
 pub fn bpf_map_get_info_by_id(id: u32) -> Result<(BpfMapInfo, bool)> {
+    #[cfg(test)]
+    if let Some(state) = mock_map_state(id) {
+        return Ok((state.info, state.frozen));
+    }
+
     let fd = bpf_map_get_fd_by_id(id)?;
     let info = bpf_map_get_info(fd.as_raw_fd())?;
     let frozen = bpf_map_try_detect_frozen(fd.as_raw_fd());
     Ok((info, frozen))
+}
+
+/// Lookup a map element by fd and return the raw value bytes.
+pub fn bpf_map_lookup_elem(fd: RawFd, key: &[u8], value_size: usize) -> Result<Vec<u8>> {
+    let mut attr: AttrMapElem = zeroed_attr();
+    let mut value = vec![0u8; value_size];
+
+    attr.map_fd = fd as u32;
+    attr.key = key.as_ptr() as u64;
+    attr.value = value.as_mut_ptr() as u64;
+    attr.flags = 0;
+
+    let ret = unsafe {
+        sys_bpf(
+            BPF_MAP_LOOKUP_ELEM,
+            &mut attr as *mut _ as *mut u8,
+            std::mem::size_of::<AttrMapElem>() as u32,
+        )
+    };
+    if ret < 0 {
+        bail!(bpf_err("BPF_MAP_LOOKUP_ELEM"));
+    }
+
+    Ok(value)
+}
+
+/// Lookup a map element by map ID and return the raw value bytes.
+pub fn bpf_map_lookup_elem_by_id(map_id: u32, key: &[u8], value_size: usize) -> Result<Vec<u8>> {
+    #[cfg(test)]
+    if let Some(state) = mock_map_state(map_id) {
+        let value = state
+            .values
+            .get(key)
+            .cloned()
+            .with_context(|| format!("mock map {} missing key {:?}", map_id, key))?;
+        if value.len() != value_size {
+            bail!(
+                "mock map {} returned value size {}, expected {}",
+                map_id,
+                value.len(),
+                value_size
+            );
+        }
+        return Ok(value);
+    }
+
+    let fd = bpf_map_get_fd_by_id(map_id)?;
+    bpf_map_lookup_elem(fd.as_raw_fd(), key, value_size)
 }
 
 /// Open a file descriptor for the BPF BTF object with the given ID.

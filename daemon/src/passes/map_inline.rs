@@ -2,11 +2,19 @@
 //! Scan helpers for dynamic map inlining.
 #![cfg_attr(not(test), allow(dead_code))]
 
+use std::collections::{BTreeMap, HashSet};
+
+use crate::analysis::{BranchTargetAnalysis, MapInfoAnalysis};
+use crate::bpf;
 use crate::insn::*;
+use crate::pass::*;
 
 const BPF_ADD: u8 = 0x00;
 const BPF_PSEUDO_MAP_FD: u8 = 1;
 const HELPER_MAP_LOOKUP_ELEM: i32 = 1;
+
+/// Dynamic map inlining optimization pass.
+pub struct MapInlinePass;
 
 /// A `bpf_map_lookup_elem()` helper call and its map argument load.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -116,6 +124,352 @@ pub fn classify_r0_uses(insns: &[BpfInsn], call_pc: usize) -> R0UseClassificatio
     }
 
     classification
+}
+
+#[derive(Clone, Debug)]
+struct SiteRewrite {
+    skipped_pcs: HashSet<usize>,
+    replacements: BTreeMap<usize, Vec<BpfInsn>>,
+}
+
+impl BpfPass for MapInlinePass {
+    fn name(&self) -> &str {
+        "map_inline"
+    }
+
+    fn required_analyses(&self) -> Vec<&str> {
+        vec!["branch_targets", "map_info"]
+    }
+
+    fn run(
+        &self,
+        program: &mut BpfProgram,
+        analyses: &mut AnalysisCache,
+        _ctx: &PassContext,
+    ) -> anyhow::Result<PassResult> {
+        let bt = analyses.get(&BranchTargetAnalysis, program);
+        let map_info = analyses.get(&MapInfoAnalysis, program);
+        let mut skipped = Vec::new();
+        let mut rewrites = Vec::new();
+
+        for site in find_map_lookup_sites(&program.insns) {
+            let Some(map_ref) = map_info.reference_at_pc(site.map_load_pc) else {
+                skipped.push(SkipReason {
+                    pc: site.call_pc,
+                    reason: "map reference metadata unavailable".into(),
+                });
+                continue;
+            };
+            let Some(info) = map_ref.info.as_ref() else {
+                skipped.push(SkipReason {
+                    pc: site.call_pc,
+                    reason: "map info unavailable".into(),
+                });
+                continue;
+            };
+            if !info.is_inlineable_v1() {
+                skipped.push(SkipReason {
+                    pc: site.call_pc,
+                    reason: format!("map type {} not inlineable in v1", info.map_type),
+                });
+                continue;
+            }
+
+            let Some(key) = extract_constant_key(&program.insns, site.call_pc) else {
+                skipped.push(SkipReason {
+                    pc: site.call_pc,
+                    reason: "lookup key is not a constant stack materialization".into(),
+                });
+                continue;
+            };
+            if key.width as u32 != info.key_size {
+                skipped.push(SkipReason {
+                    pc: site.call_pc,
+                    reason: format!(
+                        "key width {} does not match map key size {}",
+                        key.width, info.key_size
+                    ),
+                });
+                continue;
+            }
+            if key.value >= info.max_entries as u64 {
+                skipped.push(SkipReason {
+                    pc: site.call_pc,
+                    reason: format!(
+                        "constant key {} out of range for max_entries {}",
+                        key.value, info.max_entries
+                    ),
+                });
+                continue;
+            }
+
+            let uses = classify_r0_uses(&program.insns, site.call_pc);
+            if uses.fixed_loads.is_empty() {
+                skipped.push(SkipReason {
+                    pc: site.call_pc,
+                    reason: "lookup result is not consumed by fixed-offset scalar loads".into(),
+                });
+                continue;
+            }
+            if !uses.all_fixed_loads() {
+                skipped.push(SkipReason {
+                    pc: site.call_pc,
+                    reason: "lookup result has non-load uses".into(),
+                });
+                continue;
+            }
+
+            let rewrite = match build_site_rewrite(program, &site, &key, &uses, info) {
+                Ok(Some(rewrite)) => rewrite,
+                Ok(None) => {
+                    skipped.push(SkipReason {
+                        pc: site.call_pc,
+                        reason: "failed to materialize replacement constants".into(),
+                    });
+                    continue;
+                }
+                Err(err) => {
+                    skipped.push(SkipReason {
+                        pc: site.call_pc,
+                        reason: format!("map lookup failed: {err:#}"),
+                    });
+                    continue;
+                }
+            };
+
+            if rewrite
+                .skipped_pcs
+                .iter()
+                .any(|&pc| pc < bt.is_target.len() && bt.is_target[pc])
+            {
+                skipped.push(SkipReason {
+                    pc: site.call_pc,
+                    reason: "lookup pattern contains a branch target".into(),
+                });
+                continue;
+            }
+
+            if rewrite
+                .replacements
+                .keys()
+                .any(|pc| rewrite.skipped_pcs.contains(pc))
+            {
+                skipped.push(SkipReason {
+                    pc: site.call_pc,
+                    reason: "internal rewrite overlap".into(),
+                });
+                continue;
+            }
+
+            rewrites.push(rewrite);
+        }
+
+        if rewrites.is_empty() {
+            return Ok(PassResult {
+                pass_name: self.name().into(),
+                changed: false,
+                sites_applied: 0,
+                sites_skipped: skipped,
+                diagnostics: vec![],
+                ..Default::default()
+            });
+        }
+
+        let mut skip_pcs = HashSet::new();
+        let mut replacements: BTreeMap<usize, Vec<BpfInsn>> = BTreeMap::new();
+        let mut applied = 0usize;
+
+        for rewrite in rewrites {
+            let conflict = rewrite
+                .skipped_pcs
+                .iter()
+                .any(|pc| replacements.contains_key(pc))
+                || rewrite.replacements.keys().any(|pc| skip_pcs.contains(pc))
+                || rewrite
+                    .replacements
+                    .keys()
+                    .any(|pc| replacements.contains_key(pc))
+                || rewrite.skipped_pcs.iter().any(|pc| skip_pcs.contains(pc));
+            if conflict {
+                skipped.push(SkipReason {
+                    pc: rewrite.replacements.keys().next().copied().unwrap_or(0),
+                    reason: "overlapping map inline rewrite".into(),
+                });
+                continue;
+            }
+
+            skip_pcs.extend(rewrite.skipped_pcs);
+            replacements.extend(rewrite.replacements);
+            applied += 1;
+        }
+
+        if applied == 0 {
+            return Ok(PassResult {
+                pass_name: self.name().into(),
+                changed: false,
+                sites_applied: 0,
+                sites_skipped: skipped,
+                diagnostics: vec![],
+                ..Default::default()
+            });
+        }
+
+        let orig_len = program.insns.len();
+        let mut new_insns = Vec::with_capacity(orig_len);
+        let mut addr_map = vec![0usize; orig_len + 1];
+        let mut pc = 0usize;
+
+        while pc < orig_len {
+            addr_map[pc] = new_insns.len();
+
+            if let Some(replacement) = replacements.get(&pc) {
+                new_insns.extend_from_slice(replacement);
+                pc += 1;
+                continue;
+            }
+
+            if skip_pcs.contains(&pc) {
+                pc += 1;
+                continue;
+            }
+
+            let insn = program.insns[pc];
+            new_insns.push(insn);
+            if insn.is_ldimm64() && pc + 1 < orig_len {
+                pc += 1;
+                addr_map[pc] = new_insns.len();
+                new_insns.push(program.insns[pc]);
+            }
+            pc += 1;
+        }
+        addr_map[orig_len] = new_insns.len();
+
+        super::utils::fixup_all_branches(&mut new_insns, &program.insns, &addr_map);
+
+        program.insns = new_insns;
+        program.remap_annotations(&addr_map);
+        program.log_transform(TransformEntry {
+            sites_applied: applied,
+        });
+
+        Ok(PassResult {
+            pass_name: self.name().into(),
+            changed: true,
+            sites_applied: applied,
+            sites_skipped: skipped,
+            diagnostics: vec![],
+            ..Default::default()
+        })
+    }
+}
+
+fn build_site_rewrite(
+    program: &BpfProgram,
+    site: &MapLookupSite,
+    key: &ConstantKey,
+    uses: &R0UseClassification,
+    info: &crate::analysis::MapInfo,
+) -> anyhow::Result<Option<SiteRewrite>> {
+    let value = bpf::bpf_map_lookup_elem_by_id(
+        info.map_id,
+        &encode_key_bytes(key.value, info.key_size as usize),
+        info.value_size as usize,
+    )?;
+
+    let mut skipped_pcs = HashSet::new();
+    skipped_pcs.insert(site.call_pc);
+    skipped_pcs.insert(site.map_load_pc);
+    skipped_pcs.insert(site.map_load_pc + 1);
+    skipped_pcs.insert(key.store_pc);
+    skipped_pcs.insert(key.r2_mov_pc);
+    skipped_pcs.insert(key.r2_add_pc);
+    if let Some(source_imm_pc) = key.source_imm_pc {
+        skipped_pcs.insert(source_imm_pc);
+    }
+
+    let mut replacements = BTreeMap::new();
+    for load in &uses.fixed_loads {
+        let scalar = read_scalar_from_value(&value, load.offset, load.size).ok_or_else(|| {
+            anyhow::anyhow!(
+                "map value read out of bounds for load pc {} (offset {}, size {})",
+                load.pc,
+                load.offset,
+                load.size
+            )
+        })?;
+        replacements.insert(load.pc, emit_constant_load(load.dst_reg, scalar, load.size));
+    }
+
+    if replacements.is_empty() {
+        return Ok(None);
+    }
+
+    // The raw PCs we remove must be exactly the lookup pattern. If unrelated
+    // instructions are interleaved, skip the site rather than deleting them.
+    let min_removed_pc = skipped_pcs.iter().min().copied().unwrap_or(site.call_pc);
+    let max_removed_pc = skipped_pcs.iter().max().copied().unwrap_or(site.call_pc);
+    if skipped_pcs.len() != max_removed_pc - min_removed_pc + 1 {
+        return Ok(None);
+    }
+
+    // Do not remove the instruction stream past the lookup call itself.
+    if max_removed_pc != site.call_pc {
+        return Ok(None);
+    }
+
+    // All removed PCs must be within bounds.
+    if skipped_pcs.iter().any(|&pc| pc >= program.insns.len()) {
+        return Ok(None);
+    }
+
+    Ok(Some(SiteRewrite {
+        skipped_pcs,
+        replacements,
+    }))
+}
+
+fn encode_key_bytes(value: u64, key_size: usize) -> Vec<u8> {
+    value.to_le_bytes()[..key_size].to_vec()
+}
+
+fn read_scalar_from_value(value: &[u8], offset: i16, size: u8) -> Option<u64> {
+    if offset < 0 {
+        return None;
+    }
+    let width = size_in_bytes(size)? as usize;
+    let offset = offset as usize;
+    if offset + width > value.len() {
+        return None;
+    }
+
+    let mut buf = [0u8; 8];
+    buf[..width].copy_from_slice(&value[offset..offset + width]);
+    Some(u64::from_le_bytes(buf))
+}
+
+fn emit_constant_load(dst_reg: u8, value: u64, size: u8) -> Vec<BpfInsn> {
+    if size == BPF_DW || value > i32::MAX as u64 {
+        return emit_ldimm64(dst_reg, value);
+    }
+
+    vec![BpfInsn::mov64_imm(dst_reg, value as i32)]
+}
+
+fn emit_ldimm64(dst_reg: u8, value: u64) -> Vec<BpfInsn> {
+    vec![
+        BpfInsn {
+            code: BPF_LD | BPF_DW | BPF_IMM,
+            regs: BpfInsn::make_regs(dst_reg, 0),
+            off: 0,
+            imm: value as u32 as i32,
+        },
+        BpfInsn {
+            code: 0,
+            regs: 0,
+            off: 0,
+            imm: (value >> 32) as u32 as i32,
+        },
+    ]
 }
 
 fn find_map_load_for_call(insns: &[BpfInsn], call_pc: usize) -> Option<usize> {
@@ -291,6 +645,11 @@ fn insn_defines_reg(insn: &BpfInsn, reg: u8) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::collections::HashMap;
+
+    use crate::analysis::{BranchTargetAnalysis, MapInfoAnalysis};
+    use crate::bpf::{install_mock_map, BpfMapInfo, MockMapState};
+    use crate::pass::{PassContext, PassManager};
 
     fn ld_imm64(dst: u8, src: u8, imm: i32) -> [BpfInsn; 2] {
         [
@@ -343,6 +702,43 @@ mod tests {
             off,
             imm,
         }
+    }
+
+    fn exit_insn() -> BpfInsn {
+        BpfInsn {
+            code: BPF_JMP | BPF_EXIT,
+            regs: 0,
+            off: 0,
+            imm: 0,
+        }
+    }
+
+    fn install_array_map(map_id: u32, value: Vec<u8>) {
+        let mut info = BpfMapInfo::default();
+        info.map_type = 2;
+        info.id = map_id;
+        info.key_size = 4;
+        info.value_size = value.len() as u32;
+        info.max_entries = 8;
+
+        let mut values = HashMap::new();
+        values.insert(1u32.to_le_bytes().to_vec(), value);
+        install_mock_map(
+            map_id,
+            MockMapState {
+                info,
+                frozen: false,
+                values,
+            },
+        );
+    }
+
+    fn run_map_inline_pass(program: &mut BpfProgram) -> PipelineResult {
+        let mut pm = PassManager::new();
+        pm.register_analysis(BranchTargetAnalysis);
+        pm.register_analysis(MapInfoAnalysis);
+        pm.add_pass(MapInlinePass);
+        pm.run(program, &PassContext::test_default()).unwrap()
     }
 
     #[test]
@@ -462,5 +858,106 @@ mod tests {
         assert_eq!(uses.fixed_loads.len(), 1);
         assert_eq!(uses.other_uses, vec![1, 2]);
         assert!(!uses.all_fixed_loads());
+    }
+
+    #[test]
+    fn map_inline_pass_rewrites_lookup_and_scalar_loads() {
+        install_array_map(101, vec![7, 0, 0, 0, 0xaa, 0, 0, 0]);
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let mut program = BpfProgram::new(vec![
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            BpfInsn::ldx_mem(BPF_B, 7, 0, 4),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ]);
+        program.set_map_ids(vec![101]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(
+            result.program_changed,
+            "skip reasons: {:?}",
+            result.pass_results[0].sites_skipped
+        );
+        assert_eq!(result.total_sites_applied, 1);
+        assert_eq!(
+            program.insns,
+            vec![
+                BpfInsn::mov64_imm(6, 7),
+                BpfInsn::mov64_imm(7, 0xaa),
+                BpfInsn::mov64_imm(0, 0),
+                exit_insn(),
+            ]
+        );
+    }
+
+    #[test]
+    fn map_inline_pass_skips_null_checked_lookup_for_step3() {
+        install_array_map(102, vec![7, 0, 0, 0, 0xaa, 0, 0, 0]);
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let original = vec![
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            jeq_imm(0, 0, 1),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ];
+        let mut program = BpfProgram::new(original.clone());
+        program.set_map_ids(vec![102]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(!result.program_changed);
+        assert_eq!(program.insns, original);
+        assert_eq!(result.pass_results[0].sites_applied, 0);
+        assert!(result.pass_results[0]
+            .sites_skipped
+            .iter()
+            .any(|skip| skip.reason.contains("non-load uses")));
+    }
+
+    #[test]
+    fn map_inline_pass_emits_ldimm64_for_wide_constants() {
+        install_array_map(103, 0x1_0000_0000u64.to_le_bytes().to_vec());
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let mut program = BpfProgram::new(vec![
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_DW, 6, 0, 0),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ]);
+        program.set_map_ids(vec![103]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(
+            result.program_changed,
+            "skip reasons: {:?}",
+            result.pass_results[0].sites_skipped
+        );
+        assert_eq!(program.insns.len(), 4);
+        assert!(program.insns[0].is_ldimm64());
+        assert_eq!(program.insns[0].dst_reg(), 6);
+        assert_eq!(program.insns[0].imm as u32 as u64, 0);
+        assert_eq!(program.insns[1].imm as u32 as u64, 1);
     }
 }
