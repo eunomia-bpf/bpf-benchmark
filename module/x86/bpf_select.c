@@ -114,6 +114,12 @@ static int emit_select_x86(u8 *image, u32 *off, bool emit,
 	    !kinsn_x86_reg_valid(false_reg) || !kinsn_x86_reg_valid(cond_reg))
 		return -EINVAL;
 
+	if (true_reg == false_reg) {
+		if (dst_reg != true_reg)
+			emit_mov_rr(buf, &len, dst_reg, true_reg);
+		goto out;
+	}
+
 	if (dst_reg != false_reg && dst_reg != true_reg)
 		emit_mov_rr(buf, &len, dst_reg, false_reg);
 
@@ -123,6 +129,7 @@ static int emit_select_x86(u8 *image, u32 *off, bool emit,
 	else
 		emit_cmov_rr(buf, &len, dst_reg, true_reg, 0x45);
 
+out:
 	if (emit)
 		memcpy(image + *off, buf, len);
 	*off += len;

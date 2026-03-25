@@ -171,8 +171,6 @@ static int emit_endian_load16_arm64(u32 *image, int *idx, bool emit,
 	if (emit) {
 		int i;
 
-		if (!image)
-			return -EINVAL;
 		for (i = 0; i < 3; i++)
 			image[*idx + i] = cpu_to_le32(insns[i]);
 	}
@@ -213,8 +211,6 @@ static int emit_endian_load32_arm64(u32 *image, int *idx, bool emit,
 	if (emit) {
 		int i;
 
-		if (!image)
-			return -EINVAL;
 		for (i = 0; i < 2; i++)
 			image[*idx + i] = cpu_to_le32(insns[i]);
 	}
@@ -255,8 +251,6 @@ static int emit_endian_load64_arm64(u32 *image, int *idx, bool emit,
 	if (emit) {
 		int i;
 
-		if (!image)
-			return -EINVAL;
 		for (i = 0; i < 2; i++)
 			image[*idx + i] = cpu_to_le32(insns[i]);
 	}
