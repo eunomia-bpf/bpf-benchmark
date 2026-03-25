@@ -7,10 +7,12 @@
 
 static __always_inline int decode_endian_payload(u64 payload,
 						 u8 *dst_reg,
-						 u8 *base_reg)
+						 u8 *base_reg,
+						 s16 *offset)
 {
 	*dst_reg = kinsn_payload_reg(payload, 0);
 	*base_reg = kinsn_payload_reg(payload, 4);
+	*offset = kinsn_payload_s16(payload, 8);
 
 	if (*dst_reg > BPF_REG_10 || *base_reg > BPF_REG_10)
 		return -EINVAL;
@@ -21,20 +23,43 @@ static __always_inline int decode_endian_payload(u64 payload,
 static int instantiate_endian(u64 payload, struct bpf_insn *insn_buf, u8 size)
 {
 	u8 dst_reg, base_reg;
+	u8 bits;
+	s16 offset;
 	int err;
 
-	err = decode_endian_payload(payload, &dst_reg, &base_reg);
+	err = decode_endian_payload(payload, &dst_reg, &base_reg, &offset);
 	if (err)
 		return err;
+	bits = kinsn_bpf_size_bits(size);
+	if (!bits)
+		return -EINVAL;
 
-	insn_buf[0] = BPF_LDX_MEM(size, dst_reg, base_reg, 0);
-	insn_buf[1] = BPF_BSWAP(dst_reg, size * 8);
+	insn_buf[0] = BPF_LDX_MEM(size, dst_reg, base_reg, offset);
+	insn_buf[1] = BPF_BSWAP(dst_reg, bits);
 	return 2;
 }
 
-static inline u32 a64_ldrh(u8 rt, u8 rn)
+static inline bool a64_scaled_uoff_ok(s16 offset, u8 shift)
 {
-	return 0x79400000U | ((u32)rn << 5) | (u32)rt;
+	return offset >= 0 && offset <= (0x0fff << shift) &&
+	       !(offset & ((1 << shift) - 1));
+}
+
+static inline bool a64_unscaled_soff_ok(s16 offset)
+{
+	return offset >= -256 && offset <= 255;
+}
+
+static inline u32 a64_ldrh(u8 rt, u8 rn, s16 offset)
+{
+	if (a64_scaled_uoff_ok(offset, 1))
+		return 0x79400000U |
+		       ((((u32)offset) >> 1) << 10) |
+		       ((u32)rn << 5) | (u32)rt;
+
+	return 0x78400000U |
+	       ((((u32)offset) & 0x1ffU) << 12) |
+	       ((u32)rn << 5) | (u32)rt;
 }
 
 /*
@@ -42,9 +67,16 @@ static inline u32 a64_ldrh(u8 rt, u8 rn)
  *   10 111 0 01 01 imm12(0) Rn Rt
  *   = 0xB9400000 | (Rn << 5) | Rt
  */
-static inline u32 a64_ldr_w(u8 rt, u8 rn)
+static inline u32 a64_ldr_w(u8 rt, u8 rn, s16 offset)
 {
-	return 0xB9400000U | ((u32)rn << 5) | (u32)rt;
+	if (a64_scaled_uoff_ok(offset, 2))
+		return 0xB9400000U |
+		       ((((u32)offset) >> 2) << 10) |
+		       ((u32)rn << 5) | (u32)rt;
+
+	return 0xB8400000U |
+	       ((((u32)offset) & 0x1ffU) << 12) |
+	       ((u32)rn << 5) | (u32)rt;
 }
 
 /*
@@ -52,9 +84,16 @@ static inline u32 a64_ldr_w(u8 rt, u8 rn)
  *   11 111 0 01 01 imm12(0) Rn Rt
  *   = 0xF9400000 | (Rn << 5) | Rt
  */
-static inline u32 a64_ldr_x(u8 rt, u8 rn)
+static inline u32 a64_ldr_x(u8 rt, u8 rn, s16 offset)
 {
-	return 0xF9400000U | ((u32)rn << 5) | (u32)rt;
+	if (a64_scaled_uoff_ok(offset, 3))
+		return 0xF9400000U |
+		       ((((u32)offset) >> 3) << 10) |
+		       ((u32)rn << 5) | (u32)rt;
+
+	return 0xF8400000U |
+	       ((((u32)offset) & 0x1ffU) << 12) |
+	       ((u32)rn << 5) | (u32)rt;
 }
 
 /*
@@ -100,10 +139,11 @@ static inline u32 a64_and_imm_0xffff(u8 rd, u8 rn)
 }
 
 static int emit_endian_load16_arm64(u32 *image, int *idx, bool emit,
-				    u64 payload, struct bpf_prog *prog)
+				    u64 payload, const struct bpf_prog *prog)
 {
 	u32 insns[3];
 	u8 dst_reg, base_reg;
+	s16 offset;
 	int err;
 
 	if (!idx)
@@ -113,16 +153,18 @@ static int emit_endian_load16_arm64(u32 *image, int *idx, bool emit,
 
 	(void)prog;
 
-	err = decode_endian_payload(payload, &dst_reg, &base_reg);
+	err = decode_endian_payload(payload, &dst_reg, &base_reg, &offset);
 	if (err)
 		return err;
+	if (!a64_scaled_uoff_ok(offset, 1) && !a64_unscaled_soff_ok(offset))
+		return -EINVAL;
 
 	dst_reg = kinsn_arm64_reg(dst_reg);
 	base_reg = kinsn_arm64_reg(base_reg);
 	if (dst_reg == 0xff || base_reg == 0xff)
 		return -EINVAL;
 
-	insns[0] = a64_ldrh(dst_reg, base_reg);
+	insns[0] = a64_ldrh(dst_reg, base_reg, offset);
 	insns[1] = a64_rev16_w(dst_reg, dst_reg);
 	insns[2] = a64_and_imm_0xffff(dst_reg, dst_reg);
 
@@ -140,10 +182,11 @@ static int emit_endian_load16_arm64(u32 *image, int *idx, bool emit,
 }
 
 static int emit_endian_load32_arm64(u32 *image, int *idx, bool emit,
-				    u64 payload, struct bpf_prog *prog)
+				    u64 payload, const struct bpf_prog *prog)
 {
 	u32 insns[2];
 	u8 dst_reg, base_reg;
+	s16 offset;
 	int err;
 
 	if (!idx)
@@ -153,16 +196,18 @@ static int emit_endian_load32_arm64(u32 *image, int *idx, bool emit,
 
 	(void)prog;
 
-	err = decode_endian_payload(payload, &dst_reg, &base_reg);
+	err = decode_endian_payload(payload, &dst_reg, &base_reg, &offset);
 	if (err)
 		return err;
+	if (!a64_scaled_uoff_ok(offset, 2) && !a64_unscaled_soff_ok(offset))
+		return -EINVAL;
 
 	dst_reg = kinsn_arm64_reg(dst_reg);
 	base_reg = kinsn_arm64_reg(base_reg);
 	if (dst_reg == 0xff || base_reg == 0xff)
 		return -EINVAL;
 
-	insns[0] = a64_ldr_w(dst_reg, base_reg);
+	insns[0] = a64_ldr_w(dst_reg, base_reg, offset);
 	insns[1] = a64_rev_w(dst_reg, dst_reg);
 
 	if (emit) {
@@ -179,10 +224,11 @@ static int emit_endian_load32_arm64(u32 *image, int *idx, bool emit,
 }
 
 static int emit_endian_load64_arm64(u32 *image, int *idx, bool emit,
-				    u64 payload, struct bpf_prog *prog)
+				    u64 payload, const struct bpf_prog *prog)
 {
 	u32 insns[2];
 	u8 dst_reg, base_reg;
+	s16 offset;
 	int err;
 
 	if (!idx)
@@ -192,16 +238,18 @@ static int emit_endian_load64_arm64(u32 *image, int *idx, bool emit,
 
 	(void)prog;
 
-	err = decode_endian_payload(payload, &dst_reg, &base_reg);
+	err = decode_endian_payload(payload, &dst_reg, &base_reg, &offset);
 	if (err)
 		return err;
+	if (!a64_scaled_uoff_ok(offset, 3) && !a64_unscaled_soff_ok(offset))
+		return -EINVAL;
 
 	dst_reg = kinsn_arm64_reg(dst_reg);
 	base_reg = kinsn_arm64_reg(base_reg);
 	if (dst_reg == 0xff || base_reg == 0xff)
 		return -EINVAL;
 
-	insns[0] = a64_ldr_x(dst_reg, base_reg);
+	insns[0] = a64_ldr_x(dst_reg, base_reg, offset);
 	insns[1] = a64_rev_x(dst_reg, dst_reg);
 
 	if (emit) {
@@ -234,7 +282,6 @@ static int instantiate_endian64(u64 payload, struct bpf_insn *insn_buf)
 
 const struct bpf_kinsn bpf_endian_load16_desc = {
 	.owner = THIS_MODULE,
-	.api_version = 1,
 	.max_insn_cnt = 2,
 	.max_emit_bytes = 12,
 	.instantiate_insn = instantiate_endian16,
@@ -243,7 +290,6 @@ const struct bpf_kinsn bpf_endian_load16_desc = {
 
 const struct bpf_kinsn bpf_endian_load32_desc = {
 	.owner = THIS_MODULE,
-	.api_version = 1,
 	.max_insn_cnt = 2,
 	.max_emit_bytes = 8,
 	.instantiate_insn = instantiate_endian32,
@@ -252,7 +298,6 @@ const struct bpf_kinsn bpf_endian_load32_desc = {
 
 const struct bpf_kinsn bpf_endian_load64_desc = {
 	.owner = THIS_MODULE,
-	.api_version = 1,
 	.max_insn_cnt = 2,
 	.max_emit_bytes = 8,
 	.instantiate_insn = instantiate_endian64,

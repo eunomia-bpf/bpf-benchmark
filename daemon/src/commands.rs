@@ -244,6 +244,47 @@ fn attribute_verifier_failure(
     candidate.map(|s| s.to_string())
 }
 
+fn verifier_log_looks_complete(verifier_log_text: &str) -> bool {
+    verifier_log_text.contains("\nprocessed ")
+        || verifier_log_text.contains("\nSCC exit")
+        || verifier_log_text.lines().any(|line| line.trim() == "safe")
+}
+
+fn should_treat_as_verifier_rejection(err_msg: &str, verifier_log_text: &str) -> bool {
+    if verifier_log_text.is_empty() {
+        return false;
+    }
+
+    let first_line = err_msg.lines().next().unwrap_or_default().to_ascii_lowercase();
+    if first_line.contains("no space left on device")
+        || first_line.contains("out of memory")
+        || first_line.contains("operation not supported")
+    {
+        return false;
+    }
+
+    !verifier_log_looks_complete(verifier_log_text)
+}
+
+fn should_retry_post_verify_rejit_failure(err_msg: &str, verifier_log_text: &str) -> bool {
+    if !verifier_log_looks_complete(verifier_log_text) {
+        return false;
+    }
+
+    let first_line = err_msg.lines().next().unwrap_or_default().to_ascii_lowercase();
+    first_line.contains("no space left on device")
+        || first_line.contains("argument list too long")
+        || first_line.contains("out of memory")
+}
+
+fn attribute_post_verify_rejit_failure(passes: &[PassDetail]) -> Option<String> {
+    passes
+        .iter()
+        .rev()
+        .find(|pass| pass.changed)
+        .map(|pass| pass.pass_name.clone())
+}
+
 /// Rank program IDs by hotness using `HotnessRanking`.
 ///
 /// Collects a quick stats snapshot for each program, builds a `HotnessRanking`,
@@ -640,8 +681,7 @@ pub(crate) fn try_apply_one(
             .iter()
             .map(PassDetail::from)
             .collect();
-        let mut attempt_debug =
-            new_attempt_debug(pipeline_result.debug_traces.clone());
+        let mut attempt_debug = new_attempt_debug(pipeline_result.debug_traces.clone());
         let disabled_passes_sorted = sorted_strings(disabled_passes.iter().cloned());
 
         if !pipeline_result.program_changed {
@@ -815,9 +855,12 @@ pub(crate) fn try_apply_one(
                 }
 
                 let failed_pc = verifier_log::extract_failure_pc(log_text);
+                let verifier_rejected = should_treat_as_verifier_rejection(&err_msg, log_text);
+                let post_verify_retryable =
+                    should_retry_post_verify_rejit_failure(&err_msg, log_text);
 
                 // Attempt rollback if enabled.
-                if rollback_enabled && !log_text.is_empty() {
+                if rollback_enabled && verifier_rejected {
                     if let Some(ref failed_pass_name) =
                         attribute_verifier_failure(log_text, &pipeline_result.attribution)
                     {
@@ -846,17 +889,51 @@ pub(crate) fn try_apply_one(
                     }
                 }
 
+                if rollback_enabled && post_verify_retryable {
+                    if let Some(failed_pass_name) =
+                        attribute_post_verify_rejit_failure(&last_pass_details)
+                    {
+                        if !disabled_passes.contains(&failed_pass_name) {
+                            let first_line = err_msg.lines().next().unwrap_or_default();
+                            eprintln!(
+                                "    WARN: pass '{}' caused post-verifier REJIT failure ({}) for prog {} ({})",
+                                failed_pass_name,
+                                first_line,
+                                prog_id,
+                                info.name_str(),
+                            );
+                            eprintln!("          Disabling '{}', retrying...", failed_pass_name);
+
+                            attempts.push(AttemptRecord {
+                                attempt,
+                                disabled_passes: disabled_passes_sorted.clone(),
+                                result: "rejit_failed".to_string(),
+                                failure_pc: None,
+                                attributed_pass: Some(failed_pass_name.clone()),
+                                debug: attempt_debug,
+                            });
+
+                            disabled_passes.insert(failed_pass_name);
+                            continue;
+                        }
+                    }
+                }
+
                 // Cannot attribute or rollback disabled — record final attempt and fail.
                 attempts.push(AttemptRecord {
                     attempt,
                     disabled_passes: disabled_passes_sorted.clone(),
-                    result: "verifier_rejected".to_string(),
-                    failure_pc: failed_pc,
+                    result: if verifier_rejected {
+                        "verifier_rejected".to_string()
+                    } else {
+                        "rejit_failed".to_string()
+                    },
+                    failure_pc: if verifier_rejected { failed_pc } else { None },
                     attributed_pass: None,
                     debug: attempt_debug,
                 });
 
-                if !log_text.is_empty() {
+                if verifier_rejected && !log_text.is_empty() {
                     let parsed = verifier_log::parse_verifier_log(log_text);
                     eprintln!(
                         "    REJIT failed: verifier rejected with {} state snapshots",
@@ -931,6 +1008,7 @@ fn fmt_avg(value: Option<f64>) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::collections::HashMap;
 
     #[test]
     fn test_optimize_one_result_serialization() {
@@ -1203,6 +1281,94 @@ R2 invalid mem access 'scalar'
 ";
         let result = attribute_verifier_failure(log, &attribution);
         assert_eq!(result, Some("rotate".to_string()));
+    }
+
+    #[test]
+    fn test_verifier_log_completion_marker_detection() {
+        let log = "\
+10: R0=scalar
+55: safe
+processed 49965 insns (limit 1000000) max_states_per_insn 32 total_states 1318 peak_states 232 mark_read 0
+";
+        assert!(verifier_log_looks_complete(log));
+        assert!(!should_treat_as_verifier_rejection(
+            "BPF_PROG_REJIT: No space left on device (os error 28)",
+            log,
+        ));
+    }
+
+    #[test]
+    fn test_incomplete_verifier_log_still_treated_as_rejection() {
+        let log = "\
+35: R0=scalar R1=ctx()
+invalid func bpf_rotate64#12345
+";
+        assert!(!verifier_log_looks_complete(log));
+        assert!(should_treat_as_verifier_rejection(
+            "BPF_PROG_REJIT: Permission denied (os error 13)",
+            log,
+        ));
+    }
+
+    #[test]
+    fn test_complete_verifier_log_e2big_is_retryable_post_verify_failure() {
+        let log = "\
+10: R0=scalar
+55: safe
+processed 49965 insns (limit 1000000) max_states_per_insn 32 total_states 1318 peak_states 232 mark_read 0
+";
+        assert!(!should_treat_as_verifier_rejection(
+            "BPF_PROG_REJIT: Argument list too long (os error 7)",
+            log,
+        ));
+        assert!(should_retry_post_verify_rejit_failure(
+            "BPF_PROG_REJIT: Argument list too long (os error 7)",
+            log,
+        ));
+    }
+
+    #[test]
+    fn test_attribute_post_verify_rejit_failure_uses_last_changed_pass() {
+        let passes = vec![
+            PassDetail {
+                pass_name: "wide_mem".to_string(),
+                changed: false,
+                sites_applied: 0,
+                sites_skipped: 0,
+                skip_reasons: HashMap::new(),
+                insns_before: 100,
+                insns_after: 100,
+                insn_delta: 0,
+                diagnostics: vec![],
+            },
+            PassDetail {
+                pass_name: "extract".to_string(),
+                changed: true,
+                sites_applied: 2,
+                sites_skipped: 0,
+                skip_reasons: HashMap::new(),
+                insns_before: 100,
+                insns_after: 104,
+                insn_delta: 4,
+                diagnostics: vec![],
+            },
+            PassDetail {
+                pass_name: "endian_fusion".to_string(),
+                changed: true,
+                sites_applied: 3,
+                sites_skipped: 0,
+                skip_reasons: HashMap::new(),
+                insns_before: 104,
+                insns_after: 110,
+                insn_delta: 6,
+                diagnostics: vec![],
+            },
+        ];
+
+        assert_eq!(
+            attribute_post_verify_rejit_failure(&passes),
+            Some("endian_fusion".to_string())
+        );
     }
 
     /// Test build_pipeline: verify that pass selection works correctly.

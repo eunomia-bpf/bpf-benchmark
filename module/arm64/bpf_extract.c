@@ -50,7 +50,7 @@ static inline u32 a64_ubfm_x(u8 rd, u8 rn, u8 immr, u8 imms)
 }
 
 static int emit_extract_arm64(u32 *image, int *idx, bool emit,
-			      u64 payload, struct bpf_prog *prog)
+			      u64 payload, const struct bpf_prog *prog)
 {
 	u8 dst_reg, start, bit_len;
 	u32 insn;
@@ -80,7 +80,6 @@ static int emit_extract_arm64(u32 *image, int *idx, bool emit,
 
 const struct bpf_kinsn bpf_extract64_desc = {
 	.owner = THIS_MODULE,
-	.api_version = 1,
 	.max_insn_cnt = 2,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_extract,

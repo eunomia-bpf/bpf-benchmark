@@ -106,9 +106,7 @@ fn try_match_wide_mem_at(insns: &[BpfInsn], pc: usize) -> Option<RewriteSite> {
     for width in (2u32..=8).rev() {
         // Variant A: low-byte-first
         let len_a = 1 + 3 * (width as usize - 1);
-        if pc + len_a <= n
-            && match_wide_mem_low_first(insns, pc, dst, base, first_off, width)
-        {
+        if pc + len_a <= n && match_wide_mem_low_first(insns, pc, dst, base, first_off, width) {
             return Some(RewriteSite {
                 start_pc: pc,
                 old_len: len_a,
@@ -350,7 +348,6 @@ impl BpfPass for WideMemPass {
         "wide_mem"
     }
 
-
     fn required_analyses(&self) -> Vec<&str> {
         vec!["branch_targets", "liveness"]
     }
@@ -490,7 +487,9 @@ impl BpfPass for WideMemPass {
 
         program.insns = new_insns;
         program.remap_annotations(&addr_map);
-        program.log_transform(TransformEntry { sites_applied: applied });
+        program.log_transform(TransformEntry {
+            sites_applied: applied,
+        });
 
         Ok(PassResult {
             pass_name: self.name().into(),

@@ -98,7 +98,6 @@ impl BpfPass for ExtractPass {
         "extract"
     }
 
-
     fn required_analyses(&self) -> Vec<&str> {
         vec!["branch_targets"]
     }
@@ -225,7 +224,9 @@ impl BpfPass for ExtractPass {
 
         program.insns = new_insns;
         program.remap_annotations(&addr_map);
-        program.log_transform(TransformEntry { sites_applied: applied });
+        program.log_transform(TransformEntry {
+            sites_applied: applied,
+        });
 
         Ok(PassResult {
             pass_name: self.name().into(),
@@ -741,9 +742,7 @@ mod tests {
         let call_count = prog
             .insns
             .iter()
-            .filter(|i| {
-                i.is_call() && i.src_reg() == BPF_PSEUDO_KINSN_CALL && i.imm == 7777
-            })
+            .filter(|i| i.is_call() && i.src_reg() == BPF_PSEUDO_KINSN_CALL && i.imm == 7777)
             .count();
         assert_eq!(call_count, 2);
         assert!(prog.insns.last().unwrap().is_exit());

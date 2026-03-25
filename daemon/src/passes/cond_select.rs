@@ -115,7 +115,6 @@ impl BpfPass for CondSelectPass {
         "cond_select"
     }
 
-
     fn required_analyses(&self) -> Vec<&str> {
         vec!["branch_targets"]
     }
@@ -310,7 +309,9 @@ impl BpfPass for CondSelectPass {
 
         program.insns = new_insns;
         program.remap_annotations(&addr_map);
-        program.log_transform(TransformEntry { sites_applied: applied });
+        program.log_transform(TransformEntry {
+            sites_applied: applied,
+        });
 
         Ok(PassResult {
             pass_name: self.name().into(),
@@ -401,8 +402,8 @@ fn try_match_cond_select(insns: &[BpfInsn], pc: usize) -> Option<CondSelectSite>
                     None
                 };
                 let mov_true_dst = mov_true.dst_reg();
-                let cond_clobbered = mov_true_dst == jcc_cond_reg
-                    || jcc_src_used.is_some_and(|s| mov_true_dst == s);
+                let cond_clobbered =
+                    mov_true_dst == jcc_cond_reg || jcc_src_used.is_some_and(|s| mov_true_dst == s);
 
                 if !cond_clobbered {
                     return Some(CondSelectSite {

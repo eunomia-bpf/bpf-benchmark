@@ -170,6 +170,12 @@ static int sys_bpf(enum bpf_cmd cmd, union bpf_attr *attr, unsigned int size)
 #define BPF_MOV64_REG(DST, SRC) \
 	BPF_RAW_INSN(BPF_ALU64 | BPF_MOV | BPF_X, DST, SRC, 0, 0)
 
+#define BPF_LD_IMM64_RAW(DST, IMM) \
+	BPF_RAW_INSN(BPF_LD | BPF_DW | BPF_IMM, DST, 0, 0, \
+		     (__s32)((__u64)(IMM) & 0xffffffffULL)), \
+	BPF_RAW_INSN(0, 0, 0, 0, \
+		     (__s32)(((__u64)(IMM) >> 32) & 0xffffffffULL))
+
 #define BPF_ALU64_IMM(OP, DST, IMM) \
 	BPF_RAW_INSN(BPF_ALU64 | BPF_OP(OP) | BPF_K, DST, 0, 0, IMM)
 
@@ -735,6 +741,19 @@ static void patch_single_kinsn(struct bpf_insn *prog, size_t cnt, __u32 btf_id)
 	}
 }
 
+static void patch_all_kinsns(struct bpf_insn *prog, size_t cnt, __u32 btf_id)
+{
+	size_t i;
+
+	for (i = 0; i < cnt; i++) {
+		if (prog[i].code == (BPF_JMP | BPF_CALL) &&
+		    prog[i].src_reg == BPF_PSEUDO_KINSN_CALL) {
+			prog[i].imm = (__s32)btf_id;
+			prog[i].off = 1;
+		}
+	}
+}
+
 static int run_rejit_expect_success(const char *name,
 				    const struct bpf_insn *replacement,
 				    __u32 replacement_cnt,
@@ -994,6 +1013,28 @@ static int test_rejit_rotate_r5_preserved(void)
 					fd_array, ARRAY_SIZE(fd_array), 7);
 }
 
+static int test_rejit_rotate_restore_preserves_ldimm64_layout(void)
+{
+	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_ROTATE].btf_fd);
+	struct bpf_insn prog[] = {
+		BPF_MOV64_IMM(BPF_REG_1, 1),
+		BPF_KINSN_SIDECAR(KINSN_ROTATE_PAYLOAD(BPF_REG_5, BPF_REG_1, 1,
+							      BPF_REG_6)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_LD_IMM64_RAW(BPF_REG_7, 0x1122334455667788ULL),
+		BPF_MOV64_IMM(BPF_REG_1, 1),
+		BPF_KINSN_SIDECAR(KINSN_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_1, 1,
+							      BPF_REG_6)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_EXIT_INSN(),
+	};
+
+	patch_all_kinsns(prog, ARRAY_SIZE(prog), g_funcs[FUNC_ROTATE].btf_id);
+	return run_rejit_expect_success("rotate_restore_preserves_ldimm64_layout",
+					prog, ARRAY_SIZE(prog),
+					fd_array, ARRAY_SIZE(fd_array), 2);
+}
+
 static int test_rejit_rotate_invalid_tmp_rejected(void)
 {
 	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_ROTATE].btf_fd);
@@ -1066,6 +1107,24 @@ static int test_rejit_endian_apply(void)
 	return run_rejit_expect_success("endian_apply",
 					prog, ARRAY_SIZE(prog),
 					fd_array, ARRAY_SIZE(fd_array), 0x3412);
+}
+
+static int test_rejit_endian32_apply(void)
+{
+	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_ENDIAN].btf_fd);
+	struct bpf_insn prog[] = {
+		BPF_ST_MEM(BPF_W, BPF_REG_10, -4, 0x12345678),
+		BPF_MOV64_REG(BPF_REG_1, BPF_REG_10),
+		BPF_ALU64_IMM(BPF_ADD, BPF_REG_1, -4),
+		BPF_KINSN_SIDECAR(KINSN_ENDIAN_PAYLOAD(BPF_REG_0, BPF_REG_1)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_EXIT_INSN(),
+	};
+
+	patch_single_kinsn(prog, ARRAY_SIZE(prog), g_funcs[FUNC_ENDIAN32].btf_id);
+	return run_rejit_expect_success("endian32_apply",
+					prog, ARRAY_SIZE(prog),
+					fd_array, ARRAY_SIZE(fd_array), 0x78563412);
 }
 
 static int test_rejit_endian_arbitrary_regs(void)
@@ -1155,6 +1214,8 @@ int main(int argc, char **argv)
 		ret |= test_rejit_rotate_arbitrary_regs();
 	if (should_run_test(filter, "rotate_r5_preserved"))
 		ret |= test_rejit_rotate_r5_preserved();
+	if (should_run_test(filter, "rotate_restore_preserves_ldimm64_layout"))
+		ret |= test_rejit_rotate_restore_preserves_ldimm64_layout();
 #if defined(__x86_64__)
 	if (should_run_test(filter, "rotate_invalid_tmp_rejected"))
 		ret |= test_rejit_rotate_invalid_tmp_rejected();
@@ -1165,6 +1226,8 @@ int main(int argc, char **argv)
 		ret |= test_rejit_select_arbitrary_dst_reg();
 	if (should_run_test(filter, "endian_apply"))
 		ret |= test_rejit_endian_apply();
+	if (should_run_test(filter, "endian32_apply"))
+		ret |= test_rejit_endian32_apply();
 	if (should_run_test(filter, "endian_arbitrary_regs"))
 		ret |= test_rejit_endian_arbitrary_regs();
 	if (should_run_test(filter, "endian_invalid_access_rejected"))

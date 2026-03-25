@@ -82,7 +82,7 @@ static void emit_and_imm32(u8 *buf, u32 *len, u8 dst_reg, u32 imm32)
 }
 
 static int emit_extract_x86(u8 *image, u32 *off, bool emit,
-			    u64 payload, struct bpf_prog *prog)
+			    u64 payload, const struct bpf_prog *prog)
 {
 	u8 buf[16];
 	u8 dst_reg, start, bit_len;
@@ -116,7 +116,6 @@ static int emit_extract_x86(u8 *image, u32 *off, bool emit,
 
 const struct bpf_kinsn bpf_extract64_desc = {
 	.owner = THIS_MODULE,
-	.api_version = 1,
 	.max_insn_cnt = 2,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_extract,

@@ -22,6 +22,25 @@ static __always_inline u8 kinsn_payload_u8(u64 payload, u8 shift)
 	return (payload >> shift) & 0xff;
 }
 
+static __always_inline s16 kinsn_payload_s16(u64 payload, u8 shift)
+{
+	return (s16)((payload >> shift) & 0xffff);
+}
+
+static __always_inline u8 kinsn_bpf_size_bits(u8 size)
+{
+	switch (size) {
+	case BPF_H:
+		return 16;
+	case BPF_W:
+		return 32;
+	case BPF_DW:
+		return 64;
+	default:
+		return 0;
+	}
+}
+
 #ifdef CONFIG_X86_64
 static __always_inline u8 kinsn_x86_reg_code(u8 bpf_reg)
 {

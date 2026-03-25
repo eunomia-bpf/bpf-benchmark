@@ -61,7 +61,7 @@ static inline u32 a64_csel(u8 rd, u8 rn, u8 rm, u8 cond)
 }
 
 static int emit_select_arm64(u32 *image, int *idx, bool emit,
-			     u64 payload, struct bpf_prog *prog)
+			     u64 payload, const struct bpf_prog *prog)
 {
 	u8 dst_reg, true_reg, false_reg, cond_reg;
 	u32 tst_insn, csel_insn;
@@ -99,7 +99,6 @@ static int emit_select_arm64(u32 *image, int *idx, bool emit,
 
 const struct bpf_kinsn bpf_select64_desc = {
 	.owner = THIS_MODULE,
-	.api_version = 1,
 	.max_insn_cnt = 4,
 	.max_emit_bytes = 8,
 	.instantiate_insn = instantiate_select,

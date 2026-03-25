@@ -148,7 +148,9 @@ impl BpfPass for SpectreMitigationPass {
             program.insns = new_insns;
             program.remap_annotations(&addr_map);
 
-            program.log_transform(TransformEntry { sites_applied: insertions });
+            program.log_transform(TransformEntry {
+                sites_applied: insertions,
+            });
         }
 
         Ok(PassResult {

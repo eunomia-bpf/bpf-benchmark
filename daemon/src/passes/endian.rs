@@ -25,13 +25,12 @@ const BPF_ADD: u8 = 0x00;
 /// Also matches BPF_H (16-bit) and BPF_DW (64-bit) variants.
 ///
 /// Replacement:
-///   sidecar(dst, src) + call
-///   src += off; sidecar(dst, src) + call; src -= off
-///   dst = src; dst += off; sidecar(dst, dst) + call
+///   sidecar(dst, src, off) + call
 ///
-/// The pass stays packed-only; non-zero offsets are handled by materializing
-/// the effective address around the packed call instead of falling back to the
-/// legacy r1-r5 ABI.
+/// The payload carries the original memory offset directly. When a target
+/// cannot natively encode a given offset in its packed endian JIT path, the
+/// pass falls back to materializing the effective address around a zero-offset
+/// packed call instead of using any legacy call ABI.
 pub struct EndianFusionPass;
 
 /// An endian fusion site: a LDX_MEM immediately followed by ENDIAN_TO_BE
@@ -133,8 +132,26 @@ fn any_endian_kfunc_available(ctx: &PassContext) -> bool {
         || ctx.kinsn_registry.endian_load64_btf_id >= 0
 }
 
-fn endian_payload(dst_reg: u8, base_reg: u8) -> u64 {
-    (dst_reg as u64) | ((base_reg as u64) << 4)
+fn endian_payload(dst_reg: u8, base_reg: u8, offset: i16) -> u64 {
+    (dst_reg as u64) | ((base_reg as u64) << 4) | ((offset as u16 as u64) << 8)
+}
+
+fn offset_is_directly_encodable(arch: Arch, size: u8, offset: i16) -> bool {
+    match arch {
+        Arch::X86_64 => true,
+        Arch::Aarch64 => {
+            let shift = match size {
+                BPF_H => 1,
+                BPF_W => 2,
+                BPF_DW => 3,
+                _ => return false,
+            };
+            (offset >= 0
+                && offset <= (0x0fff << shift)
+                && (offset & ((1 << shift) - 1)) == 0)
+                || (-256..=255).contains(&offset)
+        }
+    }
 }
 
 fn emit_endian_fusion_call(
@@ -143,8 +160,11 @@ fn emit_endian_fusion_call(
     offset: i16,
     btf_id: i32,
     kfunc_off: i16,
+    arch: Arch,
+    size: u8,
 ) -> Vec<BpfInsn> {
-    let mut out = Vec::with_capacity(if offset == 0 {
+    let direct_offset = offset_is_directly_encodable(arch, size, offset);
+    let mut out = Vec::with_capacity(if direct_offset || offset == 0 {
         2
     } else if src_reg != dst_reg && src_reg != 10 {
         4
@@ -154,16 +174,23 @@ fn emit_endian_fusion_call(
         4
     });
 
-    // The current packed endian decoder consumes only (dst, base_reg) from
-    // the sidecar payload. For non-zero offsets, prefer to temporarily bias
-    // the original base register so verifier-proven pointer range information
-    // stays attached to the register used for the memory access.
+    if direct_offset {
+        out.extend_from_slice(&emit_packed_kinsn_call_with_off(
+            endian_payload(dst_reg, src_reg, offset),
+            btf_id,
+            kfunc_off,
+        ));
+        return out;
+    }
+
+    // Preserve packed transport even when the target cannot directly encode
+    // the original offset in its native JIT path.
     let base_reg = if offset == 0 {
         src_reg
     } else if src_reg != dst_reg && src_reg != 10 {
         out.push(BpfInsn::alu64_imm(BPF_ADD, src_reg, offset as i32));
         out.extend_from_slice(&emit_packed_kinsn_call_with_off(
-            endian_payload(dst_reg, src_reg),
+            endian_payload(dst_reg, src_reg, 0),
             btf_id,
             kfunc_off,
         ));
@@ -178,7 +205,7 @@ fn emit_endian_fusion_call(
     };
 
     out.extend_from_slice(&emit_packed_kinsn_call_with_off(
-        endian_payload(dst_reg, base_reg),
+        endian_payload(dst_reg, base_reg, 0),
         btf_id,
         kfunc_off,
     ));
@@ -189,7 +216,6 @@ impl BpfPass for EndianFusionPass {
     fn name(&self) -> &str {
         "endian_fusion"
     }
-
 
     fn required_analyses(&self) -> Vec<&str> {
         vec!["branch_targets"]
@@ -338,6 +364,8 @@ impl BpfPass for EndianFusionPass {
                     site.offset,
                     btf_id,
                     kfunc_off,
+                    ctx.platform.arch,
+                    site.size,
                 );
                 new_insns.extend_from_slice(&replacement);
 
@@ -366,7 +394,9 @@ impl BpfPass for EndianFusionPass {
 
         program.insns = new_insns;
         program.remap_annotations(&addr_map);
-        program.log_transform(TransformEntry { sites_applied: applied });
+        program.log_transform(TransformEntry {
+            sites_applied: applied,
+        });
 
         Ok(PassResult {
             pass_name: self.name().into(),
@@ -405,6 +435,12 @@ mod tests {
             off: 0,
             imm: size,
         }
+    }
+
+    fn sidecar_payload(insn: &BpfInsn) -> u64 {
+        (insn.dst_reg() as u64)
+            | (((insn.off as u16) as u64) << 4)
+            | (((insn.imm as u32) as u64) << 20)
     }
 
     fn jeq_imm(dst: u8, imm: i32, off: i16) -> BpfInsn {
@@ -621,8 +657,7 @@ mod tests {
 
     #[test]
     fn test_endian_fusion_pass_nonzero_offset() {
-        // Non-zero offsets stay packed-only by materializing the effective
-        // address around the sidecar+CALL pair without using the legacy ABI.
+        // Non-zero offsets are encoded directly in the packed payload on x86.
         let mut prog = make_program(vec![
             BpfInsn::ldx_mem(BPF_W, 2, 6, 12),
             endian_to_be(2, 32),
@@ -635,18 +670,11 @@ mod tests {
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
         assert!(result.changed);
-        assert_eq!(prog.insns.len(), 5);
-        assert_eq!(prog.insns[0].code, BPF_ALU64 | BPF_ADD | BPF_K);
-        assert_eq!(prog.insns[0].dst_reg(), 6);
-        assert_eq!(prog.insns[0].imm, 12);
-        assert!(prog.insns[1].is_kinsn_sidecar());
-        assert_eq!(prog.insns[1].dst_reg(), 2);
-        assert_eq!(prog.insns[1].off, 6);
-        assert_eq!(prog.insns[1].imm, 0);
-        assert!(prog.insns[2].is_call());
-        assert_eq!(prog.insns[3].code, BPF_ALU64 | BPF_ADD | BPF_K);
-        assert_eq!(prog.insns[3].dst_reg(), 6);
-        assert_eq!(prog.insns[3].imm, -12);
+        assert_eq!(prog.insns.len(), 3);
+        assert!(prog.insns[0].is_kinsn_sidecar());
+        assert_eq!(sidecar_payload(&prog.insns[0]), endian_payload(2, 6, 12));
+        assert!(prog.insns[1].is_call());
+        assert!(prog.insns[2].is_exit());
     }
 
     #[test]
@@ -852,9 +880,7 @@ mod tests {
         let call_count = prog
             .insns
             .iter()
-            .filter(|i| {
-                i.is_call() && i.src_reg() == BPF_PSEUDO_KINSN_CALL && i.imm == 8888
-            })
+            .filter(|i| i.is_call() && i.src_reg() == BPF_PSEUDO_KINSN_CALL && i.imm == 8888)
             .count();
         assert_eq!(call_count, 2);
         assert!(prog.insns.last().unwrap().is_exit());

@@ -67,7 +67,6 @@ impl BpfPass for BranchFlipPass {
         "branch_flip"
     }
 
-
     fn required_analyses(&self) -> Vec<&str> {
         vec!["branch_targets"]
     }
@@ -268,7 +267,9 @@ impl BpfPass for BranchFlipPass {
 
         program.insns = new_insns;
         program.remap_annotations(&addr_map);
-        program.log_transform(TransformEntry { sites_applied: applied });
+        program.log_transform(TransformEntry {
+            sites_applied: applied,
+        });
 
         Ok(PassResult {
             pass_name: self.name().into(),

@@ -114,7 +114,7 @@ VIRTME_HOSTFS_MODULE_ORDER := \
 	fs/overlayfs/overlay.o
 MICRO_BPF_STAMP      := $(MICRO_DIR)/programs/.build.stamp
 
-.PHONY: all runner micro daemon kernel kernel-build kernel-arm64 kernel-tests kinsn-modules virtme-hostfs-modules upstream-selftests-build \
+.PHONY: all runner micro daemon kernel kernel-build kernel-clean kernel-rebuild kernel-arm64 kernel-tests kinsn-modules virtme-hostfs-modules upstream-selftests-build \
 	corpus-fetch corpus-build-objects corpus-build \
 	daemon-tests python-tests check smoke validate \
 	vm-shell vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
@@ -125,7 +125,7 @@ MICRO_BPF_STAMP      := $(MICRO_DIR)/programs/.build.stamp
 
 # ── Help ───────────────────────────────────────────────────────────────────────
 help:
-	@echo "Build:  all runner micro daemon kernel kinsn-modules kernel-tests upstream-selftests-build kernel-arm64 cross-arm64"
+	@echo "Build:  all runner micro daemon kernel kernel-clean kernel-rebuild kinsn-modules kernel-tests upstream-selftests-build kernel-arm64 cross-arm64"
 	@echo "Repos:  corpus-fetch corpus-build-objects corpus-build REPOS=\"tracee tetragon ...\""
 	@echo "Test:   smoke daemon-tests python-tests check"
 	@echo "VM x86: vm-shell vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all validate"
@@ -159,6 +159,13 @@ daemon:
 	cargo build --release --manifest-path "$(DAEMON_DIR)/Cargo.toml"
 
 kernel: $(BZIMAGE_PATH)
+
+kernel-clean:
+	$(MAKE) -C "$(KERNEL_DIR)" clean
+	rm -f "$(KERNEL_CONFIG_STAMP)"
+
+kernel-rebuild: kernel-clean
+	$(MAKE) kernel BZIMAGE="$(BZIMAGE)"
 
 kinsn-modules: $(BZIMAGE_PATH)
 kinsn-modules: $(KERNEL_SYMVERS_PATH)

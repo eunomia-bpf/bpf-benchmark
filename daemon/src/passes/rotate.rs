@@ -16,7 +16,6 @@ impl BpfPass for RotatePass {
         "rotate"
     }
 
-
     fn required_analyses(&self) -> Vec<&str> {
         vec!["branch_targets", "liveness"]
     }
@@ -186,7 +185,9 @@ impl BpfPass for RotatePass {
 
         program.insns = new_insns;
         program.remap_annotations(&addr_map);
-        program.log_transform(TransformEntry { sites_applied: applied });
+        program.log_transform(TransformEntry {
+            sites_applied: applied,
+        });
 
         Ok(PassResult {
             pass_name: self.name().into(),
@@ -246,9 +247,7 @@ fn find_provenance_mov(insns: &[BpfInsn], shift_pc: usize, tmp: u8, dst: u8) -> 
 
     let mov_pc = shift_pc - 1;
     let insn = &insns[mov_pc];
-    (insn.code == (BPF_ALU64 | BPF_MOV | BPF_X)
-        && insn.dst_reg() == tmp
-        && insn.src_reg() == dst)
+    (insn.code == (BPF_ALU64 | BPF_MOV | BPF_X) && insn.dst_reg() == tmp && insn.src_reg() == dst)
         .then_some(mov_pc)
 }
 

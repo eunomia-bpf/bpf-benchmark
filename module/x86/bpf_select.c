@@ -92,7 +92,7 @@ static void emit_cmov_rr(u8 *buf, u32 *len, u8 dst_reg, u8 src_reg, u8 cc)
 }
 
 static int emit_select_x86(u8 *image, u32 *off, bool emit,
-			   u64 payload, struct bpf_prog *prog)
+			   u64 payload, const struct bpf_prog *prog)
 {
 	u8 buf[16];
 	u8 dst_reg, true_reg, false_reg, cond_reg;
@@ -131,7 +131,6 @@ static int emit_select_x86(u8 *image, u32 *off, bool emit,
 
 const struct bpf_kinsn bpf_select64_desc = {
 	.owner = THIS_MODULE,
-	.api_version = 1,
 	.max_insn_cnt = 4,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_select,

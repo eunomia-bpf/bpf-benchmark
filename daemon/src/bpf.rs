@@ -699,13 +699,15 @@ fn run_rejit_once(
     log_buf: Option<&mut [u8]>,
 ) -> Result<RejitResult> {
     let mut attr: AttrRejit = zeroed_attr();
+    let mut log_buf = log_buf;
+
     attr.prog_fd = prog_fd as u32;
     attr.insn_cnt = insns.len() as u32;
     attr.insns = insns.as_ptr() as u64;
     attr.log_level = log_level;
-    if let Some(buf) = log_buf.as_ref() {
+    if let Some(buf) = log_buf.as_mut() {
         attr.log_size = buf.len() as u32;
-        attr.log_buf = buf.as_ptr() as u64;
+        attr.log_buf = (*buf).as_mut_ptr() as u64;
     }
     if !fd_array.is_empty() {
         attr.fd_array = fd_array.as_ptr() as u64;
@@ -755,8 +757,30 @@ pub fn bpf_prog_rejit(
     fd_array: &[RawFd],
 ) -> Result<RejitResult> {
     const LOG_BUF_SIZE: usize = 16 * 1024 * 1024; // 16 MB
-    let mut log_buf = vec![0u8; LOG_BUF_SIZE];
-    run_rejit_once(prog_fd, insns, fd_array, 2, Some(&mut log_buf))
+
+    match run_rejit_once(prog_fd, insns, fd_array, 0, None) {
+        Ok(_) => Ok(RejitResult {
+            verifier_log: String::new(),
+        }),
+        Err(first_err) => {
+            let mut log_buf = vec![0u8; LOG_BUF_SIZE];
+            match run_rejit_once(prog_fd, insns, fd_array, 2, Some(&mut log_buf)) {
+                Ok(result) => Ok(result),
+                Err(second_err) => {
+                    let first_msg = format!("{first_err:#}");
+                    let second_msg = format!("{second_err:#}");
+
+                    if second_msg.contains("No space left on device") {
+                        bail!(
+                            "{second_msg}\ninitial REJIT failure without verifier log:\n{first_msg}"
+                        );
+                    }
+
+                    Err(second_err)
+                }
+            }
+        }
+    }
 }
 
 /// Iterate over all live BPF program IDs in the kernel.

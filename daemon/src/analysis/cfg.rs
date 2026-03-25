@@ -197,7 +197,7 @@ impl Analysis for CFGAnalysis {
 mod tests {
     use super::*;
     use crate::insn::*;
-    use crate::pass::{BpfProgram};
+    use crate::pass::BpfProgram;
 
     fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
         BpfProgram::new(insns)

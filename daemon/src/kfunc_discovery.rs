@@ -295,13 +295,7 @@ fn find_var_btf_id(
     base_str_off: u32,
     type_id_bias: u32,
 ) -> Option<i32> {
-    find_kind_btf_id(
-        btf_data,
-        var_name,
-        BTF_KIND_VAR,
-        base_str_off,
-        type_id_bias,
-    )
+    find_kind_btf_id(btf_data, var_name, BTF_KIND_VAR, base_str_off, type_id_bias)
 }
 
 // ── Module BTF file operations ───────────────────────────────────────
@@ -311,7 +305,6 @@ fn read_module_btf(module_name: &str) -> Result<Vec<u8>> {
     let path = format!("/sys/kernel/btf/{}", module_name);
     fs::read(&path).with_context(|| format!("read BTF for module '{}'", module_name))
 }
-
 
 // ── Discovery entry point ────────────────────────────────────────────
 
@@ -910,7 +903,11 @@ mod tests {
             "vmlinux str_len suspiciously small: {}",
             str_len
         );
-        assert!(type_cnt > 1000, "vmlinux type count suspiciously small: {}", type_cnt);
+        assert!(
+            type_cnt > 1000,
+            "vmlinux type count suspiciously small: {}",
+            type_cnt
+        );
     }
 
     #[test]

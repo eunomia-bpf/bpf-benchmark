@@ -15,7 +15,7 @@ static int instantiate_barrier(u64 payload, struct bpf_insn *insn_buf)
 }
 
 static int emit_barrier_x86(u8 *image, u32 *off, bool emit,
-			    u64 payload, struct bpf_prog *prog)
+			    u64 payload, const struct bpf_prog *prog)
 {
 	static const u8 insns[] = {
 		0x0F, 0xAE, 0xE8,
@@ -38,7 +38,6 @@ static int emit_barrier_x86(u8 *image, u32 *off, bool emit,
 
 const struct bpf_kinsn bpf_speculation_barrier_desc = {
 	.owner = THIS_MODULE,
-	.api_version = 1,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_barrier,

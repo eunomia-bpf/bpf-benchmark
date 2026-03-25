@@ -9,6 +9,6 @@ kinsn discovery:
   bpf_speculation_barrier: descriptor 'bpf_speculation_barrier_desc' found in 'bpf_barrier' btf_id=148849 fd=7
 platform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true
 serve: listening on /tmp/bpfrejit-static-verify.sock
-  prog 6 (rotate_dense_xd): 256 sites, 2796 -> 2284 insns
+  prog 6 (extract_dense_x): 512 sites, 2595 -> 2595 insns
     REJIT ok
 serve: shutting down

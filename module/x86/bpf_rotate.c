@@ -85,7 +85,7 @@ static void emit_rol_imm(u8 *buf, u32 *len, u8 dst_reg, u8 imm8)
 }
 
 static int emit_rotate_x86(u8 *image, u32 *off, bool emit,
-			   u64 payload, struct bpf_prog *prog)
+			   u64 payload, const struct bpf_prog *prog)
 {
 	u8 buf[16];
 	u8 dst_reg, src_reg, tmp_reg, shift;
@@ -118,7 +118,6 @@ static int emit_rotate_x86(u8 *image, u32 *off, bool emit,
 
 const struct bpf_kinsn bpf_rotate64_desc = {
 	.owner = THIS_MODULE,
-	.api_version = 1,
 	.max_insn_cnt = 5,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_rotate,

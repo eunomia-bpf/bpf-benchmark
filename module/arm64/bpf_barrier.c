@@ -29,7 +29,7 @@ static int instantiate_barrier(u64 payload, struct bpf_insn *insn_buf)
 #define A64_ISB		0xD5033FDFU
 
 static int emit_barrier_arm64(u32 *image, int *idx, bool emit,
-			      u64 payload, struct bpf_prog *prog)
+			      u64 payload, const struct bpf_prog *prog)
 {
 	if (!idx)
 		return -EINVAL;
@@ -51,7 +51,6 @@ static int emit_barrier_arm64(u32 *image, int *idx, bool emit,
 
 const struct bpf_kinsn bpf_speculation_barrier_desc = {
 	.owner = THIS_MODULE,
-	.api_version = 1,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 8,
 	.instantiate_insn = instantiate_barrier,

@@ -12,9 +12,7 @@ use std::collections::HashMap;
 
 use serde::Serialize;
 
-use crate::insn::{
-    dump_bytecode_compact, BpfBytecodeDump, BpfInsn, BPF_KINSN_ENC_PACKED_CALL,
-};
+use crate::insn::{dump_bytecode_compact, BpfBytecodeDump, BpfInsn, BPF_KINSN_ENC_PACKED_CALL};
 
 // ── Per-instruction annotation — populated by analysis passes, read by transform passes.
 #[derive(Clone, Debug, Default)]
@@ -474,6 +472,7 @@ impl PlatformCapabilities {
 pub enum Arch {
     #[default]
     X86_64,
+    Aarch64,
 }
 
 /// Optimization policy configuration.
@@ -1351,8 +1350,7 @@ mod tests {
         };
         reg.target_btf_fds.insert("bpf_rotate64".to_string(), 100);
         reg.target_btf_fds.insert("bpf_select64".to_string(), 200);
-        reg.target_btf_fds
-            .insert("bpf_extract64".to_string(), 300);
+        reg.target_btf_fds.insert("bpf_extract64".to_string(), 300);
 
         assert_eq!(reg.btf_fd_for_pass("rotate"), Some(100));
         assert_eq!(reg.btf_fd_for_pass("cond_select"), Some(200));
