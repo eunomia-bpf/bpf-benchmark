@@ -9,6 +9,10 @@ __bpf_kfunc_start_defs();
 __bpf_kfunc void bpf_select64(void) {}
 __bpf_kfunc_end_defs();
 
+BTF_KFUNCS_START(bpf_select_kfunc_ids)
+BTF_ID_FLAGS(func, bpf_select64)
+BTF_KFUNCS_END(bpf_select_kfunc_ids)
+
 #define KINSN_SELECT_COND_NEZ 0
 
 static __always_inline int decode_select_payload(u64 payload,
@@ -109,4 +113,9 @@ const struct bpf_kinsn bpf_select64_desc = {
 	.emit_arm64 = emit_select_arm64,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_select, "BpfReJIT kinsn: COND_SELECT (CSEL)");
+static const struct bpf_kinsn * const bpf_select_kinsn_descs[] = {
+	&bpf_select64_desc,
+};
+
+DEFINE_KINSN_V2_MODULE(bpf_select, "BpfReJIT kinsn: COND_SELECT (CSEL)",
+		       bpf_select_kfunc_ids, bpf_select_kinsn_descs);

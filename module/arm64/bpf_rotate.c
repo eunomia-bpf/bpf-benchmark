@@ -9,6 +9,10 @@ __bpf_kfunc_start_defs();
 __bpf_kfunc void bpf_rotate64(void) {}
 __bpf_kfunc_end_defs();
 
+BTF_KFUNCS_START(bpf_rotate_kfunc_ids)
+BTF_ID_FLAGS(func, bpf_rotate64)
+BTF_KFUNCS_END(bpf_rotate_kfunc_ids)
+
 static __always_inline int decode_rotate_payload(u64 payload,
 						 u8 *dst_reg,
 						 u8 *src_reg,
@@ -99,4 +103,9 @@ const struct bpf_kinsn bpf_rotate64_desc = {
 	.emit_arm64 = emit_rotate_arm64,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_rotate, "BpfReJIT kinsn: ROTATE (EXTR)");
+static const struct bpf_kinsn * const bpf_rotate_kinsn_descs[] = {
+	&bpf_rotate64_desc,
+};
+
+DEFINE_KINSN_V2_MODULE(bpf_rotate, "BpfReJIT kinsn: ROTATE (EXTR)",
+		       bpf_rotate_kfunc_ids, bpf_rotate_kinsn_descs);

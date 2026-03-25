@@ -9,6 +9,10 @@ __bpf_kfunc_start_defs();
 __bpf_kfunc void bpf_extract64(void) {}
 __bpf_kfunc_end_defs();
 
+BTF_KFUNCS_START(bpf_extract_kfunc_ids)
+BTF_ID_FLAGS(func, bpf_extract64)
+BTF_KFUNCS_END(bpf_extract_kfunc_ids)
+
 static __always_inline int decode_extract_payload(u64 payload,
 						  u8 *dst_reg,
 						  u8 *start,
@@ -130,4 +134,9 @@ const struct bpf_kinsn bpf_extract64_desc = {
 	.emit_x86 = emit_extract_x86,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_extract, "BpfReJIT kinsn: BITFIELD_EXTRACT");
+static const struct bpf_kinsn * const bpf_extract_kinsn_descs[] = {
+	&bpf_extract64_desc,
+};
+
+DEFINE_KINSN_V2_MODULE(bpf_extract, "BpfReJIT kinsn: BITFIELD_EXTRACT",
+		       bpf_extract_kfunc_ids, bpf_extract_kinsn_descs);

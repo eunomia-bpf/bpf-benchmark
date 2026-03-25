@@ -11,6 +11,12 @@ __bpf_kfunc void bpf_endian_load32(void) {}
 __bpf_kfunc void bpf_endian_load64(void) {}
 __bpf_kfunc_end_defs();
 
+BTF_KFUNCS_START(bpf_endian_kfunc_ids)
+BTF_ID_FLAGS(func, bpf_endian_load16)
+BTF_ID_FLAGS(func, bpf_endian_load32)
+BTF_ID_FLAGS(func, bpf_endian_load64)
+BTF_KFUNCS_END(bpf_endian_kfunc_ids)
+
 static __always_inline int decode_endian_payload(u64 payload,
 						 u8 *dst_reg,
 						 u8 *base_reg,
@@ -304,4 +310,11 @@ const struct bpf_kinsn bpf_endian_load64_desc = {
 	.emit_arm64 = emit_endian_load64_arm64,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_endian, "BpfReJIT kinsn: ENDIAN_LOAD (REV)");
+static const struct bpf_kinsn * const bpf_endian_kinsn_descs[] = {
+	&bpf_endian_load16_desc,
+	&bpf_endian_load32_desc,
+	&bpf_endian_load64_desc,
+};
+
+DEFINE_KINSN_V2_MODULE(bpf_endian, "BpfReJIT kinsn: ENDIAN_LOAD (REV)",
+		       bpf_endian_kfunc_ids, bpf_endian_kinsn_descs);

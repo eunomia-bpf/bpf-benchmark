@@ -7,6 +7,7 @@
 #define _KINSN_COMMON_H
 
 #include <linux/bpf.h>
+#include <linux/btf.h>
 #include <linux/filter.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
@@ -120,10 +121,17 @@ static __always_inline u8 kinsn_arm64_reg(u8 bpf_reg)
 }
 #endif
 
-#define DEFINE_KINSN_V2_MODULE(prefix, desc)				\
+#define DEFINE_KINSN_V2_MODULE(prefix, desc, kfunc_ids, kinsn_desc_array)	\
+static const struct btf_kfunc_id_set prefix##_kfunc_set = {		\
+	.owner = THIS_MODULE,						\
+	.set = &(kfunc_ids),						\
+	.kinsn_descs = (kinsn_desc_array),				\
+};									\
+									\
 static int __init prefix##_init(void)					\
 {									\
-	return 0;							\
+	return register_btf_kfunc_id_set(BPF_PROG_TYPE_UNSPEC,		\
+					 &prefix##_kfunc_set);		\
 }									\
 									\
 static void __exit prefix##_exit(void)					\

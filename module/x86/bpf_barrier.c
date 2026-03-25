@@ -9,6 +9,10 @@ __bpf_kfunc_start_defs();
 __bpf_kfunc void bpf_speculation_barrier(void) {}
 __bpf_kfunc_end_defs();
 
+BTF_KFUNCS_START(bpf_barrier_kfunc_ids)
+BTF_ID_FLAGS(func, bpf_speculation_barrier)
+BTF_KFUNCS_END(bpf_barrier_kfunc_ids)
+
 static int instantiate_barrier(u64 payload, struct bpf_insn *insn_buf)
 {
 	if (payload)
@@ -48,5 +52,10 @@ const struct bpf_kinsn bpf_speculation_barrier_desc = {
 	.emit_x86 = emit_barrier_x86,
 };
 
+static const struct bpf_kinsn * const bpf_barrier_kinsn_descs[] = {
+	&bpf_speculation_barrier_desc,
+};
+
 DEFINE_KINSN_V2_MODULE(bpf_barrier,
-		       "BpfReJIT kinsn: SPECULATION_BARRIER (LFENCE)");
+		       "BpfReJIT kinsn: SPECULATION_BARRIER (LFENCE)",
+		       bpf_barrier_kfunc_ids, bpf_barrier_kinsn_descs);
