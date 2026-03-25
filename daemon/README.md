@@ -162,16 +162,12 @@ fall-through.
 shows the taken path exceeds the bias threshold (default 70%). Without
 profiler data, the pass skips all sites. No heuristic fallback.
 
-### `spectre_mitigation` (SpectreMitigationPass)
+### `speculation_barrier` (SpectreMitigationPass)
 
-Inserts NOP (`JA +0`) barriers after conditional branches as speculation
-barrier placeholders. NOT in the default pipeline -- must be explicitly
-enabled.
-
-**Note**: current implementation inserts `JA +0` (NOP), which is a
-placeholder. It does not provide actual speculation barrier semantics.
-This pass is categorized as Security but should be treated as an
-instrumentation/debug pass until real barrier lowering is implemented.
+Inserts real `bpf_speculation_barrier()` kfunc calls after conditional
+branches. The kernel JIT lowers the kfunc inline to the architecture
+barrier instruction (`LFENCE` on x86, `DSB SY` + `ISB` on arm64). This
+pass is NOT in the default pipeline and must be explicitly enabled.
 
 ## kfunc Discovery
 
@@ -232,7 +228,7 @@ daemon/
       rotate.rs          # RotatePass -- shift+OR -> bpf_rotate64() (with provenance check)
       cond_select.rs     # CondSelectPass -- JCC+MOV diamond -> bpf_select64() (swap-safe)
       branch_flip.rs     # BranchFlipPass -- PGO-only hot-path fall-through
-      spectre.rs         # SpectreMitigationPass -- NOP placeholder barriers
+      spectre.rs         # SpectreMitigationPass -- speculation barriers
     analysis/
       mod.rs             # re-exports
       branch_target.rs   # BranchTargetAnalysis

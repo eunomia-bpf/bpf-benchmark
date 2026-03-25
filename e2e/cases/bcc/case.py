@@ -43,7 +43,7 @@ from runner.libs.metrics import (  # noqa: E402
     sample_cpu_usage,
     sample_total_cpu_usage,
 )
-from runner.libs.recompile import apply_daemon_rejit, scan_programs  # noqa: E402
+from runner.libs.rejit import apply_daemon_rejit, scan_programs  # noqa: E402
 from runner.libs.workload import (  # noqa: E402
     WorkloadResult,
     run_dd_read_load,

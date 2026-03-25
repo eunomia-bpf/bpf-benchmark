@@ -139,7 +139,7 @@ def micro_batch_parallel_jobs() -> int:
 
 
 def runtime_supports_prepared_state(runtime_mode: str) -> bool:
-    return runtime_mode in {"kernel", "kernel-rejit", "kernel_rejit"}
+    return runtime_mode in {"kernel", "kernel-rejit"}
 
 def build_micro_batch_job(
     *,
@@ -431,7 +431,7 @@ def build_micro_batch_plan(
 
         for runtime in runtimes:
             repeat = args.repeat if args.repeat is not None else runtime.default_repeat
-            is_rejit_runtime = runtime.mode in {"kernel-rejit", "kernel_rejit"}
+            is_rejit_runtime = runtime.mode == "kernel-rejit"
             daemon_socket = getattr(args, "daemon_socket", None)
             pgo_warmup_repeat = getattr(args, "pgo_warmup_repeat", 10)
 
@@ -462,7 +462,7 @@ def build_micro_batch_plan(
             bench_plan["iteration_runtime_orders"].append([runtime.name for runtime in ordered])
             for runtime in ordered:
                 repeat = args.repeat if args.repeat is not None else runtime.default_repeat
-                is_rejit_runtime = runtime.mode in {"kernel-rejit", "kernel_rejit"}
+                is_rejit_runtime = runtime.mode == "kernel-rejit"
                 daemon_socket = getattr(args, "daemon_socket", None)
                 pgo_warmup_repeat = getattr(args, "pgo_warmup_repeat", 10)
                 job_id = f"{benchmark.name}::{runtime.name}::measure::{iteration_idx}"
@@ -603,7 +603,7 @@ def main(argv: list[str] | None = None) -> int:
 
     benchmarks = select_benchmarks(args.benches, suite)
     runtimes = select_runtimes(args.runtimes, suite)
-    if args.rejit and not any(runtime.mode in {"kernel-rejit", "kernel_rejit"} for runtime in runtimes):
+    if args.rejit and not any(runtime.mode == "kernel-rejit" for runtime in runtimes):
         raise SystemExit("--rejit requires --runtime kernel-rejit")
     if args.shuffle_seed is not None:
         random.Random(args.shuffle_seed).shuffle(benchmarks)

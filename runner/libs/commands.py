@@ -122,7 +122,7 @@ def build_micro_benchmark_command(
             perf_scope=perf_scope,
         )
 
-    if runtime_mode in {"kernel-rejit", "kernel_rejit"}:
+    if runtime_mode == "kernel-rejit":
         return build_runner_command(
             runner_binary,
             "run-kernel",

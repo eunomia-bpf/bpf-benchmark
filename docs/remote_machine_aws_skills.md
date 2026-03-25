@@ -381,7 +381,7 @@ sudo lsinitrd /boot/initramfs-<ver>.img | grep -E 'ena|nvme|xfs'
 10. 上传预编译 bundle（`micro_exec`、`daemon`、运行库、micro smoke 资产、daemon smoke 资产）
 11. 在 `t4g.micro` 上直接跑：
    - micro smoke：`simple` + `load_byte_recompose`
-   - daemon smoke：`bpftool prog loadall -> daemon enumerate -> daemon enumerate --recompile`
+   - daemon smoke：`bpftool prog loadall -> daemon enumerate -> daemon apply <prog_id>`
 12. 下载结果
 13. 验证完成后立刻 `terminate-instances`
 

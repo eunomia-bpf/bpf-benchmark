@@ -234,7 +234,45 @@ Only repo bugs are listed here. Command-line mistakes or one-off debugging misha
 
 ## Open
 
-### 17. `proof lowering` still has a scaling issue beyond constant caps
+### 17. Kinsn registration lookup still carried redundant verifier-side type probing and duplicate module lifetime pins
+
+- Locations:
+  - `vendor/linux-framework/kernel/bpf/btf.c`
+  - `vendor/linux-framework/kernel/bpf/verifier.c`
+- Symptom:
+  - verifier-side kinsn lookup still repeated a local `BTF_KIND_VAR -> struct bpf_kinsn` type probe even though only explicitly registered descriptors can be resolved from `btf->kinsn_tab`
+  - `btf_try_get_kinsn_desc()` also took an extra `try_module_get(kinsn->owner)`, and `bpf_free_kinsn_desc_tab()` / verifier error paths mirrored it with matching `module_put()`
+- Root cause:
+  - the initial registration-based cleanup preserved some defensive scaffolding from the earlier `kallsyms` transition
+  - under the current API, `register_bpf_kinsn_set()` already enforces `id->desc->owner == set->owner`, while the verifier keeps the owning module/BTF namespace alive through the cached BTF transport state
+- Fix:
+  - remove the duplicate verifier-local `btf_type_is_kinsn_desc()` / `BTF_KIND_VAR` probing from `fetch_kinsn_desc_meta()`
+  - make `btf_try_get_kinsn_desc()` a pure registered-descriptor lookup instead of taking a second owner ref
+  - simplify `bpf_free_kinsn_desc_tab()` and verifier error paths accordingly
+- Verification:
+  - static diff check clean
+  - runtime matrix rerun pending after the current e2e pass finishes
+
+### 18. `extract(len=32,start=0)` proof sequence failed to zero-extend, breaking instantiate/native equivalence
+
+- Locations:
+  - `module/x86/bpf_extract.c`
+  - `module/arm64/bpf_extract.c`
+  - `tests/unittest/rejit_kinsn.c`
+- Symptom:
+  - proof lowering expanded `extract(len=32,start=0)` to `AND64 dst, -1`, which is a no-op on the high 32 bits
+  - native emit on both backends performs a 32-bit operation (`AND r32, imm32` on x86; `UBFM Xd, Xn, 0, 31` on arm64) and therefore zero-extends the result into 64 bits
+- Root cause:
+  - the instantiate path used a single `ALU64 AND` template for every mask width, but the `bit_len == 32` case has special architectural semantics because 32-bit writes zero the upper half
+- Fix:
+  - instantiate `bit_len == 32` with `BPF_ALU_IMM(BPF_AND, dst, -1)` so the proof sequence performs a real 32-bit write
+  - keep narrower widths on `ALU64 AND`
+  - add a repo-owned regression test, `extract32_zero_ext_proof`, that turns the zero-extension fact into a verifier-acceptance property
+- Verification:
+  - test added in [`tests/unittest/rejit_kinsn.c`](/home/yunwei37/workspace/bpf-benchmark/tests/unittest/rejit_kinsn.c)
+  - runtime matrix rerun pending after the current e2e pass finishes
+
+### 19. `proof lowering` still has a scaling issue beyond constant caps
 
 - Location: `vendor/linux-framework/kernel/bpf/verifier.c`
 - Symptom:
@@ -253,6 +291,7 @@ Only repo bugs are listed here. Command-line mistakes or one-off debugging misha
   - `patch_all_kinsns`
   - `test_rejit_rotate_restore_preserves_ldimm64_layout`
   - `test_rejit_endian32_apply`
+  - `test_rejit_extract32_zero_ext_proof`
 - [`daemon/src/commands.rs`](/home/yunwei37/workspace/bpf-benchmark/daemon/src/commands.rs)
   - `test_complete_verifier_log_e2big_is_retryable_post_verify_failure`
   - `test_attribute_post_verify_rejit_failure_uses_last_changed_pass`

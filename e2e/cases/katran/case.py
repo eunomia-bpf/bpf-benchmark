@@ -37,7 +37,7 @@ from runner.libs import (  # noqa: E402
 )
 from runner.libs.corpus import materialize_katran_packet  # noqa: E402
 from runner.libs.metrics import compute_delta, enable_bpf_stats, sample_bpf_stats, sample_total_cpu_usage  # noqa: E402
-from runner.libs.recompile import apply_daemon_rejit, scan_programs  # noqa: E402
+from runner.libs.rejit import apply_daemon_rejit, scan_programs  # noqa: E402
 
 from e2e.case_common import (  # noqa: E402
     git_sha,
@@ -67,6 +67,14 @@ DEFAULT_KATRAN_TEST_PACKET = ROOT_DIR / "corpus" / "inputs" / "katran_vip_packet
 DEFAULT_KERNEL_CONFIG = ROOT_DIR / "vendor" / "linux-framework" / ".config"
 DEFAULT_PROGRAM_NAME = "balancer_ingress"
 DEFAULT_INTERFACE = "katran0"
+DEFAULT_IP_CANDIDATES = (
+    "/usr/local/sbin/ip",
+    "/usr/local/bin/ip",
+    "/usr/sbin/ip",
+    "/usr/bin/ip",
+    "/sbin/ip",
+    "/bin/ip",
+)
 DEFAULT_DURATION_S = 10
 DEFAULT_SMOKE_DURATION_S = 3
 DEFAULT_WRK_CONNECTIONS = 32
@@ -449,7 +457,7 @@ def compare_phase_summaries(
     post_summary: Mapping[str, object] | None,
 ) -> dict[str, object]:
     if not post_summary:
-        return {"comparable": False, "reason": "recompile did not apply successfully"}
+        return {"comparable": False, "reason": "rejit did not apply successfully"}
     baseline_throughput = (baseline_summary.get("app_throughput_rps") or {}).get("median")
     post_throughput = (post_summary.get("app_throughput_rps") or {}).get("median")
     baseline_p99 = (baseline_summary.get("latency_ms_p99") or {}).get("median")
@@ -481,7 +489,7 @@ def compare_phase_summaries(
 
 def compare_phases(baseline: Mapping[str, object], post: Mapping[str, object] | None) -> dict[str, object]:
     if not post:
-        return {"comparable": False, "reason": "recompile did not apply successfully"}
+        return {"comparable": False, "reason": "rejit did not apply successfully"}
     return compare_phase_summaries(baseline.get("summary") or {}, post.get("summary") or {})
 
 
@@ -687,22 +695,134 @@ def bpftool_binary() -> str:
         return "bpftool"
 
 
+def ip_binary() -> str:
+    for candidate in DEFAULT_IP_CANDIDATES:
+        path = Path(candidate)
+        if path.is_file() and os.access(path, os.X_OK):
+            return str(path)
+    resolved = which("ip")
+    if resolved:
+        return resolved
+    raise RuntimeError("ip is required for the katran case")
+
+
+def _normalize_ip_command(command: Sequence[str]) -> list[str]:
+    args = [str(part) for part in command]
+    if args and args[0] == "ip":
+        return args[1:]
+    return args
+
+
+def _normalize_exec_command(command: Sequence[str]) -> list[str]:
+    return [str(part) for part in command]
+
+
+def ip_command(
+    command: Sequence[str],
+    *,
+    check: bool = True,
+    timeout: int | float | None = 30,
+) -> subprocess.CompletedProcess[str]:
+    return run_command([ip_binary(), *_normalize_ip_command(command)], check=check, timeout=timeout)
+
+
+def ip_json_command(
+    command: Sequence[str],
+    *,
+    timeout: int | float | None = 30,
+) -> object:
+    return run_json_command([ip_binary(), *_normalize_ip_command(command)], timeout=timeout)
+
+
 def link_exists(name: str) -> bool:
     return Path("/sys/class/net").joinpath(name).exists()
 
 
-def ns_command(
+def module_loaded(name: str) -> bool:
+    return Path("/sys/module").joinpath(name).exists()
+
+
+MODULE_FALLBACK_CANDIDATES: dict[str, tuple[Path, ...]] = {
+    "veth": (ROOT_DIR / "vendor" / "linux-framework" / "drivers" / "net" / "veth.ko",),
+    "tunnel4": (ROOT_DIR / "vendor" / "linux-framework" / "net" / "ipv4" / "tunnel4.ko",),
+    "ip_tunnel": (ROOT_DIR / "vendor" / "linux-framework" / "net" / "ipv4" / "ip_tunnel.ko",),
+    "ipip": (ROOT_DIR / "vendor" / "linux-framework" / "net" / "ipv4" / "ipip.ko",),
+}
+
+
+def ensure_kernel_module_loaded(name: str) -> None:
+    if module_loaded(name):
+        return
+
+    attempts: list[str] = []
+    repo_candidates = MODULE_FALLBACK_CANDIDATES.get(name, ())
+    if repo_candidates:
+        attempts.append(
+            "repo_candidates="
+            + ",".join(f"{candidate}:{candidate.exists()}" for candidate in repo_candidates)
+        )
+    modprobe = run_command(["modprobe", name], check=False, timeout=15)
+    if modprobe.returncode == 0 and module_loaded(name):
+        return
+    detail = (modprobe.stderr or modprobe.stdout).strip()
+    attempts.append(f"modprobe rc={modprobe.returncode}: {detail or 'no output'}")
+
+    candidates: list[Path] = []
+    for candidate in MODULE_FALLBACK_CANDIDATES.get(name, ()):
+        if candidate.exists():
+            candidates.append(candidate)
+    for module_root in (
+        Path("/lib/modules"),
+        ROOT_DIR / "vendor" / "linux-framework" / ".virtme_mods" / "lib" / "modules",
+    ):
+        if not module_root.exists():
+            continue
+        candidates.extend(sorted(module_root.glob(f"**/{name}.ko")))
+    candidates = list(dict.fromkeys(candidates))
+    for candidate in candidates:
+        insmod = run_command(["insmod", str(candidate)], check=False, timeout=15)
+        if insmod.returncode == 0 and module_loaded(name):
+            return
+        detail = (insmod.stderr or insmod.stdout).strip()
+        attempts.append(f"insmod {candidate} rc={insmod.returncode}: {detail or 'no output'}")
+
+    raise RuntimeError(
+        f"failed to load kernel module {name}: "
+        + "; ".join(attempts or ["no module candidate under /lib/modules"])
+    )
+
+
+def ns_exec_command(
     namespace: str,
     command: Sequence[str],
     *,
     check: bool = True,
     timeout: int | float | None = 30,
 ) -> subprocess.CompletedProcess[str]:
-    return run_command(["ip", "netns", "exec", namespace, *command], check=check, timeout=timeout)
+    return run_command(
+        [ip_binary(), "netns", "exec", namespace, *_normalize_exec_command(command)],
+        check=check,
+        timeout=timeout,
+    )
+
+
+def ns_ip_command(
+    namespace: str,
+    command: Sequence[str],
+    *,
+    check: bool = True,
+    timeout: int | float | None = 30,
+) -> subprocess.CompletedProcess[str]:
+    return ns_exec_command(
+        namespace,
+        [ip_binary(), *_normalize_ip_command(command)],
+        check=check,
+        timeout=timeout,
+    )
 
 
 def set_ns_sysctl(namespace: str, key: str, value: int) -> None:
-    completed = ns_command(
+    completed = ns_exec_command(
         namespace,
         ["sysctl", "-q", "-w", f"{key}={value}"],
         check=False,
@@ -711,7 +831,7 @@ def set_ns_sysctl(namespace: str, key: str, value: int) -> None:
     if completed.returncode == 0:
         return
     proc_key = key.replace(".", "/")
-    ns_command(
+    ns_exec_command(
         namespace,
         ["sh", "-c", f"printf '%s' '{value}' > /proc/sys/{proc_key}"],
         timeout=15,
@@ -720,17 +840,20 @@ def set_ns_sysctl(namespace: str, key: str, value: int) -> None:
 
 def set_link_mac(namespace: str | None, iface: str, mac: str) -> None:
     if namespace is None:
-        run_command(["ip", "link", "set", "dev", iface, "address", mac], timeout=15)
+        ip_command(["link", "set", "dev", iface, "address", mac], timeout=15)
         return
-    ns_command(namespace, ["ip", "link", "set", "dev", iface, "address", mac], timeout=15)
+    ns_ip_command(namespace, ["link", "set", "dev", iface, "address", mac], timeout=15)
 
 
 def get_link_json(namespace: str | None, iface: str) -> dict[str, object]:
-    command = ["ip", "-j", "-details", "-s", "link", "show", "dev", iface]
+    command = ["-j", "-details", "-s", "link", "show", "dev", iface]
     if namespace is not None:
-        payload = run_json_command(["ip", "netns", "exec", namespace, *command], timeout=30)
+        payload = run_json_command(
+            [ip_binary(), "netns", "exec", namespace, ip_binary(), *command],
+            timeout=30,
+        )
     else:
-        payload = run_json_command(command, timeout=30)
+        payload = ip_json_command(command, timeout=30)
     if not isinstance(payload, list) or not payload:
         raise RuntimeError(f"unexpected ip -j link payload for {iface}")
     return dict(payload[0])
@@ -1050,15 +1173,15 @@ class KatranDsrTopology:
 
     def __enter__(self) -> "KatranDsrTopology":
         self.cleanup()
-        # Ensure required kernel modules are loaded (may not be built-in in VM guests).
-        for mod in ("veth", "ipip"):
-            run_command(["modprobe", mod], check=False, timeout=15)
+        # Ensure required kernel modules are loaded and usable in the guest.
+        for mod in ("veth", "tunnel4", "ip_tunnel", "ipip"):
+            ensure_kernel_module_loaded(mod)
         for namespace in (ROUTER_NS, CLIENT_NS, REAL_NS):
-            run_command(["ip", "netns", "add", namespace], timeout=15)
+            ip_command(["netns", "add", namespace], timeout=15)
 
         if self.router_peer_iface is None:
-            run_command(["ip", "link", "add", self.iface, "type", "veth", "peer", "name", ROUTER_LB_IFACE], timeout=15)
-            run_command(["ip", "link", "set", ROUTER_LB_IFACE, "netns", ROUTER_NS], timeout=15)
+            ip_command(["link", "add", self.iface, "type", "veth", "peer", "name", ROUTER_LB_IFACE], timeout=15)
+            ip_command(["link", "set", ROUTER_LB_IFACE, "netns", ROUTER_NS], timeout=15)
         else:
             if self.router_peer_iface == self.iface:
                 raise RuntimeError("router peer iface must differ from Katran ingress iface")
@@ -1066,16 +1189,16 @@ class KatranDsrTopology:
                 raise RuntimeError(f"network interface does not exist: {self.iface}")
             if not link_exists(self.router_peer_iface):
                 raise RuntimeError(f"router peer interface does not exist: {self.router_peer_iface}")
-            run_command(["ip", "link", "set", self.router_peer_iface, "netns", ROUTER_NS], timeout=15)
-            ns_command(ROUTER_NS, ["ip", "link", "set", "dev", self.router_peer_iface, "name", ROUTER_LB_IFACE], timeout=15)
+            ip_command(["link", "set", self.router_peer_iface, "netns", ROUTER_NS], timeout=15)
+            ns_ip_command(ROUTER_NS, ["link", "set", "dev", self.router_peer_iface, "name", ROUTER_LB_IFACE], timeout=15)
 
-        run_command(["ip", "link", "add", ROUTER_CLIENT_IFACE, "type", "veth", "peer", "name", CLIENT_IFACE], timeout=15)
-        run_command(["ip", "link", "set", ROUTER_CLIENT_IFACE, "netns", ROUTER_NS], timeout=15)
-        run_command(["ip", "link", "set", CLIENT_IFACE, "netns", CLIENT_NS], timeout=15)
+        ip_command(["link", "add", ROUTER_CLIENT_IFACE, "type", "veth", "peer", "name", CLIENT_IFACE], timeout=15)
+        ip_command(["link", "set", ROUTER_CLIENT_IFACE, "netns", ROUTER_NS], timeout=15)
+        ip_command(["link", "set", CLIENT_IFACE, "netns", CLIENT_NS], timeout=15)
 
-        run_command(["ip", "link", "add", ROUTER_REAL_IFACE, "type", "veth", "peer", "name", REAL_IFACE], timeout=15)
-        run_command(["ip", "link", "set", ROUTER_REAL_IFACE, "netns", ROUTER_NS], timeout=15)
-        run_command(["ip", "link", "set", REAL_IFACE, "netns", REAL_NS], timeout=15)
+        ip_command(["link", "add", ROUTER_REAL_IFACE, "type", "veth", "peer", "name", REAL_IFACE], timeout=15)
+        ip_command(["link", "set", ROUTER_REAL_IFACE, "netns", ROUTER_NS], timeout=15)
+        ip_command(["link", "set", REAL_IFACE, "netns", REAL_NS], timeout=15)
 
         set_link_mac(None, self.iface, LB_MAC)
         set_link_mac(ROUTER_NS, ROUTER_LB_IFACE, ROUTER_LB_MAC)
@@ -1085,50 +1208,50 @@ class KatranDsrTopology:
         set_link_mac(REAL_NS, REAL_IFACE, REAL_MAC)
 
         for namespace in (ROUTER_NS, CLIENT_NS, REAL_NS):
-            ns_command(namespace, ["ip", "link", "set", "lo", "up"], timeout=15)
+            ns_ip_command(namespace, ["link", "set", "lo", "up"], timeout=15)
 
-        run_command(["ip", "addr", "replace", f"{LB_IP}/24", "dev", self.iface], timeout=15)
-        run_command(["ip", "link", "set", "dev", self.iface, "up"], timeout=15)
+        ip_command(["addr", "replace", f"{LB_IP}/24", "dev", self.iface], timeout=15)
+        ip_command(["link", "set", "dev", self.iface, "up"], timeout=15)
 
-        ns_command(ROUTER_NS, ["ip", "addr", "add", f"{ROUTER_LB_IP}/24", "dev", ROUTER_LB_IFACE], timeout=15)
-        ns_command(ROUTER_NS, ["ip", "addr", "add", f"{ROUTER_CLIENT_IP}/24", "dev", ROUTER_CLIENT_IFACE], timeout=15)
-        ns_command(ROUTER_NS, ["ip", "addr", "add", f"{ROUTER_REAL_IP}/24", "dev", ROUTER_REAL_IFACE], timeout=15)
-        ns_command(ROUTER_NS, ["ip", "link", "set", "dev", ROUTER_LB_IFACE, "up"], timeout=15)
-        ns_command(ROUTER_NS, ["ip", "link", "set", "dev", ROUTER_CLIENT_IFACE, "up"], timeout=15)
-        ns_command(ROUTER_NS, ["ip", "link", "set", "dev", ROUTER_REAL_IFACE, "up"], timeout=15)
+        ns_ip_command(ROUTER_NS, ["addr", "add", f"{ROUTER_LB_IP}/24", "dev", ROUTER_LB_IFACE], timeout=15)
+        ns_ip_command(ROUTER_NS, ["addr", "add", f"{ROUTER_CLIENT_IP}/24", "dev", ROUTER_CLIENT_IFACE], timeout=15)
+        ns_ip_command(ROUTER_NS, ["addr", "add", f"{ROUTER_REAL_IP}/24", "dev", ROUTER_REAL_IFACE], timeout=15)
+        ns_ip_command(ROUTER_NS, ["link", "set", "dev", ROUTER_LB_IFACE, "up"], timeout=15)
+        ns_ip_command(ROUTER_NS, ["link", "set", "dev", ROUTER_CLIENT_IFACE, "up"], timeout=15)
+        ns_ip_command(ROUTER_NS, ["link", "set", "dev", ROUTER_REAL_IFACE, "up"], timeout=15)
 
-        ns_command(CLIENT_NS, ["ip", "addr", "add", f"{CLIENT_IP}/24", "dev", CLIENT_IFACE], timeout=15)
-        ns_command(CLIENT_NS, ["ip", "link", "set", "dev", CLIENT_IFACE, "up"], timeout=15)
+        ns_ip_command(CLIENT_NS, ["addr", "add", f"{CLIENT_IP}/24", "dev", CLIENT_IFACE], timeout=15)
+        ns_ip_command(CLIENT_NS, ["link", "set", "dev", CLIENT_IFACE, "up"], timeout=15)
 
-        ns_command(REAL_NS, ["ip", "addr", "add", f"{REAL_IP}/24", "dev", REAL_IFACE], timeout=15)
-        ns_command(REAL_NS, ["ip", "link", "set", "dev", REAL_IFACE, "up"], timeout=15)
-        ns_command(REAL_NS, ["ip", "addr", "add", f"{VIP_IP}/32", "dev", "lo"], timeout=15)
-        ns_command(REAL_NS, ["ip", "link", "add", "name", "ipip0", "type", "ipip", "external"], timeout=15)
-        ns_command(REAL_NS, ["ip", "addr", "add", f"{IPIP_DUMMY_IP}/32", "dev", "ipip0"], timeout=15)
-        ns_command(REAL_NS, ["ip", "link", "set", "dev", "ipip0", "up"], timeout=15)
+        ns_ip_command(REAL_NS, ["addr", "add", f"{REAL_IP}/24", "dev", REAL_IFACE], timeout=15)
+        ns_ip_command(REAL_NS, ["link", "set", "dev", REAL_IFACE, "up"], timeout=15)
+        ns_ip_command(REAL_NS, ["addr", "add", f"{VIP_IP}/32", "dev", "lo"], timeout=15)
+        ns_ip_command(REAL_NS, ["link", "add", "name", "ipip0", "type", "ipip", "external"], timeout=15)
+        ns_ip_command(REAL_NS, ["addr", "add", f"{IPIP_DUMMY_IP}/32", "dev", "ipip0"], timeout=15)
+        ns_ip_command(REAL_NS, ["link", "set", "dev", "ipip0", "up"], timeout=15)
 
-        ns_command(CLIENT_NS, ["ip", "route", "add", "default", "via", ROUTER_CLIENT_IP, "dev", CLIENT_IFACE], timeout=15)
-        ns_command(REAL_NS, ["ip", "route", "add", "default", "via", ROUTER_REAL_IP, "dev", REAL_IFACE], timeout=15)
-        ns_command(ROUTER_NS, ["ip", "route", "add", f"{VIP_IP}/32", "via", LB_IP, "dev", ROUTER_LB_IFACE], timeout=15)
+        ns_ip_command(CLIENT_NS, ["route", "add", "default", "via", ROUTER_CLIENT_IP, "dev", CLIENT_IFACE], timeout=15)
+        ns_ip_command(REAL_NS, ["route", "add", "default", "via", ROUTER_REAL_IP, "dev", REAL_IFACE], timeout=15)
+        ns_ip_command(ROUTER_NS, ["route", "add", f"{VIP_IP}/32", "via", LB_IP, "dev", ROUTER_LB_IFACE], timeout=15)
 
-        ns_command(
+        ns_ip_command(
             CLIENT_NS,
-            ["ip", "neigh", "replace", ROUTER_CLIENT_IP, "lladdr", ROUTER_CLIENT_MAC, "dev", CLIENT_IFACE, "nud", "permanent"],
+            ["neigh", "replace", ROUTER_CLIENT_IP, "lladdr", ROUTER_CLIENT_MAC, "dev", CLIENT_IFACE, "nud", "permanent"],
             timeout=15,
         )
-        ns_command(
+        ns_ip_command(
             ROUTER_NS,
-            ["ip", "neigh", "replace", LB_IP, "lladdr", LB_MAC, "dev", ROUTER_LB_IFACE, "nud", "permanent"],
+            ["neigh", "replace", LB_IP, "lladdr", LB_MAC, "dev", ROUTER_LB_IFACE, "nud", "permanent"],
             timeout=15,
         )
-        ns_command(
+        ns_ip_command(
             ROUTER_NS,
-            ["ip", "neigh", "replace", REAL_IP, "lladdr", REAL_MAC, "dev", ROUTER_REAL_IFACE, "nud", "permanent"],
+            ["neigh", "replace", REAL_IP, "lladdr", REAL_MAC, "dev", ROUTER_REAL_IFACE, "nud", "permanent"],
             timeout=15,
         )
-        ns_command(
+        ns_ip_command(
             REAL_NS,
-            ["ip", "neigh", "replace", ROUTER_REAL_IP, "lladdr", ROUTER_REAL_MAC, "dev", REAL_IFACE, "nud", "permanent"],
+            ["neigh", "replace", ROUTER_REAL_IP, "lladdr", ROUTER_REAL_MAC, "dev", REAL_IFACE, "nud", "permanent"],
             timeout=15,
         )
 
@@ -1163,17 +1286,13 @@ class KatranDsrTopology:
 
     def cleanup(self) -> None:
         if self.router_peer_iface is None and link_exists(self.iface):
-            run_command(["ip", "link", "del", self.iface], check=False, timeout=15)
+            ip_command(["link", "del", self.iface], check=False, timeout=15)
         if self.router_peer_iface is not None:
-            run_command(
-                ["ip", "netns", "exec", ROUTER_NS, "ip", "link", "set", "dev", ROUTER_LB_IFACE, "netns", "1"],
-                check=False,
-                timeout=15,
-            )
+            ns_ip_command(ROUTER_NS, ["link", "set", "dev", ROUTER_LB_IFACE, "netns", "1"], check=False, timeout=15)
         for namespace in (REAL_NS, CLIENT_NS, ROUTER_NS):
-            run_command(["ip", "netns", "del", namespace], check=False, timeout=15)
+            ip_command(["netns", "del", namespace], check=False, timeout=15)
         if self.router_peer_iface is not None and link_exists(ROUTER_LB_IFACE) and not link_exists(self.router_peer_iface):
-            run_command(["ip", "link", "set", "dev", ROUTER_LB_IFACE, "name", self.router_peer_iface], check=False, timeout=15)
+            ip_command(["link", "set", "dev", ROUTER_LB_IFACE, "name", self.router_peer_iface], check=False, timeout=15)
 
     def ipip_stats(self) -> dict[str, int]:
         return link_stats(REAL_NS, "ipip0")
@@ -1264,7 +1383,7 @@ class NamespaceHttpServer:
     def __enter__(self) -> "NamespaceHttpServer":
         self.process = subprocess.Popen(
             [
-                "ip",
+                ip_binary(),
                 "netns",
                 "exec",
                 self.namespace,
@@ -1304,7 +1423,7 @@ class NamespaceHttpServer:
                 self.stdout_tail = tail_text(stdout or "", max_lines=20, max_chars=4000)
                 self.stderr_tail = tail_text(stderr or "", max_lines=20, max_chars=4000)
                 raise RuntimeError(f"http server exited early: {self.stderr_tail or self.stdout_tail}")
-            completed = ns_command(
+            completed = ns_exec_command(
                 self.namespace,
                 ["python3", "-c", probe, self.bind_ip, str(self.port)],
                 check=False,
@@ -2071,7 +2190,7 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
             "Traffic generator uses wrk against an HTTP/1.0 server, so the measured req/s is a short-flow connection-churn metric rather than bulk keep-alive throughput."
         )
     limitations.append(
-        "Phase order remains stock then recompile inside each same-image cycle; reverse-order randomization would require an explicit stock restore path or a second live load."
+        "Phase order remains stock then rejit inside each same-image cycle; reverse-order randomization would require an explicit stock restore path or a second live load."
     )
 
     with enable_bpf_stats():

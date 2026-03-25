@@ -1108,7 +1108,7 @@ batch_job parse_job(const YAML::Node &node, size_t index)
         options.command = "run-llvmbpf";
     } else if (runtime == "kernel") {
         options.command = "run-kernel";
-    } else if (runtime == "kernel-rejit" || runtime == "kernel_rejit") {
+    } else if (runtime == "kernel-rejit") {
         options.command = "run-kernel";
         options.rejit = true;
     } else {

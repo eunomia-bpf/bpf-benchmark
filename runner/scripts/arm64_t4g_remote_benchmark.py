@@ -21,16 +21,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from micro.benchmark_catalog import load_suite as load_micro_suite
 from runner.libs.benchmarks import resolve_memory_file
-from runner.libs.recompile import apply_daemon_rejit as _apply_daemon_rejit
-
-
-def apply_recompile(prog_ids: list[int], daemon_binary: Any) -> dict[int, dict[str, Any]]:
-    """Wrap apply_daemon_rejit to return a dict keyed by prog_id."""
-    results: dict[int, dict[str, Any]] = {}
-    for pid in prog_ids:
-        result = _apply_daemon_rejit(str(daemon_binary), [pid])
-        results[pid] = result
-    return results
+from runner.libs.rejit import apply_daemon_rejit, scan_programs
 
 
 ETHERNET_HEADER_SIZE = 14
@@ -164,68 +155,37 @@ def bpftool_prog_show_id(bpftool_binary: str, prog_id: int) -> dict[str, Any]:
     return payload
 
 
-def daemon_enumerate(daemon_binary: Path, prog_id: int) -> dict[str, Any]:
-    completed = subprocess.run(
-        [str(daemon_binary), "enumerate", "--prog-id", str(prog_id), "--json"],
-        cwd=REPO_ROOT,
-        capture_output=True,
-        text=True,
-        check=False,
-        timeout=120,
-    )
-    stdout = completed.stdout.strip()
-    stderr = completed.stderr.strip()
-    if completed.returncode != 0:
-        return {
-            "records": [],
-            "total_sites": 0,
-            "applied_sites": 0,
-            "recompile_ok": False,
-            "error": stderr or stdout or f"daemon enumerate failed (rc={completed.returncode})",
-        }
-    try:
-        payload = json.loads(stdout) if stdout else []
-    except json.JSONDecodeError as exc:
-        raise RuntimeError(f"daemon enumerate returned non-JSON for prog_id={prog_id}: {stdout[:200]}") from exc
-    if not isinstance(payload, list):
-        raise RuntimeError(f"daemon enumerate returned non-list JSON for prog_id={prog_id}")
-    if not payload:
-        return {
-            "records": [],
-            "total_sites": 0,
-            "applied_sites": 0,
-            "recompile_ok": False,
-            "error": "",
-        }
-    record = payload[0]
+def scan_program(daemon_binary: Path, prog_id: int) -> dict[str, Any]:
+    results = scan_programs([prog_id], daemon_binary)
+    record = results.get(int(prog_id))
     if not isinstance(record, dict):
-        raise RuntimeError(f"daemon enumerate returned malformed record for prog_id={prog_id}")
+        raise RuntimeError(f"daemon enumerate did not return a record for prog_id={prog_id}")
+    error = str(record.get("error") or "").strip()
+    if error:
+        raise RuntimeError(f"daemon enumerate failed for prog_id={prog_id}: {error}")
+    return record
+
+
+def skipped_rejit_result(*, reason: str, error: str = "") -> dict[str, Any]:
     return {
-        "records": payload,
-        "total_sites": int(record.get("total_sites", 0) or 0),
-        "applied_sites": int(record.get("applied_sites", 0) or 0),
-        "recompile_ok": bool(record.get("recompile_ok", False)),
-        "error": str(record.get("error", "") or ""),
+        "applied": False,
+        "output": "",
+        "exit_code": 0,
+        "counts": {
+            "total_sites": 0,
+            "applied_sites": 0,
+        },
+        "error": error,
+        "reason": reason,
     }
 
 
-def recompile_summary_from_apply(result: dict[str, Any]) -> dict[str, Any]:
-    enumerate_record = result.get("enumerate_record")
-    counts = result.get("counts") or {}
-    if isinstance(enumerate_record, dict):
-        return {
-            "records": [enumerate_record],
-            "total_sites": int(enumerate_record.get("total_sites", 0) or 0),
-            "applied_sites": int(enumerate_record.get("applied_sites", 0) or 0),
-            "recompile_ok": bool(enumerate_record.get("recompile_ok", False)),
-            "error": str(result.get("error", "") or ""),
-        }
+def command_record(mode: str, completed: subprocess.CompletedProcess[str]) -> dict[str, Any]:
     return {
-        "records": [],
-        "total_sites": int(counts.get("total_sites", 0) or 0),
-        "applied_sites": 0,
-        "recompile_ok": bool(result.get("applied", False)),
-        "error": str(result.get("error", "") or ""),
+        "mode": mode,
+        "returncode": int(completed.returncode),
+        "stdout": completed.stdout,
+        "stderr": completed.stderr,
     }
 
 
@@ -308,7 +268,7 @@ def run_llvmbpf_vs_kernel(
     return json.loads(output_path.read_text())
 
 
-def run_daemon_stock_vs_recompile(
+def run_daemon_stock_vs_rejit(
     *,
     runner_binary: Path,
     daemon_binary: Path,
@@ -362,7 +322,7 @@ def run_daemon_stock_vs_recompile(
             if prog_id <= 0:
                 raise RuntimeError(f"{benchmark.name}: invalid prog id from pinned program")
 
-            enumerate_before = daemon_enumerate(daemon_binary, prog_id)
+            scan_before = scan_program(daemon_binary, prog_id)
             stock = run_bpftool_samples(
                 bpftool_binary,
                 pin_path,
@@ -372,27 +332,25 @@ def run_daemon_stock_vs_recompile(
                 iterations=iterations,
             )
 
-            if int(enumerate_before.get("total_sites", 0) or 0) > 0:
-                apply_result = apply_recompile([prog_id], daemon_binary)[prog_id]
-                recompile_apply = recompile_summary_from_apply(apply_result)
+            total_sites = int(((scan_before.get("counts") or {}).get("total_sites", 0)) or 0)
+            if total_sites > 0:
+                rejit_apply = apply_daemon_rejit(str(daemon_binary), [prog_id])
             else:
-                recompile_apply = {
-                    "records": [],
-                    "total_sites": 0,
-                    "applied_sites": 0,
-                    "recompile_ok": False,
-                    "error": "",
-                }
+                rejit_apply = skipped_rejit_result(reason="no_sites")
 
-            load_info_after = bpftool_prog_show_id(bpftool_binary, prog_id)
-            recompile = run_bpftool_samples(
-                bpftool_binary,
-                pin_path,
-                packet_path,
-                repeat=repeat,
-                warmups=warmups,
-                iterations=iterations,
-            )
+            load_info_after = None
+            rejit = None
+            if total_sites > 0:
+                load_info_after = bpftool_prog_show_id(bpftool_binary, prog_id)
+            if bool(rejit_apply.get("applied")):
+                rejit = run_bpftool_samples(
+                    bpftool_binary,
+                    pin_path,
+                    packet_path,
+                    repeat=repeat,
+                    warmups=warmups,
+                    iterations=iterations,
+                )
 
             benchmarks.append(
                 {
@@ -408,10 +366,10 @@ def run_daemon_stock_vs_recompile(
                     "program": program,
                     "load_info_before": load_info_before,
                     "load_info_after": load_info_after,
-                    "enumerate_before": enumerate_before,
-                    "recompile_apply": recompile_apply,
+                    "scan_before": scan_before,
+                    "rejit_apply": rejit_apply,
                     "stock": stock,
-                    "recompile": recompile,
+                    "rejit": rejit,
                 }
             )
         finally:
@@ -419,7 +377,7 @@ def run_daemon_stock_vs_recompile(
 
     return {
         "suite": suite.suite_name,
-        "method": "bpftool prog loadall/run pinned + daemon enumerate --recompile (live-auto-policy)",
+        "method": "bpftool prog loadall/run pinned + daemon enumerate/apply (live auto policy)",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "host": {
             "hostname": platform.node(),
@@ -452,29 +410,10 @@ def run_katran_smoke(
     run_command(["rm", "-rf", str(pin_root)], check=False)
     run_command(["mkdir", "-p", str(pin_dir), str(map_dir)])
 
-    with_kernel_btf = {
-        "returncode": 0,
-        "stdout": "",
-        "stderr": "",
-    }
-    without_kernel_btf = {
-        "returncode": 0,
-        "stdout": "",
-        "stderr": "",
-    }
-    enumerate_run = {
-        "returncode": 0,
-        "stdout": "",
-        "stderr": "",
-    }
-    apply_run = {
-        "returncode": 0,
-        "stdout": "",
-        "stderr": "",
-    }
+    loadall_attempts: list[dict[str, Any]] = []
 
     try:
-        attempt = subprocess.run(
+        kernel_btf_attempt = subprocess.run(
             [
                 bpftool_binary,
                 "prog",
@@ -494,14 +433,10 @@ def run_katran_smoke(
             check=False,
             timeout=180,
         )
-        with_kernel_btf = {
-            "returncode": int(attempt.returncode),
-            "stdout": attempt.stdout,
-            "stderr": attempt.stderr,
-        }
-        used_fallback = attempt.returncode != 0
-        if used_fallback:
-            fallback = subprocess.run(
+        loadall_attempts.append(command_record("kernel_btf", kernel_btf_attempt))
+        selected_load_mode = "kernel_btf"
+        if kernel_btf_attempt.returncode != 0:
+            plain_xdp_attempt = subprocess.run(
                 [
                     bpftool_binary,
                     "prog",
@@ -519,94 +454,30 @@ def run_katran_smoke(
                 check=False,
                 timeout=180,
             )
-            without_kernel_btf = {
-                "returncode": int(fallback.returncode),
-                "stdout": fallback.stdout,
-                "stderr": fallback.stderr,
-            }
-            if fallback.returncode != 0:
-                detail = fallback.stderr.strip() or fallback.stdout.strip()
-                raise RuntimeError(f"katran fallback loadall failed ({fallback.returncode}): {detail}")
+            loadall_attempts.append(command_record("plain_xdp", plain_xdp_attempt))
+            selected_load_mode = "plain_xdp"
+            if plain_xdp_attempt.returncode != 0:
+                detail = plain_xdp_attempt.stderr.strip() or plain_xdp_attempt.stdout.strip()
+                raise RuntimeError(f"katran loadall failed ({plain_xdp_attempt.returncode}): {detail}")
 
         pinned_program = bpftool_prog_show_pinned(bpftool_binary, pin_dir / "balancer_ingress")
         prog_id = int(pinned_program.get("id", 0) or 0)
-
-        # Enumerate sites on the loaded program using the v2 daemon API.
-        enumerate_command = [str(daemon_binary), "enumerate"]
-        enumerate_completed = subprocess.run(
-            enumerate_command,
-            cwd=REPO_ROOT,
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=180,
-        )
-        enumerate_run = {
-            "returncode": int(enumerate_completed.returncode),
-            "stdout": enumerate_completed.stdout,
-            "stderr": enumerate_completed.stderr,
-        }
-        if enumerate_completed.returncode != 0:
-            detail = enumerate_completed.stderr.strip() or enumerate_completed.stdout.strip()
-            raise RuntimeError(f"katran enumerate failed ({enumerate_completed.returncode}): {detail}")
-        # Parse enumerate output (text lines, not JSON array from v1)
-        enumerate_payload: list[Any] = []
-        for line in enumerate_completed.stdout.splitlines():
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                obj = json.loads(line)
-                if isinstance(obj, (dict, list)):
-                    if isinstance(obj, list):
-                        enumerate_payload.extend(obj)
-                    else:
-                        enumerate_payload.append(obj)
-            except json.JSONDecodeError:
-                pass
-
-        # Apply optimization via daemon apply <prog_id> (v2 API).
-        if prog_id > 0:
-            apply_command = [str(daemon_binary), "apply", str(prog_id)]
-            apply_completed = subprocess.run(
-                apply_command,
-                cwd=REPO_ROOT,
-                capture_output=True,
-                text=True,
-                check=False,
-                timeout=180,
-            )
-            apply_run = {
-                "returncode": int(apply_completed.returncode),
-                "stdout": apply_completed.stdout,
-                "stderr": apply_completed.stderr,
-            }
-        apply_payload: list[Any] = []
-        for line in apply_run.get("stdout", "").splitlines():
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                obj = json.loads(line)
-                if isinstance(obj, list):
-                    apply_payload.extend(obj)
-                elif isinstance(obj, dict):
-                    apply_payload.append(obj)
-            except json.JSONDecodeError:
-                pass
+        if prog_id <= 0:
+            raise RuntimeError("katran smoke did not produce a live program id")
+        scan_before = scan_program(daemon_binary, prog_id)
+        if int(((scan_before.get("counts") or {}).get("total_sites", 0)) or 0) > 0:
+            rejit_apply = apply_daemon_rejit(str(daemon_binary), [prog_id])
+        else:
+            rejit_apply = skipped_rejit_result(reason="no_sites")
 
         return {
             "object": str(object_path),
             "pin_dir": str(pin_dir),
-            "with_kernel_btf": with_kernel_btf,
-            "used_fallback": used_fallback,
-            "without_kernel_btf": without_kernel_btf,
+            "loadall_attempts": loadall_attempts,
+            "selected_load_mode": selected_load_mode,
             "pinned_program": pinned_program,
-            "enumerate_run": enumerate_run,
-            "apply_run": apply_run,
-            "enumerate": enumerate_payload,
-            "recompile": apply_payload,
-            "zero_site_diagnostics": None,
+            "scan_before": scan_before,
+            "rejit_apply": rejit_apply,
         }
     finally:
         run_command(["rm", "-rf", str(pin_root)], check=False)
@@ -657,34 +528,38 @@ def summarize_llvmbpf_vs_kernel(raw: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def summarize_daemon(raw: dict[str, Any]) -> dict[str, Any]:
+def summarize_rejit(raw: dict[str, Any]) -> dict[str, Any]:
     total_sites = 0
     applied_sites = 0
     deltas: list[tuple[str, float, float, float]] = []
     benchmarks_with_sites = 0
+    benchmarks_rejited = 0
 
     for benchmark in raw.get("benchmarks", []):
         if not isinstance(benchmark, dict):
             continue
-        enumerate_before = benchmark.get("enumerate_before") or {}
-        recompile_apply = benchmark.get("recompile_apply") or {}
+        scan_before = benchmark.get("scan_before") or {}
+        rejit_apply = benchmark.get("rejit_apply") or {}
         stock = benchmark.get("stock") or {}
-        recompile = benchmark.get("recompile") or {}
-        total = int(enumerate_before.get("total_sites", 0) or 0)
-        applied = int(recompile_apply.get("applied_sites", 0) or 0)
+        rejit = benchmark.get("rejit") or {}
+        total = int((((scan_before.get("counts") or {}).get("total_sites", 0)) or 0))
+        applied = int((((rejit_apply.get("counts") or {}).get("applied_sites", 0)) or 0))
         total_sites += total
         applied_sites += applied
         if total > 0:
             benchmarks_with_sites += 1
+        if bool(rejit_apply.get("applied")):
+            benchmarks_rejited += 1
         stock_exec = float((stock.get("exec_ns") or {}).get("median") or 0.0)
-        recompile_exec = float((recompile.get("exec_ns") or {}).get("median") or 0.0)
-        if stock_exec > 0 and recompile_exec > 0:
-            deltas.append((str(benchmark.get("name")), recompile_exec - stock_exec, stock_exec, recompile_exec))
+        rejit_exec = float((rejit.get("exec_ns") or {}).get("median") or 0.0)
+        if stock_exec > 0 and rejit_exec > 0:
+            deltas.append((str(benchmark.get("name")), rejit_exec - stock_exec, stock_exec, rejit_exec))
 
     sorted_deltas = sorted(deltas, key=lambda item: abs(item[1]), reverse=True)
     return {
         "benchmarks": len(raw.get("benchmarks", [])),
         "benchmarks_with_sites": benchmarks_with_sites,
+        "benchmarks_rejited": benchmarks_rejited,
         "total_sites": total_sites,
         "applied_sites": applied_sites,
         "median_absolute_exec_delta_ns": statistics.median(abs(item[1]) for item in deltas) if deltas else None,
@@ -692,9 +567,9 @@ def summarize_daemon(raw: dict[str, Any]) -> dict[str, Any]:
         "largest_exec_deltas": [
             {
                 "name": item[0],
-                "recompile_minus_stock_ns": item[1],
+                "rejit_minus_stock_ns": item[1],
                 "stock_exec_ns": item[2],
-                "recompile_exec_ns": item[3],
+                "rejit_exec_ns": item[3],
             }
             for item in sorted_deltas[:10]
         ],
@@ -702,22 +577,24 @@ def summarize_daemon(raw: dict[str, Any]) -> dict[str, Any]:
 
 
 def summarize_katran(raw: dict[str, Any]) -> dict[str, Any]:
-    enumerate_records = raw.get("enumerate") if isinstance(raw.get("enumerate"), list) else []
-    recompile_records = raw.get("recompile") if isinstance(raw.get("recompile"), list) else []
-    enumerate_head = enumerate_records[0] if enumerate_records and isinstance(enumerate_records[0], dict) else {}
-    recompile_head = recompile_records[0] if recompile_records and isinstance(recompile_records[0], dict) else {}
+    attempts = raw.get("loadall_attempts") if isinstance(raw.get("loadall_attempts"), list) else []
+    scan_before = raw.get("scan_before") if isinstance(raw.get("scan_before"), dict) else {}
+    rejit_apply = raw.get("rejit_apply") if isinstance(raw.get("rejit_apply"), dict) else {}
+    attempt_by_mode = {
+        str(item.get("mode")): item
+        for item in attempts
+        if isinstance(item, dict) and item.get("mode")
+    }
     return {
-        "used_kernel_btf_fallback": bool(raw.get("used_fallback", False)),
-        "loadall_with_kernel_btf_rc": int((raw.get("with_kernel_btf") or {}).get("returncode", 0) or 0),
-        "loadall_without_kernel_btf_rc": int((raw.get("without_kernel_btf") or {}).get("returncode", 0) or 0),
+        "selected_load_mode": raw.get("selected_load_mode"),
+        "loadall_attempts": len(attempts),
+        "loadall_kernel_btf_rc": int((attempt_by_mode.get("kernel_btf") or {}).get("returncode", 0) or 0),
+        "loadall_plain_xdp_rc": int((attempt_by_mode.get("plain_xdp") or {}).get("returncode", 0) or 0),
         "pinned_program": raw.get("pinned_program"),
-        "enumerate_records": len(enumerate_records),
-        "recompile_records": len(recompile_records),
-        "total_sites": int(enumerate_head.get("total_sites", 0) or 0),
-        "applied_sites": int(recompile_head.get("applied_sites", 0) or 0),
-        "recompile_ok": bool(recompile_head.get("recompile_ok", False)),
-        "error": str(recompile_head.get("error", enumerate_head.get("error", "")) or ""),
-        "zero_site_diagnostics_present": raw.get("zero_site_diagnostics") is not None,
+        "total_sites": int((((scan_before.get("counts") or {}).get("total_sites", 0)) or 0)),
+        "applied_sites": int((((rejit_apply.get("counts") or {}).get("applied_sites", 0)) or 0)),
+        "rejit_applied": bool(rejit_apply.get("applied")),
+        "error": str(rejit_apply.get("error", scan_before.get("error", "")) or ""),
     }
 
 
@@ -728,7 +605,7 @@ def main() -> int:
     results_dir.mkdir(parents=True, exist_ok=True)
 
     runner_binary = (REPO_ROOT / "runner" / "build" / "micro_exec").resolve()
-    daemon_binary = (REPO_ROOT / "daemon" / "build" / "bpfrejit-daemon").resolve()
+    daemon_binary = (REPO_ROOT / "daemon" / "target" / "release" / "bpfrejit-daemon").resolve()
     bpftool_binary = shutil.which("bpftool") or "bpftool"
 
     if not runner_binary.exists():
@@ -743,7 +620,7 @@ def main() -> int:
         cpu=args.cpu,
         results_dir=results_dir,
     )
-    raw_daemon = run_daemon_stock_vs_recompile(
+    raw_rejit = run_daemon_stock_vs_rejit(
         runner_binary=runner_binary,
         daemon_binary=daemon_binary,
         bpftool_binary=bpftool_binary,
@@ -784,12 +661,12 @@ def main() -> int:
         },
         "summary": {
             "llvmbpf_vs_kernel": summarize_llvmbpf_vs_kernel(raw_llvmbpf_vs_kernel),
-            "daemon_stock_vs_recompile": summarize_daemon(raw_daemon),
+            "daemon_stock_vs_rejit": summarize_rejit(raw_rejit),
             "katran_smoke": summarize_katran(raw_katran),
         },
         "raw": {
             "llvmbpf_vs_kernel": raw_llvmbpf_vs_kernel,
-            "daemon_stock_vs_recompile": raw_daemon,
+            "daemon_stock_vs_rejit": raw_rejit,
             "katran_smoke": raw_katran,
         },
     }

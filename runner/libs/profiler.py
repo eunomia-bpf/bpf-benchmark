@@ -11,7 +11,7 @@ from typing import Any, Callable, Mapping, Sequence
 
 from . import resolve_bpftool_binary, resolve_perf_binary, run_json_command, tail_text
 from .metrics import compute_delta, sample_bpf_stats
-from .recompile import scan_programs
+from .rejit import scan_programs
 
 DEFAULT_DAEMON = Path(__file__).resolve().parents[2] / "daemon" / "build" / "bpfrejit-daemon"
 DEFAULT_PERF_EVENTS = ("cycles", "instructions", "branches", "branch-misses")

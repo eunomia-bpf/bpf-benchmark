@@ -51,7 +51,6 @@ runtimes:
     mode: kernel-rejit
     repeat: 200
     sudo: true
-    aliases: [kernel_rejit, rejit]
 
 benchmarks:
   - name: simple

@@ -255,7 +255,11 @@ fn should_treat_as_verifier_rejection(err_msg: &str, verifier_log_text: &str) ->
         return false;
     }
 
-    let first_line = err_msg.lines().next().unwrap_or_default().to_ascii_lowercase();
+    let first_line = err_msg
+        .lines()
+        .next()
+        .unwrap_or_default()
+        .to_ascii_lowercase();
     if first_line.contains("no space left on device")
         || first_line.contains("out of memory")
         || first_line.contains("operation not supported")
@@ -271,7 +275,11 @@ fn should_retry_post_verify_rejit_failure(err_msg: &str, verifier_log_text: &str
         return false;
     }
 
-    let first_line = err_msg.lines().next().unwrap_or_default().to_ascii_lowercase();
+    let first_line = err_msg
+        .lines()
+        .next()
+        .unwrap_or_default()
+        .to_ascii_lowercase();
     first_line.contains("no space left on device")
         || first_line.contains("argument list too long")
         || first_line.contains("out of memory")

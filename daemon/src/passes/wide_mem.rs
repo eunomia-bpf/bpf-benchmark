@@ -10,7 +10,7 @@ use crate::analysis::{BranchTargetAnalysis, LivenessAnalysis};
 use crate::insn::*;
 use crate::pass::*;
 
-use super::fixup_branches_inline;
+use super::utils::fixup_all_branches;
 
 // ═══════════════════════════════════════════════════════════════════
 // Pattern matching (absorbed from matcher.rs)
@@ -483,7 +483,7 @@ impl BpfPass for WideMemPass {
         addr_map[orig_len] = new_insns.len();
 
         // Fix up branch offsets.
-        fixup_branches_inline(&mut new_insns, orig_insns, &addr_map);
+        fixup_all_branches(&mut new_insns, orig_insns, &addr_map);
 
         program.insns = new_insns;
         program.remap_annotations(&addr_map);

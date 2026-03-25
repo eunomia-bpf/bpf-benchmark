@@ -415,11 +415,6 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         help="Path to the runner batch binary.",
     )
     parser.add_argument(
-        "--bpftool",
-        default="",
-        help="Deprecated. Kept for compatibility; no longer used by the batch path.",
-    )
-    parser.add_argument(
         "--pin-root",
         default=str(DEFAULT_PIN_ROOT),
         help="bpffs directory used for temporary pinning during verification.",

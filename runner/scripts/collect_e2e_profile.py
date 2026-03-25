@@ -21,11 +21,7 @@ from runner.libs.workload import WorkloadResult  # noqa: E402
 from e2e.cases.tracee.case import (  # noqa: E402
     DEFAULT_CONFIG as DEFAULT_TRACEE_CONFIG,
     DEFAULT_RUNNER as DEFAULT_TRACEE_RUNNER,
-    DEFAULT_DAEMON as DEFAULT_TRACEE_SCANNER,
     DEFAULT_SETUP_SCRIPT as DEFAULT_TRACEE_SETUP_SCRIPT,
-    DEFAULT_TRACEE_OBJECT,
-    ManualLibbpf as TraceeManualLibbpf,
-    ManualTraceeSession,
     TraceeAgentSession,
     build_tracee_commands,
     ensure_artifacts as ensure_tracee_artifacts,
@@ -33,23 +29,15 @@ from e2e.cases.tracee.case import (  # noqa: E402
     resolve_tracee_binary,
     run_setup_script as run_tracee_setup,
     run_workload as run_tracee_workload,
-    select_manual_programs,
 )
 from e2e.cases.tetragon.case import (  # noqa: E402
     DEFAULT_DURATION_S as DEFAULT_TETRAGON_DURATION_S,
-    DEFAULT_EXECVE_OBJECT,
-    DEFAULT_KPROBE_OBJECT,
     DEFAULT_LOAD_TIMEOUT_S as DEFAULT_TETRAGON_LOAD_TIMEOUT_S,
     DEFAULT_RUNNER as DEFAULT_TETRAGON_RUNNER,
-    DEFAULT_DAEMON as DEFAULT_TETRAGON_SCANNER,
     DEFAULT_SETUP_SCRIPT as DEFAULT_TETRAGON_SETUP_SCRIPT,
     DEFAULT_SMOKE_DURATION_S as DEFAULT_TETRAGON_SMOKE_DURATION_S,
     DEFAULT_WORKLOADS as DEFAULT_TETRAGON_WORKLOADS,
-    Libbpf as TetragonLibbpf,
-    ManualProgramSession,
-    RuntimeStatsHandle,
     TetragonAgentSession,
-    build_manual_targets,
     ensure_artifacts as ensure_tetragon_artifacts,
     resolve_tetragon_binary,
     run_setup_script as run_tetragon_setup,
@@ -91,12 +79,6 @@ from e2e.cases.katran.case import (  # noqa: E402
     run_setup_script as run_katran_setup,
     wrk_binary,
 )
-
-try:  # noqa: E402
-    from runner.libs.inventory import discover_object_programs
-except ModuleNotFoundError:  # noqa: E402
-    sys.path.insert(0, str(ROOT_DIR / "micro"))
-    from runner.libs.inventory import discover_object_programs
 
 
 def utc_now() -> str:
@@ -179,23 +161,18 @@ def build_parser() -> argparse.ArgumentParser:
     add_common_profile_args(tracee)
     tracee.add_argument("--config", default=str(DEFAULT_TRACEE_CONFIG))
     tracee.add_argument("--setup-script", default=str(DEFAULT_TRACEE_SETUP_SCRIPT))
-    tracee.add_argument("--tracee-object", default=str(DEFAULT_TRACEE_OBJECT))
     tracee.add_argument("--runner", default=str(DEFAULT_TRACEE_RUNNER))
     tracee.add_argument("--tracee-binary")
     tracee.add_argument("--load-timeout", type=int, default=20)
     tracee.add_argument("--smoke", action="store_true", help="Use smoke duration from the Tracee config when --duration is omitted.")
-    tracee.add_argument("--force-direct", action="store_true", help="Force manual fallback instead of Tracee daemon mode.")
     tracee.add_argument("--tracee-extra-arg", action="append", default=[])
 
     tetragon = subparsers.add_parser("tetragon", help="Collect a Tetragon profile.")
     add_common_profile_args(tetragon)
     tetragon.add_argument("--setup-script", default=str(DEFAULT_TETRAGON_SETUP_SCRIPT))
     tetragon.add_argument("--runner", default=str(DEFAULT_TETRAGON_RUNNER))
-    tetragon.add_argument("--execve-object", default=str(DEFAULT_EXECVE_OBJECT))
-    tetragon.add_argument("--kprobe-object", default=str(DEFAULT_KPROBE_OBJECT))
     tetragon.add_argument("--tetragon-binary")
     tetragon.add_argument("--load-timeout", type=int, default=DEFAULT_TETRAGON_LOAD_TIMEOUT_S)
-    tetragon.add_argument("--force-direct", action="store_true", help="Force manual fallback instead of daemon mode.")
     tetragon.add_argument("--smoke", action="store_true", help="Use smoke defaults when --duration is omitted.")
 
     katran = subparsers.add_parser("katran", help="Collect a Katran profile.")
@@ -232,7 +209,6 @@ def profiler_options(args: argparse.Namespace) -> dict[str, Any]:
 def run_tracee_collection(args: argparse.Namespace) -> dict[str, Any]:
     runner_binary = Path(args.runner).resolve()
     daemon_binary = Path(args.daemon).resolve()
-    tracee_object = Path(args.tracee_object).resolve()
     config_path = Path(args.config).resolve()
     setup_script = Path(args.setup_script).resolve()
     ensure_tracee_artifacts(runner_binary, daemon_binary)
@@ -248,48 +224,11 @@ def run_tracee_collection(args: argparse.Namespace) -> dict[str, Any]:
         duration_s = float(config.get("measurement_duration_s") or 30.0)
 
     with enable_bpf_stats():
-        tracee_binary = None if args.force_direct else resolve_tracee_binary(args.tracee_binary, setup_result)
-        if tracee_binary:
-            commands = build_tracee_commands(tracee_binary, list(config.get("events") or []), args.tracee_extra_arg or [])
-            with TraceeAgentSession(commands, load_timeout=int(args.load_timeout)) as session:
-                workload_records: list[dict[str, Any]] = []
-
-                def activity(window_s: float) -> None:
-                    workload_records.extend(
-                        run_profiled_workloads(
-                            list(config.get("workloads") or []),
-                            window_s,
-                            runner=run_tracee_workload,
-                            name_getter=tracee_name,
-                        )
-                    )
-
-                profile = profile_programs(
-                    list(session.program_fds.keys()) or [int(program["id"]) for program in session.programs],
-                    duration_s=duration_s,
-                    prog_fds=session.program_fds,
-                    activity=activity,
-                    metadata={"case": "tracee", "mode": "tracee_daemon", "config": str(config_path)},
-                    **profiler_options(args),
-                )
-                return {
-                    "generated_at": utc_now(),
-                    "case": "tracee",
-                    "mode": "tracee_daemon",
-                    "duration_s": duration_s,
-                    "config": str(config_path),
-                    "setup": setup_result,
-                    "tracee_binary": tracee_binary,
-                    "tracee_launch_command": session.command_used,
-                    "tracee_programs": session.programs,
-                    "workloads": workload_records,
-                    "agent_snapshot": session.collector_snapshot(),
-                    "profile": profile,
-                }
-
-        inventory = discover_object_programs(runner_binary, tracee_object)
-        selected = select_manual_programs(inventory)
-        with ManualTraceeSession(TraceeManualLibbpf(), tracee_object, selected) as session:
+        tracee_binary = resolve_tracee_binary(args.tracee_binary, setup_result)
+        if tracee_binary is None:
+            raise RuntimeError("Tracee binary is unavailable; direct .bpf.o fallback has been removed.")
+        commands = build_tracee_commands(tracee_binary, list(config.get("events") or []), args.tracee_extra_arg or [])
+        with TraceeAgentSession(commands, load_timeout=int(args.load_timeout)) as session:
             workload_records: list[dict[str, Any]] = []
 
             def activity(window_s: float) -> None:
@@ -302,29 +241,26 @@ def run_tracee_collection(args: argparse.Namespace) -> dict[str, Any]:
                     )
                 )
 
-            prog_ids = [int(handle.prog_id) for handle in session.program_handles.values()]
-            prog_fds = {int(handle.prog_id): int(handle.prog_fd) for handle in session.program_handles.values()}
             profile = profile_programs(
-                prog_ids,
+                list(session.program_fds.keys()) or [int(program["id"]) for program in session.programs],
                 duration_s=duration_s,
-                prog_fds=prog_fds,
+                prog_fds=session.program_fds,
                 activity=activity,
-                metadata={"case": "tracee", "mode": "manual_fallback", "config": str(config_path)},
+                metadata={"case": "tracee", "mode": "tracee_daemon", "config": str(config_path)},
                 **profiler_options(args),
             )
             return {
                 "generated_at": utc_now(),
                 "case": "tracee",
-                "mode": "manual_fallback",
+                "mode": "tracee_daemon",
                 "duration_s": duration_s,
                 "config": str(config_path),
                 "setup": setup_result,
-                "tracee_binary": None,
-                "tracee_programs": [
-                    {"name": entry.name, "section_name": entry.section_name}
-                    for entry in selected
-                ],
+                "tracee_binary": tracee_binary,
+                "tracee_launch_command": session.command_used,
+                "tracee_programs": session.programs,
                 "workloads": workload_records,
+                "agent_snapshot": session.collector_snapshot(),
                 "profile": profile,
             }
 
@@ -332,8 +268,6 @@ def run_tracee_collection(args: argparse.Namespace) -> dict[str, Any]:
 def run_tetragon_collection(args: argparse.Namespace) -> dict[str, Any]:
     runner_binary = Path(args.runner).resolve()
     daemon_binary = Path(args.daemon).resolve()
-    execve_object = Path(args.execve_object).resolve()
-    kprobe_object = Path(args.kprobe_object).resolve()
     setup_script = Path(args.setup_script).resolve()
     ensure_tetragon_artifacts(runner_binary, daemon_binary)
     setup_result = {
@@ -350,64 +284,14 @@ def run_tetragon_collection(args: argparse.Namespace) -> dict[str, Any]:
         if args.duration is not None
         else (DEFAULT_TETRAGON_SMOKE_DURATION_S if bool(args.smoke) else DEFAULT_TETRAGON_DURATION_S)
     )
-    libbpf = TetragonLibbpf()
-
-    with RuntimeStatsHandle(libbpf):
-        tetragon_binary = None if args.force_direct else resolve_tetragon_binary(args.tetragon_binary, setup_result)
-        if tetragon_binary:
-            with tempfile.TemporaryDirectory(prefix="tetragon-profile-policies-") as tempdir:
-                policy_dir = Path(tempdir)
-                policy_paths = write_tetragon_policies(policy_dir)
-                command = [tetragon_binary, "--tracing-policy-dir", str(policy_dir)]
-                try:
-                    with TetragonAgentSession(command, int(args.load_timeout)) as session:
-                        workload_records: list[dict[str, Any]] = []
-
-                        def activity(window_s: float) -> None:
-                            workload_records.extend(
-                                run_profiled_workloads(
-                                    list(DEFAULT_TETRAGON_WORKLOADS),
-                                    window_s,
-                                    runner=run_tetragon_workload,
-                                    name_getter=tetragon_name,
-                                )
-                            )
-
-                        profile = profile_programs(
-                            [int(program["id"]) for program in session.programs],
-                            duration_s=duration_s,
-                            activity=activity,
-                            metadata={"case": "tetragon", "mode": "tetragon_daemon"},
-                            **profiler_options(args),
-                        )
-                        return {
-                            "generated_at": utc_now(),
-                            "case": "tetragon",
-                            "mode": "tetragon_daemon",
-                            "duration_s": duration_s,
-                            "setup": setup_result,
-                            "tetragon_binary": tetragon_binary,
-                            "tetragon_launch_command": command,
-                            "policy_dir": str(policy_dir),
-                            "policy_paths": [str(path) for path in policy_paths],
-                            "tetragon_programs": session.programs,
-                            "workloads": workload_records,
-                            "agent_logs": session.collector_snapshot(),
-                            "profile": profile,
-                        }
-                except Exception as exc:
-                    fallback_reason = str(exc)
-                else:
-                    fallback_reason = ""
-        else:
-            fallback_reason = ""
-
-        opened: list[ManualProgramSession] = []
-        from contextlib import ExitStack
-
-        with ExitStack() as stack:
-            for spec in build_manual_targets(execve_object, kprobe_object):
-                opened.append(stack.enter_context(ManualProgramSession(libbpf, spec)))
+    tetragon_binary = resolve_tetragon_binary(args.tetragon_binary, setup_result)
+    if tetragon_binary is None:
+        raise RuntimeError("Tetragon binary is unavailable; direct .bpf.o fallback has been removed.")
+    with tempfile.TemporaryDirectory(prefix="tetragon-profile-policies-") as tempdir:
+        policy_dir = Path(tempdir)
+        policy_paths = write_tetragon_policies(policy_dir)
+        command = [tetragon_binary, "--tracing-policy-dir", str(policy_dir)]
+        with TetragonAgentSession(command, int(args.load_timeout)) as session:
             workload_records: list[dict[str, Any]] = []
 
             def activity(window_s: float) -> None:
@@ -421,26 +305,27 @@ def run_tetragon_collection(args: argparse.Namespace) -> dict[str, Any]:
                 )
 
             profile = profile_programs(
-                [int(session.prog_id or 0) for session in opened if int(session.prog_id or 0) > 0],
+                [int(program["id"]) for program in session.programs],
                 duration_s=duration_s,
                 activity=activity,
-                metadata={"case": "tetragon", "mode": "manual_fallback"},
+                metadata={"case": "tetragon", "mode": "tetragon_daemon"},
                 **profiler_options(args),
             )
-            payload = {
+            return {
                 "generated_at": utc_now(),
                 "case": "tetragon",
-                "mode": "manual_fallback",
+                "mode": "tetragon_daemon",
                 "duration_s": duration_s,
                 "setup": setup_result,
-                "tetragon_binary": None,
-                "tetragon_programs": [session.metadata() for session in opened],
+                "tetragon_binary": tetragon_binary,
+                "tetragon_launch_command": command,
+                "policy_dir": str(policy_dir),
+                "policy_paths": [str(path) for path in policy_paths],
+                "tetragon_programs": session.programs,
                 "workloads": workload_records,
+                "agent_logs": session.collector_snapshot(),
                 "profile": profile,
             }
-            if fallback_reason:
-                payload["fallback_reason"] = fallback_reason
-            return payload
 
 
 def run_katran_collection(args: argparse.Namespace) -> dict[str, Any]:

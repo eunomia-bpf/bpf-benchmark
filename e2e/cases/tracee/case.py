@@ -37,7 +37,7 @@ from runner.libs.metrics import (  # noqa: E402
     sample_cpu_usage,
     sample_total_cpu_usage,
 )
-from runner.libs.recompile import apply_daemon_rejit, scan_programs  # noqa: E402
+from runner.libs.rejit import apply_daemon_rejit, scan_programs  # noqa: E402
 from runner.libs.workload import (  # noqa: E402
     WorkloadResult,
     run_exec_storm,
@@ -471,7 +471,7 @@ def aggregate_programs(phase: Mapping[str, object]) -> dict[str, dict[str, objec
 
 def compare_phases(baseline: Mapping[str, object], post: Mapping[str, object] | None) -> dict[str, object]:
     if not post:
-        return {"comparable": False, "reason": "recompile did not apply successfully"}
+        return {"comparable": False, "reason": "rejit did not apply successfully"}
 
     baseline_by_name = {record["name"]: record for record in baseline.get("workloads") or []}
     post_by_name = {record["name"]: record for record in post.get("workloads") or []}

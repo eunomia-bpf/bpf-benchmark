@@ -43,7 +43,7 @@ DEFAULT_BTF_CANDIDATES = (
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Measure stock-vs-v5 code size for every loadable corpus program, "
+            "Measure stock-vs-REJIT code size for every loadable corpus program, "
             "grouped by program type."
         )
     )
@@ -111,7 +111,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Only perform baseline compile-only loadability inventory; skip v5 recompile measurements.",
+        help="Only perform baseline compile-only loadability inventory; skip REJIT measurements.",
     )
     return parser.parse_args(argv)
 
@@ -623,45 +623,58 @@ def stock_jitted_len(record: dict[str, Any]) -> int | None:
     return sample.get("jited_prog_len")
 
 
-def recompile_jitted_len(record: dict[str, Any]) -> int | None:
-    sample = ((record.get("v5_compile") or {}).get("sample") or {})
+def rejit_compile_result(record: dict[str, Any]) -> dict[str, Any] | None:
+    result = record.get("rejit_compile")
+    if result is not None:
+        return result
+    return record.get("v5_compile")
+
+
+def rejit_jitted_len(record: dict[str, Any]) -> int | None:
+    sample = ((rejit_compile_result(record) or {}).get("sample") or {})
     return sample.get("jited_prog_len")
 
 
-def recompile_meta(record: dict[str, Any]) -> dict[str, Any]:
-    return (((record.get("v5_compile") or {}).get("sample") or {}).get("rejit") or {})
+def rejit_meta(record: dict[str, Any]) -> dict[str, Any]:
+    return (((rejit_compile_result(record) or {}).get("sample") or {}).get("rejit") or {})
+
+
+def summary_value(summary: dict[str, Any], canonical_key: str, legacy_key: str) -> Any:
+    if canonical_key in summary:
+        return summary[canonical_key]
+    return summary.get(legacy_key)
 
 
 def is_loadable(record: dict[str, Any]) -> bool:
     return bool((record.get("stock_compile") or {}).get("ok"))
 
 
-def has_recompile_error(record: dict[str, Any]) -> bool:
-    if not (record.get("v5_compile") or {}).get("ok"):
+def has_rejit_error(record: dict[str, Any]) -> bool:
+    if not (rejit_compile_result(record) or {}).get("ok"):
         return True
-    return bool(recompile_meta(record).get("error"))
+    return bool(rejit_meta(record).get("error"))
 
 
 def compile_pair_ok(record: dict[str, Any]) -> bool:
     if not is_loadable(record):
         return False
-    if not (record.get("v5_compile") or {}).get("ok"):
+    if not (rejit_compile_result(record) or {}).get("ok"):
         return False
-    if has_recompile_error(record):
+    if has_rejit_error(record):
         return False
     stock_len = stock_jitted_len(record)
-    v5_len = recompile_jitted_len(record)
-    return bool(stock_len and v5_len)
+    rejit_len = rejit_jitted_len(record)
+    return bool(stock_len and rejit_len)
 
 
-def ratio_recompile_over_stock(record: dict[str, Any]) -> float | None:
+def ratio_rejit_over_stock(record: dict[str, Any]) -> float | None:
     if not compile_pair_ok(record):
         return None
     stock_len = stock_jitted_len(record)
-    v5_len = recompile_jitted_len(record)
-    if not stock_len or not v5_len:
+    rejit_len = rejit_jitted_len(record)
+    if not stock_len or not rejit_len:
         return None
-    return float(v5_len) / float(stock_len)
+    return float(rejit_len) / float(stock_len)
 
 
 def delta_bytes(record: dict[str, Any]) -> int | None:
@@ -669,20 +682,20 @@ def delta_bytes(record: dict[str, Any]) -> int | None:
     if not ratio_ok:
         return None
     stock_len = stock_jitted_len(record)
-    v5_len = recompile_jitted_len(record)
-    if stock_len is None or v5_len is None:
+    rejit_len = rejit_jitted_len(record)
+    if stock_len is None or rejit_len is None:
         return None
-    return int(v5_len) - int(stock_len)
+    return int(rejit_len) - int(stock_len)
 
 
 def delta_pct(record: dict[str, Any]) -> float | None:
     if not compile_pair_ok(record):
         return None
     stock_len = stock_jitted_len(record)
-    v5_len = recompile_jitted_len(record)
-    if stock_len in (None, 0) or v5_len is None:
+    rejit_len = rejit_jitted_len(record)
+    if stock_len in (None, 0) or rejit_len is None:
         return None
-    return (float(v5_len) - float(stock_len)) * 100.0 / float(stock_len)
+    return (float(rejit_len) - float(stock_len)) * 100.0 / float(stock_len)
 
 
 def measurement_status(record: dict[str, Any], *, dry_run: bool) -> str:
@@ -690,11 +703,11 @@ def measurement_status(record: dict[str, Any], *, dry_run: bool) -> str:
         return "load_failed"
     if dry_run:
         return "loadable_inventory"
-    if not (record.get("v5_compile") or {}).get("ok"):
-        return "recompile_load_failed"
-    meta = recompile_meta(record)
+    if not (rejit_compile_result(record) or {}).get("ok"):
+        return "rejit_load_failed"
+    meta = rejit_meta(record)
     if meta.get("error"):
-        return "recompile_failed"
+        return "rejit_failed"
     if int(meta.get("total_sites", 0) or 0) == 0:
         return "no_sites"
     if meta.get("applied"):
@@ -756,13 +769,13 @@ def detect_support_status(programs: list[dict[str, Any]], *, dry_run: bool) -> s
     site_positive = [
         record
         for record in programs
-        if is_loadable(record) and int(recompile_meta(record).get("total_sites", 0) or 0) > 0
+        if is_loadable(record) and int(rejit_meta(record).get("total_sites", 0) or 0) > 0
     ]
-    if any(bool(recompile_meta(record).get("applied")) for record in site_positive):
+    if any(bool(rejit_meta(record).get("applied")) for record in site_positive):
         return "supported"
-    if site_positive and all(bool(recompile_meta(record).get("error")) for record in site_positive):
+    if site_positive and all(bool(rejit_meta(record).get("error")) for record in site_positive):
         return "unavailable"
-    if any((record.get("v5_compile") or {}).get("ok") for record in programs):
+    if any((rejit_compile_result(record) or {}).get("ok") for record in programs):
         return "unknown"
     return "not_attempted"
 
@@ -779,7 +792,7 @@ def per_prog_type_summary(
 
     rows: list[dict[str, Any]] = []
     for prog_type, prog_records in grouped.items():
-        ratios = [ratio_recompile_over_stock(item) for item in prog_records]
+        ratios = [ratio_rejit_over_stock(item) for item in prog_records]
         deltas = [delta_pct(item) for item in prog_records]
         row = {
             "prog_type": prog_type,
@@ -787,14 +800,14 @@ def per_prog_type_summary(
             "loadable_programs": sum(1 for item in prog_records if is_loadable(item)),
             "compile_pairs": sum(1 for item in prog_records if compile_pair_ok(item)),
             "site_positive_programs": sum(
-                1 for item in prog_records if int(recompile_meta(item).get("total_sites", 0) or 0) > 0
+                1 for item in prog_records if int(rejit_meta(item).get("total_sites", 0) or 0) > 0
             ),
-            "recompile_applied_programs": sum(
-                1 for item in prog_records if bool(recompile_meta(item).get("applied"))
+            "rejit_applied_programs": sum(
+                1 for item in prog_records if bool(rejit_meta(item).get("applied"))
             ),
-            "recompile_failed_programs": sum(
+            "rejit_failed_programs": sum(
                 1 for item in prog_records
-                if measurement_status(item, dry_run=dry_run) in {"recompile_failed", "recompile_load_failed", "not_applied"}
+                if measurement_status(item, dry_run=dry_run) in {"rejit_failed", "rejit_load_failed", "not_applied"}
             ),
             "ratio_geomean": geomean([value for value in ratios if value is not None]) if ratios_enabled else None,
             "delta_pct_median": statistics.median([value for value in deltas if value is not None])
@@ -815,12 +828,12 @@ def build_summary(
     support_status: str,
 ) -> dict[str, Any]:
     ratios_enabled = support_status == "supported" and not dry_run
-    program_ratios = [ratio_recompile_over_stock(record) for record in programs] if ratios_enabled else []
+    program_ratios = [ratio_rejit_over_stock(record) for record in programs] if ratios_enabled else []
     program_deltas = [delta_pct(record) for record in programs] if ratios_enabled else []
 
     object_discovery_failures = Counter()
     load_failures = Counter()
-    recompile_failures = Counter()
+    rejit_failures = Counter()
     for record in objects:
         if not record["discovery"]["ok"]:
             object_discovery_failures[summarize_error(record["discovery"]["error"])] += 1
@@ -831,10 +844,10 @@ def build_summary(
         if dry_run:
             continue
         status = measurement_status(record, dry_run=dry_run)
-        if status == "recompile_load_failed":
-            recompile_failures[summarize_error((record.get("v5_compile") or {}).get("error"))] += 1
-        elif status in {"recompile_failed", "not_applied"}:
-            recompile_failures[summarize_error(recompile_meta(record).get("error"))] += 1
+        if status == "rejit_load_failed":
+            rejit_failures[summarize_error((rejit_compile_result(record) or {}).get("error"))] += 1
+        elif status in {"rejit_failed", "not_applied"}:
+            rejit_failures[summarize_error(rejit_meta(record).get("error"))] += 1
 
     return {
         "objects_scanned": len(objects),
@@ -844,14 +857,14 @@ def build_summary(
         "loadable_programs": sum(1 for item in programs if is_loadable(item)),
         "compile_pairs": sum(1 for item in programs if compile_pair_ok(item)),
         "site_positive_programs": sum(
-            1 for item in programs if int(recompile_meta(item).get("total_sites", 0) or 0) > 0
+            1 for item in programs if int(rejit_meta(item).get("total_sites", 0) or 0) > 0
         ),
-        "recompile_applied_programs": sum(
-            1 for item in programs if bool(recompile_meta(item).get("applied"))
+        "rejit_applied_programs": sum(
+            1 for item in programs if bool(rejit_meta(item).get("applied"))
         ),
-        "recompile_failed_programs": sum(
+        "rejit_failed_programs": sum(
             1 for item in programs
-            if measurement_status(item, dry_run=dry_run) in {"recompile_failed", "recompile_load_failed", "not_applied"}
+            if measurement_status(item, dry_run=dry_run) in {"rejit_failed", "rejit_load_failed", "not_applied"}
         ),
         "overall_ratio_geomean": geomean([value for value in program_ratios if value is not None]) if ratios_enabled else None,
         "overall_delta_pct_median": statistics.median([value for value in program_deltas if value is not None])
@@ -860,7 +873,7 @@ def build_summary(
         "support_status": support_status,
         "object_discovery_failure_reasons": dict(object_discovery_failures.most_common(16)),
         "load_failure_reasons": dict(load_failures.most_common(16)),
-        "recompile_failure_reasons": dict(recompile_failures.most_common(16)),
+        "rejit_failure_reasons": dict(rejit_failures.most_common(16)),
     }
 
 
@@ -870,18 +883,18 @@ def top_ratio_rows(programs: list[dict[str, Any]], *, reverse: bool, limit: int 
             "program": f"{record['object_path']}:{record['program_name']}",
             "prog_type": record["grouped_prog_type"],
             "stock_jited_len": stock_jitted_len(record),
-            "v5_jited_len": recompile_jitted_len(record),
-            "ratio_recompile_over_stock": ratio_recompile_over_stock(record),
+            "rejit_jited_len": rejit_jitted_len(record),
+            "ratio_rejit_over_stock": ratio_rejit_over_stock(record),
             "delta_pct": delta_pct(record),
-            "recompile_applied": bool(recompile_meta(record).get("applied")),
-            "site_count": int(recompile_meta(record).get("total_sites", 0) or 0),
+            "rejit_applied": bool(rejit_meta(record).get("applied")),
+            "site_count": int(rejit_meta(record).get("total_sites", 0) or 0),
         }
         for record in programs
-        if compile_pair_ok(record) and ratio_recompile_over_stock(record) is not None
+        if compile_pair_ok(record) and ratio_rejit_over_stock(record) is not None
     ]
     rows.sort(
         key=lambda item: (
-            item["ratio_recompile_over_stock"],
+            item["ratio_rejit_over_stock"],
             item["program"],
         ),
         reverse=reverse,
@@ -919,7 +932,7 @@ def build_markdown(payload: dict[str, Any]) -> str:
         )
     lines.extend(
         [
-            f"- v5 support status: `{summary['support_status']}`",
+            f"- REJIT support status: `{summary['support_status']}`",
             "",
             "## Summary",
             "",
@@ -931,15 +944,15 @@ def build_markdown(payload: dict[str, Any]) -> str:
         ["Objects with discovery failures", summary["objects_with_discovery_failures"]],
         ["Programs discovered", summary["programs_discovered"]],
         ["Loadable programs", summary["loadable_programs"]],
-        ["Compile pairs with usable stock/v5 code size", summary["compile_pairs"]],
+        ["Compile pairs with usable stock/REJIT code size", summary["compile_pairs"]],
     ]
     if not payload["dry_run"]:
         summary_rows.extend(
             [
-                ["Programs with v5-detected sites", summary["site_positive_programs"]],
-                ["Programs with recompile applied", summary["recompile_applied_programs"]],
-                ["Programs with recompile failures", summary["recompile_failed_programs"]],
-                ["Overall geomean code-size ratio (recompile/stock)", format_ratio(summary["overall_ratio_geomean"])],
+                ["Programs with REJIT-detected sites", summary["site_positive_programs"]],
+                ["Programs with REJIT applied", summary_value(summary, "rejit_applied_programs", "recompile_applied_programs")],
+                ["Programs with REJIT failures", summary_value(summary, "rejit_failed_programs", "recompile_failed_programs")],
+                ["Overall geomean code-size ratio (rejit/stock)", format_ratio(summary["overall_ratio_geomean"])],
                 ["Overall median code-size delta", format_pct(summary["overall_delta_pct_median"])],
             ]
         )
@@ -955,8 +968,8 @@ def build_markdown(payload: dict[str, Any]) -> str:
                 row["loadable_programs"],
                 row["compile_pairs"],
                 row["site_positive_programs"],
-                row["recompile_applied_programs"],
-                row["recompile_failed_programs"],
+                row.get("rejit_applied_programs", row.get("recompile_applied_programs")),
+                row.get("rejit_failed_programs", row.get("recompile_failed_programs")),
                 format_ratio(row["ratio_geomean"]) if ratios_enabled else "n/a",
                 format_pct(row["delta_pct_median"]) if ratios_enabled else "n/a",
             ]
@@ -982,16 +995,16 @@ def build_markdown(payload: dict[str, Any]) -> str:
         lines.extend(["", "## Largest Shrinks", ""])
         lines.extend(
             markdown_table(
-                ["Program", "Prog Type", "Stock JIT", "v5 JIT", "R/S", "Delta", "Applied", "Sites"],
+                ["Program", "Prog Type", "Stock JIT", "REJIT JIT", "R/S", "Delta", "Applied", "Sites"],
                 [
                     [
                         row["program"],
                         row["prog_type"],
                         row["stock_jited_len"],
-                        row["v5_jited_len"],
-                        format_ratio(row["ratio_recompile_over_stock"]),
+                        row.get("rejit_jited_len", row.get("v5_jited_len")),
+                        format_ratio(row.get("ratio_rejit_over_stock", row.get("ratio_recompile_over_stock"))),
                         format_pct(row["delta_pct"]),
-                        "yes" if row["recompile_applied"] else "no",
+                        "yes" if row.get("rejit_applied", row.get("recompile_applied")) else "no",
                         row["site_count"],
                     ]
                     for row in payload["top_shrinks"]
@@ -1003,16 +1016,16 @@ def build_markdown(payload: dict[str, Any]) -> str:
         lines.extend(["", "## Largest Growths", ""])
         lines.extend(
             markdown_table(
-                ["Program", "Prog Type", "Stock JIT", "v5 JIT", "R/S", "Delta", "Applied", "Sites"],
+                ["Program", "Prog Type", "Stock JIT", "REJIT JIT", "R/S", "Delta", "Applied", "Sites"],
                 [
                     [
                         row["program"],
                         row["prog_type"],
                         row["stock_jited_len"],
-                        row["v5_jited_len"],
-                        format_ratio(row["ratio_recompile_over_stock"]),
+                        row.get("rejit_jited_len", row.get("v5_jited_len")),
+                        format_ratio(row.get("ratio_rejit_over_stock", row.get("ratio_recompile_over_stock"))),
                         format_pct(row["delta_pct"]),
-                        "yes" if row["recompile_applied"] else "no",
+                        "yes" if row.get("rejit_applied", row.get("recompile_applied")) else "no",
                         row["site_count"],
                     ]
                     for row in payload["top_growths"]
@@ -1038,12 +1051,13 @@ def build_markdown(payload: dict[str, Any]) -> str:
             )
         )
 
-    if summary["recompile_failure_reasons"]:
-        lines.extend(["", "## Recompile Failures", ""])
+    rejit_failure_reasons = summary_value(summary, "rejit_failure_reasons", "recompile_failure_reasons") or {}
+    if rejit_failure_reasons:
+        lines.extend(["", "## REJIT Failures", ""])
         lines.extend(
             markdown_table(
                 ["Reason", "Count"],
-                [[reason, count] for reason, count in summary["recompile_failure_reasons"].items()],
+                [[reason, count] for reason, count in rejit_failure_reasons.items()],
             )
         )
 
@@ -1060,14 +1074,14 @@ def build_markdown(payload: dict[str, Any]) -> str:
     if summary["support_status"] != "supported":
         lines.extend(
             [
-                "- This host did not provide usable v5 recompile measurements, so the report should be treated as loadability inventory plus failure diagnostics.",
+                "- This host did not provide usable REJIT measurements, so the report should be treated as loadability inventory plus failure diagnostics.",
                 f"- VM rerun command: `{vm_command}`",
             ]
         )
     else:
         lines.extend(
             [
-                "- Ratios are `recompile_jitted_len / stock_jitted_len`; values below `1.0x` mean smaller native code after recompile.",
+                "- Ratios are `rejit_jited_len / stock_jited_len`; values below `1.0x` mean smaller native code after REJIT.",
                 f"- Equivalent VM rerun command: `{vm_command}`",
             ]
         )
@@ -1186,7 +1200,7 @@ def main(argv: list[str] | None = None) -> int:
                 preferred_btf_path=preferred_btf_path,
             )
             stock_compile = invocation_summary(baseline_raw)
-            v5_compile = None
+            rejit_compile = None
 
             record = {
                 "object_path": relpath(object_path),
@@ -1201,12 +1215,12 @@ def main(argv: list[str] | None = None) -> int:
                 "io_mode": plan["io_mode"],
                 "input_size": plan["input_size"],
                 "stock_compile": stock_compile,
-                "v5_compile": v5_compile,
+                "rejit_compile": rejit_compile,
             }
             record["measurement_status"] = measurement_status(record, dry_run=args.dry_run)
             record["stock_jited_len"] = stock_jitted_len(record)
-            record["v5_jited_len"] = recompile_jitted_len(record)
-            record["ratio_recompile_over_stock"] = ratio_recompile_over_stock(record)
+            record["rejit_jited_len"] = rejit_jitted_len(record)
+            record["ratio_rejit_over_stock"] = ratio_rejit_over_stock(record)
             record["delta_bytes"] = delta_bytes(record)
             record["delta_pct"] = delta_pct(record)
             program_records.append(record)

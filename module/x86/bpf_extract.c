@@ -36,7 +36,7 @@ static int instantiate_extract(u64 payload, struct bpf_insn *insn_buf)
 	if (start)
 		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_RSH, dst_reg, start);
 	if (bit_len == 32)
-		insn_buf[cnt++] = BPF_ALU_IMM(BPF_AND, dst_reg, -1);
+		insn_buf[cnt++] = BPF_ALU32_IMM(BPF_AND, dst_reg, -1);
 	else {
 		mask = (1U << bit_len) - 1;
 		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, dst_reg, mask);

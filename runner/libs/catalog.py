@@ -31,10 +31,8 @@ def _resolve_path(value: str | Path | None, root_dir: Path) -> Path | None:
 
 def _policy_mode_for_runtime(name: str, mode: str) -> str:
     text = f"{name} {mode}".lower()
-    if "recompile" in text:
-        return "recompile"
-    if "policy" in text:
-        return "policy_blob"
+    if "rejit" in text:
+        return "rejit"
     return "stock"
 
 

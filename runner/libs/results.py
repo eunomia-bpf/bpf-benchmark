@@ -90,7 +90,7 @@ class RunnerSample(TypedDict, total=False):
 
 @dataclass(frozen=True, slots=True)
 class UnifiedResultRecord:
-    """Core schema shared by micro suite, corpus recompile, and rigorous drivers."""
+    """Core schema shared by micro suite, corpus rejit, and rigorous drivers."""
 
     suite: str
     target: Mapping[str, object]
@@ -104,7 +104,7 @@ class UnifiedResultRecord:
     compile: Mapping[str, object] | None = None
     execution: Mapping[str, object] | None = None
     directive_scan: Mapping[str, object] | None = None
-    recompile: Mapping[str, object] | None = None
+    rejit: Mapping[str, object] | None = None
     perf_counters: Mapping[str, object] | None = None
     samples: Sequence[RunnerSample] = field(default_factory=tuple)
     statistics: Mapping[str, object] | None = None
@@ -155,7 +155,7 @@ def collapse_command_samples(samples: Sequence[RunnerSample]) -> list[RunnerSamp
         if (
             sample.get("phase") == "stock"
             and index + 1 < len(samples)
-            and samples[index + 1].get("phase") == "recompile"
+            and samples[index + 1].get("phase") == "rejit"
         ):
             collapsed.append(samples[index + 1])
             index += 2
@@ -250,10 +250,7 @@ def normalize_runner_sample(sample: Mapping[str, object]) -> RunnerSample:
         {"performed": False, **zero_directive_scan()},
     )
 
-    # Unify rejit / recompile: `rejit` is the canonical field.
-    # If the sample has `rejit` (from C++ runner), use it.
-    # If it only has `recompile` (legacy), promote to `rejit`.
-    raw_rejit = sample.get("rejit") or sample.get("recompile") or {}
+    raw_rejit = sample.get("rejit") or {}
     rejit_defaults = _default_rejit()
     rejit_defaults.update(raw_rejit)
     normalized["rejit"] = rejit_defaults

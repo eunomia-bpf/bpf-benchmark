@@ -472,11 +472,18 @@ fn emit_ldimm64(dst_reg: u8, value: u64) -> Vec<BpfInsn> {
 
 fn decode_ldimm64(insns: &[BpfInsn], pc: usize) -> u64 {
     let lo = insns[pc].imm as u32 as u64;
-    let hi = insns.get(pc + 1).map(|insn| insn.imm as u32 as u64).unwrap_or(0);
+    let hi = insns
+        .get(pc + 1)
+        .map(|insn| insn.imm as u32 as u64)
+        .unwrap_or(0);
     lo | (hi << 32)
 }
 
-fn replacement_if_changed(insns: &[BpfInsn], pc: usize, candidate: &[BpfInsn]) -> Option<Vec<BpfInsn>> {
+fn replacement_if_changed(
+    insns: &[BpfInsn],
+    pc: usize,
+    candidate: &[BpfInsn],
+) -> Option<Vec<BpfInsn>> {
     let width = insn_width(&insns[pc]);
     let original = &insns[pc..pc + width];
     (original != candidate).then(|| candidate.to_vec())

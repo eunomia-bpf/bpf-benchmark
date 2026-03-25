@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -187,6 +188,13 @@ def apply_case_defaults(args: argparse.Namespace) -> None:
 ALL_CASES = ("tracee", "tetragon", "bpftrace", "scx", "katran", "bcc")
 
 
+def _restore_environment(saved_env: dict[str, str]) -> None:
+    for key in list(os.environ.keys()):
+        if key not in saved_env:
+            del os.environ[key]
+    os.environ.update(saved_env)
+
+
 def _is_skipped_payload(payload: object) -> bool:
     return isinstance(payload, dict) and str(payload.get("status", "")).lower() == "skipped"
 
@@ -257,6 +265,7 @@ def _run_single_case(args: argparse.Namespace, *, clear_existing: bool = False) 
     )
     artifact_dir = session.run_dir
     session.write(status="running", progress_payload=progress_payload)
+    saved_env = os.environ.copy()
 
     try:
         payload = spec.run_case(args)
@@ -294,6 +303,8 @@ def _run_single_case(args: argparse.Namespace, *, clear_existing: bool = False) 
             error_message=str(exc),
         )
         raise
+    finally:
+        _restore_environment(saved_env)
 
     print(f"  e2e: wrote {artifact_dir / 'metadata.json'}")
     return payload

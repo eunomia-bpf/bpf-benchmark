@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -20,7 +19,6 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 RUNNER_DIR = SCRIPT_DIR.parent
 REPO_ROOT = RUNNER_DIR.parent
 DEFAULT_CONFIG = REPO_ROOT / "corpus" / "config" / "macro_corpus.yaml"
-LEGACY_REPO_ROOT = REPO_ROOT / "corpus" / "repos"
 
 
 def run(command: list[str], cwd: Path | None = None) -> None:
@@ -43,16 +41,6 @@ def load_corpus_config(path: Path) -> dict[str, Path]:
     }
 
 
-def migrate_legacy_repo(name: str, destination: Path) -> bool:
-    legacy_repo = LEGACY_REPO_ROOT / name
-    if destination.exists() or not legacy_repo.exists():
-        return False
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    shutil.move(str(legacy_repo), str(destination))
-    print(f"[migrate] {legacy_repo} -> {destination}")
-    return True
-
-
 def _git_head(path: Path) -> str | None:
     completed = capture(["git", "rev-parse", "HEAD"], cwd=path)
     if completed.returncode != 0:
@@ -67,35 +55,6 @@ def _git_clean(path: Path) -> bool:
     return not completed.stdout.strip()
 
 
-def cleanup_legacy_repo(name: str, destination: Path) -> bool:
-    legacy_repo = LEGACY_REPO_ROOT / name
-    if not legacy_repo.exists() or not destination.exists():
-        return False
-
-    legacy_head = _git_head(legacy_repo)
-    destination_head = _git_head(destination)
-    if legacy_head is None or destination_head is None:
-        return False
-    if legacy_head != destination_head:
-        return False
-    if not _git_clean(legacy_repo):
-        return False
-
-    shutil.rmtree(legacy_repo)
-    print(f"[cleanup] removed legacy checkout {legacy_repo}")
-    return True
-
-
-def cleanup_legacy_root() -> None:
-    if not LEGACY_REPO_ROOT.exists():
-        return
-    try:
-        next(LEGACY_REPO_ROOT.iterdir())
-    except StopIteration:
-        LEGACY_REPO_ROOT.rmdir()
-        print(f"[cleanup] removed empty {LEGACY_REPO_ROOT}")
-
-
 def ensure_repo(spec: dict[str, object], local_repos: Path) -> Path:
     name = str(spec["name"])
     url = str(spec["url"])
@@ -103,8 +62,6 @@ def ensure_repo(spec: dict[str, object], local_repos: Path) -> Path:
     sparse_paths = [str(path) for path in spec.get("sparse_paths", [])]
     repo_dir = local_repos / name
 
-    if not repo_dir.exists():
-        migrate_legacy_repo(name, repo_dir)
     if not repo_dir.exists():
         run(
             [
@@ -140,7 +97,6 @@ def ensure_repo(spec: dict[str, object], local_repos: Path) -> Path:
     else:
         run(["git", "sparse-checkout", "disable"], cwd=repo_dir)
 
-    cleanup_legacy_repo(name, repo_dir)
     return repo_dir
 
 
@@ -213,7 +169,6 @@ def main() -> int:
         "total_bpf_c": sum(int(record["num_bpf_c"]) for record in records),
     }
     inventory_path.write_text(json.dumps(output, indent=2))
-    cleanup_legacy_root()
     print(f"[done] wrote {inventory_path}")
     return 0
 

@@ -122,7 +122,7 @@ def run_in_vm(
     networks: Sequence[str] = (),
 ) -> subprocess.CompletedProcess[str]:
     script = Path(script_path).resolve()
-    guest_path = f"./{script.relative_to(ROOT_DIR).as_posix()}"
+    guest_path = str(script)
     command = build_vng_command(
         kernel_path=kernel_path,
         guest_exec=guest_path,

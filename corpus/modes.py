@@ -74,7 +74,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 DRIVER_RELATIVE = Path(__file__).with_name("driver.py").resolve().relative_to(ROOT_DIR)
 DEFAULT_INVENTORY_JSON = ROOT_DIR / "docs" / "tmp" / "corpus-runnability-results.json"
 DEFAULT_OUTPUT_JSON = authoritative_output_path(ROOT_DIR / "corpus" / "results", "corpus_vm_batch")
-DEFAULT_OUTPUT_MD = ROOT_DIR / "docs" / "tmp" / "corpus-batch-recompile-results.md"
+DEFAULT_OUTPUT_MD = ROOT_DIR / "docs" / "tmp" / "corpus-batch-rejit-results.md"
 DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
 DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
 DEFAULT_KERNEL_TREE = ROOT_DIR / "vendor" / "linux-framework"
@@ -118,7 +118,7 @@ FAMILY_DISPLAY_NAMES = {
 def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Run the inventory-derived packet-test-run corpus v5 recompile batch on "
+            "Run the inventory-derived packet-test-run corpus REJIT batch on "
             "the framework kernel guest."
         )
     )
@@ -161,12 +161,12 @@ def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--skip-families",
         action="append",
-        help="Comma-separated recompile families to exclude from daemon apply. Supported: cmov, wide, rotate, lea, extract, endian, branch-flip.",
+        help="Comma-separated REJIT families to exclude from daemon apply. Supported: cmov, wide, rotate, lea, extract, endian, branch-flip.",
     )
     parser.add_argument(
         "--blind-apply",
         action="store_true",
-        help="Ignore per-program policies and force blind all-apply auto-scan recompile for debugging.",
+        help="Ignore per-program policies and force blind all-apply auto-scan REJIT for debugging.",
     )
     parser.add_argument(
         "--guest-info",
@@ -325,46 +325,46 @@ def packet_batch_timeout_seconds(target_count: int, per_target_timeout: int) -> 
 
 def size_ratio(
     baseline_record: dict[str, Any] | None,
-    v5_record: dict[str, Any] | None,
+    rejit_record: dict[str, Any] | None,
 ) -> float | None:
-    if not baseline_record or not v5_record:
+    if not baseline_record or not rejit_record:
         return None
-    if not baseline_record.get("ok") or not v5_record.get("ok"):
+    if not baseline_record.get("ok") or not rejit_record.get("ok"):
         return None
     baseline_len = ((baseline_record.get("sample") or {}).get("jited_prog_len"))
-    v5_len = ((v5_record.get("sample") or {}).get("jited_prog_len"))
-    if not baseline_len or not v5_len:
+    rejit_len = ((rejit_record.get("sample") or {}).get("jited_prog_len"))
+    if not baseline_len or not rejit_len:
         return None
-    return float(baseline_len) / float(v5_len)
+    return float(baseline_len) / float(rejit_len)
 
 
 def size_delta_pct(
     baseline_record: dict[str, Any] | None,
-    v5_record: dict[str, Any] | None,
+    rejit_record: dict[str, Any] | None,
 ) -> float | None:
-    ratio = size_ratio(baseline_record, v5_record)
+    ratio = size_ratio(baseline_record, rejit_record)
     if ratio is None:
         return None
     baseline_len = ((baseline_record.get("sample") or {}).get("jited_prog_len"))
-    v5_len = ((v5_record.get("sample") or {}).get("jited_prog_len"))
-    if baseline_len in (None, 0) or v5_len is None:
+    rejit_len = ((rejit_record.get("sample") or {}).get("jited_prog_len"))
+    if baseline_len in (None, 0) or rejit_len is None:
         return None
-    return (float(v5_len) - float(baseline_len)) * 100.0 / float(baseline_len)
+    return (float(rejit_len) - float(baseline_len)) * 100.0 / float(baseline_len)
 
 
 def speedup_ratio(
     baseline_record: dict[str, Any] | None,
-    v5_record: dict[str, Any] | None,
+    rejit_record: dict[str, Any] | None,
 ) -> float | None:
-    if not baseline_record or not v5_record:
+    if not baseline_record or not rejit_record:
         return None
-    if not baseline_record.get("ok") or not v5_record.get("ok"):
+    if not baseline_record.get("ok") or not rejit_record.get("ok"):
         return None
     baseline_ns = ((baseline_record.get("sample") or {}).get("exec_ns"))
-    v5_ns = ((v5_record.get("sample") or {}).get("exec_ns"))
-    if not baseline_ns or not v5_ns:
+    rejit_ns = ((rejit_record.get("sample") or {}).get("exec_ns"))
+    if not baseline_ns or not rejit_ns:
         return None
-    return float(baseline_ns) / float(v5_ns)
+    return float(baseline_ns) / float(rejit_ns)
 
 
 def summarize_failure_reason(record: dict[str, Any] | None) -> str:
@@ -384,7 +384,7 @@ def program_label(record: dict[str, Any]) -> str:
     return f"{record['object_path']}:{record['program_name']}"
 
 
-def recompile_metadata(record: dict[str, Any] | None) -> dict[str, Any]:
+def rejit_metadata(record: dict[str, Any] | None) -> dict[str, Any]:
     if not record or not record.get("ok"):
         return {}
     return (record.get("sample") or {}).get("rejit") or {}
@@ -413,11 +413,11 @@ def build_empty_record(target: dict[str, Any], execution_mode: str) -> dict[str,
         "daemon_counts": normalize_scan(target.get("inventory_scan")),
         "daemon_cli": None,
         "baseline_compile": None,
-        "v5_compile": None,
+        "rejit_compile": None,
         "baseline_run": None,
-        "v5_run": None,
-        "v5_compile_applied": False,
-        "v5_run_applied": False,
+        "rejit_run": None,
+        "rejit_compile_applied": False,
+        "rejit_run_applied": False,
         "eligible_families": families_from_scan(target.get("inventory_scan")),
         "requested_families_compile": [],
         "requested_families_run": [],
@@ -548,14 +548,14 @@ def build_target_batch_plan(
                 "prefix": prefix,
                 "refs": refs,
                 "baseline_prepared_key": f"{prefix}:baseline-prepared",
-                "v5_prepared_key": f"{prefix}:v5-prepared",
+                "rejit_prepared_key": f"{prefix}:rejit-prepared",
             }
         )
 
     for chunk_start in range(0, len(target_entries), parallel_jobs):
         chunk = target_entries[chunk_start : chunk_start + parallel_jobs]
         baseline_group = f"chunk-{chunk_start // parallel_jobs:04d}:baseline"
-        v5_group = f"chunk-{chunk_start // parallel_jobs:04d}:v5"
+        rejit_group = f"chunk-{chunk_start // parallel_jobs:04d}:rejit"
 
         for entry in chunk:
             target = entry["target"]
@@ -639,10 +639,10 @@ def build_target_batch_plan(
             for entry in chunk:
                 target = entry["target"]
                 refs = entry["refs"]
-                refs["v5_compile"] = f"{entry['prefix']}:v5-compile"
+                refs["rejit_compile"] = f"{entry['prefix']}:rejit-compile"
                 jobs.append(
                     build_test_run_batch_job(
-                        job_id=refs["v5_compile"],
+                        job_id=refs["rejit_compile"],
                         execution="parallel",
                         runtime="kernel-rejit",
                         object_path=entry["object_path"],
@@ -655,12 +655,12 @@ def build_target_batch_plan(
                         compile_only=True,
                         daemon_socket=daemon_socket,
                         prepared_key=(
-                            entry["v5_prepared_key"]
+                            entry["rejit_prepared_key"]
                             if enable_exec and target.get("can_test_run")
                             else None
                         ),
                         prepared_group=(
-                            v5_group
+                            rejit_group
                             if enable_exec and target.get("can_test_run")
                             else None
                         ),
@@ -673,10 +673,10 @@ def build_target_batch_plan(
                 refs = entry["refs"]
                 if not target.get("can_test_run"):
                     continue
-                refs["v5_run"] = f"{entry['prefix']}:v5-run"
+                refs["rejit_run"] = f"{entry['prefix']}:rejit-run"
                 jobs.append(
                     build_test_run_batch_job(
-                        job_id=refs["v5_run"],
+                        job_id=refs["rejit_run"],
                         execution="serial",
                         runtime="kernel-rejit",
                         object_path=entry["object_path"],
@@ -688,8 +688,8 @@ def build_target_batch_plan(
                         btf_custom_path=btf_custom_path,
                         compile_only=False,
                         daemon_socket=daemon_socket,
-                        prepared_ref=entry["v5_prepared_key"],
-                        prepared_group=v5_group,
+                        prepared_ref=entry["rejit_prepared_key"],
+                        prepared_group=rejit_group,
                     )
                 )
 
@@ -712,18 +712,17 @@ def build_record_from_batch_results(
     blind_apply: bool,
     job_refs: Mapping[str, str],
     results_by_id: Mapping[str, dict[str, Any]],
-) -> dict[str, Any]:
+    ) -> dict[str, Any]:
     record = build_empty_record(target, execution_mode)
-    recompile_all = blind_apply
-    policy_mode = "blind-apply-v5" if blind_apply else "daemon-auto"
+    policy_mode = "blind-apply-rejit" if blind_apply else "daemon-auto"
     inventory_scan = normalize_scan(target.get("inventory_scan"))
     scan_source = "inventory"
     daemon_counts = inventory_scan
 
     baseline_compile_raw = batch_job_invocation_summary(results_by_id.get(job_refs.get("baseline_compile", "")))
     baseline_run_raw = batch_job_invocation_summary(results_by_id.get(job_refs.get("baseline_run", "")))
-    v5_compile_raw = batch_job_invocation_summary(results_by_id.get(job_refs.get("v5_compile", "")))
-    v5_run_raw = batch_job_invocation_summary(results_by_id.get(job_refs.get("v5_run", "")))
+    rejit_compile_raw = batch_job_invocation_summary(results_by_id.get(job_refs.get("rejit_compile", "")))
+    rejit_run_raw = batch_job_invocation_summary(results_by_id.get(job_refs.get("rejit_run", "")))
 
     if baseline_compile_raw and baseline_compile_raw.get("ok"):
         baseline_scan = directive_scan_from_record(baseline_compile_raw)
@@ -738,36 +737,36 @@ def build_record_from_batch_results(
     record["daemon_counts"] = daemon_counts
     record["eligible_families"] = families_from_scan(daemon_counts)
     record["baseline_compile"] = baseline_compile_raw
-    record["v5_compile"] = v5_compile_raw
-    record["v5_run"] = v5_run_raw
+    record["rejit_compile"] = rejit_compile_raw
+    record["rejit_run"] = rejit_run_raw
     record["baseline_run"] = baseline_run_raw
 
     if (
         enable_exec
         and enable_recompile
         and target.get("can_test_run")
-        and v5_run_raw
-        and v5_run_raw.get("ok")
+        and rejit_run_raw
+        and rejit_run_raw.get("ok")
         and record["baseline_run"] is None
     ):
         record["record_error"] = "stock phase missing from batch runner output"
-    record["v5_compile_applied"] = bool((((record["v5_compile"] or {}).get("sample") or {}).get("rejit") or {}).get("applied"))
-    record["v5_run_applied"] = bool((((record["v5_run"] or {}).get("sample") or {}).get("rejit") or {}).get("applied"))
-    record["requested_families_compile"] = list(recompile_metadata(record["v5_compile"]).get("requested_families") or [])
-    record["requested_families_run"] = list(recompile_metadata(record["v5_run"]).get("requested_families") or [])
+    record["rejit_compile_applied"] = bool((((record["rejit_compile"] or {}).get("sample") or {}).get("rejit") or {}).get("applied"))
+    record["rejit_run_applied"] = bool((((record["rejit_run"] or {}).get("sample") or {}).get("rejit") or {}).get("applied"))
+    record["requested_families_compile"] = list(rejit_metadata(record["rejit_compile"]).get("requested_families") or [])
+    record["requested_families_run"] = list(rejit_metadata(record["rejit_run"]).get("requested_families") or [])
     record["applied_families_compile"] = effective_applied_families(
         record["requested_families_compile"],
         record["eligible_families"],
-        record["v5_compile_applied"],
+        record["rejit_compile_applied"],
     )
     record["applied_families_run"] = effective_applied_families(
         record["requested_families_run"],
         record["eligible_families"],
-        record["v5_run_applied"],
+        record["rejit_run_applied"],
     )
-    record["size_ratio"] = size_ratio(record["baseline_compile"], record["v5_compile"])
-    record["size_delta_pct"] = size_delta_pct(record["baseline_compile"], record["v5_compile"])
-    record["speedup_ratio"] = speedup_ratio(record["baseline_run"], record["v5_run"])
+    record["size_ratio"] = size_ratio(record["baseline_compile"], record["rejit_compile"])
+    record["size_delta_pct"] = size_delta_pct(record["baseline_compile"], record["rejit_compile"])
+    record["speedup_ratio"] = speedup_ratio(record["baseline_run"], record["rejit_run"])
     return record
 
 
@@ -999,14 +998,14 @@ def run_targets_in_guest_batch(
 ) -> dict[str, Any]:
     handle = tempfile.NamedTemporaryFile(
         mode="w",
-        prefix="corpus-v5-vm-batch-",
+        prefix="corpus-rejit-vm-batch-",
         suffix=".json",
         dir=ROOT_DIR,
         delete=False,
     )
     result_handle = tempfile.NamedTemporaryFile(
         mode="w",
-        prefix="corpus-v5-vm-batch-result-",
+        prefix="corpus-rejit-vm-batch-result-",
         suffix=".json",
         dir=ROOT_DIR,
         delete=False,
@@ -1016,7 +1015,7 @@ def run_targets_in_guest_batch(
             "targets": [
                 {
                     **target,
-                    "policy_mode": "blind-apply-v5" if blind_apply else "daemon-auto",
+                    "policy_mode": "blind-apply-rejit" if blind_apply else "daemon-auto",
                     "policy_path": None,
                 }
                 for target in targets
@@ -1222,18 +1221,18 @@ def build_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
         record
         for record in records
         if record.get("baseline_compile") and record["baseline_compile"].get("ok")
-        and record.get("v5_compile") and record["v5_compile"].get("ok")
+        and record.get("rejit_compile") and record["rejit_compile"].get("ok")
     ]
     measured_pairs = [
         record
         for record in records
         if record.get("baseline_run") and record["baseline_run"].get("ok")
-        and record.get("v5_run") and record["v5_run"].get("ok")
+        and record.get("rejit_run") and record["rejit_run"].get("ok")
     ]
     applied_programs = [
         record
         for record in records
-        if record.get("v5_compile_applied") or record.get("v5_run_applied")
+        if record.get("rejit_compile_applied") or record.get("rejit_run_applied")
     ]
     family_totals = Counter()
     for record in records:
@@ -1242,31 +1241,31 @@ def build_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
             family_totals[field] += scan[field]
 
     failure_reasons = Counter()
-    recompile_failures = Counter()
+    rejit_failures = Counter()
     for record in records:
         if record.get("record_error"):
             failure_reasons[str(record["record_error"])] += 1
             continue
         baseline_compile = record.get("baseline_compile")
-        v5_compile = record.get("v5_compile")
+        rejit_compile = record.get("rejit_compile")
         baseline_run = record.get("baseline_run")
-        v5_run = record.get("v5_run")
+        rejit_run = record.get("rejit_run")
         if baseline_compile and not baseline_compile.get("ok"):
             failure_reasons[summarize_failure_reason(baseline_compile)] += 1
-        if v5_compile and not v5_compile.get("ok"):
-            failure_reasons[summarize_failure_reason(v5_compile)] += 1
+        if rejit_compile and not rejit_compile.get("ok"):
+            failure_reasons[summarize_failure_reason(rejit_compile)] += 1
         if baseline_run and not baseline_run.get("ok"):
             failure_reasons[summarize_failure_reason(baseline_run)] += 1
-        if v5_run and not v5_run.get("ok"):
-            failure_reasons[summarize_failure_reason(v5_run)] += 1
-        if v5_compile and v5_compile.get("ok"):
-            rejit = ((v5_compile.get("sample") or {}).get("rejit") or {})
+        if rejit_run and not rejit_run.get("ok"):
+            failure_reasons[summarize_failure_reason(rejit_run)] += 1
+        if rejit_compile and rejit_compile.get("ok"):
+            rejit = ((rejit_compile.get("sample") or {}).get("rejit") or {})
             if rejit.get("requested") and not rejit.get("applied") and rejit.get("error"):
-                recompile_failures[str(rejit["error"])] += 1
-        if v5_run and v5_run.get("ok"):
-            rejit = ((v5_run.get("sample") or {}).get("rejit") or {})
+                rejit_failures[str(rejit["error"])] += 1
+        if rejit_run and rejit_run.get("ok"):
+            rejit = ((rejit_run.get("sample") or {}).get("rejit") or {})
             if rejit.get("requested") and not rejit.get("applied") and rejit.get("error"):
-                recompile_failures[str(rejit["error"])] += 1
+                rejit_failures[str(rejit["error"])] += 1
 
     size_ratios = [record["size_ratio"] for record in compile_pairs if record.get("size_ratio") is not None]
     exec_ratios = [record["speedup_ratio"] for record in measured_pairs if record.get("speedup_ratio") is not None]
@@ -1292,7 +1291,7 @@ def build_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
             "programs": len(items),
             "compile_pairs": len(source_compile),
             "measured_pairs": len(source_measured),
-            "applied_programs": sum(1 for item in items if item.get("v5_compile_applied") or item.get("v5_run_applied")),
+            "applied_programs": sum(1 for item in items if item.get("rejit_compile_applied") or item.get("rejit_run_applied")),
             "total_sites": sum(counts[field] for _, field in FAMILY_FIELDS),
             "code_size_ratio_geomean": geomean(source_size),
             "exec_ratio_geomean": geomean(source_exec),
@@ -1363,7 +1362,7 @@ def build_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
         "regressions": len(regressions),
         "family_totals": dict(family_totals),
         "failure_reasons": dict(failure_reasons.most_common(16)),
-        "recompile_failure_reasons": dict(recompile_failures.most_common(16)),
+        "rejit_failure_reasons": dict(rejit_failures.most_common(16)),
         "by_source": by_source,
         "by_family": by_family,
         "top_speedups": [
@@ -1406,7 +1405,7 @@ def build_markdown(data: dict[str, Any]) -> str:
     guest_info = (data.get("guest_smoke") or {}).get("payload")
     family_headers = [FAMILY_DISPLAY_NAMES[name] for name, _ in FAMILY_FIELDS]
     lines: list[str] = [
-        "# Corpus Batch Recompile Results",
+        "# Corpus Batch REJIT Results",
         "",
         f"- Generated: {data['generated_at']}",
         f"- Inventory: `{data['inventory_json']}`",
@@ -1419,9 +1418,9 @@ def build_markdown(data: dict[str, Any]) -> str:
         f"- Target programs: {summary['targets_attempted']}",
         f"- Compile pairs: {summary['compile_pairs']}",
         f"- Measured pairs: {summary['measured_pairs']}",
-        f"- Recompile applied programs: {summary['applied_programs']}",
-        f"- Code-size ratio geomean (baseline/v5): {format_ratio(summary['code_size_ratio_geomean'])}",
-        f"- Exec-time ratio geomean (baseline/v5): {format_ratio(summary['exec_ratio_geomean'])}",
+        f"- REJIT applied programs: {summary['applied_programs']}",
+        f"- Code-size ratio geomean (baseline/rejit): {format_ratio(summary['code_size_ratio_geomean'])}",
+        f"- Exec-time ratio geomean (baseline/rejit): {format_ratio(summary['exec_ratio_geomean'])}",
         f"- Total sites: {sum(summary['family_totals'].get(field, 0) for _, field in FAMILY_FIELDS)}",
         *[
             f"- {FAMILY_DISPLAY_NAMES[name]} sites: {summary['family_totals'].get(field, 0)}"
@@ -1559,10 +1558,10 @@ def build_markdown(data: dict[str, Any]) -> str:
                 "Sites",
                 "Applied Families",
                 "Baseline JIT",
-                "v5 JIT",
+                "REJIT JIT",
                 "Code Ratio",
                 "Baseline ns",
-                "v5 ns",
+                "REJIT ns",
                 "Exec Ratio",
                 "Note",
             ],
@@ -1574,15 +1573,15 @@ def build_markdown(data: dict[str, Any]) -> str:
                     normalize_scan(record.get("daemon_counts"))["total_sites"],
                     ", ".join(record.get("applied_families_run") or record.get("applied_families_compile") or []),
                     format_ns(((record.get("baseline_compile") or {}).get("sample") or {}).get("jited_prog_len")),
-                    format_ns(((record.get("v5_compile") or {}).get("sample") or {}).get("jited_prog_len")),
+                    format_ns(((record.get("rejit_compile") or {}).get("sample") or {}).get("jited_prog_len")),
                     format_ratio(record.get("size_ratio")),
                     format_ns(((record.get("baseline_run") or {}).get("sample") or {}).get("exec_ns")),
-                    format_ns(((record.get("v5_run") or {}).get("sample") or {}).get("exec_ns")),
+                    format_ns(((record.get("rejit_run") or {}).get("sample") or {}).get("exec_ns")),
                     format_ratio(record.get("speedup_ratio")),
                     record.get("record_error")
                     or (
-                        summarize_failure_reason(record.get("v5_compile"))
-                        if record.get("v5_compile") and not record["v5_compile"].get("ok")
+                        summarize_failure_reason(record.get("rejit_compile"))
+                        if record.get("rejit_compile") and not record["rejit_compile"].get("ok")
                         else ""
                     ),
                 ]
@@ -1600,12 +1599,12 @@ def build_markdown(data: dict[str, Any]) -> str:
             )
         )
 
-    if summary["recompile_failure_reasons"]:
-        lines.extend(["", "## Recompile Failures", ""])
+    if summary["rejit_failure_reasons"]:
+        lines.extend(["", "## REJIT Failures", ""])
         lines.extend(
             markdown_table(
                 ["Reason", "Count"],
-                [[reason, count] for reason, count in summary["recompile_failure_reasons"].items()],
+                [[reason, count] for reason, count in summary["rejit_failure_reasons"].items()],
             )
         )
 
@@ -1614,10 +1613,10 @@ def build_markdown(data: dict[str, Any]) -> str:
             "",
             "## Notes",
             "",
-            "- Target selection comes from the runnability inventory and keeps every packet-test-run target whose baseline run already succeeds; the current daemon pass determines whether v5 has any eligible families.",
-            "- In strict VM mode, the framework v5 guest boots once, keeps `daemon serve` alive for the full batch, and runs baseline compile-only, v5 compile-only, baseline test_run, and v5 test_run for each target in that order.",
+            "- Target selection comes from the runnability inventory and keeps every packet-test-run target whose baseline run already succeeds; the current daemon pass determines whether REJIT has any eligible families.",
+            "- In strict VM mode, the framework REJIT guest boots once, keeps `daemon serve` alive for the full batch, and runs baseline compile-only, REJIT compile-only, baseline test_run, and REJIT test_run for each target in that order.",
             "- Default steady-state semantics: the daemon is always started and tries to optimize each program; programs with no applicable sites stay on stock JIT.",
-            "- `--blind-apply` forces the old debug/exploration path with `--recompile-v5 --recompile-all`.",
+            "- `--blind-apply` switches from per-program policy mode to unconditional daemon auto-scan REJIT.",
             "- `--skip-families` only applies together with `--blind-apply`; the family columns above report applied families, not just eligible sites.",
             "- The Make-driven `vm-corpus` path is strict VM-only: guest batch failures fail the run instead of falling back to host execution.",
             "- Family summaries are overlap-based: one program can contribute to multiple family rows, so those rows are not isolated causal attributions.",
@@ -1841,9 +1840,9 @@ def _mode_defaults(mode_name: str) -> tuple[Path, Path]:
 def parse_linear_mode_args(mode_name: str, argv: list[str] | None = None) -> argparse.Namespace:
     default_output_json, default_output_md = _mode_defaults(mode_name)
     description = {
-        "perf": "Measure corpus programs locally with stock vs recompile runs when test_run is supported.",
-        "tracing": "Inspect tracing-style corpus programs with stock vs recompile compile-only passes.",
-        "code-size": "Compare stock vs recompile code size for the discovered corpus programs.",
+        "perf": "Measure corpus programs locally with stock vs REJIT runs when test_run is supported.",
+        "tracing": "Inspect tracing-style corpus programs with stock vs REJIT compile-only passes.",
+        "code-size": "Compare stock vs REJIT code size for the discovered corpus programs.",
     }[mode_name]
     parser = argparse.ArgumentParser(description=description)
     add_output_json_argument(parser, default_output_json)
@@ -1875,12 +1874,12 @@ def parse_linear_mode_args(mode_name: str, argv: list[str] | None = None) -> arg
     parser.add_argument(
         "--skip-families",
         action="append",
-        help="Comma-separated recompile families to skip from blind auto-scan apply mode.",
+        help="Comma-separated REJIT families to skip from blind auto-scan apply mode.",
     )
     parser.add_argument(
         "--blind-apply",
         action="store_true",
-        help="Ignore per-program policies and force blind all-apply auto-scan recompile.",
+        help="Ignore per-program policies and force blind all-apply auto-scan REJIT.",
     )
     return parser.parse_args(argv)
 
@@ -1981,17 +1980,17 @@ def build_linear_summary(
         1
         for record in records
         if (record.get("baseline_compile") or {}).get("ok")
-        and (record.get("v5_compile") or {}).get("ok")
+        and (record.get("rejit_compile") or {}).get("ok")
     )
     measured_pairs = sum(
         1
         for record in records
         if enable_exec
         and (record.get("baseline_run") or {}).get("ok")
-        and (record.get("v5_run") or {}).get("ok")
+        and (record.get("rejit_run") or {}).get("ok")
     )
     applied_programs = sum(
-        1 for record in records if record.get("v5_compile_applied") or record.get("v5_run_applied")
+        1 for record in records if record.get("rejit_compile_applied") or record.get("rejit_run_applied")
     )
     size_ratios = [float(record["size_ratio"]) for record in records if record.get("size_ratio")]
     speedup_ratios = [float(record["speedup_ratio"]) for record in records if record.get("speedup_ratio")]
@@ -2052,7 +2051,7 @@ def build_linear_markdown(
                 record["section_name"],
                 format_ratio(record.get("size_ratio")),
                 format_ratio(record.get("speedup_ratio")) if enable_exec else "n/a",
-                "yes" if record.get("v5_compile_applied") or record.get("v5_run_applied") else "no",
+                "yes" if record.get("rejit_compile_applied") or record.get("rejit_run_applied") else "no",
                 record.get("record_error") or "",
             ]
         )

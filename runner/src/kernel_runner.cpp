@@ -948,9 +948,6 @@ daemon_socket_response daemon_socket_optimize(const std::string &socket_path, ui
                 response.final_disabled_passes =
                     extract_json_string_array(summary, "final_disabled_passes");
             }
-        } else {
-            /* Fallback: check top-level applied for backward compat */
-            response.applied = extract_json_bool(buf, "applied");
         }
 
         /* Extract program.insn_delta */

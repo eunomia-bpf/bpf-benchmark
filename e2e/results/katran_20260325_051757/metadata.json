@@ -1,0 +1,24 @@
+{
+  "artifact_kind": "result_run",
+  "artifact_version": 1,
+  "case": "katran",
+  "details_dir": "details",
+  "error_message": "command failed (1): /usr/sbin/ip netns exec katran-router link set dev rtlb0 address 02:00:00:00:00:0b\nlink: extra operand \u2018rtlb0\u2019\nTry 'link --help' for more information.",
+  "generated_at": "2026-03-25T05:17:58.473171+00:00",
+  "last_updated_at": "2026-03-25T05:17:58.473167+00:00",
+  "output_hint_json": "e2e/results/katran_authoritative_20260325.json",
+  "output_hint_md": "e2e/results/katran-e2e-real.md",
+  "output_hint_report_md": "docs/tmp/bpftrace-real-e2e-report.md",
+  "paper_summary": {
+    "case": "katran",
+    "error_message": "command failed (1): /usr/sbin/ip netns exec katran-router link set dev rtlb0 address 02:00:00:00:00:0b\nlink: extra operand \u2018rtlb0\u2019\nTry 'link --help' for more information.",
+    "failed_at": "2026-03-25T05:17:58.473151+00:00",
+    "smoke": false,
+    "status": "error"
+  },
+  "run_type": "katran",
+  "smoke": false,
+  "started_at": "2026-03-25T05:17:57.234069+00:00",
+  "status": "error",
+  "suite": "e2e"
+}

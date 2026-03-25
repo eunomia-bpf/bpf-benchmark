@@ -146,9 +146,7 @@ fn offset_is_directly_encodable(arch: Arch, size: u8, offset: i16) -> bool {
                 BPF_DW => 3,
                 _ => return false,
             };
-            (offset >= 0
-                && offset <= (0x0fff << shift)
-                && (offset & ((1 << shift) - 1)) == 0)
+            (offset >= 0 && offset <= (0x0fff << shift) && (offset & ((1 << shift) - 1)) == 0)
                 || (-256..=255).contains(&offset)
         }
     }

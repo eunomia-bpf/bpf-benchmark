@@ -6,8 +6,8 @@ Usage:
     make compare OLD=micro/results/old.json NEW=micro/results/new.json
 
 For each benchmark present in both files, reports:
-  - old kernel-recompile ratio (llvmbpf/kernel or recompile/kernel)
-  - new kernel-recompile ratio
+  - old kernel-rejit ratio (llvmbpf/kernel or kernel-rejit/kernel)
+  - new kernel-rejit ratio
   - delta (new - old)
   - flag if |delta| > 5%
 
@@ -60,7 +60,7 @@ def _extract_abs(benchmark_record: dict, runtime: str) -> float | None:
 
 
 def _infer_comparison_pair(benchmarks: list[dict]) -> tuple[str, str]:
-    """Infer which runtimes to compare: prefer kernel-recompile/kernel, fall back to llvmbpf/kernel.
+    """Infer which runtimes to compare: prefer kernel-rejit/kernel, fall back to llvmbpf/kernel.
 
     Returns ("", "") only when zero runtimes are found (no data).
     Returns (runtime, "") when only one runtime exists — caller should use absolute mode.
@@ -70,8 +70,8 @@ def _infer_comparison_pair(benchmarks: list[dict]) -> tuple[str, str]:
         for run in b.get("runs", []):
             runtime_names.add(str(run.get("runtime", "")))
 
-    if "kernel-recompile" in runtime_names and "kernel" in runtime_names:
-        return "kernel-recompile", "kernel"
+    if "kernel-rejit" in runtime_names and "kernel" in runtime_names:
+        return "kernel-rejit", "kernel"
     if "llvmbpf" in runtime_names and "kernel" in runtime_names:
         return "llvmbpf", "kernel"
     # Fall back to first two found

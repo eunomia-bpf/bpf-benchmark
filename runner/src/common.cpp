@@ -93,10 +93,10 @@ std::string usage_text()
         "run-llvmbpf|"
 #endif
         "run-kernel|list-programs> [--program <path>|<path>] [--program-name <name>] "
-        "[--memory|--input <path>] [--btf-custom-path <path>] "
+        "[--memory <path>] [--btf-custom-path <path>] "
         "[--rejit] [--rejit-program <path>] [--daemon-socket <path>] "
         "[--manual-load] "
-        "[--io-mode map|staged|packet|context] [--raw-packet] [--repeat N] [--warmup N] [--input-size|--kernel-input-size N] "
+        "[--io-mode map|staged|packet|context] [--raw-packet] [--repeat N] [--warmup N] [--input-size N] "
         "[--opt-level 0|1|2|3] [--no-cmov] [--llvm-target-cpu <cpu>] [--llvm-target-features <csv>] [--llvm-disable-pass <name>] [--llvm-log-passes] "
         "[--perf-counters] [--perf-scope full_repeat_raw|full_repeat_avg] "
         "[--dump-jit] [--dump-xlated <path>] [--compile-only]";
@@ -510,8 +510,7 @@ cli_options parse_args(int argc, char **argv)
             std::cout << usage_text() << "\n";
             std::exit(0);
         }
-        if ((current == "--program" || current == "--bpf-object" ||
-             current == "--bpf-obj") && index + 1 < argc) {
+        if (current == "--program" && index + 1 < argc) {
             options.program = argv[++index];
             continue;
         }
@@ -520,7 +519,7 @@ cli_options parse_args(int argc, char **argv)
             options.program = std::filesystem::path(current);
             continue;
         }
-        if ((current == "--memory" || current == "--input") && index + 1 < argc) {
+        if (current == "--memory" && index + 1 < argc) {
             options.memory = std::filesystem::path(argv[++index]);
             continue;
         }
@@ -562,12 +561,11 @@ cli_options parse_args(int argc, char **argv)
             options.repeat = static_cast<uint32_t>(std::stoul(argv[++index]));
             continue;
         }
-        if ((current == "--warmup" || current == "--warmups") && index + 1 < argc) {
+        if (current == "--warmup" && index + 1 < argc) {
             options.warmup_repeat = static_cast<uint32_t>(std::stoul(argv[++index]));
             continue;
         }
-        if ((current == "--input-size" || current == "--kernel-input-size") &&
-            index + 1 < argc) {
+        if (current == "--input-size" && index + 1 < argc) {
             options.input_size = static_cast<uint32_t>(std::stoul(argv[++index]));
             continue;
         }
@@ -649,8 +647,7 @@ keep_alive_request parse_keep_alive_request(std::string_view json_line)
             fail("keep-alive run command requires a string field named 'runtime'");
         }
         const std::string runtime_name = lower_ascii(*runtime);
-        const bool runtime_implies_rejit =
-            runtime_name == "kernel-rejit" || runtime_name == "kernel_rejit";
+        const bool runtime_implies_rejit = runtime_name == "kernel-rejit";
         if (runtime_name == "kernel" ||
             runtime_implies_rejit) {
             options.command = "run-kernel";
@@ -664,16 +661,13 @@ keep_alive_request parse_keep_alive_request(std::string_view json_line)
         fail("unsupported keep-alive command: " + request.cmd);
     }
 
-    const auto program = get_optional_string_field(
-        fields,
-        {"bpf_object", "program", "bpf_obj"});
+    const auto program = get_optional_string_field(fields, {"program"});
     if (!program.has_value()) {
-        fail("keep-alive command requires a program path in 'bpf_object'");
+        fail("keep-alive command requires a program path in 'program'");
     }
     options.program = std::filesystem::path(*program);
 
-    if (const auto memory = get_optional_string_field(
-            fields, {"memory_file", "memory", "input"});
+    if (const auto memory = get_optional_string_field(fields, {"memory"});
         memory.has_value()) {
         options.memory = std::filesystem::path(*memory);
     }
@@ -693,13 +687,11 @@ keep_alive_request parse_keep_alive_request(std::string_view json_line)
         repeat.has_value()) {
         options.repeat = require_u32_value(*repeat, "repeat");
     }
-    if (const auto warmup = get_optional_int_field(
-            fields, {"warmup", "warmups", "warmup_repeat"});
+    if (const auto warmup = get_optional_int_field(fields, {"warmup_repeat"});
         warmup.has_value()) {
         options.warmup_repeat = require_u32_value(*warmup, "warmup_repeat");
     }
-    if (const auto input_size = get_optional_int_field(
-            fields, {"input_size", "kernel_input_size"});
+    if (const auto input_size = get_optional_int_field(fields, {"input_size"});
         input_size.has_value()) {
         options.input_size = require_u32_value(*input_size, "input_size");
     }
@@ -743,13 +735,11 @@ keep_alive_request parse_keep_alive_request(std::string_view json_line)
         target_features.has_value()) {
         options.llvm_target_features = *target_features;
     }
-    if (const auto disabled_passes = get_optional_string_array_field(
-            fields, {"disabled_passes", "llvm_disable_passes"});
+    if (const auto disabled_passes = get_optional_string_array_field(fields, {"disabled_passes"});
         disabled_passes.has_value()) {
         options.disabled_passes = *disabled_passes;
     }
-    if (const auto log_passes = get_optional_bool_field(
-            fields, {"log_passes", "llvm_log_passes"});
+    if (const auto log_passes = get_optional_bool_field(fields, {"log_passes"});
         log_passes.has_value()) {
         options.log_passes = *log_passes;
     }
