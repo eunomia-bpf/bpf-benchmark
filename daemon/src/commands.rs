@@ -378,6 +378,7 @@ fn enumerate_one(
     // Run the pipeline in dry-run mode to count sites.
     let site_summary = if !orig_insns.is_empty() {
         let mut program = pass::BpfProgram::new(orig_insns);
+        program.set_map_ids(bpf::bpf_prog_get_map_ids(fd.as_raw_fd()).unwrap_or_default());
         let pm = build_pipeline(pass_names);
 
         match pm.run(&mut program, ctx) {
@@ -427,6 +428,8 @@ pub(crate) fn cmd_rewrite(
     );
 
     let mut program = pass::BpfProgram::new(orig_insns.clone());
+    let fd = bpf::bpf_prog_get_fd_by_id(prog_id)?;
+    program.set_map_ids(bpf::bpf_prog_get_map_ids(fd.as_raw_fd()).unwrap_or_default());
     let pm = build_pipeline(pass_names);
 
     let pipeline_result = pm.run(&mut program, ctx)?;
@@ -663,6 +666,7 @@ pub(crate) fn try_apply_one(
 
     for attempt in 0..=max_retries {
         let mut program = pass::BpfProgram::new(orig_insns.clone());
+        program.set_map_ids(map_ids.clone());
         let pm = build_pipeline(pass_names);
         let mut local_ctx = ctx.clone();
         for disabled in sorted_strings(disabled_passes.iter().cloned()) {

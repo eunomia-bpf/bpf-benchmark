@@ -3,7 +3,7 @@
 //!
 //! All interaction with the kernel goes through `libc::syscall(SYS_bpf, ...)`.
 
-use std::os::unix::io::{FromRawFd, OwnedFd, RawFd};
+use std::os::unix::io::{AsRawFd, FromRawFd, OwnedFd, RawFd};
 
 use anyhow::{bail, Context, Result};
 use serde::Serialize;
@@ -153,6 +153,37 @@ impl BpfProgInfo {
     }
 }
 
+/// Mirrors `struct bpf_map_info` from the kernel UAPI header.
+#[repr(C)]
+#[derive(Clone, Debug)]
+pub struct BpfMapInfo {
+    pub map_type: u32,
+    pub id: u32,
+    pub key_size: u32,
+    pub value_size: u32,
+    pub max_entries: u32,
+    pub map_flags: u32,
+    pub name: [u8; BPF_OBJ_NAME_LEN],
+    pub ifindex: u32,
+    pub btf_vmlinux_value_type_id: u32,
+    pub netns_dev: u64,
+    pub netns_ino: u64,
+    pub btf_id: u32,
+    pub btf_key_type_id: u32,
+    pub btf_value_type_id: u32,
+    pub btf_vmlinux_id: u32,
+    pub map_extra: u64,
+    pub hash: u64,
+    pub hash_size: u32,
+}
+
+impl Default for BpfMapInfo {
+    fn default() -> Self {
+        // Safety: all-zero is valid for this repr(C) struct.
+        unsafe { std::mem::zeroed() }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Default)]
 struct ProgImageRequest {
     fetch_orig: bool,
@@ -245,6 +276,36 @@ fn bpf_obj_get_info_by_fd(fd: RawFd, info: &mut BpfProgInfo, context: &str) -> R
         bail!(bpf_err(context));
     }
     Ok(())
+}
+
+fn bpf_map_obj_get_info_by_fd(fd: RawFd, info: &mut BpfMapInfo, context: &str) -> Result<()> {
+    let mut attr: AttrGetInfoByFd = zeroed_attr();
+    attr.bpf_fd = fd as u32;
+    attr.info_len = std::mem::size_of::<BpfMapInfo>() as u32;
+    attr.info = info as *mut _ as u64;
+
+    let ret = unsafe {
+        sys_bpf(
+            BPF_OBJ_GET_INFO_BY_FD,
+            &mut attr as *mut _ as *mut u8,
+            std::mem::size_of::<AttrGetInfoByFd>() as u32,
+        )
+    };
+    if ret < 0 {
+        bail!(bpf_err(context));
+    }
+    Ok(())
+}
+
+fn bpf_map_try_detect_frozen(fd: RawFd) -> bool {
+    const SHA256_DIGEST_SIZE: usize = 32;
+
+    let mut info = BpfMapInfo::default();
+    let mut hash = [0u8; SHA256_DIGEST_SIZE];
+    info.hash = hash.as_mut_ptr() as u64;
+    info.hash_size = SHA256_DIGEST_SIZE as u32;
+
+    bpf_map_obj_get_info_by_fd(fd, &mut info, "BPF_OBJ_GET_INFO_BY_FD (map hash)").is_ok()
 }
 
 fn parse_bpf_insn_bytes(bytes: &[u8], field_name: &str) -> Result<Vec<BpfInsn>> {
@@ -383,6 +444,21 @@ pub fn bpf_map_get_fd_by_id(id: u32) -> Result<OwnedFd> {
         bail!(bpf_err(&format!("BPF_MAP_GET_FD_BY_ID({})", id)));
     }
     Ok(unsafe { OwnedFd::from_raw_fd(ret as RawFd) })
+}
+
+/// Retrieve `bpf_map_info` for an open map fd.
+pub fn bpf_map_get_info(fd: RawFd) -> Result<BpfMapInfo> {
+    let mut info = BpfMapInfo::default();
+    bpf_map_obj_get_info_by_fd(fd, &mut info, "BPF_OBJ_GET_INFO_BY_FD (map)")?;
+    Ok(info)
+}
+
+/// Retrieve `bpf_map_info` and a best-effort frozen bit for a map ID.
+pub fn bpf_map_get_info_by_id(id: u32) -> Result<(BpfMapInfo, bool)> {
+    let fd = bpf_map_get_fd_by_id(id)?;
+    let info = bpf_map_get_info(fd.as_raw_fd())?;
+    let frozen = bpf_map_try_detect_frozen(fd.as_raw_fd());
+    Ok((info, frozen))
 }
 
 /// Open a file descriptor for the BPF BTF object with the given ID.

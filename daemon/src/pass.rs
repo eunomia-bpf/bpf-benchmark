@@ -68,6 +68,10 @@ pub struct BpfProgram {
     /// BTF FDs required by kinsn descriptor calls introduced during rewrite.
     /// Used by cmd_apply to construct the REJIT transport fd_array.
     pub required_btf_fds: Vec<i32>,
+    /// Map IDs referenced by this program, in the kernel's `used_maps` order.
+    /// This metadata lets analyses resolve `BPF_PSEUDO_MAP_FD` references
+    /// found in the original bytecode back to live kernel map objects.
+    pub map_ids: Vec<u32>,
     /// Program-level branch miss rate from PMU hardware counters.
     /// Set by `inject_profiling` when PMU data is available.
     /// Consumed by BranchFlipPass to gate optimization.
@@ -89,8 +93,14 @@ impl BpfProgram {
             annotations: vec![InsnAnnotation::default(); len],
             transform_log: Vec::new(),
             required_btf_fds: Vec::new(),
+            map_ids: Vec::new(),
             branch_miss_rate: None,
         }
+    }
+
+    /// Attach live-kernel map IDs to this program.
+    pub fn set_map_ids(&mut self, map_ids: Vec<u32>) {
+        self.map_ids = map_ids;
     }
 
     /// Resynchronize annotations length after instruction stream changes.

@@ -18,12 +18,13 @@ pub use rotate::RotatePass;
 pub use spectre::SpectreMitigationPass;
 pub use wide_mem::WideMemPass;
 
-use crate::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis};
+use crate::analysis::{BranchTargetAnalysis, CFGAnalysis, LivenessAnalysis, MapInfoAnalysis};
 use crate::pass::{BpfPass, PassManager};
 
 // ── Legacy alias ───────────────────────────────────────────────────
 // Re-export `fixup_all_branches` under the old name for backward compat
 // within this crate. New code should use `utils::fixup_all_branches` directly.
+#[allow(unused_imports)]
 pub(crate) use utils::fixup_all_branches as fixup_branches_inline;
 
 // ── Pass registry ───────────────────────────────────────────────────
@@ -119,6 +120,7 @@ fn register_standard_analyses(pm: &mut PassManager) {
     pm.register_analysis(BranchTargetAnalysis);
     pm.register_analysis(CFGAnalysis);
     pm.register_analysis(LivenessAnalysis);
+    pm.register_analysis(MapInfoAnalysis);
 }
 
 /// Build the default optimization pipeline.
