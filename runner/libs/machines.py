@@ -23,6 +23,7 @@ class MachineSpec:
     backend: str
     arch: str
     executable: str
+    args: tuple[str, ...]
     cpus: int | None
     memory: str | None
     lock_scope: str
@@ -137,6 +138,7 @@ def resolve_machine(
         backend=str(entry.get("backend", "")).strip(),
         arch=str(entry.get("arch", "")).strip(),
         executable=executable,
+        args=tuple(str(arg) for arg in entry.get("args", ()) or ()),
         cpus=_resolve_cpu_count(entry, defaults),
         memory=_resolve_memory(entry, defaults),
         lock_scope=lock_scope,

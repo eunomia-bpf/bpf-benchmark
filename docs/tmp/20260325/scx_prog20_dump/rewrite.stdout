@@ -1,0 +1,33 @@
+prog 20 ("rusty_exit"): 30 original instructions
+  const_prop: 1 sites applied
+  dce: 1 sites applied
+  rewrite: 30 insns -> 29 insns (2 sites applied)
+    [   0] BpfInsn { code: 0x79, dst: 6, src: 1, off: 0, imm: 0 }
+    [   1] BpfInsn { code: 0x79, dst: 3, src: 6, off: 24, imm: 0 }
+    [   2] BpfInsn { code: 0x18, dst: 7, src: 2, off: 0, imm: 17 }
+    [   3] BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: 424 }
+    [   4] BpfInsn { code: 0x18, dst: 1, src: 2, off: 0, imm: 17 }
+    [   5] BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: 424 }
+    [   6] BpfInsn { code: 0x07, dst: 1, src: 0, off: 0, imm: 16 }
+    [   7] BpfInsn { code: 0xb4, dst: 2, src: 0, off: 0, imm: 128 }
+    [   8] BpfInsn { code: 0x85, dst: 0, src: 0, off: 0, imm: 115 }
+    [   9] BpfInsn { code: 0x18, dst: 1, src: 2, off: 0, imm: 17 }
+    [  10] BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: 424 }
+    [  11] BpfInsn { code: 0x07, dst: 1, src: 0, off: 0, imm: 144 }
+    [  12] BpfInsn { code: 0x79, dst: 3, src: 6, off: 48, imm: 0 }
+    [  13] BpfInsn { code: 0xb4, dst: 2, src: 0, off: 0, imm: 1024 }
+    [  14] BpfInsn { code: 0x85, dst: 0, src: 0, off: 0, imm: 115 }
+    [  15] BpfInsn { code: 0x18, dst: 1, src: 2, off: 0, imm: 16 }
+    [  16] BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: 4912 }
+    [  17] BpfInsn { code: 0x61, dst: 2, src: 1, off: 0, imm: 0 }
+    [  18] BpfInsn { code: 0x79, dst: 3, src: 6, off: 56, imm: 0 }
+    [  19] BpfInsn { code: 0x18, dst: 1, src: 2, off: 0, imm: 19 }
+    [  20] BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: 0 }
+    [  21] BpfInsn { code: 0x85, dst: 0, src: 0, off: 0, imm: 115 }
+    [  22] BpfInsn { code: 0xb7, dst: 1, src: 0, off: 0, imm: 1 }
+    [  23] BpfInsn { code: 0x79, dst: 1, src: 6, off: 8, imm: 0 }
+    [  24] BpfInsn { code: 0x7b, dst: 7, src: 1, off: 8, imm: 0 }
+    [  25] BpfInsn { code: 0x61, dst: 1, src: 6, off: 0, imm: 0 }
+    [  26] BpfInsn { code: 0x61, dst: 0, src: 7, off: 0, imm: 0 }
+    [  27] BpfInsn { code: 0xc3, dst: 7, src: 1, off: 0, imm: 241 }
+    [  28] BpfInsn { code: 0x95, dst: 0, src: 0, off: 0, imm: 0 }

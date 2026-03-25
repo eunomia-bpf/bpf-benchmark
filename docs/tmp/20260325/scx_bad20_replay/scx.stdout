@@ -1,0 +1,48 @@
+###### Wed, 25 Mar 2026 12:40:04 -0700, load balance @  -939.3ms ######
+cpu=   0.00 load=   -0.00 mig=0 task_err=0 time_used= 0.0ms
+tot=      4 sync_prev_idle= 0.00 wsync= 0.00
+prev_idle=75.00 greedy_idle= 0.00 pin= 0.00
+dir=25.00 dir_greedy= 0.00 dir_greedy_far= 0.00
+dsq= 0.00 greedy_local= 0.00 greedy_xnuma= 0.00
+kick_greedy= 0.00 rep= 0.00
+dl_clamp= 0.00 dl_preset= 0.00
+slice=20000us
+direct_greedy_cpus=3
+  kick_greedy_cpus=3
+###### Wed, 25 Mar 2026 12:40:05 -0700, load balance @ -1969.3ms ######
+cpu=   4.93 load=   -0.00 mig=0 task_err=0 time_used= 4.7ms
+tot=   1156 sync_prev_idle= 0.00 wsync= 0.17
+prev_idle=95.76 greedy_idle= 0.00 pin= 0.00
+dir= 0.61 dir_greedy= 0.00 dir_greedy_far= 0.00
+dsq= 3.46 greedy_local= 0.00 greedy_xnuma= 0.00
+kick_greedy= 0.26 rep= 0.00
+dl_clamp= 1.82 dl_preset= 1.73
+slice=20000us
+direct_greedy_cpus=3
+  kick_greedy_cpus=3
+###### Wed, 25 Mar 2026 12:40:06 -0700, load balance @  -964.9ms ######
+cpu=  28.33 load=    0.10 mig=0 task_err=0 time_used= 6.4ms
+tot=  10533 sync_prev_idle= 0.00 wsync= 0.02
+prev_idle=96.40 greedy_idle= 0.00 pin= 0.00
+dir= 0.56 dir_greedy= 0.17 dir_greedy_far= 0.02
+dsq= 2.83 greedy_local= 0.00 greedy_xnuma= 0.00
+kick_greedy= 0.33 rep= 0.00
+dl_clamp= 2.44 dl_preset= 0.39
+slice=20000us
+direct_greedy_cpus=3
+  kick_greedy_cpus=3
+  NODE[00] load=  0.10 imbal=  +0.00 delta=  +0.00
+   DOM[00] load=  0.10 imbal=  +0.00 delta=  +0.00
+###### Wed, 25 Mar 2026 12:40:07 -0700, load balance @ -1972.5ms ######
+cpu=  45.13 load=    0.10 mig=0 task_err=0 time_used= 2.2ms
+tot=   2451 sync_prev_idle= 0.00 wsync= 0.04
+prev_idle=91.88 greedy_idle= 0.00 pin= 0.00
+dir= 1.43 dir_greedy= 0.20 dir_greedy_far= 0.08
+dsq= 6.36 greedy_local= 0.00 greedy_xnuma= 0.00
+kick_greedy= 0.29 rep= 0.00
+dl_clamp= 5.06 dl_preset= 1.31
+slice=20000us
+direct_greedy_cpus=3
+  kick_greedy_cpus=3
+  NODE[00] load=  0.10 imbal=  +0.00 delta=  +0.00
+   DOM[00] load=  0.10 imbal=  +0.00 delta=  +0.00

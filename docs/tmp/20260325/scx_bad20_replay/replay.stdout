@@ -1,0 +1,17 @@
+prog_id=20 map_ids=[13,12,15]
+prog_fd=3 map_fds=[8,9,10]
+rejit_ret=-1 errno=13 (Permission denied)
+verifier_log:
+0: R1=ctx() R10=fp0
+0: (79) r6 = *(u64 *)(r1 +0)
+func 'exit' arg0 has btf_id 129484 type STRUCT 'scx_exit_info'
+1: R1=ctx() R6=trusted_ptr_scx_exit_info()
+1: (79) r3 = *(u64 *)(r6 +24)         ; R3=rdonly_untrusted_mem(sz=0) R6=trusted_ptr_scx_exit_info()
+2: (18) r7 = 0xffffd1808025a1a8       ; R7=map_value(map=bpf_bpf.data,ks=4,vs=3549,off=424)
+4: (18) r1 = 0xffffd1808025a1a8       ; R1=map_value(map=bpf_bpf.data,ks=4,vs=3549,off=424)
+6: (18) r1 = 0x1a800000018            ; R1=0x1a800000018
+8: (b4) w2 = 128                      ; R2=128
+9: (85) call bpf_probe_read_kernel_str#115
+R1 type=scalar expected=fp, pkt, pkt_meta, map_key, map_value, mem, ringbuf_mem, buf, trusted_ptr_
+processed 7 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+

@@ -1,0 +1,22 @@
+###### Wed, 25 Mar 2026 12:29:08 -0700, load balance @  -922.3ms ######
+cpu=   0.00 load=   -0.00 mig=0 task_err=0 time_used= 0.0ms
+tot=      4 sync_prev_idle= 0.00 wsync= 0.00
+prev_idle=75.00 greedy_idle= 0.00 pin= 0.00
+dir=25.00 dir_greedy= 0.00 dir_greedy_far= 0.00
+dsq= 0.00 greedy_local= 0.00 greedy_xnuma= 0.00
+kick_greedy= 0.00 rep= 0.00
+dl_clamp= 0.00 dl_preset= 0.00
+slice=20000us
+direct_greedy_cpus=3
+  kick_greedy_cpus=3
+###### Wed, 25 Mar 2026 12:29:09 -0700, load balance @ -1950.2ms ######
+cpu=   5.39 load=   -0.00 mig=0 task_err=0 time_used= 6.2ms
+tot=    730 sync_prev_idle= 0.27 wsync= 0.00
+prev_idle=93.01 greedy_idle= 0.00 pin= 0.00
+dir= 1.64 dir_greedy= 0.00 dir_greedy_far= 0.00
+dsq= 5.07 greedy_local= 0.00 greedy_xnuma= 0.00
+kick_greedy= 0.14 rep= 0.00
+dl_clamp= 3.15 dl_preset= 1.92
+slice=20000us
+direct_greedy_cpus=3
+  kick_greedy_cpus=3

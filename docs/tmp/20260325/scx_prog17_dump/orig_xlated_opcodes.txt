@@ -1,0 +1,2522 @@
+s32 rusty_init_task(unsigned long long * ctx):
+; s32 BPF_STRUCT_OPS_SLEEPABLE(rusty_init_task, struct task_struct *p,
+   0: (79) r6 = *(u64 *)(r1 +0)
+       79 16 00 00 00 00 00 00
+; u64 now = scx_bpf_now();
+   1: (18) r1 = 0xffffffff8ac02190
+       18 01 00 00 90 21 c0 8a 00 00 00 00 ff ff ff ff
+   3: (85) call scx_bpf_now#-1707392
+       85 20 00 00 80 f2 e5 ff
+   4: (bf) r7 = r0
+       bf 07 00 00 00 00 00 00
+   5: (b7) r8 = 0
+       b7 08 00 00 00 00 00 00
+; struct bpfmask_wrapper wrapper = {};
+   6: (7b) *(u64 *)(r10 -24) = r8
+       7b 8a e8 ff 00 00 00 00
+; taskc = (struct task_ctx *)sdt_task_alloc(p);
+   7: (bf) r1 = r6
+       bf 61 00 00 00 00 00 00
+   8: (85) call pc+102#bpf_prog_4ad287fad7850d6c_sdt_task_alloc
+       85 10 66 00 01 00 00 00
+   9: (b4) w1 = -12
+       b4 01 00 00 f4 ff ff ff
+; if (!taskc)
+  10: (15) if r0 == 0x0 goto pc+41
+       15 00 29 00 00 00 00 00
+; .pid = p->pid,
+  11: (61) r1 = *(u32 *)(r6 +2800)
+       61 61 f0 0a 00 00 00 00
+  12: (b7) r2 = -1
+       b7 02 00 00 ff ff ff ff
+; *taskc = (struct task_ctx) {
+  13: (7b) *(u64 *)(r0 +40) = r2
+       7b 20 28 00 00 00 00 00
+  14: (63) *(u32 *)(r0 +116) = r1
+       63 10 74 00 00 00 00 00
+  15: (b4) w1 = 0
+       b4 01 00 00 00 00 00 00
+  16: (63) *(u32 *)(r0 +112) = r1
+       63 10 70 00 00 00 00 00
+  17: (7b) *(u64 *)(r0 +104) = r7
+       7b 70 68 00 00 00 00 00
+  18: (7b) *(u64 *)(r0 +88) = r7
+       7b 70 58 00 00 00 00 00
+  19: (7b) *(u64 *)(r0 +32) = r8
+       7b 80 20 00 00 00 00 00
+  20: (7b) *(u64 *)(r0 +24) = r8
+       7b 80 18 00 00 00 00 00
+  21: (7b) *(u64 *)(r0 +16) = r8
+       7b 80 10 00 00 00 00 00
+  22: (7b) *(u64 *)(r0 +8) = r8
+       7b 80 08 00 00 00 00 00
+  23: (7b) *(u64 *)(r0 +0) = r8
+       7b 80 00 00 00 00 00 00
+  24: (7b) *(u64 *)(r0 +48) = r8
+       7b 80 30 00 00 00 00 00
+  25: (7b) *(u64 *)(r0 +56) = r8
+       7b 80 38 00 00 00 00 00
+  26: (7b) *(u64 *)(r0 +64) = r8
+       7b 80 40 00 00 00 00 00
+  27: (7b) *(u64 *)(r0 +72) = r8
+       7b 80 48 00 00 00 00 00
+  28: (7b) *(u64 *)(r0 +80) = r8
+       7b 80 50 00 00 00 00 00
+  29: (7b) *(u64 *)(r0 +120) = r8
+       7b 80 78 00 00 00 00 00
+  30: (7b) *(u64 *)(r0 +96) = r8
+       7b 80 60 00 00 00 00 00
+  31: (7b) *(u64 *)(r0 +128) = r8
+       7b 80 80 00 00 00 00 00
+  32: (7b) *(u64 *)(r0 +136) = r8
+       7b 80 88 00 00 00 00 00
+  33: (bf) r7 = r0
+       bf 07 00 00 00 00 00 00
+  34: (7b) *(u64 *)(r0 +144) = r8
+       7b 80 90 00 00 00 00 00
+; if (debug >= 2)
+  35: (18) r1 = map[id:12][0]+11076
+       18 21 00 00 0c 00 00 00 00 00 00 00 44 2b 00 00
+  37: (61) r1 = *(u32 *)(r1 +0)
+       61 11 00 00 00 00 00 00
+; p_map = p;
+  38: (7b) *(u64 *)(r10 -16) = r6
+       7b 6a f0 ff 00 00 00 00
+  39: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+  40: (07) r2 += -16
+       07 02 00 00 f0 ff ff ff
+  41: (bf) r3 = r10
+       bf a3 00 00 00 00 00 00
+  42: (07) r3 += -24
+       07 03 00 00 e8 ff ff ff
+; ret = bpf_map_update_elem(&task_masks, &p_map, &wrapper, 0 /*BPF NOEXIST*/);
+  43: (18) r1 = map[id:6]
+       18 11 00 00 06 00 00 00 00 00 00 00 00 00 00 00
+  45: (b7) r4 = 0
+       b7 04 00 00 00 00 00 00
+  46: (85) call htab_map_update_elem#384080
+       85 00 00 00 50 dc 05 00
+  47: (bf) r8 = r0
+       bf 08 00 00 00 00 00 00
+; if (ret) {
+  48: (15) if r8 == 0x0 goto pc+5
+       15 08 05 00 00 00 00 00
+; sdt_task_free(p);
+  49: (bf) r1 = r6
+       bf 61 00 00 00 00 00 00
+  50: (85) call pc+801#bpf_prog_c625519fe8d724c0_sdt_task_free
+       85 10 21 03 06 00 00 00
+  51: (bc) w1 = w8
+       bc 81 00 00 00 00 00 00
+; s32 BPF_STRUCT_OPS_SLEEPABLE(rusty_init_task, struct task_struct *p,
+  52: (bc) w0 = w1
+       bc 10 00 00 00 00 00 00
+  53: (95) exit
+       95 00 00 00 00 00 00 00
+  54: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; mask_map_value = bpf_map_lookup_elem(&task_masks, &p_map);
+  55: (07) r2 += -16
+       07 02 00 00 f0 ff ff ff
+  56: (18) r1 = map[id:6]
+       18 11 00 00 06 00 00 00 00 00 00 00 00 00 00 00
+  58: (85) call __htab_map_lookup_elem#370592
+       85 00 00 00 a0 a7 05 00
+  59: (15) if r0 == 0x0 goto pc+1
+       15 00 01 00 00 00 00 00
+  60: (07) r0 += 56
+       07 00 00 00 38 00 00 00
+  61: (bf) r8 = r0
+       bf 08 00 00 00 00 00 00
+; if (!mask_map_value) {
+  62: (55) if r8 != 0x0 goto pc+4
+       55 08 04 00 00 00 00 00
+; sdt_task_free(p);
+  63: (bf) r1 = r6
+       bf 61 00 00 00 00 00 00
+  64: (85) call pc+787#bpf_prog_c625519fe8d724c0_sdt_task_free
+       85 10 13 03 06 00 00 00
+  65: (b4) w1 = -22
+       b4 01 00 00 ea ff ff ff
+  66: (05) goto pc-15
+       05 00 f1 ff 00 00 00 00
+; cpumask = bpf_cpumask_create();
+  67: (85) call bpf_cpumask_create#659888
+       85 20 00 00 b0 11 0a 00
+; if (!cpumask) {
+  68: (15) if r0 == 0x0 goto pc+25
+       15 00 19 00 00 00 00 00
+; cpumask = bpf_kptr_xchg(kptr, cpumask);
+  69: (bf) r1 = r8
+       bf 81 00 00 00 00 00 00
+  70: (bf) r2 = r0
+       bf 02 00 00 00 00 00 00
+  71: (bf) r0 = r2
+       bf 20 00 00 00 00 00 00
+  72: (db) r0 = atomic64_xchg((u64 *)(r1 +0), r0)
+       db 01 00 00 e1 00 00 00
+  73: (bf) r8 = r0
+       bf 08 00 00 00 00 00 00
+; if (cpumask) {
+  74: (15) if r8 == 0x0 goto pc+10
+       15 08 0a 00 00 00 00 00
+  75: (b7) r1 = 0
+       b7 01 00 00 00 00 00 00
+; scx_bpf_error("kptr already had cpumask");
+  76: (7b) *(u64 *)(r10 -8) = r1
+       7b 1a f8 ff 00 00 00 00
+  77: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+  78: (07) r2 += -8
+       07 02 00 00 f8 ff ff ff
+  79: (18) r1 = map[id:13][0]+2929
+       18 21 00 00 0d 00 00 00 00 00 00 00 71 0b 00 00
+  81: (b4) w3 = 8
+       b4 03 00 00 08 00 00 00
+  82: (85) call scx_bpf_error_bstr#-1709968
+       85 20 00 00 70 e8 e5 ff
+; bpf_cpumask_release(cpumask);
+  83: (bf) r1 = r8
+       bf 81 00 00 00 00 00 00
+  84: (85) call bpf_cpumask_release#660144
+       85 20 00 00 b0 12 0a 00
+; bpf_rcu_read_lock();
+  85: (85) call bpf_rcu_read_lock#326064
+       85 20 00 00 b0 f9 04 00
+; task_pick_and_set_domain(taskc, p, p->cpus_ptr, true);
+  86: (79) r3 = *(u64 *)(r6 +1376)
+       79 63 60 05 00 00 00 00
+; task_pick_and_set_domain(taskc, p, p->cpus_ptr, true);
+  87: (bf) r1 = r7
+       bf 71 00 00 00 00 00 00
+  88: (bf) r2 = r6
+       bf 62 00 00 00 00 00 00
+  89: (b4) w4 = 1
+       b4 04 00 00 01 00 00 00
+  90: (85) call pc+797#bpf_prog_10501d98fead0768_task_pick_and_set_domain
+       85 10 1d 03 08 00 00 00
+; bpf_rcu_read_unlock();
+  91: (85) call bpf_rcu_read_unlock#326096
+       85 20 00 00 d0 f9 04 00
+  92: (b4) w1 = 0
+       b4 01 00 00 00 00 00 00
+  93: (05) goto pc-42
+       05 00 d6 ff 00 00 00 00
+  94: (b7) r1 = 0
+       b7 01 00 00 00 00 00 00
+; scx_bpf_error("Failed to create cpumask");
+  95: (7b) *(u64 *)(r10 -8) = r1
+       7b 1a f8 ff 00 00 00 00
+  96: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+  97: (07) r2 += -8
+       07 02 00 00 f8 ff ff ff
+  98: (18) r1 = map[id:13][0]+2880
+       18 21 00 00 0d 00 00 00 00 00 00 00 40 0b 00 00
+ 100: (b4) w3 = 8
+       b4 03 00 00 08 00 00 00
+ 101: (85) call scx_bpf_error_bstr#-1709968
+       85 20 00 00 70 e8 e5 ff
+ 102: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+ 103: (07) r2 += -16
+       07 02 00 00 f0 ff ff ff
+; bpf_map_delete_elem(&task_masks, &p_map);
+ 104: (18) r1 = map[id:6]
+       18 11 00 00 06 00 00 00 00 00 00 00 00 00 00 00
+ 106: (85) call htab_map_delete_elem#379936
+       85 00 00 00 20 cc 05 00
+; sdt_task_free(p);
+ 107: (bf) r1 = r6
+       bf 61 00 00 00 00 00 00
+ 108: (85) call pc+743#bpf_prog_c625519fe8d724c0_sdt_task_free
+       85 10 e7 02 06 00 00 00
+ 109: (b4) w1 = -12
+       b4 01 00 00 f4 ff ff ff
+ 110: (05) goto pc-59
+       05 00 c5 ff 00 00 00 00
+void * sdt_task_alloc(struct task_struct * p):
+; void __arena *sdt_task_alloc(struct task_struct *p)
+ 111: (bf) r6 = r1
+       bf 16 00 00 00 00 00 00
+ 112: (b7) r7 = 0
+       b7 07 00 00 00 00 00 00
+; mval = bpf_task_storage_get(&sdt_task_map, p, 0,
+ 113: (18) r1 = map[id:9]
+       18 11 00 00 09 00 00 00 00 00 00 00 00 00 00 00
+ 115: (bf) r2 = r6
+       bf 62 00 00 00 00 00 00
+ 116: (b7) r3 = 0
+       b7 03 00 00 00 00 00 00
+ 117: (b7) r4 = 1
+       b7 04 00 00 01 00 00 00
+ 118: (b7) r5 = 3264
+       b7 05 00 00 c0 0c 00 00
+ 119: (85) call bpf_task_storage_get#438096
+       85 00 00 00 50 af 06 00
+ 120: (bf) r8 = r0
+       bf 08 00 00 00 00 00 00
+; if (!mval)
+ 121: (15) if r8 == 0x0 goto pc+11
+       15 08 0b 00 00 00 00 00
+; data = sdt_alloc(&sdt_task_allocator);
+ 122: (18) r1 = map[id:11][0]+33728
+       18 21 00 00 0b 00 00 00 00 00 00 00 c0 83 00 00
+ 124: (85) call pc+10#bpf_prog_6212925f1b8c4c6b_sdt_alloc_internal
+       85 10 0a 00 02 00 00 00
+; if (unlikely(!data))
+ 125: (15) if r0 == 0x0 goto pc+7
+       15 00 07 00 00 00 00 00
+; cast_kern(data);
+ 126: (bc) w0 = w0
+       bc 00 00 00 00 00 00 00
+; mval->tid = data->tid;
+ 127: (79) r1 = *(u64 *)(r0 +0)
+       79 01 00 00 00 00 00 00
+ 128: (7b) *(u64 *)(r8 +0) = r1
+       7b 18 00 00 00 00 00 00
+; mval->tptr = (__u64) p;
+ 129: (7b) *(u64 *)(r8 +8) = r6
+       7b 68 08 00 00 00 00 00
+; mval->data = data;
+ 130: (7b) *(u64 *)(r8 +16) = r0
+       7b 08 10 00 00 00 00 00
+; return (void __arena *)data->payload;
+ 131: (04) w0 += 8
+       04 00 00 00 08 00 00 00
+ 132: (bf) r7 = r0
+       bf 07 00 00 00 00 00 00
+; }
+ 133: (bf) r0 = r7
+       bf 70 00 00 00 00 00 00
+ 134: (95) exit
+       95 00 00 00 00 00 00 00
+u64 sdt_alloc_internal(struct sdt_allocator * alloc):
+; u64 sdt_alloc_internal(struct sdt_allocator *alloc)
+ 135: (7a) *(u64 *)(r10 -80) = 65535
+       7a 0a b0 ff ff ff 00 00
+ 136: (7a) *(u64 *)(r10 -72) = 0
+       7a 0a b8 ff 00 00 00 00
+ 137: (bf) r6 = r1
+       bf 16 00 00 00 00 00 00
+ 138: (b7) r9 = 0
+       b7 09 00 00 00 00 00 00
+; if (!alloc)
+ 139: (15) if r6 == 0x0 goto pc+353
+       15 06 61 01 00 00 00 00
+; 
+ 140: (18) r1 = map[id:11][0]+33608
+       18 21 00 00 0b 00 00 00 00 00 00 00 48 83 00 00
+ 142: (79) r7 = *(u64 *)(r1 +0)
+       79 17 00 00 00 00 00 00
+; ret = sdt_alloc_attempt(stack);
+ 143: (bf) r1 = r7
+       bf 71 00 00 00 00 00 00
+ 144: (85) call pc+357#bpf_prog_d5f58d89e69afca7_sdt_alloc_attempt
+       85 10 65 01 03 00 00 00
+; if (ret != 0)
+ 145: (56) if w0 != 0x0 goto pc+347
+       56 00 5b 01 00 00 00 00
+ 146: (7b) *(u64 *)(r10 -56) = r7
+       7b 7a c8 ff 00 00 00 00
+ 147: (b7) r1 = 0
+       b7 01 00 00 00 00 00 00
+ 148: (7b) *(u64 *)(r10 -64) = r6
+       7b 6a c0 ff 00 00 00 00
+; desc = sdt_find_empty(alloc->root, stack, &idx);
+ 149: (79) r6 = *(u64 *)(r6 +32)
+       79 66 20 00 00 00 00 00
+ 150: (18) r3 = map[id:11][0]+33576
+       18 23 00 00 0b 00 00 00 00 00 00 00 28 83 00 00
+ 152: (b7) r7 = 0
+       b7 07 00 00 00 00 00 00
+ 153: (05) goto pc+94
+       05 00 5e 00 00 00 00 00
+; if ((word & 0x1) == 0) {
+ 154: (a4) w5 ^= -1
+       a4 05 00 00 ff ff ff ff
+ 155: (54) w5 &= 1
+       54 05 00 00 01 00 00 00
+ 156: (0c) w5 += w0
+       0c 05 00 00 00 00 00 00
+; return (i * 64) + sdt_ffs(freeslots);
+ 157: (0f) r4 += r5
+       0f 54 00 00 00 00 00 00
+; if (unlikely(pos > SDT_TASK_ENTS_PER_CHUNK))
+ 158: (25) if r4 > 0x1ff goto pc+336
+       25 04 50 01 ff 01 00 00
+ 159: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; lv_desc[level] = desc;
+ 160: (07) r2 += -24
+       07 02 00 00 e8 ff ff ff
+ 161: (0f) r2 += r1
+       0f 12 00 00 00 00 00 00
+ 162: (7b) *(u64 *)(r2 +0) = r6
+       7b 62 00 00 00 00 00 00
+ 163: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+ 164: (07) r2 += -48
+       07 02 00 00 d0 ff ff ff
+; lv_pos[level] = pos;
+ 165: (0f) r2 += r1
+       0f 12 00 00 00 00 00 00
+ 166: (7b) *(u64 *)(r2 +0) = r4
+       7b 42 00 00 00 00 00 00
+; idx <<= SDT_TASK_ENTS_PER_PAGE_SHIFT;
+ 167: (67) r7 <<= 9
+       67 07 00 00 09 00 00 00
+; idx |= pos;
+ 168: (bf) r0 = r4
+       bf 40 00 00 00 00 00 00
+ 169: (4f) r0 |= r7
+       4f 70 00 00 00 00 00 00
+ 170: (bf) r7 = r0
+       bf 07 00 00 00 00 00 00
+; if (level == SDT_TASK_LEVELS - 1)
+ 171: (15) if r1 == 0x10 goto pc+162
+       15 01 a2 00 10 00 00 00
+; cast_kern(desc);
+ 172: (bc) w6 = w6
+       bc 66 00 00 00 00 00 00
+; chunk = desc->chunk;
+ 173: (79) r7 = *(u64 *)(r6 +72)
+       79 67 48 00 00 00 00 00
+; cast_kern(chunk);
+ 174: (bc) w7 = w7
+       bc 77 00 00 00 00 00 00
+; desc = desc_children[pos];
+ 175: (67) r4 <<= 3
+       67 04 00 00 03 00 00 00
+ 176: (0c) w7 += w4
+       0c 47 00 00 00 00 00 00
+ 177: (79) r6 = *(u64 *)(r7 +0)
+       79 76 00 00 00 00 00 00
+; if (!desc) {
+ 178: (55) if r6 != 0x0 goto pc+67
+       55 06 43 00 00 00 00 00
+ 179: (b7) r6 = 0
+       b7 06 00 00 00 00 00 00
+ 180: (18) r2 = map[id:11][0]+33544
+       18 22 00 00 0b 00 00 00 00 00 00 00 08 83 00 00
+; elem_size = pool->elem_size;
+ 182: (79) r9 = *(u64 *)(r2 +8)
+       79 29 08 00 00 00 00 00
+ 183: (b7) r4 = 0
+       b7 04 00 00 00 00 00 00
+; if (elem_size > PAGE_SIZE)
+ 184: (25) if r9 > 0x1000 goto pc+26
+       25 09 1a 00 00 10 00 00
+; if (pool->idx >= max_elems) {
+ 185: (79) r4 = *(u64 *)(r2 +24)
+       79 24 18 00 00 00 00 00
+ 186: (18) r5 = map[id:11][0]+33544
+       18 25 00 00 0b 00 00 00 00 00 00 00 08 83 00 00
+; max_elems = pool->max_elems;
+ 188: (79) r2 = *(u64 *)(r5 +16)
+       79 52 10 00 00 00 00 00
+; if (pool->idx >= max_elems) {
+ 189: (3d) if r4 >= r2 goto pc+2
+       3d 24 02 00 00 00 00 00
+; ptr = (void __arena *)((__u64) pool->slab + elem_size * pool->idx);
+ 190: (79) r8 = *(u64 *)(r5 +0)
+       79 58 00 00 00 00 00 00
+ 191: (05) goto pc+14
+       05 00 0e 00 00 00 00 00
+; cast_kern(stack);
+ 192: (79) r5 = *(u64 *)(r10 -56)
+       79 a5 c8 ff 00 00 00 00
+ 193: (bc) w5 = w5
+       bc 55 00 00 00 00 00 00
+ 194: (b7) r4 = 0
+       b7 04 00 00 00 00 00 00
+; if (unlikely(stack->idx == 0))
+ 195: (79) r2 = *(u64 *)(r5 +0)
+       79 52 00 00 00 00 00 00
+ 196: (b7) r8 = 0
+       b7 08 00 00 00 00 00 00
+; if (unlikely(stack->idx == 0))
+ 197: (15) if r2 == 0x0 goto pc+5
+       15 02 05 00 00 00 00 00
+; stack->idx -= 1;
+ 198: (07) r2 += -1
+       07 02 00 00 ff ff ff ff
+ 199: (7b) *(u64 *)(r5 +0) = r2
+       7b 25 00 00 00 00 00 00
+; slab = stack->stack[stack->idx];
+ 200: (67) r2 <<= 3
+       67 02 00 00 03 00 00 00
+ 201: (0c) w5 += w2
+       0c 25 00 00 00 00 00 00
+ 202: (79) r8 = *(u64 *)(r5 +8)
+       79 58 08 00 00 00 00 00
+ 203: (18) r5 = map[id:11][0]+33544
+       18 25 00 00 0b 00 00 00 00 00 00 00 08 83 00 00
+; pool->slab = slab;
+ 205: (7b) *(u64 *)(r5 +0) = r8
+       7b 85 00 00 00 00 00 00
+; pool->idx += 1;
+ 206: (bf) r2 = r4
+       bf 42 00 00 00 00 00 00
+ 207: (07) r2 += 1
+       07 02 00 00 01 00 00 00
+ 208: (7b) *(u64 *)(r5 +24) = r2
+       7b 25 18 00 00 00 00 00
+; ptr = (void __arena *)((__u64) pool->slab + elem_size * pool->idx);
+ 209: (2f) r4 *= r9
+       2f 94 00 00 00 00 00 00
+; ptr = (void __arena *)((__u64) pool->slab + elem_size * pool->idx);
+ 210: (0f) r4 += r8
+       0f 84 00 00 00 00 00 00
+; elem_size = pool->elem_size;
+ 211: (79) r9 = *(u64 *)(r3 +8)
+       79 39 08 00 00 00 00 00
+; if (elem_size > PAGE_SIZE)
+ 212: (25) if r9 > 0x1000 goto pc+22
+       25 09 16 00 00 10 00 00
+; if (pool->idx >= max_elems) {
+ 213: (79) r6 = *(u64 *)(r3 +24)
+       79 36 18 00 00 00 00 00
+; max_elems = pool->max_elems;
+ 214: (79) r2 = *(u64 *)(r3 +16)
+       79 32 10 00 00 00 00 00
+; if (pool->idx >= max_elems) {
+ 215: (3d) if r6 >= r2 goto pc+2
+       3d 26 02 00 00 00 00 00
+; ptr = (void __arena *)((__u64) pool->slab + elem_size * pool->idx);
+ 216: (79) r8 = *(u64 *)(r3 +0)
+       79 38 00 00 00 00 00 00
+ 217: (05) goto pc+12
+       05 00 0c 00 00 00 00 00
+; cast_kern(stack);
+ 218: (79) r5 = *(u64 *)(r10 -56)
+       79 a5 c8 ff 00 00 00 00
+ 219: (bc) w5 = w5
+       bc 55 00 00 00 00 00 00
+ 220: (b7) r6 = 0
+       b7 06 00 00 00 00 00 00
+; if (unlikely(stack->idx == 0))
+ 221: (79) r2 = *(u64 *)(r5 +0)
+       79 52 00 00 00 00 00 00
+ 222: (b7) r8 = 0
+       b7 08 00 00 00 00 00 00
+; if (unlikely(stack->idx == 0))
+ 223: (15) if r2 == 0x0 goto pc+5
+       15 02 05 00 00 00 00 00
+; stack->idx -= 1;
+ 224: (07) r2 += -1
+       07 02 00 00 ff ff ff ff
+ 225: (7b) *(u64 *)(r5 +0) = r2
+       7b 25 00 00 00 00 00 00
+; slab = stack->stack[stack->idx];
+ 226: (67) r2 <<= 3
+       67 02 00 00 03 00 00 00
+ 227: (0c) w5 += w2
+       0c 25 00 00 00 00 00 00
+ 228: (79) r8 = *(u64 *)(r5 +8)
+       79 58 08 00 00 00 00 00
+; pool->slab = slab;
+ 229: (7b) *(u64 *)(r3 +0) = r8
+       7b 83 00 00 00 00 00 00
+; pool->idx += 1;
+ 230: (bf) r2 = r6
+       bf 62 00 00 00 00 00 00
+ 231: (07) r2 += 1
+       07 02 00 00 01 00 00 00
+ 232: (7b) *(u64 *)(r3 +24) = r2
+       7b 23 18 00 00 00 00 00
+; ptr = (void __arena *)((__u64) pool->slab + elem_size * pool->idx);
+ 233: (2f) r6 *= r9
+       2f 96 00 00 00 00 00 00
+; ptr = (void __arena *)((__u64) pool->slab + elem_size * pool->idx);
+ 234: (0f) r6 += r8
+       0f 86 00 00 00 00 00 00
+; cast_kern(desc);
+ 235: (bf) r2 = r6
+       bf 62 00 00 00 00 00 00
+ 236: (bc) w2 = w2
+       bc 22 00 00 00 00 00 00
+; desc->chunk = chunk;
+ 237: (7b) *(u64 *)(r2 +72) = r4
+       7b 42 48 00 00 00 00 00
+; desc->nr_free = SDT_TASK_ENTS_PER_CHUNK;
+ 238: (b7) r4 = 512
+       b7 04 00 00 00 02 00 00
+ 239: (7b) *(u64 *)(r2 +64) = r4
+       7b 42 40 00 00 00 00 00
+ 240: (18) r4 = map[id:11][0]+33616
+       18 24 00 00 0b 00 00 00 00 00 00 00 50 83 00 00
+; sdt_stats.chunk_allocs += 1;
+ 242: (79) r2 = *(u64 *)(r4 +0)
+       79 42 00 00 00 00 00 00
+ 243: (07) r2 += 1
+       07 02 00 00 01 00 00 00
+ 244: (7b) *(u64 *)(r4 +0) = r2
+       7b 24 00 00 00 00 00 00
+; desc_children[pos] = desc;
+ 245: (7b) *(u64 *)(r7 +0) = r6
+       7b 67 00 00 00 00 00 00
+; for (level = zero; level < SDT_TASK_LEVELS && can_loop; level++) {
+ 246: (07) r1 += 8
+       07 01 00 00 08 00 00 00
+ 247: (bf) r7 = r0
+       bf 07 00 00 00 00 00 00
+; for (level = zero; level < SDT_TASK_LEVELS && can_loop; level++) {
+ 248: (79) r11 = *(u64 *)(r10 -80)
+       79 ab b0 ff 00 00 00 00
+ 249: (15) if r11 == 0x0 goto pc+84
+       15 0b 54 00 00 00 00 00
+ 250: (17) r11 -= 1
+       17 0b 00 00 01 00 00 00
+ 251: (55) if r11 != 0x0 goto pc+2
+       55 0b 02 00 00 00 00 00
+ 252: (b7) r11 = -80
+       b7 0b 00 00 b0 ff ff ff
+ 253: (85) call arch_bpf_timed_may_goto#-2347920
+       85 00 00 00 70 2c dc ff
+ 254: (7b) *(u64 *)(r10 -80) = r11
+       7b ba b0 ff 00 00 00 00
+; cast_kern(desc);
+ 255: (bf) r9 = r6
+       bf 69 00 00 00 00 00 00
+ 256: (bc) w9 = w9
+       bc 99 00 00 00 00 00 00
+ 257: (b7) r4 = 0
+       b7 04 00 00 00 00 00 00
+; freeslots = ~desc->allocated[i];
+ 258: (79) r0 = *(u64 *)(r9 +0)
+       79 90 00 00 00 00 00 00
+; if (freeslots == (__u64)0)
+ 259: (55) if r0 != 0xffffffff goto pc+21
+       55 00 15 00 ff ff ff ff
+ 260: (b7) r4 = 64
+       b7 04 00 00 40 00 00 00
+; freeslots = ~desc->allocated[i];
+ 261: (79) r0 = *(u64 *)(r9 +8)
+       79 90 08 00 00 00 00 00
+; if (freeslots == (__u64)0)
+ 262: (55) if r0 != 0xffffffff goto pc+18
+       55 00 12 00 ff ff ff ff
+ 263: (b7) r4 = 128
+       b7 04 00 00 80 00 00 00
+; freeslots = ~desc->allocated[i];
+ 264: (79) r0 = *(u64 *)(r9 +16)
+       79 90 10 00 00 00 00 00
+; if (freeslots == (__u64)0)
+ 265: (55) if r0 != 0xffffffff goto pc+15
+       55 00 0f 00 ff ff ff ff
+ 266: (b7) r4 = 192
+       b7 04 00 00 c0 00 00 00
+; freeslots = ~desc->allocated[i];
+ 267: (79) r0 = *(u64 *)(r9 +24)
+       79 90 18 00 00 00 00 00
+; if (freeslots == (__u64)0)
+ 268: (55) if r0 != 0xffffffff goto pc+12
+       55 00 0c 00 ff ff ff ff
+ 269: (b7) r4 = 256
+       b7 04 00 00 00 01 00 00
+; freeslots = ~desc->allocated[i];
+ 270: (79) r0 = *(u64 *)(r9 +32)
+       79 90 20 00 00 00 00 00
+; if (freeslots == (__u64)0)
+ 271: (55) if r0 != 0xffffffff goto pc+9
+       55 00 09 00 ff ff ff ff
+ 272: (b7) r4 = 320
+       b7 04 00 00 40 01 00 00
+; freeslots = ~desc->allocated[i];
+ 273: (79) r0 = *(u64 *)(r9 +40)
+       79 90 28 00 00 00 00 00
+; if (freeslots == (__u64)0)
+ 274: (55) if r0 != 0xffffffff goto pc+6
+       55 00 06 00 ff ff ff ff
+ 275: (b7) r4 = 384
+       b7 04 00 00 80 01 00 00
+; freeslots = ~desc->allocated[i];
+ 276: (79) r0 = *(u64 *)(r9 +48)
+       79 90 30 00 00 00 00 00
+; if (freeslots == (__u64)0)
+ 277: (55) if r0 != 0xffffffff goto pc+3
+       55 00 03 00 ff ff ff ff
+ 278: (b7) r4 = 448
+       b7 04 00 00 c0 01 00 00
+; freeslots = ~desc->allocated[i];
+ 279: (79) r0 = *(u64 *)(r9 +56)
+       79 90 38 00 00 00 00 00
+; if (freeslots == (__u64)0)
+ 280: (15) if r0 == 0xffffffff goto pc+214
+       15 00 d6 00 ff ff ff ff
+; freeslots = ~desc->allocated[i];
+ 281: (a7) r0 ^= -1
+       a7 00 00 00 ff ff ff ff
+; if ((word & 0xffffffff) == 0) {
+ 282: (bf) r8 = r0
+       bf 08 00 00 00 00 00 00
+ 283: (67) r8 <<= 32
+       67 08 00 00 20 00 00 00
+ 284: (77) r8 >>= 32
+       77 08 00 00 20 00 00 00
+; if ((word & 0xffffffff) == 0) {
+ 285: (bf) r2 = r0
+       bf 02 00 00 00 00 00 00
+ 286: (77) r2 >>= 32
+       77 02 00 00 20 00 00 00
+ 287: (15) if r8 == 0x0 goto pc+1
+       15 08 01 00 00 00 00 00
+ 288: (bf) r2 = r0
+       bf 02 00 00 00 00 00 00
+ 289: (b4) w5 = 1
+       b4 05 00 00 01 00 00 00
+; if ((word & 0xffffffff) == 0) {
+ 290: (15) if r8 == 0x0 goto pc+1
+       15 08 01 00 00 00 00 00
+ 291: (b4) w5 = 0
+       b4 05 00 00 00 00 00 00
+; if ((word & 0xffffffff) == 0) {
+ 292: (64) w5 <<= 5
+       64 05 00 00 05 00 00 00
+; if ((word & 0xffff) == 0) {
+ 293: (bf) r9 = r2
+       bf 29 00 00 00 00 00 00
+ 294: (57) r9 &= 65535
+       57 09 00 00 ff ff 00 00
+; if ((word & 0xffff) == 0) {
+ 295: (bc) w0 = w5
+       bc 50 00 00 00 00 00 00
+ 296: (44) w0 |= 16
+       44 00 00 00 10 00 00 00
+ 297: (15) if r9 == 0x0 goto pc+1
+       15 09 01 00 00 00 00 00
+ 298: (bc) w0 = w5
+       bc 50 00 00 00 00 00 00
+ 299: (bf) r8 = r2
+       bf 28 00 00 00 00 00 00
+ 300: (77) r8 >>= 16
+       77 08 00 00 10 00 00 00
+ 301: (15) if r9 == 0x0 goto pc+1
+       15 09 01 00 00 00 00 00
+ 302: (bf) r8 = r2
+       bf 28 00 00 00 00 00 00
+; if ((word & 0xff) == 0) {
+ 303: (bf) r2 = r8
+       bf 82 00 00 00 00 00 00
+ 304: (57) r2 &= 255
+       57 02 00 00 ff 00 00 00
+; if ((word & 0xff) == 0) {
+ 305: (bc) w9 = w0
+       bc 09 00 00 00 00 00 00
+ 306: (44) w9 |= 8
+       44 09 00 00 08 00 00 00
+ 307: (15) if r2 == 0x0 goto pc+1
+       15 02 01 00 00 00 00 00
+ 308: (bc) w9 = w0
+       bc 09 00 00 00 00 00 00
+ 309: (bf) r0 = r8
+       bf 80 00 00 00 00 00 00
+ 310: (77) r0 >>= 8
+       77 00 00 00 08 00 00 00
+ 311: (15) if r2 == 0x0 goto pc+1
+       15 02 01 00 00 00 00 00
+ 312: (bf) r0 = r8
+       bf 80 00 00 00 00 00 00
+; if ((word & 0xf) == 0) {
+ 313: (bf) r2 = r0
+       bf 02 00 00 00 00 00 00
+ 314: (57) r2 &= 15
+       57 02 00 00 0f 00 00 00
+; if ((word & 0xf) == 0) {
+ 315: (bc) w5 = w9
+       bc 95 00 00 00 00 00 00
+ 316: (44) w5 |= 4
+       44 05 00 00 04 00 00 00
+ 317: (15) if r2 == 0x0 goto pc+1
+       15 02 01 00 00 00 00 00
+ 318: (bc) w5 = w9
+       bc 95 00 00 00 00 00 00
+ 319: (bf) r8 = r0
+       bf 08 00 00 00 00 00 00
+ 320: (77) r8 >>= 4
+       77 08 00 00 04 00 00 00
+ 321: (15) if r2 == 0x0 goto pc+1
+       15 02 01 00 00 00 00 00
+ 322: (bf) r8 = r0
+       bf 08 00 00 00 00 00 00
+; if ((word & 0x3) == 0) {
+ 323: (bf) r9 = r8
+       bf 89 00 00 00 00 00 00
+ 324: (57) r9 &= 3
+       57 09 00 00 03 00 00 00
+; if ((word & 0x3) == 0) {
+ 325: (bc) w0 = w5
+       bc 50 00 00 00 00 00 00
+ 326: (04) w0 += 2
+       04 00 00 00 02 00 00 00
+ 327: (15) if r9 == 0x0 goto pc+1
+       15 09 01 00 00 00 00 00
+ 328: (bc) w0 = w5
+       bc 50 00 00 00 00 00 00
+ 329: (bc) w5 = w8
+       bc 85 00 00 00 00 00 00
+ 330: (74) w5 >>= 2
+       74 05 00 00 02 00 00 00
+; if ((word & 0x1) == 0) {
+ 331: (15) if r9 == 0x0 goto pc-178
+       15 09 4e ff 00 00 00 00
+ 332: (bc) w5 = w8
+       bc 85 00 00 00 00 00 00
+ 333: (05) goto pc-180
+       05 00 4c ff 00 00 00 00
+; for (u = zero; u < SDT_TASK_LEVELS && can_loop; u++) {
+ 334: (79) r11 = *(u64 *)(r10 -80)
+       79 ab b0 ff 00 00 00 00
+ 335: (15) if r11 == 0x0 goto pc+27
+       15 0b 1b 00 00 00 00 00
+ 336: (17) r11 -= 1
+       17 0b 00 00 01 00 00 00
+ 337: (55) if r11 != 0x0 goto pc+2
+       55 0b 02 00 00 00 00 00
+ 338: (b7) r11 = -80
+       b7 0b 00 00 b0 ff ff ff
+ 339: (85) call arch_bpf_timed_may_goto#-2347920
+       85 00 00 00 70 2c dc ff
+ 340: (7b) *(u64 *)(r10 -80) = r11
+       7b ba b0 ff 00 00 00 00
+; tmp = lv_desc[level];
+ 341: (79) r1 = *(u64 *)(r10 -8)
+       79 a1 f8 ff 00 00 00 00
+; cast_kern(tmp);
+ 342: (bc) w1 = w1
+       bc 11 00 00 00 00 00 00
+; ret = sdt_set_idx_state(tmp, lv_pos[level], true);
+ 343: (79) r3 = *(u64 *)(r10 -32)
+       79 a3 e0 ff 00 00 00 00
+; cast_kern(allocated);
+ 344: (bf) r2 = r1
+       bf 12 00 00 00 00 00 00
+ 345: (bc) w2 = w2
+       bc 22 00 00 00 00 00 00
+; if (unlikely(pos >= SDT_TASK_ENTS_PER_CHUNK))
+ 346: (25) if r3 > 0x1ff goto pc+16
+       25 03 10 00 ff 01 00 00
+; bit = (__u64)1 << (pos % 64);
+ 347: (bf) r4 = r3
+       bf 34 00 00 00 00 00 00
+ 348: (57) r4 &= 63
+       57 04 00 00 3f 00 00 00
+ 349: (b7) r5 = 1
+       b7 05 00 00 01 00 00 00
+; bit = (__u64)1 << (pos % 64);
+ 350: (6f) r5 <<= r4
+       6f 45 00 00 00 00 00 00
+; allocated[pos / 64] |= bit;
+ 351: (77) r3 >>= 3
+       77 03 00 00 03 00 00 00
+ 352: (18) r4 = 0x1ffffffffffffff8
+       18 04 00 00 f8 ff ff ff 00 00 00 00 ff ff ff 1f
+ 354: (5f) r3 &= r4
+       5f 43 00 00 00 00 00 00
+ 355: (0c) w2 += w3
+       0c 32 00 00 00 00 00 00
+; allocated[pos / 64] |= bit;
+ 356: (79) r3 = *(u64 *)(r2 +0)
+       79 23 00 00 00 00 00 00
+ 357: (4f) r3 |= r5
+       4f 53 00 00 00 00 00 00
+ 358: (7b) *(u64 *)(r2 +0) = r3
+       7b 32 00 00 00 00 00 00
+; tmp->nr_free -= 1;
+ 359: (79) r2 = *(u64 *)(r1 +64)
+       79 12 40 00 00 00 00 00
+ 360: (07) r2 += -1
+       07 02 00 00 ff ff ff ff
+ 361: (7b) *(u64 *)(r1 +64) = r2
+       7b 21 40 00 00 00 00 00
+; if (tmp->nr_free > 0)
+ 362: (15) if r2 == 0x0 goto pc+21
+       15 02 15 00 00 00 00 00
+; bpf_spin_unlock(&sdt_lock);
+ 363: (18) r1 = map[id:17][0]+0
+       18 21 00 00 11 00 00 00 00 00 00 00 00 00 00 00
+ 365: (85) call bpf_spin_unlock#310512
+       85 00 00 00 f0 bc 04 00
+; if (unlikely(desc == NULL)) {
+ 366: (55) if r6 != 0x0 goto pc+1
+       55 06 01 00 00 00 00 00
+ 367: (05) goto pc+130
+       05 00 82 00 00 00 00 00
+; cast_kern(desc);
+ 368: (bc) w6 = w6
+       bc 66 00 00 00 00 00 00
+; chunk = desc->chunk;
+ 369: (79) r8 = *(u64 *)(r6 +72)
+       79 68 48 00 00 00 00 00
+; cast_kern(chunk);
+ 370: (bc) w8 = w8
+       bc 88 00 00 00 00 00 00
+; pos = idx & (SDT_TASK_ENTS_PER_CHUNK - 1);
+ 371: (bf) r1 = r7
+       bf 71 00 00 00 00 00 00
+ 372: (57) r1 &= 511
+       57 01 00 00 ff 01 00 00
+; data = chunk->data[pos];
+ 373: (67) r1 <<= 3
+       67 01 00 00 03 00 00 00
+ 374: (0c) w8 += w1
+       0c 18 00 00 00 00 00 00
+ 375: (79) r9 = *(u64 *)(r8 +0)
+       79 89 00 00 00 00 00 00
+; if (!data) {
+ 376: (55) if r9 != 0x0 goto pc+95
+       55 09 5f 00 00 00 00 00
+ 377: (79) r6 = *(u64 *)(r10 -64)
+       79 a6 c0 ff 00 00 00 00
+; elem_size = pool->elem_size;
+ 378: (79) r2 = *(u64 *)(r6 +8)
+       79 62 08 00 00 00 00 00
+; if (pool->idx >= max_elems) {
+ 379: (79) r9 = *(u64 *)(r6 +24)
+       79 69 18 00 00 00 00 00
+; max_elems = pool->max_elems;
+ 380: (79) r3 = *(u64 *)(r6 +16)
+       79 63 10 00 00 00 00 00
+; if (pool->idx >= max_elems) {
+ 381: (3d) if r9 >= r3 goto pc+60
+       3d 39 3c 00 00 00 00 00
+; ptr = (void __arena *)((__u64) pool->slab + elem_size * pool->idx);
+ 382: (79) r0 = *(u64 *)(r6 +0)
+       79 60 00 00 00 00 00 00
+ 383: (05) goto pc+71
+       05 00 47 00 00 00 00 00
+; for (u = zero; u < SDT_TASK_LEVELS && can_loop; u++) {
+ 384: (79) r11 = *(u64 *)(r10 -80)
+       79 ab b0 ff 00 00 00 00
+ 385: (15) if r11 == 0x0 goto pc-23
+       15 0b e9 ff 00 00 00 00
+ 386: (17) r11 -= 1
+       17 0b 00 00 01 00 00 00
+ 387: (55) if r11 != 0x0 goto pc+2
+       55 0b 02 00 00 00 00 00
+ 388: (b7) r11 = -80
+       b7 0b 00 00 b0 ff ff ff
+ 389: (85) call arch_bpf_timed_may_goto#-2347920
+       85 00 00 00 70 2c dc ff
+ 390: (7b) *(u64 *)(r10 -80) = r11
+       7b ba b0 ff 00 00 00 00
+; tmp = lv_desc[level];
+ 391: (79) r1 = *(u64 *)(r10 -16)
+       79 a1 f0 ff 00 00 00 00
+; cast_kern(tmp);
+ 392: (bc) w1 = w1
+       bc 11 00 00 00 00 00 00
+; ret = sdt_set_idx_state(tmp, lv_pos[level], true);
+ 393: (79) r3 = *(u64 *)(r10 -40)
+       79 a3 d8 ff 00 00 00 00
+; cast_kern(allocated);
+ 394: (bf) r2 = r1
+       bf 12 00 00 00 00 00 00
+ 395: (bc) w2 = w2
+       bc 22 00 00 00 00 00 00
+; if (unlikely(pos >= SDT_TASK_ENTS_PER_CHUNK))
+ 396: (25) if r3 > 0x1ff goto pc-34
+       25 03 de ff ff 01 00 00
+; bit = (__u64)1 << (pos % 64);
+ 397: (bf) r4 = r3
+       bf 34 00 00 00 00 00 00
+ 398: (57) r4 &= 63
+       57 04 00 00 3f 00 00 00
+ 399: (b7) r5 = 1
+       b7 05 00 00 01 00 00 00
+; bit = (__u64)1 << (pos % 64);
+ 400: (6f) r5 <<= r4
+       6f 45 00 00 00 00 00 00
+; allocated[pos / 64] |= bit;
+ 401: (77) r3 >>= 3
+       77 03 00 00 03 00 00 00
+ 402: (18) r4 = 0x1ffffffffffffff8
+       18 04 00 00 f8 ff ff ff 00 00 00 00 ff ff ff 1f
+ 404: (5f) r3 &= r4
+       5f 43 00 00 00 00 00 00
+ 405: (0c) w2 += w3
+       0c 32 00 00 00 00 00 00
+; allocated[pos / 64] |= bit;
+ 406: (79) r3 = *(u64 *)(r2 +0)
+       79 23 00 00 00 00 00 00
+ 407: (4f) r3 |= r5
+       4f 53 00 00 00 00 00 00
+ 408: (7b) *(u64 *)(r2 +0) = r3
+       7b 32 00 00 00 00 00 00
+; tmp->nr_free -= 1;
+ 409: (79) r2 = *(u64 *)(r1 +64)
+       79 12 40 00 00 00 00 00
+ 410: (07) r2 += -1
+       07 02 00 00 ff ff ff ff
+ 411: (7b) *(u64 *)(r1 +64) = r2
+       7b 21 40 00 00 00 00 00
+; if (tmp->nr_free > 0)
+ 412: (55) if r2 != 0x0 goto pc-50
+       55 02 ce ff 00 00 00 00
+; for (u = zero; u < SDT_TASK_LEVELS && can_loop; u++) {
+ 413: (79) r11 = *(u64 *)(r10 -80)
+       79 ab b0 ff 00 00 00 00
+ 414: (15) if r11 == 0x0 goto pc-52
+       15 0b cc ff 00 00 00 00
+ 415: (17) r11 -= 1
+       17 0b 00 00 01 00 00 00
+ 416: (55) if r11 != 0x0 goto pc+2
+       55 0b 02 00 00 00 00 00
+ 417: (b7) r11 = -80
+       b7 0b 00 00 b0 ff ff ff
+ 418: (85) call arch_bpf_timed_may_goto#-2347920
+       85 00 00 00 70 2c dc ff
+ 419: (7b) *(u64 *)(r10 -80) = r11
+       7b ba b0 ff 00 00 00 00
+; tmp = lv_desc[level];
+ 420: (79) r1 = *(u64 *)(r10 -24)
+       79 a1 e8 ff 00 00 00 00
+; cast_kern(tmp);
+ 421: (bc) w1 = w1
+       bc 11 00 00 00 00 00 00
+; ret = sdt_set_idx_state(tmp, lv_pos[level], true);
+ 422: (79) r3 = *(u64 *)(r10 -48)
+       79 a3 d0 ff 00 00 00 00
+; cast_kern(allocated);
+ 423: (bf) r2 = r1
+       bf 12 00 00 00 00 00 00
+ 424: (bc) w2 = w2
+       bc 22 00 00 00 00 00 00
+; if (unlikely(pos >= SDT_TASK_ENTS_PER_CHUNK))
+ 425: (25) if r3 > 0x1ff goto pc-63
+       25 03 c1 ff ff 01 00 00
+; bit = (__u64)1 << (pos % 64);
+ 426: (bf) r4 = r3
+       bf 34 00 00 00 00 00 00
+ 427: (57) r4 &= 63
+       57 04 00 00 3f 00 00 00
+ 428: (b7) r5 = 1
+       b7 05 00 00 01 00 00 00
+; bit = (__u64)1 << (pos % 64);
+ 429: (6f) r5 <<= r4
+       6f 45 00 00 00 00 00 00
+; allocated[pos / 64] |= bit;
+ 430: (77) r3 >>= 3
+       77 03 00 00 03 00 00 00
+ 431: (18) r4 = 0x1ffffffffffffff8
+       18 04 00 00 f8 ff ff ff 00 00 00 00 ff ff ff 1f
+ 433: (5f) r3 &= r4
+       5f 43 00 00 00 00 00 00
+ 434: (0c) w2 += w3
+       0c 32 00 00 00 00 00 00
+; allocated[pos / 64] |= bit;
+ 435: (79) r3 = *(u64 *)(r2 +0)
+       79 23 00 00 00 00 00 00
+ 436: (4f) r3 |= r5
+       4f 53 00 00 00 00 00 00
+ 437: (7b) *(u64 *)(r2 +0) = r3
+       7b 32 00 00 00 00 00 00
+; tmp->nr_free -= 1;
+ 438: (79) r2 = *(u64 *)(r1 +64)
+       79 12 40 00 00 00 00 00
+ 439: (07) r2 += -1
+       07 02 00 00 ff ff ff ff
+ 440: (7b) *(u64 *)(r1 +64) = r2
+       7b 21 40 00 00 00 00 00
+ 441: (05) goto pc-79
+       05 00 b1 ff 00 00 00 00
+; div_round_up(max_elems * elem_size, PAGE_SIZE), NUMA_NO_NODE, 0);
+ 442: (2f) r3 *= r2
+       2f 23 00 00 00 00 00 00
+ 443: (07) r3 += 4095
+       07 03 00 00 ff 0f 00 00
+ 444: (77) r3 >>= 12
+       77 03 00 00 0c 00 00 00
+ 445: (b7) r9 = 0
+       b7 09 00 00 00 00 00 00
+; slab = bpf_arena_alloc_pages(&arena, NULL,
+ 446: (18) r1 = map[id:8]
+       18 11 00 00 08 00 00 00 00 00 00 00 00 00 00 00
+ 448: (7b) *(u64 *)(r10 -56) = r2
+       7b 2a c8 ff 00 00 00 00
+ 449: (b7) r2 = 0
+       b7 02 00 00 00 00 00 00
+ 450: (b4) w4 = -1
+       b4 04 00 00 ff ff ff ff
+ 451: (b7) r5 = 0
+       b7 05 00 00 00 00 00 00
+ 452: (85) call bpf_arena_alloc_pages#568976
+       85 20 00 00 90 ae 08 00
+ 453: (79) r2 = *(u64 *)(r10 -56)
+       79 a2 c8 ff 00 00 00 00
+; pool->slab = slab;
+ 454: (7b) *(u64 *)(r6 +0) = r0
+       7b 06 00 00 00 00 00 00
+; pool->idx += 1;
+ 455: (bf) r1 = r9
+       bf 91 00 00 00 00 00 00
+ 456: (07) r1 += 1
+       07 01 00 00 01 00 00 00
+ 457: (7b) *(u64 *)(r6 +24) = r1
+       7b 16 18 00 00 00 00 00
+; ptr = (void __arena *)((__u64) pool->slab + elem_size * pool->idx);
+ 458: (2f) r9 *= r2
+       2f 29 00 00 00 00 00 00
+; ptr = (void __arena *)((__u64) pool->slab + elem_size * pool->idx);
+ 459: (0f) r9 += r0
+       0f 09 00 00 00 00 00 00
+; if (!data) {
+ 460: (55) if r9 != 0x0 goto pc+11
+       55 09 0b 00 00 00 00 00
+; sdt_free_idx(alloc, idx);
+ 461: (79) r1 = *(u64 *)(r10 -64)
+       79 a1 c0 ff 00 00 00 00
+ 462: (bf) r2 = r7
+       bf 72 00 00 00 00 00 00
+ 463: (85) call pc+104#bpf_prog_e32fa1e00ac25294_sdt_free_idx
+       85 10 68 00 04 00 00 00
+; bpf_printk("%s: failed to allocate data from pool", __func__);
+ 464: (18) r1 = map[id:12][0]+11479
+       18 21 00 00 0c 00 00 00 00 00 00 00 d7 2c 00 00
+ 466: (b4) w2 = 38
+       b4 02 00 00 26 00 00 00
+; 
+ 467: (18) r3 = map[id:16][0]+36
+       18 23 00 00 10 00 00 00 00 00 00 00 24 00 00 00
+ 469: (85) call bpf_trace_printk#-130480
+       85 00 00 00 50 02 fe ff
+ 470: (b7) r9 = 0
+       b7 09 00 00 00 00 00 00
+ 471: (05) goto pc+21
+       05 00 15 00 00 00 00 00
+; chunk->data[pos] = data;
+ 472: (7b) *(u64 *)(r8 +0) = r9
+       7b 98 00 00 00 00 00 00
+; bpf_spin_lock(&sdt_lock);
+ 473: (18) r1 = map[id:17][0]+0
+       18 21 00 00 11 00 00 00 00 00 00 00 00 00 00 00
+ 475: (85) call bpf_spin_lock#305040
+       85 00 00 00 90 a7 04 00
+; sdt_stats.data_allocs += 1;
+ 476: (18) r1 = map[id:11][0]+33616
+       18 21 00 00 0b 00 00 00 00 00 00 00 50 83 00 00
+ 478: (79) r2 = *(u64 *)(r1 +8)
+       79 12 08 00 00 00 00 00
+ 479: (07) r2 += 1
+       07 02 00 00 01 00 00 00
+ 480: (7b) *(u64 *)(r1 +8) = r2
+       7b 21 08 00 00 00 00 00
+; sdt_stats.alloc_ops += 1;
+ 481: (79) r2 = *(u64 *)(r1 +16)
+       79 12 10 00 00 00 00 00
+ 482: (07) r2 += 1
+       07 02 00 00 01 00 00 00
+ 483: (7b) *(u64 *)(r1 +16) = r2
+       7b 21 10 00 00 00 00 00
+; sdt_stats.active_allocs += 1;
+ 484: (79) r2 = *(u64 *)(r1 +32)
+       79 12 20 00 00 00 00 00
+ 485: (07) r2 += 1
+       07 02 00 00 01 00 00 00
+ 486: (7b) *(u64 *)(r1 +32) = r2
+       7b 21 20 00 00 00 00 00
+; bpf_spin_unlock(&sdt_lock);
+ 487: (18) r1 = map[id:17][0]+0
+       18 21 00 00 11 00 00 00 00 00 00 00 00 00 00 00
+ 489: (85) call bpf_spin_unlock#310512
+       85 00 00 00 f0 bc 04 00
+; cast_kern(data);
+ 490: (bf) r1 = r9
+       bf 91 00 00 00 00 00 00
+ 491: (bc) w1 = w1
+       bc 11 00 00 00 00 00 00
+; data->tid.idx = idx;
+ 492: (63) *(u32 *)(r1 +0) = r7
+       63 71 00 00 00 00 00 00
+; }
+ 493: (bf) r0 = r9
+       bf 90 00 00 00 00 00 00
+ 494: (95) exit
+       95 00 00 00 00 00 00 00
+; bpf_spin_unlock(&sdt_lock);
+ 495: (18) r1 = map[id:17][0]+0
+       18 21 00 00 11 00 00 00 00 00 00 00 00 00 00 00
+ 497: (85) call bpf_spin_unlock#310512
+       85 00 00 00 f0 bc 04 00
+; bpf_printk("%s: failed to find empty tree key", __func__);
+ 498: (18) r1 = map[id:12][0]+11445
+       18 21 00 00 0c 00 00 00 00 00 00 00 b5 2c 00 00
+ 500: (b4) w2 = 34
+       b4 02 00 00 22 00 00 00
+ 501: (05) goto pc-35
+       05 00 dd ff 00 00 00 00
+int sdt_alloc_attempt(struct sdt_alloc_stack * stack):
+; int sdt_alloc_attempt(struct sdt_alloc_stack __arena *stack)
+ 502: (7a) *(u64 *)(r10 -16) = 65535
+       7a 0a f0 ff ff ff 00 00
+ 503: (7a) *(u64 *)(r10 -8) = 0
+       7a 0a f8 ff 00 00 00 00
+ 504: (bf) r9 = r1
+       bf 19 00 00 00 00 00 00
+ 505: (b4) w8 = 32
+       b4 08 00 00 20 00 00 00
+ 506: (05) goto pc+19
+       05 00 13 00 00 00 00 00
+; stack->stack[stack->idx] = slab;
+ 507: (bf) r2 = r1
+       bf 12 00 00 00 00 00 00
+ 508: (67) r2 <<= 3
+       67 02 00 00 03 00 00 00
+ 509: (bf) r3 = r6
+       bf 63 00 00 00 00 00 00
+ 510: (0c) w3 += w2
+       0c 23 00 00 00 00 00 00
+; stack->stack[stack->idx] = slab;
+ 511: (7b) *(u64 *)(r3 +8) = r7
+       7b 73 08 00 00 00 00 00
+; stack->idx += 1;
+ 512: (07) r1 += 1
+       07 01 00 00 01 00 00 00
+ 513: (7b) *(u64 *)(r6 +0) = r1
+       7b 16 00 00 00 00 00 00
+ 514: (18) r2 = map[id:11][0]+33616
+       18 22 00 00 0b 00 00 00 00 00 00 00 50 83 00 00
+; sdt_stats.arena_pages_used += 1;
+ 516: (79) r1 = *(u64 *)(r2 +40)
+       79 21 28 00 00 00 00 00
+ 517: (07) r1 += 1
+       07 01 00 00 01 00 00 00
+ 518: (7b) *(u64 *)(r2 +40) = r1
+       7b 12 28 00 00 00 00 00
+; bpf_spin_unlock(&sdt_lock);
+ 519: (18) r1 = map[id:17][0]+0
+       18 21 00 00 11 00 00 00 00 00 00 00 00 00 00 00
+ 521: (85) call bpf_spin_unlock#310512
+       85 00 00 00 f0 bc 04 00
+ 522: (b4) w0 = -12
+       b4 00 00 00 f4 ff ff ff
+; for (i = zero; i < SDT_TASK_ALLOC_ATTEMPTS && can_loop; i++) {
+ 523: (04) w8 += -1
+       04 08 00 00 ff ff ff ff
+; for (i = zero; i < SDT_TASK_ALLOC_ATTEMPTS && can_loop; i++) {
+ 524: (56) if w8 != 0x0 goto pc+1
+       56 08 01 00 00 00 00 00
+; }
+ 525: (95) exit
+       95 00 00 00 00 00 00 00
+ 526: (b4) w0 = -12
+       b4 00 00 00 f4 ff ff ff
+; for (i = zero; i < SDT_TASK_ALLOC_ATTEMPTS && can_loop; i++) {
+ 527: (79) r11 = *(u64 *)(r10 -16)
+       79 ab f0 ff 00 00 00 00
+ 528: (15) if r11 == 0x0 goto pc-4
+       15 0b fc ff 00 00 00 00
+ 529: (17) r11 -= 1
+       17 0b 00 00 01 00 00 00
+ 530: (55) if r11 != 0x0 goto pc+2
+       55 0b 02 00 00 00 00 00
+ 531: (b7) r11 = -16
+       b7 0b 00 00 f0 ff ff ff
+ 532: (85) call arch_bpf_timed_may_goto#-2347920
+       85 00 00 00 70 2c dc ff
+ 533: (7b) *(u64 *)(r10 -16) = r11
+       7b ba f0 ff 00 00 00 00
+; cast_kern(stack);
+ 534: (bf) r6 = r9
+       bf 96 00 00 00 00 00 00
+ 535: (bc) w6 = w6
+       bc 66 00 00 00 00 00 00
+; bpf_spin_lock(&sdt_lock);
+ 536: (18) r1 = map[id:17][0]+0
+       18 21 00 00 11 00 00 00 00 00 00 00 00 00 00 00
+ 538: (85) call bpf_spin_lock#305040
+       85 00 00 00 90 a7 04 00
+ 539: (b4) w0 = 0
+       b4 00 00 00 00 00 00 00
+; if (stack->idx >= SDT_TASK_ALLOC_STACK_MIN)
+ 540: (79) r1 = *(u64 *)(r6 +0)
+       79 61 00 00 00 00 00 00
+; if (stack->idx >= SDT_TASK_ALLOC_STACK_MIN)
+ 541: (25) if r1 > 0x5 goto pc-17
+       25 01 ef ff 05 00 00 00
+; bpf_spin_unlock(&sdt_lock);
+ 542: (18) r1 = map[id:17][0]+0
+       18 21 00 00 11 00 00 00 00 00 00 00 00 00 00 00
+ 544: (85) call bpf_spin_unlock#310512
+       85 00 00 00 f0 bc 04 00
+; slab = bpf_arena_alloc_pages(&arena, NULL, 1, NUMA_NO_NODE, 0);
+ 545: (18) r1 = map[id:8]
+       18 11 00 00 08 00 00 00 00 00 00 00 00 00 00 00
+ 547: (b7) r2 = 0
+       b7 02 00 00 00 00 00 00
+ 548: (b4) w3 = 1
+       b4 03 00 00 01 00 00 00
+ 549: (b4) w4 = -1
+       b4 04 00 00 ff ff ff ff
+ 550: (b7) r5 = 0
+       b7 05 00 00 00 00 00 00
+ 551: (85) call bpf_arena_alloc_pages#568976
+       85 20 00 00 90 ae 08 00
+ 552: (bf) r7 = r0
+       bf 07 00 00 00 00 00 00
+; if (slab == NULL)
+ 553: (15) if r7 == 0x0 goto pc-32
+       15 07 e0 ff 00 00 00 00
+; bpf_spin_lock(&sdt_lock);
+ 554: (18) r1 = map[id:17][0]+0
+       18 21 00 00 11 00 00 00 00 00 00 00 00 00 00 00
+ 556: (85) call bpf_spin_lock#305040
+       85 00 00 00 90 a7 04 00
+; if (stack->idx >= SDT_TASK_ALLOC_STACK_MAX) {
+ 557: (79) r1 = *(u64 *)(r6 +0)
+       79 61 00 00 00 00 00 00
+; if (stack->idx >= SDT_TASK_ALLOC_STACK_MAX) {
+ 558: (a5) if r1 < 0x1e goto pc-52
+       a5 01 cc ff 1e 00 00 00
+; bpf_spin_unlock(&sdt_lock);
+ 559: (18) r1 = map[id:17][0]+0
+       18 21 00 00 11 00 00 00 00 00 00 00 00 00 00 00
+ 561: (85) call bpf_spin_unlock#310512
+       85 00 00 00 f0 bc 04 00
+; bpf_arena_free_pages(&arena, slab, 1);
+ 562: (18) r1 = map[id:8]
+       18 11 00 00 08 00 00 00 00 00 00 00 00 00 00 00
+ 564: (bf) r2 = r7
+       bf 72 00 00 00 00 00 00
+ 565: (b4) w3 = 1
+       b4 03 00 00 01 00 00 00
+ 566: (85) call bpf_arena_free_pages#569136
+       85 20 00 00 30 af 08 00
+ 567: (05) goto pc-46
+       05 00 d2 ff 00 00 00 00
+int sdt_free_idx(struct sdt_allocator * alloc, __u64 idx):
+; int sdt_free_idx(struct sdt_allocator *alloc, __u64 idx)
+ 568: (7a) *(u64 *)(r10 -88) = 65535
+       7a 0a a8 ff ff ff 00 00
+ 569: (7a) *(u64 *)(r10 -80) = 0
+       7a 0a b0 ff 00 00 00 00
+ 570: (bf) r7 = r2
+       bf 27 00 00 00 00 00 00
+ 571: (bf) r6 = r1
+       bf 16 00 00 00 00 00 00
+; if (sdt_verify_once)
+ 572: (18) r8 = map[id:11][0]+33536
+       18 28 00 00 0b 00 00 00 00 00 00 00 00 83 00 00
+ 574: (71) r1 = *(u8 *)(r8 +0)
+       71 81 00 00 00 00 00 00
+; if (sdt_verify_once)
+ 575: (56) if w1 != 0x0 goto pc+10
+       56 01 0a 00 00 00 00 00
+; bpf_printk("%s: arena pointer %p", __func__, &arena);
+ 576: (18) r1 = map[id:12][0]+11424
+       18 21 00 00 0c 00 00 00 00 00 00 00 a0 2c 00 00
+ 578: (b4) w2 = 21
+       b4 02 00 00 15 00 00 00
+ 579: (18) r3 = map[id:16][0]+0
+       18 23 00 00 10 00 00 00 00 00 00 00 00 00 00 00
+ 581: (18) r4 = map[id:8]
+       18 14 00 00 08 00 00 00 00 00 00 00 00 00 00 00
+ 583: (85) call bpf_trace_printk#-130480
+       85 00 00 00 50 02 fe ff
+ 584: (b4) w1 = 1
+       b4 01 00 00 01 00 00 00
+; sdt_verify_once = true;
+ 585: (73) *(u8 *)(r8 +0) = r1
+       73 18 00 00 00 00 00 00
+; if (!alloc)
+ 586: (15) if r6 == 0x0 goto pc+152
+       15 06 98 00 00 00 00 00
+; bpf_spin_lock(&sdt_lock);
+ 587: (18) r1 = map[id:17][0]+0
+       18 21 00 00 11 00 00 00 00 00 00 00 00 00 00 00
+ 589: (85) call bpf_spin_lock#305040
+       85 00 00 00 90 a7 04 00
+; desc = alloc->root;
+ 590: (79) r1 = *(u64 *)(r6 +32)
+       79 61 20 00 00 00 00 00
+; if (unlikely(!desc)) {
+ 591: (15) if r1 == 0x0 goto pc+149
+       15 01 95 00 00 00 00 00
+; for (level = zero; level < SDT_TASK_LEVELS && can_loop; level++) {
+ 592: (79) r11 = *(u64 *)(r10 -88)
+       79 ab a8 ff 00 00 00 00
+ 593: (15) if r11 == 0x0 goto pc+26
+       15 0b 1a 00 00 00 00 00
+ 594: (17) r11 -= 1
+       17 0b 00 00 01 00 00 00
+ 595: (55) if r11 != 0x0 goto pc+2
+       55 0b 02 00 00 00 00 00
+ 596: (b7) r11 = -88
+       b7 0b 00 00 a8 ff ff ff
+ 597: (85) call arch_bpf_timed_may_goto#-2347920
+       85 00 00 00 70 2c dc ff
+ 598: (7b) *(u64 *)(r10 -88) = r11
+       7b ba a8 ff 00 00 00 00
+ 599: (b7) r2 = 0
+       b7 02 00 00 00 00 00 00
+; lv_pos[level] = 0;
+ 600: (7b) *(u64 *)(r10 -48) = r2
+       7b 2a d0 ff 00 00 00 00
+; lv_desc[level] = NULL;
+ 601: (7b) *(u64 *)(r10 -24) = r2
+       7b 2a e8 ff 00 00 00 00
+; for (level = zero; level < SDT_TASK_LEVELS && can_loop; level++) {
+ 602: (79) r11 = *(u64 *)(r10 -88)
+       79 ab a8 ff 00 00 00 00
+ 603: (15) if r11 == 0x0 goto pc+16
+       15 0b 10 00 00 00 00 00
+ 604: (17) r11 -= 1
+       17 0b 00 00 01 00 00 00
+ 605: (55) if r11 != 0x0 goto pc+2
+       55 0b 02 00 00 00 00 00
+ 606: (b7) r11 = -88
+       b7 0b 00 00 a8 ff ff ff
+ 607: (85) call arch_bpf_timed_may_goto#-2347920
+       85 00 00 00 70 2c dc ff
+ 608: (7b) *(u64 *)(r10 -88) = r11
+       7b ba a8 ff 00 00 00 00
+; lv_pos[level] = 0;
+ 609: (7b) *(u64 *)(r10 -40) = r2
+       7b 2a d8 ff 00 00 00 00
+; lv_desc[level] = NULL;
+ 610: (7b) *(u64 *)(r10 -16) = r2
+       7b 2a f0 ff 00 00 00 00
+; for (level = zero; level < SDT_TASK_LEVELS && can_loop; level++) {
+ 611: (79) r11 = *(u64 *)(r10 -88)
+       79 ab a8 ff 00 00 00 00
+ 612: (15) if r11 == 0x0 goto pc+7
+       15 0b 07 00 00 00 00 00
+ 613: (17) r11 -= 1
+       17 0b 00 00 01 00 00 00
+ 614: (55) if r11 != 0x0 goto pc+2
+       55 0b 02 00 00 00 00 00
+ 615: (b7) r11 = -88
+       b7 0b 00 00 a8 ff ff ff
+ 616: (85) call arch_bpf_timed_may_goto#-2347920
+       85 00 00 00 70 2c dc ff
+ 617: (7b) *(u64 *)(r10 -88) = r11
+       7b ba a8 ff 00 00 00 00
+; lv_pos[level] = 0;
+ 618: (7b) *(u64 *)(r10 -32) = r2
+       7b 2a e0 ff 00 00 00 00
+; lv_desc[level] = NULL;
+ 619: (7b) *(u64 *)(r10 -8) = r2
+       7b 2a f8 ff 00 00 00 00
+; for (level = zero; level < SDT_TASK_LEVELS && can_loop; level++) {
+ 620: (79) r11 = *(u64 *)(r10 -88)
+       79 ab a8 ff 00 00 00 00
+ 621: (15) if r11 == 0x0 goto pc+64
+       15 0b 40 00 00 00 00 00
+ 622: (17) r11 -= 1
+       17 0b 00 00 01 00 00 00
+ 623: (55) if r11 != 0x0 goto pc+2
+       55 0b 02 00 00 00 00 00
+ 624: (b7) r11 = -88
+       b7 0b 00 00 a8 ff ff ff
+ 625: (85) call arch_bpf_timed_may_goto#-2347920
+       85 00 00 00 70 2c dc ff
+ 626: (7b) *(u64 *)(r10 -88) = r11
+       7b ba a8 ff 00 00 00 00
+; lv_desc[level] = desc;
+ 627: (7b) *(u64 *)(r10 -24) = r1
+       7b 1a e8 ff 00 00 00 00
+; pos = (idx >> shift) & mask;
+ 628: (bf) r2 = r7
+       bf 72 00 00 00 00 00 00
+ 629: (77) r2 >>= 18
+       77 02 00 00 12 00 00 00
+; pos = (idx >> shift) & mask;
+ 630: (57) r2 &= 511
+       57 02 00 00 ff 01 00 00
+; lv_pos[level] = pos;
+ 631: (7b) *(u64 *)(r10 -48) = r2
+       7b 2a d0 ff 00 00 00 00
+; cast_kern(desc);
+ 632: (bc) w1 = w1
+       bc 11 00 00 00 00 00 00
+; chunk = desc->chunk;
+ 633: (79) r1 = *(u64 *)(r1 +72)
+       79 11 48 00 00 00 00 00
+; cast_kern(chunk);
+ 634: (bc) w1 = w1
+       bc 11 00 00 00 00 00 00
+; desc = desc_children[pos];
+ 635: (67) r2 <<= 3
+       67 02 00 00 03 00 00 00
+ 636: (0c) w1 += w2
+       0c 21 00 00 00 00 00 00
+ 637: (b7) r8 = 0
+       b7 08 00 00 00 00 00 00
+ 638: (79) r1 = *(u64 *)(r1 +0)
+       79 11 00 00 00 00 00 00
+; if (unlikely(!desc)) {
+ 639: (55) if r1 != 0x0 goto pc+15
+       55 01 0f 00 00 00 00 00
+; bpf_spin_unlock(&sdt_lock);
+ 640: (18) r1 = map[id:17][0]+0
+       18 21 00 00 11 00 00 00 00 00 00 00 00 00 00 00
+ 642: (85) call bpf_spin_unlock#310512
+       85 00 00 00 f0 bc 04 00
+; scx_bpf_error("%s: freeing nonexistent idx [0x%llx] (level %llu)",
+ 643: (7b) *(u64 *)(r10 -56) = r8
+       7b 8a c8 ff 00 00 00 00
+ 644: (7b) *(u64 *)(r10 -64) = r7
+       7b 7a c0 ff 00 00 00 00
+ 645: (18) r1 = map[id:16][0]+23
+       18 21 00 00 10 00 00 00 00 00 00 00 17 00 00 00
+ 647: (7b) *(u64 *)(r10 -72) = r1
+       7b 1a b8 ff 00 00 00 00
+ 648: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; bpf_spin_unlock(&sdt_lock);
+ 649: (07) r2 += -72
+       07 02 00 00 b8 ff ff ff
+; scx_bpf_error("%s: freeing nonexistent idx [0x%llx] (level %llu)",
+ 650: (18) r1 = map[id:13][0]+3276
+       18 21 00 00 0d 00 00 00 00 00 00 00 cc 0c 00 00
+ 652: (b4) w3 = 24
+       b4 03 00 00 18 00 00 00
+ 653: (85) call scx_bpf_error_bstr#-1709968
+       85 20 00 00 70 e8 e5 ff
+ 654: (05) goto pc+84
+       05 00 54 00 00 00 00 00
+; for (level = zero; level < SDT_TASK_LEVELS && can_loop; level++) {
+ 655: (79) r11 = *(u64 *)(r10 -88)
+       79 ab a8 ff 00 00 00 00
+ 656: (15) if r11 == 0x0 goto pc+29
+       15 0b 1d 00 00 00 00 00
+ 657: (17) r11 -= 1
+       17 0b 00 00 01 00 00 00
+ 658: (55) if r11 != 0x0 goto pc+2
+       55 0b 02 00 00 00 00 00
+ 659: (b7) r11 = -88
+       b7 0b 00 00 a8 ff ff ff
+ 660: (85) call arch_bpf_timed_may_goto#-2347920
+       85 00 00 00 70 2c dc ff
+ 661: (7b) *(u64 *)(r10 -88) = r11
+       7b ba a8 ff 00 00 00 00
+; lv_desc[level] = desc;
+ 662: (7b) *(u64 *)(r10 -16) = r1
+       7b 1a f0 ff 00 00 00 00
+; pos = (idx >> shift) & mask;
+ 663: (bf) r2 = r7
+       bf 72 00 00 00 00 00 00
+ 664: (77) r2 >>= 9
+       77 02 00 00 09 00 00 00
+; pos = (idx >> shift) & mask;
+ 665: (57) r2 &= 511
+       57 02 00 00 ff 01 00 00
+; lv_pos[level] = pos;
+ 666: (7b) *(u64 *)(r10 -40) = r2
+       7b 2a d8 ff 00 00 00 00
+; cast_kern(desc);
+ 667: (bc) w1 = w1
+       bc 11 00 00 00 00 00 00
+; chunk = desc->chunk;
+ 668: (79) r1 = *(u64 *)(r1 +72)
+       79 11 48 00 00 00 00 00
+; cast_kern(chunk);
+ 669: (bc) w1 = w1
+       bc 11 00 00 00 00 00 00
+; desc = desc_children[pos];
+ 670: (67) r2 <<= 3
+       67 02 00 00 03 00 00 00
+ 671: (0c) w1 += w2
+       0c 21 00 00 00 00 00 00
+ 672: (b7) r8 = 1
+       b7 08 00 00 01 00 00 00
+ 673: (79) r1 = *(u64 *)(r1 +0)
+       79 11 00 00 00 00 00 00
+; if (unlikely(!desc)) {
+ 674: (15) if r1 == 0x0 goto pc-35
+       15 01 dd ff 00 00 00 00
+; for (level = zero; level < SDT_TASK_LEVELS && can_loop; level++) {
+ 675: (79) r11 = *(u64 *)(r10 -88)
+       79 ab a8 ff 00 00 00 00
+ 676: (15) if r11 == 0x0 goto pc+9
+       15 0b 09 00 00 00 00 00
+ 677: (17) r11 -= 1
+       17 0b 00 00 01 00 00 00
+ 678: (55) if r11 != 0x0 goto pc+2
+       55 0b 02 00 00 00 00 00
+ 679: (b7) r11 = -88
+       b7 0b 00 00 a8 ff ff ff
+ 680: (85) call arch_bpf_timed_may_goto#-2347920
+       85 00 00 00 70 2c dc ff
+ 681: (7b) *(u64 *)(r10 -88) = r11
+       7b ba a8 ff 00 00 00 00
+; lv_desc[level] = desc;
+ 682: (7b) *(u64 *)(r10 -8) = r1
+       7b 1a f8 ff 00 00 00 00
+; pos = (idx >> shift) & mask;
+ 683: (bf) r2 = r7
+       bf 72 00 00 00 00 00 00
+ 684: (57) r2 &= 511
+       57 02 00 00 ff 01 00 00
+; lv_pos[level] = pos;
+ 685: (7b) *(u64 *)(r10 -32) = r2
+       7b 2a e0 ff 00 00 00 00
+; cast_kern(desc);
+ 686: (bc) w1 = w1
+       bc 11 00 00 00 00 00 00
+; chunk = desc->chunk;
+ 687: (79) r1 = *(u64 *)(r1 +72)
+       79 11 48 00 00 00 00 00
+; cast_kern(chunk);
+ 688: (bc) w1 = w1
+       bc 11 00 00 00 00 00 00
+; pos = idx & mask;
+ 689: (57) r7 &= 511
+       57 07 00 00 ff 01 00 00
+; data = chunk->data[pos];
+ 690: (67) r7 <<= 3
+       67 07 00 00 03 00 00 00
+ 691: (0c) w1 += w7
+       0c 71 00 00 00 00 00 00
+ 692: (79) r1 = *(u64 *)(r1 +0)
+       79 11 00 00 00 00 00 00
+; if (likely(!data)) {
+ 693: (55) if r1 != 0x0 goto pc+27
+       55 01 1b 00 00 00 00 00
+ 694: (b7) r1 = 0
+       b7 01 00 00 00 00 00 00
+; cast_kern(data);
+ 695: (b7) r2 = 0
+       b7 02 00 00 00 00 00 00
+ 696: (bc) w2 = w2
+       bc 22 00 00 00 00 00 00
+; data[pos] = (struct sdt_data) {
+ 697: (bf) r3 = r2
+       bf 23 00 00 00 00 00 00
+ 698: (0c) w3 += w7
+       0c 73 00 00 00 00 00 00
+; .tid.genn = data->tid.genn + 1,
+ 699: (61) r4 = *(u32 *)(r2 +4)
+       61 24 04 00 00 00 00 00
+ 700: (b4) w5 = 0
+       b4 05 00 00 00 00 00 00
+; data[pos] = (struct sdt_data) {
+ 701: (63) *(u32 *)(r3 +0) = r5
+       63 53 00 00 00 00 00 00
+; .tid.genn = data->tid.genn + 1,
+ 702: (04) w4 += 1
+       04 04 00 00 01 00 00 00
+; data[pos] = (struct sdt_data) {
+ 703: (63) *(u32 *)(r3 +4) = r4
+       63 43 04 00 00 00 00 00
+; for (i = zero; i < alloc->pool.elem_size / 8 && can_loop; i++) {
+ 704: (79) r3 = *(u64 *)(r6 +8)
+       79 63 08 00 00 00 00 00
+; for (i = zero; i < alloc->pool.elem_size / 8 && can_loop; i++) {
+ 705: (a5) if r3 < 0x8 goto pc+15
+       a5 03 0f 00 08 00 00 00
+; for (i = zero; i < alloc->pool.elem_size / 8 && can_loop; i++) {
+ 706: (04) w2 += 8
+       04 02 00 00 08 00 00 00
+ 707: (b7) r3 = 0
+       b7 03 00 00 00 00 00 00
+; for (i = zero; i < alloc->pool.elem_size / 8 && can_loop; i++) {
+ 708: (79) r11 = *(u64 *)(r10 -88)
+       79 ab a8 ff 00 00 00 00
+ 709: (15) if r11 == 0x0 goto pc+11
+       15 0b 0b 00 00 00 00 00
+ 710: (17) r11 -= 1
+       17 0b 00 00 01 00 00 00
+ 711: (55) if r11 != 0x0 goto pc+2
+       55 0b 02 00 00 00 00 00
+ 712: (b7) r11 = -88
+       b7 0b 00 00 a8 ff ff ff
+ 713: (85) call arch_bpf_timed_may_goto#-2347920
+       85 00 00 00 70 2c dc ff
+ 714: (7b) *(u64 *)(r10 -88) = r11
+       7b ba a8 ff 00 00 00 00
+; data->payload[i] = 0;
+ 715: (7b) *(u64 *)(r2 +0) = r1
+       7b 12 00 00 00 00 00 00
+; for (i = zero; i < alloc->pool.elem_size / 8 && can_loop; i++) {
+ 716: (04) w2 += 8
+       04 02 00 00 08 00 00 00
+; for (i = zero; i < alloc->pool.elem_size / 8 && can_loop; i++) {
+ 717: (07) r3 += 1
+       07 03 00 00 01 00 00 00
+; for (i = zero; i < alloc->pool.elem_size / 8 && can_loop; i++) {
+ 718: (79) r4 = *(u64 *)(r6 +8)
+       79 64 08 00 00 00 00 00
+; for (i = zero; i < alloc->pool.elem_size / 8 && can_loop; i++) {
+ 719: (77) r4 >>= 3
+       77 04 00 00 03 00 00 00
+; for (i = zero; i < alloc->pool.elem_size / 8 && can_loop; i++) {
+ 720: (2d) if r4 > r3 goto pc-13
+       2d 34 f3 ff 00 00 00 00
+ 721: (bf) r1 = r10
+       bf a1 00 00 00 00 00 00
+; ret = sdt_mark_nodes_avail(lv_desc, lv_pos);
+ 722: (07) r1 += -24
+       07 01 00 00 e8 ff ff ff
+ 723: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+ 724: (07) r2 += -48
+       07 02 00 00 d0 ff ff ff
+ 725: (85) call pc+28#bpf_prog_81e2590303865f24_sdt_mark_nodes_avail
+       85 10 1c 00 05 00 00 00
+; if (unlikely(ret != 0)) {
+ 726: (16) if w0 == 0x0 goto pc+1
+       16 00 01 00 00 00 00 00
+ 727: (05) goto pc+8
+       05 00 08 00 00 00 00 00
+; sdt_stats.active_allocs -= 1;
+ 728: (18) r1 = map[id:11][0]+33616
+       18 21 00 00 0b 00 00 00 00 00 00 00 50 83 00 00
+ 730: (79) r2 = *(u64 *)(r1 +32)
+       79 12 20 00 00 00 00 00
+ 731: (07) r2 += -1
+       07 02 00 00 ff ff ff ff
+ 732: (7b) *(u64 *)(r1 +32) = r2
+       7b 21 20 00 00 00 00 00
+; sdt_stats.free_ops += 1;
+ 733: (79) r2 = *(u64 *)(r1 +24)
+       79 12 18 00 00 00 00 00
+ 734: (07) r2 += 1
+       07 02 00 00 01 00 00 00
+ 735: (7b) *(u64 *)(r1 +24) = r2
+       7b 21 18 00 00 00 00 00
+; 
+ 736: (18) r1 = map[id:17][0]+0
+       18 21 00 00 11 00 00 00 00 00 00 00 00 00 00 00
+ 738: (85) call bpf_spin_unlock#310512
+       85 00 00 00 f0 bc 04 00
+; }
+ 739: (b4) w0 = 0
+       b4 00 00 00 00 00 00 00
+ 740: (95) exit
+       95 00 00 00 00 00 00 00
+; bpf_spin_unlock(&sdt_lock);
+ 741: (18) r1 = map[id:17][0]+0
+       18 21 00 00 11 00 00 00 00 00 00 00 00 00 00 00
+ 743: (85) call bpf_spin_unlock#310512
+       85 00 00 00 f0 bc 04 00
+; scx_bpf_error("%s: root not allocated", __func__);
+ 744: (18) r1 = map[id:16][0]+23
+       18 21 00 00 10 00 00 00 00 00 00 00 17 00 00 00
+ 746: (7b) *(u64 *)(r10 -24) = r1
+       7b 1a e8 ff 00 00 00 00
+ 747: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; bpf_spin_unlock(&sdt_lock);
+ 748: (07) r2 += -24
+       07 02 00 00 e8 ff ff ff
+; scx_bpf_error("%s: root not allocated", __func__);
+ 749: (18) r1 = map[id:13][0]+3224
+       18 21 00 00 0d 00 00 00 00 00 00 00 98 0c 00 00
+ 751: (b4) w3 = 8
+       b4 03 00 00 08 00 00 00
+ 752: (85) call scx_bpf_error_bstr#-1709968
+       85 20 00 00 70 e8 e5 ff
+ 753: (05) goto pc-15
+       05 00 f1 ff 00 00 00 00
+int sdt_mark_nodes_avail(sdt_desc_t * * lv_desc, __u64 * lv_pos):
+; int sdt_mark_nodes_avail(sdt_desc_t *lv_desc[SDT_TASK_LEVELS], __u64 lv_pos[SDT_TASK_LEVELS])
+ 754: (7a) *(u64 *)(r10 -16) = 65535
+       7a 0a f0 ff ff ff 00 00
+ 755: (7a) *(u64 *)(r10 -8) = 0
+       7a 0a f8 ff 00 00 00 00
+ 756: (b4) w0 = 0
+       b4 00 00 00 00 00 00 00
+; for (u = zero; u < SDT_TASK_LEVELS && can_loop; u++) {
+ 757: (79) r11 = *(u64 *)(r10 -16)
+       79 ab f0 ff 00 00 00 00
+ 758: (15) if r11 == 0x0 goto pc+30
+       15 0b 1e 00 00 00 00 00
+ 759: (17) r11 -= 1
+       17 0b 00 00 01 00 00 00
+ 760: (55) if r11 != 0x0 goto pc+2
+       55 0b 02 00 00 00 00 00
+ 761: (b7) r11 = -16
+       b7 0b 00 00 f0 ff ff ff
+ 762: (85) call arch_bpf_timed_may_goto#-2347920
+       85 00 00 00 70 2c dc ff
+ 763: (7b) *(u64 *)(r10 -16) = r11
+       7b ba f0 ff 00 00 00 00
+ 764: (b4) w0 = -22
+       b4 00 00 00 ea ff ff ff
+; ret = sdt_set_idx_state(desc, lv_pos[level], false);
+ 765: (79) r5 = *(u64 *)(r2 +16)
+       79 25 10 00 00 00 00 00
+; desc = lv_desc[level];
+ 766: (79) r3 = *(u64 *)(r1 +16)
+       79 13 10 00 00 00 00 00
+; cast_kern(allocated);
+ 767: (bf) r4 = r3
+       bf 34 00 00 00 00 00 00
+ 768: (bc) w4 = w4
+       bc 44 00 00 00 00 00 00
+; if (unlikely(pos >= SDT_TASK_ENTS_PER_CHUNK))
+ 769: (25) if r5 > 0x1ff goto pc+19
+       25 05 13 00 ff 01 00 00
+ 770: (b4) w0 = 0
+       b4 00 00 00 00 00 00 00
+; allocated[pos / 64] &= ~bit;
+ 771: (bf) r6 = r5
+       bf 56 00 00 00 00 00 00
+ 772: (77) r6 >>= 3
+       77 06 00 00 03 00 00 00
+ 773: (18) r7 = 0x1ffffffffffffff8
+       18 07 00 00 f8 ff ff ff 00 00 00 00 ff ff ff 1f
+ 775: (5f) r6 &= r7
+       5f 76 00 00 00 00 00 00
+ 776: (0c) w4 += w6
+       0c 64 00 00 00 00 00 00
+; bit = (__u64)1 << (pos % 64);
+ 777: (57) r5 &= 63
+       57 05 00 00 3f 00 00 00
+ 778: (b7) r6 = 1
+       b7 06 00 00 01 00 00 00
+; bit = (__u64)1 << (pos % 64);
+ 779: (6f) r6 <<= r5
+       6f 56 00 00 00 00 00 00
+; allocated[pos / 64] &= ~bit;
+ 780: (a7) r6 ^= -1
+       a7 06 00 00 ff ff ff ff
+; allocated[pos / 64] &= ~bit;
+ 781: (79) r5 = *(u64 *)(r4 +0)
+       79 45 00 00 00 00 00 00
+ 782: (5f) r5 &= r6
+       5f 65 00 00 00 00 00 00
+ 783: (7b) *(u64 *)(r4 +0) = r5
+       7b 54 00 00 00 00 00 00
+; cast_kern(desc);
+ 784: (bc) w3 = w3
+       bc 33 00 00 00 00 00 00
+; desc->nr_free += 1;
+ 785: (79) r4 = *(u64 *)(r3 +64)
+       79 34 40 00 00 00 00 00
+ 786: (07) r4 += 1
+       07 04 00 00 01 00 00 00
+ 787: (7b) *(u64 *)(r3 +64) = r4
+       7b 43 40 00 00 00 00 00
+; if (desc->nr_free > 1)
+ 788: (a5) if r4 < 0x2 goto pc+1
+       a5 04 01 00 02 00 00 00
+; }
+ 789: (95) exit
+       95 00 00 00 00 00 00 00
+; for (u = zero; u < SDT_TASK_LEVELS && can_loop; u++) {
+ 790: (79) r11 = *(u64 *)(r10 -16)
+       79 ab f0 ff 00 00 00 00
+ 791: (15) if r11 == 0x0 goto pc-3
+       15 0b fd ff 00 00 00 00
+ 792: (17) r11 -= 1
+       17 0b 00 00 01 00 00 00
+ 793: (55) if r11 != 0x0 goto pc+2
+       55 0b 02 00 00 00 00 00
+ 794: (b7) r11 = -16
+       b7 0b 00 00 f0 ff ff ff
+ 795: (85) call arch_bpf_timed_may_goto#-2347920
+       85 00 00 00 70 2c dc ff
+ 796: (7b) *(u64 *)(r10 -16) = r11
+       7b ba f0 ff 00 00 00 00
+ 797: (b4) w0 = -22
+       b4 00 00 00 ea ff ff ff
+; ret = sdt_set_idx_state(desc, lv_pos[level], false);
+ 798: (79) r5 = *(u64 *)(r2 +8)
+       79 25 08 00 00 00 00 00
+; desc = lv_desc[level];
+ 799: (79) r3 = *(u64 *)(r1 +8)
+       79 13 08 00 00 00 00 00
+; cast_kern(allocated);
+ 800: (bf) r4 = r3
+       bf 34 00 00 00 00 00 00
+ 801: (bc) w4 = w4
+       bc 44 00 00 00 00 00 00
+; if (unlikely(pos >= SDT_TASK_ENTS_PER_CHUNK))
+ 802: (25) if r5 > 0x1ff goto pc-14
+       25 05 f2 ff ff 01 00 00
+ 803: (b4) w0 = 0
+       b4 00 00 00 00 00 00 00
+; allocated[pos / 64] &= ~bit;
+ 804: (bf) r6 = r5
+       bf 56 00 00 00 00 00 00
+ 805: (77) r6 >>= 3
+       77 06 00 00 03 00 00 00
+ 806: (5f) r6 &= r7
+       5f 76 00 00 00 00 00 00
+ 807: (0c) w4 += w6
+       0c 64 00 00 00 00 00 00
+; bit = (__u64)1 << (pos % 64);
+ 808: (57) r5 &= 63
+       57 05 00 00 3f 00 00 00
+ 809: (b7) r6 = 1
+       b7 06 00 00 01 00 00 00
+; bit = (__u64)1 << (pos % 64);
+ 810: (6f) r6 <<= r5
+       6f 56 00 00 00 00 00 00
+; allocated[pos / 64] &= ~bit;
+ 811: (a7) r6 ^= -1
+       a7 06 00 00 ff ff ff ff
+; allocated[pos / 64] &= ~bit;
+ 812: (79) r5 = *(u64 *)(r4 +0)
+       79 45 00 00 00 00 00 00
+ 813: (5f) r5 &= r6
+       5f 65 00 00 00 00 00 00
+ 814: (7b) *(u64 *)(r4 +0) = r5
+       7b 54 00 00 00 00 00 00
+; cast_kern(desc);
+ 815: (bc) w3 = w3
+       bc 33 00 00 00 00 00 00
+; desc->nr_free += 1;
+ 816: (79) r4 = *(u64 *)(r3 +64)
+       79 34 40 00 00 00 00 00
+ 817: (07) r4 += 1
+       07 04 00 00 01 00 00 00
+ 818: (7b) *(u64 *)(r3 +64) = r4
+       7b 43 40 00 00 00 00 00
+; if (desc->nr_free > 1)
+ 819: (25) if r4 > 0x1 goto pc-31
+       25 04 e1 ff 01 00 00 00
+; for (u = zero; u < SDT_TASK_LEVELS && can_loop; u++) {
+ 820: (79) r11 = *(u64 *)(r10 -16)
+       79 ab f0 ff 00 00 00 00
+ 821: (15) if r11 == 0x0 goto pc-33
+       15 0b df ff 00 00 00 00
+ 822: (17) r11 -= 1
+       17 0b 00 00 01 00 00 00
+ 823: (55) if r11 != 0x0 goto pc+2
+       55 0b 02 00 00 00 00 00
+ 824: (b7) r11 = -16
+       b7 0b 00 00 f0 ff ff ff
+ 825: (85) call arch_bpf_timed_may_goto#-2347920
+       85 00 00 00 70 2c dc ff
+ 826: (7b) *(u64 *)(r10 -16) = r11
+       7b ba f0 ff 00 00 00 00
+ 827: (b4) w0 = -22
+       b4 00 00 00 ea ff ff ff
+; ret = sdt_set_idx_state(desc, lv_pos[level], false);
+ 828: (79) r3 = *(u64 *)(r2 +0)
+       79 23 00 00 00 00 00 00
+; desc = lv_desc[level];
+ 829: (79) r1 = *(u64 *)(r1 +0)
+       79 11 00 00 00 00 00 00
+; cast_kern(allocated);
+ 830: (bf) r2 = r1
+       bf 12 00 00 00 00 00 00
+ 831: (bc) w2 = w2
+       bc 22 00 00 00 00 00 00
+; if (unlikely(pos >= SDT_TASK_ENTS_PER_CHUNK))
+ 832: (25) if r3 > 0x1ff goto pc-44
+       25 03 d4 ff ff 01 00 00
+ 833: (b4) w0 = 0
+       b4 00 00 00 00 00 00 00
+; allocated[pos / 64] &= ~bit;
+ 834: (bf) r4 = r3
+       bf 34 00 00 00 00 00 00
+ 835: (77) r4 >>= 3
+       77 04 00 00 03 00 00 00
+ 836: (18) r5 = 0x1ffffffffffffff8
+       18 05 00 00 f8 ff ff ff 00 00 00 00 ff ff ff 1f
+ 838: (5f) r4 &= r5
+       5f 54 00 00 00 00 00 00
+ 839: (0c) w2 += w4
+       0c 42 00 00 00 00 00 00
+; bit = (__u64)1 << (pos % 64);
+ 840: (57) r3 &= 63
+       57 03 00 00 3f 00 00 00
+ 841: (b7) r4 = 1
+       b7 04 00 00 01 00 00 00
+; bit = (__u64)1 << (pos % 64);
+ 842: (6f) r4 <<= r3
+       6f 34 00 00 00 00 00 00
+; allocated[pos / 64] &= ~bit;
+ 843: (a7) r4 ^= -1
+       a7 04 00 00 ff ff ff ff
+; allocated[pos / 64] &= ~bit;
+ 844: (79) r3 = *(u64 *)(r2 +0)
+       79 23 00 00 00 00 00 00
+ 845: (5f) r3 &= r4
+       5f 43 00 00 00 00 00 00
+ 846: (7b) *(u64 *)(r2 +0) = r3
+       7b 32 00 00 00 00 00 00
+; cast_kern(desc);
+ 847: (bc) w1 = w1
+       bc 11 00 00 00 00 00 00
+; desc->nr_free += 1;
+ 848: (79) r2 = *(u64 *)(r1 +64)
+       79 12 40 00 00 00 00 00
+ 849: (07) r2 += 1
+       07 02 00 00 01 00 00 00
+ 850: (7b) *(u64 *)(r1 +64) = r2
+       7b 21 40 00 00 00 00 00
+; if (desc->nr_free > 1)
+ 851: (05) goto pc-63
+       05 00 c1 ff 00 00 00 00
+void sdt_task_free(struct task_struct * p):
+; void sdt_task_free(struct task_struct *p)
+ 852: (bf) r6 = r1
+       bf 16 00 00 00 00 00 00
+; sdt_subprog_init_arena();
+ 853: (85) call pc+19#bpf_prog_f1091e344dd82180_sdt_subprog_init_arena
+       85 10 13 00 07 00 00 00
+; mval = bpf_task_storage_get(&sdt_task_map, p, 0, 0);
+ 854: (18) r1 = map[id:9]
+       18 11 00 00 09 00 00 00 00 00 00 00 00 00 00 00
+ 856: (bf) r2 = r6
+       bf 62 00 00 00 00 00 00
+ 857: (b7) r3 = 0
+       b7 03 00 00 00 00 00 00
+ 858: (b7) r4 = 0
+       b7 04 00 00 00 00 00 00
+ 859: (b7) r5 = 3264
+       b7 05 00 00 c0 0c 00 00
+ 860: (85) call bpf_task_storage_get#438096
+       85 00 00 00 50 af 06 00
+; if (!mval)
+ 861: (15) if r0 == 0x0 goto pc+10
+       15 00 0a 00 00 00 00 00
+; sdt_free_idx(&sdt_task_allocator, mval->tid.idx);
+ 862: (61) r2 = *(u32 *)(r0 +0)
+       61 02 00 00 00 00 00 00
+ 863: (67) r2 <<= 32
+       67 02 00 00 20 00 00 00
+ 864: (c7) r2 s>>= 32
+       c7 02 00 00 20 00 00 00
+; sdt_free_idx(&sdt_task_allocator, mval->tid.idx);
+ 865: (18) r1 = map[id:11][0]+33728
+       18 21 00 00 0b 00 00 00 00 00 00 00 c0 83 00 00
+ 867: (85) call pc-300#bpf_prog_e32fa1e00ac25294_sdt_free_idx
+       85 10 d4 fe 04 00 00 00
+; bpf_task_storage_delete(&sdt_task_map, p);
+ 868: (18) r1 = map[id:9]
+       18 11 00 00 09 00 00 00 00 00 00 00 00 00 00 00
+ 870: (bf) r2 = r6
+       bf 62 00 00 00 00 00 00
+ 871: (85) call bpf_task_storage_delete#438464
+       85 00 00 00 c0 b0 06 00
+; }
+ 872: (95) exit
+       95 00 00 00 00 00 00 00
+void sdt_subprog_init_arena():
+; if (sdt_verify_once)
+ 873: (18) r6 = map[id:11][0]+33536
+       18 26 00 00 0b 00 00 00 00 00 00 00 00 83 00 00
+ 875: (71) r1 = *(u8 *)(r6 +0)
+       71 61 00 00 00 00 00 00
+; if (sdt_verify_once)
+ 876: (56) if w1 != 0x0 goto pc+10
+       56 01 0a 00 00 00 00 00
+; bpf_printk("%s: arena pointer %p", __func__, &arena);
+ 877: (18) r1 = map[id:12][0]+11424
+       18 21 00 00 0c 00 00 00 00 00 00 00 a0 2c 00 00
+ 879: (b4) w2 = 21
+       b4 02 00 00 15 00 00 00
+ 880: (18) r3 = map[id:16][0]+0
+       18 23 00 00 10 00 00 00 00 00 00 00 00 00 00 00
+ 882: (18) r4 = map[id:8]
+       18 14 00 00 08 00 00 00 00 00 00 00 00 00 00 00
+ 884: (85) call bpf_trace_printk#-130480
+       85 00 00 00 50 02 fe ff
+ 885: (b4) w1 = 1
+       b4 01 00 00 01 00 00 00
+; sdt_verify_once = true;
+ 886: (73) *(u8 *)(r6 +0) = r1
+       73 16 00 00 00 00 00 00
+; }
+ 887: (95) exit
+       95 00 00 00 00 00 00 00
+void task_pick_and_set_domain(struct task_ctx * taskc, struct task_struct * p, const struct cpumask * cpumask, _Bool init_dsq_vtime):
+; static void task_pick_and_set_domain(struct task_ctx *taskc,
+ 888: (bc) w6 = w4
+       bc 46 00 00 00 00 00 00
+ 889: (7b) *(u64 *)(r10 -48) = r3
+       7b 3a d0 ff 00 00 00 00
+ 890: (bf) r8 = r2
+       bf 28 00 00 00 00 00 00
+ 891: (bf) r9 = r1
+       bf 19 00 00 00 00 00 00
+ 892: (b4) w7 = 0
+       b4 07 00 00 00 00 00 00
+; if (nr_doms > 1)
+ 893: (18) r1 = map[id:12][0]+0
+       18 21 00 00 0c 00 00 00 00 00 00 00 00 00 00 00
+ 895: (61) r1 = *(u32 *)(r1 +0)
+       61 11 00 00 00 00 00 00
+; if (!task_set_domain(p, dom_id, init_dsq_vtime))
+ 896: (bf) r1 = r8
+       bf 81 00 00 00 00 00 00
+ 897: (bc) w2 = w7
+       bc 72 00 00 00 00 00 00
+ 898: (bc) w3 = w6
+       bc 63 00 00 00 00 00 00
+ 899: (85) call pc+15#bpf_prog_2d8c4c8fe1fa1e05_task_set_domain
+       85 10 0f 00 09 00 00 00
+ 900: (54) w0 &= 1
+       54 00 00 00 01 00 00 00
+; if (!task_set_domain(p, dom_id, init_dsq_vtime))
+ 901: (56) if w0 != 0x0 goto pc+12
+       56 00 0c 00 00 00 00 00
+; scx_bpf_error("Failed to set dom%d for %s[%p]",
+ 902: (bc) w1 = w7
+       bc 71 00 00 00 00 00 00
+ 903: (7b) *(u64 *)(r10 -40) = r1
+       7b 1a d8 ff 00 00 00 00
+ 904: (7b) *(u64 *)(r10 -24) = r8
+       7b 8a e8 ff 00 00 00 00
+ 905: (b7) r1 = 3344
+       b7 01 00 00 10 0d 00 00
+ 906: (0f) r8 += r1
+       0f 18 00 00 00 00 00 00
+ 907: (7b) *(u64 *)(r10 -32) = r8
+       7b 8a e0 ff 00 00 00 00
+ 908: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+ 909: (07) r2 += -40
+       07 02 00 00 d8 ff ff ff
+; scx_bpf_error("Failed to set dom%d for %s[%p]",
+ 910: (18) r1 = map[id:13][0]+2824
+       18 21 00 00 0d 00 00 00 00 00 00 00 08 0b 00 00
+ 912: (b4) w3 = 24
+       b4 03 00 00 18 00 00 00
+ 913: (85) call scx_bpf_error_bstr#-1709968
+       85 20 00 00 70 e8 e5 ff
+; }
+ 914: (95) exit
+       95 00 00 00 00 00 00 00
+_Bool task_set_domain(struct task_struct * p, u32 new_dom_id, _Bool init_dsq_vtime):
+; static bool task_set_domain(struct task_struct *p __arg_trusted,
+ 915: (bc) w8 = w3
+       bc 38 00 00 00 00 00 00
+ 916: (bc) w6 = w2
+       bc 26 00 00 00 00 00 00
+ 917: (bf) r7 = r1
+       bf 17 00 00 00 00 00 00
+ 918: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+ 919: (07) r2 += -16
+       07 02 00 00 f0 ff ff ff
+; taskc = lookup_task_ctx_mask(p, &t_cpumask);
+ 920: (85) call pc+109#bpf_prog_fbfc69409ae208e6_lookup_task_ctx_mask
+       85 10 6d 00 0a 00 00 00
+; if (!taskc || !t_cpumask) {
+ 921: (15) if r0 == 0x0 goto pc+2
+       15 00 02 00 00 00 00 00
+ 922: (79) r1 = *(u64 *)(r10 -16)
+       79 a1 f0 ff 00 00 00 00
+ 923: (55) if r1 != 0x0 goto pc+7
+       55 01 07 00 00 00 00 00
+ 924: (b7) r1 = 0
+       b7 01 00 00 00 00 00 00
+; scx_bpf_error("Failed to look up task cpumask");
+ 925: (7b) *(u64 *)(r10 -8) = r1
+       7b 1a f8 ff 00 00 00 00
+ 926: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+ 927: (07) r2 += -8
+       07 02 00 00 f8 ff ff ff
+ 928: (18) r1 = map[id:13][0]+2442
+       18 21 00 00 0d 00 00 00 00 00 00 00 8a 09 00 00
+ 930: (05) goto pc+24
+       05 00 18 00 00 00 00 00
+ 931: (7b) *(u64 *)(r10 -24) = r0
+       7b 0a e8 ff 00 00 00 00
+; old_dom_id = taskc->target_dom;
+ 932: (61) r9 = *(u32 *)(r0 +24)
+       61 09 18 00 00 00 00 00
+ 933: (63) *(u32 *)(r10 -8) = r9
+       63 9a f8 ff 00 00 00 00
+ 934: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+ 935: (07) r2 += -8
+       07 02 00 00 f8 ff ff ff
+; return bpf_map_lookup_elem(&lb_domain_map, &dom_id);
+ 936: (18) r1 = map[id:2]
+       18 11 00 00 02 00 00 00 00 00 00 00 00 00 00 00
+ 938: (07) r1 += 304
+       07 01 00 00 30 01 00 00
+ 939: (61) r0 = *(u32 *)(r2 +0)
+       61 20 00 00 00 00 00 00
+ 940: (35) if r0 >= 0x40 goto pc+3
+       35 00 03 00 40 00 00 00
+ 941: (27) r0 *= 48
+       27 00 00 00 30 00 00 00
+ 942: (0f) r0 += r1
+       0f 10 00 00 00 00 00 00
+ 943: (05) goto pc+1
+       05 00 01 00 00 00 00 00
+ 944: (b7) r0 = 0
+       b7 00 00 00 00 00 00 00
+ 945: (b7) r1 = 0
+       b7 01 00 00 00 00 00 00
+; if (!lb_domain)
+ 946: (15) if r0 == 0x0 goto pc+1
+       15 00 01 00 00 00 00 00
+; return lb_domain->domc;
+ 947: (79) r1 = *(u64 *)(r0 +40)
+       79 01 28 00 00 00 00 00
+; cast_kern(domc);
+ 948: (bc) w1 = w1
+       bc 11 00 00 00 00 00 00
+; if (!domc)
+ 949: (55) if r1 != 0x0 goto pc+8
+       55 01 08 00 00 00 00 00
+; scx_bpf_error("Failed to lookup dom[%u]", dom_id);
+ 950: (7b) *(u64 *)(r10 -8) = r9
+       7b 9a f8 ff 00 00 00 00
+ 951: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+ 952: (07) r2 += -8
+       07 02 00 00 f8 ff ff ff
+; scx_bpf_error("Failed to lookup dom[%u]", dom_id);
+ 953: (18) r1 = map[id:13][0]+1651
+       18 21 00 00 0d 00 00 00 00 00 00 00 73 06 00 00
+; 
+ 955: (b4) w3 = 8
+       b4 03 00 00 08 00 00 00
+ 956: (85) call scx_bpf_error_bstr#-1709968
+       85 20 00 00 70 e8 e5 ff
+ 957: (05) goto pc+70
+       05 00 46 00 00 00 00 00
+; return !(p->scx.flags & SCX_TASK_QUEUED);
+ 958: (63) *(u32 *)(r10 -8) = r6
+       63 6a f8 ff 00 00 00 00
+ 959: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+ 960: (07) r2 += -8
+       07 02 00 00 f8 ff ff ff
+; return bpf_map_lookup_elem(&lb_domain_map, &dom_id);
+ 961: (18) r1 = map[id:2]
+       18 11 00 00 02 00 00 00 00 00 00 00 00 00 00 00
+ 963: (07) r1 += 304
+       07 01 00 00 30 01 00 00
+ 964: (61) r0 = *(u32 *)(r2 +0)
+       61 20 00 00 00 00 00 00
+ 965: (35) if r0 >= 0x40 goto pc+3
+       35 00 03 00 40 00 00 00
+ 966: (27) r0 *= 48
+       27 00 00 00 30 00 00 00
+ 967: (0f) r0 += r1
+       0f 10 00 00 00 00 00 00
+ 968: (05) goto pc+1
+       05 00 01 00 00 00 00 00
+ 969: (b7) r0 = 0
+       b7 00 00 00 00 00 00 00
+ 970: (bf) r1 = r0
+       bf 01 00 00 00 00 00 00
+ 971: (b4) w0 = 0
+       b4 00 00 00 00 00 00 00
+; if (!lb_domain)
+ 972: (15) if r1 == 0x0 goto pc+56
+       15 01 38 00 00 00 00 00
+; return lb_domain->domc;
+ 973: (79) r9 = *(u64 *)(r1 +40)
+       79 19 28 00 00 00 00 00
+; if (!new_domc)
+ 974: (15) if r9 == 0x0 goto pc+54
+       15 09 36 00 00 00 00 00
+ 975: (63) *(u32 *)(r10 -8) = r6
+       63 6a f8 ff 00 00 00 00
+ 976: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+ 977: (07) r2 += -8
+       07 02 00 00 f8 ff ff ff
+; return bpf_map_lookup_elem(&lb_domain_map, &dom_id);
+ 978: (18) r1 = map[id:2]
+       18 11 00 00 02 00 00 00 00 00 00 00 00 00 00 00
+ 980: (07) r1 += 304
+       07 01 00 00 30 01 00 00
+ 981: (61) r0 = *(u32 *)(r2 +0)
+       61 20 00 00 00 00 00 00
+ 982: (35) if r0 >= 0x40 goto pc+3
+       35 00 03 00 40 00 00 00
+ 983: (27) r0 *= 48
+       27 00 00 00 30 00 00 00
+ 984: (0f) r0 += r1
+       0f 10 00 00 00 00 00 00
+ 985: (05) goto pc+1
+       05 00 01 00 00 00 00 00
+ 986: (b7) r0 = 0
+       b7 00 00 00 00 00 00 00
+; d_cpumask = new_lb_domain->cpumask;
+ 987: (79) r1 = *(u64 *)(r0 +16)
+       79 01 10 00 00 00 00 00
+; if (!d_cpumask) {
+ 988: (55) if r1 != 0x0 goto pc+7
+       55 01 07 00 00 00 00 00
+; scx_bpf_error("Failed to get dom%u cpumask kptr",
+ 989: (bc) w1 = w6
+       bc 61 00 00 00 00 00 00
+ 990: (7b) *(u64 *)(r10 -8) = r1
+       7b 1a f8 ff 00 00 00 00
+ 991: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+ 992: (07) r2 += -8
+       07 02 00 00 f8 ff ff ff
+; scx_bpf_error("Failed to get dom%u cpumask kptr",
+ 993: (18) r1 = map[id:13][0]+2545
+       18 21 00 00 0d 00 00 00 00 00 00 00 f1 09 00 00
+ 995: (05) goto pc-41
+       05 00 d7 ff 00 00 00 00
+; if (bpf_cpumask_intersects(cast_mask(d_cpumask), p->cpus_ptr)) {
+ 996: (79) r2 = *(u64 *)(r7 +1376)
+       79 72 60 05 00 00 00 00
+ 997: (7b) *(u64 *)(r10 -32) = r1
+       7b 1a e0 ff 00 00 00 00
+; if (bpf_cpumask_intersects(cast_mask(d_cpumask), p->cpus_ptr)) {
+ 998: (85) call bpf_cpumask_intersects#661056
+       85 20 00 00 40 16 0a 00
+ 999: (54) w0 &= 1
+       54 00 00 00 01 00 00 00
+; if (bpf_cpumask_intersects(cast_mask(d_cpumask), p->cpus_ptr)) {
+1000: (16) if w0 == 0x0 goto pc+23
+       16 00 17 00 00 00 00 00
+; u64 now = scx_bpf_now();
+1001: (18) r1 = 0xffffffff8ac02190
+       18 01 00 00 90 21 c0 8a 00 00 00 00 ff ff ff ff
+1003: (85) call scx_bpf_now#-1707392
+       85 20 00 00 80 f2 e5 ff
+; dom_xfer_task(p, new_dom_id, now);
+1004: (79) r1 = *(u64 *)(r10 -24)
+       79 a1 e8 ff 00 00 00 00
+; taskc->target_dom = new_dom_id;
+1005: (63) *(u32 *)(r1 +24) = r6
+       63 61 18 00 00 00 00 00
+; taskc->domc = new_domc;
+1006: (7b) *(u64 *)(r1 +16) = r9
+       7b 91 10 00 00 00 00 00
+; cast_kern(new_domc);
+1007: (bc) w9 = w9
+       bc 99 00 00 00 00 00 00
+; case 8: *(__u64_alias_t *) res = *(volatile __u64_alias_t *) p; break;
+1008: (79) r2 = *(u64 *)(r9 +8)
+       79 92 08 00 00 00 00 00
+; p->scx.dsq_vtime = dom_min_vruntime(new_domc);
+1009: (7b) *(u64 *)(r7 +912) = r2
+       7b 27 90 03 00 00 00 00
+; scale_inverse_fair(taskc->avg_runtime, taskc->weight);
+1010: (61) r2 = *(u32 *)(r1 +28)
+       61 12 1c 00 00 00 00 00
+; scale_inverse_fair(taskc->avg_runtime, taskc->weight);
+1011: (79) r3 = *(u64 *)(r1 +64)
+       79 13 40 00 00 00 00 00
+; return value * 100 / weight;
+1012: (27) r3 *= 100
+       27 03 00 00 64 00 00 00
+; return value * 100 / weight;
+1013: (55) if r2 != 0x0 goto pc+2
+       55 02 02 00 00 00 00 00
+1014: (ac) w3 ^= w3
+       ac 33 00 00 00 00 00 00
+1015: (05) goto pc+1
+       05 00 01 00 00 00 00 00
+1016: (3f) r3 /= r2
+       3f 23 00 00 00 00 00 00
+; taskc->deadline = p->scx.dsq_vtime +
+1017: (79) r2 = *(u64 *)(r7 +912)
+       79 72 90 03 00 00 00 00
+; taskc->deadline = p->scx.dsq_vtime +
+1018: (0f) r3 += r2
+       0f 23 00 00 00 00 00 00
+; taskc->deadline = p->scx.dsq_vtime +
+1019: (7b) *(u64 *)(r1 +48) = r3
+       7b 31 30 00 00 00 00 00
+; bpf_cpumask_and(t_cpumask, cast_mask(d_cpumask), p->cpus_ptr);
+1020: (79) r3 = *(u64 *)(r7 +1376)
+       79 73 60 05 00 00 00 00
+; bpf_cpumask_and(t_cpumask, cast_mask(d_cpumask), p->cpus_ptr);
+1021: (79) r1 = *(u64 *)(r10 -16)
+       79 a1 f0 ff 00 00 00 00
+; bpf_cpumask_and(t_cpumask, cast_mask(d_cpumask), p->cpus_ptr);
+1022: (79) r2 = *(u64 *)(r10 -32)
+       79 a2 e0 ff 00 00 00 00
+1023: (85) call bpf_cpumask_and#660864
+       85 20 00 00 80 15 0a 00
+; return taskc->target_dom == new_dom_id;
+1024: (79) r1 = *(u64 *)(r10 -24)
+       79 a1 e8 ff 00 00 00 00
+1025: (61) r1 = *(u32 *)(r1 +24)
+       61 11 18 00 00 00 00 00
+1026: (b4) w0 = 1
+       b4 00 00 00 01 00 00 00
+; return taskc->target_dom == new_dom_id;
+1027: (1e) if w1 == w6 goto pc+1
+       1e 61 01 00 00 00 00 00
+1028: (b4) w0 = 0
+       b4 00 00 00 00 00 00 00
+; }
+1029: (95) exit
+       95 00 00 00 00 00 00 00
+struct task_ctx * lookup_task_ctx_mask(struct task_struct * p, struct bpf_cpumask * * p_cpumaskp):
+; static struct task_ctx *lookup_task_ctx_mask(struct task_struct *p, struct bpf_cpumask **p_cpumaskp)
+1030: (bf) r8 = r2
+       bf 28 00 00 00 00 00 00
+1031: (bf) r7 = r1
+       bf 17 00 00 00 00 00 00
+; if (p_cpumaskp == NULL) {
+1032: (55) if r8 != 0x0 goto pc+7
+       55 08 07 00 00 00 00 00
+1033: (b7) r6 = 0
+       b7 06 00 00 00 00 00 00
+; scx_bpf_error("no mask pointer provided");
+1034: (7b) *(u64 *)(r10 -8) = r6
+       7b 6a f8 ff 00 00 00 00
+1035: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+1036: (07) r2 += -8
+       07 02 00 00 f8 ff ff ff
+1037: (18) r1 = map[id:13][0]+1977
+       18 21 00 00 0d 00 00 00 00 00 00 00 b9 07 00 00
+1039: (05) goto pc+47
+       05 00 2f 00 00 00 00 00
+; struct task_ctx __arena *taskc = sdt_task_data(p);
+1040: (bf) r1 = r7
+       bf 71 00 00 00 00 00 00
+1041: (85) call pc+49#bpf_prog_c1f2282ed8e4e41b_sdt_task_data
+       85 10 31 00 0b 00 00 00
+1042: (bf) r6 = r0
+       bf 06 00 00 00 00 00 00
+; cast_kern(taskc);
+1043: (bc) w6 = w6
+       bc 66 00 00 00 00 00 00
+; if (!taskc)
+1044: (55) if r6 != 0x0 goto pc+14
+       55 06 0e 00 00 00 00 00
+; scx_bpf_error("task_ctx lookup failed for task %p", p);
+1045: (7b) *(u64 *)(r10 -8) = r7
+       7b 7a f8 ff 00 00 00 00
+1046: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+1047: (07) r2 += -8
+       07 02 00 00 f8 ff ff ff
+; scx_bpf_error("task_ctx lookup failed for task %p", p);
+1048: (18) r1 = map[id:13][0]+1592
+       18 21 00 00 0d 00 00 00 00 00 00 00 38 06 00 00
+1050: (b4) w3 = 8
+       b4 03 00 00 08 00 00 00
+1051: (85) call scx_bpf_error_bstr#-1709968
+       85 20 00 00 70 e8 e5 ff
+; scx_bpf_error("task_ctx lookup failed for task %p", p);
+1052: (7b) *(u64 *)(r10 -8) = r7
+       7b 7a f8 ff 00 00 00 00
+1053: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+1054: (07) r2 += -8
+       07 02 00 00 f8 ff ff ff
+; scx_bpf_error("task_ctx lookup failed for task %p", p);
+1055: (18) r1 = map[id:13][0]+2026
+       18 21 00 00 0d 00 00 00 00 00 00 00 ea 07 00 00
+1057: (b4) w3 = 8
+       b4 03 00 00 08 00 00 00
+1058: (85) call scx_bpf_error_bstr#-1709968
+       85 20 00 00 70 e8 e5 ff
+1059: (7b) *(u64 *)(r10 -8) = r7
+       7b 7a f8 ff 00 00 00 00
+1060: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+1061: (07) r2 += -8
+       07 02 00 00 f8 ff ff ff
+; wrapper = bpf_map_lookup_elem(&task_masks, &p);
+1062: (18) r1 = map[id:6]
+       18 11 00 00 06 00 00 00 00 00 00 00 00 00 00 00
+1064: (85) call __htab_map_lookup_elem#370592
+       85 00 00 00 a0 a7 05 00
+1065: (15) if r0 == 0x0 goto pc+1
+       15 00 01 00 00 00 00 00
+1066: (07) r0 += 56
+       07 00 00 00 38 00 00 00
+; if (!wrapper) {
+1067: (55) if r0 != 0x0 goto pc+11
+       55 00 0b 00 00 00 00 00
+; scx_bpf_error("lookup_mask_bpfmask failed for task %p", p);
+1068: (79) r1 = *(u64 *)(r10 -8)
+       79 a1 f8 ff 00 00 00 00
+1069: (7b) *(u64 *)(r10 -16) = r1
+       7b 1a f0 ff 00 00 00 00
+1070: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+1071: (07) r2 += -16
+       07 02 00 00 f0 ff ff ff
+; scx_bpf_error("lookup_mask_bpfmask failed for task %p", p);
+1072: (18) r1 = map[id:13][0]+2152
+       18 21 00 00 0d 00 00 00 00 00 00 00 68 08 00 00
+1074: (b4) w3 = 8
+       b4 03 00 00 08 00 00 00
+1075: (85) call scx_bpf_error_bstr#-1709968
+       85 20 00 00 70 e8 e5 ff
+1076: (b7) r1 = 0
+       b7 01 00 00 00 00 00 00
+; *p_cpumaskp = lookup_task_bpfmask(p);
+1077: (7b) *(u64 *)(r8 +0) = r1
+       7b 18 00 00 00 00 00 00
+1078: (05) goto pc+3
+       05 00 03 00 00 00 00 00
+; return wrapper->instance;
+1079: (79) r1 = *(u64 *)(r0 +0)
+       79 01 00 00 00 00 00 00
+; *p_cpumaskp = lookup_task_bpfmask(p);
+1080: (7b) *(u64 *)(r8 +0) = r1
+       7b 18 00 00 00 00 00 00
+; if (*p_cpumaskp == NULL)
+1081: (55) if r1 != 0x0 goto pc+7
+       55 01 07 00 00 00 00 00
+; scx_bpf_error("task bpf_cpumask lookup failed for task %p", p);
+1082: (7b) *(u64 *)(r10 -8) = r7
+       7b 7a f8 ff 00 00 00 00
+1083: (bf) r2 = r10
+       bf a2 00 00 00 00 00 00
+; 
+1084: (07) r2 += -8
+       07 02 00 00 f8 ff ff ff
+; scx_bpf_error("task bpf_cpumask lookup failed for task %p", p);
+1085: (18) r1 = map[id:13][0]+2085
+       18 21 00 00 0d 00 00 00 00 00 00 00 25 08 00 00
+; 
+1087: (b4) w3 = 8
+       b4 03 00 00 08 00 00 00
+1088: (85) call scx_bpf_error_bstr#-1709968
+       85 20 00 00 70 e8 e5 ff
+; }
+1089: (bf) r0 = r6
+       bf 60 00 00 00 00 00 00
+1090: (95) exit
+       95 00 00 00 00 00 00 00
+void * sdt_task_data(struct task_struct * p):
+; void __arena *sdt_task_data(struct task_struct *p)
+1091: (bf) r7 = r1
+       bf 17 00 00 00 00 00 00
+; sdt_subprog_init_arena();
+1092: (85) call pc-220#bpf_prog_f1091e344dd82180_sdt_subprog_init_arena
+       85 10 24 ff 07 00 00 00
+1093: (b7) r6 = 0
+       b7 06 00 00 00 00 00 00
+; mval = bpf_task_storage_get(&sdt_task_map, p, 0, 0);
+1094: (18) r1 = map[id:9]
+       18 11 00 00 09 00 00 00 00 00 00 00 00 00 00 00
+1096: (bf) r2 = r7
+       bf 72 00 00 00 00 00 00
+1097: (b7) r3 = 0
+       b7 03 00 00 00 00 00 00
+1098: (b7) r4 = 0
+       b7 04 00 00 00 00 00 00
+1099: (b7) r5 = 2080
+       b7 05 00 00 20 08 00 00
+1100: (85) call bpf_task_storage_get#438096
+       85 00 00 00 50 af 06 00
+; if (!mval)
+1101: (15) if r0 == 0x0 goto pc+2
+       15 00 02 00 00 00 00 00
+; data = mval->data;
+1102: (79) r6 = *(u64 *)(r0 +16)
+       79 06 10 00 00 00 00 00
+; return (void __arena *)data->payload;
+1103: (07) r6 += 8
+       07 06 00 00 08 00 00 00
+; }
+1104: (bf) r0 = r6
+       bf 60 00 00 00 00 00 00
+1105: (95) exit
+       95 00 00 00 00 00 00 00

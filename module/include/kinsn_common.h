@@ -134,12 +134,7 @@ static int __init prefix##_init(void)					\
 					 &prefix##_kfunc_set);		\
 }									\
 									\
-static void __exit prefix##_exit(void)					\
-{									\
-}									\
-									\
 module_init(prefix##_init);						\
-module_exit(prefix##_exit);						\
 									\
 MODULE_DESCRIPTION(desc);						\
 MODULE_LICENSE("GPL");							\

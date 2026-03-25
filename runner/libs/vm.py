@@ -86,6 +86,7 @@ def build_vng_command(
 
     command = [
         str(vng_path),
+        *machine.args,
         "--run",
         str(kernel),
         "--cwd",

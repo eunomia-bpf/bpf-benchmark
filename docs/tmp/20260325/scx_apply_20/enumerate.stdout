@@ -1,0 +1,15 @@
+    ID    type  insns  name              sites
+------------------------------------------------------------
+     7      27    733  rusty_select_cp   -
+     9      27   2194  rusty_enqueue     const_prop=7 dce=40
+    10      27    246  rusty_dispatch    const_prop=3 dce=15
+    11      27    611  rusty_runnable    const_prop=1 dce=3
+    12      27    115  rusty_running     const_prop=3 dce=3
+    13      27    223  rusty_stopping    const_prop=1 dce=3
+    14      27    603  rusty_quiescent   const_prop=1 dce=3
+    15      27     68  rusty_set_weigh   -
+    16      27   2093  rusty_set_cpuma   const_prop=1 dce=4
+    17      27   2847  rusty_init_task   const_prop=5 dce=7 extract=2
+    18      27    276  rusty_exit_task   const_prop=3 extract=2
+    19      27   1547  rusty_init        const_prop=3 extract=2
+    20      27     30  rusty_exit        const_prop=3 dce=1

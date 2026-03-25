@@ -7,7 +7,7 @@ CFLAGS ?= -O2 -g -Wall -Wno-\#warnings
 # Use -I (not -isystem) so vendor REJIT headers override system linux/bpf.h
 INCLUDES := -I$(ROOT_DIR)/vendor/linux-framework/include/uapi
 
-TESTS := fuzz_rejit adversarial_rejit
+TESTS := fuzz_rejit adversarial_rejit scx_bad_rejit_replay
 
 .PHONY: all clean run
 

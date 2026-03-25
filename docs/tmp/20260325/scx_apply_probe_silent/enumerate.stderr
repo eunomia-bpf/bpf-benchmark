@@ -1,0 +1,10 @@
+kinsn discovery:
+  vmlinux BTF str_len=2760663 type_cnt=148809 type_id_bias=148808
+  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=148831 fd=3
+  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=148833 fd=4
+  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=148830 fd=5
+  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=148833 fd=6
+  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=148834 fd=6
+  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=148835 fd=6
+  bpf_speculation_barrier: function 'bpf_speculation_barrier' found in 'bpf_barrier' btf_id=148832 fd=7
+platform: arch=X86_64 bmi1=false bmi2=false cmov=true movbe=false rorx=false

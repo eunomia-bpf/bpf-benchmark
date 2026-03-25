@@ -1,0 +1,61 @@
+###### Wed, 25 Mar 2026 12:24:31 -0700, load balance @  -936.4ms ######
+cpu=   0.00 load=   -0.00 mig=0 task_err=0 time_used= 0.0ms
+tot=     13 sync_prev_idle= 0.00 wsync= 0.00
+prev_idle=23.08 greedy_idle= 0.00 pin= 0.00
+dir= 7.69 dir_greedy= 0.00 dir_greedy_far= 0.00
+dsq=69.23 greedy_local= 0.00 greedy_xnuma= 0.00
+kick_greedy= 0.00 rep= 0.00
+dl_clamp= 7.69 dl_preset=61.54
+slice=20000us
+direct_greedy_cpus=3
+  kick_greedy_cpus=3
+###### Wed, 25 Mar 2026 12:24:32 -0700, load balance @ -1964.5ms ######
+cpu=   4.46 load=   -0.00 mig=0 task_err=0 time_used= 7.1ms
+tot=    712 sync_prev_idle= 0.28 wsync= 0.00
+prev_idle=91.71 greedy_idle= 0.00 pin= 0.00
+dir= 1.97 dir_greedy= 0.00 dir_greedy_far= 0.00
+dsq= 6.04 greedy_local= 0.00 greedy_xnuma= 0.00
+kick_greedy= 0.42 rep= 0.00
+dl_clamp= 3.93 dl_preset= 2.11
+slice=20000us
+direct_greedy_cpus=3
+  kick_greedy_cpus=3
+###### Wed, 25 Mar 2026 12:24:33 -0700, load balance @  -961.2ms ######
+cpu=  32.26 load=    0.10 mig=0 task_err=0 time_used= 5.8ms
+tot=   8454 sync_prev_idle= 0.01 wsync= 0.01
+prev_idle=97.34 greedy_idle= 0.00 pin= 0.00
+dir= 0.26 dir_greedy= 0.05 dir_greedy_far= 0.00
+dsq= 2.33 greedy_local= 0.00 greedy_xnuma= 0.00
+kick_greedy= 0.07 rep= 0.00
+dl_clamp= 1.92 dl_preset= 0.43
+slice=20000us
+direct_greedy_cpus=3
+  kick_greedy_cpus=3
+  NODE[00] load=  0.10 imbal=  +0.00 delta=  +0.00
+   DOM[00] load=  0.10 imbal=  +0.00 delta=  +0.00
+###### Wed, 25 Mar 2026 12:24:34 -0700, load balance @ -1969.8ms ######
+cpu=  43.23 load=    0.10 mig=0 task_err=0 time_used= 3.6ms
+tot=   3874 sync_prev_idle= 0.00 wsync= 0.00
+prev_idle=96.52 greedy_idle= 0.00 pin= 0.00
+dir= 0.49 dir_greedy= 0.15 dir_greedy_far= 0.00
+dsq= 2.84 greedy_local= 0.00 greedy_xnuma= 0.00
+kick_greedy= 0.18 rep= 0.00
+dl_clamp= 2.19 dl_preset= 0.62
+slice=20000us
+direct_greedy_cpus=3
+  kick_greedy_cpus=3
+  NODE[00] load=  0.10 imbal=  +0.00 delta=  +0.00
+   DOM[00] load=  0.10 imbal=  +0.00 delta=  +0.00
+###### Wed, 25 Mar 2026 12:24:35 -0700, load balance @  -983.4ms ######
+cpu=  48.50 load=    0.74 mig=0 task_err=0 time_used= 4.4ms
+tot=    716 sync_prev_idle= 0.14 wsync= 0.00
+prev_idle=84.50 greedy_idle= 0.00 pin= 0.00
+dir= 1.82 dir_greedy= 0.00 dir_greedy_far= 0.00
+dsq=13.55 greedy_local= 0.00 greedy_xnuma= 0.00
+kick_greedy= 0.14 rep= 0.00
+dl_clamp= 8.80 dl_preset= 4.89
+slice=20000us
+direct_greedy_cpus=3
+  kick_greedy_cpus=3
+  NODE[00] load=  0.74 imbal=  +0.00 delta=  +0.00
+   DOM[00] load=  0.74 imbal=  +0.00 delta=  +0.00

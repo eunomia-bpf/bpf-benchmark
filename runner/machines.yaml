@@ -28,6 +28,15 @@ targets:
     memory: 16G
     lock_scope: vm_global
 
+  local-x86-vng-tcg:
+    backend: vng
+    arch: x86_64
+    executable: runner/scripts/vng-wrapper.sh
+    args:
+    - --disable-kvm
+    memory: 16G
+    lock_scope: vm_global
+
   local-arm64-qemu:
     backend: qemu
     arch: arm64
