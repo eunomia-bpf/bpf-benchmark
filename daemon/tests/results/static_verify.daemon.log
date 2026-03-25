@@ -1,14 +1,118 @@
 kinsn discovery:
-  vmlinux BTF str_len=2760769 type_cnt=148811 type_id_bias=148810
-  bpf_rotate64: descriptor 'bpf_rotate64_desc' found in 'bpf_rotate' btf_id=148847 fd=3
-  bpf_select64: descriptor 'bpf_select64_desc' found in 'bpf_select' btf_id=148848 fd=4
-  bpf_extract64: descriptor 'bpf_extract64_desc' found in 'bpf_extract' btf_id=148847 fd=5
-  bpf_endian_load16: descriptor 'bpf_endian_load16_desc' found in 'bpf_endian' btf_id=148850 fd=6
-  bpf_endian_load32: descriptor 'bpf_endian_load32_desc' found in 'bpf_endian' btf_id=148851 fd=6
-  bpf_endian_load64: descriptor 'bpf_endian_load64_desc' found in 'bpf_endian' btf_id=148852 fd=6
-  bpf_speculation_barrier: descriptor 'bpf_speculation_barrier_desc' found in 'bpf_barrier' btf_id=148849 fd=7
+  vmlinux BTF str_len=2760885 type_cnt=148828 type_id_bias=148827
+  bpf_rotate64: descriptor 'bpf_rotate64_desc' found in 'bpf_rotate' btf_id=148868 fd=3
+  bpf_select64: descriptor 'bpf_select64_desc' found in 'bpf_select' btf_id=148870 fd=4
+  bpf_extract64: descriptor 'bpf_extract64_desc' found in 'bpf_extract' btf_id=148868 fd=5
+  bpf_endian_load16: descriptor 'bpf_endian_load16_desc' found in 'bpf_endian' btf_id=148873 fd=6
+  bpf_endian_load32: descriptor 'bpf_endian_load32_desc' found in 'bpf_endian' btf_id=148874 fd=6
+  bpf_endian_load64: descriptor 'bpf_endian_load64_desc' found in 'bpf_endian' btf_id=148875 fd=6
+  bpf_speculation_barrier: descriptor 'bpf_speculation_barrier_desc' found in 'bpf_barrier' btf_id=148872 fd=7
 platform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true
 serve: listening on /tmp/bpfrejit-static-verify.sock
-  prog 6 (rotate_dense_xd): 256 sites, 2796 -> 2284 insns
+  prog 8 (dep_chain_short): 2 sites, 104 -> 86 insns
+    REJIT ok
+  prog 13 (memory_pair_sum): 2 sites, 78 -> 72 insns
+    REJIT ok
+  prog 18 (dep_chain_long_): 2 sites, 104 -> 86 insns
+    REJIT ok
+  prog 19 (log2_fold_xdp): 3 sites, 127 -> 112 insns
+    REJIT ok
+  prog 20 (binary_search_x): 2 sites, 180 -> 162 insns
+    REJIT ok
+  prog 25 (branch_layout_x): 2 sites, 95 -> 77 insns
+    REJIT ok
+  prog 27 (cmov_dense_xdp): 26 sites, 607 -> 555 insns
+    REJIT ok
+  prog 28 (cmov_select_xdp): 6 sites, 534 -> 504 insns
+    REJIT ok
+  prog 29 (branch_dense_xd): 4 sites, 177 -> 155 insns
+    REJIT ok
+  prog 31 (switch_dispatch): 2 sites, 321 -> 303 insns
+    REJIT ok
+  prog 33 (load_word32_xdp): 2 sites, 68 -> 50 insns
+    REJIT ok
+  prog 34 (bitcount_xdp): 2 sites, 130 -> 112 insns
+    REJIT ok
+  prog 36 (load_byte_xdp): 2 sites, 74 -> 56 insns
+    REJIT ok
+  prog 37 (checksum_xdp): 2 sites, 98 -> 80 insns
+    REJIT ok
+  prog 39 (load_byte_recom): 1 sites, 83 -> 74 insns
+    REJIT ok
+  prog 43 (packet_parse_xd): 2 sites, 108 -> 90 insns
+    REJIT ok
+  prog 46 (bounds_ladder_x): 2 sites, 180 -> 162 insns
+    REJIT ok
+  prog 47 (bounds_check_he): 3 sites, 699 -> 681 insns
+    REJIT ok
+  prog 49 (stride_load_4_x): 2 sites, 103 -> 85 insns
+    REJIT ok
+  prog 51 (stride_load_16_): 2 sites, 103 -> 85 insns
+    REJIT ok
+  prog 54 (spill_pressure_): 2 sites, 200 -> 182 insns
+    REJIT ok
+  prog 56 (multi_acc_4_xdp): 2 sites, 128 -> 110 insns
+    REJIT ok
+  prog 58 (multi_acc_8_xdp): 2 sites, 202 -> 184 insns
+    REJIT ok
+  prog 60 (fibonacci_iter_): 4 sites, 97 -> 79 insns
+    REJIT ok
+  prog 61 (mixed_alu_mem_x): 3 sites, 267 -> 258 insns
+    REJIT ok
+  prog 63 (fibonacci_iter_): 4 sites, 97 -> 79 insns
+    REJIT ok
+  prog 65 (fixed_loop_smal): 4 sites, 108 -> 85 insns
+    REJIT ok
+  prog 67 (fixed_loop_larg): 4 sites, 110 -> 87 insns
+    REJIT ok
+  prog 69 (nested_loop_2_x): 3 sites, 154 -> 133 insns
+    REJIT ok
+  prog 71 (nested_loop_3_x): 3 sites, 221 -> 194 insns
+    REJIT ok
+  prog 73 (code_clone_2_xd): 2 sites, 114 -> 103 insns
+    REJIT ok
+  prog 75 (code_clone_8_xd): 3 sites, 184 -> 171 insns
+    REJIT ok
+  prog 79 (large_mixed_500): 8 sites, 548 -> 525 insns
+    REJIT ok
+  prog 80 (bpf_call_chain_): 3 sites, 215 -> 209 insns
+    REJIT ok
+  prog 82 (memcmp_prefix_6): 4 sites, 139 -> 124 insns
+    REJIT ok
+  prog 83 (large_mixed_100): 8 sites, 1008 -> 985 insns
+    REJIT ok
+  prog 89 (local_call_fano): 11 sites, 530 -> 479 insns
+    REJIT ok
+  prog 91 (imm64_storm_xdp): 68 sites, 1705 -> 1565 insns
+    REJIT ok
+  prog 93 (alu32_64_pingpo): 3 sites, 148 -> 127 insns
+    REJIT ok
+  prog 96 (deep_guard_tree): 2 sites, 147 -> 135 insns
+    REJIT ok
+  prog 97 (branch_fanout_3): 1 sites, 423 -> 414 insns
+    REJIT ok
+  prog 101 (packet_redundan): 7 sites, 163 -> 118 insns
+    REJIT ok
+  prog 100 (rotate64_hash_x): 69 sites, 992 -> 847 insns
+    REJIT ok
+  prog 103 (mega_basic_bloc): 264 sites, 13777 -> 13241 insns
+    REJIT ok
+  prog 105 (const_fold_chai): 2 sites, 128 -> 110 insns
+    REJIT ok
+  prog 109 (bitfield_extrac): 11 sites, 247 -> 229 insns
+    REJIT ok
+  prog 111 (smallmul_streng): 2 sites, 127 -> 115 insns
+    REJIT ok
+  prog 115 (rotate_dense_xd): 256 sites, 2796 -> 2284 insns
+    REJIT ok
+  prog 119 (endian_swap_den): 256 sites, 1059 -> 1059 insns
+    REJIT ok
+  prog 121 (extract_dense_x): 512 sites, 2595 -> 2595 insns
+    REJIT ok
+  prog 127 (cgroup_hash_cha): 2 sites, 117 -> 99 insns
+    REJIT ok
+  prog 128 (tc_checksum_pro): 2 sites, 84 -> 66 insns
+    REJIT ok
+  prog 129 (tc_bitcount_pro): 2 sites, 115 -> 97 insns
     REJIT ok
 serve: shutting down
