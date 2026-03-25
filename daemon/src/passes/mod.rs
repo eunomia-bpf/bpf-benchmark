@@ -5,6 +5,7 @@ mod branch_flip;
 mod cond_select;
 mod endian;
 mod extract;
+mod map_inline;
 mod rotate;
 mod spectre;
 pub mod utils;
