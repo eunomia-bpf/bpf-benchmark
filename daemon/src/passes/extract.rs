@@ -68,9 +68,8 @@ fn scan_extract_sites(insns: &[BpfInsn]) -> Vec<ExtractSite> {
 
         if is_rsh && is_and && i0.dst_reg() == i1.dst_reg() {
             let shift = i0.imm as u32;
-            // AND immediate is sign-extended from i32 to u64 in BPF.
-            // For our purposes, interpret the mask as u64.
-            let mask = i1.imm as u32 as u64;
+            // AND immediate is sign-extended from i32 to 64-bit ALU semantics.
+            let mask = i1.imm as i64 as u64;
 
             if let Some(bit_len) = contiguous_mask_len(mask) {
                 // Ensure the extraction is within 64 bits.
@@ -332,6 +331,18 @@ mod tests {
         assert_eq!(sites.len(), 1);
         assert_eq!(sites[0].shift_amount, 16);
         assert_eq!(sites[0].bit_len, 16);
+    }
+
+    #[test]
+    fn test_scan_extract_sign_extended_all_ones_is_64bit_mask() {
+        let insns = vec![
+            BpfInsn::alu64_imm(BPF_RSH, 3, 0),
+            BpfInsn::alu64_imm(BPF_AND, 3, -1),
+            exit_insn(),
+        ];
+        let sites = scan_extract_sites(&insns);
+        assert_eq!(sites.len(), 1);
+        assert_eq!(sites[0].bit_len, 64);
     }
 
     #[test]
@@ -634,27 +645,24 @@ mod tests {
         assert!(prog.insns.last().unwrap().is_exit());
     }
 
-    // ── Edge case: width=32 (mask=0xFFFFFFFF) ─────────────────────────
+    // ── Edge case: sign-extended all-ones mask ────────────────────────
 
     #[test]
-    fn test_scan_extract_width_32() {
-        // 0xFFFFFFFF as i32 is -1.
+    fn test_scan_extract_sign_extended_all_ones_shifted_is_not_width_32() {
         let insns = vec![
             BpfInsn::alu64_imm(BPF_RSH, 2, 16),
-            BpfInsn::alu64_imm(BPF_AND, 2, -1), // mask = 0xFFFFFFFF → width=32
+            BpfInsn::alu64_imm(BPF_AND, 2, -1),
             exit_insn(),
         ];
         let sites = scan_extract_sites(&insns);
-        assert_eq!(sites.len(), 1);
-        assert_eq!(sites[0].shift_amount, 16);
-        assert_eq!(sites[0].bit_len, 32);
+        assert!(sites.is_empty());
     }
 
     #[test]
-    fn test_extract_pass_width_32() {
+    fn test_extract_pass_sign_extended_all_ones_shifted_no_match() {
         let mut prog = make_program(vec![
             BpfInsn::alu64_imm(BPF_RSH, 2, 16),
-            BpfInsn::alu64_imm(BPF_AND, 2, -1), // mask = 0xFFFFFFFF
+            BpfInsn::alu64_imm(BPF_AND, 2, -1),
             exit_insn(),
         ]);
         let mut cache = AnalysisCache::new();
@@ -663,22 +671,15 @@ mod tests {
         let pass = ExtractPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
-        assert!(result.changed);
-        assert_eq!(result.sites_applied, 1);
-        let call = prog
-            .insns
-            .iter()
-            .find(|i| i.is_call() && i.src_reg() == BPF_PSEUDO_KINSN_CALL)
-            .unwrap();
-        assert_eq!(call.imm, 7777);
+        assert!(!result.changed);
+        assert_eq!(result.sites_applied, 0);
     }
 
     #[test]
-    fn test_scan_extract_width_32_shift_too_large() {
-        // shift=33 + width=32 = 65 > 64, should not match.
+    fn test_scan_extract_sign_extended_all_ones_shift_too_large() {
         let insns = vec![
             BpfInsn::alu64_imm(BPF_RSH, 2, 33),
-            BpfInsn::alu64_imm(BPF_AND, 2, -1), // mask = 0xFFFFFFFF → width=32
+            BpfInsn::alu64_imm(BPF_AND, 2, -1),
             exit_insn(),
         ];
         let sites = scan_extract_sites(&insns);

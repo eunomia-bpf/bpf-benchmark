@@ -8,6 +8,8 @@ Repository-level constraints for coding agents working in this tree.
 - Keep the root `Makefile` thin; directory-specific logic belongs in that directory's own `Makefile`.
 - Host-side compilation is allowed, but kernel/BPF runtime actions must happen in the VM.
 - Do not run kernel-related tests, load modules, load BPF programs, or use `bpftool` against the host kernel.
+- Debugging, static verification, and correctness-focused VM test runs may use multiple agents and multiple VMs in parallel when they do not share mutable build state.
+- Performance benchmarks (`vm-micro`, `vm-corpus`, `vm-e2e`, or any timing/perf-counter run) must not run in parallel with other performance benchmarks.
 
 ## Test Ownership
 

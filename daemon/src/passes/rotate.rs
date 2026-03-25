@@ -235,79 +235,21 @@ fn scan_rotate_sites(insns: &[BpfInsn]) -> Vec<RotateSite> {
     sites
 }
 
-/// Scan backwards from `pc` to find `MOV tmp, dst` proving provenance.
-/// Returns the PC of the MOV instruction and the updated start_pc/old_len.
+/// The rotate lowering is only sound when the provenance copy is the
+/// instruction immediately preceding the shift pair. If arbitrary instructions
+/// are allowed between the MOV and the rotate idiom, rewriting the whole
+/// window into sidecar+call would silently drop those side effects.
 fn find_provenance_mov(insns: &[BpfInsn], shift_pc: usize, tmp: u8, dst: u8) -> Option<usize> {
-    // Look back up to 8 instructions for the MOV tmp, dst.
-    let search_start = shift_pc.saturating_sub(8);
-    for check_pc in (search_start..shift_pc).rev() {
-        let insn = &insns[check_pc];
-        // Must be MOV64_REG tmp, dst
-        if insn.code == (BPF_ALU64 | BPF_MOV | BPF_X)
-            && insn.dst_reg() == tmp
-            && insn.src_reg() == dst
-        {
-            // Found the MOV. Now verify that `dst` is NOT overwritten between
-            // (check_pc, shift_pc) -- if dst is written after the MOV, then
-            // tmp and dst no longer hold the same value at shift_pc.
-            if is_reg_written_in_range(insns, check_pc + 1, shift_pc, dst) {
-                return None; // dst was modified after the MOV
-            }
-            return Some(check_pc);
-        }
-        // If tmp is written by any other instruction, the chain is broken.
-        let class = bpf_class(insn.code);
-        match class {
-            BPF_ALU64 | BPF_ALU | BPF_LDX | BPF_LD => {
-                if insn.dst_reg() == tmp {
-                    return None; // tmp was overwritten by something else
-                }
-            }
-            BPF_JMP | BPF_JMP32 => {
-                if insn.is_call() {
-                    // call clobbers r0-r5
-                    if tmp <= 5 {
-                        return None;
-                    }
-                }
-                // Any branch means we can't trace linearly
-                if insn.is_cond_jmp() || insn.is_ja() {
-                    return None;
-                }
-            }
-            _ => {}
-        }
+    if shift_pc == 0 {
+        return None;
     }
-    None
-}
 
-/// Check if a register `reg` is written (as dst_reg) by any instruction in [start, end).
-fn is_reg_written_in_range(insns: &[BpfInsn], start: usize, end: usize, reg: u8) -> bool {
-    for pc in start..end {
-        if pc >= insns.len() {
-            break;
-        }
-        let insn = &insns[pc];
-        let class = bpf_class(insn.code);
-        match class {
-            BPF_ALU64 | BPF_ALU | BPF_LDX | BPF_LD => {
-                if insn.dst_reg() == reg {
-                    return true;
-                }
-            }
-            BPF_JMP | BPF_JMP32 => {
-                if insn.is_call() && reg <= 5 {
-                    // call clobbers r0-r5
-                    return true;
-                }
-            }
-            BPF_ST | BPF_STX => {
-                // Store instructions don't write to a register.
-            }
-            _ => {}
-        }
-    }
-    false
+    let mov_pc = shift_pc - 1;
+    let insn = &insns[mov_pc];
+    (insn.code == (BPF_ALU64 | BPF_MOV | BPF_X)
+        && insn.dst_reg() == tmp
+        && insn.src_reg() == dst)
+        .then_some(mov_pc)
 }
 
 fn try_match_rotate(
@@ -480,6 +422,19 @@ mod tests {
         let sites = scan_rotate_sites(&insns);
         assert_eq!(sites.len(), 1);
         assert_eq!(sites[0].shift_amount, 16);
+    }
+
+    #[test]
+    fn test_rotate_pass_requires_adjacent_provenance_mov() {
+        let insns = vec![
+            BpfInsn::mov64_reg(3, 2),
+            BpfInsn::mov64_reg(8, 8),
+            BpfInsn::alu64_imm(BPF_RSH, 3, 56),
+            BpfInsn::alu64_imm(BPF_LSH, 2, 8),
+            BpfInsn::alu64_reg(BPF_OR, 2, 3),
+        ];
+
+        assert!(scan_rotate_sites(&insns).is_empty());
     }
 
     #[test]
@@ -787,18 +742,19 @@ mod tests {
     }
 
     #[test]
-    fn test_rotate_pass_match_dst_not_overwritten() {
-        // mov r3, r2; mov r5, r6; rsh r2, 56; lsh r3, 8; or r2, r3
-        // The MOV r5, r6 doesn't write r2 or r3, so the provenance holds.
+    fn test_rotate_pass_no_match_with_intervening_harmless_insn() {
+        // Even a harmless intervening instruction changes the window shape.
+        // The pass now requires the provenance MOV to be immediately adjacent
+        // to the rotate idiom so it never drops side effects in between.
         let insns = vec![
             BpfInsn::mov64_reg(3, 2),
-            BpfInsn::mov64_reg(5, 6), // doesn't modify r2 or r3
+            BpfInsn::mov64_reg(5, 6),
             BpfInsn::alu64_imm(BPF_RSH, 2, 56),
             BpfInsn::alu64_imm(BPF_LSH, 3, 8),
             BpfInsn::alu64_reg(BPF_OR, 2, 3),
         ];
         let sites = scan_rotate_sites(&insns);
-        assert_eq!(sites.len(), 1, "should match when dst is not overwritten");
+        assert!(sites.is_empty());
     }
 
     // ── MEDIUM #6: Real bytecode pattern test for rotate ────────────
