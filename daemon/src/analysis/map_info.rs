@@ -8,7 +8,11 @@ use crate::insn::BpfInsn;
 use crate::pass::{Analysis, BpfProgram};
 
 #[cfg_attr(not(test), allow(dead_code))]
+const BPF_MAP_TYPE_HASH: u32 = 1;
+#[cfg_attr(not(test), allow(dead_code))]
 const BPF_MAP_TYPE_ARRAY: u32 = 2;
+#[cfg_attr(not(test), allow(dead_code))]
+const BPF_MAP_TYPE_LRU_HASH: u32 = 9;
 const BPF_PSEUDO_MAP_FD: u8 = 1;
 
 /// Runtime metadata for a live kernel map referenced by the program.
@@ -26,7 +30,22 @@ impl MapInfo {
     /// Returns whether this map is inlineable in v1.
     #[cfg_attr(not(test), allow(dead_code))]
     pub fn is_inlineable_v1(&self) -> bool {
+        matches!(
+            self.map_type,
+            BPF_MAP_TYPE_ARRAY | BPF_MAP_TYPE_HASH | BPF_MAP_TYPE_LRU_HASH
+        )
+    }
+
+    /// Returns whether v1 can eliminate the lookup/null-check sequence.
+    #[cfg_attr(not(test), allow(dead_code))]
+    pub fn can_remove_lookup_pattern_v1(&self) -> bool {
         self.map_type == BPF_MAP_TYPE_ARRAY
+    }
+
+    /// Returns whether this inline is speculative and depends on runtime stability.
+    #[cfg_attr(not(test), allow(dead_code))]
+    pub fn is_speculative_v1(&self) -> bool {
+        matches!(self.map_type, BPF_MAP_TYPE_HASH | BPF_MAP_TYPE_LRU_HASH)
     }
 }
 
@@ -183,7 +202,18 @@ mod tests {
 
     fn hash_map(map_id: u32) -> MapInfo {
         MapInfo {
-            map_type: 1,
+            map_type: BPF_MAP_TYPE_HASH,
+            key_size: 4,
+            value_size: 8,
+            max_entries: 16,
+            frozen: false,
+            map_id,
+        }
+    }
+
+    fn lru_hash_map(map_id: u32) -> MapInfo {
+        MapInfo {
+            map_type: BPF_MAP_TYPE_LRU_HASH,
             key_size: 4,
             value_size: 8,
             max_entries: 16,
@@ -213,7 +243,24 @@ mod tests {
         assert_eq!(result.references[1].map_id, Some(202));
         assert_eq!(result.unique_maps.len(), 2);
         assert!(result.unique_maps[0].is_inlineable_v1());
-        assert!(!result.unique_maps[1].is_inlineable_v1());
+        assert!(result.unique_maps[1].is_inlineable_v1());
+        assert!(result.unique_maps[1].is_speculative_v1());
+    }
+
+    #[test]
+    fn map_info_marks_lru_hash_as_speculative_inlineable() {
+        let ld = make_ld_imm64(1, BPF_PSEUDO_MAP_FD, 10);
+        let insns = vec![ld[0], ld[1]];
+
+        let result = collect_map_references(&insns, &[303], |map_id| match map_id {
+            303 => Some(lru_hash_map(303)),
+            _ => None,
+        });
+
+        assert_eq!(result.unique_maps.len(), 1);
+        assert!(result.unique_maps[0].is_inlineable_v1());
+        assert!(result.unique_maps[0].is_speculative_v1());
+        assert!(!result.unique_maps[0].can_remove_lookup_pattern_v1());
     }
 
     #[test]

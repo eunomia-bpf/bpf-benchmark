@@ -130,6 +130,7 @@ pub fn classify_r0_uses(insns: &[BpfInsn], call_pc: usize) -> R0UseClassificatio
 struct SiteRewrite {
     call_pc: usize,
     removed_null_check: bool,
+    speculative: bool,
     skipped_pcs: HashSet<usize>,
     replacements: BTreeMap<usize, Vec<BpfInsn>>,
 }
@@ -194,7 +195,7 @@ impl BpfPass for MapInlinePass {
                 });
                 continue;
             }
-            if key.value >= info.max_entries as u64 {
+            if info.can_remove_lookup_pattern_v1() && key.value >= info.max_entries as u64 {
                 skipped.push(SkipReason {
                     pc: site.call_pc,
                     reason: format!(
@@ -206,6 +207,13 @@ impl BpfPass for MapInlinePass {
             }
 
             let null_check_pc = find_immediate_null_check(&program.insns, site.call_pc);
+            if info.is_speculative_v1() && null_check_pc.is_none() {
+                skipped.push(SkipReason {
+                    pc: site.call_pc,
+                    reason: "speculative map inline requires an immediate null check".into(),
+                });
+                continue;
+            }
             let uses = classify_r0_uses_from(&program.insns, null_check_pc.unwrap_or(site.call_pc));
             if uses.fixed_loads.is_empty() {
                 skipped.push(SkipReason {
@@ -283,6 +291,7 @@ impl BpfPass for MapInlinePass {
         let mut replacements: BTreeMap<usize, Vec<BpfInsn>> = BTreeMap::new();
         let mut applied = 0usize;
         let mut removed_any_null_check = false;
+        let mut speculative_sites = 0usize;
 
         for rewrite in rewrites {
             let conflict = rewrite
@@ -304,6 +313,7 @@ impl BpfPass for MapInlinePass {
             }
 
             removed_any_null_check |= rewrite.removed_null_check;
+            speculative_sites += usize::from(rewrite.speculative);
             skip_pcs.extend(rewrite.skipped_pcs);
             replacements.extend(rewrite.replacements);
             applied += 1;
@@ -371,12 +381,20 @@ impl BpfPass for MapInlinePass {
             sites_applied: applied,
         });
 
+        let mut diagnostics = Vec::new();
+        if speculative_sites > 0 {
+            diagnostics.push(format!(
+                "speculative map-inline sites: {}",
+                speculative_sites
+            ));
+        }
+
         Ok(PassResult {
             pass_name: self.name().into(),
             changed: true,
             sites_applied: applied,
             sites_skipped: skipped,
-            diagnostics: vec![],
+            diagnostics,
             ..Default::default()
         })
     }
@@ -390,6 +408,7 @@ fn build_site_rewrite(
     info: &crate::analysis::MapInfo,
     null_check_pc: Option<usize>,
 ) -> anyhow::Result<Option<SiteRewrite>> {
+    let remove_lookup_pattern = info.can_remove_lookup_pattern_v1();
     let value = bpf::bpf_map_lookup_elem_by_id(
         info.map_id,
         &encode_key_bytes(key.value, info.key_size as usize),
@@ -397,17 +416,19 @@ fn build_site_rewrite(
     )?;
 
     let mut skipped_pcs = HashSet::new();
-    skipped_pcs.insert(site.call_pc);
-    skipped_pcs.insert(site.map_load_pc);
-    skipped_pcs.insert(site.map_load_pc + 1);
-    skipped_pcs.insert(key.store_pc);
-    skipped_pcs.insert(key.r2_mov_pc);
-    skipped_pcs.insert(key.r2_add_pc);
-    if let Some(source_imm_pc) = key.source_imm_pc {
-        skipped_pcs.insert(source_imm_pc);
-    }
-    if let Some(null_check_pc) = null_check_pc {
-        skipped_pcs.insert(null_check_pc);
+    if remove_lookup_pattern {
+        skipped_pcs.insert(site.call_pc);
+        skipped_pcs.insert(site.map_load_pc);
+        skipped_pcs.insert(site.map_load_pc + 1);
+        skipped_pcs.insert(key.store_pc);
+        skipped_pcs.insert(key.r2_mov_pc);
+        skipped_pcs.insert(key.r2_add_pc);
+        if let Some(source_imm_pc) = key.source_imm_pc {
+            skipped_pcs.insert(source_imm_pc);
+        }
+        if let Some(null_check_pc) = null_check_pc {
+            skipped_pcs.insert(null_check_pc);
+        }
     }
 
     let mut replacements = BTreeMap::new();
@@ -427,28 +448,31 @@ fn build_site_rewrite(
         return Ok(None);
     }
 
-    // The raw PCs we remove must be exactly the lookup pattern. If unrelated
-    // instructions are interleaved, skip the site rather than deleting them.
-    let min_removed_pc = skipped_pcs.iter().min().copied().unwrap_or(site.call_pc);
-    let max_removed_pc = skipped_pcs.iter().max().copied().unwrap_or(site.call_pc);
-    if skipped_pcs.len() != max_removed_pc - min_removed_pc + 1 {
-        return Ok(None);
-    }
+    if remove_lookup_pattern {
+        // The raw PCs we remove must be exactly the lookup pattern. If unrelated
+        // instructions are interleaved, skip the site rather than deleting them.
+        let min_removed_pc = skipped_pcs.iter().min().copied().unwrap_or(site.call_pc);
+        let max_removed_pc = skipped_pcs.iter().max().copied().unwrap_or(site.call_pc);
+        if skipped_pcs.len() != max_removed_pc - min_removed_pc + 1 {
+            return Ok(None);
+        }
 
-    // Only remove the lookup pattern itself: key materialization, map load,
-    // helper call, and an optional immediate null check.
-    if max_removed_pc != null_check_pc.unwrap_or(site.call_pc) {
-        return Ok(None);
-    }
+        // Only remove the lookup pattern itself: key materialization, map load,
+        // helper call, and an optional immediate null check.
+        if max_removed_pc != null_check_pc.unwrap_or(site.call_pc) {
+            return Ok(None);
+        }
 
-    // All removed PCs must be within bounds.
-    if skipped_pcs.iter().any(|&pc| pc >= program.insns.len()) {
-        return Ok(None);
+        // All removed PCs must be within bounds.
+        if skipped_pcs.iter().any(|&pc| pc >= program.insns.len()) {
+            return Ok(None);
+        }
     }
 
     Ok(Some(SiteRewrite {
         call_pc: site.call_pc,
-        removed_null_check: null_check_pc.is_some(),
+        removed_null_check: remove_lookup_pattern && null_check_pc.is_some(),
+        speculative: info.is_speculative_v1(),
         skipped_pcs,
         replacements,
     }))
@@ -1148,6 +1172,46 @@ mod tests {
     }
 
     #[test]
+    fn map_inline_pass_rewrites_struct_value_multiple_fields() {
+        let mut value = vec![0u8; 16];
+        value[0..4].copy_from_slice(&0x1234_5678u32.to_le_bytes());
+        value[8..16].copy_from_slice(&0x0123_4567_89ab_cdefu64.to_le_bytes());
+        install_array_map(110, value);
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let mut program = BpfProgram::new(vec![
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            BpfInsn::ldx_mem(BPF_DW, 7, 0, 8),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ]);
+        program.set_map_ids(vec![110]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(
+            result.program_changed,
+            "skip reasons: {:?}",
+            result.pass_results[0].sites_skipped
+        );
+        assert_eq!(result.total_sites_applied, 1);
+        assert_eq!(program.insns.len(), 5);
+        assert_eq!(program.insns[0], BpfInsn::mov64_imm(6, 0x1234_5678i32));
+        assert!(program.insns[1].is_ldimm64());
+        assert_eq!(program.insns[1].dst_reg(), 7);
+        assert_eq!(program.insns[1].imm as u32 as u64, 0x89ab_cdef);
+        assert_eq!(program.insns[2].imm as u32 as u64, 0x0123_4567);
+        assert_eq!(program.insns[3], BpfInsn::mov64_imm(0, 0));
+        assert_eq!(program.insns[4], exit_insn());
+    }
+
+    #[test]
     fn map_inline_pass_removes_null_check_and_dead_cold_block() {
         install_array_map(102, vec![7, 0, 0, 0, 0xaa, 0, 0, 0]);
 
@@ -1248,32 +1312,55 @@ mod tests {
     }
 
     #[test]
-    fn map_inline_pass_skips_hash_maps() {
+    fn map_inline_pass_keeps_hash_lookup_and_null_check() {
         install_hash_map(105, vec![7, 0, 0, 0]);
 
         let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
-        let original = vec![
+        let mut program = BpfProgram::new(vec![
             map[0],
             map[1],
             st_mem(BPF_W, 10, -4, 1),
             BpfInsn::mov64_reg(2, 10),
             add64_imm(2, -4),
             call_helper(HELPER_MAP_LOOKUP_ELEM),
+            jeq_imm(0, 0, 3),
             BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
             BpfInsn::mov64_imm(0, 0),
+            ja(1),
+            BpfInsn::mov64_imm(0, 1),
             exit_insn(),
-        ];
-        let mut program = BpfProgram::new(original.clone());
+        ]);
         program.set_map_ids(vec![105]);
 
         let result = run_map_inline_pass(&mut program);
 
-        assert!(!result.program_changed);
-        assert_eq!(program.insns, original);
-        assert!(result.pass_results[0]
-            .sites_skipped
-            .iter()
-            .any(|skip| skip.reason.contains("not inlineable")));
+        assert!(
+            result.program_changed,
+            "skip reasons: {:?}",
+            result.pass_results[0].sites_skipped
+        );
+        assert_eq!(result.total_sites_applied, 1);
+        assert_eq!(
+            program.insns,
+            vec![
+                map[0],
+                map[1],
+                st_mem(BPF_W, 10, -4, 1),
+                BpfInsn::mov64_reg(2, 10),
+                add64_imm(2, -4),
+                call_helper(HELPER_MAP_LOOKUP_ELEM),
+                jeq_imm(0, 0, 3),
+                BpfInsn::mov64_imm(6, 7),
+                BpfInsn::mov64_imm(0, 0),
+                ja(1),
+                BpfInsn::mov64_imm(0, 1),
+                exit_insn(),
+            ]
+        );
+        assert_eq!(
+            result.pass_results[0].diagnostics,
+            vec!["speculative map-inline sites: 1"]
+        );
     }
 
     #[test]
