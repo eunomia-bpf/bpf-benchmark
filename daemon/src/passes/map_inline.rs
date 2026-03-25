@@ -4,7 +4,7 @@
 
 use std::collections::{BTreeMap, HashSet};
 
-use crate::analysis::{BranchTargetAnalysis, MapInfoAnalysis};
+use crate::analysis::{BranchTargetAnalysis, CFGAnalysis, MapInfoAnalysis};
 use crate::bpf;
 use crate::insn::*;
 use crate::pass::*;
@@ -128,6 +128,8 @@ pub fn classify_r0_uses(insns: &[BpfInsn], call_pc: usize) -> R0UseClassificatio
 
 #[derive(Clone, Debug)]
 struct SiteRewrite {
+    call_pc: usize,
+    removed_null_check: bool,
     skipped_pcs: HashSet<usize>,
     replacements: BTreeMap<usize, Vec<BpfInsn>>,
 }
@@ -203,7 +205,8 @@ impl BpfPass for MapInlinePass {
                 continue;
             }
 
-            let uses = classify_r0_uses(&program.insns, site.call_pc);
+            let null_check_pc = find_immediate_null_check(&program.insns, site.call_pc);
+            let uses = classify_r0_uses_from(&program.insns, null_check_pc.unwrap_or(site.call_pc));
             if uses.fixed_loads.is_empty() {
                 skipped.push(SkipReason {
                     pc: site.call_pc,
@@ -219,7 +222,8 @@ impl BpfPass for MapInlinePass {
                 continue;
             }
 
-            let rewrite = match build_site_rewrite(program, &site, &key, &uses, info) {
+            let rewrite = match build_site_rewrite(program, &site, &key, &uses, info, null_check_pc)
+            {
                 Ok(Some(rewrite)) => rewrite,
                 Ok(None) => {
                     skipped.push(SkipReason {
@@ -278,6 +282,7 @@ impl BpfPass for MapInlinePass {
         let mut skip_pcs = HashSet::new();
         let mut replacements: BTreeMap<usize, Vec<BpfInsn>> = BTreeMap::new();
         let mut applied = 0usize;
+        let mut removed_any_null_check = false;
 
         for rewrite in rewrites {
             let conflict = rewrite
@@ -292,12 +297,13 @@ impl BpfPass for MapInlinePass {
                 || rewrite.skipped_pcs.iter().any(|pc| skip_pcs.contains(pc));
             if conflict {
                 skipped.push(SkipReason {
-                    pc: rewrite.replacements.keys().next().copied().unwrap_or(0),
+                    pc: rewrite.call_pc,
                     reason: "overlapping map inline rewrite".into(),
                 });
                 continue;
             }
 
+            removed_any_null_check |= rewrite.removed_null_check;
             skip_pcs.extend(rewrite.skipped_pcs);
             replacements.extend(rewrite.replacements);
             applied += 1;
@@ -346,8 +352,21 @@ impl BpfPass for MapInlinePass {
 
         super::utils::fixup_all_branches(&mut new_insns, &program.insns, &addr_map);
 
-        program.insns = new_insns;
-        program.remap_annotations(&addr_map);
+        let mut final_insns = new_insns;
+        let mut final_addr_map = addr_map;
+        if removed_any_null_check {
+            if let Some((cleaned_insns, cleanup_map)) = eliminate_unreachable_blocks(&final_insns) {
+                final_addr_map = compose_addr_maps(&final_addr_map, &cleanup_map);
+                final_insns = cleaned_insns;
+            }
+            if let Some((cleaned_insns, cleanup_map)) = eliminate_trivial_jumps(&final_insns) {
+                final_addr_map = compose_addr_maps(&final_addr_map, &cleanup_map);
+                final_insns = cleaned_insns;
+            }
+        }
+
+        program.insns = final_insns;
+        program.remap_annotations(&final_addr_map);
         program.log_transform(TransformEntry {
             sites_applied: applied,
         });
@@ -369,6 +388,7 @@ fn build_site_rewrite(
     key: &ConstantKey,
     uses: &R0UseClassification,
     info: &crate::analysis::MapInfo,
+    null_check_pc: Option<usize>,
 ) -> anyhow::Result<Option<SiteRewrite>> {
     let value = bpf::bpf_map_lookup_elem_by_id(
         info.map_id,
@@ -385,6 +405,9 @@ fn build_site_rewrite(
     skipped_pcs.insert(key.r2_add_pc);
     if let Some(source_imm_pc) = key.source_imm_pc {
         skipped_pcs.insert(source_imm_pc);
+    }
+    if let Some(null_check_pc) = null_check_pc {
+        skipped_pcs.insert(null_check_pc);
     }
 
     let mut replacements = BTreeMap::new();
@@ -412,8 +435,9 @@ fn build_site_rewrite(
         return Ok(None);
     }
 
-    // Do not remove the instruction stream past the lookup call itself.
-    if max_removed_pc != site.call_pc {
+    // Only remove the lookup pattern itself: key materialization, map load,
+    // helper call, and an optional immediate null check.
+    if max_removed_pc != null_check_pc.unwrap_or(site.call_pc) {
         return Ok(None);
     }
 
@@ -423,9 +447,175 @@ fn build_site_rewrite(
     }
 
     Ok(Some(SiteRewrite {
+        call_pc: site.call_pc,
+        removed_null_check: null_check_pc.is_some(),
         skipped_pcs,
         replacements,
     }))
+}
+
+fn eliminate_unreachable_blocks(insns: &[BpfInsn]) -> Option<(Vec<BpfInsn>, Vec<usize>)> {
+    if insns.is_empty() {
+        return None;
+    }
+
+    let cfg = CFGAnalysis.run(&BpfProgram::new(insns.to_vec()));
+    let mut reachable = vec![false; cfg.blocks.len()];
+    let mut worklist = Vec::new();
+    let mut entry_blocks = HashSet::new();
+
+    for subprog in &cfg.subprogs {
+        if subprog.start < insns.len() {
+            entry_blocks.insert(cfg.insn_to_block[subprog.start]);
+        }
+    }
+
+    for block_idx in entry_blocks {
+        reachable[block_idx] = true;
+        worklist.push(block_idx);
+    }
+
+    while let Some(block_idx) = worklist.pop() {
+        for &succ in &cfg.blocks[block_idx].succs {
+            if !reachable[succ] {
+                reachable[succ] = true;
+                worklist.push(succ);
+            }
+        }
+    }
+
+    let mut dead_pc = vec![false; insns.len()];
+    let mut removed_any = false;
+    for (block_idx, block) in cfg.blocks.iter().enumerate() {
+        if reachable[block_idx] {
+            continue;
+        }
+        removed_any = true;
+        for slot in &mut dead_pc[block.start..block.end] {
+            *slot = true;
+        }
+    }
+
+    if !removed_any {
+        return None;
+    }
+
+    let orig_len = insns.len();
+    let mut new_insns = Vec::with_capacity(orig_len);
+    let mut addr_map = vec![0usize; orig_len + 1];
+    let mut deleted = vec![false; orig_len];
+    let mut pc = 0usize;
+
+    while pc < orig_len {
+        let insn = &insns[pc];
+        let width = insn_width(insn);
+        let new_pc = new_insns.len();
+
+        if dead_pc[pc] {
+            for j in 0..width {
+                addr_map[pc + j] = new_pc;
+                deleted[pc + j] = true;
+            }
+            pc += width;
+            continue;
+        }
+
+        addr_map[pc] = new_pc;
+        new_insns.push(*insn);
+        if width == 2 && pc + 1 < orig_len {
+            addr_map[pc + 1] = new_insns.len();
+            new_insns.push(insns[pc + 1]);
+        }
+        pc += width;
+    }
+    addr_map[orig_len] = new_insns.len();
+
+    fixup_surviving_branches(&mut new_insns, insns, &addr_map, &deleted);
+    Some((new_insns, addr_map))
+}
+
+fn compose_addr_maps(first: &[usize], second: &[usize]) -> Vec<usize> {
+    first.iter().map(|&pc| second[pc]).collect()
+}
+
+fn eliminate_trivial_jumps(insns: &[BpfInsn]) -> Option<(Vec<BpfInsn>, Vec<usize>)> {
+    let orig_len = insns.len();
+    let mut removed_any = false;
+    let mut new_insns = Vec::with_capacity(orig_len);
+    let mut addr_map = vec![0usize; orig_len + 1];
+    let mut deleted = vec![false; orig_len];
+    let mut pc = 0usize;
+
+    while pc < orig_len {
+        let insn = &insns[pc];
+        let width = insn_width(insn);
+        let new_pc = new_insns.len();
+
+        if insn.is_ja() && insn.off == 0 {
+            removed_any = true;
+            for j in 0..width {
+                addr_map[pc + j] = new_pc;
+                deleted[pc + j] = true;
+            }
+            pc += width;
+            continue;
+        }
+
+        addr_map[pc] = new_pc;
+        new_insns.push(*insn);
+        if width == 2 && pc + 1 < orig_len {
+            addr_map[pc + 1] = new_insns.len();
+            new_insns.push(insns[pc + 1]);
+        }
+        pc += width;
+    }
+    addr_map[orig_len] = new_insns.len();
+
+    if !removed_any {
+        return None;
+    }
+
+    fixup_surviving_branches(&mut new_insns, insns, &addr_map, &deleted);
+    Some((new_insns, addr_map))
+}
+
+fn fixup_surviving_branches(
+    new_insns: &mut [BpfInsn],
+    old_insns: &[BpfInsn],
+    addr_map: &[usize],
+    deleted: &[bool],
+) {
+    let old_n = old_insns.len();
+    let mut old_pc = 0usize;
+
+    while old_pc < old_n {
+        let insn = &old_insns[old_pc];
+        if !deleted[old_pc] {
+            if insn.is_call() && insn.src_reg() == 1 {
+                let old_target = (old_pc as i64 + 1 + insn.imm as i64) as usize;
+                if old_target < old_n {
+                    let new_pc = addr_map[old_pc];
+                    let new_target = addr_map[old_target];
+                    if new_pc < new_insns.len() && new_insns[new_pc].is_call() {
+                        let new_imm = new_target as i64 - (new_pc as i64 + 1);
+                        new_insns[new_pc].imm = new_imm as i32;
+                    }
+                }
+            } else if insn.is_jmp_class() && !insn.is_call() && !insn.is_exit() {
+                let old_target = (old_pc as i64 + 1 + insn.off as i64) as usize;
+                if old_target <= old_n {
+                    let new_pc = addr_map[old_pc];
+                    let new_target = addr_map[old_target];
+                    if new_pc < new_insns.len() && new_insns[new_pc].is_jmp_class() {
+                        let new_off = new_target as i64 - (new_pc as i64 + 1);
+                        new_insns[new_pc].off = new_off as i16;
+                    }
+                }
+            }
+        }
+
+        old_pc += insn_width(insn);
+    }
 }
 
 fn encode_key_bytes(value: u64, key_size: usize) -> Vec<u8> {
@@ -470,6 +660,18 @@ fn emit_ldimm64(dst_reg: u8, value: u64) -> Vec<BpfInsn> {
             imm: (value >> 32) as u32 as i32,
         },
     ]
+}
+
+fn find_immediate_null_check(insns: &[BpfInsn], call_pc: usize) -> Option<usize> {
+    let pc = call_pc + 1;
+    let insn = insns.get(pc)?;
+
+    (insn.code == (BPF_JMP | BPF_JEQ | BPF_K)
+        && insn.dst_reg() == 0
+        && insn.src_reg() == 0
+        && insn.imm == 0
+        && insn.off >= 0)
+        .then_some(pc)
 }
 
 fn find_map_load_for_call(insns: &[BpfInsn], call_pc: usize) -> Option<usize> {
@@ -606,6 +808,34 @@ fn insn_width(insn: &BpfInsn) -> usize {
     }
 }
 
+fn classify_r0_uses_from(insns: &[BpfInsn], start_pc: usize) -> R0UseClassification {
+    let mut classification = R0UseClassification::default();
+    let mut pc = start_pc + 1;
+
+    while pc < insns.len() {
+        let insn = &insns[pc];
+
+        if insn.is_ldx_mem() && insn.src_reg() == 0 {
+            classification.fixed_loads.push(FixedLoadUse {
+                pc,
+                dst_reg: insn.dst_reg(),
+                size: bpf_size(insn.code),
+                offset: insn.off,
+            });
+        } else if insn_uses_reg(insn, 0) {
+            classification.other_uses.push(pc);
+        }
+
+        if insn_defines_reg(insn, 0) {
+            break;
+        }
+
+        pc += insn_width(insn);
+    }
+
+    classification
+}
+
 fn insn_uses_reg(insn: &BpfInsn, reg: u8) -> bool {
     match insn.class() {
         BPF_ALU64 | BPF_ALU => {
@@ -711,6 +941,10 @@ mod tests {
             off: 0,
             imm: 0,
         }
+    }
+
+    fn ja(off: i16) -> BpfInsn {
+        BpfInsn::ja(off)
     }
 
     fn install_array_map(map_id: u32, value: Vec<u8>) {
@@ -899,34 +1133,42 @@ mod tests {
     }
 
     #[test]
-    fn map_inline_pass_skips_null_checked_lookup_for_step3() {
+    fn map_inline_pass_removes_null_check_and_dead_cold_block() {
         install_array_map(102, vec![7, 0, 0, 0, 0xaa, 0, 0, 0]);
 
         let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
-        let original = vec![
+        let mut program = BpfProgram::new(vec![
             map[0],
             map[1],
             st_mem(BPF_W, 10, -4, 1),
             BpfInsn::mov64_reg(2, 10),
             add64_imm(2, -4),
             call_helper(HELPER_MAP_LOOKUP_ELEM),
-            jeq_imm(0, 0, 1),
+            jeq_imm(0, 0, 3),
             BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
             BpfInsn::mov64_imm(0, 0),
+            ja(1),
+            BpfInsn::mov64_imm(0, 1),
             exit_insn(),
-        ];
-        let mut program = BpfProgram::new(original.clone());
+        ]);
         program.set_map_ids(vec![102]);
 
         let result = run_map_inline_pass(&mut program);
 
-        assert!(!result.program_changed);
-        assert_eq!(program.insns, original);
-        assert_eq!(result.pass_results[0].sites_applied, 0);
-        assert!(result.pass_results[0]
-            .sites_skipped
-            .iter()
-            .any(|skip| skip.reason.contains("non-load uses")));
+        assert!(
+            result.program_changed,
+            "skip reasons: {:?}",
+            result.pass_results[0].sites_skipped
+        );
+        assert_eq!(result.pass_results[0].sites_applied, 1);
+        assert_eq!(
+            program.insns,
+            vec![
+                BpfInsn::mov64_imm(6, 7),
+                BpfInsn::mov64_imm(0, 0),
+                exit_insn(),
+            ]
+        );
     }
 
     #[test]
