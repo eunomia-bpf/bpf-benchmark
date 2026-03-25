@@ -947,16 +947,19 @@ mod tests {
         BpfInsn::ja(off)
     }
 
-    fn install_array_map(map_id: u32, value: Vec<u8>) {
+    fn install_map(
+        map_id: u32,
+        map_type: u32,
+        max_entries: u32,
+        values: HashMap<Vec<u8>, Vec<u8>>,
+    ) {
         let mut info = BpfMapInfo::default();
-        info.map_type = 2;
+        info.map_type = map_type;
         info.id = map_id;
         info.key_size = 4;
-        info.value_size = value.len() as u32;
-        info.max_entries = 8;
+        info.value_size = values.values().next().map(|value| value.len()).unwrap_or(0) as u32;
+        info.max_entries = max_entries;
 
-        let mut values = HashMap::new();
-        values.insert(1u32.to_le_bytes().to_vec(), value);
         install_mock_map(
             map_id,
             MockMapState {
@@ -965,6 +968,18 @@ mod tests {
                 values,
             },
         );
+    }
+
+    fn install_array_map(map_id: u32, value: Vec<u8>) {
+        let mut values = HashMap::new();
+        values.insert(1u32.to_le_bytes().to_vec(), value);
+        install_map(map_id, 2, 8, values);
+    }
+
+    fn install_hash_map(map_id: u32, value: Vec<u8>) {
+        let mut values = HashMap::new();
+        values.insert(1u32.to_le_bytes().to_vec(), value);
+        install_map(map_id, 1, 8, values);
     }
 
     fn run_map_inline_pass(program: &mut BpfProgram) -> PipelineResult {
@@ -1201,5 +1216,195 @@ mod tests {
         assert_eq!(program.insns[0].dst_reg(), 6);
         assert_eq!(program.insns[0].imm as u32 as u64, 0);
         assert_eq!(program.insns[1].imm as u32 as u64, 1);
+    }
+
+    #[test]
+    fn map_inline_pass_skips_non_constant_key() {
+        install_array_map(104, vec![7, 0, 0, 0]);
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let original = vec![
+            map[0],
+            map[1],
+            BpfInsn::stx_mem(BPF_W, 10, 3, -4),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ];
+        let mut program = BpfProgram::new(original.clone());
+        program.set_map_ids(vec![104]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(!result.program_changed);
+        assert_eq!(program.insns, original);
+        assert!(result.pass_results[0]
+            .sites_skipped
+            .iter()
+            .any(|skip| skip.reason.contains("constant stack materialization")));
+    }
+
+    #[test]
+    fn map_inline_pass_skips_hash_maps() {
+        install_hash_map(105, vec![7, 0, 0, 0]);
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let original = vec![
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ];
+        let mut program = BpfProgram::new(original.clone());
+        program.set_map_ids(vec![105]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(!result.program_changed);
+        assert_eq!(program.insns, original);
+        assert!(result.pass_results[0]
+            .sites_skipped
+            .iter()
+            .any(|skip| skip.reason.contains("not inlineable")));
+    }
+
+    #[test]
+    fn map_inline_pass_skips_pointer_escape_to_helper() {
+        install_array_map(106, vec![7, 0, 0, 0]);
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let original = vec![
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            BpfInsn::mov64_reg(1, 0),
+            call_helper(2),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ];
+        let mut program = BpfProgram::new(original.clone());
+        program.set_map_ids(vec![106]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(!result.program_changed);
+        assert_eq!(program.insns, original);
+        assert!(result.pass_results[0]
+            .sites_skipped
+            .iter()
+            .any(|skip| skip.reason.contains("non-load uses")));
+    }
+
+    #[test]
+    fn map_inline_pass_rewrites_multiple_lookup_sites() {
+        install_array_map(107, vec![7, 0, 0, 0]);
+        install_array_map(108, vec![9, 0, 0, 0]);
+
+        let map0 = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let map1 = ld_imm64(1, BPF_PSEUDO_MAP_FD, 43);
+        let mut program = BpfProgram::new(vec![
+            map0[0],
+            map0[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            map1[0],
+            map1[1],
+            st_mem(BPF_W, 10, -8, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -8),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 7, 0, 0),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ]);
+        program.set_map_ids(vec![107, 108]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(
+            result.program_changed,
+            "skip reasons: {:?}",
+            result.pass_results[0].sites_skipped
+        );
+        assert_eq!(result.total_sites_applied, 2);
+        assert_eq!(
+            program.insns,
+            vec![
+                BpfInsn::mov64_imm(6, 7),
+                BpfInsn::mov64_imm(7, 9),
+                BpfInsn::mov64_imm(0, 0),
+                exit_insn(),
+            ]
+        );
+    }
+
+    #[test]
+    fn map_inline_pass_rewrites_lookup_inside_subprog() {
+        install_array_map(109, vec![7, 0, 0, 0]);
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let mut program = BpfProgram::new(vec![
+            BpfInsn {
+                code: BPF_JMP | BPF_CALL,
+                regs: BpfInsn::make_regs(0, 1),
+                off: 0,
+                imm: 2,
+            },
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+            BpfInsn::mov64_imm(9, 0),
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ]);
+        program.set_map_ids(vec![109]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(
+            result.program_changed,
+            "skip reasons: {:?}",
+            result.pass_results[0].sites_skipped
+        );
+        assert_eq!(result.total_sites_applied, 1);
+        assert_eq!(program.insns[0].imm, 2);
+        assert_eq!(
+            program.insns,
+            vec![
+                BpfInsn {
+                    code: BPF_JMP | BPF_CALL,
+                    regs: BpfInsn::make_regs(0, 1),
+                    off: 0,
+                    imm: 2,
+                },
+                BpfInsn::mov64_imm(0, 0),
+                exit_insn(),
+                BpfInsn::mov64_imm(9, 0),
+                BpfInsn::mov64_imm(6, 7),
+                BpfInsn::mov64_imm(0, 0),
+                exit_insn(),
+            ]
+        );
     }
 }
