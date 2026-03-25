@@ -205,4 +205,85 @@ mod tests {
             ]
         );
     }
+
+    /// After const_prop folds a conditional branch, the dead block that
+    /// contained the only pseudo-call to a subprog should be removed, AND the
+    /// now-orphaned subprog should also be removed. Otherwise the verifier
+    /// would report "unreachable insn N" for the orphaned subprog.
+    #[test]
+    fn dce_removes_orphaned_subprog_after_const_prop() {
+        // Program:
+        //   0: mov r1, 7
+        //   1: jeq r1, 7, +2  (always taken -> jump to pc 4)
+        //   2: call sub (pc 6) -- dead after const_prop folds the branch
+        //   3: exit             -- dead
+        //   4: mov r0, 0
+        //   5: exit
+        //   6: mov r0, 3   -- subprog entry (orphaned after DCE removes pc 2)
+        //   7: exit
+        let mut program = BpfProgram::new(vec![
+            BpfInsn::mov64_imm(1, 7),  // 0
+            jeq_imm(1, 7, 2),          // 1: always taken
+            pseudo_call(3),             // 2: dead block
+            exit_insn(),                // 3: dead block
+            BpfInsn::mov64_imm(0, 0),  // 4: branch target (live)
+            exit_insn(),                // 5
+            BpfInsn::mov64_imm(0, 3),  // 6: subprog entry (orphaned)
+            exit_insn(),                // 7
+        ]);
+
+        let result = run_const_prop_then_dce(&mut program);
+
+        assert!(result.program_changed);
+        // The orphaned subprog should be removed entirely.
+        // After const_prop: jeq becomes JA +2, dead block (call+exit) becomes
+        // unreachable, subprog has no remaining callers.
+        assert_eq!(
+            program.insns,
+            vec![
+                BpfInsn::mov64_imm(1, 7),
+                BpfInsn::mov64_imm(0, 0),
+                exit_insn(),
+            ],
+            "orphaned subprog should be removed; got {:?}",
+            program.insns
+        );
+    }
+
+    /// When const_prop folds a branch and one path (with a subprog call) dies,
+    /// but there's another live call to the same subprog, the subprog must be
+    /// preserved.
+    #[test]
+    fn dce_preserves_subprog_with_remaining_live_caller() {
+        // Program:
+        //   0: call sub (pc 5) -- live call
+        //   1: mov r1, 7
+        //   2: jeq r1, 7, +1  (always taken -> jump to pc 4)
+        //   3: call sub (pc 1) -- dead call (different imm, still targets sub)
+        //   4: mov r0, 0
+        //   5: exit
+        //   6: mov r0, 3   -- subprog entry (still has live caller at pc 0)
+        //   7: exit
+        let mut program = BpfProgram::new(vec![
+            pseudo_call(5),             // 0: live call to subprog at pc 6
+            BpfInsn::mov64_imm(1, 7),  // 1
+            jeq_imm(1, 7, 1),          // 2: always taken
+            pseudo_call(2),             // 3: dead call to subprog at pc 6
+            BpfInsn::mov64_imm(0, 0),  // 4
+            exit_insn(),                // 5
+            BpfInsn::mov64_imm(0, 3),  // 6: subprog entry
+            exit_insn(),                // 7
+        ]);
+
+        let result = run_const_prop_then_dce(&mut program);
+
+        assert!(result.program_changed);
+        // Subprog must be preserved because pc 0 still calls it.
+        let has_subprog = program.insns.iter().any(|i| *i == BpfInsn::mov64_imm(0, 3));
+        assert!(
+            has_subprog,
+            "subprog with live caller should be preserved; got {:?}",
+            program.insns
+        );
+    }
 }

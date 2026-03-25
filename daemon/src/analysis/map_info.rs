@@ -12,7 +12,13 @@ const BPF_MAP_TYPE_HASH: u32 = 1;
 #[cfg_attr(not(test), allow(dead_code))]
 const BPF_MAP_TYPE_ARRAY: u32 = 2;
 #[cfg_attr(not(test), allow(dead_code))]
+const BPF_MAP_TYPE_PERCPU_HASH: u32 = 5;
+#[cfg_attr(not(test), allow(dead_code))]
+const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = 6;
+#[cfg_attr(not(test), allow(dead_code))]
 const BPF_MAP_TYPE_LRU_HASH: u32 = 9;
+#[cfg_attr(not(test), allow(dead_code))]
+const BPF_MAP_TYPE_LRU_PERCPU_HASH: u32 = 10;
 const BPF_PSEUDO_MAP_FD: u8 = 1;
 
 /// Runtime metadata for a live kernel map referenced by the program.
@@ -27,27 +33,52 @@ pub struct MapInfo {
 }
 
 impl MapInfo {
+    /// Returns whether this map type supports direct value access (i.e. the
+    /// kernel allows reading element values by ID). Map types like
+    /// `PERF_EVENT_ARRAY`, `PROG_ARRAY`, `RINGBUF`, `STACK_TRACE`, and
+    /// `CGROUP_STORAGE` do NOT support direct value access and must never be
+    /// inlined.
+    #[cfg_attr(not(test), allow(dead_code))]
+    pub fn supports_direct_value_access(&self) -> bool {
+        matches!(
+            self.map_type,
+            BPF_MAP_TYPE_HASH
+                | BPF_MAP_TYPE_ARRAY
+                | BPF_MAP_TYPE_PERCPU_HASH
+                | BPF_MAP_TYPE_PERCPU_ARRAY
+                | BPF_MAP_TYPE_LRU_HASH
+                | BPF_MAP_TYPE_LRU_PERCPU_HASH
+        )
+    }
+
     /// Returns whether this map is inlineable in v1.
     /// Mutable map contents would invalidate the constant replacement.
+    /// The map must be frozen, AND the map type must support direct value
+    /// access.
     #[cfg_attr(not(test), allow(dead_code))]
     pub fn is_inlineable_v1(&self) -> bool {
-        self.frozen
-            && matches!(
-            self.map_type,
-            BPF_MAP_TYPE_ARRAY | BPF_MAP_TYPE_HASH | BPF_MAP_TYPE_LRU_HASH
-        )
+        self.frozen && self.supports_direct_value_access()
     }
 
     /// Returns whether v1 can eliminate the lookup/null-check sequence.
     #[cfg_attr(not(test), allow(dead_code))]
     pub fn can_remove_lookup_pattern_v1(&self) -> bool {
-        self.map_type == BPF_MAP_TYPE_ARRAY
+        matches!(
+            self.map_type,
+            BPF_MAP_TYPE_ARRAY | BPF_MAP_TYPE_PERCPU_ARRAY
+        )
     }
 
     /// Returns whether this inline is speculative and depends on runtime stability.
     #[cfg_attr(not(test), allow(dead_code))]
     pub fn is_speculative_v1(&self) -> bool {
-        matches!(self.map_type, BPF_MAP_TYPE_HASH | BPF_MAP_TYPE_LRU_HASH)
+        matches!(
+            self.map_type,
+            BPF_MAP_TYPE_HASH
+                | BPF_MAP_TYPE_LRU_HASH
+                | BPF_MAP_TYPE_PERCPU_HASH
+                | BPF_MAP_TYPE_LRU_PERCPU_HASH
+        )
     }
 }
 
@@ -313,5 +344,83 @@ mod tests {
         assert_eq!(result.references.len(), 1);
         assert_eq!(result.references[0].map_id, None);
         assert_eq!(result.references[0].info, None);
+    }
+
+    #[test]
+    fn unsupported_map_types_reject_direct_value_access() {
+        const BPF_MAP_TYPE_PROG_ARRAY: u32 = 3;
+        const BPF_MAP_TYPE_PERF_EVENT_ARRAY: u32 = 4;
+        const BPF_MAP_TYPE_STACK_TRACE: u32 = 7;
+        const BPF_MAP_TYPE_CGROUP_STORAGE: u32 = 19;
+        const BPF_MAP_TYPE_RINGBUF: u32 = 27;
+
+        for map_type in [
+            BPF_MAP_TYPE_PROG_ARRAY,
+            BPF_MAP_TYPE_PERF_EVENT_ARRAY,
+            BPF_MAP_TYPE_STACK_TRACE,
+            BPF_MAP_TYPE_CGROUP_STORAGE,
+            BPF_MAP_TYPE_RINGBUF,
+        ] {
+            let info = MapInfo {
+                map_type,
+                key_size: 4,
+                value_size: 8,
+                max_entries: 16,
+                frozen: true,
+                map_id: 999,
+            };
+            assert!(
+                !info.supports_direct_value_access(),
+                "map_type {} should NOT support direct value access",
+                map_type
+            );
+            assert!(
+                !info.is_inlineable_v1(),
+                "map_type {} should NOT be inlineable",
+                map_type
+            );
+        }
+    }
+
+    #[test]
+    fn percpu_map_types_support_direct_value_access() {
+        let percpu_array = MapInfo {
+            map_type: BPF_MAP_TYPE_PERCPU_ARRAY,
+            key_size: 4,
+            value_size: 8,
+            max_entries: 16,
+            frozen: true,
+            map_id: 501,
+        };
+        assert!(percpu_array.supports_direct_value_access());
+        assert!(percpu_array.is_inlineable_v1());
+        assert!(percpu_array.can_remove_lookup_pattern_v1());
+        assert!(!percpu_array.is_speculative_v1());
+
+        let percpu_hash = MapInfo {
+            map_type: BPF_MAP_TYPE_PERCPU_HASH,
+            key_size: 4,
+            value_size: 8,
+            max_entries: 16,
+            frozen: true,
+            map_id: 502,
+        };
+        assert!(percpu_hash.supports_direct_value_access());
+        assert!(percpu_hash.is_inlineable_v1());
+        assert!(!percpu_hash.can_remove_lookup_pattern_v1());
+        assert!(percpu_hash.is_speculative_v1());
+
+        let lru_percpu_hash = MapInfo {
+            map_type: BPF_MAP_TYPE_LRU_PERCPU_HASH,
+            key_size: 4,
+            value_size: 8,
+            max_entries: 16,
+            frozen: true,
+            map_id: 503,
+        };
+        assert!(lru_percpu_hash.supports_direct_value_access());
+        assert!(lru_percpu_hash.is_inlineable_v1());
+        assert!(!lru_percpu_hash.can_remove_lookup_pattern_v1());
+        assert!(lru_percpu_hash.is_speculative_v1());
     }
 }

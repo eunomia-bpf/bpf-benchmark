@@ -69,6 +69,11 @@ pub fn eliminate_unreachable_blocks(insns: &[BpfInsn]) -> Option<(Vec<BpfInsn>, 
 
 /// Remove all CFG-unreachable basic blocks from the instruction stream using
 /// a caller-provided CFG.
+///
+/// Subprog entries are only considered reachable if there exists a reachable
+/// pseudo-call that targets them. This prevents orphaned subprogs (whose only
+/// call site was in a dead block) from surviving and triggering verifier
+/// "unreachable insn" errors.
 pub fn eliminate_unreachable_blocks_with_cfg(
     insns: &[BpfInsn],
     cfg: &CFGResult,
@@ -79,25 +84,63 @@ pub fn eliminate_unreachable_blocks_with_cfg(
 
     let mut reachable = vec![false; cfg.blocks.len()];
     let mut worklist = Vec::new();
-    let mut entry_blocks = HashSet::new();
 
-    for subprog in &cfg.subprogs {
-        if subprog.start < insns.len() {
-            entry_blocks.insert(cfg.insn_to_block[subprog.start]);
-        }
+    // Seed with main entry (the first subprog, which always starts at 0).
+    if !cfg.subprogs.is_empty() {
+        let main_entry_block = cfg.insn_to_block[cfg.subprogs[0].start];
+        reachable[main_entry_block] = true;
+        worklist.push(main_entry_block);
     }
 
-    for block_idx in entry_blocks {
-        reachable[block_idx] = true;
-        worklist.push(block_idx);
-    }
+    // Collect all subprog entry PCs for quick lookup.
+    let subprog_entry_pcs: HashSet<usize> = cfg
+        .subprogs
+        .iter()
+        .filter(|s| s.start < insns.len())
+        .map(|s| s.start)
+        .collect();
 
-    while let Some(block_idx) = worklist.pop() {
-        for &succ in &cfg.blocks[block_idx].succs {
-            if !reachable[succ] {
-                reachable[succ] = true;
-                worklist.push(succ);
+    // Iterative reachability: propagate through CFG edges, and when a
+    // reachable block contains a pseudo-call, seed the target subprog entry.
+    loop {
+        // Drain the worklist, propagating through CFG successors.
+        while let Some(block_idx) = worklist.pop() {
+            for &succ in &cfg.blocks[block_idx].succs {
+                if !reachable[succ] {
+                    reachable[succ] = true;
+                    worklist.push(succ);
+                }
             }
+        }
+
+        // Find pseudo-calls in reachable blocks that target not-yet-reachable
+        // subprog entries.
+        let mut found_new = false;
+        for (block_idx, block) in cfg.blocks.iter().enumerate() {
+            if !reachable[block_idx] {
+                continue;
+            }
+            let mut pc = block.start;
+            while pc < block.end {
+                let insn = &insns[pc];
+                if insn.is_call() && insn.src_reg() == 1 {
+                    // BPF pseudo-call: target = pc + 1 + imm
+                    let target = (pc as i64 + 1 + insn.imm as i64) as usize;
+                    if target < insns.len() && subprog_entry_pcs.contains(&target) {
+                        let target_block = cfg.insn_to_block[target];
+                        if !reachable[target_block] {
+                            reachable[target_block] = true;
+                            worklist.push(target_block);
+                            found_new = true;
+                        }
+                    }
+                }
+                pc = if insn.is_ldimm64() { pc + 2 } else { pc + 1 };
+            }
+        }
+
+        if !found_new {
+            break;
         }
     }
 
