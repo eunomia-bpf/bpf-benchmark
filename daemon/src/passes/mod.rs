@@ -3,6 +3,7 @@
 
 mod branch_flip;
 mod cond_select;
+mod const_prop;
 mod endian;
 mod extract;
 mod map_inline;
@@ -13,6 +14,7 @@ mod wide_mem;
 
 pub use branch_flip::BranchFlipPass;
 pub use cond_select::CondSelectPass;
+pub use const_prop::ConstPropPass;
 pub use endian::EndianFusionPass;
 pub use extract::ExtractPass;
 pub use map_inline::MapInlinePass;
@@ -53,9 +55,15 @@ pub struct PassRegistryEntry {
 pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
     PassRegistryEntry {
         name: "map_inline",
-        description: "Inline array map lookups with constant keys",
+        description: "Inline stable map value loads with constant keys",
         aliases: &[],
         make: || Box::new(MapInlinePass),
+    },
+    PassRegistryEntry {
+        name: "const_prop",
+        description: "Fold register constants into MOV/LD_IMM64/JA rewrites",
+        aliases: &[],
+        make: || Box::new(ConstPropPass),
     },
     PassRegistryEntry {
         name: "wide_mem",
@@ -320,6 +328,7 @@ mod tests {
     fn test_default_pipeline_starts_with_map_inline() {
         let pm = build_default_pipeline();
         assert_eq!(pm.pass_names().first().copied(), Some("map_inline"));
+        assert_eq!(pm.pass_names().get(1).copied(), Some("const_prop"));
     }
 
     // ── HIGH #6: Real BPF bytecode pipeline tests ────────────────────
