@@ -67,8 +67,8 @@ struct cli_options {
     std::optional<std::filesystem::path> dump_xlated;
     bool compile_only = false;
     bool attach_mode = false;                            // attach + bpf_stats measurement path
-    uint32_t workload_iterations = 10000;                // number of workload syscall iterations
-    std::string workload_type = "getpid";                // workload: "getpid", "nanosleep", "write_devnull"
+    uint32_t workload_iterations = 2;                    // syscall iterations, or duration seconds for mixed/stress-ng/fio/wrk
+    std::string workload_type = "mixed";                 // workload: "mixed", "stress-ng", "fio", "wrk", or legacy syscall loops
 };
 
 struct keep_alive_request {

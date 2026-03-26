@@ -92,11 +92,12 @@ std::string usage_text()
 #if MICRO_EXEC_ENABLE_LLVMBPF
         "run-llvmbpf|"
 #endif
-        "run-kernel|list-programs> [--program <path>|<path>] [--program-name <name>] "
+        "run-kernel|run-kernel-attach|list-programs> [--program <path>|<path>] [--program-name <name>] "
         "[--memory <path>] [--btf-custom-path <path>] "
         "[--rejit] [--rejit-program <path>] [--daemon-socket <path>] "
         "[--manual-load] "
         "[--io-mode map|staged|packet|context] [--raw-packet] [--repeat N] [--warmup N] [--input-size N] "
+        "[--attach] [--workload-iterations N] [--workload-type mixed|stress-ng|fio|wrk|getpid|nanosleep|write_devnull] "
         "[--opt-level 0|1|2|3] [--no-cmov] [--llvm-target-cpu <cpu>] [--llvm-target-features <csv>] [--llvm-disable-pass <name>] [--llvm-log-passes] "
         "[--perf-counters] [--perf-scope full_repeat_raw|full_repeat_avg] "
         "[--dump-jit] [--dump-xlated <path>] [--compile-only]";

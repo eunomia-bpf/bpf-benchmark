@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <cerrno>
 #include <chrono>
 #include <cmath>
@@ -20,11 +21,14 @@
 #include <fstream>
 #include <time.h>
 #include <memory>
+#include <netinet/in.h>
 #include <string>
 #include <string_view>
 #include <sys/socket.h>
 #include <sys/syscall.h>
+#include <sys/wait.h>
 #include <sys/un.h>
+#include <system_error>
 #include <thread>
 #include <unordered_map>
 #include <unistd.h>
@@ -1417,15 +1421,289 @@ int manual_load_program(bpf_object *object, const cli_options &options)
  * Attach-mode helpers: workload generation and bpf_stats
  * ================================================================ */
 
-void run_workload(const std::string &workload_type, uint32_t iterations)
+bool is_duration_based_workload(std::string_view workload_type)
 {
-    if (workload_type == "getpid") {
-        for (uint32_t i = 0; i < iterations; ++i) {
+    return workload_type == "mixed" ||
+           workload_type == "stress-ng" ||
+           workload_type == "fio" ||
+           workload_type == "wrk";
+}
+
+uint32_t workload_duration_seconds(uint32_t requested_seconds)
+{
+    return std::max(1u, requested_seconds);
+}
+
+std::string shell_escape(std::string_view value)
+{
+    std::string escaped;
+    escaped.reserve(value.size() + 2);
+    escaped += '\'';
+    for (const char ch : value) {
+        if (ch == '\'') {
+            escaped += "'\\''";
+        } else {
+            escaped += ch;
+        }
+    }
+    escaped += '\'';
+    return escaped;
+}
+
+bool run_shell_workload_command(const std::string &command)
+{
+    const int status = std::system(command.c_str());
+    if (status == -1) {
+        return false;
+    }
+    if (!WIFEXITED(status)) {
+        return false;
+    }
+    return WEXITSTATUS(status) == 0;
+}
+
+void run_mixed_syscall_fallback(uint32_t duration_seconds)
+{
+    const uint32_t seconds = workload_duration_seconds(duration_seconds);
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(seconds);
+    const int read_fd = open("/dev/null", O_RDONLY | O_CLOEXEC);
+    if (read_fd < 0) {
+        fail("unable to open /dev/null for read workload fallback");
+    }
+    scoped_fd read_fd_guard(read_fd);
+
+    const int write_fd = open("/dev/null", O_WRONLY | O_CLOEXEC);
+    if (write_fd < 0) {
+        fail("unable to open /dev/null for write workload fallback");
+    }
+    scoped_fd write_fd_guard(write_fd);
+
+    char read_byte = '\0';
+    const char write_byte = 'x';
+    const struct timespec ts = {0, 1}; /* 1 nanosecond */
+    while (std::chrono::steady_clock::now() < deadline) {
+        (void)syscall(__NR_getpid);
+        const ssize_t read_ret = read(read_fd_guard.get(), &read_byte, 1);
+        const ssize_t write_ret = write(write_fd_guard.get(), &write_byte, 1);
+        (void)read_ret;
+        (void)write_ret;
+        (void)nanosleep(&ts, nullptr);
+        const int open_fd = openat(AT_FDCWD, "/dev/null", O_RDONLY | O_CLOEXEC);
+        if (open_fd >= 0) {
+            close(open_fd);
+        }
+    }
+}
+
+class temporary_directory {
+  public:
+    explicit temporary_directory(std::string_view prefix)
+    {
+        std::string template_path = std::filesystem::temp_directory_path().string();
+        if (!template_path.empty() && template_path.back() != '/') {
+            template_path += '/';
+        }
+        template_path += std::string(prefix);
+        template_path += "XXXXXX";
+        template_buffer_.assign(template_path.begin(), template_path.end());
+        template_buffer_.push_back('\0');
+        char *created = ::mkdtemp(template_buffer_.data());
+        if (created == nullptr) {
+            fail("mkdtemp failed for workload temp directory: " + std::string(strerror(errno)));
+        }
+        path_ = created;
+    }
+
+    temporary_directory(const temporary_directory &) = delete;
+    temporary_directory &operator=(const temporary_directory &) = delete;
+
+    ~temporary_directory()
+    {
+        std::error_code error;
+        std::filesystem::remove_all(path_, error);
+    }
+
+    const std::filesystem::path &path() const
+    {
+        return path_;
+    }
+
+  private:
+    std::vector<char> template_buffer_;
+    std::filesystem::path path_;
+};
+
+class local_http_server {
+  public:
+    local_http_server()
+    {
+        scoped_fd listener(socket(AF_INET, SOCK_STREAM, 0));
+        if (listener.get() < 0) {
+            fail("socket failed for wrk workload: " + std::string(strerror(errno)));
+        }
+
+        const int reuse = 1;
+        (void)setsockopt(listener.get(), SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+
+        sockaddr_in addr = {};
+        addr.sin_family = AF_INET;
+        addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+        addr.sin_port = 0;
+        if (bind(listener.get(), reinterpret_cast<const sockaddr *>(&addr), sizeof(addr)) != 0) {
+            fail("bind failed for wrk workload: " + std::string(strerror(errno)));
+        }
+        if (listen(listener.get(), 64) != 0) {
+            fail("listen failed for wrk workload: " + std::string(strerror(errno)));
+        }
+
+        socklen_t addr_len = sizeof(addr);
+        if (getsockname(listener.get(), reinterpret_cast<sockaddr *>(&addr), &addr_len) != 0) {
+            fail("getsockname failed for wrk workload: " + std::string(strerror(errno)));
+        }
+
+        port_ = ntohs(addr.sin_port);
+        listener_fd_ = std::move(listener);
+        server_thread_ = std::thread([this]() { serve(); });
+    }
+
+    local_http_server(const local_http_server &) = delete;
+    local_http_server &operator=(const local_http_server &) = delete;
+
+    ~local_http_server()
+    {
+        stop();
+    }
+
+    std::string url() const
+    {
+        return "http://127.0.0.1:" + std::to_string(port_) + "/";
+    }
+
+  private:
+    void serve()
+    {
+        static constexpr char kResponse[] =
+            "HTTP/1.1 200 OK\r\n"
+            "Content-Type: text/plain\r\n"
+            "Content-Length: 23\r\n"
+            "Connection: close\r\n"
+            "\r\n"
+            "kernel-attach-workload\n";
+
+        while (!stop_.load(std::memory_order_relaxed)) {
+            const int client_fd = accept(listener_fd_.get(), nullptr, nullptr);
+            if (client_fd < 0) {
+                if (errno == EINTR) {
+                    continue;
+                }
+                if (stop_.load(std::memory_order_relaxed)) {
+                    break;
+                }
+                continue;
+            }
+
+            scoped_fd client(client_fd);
+            if (stop_.load(std::memory_order_relaxed)) {
+                break;
+            }
+            std::array<char, 1024> request = {};
+            (void)recv(client.get(), request.data(), request.size(), 0);
+            (void)send(client.get(), kResponse, sizeof(kResponse) - 1, MSG_NOSIGNAL);
+        }
+    }
+
+    void stop()
+    {
+        if (!server_thread_.joinable()) {
+            return;
+        }
+
+        stop_.store(true, std::memory_order_relaxed);
+        wake_accept();
+        server_thread_.join();
+        listener_fd_.reset();
+    }
+
+    void wake_accept() const
+    {
+        const int wake_fd = socket(AF_INET, SOCK_STREAM, 0);
+        if (wake_fd < 0) {
+            return;
+        }
+
+        sockaddr_in addr = {};
+        addr.sin_family = AF_INET;
+        addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+        addr.sin_port = htons(port_);
+        (void)connect(wake_fd, reinterpret_cast<const sockaddr *>(&addr), sizeof(addr));
+        close(wake_fd);
+    }
+
+    scoped_fd listener_fd_;
+    uint16_t port_ = 0;
+    std::atomic<bool> stop_ = false;
+    std::thread server_thread_;
+};
+
+bool run_stress_ng_workload(uint32_t duration_seconds)
+{
+    const uint32_t seconds = workload_duration_seconds(duration_seconds);
+    const std::string command =
+        "stress-ng --cpu 1 --io 1 --vm 1 --fork 1 --timeout " +
+        std::to_string(seconds) + "s --quiet >/dev/null 2>&1";
+    return run_shell_workload_command(command);
+}
+
+bool run_fio_workload(uint32_t duration_seconds)
+{
+    const uint32_t seconds = workload_duration_seconds(duration_seconds);
+    temporary_directory tempdir("kernel-attach-fio-");
+    const std::filesystem::path data_path = tempdir.path() / "fio.bin";
+    const std::string command =
+        "fio --name=kernel-attach"
+        " --filename=" + shell_escape(data_path.string()) +
+        " --rw=randread --bs=4k --size=64M"
+        " --runtime=" + std::to_string(seconds) +
+        " --time_based=1 --ioengine=sync --direct=0"
+        " --output-format=json >/dev/null 2>&1";
+    return run_shell_workload_command(command);
+}
+
+bool run_wrk_workload(uint32_t duration_seconds)
+{
+    const uint32_t seconds = workload_duration_seconds(duration_seconds);
+    local_http_server server;
+    const std::string command =
+        "wrk -t2 -c10 -d" + std::to_string(seconds) + "s " +
+        shell_escape(server.url()) + " >/dev/null 2>&1";
+    return run_shell_workload_command(command);
+}
+
+void run_workload(const std::string &workload_type, uint32_t iterations_or_duration)
+{
+    if (workload_type == "mixed") {
+        if (!run_stress_ng_workload(iterations_or_duration)) {
+            run_mixed_syscall_fallback(iterations_or_duration);
+        }
+    } else if (workload_type == "stress-ng") {
+        if (!run_stress_ng_workload(iterations_or_duration)) {
+            run_mixed_syscall_fallback(iterations_or_duration);
+        }
+    } else if (workload_type == "fio") {
+        if (!run_fio_workload(iterations_or_duration)) {
+            run_mixed_syscall_fallback(iterations_or_duration);
+        }
+    } else if (workload_type == "wrk") {
+        if (!run_wrk_workload(iterations_or_duration)) {
+            run_mixed_syscall_fallback(iterations_or_duration);
+        }
+    } else if (workload_type == "getpid") {
+        for (uint32_t i = 0; i < iterations_or_duration; ++i) {
             (void)syscall(__NR_getpid);
         }
     } else if (workload_type == "nanosleep") {
         struct timespec ts = {0, 1}; /* 1 nanosecond */
-        for (uint32_t i = 0; i < iterations; ++i) {
+        for (uint32_t i = 0; i < iterations_or_duration; ++i) {
             (void)nanosleep(&ts, nullptr);
         }
     } else if (workload_type == "write_devnull") {
@@ -1434,7 +1712,7 @@ void run_workload(const std::string &workload_type, uint32_t iterations)
             fail("unable to open /dev/null for workload");
         }
         const char data = 'x';
-        for (uint32_t i = 0; i < iterations; ++i) {
+        for (uint32_t i = 0; i < iterations_or_duration; ++i) {
             ssize_t ret = write(fd, &data, 1);
             (void)ret;
         }
@@ -2600,9 +2878,16 @@ std::vector<sample_result> run_kernel_attach(const cli_options &options)
     }
     scoped_fd stats_fd_guard(stats_fd);
 
-    /* Warmup: run some workload iterations to warm caches */
+    const uint32_t warmup_workload_amount = is_duration_based_workload(options.workload_type)
+        ? options.workload_iterations
+        : options.warmup_repeat * options.workload_iterations;
+    const uint32_t measured_workload_amount = is_duration_based_workload(options.workload_type)
+        ? options.workload_iterations
+        : options.repeat * options.workload_iterations;
+
+    /* Warmup: duration-based workloads treat workload_iterations as total seconds. */
     if (options.warmup_repeat > 0) {
-        run_workload(options.workload_type, options.warmup_repeat * options.workload_iterations);
+        run_workload(options.workload_type, warmup_workload_amount);
     }
 
     /* Read stats before the measured workload */
@@ -2611,7 +2896,7 @@ std::vector<sample_result> run_kernel_attach(const cli_options &options)
     /* Execute the measured workload */
     const auto exec_wall_start = std::chrono::steady_clock::now();
     const uint64_t tsc_before = rdtsc_start();
-    run_workload(options.workload_type, options.repeat * options.workload_iterations);
+    run_workload(options.workload_type, measured_workload_amount);
     const uint64_t tsc_after = rdtsc_end();
     const auto exec_wall_end = std::chrono::steady_clock::now();
 
