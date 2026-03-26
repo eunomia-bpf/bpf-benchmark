@@ -3,6 +3,7 @@
 
 pub mod bounds_check_merge;
 mod branch_flip;
+mod bulk_memory;
 mod cond_select;
 mod const_prop;
 mod dce;
@@ -17,6 +18,7 @@ mod wide_mem;
 
 pub use bounds_check_merge::BoundsCheckMergePass;
 pub use branch_flip::BranchFlipPass;
+pub use bulk_memory::BulkMemoryPass;
 pub use cond_select::CondSelectPass;
 pub use const_prop::ConstPropPass;
 pub use dce::DcePass;
@@ -88,6 +90,12 @@ pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
         description: "Fuse byte-by-byte loads into wider memory accesses",
         aliases: &[],
         make: || Box::new(WideMemPass),
+    },
+    PassRegistryEntry {
+        name: "bulk_memory",
+        description: "Lower large scalarized memcpy/memset runs into bulk-memory kinsn calls",
+        aliases: &["bulk_mem"],
+        make: || Box::new(BulkMemoryPass),
     },
     PassRegistryEntry {
         name: "rotate",

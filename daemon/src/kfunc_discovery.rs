@@ -18,10 +18,13 @@ use crate::pass::KinsnRegistry;
 
 /// A kinsn target we want to discover:
 /// (registry_key, function_name, module_name).
+const BULK_MEMORY_MODULE: &str = "bpf_bulk_memory";
 const KNOWN_KINSNS: &[(&str, &str, &str)] = &[
     ("bpf_rotate64", "bpf_rotate64", "bpf_rotate"),
     ("bpf_select64", "bpf_select64", "bpf_select"),
     ("bpf_extract64", "bpf_extract64", "bpf_extract"),
+    ("bpf_memcpy_bulk", "bpf_memcpy_bulk", BULK_MEMORY_MODULE),
+    ("bpf_memset_bulk", "bpf_memset_bulk", BULK_MEMORY_MODULE),
     ("bpf_endian_load16", "bpf_endian_load16", "bpf_endian"),
     ("bpf_endian_load32", "bpf_endian_load32", "bpf_endian"),
     ("bpf_endian_load64", "bpf_endian_load64", "bpf_endian"),
@@ -316,6 +319,8 @@ pub fn discover_kinsns() -> DiscoveryResult {
         rotate64_btf_id: -1,
         select64_btf_id: -1,
         extract64_btf_id: -1,
+        memcpy_bulk_btf_id: -1,
+        memset_bulk_btf_id: -1,
         endian_load16_btf_id: -1,
         endian_load32_btf_id: -1,
         endian_load64_btf_id: -1,
@@ -417,6 +422,8 @@ pub fn discover_kinsns() -> DiscoveryResult {
             "bpf_rotate64" => registry.rotate64_btf_id = btf_id,
             "bpf_select64" => registry.select64_btf_id = btf_id,
             "bpf_extract64" => registry.extract64_btf_id = btf_id,
+            "bpf_memcpy_bulk" => registry.memcpy_bulk_btf_id = btf_id,
+            "bpf_memset_bulk" => registry.memset_bulk_btf_id = btf_id,
             "bpf_endian_load16" => registry.endian_load16_btf_id = btf_id,
             "bpf_endian_load32" => registry.endian_load32_btf_id = btf_id,
             "bpf_endian_load64" => registry.endian_load64_btf_id = btf_id,
@@ -565,6 +572,20 @@ mod tests {
     }
 
     #[test]
+    fn test_known_kinsns_include_bulk_memory_targets() {
+        assert!(KNOWN_KINSNS
+            .iter()
+            .any(|&(key, func, module)| key == "bpf_memcpy_bulk"
+                && func == "bpf_memcpy_bulk"
+                && module == BULK_MEMORY_MODULE));
+        assert!(KNOWN_KINSNS
+            .iter()
+            .any(|&(key, func, module)| key == "bpf_memset_bulk"
+                && func == "bpf_memset_bulk"
+                && module == BULK_MEMORY_MODULE));
+    }
+
+    #[test]
     fn test_discover_kinsns_no_modules_loaded() {
         // On a host without kinsn modules, discovery should return all -1 IDs.
         // This test runs on any machine — if modules happen to be loaded, that's OK too.
@@ -573,6 +594,8 @@ mod tests {
         assert!(result.registry.rotate64_btf_id == -1 || result.registry.rotate64_btf_id > 0);
         assert!(result.registry.select64_btf_id == -1 || result.registry.select64_btf_id > 0);
         assert!(result.registry.extract64_btf_id == -1 || result.registry.extract64_btf_id > 0);
+        assert!(result.registry.memcpy_bulk_btf_id == -1 || result.registry.memcpy_bulk_btf_id > 0);
+        assert!(result.registry.memset_bulk_btf_id == -1 || result.registry.memset_bulk_btf_id > 0);
     }
 
     #[test]

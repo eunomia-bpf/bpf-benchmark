@@ -337,6 +337,8 @@ pub struct KinsnRegistry {
     pub rotate64_btf_id: i32,
     pub select64_btf_id: i32,
     pub extract64_btf_id: i32,
+    pub memcpy_bulk_btf_id: i32,
+    pub memset_bulk_btf_id: i32,
     pub endian_load16_btf_id: i32,
     pub endian_load32_btf_id: i32,
     pub endian_load64_btf_id: i32,
@@ -361,11 +363,13 @@ impl KinsnRegistry {
         }
     }
 
-    fn btf_id_for_target_name(&self, target_name: &str) -> i32 {
+    pub fn btf_id_for_target_name(&self, target_name: &str) -> i32 {
         match target_name {
             "bpf_rotate64" => self.rotate64_btf_id,
             "bpf_select64" => self.select64_btf_id,
             "bpf_extract64" => self.extract64_btf_id,
+            "bpf_memcpy_bulk" => self.memcpy_bulk_btf_id,
+            "bpf_memset_bulk" => self.memset_bulk_btf_id,
             "bpf_endian_load16" => self.endian_load16_btf_id,
             "bpf_endian_load32" => self.endian_load32_btf_id,
             "bpf_endian_load64" => self.endian_load64_btf_id,
@@ -374,10 +378,14 @@ impl KinsnRegistry {
         }
     }
 
+    pub fn btf_fd_for_target_name(&self, target_name: &str) -> Option<i32> {
+        self.target_btf_fds.get(target_name).copied()
+    }
+
     /// Return the BTF FD required by a given pass's kinsn target.
     pub fn btf_fd_for_pass(&self, pass_name: &str) -> Option<i32> {
         let target_name = Self::target_name_for_pass(pass_name)?;
-        self.target_btf_fds.get(target_name).copied()
+        self.btf_fd_for_target_name(target_name)
     }
 
     pub fn supported_encodings_for_target_name(&self, target_name: &str) -> u32 {
@@ -757,6 +765,8 @@ impl PassContext {
                 rotate64_btf_id: -1,
                 select64_btf_id: -1,
                 extract64_btf_id: -1,
+                memcpy_bulk_btf_id: -1,
+                memset_bulk_btf_id: -1,
                 endian_load16_btf_id: -1,
                 endian_load32_btf_id: -1,
                 endian_load64_btf_id: -1,
@@ -1311,6 +1321,8 @@ mod tests {
         let ctx = PassContext::test_default();
         assert_eq!(ctx.kinsn_registry.rotate64_btf_id, -1);
         assert_eq!(ctx.kinsn_registry.select64_btf_id, -1);
+        assert_eq!(ctx.kinsn_registry.memcpy_bulk_btf_id, -1);
+        assert_eq!(ctx.kinsn_registry.memset_bulk_btf_id, -1);
         assert!(!ctx.platform.has_bmi1);
         assert!(ctx.policy.enabled_passes.is_empty());
         assert!(ctx.policy.disabled_passes.is_empty());
@@ -1323,6 +1335,8 @@ mod tests {
                 rotate64_btf_id: 1234,
                 select64_btf_id: -1,
                 extract64_btf_id: -1,
+                memcpy_bulk_btf_id: -1,
+                memset_bulk_btf_id: -1,
                 endian_load16_btf_id: -1,
                 endian_load32_btf_id: -1,
                 endian_load64_btf_id: -1,
@@ -1357,6 +1371,8 @@ mod tests {
             rotate64_btf_id: 10,
             select64_btf_id: 20,
             extract64_btf_id: 30,
+            memcpy_bulk_btf_id: -1,
+            memset_bulk_btf_id: -1,
             endian_load16_btf_id: -1,
             endian_load32_btf_id: -1,
             endian_load64_btf_id: -1,
@@ -1379,6 +1395,8 @@ mod tests {
             rotate64_btf_id: 10,
             select64_btf_id: 20,
             extract64_btf_id: -1,
+            memcpy_bulk_btf_id: -1,
+            memset_bulk_btf_id: -1,
             endian_load16_btf_id: -1,
             endian_load32_btf_id: -1,
             endian_load64_btf_id: -1,
@@ -1401,6 +1419,8 @@ mod tests {
             rotate64_btf_id: 10,
             select64_btf_id: 20,
             extract64_btf_id: -1,
+            memcpy_bulk_btf_id: -1,
+            memset_bulk_btf_id: -1,
             endian_load16_btf_id: -1,
             endian_load32_btf_id: -1,
             endian_load64_btf_id: -1,
