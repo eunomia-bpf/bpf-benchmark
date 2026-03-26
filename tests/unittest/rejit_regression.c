@@ -651,6 +651,173 @@ static void test_concurrent_rejit_and_run(void)
 }
 
 /* ================================================================== */
+/*  Test 6: Parallel REJIT of progs with subprogs (kallsyms double-  */
+/*          delete crash)                                             */
+/* ================================================================== */
+
+/*
+ * BPF program with a bpf2bpf subprog call.  This forces the kernel to
+ * create real_func_cnt > 0 via jit_subprogs(), which registers per-subprog
+ * kallsyms entries.
+ *
+ * Layout:
+ *   [0] main:  call subprog (PC-relative, offset +1 → insn 2)
+ *   [1]        exit
+ *   [2] sub:   r0 = XDP_PASS
+ *   [3]        exit
+ *
+ * The BPF_PSEUDO_CALL encoding uses src_reg=1 and imm=relative offset
+ * from the *next* instruction.
+ */
+#define BPF_PSEUDO_CALL 1
+
+static const struct bpf_insn prog_with_subprog[] = {
+	/* main: call subprog at PC+2 (imm = offset from next insn = +1) */
+	{ .code = BPF_JMP | BPF_CALL, .src_reg = BPF_PSEUDO_CALL,
+	  .imm = 1 },
+	/* main: exit */
+	{ .code = BPF_JMP | BPF_EXIT },
+	/* subprog: r0 = XDP_PASS (2) */
+	{ .code = BPF_ALU64 | BPF_MOV | BPF_K, .dst_reg = BPF_REG_0,
+	  .imm = XDP_PASS },
+	/* subprog: exit */
+	{ .code = BPF_JMP | BPF_EXIT },
+};
+
+/* Alternate version: subprog returns XDP_DROP */
+static const struct bpf_insn prog_with_subprog_drop[] = {
+	{ .code = BPF_JMP | BPF_CALL, .src_reg = BPF_PSEUDO_CALL,
+	  .imm = 1 },
+	{ .code = BPF_JMP | BPF_EXIT },
+	{ .code = BPF_ALU64 | BPF_MOV | BPF_K, .dst_reg = BPF_REG_0,
+	  .imm = XDP_DROP },
+	{ .code = BPF_JMP | BPF_EXIT },
+};
+
+#define PARALLEL_SUBPROG_PROGS   8
+#define PARALLEL_SUBPROG_REJITS  20
+
+struct subprog_thread_args {
+	int prog_fd;
+	int thread_id;
+	int success_count;
+	int error;
+};
+
+static void *subprog_rejit_worker(void *arg)
+{
+	struct subprog_thread_args *a = arg;
+	char log_buf[65536];
+	int i;
+
+	a->success_count = 0;
+	a->error = 0;
+
+	for (i = 0; i < PARALLEL_SUBPROG_REJITS; i++) {
+		const struct bpf_insn *insns;
+		__u32 cnt;
+
+		if (i % 2 == 0) {
+			insns = prog_with_subprog_drop;
+			cnt = ARRAY_SIZE(prog_with_subprog_drop);
+		} else {
+			insns = prog_with_subprog;
+			cnt = ARRAY_SIZE(prog_with_subprog);
+		}
+
+		memset(log_buf, 0, sizeof(log_buf));
+		if (rejit_prog(a->prog_fd, insns, cnt,
+			       log_buf, sizeof(log_buf)) < 0) {
+			/* Some failures expected under contention; not fatal */
+			continue;
+		}
+		a->success_count++;
+	}
+
+	return NULL;
+}
+
+static void test_parallel_subprog_rejit(void)
+{
+	const char *name = "parallel_subprog_rejit (fix 6: kallsyms double-delete)";
+	int prog_fds[PARALLEL_SUBPROG_PROGS];
+	pthread_t threads[PARALLEL_SUBPROG_PROGS];
+	struct subprog_thread_args args[PARALLEL_SUBPROG_PROGS];
+	char log_buf[65536];
+	int i, total_success = 0;
+
+	/*
+	 * Load N distinct progs with subprogs, then REJIT them all in
+	 * parallel.  The bug is in bpf_prog_rejit_swap(): after
+	 * bpf_prog_kallsyms_del_all(prog) poisons the subprog ksym
+	 * list nodes, the func[] swap moves those poisoned nodes to
+	 * tmp, and __bpf_prog_put_noref(tmp) tries to delete them
+	 * again → GPF on LIST_POISON2.
+	 *
+	 * With N progs × M REJITs, this reliably triggers the crash
+	 * if the kernel has the bug.
+	 */
+
+	for (i = 0; i < PARALLEL_SUBPROG_PROGS; i++) {
+		memset(log_buf, 0, sizeof(log_buf));
+		prog_fds[i] = load_xdp_prog(prog_with_subprog,
+					     ARRAY_SIZE(prog_with_subprog),
+					     log_buf, sizeof(log_buf));
+		if (prog_fds[i] < 0) {
+			char msg[256];
+			snprintf(msg, sizeof(msg),
+				 "load prog %d with subprog failed: %s (log: %.200s)",
+				 i, strerror(errno), log_buf);
+			TEST_FAIL(name, msg);
+			while (--i >= 0)
+				close(prog_fds[i]);
+			return;
+		}
+	}
+
+	/* Launch parallel REJIT threads */
+	for (i = 0; i < PARALLEL_SUBPROG_PROGS; i++) {
+		args[i].prog_fd = prog_fds[i];
+		args[i].thread_id = i;
+		if (pthread_create(&threads[i], NULL, subprog_rejit_worker,
+				   &args[i]) != 0) {
+			TEST_FAIL(name, "pthread_create failed");
+			goto cleanup;
+		}
+	}
+
+	for (i = 0; i < PARALLEL_SUBPROG_PROGS; i++)
+		pthread_join(threads[i], NULL);
+
+	/* Verify all progs still functional */
+	for (i = 0; i < PARALLEL_SUBPROG_PROGS; i++) {
+		__u32 retval = 0;
+		if (test_run_xdp(prog_fds[i], 1, &retval, NULL) < 0) {
+			char msg[256];
+			snprintf(msg, sizeof(msg),
+				 "prog %d not runnable after parallel REJIT", i);
+			TEST_FAIL(name, msg);
+			goto cleanup;
+		}
+		total_success += args[i].success_count;
+	}
+
+	if (total_success == 0) {
+		TEST_FAIL(name, "no REJIT succeeded");
+		goto cleanup;
+	}
+
+	printf("    (%d/%d subprog REJITs succeeded across %d progs)\n",
+	       total_success, PARALLEL_SUBPROG_PROGS * PARALLEL_SUBPROG_REJITS,
+	       PARALLEL_SUBPROG_PROGS);
+	TEST_PASS(name);
+
+cleanup:
+	for (i = 0; i < PARALLEL_SUBPROG_PROGS; i++)
+		close(prog_fds[i]);
+}
+
+/* ================================================================== */
 /*  Main                                                              */
 /* ================================================================== */
 
@@ -663,6 +830,7 @@ int main(void)
 	test_rapid_rejit_kallsyms();
 	test_xdp_test_run_rejit();
 	test_concurrent_rejit_and_run();
+	test_parallel_subprog_rejit();
 
 	printf("\n=== Results: %d passed, %d failed ===\n", g_pass, g_fail);
 
