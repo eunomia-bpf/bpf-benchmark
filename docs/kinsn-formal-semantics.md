@@ -73,6 +73,15 @@ over `(PC, R, M)` that starts at the beginning of the proof sequence and
 terminates when `PC` advances past its end. We take this as given from the
 kernel BPF specification and do not re-derive it here.
 
+`Exec_BPF` is a partial function: memory-accessing instructions (e.g.,
+`BPF_LDX_MEM` in `endian_load` proof sequences) are only defined when the
+verifier's abstract state proves the access is safe (valid pointer kind,
+in-bounds offset, correct alignment). We write `VerifierSafe(σ, site)` for the
+predicate "the verifier abstract state `σ` at `site` proves all memory accesses
+in the proof sequence are legal." This condition is established by the standard
+verifier analysis on the lowered program and is a precondition for both the
+proof semantics and the local refinement below.
+
 This is the semantics the verifier actually reasons about after
 `lower_kinsn_proof_regions()`.
 
@@ -104,10 +113,24 @@ with payload `p` is a correct local refinement when:
 π_s(Exec_a(Emit_K^a(p), (R, M))) = π_s(Exec_BPF(Inst_K(p), (R, M)))
 ```
 
-for every initial state `(R, M)` satisfying both:
+for every initial state `(R, M)` satisfying:
 
-- `Valid_K(p)` — payload well-formedness (checked by the module decoder)
-- `Admissible_K^a(s, p)` — site conditions required for native emit
+1. `Valid_K(p)` — payload well-formedness (checked by the module decoder)
+2. `Admissible_K^a(s, p)` — site conditions required for native emit
+3. `VerifierSafe(σ, s)` — the verifier abstract state proves all proof-sequence
+   memory accesses are safe (only relevant for memory-accessing instances like
+   `endian_load`)
+
+**Implementation assumptions.** The local refinement definition implicitly
+requires:
+
+- **Emit purity**: `emit_x86(p, prog)` and `emit_arm64(p, prog)` are
+  deterministic pure functions of `(p, prog)`. All current in-tree callbacks
+  ignore the `prog` argument and depend only on the payload. This ensures the
+  sizing pass and emit pass produce identical code lengths.
+- **Proof-sequence locality**: current proof sequences do not use stack writes,
+  function calls, or global memory writes; they only compute on registers (and
+  read memory for `endian_load`).
 
 Each in-tree instance thus has three formal pieces:
 
@@ -116,31 +139,70 @@ Each in-tree instance thus has three formal pieces:
 - `Admissible_K^a(s, p)`: extra conditions the daemon rewrite pipeline enforces
   before emitting a kinsn site (not checked by the kernel verifier)
 
-### 1.5 Whole-program refinement
+### 1.5 Program phases and whole-program refinement
 
-**Theorem (Whole-Program Refinement).** Let `P` be a BPF program accepted by
-the verifier after proof lowering, containing kinsn sites `s_1, …, s_n`. If
-for every site `s_i = (K_i, p_i)`:
-
-1. `Valid_{K_i}(p_i)` holds (payload well-formed),
-2. `Admissible_{K_i}^a(s_i, p_i)` holds (site conditions enforced by daemon),
-3. local refinement holds for `(K_i, p_i, s_i)`,
-
-then the JIT-compiled program `P_jit` and the verified lowered program `P_low`
-produce the same observable result:
+The verifier/JIT pipeline transforms a program through several phases. Using
+the same names as the implementation:
 
 ```text
-P_jit(s_0)|_{r0, M} = P_low(s_0)|_{r0, M}
+P_src       original program with sidecar + BPF_PSEUDO_KINSN_CALL pairs
+    │  lower_kinsn_proof_regions()
+    ▼
+P_low       proof sequences substituted; this is what the verifier analyzes
+    │  verifier analysis (CFG, liveness, abstract interpretation)
+    ▼
+P_low_ok    verified: all proof sequences are safe
+    │  restore_kinsn_proof_regions()
+    ▼
+P_restored  original sidecar + kinsn_call pairs restored
+    │  do_misc_fixups()
+    ▼
+P_fix       sites with native emit retained; sites without → lowered to BPF
+    │  arch JIT
+    ▼
+P_jit       native machine code; kinsn sites compiled via emit callbacks
 ```
 
-for all initial states `s_0` in the verifier-accepted domain.
+**Scope.** This formalization proves that `P_jit` refines `P_low` — that is,
+native emit at each kinsn site produces the same observable result as the
+proof sequence the verifier analyzed. It does **not** prove that the daemon's
+rewrite from an original BPF idiom to a kinsn site is semantics-preserving;
+that is a separate engineering argument in the daemon rewrite passes.
 
-**Proof sketch.** kinsn sites are non-overlapping, single-entry single-exit
-regions in a program whose proof sequences contain no backward jumps (enforced
-by `validate_kinsn_proof_seq()`). Each site's replacement preserves state on
-`LiveOut(s_i)`, which is exactly what downstream code depends on. By structural
-induction on the program's topological order, local refinement at each site
-lifts to whole-program observational equivalence at program exit.
+**Theorem (Whole-Program Refinement).** Let `P_low` be the lowered program
+accepted by the verifier, containing `n` proof-sequence regions corresponding
+to kinsn sites `s_1, …, s_n` in `P_src`. Let `P_jit` be the JIT-compiled
+program where each retained site uses native emit. If for every site
+`s_i = (K_i, p_i)`:
+
+1. `Valid_{K_i}(p_i)` holds,
+2. `Admissible_{K_i}^a(s_i, p_i)` holds,
+3. `VerifierSafe(σ_i, s_i)` holds (for memory-accessing instances),
+4. local refinement holds for `(K_i, p_i, s_i)`,
+
+then for all initial states accepted by the verifier:
+
+```text
+Exec(P_jit, σ_0)|_{r0, M} = Exec(P_low, σ_0)|_{r0, M}
+```
+
+**Proof sketch.** We argue by trace simulation on execution steps, not by
+structural induction on a topological order (BPF programs may contain bounded
+loops, so kinsn sites can execute more than once).
+
+Consider an execution trace `τ` of `P_low`. Each time the trace enters a
+proof-sequence region for site `s_i`, it executes the instantiated BPF
+instructions and exits with state `(R', M')`. In `P_jit`, the same trace
+position instead executes `Emit_{K_i}^a(p_i)`. By local refinement (§1.4),
+the two executions agree on `π_{s_i}(R', M')` — that is, on every register
+in `LiveOut(s_i)` and on all of `M`.
+
+Between kinsn sites, `P_jit` and `P_low` execute identical BPF instructions,
+so their states remain synchronized. Since kinsn sites are non-overlapping and
+single-entry single-exit (no backward jumps within a proof sequence, enforced
+by `validate_kinsn_proof_seq()`), every inter-site segment sees identical
+input state. By induction on the number of site entries in the trace, the
+final program state agrees on `{r0} ∪ M`.
 
 ### 1.6 Failure modes
 
@@ -151,10 +213,24 @@ The current tree handles failures as follows:
 |---------|-------|-------------|
 | `instantiate_insn` returns error | `lower_kinsn_proof_regions()` | Verifier rejects the program |
 | Native emit callback missing for arch | `do_misc_fixups()` | Transparent fallback: site rewritten to instantiated BPF |
-| Native emit returns error at JIT time | JIT compilation | JIT fails; kernel falls back to BPF interpreter on the lowered program |
+| Native emit returns error at JIT time | JIT compilation | JIT compilation fails; program is rejected |
 
-In all failure cases the system either rejects the program or falls back to the
-verified proof sequence. No unverified native code is ever executed.
+**Important:** the BPF interpreter does not understand `BPF_PSEUDO_KINSN_CALL`.
+After `restore_kinsn_proof_regions()`, the program contains raw kinsn encodings
+that only the arch JIT can execute. There is no late interpreter fallback for
+kinsn programs. If JIT compilation fails for a program with retained kinsn
+sites, the program cannot run — it is rejected at load time. This is enforced
+by requiring `jit_requested` for programs containing kinsn sites.
+
+The `do_misc_fixups()` path provides the only safe fallback: if no native emit
+callback exists for the running architecture, the site is rewritten back to
+instantiated BPF before JIT, so the resulting program contains only ordinary
+BPF instructions.
+
+**Two-pass consistency.** The arch JIT calls emit callbacks twice: once for
+sizing (`emit = false`) and once for code generation (`emit = true`). The emit
+purity assumption (§1.4) ensures both passes produce the same code length.
+Current in-tree callbacks are deterministic functions of `payload` alone.
 
 ## 2. Instance Set
 
@@ -229,16 +305,17 @@ Abs_rotate(dst, src, s)(R, M) =
 Admissibility required by the current rewrite path:
 
 ```text
-tmp notin LiveOut(site)
+shift = 0  OR  tmp notin LiveOut(site)
 ```
 
 Reason:
 
-- the proof sequence clobbers `tmp`
-- current x86 and arm64 native emitters compute the rotate directly and do not
-  write `tmp`
-- the daemon `rotate` pass explicitly checks this liveness condition before
-  rewriting
+- when `shift ≠ 0`, the proof sequence clobbers `tmp` with `R[src] >> (64 - shift)`,
+  but the native emitters compute the rotate directly without writing `tmp`
+- when `shift = 0`, neither the proof sequence nor the native emitters write `tmp`
+  (both reduce to `MOV dst, src`), so the `LiveOut` condition is not needed
+- the daemon `rotate` pass only matches `shift ≠ 0` idioms in practice, so it
+  always checks `tmp ∉ LiveOut(site)` before rewriting
 
 So `rotate64` is formalized as:
 
@@ -372,6 +449,13 @@ dst, base in {r0, ..., r10}
 
 Let `addr = R[base] + offset`.
 
+**Memory safety precondition.** The proof sequence contains a `BPF_LDX_MEM`
+instruction. `load_n(M, addr)` is only defined when the verifier abstract state
+proves: `R[base]` is a valid pointer kind (stack, map value, packet, etc.),
+`addr` is within bounds, and the access size and alignment are legal. This is
+captured by `VerifierSafe(σ, site)` (§1.2) and is a precondition for both the
+proof semantics and the local refinement.
+
 Let `load_n(M, addr)` be the value produced by the corresponding BPF
 `LDX_MEM(size, dst, base, offset)` instruction, and let `bswap_n` be the BPF
 byte-swap on `n` bits, zero-extended to 64 bits.
@@ -440,52 +524,56 @@ That is why the proof object is a no-op while the native emit is still useful.
 
 ## 4. What This Formalization Says About the Current System
 
-### 4.1 kinsn is best modeled as a tuple
+### 4.1 Three layers of correctness
 
-For the current tree, the clean formal object is:
+The full correctness story has three distinct layers. This formalization only
+addresses layer (c):
 
-```text
-K = (Valid, Proof, Emit_x86, Emit_arm64, Admissible_x86, Admissible_arm64)
-```
+| Layer | Claim | Status |
+|-------|-------|--------|
+| (a) Rewrite soundness | Daemon rewrite from BPF idiom to kinsn site preserves program semantics | Engineering argument in daemon passes; not formally modeled here |
+| (b) Proof-sequence safety | Verifier accepts the lowered proof sequence, proving memory safety and type safety | Inherited from the standard BPF verifier; not re-proved here |
+| (c) Native refinement | JIT native emit refines the verified proof sequence on observable state | **This is what the Whole-Program Refinement theorem (§1.5) proves** |
 
-not just a single pure state transformer.
+If all three hold, the end-to-end guarantee is: the JIT'd program with native
+kinsn emit behaves identically to the original BPF program on all observable
+state. But the formal model only covers (c); (a) and (b) are trusted.
 
-This is because the current system combines:
+### 4.2 Trusted computing base
 
-- a proof object used by the verifier
-- an architecture-specific implementation object
-- site-side rewrite obligations supplied by the daemon
+The system's TCB is not self-contained within the kernel verifier. The
+Whole-Program Refinement theorem's preconditions are discharged by different
+components:
 
-The Whole-Program Refinement theorem (§1.5) ties these pieces together: given
-payload validity, site admissibility, and per-site local refinement, the
-JIT-compiled program is observationally equivalent to the verified lowered
-program.
+| Obligation | Enforced by | In TCB? |
+|------------|-------------|---------|
+| Proof-sequence structural safety | Kernel (`validate_kinsn_proof_seq`) | Yes |
+| Proof-sequence semantic safety | Kernel (standard verifier on lowered program) | Yes |
+| Payload validity (`Valid_K`) | Kernel module decoder | Yes |
+| Emit purity and determinism | Implementation convention (not dynamically checked) | Yes |
+| Site admissibility (`Admissible_K^a`) | **Daemon rewrite passes** | **Yes** |
+| Rewrite soundness (layer a) | **Daemon rewrite passes** | **Yes** |
 
-### 4.2 Split responsibility: kernel verifier + daemon
+The daemon is in the TCB. If a daemon rewrite pass emits a kinsn site where
+`Admissible` does not hold (e.g., `rotate64` with `tmp ∈ LiveOut(site)`), the
+native emit may produce a semantically incorrect result. The kernel verifier
+does **not** re-check admissibility conditions after REJIT.
 
-The correctness argument is not self-contained within the kernel. The current
-system distributes obligations across two trust boundaries:
+However, a daemon bug cannot cause a kernel crash through kinsn alone: native
+emit callbacks can only write to the JIT image buffer, not to arbitrary kernel
+memory. The worst case is a semantically incorrect BPF program, not a kernel
+exploit. (This assumes the module emit callbacks themselves are correct kernel
+code.)
 
-| Obligation | Enforced by |
-|------------|-------------|
-| Proof-sequence structural safety | Kernel (`validate_kinsn_proof_seq`) |
-| Proof-sequence semantic safety | Kernel (standard verifier analysis on lowered program) |
-| Payload validity (`Valid_K`) | Kernel module decoder |
-| Site admissibility (`Admissible_K^a`) | Daemon rewrite passes |
+Concrete admissibility conditions:
 
-Concrete admissibility conditions enforced by the daemon or the kernel emit:
-
-- `rotate64`: `tmp ∉ LiveOut(site)` — the proof sequence clobbers `tmp` but
-  native ROL does not
+- `rotate64`: `shift = 0 ∨ tmp ∉ LiveOut(site)` — proof sequence clobbers
+  `tmp` but native ROL does not
 - `select64` on x86: `TEST cond` must execute before any `MOV dst` that could
-  alias `cond` — enforced by the emit ordering in `emit_select_x86`
+  alias `cond` — enforced by emit ordering in `emit_select_x86`
 - `endian_load*` on arm64: offset must be in the native emitter's direct
   encoding domain, or the daemon must first materialize an adjusted base with
   offset zero
-
-This split does not weaken the correctness guarantee: the Whole-Program
-Refinement theorem holds regardless of *where* each predicate is checked, as
-long as all predicates hold at JIT time.
 
 ### 4.3 Barrier: native emit is strictly stronger than proof
 
@@ -505,3 +593,26 @@ Local refinement still holds because identity is trivially refined by any
 state-preserving transformation. The extra fence guarantee is a bonus that the
 formal model acknowledges but does not attempt to encode in the BPF state
 model.
+
+**Scope limitation.** The formal model only claims architectural state
+preservation for `speculation_barrier`. Any Spectre-style security argument
+requires a microarchitectural execution model that this formalization does
+not provide.
+
+### 4.4 What this formalization is and is not
+
+This is a **semi-formal specification with a proof sketch** — not a
+mechanically verified proof. It is closer to the style of Jitk (OSDI '14)
+§3's pen-and-paper argument than to CertiKOS or seL4's Coq/Isabelle proofs.
+
+What it provides:
+
+- precise per-instance semantics cross-referenced against module source code
+- a clear statement of what "native emit refines proof sequence" means
+- an explicit enumeration of trusted assumptions and TCB components
+
+What it does not provide:
+
+- a machine-checked proof
+- a formal model of the BPF verifier's abstract state
+- a formal proof of daemon rewrite soundness (layer a)
