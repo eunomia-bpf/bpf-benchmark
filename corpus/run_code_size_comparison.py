@@ -1059,7 +1059,7 @@ def build_markdown(payload: dict[str, Any]) -> str:
             "",
             "- The harness enumerates programs with `micro_exec list-programs`, then runs `run-kernel --compile-only` to measure stock kernel JIT compilation time.",
             "- Program-type grouping refines generic libbpf `prog_type_name` using section roots so `fentry`, `fexit`, `lsm`, `raw_tracepoint`, and `sched_cls` remain separate buckets.",
-            "- When the older `corpus/expanded_corpus` and `corpus/objects` paths are absent, the harness falls back to the current canonical `corpus/build` tree from `corpus/config/corpus_manifest.yaml`.",
+            "- When no explicit build report is provided, the harness falls back to the current canonical `corpus/build` tree.",
         ]
     )
     if summary["support_status"] != "supported":

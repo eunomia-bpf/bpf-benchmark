@@ -1,10 +1,5 @@
 suite_name: macro_corpus
 
-corpus:
-  manifest: runner/repos.yaml
-  local_repos: runner/repos
-  inventory: runner/inventory.json
-
 defaults:
   iterations: 3
   warmups: 1

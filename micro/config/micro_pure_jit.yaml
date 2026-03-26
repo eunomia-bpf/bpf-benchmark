@@ -624,11 +624,11 @@ benchmarks:
     tags: [compute, code-size, straight-line, pure-jit]
 
   - name: rotate64_hash
-    description: SipHash-like hash using 64-bit rotations for ROTATE directive coverage
+    description: SipHash-like hash using 64-bit rotations to stress the ROTATE rewrite
     category: alu-mix
     family: rotate-hash
     level: siphash-64
-    hypothesis: Dense 64-bit rotations should exercise the 4-insn rotate JIT directive pattern
+    hypothesis: Dense 64-bit rotations should exercise the 4-insn rotate rewrite pattern
     base_name: rotate64_hash
     kernel_input_size: 64
     input_generator: rotate64_hash

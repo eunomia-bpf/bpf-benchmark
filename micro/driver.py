@@ -377,7 +377,7 @@ def build_run_metadata(
     metadata = summarize_benchmark_results(results)
     metadata["run_type"] = run_type
     metadata["output_hint"] = repo_relative_path(output_hint)
-    metadata["paper_summary"]["daemon_debug_entries"] = daemon_debug_entries
+    metadata["optimization_summary"]["daemon_debug_entries"] = daemon_debug_entries
     return metadata
 
 

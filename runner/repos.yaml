@@ -133,7 +133,7 @@ repos:
       - .
       - client/internal/ebpf/ebpf/src
     forced_includes:
-      - /usr/include/linux/types.h
+      - vendor/linux-framework/tools/include/linux/types.h
       - corpus/include/netbird_legacy_bpf_map_def.h
 
   - name: systemd
@@ -161,7 +161,7 @@ repos:
       - src/core/bpf/restrict-ifaces
       - src/core/bpf/socket-bind
     forced_includes:
-      - /usr/include/linux/types.h
+      - vendor/linux-framework/tools/include/linux/types.h
 
   - name: KubeArmor
     url: https://github.com/kubearmor/KubeArmor.git

@@ -10,7 +10,7 @@ from typing import Any, Mapping
 
 from . import ensure_parent
 from .commands import build_runner_command
-from .results import normalize_directive_scan, parse_runner_sample
+from .results import parse_runner_sample
 
 
 def relpath(path: Path | str, root_dir: Path) -> str:
@@ -96,14 +96,6 @@ def add_max_programs_argument(
     help_text: str,
 ) -> None:
     parser.add_argument("--max-programs", type=int, help=help_text)
-
-
-def add_corpus_build_report_argument(
-    parser: argparse.ArgumentParser,
-    *,
-    help_text: str,
-) -> None:
-    parser.add_argument("--corpus-build-report", help=help_text)
 
 
 def require_minimum(value: int, minimum: int, flag: str) -> None:
@@ -468,12 +460,6 @@ def execution_plan(section_name: str, packet_path: Path, context_path: Path) -> 
     }
 
 
-def directive_scan_from_record(record: Mapping[str, Any] | None) -> dict[str, int]:
-    sample = record.get("sample") if record else None
-    scan = sample.get("directive_scan") if isinstance(sample, Mapping) else None
-    return normalize_directive_scan(scan)
-
-
 def text_invocation_summary(result: Mapping[str, Any] | None) -> dict[str, Any] | None:
     if result is None:
         return None
@@ -537,7 +523,6 @@ def summarize_failure_reason(record: Mapping[str, Any] | None) -> str:
 
 
 __all__ = [
-    "add_corpus_build_report_argument",
     "add_filter_argument",
     "add_max_programs_argument",
     "add_output_json_argument",
@@ -546,7 +531,6 @@ __all__ = [
     "add_runner_argument",
     "add_daemon_argument",
     "add_timeout_argument",
-    "directive_scan_from_record",
     "ensure_parent",
     "execution_plan",
     "extract_error",

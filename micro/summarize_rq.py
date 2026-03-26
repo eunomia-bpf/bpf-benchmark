@@ -44,14 +44,6 @@ def default_results_path() -> Path:
     return first_existing_path(default_results_candidates())
 
 
-def default_corpus_inventory_path() -> Path:
-    if DEFAULT_MACRO_MANIFEST.exists():
-        macro_manifest = load_manifest(DEFAULT_MACRO_MANIFEST)
-        if macro_manifest.corpus is not None and macro_manifest.corpus.inventory is not None:
-            return macro_manifest.corpus.inventory
-    return REPO_ROOT / "corpus" / "inventory.json"
-
-
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Summarize micro benchmark results against the active RQs.")
     parser.add_argument(
@@ -65,8 +57,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--corpus",
-        default=str(default_corpus_inventory_path()),
-        help="Path to a corpus inventory JSON file.",
+        help="Optional path to a corpus summary JSON file.",
     )
     parser.add_argument(
         "--corpus-manifest",
@@ -104,7 +95,7 @@ def main() -> int:
     if args.manifest:
         manifest = load_manifest(Path(args.manifest).resolve())
     else:
-        manifest = load_manifest_from_results(results, fallback=DEFAULT_MICRO_MANIFEST)
+        manifest = load_manifest_from_results(results)
 
     report = render_rq_summary_markdown(
         results,
@@ -113,8 +104,8 @@ def main() -> int:
         bootstrap_seed=args.bootstrap_seed,
     )
 
-    corpus_path = Path(args.corpus).resolve()
-    if corpus_path.exists():
+    if args.corpus:
+        corpus_path = Path(args.corpus).resolve()
         corpus_manifest = None
         if args.corpus_manifest:
             corpus_manifest_path = Path(args.corpus_manifest).resolve()

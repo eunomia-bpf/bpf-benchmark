@@ -5,7 +5,7 @@
  *
  * Uses micro_rotl64() exclusively in the hot path so clang emits
  * the clean 4-insn rotate pattern (mov+lsh+rsh+or) without masking.
- * This exercises the ROTATE directive's 4-insn variant.
+ * This exercises the ROTATE rewrite's 4-insn variant.
  *
  * Input: 8 u64 words (64 bytes) from the packet payload.
  * Output: 64-bit hash result.

@@ -613,7 +613,7 @@ class scoped_fd {
     int fd_ = -1;
 };
 
-struct prog_load_attr_with_directives {
+struct prog_load_attr {
     __u32 prog_type;
     __u32 insn_cnt;
     __aligned_u64 insns;
@@ -1215,7 +1215,7 @@ void write_full_or_fail(int fd, const uint8_t *data, size_t size)
             if (errno == EINTR) {
                 continue;
             }
-            fail("unable to write directive memfd: " + std::string(strerror(errno)));
+            fail("unable to write memfd: " + std::string(strerror(errno)));
         }
         written += static_cast<size_t>(rc);
     }
@@ -1360,7 +1360,7 @@ int manual_bpf_prog_load(program_image &image)
         fail("program image does not contain aligned BPF instructions");
     }
 
-    prog_load_attr_with_directives attr = {};
+    prog_load_attr attr = {};
     attr.prog_type = image.prog_type;
     attr.expected_attach_type = image.expected_attach_type;
     attr.insn_cnt = static_cast<__u32>(image.code.size() / sizeof(bpf_insn));

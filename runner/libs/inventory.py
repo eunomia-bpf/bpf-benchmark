@@ -8,11 +8,6 @@ from typing import Iterable, Mapping
 
 from elftools.elf.elffile import ELFFile
 
-try:
-    from . import authoritative_candidates
-except ImportError:
-    from runner.libs import authoritative_candidates
-
 from .commands import build_list_programs_command
 from .results import parse_last_json_line
 
@@ -79,13 +74,9 @@ def discover_object_programs(
 def load_corpus_paths_from_build_report(report_path: Path) -> tuple[list[Path], str]:
     payload = json.loads(report_path.read_text())
     summary = payload.get("summary") or {}
-    object_paths = summary.get("compiled_objects") or []
-    if not object_paths:
-        object_paths = [
-            record["object_path"]
-            for record in payload.get("records", [])
-            if record.get("status") == "ok" and record.get("object_path")
-        ]
+    object_paths = summary.get("available_objects")
+    if not isinstance(object_paths, list) or not object_paths:
+        raise RuntimeError(f"invalid corpus build report schema: missing summary.available_objects in {report_path}")
 
     seen: set[Path] = set()
     resolved: list[Path] = []
@@ -123,17 +114,12 @@ def collect_corpus_object_paths(
     *,
     corpus_build_report: Path | None = None,
 ) -> tuple[list[Path], str]:
-    report_path = corpus_build_report
-    if report_path is None:
-        for candidate in authoritative_candidates(repo_root / "corpus" / "results", "expanded_corpus_build"):
-            if candidate.exists():
-                report_path = candidate
-                break
-
-    if report_path is not None and report_path.exists():
-        return load_corpus_paths_from_build_report(report_path.resolve())
-
-    return sorted((repo_root / "corpus").rglob("*.bpf.o")), "filesystem scan under `corpus/`"
+    if corpus_build_report is None:
+        raise RuntimeError("corpus_build_report is required")
+    report_path = corpus_build_report.resolve()
+    if not report_path.exists():
+        raise RuntimeError(f"corpus build report not found: {report_path}")
+    return load_corpus_paths_from_build_report(report_path)
 
 
 def discover_corpus_objects(

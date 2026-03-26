@@ -25,7 +25,7 @@ for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpu
     if candidate_str not in sys.path:
         sys.path.insert(0, candidate_str)
 
-from runner.libs import authoritative_output_path, smoke_output_path
+from runner.libs import authoritative_output_path, latest_output_path, smoke_output_path
 from runner.libs.batch_runner import run_batch_runner
 from runner.libs.machines import resolve_machine
 from runner.libs.vm import DEFAULT_VM_TARGET
@@ -45,12 +45,10 @@ from runner.libs.corpus import (
     add_runner_argument,
     add_daemon_argument,
     add_timeout_argument,
-    directive_scan_from_record,
     format_ns,
     format_ratio,
     geomean,
     markdown_table,
-    normalize_directive_scan as shared_normalize_directive_scan,
     require_minimum,
     summarize_text,
     extract_error,
@@ -69,30 +67,11 @@ DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
 DEFAULT_KERNEL_TREE = ROOT_DIR / "vendor" / "linux-framework"
 DEFAULT_KERNEL_IMAGE = DEFAULT_KERNEL_TREE / "arch" / "x86" / "boot" / "bzImage"
 DEFAULT_BTF_PATH = DEFAULT_KERNEL_TREE / "vmlinux"
+DEFAULT_CORPUS_BUILD_REPORT = latest_output_path(ROOT_DIR / "corpus" / "results", "expanded_corpus_build")
 DEFAULT_VNG_MACHINE = resolve_machine(target=DEFAULT_VM_TARGET, action="vm-corpus")
 DEFAULT_VNG = str(Path(DEFAULT_VNG_MACHINE.executable))
 DEFAULT_REPEAT = 200
 DEFAULT_TIMEOUT_SECONDS = 240
-
-
-FAMILY_FIELDS = (
-    ("cmov", "cmov_sites"),
-    ("wide", "wide_sites"),
-    ("rotate", "rotate_sites"),
-    ("lea", "lea_sites"),
-    ("extract", "bitfield_sites"),
-    ("endian", "endian_sites"),
-    ("branch-flip", "branch_flip_sites"),
-)
-FAMILY_DISPLAY_NAMES = {
-    "cmov": "CMOV",
-    "wide": "WIDE",
-    "rotate": "ROTATE",
-    "lea": "LEA",
-    "extract": "EXTRACT",
-    "endian": "ENDIAN",
-    "branch-flip": "BRANCH-FLIP",
-}
 
 
 def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -125,6 +104,11 @@ def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--btf-custom-path",
         default=str(DEFAULT_BTF_PATH),
         help="BTF path passed to guest micro_exec invocations.",
+    )
+    parser.add_argument(
+        "--corpus-build-report",
+        default=str(DEFAULT_CORPUS_BUILD_REPORT),
+        help="Strict corpus object availability report emitted by build_corpus_objects.py.",
     )
     parser.add_argument(
         "--vng",
@@ -183,7 +167,6 @@ def build_corpus_artifact_metadata(
         "output_hint_json": repo_relative_path(output_json),
         "output_hint_md": repo_relative_path(output_md),
         "summary": summary,
-        "paper_summary": summary,
         "progress": progress,
     }
     metadata.update(extra_fields)
@@ -234,13 +217,22 @@ def normalize_skip_families(values: list[str] | None) -> list[str]:
     return normalized
 
 
-def normalize_scan(scan: dict[str, Any] | None) -> dict[str, int]:
-    return shared_normalize_directive_scan(scan)
+def normalize_passes(value: Any) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return [str(item) for item in value if str(item)]
 
 
-def families_from_scan(scan: dict[str, Any] | None) -> list[str]:
-    normalized = normalize_scan(scan)
-    return [name for name, field in FAMILY_FIELDS if normalized[field] > 0]
+def merge_passes(*pass_lists: list[str]) -> list[str]:
+    merged: list[str] = []
+    seen: set[str] = set()
+    for values in pass_lists:
+        for name in values:
+            if name in seen:
+                continue
+            seen.add(name)
+            merged.append(name)
+    return merged
 
 
 def batch_text_invocation_summary(result: dict[str, Any] | None) -> dict[str, Any] | None:
@@ -370,17 +362,8 @@ def rejit_metadata(record: dict[str, Any] | None) -> dict[str, Any]:
     return (record.get("sample") or {}).get("rejit") or {}
 
 
-def effective_applied_families(
-    requested_families: list[str],
-    eligible_families: list[str],
-    applied: bool,
-) -> list[str]:
-    if not applied:
-        return []
-    if not requested_families:
-        return list(eligible_families)
-    eligible_set = set(eligible_families)
-    return [family for family in requested_families if family in eligible_set]
+def rejit_passes(record: dict[str, Any] | None) -> list[str]:
+    return normalize_passes(rejit_metadata(record).get("passes_applied"))
 
 
 def build_empty_record(target: dict[str, Any], execution_mode: str) -> dict[str, Any]:
@@ -389,8 +372,6 @@ def build_empty_record(target: dict[str, Any], execution_mode: str) -> dict[str,
         "execution_mode": execution_mode,
         "policy_path": target.get("policy_path"),
         "policy_mode": str(target.get("policy_mode", "stock")),
-        "scan_source": "yaml_manifest",
-        "daemon_counts": normalize_scan(target.get("inventory_scan")),
         "daemon_cli": None,
         "baseline_compile": None,
         "rejit_compile": None,
@@ -398,11 +379,9 @@ def build_empty_record(target: dict[str, Any], execution_mode: str) -> dict[str,
         "rejit_run": None,
         "rejit_compile_applied": False,
         "rejit_run_applied": False,
-        "eligible_families": families_from_scan(target.get("inventory_scan")),
-        "requested_families_compile": [],
-        "requested_families_run": [],
-        "applied_families_compile": [],
-        "applied_families_run": [],
+        "compile_passes_applied": [],
+        "run_passes_applied": [],
+        "applied_passes": [],
         "size_ratio": None,
         "size_delta_pct": None,
         "speedup_ratio": None,
@@ -723,30 +702,18 @@ def build_record_from_batch_results(
     blind_apply: bool,
     job_refs: Mapping[str, str],
     results_by_id: Mapping[str, dict[str, Any]],
-    ) -> dict[str, Any]:
+) -> dict[str, Any]:
     record = build_empty_record(target, execution_mode)
     policy_mode = "blind-apply-rejit" if blind_apply else "daemon-auto"
-    initial_scan = normalize_scan(target.get("inventory_scan"))
-    scan_source = "yaml_manifest"
-    daemon_counts = initial_scan
 
     baseline_compile_raw = batch_job_invocation_summary(results_by_id.get(job_refs.get("baseline_compile", "")))
     baseline_run_raw = batch_job_invocation_summary(results_by_id.get(job_refs.get("baseline_run", "")))
     rejit_compile_raw = batch_job_invocation_summary(results_by_id.get(job_refs.get("rejit_compile", "")))
     rejit_run_raw = batch_job_invocation_summary(results_by_id.get(job_refs.get("rejit_run", "")))
 
-    if baseline_compile_raw and baseline_compile_raw.get("ok"):
-        baseline_scan = directive_scan_from_record(baseline_compile_raw)
-        if baseline_scan["total_sites"] > 0:
-            daemon_counts = baseline_scan
-            scan_source = f"{execution_mode}_runner_scan"
-
     record["daemon_cli"] = None
     record["policy_path"] = None
     record["policy_mode"] = policy_mode
-    record["scan_source"] = scan_source
-    record["daemon_counts"] = daemon_counts
-    record["eligible_families"] = families_from_scan(daemon_counts)
     record["baseline_compile"] = baseline_compile_raw
     record["rejit_compile"] = rejit_compile_raw
     record["rejit_run"] = rejit_run_raw
@@ -763,17 +730,11 @@ def build_record_from_batch_results(
         record["record_error"] = "stock phase missing from batch runner output"
     record["rejit_compile_applied"] = bool((((record["rejit_compile"] or {}).get("sample") or {}).get("rejit") or {}).get("applied"))
     record["rejit_run_applied"] = bool((((record["rejit_run"] or {}).get("sample") or {}).get("rejit") or {}).get("applied"))
-    record["requested_families_compile"] = list(rejit_metadata(record["rejit_compile"]).get("requested_families") or [])
-    record["requested_families_run"] = list(rejit_metadata(record["rejit_run"]).get("requested_families") or [])
-    record["applied_families_compile"] = effective_applied_families(
-        record["requested_families_compile"],
-        record["eligible_families"],
-        record["rejit_compile_applied"],
-    )
-    record["applied_families_run"] = effective_applied_families(
-        record["requested_families_run"],
-        record["eligible_families"],
-        record["rejit_run_applied"],
+    record["compile_passes_applied"] = rejit_passes(record["rejit_compile"])
+    record["run_passes_applied"] = rejit_passes(record["rejit_run"])
+    record["applied_passes"] = merge_passes(
+        record["compile_passes_applied"],
+        record["run_passes_applied"],
     )
     record["size_ratio"] = size_ratio(record["baseline_compile"], record["rejit_compile"])
     record["size_delta_pct"] = size_delta_pct(record["baseline_compile"], record["rejit_compile"])
@@ -987,37 +948,59 @@ def build_guest_exec(argv: list[str]) -> str:
     return kinsn_load + main_cmd
 
 
+def load_corpus_build_report(path: Path) -> dict[str, Any]:
+    payload = json.loads(path.read_text())
+    summary = payload.get("summary") or {}
+    raw_paths = summary.get("available_objects")
+    if not isinstance(raw_paths, list) or not raw_paths:
+        raise SystemExit(f"invalid corpus build report schema (missing summary.available_objects): {path}")
+    available_objects = {
+        str(Path(raw_path).resolve())
+        for raw_path in raw_paths
+        if Path(raw_path).exists()
+    }
+    if not available_objects:
+        raise SystemExit(f"corpus build report has no existing available_objects: {path}")
+    return {
+        "path": path,
+        "payload": payload,
+        "summary": summary,
+        "available_objects": available_objects,
+    }
+
+
 def load_targets_from_yaml(
     yaml_path: Path,
+    corpus_build_report: dict[str, Any],
     filters: list[str] | None,
     max_programs: int | None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    """Load corpus targets from macro_corpus.yaml instead of inventory JSON."""
+    """Load strict corpus targets from macro_corpus.yaml plus the build report."""
     with open(yaml_path) as f:
         manifest = yaml.safe_load(f)
     programs = manifest.get("programs") or []
-    selected: list[dict[str, Any]] = []
+    candidates: list[dict[str, Any]] = []
     for entry in programs:
         test_method = entry.get("test_method", "")
         can_test_run = test_method == "bpf_prog_test_run"
-        # For entries with program_name (singular), use that.
-        # For entries with program_names (list), use the first one.
         program_name = entry.get("program_name") or ""
         if not program_name:
             names = entry.get("program_names") or []
             program_name = names[0] if names else ""
         source = str(entry.get("source", ""))
-        # Derive source_name from the object path (e.g. corpus/build/katran/... -> katran)
+        object_candidate = Path(source)
+        object_path = object_candidate if object_candidate.is_absolute() else (ROOT_DIR / object_candidate)
         source_parts = Path(source).parts
         if len(source_parts) >= 3 and source_parts[0] == "corpus" and source_parts[1] == "build":
             source_name = source_parts[2]
         else:
             source_name = entry.get("family", entry.get("name", ""))
-        # Derive section_name from sections list or prog_type
         sections = entry.get("sections") or []
         section_name = sections[0] if sections else entry.get("prog_type", "")
-        target: dict[str, Any] = {
+        candidates.append(
+            {
             "object_path": source,
+            "object_abs_path": str(object_path.resolve()),
             "source_name": source_name,
             "program_name": program_name,
             "section_name": section_name,
@@ -1027,12 +1010,10 @@ def load_targets_from_yaml(
             "input_size": int(entry.get("input_size", 0) or 0),
             "memory_path": str(entry.get("test_input")) if entry.get("test_input") else None,
             "can_test_run": can_test_run,
-            "inventory_scan": {},
-            "inventory_speedup_ratio": None,
-            "inventory_baseline_exec_ns": None,
-        }
-        selected.append(target)
+            }
+        )
 
+    selected = candidates
     if filters:
         lowered = [item.lower() for item in filters]
         selected = [
@@ -1051,10 +1032,31 @@ def load_targets_from_yaml(
     if max_programs is not None:
         selected = selected[:max_programs]
 
+    available_objects = corpus_build_report["available_objects"]
+    missing_objects = [
+        record["object_path"]
+        for record in selected
+        if record["object_abs_path"] not in available_objects
+    ]
+    if missing_objects:
+        raise SystemExit(
+            "selected corpus objects missing from build report: "
+            + ", ".join(missing_objects[:12])
+            + (" ..." if len(missing_objects) > 12 else "")
+        )
+
+    for record in selected:
+        record.pop("object_abs_path", None)
+
+    build_summary = corpus_build_report.get("summary") or {}
     summary = {
-        "manifest_path": str(yaml_path),
+        "manifest": str(yaml_path),
         "total_entries": len(programs),
         "selected_entries": len(selected),
+        "build_report_path": str(corpus_build_report["path"]),
+        "available_objects": int(build_summary.get("available_total", len(available_objects)) or len(available_objects)),
+        "built_from_source": int(build_summary.get("built_ok", 0) or 0),
+        "staged_existing": int(build_summary.get("staged_existing", 0) or 0),
     }
     return selected, summary
 
@@ -1307,16 +1309,12 @@ def build_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
         if record.get("baseline_run") and record["baseline_run"].get("ok")
         and record.get("rejit_run") and record["rejit_run"].get("ok")
     ]
-    applied_programs = [
-        record
-        for record in records
-        if record.get("rejit_compile_applied") or record.get("rejit_run_applied")
-    ]
-    family_totals = Counter()
+    applied_programs = [record for record in records if record.get("applied_passes")]
+    compile_pass_counts = Counter()
+    run_pass_counts = Counter()
     for record in records:
-        scan = normalize_scan(record.get("daemon_counts"))
-        for _, field in FAMILY_FIELDS:
-            family_totals[field] += scan[field]
+        compile_pass_counts.update(record.get("compile_passes_applied") or [])
+        run_pass_counts.update(record.get("run_passes_applied") or [])
 
     failure_reasons = Counter()
     rejit_failures = Counter()
@@ -1357,58 +1355,18 @@ def build_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
         source_measured = [item for item in items if item in measured_pairs]
         source_size = [item["size_ratio"] for item in source_compile if item.get("size_ratio") is not None]
         source_exec = [item["speedup_ratio"] for item in source_measured if item.get("speedup_ratio") is not None]
-        counts = Counter()
-        for item in items:
-            scan = normalize_scan(item.get("daemon_counts"))
-            for _, field in FAMILY_FIELDS:
-                counts[field] += scan[field]
         source_row = {
             "source_name": source_name,
             "programs": len(items),
             "compile_pairs": len(source_compile),
             "measured_pairs": len(source_measured),
-            "applied_programs": sum(1 for item in items if item.get("rejit_compile_applied") or item.get("rejit_run_applied")),
-            "total_sites": sum(counts[field] for _, field in FAMILY_FIELDS),
+            "applied_programs": sum(1 for item in items if item.get("applied_passes")),
             "code_size_ratio_geomean": geomean(source_size),
             "exec_ratio_geomean": geomean(source_exec),
+            "pass_counts": dict(sorted(Counter(pass_name for item in items for pass_name in item.get("applied_passes") or []).items())),
         }
-        for _, field in FAMILY_FIELDS:
-            source_row[field] = counts[field]
         by_source.append(source_row)
     by_source.sort(key=lambda item: (-item["programs"], item["source_name"]))
-
-    by_family: list[dict[str, Any]] = []
-    for family_name, field in FAMILY_FIELDS:
-        items = [record for record in records if normalize_scan(record.get("daemon_counts"))[field] > 0]
-        family_compile = [item for item in items if item in compile_pairs]
-        family_measured = [item for item in items if item in measured_pairs]
-        family_size = [item["size_ratio"] for item in family_compile if item.get("size_ratio") is not None]
-        family_exec = [item["speedup_ratio"] for item in family_measured if item.get("speedup_ratio") is not None]
-        applied_items = [
-            item
-            for item in items
-            if family_name in item.get("applied_families_compile", [])
-            or family_name in item.get("applied_families_run", [])
-        ]
-        by_family.append(
-            {
-                "family_name": family_name,
-                "programs": len(items),
-                "compile_pairs": len(family_compile),
-                "measured_pairs": len(family_measured),
-                "applied_programs": len(applied_items),
-                "total_sites": sum(normalize_scan(item.get("daemon_counts"))[field] for item in items),
-                "applied_sites": sum(normalize_scan(item.get("daemon_counts"))[field] for item in applied_items),
-                "code_size_ratio_geomean": geomean(family_size),
-                "exec_ratio_geomean": geomean(family_exec),
-            }
-        )
-    by_family.sort(key=lambda item: (-item["total_sites"], item["family_name"]))
-
-    top_code_shrinks = sorted(
-        [record for record in compile_pairs if (record.get("size_ratio") or 0) > 1.0],
-        key=lambda item: (-(item.get("size_ratio") or 0), item["source_name"], program_label(item)),
-    )[:10]
 
     return {
         "effective_mode": "vm",
@@ -1422,35 +1380,26 @@ def build_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
         "exec_ratio_median": statistics.median(exec_ratios) if exec_ratios else None,
         "exec_ratio_min": min(exec_ratios) if exec_ratios else None,
         "exec_ratio_max": max(exec_ratios) if exec_ratios else None,
-        "family_totals": dict(family_totals),
+        "pass_counts": dict(sorted((compile_pass_counts + run_pass_counts).items())),
+        "compile_pass_counts": dict(sorted(compile_pass_counts.items())),
+        "run_pass_counts": dict(sorted(run_pass_counts.items())),
         "failure_reasons": dict(failure_reasons.most_common(16)),
         "rejit_failure_reasons": dict(rejit_failures.most_common(16)),
         "by_source": by_source,
-        "by_family": by_family,
-        "top_code_shrinks": [
-            {
-                "program": program_label(record),
-                "source_name": record["source_name"],
-                "prog_type_name": record["prog_type_name"],
-                "size_ratio": record.get("size_ratio"),
-                "families": record.get("applied_families_compile") or record.get("eligible_families", []),
-            }
-            for record in top_code_shrinks
-        ],
     }
 
 
 def build_markdown(data: dict[str, Any]) -> str:
     summary = data["summary"]
     records = sorted(data["programs"], key=lambda item: (item["source_name"], item["object_path"], item["program_name"]))
-    build_summary_data = data.get("kernel_build") or {}
+    corpus_build_summary = data.get("corpus_build_summary") or {}
     guest_info = (data.get("guest_smoke") or {}).get("payload")
-    family_headers = [FAMILY_DISPLAY_NAMES[name] for name, _ in FAMILY_FIELDS]
     lines: list[str] = [
         "# Corpus Batch REJIT Results",
         "",
         f"- Generated: {data['generated_at']}",
         f"- Corpus manifest: `{data['macro_corpus_yaml']}`",
+        f"- Corpus build report: `{data['corpus_build_report']}`",
         f"- Runner: `{data['runner_binary']}`",
         f"- Daemon: `{data['daemon_binary']}`",
         "- Requested mode: `strict-vm`",
@@ -1463,34 +1412,38 @@ def build_markdown(data: dict[str, Any]) -> str:
         f"- REJIT applied programs: {summary['applied_programs']}",
         f"- Code-size ratio geomean (baseline/rejit): {format_ratio(summary['code_size_ratio_geomean'])}",
         f"- Exec-time ratio geomean (baseline/rejit): {format_ratio(summary['exec_ratio_geomean'])}",
-        f"- Total sites: {sum(summary['family_totals'].get(field, 0) for _, field in FAMILY_FIELDS)}",
-        *[
-            f"- {FAMILY_DISPLAY_NAMES[name]} sites: {summary['family_totals'].get(field, 0)}"
-            for name, field in FAMILY_FIELDS
-        ],
     ]
-    if build_summary_data:
+    if corpus_build_summary:
         lines.append(
-            f"- Kernel build: {'ok' if build_summary_data.get('ok') else 'failed'} "
-            f"({build_summary_data.get('duration_seconds', 0):.2f}s)"
+            f"- Build availability: {corpus_build_summary.get('available_total', 0)} objects "
+            f"({corpus_build_summary.get('built_ok', 0)} built, {corpus_build_summary.get('staged_existing', 0)} staged)"
         )
     if guest_info:
         lines.append(f"- Guest kernel: `{guest_info.get('kernel_release', 'unknown')}`")
     lines.append("")
 
+    if summary["pass_counts"]:
+        lines.extend(["## Pass Counts", ""])
+        lines.extend(
+            markdown_table(
+                ["Pass", "Compile", "Run", "Total"],
+                [
+                    [
+                        pass_name,
+                        summary["compile_pass_counts"].get(pass_name, 0),
+                        summary["run_pass_counts"].get(pass_name, 0),
+                        total,
+                    ]
+                    for pass_name, total in summary["pass_counts"].items()
+                ],
+            )
+        )
+        lines.append("")
+
     lines.extend(["## By Project", ""])
     lines.extend(
         markdown_table(
-            [
-                "Project",
-                "Programs",
-                "Compile Pairs",
-                "Measured Pairs",
-                "Applied",
-                *family_headers,
-                "Code Ratio",
-                "Exec Ratio",
-            ],
+            ["Project", "Programs", "Compile Pairs", "Measured Pairs", "Applied", "Code Ratio", "Exec Ratio"],
             [
                 [
                     row["source_name"],
@@ -1498,7 +1451,6 @@ def build_markdown(data: dict[str, Any]) -> str:
                     row["compile_pairs"],
                     row["measured_pairs"],
                     row["applied_programs"],
-                    *[row[field] for _, field in FAMILY_FIELDS],
                     format_ratio(row["code_size_ratio_geomean"]),
                     format_ratio(row["exec_ratio_geomean"]),
                 ]
@@ -1508,47 +1460,6 @@ def build_markdown(data: dict[str, Any]) -> str:
     )
     lines.append("")
 
-    lines.extend(["## By Family", ""])
-    lines.extend(
-        markdown_table(
-            ["Family", "Programs", "Applied", "Sites", "Applied Sites", "Compile Pairs", "Measured Pairs", "Code Ratio", "Exec Ratio"],
-            [
-                [
-                    row["family_name"],
-                    row["programs"],
-                    row["applied_programs"],
-                    row["total_sites"],
-                    row["applied_sites"],
-                    row["compile_pairs"],
-                    row["measured_pairs"],
-                    format_ratio(row["code_size_ratio_geomean"]),
-                    format_ratio(row["exec_ratio_geomean"]),
-                ]
-                for row in summary["by_family"]
-            ],
-        )
-    )
-    lines.append("")
-
-    if summary["top_code_shrinks"]:
-        lines.extend(["## Largest Code Shrinks", ""])
-        lines.extend(
-            markdown_table(
-                ["Program", "Project", "Type", "Code Ratio", "Families"],
-                [
-                    [
-                        row["program"],
-                        row["source_name"],
-                        row["prog_type_name"],
-                        format_ratio(row["size_ratio"]),
-                        ", ".join(row["families"]),
-                    ]
-                    for row in summary["top_code_shrinks"]
-                ],
-            )
-        )
-        lines.append("")
-
     lines.extend(["## Per-Program Results", ""])
     lines.extend(
         markdown_table(
@@ -1556,8 +1467,8 @@ def build_markdown(data: dict[str, Any]) -> str:
                 "Program",
                 "Project",
                 "Type",
-                "Sites",
-                "Applied Families",
+                "Compile Passes",
+                "Run Passes",
                 "Baseline JIT",
                 "REJIT JIT",
                 "Code Ratio",
@@ -1571,8 +1482,8 @@ def build_markdown(data: dict[str, Any]) -> str:
                     program_label(record),
                     record["source_name"],
                     record["prog_type_name"],
-                    normalize_scan(record.get("daemon_counts"))["total_sites"],
-                    ", ".join(record.get("applied_families_run") or record.get("applied_families_compile") or []),
+                    ", ".join(record.get("compile_passes_applied") or []) or "-",
+                    ", ".join(record.get("run_passes_applied") or []) or "-",
                     format_ns(((record.get("baseline_compile") or {}).get("sample") or {}).get("jited_prog_len")),
                     format_ns(((record.get("rejit_compile") or {}).get("sample") or {}).get("jited_prog_len")),
                     format_ratio(record.get("size_ratio")),
@@ -1614,13 +1525,12 @@ def build_markdown(data: dict[str, Any]) -> str:
             "",
             "## Notes",
             "",
-            "- Target selection comes from `macro_corpus.yaml`; programs with `test_method: bpf_prog_test_run` use packet replay and programs with `test_method: attach_trigger` use the kernel-attach runtime. The current daemon pass determines whether REJIT has any eligible families.",
+            "- Target selection comes from `macro_corpus.yaml`, and every selected object must already appear in the strict build report.",
             "- In strict VM mode, the framework REJIT guest boots once, keeps `daemon serve` alive for the full batch, and runs baseline compile-only, REJIT compile-only, baseline test_run, and REJIT test_run for each target in that order.",
             "- Default steady-state semantics: the daemon is always started and tries to optimize each program; programs with no applicable sites stay on stock JIT.",
             "- `--blind-apply` switches from per-program policy mode to unconditional daemon auto-scan REJIT.",
-            "- `--skip-families` only applies together with `--blind-apply`; the family columns above report applied families, not just eligible sites.",
+            "- Per-program pass columns are the raw `passes_applied` lists emitted by the runner; the summary above only adds basic pass counts.",
             "- The Make-driven `vm-corpus` path is strict VM-only: guest batch failures fail the run instead of falling back to host execution.",
-            "- Family summaries are overlap-based: one program can contribute to multiple family rows, so those rows are not isolated causal attributions.",
         ]
     )
     return "\n".join(lines) + "\n"
@@ -1649,6 +1559,7 @@ def packet_main(argv: list[str] | None = None) -> int:
     kernel_tree = Path(args.kernel_tree).resolve()
     kernel_image = Path(args.kernel_image).resolve()
     btf_custom_path = Path(args.btf_custom_path).resolve() if args.btf_custom_path else None
+    corpus_build_report_path = Path(args.corpus_build_report).resolve()
 
     if not macro_corpus_yaml.exists():
         raise SystemExit(f"macro corpus YAML not found: {macro_corpus_yaml}")
@@ -1656,12 +1567,16 @@ def packet_main(argv: list[str] | None = None) -> int:
         raise SystemExit(f"runner not found: {runner}")
     if not daemon.exists():
         raise SystemExit(f"daemon not found: {daemon}")
+    if not corpus_build_report_path.exists():
+        raise SystemExit(f"corpus build report not found: {corpus_build_report_path}")
 
     run_type = derive_run_type(output_json, "corpus_vm_batch")
     started_at = datetime.now(timezone.utc).isoformat()
+    corpus_build_report = load_corpus_build_report(corpus_build_report_path)
 
     targets, yaml_summary = load_targets_from_yaml(
         yaml_path=macro_corpus_yaml,
+        corpus_build_report=corpus_build_report,
         filters=args.filters,
         max_programs=args.max_programs,
     )
@@ -1677,6 +1592,8 @@ def packet_main(argv: list[str] | None = None) -> int:
         "generated_at": started_at,
         "repo_root": str(ROOT_DIR),
         "macro_corpus_yaml": str(macro_corpus_yaml),
+        "corpus_build_report": str(corpus_build_report_path),
+        "corpus_build_summary": corpus_build_report.get("summary") or {},
         "yaml_summary": yaml_summary,
         "runner_binary": str(runner),
         "daemon_binary": str(daemon),
@@ -1722,6 +1639,8 @@ def packet_main(argv: list[str] | None = None) -> int:
             progress=progress,
             extra_fields={
                 "macro_corpus_yaml": repo_relative_path(macro_corpus_yaml),
+                "corpus_build_report": repo_relative_path(corpus_build_report_path),
+                "corpus_build_summary": corpus_build_report.get("summary") or {},
                 "yaml_summary": yaml_summary,
                 "runner_binary": repo_relative_path(runner),
                 "daemon_binary": repo_relative_path(daemon),

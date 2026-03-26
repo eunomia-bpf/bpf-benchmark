@@ -246,7 +246,7 @@ def summarize_benchmark_results(payload: Mapping[str, Any]) -> dict[str, Any]:
         benchmark_summaries.append(benchmark_summary)
 
     summarized["benchmarks"] = benchmark_summaries
-    summarized["paper_summary"] = {
+    summarized["optimization_summary"] = {
         "benchmark_count": len(benchmark_summaries),
         "correctness_mismatch_count": len(correctness_mismatches),
         "correctness_mismatches": correctness_mismatches,

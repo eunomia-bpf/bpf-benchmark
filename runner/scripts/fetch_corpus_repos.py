@@ -2,23 +2,23 @@
 from __future__ import annotations
 
 import argparse
-import json
 import subprocess
 import sys
 from pathlib import Path
 
-import yaml
-
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from runner.libs.repo_registry import load_repo_manifest  # noqa: E402
+from runner.libs.repo_registry import (  # noqa: E402
+    DEFAULT_REPO_MANIFEST,
+    DEFAULT_REPO_ROOT,
+    load_repo_manifest,
+)
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 RUNNER_DIR = SCRIPT_DIR.parent
 REPO_ROOT = RUNNER_DIR.parent
-DEFAULT_CONFIG = REPO_ROOT / "corpus" / "config" / "macro_corpus.yaml"
 
 
 def run(command: list[str], cwd: Path | None = None) -> None:
@@ -31,36 +31,19 @@ def capture(command: list[str], cwd: Path | None = None) -> subprocess.Completed
     return subprocess.run(command, cwd=cwd, text=True, capture_output=True)
 
 
-def load_corpus_config(path: Path) -> dict[str, Path]:
-    data = yaml.safe_load(path.read_text())
-    corpus = data["corpus"]
-    return {
-        "manifest": (REPO_ROOT / corpus["manifest"]).resolve(),
-        "local_repos": (REPO_ROOT / corpus["local_repos"]).resolve(),
-        "inventory": (REPO_ROOT / corpus["inventory"]).resolve(),
-    }
-
-
-def _git_head(path: Path) -> str | None:
+def git_head(path: Path) -> str | None:
     completed = capture(["git", "rev-parse", "HEAD"], cwd=path)
     if completed.returncode != 0:
         return None
     return completed.stdout.strip() or None
 
 
-def _git_clean(path: Path) -> bool:
-    completed = capture(["git", "status", "--porcelain"], cwd=path)
-    if completed.returncode != 0:
-        return False
-    return not completed.stdout.strip()
-
-
-def ensure_repo(spec: dict[str, object], local_repos: Path) -> Path:
+def ensure_repo(spec: dict[str, object], repo_root: Path) -> Path:
     name = str(spec["name"])
     url = str(spec["url"])
     branch = str(spec.get("branch", "main"))
     sparse_paths = [str(path) for path in spec.get("sparse_paths", [])]
-    repo_dir = local_repos / name
+    repo_dir = repo_root / name
 
     if not repo_dir.exists():
         run(
@@ -87,9 +70,6 @@ def ensure_repo(spec: dict[str, object], local_repos: Path) -> Path:
             run(["git", "checkout", branch], cwd=repo_dir)
             run(["git", "pull", "--ff-only", "--depth", "1", "origin", branch], cwd=repo_dir)
         else:
-            # Runner-managed third-party checkouts are disposable benchmark
-            # inputs; when tracked files are clean we can realign to origin even
-            # if untracked caches (for example __pycache__) are present.
             run(["git", "checkout", "-B", branch, f"origin/{branch}"], cwd=repo_dir)
 
     if sparse_paths:
@@ -100,76 +80,34 @@ def ensure_repo(spec: dict[str, object], local_repos: Path) -> Path:
     return repo_dir
 
 
-def harvest_repo(spec: dict[str, object], repo_dir: Path) -> dict[str, object]:
-    globs = [str(pattern) for pattern in spec.get("harvest_globs", [])]
-    exclude_globs = [str(pattern) for pattern in spec.get("exclude_globs", [])]
-    harvested: set[str] = set()
-    excluded: set[str] = set()
-
-    for pattern in globs:
-        harvested.update(
-            str(path.relative_to(repo_dir))
-            for path in repo_dir.glob(pattern)
-            if path.is_file()
-        )
-    for pattern in exclude_globs:
-        excluded.update(
-            str(path.relative_to(repo_dir))
-            for path in repo_dir.glob(pattern)
-            if path.is_file()
-        )
-
-    files = sorted(harvested - excluded)
-
-    return {
-        "name": spec["name"],
-        "url": spec["url"],
-        "branch": spec.get("branch", "main"),
-        "repo_dir": str(repo_dir),
-        "sparse_paths": list(spec.get("sparse_paths", [])),
-        "harvest_globs": globs,
-        "exclude_globs": exclude_globs,
-        "num_program_sources": len(files),
-        "num_bpf_c": len(files),
-        "files": files,
-    }
-
-
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Fetch and inventory third-party BPF repos via runner control plane.")
-    parser.add_argument("--config", default=str(DEFAULT_CONFIG), help="Path to macro corpus config.")
+    parser = argparse.ArgumentParser(description="Fetch or refresh third-party BPF repos under runner/repos/.")
+    parser.add_argument("--manifest", default=str(DEFAULT_REPO_MANIFEST), help="Repo manifest path.")
+    parser.add_argument("--repo-root", default=str(DEFAULT_REPO_ROOT), help="Checkout directory root.")
     parser.add_argument("--repo", action="append", dest="repos", help="Only fetch selected repo names.")
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
-    config = load_corpus_config(Path(args.config).resolve())
-    manifest_path = config["manifest"]
-    local_repos = config["local_repos"]
-    inventory_path = config["inventory"]
-
-    local_repos.mkdir(parents=True, exist_ok=True)
-
+    manifest_path = Path(args.manifest).resolve()
+    repo_root = Path(args.repo_root).resolve()
     selected = set(args.repos or [])
+
     manifest = load_repo_manifest(manifest_path)
-    records = []
+    known_repos = {str(spec["name"]) for spec in manifest}
+    missing_selected = sorted(selected - known_repos)
+    if missing_selected:
+        raise SystemExit(f"unknown repos in {manifest_path}: {', '.join(missing_selected)}")
+
+    repo_root.mkdir(parents=True, exist_ok=True)
+
     for spec in manifest:
         name = str(spec["name"])
         if selected and name not in selected:
             continue
-        repo_dir = ensure_repo(spec, local_repos)
-        records.append(harvest_repo(spec, repo_dir))
-
-    output = {
-        "config": str(Path(args.config).resolve()),
-        "manifest": str(manifest_path),
-        "repos": records,
-        "total_program_sources": sum(int(record["num_program_sources"]) for record in records),
-        "total_bpf_c": sum(int(record["num_bpf_c"]) for record in records),
-    }
-    inventory_path.write_text(json.dumps(output, indent=2))
-    print(f"[done] wrote {inventory_path}")
+        repo_dir = ensure_repo(spec, repo_root)
+        print(f"[ready] {name} {git_head(repo_dir) or 'unknown'} {repo_dir}")
     return 0
 
 

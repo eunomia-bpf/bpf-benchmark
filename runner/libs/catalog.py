@@ -78,13 +78,6 @@ class DefaultsSpec:
 
 
 @dataclass(frozen=True, slots=True)
-class CorpusSpec:
-    manifest: Path | None = None
-    local_repos: Path | None = None
-    inventory: Path | None = None
-
-
-@dataclass(frozen=True, slots=True)
 class CatalogTarget:
     name: str
     description: str
@@ -132,7 +125,6 @@ class CatalogManifest:
     runtimes: tuple[CatalogRuntime, ...]
     targets: tuple[CatalogTarget, ...]
     runtime_aliases: Mapping[str, str]
-    corpus: CorpusSpec | None = None
     metadata: Mapping[str, object] = field(default_factory=dict)
 
     @property
@@ -362,12 +354,7 @@ def _load_macro_catalog(path: Path, data: Mapping[str, Any]) -> CatalogManifest:
         runtimes=runtimes,
         targets=_validate_target_names(targets),
         runtime_aliases=aliases,
-        corpus=CorpusSpec(
-            manifest=_resolve_path(data.get("corpus", {}).get("manifest"), root_dir),
-            local_repos=_resolve_path(data.get("corpus", {}).get("local_repos"), root_dir),
-            inventory=_resolve_path(data.get("corpus", {}).get("inventory"), root_dir),
-        ),
-        metadata={"corpus": dict(data.get("corpus", {}))},
+        metadata={},
     )
 
 
@@ -390,23 +377,12 @@ load_manifest = load_catalog
 
 def load_manifest_from_results(
     results: Mapping[str, object],
-    *,
-    fallback: str | Path | None = DEFAULT_MICRO_MANIFEST,
 ) -> ManifestSpec | None:
-    manifest_candidates = [
-        results.get("manifest"),
-        results.get("manifest_path"),
-    ]
-    for candidate in manifest_candidates:
-        if isinstance(candidate, str) and candidate:
-            try:
-                return load_catalog(candidate)
-            except Exception:
-                pass
-    if fallback is None:
+    manifest_path = results.get("manifest")
+    if not isinstance(manifest_path, str) or not manifest_path:
         return None
     try:
-        return load_catalog(fallback)
+        return load_catalog(manifest_path)
     except Exception:
         return None
 
@@ -417,7 +393,6 @@ __all__ = [
     "CatalogManifest",
     "CatalogRuntime",
     "CatalogTarget",
-    "CorpusSpec",
     "DEFAULT_MACRO_MANIFEST",
     "DEFAULT_MICRO_MANIFEST",
     "DefaultsSpec",

@@ -316,7 +316,7 @@ def compute_per_benchmark_statistics(
     bootstrap_iterations: int = 5000,
     bootstrap_seed: int = 20260306,
 ) -> tuple[BenchmarkStatistics, ...]:
-    resolved_manifest = manifest or load_manifest_from_results(results, fallback=DEFAULT_MICRO_MANIFEST)
+    resolved_manifest = manifest or load_manifest_from_results(results)
     baseline_name = _detect_baseline_name(results, resolved_manifest)
     manifest_targets = resolved_manifest.targets_by_name if resolved_manifest is not None else {}
 
@@ -483,7 +483,7 @@ def build_rq_report(
     bootstrap_iterations: int = 5000,
     bootstrap_seed: int = 20260306,
 ) -> RQReport:
-    resolved_manifest = manifest or load_manifest_from_results(results, fallback=DEFAULT_MICRO_MANIFEST)
+    resolved_manifest = manifest or load_manifest_from_results(results)
     benchmark_rows = compute_per_benchmark_statistics(
         results,
         manifest=resolved_manifest,

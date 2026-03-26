@@ -542,7 +542,7 @@ def build_markdown(payload: Mapping[str, object]) -> str:
         "across the libbpf-tool-owned BPF programs.",
         "- `Ops/s` is application workload throughput while the tool is tracing; "
         "`CPU%` is the tool process CPU from `/proc/<pid>/stat`.",
-        "- Tools that fail to attach or have no eligible directive sites show `n/a` ReJIT columns.",
+        "- Tools that fail to attach or have no applicable ReJIT passes show `n/a` ReJIT columns.",
         "",
     ])
     return "\n".join(lines)

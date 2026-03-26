@@ -1,6 +1,6 @@
 # BPF Benchmark
 
-eBPF benchmarking suite for the BpfReJIT paper — comparing llvmbpf (userspace LLVM JIT) against kernel eBPF with and without JIT specialization directives.
+eBPF benchmarking suite for the BpfReJIT paper — comparing llvmbpf (userspace LLVM JIT) against kernel eBPF with and without ReJIT.
 
 Three-layer benchmarking pipeline:
 

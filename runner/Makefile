@@ -12,7 +12,6 @@ LIBBPF_A := $(LIBBPF_OBJDIR)/libbpf.a
 LIBBPF_HEADER := $(LIBBPF_PREFIX)/include/bpf/bpf.h
 BPFTOOL_BUILD_DIR := $(BUILD_DIR)/vendor/bpftool
 TOOLS_BUILD_DIR := $(BUILD_DIR)/tools
-DIRECTIVE_HINT_BIN := $(TOOLS_BUILD_DIR)/directive_hint
 MICRO_EXEC_ENABLE_LLVMBPF ?= ON
 PYTHON ?= python3
 REPOS ?=
@@ -50,6 +49,7 @@ VM_MICRO_SMOKE_OUTPUT ?= $(MICRO_RESULTS_DIR)/vm_micro_smoke.json
 VM_MICRO_OUTPUT ?= $(MICRO_RESULTS_DIR)/vm_micro.json
 VM_CORPUS_OUTPUT_JSON ?= $(CORPUS_RESULTS_DIR)/vm_corpus.json
 VM_CORPUS_OUTPUT_MD ?= $(CORPUS_RESULTS_DIR)/vm_corpus.md
+CORPUS_BUILD_REPORT ?= $(CORPUS_RESULTS_DIR)/expanded_corpus_build.latest.json
 VM_STATIC_OUTPUT ?= $(REPO_ROOT)/daemon/tests/results/static_verify.json
 
 VM_CPUS ?=
@@ -79,14 +79,14 @@ BENCH_FLAGS := $(foreach b,$(BENCH),--bench $(b))
 MICRO_ARGS := --iterations $(ITERATIONS) --warmups $(WARMUPS) --repeat $(REPEAT) $(BENCH_FLAGS)
 VM_SMOKE_ARGS := --iterations 1 --warmups 0 --repeat 50
 
-.PHONY: all micro_exec directive_hint vendor_libbpf vendor_bpftool \
+.PHONY: all micro_exec vendor_libbpf vendor_bpftool \
 	corpus-fetch corpus-build-objects corpus-build \
 	scx-artifacts e2e-prep e2e-tracee-setup e2e-tetragon-setup \
 	kernel-image unittest-build negative-build upstream-selftests-build kinsn-modules-build micro-programs daemon-binary \
 	vm-shell vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 	clean
 
-all: micro_exec directive_hint
+all: micro_exec
 
 corpus-fetch:
 	$(PYTHON) $(ROOT_DIR)/scripts/fetch_corpus_repos.py $(REPO_FLAGS)
@@ -153,16 +153,6 @@ micro_exec: $(LIBBPF_A) $(LIBBPF_HEADER) | $(BUILD_DIR)
 		-DMICRO_LIBBPF_LIBRARY=$(LIBBPF_A) \
 		-DMICRO_EXEC_ENABLE_LLVMBPF=$(MICRO_EXEC_ENABLE_LLVMBPF)
 	cmake --build $(BUILD_DIR) --target micro_exec -j "$(JOBS)"
-
-directive_hint: $(LIBBPF_A) $(LIBBPF_HEADER) | $(TOOLS_BUILD_DIR)
-	$(CXX) -O2 -g -Wall -Wextra -std=c++20 \
-		-I$(LIBBPF_PREFIX)/include \
-		-I$(ROOT_DIR)/include \
-		-o $(DIRECTIVE_HINT_BIN) \
-		$(REPO_ROOT)/micro/tools/directive_hint.c \
-		$(ROOT_DIR)/src/common.cpp \
-		$(ROOT_DIR)/src/elf_program_loader.cpp \
-		$(LIBBPF_A) -lelf -lz
 
 vendor_bpftool: | $(BPFTOOL_BUILD_DIR)
 	$(MAKE) -C $(REPO_ROOT)/vendor/bpftool/src \
@@ -264,13 +254,14 @@ vm-micro: micro_exec micro-programs daemon-binary kernel-image kinsn-modules-bui
 		--timeout "$(VM_MICRO_TIMEOUT)" \
 		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) "$(DAEMON_PATH)" $(DAEMON_ARGS) --pgo serve --socket "$(DAEMON_SOCKET)" & DAEMON_PID=$$!; sleep 0.5; trap "kill $$DAEMON_PID 2>/dev/null; rm -f $(DAEMON_SOCKET)" EXIT; python3 "$(REPO_ROOT)/micro/driver.py" --runtime llvmbpf --runtime kernel --runtime kernel-rejit --daemon-socket "$(DAEMON_SOCKET)" $(MICRO_ARGS) --output "$(VM_MICRO_OUTPUT)"'
 
-vm-corpus: micro_exec daemon-binary kernel-image kinsn-modules-build
+vm-corpus: corpus-build micro_exec daemon-binary kernel-image kinsn-modules-build
 	mkdir -p "$(CORPUS_RESULTS_DIR)"
 	TARGET="$(TARGET)" $(VENV_ACTIVATE) $(PYTHON) "$(REPO_ROOT)/corpus/driver.py" \
 		--kernel-image "$(BZIMAGE_PATH)" \
 		--runner "$(MICRO_RUNNER)" \
 		--daemon "$(DAEMON_PATH)" \
 		--btf-custom-path "$(VMLINUX_PATH)" \
+		--corpus-build-report "$(CORPUS_BUILD_REPORT)" \
 		--repeat "$(REPEAT)" \
 		--output-json "$(VM_CORPUS_OUTPUT_JSON)" \
 		--output-md "$(VM_CORPUS_OUTPUT_MD)"

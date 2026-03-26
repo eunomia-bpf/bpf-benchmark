@@ -32,20 +32,6 @@ class PerfCounterMeta(TypedDict, total=False):
     error: str
 
 
-class DirectiveScanSummary(TypedDict, total=False):
-    performed: bool
-    cmov_sites: int
-    wide_sites: int
-    rotate_sites: int
-    lea_sites: int
-    bitfield_sites: int
-    extract_sites: int
-    endian_sites: int
-    branch_flip_sites: int
-    total_sites: int
-
-
-
 class RejitSummary(TypedDict, total=False):
     """Canonical rejit summary — output by C++ runner, consumed by all drivers."""
     requested: bool
@@ -84,7 +70,6 @@ class RunnerSample(TypedDict, total=False):
     phases_ns: dict[str, int]
     perf_counters: dict[str, int]
     perf_counters_meta: PerfCounterMeta
-    directive_scan: DirectiveScanSummary
     rejit: RejitSummary
 
 
@@ -103,7 +88,6 @@ class UnifiedResultRecord:
     artifacts: Mapping[str, object] | None = None
     compile: Mapping[str, object] | None = None
     execution: Mapping[str, object] | None = None
-    directive_scan: Mapping[str, object] | None = None
     rejit: Mapping[str, object] | None = None
     perf_counters: Mapping[str, object] | None = None
     samples: Sequence[RunnerSample] = field(default_factory=tuple)
@@ -169,48 +153,6 @@ def parse_command_samples(stdout: str) -> list[RunnerSample]:
     return collapse_command_samples(parse_runner_samples(stdout))
 
 
-def zero_directive_scan() -> dict[str, int]:
-    return {
-        "cmov_sites": 0,
-        "wide_sites": 0,
-        "rotate_sites": 0,
-        "lea_sites": 0,
-        "bitfield_sites": 0,
-        "endian_sites": 0,
-        "branch_flip_sites": 0,
-        "total_sites": 0,
-    }
-
-
-def normalize_directive_scan(scan: Mapping[str, object] | None) -> dict[str, int]:
-    normalized = zero_directive_scan()
-    if not scan:
-        return normalized
-    normalized["cmov_sites"] = int(scan.get("cmov_sites", 0) or 0)
-    normalized["wide_sites"] = int(scan.get("wide_sites", 0) or 0)
-    normalized["rotate_sites"] = int(scan.get("rotate_sites", 0) or 0)
-    normalized["lea_sites"] = int(scan.get("lea_sites", 0) or 0)
-    normalized["bitfield_sites"] = int(
-        scan.get("bitfield_sites", scan.get("extract_sites", 0)) or 0
-    )
-    normalized["endian_sites"] = int(scan.get("endian_sites", 0) or 0)
-    normalized["branch_flip_sites"] = int(scan.get("branch_flip_sites", 0) or 0)
-    normalized["total_sites"] = int(
-        scan.get(
-            "total_sites",
-            normalized["cmov_sites"] +
-            normalized["wide_sites"] +
-            normalized["rotate_sites"] +
-            normalized["lea_sites"] +
-            normalized["bitfield_sites"] +
-            normalized["endian_sites"] +
-            normalized["branch_flip_sites"],
-        )
-        or 0
-    )
-    return normalized
-
-
 def _default_rejit() -> dict:
     """Default rejit summary with all canonical fields."""
     return {
@@ -245,10 +187,6 @@ def normalize_runner_sample(sample: Mapping[str, object]) -> RunnerSample:
             "error": "",
         },
     )
-    normalized.setdefault(
-        "directive_scan",
-        {"performed": False, **zero_directive_scan()},
-    )
 
     raw_rejit = sample.get("rejit") or {}
     rejit_defaults = _default_rejit()
@@ -267,7 +205,6 @@ def parse_runner_sample(stdout: str) -> RunnerSample:
 
 __all__ = [
     "CodeSizeSummary",
-    "DirectiveScanSummary",
     "PerfCounterMeta",
     "RejitSummary",
     "RunnerSample",
@@ -280,7 +217,6 @@ __all__ = [
     "load_json",
     "normalize_runner_sample",
     "ns_summary",
-    "normalize_directive_scan",
     "parse_json_lines",
     "parse_last_json_line",
     "parse_command_samples",
@@ -290,5 +226,4 @@ __all__ = [
     "summarize_optional_ns",
     "summarize_perf_counter_meta",
     "summarize_phase_timings",
-    "zero_directive_scan",
 ]

@@ -221,7 +221,7 @@ def build_run_metadata(
         "case": args.case,
         "smoke": bool(args.smoke),
         "output_hint_json": repo_relative_path(primary_output_json),
-        "paper_summary": _trim_e2e_value(payload),
+        "optimization_summary": _trim_e2e_value(payload),
     }
     metadata["output_hint_md"] = repo_relative_path(Path(args.output_md).resolve())
     metadata["output_hint_report_md"] = repo_relative_path(Path(args.report_md).resolve())

@@ -9,771 +9,733 @@
 - `daemon/src/pass.rs`
 - `daemon/src/insn.rs`
 - `daemon/src/passes/mod.rs`
+- `docs/kernel-jit-optimization-plan.md` §3.2
 
-本文给出 `DangerousHelperFirewallPass` 在 BpfReJIT daemon 中的实现级设计。目标不是做一个新的 verifier，而是在现有 `orig_insns -> PassManager -> REJIT -> re-verify` 流水线里，识别并中和 live 程序中的危险 helper 调用。
+本文描述 `DangerousHelperFirewallPass` 在 BpfReJIT daemon 中的实现级设计。它是 **Security pass**，目标是对 live 程序中的危险 helper 做最小权限化重写，而不是做性能优化。
 
-## TL;DR
+## 0. 先澄清一个 helper 编号问题
 
-- Phase 1 只做三类动作：`deny`、`coarseify`、`audit`。
-- `send_signal`、`override_return`、`set_retval` 走 fail-closed：把 `call helper` 改成 `mov64 r0, -1`，即 `-EPERM`。
-- `ktime_get_ns` 走 coarseify：把 helper id 从 `5` 改成 `160`，即 `ktime_get_coarse_ns`。
-- `probe_read*`、`d_path`、`copy_from_user`、`snprintf_btf`、`find_vma` 等 Phase 1 只审计，不改字节码。
-- 对 `send_signal` 这类纯副作用 helper，可以额外删除其单用途参数准备指令；实现上建议直接在 rebuild 阶段省略这些指令，效果等价于“先 NOP out，再清理 NOP”。
-- 该 pass 必须放在 pipeline 最后。它是安全策略 pass，不应被后续优化再改写。
-- verifier 友好的核心原因是：本设计 Phase 1 会真实改写的 helper 都返回 scalar，不返回 pointer type。
-- `set_retval` 有一个必须写清楚的语义 caveat：仅把 helper call 改成 `r0 = -EPERM` 能中和 helper 本身，但不能在所有情况下强制 cgroup 程序整体 fail-closed。
+你给出的需求里写了 “`ktime_get_ns` (helper `125`) -> `ktime_get_coarse_ns` (helper `160`)”。按当前仓库中的 `dangerous_helper_firewall.rs` 常量定义，以及 `vendor/linux-framework/include/uapi/linux/bpf.h` 的 helper 编号：
 
-## 1. 目标与非目标
+- `ktime_get_ns` = `5`
+- `ktime_get_boot_ns` = `125`
+- `ktime_get_coarse_ns` = `160`
+
+因此本文按 **仓库/UAPI 当前编号** 设计：
+
+- `ktime_get_ns (5)` 默认 coarseify 到 `ktime_get_coarse_ns (160)`
+- `ktime_get_boot_ns (125)` 可作为同类扩展项，默认先 `audit`
+
+如果后续策略希望把 `125` 也 coarseify，可复用同一套动作类型，但它不应在文档里和 `ktime_get_ns` 混写。
+
+## 1. 目标与范围
 
 ### 1.1 目标
 
-`DangerousHelperFirewallPass` 的 Phase 1 目标是：
+`DangerousHelperFirewallPass` 需要在 `BpfProgram.insns` 上完成四类动作：
 
-1. 在 `BpfProgram.insns` 中识别危险 regular helper call。
-2. 按 helper 策略做三种处理：
-   - `deny`: 中和 helper 副作用，并给后续代码留下明确错误值。
-   - `coarseify`: 用返回类型兼容、语义更保守的 helper 替换。
-   - `audit`: 仅记录命中位点，不改字节码。
-3. 让 pass 结果能够直接进入现有 REJIT / rollback 流水线。
+1. 识别 regular helper call：`BPF_CALL + src_reg()==0`
+2. 依据 helper 策略执行：
+   - `deny / fail-closed`
+   - `redaction`
+   - `coarseify`
+   - `allowlist`
+3. 对不能安全改写的站点保守降级到 `audit`
+4. 产出可直接进入现有 `PassManager -> REJIT -> re-verify` 流水线的字节码
 
-### 1.2 非目标
+### 1.2 本文覆盖的最小策略集
 
-Phase 1 明确不做：
+按题目要求，Phase 1 最少覆盖：
 
-- 不在 host kernel 上直接 patch `xlated_prog_insns`。
-- 不实现 `probe_read* -> bounded read / dynptr read` 的语义级重写。
-- 不实现 `d_path -> bpf_path_d_path` 的跨 helper 语义迁移。
-- 不为 packet-mutator helper 建完整 verifier 语义模拟。
-- 不修补“helper 实现本身的内核漏洞”。
+| helper | id | 默认策略 |
+| --- | ---: | --- |
+| `send_signal` | 109 | `deny`，返回 `-EPERM` |
+| `override_return` | 58 | `deny`，返回 `-EPERM` |
+| `probe_read_kernel` | 113 | `redaction`，优先“清零 dst + 返回 `-EFAULT`”，无法证明安全时降级 `audit` |
+| `ktime_get_ns` | 5 | `coarseify` 到 helper `160` |
+| `skb_store_bytes` | 9 | 仅允许 `XDP/TC/LWT`，其余 `deny` |
 
-## 2. 背景结论与设计约束
+同一机制自然可扩展到：
 
-研究数据给出了三个直接影响实现边界的事实：
+- `send_signal_thread (117)`：与 `send_signal` 同类
+- `set_retval (187)`：与 `override_return` 同类，但需要额外语义注记
+- `ktime_get_boot_ns (125)`：与 `ktime_get_ns` 同类
+- `probe_read*` 其他 alias：与 `probe_read_kernel` 同类
 
-1. 全 corpus 一共扫描到 `91,034` 次真实 helper 调用。
-2. 真正适合 Phase 1 直接 fail-closed 的权限/控制流 helper 极少：`send_signal + override_return + set_retval` 严格集合里只有 `10` 次，其中 `set_retval` 为 `0`。
-3. 高频危险面其实是 `probe_read*` 和 `ktime_get_ns`，所以 Phase 1 必须同时支持“强中和”和“兼容性友好的降权”。
+### 1.3 非目标
 
-另一个关键约束来自 daemon 当前架构：
+Phase 1 不做以下事情：
 
-- 检测可以基于 live `xlated` 做 inventory。
-- 但 pass 真正改写的是 `BpfProgram.insns`，即 daemon 从内核取回的原始 `orig_insns`。
-- 因此本文的匹配对象始终是原始 BPF bytecode，而不是 verifier fixup 之后的内部表示。
+- 不直接 patch host kernel 上的 `xlated_prog_insns`
+- 不在 pass 里维护完整 verifier helper availability matrix
+- 不对所有 memory-writing helper 盲目做 `mov r0, imm`
+- 不做“整程序 CFG 级强制 fail path 跳转”作为默认实现
+- 不做内核 helper 实现本身的漏洞修复
 
-## 3. Pass 形态与内部数据模型
+## 2. 设计依据
 
-建议新增一个纯 transform pass：
+研究报告给出了三个直接影响实现边界的事实：
+
+1. `568` 个 `.bpf.o` 对象中扫描到 `91,034` 次真实 helper 调用
+2. 严格危险集中，权限/控制流类 helper 很少：`send_signal` `7` 次，`override_return` `3` 次
+3. 高频风险面是 `probe_read*` 与时间源 helper，而不是 `send_signal`
+
+这意味着 pass 不能只有一种动作：
+
+- 对极少数高危且语义单纯的 helper，适合 `fail-closed`
+- 对计时 helper，适合 `coarseify`
+- 对信息读取 helper，必须支持 `redaction` 或保守 `audit`
+- 对数据面 mutator，必须支持 `prog_type` allowlist
+
+## 3. 与当前 pass 框架的对接方式
+
+### 3.1 Pass 形态
+
+实现形态保持为一个普通 transform pass：
 
 ```rust
 pub struct DangerousHelperFirewallPass;
 ```
 
-建议 trait 形态：
+trait 形态：
 
 ```rust
 impl BpfPass for DangerousHelperFirewallPass {
     fn name(&self) -> &str { "dangerous_helper_firewall" }
     fn category(&self) -> PassCategory { PassCategory::Security }
-    fn required_analyses(&self) -> Vec<&str> { vec!["branch_targets", "liveness"] }
+    fn required_analyses(&self) -> Vec<&str> {
+        vec!["branch_targets", "liveness"]
+    }
 }
 ```
 
-其中：
+理由：
 
-- `branch_targets` 用于安全删除参数准备窗口，不跨 branch target 回溯。
-- `liveness` 用于证明参数寄存器定义在 helper 后不再活跃。
-- 如果 policy 关闭 cleanup，仅有 `deny/coarseify` 时理论上可以不依赖分析；但为减少分支复杂度，v1 仍可固定声明这两个 analysis。
+- `PassCategory::Security` 已在 `pass.rs` 中存在，语义上与本 pass 完全匹配
+- `branch_targets` 用于扩容重写后的分支修正，及可选的参数准备窗口删除
+- `liveness` 用于保守删除 deny 站点前的单用途参数准备
 
-建议在 pass 内维护如下私有结构：
+### 3.2 PassContext 依赖
+
+当前 `PassContext` 已提供：
+
+- `prog_type`
+- `policy`
+
+因此本设计不需要新上下文类型；只需要扩展 `PolicyConfig` 的 helper firewall 子结构。
+
+## 4. Helper 分类系统
+
+### 4.1 推荐的数据结构
+
+建议将“风险类别”和“动作策略”拆开：
 
 ```rust
-enum RiskLevel {
-    Critical,
-    High,
-    Medium,
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum HelperRiskClass {
+    FailClosed,
+    Redaction,
+    Coarseify,
+    Allowlist,
 }
 
-enum HelperAction {
-    Deny,
-    Coarseify { replacement_id: i32 },
-    Audit,
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum PolicyAction {
     Allow,
+    Audit,
+    Deny { errno: i32 },
+    Coarseify { replacement_id: i32 },
+    Redact {
+        errno: i32,
+        strategy: RedactionStrategy,
+    },
 }
 
-struct HelperRule {
-    helper_id: i32,
-    helper_name: &'static str,
-    risk: RiskLevel,
-    default_action: HelperAction,
-    phase1_rewrite: bool,
-    pure_side_effect: bool,
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum RedactionStrategy {
+    ZeroDstThenFail,
+    BoundedReadAlternative,
 }
 
-struct RewriteSite {
-    call_pc: usize,
+#[derive(Clone, Copy, Debug)]
+struct HelperPolicy {
     helper_id: i32,
     helper_name: &'static str,
-    action: HelperAction,
-    cleanup_pcs: Vec<usize>,
+    risk_class: HelperRiskClass,
+    default_action: PolicyAction,
+    allowed_prog_types: &'static [u32],
 }
 ```
 
-设计重点：
+核心点：
 
-- `Allow` 只作为 policy override 的结果存在，不出现在内建默认动作表中。
-- `pure_side_effect` 只用于决定是否尝试删除参数准备窗口；Phase 1 只建议对 `send_signal` 开启。
+- `risk_class` 解释“为什么危险”
+- `default_action` 解释“当前默认怎么做”
+- `allowed_prog_types` 只对 `Allowlist` 类 helper 有意义
+- `Allow` 不是内建默认结果，而是 override 后才会出现
 
-## 4. Helper 分类表
+### 4.2 最小默认策略表
 
-### 4.1 Phase 1 内建默认动作
+建议内建一份 hardcoded 默认表，安全上 fail-closed；外部配置只做 override。
 
-下表是 pass 的内建规则表。Phase 1 默认动作只使用 `deny / coarseify / audit` 三种。
+| helper | id | 风险类 | 默认动作 | 说明 |
+| --- | ---: | --- | --- | --- |
+| `send_signal` | 109 | `FailClosed` | `Deny { errno: -1 }` | `-EPERM` |
+| `override_return` | 58 | `FailClosed` | `Deny { errno: -1 }` | `-EPERM` |
+| `probe_read_kernel` | 113 | `Redaction` | `Redact { errno: -14, strategy: ZeroDstThenFail }` | `-EFAULT` |
+| `ktime_get_ns` | 5 | `Coarseify` | `Coarseify { replacement_id: 160 }` | `ktime_get_coarse_ns` |
+| `skb_store_bytes` | 9 | `Allowlist` | `Deny { errno: -1 }` outside allowlist | 允许集见下 |
 
-| helper id | helper 名 | 风险级别 | 默认动作 | Phase 1 是否真改写 | 说明 |
-| --- | --- | --- | --- | --- | --- |
-| 58 | `override_return` | Critical | `deny` | 是 | 直接篡改被探测函数返回路径 |
-| 109 | `send_signal` | Critical | `deny` | 是 | 直接向当前进程发信号 |
-| 187 | `set_retval` | Critical | `deny` | 是 | 可篡改 cgroup hook 最终 errno |
-| 5 | `ktime_get_ns` | Medium | `coarseify` | 是 | 降成低精度时间源 |
-| 4 | `probe_read` | High | `audit` | 否 | legacy alias，高频信息读取 |
-| 45 | `probe_read_str` | High | `audit` | 否 | 高频字符串读取 |
-| 112 | `probe_read_user` | High | `audit` | 否 | 用户态读取 |
-| 113 | `probe_read_kernel` | High | `audit` | 否 | 内核态读取 |
-| 114 | `probe_read_user_str` | High | `audit` | 否 | 用户字符串读取 |
-| 115 | `probe_read_kernel_str` | High | `audit` | 否 | 内核字符串读取 |
-| 117 | `send_signal_thread` | Critical | `audit` | 否 | 语义与 `send_signal` 接近，Phase 1 先只记录 |
-| 118 | `jiffies64` | Medium | `audit` | 否 | 低精度时间源，先作为 timing inventory |
-| 125 | `ktime_get_boot_ns` | Medium | `audit` | 否 | 另一类高精度时间源 |
-| 147 | `d_path` | High | `audit` | 否 | 路径泄露 |
-| 148 | `copy_from_user` | High | `audit` | 否 | 用户态数据吸入 |
-| 149 | `snprintf_btf` | High | `audit` | 否 | BTF 结构外带 |
-| 180 | `find_vma` | High | `audit` | 否 | 地址空间信息泄露 |
-| 36 | `probe_write_user` | Critical | `audit` | 否 | 风险很高，但 Phase 1 不做 stub |
-| 9 | `skb_store_bytes` | High | `audit` | 否 | 数据面包修改，留到后续按 prog_type 细化 |
-| 44 | `xdp_adjust_head` | High | `audit` | 否 | 数据面 headroom 修改 |
-| 38 | `skb_change_tail` | High | `audit` | 否 | 数据面 tail 修改 |
-| 50 | `skb_adjust_room` | High | `audit` | 否 | 数据面 room 修改 |
-| 65 | `xdp_adjust_tail` | High | `audit` | 否 | 数据面 tail 修改 |
-| 190 | `xdp_store_bytes` | High | `audit` | 否 | XDP 包内容修改 |
+`skb_store_bytes` 默认允许的 `prog_type`：
 
-### 4.2 为什么 `send_signal` / `override_return` / `set_retval` 先做 hard rewrite
+- `BPF_PROG_TYPE_SCHED_CLS = 3`
+- `BPF_PROG_TYPE_SCHED_ACT = 4`
+- `BPF_PROG_TYPE_XDP = 6`
+- `BPF_PROG_TYPE_LWT_IN = 18`
+- `BPF_PROG_TYPE_LWT_OUT = 19`
+- `BPF_PROG_TYPE_LWT_XMIT = 20`
 
-因为它们同时满足三条：
+这里 **不默认包含 `SK_SKB (14)`**，因为题目要求是 “only allow in XDP/TC/LWT”。如果将来要扩大 allowlist，应通过策略 override 显式打开。
 
-1. 真实使用量极低，兼容性风险可接受。
-2. 风险语义非常直接，不需要上下文解释。
-3. helper 返回值都是 scalar，适合直接 stub。
+### 4.3 为什么默认表必须 hardcoded
 
-### 4.3 为什么 `probe_read*` 先只审计
+推荐模式是：
 
-因为这类 helper 高频且经常是 observability agent 的主体功能。Phase 1 如果直接改成 `r0 = -EFAULT`，兼容性破坏会非常大；而语义保真的 bounded read / dynptr rewrite 又超出当前 pass 的最小实现范围。
+1. pass 内 hardcoded 一份最小默认表
+2. daemon 启动时可加载 YAML/CLI override
+3. 如果配置文件缺失、损坏或字段不认识，回退到内建默认表
+
+原因：
+
+- 这是安全 pass，不应因为缺少配置文件而静默放开 helper
+- helper 编号、默认 allowlist、返回 errno 应与当前仓库实现一起版本化
+- 配置文件更适合做环境差异化，而不是承载唯一真相
 
 ## 5. Pattern Detection
 
-## 5.1 regular helper call 的识别规则
+### 5.1 通用 helper 检测规则
 
-危险 helper 的匹配条件是：
+线性扫描 `program.insns`，识别条件为：
 
 ```text
 insn.code == (BPF_JMP | BPF_CALL)
 insn.src_reg() == 0
-insn.imm == helper_id
+helper_id = insn.imm
 ```
 
-这里必须明确排除：
+必须显式排除：
 
-- pseudo-call：`src_reg() == BPF_PSEUDO_CALL (1)`
-- kfunc call：`src_reg() == BPF_PSEUDO_KFUNC_CALL (2)`
-- kinsn sidecar / packed call
+- pseudo-call：`src_reg()==BPF_PSEUDO_CALL`
+- kfunc call：`src_reg()==BPF_PSEUDO_KFUNC_CALL`
+- kinsn packed / sidecar call
 
-因此 matcher 不应该只看 `insn.is_call()`，还必须同时检查 `src_reg() == 0`。
+这与研究脚本统计口径一致，也和当前 `dangerous_helper_firewall.rs` 的实现风格一致。
 
-## 5.2 扫描方式
+### 5.2 通用扫描骨架
 
-建议沿用现有 pass 的线性扫描风格：
-
-1. `pc = 0`
-2. 逐条读取 `program.insns[pc]`
-3. 如果是 regular helper call，则取 `helper_id = insn.imm`
-4. 查规则表，决定是否生成 `RewriteSite`
-5. `pc += insn_width(insn)`；`LD_IMM64` 仍按 2-slot 前进
-
-这里不需要完整 dataflow；helper 检测只看 call 本体即可。
-
-## 5.3 `prog_type` 在检测阶段的作用
-
-`PassContext.prog_type` 在 Phase 1 主要用于两件事：
-
-1. 选择 policy profile。
-2. 判断“该 helper 在该程序类型下是否属于 expected but dangerous”。
-
-建议在 pass 内引入一个轻量分组，而不是硬编码完整 kernel helper availability matrix：
+扫描逻辑可复用现有 pass 的线性模板：
 
 ```rust
-enum ProgramClass {
-    TracingLike,
-    DatapathLike,
-    CgroupLike,
-    Other,
+let mut pc = 0usize;
+while pc < insns.len() {
+    let insn = &insns[pc];
+    if insn.is_call() && insn.src_reg() == 0 {
+        let helper_id = insn.imm;
+        // 查策略表
+    }
+    pc += insn_width(insn);
 }
 ```
 
-示意映射：
+其中 `insn_width()` 必须像 `skb_load_bytes.rs` / `bounds_check_merge.rs` 那样正确处理 `LD_IMM64` 的双槽宽度。
 
-- `TracingLike`: `KPROBE / TRACEPOINT / PERF_EVENT / RAW_TRACEPOINT / TRACING / LSM`
-- `DatapathLike`: `SCHED_CLS / SCHED_ACT / XDP / SK_SKB / LWT_*`
-- `CgroupLike`: 各类 cgroup hook
-- 其余为 `Other`
+### 5.3 `prog_type` 感知
 
-注意：
+`PassContext.prog_type` 在本 pass 中的用途不是证明 helper 一定可用，而是决定 policy：
 
-- v1 不用 `prog_type` 证明 helper 一定可用。
-- 真正的 helper 可用性仍交给 REJIT 之后的 verifier。
-- `prog_type` 只是用于 policy 选择和审计分级。
+- `skb_store_bytes`：是否在 allowlist 内
+- `ktime_get_ns`：是否 coarseify，或在未知 `prog_type` 时退化为 audit
+- `probe_read_kernel`：是否允许尝试 redaction，或仅记录 audit
 
-## 6. Rewrite 算法
+推荐做法：
 
-## 6.1 总体流程
+1. 内部仍然用 **精确的 u32 prog_type 值** 做最终判定
+2. 配置层允许用逻辑分组名，例如 `datapath_like` / `tracing_like`
+3. 载入配置时把分组名展开成精确 `u32` 集合
 
-建议 `run()` 分成四步：
+### 5.4 `probe_read_kernel` 的额外模式匹配
 
-1. 扫描 `insns`，收集 `RewriteSite` 与 `audit` 命中。
-2. 对 `deny/coarseify` 站点构造替换计划。
-3. 如果存在可删参数准备窗口，走一次 rebuild，生成 `addr_map` 并修正 branch。
-4. 记录 `PassResult`：
-   - 改写站点进入 `sites_applied`
-   - 纯审计站点进入 `sites_skipped`
-   - audit summary 放进 `diagnostics`
+`probe_read_kernel` 与 `send_signal`/`override_return` 不同：它不仅返回 `r0`，还会向 `dst` 写数据。因此它不能只看 helper ID，还必须知道：
 
-## 6.2 Fail-Closed Stub
+- `r1` 是否是可证明安全的目标地址
+- `r2` 是否是可证明的有界长度
 
-### 6.2.1 基本规则
-
-对以下 helper：
-
-- `send_signal` (`109`)
-- `override_return` (`58`)
-- `set_retval` (`187`)
-
-把原来的：
-
-```text
-call helper_id
-```
-
-改成：
-
-```text
-mov64 r0, -1
-```
-
-即：
+推荐 Phase 1 只支持 **fp-relative stack dst + 常量长度** 的 redaction 匹配，方法参考 `skb_load_bytes.rs` 的轻量寄存器抽象解释：
 
 ```rust
-BpfInsn::mov64_imm(0, -1)
-```
-
-原因：
-
-- `-1` 在 Linux errno 语义里就是 `-EPERM`
-- 这是单条指令，和原 `call` 同宽
-- 后续若存在 `if r0 != 0 goto err`、`if r0 < 0 goto err` 之类错误检查，仍能自然落到 fail path
-
-### 6.2.2 为什么不能直接改成 NOP
-
-不能把 `call` 直接删掉或改成 `ja +0`，因为：
-
-1. helper call 定义了 `r0`
-2. 后续代码很可能立刻分支检查 `r0`
-3. 裸 NOP 会让后继指令读取旧 `r0`
-
-所以 fail-closed 必须显式写 `r0`。
-
-### 6.2.3 `r0` 被后续检查时的语义
-
-典型例子：
-
-```text
-call 109
-if r0 != 0 goto err
-...
-```
-
-改写后：
-
-```text
-mov64 r0, -1
-if r0 != 0 goto err
-...
-```
-
-结果是程序稳定走错误分支；这就是期望的 fail-closed 行为。
-
-### 6.2.4 `set_retval` 的特殊 caveat
-
-`set_retval` 与 `send_signal` / `override_return` 不同，它的危险性来自 helper 的副作用，而不是 helper 返回值本身。
-
-例如 UAPI 文档明确给出了这种模式：
-
-```c
-bpf_set_retval(-EPERM);
-return 1;
-```
-
-如果仅把 helper 改成：
-
-```text
-mov64 r0, -1
-```
-
-那么：
-
-- helper 的“写最终返回值”副作用被中和了
-- 但程序后面如果继续 `return 1`，整个 cgroup hook 未必 fail-closed
-
-因此 v1 设计应明确：
-
-1. `set_retval -> mov64 r0, -1` 只保证中和危险 helper primitive。
-2. 它不保证“整个程序最终一定拒绝”。
-3. 若扫描发现 `set_retval` 后 helper 返回值未被检查，pass 应追加高优先级审计诊断。
-4. 真正的“强制整程序 fail-closed”要到 Phase 2 再做 CFG-aware exit rewrite。
-
-这不是实现 bug，而是 `set_retval` 语义本身决定的限制。
-
-## 6.3 Coarseify
-
-### 6.3.1 基本规则
-
-对：
-
-- `ktime_get_ns` (`5`)
-
-把：
-
-```text
-call 5
-```
-
-改成：
-
-```text
-call 160
-```
-
-即：
-
-- `imm: 5 -> 160`
-- `code/off/regs` 原样保持
-
-### 6.3.2 为什么这是安全替换
-
-设计上依赖两条事实：
-
-1. `ktime_get_ns` 与 `ktime_get_coarse_ns` 都是无参数 helper。
-2. 两者返回值都是 `u64` scalar。
-
-因此 coarseify 不需要改参数准备，也不会改变后续对 `r0` 的类型假设。
-
-### 6.3.3 `prog_type` 与 coarseify
-
-v1 不试图在 daemon 里维护一份完整 helper availability matrix。建议策略是：
-
-- 对已知 profile 默认执行 coarseify。
-- 对 `prog_type == 0` 或 operator 明确要求保守模式时，降级成 `audit`。
-- 最终接受性仍以 REJIT verifier 为准。
-
-## 6.4 Audit-Only
-
-对 audit-only helper，pass 不改字节码。
-
-建议行为：
-
-1. 记录一个审计事件，包含：
-   - `pc`
-   - `helper_id`
-   - `helper_name`
-   - `prog_type`
-   - `risk_level`
-2. 在当前 pass framework 下，不额外扩展 `PassResult` 结构，直接把 audit 命中编码进：
-   - `sites_skipped`
-   - `diagnostics`
-
-建议 skip reason 文案类似：
-
-```text
-audit-only dangerous helper probe_read_kernel (#113)
-```
-
-这样 `cmd_rewrite` 与 server JSON 都能直接看到。
-
-## 6.5 参数准备窗口删除（逻辑上的 NOP out）
-
-### 6.5.1 适用范围
-
-用户要求里提到：对纯副作用 helper，例如 `send_signal`，在 deny 后还应尽量 NOP out 它的参数准备。
-
-v1 建议只对 `send_signal` 开启，原因是：
-
-- 只有一个实参，窗口最容易证明。
-- 删除后不影响 replacement 指令。
-- `override_return` / `set_retval` 的参数语义更复杂，收益没那么高。
-
-### 6.5.2 安全删除条件
-
-对 `send_signal` 的 deny site，向前回溯单用途参数准备窗口，只有同时满足以下条件才删：
-
-1. 只回溯当前 basic block，不跨 branch target。
-2. 只考虑最后一次定义 `r1` 的指令链。
-3. 指令必须是无副作用、纯寄存器/常量准备：
-   - `mov64_imm`
-   - `ldimm64`
-   - `mov64_reg`
-   - `alu64 add/sub imm` 到同一寄存器
-4. 这些定义只服务于该 helper，不被别的活跃用途共享。
-5. `liveness` 证明这些定义在 `call_pc + 1` 之后不再活跃。
-
-不满足任一条件就保守跳过 cleanup，只做 call stub。
-
-### 6.5.3 实现方式
-
-这里虽然用户表述是“NOP out”，但实现上更好的方式不是原位写 NOP，而是：
-
-1. 扫描阶段把这些 setup PC 记入 `cleanup_pcs`
-2. rebuild 新指令流时直接省略这些 PC
-3. 生成 `addr_map`
-4. 调用 `fixup_all_branches()`
-
-这样做比原位 NOP 更好，因为：
-
-- 能安全处理 `ldimm64` 这类 2-slot 指令
-- 不会在最终字节码里留下多余 `ja +0`
-- 完全复用现有 `bounds_check_merge.rs` / `utils.rs` 风格
-
-语义上它等价于“先 NOP out，再物理清理 NOP”。
-
-### 6.5.4 rebuild 模式
-
-建议重写器沿用如下模式：
-
-- `replacements: BTreeMap<usize, Vec<BpfInsn>>`
-- `skip_pcs: HashSet<usize>`
-- `addr_map: Vec<usize>`
-
-遍历原始指令流时：
-
-- 若 `pc` 是 helper call 的替换位点，则发射 replacement
-- 若 `pc` 在 `skip_pcs`，则跳过
-- 否则复制原指令
-
-完成后：
-
-- `fixup_all_branches(&mut new_insns, &old_insns, &addr_map)`
-- `program.remap_annotations(&addr_map)`
-
-若没有 cleanup，`deny/coarseify` 都是等宽改写，可以直接原位改并保留注解长度不变。
-
-## 7. Policy Configuration
-
-## 7.1 不建议只做 allowlist/denylist 二元配置
-
-因为本 pass 有三种默认动作：
-
-- `deny`
-- `coarseify`
-- `audit`
-
-再加上 operator override 还需要 `allow`。所以纯二元 `allowlist/denylist` 不够表达。
-
-建议使用 YAML 显式动作表。
-
-## 7.2 推荐 YAML 结构
-
-建议新增 daemon 级 policy 文件，例如：
-
-```yaml
-version: 1
-
-defaults:
-  action_by_helper:
-    send_signal: deny
-    override_return: deny
-    set_retval: deny
-    ktime_get_ns: coarseify
-    probe_read: audit
-    probe_read_str: audit
-    probe_read_user: audit
-    probe_read_kernel: audit
-    probe_read_user_str: audit
-    probe_read_kernel_str: audit
-    d_path: audit
-    copy_from_user: audit
-    snprintf_btf: audit
-    find_vma: audit
-
-prog_type_overrides:
-  tracing_like:
-    action_by_helper:
-      ktime_get_ns: coarseify
-  datapath_like:
-    action_by_helper:
-      skb_store_bytes: audit
-      xdp_adjust_head: audit
-  cgroup_like:
-    action_by_helper:
-      set_retval: deny
-
-options:
-  cleanup_send_signal_args: true
-  conservative_unknown_prog_type: true
-```
-
-### 7.2.1 解析规则
-
-建议：
-
-- YAML 中 helper 优先写名字，加载时统一归一化到 `i32 helper_id`
-- `prog_type_overrides` 可以先支持 symbolic class，而不是穷举数值
-- 内部表示统一成：
-
-```rust
-HashMap<i32, HelperAction>
-```
-
-## 7.3 规则优先级
-
-建议优先级：
-
-1. `prog_type` override
-2. 全局 `defaults.action_by_helper`
-3. 内建默认表
-4. 未命中的 helper 视为 `allow`
-
-## 7.4 与现有 `PassContext` 的对接
-
-当前 `PassContext.policy` 只有：
-
-- `enabled_passes`
-- `disabled_passes`
-
-实现上建议在 `PolicyConfig` 中追加一个专门子结构，例如：
-
-```rust
-pub struct DangerousHelperPolicy {
-    pub action_by_helper: HashMap<i32, HelperAction>,
-    pub prog_type_overrides: HashMap<ProgramClass, HashMap<i32, HelperAction>>,
-    pub cleanup_send_signal_args: bool,
-    pub conservative_unknown_prog_type: bool,
+enum RegValue {
+    Unknown,
+    Ctx,
+    Const(i64),
+    FpPlusConst(i32),
 }
 ```
 
-然后：
+对 `probe_read_kernel(dst=r1, len=r2, src=r3)`，只在以下条件满足时做 redaction rewrite：
 
-- daemon 启动时加载 YAML
-- 归一化后放进 `PassContext.policy`
-- `commands.rs` 里复制 `ctx` 时，这些字段随 `local_ctx` 一起带入
+1. `r1 == FpPlusConst(off)`，且 `off < 0`
+2. `r2 == Const(len)`，且 `0 < len <= MAX_REDACT_LEN`
+3. `[fp+off, fp+off+len)` 全部在合法 stack 区间内
+4. call PC 不是 branch target
 
-## 8. Pass Context Requirements
+否则降级为 `audit`。
 
-## 8.1 必需字段
+这样做的原因很重要：`probe_read_kernel` 常见目标就是 stack buffer。如果只把 call 改成 `mov r0, -EFAULT`，后续可能读取“原本应被 helper 初始化、现在却未初始化”的 stack 区间，导致 verifier 拒绝或语义不稳。
 
-Phase 1 只要求 `PassContext` 至少提供：
+## 6. Rewrite 动作设计
 
-1. `prog_type`
-2. helper firewall policy
+### 6.1 `deny / fail-closed`
 
-`prog_type` 已经在现有 `PassContext` 里存在，因此这部分无需新建上下文机制。
+#### 6.1.1 默认实现：等宽替换
 
-## 8.2 为什么必须要 `prog_type`
-
-因为同一个 helper 在不同程序类里的语义预期不同：
-
-- `probe_read*` 在 tracing 类程序里是 expected-but-dangerous
-- `skb_store_bytes` / `xdp_adjust_head` 在 datapath 程序里才合理
-- `set_retval` 明显属于 cgroup / policy 类上下文
-
-因此 `prog_type` 至少影响：
-
-1. 默认 profile 选择
-2. 审计等级
-3. 是否对 unknown program 保守退化成 `audit`
-
-## 8.3 Phase 1 不必引入的上下文字段
-
-Phase 1 不强制要求 pass 直接拿到：
-
-- `prog_name`
-- `attach_type`
-- loader provenance
-- ELF 签名信息
-
-这些可以留到后续 admission / trusted-loader 设计再加。当前 pass 只靠 `prog_type + helper policy` 就能落地。
-
-## 9. Verifier Acceptance
-
-## 9.1 为什么 fail-closed stub 一般 verifier-friendly
-
-因为本文 Phase 1 真正改写的 helper 都满足：
-
-- 返回值是 scalar/integer
-- 不返回 `PTR_TO_*`
-
-因此把：
+对 `send_signal (109)`、`override_return (58)`，默认改写为：
 
 ```text
 call helper
 ```
 
-换成：
+替换成：
 
 ```text
 mov64 r0, -1
 ```
 
-在 verifier 看来只是“显式给 `r0` 一个标量常量值”。
+即：
 
-## 9.2 为什么 `ktime_get_ns -> ktime_get_coarse_ns` 一般 verifier-friendly
+```rust
+BpfInsn::mov64_imm(0, -1)   // -EPERM
+```
 
-因为两者：
+优点：
 
-- 参数个数一致：都无参数
-- 返回类型一致：都给 `r0` 一个标量时间值
+- 单条指令，和原 `call` 同宽
+- 指令数不变，不需要 branch fixup
+- 后续如果已有 `if r0 != 0 goto err` 或 `if r0 < 0 goto err`，会自然进入错误路径
 
-所以后续对 `r0` 的使用不会出现 type mismatch。
+#### 6.1.2 关于题目里的 `JA +N`
 
-## 9.3 边界条件：不要把该套路泛化到所有 helper
-
-这个 stub 模式不能泛化到：
-
-- 返回 pointer 的 helper
-- 会触发 verifier 特殊状态变迁的 helper
-- packet pointer invalidation helper
-
-例如 `skb_store_bytes` / `xdp_adjust_head` 这类 helper 可能影响 packet pointer proof；对它们简单 `mov r0, -1` 并不构成通用安全设计。因此 Phase 1 只审计它们。
-
-## 9.4 关于 helper call clobber 的说明
-
-helper call 在 BPF ABI 上会消耗 `r1-r5`，而 `mov64 r0, -1` 不会。
-
-这在 Phase 1 可接受，理由是：
-
-1. 合法编译出来的 BPF 程序本就不应跨 helper call 继续依赖 `r1-r5`
-2. 本文只对少数 scalar-return helper 做 stub
-3. 真正危险的“call 后特殊 verifier 状态” helper 不在 stub 集合内
-
-但这也是为什么本设计不应用于更宽泛 helper 集。
-
-## 10. PassManager 集成与排序
-
-## 10.1 排序要求
-
-`DangerousHelperFirewallPass` 必须放在 canonical pipeline 最后。
+题目里写了 “`r0 = -EPERM; JA +N`”。实现上应将其视为 **可选的 Phase 2 CFG 强化模式**，而不是 Phase 1 默认动作。
 
 原因：
 
-1. 它是安全策略 pass，不是性能优化 pass。
-2. 其输出不应再被后续 pass 合并、折叠或重写。
-3. 前面的优化 pass 可能会消掉一部分 helper 周围的冗余代码，最后再做 firewall 命中率更高、逻辑更简单。
-4. 参数窗口删除会改指令地址；放最后能减少后续 pass 重新建立地址映射的成本。
+1. 插入 `JA +N` 会改变指令数，需要 rebuild + `addr_map` + branch fixup
+2. `N` 不是局部常量，必须先证明“哪个块是 helper 的 fail path”
+3. 很多程序本来就有 `if r0 != 0 goto err`，再额外插 `JA` 只会复杂化控制流
 
-## 10.2 在 `PASS_REGISTRY` 中的位置
+因此推荐分两档：
 
-建议把它注册在 `PASS_REGISTRY` 最后一个条目，连 `speculation_barrier` 之后也要排在它后面：
+- Phase 1 默认：只做 `mov64 r0, -EPERM`
+- Phase 2 可选：若识别到紧随 call 的标准错误分支，可做 `mov64 r0, -EPERM` 后直接跳到既有 error block
+
+### 6.2 `coarseify`
+
+对 `ktime_get_ns`：
 
 ```text
-...
-branch_flip
-speculation_barrier
-dangerous_helper_firewall
+call 5
 ```
 
-这样：
+替换成：
 
-- 默认 pipeline 中，它自然成为最后一个 pass
-- 自定义 `--passes` 选择时，仍保持 canonical order
-- 原因是现有 `build_default_pipeline()` 与 `build_pipeline_with_passes()` 都按 `PASS_REGISTRY` 顺序迭代；因此只要 registry 尾部追加一次，就能同时约束两条构造路径
+```text
+call 160
+```
 
-## 10.3 是否默认启用
+即只改 `imm`：
 
-建议默认启用。
+```rust
+let mut insn = old_insns[pc];
+insn.imm = 160;
+```
+
+不改：
+
+- `code`
+- `regs`
+- `off`
+
+这是最简单、最稳妥的一类 rewrite。
+
+### 6.3 `redaction` for `probe_read_kernel`
+
+#### 6.3.1 为什么不能一律只做 `mov64 r0, -14`
+
+`mov64 r0, -14` 本身是合法指令，但 **不等于“总是 verifier-safe 的 helper 替身”**。问题不在返回值，而在 helper 的副作用：
+
+- 原 helper 会初始化 `dst` 指向的内存
+- 纯 `mov r0, -EFAULT` 不会初始化任何内存
+- 若后续代码仍读取该内存，重写后的程序可能触发未初始化 stack 读
+
+因此：
+
+- 对 `send_signal` / `override_return`，单纯 `mov r0, imm` 是合理的
+- 对 `probe_read_kernel`，必须使用“带内存语义的 redaction”，或保守退回 `audit`
+
+#### 6.3.2 推荐的 Phase 1 redaction 形态
+
+当检测到 `dst` 是 fp-relative stack 且 `len` 是有界常量时，生成：
+
+1. 若需要，先把 `r0` 置零作为 store 源
+2. 向 `[fp+off, fp+off+len)` 写零
+3. 最后 `mov64 r0, -14`
+
+语义是：
+
+- 不再泄露真实内核数据
+- 但目标 buffer 仍然被初始化为确定值
+- 后续代码读取该 buffer 时 verifier 仍可接受
+- 返回值明确表示 helper 失败
+
+示意：
+
+```text
+call bpf_probe_read_kernel(dst, len, src)
+```
+
+改写为：
+
+```text
+r0 = 0
+*(dst + 0 .. len-1) = 0
+r0 = -EFAULT
+```
+
+Phase 1 只建议支持小长度、常量长度的 stack redaction，例如 `MAX_REDACT_LEN = 64`。超过上限或目标不是 stack 时，直接降级 `audit`。
+
+#### 6.3.3 `BoundedReadAlternative`
+
+如果将来要做更强的兼容性保留，可把 `RedactionStrategy::BoundedReadAlternative` 留作 Phase 2：
+
+- 例如转成受限的安全读取 helper/kfunc
+- 或在已知上下文中转成显式边界检查后的逐字节读取
+
+Phase 1 不建议在没有强上下文证明的情况下实现它。
+
+### 6.4 `allowlist` for `skb_store_bytes`
+
+`skb_store_bytes (9)` 的处理规则：
+
+1. 如果 `prog_type` 属于 `{3,4,6,18,19,20}`，保留原 call
+2. 否则阻断，默认改写为：
+
+```rust
+BpfInsn::mov64_imm(0, -1)   // -EPERM
+```
+
+为什么这类 helper 用 allowlist 而不是纯 deny：
+
+- 它本身是数据面 mutator，在 datapath 程序里经常是合理能力
+- 同样的 helper 出现在 tracing/LSM/cgroup 程序里，风险就明显更高
+
+与 `send_signal` 类似，Phase 2 可以增加“直接跳到既有错误块”的强化版 CFG rewrite；Phase 1 默认只做等宽 deny。
+
+## 7. 寄存器 clobber、宽度与分支修正
+
+### 7.1 helper ABI 约束
+
+regular helper call 的 ABI 语义是：
+
+- `r0` 保存返回值
+- `r1-r5` 视为 call-clobbered
+- `r6-r9` 保持
+- `r10` 是 frame pointer
+
+### 7.2 为什么 `mov64 r0, imm` 仍然可行
+
+`mov64 r0, imm` 只显式写 `r0`，不像 helper call 那样“杀死” `r1-r5`。这在本设计中可接受，原因是：
+
+1. 原程序已经通过 verifier，合法程序本来就不能在 helper call 之后继续依赖旧 `r1-r5`
+2. 因此把 call 替换成 `mov r0, imm` 不会让合法原程序出现新的真实依赖
+3. 对需要更多 scratch 的扩容 rewrite，可以只使用 `r0-r5`，仍然 ABI 兼容
+
+### 7.3 什么时候需要 branch fixup
+
+不需要 branch fixup 的情况：
+
+- `deny` 的等宽 `call -> mov64`
+- `coarseify` 的 `imm` 原位替换
+
+需要 branch fixup 的情况：
+
+- `probe_read_kernel` 扩容 redaction
+- 插入 `JA +N` 的强化 fail-closed 模式
+- 删除 dead 参数准备窗口
+
+实现方式应复用现有 pass 的通用模式：
+
+1. 构造 `replacements` / `deleted_pcs`
+2. rebuild 新指令流
+3. 生成 `addr_map`
+4. 调用 `fixup_all_branches(&mut new_insns, &old_insns, &addr_map)`
+5. `program.remap_annotations(&addr_map)`
+
+这与 `skb_load_bytes.rs`、`bounds_check_merge.rs` 的做法一致。
+
+## 8. Verifier 接受性分析
+
+### 8.1 `send_signal` / `override_return`
+
+这两类 helper 适合直接 `mov r0, -EPERM`，原因是：
+
+- 返回值是 scalar
+- 不向外部内存写初始化结果
+- 不产生 verifier 需要跟踪的 pointer/ref 状态
+
+因此 rewrite 后 verifier 看到的只是“`r0` 被赋成常量错误码”。
+
+### 8.2 `ktime_get_ns -> ktime_get_coarse_ns`
+
+接受性理由：
+
+- 参数个数相同：都是无参数 helper
+- 返回类型相同：都是 `u64` scalar in `r0`
+- call-clobber 语义相同：仍然是 regular helper call
+
+所以这是最稳的一类 rewrite。
+
+### 8.3 `probe_read_kernel`
+
+这里必须明确写出边界：
+
+- “`MOV r0, -EFAULT` 总是 valid instruction” 这句话成立
+- 但“把 memory-writing helper 直接替换成 `MOV r0, -EFAULT` 总是 verifier-safe” 这句话 **不成立**
+
+真正安全的结论应是：
+
+- 若 replacement 同时保留“dst 已初始化”的语义，则通常可接受
+- 若做不到，就不能强行 rewrite，必须降级成 `audit`
+
+这也是本文把 `probe_read_kernel` 放到 `Redaction` 类，而不是 `FailClosed` 类的根本原因。
+
+### 8.4 `skb_store_bytes`
+
+对 allowlist 之外的 `skb_store_bytes`，`mov r0, -EPERM` 在 verifier 层面通常可接受，因为：
+
+- 返回值是 scalar
+- 原 helper 的 packet mutation 不会在 verifier 中变成“必须发生的初始化副作用”
+
+但语义上仍有一条 caveat：
+
+- 如果原程序根本不检查 `r0`，它可能继续走 success path，只是包没有被修改
+
+所以：
+
+- Phase 1 的最小实现是“阻断 helper primitive”
+- 真正的“强制整个程序走 fail path”需要 Phase 2 的 CFG-aware rewrite
+
+## 9. Policy 配置
+
+### 9.1 推荐策略：内建默认表 + 可选 YAML override
+
+推荐顺序：
+
+1. hardcoded 默认表
+2. 载入 YAML override
+3. 最终生成运行时 `HashMap<i32, EffectiveHelperPolicy>`
 
 理由：
 
-- `send_signal` / `override_return` / `set_retval` 的 corpus 使用极少
-- `audit-only` 规则本身不破坏程序
-- `ktime_get_ns -> coarseify` 是安全加固，不是激进语义迁移
+- 没有配置文件时仍然有安全默认值
+- 不同部署环境可以微调 allowlist 或审计等级
+- pass 内部仍保持 O(1) helper_id 查表
 
-若 operator 不希望启用，可继续使用现有 `disabled_passes` 机制关闭整个 pass。
+### 9.2 推荐的 `PolicyConfig` 扩展
 
-## 11. Test Plan
+建议在现有 `PolicyConfig` 中增加：
 
-Phase 1 不需要 VM/kernel 运行测试就能完成核心单元验证。建议全部放在 daemon crate 的 `#[cfg(test)]` 单元测试里。
+```rust
+pub struct DangerousHelperFirewallConfig {
+    pub enabled: bool,
+    pub global_audit_mode: bool,
+    pub helper_overrides: HashMap<i32, PolicyAction>,
+    pub prog_type_overrides: HashMap<u32, HashMap<i32, PolicyAction>>,
+    pub unknown_prog_type_fallback_audit: bool,
+    pub enable_arg_cleanup: bool,
+    pub max_redact_len: u32,
+}
+```
 
-### 11.1 检测类测试
+然后挂到：
 
-1. `test_detects_regular_helper_call_only`
-   - `src_reg == 0` 的 `call 109` 被识别
-   - pseudo-call / kfunc call 不被识别
-2. `test_helper_scan_skips_unknown_helper`
-   - 非规则表 helper 被忽略
-3. `test_scan_handles_ldimm64_width`
-   - 扫描不会把 `LD_IMM64` 第二槽当成独立指令
+```rust
+pub struct PolicyConfig {
+    pub enabled_passes: Vec<String>,
+    pub disabled_passes: Vec<String>,
+    pub dangerous_helper_firewall: DangerousHelperFirewallConfig,
+}
+```
 
-### 11.2 Fail-Closed 测试
+### 9.3 推荐 YAML 结构
 
-4. `test_deny_rewrites_send_signal_to_mov_r0_neg1`
-5. `test_deny_rewrites_override_return_to_mov_r0_neg1`
-6. `test_deny_rewrites_set_retval_to_mov_r0_neg1`
-7. `test_deny_preserves_following_r0_error_check`
-   - `call -> if r0 != 0 goto err` 改写后仍能工作
+```yaml
+dangerous_helper_firewall:
+  enabled: true
+  global_audit_mode: false
+  unknown_prog_type_fallback_audit: true
+  enable_arg_cleanup: true
+  max_redact_len: 64
 
-### 11.3 Coarseify 测试
+  helper_overrides:
+    109: deny
+    58: deny
+    113: redact
+    5: coarseify:160
+    9: allowlist
 
-8. `test_coarseify_rewrites_ktime_get_ns_5_to_160`
-9. `test_coarseify_preserves_code_regs_off`
-   - 只改 `imm`
+  prog_type_overrides:
+    6:
+      9: allow
+    3:
+      9: allow
+    4:
+      9: allow
+    18:
+      9: allow
+    19:
+      9: allow
+    20:
+      9: allow
+```
 
-### 11.4 Audit-Only 测试
+语义优先级：
 
-10. `test_audit_only_probe_read_kernel_reports_skip_without_change`
-11. `test_audit_only_d_path_reports_skip_without_change`
+1. `global_audit_mode`
+2. `prog_type_overrides`
+3. `helper_overrides`
+4. hardcoded 默认表
+5. 未命中的 helper = `Allow`
 
-### 11.5 Cleanup / NOP Removal 测试
+### 9.4 CLI 接入建议
 
-12. `test_cleanup_removes_single_use_send_signal_arg_setup`
-13. `test_cleanup_does_not_cross_branch_target`
-14. `test_cleanup_does_not_remove_live_arg_setup`
-15. `test_cleanup_handles_ldimm64_as_two_slot_delete`
+当前 CLI 只有 `--passes` / `--list-passes` / `--no-rollback` / `--pgo`。建议新增：
 
-### 11.6 Policy 测试
+- `--dangerous-helper-policy <path>`
+- `--dangerous-helper-audit-only`
 
-16. `test_policy_override_allows_helper`
-17. `test_policy_override_changes_ktime_from_coarseify_to_audit`
-18. `test_unknown_prog_type_uses_conservative_profile`
+语义：
 
-### 11.7 Pipeline 集成测试
+- `--dangerous-helper-policy`：加载 YAML override
+- `--dangerous-helper-audit-only`：强制本次运行只做 inventory，不改字节码
 
-19. `test_firewall_pass_is_last_in_default_pipeline`
-20. `test_pipeline_runs_firewall_after_speculation_barrier_when_requested`
+## 10. Audit Mode 设计
 
-## 12. 已知限制与 Phase 2 扩展
+Audit mode 不是简单“忽略 rewrite”，而是：
 
-Phase 1 已知限制：
+1. 仍然跑完整检测和策略决策
+2. 计算“本来会执行什么动作”
+3. 不修改 `program.insns`
+4. 把结果编码进 `PassResult.sites_skipped` 和 `diagnostics`
 
-1. `set_retval` 只能中和 helper，不保证整程序一定拒绝。
-2. `probe_read*` 只审计，不做保语义降权。
-3. `send_signal_thread`、`probe_write_user` 等高危 helper 先只审计。
-4. `prog_type` 只用于 profile，不在 daemon 内重建完整 helper availability matrix。
+推荐文案：
 
-Phase 2 可扩展方向：
+- `would_deny dangerous helper send_signal (#109)`
+- `would_redact dangerous helper probe_read_kernel (#113)`
+- `would_coarseify dangerous helper ktime_get_ns (#5 -> #160)`
+- `would_deny disallowed helper skb_store_bytes (#9) for prog_type 5`
 
-1. `set_retval` 的 CFG-aware exit rewrite
-2. `probe_read* -> bounded read / dynptr read`
-3. `d_path -> safer helper/kfunc` 迁移
-4. packet-mutator helper 的 prog_type-aware hard deny
-5. 将审计事件升级成结构化 telemetry，而不是复用 `sites_skipped`
+这样：
 
-## 13. 结论
+- `rewrite` 子命令能直接看到 policy 命中
+- `apply` / `serve` JSON 输出也能直接带出审计结果
 
-`DangerousHelperFirewallPass` 的最小可行实现并不复杂：helper 检测只需匹配 regular `BPF_CALL`，真正的字节码改写只覆盖 `send_signal` / `override_return` / `set_retval` / `ktime_get_ns` 四类位点，其余危险 helper 先进入审计面。
+## 11. 测试计划
 
-这个边界之所以成立，核心是 corpus 数据足够偏斜：最危险的权限 helper 极少，而高频风险面主要是信息读取与高精度计时。于是 Phase 1 可以用很小的实现面拿到很强的安全收益，同时保持 verifier 风险可控、和现有 PassManager/REJIT 流水线兼容。
+### 11.1 分类与匹配
+
+1. `regular helper` 检测：`src_reg()==0` 才命中
+2. pseudo-call / kfunc call 不命中
+3. 未列入策略表的 helper 不命中
+4. `LD_IMM64` 双槽扫描不串位
+
+### 11.2 `deny`
+
+1. `send_signal` 改为 `mov64 r0, -1`
+2. `override_return` 改为 `mov64 r0, -1`
+3. 若后继存在 `if r0 != 0 goto err`，rewrite 后仍走错误分支
+4. dead 参数准备窗口只在 `liveness + branch_targets` 证明安全时删除
+
+### 11.3 `coarseify`
+
+1. `ktime_get_ns (5)` 改为 `ktime_get_coarse_ns (160)`
+2. 只改 `imm`
+3. `prog_type==0` 且策略要求保守时，退化为 `audit`
+
+### 11.4 `redaction`
+
+1. `probe_read_kernel` 的 `fp-relative stack + const len` 站点可被 redaction
+2. rewrite 后 stack 目标区被写零且 `r0==-EFAULT`
+3. call 后读取该 buffer 的程序仍能通过单元级 verifier 预期
+4. 非 stack dst 或超长 len 退化为 `audit`
+
+### 11.5 allowlist
+
+1. `skb_store_bytes` 在 `XDP/TC/LWT` 不改写
+2. `skb_store_bytes` 在 tracing/其他 `prog_type` 改为 `mov64 r0, -EPERM`
+3. allowlist 决策受 YAML override 影响
+
+### 11.6 Audit mode
+
+1. `global_audit_mode=true` 时永不改字节码
+2. 但 `sites_skipped` / `diagnostics` 正确反映“would_*”动作
+
+### 11.7 集成测试
+
+1. `dangerous_helper_firewall` 在默认 pipeline 中必须是最后一个 pass
+2. 自定义 `--passes` 仍按 canonical order 排在最后
+3. 对扩容 rewrite，`fixup_all_branches()` 后跳转目标正确
+
+## 12. Pass 排序与集成建议
+
+### 12.1 结论：放在最后
+
+推荐 `DangerousHelperFirewallPass` 放在 canonical pipeline 最后，理由是：
+
+1. 它是 security pass，不应再被后续优化 pass 改写
+2. 其他 pass 先运行，能把 helper 周围的冗余代码、常量传播和死代码先简化掉
+3. firewall 最终看到的是“优化后的最终 helper 形态”，命中最准确
+4. 扩容 rewrite 或 cleanup 会产生地址映射变化；最后做能减少后续 pass 的重新分析成本
+
+### 12.2 与当前仓库状态
+
+当前 `daemon/src/passes/mod.rs` 已经把 `dangerous_helper_firewall` 放在 `PASS_REGISTRY` 最后，这一排序应保持不变。
+
+## 13. 与当前树内实现的差异
+
+截至当前树内实现，`daemon/src/passes/dangerous_helper_firewall.rs` 已经具备：
+
+- `send_signal` / `override_return` / `send_signal_thread` / `set_retval` 的 deny
+- `ktime_get_ns (5) -> ktime_get_coarse_ns (160)` 的 coarseify
+- 多种危险 helper 的 `audit`
+- 基于 `liveness` 的保守参数清理
+
+但与本文目标设计相比，还缺少：
+
+1. `probe_read_kernel` 的真正 `redaction` rewrite
+2. `skb_store_bytes` 的 `prog_type` allowlist enforcement
+3. daemon 级 YAML/CLI policy override
+4. 全局 audit-only 模式
+5. 可选的 Phase 2 `JA +N` CFG 强化模式
+
+因此本文应视为 **DangerousHelperFirewallPass 的 v2 设计文档**：它兼容当前 pass 框架和当前实现风格，但把题目要求的安全语义补全到了真正可落地的实现边界上。
+
+## 14. 最终建议
+
+推荐按以下顺序实现：
+
+1. 保持 pass 末尾排序不变
+2. 先补 `PolicyConfig` 扩展和 `global_audit_mode`
+3. 补 `skb_store_bytes` 的 `prog_type` allowlist
+4. 实现 `probe_read_kernel` 的 `stack-zero + -EFAULT` redaction
+5. 将 `JA +N` 留到后续 CFG-aware Phase 2
+
+这样可以先把“helper 分类、配置、allowlist、审计模式”落地，再处理最难的 memory-initialization rewrite。

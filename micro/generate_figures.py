@@ -825,7 +825,7 @@ def main() -> int:
     args = parse_args()
     pure_results = load_results(Path(args.pure_json))
     causal_results = load_results(Path(args.causal_json))
-    manifest = load_manifest_from_results(pure_results, fallback=DEFAULT_MICRO_MANIFEST)
+    manifest = load_manifest_from_results(pure_results)
     figures_dir = Path(args.figures_dir)
     figures_dir.mkdir(parents=True, exist_ok=True)
 

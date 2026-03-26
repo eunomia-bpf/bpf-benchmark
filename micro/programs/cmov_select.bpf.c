@@ -13,7 +13,7 @@
 
 /*
  * Keep the actual select in a dedicated subprog so the BPF body at the
- * directive site is just register-to-register choice, not extra load work.
+ * The interesting pattern here is register-to-register choice, not extra load work.
  * The userspace scanner should find the select pattern across the full
  * translated program, not just the entry subprog.
  */

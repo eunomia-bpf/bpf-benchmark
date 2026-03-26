@@ -337,7 +337,9 @@ fn collect_cleanup_pcs(
 ) -> Vec<usize> {
     let mut cleanup = Vec::new();
     for &arg_reg in arg_regs {
-        cleanup.extend(collect_arg_cleanup_pcs(insns, call_pc, bt, liveness, arg_reg));
+        cleanup.extend(collect_arg_cleanup_pcs(
+            insns, call_pc, bt, liveness, arg_reg,
+        ));
     }
     cleanup.sort_unstable();
     cleanup.dedup();
