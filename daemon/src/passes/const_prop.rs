@@ -201,8 +201,16 @@ fn analyze_instruction(
     match insn.class() {
         BPF_LD => {
             if insn.is_ldimm64() {
-                let value = decode_ldimm64(insns, pc);
-                set_reg_const(&mut next, insn.dst_reg(), Some(value));
+                if insn.src_reg() == 0 {
+                    let value = decode_ldimm64(insns, pc);
+                    set_reg_const(&mut next, insn.dst_reg(), Some(value));
+                } else {
+                    /* Pseudo-imm forms like MAP_FD/MAP_VALUE carry verifier-visible
+                     * type via src_reg. Treat them as non-foldable so const_prop
+                     * never re-emits them as plain scalar LD_IMM64.
+                     */
+                    set_reg_const(&mut next, insn.dst_reg(), None);
+                }
             } else {
                 set_reg_const(&mut next, insn.dst_reg(), None);
             }
@@ -637,6 +645,19 @@ mod tests {
         assert_eq!(program.insns[2].imm as u32 as u64, 1);
         assert_eq!(program.insns[3].imm as u32 as u64, 1);
         assert_eq!(program.insns[4], exit_insn());
+    }
+
+    #[test]
+    fn const_prop_does_not_fold_typed_ldimm64_map_value() {
+        let typed = ld_imm64(1, 2, 0x11, 0x1a8);
+        let original = vec![typed[0], typed[1], add64_imm(1, 16), exit_insn()];
+        let mut program = BpfProgram::new(original.clone());
+
+        let result = run_const_prop_pass(&mut program);
+
+        assert!(!result.program_changed);
+        assert_eq!(result.total_sites_applied, 0);
+        assert_eq!(program.insns, original);
     }
 
     #[test]

@@ -1400,6 +1400,15 @@ The current dirty tree now includes these targeted kernel-side changes:
     `saved_dst_{prog,attach}_type`, `mod`, and `jit_requested`
   - restore release semantics for publishing the replacement image with
     `smp_store_release(&prog->bpf_func, tmp->bpf_func)`
+  - serialize `bpf_prog_get_info_by_fd()` under `prog->aux->rejit_mutex`
+    and snapshot `func[]/func_cnt/real_func_cnt` before walking subprog
+    metadata, so `bpftool prog show` fails closed with `-EIO` instead of
+    continuing through an internally inconsistent function array
+  - defer main-program kallsyms re-registration until `post_swap_sync`,
+    after the REJIT grace period
+- `vendor/linux-framework/kernel/bpf/core.c`
+  - restore `__bpf_ksym_del()` to `list_del_rcu()` semantics without the
+    early `INIT_LIST_HEAD_RCU()` self-loop, matching original `master`
 - `vendor/linux-framework/include/linux/filter.h`
   - switch `__bpf_prog_run()` to `smp_load_acquire(&prog->bpf_func)` so the
     runtime execution path pairs with the release-store publish above
@@ -1407,17 +1416,6 @@ The current dirty tree now includes these targeted kernel-side changes:
   - make `bpf_struct_ops_refresh_prog()` tolerate already-updated call sites
   - add local rollback of already-patched call sites if a later `text_poke`
     fails, instead of leaving a partial mixed old/new trampoline image behind
-
-One candidate fix was reviewed and then intentionally dropped from the current
-dirty tree:
-
-- `bpf_prog_get_info_by_fd()` is **not** serialized under `prog->aux->rejit_mutex`
-  in the current tree.
-  - Reason: the live crash reproducer that remains under investigation does not
-    require `BPF_PROG_REJIT`; it is a `probe struct_ops register` + second
-    `scx_rusty --stats 1` loader + repeated `bpftool prog show` path.
-  - So serializing `prog show` against in-place REJIT was judged too speculative
-    to keep as a real fix for this bug.
 
 I then ran a targeted host-side build check for the touched code:
 
@@ -1432,3 +1430,378 @@ This completed successfully.
 These changes do **not** yet prove that the live QEMU/host crash is fully
 resolved, but they remove several confirmed correctness holes from the current
 investigation tree before the next narrow VM reproducer pass.
+
+## 2026-03-25 Daemon fix and current-tree validation after the crash-path split
+
+After the crash-path review converged on "two independent bugs were being mixed
+together", I applied a separate daemon-side fix and reran the narrow VM probes
+against the current kernel tree.
+
+### Daemon-side fix (`const_prop` typed `LD_IMM64`)
+
+The daemon-side malformed rewrite bug is now fixed in the current tree:
+
+- `daemon/src/passes/const_prop.rs`
+  - `const_prop` no longer treats typed `LD_IMM64` (`src_reg != 0`) as a plain
+    scalar constant
+  - this prevents it from folding `BPF_PSEUDO_MAP_VALUE` into a replacement
+    `LD_IMM64(src=0)` and losing verifier-visible pointer provenance
+  - a regression test was added to pin this behavior
+
+Host-side daemon validation:
+
+```bash
+make daemon-tests
+```
+
+Result:
+
+- `340 passed`
+- `0 failed`
+- `12 ignored`
+
+So the daemon-side `const_prop` bug is fixed and test-covered locally.
+
+### Current-tree VM validation: full `bpftool prog show` path still crashes
+
+I reran the previously crashing minimal live reproducer on the current tree:
+
+```bash
+make vm-shell TARGET=local-x86-vng-tcg VM_CPUS=2 VM_MEM=8G VM_TEST_TIMEOUT=1800 \
+  VM_COMMAND='cd "/home/yunwei37/workspace/bpf-benchmark" && \
+  python3 -u docs/tmp/20260325/debug_scx_sequence.py \
+    --mode manual-bpftool-loop --find-iterations 20 --load-timeout 20'
+```
+
+Observed guest output:
+
+- `MARK after_probe 0 disabled False`
+- `MARK after_start_agent 201`
+- `MARK after_wait_state True`
+- `MARK after_bpftool_iter 0 0 13`
+- `MARK after_bpftool_iter 1 0 13`
+- crash/hang before `after_bpftool_iter 2`
+
+Host-side evidence for the same run:
+
+- `2026-03-25 16:57:24 PDT`
+- `qemu-system-x86_64` segfault
+- fixed fault offset still `0x8d8f21`
+
+So the current kernel-side hardening patches did **not** fully resolve the live
+crash. The failure now occurs even earlier in the repeated `bpftool prog show`
+loop than the earlier `iter 7` observation.
+
+### Current-tree VM validation: minimal raw prog-info loop is stable
+
+To separate "early `BPF_OBJ_GET_INFO_BY_FD` scalar fields" from the fuller
+metadata that `bpftool prog show` requests, I then ran the raw-syscall probe:
+
+```bash
+make vm-shell TARGET=local-x86-vng-tcg VM_CPUS=2 VM_MEM=8G VM_TEST_TIMEOUT=1800 \
+  VM_COMMAND='cd "/home/yunwei37/workspace/bpf-benchmark" && \
+  python3 -u docs/tmp/20260325/debug_scx_sequence.py \
+    --mode manual-raw-prog-loop --find-iterations 10 --load-timeout 20'
+```
+
+Observed result:
+
+- `10/10` iterations completed successfully
+- every iteration returned the same 13 live program ids:
+  - `[37, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50]`
+- `after_stop_agent 0`
+- VM exited normally with `COMMAND_EXIT_CODE="0"`
+
+This is an important narrowing result:
+
+- the current crash is **not** triggered by the minimal `BPF_OBJ_GET_INFO_BY_FD`
+  scalar snapshot alone
+- the remaining failure is now more likely in the richer metadata requested by
+  `bpftool -j -p prog show`
+- in other words, the bug window is narrower than "all of get_info"; it is in
+  the later metadata/reporting path that the raw minimal loop does not touch
+
+That means the next reproducer pass should focus on isolating which owner
+program id and which later metadata block inside `bpftool prog show` is still
+capable of killing the live TCG guest.
+
+### Current-tree VM validation: raw prog + `map_ids` loop is also stable
+
+I then extended the raw-syscall probe to include the second
+`BPF_OBJ_GET_INFO_BY_FD` call that fetches `map_ids[]` for each live program:
+
+```bash
+make vm-shell TARGET=local-x86-vng-tcg VM_CPUS=2 VM_MEM=8G VM_TEST_TIMEOUT=1800 \
+  VM_COMMAND='cd "/home/yunwei37/workspace/bpf-benchmark" && \
+  python3 -u docs/tmp/20260325/debug_scx_sequence.py \
+    --mode manual-raw-prog-mapids-loop --find-iterations 10 --load-timeout 20'
+```
+
+Observed result:
+
+- `10/10` iterations completed successfully
+- every iteration returned the same 13 records and the same stable map-counts:
+  - `[(37, 11), (39, 11), (40, 5), (41, 7), (42, 7), (43, 6), (44, 7),`
+    `(45, 6), (46, 10), (47, 10), (48, 9), (49, 10), (50, 4)]`
+- `after_stop_agent 0`
+- VM exited normally with `COMMAND_EXIT_CODE="0"`
+
+This narrows the remaining crash window again:
+
+- the residual crash is **not** in the initial raw prog-info snapshot
+- it is also **not** in the second raw `map_ids[]` fetch alone
+- the next most likely trigger is later in the `bpftool prog show` metadata
+  expansion, i.e. `show_prog_metadata()` and its per-map map-info / rodata /
+  BTF follow-up path rather than the earliest `bpf_prog_get_info_by_fd()` calls
+
+### Mitigation note only: repo-side workaround exists, but is intentionally not landed
+
+At this point there is a straightforward repo-side mitigation available:
+
+- replace the current health-check discovery path that shells out to
+  `bpftool -j -p prog show` with a raw-syscall-based discovery path that only
+  needs stable prog ids and, if necessary, stable `map_ids[]`
+
+This would likely avoid the current live crash in the short term, but I am
+**not** landing that workaround in the repo now for two reasons:
+
+- the user explicitly asked to treat it as a mitigation note, not as the fix
+- the current evidence says the real kernel-side bug is still somewhere deeper
+  in the live metadata expansion path, and masking it would make root-cause
+  confirmation harder
+
+So the workaround is recorded here as a fallback mitigation option only. The
+active investigation continues to optimize for a narrower and more stable
+kernel-side reproducer instead of routing around the bug in repo code.
+
+### Further narrowing after the `show_prog_metadata()` split
+
+I then continued slicing the full `bpftool -j -p prog show` path into smaller
+raw-syscall probes that each emulate one later stage of `bpftool`'s metadata
+expansion.
+
+#### Raw prog + `map_info` loop is stable
+
+```bash
+make vm-shell TARGET=local-x86-vng-tcg VM_CPUS=2 VM_MEM=8G VM_TEST_TIMEOUT=1800 \
+  VM_COMMAND='cd "/home/yunwei37/workspace/bpf-benchmark" && \
+  python3 -u docs/tmp/20260325/debug_scx_sequence.py \
+    --mode manual-raw-prog-mapinfo-loop --find-iterations 10 --load-timeout 20'
+```
+
+Observed result:
+
+- `10/10` iterations completed successfully
+- all 13 live programs remained stable
+- each live program consistently exposed exactly one `.rodata` metadata-map
+  candidate
+- VM exited normally with `COMMAND_EXIT_CODE="0"`
+
+#### Raw prog + `.rodata` map lookup loop is stable
+
+```bash
+make vm-shell TARGET=local-x86-vng-tcg VM_CPUS=2 VM_MEM=8G VM_TEST_TIMEOUT=1800 \
+  VM_COMMAND='cd "/home/yunwei37/workspace/bpf-benchmark" && \
+  python3 -u docs/tmp/20260325/debug_scx_sequence.py \
+    --mode manual-raw-prog-rodata-loop --find-iterations 10 --load-timeout 20'
+```
+
+Observed result:
+
+- `10/10` iterations completed successfully
+- every live program consistently resolved the same metadata map
+  (`map_id=36`, value size `12192`)
+- VM exited normally with `COMMAND_EXIT_CODE="0"`
+
+#### Raw prog + BTF FD/info/blob loop is stable
+
+```bash
+make vm-shell TARGET=local-x86-vng-tcg VM_CPUS=2 VM_MEM=8G VM_TEST_TIMEOUT=1800 \
+  VM_COMMAND='cd "/home/yunwei37/workspace/bpf-benchmark" && \
+  python3 -u docs/tmp/20260325/debug_scx_sequence.py \
+    --mode manual-raw-prog-btf-loop --find-iterations 10 --load-timeout 20'
+```
+
+Observed result:
+
+- `10/10` iterations completed successfully
+- every live program consistently resolved the same metadata map BTF
+  (`map_id=36`, `btf_id=47`, blob size `79341`)
+- VM exited normally with `COMMAND_EXIT_CODE="0"`
+
+#### Raw full `struct bpf_prog_info` loop is stable
+
+```bash
+make vm-shell TARGET=local-x86-vng-tcg VM_CPUS=2 VM_MEM=8G VM_TEST_TIMEOUT=1800 \
+  VM_COMMAND='cd "/home/yunwei37/workspace/bpf-benchmark" && \
+  python3 -u docs/tmp/20260325/debug_scx_sequence.py \
+    --mode manual-raw-prog-fullinfo-loop --find-iterations 10 --load-timeout 20'
+```
+
+Observed result:
+
+- `10/10` iterations completed successfully
+- the first `show_prog(fd)`-style full `struct bpf_prog_info` query remained
+  stable across all 13 live programs
+- representative returned fields such as `nr_map_ids`, `btf_id`,
+  `nr_func_info`, `nr_line_info`, `nr_jited_ksyms`, `nr_jited_func_lens`, and
+  `nr_prog_tags` were stable across iterations
+- VM exited normally with `COMMAND_EXIT_CODE="0"`
+
+#### Raw `get_prog_full_name()` path is stable
+
+```bash
+make vm-shell TARGET=local-x86-vng-tcg VM_CPUS=2 VM_MEM=8G VM_TEST_TIMEOUT=1800 \
+  VM_COMMAND='cd "/home/yunwei37/workspace/bpf-benchmark" && \
+  python3 -u docs/tmp/20260325/debug_scx_sequence.py \
+    --mode manual-raw-prog-fullname-loop --find-iterations 10 --load-timeout 20'
+```
+
+Observed result:
+
+- `10/10` iterations completed successfully
+- all six 15-byte program names that force `bpftool` to call
+  `get_prog_full_name()` remained stable:
+  - `rusty_select_cp`
+  - `rusty_quiescent`
+  - `rusty_set_weigh`
+  - `rusty_set_cpuma`
+  - `rusty_init_task`
+  - `rusty_exit_task`
+- the nested `nr_func_info=1` prog-info query plus program-BTF load path also
+  remained stable
+- VM exited normally with `COMMAND_EXIT_CODE="0"`
+
+These additional probes materially tighten the remaining crash window:
+
+- the crash is not reproduced by:
+  - minimal prog-info
+  - full prog-info
+  - map-ids fetch
+  - per-map map-info fetch
+  - `.rodata` lookup
+  - map-BTF FD/info/blob fetch
+  - `get_prog_full_name()`'s nested `func_info[0]` + program-BTF path
+- therefore the remaining gap between "stable raw probes" and "crashing
+  `bpftool -j -p prog show`" is now much smaller
+- the leading suspects are now the residual `bpftool`-specific enumeration and
+  dump layers that were not yet mirrored by the raw probe harness, especially:
+  - object-ref/pid enumeration (`build_obj_refs_table()` / `emit_obj_refs_*()`)
+  - any remaining BTF pretty-print / dumper path (`btf_dumper_type()`) that is
+    specific to the final metadata rendering stage
+
+### Host reboot note after the raw-probe sequence
+
+After the successful raw-probe sequence above, the host later rebooted again.
+Current evidence does **not** let me attribute that reboot to one of the new
+raw probes directly:
+
+- `manual-raw-prog-mapinfo-loop` completed successfully at
+  `2026-03-25 17:07:57 PDT`
+- `manual-raw-prog-rodata-loop` completed successfully at
+  `2026-03-25 17:08:20 PDT`
+- `manual-raw-prog-btf-loop` completed successfully at
+  `2026-03-25 17:10:24 PDT`
+- the previous host boot ended later, at `2026-03-25 17:12:40 PDT`
+
+So this reboot happened after the last successful raw probe, but there is no
+new direct `qemu-system-x86_64` segfault record or kernel panic/oops/OOM log
+that pins the reboot to one of these narrower reproducer runs.
+
+## 2026-03-25 Follow-up fixes for the later REJIT review findings
+
+After a later code-review pass identified two more real REJIT-side bugs, I
+re-checked both against the current tree and then fixed them in the
+investigation branch.
+
+Important context:
+
+- these two bugs are real and worth fixing
+- but they are **not** the leading explanation for the current live
+  `bpftool -j -p prog show` / QEMU crash, because the live crash reproducer does
+  not require `BPF_PROG_REJIT`
+- the raw-probe narrowing above still points to a different residual gap
+  between the stable raw probes and the full `bpftool prog show` path
+
+### Fix 1: REJIT rollback now restores non-swappable metadata
+
+The review finding was correct: `bpf_prog_rejit_swap()` still had a set of
+one-way metadata copies that made rollback non-reversible for some fields.
+
+I fixed the current tree in `vendor/linux-framework/kernel/bpf/syscall.c` by:
+
+- making the scalar metadata exchanges reversible instead of one-way for the
+  relevant `struct bpf_prog` / `struct bpf_prog_aux` fields
+- swapping the digest content instead of doing a one-way overwrite
+- adding an explicit rollback snapshot for the non-pointer/non-swappable parts
+  that cannot be made reversible with a simple `swap()`
+  - saved old `insnsi`
+  - saved old `len`
+  - saved old `load_time`
+- restoring that snapshot after the swap-back path in
+  `bpf_prog_rejit_rollback()`
+- also making the ambiguous `__bpf_prog_put_noref(tmp, tmp->aux->real_func_cnt)`
+  sites explicit with `tmp->aux->real_func_cnt > 0`
+
+This means rollback no longer leaves the old JIT image paired with the new
+rewritten instruction stream or the new metadata length.
+
+### Fix 2: struct_ops refresh now patches all matching call sites
+
+The second review finding was also correct in substance: the refresh logic was
+still assuming a single matching direct-call site per trampoline image.
+
+I fixed the current tree in `vendor/linux-framework/kernel/bpf/bpf_struct_ops.c`
+by:
+
+- replacing the single-hit `find_call_site()` scan with an iterator-style
+  `find_next_call_site()` helper
+- collecting **all** matching direct-call sites to `old_bpf_func` across the
+  relevant struct_ops trampoline images
+- patching every collected call site
+- rolling back every already-patched call site if a later `text_poke` fails
+
+This removes the remaining "first hit only" assumption from the refresh path.
+
+### Validation for these follow-up fixes
+
+Host-side object build:
+
+```bash
+make -C vendor/linux-framework -j4 kernel/bpf/syscall.o kernel/bpf/bpf_struct_ops.o
+```
+
+Result:
+
+- build passed
+
+VM-side regression sweep with the existing audit suite:
+
+```bash
+make vm-shell TARGET=local-x86-vng-tcg VM_CPUS=2 VM_MEM=8G VM_TEST_TIMEOUT=1800 \
+  VM_COMMAND='cd "/home/yunwei37/workspace/bpf-benchmark" && \
+  ./tests/unittest/build/rejit_audit_tests ./tests/unittest/build/progs'
+```
+
+Observed result:
+
+- `9 PASS, 0 FAIL, 0 SKIP`
+- notable relevant coverage that still passed:
+  - `T2_M4_xlated_prog_len`
+  - `T3_M4_xlated_content`
+  - `T8_M4_multi_length_transitions`
+  - `T9_H3_struct_ops_multi_slot`
+
+### What is still missing test-wise
+
+I do **not** yet have a deterministic `make vm-test` reproducer that isolates
+either of these two new bugs on demand:
+
+- the rollback bug needs a controllable refresh failure after successful REJIT
+  so that the kernel actually enters the swap-back path
+- the multi-call-site struct_ops bug needs a trampoline image that reliably
+  contains multiple direct calls to the same target in one refreshable image
+
+So these two are now patched and compile/VM-smoke-validated, but they are not
+yet covered by a dedicated, minimal, deterministic regression testcase in the
+same way that the older `M4/H3` audit cases are.
