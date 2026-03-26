@@ -211,10 +211,10 @@ BpfReJIT 的设计基于三个层次的 insight：
 | **ADDR_CALC (LEA)** | 可选 | ❌ 低优先级 | mov+shift+add → `bpf_lea()` kinsn → JIT emit LEA | **corpus 仅 14 个严格命中 site（全部 tetragon），ROI 很低**。调研：`addr_calc_lea_research_20260324.md` |
 | **Helper call specialization** | 否/可选 | 🔄 调研完成 | `skb_load_bytes → direct packet access` 优先（纯 bytecode）；`probe_read_kernel` 需 safe-load kinsn | **590 skb_load_bytes + 25296 probe_read_kernel site。结论：skb_load_bytes 最可行，probe_read 风险高**。调研：`helper_call_inlining_research_20260324.md` |
 | **Frozen map inlining** | 否 | ❌ 不做 | BPF_MAP_FREEZE 后只读 map → 常量 MOV | **调研结论：真实 workload 无显式 freeze，hot-path lookup ≈ 0** |
-| **Subprog inline** | 否 | 待调研 | bytecode 层展开 subprogram call | 无数据 |
+| **Subprog inline** | 否 | 🔄 调研中 | bytecode 层展开 subprogram call | codex 调研中（2026-03-26）→ `subprog_inline_research_20260326.md` |
 | **Const propagation** | 否 | ↗ 归入 #424 | 利用 frozen map / runtime invariants 做常量折叠 | 归入 verifier const prop |
 | **SIMD (FPU)** | 是 | Phase 2 | AVX2/NEON 仅在 ≥512B(x86)/≥1024B(ARM64) 时启用 | FPU context 开销高，phase 2 only |
-| **Tail-call specialization** | 否 | 待调研 | tail_call map 稳定 → inline target → deopt | 无数据，综合报告评为"最像 HotSpot" |
+| **Tail-call specialization** | 否 | 🔄 调研中 | tail_call map 稳定 → inline target → deopt | codex 调研中（2026-03-26）→ `tail_call_specialization_research_20260326.md` |
 | **Spill/fill 消除** | 否 | ❌ 不做 | 冗余 spill/fill 消除 | **内核已有 KF_FASTCALL，增量收益低** |
 
 ### 3.2 安全加固变换
@@ -223,9 +223,9 @@ BpfReJIT 的设计基于三个层次的 insight：
 |------|:---:|------|------|
 | **Spectre 缓解注入** | ✅ 已实现 | 在缺少 speculation barrier 的位置插入 lfence kinsn | SpeculationBarrierPass + bpf_barrier kinsn |
 | **LFENCE/BPF_NOSPEC 消除** | ⏸ 降优先级 | daemon 重构 bytecode 使 speculative path 安全 → verifier 不再插 barrier | **corpus 861 程序实测 BPF_ST_NOSPEC = 0**。设计保留：`lfence_nospec_elimination_design_20260324.md` |
-| **危险 helper 防火墙** | 待做 | 中和恶意 BPF 程序的 bpf_probe_read_kernel / bpf_send_signal 等 | |
-| **BPF 程序漏洞热修复** | 待做 | verifier bug 发现后对 live 程序加额外检查 | |
-| **权限收紧** | 待做 | 收窄过度权限的 BPF 程序的访问范围 | |
+| **危险 helper 防火墙** | 🔄 调研中 | 中和恶意 BPF 程序的 bpf_probe_read_kernel / bpf_send_signal 等 | codex 调研中（2026-03-26）→ `dangerous_helper_firewall_research_20260326.md` |
+| **BPF 程序漏洞热修复** | 🔄 调研中 | verifier bug 发现后对 live 程序加额外检查 | codex 调研中（2026-03-26）→ `bpf_live_patching_research_20260326.md` |
+| **权限收紧** | 🔄 调研中 | 收窄过度权限的 BPF 程序的访问范围 | codex 调研中（2026-03-26）→ `privilege_narrowing_research_20260326.md` |
 
 ### 3.3 不在范围内
 
@@ -815,4 +815,12 @@ make clean
 | **476** | **Daemon P1: map type 过滤 + WideMemPass packet pointer（2026-03-25）** | ✅ | **(1)** MapInlinePass PERCPU 过滤：从 `supports_direct_value_access()` / `can_remove_lookup_pattern_v1()` / `is_speculative_v1()` 中移除 PERCPU_HASH/PERCPU_ARRAY/LRU_PERCPU_HASH（用户态读值≠BPF运行时值）。+3 tests。**(2)** WideMemPass packet pointer：PassContext 新增 `prog_type`，XDP/TC/LWT/SK_SKB 程序中 skip 非 R10 base site。+7 tests。**350 daemon tests pass**。修复 #474e Tracee/Tetragon REJIT 失败 + #457 wide_mem verifier 拒绝。 |
 | **481** | **⚠️ QEMU 8.2.2 TCG crash 根因确认 + QEMU 9.2.2 升级（2026-03-25）** | ✅ | **Bug**: 反复 `pid_iter_bpf__load()` + struct_ops probe 后 QEMU 8.2.2 TCG `tlb_set_dirty` segfault（固定 offset `0x8d8f21`）。**调查**：narrowing 到只需 `pid_iter_bpf__load()`（不需 attach/run）；KASAN 内核 KVM 模式全量测试（rejit_regression 6/6 + vm-static-test 191 obj + vm-negative-test + scx 500 轮 + unit tests）零内存安全报错；KASAN 内核 TCG 连 boot 都 crash（QEMU 同一 offset）。**根因**：QEMU 8.2.2 TCG softmmu `tlb_set_dirty` 实现 bug，处理 guest `text_poke_copy()` 快速 fixmap PTE 修改时出错。与内核 BPF/REJIT 代码无关。**修复**：源码编译 QEMU 9.2.2 安装到 `/usr/local`（`--prefix=/usr/local --datadir=/usr/share --target-list=x86_64-softmmu,aarch64-softmmu`），apt 8.2.2 保留不冲突。**验证**：QEMU 9.2.2 + TCG + 非 KASAN 内核 200 轮全过，零 segfault。报告：`docs/tmp/20260325/tcg_min_repro_and_e2e_investigation_20260325.md`。 |
 | **482** | **Daemon const_prop typed LD_IMM64 修复（2026-03-25）** | ✅ | **Bug**: `const_prop` 把 typed `LD_IMM64`（`src_reg != 0`，如 `BPF_PSEUDO_MAP_VALUE`）当纯标量折叠，破坏 verifier 可见指针类型信息 → 多个 scx/tracee 程序 REJIT 失败。**修复**：`daemon/src/passes/const_prop.rs` 不再折叠 `src_reg != 0` 的 LD_IMM64 + 回归测试。**验证**：340 daemon tests pass。 |
+| **490** | **⚠️ 未调研 pass 补全（2026-03-26）** | 🔄 | 6 个 codex 并行调研：**(1)** Subprog inline → `subprog_inline_research_20260326.md`。**(2)** Tail-call specialization → `tail_call_specialization_research_20260326.md`。**(3)** 危险 helper 防火墙 → `dangerous_helper_firewall_research_20260326.md`。**(4)** Corpus bpf2bpf/tail_call/helper 统计 → `corpus_call_statistics_20260326.json`。**(5)** BPF 漏洞热修复 → `bpf_live_patching_research_20260326.md`。**(6)** 权限收紧 → `privilege_narrowing_research_20260326.md`。 |
+| **491** | **Recompile overhead 分解** | 待做 | verify 时间 + JIT 时间 + swap 时间 + daemon pipeline 时间。reviewer 必问。从 static_verify.json 和 micro results 可提取部分数据。 |
+| **492** | **Scalability 测量** | 待做 | 100/500/1000 个 live 程序时 daemon 吞吐量和延迟。apply-all 和 watch mode。 |
+| **493** | **Memory overhead 测量** | 待做 | REJIT 保留 orig bytecode + tmp prog 的额外内存。per-prog 和总量。 |
+| **494** | **Fixed kernel peephole baseline 对比** | 待做 | `jit-fixed-baselines` 分支 vs BpfReJIT v2 在同样 benchmark 上的 A/B 对比。支撑 "userspace policy > fixed heuristic" 论点。 |
+| **495** | **BPF 程序生命周期分析** | 待做 | 生产环境程序加载频率、存活时间分布。证明 post-load 优化有价值。可从 Tracee/Tetragon/Cilium 文档和 bpf_stats 数据推断。 |
+| **496** | **K2/Merlin/EPSO 量化对比** | 待做 | 在同样的 benchmark 上 head-to-head 跑数据。至少 K2（有开源）。 |
+| **497** | **ARM64 性能数据** | 待做 | vm-arm64-selftest + vm-arm64-micro。论文声称 multi-platform 需要至少一组数据。 |
 | **483** | **宿主频繁重启分析（2026-03-25）** | 📝 | 调查期间宿主多次无 panic/oops 重启。每次 boot 有 `mce: [Hardware Error]: Machine check events logged`，有 CPU 过热降频（event count 65+）。原因：Intel Core Ultra 9 285K 在 `-j24` 全核编译 + QEMU TCG 高负载下过热。建议：降低编译并行度、检查散热。 |
