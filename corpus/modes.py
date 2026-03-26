@@ -33,7 +33,6 @@ from runner.libs.vm import DEFAULT_VM_TARGET, build_vng_command as build_runner_
 from runner.libs.inventory import (
     discover_corpus_objects,
     discover_object_programs,
-    load_packet_test_run_targets,
 )
 from runner.libs.run_artifacts import (
     ArtifactSession,
@@ -70,9 +69,11 @@ from runner.libs.corpus import (
 )
 
 
+import yaml
+
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DRIVER_RELATIVE = Path(__file__).with_name("driver.py").resolve().relative_to(ROOT_DIR)
-DEFAULT_INVENTORY_JSON = ROOT_DIR / "docs" / "tmp" / "corpus-runnability-results.json"
+DEFAULT_MACRO_CORPUS_YAML = ROOT_DIR / "corpus" / "config" / "macro_corpus.yaml"
 DEFAULT_OUTPUT_JSON = authoritative_output_path(ROOT_DIR / "corpus" / "results", "corpus_vm_batch")
 DEFAULT_OUTPUT_MD = ROOT_DIR / "docs" / "tmp" / "corpus-batch-rejit-results.md"
 DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
@@ -118,14 +119,14 @@ FAMILY_DISPLAY_NAMES = {
 def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Run the inventory-derived packet-test-run corpus REJIT batch on "
+            "Run the macro_corpus.yaml-driven corpus REJIT batch on "
             "the framework kernel guest."
         )
     )
     parser.add_argument(
-        "--inventory-json",
-        default=str(DEFAULT_INVENTORY_JSON),
-        help="Inventory JSON used to select the paired packet-test-run targets.",
+        "--macro-corpus-yaml",
+        default=str(DEFAULT_MACRO_CORPUS_YAML),
+        help="Macro corpus YAML manifest used to select the corpus targets.",
     )
     add_output_json_argument(parser, DEFAULT_OUTPUT_JSON)
     add_output_md_argument(parser, DEFAULT_OUTPUT_MD)
@@ -409,7 +410,7 @@ def build_empty_record(target: dict[str, Any], execution_mode: str) -> dict[str,
         "execution_mode": execution_mode,
         "policy_path": target.get("policy_path"),
         "policy_mode": str(target.get("policy_mode", "stock")),
-        "scan_source": "inventory",
+        "scan_source": "yaml_manifest",
         "daemon_counts": normalize_scan(target.get("inventory_scan")),
         "daemon_cli": None,
         "baseline_compile": None,
@@ -746,9 +747,9 @@ def build_record_from_batch_results(
     ) -> dict[str, Any]:
     record = build_empty_record(target, execution_mode)
     policy_mode = "blind-apply-rejit" if blind_apply else "daemon-auto"
-    inventory_scan = normalize_scan(target.get("inventory_scan"))
-    scan_source = "inventory"
-    daemon_counts = inventory_scan
+    initial_scan = normalize_scan(target.get("inventory_scan"))
+    scan_source = "yaml_manifest"
+    daemon_counts = initial_scan
 
     baseline_compile_raw = batch_job_invocation_summary(results_by_id.get(job_refs.get("baseline_compile", "")))
     baseline_run_raw = batch_job_invocation_summary(results_by_id.get(job_refs.get("baseline_run", "")))
@@ -999,18 +1000,76 @@ def build_guest_exec(argv: list[str]) -> str:
     return kinsn_load + main_cmd
 
 
-def load_targets(
-    inventory_json: Path,
+def load_targets_from_yaml(
+    yaml_path: Path,
     filters: list[str] | None,
     max_programs: int | None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    return load_packet_test_run_targets(
-        inventory_json,
-        filters=filters,
-        max_programs=max_programs,
-        require_inventory_sites=False,
-        include_attach=True,
-    )
+    """Load corpus targets from macro_corpus.yaml instead of inventory JSON."""
+    with open(yaml_path) as f:
+        manifest = yaml.safe_load(f)
+    programs = manifest.get("programs") or []
+    selected: list[dict[str, Any]] = []
+    for entry in programs:
+        test_method = entry.get("test_method", "")
+        can_test_run = test_method == "bpf_prog_test_run"
+        # For entries with program_name (singular), use that.
+        # For entries with program_names (list), use the first one.
+        program_name = entry.get("program_name") or ""
+        if not program_name:
+            names = entry.get("program_names") or []
+            program_name = names[0] if names else ""
+        source = str(entry.get("source", ""))
+        # Derive source_name from the object path (e.g. corpus/build/katran/... -> katran)
+        source_parts = Path(source).parts
+        if len(source_parts) >= 3 and source_parts[0] == "corpus" and source_parts[1] == "build":
+            source_name = source_parts[2]
+        else:
+            source_name = entry.get("family", entry.get("name", ""))
+        # Derive section_name from sections list or prog_type
+        sections = entry.get("sections") or []
+        section_name = sections[0] if sections else entry.get("prog_type", "")
+        target: dict[str, Any] = {
+            "object_path": source,
+            "source_name": source_name,
+            "program_name": program_name,
+            "section_name": section_name,
+            "section_root": "",
+            "prog_type_name": str(entry.get("prog_type", "")),
+            "io_mode": str(entry.get("io_mode", "context")),
+            "input_size": int(entry.get("input_size", 0) or 0),
+            "memory_path": str(entry.get("test_input")) if entry.get("test_input") else None,
+            "can_test_run": can_test_run,
+            "inventory_scan": {},
+            "inventory_speedup_ratio": None,
+            "inventory_baseline_exec_ns": None,
+        }
+        selected.append(target)
+
+    if filters:
+        lowered = [item.lower() for item in filters]
+        selected = [
+            record
+            for record in selected
+            if any(
+                needle in record["object_path"].lower()
+                or needle in record["program_name"].lower()
+                or needle in record["source_name"].lower()
+                or needle in record["section_name"].lower()
+                or needle in record["prog_type_name"].lower()
+                for needle in lowered
+            )
+        ]
+    selected.sort(key=lambda item: (item["source_name"], item["object_path"], item["program_name"]))
+    if max_programs is not None:
+        selected = selected[:max_programs]
+
+    summary = {
+        "manifest_path": str(yaml_path),
+        "total_entries": len(programs),
+        "selected_entries": len(selected),
+    }
+    return selected, summary
 
 
 def run_targets_in_guest_batch(
@@ -1440,7 +1499,7 @@ def build_markdown(data: dict[str, Any]) -> str:
         "# Corpus Batch REJIT Results",
         "",
         f"- Generated: {data['generated_at']}",
-        f"- Inventory: `{data['inventory_json']}`",
+        f"- Corpus manifest: `{data['macro_corpus_yaml']}`",
         f"- Runner: `{data['runner_binary']}`",
         f"- Daemon: `{data['daemon_binary']}`",
         "- Requested mode: `strict-vm`",
@@ -1645,7 +1704,7 @@ def build_markdown(data: dict[str, Any]) -> str:
             "",
             "## Notes",
             "",
-            "- Target selection comes from the runnability inventory and keeps every packet-test-run target whose baseline run already succeeds; the current daemon pass determines whether REJIT has any eligible families.",
+            "- Target selection comes from `macro_corpus.yaml`; programs with `test_method: bpf_prog_test_run` use packet replay and programs with `test_method: attach_trigger` use the kernel-attach runtime. The current daemon pass determines whether REJIT has any eligible families.",
             "- In strict VM mode, the framework REJIT guest boots once, keeps `daemon serve` alive for the full batch, and runs baseline compile-only, REJIT compile-only, baseline test_run, and REJIT test_run for each target in that order.",
             "- Default steady-state semantics: the daemon is always started and tries to optimize each program; programs with no applicable sites stay on stock JIT.",
             "- `--blind-apply` switches from per-program policy mode to unconditional daemon auto-scan REJIT.",
@@ -1669,7 +1728,7 @@ def packet_main(argv: list[str] | None = None) -> int:
     if args.guest_target_json:
         return run_guest_batch_mode(args)
 
-    inventory_json = Path(args.inventory_json).resolve()
+    macro_corpus_yaml = Path(args.macro_corpus_yaml).resolve()
     if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.max_programs is not None:
         output_json = smoke_output_path(ROOT_DIR / "corpus" / "results", "corpus_vm_batch")
     else:
@@ -1681,8 +1740,8 @@ def packet_main(argv: list[str] | None = None) -> int:
     kernel_image = Path(args.kernel_image).resolve()
     btf_custom_path = Path(args.btf_custom_path).resolve() if args.btf_custom_path else None
 
-    if not inventory_json.exists():
-        raise SystemExit(f"inventory JSON not found: {inventory_json}")
+    if not macro_corpus_yaml.exists():
+        raise SystemExit(f"macro corpus YAML not found: {macro_corpus_yaml}")
     if not runner.exists():
         raise SystemExit(f"runner not found: {runner}")
     if not daemon.exists():
@@ -1691,8 +1750,8 @@ def packet_main(argv: list[str] | None = None) -> int:
     run_type = derive_run_type(output_json, "corpus_vm_batch")
     started_at = datetime.now(timezone.utc).isoformat()
 
-    targets, inventory_summary = load_targets(
-        inventory_json=inventory_json,
+    targets, yaml_summary = load_targets_from_yaml(
+        yaml_path=macro_corpus_yaml,
         filters=args.filters,
         max_programs=args.max_programs,
     )
@@ -1707,8 +1766,8 @@ def packet_main(argv: list[str] | None = None) -> int:
     result = {
         "generated_at": started_at,
         "repo_root": str(ROOT_DIR),
-        "inventory_json": str(inventory_json),
-        "inventory_summary": inventory_summary,
+        "macro_corpus_yaml": str(macro_corpus_yaml),
+        "yaml_summary": yaml_summary,
         "runner_binary": str(runner),
         "daemon_binary": str(daemon),
         "kernel_tree": str(kernel_tree),
@@ -1752,8 +1811,8 @@ def packet_main(argv: list[str] | None = None) -> int:
             summary=dict(result["summary"]),
             progress=progress,
             extra_fields={
-                "inventory_json": repo_relative_path(inventory_json),
-                "inventory_summary": inventory_summary,
+                "macro_corpus_yaml": repo_relative_path(macro_corpus_yaml),
+                "yaml_summary": yaml_summary,
                 "runner_binary": repo_relative_path(runner),
                 "daemon_binary": repo_relative_path(daemon),
                 "kernel_tree": repo_relative_path(kernel_tree),
@@ -2253,7 +2312,12 @@ def run_linear_mode(mode_name: str, argv: list[str] | None = None) -> int:
             blind_apply=args.blind_apply,
         )
         if not batch_invocation["ok"]:
-            raise RuntimeError(batch_invocation["error"] or "corpus batch runner failed")
+            err_msg = batch_invocation["error"] or "corpus batch runner failed"
+            stderr_tail = batch_invocation.get("stderr") or ""
+            stdout_tail = batch_invocation.get("stdout") or ""
+            raise RuntimeError(
+                f"{err_msg}\nbatch stderr:\n{stderr_tail}\nbatch stdout tail:\n{stdout_tail[-500:]}"
+            )
 
         for index, (target, record) in enumerate(zip(targets, built_records, strict=True), start=1):
             current_target_index = index

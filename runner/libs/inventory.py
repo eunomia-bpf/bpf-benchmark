@@ -4,7 +4,7 @@ import json
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable, Mapping
+from typing import Iterable, Mapping
 
 from elftools.elf.elffile import ELFFile
 
@@ -14,7 +14,7 @@ except ImportError:
     from runner.libs import authoritative_candidates
 
 from .commands import build_list_programs_command
-from .results import normalize_directive_scan, parse_last_json_line
+from .results import parse_last_json_line
 
 
 @dataclass(frozen=True, slots=True)
@@ -150,64 +150,6 @@ def discover_corpus_objects(
     )
 
 
-def load_packet_test_run_targets(
-    inventory_json: Path,
-    *,
-    filters: list[str] | None = None,
-    max_programs: int | None = None,
-    require_inventory_sites: bool = False,
-) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    payload = json.loads(inventory_json.read_text())
-    selected: list[dict[str, Any]] = []
-    for record in payload.get("programs", []):
-        if not isinstance(record, Mapping):
-            continue
-        if record.get("strategy") != "packet_test_run":
-            continue
-        inventory_scan = normalize_directive_scan(record.get("directive_scan"))
-        if require_inventory_sites and inventory_scan["total_sites"] <= 0:
-            continue
-        if not (record.get("baseline_run") or {}).get("ok"):
-            continue
-        selected.append(
-            {
-                "object_path": str(record["object_path"]),
-                "source_name": str(record["source_name"]),
-                "program_name": str(record["program_name"]),
-                "section_name": str(record["section_name"]),
-                "section_root": str(record.get("section_root") or ""),
-                "prog_type_name": str(record.get("prog_type_name") or ""),
-                "io_mode": str(record.get("io_mode") or "context"),
-                "input_size": int(record.get("input_size") or 0),
-                "memory_path": str(record["memory_path"]) if record.get("memory_path") else None,
-                "can_test_run": True,
-                "inventory_scan": inventory_scan,
-                "inventory_speedup_ratio": record.get("speedup_ratio"),
-                "inventory_baseline_exec_ns": ((record.get("baseline_run") or {}).get("sample") or {}).get("exec_ns"),
-            }
-        )
-
-    if filters:
-        lowered = [item.lower() for item in filters]
-        selected = [
-            record
-            for record in selected
-            if any(
-                needle in record["object_path"].lower()
-                or needle in record["program_name"].lower()
-                or needle in record["source_name"].lower()
-                or needle in record["section_name"].lower()
-                or needle in record["prog_type_name"].lower()
-                for needle in lowered
-            )
-        ]
-    selected.sort(key=lambda item: (item["source_name"], item["object_path"], item["program_name"]))
-    if max_programs is not None:
-        selected = selected[:max_programs]
-
-    return selected, dict(payload.get("summary") or {})
-
-
 __all__ = [
     "CorpusObjectDiscovery",
     "ProgramInventoryEntry",
@@ -216,6 +158,5 @@ __all__ = [
     "discover_object_programs",
     "filter_bpf_object_paths",
     "load_corpus_paths_from_build_report",
-    "load_packet_test_run_targets",
     "parse_program_inventory",
 ]

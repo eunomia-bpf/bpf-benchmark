@@ -26,7 +26,7 @@ DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
 DEFAULT_PACKET_PATH = ROOT_DIR / "micro" / "generated-inputs" / "corpus_dummy_packet_64.bin"
 DEFAULT_CONTEXT_PATH = ROOT_DIR / "micro" / "generated-inputs" / "corpus_dummy_context_64.bin"
 DEFAULT_TIMEOUT_SECONDS = 180
-DEFAULT_REFERENCE_INVENTORY = ROOT_DIR / "docs" / "tmp" / "corpus-runnability-results.json"
+DEFAULT_REFERENCE_INVENTORY = ROOT_DIR / "corpus" / "config" / "macro_corpus.yaml"
 DEFAULT_VM_KERNEL_IMAGE = ROOT_DIR / "vendor" / "linux-framework" / "arch" / "x86" / "boot" / "bzImage"
 DEFAULT_OBJECT_ROOT_CANDIDATES = (
     ROOT_DIR / "corpus" / "expanded_corpus",
