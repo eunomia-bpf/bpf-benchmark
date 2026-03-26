@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 //! Concrete pass implementations and pipeline constructors.
 
+use anyhow::Result;
+
 pub mod bounds_check_merge;
 mod branch_flip;
 mod bulk_memory;
@@ -52,8 +54,8 @@ pub struct PassRegistryEntry {
     pub make: fn() -> Box<dyn BpfPass>,
 }
 
-/// Canonical pass ordering and metadata. Both `build_default_pipeline()` and
-/// `build_pipeline_with_passes()` iterate this array in order, guaranteeing
+/// Canonical pass ordering and metadata. Both `build_full_pipeline()` and
+/// `build_custom_pipeline()` iterate this array in order, guaranteeing
 /// consistent pass sequencing regardless of which passes are selected.
 ///
 /// `speculation_barrier` is excluded from the default pipeline but is available
@@ -80,7 +82,7 @@ pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
     PassRegistryEntry {
         name: "skb_load_bytes_spec",
         description: "Specialize eligible skb_load_bytes helper sites into direct packet access",
-        aliases: &[],
+        aliases: &["skb_load_bytes"],
         make: || Box::new(SkbLoadBytesSpecPass),
     },
     PassRegistryEntry {
@@ -173,6 +175,51 @@ pub fn available_passes_help() -> String {
 
 // ── Pipeline constructors ───────────────────────────────────────────
 
+fn resolve_requested_passes(names: &[String]) -> Result<Vec<&'static PassRegistryEntry>> {
+    let requested: std::collections::HashSet<&str> = names.iter().map(|s| s.as_str()).collect();
+    let mut unknown = Vec::new();
+
+    for name in &requested {
+        let known = PASS_REGISTRY
+            .iter()
+            .any(|entry| entry.name == *name || entry.aliases.iter().any(|alias| alias == name));
+        if !known {
+            unknown.push((*name).to_string());
+        }
+    }
+
+    if !unknown.is_empty() {
+        unknown.sort();
+        anyhow::bail!("unknown pass name(s): {}", unknown.join(", "));
+    }
+
+    Ok(PASS_REGISTRY
+        .iter()
+        .filter(|entry| {
+            requested.contains(entry.name)
+                || entry.aliases.iter().any(|alias| requested.contains(alias))
+        })
+        .collect())
+}
+
+pub fn validate_pass_names(names: &[String]) -> Result<()> {
+    resolve_requested_passes(names).map(|_| ())
+}
+
+pub fn selected_pass_names(names: Option<&[String]>) -> Result<Vec<String>> {
+    match names {
+        Some(names) => Ok(resolve_requested_passes(names)?
+            .into_iter()
+            .map(|entry| entry.name.to_string())
+            .collect()),
+        None => Ok(PASS_REGISTRY
+            .iter()
+            .filter(|entry| is_default_pass(entry.name))
+            .map(|entry| entry.name.to_string())
+            .collect()),
+    }
+}
+
 /// Register standard analyses into a PassManager.
 fn register_standard_analyses(pm: &mut PassManager) {
     pm.register_analysis(BranchTargetAnalysis);
@@ -185,7 +232,7 @@ fn register_standard_analyses(pm: &mut PassManager) {
 ///
 /// Includes all passes from `PASS_REGISTRY` except opt-in passes
 /// (currently `speculation_barrier`), in canonical order.
-pub fn build_default_pipeline() -> PassManager {
+pub fn build_full_pipeline() -> PassManager {
     let mut pm = PassManager::new();
     register_standard_analyses(&mut pm);
 
@@ -201,34 +248,56 @@ pub fn build_default_pipeline() -> PassManager {
 /// Build a pipeline containing only the named passes, in canonical order.
 ///
 /// Pass names are matched against `PASS_REGISTRY` entries by canonical name
-/// and legacy aliases. Unknown names are silently ignored.
-pub fn build_pipeline_with_passes(names: &[String]) -> PassManager {
+/// and legacy aliases. Unknown names are rejected.
+pub fn build_custom_pipeline(names: &[String]) -> Result<PassManager> {
     let mut pm = PassManager::new();
     register_standard_analyses(&mut pm);
 
-    let name_set: std::collections::HashSet<&str> = names.iter().map(|s| s.as_str()).collect();
-
-    for entry in PASS_REGISTRY {
-        let matched = name_set.contains(entry.name)
-            || entry.aliases.iter().any(|alias| name_set.contains(alias));
-        if matched {
-            pm.add_pass_boxed((entry.make)());
-        }
+    for entry in resolve_requested_passes(names)? {
+        pm.add_pass_boxed((entry.make)());
     }
 
-    pm
+    Ok(pm)
 }
 
 // ── Cross-pass integration tests ────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
+    #![allow(dead_code)]
+
     use super::*;
+    use std::collections::HashMap;
+
+    use crate::bpf::{install_mock_map, BpfMapInfo, MockMapState};
     use crate::insn::*;
-    use crate::pass::{BpfProgram, PassContext};
+    use crate::pass::{BpfProgram, PassContext, PipelineResult};
+
+    const BPF_ADD: u8 = 0x00;
+    const BPF_MAP_TYPE_HASH: u32 = 1;
+    const BPF_MAP_TYPE_ARRAY: u32 = 2;
+    const BPF_PSEUDO_MAP_FD: u8 = 1;
+    const HELPER_MAP_LOOKUP_ELEM: i32 = 1;
 
     fn make_program(insns: Vec<BpfInsn>) -> BpfProgram {
         BpfProgram::new(insns)
+    }
+
+    fn ld_imm64(dst: u8, src: u8, imm_lo: i32) -> [BpfInsn; 2] {
+        [
+            BpfInsn {
+                code: BPF_LD | BPF_DW | BPF_IMM,
+                regs: BpfInsn::make_regs(dst, src),
+                off: 0,
+                imm: imm_lo,
+            },
+            BpfInsn {
+                code: 0,
+                regs: 0,
+                off: 0,
+                imm: 0,
+            },
+        ]
     }
 
     fn exit_insn() -> BpfInsn {
@@ -247,6 +316,62 @@ mod tests {
             off,
             imm,
         }
+    }
+
+    fn st_mem(size: u8, dst: u8, off: i16, imm: i32) -> BpfInsn {
+        BpfInsn {
+            code: BPF_ST | size | BPF_MEM,
+            regs: BpfInsn::make_regs(dst, 0),
+            off,
+            imm,
+        }
+    }
+
+    fn call_helper(imm: i32) -> BpfInsn {
+        BpfInsn {
+            code: BPF_JMP | BPF_CALL,
+            regs: BpfInsn::make_regs(0, 0),
+            off: 0,
+            imm,
+        }
+    }
+
+    fn install_map(map_id: u32, map_type: u32, value: Vec<u8>) {
+        let mut values = HashMap::new();
+        values.insert(1u32.to_le_bytes().to_vec(), value.clone());
+
+        let mut info = BpfMapInfo::default();
+        info.map_type = map_type;
+        info.id = map_id;
+        info.key_size = 4;
+        info.value_size = value.len() as u32;
+        info.max_entries = 8;
+
+        install_mock_map(
+            map_id,
+            MockMapState {
+                info,
+                frozen: true,
+                values,
+            },
+        );
+    }
+
+    fn install_array_map(map_id: u32, value: Vec<u8>) {
+        install_map(map_id, BPF_MAP_TYPE_ARRAY, value);
+    }
+
+    fn install_hash_map(map_id: u32, value: Vec<u8>) {
+        install_map(map_id, BPF_MAP_TYPE_HASH, value);
+    }
+
+    fn run_pipeline_with_passes(program: &mut BpfProgram, pass_names: &[&str]) -> PipelineResult {
+        let pass_names = pass_names
+            .iter()
+            .map(|name| (*name).to_string())
+            .collect::<Vec<_>>();
+        let pm = build_custom_pipeline(&pass_names).unwrap();
+        pm.run(program, &PassContext::test_default()).unwrap()
     }
 
     fn make_wide_mem_4byte_program() -> Vec<BpfInsn> {
@@ -360,7 +485,7 @@ mod tests {
         let mut prog = make_program(make_wide_mem_4byte_program());
         let ctx = PassContext::test_default();
 
-        let pm = build_default_pipeline();
+        let pm = build_full_pipeline();
         let result = pm.run(&mut prog, &ctx).unwrap();
         assert!(result.program_changed);
         assert!(result.total_sites_applied >= 1);
@@ -368,7 +493,7 @@ mod tests {
 
     #[test]
     fn test_default_pipeline_starts_with_map_inline() {
-        let pm = build_default_pipeline();
+        let pm = build_full_pipeline();
         assert_eq!(pm.pass_names().first().copied(), Some("map_inline"));
         assert_eq!(pm.pass_names().get(1).copied(), Some("const_prop"));
         assert_eq!(pm.pass_names().get(2).copied(), Some("dce"));
@@ -376,8 +501,259 @@ mod tests {
 
     #[test]
     fn test_default_pipeline_ends_with_live_patch() {
-        let pm = build_default_pipeline();
+        let pm = build_full_pipeline();
         assert_eq!(pm.pass_names().last().copied(), Some("live_patch"));
+    }
+
+    #[test]
+    fn test_build_custom_pipeline_respects_registry_order() {
+        let pm = build_custom_pipeline(&[
+            "wide_mem".to_string(),
+            "const_prop".to_string(),
+            "map_inline".to_string(),
+        ])
+        .expect("custom pipeline should build");
+
+        assert_eq!(
+            pm.pass_names(),
+            vec!["map_inline", "const_prop", "wide_mem"]
+        );
+    }
+
+    #[test]
+    fn test_build_custom_pipeline_rejects_unknown_pass_name() {
+        let err = match build_custom_pipeline(&["wide_mem".to_string(), "nope".to_string()]) {
+            Ok(_) => panic!("unknown pass should be rejected"),
+            Err(err) => err,
+        };
+
+        assert!(err.to_string().contains("unknown pass name(s): nope"));
+    }
+
+    #[test]
+    fn test_selected_pass_names_accept_aliases() {
+        let names = selected_pass_names(Some(&["skb_load_bytes".to_string()]))
+            .expect("alias should resolve to canonical pass name");
+
+        assert_eq!(names, vec!["skb_load_bytes_spec"]);
+    }
+
+    #[test]
+    fn cascade_map_inline_emits_non_zero_mov_constant() {
+        install_array_map(301, 42u32.to_le_bytes().to_vec());
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let mut program = make_program(vec![
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            BpfInsn::alu64_imm(BPF_ADD, 2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 0, 0, 0),
+            exit_insn(),
+        ]);
+        program.set_map_ids(vec![301]);
+
+        let result = run_pipeline_with_passes(&mut program, &["map_inline"]);
+
+        assert!(
+            result.program_changed,
+            "skip reasons: {:?}",
+            result.pass_results[0].sites_skipped
+        );
+        assert_eq!(result.pass_results[0].pass_name, "map_inline");
+        assert_eq!(result.pass_results[0].sites_applied, 1);
+        assert_eq!(program.insns, vec![BpfInsn::mov64_imm(0, 42), exit_insn()]);
+    }
+
+    #[test]
+    fn cascade_const_prop_folds_non_zero_map_inline_output() {
+        install_array_map(302, 42u32.to_le_bytes().to_vec());
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let mut program = make_program(vec![
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            BpfInsn::alu64_imm(BPF_ADD, 2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 0, 0, 0),
+            BpfInsn::mov64_imm(1, 10),
+            BpfInsn::alu64_reg(BPF_ADD, 1, 0),
+            exit_insn(),
+        ]);
+        program.set_map_ids(vec![302]);
+
+        let result = run_pipeline_with_passes(&mut program, &["map_inline", "const_prop"]);
+
+        assert!(result.program_changed);
+        assert_eq!(result.pass_results[0].pass_name, "map_inline");
+        assert_eq!(result.pass_results[1].pass_name, "const_prop");
+        assert_eq!(result.pass_results[1].sites_applied, 1);
+        assert_eq!(
+            program.insns,
+            vec![
+                BpfInsn::mov64_imm(0, 42),
+                BpfInsn::mov64_imm(1, 10),
+                BpfInsn::mov64_imm(1, 52),
+                exit_insn(),
+            ]
+        );
+    }
+
+    #[test]
+    fn cascade_dce_eliminates_dead_branch_after_const_prop() {
+        install_array_map(303, 42u32.to_le_bytes().to_vec());
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let mut program = make_program(vec![
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            BpfInsn::alu64_imm(BPF_ADD, 2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            jeq_imm(6, 0, 2),
+            BpfInsn::mov64_imm(0, 1),
+            BpfInsn::ja(1),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ]);
+        program.set_map_ids(vec![303]);
+
+        let result = run_pipeline_with_passes(&mut program, &["map_inline", "const_prop", "dce"]);
+
+        assert!(result.program_changed);
+        assert_eq!(result.pass_results[1].pass_name, "const_prop");
+        assert_eq!(result.pass_results[1].sites_applied, 1);
+        assert_eq!(result.pass_results[2].pass_name, "dce");
+        assert!(result.pass_results[2].changed);
+        assert_eq!(
+            program.insns,
+            vec![
+                BpfInsn::mov64_imm(6, 42),
+                BpfInsn::mov64_imm(0, 1),
+                exit_insn(),
+            ]
+        );
+    }
+
+    #[test]
+    fn cascade_full_pipeline_shortens_program_and_preserves_folded_semantics() {
+        install_array_map(304, 42u32.to_le_bytes().to_vec());
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let mut program = make_program(vec![
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            BpfInsn::alu64_imm(BPF_ADD, 2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            jeq_imm(6, 0, 4),
+            BpfInsn::mov64_imm(1, 10),
+            BpfInsn::alu64_reg(BPF_ADD, 1, 6),
+            BpfInsn::mov64_imm(0, 1),
+            exit_insn(),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ]);
+        program.set_map_ids(vec![304]);
+        let original_len = program.insns.len();
+
+        let pm = build_full_pipeline();
+        let result = pm.run(&mut program, &PassContext::test_default()).unwrap();
+
+        assert!(result.program_changed);
+        assert!(program.insns.len() < original_len);
+        assert_eq!(
+            result
+                .pass_results
+                .iter()
+                .find(|pr| pr.pass_name == "map_inline")
+                .map(|pr| pr.sites_applied),
+            Some(1)
+        );
+        assert_eq!(
+            result
+                .pass_results
+                .iter()
+                .find(|pr| pr.pass_name == "const_prop")
+                .map(|pr| pr.sites_applied),
+            Some(2)
+        );
+        assert!(result
+            .pass_results
+            .iter()
+            .find(|pr| pr.pass_name == "dce")
+            .map(|pr| pr.changed)
+            .unwrap_or(false));
+        assert_eq!(
+            program.insns,
+            vec![
+                BpfInsn::mov64_imm(6, 42),
+                BpfInsn::mov64_imm(1, 10),
+                BpfInsn::mov64_imm(1, 52),
+                BpfInsn::mov64_imm(0, 1),
+                exit_insn(),
+            ]
+        );
+    }
+
+    #[test]
+    fn cascade_hash_map_keeps_null_path_but_folds_non_null_path() {
+        install_hash_map(305, 42u32.to_le_bytes().to_vec());
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let mut program = make_program(vec![
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            BpfInsn::alu64_imm(BPF_ADD, 2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            jeq_imm(0, 0, 5),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            BpfInsn::mov64_imm(1, 10),
+            BpfInsn::alu64_reg(BPF_ADD, 1, 6),
+            BpfInsn::mov64_imm(0, 1),
+            exit_insn(),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ]);
+        program.set_map_ids(vec![305]);
+
+        let result = run_pipeline_with_passes(&mut program, &["map_inline", "const_prop", "dce"]);
+
+        assert!(result.program_changed);
+        assert_eq!(result.pass_results[0].pass_name, "map_inline");
+        assert_eq!(result.pass_results[1].pass_name, "const_prop");
+        assert_eq!(result.pass_results[1].sites_applied, 1);
+        assert_eq!(result.pass_results[2].pass_name, "dce");
+        assert!(!result.pass_results[2].changed);
+        assert_eq!(
+            program.insns,
+            vec![
+                map[0],
+                map[1],
+                st_mem(BPF_W, 10, -4, 1),
+                BpfInsn::mov64_reg(2, 10),
+                BpfInsn::alu64_imm(BPF_ADD, 2, -4),
+                call_helper(HELPER_MAP_LOOKUP_ELEM),
+                jeq_imm(0, 0, 5),
+                BpfInsn::mov64_imm(6, 42),
+                BpfInsn::mov64_imm(1, 10),
+                BpfInsn::mov64_imm(1, 52),
+                BpfInsn::mov64_imm(0, 1),
+                exit_insn(),
+                BpfInsn::mov64_imm(0, 0),
+                exit_insn(),
+            ]
+        );
     }
 
     // ── HIGH #6: Real BPF bytecode pipeline tests ────────────────────
@@ -398,7 +774,7 @@ mod tests {
         let orig_len = insns.len();
         let mut prog = make_program(insns);
         let ctx = PassContext::test_default();
-        let pm = build_default_pipeline();
+        let pm = build_full_pipeline();
         let result = pm.run(&mut prog, &ctx).unwrap();
 
         // Structural validity checks:
@@ -447,7 +823,7 @@ mod tests {
         let mut ctx = PassContext::test_default();
         ctx.kinsn_registry.rotate64_btf_id = 9999;
         ctx.platform.has_rorx = true;
-        let pm = build_default_pipeline();
+        let pm = build_full_pipeline();
         let result = pm.run(&mut prog, &ctx).unwrap();
 
         assert!(
@@ -493,7 +869,7 @@ mod tests {
         ctx.kinsn_registry.extract64_btf_id = 9999;
         ctx.platform.has_bmi1 = true;
         ctx.platform.has_bmi2 = true;
-        let pm = build_default_pipeline();
+        let pm = build_full_pipeline();
         let result = pm.run(&mut prog, &ctx).unwrap();
 
         assert!(
@@ -539,7 +915,7 @@ mod tests {
         ctx.kinsn_registry.endian_load32_btf_id = 9998;
         ctx.kinsn_registry.endian_load64_btf_id = 9997;
         ctx.platform.has_movbe = true;
-        let pm = build_default_pipeline();
+        let pm = build_full_pipeline();
         let result = pm.run(&mut prog, &ctx).unwrap();
 
         assert!(
@@ -585,7 +961,7 @@ mod tests {
         let mut ctx = PassContext::test_default();
         ctx.kinsn_registry.select64_btf_id = 9999;
         ctx.platform.has_cmov = true;
-        let pm = build_default_pipeline();
+        let pm = build_full_pipeline();
         let result = pm.run(&mut prog, &ctx).unwrap();
 
         assert!(

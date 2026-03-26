@@ -60,8 +60,9 @@ import yaml
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DRIVER_RELATIVE = Path(__file__).with_name("driver.py").resolve().relative_to(ROOT_DIR)
 DEFAULT_MACRO_CORPUS_YAML = ROOT_DIR / "corpus" / "config" / "macro_corpus.yaml"
-DEFAULT_OUTPUT_JSON = authoritative_output_path(ROOT_DIR / "corpus" / "results", "corpus_vm_batch")
-DEFAULT_OUTPUT_MD = ROOT_DIR / "docs" / "tmp" / "corpus-batch-rejit-results.md"
+DEFAULT_BENCHMARK_CONFIG_YAML = ROOT_DIR / "corpus" / "config" / "benchmark_config.yaml"
+FALLBACK_OUTPUT_JSON = authoritative_output_path(ROOT_DIR / "corpus" / "results", "corpus_vm_batch")
+FALLBACK_OUTPUT_MD = ROOT_DIR / "docs" / "tmp" / "corpus-batch-rejit-results.md"
 DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
 DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
 DEFAULT_KERNEL_TREE = ROOT_DIR / "vendor" / "linux-framework"
@@ -70,12 +71,122 @@ DEFAULT_BTF_PATH = DEFAULT_KERNEL_TREE / "vmlinux"
 DEFAULT_CORPUS_BUILD_REPORT = latest_output_path(ROOT_DIR / "corpus" / "results", "expanded_corpus_build")
 DEFAULT_VNG_MACHINE = resolve_machine(target=DEFAULT_VM_TARGET, action="vm-corpus")
 DEFAULT_VNG = str(Path(DEFAULT_VNG_MACHINE.executable))
-DEFAULT_REPEAT = 200
+FALLBACK_REPEAT = 200
 DEFAULT_TIMEOUT_SECONDS = 240
 GUEST_BATCH_TARGETS_PER_CHUNK = 1
 
 
+def _mapping_dict(value: Any, *, field_name: str) -> dict[str, Any]:
+    if value is None:
+        return {}
+    if not isinstance(value, dict):
+        raise SystemExit(f"invalid benchmark config field: {field_name} must be a mapping")
+    return dict(value)
+
+
+def _deep_merge(base: Mapping[str, Any], override: Mapping[str, Any]) -> dict[str, Any]:
+    merged = dict(base)
+    for key, value in override.items():
+        if isinstance(value, dict) and isinstance(merged.get(key), dict):
+            merged[key] = _deep_merge(
+                _mapping_dict(merged[key], field_name=str(key)),
+                value,
+            )
+        else:
+            merged[key] = value
+    return merged
+
+
+def parse_pass_csv(value: str | None) -> list[str] | None:
+    if value is None:
+        return None
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
+def _fallback_benchmark_config() -> dict[str, Any]:
+    return {
+        "defaults": {
+            "iterations": 3,
+            "warmups": 1,
+            "repeat": FALLBACK_REPEAT,
+            "output_json": str(FALLBACK_OUTPUT_JSON),
+            "output_md": str(FALLBACK_OUTPUT_MD),
+        },
+        "passes": {},
+        "profiles": {},
+    }
+
+
+def load_benchmark_config(profile: str | None = None) -> dict[str, Any]:
+    config_path = DEFAULT_BENCHMARK_CONFIG_YAML
+    root_config = _fallback_benchmark_config()
+    config_loaded = False
+
+    if config_path.exists():
+        loaded = yaml.safe_load(config_path.read_text())
+        if loaded is None:
+            loaded = {}
+        if not isinstance(loaded, dict):
+            raise SystemExit(f"benchmark config must be a YAML mapping: {config_path}")
+        root_config = _deep_merge(root_config, loaded)
+        config_loaded = True
+    elif profile:
+        raise SystemExit(f"benchmark profile requested but config file not found: {config_path}")
+
+    defaults = _mapping_dict(root_config.get("defaults"), field_name="defaults")
+    passes = _mapping_dict(root_config.get("passes"), field_name="passes")
+    profiles = _mapping_dict(root_config.get("profiles"), field_name="profiles")
+
+    profile_overrides: dict[str, Any] = {}
+    if profile:
+        available = ", ".join(sorted(profiles))
+        raw_profile = profiles.get(profile)
+        if raw_profile is None:
+            message = f"unknown benchmark profile: {profile}"
+            if available:
+                message += f" (available: {available})"
+            raise SystemExit(message)
+        profile_overrides = _mapping_dict(raw_profile, field_name=f"profiles.{profile}")
+
+    effective = _deep_merge({**defaults, "passes": passes}, profile_overrides)
+    effective["passes"] = _mapping_dict(effective.get("passes"), field_name="passes")
+    effective["profile"] = profile
+    effective["config_path"] = config_path if config_loaded else None
+    effective["config_loaded"] = config_loaded
+    effective["available_profiles"] = sorted(profiles)
+    return effective
+
+
+def resolve_requested_passes(
+    benchmark_config: Mapping[str, Any],
+    cli_passes: str | None,
+) -> list[str]:
+    cli_pass_list = parse_pass_csv(cli_passes)
+    if cli_pass_list is not None:
+        return cli_pass_list
+
+    passes_config = _mapping_dict(benchmark_config.get("passes"), field_name="passes")
+    active_list = normalize_passes(passes_config.get("active_list"))
+    if active_list:
+        return active_list
+
+    active_name = str(passes_config.get("active") or "").strip()
+    if not active_name:
+        return []
+    return normalize_passes(passes_config.get(active_name))
+
+
 def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
+    argv = list(sys.argv[1:] if argv is None else argv)
+    pre_parser = argparse.ArgumentParser(add_help=False)
+    pre_parser.add_argument("--profile")
+    pre_args, _ = pre_parser.parse_known_args(argv)
+    benchmark_config = load_benchmark_config(pre_args.profile)
+    profile_names = benchmark_config.get("available_profiles") or []
+    profile_help = "Benchmark profile from benchmark_config.yaml."
+    if profile_names:
+        profile_help += f" Available: {', '.join(profile_names)}."
+
     parser = argparse.ArgumentParser(
         description=(
             "Run the macro_corpus.yaml-driven corpus REJIT batch on "
@@ -87,8 +198,13 @@ def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=str(DEFAULT_MACRO_CORPUS_YAML),
         help="Macro corpus YAML manifest used to select the corpus targets.",
     )
-    add_output_json_argument(parser, DEFAULT_OUTPUT_JSON)
-    add_output_md_argument(parser, DEFAULT_OUTPUT_MD)
+    parser.add_argument("--profile", default=benchmark_config.get("profile"), help=profile_help)
+    parser.add_argument(
+        "--passes",
+        help="Comma-separated daemon pass list; overrides benchmark_config.yaml pass selection.",
+    )
+    add_output_json_argument(parser, benchmark_config["output_json"])
+    add_output_md_argument(parser, benchmark_config["output_md"])
     add_runner_argument(parser, DEFAULT_RUNNER, help_text="Path to micro_exec.")
     add_daemon_argument(parser, DEFAULT_DAEMON, help_text="Path to bpfrejit-daemon.")
     parser.add_argument(
@@ -116,7 +232,11 @@ def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=DEFAULT_VNG,
         help="vng executable to use for strict guest runs.",
     )
-    add_repeat_argument(parser, DEFAULT_REPEAT, help_text="Repeat count passed to each micro_exec invocation.")
+    add_repeat_argument(
+        parser,
+        int(benchmark_config["repeat"]),
+        help_text="Repeat count passed to each micro_exec invocation.",
+    )
     add_timeout_argument(parser, DEFAULT_TIMEOUT_SECONDS, help_text="Per-target timeout in seconds.")
     add_filter_argument(
         parser,
@@ -146,7 +266,12 @@ def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--guest-result-json",
         help=argparse.SUPPRESS,
     )
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    args.benchmark_config = load_benchmark_config(args.profile)
+    args.selected_passes = resolve_requested_passes(args.benchmark_config, args.passes)
+    args.default_output_json = str(args.benchmark_config["output_json"])
+    args.default_output_md = str(args.benchmark_config["output_md"])
+    return args
 
 
 def build_corpus_artifact_metadata(
@@ -409,6 +534,7 @@ def build_test_run_batch_job(
     btf_custom_path: Path | None,
     compile_only: bool,
     daemon_socket: str | None = None,
+    passes: list[str] | None = None,
     prepared_key: str | None = None,
     prepared_ref: str | None = None,
     prepared_group: str | None = None,
@@ -432,6 +558,8 @@ def build_test_run_batch_job(
         job["btf_custom_path"] = str(btf_custom_path)
     if daemon_socket is not None:
         job["daemon_socket"] = daemon_socket
+    if passes is not None:
+        job["passes"] = list(passes)
     if prepared_key is not None:
         job["prepared_key"] = prepared_key
     if prepared_ref is not None:
@@ -488,6 +616,7 @@ def build_target_batch_plan(
     enable_recompile: bool,
     enable_exec: bool,
     daemon_socket: str | None,
+    passes: list[str],
 ) -> tuple[dict[str, Any], list[dict[str, str]]]:
     jobs: list[dict[str, Any]] = []
     job_refs: list[dict[str, str]] = []
@@ -629,6 +758,7 @@ def build_target_batch_plan(
                         btf_custom_path=btf_custom_path,
                         compile_only=True,
                         daemon_socket=daemon_socket,
+                        passes=passes,
                         prepared_key=(
                             entry["rejit_prepared_key"]
                             if enable_exec and target.get("can_test_run")
@@ -662,6 +792,7 @@ def build_target_batch_plan(
                             btf_custom_path=btf_custom_path,
                             compile_only=False,
                             daemon_socket=daemon_socket,
+                            passes=passes,
                             prepared_ref=entry["rejit_prepared_key"],
                             prepared_group=rejit_group,
                         )
@@ -681,6 +812,7 @@ def build_target_batch_plan(
                             btf_custom_path=btf_custom_path,
                             compile_only=False,
                             daemon_socket=daemon_socket,
+                            passes=passes,
                         )
                     )
 
@@ -756,6 +888,7 @@ def run_targets_locally_batch(
     enable_exec: bool,
     skip_families: list[str],
     blind_apply: bool,
+    passes: list[str],
     daemon_socket: str | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     active_daemon_socket = daemon_socket
@@ -772,6 +905,7 @@ def run_targets_locally_batch(
             enable_recompile=enable_recompile,
             enable_exec=enable_exec,
             daemon_socket=active_daemon_socket,
+            passes=passes,
         )
         batch_result = run_batch_runner(
             runner,
@@ -906,6 +1040,7 @@ def run_guest_batch_mode(args: argparse.Namespace) -> int:
                     enable_exec=True,
                     skip_families=skip_families,
                     blind_apply=args.blind_apply,
+                    passes=list(args.selected_passes),
                     daemon_socket=active_daemon_socket,
                 )
             except Exception as exc:
@@ -1086,6 +1221,8 @@ def run_targets_in_guest_batch(
     vng_binary: str,
     skip_families: list[str],
     blind_apply: bool,
+    passes: list[str],
+    passes_cli_value: str | None,
     on_guest_info: Callable[[dict[str, Any]], None] | None = None,
     on_record: Callable[[int, dict[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
@@ -1140,6 +1277,11 @@ def run_targets_in_guest_batch(
             "--timeout",
             str(timeout_seconds),
         ]
+        guest_passes_value = passes_cli_value
+        if guest_passes_value is None and passes:
+            guest_passes_value = ",".join(passes)
+        if guest_passes_value is not None:
+            guest_argv.extend(["--passes", guest_passes_value])
         if skip_families:
             guest_argv.extend(["--skip-families", ",".join(skip_families)])
         if blind_apply:
@@ -1417,7 +1559,10 @@ def build_markdown(data: dict[str, Any]) -> str:
         f"- Daemon: `{data['daemon_binary']}`",
         "- Requested mode: `strict-vm`",
         f"- Effective mode: `{summary['effective_mode']}`",
+        f"- Benchmark profile: `{data.get('benchmark_profile') or 'default'}`",
+        f"- Benchmark config: `{data.get('benchmark_config') or 'fallback-defaults'}`",
         f"- Repeat: {data['repeat']}",
+        f"- Requested passes: `{', '.join(data.get('requested_passes') or []) or 'daemon default pipeline'}`",
         f"- Skip families: `{', '.join(data.get('skip_families') or []) or 'none'}`",
         f"- Target programs: {summary['targets_attempted']}",
         f"- Compile pairs: {summary['compile_pairs']}",
@@ -1554,6 +1699,8 @@ def packet_main(argv: list[str] | None = None) -> int:
     args = parse_packet_args(argv)
     require_minimum(args.repeat, 1, "--repeat")
     skip_families = normalize_skip_families(args.skip_families)
+    requested_passes = list(args.selected_passes)
+    benchmark_config_path = args.benchmark_config.get("config_path")
     if skip_families and not args.blind_apply:
         raise SystemExit("--skip-families requires --blind-apply")
 
@@ -1563,7 +1710,7 @@ def packet_main(argv: list[str] | None = None) -> int:
         return run_guest_batch_mode(args)
 
     macro_corpus_yaml = Path(args.macro_corpus_yaml).resolve()
-    if args.output_json == str(DEFAULT_OUTPUT_JSON) and args.max_programs is not None:
+    if args.output_json == args.default_output_json and args.max_programs is not None:
         output_json = smoke_output_path(ROOT_DIR / "corpus" / "results", "corpus_vm_batch")
     else:
         output_json = Path(args.output_json).resolve()
@@ -1609,6 +1756,8 @@ def packet_main(argv: list[str] | None = None) -> int:
         "corpus_build_report": str(corpus_build_report_path),
         "corpus_build_summary": corpus_build_report.get("summary") or {},
         "yaml_summary": yaml_summary,
+        "benchmark_profile": args.profile,
+        "benchmark_config": str(benchmark_config_path) if benchmark_config_path is not None else None,
         "runner_binary": str(runner),
         "daemon_binary": str(daemon),
         "kernel_tree": str(kernel_tree),
@@ -1616,6 +1765,7 @@ def packet_main(argv: list[str] | None = None) -> int:
         "btf_custom_path": str(btf_custom_path) if btf_custom_path is not None else None,
         "vng_binary": args.vng,
         "repeat": args.repeat,
+        "requested_passes": requested_passes,
         "timeout_seconds": args.timeout,
         "guest_smoke": guest_smoke,
         "skip_families": skip_families,
@@ -1656,6 +1806,8 @@ def packet_main(argv: list[str] | None = None) -> int:
                 "corpus_build_report": repo_relative_path(corpus_build_report_path),
                 "corpus_build_summary": corpus_build_report.get("summary") or {},
                 "yaml_summary": yaml_summary,
+                "benchmark_profile": args.profile,
+                "benchmark_config": repo_relative_path(benchmark_config_path) if benchmark_config_path is not None else None,
                 "runner_binary": repo_relative_path(runner),
                 "daemon_binary": repo_relative_path(daemon),
                 "kernel_tree": repo_relative_path(kernel_tree),
@@ -1663,6 +1815,7 @@ def packet_main(argv: list[str] | None = None) -> int:
                 "btf_custom_path": repo_relative_path(btf_custom_path) if btf_custom_path is not None else None,
                 "vng_binary": args.vng,
                 "repeat": args.repeat,
+                "requested_passes": requested_passes,
                 "timeout_seconds": args.timeout,
                 "skip_families": skip_families,
                 "blind_apply": bool(args.blind_apply),
@@ -1728,6 +1881,8 @@ def packet_main(argv: list[str] | None = None) -> int:
             vng_binary=args.vng,
             skip_families=skip_families,
             blind_apply=args.blind_apply,
+            passes=requested_passes,
+            passes_cli_value=args.passes,
             on_guest_info=handle_guest_info,
             on_record=handle_guest_record,
         )

@@ -64,6 +64,7 @@ DAEMON  ?= daemon/target/release/bpfrejit-daemon
 DAEMON_ARGS ?=
 DAEMON_SOCKET ?= /tmp/bpfrejit.sock
 REPOS ?=
+PROFILE ?=
 ITERATIONS ?= 3
 WARMUPS    ?= 1
 REPEAT     ?= 100
@@ -93,6 +94,9 @@ VENV_ACTIVATE := $(if $(VENV),source "$(VENV)/bin/activate" &&,)
 
 # Benchmark args
 LOCAL_SMOKE_ARGS := --bench simple --iterations 1 --warmups 0 --repeat 10
+ROOT_VM_CORPUS_REPEAT_IS_EXPLICIT := $(or $(findstring command line,$(origin REPEAT)),$(findstring environment,$(origin REPEAT)),$(findstring override,$(origin REPEAT)))
+ROOT_VM_CORPUS_REPEAT_ARG := $(if $(strip $(ROOT_VM_CORPUS_REPEAT_IS_EXPLICIT)),REPEAT="$(REPEAT)",)
+ROOT_VM_CORPUS_PROFILE_ARG := $(if $(strip $(PROFILE)),PROFILE="$(PROFILE)",)
 
 # Incremental rebuild sources
 MICRO_RUNNER_SOURCES := $(wildcard $(RUNNER_DIR)/src/*.cpp $(RUNNER_DIR)/include/*.hpp $(RUNNER_DIR)/CMakeLists.txt)
@@ -139,7 +143,7 @@ help:
 	@echo "VM x86: vm-shell vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all validate"
 	@echo "ARM64:  vm-arm64-smoke vm-arm64-selftest"
 	@echo "AWS:    aws-arm64-launch aws-arm64-setup aws-arm64-benchmark aws-arm64-terminate aws-arm64"
-	@echo "Params: ITERATIONS=$(ITERATIONS) WARMUPS=$(WARMUPS) REPEAT=$(REPEAT) BENCH=\"...\" TARGET=\"x86|arm64|aws|...\""
+	@echo "Params: ITERATIONS=$(ITERATIONS) WARMUPS=$(WARMUPS) REPEAT=$(REPEAT) PROFILE=$(PROFILE) BENCH=\"...\" TARGET=\"x86|arm64|aws|...\""
 
 # ── Build ──────────────────────────────────────────────────────────────────────
 all:
@@ -309,7 +313,8 @@ vm-micro:
 vm-corpus:
 	$(MAKE) -C "$(RUNNER_DIR)" vm-corpus \
 		PYTHON="$(PYTHON)" VENV="$(VENV)" \
-		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" DAEMON_ARGS="$(DAEMON_ARGS)" TARGET="$(TARGET)" REPEAT="$(REPEAT)"
+		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" DAEMON_ARGS="$(DAEMON_ARGS)" TARGET="$(TARGET)" \
+		$(ROOT_VM_CORPUS_PROFILE_ARG) $(ROOT_VM_CORPUS_REPEAT_ARG)
 
 vm-e2e:
 	$(MAKE) -C "$(RUNNER_DIR)" vm-e2e \

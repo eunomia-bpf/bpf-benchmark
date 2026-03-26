@@ -19,6 +19,9 @@ use crate::{bpf, insn, pass, passes, profiler, verifier_log};
 #[derive(Clone, Debug, Serialize)]
 pub(crate) struct OptimizeOneResult {
     pub status: String,
+    pub prog_id: u32,
+    pub changed: bool,
+    pub passes_applied: Vec<String>,
     pub program: ProgramInfo,
     pub summary: OptimizeSummary,
     pub passes: Vec<PassDetail>,
@@ -79,6 +82,14 @@ impl From<&pass::PassResult> for PassDetail {
             diagnostics: pr.diagnostics.clone(),
         }
     }
+}
+
+fn changed_pass_names(passes: &[PassDetail]) -> Vec<String> {
+    passes
+        .iter()
+        .filter(|pass| pass.changed)
+        .map(|pass| pass.pass_name.clone())
+        .collect()
 }
 
 /// Record of a single REJIT attempt (for rollback history).
@@ -170,12 +181,16 @@ pub(crate) fn collect_pgo_data(
 
 // ── Pipeline helpers ────────────────────────────────────────────────
 
-/// Build the appropriate pipeline based on --passes flag.
-pub(crate) fn build_pipeline(pass_names: &Option<Vec<String>>) -> pass::PassManager {
+/// Build the appropriate pipeline based on the selected pass names.
+pub(crate) fn build_pipeline(pass_names: Option<&[String]>) -> Result<pass::PassManager> {
     match pass_names {
-        Some(names) if !names.is_empty() => passes::build_pipeline_with_passes(names),
-        _ => passes::build_default_pipeline(),
+        Some(names) => passes::build_custom_pipeline(names),
+        None => Ok(passes::build_full_pipeline()),
     }
+}
+
+pub(crate) fn pipeline_pass_names(pass_names: Option<&[String]>) -> Result<Vec<String>> {
+    passes::selected_pass_names(pass_names)
 }
 
 pub(crate) type SharedInvalidationTracker = Arc<Mutex<MapInvalidationTracker<BpfMapValueReader>>>;
@@ -471,7 +486,7 @@ fn enumerate_one(
     let site_summary = if !orig_insns.is_empty() {
         let mut program = pass::BpfProgram::new(orig_insns);
         program.set_map_ids(bpf::bpf_prog_get_map_ids(fd.as_raw_fd()).unwrap_or_default());
-        let pm = build_pipeline(pass_names);
+        let pm = build_pipeline(pass_names.as_deref())?;
 
         match pm.run(&mut program, ctx) {
             Ok(result) if result.total_sites_applied > 0 => {
@@ -522,7 +537,7 @@ pub(crate) fn cmd_rewrite(
     let mut program = pass::BpfProgram::new(orig_insns.clone());
     let fd = bpf::bpf_prog_get_fd_by_id(prog_id)?;
     program.set_map_ids(bpf::bpf_prog_get_map_ids(fd.as_raw_fd()).unwrap_or_default());
-    let pm = build_pipeline(pass_names);
+    let pm = build_pipeline(pass_names.as_deref())?;
 
     let mut local_ctx = ctx.clone();
     local_ctx.prog_type = info.prog_type;
@@ -702,6 +717,9 @@ pub(crate) fn try_apply_one(
             .count();
         OptimizeOneResult {
             status: status.to_string(),
+            prog_id,
+            changed: program_changed,
+            passes_applied: changed_pass_names(&passes),
             program: ProgramInfo {
                 prog_id,
                 prog_name: prog_name.clone(),
@@ -759,11 +777,12 @@ pub(crate) fn try_apply_one(
     let mut total_pipeline_ns: u64 = 0;
     let mut total_rejit_ns: u64 = 0;
     let had_tracked_inline_sites = tracker_tracks_prog(invalidation_tracker, prog_id)?;
+    let selected_pass_names = pipeline_pass_names(pass_names.as_deref())?;
 
     for attempt in 0..=max_retries {
         let mut program = pass::BpfProgram::new(orig_insns.clone());
         program.set_map_ids(map_ids.clone());
-        let pm = build_pipeline(pass_names);
+        let pm = build_pipeline(Some(selected_pass_names.as_slice()))?;
         let mut local_ctx = ctx.clone();
         local_ctx.prog_type = info.prog_type;
         for disabled in sorted_strings(disabled_passes.iter().cloned()) {
@@ -1206,6 +1225,9 @@ mod tests {
     fn test_optimize_one_result_serialization() {
         let result = OptimizeOneResult {
             status: "ok".to_string(),
+            prog_id: 42,
+            changed: true,
+            passes_applied: vec!["wide_mem".to_string()],
             program: ProgramInfo {
                 prog_id: 42,
                 prog_name: "test_prog".to_string(),
@@ -1268,6 +1290,9 @@ mod tests {
             serde_json::from_str(&json).expect("JSON should parse back");
 
         assert_eq!(parsed["status"], "ok");
+        assert_eq!(parsed["prog_id"], 42);
+        assert_eq!(parsed["changed"], true);
+        assert_eq!(parsed["passes_applied"][0], "wide_mem");
         assert_eq!(parsed["program"]["prog_id"], 42);
         assert_eq!(parsed["program"]["insn_delta"], -10);
         assert_eq!(parsed["summary"]["applied"], true);
@@ -1297,6 +1322,9 @@ mod tests {
     fn test_optimize_one_result_with_rollback() {
         let result = OptimizeOneResult {
             status: "ok".to_string(),
+            prog_id: 99,
+            changed: true,
+            passes_applied: vec!["extract".to_string()],
             program: ProgramInfo {
                 prog_id: 99,
                 prog_name: "xdp_main".to_string(),
@@ -1346,6 +1374,7 @@ mod tests {
             serde_json::from_str(&json).expect("JSON should parse back");
 
         assert_eq!(parsed["summary"]["verifier_retries"], 1);
+        assert_eq!(parsed["passes_applied"][0], "extract");
         assert_eq!(parsed["summary"]["final_disabled_passes"][0], "branch_flip");
         assert_eq!(parsed["attempts"].as_array().unwrap().len(), 2);
         assert_eq!(parsed["attempts"][0]["failure_pc"], 76);
@@ -1633,7 +1662,7 @@ processed 49965 insns (limit 1000000) max_states_per_insn 32 total_states 1318 p
     #[test]
     fn test_build_pipeline_default_and_custom() {
         // Default pipeline should include the standard passes.
-        let pm_default = build_pipeline(&None);
+        let pm_default = build_pipeline(None).expect("default pipeline should build");
         // Just verify it was built without panic.
         // We can test it by running on a trivial program.
         let exit_insn = crate::insn::BpfInsn {
@@ -1649,7 +1678,9 @@ processed 49965 insns (limit 1000000) max_states_per_insn 32 total_states 1318 p
         assert!(!result.program_changed);
 
         // Custom pipeline with specific passes.
-        let pm_custom = build_pipeline(&Some(vec!["wide_mem".to_string()]));
+        let custom_passes = vec!["wide_mem".to_string()];
+        let pm_custom =
+            build_pipeline(Some(custom_passes.as_slice())).expect("custom pipeline should build");
         let mut prog2 = pass::BpfProgram::new(vec![exit_insn]);
         let result2 = pm_custom.run(&mut prog2, &ctx).unwrap();
         assert!(!result2.program_changed);

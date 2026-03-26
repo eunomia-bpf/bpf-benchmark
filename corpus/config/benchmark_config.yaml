@@ -1,0 +1,43 @@
+defaults:
+  iterations: 3
+  warmups: 1
+  repeat: 200
+  output_json: corpus/results/vm_corpus.json
+  output_md: corpus/results/vm_corpus.md
+
+passes:
+  performance:
+    - map_inline
+    - const_prop
+    - dce
+    - wide_mem
+    - rotate
+    - cond_select
+    - extract
+    - endian_fusion
+    - bulk_memory
+    - bounds_check_merge
+    - skb_load_bytes
+    - branch_flip
+  security:
+    - dangerous_helper_firewall
+    - live_patch
+    - speculation_barrier
+  active: performance
+
+profiles:
+  dev:
+    iterations: 1
+    warmups: 0
+    repeat: 50
+    output_json: corpus/results/dev/vm_corpus.json
+  strict:
+    iterations: 10
+    warmups: 2
+    repeat: 500
+  ablation_map_inline:
+    passes:
+      active_list: [map_inline, const_prop, dce]
+  ablation_wide_mem:
+    passes:
+      active_list: [wide_mem]

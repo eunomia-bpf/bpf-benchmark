@@ -22,6 +22,7 @@ DAEMON ?= daemon/target/release/bpfrejit-daemon
 DAEMON_ARGS ?=
 DAEMON_SOCKET ?= /tmp/bpfrejit.sock
 TARGET ?=
+PROFILE ?=
 ITERATIONS ?= 3
 WARMUPS ?= 1
 REPEAT ?= 100
@@ -78,6 +79,13 @@ JOBS ?= $(shell nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || ec
 BENCH_FLAGS := $(foreach b,$(BENCH),--bench $(b))
 MICRO_ARGS := --iterations $(ITERATIONS) --warmups $(WARMUPS) --repeat $(REPEAT) $(BENCH_FLAGS)
 VM_SMOKE_ARGS := --iterations 1 --warmups 0 --repeat 50
+PROFILE_FLAG := $(if $(strip $(PROFILE)),--profile "$(PROFILE)",)
+REPEAT_IS_EXPLICIT := $(or $(findstring command line,$(origin REPEAT)),$(findstring environment,$(origin REPEAT)),$(findstring override,$(origin REPEAT)))
+VM_CORPUS_OUTPUT_JSON_IS_EXPLICIT := $(or $(findstring command line,$(origin VM_CORPUS_OUTPUT_JSON)),$(findstring environment,$(origin VM_CORPUS_OUTPUT_JSON)),$(findstring override,$(origin VM_CORPUS_OUTPUT_JSON)))
+VM_CORPUS_OUTPUT_MD_IS_EXPLICIT := $(or $(findstring command line,$(origin VM_CORPUS_OUTPUT_MD)),$(findstring environment,$(origin VM_CORPUS_OUTPUT_MD)),$(findstring override,$(origin VM_CORPUS_OUTPUT_MD)))
+VM_CORPUS_REPEAT_FLAG := $(if $(strip $(REPEAT_IS_EXPLICIT)),--repeat "$(REPEAT)",)
+VM_CORPUS_OUTPUT_JSON_FLAG := $(if $(strip $(VM_CORPUS_OUTPUT_JSON_IS_EXPLICIT)),--output-json "$(VM_CORPUS_OUTPUT_JSON)",)
+VM_CORPUS_OUTPUT_MD_FLAG := $(if $(strip $(VM_CORPUS_OUTPUT_MD_IS_EXPLICIT)),--output-md "$(VM_CORPUS_OUTPUT_MD)",)
 
 .PHONY: all micro_exec vendor_libbpf vendor_bpftool \
 	corpus-fetch corpus-build-objects corpus-build \
@@ -257,14 +265,15 @@ vm-micro: micro_exec micro-programs daemon-binary kernel-image kinsn-modules-bui
 vm-corpus: corpus-build micro_exec daemon-binary kernel-image kinsn-modules-build
 	mkdir -p "$(CORPUS_RESULTS_DIR)"
 	TARGET="$(TARGET)" $(VENV_ACTIVATE) $(PYTHON) "$(REPO_ROOT)/corpus/driver.py" \
+		$(PROFILE_FLAG) \
 		--kernel-image "$(BZIMAGE_PATH)" \
 		--runner "$(MICRO_RUNNER)" \
 		--daemon "$(DAEMON_PATH)" \
 		--btf-custom-path "$(VMLINUX_PATH)" \
 		--corpus-build-report "$(CORPUS_BUILD_REPORT)" \
-		--repeat "$(REPEAT)" \
-		--output-json "$(VM_CORPUS_OUTPUT_JSON)" \
-		--output-md "$(VM_CORPUS_OUTPUT_MD)"
+		$(VM_CORPUS_REPEAT_FLAG) \
+		$(VM_CORPUS_OUTPUT_JSON_FLAG) \
+		$(VM_CORPUS_OUTPUT_MD_FLAG)
 
 vm-e2e: e2e-prep e2e-tracee-setup e2e-tetragon-setup micro_exec daemon-binary kernel-image kinsn-modules-build
 	mkdir -p "$(E2E_RESULTS_DIR)"

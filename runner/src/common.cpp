@@ -69,6 +69,25 @@ std::string lower_ascii(std::string_view input)
     return output;
 }
 
+std::vector<std::string> parse_comma_separated_strings(std::string_view input)
+{
+    std::vector<std::string> values;
+    size_t start = 0;
+    while (start <= input.size()) {
+        const size_t comma = input.find(',', start);
+        const size_t end = comma == std::string_view::npos ? input.size() : comma;
+        const std::string item = trim(input.substr(start, end - start));
+        if (!item.empty()) {
+            values.push_back(item);
+        }
+        if (comma == std::string_view::npos) {
+            break;
+        }
+        start = comma + 1;
+    }
+    return values;
+}
+
 void print_json_string_array(std::ostream &out,
                              const std::vector<std::string> &values)
 {
@@ -94,7 +113,7 @@ std::string usage_text()
 #endif
         "run-kernel|run-kernel-attach|list-programs> [--program <path>|<path>] [--program-name <name>] "
         "[--memory <path>] [--btf-custom-path <path>] "
-        "[--rejit] [--rejit-program <path>] [--daemon-socket <path>] "
+        "[--rejit] [--rejit-program <path>] [--daemon-socket <path>] [--passes <csv>] "
         "[--manual-load] "
         "[--io-mode map|staged|packet|context] [--raw-packet] [--repeat N] [--warmup N] [--input-size N] "
         "[--attach] [--workload-iterations N] [--workload-type mixed|stress-ng|fio|wrk|getpid|nanosleep|write_devnull] "
@@ -542,6 +561,10 @@ cli_options parse_args(int argc, char **argv)
             options.rejit = true;
             continue;
         }
+        if (current == "--passes" && index + 1 < argc) {
+            options.passes = parse_comma_separated_strings(argv[++index]);
+            continue;
+        }
         if (current == "--program-name" && index + 1 < argc) {
             options.program_name = std::string(argv[++index]);
             continue;
@@ -753,6 +776,10 @@ keep_alive_request parse_keep_alive_request(std::string_view json_line)
             fields, {"llvm_target_features"});
         target_features.has_value()) {
         options.llvm_target_features = *target_features;
+    }
+    if (const auto passes = get_optional_string_array_field(fields, {"passes"});
+        passes.has_value()) {
+        options.passes = *passes;
     }
     if (const auto disabled_passes = get_optional_string_array_field(fields, {"disabled_passes"});
         disabled_passes.has_value()) {

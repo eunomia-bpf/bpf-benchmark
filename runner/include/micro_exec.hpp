@@ -59,6 +59,7 @@ struct cli_options {
     bool no_cmov = false;
     std::optional<std::string> llvm_target_cpu;
     std::optional<std::string> llvm_target_features;
+    std::vector<std::string> passes;
     std::vector<std::string> disabled_passes;
     bool log_passes = false;
     bool perf_counters = false;

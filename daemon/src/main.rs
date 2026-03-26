@@ -155,6 +155,12 @@ fn main() -> Result<()> {
 
     // Determine which passes to use.
     let pass_names = cli.passes;
+    let validate_pass_names = || -> Result<()> {
+        if let Some(pass_names) = pass_names.as_deref() {
+            passes::validate_pass_names(pass_names)?;
+        }
+        Ok(())
+    };
     let rollback_enabled = !cli.no_rollback;
     let pgo_config = if cli.pgo {
         Some(PgoConfig {
@@ -165,29 +171,43 @@ fn main() -> Result<()> {
     };
 
     match cli.command {
-        Command::Enumerate => commands::cmd_enumerate(&ctx, &pass_names),
-        Command::Rewrite { prog_id } => commands::cmd_rewrite(prog_id, &ctx, &pass_names),
+        Command::Enumerate => {
+            validate_pass_names()?;
+            commands::cmd_enumerate(&ctx, &pass_names)
+        }
+        Command::Rewrite { prog_id } => {
+            validate_pass_names()?;
+            commands::cmd_rewrite(prog_id, &ctx, &pass_names)
+        }
         Command::Apply { prog_id } => {
+            validate_pass_names()?;
             commands::cmd_apply(prog_id, &ctx, &pass_names, &pgo_config, rollback_enabled)
         }
         Command::ApplyAll => {
+            validate_pass_names()?;
             commands::cmd_apply_all(&ctx, &pass_names, &pgo_config, rollback_enabled)
         }
         Command::Serve { socket } => {
-            server::cmd_serve(&socket, &ctx, &pass_names, &pgo_config, rollback_enabled)
+            if pass_names.is_some() {
+                eprintln!("serve: ignoring --passes; use request \"passes\" instead");
+            }
+            server::cmd_serve(&socket, &ctx, &pgo_config, rollback_enabled)
         }
         Command::Profile {
             prog_id,
             interval_ms,
             samples,
         } => commands::cmd_profile(prog_id, interval_ms, samples),
-        Command::Watch { interval, once } => server::cmd_watch(
-            interval,
-            once,
-            &ctx,
-            &pass_names,
-            &pgo_config,
-            rollback_enabled,
-        ),
+        Command::Watch { interval, once } => {
+            validate_pass_names()?;
+            server::cmd_watch(
+                interval,
+                once,
+                &ctx,
+                &pass_names,
+                &pgo_config,
+                rollback_enabled,
+            )
+        }
     }
 }
