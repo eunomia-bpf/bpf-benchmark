@@ -72,7 +72,7 @@ DEFAULT_VNG_MACHINE = resolve_machine(target=DEFAULT_VM_TARGET, action="vm-corpu
 DEFAULT_VNG = str(Path(DEFAULT_VNG_MACHINE.executable))
 DEFAULT_REPEAT = 200
 DEFAULT_TIMEOUT_SECONDS = 240
-GUEST_BATCH_TARGETS_PER_CHUNK = 32
+GUEST_BATCH_TARGETS_PER_CHUNK = 1
 
 
 def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
