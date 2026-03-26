@@ -741,7 +741,7 @@ make clean
 | **441** | Kernel CRITICAL/HIGH 修复（2026-03-23） | ✅ | 同 #431：修复 tools/uapi 头不同步、REJIT `fd_array_cnt` 无上限、`find_call_site()` x86 硬编码、`text_invalidate` 删除、`kinsn_ops` owner 引用问题。验证：`make kernel`、`make vm-selftest`、`make vm-micro-smoke` 全通过。见 #428。 |
 | **442** | 冗余 bounds check 消除 | 🔄 调研中 | BPF packet access 中冗余的 bounds check 消除。从零调研。**调研报告见 #472d**。 |
 | **443** | **Dead code elimination pass（2026-03-24）** | ✅ v1 已实现 | 新增 `daemon/src/passes/dce.rs`：做 **unreachable block elimination**（从每个 subprog entry 做 reachability）+ **`JA +0` NOP cleanup fixed-point**，并复用通用 branch-fixup/address-map helper。默认 pass 顺序改为 `map_inline -> const_prop -> dce -> wide_mem -> ...`。验证：`make daemon-tests` **333 pass**，`make daemon` 通过。设计报告：`docs/tmp/20260324/verifier_constprop_dce_design_20260324.md`。 |
-| **444** | Helper call 内联/优化 | ✅ 调研完成 | **结论**：P0 是 `skb_load_bytes -> direct packet access`；`skb_store_bytes` 仅适合 `flags=0` 窄子集；`probe_read_kernel` 一般情形受 nofault/fault-handling 语义阻塞，不应直接改成 load；`ktime_get_ns` 不是纯 bytecode rewrite 题。报告：`docs/tmp/20260324/helper_call_inlining_research_20260324.md`。 |
+| **444** | Helper call 内联/优化 | ✅ v1 已实现 | `skb_load_bytes -> direct packet access` 已落地为 `SkbLoadBytesSpecPass`，限定 TC (`SCHED_CLS`/`SCHED_ACT`) + `len<=8` + bytewise fast path；验证：`cargo test ... skb_load` **14/14**，`cargo test ...` **379 pass / 12 ignored**；实现 commit：`bf0742d9540f`。调研报告：`docs/tmp/20260324/helper_call_inlining_research_20260324.md`。 |
 | **445** | Spill/fill 消除 | ❌ 低优先级 | BPF 程序冗余 spill/fill 消除。**调研结论（`comprehensive_optimization_survey_20260323.md`）：内核已有 KF_FASTCALL，增量收益低**。 |
 | **446** | **kinsn 设计文档（2026-03-23）** | ✅ | `docs/kinsn-design.md`（1097 行）。覆盖 packed ABI 编码、daemon→verifier→JIT 数据流、bpf_kinsn_ops API、安全模型、5 个 kinsn 规格、添加新 kinsn 指南。Commit `5e10be2`。 |
 | **447** | **Daemon debug logging（2026-03-23）** | ✅ | `--debug` CLI flag。per-pass 完整 bytecode dump、verifier log（via REJIT log_level=2）、JIT machine code dump。299 tests pass。 |
@@ -822,10 +822,10 @@ make clean
 | **498b** | Bounds check merge (#442) — TDD 写测试 | ✅ | daemon unit tests 已写；最终 `cargo test bounds_check` 14/14 通过 |
 | **498c** | Bounds check merge (#442) — 实现 | ✅ | `BoundsCheckMergePass` 已实现并接入 PassManager；review 中补修 mixed strict/inclusive guard merge bug |
 | **498d** | Bounds check merge (#442) — Review + 测试 + commit | ✅ | code review 完成；`make daemon-tests` 通过；`make vm-static-test STATIC_VERIFY_ARGS='--mode micro' TARGET=x86` 已尝试，guest-side static verify 启动后超过 60s 无输出，按 review 窗口中止；commit/push：`639926cb28e9` |
-| **498e** | Helper call spec / skb_load_bytes (#444) — 设计文档 | 待做 | 检查/补充实现级设计文档 |
-| **498f** | Helper call spec / skb_load_bytes (#444) — TDD 写测试 | 待做 | codex 先写 daemon unit tests |
-| **498g** | Helper call spec / skb_load_bytes (#444) — 实现 | 待做 | codex 实现 SkbLoadBytesSpecPass |
-| **498h** | Helper call spec / skb_load_bytes (#444) — Review + 测试 + commit | 待做 | codex review + test + commit push + 更新 plan |
+| **498e** | Helper call spec / skb_load_bytes (#444) — 设计文档 | ✅ | 设计文档：`docs/tmp/20260326/skb_load_bytes_spec_design_20260326.md` |
+| **498f** | Helper call spec / skb_load_bytes (#444) — TDD 写测试 | ✅ | TDD 报告：`docs/tmp/20260326/skb_load_bytes_tdd_report_20260326.md`；当前 `cargo test ... skb_load` **14/14** 通过 |
+| **498g** | Helper call spec / skb_load_bytes (#444) — 实现 | ✅ | `SkbLoadBytesSpecPass` 已实现并接入默认 PassManager；review 中补修 `len>8`、packet pointer 宽访问和 `r1` ctx 跟踪问题 |
+| **498h** | Helper call spec / skb_load_bytes (#444) — Review + 测试 + commit | ✅ | review 完成；`cargo test ... skb_load` **14/14**，`cargo test ...` **379 pass / 12 ignored**；实现 commit：`bf0742d9540f` |
 | **498i** | Bulk memory kinsn — 设计文档 | 待做 | 补充实现级设计（daemon pass + kinsn module） |
 | **498j** | Bulk memory kinsn — TDD 写测试 | 待做 | codex 先写 daemon + module tests |
 | **498k** | Bulk memory kinsn — 实现 | 待做 | codex 实现 BulkMemoryPass + x86/arm64 kinsn module |
