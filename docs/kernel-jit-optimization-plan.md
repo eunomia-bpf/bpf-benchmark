@@ -207,7 +207,7 @@ BpfReJIT 的设计基于三个层次的 insight：
 | **DCE** | 否 | 🔄 设计完成 | const prop / map inline 后的 unreachable block / dead store 消除。specialization 乘数 | **kernel 已有 `opt_remove_dead_code()`，daemon DCE 让更多条件变常量**。和 #424 同一份设计 |
 | **Bounds check merge** | 否 | ✅ 已实现 | ~~冗余 check 删除~~ → **guard window merge / hoisting**。合并小窗口为大窗口 | **42 guard sites，严格冗余=0%，但 83.3% 可合并（ladder 结构）**。实现：`BoundsCheckMergePass`。**测试**：`cargo test bounds_check` 14/14、`cargo test` 365 pass/12 ignored、`make daemon`、`make daemon-tests`。**commit**：`639926cb28e9`。调研：`bounds_check_elimination_research_20260324.md` |
 | **128-bit LDP/STP** | 是 | ✅ 设计完成 | **ARM64**：相邻 load/store pair → `bpf_ldp128`/`bpf_stp128` kinsn → JIT emit LDP/STP，不碰 FPU。**x86**：pair load/store 用 `two mov` 即可（SSE/AVX 不值得——FPU context 开销远大于收益），bulk memcpy 走 `rep movsb`。**论文 story**：同一优化在不同架构有完全不同的 cost model（ARM64 免费 vs x86 需 FPU），体现 platform-aware kinsn 设计价值 | **ARM64 corpus store 对密度高，当前 JIT 完全没 LDP/STP**。设计：`arm64_ldp_stp_kinsn_design_20260326.md`、`x86_128bit_wide_loadstore_design_20260326.md`。调研：`128bit_wide_loadstore_research_20260324.md` |
-| **Bulk memory kinsn** | 是 | 🔄 设计完成 | ~~SIMD~~ → v1 用 `rep movsb/stosb` (x86) / `LDP/STP` (ARM64)，不碰 FPU | **corpus 有 40B/74B/360B/464B 连续 copy/zero run**。设计：`simd_kinsn_design_20260324.md`、`x86_128bit_wide_loadstore_design_20260326.md` |
+| **Bulk memory kinsn** | 是 | ✅ daemon pass 已实现 | ~~SIMD~~ → v1 用 `rep movsb/stosb` (x86) / `LDP/STP` (ARM64)，不碰 FPU | **corpus 有 40B/74B/360B/464B 连续 copy/zero run**。设计：`simd_kinsn_design_20260324.md`、`x86_128bit_wide_loadstore_design_20260326.md`。**测试**：`cargo test ... bulk_memory` **16/16**、`cargo test ...` **395 pass / 12 ignored**、`make daemon-tests`。**commit**：`958bab4528b2`。 |
 | **ADDR_CALC (LEA)** | 可选 | ❌ 低优先级 | mov+shift+add → `bpf_lea()` kinsn → JIT emit LEA | **corpus 仅 14 个严格命中 site（全部 tetragon），ROI 很低**。调研：`addr_calc_lea_research_20260324.md` |
 | **Helper call specialization** | 否/可选 | 🔄 调研完成 | `skb_load_bytes → direct packet access` 优先（纯 bytecode）；`probe_read_kernel` 需 safe-load kinsn | **590 skb_load_bytes + 25296 probe_read_kernel site。结论：skb_load_bytes 最可行，probe_read 风险高**。调研：`helper_call_inlining_research_20260324.md` |
 | **Frozen map inlining** | 否 | ❌ 不做 | BPF_MAP_FREEZE 后只读 map → 常量 MOV | **调研结论：真实 workload 无显式 freeze，hot-path lookup ≈ 0** |
@@ -826,10 +826,10 @@ make clean
 | **498f** | Helper call spec / skb_load_bytes (#444) — TDD 写测试 | ✅ | TDD 报告：`docs/tmp/20260326/skb_load_bytes_tdd_report_20260326.md`；当前 `cargo test ... skb_load` **14/14** 通过 |
 | **498g** | Helper call spec / skb_load_bytes (#444) — 实现 | ✅ | `SkbLoadBytesSpecPass` 已实现并接入默认 PassManager；review 中补修 `len>8`、packet pointer 宽访问和 `r1` ctx 跟踪问题 |
 | **498h** | Helper call spec / skb_load_bytes (#444) — Review + 测试 + commit | ✅ | review 完成；`cargo test ... skb_load` **14/14**，`cargo test ...` **379 pass / 12 ignored**；实现 commit：`bf0742d9540f` |
-| **498i** | Bulk memory kinsn — 设计文档 | 待做 | 补充实现级设计（daemon pass + kinsn module） |
-| **498j** | Bulk memory kinsn — TDD 写测试 | 待做 | codex 先写 daemon + module tests |
-| **498k** | Bulk memory kinsn — 实现 | 待做 | codex 实现 BulkMemoryPass + x86/arm64 kinsn module |
-| **498l** | Bulk memory kinsn — Review + 测试 + commit | 待做 | codex review + test + commit push + 更新 plan |
+| **498i** | Bulk memory kinsn — 设计文档 | ✅ | 设计文档：`docs/tmp/20260326/bulk_memory_pass_design_20260326.md` |
+| **498j** | Bulk memory kinsn — TDD 写测试 | ✅ | TDD 报告：`docs/tmp/20260326/bulk_memory_tdd_report_20260326.md`；stub red state 已记录 |
+| **498k** | Bulk memory kinsn — 实现 | ✅ | `BulkMemoryPass` + `pass.rs`/`mod.rs`/`kfunc_discovery.rs` bulk-memory 接线已完成；review 中补修 zero-only memset、chunked same-base overlap 和 different-base alias gate |
+| **498l** | Bulk memory kinsn — Review + 测试 + commit | ✅ | review 完成；`cargo test ... bulk_memory` **16/16**，`cargo test ...` **395 pass / 12 ignored**，`make daemon-tests` **395 pass / 12 ignored**；实现 commit：`958bab4528b2` |
 | **498m** | Dynamic map invalidation (#474f) — 设计文档 | 待做 | 补充 invalidation 循环实现设计 |
 | **498n** | Dynamic map invalidation (#474f) — TDD 写测试 | 待做 | codex 先写 daemon unit tests（map 值变化检测 + re-REJIT） |
 | **498o** | Dynamic map invalidation (#474f) — 实现 | 待做 | codex 实现 invalidation watcher + serve/watch 集成 |
