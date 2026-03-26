@@ -127,7 +127,7 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
-    // Discover available kinsn targets from exported BTF descriptors.
+    // Discover available kinsn targets from exported BTF kinsn stubs.
     let discovery = kfunc_discovery::discover_kinsns();
     eprintln!("kinsn discovery:");
     for line in &discovery.log {

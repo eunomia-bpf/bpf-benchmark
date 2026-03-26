@@ -228,7 +228,7 @@ impl BpfInsn {
 
     /// `call kinsn` (src_reg = BPF_PSEUDO_KINSN_CALL = 4)
     ///
-    /// `imm` is the BTF VAR id of the exported `struct bpf_kinsn` descriptor.
+    /// `imm` is the BTF FUNC id of the exported kinsn stub.
     /// `off` is the 1-based slot in the load/REJIT `fd_array` when module BTF
     /// is used, or 0 for vmlinux.
     pub const fn call_kinsn_with_off(btf_id: i32, off: i16) -> Self {
@@ -260,7 +260,7 @@ impl BpfInsn {
         }
     }
 
-    /// kinsn sidecar metadata for the immediately following kfunc call.
+    /// kinsn sidecar metadata for the immediately following kinsn call.
     ///
     /// Payload layout matches `bpf_kinsn_sidecar_payload()` in the kernel:
     /// bits [3:0]   = dst_reg field

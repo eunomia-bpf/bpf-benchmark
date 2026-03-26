@@ -1,82 +1,91 @@
-# kinsn v2 设计与实现
+# kinsn v2 Design and Implementation
 
-日期：2026-03-24  
-状态：current design + current implementation  
-主题：first-class kinsn IR + proof lowering + pure kinsn transport
+Date: 2026-03-26  
+Status: current design as implemented in this tree  
+Theme: first-class kinsn instruction encoding + proof lowering + shared kfunc/BTF metadata plumbing
 
-## 0. 文档定位
+## 0. Scope
 
-本文档描述当前仓库里的 `kinsn` 正式设计和实际实现。
+This document describes what is true in the current repository, not the older aspirational model from temporary design notes.
 
-它以这三类信息为准：
+In particular, the current tree does **not** have:
 
-- 长期目标与抽象边界：
-  - [docs/tmp/20260323/kinsn_v2_instantiate_design_20260323.md](/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260323/kinsn_v2_instantiate_design_20260323.md)
-- 当前 kernel 实现：
-  - [vendor/linux-framework/include/linux/bpf.h](/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/include/linux/bpf.h)
-  - [vendor/linux-framework/include/linux/btf.h](/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/include/linux/btf.h)
-  - [vendor/linux-framework/include/linux/bpf_verifier.h](/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/include/linux/bpf_verifier.h)
-  - [vendor/linux-framework/kernel/bpf/verifier.c](/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/kernel/bpf/verifier.c)
-  - [vendor/linux-framework/kernel/bpf/btf.c](/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/kernel/bpf/btf.c)
-  - [vendor/linux-framework/arch/x86/net/bpf_jit_comp.c](/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/arch/x86/net/bpf_jit_comp.c)
-  - [vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c](/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c)
-- 当前 module / daemon / tests：
-  - [module/include/kinsn_common.h](/home/yunwei37/workspace/bpf-benchmark/module/include/kinsn_common.h)
-  - [module/x86/bpf_rotate.c](/home/yunwei37/workspace/bpf-benchmark/module/x86/bpf_rotate.c)
-  - [module/x86/bpf_extract.c](/home/yunwei37/workspace/bpf-benchmark/module/x86/bpf_extract.c)
-  - [module/x86/bpf_select.c](/home/yunwei37/workspace/bpf-benchmark/module/x86/bpf_select.c)
-  - [module/x86/bpf_endian.c](/home/yunwei37/workspace/bpf-benchmark/module/x86/bpf_endian.c)
-  - [module/x86/bpf_barrier.c](/home/yunwei37/workspace/bpf-benchmark/module/x86/bpf_barrier.c)
-  - [daemon/src/insn.rs](/home/yunwei37/workspace/bpf-benchmark/daemon/src/insn.rs)
-  - [daemon/src/kfunc_discovery.rs](/home/yunwei37/workspace/bpf-benchmark/daemon/src/kfunc_discovery.rs)
-  - [daemon/src/passes/utils.rs](/home/yunwei37/workspace/bpf-benchmark/daemon/src/passes/utils.rs)
-  - [tests/unittest/rejit_kinsn.c](/home/yunwei37/workspace/bpf-benchmark/tests/unittest/rejit_kinsn.c)
+- a standalone `register_bpf_kinsn_set()` API
+- a standalone `btf->kinsn_tab`
+- a standalone `prog->aux->kinsn_tab`
+- `BPF_PSEUDO_KINSN_CALL` sites whose `imm` names a `BTF_KIND_VAR` descriptor object
 
-本文档已经不再把 `kinsn` 描述成 v1 的 “is-a kfunc + effect DSL”。  
-当前仓库的主线设计是 pure v2。
+What the current tree **does** have is:
 
-## 1. 一句话定义
+- dedicated kinsn instruction encoding in BPF bytecode
+- dedicated verifier lowering and restore logic for kinsn proof sequences
+- dedicated native JIT dispatch for kinsn sites
+- shared registration, BTF lookup, and per-program caching machinery built on top of the existing kfunc infrastructure
 
-`kinsn` 是一等扩展指令。
+Primary source files:
 
-它的核心语义是：
+- Kernel ABI and core types:
+  - [`vendor/linux-framework/include/uapi/linux/bpf.h`](../vendor/linux-framework/include/uapi/linux/bpf.h)
+  - [`vendor/linux-framework/include/linux/bpf.h`](../vendor/linux-framework/include/linux/bpf.h)
+  - [`vendor/linux-framework/include/linux/btf.h`](../vendor/linux-framework/include/linux/btf.h)
+  - [`vendor/linux-framework/include/linux/bpf_verifier.h`](../vendor/linux-framework/include/linux/bpf_verifier.h)
+- Kernel implementation:
+  - [`vendor/linux-framework/kernel/bpf/verifier.c`](../vendor/linux-framework/kernel/bpf/verifier.c)
+  - [`vendor/linux-framework/kernel/bpf/btf.c`](../vendor/linux-framework/kernel/bpf/btf.c)
+  - [`vendor/linux-framework/arch/x86/net/bpf_jit_comp.c`](../vendor/linux-framework/arch/x86/net/bpf_jit_comp.c)
+  - [`vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c`](../vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c)
+- Modules, daemon, and tests:
+  - [`module/include/kinsn_common.h`](../module/include/kinsn_common.h)
+  - [`module/x86/`](../module/x86)
+  - [`module/arm64/`](../module/arm64)
+  - [`daemon/src/insn.rs`](../daemon/src/insn.rs)
+  - [`daemon/src/kfunc_discovery.rs`](../daemon/src/kfunc_discovery.rs)
+  - [`daemon/src/passes/utils.rs`](../daemon/src/passes/utils.rs)
+  - [`tests/unittest/rejit_kinsn.c`](../tests/unittest/rejit_kinsn.c)
 
-- 原始程序里保留 first-class `kinsn`
-- `instantiate_insn(payload, insn_buf)` 定义它的 canonical BPF-visible semantics
-- verifier 通过 proof lowering 证明它
-- native JIT 直接对原始 `kinsn` 发射机器码
-- generic fallback 在需要时回到同一份 instantiated BPF 序列
+Useful higher-level design references:
 
-也就是说：
+- [`docs/tmp/20260323/kinsn_v2_instantiate_design_20260323.md`](./tmp/20260323/kinsn_v2_instantiate_design_20260323.md)
+- [`docs/tmp/20260325/kinsn_kfunc_unification_research_20260325.md`](./tmp/20260325/kinsn_kfunc_unification_research_20260325.md)
+- [`docs/tmp/20260325/kinsn_func_id_transport_design_20260325.md`](./tmp/20260325/kinsn_func_id_transport_design_20260325.md)
 
-- `kinsn` 不是 kfunc
-- 普通 BPF 是它的 proof object / fallback object
-- 不是它的长期身份
+## 1. One-sentence definition
 
-## 2. 当前 v2 的核心边界
+`kinsn` is a first-class BPF instruction form whose canonical semantics come from
+`instantiate_insn(payload, insn_buf)`, whose verifier path temporarily lowers it
+to ordinary BPF for proof checking, and whose execution path either emits native
+machine code or falls back to the same instantiated BPF sequence.
 
-### 2.1 first-class IR
+The important qualifier is that "first-class" is true at the instruction,
+verifier, and JIT layers. The current tree still reuses kfunc/BTF plumbing for
+registration, BTF lookup, and per-program metadata caching.
 
-当前实现已经把 `kinsn` 视为 first-class instruction：
+## 2. Current Architecture Boundary
 
-- 有独立的 `BPF_PSEUDO_KINSN_CALL`
-- 有独立的 sidecar tag `BPF_PSEUDO_KINSN_SIDECAR`
-- verifier 有独立的 `kinsn_tab`
-- JIT 有独立的 kinsn dispatch
-- module 导出的是 `struct bpf_kinsn` descriptor，不是 `bpf_kinsn_ops`
+### 2.1 Dedicated instruction encoding
 
-对应代码：
+The current UAPI has dedicated kinsn opcodes:
 
-- [vendor/linux-framework/include/uapi/linux/bpf.h](/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/include/uapi/linux/bpf.h)
-- [vendor/linux-framework/include/linux/bpf.h](/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/include/linux/bpf.h)
+- `BPF_PSEUDO_KINSN_SIDECAR`
+- `BPF_PSEUDO_KINSN_CALL`
 
-### 2.2 `instantiate_insn()` 是唯一 canonical 语义源
+The relevant comment in
+[`vendor/linux-framework/include/uapi/linux/bpf.h`](../vendor/linux-framework/include/uapi/linux/bpf.h)
+explicitly says that `BPF_PSEUDO_KINSN_CALL` carries the BTF ID of a
+`BTF_KIND_FUNC` kinsn stub.
 
-当前 descriptor 形状是：
+This means the bytecode-level representation is not a plain kfunc call.
+Verifier and JIT both recognize `BPF_PSEUDO_KINSN_CALL` directly.
+
+### 2.2 Canonical semantics still come from `struct bpf_kinsn`
+
+The current descriptor shape in
+[`vendor/linux-framework/include/linux/bpf.h`](../vendor/linux-framework/include/linux/bpf.h)
+is:
 
 ```c
 struct bpf_kinsn {
-	struct module *owner;
+	struct module *owner; /* NULL for built-in/vmlinux descriptors */
 	u16 max_insn_cnt;
 	u16 max_emit_bytes;
 
@@ -89,212 +98,220 @@ struct bpf_kinsn {
 };
 ```
 
-见 [vendor/linux-framework/include/linux/bpf.h](/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/include/linux/bpf.h)。
+Current meaning:
 
-这意味着：
+- `instantiate_insn()` is the canonical BPF-visible semantics source
+- native emit callbacks are architecture-specific refinements of that semantics
+- generic fallback uses the same instantiated sequence, not a separate kfunc model
 
-- verifier 不再消费 `model_call()` / `bpf_kinsn_effect`
-- module 直接提供 canonical instantiated BPF
-- native emit 是对这份语义的 refinement，不是另一套 verifier 语义来源
+There is no active `model_call()` or `bpf_kinsn_effect` path in the current tree.
 
-### 2.3 proof lowering，而不是 effect DSL
+### 2.3 Current transport identity
 
-当前 verifier 的主线是：
+The transport for one kinsn site is:
 
-1. 识别 `sidecar + BPF_PSEUDO_KINSN_CALL`
-2. 解析 target descriptor
-3. 调 `instantiate_insn(payload, env->insn_buf)`
-4. 验证 proof sequence 合法
-5. 在 verifier 主分析阶段临时 lower 成普通 BPF
-6. 主分析结束后 restore 回原始 `kinsn`
+- one sidecar pseudo-insn carrying the packed payload
+- one `CALL` whose `src_reg = BPF_PSEUDO_KINSN_CALL`
 
-对应代码：
+The sidecar payload format is implemented by
+`bpf_kinsn_sidecar_payload()` in
+[`vendor/linux-framework/include/linux/bpf.h`](../vendor/linux-framework/include/linux/bpf.h)
+and mirrored by `BpfInsn::kinsn_sidecar()` in
+[`daemon/src/insn.rs`](../daemon/src/insn.rs):
 
-- [vendor/linux-framework/kernel/bpf/verifier.c](/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/kernel/bpf/verifier.c)
-  - `validate_kinsn_proof_seq()`
-  - `build_kinsn_inst_seq()`
-  - `lower_kinsn_proof_regions()`
-  - `restore_kinsn_proof_regions()`
+- bits `[3:0]`: `dst_reg`
+- bits `[19:4]`: `off`
+- bits `[51:20]`: `imm`
 
-## 3. transport：当前已经是 pure kinsn transport
+The call-site identity is the part that the previous version of this document
+got wrong:
 
-### 3.1 指令编码
+- `CALL.imm` is the BTF ID of a `BTF_KIND_FUNC` kinsn stub
+- `CALL.off` is the 1-based `fd_array` slot for the module BTF FD, or `0` for vmlinux
 
-当前 transport 是：
+The call site does **not** directly name a `BTF_KIND_VAR` descriptor object.
 
-- 一条 sidecar pseudo-insn 承载 payload
-- 一条专用 `CALL`，`src_reg = BPF_PSEUDO_KINSN_CALL`
+Descriptor globals such as `bpf_rotate64_desc` still exist in C and may appear
+in module BTF as variables, but that is not what `BPF_PSEUDO_KINSN_CALL`
+addresses.
 
-不是：
+### 2.4 Registration and metadata reuse the kfunc path
 
-- `PSEUDO_KFUNC_CALL`
-- kfunc FUNC id
-- `KF_KINSN`
+The current module-side contract is:
 
-daemon 当前发射的是：
+1. export a stub kfunc such as `__bpf_kfunc void bpf_rotate64(void) {}`
+2. register that stub in a `BTF_KFUNCS_*` ID set
+3. provide a parallel `kinsn_descs[]` array holding the actual
+   `const struct bpf_kinsn *` descriptors
+4. register everything through `register_btf_kfunc_id_set()`
 
-- [sidecar](/home/yunwei37/workspace/bpf-benchmark/daemon/src/insn.rs)
-- [kinsn_call](/home/yunwei37/workspace/bpf-benchmark/daemon/src/insn.rs)
+This is visible in:
 
-### 3.2 当前 payload 载体
+- [`module/include/kinsn_common.h`](../module/include/kinsn_common.h)
+- [`module/x86/bpf_rotate.c`](../module/x86/bpf_rotate.c)
+- [`module/arm64/bpf_rotate.c`](../module/arm64/bpf_rotate.c)
 
-sidecar payload 仍然使用一条 `MOV K` 指令的剩余位承载：
+The key type is `struct btf_kfunc_id_set` in
+[`vendor/linux-framework/include/linux/btf.h`](../vendor/linux-framework/include/linux/btf.h):
 
-- 低 4 bit：`dst_reg`
-- 中间 16 bit：`off`
-- 高 32 bit：`imm`
+```c
+struct btf_kfunc_id_set {
+	struct module *owner;
+	struct btf_id_set8 *set;
+	btf_kfunc_filter_t filter;
+	const struct bpf_kinsn * const *kinsn_descs;
+};
+```
 
-kernel 打包接口见：
+So the current implementation is not a fully separate "kinsn registry"
+subsystem. It is a dedicated instruction encoding layered on top of shared
+kfunc/BTF registration and lookup machinery.
 
-- [vendor/linux-framework/include/linux/bpf.h](/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/include/linux/bpf.h)
-  - `bpf_kinsn_sidecar_payload()`
+Current lookup path:
 
-daemon 对应编码见：
+- module init calls `register_btf_kfunc_id_set()`
+- [`vendor/linux-framework/kernel/bpf/btf.c`](../vendor/linux-framework/kernel/bpf/btf.c)
+  stores the kfunc set and the parallel kinsn descriptor mapping in
+  `btf->kfunc_set_tab`
+- verifier uses `btf_kfunc_kinsn_desc()` to recover the `struct bpf_kinsn *`
+- verifier caches per-program metadata in `prog->aux->kfunc_tab` and
+  `prog->aux->kfunc_btf_tab`
+- JIT later resolves payload and descriptor through `bpf_jit_get_kinsn_payload()`
 
-- [daemon/src/insn.rs](/home/yunwei37/workspace/bpf-benchmark/daemon/src/insn.rs)
-  - `BpfInsn::kinsn_sidecar()`
+There is no current `register_bpf_kinsn_set()`, `btf->kinsn_tab`, or
+`prog->aux->kinsn_tab`.
 
-### 3.3 当前 target identity
+## 3. Verifier Pipeline and Proof Lowering
 
-当前 `CALL.imm` 不是 FUNC id，而是：
+### 3.1 Early descriptor collection
 
-- module BTF 里的 `BTF_KIND_VAR` id
-- 这个 VAR 的类型必须是 `struct bpf_kinsn`
+`add_subprog_and_kfunc()` in
+[`vendor/linux-framework/kernel/bpf/verifier.c`](../vendor/linux-framework/kernel/bpf/verifier.c)
+is where current kinsn sites first enter verifier bookkeeping.
 
-当前 `CALL.off` 仍然承载：
+For each `BPF_PSEUDO_KINSN_CALL` site, the verifier:
 
-- module BTF fd slot
+- counts the site in `env->kinsn_call_cnt`
+- routes metadata creation through `add_kfunc_desc(..., true)`
+- resolves the backing `struct bpf_kinsn *` through `fetch_kfunc_meta()` and
+  `btf_kfunc_kinsn_desc()`
+- stores the resulting entry in `prog->aux->kfunc_tab`
 
-也就是说，当前 transport 已经脱离了 `kfunc` 身份，但仍然复用 “module BTF fd_array 命名空间” 这一层来定位外部 module BTF。
+So current kinsn calls are "special" in instruction encoding, but not in the
+descriptor table implementation.
 
-这是当前实现中的实际折中点。
+### 3.2 Lowering happens before main verifier analysis
 
-### 3.4 descriptor registration
+The current verifier timing is:
 
-当前 runtime lookup 不再走 `kallsyms_lookup_name()`。
+1. `add_subprog_and_kfunc()`
+2. `lower_kinsn_proof_regions()`
+3. CFG, postorder, SCC, liveness, and main verifier analysis
+4. `restore_kinsn_proof_regions()`
+5. later rewrite/fixup passes such as `remove_fastcall_spills_fills()`
 
-它已经收敛成：
+This means the verifier analyzes instantiated proof sequences, not the original
+two-insn kinsn encoding, but the program is restored back to the original
+`sidecar + kinsn_call` form before later rewrite/JIT stages.
 
-- module init 时调用 `register_bpf_kinsn_set()`
-- 把 `{ BTF var name -> const struct bpf_kinsn * }` 解析并写入 `btf->kinsn_tab`
-- verifier load 时通过 `(struct btf *, var_id)` lookup descriptor
-- JIT 不再重新 lookup，而是直接使用 `prog->aux->kinsn_tab`
+### 3.3 Lowering and restore mechanics
 
-对应代码：
+Current lowering is intentionally minimal:
 
-- [vendor/linux-framework/kernel/bpf/btf.c](/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/kernel/bpf/btf.c)
-  - `register_bpf_kinsn_set()`
-  - `unregister_bpf_kinsn_set()`
-  - `btf_try_get_kinsn_desc()`
-- [module/include/kinsn_common.h](/home/yunwei37/workspace/bpf-benchmark/module/include/kinsn_common.h)
-  - `DEFINE_KINSN_V2_MODULE(...)`
-- [vendor/linux-framework/kernel/bpf/verifier.c](/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/kernel/bpf/verifier.c)
-  - `fetch_kinsn_desc_meta()`
+- `lower_kinsn_proof_regions()` walks the program from back to front
+- for each kinsn site it requires a preceding sidecar
+- it resolves `(kinsn, payload)` via `bpf_jit_get_kinsn_payload()`
+- it calls `instantiate_insn(payload, proof_buf)`
+- it validates the local structure of the proof sequence
+- it removes the sidecar with `verifier_remove_insns()`
+- it replaces the call site with the proof sequence via `bpf_patch_insn_data()`
+- it records the original two instructions in `env->kinsn_regions[]`
 
-## 4. verifier 里的 proof lowering
+Restore is the inverse:
 
-### 4.1 时序
+- `restore_kinsn_proof_regions()` patches back the original two instructions
+- it removes the remaining proof instructions
+- it cleans affected jump-table aux state
 
-当前实现采用的是：
+There is no separate `build_kinsn_inst_seq()` helper in the current tree.
 
-- `add_subprog_and_kfunc()` 之后，先收集 kinsn descriptor
-- `check_subprogs()` / `check_cfg()` / `do_check_*()` 之前做 lowering
-- `do_check_main()` / `do_check_subprogs()` 之后 restore 回原始 `kinsn`
-- restore 发生在 `remove_fastcall_spills_fills()` 之前
+### 3.4 What `validate_kinsn_proof_seq()` actually enforces
 
-这是当前代码中的真实时序，而不是仅仅文档里的设想。
+The current local validation is narrower and more concrete than the older
+version of this document claimed.
 
-### 4.2 lowering / restore 机制
+It rejects:
 
-当前实现就是“验证前展开，验证后 replace”。
+- nested kinsn sidecar pseudo-insns
+- all calls and exits
+- pseudo `ldimm64` forms (`BPF_LD | BPF_IMM` with non-zero `src_reg`)
+- backward jumps / back-edges
+- jumps that go outside the proof sequence boundary
 
-具体做法：
+One nuance matters:
 
-- lowering 阶段
-  - 保存原始 `sidecar + call`
-  - `verifier_remove_insns()` 删除 sidecar
-  - `bpf_patch_insn_data()` 把 `call` 位置扩成 instantiated proof sequence
-- restore 阶段
-  - `bpf_patch_insn_data()` 先把 proof region 开头改回原始两条
-  - `verifier_remove_insns()` 删掉剩余 proof 指令
+- a forward jump may target the one-past-end boundary of the proof sequence
+- so the verifier does **not** require every jump target to stay strictly
+  inside the proof region
 
-这里没有额外造一个复杂框架。  
-当前实现主要复用了现有 patch/rewrite 基础设施，只补了最小的 `kinsn_region` bookkeeping。
+After this local structural validation, normal verifier analysis still runs on
+the lowered ordinary-BPF proof sequence.
 
-### 4.3 proof sequence 约束
+## 4. Execution and Fallback
 
-当前 verifier 会显式验证 proof sequence 的结构安全性。
+### 4.1 Native JIT path
 
-关键约束包括：
+Current x86 and arm64 JITs both have dedicated kinsn dispatch:
 
-- 不允许 helper / kfunc / subprog / tailcall
-- 不允许跳出 region
-- 不允许形成 back-edge
-- 要求 sequence 自身是合法 BPF 指令流
+- x86:
+  [`vendor/linux-framework/arch/x86/net/bpf_jit_comp.c`](../vendor/linux-framework/arch/x86/net/bpf_jit_comp.c)
+  `emit_kinsn_desc_call()`
+- arm64:
+  [`vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c`](../vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c)
+  `emit_kinsn_desc_call_arm64()`
 
-这样做的目的不是“替 module 证明优化正确”，而是保证：
+At JIT time, the implementation does not look up symbol names or walk BTF by
+name again. Instead it calls `bpf_jit_get_kinsn_payload()` and resolves the
+descriptor from the already prepared `prog->aux->kfunc_tab` entry.
 
-- verifier 真正在分析的 proof object 是良构的普通 BPF
+So the current statement is:
 
-### 4.4 restore 后的执行表示
+- kinsn has dedicated JIT dispatch
+- but descriptor lookup is still backed by the shared kfunc metadata table
 
-当前 restore 完成后：
+### 4.2 Generic fallback
 
-- 原始程序里仍然是 `sidecar + kinsn_call`
-- verifier 后续 rewrite / JIT 看到的是原始 `kinsn`
+Current generic fallback lives in `do_misc_fixups()` in
+[`vendor/linux-framework/kernel/bpf/verifier.c`](../vendor/linux-framework/kernel/bpf/verifier.c).
 
-这正是当前设计刻意要保留的一点：
+For each kinsn site:
 
-- proof object 只是 proof object
-- 它不吞掉 first-class `kinsn`
+- if `prog->jit_requested` is true **and** the descriptor has a native emit
+  callback for the running architecture, the original kinsn site stays intact
+- otherwise, the sidecar and call are rewritten into the instantiated ordinary
+  BPF sequence
 
-## 5. 执行和 fallback
+So the current fallback behavior is:
 
-### 5.1 native JIT
+- no JIT requested -> lower to ordinary BPF
+- JIT requested but no native emit on this architecture -> lower to ordinary BPF
+- native emit available -> keep original kinsn representation for JIT
 
-当前 x86 / arm64 都直接对原始 `kinsn` dispatch：
+This fallback does **not** route through a kfunc execution model.
 
-- [vendor/linux-framework/arch/x86/net/bpf_jit_comp.c](/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/arch/x86/net/bpf_jit_comp.c)
-  - `emit_kinsn_desc_call()`
-- [vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c](/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c)
-  - `emit_kinsn_desc_call_arm64()`
+## 5. Module, Daemon, and Test Responsibilities
 
-JIT 取 descriptor 的路径是：
+### 5.1 Modules
 
-- `prog->aux->kinsn_tab`
-- `bpf_jit_get_kinsn_payload()`
+Current in-tree modules follow the same pattern on both x86 and arm64:
 
-不是重新去查 BTF symbol 或 `kallsyms`。
+- export a stub kfunc
+- provide a `const struct bpf_kinsn ..._desc`
+- implement `instantiate_insn()`
+- implement native emit for the target architecture
+- register through `DEFINE_KINSN_V2_MODULE(...)`
 
-### 5.2 generic fallback
-
-当前 generic fallback 不是“回退成 kfunc 语义”，而是：
-
-- 在 `do_misc_fixups()` 阶段
-- 如果当前 program 没有可用 native emit
-- 就把原始 `kinsn` 站点再 lower 成普通 BPF 指令序列
-
-对应代码：
-
-- [vendor/linux-framework/kernel/bpf/verifier.c](/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/kernel/bpf/verifier.c)
-  - `do_misc_fixups()`
-
-这点非常重要，因为当前实现已经满足：
-
-- **JIT 不支持时，fallback 是 instantiated BPF sequence，不是 fallback 回 kfunc**
-
-## 6. module / daemon / tests 的边界
-
-### 6.1 module 的职责
-
-每个 kinsn module 现在负责：
-
-- 导出 `const struct bpf_kinsn ..._desc`
-- 提供 `instantiate_insn(payload, ...)`
-- 提供目标架构 native emit
-- 通过 `DEFINE_KINSN_V2_MODULE(...)` 注册 descriptor set
-
-当前已有的对象包括：
+Current in-tree targets include:
 
 - rotate
 - select
@@ -302,95 +319,68 @@ JIT 取 descriptor 的路径是：
 - endian load16/load32/load64
 - speculation barrier
 
-### 6.2 daemon 的职责
+Representative files:
 
-当前 daemon 已经配合 pure-v2 transport。
+- [`module/x86/bpf_rotate.c`](../module/x86/bpf_rotate.c)
+- [`module/x86/bpf_select.c`](../module/x86/bpf_select.c)
+- [`module/x86/bpf_extract.c`](../module/x86/bpf_extract.c)
+- [`module/x86/bpf_endian.c`](../module/x86/bpf_endian.c)
+- [`module/x86/bpf_barrier.c`](../module/x86/bpf_barrier.c)
+- [`module/arm64/bpf_rotate.c`](../module/arm64/bpf_rotate.c)
+- [`module/arm64/bpf_select.c`](../module/arm64/bpf_select.c)
+- [`module/arm64/bpf_extract.c`](../module/arm64/bpf_extract.c)
+- [`module/arm64/bpf_endian.c`](../module/arm64/bpf_endian.c)
+- [`module/arm64/bpf_barrier.c`](../module/arm64/bpf_barrier.c)
 
-它负责：
+### 5.2 Daemon
 
-- 在 module BTF 里找 `BTF_KIND_VAR` descriptor
-- 获取其 absolute BTF id
-- 发射 `sidecar + BPF_PSEUDO_KINSN_CALL`
-- 继续做模式匹配与站点选择
+The daemon is already aligned with the current transport, but the transport is
+function-ID based, not variable-ID based.
 
-它不负责：
+Current daemon responsibilities are:
 
-- 语义证明
-- native emit
-- verifier 模型
+- discover module BTF-backed kinsn stubs from `/sys/kernel/btf/<module>`
+- find `BTF_KIND_FUNC` IDs for known stub names
+- bias split-BTF type IDs by the vmlinux type count to recover the absolute
+  kernel-visible BTF ID accepted by the verifier
+- obtain real BPF BTF FDs for the relevant modules
+- emit `sidecar + BPF_PSEUDO_KINSN_CALL` sequences
 
-### 6.3 tests 的职责
+Relevant files:
 
-repo-owned 回归测试当前主要在：
+- [`daemon/src/kfunc_discovery.rs`](../daemon/src/kfunc_discovery.rs)
+- [`daemon/src/insn.rs`](../daemon/src/insn.rs)
+- [`daemon/src/passes/utils.rs`](../daemon/src/passes/utils.rs)
 
-- [tests/unittest/rejit_kinsn.c](/home/yunwei37/workspace/bpf-benchmark/tests/unittest/rejit_kinsn.c)
+### 5.3 Tests
 
-它覆盖的核心点包括：
+Current repo-owned coverage for this path is centered in
+[`tests/unittest/rejit_kinsn.c`](../tests/unittest/rejit_kinsn.c).
 
-- packed sidecar 语义
-- proof lowering / restore 的结构正确性
-- dense program 回归
-- specific bug regressions
+That test suite covers current end-to-end behavior such as:
 
-## 7. 当前实现和 tmp v2 文档的关系
+- kinsn discovery through module BTF and BTF FDs
+- packed sidecar transport semantics
+- REJIT correctness for rotate/select/extract/endian/barrier
+- x86 native emit byte-pattern checks for rotate
+- rollback behavior when REJIT fails
 
-[docs/tmp/20260323/kinsn_v2_instantiate_design_20260323.md](/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260323/kinsn_v2_instantiate_design_20260323.md) 是目标设计文档。  
-本文档是它在当前仓库中的落地版。
+## 6. Bottom Line
 
-两者当前是一致的核心点：
+The current repository is best described as:
 
-- `kinsn` 是 first-class IR
-- `instantiate_insn()` 是 canonical 语义源
-- verifier 使用 proof lowering
-- 执行/JIT 保持原始 `kinsn` 为主表示
-- transport 已经纯化为 dedicated pseudo kinsn call
+- first-class kinsn instruction encoding
+- `instantiate_insn()` as the canonical semantics source
+- verifier proof lowering plus restore
+- dedicated native JIT dispatch
+- ordinary-BPF fallback when native emit is unavailable
+- shared kfunc/BTF registration and metadata caching underneath
 
-两者的差别只在于：
+So the precise current statement is **not** "kinsn is just a kfunc", but it is
+also **not** "kinsn has a completely separate descriptor transport and table
+stack".
 
-- tmp 文档更偏 “目标边界 / 设计原则”
-- 本文档更偏 “当前代码到底已经实现到哪一步”
+It is a hybrid:
 
-## 8. 当前已知 open issues
-
-### 8.1 proof lowering 的规模问题仍然存在
-
-当前 proof lowering 仍然是：
-
-- 按 site 在 live verifier program 上做 patch/restore
-
-所以它仍然有一个结构性 open issue：
-
-- 复杂度更接近 `O(site_count * prog_len)`
-- 继续受现有 patch/rewrite machinery 约束
-
-这不是当前 correctness blocker，但仍然是长期最主要的 open issue。
-
-### 8.2 commit / upstream cleanliness 仍要继续收敛
-
-当前代码虽然语义已经是 pure-v2，但 patch series 视角上仍有需要继续整理的地方：
-
-- prep refactor 与 feature patch 还要更干净地拆开
-- 一些非核心 churn 还要继续压缩
-
-这属于 patch-series 组织问题，不属于当前 `kinsn` 语义模型的问题。
-
-## 9. 结论
-
-当前仓库里的 `kinsn` 已经不是 v1。
-
-它现在的真实设计是：
-
-- first-class `kinsn`
-- dedicated `PSEUDO_KINSN_CALL`
-- per-BTF descriptor registration
-- verifier proof lowering + restore
-- native JIT 直接发原始 `kinsn`
-- JIT 不支持时 fallback 成 instantiated BPF sequence
-
-因此，后续讨论、修改和 reviewer 交流，都应以这个模型为准，而不再以旧的：
-
-- `kfunc + effect DSL`
-- `model_call()`
-- `bpf_kinsn_effect`
-
-为准。
+- dedicated at the bytecode, verifier-lowering, and JIT-dispatch layers
+- shared at the registration, BTF lookup, and per-program descriptor-cache layers
