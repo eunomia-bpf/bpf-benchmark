@@ -1,0 +1,3131 @@
+schema_version: 1
+scheduler:
+  max_parallel_jobs: 3
+jobs:
+- id: object-0001
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/simple.bpf.o
+  object_index: 1
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - simple
+  program_names_from_manifest:
+  - simple_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0002
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/simple_packet.bpf.o
+  object_index: 2
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - simple_packet
+  program_names_from_manifest:
+  - simple_packet_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0003
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/memory_pair_sum.bpf.o
+  object_index: 3
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - memory_pair_sum
+  program_names_from_manifest:
+  - memory_pair_sum_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0004
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/bitcount.bpf.o
+  object_index: 4
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - bitcount
+  program_names_from_manifest:
+  - bitcount_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0005
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/log2_fold.bpf.o
+  object_index: 5
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - log2_fold
+  program_names_from_manifest:
+  - log2_fold_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0006
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/dep_chain_short.bpf.o
+  object_index: 6
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - dep_chain_short
+  program_names_from_manifest:
+  - dep_chain_short_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0007
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/dep_chain_long.bpf.o
+  object_index: 7
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - dep_chain_long
+  program_names_from_manifest:
+  - dep_chain_long_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0008
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/binary_search.bpf.o
+  object_index: 8
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - binary_search
+  program_names_from_manifest:
+  - binary_search_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0009
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/branch_layout.bpf.o
+  object_index: 9
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - branch_layout
+  program_names_from_manifest:
+  - branch_layout_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0010
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/switch_dispatch.bpf.o
+  object_index: 10
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - switch_dispatch
+  program_names_from_manifest:
+  - switch_dispatch_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0011
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/branch_dense.bpf.o
+  object_index: 11
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - branch_dense
+  program_names_from_manifest:
+  - branch_dense_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0012
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/cmov_select.bpf.o
+  object_index: 12
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - cmov_select
+  program_names_from_manifest:
+  - cmov_select_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0013
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/cmov_dense.bpf.o
+  object_index: 13
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - cmov_dense
+  program_names_from_manifest:
+  - cmov_dense_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0014
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/checksum.bpf.o
+  object_index: 14
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - checksum
+  program_names_from_manifest:
+  - checksum_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0015
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/load_word32.bpf.o
+  object_index: 15
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - load_word32
+  program_names_from_manifest:
+  - load_word32_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0016
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/load_byte.bpf.o
+  object_index: 16
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - load_byte
+  program_names_from_manifest:
+  - load_byte_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0017
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/load_byte_recompose.bpf.o
+  object_index: 17
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - load_byte_recompose
+  program_names_from_manifest:
+  - load_byte_recompose_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0018
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/load_native_u64.bpf.o
+  object_index: 18
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - load_native_u64
+  program_names_from_manifest:
+  - load_native_u64_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0019
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/packet_parse.bpf.o
+  object_index: 19
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - packet_parse
+  program_names_from_manifest:
+  - packet_parse_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0020
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/bounds_ladder.bpf.o
+  object_index: 20
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - bounds_ladder
+  program_names_from_manifest:
+  - bounds_ladder_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0021
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/bounds_check_heavy.bpf.o
+  object_index: 21
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - bounds_check_heavy
+  program_names_from_manifest:
+  - bounds_check_heavy_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0022
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/stride_load_4.bpf.o
+  object_index: 22
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - stride_load_4
+  program_names_from_manifest:
+  - stride_load_4_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0023
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/stride_load_16.bpf.o
+  object_index: 23
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - stride_load_16
+  program_names_from_manifest:
+  - stride_load_16_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0024
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/mixed_alu_mem.bpf.o
+  object_index: 24
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - mixed_alu_mem
+  program_names_from_manifest:
+  - mixed_alu_mem_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0025
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/spill_pressure.bpf.o
+  object_index: 25
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - spill_pressure
+  program_names_from_manifest:
+  - spill_pressure_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0026
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/multi_acc_4.bpf.o
+  object_index: 26
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - multi_acc_4
+  program_names_from_manifest:
+  - multi_acc_4_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0027
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/multi_acc_8.bpf.o
+  object_index: 27
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - multi_acc_8
+  program_names_from_manifest:
+  - multi_acc_8_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0028
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/fibonacci_iter.bpf.o
+  object_index: 28
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - fibonacci_iter
+  program_names_from_manifest:
+  - fibonacci_iter_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0029
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/fibonacci_iter_packet.bpf.o
+  object_index: 29
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - fibonacci_iter_packet
+  program_names_from_manifest:
+  - fibonacci_iter_packet_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0030
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/fixed_loop_small.bpf.o
+  object_index: 30
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - fixed_loop_small
+  program_names_from_manifest:
+  - fixed_loop_small_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0031
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/fixed_loop_large.bpf.o
+  object_index: 31
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - fixed_loop_large
+  program_names_from_manifest:
+  - fixed_loop_large_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0032
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/nested_loop_2.bpf.o
+  object_index: 32
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - nested_loop_2
+  program_names_from_manifest:
+  - nested_loop_2_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0033
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/nested_loop_3.bpf.o
+  object_index: 33
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - nested_loop_3
+  program_names_from_manifest:
+  - nested_loop_3_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0034
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/code_clone_2.bpf.o
+  object_index: 34
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - code_clone_2
+  program_names_from_manifest:
+  - code_clone_2_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0035
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/code_clone_8.bpf.o
+  object_index: 35
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - code_clone_8
+  program_names_from_manifest:
+  - code_clone_8_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0036
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/large_mixed_500.bpf.o
+  object_index: 36
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - large_mixed_500
+  program_names_from_manifest:
+  - large_mixed_500_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0037
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/large_mixed_1000.bpf.o
+  object_index: 37
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - large_mixed_1000
+  program_names_from_manifest:
+  - large_mixed_1000_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0038
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/bpf_call_chain.bpf.o
+  object_index: 38
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - bpf_call_chain
+  program_names_from_manifest:
+  - bpf_call_chain_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0039
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/memcmp_prefix_64.bpf.o
+  object_index: 39
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - memcmp_prefix_64
+  program_names_from_manifest:
+  - memcmp_prefix_64_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0040
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/packet_parse_vlans_tcpopts.bpf.o
+  object_index: 40
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - packet_parse_vlans_tcpopts
+  program_names_from_manifest:
+  - packet_parse_vlans_tcpopts_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0041
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/local_call_fanout.bpf.o
+  object_index: 41
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - local_call_fanout
+  program_names_from_manifest:
+  - local_call_fanout_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0042
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/packet_rss_hash.bpf.o
+  object_index: 42
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - packet_rss_hash
+  program_names_from_manifest:
+  - packet_rss_hash_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0043
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/imm64_storm.bpf.o
+  object_index: 43
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - imm64_storm
+  program_names_from_manifest:
+  - imm64_storm_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0044
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/alu32_64_pingpong.bpf.o
+  object_index: 44
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - alu32_64_pingpong
+  program_names_from_manifest:
+  - alu32_64_pingpong_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0045
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/branch_fanout_32.bpf.o
+  object_index: 45
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - branch_fanout_32
+  program_names_from_manifest:
+  - branch_fanout_32_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0046
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/deep_guard_tree_8.bpf.o
+  object_index: 46
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - deep_guard_tree_8
+  program_names_from_manifest:
+  - deep_guard_tree_8_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0047
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/mega_basic_block_2048.bpf.o
+  object_index: 47
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - mega_basic_block_2048
+  program_names_from_manifest:
+  - mega_basic_block_2048_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0048
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/rotate64_hash.bpf.o
+  object_index: 48
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - rotate64_hash
+  program_names_from_manifest:
+  - rotate64_hash_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0049
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/packet_redundant_bounds.bpf.o
+  object_index: 49
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - packet_redundant_bounds
+  program_names_from_manifest:
+  - packet_redundant_bounds_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0050
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/const_fold_chain.bpf.o
+  object_index: 50
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - const_fold_chain
+  program_names_from_manifest:
+  - const_fold_chain_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0051
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/struct_field_cluster.bpf.o
+  object_index: 51
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - struct_field_cluster
+  program_names_from_manifest:
+  - struct_field_cluster_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0052
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/bitfield_extract.bpf.o
+  object_index: 52
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - bitfield_extract
+  program_names_from_manifest:
+  - bitfield_extract_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0053
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/smallmul_strength_reduce.bpf.o
+  object_index: 53
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - smallmul_strength_reduce
+  program_names_from_manifest:
+  - smallmul_strength_reduce_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0054
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/cond_select_dense.bpf.o
+  object_index: 54
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - cond_select_dense
+  program_names_from_manifest:
+  - cond_select_dense_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0055
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/rotate_dense.bpf.o
+  object_index: 55
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - rotate_dense
+  program_names_from_manifest:
+  - rotate_dense_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0056
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/addr_calc_stride.bpf.o
+  object_index: 56
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - addr_calc_stride
+  program_names_from_manifest:
+  - addr_calc_stride_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0057
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/extract_dense.bpf.o
+  object_index: 57
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - extract_dense
+  program_names_from_manifest:
+  - extract_dense_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0058
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/endian_swap_dense.bpf.o
+  object_index: 58
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - endian_swap_dense
+  program_names_from_manifest:
+  - endian_swap_dense_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0059
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/branch_flip_dense.bpf.o
+  object_index: 59
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - branch_flip_dense
+  program_names_from_manifest:
+  - branch_flip_dense_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0060
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/tc_bitcount.bpf.o
+  object_index: 60
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - tc_bitcount
+  program_names_from_manifest:
+  - tc_bitcount_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0061
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/tc_checksum.bpf.o
+  object_index: 61
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - tc_checksum
+  program_names_from_manifest:
+  - tc_checksum_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0062
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/micro/programs/cgroup_hash_chain.bpf.o
+  object_index: 62
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - micro
+  target_names:
+  - cgroup_hash_chain
+  program_names_from_manifest:
+  - cgroup_hash_chain_xdp
+  sections_from_manifest: []
+  prog_types: []
+- id: object-0063
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/katran/balancer.bpf.o
+  object_index: 63
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - katran_balancer
+  program_names_from_manifest:
+  - balancer_ingress
+  sections_from_manifest:
+  - xdp
+  prog_types:
+  - xdp
+- id: object-0064
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/calico/xdp_no_log.bpf.o
+  object_index: 64
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - calico_xdp_main
+  program_names_from_manifest:
+  - calico_xdp_main
+  sections_from_manifest:
+  - xdp
+  prog_types:
+  - xdp
+- id: object-0065
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/calico/from_hep_debug.bpf.o
+  object_index: 65
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - calico_tc_maglev
+  program_names_from_manifest:
+  - calico_tc_maglev
+  sections_from_manifest:
+  - tc
+  prog_types:
+  - sched_cls
+- id: object-0066
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/suricata/xdp_filter.bpf.o
+  object_index: 66
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - suricata_xdp_filter
+  program_names_from_manifest:
+  - xdp_hashfilter
+  sections_from_manifest:
+  - xdp
+  prog_types:
+  - xdp
+- id: object-0067
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/test_tc_bpf.bpf.o
+  object_index: 67
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - linux_test_tc_cls
+  - linux_test_tcx_pkt_ptr
+  program_names_from_manifest:
+  - cls
+  - pkt_ptr
+  sections_from_manifest:
+  - tc
+  - tcx
+  prog_types:
+  - sched_cls
+- id: object-0068
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/linux-selftests/xdp_synproxy_kern.bpf.o
+  object_index: 68
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - linux_xdp_synproxy
+  - linux_tc_synproxy
+  program_names_from_manifest:
+  - syncookie_xdp
+  - syncookie_tc
+  sections_from_manifest:
+  - xdp
+  - tc
+  prog_types:
+  - xdp
+  - sched_cls
+- id: object-0069
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/systemd/sysctl-monitor.bpf.o
+  object_index: 69
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - systemd_sysctl_monitor
+  program_names_from_manifest:
+  - sysctl_monitor
+  sections_from_manifest:
+  - cgroup/sysctl
+  prog_types:
+  - cgroup_sysctl
+- id: object-0070
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/datadog-agent/oom-kill-kern.bpf.o
+  object_index: 70
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - datadog_oom_kill
+  program_names_from_manifest:
+  - kprobe__oom_kill_process
+  sections_from_manifest:
+  - kprobe/oom_kill_process
+  prog_types:
+  - kprobe
+- id: object-0071
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/tracee/lsm_check.bpf.o
+  object_index: 71
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - tracee_lsm_bpf
+  program_names_from_manifest:
+  - lsm_bpf_check
+  sections_from_manifest: []
+  prog_types:
+  - lsm
+- id: object-0072
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/tetragon/bpf_execve_event.bpf.o
+  object_index: 72
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - tetragon_execve
+  program_names_from_manifest:
+  - event_execve
+  - execve_rate
+  - execve_send
+  sections_from_manifest: []
+  prog_types:
+  - tracepoint
+- id: object-0073
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/coroot-node-agent/ebpf.bpf.o
+  object_index: 73
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - coroot_process_lifecycle
+  program_names_from_manifest:
+  - task_newtask
+  - sched_process_exit
+  - oom_mark_victim
+  sections_from_manifest: []
+  prog_types:
+  - tracepoint
+- id: object-0074
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/execsnoop.bpf.o
+  object_index: 74
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_execsnoop
+  program_names_from_manifest:
+  - tracepoint__syscalls__sys_enter_execve
+  - tracepoint__syscalls__sys_exit_execve
+  sections_from_manifest:
+  - tracepoint/syscalls/sys_enter_execve
+  - tracepoint/syscalls/sys_exit_execve
+  prog_types:
+  - tracepoint
+- id: object-0075
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/opensnoop.bpf.o
+  object_index: 75
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_opensnoop
+  program_names_from_manifest:
+  - tracepoint__syscalls__sys_enter_openat
+  - tracepoint__syscalls__sys_exit_openat
+  sections_from_manifest:
+  - tracepoint/syscalls/sys_enter_openat
+  - tracepoint/syscalls/sys_exit_openat
+  prog_types:
+  - tracepoint
+- id: object-0076
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/sigsnoop.bpf.o
+  object_index: 76
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_sigsnoop
+  program_names_from_manifest:
+  - kill_entry
+  - kill_exit
+  - sig_trace
+  sections_from_manifest:
+  - tracepoint/syscalls/sys_enter_kill
+  - tracepoint/syscalls/sys_exit_kill
+  - tracepoint/signal/signal_generate
+  prog_types:
+  - tracepoint
+- id: object-0077
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/exitsnoop.bpf.o
+  object_index: 77
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_exitsnoop
+  program_names_from_manifest:
+  - sched_process_exit
+  sections_from_manifest:
+  - tracepoint/sched/sched_process_exit
+  prog_types:
+  - tracepoint
+- id: object-0078
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/futexctn.bpf.o
+  object_index: 78
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_futexctn
+  program_names_from_manifest:
+  - futex_enter
+  - futex_exit
+  sections_from_manifest:
+  - tracepoint/syscalls/sys_enter_futex
+  - tracepoint/syscalls/sys_exit_futex
+  prog_types:
+  - tracepoint
+- id: object-0079
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/syscount.bpf.o
+  object_index: 79
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_syscount
+  program_names_from_manifest:
+  - sys_enter
+  - sys_exit
+  sections_from_manifest:
+  - tracepoint/raw_syscalls/sys_enter
+  - tracepoint/raw_syscalls/sys_exit
+  prog_types:
+  - tracepoint
+- id: object-0080
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/tcplife.bpf.o
+  object_index: 80
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_tcplife
+  program_names_from_manifest:
+  - inet_sock_set_state
+  sections_from_manifest:
+  - tracepoint/sock/inet_sock_set_state
+  prog_types:
+  - tracepoint
+- id: object-0081
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/tcpconnect.bpf.o
+  object_index: 81
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_tcpconnect
+  program_names_from_manifest:
+  - tcp_v4_connect
+  - tcp_v4_connect_ret
+  sections_from_manifest:
+  - kprobe/tcp_v4_connect
+  - kretprobe/tcp_v4_connect
+  prog_types:
+  - kprobe
+- id: object-0082
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/bindsnoop.bpf.o
+  object_index: 82
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_bindsnoop
+  program_names_from_manifest:
+  - ipv4_bind_entry
+  - ipv4_bind_exit
+  sections_from_manifest:
+  - kprobe/inet_bind
+  - kretprobe/inet_bind
+  prog_types:
+  - kprobe
+- id: object-0083
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/capable.bpf.o
+  object_index: 83
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_capable
+  program_names_from_manifest:
+  - kprobe__cap_capable_entry
+  - kprobe__cap_capable_exit
+  sections_from_manifest:
+  - kprobe/cap_capable
+  - kretprobe/cap_capable
+  prog_types:
+  - kprobe
+- id: object-0084
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/filelife.bpf.o
+  object_index: 84
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_filelife
+  program_names_from_manifest:
+  - vfs_create
+  - vfs_open
+  - vfs_unlink
+  - vfs_unlink_ret
+  sections_from_manifest:
+  - kprobe/vfs_create
+  - kprobe/vfs_open
+  - kprobe/vfs_unlink
+  - kretprobe/vfs_unlink
+  prog_types:
+  - kprobe
+- id: object-0085
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/slabratetop.bpf.o
+  object_index: 85
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_slabratetop
+  program_names_from_manifest:
+  - kmem_cache_alloc
+  sections_from_manifest:
+  - kprobe/kmem_cache_alloc
+  prog_types:
+  - kprobe
+- id: object-0086
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/biolatency.bpf.o
+  object_index: 86
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_biolatency
+  program_names_from_manifest:
+  - block_rq_insert
+  - block_rq_issue
+  - block_rq_complete
+  sections_from_manifest:
+  - raw_tp/block_rq_insert
+  - raw_tp/block_rq_issue
+  - raw_tp/block_rq_complete
+  prog_types:
+  - raw_tracepoint
+- id: object-0087
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/runqlat.bpf.o
+  object_index: 87
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_runqlat
+  program_names_from_manifest:
+  - handle_sched_wakeup
+  - handle_sched_wakeup_new
+  - handle_sched_switch
+  sections_from_manifest:
+  - raw_tp/sched_wakeup
+  - raw_tp/sched_wakeup_new
+  - raw_tp/sched_switch
+  prog_types:
+  - raw_tracepoint
+- id: object-0088
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/hardirqs.bpf.o
+  object_index: 88
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_hardirqs
+  program_names_from_manifest:
+  - irq_handler_entry
+  - irq_handler_exit
+  sections_from_manifest:
+  - raw_tp/irq_handler_entry
+  - raw_tp/irq_handler_exit
+  prog_types:
+  - raw_tracepoint
+- id: object-0089
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/softirqs.bpf.o
+  object_index: 89
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_softirqs
+  program_names_from_manifest:
+  - softirq_entry
+  - softirq_exit
+  sections_from_manifest:
+  - raw_tp/softirq_entry
+  - raw_tp/softirq_exit
+  prog_types:
+  - raw_tracepoint
+- id: object-0090
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/biopattern.bpf.o
+  object_index: 90
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_biopattern
+  program_names_from_manifest:
+  - handle__block_rq_complete
+  sections_from_manifest:
+  - tracepoint/block/block_rq_complete
+  prog_types:
+  - tracepoint
+- id: object-0091
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/biosnoop.bpf.o
+  object_index: 91
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_biosnoop
+  program_names_from_manifest:
+  - block_rq_insert
+  - block_rq_issue
+  - block_rq_complete
+  sections_from_manifest:
+  - tp_btf/block_rq_insert
+  - tp_btf/block_rq_issue
+  - tp_btf/block_rq_complete
+  prog_types:
+  - raw_tracepoint
+- id: object-0092
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/biostacks.bpf.o
+  object_index: 92
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_biostacks
+  program_names_from_manifest:
+  - blk_account_io_start
+  - blk_account_io_done
+  sections_from_manifest:
+  - fentry/blk_account_io_start
+  - fentry/blk_account_io_done
+  prog_types:
+  - tracing
+- id: object-0093
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/biotop.bpf.o
+  object_index: 93
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_biotop
+  program_names_from_manifest:
+  - blk_mq_start_request
+  - blk_account_io_start
+  - blk_account_io_done
+  sections_from_manifest:
+  - kprobe/blk_mq_start_request
+  - kprobe/blk_account_io_start
+  - kprobe/blk_account_io_done
+  prog_types:
+  - kprobe
+- id: object-0094
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/bitesize.bpf.o
+  object_index: 94
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_bitesize
+  program_names_from_manifest:
+  - block_rq_issue
+  sections_from_manifest:
+  - tp_btf/block_rq_issue
+  prog_types:
+  - raw_tracepoint
+- id: object-0095
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/cachestat.bpf.o
+  object_index: 95
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_cachestat
+  program_names_from_manifest:
+  - fentry_add_to_page_cache_lru
+  - fentry_mark_page_accessed
+  - fentry_mark_buffer_dirty
+  sections_from_manifest:
+  - fentry/add_to_page_cache_lru
+  - fentry/mark_page_accessed
+  - fentry/mark_buffer_dirty
+  prog_types:
+  - tracing
+- id: object-0096
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/drsnoop.bpf.o
+  object_index: 96
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_drsnoop
+  program_names_from_manifest:
+  - direct_reclaim_begin_btf
+  - direct_reclaim_end_btf
+  sections_from_manifest:
+  - tp_btf/mm_vmscan_direct_reclaim_begin
+  - tp_btf/mm_vmscan_direct_reclaim_end
+  prog_types:
+  - raw_tracepoint
+- id: object-0097
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/memleak.bpf.o
+  object_index: 97
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_memleak
+  program_names_from_manifest:
+  - memleak__kmalloc
+  - memleak__kfree
+  - memleak__kmem_cache_alloc
+  - memleak__kmem_cache_free
+  sections_from_manifest:
+  - tracepoint/kmem/kmalloc
+  - tracepoint/kmem/kfree
+  - tracepoint/kmem/kmem_cache_alloc
+  - tracepoint/kmem/kmem_cache_free
+  prog_types:
+  - tracepoint
+- id: object-0098
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/readahead.bpf.o
+  object_index: 98
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_readahead
+  program_names_from_manifest:
+  - do_page_cache_ra
+  - do_page_cache_ra_ret
+  - folio_mark_accessed
+  sections_from_manifest:
+  - fentry/do_page_cache_ra
+  - fexit/do_page_cache_ra
+  - fentry/folio_mark_accessed
+  prog_types:
+  - tracing
+- id: object-0099
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/cpudist.bpf.o
+  object_index: 99
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_cpudist
+  program_names_from_manifest:
+  - sched_switch_btf
+  sections_from_manifest:
+  - tp_btf/sched_switch
+  prog_types:
+  - raw_tracepoint
+- id: object-0100
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/cpufreq.bpf.o
+  object_index: 100
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_cpufreq
+  program_names_from_manifest:
+  - do_sample
+  sections_from_manifest:
+  - perf_event
+  prog_types:
+  - perf_event
+- id: object-0101
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/offcputime.bpf.o
+  object_index: 101
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_offcputime
+  program_names_from_manifest:
+  - sched_switch_btf
+  sections_from_manifest:
+  - tp_btf/sched_switch
+  prog_types:
+  - raw_tracepoint
+- id: object-0102
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/profile.bpf.o
+  object_index: 102
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_profile
+  program_names_from_manifest:
+  - do_perf_event
+  sections_from_manifest:
+  - perf_event
+  prog_types:
+  - perf_event
+- id: object-0103
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/runqlen.bpf.o
+  object_index: 103
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_runqlen
+  program_names_from_manifest:
+  - do_sample
+  sections_from_manifest:
+  - perf_event
+  prog_types:
+  - perf_event
+- id: object-0104
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/runqslower.bpf.o
+  object_index: 104
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_runqslower
+  program_names_from_manifest:
+  - sched_wakeup
+  - sched_wakeup_new
+  - sched_switch
+  sections_from_manifest:
+  - raw_tp/sched_wakeup
+  - raw_tp/sched_wakeup_new
+  - raw_tp/sched_switch
+  prog_types:
+  - raw_tracepoint
+- id: object-0105
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/wakeuptime.bpf.o
+  object_index: 105
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_wakeuptime
+  program_names_from_manifest:
+  - sched_switch
+  - sched_wakeup
+  sections_from_manifest:
+  - tp_btf/sched_switch
+  - tp_btf/sched_wakeup
+  prog_types:
+  - raw_tracepoint
+- id: object-0106
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/filetop.bpf.o
+  object_index: 106
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_filetop
+  program_names_from_manifest:
+  - vfs_read_entry
+  - vfs_write_entry
+  sections_from_manifest:
+  - kprobe/vfs_read
+  - kprobe/vfs_write
+  prog_types:
+  - kprobe
+- id: object-0107
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/vfsstat.bpf.o
+  object_index: 107
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_vfsstat
+  program_names_from_manifest:
+  - kprobe_vfs_read
+  - kprobe_vfs_write
+  - kprobe_vfs_open
+  - kprobe_vfs_create
+  - kprobe_vfs_unlink
+  sections_from_manifest:
+  - kprobe/vfs_read
+  - kprobe/vfs_write
+  - kprobe/vfs_open
+  - kprobe/vfs_create
+  - kprobe/vfs_unlink
+  prog_types:
+  - kprobe
+- id: object-0108
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/mountsnoop.bpf.o
+  object_index: 108
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_mountsnoop
+  program_names_from_manifest:
+  - mount_entry
+  - mount_exit
+  - umount_entry
+  - umount_exit
+  sections_from_manifest:
+  - tracepoint/syscalls/sys_enter_mount
+  - tracepoint/syscalls/sys_exit_mount
+  - tracepoint/syscalls/sys_enter_umount
+  - tracepoint/syscalls/sys_exit_umount
+  prog_types:
+  - tracepoint
+- id: object-0109
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/statsnoop.bpf.o
+  object_index: 109
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_statsnoop
+  program_names_from_manifest:
+  - handle_newstat_entry
+  - handle_newstat_return
+  - handle_statx_entry
+  - handle_statx_return
+  sections_from_manifest:
+  - tracepoint/syscalls/sys_enter_newstat
+  - tracepoint/syscalls/sys_exit_newstat
+  - tracepoint/syscalls/sys_enter_statx
+  - tracepoint/syscalls/sys_exit_statx
+  prog_types:
+  - tracepoint
+- id: object-0110
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/syncsnoop.bpf.o
+  object_index: 110
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_syncsnoop
+  program_names_from_manifest:
+  - tracepoint__syscalls__sys_enter_sync
+  - tracepoint__syscalls__sys_enter_fsync
+  - tracepoint__syscalls__sys_enter_msync
+  - tracepoint__syscalls__sys_enter_syncfs
+  sections_from_manifest:
+  - tracepoint/syscalls/sys_enter_sync
+  - tracepoint/syscalls/sys_enter_fsync
+  - tracepoint/syscalls/sys_enter_msync
+  - tracepoint/syscalls/sys_enter_syncfs
+  prog_types:
+  - tracepoint
+- id: object-0111
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/solisten.bpf.o
+  object_index: 111
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_solisten
+  program_names_from_manifest:
+  - inet_listen_entry
+  - inet_listen_exit
+  sections_from_manifest:
+  - kprobe/inet_listen
+  - kretprobe/inet_listen
+  prog_types:
+  - kprobe
+- id: object-0112
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/tcpconnlat.bpf.o
+  object_index: 112
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_tcpconnlat
+  program_names_from_manifest:
+  - tcp_v4_connect
+  - tcp_v6_connect
+  - tcp_rcv_state_process
+  - tcp_destroy_sock
+  sections_from_manifest:
+  - kprobe/tcp_v4_connect
+  - kprobe/tcp_v6_connect
+  - kprobe/tcp_rcv_state_process
+  - tracepoint/tcp/tcp_destroy_sock
+  prog_types:
+  - kprobe
+- id: object-0113
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/tcppktlat.bpf.o
+  object_index: 113
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_tcppktlat
+  program_names_from_manifest:
+  - tcp_probe_btf
+  - tcp_rcv_space_adjust_btf
+  - tcp_destroy_sock_btf
+  sections_from_manifest:
+  - tp_btf/tcp_probe
+  - tp_btf/tcp_rcv_space_adjust
+  - tp_btf/tcp_destroy_sock
+  prog_types:
+  - raw_tracepoint
+- id: object-0114
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/tcprtt.bpf.o
+  object_index: 114
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_tcprtt
+  program_names_from_manifest:
+  - tcp_rcv
+  sections_from_manifest:
+  - fentry/tcp_rcv_established
+  prog_types:
+  - tracing
+- id: object-0115
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/tcpstates.bpf.o
+  object_index: 115
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_tcpstates
+  program_names_from_manifest:
+  - handle_set_state
+  sections_from_manifest:
+  - tracepoint/sock/inet_sock_set_state
+  prog_types:
+  - tracepoint
+- id: object-0116
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/tcpsynbl.bpf.o
+  object_index: 116
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_tcpsynbl
+  program_names_from_manifest:
+  - tcp_v4_syn_recv_kprobe
+  - tcp_v6_syn_recv_kprobe
+  sections_from_manifest:
+  - kprobe/tcp_v4_syn_recv_sock
+  - kprobe/tcp_v6_syn_recv_sock
+  prog_types:
+  - kprobe
+- id: object-0117
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/tcptop.bpf.o
+  object_index: 117
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_tcptop
+  program_names_from_manifest:
+  - tcp_sendmsg
+  - tcp_cleanup_rbuf
+  sections_from_manifest:
+  - kprobe/tcp_sendmsg
+  - kprobe/tcp_cleanup_rbuf
+  prog_types:
+  - kprobe
+- id: object-0118
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/tcptracer.bpf.o
+  object_index: 118
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_tcptracer
+  program_names_from_manifest:
+  - tcp_v4_connect
+  - tcp_v4_connect_ret
+  - tcp_v6_connect
+  - tcp_v6_connect_ret
+  - entry_trace_close
+  - enter_tcp_set_state
+  - exit_inet_csk_accept
+  sections_from_manifest:
+  - kprobe/tcp_v4_connect
+  - kretprobe/tcp_v4_connect
+  - kprobe/tcp_v6_connect
+  - kretprobe/tcp_v6_connect
+  - kprobe/tcp_close
+  - kprobe/tcp_set_state
+  - kretprobe/inet_csk_accept
+  prog_types:
+  - kprobe
+- id: object-0119
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/klockstat.bpf.o
+  object_index: 119
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_klockstat
+  program_names_from_manifest:
+  - mutex_lock
+  - mutex_lock_exit
+  - mutex_unlock
+  - down_read
+  - down_read_exit
+  - up_read
+  sections_from_manifest:
+  - fentry/mutex_lock
+  - fexit/mutex_lock
+  - fentry/mutex_unlock
+  - fentry/down_read
+  - fexit/down_read
+  - fentry/up_read
+  prog_types:
+  - tracing
+- id: object-0120
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/numamove.bpf.o
+  object_index: 120
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_numamove
+  program_names_from_manifest:
+  - fentry_migrate_misplaced_page
+  - fentry_migrate_misplaced_folio
+  sections_from_manifest:
+  - fentry/migrate_misplaced_page
+  - fentry/migrate_misplaced_folio
+  prog_types:
+  - tracing
+- id: object-0121
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/mdflush.bpf.o
+  object_index: 121
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_mdflush
+  program_names_from_manifest:
+  - md_flush_request
+  sections_from_manifest:
+  - fentry/md_flush_request
+  prog_types:
+  - tracing
+- id: object-0122
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/oomkill.bpf.o
+  object_index: 122
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_oomkill
+  program_names_from_manifest:
+  - oom_kill_process
+  sections_from_manifest:
+  - kprobe/oom_kill_process
+  prog_types:
+  - kprobe
+- id: object-0123
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bcc/libbpf-tools/llcstat.bpf.o
+  object_index: 123
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bcc_llcstat
+  program_names_from_manifest:
+  - on_cache_miss
+  - on_cache_ref
+  sections_from_manifest:
+  - perf_event
+  prog_types:
+  - perf_event
+- id: object-0124
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/libbpf-bootstrap/examples/c/bootstrap.bpf.o
+  object_index: 124
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - libbpf_bootstrap
+  program_names_from_manifest:
+  - handle_exec
+  - handle_exit
+  sections_from_manifest:
+  - tp/sched/sched_process_exec
+  - tp/sched/sched_process_exit
+  prog_types:
+  - tracepoint
+- id: object-0125
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/libbpf-bootstrap/examples/c/minimal.bpf.o
+  object_index: 125
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - libbpf_minimal
+  program_names_from_manifest:
+  - handle_tp
+  sections_from_manifest:
+  - tp/syscalls/sys_enter_write
+  prog_types:
+  - tracepoint
+- id: object-0126
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/libbpf-bootstrap/examples/c/kprobe.bpf.o
+  object_index: 126
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - libbpf_kprobe
+  program_names_from_manifest:
+  - do_unlinkat
+  - do_unlinkat_exit
+  sections_from_manifest:
+  - kprobe/do_unlinkat
+  - kretprobe/do_unlinkat
+  prog_types:
+  - kprobe
+- id: object-0127
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/libbpf-bootstrap/examples/c/fentry.bpf.o
+  object_index: 127
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - libbpf_fentry
+  program_names_from_manifest:
+  - do_unlinkat
+  - do_unlinkat_exit
+  sections_from_manifest:
+  - fentry/do_unlinkat
+  - fexit/do_unlinkat
+  prog_types:
+  - tracing
+- id: object-0128
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/libbpf-bootstrap/examples/c/profile.bpf.o
+  object_index: 128
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - libbpf_profile
+  program_names_from_manifest:
+  - profile
+  sections_from_manifest:
+  - perf_event
+  prog_types:
+  - perf_event
+- id: object-0129
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/libbpf-bootstrap/examples/c/lsm.bpf.o
+  object_index: 129
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - libbpf_lsm
+  program_names_from_manifest:
+  - lsm_bpf
+  sections_from_manifest:
+  - lsm/bpf
+  prog_types:
+  - lsm
+- id: object-0130
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/tracee/tracee.bpf.o
+  object_index: 130
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - tracee_syscall_hooks
+  program_names_from_manifest:
+  - tracepoint__raw_syscalls__sys_enter
+  - sys_enter_init
+  - sys_enter_submit
+  - tracepoint__raw_syscalls__sys_exit
+  - sys_exit_init
+  - sys_exit_submit
+  sections_from_manifest:
+  - raw_tracepoint/sys_enter
+  - raw_tracepoint/sys_enter_init
+  - raw_tracepoint/sys_enter_submit
+  - raw_tracepoint/sys_exit
+  - raw_tracepoint/sys_exit_init
+  - raw_tracepoint/sys_exit_submit
+  prog_types:
+  - raw_tracepoint
+- id: object-0131
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/cilium/bpf_lxc.bpf.o
+  object_index: 131
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - cilium_bpf_lxc_cil_from_container
+  program_names_from_manifest:
+  - cil_from_container
+  sections_from_manifest:
+  - tc/entry
+  prog_types:
+  - sched_cls
+- id: object-0132
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/cilium/bpf_overlay.bpf.o
+  object_index: 132
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - cilium_bpf_overlay_cil_from_overlay
+  program_names_from_manifest:
+  - cil_from_overlay
+  sections_from_manifest:
+  - tc/entry
+  prog_types:
+  - sched_cls
+- id: object-0133
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/cilium/bpf_xdp.bpf.o
+  object_index: 133
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - cilium_bpf_xdp_cil_xdp_entry
+  program_names_from_manifest:
+  - cil_xdp_entry
+  sections_from_manifest:
+  - xdp/entry
+  prog_types:
+  - xdp
+- id: object-0134
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/KubeArmor/enforcer.bpf.o
+  object_index: 134
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - kubearmor_enforcer_enforce_proc
+  program_names_from_manifest:
+  - enforce_proc
+  - enforce_file
+  - enforce_cap
+  sections_from_manifest:
+  - lsm/bprm_check_security
+  - lsm/file_open
+  - lsm/capable
+  prog_types:
+  - lsm
+- id: object-0135
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/KubeArmor/protectproc.bpf.o
+  object_index: 135
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - kubearmor_protectproc_enforce_file
+  program_names_from_manifest:
+  - enforce_file
+  sections_from_manifest:
+  - lsm/file_open
+  prog_types:
+  - lsm
+- id: object-0136
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/KubeArmor/system_monitor.bpf.o
+  object_index: 136
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - kubearmor_system_monitor_execve
+  program_names_from_manifest:
+  - kprobe__execve
+  - kretprobe__execve
+  - kprobe__do_exit
+  - kprobe__openat
+  - kretprobe__openat
+  sections_from_manifest:
+  - kprobe/__x64_sys_execve
+  - kretprobe/__x64_sys_execve
+  - kprobe/do_exit
+  - kprobe/__x64_sys_openat
+  - kretprobe/__x64_sys_openat
+  prog_types:
+  - kprobe
+- id: object-0137
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_emain.bpf.o
+  object_index: 137
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - loxilb_llb_ebpf_emain_tc_packet_func_fast
+  program_names_from_manifest:
+  - tc_packet_func_fast
+  sections_from_manifest:
+  - tc_packet_hook0
+  prog_types:
+  - sched_cls
+- id: object-0138
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_ebpf_main.bpf.o
+  object_index: 138
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - loxilb_llb_ebpf_main_tc_packet_func
+  program_names_from_manifest:
+  - tc_packet_func
+  sections_from_manifest:
+  - tc_packet_hook1
+  prog_types:
+  - sched_cls
+- id: object-0139
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/loxilb/llb_xdp_main.bpf.o
+  object_index: 139
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - loxilb_llb_xdp_main_xdp_packet_func
+  program_names_from_manifest:
+  - xdp_packet_func
+  sections_from_manifest:
+  - xdp_packet_hook
+  prog_types:
+  - xdp
+- id: object-0140
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/netbird/prog.bpf.o
+  object_index: 140
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - netbird_prog_nb_xdp_prog
+  program_names_from_manifest:
+  - nb_xdp_prog
+  sections_from_manifest:
+  - xdp
+  prog_types:
+  - xdp
+- id: object-0141
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/opentelemetry-ebpf-profiler/generic_probe.bpf.o
+  object_index: 141
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - opentelemetry_generic_probe_kprobe_generic
+  program_names_from_manifest:
+  - kprobe__generic
+  sections_from_manifest:
+  - kprobe/generic
+  prog_types:
+  - kprobe
+- id: object-0142
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/opentelemetry-ebpf-profiler/native_stack_trace.bpf.o
+  object_index: 142
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - opentelemetry_native_stack_trace_native_tracer_entry
+  program_names_from_manifest:
+  - native_tracer_entry
+  sections_from_manifest:
+  - perf_event/native_tracer_entry
+  prog_types:
+  - perf_event
+- id: object-0143
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/opentelemetry-ebpf-profiler/sched_monitor.bpf.o
+  object_index: 143
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - opentelemetry_sched_monitor_sched_process_free
+  program_names_from_manifest:
+  - tracepoint__sched_process_free
+  - tracepoint__sched_process_free_pre616
+  sections_from_manifest:
+  - tracepoint/sched/sched_process_free/v2
+  - tracepoint/sched/sched_process_free/v1
+  prog_types:
+  - tracepoint
+- id: object-0144
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/scx/scx_bpfland_main.bpf.o
+  object_index: 144
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - scx_bpfland_bpfland_init
+  program_names_from_manifest:
+  - bpfland_init
+  - bpfland_exit
+  sections_from_manifest:
+  - struct_ops.s/bpfland_init
+  - struct_ops/bpfland_exit
+  prog_types:
+  - struct_ops
+- id: object-0145
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/scx/scx_flash_main.bpf.o
+  object_index: 145
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - scx_flash_flash_init
+  program_names_from_manifest:
+  - flash_init
+  - flash_exit
+  sections_from_manifest:
+  - struct_ops.s/flash_init
+  - struct_ops/flash_exit
+  prog_types:
+  - struct_ops
+- id: object-0146
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/scx/scx_lavd_main.bpf.o
+  object_index: 146
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - scx_lavd_lavd_init
+  program_names_from_manifest:
+  - lavd_init
+  - lavd_exit
+  sections_from_manifest:
+  - struct_ops.s/lavd_init
+  - struct_ops/lavd_exit
+  prog_types:
+  - struct_ops
+- id: object-0147
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/scx/scx_rusty_main.bpf.o
+  object_index: 147
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - scx_rusty_rusty_init
+  program_names_from_manifest:
+  - rusty_init
+  - rusty_exit
+  sections_from_manifest:
+  - struct_ops.s/rusty_init
+  - struct_ops/rusty_exit
+  prog_types:
+  - struct_ops
+- id: object-0148
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/tubular/inet-kern.bpf.o
+  object_index: 148
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - tubular_dispatcher
+  program_names_from_manifest:
+  - dispatcher
+  sections_from_manifest:
+  - sk_lookup/dispatcher
+  prog_types:
+  - sk_lookup
+- id: object-0149
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tools/xdp_basic.bpf.o
+  object_index: 149
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tools_xdp_basic_prog
+  program_names_from_manifest:
+  - xdp_basic_prog
+  sections_from_manifest:
+  - xdp
+  prog_types:
+  - xdp
+- id: object-0150
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tools/xdp_flowtable.bpf.o
+  object_index: 150
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tools_xdp_fwd_flow_full
+  program_names_from_manifest:
+  - xdp_fwd_flow_full
+  sections_from_manifest:
+  - xdp
+  prog_types:
+  - xdp
+- id: object-0151
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tools/xdp_flowtable_sample.bpf.o
+  object_index: 151
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tools_xdp_fwd_flowtable_sample
+  program_names_from_manifest:
+  - xdp_fwd_flowtable_sample
+  sections_from_manifest:
+  - xdp
+  prog_types:
+  - xdp
+- id: object-0152
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tools/xdp_forward.bpf.o
+  object_index: 152
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tools_xdp_fwd_fib_direct
+  program_names_from_manifest:
+  - xdp_fwd_fib_direct
+  sections_from_manifest:
+  - xdp
+  prog_types:
+  - xdp
+- id: object-0153
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tools/xdp_load_bytes.bpf.o
+  object_index: 153
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tools_xdp_probe_prog
+  program_names_from_manifest:
+  - xdp_probe_prog
+  sections_from_manifest:
+  - xdp
+  prog_types:
+  - xdp
+- id: object-0154
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tools/xdp_monitor.bpf.o
+  object_index: 154
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tools_tp_xdp_exception
+  program_names_from_manifest:
+  - tp_xdp_exception
+  - tp_xdp_devmap_xmit
+  - tp_xdp_redirect_err
+  sections_from_manifest:
+  - tp_btf/xdp_exception
+  - tp_btf/xdp_devmap_xmit
+  - tp_btf/xdp_redirect_err
+  prog_types:
+  - tracing
+- id: object-0155
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tools/xdp_redirect_basic.bpf.o
+  object_index: 155
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tools_xdp_redirect_prog
+  program_names_from_manifest:
+  - xdp_redirect_prog
+  sections_from_manifest:
+  - xdp
+  prog_types:
+  - xdp
+- id: object-0156
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tools/xdp_redirect_cpumap.bpf.o
+  object_index: 156
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tools_cpumap_no_touch
+  program_names_from_manifest:
+  - cpumap_no_touch
+  sections_from_manifest:
+  - xdp
+  prog_types:
+  - xdp
+- id: object-0157
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tools/xdp_redirect_devmap.bpf.o
+  object_index: 157
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tools_redir_devmap_general
+  program_names_from_manifest:
+  - redir_devmap_general
+  sections_from_manifest:
+  - xdp
+  prog_types:
+  - xdp
+- id: object-0158
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tools/xdp_redirect_devmap_multi.bpf.o
+  object_index: 158
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tools_redir_multi_general
+  program_names_from_manifest:
+  - redir_multi_general
+  sections_from_manifest:
+  - xdp
+  prog_types:
+  - xdp
+- id: object-0159
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tools/xdp_sample.bpf.o
+  object_index: 159
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tools_tp_xdp_cpumap_kthread
+  program_names_from_manifest:
+  - tp_xdp_cpumap_kthread
+  sections_from_manifest:
+  - tp_btf/xdp_cpumap_kthread
+  prog_types:
+  - tracing
+- id: object-0160
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tools/xdp_trafficgen.bpf.o
+  object_index: 160
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tools_xdp_redirect_notouch
+  program_names_from_manifest:
+  - xdp_redirect_notouch
+  sections_from_manifest:
+  - xdp
+  prog_types:
+  - xdp
+- id: object-0161
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tools/xdpsock.bpf.o
+  object_index: 161
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tools_xdp_sock_prog
+  program_names_from_manifest:
+  - xdp_sock_prog
+  sections_from_manifest:
+  - xdp
+  prog_types:
+  - xdp
+- id: object-0162
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/advanced03-AF_XDP/af_xdp_kern.bpf.o
+  object_index: 162
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tutorial_advanced03_xdp_sock_prog
+  program_names_from_manifest:
+  - xdp_sock_prog
+  sections_from_manifest:
+  - xdp
+  prog_types:
+  - xdp
+- id: object-0163
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/basic01-xdp-pass/xdp_pass_kern.bpf.o
+  object_index: 163
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tutorial_basic01_xdp_prog_simple
+  program_names_from_manifest:
+  - xdp_prog_simple
+  sections_from_manifest:
+  - xdp
+  prog_types:
+  - xdp
+- id: object-0164
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/basic02-prog-by-name/xdp_prog_kern.bpf.o
+  object_index: 164
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tutorial_basic02_xdp_pass_func
+  program_names_from_manifest:
+  - xdp_pass_func
+  sections_from_manifest:
+  - xdp
+  prog_types:
+  - xdp
+- id: object-0165
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/basic03-map-counter/xdp_prog_kern.bpf.o
+  object_index: 165
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tutorial_basic03_xdp_stats1_func
+  program_names_from_manifest:
+  - xdp_stats1_func
+  sections_from_manifest:
+  - xdp
+  prog_types:
+  - xdp
+- id: object-0166
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/basic04-pinning-maps/xdp_prog_kern.bpf.o
+  object_index: 166
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tutorial_basic04_xdp_pass_func
+  program_names_from_manifest:
+  - xdp_pass_func
+  sections_from_manifest:
+  - xdp
+  prog_types:
+  - xdp
+- id: object-0167
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_fail1.bpf.o
+  object_index: 167
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tutorial_tailgrow_fail1
+  program_names_from_manifest:
+  - _xdp_fail1
+  sections_from_manifest:
+  - xdp_fail1
+  prog_types:
+  - xdp
+- id: object-0168
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_fail2.bpf.o
+  object_index: 168
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tutorial_tailgrow_fail2
+  program_names_from_manifest:
+  - _xdp_fail2
+  sections_from_manifest:
+  - xdp_fail2
+  prog_types:
+  - xdp
+- id: object-0169
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_fail3.bpf.o
+  object_index: 169
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tutorial_tailgrow_fail3
+  program_names_from_manifest:
+  - _xdp_fail3
+  sections_from_manifest:
+  - xdp_fail3
+  prog_types:
+  - xdp
+- id: object-0170
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_kern.bpf.o
+  object_index: 170
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tutorial_tailgrow_pass
+  program_names_from_manifest:
+  - tailgrow_pass
+  sections_from_manifest:
+  - xdp_tailgrow
+  prog_types:
+  - xdp
+- id: object-0171
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_kern2.bpf.o
+  object_index: 171
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tutorial_end_loop
+  program_names_from_manifest:
+  - _xdp_end_loop
+  sections_from_manifest:
+  - xdp_end_loop
+  prog_types:
+  - xdp
+- id: object-0172
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_kern3.bpf.o
+  object_index: 172
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tutorial_works1
+  program_names_from_manifest:
+  - _xdp_works1
+  sections_from_manifest:
+  - xdp_works1
+  prog_types:
+  - xdp
+- id: object-0173
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_kern4.bpf.o
+  object_index: 173
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tutorial_test1
+  program_names_from_manifest:
+  - _xdp_test1
+  sections_from_manifest:
+  - xdp_test1
+  prog_types:
+  - xdp
+- id: object-0174
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/packet-solutions/tc_reply_kern_02.bpf.o
+  object_index: 174
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tutorial_fix_port_egress
+  program_names_from_manifest:
+  - _fix_port_egress
+  sections_from_manifest:
+  - tc
+  prog_types:
+  - sched_cls
+- id: object-0175
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/packet-solutions/xdp_prog_kern_02.bpf.o
+  object_index: 175
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tutorial_vlan_swap_solution
+  program_names_from_manifest:
+  - xdp_vlan_swap_func
+  sections_from_manifest:
+  - xdp_vlan_swap
+  prog_types:
+  - xdp
+- id: object-0176
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/packet-solutions/xdp_prog_kern_03.bpf.o
+  object_index: 176
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tutorial_redirect_solution
+  program_names_from_manifest:
+  - xdp_redirect_func
+  sections_from_manifest:
+  - xdp_redirect
+  prog_types:
+  - xdp
+- id: object-0177
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/packet-solutions/xdp_vlan01_kern.bpf.o
+  object_index: 177
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tutorial_vlan01
+  program_names_from_manifest:
+  - xdp_vlan_01
+  sections_from_manifest:
+  - xdp_vlan01
+  prog_types:
+  - xdp
+- id: object-0178
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/packet-solutions/xdp_vlan02_kern.bpf.o
+  object_index: 178
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tutorial_vlan02
+  program_names_from_manifest:
+  - xdp_vlan_02
+  sections_from_manifest:
+  - xdp_vlan02
+  prog_types:
+  - xdp
+- id: object-0179
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/packet01-parsing/xdp_prog_kern.bpf.o
+  object_index: 179
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tutorial_parser_func
+  program_names_from_manifest:
+  - xdp_parser_func
+  sections_from_manifest:
+  - xdp
+  prog_types:
+  - xdp
+- id: object-0180
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/packet02-rewriting/xdp_prog_kern.bpf.o
+  object_index: 180
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tutorial_vlan_swap_func
+  program_names_from_manifest:
+  - xdp_vlan_swap_func
+  sections_from_manifest:
+  - xdp
+  prog_types:
+  - xdp
+- id: object-0181
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/packet03-redirecting/xdp_prog_kern.bpf.o
+  object_index: 181
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tutorial_redirect_func
+  program_names_from_manifest:
+  - xdp_redirect_func
+  sections_from_manifest:
+  - xdp
+  prog_types:
+  - xdp
+- id: object-0182
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/tracing01-xdp-simple/trace_prog_kern.bpf.o
+  object_index: 182
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tutorial_trace_xdp_exception
+  program_names_from_manifest:
+  - trace_xdp_exception
+  sections_from_manifest:
+  - tracepoint/xdp/xdp_exception
+  prog_types:
+  - tracepoint
+- id: object-0183
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/tracing01-xdp-simple/xdp_prog_kern.bpf.o
+  object_index: 183
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tutorial_trace01_xdp_drop_func
+  program_names_from_manifest:
+  - xdp_drop_func
+  sections_from_manifest:
+  - xdp
+  prog_types:
+  - xdp
+- id: object-0184
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/tracing02-xdp-monitor/trace_prog_kern.bpf.o
+  object_index: 184
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tutorial_trace_xdp_redirect_err
+  program_names_from_manifest:
+  - trace_xdp_redirect_err
+  - trace_xdp_exception
+  - trace_xdp_devmap_xmit
+  sections_from_manifest:
+  - tracepoint/xdp/xdp_redirect_err
+  - tracepoint/xdp/xdp_exception
+  - tracepoint/xdp/xdp_devmap_xmit
+  prog_types:
+  - tracepoint
+- id: object-0185
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/tracing03-xdp-debug-print/xdp_prog_kern.bpf.o
+  object_index: 185
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tutorial_trace03_xdp_prog_simple
+  program_names_from_manifest:
+  - xdp_prog_simple
+  sections_from_manifest:
+  - xdp
+  prog_types:
+  - xdp
+- id: object-0186
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/xdp-tutorial/tracing04-xdp-tcpdump/xdp_sample_pkts_kern.bpf.o
+  object_index: 186
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - xdp_tutorial_xdp_sample_prog
+  program_names_from_manifest:
+  - xdp_sample_prog
+  sections_from_manifest:
+  - xdp
+  prog_types:
+  - xdp
+- id: object-0187
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bpftrace/exec_trace.bpf.o
+  object_index: 187
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bpftrace_exec_trace
+  program_names_from_manifest:
+  - tracepoint:sched:sched_process_exec
+  sections_from_manifest:
+  - s_tracepoint:sched:sched_process_exec_1
+  prog_types:
+  - tracepoint
+- id: object-0188
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bpftrace/open_latency.bpf.o
+  object_index: 188
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bpftrace_open_latency
+  program_names_from_manifest:
+  - kprobe:do_sys_openat2
+  - kretprobe:do_sys_openat2
+  sections_from_manifest:
+  - s_kprobe:do_sys_openat2_1
+  - s_kretprobe:do_sys_openat2_2
+  prog_types:
+  - kprobe
+- id: object-0189
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bpftrace/scheduler_latency.bpf.o
+  object_index: 189
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bpftrace_scheduler_latency
+  program_names_from_manifest:
+  - tracepoint:sched:sched_wakeup
+  - tracepoint:sched:sched_switch
+  sections_from_manifest:
+  - s_tracepoint:sched:sched_wakeup_1
+  - s_tracepoint:sched:sched_switch_2
+  prog_types:
+  - tracepoint
+- id: object-0190
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bpftrace/tcp_connect.bpf.o
+  object_index: 190
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bpftrace_tcp_connect
+  program_names_from_manifest:
+  - kprobe:tcp_v4_connect
+  sections_from_manifest:
+  - s_kprobe:tcp_v4_connect_1
+  prog_types:
+  - kprobe
+- id: object-0191
+  type: static_verify_object
+  execution: parallel
+  object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/bpftrace/vfs_read_count.bpf.o
+  object_index: 191
+  daemon_socket: /tmp/bpfrejit-static-verify.sock
+  manifest_kinds:
+  - macro
+  target_names:
+  - bpftrace_vfs_read_count
+  program_names_from_manifest:
+  - kprobe:vfs_read
+  sections_from_manifest:
+  - s_kprobe:vfs_read_1
+  prog_types:
+  - kprobe

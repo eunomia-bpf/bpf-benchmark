@@ -373,6 +373,28 @@ fn is_packet_unsafe_prog_type(prog_type: u32) -> bool {
     )
 }
 
+/// Backward-scan heuristic: returns `true` if `reg` was likely loaded from
+/// R1 (ctx) via `LDX_MEM`, making it a probable packet pointer
+/// (ctx->data / ctx->data_end).  Scans up to `LOOKBACK` instructions before
+/// `before_pc`.
+fn is_likely_packet_ptr(reg: i32, before_pc: usize, insns: &[BpfInsn]) -> bool {
+    const LOOKBACK: usize = 32;
+    let start = before_pc.saturating_sub(LOOKBACK);
+    for i in (start..before_pc).rev() {
+        let insn = &insns[i];
+        if insn.dst_reg() as i32 == reg {
+            if insn.is_ldx_mem() {
+                // reg = *(type *)(src + off).  Packet ptr if src is R1 (ctx).
+                return insn.src_reg() == 1;
+            }
+            // Any other write to reg: not a ctx-derived pointer.
+            return false;
+        }
+    }
+    // Couldn't determine provenance; be conservative and skip.
+    true
+}
+
 /// WIDE_MEM optimization pass: merges byte-load + shift + OR sequences
 /// into a single wide load instruction.
 ///
@@ -472,19 +494,24 @@ impl BpfPass for WideMemPass {
             // natural alignment. The verifier may reject the wider access even when
             // individual byte accesses were valid.
             //
-            // Conservative filter: for XDP (type 6) and TC/SCHED_CLS (type 3)
-            // programs, skip any wide_mem site whose base register is not R10 (frame
-            // pointer / stack). R10-based loads always target the BPF stack, which
-            // has no range-tracking or alignment issues. All other registers could
-            // potentially hold packet pointers, map value pointers, or other typed
-            // pointers with verifier constraints.
+            // In XDP/TC programs, packet pointers (loaded from ctx->data /
+            // ctx->data_end) use verifier range tracking that may reject wide
+            // loads even when individual byte loads succeeded.  Skip sites
+            // whose base register likely holds a packet pointer.
+            //
+            // Heuristic: a register is a likely packet pointer if it was loaded
+            // from R1 (ctx) via LDX_MEM, e.g. `r6 = *(u64 *)(r1 + 0)`.  R10
+            // (stack) and registers derived from map lookups or other sources
+            // are safe for wide loads.
             if is_packet_unsafe_prog_type(ctx.prog_type) {
                 let base_reg = site.get_binding("base_reg").unwrap_or(-1);
-                if base_reg != 10 {
+                if base_reg != 10
+                    && is_likely_packet_ptr(base_reg as i32, site.start_pc, &program.insns)
+                {
                     skipped.push(SkipReason {
                         pc: site.start_pc,
                         reason: format!(
-                            "non-stack base r{} in XDP/TC prog (prog_type={})",
+                            "likely packet pointer r{} in XDP/TC prog (prog_type={})",
                             base_reg, ctx.prog_type
                         ),
                     });
@@ -1410,7 +1437,7 @@ mod tests {
         assert!(result
             .sites_skipped
             .iter()
-            .any(|s| s.reason.contains("non-stack base")));
+            .any(|s| s.reason.contains("packet pointer") || s.reason.contains("non-stack base")));
     }
 
     #[test]
@@ -1441,7 +1468,7 @@ mod tests {
         assert!(result
             .sites_skipped
             .iter()
-            .any(|s| s.reason.contains("non-stack base")));
+            .any(|s| s.reason.contains("packet pointer") || s.reason.contains("non-stack base")));
     }
 
     #[test]
@@ -1473,6 +1500,31 @@ mod tests {
         assert_eq!(bpf_size(prog.insns[0].code), BPF_W);
         assert_eq!(prog.insns[0].src_reg(), 10);
         assert_eq!(prog.insns[0].off, -4);
+    }
+
+    #[test]
+    fn test_wide_mem_allows_map_value_base_in_xdp() {
+        // In XDP, a base register derived from a map value (via LDX_MEM from
+        // R0, not R1/ctx) should be allowed — it's not a packet pointer.
+        let mut prog = make_program(vec![
+            // r6 = *(u64 *)(r0 + 0)  -- map value pointer, not ctx
+            BpfInsn::ldx_mem(BPF_DW, 6, 0, 0),
+            // byte-ladder from r6
+            BpfInsn::ldx_mem(BPF_B, 2, 6, 0),
+            BpfInsn::ldx_mem(BPF_B, 3, 6, 1),
+            BpfInsn::alu64_imm(BPF_LSH, 3, 8),
+            BpfInsn::alu64_reg(BPF_OR, 2, 3),
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let mut ctx = PassContext::test_default();
+        ctx.prog_type = 6; // XDP
+
+        let pass = WideMemPass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(result.changed, "map-value base in XDP should be allowed");
+        assert_eq!(result.sites_applied, 1);
     }
 
     #[test]

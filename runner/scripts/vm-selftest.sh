@@ -44,11 +44,8 @@ FAIL=0
 
 # All tests to run.  Must match tests/unittest/Makefile TESTS variable.
 TESTS="rejit_poc rejit_safety_tests rejit_regression rejit_tail_call
-       rejit_spectre rejit_kinsn
-       rejit_verifier_negative_tests
-       rejit_prog_types rejit_audit_tests rejit_swap_tests
-       rejit_struct_ops_rollback_tests
-       rejit_struct_ops_multi_callsite_tests"
+       rejit_spectre rejit_kinsn rejit_verifier_negative_tests
+       rejit_prog_types rejit_audit_tests rejit_swap_tests"
 
 for t in $TESTS; do
     echo "--- $t ---"

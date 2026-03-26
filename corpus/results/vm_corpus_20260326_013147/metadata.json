@@ -1,0 +1,1199 @@
+{
+  "artifact_kind": "result_run",
+  "artifact_version": 1,
+  "blind_apply": false,
+  "btf_custom_path": "vendor/linux-framework/vmlinux",
+  "completed_at": "2026-03-26T01:34:15.878272+00:00",
+  "daemon_binary": "daemon/target/release/bpfrejit-daemon",
+  "details_dir": "details",
+  "generated_at": "2026-03-26T01:31:47.294254+00:00",
+  "guest_smoke": {
+    "invocation": {
+      "duration_seconds": 148.55804201200044,
+      "error": null,
+      "ok": true,
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "Loaded bpf_barrier\nLoaded bpf_endian\nLoaded bpf_extract\nLoaded bpf_rotate\nLoaded bpf_select\nkinsn modules: 5/5 loaded\nScript started on 2026-03-25 18:31:54-07:00 [COMMAND=\"/home/yunwei37/workspace/bpf-benchmark/runner/scripts/vng-wrapper.sh /tmp/vng-wrapper.5okwnv\" <not executed on terminal>]\nLoaded bpf_barrier\nLoaded bpf_endian\nLoaded bpf_extract\nLoaded bpf_rotate\nLoaded bpf_select\nkinsn modules: 5/5 loaded\nScript done on 2026-03-25 18:34:15-07:00 [COMMAND_EXIT_CODE=\"0\"]",
+      "timed_out": false
+    },
+    "payload": {
+      "btf_exists": true,
+      "cwd": "/home/yunwei37/workspace/bpf-benchmark",
+      "kernel_release": "7.0.0-rc2+",
+      "kind": "guest_info",
+      "runner_exists": true,
+      "uid": 0
+    }
+  },
+  "inventory_json": "docs/tmp/corpus-runnability-results.json",
+  "inventory_summary": {
+    "packet_paired_programs": 166,
+    "packet_runnable_programs": 166,
+    "programs_found": 166,
+    "restored_from": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/corpus_recompile_authoritative_20260313.json",
+    "sources": [
+      "calico",
+      "katran",
+      "libbpf-bootstrap",
+      "linux-selftests",
+      "real_world_code_size",
+      "suricata",
+      "tracee",
+      "xdp-tools",
+      "xdp-tutorial"
+    ]
+  },
+  "kernel_image": "vendor/linux-framework/arch/x86/boot/bzImage",
+  "kernel_tree": "vendor/linux-framework",
+  "last_updated_at": "2026-03-26T01:34:15.878272+00:00",
+  "mode": "packet",
+  "output_hint_json": "corpus/results/vm_corpus.json",
+  "output_hint_md": "corpus/results/vm_corpus.md",
+  "paper_summary": {
+    "applied_programs": 69,
+    "by_family": [
+      {
+        "applied_programs": 2,
+        "applied_sites": 30,
+        "code_size_ratio_geomean": 0.9998470129229314,
+        "compile_pairs": 4,
+        "exec_ratio_geomean": 1.4000749231782008,
+        "family_name": "rotate",
+        "measured_pairs": 4,
+        "programs": 4,
+        "regressions": 2,
+        "total_sites": 1840,
+        "wins": 2
+      },
+      {
+        "applied_programs": 32,
+        "applied_sites": 327,
+        "code_size_ratio_geomean": 1.0072225325669333,
+        "compile_pairs": 35,
+        "exec_ratio_geomean": 1.0510952674836005,
+        "family_name": "wide",
+        "measured_pairs": 35,
+        "programs": 35,
+        "regressions": 15,
+        "total_sites": 330,
+        "wins": 20
+      },
+      {
+        "applied_programs": 50,
+        "applied_sites": 213,
+        "code_size_ratio_geomean": 1.004011420225908,
+        "compile_pairs": 68,
+        "exec_ratio_geomean": 0.9317593732430772,
+        "family_name": "cmov",
+        "measured_pairs": 68,
+        "programs": 68,
+        "regressions": 34,
+        "total_sites": 233,
+        "wins": 34
+      },
+      {
+        "applied_programs": 0,
+        "applied_sites": 0,
+        "code_size_ratio_geomean": null,
+        "compile_pairs": 0,
+        "exec_ratio_geomean": null,
+        "family_name": "branch-flip",
+        "measured_pairs": 0,
+        "programs": 0,
+        "regressions": 0,
+        "total_sites": 0,
+        "wins": 0
+      },
+      {
+        "applied_programs": 0,
+        "applied_sites": 0,
+        "code_size_ratio_geomean": null,
+        "compile_pairs": 0,
+        "exec_ratio_geomean": null,
+        "family_name": "endian",
+        "measured_pairs": 0,
+        "programs": 0,
+        "regressions": 0,
+        "total_sites": 0,
+        "wins": 0
+      },
+      {
+        "applied_programs": 0,
+        "applied_sites": 0,
+        "code_size_ratio_geomean": null,
+        "compile_pairs": 0,
+        "exec_ratio_geomean": null,
+        "family_name": "extract",
+        "measured_pairs": 0,
+        "programs": 0,
+        "regressions": 0,
+        "total_sites": 0,
+        "wins": 0
+      },
+      {
+        "applied_programs": 0,
+        "applied_sites": 0,
+        "code_size_ratio_geomean": null,
+        "compile_pairs": 0,
+        "exec_ratio_geomean": null,
+        "family_name": "lea",
+        "measured_pairs": 0,
+        "programs": 0,
+        "regressions": 0,
+        "total_sites": 0,
+        "wins": 0
+      }
+    ],
+    "by_source": [
+      {
+        "applied_programs": 54,
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 196,
+        "code_size_ratio_geomean": 1.0008501786434265,
+        "compile_pairs": 59,
+        "endian_sites": 0,
+        "exec_ratio_geomean": 0.9809998525150462,
+        "lea_sites": 0,
+        "measured_pairs": 59,
+        "programs": 59,
+        "regressions": 30,
+        "rotate_sites": 10,
+        "source_name": "calico",
+        "total_sites": 314,
+        "wide_sites": 108,
+        "wins": 29
+      },
+      {
+        "applied_programs": 7,
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 14,
+        "code_size_ratio_geomean": 1.0009934399392881,
+        "compile_pairs": 59,
+        "endian_sites": 0,
+        "exec_ratio_geomean": 0.883410051001243,
+        "lea_sites": 0,
+        "measured_pairs": 59,
+        "programs": 59,
+        "regressions": 35,
+        "rotate_sites": 1810,
+        "source_name": "linux-selftests",
+        "total_sites": 1825,
+        "wide_sites": 1,
+        "wins": 24
+      },
+      {
+        "applied_programs": 1,
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 7,
+        "code_size_ratio_geomean": 1.0012782580212483,
+        "compile_pairs": 20,
+        "endian_sites": 0,
+        "exec_ratio_geomean": 0.9201946032588041,
+        "lea_sites": 0,
+        "measured_pairs": 20,
+        "programs": 20,
+        "regressions": 9,
+        "rotate_sites": 0,
+        "source_name": "xdp-tutorial",
+        "total_sites": 10,
+        "wide_sites": 3,
+        "wins": 11
+      },
+      {
+        "applied_programs": 1,
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 6,
+        "code_size_ratio_geomean": 1.0,
+        "compile_pairs": 5,
+        "endian_sites": 0,
+        "exec_ratio_geomean": 0.9132066317830337,
+        "lea_sites": 0,
+        "measured_pairs": 5,
+        "programs": 5,
+        "regressions": 2,
+        "rotate_sites": 20,
+        "source_name": "katran",
+        "total_sites": 30,
+        "wide_sites": 4,
+        "wins": 3
+      },
+      {
+        "applied_programs": 2,
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 3,
+        "code_size_ratio_geomean": 1.005759613656702,
+        "compile_pairs": 4,
+        "endian_sites": 0,
+        "exec_ratio_geomean": 0.7538541623675457,
+        "lea_sites": 0,
+        "measured_pairs": 4,
+        "programs": 4,
+        "regressions": 2,
+        "rotate_sites": 0,
+        "source_name": "xdp-tools",
+        "total_sites": 3,
+        "wide_sites": 0,
+        "wins": 2
+      },
+      {
+        "applied_programs": 2,
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 6,
+        "code_size_ratio_geomean": 1.0896582582918508,
+        "compile_pairs": 2,
+        "endian_sites": 0,
+        "exec_ratio_geomean": 1.095587418001889,
+        "lea_sites": 0,
+        "measured_pairs": 2,
+        "programs": 2,
+        "regressions": 1,
+        "rotate_sites": 0,
+        "source_name": "tracee",
+        "total_sites": 220,
+        "wide_sites": 214,
+        "wins": 1
+      },
+      {
+        "applied_programs": 1,
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 0,
+        "code_size_ratio_geomean": 1.0373831775700935,
+        "compile_pairs": 1,
+        "endian_sites": 0,
+        "exec_ratio_geomean": 0.5187667560321716,
+        "lea_sites": 0,
+        "measured_pairs": 1,
+        "programs": 1,
+        "regressions": 1,
+        "rotate_sites": 0,
+        "source_name": "libbpf-bootstrap",
+        "total_sites": 0,
+        "wide_sites": 0,
+        "wins": 0
+      },
+      {
+        "applied_programs": 1,
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 0,
+        "code_size_ratio_geomean": 1.0373831775700935,
+        "compile_pairs": 1,
+        "endian_sites": 0,
+        "exec_ratio_geomean": 0.9127789046653144,
+        "lea_sites": 0,
+        "measured_pairs": 1,
+        "programs": 1,
+        "regressions": 1,
+        "rotate_sites": 0,
+        "source_name": "real_world_code_size",
+        "total_sites": 0,
+        "wide_sites": 0,
+        "wins": 0
+      },
+      {
+        "applied_programs": 0,
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 1,
+        "code_size_ratio_geomean": 1.0,
+        "compile_pairs": 1,
+        "endian_sites": 0,
+        "exec_ratio_geomean": 0.4954682779456193,
+        "lea_sites": 0,
+        "measured_pairs": 1,
+        "programs": 1,
+        "regressions": 1,
+        "rotate_sites": 0,
+        "source_name": "suricata",
+        "total_sites": 1,
+        "wide_sites": 0,
+        "wins": 0
+      }
+    ],
+    "code_size_delta_median_pct": 0.0,
+    "code_size_ratio_geomean": 1.002650712643743,
+    "compile_pairs": 152,
+    "effective_mode": "vm",
+    "exec_ratio_geomean": 0.9182669555221799,
+    "exec_ratio_max": 2.8140495867768593,
+    "exec_ratio_median": 0.9668890946025868,
+    "exec_ratio_min": 0.1984732824427481,
+    "failure_reasons": {},
+    "family_totals": {
+      "bitfield_sites": 0,
+      "branch_flip_sites": 0,
+      "cmov_sites": 233,
+      "endian_sites": 0,
+      "lea_sites": 0,
+      "rotate_sites": 1840,
+      "wide_sites": 330
+    },
+    "improvements": 70,
+    "measured_pairs": 152,
+    "regressions": 82,
+    "rejit_failure_reasons": {
+      "daemon socket optimize failed: BPF_PROG_REJIT: Invalid argument (os error 22)\\nverifier log:\\ncall to invalid destination\\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\\n": 8
+    },
+    "targets_attempted": 152,
+    "top_code_shrinks": [
+      {
+        "families": [
+          "cmov",
+          "wide"
+        ],
+        "prog_type_name": "cgroup_skb",
+        "program": "corpus/build/tracee/tracee.bpf.o:cgroup_skb_egress",
+        "size_ratio": 1.0896582582918508,
+        "source_name": "tracee"
+      },
+      {
+        "families": [
+          "cmov",
+          "wide"
+        ],
+        "prog_type_name": "cgroup_skb",
+        "program": "corpus/build/tracee/tracee.bpf.o:cgroup_skb_ingress",
+        "size_ratio": 1.0896582582918508,
+        "source_name": "tracee"
+      },
+      {
+        "families": [],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/libbpf-bootstrap/examples/c/tc.bpf.o:tc_ingress",
+        "size_ratio": 1.0373831775700935,
+        "source_name": "libbpf-bootstrap"
+      },
+      {
+        "families": [],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/real_world_code_size/libbpf-bootstrap/tc.bpf.o:tc_ingress",
+        "size_ratio": 1.0373831775700935,
+        "source_name": "real_world_code_size"
+      },
+      {
+        "families": [
+          "wide"
+        ],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_tc_tunnel.bpf.o:decap_f",
+        "size_ratio": 1.0294985250737463,
+        "source_name": "linux-selftests"
+      },
+      {
+        "families": [],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/xdp-tutorial/packet-solutions/tc_reply_kern_02.bpf.o:_fix_port_egress",
+        "size_ratio": 1.0258780036968578,
+        "source_name": "xdp-tutorial"
+      },
+      {
+        "families": [
+          "cmov"
+        ],
+        "prog_type_name": "xdp",
+        "program": "corpus/build/xdp-tools/xdp_forward.bpf.o:xdp_fwd_fib_full",
+        "size_ratio": 1.0115774240231548,
+        "source_name": "xdp-tools"
+      },
+      {
+        "families": [
+          "cmov"
+        ],
+        "prog_type_name": "xdp",
+        "program": "corpus/build/xdp-tools/xdp_forward.bpf.o:xdp_fwd_fib_direct",
+        "size_ratio": 1.0115273775216138,
+        "source_name": "xdp-tools"
+      },
+      {
+        "families": [
+          "cmov"
+        ],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_tc_tunnel.bpf.o:__encap_udp_none",
+        "size_ratio": 1.0062402496099845,
+        "source_name": "linux-selftests"
+      },
+      {
+        "families": [
+          "cmov"
+        ],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_tc_tunnel.bpf.o:__encap_udp_mpls",
+        "size_ratio": 1.0061162079510704,
+        "source_name": "linux-selftests"
+      }
+    ],
+    "top_regressions": [
+      {
+        "families": [
+          "cmov"
+        ],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_tc_tunnel.bpf.o:__encap_vxlan_eth",
+        "source_name": "linux-selftests",
+        "speedup_ratio": 0.1984732824427481
+      },
+      {
+        "families": [
+          "cmov",
+          "wide"
+        ],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/calico/from_nat_debug.bpf.o:calico_tc_main",
+        "source_name": "calico",
+        "speedup_ratio": 0.27915337779066396
+      },
+      {
+        "families": [],
+        "prog_type_name": "xdp",
+        "program": "corpus/build/katran/xdp_root.bpf.o:xdp_root",
+        "source_name": "katran",
+        "speedup_ratio": 0.284137129575828
+      },
+      {
+        "families": [],
+        "prog_type_name": "xdp",
+        "program": "corpus/build/xdp-tutorial/basic04-pinning-maps/xdp_prog_kern.bpf.o:xdp_abort_func",
+        "source_name": "xdp-tutorial",
+        "speedup_ratio": 0.32564575645756455
+      },
+      {
+        "families": [
+          "cmov",
+          "wide"
+        ],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/calico/to_wep_debug.bpf.o:calico_tc_skb_send_tcp_rst",
+        "source_name": "calico",
+        "speedup_ratio": 0.3397242284963887
+      },
+      {
+        "families": [
+          "cmov"
+        ],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_tc_tunnel.bpf.o:__encap_ipip_none",
+        "source_name": "linux-selftests",
+        "speedup_ratio": 0.4024663677130045
+      },
+      {
+        "families": [
+          "cmov"
+        ],
+        "prog_type_name": "xdp",
+        "program": "corpus/build/xdp-tools/xdp_load_bytes.bpf.o:xdp_probe_prog",
+        "source_name": "xdp-tools",
+        "speedup_ratio": 0.43546511627906975
+      },
+      {
+        "families": [
+          "cmov",
+          "wide"
+        ],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/calico/to_wep_debug.bpf.o:calico_tc_skb_icmp_inner_nat",
+        "source_name": "calico",
+        "speedup_ratio": 0.43607015760040674
+      },
+      {
+        "families": [
+          "cmov"
+        ],
+        "prog_type_name": "xdp",
+        "program": "corpus/build/xdp-tutorial/packet02-rewriting/xdp_prog_kern.bpf.o:xdp_parser_func",
+        "source_name": "xdp-tutorial",
+        "speedup_ratio": 0.4462564862861379
+      },
+      {
+        "families": [],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/skb_pkt_end.bpf.o:main_prog",
+        "source_name": "linux-selftests",
+        "speedup_ratio": 0.4577603143418468
+      }
+    ],
+    "top_speedups": [
+      {
+        "families": [],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_xdp_do_redirect.bpf.o:tc_count_pkts",
+        "source_name": "linux-selftests",
+        "speedup_ratio": 2.8140495867768593
+      },
+      {
+        "families": [
+          "cmov",
+          "wide",
+          "rotate"
+        ],
+        "prog_type_name": "xdp",
+        "program": "corpus/build/katran/balancer.bpf.o:balancer_ingress",
+        "source_name": "katran",
+        "speedup_ratio": 2.5552523874488404
+      },
+      {
+        "families": [
+          "cmov"
+        ],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_tc_tunnel.bpf.o:__encap_udp_none",
+        "source_name": "linux-selftests",
+        "speedup_ratio": 2.1638655462184873
+      },
+      {
+        "families": [
+          "cmov",
+          "wide"
+        ],
+        "prog_type_name": "xdp",
+        "program": "corpus/build/xdp-tutorial/packet02-rewriting/xdp_prog_kern.bpf.o:xdp_vlan_swap_func",
+        "source_name": "xdp-tutorial",
+        "speedup_ratio": 2.1524663677130045
+      },
+      {
+        "families": [
+          "cmov",
+          "wide"
+        ],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/calico/to_nat_debug.bpf.o:calico_tc_skb_send_tcp_rst",
+        "source_name": "calico",
+        "speedup_ratio": 2.032359409362237
+      },
+      {
+        "families": [
+          "rotate"
+        ],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/core_kern.bpf.o:balancer_ingress",
+        "source_name": "linux-selftests",
+        "speedup_ratio": 1.918768287585342
+      },
+      {
+        "families": [
+          "cmov"
+        ],
+        "prog_type_name": "xdp",
+        "program": "corpus/build/xdp-tutorial/tracing04-xdp-tcpdump/xdp_sample_pkts_kern.bpf.o:xdp_sample_prog",
+        "source_name": "xdp-tutorial",
+        "speedup_ratio": 1.8796185935637664
+      },
+      {
+        "families": [
+          "cmov",
+          "wide"
+        ],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/calico/from_wep_debug.bpf.o:calico_tc_skb_send_tcp_rst",
+        "source_name": "calico",
+        "speedup_ratio": 1.837138863000932
+      },
+      {
+        "families": [
+          "cmov",
+          "wide"
+        ],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/calico/from_nat_debug.bpf.o:calico_tc_skb_icmp_inner_nat",
+        "source_name": "calico",
+        "speedup_ratio": 1.8238699007717751
+      },
+      {
+        "families": [],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/calico/to_nat_debug.bpf.o:calico_tc_skb_ipv4_frag",
+        "source_name": "calico",
+        "speedup_ratio": 1.774941215989251
+      }
+    ]
+  },
+  "progress": {
+    "completed_programs": 152,
+    "current_target": null,
+    "current_target_index": null,
+    "status": "completed",
+    "total_programs": 152
+  },
+  "repeat": 1,
+  "run_type": "vm_corpus",
+  "runner_binary": "runner/build/micro_exec",
+  "skip_families": [],
+  "started_at": "2026-03-26T01:31:47.294254+00:00",
+  "status": "completed",
+  "suite": "corpus",
+  "summary": {
+    "applied_programs": 69,
+    "by_family": [
+      {
+        "applied_programs": 2,
+        "applied_sites": 30,
+        "code_size_ratio_geomean": 0.9998470129229314,
+        "compile_pairs": 4,
+        "exec_ratio_geomean": 1.4000749231782008,
+        "family_name": "rotate",
+        "measured_pairs": 4,
+        "programs": 4,
+        "regressions": 2,
+        "total_sites": 1840,
+        "wins": 2
+      },
+      {
+        "applied_programs": 32,
+        "applied_sites": 327,
+        "code_size_ratio_geomean": 1.0072225325669333,
+        "compile_pairs": 35,
+        "exec_ratio_geomean": 1.0510952674836005,
+        "family_name": "wide",
+        "measured_pairs": 35,
+        "programs": 35,
+        "regressions": 15,
+        "total_sites": 330,
+        "wins": 20
+      },
+      {
+        "applied_programs": 50,
+        "applied_sites": 213,
+        "code_size_ratio_geomean": 1.004011420225908,
+        "compile_pairs": 68,
+        "exec_ratio_geomean": 0.9317593732430772,
+        "family_name": "cmov",
+        "measured_pairs": 68,
+        "programs": 68,
+        "regressions": 34,
+        "total_sites": 233,
+        "wins": 34
+      },
+      {
+        "applied_programs": 0,
+        "applied_sites": 0,
+        "code_size_ratio_geomean": null,
+        "compile_pairs": 0,
+        "exec_ratio_geomean": null,
+        "family_name": "branch-flip",
+        "measured_pairs": 0,
+        "programs": 0,
+        "regressions": 0,
+        "total_sites": 0,
+        "wins": 0
+      },
+      {
+        "applied_programs": 0,
+        "applied_sites": 0,
+        "code_size_ratio_geomean": null,
+        "compile_pairs": 0,
+        "exec_ratio_geomean": null,
+        "family_name": "endian",
+        "measured_pairs": 0,
+        "programs": 0,
+        "regressions": 0,
+        "total_sites": 0,
+        "wins": 0
+      },
+      {
+        "applied_programs": 0,
+        "applied_sites": 0,
+        "code_size_ratio_geomean": null,
+        "compile_pairs": 0,
+        "exec_ratio_geomean": null,
+        "family_name": "extract",
+        "measured_pairs": 0,
+        "programs": 0,
+        "regressions": 0,
+        "total_sites": 0,
+        "wins": 0
+      },
+      {
+        "applied_programs": 0,
+        "applied_sites": 0,
+        "code_size_ratio_geomean": null,
+        "compile_pairs": 0,
+        "exec_ratio_geomean": null,
+        "family_name": "lea",
+        "measured_pairs": 0,
+        "programs": 0,
+        "regressions": 0,
+        "total_sites": 0,
+        "wins": 0
+      }
+    ],
+    "by_source": [
+      {
+        "applied_programs": 54,
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 196,
+        "code_size_ratio_geomean": 1.0008501786434265,
+        "compile_pairs": 59,
+        "endian_sites": 0,
+        "exec_ratio_geomean": 0.9809998525150462,
+        "lea_sites": 0,
+        "measured_pairs": 59,
+        "programs": 59,
+        "regressions": 30,
+        "rotate_sites": 10,
+        "source_name": "calico",
+        "total_sites": 314,
+        "wide_sites": 108,
+        "wins": 29
+      },
+      {
+        "applied_programs": 7,
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 14,
+        "code_size_ratio_geomean": 1.0009934399392881,
+        "compile_pairs": 59,
+        "endian_sites": 0,
+        "exec_ratio_geomean": 0.883410051001243,
+        "lea_sites": 0,
+        "measured_pairs": 59,
+        "programs": 59,
+        "regressions": 35,
+        "rotate_sites": 1810,
+        "source_name": "linux-selftests",
+        "total_sites": 1825,
+        "wide_sites": 1,
+        "wins": 24
+      },
+      {
+        "applied_programs": 1,
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 7,
+        "code_size_ratio_geomean": 1.0012782580212483,
+        "compile_pairs": 20,
+        "endian_sites": 0,
+        "exec_ratio_geomean": 0.9201946032588041,
+        "lea_sites": 0,
+        "measured_pairs": 20,
+        "programs": 20,
+        "regressions": 9,
+        "rotate_sites": 0,
+        "source_name": "xdp-tutorial",
+        "total_sites": 10,
+        "wide_sites": 3,
+        "wins": 11
+      },
+      {
+        "applied_programs": 1,
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 6,
+        "code_size_ratio_geomean": 1.0,
+        "compile_pairs": 5,
+        "endian_sites": 0,
+        "exec_ratio_geomean": 0.9132066317830337,
+        "lea_sites": 0,
+        "measured_pairs": 5,
+        "programs": 5,
+        "regressions": 2,
+        "rotate_sites": 20,
+        "source_name": "katran",
+        "total_sites": 30,
+        "wide_sites": 4,
+        "wins": 3
+      },
+      {
+        "applied_programs": 2,
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 3,
+        "code_size_ratio_geomean": 1.005759613656702,
+        "compile_pairs": 4,
+        "endian_sites": 0,
+        "exec_ratio_geomean": 0.7538541623675457,
+        "lea_sites": 0,
+        "measured_pairs": 4,
+        "programs": 4,
+        "regressions": 2,
+        "rotate_sites": 0,
+        "source_name": "xdp-tools",
+        "total_sites": 3,
+        "wide_sites": 0,
+        "wins": 2
+      },
+      {
+        "applied_programs": 2,
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 6,
+        "code_size_ratio_geomean": 1.0896582582918508,
+        "compile_pairs": 2,
+        "endian_sites": 0,
+        "exec_ratio_geomean": 1.095587418001889,
+        "lea_sites": 0,
+        "measured_pairs": 2,
+        "programs": 2,
+        "regressions": 1,
+        "rotate_sites": 0,
+        "source_name": "tracee",
+        "total_sites": 220,
+        "wide_sites": 214,
+        "wins": 1
+      },
+      {
+        "applied_programs": 1,
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 0,
+        "code_size_ratio_geomean": 1.0373831775700935,
+        "compile_pairs": 1,
+        "endian_sites": 0,
+        "exec_ratio_geomean": 0.5187667560321716,
+        "lea_sites": 0,
+        "measured_pairs": 1,
+        "programs": 1,
+        "regressions": 1,
+        "rotate_sites": 0,
+        "source_name": "libbpf-bootstrap",
+        "total_sites": 0,
+        "wide_sites": 0,
+        "wins": 0
+      },
+      {
+        "applied_programs": 1,
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 0,
+        "code_size_ratio_geomean": 1.0373831775700935,
+        "compile_pairs": 1,
+        "endian_sites": 0,
+        "exec_ratio_geomean": 0.9127789046653144,
+        "lea_sites": 0,
+        "measured_pairs": 1,
+        "programs": 1,
+        "regressions": 1,
+        "rotate_sites": 0,
+        "source_name": "real_world_code_size",
+        "total_sites": 0,
+        "wide_sites": 0,
+        "wins": 0
+      },
+      {
+        "applied_programs": 0,
+        "bitfield_sites": 0,
+        "branch_flip_sites": 0,
+        "cmov_sites": 1,
+        "code_size_ratio_geomean": 1.0,
+        "compile_pairs": 1,
+        "endian_sites": 0,
+        "exec_ratio_geomean": 0.4954682779456193,
+        "lea_sites": 0,
+        "measured_pairs": 1,
+        "programs": 1,
+        "regressions": 1,
+        "rotate_sites": 0,
+        "source_name": "suricata",
+        "total_sites": 1,
+        "wide_sites": 0,
+        "wins": 0
+      }
+    ],
+    "code_size_delta_median_pct": 0.0,
+    "code_size_ratio_geomean": 1.002650712643743,
+    "compile_pairs": 152,
+    "effective_mode": "vm",
+    "exec_ratio_geomean": 0.9182669555221799,
+    "exec_ratio_max": 2.8140495867768593,
+    "exec_ratio_median": 0.9668890946025868,
+    "exec_ratio_min": 0.1984732824427481,
+    "failure_reasons": {},
+    "family_totals": {
+      "bitfield_sites": 0,
+      "branch_flip_sites": 0,
+      "cmov_sites": 233,
+      "endian_sites": 0,
+      "lea_sites": 0,
+      "rotate_sites": 1840,
+      "wide_sites": 330
+    },
+    "improvements": 70,
+    "measured_pairs": 152,
+    "regressions": 82,
+    "rejit_failure_reasons": {
+      "daemon socket optimize failed: BPF_PROG_REJIT: Invalid argument (os error 22)\\nverifier log:\\ncall to invalid destination\\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\\n": 8
+    },
+    "targets_attempted": 152,
+    "top_code_shrinks": [
+      {
+        "families": [
+          "cmov",
+          "wide"
+        ],
+        "prog_type_name": "cgroup_skb",
+        "program": "corpus/build/tracee/tracee.bpf.o:cgroup_skb_egress",
+        "size_ratio": 1.0896582582918508,
+        "source_name": "tracee"
+      },
+      {
+        "families": [
+          "cmov",
+          "wide"
+        ],
+        "prog_type_name": "cgroup_skb",
+        "program": "corpus/build/tracee/tracee.bpf.o:cgroup_skb_ingress",
+        "size_ratio": 1.0896582582918508,
+        "source_name": "tracee"
+      },
+      {
+        "families": [],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/libbpf-bootstrap/examples/c/tc.bpf.o:tc_ingress",
+        "size_ratio": 1.0373831775700935,
+        "source_name": "libbpf-bootstrap"
+      },
+      {
+        "families": [],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/real_world_code_size/libbpf-bootstrap/tc.bpf.o:tc_ingress",
+        "size_ratio": 1.0373831775700935,
+        "source_name": "real_world_code_size"
+      },
+      {
+        "families": [
+          "wide"
+        ],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_tc_tunnel.bpf.o:decap_f",
+        "size_ratio": 1.0294985250737463,
+        "source_name": "linux-selftests"
+      },
+      {
+        "families": [],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/xdp-tutorial/packet-solutions/tc_reply_kern_02.bpf.o:_fix_port_egress",
+        "size_ratio": 1.0258780036968578,
+        "source_name": "xdp-tutorial"
+      },
+      {
+        "families": [
+          "cmov"
+        ],
+        "prog_type_name": "xdp",
+        "program": "corpus/build/xdp-tools/xdp_forward.bpf.o:xdp_fwd_fib_full",
+        "size_ratio": 1.0115774240231548,
+        "source_name": "xdp-tools"
+      },
+      {
+        "families": [
+          "cmov"
+        ],
+        "prog_type_name": "xdp",
+        "program": "corpus/build/xdp-tools/xdp_forward.bpf.o:xdp_fwd_fib_direct",
+        "size_ratio": 1.0115273775216138,
+        "source_name": "xdp-tools"
+      },
+      {
+        "families": [
+          "cmov"
+        ],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_tc_tunnel.bpf.o:__encap_udp_none",
+        "size_ratio": 1.0062402496099845,
+        "source_name": "linux-selftests"
+      },
+      {
+        "families": [
+          "cmov"
+        ],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_tc_tunnel.bpf.o:__encap_udp_mpls",
+        "size_ratio": 1.0061162079510704,
+        "source_name": "linux-selftests"
+      }
+    ],
+    "top_regressions": [
+      {
+        "families": [
+          "cmov"
+        ],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_tc_tunnel.bpf.o:__encap_vxlan_eth",
+        "source_name": "linux-selftests",
+        "speedup_ratio": 0.1984732824427481
+      },
+      {
+        "families": [
+          "cmov",
+          "wide"
+        ],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/calico/from_nat_debug.bpf.o:calico_tc_main",
+        "source_name": "calico",
+        "speedup_ratio": 0.27915337779066396
+      },
+      {
+        "families": [],
+        "prog_type_name": "xdp",
+        "program": "corpus/build/katran/xdp_root.bpf.o:xdp_root",
+        "source_name": "katran",
+        "speedup_ratio": 0.284137129575828
+      },
+      {
+        "families": [],
+        "prog_type_name": "xdp",
+        "program": "corpus/build/xdp-tutorial/basic04-pinning-maps/xdp_prog_kern.bpf.o:xdp_abort_func",
+        "source_name": "xdp-tutorial",
+        "speedup_ratio": 0.32564575645756455
+      },
+      {
+        "families": [
+          "cmov",
+          "wide"
+        ],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/calico/to_wep_debug.bpf.o:calico_tc_skb_send_tcp_rst",
+        "source_name": "calico",
+        "speedup_ratio": 0.3397242284963887
+      },
+      {
+        "families": [
+          "cmov"
+        ],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_tc_tunnel.bpf.o:__encap_ipip_none",
+        "source_name": "linux-selftests",
+        "speedup_ratio": 0.4024663677130045
+      },
+      {
+        "families": [
+          "cmov"
+        ],
+        "prog_type_name": "xdp",
+        "program": "corpus/build/xdp-tools/xdp_load_bytes.bpf.o:xdp_probe_prog",
+        "source_name": "xdp-tools",
+        "speedup_ratio": 0.43546511627906975
+      },
+      {
+        "families": [
+          "cmov",
+          "wide"
+        ],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/calico/to_wep_debug.bpf.o:calico_tc_skb_icmp_inner_nat",
+        "source_name": "calico",
+        "speedup_ratio": 0.43607015760040674
+      },
+      {
+        "families": [
+          "cmov"
+        ],
+        "prog_type_name": "xdp",
+        "program": "corpus/build/xdp-tutorial/packet02-rewriting/xdp_prog_kern.bpf.o:xdp_parser_func",
+        "source_name": "xdp-tutorial",
+        "speedup_ratio": 0.4462564862861379
+      },
+      {
+        "families": [],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/skb_pkt_end.bpf.o:main_prog",
+        "source_name": "linux-selftests",
+        "speedup_ratio": 0.4577603143418468
+      }
+    ],
+    "top_speedups": [
+      {
+        "families": [],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_xdp_do_redirect.bpf.o:tc_count_pkts",
+        "source_name": "linux-selftests",
+        "speedup_ratio": 2.8140495867768593
+      },
+      {
+        "families": [
+          "cmov",
+          "wide",
+          "rotate"
+        ],
+        "prog_type_name": "xdp",
+        "program": "corpus/build/katran/balancer.bpf.o:balancer_ingress",
+        "source_name": "katran",
+        "speedup_ratio": 2.5552523874488404
+      },
+      {
+        "families": [
+          "cmov"
+        ],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_tc_tunnel.bpf.o:__encap_udp_none",
+        "source_name": "linux-selftests",
+        "speedup_ratio": 2.1638655462184873
+      },
+      {
+        "families": [
+          "cmov",
+          "wide"
+        ],
+        "prog_type_name": "xdp",
+        "program": "corpus/build/xdp-tutorial/packet02-rewriting/xdp_prog_kern.bpf.o:xdp_vlan_swap_func",
+        "source_name": "xdp-tutorial",
+        "speedup_ratio": 2.1524663677130045
+      },
+      {
+        "families": [
+          "cmov",
+          "wide"
+        ],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/calico/to_nat_debug.bpf.o:calico_tc_skb_send_tcp_rst",
+        "source_name": "calico",
+        "speedup_ratio": 2.032359409362237
+      },
+      {
+        "families": [
+          "rotate"
+        ],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/core_kern.bpf.o:balancer_ingress",
+        "source_name": "linux-selftests",
+        "speedup_ratio": 1.918768287585342
+      },
+      {
+        "families": [
+          "cmov"
+        ],
+        "prog_type_name": "xdp",
+        "program": "corpus/build/xdp-tutorial/tracing04-xdp-tcpdump/xdp_sample_pkts_kern.bpf.o:xdp_sample_prog",
+        "source_name": "xdp-tutorial",
+        "speedup_ratio": 1.8796185935637664
+      },
+      {
+        "families": [
+          "cmov",
+          "wide"
+        ],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/calico/from_wep_debug.bpf.o:calico_tc_skb_send_tcp_rst",
+        "source_name": "calico",
+        "speedup_ratio": 1.837138863000932
+      },
+      {
+        "families": [
+          "cmov",
+          "wide"
+        ],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/calico/from_nat_debug.bpf.o:calico_tc_skb_icmp_inner_nat",
+        "source_name": "calico",
+        "speedup_ratio": 1.8238699007717751
+      },
+      {
+        "families": [],
+        "prog_type_name": "sched_cls",
+        "program": "corpus/build/calico/to_nat_debug.bpf.o:calico_tc_skb_ipv4_frag",
+        "source_name": "calico",
+        "speedup_ratio": 1.774941215989251
+      }
+    ]
+  },
+  "timeout_seconds": 240,
+  "vng_binary": "runner/scripts/vng-wrapper.sh"
+}

@@ -1714,6 +1714,157 @@ After a later code-review pass identified two more real REJIT-side bugs, I
 re-checked both against the current tree and then fixed them in the
 investigation branch.
 
+## 2026-03-25 `bpftool prog show` A/B split: `build_obj_refs_table()` is required
+
+I then switched from the host-installed `/usr/local/sbin/bpftool` binary to a
+repo-local debug build from `vendor/bpftool/src`, using the existing
+`tests/negative/scx_prog_show_race.c` reproducer with `BPFTOOL_BIN=...`.
+That debug build added temporary environment toggles to selectively disable:
+
+- `show_prog()` map-id expansion
+- `show_prog_metadata()`
+- `build_obj_refs_table()` / PID-reference enumeration
+- the post-refs `prog show` enumeration itself
+
+This was done to answer one narrow question: which `bpftool prog show` stage is
+still necessary for the live crash after all earlier raw-probe work had already
+shown that plain `BPF_OBJ_GET_INFO_BY_FD`, `map_ids[]`, `map_info`,
+`.rodata` lookup, full prog-info, and program-name/BTF lookup were stable on
+their own.
+
+### Control: debug `bpftool` binary is actually used
+
+```bash
+make vm-shell TARGET=local-x86-vng-tcg VM_CPUS=2 VM_MEM=8G VM_TEST_TIMEOUT=1800 \
+  VM_COMMAND='cd "/home/yunwei37/workspace/bpf-benchmark" && \
+    export BPFTOOL_BIN="/home/yunwei37/workspace/bpf-benchmark/runner/build/vendor/bpftool/bpftool" && \
+    ./tests/negative/build/scx_prog_show_race \
+      "/home/yunwei37/workspace/bpf-benchmark" \
+      --skip-probe --mode bpftool-loop --iterations 0 --load-timeout 20'
+```
+
+Observed result:
+
+- the guest printed
+  `MARK paths ... /home/yunwei37/workspace/bpf-benchmark/runner/build/vendor/bpftool/bpftool`
+- the control path remained stable and exited `0`
+
+### Baseline with debug `bpftool`: still reproduces
+
+```bash
+make vm-shell TARGET=local-x86-vng-tcg VM_CPUS=2 VM_MEM=8G VM_TEST_TIMEOUT=1800 \
+  VM_COMMAND='cd "/home/yunwei37/workspace/bpf-benchmark" && \
+    export BPFTOOL_BIN="/home/yunwei37/workspace/bpf-benchmark/runner/build/vendor/bpftool/bpftool" && \
+    ./tests/negative/build/scx_prog_show_race \
+      "/home/yunwei37/workspace/bpf-benchmark" \
+      --mode bpftool-loop --iterations 200 --load-timeout 20'
+```
+
+Observed result:
+
+- the reproducer still crashed
+- this run failed very early:
+  - `MARK bpftool 0 rc 0`
+  - `MARK bpftool 1 rc 0`
+  - `MARK bpftool 2 rc 0`
+  - then `COMMAND_EXIT_CODE="255"`
+
+So the debug user-space binary did not perturb the bug away.
+
+### `SKIP_REFS=1`: 200/200 stable
+
+```bash
+make vm-shell TARGET=local-x86-vng-tcg VM_CPUS=2 VM_MEM=8G VM_TEST_TIMEOUT=1800 \
+  VM_COMMAND='cd "/home/yunwei37/workspace/bpf-benchmark" && \
+    export BPFTOOL_BIN="/home/yunwei37/workspace/bpf-benchmark/runner/build/vendor/bpftool/bpftool" && \
+    export BPFTOOL_PROG_SHOW_SKIP_REFS=1 && \
+    ./tests/negative/build/scx_prog_show_race \
+      "/home/yunwei37/workspace/bpf-benchmark" \
+      --mode bpftool-loop --iterations 200 --load-timeout 20'
+```
+
+Observed result:
+
+- `MARK bpftool 0 rc 0` through `MARK bpftool 199 rc 0`
+- `MARK completed bpftool-loop`
+- VM exited normally with `COMMAND_EXIT_CODE="0"`
+
+This is the strongest result in the whole investigation so far:
+
+- disabling only `build_obj_refs_table()` / `emit_obj_refs_*()` removes the
+  crash entirely
+- therefore object-ref / PID-reference enumeration is a necessary ingredient of
+  the reproducer
+
+### `SKIP_METADATA=1`: still crashes
+
+```bash
+make vm-shell TARGET=local-x86-vng-tcg VM_CPUS=2 VM_MEM=8G VM_TEST_TIMEOUT=1800 \
+  VM_COMMAND='cd "/home/yunwei37/workspace/bpf-benchmark" && \
+    export BPFTOOL_BIN="/home/yunwei37/workspace/bpf-benchmark/runner/build/vendor/bpftool/bpftool" && \
+    export BPFTOOL_PROG_SHOW_SKIP_METADATA=1 && \
+    ./tests/negative/build/scx_prog_show_race \
+      "/home/yunwei37/workspace/bpf-benchmark" \
+      --mode bpftool-loop --iterations 200 --load-timeout 20'
+```
+
+Observed result:
+
+- the reproducer still crashed
+- this run survived longer than the full baseline, but still died at:
+  - `MARK bpftool 0 rc 0`
+  - ...
+  - `MARK bpftool 8 rc 0`
+  - then `COMMAND_EXIT_CODE="255"`
+
+So `show_prog_metadata()` is **not** a necessary precondition. It may still
+affect timing, but removing metadata rendering does not remove the bug.
+
+### `SKIP_ENUM=1` + `SKIP_METADATA=1` + `SKIP_MAPS=1`: refs-only still crashes
+
+I then added one more temporary `bpftool` toggle to return immediately after
+`build_obj_refs_table()` and before any `show_prog()` enumeration. That lets
+the reproducer repeatedly run the refs path alone.
+
+```bash
+make vm-shell TARGET=local-x86-vng-tcg VM_CPUS=2 VM_MEM=8G VM_TEST_TIMEOUT=1800 \
+  VM_COMMAND='cd "/home/yunwei37/workspace/bpf-benchmark" && \
+    export BPFTOOL_BIN="/home/yunwei37/workspace/bpf-benchmark/runner/build/vendor/bpftool/bpftool" && \
+    export BPFTOOL_PROG_SHOW_SKIP_ENUM=1 && \
+    export BPFTOOL_PROG_SHOW_SKIP_METADATA=1 && \
+    export BPFTOOL_PROG_SHOW_SKIP_MAPS=1 && \
+    ./tests/negative/build/scx_prog_show_race \
+      "/home/yunwei37/workspace/bpf-benchmark" \
+      --mode bpftool-loop --iterations 200 --load-timeout 20'
+```
+
+Observed result:
+
+- the reproducer still crashed
+- this refs-only run died at:
+  - `MARK bpftool 0 rc 0`
+  - ...
+  - `MARK bpftool 11 rc 0`
+  - then `COMMAND_EXIT_CODE="255"`
+
+This narrows the live crash much further than anything earlier:
+
+- the crash does **not** require:
+  - `show_prog()` enumeration
+  - `show_prog_metadata()`
+  - `show_prog_maps()`
+- it **does** require repeated `build_obj_refs_table()`
+- therefore the remaining primary suspect is now the PID-reference path itself:
+  - `vendor/bpftool/src/pids.c:build_obj_refs_table()`
+  - `tools/bpf/bpftool/skeleton/pid_iter.bpf.c`
+  - the kernel `iter/task_file` execution path in `kernel/bpf/task_iter.c`
+
+At this point the previous “live prog-info / struct_ops metadata race” label is
+too broad. The best current statement is narrower:
+
+- the reproducible live crash is dominated by repeated `bpftool` PID-reference
+  enumeration (`build_obj_refs_table()`), not by the later metadata dump path
+
 Important context:
 
 - these two bugs are real and worth fixing
@@ -1805,3 +1956,330 @@ either of these two new bugs on demand:
 So these two are now patched and compile/VM-smoke-validated, but they are not
 yet covered by a dedicated, minimal, deterministic regression testcase in the
 same way that the older `M4/H3` audit cases are.
+
+## 2026-03-25 Repo-owned crash-path reproducer for the live `scx` / `bpftool` path
+
+I moved the previously ad-hoc crash path out of `docs/tmp` and into a repo-owned
+script:
+
+- `tests/integration/scx_prog_show_race.py`
+
+This reproducer intentionally follows the exact mainline path identified by the
+later crash-path reports instead of any REJIT-specific path:
+
+1. `probe_bpftool_register()` on `scx_rusty_main.bpf.o`
+2. start a second `scx_rusty --stats 1`
+3. once `read_scx_state() == "enabled"`, repeatedly execute
+   `bpftool -j -p prog show`
+
+The command I ran was:
+
+```bash
+make vm-shell TARGET=local-x86-vng-tcg VM_CPUS=2 VM_MEM=8G VM_TEST_TIMEOUT=1800 \
+  VM_COMMAND='cd "/home/yunwei37/workspace/bpf-benchmark" && \
+  python3 -u tests/integration/scx_prog_show_race.py \
+    --mode bpftool-loop --iterations 20 --load-timeout 20'
+```
+
+Observed result:
+
+- `vm-shell` exited with status `255`
+- the guest-side script did not make it far enough to emit any `MARK before_probe`
+  / `after_wait` lines back through the wrapper
+- host-side journal shows a fresh `qemu-system-x86_64` userspace crash at the
+  same known code offset:
+
+```text
+Mar 25 17:47:48.942900 lab kernel: qemu-system-x86[260944]: segfault at 890 ip ... in qemu-system-x86_64[8d8f21,...]
+```
+
+This is important because it means:
+
+- the crash is now reproduced by a **repo-owned** path, not only by the
+  earlier `docs/tmp/20260325/debug_scx_sequence.py` helper
+- the reproducer does **not** depend on daemon code or on the REJIT replay path
+- the current mainline root-cause track remains:
+  `probe struct_ops register + second scx_rusty load + repeated bpftool prog show`
+
+### Control: the same repo-owned script is stable when the raw probe is skipped
+
+I also ran the exact same script with the probe removed and with zero
+`bpftool prog show` iterations:
+
+```bash
+make vm-shell TARGET=local-x86-vng-tcg VM_CPUS=2 VM_MEM=8G VM_TEST_TIMEOUT=1800 \
+  VM_COMMAND='cd "/home/yunwei37/workspace/bpf-benchmark" && \
+  python3 -u tests/integration/scx_prog_show_race.py \
+    --skip-probe --mode bpftool-loop --iterations 0 --load-timeout 20'
+```
+
+Observed result:
+
+- command exited `0`
+- the script printed:
+  - `MARK skip_probe`
+  - `MARK after_wait healthy True state enabled pid 195`
+  - `MARK completed bpftool-loop`
+- `scx_rusty` started and unregistered cleanly
+- there was no new host-side `qemu-system-x86_64` segfault during this control
+
+So the new repo-owned path already reproduces the same high-level split that the
+earlier ad-hoc investigation established:
+
+- `skip probe + second scx_rusty load` is stable
+- `probe + second scx_rusty load + repeated bpftool prog show` still triggers
+  the known `qemu-system-x86_64` crash signature
+
+## 2026-03-25 C testcase integrated into existing `vm-negative-test` / `vm-shell`
+
+I then moved the crash-path reproducer into a repo-owned C testcase under the
+existing negative-test framework:
+
+- `tests/negative/scx_prog_show_race.c`
+
+This binary now builds together with the other negative tests via:
+
+```bash
+make -C tests/negative clean all
+```
+
+and it is exercised through the existing root-level VM entrypoints instead of a
+one-off script.
+
+### Control: existing `vm-negative-test` entrypoint is stable with `--skip-probe`
+
+I ran:
+
+```bash
+make vm-negative-test TARGET=local-x86-vng-tcg VM_CPUS=2 VM_MEM=8G \
+  VM_NEGATIVE_TIMEOUT=1800 FUZZ_ROUNDS=1 \
+  SCX_PROG_SHOW_RACE_SKIP_PROBE=1 \
+  SCX_PROG_SHOW_RACE_ITERATIONS=0
+```
+
+Observed result:
+
+- the suite exited `0`
+- the new testcase printed:
+  - `MARK skip_probe 1`
+  - `MARK after_wait healthy 1 state enabled pid 196`
+  - `MARK completed bpftool-loop`
+- this matches the earlier Python control exactly:
+  - second `scx_rusty` load is healthy
+  - skipping the raw probe keeps the path stable
+
+### Existing `vm-negative-test` entrypoint: `bpftool-loop` at 20 iterations is now stable
+
+I then ran the same root entrypoint with the real trigger chain but only 20
+`bpftool prog show` iterations:
+
+```bash
+make vm-negative-test TARGET=local-x86-vng-tcg VM_CPUS=2 VM_MEM=8G \
+  VM_NEGATIVE_TIMEOUT=1800 FUZZ_ROUNDS=1 \
+  SCX_PROG_SHOW_RACE_SKIP_PROBE=0 \
+  SCX_PROG_SHOW_RACE_ITERATIONS=20 \
+  SCX_PROG_SHOW_RACE_MODE=bpftool-loop
+```
+
+Observed result:
+
+- the suite exited `0`
+- the testcase printed `MARK bpftool 0 rc 0` through `MARK bpftool 19 rc 0`
+- `scx_rusty` stayed enabled and then unregistered cleanly
+
+This means the crash remains timing-sensitive on the current tree: the old
+20-iteration crash is no longer enough once the reproducer is run through the
+current integrated path.
+
+### Existing `vm-negative-test` entrypoint: `bpftool-loop` at 200 iterations reproduces again
+
+To push the same integrated path harder, I ran:
+
+```bash
+make vm-negative-test TARGET=local-x86-vng-tcg VM_CPUS=2 VM_MEM=8G \
+  VM_NEGATIVE_TIMEOUT=1800 FUZZ_ROUNDS=1 \
+  SCX_PROG_SHOW_RACE_SKIP_PROBE=0 \
+  SCX_PROG_SHOW_RACE_ITERATIONS=200 \
+  SCX_PROG_SHOW_RACE_MODE=bpftool-loop
+```
+
+Observed result:
+
+- the suite reached:
+  - `MARK before_probe 1`
+  - `MARK after_probe 0`
+  - `MARK after_wait healthy 1 state enabled pid 199`
+  - `MARK bpftool 0 rc 0` through `MARK bpftool 27 rc 0`
+- after `MARK bpftool 27 rc 0`, the wrapper stopped abruptly with:
+
+```text
+Script done on 2026-03-25 18:09:04-07:00 [COMMAND_EXIT_CODE="255"]
+```
+
+- `make vm-negative-test` therefore failed with `Error 255`
+- unlike the earlier `17:47:48` repro, this specific run did **not** leave a
+  fresh host-side `journalctl` `qemu-system-x86_64 segfault` line or kernel log
+
+So the repo-owned C testcase is now strong enough to reproduce the failure on
+the existing root-level VM entrypoint, but the host-side crash signature is not
+logged every time.
+
+### `owner-id-loop`: 1 iteration per owner is stable
+
+I then switched the same integrated testcase to owner-scoped queries:
+
+```bash
+make vm-negative-test TARGET=local-x86-vng-tcg VM_CPUS=2 VM_MEM=8G \
+  VM_NEGATIVE_TIMEOUT=1800 FUZZ_ROUNDS=1 \
+  SCX_PROG_SHOW_RACE_SKIP_PROBE=0 \
+  SCX_PROG_SHOW_RACE_ITERATIONS=1 \
+  SCX_PROG_SHOW_RACE_MODE=owner-id-loop
+```
+
+Observed result:
+
+- the suite exited `0`
+- the testcase collected:
+
+```text
+MARK owner_ids 52 54 55 56 57 58 59 60 61 62 63 64 65
+```
+
+- and completed:
+  - `MARK owner_bpftool 52 0 rc 0`
+  - ...
+  - `MARK owner_bpftool 65 0 rc 0`
+  - `MARK completed owner-id-loop`
+
+This shows that one query per owner prog is not enough to reproduce.
+
+### `owner-id-loop`: 3 iterations per owner reproduces and narrows the failing window
+
+I then increased the per-owner repeat count:
+
+```bash
+make vm-negative-test TARGET=local-x86-vng-tcg VM_CPUS=2 VM_MEM=8G \
+  VM_NEGATIVE_TIMEOUT=1800 FUZZ_ROUNDS=1 \
+  SCX_PROG_SHOW_RACE_SKIP_PROBE=0 \
+  SCX_PROG_SHOW_RACE_ITERATIONS=3 \
+  SCX_PROG_SHOW_RACE_MODE=owner-id-loop
+```
+
+Observed result:
+
+- the testcase again reached:
+  - `MARK before_probe 1`
+  - `MARK after_probe 0`
+  - `MARK after_wait healthy 1 state enabled pid 198`
+- it successfully completed:
+  - `52 x 3`
+  - `54 x 3`
+  - `55 x 3`
+  - `56 x 3`
+  - `57 x 3`
+- the last emitted line before failure was:
+
+```text
+MARK owner_bpftool 58 0 rc 0
+```
+
+- immediately after that, the wrapper again ended with:
+
+```text
+Script done on 2026-03-25 18:10:44-07:00 [COMMAND_EXIT_CODE="255"]
+```
+
+and again there was no fresh host-side `journalctl` crash signature.
+
+This is still very useful: it shrinks the failing window from “global repeated
+`bpftool prog show`” to “owner-id query sequence after the first fifteen
+successful owner-specific queries, when entering the sixth owner in that run”.
+
+### The failure is not reproduced by hammering a single selected owner in isolation
+
+To test whether the issue is tied to one owner prog by itself, I added two tiny
+debug-only filters to `tests/negative/scx_prog_show_race.c`:
+
+- `--only-id N`
+- `--owner-ordinal N`
+
+Then I used the existing `vm-shell` root entrypoint to query only one selected
+owner from the current run:
+
+```bash
+make vm-shell TARGET=local-x86-vng-tcg VM_CPUS=2 VM_MEM=8G VM_TEST_TIMEOUT=1800 \
+  VM_COMMAND='cd "/home/yunwei37/workspace/bpf-benchmark" && \
+  ./tests/negative/build/scx_prog_show_race \
+    "/home/yunwei37/workspace/bpf-benchmark" \
+    --mode owner-id-loop --iterations 10 --owner-ordinal 5 --load-timeout 20'
+```
+
+Observed result:
+
+- command exited `0`
+- the testcase resolved the selected owner to a single current-run prog id:
+
+```text
+MARK owner_ids 34
+```
+
+- and completed:
+  - `MARK owner_bpftool 34 0 rc 0`
+  - ...
+  - `MARK owner_bpftool 34 9 rc 0`
+
+So the current evidence points away from “one specific owner prog id always
+crashes when repeated in isolation” and toward a broader cumulative sequence /
+orchestration effect across multiple owner queries in one live session.
+
+### Strongest current repo-owned reproducer: pure `vm-shell` + C harness, no extra prelude
+
+After additional narrowing, the cleanest reproducer on the current tree is now:
+
+```bash
+make vm-shell TARGET=local-x86-vng-tcg VM_CPUS=2 VM_MEM=8G VM_TEST_TIMEOUT=1800 \
+  VM_COMMAND='cd "/home/yunwei37/workspace/bpf-benchmark" && \
+  ./tests/negative/build/scx_prog_show_race \
+    "/home/yunwei37/workspace/bpf-benchmark" \
+    --mode bpftool-loop --iterations 500 --load-timeout 20'
+```
+
+Observed result:
+
+- no daemon path is involved
+- no earlier REJIT testcase prelude is needed
+- the testcase reached:
+  - `MARK before_probe 1`
+  - `MARK after_probe 0`
+  - `MARK after_wait healthy 1 state enabled pid 196`
+  - `MARK bpftool 0 rc 0` through `MARK bpftool 72 rc 0`
+- immediately after `MARK bpftool 72 rc 0`, the wrapper ended with:
+
+```text
+Script done on 2026-03-25 18:19:56-07:00 [COMMAND_EXIT_CODE="255"]
+```
+
+- and this time the host-side journal again recorded the known QEMU crash:
+
+```text
+Mar 25 18:19:54 lab kernel: qemu-system-x86[3787603]: segfault at 10 ip ... in qemu-system-x86_64[8d8f21,...]
+```
+
+This is currently the best repo-owned reproducer because it is:
+
+- minimal: only the live `scx` / `bpftool prog show` path
+- independent of daemon serve / static verify / batch infrastructure
+- independent of any earlier REJIT testcase prelude
+- source-controlled and invokable through an existing root Makefile entrypoint
+
+So the current live-crash track remains:
+
+1. `bpftool struct_ops register scx_rusty_main.bpf.o`
+2. second `scx_rusty --stats 1`
+3. repeated `bpftool -j -p prog show`
+4. host `qemu-system-x86_64` eventually segfaults at the same `8d8f21` offset
+
+This is separate from the later-discovered daemon/static-verify parallel REJIT
+`bpf_ksym_del()` / kallsyms panic path: that other bug requires daemon serve +
+parallel `BPF_PROG_REJIT`, while the reproducer above does not require REJIT at
+all.

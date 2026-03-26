@@ -1,0 +1,1 @@
+{"schema_version":1,"scheduler":{"max_parallel_jobs":1},"jobs":[{"id":"t1","type":"static_verify_object","execution":"sequential","object":"micro/programs/build/simple.bpf.o","daemon_socket":"/dev/null","manifest_kinds":["micro"],"target_names":[],"program_names_from_manifest":[],"sections_from_manifest":[],"prog_types":[],"object_index":1}]}

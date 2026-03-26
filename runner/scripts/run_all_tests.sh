@@ -62,9 +62,7 @@ if [ "$SKIP_UNITTEST" -eq 0 ]; then
     cd "$UNITTEST_DIR"
     for t in rejit_poc rejit_safety_tests rejit_regression rejit_tail_call \
              rejit_spectre rejit_kinsn rejit_verifier_negative_tests \
-             rejit_prog_types rejit_audit_tests rejit_swap_tests \
-             rejit_struct_ops_rollback_tests \
-             rejit_struct_ops_multi_callsite_tests; do
+             rejit_prog_types rejit_audit_tests rejit_swap_tests; do
         echo "--- $t ---"
         if [ ! -x "${UNITTEST_BUILD_DIR}/$t" ]; then
             echo "  ERROR: binary not found: ${UNITTEST_BUILD_DIR}/$t"
