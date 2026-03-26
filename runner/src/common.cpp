@@ -617,6 +617,18 @@ cli_options parse_args(int argc, char **argv)
             options.compile_only = true;
             continue;
         }
+        if (current == "--attach") {
+            options.attach_mode = true;
+            continue;
+        }
+        if (current == "--workload-iterations" && index + 1 < argc) {
+            options.workload_iterations = static_cast<uint32_t>(std::stoul(argv[++index]));
+            continue;
+        }
+        if (current == "--workload-type" && index + 1 < argc) {
+            options.workload_type = argv[++index];
+            continue;
+        }
         fail("unknown or incomplete argument: " + std::string(current));
     }
 
@@ -648,7 +660,13 @@ keep_alive_request parse_keep_alive_request(std::string_view json_line)
         }
         const std::string runtime_name = lower_ascii(*runtime);
         const bool runtime_implies_rejit = runtime_name == "kernel-rejit";
-        if (runtime_name == "kernel" ||
+        const bool runtime_implies_attach = runtime_name == "kernel-attach" ||
+                                            runtime_name == "kernel-attach-rejit";
+        if (runtime_implies_attach) {
+            options.command = "run-kernel-attach";
+            options.attach_mode = true;
+            options.rejit = runtime_name == "kernel-attach-rejit";
+        } else if (runtime_name == "kernel" ||
             runtime_implies_rejit) {
             options.command = "run-kernel";
             options.rejit = runtime_implies_rejit;
@@ -764,6 +782,18 @@ keep_alive_request parse_keep_alive_request(std::string_view json_line)
         daemon_socket.has_value()) {
         options.daemon_socket = *daemon_socket;
         options.rejit = true;
+    }
+    if (const auto attach_mode = get_optional_bool_field(fields, {"attach_mode"});
+        attach_mode.has_value()) {
+        options.attach_mode = *attach_mode;
+    }
+    if (const auto workload_iterations = get_optional_int_field(fields, {"workload_iterations"});
+        workload_iterations.has_value()) {
+        options.workload_iterations = require_u32_value(*workload_iterations, "workload_iterations");
+    }
+    if (const auto workload_type = get_optional_string_field(fields, {"workload_type"});
+        workload_type.has_value()) {
+        options.workload_type = *workload_type;
     }
 
     validate_cli_options(options);
@@ -891,8 +921,12 @@ void print_sample_json(std::ostream &out, const sample_result &sample)
         /* Embed daemon_response as pre-serialized JSON value (not re-escaped) */
         out << ",\"daemon_response\":" << sample.rejit.daemon_response;
     }
-    out << "}"
-        << "}";
+    out << "}";
+    if (sample.correctness_mismatch.has_value()) {
+        out << ",\"correctness_mismatch\":"
+            << (*sample.correctness_mismatch ? "true" : "false");
+    }
+    out << "}";
 }
 
 void print_json(std::ostream &out, const sample_result &sample)

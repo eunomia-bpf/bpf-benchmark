@@ -18,6 +18,7 @@
 #include <cstring>
 #include <fcntl.h>
 #include <fstream>
+#include <time.h>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -1412,6 +1413,66 @@ int manual_load_program(bpf_object *object, const cli_options &options)
     return manual_bpf_prog_load(image);
 }
 
+/* ================================================================
+ * Attach-mode helpers: workload generation and bpf_stats
+ * ================================================================ */
+
+void run_workload(const std::string &workload_type, uint32_t iterations)
+{
+    if (workload_type == "getpid") {
+        for (uint32_t i = 0; i < iterations; ++i) {
+            (void)syscall(__NR_getpid);
+        }
+    } else if (workload_type == "nanosleep") {
+        struct timespec ts = {0, 1}; /* 1 nanosecond */
+        for (uint32_t i = 0; i < iterations; ++i) {
+            (void)nanosleep(&ts, nullptr);
+        }
+    } else if (workload_type == "write_devnull") {
+        const int fd = open("/dev/null", O_WRONLY);
+        if (fd < 0) {
+            fail("unable to open /dev/null for workload");
+        }
+        const char data = 'x';
+        for (uint32_t i = 0; i < iterations; ++i) {
+            ssize_t ret = write(fd, &data, 1);
+            (void)ret;
+        }
+        close(fd);
+    } else {
+        fail("unsupported workload type: " + workload_type);
+    }
+}
+
+struct bpf_stats_snapshot {
+    uint64_t run_cnt = 0;
+    uint64_t run_time_ns = 0;
+};
+
+bpf_stats_snapshot read_bpf_stats(int program_fd)
+{
+    bpf_prog_info info = {};
+    union bpf_attr attr = {};
+    attr.info.bpf_fd = program_fd;
+    attr.info.info_len = sizeof(info);
+    attr.info.info = ptr_to_u64(&info);
+    if (syscall(__NR_bpf, BPF_OBJ_GET_INFO_BY_FD, &attr, sizeof(attr)) != 0) {
+        fail("BPF_OBJ_GET_INFO_BY_FD (bpf_stats) failed: " + std::string(strerror(errno)));
+    }
+    return {info.run_cnt, info.run_time_ns};
+}
+
+struct bpf_link_deleter {
+    void operator()(bpf_link *link) const
+    {
+        if (link != nullptr) {
+            bpf_link__destroy(link);
+        }
+    }
+};
+
+using bpf_link_ptr = std::unique_ptr<bpf_link, bpf_link_deleter>;
+
 } // namespace
 
 struct prepared_kernel_state {
@@ -1811,6 +1872,16 @@ std::vector<sample_result> execute_prepared_kernel_run(
         result_read_end,
         measure_same_image_pair);
     if (stock_sample.has_value()) {
+        const uint32_t stock_retval = stock_sample->retval;
+        const uint32_t recompile_retval = sample.retval;
+        const bool mismatch = (stock_retval != recompile_retval);
+        stock_sample->correctness_mismatch = false;
+        sample.correctness_mismatch = mismatch;
+        if (mismatch) {
+            fprintf(stderr,
+                    "CORRECTNESS MISMATCH: stock retval=%u, recompile retval=%u\n",
+                    stock_retval, recompile_retval);
+        }
         return {std::move(*stock_sample), std::move(sample)};
     }
     return {std::move(sample)};
@@ -2424,7 +2495,199 @@ std::vector<sample_result> run_kernel(const cli_options &options)
         result_read_end,
         measure_same_image_pair);
     if (stock_sample.has_value()) {
+        const uint32_t stock_retval = stock_sample->retval;
+        const uint32_t recompile_retval = sample.retval;
+        const bool mismatch = (stock_retval != recompile_retval);
+        stock_sample->correctness_mismatch = false;
+        sample.correctness_mismatch = mismatch;
+        if (mismatch) {
+            fprintf(stderr,
+                    "CORRECTNESS MISMATCH: stock retval=%u, recompile retval=%u\n",
+                    stock_retval, recompile_retval);
+        }
         return {std::move(*stock_sample), std::move(sample)};
     }
+    return {std::move(sample)};
+}
+
+/* ================================================================
+ * run_kernel_attach: attach-based execution measurement using
+ * bpf_stats (run_cnt / run_time_ns) for program types that
+ * cannot use BPF_PROG_TEST_RUN (kprobe, tracepoint, fentry, etc.)
+ * ================================================================ */
+std::vector<sample_result> run_kernel_attach(const cli_options &options)
+{
+    initialize_micro_exec_process();
+
+    const auto object_open_start = std::chrono::steady_clock::now();
+    bpf_object_open_opts open_opts = {};
+    open_opts.sz = sizeof(open_opts);
+    if (options.btf_custom_path.has_value()) {
+        open_opts.btf_custom_path = options.btf_custom_path->c_str();
+    }
+    bpf_object *raw_object = bpf_object__open_file(options.program.c_str(), &open_opts);
+    const int open_error = libbpf_get_error(raw_object);
+    if (open_error != 0) {
+        fail("bpf_object__open_file failed: " + libbpf_error_string(open_error));
+    }
+    const auto object_open_end = std::chrono::steady_clock::now();
+    bpf_object_ptr object(raw_object);
+
+    /* If a specific program is requested, disable autoload for others */
+    configure_autoload(object.get(), options.program_name);
+
+    /* Load all programs into the kernel */
+    const auto object_load_start = std::chrono::steady_clock::now();
+    const int load_error = bpf_object__load(object.get());
+    if (load_error != 0) {
+        fail("bpf_object__load failed: " + libbpf_error_string(-load_error));
+    }
+    const auto object_load_end = std::chrono::steady_clock::now();
+
+    /* Find the target program */
+    bpf_program *prog = find_program(object.get(), options.program_name);
+    const int program_fd = bpf_program__fd(prog);
+    if (program_fd < 0) {
+        fail("unable to obtain program fd");
+    }
+    const auto program_info_before = load_prog_info(program_fd);
+    const uint64_t base_compile_ns =
+        elapsed_ns(object_open_start, object_open_end) +
+        elapsed_ns(object_load_start, object_load_end);
+
+    /* v2 REJIT: optionally optimize before measurement */
+    std::chrono::steady_clock::time_point rejit_start {};
+    std::chrono::steady_clock::time_point rejit_end {};
+    rejit_summary rejit {};
+    if (options.rejit && options.daemon_socket.has_value()) {
+        rejit.requested = true;
+        rejit.mode = "daemon";
+        rejit_start = std::chrono::steady_clock::now();
+        const auto sock_resp = daemon_socket_optimize(*options.daemon_socket, program_info_before.id);
+        rejit_end = std::chrono::steady_clock::now();
+        rejit.syscall_attempted = true;
+        if (!sock_resp.ok) {
+            rejit.applied = false;
+            rejit.error = "daemon socket optimize failed: " + sock_resp.error;
+            fprintf(stderr, "daemon socket optimize failed: %s\n", sock_resp.error.c_str());
+        } else {
+            rejit.applied = sock_resp.applied;
+            rejit.total_sites_applied = sock_resp.total_sites_applied;
+            rejit.passes_applied = sock_resp.passes_applied;
+            rejit.insn_delta = sock_resp.insn_delta;
+            rejit.verifier_retries = sock_resp.verifier_retries;
+            rejit.final_disabled_passes = sock_resp.final_disabled_passes;
+        }
+        rejit.daemon_response = sock_resp.raw_json;
+    }
+
+    /* Attach the program */
+    const auto attach_start = std::chrono::steady_clock::now();
+    bpf_link *raw_link = bpf_program__attach(prog);
+    const int attach_error = libbpf_get_error(raw_link);
+    if (attach_error != 0) {
+        fail("bpf_program__attach failed: " + libbpf_error_string(attach_error));
+    }
+    bpf_link_ptr link(raw_link);
+    const auto attach_end = std::chrono::steady_clock::now();
+    fprintf(stderr, "attach: program '%s' attached successfully\n",
+            bpf_program__name(prog));
+
+    /* Enable bpf_stats (run_cnt / run_time_ns tracking) */
+    const int stats_fd = bpf_enable_stats(BPF_STATS_RUN_TIME);
+    if (stats_fd < 0) {
+        fail("bpf_enable_stats(BPF_STATS_RUN_TIME) failed: " + std::string(strerror(errno)));
+    }
+    scoped_fd stats_fd_guard(stats_fd);
+
+    /* Warmup: run some workload iterations to warm caches */
+    if (options.warmup_repeat > 0) {
+        run_workload(options.workload_type, options.warmup_repeat * options.workload_iterations);
+    }
+
+    /* Read stats before the measured workload */
+    const auto before_stats = read_bpf_stats(program_fd);
+
+    /* Execute the measured workload */
+    const auto exec_wall_start = std::chrono::steady_clock::now();
+    const uint64_t tsc_before = rdtsc_start();
+    run_workload(options.workload_type, options.repeat * options.workload_iterations);
+    const uint64_t tsc_after = rdtsc_end();
+    const auto exec_wall_end = std::chrono::steady_clock::now();
+
+    /* Read stats after the measured workload */
+    const auto after_stats = read_bpf_stats(program_fd);
+
+    /* Close stats fd to stop accounting */
+    stats_fd_guard.reset();
+
+    /* Detach and cleanup the link */
+    link.reset();
+
+    /* Compute deltas */
+    const uint64_t run_cnt_delta = after_stats.run_cnt - before_stats.run_cnt;
+    const uint64_t run_time_ns_delta = after_stats.run_time_ns - before_stats.run_time_ns;
+
+    fprintf(stderr, "attach: run_cnt=%lu run_time_ns=%lu (delta: cnt=%lu time=%lu)\n",
+            static_cast<unsigned long>(after_stats.run_cnt),
+            static_cast<unsigned long>(after_stats.run_time_ns),
+            static_cast<unsigned long>(run_cnt_delta),
+            static_cast<unsigned long>(run_time_ns_delta));
+
+    /* Compute per-invocation exec_ns (avoid division by zero) */
+    const uint64_t exec_ns = run_cnt_delta > 0
+        ? run_time_ns_delta / run_cnt_delta
+        : 0;
+
+    /* TSC-derived wall time */
+    const uint64_t tsc_freq_hz = kHasTscMeasurement ? detect_tsc_freq_hz() : 0;
+    std::optional<uint64_t> wall_exec_ns;
+    std::optional<uint64_t> exec_cycles;
+    if (kHasTscMeasurement && tsc_freq_hz > 0 && tsc_after > tsc_before && run_cnt_delta > 0) {
+        const uint64_t total_cycles = tsc_after - tsc_before;
+        exec_cycles = total_cycles / run_cnt_delta;
+        wall_exec_ns = static_cast<uint64_t>(std::llround(
+            (static_cast<long double>(total_cycles) * 1000000000.0L) /
+            (static_cast<long double>(tsc_freq_hz) *
+             static_cast<long double>(run_cnt_delta))));
+    }
+
+    const auto final_program_info = load_prog_info(program_fd);
+
+    /* Build sample result */
+    sample_result sample;
+    if (options.rejit && options.daemon_socket.has_value()) {
+        sample.phase = "recompile";
+    }
+    sample.compile_ns = base_compile_ns + elapsed_ns(rejit_start, rejit_end);
+    sample.exec_ns = exec_ns;
+    sample.timing_source = "bpf_stats";
+    sample.timing_source_wall =
+        wall_exec_ns.has_value() ? "rdtsc" : "unavailable";
+    sample.wall_exec_ns = wall_exec_ns;
+    sample.exec_cycles = exec_cycles;
+    sample.tsc_freq_hz = tsc_freq_hz > 0
+        ? std::optional<uint64_t>(tsc_freq_hz)
+        : std::nullopt;
+    sample.result = run_cnt_delta;
+    sample.retval = 0;
+    sample.jited_prog_len = final_program_info.jited_prog_len;
+    sample.xlated_prog_len = final_program_info.xlated_prog_len;
+    sample.code_size = {
+        .bpf_bytecode_bytes = final_program_info.xlated_prog_len,
+        .native_code_bytes = final_program_info.jited_prog_len,
+    };
+    sample.rejit = rejit;
+    sample.phases_ns = {
+        {"object_open_ns", elapsed_ns(object_open_start, object_open_end)},
+        {"object_load_ns", elapsed_ns(object_load_start, object_load_end)},
+        {"attach_ns", elapsed_ns(attach_start, attach_end)},
+        {"workload_wall_ns", elapsed_ns(exec_wall_start, exec_wall_end)},
+    };
+    if (rejit.syscall_attempted) {
+        sample.phases_ns.push_back(
+            {"rejit_apply_ns", elapsed_ns(rejit_start, rejit_end)});
+    }
+
     return {std::move(sample)};
 }

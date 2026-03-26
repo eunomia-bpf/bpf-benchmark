@@ -66,6 +66,9 @@ struct cli_options {
     bool dump_jit = false;
     std::optional<std::filesystem::path> dump_xlated;
     bool compile_only = false;
+    bool attach_mode = false;                            // attach + bpf_stats measurement path
+    uint32_t workload_iterations = 10000;                // number of workload syscall iterations
+    std::string workload_type = "getpid";                // workload: "getpid", "nanosleep", "write_devnull"
 };
 
 struct keep_alive_request {
@@ -142,6 +145,7 @@ struct sample_result {
     std::vector<timing_phase> phases_ns;
     perf_counter_capture perf_counters;
     rejit_summary rejit;
+    std::optional<bool> correctness_mismatch;
 };
 
 struct paired_test_run_result {
@@ -172,6 +176,7 @@ program_image load_program_image(
 void initialize_micro_exec_process();
 sample_result run_llvmbpf(const cli_options &options);
 std::vector<sample_result> run_kernel(const cli_options &options);
+std::vector<sample_result> run_kernel_attach(const cli_options &options);
 prepared_kernel_handle prepare_kernel(const cli_options &options);
 sample_result summarize_prepared_kernel_compile(const prepared_kernel_handle &prepared);
 std::vector<sample_result> run_prepared_kernel(
