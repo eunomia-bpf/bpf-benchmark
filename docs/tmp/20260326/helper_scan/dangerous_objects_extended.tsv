@@ -1,0 +1,189 @@
+object	total_helper_calls	extended_danger_helpers	helper_counts
+corpus/build/tetragon/bpf_generic_usdt.bpf.o	862	copy_from_user,ktime_get_ns,probe_read,probe_read_kernel,probe_read_str,probe_read_user,probe_write_user	copy_from_user:10, ktime_get_ns:1, probe_read:492, probe_read_kernel:53, probe_read_str:7, probe_read_user:10, probe_write_user:4
+corpus/build/tracee/tracee.bpf.o	34080	ktime_get_boot_ns,ktime_get_ns,probe_read,probe_read_kernel,probe_read_kernel_str,probe_read_str,probe_read_user	ktime_get_boot_ns:168, ktime_get_ns:168, probe_read:2103, probe_read_kernel:21732, probe_read_kernel_str:1674, probe_read_str:719, probe_read_user:12
+corpus/build/tetragon/bpf_generic_lsm_core.bpf.o	3197	ktime_get_boot_ns,ktime_get_ns,probe_read,probe_read_kernel,probe_read_str,send_signal	ktime_get_boot_ns:5, ktime_get_ns:5, probe_read:2942, probe_read_kernel:17, probe_read_str:7, send_signal:1
+corpus/build/KubeArmor/system_monitor.bpf.o	26829	ktime_get_ns,probe_read,probe_read_kernel,probe_read_str,probe_read_user_str	ktime_get_ns:53, probe_read:18668, probe_read_kernel:1532, probe_read_str:2786, probe_read_user_str:1
+corpus/build/cilium/bpf_lxc.bpf.o	1648	jiffies64,ktime_get_ns,skb_adjust_room,skb_change_tail,skb_store_bytes	jiffies64:83, ktime_get_ns:89, skb_adjust_room:8, skb_change_tail:8, skb_store_bytes:115
+corpus/build/cilium/bpf_overlay.bpf.o	1194	jiffies64,ktime_get_ns,skb_adjust_room,skb_change_tail,skb_store_bytes	jiffies64:71, ktime_get_ns:75, skb_adjust_room:4, skb_change_tail:4, skb_store_bytes:100
+corpus/build/tetragon/bpf_generic_kprobe.bpf.o	930	ktime_get_ns,override_return,probe_read,probe_read_kernel,probe_read_str	ktime_get_ns:1, override_return:1, probe_read:604, probe_read_kernel:13, probe_read_str:7
+corpus/build/tetragon/bpf_generic_uprobe.bpf.o	959	ktime_get_ns,probe_read,probe_read_kernel,probe_read_str,probe_read_user	ktime_get_ns:1, probe_read:610, probe_read_kernel:13, probe_read_str:7, probe_read_user:1
+corpus/build/KubeArmor/enforcer.bpf.o	2242	ktime_get_ns,probe_read,probe_read_kernel,probe_read_str	ktime_get_ns:12, probe_read:134, probe_read_kernel:882, probe_read_str:541
+corpus/build/KubeArmor/protectproc.bpf.o	387	ktime_get_ns,probe_read,probe_read_kernel,probe_read_str	ktime_get_ns:1, probe_read:45, probe_read_kernel:274, probe_read_str:45
+corpus/build/bcc/libbpf-tools/opensnoop.bpf.o	82	probe_read_kernel,probe_read_kernel_str,probe_read_user,probe_read_user_str	probe_read_kernel:30, probe_read_kernel_str:3, probe_read_user:1, probe_read_user_str:3
+corpus/build/calico/from_hep_debug.bpf.o	1118	ktime_get_ns,skb_adjust_room,skb_change_tail,skb_store_bytes	ktime_get_ns:15, skb_adjust_room:5, skb_change_tail:2, skb_store_bytes:7
+corpus/build/calico/from_nat_debug.bpf.o	956	ktime_get_ns,skb_adjust_room,skb_change_tail,skb_store_bytes	ktime_get_ns:15, skb_adjust_room:1, skb_change_tail:2, skb_store_bytes:7
+corpus/build/calico/from_wep_debug.bpf.o	984	ktime_get_ns,skb_adjust_room,skb_change_tail,skb_store_bytes	ktime_get_ns:16, skb_adjust_room:3, skb_change_tail:2, skb_store_bytes:7
+corpus/build/calico/to_hep_debug.bpf.o	1227	ktime_get_ns,skb_adjust_room,skb_change_tail,skb_store_bytes	ktime_get_ns:17, skb_adjust_room:3, skb_change_tail:2, skb_store_bytes:7
+corpus/build/calico/to_nat_debug.bpf.o	1220	ktime_get_ns,skb_adjust_room,skb_change_tail,skb_store_bytes	ktime_get_ns:17, skb_adjust_room:3, skb_change_tail:2, skb_store_bytes:7
+corpus/build/calico/to_wep_debug.bpf.o	769	ktime_get_ns,skb_adjust_room,skb_change_tail,skb_store_bytes	ktime_get_ns:16, skb_adjust_room:1, skb_change_tail:2, skb_store_bytes:7
+corpus/build/cilium/bpf_xdp.bpf.o	682	jiffies64,ktime_get_ns,xdp_adjust_head,xdp_adjust_tail	jiffies64:57, ktime_get_ns:57, xdp_adjust_head:9, xdp_adjust_tail:2
+corpus/build/coroot-node-agent/ebpf.bpf.o	1650	ktime_get_ns,probe_read,probe_read_kernel,probe_read_str	ktime_get_ns:47, probe_read:1278, probe_read_kernel:1, probe_read_str:18
+corpus/build/loxilb/llb_ebpf_emain.bpf.o	756	ktime_get_ns,skb_adjust_room,skb_change_tail,skb_store_bytes	ktime_get_ns:6, skb_adjust_room:11, skb_change_tail:3, skb_store_bytes:129
+corpus/build/loxilb/llb_ebpf_main.bpf.o	756	ktime_get_ns,skb_adjust_room,skb_change_tail,skb_store_bytes	ktime_get_ns:6, skb_adjust_room:11, skb_change_tail:3, skb_store_bytes:129
+corpus/build/tetragon/bpf_execve_event.bpf.o	285	ktime_get_ns,probe_read,probe_read_kernel,probe_read_str	ktime_get_ns:3, probe_read:139, probe_read_kernel:68, probe_read_str:6
+corpus/build/tetragon/bpf_fork.bpf.o	67	ktime_get_ns,probe_read,probe_read_kernel,probe_read_str	ktime_get_ns:1, probe_read:26, probe_read_kernel:18, probe_read_str:1
+corpus/build/tetragon/bpf_generic_rawtp.bpf.o	756	ktime_get_ns,probe_read,probe_read_kernel,probe_read_str	ktime_get_ns:1, probe_read:496, probe_read_kernel:13, probe_read_str:7
+corpus/build/tetragon/bpf_generic_retkprobe.bpf.o	393	ktime_get_ns,probe_read,probe_read_kernel,probe_read_str	ktime_get_ns:1, probe_read:229, probe_read_kernel:8, probe_read_str:7
+corpus/build/tetragon/bpf_generic_retuprobe.bpf.o	393	ktime_get_ns,probe_read,probe_read_kernel,probe_read_str	ktime_get_ns:1, probe_read:229, probe_read_kernel:8, probe_read_str:7
+corpus/build/tetragon/bpf_generic_tracepoint.bpf.o	811	ktime_get_ns,probe_read,probe_read_kernel,probe_read_str	ktime_get_ns:1, probe_read:419, probe_read_kernel:13, probe_read_str:7
+corpus/build/bcc/libbpf-tools/cpudist.bpf.o	20	ktime_get_ns,probe_read_kernel,probe_read_kernel_str	ktime_get_ns:1, probe_read_kernel:6, probe_read_kernel_str:2
+corpus/build/bcc/libbpf-tools/execsnoop.bpf.o	135	probe_read_kernel,probe_read_user,probe_read_user_str	probe_read_kernel:2, probe_read_user:60, probe_read_user_str:60
+corpus/build/bcc/libbpf-tools/filelife.bpf.o	43	ktime_get_ns,probe_read_kernel,probe_read_kernel_str	ktime_get_ns:4, probe_read_kernel:15, probe_read_kernel_str:2
+corpus/build/bcc/libbpf-tools/fsslower.bpf.o	37	ktime_get_ns,probe_read_kernel,probe_read_kernel_str	ktime_get_ns:9, probe_read_kernel:6, probe_read_kernel_str:1
+corpus/build/bcc/libbpf-tools/hardirqs.bpf.o	18	ktime_get_ns,probe_read_kernel,probe_read_kernel_str	ktime_get_ns:3, probe_read_kernel:1, probe_read_kernel_str:1
+corpus/build/bcc/libbpf-tools/javagc.bpf.o	32	ktime_get_ns,probe_read_kernel,probe_read_user	ktime_get_ns:4, probe_read_kernel:2, probe_read_user:1
+corpus/build/bcc/libbpf-tools/memleak.bpf.o	152	ktime_get_ns,probe_read_kernel,probe_read_user	ktime_get_ns:17, probe_read_kernel:12, probe_read_user:1
+corpus/build/bcc/libbpf-tools/mountsnoop.bpf.o	38	ktime_get_ns,probe_read_kernel,probe_read_user_str	ktime_get_ns:7, probe_read_kernel:3, probe_read_user_str:7
+corpus/build/bcc/libbpf-tools/offcputime.bpf.o	24	ktime_get_ns,probe_read_kernel,probe_read_kernel_str	ktime_get_ns:2, probe_read_kernel:11, probe_read_kernel_str:1
+corpus/build/bcc/libbpf-tools/runqlat.bpf.o	35	ktime_get_ns,probe_read_kernel,probe_read_kernel_str	ktime_get_ns:6, probe_read_kernel:13, probe_read_kernel_str:1
+corpus/build/bcc/libbpf-tools/runqslower.bpf.o	29	ktime_get_ns,probe_read_kernel,probe_read_kernel_str	ktime_get_ns:6, probe_read_kernel:10, probe_read_kernel_str:5
+corpus/build/bcc/libbpf-tools/syscount.bpf.o	14	ktime_get_ns,probe_read_kernel,probe_read_kernel_str	ktime_get_ns:2, probe_read_kernel:1, probe_read_kernel_str:1
+corpus/build/libbpf-bootstrap/examples/c/bootstrap.bpf.o	21	ktime_get_ns,probe_read_kernel,probe_read_str	ktime_get_ns:2, probe_read_kernel:5, probe_read_str:1
+corpus/build/libbpf-bootstrap/examples/c/bootstrap_legacy.bpf.o	19	ktime_get_ns,probe_read_kernel,probe_read_str	ktime_get_ns:2, probe_read_kernel:5, probe_read_str:1
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_attach_probe.bpf.o	15	copy_from_user,probe_read_kernel,probe_read_user	copy_from_user:2, probe_read_kernel:2, probe_read_user:1
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_probe_user.bpf.o	6	probe_read_kernel,probe_read_user,probe_write_user	probe_read_kernel:3, probe_read_user:2, probe_write_user:1
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/uprobe_multi.bpf.o	21	copy_from_user,probe_read_kernel,probe_read_user	copy_from_user:1, probe_read_kernel:4, probe_read_user:2
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/xdp_synproxy_kern.bpf.o	49	ktime_get_ns,skb_change_tail,xdp_adjust_tail	ktime_get_ns:2, skb_change_tail:2, xdp_adjust_tail:2
+corpus/build/linux-selftests/xdp_synproxy_kern.bpf.o	49	ktime_get_ns,skb_change_tail,xdp_adjust_tail	ktime_get_ns:2, skb_change_tail:2, xdp_adjust_tail:2
+corpus/build/opentelemetry-ebpf-profiler/native_stack_trace.bpf.o	166	ktime_get_ns,probe_read_kernel,probe_read_user	ktime_get_ns:2, probe_read_kernel:2, probe_read_user:10
+corpus/build/real_world_code_size/libbpf-bootstrap/bootstrap.bpf.o	21	ktime_get_ns,probe_read_kernel,probe_read_str	ktime_get_ns:2, probe_read_kernel:5, probe_read_str:1
+corpus/build/real_world_code_size/libbpf-bootstrap/bootstrap_legacy.bpf.o	19	ktime_get_ns,probe_read_kernel,probe_read_str	ktime_get_ns:2, probe_read_kernel:5, probe_read_str:1
+corpus/build/scx/scx_lavd_main.bpf.o	473	ktime_get_ns,probe_read_kernel,probe_read_kernel_str	ktime_get_ns:37, probe_read_kernel:5, probe_read_kernel_str:4
+corpus/build/scx/scx_rusty_main.bpf.o	118	ktime_get_ns,probe_read_kernel,probe_read_kernel_str	ktime_get_ns:6, probe_read_kernel:3, probe_read_kernel_str:3
+corpus/build/tetragon/bpf_cgroup_mkdir.bpf.o	28	probe_read,probe_read_kernel,probe_read_str	probe_read:5, probe_read_kernel:10, probe_read_str:2
+corpus/build/tetragon/bpf_cgroup_release.bpf.o	23	probe_read,probe_read_kernel,probe_read_str	probe_read:3, probe_read_kernel:7, probe_read_str:1
+corpus/build/tetragon/bpf_cgroup_rmdir.bpf.o	23	probe_read,probe_read_kernel,probe_read_str	probe_read:3, probe_read_kernel:7, probe_read_str:1
+corpus/build/bcc/libbpf-tools/bindsnoop.bpf.o	28	ktime_get_ns,probe_read_kernel	ktime_get_ns:1, probe_read_kernel:13
+corpus/build/bcc/libbpf-tools/biolatency.bpf.o	42	ktime_get_ns,probe_read_kernel	ktime_get_ns:5, probe_read_kernel:25
+corpus/build/bcc/libbpf-tools/biosnoop.bpf.o	52	ktime_get_ns,probe_read_kernel	ktime_get_ns:5, probe_read_kernel:21
+corpus/build/bcc/libbpf-tools/biostacks.bpf.o	40	ktime_get_ns,probe_read_kernel	ktime_get_ns:5, probe_read_kernel:12
+corpus/build/bcc/libbpf-tools/biotop.bpf.o	54	ktime_get_ns,probe_read_kernel	ktime_get_ns:4, probe_read_kernel:16
+corpus/build/bcc/libbpf-tools/drsnoop.bpf.o	20	ktime_get_ns,probe_read_kernel	ktime_get_ns:4, probe_read_kernel:2
+corpus/build/bcc/libbpf-tools/exitsnoop.bpf.o	10	ktime_get_ns,probe_read_kernel	ktime_get_ns:1, probe_read_kernel:4
+corpus/build/bcc/libbpf-tools/gethostlatency.bpf.o	10	ktime_get_ns,probe_read_user	ktime_get_ns:2, probe_read_user:1
+corpus/build/bcc/libbpf-tools/klockstat.bpf.o	390	ktime_get_ns,probe_read_kernel	ktime_get_ns:59, probe_read_kernel:6
+corpus/build/bcc/libbpf-tools/ksnoop.bpf.o	23	ktime_get_ns,probe_read_kernel	ktime_get_ns:1, probe_read_kernel:6
+corpus/build/bcc/libbpf-tools/mdflush.bpf.o	12	probe_read_kernel,probe_read_kernel_str	probe_read_kernel:4, probe_read_kernel_str:2
+corpus/build/bcc/libbpf-tools/statsnoop.bpf.o	54	ktime_get_ns,probe_read_user_str	ktime_get_ns:6, probe_read_user_str:6
+corpus/build/bcc/libbpf-tools/tcpconnect.bpf.o	38	ktime_get_ns,probe_read_kernel	ktime_get_ns:2, probe_read_kernel:12
+corpus/build/bcc/libbpf-tools/tcpconnlat.bpf.o	29	ktime_get_ns,probe_read_kernel	ktime_get_ns:5, probe_read_kernel:8
+corpus/build/bcc/libbpf-tools/tcplife.bpf.o	32	ktime_get_ns,probe_read_kernel	ktime_get_ns:2, probe_read_kernel:19
+corpus/build/bcc/libbpf-tools/tcppktlat.bpf.o	29	ktime_get_ns,probe_read_kernel	ktime_get_ns:2, probe_read_kernel:12
+corpus/build/bcc/libbpf-tools/tcpstates.bpf.o	12	ktime_get_ns,probe_read_kernel	ktime_get_ns:1, probe_read_kernel:3
+corpus/build/bcc/libbpf-tools/tcptracer.bpf.o	77	ktime_get_ns,probe_read_kernel	ktime_get_ns:3, probe_read_kernel:45
+corpus/build/bcc/libbpf-tools/wakeuptime.bpf.o	12	ktime_get_ns,probe_read_kernel	ktime_get_ns:2, probe_read_kernel:1
+corpus/build/datadog-agent/oom-kill-kern.bpf.o	19	ktime_get_ns,probe_read_kernel	ktime_get_ns:1, probe_read_kernel:14
+corpus/build/katran/balancer.bpf.o	88	ktime_get_ns,xdp_adjust_head	ktime_get_ns:8, xdp_adjust_head:4
+corpus/build/libbpf-bootstrap/examples/c/usdt.bpf.o	15	probe_read_kernel,probe_read_user	probe_read_kernel:2, probe_read_user:1
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/find_vma.bpf.o	7	find_vma,probe_read_kernel_str	find_vma:4, probe_read_kernel_str:1
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/kprobe_multi_verifier.bpf.o	15	probe_read_kernel,probe_read_user	probe_read_kernel:4, probe_read_user:2
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_core_read_macros.bpf.o	13	probe_read_kernel,probe_read_user	probe_read_kernel:6, probe_read_user:6
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_core_reloc_module.bpf.o	8	probe_read_kernel,probe_read_kernel_str	probe_read_kernel:4, probe_read_kernel_str:2
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_send_signal_kern.bpf.o	9	send_signal,send_signal_thread	send_signal:3, send_signal_thread:3
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_skb_helpers.bpf.o	3	probe_read_kernel,probe_read_kernel_str	probe_read_kernel:1, probe_read_kernel_str:1
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_tc_tunnel.bpf.o	88	skb_adjust_room,skb_store_bytes	skb_adjust_room:19, skb_store_bytes:20
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_urandom_usdt.bpf.o	19	probe_read_kernel,probe_read_user	probe_read_kernel:4, probe_read_user:2
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_usdt.bpf.o	39	probe_read_kernel,probe_read_user	probe_read_kernel:4, probe_read_user:2
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_usdt_multispec.bpf.o	16	probe_read_kernel,probe_read_user	probe_read_kernel:4, probe_read_user:2
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_varlen.bpf.o	14	probe_read_kernel,probe_read_kernel_str	probe_read_kernel:1, probe_read_kernel_str:9
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/uprobe_multi_usdt.bpf.o	15	probe_read_kernel,probe_read_user	probe_read_kernel:4, probe_read_user:2
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/uprobe_multi_verifier.bpf.o	15	probe_read_kernel,probe_read_user	probe_read_kernel:4, probe_read_user:2
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/uprobe_syscall_executed.bpf.o	21	probe_read_kernel,probe_read_user	probe_read_kernel:4, probe_read_user:2
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/uretprobe_stack.bpf.o	22	probe_read_kernel,probe_read_user	probe_read_kernel:4, probe_read_user:2
+corpus/build/opentelemetry-ebpf-profiler/generic_probe.bpf.o	51	ktime_get_ns,probe_read_kernel	ktime_get_ns:2, probe_read_kernel:2
+corpus/build/real_world_code_size/libbpf-bootstrap/usdt.bpf.o	15	probe_read_kernel,probe_read_user	probe_read_kernel:2, probe_read_user:1
+corpus/build/scx/scx_bpfland_main.bpf.o	42	ktime_get_ns,probe_read_kernel_str	ktime_get_ns:4, probe_read_kernel_str:3
+corpus/build/scx/scx_flash_main.bpf.o	65	ktime_get_ns,probe_read_kernel_str	ktime_get_ns:4, probe_read_kernel_str:3
+corpus/build/tetragon/bpf_cgroup.bpf.o	4	probe_read,probe_read_kernel	probe_read:1, probe_read_kernel:2
+corpus/build/tetragon/bpf_cgtracker.bpf.o	19	probe_read,probe_read_kernel	probe_read:7, probe_read_kernel:7
+corpus/build/tetragon/bpf_enforcer.bpf.o	5	override_return,send_signal	override_return:1, send_signal:1
+corpus/build/tetragon/bpf_exit.bpf.o	25	ktime_get_ns,probe_read	ktime_get_ns:2, probe_read:3
+corpus/build/tetragon/bpf_multi_enforcer.bpf.o	5	override_return,send_signal	override_return:1, send_signal:1
+corpus/build/xdp-tutorial/experiment01-tailgrow/xdp_prog_kern.bpf.o	9	ktime_get_ns,xdp_adjust_tail	ktime_get_ns:1, xdp_adjust_tail:3
+corpus/build/bcc/libbpf-tools/bashreadline.bpf.o	4	probe_read_user_str	probe_read_user_str:1
+corpus/build/bcc/libbpf-tools/biopattern.bpf.o	8	probe_read_kernel	probe_read_kernel:5
+corpus/build/bcc/libbpf-tools/bitesize.bpf.o	8	probe_read_kernel	probe_read_kernel:4
+corpus/build/bcc/libbpf-tools/filetop.bpf.o	17	probe_read_kernel	probe_read_kernel:12
+corpus/build/bcc/libbpf-tools/fsdist.bpf.o	34	ktime_get_ns	ktime_get_ns:11
+corpus/build/bcc/libbpf-tools/funclatency.bpf.o	13	ktime_get_ns	ktime_get_ns:3
+corpus/build/bcc/libbpf-tools/futexctn.bpf.o	12	ktime_get_ns	ktime_get_ns:2
+corpus/build/bcc/libbpf-tools/numamove.bpf.o	28	ktime_get_ns	ktime_get_ns:8
+corpus/build/bcc/libbpf-tools/oomkill.bpf.o	12	probe_read_kernel	probe_read_kernel:6
+corpus/build/bcc/libbpf-tools/profile.bpf.o	10	get_ns_current_pid_tgid	get_ns_current_pid_tgid:1
+corpus/build/bcc/libbpf-tools/readahead.bpf.o	22	ktime_get_ns	ktime_get_ns:5
+corpus/build/bcc/libbpf-tools/runqlen.bpf.o	7	probe_read_kernel	probe_read_kernel:5
+corpus/build/bcc/libbpf-tools/sigsnoop.bpf.o	20	probe_read_kernel	probe_read_kernel:2
+corpus/build/bcc/libbpf-tools/slabratetop.bpf.o	14	probe_read_kernel	probe_read_kernel:6
+corpus/build/bcc/libbpf-tools/softirqs.bpf.o	9	ktime_get_ns	ktime_get_ns:3
+corpus/build/bcc/libbpf-tools/solisten.bpf.o	15	probe_read_kernel	probe_read_kernel:6
+corpus/build/bcc/libbpf-tools/syncsnoop.bpf.o	24	ktime_get_ns	ktime_get_ns:8
+corpus/build/bcc/libbpf-tools/tcprtt.bpf.o	15	probe_read_kernel	probe_read_kernel:12
+corpus/build/bcc/libbpf-tools/tcpsynbl.bpf.o	5	probe_read_kernel	probe_read_kernel:2
+corpus/build/bcc/libbpf-tools/tcptop.bpf.o	11	probe_read_kernel	probe_read_kernel:6
+corpus/build/bpftrace/open_latency.bpf.o	12	ktime_get_boot_ns	ktime_get_boot_ns:2
+corpus/build/bpftrace/scheduler_latency.bpf.o	8	ktime_get_boot_ns	ktime_get_boot_ns:2
+corpus/build/calico/xdp_debug.bpf.o	54	ktime_get_ns	ktime_get_ns:1
+corpus/build/datadog-agent/noisy-neighbor-kern.bpf.o	17	ktime_get_ns	ktime_get_ns:4
+corpus/build/katran/healthchecking.bpf.o	12	skb_adjust_room	skb_adjust_room:2
+corpus/build/libbpf-bootstrap/examples/c/kprobe.bpf.o	5	probe_read_kernel	probe_read_kernel:1
+corpus/build/libbpf-bootstrap/examples/c/ksyscall.bpf.o	14	probe_read_kernel	probe_read_kernel:5
+corpus/build/libbpf-bootstrap/examples/c/task_iter.bpf.o	4	probe_read_kernel_str	probe_read_kernel_str:1
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_cc_cubic.bpf.o	1	jiffies64	jiffies64:1
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_cubic.bpf.o	7	jiffies64	jiffies64:7
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_hashmap_full_update_bench.bpf.o	5	ktime_get_ns	ktime_get_ns:2
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_hashmap_lookup.bpf.o	6	ktime_get_ns	ktime_get_ns:2
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_map_elem.bpf.o	1	probe_read_kernel	probe_read_kernel:1
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_netlink.bpf.o	6	probe_read_kernel	probe_read_kernel:2
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_task_vmas.bpf.o	5	d_path	d_path:1
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_tasks.bpf.o	18	copy_from_user_task	copy_from_user_task:2
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_iter_unix.bpf.o	7	probe_read_kernel	probe_read_kernel:1
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_mod_race.bpf.o	3	copy_from_user	copy_from_user:1
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/bpf_syscall_macro.bpf.o	28	probe_read_kernel	probe_read_kernel:23
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgrp_kfunc_failure.bpf.o	12	probe_read_kernel	probe_read_kernel:3
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/cgrp_kfunc_success.bpf.o	26	probe_read_kernel	probe_read_kernel:5
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/decap_sanity.bpf.o	3	skb_adjust_room	skb_adjust_room:1
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/find_vma_fail1.bpf.o	2	find_vma	find_vma:1
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/find_vma_fail2.bpf.o	2	find_vma	find_vma:1
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/local_storage_rcu_tasks_trace_bench.bpf.o	5	ktime_get_ns	ktime_get_ns:2
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/loop6.bpf.o	8	probe_read_kernel	probe_read_kernel:8
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/lru_bug.bpf.o	7	ktime_get_ns	ktime_get_ns:1
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/lsm.bpf.o	15	copy_from_user	copy_from_user:3
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/lsm_cgroup.bpf.o	14	probe_read_kernel	probe_read_kernel:2
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/netif_receive_skb.bpf.o	171	snprintf_btf	snprintf_btf:59
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/res_spin_lock.bpf.o	19	ktime_get_ns	ktime_get_ns:2
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/skb_pkt_end.bpf.o	1	skb_store_bytes	skb_store_bytes:1
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/summarization.bpf.o	4	copy_from_user	copy_from_user:2
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/summarization_freplace.bpf.o	2	copy_from_user	copy_from_user:1
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/task_kfunc_failure.bpf.o	23	probe_read_kernel	probe_read_kernel:6
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_bpf_nf.bpf.o	34	jiffies64	jiffies64:2
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_custom_sec_handlers.bpf.o	1	copy_from_user	copy_from_user:1
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_d_path.bpf.o	6	d_path	d_path:3
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_d_path_check_rdonly_mem.bpf.o	3	d_path	d_path:1
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_ptr_untrusted.bpf.o	1	copy_from_user	copy_from_user:1
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_sk_storage_tracing.bpf.o	20	probe_read_kernel_str	probe_read_kernel_str:6
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_skmsg_load_helpers.bpf.o	15	probe_read_kernel	probe_read_kernel:3
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_sockmap_change_tail.bpf.o	2	skb_change_tail	skb_change_tail:1
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_subprogs.bpf.o	12	probe_read_kernel	probe_read_kernel:5
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_task_pt_regs.bpf.o	4	probe_read_kernel	probe_read_kernel:2
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_tc_change_tail.bpf.o	5	skb_change_tail	skb_change_tail:4
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/test_uprobe_autoattach.bpf.o	4	probe_read_kernel	probe_read_kernel:2
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/trace_dummy_st_ops.bpf.o	2	probe_read_kernel	probe_read_kernel:2
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/verifier_const.bpf.o	8	copy_from_user	copy_from_user:1
+corpus/build/linux-selftests/tools/testing/selftests/bpf/progs/xdp_hw_metadata.bpf.o	3	ktime_get_tai_ns	ktime_get_tai_ns:1
+corpus/build/loxilb/llb_xdp_main.bpf.o	4	xdp_adjust_head	xdp_adjust_head:1
+corpus/build/opentelemetry-ebpf-profiler/sched_monitor.bpf.o	32	ktime_get_ns	ktime_get_ns:2
+corpus/build/real_world_code_size/libbpf-bootstrap/kprobe.bpf.o	5	probe_read_kernel	probe_read_kernel:1
+corpus/build/real_world_code_size/libbpf-bootstrap/ksyscall.bpf.o	14	probe_read_kernel	probe_read_kernel:5
+corpus/build/real_world_code_size/libbpf-bootstrap/minimal_ns.bpf.o	2	get_ns_current_pid_tgid	get_ns_current_pid_tgid:1
+corpus/build/real_world_code_size/libbpf-bootstrap/task_iter.bpf.o	4	probe_read_kernel_str	probe_read_kernel_str:1
+corpus/build/suricata/xdp_lb.bpf.o	10	xdp_adjust_head	xdp_adjust_head:1
+corpus/build/systemd/restrict-fs.bpf.o	7	probe_read_kernel	probe_read_kernel:3
+corpus/build/systemd/src/core/bpf/restrict-fs/restrict-fs.bpf.o	7	probe_read_kernel	probe_read_kernel:3
+corpus/build/tetragon/bpf_execve_bprm_commit_creds.bpf.o	31	probe_read	probe_read:24
+corpus/build/tetragon/bpf_fmodret_enforcer.bpf.o	4	send_signal	send_signal:1
+corpus/build/tetragon/bpf_generic_lsm_output.bpf.o	35	probe_read	probe_read:21
+corpus/build/xdp-tools/xdp_basic.bpf.o	43	xdp_store_bytes	xdp_store_bytes:1
+corpus/build/xdp-tools/xdp_flowtable.bpf.o	62	probe_read_kernel	probe_read_kernel:48
+corpus/build/xdp-tools/xdp_redirect_basic.bpf.o	24	xdp_store_bytes	xdp_store_bytes:1
+corpus/build/xdp-tools/xdp_trafficgen.bpf.o	39	ktime_get_coarse_ns	ktime_get_coarse_ns:1
+corpus/build/xdp-tutorial/packet-solutions/xdp_prog_kern_02.bpf.o	3	xdp_adjust_head	xdp_adjust_head:2

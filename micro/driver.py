@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import os
 import platform
 import random
@@ -61,11 +60,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--iterations", type=int, help="Measured runs per pair.")
     parser.add_argument("--warmups", type=int, help="Warmup runs per pair.")
     parser.add_argument("--repeat", type=int, help="Repeat count inside each helper sample.")
-    parser.add_argument(
-        "--rejit",
-        action="store_true",
-        help="Enable REJIT same-bytecode mode for kernel-rejit runtimes.",
-    )
     parser.add_argument(
         "--daemon-socket",
         default=None,
@@ -603,8 +597,6 @@ def main(argv: list[str] | None = None) -> int:
 
     benchmarks = select_benchmarks(args.benches, suite)
     runtimes = select_runtimes(args.runtimes, suite)
-    if args.rejit and not any(runtime.mode == "kernel-rejit" for runtime in runtimes):
-        raise SystemExit("--rejit requires --runtime kernel-rejit")
     if args.shuffle_seed is not None:
         random.Random(args.shuffle_seed).shuffle(benchmarks)
     runtime_order_seed = args.shuffle_seed if args.shuffle_seed is not None else DEFAULT_RUNTIME_ORDER_SEED
@@ -650,7 +642,6 @@ def main(argv: list[str] | None = None) -> int:
             "iterations": iterations,
             "warmups": warmups,
             "repeat": args.repeat if args.repeat is not None else suite.defaults.repeat,
-            "rejit": args.rejit,
             "perf_counters": args.perf_counters,
             "perf_scope": args.perf_scope,
             "shuffle_seed": args.shuffle_seed,

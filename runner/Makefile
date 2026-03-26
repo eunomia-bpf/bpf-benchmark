@@ -266,7 +266,7 @@ vm-micro: micro_exec micro-programs daemon-binary kernel-image kinsn-modules-bui
 
 vm-corpus: micro_exec daemon-binary kernel-image kinsn-modules-build
 	mkdir -p "$(CORPUS_RESULTS_DIR)"
-	TARGET="$(TARGET)" $(VENV_ACTIVATE) $(PYTHON) "$(REPO_ROOT)/corpus/driver.py" packet \
+	TARGET="$(TARGET)" $(VENV_ACTIVATE) $(PYTHON) "$(REPO_ROOT)/corpus/driver.py" \
 		--kernel-image "$(BZIMAGE_PATH)" \
 		--runner "$(MICRO_RUNNER)" \
 		--daemon "$(DAEMON_PATH)" \

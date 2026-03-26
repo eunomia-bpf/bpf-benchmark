@@ -1,0 +1,2935 @@
+diff --git a/arch/arm64/net/bpf_jit_comp.c b/arch/arm64/net/bpf_jit_comp.c
+index adf84962d..48cbcd38e 100644
+--- a/arch/arm64/net/bpf_jit_comp.c
++++ b/arch/arm64/net/bpf_jit_comp.c
+@@ -1192,6 +1192,33 @@ static int add_exception_handler(const struct bpf_insn *insn,
+ 	return 0;
+ }
+ 
++static int emit_kinsn_desc_call_arm64(struct jit_ctx *ctx,
++				      const struct bpf_prog *bpf_prog,
++				      const struct bpf_insn *insn)
++{
++	const struct bpf_kinsn *kinsn;
++	u64 payload;
++	int ret, saved_idx, n_insns;
++
++	ret = bpf_jit_get_kinsn_payload(bpf_prog, insn, &kinsn, &payload);
++	if (ret)
++		return ret;
++	if (!kinsn || !kinsn->emit_arm64)
++		return -EOPNOTSUPP;
++
++	saved_idx = ctx->idx;
++	n_insns = kinsn->emit_arm64(ctx->image, &ctx->idx, ctx->write,
++				    payload, bpf_prog);
++	if (n_insns < 0)
++		return n_insns;
++	if (ctx->idx - saved_idx != n_insns)
++		return -EFAULT;
++	if (n_insns * 4 > kinsn->max_emit_bytes)
++		return -EFAULT;
++
++	return 0;
++}
++
+ /* JITs an eBPF instruction.
+  * Returns:
+  * 0  - successfully JITed an 8-byte eBPF instruction.
+@@ -1224,6 +1251,9 @@ static int build_insn(const struct bpf_insn *insn, struct jit_ctx *ctx,
+ 	int ret;
+ 	bool sign_extend;
+ 
++	if (bpf_kinsn_is_sidecar_insn(insn))
++		return 0;
++
+ 	switch (code) {
+ 	/* dst = src */
+ 	case BPF_ALU | BPF_MOV | BPF_X:
+@@ -1594,6 +1624,14 @@ static int build_insn(const struct bpf_insn *insn, struct jit_ctx *ctx,
+ 			break;
+ 		}
+ 
++		/* Try to inline a kinsn call via module-provided ARM64 emit */
++		if (insn->src_reg == BPF_PSEUDO_KINSN_CALL) {
++			ret = emit_kinsn_desc_call_arm64(ctx, ctx->prog, insn);
++			if (ret)
++				return ret;
++			break;
++		}
++
+ 		ret = bpf_jit_get_func_addr(ctx->prog, insn, extra_pass,
+ 					    &func_addr, &func_addr_fixed);
+ 		if (ret < 0)
+diff --git a/arch/x86/net/bpf_jit_comp.c b/arch/x86/net/bpf_jit_comp.c
+index e9b78040d..f88ee3f57 100644
+--- a/arch/x86/net/bpf_jit_comp.c
++++ b/arch/x86/net/bpf_jit_comp.c
+@@ -576,6 +576,36 @@ static int emit_call(u8 **pprog, void *func, void *ip)
+ 	return emit_patch(pprog, func, ip, 0xE8);
+ }
+ 
++static int emit_kinsn_desc_call(u8 **pprog, const struct bpf_prog *bpf_prog,
++				const struct bpf_insn *insn, bool emit)
++{
++	const struct bpf_kinsn *kinsn;
++	u8 scratch[BPF_MAX_INSN_SIZE];
++	u8 *prog = *pprog;
++	u32 off = 0;
++	u64 payload;
++	int ret;
++
++	ret = bpf_jit_get_kinsn_payload(bpf_prog, insn, &kinsn, &payload);
++	if (ret)
++		return ret;
++	if (!kinsn || !kinsn->emit_x86)
++		return -EOPNOTSUPP;
++	if (kinsn->max_emit_bytes > BPF_MAX_INSN_SIZE)
++		return -E2BIG;
++
++	ret = kinsn->emit_x86(scratch, &off, emit, payload, bpf_prog);
++	if (ret < 0)
++		return ret;
++	if (ret != off || ret > kinsn->max_emit_bytes)
++		return -EFAULT;
++	if (emit)
++		memcpy(prog, scratch, off);
++
++	*pprog = prog + off;
++	return 0;
++}
++
+ static int emit_rsb_call(u8 **pprog, void *func, void *ip)
+ {
+ 	OPTIMIZER_HIDE_VAR(func);
+@@ -1865,6 +1895,8 @@ static int do_jit(struct bpf_prog *bpf_prog, int *addrs, u8 *image, u8 *rw_image
+ 
+ 		case BPF_ALU64 | BPF_MOV | BPF_K:
+ 		case BPF_ALU | BPF_MOV | BPF_K:
++			if (bpf_kinsn_is_sidecar_insn(insn))
++				break;
+ 			emit_mov_imm32(&prog, BPF_CLASS(insn->code) == BPF_ALU64,
+ 				       dst_reg, imm32);
+ 			break;
+@@ -2443,6 +2475,13 @@ st:			if (is_imm8(insn->off))
+ 			u8 *ip = image + addrs[i - 1];
+ 
+ 			func = (u8 *) __bpf_call_base + imm32;
++			if (src_reg == BPF_PSEUDO_KINSN_CALL) {
++				err = emit_kinsn_desc_call(&prog, bpf_prog, insn,
++							    !!rw_image);
++				if (err)
++					return err;
++				break;
++			}
+ 			if (src_reg == BPF_PSEUDO_CALL && tail_call_reachable) {
+ 				LOAD_TAIL_CALL_CNT_PTR(stack_depth);
+ 				ip += 7;
+diff --git a/include/linux/bpf.h b/include/linux/bpf.h
+index 05b34a635..8b49fe99b 100644
+--- a/include/linux/bpf.h
++++ b/include/linux/bpf.h
+@@ -965,6 +965,47 @@ struct bpf_func_proto {
+ 	bool (*allowed)(const struct bpf_prog *prog);
+ };
+ 
++struct bpf_kinsn {
++	struct module *owner; /* NULL for built-in/vmlinux descriptors */
++	u16 max_insn_cnt;
++	u16 max_emit_bytes;
++
++	int (*instantiate_insn)(u64 payload, struct bpf_insn *insn_buf);
++
++	int (*emit_x86)(u8 *image, u32 *off, bool emit,
++			u64 payload, const struct bpf_prog *prog);
++	int (*emit_arm64)(u32 *image, int *idx, bool emit,
++			  u64 payload, const struct bpf_prog *prog);
++};
++
++static inline bool bpf_kinsn_has_native_emit(const struct bpf_kinsn *kinsn)
++{
++	if (!kinsn)
++		return false;
++#ifdef CONFIG_X86
++	if (kinsn->emit_x86)
++		return true;
++#endif
++#ifdef CONFIG_ARM64
++	if (kinsn->emit_arm64)
++		return true;
++#endif
++	return false;
++}
++
++static inline bool bpf_kinsn_is_sidecar_insn(const struct bpf_insn *insn)
++{
++	return insn->code == (BPF_ALU64 | BPF_MOV | BPF_K) &&
++	       insn->src_reg == BPF_PSEUDO_KINSN_SIDECAR;
++}
++
++static inline u64 bpf_kinsn_sidecar_payload(const struct bpf_insn *insn)
++{
++	return (u64)(insn->dst_reg & 0xf) |
++	       ((u64)(u16)insn->off << 4) |
++	       ((u64)(u32)insn->imm << 20);
++}
++
+ /* bpf_context is intentionally undefined structure. Pointer to bpf_context is
+  * the first argument to eBPF programs.
+  * For socket filters: 'struct bpf_context *' == 'struct sk_buff *'
+@@ -1531,6 +1572,8 @@ int arch_prepare_bpf_dispatcher(void *image, void *buf, s64 *funcs, int num_func
+ #define BPF_DISPATCHER_PTR(name) (&bpf_dispatcher_##name)
+ void bpf_dispatcher_change_prog(struct bpf_dispatcher *d, struct bpf_prog *from,
+ 				struct bpf_prog *to);
++void bpf_dispatcher_refresh_prog(struct bpf_dispatcher *d,
++				 struct bpf_prog *prog);
+ /* Called only from JIT-enabled code, so there's no need for stubs. */
+ void bpf_image_ksym_init(void *data, unsigned int size, struct bpf_ksym *ksym);
+ void bpf_image_ksym_add(struct bpf_ksym *ksym);
+@@ -1541,6 +1584,7 @@ bool bpf_has_frame_pointer(unsigned long ip);
+ int bpf_jit_charge_modmem(u32 size);
+ void bpf_jit_uncharge_modmem(u32 size);
+ bool bpf_prog_has_trampoline(const struct bpf_prog *prog);
++int bpf_trampoline_refresh_prog(struct bpf_prog *prog);
+ #else
+ static inline int bpf_trampoline_link_prog(struct bpf_tramp_link *link,
+ 					   struct bpf_trampoline *tr,
+@@ -1567,6 +1611,12 @@ static inline void bpf_trampoline_put(struct bpf_trampoline *tr) {}
+ static inline void bpf_dispatcher_change_prog(struct bpf_dispatcher *d,
+ 					      struct bpf_prog *from,
+ 					      struct bpf_prog *to) {}
++static inline void bpf_dispatcher_refresh_prog(struct bpf_dispatcher *d,
++					       struct bpf_prog *prog) {}
++static inline int bpf_trampoline_refresh_prog(struct bpf_prog *prog)
++{
++	return 0;
++}
+ static inline bool is_bpf_image_address(unsigned long address)
+ {
+ 	return false;
+@@ -1675,6 +1725,8 @@ struct bpf_prog_aux {
+ 	struct btf *attach_btf;
+ 	struct bpf_ctx_arg_aux *ctx_arg_info;
+ 	void __percpu *priv_stack_ptr;
++	struct mutex rejit_mutex; /* serializes BPF_PROG_REJIT on this prog */
++	struct list_head trampoline_users; /* trampolines using this prog, protected by rejit_mutex */
+ 	struct mutex dst_mutex; /* protects dst_* pointers below, *after* prog becomes visible */
+ 	struct bpf_prog *dst_prog;
+ 	struct bpf_trampoline *dst_trampoline;
+@@ -1724,6 +1776,9 @@ struct bpf_prog_aux {
+ 	struct user_struct *user;
+ 	u64 load_time; /* ns since boottime */
+ 	u32 verified_insns;
++	u32 prog_flags; /* semantic load flags to replay during BPF_PROG_REJIT */
++	struct bpf_insn *orig_insns;
++	u32 orig_prog_len;
+ 	int cgroup_atype; /* enum cgroup_bpf_attach_type */
+ 	struct bpf_map *cgroup_storage[MAX_BPF_CGROUP_STORAGE_TYPE];
+ 	char name[BPF_OBJ_NAME_LEN];
+@@ -2097,6 +2152,7 @@ int bpf_struct_ops_prepare_trampoline(struct bpf_tramp_links *tlinks,
+ 				      void **image, u32 *image_off,
+ 				      bool allow_alloc);
+ void bpf_struct_ops_image_free(void *image);
++int bpf_struct_ops_refresh_prog(struct bpf_prog *prog, bpf_func_t old_bpf_func);
+ static inline bool bpf_try_module_get(const void *data, struct module *owner)
+ {
+ 	if (owner == BPF_MODULE_OWNER)
+@@ -3036,6 +3092,10 @@ bool bpf_prog_has_kfunc_call(const struct bpf_prog *prog);
+ const struct btf_func_model *
+ bpf_jit_find_kfunc_model(const struct bpf_prog *prog,
+ 			 const struct bpf_insn *insn);
++int bpf_jit_get_kinsn_payload(const struct bpf_prog *prog,
++			      const struct bpf_insn *insn,
++			      const struct bpf_kinsn **kinsn,
++			      u64 *payload);
+ int bpf_get_kfunc_addr(const struct bpf_prog *prog, u32 func_id,
+ 		       u16 btf_fd_idx, u8 **func_addr);
+ 
+@@ -3327,6 +3387,15 @@ bpf_jit_find_kfunc_model(const struct bpf_prog *prog,
+ 	return NULL;
+ }
+ 
++static inline int
++bpf_jit_get_kinsn_payload(const struct bpf_prog *prog,
++			      const struct bpf_insn *insn,
++			      const struct bpf_kinsn **kinsn,
++			      u64 *payload)
++{
++	return -EOPNOTSUPP;
++}
++
+ static inline int
+ bpf_get_kfunc_addr(const struct bpf_prog *prog, u32 func_id,
+ 		   u16 btf_fd_idx, u8 **func_addr)
+diff --git a/include/linux/filter.h b/include/linux/filter.h
+index 44d7ae95d..70c410ca7 100644
+--- a/include/linux/filter.h
++++ b/include/linux/filter.h
+@@ -701,15 +701,17 @@ static __always_inline u32 __bpf_prog_run(const struct bpf_prog *prog,
+ 					  const void *ctx,
+ 					  bpf_dispatcher_fn dfunc)
+ {
++	bpf_func_t bpf_func;
+ 	u32 ret;
+ 
++	bpf_func = smp_load_acquire(&prog->bpf_func);
+ 	cant_migrate();
+ 	if (static_branch_unlikely(&bpf_stats_enabled_key)) {
+ 		struct bpf_prog_stats *stats;
+ 		u64 duration, start = sched_clock();
+ 		unsigned long flags;
+ 
+-		ret = dfunc(ctx, prog->insnsi, prog->bpf_func);
++		ret = dfunc(ctx, prog->insnsi, bpf_func);
+ 
+ 		duration = sched_clock() - start;
+ 		if (likely(prog->stats)) {
+@@ -720,7 +722,7 @@ static __always_inline u32 __bpf_prog_run(const struct bpf_prog *prog,
+ 			u64_stats_update_end_irqrestore(&stats->syncp, flags);
+ 		}
+ 	} else {
+-		ret = dfunc(ctx, prog->insnsi, prog->bpf_func);
++		ret = dfunc(ctx, prog->insnsi, bpf_func);
+ 	}
+ 	return ret;
+ }
+@@ -1016,6 +1018,7 @@ DECLARE_STATIC_KEY_FALSE(bpf_master_redirect_enabled_key);
+ u32 xdp_master_redirect(struct xdp_buff *xdp);
+ 
+ void bpf_prog_change_xdp(struct bpf_prog *prev_prog, struct bpf_prog *prog);
++void bpf_prog_refresh_xdp(struct bpf_prog *prog);
+ 
+ static inline u32 bpf_prog_insn_size(const struct bpf_prog *prog)
+ {
+diff --git a/include/uapi/linux/bpf.h b/include/uapi/linux/bpf.h
+index c8d400b76..f8fdf5786 100644
+--- a/include/uapi/linux/bpf.h
++++ b/include/uapi/linux/bpf.h
+@@ -993,6 +993,7 @@ enum bpf_cmd {
+ 	BPF_TOKEN_CREATE,
+ 	BPF_PROG_STREAM_READ_BY_FD,
+ 	BPF_PROG_ASSOC_STRUCT_OPS,
++	BPF_PROG_REJIT,
+ 	__MAX_BPF_CMD,
+ };
+ 
+@@ -1382,6 +1383,15 @@ enum {
+  * bpf_call->imm == btf_id of a BTF_KIND_FUNC in the running kernel
+  */
+ #define BPF_PSEUDO_KFUNC_CALL	2
++/* when bpf_mov->src_reg == BPF_PSEUDO_KINSN_SIDECAR,
++ * the instruction carries packed kinsn metadata for the immediately
++ * following kinsn call.
++ */
++#define BPF_PSEUDO_KINSN_SIDECAR 3
++/* when bpf_call->src_reg == BPF_PSEUDO_KINSN_CALL,
++ * bpf_call->imm == btf_id of a BTF_KIND_FUNC kinsn stub
++ */
++#define BPF_PSEUDO_KINSN_CALL	4
+ 
+ enum bpf_addr_space_cast {
+ 	BPF_ADDR_SPACE_CAST = 1,
+@@ -1922,6 +1932,18 @@ union bpf_attr {
+ 		__u32		flags;
+ 	} prog_assoc_struct_ops;
+ 
++	struct {
++		__u32		prog_fd;
++		__u32		insn_cnt;
++		__aligned_u64	insns;
++		__u32		log_level;
++		__u32		log_size;
++		__aligned_u64	log_buf;
++		__aligned_u64	fd_array;
++		__u32		fd_array_cnt;
++		__u32		flags;
++	} rejit;
++
+ } __attribute__((aligned(8)));
+ 
+ /* The description below is an attempt at providing documentation to eBPF
+@@ -6696,6 +6718,8 @@ struct bpf_prog_info {
+ 	__u32 verified_insns;
+ 	__u32 attach_btf_obj_id;
+ 	__u32 attach_btf_id;
++	__u32 orig_prog_len;
++	__aligned_u64 orig_prog_insns;
+ } __attribute__((aligned(8)));
+ 
+ struct bpf_map_info {
+diff --git a/kernel/bpf/bpf_struct_ops.c b/kernel/bpf/bpf_struct_ops.c
+index 05b366b82..a5d73ede7 100644
+--- a/kernel/bpf/bpf_struct_ops.c
++++ b/kernel/bpf/bpf_struct_ops.c
+@@ -13,6 +13,13 @@
+ #include <linux/btf_ids.h>
+ #include <linux/rcupdate_wait.h>
+ #include <linux/poll.h>
++#ifdef CONFIG_X86
++#include <asm/insn.h>
++#include <asm/text-patching.h>
++#endif
++#ifdef CONFIG_ARM64
++#include <asm/insn.h>
++#endif
+ 
+ struct bpf_struct_ops_value {
+ 	struct bpf_struct_ops_common_value common;
+@@ -1458,6 +1465,159 @@ void bpf_prog_disassoc_struct_ops(struct bpf_prog *prog)
+ 	RCU_INIT_POINTER(prog->aux->st_ops_assoc, NULL);
+ }
+ 
++/* Scan a struct_ops trampoline image for the next direct call to target.
++ * cursor is updated to the next instruction boundary after a match.
++ * Returns the IP of the call opcode, or NULL.
++ */
++static void *find_next_call_site(void *image, u32 image_size, void *target,
++				 unsigned long *cursor)
++{
++	unsigned long start = *cursor ?: (unsigned long)image;
++	unsigned long end = (unsigned long)image + image_size;
++
++#ifdef CONFIG_X86
++	for (; start + CALL_INSN_SIZE <= end;) {
++		struct insn insn;
++		u8 *p = (u8 *)start;
++		int len;
++
++		insn_init(&insn, p, end - start, 1);
++		if (insn_get_length(&insn) || !insn.length)
++			break;
++		len = insn.length;
++
++		if (*p == CALL_INSN_OPCODE) {
++			s32 disp = *(s32 *)(p + 1);
++			void *call_target = (void *)((unsigned long)(p + CALL_INSN_SIZE) + disp);
++
++			if (call_target == target) {
++				*cursor = start + len;
++				return p;
++			}
++		}
++
++		start += len;
++	}
++#elif defined(CONFIG_ARM64)
++	for (; start + sizeof(u32) <= end; start += sizeof(u32)) {
++		u32 *p = (u32 *)start;
++		u32 insn = *p;
++
++		if (aarch64_insn_is_bl(insn)) {
++			void *call_target = (void *)(start + aarch64_get_branch_offset(insn));
++
++			if (call_target == target) {
++				*cursor = start + sizeof(u32);
++				return p;
++			}
++		}
++	}
++#endif
++
++	*cursor = (unsigned long)image + image_size;
++	return NULL;
++}
++
++/* After REJIT swaps prog->bpf_func, patch the struct_ops trampoline
++ * that has old_bpf_func baked in as a direct CALL target.
++ * Caller holds prog->aux->rejit_mutex.
++ */
++int bpf_struct_ops_refresh_prog(struct bpf_prog *prog, bpf_func_t old_bpf_func)
++{
++	struct bpf_struct_ops_map *st_map;
++	void *new_bpf_func = (void *)prog->bpf_func;
++	void **call_sites = NULL;
++	u32 patched_cnt = 0;
++	struct bpf_map *map;
++	u32 call_site_cnt = 0;
++	u32 i;
++	int err = 0;
++
++	guard(mutex)(&prog->aux->st_ops_assoc_mutex);
++
++	map = rcu_dereference_protected(prog->aux->st_ops_assoc,
++					lockdep_is_held(&prog->aux->st_ops_assoc_mutex));
++	if (!map || map == BPF_PTR_POISON)
++		return 0;
++
++	st_map = (struct bpf_struct_ops_map *)map;
++	for (i = 0; i < st_map->funcs_cnt; i++) {
++		struct bpf_ksym *ksym;
++		unsigned long cursor;
++		bool found_old = false;
++
++		if (!st_map->links[i])
++			continue;
++		if (st_map->links[i]->prog != prog)
++			continue;
++
++		ksym = st_map->ksyms[i];
++		if (!ksym)
++			continue;
++
++		cursor = ksym->start;
++		while (true) {
++			void **grown;
++			void *site;
++
++			site = find_next_call_site((void *)ksym->start,
++						   ksym->end - ksym->start,
++						   (void *)old_bpf_func,
++						   &cursor);
++			if (!site)
++				break;
++
++			grown = krealloc_array(call_sites, call_site_cnt + 1,
++					       sizeof(*call_sites), GFP_KERNEL);
++			if (!grown) {
++				err = -ENOMEM;
++				goto out;
++			}
++
++			call_sites = grown;
++			call_sites[call_site_cnt++] = site;
++			found_old = true;
++		}
++
++		if (!found_old) {
++			cursor = ksym->start;
++			if (find_next_call_site((void *)ksym->start,
++						ksym->end - ksym->start,
++						new_bpf_func, &cursor))
++				continue;
++
++			pr_warn("struct_ops rejit: CALL site not found in trampoline %s\n",
++				ksym->name);
++			err = -ENOENT;
++			goto out;
++		}
++	}
++
++	for (i = 0; i < call_site_cnt; i++) {
++		err = bpf_arch_text_poke(call_sites[i], BPF_MOD_CALL,
++					 BPF_MOD_CALL,
++					 (void *)old_bpf_func,
++					 new_bpf_func);
++		if (err) {
++			pr_warn("struct_ops rejit: text_poke failed: %d\n", err);
++			while (patched_cnt > 0) {
++				void *patched_site = call_sites[--patched_cnt];
++				if (bpf_arch_text_poke(patched_site, BPF_MOD_CALL,
++						      BPF_MOD_CALL,
++						      new_bpf_func,
++						      (void *)old_bpf_func))
++					pr_warn("struct_ops rejit: rollback text_poke failed\n");
++			}
++			goto out;
++		}
++		patched_cnt++;
++	}
++
++out:
++	kfree(call_sites);
++	return err;
++}
++
+ /*
+  * Get a reference to the struct_ops struct (i.e., kdata) associated with a
+  * program. Should only be called in BPF program context (e.g., in a kfunc).
+diff --git a/kernel/bpf/btf.c b/kernel/bpf/btf.c
+index 4872d2a6c..64f592148 100644
+--- a/kernel/bpf/btf.c
++++ b/kernel/bpf/btf.c
+@@ -235,8 +235,19 @@ struct btf_kfunc_hook_filter {
+ 	u32 nr_filters;
+ };
+ 
++struct btf_kfunc_kinsn_desc {
++	u32 id;
++	const struct bpf_kinsn *kinsn;
++};
++
++struct btf_kfunc_kinsn_set {
++	u32 cnt;
++	struct btf_kfunc_kinsn_desc descs[];
++};
++
+ struct btf_kfunc_set_tab {
+ 	struct btf_id_set8 *sets[BTF_KFUNC_HOOK_MAX];
++	struct btf_kfunc_kinsn_set *kinsn_sets[BTF_KFUNC_HOOK_MAX];
+ 	struct btf_kfunc_hook_filter hook_filters[BTF_KFUNC_HOOK_MAX];
+ };
+ 
+@@ -1798,12 +1809,24 @@ static void btf_free_kfunc_set_tab(struct btf *btf)
+ 
+ 	if (!tab)
+ 		return;
+-	for (hook = 0; hook < ARRAY_SIZE(tab->sets); hook++)
++	for (hook = 0; hook < ARRAY_SIZE(tab->sets); hook++) {
+ 		kfree(tab->sets[hook]);
++		kfree(tab->kinsn_sets[hook]);
++	}
+ 	kfree(tab);
+ 	btf->kfunc_set_tab = NULL;
+ }
+ 
++static int btf_kfunc_kinsn_desc_cmp(const void *a, const void *b)
++{
++	const struct btf_kfunc_kinsn_desc *d0 = a;
++	const struct btf_kfunc_kinsn_desc *d1 = b;
++
++	if (d0->id != d1->id)
++		return d0->id < d1->id ? -1 : 1;
++	return 0;
++}
++
+ static void btf_free_dtor_kfunc_tab(struct btf *btf)
+ {
+ 	struct btf_id_dtor_kfunc_tab *tab = btf->dtor_kfunc_tab;
+@@ -7819,8 +7842,13 @@ int btf_prepare_func_args(struct bpf_verifier_env *env, int subprog)
+ 		verifier_bug(env, "unreliable BTF for function %s()", tname);
+ 		return -EFAULT;
+ 	}
+-	if (prog_type == BPF_PROG_TYPE_EXT)
++	if (prog_type == BPF_PROG_TYPE_EXT) {
++		if (!prog->aux->dst_prog) {
++			bpf_log(log, "extension program missing dst_prog\n");
++			return -EINVAL;
++		}
+ 		prog_type = prog->aux->dst_prog->type;
++	}
+ 
+ 	t = btf_type_by_id(btf, fn_t->type);
+ 	if (!t || !btf_type_is_func_proto(t)) {
+@@ -8654,11 +8682,13 @@ static int btf_populate_kfunc_set(struct btf *btf, enum btf_kfunc_hook hook,
+ {
+ 	struct btf_kfunc_hook_filter *hook_filter;
+ 	struct btf_id_set8 *add_set = kset->set;
++	const struct bpf_kinsn * const *add_kinsn_descs = kset->kinsn_descs;
+ 	bool vmlinux_set = !btf_is_module(btf);
+ 	bool add_filter = !!kset->filter;
+ 	struct btf_kfunc_set_tab *tab;
++	struct btf_kfunc_kinsn_set *kinsn_set;
+ 	struct btf_id_set8 *set;
+-	u32 set_cnt, i;
++	u32 kinsn_set_cnt, set_cnt, i;
+ 	int ret;
+ 
+ 	if (hook >= BTF_KFUNC_HOOK_MAX) {
+@@ -8741,7 +8771,8 @@ static int btf_populate_kfunc_set(struct btf *btf, enum btf_kfunc_hook hook,
+ 	tab->sets[hook] = set;
+ 
+ 	/* Concatenate the two sets */
+-	memcpy(set->pairs + set->cnt, add_set->pairs, add_set->cnt * sizeof(set->pairs[0]));
++	memcpy(set->pairs + set->cnt, add_set->pairs,
++	       add_set->cnt * sizeof(set->pairs[0]));
+ 	/* Now that the set is copied, update with relocated BTF ids */
+ 	for (i = set->cnt; i < set->cnt + add_set->cnt; i++)
+ 		set->pairs[i].id = btf_relocate_id(btf, set->pairs[i].id);
+@@ -8750,6 +8781,41 @@ static int btf_populate_kfunc_set(struct btf *btf, enum btf_kfunc_hook hook,
+ 
+ 	sort(set->pairs, set->cnt, sizeof(set->pairs[0]), btf_id_cmp_func, NULL);
+ 
++	if (add_kinsn_descs) {
++		kinsn_set = tab->kinsn_sets[hook];
++		kinsn_set_cnt = kinsn_set ? kinsn_set->cnt : 0;
++
++		if (kinsn_set_cnt > U32_MAX - add_set->cnt) {
++			ret = -EOVERFLOW;
++			goto end;
++		}
++
++		kinsn_set = krealloc(tab->kinsn_sets[hook],
++				     struct_size(kinsn_set, descs,
++						 kinsn_set_cnt + add_set->cnt),
++				     GFP_KERNEL | __GFP_NOWARN);
++		if (!kinsn_set) {
++			ret = -ENOMEM;
++			goto end;
++		}
++
++		if (!tab->kinsn_sets[hook])
++			kinsn_set->cnt = 0;
++		tab->kinsn_sets[hook] = kinsn_set;
++
++		for (i = 0; i < add_set->cnt; i++) {
++			struct btf_kfunc_kinsn_desc *desc =
++				&kinsn_set->descs[kinsn_set->cnt + i];
++
++			desc->id = btf_relocate_id(btf, add_set->pairs[i].id);
++			desc->kinsn = add_kinsn_descs[i];
++		}
++
++		kinsn_set->cnt += add_set->cnt;
++		sort(kinsn_set->descs, kinsn_set->cnt, sizeof(kinsn_set->descs[0]),
++		     btf_kfunc_kinsn_desc_cmp, NULL);
++	}
++
+ 	if (add_filter) {
+ 		hook_filter = &tab->hook_filters[hook];
+ 		hook_filter->filters[hook_filter->nr_filters++] = kset->filter;
+@@ -8781,6 +8847,26 @@ static u32 *btf_kfunc_id_set_contains(const struct btf *btf,
+ 	return id + 1;
+ }
+ 
++static const struct bpf_kinsn *
++btf_kfunc_kinsn_set_contains(const struct btf *btf, enum btf_kfunc_hook hook,
++			     u32 kfunc_btf_id)
++{
++	struct btf_kfunc_kinsn_desc key = { .id = kfunc_btf_id };
++	struct btf_kfunc_kinsn_set *set;
++	struct btf_kfunc_kinsn_desc *desc;
++
++	if (hook >= BTF_KFUNC_HOOK_MAX)
++		return NULL;
++	if (!btf->kfunc_set_tab)
++		return NULL;
++	set = btf->kfunc_set_tab->kinsn_sets[hook];
++	if (!set)
++		return NULL;
++	desc = bsearch(&key, set->descs, set->cnt, sizeof(set->descs[0]),
++		       btf_kfunc_kinsn_desc_cmp);
++	return desc ? desc->kinsn : NULL;
++}
++
+ static bool __btf_kfunc_is_allowed(const struct btf *btf,
+ 				   enum btf_kfunc_hook hook,
+ 				   u32 kfunc_btf_id,
+@@ -8854,19 +8940,21 @@ bool btf_kfunc_is_allowed(const struct btf *btf,
+ 			  u32 kfunc_btf_id,
+ 			  const struct bpf_prog *prog)
+ {
+-	enum bpf_prog_type prog_type = resolve_prog_type(prog);
+-	enum btf_kfunc_hook hook;
++	enum btf_kfunc_hook hook = BTF_KFUNC_HOOK_COMMON;
+ 	u32 *kfunc_flags;
+ 
+-	kfunc_flags = btf_kfunc_id_set_contains(btf, BTF_KFUNC_HOOK_COMMON, kfunc_btf_id);
+-	if (kfunc_flags && __btf_kfunc_is_allowed(btf, BTF_KFUNC_HOOK_COMMON, kfunc_btf_id, prog))
+-		return true;
+-
+-	hook = bpf_prog_type_to_kfunc_hook(prog_type);
++again:
+ 	kfunc_flags = btf_kfunc_id_set_contains(btf, hook, kfunc_btf_id);
+-	if (kfunc_flags && __btf_kfunc_is_allowed(btf, hook, kfunc_btf_id, prog))
++	if (kfunc_flags &&
++	    __btf_kfunc_is_allowed(btf, hook, kfunc_btf_id, prog))
+ 		return true;
+ 
++	if (hook == BTF_KFUNC_HOOK_COMMON) {
++		hook = bpf_prog_type_to_kfunc_hook(resolve_prog_type(prog));
++		if (hook != BTF_KFUNC_HOOK_COMMON)
++			goto again;
++	}
++
+ 	return false;
+ }
+ 
+@@ -8879,16 +8967,41 @@ bool btf_kfunc_is_allowed(const struct btf *btf,
+  */
+ u32 *btf_kfunc_flags(const struct btf *btf, u32 kfunc_btf_id, const struct bpf_prog *prog)
+ {
+-	enum bpf_prog_type prog_type = resolve_prog_type(prog);
+-	enum btf_kfunc_hook hook;
++	enum btf_kfunc_hook hook = BTF_KFUNC_HOOK_COMMON;
+ 	u32 *kfunc_flags;
+ 
+-	kfunc_flags = btf_kfunc_id_set_contains(btf, BTF_KFUNC_HOOK_COMMON, kfunc_btf_id);
++again:
++	kfunc_flags = btf_kfunc_id_set_contains(btf, hook, kfunc_btf_id);
+ 	if (kfunc_flags)
+ 		return kfunc_flags;
+ 
+-	hook = bpf_prog_type_to_kfunc_hook(prog_type);
+-	return btf_kfunc_id_set_contains(btf, hook, kfunc_btf_id);
++	if (hook == BTF_KFUNC_HOOK_COMMON) {
++		hook = bpf_prog_type_to_kfunc_hook(resolve_prog_type(prog));
++		if (hook != BTF_KFUNC_HOOK_COMMON)
++			goto again;
++	}
++
++	return NULL;
++}
++
++const struct bpf_kinsn *btf_kfunc_kinsn_desc(const struct btf *btf, u32 kfunc_btf_id,
++					     const struct bpf_prog *prog)
++{
++	enum btf_kfunc_hook hook = BTF_KFUNC_HOOK_COMMON;
++	const struct bpf_kinsn *kinsn;
++
++again:
++	kinsn = btf_kfunc_kinsn_set_contains(btf, hook, kfunc_btf_id);
++	if (kinsn && __btf_kfunc_is_allowed(btf, hook, kfunc_btf_id, prog))
++		return kinsn;
++
++	if (hook == BTF_KFUNC_HOOK_COMMON) {
++		hook = bpf_prog_type_to_kfunc_hook(resolve_prog_type(prog));
++		if (hook != BTF_KFUNC_HOOK_COMMON)
++			goto again;
++	}
++
++	return NULL;
+ }
+ 
+ u32 *btf_kfunc_is_modify_return(const struct btf *btf, u32 kfunc_btf_id,
+@@ -8917,6 +9030,15 @@ static int __register_btf_kfunc_id_set(enum btf_kfunc_hook hook,
+ 					     kset->set->pairs[i].flags);
+ 		if (ret)
+ 			goto err_out;
++
++		if (kset->kinsn_descs) {
++			const struct bpf_kinsn *kinsn = kset->kinsn_descs[i];
++
++			if (!kinsn || kinsn->owner != kset->owner) {
++				ret = -EINVAL;
++				goto err_out;
++			}
++		}
+ 	}
+ 
+ 	ret = btf_populate_kfunc_set(btf, hook, kset);
+diff --git a/kernel/bpf/core.c b/kernel/bpf/core.c
+index 3ece2da55..25d68ef4c 100644
+--- a/kernel/bpf/core.c
++++ b/kernel/bpf/core.c
+@@ -138,6 +138,8 @@ struct bpf_prog *bpf_prog_alloc_no_stats(unsigned int size, gfp_t gfp_extra_flag
+ 	mutex_init(&fp->aux->used_maps_mutex);
+ 	mutex_init(&fp->aux->ext_mutex);
+ 	mutex_init(&fp->aux->dst_mutex);
++	mutex_init(&fp->aux->rejit_mutex);
++	INIT_LIST_HEAD(&fp->aux->trampoline_users);
+ 	mutex_init(&fp->aux->st_ops_assoc_mutex);
+ 
+ #ifdef CONFIG_BPF_SYSCALL
+diff --git a/kernel/bpf/disasm.c b/kernel/bpf/disasm.c
+index f8a3c7eb4..4df9a9ab9 100644
+--- a/kernel/bpf/disasm.c
++++ b/kernel/bpf/disasm.c
+@@ -36,6 +36,8 @@ static const char *__func_get_name(const struct bpf_insn_cbs *cbs,
+ 		snprintf(buff, len, "%+d", insn->imm);
+ 	else if (insn->src_reg == BPF_PSEUDO_KFUNC_CALL)
+ 		snprintf(buff, len, "kernel-function");
++	else if (insn->src_reg == BPF_PSEUDO_KINSN_CALL)
++		snprintf(buff, len, "kinsn-function");
+ 
+ 	return buff;
+ }
+diff --git a/kernel/bpf/dispatcher.c b/kernel/bpf/dispatcher.c
+index b77db7413..130e59d44 100644
+--- a/kernel/bpf/dispatcher.c
++++ b/kernel/bpf/dispatcher.c
+@@ -103,7 +103,8 @@ static int bpf_dispatcher_prepare(struct bpf_dispatcher *d, void *image, void *b
+ 	return arch_prepare_bpf_dispatcher(image, buf, &ips[0], d->num_progs);
+ }
+ 
+-static void bpf_dispatcher_update(struct bpf_dispatcher *d, int prev_num_progs)
++static void bpf_dispatcher_update(struct bpf_dispatcher *d, int prev_num_progs,
++				  bool expedited)
+ {
+ 	void *new, *tmp;
+ 	u32 noff = 0;
+@@ -128,12 +129,28 @@ static void bpf_dispatcher_update(struct bpf_dispatcher *d, int prev_num_progs)
+ 	/* Make sure all the callers executing the previous/old half of the
+ 	 * image leave it, so following update call can modify it safely.
+ 	 */
+-	synchronize_rcu();
++	if (expedited)
++		synchronize_rcu_expedited();
++	else
++		synchronize_rcu();
+ 
+ 	if (new)
+ 		d->image_off = noff;
+ }
+ 
++/* Rebuild dispatcher image after a prog's bpf_func changed (e.g. REJIT). */
++void bpf_dispatcher_refresh_prog(struct bpf_dispatcher *d,
++				 struct bpf_prog *prog)
++{
++	mutex_lock(&d->mutex);
++	if (!d->image || !bpf_dispatcher_find_prog(d, prog))
++		goto out;
++
++	bpf_dispatcher_update(d, d->num_progs, true);
++out:
++	mutex_unlock(&d->mutex);
++}
++
+ void bpf_dispatcher_change_prog(struct bpf_dispatcher *d, struct bpf_prog *from,
+ 				struct bpf_prog *to)
+ {
+@@ -165,7 +182,7 @@ void bpf_dispatcher_change_prog(struct bpf_dispatcher *d, struct bpf_prog *from,
+ 	if (!changed)
+ 		goto out;
+ 
+-	bpf_dispatcher_update(d, prev_num_progs);
++	bpf_dispatcher_update(d, prev_num_progs, false);
+ out:
+ 	mutex_unlock(&d->mutex);
+ }
+diff --git a/kernel/bpf/syscall.c b/kernel/bpf/syscall.c
+index 274039e36..80bc6adf8 100644
+--- a/kernel/bpf/syscall.c
++++ b/kernel/bpf/syscall.c
+@@ -2380,6 +2380,7 @@ static void __bpf_prog_put_noref(struct bpf_prog *prog, bool deferred)
+ 	module_put(prog->aux->mod);
+ 	kvfree(prog->aux->jited_linfo);
+ 	kvfree(prog->aux->linfo);
++	kvfree(prog->aux->orig_insns);
+ 	kfree(prog->aux->kfunc_tab);
+ 	kfree(prog->aux->ctx_arg_info);
+ 	if (prog->aux->attach_btf)
+@@ -2462,6 +2463,13 @@ static void bpf_prog_get_stats(const struct bpf_prog *prog,
+ 	u64 nsecs = 0, cnt = 0, misses = 0;
+ 	int cpu;
+ 
++	if (unlikely(!prog->stats)) {
++		stats->nsecs = 0;
++		stats->cnt = 0;
++		stats->misses = 0;
++		return;
++	}
++
+ 	for_each_possible_cpu(cpu) {
+ 		const struct bpf_prog_stats *st;
+ 		unsigned int start;
+@@ -3007,6 +3015,7 @@ static int bpf_prog_load(union bpf_attr *attr, bpfptr_t uattr, u32 uattr_size)
+ 	prog->aux->dst_prog = dst_prog;
+ 	prog->aux->dev_bound = !!attr->prog_ifindex;
+ 	prog->aux->xdp_has_frags = attr->prog_flags & BPF_F_XDP_HAS_FRAGS;
++	prog->aux->prog_flags = attr->prog_flags & ~BPF_F_TOKEN_FD;
+ 
+ 	/* move token into prog->aux, reuse taken refcnt */
+ 	prog->aux->token = token;
+@@ -3020,6 +3029,13 @@ static int bpf_prog_load(union bpf_attr *attr, bpfptr_t uattr, u32 uattr_size)
+ 			     make_bpfptr(attr->insns, uattr.is_kernel),
+ 			     bpf_prog_insn_size(prog)) != 0)
+ 		goto free_prog;
++	prog->aux->orig_insns = kvmemdup(prog->insns, bpf_prog_insn_size(prog),
++					 GFP_USER);
++	if (!prog->aux->orig_insns) {
++		err = -ENOMEM;
++		goto free_prog;
++	}
++	prog->aux->orig_prog_len = bpf_prog_insn_size(prog);
+ 	/* copy eBPF program license from user space */
+ 	if (strncpy_from_bpfptr(license,
+ 				make_bpfptr(attr->license, uattr.is_kernel),
+@@ -3139,12 +3155,780 @@ static int bpf_prog_load(union bpf_attr *attr, bpfptr_t uattr, u32 uattr_size)
+ 	free_uid(prog->aux->user);
+ 	if (prog->aux->attach_btf)
+ 		btf_put(prog->aux->attach_btf);
++	kvfree(prog->aux->orig_insns);
+ 	bpf_prog_free(prog);
+ put_token:
+ 	bpf_token_put(token);
+ 	return err;
+ }
+ 
++#define BPF_PROG_REJIT_LOAD_ATTR_SIZE offsetofend(union bpf_attr, keyring_id)
++
++static bool bpf_prog_rejit_supported(const struct bpf_prog *prog)
++{
++	const struct bpf_prog_aux *aux = prog->aux;
++
++	if (!prog->jited || prog->is_func)
++		return false;
++
++	if (bpf_prog_is_offloaded(aux) || bpf_prog_is_dev_bound(aux))
++		return false;
++
++	/* Attached freplace/EXT programs clear dst_prog after link setup.
++	 * REJIT's verifier path still needs a live dst_prog to resolve the
++	 * replacement target, so reject the attached case until that state
++	 * can be reconstructed safely.
++	 */
++	if (prog->type == BPF_PROG_TYPE_EXT && !aux->dst_prog)
++		return false;
++
++	/* dst_prog / dst_trampoline are cleared to NULL after attach (in
++	 * bpf_tracing_link_init); the existing trampoline_users refresh
++	 * path handles the attached tracing case.  EXT/freplace still needs
++	 * dst_prog during verification and is rejected above once attached.
++	 *
++	 * struct_ops trampolines bake bpf_func into a direct CALL;
++	 * bpf_struct_ops_refresh_prog() patches them via text_poke.
++	 *
++	 * poke_tab (tail_call direct jumps) is now supported: REJIT
++	 * updates the existing poke entries in-place after swapping the
++	 * JIT image.  The tail_call pattern (count, map, key) must be
++	 * identical between old and new bytecode.
++	 */
++
++	return true;
++}
++
++/*
++ * Update prog's existing poke_tab entries with addresses from tmp's new
++ * JIT image.  Requires that the tail_call pattern (count, map, key) is
++ * identical between old and new bytecode.
++ *
++ * For each poke entry we:
++ *   1. Lock the PROG_ARRAY's poke_mutex
++ *   2. Mark the entry unstable (blocks concurrent map_poke_run)
++ *   3. Copy the JIT-address fields from tmp's entry into prog's entry
++ *   4. text_poke the direct-jump site in the NEW image to point at the
++ *      current tail_call target (if any)
++ *   5. Mark the entry stable again
++ *   6. Unlock
++ *
++ * Returns 0 on success, -EINVAL if the poke patterns don't match.
++ */
++static int bpf_prog_rejit_update_poke_tab(struct bpf_prog *prog,
++					   struct bpf_prog *tmp)
++{
++	struct bpf_jit_poke_descriptor *old_poke, *new_poke;
++	u32 i;
++
++	if (prog->aux->size_poke_tab != tmp->aux->size_poke_tab)
++		return -EINVAL;
++
++	if (!prog->aux->size_poke_tab)
++		return 0;
++
++	/* Validate that every entry references the same map+key. */
++	for (i = 0; i < prog->aux->size_poke_tab; i++) {
++		old_poke = &prog->aux->poke_tab[i];
++		new_poke = &tmp->aux->poke_tab[i];
++
++		if (old_poke->reason != new_poke->reason ||
++		    old_poke->insn_idx != new_poke->insn_idx ||
++		    old_poke->tail_call.map != new_poke->tail_call.map ||
++		    old_poke->tail_call.key != new_poke->tail_call.key)
++			return -EINVAL;
++	}
++
++	/* Now update each poke entry in-place.
++	 *
++	 * bpf_tail_call_direct_fixup(tmp) already ran during JIT and patched
++	 * the NEW image's direct-jump sites (nop->jmp if target exists, or
++	 * left as nop+bypass).  We only need to copy the address fields so
++	 * that future poke_run calls (triggered by map updates) patch the
++	 * correct locations in the NEW image.
++	 */
++	for (i = 0; i < prog->aux->size_poke_tab; i++) {
++		struct bpf_array *array;
++
++		old_poke = &prog->aux->poke_tab[i];
++		new_poke = &tmp->aux->poke_tab[i];
++
++		if (old_poke->reason != BPF_POKE_REASON_TAIL_CALL)
++			continue;
++
++		array = container_of(old_poke->tail_call.map,
++				     struct bpf_array, map);
++		mutex_lock(&array->aux->poke_mutex);
++
++		/* Mark unstable so concurrent poke_run skips this entry. */
++		WRITE_ONCE(old_poke->tailcall_target_stable, false);
++
++		/* Copy JIT address fields from the new image.  The actual
++		 * bytes at these addresses were already patched correctly
++		 * by bpf_tail_call_direct_fixup() during tmp's JIT.
++		 */
++		old_poke->tailcall_target = new_poke->tailcall_target;
++		old_poke->tailcall_bypass = new_poke->tailcall_bypass;
++		old_poke->bypass_addr     = new_poke->bypass_addr;
++		old_poke->adj_off         = new_poke->adj_off;
++
++		/* Mark stable again so poke_run can update this entry. */
++		WRITE_ONCE(old_poke->tailcall_target_stable, true);
++
++		mutex_unlock(&array->aux->poke_mutex);
++	}
++
++	return 0;
++}
++
++/*
++ * Untrack tmp's poke entries from PROG_ARRAY poke_progs lists.
++ * tmp was tracked by the verifier's fixup_call_args(); we must untrack
++ * before freeing tmp so that poke_run doesn't see a stale aux pointer
++ * during the window between swap and RCU-deferred free.
++ */
++static void bpf_prog_rejit_untrack_tmp_pokes(struct bpf_prog *tmp)
++{
++	u32 i;
++
++	for (i = 0; i < tmp->aux->size_poke_tab; i++) {
++		struct bpf_map *map = tmp->aux->poke_tab[i].tail_call.map;
++
++		if (map->ops->map_poke_untrack)
++			map->ops->map_poke_untrack(map, tmp->aux);
++	}
++}
++
++/*
++ * When prog is a tail_call TARGET that was REJIT'd, callers' direct-jump
++ * poke sites still encode the old bpf_func address.  We fix this in two
++ * phases around the bpf_func swap:
++ *
++ *   Phase 1 (BEFORE swap, bpf_func = old):
++ *     For every PROG_ARRAY slot holding prog, simulate a "delete":
++ *       poke_run(map, key, prog, NULL)
++ *     This patches all callers: jmp old_addr -> NOP.
++ *
++ *   Phase 2 (AFTER swap, bpf_func = new):
++ *     For every PROG_ARRAY slot holding prog, simulate an "insert":
++ *       poke_run(map, key, NULL, prog)
++ *     This patches all callers: NOP -> jmp new_addr.
++ *
++ * Between the two phases, direct tail_calls to this target fall through
++ * to the caller's fallback path (NOP = no jump).  This is safe because
++ * we hold rejit_mutex so the target prog is always valid.
++ *
++ * Scans map_idr to find all PROG_ARRAY maps (no reverse index exists).
++ */
++static void bpf_prog_rejit_poke_target_phase(struct bpf_prog *prog,
++					      bool is_insert)
++{
++	struct bpf_map *map;
++	u32 id = 0;
++
++	/* Use bpf_map_get_curr_or_next() which takes a map reference,
++	 * allowing us to drop all locks before calling map_poke_run
++	 * (which may sleep via synchronize_rcu inside text_poke).
++	 */
++	while ((map = bpf_map_get_curr_or_next(&id))) {
++		struct bpf_array *array;
++		u32 key;
++
++		if (map->map_type != BPF_MAP_TYPE_PROG_ARRAY) {
++			bpf_map_put(map);
++			id++;
++			continue;
++		}
++
++		array = container_of(map, struct bpf_array, map);
++
++		for (key = 0; key < array->map.max_entries; key++) {
++			/*
++			 * This is an intentionally lockless pre-check. A slot can
++			 * change between this read and map_poke_run(), but both
++			 * directions are benign: delete phase can leave a stale
++			 * NOP until the updater repokes, and insert phase can miss
++			 * a newly added slot until that update path repokes it.
++			 */
++			if (array->ptrs[key] != prog)
++				continue;
++
++			mutex_lock(&array->aux->poke_mutex);
++			if (array->ptrs[key] != prog) {
++				mutex_unlock(&array->aux->poke_mutex);
++				continue;
++			}
++			if (is_insert)
++				map->ops->map_poke_run(map, key, NULL, prog);
++			else
++				map->ops->map_poke_run(map, key, prog, NULL);
++			mutex_unlock(&array->aux->poke_mutex);
++		}
++		bpf_map_put(map);
++		id++;
++	}
++}
++
++static void bpf_prog_rejit_swap(struct bpf_prog *prog, struct bpf_prog *tmp)
++{
++#define SWAP_PROG_BITFIELD(a, b)			\
++	do {						\
++		unsigned int __tmp = (a);		\
++		(a) = (b);				\
++		(b) = __tmp;				\
++	} while (0)
++
++	bool old_jited = prog->jited;
++	bool old_jit_requested = prog->jit_requested;
++	u32 old_jited_len = prog->jited_len;
++	bpf_func_t old_bpf_func = prog->bpf_func;
++	u8 old_digest[sizeof(prog->digest)];
++	u32 i;
++
++	swap(prog->aux->ctx_arg_info, tmp->aux->ctx_arg_info);
++	swap(prog->aux->ctx_arg_info_size, tmp->aux->ctx_arg_info_size);
++	swap(prog->aux->orig_insns, tmp->aux->orig_insns);
++	swap(prog->aux->orig_prog_len, tmp->aux->orig_prog_len);
++	swap(prog->aux->used_btfs, tmp->aux->used_btfs);
++	swap(prog->aux->used_btf_cnt, tmp->aux->used_btf_cnt);
++	swap(prog->aux->btf, tmp->aux->btf);
++	swap(prog->aux->func_info, tmp->aux->func_info);
++	swap(prog->aux->func_info_aux, tmp->aux->func_info_aux);
++	swap(prog->aux->func_info_cnt, tmp->aux->func_info_cnt);
++	swap(prog->aux->linfo, tmp->aux->linfo);
++	swap(prog->aux->jited_linfo, tmp->aux->jited_linfo);
++	swap(prog->aux->nr_linfo, tmp->aux->nr_linfo);
++	swap(prog->aux->linfo_idx, tmp->aux->linfo_idx);
++	swap(prog->aux->mod, tmp->aux->mod);
++	swap(prog->aux->num_exentries, tmp->aux->num_exentries);
++	swap(prog->aux->extable, tmp->aux->extable);
++	swap(prog->aux->priv_stack_ptr, tmp->aux->priv_stack_ptr);
++	swap(prog->aux->saved_dst_prog_type, tmp->aux->saved_dst_prog_type);
++	swap(prog->aux->saved_dst_attach_type, tmp->aux->saved_dst_attach_type);
++	swap(prog->aux->tail_call_reachable, tmp->aux->tail_call_reachable);
++	swap(prog->aux->exception_cb, tmp->aux->exception_cb);
++	swap(prog->aux->jit_data, tmp->aux->jit_data);
++	swap(prog->aux->used_maps, tmp->aux->used_maps);
++	swap(prog->aux->used_map_cnt, tmp->aux->used_map_cnt);
++	swap(prog->aux->kfunc_tab, tmp->aux->kfunc_tab);
++	swap(prog->aux->kfunc_btf_tab, tmp->aux->kfunc_btf_tab);
++	swap(prog->aux->might_sleep, tmp->aux->might_sleep);
++	swap(prog->aux->arena, tmp->aux->arena);
++	swap(prog->aux->attach_func_proto, tmp->aux->attach_func_proto);
++	swap(prog->aux->attach_func_name, tmp->aux->attach_func_name);
++
++#ifdef CONFIG_SECURITY
++	swap(prog->aux->security, tmp->aux->security);
++#endif
++
++	bpf_prog_kallsyms_del_all(prog);
++
++	/* Swap func[] array: tmp gets old (freed after RCU), prog gets new. */
++	swap(prog->aux->func, tmp->aux->func);
++	swap(prog->aux->func_cnt, tmp->aux->func_cnt);
++	swap(prog->aux->real_func_cnt, tmp->aux->real_func_cnt);
++	swap(prog->aux->bpf_exception_cb, tmp->aux->bpf_exception_cb);
++	swap(prog->aux->exception_boundary, tmp->aux->exception_boundary);
++
++	for (i = 0; i < prog->aux->real_func_cnt; i++) {
++		prog->aux->func[i]->aux->main_prog_aux = prog->aux;
++		prog->aux->func[i]->aux->poke_tab = prog->aux->poke_tab;
++		prog->aux->func[i]->aux->size_poke_tab = prog->aux->size_poke_tab;
++	}
++
++	memcpy(old_digest, prog->digest, sizeof(old_digest));
++	memcpy(prog->digest, tmp->digest, sizeof(prog->digest));
++	memcpy(tmp->digest, old_digest, sizeof(tmp->digest));
++	prog->jited = tmp->jited;
++	prog->jit_requested = tmp->jit_requested;
++	prog->jited_len = tmp->jited_len;
++	SWAP_PROG_BITFIELD(prog->gpl_compatible, tmp->gpl_compatible);
++	SWAP_PROG_BITFIELD(prog->cb_access, tmp->cb_access);
++	SWAP_PROG_BITFIELD(prog->dst_needed, tmp->dst_needed);
++	SWAP_PROG_BITFIELD(prog->blinding_requested, tmp->blinding_requested);
++	SWAP_PROG_BITFIELD(prog->blinded, tmp->blinded);
++	SWAP_PROG_BITFIELD(prog->kprobe_override, tmp->kprobe_override);
++	SWAP_PROG_BITFIELD(prog->enforce_expected_attach_type,
++			   tmp->enforce_expected_attach_type);
++	SWAP_PROG_BITFIELD(prog->call_get_stack, tmp->call_get_stack);
++	SWAP_PROG_BITFIELD(prog->call_get_func_ip, tmp->call_get_func_ip);
++	SWAP_PROG_BITFIELD(prog->call_session_cookie, tmp->call_session_cookie);
++	SWAP_PROG_BITFIELD(prog->tstamp_type_access, tmp->tstamp_type_access);
++
++	swap(prog->aux->max_ctx_offset, tmp->aux->max_ctx_offset);
++	swap(prog->aux->max_pkt_offset, tmp->aux->max_pkt_offset);
++	swap(prog->aux->max_tp_access, tmp->aux->max_tp_access);
++	swap(prog->aux->stack_depth, tmp->aux->stack_depth);
++	swap(prog->aux->max_rdonly_access, tmp->aux->max_rdonly_access);
++	swap(prog->aux->max_rdwr_access, tmp->aux->max_rdwr_access);
++	swap(prog->aux->verifier_zext, tmp->aux->verifier_zext);
++	swap(prog->aux->changes_pkt_data, tmp->aux->changes_pkt_data);
++	swap(prog->aux->kprobe_write_ctx, tmp->aux->kprobe_write_ctx);
++	swap(prog->aux->verified_insns, tmp->aux->verified_insns);
++	prog->aux->load_time = ktime_get_boottime_ns();
++
++	/* Copy the verified/rewritten BPF insns from tmp into prog so that
++	 * bpf_prog_get_info_by_fd() (bpftool prog dump xlated) shows the
++	 * current bytecode.  insns is a flexible array embedded in struct
++	 * bpf_prog, so we can only copy if the new insns fit within the
++	 * original allocation.
++	 */
++	memcpy(prog->insnsi, tmp->insnsi, bpf_prog_insn_size(tmp));
++	prog->len = tmp->len;
++
++	/* Publish the replacement image after metadata is in place. */
++	smp_store_release(&prog->bpf_func, tmp->bpf_func);
++	tmp->jited = old_jited;
++	tmp->jit_requested = old_jit_requested;
++	tmp->jited_len = old_jited_len;
++	WRITE_ONCE(tmp->bpf_func, old_bpf_func);
++
++#undef SWAP_PROG_BITFIELD
++}
++
++struct bpf_prog_rejit_rollback_state {
++	struct bpf_insn *insnsi;
++	u32 len;
++	u64 load_time;
++};
++
++static int bpf_prog_rejit_prepare_rollback(struct bpf_prog *prog,
++					   struct bpf_prog_rejit_rollback_state *state)
++{
++	state->len = prog->len;
++	state->load_time = prog->aux->load_time;
++	state->insnsi = kvmemdup(prog->insnsi, bpf_prog_insn_size(prog), GFP_KERNEL);
++	if (!state->insnsi)
++		return -ENOMEM;
++
++	return 0;
++}
++
++static void bpf_prog_rejit_restore_rollback(struct bpf_prog *prog,
++					    const struct bpf_prog_rejit_rollback_state *state)
++{
++	if (!state->insnsi)
++		return;
++
++	memcpy(prog->insnsi, state->insnsi, state->len * sizeof(struct bpf_insn));
++	prog->len = state->len;
++	prog->aux->load_time = state->load_time;
++}
++
++static void bpf_prog_rejit_release_rollback(struct bpf_prog_rejit_rollback_state *state)
++{
++	kvfree(state->insnsi);
++	state->insnsi = NULL;
++}
++
++static int bpf_prog_rejit_rollback(struct bpf_prog *prog, struct bpf_prog *tmp,
++				    bpf_func_t new_bpf_func,
++				    struct bpf_jit_poke_descriptor *saved_poke_tab,
++				    u32 saved_poke_cnt,
++				    const struct bpf_prog_rejit_rollback_state *state)
++{
++	int err, rollback_err = 0;
++
++	/* Callers currently jump to the replacement image. Remove those edges
++	 * before restoring the old bpf_func address, then republish the old
++	 * target after the swap-back.
++	 */
++	bpf_prog_rejit_poke_target_phase(prog, false);
++
++	bpf_prog_rejit_swap(prog, tmp);
++	bpf_prog_rejit_restore_rollback(prog, state);
++
++	if (saved_poke_tab && prog->aux->poke_tab &&
++	    prog->aux->size_poke_tab == saved_poke_cnt)
++		memcpy(prog->aux->poke_tab, saved_poke_tab,
++		       saved_poke_cnt * sizeof(*saved_poke_tab));
++
++	bpf_prog_rejit_poke_target_phase(prog, true);
++
++	err = bpf_trampoline_refresh_prog(prog);
++	if (err)
++		rollback_err = err;
++
++	if (rcu_access_pointer(prog->aux->st_ops_assoc)) {
++		err = bpf_struct_ops_refresh_prog(prog, new_bpf_func);
++		if (err && !rollback_err)
++			rollback_err = err;
++	}
++
++	if (prog->type == BPF_PROG_TYPE_XDP)
++		bpf_prog_refresh_xdp(prog);
++
++	return rollback_err;
++}
++
++/* last field in 'union bpf_attr' used by this command */
++#define BPF_PROG_REJIT_LAST_FIELD rejit.flags
++#define BPF_PROG_REJIT_MAX_FD_ARRAY 64
++
++static int bpf_prog_rejit(union bpf_attr *attr)
++{
++	union bpf_attr load_attr = {};
++	bpfptr_t load_uattr = KERNEL_BPFPTR(&load_attr);
++	int *kfd_array = NULL;
++	struct bpf_jit_poke_descriptor *saved_poke_tab = NULL;
++	struct bpf_prog *prog, *tmp = NULL;
++	struct bpf_prog_rejit_rollback_state rollback_state = {};
++	u32 saved_poke_cnt = 0;
++	bool retain_old_image = false;
++	int ret = 0;
++	int err;
++
++	if (CHECK_ATTR(BPF_PROG_REJIT))
++		return -EINVAL;
++
++	if (attr->rejit.flags)
++		return -EINVAL;
++
++	if (!capable(CAP_BPF) || !capable(CAP_SYS_ADMIN))
++		return -EPERM;
++
++	if (!attr->rejit.insns || !attr->rejit.insn_cnt ||
++	    attr->rejit.insn_cnt > BPF_COMPLEXITY_LIMIT_INSNS)
++		return -E2BIG;
++	if (attr->rejit.fd_array_cnt > BPF_PROG_REJIT_MAX_FD_ARRAY)
++		return -E2BIG;
++
++	prog = bpf_prog_get(attr->rejit.prog_fd);
++	if (IS_ERR(prog))
++		return PTR_ERR(prog);
++
++	err = -EOPNOTSUPP;
++	if (!bpf_prog_rejit_supported(prog))
++		goto out_put_prog;
++
++	mutex_lock(&prog->aux->rejit_mutex);
++
++	load_attr.prog_type = prog->type;
++	load_attr.expected_attach_type = prog->expected_attach_type;
++	load_attr.insn_cnt = attr->rejit.insn_cnt;
++	load_attr.insns = attr->rejit.insns;
++	load_attr.log_level = attr->rejit.log_level;
++	load_attr.log_size = attr->rejit.log_size;
++	load_attr.log_buf = attr->rejit.log_buf;
++	load_attr.prog_flags = prog->aux->prog_flags;
++	load_attr.fd_array_cnt = attr->rejit.fd_array_cnt;
++
++	/* Copy fd_array into kernel buffer for KERNEL_BPFPTR semantics. */
++	if (attr->rejit.fd_array && attr->rejit.fd_array_cnt) {
++		size_t fda_size = (size_t)attr->rejit.fd_array_cnt * sizeof(int);
++
++		kfd_array = kvmalloc(fda_size, GFP_USER);
++		if (!kfd_array) {
++			err = -ENOMEM;
++			goto out_unlock;
++		}
++		if (copy_from_user(kfd_array,
++				   u64_to_user_ptr(attr->rejit.fd_array),
++				   fda_size)) {
++			err = -EFAULT;
++			goto out_unlock;
++		}
++		load_attr.fd_array = (__u64)(unsigned long)kfd_array;
++	}
++
++	tmp = bpf_prog_alloc(bpf_prog_size(attr->rejit.insn_cnt), GFP_USER);
++	err = -ENOMEM;
++	if (!tmp)
++		goto out_unlock;
++
++	tmp->expected_attach_type = prog->expected_attach_type;
++	tmp->sleepable = prog->sleepable;
++	tmp->aux->xdp_has_frags = prog->aux->xdp_has_frags;
++	tmp->aux->user = get_current_user();
++	tmp->len = attr->rejit.insn_cnt;
++
++	/* Propagate attach_btf info so the verifier can resolve tracing targets. */
++	if (prog->aux->attach_btf) {
++		btf_get(prog->aux->attach_btf);
++		tmp->aux->attach_btf = prog->aux->attach_btf;
++	}
++	tmp->aux->attach_btf_id = prog->aux->attach_btf_id;
++
++	/* Propagate dst_prog for EXT (freplace) programs.
++	 * The verifier needs dst_prog to resolve the target function.
++	 * Attached EXT progs clear dst_prog in link setup and are rejected
++	 * earlier by bpf_prog_rejit_supported().
++	 */
++	if (prog->aux->dst_prog) {
++		bpf_prog_inc(prog->aux->dst_prog);
++		tmp->aux->dst_prog = prog->aux->dst_prog;
++	}
++
++	err = -EFAULT;
++	if (copy_from_bpfptr(tmp->insns, make_bpfptr(attr->rejit.insns, false),
++			     bpf_prog_insn_size(tmp)) != 0)
++		goto free_tmp;
++
++	tmp->aux->orig_insns = kvmemdup(tmp->insns, bpf_prog_insn_size(tmp),
++					GFP_USER);
++	if (!tmp->aux->orig_insns) {
++		err = -ENOMEM;
++		goto free_tmp;
++	}
++	tmp->aux->orig_prog_len = bpf_prog_insn_size(tmp);
++	tmp->gpl_compatible = prog->gpl_compatible;
++	tmp->orig_prog = NULL;
++	tmp->jited = 0;
++	tmp->aux->prog_flags = prog->aux->prog_flags;
++
++	atomic64_set(&tmp->aux->refcnt, 1);
++
++	err = find_prog_type(prog->type, tmp);
++	if (err < 0)
++		goto free_tmp;
++
++	tmp->aux->load_time = ktime_get_boottime_ns();
++	memcpy(tmp->aux->name, prog->aux->name, sizeof(tmp->aux->name));
++
++	/*
++	 * For EXT (freplace) programs, the verifier calls btf_check_type_match()
++	 * which requires prog->aux->func_info, func_info_aux, and btf.
++	 * Since REJIT doesn't pass BTF/func_info via the attr, we pre-populate
++	 * them from the original program.  The verifier's check_btf_info_early()
++	 * returns early when func_info_cnt==0 in the attr and won't overwrite
++	 * these pre-populated fields.
++	 */
++	if (prog->type == BPF_PROG_TYPE_EXT && prog->aux->btf &&
++	    prog->aux->func_info && prog->aux->func_info_cnt) {
++		size_t fi_size = prog->aux->func_info_cnt *
++				 sizeof(struct bpf_func_info);
++
++		btf_get(prog->aux->btf);
++		tmp->aux->btf = prog->aux->btf;
++		tmp->aux->func_info = kvmemdup(prog->aux->func_info,
++					       fi_size, GFP_USER);
++		if (!tmp->aux->func_info) {
++			btf_put(tmp->aux->btf);
++			tmp->aux->btf = NULL;
++			err = -ENOMEM;
++			goto free_tmp;
++		}
++		tmp->aux->func_info_cnt = prog->aux->func_info_cnt;
++		tmp->aux->func_info_aux = kcalloc(
++			prog->aux->func_info_cnt,
++			sizeof(struct bpf_func_info_aux),
++			GFP_KERNEL_ACCOUNT);
++		if (!tmp->aux->func_info_aux) {
++			kvfree(tmp->aux->func_info);
++			tmp->aux->func_info = NULL;
++			btf_put(tmp->aux->btf);
++			tmp->aux->btf = NULL;
++			err = -ENOMEM;
++			goto free_tmp;
++		}
++	}
++
++	err = security_bpf_prog_load(tmp, &load_attr, NULL, true);
++	if (err)
++		goto free_tmp_sec;
++
++	err = bpf_check(&tmp, &load_attr, load_uattr,
++			BPF_PROG_REJIT_LOAD_ATTR_SIZE);
++	if (err < 0)
++		goto free_tmp_noref;
++
++	tmp = bpf_prog_select_runtime(tmp, &err);
++	if (err < 0)
++		goto free_tmp_noref;
++
++	err = bpf_prog_mark_insn_arrays_ready(tmp);
++	if (err < 0)
++		goto free_tmp_noref;
++
++	err = -EOPNOTSUPP;
++	if (!bpf_prog_rejit_supported(tmp) || !tmp->jited)
++		goto free_tmp_noref;
++	if (bpf_prog_size(tmp->len) > prog->pages * PAGE_SIZE) {
++		err = -E2BIG;
++		goto free_tmp_noref;
++	}
++	if (prog->aux->size_poke_tab) {
++		saved_poke_cnt = prog->aux->size_poke_tab;
++		saved_poke_tab = kvmemdup(prog->aux->poke_tab,
++					  saved_poke_cnt * sizeof(*saved_poke_tab),
++					  GFP_KERNEL);
++		if (!saved_poke_tab) {
++			err = -ENOMEM;
++			goto free_tmp_noref;
++		}
++	}
++
++	err = bpf_prog_rejit_prepare_rollback(prog, &rollback_state);
++	if (err)
++		goto free_tmp_noref;
++
++	{
++		bpf_func_t old_bpf_func = prog->bpf_func;
++		bpf_func_t new_bpf_func;
++
++		/* Update poke_tab (tail_call direct jumps) BEFORE swapping
++		 * the JIT image.  This patches the NEW image's direct-jump
++		 * sites and updates prog's poke entries to point into it.
++		 * Must happen before bpf_func is published.
++		 */
++		err = bpf_prog_rejit_update_poke_tab(prog, tmp);
++		if (err) {
++			pr_warn("bpf_rejit: poke_tab update failed: %d\n",
++				err);
++			goto free_tmp_noref;
++		}
++
++		/* Untrack tmp's poke entries from PROG_ARRAY poke_progs.
++		 * The verifier tracked tmp->aux; remove it now so poke_run
++		 * never sees a stale aux during the free window.
++		 */
++		bpf_prog_rejit_untrack_tmp_pokes(tmp);
++
++		/* Target-side Phase 1: if prog is a target in any PROG_ARRAY,
++		 * remove all direct jumps to it (jmp old_addr -> NOP).
++		 * Must happen while bpf_func still points to old image.
++		 */
++		bpf_prog_rejit_poke_target_phase(prog, false);
++
++		bpf_prog_rejit_swap(prog, tmp);
++
++		/* Target-side Phase 2: re-establish direct jumps with the
++		 * new bpf_func address (NOP -> jmp new_addr).
++		 */
++		bpf_prog_rejit_poke_target_phase(prog, true);
++		new_bpf_func = prog->bpf_func;
++
++		err = bpf_trampoline_refresh_prog(prog);
++		if (err) {
++			pr_warn("bpf_rejit: trampoline refresh failed: %d\n",
++				err);
++			ret = err;
++			err = bpf_prog_rejit_rollback(prog, tmp, new_bpf_func,
++						      saved_poke_tab,
++						      saved_poke_cnt,
++						      &rollback_state);
++			if (err) {
++				pr_warn("bpf_rejit: rollback after trampoline refresh failure failed: %d\n",
++					err);
++				retain_old_image = true;
++			}
++			goto post_swap_sync;
++		}
++
++		/* Refresh struct_ops trampoline if this prog is associated */
++		if (rcu_access_pointer(prog->aux->st_ops_assoc)) {
++			err = bpf_struct_ops_refresh_prog(prog, old_bpf_func);
++			if (err) {
++				pr_warn("bpf_rejit: struct_ops refresh failed: %d\n",
++					err);
++				ret = err;
++				err = bpf_prog_rejit_rollback(prog, tmp,
++						      new_bpf_func,
++						      saved_poke_tab,
++						      saved_poke_cnt,
++						      &rollback_state);
++				if (err) {
++					pr_warn("bpf_rejit: rollback after struct_ops refresh failure failed: %d\n",
++						err);
++					retain_old_image = true;
++				}
++				goto post_swap_sync;
++			}
++		}
++
++		/* Refresh XDP dispatcher if this prog is registered */
++		if (prog->type == BPF_PROG_TYPE_XDP)
++			bpf_prog_refresh_xdp(prog);
++	}
++
++post_swap_sync:
++	bpf_prog_rejit_release_rollback(&rollback_state);
++
++	if (prog->sleepable)
++		synchronize_rcu_tasks_trace();
++	else
++		synchronize_rcu_expedited();
++
++	/* __bpf_ksym_del() leaves the deleted list nodes untouched until the
++	 * grace period ends, so reset and re-register the main-program symbols
++	 * only after post-swap synchronization. The func[] swap above already
++	 * transferred the new subprog objects into prog, so their existing
++	 * kallsyms registrations stay with prog and tmp now owns only the old
++	 * subprog symbols that will be torn down below.
++	 */
++	INIT_LIST_HEAD_RCU(&prog->aux->ksym.lnode);
++#ifdef CONFIG_FINEIBT
++	INIT_LIST_HEAD_RCU(&prog->aux->ksym_prefix.lnode);
++#endif
++	bpf_prog_kallsyms_add(prog);
++
++	/* Release the extra dst_prog ref we took for the tmp verifier pass */
++	if (tmp->aux->dst_prog) {
++		bpf_prog_put(tmp->aux->dst_prog);
++		tmp->aux->dst_prog = NULL;
++	}
++	/* Reset the ksym list nodes on tmp's (old) subprogs.  The swap in
++	 * bpf_prog_rejit_swap() first called bpf_prog_kallsyms_del_all(prog)
++	 * which poisoned the old subprogs' lnodes via list_del_rcu(), then
++	 * swapped func[] so those poisoned entries now live on tmp.  Without
++	 * this reset, __bpf_prog_put_noref(tmp) → bpf_prog_kallsyms_del_all()
++	 * would try to list_del_rcu() the already-poisoned nodes, triggering a
++	 * GPF on LIST_POISON2.
++	 */
++	{
++	u32 i;
++	for (i = 0; i < tmp->aux->real_func_cnt; i++) {
++		INIT_LIST_HEAD_RCU(&tmp->aux->func[i]->aux->ksym.lnode);
++#ifdef CONFIG_FINEIBT
++		INIT_LIST_HEAD_RCU(&tmp->aux->func[i]->aux->ksym_prefix.lnode);
++#endif
++	}
++	}
++
++	if (retain_old_image) {
++		pr_warn("bpf_rejit: retaining old JIT image after refresh failure\n");
++	} else {
++		__bpf_prog_put_noref(tmp, tmp->aux->real_func_cnt > 0);
++	}
++	kvfree(saved_poke_tab);
++	kvfree(kfd_array);
++	mutex_unlock(&prog->aux->rejit_mutex);
++	bpf_prog_put(prog);
++	return ret;
++
++free_tmp_noref:
++	if (tmp->aux->dst_prog) {
++		bpf_prog_put(tmp->aux->dst_prog);
++		tmp->aux->dst_prog = NULL;
++	}
++	bpf_prog_rejit_release_rollback(&rollback_state);
++	__bpf_prog_put_noref(tmp, tmp->aux->real_func_cnt > 0);
++	goto out_unlock;
++free_tmp_sec:
++	security_bpf_prog_free(tmp);
++free_tmp:
++	if (tmp->aux->dst_prog)
++		bpf_prog_put(tmp->aux->dst_prog);
++	tmp->aux->dst_prog = NULL;
++	if (tmp->aux->attach_btf)
++		btf_put(tmp->aux->attach_btf);
++	tmp->aux->attach_btf = NULL;
++	kvfree(tmp->aux->func_info);
++	tmp->aux->func_info = NULL;
++	kfree(tmp->aux->func_info_aux);
++	tmp->aux->func_info_aux = NULL;
++	free_uid(tmp->aux->user);
++	kvfree(tmp->aux->orig_insns);
++	bpf_prog_free(tmp);
++out_unlock:
++	kvfree(saved_poke_tab);
++	kvfree(kfd_array);
++	mutex_unlock(&prog->aux->rejit_mutex);
++out_put_prog:
++	bpf_prog_put(prog);
++	return err;
++}
++
+ #define BPF_OBJ_LAST_FIELD path_fd
+ 
+ static int bpf_obj_pin(const union bpf_attr *attr)
+@@ -4810,6 +5594,16 @@ struct bpf_prog *bpf_prog_by_id(u32 id)
+ 	return prog;
+ }
+ 
++static void rejit_scx_debug_prog(const char *phase, const struct bpf_prog *prog, u32 req_id)
++{
++	if (!prog || prog->type != BPF_PROG_TYPE_STRUCT_OPS)
++		return;
++
++	pr_info("rejit-scx-debug: %s req_id=%u prog_id=%u name=%s func=%px jited_len=%u aux=%px\n",
++		phase, req_id, prog->aux->id, prog->aux->name,
++		prog->bpf_func, prog->jited_len, prog->aux);
++}
++
+ static int bpf_prog_get_fd_by_id(const union bpf_attr *attr)
+ {
+ 	struct bpf_prog *prog;
+@@ -4825,10 +5619,15 @@ static int bpf_prog_get_fd_by_id(const union bpf_attr *attr)
+ 	prog = bpf_prog_by_id(id);
+ 	if (IS_ERR(prog))
+ 		return PTR_ERR(prog);
++	rejit_scx_debug_prog("get_fd_by_id.enter", prog, id);
+ 
+ 	fd = bpf_prog_new_fd(prog);
+-	if (fd < 0)
++	if (fd < 0) {
++		rejit_scx_debug_prog("get_fd_by_id.fd_fail", prog, id);
+ 		bpf_prog_put(prog);
++	} else {
++		rejit_scx_debug_prog("get_fd_by_id.fd_ok", prog, id);
++	}
+ 
+ 	return fd;
+ }
+@@ -4988,15 +5787,48 @@ static int set_info_rec_size(struct bpf_prog_info *info)
+ 	return 0;
+ }
+ 
++static int bpf_prog_info_get_subprog(struct bpf_prog * const *func,
++				     u32 func_cnt, u32 i,
++				     struct bpf_prog **subprog)
++{
++	if (unlikely(!func || i >= func_cnt))
++		return -EIO;
++
++	*subprog = READ_ONCE(func[i]);
++	if (unlikely(!*subprog))
++		return -EIO;
++
++	return 0;
++}
++
++static bool bpf_prog_info_expose_subprog_metadata(const struct bpf_prog *prog,
++						  u32 func_cnt)
++{
++	if (!func_cnt)
++		return false;
++
++	/* struct_ops programs can be registered/unregistered while userspace is
++	 * polling prog metadata. Export only the stable main-program JIT fields
++	 * here instead of chasing live subprog arrays.
++	 */
++	if (prog->type == BPF_PROG_TYPE_STRUCT_OPS)
++		return false;
++
++	return true;
++}
++
+ static int bpf_prog_get_info_by_fd(struct file *file,
+ 				   struct bpf_prog *prog,
+ 				   const union bpf_attr *attr,
+ 				   union bpf_attr __user *uattr)
+ {
+ 	struct bpf_prog_info __user *uinfo = u64_to_user_ptr(attr->info.info);
+-	struct btf *attach_btf = bpf_prog_get_target_btf(prog);
++	struct btf *attach_btf;
++	struct bpf_prog * const *func;
+ 	struct bpf_prog_info info;
+ 	u32 info_len = attr->info.info_len;
++	u32 func_cnt, real_func_cnt;
++	bool multi_func_meta;
+ 	struct bpf_prog_kstats stats;
+ 	char __user *uinsns;
+ 	u32 ulen;
+@@ -5011,6 +5843,21 @@ static int bpf_prog_get_info_by_fd(struct file *file,
+ 	if (copy_from_user(&info, uinfo, info_len))
+ 		return -EFAULT;
+ 
++	/* Snapshot prog metadata under rejit_mutex so prog show sees a
++	 * self-consistent image while BPF_PROG_REJIT swaps it in place.
++	 */
++	guard(mutex)(&prog->aux->rejit_mutex);
++	attach_btf = bpf_prog_get_target_btf(prog);
++	rejit_scx_debug_prog("get_info.enter", prog, prog->aux->id);
++	func = READ_ONCE(prog->aux->func);
++	func_cnt = READ_ONCE(prog->aux->func_cnt);
++	real_func_cnt = READ_ONCE(prog->aux->real_func_cnt);
++	if (unlikely(func_cnt > real_func_cnt || (func_cnt && !func))) {
++		rejit_scx_debug_prog("get_info.bad_func_array", prog, prog->aux->id);
++		return -EIO;
++	}
++	multi_func_meta = bpf_prog_info_expose_subprog_metadata(prog, func_cnt);
++
+ 	info.type = prog->type;
+ 	info.id = prog->aux->id;
+ 	info.load_time = prog->aux->load_time;
+@@ -5037,6 +5884,7 @@ static int bpf_prog_get_info_by_fd(struct file *file,
+ 			}
+ 	}
+ 	mutex_unlock(&prog->aux->used_maps_mutex);
++	rejit_scx_debug_prog("get_info.after_maps", prog, prog->aux->id);
+ 
+ 	err = set_info_rec_size(&info);
+ 	if (err)
+@@ -5046,6 +5894,7 @@ static int bpf_prog_get_info_by_fd(struct file *file,
+ 	info.run_time_ns = stats.nsecs;
+ 	info.run_cnt = stats.cnt;
+ 	info.recursion_misses = stats.misses;
++	rejit_scx_debug_prog("get_info.after_stats", prog, prog->aux->id);
+ 
+ 	info.verified_insns = prog->aux->verified_insns;
+ 	if (prog->aux->btf)
+@@ -5054,6 +5903,7 @@ static int bpf_prog_get_info_by_fd(struct file *file,
+ 	if (!bpf_capable()) {
+ 		info.jited_prog_len = 0;
+ 		info.xlated_prog_len = 0;
++		info.orig_prog_len = 0;
+ 		info.nr_jited_ksyms = 0;
+ 		info.nr_jited_func_lens = 0;
+ 		info.nr_func_info = 0;
+@@ -5083,6 +5933,19 @@ static int bpf_prog_get_info_by_fd(struct file *file,
+ 		}
+ 	}
+ 
++	ulen = info.orig_prog_len;
++	info.orig_prog_len = prog->aux->orig_prog_len;
++	if (info.orig_prog_len && ulen) {
++		if (bpf_dump_raw_ok(file->f_cred)) {
++			uinsns = u64_to_user_ptr(info.orig_prog_insns);
++			ulen = min_t(u32, info.orig_prog_len, ulen);
++			if (copy_to_user(uinsns, prog->aux->orig_insns, ulen))
++				return -EFAULT;
++		} else {
++			info.orig_prog_insns = 0;
++		}
++	}
++
+ 	if (bpf_prog_is_offloaded(prog->aux)) {
+ 		err = bpf_prog_offload_info_fill(&info, prog);
+ 		if (err)
+@@ -5095,12 +5958,19 @@ static int bpf_prog_get_info_by_fd(struct file *file,
+ 	 * for offload.
+ 	 */
+ 	ulen = info.jited_prog_len;
+-	if (prog->aux->func_cnt) {
++	if (multi_func_meta) {
+ 		u32 i;
+ 
+ 		info.jited_prog_len = 0;
+-		for (i = 0; i < prog->aux->func_cnt; i++)
+-			info.jited_prog_len += prog->aux->func[i]->jited_len;
++		for (i = 0; i < func_cnt; i++) {
++			struct bpf_prog *subprog;
++
++			err = bpf_prog_info_get_subprog(func, func_cnt, i, &subprog);
++			if (err)
++				return err;
++
++			info.jited_prog_len += subprog->jited_len;
++		}
+ 	} else {
+ 		info.jited_prog_len = prog->jited_len;
+ 	}
+@@ -5113,15 +5983,21 @@ static int bpf_prog_get_info_by_fd(struct file *file,
+ 			/* for multi-function programs, copy the JITed
+ 			 * instructions for all the functions
+ 			 */
+-			if (prog->aux->func_cnt) {
++			if (multi_func_meta) {
+ 				u32 len, free, i;
+ 				u8 *img;
+ 
+ 				free = ulen;
+-				for (i = 0; i < prog->aux->func_cnt; i++) {
+-					len = prog->aux->func[i]->jited_len;
++				for (i = 0; i < func_cnt; i++) {
++					struct bpf_prog *subprog;
++
++					err = bpf_prog_info_get_subprog(func, func_cnt, i, &subprog);
++					if (err)
++						return err;
++
++					len = subprog->jited_len;
+ 					len = min_t(u32, len, free);
+-					img = (u8 *) prog->aux->func[i]->bpf_func;
++					img = (u8 *)subprog->bpf_func;
+ 					if (copy_to_user(uinsns, img, len))
+ 						return -EFAULT;
+ 					uinsns += len;
+@@ -5139,7 +6015,7 @@ static int bpf_prog_get_info_by_fd(struct file *file,
+ 	}
+ 
+ 	ulen = info.nr_jited_ksyms;
+-	info.nr_jited_ksyms = prog->aux->func_cnt ? : 1;
++	info.nr_jited_ksyms = multi_func_meta ? func_cnt : 1;
+ 	if (ulen) {
+ 		if (bpf_dump_raw_ok(file->f_cred)) {
+ 			unsigned long ksym_addr;
+@@ -5151,10 +6027,15 @@ static int bpf_prog_get_info_by_fd(struct file *file,
+ 			 */
+ 			ulen = min_t(u32, info.nr_jited_ksyms, ulen);
+ 			user_ksyms = u64_to_user_ptr(info.jited_ksyms);
+-			if (prog->aux->func_cnt) {
++			if (multi_func_meta) {
+ 				for (i = 0; i < ulen; i++) {
+-					ksym_addr = (unsigned long)
+-						prog->aux->func[i]->bpf_func;
++					struct bpf_prog *subprog;
++
++					err = bpf_prog_info_get_subprog(func, func_cnt, i, &subprog);
++					if (err)
++						return err;
++
++					ksym_addr = (unsigned long)subprog->bpf_func;
+ 					if (put_user((u64) ksym_addr,
+ 						     &user_ksyms[i]))
+ 						return -EFAULT;
+@@ -5170,7 +6051,7 @@ static int bpf_prog_get_info_by_fd(struct file *file,
+ 	}
+ 
+ 	ulen = info.nr_jited_func_lens;
+-	info.nr_jited_func_lens = prog->aux->func_cnt ? : 1;
++	info.nr_jited_func_lens = multi_func_meta ? func_cnt : 1;
+ 	if (ulen) {
+ 		if (bpf_dump_raw_ok(file->f_cred)) {
+ 			u32 __user *user_lens;
+@@ -5179,10 +6060,15 @@ static int bpf_prog_get_info_by_fd(struct file *file,
+ 			/* copy the JITed image lengths for each function */
+ 			ulen = min_t(u32, info.nr_jited_func_lens, ulen);
+ 			user_lens = u64_to_user_ptr(info.jited_func_lens);
+-			if (prog->aux->func_cnt) {
++			if (multi_func_meta) {
+ 				for (i = 0; i < ulen; i++) {
+-					func_len =
+-						prog->aux->func[i]->jited_len;
++					struct bpf_prog *subprog;
++
++					err = bpf_prog_info_get_subprog(func, func_cnt, i, &subprog);
++					if (err)
++						return err;
++
++					func_len = subprog->jited_len;
+ 					if (put_user(func_len, &user_lens[i]))
+ 						return -EFAULT;
+ 				}
+@@ -5248,17 +6134,23 @@ static int bpf_prog_get_info_by_fd(struct file *file,
+ 	}
+ 
+ 	ulen = info.nr_prog_tags;
+-	info.nr_prog_tags = prog->aux->func_cnt ? : 1;
++	info.nr_prog_tags = multi_func_meta ? func_cnt : 1;
+ 	if (ulen) {
+ 		__u8 __user (*user_prog_tags)[BPF_TAG_SIZE];
+ 		u32 i;
+ 
+ 		user_prog_tags = u64_to_user_ptr(info.prog_tags);
+ 		ulen = min_t(u32, info.nr_prog_tags, ulen);
+-		if (prog->aux->func_cnt) {
++		if (multi_func_meta) {
+ 			for (i = 0; i < ulen; i++) {
++				struct bpf_prog *subprog;
++
++				err = bpf_prog_info_get_subprog(func, func_cnt, i, &subprog);
++				if (err)
++					return err;
++
+ 				if (copy_to_user(user_prog_tags[i],
+-						 prog->aux->func[i]->tag,
++						 subprog->tag,
+ 						 BPF_TAG_SIZE))
+ 					return -EFAULT;
+ 			}
+@@ -5270,6 +6162,7 @@ static int bpf_prog_get_info_by_fd(struct file *file,
+ 	}
+ 
+ done:
++	rejit_scx_debug_prog("get_info.done", prog, prog->aux->id);
+ 	if (copy_to_user(uinfo, &info, info_len) ||
+ 	    put_user(info_len, &uattr->info.info_len))
+ 		return -EFAULT;
+@@ -6328,6 +7221,9 @@ static int __sys_bpf(enum bpf_cmd cmd, bpfptr_t uattr, unsigned int size)
+ 	case BPF_PROG_ASSOC_STRUCT_OPS:
+ 		err = prog_assoc_struct_ops(&attr);
+ 		break;
++	case BPF_PROG_REJIT:
++		err = bpf_prog_rejit(&attr);
++		break;
+ 	default:
+ 		err = -EINVAL;
+ 		break;
+diff --git a/kernel/bpf/trampoline.c b/kernel/bpf/trampoline.c
+index f02254a21..15d256733 100644
+--- a/kernel/bpf/trampoline.c
++++ b/kernel/bpf/trampoline.c
+@@ -838,15 +838,34 @@ static int __bpf_trampoline_link_prog(struct bpf_tramp_link *link,
+ 	return err;
+ }
+ 
++struct bpf_tramp_user {
++	struct list_head list;
++	struct bpf_trampoline *tr;
++};
++
+ int bpf_trampoline_link_prog(struct bpf_tramp_link *link,
+ 			     struct bpf_trampoline *tr,
+ 			     struct bpf_prog *tgt_prog)
+ {
++	struct bpf_tramp_user *tu;
+ 	int err;
+ 
++	/* Pre-allocate reverse index entry before taking locks */
++	tu = kzalloc(sizeof(*tu), GFP_KERNEL);
++	if (!tu)
++		return -ENOMEM;
++
++	tu->tr = tr;
++	mutex_lock(&link->link.prog->aux->rejit_mutex);
+ 	mutex_lock(&tr->mutex);
+ 	err = __bpf_trampoline_link_prog(link, tr, tgt_prog);
++	if (!err)
++		list_add(&tu->list, &link->link.prog->aux->trampoline_users);
+ 	mutex_unlock(&tr->mutex);
++	mutex_unlock(&link->link.prog->aux->rejit_mutex);
++	if (err)
++		kfree(tu);
++
+ 	return err;
+ }
+ 
+@@ -885,11 +904,50 @@ int bpf_trampoline_unlink_prog(struct bpf_tramp_link *link,
+ 			       struct bpf_trampoline *tr,
+ 			       struct bpf_prog *tgt_prog)
+ {
++	struct bpf_tramp_user *tu, *tmp;
+ 	int err;
+ 
++	mutex_lock(&link->link.prog->aux->rejit_mutex);
+ 	mutex_lock(&tr->mutex);
+ 	err = __bpf_trampoline_unlink_prog(link, tr, tgt_prog);
++	list_for_each_entry_safe(tu, tmp,
++				 &link->link.prog->aux->trampoline_users,
++				 list) {
++		if (tu->tr == tr) {
++			list_del(&tu->list);
++			kfree(tu);
++			break;
++		}
++	}
+ 	mutex_unlock(&tr->mutex);
++	mutex_unlock(&link->link.prog->aux->rejit_mutex);
++
++	return err;
++}
++
++/* Called after bpf_func update, before old image free. Caller holds rejit_mutex. */
++int bpf_trampoline_refresh_prog(struct bpf_prog *prog)
++{
++	struct bpf_tramp_user *tu;
++	int err = 0;
++
++	list_for_each_entry(tu, &prog->aux->trampoline_users, list) {
++		struct bpf_trampoline *tr = tu->tr;
++
++		mutex_lock(&tr->mutex);
++
++		/* Rebuild the trampoline image for every user instead of trying
++		 * to text-poke freplace callsites in place. This keeps refresh
++		 * semantics aligned with the normal trampoline update path.
++		 */
++		err = bpf_trampoline_update(tr, true /* lock_direct_mutex */);
++
++		mutex_unlock(&tr->mutex);
++
++		if (err)
++			break;
++	}
++
+ 	return err;
+ }
+ 
+diff --git a/kernel/bpf/verifier.c b/kernel/bpf/verifier.c
+index 159b25f82..c531aea0d 100644
+--- a/kernel/bpf/verifier.c
++++ b/kernel/bpf/verifier.c
+@@ -272,6 +272,12 @@ static bool bpf_pseudo_kfunc_call(const struct bpf_insn *insn)
+ 	       insn->src_reg == BPF_PSEUDO_KFUNC_CALL;
+ }
+ 
++static bool bpf_pseudo_kinsn_call(const struct bpf_insn *insn)
++{
++	return insn->code == (BPF_JMP | BPF_CALL) &&
++	       insn->src_reg == BPF_PSEUDO_KINSN_CALL;
++}
++
+ struct bpf_map_desc {
+ 	struct bpf_map *ptr;
+ 	int uid;
+@@ -301,6 +307,7 @@ struct bpf_call_arg_meta {
+ struct bpf_kfunc_meta {
+ 	struct btf *btf;
+ 	const struct btf_type *proto;
++	const struct bpf_kinsn *kinsn;
+ 	const char *name;
+ 	const u32 *flags;
+ 	s32 id;
+@@ -3172,6 +3179,7 @@ static int bpf_find_exception_callback_insn_off(struct bpf_verifier_env *env)
+ 
+ struct bpf_kfunc_desc {
+ 	struct btf_func_model func_model;
++	const struct bpf_kinsn *kinsn;
+ 	u32 func_id;
+ 	s32 imm;
+ 	u16 offset;
+@@ -3199,6 +3207,10 @@ struct bpf_kfunc_btf_tab {
+ 	u32 nr_descs;
+ };
+ 
++static struct bpf_prog *bpf_patch_insn_data(struct bpf_verifier_env *env, u32 off,
++					    const struct bpf_insn *patch, u32 len);
++static int verifier_remove_insns(struct bpf_verifier_env *env, u32 off, u32 cnt);
++
+ static int specialize_kfunc(struct bpf_verifier_env *env, struct bpf_kfunc_desc *desc,
+ 			    int insn_idx);
+ 
+@@ -3211,6 +3223,8 @@ static int kfunc_desc_cmp_by_id_off(const void *a, const void *b)
+ 	return d0->func_id - d1->func_id ?: d0->offset - d1->offset;
+ }
+ 
++static int kfunc_desc_cmp_by_imm_off(const void *a, const void *b);
++
+ static int kfunc_btf_cmp_by_off(const void *a, const void *b)
+ {
+ 	const struct bpf_kfunc_btf *d0 = a;
+@@ -3257,6 +3271,13 @@ static struct btf *__find_kfunc_desc_btf(struct bpf_verifier_env *env,
+ 	int btf_fd;
+ 
+ 	tab = env->prog->aux->kfunc_btf_tab;
++	if (!tab) {
++		tab = kzalloc_obj(*tab, GFP_KERNEL_ACCOUNT);
++		if (!tab)
++			return ERR_PTR(-ENOMEM);
++		env->prog->aux->kfunc_btf_tab = tab;
++	}
++
+ 	b = bsearch(&kf_btf, tab->descs, tab->nr_descs,
+ 		    sizeof(tab->descs[0]), kfunc_btf_cmp_by_off);
+ 	if (!b) {
+@@ -3422,6 +3443,7 @@ static int fetch_kfunc_meta(struct bpf_verifier_env *env,
+ 	memset(kfunc, 0, sizeof(*kfunc));
+ 	kfunc->btf = btf;
+ 	kfunc->id = func_id;
++	kfunc->kinsn = btf_kfunc_kinsn_desc(btf, func_id, env->prog);
+ 	kfunc->name = func_name;
+ 	kfunc->proto = func_proto;
+ 	kfunc->flags = kfunc_flags;
+@@ -3429,9 +3451,9 @@ static int fetch_kfunc_meta(struct bpf_verifier_env *env,
+ 	return 0;
+ }
+ 
+-static int add_kfunc_call(struct bpf_verifier_env *env, u32 func_id, s16 offset)
++static int add_kfunc_desc(struct bpf_verifier_env *env, u32 func_id, s16 offset,
++			  bool kinsn_call)
+ {
+-	struct bpf_kfunc_btf_tab *btf_tab;
+ 	struct btf_func_model func_model;
+ 	struct bpf_kfunc_desc_tab *tab;
+ 	struct bpf_prog_aux *prog_aux;
+@@ -3441,27 +3463,40 @@ static int add_kfunc_call(struct bpf_verifier_env *env, u32 func_id, s16 offset)
+ 	int err;
+ 
+ 	prog_aux = env->prog->aux;
++
++	/* func_id == 0 is always invalid, but instead of returning an error, be
++	 * conservative and wait until the code elimination pass before returning
++	 * error, so that invalid calls that get pruned out can be in BPF programs
++	 * loaded from userspace. It is also required that offset be untouched
++	 * for such calls.
++	 */
++	if (!kinsn_call && !func_id && !offset)
++		return 0;
++
+ 	tab = prog_aux->kfunc_tab;
+-	btf_tab = prog_aux->kfunc_btf_tab;
+ 	if (!tab) {
+-		if (!btf_vmlinux) {
+-			verbose(env, "calling kernel function is not supported without CONFIG_DEBUG_INFO_BTF\n");
+-			return -ENOTSUPP;
+-		}
++		if (!kinsn_call) {
++			if (!btf_vmlinux) {
++				verbose(env,
++					"calling kernel function is not supported without CONFIG_DEBUG_INFO_BTF\n");
++				return -EOPNOTSUPP;
++			}
+ 
+-		if (!env->prog->jit_requested) {
+-			verbose(env, "JIT is required for calling kernel function\n");
+-			return -ENOTSUPP;
+-		}
++			if (!env->prog->jit_requested) {
++				verbose(env, "JIT is required for calling kernel function\n");
++				return -EOPNOTSUPP;
++			}
+ 
+-		if (!bpf_jit_supports_kfunc_call()) {
+-			verbose(env, "JIT does not support calling kernel function\n");
+-			return -ENOTSUPP;
+-		}
++			if (!bpf_jit_supports_kfunc_call()) {
++				verbose(env, "JIT does not support calling kernel function\n");
++				return -EOPNOTSUPP;
++			}
+ 
+-		if (!env->prog->gpl_compatible) {
+-			verbose(env, "cannot call kernel function from non-GPL compatible program\n");
+-			return -EINVAL;
++			if (!env->prog->gpl_compatible) {
++				verbose(env,
++					"cannot call kernel function from non-GPL compatible program\n");
++				return -EINVAL;
++			}
+ 		}
+ 
+ 		tab = kzalloc_obj(*tab, GFP_KERNEL_ACCOUNT);
+@@ -3470,27 +3505,12 @@ static int add_kfunc_call(struct bpf_verifier_env *env, u32 func_id, s16 offset)
+ 		prog_aux->kfunc_tab = tab;
+ 	}
+ 
+-	/* func_id == 0 is always invalid, but instead of returning an error, be
+-	 * conservative and wait until the code elimination pass before returning
+-	 * error, so that invalid calls that get pruned out can be in BPF programs
+-	 * loaded from userspace.  It is also required that offset be untouched
+-	 * for such calls.
+-	 */
+-	if (!func_id && !offset)
+-		return 0;
+-
+-	if (!btf_tab && offset) {
+-		btf_tab = kzalloc_obj(*btf_tab, GFP_KERNEL_ACCOUNT);
+-		if (!btf_tab)
+-			return -ENOMEM;
+-		prog_aux->kfunc_btf_tab = btf_tab;
+-	}
+-
+ 	if (find_kfunc_desc(env->prog, func_id, offset))
+ 		return 0;
+ 
+ 	if (tab->nr_descs == MAX_KFUNC_DESCS) {
+-		verbose(env, "too many different kernel function calls\n");
++		verbose(env, "too many different kernel/%s calls\n",
++			kinsn_call ? "kinsn" : "function");
+ 		return -E2BIG;
+ 	}
+ 
+@@ -3498,27 +3518,54 @@ static int add_kfunc_call(struct bpf_verifier_env *env, u32 func_id, s16 offset)
+ 	if (err)
+ 		return err;
+ 
+-	addr = kallsyms_lookup_name(kfunc.name);
+-	if (!addr) {
+-		verbose(env, "cannot find address for kernel function %s\n", kfunc.name);
+-		return -EINVAL;
+-	}
++	desc = &tab->descs[tab->nr_descs++];
++	desc->func_id = func_id;
++	desc->offset = offset;
++	if (kinsn_call) {
++		if (!kfunc.kinsn) {
++			verbose(env, "kfunc btf_id %d is not registered as kinsn\n",
++				func_id);
++			tab->nr_descs--;
++			return -ENOENT;
++		}
+ 
+-	if (bpf_dev_bound_kfunc_id(func_id)) {
+-		err = bpf_dev_bound_kfunc_check(&env->log, prog_aux);
+-		if (err)
++		if (!kfunc.kinsn->instantiate_insn || !kfunc.kinsn->max_insn_cnt) {
++			verbose(env, "kinsn function btf_id %d is incomplete\n",
++				func_id);
++			tab->nr_descs--;
++			return -EINVAL;
++		}
++
++		desc->imm = func_id;
++		desc->kinsn = kfunc.kinsn;
++	} else {
++		addr = kallsyms_lookup_name(kfunc.name);
++		if (!addr) {
++			verbose(env, "cannot find address for kernel function %s\n",
++				kfunc.name);
++			tab->nr_descs--;
++			return -EINVAL;
++		}
++
++		if (bpf_dev_bound_kfunc_id(func_id)) {
++			err = bpf_dev_bound_kfunc_check(&env->log, prog_aux);
++			if (err) {
++				tab->nr_descs--;
++				return err;
++			}
++		}
++
++		err = btf_distill_func_proto(&env->log, kfunc.btf, kfunc.proto,
++					     kfunc.name, &func_model);
++		if (err) {
++			tab->nr_descs--;
+ 			return err;
+-	}
++		}
+ 
+-	err = btf_distill_func_proto(&env->log, kfunc.btf, kfunc.proto, kfunc.name, &func_model);
+-	if (err)
+-		return err;
++		desc->addr = addr;
++		desc->func_model = func_model;
++	}
+ 
+-	desc = &tab->descs[tab->nr_descs++];
+-	desc->func_id = func_id;
+-	desc->offset = offset;
+-	desc->addr = addr;
+-	desc->func_model = func_model;
+ 	sort(tab->descs, tab->nr_descs, sizeof(tab->descs[0]),
+ 	     kfunc_desc_cmp_by_id_off, NULL);
+ 	return 0;
+@@ -3536,7 +3583,8 @@ static int kfunc_desc_cmp_by_imm_off(const void *a, const void *b)
+ 	return 0;
+ }
+ 
+-static int set_kfunc_desc_imm(struct bpf_verifier_env *env, struct bpf_kfunc_desc *desc)
++static int set_kfunc_desc_imm(struct bpf_verifier_env *env,
++			      struct bpf_kfunc_desc *desc)
+ {
+ 	unsigned long call_imm;
+ 
+@@ -3558,14 +3606,22 @@ static int set_kfunc_desc_imm(struct bpf_verifier_env *env, struct bpf_kfunc_des
+ static int sort_kfunc_descs_by_imm_off(struct bpf_verifier_env *env)
+ {
+ 	struct bpf_kfunc_desc_tab *tab;
+-	int i, err;
++	int i;
+ 
+ 	tab = env->prog->aux->kfunc_tab;
+ 	if (!tab)
+ 		return 0;
+ 
+ 	for (i = 0; i < tab->nr_descs; i++) {
+-		err = set_kfunc_desc_imm(env, &tab->descs[i]);
++		struct bpf_kfunc_desc *desc = &tab->descs[i];
++		int err;
++
++		if (desc->kinsn) {
++			desc->imm = desc->func_id;
++			continue;
++		}
++
++		err = set_kfunc_desc_imm(env, desc);
+ 		if (err)
+ 			return err;
+ 	}
+@@ -3577,25 +3633,281 @@ static int sort_kfunc_descs_by_imm_off(struct bpf_verifier_env *env)
+ 
+ bool bpf_prog_has_kfunc_call(const struct bpf_prog *prog)
+ {
+-	return !!prog->aux->kfunc_tab;
++	struct bpf_kfunc_desc_tab *tab = prog->aux->kfunc_tab;
++	u32 i;
++
++	if (!tab)
++		return false;
++
++	for (i = 0; i < tab->nr_descs; i++) {
++		if (!tab->descs[i].kinsn)
++			return true;
++	}
++
++	return false;
+ }
+ 
+ const struct btf_func_model *
+ bpf_jit_find_kfunc_model(const struct bpf_prog *prog,
+ 			 const struct bpf_insn *insn)
+ {
+-	const struct bpf_kfunc_desc desc = {
++	const struct bpf_kfunc_desc key = {
+ 		.imm = insn->imm,
+ 		.offset = insn->off,
+ 	};
+-	const struct bpf_kfunc_desc *res;
++	const struct bpf_kfunc_desc *desc;
+ 	struct bpf_kfunc_desc_tab *tab;
+ 
+ 	tab = prog->aux->kfunc_tab;
+-	res = bsearch(&desc, tab->descs, tab->nr_descs,
+-		      sizeof(tab->descs[0]), kfunc_desc_cmp_by_imm_off);
++	if (!tab)
++		return NULL;
++	desc = bsearch(&key, tab->descs, tab->nr_descs,
++		       sizeof(tab->descs[0]), kfunc_desc_cmp_by_imm_off);
++	return desc && !desc->kinsn ? &desc->func_model : NULL;
++}
++
++static int validate_kinsn_proof_seq(struct bpf_verifier_env *env,
++				    const struct bpf_kinsn *kinsn,
++				    const struct bpf_insn *insn_buf,
++				    u32 cnt)
++{
++	u32 i;
++
++	if (!cnt || cnt > kinsn->max_insn_cnt)
++		return -EINVAL;
++
++	for (i = 0; i < cnt; i++) {
++		const struct bpf_insn *insn = &insn_buf[i];
++		u8 class = BPF_CLASS(insn->code);
++
++		if (bpf_kinsn_is_sidecar_insn(insn)) {
++			verbose(env, "kinsn proof sequence cannot contain sidecar pseudo-insns\n");
++			return -EINVAL;
++		}
++
++		if (class == BPF_JMP || class == BPF_JMP32) {
++			u8 op = BPF_OP(insn->code);
++			s32 jmp_off;
++			int tgt;
+ 
+-	return res ? &res->func_model : NULL;
++			if (op == BPF_CALL || op == BPF_EXIT) {
++				verbose(env, "kinsn proof sequence cannot contain calls or exits\n");
++				return -EINVAL;
++			}
++
++			jmp_off = insn->off;
++			if (class == BPF_JMP32 && op == BPF_JA)
++				jmp_off = insn->imm;
++
++			tgt = i + 1 + jmp_off;
++			if (tgt < 0 || tgt > cnt) {
++				verbose(env, "kinsn proof sequence jump escapes its region\n");
++				return -EINVAL;
++			}
++			if (tgt <= i) {
++				verbose(env, "kinsn proof sequence cannot contain back-edges\n");
++				return -EINVAL;
++			}
++		}
++
++		if (class == BPF_LD && BPF_MODE(insn->code) == BPF_IMM &&
++		    insn->src_reg != 0) {
++			verbose(env, "kinsn proof sequence cannot contain pseudo ldimm64\n");
++			return -EINVAL;
++		}
++	}
++
++	return 0;
++}
++
++static int lower_kinsn_proof_regions(struct bpf_verifier_env *env)
++{
++	u32 cap = env->kinsn_call_cnt;
++	struct bpf_insn *proof_buf = NULL;
++	int err;
++	int i;
++
++	kvfree(env->kinsn_regions);
++	env->kinsn_regions = NULL;
++	env->kinsn_region_cnt = 0;
++	env->kinsn_region_cap = cap;
++	if (cap) {
++		env->kinsn_regions = kvcalloc(cap, sizeof(*env->kinsn_regions),
++					      GFP_KERNEL_ACCOUNT);
++		if (!env->kinsn_regions)
++			return -ENOMEM;
++	}
++
++	for (i = env->prog->len - 1; i >= 0; i--) {
++		struct bpf_prog *new_prog;
++		struct bpf_kinsn_region *region;
++		const struct bpf_kinsn *kinsn;
++		struct bpf_insn *call;
++		const struct bpf_insn *sidecar = NULL;
++		u64 payload;
++		int cnt;
++
++		proof_buf = NULL;
++		call = &env->prog->insnsi[i];
++		if (!bpf_pseudo_kinsn_call(call))
++			continue;
++
++		if (i > 0 && bpf_kinsn_is_sidecar_insn(&env->prog->insnsi[i - 1])) {
++			int j;
++
++			sidecar = &env->prog->insnsi[i - 1];
++			for (j = 1; j < env->subprog_cnt; j++) {
++				if (env->subprog_info[j].start == i) {
++					sidecar = NULL;
++					break;
++				}
++			}
++		}
++		if (!sidecar) {
++			verbose(env, "kinsn call must be preceded by sidecar payload\n");
++			return -EINVAL;
++		}
++
++		err = bpf_jit_get_kinsn_payload(env->prog, call, &kinsn, &payload);
++		if (err)
++			return err;
++
++		proof_buf = kvcalloc(kinsn->max_insn_cnt, sizeof(*proof_buf),
++				     GFP_KERNEL_ACCOUNT);
++		if (!proof_buf)
++			return -ENOMEM;
++
++		cnt = kinsn->instantiate_insn(payload, proof_buf);
++		if (cnt <= 0) {
++			err = cnt ? cnt : -EINVAL;
++			goto err_free_proof_buf;
++		}
++
++		err = validate_kinsn_proof_seq(env, kinsn, proof_buf, cnt);
++		if (err)
++			goto err_free_proof_buf;
++
++		if (env->kinsn_region_cnt == env->kinsn_region_cap) {
++			verbose(env, "too many kinsn proof regions\n");
++			err = -E2BIG;
++			goto err_free_proof_buf;
++		}
++
++		region = &env->kinsn_regions[env->kinsn_region_cnt++];
++		region->start = i - 1;
++		region->proof_len = cnt;
++		region->orig[0] = *sidecar;
++		region->orig[1] = *call;
++
++		err = verifier_remove_insns(env, i - 1, 1);
++		if (err)
++			goto err_free_proof_buf;
++
++		new_prog = bpf_patch_insn_data(env, i - 1, proof_buf, cnt);
++		kvfree(proof_buf);
++		if (!new_prog)
++			return -ENOMEM;
++
++		env->prog = new_prog;
++		if (cnt != 2) {
++			u32 j;
++
++			for (j = 0; j < env->kinsn_region_cnt - 1; j++) {
++				struct bpf_kinsn_region *prior = &env->kinsn_regions[j];
++				s32 new_start;
++
++				if (prior->start <= region->start)
++					continue;
++
++				new_start = (s32)prior->start + (cnt - 2);
++				if (WARN_ON_ONCE(new_start < 0))
++					new_start = 0;
++				prior->start = new_start;
++			}
++		}
++	}
++
++	return 0;
++
++err_free_proof_buf:
++	kvfree(proof_buf);
++	return err;
++}
++
++static int restore_kinsn_proof_regions(struct bpf_verifier_env *env)
++{
++	struct bpf_insn_aux_data *aux = env->insn_aux_data;
++	u32 i;
++
++	for (i = 0; i < env->kinsn_region_cnt; i++) {
++		struct bpf_prog *new_prog;
++		struct bpf_kinsn_region *region = &env->kinsn_regions[i];
++		int err;
++
++		new_prog = bpf_patch_insn_data(env, region->start, region->orig, 2);
++		if (!new_prog)
++			return -ENOMEM;
++		env->prog = new_prog;
++
++		if (region->proof_len > 1) {
++			err = verifier_remove_insns(env, region->start + 2,
++						    region->proof_len - 1);
++			if (err)
++				return err;
++		}
++
++		if (aux[region->start].jt) {
++			kvfree(aux[region->start].jt);
++			aux[region->start].jt = NULL;
++		}
++		if (aux[region->start + 1].jt) {
++			kvfree(aux[region->start + 1].jt);
++			aux[region->start + 1].jt = NULL;
++		}
++
++		aux[region->start] = (struct bpf_insn_aux_data) {
++			.seen = max(aux[region->start].seen,
++				    aux[region->start + 1].seen),
++			.orig_idx = aux[region->start].orig_idx,
++		};
++		aux[region->start + 1] = (struct bpf_insn_aux_data) {
++			.seen = aux[region->start].seen,
++			.orig_idx = aux[region->start + 1].orig_idx,
++		};
++	}
++
++	return 0;
++}
++
++int bpf_jit_get_kinsn_payload(const struct bpf_prog *prog,
++			      const struct bpf_insn *insn,
++			      const struct bpf_kinsn **kinsn,
++			      u64 *payload)
++{
++	const struct bpf_kfunc_desc key = {
++		.imm = insn->imm,
++		.offset = insn->off,
++	};
++	const struct bpf_kfunc_desc *desc;
++	ptrdiff_t insn_idx = insn - prog->insnsi;
++	struct bpf_kfunc_desc_tab *tab;
++
++	tab = prog->aux->kfunc_tab;
++	if (!tab)
++		return -ENOENT;
++	desc = bsearch(&key, tab->descs, tab->nr_descs,
++		       sizeof(tab->descs[0]), kfunc_desc_cmp_by_imm_off);
++	if (!desc || !desc->kinsn)
++		return -ENOENT;
++
++	if (insn_idx <= 0 || !bpf_kinsn_is_sidecar_insn(insn - 1))
++		return -EINVAL;
++
++	if (kinsn)
++		*kinsn = desc->kinsn;
++	if (payload)
++		*payload = bpf_kinsn_sidecar_payload(insn - 1);
++	return 0;
+ }
+ 
+ static int add_kfunc_in_insns(struct bpf_verifier_env *env,
+@@ -3605,7 +3917,7 @@ static int add_kfunc_in_insns(struct bpf_verifier_env *env,
+ 
+ 	for (i = 0; i < cnt; i++, insn++) {
+ 		if (bpf_pseudo_kfunc_call(insn)) {
+-			ret = add_kfunc_call(env, insn->imm, insn->off);
++			ret = add_kfunc_desc(env, insn->imm, insn->off, false);
+ 			if (ret < 0)
+ 				return ret;
+ 		}
+@@ -3620,13 +3932,16 @@ static int add_subprog_and_kfunc(struct bpf_verifier_env *env)
+ 	struct bpf_insn *insn = env->prog->insnsi;
+ 
+ 	/* Add entry function. */
++	env->kinsn_call_cnt = 0;
++
+ 	ret = add_subprog(env, 0);
+ 	if (ret)
+ 		return ret;
+ 
+ 	for (i = 0; i < insn_cnt; i++, insn++) {
+ 		if (!bpf_pseudo_func(insn) && !bpf_pseudo_call(insn) &&
+-		    !bpf_pseudo_kfunc_call(insn))
++		    !bpf_pseudo_kfunc_call(insn) &&
++		    !bpf_pseudo_kinsn_call(insn))
+ 			continue;
+ 
+ 		if (!env->bpf_capable) {
+@@ -3636,8 +3951,12 @@ static int add_subprog_and_kfunc(struct bpf_verifier_env *env)
+ 
+ 		if (bpf_pseudo_func(insn) || bpf_pseudo_call(insn))
+ 			ret = add_subprog(env, i + insn->imm + 1);
+-		else
+-			ret = add_kfunc_call(env, insn->imm, insn->off);
++		else if (bpf_pseudo_kfunc_call(insn))
++			ret = add_kfunc_desc(env, insn->imm, insn->off, false);
++		else {
++			env->kinsn_call_cnt++;
++			ret = add_kfunc_desc(env, insn->imm, insn->off, true);
++		}
+ 
+ 		if (ret < 0)
+ 			return ret;
+@@ -4162,18 +4481,19 @@ static int get_prev_insn_idx(struct bpf_verifier_state *st, int i,
+ 
+ static const char *disasm_kfunc_name(void *data, const struct bpf_insn *insn)
+ {
+-	const struct btf_type *func;
++	const struct btf_type *t;
+ 	struct btf *desc_btf;
+ 
+-	if (insn->src_reg != BPF_PSEUDO_KFUNC_CALL)
++	if (insn->src_reg != BPF_PSEUDO_KFUNC_CALL &&
++	    insn->src_reg != BPF_PSEUDO_KINSN_CALL)
+ 		return NULL;
+ 
+ 	desc_btf = find_kfunc_desc_btf(data, insn->off);
+ 	if (IS_ERR(desc_btf))
+ 		return "<error>";
+ 
+-	func = btf_type_by_id(desc_btf, insn->imm);
+-	return btf_name_by_offset(desc_btf, func->name_off);
++	t = btf_type_by_id(desc_btf, insn->imm);
++	return t ? btf_name_by_offset(desc_btf, t->name_off) : "<invalid>";
+ }
+ 
+ static void verbose_insn(struct bpf_verifier_env *env, struct bpf_insn *insn)
+@@ -4409,6 +4729,9 @@ static int backtrack_insn(struct bpf_verifier_env *env, int idx, int subseq_idx,
+ 	 */
+ 	bt_sync_linked_regs(bt, hist);
+ 
++	if (bpf_kinsn_is_sidecar_insn(insn))
++		return 0;
++
+ 	if (class == BPF_ALU || class == BPF_ALU64) {
+ 		if (!bt_is_reg_set(bt, dreg))
+ 			return 0;
+@@ -21029,12 +21352,35 @@ static int check_indirect_jump(struct bpf_verifier_env *env, struct bpf_insn *in
+ 	return 0;
+ }
+ 
++static int check_kinsn_sidecar_insn(struct bpf_verifier_env *env,
++				    const struct bpf_insn *insn)
++{
++	const struct bpf_insn *next;
++
++	if (env->insn_idx == env->prog->len - 1) {
++		verbose(env, "kinsn sidecar must be followed by a kinsn call\n");
++		return -EINVAL;
++	}
++
++	next = &env->prog->insnsi[env->insn_idx + 1];
++	if (!bpf_pseudo_kinsn_call(next)) {
++		verbose(env, "kinsn sidecar must be immediately followed by a kinsn call\n");
++		return -EINVAL;
++	}
++
++	env->insn_idx++;
++	return 0;
++}
++
+ static int do_check_insn(struct bpf_verifier_env *env, bool *do_print_state)
+ {
+ 	int err;
+ 	struct bpf_insn *insn = &env->prog->insnsi[env->insn_idx];
+ 	u8 class = BPF_CLASS(insn->code);
+ 
++	if (bpf_kinsn_is_sidecar_insn(insn))
++		return check_kinsn_sidecar_insn(env, insn);
++
+ 	if (class == BPF_ALU || class == BPF_ALU64) {
+ 		err = check_alu_op(env, insn);
+ 		if (err)
+@@ -21098,10 +21444,12 @@ static int do_check_insn(struct bpf_verifier_env *env, bool *do_print_state)
+ 		if (opcode == BPF_CALL) {
+ 			if (BPF_SRC(insn->code) != BPF_K ||
+ 			    (insn->src_reg != BPF_PSEUDO_KFUNC_CALL &&
++			     insn->src_reg != BPF_PSEUDO_KINSN_CALL &&
+ 			     insn->off != 0) ||
+ 			    (insn->src_reg != BPF_REG_0 &&
+ 			     insn->src_reg != BPF_PSEUDO_CALL &&
+-			     insn->src_reg != BPF_PSEUDO_KFUNC_CALL) ||
++			     insn->src_reg != BPF_PSEUDO_KFUNC_CALL &&
++			     insn->src_reg != BPF_PSEUDO_KINSN_CALL) ||
+ 			    insn->dst_reg != BPF_REG_0 || class == BPF_JMP32) {
+ 				verbose(env, "BPF_CALL uses reserved fields\n");
+ 				return -EINVAL;
+@@ -21123,6 +21471,9 @@ static int do_check_insn(struct bpf_verifier_env *env, bool *do_print_state)
+ 				err = check_kfunc_call(env, insn, &env->insn_idx);
+ 				if (!err && is_bpf_throw_kfunc(insn))
+ 					return process_bpf_exit_full(env, do_print_state, true);
++			} else if (insn->src_reg == BPF_PSEUDO_KINSN_CALL) {
++				verbose(env, "internal error: kinsn call reached verifier without proof lowering\n");
++				return -EFAULT;
+ 			} else {
+ 				err = check_helper_call(env, insn, &env->insn_idx);
+ 			}
+@@ -23066,7 +23417,8 @@ static int fixup_call_args(struct bpf_verifier_env *env)
+ #ifndef CONFIG_BPF_JIT_ALWAYS_ON
+ 	struct bpf_prog *prog = env->prog;
+ 	struct bpf_insn *insn = prog->insnsi;
+-	bool has_kfunc_call = bpf_prog_has_kfunc_call(prog);
++	struct bpf_kfunc_desc_tab *tab = prog->aux->kfunc_tab;
++	bool has_kfunc_call = false, has_kinsn_call = false;
+ 	int i, depth;
+ #endif
+ 	int err = 0;
+@@ -23080,10 +23432,25 @@ static int fixup_call_args(struct bpf_verifier_env *env)
+ 			return err;
+ 	}
+ #ifndef CONFIG_BPF_JIT_ALWAYS_ON
++	if (tab) {
++		for (i = 0; i < tab->nr_descs; i++) {
++			if (tab->descs[i].kinsn)
++				has_kinsn_call = true;
++			else
++				has_kfunc_call = true;
++			if (has_kfunc_call && has_kinsn_call)
++				break;
++		}
++	}
++
+ 	if (has_kfunc_call) {
+ 		verbose(env, "calling kernel functions are not allowed in non-JITed programs\n");
+ 		return -EINVAL;
+ 	}
++	if (has_kinsn_call) {
++		verbose(env, "kinsn calls are not allowed in non-JITed programs\n");
++		return -EINVAL;
++	}
+ 	if (env->subprog_cnt > 1 && env->prog->aux->tail_call_reachable) {
+ 		/* When JIT fails the progs with bpf2bpf calls and tail_calls
+ 		 * have to be rejected, since interpreter doesn't support them yet.
+@@ -23386,6 +23753,44 @@ static int do_misc_fixups(struct bpf_verifier_env *env)
+ 	}
+ 
+ 	for (i = 0; i < insn_cnt;) {
++		if (bpf_kinsn_is_sidecar_insn(insn)) {
++			const struct bpf_kinsn *kinsn;
++			const struct bpf_insn *call = insn + 1;
++
++			if (i + 1 >= insn_cnt || !bpf_pseudo_kinsn_call(call))
++				goto next_insn;
++
++			ret = bpf_jit_get_kinsn_payload(env->prog, call, &kinsn, NULL);
++			if (ret)
++				return ret;
++
++			cnt = kinsn->instantiate_insn(bpf_kinsn_sidecar_payload(insn),
++						      env->insn_buf);
++			if (cnt <= 0)
++				return cnt ? cnt : -EINVAL;
++
++			ret = validate_kinsn_proof_seq(env, kinsn, env->insn_buf, cnt);
++			if (ret)
++				return ret;
++
++			if (prog->jit_requested && bpf_kinsn_has_native_emit(kinsn))
++				goto next_insn;
++
++			ret = verifier_remove_insns(env, i + delta + 1, 1);
++			if (ret)
++				return ret;
++
++			new_prog = bpf_patch_insn_data(env, i + delta, insn_buf, cnt);
++			if (!new_prog)
++				return -ENOMEM;
++
++			delta += cnt - 2;
++			env->prog = prog = new_prog;
++			insn = new_prog->insnsi + i + delta;
++			i++;
++			goto next_insn;
++		}
++
+ 		if (insn->code == (BPF_ALU64 | BPF_MOV | BPF_X) && insn->imm) {
+ 			if ((insn->off == BPF_ADDR_SPACE_CAST && insn->imm == 1) ||
+ 			    (((struct bpf_map *)env->prog->aux->arena)->map_flags & BPF_F_NO_USER_CONV)) {
+@@ -23695,6 +24100,8 @@ static int do_misc_fixups(struct bpf_verifier_env *env)
+ 			goto next_insn;
+ 		if (insn->src_reg == BPF_PSEUDO_CALL)
+ 			goto next_insn;
++		if (insn->src_reg == BPF_PSEUDO_KINSN_CALL)
++			goto next_insn;
+ 		if (insn->src_reg == BPF_PSEUDO_KFUNC_CALL) {
+ 			ret = fixup_kfunc_call(env, insn, insn_buf, i + delta, &cnt);
+ 			if (ret)
+@@ -25988,6 +26395,18 @@ int bpf_check(struct bpf_prog **prog, union bpf_attr *attr, bpfptr_t uattr, __u3
+ 		env->test_state_freq = attr->prog_flags & BPF_F_TEST_STATE_FREQ;
+ 	env->test_reg_invariants = attr->prog_flags & BPF_F_TEST_REG_INVARIANTS;
+ 
++	ret = check_btf_info_early(env, attr, uattr);
++	if (ret < 0)
++		goto skip_full_check;
++
++	ret = add_subprog_and_kfunc(env);
++	if (ret < 0)
++		goto skip_full_check;
++
++	ret = lower_kinsn_proof_regions(env);
++	if (ret < 0)
++		goto skip_full_check;
++
+ 	env->explored_states = kvzalloc_objs(struct list_head,
+ 					     state_htab_size(env),
+ 					     GFP_KERNEL_ACCOUNT);
+@@ -25999,14 +26418,6 @@ int bpf_check(struct bpf_prog **prog, union bpf_attr *attr, bpfptr_t uattr, __u3
+ 		INIT_LIST_HEAD(&env->explored_states[i]);
+ 	INIT_LIST_HEAD(&env->free_list);
+ 
+-	ret = check_btf_info_early(env, attr, uattr);
+-	if (ret < 0)
+-		goto skip_full_check;
+-
+-	ret = add_subprog_and_kfunc(env);
+-	if (ret < 0)
+-		goto skip_full_check;
+-
+ 	ret = check_subprogs(env);
+ 	if (ret < 0)
+ 		goto skip_full_check;
+@@ -26061,6 +26472,10 @@ int bpf_check(struct bpf_prog **prog, union bpf_attr *attr, bpfptr_t uattr, __u3
+ 
+ skip_full_check:
+ 	kvfree(env->explored_states);
++	env->explored_states = NULL;
++
++	if (ret == 0)
++		ret = restore_kinsn_proof_regions(env);
+ 
+ 	/* might decrease stack depth, keep it before passes that
+ 	 * allocate additional slots.
+@@ -26194,6 +26609,7 @@ int bpf_check(struct bpf_prog **prog, union bpf_attr *attr, bpfptr_t uattr, __u3
+ 	kvfree(env->scc_info);
+ 	kvfree(env->succ);
+ 	kvfree(env->gotox_tmp_buf);
++	kvfree(env->kinsn_regions);
+ 	kvfree(env);
+ 	return ret;
+ }

@@ -1104,7 +1104,6 @@ def run_targets_in_guest_batch(
         guest_argv = [
             "python3",
             str(DRIVER_RELATIVE),
-            "packet",
             "--guest-target-json",
             str(target_path),
             "--guest-result-json",
