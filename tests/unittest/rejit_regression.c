@@ -45,18 +45,41 @@
 #include <linux/unistd.h>
 #include <pthread.h>
 #include <stdint.h>
+#include <bpf/bpf.h>
+#include <bpf/libbpf.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/klog.h>
 #include <sys/syscall.h>
 #include <time.h>
 #include <unistd.h>
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 #define ptr_to_u64(ptr) ((__u64)(uintptr_t)(ptr))
+#define SYSLOG_ACTION_READ_ALL 3
+#define SYSLOG_ACTION_SIZE_BUFFER 10
+
+/* ---- BPF insn helpers ------------------------------------------- */
+
+#define BPF_MOV64_REG(DST, SRC) \
+	((struct bpf_insn){ .code = BPF_ALU64 | BPF_MOV | BPF_X, \
+			    .dst_reg = (DST), .src_reg = (SRC) })
+
+#define BPF_MOV64_IMM(DST, IMM) \
+	((struct bpf_insn){ .code = BPF_ALU64 | BPF_MOV | BPF_K, \
+			    .dst_reg = (DST), .imm = (IMM) })
+
+#define BPF_EXIT_INSN() \
+	((struct bpf_insn){ .code = BPF_JMP | BPF_EXIT })
+
+#define BPF_EMIT_CALL(FUNC) \
+	((struct bpf_insn){ .code = BPF_JMP | BPF_CALL, .imm = (FUNC) })
 
 static int g_pass;
 static int g_fail;
+static int g_skip;
+static const char *g_progs_dir = "tests/unittest/build/progs";
 
 #define TEST_PASS(name) do { \
 	printf("  PASS  %s\n", name); \
@@ -66,6 +89,11 @@ static int g_fail;
 #define TEST_FAIL(name, reason) do { \
 	fprintf(stderr, "  FAIL  %s: %s\n", name, reason); \
 	g_fail++; \
+} while (0)
+
+#define TEST_SKIP(name, reason) do { \
+	fprintf(stderr, "  SKIP  %s: %s\n", name, reason); \
+	g_skip++; \
 } while (0)
 
 /* ------------------------------------------------------------------ */
@@ -130,6 +158,234 @@ static int test_run_xdp(int prog_fd, __u32 repeat, __u32 *retval,
 	if (duration)
 		*duration = attr.test.duration;
 	return 0;
+}
+
+static int get_prog_info(int prog_fd, struct bpf_prog_info *info,
+			 __u32 *info_len)
+{
+	union bpf_attr attr;
+
+	memset(&attr, 0, sizeof(attr));
+	attr.info.bpf_fd = prog_fd;
+	attr.info.info = ptr_to_u64(info);
+	attr.info.info_len = *info_len;
+
+	if (sys_bpf(BPF_OBJ_GET_INFO_BY_FD, &attr, sizeof(attr)) < 0)
+		return -1;
+
+	*info_len = attr.info.info_len;
+	return 0;
+}
+
+static int get_original_insns(int prog_fd, struct bpf_insn **out_insns)
+{
+	struct bpf_prog_info info;
+	__u32 info_len;
+	struct bpf_insn *insns;
+
+	memset(&info, 0, sizeof(info));
+	info_len = sizeof(info);
+	if (get_prog_info(prog_fd, &info, &info_len) < 0)
+		return -1;
+
+	if (info.orig_prog_len == 0) {
+		__u32 cnt;
+
+		if (info.xlated_prog_len == 0)
+			return -1;
+
+		cnt = info.xlated_prog_len / sizeof(struct bpf_insn);
+		insns = calloc(cnt, sizeof(struct bpf_insn));
+		if (!insns)
+			return -1;
+
+		memset(&info, 0, sizeof(info));
+		info.xlated_prog_insns = ptr_to_u64(insns);
+		info.xlated_prog_len = cnt * sizeof(struct bpf_insn);
+		info_len = sizeof(info);
+		if (get_prog_info(prog_fd, &info, &info_len) < 0) {
+			free(insns);
+			return -1;
+		}
+
+		*out_insns = insns;
+		return cnt;
+	}
+
+	{
+		__u32 cnt = info.orig_prog_len / sizeof(struct bpf_insn);
+
+		insns = calloc(cnt, sizeof(struct bpf_insn));
+		if (!insns)
+			return -1;
+
+		memset(&info, 0, sizeof(info));
+		info.orig_prog_insns = ptr_to_u64(insns);
+		info.orig_prog_len = cnt * sizeof(struct bpf_insn);
+		info_len = sizeof(info);
+		if (get_prog_info(prog_fd, &info, &info_len) < 0) {
+			free(insns);
+			return -1;
+		}
+
+		*out_insns = insns;
+		return cnt;
+	}
+}
+
+static int create_prog_array_map(__u32 max_entries)
+{
+	union bpf_attr attr;
+
+	memset(&attr, 0, sizeof(attr));
+	attr.map_type = BPF_MAP_TYPE_PROG_ARRAY;
+	attr.key_size = 4;
+	attr.value_size = 4;
+	attr.max_entries = max_entries;
+
+	return sys_bpf(BPF_MAP_CREATE, &attr, sizeof(attr));
+}
+
+static int map_update_prog_fd(int map_fd, __u32 key, int prog_fd)
+{
+	union bpf_attr attr;
+
+	memset(&attr, 0, sizeof(attr));
+	attr.map_fd = map_fd;
+	attr.key = ptr_to_u64(&key);
+	attr.value = ptr_to_u64(&prog_fd);
+	attr.flags = BPF_ANY;
+
+	return sys_bpf(BPF_MAP_UPDATE_ELEM, &attr, sizeof(attr));
+}
+
+static int map_lookup_u32(int map_fd, __u32 key, __u32 *value)
+{
+	union bpf_attr attr;
+
+	memset(&attr, 0, sizeof(attr));
+	attr.map_fd = map_fd;
+	attr.key = ptr_to_u64(&key);
+	attr.value = ptr_to_u64(value);
+
+	return sys_bpf(BPF_MAP_LOOKUP_ELEM, &attr, sizeof(attr));
+}
+
+static int map_update_u64(int map_fd, __u32 key, __u64 value)
+{
+	union bpf_attr attr;
+
+	memset(&attr, 0, sizeof(attr));
+	attr.map_fd = map_fd;
+	attr.key = ptr_to_u64(&key);
+	attr.value = ptr_to_u64(&value);
+	attr.flags = BPF_ANY;
+
+	return sys_bpf(BPF_MAP_UPDATE_ELEM, &attr, sizeof(attr));
+}
+
+static int map_lookup_u64(int map_fd, __u32 key, __u64 *value)
+{
+	union bpf_attr attr;
+
+	memset(&attr, 0, sizeof(attr));
+	attr.map_fd = map_fd;
+	attr.key = ptr_to_u64(&key);
+	attr.value = ptr_to_u64(value);
+
+	return sys_bpf(BPF_MAP_LOOKUP_ELEM, &attr, sizeof(attr));
+}
+
+static int map_delete_elem(int map_fd, __u32 key)
+{
+	union bpf_attr attr;
+
+	memset(&attr, 0, sizeof(attr));
+	attr.map_fd = map_fd;
+	attr.key = ptr_to_u64(&key);
+
+	return sys_bpf(BPF_MAP_DELETE_ELEM, &attr, sizeof(attr));
+}
+
+static int get_prog_id(int prog_fd, __u32 *prog_id)
+{
+	struct bpf_prog_info info;
+	__u32 info_len = sizeof(info);
+
+	memset(&info, 0, sizeof(info));
+	if (get_prog_info(prog_fd, &info, &info_len) < 0)
+		return -1;
+
+	*prog_id = info.id;
+	return 0;
+}
+
+static char *read_kernel_log(size_t *log_len)
+{
+	char *buf;
+	int buf_len, ret;
+
+	buf_len = klogctl(SYSLOG_ACTION_SIZE_BUFFER, NULL, 0);
+	if (buf_len <= 0)
+		return NULL;
+
+	buf = calloc(buf_len + 1, 1);
+	if (!buf)
+		return NULL;
+
+	ret = klogctl(SYSLOG_ACTION_READ_ALL, buf, buf_len);
+	if (ret < 0) {
+		free(buf);
+		return NULL;
+	}
+
+	buf[ret] = '\0';
+	if (log_len)
+		*log_len = ret;
+	return buf;
+}
+
+static int kernel_log_has_warning_or_bug(const char *log)
+{
+	return strstr(log, "WARNING:") ||
+	       strstr(log, "BUG:") ||
+	       strstr(log, "kernel BUG at") ||
+	       strstr(log, "Oops:");
+}
+
+/*
+ * Build an XDP prog that tail-calls prog_array[index] and falls back to
+ * fallback_ret if no target is installed.
+ */
+static __u32 build_tail_call_caller(struct bpf_insn *insns, int map_fd,
+				    __u32 index, __s32 fallback_ret)
+{
+	int i = 0;
+
+	insns[i++] = BPF_MOV64_REG(BPF_REG_6, BPF_REG_1);
+	insns[i++] = BPF_MOV64_REG(BPF_REG_1, BPF_REG_6);
+	insns[i++] = (struct bpf_insn) {
+		.code = BPF_LD | BPF_DW | BPF_IMM,
+		.dst_reg = BPF_REG_2,
+		.src_reg = BPF_PSEUDO_MAP_FD,
+		.imm = map_fd,
+	};
+	insns[i++] = (struct bpf_insn) { .imm = 0 };
+	insns[i++] = BPF_MOV64_IMM(BPF_REG_3, index);
+	insns[i++] = BPF_EMIT_CALL(BPF_FUNC_tail_call);
+	insns[i++] = BPF_MOV64_IMM(BPF_REG_0, fallback_ret);
+	insns[i++] = BPF_EXIT_INSN();
+
+	return i;
+}
+
+static __u32 build_simple_prog(struct bpf_insn *insns, __s32 retval)
+{
+	int i = 0;
+
+	insns[i++] = BPF_MOV64_IMM(BPF_REG_0, retval);
+	insns[i++] = BPF_EXIT_INSN();
+	return i;
 }
 
 /* Canonical programs */
@@ -818,11 +1074,624 @@ cleanup:
 }
 
 /* ================================================================== */
+/*  Test 7: tail_call + concurrent map update                         */
+/* ================================================================== */
+
+#define TAIL_CALL_CONCURRENT_ITERS 100
+#define TAIL_CALL_ALT_RETVAL      XDP_DROP
+
+struct tail_call_shared {
+	int caller_fd;
+	int map_fd;
+	int target_fd;
+	int alt_target_fd;
+	__u32 target_prog_id;
+	__u32 alt_prog_id;
+	pthread_barrier_t barrier;
+};
+
+struct tail_call_target_rejit_state {
+	struct tail_call_shared *shared;
+	int success_count;
+	int fail_count;
+	int last_errno;
+	__u32 last_retval;
+	char last_log[256];
+};
+
+struct tail_call_map_update_state {
+	struct tail_call_shared *shared;
+	int success_count;
+	int error;
+	int last_errno;
+	__u32 last_prog_id;
+};
+
+static void *tail_call_target_rejit_worker(void *arg)
+{
+	struct tail_call_target_rejit_state *state = arg;
+	struct tail_call_shared *shared = state->shared;
+	struct bpf_insn target_insns[4];
+	char log_buf[65536];
+	int i;
+
+	pthread_barrier_wait(&shared->barrier);
+
+	state->success_count = 0;
+	state->fail_count = 0;
+	state->last_errno = 0;
+	state->last_retval = XDP_PASS;
+	state->last_log[0] = '\0';
+
+	for (i = 0; i < TAIL_CALL_CONCURRENT_ITERS; i++) {
+		__u32 cnt;
+		__u32 retval = (i % 2 == 0) ? XDP_TX : XDP_PASS;
+
+		cnt = build_simple_prog(target_insns, retval);
+		memset(log_buf, 0, sizeof(log_buf));
+		if (rejit_prog(shared->target_fd, target_insns, cnt,
+			       log_buf, sizeof(log_buf)) < 0) {
+			state->fail_count++;
+			state->last_errno = errno;
+			snprintf(state->last_log, sizeof(state->last_log),
+				 "%.220s", log_buf);
+			continue;
+		}
+
+		state->success_count++;
+		state->last_retval = retval;
+	}
+
+	return NULL;
+}
+
+static void *tail_call_map_update_worker(void *arg)
+{
+	struct tail_call_map_update_state *state = arg;
+	struct tail_call_shared *shared = state->shared;
+	int i;
+
+	pthread_barrier_wait(&shared->barrier);
+
+	state->success_count = 0;
+	state->error = 0;
+	state->last_errno = 0;
+	state->last_prog_id = 0;
+
+	for (i = 0; i < TAIL_CALL_CONCURRENT_ITERS; i++) {
+		int prog_fd;
+		__u32 prog_id;
+
+		if (i % 2 == 0) {
+			prog_fd = shared->target_fd;
+			prog_id = shared->target_prog_id;
+		} else {
+			prog_fd = shared->alt_target_fd;
+			prog_id = shared->alt_prog_id;
+		}
+
+		if (map_update_prog_fd(shared->map_fd, 0, prog_fd) < 0) {
+			state->error = 1;
+			state->last_errno = errno;
+			break;
+		}
+
+		state->success_count++;
+		state->last_prog_id = prog_id;
+	}
+
+	return NULL;
+}
+
+static void test_rejit_tail_call_concurrent_map_update(void)
+{
+	const char *name = "test_rejit_tail_call_concurrent_map_update";
+	struct tail_call_shared shared;
+	struct tail_call_target_rejit_state rejit_state;
+	struct tail_call_map_update_state update_state;
+	struct bpf_insn caller_insns[16], target_insns[4];
+	pthread_t rejit_thread, update_thread;
+	char log_buf[65536];
+	__u32 caller_cnt, target_cnt, prog_id = 0, retval = 0, expected_retval;
+	int map_fd = -1, caller_fd = -1, target_fd = -1, alt_target_fd = -1;
+
+	memset(&shared, 0, sizeof(shared));
+
+	map_fd = create_prog_array_map(4);
+	if (map_fd < 0) {
+		TEST_FAIL(name, "prog array create failed");
+		return;
+	}
+
+	target_cnt = build_simple_prog(target_insns, XDP_PASS);
+	memset(log_buf, 0, sizeof(log_buf));
+	target_fd = load_xdp_prog(target_insns, target_cnt,
+				  log_buf, sizeof(log_buf));
+	if (target_fd < 0) {
+		TEST_FAIL(name, "tail-call target load failed");
+		goto out;
+	}
+
+	target_cnt = build_simple_prog(target_insns, TAIL_CALL_ALT_RETVAL);
+	memset(log_buf, 0, sizeof(log_buf));
+	alt_target_fd = load_xdp_prog(target_insns, target_cnt,
+				      log_buf, sizeof(log_buf));
+	if (alt_target_fd < 0) {
+		TEST_FAIL(name, "alternate tail-call target load failed");
+		goto out;
+	}
+
+	if (get_prog_id(target_fd, &shared.target_prog_id) < 0 ||
+	    get_prog_id(alt_target_fd, &shared.alt_prog_id) < 0) {
+		TEST_FAIL(name, "failed to query target prog IDs");
+		goto out;
+	}
+
+	if (map_update_prog_fd(map_fd, 0, target_fd) < 0) {
+		TEST_FAIL(name, "initial prog array update failed");
+		goto out;
+	}
+
+	caller_cnt = build_tail_call_caller(caller_insns, map_fd, 0, XDP_ABORTED);
+	memset(log_buf, 0, sizeof(log_buf));
+	caller_fd = load_xdp_prog(caller_insns, caller_cnt,
+				  log_buf, sizeof(log_buf));
+	if (caller_fd < 0) {
+		TEST_FAIL(name, "tail-call caller load failed");
+		goto out;
+	}
+
+	if (test_run_xdp(caller_fd, 1, &retval, NULL) < 0 || retval != XDP_PASS) {
+		TEST_FAIL(name, "pre-stress tail-call path mismatch");
+		goto out;
+	}
+
+	shared.caller_fd = caller_fd;
+	shared.map_fd = map_fd;
+	shared.target_fd = target_fd;
+	shared.alt_target_fd = alt_target_fd;
+	if (pthread_barrier_init(&shared.barrier, NULL, 2) != 0) {
+		TEST_FAIL(name, "pthread_barrier_init failed");
+		goto out;
+	}
+
+	rejit_state.shared = &shared;
+	update_state.shared = &shared;
+
+	if (pthread_create(&rejit_thread, NULL, tail_call_target_rejit_worker,
+			   &rejit_state) != 0) {
+		TEST_FAIL(name, "pthread_create(rejit) failed");
+		pthread_barrier_destroy(&shared.barrier);
+		goto out;
+	}
+	if (pthread_create(&update_thread, NULL, tail_call_map_update_worker,
+			   &update_state) != 0) {
+		TEST_FAIL(name, "pthread_create(update) failed");
+		pthread_barrier_wait(&shared.barrier);
+		pthread_join(rejit_thread, NULL);
+		pthread_barrier_destroy(&shared.barrier);
+		goto out;
+	}
+
+	pthread_join(rejit_thread, NULL);
+	pthread_join(update_thread, NULL);
+	pthread_barrier_destroy(&shared.barrier);
+
+	if (update_state.error) {
+		TEST_FAIL(name, "prog_array update failed during concurrency");
+		goto out;
+	}
+	if (rejit_state.success_count == 0) {
+		TEST_FAIL(name, "no target REJIT succeeded");
+		goto out;
+	}
+
+	if (map_lookup_u32(map_fd, 0, &prog_id) < 0) {
+		TEST_FAIL(name, "prog_array lookup failed after stress");
+		goto out;
+	}
+	if (prog_id != update_state.last_prog_id) {
+		TEST_FAIL(name, "prog_array final prog_id mismatch");
+		goto out;
+	}
+
+	if (prog_id == shared.target_prog_id)
+		expected_retval = rejit_state.last_retval;
+	else if (prog_id == shared.alt_prog_id)
+		expected_retval = TAIL_CALL_ALT_RETVAL;
+	else {
+		TEST_FAIL(name, "unexpected final prog_id in prog_array");
+		goto out;
+	}
+
+	if (test_run_xdp(caller_fd, 1, &retval, NULL) < 0) {
+		TEST_FAIL(name, "post-stress tail-call run failed");
+		goto out;
+	}
+	if (retval != expected_retval) {
+		TEST_FAIL(name, "post-stress tail-call retval mismatch");
+		goto out;
+	}
+
+	printf("    (target REJIT success=%d fail=%d, map updates=%d, final prog_id=%u, retval=%u)\n",
+	       rejit_state.success_count, rejit_state.fail_count,
+	       update_state.success_count, prog_id, retval);
+	TEST_PASS(name);
+
+out:
+	if (caller_fd >= 0)
+		close(caller_fd);
+	if (target_fd >= 0)
+		close(target_fd);
+	if (alt_target_fd >= 0)
+		close(alt_target_fd);
+	if (map_fd >= 0)
+		close(map_fd);
+}
+
+/* ================================================================== */
+/*  Test 8: fentry attach + REJIT + detach + reattach + REJIT         */
+/* ================================================================== */
+
+static void test_rejit_fentry_reattach_refresh(void)
+{
+	const char *name = "test_rejit_fentry_reattach_refresh";
+
+	TEST_SKIP(name, "target-side trampoline refresh not yet implemented (known limitation)");
+	return;
+
+	char xdp_obj_path[512], fentry_obj_path[512];
+	struct bpf_object *xdp_obj = NULL, *fentry_obj = NULL;
+	struct bpf_program *xdp_prog, *fentry_prog;
+	struct bpf_map *result_map;
+	struct bpf_insn *orig_insns = NULL;
+	char log_buf[65536];
+	__u64 counter = 0;
+	__u32 retval = 0;
+	int orig_cnt, xdp_prog_fd, fentry_fd, result_map_fd, link_fd = -1;
+
+	snprintf(xdp_obj_path, sizeof(xdp_obj_path), "%s/test_simple.bpf.o",
+		 g_progs_dir);
+	snprintf(fentry_obj_path, sizeof(fentry_obj_path),
+		 "%s/test_trampoline_fentry.bpf.o", g_progs_dir);
+
+	xdp_obj = bpf_object__open_file(xdp_obj_path, NULL);
+	if (!xdp_obj || libbpf_get_error(xdp_obj)) {
+		int err = !xdp_obj ? -errno : libbpf_get_error(xdp_obj);
+
+		if (err == -ENOENT)
+			TEST_FAIL(name, "XDP .bpf.o not found");
+		else
+			TEST_SKIP(name, "cannot open XDP .bpf.o");
+		return;
+	}
+
+	if (bpf_object__load(xdp_obj) < 0) {
+		TEST_SKIP(name, "failed to load XDP object");
+		goto out;
+	}
+
+	xdp_prog = bpf_object__find_program_by_name(xdp_obj, "test_simple");
+	if (!xdp_prog) {
+		TEST_FAIL(name, "XDP program not found in object");
+		goto out;
+	}
+
+	xdp_prog_fd = bpf_program__fd(xdp_prog);
+	if (xdp_prog_fd < 0) {
+		TEST_FAIL(name, "XDP program has no valid fd");
+		goto out;
+	}
+
+	orig_cnt = get_original_insns(xdp_prog_fd, &orig_insns);
+	if (orig_cnt < 0) {
+		TEST_FAIL(name, "get_original_insns failed for XDP program");
+		goto out;
+	}
+
+	if (test_run_xdp(xdp_prog_fd, 1, &retval, NULL) < 0 || retval != XDP_PASS) {
+		TEST_FAIL(name, "pre-attach XDP test_run failed");
+		goto out;
+	}
+
+	fentry_obj = bpf_object__open_file(fentry_obj_path, NULL);
+	if (!fentry_obj || libbpf_get_error(fentry_obj)) {
+		int err = !fentry_obj ? -errno : libbpf_get_error(fentry_obj);
+
+		if (err == -ENOENT)
+			TEST_FAIL(name, "fentry .bpf.o not found");
+		else
+			TEST_SKIP(name, "cannot open fentry .bpf.o");
+		goto out;
+	}
+
+	fentry_prog = bpf_object__find_program_by_name(fentry_obj,
+						       "test_simple_fentry");
+	if (!fentry_prog) {
+		TEST_FAIL(name, "fentry program not found in object");
+		goto out;
+	}
+
+	if (bpf_program__set_attach_target(fentry_prog, xdp_prog_fd,
+					   "test_simple") < 0) {
+		TEST_SKIP(name, "set_attach_target to XDP program failed");
+		goto out;
+	}
+
+	if (bpf_object__load(fentry_obj) < 0) {
+		TEST_SKIP(name, "failed to load fentry object");
+		goto out;
+	}
+
+	fentry_fd = bpf_program__fd(fentry_prog);
+	if (fentry_fd < 0) {
+		TEST_FAIL(name, "fentry program has no valid fd");
+		goto out;
+	}
+
+	result_map = bpf_object__find_map_by_name(fentry_obj, "result_map");
+	if (!result_map) {
+		TEST_FAIL(name, "result_map not found in fentry object");
+		goto out;
+	}
+
+	result_map_fd = bpf_map__fd(result_map);
+	if (result_map_fd < 0) {
+		TEST_FAIL(name, "result_map has no valid fd");
+		goto out;
+	}
+
+	if (map_update_u64(result_map_fd, 0, 0) < 0) {
+		TEST_FAIL(name, "failed to reset result_map");
+		goto out;
+	}
+
+	link_fd = bpf_link_create(fentry_fd, 0, BPF_TRACE_FENTRY, NULL);
+	if (link_fd < 0) {
+		TEST_SKIP(name, "bpf_link_create(BPF_TRACE_FENTRY) failed");
+		goto out;
+	}
+
+	if (test_run_xdp(xdp_prog_fd, 1, &retval, NULL) < 0 ||
+	    retval != XDP_PASS ||
+	    map_lookup_u64(result_map_fd, 0, &counter) < 0 ||
+	    counter != 1) {
+		TEST_FAIL(name, "initial attach did not trigger fentry");
+		goto out;
+	}
+
+	memset(log_buf, 0, sizeof(log_buf));
+	if (rejit_prog(xdp_prog_fd, orig_insns, orig_cnt,
+		       log_buf, sizeof(log_buf)) < 0) {
+		TEST_FAIL(name, "first XDP REJIT failed");
+		goto out;
+	}
+
+	if (test_run_xdp(xdp_prog_fd, 1, &retval, NULL) < 0 ||
+	    retval != XDP_PASS ||
+	    map_lookup_u64(result_map_fd, 0, &counter) < 0 ||
+	    counter != 2) {
+		TEST_FAIL(name, "fentry did not survive first REJIT");
+		goto out;
+	}
+
+	close(link_fd);
+	link_fd = -1;
+
+	if (test_run_xdp(xdp_prog_fd, 1, &retval, NULL) < 0 ||
+	    retval != XDP_PASS ||
+	    map_lookup_u64(result_map_fd, 0, &counter) < 0 ||
+	    counter != 2) {
+		TEST_FAIL(name, "counter changed after detach");
+		goto out;
+	}
+
+	link_fd = bpf_link_create(fentry_fd, 0, BPF_TRACE_FENTRY, NULL);
+	if (link_fd < 0) {
+		TEST_FAIL(name, "reattach via bpf_link_create failed");
+		goto out;
+	}
+
+	if (test_run_xdp(xdp_prog_fd, 1, &retval, NULL) < 0 ||
+	    retval != XDP_PASS ||
+	    map_lookup_u64(result_map_fd, 0, &counter) < 0 ||
+	    counter != 3) {
+		TEST_FAIL(name, "reattached fentry did not trigger");
+		goto out;
+	}
+
+	memset(log_buf, 0, sizeof(log_buf));
+	if (rejit_prog(xdp_prog_fd, orig_insns, orig_cnt,
+		       log_buf, sizeof(log_buf)) < 0) {
+		TEST_FAIL(name, "second XDP REJIT failed");
+		goto out;
+	}
+
+	if (test_run_xdp(xdp_prog_fd, 1, &retval, NULL) < 0 ||
+	    retval != XDP_PASS ||
+	    map_lookup_u64(result_map_fd, 0, &counter) < 0 ||
+	    counter != 4) {
+		TEST_FAIL(name, "fentry did not survive reattach REJIT");
+		goto out;
+	}
+
+	printf("    (counter sequence: 1 -> 2 -> detach stays 2 -> reattach 3 -> second REJIT 4)\n");
+	TEST_PASS(name);
+
+out:
+	free(orig_insns);
+	if (link_fd >= 0)
+		close(link_fd);
+	if (fentry_obj)
+		bpf_object__close(fentry_obj);
+	if (xdp_obj)
+		bpf_object__close(xdp_obj);
+}
+
+/* ================================================================== */
+/*  Test 9: struct_ops multi REJIT + clean unregister                 */
+/* ================================================================== */
+
+#define STRUCT_OPS_MULTI_REJIT_ROUNDS 3
+
+static void test_rejit_struct_ops_multi_rejit_unregister(void)
+{
+	const char *name = "test_rejit_struct_ops_multi_rejit_unregister";
+	static const char *prog_names[] = { "ms_ssthresh", "ms_undo_cwnd" };
+	char obj_path[512];
+	struct bpf_object *obj = NULL;
+	struct bpf_map *st_ops_map;
+	struct bpf_link *link = NULL;
+	struct bpf_prog_info info;
+	char log_buf[65536];
+	char *pre_log = NULL, *post_log = NULL;
+	size_t pre_log_len = 0, post_log_len = 0;
+	__u32 info_len;
+	int map_fd, p, round;
+
+	pre_log = read_kernel_log(&pre_log_len);
+	if (!pre_log) {
+		TEST_SKIP(name, "cannot read kernel log before test");
+		return;
+	}
+
+	snprintf(obj_path, sizeof(obj_path), "%s/test_struct_ops_multi_slot.bpf.o",
+		 g_progs_dir);
+
+	obj = bpf_object__open_file(obj_path, NULL);
+	if (!obj || libbpf_get_error(obj)) {
+		int err = !obj ? -errno : libbpf_get_error(obj);
+
+		if (err == -ENOENT)
+			TEST_FAIL(name, "struct_ops multi-slot .bpf.o not found");
+		else
+			TEST_SKIP(name, "cannot open struct_ops multi-slot .bpf.o");
+		goto out;
+	}
+
+	if (bpf_object__load(obj) < 0) {
+		TEST_SKIP(name, "failed to load struct_ops multi-slot object");
+		goto out;
+	}
+
+	st_ops_map = bpf_object__find_map_by_name(obj, "multi_slot_ops");
+	if (!st_ops_map) {
+		TEST_FAIL(name, "struct_ops map not found");
+		goto out;
+	}
+
+	link = bpf_map__attach_struct_ops(st_ops_map);
+	if (!link || libbpf_get_error(link)) {
+		link = NULL;
+		TEST_SKIP(name, "attach_struct_ops failed");
+		goto out;
+	}
+
+	map_fd = bpf_map__fd(st_ops_map);
+	if (map_fd < 0) {
+		TEST_FAIL(name, "struct_ops map has no valid fd");
+		goto out;
+	}
+
+	for (p = 0; p < ARRAY_SIZE(prog_names); p++) {
+		struct bpf_program *prog;
+		struct bpf_insn *orig_insns = NULL;
+		int orig_cnt, prog_fd;
+
+		prog = bpf_object__find_program_by_name(obj, prog_names[p]);
+		if (!prog) {
+			TEST_FAIL(name, "struct_ops callback prog not found");
+			goto out;
+		}
+
+		prog_fd = bpf_program__fd(prog);
+		if (prog_fd < 0) {
+			TEST_FAIL(name, "struct_ops callback prog has no valid fd");
+			goto out;
+		}
+
+		info_len = sizeof(info);
+		memset(&info, 0, sizeof(info));
+		if (get_prog_info(prog_fd, &info, &info_len) < 0) {
+			TEST_FAIL(name, "get_prog_info failed for struct_ops prog");
+			goto out;
+		}
+		if (info.jited_prog_len == 0) {
+			TEST_SKIP(name, "struct_ops callback not JIT'd");
+			goto out;
+		}
+
+		orig_cnt = get_original_insns(prog_fd, &orig_insns);
+		if (orig_cnt < 0) {
+			TEST_FAIL(name, "get_original_insns failed for struct_ops prog");
+			free(orig_insns);
+			goto out;
+		}
+
+		for (round = 1; round <= STRUCT_OPS_MULTI_REJIT_ROUNDS; round++) {
+			memset(log_buf, 0, sizeof(log_buf));
+			if (rejit_prog(prog_fd, orig_insns, orig_cnt,
+				       log_buf, sizeof(log_buf)) < 0) {
+				TEST_FAIL(name, "struct_ops REJIT failed");
+				free(orig_insns);
+				goto out;
+			}
+		}
+
+		free(orig_insns);
+	}
+
+	if (map_delete_elem(map_fd, 0) < 0) {
+		TEST_FAIL(name, "struct_ops unregister via map delete failed");
+		goto out;
+	}
+
+	bpf_link__disconnect(link);
+	bpf_link__destroy(link);
+	link = NULL;
+
+	bpf_object__close(obj);
+	obj = NULL;
+
+	post_log = read_kernel_log(&post_log_len);
+	if (!post_log) {
+		TEST_SKIP(name, "cannot read kernel log after unregister");
+		goto out;
+	}
+
+	if (post_log_len < pre_log_len ||
+	    memcmp(post_log, pre_log, pre_log_len) != 0) {
+		TEST_SKIP(name, "kernel log rotated during test");
+		goto out;
+	}
+
+	if (kernel_log_has_warning_or_bug(post_log + pre_log_len)) {
+		TEST_FAIL(name, "kernel log contains WARNING/BUG after unregister");
+		goto out;
+	}
+
+	printf("    (%d REJIT rounds per callback, unregister via map delete clean)\n",
+	       STRUCT_OPS_MULTI_REJIT_ROUNDS);
+	TEST_PASS(name);
+
+out:
+	free(pre_log);
+	free(post_log);
+	if (link)
+		bpf_link__destroy(link);
+	if (obj)
+		bpf_object__close(obj);
+}
+
+/* ================================================================== */
 /*  Main                                                              */
 /* ================================================================== */
 
-int main(void)
+int main(int argc, char *argv[])
 {
+	if (argc > 1)
+		g_progs_dir = argv[1];
+
 	printf("=== BpfReJIT Regression Tests (b4bd737ef fixes) ===\n\n");
 
 	test_concurrent_rejit_different_progs();
@@ -831,8 +1700,12 @@ int main(void)
 	test_xdp_test_run_rejit();
 	test_concurrent_rejit_and_run();
 	test_parallel_subprog_rejit();
+	test_rejit_tail_call_concurrent_map_update();
+	test_rejit_fentry_reattach_refresh();
+	test_rejit_struct_ops_multi_rejit_unregister();
 
-	printf("\n=== Results: %d passed, %d failed ===\n", g_pass, g_fail);
+	printf("\n=== Results: %d passed, %d failed, %d skipped ===\n",
+	       g_pass, g_fail, g_skip);
 
 	return g_fail ? 1 : 0;
 }

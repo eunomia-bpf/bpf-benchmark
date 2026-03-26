@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <sys/syscall.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -38,6 +39,7 @@
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 #define ptr_to_u64(ptr) ((__u64)(uintptr_t)(ptr))
+#define LOG_BUF_SIZE 65536
 
 /* BPF_MAXINSNS from bpf_common.h is only 4096 (cBPF). The eBPF verifier
  * allows up to 1M instructions for privileged loaders.  We use a much
@@ -54,9 +56,39 @@ static int sys_bpf(enum bpf_cmd cmd, union bpf_attr *attr, unsigned int size)
 	return syscall(__NR_bpf, cmd, attr, size);
 }
 
+struct unittest_btf_header {
+	__u16 magic;
+	__u8 version;
+	__u8 flags;
+	__u32 hdr_len;
+	__u32 type_off;
+	__u32 type_len;
+	__u32 str_off;
+	__u32 str_len;
+};
+
+struct unittest_btf_type {
+	__u32 name_off;
+	__u32 info;
+	__u32 size_or_type;
+};
+
+struct unittest_btf_info {
+	__u64 btf;
+	__u32 btf_size;
+	__u32 id;
+	__u64 name;
+	__u32 name_len;
+	__u32 kernel_btf;
+	__u8 pad[96];
+};
+
 /* Load a simple XDP program. Returns prog_fd or -1. */
-static int load_xdp_prog(const struct bpf_insn *insns, __u32 insn_cnt,
-			  char *log_buf, size_t log_buf_sz)
+static int load_xdp_prog_with_fd_array(const struct bpf_insn *insns,
+				       __u32 insn_cnt,
+				       const int *fd_array,
+				       __u32 fd_array_cnt,
+				       char *log_buf, size_t log_buf_sz)
 {
 	static const char license[] = "GPL";
 	union bpf_attr attr;
@@ -69,13 +101,28 @@ static int load_xdp_prog(const struct bpf_insn *insns, __u32 insn_cnt,
 	attr.log_level    = 1;
 	attr.log_buf      = ptr_to_u64(log_buf);
 	attr.log_size     = log_buf_sz;
+	if (fd_array && fd_array_cnt) {
+		attr.fd_array = ptr_to_u64(fd_array);
+		attr.fd_array_cnt = fd_array_cnt;
+	}
 
 	return sys_bpf(BPF_PROG_LOAD, &attr, sizeof(attr));
 }
 
+static int load_xdp_prog(const struct bpf_insn *insns, __u32 insn_cnt,
+			 char *log_buf, size_t log_buf_sz)
+{
+	return load_xdp_prog_with_fd_array(insns, insn_cnt, NULL, 0,
+					   log_buf, log_buf_sz);
+}
+
 /* REJIT an existing prog.  Returns 0 on success, -1 on error (check errno). */
-static int rejit_prog(int prog_fd, const struct bpf_insn *insns,
-		      __u32 insn_cnt, char *log_buf, size_t log_buf_sz)
+static int rejit_prog_with_fd_array(int prog_fd,
+				    const struct bpf_insn *insns,
+				    __u32 insn_cnt,
+				    const int *fd_array,
+				    __u32 fd_array_cnt,
+				    char *log_buf, size_t log_buf_sz)
 {
 	union bpf_attr attr;
 
@@ -86,8 +133,19 @@ static int rejit_prog(int prog_fd, const struct bpf_insn *insns,
 	attr.rejit.log_level = 1;
 	attr.rejit.log_buf  = ptr_to_u64(log_buf);
 	attr.rejit.log_size = log_buf_sz;
+	if (fd_array && fd_array_cnt) {
+		attr.rejit.fd_array = ptr_to_u64(fd_array);
+		attr.rejit.fd_array_cnt = fd_array_cnt;
+	}
 
 	return sys_bpf(BPF_PROG_REJIT, &attr, sizeof(attr));
+}
+
+static int rejit_prog(int prog_fd, const struct bpf_insn *insns,
+		      __u32 insn_cnt, char *log_buf, size_t log_buf_sz)
+{
+	return rejit_prog_with_fd_array(prog_fd, insns, insn_cnt, NULL, 0,
+					log_buf, log_buf_sz);
 }
 
 /* Execute an XDP program via bpf_prog_test_run. Returns 0 on success. */
@@ -184,6 +242,402 @@ static int verify_retval(int prog_fd, __u32 expected)
 	fprintf(stderr, "  FAIL  %s: %s\n", name, reason); \
 	g_fail++; \
 } while (0)
+
+#define TEST_SKIP(name, reason) do { \
+	fprintf(stderr, "  FAIL  %s: %s\n", name, reason); \
+	g_fail++; \
+} while (0)
+
+#define BPF_UT_RAW_INSN(CODE, DST, SRC, OFF, IMM) ((struct bpf_insn) { \
+	.code = (CODE), \
+	.dst_reg = (DST), \
+	.src_reg = (SRC), \
+	.off = (OFF), \
+	.imm = (IMM), \
+})
+
+#define BPF_UT_EXIT_INSN() \
+	BPF_UT_RAW_INSN(BPF_JMP | BPF_EXIT, 0, 0, 0, 0)
+
+#define BPF_UT_MOV64_IMM(DST, IMM) \
+	BPF_UT_RAW_INSN(BPF_ALU64 | BPF_MOV | BPF_K, DST, 0, 0, IMM)
+
+#define BPF_UT_KINSN_SIDECAR(PAYLOAD) \
+	BPF_UT_RAW_INSN(BPF_ALU64 | BPF_MOV | BPF_K, \
+			(__u8)((__u64)(PAYLOAD) & 0xf), \
+			BPF_PSEUDO_KINSN_SIDECAR, \
+			(__s16)(((__u64)(PAYLOAD) >> 4) & 0xffff), \
+			(__s32)(((__u64)(PAYLOAD) >> 20) & 0xffffffffU))
+
+#define BPF_UT_CALL_KINSN(OFF, IMM) \
+	BPF_UT_RAW_INSN(BPF_JMP | BPF_CALL, 0, BPF_PSEUDO_KINSN_CALL, \
+			OFF, IMM)
+
+#define BPF_UT_BTF_FD_ARRAY(FD) { (FD), (FD) }
+
+static int read_whole_file(const char *path, void **data_out, size_t *len_out)
+{
+	struct stat st;
+	void *data;
+	int fd;
+	size_t cap;
+	size_t len = 0;
+
+	fd = open(path, O_RDONLY);
+	if (fd < 0)
+		return -1;
+	if (fstat(fd, &st) < 0) {
+		close(fd);
+		return -1;
+	}
+
+	cap = st.st_size > 0 ? (size_t)st.st_size : 4096;
+	data = malloc(cap);
+	if (!data) {
+		close(fd);
+		errno = ENOMEM;
+		return -1;
+	}
+
+	for (;;) {
+		ssize_t nread;
+
+		if (len == cap) {
+			size_t new_cap = cap * 2;
+			void *new_data;
+
+			if (new_cap < cap) {
+				free(data);
+				close(fd);
+				errno = EOVERFLOW;
+				return -1;
+			}
+
+			new_data = realloc(data, new_cap);
+			if (!new_data) {
+				free(data);
+				close(fd);
+				errno = ENOMEM;
+				return -1;
+			}
+			data = new_data;
+			cap = new_cap;
+		}
+
+		nread = read(fd, (char *)data + len, cap - len);
+		if (nread < 0) {
+			free(data);
+			close(fd);
+			return -1;
+		}
+		if (nread == 0)
+			break;
+		len += nread;
+	}
+
+	close(fd);
+	*data_out = data;
+	*len_out = len;
+	return 0;
+}
+
+static __u32 unittest_btf_kind(const struct unittest_btf_type *bt)
+{
+	return (bt->info >> 24) & 0x1f;
+}
+
+static size_t unittest_btf_type_extra_size(const struct unittest_btf_type *bt)
+{
+	__u32 kind = unittest_btf_kind(bt);
+	__u32 vlen = bt->info & 0xffff;
+
+	switch (kind) {
+	case 1:
+		return 4;
+	case 3:
+		return 12;
+	case 4:
+	case 5:
+		return vlen * 12;
+	case 6:
+		return vlen * 8;
+	case 13:
+		return vlen * 8;
+	case 14:
+		return 4;
+	case 15:
+		return vlen * 12;
+	case 17:
+		return 4;
+	case 19:
+		return vlen * 12;
+	default:
+		return 0;
+	}
+}
+
+static int count_btf_types(const void *btf_data, size_t btf_len,
+			   __u32 *type_cnt_out)
+{
+	const struct unittest_btf_header *hdr = btf_data;
+	const unsigned char *data = btf_data;
+	const unsigned char *type_section;
+	size_t type_start, type_end;
+	size_t offset = 0;
+	__u32 type_cnt = 1;
+
+	if (btf_len < sizeof(*hdr)) {
+		errno = EINVAL;
+		return -1;
+	}
+	if (hdr->magic != 0xeb9f) {
+		errno = EPROTO;
+		return -1;
+	}
+
+	type_start = hdr->hdr_len + hdr->type_off;
+	type_end = type_start + hdr->type_len;
+	if (type_end > btf_len) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	type_section = data + type_start;
+	while (offset + sizeof(struct unittest_btf_type) <= hdr->type_len) {
+		const struct unittest_btf_type *bt;
+		size_t skip;
+
+		bt = (const struct unittest_btf_type *)(type_section + offset);
+		offset += sizeof(*bt);
+
+		skip = unittest_btf_type_extra_size(bt);
+		if (offset + skip > hdr->type_len) {
+			errno = EINVAL;
+			return -1;
+		}
+
+		offset += skip;
+		type_cnt++;
+	}
+
+	if (offset != hdr->type_len) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	*type_cnt_out = type_cnt;
+	return 0;
+}
+
+static int get_vmlinux_btf_layout(__u32 *str_len_out, __u32 *type_cnt_out)
+{
+	const char *path = "/sys/kernel/btf/vmlinux";
+	const struct unittest_btf_header *hdr;
+	void *data = NULL;
+	size_t data_len = 0;
+
+	if (read_whole_file(path, &data, &data_len) < 0)
+		return -1;
+	if (data_len < sizeof(*hdr)) {
+		free(data);
+		errno = EINVAL;
+		return -1;
+	}
+
+	hdr = data;
+	if (hdr->magic != 0xeb9f) {
+		free(data);
+		errno = EPROTO;
+		return -1;
+	}
+	if (count_btf_types(data, data_len, type_cnt_out) < 0) {
+		free(data);
+		return -1;
+	}
+
+	*str_len_out = hdr->str_len;
+	free(data);
+	return 0;
+}
+
+static int find_func_btf_id(const void *btf_data, size_t btf_len,
+			    const char *func_name, __u32 base_str_off,
+			    __u32 type_id_bias, __u32 *btf_id_out)
+{
+	const struct unittest_btf_header *hdr = btf_data;
+	const unsigned char *data = btf_data;
+	const unsigned char *type_section;
+	const unsigned char *str_section;
+	size_t type_start, type_end, str_start, str_end;
+	size_t offset = 0;
+	__u32 type_id = 1;
+
+	if (btf_len < sizeof(*hdr))
+		return -1;
+	if (hdr->magic != 0xeb9f) {
+		errno = EPROTO;
+		return -1;
+	}
+
+	type_start = hdr->hdr_len + hdr->type_off;
+	type_end = type_start + hdr->type_len;
+	str_start = hdr->hdr_len + hdr->str_off;
+	str_end = str_start + hdr->str_len;
+	if (type_end > btf_len || str_end > btf_len) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	type_section = data + type_start;
+	str_section = data + str_start;
+
+	while (offset + sizeof(struct unittest_btf_type) <= hdr->type_len) {
+		const struct unittest_btf_type *bt;
+
+		bt = (const struct unittest_btf_type *)(type_section + offset);
+		if (unittest_btf_kind(bt) == 12) {
+			size_t raw_off = bt->name_off;
+			size_t local_off = raw_off;
+			const char *name;
+			size_t max_len;
+
+			if (base_str_off && raw_off >= base_str_off)
+				local_off = raw_off - base_str_off;
+			if (local_off < hdr->str_len) {
+				name = (const char *)(str_section + local_off);
+				max_len = hdr->str_len - local_off;
+				if (strnlen(name, max_len) < max_len &&
+				    strcmp(name, func_name) == 0) {
+					*btf_id_out = type_id + type_id_bias;
+					return 0;
+				}
+			}
+		}
+
+		offset += sizeof(*bt);
+		offset += unittest_btf_type_extra_size(bt);
+		type_id++;
+	}
+
+	errno = ENOENT;
+	return -1;
+}
+
+static int bpf_btf_get_fd_by_id(__u32 id)
+{
+	union bpf_attr attr;
+
+	memset(&attr, 0, sizeof(attr));
+	attr.btf_id = id;
+	return sys_bpf(BPF_BTF_GET_FD_BY_ID, &attr, sizeof(attr));
+}
+
+static int bpf_btf_get_next_id(__u32 start_id, __u32 *next_id)
+{
+	union bpf_attr attr;
+
+	memset(&attr, 0, sizeof(attr));
+	attr.start_id = start_id;
+	if (sys_bpf(BPF_BTF_GET_NEXT_ID, &attr, sizeof(attr)) < 0)
+		return -1;
+
+	*next_id = attr.next_id;
+	return 0;
+}
+
+static int bpf_btf_get_info_name(int btf_fd, char *name_buf, size_t name_buf_sz)
+{
+	union bpf_attr attr;
+	struct unittest_btf_info info;
+
+	memset(&info, 0, sizeof(info));
+	memset(&attr, 0, sizeof(attr));
+	info.name = ptr_to_u64(name_buf);
+	info.name_len = name_buf_sz;
+	attr.info.bpf_fd = btf_fd;
+	attr.info.info_len = sizeof(info);
+	attr.info.info = ptr_to_u64(&info);
+
+	return sys_bpf(BPF_OBJ_GET_INFO_BY_FD, &attr, sizeof(attr));
+}
+
+static int bpf_btf_get_fd_by_module_name(const char *module_name)
+{
+	__u32 id = 0;
+
+	for (;;) {
+		char name_buf[64];
+		int fd;
+
+		if (bpf_btf_get_next_id(id, &id) < 0)
+			return -1;
+
+		fd = bpf_btf_get_fd_by_id(id);
+		if (fd < 0)
+			continue;
+
+		memset(name_buf, 0, sizeof(name_buf));
+		if (bpf_btf_get_info_name(fd, name_buf, sizeof(name_buf)) == 0 &&
+		    strcmp(name_buf, module_name) == 0)
+			return fd;
+
+		close(fd);
+	}
+}
+
+static int discover_barrier_kinsn(int *module_btf_fd, __u32 *func_btf_id)
+{
+	const char *module_name = "bpf_barrier";
+	const char *func_name = "bpf_speculation_barrier";
+	__u32 base_str_off;
+	__u32 type_id_bias;
+	char path[128];
+	void *data = NULL;
+	size_t data_len = 0;
+	int fd;
+
+	if (get_vmlinux_btf_layout(&base_str_off, &type_id_bias) < 0)
+		return -1;
+	if (type_id_bias == 0) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	fd = bpf_btf_get_fd_by_module_name(module_name);
+	if (fd < 0)
+		return -1;
+
+	snprintf(path, sizeof(path), "/sys/kernel/btf/%s", module_name);
+	if (read_whole_file(path, &data, &data_len) < 0) {
+		close(fd);
+		return -1;
+	}
+
+	if (find_func_btf_id(data, data_len, func_name, base_str_off,
+			     type_id_bias - 1, func_btf_id) < 0) {
+		free(data);
+		close(fd);
+		return -1;
+	}
+
+	free(data);
+	*module_btf_fd = fd;
+	return 0;
+}
+
+static void patch_kinsn_call(struct bpf_insn *prog, size_t cnt, __u32 btf_id)
+{
+	size_t i;
+
+	for (i = 0; i < cnt; i++) {
+		if (prog[i].code == (BPF_JMP | BPF_CALL) &&
+		    prog[i].src_reg == BPF_PSEUDO_KINSN_CALL) {
+			prog[i].imm = (__s32)btf_id;
+			prog[i].off = 1;
+			return;
+		}
+	}
+}
 
 /* ================================================================== */
 /*  PART A: Negative Tests -- REJIT must reject invalid bytecode      */
@@ -503,8 +957,9 @@ static int test_neg_unprivileged_rejit(void)
 		TEST_PASS(name);
 		return 0;
 	} else if (WIFEXITED(status) && WEXITSTATUS(status) == 2) {
-		/* Could not setresuid -- likely not root. Skip. */
-		printf("  SKIP  %s (cannot drop privileges)\n", name);
+		/* Could not setresuid -- likely not root. Treat as failure. */
+		fprintf(stderr, "  FAIL  %s: cannot drop privileges\n", name);
+		g_fail++;
 		return 0;
 	} else {
 		TEST_FAIL(name, "child reported failure");
@@ -574,6 +1029,78 @@ static int test_neg_original_survives_failed_rejit(void)
 	}
 
 	close(prog_fd);
+	TEST_PASS(name);
+	return 0;
+}
+
+/*
+ * N16: The verifier now rejects kinsn modules whose max_insn_cnt would exceed
+ * INSN_BUF_SIZE. Userspace cannot force a module's descriptor value at runtime,
+ * so this regression test exercises the supported path instead: discover a live
+ * kinsn module, REJIT a program that uses it, and verify the verifier accepts
+ * the normal case and the transformed program runs correctly.
+ */
+static int test_kinsn_max_insn_cnt_exceeds_buf(void)
+{
+	const char *name = "N16_kinsn_max_insn_cnt_exceeds_buf";
+	int module_btf_fd = -1;
+	int fd_array[2];
+	char log_buf[LOG_BUF_SIZE];
+	__u32 func_btf_id = 0;
+	__u32 retval = 0;
+	int prog_fd = -1;
+	struct bpf_insn kinsn_prog[] = {
+		BPF_UT_KINSN_SIDECAR(0),
+		BPF_UT_CALL_KINSN(0, 0),
+		BPF_UT_MOV64_IMM(BPF_REG_0, XDP_PASS),
+		BPF_UT_EXIT_INSN(),
+	};
+
+	if (discover_barrier_kinsn(&module_btf_fd, &func_btf_id) < 0) {
+		TEST_SKIP(name, "bpf_barrier kinsn module/BTF not available");
+		return 0;
+	}
+
+	fd_array[0] = module_btf_fd;
+	fd_array[1] = module_btf_fd;
+	patch_kinsn_call(kinsn_prog, ARRAY_SIZE(kinsn_prog), func_btf_id);
+
+	memset(log_buf, 0, sizeof(log_buf));
+	prog_fd = load_xdp_prog(prog_xdp_drop, ARRAY_SIZE(prog_xdp_drop),
+				log_buf, sizeof(log_buf));
+	if (prog_fd < 0) {
+		TEST_FAIL(name, "cannot load base program");
+		close(module_btf_fd);
+		return 1;
+	}
+
+	if (verify_retval(prog_fd, XDP_DROP) < 0) {
+		TEST_FAIL(name, "base program returned wrong value");
+		close(prog_fd);
+		close(module_btf_fd);
+		return 1;
+	}
+
+	memset(log_buf, 0, sizeof(log_buf));
+	if (rejit_prog_with_fd_array(prog_fd, kinsn_prog, ARRAY_SIZE(kinsn_prog),
+				     fd_array, ARRAY_SIZE(fd_array),
+				     log_buf, sizeof(log_buf)) < 0) {
+		fprintf(stderr, "    verifier log:\n%s\n", log_buf);
+		TEST_FAIL(name, "valid kinsn REJIT was rejected");
+		close(prog_fd);
+		close(module_btf_fd);
+		return 1;
+	}
+
+	if (test_run_xdp(prog_fd, &retval) < 0 || retval != XDP_PASS) {
+		TEST_FAIL(name, "recompiled kinsn program returned wrong value");
+		close(prog_fd);
+		close(module_btf_fd);
+		return 1;
+	}
+
+	close(prog_fd);
+	close(module_btf_fd);
 	TEST_PASS(name);
 	return 0;
 }
@@ -891,6 +1418,7 @@ int main(void)
 	test_neg_wrong_helper_for_prog_type();     /* N13 */
 	test_neg_unprivileged_rejit();             /* N14 */
 	test_neg_original_survives_failed_rejit(); /* N15 */
+	test_kinsn_max_insn_cnt_exceeds_buf();     /* N16 */
 
 	printf("\n--- Correctness Verification Tests ---\n");
 	test_cor_identity_transform();             /* C01 */
@@ -899,7 +1427,8 @@ int main(void)
 	test_cor_multiple_rejits();                /* C04 */
 	test_cor_rejit_roundtrip();                /* C05 */
 
-	printf("\n=== Summary: %d passed, %d failed ===\n", g_pass, g_fail);
+	printf("\n=== Summary: %d passed, %d failed ===\n",
+	       g_pass, g_fail);
 
 	if (g_fail) {
 		fprintf(stderr, "SOME TESTS FAILED\n");

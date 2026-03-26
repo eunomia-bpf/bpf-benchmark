@@ -40,6 +40,8 @@
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 #define ptr_to_u64(ptr) ((__u64)(uintptr_t)(ptr))
 
+static const char *g_progs_dir = "tests/unittest/build/progs";
+
 /* ---- BPF instruction helpers ------------------------------------- */
 
 #define BPF_MOV64_REG(DST, SRC) \
@@ -60,7 +62,6 @@
 
 static int g_pass;
 static int g_fail;
-static int g_skip;
 
 #define TEST_PASS(name) do { \
 	printf("  PASS  %s\n", name); \
@@ -74,8 +75,9 @@ static int g_skip;
 } while (0)
 
 #define TEST_SKIP(name, reason) do { \
-	printf("  SKIP  %s: %s\n", name, reason); \
-	g_skip++; \
+	fprintf(stderr, "  FAIL  %s: %s (errno=%d: %s)\n", \
+		name, reason, errno, strerror(errno)); \
+	g_fail++; \
 } while (0)
 
 /* ---- Syscall helpers --------------------------------------------- */
@@ -343,6 +345,12 @@ struct info_rejit_args {
 	volatile int rejit_err;
 };
 
+struct callchain_state_value {
+	__u64 hits;
+	__s32 last_stack_size;
+	__u32 pad;
+};
+
 static void *info_query_worker(void *arg)
 {
 	struct info_rejit_args *a = arg;
@@ -402,6 +410,31 @@ static void *rejit_stress_worker(void *arg)
 	}
 
 	return NULL;
+}
+
+static int read_callchain_state(int map_fd, struct callchain_state_value *state)
+{
+	__u32 key = 0;
+
+	return bpf_map_lookup_elem(map_fd, &key, state);
+}
+
+static int wait_for_callchain_hit(int map_fd, __u64 prev_hits,
+				  struct callchain_state_value *state)
+{
+	int i;
+
+	for (i = 0; i < 20; i++) {
+		(void)getpid();
+		(void)getpid();
+		if (read_callchain_state(map_fd, state) == 0 &&
+		    state->hits > prev_hits &&
+		    state->last_stack_size > 0)
+			return 0;
+		usleep(10000);
+	}
+
+	return -1;
 }
 
 /* ================================================================== */
@@ -858,11 +891,122 @@ out:
 }
 
 /* ================================================================== */
+/*  T6: has_callchain_buf survives REJIT swap                          */
+/* ================================================================== */
+/*
+ * Load a raw_tracepoint program that calls bpf_get_stack(), attach it to
+ * sys_enter, confirm it records a positive stack size, then REJIT it with
+ * the same original bytecode and confirm it continues to do so. Destroying
+ * the link and closing the object exercises the unload path that owns the
+ * callchain buffer.
+ */
+static void test_rejit_swap_callchain_buf(void)
+{
+	const char *name = "T6_rejit_swap_callchain_buf";
+	char obj_path[512];
+	char log_buf[65536];
+	struct bpf_link *link = NULL;
+	struct bpf_object *obj = NULL;
+	struct bpf_program *prog;
+	struct bpf_insn *orig_insns = NULL;
+	struct callchain_state_value state_before = {};
+	struct callchain_state_value state_after = {};
+	int state_map_fd;
+	int prog_fd;
+	int orig_cnt;
+
+	snprintf(obj_path, sizeof(obj_path), "%s/test_callchain_buf_rawtp.bpf.o",
+		 g_progs_dir);
+
+	obj = bpf_object__open_file(obj_path, NULL);
+	if (!obj || libbpf_get_error(obj)) {
+		TEST_SKIP(name, "cannot open callchain rawtp object");
+		return;
+	}
+
+	if (bpf_object__load(obj) < 0) {
+		TEST_SKIP(name, "failed to load callchain rawtp object");
+		bpf_object__close(obj);
+		return;
+	}
+
+	prog = bpf_object__find_program_by_name(obj, "test_callchain_buf_rawtp");
+	if (!prog) {
+		TEST_FAIL(name, "program not found in object");
+		goto out;
+	}
+
+	prog_fd = bpf_program__fd(prog);
+	if (prog_fd < 0) {
+		TEST_FAIL(name, "program has no valid fd");
+		goto out;
+	}
+
+	state_map_fd = bpf_object__find_map_fd_by_name(obj, "state_map");
+	if (state_map_fd < 0) {
+		TEST_FAIL(name, "state_map not found");
+		goto out;
+	}
+
+	link = bpf_program__attach(prog);
+	if (!link || libbpf_get_error(link)) {
+		TEST_SKIP(name, "raw tracepoint attach failed");
+		link = NULL;
+		goto out;
+	}
+
+	if (read_callchain_state(state_map_fd, &state_before) < 0) {
+		TEST_FAIL(name, "initial map lookup failed");
+		goto out;
+	}
+
+	if (wait_for_callchain_hit(state_map_fd, state_before.hits,
+				   &state_after) < 0) {
+		TEST_FAIL(name, "pre-rejit bpf_get_stack did not produce a sample");
+		goto out;
+	}
+
+	orig_cnt = get_original_insns(prog_fd, &orig_insns);
+	if (orig_cnt < 0) {
+		TEST_FAIL(name, "get_original_insns failed");
+		goto out;
+	}
+
+	memset(log_buf, 0, sizeof(log_buf));
+	if (rejit_prog(prog_fd, orig_insns, orig_cnt,
+		       log_buf, sizeof(log_buf)) < 0) {
+		fprintf(stderr, "    verifier log:\n%s\n", log_buf);
+		TEST_FAIL(name, "identity REJIT failed");
+		goto out;
+	}
+
+	state_before = state_after;
+	memset(&state_after, 0, sizeof(state_after));
+	if (wait_for_callchain_hit(state_map_fd, state_before.hits,
+				   &state_after) < 0) {
+		TEST_FAIL(name, "post-rejit bpf_get_stack did not produce a sample");
+		goto out;
+	}
+
+	TEST_PASS(name);
+
+out:
+	free(orig_insns);
+	if (link)
+		bpf_link__destroy(link);
+	if (obj)
+		bpf_object__close(obj);
+}
+
+/* ================================================================== */
 /*  Main                                                               */
 /* ================================================================== */
 
-int main(void)
+int main(int argc, char **argv)
 {
+	if (argc > 1)
+		g_progs_dir = argv[1];
+
 	printf("=== BpfReJIT swap/rollback regression tests ===\n");
 
 	printf("\n[T1] metadata consistency across REJIT:\n");
@@ -880,7 +1024,10 @@ int main(void)
 	printf("\n[T5] orig_prog_insns follows latest REJIT:\n");
 	test_t5_orig_insns_updated_after_rejit();
 
-	printf("\n=== Summary: %d passed, %d failed, %d skipped ===\n",
-	       g_pass, g_fail, g_skip);
+	printf("\n[T6] callchain buffer preserved across swap:\n");
+	test_rejit_swap_callchain_buf();
+
+	printf("\n=== Summary: %d passed, %d failed ===\n",
+	       g_pass, g_fail);
 	return g_fail ? 1 : 0;
 }
