@@ -287,7 +287,14 @@ Proof_select(dst, treg, freg, cond)(R, M) =
 
 There is no additional hidden temporary register in the proof object. The x86
 native emitter uses `TEST + CMOV` to refine this state transformer directly
-without branches. No admissibility conditions beyond `Valid` are required.
+without branches.
+
+**Register aliasing note.** When `dst == cond` and `dst ∉ {treg, freg}`, the
+x86 emit sequence must execute `TEST cond` before any `MOV dst, ...` that would
+overwrite the condition register. The proof sequence is naturally correct
+because `JEQ cond` evaluates before any `MOV dst`, but the native emit must
+respect this ordering. The arm64 path (`TST` + `CSEL`) is inherently safe
+because `TST` always precedes the single `CSEL` instruction.
 
 ### 3.3 `extract64`
 
@@ -320,8 +327,8 @@ start + len <= 64
 The `len ≤ 32` bound is a **proof-sequence encoding constraint**, not a
 hardware limit. The BPF proof sequence uses `BPF_ALU_IMM(AND, dst, mask)` with
 a 32-bit immediate; `mask(len)` for `len > 32` exceeds `s32` range and cannot
-be encoded in a single BPF ALU instruction. The x86 `BEXTR` instruction itself
-can handle wider extractions, but the proof sequence cannot verify them.
+be encoded in a single BPF ALU instruction. The x86 native emit (`SHR` + `AND`)
+could handle wider extractions, but the proof sequence cannot verify them.
 
 Helper:
 
@@ -339,8 +346,8 @@ Proof_extract(dst, start, len)(R, M) =
 For `len = 32`, the proof sequence uses `BPF_ALU_IMM(AND, dst, -1)` (32-bit
 ALU), which masks with `0xffff_ffff` and zero-extends the result to 64 bits.
 
-No admissibility conditions beyond `Valid` are required; the native x86 `BEXTR`
-and the proof sequence agree on the full destination register.
+No admissibility conditions beyond `Valid` are required; the native x86 emit
+(`SHR` + `AND`) and the proof sequence agree on the full destination register.
 
 ### 3.4 `endian_load16`, `endian_load32`, `endian_load64`
 
@@ -466,10 +473,12 @@ system distributes obligations across two trust boundaries:
 | Payload validity (`Valid_K`) | Kernel module decoder |
 | Site admissibility (`Admissible_K^a`) | Daemon rewrite passes |
 
-Concrete admissibility conditions enforced by the daemon today:
+Concrete admissibility conditions enforced by the daemon or the kernel emit:
 
 - `rotate64`: `tmp ∉ LiveOut(site)` — the proof sequence clobbers `tmp` but
   native ROL does not
+- `select64` on x86: `TEST cond` must execute before any `MOV dst` that could
+  alias `cond` — enforced by the emit ordering in `emit_select_x86`
 - `endian_load*` on arm64: offset must be in the native emitter's direct
   encoding domain, or the daemon must first materialize an adjusted base with
   offset zero

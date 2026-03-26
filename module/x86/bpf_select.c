@@ -128,10 +128,11 @@ static int emit_select_x86(u8 *image, u32 *off, bool emit,
 		goto out;
 	}
 
+	emit_test_rr(buf, &len, cond_reg);
+
 	if (dst_reg != false_reg && dst_reg != true_reg)
 		emit_mov_rr(buf, &len, dst_reg, false_reg);
 
-	emit_test_rr(buf, &len, cond_reg);
 	if (dst_reg == true_reg)
 		emit_cmov_rr(buf, &len, dst_reg, false_reg, 0x44);
 	else
