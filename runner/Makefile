@@ -266,14 +266,13 @@ vm-micro: micro_exec micro-programs daemon-binary kernel-image kinsn-modules-bui
 
 vm-corpus: micro_exec daemon-binary kernel-image kinsn-modules-build
 	mkdir -p "$(CORPUS_RESULTS_DIR)"
-	TARGET="$(TARGET)" $(VENV_ACTIVATE) $(PYTHON) "$(REPO_ROOT)/corpus/driver.py" packet \
+	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
+		--action vm-corpus \
 		--kernel-image "$(BZIMAGE_PATH)" \
-		--runner "$(MICRO_RUNNER)" \
-		--daemon "$(DAEMON_PATH)" \
-		--btf-custom-path "$(VMLINUX_PATH)" \
-		--repeat "$(REPEAT)" \
-		--output-json "$(VM_CORPUS_OUTPUT_JSON)" \
-		--output-md "$(VM_CORPUS_OUTPUT_MD)"
+		$(VM_CPU_FLAG) \
+		$(VM_MEM_FLAG) \
+		--timeout "$(VM_E2E_TIMEOUT)" \
+		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) python3 "$(REPO_ROOT)/corpus/driver.py" perf --runner "$(MICRO_RUNNER)" --daemon "$(DAEMON_PATH)" --btf-custom-path "$(VMLINUX_PATH)" --repeat "$(REPEAT)" --output-json "$(VM_CORPUS_OUTPUT_JSON)" --output-md "$(VM_CORPUS_OUTPUT_MD)"'
 
 vm-e2e: e2e-prep e2e-tracee-setup e2e-tetragon-setup micro_exec daemon-binary kernel-image kinsn-modules-build
 	mkdir -p "$(E2E_RESULTS_DIR)"

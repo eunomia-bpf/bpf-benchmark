@@ -591,26 +591,41 @@ def build_target_batch_plan(
             for entry in chunk:
                 target = entry["target"]
                 refs = entry["refs"]
-                if not target.get("can_test_run"):
-                    continue
                 refs["baseline_run"] = f"{entry['prefix']}:baseline-run"
-                jobs.append(
-                    build_test_run_batch_job(
-                        job_id=refs["baseline_run"],
-                        execution="serial",
-                        runtime="kernel",
-                        object_path=entry["object_path"],
-                        program_name=target["program_name"],
-                        io_mode=target["io_mode"],
-                        memory_path=entry["memory_path"],
-                        input_size=int(target["input_size"]),
-                        repeat=repeat,
-                        btf_custom_path=btf_custom_path,
-                        compile_only=False,
-                        prepared_ref=entry["baseline_prepared_key"],
-                        prepared_group=baseline_group,
+                if target.get("can_test_run"):
+                    jobs.append(
+                        build_test_run_batch_job(
+                            job_id=refs["baseline_run"],
+                            execution="serial",
+                            runtime="kernel",
+                            object_path=entry["object_path"],
+                            program_name=target["program_name"],
+                            io_mode=target["io_mode"],
+                            memory_path=entry["memory_path"],
+                            input_size=int(target["input_size"]),
+                            repeat=repeat,
+                            btf_custom_path=btf_custom_path,
+                            compile_only=False,
+                            prepared_ref=entry["baseline_prepared_key"],
+                            prepared_group=baseline_group,
+                        )
                     )
-                )
+                else:
+                    jobs.append(
+                        build_test_run_batch_job(
+                            job_id=refs["baseline_run"],
+                            execution="serial",
+                            runtime="kernel-attach",
+                            object_path=entry["object_path"],
+                            program_name=target["program_name"],
+                            io_mode="map",
+                            memory_path=None,
+                            input_size=0,
+                            repeat=repeat,
+                            btf_custom_path=btf_custom_path,
+                            compile_only=False,
+                        )
+                    )
 
         if enable_recompile and enable_exec:
             for entry in chunk:
@@ -671,27 +686,43 @@ def build_target_batch_plan(
             for entry in chunk:
                 target = entry["target"]
                 refs = entry["refs"]
-                if not target.get("can_test_run"):
-                    continue
                 refs["rejit_run"] = f"{entry['prefix']}:rejit-run"
-                jobs.append(
-                    build_test_run_batch_job(
-                        job_id=refs["rejit_run"],
-                        execution="serial",
-                        runtime="kernel-rejit",
-                        object_path=entry["object_path"],
-                        program_name=target["program_name"],
-                        io_mode=target["io_mode"],
-                        memory_path=entry["memory_path"],
-                        input_size=int(target["input_size"]),
-                        repeat=repeat,
-                        btf_custom_path=btf_custom_path,
-                        compile_only=False,
-                        daemon_socket=daemon_socket,
-                        prepared_ref=entry["rejit_prepared_key"],
-                        prepared_group=rejit_group,
+                if target.get("can_test_run"):
+                    jobs.append(
+                        build_test_run_batch_job(
+                            job_id=refs["rejit_run"],
+                            execution="serial",
+                            runtime="kernel-rejit",
+                            object_path=entry["object_path"],
+                            program_name=target["program_name"],
+                            io_mode=target["io_mode"],
+                            memory_path=entry["memory_path"],
+                            input_size=int(target["input_size"]),
+                            repeat=repeat,
+                            btf_custom_path=btf_custom_path,
+                            compile_only=False,
+                            daemon_socket=daemon_socket,
+                            prepared_ref=entry["rejit_prepared_key"],
+                            prepared_group=rejit_group,
+                        )
                     )
-                )
+                else:
+                    jobs.append(
+                        build_test_run_batch_job(
+                            job_id=refs["rejit_run"],
+                            execution="serial",
+                            runtime="kernel-attach-rejit",
+                            object_path=entry["object_path"],
+                            program_name=target["program_name"],
+                            io_mode="map",
+                            memory_path=None,
+                            input_size=0,
+                            repeat=repeat,
+                            btf_custom_path=btf_custom_path,
+                            compile_only=False,
+                            daemon_socket=daemon_socket,
+                        )
+                    )
 
     return {
         "schema_version": 1,
@@ -978,6 +1009,7 @@ def load_targets(
         filters=filters,
         max_programs=max_programs,
         require_inventory_sites=False,
+        include_attach=True,
     )
 
 
@@ -1924,8 +1956,6 @@ def discover_linear_targets(
             if mode_name == "tracing":
                 if kind != "tracing":
                     continue
-            elif mode_name == "perf" and kind == "tracing":
-                continue
             if requested_kinds and kind not in requested_kinds:
                 continue
             haystack = " ".join(
