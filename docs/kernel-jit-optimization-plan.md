@@ -224,7 +224,7 @@ BpfReJIT 的设计基于三个层次的 insight：
 | **Spectre 缓解注入** | ✅ 已实现 | 在缺少 speculation barrier 的位置插入 lfence kinsn | SpeculationBarrierPass + bpf_barrier kinsn |
 | **LFENCE/BPF_NOSPEC 消除** | ⏸ 降优先级 | daemon 重构 bytecode 使 speculative path 安全 → verifier 不再插 barrier | **corpus 861 程序实测 BPF_ST_NOSPEC = 0**。设计保留：`lfence_nospec_elimination_design_20260324.md` |
 | **危险 helper 防火墙** | ✅ 已实现 | 分级策略：P0 `send_signal`/`send_signal_thread`/`override_return` fail-closed（`r0=-EPERM`）；P1 `ktime_get_ns` coarseify；`probe_read_kernel` audit-only | **91034 helper 调用 / 568 对象；严格危险集 26925 调用(29.6%) / 155 对象(27.3%)；权限提升类仅 10 次调用(send_signal 7 + override_return 3)；Tracee+KubeArmor 占 91.6%**。实现：`dangerous_helper_firewall_design_20260326.md` / `dangerous_helper_firewall_impl_report_20260326.md` |
-| **BPF 程序漏洞热修复** | ✅ 调研完成 | 不修 verifier，对已加载字节码硬化（null-guard/参数净化/tail-call 隔离）。CVE 签名库 + 四类补丁模板 | **45+ verifier CVE 中 31 个(G1)适合热补丁，13 个高可行性（nullability/helper contract/packet pointer 刷新）；信任模型：补丁绕开缺陷 verifier 规则 + re-verify**。调研：`bpf_live_patching_research_20260326.md` |
+| **BPF 程序漏洞热修复** | ✅ 已实现 | 不修 verifier，对已加载字节码做 null-guard / helper 参数净化 / packet pointer refresh / tail-call isolation，并要求补丁后重新过 verifier | **45+ verifier CVE 中 31 个(G1)适合热补丁，13 个高可行性（nullability/helper contract/packet pointer 刷新）；信任模型：补丁绕开缺陷 verifier 规则 + re-verify**。设计/实现/评审：`live_patch_pass_design_20260326.md` / `live_patch_impl_report_20260326.md` / `live_patch_review_report_20260326.md` |
 | **权限收紧** | ✅ 调研完成 | D(部署声明)⊇S(静态包络)⊇N(可安全收紧)⊇O(观测 live)。BpfReJIT 补上 BPF token 只收紧"未来加载"的缺口 | **157 源文件中 0 个使用高风险 helper，但 systemd/Tracee/bcc 容器以 privileged/CAP_SYS_ADMIN 部署；过权在部署层面非字节码层面；不能仅凭 live 观测删除 helper**。调研：`privilege_narrowing_research_20260326.md` |
 
 ### 3.3 不在范围内
@@ -838,10 +838,10 @@ make clean
 | **498r** | 危险 helper 防火墙 — TDD 写测试 | ✅ | TDD 报告：`docs/tmp/20260326/dangerous_helper_firewall_tdd_report_20260326.md`；daemon unit tests 先红后绿 |
 | **498s** | 危险 helper 防火墙 — 实现 | ✅ | `daemon/src/passes/dangerous_helper_firewall.rs` 已实现 deny/coarseify/audit + conservative cleanup；实现报告：`docs/tmp/20260326/dangerous_helper_firewall_impl_report_20260326.md` |
 | **498t** | 危险 helper 防火墙 — Review + 测试 + commit | ✅ | review 报告：`docs/tmp/20260326/dangerous_helper_firewall_review_report_20260326.md`；`cargo test --manifest-path daemon/Cargo.toml dangerous_helper` **13/13** 通过；完整 `cargo test` 当前被未提交 `live_patch` 测试阻塞；实现 commit：`ca020c4`；plan 已同步更新 |
-| **498u** | BPF 漏洞热修复 — 设计文档 | 待做 | 基于调研报告补充实现级设计（CVE 签名库 + 补丁模板） |
-| **498v** | BPF 漏洞热修复 — TDD 写测试 | 待做 | codex 先写 daemon unit tests（CVE 匹配 + guard 插入 + re-verify） |
-| **498w** | BPF 漏洞热修复 — 实现 | 待做 | codex 实现 LivePatchPass + CVE 签名框架 |
-| **498x** | BPF 漏洞热修复 — Review + 测试 + commit | 待做 | codex review + test + commit push + 更新 plan |
+| **498u** | BPF 漏洞热修复 — 设计文档 | ✅ | 设计文档：`docs/tmp/20260326/live_patch_pass_design_20260326.md` |
+| **498v** | BPF 漏洞热修复 — TDD 写测试 | ✅ | TDD 报告：`docs/tmp/20260326/live_patch_tdd_report_20260326.md`；daemon unit tests 先红后绿 |
+| **498w** | BPF 漏洞热修复 — 实现 | ✅ | `daemon/src/passes/live_patch.rs` 已实现 null guard + helper arg sanitization + pointer refresh + tail-call isolation；实现报告：`docs/tmp/20260326/live_patch_impl_report_20260326.md` |
+| **498x** | BPF 漏洞热修复 — Review + 测试 + commit | ✅ | review 报告：`docs/tmp/20260326/live_patch_review_report_20260326.md`；`cargo test --manifest-path daemon/Cargo.toml live_patch` **14/14** 通过；完整 `cargo test --manifest-path daemon/Cargo.toml` **430 passed, 0 failed, 12 ignored**；实现 commit：`750adfa`；plan 已同步更新 |
 | **491** | **Recompile overhead 分解** | 待做 | verify 时间 + JIT 时间 + swap 时间 + daemon pipeline 时间。reviewer 必问。从 static_verify.json 和 micro results 可提取部分数据。 |
 | **492** | **Scalability 测量** | 待做 | 100/500/1000 个 live 程序时 daemon 吞吐量和延迟。apply-all 和 watch mode。 |
 | **493** | **Memory overhead 测量** | 待做 | REJIT 保留 orig bytecode + tmp prog 的额外内存。per-prog 和总量。 |
