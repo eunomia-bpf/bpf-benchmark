@@ -366,6 +366,14 @@ mod tests {
         assert_eq!(pm.pass_names().get(2).copied(), Some("dce"));
     }
 
+    #[test]
+    fn test_default_pipeline_ends_with_dangerous_helper_firewall() {
+        let pm = build_default_pipeline();
+        if pm.pass_names().last().copied() != Some("dangerous_helper_firewall") {
+            std::panic::panic_any("dangerous_helper_firewall should be last");
+        }
+    }
+
     // ── HIGH #6: Real BPF bytecode pipeline tests ────────────────────
 
     /// Run the full default pipeline on real compiled BPF bytecode from
