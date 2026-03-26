@@ -1,0 +1,21 @@
+{
+  "artifact_kind": "result_run",
+  "artifact_version": 1,
+  "case": "katran",
+  "details_dir": "details",
+  "generated_at": "2026-03-26T11:52:35.442147+00:00",
+  "last_updated_at": "2026-03-26T11:52:35.442136+00:00",
+  "output_hint_json": "e2e/results/katran_authoritative_20260326.json",
+  "output_hint_md": "e2e/results/katran-e2e-real.md",
+  "output_hint_report_md": "docs/tmp/bpftrace-real-e2e-report.md",
+  "paper_summary": {
+    "case": "katran",
+    "smoke": false,
+    "status": "running"
+  },
+  "run_type": "katran",
+  "smoke": false,
+  "started_at": "2026-03-26T11:52:33.914249+00:00",
+  "status": "running",
+  "suite": "e2e"
+}

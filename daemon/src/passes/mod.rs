@@ -10,6 +10,7 @@ mod endian;
 mod extract;
 mod map_inline;
 mod rotate;
+mod skb_load_bytes;
 mod spectre;
 pub mod utils;
 mod wide_mem;
@@ -23,6 +24,7 @@ pub use endian::EndianFusionPass;
 pub use extract::ExtractPass;
 pub use map_inline::MapInlinePass;
 pub use rotate::RotatePass;
+pub use skb_load_bytes::SkbLoadBytesSpecPass;
 pub use spectre::SpectreMitigationPass;
 pub use wide_mem::WideMemPass;
 
@@ -68,6 +70,12 @@ pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
         description: "Remove CFG-unreachable blocks and NOPs after simplification",
         aliases: &[],
         make: || Box::new(DcePass),
+    },
+    PassRegistryEntry {
+        name: "skb_load_bytes_spec",
+        description: "Specialize eligible skb_load_bytes helper sites into direct packet access",
+        aliases: &[],
+        make: || Box::new(SkbLoadBytesSpecPass),
     },
     PassRegistryEntry {
         name: "bounds_check_merge",
