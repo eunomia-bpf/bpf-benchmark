@@ -77,7 +77,7 @@ impl<A: MapValueReader> MapInvalidationTracker<A> {
         });
     }
 
-    pub fn check_all<R: MapValueReader>(&self, reader: &R) -> Result<Vec<u32>> {
+    pub fn check_all<R: MapValueReader + ?Sized>(&self, reader: &R) -> Result<Vec<u32>> {
         if self.entries.is_empty() {
             return Ok(Vec::new());
         }
@@ -115,7 +115,7 @@ impl<A: MapValueReader> MapInvalidationTracker<A> {
         Ok(invalidated.into_iter().collect())
     }
 
-    pub fn check_for_invalidations(&mut self) -> Result<Vec<u32>> {
+    pub fn check_for_invalidations(&self) -> Result<Vec<u32>> {
         self.check_all(&self.map_reader)
     }
 
@@ -236,6 +236,7 @@ mod tests {
 
         let mut tracker = MapInvalidationTracker::new(accessor.clone());
         tracker.record_inline_site(101, 7, key(1), value(11));
+        let tracker = tracker;
 
         let invalidated = tracker
             .check_for_invalidations()

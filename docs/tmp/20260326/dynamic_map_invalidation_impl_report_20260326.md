@@ -11,6 +11,7 @@ Implemented `MapInvalidationTracker` in `daemon/src/invalidation.rs` to satisfy 
 - batched invalidation checking via `MapValueReader`
 - duplicate `(prog_id, map_fd, key)` updates
 - deduplicated invalidated program ID output
+- immutable polling via `check_for_invalidations(&self)`
 
 This change is intentionally scoped to the tracker and its test-side reader mock. Runtime wiring into `cmd_apply`, `cmd_watch`, or `cmd_serve` was not added in this patch because the current failing tests were limited to tracker behavior.
 
@@ -44,6 +45,11 @@ Key behaviors implemented:
    - Added `MockMapValueReader` in the invalidation test module.
    - It supports configurable per-map key/value state and records batch call counts for the batch-efficiency assertions.
 
+6. Read-only invalidation polling
+   - `check_for_invalidations()` now takes `&self` rather than `&mut self`.
+   - This matches the implementation, which only reads tracker state during polling.
+   - The change removes an unnecessary exclusive-borrow requirement for callers that want to poll through shared synchronization primitives.
+
 ## Verification
 
 Executed:
@@ -55,7 +61,9 @@ cargo test --manifest-path /home/yunwei37/workspace/bpf-benchmark/daemon/Cargo.t
 Result:
 
 - Passed
-- Invalidation-specific tests passed: 9/9
+- Filtered test run: 12/12 passed
+- New invalidation tests passed: 9/9
+- Additional pre-existing `*invalidation*` substring matches passed: 3/3
 
 Executed:
 
@@ -65,10 +73,18 @@ cargo test --manifest-path /home/yunwei37/workspace/bpf-benchmark/daemon/Cargo.t
 
 Result:
 
-- Passed
-- Full daemon test suite: 404 passed, 0 failed, 12 ignored
+- Failed due to pre-existing unrelated `dangerous_helper_firewall` tests
+- Full daemon test suite at execution time: 407 passed, 6 failed, 12 ignored
+- Failing tests:
+  - `passes::dangerous_helper_firewall::tests::test_branch_fixup_after_replacement`
+  - `passes::dangerous_helper_firewall::tests::test_override_return_replaced`
+  - `passes::dangerous_helper_firewall::tests::test_probe_read_kernel_audit_only`
+  - `passes::dangerous_helper_firewall::tests::test_send_signal_replaced`
+  - `passes::dangerous_helper_firewall::tests::test_multiple_dangerous_calls`
+  - `passes::dangerous_helper_firewall::tests::test_ktime_get_ns_coarseified`
 
 ## Notes
 
 - The current tracker interface still stores a reader instance internally and keeps `check_for_invalidations()` as the main convenience entry point.
 - `check_all()` was added as a reusable explicit-reader helper so the batched comparison logic is available independently of the internal reader field.
+- `main.rs` currently registers the module only; runtime integration into `watch`/`serve` remains follow-on work outside this tracker patch.
