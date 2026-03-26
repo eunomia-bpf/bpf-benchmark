@@ -275,16 +275,6 @@ vm-corpus: micro_exec daemon-binary kernel-image kinsn-modules-build
 		--output-json "$(VM_CORPUS_OUTPUT_JSON)" \
 		--output-md "$(VM_CORPUS_OUTPUT_MD)"
 
-vm-corpus-tracing: micro_exec daemon-binary kernel-image kinsn-modules-build
-	mkdir -p "$(CORPUS_RESULTS_DIR)"
-	TARGET="$(TARGET)" $(VENV_ACTIVATE) $(PYTHON) "$(REPO_ROOT)/corpus/driver.py" tracing \
-		--runner "$(MICRO_RUNNER)" \
-		--daemon "$(DAEMON_PATH)" \
-		--btf-custom-path "$(VMLINUX_PATH)" \
-		--repeat "1" \
-		--output-json "$(CORPUS_RESULTS_DIR)/corpus_tracing.json" \
-		--output-md "$(CORPUS_RESULTS_DIR)/corpus_tracing.md"
-
 vm-e2e: e2e-prep e2e-tracee-setup e2e-tetragon-setup micro_exec daemon-binary kernel-image kinsn-modules-build
 	mkdir -p "$(E2E_RESULTS_DIR)"
 	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
@@ -297,6 +287,7 @@ vm-e2e: e2e-prep e2e-tracee-setup e2e-tetragon-setup micro_exec daemon-binary ke
 
 vm-all:
 	$(MAKE) vm-test TARGET="$(TARGET)"
+	$(MAKE) vm-static-test TARGET="$(TARGET)"
 	$(MAKE) vm-micro TARGET="$(TARGET)"
 	$(MAKE) vm-corpus TARGET="$(TARGET)"
 	$(MAKE) vm-e2e TARGET="$(TARGET)"

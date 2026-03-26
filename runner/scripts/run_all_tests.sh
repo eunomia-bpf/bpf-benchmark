@@ -60,9 +60,7 @@ fi
 if [ "$SKIP_UNITTEST" -eq 0 ]; then
     run_section "Running tests/unittest/ suite (pre-built)"
     cd "$UNITTEST_DIR"
-    for t in rejit_poc rejit_safety_tests rejit_regression rejit_tail_call \
-             rejit_spectre rejit_kinsn rejit_verifier_negative_tests \
-             rejit_prog_types rejit_audit_tests rejit_swap_tests; do
+    for t in $(find "$UNITTEST_BUILD_DIR" -maxdepth 1 -name 'rejit_*' -executable -printf '%f\n' 2>/dev/null | sort); do
         echo "--- $t ---"
         if [ ! -x "${UNITTEST_BUILD_DIR}/$t" ]; then
             echo "  ERROR: binary not found: ${UNITTEST_BUILD_DIR}/$t"

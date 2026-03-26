@@ -40,11 +40,12 @@ FAIL=0
 # Part 1: run pre-built tests/unittest/ suite.
 echo "=== Running tests/unittest/ (pre-built) ==="
 
-# All tests to run.  Must match tests/unittest/Makefile TESTS variable.
-TESTS="rejit_poc rejit_safety_tests rejit_regression rejit_tail_call
-       rejit_spectre rejit_kinsn rejit_verifier_negative_tests
-       rejit_prog_types rejit_audit_tests rejit_swap_tests
-       rejit_pass_correctness"
+# Auto-discover all rejit_* test binaries from the build directory.
+TESTS=$(find "$BUILD_DIR" -maxdepth 1 -name 'rejit_*' -executable -printf '%f\n' 2>/dev/null | sort)
+if [ -z "$TESTS" ]; then
+    echo "ERROR: no rejit_* test binaries found in $BUILD_DIR"
+    FAIL=$((FAIL + 1))
+fi
 
 for t in $TESTS; do
     echo "--- $t ---"
