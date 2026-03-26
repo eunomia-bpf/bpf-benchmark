@@ -324,6 +324,10 @@ pub struct PassContext {
     pub platform: PlatformCapabilities,
     /// Policy configuration (which passes are enabled, parameters, etc.).
     pub policy: PolicyConfig,
+    /// BPF program type (from `bpf_prog_info.type`).
+    /// Used by passes to apply program-type-specific safety filters.
+    /// 0 = unspecified (conservative behavior applies).
+    pub prog_type: u32,
 }
 
 /// Available kinsn targets and their descriptor/BTF transport metadata.
@@ -762,6 +766,7 @@ impl PassContext {
             },
             platform: PlatformCapabilities::default(),
             policy: PolicyConfig::default(),
+            prog_type: 0,
         }
     }
 }
@@ -1327,6 +1332,7 @@ mod tests {
             },
             platform: PlatformCapabilities::default(),
             policy: PolicyConfig::default(),
+            prog_type: 0,
         };
         assert!(ctx.kinsn_registry.rotate64_btf_id > 0);
         assert!(ctx.kinsn_registry.select64_btf_id < 0);

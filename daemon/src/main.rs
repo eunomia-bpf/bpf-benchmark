@@ -147,6 +147,7 @@ fn main() -> Result<()> {
         kinsn_registry: discovery.registry,
         platform,
         policy: pass::PolicyConfig::default(),
+        prog_type: 0,
     };
     // Keep descriptor BTF FDs alive for the daemon's lifetime.
     let _btf_fds = discovery.btf_fds;

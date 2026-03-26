@@ -1368,4 +1368,118 @@ mod tests {
             .iter()
             .any(|skip| skip.reason.contains("not inlineable")));
     }
+
+    /// PERCPU map types must not be inlined: userspace reads CPU-0's value,
+    /// but the BPF program sees the per-CPU slot for its running CPU.
+    #[test]
+    fn map_inline_pass_skips_percpu_array_maps() {
+        // map_type 6 = BPF_MAP_TYPE_PERCPU_ARRAY
+        let mut values = HashMap::new();
+        values.insert(1u32.to_le_bytes().to_vec(), vec![7, 0, 0, 0]);
+        install_map(112, 6, 8, true, values);
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let original = vec![
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ];
+        let mut program = BpfProgram::new(original.clone());
+        program.set_map_ids(vec![112]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(!result.program_changed);
+        assert_eq!(program.insns, original);
+        assert!(
+            result.pass_results[0]
+                .sites_skipped
+                .iter()
+                .any(|skip| skip.reason.contains("not inlineable")),
+            "PERCPU_ARRAY should be rejected: {:?}",
+            result.pass_results[0].sites_skipped
+        );
+    }
+
+    /// PERCPU_HASH maps must not be inlined either.
+    #[test]
+    fn map_inline_pass_skips_percpu_hash_maps() {
+        // map_type 5 = BPF_MAP_TYPE_PERCPU_HASH
+        let mut values = HashMap::new();
+        values.insert(1u32.to_le_bytes().to_vec(), vec![7, 0, 0, 0]);
+        install_map(113, 5, 8, true, values);
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let original = vec![
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            jeq_imm(0, 0, 2),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ];
+        let mut program = BpfProgram::new(original.clone());
+        program.set_map_ids(vec![113]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(!result.program_changed);
+        assert_eq!(program.insns, original);
+        assert!(
+            result.pass_results[0]
+                .sites_skipped
+                .iter()
+                .any(|skip| skip.reason.contains("not inlineable")),
+            "PERCPU_HASH should be rejected: {:?}",
+            result.pass_results[0].sites_skipped
+        );
+    }
+
+    /// LRU_PERCPU_HASH maps must not be inlined either.
+    #[test]
+    fn map_inline_pass_skips_lru_percpu_hash_maps() {
+        // map_type 10 = BPF_MAP_TYPE_LRU_PERCPU_HASH
+        let mut values = HashMap::new();
+        values.insert(1u32.to_le_bytes().to_vec(), vec![7, 0, 0, 0]);
+        install_map(114, 10, 8, true, values);
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let original = vec![
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            jeq_imm(0, 0, 2),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ];
+        let mut program = BpfProgram::new(original.clone());
+        program.set_map_ids(vec![114]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(!result.program_changed);
+        assert_eq!(program.insns, original);
+        assert!(
+            result.pass_results[0]
+                .sites_skipped
+                .iter()
+                .any(|skip| skip.reason.contains("not inlineable")),
+            "LRU_PERCPU_HASH should be rejected: {:?}",
+            result.pass_results[0].sites_skipped
+        );
+    }
 }

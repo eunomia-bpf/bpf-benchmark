@@ -336,6 +336,43 @@ fn emit_wide_mem(site: &RewriteSite) -> anyhow::Result<Vec<BpfInsn>> {
 // BpfPass implementation
 // ═══════════════════════════════════════════════════════════════════
 
+// ── Packet-pointer safety constants ─────────────────────────────────
+
+/// BPF_PROG_TYPE_SCHED_CLS (TC classifier).
+const BPF_PROG_TYPE_SCHED_CLS: u32 = 3;
+/// BPF_PROG_TYPE_SCHED_ACT (TC action).
+const BPF_PROG_TYPE_SCHED_ACT: u32 = 4;
+/// BPF_PROG_TYPE_XDP.
+const BPF_PROG_TYPE_XDP: u32 = 6;
+/// BPF_PROG_TYPE_LWT_IN.
+const BPF_PROG_TYPE_LWT_IN: u32 = 18;
+/// BPF_PROG_TYPE_LWT_OUT.
+const BPF_PROG_TYPE_LWT_OUT: u32 = 19;
+/// BPF_PROG_TYPE_LWT_XMIT.
+const BPF_PROG_TYPE_LWT_XMIT: u32 = 20;
+/// BPF_PROG_TYPE_SK_SKB.
+const BPF_PROG_TYPE_SK_SKB: u32 = 14;
+
+/// Returns `true` if the given BPF program type may expose packet pointers
+/// whose wide-load safety cannot be statically guaranteed.
+///
+/// These program types receive a context containing `data`/`data_end` packet
+/// pointers. The BPF verifier applies special range and alignment tracking to
+/// packet pointer dereferences that may reject wider loads even when
+/// individual byte loads were valid.
+fn is_packet_unsafe_prog_type(prog_type: u32) -> bool {
+    matches!(
+        prog_type,
+        BPF_PROG_TYPE_SCHED_CLS
+            | BPF_PROG_TYPE_SCHED_ACT
+            | BPF_PROG_TYPE_XDP
+            | BPF_PROG_TYPE_LWT_IN
+            | BPF_PROG_TYPE_LWT_OUT
+            | BPF_PROG_TYPE_LWT_XMIT
+            | BPF_PROG_TYPE_SK_SKB
+    )
+}
+
 /// WIDE_MEM optimization pass: merges byte-load + shift + OR sequences
 /// into a single wide load instruction.
 ///
@@ -356,7 +393,7 @@ impl BpfPass for WideMemPass {
         &self,
         program: &mut BpfProgram,
         analyses: &mut AnalysisCache,
-        _ctx: &PassContext,
+        ctx: &PassContext,
     ) -> anyhow::Result<PassResult> {
         let bt_analysis = BranchTargetAnalysis;
         let bt = analyses.get(&bt_analysis, program);
@@ -424,6 +461,35 @@ impl BpfPass for WideMemPass {
                     reason: format!("unsupported width {} (supports 2, 4, 8)", width),
                 });
                 continue;
+            }
+
+            // Skip sites that may use packet pointers in XDP/TC programs.
+            //
+            // The BPF verifier tracks packet pointer ranges specially. Byte-by-byte
+            // loads (BPF_B) are always accepted because each only requires 1 byte of
+            // range. Wide loads (BPF_H/W/DW) require the verifier to prove a larger
+            // contiguous range is within [data, data_end), and may also require
+            // natural alignment. The verifier may reject the wider access even when
+            // individual byte accesses were valid.
+            //
+            // Conservative filter: for XDP (type 6) and TC/SCHED_CLS (type 3)
+            // programs, skip any wide_mem site whose base register is not R10 (frame
+            // pointer / stack). R10-based loads always target the BPF stack, which
+            // has no range-tracking or alignment issues. All other registers could
+            // potentially hold packet pointers, map value pointers, or other typed
+            // pointers with verifier constraints.
+            if is_packet_unsafe_prog_type(ctx.prog_type) {
+                let base_reg = site.get_binding("base_reg").unwrap_or(-1);
+                if base_reg != 10 {
+                    skipped.push(SkipReason {
+                        pc: site.start_pc,
+                        reason: format!(
+                            "non-stack base r{} in XDP/TC prog (prog_type={})",
+                            base_reg, ctx.prog_type
+                        ),
+                    });
+                    continue;
+                }
             }
 
             safe_sites.push(site.clone());
@@ -1301,6 +1367,185 @@ mod tests {
             "  load_byte_recompose.bpf.o: found {} wide_mem sites in {} insns",
             sites.len(),
             insns.len()
+        );
+    }
+
+    // ── Packet pointer safety tests ─────────────────────────────────
+
+    #[test]
+    fn test_is_packet_unsafe_prog_type() {
+        // XDP and TC are packet-unsafe.
+        assert!(is_packet_unsafe_prog_type(6)); // XDP
+        assert!(is_packet_unsafe_prog_type(3)); // SCHED_CLS
+        assert!(is_packet_unsafe_prog_type(4)); // SCHED_ACT
+        // Tracing, kprobe, etc. are not packet-unsafe.
+        assert!(!is_packet_unsafe_prog_type(0)); // unspecified
+        assert!(!is_packet_unsafe_prog_type(1)); // SOCKET_FILTER
+        assert!(!is_packet_unsafe_prog_type(2)); // KPROBE
+        assert!(!is_packet_unsafe_prog_type(5)); // CGROUP_SKB
+        assert!(!is_packet_unsafe_prog_type(7)); // PERF_EVENT
+        assert!(!is_packet_unsafe_prog_type(26)); // TRACING
+    }
+
+    #[test]
+    fn test_wide_mem_skips_non_stack_in_xdp() {
+        // 2-byte wide_mem site with base_reg=6 (not stack pointer R10).
+        // In XDP prog (type 6), this should be skipped.
+        let mut prog = make_program(vec![
+            BpfInsn::ldx_mem(BPF_B, 0, 6, 0),
+            BpfInsn::ldx_mem(BPF_B, 1, 6, 1),
+            BpfInsn::alu64_imm(BPF_LSH, 1, 8),
+            BpfInsn::alu64_reg(BPF_OR, 0, 1),
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let mut ctx = PassContext::test_default();
+        ctx.prog_type = 6; // XDP
+
+        let pass = WideMemPass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(!result.changed, "should skip non-stack base in XDP");
+        assert_eq!(result.sites_applied, 0);
+        assert!(result
+            .sites_skipped
+            .iter()
+            .any(|s| s.reason.contains("non-stack base")));
+    }
+
+    #[test]
+    fn test_wide_mem_skips_non_stack_in_tc() {
+        // Same pattern but with SCHED_CLS (type 3).
+        let mut prog = make_program(vec![
+            BpfInsn::ldx_mem(BPF_B, 2, 1, 0),
+            BpfInsn::ldx_mem(BPF_B, 3, 1, 1),
+            BpfInsn::alu64_imm(BPF_LSH, 3, 8),
+            BpfInsn::alu64_reg(BPF_OR, 2, 3),
+            BpfInsn::ldx_mem(BPF_B, 3, 1, 2),
+            BpfInsn::alu64_imm(BPF_LSH, 3, 16),
+            BpfInsn::alu64_reg(BPF_OR, 2, 3),
+            BpfInsn::ldx_mem(BPF_B, 3, 1, 3),
+            BpfInsn::alu64_imm(BPF_LSH, 3, 24),
+            BpfInsn::alu64_reg(BPF_OR, 2, 3),
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let mut ctx = PassContext::test_default();
+        ctx.prog_type = 3; // SCHED_CLS
+
+        let pass = WideMemPass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(!result.changed, "should skip non-stack base in TC");
+        assert_eq!(result.sites_applied, 0);
+        assert!(result
+            .sites_skipped
+            .iter()
+            .any(|s| s.reason.contains("non-stack base")));
+    }
+
+    #[test]
+    fn test_wide_mem_allows_stack_base_in_xdp() {
+        // Byte-ladder from R10 (stack pointer) should still work in XDP.
+        let mut prog = make_program(vec![
+            BpfInsn::ldx_mem(BPF_B, 0, 10, -4),
+            BpfInsn::ldx_mem(BPF_B, 1, 10, -3),
+            BpfInsn::alu64_imm(BPF_LSH, 1, 8),
+            BpfInsn::alu64_reg(BPF_OR, 0, 1),
+            BpfInsn::ldx_mem(BPF_B, 1, 10, -2),
+            BpfInsn::alu64_imm(BPF_LSH, 1, 16),
+            BpfInsn::alu64_reg(BPF_OR, 0, 1),
+            BpfInsn::ldx_mem(BPF_B, 1, 10, -1),
+            BpfInsn::alu64_imm(BPF_LSH, 1, 24),
+            BpfInsn::alu64_reg(BPF_OR, 0, 1),
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let mut ctx = PassContext::test_default();
+        ctx.prog_type = 6; // XDP
+
+        let pass = WideMemPass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(result.changed, "R10-based wide_mem should apply in XDP");
+        assert_eq!(result.sites_applied, 1);
+        assert_eq!(prog.insns.len(), 2);
+        assert_eq!(bpf_size(prog.insns[0].code), BPF_W);
+        assert_eq!(prog.insns[0].src_reg(), 10);
+        assert_eq!(prog.insns[0].off, -4);
+    }
+
+    #[test]
+    fn test_wide_mem_allows_non_stack_in_tracing() {
+        // In non-packet prog types (e.g., tracing/kprobe), non-stack base is OK.
+        let mut prog = make_program(vec![
+            BpfInsn::ldx_mem(BPF_B, 0, 6, 0),
+            BpfInsn::ldx_mem(BPF_B, 1, 6, 1),
+            BpfInsn::alu64_imm(BPF_LSH, 1, 8),
+            BpfInsn::alu64_reg(BPF_OR, 0, 1),
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let mut ctx = PassContext::test_default();
+        ctx.prog_type = 26; // TRACING
+
+        let pass = WideMemPass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(result.changed, "non-stack base should work in tracing progs");
+        assert_eq!(result.sites_applied, 1);
+    }
+
+    #[test]
+    fn test_wide_mem_allows_non_stack_with_unknown_prog_type() {
+        // With prog_type=0 (unknown/unspecified), no packet filter applies.
+        let mut prog = make_program(vec![
+            BpfInsn::ldx_mem(BPF_B, 0, 6, 0),
+            BpfInsn::ldx_mem(BPF_B, 1, 6, 1),
+            BpfInsn::alu64_imm(BPF_LSH, 1, 8),
+            BpfInsn::alu64_reg(BPF_OR, 0, 1),
+            exit_insn(),
+        ]);
+        let mut cache = AnalysisCache::new();
+        let ctx = PassContext::test_default(); // prog_type = 0
+
+        let pass = WideMemPass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(result.changed, "unknown prog_type should not block wide_mem");
+        assert_eq!(result.sites_applied, 1);
+    }
+
+    #[test]
+    fn test_wide_mem_mixed_sites_xdp_some_skipped() {
+        // Two sites: one from stack (R10, should apply), one from R6 (should skip in XDP).
+        let mut insns = Vec::new();
+        // Site 1: R10-based (stack), 2-byte
+        insns.push(BpfInsn::ldx_mem(BPF_B, 0, 10, -4));
+        insns.push(BpfInsn::ldx_mem(BPF_B, 1, 10, -3));
+        insns.push(BpfInsn::alu64_imm(BPF_LSH, 1, 8));
+        insns.push(BpfInsn::alu64_reg(BPF_OR, 0, 1));
+        // Site 2: R6-based (potential packet ptr), 2-byte
+        insns.push(BpfInsn::ldx_mem(BPF_B, 2, 6, 0));
+        insns.push(BpfInsn::ldx_mem(BPF_B, 3, 6, 1));
+        insns.push(BpfInsn::alu64_imm(BPF_LSH, 3, 8));
+        insns.push(BpfInsn::alu64_reg(BPF_OR, 2, 3));
+        insns.push(exit_insn());
+
+        let mut prog = make_program(insns);
+        let mut cache = AnalysisCache::new();
+        let mut ctx = PassContext::test_default();
+        ctx.prog_type = 6; // XDP
+
+        let pass = WideMemPass;
+        let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
+
+        assert!(result.changed, "stack-based site should still apply");
+        assert_eq!(result.sites_applied, 1);
+        assert_eq!(
+            result.sites_skipped.iter().filter(|s| s.reason.contains("non-stack base")).count(),
+            1,
+            "one site should be skipped for non-stack base in XDP"
         );
     }
 }

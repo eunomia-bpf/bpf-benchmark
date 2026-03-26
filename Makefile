@@ -216,12 +216,16 @@ $(KERNEL_CONFIG_STAMP): $(DEFCONFIG_SRC) $(KERNEL_CONFIG_PATH)
 	touch "$@"
 
 kernel-build: $(KERNEL_CONFIG_STAMP)
-	$(MAKE) -C "$(KERNEL_DIR)" -j"$(JOBS)" bzImage modules_prepare
-	@if [ -f "$(KERNEL_DIR)/vmlinux.symvers" ]; then \
-		cp "$(KERNEL_DIR)/vmlinux.symvers" "$(KERNEL_SYMVERS_PATH)"; \
+	@if [ ! -f "$(BZIMAGE_PATH)" ]; then \
+		$(MAKE) -C "$(KERNEL_DIR)" -j"$(JOBS)" bzImage modules_prepare; \
+		if [ -f "$(KERNEL_DIR)/vmlinux.symvers" ]; then \
+			cp "$(KERNEL_DIR)/vmlinux.symvers" "$(KERNEL_SYMVERS_PATH)"; \
+		fi; \
+		test -f "$(KERNEL_SYMVERS_PATH)"; \
+		touch "$(KERNEL_SYMVERS_PATH)"; \
+	else \
+		echo "  SKIP    kernel-build (bzImage already exists)"; \
 	fi
-	@test -f "$(KERNEL_SYMVERS_PATH)"
-	@touch "$(KERNEL_SYMVERS_PATH)"
 
 $(BZIMAGE_PATH): kernel-build
 	@test -f "$@"
@@ -280,7 +284,16 @@ FUZZ_ROUNDS ?= 1000
 vm-negative-test:
 	$(MAKE) -C "$(RUNNER_DIR)" vm-negative-test \
 		PYTHON="$(PYTHON)" VENV="$(VENV)" \
-		BZIMAGE="$(BZIMAGE)" TARGET="$(TARGET)" FUZZ_ROUNDS="$(FUZZ_ROUNDS)"
+		BZIMAGE="$(BZIMAGE)" TARGET="$(TARGET)" FUZZ_ROUNDS="$(FUZZ_ROUNDS)" \
+		SCX_PROG_SHOW_RACE_MODE="$(SCX_PROG_SHOW_RACE_MODE)" \
+		SCX_PROG_SHOW_RACE_ITERATIONS="$(SCX_PROG_SHOW_RACE_ITERATIONS)" \
+		SCX_PROG_SHOW_RACE_LOAD_TIMEOUT="$(SCX_PROG_SHOW_RACE_LOAD_TIMEOUT)" \
+		SCX_PROG_SHOW_RACE_SKIP_PROBE="$(SCX_PROG_SHOW_RACE_SKIP_PROBE)"
+
+SCX_PROG_SHOW_RACE_MODE ?= bpftool-loop
+SCX_PROG_SHOW_RACE_ITERATIONS ?= 20
+SCX_PROG_SHOW_RACE_LOAD_TIMEOUT ?= 20
+SCX_PROG_SHOW_RACE_SKIP_PROBE ?= 0
 
 vm-micro-smoke:
 	$(MAKE) -C "$(RUNNER_DIR)" vm-micro-smoke \

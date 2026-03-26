@@ -38,16 +38,19 @@ impl MapInfo {
     /// `PERF_EVENT_ARRAY`, `PROG_ARRAY`, `RINGBUF`, `STACK_TRACE`, and
     /// `CGROUP_STORAGE` do NOT support direct value access and must never be
     /// inlined.
+    ///
+    /// PERCPU map types (`PERCPU_HASH`, `PERCPU_ARRAY`, `LRU_PERCPU_HASH`)
+    /// are deliberately excluded: userspace reads a single CPU's value via
+    /// `bpf_map_lookup_elem`, but the BPF program sees the per-CPU slot for
+    /// the CPU it is running on. Inlining the userspace-read value would
+    /// silently hardcode the wrong constant for all other CPUs.
     #[cfg_attr(not(test), allow(dead_code))]
     pub fn supports_direct_value_access(&self) -> bool {
         matches!(
             self.map_type,
             BPF_MAP_TYPE_HASH
                 | BPF_MAP_TYPE_ARRAY
-                | BPF_MAP_TYPE_PERCPU_HASH
-                | BPF_MAP_TYPE_PERCPU_ARRAY
                 | BPF_MAP_TYPE_LRU_HASH
-                | BPF_MAP_TYPE_LRU_PERCPU_HASH
         )
     }
 
@@ -63,10 +66,7 @@ impl MapInfo {
     /// Returns whether v1 can eliminate the lookup/null-check sequence.
     #[cfg_attr(not(test), allow(dead_code))]
     pub fn can_remove_lookup_pattern_v1(&self) -> bool {
-        matches!(
-            self.map_type,
-            BPF_MAP_TYPE_ARRAY | BPF_MAP_TYPE_PERCPU_ARRAY
-        )
+        matches!(self.map_type, BPF_MAP_TYPE_ARRAY)
     }
 
     /// Returns whether this inline is speculative and depends on runtime stability.
@@ -74,10 +74,7 @@ impl MapInfo {
     pub fn is_speculative_v1(&self) -> bool {
         matches!(
             self.map_type,
-            BPF_MAP_TYPE_HASH
-                | BPF_MAP_TYPE_LRU_HASH
-                | BPF_MAP_TYPE_PERCPU_HASH
-                | BPF_MAP_TYPE_LRU_PERCPU_HASH
+            BPF_MAP_TYPE_HASH | BPF_MAP_TYPE_LRU_HASH
         )
     }
 }
@@ -357,7 +354,10 @@ mod tests {
         for map_type in [
             BPF_MAP_TYPE_PROG_ARRAY,
             BPF_MAP_TYPE_PERF_EVENT_ARRAY,
+            BPF_MAP_TYPE_PERCPU_HASH,
+            BPF_MAP_TYPE_PERCPU_ARRAY,
             BPF_MAP_TYPE_STACK_TRACE,
+            BPF_MAP_TYPE_LRU_PERCPU_HASH,
             BPF_MAP_TYPE_CGROUP_STORAGE,
             BPF_MAP_TYPE_RINGBUF,
         ] {
@@ -382,8 +382,11 @@ mod tests {
         }
     }
 
+    /// PERCPU map types must NOT be inlineable: userspace reads a single
+    /// CPU's value, but BPF programs see the per-CPU slot for the running
+    /// CPU. Inlining would hardcode the wrong constant.
     #[test]
-    fn percpu_map_types_support_direct_value_access() {
+    fn percpu_map_types_reject_direct_value_access() {
         let percpu_array = MapInfo {
             map_type: BPF_MAP_TYPE_PERCPU_ARRAY,
             key_size: 4,
@@ -392,10 +395,18 @@ mod tests {
             frozen: true,
             map_id: 501,
         };
-        assert!(percpu_array.supports_direct_value_access());
-        assert!(percpu_array.is_inlineable_v1());
-        assert!(percpu_array.can_remove_lookup_pattern_v1());
-        assert!(!percpu_array.is_speculative_v1());
+        assert!(
+            !percpu_array.supports_direct_value_access(),
+            "PERCPU_ARRAY must not support direct value access"
+        );
+        assert!(
+            !percpu_array.is_inlineable_v1(),
+            "PERCPU_ARRAY must not be inlineable"
+        );
+        assert!(
+            !percpu_array.can_remove_lookup_pattern_v1(),
+            "PERCPU_ARRAY must not remove lookup pattern"
+        );
 
         let percpu_hash = MapInfo {
             map_type: BPF_MAP_TYPE_PERCPU_HASH,
@@ -405,10 +416,18 @@ mod tests {
             frozen: true,
             map_id: 502,
         };
-        assert!(percpu_hash.supports_direct_value_access());
-        assert!(percpu_hash.is_inlineable_v1());
-        assert!(!percpu_hash.can_remove_lookup_pattern_v1());
-        assert!(percpu_hash.is_speculative_v1());
+        assert!(
+            !percpu_hash.supports_direct_value_access(),
+            "PERCPU_HASH must not support direct value access"
+        );
+        assert!(
+            !percpu_hash.is_inlineable_v1(),
+            "PERCPU_HASH must not be inlineable"
+        );
+        assert!(
+            !percpu_hash.is_speculative_v1(),
+            "PERCPU_HASH must not be speculative (not inlineable at all)"
+        );
 
         let lru_percpu_hash = MapInfo {
             map_type: BPF_MAP_TYPE_LRU_PERCPU_HASH,
@@ -418,9 +437,17 @@ mod tests {
             frozen: true,
             map_id: 503,
         };
-        assert!(lru_percpu_hash.supports_direct_value_access());
-        assert!(lru_percpu_hash.is_inlineable_v1());
-        assert!(!lru_percpu_hash.can_remove_lookup_pattern_v1());
-        assert!(lru_percpu_hash.is_speculative_v1());
+        assert!(
+            !lru_percpu_hash.supports_direct_value_access(),
+            "LRU_PERCPU_HASH must not support direct value access"
+        );
+        assert!(
+            !lru_percpu_hash.is_inlineable_v1(),
+            "LRU_PERCPU_HASH must not be inlineable"
+        );
+        assert!(
+            !lru_percpu_hash.is_speculative_v1(),
+            "LRU_PERCPU_HASH must not be speculative (not inlineable at all)"
+        );
     }
 }

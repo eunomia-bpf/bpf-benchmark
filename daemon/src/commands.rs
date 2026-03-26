@@ -440,7 +440,9 @@ pub(crate) fn cmd_rewrite(
     program.set_map_ids(bpf::bpf_prog_get_map_ids(fd.as_raw_fd()).unwrap_or_default());
     let pm = build_pipeline(pass_names);
 
-    let pipeline_result = pm.run(&mut program, ctx)?;
+    let mut local_ctx = ctx.clone();
+    local_ctx.prog_type = info.prog_type;
+    let pipeline_result = pm.run(&mut program, &local_ctx)?;
 
     for pr in &pipeline_result.pass_results {
         if pr.sites_applied > 0 {
@@ -677,6 +679,7 @@ pub(crate) fn try_apply_one(
         program.set_map_ids(map_ids.clone());
         let pm = build_pipeline(pass_names);
         let mut local_ctx = ctx.clone();
+        local_ctx.prog_type = info.prog_type;
         for disabled in sorted_strings(disabled_passes.iter().cloned()) {
             local_ctx.policy.disabled_passes.push(disabled.clone());
         }
@@ -1429,6 +1432,7 @@ processed 49965 insns (limit 1000000) max_states_per_insn 32 total_states 1318 p
             kinsn_registry: discovery.registry,
             platform: pass::PlatformCapabilities::default(),
             policy: pass::PolicyConfig::default(),
+            prog_type: 0,
         };
 
         // Find a program to try applying to.
