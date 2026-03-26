@@ -30,10 +30,6 @@ from runner.libs.batch_runner import run_batch_runner
 from runner.libs.machines import resolve_machine
 from runner.libs.vm import DEFAULT_VM_TARGET, build_vng_command as build_runner_vng_command
 
-from runner.libs.inventory import (
-    discover_corpus_objects,
-    discover_object_programs,
-)
 from runner.libs.run_artifacts import (
     ArtifactSession,
     derive_run_type,
@@ -43,7 +39,6 @@ from runner.libs.run_artifacts import (
 from runner.libs.corpus import (
     add_filter_argument,
     add_max_programs_argument,
-    add_corpus_build_report_argument,
     add_output_json_argument,
     add_output_md_argument,
     add_repeat_argument,
@@ -51,20 +46,13 @@ from runner.libs.corpus import (
     add_daemon_argument,
     add_timeout_argument,
     directive_scan_from_record,
-    ensure_parent,
-    execution_plan,
     format_ns,
     format_ratio,
     geomean,
-    infer_program_kind,
     markdown_table,
-    materialize_dummy_context,
-    materialize_dummy_packet,
     normalize_directive_scan as shared_normalize_directive_scan,
     require_minimum,
     summarize_text,
-    write_json_output,
-    write_text_output,
     extract_error,
 )
 
@@ -81,7 +69,6 @@ DEFAULT_DAEMON = ROOT_DIR / "daemon" / "target" / "release" / "bpfrejit-daemon"
 DEFAULT_KERNEL_TREE = ROOT_DIR / "vendor" / "linux-framework"
 DEFAULT_KERNEL_IMAGE = DEFAULT_KERNEL_TREE / "arch" / "x86" / "boot" / "bzImage"
 DEFAULT_BTF_PATH = DEFAULT_KERNEL_TREE / "vmlinux"
-DEFAULT_HOST_BTF_PATH = Path("/sys/kernel/btf/vmlinux")
 DEFAULT_VNG_MACHINE = resolve_machine(target=DEFAULT_VM_TARGET, action="vm-corpus")
 DEFAULT_VNG = str(Path(DEFAULT_VNG_MACHINE.executable))
 DEFAULT_VNG_MEMORY = DEFAULT_VNG_MACHINE.memory or "4G"
@@ -90,12 +77,6 @@ DEFAULT_REPEAT = 200
 DEFAULT_TIMEOUT_SECONDS = 240
 
 
-DEFAULT_PERF_OUTPUT_JSON = authoritative_output_path(ROOT_DIR / "corpus" / "results", "corpus_perf")
-DEFAULT_PERF_OUTPUT_MD = ROOT_DIR / "docs" / "tmp" / "corpus-perf-results.md"
-DEFAULT_TRACING_OUTPUT_JSON = authoritative_output_path(ROOT_DIR / "corpus" / "results", "corpus_tracing")
-DEFAULT_TRACING_OUTPUT_MD = ROOT_DIR / "docs" / "tmp" / "corpus-tracing-results.md"
-DEFAULT_CODE_SIZE_OUTPUT_JSON = authoritative_output_path(ROOT_DIR / "corpus" / "results", "corpus_code_size")
-DEFAULT_CODE_SIZE_OUTPUT_MD = ROOT_DIR / "docs" / "tmp" / "corpus-code-size-results.md"
 FAMILY_FIELDS = (
     ("cmov", "cmov_sites"),
     ("wide", "wide_sites"),
@@ -1360,8 +1341,6 @@ def build_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
 
     size_ratios = [record["size_ratio"] for record in compile_pairs if record.get("size_ratio") is not None]
     exec_ratios = [record["speedup_ratio"] for record in measured_pairs if record.get("speedup_ratio") is not None]
-    regressions = [record for record in measured_pairs if (record.get("speedup_ratio") or 0) < 1.0]
-    improvements = [record for record in measured_pairs if (record.get("speedup_ratio") or 0) > 1.0]
 
     by_source: list[dict[str, Any]] = []
     grouped_sources: dict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -1386,8 +1365,6 @@ def build_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
             "total_sites": sum(counts[field] for _, field in FAMILY_FIELDS),
             "code_size_ratio_geomean": geomean(source_size),
             "exec_ratio_geomean": geomean(source_exec),
-            "wins": sum(1 for item in source_measured if (item.get("speedup_ratio") or 0) > 1.0),
-            "regressions": sum(1 for item in source_measured if (item.get("speedup_ratio") or 0) < 1.0),
         }
         for _, field in FAMILY_FIELDS:
             source_row[field] = counts[field]
@@ -1418,20 +1395,10 @@ def build_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
                 "applied_sites": sum(normalize_scan(item.get("daemon_counts"))[field] for item in applied_items),
                 "code_size_ratio_geomean": geomean(family_size),
                 "exec_ratio_geomean": geomean(family_exec),
-                "wins": sum(1 for item in family_measured if (item.get("speedup_ratio") or 0) > 1.0),
-                "regressions": sum(1 for item in family_measured if (item.get("speedup_ratio") or 0) < 1.0),
             }
         )
     by_family.sort(key=lambda item: (-item["total_sites"], item["family_name"]))
 
-    top_speedups = sorted(
-        improvements,
-        key=lambda item: (-(item.get("speedup_ratio") or 0), item["source_name"], program_label(item)),
-    )[:10]
-    top_regressions = sorted(
-        regressions,
-        key=lambda item: ((item.get("speedup_ratio") or math.inf), item["source_name"], program_label(item)),
-    )[:10]
     top_code_shrinks = sorted(
         [record for record in compile_pairs if (record.get("size_ratio") or 0) > 1.0],
         key=lambda item: (-(item.get("size_ratio") or 0), item["source_name"], program_label(item)),
@@ -1449,33 +1416,11 @@ def build_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
         "exec_ratio_median": statistics.median(exec_ratios) if exec_ratios else None,
         "exec_ratio_min": min(exec_ratios) if exec_ratios else None,
         "exec_ratio_max": max(exec_ratios) if exec_ratios else None,
-        "improvements": len(improvements),
-        "regressions": len(regressions),
         "family_totals": dict(family_totals),
         "failure_reasons": dict(failure_reasons.most_common(16)),
         "rejit_failure_reasons": dict(rejit_failures.most_common(16)),
         "by_source": by_source,
         "by_family": by_family,
-        "top_speedups": [
-            {
-                "program": program_label(record),
-                "source_name": record["source_name"],
-                "prog_type_name": record["prog_type_name"],
-                "speedup_ratio": record.get("speedup_ratio"),
-                "families": record.get("applied_families_run") or record.get("eligible_families", []),
-            }
-            for record in top_speedups
-        ],
-        "top_regressions": [
-            {
-                "program": program_label(record),
-                "source_name": record["source_name"],
-                "prog_type_name": record["prog_type_name"],
-                "speedup_ratio": record.get("speedup_ratio"),
-                "families": record.get("applied_families_run") or record.get("eligible_families", []),
-            }
-            for record in top_regressions
-        ],
         "top_code_shrinks": [
             {
                 "program": program_label(record),
@@ -1539,7 +1484,6 @@ def build_markdown(data: dict[str, Any]) -> str:
                 *family_headers,
                 "Code Ratio",
                 "Exec Ratio",
-                "Regressions",
             ],
             [
                 [
@@ -1551,7 +1495,6 @@ def build_markdown(data: dict[str, Any]) -> str:
                     *[row[field] for _, field in FAMILY_FIELDS],
                     format_ratio(row["code_size_ratio_geomean"]),
                     format_ratio(row["exec_ratio_geomean"]),
-                    row["regressions"],
                 ]
                 for row in summary["by_source"]
             ],
@@ -1562,7 +1505,7 @@ def build_markdown(data: dict[str, Any]) -> str:
     lines.extend(["## By Family", ""])
     lines.extend(
         markdown_table(
-            ["Family", "Programs", "Applied", "Sites", "Applied Sites", "Compile Pairs", "Measured Pairs", "Code Ratio", "Exec Ratio", "Regressions"],
+            ["Family", "Programs", "Applied", "Sites", "Applied Sites", "Compile Pairs", "Measured Pairs", "Code Ratio", "Exec Ratio"],
             [
                 [
                     row["family_name"],
@@ -1574,51 +1517,12 @@ def build_markdown(data: dict[str, Any]) -> str:
                     row["measured_pairs"],
                     format_ratio(row["code_size_ratio_geomean"]),
                     format_ratio(row["exec_ratio_geomean"]),
-                    row["regressions"],
                 ]
                 for row in summary["by_family"]
             ],
         )
     )
     lines.append("")
-
-    if summary["top_speedups"]:
-        lines.extend(["## Top Speedups", ""])
-        lines.extend(
-            markdown_table(
-                ["Program", "Project", "Type", "Exec Ratio", "Families"],
-                [
-                    [
-                        row["program"],
-                        row["source_name"],
-                        row["prog_type_name"],
-                        format_ratio(row["speedup_ratio"]),
-                        ", ".join(row["families"]),
-                    ]
-                    for row in summary["top_speedups"]
-                ],
-            )
-        )
-        lines.append("")
-
-    if summary["top_regressions"]:
-        lines.extend(["## Regressions", ""])
-        lines.extend(
-            markdown_table(
-                ["Program", "Project", "Type", "Exec Ratio", "Families"],
-                [
-                    [
-                        row["program"],
-                        row["source_name"],
-                        row["prog_type_name"],
-                        format_ratio(row["speedup_ratio"]),
-                        ", ".join(row["families"]),
-                    ]
-                    for row in summary["top_regressions"]
-                ],
-            )
-        )
-        lines.append("")
 
     if summary["top_code_shrinks"]:
         lines.extend(["## Largest Code Shrinks", ""])
@@ -1915,422 +1819,4 @@ def packet_main(argv: list[str] | None = None) -> int:
         f"measured_pairs={summary['measured_pairs']} "
         f"applied={summary['applied_programs']}"
     )
-    return 0
-
-
-def _mode_defaults(mode_name: str) -> tuple[Path, Path]:
-    if mode_name == "perf":
-        return DEFAULT_PERF_OUTPUT_JSON, DEFAULT_PERF_OUTPUT_MD
-    if mode_name == "tracing":
-        return DEFAULT_TRACING_OUTPUT_JSON, DEFAULT_TRACING_OUTPUT_MD
-    if mode_name == "code-size":
-        return DEFAULT_CODE_SIZE_OUTPUT_JSON, DEFAULT_CODE_SIZE_OUTPUT_MD
-    raise SystemExit(f"unsupported mode: {mode_name}")
-
-
-def parse_linear_mode_args(mode_name: str, argv: list[str] | None = None) -> argparse.Namespace:
-    default_output_json, default_output_md = _mode_defaults(mode_name)
-    description = {
-        "perf": "Measure corpus programs locally with stock vs REJIT runs when test_run is supported.",
-        "tracing": "Inspect tracing-style corpus programs with stock vs REJIT compile-only passes.",
-        "code-size": "Compare stock vs REJIT code size for the discovered corpus programs.",
-    }[mode_name]
-    parser = argparse.ArgumentParser(description=description)
-    add_output_json_argument(parser, default_output_json)
-    add_output_md_argument(parser, default_output_md)
-    add_runner_argument(parser, DEFAULT_RUNNER, help_text="Path to micro_exec.")
-    add_daemon_argument(parser, DEFAULT_DAEMON, help_text="Path to bpfrejit-daemon.")
-    add_repeat_argument(parser, DEFAULT_REPEAT, help_text="Repeat count passed to each micro_exec invocation.")
-    add_timeout_argument(parser, DEFAULT_TIMEOUT_SECONDS, help_text="Per-target timeout in seconds.")
-    add_filter_argument(
-        parser,
-        help_text="Only include targets whose object path, program name, or section name contains this substring. Repeatable.",
-    )
-    add_max_programs_argument(parser, help_text="Optional cap for smoke testing.")
-    add_corpus_build_report_argument(
-        parser,
-        help_text="Optional expanded corpus build JSON report used to discover object files.",
-    )
-    parser.add_argument(
-        "--kind",
-        action="append",
-        dest="kinds",
-        help="Restrict processing to inferred program kinds such as xdp, tc, socket, tracing, or perf_event.",
-    )
-    parser.add_argument(
-        "--btf-custom-path",
-        default=str(DEFAULT_HOST_BTF_PATH) if DEFAULT_HOST_BTF_PATH.exists() else None,
-        help="Host BTF path passed to micro_exec compile/load invocations when available.",
-    )
-    parser.add_argument(
-        "--skip-families",
-        action="append",
-        help="Comma-separated REJIT families to skip from blind auto-scan apply mode.",
-    )
-    parser.add_argument(
-        "--blind-apply",
-        action="store_true",
-        help="Ignore per-program policies and force blind all-apply auto-scan REJIT.",
-    )
-    return parser.parse_args(argv)
-
-
-def _source_name_for_object(relative_object_path: str) -> str:
-    path = Path(relative_object_path)
-    parts = path.parts
-    if len(parts) >= 3 and parts[0] == "corpus" and parts[1] == "build":
-        return parts[2]
-    if len(parts) >= 3 and parts[0] == "corpus" and parts[1] in {"repos", "bcf"}:
-        return parts[2]
-    return path.parent.name or "corpus"
-
-
-def discover_linear_targets(
-    *,
-    runner: Path,
-    mode_name: str,
-    filters: list[str] | None,
-    kinds: list[str] | None,
-    max_programs: int | None,
-    corpus_build_report: Path | None,
-) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    packet_path = materialize_dummy_packet(ROOT_DIR / "corpus" / "inputs" / "macro_dummy_packet_64.bin")
-    context_path = materialize_dummy_context(ROOT_DIR / "corpus" / "inputs" / "macro_dummy_context_64.bin")
-    lowered_filters = [item.lower() for item in filters or []]
-    requested_kinds = {item.lower() for item in kinds or []}
-    discovery = discover_corpus_objects(ROOT_DIR, corpus_build_report=corpus_build_report)
-    targets: list[dict[str, Any]] = []
-    inventory_failures: list[dict[str, Any]] = []
-
-    for object_path in discovery.corpus_paths:
-        rel_object = object_path.relative_to(ROOT_DIR).as_posix()
-        try:
-            programs = discover_object_programs(runner, object_path)
-        except Exception as exc:
-            inventory_failures.append({"object_path": rel_object, "error": str(exc)})
-            continue
-
-        for program in programs:
-            kind = infer_program_kind(program.section_name)
-            if mode_name == "tracing":
-                if kind != "tracing":
-                    continue
-            if requested_kinds and kind not in requested_kinds:
-                continue
-            haystack = " ".join(
-                [
-                    rel_object.lower(),
-                    program.name.lower(),
-                    program.section_name.lower(),
-                    kind.lower(),
-                ]
-            )
-            if lowered_filters and not any(item in haystack for item in lowered_filters):
-                continue
-
-            plan = execution_plan(program.section_name, packet_path, context_path)
-            can_test_run = kind not in {"tracing", "perf_event", "iter", "struct_ops", "syscall"}
-            targets.append(
-                {
-                    "object_path": rel_object,
-                    "source_name": _source_name_for_object(rel_object),
-                    "program_name": program.name,
-                    "section_name": program.section_name,
-                    "section_root": program.section_name.split("/", 1)[0],
-                    "prog_type_name": program.prog_type_name,
-                    "io_mode": str(plan["io_mode"]),
-                    "input_size": int(plan["input_size"]),
-                    "memory_path": str(plan["memory_path"]) if plan["memory_path"] is not None else None,
-                    "can_test_run": can_test_run,
-                    "inventory_scan": {},
-                }
-            )
-            if max_programs is not None and len(targets) >= max_programs:
-                return targets, {
-                    "discovery_source": discovery.corpus_source,
-                    "inventory_failures": inventory_failures,
-                    "skipped_non_bpf": list(discovery.skipped_non_bpf),
-                }
-
-    return targets, {
-        "discovery_source": discovery.corpus_source,
-        "inventory_failures": inventory_failures,
-        "skipped_non_bpf": list(discovery.skipped_non_bpf),
-    }
-
-
-def build_linear_summary(
-    records: list[dict[str, Any]],
-    *,
-    mode_name: str,
-    enable_exec: bool,
-) -> dict[str, Any]:
-    compile_pairs = sum(
-        1
-        for record in records
-        if (record.get("baseline_compile") or {}).get("ok")
-        and (record.get("rejit_compile") or {}).get("ok")
-    )
-    measured_pairs = sum(
-        1
-        for record in records
-        if enable_exec
-        and (record.get("baseline_run") or {}).get("ok")
-        and (record.get("rejit_run") or {}).get("ok")
-    )
-    applied_programs = sum(
-        1 for record in records if record.get("rejit_compile_applied") or record.get("rejit_run_applied")
-    )
-    size_ratios = [float(record["size_ratio"]) for record in records if record.get("size_ratio")]
-    speedup_ratios = [float(record["speedup_ratio"]) for record in records if record.get("speedup_ratio")]
-    errors = Counter(
-        str(record.get("record_error") or "")
-        for record in records
-        if record.get("record_error")
-    )
-    return {
-        "mode": mode_name,
-        "targets_attempted": len(records),
-        "compile_pairs": compile_pairs,
-        "measured_pairs": measured_pairs,
-        "applied_programs": applied_programs,
-        "size_ratio_geomean": geomean(size_ratios),
-        "speedup_ratio_geomean": geomean(speedup_ratios) if enable_exec else None,
-        "record_errors": dict(errors),
-    }
-
-
-def build_linear_markdown(
-    payload: dict[str, Any],
-    *,
-    mode_name: str,
-    enable_exec: bool,
-) -> str:
-    summary = payload["summary"]
-    title = {
-        "perf": "Corpus Perf Mode",
-        "tracing": "Corpus Tracing Mode",
-        "code-size": "Corpus Code-Size Mode",
-    }[mode_name]
-    lines = [
-        f"# {title}",
-        "",
-        f"- Generated: `{payload['generated_at']}`",
-        f"- Runner: `{payload['runner_binary']}`",
-        f"- Daemon: `{payload['daemon_binary']}`",
-        f"- Targets attempted: `{summary['targets_attempted']}`",
-        f"- Compile pairs: `{summary['compile_pairs']}`",
-        f"- Measured pairs: `{summary['measured_pairs']}`",
-        f"- Applied programs: `{summary['applied_programs']}`",
-        f"- Native code size geomean ratio: `{format_ratio(summary['size_ratio_geomean'])}`",
-    ]
-    if enable_exec:
-        lines.append(f"- Exec speedup geomean: `{format_ratio(summary['speedup_ratio_geomean'])}`")
-    else:
-        lines.append("- Exec speedup geomean: `n/a`")
-    if mode_name == "tracing":
-        lines.append("- Tracing mode uses compile-only inspection in the consolidated driver.")
-
-    rows = []
-    for record in payload["programs"]:
-        rows.append(
-            [
-                record["source_name"],
-                record["program_name"],
-                record["section_name"],
-                format_ratio(record.get("size_ratio")),
-                format_ratio(record.get("speedup_ratio")) if enable_exec else "n/a",
-                "yes" if record.get("rejit_compile_applied") or record.get("rejit_run_applied") else "no",
-                record.get("record_error") or "",
-            ]
-        )
-
-    if rows:
-        lines.extend(
-            [
-                "",
-                "## Records",
-                "",
-                *markdown_table(
-                    ["Source", "Program", "Section", "Size Ratio", "Speedup", "Applied", "Error"],
-                    rows,
-                ),
-            ]
-        )
-
-    if summary["record_errors"]:
-        lines.extend(["", "## Record Errors", ""])
-        lines.extend(
-            markdown_table(
-                ["Reason", "Count"],
-                [[reason, count] for reason, count in summary["record_errors"].items()],
-            )
-        )
-
-    return "\n".join(lines) + "\n"
-
-
-def run_linear_mode(mode_name: str, argv: list[str] | None = None) -> int:
-    args = parse_linear_mode_args(mode_name, argv)
-    require_minimum(args.repeat, 1, "--repeat")
-    skip_families = normalize_skip_families(args.skip_families)
-    if skip_families and not args.blind_apply:
-        raise SystemExit("--skip-families requires --blind-apply")
-
-    runner = Path(args.runner).resolve()
-    daemon = Path(args.daemon).resolve()
-    if not runner.exists():
-        raise SystemExit(f"runner not found: {runner}")
-    if not daemon.exists():
-        raise SystemExit(f"daemon not found: {daemon}")
-
-    output_json = Path(args.output_json).resolve()
-    output_md = Path(args.output_md).resolve()
-    run_type = derive_run_type(output_json, mode_name)
-    started_at = datetime.now(timezone.utc).isoformat()
-
-    btf_custom_path = Path(args.btf_custom_path).resolve() if args.btf_custom_path else None
-    corpus_build_report = Path(args.corpus_build_report).resolve() if args.corpus_build_report else None
-    targets, discovery_summary = discover_linear_targets(
-        runner=runner,
-        mode_name=mode_name,
-        filters=args.filters,
-        kinds=args.kinds,
-        max_programs=args.max_programs,
-        corpus_build_report=corpus_build_report,
-    )
-
-    enable_exec = mode_name == "perf"
-    records: list[dict[str, Any]] = []
-    payload = {
-        "generated_at": started_at,
-        "mode": mode_name,
-        "repo_root": str(ROOT_DIR),
-        "runner_binary": str(runner),
-        "daemon_binary": str(daemon),
-        "btf_custom_path": str(btf_custom_path) if btf_custom_path is not None else None,
-        "repeat": args.repeat,
-        "timeout_seconds": args.timeout,
-        "skip_families": skip_families,
-        "blind_apply": args.blind_apply,
-        "corpus_build_report": str(corpus_build_report) if corpus_build_report is not None else None,
-        "discovery": discovery_summary,
-        "summary": build_linear_summary(records, mode_name=mode_name, enable_exec=enable_exec),
-        "programs": records,
-    }
-    current_target: dict[str, Any] | None = None
-    current_target_index: int | None = None
-
-    def build_artifact_metadata(
-        status: str,
-        session_started_at: str,
-        updated_at: str,
-        error_message: str | None,
-    ) -> dict[str, Any]:
-        payload["summary"] = build_linear_summary(records, mode_name=mode_name, enable_exec=enable_exec)
-        progress = {
-            "status": status,
-            "total_programs": len(targets),
-            "completed_programs": len(records),
-            "current_target_index": current_target_index,
-            "current_target": current_target,
-        }
-        if error_message:
-            progress["error_message"] = error_message
-
-        metadata = build_corpus_artifact_metadata(
-            generated_at=str(payload["generated_at"]),
-            run_type=run_type,
-            mode_name=mode_name,
-            output_json=output_json,
-            output_md=output_md,
-            summary=dict(payload["summary"]),
-            progress=progress,
-            extra_fields={
-                "runner_binary": repo_relative_path(runner),
-                "daemon_binary": repo_relative_path(daemon),
-                "btf_custom_path": repo_relative_path(btf_custom_path) if btf_custom_path is not None else None,
-                "repeat": args.repeat,
-                "timeout_seconds": args.timeout,
-                "skip_families": skip_families,
-                "blind_apply": bool(args.blind_apply),
-                "corpus_build_report": repo_relative_path(corpus_build_report) if corpus_build_report is not None else None,
-                "discovery": discovery_summary,
-                "enable_exec": enable_exec,
-                "started_at": session_started_at,
-                "last_updated_at": updated_at,
-                "status": status,
-            },
-        )
-        if error_message:
-            metadata["error_message"] = error_message
-        return metadata
-
-    session = ArtifactSession(
-        output_path=output_json,
-        run_type=run_type,
-        generated_at=started_at,
-        metadata_builder=build_artifact_metadata,
-    )
-    artifact_dir = session.run_dir
-
-    def flush_artifact(status: str, *, error_message: str | None = None, include_markdown: bool = False) -> None:
-        payload["summary"] = build_linear_summary(records, mode_name=mode_name, enable_exec=enable_exec)
-        progress = {
-            "status": status,
-            "total_programs": len(targets),
-            "completed_programs": len(records),
-            "current_target_index": current_target_index,
-            "current_target": current_target,
-        }
-        if error_message:
-            progress["error_message"] = error_message
-        detail_texts = {
-            "result.md": build_linear_markdown(payload, mode_name=mode_name, enable_exec=enable_exec)
-        } if include_markdown else None
-        session.write(
-            status=status,
-            progress_payload=progress,
-            result_payload=payload,
-            detail_texts=detail_texts,
-            error_message=error_message,
-        )
-
-    flush_artifact("running")
-    try:
-        built_records, batch_invocation = run_targets_locally_batch(
-            targets=targets,
-            runner=runner,
-            daemon=daemon,
-            repeat=args.repeat,
-            timeout_seconds=args.timeout,
-            execution_mode=mode_name,
-            btf_custom_path=btf_custom_path,
-            enable_recompile=True,
-            enable_exec=enable_exec,
-            skip_families=skip_families,
-            blind_apply=args.blind_apply,
-        )
-        if not batch_invocation["ok"]:
-            err_msg = batch_invocation["error"] or "corpus batch runner failed"
-            stderr_tail = batch_invocation.get("stderr") or ""
-            stdout_tail = batch_invocation.get("stdout") or ""
-            raise RuntimeError(
-                f"{err_msg}\nbatch stderr:\n{stderr_tail}\nbatch stdout tail:\n{stdout_tail[-500:]}"
-            )
-
-        for index, (target, record) in enumerate(zip(targets, built_records, strict=True), start=1):
-            current_target_index = index
-            current_target = target
-            records.append(record)
-            flush_artifact("running")
-
-        current_target = None
-        current_target_index = None
-        flush_artifact("completed", include_markdown=True)
-    except Exception as exc:
-        flush_artifact("error", error_message=str(exc))
-        raise
-
-    print(f"Wrote {artifact_dir / 'metadata.json'}")
     return 0
