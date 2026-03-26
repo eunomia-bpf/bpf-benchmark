@@ -69,7 +69,7 @@ SIMPLE_TESTS := rejit_poc rejit_safety_tests rejit_regression rejit_tail_call \
                 rejit_verifier_negative_tests
 
 # Tests that also need libbpf
-LIBBPF_TESTS := rejit_prog_types rejit_audit_tests rejit_swap_tests
+LIBBPF_TESTS := rejit_prog_types rejit_audit_tests rejit_swap_tests rejit_pass_correctness
 
 TESTS := $(SIMPLE_TESTS) $(LIBBPF_TESTS)
 
