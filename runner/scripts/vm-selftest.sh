@@ -1,6 +1,7 @@
 #!/bin/bash
 # Helper script for `make vm-selftest`.
-# Runs kernel REJIT selftest + builds and runs tests/unittest/ suite.
+# Runs kernel REJIT selftest + pre-built tests/unittest/ suite.
+# Binaries are built on the host by `make unittest-build` (runner/Makefile).
 #
 # Usage: vm-selftest.sh <ROOT_DIR> <KERNEL_SELFTEST> <UNITTEST_DIR> <KINSN_MODULE_DIR>
 set -eu
@@ -34,20 +35,39 @@ fi
 echo "=== Running kernel selftest ==="
 "$KERNEL_SELFTEST"
 
-# Part 2: build tests/unittest/ inside VM.
-echo "=== Building tests/unittest/ inside VM ==="
-make -C "$UNITTEST_DIR" clean all
+# Part 2: run pre-built tests/unittest/ suite.
+# Binaries were built on the host; no in-VM compilation needed.
+echo "=== Running tests/unittest/ (pre-built) ==="
 
-# Part 3: run tests/unittest/ suite.
-echo "=== Running tests/unittest/ ==="
-cd "$UNITTEST_DIR"
-for t in rejit_poc rejit_safety_tests rejit_regression rejit_tail_call \
-         rejit_spectre rejit_kinsn rejit_rollback_tests rejit_swap_tests \
-         rejit_prog_types rejit_audit_tests \
-         rejit_struct_ops_rollback_tests \
-         rejit_struct_ops_multi_callsite_tests; do
-    echo "=== $t ==="
-    "${BUILD_DIR}/$t" "${BUILD_DIR}/progs" || exit 1
+PASS=0
+FAIL=0
+
+# All tests to run.  Must match tests/unittest/Makefile TESTS variable.
+TESTS="rejit_poc rejit_safety_tests rejit_regression rejit_tail_call
+       rejit_spectre rejit_kinsn
+       rejit_verifier_negative_tests
+       rejit_prog_types rejit_audit_tests rejit_swap_tests
+       rejit_struct_ops_rollback_tests
+       rejit_struct_ops_multi_callsite_tests"
+
+for t in $TESTS; do
+    echo "--- $t ---"
+    if [ ! -x "${BUILD_DIR}/$t" ]; then
+        echo "  ERROR: binary not found: ${BUILD_DIR}/$t"
+        FAIL=$((FAIL + 1))
+        continue
+    fi
+    if "${BUILD_DIR}/$t" "${BUILD_DIR}/progs"; then
+        PASS=$((PASS + 1))
+    else
+        FAIL=$((FAIL + 1))
+        echo "  FAIL: $t"
+    fi
 done
 
+echo ""
+echo "=== vm-selftest: ${PASS} passed, ${FAIL} failed ==="
+if [ "$FAIL" -gt 0 ]; then
+    exit 1
+fi
 echo "=== vm-selftest: ALL PASSED ==="

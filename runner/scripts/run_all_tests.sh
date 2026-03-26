@@ -58,14 +58,19 @@ fi
 
 # --- Part 2: unittest suite ---
 if [ "$SKIP_UNITTEST" -eq 0 ]; then
-    run_section "Building tests/unittest/"
-    make -C "$UNITTEST_DIR" clean all
-
-    run_section "Running tests/unittest/ suite"
+    run_section "Running tests/unittest/ suite (pre-built)"
     cd "$UNITTEST_DIR"
     for t in rejit_poc rejit_safety_tests rejit_regression rejit_tail_call \
-             rejit_spectre rejit_kinsn rejit_prog_types rejit_audit_tests; do
+             rejit_spectre rejit_kinsn rejit_verifier_negative_tests \
+             rejit_prog_types rejit_audit_tests rejit_swap_tests \
+             rejit_struct_ops_rollback_tests \
+             rejit_struct_ops_multi_callsite_tests; do
         echo "--- $t ---"
+        if [ ! -x "${UNITTEST_BUILD_DIR}/$t" ]; then
+            echo "  ERROR: binary not found: ${UNITTEST_BUILD_DIR}/$t"
+            FAIL=$((FAIL + 1))
+            continue
+        fi
         if "${UNITTEST_BUILD_DIR}/$t" "${UNITTEST_BUILD_DIR}/progs"; then
             PASS=$((PASS + 1))
         else
@@ -79,6 +84,19 @@ fi
 # --- Part 2b: negative / adversarial tests ---
 NEGATIVE_DIR="${ROOT_DIR}/tests/negative"
 NEGATIVE_BUILD_DIR="${NEGATIVE_DIR}/build"
+SCX_PROG_SHOW_RACE_MODE="${SCX_PROG_SHOW_RACE_MODE:-bpftool-loop}"
+SCX_PROG_SHOW_RACE_ITERATIONS="${SCX_PROG_SHOW_RACE_ITERATIONS:-20}"
+SCX_PROG_SHOW_RACE_LOAD_TIMEOUT="${SCX_PROG_SHOW_RACE_LOAD_TIMEOUT:-20}"
+SCX_PROG_SHOW_RACE_ARGS=(
+    "$ROOT_DIR"
+    --mode "$SCX_PROG_SHOW_RACE_MODE"
+    --iterations "$SCX_PROG_SHOW_RACE_ITERATIONS"
+    --load-timeout "$SCX_PROG_SHOW_RACE_LOAD_TIMEOUT"
+)
+
+if [ "${SCX_PROG_SHOW_RACE_SKIP_PROBE:-0}" = "1" ]; then
+    SCX_PROG_SHOW_RACE_ARGS+=(--skip-probe)
+fi
 
 if [ "$SKIP_NEGATIVE" -eq 0 ] && [ -d "$NEGATIVE_DIR" ]; then
     run_section "Building tests/negative/"
@@ -99,6 +117,14 @@ if [ "$SKIP_NEGATIVE" -eq 0 ] && [ -d "$NEGATIVE_DIR" ]; then
     else
         FAIL=$((FAIL + 1))
         echo "FAIL: fuzz_rejit"
+    fi
+
+    echo "--- scx_prog_show_race (${SCX_PROG_SHOW_RACE_MODE}) ---"
+    if "${NEGATIVE_BUILD_DIR}/scx_prog_show_race" "${SCX_PROG_SHOW_RACE_ARGS[@]}"; then
+        PASS=$((PASS + 1))
+    else
+        FAIL=$((FAIL + 1))
+        echo "FAIL: scx_prog_show_race"
     fi
 fi
 

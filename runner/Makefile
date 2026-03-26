@@ -36,6 +36,7 @@ DAEMON_PATH := $(if $(filter /%,$(DAEMON)),$(DAEMON),$(REPO_ROOT)/$(DAEMON))
 VMLINUX_PATH := $(REPO_ROOT)/vendor/linux-framework/vmlinux
 MICRO_RUNNER := $(ROOT_DIR)/build/micro_exec
 KERNEL_TEST_DIR := $(REPO_ROOT)/tests/kernel
+UNITTEST_DIR := $(REPO_ROOT)/tests/unittest
 KINSN_MODULE_DIR := $(REPO_ROOT)/module/x86
 NEGATIVE_TEST_DIR := $(REPO_ROOT)/tests/negative
 
@@ -59,6 +60,10 @@ VM_STATIC_TIMEOUT ?= 7200
 VM_NEGATIVE_TIMEOUT ?= 3600
 VM_MICRO_TIMEOUT ?= 7200
 VM_E2E_TIMEOUT ?= 7200
+SCX_PROG_SHOW_RACE_MODE ?= bpftool-loop
+SCX_PROG_SHOW_RACE_ITERATIONS ?= 20
+SCX_PROG_SHOW_RACE_LOAD_TIMEOUT ?= 20
+SCX_PROG_SHOW_RACE_SKIP_PROBE ?= 0
 
 _VENV_CANDIDATES := $(HOME)/workspace/.venv $(HOME)/.venv $(REPO_ROOT)/.venv $(REPO_ROOT)/venv
 _VENV_FOUND := $(firstword $(foreach v,$(_VENV_CANDIDATES),$(if $(wildcard $(v)/bin/activate),$(v),)))
@@ -77,7 +82,7 @@ VM_SMOKE_ARGS := --iterations 1 --warmups 0 --repeat 50
 .PHONY: all micro_exec directive_hint vendor_libbpf vendor_bpftool \
 	corpus-fetch corpus-build-objects corpus-build \
 	scx-artifacts e2e-prep e2e-tracee-setup e2e-tetragon-setup \
-	kernel-image kernel-tests-build upstream-selftests-build kinsn-modules-build micro-programs daemon-binary \
+	kernel-image kernel-tests-build unittest-build upstream-selftests-build kinsn-modules-build micro-programs daemon-binary \
 	vm-shell vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 	clean
 
@@ -178,6 +183,9 @@ upstream-selftests-build:
 kinsn-modules-build:
 	$(MAKE) -C "$(REPO_ROOT)" kinsn-modules BZIMAGE="$(BZIMAGE)"
 
+unittest-build:
+	$(MAKE) -C "$(UNITTEST_DIR)" all
+
 micro-programs:
 	$(MAKE) -C "$(REPO_ROOT)/micro" programs
 
@@ -193,7 +201,7 @@ vm-shell: kernel-image kinsn-modules-build
 		--timeout "$(VM_TEST_TIMEOUT)" \
 		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) $(VM_COMMAND)'
 
-vm-test:
+vm-test: scx-artifacts
 	$(MAKE) kernel-image BZIMAGE="$(BZIMAGE)"
 	$(MAKE) upstream-selftests-build BZIMAGE="$(BZIMAGE)"
 	$(MAKE) kernel-tests-build
@@ -204,9 +212,9 @@ vm-test:
 		$(VM_CPU_FLAG) \
 		$(VM_MEM_FLAG) \
 		--timeout "$(VM_TEST_TIMEOUT)" \
-		--command '$(VM_INIT) "$(ROOT_DIR)/scripts/run_all_tests.sh" "$(REPO_ROOT)"'
+		--command 'SCX_PROG_SHOW_RACE_MODE="$(SCX_PROG_SHOW_RACE_MODE)" SCX_PROG_SHOW_RACE_ITERATIONS="$(SCX_PROG_SHOW_RACE_ITERATIONS)" SCX_PROG_SHOW_RACE_LOAD_TIMEOUT="$(SCX_PROG_SHOW_RACE_LOAD_TIMEOUT)" SCX_PROG_SHOW_RACE_SKIP_PROBE="$(SCX_PROG_SHOW_RACE_SKIP_PROBE)" $(VM_INIT) "$(ROOT_DIR)/scripts/run_all_tests.sh" "$(REPO_ROOT)"'
 
-vm-selftest: kernel-tests-build kernel-image kinsn-modules-build
+vm-selftest: kernel-tests-build unittest-build kernel-image kinsn-modules-build
 	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
 		--action vm-selftest \
 		--kernel-image "$(BZIMAGE_PATH)" \
@@ -225,7 +233,7 @@ vm-static-test: micro-programs daemon-binary kernel-image kinsn-modules-build
 		--timeout "$(VM_STATIC_TIMEOUT)" \
 		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) python3 "$(REPO_ROOT)/daemon/tests/static_verify.py" --daemon-binary "$(DAEMON_PATH)" --daemon-args="$(DAEMON_ARGS)" --output "$(VM_STATIC_OUTPUT)" $(STATIC_VERIFY_ARGS)'
 
-vm-negative-test: kernel-image kinsn-modules-build
+vm-negative-test: scx-artifacts kernel-image kinsn-modules-build
 	$(MAKE) -C "$(NEGATIVE_TEST_DIR)"
 	$(PYTHON) "$(ROOT_DIR)/scripts/run_vm_shell.py" $(TARGET_FLAG) \
 		--action vm-negative-test \
@@ -233,7 +241,7 @@ vm-negative-test: kernel-image kinsn-modules-build
 		$(VM_CPU_FLAG) \
 		$(VM_MEM_FLAG) \
 		--timeout "$(VM_NEGATIVE_TIMEOUT)" \
-		--command '$(VM_INIT) echo "=== adversarial_rejit ===" && "$(NEGATIVE_TEST_DIR)/build/adversarial_rejit" && echo "=== fuzz_rejit ($(FUZZ_ROUNDS) rounds) ===" && "$(NEGATIVE_TEST_DIR)/build/fuzz_rejit" $(FUZZ_ROUNDS)'
+		--command '$(VM_INIT) echo "=== adversarial_rejit ===" && "$(NEGATIVE_TEST_DIR)/build/adversarial_rejit" && echo "=== fuzz_rejit ($(FUZZ_ROUNDS) rounds) ===" && "$(NEGATIVE_TEST_DIR)/build/fuzz_rejit" $(FUZZ_ROUNDS) && echo "=== scx_prog_show_race ($(SCX_PROG_SHOW_RACE_MODE)) ===" && "$(NEGATIVE_TEST_DIR)/build/scx_prog_show_race" "$(REPO_ROOT)" --mode "$(SCX_PROG_SHOW_RACE_MODE)" --iterations "$(SCX_PROG_SHOW_RACE_ITERATIONS)" --load-timeout "$(SCX_PROG_SHOW_RACE_LOAD_TIMEOUT)" $(if $(filter 1,$(SCX_PROG_SHOW_RACE_SKIP_PROBE)),--skip-probe,)'
 
 vm-micro-smoke: micro_exec micro-programs daemon-binary kernel-image kinsn-modules-build
 	mkdir -p "$(MICRO_RESULTS_DIR)"
