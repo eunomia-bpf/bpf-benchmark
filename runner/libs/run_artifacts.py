@@ -119,9 +119,9 @@ def repo_relative_path(path: Path) -> str:
 
 def _managed_run_artifact_metadata(path: Path) -> dict[str, Any] | None:
     metadata_path = path / "metadata.json"
-    if not metadata_path.is_file():
-        return None
     try:
+        if not metadata_path.is_file():
+            return None
         payload = json.loads(metadata_path.read_text())
     except (OSError, json.JSONDecodeError):
         return None

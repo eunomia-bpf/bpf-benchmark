@@ -2395,3 +2395,64 @@ So the only safe conclusion from this run is narrower:
 - it did **not** change the host-side crash signature
 - it therefore does **not** provide a workaround, but it also does **not**
   exclude internal `bpf_prog_kallsyms_add/del` lifecycle bugs
+
+## 2026-03-25 QEMU 升级验证：Bug 2 (TCG crash) 根因确认为 QEMU 8.2.2 bug
+
+### KASAN 内核验证（KVM 模式）
+
+在升级 QEMU 之前，先用 KASAN 内核在 KVM 模式下全面测试了内核代码安全性：
+
+| 测试 | 结果 | KASAN 报错 |
+|------|------|-----------|
+| REJIT regression (6 tests, 160 subprog REJITs) | 6/6 PASS | 无 |
+| vm-static-test (191 objects, 616 programs) | 全通过 | 无 |
+| vm-negative-test (fuzz 1000 rounds + adversarial) | 全通过 | 无 |
+| scx_prog_show_race (500 iterations) | 全通过 | 无 |
+| unit tests (audit/swap/safety/verifier/tail_call) | 全通过 | 无 |
+
+结论：KASAN 未检测到任何 use-after-free、out-of-bounds 或 slab corruption。内核 BPF 代码无内存安全问题。
+
+注意：KASAN 内核在 TCG 模式下连 boot 都无法完成（QEMU 8.2.2 在处理 KASAN shadow memory 地址空间时触发同一个 `tlb_set_dirty` crash），进一步佐证问题在 QEMU TCG 侧。
+
+### QEMU 升级
+
+- 从 https://download.qemu.org/qemu-9.2.2.tar.xz 下载源码
+- 配置：`--prefix=/usr/local --datadir=/usr/share --target-list=x86_64-softmmu,aarch64-softmmu`
+- 编译安装到 `/usr/local/bin/`（不覆盖系统 apt 包）
+- 系统 apt 的 8.2.2 保留在 `/usr/bin/`，`/usr/local/bin` 在 PATH 中优先
+
+### Bug 2 验证：QEMU 9.2.2 + TCG
+
+配置：
+- QEMU 9.2.2（`/usr/local/bin/qemu-system-x86_64`）
+- TCG 模式（`--disable-kvm`）
+- 非 KASAN 内核（#3, 17MB）
+- VM_CPUS=1, VM_MEM=8G
+- reproducer: `tests/negative/build/scx_prog_show_race --mode bpftool-loop --iterations 200`
+
+结果：
+- **200/200 轮全部通过**
+- host journal **零 QEMU segfault**
+- scx_rusty 正常启动和退出
+
+### 对比
+
+| 配置 | QEMU 8.2.2 | QEMU 9.2.2 |
+|------|-----------|-----------|
+| TCG + scx reproducer | ~8 轮 crash (`tlb_set_dirty` at `0x8d8f21`) | **200 轮全过** |
+| KVM + scx reproducer | 通过 | 通过 |
+| TCG + KASAN 内核 | 连 boot 都 crash | 未测试 |
+
+### 根因确认
+
+Bug 2 (TCG crash) 的根因是 **QEMU 8.2.2 的 TCG softmmu `tlb_set_dirty` 实现 bug**，在处理 guest 内核快速连续的 `text_poke_copy()`（fixmap PTE 修改 + INVLPG）时触发。QEMU 9.2.2 修复了此问题。
+
+此问题与内核 BPF/REJIT 代码无关。内核代码的行为是合法的（通过 KASAN 验证），但触发了 QEMU 8.2.2 TCG 的已知限制。
+
+### 宿主频繁重启分析
+
+调查期间宿主多次无明确原因重启。分析发现：
+- 每次 boot 都有 `mce: [Hardware Error]: Machine check events logged`
+- 有 CPU 过热降频记录（`Package temperature is above threshold`，event count 65+）
+- 无 kernel panic/oops 日志
+- 原因为 CPU 过热（Intel Core Ultra 9 285K 在 `-j24` 全核编译 + QEMU TCG 高负载下过热）

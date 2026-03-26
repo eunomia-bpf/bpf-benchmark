@@ -83,3 +83,45 @@
 **问题**: `__bpf_prog_put_noref(tmp, tmp->aux->real_func_cnt)` — 第二个参数是 `u32` 被当 `bool deferred`。当前碰巧正确但是维护隐患。
 
 **修复方案**: 改为显式 `tmp->aux->real_func_cnt > 0`。
+
+---
+
+## 最新进展（2026-03-25 20:00 更新）
+
+### 已验证通过
+
+- **vm-selftest x86**: 13 suites ALL PASSED（含 adversarial 23 + fuzz 1000 轮 + pass_correctness 16 个 BPF progs）
+- **vm-selftest ARM64**: 53 pass, 0 fail, 2 skip（QEMU aarch64 + 交叉编译）
+- **vm-micro**: 62/62 benchmarks, **0 correctness mismatch**, 1591 sites applied
+- **C++ runner retval check**: 已加入 paired measurement（stock vs recompile retval 对比），micro 验证通过
+
+### 当前阻塞
+
+- **vm-corpus**: batch runner exit code 1 — C++ runner 在 VM 启动时失败，正在诊断
+
+### 新增测试覆盖
+
+| 新增 Suite | 测试数 | 覆盖 |
+|-----------|--------|------|
+| rejit_pass_correctness | 16 | 每个 pass 的 BPF prog identity REJIT 正确性 |
+| rejit_verifier_negative_tests | 4 | daemon bug verifier 回归 |
+| rejit_swap_tests | 5 | swap metadata/concurrent/tail_call |
+| C++ retval check | 全覆盖 | corpus paired measurement retval 对比 |
+
+### 已确认修复的 bug
+
+| Bug | 修复位置 | 验证 |
+|-----|---------|------|
+| const_prop 丢弃 map_value 类型 | daemon/src/passes/const_prop.rs:202-217 | daemon-tests 339 pass |
+| bpf_prog_get_info_by_fd 竞态 | syscall.c:5772 guard(mutex) | T3 concurrent test PASS |
+| bpf_prog_get_stats null deref | syscall.c:2466 | selftest PASS |
+| smp_wmb → smp_store_release | syscall.c:3455 | selftest PASS |
+| tail_call_reachable 未 swap | syscall.c swap函数 | T4 PASS |
+| arena 未 swap | syscall.c swap函数 | selftest PASS |
+| map type 过滤 | daemon/src/analysis/map_info.rs | static_verify PASS |
+| DCE orphaned subprog | daemon/src/passes/dce.rs + utils.rs | daemon-tests PASS |
+
+### 仍存在的 P1 bug
+
+1. **bpf_prog_rejit_swap() one-way copy** — rollback 路径仍不可逆（需要 kernel fault injection 测试）
+2. **find_call_site() 单匹配** — struct_ops 同一程序多 callback（libbpf 限制无法测试）
