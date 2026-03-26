@@ -90,6 +90,10 @@ if data_end <  cursor goto slow
 if data_end <= cursor goto slow
 ```
 
+但 ladder merge 时必须额外保守一条：
+
+- **所有被合并 guard 的比较严格性必须一致**。也就是 `>` / `<` 这一类（strict）只能和 strict guard 合并，`>=` / `<=` 这一类（inclusive）只能和 inclusive guard 合并。否则如果仅保留 dominant guard 的原始 compare opcode，再把窗口扩大到 later site，会把 later guard 的边界语义弱化或强化，破坏原程序语义。
+
 以及它们的“fast-edge 反写”形式，例如：
 
 ```text

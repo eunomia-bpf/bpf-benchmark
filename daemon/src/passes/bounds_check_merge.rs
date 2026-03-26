@@ -39,6 +39,12 @@ enum RegValue {
     PacketEnd { root_id: u32 },
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum GuardCmpKind {
+    Strict,
+    Inclusive,
+}
+
 #[derive(Clone, Debug)]
 struct GuardSite {
     mov_pc: usize,
@@ -48,6 +54,7 @@ struct GuardSite {
     data_end_reg: u8,
     root_id: u32,
     window_end: i32,
+    cmp_kind: GuardCmpKind,
     slow_target_pc: usize,
     can_widen_in_place: bool,
     can_remove_setup: bool,
@@ -298,7 +305,7 @@ fn detect_guard_site(
     states: &[RegValue],
 ) -> Option<GuardSite> {
     let insn = insns.get(pc)?;
-    let (cursor_reg, data_end_reg) = normalize_slow_guard(insn)?;
+    let (cursor_reg, data_end_reg, cmp_kind) = normalize_slow_guard(insn)?;
     let mov_pc = pc.checked_sub(2)?;
     let add_pc = pc.checked_sub(1)?;
     let mov = insns.get(mov_pc)?;
@@ -360,6 +367,7 @@ fn detect_guard_site(
         data_end_reg,
         root_id,
         window_end,
+        cmp_kind,
         slow_target_pc,
         can_widen_in_place,
         can_remove_setup,
@@ -368,7 +376,7 @@ fn detect_guard_site(
 
 fn detect_variable_guard(pc: usize, insns: &[BpfInsn], states: &[RegValue]) -> Option<SkipReason> {
     let insn = insns.get(pc)?;
-    let (cursor_reg, data_end_reg) = normalize_slow_guard(insn)?;
+    let (cursor_reg, data_end_reg, _) = normalize_slow_guard(insn)?;
     let mov_pc = pc.checked_sub(2)?;
     let add_pc = pc.checked_sub(1)?;
     let mov = insns.get(mov_pc)?;
@@ -402,14 +410,16 @@ fn detect_variable_guard(pc: usize, insns: &[BpfInsn], states: &[RegValue]) -> O
     }
 }
 
-fn normalize_slow_guard(insn: &BpfInsn) -> Option<(u8, u8)> {
+fn normalize_slow_guard(insn: &BpfInsn) -> Option<(u8, u8, GuardCmpKind)> {
     if insn.class() != BPF_JMP || bpf_src(insn.code) != BPF_X {
         return None;
     }
 
     match bpf_op(insn.code) {
-        BPF_JGT | BPF_JGE => Some((insn.dst_reg(), insn.src_reg())),
-        BPF_JLT | BPF_JLE => Some((insn.src_reg(), insn.dst_reg())),
+        BPF_JGT => Some((insn.dst_reg(), insn.src_reg(), GuardCmpKind::Strict)),
+        BPF_JLT => Some((insn.src_reg(), insn.dst_reg(), GuardCmpKind::Strict)),
+        BPF_JGE => Some((insn.dst_reg(), insn.src_reg(), GuardCmpKind::Inclusive)),
+        BPF_JLE => Some((insn.src_reg(), insn.dst_reg(), GuardCmpKind::Inclusive)),
         _ => None,
     }
 }
@@ -423,6 +433,7 @@ fn can_extend_ladder(
     if prev.root_id != next.root_id
         || prev.root_reg != next.root_reg
         || prev.data_end_reg != next.data_end_reg
+        || prev.cmp_kind != next.cmp_kind
         || prev.slow_target_pc != next.slow_target_pc
         || next.window_end <= prev.window_end
         || next.window_end - prev.window_end > MAX_LADDER_WINDOW_GROWTH
@@ -615,6 +626,15 @@ mod tests {
         }
     }
 
+    fn jge_reg(dst: u8, src: u8, off: i16) -> BpfInsn {
+        BpfInsn {
+            code: BPF_JMP | BPF_JGE | BPF_X,
+            regs: BpfInsn::make_regs(dst, src),
+            off,
+            imm: 0,
+        }
+    }
+
     fn load_packet_root() -> Vec<BpfInsn> {
         vec![
             BpfInsn::ldx_mem(BPF_W, 2, 1, 0),
@@ -634,7 +654,16 @@ mod tests {
         insns
             .iter()
             .enumerate()
-            .filter_map(|(pc, insn)| (insn.code == (BPF_JMP | BPF_JGT | BPF_X)).then_some(pc))
+            .filter_map(|(pc, insn)| {
+                (matches!(
+                    insn.code,
+                    code if code == (BPF_JMP | BPF_JGT | BPF_X)
+                        || code == (BPF_JMP | BPF_JGE | BPF_X)
+                        || code == (BPF_JMP | BPF_JLT | BPF_X)
+                        || code == (BPF_JMP | BPF_JLE | BPF_X)
+                ))
+                .then_some(pc)
+            })
             .collect()
     }
 
@@ -698,6 +727,17 @@ mod tests {
         insns.push(jgt_reg(4, 3, 0));
         insns.push(BpfInsn::ldx_mem(BPF_H, 6, 2, 12));
         insns.extend(guard(5, 2, 3, 34));
+        insns.push(BpfInsn::ldx_mem(BPF_W, 7, 2, 30));
+        shared_error_program(insns)
+    }
+
+    fn make_mixed_cmp_kind_program() -> Vec<BpfInsn> {
+        let mut insns = load_packet_root();
+        insns.extend(guard(4, 2, 3, 14));
+        insns.push(BpfInsn::ldx_mem(BPF_H, 6, 2, 12));
+        insns.push(BpfInsn::mov64_reg(5, 2));
+        insns.push(BpfInsn::alu64_imm(BPF_ADD, 5, 34));
+        insns.push(jge_reg(5, 3, 0));
         insns.push(BpfInsn::ldx_mem(BPF_W, 7, 2, 30));
         shared_error_program(insns)
     }
@@ -840,6 +880,22 @@ mod tests {
         assert!(
             !result.pass_results[0].sites_skipped.is_empty(),
             "variable-offset guards should be recognized and skipped",
+        );
+    }
+
+    #[test]
+    fn test_mixed_cmp_kinds_not_merged() {
+        let original = make_mixed_cmp_kind_program();
+        let mut program = BpfProgram::new(original.clone());
+
+        let result = run_bounds_check_merge_pass(&mut program, BPF_PROG_TYPE_XDP);
+
+        assert!(!result.program_changed);
+        assert_eq!(program.insns, original);
+        assert_eq!(compare_pcs(&program.insns), vec![4, 8]);
+        assert!(
+            !result.pass_results[0].sites_skipped.is_empty(),
+            "mixed strict/inclusive guards must not be merged",
         );
     }
 

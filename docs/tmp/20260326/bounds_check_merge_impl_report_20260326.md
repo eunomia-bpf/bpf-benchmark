@@ -14,6 +14,7 @@ The pass now:
   - `tmp = data`
   - `tmp += const`
   - `if tmp > data_end goto slow`
+- keeps guard comparison semantics stable by only merging ladders whose guards all use the same strictness (`>`/`<` or `>=`/`<=`)
 - recognizes and reports variable-offset guards as non-mergeable in v1
 - forms conservative ladders that require:
   - same packet root/base register
@@ -50,5 +51,5 @@ cd daemon && cargo test
 
 Result:
 
-- `cargo test bounds_check`: 13 passed
-- `cargo test`: 364 passed, 12 ignored, 0 failed
+- `cargo test bounds_check`: 14 passed
+- `cargo test`: 365 passed, 12 ignored, 0 failed
