@@ -1,16 +1,19 @@
 #!/bin/bash
 # Helper script for `make vm-selftest`.
-# Runs kernel REJIT selftest + pre-built tests/unittest/ suite.
-# Binaries are built on the host by `make unittest-build` (runner/Makefile).
+# Runs pre-built tests/unittest/ suite + tests/negative/ adversarial suite.
+# Binaries are built on the host by `make unittest-build` and `make negative-build`
+# (runner/Makefile).
 #
-# Usage: vm-selftest.sh <ROOT_DIR> <KERNEL_SELFTEST> <UNITTEST_DIR> <KINSN_MODULE_DIR>
+# Usage: vm-selftest.sh <ROOT_DIR> <UNITTEST_DIR> <KINSN_MODULE_DIR> <NEGATIVE_DIR> [FUZZ_ROUNDS]
 set -eu
 
 ROOT_DIR="$1"
-KERNEL_SELFTEST="$2"
-UNITTEST_DIR="$3"
-KINSN_MODULE_DIR="$4"
+UNITTEST_DIR="$2"
+KINSN_MODULE_DIR="$3"
+NEGATIVE_DIR="$4"
+FUZZ_ROUNDS="${5:-1000}"
 BUILD_DIR="${UNITTEST_DIR}/build"
+NEGATIVE_BUILD_DIR="${NEGATIVE_DIR}/build"
 
 cd "$ROOT_DIR"
 
@@ -31,16 +34,11 @@ else
     echo "kinsn modules: ${loaded}/3 loaded"
 fi
 
-# Part 1: kernel selftest (test_recompile).
-echo "=== Running kernel selftest ==="
-"$KERNEL_SELFTEST"
-
-# Part 2: run pre-built tests/unittest/ suite.
-# Binaries were built on the host; no in-VM compilation needed.
-echo "=== Running tests/unittest/ (pre-built) ==="
-
 PASS=0
 FAIL=0
+
+# Part 1: run pre-built tests/unittest/ suite.
+echo "=== Running tests/unittest/ (pre-built) ==="
 
 # All tests to run.  Must match tests/unittest/Makefile TESTS variable.
 TESTS="rejit_poc rejit_safety_tests rejit_regression rejit_tail_call
@@ -61,6 +59,35 @@ for t in $TESTS; do
         echo "  FAIL: $t"
     fi
 done
+
+# Part 2: run pre-built tests/negative/ adversarial suite.
+echo ""
+echo "=== Running tests/negative/ (pre-built) ==="
+
+echo "--- adversarial_rejit ---"
+if [ ! -x "${NEGATIVE_BUILD_DIR}/adversarial_rejit" ]; then
+    echo "  ERROR: binary not found: ${NEGATIVE_BUILD_DIR}/adversarial_rejit"
+    FAIL=$((FAIL + 1))
+elif "${NEGATIVE_BUILD_DIR}/adversarial_rejit"; then
+    PASS=$((PASS + 1))
+else
+    FAIL=$((FAIL + 1))
+    echo "  FAIL: adversarial_rejit"
+fi
+
+echo "--- fuzz_rejit (${FUZZ_ROUNDS} rounds) ---"
+if [ ! -x "${NEGATIVE_BUILD_DIR}/fuzz_rejit" ]; then
+    echo "  ERROR: binary not found: ${NEGATIVE_BUILD_DIR}/fuzz_rejit"
+    FAIL=$((FAIL + 1))
+elif "${NEGATIVE_BUILD_DIR}/fuzz_rejit" "$FUZZ_ROUNDS"; then
+    PASS=$((PASS + 1))
+else
+    FAIL=$((FAIL + 1))
+    echo "  FAIL: fuzz_rejit"
+fi
+
+# scx_bad_rejit_replay and scx_prog_show_race require a running scx scheduler;
+# they are integration tests and run separately via `make vm-negative-test`.
 
 echo ""
 echo "=== vm-selftest: ${PASS} passed, ${FAIL} failed ==="

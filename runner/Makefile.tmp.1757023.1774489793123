@@ -35,7 +35,6 @@ BZIMAGE_PATH := $(if $(filter /%,$(BZIMAGE)),$(BZIMAGE),$(REPO_ROOT)/$(BZIMAGE))
 DAEMON_PATH := $(if $(filter /%,$(DAEMON)),$(DAEMON),$(REPO_ROOT)/$(DAEMON))
 VMLINUX_PATH := $(REPO_ROOT)/vendor/linux-framework/vmlinux
 MICRO_RUNNER := $(ROOT_DIR)/build/micro_exec
-KERNEL_TEST_DIR := $(REPO_ROOT)/tests/kernel
 UNITTEST_DIR := $(REPO_ROOT)/tests/unittest
 KINSN_MODULE_DIR := $(REPO_ROOT)/module/x86
 NEGATIVE_TEST_DIR := $(REPO_ROOT)/tests/negative
@@ -274,16 +273,6 @@ vm-corpus: micro_exec daemon-binary kernel-image kinsn-modules-build
 		--repeat "$(REPEAT)" \
 		--output-json "$(VM_CORPUS_OUTPUT_JSON)" \
 		--output-md "$(VM_CORPUS_OUTPUT_MD)"
-
-vm-corpus-tracing: micro_exec daemon-binary kernel-image kinsn-modules-build
-	mkdir -p "$(CORPUS_RESULTS_DIR)"
-	TARGET="$(TARGET)" $(VENV_ACTIVATE) $(PYTHON) "$(REPO_ROOT)/corpus/driver.py" tracing \
-		--runner "$(MICRO_RUNNER)" \
-		--daemon "$(DAEMON_PATH)" \
-		--btf-custom-path "$(VMLINUX_PATH)" \
-		--repeat "1" \
-		--output-json "$(CORPUS_RESULTS_DIR)/corpus_tracing.json" \
-		--output-md "$(CORPUS_RESULTS_DIR)/corpus_tracing.md"
 
 vm-e2e: e2e-prep e2e-tracee-setup e2e-tetragon-setup micro_exec daemon-binary kernel-image kinsn-modules-build
 	mkdir -p "$(E2E_RESULTS_DIR)"

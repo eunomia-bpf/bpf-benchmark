@@ -2283,3 +2283,115 @@ This is separate from the later-discovered daemon/static-verify parallel REJIT
 `bpf_ksym_del()` / kallsyms panic path: that other bug requires daemon serve +
 parallel `BPF_PROG_REJIT`, while the reproducer above does not require REJIT at
 all.
+
+### `bpftool` refs path A/B: crash now narrows to `pid_iter_bpf__load()`
+
+To isolate the remaining `bpftool prog show` crash path further, I built and
+used a repo-local debug `bpftool` binary from `vendor/bpftool/src` and pointed
+the existing C reproducer at it via `BPFTOOL_BIN=.../runner/build/vendor/bpftool/bpftool`.
+
+The debug `bpftool` added temporary env-gated skips in:
+
+- `vendor/bpftool/src/prog.c`
+- `vendor/bpftool/src/pids.c`
+
+The reproducer entrypoint stayed the same:
+
+```bash
+make vm-shell TARGET=local-x86-vng-tcg VM_CPUS=2 VM_MEM=8G VM_TEST_TIMEOUT=1800 \
+  VM_COMMAND='cd "/home/yunwei37/workspace/bpf-benchmark" && \
+  BPFTOOL_BIN="/home/yunwei37/workspace/bpf-benchmark/runner/build/vendor/bpftool/bpftool" \
+  ./tests/negative/build/scx_prog_show_race \
+    "/home/yunwei37/workspace/bpf-benchmark" \
+    --mode bpftool-loop --iterations 200 --load-timeout 20'
+```
+
+Results:
+
+- baseline with debug `bpftool`: still crashes very early
+  - completed `MARK bpftool 0 rc 0`
+  - completed `MARK bpftool 1 rc 0`
+  - completed `MARK bpftool 2 rc 0`
+  - then wrapper ended with `COMMAND_EXIT_CODE="255"`
+- `BPFTOOL_PROG_SHOW_SKIP_REFS=1`: stable `200/200`
+- `BPFTOOL_PROG_SHOW_SKIP_METADATA=1`: still crashes
+- `BPFTOOL_PROG_SHOW_SKIP_ENUM=1 BPFTOOL_PROG_SHOW_SKIP_METADATA=1 BPFTOOL_PROG_SHOW_SKIP_MAPS=1`
+  - this leaves only `build_obj_refs_table()`
+  - still crashes
+
+That already narrowed the live crash from generic `prog show` to the object-ref
+collection path.
+
+Then I split `build_obj_refs_table()` itself in `vendor/bpftool/src/pids.c`:
+
+- `BPFTOOL_PIDS_FORCE_UNKNOWN=1`
+  - makes the iterator program return early without object-type-specific
+    dereference
+  - still crashes
+- `BPFTOOL_PIDS_SKIP_ITER_READ=1`
+  - creates the iterator FD but never reads seq output
+  - still crashes
+- `BPFTOOL_PIDS_SKIP_ATTACH=1`
+  - returns after `pid_iter_bpf__load(skel)` and before
+    `pid_iter_bpf__attach(skel)`
+  - still crashes
+- `BPFTOOL_PIDS_SKIP_LOAD=1`
+  - returns after `pid_iter_bpf__open()` / rodata setup and before
+    `pid_iter_bpf__load(skel)`
+  - stable `200/200`
+
+This is the strongest current narrowing result:
+
+- `attach`, `bpf_iter_create`, and iter `read()` are not required
+- object-type-specific dereference inside the iterator program is not required
+- the necessary condition is repeated `pid_iter_bpf__load()` itself
+
+So the live-crash track is no longer best described as a generic
+`bpf_prog_get_info_by_fd()` / metadata query bug. On the current tree, the
+dominant necessary condition is repeated loading of bpftool's PID-iterator BPF
+program under the live state created by:
+
+1. `bpftool struct_ops register scx_rusty_main.bpf.o`
+2. second `scx_rusty --stats 1`
+3. repeated `pid_iter_bpf__load()` through the refs path of `bpftool prog show`
+
+### 2026-03-25 18:30-18:50 PDT: `bpf_jit_kallsyms=0` experiment did not stop the host-side QEMU crash
+
+After the narrowing above, I ran a guest-side A/B using the same repo-owned
+reproducer path, but with:
+
+```bash
+sysctl -w net.core.bpf_jit_kallsyms=0
+```
+
+before invoking the `refs-only` / `skip-attach` case.
+
+Observed host-side result from `journalctl -b -1`:
+
+- `2026-03-25 18:30:18 PDT`: `qemu-system-x86_64` segfault
+- `2026-03-25 18:31:52 PDT`: `qemu-system-x86_64` segfault
+- `2026-03-25 18:34:37 PDT`: `qemu-system-x86_64` segfault
+- `2026-03-25 18:39:49 PDT`: `qemu-system-x86_64` segfault
+- `2026-03-25 18:40:21 PDT`: `qemu-system-x86_64` segfault
+- `2026-03-25 18:41:58 PDT`: `qemu-system-x86_64` segfault
+- host rebooted at `2026-03-25 18:50 PDT`
+
+All of these crashes still hit the same host QEMU text offset:
+
+```text
+qemu-system-x86_64[8d8f21,...]
+```
+
+Important interpretation detail:
+
+- this experiment did **not** show that the issue is unrelated to BPF kallsyms
+- on this kernel, `/proc/sys/net/core/bpf_jit_kallsyms` gates symbol exposure
+  via `bpf_get_kallsym()`, but `bpf_prog_kallsyms_add()` /
+  `bpf_prog_kallsyms_del_all()` still remain in the ordinary load/unload path
+
+So the only safe conclusion from this run is narrower:
+
+- setting `net.core.bpf_jit_kallsyms=0` did **not** make the reproducer stable
+- it did **not** change the host-side crash signature
+- it therefore does **not** provide a workaround, but it also does **not**
+  exclude internal `bpf_prog_kallsyms_add/del` lifecycle bugs
