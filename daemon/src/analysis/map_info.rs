@@ -53,12 +53,13 @@ impl MapInfo {
     }
 
     /// Returns whether this map is inlineable in v1.
-    /// Mutable map contents would invalidate the constant replacement.
-    /// The map must be frozen, AND the map type must support direct value
-    /// access.
+    ///
+    /// v1 now performs speculative inlining for mutable maps and relies on the
+    /// invalidation tracker to re-specialize when values change. The remaining
+    /// hard requirement is that userspace can read the backing value correctly.
     #[cfg_attr(not(test), allow(dead_code))]
     pub fn is_inlineable_v1(&self) -> bool {
-        self.frozen && self.supports_direct_value_access()
+        self.supports_direct_value_access()
     }
 
     /// Returns whether v1 can eliminate the lookup/null-check sequence.
@@ -248,7 +249,7 @@ mod tests {
     }
 
     #[test]
-    fn mutable_maps_are_not_inlineable_v1() {
+    fn mutable_maps_are_still_inlineable_when_direct_access_is_supported() {
         let array = MapInfo {
             frozen: false,
             ..array_map(101, 4)
@@ -258,8 +259,8 @@ mod tests {
             ..hash_map(202)
         };
 
-        assert!(!array.is_inlineable_v1());
-        assert!(!hash.is_inlineable_v1());
+        assert!(array.is_inlineable_v1());
+        assert!(hash.is_inlineable_v1());
         assert!(hash.is_speculative_v1());
     }
 

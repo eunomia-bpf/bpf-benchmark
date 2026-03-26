@@ -131,6 +131,7 @@ struct SiteRewrite {
     call_pc: usize,
     removed_null_check: bool,
     speculative: bool,
+    map_inline_record: MapInlineRecord,
     skipped_pcs: HashSet<usize>,
     replacements: BTreeMap<usize, Vec<BpfInsn>>,
 }
@@ -289,6 +290,7 @@ impl BpfPass for MapInlinePass {
 
         let mut skip_pcs = HashSet::new();
         let mut replacements: BTreeMap<usize, Vec<BpfInsn>> = BTreeMap::new();
+        let mut map_inline_records = Vec::new();
         let mut applied = 0usize;
         let mut removed_any_null_check = false;
         let mut speculative_sites = 0usize;
@@ -314,6 +316,7 @@ impl BpfPass for MapInlinePass {
 
             removed_any_null_check |= rewrite.removed_null_check;
             speculative_sites += usize::from(rewrite.speculative);
+            map_inline_records.push(rewrite.map_inline_record);
             skip_pcs.extend(rewrite.skipped_pcs);
             replacements.extend(rewrite.replacements);
             applied += 1;
@@ -326,6 +329,7 @@ impl BpfPass for MapInlinePass {
                 sites_applied: 0,
                 sites_skipped: skipped,
                 diagnostics: vec![],
+                map_inline_records,
                 ..Default::default()
             });
         }
@@ -397,6 +401,7 @@ impl BpfPass for MapInlinePass {
             sites_applied: applied,
             sites_skipped: skipped,
             diagnostics,
+            map_inline_records,
             ..Default::default()
         })
     }
@@ -411,11 +416,9 @@ fn build_site_rewrite(
     null_check_pc: Option<usize>,
 ) -> anyhow::Result<Option<SiteRewrite>> {
     let remove_lookup_pattern = info.can_remove_lookup_pattern_v1();
-    let value = bpf::bpf_map_lookup_elem_by_id(
-        info.map_id,
-        &encode_key_bytes(key.value, info.key_size as usize),
-        info.value_size as usize,
-    )?;
+    let encoded_key = encode_key_bytes(key.value, info.key_size as usize);
+    let value =
+        bpf::bpf_map_lookup_elem_by_id(info.map_id, &encoded_key, info.value_size as usize)?;
 
     let mut skipped_pcs = HashSet::new();
     if remove_lookup_pattern {
@@ -475,6 +478,11 @@ fn build_site_rewrite(
         call_pc: site.call_pc,
         removed_null_check: remove_lookup_pattern && null_check_pc.is_some(),
         speculative: info.is_speculative_v1(),
+        map_inline_record: MapInlineRecord {
+            map_id: info.map_id,
+            key: encoded_key,
+            expected_value: value,
+        },
         skipped_pcs,
         replacements,
     }))
@@ -741,7 +749,7 @@ mod tests {
 
     use crate::analysis::{BranchTargetAnalysis, MapInfoAnalysis};
     use crate::bpf::{install_mock_map, BpfMapInfo, MockMapState};
-    use crate::pass::{PassContext, PassManager};
+    use crate::pass::{MapInlineRecord, PassContext, PassManager};
 
     fn ld_imm64(dst: u8, src: u8, imm: i32) -> [BpfInsn; 2] {
         [
@@ -1240,6 +1248,36 @@ mod tests {
     }
 
     #[test]
+    fn map_inline_pass_skips_lookup_result_write_back() {
+        install_array_map(116, vec![7, 0, 0, 0]);
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let original = vec![
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            st_mem(BPF_W, 0, 0, 99),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ];
+        let mut program = BpfProgram::new(original.clone());
+        program.set_map_ids(vec![116]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(!result.program_changed);
+        assert_eq!(program.insns, original);
+        assert!(result.pass_results[0]
+            .sites_skipped
+            .iter()
+            .any(|skip| skip.reason.contains("non-load uses")));
+    }
+
+    #[test]
     fn map_inline_pass_rewrites_multiple_lookup_sites() {
         install_array_map(107, vec![7, 0, 0, 0]);
         install_array_map(108, vec![9, 0, 0, 0]);
@@ -1341,11 +1379,11 @@ mod tests {
     }
 
     #[test]
-    fn map_inline_pass_skips_mutable_array_maps() {
+    fn map_inline_pass_inlines_non_frozen_array_maps() {
         install_mutable_array_map(111, vec![7, 0, 0, 0]);
 
         let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
-        let original = vec![
+        let mut program = BpfProgram::new(vec![
             map[0],
             map[1],
             st_mem(BPF_W, 10, -4, 1),
@@ -1355,18 +1393,52 @@ mod tests {
             BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
             BpfInsn::mov64_imm(0, 0),
             exit_insn(),
-        ];
-        let mut program = BpfProgram::new(original.clone());
+        ]);
         program.set_map_ids(vec![111]);
 
         let result = run_map_inline_pass(&mut program);
 
-        assert!(!result.program_changed);
-        assert_eq!(program.insns, original);
-        assert!(result.pass_results[0]
-            .sites_skipped
-            .iter()
-            .any(|skip| skip.reason.contains("not inlineable")));
+        assert!(result.program_changed);
+        assert_eq!(result.total_sites_applied, 1);
+        assert_eq!(
+            program.insns,
+            vec![
+                BpfInsn::mov64_imm(6, 7),
+                BpfInsn::mov64_imm(0, 0),
+                exit_insn(),
+            ]
+        );
+    }
+
+    #[test]
+    fn map_inline_pass_records_inlined_sites_for_tracker() {
+        let value = vec![7, 0, 0, 0];
+        install_array_map(115, value.clone());
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let mut program = BpfProgram::new(vec![
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ]);
+        program.set_map_ids(vec![115]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert_eq!(
+            result.pass_results[0].map_inline_records,
+            vec![MapInlineRecord {
+                map_id: 115,
+                key: 1u32.to_le_bytes().to_vec(),
+                expected_value: value,
+            }]
+        );
     }
 
     /// PERCPU map types must not be inlined: userspace reads CPU-0's value,

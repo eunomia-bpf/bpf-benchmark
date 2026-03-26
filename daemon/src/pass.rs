@@ -249,6 +249,8 @@ pub struct PassResult {
     /// Diagnostic messages (read by tests and debug output).
     #[cfg_attr(not(test), allow(dead_code))]
     pub diagnostics: Vec<String>,
+    /// Map-inline dependencies produced by this pass.
+    pub map_inline_records: Vec<MapInlineRecord>,
     /// Instruction count before this pass ran.
     pub insns_before: usize,
     /// Instruction count after this pass ran.
@@ -270,6 +272,14 @@ impl PassResult {
 pub struct SkipReason {
     pub pc: usize,
     pub reason: String,
+}
+
+/// One specialized map value snapshot emitted by `MapInlinePass`.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct MapInlineRecord {
+    pub map_id: u32,
+    pub key: Vec<u8>,
+    pub expected_value: Vec<u8>,
 }
 
 /// High-level pass classification used by diagnostics and tests.

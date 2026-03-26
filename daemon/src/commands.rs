@@ -3,11 +3,13 @@
 
 use std::collections::{HashMap, HashSet};
 use std::os::unix::io::{AsRawFd, RawFd};
+use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
 use anyhow::Result;
 use serde::Serialize;
 
+use crate::invalidation::{BpfMapValueReader, MapInvalidationTracker};
 use crate::{bpf, insn, pass, passes, profiler, verifier_log};
 
 // ── OptimizeOneResult — structured return from try_apply_one ────────
@@ -174,6 +176,88 @@ pub(crate) fn build_pipeline(pass_names: &Option<Vec<String>>) -> pass::PassMana
         Some(names) if !names.is_empty() => passes::build_pipeline_with_passes(names),
         _ => passes::build_default_pipeline(),
     }
+}
+
+pub(crate) type SharedInvalidationTracker = Arc<Mutex<MapInvalidationTracker<BpfMapValueReader>>>;
+
+pub(crate) fn new_invalidation_tracker() -> SharedInvalidationTracker {
+    Arc::new(Mutex::new(MapInvalidationTracker::new(BpfMapValueReader)))
+}
+
+fn collect_map_inline_records(pass_results: &[pass::PassResult]) -> Vec<pass::MapInlineRecord> {
+    pass_results
+        .iter()
+        .flat_map(|result| result.map_inline_records.iter().cloned())
+        .collect()
+}
+
+fn record_map_inline_records<A, F>(
+    tracker: &mut MapInvalidationTracker<A>,
+    prog_id: u32,
+    map_inline_records: &[pass::MapInlineRecord],
+    mut open_map_fd: F,
+) -> Result<()>
+where
+    F: FnMut(u32) -> Result<std::os::unix::io::OwnedFd>,
+{
+    let mut raw_fds_by_map_id: HashMap<u32, u32> = HashMap::new();
+    let mut owned_fds = Vec::new();
+    let mut tracked_sites = Vec::new();
+    for record in map_inline_records {
+        let map_fd = match raw_fds_by_map_id.get(&record.map_id) {
+            Some(&map_fd) => map_fd,
+            None => {
+                let fd = open_map_fd(record.map_id)?;
+                let raw_fd = fd.as_raw_fd() as u32;
+                raw_fds_by_map_id.insert(record.map_id, raw_fd);
+                owned_fds.push(fd);
+                raw_fd
+            }
+        };
+
+        tracked_sites.push((map_fd, record.key.clone(), record.expected_value.clone()));
+    }
+
+    tracker.remove_prog(prog_id);
+    for fd in owned_fds {
+        tracker.remember_map_fd(fd);
+    }
+    for (map_fd, key, expected_value) in tracked_sites {
+        tracker.record_inline_site(prog_id, map_fd, key, expected_value);
+    }
+
+    Ok(())
+}
+
+fn tracker_tracks_prog(tracker: Option<&SharedInvalidationTracker>, prog_id: u32) -> Result<bool> {
+    let Some(tracker) = tracker else {
+        return Ok(false);
+    };
+
+    let tracker = tracker
+        .lock()
+        .map_err(|_| anyhow::anyhow!("invalidation tracker lock poisoned"))?;
+    Ok(tracker.tracks_prog(prog_id))
+}
+
+fn refresh_invalidation_tracking(
+    tracker: Option<&SharedInvalidationTracker>,
+    prog_id: u32,
+    map_inline_records: &[pass::MapInlineRecord],
+) -> Result<()> {
+    let Some(tracker) = tracker else {
+        return Ok(());
+    };
+
+    let mut tracker = tracker
+        .lock()
+        .map_err(|_| anyhow::anyhow!("invalidation tracker lock poisoned"))?;
+    record_map_inline_records(
+        &mut tracker,
+        prog_id,
+        map_inline_records,
+        bpf::bpf_map_get_fd_by_id,
+    )
 }
 
 fn build_rejit_fd_array(required_btf_fds: &[RawFd]) -> Vec<RawFd> {
@@ -480,7 +564,7 @@ pub(crate) fn cmd_apply(
     pgo_config: &Option<PgoConfig>,
     rollback_enabled: bool,
 ) -> Result<()> {
-    let result = try_apply_one(prog_id, ctx, pass_names, pgo_config, rollback_enabled)?;
+    let result = try_apply_one(prog_id, ctx, pass_names, pgo_config, rollback_enabled, None)?;
     emit_debug_result(&result);
 
     if result.program.orig_insn_count == 0 {
@@ -507,7 +591,7 @@ pub(crate) fn cmd_apply_all(
 
     for prog_id in bpf::iter_prog_ids() {
         total += 1;
-        match try_apply_one(prog_id, ctx, pass_names, pgo_config, rollback_enabled) {
+        match try_apply_one(prog_id, ctx, pass_names, pgo_config, rollback_enabled, None) {
             Ok(result) => {
                 emit_debug_result(&result);
                 if result.summary.applied {
@@ -586,6 +670,7 @@ pub(crate) fn try_apply_one(
     pass_names: &Option<Vec<String>>,
     pgo_config: &Option<PgoConfig>,
     rollback_enabled: bool,
+    invalidation_tracker: Option<&SharedInvalidationTracker>,
 ) -> Result<OptimizeOneResult> {
     let total_start = Instant::now();
     let fd = bpf::bpf_prog_get_fd_by_id(prog_id)?;
@@ -673,6 +758,7 @@ pub(crate) fn try_apply_one(
     let mut last_pass_details: Vec<PassDetail> = Vec::new();
     let mut total_pipeline_ns: u64 = 0;
     let mut total_rejit_ns: u64 = 0;
+    let had_tracked_inline_sites = tracker_tracks_prog(invalidation_tracker, prog_id)?;
 
     for attempt in 0..=max_retries {
         let mut program = pass::BpfProgram::new(orig_insns.clone());
@@ -689,6 +775,7 @@ pub(crate) fn try_apply_one(
             pm.run_with_profiling(&mut program, &local_ctx, profiling.as_ref())?;
         let pipeline_elapsed = pipeline_start.elapsed().as_nanos() as u64;
         total_pipeline_ns += pipeline_elapsed;
+        let attempt_map_inline_records = collect_map_inline_records(&pipeline_result.pass_results);
 
         // Build per-pass details from the latest pipeline run.
         last_pass_details = pipeline_result
@@ -700,10 +787,49 @@ pub(crate) fn try_apply_one(
         let disabled_passes_sorted = sorted_strings(disabled_passes.iter().cloned());
 
         if !pipeline_result.program_changed {
+            let mut restored_original = false;
+            if had_tracked_inline_sites {
+                let mut restore_insns = orig_insns.clone();
+                let _map_fds_guard = bpf::relocate_map_fds(&mut restore_insns, &map_ids)
+                    .unwrap_or_else(|e| {
+                        eprintln!("    warning: map FD relocation failed: {:#}", e);
+                        push_debug_warning(
+                            &mut attempt_debug,
+                            format!("map FD relocation failed before restore REJIT: {e:#}"),
+                        );
+                        Vec::new()
+                    });
+
+                if let Some(debug) = attempt_debug.as_mut() {
+                    debug.pre_rejit_bytecode = Some(insn::dump_bytecode_compact(&restore_insns));
+                    debug.warnings.push(
+                        "restoring original bytecode after invalidated map inline produced no rewrite"
+                            .to_string(),
+                    );
+                }
+
+                let rejit_start = Instant::now();
+                bpf::bpf_prog_rejit(fd.as_raw_fd(), &restore_insns, &[])?;
+                total_rejit_ns += rejit_start.elapsed().as_nanos() as u64;
+                restored_original = true;
+
+                if let Err(err) = refresh_invalidation_tracking(invalidation_tracker, prog_id, &[])
+                {
+                    eprintln!(
+                        "    warning: failed to clear invalidation tracking for prog {}: {:#}",
+                        prog_id, err
+                    );
+                }
+            }
+
             attempts.push(AttemptRecord {
                 attempt,
                 disabled_passes: disabled_passes_sorted.clone(),
-                result: "no_change".to_string(),
+                result: if restored_original {
+                    "restored_original".to_string()
+                } else {
+                    "no_change".to_string()
+                },
                 failure_pc: None,
                 attributed_pass: None,
                 debug: attempt_debug,
@@ -712,7 +838,7 @@ pub(crate) fn try_apply_one(
             return Ok(make_result(
                 "ok",
                 false,
-                false,
+                restored_original,
                 0,
                 orig_insn_count,
                 last_pass_details,
@@ -826,6 +952,17 @@ pub(crate) fn try_apply_one(
                     attributed_pass: None,
                     debug: attempt_debug,
                 });
+
+                if let Err(err) = refresh_invalidation_tracking(
+                    invalidation_tracker,
+                    prog_id,
+                    &attempt_map_inline_records,
+                ) {
+                    eprintln!(
+                        "    warning: failed to refresh invalidation tracking for prog {}: {:#}",
+                        prog_id, err
+                    );
+                }
 
                 return Ok(make_result(
                     "ok",
@@ -1023,7 +1160,47 @@ fn fmt_avg(value: Option<f64>) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::cell::RefCell;
     use std::collections::HashMap;
+    use std::fs::File;
+    use std::os::unix::io::AsRawFd;
+    use std::rc::Rc;
+
+    use crate::invalidation::{BatchLookupValue, MapInvalidationTracker, MapValueReader};
+
+    #[derive(Clone, Debug, Default)]
+    struct MockTrackerReader {
+        values: Rc<RefCell<HashMap<u32, HashMap<Vec<u8>, Vec<u8>>>>>,
+    }
+
+    impl MockTrackerReader {
+        fn set_value(&self, map_fd: u32, key: Vec<u8>, value: Vec<u8>) {
+            self.values
+                .borrow_mut()
+                .entry(map_fd)
+                .or_default()
+                .insert(key, value);
+        }
+    }
+
+    impl MapValueReader for MockTrackerReader {
+        fn lookup_values_batch(
+            &self,
+            map_fd: u32,
+            keys: &[Vec<u8>],
+        ) -> Result<Vec<BatchLookupValue>> {
+            let values = self.values.borrow();
+            let map_values = values.get(&map_fd).cloned().unwrap_or_default();
+            Ok(keys
+                .iter()
+                .cloned()
+                .map(|key| BatchLookupValue {
+                    value: map_values.get(&key).cloned(),
+                    key,
+                })
+                .collect())
+        }
+    }
 
     #[test]
     fn test_optimize_one_result_serialization() {
@@ -1197,6 +1374,7 @@ mod tests {
                 },
             ],
             diagnostics: vec!["test".to_string()],
+            map_inline_records: vec![],
             insns_before: 100,
             insns_after: 95,
         };
@@ -1212,6 +1390,71 @@ mod tests {
         assert_eq!(detail.insns_before, 100);
         assert_eq!(detail.insns_after, 95);
         assert_eq!(detail.insn_delta, -5);
+    }
+
+    #[test]
+    fn test_record_map_inline_records_updates_tracker() {
+        let reader = MockTrackerReader::default();
+        let mut tracker = MapInvalidationTracker::new(reader.clone());
+        let key = 1u32.to_le_bytes().to_vec();
+        let expected_value = 11u32.to_le_bytes().to_vec();
+        let records = vec![pass::MapInlineRecord {
+            map_id: 77,
+            key: key.clone(),
+            expected_value: expected_value.clone(),
+        }];
+        let mut opened_fds = HashMap::new();
+
+        record_map_inline_records(&mut tracker, 101, &records, |map_id| {
+            let file = File::open("/dev/null")?;
+            opened_fds.insert(map_id, file.as_raw_fd() as u32);
+            Ok(file.into())
+        })
+        .expect("record_map_inline_records should succeed");
+
+        assert_eq!(tracker.entry_count(), 1);
+
+        let map_fd = opened_fds[&77];
+        reader.set_value(map_fd, key.clone(), expected_value);
+        assert!(tracker
+            .check_for_invalidations()
+            .expect("check_for_invalidations should succeed")
+            .is_empty());
+
+        reader.set_value(map_fd, key, 99u32.to_le_bytes().to_vec());
+        assert_eq!(
+            tracker
+                .check_for_invalidations()
+                .expect("check_for_invalidations should succeed"),
+            vec![101]
+        );
+    }
+
+    #[test]
+    fn test_record_map_inline_records_preserves_existing_entries_on_open_failure() {
+        let reader = MockTrackerReader::default();
+        let mut tracker = MapInvalidationTracker::new(reader);
+        tracker.record_inline_site(
+            101,
+            7,
+            1u32.to_le_bytes().to_vec(),
+            11u32.to_le_bytes().to_vec(),
+        );
+
+        let records = vec![pass::MapInlineRecord {
+            map_id: 77,
+            key: 2u32.to_le_bytes().to_vec(),
+            expected_value: 22u32.to_le_bytes().to_vec(),
+        }];
+
+        let err = record_map_inline_records(&mut tracker, 101, &records, |_map_id| {
+            anyhow::bail!("synthetic open failure")
+        })
+        .expect_err("record_map_inline_records should fail");
+
+        assert!(err.to_string().contains("synthetic open failure"));
+        assert_eq!(tracker.entry_count(), 1);
+        assert!(tracker.tracks_prog(101));
     }
 
     // ── HIGH #3: Orchestration unit tests ───────────────────────────
@@ -1437,7 +1680,7 @@ processed 49965 insns (limit 1000000) max_states_per_insn 32 total_states 1318 p
 
         // Find a program to try applying to.
         for prog_id in bpf::iter_prog_ids().take(50) {
-            let result = try_apply_one(prog_id, &ctx, &None, &None, true);
+            let result = try_apply_one(prog_id, &ctx, &None, &None, true, None);
             match result {
                 Ok(opt_result) => {
                     // Verify the result structure is well-formed.

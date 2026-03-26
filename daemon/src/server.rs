@@ -3,11 +3,12 @@
 
 use std::collections::HashSet;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use anyhow::{Context, Result};
 
 use crate::commands::{self, PgoConfig};
+use crate::invalidation::{MapInvalidationTracker, MapValueReader};
 use crate::{bpf, pass};
 
 /// Global shutdown flag set by signal handler.
@@ -24,6 +25,33 @@ fn register_signal_handlers() {
     }
 }
 
+fn process_invalidation_tick<A, F>(
+    tracker: &std::sync::Arc<std::sync::Mutex<MapInvalidationTracker<A>>>,
+    mut reoptimize: F,
+) -> Result<Vec<u32>>
+where
+    A: MapValueReader,
+    F: FnMut(u32) -> Result<()>,
+{
+    let invalidated = {
+        let tracker = tracker
+            .lock()
+            .map_err(|_| anyhow::anyhow!("invalidation tracker lock poisoned"))?;
+        tracker.check_for_invalidations()?
+    };
+
+    for prog_id in &invalidated {
+        if let Err(err) = reoptimize(*prog_id) {
+            eprintln!(
+                "  invalidation: prog {} reoptimization failed: {:#}",
+                prog_id, err
+            );
+        }
+    }
+
+    Ok(invalidated)
+}
+
 // ── Serve (Unix socket server) ──────────────────────────────────────
 
 pub(crate) fn cmd_serve(
@@ -36,6 +64,8 @@ pub(crate) fn cmd_serve(
     use std::os::unix::net::UnixListener;
 
     register_signal_handlers();
+    let tracker = commands::new_invalidation_tracker();
+    let mut last_invalidation_check = Instant::now();
 
     // Remove stale socket file if it exists.
     let _ = std::fs::remove_file(socket_path);
@@ -47,9 +77,32 @@ pub(crate) fn cmd_serve(
     println!("serve: listening on {}", socket_path);
 
     while !SHUTDOWN_FLAG.load(Ordering::Relaxed) {
+        if last_invalidation_check.elapsed() >= Duration::from_secs(1) {
+            let tracker_for_apply = tracker.clone();
+            let _ = process_invalidation_tick(&tracker, |prog_id| {
+                commands::try_apply_one(
+                    prog_id,
+                    ctx,
+                    pass_names,
+                    pgo_config,
+                    rollback_enabled,
+                    Some(&tracker_for_apply),
+                )?;
+                Ok(())
+            });
+            last_invalidation_check = Instant::now();
+        }
+
         match listener.accept() {
             Ok((stream, _addr)) => {
-                let _ = handle_client(stream, ctx, pass_names, pgo_config, rollback_enabled);
+                let _ = handle_client(
+                    stream,
+                    ctx,
+                    pass_names,
+                    pgo_config,
+                    rollback_enabled,
+                    &tracker,
+                );
             }
             Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
                 std::thread::sleep(Duration::from_millis(100));
@@ -72,6 +125,7 @@ fn handle_client(
     pass_names: &Option<Vec<String>>,
     pgo_config: &Option<PgoConfig>,
     rollback_enabled: bool,
+    tracker: &commands::SharedInvalidationTracker,
 ) -> Result<()> {
     use std::io::{BufRead, BufReader, Write};
 
@@ -85,7 +139,9 @@ fn handle_client(
         }
 
         let response = match serde_json::from_str::<serde_json::Value>(&line) {
-            Ok(req) => process_request(&req, ctx, pass_names, pgo_config, rollback_enabled),
+            Ok(req) => {
+                process_request(&req, ctx, pass_names, pgo_config, rollback_enabled, tracker)
+            }
             Err(e) => {
                 serde_json::json!({"status": "error", "message": format!("invalid JSON: {}", e)})
             }
@@ -106,6 +162,7 @@ fn process_request(
     pass_names: &Option<Vec<String>>,
     pgo_config: &Option<PgoConfig>,
     rollback_enabled: bool,
+    tracker: &commands::SharedInvalidationTracker,
 ) -> serde_json::Value {
     let cmd = req.get("cmd").and_then(|v| v.as_str()).unwrap_or("");
     match cmd {
@@ -114,7 +171,14 @@ fn process_request(
                 Some(id) => id as u32,
                 None => return serde_json::json!({"status": "error", "message": "missing prog_id"}),
             };
-            match commands::try_apply_one(prog_id, ctx, pass_names, pgo_config, rollback_enabled) {
+            match commands::try_apply_one(
+                prog_id,
+                ctx,
+                pass_names,
+                pgo_config,
+                rollback_enabled,
+                Some(tracker),
+            ) {
                 Ok(result) => {
                     // Debug data is embedded in the JSON response; no need to
                     // duplicate to stderr in serve mode.
@@ -141,6 +205,7 @@ fn process_request(
                     pass_names,
                     pgo_config,
                     rollback_enabled,
+                    Some(tracker),
                 ) {
                     Ok(result) => {
                         if result.summary.applied {
@@ -172,6 +237,8 @@ pub(crate) fn cmd_watch(
     rollback_enabled: bool,
 ) -> Result<()> {
     register_signal_handlers();
+    let tracker = commands::new_invalidation_tracker();
+    let mut last_invalidation_check = Instant::now();
 
     // Programs that were successfully optimized — never revisited.
     let mut optimized: HashSet<u32> = HashSet::new();
@@ -193,6 +260,22 @@ pub(crate) fn cmd_watch(
         if SHUTDOWN_FLAG.load(Ordering::Relaxed) {
             println!("watch: received shutdown signal, exiting");
             break;
+        }
+
+        if last_invalidation_check.elapsed() >= Duration::from_secs(1) {
+            let tracker_for_apply = tracker.clone();
+            let _ = process_invalidation_tick(&tracker, |prog_id| {
+                commands::try_apply_one(
+                    prog_id,
+                    ctx,
+                    pass_names,
+                    pgo_config,
+                    rollback_enabled,
+                    Some(&tracker_for_apply),
+                )?;
+                Ok(())
+            });
+            last_invalidation_check = Instant::now();
         }
 
         round += 1;
@@ -217,7 +300,14 @@ pub(crate) fn cmd_watch(
         let mut applied = 0u32;
         let mut errors = 0u32;
         for prog_id in &ranked_ids {
-            match commands::try_apply_one(*prog_id, ctx, pass_names, pgo_config, rollback_enabled) {
+            match commands::try_apply_one(
+                *prog_id,
+                ctx,
+                pass_names,
+                pgo_config,
+                rollback_enabled,
+                Some(&tracker),
+            ) {
                 Ok(result) => {
                     if result.summary.applied {
                         optimized.insert(*prog_id);
@@ -259,6 +349,21 @@ pub(crate) fn cmd_watch(
             if SHUTDOWN_FLAG.load(Ordering::Relaxed) {
                 break;
             }
+            if last_invalidation_check.elapsed() >= Duration::from_secs(1) {
+                let tracker_for_apply = tracker.clone();
+                let _ = process_invalidation_tick(&tracker, |prog_id| {
+                    commands::try_apply_one(
+                        prog_id,
+                        ctx,
+                        pass_names,
+                        pgo_config,
+                        rollback_enabled,
+                        Some(&tracker_for_apply),
+                    )?;
+                    Ok(())
+                });
+                last_invalidation_check = Instant::now();
+            }
             std::thread::sleep(Duration::from_millis(100));
         }
 
@@ -269,4 +374,84 @@ pub(crate) fn cmd_watch(
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::HashMap;
+    use std::sync::{Arc, Mutex};
+
+    use crate::invalidation::{BatchLookupValue, MapInvalidationTracker};
+
+    #[derive(Clone, Debug, Default)]
+    struct MockMapValueReader {
+        values: Arc<Mutex<HashMap<u32, HashMap<Vec<u8>, Vec<u8>>>>>,
+    }
+
+    impl MockMapValueReader {
+        fn set_value(&self, map_fd: u32, key: Vec<u8>, value: Vec<u8>) {
+            self.values
+                .lock()
+                .expect("values lock should not be poisoned")
+                .entry(map_fd)
+                .or_default()
+                .insert(key, value);
+        }
+    }
+
+    impl MapValueReader for MockMapValueReader {
+        fn lookup_values_batch(
+            &self,
+            map_fd: u32,
+            keys: &[Vec<u8>],
+        ) -> Result<Vec<BatchLookupValue>> {
+            let values = self
+                .values
+                .lock()
+                .expect("values lock should not be poisoned");
+            let map_values = values.get(&map_fd).cloned().unwrap_or_default();
+
+            Ok(keys
+                .iter()
+                .cloned()
+                .map(|key| BatchLookupValue {
+                    value: map_values.get(&key).cloned(),
+                    key,
+                })
+                .collect())
+        }
+    }
+
+    #[test]
+    fn process_invalidation_tick_reoptimizes_invalidated_programs() {
+        let reader = MockMapValueReader::default();
+        reader.set_value(7, 1u32.to_le_bytes().to_vec(), 99u32.to_le_bytes().to_vec());
+
+        let mut tracker = MapInvalidationTracker::new(reader);
+        tracker.record_inline_site(
+            101,
+            7,
+            1u32.to_le_bytes().to_vec(),
+            11u32.to_le_bytes().to_vec(),
+        );
+        let tracker = Arc::new(Mutex::new(tracker));
+        let seen = Arc::new(Mutex::new(Vec::new()));
+        let seen_for_closure = seen.clone();
+
+        let invalidated = process_invalidation_tick(&tracker, move |prog_id| {
+            seen_for_closure
+                .lock()
+                .expect("seen lock should not be poisoned")
+                .push(prog_id);
+            Ok(())
+        })
+        .expect("process_invalidation_tick should succeed");
+
+        assert_eq!(invalidated, vec![101]);
+        assert_eq!(
+            *seen.lock().expect("seen lock should not be poisoned"),
+            vec![101]
+        );
+    }
 }
