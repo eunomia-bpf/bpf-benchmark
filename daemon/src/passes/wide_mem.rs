@@ -1595,9 +1595,9 @@ mod tests {
         assert!(result.changed, "stack-based site should still apply");
         assert_eq!(result.sites_applied, 1);
         assert_eq!(
-            result.sites_skipped.iter().filter(|s| s.reason.contains("non-stack base")).count(),
+            result.sites_skipped.iter().filter(|s| s.reason.contains("packet pointer") || s.reason.contains("non-stack base")).count(),
             1,
-            "one site should be skipped for non-stack base in XDP"
+            "one site should be skipped for likely packet pointer in XDP"
         );
     }
 }
