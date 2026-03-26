@@ -16,10 +16,13 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-try:
-    from benchmark_catalog import CONFIG_PATH, ROOT_DIR, RuntimeSpec, SuiteSpec, load_suite
-except ImportError:
-    from micro.benchmark_catalog import CONFIG_PATH, ROOT_DIR, RuntimeSpec, SuiteSpec, load_suite
+from runner.libs.catalog import (
+    DEFAULT_MICRO_MANIFEST as CONFIG_PATH,
+    REPO_ROOT as ROOT_DIR,
+    CatalogManifest as SuiteSpec,
+    CatalogRuntime as RuntimeSpec,
+    load_manifest as load_suite,
+)
 
 from runner.libs import smoke_output_path
 from runner.libs.batch_runner import run_batch_runner
@@ -279,19 +282,20 @@ def list_suite(suite: SuiteSpec) -> None:
     print()
     print("Runtimes")
     print("--------")
-    for runtime in suite.runtimes.values():
+    for runtime in suite.runtimes:
         aliases = f" (aliases: {', '.join(runtime.aliases)})" if runtime.aliases else ""
         print(f"{runtime.name:12} {runtime.label}{aliases}")
 
 
 def select_runtimes(names: list[str] | None, suite: SuiteSpec) -> list[RuntimeSpec]:
     requested = names or list(suite.defaults.runtimes)
+    runtimes_by_name = {runtime.name: runtime for runtime in suite.runtimes}
     selected: list[RuntimeSpec] = []
     for raw_name in requested:
         name = suite.runtime_aliases.get(raw_name, raw_name)
-        if name not in suite.runtimes:
+        if name not in runtimes_by_name:
             raise SystemExit(f"unknown runtime: {raw_name}")
-        selected.append(suite.runtimes[name])
+        selected.append(runtimes_by_name[name])
     return selected
 
 
@@ -633,7 +637,11 @@ def main(argv: list[str] | None = None) -> int:
             "turbo_state": read_optional_text("/sys/devices/system/cpu/intel_pstate/no_turbo"),
             "perf_event_paranoid": read_optional_text("/proc/sys/kernel/perf_event_paranoid"),
         },
-        "toolchains": {name: {"root": str(toolchain.root)} for name, toolchain in suite.toolchains.items()},
+        "toolchains": {
+            name: {"root": str(spec.get("root"))}
+            for name, spec in ((suite.metadata.get("toolchains") or {}).items())
+            if isinstance(spec, dict)
+        },
         "build": {
             "runner_binary": str(suite.build.runner_binary),
             "bpftool_binary": str(suite.build.bpftool_binary),

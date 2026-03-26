@@ -9,7 +9,7 @@ namespace {
 int run_single_shot(const cli_options &options)
 {
     if (options.command == "list-programs") {
-        print_program_inventory(list_programs(options.program));
+        print_program_listing(list_programs(options.program));
         return 0;
     }
     if (options.command == "run-llvmbpf") {
@@ -46,7 +46,7 @@ int run_keep_alive_loop()
             return 0;
         }
         if (request.cmd == "list-programs") {
-            print_program_inventory(list_programs(request.options.program));
+            print_program_listing(list_programs(request.options.program));
             std::cout.flush();
             continue;
         }

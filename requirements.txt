@@ -1,7 +1,7 @@
-# Core dependency — required for benchmark orchestration (benchmark_catalog.py, policy_utils.py, etc.)
+# Core dependency — required for benchmark orchestration (runner/libs/catalog.py, policy_utils.py, etc.)
 pyyaml>=6.0
 
-# Required for corpus ELF analysis helpers (generate_default_policies.py, runner/libs/inventory.py)
+# Required for corpus ELF analysis helpers (generate_default_policies.py, runner/libs/object_discovery.py)
 pyelftools>=0.29
 
 # Required for figure generation and statistical analysis (generate_figures.py)

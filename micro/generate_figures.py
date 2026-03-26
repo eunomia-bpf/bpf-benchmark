@@ -26,11 +26,8 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-try:
-    from runner.libs.catalog import DEFAULT_MICRO_MANIFEST, ManifestSpec, load_manifest, load_manifest_from_results
-except ModuleNotFoundError:
-    from runner.libs.catalog import DEFAULT_MICRO_MANIFEST, ManifestSpec, load_manifest, load_manifest_from_results
-from runner.libs import authoritative_candidates, latest_output_path
+from runner.libs.catalog import DEFAULT_MICRO_MANIFEST, ManifestSpec, load_manifest, load_manifest_from_results
+from runner.libs import latest_output_path
 
 
 plt.rcParams.update(
@@ -54,48 +51,9 @@ plt.rcParams.update(
 MICRO_DIR = Path(__file__).resolve().parent
 RESULTS_DIR = MICRO_DIR / "results"
 FIGURES_DIR = RESULTS_DIR / "figures"
-DEFAULT_MICRO_CATALOG = load_manifest(DEFAULT_MICRO_MANIFEST) if DEFAULT_MICRO_MANIFEST.exists() else None
-PURE_JIT_RESULTS_CANDIDATES = (
-    DEFAULT_MICRO_CATALOG.defaults.output if DEFAULT_MICRO_CATALOG is not None else latest_output_path(RESULTS_DIR, "pure_jit"),
-    *authoritative_candidates(RESULTS_DIR, "pure_jit"),
-)
-CAUSAL_RESULTS_CANDIDATES = (
-    *tuple(sorted(RESULTS_DIR.glob("causal_isolation_authoritative_*.json"), reverse=True)),
-    *tuple(sorted(RESULTS_DIR.glob("pure_jit_with_cmov_authoritative_*.json"), reverse=True)),
-    DEFAULT_MICRO_CATALOG.defaults.output if DEFAULT_MICRO_CATALOG is not None else latest_output_path(RESULTS_DIR, "pure_jit"),
-    latest_output_path(RESULTS_DIR, "pure_jit"),
-)
-
-
-def first_existing_path(candidates: Iterable[Path]) -> Path:
-    candidate_list = tuple(candidates)
-    for candidate in candidate_list:
-        if candidate.exists():
-            return candidate
-    return candidate_list[0]
-
-
-def most_complete_results_path(candidates: Iterable[Path]) -> Path:
-    candidate_list = tuple(candidates)
-    existing = [candidate for candidate in candidate_list if candidate.exists()]
-    if not existing:
-        return candidate_list[0]
-
-    def benchmark_count(path: Path) -> int:
-        try:
-            payload = json.loads(path.read_text())
-        except Exception:
-            return -1
-        benchmarks = payload.get("benchmarks")
-        if not isinstance(benchmarks, list):
-            return -1
-        return len(benchmarks)
-
-    return max(existing, key=lambda path: (benchmark_count(path), path.stat().st_mtime_ns))
-
-
-PURE_JIT_RESULTS = most_complete_results_path(PURE_JIT_RESULTS_CANDIDATES)
-CAUSAL_RESULTS = first_existing_path(CAUSAL_RESULTS_CANDIDATES)
+DEFAULT_MICRO_CATALOG = load_manifest(DEFAULT_MICRO_MANIFEST)
+PURE_JIT_RESULTS = DEFAULT_MICRO_CATALOG.defaults.output
+CAUSAL_RESULTS = latest_output_path(RESULTS_DIR, "causal_isolation")
 CATEGORY_DISPLAY = {
     "baseline": {"label": "baseline", "color": "#4E79A7"},
     "alu-mix": {"label": "alu\nmix", "color": "#F28E2B"},

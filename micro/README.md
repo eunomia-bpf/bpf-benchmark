@@ -11,7 +11,7 @@
 ## Directory Layout
 
 - `driver.py`: consolidated micro suite driver; `python3 micro/driver.py suite ...` is the canonical entrypoint
-- `benchmark_catalog.py`: suite YAML parser for micro manifests
+- `../runner/libs/catalog.py`: shared suite YAML parser for micro and corpus manifests
 - `input_generators.py`: deterministic input generation for active benchmarks
 - `summarize_rq.py`, `generate_figures.py`: active reporting utilities
 - `../runner/`: shared C++ runner plus reusable Python libs for `micro/`, `corpus/`, and `e2e/`

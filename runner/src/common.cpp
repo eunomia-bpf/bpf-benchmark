@@ -960,7 +960,7 @@ void print_json(const std::vector<sample_result> &samples)
     }
 }
 
-void print_program_inventory(const std::vector<program_descriptor> &programs)
+void print_program_listing(const std::vector<program_descriptor> &programs)
 {
     std::cout << "[";
     for (size_t index = 0; index < programs.size(); ++index) {

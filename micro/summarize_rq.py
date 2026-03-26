@@ -17,31 +17,13 @@ from runner.libs.catalog import (
     load_manifest_from_results,
 )
 from runner.libs.reporting import render_corpus_summary_markdown, render_rq_summary_markdown
-from runner.libs import authoritative_candidates
-
-
-MICRO_DIR = REPO_ROOT / "micro"
-RESULTS_DIR = MICRO_DIR / "results"
-
-
-def first_existing_path(candidates: tuple[Path, ...]) -> Path:
-    for candidate in candidates:
-        if candidate.exists():
-            return candidate
-    return candidates[0]
-
-
-def default_results_candidates() -> tuple[Path, ...]:
-    candidates: list[Path] = []
-    if DEFAULT_MICRO_MANIFEST.exists():
-        manifest = load_manifest(DEFAULT_MICRO_MANIFEST)
-        candidates.append(manifest.defaults.output)
-    candidates.extend(authoritative_candidates(RESULTS_DIR, "pure_jit"))
-    return tuple(candidates)
+DEFAULT_RESULTS_PATH = load_manifest(DEFAULT_MICRO_MANIFEST).defaults.output
 
 
 def default_results_path() -> Path:
-    return first_existing_path(default_results_candidates())
+    if DEFAULT_RESULTS_PATH is None:
+        raise SystemExit(f"default micro manifest has no output path: {DEFAULT_MICRO_MANIFEST}")
+    return DEFAULT_RESULTS_PATH
 
 
 def parse_args() -> argparse.Namespace:

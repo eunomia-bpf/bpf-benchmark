@@ -60,14 +60,6 @@ def smoke_output_path(results_dir: Path, suite: str, *, stamp: str | None = None
 def latest_output_path(results_dir: Path, suite: str) -> Path:
     return results_dir / f"{suite}.latest.json"
 
-
-def authoritative_candidates(results_dir: Path, suite: str) -> tuple[Path, ...]:
-    latest = latest_output_path(results_dir, suite)
-    dated = tuple(sorted(results_dir.glob(f"{suite}_authoritative_*.json"), reverse=True))
-    return (latest, *dated)
-
-
-
 def tail_text(text: str, *, max_lines: int = 12, max_chars: int = 4000) -> str:
     lines = [line.rstrip() for line in text.splitlines() if line.strip()]
     if len(lines) > max_lines:
@@ -226,7 +218,6 @@ __all__ = [
     "DEFAULT_VENV_ACTIVATE",
     "RESULTS_DIR",
     "ROOT_DIR",
-    "authoritative_candidates",
     "authoritative_output_path",
     "ensure_parent",
     "latest_output_path",

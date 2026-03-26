@@ -50,11 +50,7 @@ from e2e.case_common import (  # noqa: E402
     persist_results,
 )
 
-try:  # noqa: E402
-    from runner.libs.inventory import discover_object_programs
-except ModuleNotFoundError:  # noqa: E402
-    sys.path.insert(0, str(ROOT_DIR / "micro"))
-    from runner.libs.inventory import discover_object_programs
+from runner.libs.object_discovery import discover_object_programs  # noqa: E402
 
 
 DEFAULT_SETUP_SCRIPT = Path(__file__).with_name("setup.sh")
@@ -660,7 +656,7 @@ def inspect_object_program(
         "error": "",
     }
     try:
-        inventory = discover_object_programs(runner_binary, object_path)
+        program_listing = discover_object_programs(runner_binary, object_path)
     except Exception as exc:
         result["error"] = str(exc)
         return result
@@ -672,9 +668,9 @@ def inspect_object_program(
             "attach_type_name": entry.attach_type_name,
             "insn_count": entry.insn_count,
         }
-        for entry in inventory
+        for entry in program_listing
     ]
-    for entry in inventory:
+    for entry in program_listing:
         if entry.name != program_name:
             continue
         result["selected_program"] = {
@@ -2162,13 +2158,13 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
 
     server_binary = resolve_katran_server_binary(args.katran_server_binary, setup_result)
     kernel_config = read_kernel_config(Path(args.kernel_config).resolve())
-    object_inventory = inspect_object_program(runner_binary, katran_object, DEFAULT_PROGRAM_NAME)
+    object_program_listing = inspect_object_program(runner_binary, katran_object, DEFAULT_PROGRAM_NAME)
 
     limitations: list[str] = []
     if setup_result["returncode"] != 0:
         limitations.append("Setup script returned non-zero; case continued because required tools were already available.")
-    if object_inventory.get("selected_program") is None:
-        limitations.append("Object inventory could not confirm balancer_ingress; continuing with direct load based on the pinned name.")
+    if object_program_listing.get("selected_program") is None:
+        limitations.append("Object program listing could not confirm balancer_ingress; continuing with direct load based on the pinned name.")
     if not kernel_config.get("net_ipip_enabled"):
         limitations.append("CONFIG_NET_IPIP is not enabled in vendor/linux-framework/.config.")
     if not kernel_config.get("dummy_enabled"):
@@ -2329,7 +2325,7 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
         "setup": setup_result,
         "host": host_metadata(),
         "kernel_config": kernel_config,
-        "object_inventory": object_inventory,
+        "object_program_listing": object_program_listing,
         "topology": topology_metadata,
         "map_configuration": map_config,
         "test_run_validation": test_run_validation,

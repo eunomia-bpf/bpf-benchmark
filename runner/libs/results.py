@@ -84,7 +84,6 @@ class UnifiedResultRecord:
     transport: str = "local"
     manifest: str | None = None
     host: Mapping[str, object] | None = None
-    inventory: Mapping[str, object] | None = None
     artifacts: Mapping[str, object] | None = None
     compile: Mapping[str, object] | None = None
     execution: Mapping[str, object] | None = None

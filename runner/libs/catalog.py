@@ -47,6 +47,7 @@ class CatalogRuntime:
     mode: str
     backend: str
     policy_mode: str
+    default_repeat: int | None = None
     transport: str = "local"
     aliases: tuple[str, ...] = ()
 
@@ -105,6 +106,14 @@ class CatalogTarget:
     transports: tuple[str, ...] = ()
     metadata: Mapping[str, object] = field(default_factory=dict)
 
+    @property
+    def program_object(self) -> Path:
+        return self.object_path
+
+    @property
+    def kernel_input_size(self) -> int:
+        return int(self.input_size or 0)
+
 
 @dataclass(frozen=True, slots=True)
 class CatalogBuild:
@@ -134,6 +143,10 @@ class CatalogManifest:
     @property
     def targets_by_name(self) -> Mapping[str, CatalogTarget]:
         return {target.name: target for target in self.targets}
+
+    @property
+    def benchmarks(self) -> Mapping[str, CatalogTarget]:
+        return self.targets_by_name
 
     @property
     def analysis(self) -> AnalysisSpec:
@@ -182,7 +195,11 @@ def _normalize_commands(raw_commands: Mapping[str, Sequence[str]] | None) -> dic
     return {str(name): tuple(str(token) for token in command) for name, command in raw_commands.items()}
 
 
-def _load_runtimes(raw_runtimes: Sequence[Mapping[str, Any]]) -> tuple[tuple[CatalogRuntime, ...], dict[str, str]]:
+def _load_runtimes(
+    raw_runtimes: Sequence[Mapping[str, Any]],
+    *,
+    default_repeat: int | None = None,
+) -> tuple[tuple[CatalogRuntime, ...], dict[str, str]]:
     runtimes: list[CatalogRuntime] = []
     aliases: dict[str, str] = {}
     seen_names: set[str] = set()
@@ -198,6 +215,7 @@ def _load_runtimes(raw_runtimes: Sequence[Mapping[str, Any]]) -> tuple[tuple[Cat
             mode=mode,
             backend=_backend_for_runtime(mode),
             policy_mode=_policy_mode_for_runtime(name, mode),
+            default_repeat=int(entry.get("repeat", default_repeat)) if entry.get("repeat", default_repeat) is not None else None,
             transport=str(entry.get("transport", "local")),
             aliases=tuple(str(alias) for alias in entry.get("aliases", ())),
         )
@@ -231,7 +249,8 @@ def _load_micro_catalog(path: Path, data: Mapping[str, Any]) -> CatalogManifest:
     raw_runtimes = data.get("runtimes")
     if not isinstance(raw_runtimes, Sequence) or not raw_runtimes:
         raise ValueError("micro manifest missing runtimes[]")
-    runtimes, aliases = _load_runtimes(raw_runtimes)
+    default_repeat = int(defaults_raw["repeat"]) if defaults_raw.get("repeat") is not None else None
+    runtimes, aliases = _load_runtimes(raw_runtimes, default_repeat=default_repeat)
     runtime_backends = tuple(sorted({runtime.backend for runtime in runtimes}))
     runtime_policy_modes = tuple(sorted({runtime.policy_mode for runtime in runtimes}))
     runtime_transports = tuple(sorted({runtime.transport for runtime in runtimes}))
@@ -270,7 +289,7 @@ def _load_micro_catalog(path: Path, data: Mapping[str, Any]) -> CatalogManifest:
         defaults=DefaultsSpec(
             iterations=int(defaults_raw["iterations"]) if defaults_raw.get("iterations") is not None else None,
             warmups=int(defaults_raw["warmups"]) if defaults_raw.get("warmups") is not None else None,
-            repeat=int(defaults_raw["repeat"]) if defaults_raw.get("repeat") is not None else None,
+            repeat=default_repeat,
             runtimes=tuple(str(runtime) for runtime in defaults_raw.get("runtimes", ())),
             output=_resolve_path(defaults_raw.get("output"), root_dir),
             raw=defaults_raw,
@@ -377,14 +396,11 @@ load_manifest = load_catalog
 
 def load_manifest_from_results(
     results: Mapping[str, object],
-) -> ManifestSpec | None:
+) -> ManifestSpec:
     manifest_path = results.get("manifest")
     if not isinstance(manifest_path, str) or not manifest_path:
-        return None
-    try:
-        return load_catalog(manifest_path)
-    except Exception:
-        return None
+        raise ValueError("results payload missing manifest path")
+    return load_catalog(manifest_path)
 
 
 __all__ = [

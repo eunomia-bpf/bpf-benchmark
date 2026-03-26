@@ -563,8 +563,7 @@ ensure_benchmark_bundle() {
     make -C "$ROOT_DIR/micro" programs >/dev/null
 
     require_local_path "$ROOT_DIR/micro/driver.py" "micro driver"
-    require_local_path "$ROOT_DIR/micro/benchmark_catalog.py" "micro benchmark catalog"
-    require_local_path "$ROOT_DIR/micro/results_layout.py" "micro results layout"
+    require_local_path "$ROOT_DIR/runner/libs/catalog.py" "shared benchmark catalog"
     require_local_path "$ROOT_DIR/micro/config/micro_pure_jit.yaml" "micro suite manifest"
     require_local_path "$ROOT_DIR/micro/programs/simple.bpf.o" "simple micro object"
     require_local_path "$ROOT_DIR/runner/libs/__init__.py" "runner python helpers"

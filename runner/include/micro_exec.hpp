@@ -189,7 +189,7 @@ void print_json(std::ostream &out, const sample_result &sample);
 void print_json(std::ostream &out, const std::vector<sample_result> &samples);
 void print_json(const sample_result &sample);
 void print_json(const std::vector<sample_result> &samples);
-void print_program_inventory(const std::vector<program_descriptor> &programs);
+void print_program_listing(const std::vector<program_descriptor> &programs);
 perf_counter_capture measure_perf_counters(
     const perf_counter_options &options,
     const std::function<void()> &callback);

@@ -479,7 +479,7 @@ def stage_macro_objects(
     macro_corpus_yaml: Path,
     build_root: Path,
     selected_repos: set[str],
-    compiled_objects: set[str],
+    built_objects: set[str],
 ) -> list[dict[str, Any]]:
     records: list[dict[str, Any]] = []
     for raw_path, metadata in sorted(load_macro_object_paths(macro_corpus_yaml).items()):
@@ -487,7 +487,7 @@ def stage_macro_objects(
         repo_name = infer_macro_repo_name(object_path, build_root)
         if selected_repos and repo_name not in selected_repos:
             continue
-        if raw_path in compiled_objects:
+        if raw_path in built_objects:
             continue
         exists = object_path.exists()
         records.append(
@@ -524,14 +524,14 @@ def compute_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
     by_repo: dict[str, Counter[str]] = defaultdict(Counter)
     stage_failures = Counter()
     error_breakdown = Counter()
-    compiled_objects: list[str] = []
+    built_objects: list[str] = []
     available_objects: list[str] = []
 
     for record in records:
         status = str(record["status"])
         by_repo[str(record["repo"])][status] += 1
         if status == "ok":
-            compiled_objects.append(str(record["object_path"]))
+            built_objects.append(str(record["object_path"]))
             available_objects.append(str(record["object_path"]))
             continue
         if status == "existing":
@@ -542,11 +542,10 @@ def compute_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
 
     return {
         "sources_total": len(records),
-        "built_ok": len(compiled_objects),
-        "staged_existing": len(available_objects) - len(compiled_objects),
+        "built_ok": len(built_objects),
+        "staged_existing": len(available_objects) - len(built_objects),
         "available_total": len(available_objects),
         "compiled_failed": len(records) - len(available_objects),
-        "compiled_objects": compiled_objects,
         "available_objects": available_objects,
         "per_repo": {repo: dict(counter) for repo, counter in sorted(by_repo.items())},
         "failure_stage_breakdown": dict(stage_failures),
@@ -698,7 +697,7 @@ def main() -> int:
                 if record["status"] not in {"ok", "existing"}:
                     print(f"        {summarize_error(record.get('error'))}")
 
-    compiled_objects = {
+    built_objects = {
         str(Path(record["object_path"]).resolve())
         for record in records
         if record["status"] == "ok" and record.get("object_path")
@@ -708,7 +707,7 @@ def main() -> int:
             macro_corpus_yaml=macro_corpus_yaml,
             build_root=build_root,
             selected_repos=selected_repos,
-            compiled_objects=compiled_objects,
+            built_objects=built_objects,
         )
     )
     records.sort(key=lambda record: (str(record["repo"]), str(record["relative_path"])))

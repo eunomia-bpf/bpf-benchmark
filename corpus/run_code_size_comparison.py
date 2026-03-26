@@ -26,7 +26,6 @@ DEFAULT_RUNNER = ROOT_DIR / "runner" / "build" / "micro_exec"
 DEFAULT_PACKET_PATH = ROOT_DIR / "micro" / "generated-inputs" / "corpus_dummy_packet_64.bin"
 DEFAULT_CONTEXT_PATH = ROOT_DIR / "micro" / "generated-inputs" / "corpus_dummy_context_64.bin"
 DEFAULT_TIMEOUT_SECONDS = 180
-DEFAULT_REFERENCE_INVENTORY = ROOT_DIR / "corpus" / "config" / "macro_corpus.yaml"
 DEFAULT_VM_KERNEL_IMAGE = ROOT_DIR / "vendor" / "linux-framework" / "arch" / "x86" / "boot" / "bzImage"
 DEFAULT_OBJECT_ROOT_CANDIDATES = (
     ROOT_DIR / "corpus" / "expanded_corpus",
@@ -99,8 +98,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Optional cap for program-level smoke testing.",
     )
     parser.add_argument(
-        "--reference-inventory",
-        default=str(DEFAULT_REFERENCE_INVENTORY),
+        "--reference-loadability-report",
         help="Optional runnability JSON used only for report context.",
     )
     parser.add_argument(
@@ -111,7 +109,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Only perform baseline compile-only loadability inventory; skip REJIT measurements.",
+        help="Only perform baseline compile-only loadability report generation; skip REJIT measurements.",
     )
     return parser.parse_args(argv)
 
@@ -693,7 +691,7 @@ def measurement_status(record: dict[str, Any], *, dry_run: bool) -> str:
     if not is_loadable(record):
         return "load_failed"
     if dry_run:
-        return "loadable_inventory"
+        return "loadable_only"
     if not (rejit_compile_result(record) or {}).get("ok"):
         return "rejit_load_failed"
     meta = rejit_meta(record)
@@ -735,7 +733,7 @@ def markdown_table(headers: list[str], rows: list[list[Any]]) -> list[str]:
     return lines
 
 
-def load_reference_inventory(path: Path) -> dict[str, Any] | None:
+def load_reference_loadability_report(path: Path) -> dict[str, Any] | None:
     if not path.exists():
         return None
     try:
@@ -903,7 +901,7 @@ def build_markdown(payload: dict[str, Any]) -> str:
         "# Code Size by Program Type",
         "",
         f"- Generated: {payload['generated_at']}",
-        f"- Mode: `{'dry-run inventory' if payload['dry_run'] else 'actual measurement attempt'}`",
+        f"- Mode: `{'dry-run report' if payload['dry_run'] else 'actual measurement attempt'}`",
         f"- Kernel release: `{payload['host']['kernel_release']}`",
         f"- Host: `{payload['host']['hostname']}`",
         f"- Runner: `{payload['runner_binary']}`",
@@ -915,10 +913,10 @@ def build_markdown(payload: dict[str, Any]) -> str:
             "- Missing object roots skipped: "
             + ", ".join(f"`{item}`" for item in payload["object_roots"]["missing"])
         )
-    if payload.get("reference_inventory"):
-        ref = payload["reference_inventory"]
+    if payload.get("reference_loadability_report"):
+        ref = payload["reference_loadability_report"]
         lines.append(
-            f"- Reference runnability inventory: `{relpath(ref['path'])}` "
+            f"- Reference runnability report: `{relpath(ref['path'])}` "
             f"(programs_found={ref.get('programs_found')}, loadable_programs={ref.get('loadable_programs')})"
         )
     lines.extend(
@@ -1065,7 +1063,7 @@ def build_markdown(payload: dict[str, Any]) -> str:
     if summary["support_status"] != "supported":
         lines.extend(
             [
-                "- This host did not provide usable REJIT measurements, so the report should be treated as loadability inventory plus failure diagnostics.",
+                "- This host did not provide usable REJIT measurements, so the report should be treated as a loadability report plus failure diagnostics.",
                 f"- VM rerun command: `{vm_command}`",
             ]
         )
@@ -1132,7 +1130,9 @@ def main(argv: list[str] | None = None) -> int:
     runner = Path(args.runner).resolve()
     output_json = Path(args.output_json).resolve()
     output_md = Path(args.output_md).resolve()
-    reference_inventory = load_reference_inventory(Path(args.reference_inventory).resolve())
+    reference_loadability_report = None
+    if args.reference_loadability_report:
+        reference_loadability_report = load_reference_loadability_report(Path(args.reference_loadability_report).resolve())
 
     if not runner.exists():
         raise SystemExit(f"runner not found: {runner}")
@@ -1243,7 +1243,7 @@ def main(argv: list[str] | None = None) -> int:
     payload = {
         "dataset": "corpus_code_size_by_prog_type",
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "mode": "dry_run_inventory" if args.dry_run else "actual_measurement_attempt",
+        "mode": "dry_run_report" if args.dry_run else "actual_measurement_attempt",
         "dry_run": args.dry_run,
         "repo_root": str(ROOT_DIR),
         "runner_binary": str(runner),
@@ -1252,7 +1252,7 @@ def main(argv: list[str] | None = None) -> int:
             "used": [relpath(path) for path in used_roots],
             "missing": [relpath(path) for path in missing_roots],
         },
-        "reference_inventory": reference_inventory,
+        "reference_loadability_report": reference_loadability_report,
         "host": {
             "hostname": platform.node(),
             "platform": platform.platform(),

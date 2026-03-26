@@ -6,7 +6,7 @@ import statistics
 from dataclasses import dataclass
 from typing import Mapping, Sequence
 
-from .catalog import DEFAULT_MICRO_MANIFEST, ManifestSpec, load_manifest_from_results
+from .catalog import ManifestSpec, load_manifest_from_results
 
 
 PRIMARY_RUNTIME = "llvmbpf"

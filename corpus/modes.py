@@ -72,6 +72,7 @@ DEFAULT_VNG_MACHINE = resolve_machine(target=DEFAULT_VM_TARGET, action="vm-corpu
 DEFAULT_VNG = str(Path(DEFAULT_VNG_MACHINE.executable))
 DEFAULT_REPEAT = 200
 DEFAULT_TIMEOUT_SECONDS = 240
+GUEST_BATCH_TARGETS_PER_CHUNK = 32
 
 
 def parse_packet_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -883,35 +884,47 @@ def run_guest_batch_mode(args: argparse.Namespace) -> int:
     if guest_result_path is not None:
         write_guest_batch_records(guest_result_path, records)
 
-    try:
-        built_records, _batch_result = run_targets_locally_batch(
-            targets=targets,
-            runner=runner,
-            daemon=daemon,
-            repeat=args.repeat,
-            timeout_seconds=args.timeout,
-            execution_mode="vm",
-            btf_custom_path=btf_custom_path,
-            enable_recompile=True,
-            enable_exec=True,
-            skip_families=skip_families,
-            blind_apply=args.blind_apply,
-        )
-    except Exception as exc:
-        print(traceback.format_exc(), file=sys.stderr, flush=True)
-        built_records = []
-        for target in targets:
-            record = build_empty_record(target, "vm")
-            record["record_error"] = f"guest batch exception: {exc}"
-            built_records.append(record)
+    active_daemon_socket: str | None = None
+    daemon_proc: subprocess.Popen[str] | None = None
+    if targets:
+        active_daemon_socket = f"/tmp/bpfrejit-guest-{os.getpid()}.sock"
+        daemon_proc = start_daemon_server(daemon, active_daemon_socket)
 
-    for index, record in enumerate(built_records, start=1):
-        records.append(sanitize_guest_batch_record(record))
-        if guest_result_path is not None:
-            write_guest_batch_records(guest_result_path, records)
-            emit_guest_event("program_progress", index=index, total=len(targets))
-        else:
-            emit_guest_event("program_record", index=index, total=len(targets), record=record)
+    try:
+        for chunk_start in range(0, len(targets), GUEST_BATCH_TARGETS_PER_CHUNK):
+            target_chunk = targets[chunk_start : chunk_start + GUEST_BATCH_TARGETS_PER_CHUNK]
+            try:
+                built_records, _batch_result = run_targets_locally_batch(
+                    targets=target_chunk,
+                    runner=runner,
+                    daemon=daemon,
+                    repeat=args.repeat,
+                    timeout_seconds=args.timeout,
+                    execution_mode="vm",
+                    btf_custom_path=btf_custom_path,
+                    enable_recompile=True,
+                    enable_exec=True,
+                    skip_families=skip_families,
+                    blind_apply=args.blind_apply,
+                    daemon_socket=active_daemon_socket,
+                )
+            except Exception as exc:
+                print(traceback.format_exc(), file=sys.stderr, flush=True)
+                built_records = []
+                for target in target_chunk:
+                    record = build_empty_record(target, "vm")
+                    record["record_error"] = f"guest batch exception: {exc}"
+                    built_records.append(record)
+
+            for index, record in enumerate(built_records, start=chunk_start + 1):
+                records.append(sanitize_guest_batch_record(record))
+                if guest_result_path is not None:
+                    write_guest_batch_records(guest_result_path, records)
+                    emit_guest_event("program_progress", index=index, total=len(targets))
+                else:
+                    emit_guest_event("program_record", index=index, total=len(targets), record=record)
+    finally:
+        stop_daemon_server(daemon_proc, active_daemon_socket if daemon_proc is not None else None)
     return 0
 
 
@@ -1530,6 +1543,7 @@ def build_markdown(data: dict[str, Any]) -> str:
             "- Default steady-state semantics: the daemon is always started and tries to optimize each program; programs with no applicable sites stay on stock JIT.",
             "- `--blind-apply` switches from per-program policy mode to unconditional daemon auto-scan REJIT.",
             "- Per-program pass columns are the raw `passes_applied` lists emitted by the runner; the summary above only adds basic pass counts.",
+            "- Guest batch execution writes records incrementally while keeping one guest boot and one daemon session for the full corpus run.",
             "- The Make-driven `vm-corpus` path is strict VM-only: guest batch failures fail the run instead of falling back to host execution.",
         ]
     )

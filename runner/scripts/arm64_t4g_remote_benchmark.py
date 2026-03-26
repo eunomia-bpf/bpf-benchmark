@@ -19,7 +19,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from micro.benchmark_catalog import load_suite as load_micro_suite
+from runner.libs.catalog import DEFAULT_MICRO_MANIFEST, load_manifest as load_micro_suite
 from runner.libs.benchmarks import resolve_memory_file
 from runner.libs.rejit import apply_daemon_rejit, scan_programs
 
@@ -245,7 +245,6 @@ def run_llvmbpf_vs_kernel(
         [
             sys.executable,
             str(REPO_ROOT / "micro" / "driver.py"),
-            "suite",
             "--runtime",
             "llvmbpf",
             "--runtime",
@@ -279,7 +278,7 @@ def run_daemon_stock_vs_rejit(
     cpu: str,
     results_dir: Path,
 ) -> dict[str, Any]:
-    suite = load_micro_suite()
+    suite = load_micro_suite(DEFAULT_MICRO_MANIFEST)
     packet_dir = results_dir / "packets"
     packet_dir.mkdir(parents=True, exist_ok=True)
     benchmarks: list[dict[str, Any]] = []
