@@ -24,6 +24,10 @@ int run_single_shot(const cli_options &options)
         print_json(run_kernel(options));
         return 0;
     }
+    if (options.command == "run-kernel-attach") {
+        print_json(run_kernel_attach(options));
+        return 0;
+    }
     fail("unknown command: " + options.command);
 }
 
@@ -62,6 +66,15 @@ int run_keep_alive_loop()
             }
             // Keep-alive mode is strictly request/response, so return the final
             // measured sample for multi-phase kernel REJIT runs.
+            print_json(samples.back());
+            std::cout.flush();
+            continue;
+        }
+        if (request.options.command == "run-kernel-attach") {
+            auto samples = run_kernel_attach(request.options);
+            if (samples.empty()) {
+                fail("run-kernel-attach produced no samples");
+            }
             print_json(samples.back());
             std::cout.flush();
             continue;

@@ -1019,7 +1019,9 @@ void validate_batch_job(const batch_job &job)
         if (job.options.program.empty()) {
             fail("batch job is missing program path: " + job.id);
         }
-        if (job.options.command != "run-kernel" && job.options.command != "run-llvmbpf") {
+        if (job.options.command != "run-kernel" &&
+            job.options.command != "run-kernel-attach" &&
+            job.options.command != "run-llvmbpf") {
             fail("unsupported batch job command for job " + job.id + ": " + job.options.command);
         }
         if (job.options.io_mode != "map" &&
@@ -1111,6 +1113,13 @@ batch_job parse_job(const YAML::Node &node, size_t index)
     } else if (runtime == "kernel-rejit") {
         options.command = "run-kernel";
         options.rejit = true;
+    } else if (runtime == "kernel-attach") {
+        options.command = "run-kernel-attach";
+        options.attach_mode = true;
+    } else if (runtime == "kernel-attach-rejit") {
+        options.command = "run-kernel-attach";
+        options.attach_mode = true;
+        options.rejit = true;
     } else {
         fail("unsupported batch runtime for job " + job.id + ": " + runtime);
     }
@@ -1141,6 +1150,9 @@ batch_job parse_job(const YAML::Node &node, size_t index)
     options.dump_jit = optional_bool(node, "dump_jit", false);
     options.dump_xlated = optional_path(node, "dump_xlated");
     options.compile_only = optional_bool(node, "compile_only", false);
+    options.attach_mode = optional_bool(node, "attach_mode", options.attach_mode);
+    options.workload_iterations = optional_u32(node, "workload_iterations", options.workload_iterations);
+    options.workload_type = optional_scalar_string(node, "workload_type", options.workload_type);
     job.options = std::move(options);
 
     validate_batch_job(job);
@@ -1466,6 +1478,8 @@ batch_job_result execute_job(
         }
         if (job.options.command == "run-llvmbpf") {
             result.samples = {run_llvmbpf(job.options)};
+        } else if (job.options.command == "run-kernel-attach") {
+            result.samples = run_kernel_attach(job.options);
         } else if (job.options.command == "run-kernel") {
             if (!job.prepared_ref.empty()) {
                 auto prepared = prepared_store.get(job.prepared_ref);
