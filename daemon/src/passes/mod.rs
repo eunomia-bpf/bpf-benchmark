@@ -6,6 +6,7 @@ mod branch_flip;
 mod bulk_memory;
 mod cond_select;
 mod const_prop;
+mod dangerous_helper_firewall;
 mod dce;
 mod endian;
 mod extract;
@@ -21,6 +22,7 @@ pub use branch_flip::BranchFlipPass;
 pub use bulk_memory::BulkMemoryPass;
 pub use cond_select::CondSelectPass;
 pub use const_prop::ConstPropPass;
+pub use dangerous_helper_firewall::DangerousHelperFirewallPass;
 pub use dce::DcePass;
 pub use endian::EndianFusionPass;
 pub use extract::ExtractPass;
@@ -137,6 +139,12 @@ pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
         description: "Insert speculation barrier kfunc after conditional branches",
         aliases: &[],
         make: || Box::new(SpectreMitigationPass),
+    },
+    PassRegistryEntry {
+        name: "dangerous_helper_firewall",
+        description: "Rewrite or audit dangerous helper calls according to security policy",
+        aliases: &["dangerous_helper"],
+        make: || Box::new(DangerousHelperFirewallPass),
     },
 ];
 

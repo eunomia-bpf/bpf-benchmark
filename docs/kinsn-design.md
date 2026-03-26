@@ -42,6 +42,8 @@ Primary source files:
   - [`daemon/src/kfunc_discovery.rs`](../daemon/src/kfunc_discovery.rs)
   - [`daemon/src/passes/utils.rs`](../daemon/src/passes/utils.rs)
   - [`tests/unittest/rejit_kinsn.c`](../tests/unittest/rejit_kinsn.c)
+- Formal semantics:
+  - [`docs/kinsn-formal-semantics.md`](./kinsn-formal-semantics.md)
 
 Useful higher-level design references:
 

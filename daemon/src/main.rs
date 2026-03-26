@@ -8,6 +8,7 @@ mod analysis;
 mod bpf;
 mod commands;
 mod insn;
+mod invalidation;
 mod kfunc_discovery;
 mod pass;
 mod passes;

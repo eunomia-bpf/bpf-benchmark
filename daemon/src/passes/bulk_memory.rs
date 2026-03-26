@@ -3,9 +3,7 @@
 
 use std::collections::HashSet;
 
-use crate::analysis::{
-    BranchTargetAnalysis, BranchTargetResult, LivenessAnalysis, LivenessResult,
-};
+use crate::analysis::{BranchTargetAnalysis, BranchTargetResult, LivenessAnalysis, LivenessResult};
 use crate::insn::*;
 use crate::pass::*;
 
@@ -216,8 +214,13 @@ impl BpfPass for BulkMemoryPass {
 
             if site_idx < safe_sites.len() && pc == safe_sites[site_idx].start_pc {
                 let site = &safe_sites[site_idx];
-                let replacement =
-                    emit_site_replacement(site, memcpy_btf_id, memcpy_off, memset_btf_id, memset_off);
+                let replacement = emit_site_replacement(
+                    site,
+                    memcpy_btf_id,
+                    memcpy_off,
+                    memset_btf_id,
+                    memset_off,
+                );
                 new_insns.extend_from_slice(&replacement);
                 for j in 1..site.old_len {
                     addr_map[pc + j] = new_pc;
@@ -460,7 +463,8 @@ fn memcpy_lane_at(insns: &[BpfInsn], pc: usize) -> Option<MemcpyLane> {
     if !load.is_ldx_mem() || !is_supported_width(width) {
         return None;
     }
-    if store.class() != BPF_STX || bpf_mode(store.code) != BPF_MEM || bpf_size(store.code) != width {
+    if store.class() != BPF_STX || bpf_mode(store.code) != BPF_MEM || bpf_size(store.code) != width
+    {
         return None;
     }
     if store.src_reg() != load.dst_reg() {
