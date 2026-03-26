@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 //! Concrete pass implementations and pipeline constructors.
 
+pub mod bounds_check_merge;
 mod branch_flip;
 mod cond_select;
 mod const_prop;
@@ -13,6 +14,7 @@ mod spectre;
 pub mod utils;
 mod wide_mem;
 
+pub use bounds_check_merge::BoundsCheckMergePass;
 pub use branch_flip::BranchFlipPass;
 pub use cond_select::CondSelectPass;
 pub use const_prop::ConstPropPass;
@@ -66,6 +68,12 @@ pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
         description: "Remove CFG-unreachable blocks and NOPs after simplification",
         aliases: &[],
         make: || Box::new(DcePass),
+    },
+    PassRegistryEntry {
+        name: "bounds_check_merge",
+        description: "Merge direct packet bounds-check ladders into a dominant guard",
+        aliases: &[],
+        make: || Box::new(BoundsCheckMergePass),
     },
     PassRegistryEntry {
         name: "wide_mem",

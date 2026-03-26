@@ -206,14 +206,14 @@ BpfReJIT 的设计基于三个层次的 insight：
 | **Verifier const prop** | 否 | 🔄 设计完成 | `log_level=2` → tnum/range 常量 → `MOV imm` → branch folding | **23% verifier state 含精确常量；62.5% 分支和立即数比较**。设计：`verifier_constprop_dce_design_20260324.md` |
 | **DCE** | 否 | 🔄 设计完成 | const prop / map inline 后的 unreachable block / dead store 消除。specialization 乘数 | **kernel 已有 `opt_remove_dead_code()`，daemon DCE 让更多条件变常量**。和 #424 同一份设计 |
 | **Bounds check merge** | 否 | 🔄 调研完成 | ~~冗余 check 删除~~ → **guard window merge / hoisting**。合并小窗口为大窗口 | **42 guard sites，严格冗余=0%，但 83.3% 可合并（ladder 结构）**。调研：`bounds_check_elimination_research_20260324.md` |
-| **128-bit LDP/STP** | 是 | 🔄 调研完成 | ARM64 LDP/STP pair load/store + x86 `rep movsb` 路径（和 Bulk memory 合并）。**双架构** | **ARM64 corpus store 对密度高，当前 JIT 完全没 LDP/STP；x86 侧与 Bulk memory kinsn 合并**。调研：`128bit_wide_loadstore_research_20260324.md` |
-| **Bulk memory kinsn** | 是 | 🔄 设计完成 | ~~SIMD~~ → v1 用 `rep movsb/stosb` (x86) / `LDP/STP` (ARM64)，不碰 FPU | **corpus 有 40B/74B/360B/464B 连续 copy/zero run**。设计：`simd_kinsn_design_20260324.md` |
+| **128-bit LDP/STP** | 是 | ✅ 设计完成 | **ARM64**：相邻 load/store pair → `bpf_ldp128`/`bpf_stp128` kinsn → JIT emit LDP/STP，不碰 FPU。**x86**：pair load/store 用 `two mov` 即可（SSE/AVX 不值得——FPU context 开销远大于收益），bulk memcpy 走 `rep movsb`。**论文 story**：同一优化在不同架构有完全不同的 cost model（ARM64 免费 vs x86 需 FPU），体现 platform-aware kinsn 设计价值 | **ARM64 corpus store 对密度高，当前 JIT 完全没 LDP/STP**。设计：`arm64_ldp_stp_kinsn_design_20260326.md`、`x86_128bit_wide_loadstore_design_20260326.md`。调研：`128bit_wide_loadstore_research_20260324.md` |
+| **Bulk memory kinsn** | 是 | 🔄 设计完成 | ~~SIMD~~ → v1 用 `rep movsb/stosb` (x86) / `LDP/STP` (ARM64)，不碰 FPU | **corpus 有 40B/74B/360B/464B 连续 copy/zero run**。设计：`simd_kinsn_design_20260324.md`、`x86_128bit_wide_loadstore_design_20260326.md` |
 | **ADDR_CALC (LEA)** | 可选 | ❌ 低优先级 | mov+shift+add → `bpf_lea()` kinsn → JIT emit LEA | **corpus 仅 14 个严格命中 site（全部 tetragon），ROI 很低**。调研：`addr_calc_lea_research_20260324.md` |
 | **Helper call specialization** | 否/可选 | 🔄 调研完成 | `skb_load_bytes → direct packet access` 优先（纯 bytecode）；`probe_read_kernel` 需 safe-load kinsn | **590 skb_load_bytes + 25296 probe_read_kernel site。结论：skb_load_bytes 最可行，probe_read 风险高**。调研：`helper_call_inlining_research_20260324.md` |
 | **Frozen map inlining** | 否 | ❌ 不做 | BPF_MAP_FREEZE 后只读 map → 常量 MOV | **调研结论：真实 workload 无显式 freeze，hot-path lookup ≈ 0** |
 | **Subprog inline** | 否 | ✅ 调研完成 | bytecode 层展开 subprogram call。**REJIT 元数据 blocker**：UAPI 不接受新 func_info/line_info | **834 调用点 / 67 对象(11.8%)；scx 占 63.7%（531 sites）；中位数 callee 40.5 insns；Phase 1 = leaf+单callsite+≤64insns；路径 C（kernel-side inline）工程风险最低**。调研：`subprog_inline_research_20260326.md` |
 | **Const propagation** | 否 | ↗ 归入 #424 | 利用 frozen map / runtime invariants 做常量折叠 | 归入 verifier const prop |
-| **SIMD (FPU)** | 是 | Phase 2 | AVX2/NEON 仅在 ≥512B(x86)/≥1024B(ARM64) 时启用 | FPU context 开销高，phase 2 only |
+| **SIMD (FPU)** | 是 | ❌ 不进 OSDI 主线 | **x86 SIMD 不做**：`kernel_fpu_begin/end` XSAVE/XRSTOR 开销 ~200-800 cycles，pair load/store 场景下远超收益；**ARM64 NEON 条件性 Phase 2**：仅 ≥1KiB + `may_use_simd()` 成立时考虑，no-FPU `LDP/STP` 优先。Linux crypto 模式（per-operation fpu_begin/end）不适用于 BPF 的细粒度调用 | **深度调研结论：x86 break-even ≥数百字节且需整次 BPF 调用摊销一次 FPU context；corpus 中绝大多数 copy/store ≤128B，不满足条件**。调研：`simd_fpu_kinsn_deep_research_20260326.md` |
 | **Tail-call specialization** | 否 | ✅ 调研完成 | **Phase 1**：dynamic-key monomorphic PIC（guarded constant-key fast path），复用 kernel `map_poke_run()`。**Kernel blocker**：`poke_tab` shape check 需放宽 | **537 sites / 31 对象(5.46%)；Cilium 216、Tetragon 118、Tracee 49；upstream 已有 constant-key direct jump → 论文新意在 dynamic-key PIC；break-even 命中率 ~8%**。调研：`tail_call_specialization_research_20260326.md` |
 | **Spill/fill 消除** | 否 | ❌ 不做 | 冗余 spill/fill 消除 | **内核已有 KF_FASTCALL，增量收益低** |
 
@@ -818,6 +818,30 @@ make clean
 | **482** | **Daemon const_prop typed LD_IMM64 修复（2026-03-25）** | ✅ | **Bug**: `const_prop` 把 typed `LD_IMM64`（`src_reg != 0`，如 `BPF_PSEUDO_MAP_VALUE`）当纯标量折叠，破坏 verifier 可见指针类型信息 → 多个 scx/tracee 程序 REJIT 失败。**修复**：`daemon/src/passes/const_prop.rs` 不再折叠 `src_reg != 0` 的 LD_IMM64 + 回归测试。**验证**：340 daemon tests pass。 |
 | **484** | **内核代码 4 轮审阅（2026-03-25/26）** | ✅ | **审阅方法**：Opus + Codex 分别审阅 `kernel_vs_upstream_diff.patch`（2935 行，13 文件，+1967/-121 vs 上游 `c23719abc`），Opus 最终裁决交叉验证。**确认 7 个必修 HIGH**：(1) `do_misc_fixups` kinsn `insn_buf` 溢出（`max_insn_cnt` 无上界）。(2) `has_callchain_buf` 未 swap。(3) rollback `poke_tab` 裸 `memcpy` 无 `poke_mutex`。(4) unlink 失败时误删 `trampoline_users` 反向索引。(5) ARM64 emit 回调无 scratch buffer。(6) `rejit_scx_debug_prog` 调试残留。(7) rollback trampoline refresh 失败不一致。**确认 4 个误报**：`memcpy(prog->insnsi)` 越界（vmalloc 页对齐正确）、`bpf_arch_text_poke` 参数错（5 参数签名正确）、TRACING 类型缺处理（`trampoline_users` 已覆盖）、`validate_kinsn_proof_seq` `BPF_LD_IMM64`（class 检查避免误判）。**新发现（遗漏）**：`bpf_prog_get_info_by_fd` 持 `rejit_mutex` 执行 `copy_to_user` → page fault 时长时间持锁。**报告**：`docs/tmp/20260325/kernel_review_opus_final_20260325.md`、`kernel_review_codex_final_20260325.md`、`kernel_final_verdict_opus_20260326.md`、`kernel_verify_codex{1,2,3}_20260326.md`。 |
 | **490** | **⚠️ 未调研 pass 补全（2026-03-26）** | ✅ | 6 个 codex 并行调研全部完成。**(1)** Subprog inline：834 调用点/67 对象，scx 占 63.7%，Phase 1 = leaf+单callsite+≤64insns，REJIT 元数据 blocker → `subprog_inline_research_20260326.md`。**(2)** Tail-call specialization：537 sites/31 对象，推荐 dynamic-key PIC（guarded constant-key），kernel poke_tab blocker → `tail_call_specialization_research_20260326.md`。**(3)** 危险 helper 防火墙：91034 helper 调用，权限提升类仅 10 次，Tracee+KubeArmor 占 91.6% 风险 → `dangerous_helper_firewall_research_20260326.md`。**(4)** Corpus 统计：568 对象/2019 程序/3427 bpf2bpf/537 tail_call/59939 dangerous → `corpus_call_statistics_20260326.md` + `.json`。**(5)** BPF 漏洞热修复：45+ CVE 中 31 个适合热补丁，四类模板 → `bpf_live_patching_research_20260326.md`。**(6)** 权限收紧：过权在部署层面非字节码层面，D⊇S⊇N⊇O 模型 → `privilege_narrowing_research_20260326.md`。 |
+| **498a** | Bounds check merge (#442) — 设计文档 | 🔄 | codex 补充实现级设计文档 → `bounds_check_merge_design_20260326.md` |
+| **498b** | Bounds check merge (#442) — TDD 写测试 | 待做 | codex 先写 daemon unit tests |
+| **498c** | Bounds check merge (#442) — 实现 | 待做 | codex 实现 BoundsCheckMergePass，接入 PassManager |
+| **498d** | Bounds check merge (#442) — Review + 测试 + commit | 待做 | codex review + `make daemon-tests` + `make vm-static-test` + commit push + 更新 plan |
+| **498e** | Helper call spec / skb_load_bytes (#444) — 设计文档 | 待做 | 检查/补充实现级设计文档 |
+| **498f** | Helper call spec / skb_load_bytes (#444) — TDD 写测试 | 待做 | codex 先写 daemon unit tests |
+| **498g** | Helper call spec / skb_load_bytes (#444) — 实现 | 待做 | codex 实现 SkbLoadBytesSpecPass |
+| **498h** | Helper call spec / skb_load_bytes (#444) — Review + 测试 + commit | 待做 | codex review + test + commit push + 更新 plan |
+| **498i** | Bulk memory kinsn — 设计文档 | 待做 | 补充实现级设计（daemon pass + kinsn module） |
+| **498j** | Bulk memory kinsn — TDD 写测试 | 待做 | codex 先写 daemon + module tests |
+| **498k** | Bulk memory kinsn — 实现 | 待做 | codex 实现 BulkMemoryPass + x86/arm64 kinsn module |
+| **498l** | Bulk memory kinsn — Review + 测试 + commit | 待做 | codex review + test + commit push + 更新 plan |
+| **498m** | Dynamic map invalidation (#474f) — 设计文档 | 待做 | 补充 invalidation 循环实现设计 |
+| **498n** | Dynamic map invalidation (#474f) — TDD 写测试 | 待做 | codex 先写 daemon unit tests（map 值变化检测 + re-REJIT） |
+| **498o** | Dynamic map invalidation (#474f) — 实现 | 待做 | codex 实现 invalidation watcher + serve/watch 集成 |
+| **498p** | Dynamic map invalidation (#474f) — Review + 测试 + commit | 待做 | codex review + test + commit push + 更新 plan |
+| **498q** | 危险 helper 防火墙 — 设计文档 | 待做 | 基于调研报告补充实现级设计 |
+| **498r** | 危险 helper 防火墙 — TDD 写测试 | 待做 | codex 先写 daemon unit tests（helper 检测 + rewrite + fail-closed） |
+| **498s** | 危险 helper 防火墙 — 实现 | 待做 | codex 实现 DangerousHelperFirewallPass |
+| **498t** | 危险 helper 防火墙 — Review + 测试 + commit | 待做 | codex review + test + commit push + 更新 plan |
+| **498u** | BPF 漏洞热修复 — 设计文档 | 待做 | 基于调研报告补充实现级设计（CVE 签名库 + 补丁模板） |
+| **498v** | BPF 漏洞热修复 — TDD 写测试 | 待做 | codex 先写 daemon unit tests（CVE 匹配 + guard 插入 + re-verify） |
+| **498w** | BPF 漏洞热修复 — 实现 | 待做 | codex 实现 LivePatchPass + CVE 签名框架 |
+| **498x** | BPF 漏洞热修复 — Review + 测试 + commit | 待做 | codex review + test + commit push + 更新 plan |
 | **491** | **Recompile overhead 分解** | 待做 | verify 时间 + JIT 时间 + swap 时间 + daemon pipeline 时间。reviewer 必问。从 static_verify.json 和 micro results 可提取部分数据。 |
 | **492** | **Scalability 测量** | 待做 | 100/500/1000 个 live 程序时 daemon 吞吐量和延迟。apply-all 和 watch mode。 |
 | **493** | **Memory overhead 测量** | 待做 | REJIT 保留 orig bytecode + tmp prog 的额外内存。per-prog 和总量。 |

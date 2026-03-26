@@ -25,7 +25,11 @@ const KNOWN_KINSNS: &[(&str, &str, &str)] = &[
     ("bpf_endian_load16", "bpf_endian_load16", "bpf_endian"),
     ("bpf_endian_load32", "bpf_endian_load32", "bpf_endian"),
     ("bpf_endian_load64", "bpf_endian_load64", "bpf_endian"),
-    ("bpf_speculation_barrier", "bpf_speculation_barrier", "bpf_barrier"),
+    (
+        "bpf_speculation_barrier",
+        "bpf_speculation_barrier",
+        "bpf_barrier",
+    ),
 ];
 
 // ── BTF constants (synced from vendor/linux-framework/include/uapi/linux/btf.h) ──

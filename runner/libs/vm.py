@@ -68,6 +68,7 @@ def build_vng_command(
     guest_exec: str,
     cpus: int | None = None,
     mem: str | None = None,
+    vm_executable: str | Path | None = None,
     target: str = DEFAULT_VM_TARGET,
     action: str | None = None,
     networks: Sequence[str] = (),
@@ -79,13 +80,15 @@ def build_vng_command(
             f"machine target {machine.name} uses backend {machine.backend!r}; "
             "runner.libs.vm.build_vng_command only supports vng targets"
         )
-    vng_path = resolve_machine_executable(target=target, action=action)
+    vng_path = str(vm_executable) if vm_executable is not None else str(
+        resolve_machine_executable(target=target, action=action)
+    )
     kernel = Path(kernel_path).resolve()
     resolved_cpus = max(1, int(cpus if cpus is not None else machine.cpus or 1))
     resolved_mem = str(mem if mem is not None else machine.memory or "4G")
 
     command = [
-        str(vng_path),
+        vng_path,
         *machine.args,
         "--run",
         str(kernel),
@@ -118,6 +121,7 @@ def run_in_vm(
     mem: str | None,
     timeout: int,
     *,
+    vm_executable: str | Path | None = None,
     target: str = DEFAULT_VM_TARGET,
     action: str | None = None,
     networks: Sequence[str] = (),
@@ -129,6 +133,7 @@ def run_in_vm(
         guest_exec=guest_path,
         cpus=cpus,
         mem=mem,
+        vm_executable=vm_executable,
         target=target,
         action=action,
         networks=networks,

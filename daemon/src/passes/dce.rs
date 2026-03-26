@@ -222,14 +222,14 @@ mod tests {
         //   6: mov r0, 3   -- subprog entry (orphaned after DCE removes pc 2)
         //   7: exit
         let mut program = BpfProgram::new(vec![
-            BpfInsn::mov64_imm(1, 7),  // 0
-            jeq_imm(1, 7, 2),          // 1: always taken
-            pseudo_call(3),             // 2: dead block
-            exit_insn(),                // 3: dead block
-            BpfInsn::mov64_imm(0, 0),  // 4: branch target (live)
-            exit_insn(),                // 5
-            BpfInsn::mov64_imm(0, 3),  // 6: subprog entry (orphaned)
-            exit_insn(),                // 7
+            BpfInsn::mov64_imm(1, 7), // 0
+            jeq_imm(1, 7, 2),         // 1: always taken
+            pseudo_call(3),           // 2: dead block
+            exit_insn(),              // 3: dead block
+            BpfInsn::mov64_imm(0, 0), // 4: branch target (live)
+            exit_insn(),              // 5
+            BpfInsn::mov64_imm(0, 3), // 6: subprog entry (orphaned)
+            exit_insn(),              // 7
         ]);
 
         let result = run_const_prop_then_dce(&mut program);
@@ -265,14 +265,14 @@ mod tests {
         //   6: mov r0, 3   -- subprog entry (still has live caller at pc 0)
         //   7: exit
         let mut program = BpfProgram::new(vec![
-            pseudo_call(5),             // 0: live call to subprog at pc 6
-            BpfInsn::mov64_imm(1, 7),  // 1
-            jeq_imm(1, 7, 1),          // 2: always taken
-            pseudo_call(2),             // 3: dead call to subprog at pc 6
-            BpfInsn::mov64_imm(0, 0),  // 4
-            exit_insn(),                // 5
-            BpfInsn::mov64_imm(0, 3),  // 6: subprog entry
-            exit_insn(),                // 7
+            pseudo_call(5),           // 0: live call to subprog at pc 6
+            BpfInsn::mov64_imm(1, 7), // 1
+            jeq_imm(1, 7, 1),         // 2: always taken
+            pseudo_call(2),           // 3: dead call to subprog at pc 6
+            BpfInsn::mov64_imm(0, 0), // 4
+            exit_insn(),              // 5
+            BpfInsn::mov64_imm(0, 3), // 6: subprog entry
+            exit_insn(),              // 7
         ]);
 
         let result = run_const_prop_then_dce(&mut program);

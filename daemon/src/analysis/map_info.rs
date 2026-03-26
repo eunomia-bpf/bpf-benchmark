@@ -48,9 +48,7 @@ impl MapInfo {
     pub fn supports_direct_value_access(&self) -> bool {
         matches!(
             self.map_type,
-            BPF_MAP_TYPE_HASH
-                | BPF_MAP_TYPE_ARRAY
-                | BPF_MAP_TYPE_LRU_HASH
+            BPF_MAP_TYPE_HASH | BPF_MAP_TYPE_ARRAY | BPF_MAP_TYPE_LRU_HASH
         )
     }
 
@@ -72,10 +70,7 @@ impl MapInfo {
     /// Returns whether this inline is speculative and depends on runtime stability.
     #[cfg_attr(not(test), allow(dead_code))]
     pub fn is_speculative_v1(&self) -> bool {
-        matches!(
-            self.map_type,
-            BPF_MAP_TYPE_HASH | BPF_MAP_TYPE_LRU_HASH
-        )
+        matches!(self.map_type, BPF_MAP_TYPE_HASH | BPF_MAP_TYPE_LRU_HASH)
     }
 }
 

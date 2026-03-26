@@ -1405,7 +1405,7 @@ mod tests {
         assert!(is_packet_unsafe_prog_type(6)); // XDP
         assert!(is_packet_unsafe_prog_type(3)); // SCHED_CLS
         assert!(is_packet_unsafe_prog_type(4)); // SCHED_ACT
-        // Tracing, kprobe, etc. are not packet-unsafe.
+                                                // Tracing, kprobe, etc. are not packet-unsafe.
         assert!(!is_packet_unsafe_prog_type(0)); // unspecified
         assert!(!is_packet_unsafe_prog_type(1)); // SOCKET_FILTER
         assert!(!is_packet_unsafe_prog_type(2)); // KPROBE
@@ -1544,7 +1544,10 @@ mod tests {
         let pass = WideMemPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
-        assert!(result.changed, "non-stack base should work in tracing progs");
+        assert!(
+            result.changed,
+            "non-stack base should work in tracing progs"
+        );
         assert_eq!(result.sites_applied, 1);
     }
 
@@ -1564,7 +1567,10 @@ mod tests {
         let pass = WideMemPass;
         let result = pass.run(&mut prog, &mut cache, &ctx).unwrap();
 
-        assert!(result.changed, "unknown prog_type should not block wide_mem");
+        assert!(
+            result.changed,
+            "unknown prog_type should not block wide_mem"
+        );
         assert_eq!(result.sites_applied, 1);
     }
 
@@ -1595,7 +1601,13 @@ mod tests {
         assert!(result.changed, "stack-based site should still apply");
         assert_eq!(result.sites_applied, 1);
         assert_eq!(
-            result.sites_skipped.iter().filter(|s| s.reason.contains("packet pointer") || s.reason.contains("non-stack base")).count(),
+            result
+                .sites_skipped
+                .iter()
+                .filter(
+                    |s| s.reason.contains("packet pointer") || s.reason.contains("non-stack base")
+                )
+                .count(),
             1,
             "one site should be skipped for likely packet pointer in XDP"
         );

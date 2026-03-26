@@ -28,7 +28,7 @@ for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpu
 from runner.libs import authoritative_output_path, smoke_output_path
 from runner.libs.batch_runner import run_batch_runner
 from runner.libs.machines import resolve_machine
-from runner.libs.vm import DEFAULT_VM_TARGET, build_vng_command as build_runner_vng_command
+from runner.libs.vm import DEFAULT_VM_TARGET
 
 from runner.libs.run_artifacts import (
     ArtifactSession,
@@ -71,8 +71,6 @@ DEFAULT_KERNEL_IMAGE = DEFAULT_KERNEL_TREE / "arch" / "x86" / "boot" / "bzImage"
 DEFAULT_BTF_PATH = DEFAULT_KERNEL_TREE / "vmlinux"
 DEFAULT_VNG_MACHINE = resolve_machine(target=DEFAULT_VM_TARGET, action="vm-corpus")
 DEFAULT_VNG = str(Path(DEFAULT_VNG_MACHINE.executable))
-DEFAULT_VNG_MEMORY = DEFAULT_VNG_MACHINE.memory or "4G"
-DEFAULT_VNG_CPUS = str(DEFAULT_VNG_MACHINE.cpus or 2)
 DEFAULT_REPEAT = 200
 DEFAULT_TIMEOUT_SECONDS = 240
 
@@ -956,20 +954,28 @@ def run_guest_batch_mode(args: argparse.Namespace) -> int:
     return 0
 
 
-def build_vng_command(*, vng_binary: str, kernel_image: Path, guest_exec: str) -> list[str]:
-    command = build_runner_vng_command(
-        kernel_path=kernel_image,
-        guest_exec=guest_exec,
-        cpus=int(DEFAULT_VNG_CPUS),
-        mem=DEFAULT_VNG_MEMORY,
-        target=DEFAULT_VM_TARGET,
-        action="vm-corpus",
-    )
-    if vng_binary == DEFAULT_VNG:
-        return command
-    inner = command[command.index("--") + 1 :]
-    inner[0] = vng_binary
-    return command[: command.index("--") + 1] + inner
+def build_vm_shell_command(
+    *,
+    kernel_image: Path,
+    guest_exec: str,
+    timeout_seconds: int,
+    vng_binary: str,
+) -> list[str]:
+    command = [
+        sys.executable,
+        str(ROOT_DIR / "runner" / "scripts" / "run_vm_shell.py"),
+        "--action",
+        "vm-corpus",
+        "--kernel-image",
+        str(kernel_image),
+        "--timeout",
+        str(timeout_seconds),
+        "--command",
+        guest_exec,
+    ]
+    if vng_binary != DEFAULT_VNG:
+        command.extend(["--vm-executable", vng_binary])
+    return command
 
 
 def build_guest_exec(argv: list[str]) -> str:
@@ -1124,12 +1130,13 @@ def run_targets_in_guest_batch(
         if blind_apply:
             guest_argv.append("--blind-apply")
         guest_exec = build_guest_exec(guest_argv)
-        command = build_vng_command(
-            vng_binary=vng_binary,
+        timeout_limit = packet_batch_timeout_seconds(len(targets), timeout_seconds)
+        command = build_vm_shell_command(
             kernel_image=kernel_image,
             guest_exec=guest_exec,
+            timeout_seconds=timeout_limit,
+            vng_binary=vng_binary,
         )
-        timeout_limit = packet_batch_timeout_seconds(len(targets), timeout_seconds)
         start = time.monotonic()
         process = subprocess.Popen(
             command,

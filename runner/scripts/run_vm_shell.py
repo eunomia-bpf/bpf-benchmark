@@ -18,6 +18,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--kernel-image", required=True, help="Kernel image passed to the VM backend.")
     parser.add_argument("--cpus", type=int, help="Optional guest CPU count override.")
     parser.add_argument("--mem", help="Optional guest memory override.")
+    parser.add_argument(
+        "--vm-executable",
+        help="Optional backend executable override (for example a custom vng binary).",
+    )
     parser.add_argument("--timeout", type=int, default=3600, help="End-to-end timeout in seconds.")
     parser.add_argument("--network", action="append", default=[], help="Repeatable VM network configuration.")
     parser.add_argument("--command", required=True, help="Shell command to run inside the guest.")
@@ -33,6 +37,7 @@ def main() -> int:
         args.cpus,
         args.mem,
         args.timeout,
+        vm_executable=args.vm_executable or None,
         target=args.target or None,
         action=args.action,
         networks=args.network or (),
