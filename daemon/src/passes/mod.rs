@@ -10,6 +10,7 @@ mod dangerous_helper_firewall;
 mod dce;
 mod endian;
 mod extract;
+mod live_patch;
 mod map_inline;
 mod rotate;
 mod skb_load_bytes;
@@ -26,6 +27,7 @@ pub use dangerous_helper_firewall::DangerousHelperFirewallPass;
 pub use dce::DcePass;
 pub use endian::EndianFusionPass;
 pub use extract::ExtractPass;
+pub use live_patch::LivePatchPass;
 pub use map_inline::MapInlinePass;
 pub use rotate::RotatePass;
 pub use skb_load_bytes::SkbLoadBytesSpecPass;
@@ -145,6 +147,12 @@ pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
         description: "Rewrite or audit dangerous helper calls according to security policy",
         aliases: &["dangerous_helper"],
         make: || Box::new(DangerousHelperFirewallPass),
+    },
+    PassRegistryEntry {
+        name: "live_patch",
+        description: "Insert runtime hardening guards for known verifier CVE signatures",
+        aliases: &[],
+        make: || Box::new(LivePatchPass),
     },
 ];
 
@@ -367,11 +375,9 @@ mod tests {
     }
 
     #[test]
-    fn test_default_pipeline_ends_with_dangerous_helper_firewall() {
+    fn test_default_pipeline_ends_with_live_patch() {
         let pm = build_default_pipeline();
-        if pm.pass_names().last().copied() != Some("dangerous_helper_firewall") {
-            std::panic::panic_any("dangerous_helper_firewall should be last");
-        }
+        assert_eq!(pm.pass_names().last().copied(), Some("live_patch"));
     }
 
     // ── HIGH #6: Real BPF bytecode pipeline tests ────────────────────
