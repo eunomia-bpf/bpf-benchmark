@@ -121,12 +121,7 @@ fn handle_client(
         }
 
         let response = match serde_json::from_str::<serde_json::Value>(&line) {
-            Ok(req) => process_request(
-                &req,
-                ctx,
-                rollback_enabled,
-                tracker,
-            ),
+            Ok(req) => process_request(&req, ctx, rollback_enabled, tracker),
             Err(e) => {
                 serde_json::json!({"status": "error", "message": format!("invalid JSON: {}", e)})
             }
@@ -406,5 +401,4 @@ mod tests {
             vec![101]
         );
     }
-
 }

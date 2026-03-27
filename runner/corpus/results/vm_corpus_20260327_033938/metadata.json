@@ -692,26 +692,55 @@
   },
   "daemon_binary": "daemon/target/release/bpfrejit-daemon",
   "details_dir": "details",
+  "error_message": "vm guest batch failed: Script done on 2026-03-26 21:07:59-07:00 [COMMAND_EXIT_CODE=\"1\"] (exit=1)",
   "generated_at": "2026-03-27T03:39:38.353170+00:00",
   "guest_smoke": {
-    "invocation": null,
-    "payload": null
+    "invocation": {
+      "command": [
+        "/home/yunwei37/workspace/.venv/bin/python3",
+        "/home/yunwei37/workspace/bpf-benchmark/runner/scripts/run_vm_shell.py",
+        "--action",
+        "vm-corpus",
+        "--kernel-image",
+        "/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/arch/x86/boot/bzImage",
+        "--timeout",
+        "458040",
+        "--command",
+        "/home/yunwei37/workspace/bpf-benchmark/module/load_all.sh 2>/dev/null || true; python3 corpus/driver.py --guest-target-json /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260326/corpus-rejit-batch/corpus-rejit-vm-batch-e71jupyv.json --guest-result-json /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260326/corpus-rejit-batch/corpus-rejit-vm-batch-result-z0e59l13.json --runner /home/yunwei37/workspace/bpf-benchmark/runner/build/micro_exec --daemon /home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon --btf-custom-path /home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/vmlinux --repeat 10 --timeout 240"
+      ],
+      "duration_seconds": 1701.1958586479996,
+      "error": "Script done on 2026-03-26 21:07:59-07:00 [COMMAND_EXIT_CODE=\"1\"] (exit=1)",
+      "ok": false,
+      "returncode": 1,
+      "stderr_tail": "",
+      "stdout_tail": "Loaded bpf_barrier\nLoaded bpf_bulk_memory\nLoaded bpf_endian\nLoaded bpf_extract\nLoaded bpf_rotate\nLoaded bpf_select\nkinsn modules: 6/6 loaded\nqemu-system-x86_64: terminating on signal 2\nInterrupted.Script started on 2026-03-26 20:42:07-07:00 [COMMAND=\"/home/yunwei37/workspace/bpf-benchmark/runner/scripts/vng-wrapper.sh /tmp/vng-wrapper.tRwu7u\" TERM=\"xterm-256color\" TTY=\"/dev/pts/7\" COLUMNS=\"-1\" LINES=\"-1\"]\nLoaded bpf_barrier\nLoaded bpf_bulk_memory\nLoaded bpf_endian\nLoaded bpf_extract\nLoaded bpf_rotate\nLoaded bpf_select\nkinsn modules: 6/6 loaded\nqemu-system-x86_64: terminating on signal 2\nInterrupted.\nScript done on 2026-03-26 21:07:59-07:00 [COMMAND_EXIT_CODE=\"1\"]",
+      "timed_out": false
+    },
+    "payload": {
+      "btf_exists": true,
+      "cwd": "/home/yunwei37/workspace/bpf-benchmark",
+      "kernel_release": "7.0.0-rc2+",
+      "kind": "guest_info",
+      "runner_exists": true,
+      "uid": 0
+    }
   },
   "kernel_image": "vendor/linux-framework/arch/x86/boot/bzImage",
   "kernel_tree": "vendor/linux-framework",
-  "last_updated_at": "2026-03-27T03:42:40.026626+00:00",
+  "last_updated_at": "2026-03-27T04:08:00.043614+00:00",
   "macro_corpus_yaml": "corpus/config/macro_corpus.yaml",
   "mode": "packet",
   "output_hint_json": "runner/corpus/results/vm_corpus.json",
   "output_hint_md": "runner/corpus/results/vm_corpus.md",
   "progress": {
-    "completed_objects": 2,
-    "completed_programs": 8,
+    "completed_objects": 27,
+    "completed_programs": 177,
     "current_target": {
-      "canonical_object_name": "KubeArmor:protectproc.bpf.o"
+      "canonical_object_name": "bcc:libbpf-tools/javagc.bpf.o"
     },
-    "current_target_index": 2,
-    "status": "running",
+    "current_target_index": 27,
+    "error_message": "vm guest batch failed: Script done on 2026-03-26 21:07:59-07:00 [COMMAND_EXIT_CODE=\"1\"] (exit=1)",
+    "status": "error",
     "total_objects": 477,
     "total_programs": 2019
   },
@@ -720,11 +749,47 @@
   "runner_binary": "runner/build/micro_exec",
   "skip_families": [],
   "started_at": "2026-03-27T03:39:38.353170+00:00",
-  "status": "running",
+  "status": "error",
   "suite": "corpus",
   "summary": {
-    "applied_programs": 0,
+    "applied_programs": 17,
     "by_object": [
+      {
+        "applied_programs": 0,
+        "canonical_object_name": "KubeArmor:system_monitor.bpf.o",
+        "code_size_ratio_geomean": null,
+        "compile_pairs": 0,
+        "exec_ratio_geomean": null,
+        "measured_pairs": 0,
+        "programs": 55
+      },
+      {
+        "applied_programs": 0,
+        "canonical_object_name": "bcc:libbpf-tools/fsdist.bpf.o",
+        "code_size_ratio_geomean": null,
+        "compile_pairs": 0,
+        "exec_ratio_geomean": null,
+        "measured_pairs": 0,
+        "programs": 20
+      },
+      {
+        "applied_programs": 0,
+        "canonical_object_name": "bcc:libbpf-tools/fsslower.bpf.o",
+        "code_size_ratio_geomean": null,
+        "compile_pairs": 0,
+        "exec_ratio_geomean": null,
+        "measured_pairs": 0,
+        "programs": 16
+      },
+      {
+        "applied_programs": 0,
+        "canonical_object_name": "bcc:libbpf-tools/cachestat.bpf.o",
+        "code_size_ratio_geomean": 1.0,
+        "compile_pairs": 7,
+        "exec_ratio_geomean": null,
+        "measured_pairs": 7,
+        "programs": 11
+      },
       {
         "applied_programs": 0,
         "canonical_object_name": "KubeArmor:enforcer.bpf.o",
@@ -735,6 +800,159 @@
         "programs": 7
       },
       {
+        "applied_programs": 1,
+        "canonical_object_name": "bcc:libbpf-tools/biotop.bpf.o",
+        "code_size_ratio_geomean": 1.0,
+        "compile_pairs": 3,
+        "exec_ratio_geomean": 1.0642149623081252,
+        "measured_pairs": 3,
+        "programs": 7
+      },
+      {
+        "applied_programs": 6,
+        "canonical_object_name": "bcc:libbpf-tools/biolatency.bpf.o",
+        "code_size_ratio_geomean": 1.0,
+        "compile_pairs": 6,
+        "exec_ratio_geomean": 1.0649870952633818,
+        "measured_pairs": 6,
+        "programs": 6
+      },
+      {
+        "applied_programs": 2,
+        "canonical_object_name": "bcc:libbpf-tools/biosnoop.bpf.o",
+        "code_size_ratio_geomean": 1.0,
+        "compile_pairs": 5,
+        "exec_ratio_geomean": 0.9446627733704122,
+        "measured_pairs": 5,
+        "programs": 6
+      },
+      {
+        "applied_programs": 2,
+        "canonical_object_name": "bcc:libbpf-tools/biostacks.bpf.o",
+        "code_size_ratio_geomean": 1.0005608526133736,
+        "compile_pairs": 3,
+        "exec_ratio_geomean": 1.3450793018780278,
+        "measured_pairs": 3,
+        "programs": 5
+      },
+      {
+        "applied_programs": 2,
+        "canonical_object_name": "bcc:libbpf-tools/filelife.bpf.o",
+        "code_size_ratio_geomean": 1.0121002950626046,
+        "compile_pairs": 5,
+        "exec_ratio_geomean": 1.125,
+        "measured_pairs": 5,
+        "programs": 5
+      },
+      {
+        "applied_programs": 2,
+        "canonical_object_name": "bcc:libbpf-tools/bindsnoop.bpf.o",
+        "code_size_ratio_geomean": 0.9994814587549579,
+        "compile_pairs": 4,
+        "exec_ratio_geomean": null,
+        "measured_pairs": 4,
+        "programs": 4
+      },
+      {
+        "applied_programs": 0,
+        "canonical_object_name": "bcc:libbpf-tools/drsnoop.bpf.o",
+        "code_size_ratio_geomean": 1.0,
+        "compile_pairs": 4,
+        "exec_ratio_geomean": null,
+        "measured_pairs": 4,
+        "programs": 4
+      },
+      {
+        "applied_programs": 0,
+        "canonical_object_name": "bcc:libbpf-tools/funclatency.bpf.o",
+        "code_size_ratio_geomean": null,
+        "compile_pairs": 0,
+        "exec_ratio_geomean": null,
+        "measured_pairs": 0,
+        "programs": 4
+      },
+      {
+        "applied_programs": 0,
+        "canonical_object_name": "bcc:libbpf-tools/hardirqs.bpf.o",
+        "code_size_ratio_geomean": 1.0,
+        "compile_pairs": 4,
+        "exec_ratio_geomean": 1.180982288886043,
+        "measured_pairs": 4,
+        "programs": 4
+      },
+      {
+        "applied_programs": 0,
+        "canonical_object_name": "bcc:libbpf-tools/javagc.bpf.o",
+        "code_size_ratio_geomean": null,
+        "compile_pairs": 0,
+        "exec_ratio_geomean": null,
+        "measured_pairs": 0,
+        "programs": 4
+      },
+      {
+        "applied_programs": 0,
+        "canonical_object_name": "bcc:libbpf-tools/capable.bpf.o",
+        "code_size_ratio_geomean": null,
+        "compile_pairs": 0,
+        "exec_ratio_geomean": null,
+        "measured_pairs": 0,
+        "programs": 2
+      },
+      {
+        "applied_programs": 0,
+        "canonical_object_name": "bcc:libbpf-tools/cpudist.bpf.o",
+        "code_size_ratio_geomean": null,
+        "compile_pairs": 0,
+        "exec_ratio_geomean": null,
+        "measured_pairs": 0,
+        "programs": 2
+      },
+      {
+        "applied_programs": 0,
+        "canonical_object_name": "bcc:libbpf-tools/cpufreq.bpf.o",
+        "code_size_ratio_geomean": 1.0,
+        "compile_pairs": 1,
+        "exec_ratio_geomean": null,
+        "measured_pairs": 1,
+        "programs": 2
+      },
+      {
+        "applied_programs": 0,
+        "canonical_object_name": "bcc:libbpf-tools/execsnoop.bpf.o",
+        "code_size_ratio_geomean": 1.0,
+        "compile_pairs": 2,
+        "exec_ratio_geomean": 1.3449474667679786,
+        "measured_pairs": 2,
+        "programs": 2
+      },
+      {
+        "applied_programs": 0,
+        "canonical_object_name": "bcc:libbpf-tools/filetop.bpf.o",
+        "code_size_ratio_geomean": 1.0,
+        "compile_pairs": 2,
+        "exec_ratio_geomean": 1.3824561462904859,
+        "measured_pairs": 2,
+        "programs": 2
+      },
+      {
+        "applied_programs": 0,
+        "canonical_object_name": "bcc:libbpf-tools/futexctn.bpf.o",
+        "code_size_ratio_geomean": null,
+        "compile_pairs": 0,
+        "exec_ratio_geomean": null,
+        "measured_pairs": 0,
+        "programs": 2
+      },
+      {
+        "applied_programs": 0,
+        "canonical_object_name": "bcc:libbpf-tools/gethostlatency.bpf.o",
+        "code_size_ratio_geomean": null,
+        "compile_pairs": 0,
+        "exec_ratio_geomean": null,
+        "measured_pairs": 0,
+        "programs": 2
+      },
+      {
         "applied_programs": 0,
         "canonical_object_name": "KubeArmor:protectproc.bpf.o",
         "code_size_ratio_geomean": null,
@@ -742,37 +960,107 @@
         "exec_ratio_geomean": null,
         "measured_pairs": 0,
         "programs": 1
+      },
+      {
+        "applied_programs": 0,
+        "canonical_object_name": "bcc:libbpf-tools/bashreadline.bpf.o",
+        "code_size_ratio_geomean": null,
+        "compile_pairs": 0,
+        "exec_ratio_geomean": null,
+        "measured_pairs": 0,
+        "programs": 1
+      },
+      {
+        "applied_programs": 1,
+        "canonical_object_name": "bcc:libbpf-tools/biopattern.bpf.o",
+        "code_size_ratio_geomean": 1.0,
+        "compile_pairs": 1,
+        "exec_ratio_geomean": 1.2541176470588236,
+        "measured_pairs": 1,
+        "programs": 1
+      },
+      {
+        "applied_programs": 1,
+        "canonical_object_name": "bcc:libbpf-tools/bitesize.bpf.o",
+        "code_size_ratio_geomean": 1.0,
+        "compile_pairs": 1,
+        "exec_ratio_geomean": 0.7579988365328679,
+        "measured_pairs": 1,
+        "programs": 1
+      },
+      {
+        "applied_programs": 0,
+        "canonical_object_name": "bcc:libbpf-tools/exitsnoop.bpf.o",
+        "code_size_ratio_geomean": 1.0,
+        "compile_pairs": 1,
+        "exec_ratio_geomean": 1.0296803652968036,
+        "measured_pairs": 1,
+        "programs": 1
       }
     ],
     "by_repo": [
+      {
+        "applied_programs": 17,
+        "code_size_ratio_geomean": 1.0012200445063466,
+        "compile_pairs": 49,
+        "exec_ratio_geomean": 1.1205588896024707,
+        "measured_pairs": 49,
+        "programs": 114,
+        "repo": "bcc"
+      },
       {
         "applied_programs": 0,
         "code_size_ratio_geomean": null,
         "compile_pairs": 0,
         "exec_ratio_geomean": null,
         "measured_pairs": 0,
-        "programs": 8,
+        "programs": 63,
         "repo": "KubeArmor"
       }
     ],
-    "code_size_delta_median_pct": null,
-    "code_size_ratio_geomean": null,
-    "compile_pairs": 0,
-    "compile_pass_counts": {},
-    "effective_mode": "vm",
-    "exec_ratio_geomean": null,
-    "exec_ratio_max": null,
-    "exec_ratio_median": null,
-    "exec_ratio_min": null,
-    "failure_reasons": {
-      "bpf_object__load failed: Invalid argument": 32
+    "code_size_delta_median_pct": 0.0,
+    "code_size_ratio_geomean": 1.0012200445063466,
+    "compile_pairs": 49,
+    "compile_pass_counts": {
+      "cond_select": 1,
+      "const_prop": 18,
+      "dce": 18,
+      "endian_fusion": 2,
+      "extract": 2
     },
-    "measured_pairs": 0,
-    "objects_attempted": 2,
-    "pass_counts": {},
-    "rejit_failure_reasons": {},
-    "run_pass_counts": {},
-    "targets_attempted": 8
+    "effective_mode": "vm",
+    "exec_ratio_geomean": 1.1205588896024707,
+    "exec_ratio_max": 1.889367816091954,
+    "exec_ratio_median": 1.128459952885748,
+    "exec_ratio_min": 0.652696365767878,
+    "failure_reasons": {
+      "bpf_object__load failed: Invalid argument": 276,
+      "bpf_object__load failed: No such process": 88,
+      "bpf_program__attach failed: Device or resource busy": 8,
+      "bpf_program__attach failed: Invalid argument": 8,
+      "bpf_program__attach failed: No such file or directory": 104,
+      "bpf_program__attach failed: Operation not supported": 28
+    },
+    "measured_pairs": 49,
+    "objects_attempted": 27,
+    "pass_counts": {
+      "cond_select": 2,
+      "const_prop": 36,
+      "dce": 36,
+      "endian_fusion": 4,
+      "extract": 4
+    },
+    "rejit_failure_reasons": {
+      "daemon socket optimize failed: BPF_PROG_REJIT: Invalid argument (os error 22)\\nverifier log:\\nfunc#0 @0\\nno direct value access support for this map type\\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\\n": 2
+    },
+    "run_pass_counts": {
+      "cond_select": 1,
+      "const_prop": 18,
+      "dce": 18,
+      "endian_fusion": 2,
+      "extract": 2
+    },
+    "targets_attempted": 177
   },
   "timeout_seconds": 240,
   "vng_binary": "runner/scripts/vng-wrapper.sh",

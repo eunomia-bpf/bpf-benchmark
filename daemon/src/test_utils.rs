@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 //! Shared helpers for real `.bpf.o` unit tests.
 
-use std::collections::HashMap;
-use std::path::PathBuf;
+use std::collections::{HashMap, HashSet};
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU32, Ordering};
 
 use anyhow::{anyhow, Context, Result};
+use serde::Deserialize;
 
 use crate::bpf::{install_mock_map, BpfMapInfo, MockMapState};
 use crate::elf_parser::{parse_bpf_object, ElfBpfObject, ElfMapMetadata, ElfProgramInfo};
@@ -56,12 +57,53 @@ impl LoadedFixtureProgram {
         program.set_map_ids(map_ids);
         program
     }
+
+    pub fn into_program_with_captured_maps<P: AsRef<Path>>(
+        &self,
+        capture_path: P,
+    ) -> Result<BpfProgram> {
+        let capture = load_captured_map_fixture(capture_path)?;
+        let mut program = self.into_program();
+        if self.used_maps.is_empty() {
+            return Ok(program);
+        }
+
+        let mut map_ids = Vec::with_capacity(self.used_maps.len());
+        let mut used_capture_indices = HashSet::new();
+        for map in &self.used_maps {
+            let map_id = NEXT_TEST_MAP_ID.fetch_add(1, Ordering::Relaxed);
+            let values = find_capture_map_index(&capture.maps, map, &used_capture_indices)
+                .map(|capture_index| {
+                    used_capture_indices.insert(capture_index);
+                    decode_captured_map_values(&capture.maps[capture_index])
+                })
+                .transpose()?
+                .unwrap_or_default();
+            install_mock_map(
+                map_id,
+                MockMapState {
+                    info: synthetic_map_info(map, map_id),
+                    frozen: true,
+                    values,
+                },
+            );
+            map_ids.push(map_id);
+        }
+        program.set_map_ids(map_ids);
+        Ok(program)
+    }
 }
 
 pub fn fixture_path(rel_path: &str) -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("fixtures")
+        .join(rel_path)
+}
+
+pub fn repo_path(rel_path: &str) -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("..")
         .join(rel_path)
 }
 
@@ -76,6 +118,23 @@ pub fn load_fixture_program(rel_path: &str, name: &str) -> Result<LoadedFixtureP
         .program_named(name)
         .or_else(|| object.program_named(&format!("{name}/")))
         .with_context(|| format!("fixture {} has no unique program named {}", rel_path, name))?;
+    Ok(materialize_program_fixture(&object, program))
+}
+
+pub fn load_program_from_path<P: AsRef<Path>>(path: P, name: &str) -> Result<LoadedFixtureProgram> {
+    let path = path.as_ref();
+    let object = parse_bpf_object(path)
+        .with_context(|| format!("failed to load fixture {}", path.display()))?;
+    let program = object
+        .program_named(name)
+        .or_else(|| object.program_named(&format!("{name}/")))
+        .with_context(|| {
+            format!(
+                "fixture {} has no unique program named {}",
+                path.display(),
+                name
+            )
+        })?;
     Ok(materialize_program_fixture(&object, program))
 }
 
@@ -311,4 +370,128 @@ fn synthetic_value_bytes(seed: u64, value_size: usize) -> Vec<u8> {
         }
     }
     value
+}
+
+#[derive(Clone, Debug, Deserialize)]
+struct CapturedMapFixture {
+    maps: Vec<CapturedMapFixtureMap>,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+struct CapturedMapFixtureMap {
+    map_name: String,
+    key_size: u32,
+    value_size: u32,
+    max_entries: u32,
+    entries: Vec<CapturedMapFixtureEntry>,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+struct CapturedMapFixtureEntry {
+    key_hex: String,
+    value_hex: String,
+}
+
+fn load_captured_map_fixture<P: AsRef<Path>>(path: P) -> Result<CapturedMapFixture> {
+    let path = path.as_ref();
+    let payload = std::fs::read_to_string(path)
+        .with_context(|| format!("failed to read captured map fixture {}", path.display()))?;
+    serde_json::from_str(&payload)
+        .with_context(|| format!("failed to parse captured map fixture {}", path.display()))
+}
+
+fn find_capture_map_index(
+    capture_maps: &[CapturedMapFixtureMap],
+    used_map: &ElfMapMetadata,
+    used_capture_indices: &HashSet<usize>,
+) -> Option<usize> {
+    let exact_name = capture_maps
+        .iter()
+        .enumerate()
+        .find_map(|(index, capture_map)| {
+            (!used_capture_indices.contains(&index) && capture_map.map_name == used_map.name)
+                .then_some(index)
+        });
+    if exact_name.is_some() {
+        return exact_name;
+    }
+
+    let normalized_name = normalize_map_name(&used_map.name);
+    let normalized_match = capture_maps
+        .iter()
+        .enumerate()
+        .find_map(|(index, capture_map)| {
+            (!used_capture_indices.contains(&index)
+                && normalize_map_name(&capture_map.map_name) == normalized_name)
+                .then_some(index)
+        });
+    if normalized_match.is_some() {
+        return normalized_match;
+    }
+
+    let key_size = used_map.key_size?;
+    let value_size = used_map.value_size?;
+    let max_entries = used_map.max_entries?;
+    let matches = capture_maps
+        .iter()
+        .enumerate()
+        .filter(|(index, capture_map)| {
+            !used_capture_indices.contains(index)
+                && capture_map.key_size == key_size
+                && capture_map.value_size == value_size
+                && capture_map.max_entries == max_entries
+        })
+        .map(|(index, _)| index)
+        .collect::<Vec<_>>();
+    if matches.len() == 1 {
+        return matches.into_iter().next();
+    }
+
+    None
+}
+
+fn normalize_map_name(name: &str) -> &str {
+    name.strip_suffix('s').unwrap_or(name)
+}
+
+fn decode_captured_map_values(
+    capture_map: &CapturedMapFixtureMap,
+) -> Result<HashMap<Vec<u8>, Vec<u8>>> {
+    let mut values = HashMap::new();
+    for entry in &capture_map.entries {
+        values.insert(
+            decode_hex(&entry.key_hex).with_context(|| {
+                format!("invalid key for captured map {}", capture_map.map_name)
+            })?,
+            decode_hex(&entry.value_hex).with_context(|| {
+                format!("invalid value for captured map {}", capture_map.map_name)
+            })?,
+        );
+    }
+    Ok(values)
+}
+
+fn decode_hex(text: &str) -> Result<Vec<u8>> {
+    let text = text.trim();
+    if text.len() % 2 != 0 {
+        return Err(anyhow!("hex payload must have even length"));
+    }
+
+    let mut bytes = Vec::with_capacity(text.len() / 2);
+    let chars = text.as_bytes().chunks_exact(2);
+    for pair in chars {
+        let hi = hex_nibble(pair[0]).ok_or_else(|| anyhow!("invalid hex digit"))?;
+        let lo = hex_nibble(pair[1]).ok_or_else(|| anyhow!("invalid hex digit"))?;
+        bytes.push((hi << 4) | lo);
+    }
+    Ok(bytes)
+}
+
+fn hex_nibble(byte: u8) -> Option<u8> {
+    match byte {
+        b'0'..=b'9' => Some(byte - b'0'),
+        b'a'..=b'f' => Some(byte - b'a' + 10),
+        b'A'..=b'F' => Some(byte - b'A' + 10),
+        _ => None,
+    }
 }

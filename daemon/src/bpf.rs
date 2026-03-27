@@ -14,6 +14,8 @@ use crate::insn::BpfInsn;
 // The enum starts at 0. We only define the commands we actually use.
 // Note: BPF_MAP_FREEZE=22 sits between BTF_GET_FD_BY_ID and BTF_GET_NEXT_ID.
 const BPF_MAP_LOOKUP_ELEM: u32 = 1;
+#[cfg(test)]
+const BPF_MAP_TYPE_ARRAY: u32 = 2;
 const BPF_PROG_GET_NEXT_ID: u32 = 11;
 const BPF_MAP_GET_NEXT_ID: u32 = 12;
 const BPF_PROG_GET_FD_BY_ID: u32 = 13;
@@ -576,11 +578,15 @@ pub fn bpf_map_lookup_elem_optional(
 pub fn bpf_map_lookup_elem_by_id(map_id: u32, key: &[u8], value_size: usize) -> Result<Vec<u8>> {
     #[cfg(test)]
     if let Some(state) = mock_map_state(map_id) {
-        let value = state
-            .values
-            .get(key)
-            .cloned()
-            .with_context(|| format!("mock map {} missing key {:?}", map_id, key))?;
+        let value = match state.values.get(key).cloned() {
+            Some(value) => value,
+            None if mock_array_lookup_returns_zero(&state, key, value_size) => {
+                vec![0u8; value_size]
+            }
+            None => {
+                return Err(anyhow::anyhow!("mock map {} missing key {:?}", map_id, key));
+            }
+        };
         if value.len() != value_size {
             bail!(
                 "mock map {} returned value size {}, expected {}",
@@ -594,6 +600,22 @@ pub fn bpf_map_lookup_elem_by_id(map_id: u32, key: &[u8], value_size: usize) -> 
 
     let fd = bpf_map_get_fd_by_id(map_id)?;
     bpf_map_lookup_elem(fd.as_raw_fd(), key, value_size)
+}
+
+#[cfg(test)]
+fn mock_array_lookup_returns_zero(state: &MockMapState, key: &[u8], value_size: usize) -> bool {
+    if state.info.map_type != BPF_MAP_TYPE_ARRAY
+        || state.info.key_size as usize != key.len()
+        || state.info.value_size as usize != value_size
+        || key.len() > 8
+    {
+        return false;
+    }
+
+    let mut raw = [0u8; 8];
+    raw[..key.len()].copy_from_slice(key);
+    let index = u64::from_le_bytes(raw);
+    index < state.info.max_entries as u64
 }
 
 /// Open a file descriptor for the BPF BTF object with the given ID.
@@ -2012,5 +2034,49 @@ mod tests {
         let result = relocate_map_fds(&mut insns, &[]);
         assert!(result.is_ok());
         assert!(result.unwrap().is_empty());
+    }
+
+    #[test]
+    fn test_mock_array_lookup_returns_zero_for_in_range_missing_key() {
+        clear_mock_maps();
+        let mut info = BpfMapInfo::default();
+        info.id = 9001;
+        info.map_type = BPF_MAP_TYPE_ARRAY;
+        info.key_size = 4;
+        info.value_size = 8;
+        info.max_entries = 4;
+        install_mock_map(
+            info.id,
+            MockMapState {
+                info,
+                frozen: true,
+                values: std::collections::HashMap::new(),
+            },
+        );
+
+        let value = bpf_map_lookup_elem_by_id(9001, &[2, 0, 0, 0], 8).expect("array lookup");
+        assert_eq!(value, vec![0u8; 8]);
+    }
+
+    #[test]
+    fn test_mock_hash_lookup_missing_key_still_errors() {
+        clear_mock_maps();
+        let mut info = BpfMapInfo::default();
+        info.id = 9002;
+        info.map_type = 1;
+        info.key_size = 4;
+        info.value_size = 8;
+        info.max_entries = 4;
+        install_mock_map(
+            info.id,
+            MockMapState {
+                info,
+                frozen: true,
+                values: std::collections::HashMap::new(),
+            },
+        );
+
+        let err = bpf_map_lookup_elem_by_id(9002, &[2, 0, 0, 0], 8).expect_err("hash miss");
+        assert!(err.to_string().contains("missing key"));
     }
 }

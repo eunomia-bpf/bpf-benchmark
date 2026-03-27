@@ -996,9 +996,9 @@ mod tests {
 mod real_bpfo_tests {
     use crate::pass::{BpfProgram, PipelineResult};
     use crate::test_utils::{
-        assert_valid_bpf, hot_branch_profiling, load_fixture_program, pass_result,
-        permissive_pass_ctx, run_named_pipeline, run_named_pipeline_with_profiling,
-        LoadedFixtureProgram,
+        assert_valid_bpf, hot_branch_profiling, load_fixture_program, load_program_from_path,
+        pass_result, permissive_pass_ctx, repo_path, run_named_pipeline,
+        run_named_pipeline_with_profiling, LoadedFixtureProgram,
     };
 
     fn run_real_case(
@@ -1093,6 +1093,136 @@ mod real_bpfo_tests {
         false,
         true
     );
+    #[test]
+    fn test_map_inline_real_tracee_cgroup_skb_ingress() {
+        let (fixture, _program, result) = run_real_case(
+            &["map_inline"],
+            "tracee/tracee.bpf.o",
+            "cgroup_skb_ingress",
+            true,
+            false,
+        );
+        assert_pass_changed(&result, "map_inline", &fixture);
+        let pass = pass_result(&result, "map_inline").unwrap();
+        assert!(
+            !pass.sites_skipped.iter().any(|skip| skip
+                .reason
+                .contains("speculative map inline requires an immediate null check")),
+            "unexpected null-check skips on {}:{}: {:?}",
+            fixture.object_path.display(),
+            fixture.section_name,
+            pass.sites_skipped
+        );
+    }
+
+    #[test]
+    fn test_map_inline_real_tracee_cgroup_skb_egress() {
+        let (fixture, _program, result) = run_real_case(
+            &["map_inline"],
+            "tracee/tracee.bpf.o",
+            "cgroup_skb_egress",
+            true,
+            false,
+        );
+        assert_pass_changed(&result, "map_inline", &fixture);
+        let pass = pass_result(&result, "map_inline").unwrap();
+        assert!(
+            !pass.sites_skipped.iter().any(|skip| skip
+                .reason
+                .contains("speculative map inline requires an immediate null check")),
+            "unexpected null-check skips on {}:{}: {:?}",
+            fixture.object_path.display(),
+            fixture.section_name,
+            pass.sites_skipped
+        );
+    }
+
+    #[test]
+    fn test_map_inline_real_tetragon_event_exit_acct_rejects_dynamic_and_percpu_maps() {
+        let object_path = repo_path("corpus/build/tetragon/bpf_exit.bpf.o");
+        let capture_path =
+            repo_path("corpus/fixtures/tetragon/bpf_exit.bpf.o/event_exit_acct_process.json");
+        let loaded = load_program_from_path(&object_path, "event_exit_acct_process").unwrap();
+        let mut program = loaded
+            .into_program_with_captured_maps(&capture_path)
+            .unwrap();
+        let ctx = permissive_pass_ctx(loaded.prog_type);
+        let result = run_named_pipeline(&mut program, &ctx, &["map_inline"]).unwrap();
+        assert_valid_bpf(&program);
+        let pass = pass_result(&result, "map_inline").unwrap();
+        assert!(
+            !pass.changed && pass.sites_applied == 0,
+            "map_inline should not apply on {}:{}; skipped={:?}",
+            loaded.object_path.display(),
+            loaded.section_name,
+            pass.sites_skipped
+        );
+        assert!(
+            pass.sites_skipped
+                .iter()
+                .any(|skip| skip.reason == "lookup key is not a constant stack materialization"),
+            "expected dynamic-key skip on {}:{}; skipped={:?}",
+            loaded.object_path.display(),
+            loaded.section_name,
+            pass.sites_skipped
+        );
+        assert!(
+            pass.sites_skipped
+                .iter()
+                .any(|skip| skip.reason == "map type 6 not inlineable in v1"),
+            "expected percpu-array skip on {}:{}; skipped={:?}",
+            loaded.object_path.display(),
+            loaded.section_name,
+            pass.sites_skipped
+        );
+    }
+
+    #[test]
+    fn test_map_inline_real_tetragon_execve_rate() {
+        let object_path = repo_path("corpus/build/tetragon/bpf_execve_event.bpf.o");
+        let capture_path =
+            repo_path("corpus/fixtures/tetragon/bpf_execve_event.bpf.o/execve_rate.json");
+        let loaded = load_program_from_path(&object_path, "execve_rate").unwrap();
+        let mut program = loaded
+            .into_program_with_captured_maps(&capture_path)
+            .unwrap();
+        let ctx = permissive_pass_ctx(loaded.prog_type);
+        let result = run_named_pipeline(&mut program, &ctx, &["map_inline"]).unwrap();
+        assert_valid_bpf(&program);
+        assert_pass_changed(&result, "map_inline", &loaded);
+        let pass = pass_result(&result, "map_inline").unwrap();
+        assert!(
+            pass.sites_applied > 0,
+            "expected map_inline to apply on {}:{}; skipped={:?}",
+            loaded.object_path.display(),
+            loaded.section_name,
+            pass.sites_skipped
+        );
+    }
+
+    #[test]
+    fn test_map_inline_real_tetragon_event_execve() {
+        let object_path = repo_path("corpus/build/tetragon/bpf_execve_event.bpf.o");
+        let capture_path =
+            repo_path("corpus/fixtures/tetragon/bpf_execve_event.bpf.o/event_execve.json");
+        let loaded = load_program_from_path(&object_path, "event_execve").unwrap();
+        let mut program = loaded
+            .into_program_with_captured_maps(&capture_path)
+            .unwrap();
+        let ctx = permissive_pass_ctx(loaded.prog_type);
+        let result = run_named_pipeline(&mut program, &ctx, &["map_inline"]).unwrap();
+        assert_valid_bpf(&program);
+        assert_pass_changed(&result, "map_inline", &loaded);
+        let pass = pass_result(&result, "map_inline").unwrap();
+        assert!(
+            pass.sites_applied > 0,
+            "expected map_inline to apply on {}:{}; skipped={:?}",
+            loaded.object_path.display(),
+            loaded.section_name,
+            pass.sites_skipped
+        );
+    }
+
     real_single_pass_test!(
         test_map_inline_real_bindsnoop,
         "map_inline",

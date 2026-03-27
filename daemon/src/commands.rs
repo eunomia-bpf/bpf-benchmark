@@ -495,10 +495,7 @@ fn enumerate_one(prog_id: u32, ctx: &pass::PassContext) -> Result<()> {
     Ok(())
 }
 
-pub(crate) fn cmd_rewrite(
-    prog_id: u32,
-    ctx: &pass::PassContext,
-) -> Result<()> {
+pub(crate) fn cmd_rewrite(prog_id: u32, ctx: &pass::PassContext) -> Result<()> {
     let (info, orig_insns) = bpf::get_orig_insns_by_id(prog_id)?;
 
     if orig_insns.is_empty() {
@@ -574,10 +571,7 @@ pub(crate) fn cmd_apply(
     Ok(())
 }
 
-pub(crate) fn cmd_apply_all(
-    ctx: &pass::PassContext,
-    rollback_enabled: bool,
-) -> Result<()> {
+pub(crate) fn cmd_apply_all(ctx: &pass::PassContext, rollback_enabled: bool) -> Result<()> {
     let mut total = 0u32;
     let mut applied = 0u32;
     let mut errors = 0u32;
