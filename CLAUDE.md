@@ -24,6 +24,12 @@ Repository-level constraints for coding agents working in this tree.
 - Keep LLVM tool selection consistent inside one pipeline.
 - Do not mix one `clang` version with a different default `llvm-config`/LLVM disassembler version for upstream selftests.
 
+## Git Branch Safety
+
+- Never change the checked-out branch in this repository.
+- Do not use `git switch` or `git checkout` to move to another branch, even for inspection.
+- If a branch ref must be updated, move the ref without switching branches.
+
 ## Code Change Scope
 
 - Delete v1 and dead code when v2 replaces it.
