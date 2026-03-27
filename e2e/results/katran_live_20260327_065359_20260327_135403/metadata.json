@@ -1,0 +1,24 @@
+{
+  "artifact_kind": "result_run",
+  "artifact_version": 1,
+  "case": "katran",
+  "details_dir": "details",
+  "error_message": "'NoneType' object is not iterable",
+  "generated_at": "2026-03-27T13:54:26.642618+00:00",
+  "last_updated_at": "2026-03-27T13:54:26.642615+00:00",
+  "optimization_summary": {
+    "case": "katran",
+    "error_message": "'NoneType' object is not iterable",
+    "failed_at": "2026-03-27T13:54:26.642599+00:00",
+    "smoke": false,
+    "status": "error"
+  },
+  "output_hint_json": "e2e/results/katran-live-20260327_065359.json",
+  "output_hint_md": "e2e/results/katran-live-20260327_065359.md",
+  "output_hint_report_md": "docs/tmp/bpftrace-real-e2e-report.md",
+  "run_type": "katran_live_20260327_065359",
+  "smoke": false,
+  "started_at": "2026-03-27T13:54:03.635087+00:00",
+  "status": "error",
+  "suite": "e2e"
+}

@@ -228,6 +228,8 @@ def _apply_one(
     raw_inlined_entries = (
         debug_result.get("inlined_map_entries") if isinstance(debug_result, Mapping) else []
     )
+    if not isinstance(raw_inlined_entries, list):
+        raw_inlined_entries = []
     inlined_map_entries = [
         dict(entry) for entry in raw_inlined_entries if isinstance(entry, Mapping)
     ]

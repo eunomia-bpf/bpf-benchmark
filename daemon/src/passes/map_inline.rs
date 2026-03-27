@@ -422,7 +422,7 @@ fn verifier_known_scalar_value(reg: &crate::verifier_log::RegState) -> Option<u6
 
 /// Classify all uses of the lookup result until its value-pointer aliases die out.
 pub fn classify_r0_uses(insns: &[BpfInsn], call_pc: usize) -> R0UseClassification {
-    classify_r0_uses_with_options(insns, call_pc, false)
+    classify_r0_uses_with_options(insns, call_pc, false, false)
 }
 
 #[derive(Clone, Debug)]
@@ -611,6 +611,7 @@ impl BpfPass for MapInlinePass {
                 &program.insns,
                 site.call_pc,
                 info.frozen && info.can_remove_lookup_pattern_v1(),
+                info.can_remove_lookup_pattern_v1(),
             );
             let null_check_pc = uses.null_check_pc;
             if info.is_speculative_v1() && null_check_pc.is_none() {
@@ -1674,6 +1675,7 @@ fn classify_r0_uses_with_options(
     insns: &[BpfInsn],
     start_pc: usize,
     allow_unrelated_helper_calls: bool,
+    allow_readonly_helper_calls: bool,
 ) -> R0UseClassification {
     let mut classification = R0UseClassification::default();
     let mut alias_regs = HashSet::from([0u8]);
@@ -1710,7 +1712,9 @@ fn classify_r0_uses_with_options(
         }
 
         if insn.is_call() {
-            if allow_unrelated_helper_calls || helper_call_is_readonly_for_lookup_value(insn) {
+            if allow_unrelated_helper_calls
+                || (allow_readonly_helper_calls && helper_call_is_readonly_for_lookup_value(insn))
+            {
                 let surviving_aliases = surviving_alias_regs_after_helper_call(&alias_regs);
                 if !surviving_aliases.is_empty() {
                     alias_regs = surviving_aliases;
@@ -2349,7 +2353,7 @@ mod tests {
         assert_eq!(strict_uses.other_uses, vec![3]);
         assert!(strict_uses.fixed_loads.is_empty());
 
-        let relaxed_uses = classify_r0_uses_with_options(&insns, 0, true);
+        let relaxed_uses = classify_r0_uses_with_options(&insns, 0, true, true);
         assert_eq!(relaxed_uses.null_check_pc, Some(2));
         assert_eq!(relaxed_uses.other_uses, Vec::<usize>::new());
         assert_eq!(
@@ -3240,6 +3244,40 @@ mod tests {
                 exit_insn(),
             ]
         );
+    }
+
+    #[test]
+    fn map_inline_pass_skips_hash_lookup_across_readonly_helper_call() {
+        install_hash_map(413, vec![7, 0, 0, 0]);
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let original = vec![
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::mov64_reg(9, 0),
+            jeq_imm(9, 0, 2),
+            call_helper(HELPER_KTIME_GET_NS),
+            BpfInsn::ldx_mem(BPF_W, 6, 9, 0),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ];
+        let mut program = BpfProgram::new(original.clone());
+        program.set_map_ids(vec![413]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(!result.program_changed);
+        assert_eq!(program.insns, original);
+        assert!(result.pass_results[0]
+            .sites_skipped
+            .iter()
+            .any(|skip| skip
+                .reason
+                .contains("fixed-offset scalar loads")));
     }
 
     #[test]

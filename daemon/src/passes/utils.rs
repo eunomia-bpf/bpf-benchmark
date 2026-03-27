@@ -22,23 +22,32 @@ pub fn fixup_all_branches(new_insns: &mut [BpfInsn], old_insns: &[BpfInsn], addr
     let mut old_pc = 0;
     while old_pc < old_n {
         let insn = &old_insns[old_pc];
+        let new_pc = addr_map[old_pc];
+        let next_old_pc = old_pc + insn_width(insn);
+        let survived_unchanged = new_pc < new_insns.len()
+            && next_old_pc < addr_map.len()
+            && addr_map[next_old_pc] > new_pc
+            && new_insns.get(new_pc).copied() == Some(*insn);
+
         if insn.is_call() && insn.src_reg() == 1 {
             // BPF pseudo-call: fix up imm (pc-relative offset to target subprog).
             let old_target = (old_pc as i64 + 1 + insn.imm as i64) as usize;
             if old_target < old_n {
-                let new_pc = addr_map[old_pc];
                 let new_target = addr_map[old_target];
-                if new_pc < new_insns.len() && new_insns[new_pc].is_call() {
+                if survived_unchanged && new_insns[new_pc].is_call() {
                     let new_imm = new_target as i64 - (new_pc as i64 + 1);
                     new_insns[new_pc].imm = new_imm as i32;
                 }
             }
         } else if insn.is_jmp_class() && !insn.is_call() && !insn.is_exit() {
-            let new_pc = addr_map[old_pc];
             let old_target = (old_pc as i64 + 1 + insn.off as i64) as usize;
             if old_target <= old_n {
                 let new_target = addr_map[old_target];
-                if new_pc < new_insns.len() && new_insns[new_pc].is_jmp_class() {
+                if survived_unchanged
+                    && new_insns[new_pc].is_jmp_class()
+                    && !new_insns[new_pc].is_call()
+                    && !new_insns[new_pc].is_exit()
+                {
                     let new_off = new_target as i64 - (new_pc as i64 + 1);
                     new_insns[new_pc].off = new_off as i16;
                 }
@@ -243,7 +252,11 @@ fn fixup_surviving_branches(
                 if old_target <= old_n {
                     let new_pc = addr_map[old_pc];
                     let new_target = addr_map[old_target];
-                    if new_pc < new_insns.len() && new_insns[new_pc].is_jmp_class() {
+                    if new_pc < new_insns.len()
+                        && new_insns[new_pc].is_jmp_class()
+                        && !new_insns[new_pc].is_call()
+                        && !new_insns[new_pc].is_exit()
+                    {
                         let new_off = new_target as i64 - (new_pc as i64 + 1);
                         new_insns[new_pc].off = new_off as i16;
                     }
@@ -327,6 +340,15 @@ mod tests {
         }
     }
 
+    fn call_helper(imm: i32) -> BpfInsn {
+        BpfInsn {
+            code: BPF_JMP | BPF_CALL,
+            regs: BpfInsn::make_regs(0, 0),
+            off: 0,
+            imm,
+        }
+    }
+
     #[test]
     fn test_fixup_all_branches_forward_jump() {
         // Old: [0] JA +1  [1] nop  [2] exit
@@ -343,6 +365,56 @@ mod tests {
         fixup_all_branches(&mut new_insns, &old_insns, &addr_map);
         // JA at new_pc=0 should target new_pc=3 (old target was pc=2 -> addr_map[2]=3)
         assert_eq!(new_insns[0].off, 2); // 3 - (0+1) = 2
+    }
+
+    #[test]
+    fn test_fixup_all_branches_does_not_write_branch_off_into_helper_call() {
+        // Old pc 0 is a branch that gets deleted by a rewrite. addr_map[0] then
+        // points at the next surviving insn, which happens to be a helper call.
+        // Branch fixup must not treat that helper call like a jump and scribble
+        // a non-zero off field into its reserved bits.
+        let old_insns = vec![BpfInsn::ja(1), BpfInsn::nop(), call_helper(5), exit_insn()];
+        let mut new_insns = vec![call_helper(5), exit_insn()];
+        let addr_map = vec![0, 0, 0, 1, 2];
+
+        fixup_all_branches(&mut new_insns, &old_insns, &addr_map);
+
+        assert!(new_insns[0].is_call());
+        assert_eq!(new_insns[0].src_reg(), 0);
+        assert_eq!(new_insns[0].dst_reg(), 0);
+        assert_eq!(new_insns[0].off, 0);
+        assert_eq!(new_insns[0].imm, 5);
+    }
+
+    #[test]
+    fn test_fixup_all_branches_does_not_write_deleted_branch_target_into_surviving_branch() {
+        let old_insns = vec![
+            BpfInsn::ja(1),
+            BpfInsn::nop(),
+            BpfInsn::ja(1),
+            BpfInsn::nop(),
+            exit_insn(),
+        ];
+        let mut new_insns = vec![BpfInsn::ja(1), BpfInsn::nop(), exit_insn()];
+        let addr_map = vec![0, 0, 0, 1, 2, 3];
+
+        fixup_all_branches(&mut new_insns, &old_insns, &addr_map);
+
+        assert!(new_insns[0].is_ja());
+        assert_eq!(new_insns[0].off, 1);
+    }
+
+    #[test]
+    fn test_eliminate_nops_preserves_helper_call_reserved_fields() {
+        let insns = vec![BpfInsn::ja(0), call_helper(5), exit_insn()];
+        let (new_insns, _addr_map) = eliminate_nops(&insns).expect("nop should be removed");
+
+        assert_eq!(new_insns.len(), 2);
+        assert!(new_insns[0].is_call());
+        assert_eq!(new_insns[0].src_reg(), 0);
+        assert_eq!(new_insns[0].dst_reg(), 0);
+        assert_eq!(new_insns[0].off, 0);
+        assert_eq!(new_insns[0].imm, 5);
     }
 
     #[test]

@@ -290,6 +290,21 @@ pub fn assert_valid_bpf(program: &BpfProgram) {
             );
         }
 
+        if insn.is_call() && insn.src_reg() == 0 {
+            assert_eq!(
+                insn.dst_reg(),
+                0,
+                "helper call at pc {} uses non-zero dst_reg reserved field",
+                pc
+            );
+            assert_eq!(
+                insn.off,
+                0,
+                "helper call at pc {} uses non-zero off reserved field",
+                pc
+            );
+        }
+
         pc += if insn.is_ldimm64() { 2 } else { 1 };
     }
 }
