@@ -28,6 +28,7 @@ for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpu
 
 from runner.libs import authoritative_output_path, docs_tmp_dir, latest_output_path, smoke_output_path
 from runner.libs.batch_runner import run_batch_runner
+from runner.libs.object_discovery import supplement_with_existing_corpus_build_objects
 from runner.libs.machines import resolve_machine
 from runner.libs.vm import DEFAULT_VM_TARGET
 
@@ -556,7 +557,7 @@ def merge_passes(*pass_lists: list[str]) -> list[str]:
 def batch_text_invocation_summary(result: dict[str, Any] | None) -> dict[str, Any] | None:
     if result is None:
         return None
-    return {
+    summary = {
         "ok": result["ok"],
         "returncode": result["returncode"],
         "timed_out": result["timed_out"],
@@ -565,6 +566,12 @@ def batch_text_invocation_summary(result: dict[str, Any] | None) -> dict[str, An
         "stderr_tail": summarize_text(result["stderr"]),
         "stdout_tail": summarize_text(result.get("diagnostic_stdout", result["stdout"])),
     }
+    command = result.get("command")
+    if isinstance(command, str):
+        summary["command"] = command
+    elif isinstance(command, list):
+        summary["command"] = [str(part) for part in command]
+    return summary
 
 
 def start_daemon_server(daemon: Path, daemon_socket: str) -> subprocess.Popen[str]:
@@ -1317,11 +1324,16 @@ def load_corpus_build_report(path: Path) -> dict[str, Any]:
     raw_paths = summary.get("available_objects")
     if not isinstance(raw_paths, list) or not raw_paths:
         raise SystemExit(f"invalid corpus build report schema (missing summary.available_objects): {path}")
-    available_objects = {
-        str(Path(raw_path).resolve())
-        for raw_path in raw_paths
-        if Path(raw_path).exists()
-    }
+    raw_build_root = payload.get("build_root")
+    if isinstance(raw_build_root, str) and raw_build_root.strip():
+        build_root = Path(raw_build_root).resolve()
+    else:
+        build_root = (path.parent.parent / "build").resolve()
+    resolved_paths, supplemented_existing = supplement_with_existing_corpus_build_objects(
+        raw_paths,
+        build_root=build_root,
+    )
+    available_objects = {str(object_path) for object_path in resolved_paths}
     if not available_objects:
         raise SystemExit(f"corpus build report has no existing available_objects: {path}")
     return {
@@ -1329,6 +1341,8 @@ def load_corpus_build_report(path: Path) -> dict[str, Any]:
         "payload": payload,
         "summary": summary,
         "available_objects": available_objects,
+        "build_root": build_root,
+        "supplemented_existing": supplemented_existing,
     }
 
 
@@ -2069,8 +2083,8 @@ def build_markdown_v2(data: dict[str, Any]) -> str:
 def load_targets_from_yaml(
     yaml_path: Path,
     corpus_build_report: dict[str, Any],
-    filters: list[str] | None,
-    max_programs: int | None,
+    filters: list[str] | None = None,
+    max_programs: int | None = None,
 ) -> tuple[list[ResolvedObject], dict[str, Any]]:
     with open(yaml_path) as f:
         manifest = yaml.safe_load(f)
@@ -2107,19 +2121,40 @@ def load_targets_from_yaml(
         selected_objects.append(clone_resolved_object(obj, selected_programs))
 
     available_objects = corpus_build_report["available_objects"]
-    missing_objects = [
-        obj.object_path
-        for obj in selected_objects
-        if obj.object_abs_path not in available_objects
-    ]
-    if missing_objects:
-        raise SystemExit(
-            "selected corpus objects missing from build report: "
-            + ", ".join(missing_objects[:12])
-            + (" ..." if len(missing_objects) > 12 else "")
+    kept_selected_objects: list[ResolvedObject] = []
+    kept_on_disk_only: list[str] = []
+    dropped_missing_objects: list[str] = []
+    for obj in selected_objects:
+        if obj.object_abs_path in available_objects:
+            kept_selected_objects.append(obj)
+            continue
+        if Path(obj.object_abs_path).exists():
+            kept_selected_objects.append(obj)
+            kept_on_disk_only.append(obj.object_path)
+            continue
+        dropped_missing_objects.append(obj.object_path)
+
+    if kept_on_disk_only:
+        print(
+            "warning: selected corpus objects missing from build report but present on disk; keeping them: "
+            + ", ".join(kept_on_disk_only[:12])
+            + (" ..." if len(kept_on_disk_only) > 12 else ""),
+            file=sys.stderr,
+            flush=True,
         )
+    if dropped_missing_objects:
+        print(
+            "warning: selected corpus objects missing from build report and disk; dropping them: "
+            + ", ".join(dropped_missing_objects[:12])
+            + (" ..." if len(dropped_missing_objects) > 12 else ""),
+            file=sys.stderr,
+            flush=True,
+        )
+    selected_objects = kept_selected_objects
 
     build_summary_payload = corpus_build_report.get("summary") or {}
+    report_available_total = int(build_summary_payload.get("available_total", len(available_objects)) or len(available_objects))
+    supplemented_existing = int(corpus_build_report.get("supplemented_existing", 0) or 0)
     summary = {
         "manifest": str(yaml_path),
         "schema_version": 2,
@@ -2128,9 +2163,10 @@ def load_targets_from_yaml(
         "total_programs": sum(len(obj.programs) for obj in resolved_objects),
         "selected_programs": sum(len(obj.programs) for obj in selected_objects),
         "build_report_path": str(corpus_build_report["path"]),
-        "available_objects": int(build_summary_payload.get("available_total", len(available_objects)) or len(available_objects)),
+        "available_objects": max(report_available_total, len(available_objects)),
         "built_from_source": int(build_summary_payload.get("built_ok", 0) or 0),
-        "staged_existing": int(build_summary_payload.get("staged_existing", 0) or 0),
+        "staged_existing": int(build_summary_payload.get("staged_existing", 0) or 0) + supplemented_existing,
+        "supplemented_existing": supplemented_existing,
     }
     return selected_objects, summary
 
@@ -2603,7 +2639,7 @@ def build_markdown(data: dict[str, Any]) -> str:
             "",
             "## Notes",
             "",
-            "- Target selection comes from `macro_corpus.yaml`, and every selected object must already appear in the strict build report.",
+            "- Target selection comes from `macro_corpus.yaml`; selected objects must appear in the strict build report or already exist as prebuilt `corpus/build/*.bpf.o` artifacts on disk.",
             "- In strict VM mode, the framework REJIT guest boots once, keeps `daemon serve` alive for the full batch, and runs baseline compile-only, REJIT compile-only, baseline test_run, and REJIT test_run for each target in that order.",
             "- Default steady-state semantics: the daemon is always started and tries to optimize each program; programs with no applicable sites stay on stock JIT.",
             "- `--blind-apply` switches from per-program policy mode to unconditional daemon auto-scan REJIT.",
@@ -2671,6 +2707,17 @@ def packet_main(argv: list[str] | None = None) -> int:
     object_records: list[dict[str, Any]] = []
     program_records: list[dict[str, Any]] = []
     total_programs = sum(len(obj.programs) for obj in objects)
+    print(
+        "vm-corpus selection "
+        f"profile={args.profile or 'default'} "
+        f"passes={','.join(requested_passes) or 'daemon-default'} "
+        f"manifest_objects={yaml_summary['total_objects']} "
+        f"manifest_programs={yaml_summary['total_programs']} "
+        f"selected_objects={yaml_summary['selected_objects']} "
+        f"selected_programs={yaml_summary['selected_programs']} "
+        f"available_objects={yaml_summary['available_objects']}",
+        flush=True,
+    )
     result = {
         "generated_at": started_at,
         "repo_root": str(ROOT_DIR),

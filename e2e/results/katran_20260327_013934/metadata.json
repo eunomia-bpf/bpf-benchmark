@@ -1,0 +1,24 @@
+{
+  "artifact_kind": "result_run",
+  "artifact_version": 1,
+  "case": "katran",
+  "details_dir": "details",
+  "error_message": "command failed (-9): /home/yunwei37/workspace/.venv/bin/python3 /home/yunwei37/workspace/bpf-benchmark/runner/scripts/capture_map_state.py --captured-from e2e/katran --fixture-root /home/yunwei37/workspace/bpf-benchmark/corpus/fixtures --program-specs /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260326/vm-tmp/map-capture-9ace80c_/program_specs.json\n",
+  "generated_at": "2026-03-27T01:41:11.082986+00:00",
+  "last_updated_at": "2026-03-27T01:41:11.082983+00:00",
+  "optimization_summary": {
+    "case": "katran",
+    "error_message": "command failed (-9): /home/yunwei37/workspace/.venv/bin/python3 /home/yunwei37/workspace/bpf-benchmark/runner/scripts/capture_map_state.py --captured-from e2e/katran --fixture-root /home/yunwei37/workspace/bpf-benchmark/corpus/fixtures --program-specs /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260326/vm-tmp/map-capture-9ace80c_/program_specs.json\n",
+    "failed_at": "2026-03-27T01:41:11.081757+00:00",
+    "smoke": false,
+    "status": "error"
+  },
+  "output_hint_json": "e2e/results/katran_authoritative_20260327.json",
+  "output_hint_md": "e2e/results/katran-e2e-real.md",
+  "output_hint_report_md": "docs/tmp/bpftrace-real-e2e-report.md",
+  "run_type": "katran",
+  "smoke": false,
+  "started_at": "2026-03-27T01:39:34.555307+00:00",
+  "status": "error",
+  "suite": "e2e"
+}

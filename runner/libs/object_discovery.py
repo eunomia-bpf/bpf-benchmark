@@ -31,6 +31,50 @@ class CorpusObjectDiscovery:
     corpus_source: str
 
 
+def _resolve_existing_paths(paths: Iterable[str | Path]) -> list[Path]:
+    seen: set[Path] = set()
+    resolved: list[Path] = []
+    for raw_path in paths:
+        path = Path(raw_path).resolve()
+        if path in seen or not path.exists():
+            continue
+        seen.add(path)
+        resolved.append(path)
+    return resolved
+
+
+def existing_corpus_build_objects(build_root: Path) -> list[Path]:
+    if not build_root.exists():
+        return []
+    return _resolve_existing_paths(sorted(build_root.rglob("*.bpf.o")))
+
+
+def supplement_with_existing_corpus_build_objects(
+    paths: Iterable[str | Path],
+    *,
+    build_root: Path,
+) -> tuple[list[Path], int]:
+    resolved = _resolve_existing_paths(paths)
+    seen = set(resolved)
+    supplemented = 0
+
+    for path in existing_corpus_build_objects(build_root):
+        if path in seen:
+            continue
+        seen.add(path)
+        resolved.append(path)
+        supplemented += 1
+
+    return sorted(resolved), supplemented
+
+
+def _report_build_root(report_path: Path, payload: Mapping[str, object]) -> Path:
+    raw_build_root = payload.get("build_root")
+    if isinstance(raw_build_root, str) and raw_build_root.strip():
+        return Path(raw_build_root).resolve()
+    return (report_path.resolve().parent.parent / "build").resolve()
+
+
 def _to_program_entry(record: Mapping[str, object], *, object_path: Path | None = None) -> ProgramListingEntry:
     return ProgramListingEntry(
         name=str(record.get("name", "")),
@@ -77,16 +121,14 @@ def load_corpus_paths_from_build_report(report_path: Path) -> tuple[list[Path], 
     object_paths = summary.get("available_objects")
     if not isinstance(object_paths, list) or not object_paths:
         raise RuntimeError(f"invalid corpus build report schema: missing summary.available_objects in {report_path}")
-
-    seen: set[Path] = set()
-    resolved: list[Path] = []
-    for raw_path in object_paths:
-        path = Path(raw_path).resolve()
-        if path in seen or not path.exists():
-            continue
-        seen.add(path)
-        resolved.append(path)
-    return sorted(resolved), f"expanded build report `{report_path}`"
+    resolved, supplemented = supplement_with_existing_corpus_build_objects(
+        object_paths,
+        build_root=_report_build_root(report_path, payload),
+    )
+    source = f"expanded build report `{report_path}`"
+    if supplemented:
+        source += f" + {supplemented} on-disk prebuilt object(s)"
+    return resolved, source
 
 
 def _is_bpf_machine(path: Path) -> bool:
@@ -142,7 +184,9 @@ __all__ = [
     "collect_corpus_object_paths",
     "discover_corpus_objects",
     "discover_object_programs",
+    "existing_corpus_build_objects",
     "filter_bpf_object_paths",
     "load_corpus_paths_from_build_report",
     "parse_program_listing",
+    "supplement_with_existing_corpus_build_objects",
 ]

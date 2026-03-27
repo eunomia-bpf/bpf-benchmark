@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
-//! Constant propagation and branch folding.
-#![cfg_attr(not(test), allow(dead_code))]
+// Constant propagation and branch folding.
 
 use std::collections::{BTreeMap, HashSet};
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-//! Lightweight branch target analysis.
+// Lightweight branch target analysis.
 
 use crate::pass::{Analysis, BpfProgram};
 

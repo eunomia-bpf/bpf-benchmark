@@ -98,8 +98,8 @@ runner/inventory.json
 docs/reference/papers/*.pdf
 
 # Keep generated per-run detail payloads ignored, but track metadata directories.
-*/results/*/details/
-*/results/*/details/**
+**/results/*/details/
+**/results/*/details/**
 
 # Temporary files and scratch results
 # /tmp/ and tmp/ - the repo-root scratch directory (old layout, superseded by docs/tmp/)
@@ -122,6 +122,15 @@ tmp/
 docs/tmp/**/*.log
 docs/tmp/**/*.json
 docs/tmp/**/*.diff
+docs/tmp/**/*.txt
+docs/tmp/**/*.exit
+docs/tmp/**/guest-scripts/
+docs/tmp/**/guest-scripts/**
+docs/tmp/**/raw/
+docs/tmp/**/raw/**
+docs/tmp/**/target/
+docs/tmp/**/target/**
+docs/tmp/runner-batch-*/
 docs/tmp/bpf_selftest_vm_build/
 docs/tmp/bpf_selftests_bin/
 docs/tmp/*.sh

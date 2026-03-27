@@ -29,7 +29,7 @@ from runner.libs import (  # noqa: E402
 )
 from runner.libs.agent import find_bpf_programs, start_agent, stop_agent, wait_healthy  # noqa: E402
 from runner.libs.metrics import sample_cpu_usage, sample_total_cpu_usage  # noqa: E402
-from runner.libs.rejit import apply_daemon_rejit, scan_programs  # noqa: E402
+from runner.libs.rejit import apply_daemon_rejit, benchmark_performance_passes, scan_programs  # noqa: E402
 from runner.libs.vm import run_in_vm, write_guest_script  # noqa: E402
 from runner.libs.workload import WorkloadResult  # noqa: E402
 from e2e.case_common import (  # noqa: E402
@@ -645,6 +645,7 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
     scx_repo = Path(args.scx_repo).resolve()
     object_path = Path(args.scheduler_object).resolve()
     daemon_binary = Path(args.daemon).resolve()
+    performance_passes = benchmark_performance_passes()
     bpftool_binary = Path(args.bpftool).resolve()
     ensure_artifacts(daemon_binary, scheduler_binary, scx_repo)
 
@@ -689,8 +690,12 @@ def run_scx_case(args: argparse.Namespace) -> dict[str, object]:
                 )
             prog_ids = [int(program["id"]) for program in scheduler_programs]
             baseline = run_phase(workloads, duration_s, agent_pid=session.pid)
-            scan_results = scan_programs(prog_ids, daemon_binary)
-            rejit_result = apply_daemon_rejit(daemon_binary, prog_ids)
+            scan_results = scan_programs(prog_ids, daemon_binary, pass_names=performance_passes)
+            rejit_result = apply_daemon_rejit(
+                daemon_binary,
+                prog_ids,
+                pass_names=performance_passes,
+            )
             if rejit_result["applied"]:
                 post_rejit = run_phase(workloads, duration_s, agent_pid=session.pid)
             else:

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-//! Dead code elimination after constant propagation.
+// Dead code elimination after constant propagation.
 
 use crate::analysis::CFGAnalysis;
 use crate::pass::*;

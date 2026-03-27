@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-//! Per-instruction liveness analysis.
+// Per-instruction liveness analysis.
 
 use std::collections::HashSet;
 

@@ -258,15 +258,27 @@ def macro_relative_path(object_path: Path, build_root: Path) -> str:
 
 def load_macro_object_paths(path: Path) -> dict[str, dict[str, str]]:
     payload = yaml.safe_load(path.read_text()) or {}
+    raw_entries = payload.get("objects")
+    if not isinstance(raw_entries, list):
+        raw_entries = payload.get("programs", [])
     objects: dict[str, dict[str, str]] = {}
-    for program in payload.get("programs", []):
-        raw_source = program.get("source")
+    for entry in raw_entries:
+        if not isinstance(entry, dict):
+            continue
+        raw_source = entry.get("source")
         if not raw_source:
             continue
         source_path = Path(str(raw_source))
         object_path = source_path.resolve() if source_path.is_absolute() else (REPO_ROOT / source_path).resolve()
+        program_name = str(entry.get("program_name") or entry.get("name") or "")
+        if not program_name:
+            programs = entry.get("programs")
+            if isinstance(programs, list) and programs:
+                first_program = programs[0]
+                if isinstance(first_program, dict):
+                    program_name = str(first_program.get("name") or "")
         objects[str(object_path)] = {
-            "program_name": str(program.get("program_name") or program.get("name") or ""),
+            "program_name": program_name,
             "source": str(raw_source),
         }
     return objects

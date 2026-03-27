@@ -377,6 +377,159 @@ def _load_macro_catalog(path: Path, data: Mapping[str, Any]) -> CatalogManifest:
     )
 
 
+def _load_macro_object_catalog(path: Path, data: Mapping[str, Any]) -> CatalogManifest:
+    root_dir = _manifest_root(path)
+    defaults_raw = dict(data.get("defaults", {}))
+    build_data = dict(data.get("build", {}))
+    raw_runtimes = data.get("runtimes")
+    if not isinstance(raw_runtimes, Sequence) or not raw_runtimes:
+        raise ValueError("macro/corpus manifest missing runtimes[]")
+    runtimes, aliases = _load_runtimes(raw_runtimes)
+    runtime_backends = tuple(sorted({runtime.backend for runtime in runtimes}))
+    runtime_policy_modes = tuple(sorted({runtime.policy_mode for runtime in runtimes}))
+    runtime_transports = tuple(sorted({runtime.transport for runtime in runtimes}))
+
+    raw_objects = data.get("objects")
+    if not isinstance(raw_objects, Sequence) or not raw_objects:
+        raise ValueError("macro/corpus manifest missing objects[]")
+
+    targets: list[CatalogTarget] = []
+    for object_index, raw_object in enumerate(raw_objects, start=1):
+        if not isinstance(raw_object, Mapping):
+            raise ValueError(f"macro/corpus objects[{object_index}] must be a mapping")
+
+        object_path = _resolve_path(raw_object.get("source"), root_dir)
+        if object_path is None:
+            raise ValueError(f"macro/corpus objects[{object_index}] missing source")
+
+        object_kind = str(raw_object.get("kind", "macro"))
+        object_section = str(raw_object.get("section", "")) if raw_object.get("section") else ""
+        object_prog_type = str(raw_object["prog_type"]) if raw_object.get("prog_type") else None
+        object_io_mode = str(raw_object["io_mode"]) if raw_object.get("io_mode") else None
+        object_input_size = int(raw_object["input_size"]) if raw_object.get("input_size") is not None else None
+        object_input_path = _resolve_path(raw_object.get("test_input"), root_dir)
+        object_test_method = str(raw_object["test_method"]) if raw_object.get("test_method") else None
+        object_trigger = str(raw_object["trigger"]) if raw_object.get("trigger") else None
+        object_trigger_timeout = (
+            int(raw_object["trigger_timeout_seconds"])
+            if raw_object.get("trigger_timeout_seconds") is not None
+            else None
+        )
+        object_compile_loader = str(raw_object.get("compile_loader", "micro_exec"))
+        object_category = str(raw_object["category"]) if raw_object.get("category") else None
+        object_family = str(raw_object["family"]) if raw_object.get("family") else None
+        object_level = str(raw_object["level"]) if raw_object.get("level") else None
+        object_hypothesis = str(raw_object["hypothesis"]) if raw_object.get("hypothesis") else None
+        object_description = str(raw_object["description"]) if raw_object.get("description") else str(object_path)
+        object_tags = tuple(str(tag) for tag in raw_object.get("tags", ()))
+
+        raw_programs = raw_object.get("programs")
+        if isinstance(raw_programs, Sequence) and raw_programs:
+            for program_index, raw_program in enumerate(raw_programs, start=1):
+                if not isinstance(raw_program, Mapping):
+                    raise ValueError(
+                        f"macro/corpus objects[{object_index}].programs[{program_index}] must be a mapping"
+                    )
+                program_name = raw_program.get("name")
+                if not program_name:
+                    raise ValueError(
+                        f"macro/corpus objects[{object_index}].programs[{program_index}] missing name"
+                    )
+                section = str(raw_program.get("section") or object_section)
+                source_name = str(raw_object.get("source"))
+                target_name = f"{source_name}::{program_index}:{program_name}"
+                tags = tuple(str(tag) for tag in raw_program.get("tags", ())) or object_tags
+                targets.append(
+                    CatalogTarget(
+                        name=target_name,
+                        description=str(raw_program.get("description") or object_description),
+                        kind=object_kind,
+                        object_path=object_path,
+                        program_names=(str(program_name),),
+                        sections=(section,) if section else (),
+                        prog_type=str(raw_program["prog_type"]) if raw_program.get("prog_type") else object_prog_type,
+                        io_mode=str(raw_program.get("io_mode") or object_io_mode) if (raw_program.get("io_mode") or object_io_mode) else None,
+                        input_size=(
+                            int(raw_program["input_size"])
+                            if raw_program.get("input_size") is not None
+                            else object_input_size
+                        ),
+                        input_path=_resolve_path(raw_program.get("test_input"), root_dir) or object_input_path,
+                        test_method=str(raw_program.get("test_method") or object_test_method) if (raw_program.get("test_method") or object_test_method) else None,
+                        trigger=str(raw_program.get("trigger") or object_trigger) if (raw_program.get("trigger") or object_trigger) else None,
+                        trigger_timeout_seconds=(
+                            int(raw_program["trigger_timeout_seconds"])
+                            if raw_program.get("trigger_timeout_seconds") is not None
+                            else object_trigger_timeout
+                        ),
+                        compile_loader=str(raw_program.get("compile_loader") or object_compile_loader),
+                        category=str(raw_program.get("category") or object_category) if (raw_program.get("category") or object_category) else None,
+                        family=str(raw_program.get("family") or object_family) if (raw_program.get("family") or object_family) else None,
+                        level=str(raw_program.get("level") or object_level) if (raw_program.get("level") or object_level) else None,
+                        hypothesis=str(raw_program.get("hypothesis") or object_hypothesis) if (raw_program.get("hypothesis") or object_hypothesis) else None,
+                        tags=tags,
+                        backends=runtime_backends,
+                        policy_modes=runtime_policy_modes,
+                        transports=runtime_transports,
+                        metadata={},
+                    )
+                )
+            continue
+
+        source_name = str(raw_object.get("source"))
+        targets.append(
+            CatalogTarget(
+                name=f"{source_name}::{object_index}",
+                description=object_description,
+                kind=object_kind,
+                object_path=object_path,
+                program_names=(),
+                sections=(object_section,) if object_section else (),
+                prog_type=object_prog_type,
+                io_mode=object_io_mode,
+                input_size=object_input_size,
+                input_path=object_input_path,
+                test_method=object_test_method,
+                trigger=object_trigger,
+                trigger_timeout_seconds=object_trigger_timeout,
+                compile_loader=object_compile_loader,
+                category=object_category,
+                family=object_family,
+                level=object_level,
+                hypothesis=object_hypothesis,
+                tags=object_tags,
+                backends=runtime_backends,
+                policy_modes=runtime_policy_modes,
+                transports=runtime_transports,
+                metadata={},
+            )
+        )
+
+    return CatalogManifest(
+        manifest_path=path,
+        manifest_kind="macro",
+        schema_version=int(data.get("schema_version", 2)),
+        suite_name=str(data.get("suite_name", path.stem)),
+        defaults=DefaultsSpec(
+            iterations=int(defaults_raw["iterations"]) if defaults_raw.get("iterations") is not None else None,
+            warmups=int(defaults_raw["warmups"]) if defaults_raw.get("warmups") is not None else None,
+            repeat=int(defaults_raw["repeat"]) if defaults_raw.get("repeat") is not None else None,
+            output=_resolve_path(defaults_raw.get("output"), root_dir),
+            raw=defaults_raw,
+        ),
+        build=CatalogBuild(
+            commands=_normalize_commands(build_data.get("commands")),
+            runner_binary=_resolve_path(build_data.get("runner_binary"), root_dir),
+            daemon_binary=_resolve_path(build_data.get("daemon_binary"), root_dir),
+            bpftool_binary=build_data.get("bpftool_binary"),
+        ),
+        runtimes=runtimes,
+        targets=_validate_target_names(targets),
+        runtime_aliases=aliases,
+        metadata={},
+    )
+
+
 def load_catalog(path: str | Path) -> CatalogManifest:
     manifest_path = Path(path).resolve()
     data = yaml.safe_load(manifest_path.read_text())
@@ -387,6 +540,8 @@ def load_catalog(path: str | Path) -> CatalogManifest:
         return _load_micro_catalog(manifest_path, data)
     if "programs" in data:
         return _load_macro_catalog(manifest_path, data)
+    if "objects" in data:
+        return _load_macro_object_catalog(manifest_path, data)
     raise ValueError(f"unsupported manifest schema: {manifest_path}")
 
 

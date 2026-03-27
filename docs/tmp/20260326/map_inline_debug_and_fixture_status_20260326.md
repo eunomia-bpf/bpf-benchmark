@@ -1,0 +1,181 @@
+# Map Inline Debug And Fixture Status (2026-03-26)
+
+## 1. Corpus build report bug: prebuilt objects missing from `expanded_corpus_build.latest.json`
+
+### Failure path
+
+- `corpus/driver.py` is only a thin entrypoint. It calls `corpus.modes.packet_main()`.
+- `packet_main()` loads `corpus/results/expanded_corpus_build.latest.json` via `load_corpus_build_report()`.
+- `load_targets_from_yaml()` resolves every object in `corpus/config/macro_corpus.yaml` and rejects any selected object whose `object_abs_path` is not present in `corpus_build_report["available_objects"]`.
+- The exact failure is raised here:
+  - `corpus/modes.py`: `selected corpus objects missing from build report: ...`
+
+### What was wrong
+
+- The current `corpus/results/expanded_corpus_build.latest.json` reports:
+  - `available_total = 565`
+  - `built_ok = 429`
+  - `staged_existing = 136`
+- But `corpus/build/` currently contains 568 `.bpf.o` files on disk.
+- The raw report now covers every manifest object in `macro_corpus.yaml`, but it still under-reports the build tree by 3 on-disk `.bpf.o` artifacts.
+- `runner/scripts/build_corpus_objects.py` already has logic to stage macro-corpus prebuilts as `status=existing`, so the underlying issue is still report drift relative to the live `corpus/build/` tree.
+
+### Fix applied
+
+- Updated `runner/libs/object_discovery.py` to supplement `summary.available_objects` with existing `corpus/build/**/*.bpf.o` files on disk.
+- Updated `corpus/modes.py` to use the same supplementation logic before validating selected objects.
+- Result: stale reports no longer reject valid prebuilt corpus objects that already exist in `corpus/build/`.
+
+### Verification
+
+- Focused selection check:
+  - `selected_objects = 477`
+  - `selected_programs = 2019`
+  - `available_objects = 568`
+  - `staged_existing = 139`
+  - `supplemented_existing = 3`
+- Requested import check:
+
+```bash
+source /home/yunwei37/workspace/.venv/bin/activate && python3 -c "import corpus.driver; print('ok')"
+```
+
+- Output: `ok`
+
+## 2. Map fixture integration status
+
+### Runner replay path
+
+- `runner/src/common.cpp` parses `--fixture-path` into `cli_options.fixture_path`.
+- `runner/src/batch_runner.cpp` also accepts `fixture_path` in batch JSON jobs and forwards it into the same `cli_options` field.
+- `runner/src/kernel_runner.cpp` calls `maybe_load_map_fixtures()` before execution.
+- Fixtures are only loaded for non-`compile_only` runs.
+- `load_map_fixtures()`:
+  - parses the fixture JSON/YAML file,
+  - expects a top-level `maps` sequence,
+  - matches maps by `map_name` or `map_id`,
+  - validates optional `key_size` / `value_size`,
+  - updates live map entries before execution,
+  - handles special map value types that store referenced map/program FDs.
+
+### Capture path
+
+- `runner/scripts/capture_map_state.py` writes per-program fixtures under:
+  - `corpus/fixtures/<repo>/<object>/<program>.json`
+- It consumes:
+  - a program-spec JSON (`repo`, `object`, `program`, `prog_id`),
+  - daemon optimize results containing `inlined_map_entries`.
+- Current capture grouping is by `map_id`, with deduplication by `(map_id, key_hex)`.
+
+### Existing fixture artifacts
+
+- The user-provided `find e2e/results/ corpus/ -name '*.fixture.json' -o -name '*fixture*' | head -20` only surfaces `corpus/fixtures`, because the loose `*fixture*` branch matches the directory name itself.
+- Actual fixture files exist under `corpus/fixtures/`.
+- Current tree contains 20 fixture JSON files:
+  - Tracee: 13
+  - Tetragon: 7
+- Existing E2E metadata confirms successful capture:
+  - `e2e/results/tracee_20260327_012734/metadata.json`: `programs_written = 13`
+  - `e2e/results/tetragon_20260327_013101/metadata.json`: `programs_written = 7`
+- Katran capture is not healthy yet:
+  - `e2e/results/katran_20260327_013934/metadata.json` records `capture_map_state.py` failing with `command failed (-9)`.
+
+### `macro_corpus.yaml` status
+
+- `corpus/config/macro_corpus.yaml` documents `fixture_path` as an optional object field.
+- No current object entry sets `fixture_path`.
+- By filename convention, 20 existing fixtures already match macro-corpus objects, all from:
+  - `tracee/tracee.bpf.o`
+  - several `tetragon/*.bpf.o` objects
+- But because `fixture_path` is never set in the YAML, corpus batch jobs never pass `--fixture-path` to the runner.
+
+### Important schema drift / missing glue
+
+1. Corpus integration is not wired.
+   - The runner path is ready.
+   - The corpus planner already forwards `ResolvedObject.fixture_path` into batch jobs.
+   - But `macro_corpus.yaml` leaves every `fixture_path` unset, so VM corpus runs do not replay any fixtures.
+
+2. The current capture script writes unstable identifiers.
+   - `runner/src/kernel_runner.cpp` can replay by stable `map_name` or by `map_id`.
+   - The current `runner/scripts/capture_map_state.py` only emits `map_id` plus entry data.
+   - Kernel map IDs are runtime-assigned and are not stable across runs.
+   - So fixtures generated by the current script are not portable enough for reliable future replay unless the loader happens to see the same map IDs.
+
+3. Existing checked-in fixtures are richer than the current capture code.
+   - Current script output model only includes grouped `map_id` + `entries`.
+   - Existing fixtures under `corpus/fixtures/` already contain stable metadata such as `map_name`, `map_type`, `key_size`, `value_size`, and `max_entries`.
+   - Existing E2E result manifests also include per-program `map_errors`, but the current script always emits `map_errors: []`.
+   - That means the current capture implementation has drifted from the artifact format already present in the repo.
+
+4. The daemon optimize output currently exposes only `map_id`, `key_hex`, and `value_hex`.
+   - To regenerate robust fixtures end-to-end, capture needs either:
+     - richer daemon output with stable map metadata, or
+     - a lookup step inside `capture_map_state.py` to resolve `map_id -> map_name` / sizes / type before writing fixtures.
+
+### End-to-end status summary
+
+- E2E capture path exists and has produced fixture files for Tracee and Tetragon.
+- Runner replay path exists and can load fixtures.
+- Corpus batch plumbing for `fixture_path` exists.
+- What is missing for full end-to-end corpus use:
+  - populate `fixture_path` in `macro_corpus.yaml`,
+  - make capture emit stable map identity (`map_name`) and preferably map metadata,
+  - fix Katran capture reliability,
+  - ideally restore richer `map_errors` / metadata output so generated fixtures match the checked-in format.
+
+## 3. `map_inline` usefulness, especially for zero-valued map entries
+
+### Test output
+
+- Command run:
+
+```bash
+cargo test --manifest-path daemon/Cargo.toml map_inline -- --nocapture 2>&1 | tail -50
+```
+
+- Result: 37 `map_inline`-related tests passed.
+
+### What the pass does
+
+- `MapInlinePass` finds `bpf_map_lookup_elem()` call sites.
+- It resolves the referenced live map via `MapInfoAnalysis`.
+- It extracts a constant lookup key from the stack setup.
+- It reads the concrete map value at specialization time with `bpf_map_lookup_elem_by_id(...)`.
+- For each fixed-offset scalar load from the returned `r0` map-value pointer, it replaces that load with a constant materialization.
+
+### What zero values become
+
+- Constant emission is handled by `emit_constant_load()`.
+- When the inlined scalar value is zero, the replacement is still a normal constant load:
+  - typically `mov64_imm dst, 0`
+  - `ldimm64` is only used when the constant needs a wider encoding
+- So a zero-filled map value does not produce “nothing”; it still rewrites the load into an immediate constant.
+
+### Does zero still help?
+
+Yes, but the answer depends on map type.
+
+#### Array maps
+
+- `MapInfo::can_remove_lookup_pattern_v1()` returns true only for `BPF_MAP_TYPE_ARRAY`.
+- For array maps, when the lookup pattern is safe to remove, the pass deletes:
+  - the pseudo-map load,
+  - constant-key setup,
+  - `bpf_map_lookup_elem()` helper call,
+  - the immediate null check,
+  - then cleans dead blocks / nops.
+- This is true even when the inlined value is zero.
+- So for array maps, zero-valued inline is still directly useful because it removes the helper dispatch itself, not just the dependent load.
+
+#### Hash / LRU hash maps
+
+- Hash-family maps are treated as speculative.
+- The pass rewrites scalar loads to constants, but keeps the lookup helper call and null-check in place.
+- Confirmed by the unit test `map_inline_pass_keeps_hash_lookup_and_null_check`.
+- So for hash maps, a zero value can still help later passes such as `const_prop` / DCE, but it does not currently remove helper-call overhead.
+
+### Bottom line
+
+- The key cycle-saving argument is valid for array maps: even if the map value is all zeroes, removing `bpf_map_lookup_elem()` avoids helper dispatch overhead and null-check/control-flow overhead.
+- For hash maps, the current implementation does not yet realize that helper-dispatch saving; the benefit is limited to replacing downstream loads and enabling later simplifications.

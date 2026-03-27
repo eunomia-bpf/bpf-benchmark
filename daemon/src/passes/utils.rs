@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-//! Shared utilities for BPF rewrite passes.
-//!
-//! Contains branch fixup, kinsn call emission, and instruction iteration
-//! helpers that are used by multiple passes.
+// Shared utilities for BPF rewrite passes.
+//
+// Contains branch fixup, kinsn call emission, and instruction iteration
+// helpers that are used by multiple passes.
 
 use std::collections::HashSet;
 

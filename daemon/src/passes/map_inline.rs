@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
-//! Scan helpers for dynamic map inlining.
-#![cfg_attr(not(test), allow(dead_code))]
+// Scan helpers for dynamic map inlining.
 
 use std::collections::{BTreeMap, HashSet};
 use std::fmt::Write as _;
@@ -176,50 +175,92 @@ impl BpfPass for MapInlinePass {
         let mut skipped = Vec::new();
         let mut rewrites = Vec::new();
         let mut diagnostics = Vec::new();
+        let sites = find_map_lookup_sites(&program.insns);
 
-        for site in find_map_lookup_sites(&program.insns) {
+        log_map_inline_debug(&format!("found {} lookup sites", sites.len()));
+
+        for site in sites {
+            log_map_inline_debug(&format!(
+                "evaluating site at PC={} (map_load_pc={})",
+                site.call_pc, site.map_load_pc
+            ));
             let Some(map_ref) = map_info.reference_at_pc(site.map_load_pc) else {
+                log_map_inline_debug(&format!(
+                    "site pc={} skip: map reference unavailable",
+                    site.call_pc
+                ));
                 let reason = "map reference metadata unavailable".to_string();
-                skipped.push(SkipReason {
-                    pc: site.call_pc,
-                    reason: reason.clone(),
-                });
-                diagnostics.push(site_skip_diagnostic(site.call_pc, &reason));
+                record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
                 continue;
             };
+            log_map_inline_debug(&format!(
+                "site at PC={}: map_ref old_fd={} map_index={} map_id={:?}",
+                site.call_pc, map_ref.old_fd, map_ref.map_index, map_ref.map_id
+            ));
             let Some(info) = map_ref.info.as_ref() else {
                 let reason = "map info unavailable".to_string();
-                skipped.push(SkipReason {
-                    pc: site.call_pc,
-                    reason: reason.clone(),
-                });
-                diagnostics.push(site_skip_diagnostic(site.call_pc, &reason));
+                record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
                 continue;
             };
+            log_map_inline_debug(&format!(
+                "site at PC={}: resolved map_id={} map_type={} key_size={} value_size={} max_entries={} frozen={}",
+                site.call_pc,
+                info.map_id,
+                info.map_type,
+                info.key_size,
+                info.value_size,
+                info.max_entries,
+                info.frozen
+            ));
             if !info.is_inlineable_v1() {
-                let reason = format!("map type {} not inlineable in v1", info.map_type);
-                skipped.push(SkipReason {
-                    pc: site.call_pc,
-                    reason,
-                });
-                diagnostics.push(format!(
-                    "site at PC={}: map_type={}, skip reason: unsupported map type",
+                log_map_inline_debug(&format!(
+                    "site pc={} skip: map type {} not inlineable",
                     site.call_pc, info.map_type
                 ));
+                let reason = format!("map type {} not inlineable in v1", info.map_type);
+                record_skip(
+                    &mut skipped,
+                    &mut diagnostics,
+                    site.call_pc,
+                    reason,
+                    Some(format!(
+                        "site at PC={}: map_type={}, skip reason: unsupported map type",
+                        site.call_pc, info.map_type
+                    )),
+                );
                 continue;
             }
 
             let key = match try_extract_constant_key(&program.insns, site.call_pc) {
-                Ok(key) => key,
+                Ok(key) => {
+                    log_map_inline_debug(&format!(
+                        "site at PC={}: extracted key value={} width={} stack_off={} store_pc={} source_imm_pc={:?} r2_mov_pc={:?} r2_add_pc={:?}",
+                        site.call_pc,
+                        key.value,
+                        key.width,
+                        key.stack_off,
+                        key.store_pc,
+                        key.source_imm_pc,
+                        key.r2_mov_pc,
+                        key.r2_add_pc
+                    ));
+                    key
+                }
                 Err(err) => {
-                    skipped.push(SkipReason {
-                        pc: site.call_pc,
-                        reason: "lookup key is not a constant stack materialization".into(),
-                    });
-                    diagnostics.push(format!(
-                        "site at PC={}: key extraction failed: {}",
+                    log_map_inline_debug(&format!(
+                        "site pc={} skip: {}",
                         site.call_pc, err
                     ));
+                    record_skip(
+                        &mut skipped,
+                        &mut diagnostics,
+                        site.call_pc,
+                        "lookup key is not a constant stack materialization".into(),
+                        Some(format!(
+                            "site at PC={}: key extraction failed: {}",
+                            site.call_pc, err
+                        )),
+                    );
                     continue;
                 }
             };
@@ -228,11 +269,7 @@ impl BpfPass for MapInlinePass {
                     "key width {} is smaller than map key size {}",
                     key.width, info.key_size
                 );
-                skipped.push(SkipReason {
-                    pc: site.call_pc,
-                    reason: reason.clone(),
-                });
-                diagnostics.push(site_skip_diagnostic(site.call_pc, &reason));
+                record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
                 continue;
             }
             if info.can_remove_lookup_pattern_v1() && key.value >= info.max_entries as u64 {
@@ -240,42 +277,33 @@ impl BpfPass for MapInlinePass {
                     "constant key {} out of range for max_entries {}",
                     key.value, info.max_entries
                 );
-                skipped.push(SkipReason {
-                    pc: site.call_pc,
-                    reason: reason.clone(),
-                });
-                diagnostics.push(site_skip_diagnostic(site.call_pc, &reason));
+                record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
                 continue;
             }
 
             let null_check_pc = find_immediate_null_check(&program.insns, site.call_pc);
             if info.is_speculative_v1() && null_check_pc.is_none() {
                 let reason = "speculative map inline requires an immediate null check".to_string();
-                skipped.push(SkipReason {
-                    pc: site.call_pc,
-                    reason: reason.clone(),
-                });
-                diagnostics.push(site_skip_diagnostic(site.call_pc, &reason));
+                record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
                 continue;
             }
             let uses = classify_r0_uses_from(&program.insns, null_check_pc.unwrap_or(site.call_pc));
+            log_map_inline_debug(&format!(
+                "site at PC={}: null_check_pc={:?} fixed_loads={} other_uses={}",
+                site.call_pc,
+                null_check_pc,
+                uses.fixed_loads.len(),
+                uses.other_uses.len()
+            ));
             if uses.fixed_loads.is_empty() {
                 let reason =
                     "lookup result is not consumed by fixed-offset scalar loads".to_string();
-                skipped.push(SkipReason {
-                    pc: site.call_pc,
-                    reason: reason.clone(),
-                });
-                diagnostics.push(site_skip_diagnostic(site.call_pc, &reason));
+                record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
                 continue;
             }
             if !uses.all_fixed_loads() {
                 let reason = "lookup result has non-load uses".to_string();
-                skipped.push(SkipReason {
-                    pc: site.call_pc,
-                    reason: reason.clone(),
-                });
-                diagnostics.push(site_skip_diagnostic(site.call_pc, &reason));
+                record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
                 continue;
             }
 
@@ -284,23 +312,21 @@ impl BpfPass for MapInlinePass {
                 Ok(Some(rewrite)) => rewrite,
                 Ok(None) => {
                     let reason = "failed to materialize replacement constants".to_string();
-                    skipped.push(SkipReason {
-                        pc: site.call_pc,
-                        reason: reason.clone(),
-                    });
-                    diagnostics.push(site_skip_diagnostic(site.call_pc, &reason));
+                    record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
                     continue;
                 }
                 Err(err) => {
                     let reason = format!("map lookup failed: {err:#}");
-                    skipped.push(SkipReason {
-                        pc: site.call_pc,
-                        reason: reason.clone(),
-                    });
-                    diagnostics.push(format!(
-                        "site at PC={}: value read failed: {:#}",
-                        site.call_pc, err
-                    ));
+                    record_skip(
+                        &mut skipped,
+                        &mut diagnostics,
+                        site.call_pc,
+                        reason,
+                        Some(format!(
+                            "site at PC={}: value read failed: {:#}",
+                            site.call_pc, err
+                        )),
+                    );
                     continue;
                 }
             };
@@ -311,11 +337,7 @@ impl BpfPass for MapInlinePass {
                 .any(|&pc| pc < bt.is_target.len() && bt.is_target[pc])
             {
                 let reason = "lookup pattern contains a branch target".to_string();
-                skipped.push(SkipReason {
-                    pc: site.call_pc,
-                    reason: reason.clone(),
-                });
-                diagnostics.push(site_skip_diagnostic(site.call_pc, &reason));
+                record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
                 continue;
             }
 
@@ -325,18 +347,22 @@ impl BpfPass for MapInlinePass {
                 .any(|pc| rewrite.skipped_pcs.contains(pc))
             {
                 let reason = "internal rewrite overlap".to_string();
-                skipped.push(SkipReason {
-                    pc: site.call_pc,
-                    reason: reason.clone(),
-                });
-                diagnostics.push(site_skip_diagnostic(site.call_pc, &reason));
+                record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
                 continue;
             }
 
+            log_map_inline_debug(&format!(
+                "site at PC={}: rewrite prepared with {} replacement load(s), removed_null_check={}, speculative={}",
+                site.call_pc,
+                rewrite.replacements.len(),
+                rewrite.removed_null_check,
+                rewrite.speculative
+            ));
             rewrites.push(rewrite);
         }
 
         if rewrites.is_empty() {
+            log_map_inline_debug("no map_inline rewrites prepared");
             return Ok(PassResult {
                 pass_name: self.name().into(),
                 changed: false,
@@ -367,20 +393,25 @@ impl BpfPass for MapInlinePass {
                 || rewrite.skipped_pcs.iter().any(|pc| skip_pcs.contains(pc));
             if conflict {
                 let reason = "overlapping map inline rewrite".to_string();
-                skipped.push(SkipReason {
-                    pc: rewrite.call_pc,
-                    reason: reason.clone(),
-                });
-                diagnostics.push(site_skip_diagnostic(rewrite.call_pc, &reason));
+                record_skip(
+                    &mut skipped,
+                    &mut diagnostics,
+                    rewrite.call_pc,
+                    reason,
+                    None,
+                );
                 continue;
             }
 
             removed_any_null_check |= rewrite.removed_null_check;
             speculative_sites += usize::from(rewrite.speculative);
-            diagnostics.push(format!(
-                "site at PC={}: inlined successfully, value={}",
-                rewrite.call_pc, rewrite.diagnostic_value
-            ));
+            record_diagnostic(
+                &mut diagnostics,
+                format!(
+                    "site at PC={}: inlined successfully, value={}",
+                    rewrite.call_pc, rewrite.diagnostic_value
+                ),
+            );
             map_inline_records.push(rewrite.map_inline_record);
             skip_pcs.extend(rewrite.skipped_pcs);
             replacements.extend(rewrite.replacements);
@@ -388,6 +419,7 @@ impl BpfPass for MapInlinePass {
         }
 
         if applied == 0 {
+            log_map_inline_debug("all prepared rewrites were discarded");
             return Ok(PassResult {
                 pass_name: self.name().into(),
                 changed: false,
@@ -453,11 +485,17 @@ impl BpfPass for MapInlinePass {
         });
 
         if speculative_sites > 0 {
-            diagnostics.push(format!(
-                "speculative map-inline sites: {}",
-                speculative_sites
-            ));
+            record_diagnostic(
+                &mut diagnostics,
+                format!("speculative map-inline sites: {}", speculative_sites),
+            );
         }
+
+        log_map_inline_debug(&format!(
+            "applied {} map_inline rewrite(s), skipped {} site(s)",
+            applied,
+            skipped.len()
+        ));
 
         Ok(PassResult {
             pass_name: self.name().into(),
@@ -481,8 +519,29 @@ fn build_site_rewrite(
 ) -> anyhow::Result<Option<SiteRewrite>> {
     let remove_lookup_pattern = info.can_remove_lookup_pattern_v1();
     let encoded_key = encode_key_bytes(key.value, info.key_size as usize);
-    let value =
-        bpf::bpf_map_lookup_elem_by_id(info.map_id, &encoded_key, info.value_size as usize)?;
+    log_map_inline_debug(&format!(
+        "site pc={} reading map_id={} key={:?}",
+        site.call_pc, info.map_id, encoded_key
+    ));
+    let value = match bpf::bpf_map_lookup_elem_by_id(info.map_id, &encoded_key, info.value_size as usize) {
+        Ok(value) => {
+            log_map_inline_debug(&format!(
+                "site pc={} INLINE value={:?}",
+                site.call_pc, value
+            ));
+            value
+        }
+        Err(err) => {
+            log_map_inline_debug(&format!(
+                "site at PC={}: bpf_map_lookup_elem_by_id(map_id={}, key={}) failed: {:#}",
+                site.call_pc,
+                info.map_id,
+                format_bytes_preview(&encoded_key),
+                err
+            ));
+            return Err(err);
+        }
+    };
 
     let mut lookup_pattern_pcs = HashSet::new();
     if remove_lookup_pattern {
@@ -1048,6 +1107,32 @@ fn subprog_bounds(insns: &[BpfInsn], pc: usize) -> (usize, usize) {
 
 fn site_skip_diagnostic(pc: usize, reason: &str) -> String {
     format!("site at PC={}: skip reason: {}", pc, reason)
+}
+
+fn log_map_inline_debug(message: &str) {
+    eprintln!("map_inline: {}", message);
+}
+
+fn record_diagnostic(diagnostics: &mut Vec<String>, message: String) {
+    log_map_inline_debug(&message);
+    diagnostics.push(message);
+}
+
+fn record_skip(
+    skipped: &mut Vec<SkipReason>,
+    diagnostics: &mut Vec<String>,
+    pc: usize,
+    reason: String,
+    detail: Option<String>,
+) {
+    skipped.push(SkipReason {
+        pc,
+        reason: reason.clone(),
+    });
+    record_diagnostic(diagnostics, site_skip_diagnostic(pc, &reason));
+    if let Some(detail) = detail {
+        record_diagnostic(diagnostics, detail);
+    }
 }
 
 fn format_bytes_preview(bytes: &[u8]) -> String {

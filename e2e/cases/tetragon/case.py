@@ -35,7 +35,7 @@ from runner.libs.metrics import (  # noqa: E402
     sample_cpu_usage,
     sample_total_cpu_usage,
 )
-from runner.libs.rejit import apply_daemon_rejit, scan_programs  # noqa: E402
+from runner.libs.rejit import apply_daemon_rejit, benchmark_performance_passes, scan_programs  # noqa: E402
 from runner.libs.workload import (  # noqa: E402
     WorkloadResult,
     run_connect_storm,
@@ -668,6 +668,7 @@ def daemon_payload(
     setup_result: Mapping[str, object],
     limitations: list[str],
 ) -> dict[str, object]:
+    performance_passes = benchmark_performance_passes()
     with tempfile.TemporaryDirectory(prefix="tetragon-policy-") as tempdir:
         policy_dir = Path(tempdir)
         policy_paths = write_tetragon_policies(policy_dir)
@@ -693,8 +694,12 @@ def daemon_payload(
                             if key != "program_specs"
                         }
                     }
-                scan_results = scan_programs(prog_ids, daemon_binary)
-                rejit_result = apply_daemon_rejit(daemon_binary, prog_ids)
+                scan_results = scan_programs(prog_ids, daemon_binary, pass_names=performance_passes)
+                rejit_result = apply_daemon_rejit(
+                    daemon_binary,
+                    prog_ids,
+                    pass_names=performance_passes,
+                )
                 if capture_maps and map_capture is not None:
                     optimize_results = (
                         rejit_result.get("per_program")

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-//! Map metadata analysis for map inlining.
+// Map metadata analysis for map inlining.
 
 use std::collections::HashMap;
 

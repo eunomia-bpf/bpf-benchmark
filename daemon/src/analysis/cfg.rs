@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-//! CFG (Control Flow Graph) analysis.
+// CFG (Control Flow Graph) analysis.
 
 use crate::pass::{Analysis, BpfProgram};
 
