@@ -25,7 +25,7 @@ for candidate in (REPO_ROOT, SCRIPT_DIR, REPO_ROOT / "micro", REPO_ROOT / "corpu
     if candidate_str not in sys.path:
         sys.path.insert(0, candidate_str)
 
-from runner.libs import authoritative_output_path, latest_output_path, smoke_output_path
+from runner.libs import authoritative_output_path, docs_tmp_dir, latest_output_path, smoke_output_path
 from runner.libs.batch_runner import run_batch_runner
 from runner.libs.machines import resolve_machine
 from runner.libs.vm import DEFAULT_VM_TARGET
@@ -1226,18 +1226,19 @@ def run_targets_in_guest_batch(
     on_guest_info: Callable[[dict[str, Any]], None] | None = None,
     on_record: Callable[[int, dict[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
+    batch_tmp_dir = docs_tmp_dir("corpus-rejit-batch")
     handle = tempfile.NamedTemporaryFile(
         mode="w",
         prefix="corpus-rejit-vm-batch-",
         suffix=".json",
-        dir=ROOT_DIR,
+        dir=batch_tmp_dir,
         delete=False,
     )
     result_handle = tempfile.NamedTemporaryFile(
         mode="w",
         prefix="corpus-rejit-vm-batch-result-",
         suffix=".json",
-        dir=ROOT_DIR,
+        dir=batch_tmp_dir,
         delete=False,
     )
     try:

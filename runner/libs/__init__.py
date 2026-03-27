@@ -49,6 +49,20 @@ def result_date_stamp(now: datetime | None = None) -> str:
     return current.astimezone(timezone.utc).strftime("%Y%m%d")
 
 
+def scratch_date_stamp(now: datetime | None = None) -> str:
+    current = now or datetime.now().astimezone()
+    return current.astimezone().strftime("%Y%m%d")
+
+
+def docs_tmp_dir(*parts: str | Path, stamp: str | None = None, ensure: bool = True) -> Path:
+    path = ROOT_DIR / "docs" / "tmp" / (stamp or scratch_date_stamp())
+    for part in parts:
+        path /= str(part)
+    if ensure:
+        path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
 def authoritative_output_path(results_dir: Path, suite: str, *, stamp: str | None = None) -> Path:
     return results_dir / f"{suite}_authoritative_{stamp or result_date_stamp()}.json"
 
@@ -219,6 +233,7 @@ __all__ = [
     "RESULTS_DIR",
     "ROOT_DIR",
     "authoritative_output_path",
+    "docs_tmp_dir",
     "ensure_parent",
     "latest_output_path",
     "prepare_bpftool_environment",
@@ -227,6 +242,7 @@ __all__ = [
     "result_date_stamp",
     "run_command",
     "run_json_command",
+    "scratch_date_stamp",
     "smoke_output_path",
     "tail_text",
     "which",

@@ -540,6 +540,38 @@ pub fn bpf_map_lookup_elem(fd: RawFd, key: &[u8], value_size: usize) -> Result<V
     Ok(value)
 }
 
+/// Lookup a map element by fd and return `None` when the key is absent.
+pub fn bpf_map_lookup_elem_optional(
+    fd: RawFd,
+    key: &[u8],
+    value_size: usize,
+) -> Result<Option<Vec<u8>>> {
+    let mut attr: AttrMapElem = zeroed_attr();
+    let mut value = vec![0u8; value_size];
+
+    attr.map_fd = fd as u32;
+    attr.key = key.as_ptr() as u64;
+    attr.value = value.as_mut_ptr() as u64;
+    attr.flags = 0;
+
+    let ret = unsafe {
+        sys_bpf(
+            BPF_MAP_LOOKUP_ELEM,
+            &mut attr as *mut _ as *mut u8,
+            std::mem::size_of::<AttrMapElem>() as u32,
+        )
+    };
+    if ret < 0 {
+        let err = std::io::Error::last_os_error();
+        if err.raw_os_error() == Some(libc::ENOENT) {
+            return Ok(None);
+        }
+        bail!("BPF_MAP_LOOKUP_ELEM: {}", err);
+    }
+
+    Ok(Some(value))
+}
+
 /// Lookup a map element by map ID and return the raw value bytes.
 pub fn bpf_map_lookup_elem_by_id(map_id: u32, key: &[u8], value_size: usize) -> Result<Vec<u8>> {
     #[cfg(test)]

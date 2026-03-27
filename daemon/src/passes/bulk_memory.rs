@@ -31,7 +31,7 @@ enum BulkSiteKind {
         src_base: u8,
         dst_off: i16,
         src_off: i16,
-        width: u8,
+        temp_reg: u8,
         chunk_sizes: Vec<usize>,
     },
     Memset {
@@ -360,7 +360,6 @@ fn try_match_memcpy_run_at(
     let consumed_pairs = consumed_bytes / lane_bytes;
     let old_len = consumed_pairs * 2;
     let last_pc = pc + old_len - 1;
-
     if first.src_base == first.dst_base && ranges_overlap(first.src_off, first.dst_off, raw_bytes) {
         return MatchOutcome::Skip {
             reason: "overlapping same-base memcpy run".into(),
@@ -388,7 +387,7 @@ fn try_match_memcpy_run_at(
             src_base: first.src_base,
             dst_off: first.dst_off,
             src_off: first.src_off,
-            width: first.width,
+            temp_reg: first.tmp_reg,
             chunk_sizes,
         },
     })
@@ -524,7 +523,7 @@ fn emit_site_replacement(
             src_base,
             dst_off,
             src_off,
-            width,
+            temp_reg,
             chunk_sizes,
         } => {
             let mut out = Vec::with_capacity(chunk_sizes.len() * 2);
@@ -538,7 +537,7 @@ fn emit_site_replacement(
                         cur_dst_off as i16,
                         cur_src_off as i16,
                         chunk_size as u8,
-                        *width,
+                        *temp_reg,
                     ),
                     memcpy_btf_id,
                     memcpy_off,
@@ -582,14 +581,14 @@ fn pack_memcpy_payload(
     dst_off: i16,
     src_off: i16,
     len: u8,
-    width: u8,
+    temp_reg: u8,
 ) -> u64 {
     (dst_base as u64)
         | ((src_base as u64) << 4)
         | ((dst_off as u16 as u64) << 8)
         | ((src_off as u16 as u64) << 24)
         | (((len - 1) as u64) << 40)
-        | (width_class(width) << 48)
+        | ((temp_reg as u64) << 48)
 }
 
 fn pack_memset_payload(base: u8, dst_off: i16, len: u8, width: u8, fill_byte: u8) -> u64 {
@@ -916,7 +915,7 @@ mod tests {
         dst_off: i16,
         src_off: i16,
         len: u8,
-        size: u8,
+        temp_reg: u8,
     ) -> u64 {
         assert!((1..=128).contains(&len));
         (dst_base as u64)
@@ -924,7 +923,7 @@ mod tests {
             | ((dst_off as u16 as u64) << 8)
             | ((src_off as u16 as u64) << 24)
             | (((len - 1) as u64) << 40)
-            | (width_class(size) << 48)
+            | ((temp_reg as u64) << 48)
     }
 
     fn pack_memset_payload(
@@ -954,10 +953,10 @@ mod tests {
         src_base: u8,
         src_off: i16,
         len: u8,
-        size: u8,
+        temp_reg: u8,
     ) -> Vec<BpfInsn> {
         emit_packed_kinsn_call_with_off(
-            pack_memcpy_payload(dst_base, src_base, dst_off, src_off, len, size),
+            pack_memcpy_payload(dst_base, src_base, dst_off, src_off, len, temp_reg),
             MEMCPY_BTF_ID,
             0,
         )
@@ -1175,7 +1174,7 @@ mod tests {
     #[test]
     fn test_memcpy_pattern_8_pairs() {
         let mut program = make_program(make_memcpy_program_8_pairs());
-        let mut expected = memcpy_call(10, -64, 6, 0, 64, BPF_DW);
+        let mut expected = memcpy_call(10, -64, 6, 0, 64, 3);
         expected.push(exit_insn());
 
         let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
@@ -1213,8 +1212,8 @@ mod tests {
     #[test]
     fn test_different_base_regs_not_merged() {
         let mut program = make_program(make_different_base_regs_program());
-        let mut expected = memcpy_call(10, -64, 6, 0, 32, BPF_DW);
-        expected.extend(memcpy_call(8, 0, 10, -32, 32, BPF_DW));
+        let mut expected = memcpy_call(10, -64, 6, 0, 32, 3);
+        expected.extend(memcpy_call(8, 0, 10, -32, 32, 3));
         expected.push(exit_insn());
 
         let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
@@ -1243,8 +1242,8 @@ mod tests {
     #[test]
     fn test_non_consecutive_offsets_split() {
         let mut program = make_program(make_non_consecutive_offsets_program());
-        let mut expected = memcpy_call(10, -64, 6, 0, 32, BPF_DW);
-        expected.extend(memcpy_call(10, -24, 6, 40, 32, BPF_DW));
+        let mut expected = memcpy_call(10, -64, 6, 0, 32, 3);
+        expected.extend(memcpy_call(10, -24, 6, 40, 32, 3));
         expected.push(exit_insn());
 
         let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
@@ -1271,7 +1270,7 @@ mod tests {
     fn test_memcpy_preserves_surrounding() {
         let mut program = make_program(make_memcpy_preserves_surrounding_program());
         let mut expected = vec![BpfInsn::mov64_imm(8, 7)];
-        expected.extend(memcpy_call(10, -64, 6, 0, 64, BPF_DW));
+        expected.extend(memcpy_call(10, -64, 6, 0, 64, 3));
         expected.push(BpfInsn::mov64_reg(0, 8));
         expected.push(exit_insn());
 
@@ -1352,5 +1351,22 @@ mod tests {
         assert_eq!(program.insns, original);
         assert_eq!(bulk_call_count(&program.insns, MEMSET_BTF_ID), 0);
         assert_eq!(result.pass_results[0].sites_applied, 0);
+    }
+
+    #[test]
+    fn test_memcpy_proof_tmp_live_out_skipped() {
+        let mut original = make_memcpy_run(BPF_DW, 3, 6, 0, 10, -64, 8);
+        original.push(BpfInsn::mov64_reg(8, 3));
+        original.push(exit_insn());
+        let mut program = make_program(original.clone());
+
+        let result = run_bulk_memory_pass(&mut program, &ctx_with_bulk_kfuncs());
+
+        assert!(!result.program_changed);
+        assert_eq!(program.insns, original);
+        assert!(result.pass_results[0]
+            .sites_skipped
+            .iter()
+            .any(|skip| skip.reason.contains("tmp_reg r3 is live after site")));
     }
 }

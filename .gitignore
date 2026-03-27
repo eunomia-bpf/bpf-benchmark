@@ -107,6 +107,13 @@ docs/reference/papers/*.pdf
 tmp/
 /live-xlated-test.*/
 /.worktrees/
+/tracee-e2e-guest-*.sh
+/corpus-rejit-vm-batch-*.json
+/corpus-rejit-vm-batch-result-*.json
+/corpus-v5-vm-target-*.json
+/corpus-v5-vm-batch-*.json
+/corpus-v5-vm-batch-result-*.json
+/corpus-v5-vm-batch-result-*.json.*
 *.tmp
 *.tmp.md
 .tmp-*

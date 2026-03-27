@@ -1,0 +1,4 @@
+label=pktcntr_one
+object=/home/yunwei37/workspace/bpf-benchmark/corpus/build/katran/xdp_pktcntr.bpf.o
+prog_pin=/sys/fs/bpf/pktcntr_one/progs/pktcntr
+prog_id=32

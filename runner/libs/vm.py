@@ -8,7 +8,7 @@ import tempfile
 from pathlib import Path
 from typing import Sequence
 
-from . import DEFAULT_VENV_ACTIVATE, ROOT_DIR, which
+from . import DEFAULT_VENV_ACTIVATE, ROOT_DIR, docs_tmp_dir, scratch_date_stamp, which
 from .machines import resolve_machine, resolve_machine_executable
 
 
@@ -16,17 +16,19 @@ DEFAULT_VM_TARGET = os.environ.get("TARGET", "").strip() or "local-x86-vng"
 
 
 def write_guest_script(commands: Sequence[str | Sequence[str]]) -> Path:
+    scratch_stamp = scratch_date_stamp()
+    script_dir = docs_tmp_dir("guest-scripts", stamp=scratch_stamp)
     handle = tempfile.NamedTemporaryFile(
         mode="w",
         prefix="tracee-e2e-guest-",
         suffix=".sh",
-        dir=ROOT_DIR,
+        dir=script_dir,
         delete=False,
     )
-    # docs/tmp is mounted --rwdir in virtme-ng; use a vm-tmp subdirectory so that
+    # docs/tmp is mounted --rwdir in virtme-ng; use a dated vm-tmp subdirectory so
     # Python's tempfile module (and any subprocesses) can create temp files even
     # when the VM's /tmp is read-only (virtme-ng only mounts specific --rwdir paths).
-    vm_tmp_dir = ROOT_DIR / "docs" / "tmp" / "vm-tmp"
+    vm_tmp_dir = docs_tmp_dir("vm-tmp", stamp=scratch_stamp)
     with handle:
         handle.write("#!/bin/bash\nset -eu\n")
         handle.write(f"cd {shlex.quote(str(ROOT_DIR))}\n")
