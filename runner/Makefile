@@ -15,6 +15,7 @@ TOOLS_BUILD_DIR := $(BUILD_DIR)/tools
 MICRO_EXEC_ENABLE_LLVMBPF ?= ON
 PYTHON ?= python3
 REPOS ?=
+SKIP_CORPUS_FETCH ?= 0
 REPO_FLAGS := $(foreach repo,$(REPOS),--repo $(repo))
 
 BZIMAGE ?= vendor/linux-framework/arch/x86/boot/bzImage
@@ -23,6 +24,7 @@ DAEMON_ARGS ?=
 DAEMON_SOCKET ?= /tmp/bpfrejit.sock
 TARGET ?=
 PROFILE ?=
+FILTERS ?=
 ITERATIONS ?= 3
 WARMUPS ?= 1
 REPEAT ?= 100
@@ -80,6 +82,7 @@ BENCH_FLAGS := $(foreach b,$(BENCH),--bench $(b))
 MICRO_ARGS := --iterations $(ITERATIONS) --warmups $(WARMUPS) --repeat $(REPEAT) $(BENCH_FLAGS)
 VM_SMOKE_ARGS := --iterations 1 --warmups 0 --repeat 50
 PROFILE_FLAG := $(if $(strip $(PROFILE)),--profile "$(PROFILE)",)
+FILTER_FLAGS := $(foreach filter,$(FILTERS),--filter "$(filter)")
 REPEAT_IS_EXPLICIT := $(or $(findstring command line,$(origin REPEAT)),$(findstring environment,$(origin REPEAT)),$(findstring override,$(origin REPEAT)))
 VM_CORPUS_OUTPUT_JSON_IS_EXPLICIT := $(or $(findstring command line,$(origin VM_CORPUS_OUTPUT_JSON)),$(findstring environment,$(origin VM_CORPUS_OUTPUT_JSON)),$(findstring override,$(origin VM_CORPUS_OUTPUT_JSON)))
 VM_CORPUS_OUTPUT_MD_IS_EXPLICIT := $(or $(findstring command line,$(origin VM_CORPUS_OUTPUT_MD)),$(findstring environment,$(origin VM_CORPUS_OUTPUT_MD)),$(findstring override,$(origin VM_CORPUS_OUTPUT_MD)))
@@ -97,7 +100,11 @@ VM_CORPUS_OUTPUT_MD_FLAG := $(if $(strip $(VM_CORPUS_OUTPUT_MD_IS_EXPLICIT)),--o
 all: micro_exec
 
 corpus-fetch:
+ifeq ($(SKIP_CORPUS_FETCH),1)
+	@echo "corpus-fetch: skipped (SKIP_CORPUS_FETCH=1)"
+else
 	$(PYTHON) $(ROOT_DIR)/scripts/fetch_corpus_repos.py $(REPO_FLAGS)
+endif
 
 corpus-build-objects:
 	$(PYTHON) $(ROOT_DIR)/scripts/build_corpus_objects.py $(REPO_FLAGS)
@@ -266,6 +273,7 @@ vm-corpus: corpus-build micro_exec daemon-binary kernel-image kinsn-modules-buil
 	mkdir -p "$(CORPUS_RESULTS_DIR)"
 	TARGET="$(TARGET)" $(VENV_ACTIVATE) $(PYTHON) "$(REPO_ROOT)/corpus/driver.py" \
 		$(PROFILE_FLAG) \
+		$(FILTER_FLAGS) \
 		--kernel-image "$(BZIMAGE_PATH)" \
 		--runner "$(MICRO_RUNNER)" \
 		--daemon "$(DAEMON_PATH)" \

@@ -39,16 +39,19 @@ impl MapInfo {
     /// `CGROUP_STORAGE` do NOT support direct value access and must never be
     /// inlined.
     ///
-    /// PERCPU map types (`PERCPU_HASH`, `PERCPU_ARRAY`, `LRU_PERCPU_HASH`)
-    /// are deliberately excluded: userspace reads a single CPU's value via
-    /// `bpf_map_lookup_elem`, but the BPF program sees the per-CPU slot for
-    /// the CPU it is running on. Inlining the userspace-read value would
-    /// silently hardcode the wrong constant for all other CPUs.
+    /// `PERCPU_HASH`/`LRU_PERCPU_HASH` are deliberately excluded: the userspace
+    /// lookup returns a concatenated per-CPU blob and the running program sees
+    /// only the current CPU slot. `PERCPU_ARRAY` is handled as a special case:
+    /// map_inline may inline it only after verifying that every per-CPU slot is
+    /// byte-identical for the accessed key.
     #[cfg_attr(not(test), allow(dead_code))]
     pub fn supports_direct_value_access(&self) -> bool {
         matches!(
             self.map_type,
-            BPF_MAP_TYPE_HASH | BPF_MAP_TYPE_ARRAY | BPF_MAP_TYPE_LRU_HASH
+            BPF_MAP_TYPE_HASH
+                | BPF_MAP_TYPE_ARRAY
+                | BPF_MAP_TYPE_PERCPU_ARRAY
+                | BPF_MAP_TYPE_LRU_HASH
         )
     }
 
@@ -65,7 +68,7 @@ impl MapInfo {
     /// Returns whether v1 can eliminate the lookup/null-check sequence.
     #[cfg_attr(not(test), allow(dead_code))]
     pub fn can_remove_lookup_pattern_v1(&self) -> bool {
-        matches!(self.map_type, BPF_MAP_TYPE_ARRAY)
+        matches!(self.map_type, BPF_MAP_TYPE_ARRAY | BPF_MAP_TYPE_PERCPU_ARRAY)
     }
 
     /// Returns whether this inline is speculative and depends on runtime stability.
@@ -112,7 +115,12 @@ impl Analysis for MapInfoAnalysis {
     }
 
     fn run(&self, program: &BpfProgram) -> MapInfoResult {
-        collect_map_references(&program.insns, &program.map_ids, resolve_live_map_info)
+        collect_map_references_with_bindings(
+            &program.insns,
+            &program.map_ids,
+            &program.map_fd_bindings,
+            resolve_live_map_info,
+        )
     }
 }
 
@@ -120,6 +128,20 @@ impl Analysis for MapInfoAnalysis {
 pub fn collect_map_references<F>(
     insns: &[BpfInsn],
     map_ids: &[u32],
+    mut resolver: F,
+) -> MapInfoResult
+where
+    F: FnMut(u32) -> Option<MapInfo>,
+{
+    collect_map_references_with_bindings(insns, map_ids, &HashMap::new(), resolver)
+}
+
+/// Scan the instruction stream and resolve each unique map reference, using a
+/// stable `old_fd -> map_id` binding table when available.
+pub fn collect_map_references_with_bindings<F>(
+    insns: &[BpfInsn],
+    map_ids: &[u32],
+    map_fd_bindings: &HashMap<i32, u32>,
     mut resolver: F,
 ) -> MapInfoResult
 where
@@ -144,7 +166,10 @@ where
                     index
                 }
             };
-            let map_id = map_ids.get(map_index).copied();
+            let map_id = map_fd_bindings
+                .get(&old_fd)
+                .copied()
+                .or_else(|| map_ids.get(map_index).copied());
             let info = match resolved_by_index.get(&map_index) {
                 Some(info) => info.clone(),
                 None => {
@@ -340,6 +365,27 @@ mod tests {
     }
 
     #[test]
+    fn map_info_analysis_preserves_old_fd_binding_after_leading_map_is_deleted() {
+        let ld0 = make_ld_imm64(1, BPF_PSEUDO_MAP_FD, 10);
+        let ld1 = make_ld_imm64(2, BPF_PSEUDO_MAP_FD, 11);
+        let mut program = BpfProgram::new(vec![ld0[0], ld0[1], ld1[0], ld1[1]]);
+        program.set_map_ids(vec![101, 202]);
+
+        program.insns = vec![ld1[0], ld1[1]];
+
+        let result = collect_map_references_with_bindings(
+            &program.insns,
+            &program.map_ids,
+            &program.map_fd_bindings,
+            |map_id| Some(array_map(map_id, 4)),
+        );
+
+        assert_eq!(result.references.len(), 1);
+        assert_eq!(result.references[0].old_fd, 11);
+        assert_eq!(result.references[0].map_id, Some(202));
+    }
+
+    #[test]
     fn unsupported_map_types_reject_direct_value_access() {
         const BPF_MAP_TYPE_PROG_ARRAY: u32 = 3;
         const BPF_MAP_TYPE_PERF_EVENT_ARRAY: u32 = 4;
@@ -351,7 +397,6 @@ mod tests {
             BPF_MAP_TYPE_PROG_ARRAY,
             BPF_MAP_TYPE_PERF_EVENT_ARRAY,
             BPF_MAP_TYPE_PERCPU_HASH,
-            BPF_MAP_TYPE_PERCPU_ARRAY,
             BPF_MAP_TYPE_STACK_TRACE,
             BPF_MAP_TYPE_LRU_PERCPU_HASH,
             BPF_MAP_TYPE_CGROUP_STORAGE,
@@ -378,11 +423,10 @@ mod tests {
         }
     }
 
-    /// PERCPU map types must NOT be inlineable: userspace reads a single
-    /// CPU's value, but BPF programs see the per-CPU slot for the running
-    /// CPU. Inlining would hardcode the wrong constant.
+    /// PERCPU_ARRAY is only conditionally safe: map_inline must still prove
+    /// that all per-CPU slots carry the same bytes for the accessed key.
     #[test]
-    fn percpu_map_types_reject_direct_value_access() {
+    fn percpu_array_is_conditionally_inlineable_but_percpu_hashes_still_are_not() {
         let percpu_array = MapInfo {
             map_type: BPF_MAP_TYPE_PERCPU_ARRAY,
             key_size: 4,
@@ -392,16 +436,20 @@ mod tests {
             map_id: 501,
         };
         assert!(
-            !percpu_array.supports_direct_value_access(),
-            "PERCPU_ARRAY must not support direct value access"
+            percpu_array.supports_direct_value_access(),
+            "PERCPU_ARRAY should allow site-level direct blob access"
         );
         assert!(
-            !percpu_array.is_inlineable_v1(),
-            "PERCPU_ARRAY must not be inlineable"
+            percpu_array.is_inlineable_v1(),
+            "PERCPU_ARRAY should be conditionally inlineable"
         );
         assert!(
-            !percpu_array.can_remove_lookup_pattern_v1(),
-            "PERCPU_ARRAY must not remove lookup pattern"
+            percpu_array.can_remove_lookup_pattern_v1(),
+            "PERCPU_ARRAY should remove the lookup pattern when the key is in range"
+        );
+        assert!(
+            !percpu_array.is_speculative_v1(),
+            "PERCPU_ARRAY should not use HASH-style speculative null handling"
         );
 
         let percpu_hash = MapInfo {

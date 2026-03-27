@@ -50,6 +50,8 @@ struct cli_options {
     std::optional<std::filesystem::path> rejit_program; // replacement ELF for REJIT
     std::optional<std::string> daemon_socket;             // --daemon-socket <path> for Unix socket daemon
     std::optional<std::string> program_name;
+    std::optional<std::string> trigger_command;
+    std::optional<uint32_t> trigger_timeout_seconds;
     std::string io_mode = "map";
     bool manual_load = false;
     bool raw_packet = false;

@@ -65,6 +65,7 @@ DAEMON_ARGS ?=
 DAEMON_SOCKET ?= /tmp/bpfrejit.sock
 REPOS ?=
 PROFILE ?=
+FILTERS ?=
 ITERATIONS ?= 3
 WARMUPS    ?= 1
 REPEAT     ?= 100
@@ -97,6 +98,7 @@ LOCAL_SMOKE_ARGS := --bench simple --iterations 1 --warmups 0 --repeat 10
 ROOT_VM_CORPUS_REPEAT_IS_EXPLICIT := $(or $(findstring command line,$(origin REPEAT)),$(findstring environment,$(origin REPEAT)),$(findstring override,$(origin REPEAT)))
 ROOT_VM_CORPUS_REPEAT_ARG := $(if $(strip $(ROOT_VM_CORPUS_REPEAT_IS_EXPLICIT)),REPEAT="$(REPEAT)",)
 ROOT_VM_CORPUS_PROFILE_ARG := $(if $(strip $(PROFILE)),PROFILE="$(PROFILE)",)
+ROOT_VM_CORPUS_FILTERS_ARG := $(if $(strip $(FILTERS)),FILTERS="$(FILTERS)",)
 
 # Incremental rebuild sources
 MICRO_RUNNER_SOURCES := $(wildcard $(RUNNER_DIR)/src/*.cpp $(RUNNER_DIR)/include/*.hpp $(RUNNER_DIR)/CMakeLists.txt)
@@ -314,7 +316,7 @@ vm-corpus:
 	$(MAKE) -C "$(RUNNER_DIR)" vm-corpus \
 		PYTHON="$(PYTHON)" VENV="$(VENV)" \
 		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" DAEMON_ARGS="$(DAEMON_ARGS)" TARGET="$(TARGET)" \
-		$(ROOT_VM_CORPUS_PROFILE_ARG) $(ROOT_VM_CORPUS_REPEAT_ARG)
+		$(ROOT_VM_CORPUS_PROFILE_ARG) $(ROOT_VM_CORPUS_REPEAT_ARG) $(ROOT_VM_CORPUS_FILTERS_ARG)
 
 vm-e2e:
 	$(MAKE) -C "$(RUNNER_DIR)" vm-e2e \

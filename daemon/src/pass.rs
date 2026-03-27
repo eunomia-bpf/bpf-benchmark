@@ -72,6 +72,9 @@ pub struct BpfProgram {
     /// This metadata lets analyses resolve `BPF_PSEUDO_MAP_FD` references
     /// found in the original bytecode back to live kernel map objects.
     pub map_ids: Vec<u32>,
+    /// Stable `old_fd -> map_id` bindings captured from the original program
+    /// before any transform removes or reorders pseudo-map loads.
+    pub map_fd_bindings: HashMap<i32, u32>,
     /// Program-level branch miss rate from PMU hardware counters.
     /// Set by `inject_profiling` when PMU data is available.
     /// Consumed by BranchFlipPass to gate optimization.
@@ -94,12 +97,14 @@ impl BpfProgram {
             transform_log: Vec::new(),
             required_btf_fds: Vec::new(),
             map_ids: Vec::new(),
+            map_fd_bindings: HashMap::new(),
             branch_miss_rate: None,
         }
     }
 
     /// Attach live-kernel map IDs to this program.
     pub fn set_map_ids(&mut self, map_ids: Vec<u32>) {
+        self.map_fd_bindings = build_map_fd_bindings(&self.insns, &map_ids);
         self.map_ids = map_ids;
     }
 
@@ -165,6 +170,37 @@ impl BpfProgram {
     pub fn has_transforms(&self) -> bool {
         self.transform_log.iter().any(|e| e.sites_applied > 0)
     }
+}
+
+const BPF_PSEUDO_MAP_FD: u8 = 1;
+const BPF_PSEUDO_MAP_VALUE: u8 = 2;
+
+pub fn build_map_fd_bindings(insns: &[BpfInsn], map_ids: &[u32]) -> HashMap<i32, u32> {
+    let mut old_fd_to_map_id = HashMap::new();
+    let mut unique_old_fds = Vec::new();
+
+    let mut pc = 0usize;
+    while pc < insns.len() {
+        let insn = insns[pc];
+        if insn.is_ldimm64() {
+            if matches!(insn.src_reg(), BPF_PSEUDO_MAP_FD | BPF_PSEUDO_MAP_VALUE)
+                && !unique_old_fds.contains(&insn.imm)
+            {
+                unique_old_fds.push(insn.imm);
+            }
+            pc += 2;
+            continue;
+        }
+        pc += 1;
+    }
+
+    for (index, old_fd) in unique_old_fds.into_iter().enumerate() {
+        if let Some(&map_id) = map_ids.get(index) {
+            old_fd_to_map_id.insert(old_fd, map_id);
+        }
+    }
+
+    old_fd_to_map_id
 }
 
 // ── Analysis trait ──────────────────────────────────────────────────

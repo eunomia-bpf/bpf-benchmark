@@ -97,6 +97,7 @@ class ResolvedProgram:
     short_name: str
     program_name: str
     canonical_name: str
+    fixture_path: str | None
     test_method: str
     prog_type_name: str
     section_name: str
@@ -708,6 +709,8 @@ def build_test_run_batch_job(
     prepared_group: str | None = None,
     release_prepared: bool = True,
     fixture_path: Path | None = None,
+    trigger_command: str | None = None,
+    trigger_timeout_seconds: int | None = None,
 ) -> dict[str, Any]:
     job: dict[str, Any] = {
         "id": job_id,
@@ -725,6 +728,10 @@ def build_test_run_batch_job(
         job["memory"] = str(memory_path)
     if fixture_path is not None:
         job["fixture_path"] = str(fixture_path)
+    if trigger_command is not None:
+        job["trigger_command"] = trigger_command
+    if trigger_timeout_seconds is not None:
+        job["trigger_timeout_seconds"] = int(trigger_timeout_seconds)
     if input_size > 0:
         job["input_size"] = int(input_size)
     if btf_custom_path is not None:
@@ -1314,7 +1321,14 @@ def deserialize_resolved_object(payload: Mapping[str, Any]) -> ResolvedObject:
     programs_payload = payload.get("programs")
     if not isinstance(programs_payload, list):
         raise SystemExit("guest object payload missing programs list")
-    programs = tuple(ResolvedProgram(**dict(item)) for item in programs_payload if isinstance(item, Mapping))
+    programs = []
+    for item in programs_payload:
+        if not isinstance(item, Mapping):
+            continue
+        program_payload = dict(item)
+        program_payload.setdefault("fixture_path", None)
+        programs.append(ResolvedProgram(**program_payload))
+    programs = tuple(programs)
     base = dict(payload)
     base["programs"] = programs
     base.setdefault("fixture_path", None)
@@ -1379,6 +1393,11 @@ def resolve_manifest_object(entry: Mapping[str, Any], *, index: int) -> Resolved
     object_attach_group = _string_or_none(entry.get("attach_group"))
     object_rejit_enabled = bool(entry.get("rejit_enabled", True))
 
+    def default_program_fixture_path(program_name: str) -> str | None:
+        relative = Path("corpus") / "fixtures" / repo / object_basename / f"{program_name}.json"
+        absolute = ROOT_DIR / relative
+        return relative.as_posix() if absolute.exists() else None
+
     raw_programs = _sequence(entry.get("programs"), field_name=f"objects[{index}].programs")
     programs: list[ResolvedProgram] = []
     for program_index, raw_program in enumerate(raw_programs, start=1):
@@ -1401,6 +1420,11 @@ def resolve_manifest_object(entry: Mapping[str, Any], *, index: int) -> Resolved
         if test_method == "attach_trigger" and attach_group is None:
             attach_group = program_name
         rejit_enabled = bool(raw_program.get("rejit_enabled", object_rejit_enabled))
+        program_fixture_path = (
+            _string_or_none(raw_program.get("fixture_path"))
+            or fixture_path
+            or default_program_fixture_path(program_name)
+        )
         program_family = _string_or_none(raw_program.get("family")) or family
         program_category = _string_or_none(raw_program.get("category")) or category
         program_level = _string_or_none(raw_program.get("level")) or level
@@ -1428,6 +1452,7 @@ def resolve_manifest_object(entry: Mapping[str, Any], *, index: int) -> Resolved
                 short_name=short_program_name,
                 program_name=program_name,
                 canonical_name=canonical_name,
+                fixture_path=program_fixture_path,
                 test_method=test_method,
                 prog_type_name=prog_type_name,
                 section_name=section_name,
@@ -1529,6 +1554,7 @@ def build_object_batch_plan_v2(
             }
             refs["programs"][program.canonical_name] = program_refs
             memory_path = Path(program.memory_path) if program.memory_path else None
+            program_fixture_path = Path(program.fixture_path) if program.fixture_path else fixture_path
             jobs.append(
                 build_test_run_batch_job(
                     job_id=program_refs["baseline_compile"],
@@ -1545,7 +1571,9 @@ def build_object_batch_plan_v2(
                     prepared_ref=baseline_prepared_key,
                     prepared_group=baseline_group,
                     release_prepared=False,
-                    fixture_path=fixture_path,
+                    fixture_path=program_fixture_path,
+                    trigger_command=program.trigger,
+                    trigger_timeout_seconds=program.trigger_timeout_seconds,
                 )
             )
             if program.test_method != "compile_only":
@@ -1565,7 +1593,9 @@ def build_object_batch_plan_v2(
                         prepared_ref=baseline_prepared_key,
                         prepared_group=baseline_group,
                         release_prepared=False,
-                        fixture_path=fixture_path,
+                        fixture_path=program_fixture_path,
+                        trigger_command=program.trigger,
+                        trigger_timeout_seconds=program.trigger_timeout_seconds,
                     )
                 )
 
@@ -1592,6 +1622,7 @@ def build_object_batch_plan_v2(
         for program_index, program in enumerate(obj.programs, start=1):
             program_refs = refs["programs"][program.canonical_name]
             memory_path = Path(program.memory_path) if program.memory_path else None
+            program_fixture_path = Path(program.fixture_path) if program.fixture_path else fixture_path
             jobs.append(
                 build_test_run_batch_job(
                     job_id=program_refs["rejit_compile"],
@@ -1609,7 +1640,9 @@ def build_object_batch_plan_v2(
                     prepared_ref=rejit_prepared_key,
                     prepared_group=rejit_group,
                     release_prepared=False,
-                    fixture_path=fixture_path,
+                    fixture_path=program_fixture_path,
+                    trigger_command=program.trigger,
+                    trigger_timeout_seconds=program.trigger_timeout_seconds,
                 )
             )
             if program.test_method != "compile_only" and program.rejit_enabled:
@@ -1630,7 +1663,9 @@ def build_object_batch_plan_v2(
                         prepared_ref=rejit_prepared_key,
                         prepared_group=rejit_group,
                         release_prepared=False,
-                        fixture_path=fixture_path,
+                        fixture_path=program_fixture_path,
+                        trigger_command=program.trigger,
+                        trigger_timeout_seconds=program.trigger_timeout_seconds,
                     )
                 )
 

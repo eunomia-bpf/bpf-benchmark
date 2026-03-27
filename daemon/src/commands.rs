@@ -777,15 +777,19 @@ pub(crate) fn try_apply_one(
             let mut restored_original = false;
             if had_tracked_inline_sites {
                 let mut restore_insns = orig_insns.clone();
-                let _map_fds_guard = bpf::relocate_map_fds(&mut restore_insns, &map_ids)
-                    .unwrap_or_else(|e| {
-                        eprintln!("    warning: map FD relocation failed: {:#}", e);
-                        push_debug_warning(
-                            &mut attempt_debug,
-                            format!("map FD relocation failed before restore REJIT: {e:#}"),
-                        );
-                        Vec::new()
-                    });
+                let _map_fds_guard = bpf::relocate_map_fds_with_bindings(
+                    &mut restore_insns,
+                    &map_ids,
+                    &program.map_fd_bindings,
+                )
+                .unwrap_or_else(|e| {
+                    eprintln!("    warning: map FD relocation failed: {:#}", e);
+                    push_debug_warning(
+                        &mut attempt_debug,
+                        format!("map FD relocation failed before restore REJIT: {e:#}"),
+                    );
+                    Vec::new()
+                });
 
                 if let Some(debug) = attempt_debug.as_mut() {
                     debug.pre_rejit_bytecode = Some(insn::dump_bytecode_compact(&restore_insns));
@@ -852,8 +856,12 @@ pub(crate) fn try_apply_one(
         }
 
         // Relocate stale map FDs in the rewritten bytecode.
-        let _map_fds_guard =
-            bpf::relocate_map_fds(&mut program.insns, &map_ids).unwrap_or_else(|e| {
+        let _map_fds_guard = bpf::relocate_map_fds_with_bindings(
+            &mut program.insns,
+            &map_ids,
+            &program.map_fd_bindings,
+        )
+        .unwrap_or_else(|e| {
                 eprintln!("    warning: map FD relocation failed: {:#}", e);
                 push_debug_warning(
                     &mut attempt_debug,

@@ -1125,6 +1125,11 @@ batch_job parse_job(const YAML::Node &node, size_t index)
 
     options.program = std::filesystem::path(require_scalar_string(node["program"], "program"));
     options.program_name = optional_string(node, "program_name");
+    options.trigger_command = optional_string(node, "trigger_command");
+    if (const auto trigger_timeout = optional_u32(node, "trigger_timeout_seconds", 0);
+        trigger_timeout != 0) {
+        options.trigger_timeout_seconds = trigger_timeout;
+    }
     options.memory = optional_path(node, "memory");
     options.fixture_path = optional_path(node, "fixture_path");
     options.btf_custom_path = optional_path(node, "btf_custom_path");
@@ -1480,7 +1485,22 @@ batch_job_result execute_job(
         if (job.options.command == "run-llvmbpf") {
             result.samples = {run_llvmbpf(job.options)};
         } else if (job.options.command == "run-kernel-attach") {
-            result.samples = run_kernel_attach(job.options);
+            if (!job.prepared_ref.empty()) {
+                auto prepared = prepared_store.get(job.prepared_ref);
+                if (!prepared) {
+                    fail("missing prepared kernel state for ref: " + job.prepared_ref);
+                }
+                result.samples = run_prepared_kernel(prepared, job.options);
+                if (job.release_prepared && job.prepared_group.empty()) {
+                    prepared_store.erase(job.prepared_ref);
+                }
+            } else if (!job.prepared_key.empty()) {
+                auto prepared = prepare_kernel(job.options);
+                result.samples = {summarize_prepared_kernel_compile(prepared)};
+                prepared_store.put(job.prepared_key, std::move(prepared), job.prepared_group);
+            } else {
+                result.samples = run_kernel_attach(job.options);
+            }
         } else if (job.options.command == "run-kernel") {
             if (!job.prepared_ref.empty()) {
                 auto prepared = prepared_store.get(job.prepared_ref);

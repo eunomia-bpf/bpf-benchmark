@@ -12,10 +12,12 @@ use crate::pass::*;
 const BPF_ADD: u8 = 0x00;
 const BPF_SUB: u8 = 0x10;
 const BPF_MUL: u8 = 0x20;
+const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = 6;
 const BPF_PSEUDO_MAP_FD: u8 = 1;
 const HELPER_MAP_LOOKUP_ELEM: i32 = 1;
 const R2_SETUP_LOOKBACK_LIMIT: usize = 8;
 const REG_RESOLUTION_LIMIT: usize = 64;
+const SITE_LEVEL_INLINE_VETO_PREFIX: &str = "site-level inline veto: ";
 const VALUE_PREVIEW_BYTES: usize = 32;
 
 /// Dynamic map inlining optimization pass.
@@ -119,7 +121,7 @@ pub fn try_extract_constant_key(insns: &[BpfInsn], call_pc: usize) -> Result<Con
 
 /// Classify all uses of the lookup result until its value-pointer aliases die out.
 pub fn classify_r0_uses(insns: &[BpfInsn], call_pc: usize) -> R0UseClassification {
-    classify_r0_uses_from(insns, call_pc)
+    classify_r0_uses_with_options(insns, call_pc, false)
 }
 
 #[derive(Clone, Debug)]
@@ -256,7 +258,11 @@ impl BpfPass for MapInlinePass {
                 continue;
             }
 
-            let uses = classify_r0_uses(&program.insns, site.call_pc);
+            let uses = classify_r0_uses_with_options(
+                &program.insns,
+                site.call_pc,
+                info.frozen && info.can_remove_lookup_pattern_v1(),
+            );
             let null_check_pc = uses.null_check_pc;
             if info.is_speculative_v1() && null_check_pc.is_none() {
                 let reason = "speculative map inline requires an immediate null check".to_string();
@@ -292,6 +298,10 @@ impl BpfPass for MapInlinePass {
                     continue;
                 }
                 Err(err) => {
+                    if let Some(reason) = site_level_inline_veto_reason(&err) {
+                        record_skip(&mut skipped, &mut diagnostics, site.call_pc, reason, None);
+                        continue;
+                    }
                     let reason = format!("map lookup failed: {err:#}");
                     record_skip(
                         &mut skipped,
@@ -495,12 +505,12 @@ fn build_site_rewrite(
 ) -> anyhow::Result<Option<SiteRewrite>> {
     let remove_lookup_pattern = info.can_remove_lookup_pattern_v1();
     let encoded_key = encode_key_bytes(key.value, info.key_size as usize);
+    let lookup_value_size = bpf::bpf_map_lookup_value_size_by_id(info.map_id)?;
     log_map_inline_debug(&format!(
-        "site pc={} reading map_id={} key={:?}",
-        site.call_pc, info.map_id, encoded_key
+        "site pc={} reading map_id={} key={:?} lookup_value_size={}",
+        site.call_pc, info.map_id, encoded_key, lookup_value_size
     ));
-    let value =
-        match bpf::bpf_map_lookup_elem_by_id(info.map_id, &encoded_key, info.value_size as usize) {
+    let value = match bpf::bpf_map_lookup_elem_by_id(info.map_id, &encoded_key, lookup_value_size) {
             Ok(value) => {
                 log_map_inline_debug(&format!(
                     "site pc={} INLINE value={:?}",
@@ -519,6 +529,8 @@ fn build_site_rewrite(
                 return Err(err);
             }
         };
+    let inline_value = prepare_inline_value(info, &value)
+        .map_err(|reason| site_level_inline_veto(reason))?;
 
     let removable_null_check_pc =
         null_check_pc.filter(|&pc| null_check_is_fallthrough_non_null(&program.insns[pc]));
@@ -557,7 +569,7 @@ fn build_site_rewrite(
 
     let mut replacements = BTreeMap::new();
     for load in &uses.fixed_loads {
-        let scalar = read_scalar_from_value(&value, load.offset, load.size).ok_or_else(|| {
+        let scalar = read_scalar_from_value(&inline_value, load.offset, load.size).ok_or_else(|| {
             anyhow::anyhow!(
                 "map value read out of bounds for load pc {} (offset {}, size {})",
                 load.pc,
@@ -574,7 +586,7 @@ fn build_site_rewrite(
 
     Ok(Some(SiteRewrite {
         call_pc: site.call_pc,
-        diagnostic_value: format_inlined_value_diagnostic(&value, &uses.fixed_loads),
+        diagnostic_value: format_inlined_value_diagnostic(&inline_value, &uses.fixed_loads),
         removed_null_check: can_remove_lookup_pattern && removable_null_check_pc.is_some(),
         speculative: info.is_speculative_v1(),
         map_inline_record: MapInlineRecord {
@@ -591,6 +603,43 @@ fn encode_key_bytes(value: u64, key_size: usize) -> Vec<u8> {
     value.to_le_bytes()[..key_size].to_vec()
 }
 
+fn prepare_inline_value(info: &crate::analysis::MapInfo, raw_value: &[u8]) -> Result<Vec<u8>, String> {
+    if info.map_type != BPF_MAP_TYPE_PERCPU_ARRAY {
+        return Ok(raw_value.to_vec());
+    }
+
+    collapse_uniform_percpu_array_value(info.value_size as usize, raw_value)
+}
+
+fn collapse_uniform_percpu_array_value(value_size: usize, raw_value: &[u8]) -> Result<Vec<u8>, String> {
+    if value_size == 0 {
+        return Err("PERCPU_ARRAY has zero value_size".to_string());
+    }
+
+    let stride = round_up_8(value_size);
+    if raw_value.len() < stride || raw_value.len() % stride != 0 {
+        return Err(format!(
+            "PERCPU_ARRAY lookup blob length {} is inconsistent with slot stride {}",
+            raw_value.len(),
+            stride
+        ));
+    }
+
+    let slot_count = raw_value.len() / stride;
+    let first_value = raw_value[..value_size].to_vec();
+    for slot in 1..slot_count {
+        let offset = slot * stride;
+        if raw_value[offset..offset + value_size] != first_value[..] {
+            return Err(format!(
+                "PERCPU_ARRAY value differs across CPUs for {} slot(s)",
+                slot_count
+            ));
+        }
+    }
+
+    Ok(first_value)
+}
+
 fn read_scalar_from_value(value: &[u8], offset: i16, size: u8) -> Option<u64> {
     if offset < 0 {
         return None;
@@ -604,6 +653,10 @@ fn read_scalar_from_value(value: &[u8], offset: i16, size: u8) -> Option<u64> {
     let mut buf = [0u8; 8];
     buf[..width].copy_from_slice(&value[offset..offset + width]);
     Some(u64::from_le_bytes(buf))
+}
+
+fn round_up_8(value: usize) -> usize {
+    (value + 7) & !7
 }
 
 fn emit_constant_load(dst_reg: u8, value: u64, size: u8) -> Vec<BpfInsn> {
@@ -650,6 +703,16 @@ fn find_map_load_for_call(insns: &[BpfInsn], call_pc: usize) -> Option<usize> {
         cursor = pc;
     }
     None
+}
+
+fn site_level_inline_veto(reason: impl Into<String>) -> anyhow::Error {
+    anyhow::anyhow!("{}{}", SITE_LEVEL_INLINE_VETO_PREFIX, reason.into())
+}
+
+fn site_level_inline_veto_reason(err: &anyhow::Error) -> Option<String> {
+    err.to_string()
+        .strip_prefix(SITE_LEVEL_INLINE_VETO_PREFIX)
+        .map(str::to_string)
 }
 
 fn lookup_pattern_removal_is_safe(
@@ -1143,7 +1206,11 @@ fn insn_width(insn: &BpfInsn) -> usize {
     }
 }
 
-fn classify_r0_uses_from(insns: &[BpfInsn], start_pc: usize) -> R0UseClassification {
+fn classify_r0_uses_with_options(
+    insns: &[BpfInsn],
+    start_pc: usize,
+    allow_unrelated_helper_calls: bool,
+) -> R0UseClassification {
     let mut classification = R0UseClassification::default();
     let mut alias_regs = HashSet::from([0u8]);
     let mut pc = start_pc + 1;
@@ -1179,6 +1246,14 @@ fn classify_r0_uses_from(insns: &[BpfInsn], start_pc: usize) -> R0UseClassificat
         }
 
         if insn.is_call() {
+            if allow_unrelated_helper_calls {
+                let surviving_aliases = surviving_alias_regs_after_helper_call(&alias_regs);
+                if !surviving_aliases.is_empty() {
+                    alias_regs = surviving_aliases;
+                    pc += insn_width(insn);
+                    continue;
+                }
+            }
             classification.other_uses.push(pc);
             break;
         }
@@ -1200,6 +1275,14 @@ fn classify_r0_uses_from(insns: &[BpfInsn], start_pc: usize) -> R0UseClassificat
     }
 
     classification
+}
+
+fn surviving_alias_regs_after_helper_call(alias_regs: &HashSet<u8>) -> HashSet<u8> {
+    alias_regs
+        .iter()
+        .copied()
+        .filter(|reg| (6..=9).contains(reg))
+        .collect()
 }
 
 fn advance_to_non_null_path(pc: usize, insn: &BpfInsn, insn_count: usize) -> Option<usize> {
@@ -1413,6 +1496,40 @@ mod tests {
         );
     }
 
+    fn install_percpu_array_map(
+        map_id: u32,
+        value_size: u32,
+        max_entries: u32,
+        frozen: bool,
+        values: HashMap<Vec<u8>, Vec<u8>>,
+    ) {
+        let mut info = BpfMapInfo::default();
+        info.map_type = BPF_MAP_TYPE_PERCPU_ARRAY;
+        info.id = map_id;
+        info.key_size = 4;
+        info.value_size = value_size;
+        info.max_entries = max_entries;
+
+        install_mock_map(
+            map_id,
+            MockMapState {
+                info,
+                frozen,
+                values,
+            },
+        );
+    }
+
+    fn make_percpu_blob(slot_value: &[u8], slots: usize) -> Vec<u8> {
+        let stride = round_up_8(slot_value.len());
+        let mut blob = vec![0u8; stride * slots];
+        for slot in 0..slots {
+            let offset = slot * stride;
+            blob[offset..offset + slot_value.len()].copy_from_slice(slot_value);
+        }
+        blob
+    }
+
     fn install_array_map(map_id: u32, value: Vec<u8>) {
         let mut values = HashMap::new();
         values.insert(1u32.to_le_bytes().to_vec(), value);
@@ -1618,6 +1735,34 @@ mod tests {
         assert_eq!(uses.alias_copy_pcs, vec![1]);
         assert_eq!(uses.null_check_pc, Some(2));
         assert!(uses.all_fixed_loads());
+    }
+
+    #[test]
+    fn classify_r0_uses_can_follow_callee_saved_alias_across_helper_when_enabled() {
+        let insns = vec![
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::mov64_reg(9, 0),
+            jeq_imm(9, 0, 2),
+            call_helper(2),
+            BpfInsn::ldx_mem(BPF_W, 3, 9, 4),
+        ];
+
+        let strict_uses = classify_r0_uses(&insns, 0);
+        assert_eq!(strict_uses.other_uses, vec![3]);
+        assert!(strict_uses.fixed_loads.is_empty());
+
+        let relaxed_uses = classify_r0_uses_with_options(&insns, 0, true);
+        assert_eq!(relaxed_uses.null_check_pc, Some(2));
+        assert_eq!(relaxed_uses.other_uses, Vec::<usize>::new());
+        assert_eq!(
+            relaxed_uses.fixed_loads,
+            vec![FixedLoadUse {
+                pc: 4,
+                dst_reg: 3,
+                size: BPF_W,
+                offset: 4,
+            }]
+        );
     }
 
     #[test]
@@ -2415,14 +2560,51 @@ mod tests {
         );
     }
 
-    /// PERCPU map types must not be inlined: userspace reads CPU-0's value,
-    /// but the BPF program sees the per-CPU slot for its running CPU.
     #[test]
-    fn map_inline_pass_skips_percpu_array_maps() {
-        // map_type 6 = BPF_MAP_TYPE_PERCPU_ARRAY
+    fn map_inline_pass_inlines_uniform_percpu_array_maps() {
+        let blob = make_percpu_blob(&7u32.to_le_bytes(), 2);
         let mut values = HashMap::new();
-        values.insert(1u32.to_le_bytes().to_vec(), vec![7, 0, 0, 0]);
-        install_map(112, 6, 8, true, values);
+        values.insert(1u32.to_le_bytes().to_vec(), blob.clone());
+        install_percpu_array_map(112, 4, 8, true, values);
+
+        let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
+        let mut program = BpfProgram::new(vec![
+            map[0],
+            map[1],
+            st_mem(BPF_W, 10, -4, 1),
+            BpfInsn::mov64_reg(2, 10),
+            add64_imm(2, -4),
+            call_helper(HELPER_MAP_LOOKUP_ELEM),
+            BpfInsn::ldx_mem(BPF_W, 6, 0, 0),
+            BpfInsn::mov64_imm(0, 0),
+            exit_insn(),
+        ]);
+        program.set_map_ids(vec![112]);
+
+        let result = run_map_inline_pass(&mut program);
+
+        assert!(result.program_changed);
+        assert!(
+            !program
+                .insns
+                .iter()
+                .any(|insn| insn.is_call() && insn.imm == HELPER_MAP_LOOKUP_ELEM)
+        );
+        assert!(program.insns.iter().any(|insn| insn == &BpfInsn::mov64_imm(6, 7)));
+        assert!(
+            result.pass_results[0].map_inline_records[0].expected_value == blob,
+            "tracker should store the full per-cpu blob: {:?}",
+            result.pass_results[0].map_inline_records
+        );
+    }
+
+    #[test]
+    fn map_inline_pass_skips_mixed_percpu_array_maps() {
+        let mut blob = make_percpu_blob(&7u32.to_le_bytes(), 2);
+        blob[8..12].copy_from_slice(&9u32.to_le_bytes());
+        let mut values = HashMap::new();
+        values.insert(1u32.to_le_bytes().to_vec(), blob);
+        install_percpu_array_map(212, 4, 8, true, values);
 
         let map = ld_imm64(1, BPF_PSEUDO_MAP_FD, 42);
         let original = vec![
@@ -2437,7 +2619,7 @@ mod tests {
             exit_insn(),
         ];
         let mut program = BpfProgram::new(original.clone());
-        program.set_map_ids(vec![112]);
+        program.set_map_ids(vec![212]);
 
         let result = run_map_inline_pass(&mut program);
 
@@ -2447,14 +2629,10 @@ mod tests {
             result.pass_results[0]
                 .sites_skipped
                 .iter()
-                .any(|skip| skip.reason.contains("not inlineable")),
-            "PERCPU_ARRAY should be rejected: {:?}",
+                .any(|skip| skip.reason.contains("PERCPU_ARRAY value differs across CPUs")),
+            "mixed PERCPU_ARRAY should be rejected with a precise reason: {:?}",
             result.pass_results[0].sites_skipped
         );
-        assert!(result.pass_results[0]
-            .diagnostics
-            .iter()
-            .any(|diag| diag.contains("map_type=6, skip reason: unsupported map type")));
     }
 
     /// PERCPU_HASH maps must not be inlined either.

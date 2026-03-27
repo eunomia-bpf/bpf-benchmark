@@ -622,6 +622,7 @@ struct live_fixture_map {
     uint32_t type = 0;
     uint32_t key_size = 0;
     uint32_t value_size = 0;
+    uint32_t max_entries = 0;
     int fd = -1;
 };
 
@@ -744,6 +745,7 @@ live_fixture_map describe_live_fixture_map(bpf_map *map)
         .type = info.type,
         .key_size = info.key_size,
         .value_size = info.value_size,
+        .max_entries = info.max_entries,
         .fd = fd,
     };
 }
@@ -812,19 +814,32 @@ void load_map_fixtures(
              "' must contain a 'maps' sequence");
     }
 
-    std::unordered_map<std::string, live_fixture_map> maps_by_name;
+    std::unordered_map<std::string, std::vector<live_fixture_map>> maps_by_name;
     std::unordered_map<uint32_t, live_fixture_map> maps_by_id;
     bpf_map *map = nullptr;
     while ((map = bpf_object__next_map(object, map)) != nullptr) {
         const auto live_map = describe_live_fixture_map(map);
         if (!live_map.name.empty()) {
-            maps_by_name.insert_or_assign(live_map.name, live_map);
+            maps_by_name[live_map.name].push_back(live_map);
+            const size_t truncated_len = BPF_OBJ_NAME_LEN - 1;
+            if (live_map.name.size() > truncated_len) {
+                maps_by_name[live_map.name.substr(0, truncated_len)].push_back(live_map);
+            }
         }
         maps_by_id.insert_or_assign(live_map.id, live_map);
+    }
+    for (auto &[_, live_maps] : maps_by_name) {
+        std::sort(
+            live_maps.begin(),
+            live_maps.end(),
+            [](const live_fixture_map &left, const live_fixture_map &right) {
+                return left.id < right.id;
+            });
     }
 
     size_t loaded_entries = 0;
     std::unordered_set<uint32_t> updated_map_ids;
+    std::unordered_map<std::string, size_t> name_occurrence_counts;
     for (const auto &map_node : maps) {
         if (!map_node.IsMap()) {
             fail("fixture JSON '" + fixture_json_path.string() +
@@ -846,19 +861,37 @@ void load_map_fixtures(
         if (map_name.has_value()) {
             const auto found = maps_by_name.find(*map_name);
             if (found == maps_by_name.end()) {
-                fail("fixture map '" + *map_name + "' not found in loaded object");
+                std::fprintf(
+                    stderr,
+                    "fixture map '%s' not found in loaded object; skipping map\n",
+                    map_name->c_str());
+                continue;
             }
-            live_map = &found->second;
+            const size_t occurrence_index = name_occurrence_counts[*map_name]++;
+            if (occurrence_index >= found->second.size()) {
+                std::fprintf(
+                    stderr,
+                    "fixture map '%s' occurrence exceeds matching loaded maps; skipping map\n",
+                    map_name->c_str());
+                continue;
+            }
+            live_map = &found->second[occurrence_index];
             if (map_id.has_value() && live_map->id != *map_id) {
-                fail("fixture map '" + *map_name + "' id mismatch: fixture=" +
-                     std::to_string(*map_id) + " live=" +
-                     std::to_string(live_map->id));
+                std::fprintf(
+                    stderr,
+                    "fixture map '%s' id remapped: fixture=%u live=%u\n",
+                    map_name->c_str(),
+                    *map_id,
+                    live_map->id);
             }
         } else {
             const auto found = maps_by_id.find(*map_id);
             if (found == maps_by_id.end()) {
-                fail("fixture map id " + std::to_string(*map_id) +
-                     " not found in loaded object");
+                std::fprintf(
+                    stderr,
+                    "fixture map id %u not found in loaded object; skipping map\n",
+                    *map_id);
+                continue;
             }
             live_map = &found->second;
         }
@@ -867,20 +900,42 @@ void load_map_fixtures(
                 optional_u32_field(map_node["key_size"], "key_size");
             declared_key_size.has_value() &&
             *declared_key_size != live_map->key_size) {
-            fail("fixture key_size mismatch for map '" + live_map->name + "'");
+            std::fprintf(
+                stderr,
+                "fixture map '%s' key_size mismatch: fixture=%u live=%u; skipping map\n",
+                live_map->name.c_str(),
+                *declared_key_size,
+                live_map->key_size);
+            continue;
         }
         if (const auto declared_value_size =
                 optional_u32_field(map_node["value_size"], "value_size");
             declared_value_size.has_value() &&
             *declared_value_size != live_map->value_size) {
-            fail("fixture value_size mismatch for map '" + live_map->name + "'");
+            std::fprintf(
+                stderr,
+                "fixture map '%s' value_size mismatch: fixture=%u live=%u; skipping map\n",
+                live_map->name.c_str(),
+                *declared_value_size,
+                live_map->value_size);
+            continue;
         }
 
         const YAML::Node entries = map_node["entries"];
         if (!entries || !entries.IsSequence()) {
             fail("fixture map '" + live_map->name + "' must contain an 'entries' sequence");
         }
+        if (entries.size() > live_map->max_entries) {
+            std::fprintf(
+                stderr,
+                "fixture map '%s' has %zu entries but live max_entries=%u; skipping map\n",
+                live_map->name.c_str(),
+                entries.size(),
+                live_map->max_entries);
+            continue;
+        }
 
+        bool skip_map = false;
         for (const auto &entry_node : entries) {
             if (!entry_node.IsMap()) {
                 fail("fixture map '" + live_map->name +
@@ -894,15 +949,32 @@ void load_map_fixtures(
                 require_scalar_string_field(entry_node["value_hex"], "value_hex"),
                 "value_hex");
             if (key.size() != live_map->key_size) {
-                fail("fixture key size mismatch for map '" + live_map->name + "'");
+                std::fprintf(
+                    stderr,
+                    "fixture map '%s' entry key size mismatch: fixture=%zu live=%u; skipping map\n",
+                    live_map->name.c_str(),
+                    key.size(),
+                    live_map->key_size);
+                skip_map = true;
+                break;
             }
             if (value.size() != live_map->value_size) {
-                fail("fixture value size mismatch for map '" + live_map->name + "'");
+                std::fprintf(
+                    stderr,
+                    "fixture map '%s' entry value size mismatch: fixture=%zu live=%u; skipping map\n",
+                    live_map->name.c_str(),
+                    value.size(),
+                    live_map->value_size);
+                skip_map = true;
+                break;
             }
 
             update_fixture_map_elem(*live_map, key, value);
             ++loaded_entries;
             updated_map_ids.insert(live_map->id);
+        }
+        if (skip_map) {
+            continue;
         }
     }
 
@@ -916,7 +988,7 @@ void load_map_fixtures(
 
 void maybe_load_map_fixtures(const cli_options &options, bpf_object *object)
 {
-    if (!options.fixture_path.has_value() || options.compile_only) {
+    if (!options.fixture_path.has_value()) {
         return;
     }
     load_map_fixtures(*options.fixture_path, object);
@@ -1777,6 +1849,25 @@ bool run_shell_workload_command(const std::string &command)
     return WEXITSTATUS(status) == 0;
 }
 
+bool run_trigger_workload_command(
+    std::string_view trigger_command,
+    std::optional<uint32_t> timeout_seconds)
+{
+    std::string wrapped_command = "(";
+    wrapped_command += trigger_command;
+    wrapped_command += ") >/dev/null 2>&1";
+
+    std::string shell_command;
+    if (timeout_seconds.has_value() && *timeout_seconds > 0) {
+        shell_command =
+            "timeout --signal=TERM " + std::to_string(*timeout_seconds) +
+            "s bash -lc " + shell_escape(wrapped_command);
+    } else {
+        shell_command = "bash -lc " + shell_escape(wrapped_command);
+    }
+    return run_shell_workload_command(shell_command);
+}
+
 void run_mixed_syscall_fallback(uint32_t duration_seconds)
 {
     const uint32_t seconds = workload_duration_seconds(duration_seconds);
@@ -2037,6 +2128,20 @@ void run_workload(const std::string &workload_type, uint32_t iterations_or_durat
     }
 }
 
+void run_attach_workload(const cli_options &options, uint32_t iterations_or_duration)
+{
+    if (options.trigger_command.has_value()) {
+        if (!run_trigger_workload_command(
+                *options.trigger_command,
+                options.trigger_timeout_seconds)) {
+            fail("attach trigger command failed: " + *options.trigger_command);
+        }
+        return;
+    }
+
+    run_workload(options.workload_type, iterations_or_duration);
+}
+
 struct bpf_stats_snapshot {
     uint64_t run_cnt = 0;
     uint64_t run_time_ns = 0;
@@ -2136,6 +2241,20 @@ prepared_program_state &require_prepared_program(
         fail("multi-program prepared kernel state requires --program-name");
     }
     return prepared.programs.at(prepared.program_order.front());
+}
+
+void maybe_initialize_prepared_program_fixtures(
+    prepared_kernel_state &prepared,
+    const cli_options &options)
+{
+    if (katran_balancer_fixture_requested(options)) {
+        auto &program = require_prepared_program(prepared, options.program_name);
+        if (!program.katran_fixture_initialized) {
+            initialize_katran_test_fixture(prepared.object.get());
+            program.katran_fixture_initialized = true;
+        }
+    }
+    maybe_load_map_fixtures(options, prepared.object.get());
 }
 
 prepared_program_state *summary_program_for_prepared(prepared_kernel_state &prepared)
@@ -2269,6 +2388,7 @@ sample_result build_prepared_program_compile_sample(
     const cli_options &options)
 {
     auto &program = require_prepared_program(prepared, options.program_name);
+    maybe_initialize_prepared_program_fixtures(prepared, options);
     if (options.daemon_socket.has_value()) {
         maybe_apply_prepared_daemon_rejit(program, options);
     } else {
@@ -2306,7 +2426,7 @@ std::vector<sample_result> execute_prepared_kernel_attach(
     const cli_options &options)
 {
     auto &program = require_prepared_program(prepared, options.program_name);
-    maybe_load_map_fixtures(options, prepared.object.get());
+    maybe_initialize_prepared_program_fixtures(prepared, options);
     if (options.daemon_socket.has_value()) {
         maybe_apply_prepared_daemon_rejit(program, options);
     }
@@ -2338,14 +2458,14 @@ std::vector<sample_result> execute_prepared_kernel_attach(
         : options.repeat * options.workload_iterations;
 
     if (options.warmup_repeat > 0) {
-        run_workload(options.workload_type, warmup_workload_amount);
+        run_attach_workload(options, warmup_workload_amount);
     }
 
     const auto before_stats = read_bpf_stats(program.program_fd);
 
     const auto exec_wall_start = std::chrono::steady_clock::now();
     const uint64_t tsc_before = rdtsc_start();
-    run_workload(options.workload_type, measured_workload_amount);
+    run_attach_workload(options, measured_workload_amount);
     const uint64_t tsc_after = rdtsc_end();
     const auto exec_wall_end = std::chrono::steady_clock::now();
 
@@ -2412,12 +2532,7 @@ std::vector<sample_result> execute_prepared_kernel_run(
     const cli_options &options)
 {
     auto &program = require_prepared_program(prepared, options.program_name);
-    if (katran_balancer_fixture_requested(options) &&
-        !program.katran_fixture_initialized) {
-        initialize_katran_test_fixture(prepared.object.get());
-        program.katran_fixture_initialized = true;
-    }
-    maybe_load_map_fixtures(options, prepared.object.get());
+    maybe_initialize_prepared_program_fixtures(prepared, options);
 
     rejit_summary rejit = program.prepared_rejit;
     uint64_t rejit_apply_ns = program.rejit_apply_ns;
@@ -3496,7 +3611,7 @@ std::vector<sample_result> run_kernel_attach(const cli_options &options)
 
     /* Warmup: duration-based workloads treat workload_iterations as total seconds. */
     if (options.warmup_repeat > 0) {
-        run_workload(options.workload_type, warmup_workload_amount);
+        run_attach_workload(options, warmup_workload_amount);
     }
 
     /* Read stats before the measured workload */
@@ -3505,7 +3620,7 @@ std::vector<sample_result> run_kernel_attach(const cli_options &options)
     /* Execute the measured workload */
     const auto exec_wall_start = std::chrono::steady_clock::now();
     const uint64_t tsc_before = rdtsc_start();
-    run_workload(options.workload_type, measured_workload_amount);
+    run_attach_workload(options, measured_workload_amount);
     const uint64_t tsc_after = rdtsc_end();
     const auto exec_wall_end = std::chrono::steady_clock::now();
 

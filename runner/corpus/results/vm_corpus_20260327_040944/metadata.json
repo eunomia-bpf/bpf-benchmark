@@ -699,18 +699,18 @@
   },
   "kernel_image": "vendor/linux-framework/arch/x86/boot/bzImage",
   "kernel_tree": "vendor/linux-framework",
-  "last_updated_at": "2026-03-27T04:23:49.710737+00:00",
+  "last_updated_at": "2026-03-27T04:28:34.066890+00:00",
   "macro_corpus_yaml": "corpus/config/macro_corpus.yaml",
   "mode": "packet",
   "output_hint_json": "runner/corpus/results/dev/vm_corpus.json",
   "output_hint_md": "runner/corpus/results/vm_corpus.md",
   "progress": {
-    "completed_objects": 10,
-    "completed_programs": 93,
+    "completed_objects": 17,
+    "completed_programs": 117,
     "current_target": {
-      "canonical_object_name": "bcc:libbpf-tools/biotop.bpf.o"
+      "canonical_object_name": "bcc:libbpf-tools/execsnoop.bpf.o"
     },
-    "current_target_index": 10,
+    "current_target_index": 17,
     "status": "running",
     "total_objects": 477,
     "total_programs": 2019
@@ -723,7 +723,7 @@
   "status": "running",
   "suite": "corpus",
   "summary": {
-    "applied_programs": 14,
+    "applied_programs": 15,
     "by_object": [
       {
         "applied_programs": 0,
@@ -733,6 +733,15 @@
         "exec_ratio_geomean": null,
         "measured_pairs": 0,
         "programs": 55
+      },
+      {
+        "applied_programs": 0,
+        "canonical_object_name": "bcc:libbpf-tools/cachestat.bpf.o",
+        "code_size_ratio_geomean": 1.0,
+        "compile_pairs": 7,
+        "exec_ratio_geomean": null,
+        "measured_pairs": 7,
+        "programs": 11
       },
       {
         "applied_programs": 0,
@@ -790,6 +799,51 @@
       },
       {
         "applied_programs": 0,
+        "canonical_object_name": "bcc:libbpf-tools/drsnoop.bpf.o",
+        "code_size_ratio_geomean": 1.0,
+        "compile_pairs": 4,
+        "exec_ratio_geomean": null,
+        "measured_pairs": 4,
+        "programs": 4
+      },
+      {
+        "applied_programs": 0,
+        "canonical_object_name": "bcc:libbpf-tools/capable.bpf.o",
+        "code_size_ratio_geomean": null,
+        "compile_pairs": 0,
+        "exec_ratio_geomean": null,
+        "measured_pairs": 0,
+        "programs": 2
+      },
+      {
+        "applied_programs": 0,
+        "canonical_object_name": "bcc:libbpf-tools/cpudist.bpf.o",
+        "code_size_ratio_geomean": null,
+        "compile_pairs": 0,
+        "exec_ratio_geomean": null,
+        "measured_pairs": 0,
+        "programs": 2
+      },
+      {
+        "applied_programs": 0,
+        "canonical_object_name": "bcc:libbpf-tools/cpufreq.bpf.o",
+        "code_size_ratio_geomean": 1.0,
+        "compile_pairs": 1,
+        "exec_ratio_geomean": null,
+        "measured_pairs": 1,
+        "programs": 2
+      },
+      {
+        "applied_programs": 0,
+        "canonical_object_name": "bcc:libbpf-tools/execsnoop.bpf.o",
+        "code_size_ratio_geomean": 1.0,
+        "compile_pairs": 2,
+        "exec_ratio_geomean": 1.2245293375711908,
+        "measured_pairs": 2,
+        "programs": 2
+      },
+      {
+        "applied_programs": 0,
         "canonical_object_name": "KubeArmor:protectproc.bpf.o",
         "code_size_ratio_geomean": null,
         "compile_pairs": 0,
@@ -814,6 +868,15 @@
         "exec_ratio_geomean": 1.2807377049180328,
         "measured_pairs": 1,
         "programs": 1
+      },
+      {
+        "applied_programs": 1,
+        "canonical_object_name": "bcc:libbpf-tools/bitesize.bpf.o",
+        "code_size_ratio_geomean": 1.0,
+        "compile_pairs": 1,
+        "exec_ratio_geomean": 1.0490053372149442,
+        "measured_pairs": 1,
+        "programs": 1
       }
     ],
     "by_repo": [
@@ -827,55 +890,56 @@
         "repo": "KubeArmor"
       },
       {
-        "applied_programs": 14,
-        "code_size_ratio_geomean": 0.999982153943188,
-        "compile_pairs": 22,
-        "exec_ratio_geomean": 0.9921883604781785,
-        "measured_pairs": 22,
-        "programs": 30,
+        "applied_programs": 15,
+        "code_size_ratio_geomean": 0.9999893887926992,
+        "compile_pairs": 37,
+        "exec_ratio_geomean": 1.0265381800743623,
+        "measured_pairs": 37,
+        "programs": 54,
         "repo": "bcc"
       }
     ],
     "code_size_delta_median_pct": 0.0,
-    "code_size_ratio_geomean": 0.999982153943188,
-    "compile_pairs": 22,
+    "code_size_ratio_geomean": 0.9999893887926992,
+    "compile_pairs": 37,
     "compile_pass_counts": {
       "cond_select": 1,
-      "const_prop": 14,
-      "dce": 14,
+      "const_prop": 15,
+      "dce": 15,
       "endian_fusion": 2,
       "extract": 2
     },
     "effective_mode": "vm",
-    "exec_ratio_geomean": 0.9921883604781785,
+    "exec_ratio_geomean": 1.0265381800743623,
     "exec_ratio_max": 1.2807377049180328,
-    "exec_ratio_median": 0.9798994974874372,
+    "exec_ratio_median": 1.0157508571277722,
     "exec_ratio_min": 0.7626123013130615,
     "failure_reasons": {
-      "bpf_object__load failed: Invalid argument": 252,
-      "bpf_object__load failed: No such process": 4,
+      "bpf_object__load failed: Invalid argument": 268,
+      "bpf_object__load failed: No such process": 8,
       "bpf_program__attach failed: Device or resource busy": 8,
       "bpf_program__attach failed: Invalid argument": 8,
-      "bpf_program__attach failed: No such file or directory": 12
+      "bpf_program__attach failed: No such file or directory": 24,
+      "bpf_program__attach failed: Operation not supported": 4
     },
-    "measured_pairs": 22,
-    "objects_attempted": 10,
+    "measured_pairs": 37,
+    "objects_attempted": 17,
     "pass_counts": {
       "cond_select": 2,
-      "const_prop": 28,
-      "dce": 28,
+      "const_prop": 30,
+      "dce": 30,
       "endian_fusion": 4,
       "extract": 4
     },
     "rejit_failure_reasons": {},
     "run_pass_counts": {
       "cond_select": 1,
-      "const_prop": 14,
-      "dce": 14,
+      "const_prop": 15,
+      "dce": 15,
       "endian_fusion": 2,
       "extract": 2
     },
-    "targets_attempted": 93
+    "targets_attempted": 117
   },
   "timeout_seconds": 240,
   "vng_binary": "runner/scripts/vng-wrapper.sh",

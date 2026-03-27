@@ -1001,6 +1001,13 @@ mod real_bpfo_tests {
         run_named_pipeline_with_profiling, LoadedFixtureProgram,
     };
 
+    #[derive(Clone, Copy)]
+    struct CapturedRealCase {
+        object_path: &'static str,
+        program_name: &'static str,
+        capture_path: &'static str,
+    }
+
     fn run_real_case(
         pass_names: &[&str],
         fixture: &str,
@@ -1026,6 +1033,27 @@ mod real_bpfo_tests {
         (loaded, program, result)
     }
 
+    fn run_captured_real_case(
+        pass_names: &[&str],
+        case: CapturedRealCase,
+    ) -> (LoadedFixtureProgram, BpfProgram, PipelineResult) {
+        try_run_captured_real_case(pass_names, case).unwrap()
+    }
+
+    fn try_run_captured_real_case(
+        pass_names: &[&str],
+        case: CapturedRealCase,
+    ) -> anyhow::Result<(LoadedFixtureProgram, BpfProgram, PipelineResult)> {
+        let object_path = repo_path(case.object_path);
+        let capture_path = repo_path(case.capture_path);
+        let loaded = load_program_from_path(&object_path, case.program_name)?;
+        let mut program = loaded.into_program_with_captured_maps(&capture_path)?;
+        let ctx = permissive_pass_ctx(loaded.prog_type);
+        let result = run_named_pipeline(&mut program, &ctx, pass_names)?;
+        assert_valid_bpf(&program);
+        Ok((loaded, program, result))
+    }
+
     fn assert_pass_changed(
         result: &PipelineResult,
         pass_name: &str,
@@ -1047,6 +1075,131 @@ mod real_bpfo_tests {
             fixture.object_path.display(),
             fixture.section_name
         );
+    }
+
+    fn all_captured_real_cases() -> &'static [CapturedRealCase] {
+        &[
+            CapturedRealCase {
+                object_path: "corpus/build/tetragon/bpf_execve_bprm_commit_creds.bpf.o",
+                program_name: "tg_kp_bprm_committing_creds",
+                capture_path:
+                    "corpus/fixtures/tetragon/bpf_execve_bprm_commit_creds.bpf.o/tg_kp_bprm_committing_creds.json",
+            },
+            CapturedRealCase {
+                object_path: "corpus/build/tetragon/bpf_execve_event.bpf.o",
+                program_name: "event_execve",
+                capture_path:
+                    "corpus/fixtures/tetragon/bpf_execve_event.bpf.o/event_execve.json",
+            },
+            CapturedRealCase {
+                object_path: "corpus/build/tetragon/bpf_execve_event.bpf.o",
+                program_name: "execve_rate",
+                capture_path:
+                    "corpus/fixtures/tetragon/bpf_execve_event.bpf.o/execve_rate.json",
+            },
+            CapturedRealCase {
+                object_path: "corpus/build/tetragon/bpf_execve_event.bpf.o",
+                program_name: "execve_send",
+                capture_path:
+                    "corpus/fixtures/tetragon/bpf_execve_event.bpf.o/execve_send.json",
+            },
+            CapturedRealCase {
+                object_path: "corpus/build/tetragon/bpf_execve_map_update.bpf.o",
+                program_name: "execve_map_update",
+                capture_path:
+                    "corpus/fixtures/tetragon/bpf_execve_map_update.bpf.o/execve_map_update.json",
+            },
+            CapturedRealCase {
+                object_path: "corpus/build/tetragon/bpf_exit.bpf.o",
+                program_name: "event_exit_acct_process",
+                capture_path:
+                    "corpus/fixtures/tetragon/bpf_exit.bpf.o/event_exit_acct_process.json",
+            },
+            CapturedRealCase {
+                object_path: "corpus/build/tetragon/bpf_fork.bpf.o",
+                program_name: "event_wake_up_new_task",
+                capture_path:
+                    "corpus/fixtures/tetragon/bpf_fork.bpf.o/event_wake_up_new_task.json",
+            },
+            CapturedRealCase {
+                object_path: "corpus/build/tracee/tracee.bpf.o",
+                program_name: "lkm_seeker_modtree_loop",
+                capture_path:
+                    "corpus/fixtures/tracee/tracee.bpf.o/lkm_seeker_modtree_loop.json",
+            },
+            CapturedRealCase {
+                object_path: "corpus/build/tracee/tracee.bpf.o",
+                program_name: "sys_dup_exit_tail",
+                capture_path:
+                    "corpus/fixtures/tracee/tracee.bpf.o/sys_dup_exit_tail.json",
+            },
+            CapturedRealCase {
+                object_path: "corpus/build/tracee/tracee.bpf.o",
+                program_name: "sys_enter_init",
+                capture_path:
+                    "corpus/fixtures/tracee/tracee.bpf.o/sys_enter_init.json",
+            },
+            CapturedRealCase {
+                object_path: "corpus/build/tracee/tracee.bpf.o",
+                program_name: "sys_enter_submit",
+                capture_path:
+                    "corpus/fixtures/tracee/tracee.bpf.o/sys_enter_submit.json",
+            },
+            CapturedRealCase {
+                object_path: "corpus/build/tracee/tracee.bpf.o",
+                program_name: "sys_exit_init",
+                capture_path:
+                    "corpus/fixtures/tracee/tracee.bpf.o/sys_exit_init.json",
+            },
+            CapturedRealCase {
+                object_path: "corpus/build/tracee/tracee.bpf.o",
+                program_name: "sys_exit_submit",
+                capture_path:
+                    "corpus/fixtures/tracee/tracee.bpf.o/sys_exit_submit.json",
+            },
+            CapturedRealCase {
+                object_path: "corpus/build/tracee/tracee.bpf.o",
+                program_name: "syscall__execve_enter",
+                capture_path:
+                    "corpus/fixtures/tracee/tracee.bpf.o/syscall__execve_enter.json",
+            },
+            CapturedRealCase {
+                object_path: "corpus/build/tracee/tracee.bpf.o",
+                program_name: "syscall__execve_exit",
+                capture_path:
+                    "corpus/fixtures/tracee/tracee.bpf.o/syscall__execve_exit.json",
+            },
+            CapturedRealCase {
+                object_path: "corpus/build/tracee/tracee.bpf.o",
+                program_name: "syscall__execveat_enter",
+                capture_path:
+                    "corpus/fixtures/tracee/tracee.bpf.o/syscall__execveat_enter.json",
+            },
+            CapturedRealCase {
+                object_path: "corpus/build/tracee/tracee.bpf.o",
+                program_name: "syscall__execveat_exit",
+                capture_path:
+                    "corpus/fixtures/tracee/tracee.bpf.o/syscall__execveat_exit.json",
+            },
+            CapturedRealCase {
+                object_path: "corpus/build/tracee/tracee.bpf.o",
+                program_name: "tracepoint__raw_syscalls__sys_enter",
+                capture_path:
+                    "corpus/fixtures/tracee/tracee.bpf.o/tracepoint__raw_syscalls__sys_enter.json",
+            },
+            CapturedRealCase {
+                object_path: "corpus/build/tracee/tracee.bpf.o",
+                program_name: "tracepoint__raw_syscalls__sys_exit",
+                capture_path:
+                    "corpus/fixtures/tracee/tracee.bpf.o/tracepoint__raw_syscalls__sys_exit.json",
+            },
+            CapturedRealCase {
+                object_path: "corpus/build/tracee/tracee.bpf.o",
+                program_name: "tracepoint__sched__sched_process_fork",
+                capture_path:
+                    "corpus/fixtures/tracee/tracee.bpf.o/tracepoint__sched__sched_process_fork.json",
+            },
+        ]
     }
 
     macro_rules! real_single_pass_test {
@@ -1138,7 +1291,7 @@ mod real_bpfo_tests {
     }
 
     #[test]
-    fn test_map_inline_real_tetragon_event_exit_acct_rejects_dynamic_and_percpu_maps() {
+    fn test_map_inline_real_tetragon_event_exit_acct_still_rejects_dynamic_sites() {
         let object_path = repo_path("corpus/build/tetragon/bpf_exit.bpf.o");
         let capture_path =
             repo_path("corpus/fixtures/tetragon/bpf_exit.bpf.o/event_exit_acct_process.json");
@@ -1162,15 +1315,6 @@ mod real_bpfo_tests {
                 .iter()
                 .any(|skip| skip.reason == "lookup key is not a constant stack materialization"),
             "expected dynamic-key skip on {}:{}; skipped={:?}",
-            loaded.object_path.display(),
-            loaded.section_name,
-            pass.sites_skipped
-        );
-        assert!(
-            pass.sites_skipped
-                .iter()
-                .any(|skip| skip.reason == "map type 6 not inlineable in v1"),
-            "expected percpu-array skip on {}:{}; skipped={:?}",
             loaded.object_path.display(),
             loaded.section_name,
             pass.sites_skipped
@@ -1202,16 +1346,12 @@ mod real_bpfo_tests {
 
     #[test]
     fn test_map_inline_real_tetragon_event_execve() {
-        let object_path = repo_path("corpus/build/tetragon/bpf_execve_event.bpf.o");
-        let capture_path =
-            repo_path("corpus/fixtures/tetragon/bpf_execve_event.bpf.o/event_execve.json");
-        let loaded = load_program_from_path(&object_path, "event_execve").unwrap();
-        let mut program = loaded
-            .into_program_with_captured_maps(&capture_path)
-            .unwrap();
-        let ctx = permissive_pass_ctx(loaded.prog_type);
-        let result = run_named_pipeline(&mut program, &ctx, &["map_inline"]).unwrap();
-        assert_valid_bpf(&program);
+        let case = CapturedRealCase {
+            object_path: "corpus/build/tetragon/bpf_execve_event.bpf.o",
+            program_name: "event_execve",
+            capture_path: "corpus/fixtures/tetragon/bpf_execve_event.bpf.o/event_execve.json",
+        };
+        let (loaded, _program, result) = run_captured_real_case(&["map_inline"], case);
         assert_pass_changed(&result, "map_inline", &loaded);
         let pass = pass_result(&result, "map_inline").unwrap();
         assert!(
@@ -1220,6 +1360,69 @@ mod real_bpfo_tests {
             loaded.object_path.display(),
             loaded.section_name,
             pass.sites_skipped
+        );
+    }
+
+    #[test]
+    fn test_map_inline_real_tetragon_event_wake_up_new_task() {
+        let case = CapturedRealCase {
+            object_path: "corpus/build/tetragon/bpf_fork.bpf.o",
+            program_name: "event_wake_up_new_task",
+            capture_path: "corpus/fixtures/tetragon/bpf_fork.bpf.o/event_wake_up_new_task.json",
+        };
+        let (loaded, _program, result) = run_captured_real_case(&["map_inline"], case);
+        assert_pass_changed(&result, "map_inline", &loaded);
+        let pass = pass_result(&result, "map_inline").unwrap();
+        assert!(
+            pass.sites_applied > 0,
+            "expected map_inline to apply on {}:{}; skipped={:?}",
+            loaded.object_path.display(),
+            loaded.section_name,
+            pass.sites_skipped
+        );
+    }
+
+    #[test]
+    fn test_map_inline_real_all_captured_fixtures_smoke() {
+        let mut changed_cases = 0usize;
+        let mut attempted_cases = 0usize;
+
+        for case in all_captured_real_cases() {
+            let (loaded, _program, result) = match try_run_captured_real_case(&["map_inline"], *case)
+            {
+                Ok(result) => result,
+                Err(err) => {
+                    eprintln!(
+                        "captured fixture {}:{} skipped during smoke scan: {:#}",
+                        case.object_path, case.program_name, err
+                    );
+                    continue;
+                }
+            };
+            attempted_cases += 1;
+            let pass = pass_result(&result, "map_inline").unwrap();
+            eprintln!(
+                "captured fixture {}:{} changed={} applied={} skipped={}",
+                loaded.object_path.display(),
+                loaded.section_name,
+                pass.changed,
+                pass.sites_applied,
+                pass.sites_skipped.len()
+            );
+            if pass.changed {
+                changed_cases += 1;
+            }
+        }
+
+        assert!(
+            changed_cases >= 2,
+            "expected at least two captured real fixtures to hit map_inline, got {}",
+            changed_cases
+        );
+        assert!(
+            attempted_cases >= 10,
+            "expected to scan at least ten captured real fixtures, got {}",
+            attempted_cases
         );
     }
 

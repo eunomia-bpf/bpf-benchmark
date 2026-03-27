@@ -81,6 +81,7 @@ std::string usage_text()
         "[--manual-load] "
         "[--io-mode map|staged|packet|context] [--raw-packet] [--repeat N] [--warmup N] [--input-size N] "
         "[--attach] [--workload-iterations N] [--workload-type mixed|stress-ng|fio|wrk|getpid|nanosleep|write_devnull] "
+        "[--trigger-command <shell>] [--trigger-timeout-seconds N] "
         "[--opt-level 0|1|2|3] [--no-cmov] [--llvm-target-cpu <cpu>] [--llvm-target-features <csv>] [--llvm-disable-pass <name>] [--llvm-log-passes] "
         "[--perf-counters] [--perf-scope full_repeat_raw|full_repeat_avg] "
         "[--dump-jit] [--dump-xlated <path>] [--compile-only]";
@@ -617,6 +618,15 @@ cli_options parse_args(int argc, char **argv)
             options.workload_type = argv[++index];
             continue;
         }
+        if (current == "--trigger-command" && index + 1 < argc) {
+            options.trigger_command = std::string(argv[++index]);
+            continue;
+        }
+        if (current == "--trigger-timeout-seconds" && index + 1 < argc) {
+            options.trigger_timeout_seconds =
+                static_cast<uint32_t>(std::stoul(argv[++index]));
+            continue;
+        }
         fail("unknown or incomplete argument: " + std::string(current));
     }
 
@@ -688,6 +698,15 @@ keep_alive_request parse_keep_alive_request(std::string_view json_line)
     if (const auto program_name = get_optional_string_field(fields, {"program_name"});
         program_name.has_value()) {
         options.program_name = *program_name;
+    }
+    if (const auto trigger_command = get_optional_string_field(fields, {"trigger_command"});
+        trigger_command.has_value()) {
+        options.trigger_command = *trigger_command;
+    }
+    if (const auto trigger_timeout = get_optional_int_field(fields, {"trigger_timeout_seconds"});
+        trigger_timeout.has_value()) {
+        options.trigger_timeout_seconds =
+            require_u32_value(*trigger_timeout, "trigger_timeout_seconds");
     }
     if (const auto io_mode = get_optional_string_field(fields, {"io_mode"});
         io_mode.has_value()) {

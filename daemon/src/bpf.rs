@@ -3,7 +3,9 @@
 //!
 //! All interaction with the kernel goes through `libc::syscall(SYS_bpf, ...)`.
 
+use std::collections::HashMap;
 use std::os::unix::io::{AsRawFd, FromRawFd, OwnedFd, RawFd};
+use std::sync::OnceLock;
 
 use anyhow::{bail, Context, Result};
 use serde::Serialize;
@@ -14,8 +16,10 @@ use crate::insn::BpfInsn;
 // The enum starts at 0. We only define the commands we actually use.
 // Note: BPF_MAP_FREEZE=22 sits between BTF_GET_FD_BY_ID and BTF_GET_NEXT_ID.
 const BPF_MAP_LOOKUP_ELEM: u32 = 1;
-#[cfg(test)]
 const BPF_MAP_TYPE_ARRAY: u32 = 2;
+const BPF_MAP_TYPE_PERCPU_HASH: u32 = 5;
+const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = 6;
+const BPF_MAP_TYPE_LRU_PERCPU_HASH: u32 = 10;
 const BPF_PROG_GET_NEXT_ID: u32 = 11;
 const BPF_MAP_GET_NEXT_ID: u32 = 12;
 const BPF_PROG_GET_FD_BY_ID: u32 = 13;
@@ -580,12 +584,8 @@ pub fn bpf_map_lookup_elem_by_id(map_id: u32, key: &[u8], value_size: usize) -> 
     if let Some(state) = mock_map_state(map_id) {
         let value = match state.values.get(key).cloned() {
             Some(value) => value,
-            None if mock_array_lookup_returns_zero(&state, key, value_size) => {
-                vec![0u8; value_size]
-            }
-            None => {
-                return Err(anyhow::anyhow!("mock map {} missing key {:?}", map_id, key));
-            }
+            None => mock_zero_filled_lookup_value(&state, key, value_size)
+                .ok_or_else(|| anyhow::anyhow!("mock map {} missing key {:?}", map_id, key))?,
         };
         if value.len() != value_size {
             bail!(
@@ -602,20 +602,94 @@ pub fn bpf_map_lookup_elem_by_id(map_id: u32, key: &[u8], value_size: usize) -> 
     bpf_map_lookup_elem(fd.as_raw_fd(), key, value_size)
 }
 
+pub fn bpf_map_lookup_value_size(info: &BpfMapInfo) -> usize {
+    if is_percpu_map_type(info.map_type) {
+        round_up_8(info.value_size as usize).saturating_mul(possible_cpu_count())
+    } else {
+        info.value_size as usize
+    }
+}
+
+pub fn bpf_map_lookup_value_size_by_id(map_id: u32) -> Result<usize> {
+    #[cfg(test)]
+    if let Some(state) = mock_map_state(map_id) {
+        return Ok(mock_lookup_value_size(&state));
+    }
+
+    let (info, _) = bpf_map_get_info_by_id(map_id)?;
+    Ok(bpf_map_lookup_value_size(&info))
+}
+
+fn is_percpu_map_type(map_type: u32) -> bool {
+    matches!(
+        map_type,
+        BPF_MAP_TYPE_PERCPU_HASH | BPF_MAP_TYPE_PERCPU_ARRAY | BPF_MAP_TYPE_LRU_PERCPU_HASH
+    )
+}
+
+fn round_up_8(value: usize) -> usize {
+    (value + 7) & !7
+}
+
+fn possible_cpu_count() -> usize {
+    static POSSIBLE_CPU_COUNT: OnceLock<usize> = OnceLock::new();
+    *POSSIBLE_CPU_COUNT.get_or_init(|| read_possible_cpu_count().unwrap_or(1))
+}
+
+fn read_possible_cpu_count() -> Option<usize> {
+    let text = std::fs::read_to_string("/sys/devices/system/cpu/possible").ok()?;
+    parse_possible_cpu_list(&text).or_else(|| std::thread::available_parallelism().ok().map(usize::from))
+}
+
+fn parse_possible_cpu_list(text: &str) -> Option<usize> {
+    let mut count = 0usize;
+    for segment in text.trim().split(',').filter(|segment| !segment.is_empty()) {
+        let parsed = if let Some((start, end)) = segment.split_once('-') {
+            let start = start.trim().parse::<usize>().ok()?;
+            let end = end.trim().parse::<usize>().ok()?;
+            end.checked_sub(start)?.checked_add(1)?
+        } else {
+            segment.trim().parse::<usize>().ok()?;
+            1
+        };
+        count = count.checked_add(parsed)?;
+    }
+    (count > 0).then_some(count)
+}
+
 #[cfg(test)]
-fn mock_array_lookup_returns_zero(state: &MockMapState, key: &[u8], value_size: usize) -> bool {
-    if state.info.map_type != BPF_MAP_TYPE_ARRAY
-        || state.info.key_size as usize != key.len()
-        || state.info.value_size as usize != value_size
-        || key.len() > 8
-    {
-        return false;
+fn mock_zero_filled_lookup_value(
+    state: &MockMapState,
+    key: &[u8],
+    value_size: usize,
+) -> Option<Vec<u8>> {
+    if state.info.key_size as usize != key.len() || key.len() > 8 {
+        return None;
+    }
+
+    let expected_size = mock_lookup_value_size(state);
+    let always_present = matches!(
+        state.info.map_type,
+        BPF_MAP_TYPE_ARRAY | BPF_MAP_TYPE_PERCPU_ARRAY
+    );
+    if !always_present || value_size != expected_size {
+        return None;
     }
 
     let mut raw = [0u8; 8];
     raw[..key.len()].copy_from_slice(key);
     let index = u64::from_le_bytes(raw);
-    index < state.info.max_entries as u64
+    (index < state.info.max_entries as u64).then_some(vec![0u8; value_size])
+}
+
+#[cfg(test)]
+fn mock_lookup_value_size(state: &MockMapState) -> usize {
+    state
+        .values
+        .values()
+        .next()
+        .map(|value| value.len())
+        .unwrap_or_else(|| bpf_map_lookup_value_size(&state.info))
 }
 
 /// Open a file descriptor for the BPF BTF object with the given ID.
@@ -820,7 +894,14 @@ const BPF_PSEUDO_MAP_VALUE: u8 = 2;
 ///
 /// Returns the list of opened map `OwnedFd`s (caller must keep them alive until REJIT completes).
 pub fn relocate_map_fds(insns: &mut [BpfInsn], map_ids: &[u32]) -> Result<Vec<OwnedFd>> {
-    use std::collections::HashMap;
+    relocate_map_fds_with_bindings(insns, map_ids, &HashMap::new())
+}
+
+pub fn relocate_map_fds_with_bindings(
+    insns: &mut [BpfInsn],
+    map_ids: &[u32],
+    map_fd_bindings: &HashMap<i32, u32>,
+) -> Result<Vec<OwnedFd>> {
     use std::os::unix::io::AsRawFd;
 
     // Step 1: Scan for BPF_LD_IMM64 with BPF_PSEUDO_MAP_FD or BPF_PSEUDO_MAP_VALUE.
@@ -852,12 +933,14 @@ pub fn relocate_map_fds(insns: &mut [BpfInsn], map_ids: &[u32]) -> Result<Vec<Ow
         return Ok(Vec::new());
     }
 
+    let relocation_targets = resolve_map_ids_for_relocation(&unique_old_fds, map_ids, map_fd_bindings);
+
     // Step 2: Verify we have enough map IDs.
-    if unique_old_fds.len() > map_ids.len() {
+    if relocation_targets.len() < unique_old_fds.len() {
         eprintln!(
             "  relocate_map_fds: found {} unique FDs in bytecode but only {} map IDs in prog info",
             unique_old_fds.len(),
-            map_ids.len()
+            relocation_targets.len()
         );
         // Proceed with what we have, remaining will fail but this is better than failing all.
     }
@@ -866,11 +949,7 @@ pub fn relocate_map_fds(insns: &mut [BpfInsn], map_ids: &[u32]) -> Result<Vec<Ow
     let mut owned_fds: Vec<OwnedFd> = Vec::new();
     let mut fd_map: HashMap<i32, i32> = HashMap::new();
 
-    for (idx, &old_fd) in unique_old_fds.iter().enumerate() {
-        if idx >= map_ids.len() {
-            break;
-        }
-        let map_id = map_ids[idx];
+    for (&old_fd, &map_id) in &relocation_targets {
         match bpf_map_get_fd_by_id(map_id) {
             Ok(new_fd) => {
                 let raw = new_fd.as_raw_fd();
@@ -906,6 +985,26 @@ pub fn relocate_map_fds(insns: &mut [BpfInsn], map_ids: &[u32]) -> Result<Vec<Ow
     }
 
     Ok(owned_fds)
+}
+
+fn resolve_map_ids_for_relocation(
+    unique_old_fds: &[i32],
+    map_ids: &[u32],
+    map_fd_bindings: &HashMap<i32, u32>,
+) -> HashMap<i32, u32> {
+    let mut resolved = HashMap::new();
+
+    for (idx, &old_fd) in unique_old_fds.iter().enumerate() {
+        if let Some(&map_id) = map_fd_bindings.get(&old_fd) {
+            resolved.insert(old_fd, map_id);
+            continue;
+        }
+        if let Some(&map_id) = map_ids.get(idx) {
+            resolved.insert(old_fd, map_id);
+        }
+    }
+
+    resolved
 }
 
 /// Result of a REJIT attempt, including any verifier log on failure.
@@ -1160,6 +1259,18 @@ mod tests {
         // 2 unique old FDs (10 and 11), but no map_ids -> warning, no remapping.
         let result = relocate_map_fds(&mut insns, &[]);
         assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_resolve_map_ids_for_relocation_uses_old_fd_binding_after_map_removal() {
+        let resolved = resolve_map_ids_for_relocation(
+            &[11, 12],
+            &[101, 202, 303],
+            &HashMap::from([(11, 202), (12, 303)]),
+        );
+
+        assert_eq!(resolved.get(&11), Some(&202));
+        assert_eq!(resolved.get(&12), Some(&303));
     }
 
     // ── BPF cmd constant sync tests ──────────────────────────────────
@@ -2038,7 +2149,6 @@ mod tests {
 
     #[test]
     fn test_mock_array_lookup_returns_zero_for_in_range_missing_key() {
-        clear_mock_maps();
         let mut info = BpfMapInfo::default();
         info.id = 9001;
         info.map_type = BPF_MAP_TYPE_ARRAY;
@@ -2060,7 +2170,6 @@ mod tests {
 
     #[test]
     fn test_mock_hash_lookup_missing_key_still_errors() {
-        clear_mock_maps();
         let mut info = BpfMapInfo::default();
         info.id = 9002;
         info.map_type = 1;
@@ -2078,5 +2187,58 @@ mod tests {
 
         let err = bpf_map_lookup_elem_by_id(9002, &[2, 0, 0, 0], 8).expect_err("hash miss");
         assert!(err.to_string().contains("missing key"));
+    }
+
+    #[test]
+    fn test_mock_percpu_array_lookup_uses_full_blob_size() {
+        let mut info = BpfMapInfo::default();
+        info.id = 9003;
+        info.map_type = BPF_MAP_TYPE_PERCPU_ARRAY;
+        info.key_size = 4;
+        info.value_size = 4;
+        info.max_entries = 4;
+        let mut value = vec![0u8; round_up_8(4) * 2];
+        value[..4].copy_from_slice(&7u32.to_le_bytes());
+        value[8..12].copy_from_slice(&7u32.to_le_bytes());
+        install_mock_map(
+            info.id,
+            MockMapState {
+                info,
+                frozen: true,
+                values: std::collections::HashMap::from([(
+                    1u32.to_le_bytes().to_vec(),
+                    value.clone(),
+                )]),
+            },
+        );
+
+        let lookup_size = bpf_map_lookup_value_size_by_id(9003).expect("lookup size");
+        assert_eq!(lookup_size, value.len());
+        let fetched =
+            bpf_map_lookup_elem_by_id(9003, &1u32.to_le_bytes(), lookup_size).expect("lookup");
+        assert_eq!(fetched, value);
+    }
+
+    #[test]
+    fn test_mock_percpu_array_lookup_returns_zero_for_in_range_missing_key() {
+        let mut info = BpfMapInfo::default();
+        info.id = 9004;
+        info.map_type = BPF_MAP_TYPE_PERCPU_ARRAY;
+        info.key_size = 4;
+        info.value_size = 8;
+        info.max_entries = 4;
+        install_mock_map(
+            info.id,
+            MockMapState {
+                info,
+                frozen: true,
+                values: std::collections::HashMap::new(),
+            },
+        );
+
+        let lookup_size = bpf_map_lookup_value_size_by_id(9004).expect("lookup size");
+        let value =
+            bpf_map_lookup_elem_by_id(9004, &2u32.to_le_bytes(), lookup_size).expect("lookup");
+        assert_eq!(value, vec![0u8; lookup_size]);
     }
 }
