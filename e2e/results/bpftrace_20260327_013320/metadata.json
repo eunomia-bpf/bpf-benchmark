@@ -1,0 +1,21 @@
+{
+  "artifact_kind": "result_run",
+  "artifact_version": 1,
+  "case": "bpftrace",
+  "details_dir": "details",
+  "generated_at": "2026-03-27T01:33:22.487127+00:00",
+  "last_updated_at": "2026-03-27T01:33:22.487114+00:00",
+  "optimization_summary": {
+    "case": "bpftrace",
+    "smoke": false,
+    "status": "running"
+  },
+  "output_hint_json": "e2e/results/bpftrace_authoritative_20260327.json",
+  "output_hint_md": "e2e/results/bpftrace-real-e2e.md",
+  "output_hint_report_md": "docs/tmp/bpftrace-real-e2e-report.md",
+  "run_type": "bpftrace",
+  "smoke": false,
+  "started_at": "2026-03-27T01:33:20.343087+00:00",
+  "status": "running",
+  "suite": "e2e"
+}

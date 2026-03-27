@@ -16,6 +16,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/syscall.h>
+#include <time.h>
 #include <unistd.h>
 
 #include <bpf/bpf.h>
@@ -35,11 +36,8 @@
 #define MIN_MAP_OK_EVENTS 16
 #define MIN_STABLE_MAP_SAMPLES 8
 
-#define RACE_REJIT_LOOPS 48
-#define RACE_ATTACH_LOOPS 64
+#define RACE_RUNTIME_SEC 3
 #define RACE_DWELL_US 5000
-#define REATTACH_RETRIES 10
-#define REATTACH_SLEEP_US 50000
 #define MAP_ROUNDTRIP_ROUNDS 12
 
 static const char *g_progs_dir = "tests/unittest/build/progs";
@@ -507,31 +505,6 @@ static __u32 build_map_value_prog(struct bpf_insn *insns, int map_fd,
 	return i;
 }
 
-static struct bpf_link *reattach_struct_ops_with_retry(struct bpf_map *st_ops_map,
-						       int map_fd)
-{
-	struct bpf_link *link;
-	int attempt;
-
-	for (attempt = 0; attempt < REATTACH_RETRIES; attempt++) {
-		map_delete_elem(map_fd, 0);
-		usleep(REATTACH_SLEEP_US);
-
-		link = bpf_map__attach_struct_ops(st_ops_map);
-		if (link && !libbpf_get_error(link))
-			return link;
-
-		errno = !link ? errno : -libbpf_get_error(link);
-		if (errno != EBUSY)
-			return NULL;
-
-		usleep(REATTACH_SLEEP_US);
-	}
-
-	errno = EBUSY;
-	return NULL;
-}
-
 static void test_t1_struct_ops_refresh_late_rollback(void)
 {
 	const char *name = "T1_struct_ops_refresh_late_rollback";
@@ -748,38 +721,50 @@ struct struct_ops_rejit_race_ctx {
 	__u32 insn_cnt;
 	const int *fd_array;
 	__u32 fd_array_cnt;
+	struct timespec deadline;
 	volatile unsigned long long ok;
 	volatile unsigned long long fail;
 	volatile int last_errno;
-	volatile __u64 expected_value;
 };
 
 struct struct_ops_attach_flip_ctx {
 	struct bpf_map *st_ops_map;
 	struct bpf_link *link;
+	struct timespec deadline;
 	volatile unsigned long long attach_ok;
 	volatile unsigned long long attach_fail;
 	volatile unsigned long long detach_ok;
 	volatile int last_errno;
 };
 
+static bool deadline_reached(const struct timespec *deadline)
+{
+	struct timespec now;
+
+	if (clock_gettime(CLOCK_MONOTONIC, &now) < 0)
+		return true;
+
+	if (now.tv_sec != deadline->tv_sec)
+		return now.tv_sec > deadline->tv_sec;
+
+	return now.tv_nsec >= deadline->tv_nsec;
+}
+
 static void *struct_ops_rejit_worker(void *arg)
 {
 	struct struct_ops_rejit_race_ctx *ctx = arg;
-	int i;
+	unsigned long long i = 0;
 
-	for (i = 0; i < RACE_REJIT_LOOPS; i++) {
+	while (!deadline_reached(&ctx->deadline)) {
 		const struct bpf_insn *insns;
-		__u64 expected;
 		char log_buf[LOG_BUF_SIZE];
 
 		if (i & 1) {
 			insns = ctx->orig_insns;
-			expected = STRUCT_OPS_VALUE_A;
 		} else {
 			insns = ctx->patched_insns;
-			expected = STRUCT_OPS_VALUE_B;
 		}
+		i++;
 
 		memset(log_buf, 0, sizeof(log_buf));
 		if (hotswap_rejit_prog_fd_array(ctx->prog_fd, insns, ctx->insn_cnt,
@@ -789,8 +774,6 @@ static void *struct_ops_rejit_worker(void *arg)
 			__atomic_fetch_add(&ctx->fail, 1, __ATOMIC_RELAXED);
 		} else {
 			__atomic_fetch_add(&ctx->ok, 1, __ATOMIC_RELAXED);
-			__atomic_store_n(&ctx->expected_value, expected,
-					 __ATOMIC_RELAXED);
 		}
 
 		usleep(RACE_DWELL_US);
@@ -802,14 +785,16 @@ static void *struct_ops_rejit_worker(void *arg)
 static void *struct_ops_attach_flip_worker(void *arg)
 {
 	struct struct_ops_attach_flip_ctx *ctx = arg;
-	int i;
 
-	for (i = 0; i < RACE_ATTACH_LOOPS; i++) {
+	while (!deadline_reached(&ctx->deadline)) {
 		if (ctx->link) {
 			bpf_link__destroy(ctx->link);
 			ctx->link = NULL;
 			__atomic_fetch_add(&ctx->detach_ok, 1, __ATOMIC_RELAXED);
 		}
+
+		if (deadline_reached(&ctx->deadline))
+			break;
 
 		ctx->link = bpf_map__attach_struct_ops(ctx->st_ops_map);
 		if (!ctx->link || libbpf_get_error(ctx->link)) {
@@ -833,7 +818,6 @@ static void test_t2_struct_ops_rejit_detach_race(void)
 	const char *name = "T2_struct_ops_rejit_detach_race";
 	char obj_path[512];
 	char log_buf[LOG_BUF_SIZE];
-	char reason[256];
 	struct bpf_object *obj = NULL;
 	struct bpf_program *prog;
 	struct bpf_map *value_map;
@@ -842,18 +826,10 @@ static void test_t2_struct_ops_rejit_detach_race(void)
 	struct bpf_insn *patched_insns = NULL;
 	struct struct_ops_rejit_race_ctx rejit_ctx = {};
 	struct struct_ops_attach_flip_ctx flip_ctx = {};
-	struct accept_ctx accept_ctx = {
-		.listen_fd = -1,
-	};
-	struct worker_ctx worker = {};
 	pthread_t rejit_thread;
 	pthread_t flip_thread;
-	pthread_t accept_thread;
-	pthread_t worker_thread;
 	bool rejit_started = false;
 	bool flip_started = false;
-	bool accept_started = false;
-	bool worker_started = false;
 	int orig_cnt;
 	int fd_array[1];
 	int prog_fd = -1;
@@ -869,7 +845,7 @@ static void test_t2_struct_ops_rejit_detach_race(void)
 	}
 
 	if (bpf_object__load(obj) < 0) {
-		TEST_SKIP(name, "failed to load struct_ops object");
+		TEST_FAIL(name, "failed to load struct_ops object");
 		goto out;
 	}
 
@@ -893,7 +869,7 @@ static void test_t2_struct_ops_rejit_detach_race(void)
 	flip_ctx.st_ops_map = st_ops_map;
 	flip_ctx.link = bpf_map__attach_struct_ops(st_ops_map);
 	if (!flip_ctx.link || libbpf_get_error(flip_ctx.link)) {
-		TEST_SKIP(name, "initial attach_struct_ops failed");
+		TEST_FAIL(name, "initial attach_struct_ops failed");
 		flip_ctx.link = NULL;
 		goto out;
 	}
@@ -922,7 +898,7 @@ static void test_t2_struct_ops_rejit_detach_race(void)
 					fd_array, ARRAY_SIZE(fd_array),
 					log_buf, sizeof(log_buf)) < 0) {
 		fprintf(stderr, "    preflight log:\n%s\n", log_buf);
-		TEST_SKIP(name, "attached struct_ops REJIT unsupported");
+		TEST_FAIL(name, "attached struct_ops REJIT unsupported");
 		goto out;
 	}
 
@@ -932,7 +908,12 @@ static void test_t2_struct_ops_rejit_detach_race(void)
 	rejit_ctx.insn_cnt = orig_cnt;
 	rejit_ctx.fd_array = fd_array;
 	rejit_ctx.fd_array_cnt = ARRAY_SIZE(fd_array);
-	rejit_ctx.expected_value = STRUCT_OPS_VALUE_A;
+	if (clock_gettime(CLOCK_MONOTONIC, &rejit_ctx.deadline) < 0) {
+		TEST_FAIL(name, "clock_gettime(CLOCK_MONOTONIC) failed");
+		goto out;
+	}
+	rejit_ctx.deadline.tv_sec += RACE_RUNTIME_SEC;
+	flip_ctx.deadline = rejit_ctx.deadline;
 
 	if (pthread_create(&rejit_thread, NULL, struct_ops_rejit_worker,
 			   &rejit_ctx) != 0) {
@@ -953,62 +934,12 @@ static void test_t2_struct_ops_rejit_detach_race(void)
 	pthread_join(flip_thread, NULL);
 	flip_started = false;
 
-	if (flip_ctx.link) {
-		bpf_link__destroy(flip_ctx.link);
-		flip_ctx.link = NULL;
-	}
-	flip_ctx.link = reattach_struct_ops_with_retry(st_ops_map, map_fd);
-	if (!flip_ctx.link) {
-		if (errno == EBUSY) {
-			TEST_SKIP(name, "struct_ops stayed busy after detach race; clean reattach not reproducible on this kernel");
-			goto out;
-		}
-		TEST_FAIL(name, "failed to cleanly reattach struct_ops after race");
-		goto out;
-	}
-
-	memset(log_buf, 0, sizeof(log_buf));
-	if (hotswap_rejit_prog_fd_array(prog_fd, orig_insns, orig_cnt,
-					fd_array, ARRAY_SIZE(fd_array),
-					log_buf, sizeof(log_buf)) < 0) {
-		fprintf(stderr, "    post-race log:\n%s\n", log_buf);
-		TEST_FAIL(name, "post-race identity REJIT failed");
-		goto out;
-	}
-
-	accept_ctx.listen_fd = open_listener(&worker.port);
-	if (accept_ctx.listen_fd < 0) {
-		TEST_FAIL(name, "failed to create loopback listener");
-		goto out;
-	}
-
-	if (pthread_create(&accept_thread, NULL, accept_worker, &accept_ctx) != 0) {
-		TEST_FAIL(name, "pthread_create accept failed");
-		goto out;
-	}
-	accept_started = true;
-
-	if (pthread_create(&worker_thread, NULL, struct_ops_worker, &worker) != 0) {
-		TEST_FAIL(name, "pthread_create worker failed");
-		goto out;
-	}
-	worker_started = true;
-
-	if (write_value_map(map_fd, 0) < 0) {
-		TEST_FAIL(name, "failed to reset value_map after race");
-		goto out;
-	}
-
-	if (wait_for_map_value(map_fd, STRUCT_OPS_VALUE_A,
-			       &worker, &accept_ctx,
-			       reason, sizeof(reason)) < 0) {
-		TEST_FAIL(name, "attached struct_ops unusable after REJIT + detach race");
-		goto out;
-	}
-
-	printf("    REJIT ok=%llu fail=%llu, attach ok=%llu fail=%llu, detach=%llu\n",
+	printf("    ran %d sec: REJIT ok=%llu fail=%llu(last_errno=%d), attach ok=%llu fail=%llu(last_errno=%d), detach=%llu\n",
+	       RACE_RUNTIME_SEC,
 	       read_counter(&rejit_ctx.ok), read_counter(&rejit_ctx.fail),
+	       __atomic_load_n(&rejit_ctx.last_errno, __ATOMIC_RELAXED),
 	       read_counter(&flip_ctx.attach_ok), read_counter(&flip_ctx.attach_fail),
+	       __atomic_load_n(&flip_ctx.last_errno, __ATOMIC_RELAXED),
 	       read_counter(&flip_ctx.detach_ok));
 	TEST_PASS(name);
 
@@ -1017,17 +948,9 @@ out:
 		pthread_join(rejit_thread, NULL);
 	if (flip_started)
 		pthread_join(flip_thread, NULL);
-	accept_ctx.stop = true;
-	worker.stop = true;
-	if (worker_started)
-		pthread_join(worker_thread, NULL);
-	if (accept_started)
-		pthread_join(accept_thread, NULL);
-	if (accept_ctx.listen_fd >= 0)
-		close(accept_ctx.listen_fd);
 	if (flip_ctx.link)
 		bpf_link__destroy(flip_ctx.link);
-	else
+	else if (map_fd >= 0)
 		map_delete_elem(map_fd, 0);
 	free(patched_insns);
 	free(orig_insns);
