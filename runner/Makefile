@@ -91,7 +91,8 @@ VM_CORPUS_OUTPUT_JSON_FLAG := $(if $(strip $(VM_CORPUS_OUTPUT_JSON_IS_EXPLICIT))
 VM_CORPUS_OUTPUT_MD_FLAG := $(if $(strip $(VM_CORPUS_OUTPUT_MD_IS_EXPLICIT)),--output-md "$(VM_CORPUS_OUTPUT_MD)",)
 
 .PHONY: all micro_exec vendor_libbpf vendor_bpftool \
-	corpus-fetch corpus-build-objects corpus-build \
+	corpus-fetch corpus-build-objects corpus-build corpus-build-native \
+	corpus-build-bcc corpus-build-libbpf-bootstrap corpus-build-xdp-tools corpus-build-xdp-tutorial corpus-build-scx \
 	scx-artifacts e2e-prep e2e-tracee-setup e2e-tetragon-setup \
 	kernel-image unittest-build negative-build upstream-selftests-build kinsn-modules-build micro-programs daemon-binary \
 	vm-shell vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
@@ -110,6 +111,29 @@ corpus-build-objects:
 	$(PYTHON) $(ROOT_DIR)/scripts/build_corpus_objects.py $(REPO_FLAGS)
 
 corpus-build: corpus-fetch corpus-build-objects
+
+corpus-build-native: corpus-fetch vendor_bpftool
+	$(PYTHON) "$(ROOT_DIR)/scripts/build_corpus_native.py" --jobs "$(JOBS)" $(REPO_FLAGS)
+
+corpus-build-bcc: vendor_bpftool
+	$(PYTHON) "$(ROOT_DIR)/scripts/fetch_corpus_repos.py" --repo bcc
+	$(PYTHON) "$(ROOT_DIR)/scripts/build_corpus_native.py" --jobs "$(JOBS)" --repo bcc
+
+corpus-build-libbpf-bootstrap: vendor_bpftool
+	$(PYTHON) "$(ROOT_DIR)/scripts/fetch_corpus_repos.py" --repo libbpf-bootstrap
+	$(PYTHON) "$(ROOT_DIR)/scripts/build_corpus_native.py" --jobs "$(JOBS)" --repo libbpf-bootstrap
+
+corpus-build-xdp-tools:
+	$(PYTHON) "$(ROOT_DIR)/scripts/fetch_corpus_repos.py" --repo xdp-tools
+	$(PYTHON) "$(ROOT_DIR)/scripts/build_corpus_native.py" --jobs "$(JOBS)" --repo xdp-tools
+
+corpus-build-xdp-tutorial:
+	$(PYTHON) "$(ROOT_DIR)/scripts/fetch_corpus_repos.py" --repo xdp-tutorial --repo xdp-tools
+	$(PYTHON) "$(ROOT_DIR)/scripts/build_corpus_native.py" --jobs "$(JOBS)" --repo xdp-tutorial
+
+corpus-build-scx:
+	$(PYTHON) "$(ROOT_DIR)/scripts/fetch_corpus_repos.py" --repo scx
+	$(PYTHON) "$(ROOT_DIR)/scripts/build_corpus_native.py" --jobs "$(JOBS)" --repo scx
 
 scx-artifacts:
 	@if [ ! -d "$(REPO_ROOT)/runner/repos/scx" ]; then \

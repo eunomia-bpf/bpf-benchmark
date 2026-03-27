@@ -373,6 +373,7 @@ fn should_retry_post_verify_rejit_failure(err_msg: &str, verifier_log_text: &str
         .to_ascii_lowercase();
     first_line.contains("no space left on device")
         || first_line.contains("argument list too long")
+        || first_line.contains("invalid argument")
         || first_line.contains("out of memory")
 }
 
@@ -1689,6 +1690,23 @@ processed 49965 insns (limit 1000000) max_states_per_insn 32 total_states 1318 p
         ));
         assert!(should_retry_post_verify_rejit_failure(
             "BPF_PROG_REJIT: Argument list too long (os error 7)",
+            log,
+        ));
+    }
+
+    #[test]
+    fn test_complete_verifier_log_einval_is_retryable_post_verify_failure() {
+        let log = "\
+10: R0=scalar
+55: safe
+processed 26 insns (limit 1000000) max_states_per_insn 1 total_states 3 peak_states 3 mark_read 0
+";
+        assert!(!should_treat_as_verifier_rejection(
+            "BPF_PROG_REJIT: Invalid argument (os error 22)",
+            log,
+        ));
+        assert!(should_retry_post_verify_rejit_failure(
+            "BPF_PROG_REJIT: Invalid argument (os error 22)",
             log,
         ));
     }

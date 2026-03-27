@@ -5099,6 +5099,7 @@ objects:
   prog_type: xdp
   section: xdp
   io_mode: packet
+  raw_packet: true
   test_input: corpus/inputs/katran_vip_packet_64.bin
   input_size: 64
   programs:
@@ -14418,8 +14419,10 @@ objects:
   programs:
   - name: execve_rate
     section: tracepoint
+    attach_group: event_execve
   - name: execve_send
     section: tracepoint
+    attach_group: event_execve
   - name: event_execve
     section: tracepoint/sys_execve
 - source: corpus/build/tetragon/bpf_execve_map_update.bpf.o
@@ -14875,6 +14878,7 @@ objects:
     - attach
     prog_type: raw_tracepoint
     section: raw_tracepoint/sys_enter_init
+    attach_group: tracepoint__raw_syscalls__sys_enter
     trigger: for i in $(seq 200); do /bin/true; done
     trigger_timeout_seconds: 30
   - name: sys_enter_submit
@@ -14891,6 +14895,7 @@ objects:
     - attach
     prog_type: raw_tracepoint
     section: raw_tracepoint/sys_enter_submit
+    attach_group: tracepoint__raw_syscalls__sys_enter
     trigger: for i in $(seq 200); do /bin/true; done
     trigger_timeout_seconds: 30
   - name: tracepoint__raw_syscalls__sys_exit
@@ -14923,6 +14928,7 @@ objects:
     - attach
     prog_type: raw_tracepoint
     section: raw_tracepoint/sys_exit_init
+    attach_group: tracepoint__raw_syscalls__sys_exit
     trigger: for i in $(seq 200); do /bin/true; done
     trigger_timeout_seconds: 30
   - name: sys_exit_submit
@@ -14939,6 +14945,7 @@ objects:
     - attach
     prog_type: raw_tracepoint
     section: raw_tracepoint/sys_exit_submit
+    attach_group: tracepoint__raw_syscalls__sys_exit
     trigger: for i in $(seq 200); do /bin/true; done
     trigger_timeout_seconds: 30
   - name: trace_sys_enter
@@ -14947,8 +14954,9 @@ objects:
     - tracee
     - kprobe
     - attach
-    prog_type: kprobe
+    prog_type: raw_tracepoint
     section: raw_tracepoint/trace_sys_enter
+    attach_group: tracepoint__raw_syscalls__sys_enter
     trigger: for i in $(seq 200); do /bin/true; done
     trigger_timeout_seconds: 30
   - name: trace_sys_exit
@@ -14957,8 +14965,9 @@ objects:
     - tracee
     - kprobe
     - attach
-    prog_type: kprobe
+    prog_type: raw_tracepoint
     section: raw_tracepoint/trace_sys_exit
+    attach_group: tracepoint__raw_syscalls__sys_exit
     trigger: for i in $(seq 200); do /bin/true; done
     trigger_timeout_seconds: 30
   - name: trace_ptrace

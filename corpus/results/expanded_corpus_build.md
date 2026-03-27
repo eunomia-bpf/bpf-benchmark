@@ -1,15 +1,15 @@
 # Expanded Corpus Build Results
 
-- Generated: `2026-03-27T15:26:08.233130+00:00`
+- Generated: `2026-03-27T17:04:23.413984+00:00`
 - Manifest: `/home/yunwei37/workspace/bpf-benchmark/runner/repos.yaml`
 - Repo root: `/home/yunwei37/workspace/bpf-benchmark/runner/repos`
 - Macro corpus: `/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_corpus.yaml`
 - Build root: `/home/yunwei37/workspace/bpf-benchmark/corpus/build`
 - Sources considered: 1213
 - Built from source: 429
-- Staged existing objects: 136
-- Available objects: 565
-- Failures: 648
+- Staged existing objects: 134
+- Available objects: 563
+- Failures: 650
 
 ## Per-Repo Summary
 
@@ -38,13 +38,14 @@
 | tubular | 0 | 1 | 0 | 0 |
 | xdp-examples | 0 | 0 | 13 | 0 |
 | xdp-tools | 0 | 13 | 14 | 0 |
-| xdp-tutorial | 0 | 25 | 16 | 0 |
+| xdp-tutorial | 0 | 23 | 18 | 0 |
 
 ## Failure Stages
 
 | Stage | Count |
 | --- | ---: |
 | clang | 648 |
+| missing_object | 2 |
 
 ## Top Errors
 

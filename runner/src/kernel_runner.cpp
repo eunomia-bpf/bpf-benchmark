@@ -1576,9 +1576,32 @@ bpf_program *find_program(bpf_object *object, const std::optional<std::string> &
     fail("unable to find program named '" + *program_name + "'");
 }
 
-void configure_autoload(bpf_object *object, const std::optional<std::string> &program_name)
+std::vector<std::string> configured_program_names_for_load(const cli_options &options)
 {
-    if (!program_name.has_value()) {
+    std::vector<std::string> names;
+    if (options.program_name.has_value() && !options.program_name->empty()) {
+        names.push_back(*options.program_name);
+    }
+    if (options.attach_program_name.has_value() && !options.attach_program_name->empty()) {
+        if (std::find(names.begin(), names.end(), *options.attach_program_name) == names.end()) {
+            names.push_back(*options.attach_program_name);
+        }
+    }
+    return names;
+}
+
+std::optional<std::string> attach_program_name_for_options(const cli_options &options)
+{
+    if (options.attach_program_name.has_value() && !options.attach_program_name->empty()) {
+        return options.attach_program_name;
+    }
+    return options.program_name;
+}
+
+void configure_autoload(bpf_object *object, const cli_options &options)
+{
+    const auto configured_names = configured_program_names_for_load(options);
+    if (configured_names.empty()) {
         return;
     }
 
@@ -1596,10 +1619,13 @@ void configure_autoload(bpf_object *object, const std::optional<std::string> &pr
         }
     }
 
+    const std::unordered_set<std::string> selected_names(
+        configured_names.begin(), configured_names.end());
     bpf_program *program = nullptr;
     while ((program = bpf_object__next_program(object, program)) != nullptr) {
         const char *current_name = bpf_program__name(program);
-        const bool autoload = current_name != nullptr && *program_name == current_name;
+        const bool autoload =
+            current_name != nullptr && selected_names.contains(current_name);
         if (bpf_program__set_autoload(program, autoload) != 0) {
             fail("unable to configure program autoload");
         }
@@ -2402,6 +2428,10 @@ struct prepared_kernel_state {
 
 namespace {
 
+void maybe_apply_prepared_daemon_rejit(
+    prepared_program_state &program,
+    const cli_options &options);
+
 void populate_rejit_from_daemon_summary(
     rejit_summary &summary,
     const daemon_socket_response &response)
@@ -2422,6 +2452,117 @@ void populate_rejit_from_daemon_summary(
     summary.daemon_response = response.raw_json;
 }
 
+bool use_object_scope_daemon_rejit(
+    const prepared_kernel_state &prepared,
+    const cli_options &options)
+{
+    return options.rejit &&
+           options.daemon_socket.has_value() &&
+           prepared.program_order.size() > 1;
+}
+
+std::vector<std::string> merge_unique_strings_preserving_order(
+    const std::vector<std::vector<std::string>> &lists)
+{
+    std::vector<std::string> merged;
+    std::unordered_set<std::string> seen;
+    for (const auto &list : lists) {
+        for (const auto &item : list) {
+            if (item.empty()) {
+                continue;
+            }
+            if (seen.insert(item).second) {
+                merged.push_back(item);
+            }
+        }
+    }
+    return merged;
+}
+
+rejit_summary aggregate_prepared_daemon_rejit_summary(
+    const prepared_kernel_state &prepared)
+{
+    rejit_summary aggregate {};
+    aggregate.requested = prepared.options.rejit;
+    if (prepared.options.daemon_socket.has_value()) {
+        aggregate.mode = "daemon";
+    } else if (prepared.options.rejit_program.has_value()) {
+        aggregate.mode = "replacement";
+    } else if (prepared.options.rejit) {
+        aggregate.mode = "same-bytecode";
+    }
+
+    std::vector<std::vector<std::string>> applied_pass_lists;
+    std::vector<std::vector<std::string>> disabled_pass_lists;
+    std::vector<std::string> error_lines;
+    for (const auto &program_name : prepared.program_order) {
+        const auto found = prepared.programs.find(program_name);
+        if (found == prepared.programs.end()) {
+            continue;
+        }
+        const auto &program = found->second;
+        const auto &summary = program.prepared_rejit;
+
+        aggregate.requested = aggregate.requested || summary.requested;
+        aggregate.syscall_attempted = aggregate.syscall_attempted || summary.syscall_attempted;
+        aggregate.applied = aggregate.applied || summary.applied;
+        aggregate.total_sites_applied += summary.total_sites_applied;
+        aggregate.verifier_retries += summary.verifier_retries;
+        applied_pass_lists.push_back(summary.passes_applied);
+        disabled_pass_lists.push_back(summary.final_disabled_passes);
+        if (!summary.error.empty()) {
+            error_lines.push_back(program_name + ": " + summary.error);
+        }
+    }
+
+    aggregate.passes_applied = merge_unique_strings_preserving_order(applied_pass_lists);
+    aggregate.final_disabled_passes = merge_unique_strings_preserving_order(disabled_pass_lists);
+    if (!error_lines.empty()) {
+        for (size_t index = 0; index < error_lines.size(); ++index) {
+            if (index != 0) {
+                aggregate.error += "\n";
+            }
+            aggregate.error += error_lines[index];
+        }
+    }
+    return aggregate;
+}
+
+void refresh_prepared_daemon_rejit_rollup(prepared_kernel_state &prepared)
+{
+    prepared.rejit_apply_ns = 0;
+    prepared.rejit_applied = false;
+    for (const auto &program_name : prepared.program_order) {
+        const auto found = prepared.programs.find(program_name);
+        if (found == prepared.programs.end()) {
+            continue;
+        }
+        const auto &program = found->second;
+        if (program.prepared_rejit.syscall_attempted || program.rejit_applied) {
+            prepared.rejit_apply_ns += program.rejit_apply_ns;
+        }
+        prepared.rejit_applied = prepared.rejit_applied || program.rejit_applied;
+    }
+    prepared.prepared_rejit = aggregate_prepared_daemon_rejit_summary(prepared);
+}
+
+void maybe_apply_prepared_daemon_rejit_for_loaded_object(
+    prepared_kernel_state &prepared,
+    const cli_options &options)
+{
+    if (!use_object_scope_daemon_rejit(prepared, options)) {
+        return;
+    }
+    for (const auto &program_name : prepared.program_order) {
+        auto found = prepared.programs.find(program_name);
+        if (found == prepared.programs.end()) {
+            continue;
+        }
+        maybe_apply_prepared_daemon_rejit(found->second, options);
+    }
+    refresh_prepared_daemon_rejit_rollup(prepared);
+}
+
 prepared_program_state &require_prepared_program(
     prepared_kernel_state &prepared,
     const std::optional<std::string> &program_name)
@@ -2437,6 +2578,13 @@ prepared_program_state &require_prepared_program(
         fail("multi-program prepared kernel state requires --program-name");
     }
     return prepared.programs.at(prepared.program_order.front());
+}
+
+prepared_program_state &require_prepared_attach_program(
+    prepared_kernel_state &prepared,
+    const cli_options &options)
+{
+    return require_prepared_program(prepared, attach_program_name_for_options(options));
 }
 
 void maybe_initialize_prepared_program_fixtures(
@@ -2587,9 +2735,15 @@ sample_result build_prepared_program_compile_sample(
     const cli_options &options)
 {
     auto &program = require_prepared_program(prepared, options.program_name);
+    const bool object_scope_daemon_rejit =
+        use_object_scope_daemon_rejit(prepared, options);
     maybe_initialize_prepared_program_fixtures(prepared, options);
     if (options.daemon_socket.has_value()) {
-        maybe_apply_prepared_daemon_rejit(program, options);
+        if (object_scope_daemon_rejit) {
+            maybe_apply_prepared_daemon_rejit_for_loaded_object(prepared, options);
+        } else {
+            maybe_apply_prepared_daemon_rejit(program, options);
+        }
     } else {
         maybe_apply_prepared_bytecode_rejit(program, options);
     }
@@ -2597,25 +2751,31 @@ sample_result build_prepared_program_compile_sample(
     program.program_info = load_prog_info(program.program_fd);
     maybe_write_prepared_program_dumps(prepared, program);
 
+    const uint64_t rejit_apply_ns =
+        object_scope_daemon_rejit ? prepared.rejit_apply_ns : program.rejit_apply_ns;
+    const rejit_summary rejit =
+        object_scope_daemon_rejit ? prepared.prepared_rejit : program.prepared_rejit;
+
     sample_result sample;
     sample.compile_ns = prepared.memory_prepare_ns +
                         prepared.object_open_ns +
                         prepared.object_load_ns +
-                        program.rejit_apply_ns;
+                        rejit_apply_ns;
     sample.jited_prog_len = program.program_info.jited_prog_len;
     sample.xlated_prog_len = program.program_info.xlated_prog_len;
     sample.code_size = {
         .bpf_bytecode_bytes = program.program_info.xlated_prog_len,
         .native_code_bytes = program.program_info.jited_prog_len,
     };
-    sample.rejit = program.prepared_rejit;
+    sample.rejit = rejit;
     sample.phases_ns = {
         {"memory_prepare_ns", prepared.memory_prepare_ns},
         {"object_open_ns", prepared.object_open_ns},
         {"object_load_ns", prepared.object_load_ns},
     };
-    if (program.prepared_rejit.syscall_attempted || program.rejit_applied) {
-        sample.phases_ns.push_back({"rejit_apply_ns", program.rejit_apply_ns});
+    if (rejit.syscall_attempted ||
+        (object_scope_daemon_rejit ? prepared.rejit_applied : program.rejit_applied)) {
+        sample.phases_ns.push_back({"rejit_apply_ns", rejit_apply_ns});
     }
     return sample;
 }
@@ -2625,9 +2785,16 @@ std::vector<sample_result> execute_prepared_kernel_attach(
     const cli_options &options)
 {
     auto &program = require_prepared_program(prepared, options.program_name);
+    auto &attach_program = require_prepared_attach_program(prepared, options);
+    const bool object_scope_daemon_rejit =
+        use_object_scope_daemon_rejit(prepared, options);
     maybe_initialize_prepared_program_fixtures(prepared, options);
     if (options.daemon_socket.has_value()) {
-        maybe_apply_prepared_daemon_rejit(program, options);
+        if (object_scope_daemon_rejit) {
+            maybe_apply_prepared_daemon_rejit_for_loaded_object(prepared, options);
+        } else {
+            maybe_apply_prepared_daemon_rejit(program, options);
+        }
     }
 
     const uint64_t base_compile_ns =
@@ -2635,7 +2802,7 @@ std::vector<sample_result> execute_prepared_kernel_attach(
         prepared.object_load_ns;
 
     const auto attach_start = std::chrono::steady_clock::now();
-    bpf_link *raw_link = bpf_program__attach(program.prog);
+    bpf_link *raw_link = bpf_program__attach(attach_program.prog);
     const int attach_error = libbpf_get_error(raw_link);
     if (attach_error != 0) {
         fail("bpf_program__attach failed: " + libbpf_error_string(attach_error));
@@ -2691,11 +2858,15 @@ std::vector<sample_result> execute_prepared_kernel_attach(
     }
 
     program.program_info = load_prog_info(program.program_fd);
+    const uint64_t rejit_apply_ns =
+        object_scope_daemon_rejit ? prepared.rejit_apply_ns : program.rejit_apply_ns;
+    const rejit_summary rejit =
+        object_scope_daemon_rejit ? prepared.prepared_rejit : program.prepared_rejit;
     sample_result sample;
     if (options.rejit && options.daemon_socket.has_value()) {
         sample.phase = "recompile";
     }
-    sample.compile_ns = base_compile_ns + program.rejit_apply_ns;
+    sample.compile_ns = base_compile_ns + rejit_apply_ns;
     sample.exec_ns = exec_ns;
     sample.timing_source = "bpf_stats";
     sample.timing_source_wall =
@@ -2713,15 +2884,15 @@ std::vector<sample_result> execute_prepared_kernel_attach(
         .bpf_bytecode_bytes = program.program_info.xlated_prog_len,
         .native_code_bytes = program.program_info.jited_prog_len,
     };
-    sample.rejit = program.prepared_rejit;
+    sample.rejit = rejit;
     sample.phases_ns = {
         {"object_open_ns", prepared.object_open_ns},
         {"object_load_ns", prepared.object_load_ns},
         {"attach_ns", elapsed_ns(attach_start, attach_end)},
         {"workload_wall_ns", elapsed_ns(exec_wall_start, exec_wall_end)},
     };
-    if (program.prepared_rejit.syscall_attempted) {
-        sample.phases_ns.push_back({"rejit_apply_ns", program.rejit_apply_ns});
+    if (rejit.syscall_attempted) {
+        sample.phases_ns.push_back({"rejit_apply_ns", rejit_apply_ns});
     }
     return {std::move(sample)};
 }
@@ -2731,19 +2902,30 @@ std::vector<sample_result> execute_prepared_kernel_run(
     const cli_options &options)
 {
     auto &program = require_prepared_program(prepared, options.program_name);
+    const bool object_scope_daemon_rejit =
+        use_object_scope_daemon_rejit(prepared, options);
     maybe_initialize_prepared_program_fixtures(prepared, options);
 
-    rejit_summary rejit = program.prepared_rejit;
-    uint64_t rejit_apply_ns = program.rejit_apply_ns;
-    const bool prepared_rejit_already_applied = program.rejit_applied;
+    rejit_summary rejit =
+        object_scope_daemon_rejit ? prepared.prepared_rejit : program.prepared_rejit;
+    uint64_t rejit_apply_ns =
+        object_scope_daemon_rejit ? prepared.rejit_apply_ns : program.rejit_apply_ns;
+    const bool prepared_rejit_already_applied =
+        object_scope_daemon_rejit ? prepared.rejit_applied : program.rejit_applied;
     const auto packet_kind = resolve_packet_context_kind(program.program_info.type);
 
     if (options.daemon_socket.has_value() &&
         rejit.requested &&
         !prepared_rejit_already_applied) {
-        maybe_apply_prepared_daemon_rejit(program, options);
-        rejit = program.prepared_rejit;
-        rejit_apply_ns = program.rejit_apply_ns;
+        if (object_scope_daemon_rejit) {
+            maybe_apply_prepared_daemon_rejit_for_loaded_object(prepared, options);
+            rejit = prepared.prepared_rejit;
+            rejit_apply_ns = prepared.rejit_apply_ns;
+        } else {
+            maybe_apply_prepared_daemon_rejit(program, options);
+            rejit = program.prepared_rejit;
+            rejit_apply_ns = program.rejit_apply_ns;
+        }
     }
 
     std::chrono::steady_clock::time_point exec_input_prepare_start {};
@@ -3084,7 +3266,7 @@ prepared_kernel_handle prepare_kernel(const cli_options &options)
     const auto object_open_end = std::chrono::steady_clock::now();
     prepared->object_open_ns = elapsed_ns(object_open_start, object_open_end);
     prepared->object = bpf_object_ptr(raw_object);
-    configure_autoload(prepared->object.get(), options.program_name);
+    configure_autoload(prepared->object.get(), options);
 
     const auto object_load_start = std::chrono::steady_clock::now();
     if (options.manual_load) {
@@ -3271,7 +3453,7 @@ std::vector<sample_result> run_kernel(const cli_options &options)
     }
     const auto object_open_end = std::chrono::steady_clock::now();
     bpf_object_ptr object(raw_object);
-    configure_autoload(object.get(), options.program_name);
+    configure_autoload(object.get(), options);
 
     scoped_fd manual_program_fd;
     int program_fd = -1;
@@ -3755,7 +3937,7 @@ std::vector<sample_result> run_kernel_attach(const cli_options &options)
     bpf_object_ptr object(raw_object);
 
     /* If a specific program is requested, disable autoload for others */
-    configure_autoload(object.get(), options.program_name);
+    configure_autoload(object.get(), options);
 
     /* Load all programs into the kernel */
     const auto object_load_start = std::chrono::steady_clock::now();
@@ -3768,6 +3950,7 @@ std::vector<sample_result> run_kernel_attach(const cli_options &options)
 
     /* Find the target program */
     bpf_program *prog = find_program(object.get(), options.program_name);
+    bpf_program *attach_prog = find_program(object.get(), attach_program_name_for_options(options));
     const int program_fd = bpf_program__fd(prog);
     if (program_fd < 0) {
         fail("unable to obtain program fd");
@@ -3809,7 +3992,7 @@ std::vector<sample_result> run_kernel_attach(const cli_options &options)
 
     /* Attach the program */
     const auto attach_start = std::chrono::steady_clock::now();
-    bpf_link *raw_link = bpf_program__attach(prog);
+    bpf_link *raw_link = bpf_program__attach(attach_prog);
     const int attach_error = libbpf_get_error(raw_link);
     if (attach_error != 0) {
         fail("bpf_program__attach failed: " + libbpf_error_string(attach_error));
@@ -3817,7 +4000,7 @@ std::vector<sample_result> run_kernel_attach(const cli_options &options)
     bpf_link_ptr link(raw_link);
     const auto attach_end = std::chrono::steady_clock::now();
     fprintf(stderr, "attach: program '%s' attached successfully\n",
-            bpf_program__name(prog));
+            bpf_program__name(attach_prog));
 
     /* Enable bpf_stats (run_cnt / run_time_ns tracking) */
     const int stats_fd = bpf_enable_stats(BPF_STATS_RUN_TIME);

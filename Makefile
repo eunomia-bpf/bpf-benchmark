@@ -129,7 +129,8 @@ VIRTME_HOSTFS_MODULE_ORDER := \
 MICRO_BPF_STAMP      := $(MICRO_DIR)/programs/.build.stamp
 
 .PHONY: all runner micro daemon kernel kernel-build kernel-clean kernel-rebuild kernel-arm64 kernel-tests kinsn-modules virtme-hostfs-modules upstream-selftests-build \
-	corpus-fetch corpus-build-objects corpus-build \
+	corpus-fetch corpus-build-objects corpus-build corpus-build-native \
+	corpus-build-bcc corpus-build-libbpf-bootstrap corpus-build-xdp-tools corpus-build-xdp-tutorial corpus-build-scx \
 	daemon-tests python-tests check smoke validate \
 	vm-shell vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all \
 	arm64-worktree arm64-rootfs arm64-crossbuild-image cross-arm64 selftest-arm64 \
@@ -140,7 +141,7 @@ MICRO_BPF_STAMP      := $(MICRO_DIR)/programs/.build.stamp
 # ── Help ───────────────────────────────────────────────────────────────────────
 help:
 	@echo "Build:  all runner micro daemon kernel kernel-clean kernel-rebuild kinsn-modules kernel-tests upstream-selftests-build kernel-arm64 cross-arm64"
-	@echo "Repos:  corpus-fetch corpus-build-objects corpus-build REPOS=\"tracee tetragon ...\""
+	@echo "Repos:  corpus-fetch corpus-build-objects corpus-build corpus-build-native corpus-build-bcc corpus-build-libbpf-bootstrap corpus-build-xdp-tools corpus-build-xdp-tutorial corpus-build-scx REPOS=\"tracee tetragon ...\""
 	@echo "Test:   smoke daemon-tests python-tests check"
 	@echo "VM x86: vm-shell vm-test vm-selftest vm-static-test vm-negative-test vm-micro-smoke vm-micro vm-corpus vm-e2e vm-all validate"
 	@echo "ARM64:  vm-arm64-smoke vm-arm64-selftest"
@@ -165,6 +166,24 @@ corpus-build-objects:
 corpus-build:
 	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" REPOS="$(REPOS)" corpus-build
 
+corpus-build-native:
+	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" REPOS="$(REPOS)" corpus-build-native
+
+corpus-build-bcc:
+	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" corpus-build-bcc
+
+corpus-build-libbpf-bootstrap:
+	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" corpus-build-libbpf-bootstrap
+
+corpus-build-xdp-tools:
+	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" corpus-build-xdp-tools
+
+corpus-build-xdp-tutorial:
+	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" corpus-build-xdp-tutorial
+
+corpus-build-scx:
+	$(MAKE) -j"$(JOBS)" -C "$(RUNNER_DIR)" JOBS="$(JOBS)" PYTHON="$(PYTHON)" corpus-build-scx
+
 micro:
 	$(MAKE) -j"$(JOBS)" runner
 	$(MAKE) -j"$(JOBS)" -C "$(MICRO_DIR)" JOBS="$(JOBS)" programs
@@ -187,7 +206,8 @@ kinsn-modules: $(KERNEL_SYMVERS_PATH)
 
 virtme-hostfs-modules: $(BZIMAGE_PATH)
 	rm -rf "$(KERNEL_DIR)/.virtme_mods"
-	$(MAKE) -C "$(KERNEL_DIR)" -j"$(JOBS)" $(VIRTME_HOSTFS_MODULES)
+	# Parallel sub-makes here occasionally race on generated kernel headers.
+	$(MAKE) -j1 -C "$(KERNEL_DIR)" $(VIRTME_HOSTFS_MODULES)
 	@printf '%s\n' $(VIRTME_HOSTFS_MODULE_ORDER) > "$(KERNEL_DIR)/modules.order"
 
 kernel-tests:

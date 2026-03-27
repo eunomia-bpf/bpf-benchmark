@@ -346,8 +346,18 @@ fn eval_binary_alu(op: u8, lhs: u64, rhs: u64, is_32: bool) -> Option<u64> {
             BPF_ADD => lhs.wrapping_add(rhs),
             BPF_SUB => lhs.wrapping_sub(rhs),
             BPF_MUL => lhs.wrapping_mul(rhs),
-            BPF_DIV => (rhs != 0).then_some(lhs / rhs)?,
-            BPF_MOD => (rhs != 0).then_some(lhs % rhs)?,
+            BPF_DIV => {
+                if rhs == 0 {
+                    return None;
+                }
+                lhs / rhs
+            }
+            BPF_MOD => {
+                if rhs == 0 {
+                    return None;
+                }
+                lhs % rhs
+            }
             BPF_OR => lhs | rhs,
             BPF_AND => lhs & rhs,
             BPF_XOR => lhs ^ rhs,
@@ -366,8 +376,18 @@ fn eval_binary_alu(op: u8, lhs: u64, rhs: u64, is_32: bool) -> Option<u64> {
         BPF_ADD => lhs.wrapping_add(rhs),
         BPF_SUB => lhs.wrapping_sub(rhs),
         BPF_MUL => lhs.wrapping_mul(rhs),
-        BPF_DIV => (rhs != 0).then_some(lhs / rhs)?,
-        BPF_MOD => (rhs != 0).then_some(lhs % rhs)?,
+        BPF_DIV => {
+            if rhs == 0 {
+                return None;
+            }
+            lhs / rhs
+        }
+        BPF_MOD => {
+            if rhs == 0 {
+                return None;
+            }
+            lhs % rhs
+        }
         BPF_OR => lhs | rhs,
         BPF_AND => lhs & rhs,
         BPF_XOR => lhs ^ rhs,
@@ -722,5 +742,13 @@ mod tests {
                 exit_insn(),
             ]
         );
+    }
+
+    #[test]
+    fn eval_binary_alu_rejects_zero_divisor_without_panicking() {
+        assert_eq!(eval_binary_alu(BPF_DIV, 9, 0, false), None);
+        assert_eq!(eval_binary_alu(BPF_MOD, 9, 0, false), None);
+        assert_eq!(eval_binary_alu(BPF_DIV, 9, 0, true), None);
+        assert_eq!(eval_binary_alu(BPF_MOD, 9, 0, true), None);
     }
 }

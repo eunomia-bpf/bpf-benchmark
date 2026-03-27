@@ -732,6 +732,10 @@ keep_alive_request parse_keep_alive_request(std::string_view json_line)
         trigger_command.has_value()) {
         options.trigger_command = *trigger_command;
     }
+    if (const auto attach_program_name = get_optional_string_field(fields, {"attach_program_name"});
+        attach_program_name.has_value()) {
+        options.attach_program_name = *attach_program_name;
+    }
     if (const auto trigger_timeout = get_optional_int_field(fields, {"trigger_timeout_seconds"});
         trigger_timeout.has_value()) {
         options.trigger_timeout_seconds =

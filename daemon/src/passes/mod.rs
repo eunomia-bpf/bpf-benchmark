@@ -1335,7 +1335,8 @@ mod real_bpfo_tests {
     }
 
     #[test]
-    fn test_map_inline_real_tetragon_event_exit_acct_still_rejects_dynamic_sites() {
+    fn test_map_inline_real_tetragon_event_exit_acct_partially_applies_but_still_rejects_dynamic_sites(
+    ) {
         let object_path = repo_path("corpus/build/tetragon/bpf_exit.bpf.o");
         let capture_path =
             repo_path("corpus/fixtures/tetragon/bpf_exit.bpf.o/event_exit_acct_process.json");
@@ -1348,8 +1349,8 @@ mod real_bpfo_tests {
         assert_valid_bpf(&program);
         let pass = pass_result(&result, "map_inline").unwrap();
         assert!(
-            !pass.changed && pass.sites_applied == 0,
-            "map_inline should not apply on {}:{}; skipped={:?}",
+            pass.changed && pass.sites_applied >= 1,
+            "map_inline should partially apply on {}:{}; skipped={:?}",
             loaded.object_path.display(),
             loaded.section_name,
             pass.sites_skipped

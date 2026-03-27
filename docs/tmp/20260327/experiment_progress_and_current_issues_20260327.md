@@ -423,3 +423,91 @@ benchmark 完成后，需要立即检查：
 - Katran corpus 的 runtime 死路已经打通
 - 真实 hot program 上的 `map_inline` 命中已经存在
 - 后续优化已经从“盲修”进入“针对明确 skip 类别逐个清掉”的阶段
+
+## 10. 2026-03-27 最新进展补充
+
+这一轮又向前推了一步，主要集中在 Katran 的 `20-byte` key 形态。
+
+### 10.1 新实现
+
+- `map_inline` 的 `ConstantKey` 现在保留原始 `bytes`，不再只保留截断后的 `u64`
+- `build_site_rewrite()` / `MapInlineRecord` 现在会把完整 key bytes 传给 map value 读取与 invalidation 记录
+- 新增回归测试：
+  - `map_inline_pass_rewrites_hash_lookup_with_pseudo_map_value_20_byte_key`
+
+这修掉的是一个很具体、但对 Katran 很关键的问题：
+
+- 以前 `BPF_PSEUDO_MAP_VALUE` 提供的 key 如果超过 `8` 字节，虽然前面已经能把 key bytes 读出来，但真正去做 map lookup 时还是只把前 `8` 字节写回
+- 结果就是像 Katran `vip_map` 这种 `20-byte` key 形态，逻辑上“看起来支持了”，实际上还不能命中真实 value
+
+### 10.2 当前验证结果
+
+- `make daemon-tests`
+  - **546 passed / 0 failed / 13 ignored**
+
+- Katran 定向 corpus：
+  - 命令：
+    - `make vm-corpus TARGET=x86 PROFILE=ablation_map_inline_full FILTERS='katran:balancer.bpf.o:balancer_ingress' SKIP_CORPUS_FETCH=1`
+  - artifact：
+    - `runner/corpus/results/vm_corpus_20260327_164205/details/result.json`
+
+### 10.3 最新 Katran 真实数字
+
+`balancer_ingress` 这一轮结果是：
+
+- `map_inline`
+  - `sites_applied = 41`
+  - `sites_found = 105`
+  - 相比上一轮 `40 / 104`，又多吃掉了 `1` 个 site
+- `const_prop`
+  - `29 -> 30`
+- `dce`
+  - 维持 `2`
+- `constant-key` 相关 skip
+  - `24 -> 23`
+
+运行时：
+
+- baseline `exec_ns = 7`
+- rejit `exec_ns = 6`
+- `speedup_ratio = 1.1667x`
+
+更可信的 wall/cycles：
+
+- `wall_exec_ns: 32433 -> 27814`
+  - 约 **-14.2%**
+- `exec_cycles: 119556 -> 102530`
+  - 约 **-14.2%**
+
+代码尺寸：
+
+- JIT `13645 -> 13573`
+- xlated `23872 -> 23856`
+
+### 10.4 现在 Katran 还剩什么
+
+现在 Katran 这条线已经不是“完全打不动”，而是进入了很明确的剩余问题阶段：
+
+- 第一类：`lookup result is not consumed by fixed-offset scalar loads`
+  - 当前还是 **37**
+  - 这是最大的残余 skip 类别
+- 第二类：`map type 12/13`
+  - 还是 **2 + 2**
+  - 也就是 map-in-map 相关形态还没吃
+- 第三类：剩余 `constant-key` miss
+  - 现在已经从 **24** 降到 **23**
+  - 说明这次 `20-byte pseudo-map-value key` 修复是真实生效的，但还没有把所有复杂 key 形态全打掉
+
+### 10.5 对整体状态的影响
+
+这次更新后的判断更清晰了：
+
+- **Katran**：已经连续多轮拿到真实正收益，且 coverage 还在继续上升
+- **Tetragon**：仍然主要卡在 attach orchestration + `BPF_PROG_REJIT: Invalid argument`
+- **Tracee**：仍然主要卡在 attach / fixture replay 完整性，不是 `map_inline` 本体
+
+所以当前最合理的下一步仍然是：
+
+1. 继续沿着 Katran 剩余 skip 类别往下打，把 `non-load uses` 和 map-in-map 形态继续吃掉
+2. 并行修 Tetragon `execve_rate` 的 attach + REJIT blocker
+3. 修 Tracee versioned map-of-maps / inner-map fixture replay

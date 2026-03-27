@@ -29,6 +29,12 @@ profiles:
   ablation_map_inline:
     passes:
       active_list: [map_inline, const_prop, dce]
+  ablation_map_inline_only:
+    passes:
+      active_list: [map_inline]
+  ablation_map_inline_const_prop:
+    passes:
+      active_list: [map_inline, const_prop]
   ablation_map_inline_full:
     passes:
       active_list: [map_inline, const_prop, dce]

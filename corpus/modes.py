@@ -103,6 +103,7 @@ class ResolvedProgram:
     prog_type_name: str
     section_name: str
     io_mode: str
+    raw_packet: bool
     input_size: int
     memory_path: str | None
     trigger: str | None
@@ -447,6 +448,19 @@ def _int_or_none(value: Any) -> int | None:
     return int(value)
 
 
+def _bool_or_default(value: Any, default: bool) -> bool:
+    if value in (None, ""):
+        return default
+    if isinstance(value, bool):
+        return value
+    text = str(value).strip().lower()
+    if text in {"1", "true", "yes", "on"}:
+        return True
+    if text in {"0", "false", "no", "off"}:
+        return False
+    raise SystemExit(f"invalid boolean value: {value!r}")
+
+
 def _string_tuple(value: Any) -> tuple[str, ...]:
     if not isinstance(value, list):
         return ()
@@ -726,7 +740,9 @@ def build_test_run_batch_job(
     runtime: str,
     object_path: Path,
     program_name: str | None,
+    attach_program_name: str | None,
     io_mode: str,
+    raw_packet: bool,
     memory_path: Path | None,
     input_size: int,
     repeat: int,
@@ -754,6 +770,10 @@ def build_test_run_batch_job(
     }
     if program_name is not None:
         job["program_name"] = program_name
+    if attach_program_name is not None:
+        job["attach_program_name"] = attach_program_name
+    if raw_packet:
+        job["raw_packet"] = True
     if memory_path is not None:
         job["memory"] = str(memory_path)
     if fixture_path is not None:
@@ -869,7 +889,9 @@ def build_target_batch_plan(
                     runtime="kernel",
                     object_path=entry["object_path"],
                     program_name=target["program_name"],
+                    attach_program_name=target.get("attach_group"),
                     io_mode=target["io_mode"],
+                    raw_packet=bool(target.get("raw_packet", False)),
                     memory_path=entry["memory_path"],
                     input_size=int(target["input_size"]),
                     repeat=repeat,
@@ -901,7 +923,9 @@ def build_target_batch_plan(
                             runtime="kernel",
                             object_path=entry["object_path"],
                             program_name=target["program_name"],
+                            attach_program_name=target.get("attach_group"),
                             io_mode=target["io_mode"],
+                            raw_packet=bool(target.get("raw_packet", False)),
                             memory_path=entry["memory_path"],
                             input_size=int(target["input_size"]),
                             repeat=repeat,
@@ -919,7 +943,9 @@ def build_target_batch_plan(
                             runtime="kernel-attach",
                             object_path=entry["object_path"],
                             program_name=target["program_name"],
+                            attach_program_name=target.get("attach_group"),
                             io_mode="map",
+                            raw_packet=False,
                             memory_path=None,
                             input_size=0,
                             repeat=repeat,
@@ -942,7 +968,9 @@ def build_target_batch_plan(
                         runtime="kernel",
                         object_path=entry["object_path"],
                         program_name=target["program_name"],
+                        attach_program_name=target.get("attach_group"),
                         io_mode=target["io_mode"],
+                        raw_packet=bool(target.get("raw_packet", False)),
                         memory_path=entry["memory_path"],
                         input_size=int(target["input_size"]),
                         repeat=10,
@@ -963,7 +991,9 @@ def build_target_batch_plan(
                         runtime="kernel-rejit",
                         object_path=entry["object_path"],
                         program_name=target["program_name"],
+                        attach_program_name=target.get("attach_group"),
                         io_mode=target["io_mode"],
+                        raw_packet=bool(target.get("raw_packet", False)),
                         memory_path=entry["memory_path"],
                         input_size=int(target["input_size"]),
                         repeat=repeat,
@@ -997,7 +1027,9 @@ def build_target_batch_plan(
                             runtime="kernel-rejit",
                             object_path=entry["object_path"],
                             program_name=target["program_name"],
+                            attach_program_name=target.get("attach_group"),
                             io_mode=target["io_mode"],
+                            raw_packet=bool(target.get("raw_packet", False)),
                             memory_path=entry["memory_path"],
                             input_size=int(target["input_size"]),
                             repeat=repeat,
@@ -1017,7 +1049,9 @@ def build_target_batch_plan(
                             runtime="kernel-attach-rejit",
                             object_path=entry["object_path"],
                             program_name=target["program_name"],
+                            attach_program_name=target.get("attach_group"),
                             io_mode="map",
+                            raw_packet=False,
                             memory_path=None,
                             input_size=0,
                             repeat=repeat,
@@ -1426,6 +1460,7 @@ def resolve_manifest_object(entry: Mapping[str, Any], *, index: int) -> Resolved
     object_prog_type = _string_or_none(entry.get("prog_type")) or ""
     object_section = _string_or_none(entry.get("section")) or ""
     object_io_mode = _string_or_none(entry.get("io_mode")) or "context"
+    object_raw_packet = _bool_or_default(entry.get("raw_packet"), False)
     object_test_input = _string_or_none(entry.get("test_input"))
     object_input_size = _int_or_default(entry.get("input_size"), 0)
     object_trigger = _string_or_none(entry.get("trigger"))
@@ -1450,6 +1485,7 @@ def resolve_manifest_object(entry: Mapping[str, Any], *, index: int) -> Resolved
         prog_type_name = _string_or_none(raw_program.get("prog_type")) or object_prog_type
         section_name = _string_or_none(raw_program.get("section")) or object_section or ""
         io_mode = _string_or_none(raw_program.get("io_mode")) or object_io_mode
+        raw_packet = _bool_or_default(raw_program.get("raw_packet"), object_raw_packet)
         memory_path = _string_or_none(raw_program.get("test_input")) or object_test_input
         input_size = _int_or_default(raw_program.get("input_size"), object_input_size)
         trigger = _string_or_none(raw_program.get("trigger")) or object_trigger
@@ -1497,6 +1533,7 @@ def resolve_manifest_object(entry: Mapping[str, Any], *, index: int) -> Resolved
                 prog_type_name=prog_type_name,
                 section_name=section_name,
                 io_mode=io_mode,
+                raw_packet=raw_packet,
                 input_size=input_size,
                 memory_path=memory_path,
                 trigger=trigger,
@@ -1574,7 +1611,9 @@ def build_object_batch_plan_v2(
                 runtime="kernel",
                 object_path=object_path,
                 program_name=None,
+                attach_program_name=None,
                 io_mode="context",
+                raw_packet=False,
                 memory_path=None,
                 input_size=0,
                 repeat=repeat,
@@ -1603,7 +1642,9 @@ def build_object_batch_plan_v2(
                     runtime=runtime_for_program(program, rejit=False),
                     object_path=object_path,
                     program_name=program.program_name,
+                    attach_program_name=program.attach_group,
                     io_mode=program.io_mode,
+                    raw_packet=program.raw_packet,
                     memory_path=memory_path,
                     input_size=program.input_size,
                     repeat=repeat,
@@ -1625,7 +1666,9 @@ def build_object_batch_plan_v2(
                         runtime=runtime_for_program(program, rejit=False),
                         object_path=object_path,
                         program_name=program.program_name,
+                        attach_program_name=program.attach_group,
                         io_mode=program.io_mode,
+                        raw_packet=program.raw_packet,
                         memory_path=memory_path,
                         input_size=program.input_size,
                         repeat=repeat,
@@ -1647,7 +1690,9 @@ def build_object_batch_plan_v2(
                 runtime="kernel-rejit",
                 object_path=object_path,
                 program_name=None,
+                attach_program_name=None,
                 io_mode="context",
+                raw_packet=False,
                 memory_path=None,
                 input_size=0,
                 repeat=repeat,
@@ -1672,7 +1717,9 @@ def build_object_batch_plan_v2(
                     runtime=runtime_for_program(program, rejit=True),
                     object_path=object_path,
                     program_name=program.program_name,
+                    attach_program_name=program.attach_group,
                     io_mode=program.io_mode,
+                    raw_packet=program.raw_packet,
                     memory_path=memory_path,
                     input_size=program.input_size,
                     repeat=repeat,
@@ -1696,7 +1743,9 @@ def build_object_batch_plan_v2(
                         runtime=runtime_for_program(program, rejit=True),
                         object_path=object_path,
                         program_name=program.program_name,
+                        attach_program_name=program.attach_group,
                         io_mode=program.io_mode,
+                        raw_packet=program.raw_packet,
                         memory_path=memory_path,
                         input_size=program.input_size,
                         repeat=repeat,
@@ -1745,6 +1794,7 @@ def build_empty_program_record(program: ResolvedProgram, execution_mode: str) ->
         "compile_loader": program.compile_loader,
         "attach_group": program.attach_group,
         "io_mode": program.io_mode,
+        "raw_packet": program.raw_packet,
         "input_size": program.input_size,
         "memory_path": program.memory_path,
         "execution_mode": execution_mode,
@@ -2213,6 +2263,7 @@ def run_targets_in_guest_batch(
     daemon: Path,
     kernel_image: Path,
     btf_custom_path: Path,
+    profile: str | None,
     repeat: int,
     timeout_seconds: int,
     vng_binary: str,
@@ -2266,6 +2317,8 @@ def run_targets_in_guest_batch(
             "--timeout",
             str(timeout_seconds),
         ]
+        if profile:
+            guest_argv.extend(["--profile", profile])
         if skip_families:
             guest_argv.extend(["--skip-families", ",".join(skip_families)])
         if blind_apply:
@@ -2884,6 +2937,7 @@ def packet_main(argv: list[str] | None = None) -> int:
             daemon=daemon,
             kernel_image=kernel_image,
             btf_custom_path=btf_custom_path,
+            profile=args.profile,
             repeat=args.repeat,
             timeout_seconds=args.timeout,
             vng_binary=args.vng,

@@ -1230,6 +1230,7 @@ batch_job parse_job(const YAML::Node &node, size_t index)
 
     options.program = std::filesystem::path(require_scalar_string(node["program"], "program"));
     options.program_name = optional_string(node, "program_name");
+    options.attach_program_name = optional_string(node, "attach_program_name");
     options.trigger_command = optional_string(node, "trigger_command");
     if (const auto trigger_timeout = optional_u32(node, "trigger_timeout_seconds", 0);
         trigger_timeout != 0) {

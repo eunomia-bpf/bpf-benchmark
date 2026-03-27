@@ -229,6 +229,61 @@ cargo test --manifest-path /home/yunwei37/workspace/bpf-benchmark/daemon/Cargo.t
 - `daemon/src/analysis/map_info.rs`
   - 小幅清理一个无意义 `mut`
 
+## 8. 手工 VM 验证：`execsnoop` + `stress-ng --exec`
+
+为了避开 `corpus` / `e2e` / `micro_exec` / `bpftool` 基础设施，我额外做了一次纯手工链路验证：
+
+- 入口：`make vm-shell`
+- guest 内直接运行：
+  - `daemon/target/release/bpfrejit-daemon serve --socket /tmp/bpfrejit.sock`
+  - `runner/repos/bcc/libbpf-tools/execsnoop -T -U -u 65534`
+  - `stress-ng --exec 2 --exec-method execve --timeout {3,5} --metrics-brief`
+- optimize 请求走 daemon Unix socket，且只启用：
+  - `["map_inline", "const_prop", "dce"]`
+
+说明：
+
+- `stress-ng --exec` 在 guest 里不能直接以 root 运行；需要：
+  - `setpriv --reuid 65534 --regid 65534 --clear-groups`
+- 之所以选 `execsnoop -u 65534`，是为了：
+  - 用非 root UID 跑 `stress-ng --exec`
+  - 把 `execsnoop` 输出噪音压到最低
+  - 让 UID/filter 相关 `.rodata` 常量化更容易命中
+
+这次手工验证里，`execsnoop` 启动后新增了两个 live program：
+
+| prog_id | prog_type | insns(before) | site summary |
+| --- | ---: | ---: | --- |
+| `7` | `5` | `2236` | `map_inline=63 const_prop=182 dce=1490` |
+| `9` | `5` | `64` | `map_inline=4 const_prop=3 dce=8` |
+
+daemon socket optimize 结果：
+
+| requested prog_id | orig insns | final insns | delta | map_inline | const_prop | dce |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `7` | `2236` | `806` | `-1430` | `63` | `182` | `1490` |
+| `9` | `64` | `56` | `-8` | `4` | `3` | `8` |
+
+几点观察：
+
+1. 这条链路完全不依赖 `micro_exec`，也没有用 `bpftool`；`execsnoop` 是按 BCC `libbpf-tools` 自己的正常加载方式运行的。
+2. `map_inline` 在主 tracepoint program 上命中了 `63` 个 site；从 daemon debug log 看，命中的都是 `BPF_PSEUDO_MAP_VALUE` / global-data constantization，而不是 helper lookup inline。
+3. optimize 后 live enumerate 中相同 program id 的指令数已经变成：
+   - `2236 -> 806`
+   - `64 -> 56`
+4. `execsnoop` 在 optimize 后仍持续产生日志：
+   - optimize 前样本行数：`349`
+   - optimize 后再跑一轮 `stress-ng --exec` 后：`898`
+   - 新增事件行数：`549`
+5. 两轮 `stress-ng` 都稳定跑通：
+   - 3 秒轮次：`623` exec bogo ops
+   - 5 秒轮次：`988` exec bogo ops
+
+结论：
+
+- `execsnoop + stress-ng --exec` 是一个比 `bindsnoop` 更容易手工复现、也更容易稳定看到 `map_inline` 效果的 BCC 验证路径。
+- 对这个工具，收益的主来源确实是 `.rodata` / global-data constantization，再由 `const_prop + dce` 折叠过滤分支并删掉 dead code。
+
 ## 最终建议
 
 1. 保留当前 Pattern A 实现，并把它视为 BCC 的主 map 优化入口。
