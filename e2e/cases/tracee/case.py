@@ -721,12 +721,19 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                             if key != "program_specs"
                         }
                     }
+                scan_results = scan_programs(prog_ids, daemon_binary, prog_fds=session.program_fds)
+                rejit_result = apply_daemon_rejit(daemon_binary, prog_ids)
+                if args.capture_maps and map_capture is not None:
+                    optimize_results = (
+                        rejit_result.get("per_program")
+                        if isinstance(rejit_result.get("per_program"), Mapping)
+                        else {}
+                    )
                     map_capture["result"] = capture_map_state(
                         captured_from="e2e/tracee",
                         program_specs=capture_plan["program_specs"],
+                        optimize_results=optimize_results,
                     )
-                scan_results = scan_programs(prog_ids, daemon_binary, prog_fds=session.program_fds)
-                rejit_result = apply_daemon_rejit(daemon_binary, prog_ids)
                 if rejit_result["applied"]:
                     post_rejit = run_phase(
                         workloads,

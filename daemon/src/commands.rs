@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 //! Subcommand implementations: enumerate, rewrite, apply, apply-all, profile.
 
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
+use std::fmt::Write as _;
 use std::os::unix::io::{AsRawFd, RawFd};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
@@ -27,8 +28,18 @@ pub(crate) struct OptimizeOneResult {
     pub passes: Vec<PassDetail>,
     pub attempts: Vec<AttemptRecord>,
     pub timings_ns: TimingsNs,
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub inlined_map_entries: Vec<InlinedMapEntry>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error_message: Option<String>,
+}
+
+/// One deduplicated map entry that `map_inline` specialized for this program.
+#[derive(Clone, Debug, Serialize, PartialEq, Eq)]
+pub(crate) struct InlinedMapEntry {
+    pub map_id: u32,
+    pub key_hex: String,
+    pub value_hex: String,
 }
 
 /// Program identity and size information.
@@ -203,6 +214,35 @@ fn collect_map_inline_records(pass_results: &[pass::PassResult]) -> Vec<pass::Ma
     pass_results
         .iter()
         .flat_map(|result| result.map_inline_records.iter().cloned())
+        .collect()
+}
+
+fn hex_bytes(bytes: &[u8]) -> String {
+    let mut out = String::with_capacity(bytes.len() * 2);
+    for byte in bytes {
+        let _ = write!(out, "{:02x}", byte);
+    }
+    out
+}
+
+fn collect_inlined_map_entries(
+    map_inline_records: &[pass::MapInlineRecord],
+) -> Vec<InlinedMapEntry> {
+    let mut deduped: BTreeMap<(u32, String), String> = BTreeMap::new();
+    for record in map_inline_records {
+        deduped.insert(
+            (record.map_id, hex_bytes(&record.key)),
+            hex_bytes(&record.expected_value),
+        );
+    }
+
+    deduped
+        .into_iter()
+        .map(|((map_id, key_hex), value_hex)| InlinedMapEntry {
+            map_id,
+            key_hex,
+            value_hex,
+        })
         .collect()
 }
 
@@ -708,6 +748,7 @@ pub(crate) fn try_apply_one(
                        pipeline_ns: u64,
                        rejit_ns: u64,
                        final_disabled_passes: Vec<String>,
+                       inlined_map_entries: Vec<InlinedMapEntry>,
                        error_message: Option<String>|
      -> OptimizeOneResult {
         let total_ns = total_start.elapsed().as_nanos() as u64;
@@ -744,6 +785,7 @@ pub(crate) fn try_apply_one(
                 rejit_syscall_ns: rejit_ns,
                 total_ns,
             },
+            inlined_map_entries,
             error_message,
         }
     };
@@ -759,6 +801,7 @@ pub(crate) fn try_apply_one(
             vec![],
             0,
             0,
+            vec![],
             vec![],
             None,
         ));
@@ -795,6 +838,7 @@ pub(crate) fn try_apply_one(
         let pipeline_elapsed = pipeline_start.elapsed().as_nanos() as u64;
         total_pipeline_ns += pipeline_elapsed;
         let attempt_map_inline_records = collect_map_inline_records(&pipeline_result.pass_results);
+        let attempt_inlined_map_entries = collect_inlined_map_entries(&attempt_map_inline_records);
 
         // Build per-pass details from the latest pipeline run.
         last_pass_details = pipeline_result
@@ -865,6 +909,7 @@ pub(crate) fn try_apply_one(
                 total_pipeline_ns,
                 total_rejit_ns,
                 disabled_passes_sorted,
+                vec![],
                 None,
             ));
         }
@@ -994,6 +1039,7 @@ pub(crate) fn try_apply_one(
                     total_pipeline_ns,
                     total_rejit_ns,
                     disabled_passes_sorted,
+                    attempt_inlined_map_entries,
                     None,
                 ));
             }
@@ -1132,6 +1178,7 @@ pub(crate) fn try_apply_one(
                         total_pipeline_ns,
                         total_rejit_ns,
                         disabled_passes_sorted,
+                        vec![],
                         Some(err_msg),
                     );
                     emit_debug_result(&failure_result);
@@ -1159,6 +1206,7 @@ pub(crate) fn try_apply_one(
             total_pipeline_ns,
             total_rejit_ns,
             sorted_strings(disabled_passes.iter().cloned()),
+            vec![],
             Some(exhausted_msg.clone()),
         );
         emit_debug_result(&failure_result);
@@ -1282,6 +1330,11 @@ mod tests {
                 rejit_syscall_ns: 50_000,
                 total_ns: 200_000,
             },
+            inlined_map_entries: vec![InlinedMapEntry {
+                map_id: 7,
+                key_hex: "00000000".to_string(),
+                value_hex: "0b000000".to_string(),
+            }],
             error_message: None,
         };
 
@@ -1315,6 +1368,9 @@ mod tests {
         assert_eq!(parsed["timings_ns"]["pipeline_run_ns"], 100_000);
         assert_eq!(parsed["timings_ns"]["rejit_syscall_ns"], 50_000);
         assert_eq!(parsed["timings_ns"]["total_ns"], 200_000);
+        assert_eq!(parsed["inlined_map_entries"][0]["map_id"], 7);
+        assert_eq!(parsed["inlined_map_entries"][0]["key_hex"], "00000000");
+        assert_eq!(parsed["inlined_map_entries"][0]["value_hex"], "0b000000");
         assert!(parsed.get("error_message").is_none());
     }
 
@@ -1366,6 +1422,7 @@ mod tests {
                 rejit_syscall_ns: 100_000,
                 total_ns: 400_000,
             },
+            inlined_map_entries: vec![],
             error_message: None,
         };
 
@@ -1380,6 +1437,7 @@ mod tests {
         assert_eq!(parsed["attempts"][0]["failure_pc"], 76);
         assert_eq!(parsed["attempts"][0]["attributed_pass"], "branch_flip");
         assert_eq!(parsed["attempts"][1]["result"], "applied");
+        assert!(parsed.get("inlined_map_entries").is_none());
     }
 
     #[test]
@@ -1419,6 +1477,43 @@ mod tests {
         assert_eq!(detail.insns_before, 100);
         assert_eq!(detail.insns_after, 95);
         assert_eq!(detail.insn_delta, -5);
+    }
+
+    #[test]
+    fn test_collect_inlined_map_entries_deduplicates_map_key_pairs() {
+        let entries = collect_inlined_map_entries(&[
+            pass::MapInlineRecord {
+                map_id: 17,
+                key: 0u32.to_le_bytes().to_vec(),
+                expected_value: 11u32.to_le_bytes().to_vec(),
+            },
+            pass::MapInlineRecord {
+                map_id: 17,
+                key: 0u32.to_le_bytes().to_vec(),
+                expected_value: 22u32.to_le_bytes().to_vec(),
+            },
+            pass::MapInlineRecord {
+                map_id: 18,
+                key: 1u32.to_le_bytes().to_vec(),
+                expected_value: 33u32.to_le_bytes().to_vec(),
+            },
+        ]);
+
+        assert_eq!(
+            entries,
+            vec![
+                InlinedMapEntry {
+                    map_id: 17,
+                    key_hex: "00000000".to_string(),
+                    value_hex: "16000000".to_string(),
+                },
+                InlinedMapEntry {
+                    map_id: 18,
+                    key_hex: "01000000".to_string(),
+                    value_hex: "21000000".to_string(),
+                },
+            ]
+        );
     }
 
     #[test]

@@ -2237,21 +2237,28 @@ def run_katran_case(args: argparse.Namespace) -> dict[str, object]:
                         if args.capture_maps and map_capture is None:
                             map_capture = {
                                 "cycle_index": cycle_index,
-                                "result": capture_map_state(
-                                    captured_from="e2e/katran",
-                                    program_specs=[
-                                        {
-                                            "prog_id": int(session.prog_id),
-                                            "repo": "katran",
-                                            "object": katran_object.name,
-                                            "program": DEFAULT_PROGRAM_NAME,
-                                            "qualified_prog_name": f"katran/{katran_object.name}:{DEFAULT_PROGRAM_NAME}",
-                                        }
-                                    ],
-                                ),
                             }
                         scan_results = scan_programs(prog_ids, daemon_binary)
                         rejit_result = apply_daemon_rejit(daemon_binary, prog_ids)
+                        if args.capture_maps and map_capture is not None and "result" not in map_capture:
+                            optimize_results = (
+                                rejit_result.get("per_program")
+                                if isinstance(rejit_result.get("per_program"), Mapping)
+                                else {}
+                            )
+                            map_capture["result"] = capture_map_state(
+                                captured_from="e2e/katran",
+                                program_specs=[
+                                    {
+                                        "prog_id": int(session.prog_id),
+                                        "repo": "katran",
+                                        "object": katran_object.name,
+                                        "program": DEFAULT_PROGRAM_NAME,
+                                        "qualified_prog_name": f"katran/{katran_object.name}:{DEFAULT_PROGRAM_NAME}",
+                                    }
+                                ],
+                                optimize_results=optimize_results,
+                            )
                         post_rejit_phase: dict[str, object] | None = None
                         if rejit_result["applied"]:
                             try:

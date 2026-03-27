@@ -173,8 +173,9 @@ fn process_request(
                 Some(tracker),
             ) {
                 Ok(result) => {
-                    // Debug data is embedded in the JSON response; no need to
-                    // duplicate to stderr in serve mode.
+                    // The optimize response already embeds the full structured
+                    // result, including any deduplicated `inlined_map_entries`,
+                    // so serve mode does not need a second debug channel.
                     match serde_json::to_value(&result) {
                         Ok(v) => v,
                         Err(e) => serde_json::json!({

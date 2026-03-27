@@ -214,6 +214,13 @@ def _apply_one(
     combined_output = result.stdout + result.stderr
     debug_result = _parse_last_json_object(f"{result.stderr}\n{result.stdout}")
     summary = debug_result.get("summary") if isinstance(debug_result, Mapping) else {}
+    program = debug_result.get("program") if isinstance(debug_result, Mapping) else {}
+    raw_inlined_entries = (
+        debug_result.get("inlined_map_entries") if isinstance(debug_result, Mapping) else []
+    )
+    inlined_map_entries = [
+        dict(entry) for entry in raw_inlined_entries if isinstance(entry, Mapping)
+    ]
     applied_sites = int((summary or {}).get("total_sites_applied", 0) or 0)
     error_message = ""
     if isinstance(debug_result, Mapping):
@@ -226,6 +233,8 @@ def _apply_one(
         "output": combined_output,
         "exit_code": result.returncode,
         "debug_result": debug_result,
+        "kernel_prog_name": str((program or {}).get("prog_name") or ""),
+        "inlined_map_entries": inlined_map_entries,
         "summary": dict(summary) if isinstance(summary, Mapping) else {},
         "counts": {
             "total_sites": applied_sites,

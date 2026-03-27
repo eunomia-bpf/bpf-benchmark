@@ -134,6 +134,7 @@ def capture_map_state(
     *,
     captured_from: str,
     program_specs: Sequence[Mapping[str, object]],
+    optimize_results: Mapping[int, Mapping[str, object]],
     fixture_root: Path | None = None,
 ) -> dict[str, object]:
     if not program_specs:
@@ -149,6 +150,30 @@ def capture_map_state(
             "skipped_programs": [],
             "errors": [],
         }
+
+    inline_capture_programs: list[dict[str, object]] = []
+    normalized_results: list[tuple[int, Mapping[str, object]]] = []
+    for raw_prog_id, raw_result in optimize_results.items():
+        if not isinstance(raw_result, Mapping):
+            continue
+        normalized_results.append((int(raw_prog_id), raw_result))
+
+    for prog_id, result in sorted(normalized_results, key=lambda item: item[0]):
+        kernel_prog_name = str(result.get("kernel_prog_name") or f"prog_{prog_id}")
+        raw_entries = result.get("inlined_map_entries")
+        inlined_map_entries = (
+            [dict(entry) for entry in raw_entries if isinstance(entry, Mapping)]
+            if isinstance(raw_entries, list)
+            else []
+        )
+        inline_capture_programs.append(
+            {
+                "prog_id": prog_id,
+                "kernel_prog_name": kernel_prog_name,
+                "inlined_map_entries": inlined_map_entries,
+            }
+        )
+
     fixture_dir = fixture_root or (ROOT_DIR / "corpus" / "fixtures")
     script_path = ROOT_DIR / "runner" / "scripts" / "capture_map_state.py"
     if not script_path.exists():
@@ -157,7 +182,9 @@ def capture_map_state(
     with tempfile.TemporaryDirectory(prefix="map-capture-") as tempdir:
         tempdir_path = Path(tempdir)
         spec_path = tempdir_path / "program_specs.json"
+        inline_capture_path = tempdir_path / "inline_capture.json"
         write_json(spec_path, list(program_specs))
+        write_json(inline_capture_path, inline_capture_programs)
         command = [
             sys.executable or "python3",
             str(script_path),
@@ -167,6 +194,8 @@ def capture_map_state(
             str(fixture_dir),
             "--program-specs",
             str(spec_path),
+            "--inline-capture-json",
+            str(inline_capture_path),
         ]
         completed = run_command(command, timeout=600)
 
