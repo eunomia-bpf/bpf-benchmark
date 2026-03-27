@@ -321,7 +321,10 @@ fn parse_stack_state(raw: &str) -> StackState {
     for split in raw.char_indices().skip(1).map(|(idx, _)| idx) {
         let prefix = &raw[..split];
         let rest = raw[split..].trim();
-        if prefix.chars().all(is_stack_slot_type_char) && looks_like_reg_state(rest) {
+        if prefix.len() == 8
+            && prefix.chars().all(is_stack_slot_type_char)
+            && looks_like_reg_state(rest)
+        {
             return StackState {
                 slot_types: Some(prefix.to_string()),
                 value: Some(parse_reg_state(rest)),

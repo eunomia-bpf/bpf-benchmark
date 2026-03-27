@@ -1263,6 +1263,33 @@ mod real_bpfo_tests {
         false,
         true
     );
+
+    #[test]
+    fn test_map_inline_real_katran_balancer_ingress() {
+        let object_path = repo_path("corpus/build/katran/balancer.bpf.o");
+        let loaded = load_program_from_path(&object_path, "balancer_ingress").unwrap();
+        let mut program = loaded.into_program_with_synthetic_maps();
+        let ctx = permissive_pass_ctx(loaded.prog_type);
+        let result = run_named_pipeline(&mut program, &ctx, &["map_inline"]).unwrap();
+        assert_valid_bpf(&program);
+        let pass = pass_result(&result, "map_inline").unwrap();
+        assert!(
+            pass.changed && pass.sites_applied > 0,
+            "expected map_inline to apply on {}:{}; applied={} skipped={:?} diagnostics={:?}",
+            loaded.object_path.display(),
+            loaded.section_name,
+            pass.sites_applied,
+            pass.sites_skipped,
+            pass.diagnostics
+        );
+        assert!(
+            !pass.map_inline_records.is_empty(),
+            "expected balancer_ingress to record inlined map entries on {}:{}",
+            loaded.object_path.display(),
+            loaded.section_name
+        );
+    }
+
     #[test]
     fn test_map_inline_real_tracee_cgroup_skb_ingress() {
         let (fixture, _program, result) = run_real_case(
@@ -1330,7 +1357,10 @@ mod real_bpfo_tests {
         assert!(
             pass.sites_skipped
                 .iter()
-                .any(|skip| skip.reason == "lookup key is not a constant stack materialization"),
+                .any(|skip| {
+                    skip.reason
+                        == "lookup key is not a constant stack or pseudo-map-value materialization"
+                }),
             "expected dynamic-key skip on {}:{}; skipped={:?}",
             loaded.object_path.display(),
             loaded.section_name,

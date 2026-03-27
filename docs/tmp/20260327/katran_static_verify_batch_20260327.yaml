@@ -1,0 +1,10 @@
+schema_version: 1
+max_parallel_jobs: 1
+retain_daemon_debug: true
+jobs:
+  - id: katran-static-verify
+    type: static_verify_object
+    execution: serial
+    runtime: kernel
+    object: /home/yunwei37/workspace/bpf-benchmark/corpus/build/katran/balancer.bpf.o
+    daemon_socket: /tmp/bpfrejit-katran-static.sock
