@@ -978,3 +978,518 @@ mod tests {
         );
     }
 }
+
+#[cfg(test)]
+mod real_bpfo_tests {
+    use crate::pass::{BpfProgram, PipelineResult};
+    use crate::test_utils::{
+        assert_valid_bpf, hot_branch_profiling, load_fixture_program, pass_result,
+        permissive_pass_ctx, run_named_pipeline, run_named_pipeline_with_profiling,
+        LoadedFixtureProgram,
+    };
+
+    fn run_real_case(
+        pass_names: &[&str],
+        fixture: &str,
+        program_name: &str,
+        with_maps: bool,
+        with_profiling: bool,
+    ) -> (LoadedFixtureProgram, BpfProgram, PipelineResult) {
+        let loaded = load_fixture_program(fixture, program_name).unwrap();
+        let mut program = if with_maps {
+            loaded.into_program_with_synthetic_maps()
+        } else {
+            loaded.into_program()
+        };
+        let ctx = permissive_pass_ctx(loaded.prog_type);
+        let result = if with_profiling {
+            let profiling = hot_branch_profiling(&program.insns);
+            run_named_pipeline_with_profiling(&mut program, &ctx, pass_names, Some(&profiling))
+                .unwrap()
+        } else {
+            run_named_pipeline(&mut program, &ctx, pass_names).unwrap()
+        };
+        assert_valid_bpf(&program);
+        (loaded, program, result)
+    }
+
+    fn assert_pass_changed(
+        result: &PipelineResult,
+        pass_name: &str,
+        fixture: &LoadedFixtureProgram,
+    ) {
+        let pass = pass_result(result, pass_name).unwrap();
+        assert!(
+            pass.changed,
+            "{} on {}:{} did not change; skipped={:?}",
+            pass_name,
+            fixture.object_path.display(),
+            fixture.section_name,
+            pass.sites_skipped
+        );
+        assert!(
+            pass.insns_after != pass.insns_before || pass.sites_applied > 0,
+            "{} on {}:{} reported changed without any visible delta",
+            pass_name,
+            fixture.object_path.display(),
+            fixture.section_name
+        );
+    }
+
+    macro_rules! real_single_pass_test {
+        ($name:ident, $pass:literal, $fixture:literal, $program:literal, $with_maps:expr, $with_profile:expr, $expect_change:expr) => {
+            #[test]
+            fn $name() {
+                let (fixture, _program, result) = run_real_case(
+                    &[$pass],
+                    $fixture,
+                    $program,
+                    $with_maps,
+                    $with_profile,
+                );
+                if $expect_change {
+                    assert_pass_changed(&result, $pass, &fixture);
+                } else {
+                    let _ = pass_result(&result, $pass).unwrap();
+                }
+            }
+        };
+    }
+
+    macro_rules! real_pipeline_test {
+        ($name:ident, [$($pass:literal),+ $(,)?], assert_pass=$assert_pass:literal, fixture=$fixture:literal, program=$program:literal, maps=$with_maps:expr, profile=$with_profile:expr, change=$expect_change:expr) => {
+            #[test]
+            fn $name() {
+                let (fixture, _program, result) = run_real_case(
+                    &[$($pass),+],
+                    $fixture,
+                    $program,
+                    $with_maps,
+                    $with_profile,
+                );
+                if $expect_change {
+                    assert_pass_changed(&result, $assert_pass, &fixture);
+                } else {
+                    let _ = pass_result(&result, $assert_pass).unwrap();
+                }
+            }
+        };
+    }
+
+    real_single_pass_test!(
+        test_map_inline_real_katran_xdp,
+        "map_inline",
+        "katran/xdp_pktcntr.bpf.o",
+        "xdp",
+        true,
+        false,
+        true
+    );
+    real_single_pass_test!(
+        test_map_inline_real_bindsnoop,
+        "map_inline",
+        "bcc/libbpf-tools/bindsnoop.bpf.o",
+        "kprobe/inet_bind",
+        true,
+        false,
+        false
+    );
+    real_single_pass_test!(
+        test_map_inline_real_cilium_xdp_entry,
+        "map_inline",
+        "cilium/bpf_xdp.bpf.o",
+        "xdp/entry",
+        true,
+        false,
+        false
+    );
+
+    real_pipeline_test!(
+        test_const_prop_real_katran_xdp,
+        ["map_inline", "const_prop"],
+        assert_pass="const_prop",
+        fixture="katran/xdp_pktcntr.bpf.o",
+        program="xdp",
+        maps=true,
+        profile=false,
+        change=true
+    );
+    real_pipeline_test!(
+        test_const_prop_real_bindsnoop,
+        ["map_inline", "const_prop"],
+        assert_pass="const_prop",
+        fixture="bcc/libbpf-tools/bindsnoop.bpf.o",
+        program="kprobe/inet_bind",
+        maps=true,
+        profile=false,
+        change=false
+    );
+    real_pipeline_test!(
+        test_const_prop_real_cilium_xdp_entry,
+        ["map_inline", "const_prop"],
+        assert_pass="const_prop",
+        fixture="cilium/bpf_xdp.bpf.o",
+        program="xdp/entry",
+        maps=true,
+        profile=false,
+        change=false
+    );
+
+    real_pipeline_test!(
+        test_dce_real_katran_xdp,
+        ["map_inline", "const_prop", "dce"],
+        assert_pass="dce",
+        fixture="katran/xdp_pktcntr.bpf.o",
+        program="xdp",
+        maps=true,
+        profile=false,
+        change=true
+    );
+    real_pipeline_test!(
+        test_dce_real_bindsnoop,
+        ["map_inline", "const_prop", "dce"],
+        assert_pass="dce",
+        fixture="bcc/libbpf-tools/bindsnoop.bpf.o",
+        program="kprobe/inet_bind",
+        maps=true,
+        profile=false,
+        change=false
+    );
+    real_pipeline_test!(
+        test_dce_real_cilium_xdp_entry,
+        ["map_inline", "const_prop", "dce"],
+        assert_pass="dce",
+        fixture="cilium/bpf_xdp.bpf.o",
+        program="xdp/entry",
+        maps=true,
+        profile=false,
+        change=false
+    );
+
+    real_single_pass_test!(
+        test_skb_load_bytes_real_cilium_lxc_tail,
+        "skb_load_bytes_spec",
+        "cilium/bpf_lxc.bpf.o",
+        "tc/tail",
+        false,
+        false,
+        true
+    );
+    real_single_pass_test!(
+        test_skb_load_bytes_real_cilium_overlay_tail,
+        "skb_load_bytes_spec",
+        "cilium/bpf_overlay.bpf.o",
+        "tc/tail",
+        false,
+        false,
+        true
+    );
+    real_single_pass_test!(
+        test_skb_load_bytes_real_decap_sanity,
+        "skb_load_bytes_spec",
+        "linux-selftests/tools/testing/selftests/bpf/progs/decap_sanity.bpf.o",
+        "tc",
+        false,
+        false,
+        true
+    );
+
+    real_single_pass_test!(
+        test_bounds_check_merge_real_cilium_xdp_entry,
+        "bounds_check_merge",
+        "cilium/bpf_xdp.bpf.o",
+        "xdp/entry",
+        false,
+        false,
+        false
+    );
+    real_single_pass_test!(
+        test_bounds_check_merge_real_xdp_flowtable,
+        "bounds_check_merge",
+        "xdp-tools/xdp_flowtable.bpf.o",
+        "xdp",
+        false,
+        false,
+        false
+    );
+    real_single_pass_test!(
+        test_bounds_check_merge_real_calico_from_hep,
+        "bounds_check_merge",
+        "calico/from_hep_debug.bpf.o",
+        "tc",
+        false,
+        false,
+        false
+    );
+
+    real_single_pass_test!(
+        test_wide_mem_real_cilium_xdp_entry,
+        "wide_mem",
+        "cilium/bpf_xdp.bpf.o",
+        "xdp/entry",
+        false,
+        false,
+        false
+    );
+    real_single_pass_test!(
+        test_wide_mem_real_cilium_lxc_entry,
+        "wide_mem",
+        "cilium/bpf_lxc.bpf.o",
+        "tc/entry",
+        false,
+        false,
+        false
+    );
+    real_single_pass_test!(
+        test_wide_mem_real_calico_to_hep,
+        "wide_mem",
+        "calico/to_hep_debug.bpf.o",
+        "tc",
+        false,
+        false,
+        false
+    );
+
+    real_single_pass_test!(
+        test_bulk_memory_real_calico_to_hep,
+        "bulk_memory",
+        "calico/to_hep_debug.bpf.o",
+        "tc",
+        false,
+        false,
+        false
+    );
+    real_single_pass_test!(
+        test_bulk_memory_real_calico_from_hep,
+        "bulk_memory",
+        "calico/from_hep_debug.bpf.o",
+        "tc",
+        false,
+        false,
+        false
+    );
+    real_single_pass_test!(
+        test_bulk_memory_real_xdp_flowtable,
+        "bulk_memory",
+        "xdp-tools/xdp_flowtable.bpf.o",
+        "xdp",
+        false,
+        false,
+        false
+    );
+
+    real_single_pass_test!(
+        test_rotate_real_cilium_xdp_entry,
+        "rotate",
+        "cilium/bpf_xdp.bpf.o",
+        "xdp/entry",
+        false,
+        false,
+        false
+    );
+    real_single_pass_test!(
+        test_rotate_real_cilium_lxc_entry,
+        "rotate",
+        "cilium/bpf_lxc.bpf.o",
+        "tc/entry",
+        false,
+        false,
+        false
+    );
+
+    real_single_pass_test!(
+        test_cond_select_real_cilium_xdp_tail,
+        "cond_select",
+        "cilium/bpf_xdp.bpf.o",
+        "xdp/tail",
+        false,
+        false,
+        false
+    );
+    real_single_pass_test!(
+        test_cond_select_real_cilium_lxc_tail,
+        "cond_select",
+        "cilium/bpf_lxc.bpf.o",
+        "tc/tail",
+        false,
+        false,
+        false
+    );
+    real_single_pass_test!(
+        test_cond_select_real_calico_to_hep,
+        "cond_select",
+        "calico/to_hep_debug.bpf.o",
+        "tc",
+        false,
+        false,
+        false
+    );
+
+    real_single_pass_test!(
+        test_extract_real_cilium_xdp_entry,
+        "extract",
+        "cilium/bpf_xdp.bpf.o",
+        "xdp/entry",
+        false,
+        false,
+        false
+    );
+    real_single_pass_test!(
+        test_extract_real_calico_to_hep,
+        "extract",
+        "calico/to_hep_debug.bpf.o",
+        "tc",
+        false,
+        false,
+        false
+    );
+    real_single_pass_test!(
+        test_extract_real_tracee_sys_enter,
+        "extract",
+        "tracee/tracee.bpf.o",
+        "tracepoint__raw_syscalls__sys_enter",
+        false,
+        false,
+        false
+    );
+
+    real_single_pass_test!(
+        test_endian_real_selftest,
+        "endian_fusion",
+        "linux-selftests/tools/testing/selftests/bpf/progs/test_endian.bpf.o",
+        "raw_tp/sys_enter",
+        false,
+        false,
+        true
+    );
+    real_single_pass_test!(
+        test_endian_real_calico_to_hep,
+        "endian_fusion",
+        "calico/to_hep_debug.bpf.o",
+        "tc",
+        false,
+        false,
+        false
+    );
+    real_single_pass_test!(
+        test_endian_real_cilium_lxc_entry,
+        "endian_fusion",
+        "cilium/bpf_lxc.bpf.o",
+        "tc/entry",
+        false,
+        false,
+        false
+    );
+
+    real_single_pass_test!(
+        test_branch_flip_real_cilium_xdp_entry,
+        "branch_flip",
+        "cilium/bpf_xdp.bpf.o",
+        "xdp/entry",
+        false,
+        true,
+        true
+    );
+    real_single_pass_test!(
+        test_branch_flip_real_cilium_lxc_entry,
+        "branch_flip",
+        "cilium/bpf_lxc.bpf.o",
+        "tc/entry",
+        false,
+        true,
+        true
+    );
+    real_single_pass_test!(
+        test_branch_flip_real_tracee_sys_enter,
+        "branch_flip",
+        "tracee/tracee.bpf.o",
+        "tracepoint__raw_syscalls__sys_enter",
+        false,
+        true,
+        false
+    );
+
+    real_single_pass_test!(
+        test_speculation_barrier_real_cilium_xdp_entry,
+        "speculation_barrier",
+        "cilium/bpf_xdp.bpf.o",
+        "xdp/entry",
+        false,
+        false,
+        true
+    );
+    real_single_pass_test!(
+        test_speculation_barrier_real_cilium_lxc_entry,
+        "speculation_barrier",
+        "cilium/bpf_lxc.bpf.o",
+        "tc/entry",
+        false,
+        false,
+        true
+    );
+    real_single_pass_test!(
+        test_speculation_barrier_real_tracee_sys_enter,
+        "speculation_barrier",
+        "tracee/tracee.bpf.o",
+        "tracepoint__raw_syscalls__sys_enter",
+        false,
+        false,
+        true
+    );
+
+    real_single_pass_test!(
+        test_dangerous_helper_firewall_real_tracee_check_helper_call,
+        "dangerous_helper_firewall",
+        "tracee/tracee.bpf.o",
+        "kprobe/check_helper_call",
+        false,
+        false,
+        true
+    );
+    real_single_pass_test!(
+        test_dangerous_helper_firewall_real_tcplife,
+        "dangerous_helper_firewall",
+        "bcc/libbpf-tools/tcplife.bpf.o",
+        "tracepoint/sock/inet_sock_set_state",
+        false,
+        false,
+        true
+    );
+    real_single_pass_test!(
+        test_dangerous_helper_firewall_real_calico_from_hep,
+        "dangerous_helper_firewall",
+        "calico/from_hep_debug.bpf.o",
+        "tc",
+        false,
+        false,
+        true
+    );
+
+    real_single_pass_test!(
+        test_live_patch_real_cilium_lxc_entry,
+        "live_patch",
+        "cilium/bpf_lxc.bpf.o",
+        "tc/entry",
+        false,
+        false,
+        true
+    );
+    real_single_pass_test!(
+        test_live_patch_real_calico_from_hep,
+        "live_patch",
+        "calico/from_hep_debug.bpf.o",
+        "tc",
+        false,
+        false,
+        true
+    );
+    real_single_pass_test!(
+        test_live_patch_real_tracee_sys_enter,
+        "live_patch",
+        "tracee/tracee.bpf.o",
+        "tracepoint__raw_syscalls__sys_enter",
+        false,
+        false,
+        true
+    );
+}

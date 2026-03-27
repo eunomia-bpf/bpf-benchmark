@@ -7,6 +7,7 @@
 mod analysis;
 mod bpf;
 mod commands;
+mod elf_parser;
 mod insn;
 mod invalidation;
 mod kfunc_discovery;
@@ -14,6 +15,8 @@ mod pass;
 mod passes;
 mod profiler;
 mod server;
+#[cfg(test)]
+mod test_utils;
 mod verifier_log;
 
 use std::time::Duration;
