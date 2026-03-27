@@ -749,16 +749,32 @@ daemon_socket_response_batch daemon_socket_optimize_batch(
 
     std::string line;
     char byte = 0;
+    bool peer_closed = false;
+    int read_error = 0;
     while (true) {
         const ssize_t read_result = read(fd, &byte, 1);
-        if (read_result <= 0 || byte == '\n') {
+        if (read_result < 0) {
+            read_error = errno;
+            break;
+        }
+        if (read_result == 0) {
+            peer_closed = true;
+            break;
+        }
+        if (byte == '\n') {
             break;
         }
         line.push_back(byte);
     }
     close(fd);
     if (line.empty()) {
-        response.error = "empty response from daemon";
+        if (read_error != 0) {
+            response.error = "read() failed: " + std::string(strerror(read_error));
+        } else if (peer_closed) {
+            response.error = "daemon closed connection before responding";
+        } else {
+            response.error = "empty response from daemon";
+        }
         return response;
     }
 

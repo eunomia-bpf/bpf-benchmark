@@ -63,6 +63,7 @@ BZIMAGE ?= vendor/linux-framework/arch/x86/boot/bzImage
 DAEMON  ?= daemon/target/release/bpfrejit-daemon
 DAEMON_ARGS ?=
 DAEMON_SOCKET ?= /tmp/bpfrejit.sock
+E2E_ARGS ?=
 REPOS ?=
 PROFILE ?=
 FILTERS ?=
@@ -357,7 +358,8 @@ vm-corpus:
 vm-e2e:
 	$(MAKE) -C "$(RUNNER_DIR)" vm-e2e \
 		PYTHON="$(PYTHON)" VENV="$(VENV)" \
-		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" DAEMON_ARGS="$(DAEMON_ARGS)" TARGET="$(TARGET)"
+		BZIMAGE="$(BZIMAGE)" DAEMON="$(DAEMON)" DAEMON_ARGS="$(DAEMON_ARGS)" TARGET="$(TARGET)" \
+		E2E_ARGS="$(E2E_ARGS)"
 
 vm-all:
 	$(MAKE) vm-test

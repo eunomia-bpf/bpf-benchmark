@@ -16,6 +16,7 @@ from runner.libs import (  # noqa: E402
     ROOT_DIR,
     prepare_bpftool_environment,
 )
+from runner.libs.rejit import benchmark_rejit_enabled_passes  # noqa: E402
 from runner.libs.run_artifacts import (  # noqa: E402
     ArtifactSession,
     derive_run_type,
@@ -169,6 +170,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--skip-setup", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--tools-dir", default="", help="Directory with compiled libbpf-tools binaries (bcc case).")
     parser.add_argument("--tool", action="append", dest="tools", help="Select specific libbpf-tools by name (bcc case).")
+    parser.add_argument(
+        "--rejit-passes",
+        default="",
+        help="Comma-separated ReJIT passes to enable for e2e apply, for example 'map_inline' or 'map_inline,const_prop'.",
+    )
     return parser
 
 
@@ -225,6 +231,7 @@ def build_run_metadata(
         "suite": "e2e",
         "case": args.case,
         "smoke": bool(args.smoke),
+        "selected_rejit_passes": benchmark_rejit_enabled_passes(),
         "output_hint_json": repo_relative_path(primary_output_json),
         "optimization_summary": _trim_e2e_value(payload),
     }
@@ -319,6 +326,8 @@ def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     prepare_bpftool_environment()
+    if str(args.rejit_passes or "").strip():
+        os.environ["BPFREJIT_BENCH_PASSES"] = str(args.rejit_passes).strip()
 
     if args.case == "all":
         # Run all cases sequentially, each with its own default outputs.

@@ -903,3 +903,126 @@ pass 结果：
 4. 真正的下一步不是再重复同一轮 corpus，而是：
    - 要么扩大可证明安全的 inline coverage
    - 要么换一个能让 `const_prop + dce` 真正折叠掉长路径的 Katran 配置 / live workload
+
+### 11.12 Tracee read-hotpath live smoke 已拿到首个正向 runtime 信号
+
+为了避免继续拿“没真正命中优化目标程序”的数据做结论，这一轮我把 Tracee e2e case 的目标拆成了两组：
+
+- `target_programs`
+  - 用来量 runtime
+  - 当前配置为真正被 `read` workload 持续打热的 `tracepoint__raw_syscalls__sys_enter` / `tracepoint__raw_syscalls__sys_exit`
+- `apply_programs`
+  - 用来做 scan / ReJIT / map capture
+  - 当前配置为有优化位点的 `sys_enter_submit` / `sys_exit_submit`
+
+同时新增了 preflight：
+
+- 先跑 5s workload
+- 如果 `target_programs` 的 `run_cnt_delta == 0`，直接跳过整轮 benchmark
+- 避免再次生成“优化程序根本没执行，但还是算了 delta”的无效结果
+
+本轮 smoke artifact：
+
+- `docs/tmp/20260327/tracee_read_hotpath_smoke_20260327_v2.json`
+- `docs/tmp/20260327/tracee_read_hotpath_smoke_20260327_v2.md`
+
+关键结果：
+
+- preflight 已确认 measurement targets 真正在跑
+  - prog `17` (`tracepoint__raw_syscalls__sys_enter`) `run_cnt_delta = 1647808`
+  - prog `21` (`tracepoint__raw_syscalls__sys_exit`) `run_cnt_delta = 1647744`
+- apply targets:
+  - prog `20` `sys_enter_submit`
+  - prog `23` `sys_exit_submit`
+- scan / ReJIT:
+  - `applied_sites = 258`
+  - `total_sites = 258`
+- program runtime delta:
+  - prog `17`: `56.46 ns/run -> 55.77 ns/run` (`-1.22%`)
+  - prog `21`: `265.21 ns/run -> 264.03 ns/run` (`-0.45%`)
+- workload-level delta:
+  - `bpf_avg_ns_delta_pct = -0.58%`
+  - `events_per_sec_delta_pct = -0.16%`
+  - `app_throughput_delta_pct = -0.67%`
+
+这轮的含义是：
+
+1. 之前直接盯 `sys_enter_submit` 的 live 统计会误判，因为 `read` workload 真正稳定打热的是外层 `sys_enter` / `sys_exit`
+2. 只优化 `sys_enter_submit` 一条 submit 路径时，我前面的临时诊断结果还是轻微变慢
+3. 把 `sys_enter_submit + sys_exit_submit` 一起做 ReJIT 后，至少在 5s smoke 上已经出现了首个正向 BPF runtime 信号
+
+当前仍未完成的部分：
+
+- 30s 权威 run 还没有落出来
+- 不是 case 逻辑问题，而是 `vm-e2e` 被另一条外部运行中的 job 占着
+- 我没有抢锁或杀掉那条 job，因此这次只先保留 smoke 结果，等 VM 空闲后再补权威测量
+
+### 11.13 Tracee read-hotpath 30s 权威 run 已完成，但 smoke 的正向信号没有站住
+
+VM 空闲后，我已经按同一套配置补跑了完整 30s 版本：
+
+- `docs/tmp/20260327/tracee_read_hotpath_20260327_v1.json`
+- `docs/tmp/20260327/tracee_read_hotpath_20260327_v1.md`
+
+这轮仍然满足前提条件：
+
+- preflight 已确认 measurement targets 真正在跑
+  - target runs `= 4391720`
+- apply targets 仍然是：
+  - `sys_enter_submit`
+  - `sys_exit_submit`
+- ReJIT 仍然完整命中：
+  - `applied_sites = 258`
+  - `total_sites = 258`
+
+但 30s 正式结果显示，之前 5s smoke 上那点正向 runtime 信号并没有稳定复现：
+
+- program runtime delta:
+  - prog `17` (`sys_enter`)：`58.4243 ns/run -> 58.3857 ns/run` (`-0.066%`)
+  - prog `21` (`sys_exit`)：`271.0915 ns/run -> 273.3297 ns/run` (`+0.826%`)
+- workload-level delta:
+  - `bpf_avg_ns_delta_pct = +0.6676%`
+  - `events_per_sec_delta_pct = +0.4391%`
+  - `app_throughput_delta_pct = +0.0811%`
+  - `agent_cpu_delta_pct = +0.0745%`
+
+所以当前 Tracee 这条线的最新判断应更新为：
+
+1. measurement/apply split 是对的，至少现在不会再拿“目标程序根本没执行”的数据做结论
+2. `sys_enter_submit + sys_exit_submit` 一起做 ReJIT，确实会改到真实热路径关联的 submit 程序
+3. 但在当前 `read_hotpath` live workload 下，30s 权威 run 还没有证明 runtime 获益
+4. 目前更准确的结论是：
+   - app throughput 基本持平
+   - BPF runtime 小幅退化
+   - 之前 smoke 的 `-0.58%` 更像是短窗口噪声，不应作为正式结论
+
+### 11.14 Tracee preflight 现在也会校验 apply-program activity
+
+做完 11.13 之后，又暴露出一个更细的 benchmark 有效性问题：
+
+- 当前 case 的 preflight 只校验了 `target_programs`
+- 但 Tracee 这轮实验里真正被 ReJIT 的其实是 `apply_programs`
+- 如果 `apply_programs` 根本没执行，benchmark 仍然可能产出 baseline/post 数字，但那不是有效的优化测量
+
+因此我已经把 `e2e/cases/tracee/case.py` 再往前补了一步：
+
+1. preflight 现在会采样 `target_programs ∪ apply_programs`
+2. preflight payload 会额外记录：
+   - `program_activity.target_programs`
+   - `program_activity.apply_programs`
+3. 当配置里显式给了 `apply_programs` 且 `require_program_activity: true` 时：
+   - 不仅要求 target programs 有 `run_cnt_delta`
+   - 也要求 apply programs 自己有 `run_cnt_delta`
+4. 如果 apply side 没执行，case 会直接 skip：
+   - `preflight observed zero apply-program executions; skipping invalid optimization benchmark`
+
+这一步的意义是：
+
+- Tracee 之后不会再把“measurement program 在跑、但 apply program 没跑”的场景当成有效 benchmark
+- 11.13 那种“30s 数字已经拿到了，但优化程序是否真的执行仍然不够硬”的模糊状态，下一轮会被前置判死，不会再混进正式结论
+
+当前状态：
+
+- 代码和语法检查已经完成
+- 但我准备补的验证 run 被另一条外部 `vm-e2e` 占住了
+- 所以这一节先记录机制更新；等 VM 空闲后，只需要补一条短 run，就能确认当前 `read_hotpath` 会不会被新 guard 直接判成无效

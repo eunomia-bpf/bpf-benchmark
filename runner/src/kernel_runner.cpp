@@ -629,6 +629,16 @@ struct live_fixture_map {
 
 std::string libbpf_error_string(int error_code);
 
+bool fixture_map_is_userspace_readonly(const live_fixture_map &map)
+{
+    if ((map.map_flags & BPF_F_RDONLY) != 0) {
+        return true;
+    }
+    return map.name.rfind(".rodata", 0) == 0 ||
+           map.name.rfind(".kconfig", 0) == 0 ||
+           map.name.rfind(".ksyms", 0) == 0;
+}
+
 std::optional<uint32_t> optional_fixture_map_type_field(
     const YAML::Node &node,
     std::string_view field_name)
@@ -1184,7 +1194,7 @@ void load_map_fixtures(
                 continue;
             }
 
-            if ((live_map->map_flags & BPF_F_RDONLY) != 0) {
+            if (fixture_map_is_userspace_readonly(*live_map)) {
                 std::fprintf(
                     stderr,
                     "fixture map '%s' is read-only to userspace; skipping replay\n",
@@ -1705,9 +1715,16 @@ daemon_socket_response daemon_socket_optimize(
     /* Read JSON response line */
     std::string buf;
     char ch;
+    bool peer_closed = false;
+    int read_error = 0;
     while (true) {
         const ssize_t n = read(fd, &ch, 1);
-        if (n <= 0) {
+        if (n < 0) {
+            read_error = errno;
+            break;
+        }
+        if (n == 0) {
+            peer_closed = true;
             break;
         }
         if (ch == '\n') {
@@ -1718,7 +1735,13 @@ daemon_socket_response daemon_socket_optimize(
     close(fd);
 
     if (buf.empty()) {
-        response.error = "empty response from daemon";
+        if (read_error != 0) {
+            response.error = "read() failed: " + std::string(strerror(read_error));
+        } else if (peer_closed) {
+            response.error = "daemon closed connection before responding";
+        } else {
+            response.error = "empty response from daemon";
+        }
         return response;
     }
 

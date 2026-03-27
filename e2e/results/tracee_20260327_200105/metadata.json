@@ -1,0 +1,2409 @@
+{
+  "artifact_kind": "result_run",
+  "artifact_version": 1,
+  "case": "tracee",
+  "completed_at": "2026-03-27T20:02:50.172522+00:00",
+  "details_dir": "details",
+  "generated_at": "2026-03-27T20:02:50.172526+00:00",
+  "last_updated_at": "2026-03-27T20:02:50.172522+00:00",
+  "optimization_summary": {
+    "apply_tracee_programs": [
+      {
+        "btf_id": 36,
+        "bytes_jited": 17850,
+        "bytes_memlock": 32768,
+        "bytes_xlated": 30384,
+        "gpl_compatible": true,
+        "id": 20,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          166,
+          127,
+          124,
+          136,
+          169,
+          126,
+          143,
+          211,
+          181,
+          178,
+          184,
+          187,
+          190,
+          202,
+          205,
+          139,
+          208,
+          158,
+          227,
+          130,
+          162,
+          213,
+          129,
+          226
+        ],
+        "name": "sys_enter_submit",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 59,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "3b3b077f95b0b5ae",
+        "type": "raw_tracepoint",
+        "uid": 0
+      }
+    ],
+    "baseline": {
+      "summary": {
+        "agent_cpu_total_pct": {
+          "count": 3,
+          "max": 19.799510369988276,
+          "mean": 12.583202136272904,
+          "median": 17.75010072868046,
+          "min": 0.1999953101499761
+        },
+        "app_throughput": {
+          "count": 3,
+          "max": 6761.763704555985,
+          "mean": 3057.077842395328,
+          "median": 2409.3536319799655,
+          "min": 0.11619065003382022
+        },
+        "bpf_avg_ns_per_run": {
+          "count": 0,
+          "max": null,
+          "mean": null,
+          "median": null,
+          "min": null
+        },
+        "events_per_sec": {
+          "count": 3,
+          "max": 70223.88602069044,
+          "mean": 25684.881043361485,
+          "median": 6788.0687619046985,
+          "min": 42.68834748931831
+        },
+        "system_cpu_busy_pct": {
+          "count": 3,
+          "max": 79.80922098569158,
+          "mean": 29.430881969163003,
+          "median": 8.219906422798806,
+          "min": 0.2635184989986272
+        }
+      },
+      "workloads": [
+        {
+          "agent_cpu": {
+            "sys_pct": 3.1910293444818807,
+            "total_pct": 17.75010072868046,
+            "user_pct": 14.559071384198582
+          },
+          "app_throughput": 0.11619065003382022,
+          "bpf": {
+            "programs": {
+              "20": {
+                "avg_ns_per_run": null,
+                "bytes_jited": 17850,
+                "bytes_xlated": 30384,
+                "id": 20,
+                "name": "sys_enter_submi",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "raw_tracepoint"
+              }
+            },
+            "summary": {
+              "active_programs": 0,
+              "avg_ns_per_run": null,
+              "total_events": 0,
+              "total_run_time_ns": 0
+            }
+          },
+          "command_template": "stress-ng --exec 4 --exec-method execve --timeout {duration}s --metrics-brief",
+          "drop_counters": {
+            "event_count": 0,
+            "lost_event_count": 0,
+            "lost_write_count": 0
+          },
+          "duration_s": 8.606544499999998,
+          "event_counts": {
+            "execve": 9612,
+            "sched_process_exec": 9091,
+            "security_file_open": 585665,
+            "security_socket_connect": 17
+          },
+          "events_per_sec": 70223.88602069044,
+          "events_total": 604385,
+          "kind": "exec_storm",
+          "metric": "bogo-ops/s",
+          "name": "exec_storm",
+          "ops_per_sec": 0.11619065003382022,
+          "ops_total": 1.0,
+          "stderr_tail": "stress-ng exec workload timed out; fell back to rapid exec loop\nfallback=rapid_exec_loop",
+          "stdout_tail": "",
+          "system_cpu": {
+            "busy_pct": 79.80922098569158
+          }
+        },
+        {
+          "agent_cpu": {
+            "sys_pct": 0.0,
+            "total_pct": 0.1999953101499761,
+            "user_pct": 0.1999953101499761
+          },
+          "app_throughput": 2409.3536319799655,
+          "bpf": {
+            "programs": {
+              "20": {
+                "avg_ns_per_run": null,
+                "bytes_jited": 17850,
+                "bytes_xlated": 30384,
+                "id": 20,
+                "name": "sys_enter_submi",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "raw_tracepoint"
+              }
+            },
+            "summary": {
+              "active_programs": 0,
+              "avg_ns_per_run": null,
+              "total_events": 0,
+              "total_run_time_ns": 0
+            }
+          },
+          "command_template": "fio --name=test --rw=randread --bs=4k --size=100M --runtime={duration} --time_based",
+          "drop_counters": {
+            "event_count": 0,
+            "lost_event_count": 0,
+            "lost_write_count": 0
+          },
+          "duration_s": 12.017330962000003,
+          "event_counts": {
+            "execve": 2,
+            "sched_process_exec": 2,
+            "security_file_open": 509,
+            "security_socket_connect": 0
+          },
+          "events_per_sec": 42.68834748931831,
+          "events_total": 513,
+          "kind": "file_io",
+          "metric": "IOPS",
+          "name": "file_io",
+          "ops_per_sec": 2409.3536319799655,
+          "ops_total": 28954.0,
+          "stderr_tail": "",
+          "stdout_tail": "        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000\n      },\n      \"latency_us\" : {\n        \"2\" : 0.000000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.103613,\n        \"250\" : 85.615114,\n        \"500\" : 14.226014,\n        \"750\" : 0.044899,\n        \"1000\" : 0.010000\n      },\n      \"latency_ms\" : {\n        \"2\" : 0.010000,\n        \"4\" : 0.000000,\n        \"10\" : 0.000000,\n        \"20\" : 0.000000,\n        \"50\" : 0.000000,\n        \"100\" : 0.000000,\n        \"250\" : 0.000000,\n        \"500\" : 0.000000,\n        \"750\" : 0.000000,\n        \"1000\" : 0.000000,\n        \"2000\" : 0.000000,\n        \">=2000\" : 0.000000\n      },\n      \"latency_depth\" : 1,\n      \"latency_target\" : 0,\n      \"latency_percentile\" : 100.000000,\n      \"latency_window\" : 0\n    }\n  ]\n}",
+          "system_cpu": {
+            "busy_pct": 0.2635184989986272
+          }
+        },
+        {
+          "agent_cpu": {
+            "sys_pct": 5.5998615187845635,
+            "total_pct": 19.799510369988276,
+            "user_pct": 14.199648851203712
+          },
+          "app_throughput": 6761.763704555985,
+          "bpf": {
+            "programs": {
+              "20": {
+                "avg_ns_per_run": null,
+                "bytes_jited": 17850,
+                "bytes_xlated": 30384,
+                "id": 20,
+                "name": "sys_enter_submi",
+                "run_cnt_delta": 0,
+                "run_time_ns_delta": 0,
+                "type": "raw_tracepoint"
+              }
+            },
+            "summary": {
+              "active_programs": 0,
+              "avg_ns_per_run": null,
+              "total_events": 0,
+              "total_run_time_ns": 0
+            }
+          },
+          "command_template": "wrk -t2 -c10 -d{duration}s http://127.0.0.1:{port}/",
+          "drop_counters": {
+            "event_count": 0,
+            "lost_event_count": 0,
+            "lost_write_count": 0
+          },
+          "duration_s": 5.1320929740000025,
+          "event_counts": {
+            "execve": 2,
+            "sched_process_exec": 2,
+            "security_file_open": 118,
+            "security_socket_connect": 34715
+          },
+          "events_per_sec": 6788.0687619046985,
+          "events_total": 34837,
+          "kind": "network",
+          "metric": "req/s",
+          "name": "network",
+          "ops_per_sec": 6761.763704555985,
+          "ops_total": 34702.0,
+          "stderr_tail": "",
+          "stdout_tail": "Running 5s test @ http://127.0.0.1:46609/\n  2 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     3.39ms   24.02ms 416.88ms   98.54%\n    Req/Sec     3.42k     1.16k    5.79k    53.92%\n  34702 requests in 5.10s, 5.13MB read\nRequests/sec:   6804.14\nTransfer/sec:      1.01MB",
+          "system_cpu": {
+            "busy_pct": 8.219906422798806
+          }
+        }
+      ]
+    },
+    "comparison": {
+      "comparable": false,
+      "reason": "rejit did not apply successfully"
+    },
+    "config": {
+      "events": [
+        "execve",
+        "security_file_open",
+        "security_socket_connect",
+        "sched_process_exec"
+      ],
+      "measurement_duration_s": 60,
+      "smoke_duration_s": 10,
+      "target_programs": [
+        "sys_enter_submit"
+      ],
+      "workloads": [
+        {
+          "command": "stress-ng --exec 4 --exec-method execve --timeout {duration}s --metrics-brief",
+          "kind": "exec_storm",
+          "metric": "bogo-ops/s",
+          "name": "exec_storm",
+          "rate": 4
+        },
+        {
+          "command": "fio --name=test --rw=randread --bs=4k --size=100M --runtime={duration} --time_based",
+          "kind": "file_io",
+          "metric": "IOPS",
+          "name": "file_io"
+        },
+        {
+          "command": "wrk -t2 -c10 -d{duration}s http://127.0.0.1:{port}/",
+          "kind": "network",
+          "metric": "req/s",
+          "name": "network"
+        }
+      ]
+    },
+    "duration_s": 5,
+    "generated_at": "2026-03-27T20:02:50.135480+00:00",
+    "host": {
+      "git_sha": "unknown",
+      "hostname": "virtme-ng",
+      "kernel": "7.0.0-rc2+",
+      "platform": "Linux-7.0.0-rc2+-x86_64-with-glibc2.39",
+      "python": "3.12.3"
+    },
+    "limitations": [],
+    "map_capture": null,
+    "mode": "tracee_daemon",
+    "post_rejit": null,
+    "preflight": null,
+    "rejit_result": {
+      "applied": false,
+      "counts": {
+        "applied_sites": 0,
+        "total_sites": 0
+      },
+      "error": "",
+      "exit_code": 0,
+      "output": "{\"attempts\":[{\"attempt\":0,\"debug\":{\"pass_traces\":[{\"changed\":false,\"pass_name\":\"dce\"}]},\"disabled_passes\":[],\"result\":\"no_change\"}],\"changed\":false,\"passes\":[{\"changed\":false,\"diagnostics\":[],\"insn_delta\":0,\"insns_after\":3774,\"insns_before\":3774,\"pass_name\":\"dce\",\"sites_applied\":0,\"sites_skipped\":0,\"skip_reasons\":{}}],\"passes_applied\":[],\"prog_id\":20,\"program\":{\"final_insn_count\":3774,\"insn_delta\":0,\"orig_insn_count\":3774,\"prog_id\":20,\"prog_name\":\"sys_enter_submi\",\"prog_type\":17},\"status\":\"ok\",\"summary\":{\"applied\":false,\"final_disabled_passes\":[],\"passes_changed\":0,\"passes_executed\":1,\"program_changed\":false,\"total_sites_applied\":0,\"verifier_retries\":0},\"timings_ns\":{\"pipeline_run_ns\":2826449,\"rejit_syscall_ns\":0,\"total_ns\":43942756}}",
+      "per_program": {
+        "20": {
+          "applied": false,
+          "counts": {
+            "applied_sites": 0,
+            "total_sites": 0
+          },
+          "debug_result": {
+            "attempts": [
+              {
+                "attempt": 0,
+                "debug": {
+                  "pass_traces": [
+                    {
+                      "changed": false,
+                      "pass_name": "dce"
+                    }
+                  ]
+                },
+                "disabled_passes": [],
+                "result": "no_change"
+              }
+            ],
+            "changed": false,
+            "passes": [
+              {
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 3774,
+                "insns_before": 3774,
+                "pass_name": "dce",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {}
+              }
+            ],
+            "passes_applied": [],
+            "prog_id": 20,
+            "program": {
+              "final_insn_count": 3774,
+              "insn_delta": 0,
+              "orig_insn_count": 3774,
+              "prog_id": 20,
+              "prog_name": "sys_enter_submi",
+              "prog_type": 17
+            },
+            "status": "ok",
+            "summary": {
+              "applied": false,
+              "final_disabled_passes": [],
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_retries": 0
+            },
+            "timings_ns": {
+              "pipeline_run_ns": 2826449,
+              "rejit_syscall_ns": 0,
+              "total_ns": 43942756
+            }
+          },
+          "error": "",
+          "exit_code": 0,
+          "inlined_map_entries": [],
+          "kernel_prog_name": "sys_enter_submi",
+          "output": "{\"attempts\":[{\"attempt\":0,\"debug\":{\"pass_traces\":[{\"changed\":false,\"pass_name\":\"dce\"}]},\"disabled_passes\":[],\"result\":\"no_change\"}],\"changed\":false,\"passes\":[{\"changed\":false,\"diagnostics\":[],\"insn_delta\":0,\"insns_after\":3774,\"insns_before\":3774,\"pass_name\":\"dce\",\"sites_applied\":0,\"sites_skipped\":0,\"skip_reasons\":{}}],\"passes_applied\":[],\"prog_id\":20,\"program\":{\"final_insn_count\":3774,\"insn_delta\":0,\"orig_insn_count\":3774,\"prog_id\":20,\"prog_name\":\"sys_enter_submi\",\"prog_type\":17},\"status\":\"ok\",\"summary\":{\"applied\":false,\"final_disabled_passes\":[],\"passes_changed\":0,\"passes_executed\":1,\"program_changed\":false,\"total_sites_applied\":0,\"verifier_retries\":0},\"timings_ns\":{\"pipeline_run_ns\":2826449,\"rejit_syscall_ns\":0,\"total_ns\":43942756}}",
+          "summary": {
+            "applied": false,
+            "final_disabled_passes": [],
+            "passes_changed": 0,
+            "passes_executed": 1,
+            "program_changed": false,
+            "total_sites_applied": 0,
+            "verifier_retries": 0
+          }
+        }
+      }
+    },
+    "scan_results": {
+      "20": {
+        "counts": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 32,
+          "dce_sites": 98,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 130,
+          "wide_sites": 0
+        },
+        "enumerate_record": {
+          "counts": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 32,
+            "dce_sites": 98,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "map_inline_sites": 0,
+            "rotate_sites": 0,
+            "total_sites": 130,
+            "wide_sites": 0
+          },
+          "insn_count": 3774,
+          "name": "sys_enter_submi",
+          "prog_id": 20,
+          "prog_type": 17,
+          "site_summary": "const_prop=32 dce=98 bulk_memory=1",
+          "sites": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 32,
+            "dce_sites": 98,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "map_inline_sites": 0,
+            "rotate_sites": 0,
+            "total_sites": 130,
+            "wide_sites": 0
+          },
+          "total_sites": 130,
+          "type": 17
+        },
+        "error": "",
+        "sites": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 32,
+          "dce_sites": 98,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 130,
+          "wide_sites": 0
+        }
+      }
+    },
+    "selected_tracee_programs": [
+      {
+        "btf_id": 36,
+        "bytes_jited": 17850,
+        "bytes_memlock": 32768,
+        "bytes_xlated": 30384,
+        "gpl_compatible": true,
+        "id": 20,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          166,
+          127,
+          124,
+          136,
+          169,
+          126,
+          143,
+          211,
+          181,
+          178,
+          184,
+          187,
+          190,
+          202,
+          205,
+          139,
+          208,
+          158,
+          227,
+          130,
+          162,
+          213,
+          129,
+          226
+        ],
+        "name": "sys_enter_submit",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 59,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "3b3b077f95b0b5ae",
+        "type": "raw_tracepoint",
+        "uid": 0
+      }
+    ],
+    "setup": {
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "Tracee setup skipped: using an already available binary.",
+      "tracee_binary": "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/tracee/bin/tracee"
+    },
+    "smoke": false,
+    "status": "ok",
+    "tracee_binary": "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/tracee/bin/tracee",
+    "tracee_launch_command": [
+      [
+        "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/tracee/bin/tracee",
+        "--events",
+        "execve,security_file_open,security_socket_connect,sched_process_exec",
+        "--output",
+        "json",
+        "--signatures-dir",
+        "/home/yunwei37/workspace/bpf-benchmark/e2e/cases/tracee/bin/signatures"
+      ]
+    ],
+    "tracee_programs": [
+      {
+        "btf_id": 36,
+        "bytes_jited": 243,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 264,
+        "gpl_compatible": true,
+        "id": 17,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          124,
+          125,
+          226,
+          227
+        ],
+        "name": "tracepoint__raw_syscalls__sys_enter",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 20,
+            "pid": 370
+          },
+          {
+            "fd": 243,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "run_cnt": 21662,
+        "run_time_ns": 536748,
+        "tag": "42088bd94d9b148c",
+        "type": "raw_tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 2522,
+        "bytes_memlock": 8192,
+        "bytes_xlated": 4552,
+        "gpl_compatible": true,
+        "id": 19,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          126,
+          169,
+          127,
+          124,
+          128,
+          129,
+          226,
+          227
+        ],
+        "name": "sys_enter_init",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 56,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "04cfd32a108dadfd",
+        "type": "raw_tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 17850,
+        "bytes_memlock": 32768,
+        "bytes_xlated": 30384,
+        "gpl_compatible": true,
+        "id": 20,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          166,
+          127,
+          124,
+          136,
+          169,
+          126,
+          143,
+          211,
+          181,
+          178,
+          184,
+          187,
+          190,
+          202,
+          205,
+          139,
+          208,
+          158,
+          227,
+          130,
+          162,
+          213,
+          129,
+          226
+        ],
+        "name": "sys_enter_submit",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 59,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "3b3b077f95b0b5ae",
+        "type": "raw_tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 272,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 320,
+        "gpl_compatible": true,
+        "id": 21,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          124,
+          131,
+          226,
+          227
+        ],
+        "name": "tracepoint__raw_syscalls__sys_exit",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 62,
+            "pid": 370
+          },
+          {
+            "fd": 244,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "run_cnt": 21969,
+        "run_time_ns": 622942,
+        "tag": "805bc16b4b998d1f",
+        "type": "raw_tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 2101,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 3800,
+        "gpl_compatible": true,
+        "id": 22,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          126,
+          169,
+          127,
+          124,
+          132,
+          133,
+          226,
+          227
+        ],
+        "name": "sys_exit_init",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 65,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "52c42200436dc579",
+        "type": "raw_tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 11851,
+        "bytes_memlock": 20480,
+        "bytes_xlated": 19984,
+        "gpl_compatible": true,
+        "id": 23,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          166,
+          127,
+          124,
+          136,
+          169,
+          126,
+          143,
+          211,
+          181,
+          178,
+          184,
+          187,
+          190,
+          202,
+          205,
+          139,
+          208,
+          226,
+          162,
+          213,
+          133,
+          227
+        ],
+        "name": "sys_exit_submit",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 68,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "01b9ecdf551357c6",
+        "type": "raw_tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 22635,
+        "bytes_memlock": 36864,
+        "bytes_xlated": 33816,
+        "gpl_compatible": true,
+        "id": 24,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          166,
+          127,
+          126,
+          136,
+          211,
+          181,
+          178,
+          184,
+          187,
+          190,
+          202,
+          205,
+          139,
+          208,
+          162,
+          213,
+          226,
+          227
+        ],
+        "name": "syscall__execve_enter",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 71,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "37b343494060e016",
+        "type": "raw_tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 22643,
+        "bytes_memlock": 36864,
+        "bytes_xlated": 33824,
+        "gpl_compatible": true,
+        "id": 25,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          166,
+          127,
+          126,
+          136,
+          211,
+          181,
+          178,
+          184,
+          187,
+          190,
+          202,
+          205,
+          139,
+          208,
+          162,
+          213,
+          226,
+          227
+        ],
+        "name": "syscall__execve_exit",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 74,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "0c582255d78c69be",
+        "type": "raw_tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 22915,
+        "bytes_memlock": 36864,
+        "bytes_xlated": 34232,
+        "gpl_compatible": true,
+        "id": 26,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          166,
+          127,
+          126,
+          136,
+          211,
+          181,
+          178,
+          184,
+          187,
+          190,
+          202,
+          205,
+          139,
+          208,
+          162,
+          213,
+          226,
+          227
+        ],
+        "name": "syscall__execveat_enter",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 77,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "e7c2548bac6e345e",
+        "type": "raw_tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 22923,
+        "bytes_memlock": 36864,
+        "bytes_xlated": 34240,
+        "gpl_compatible": true,
+        "id": 27,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          166,
+          127,
+          126,
+          136,
+          211,
+          181,
+          178,
+          184,
+          187,
+          190,
+          202,
+          205,
+          139,
+          208,
+          162,
+          213,
+          226,
+          227
+        ],
+        "name": "syscall__execveat_exit",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 80,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "1bd62392a9f86638",
+        "type": "raw_tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 12470,
+        "bytes_memlock": 20480,
+        "bytes_xlated": 18912,
+        "gpl_compatible": true,
+        "id": 28,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          166,
+          127,
+          126,
+          136,
+          211,
+          181,
+          178,
+          184,
+          187,
+          190,
+          202,
+          205,
+          139,
+          208,
+          162,
+          213,
+          226,
+          227
+        ],
+        "name": "sys_dup_exit_tail",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 83,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "dd2245aa056ecd99",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 19841,
+        "bytes_memlock": 32768,
+        "bytes_xlated": 32408,
+        "gpl_compatible": true,
+        "id": 29,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          166,
+          127,
+          124,
+          136,
+          169,
+          126,
+          143,
+          211,
+          168,
+          212,
+          181,
+          178,
+          184,
+          228,
+          187,
+          190,
+          202,
+          205,
+          139,
+          208,
+          162,
+          213,
+          226,
+          227
+        ],
+        "name": "tracepoint__sched__sched_process_fork",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 86,
+            "pid": 370
+          },
+          {
+            "fd": 245,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "run_cnt": 1,
+        "run_time_ns": 2445,
+        "tag": "7ac3e9edaf1ec082",
+        "type": "raw_tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 59404,
+        "bytes_memlock": 114688,
+        "bytes_xlated": 108568,
+        "gpl_compatible": true,
+        "id": 30,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          166,
+          127,
+          126,
+          136,
+          140,
+          141,
+          222,
+          146,
+          228,
+          162,
+          213,
+          169,
+          168,
+          212,
+          142,
+          226,
+          227
+        ],
+        "name": "lkm_seeker_modtree_loop",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 89,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "2068b9f3d6ce01ae",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 62601,
+        "bytes_memlock": 122880,
+        "bytes_xlated": 113120,
+        "gpl_compatible": true,
+        "id": 31,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          169,
+          166,
+          127,
+          126,
+          136,
+          152,
+          222,
+          146,
+          228,
+          162,
+          213,
+          142,
+          168,
+          212,
+          226,
+          227
+        ],
+        "name": "lkm_seeker_kset_tail",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 92,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "ded3faa622eb5817",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 661,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 1048,
+        "gpl_compatible": true,
+        "id": 32,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          169,
+          166,
+          127,
+          126,
+          136,
+          152,
+          140,
+          142,
+          168,
+          212,
+          226,
+          227
+        ],
+        "name": "lkm_seeker_mod_tree_tail",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 122,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "0f5bb4e291b61133",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 56221,
+        "bytes_memlock": 114688,
+        "bytes_xlated": 102120,
+        "gpl_compatible": true,
+        "id": 33,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          169,
+          166,
+          127,
+          126,
+          136,
+          152,
+          222,
+          228,
+          162,
+          213,
+          142,
+          168,
+          212,
+          226,
+          227
+        ],
+        "name": "lkm_seeker_proc_tail",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 123,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "af1d1c89743dcd6c",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 3910,
+        "bytes_memlock": 8192,
+        "bytes_xlated": 6488,
+        "gpl_compatible": true,
+        "id": 34,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          169,
+          166,
+          127,
+          126,
+          136,
+          152,
+          145,
+          168,
+          212,
+          162,
+          213,
+          226,
+          227
+        ],
+        "name": "lkm_seeker_new_mod_only_tail",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 124,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "42d7533229d28fd3",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 21589,
+        "bytes_memlock": 36864,
+        "bytes_xlated": 35472,
+        "gpl_compatible": true,
+        "id": 35,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          166,
+          127,
+          124,
+          136,
+          169,
+          126,
+          143,
+          211,
+          158,
+          227,
+          181,
+          178,
+          184,
+          187,
+          190,
+          202,
+          205,
+          139,
+          208,
+          144,
+          226
+        ],
+        "name": "tracepoint__sched__sched_process_exec",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 125,
+            "pid": 370
+          },
+          {
+            "fd": 239,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "run_cnt": 1,
+        "run_time_ns": 9922,
+        "tag": "44628423ef7549cc",
+        "type": "raw_tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 24485,
+        "bytes_memlock": 40960,
+        "bytes_xlated": 38440,
+        "gpl_compatible": true,
+        "id": 36,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          166,
+          127,
+          126,
+          136,
+          158,
+          227,
+          162,
+          213,
+          226
+        ],
+        "name": "sched_process_exec_event_submit_tail",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 126,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "31e915a07e81ca2e",
+        "type": "raw_tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 8722,
+        "bytes_memlock": 16384,
+        "bytes_xlated": 14544,
+        "gpl_compatible": true,
+        "id": 37,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          166,
+          127,
+          124,
+          136,
+          169,
+          126,
+          143,
+          211,
+          181,
+          178,
+          184,
+          187,
+          190,
+          202,
+          205,
+          139,
+          208,
+          162,
+          213,
+          226,
+          227
+        ],
+        "name": "tracepoint__sched__sched_process_exit",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 127,
+            "pid": 370
+          },
+          {
+            "fd": 250,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "d3cc1afa9dcd9e4d",
+        "type": "raw_tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 257,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 440,
+        "gpl_compatible": true,
+        "id": 38,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          136,
+          127,
+          139,
+          226,
+          227
+        ],
+        "name": "tracepoint__sched__sched_process_free",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 128,
+            "pid": 370
+          },
+          {
+            "fd": 240,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "run_cnt": 1,
+        "run_time_ns": 1730,
+        "tag": "65d97fc0b559bae4",
+        "type": "raw_tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 9274,
+        "bytes_memlock": 16384,
+        "bytes_xlated": 14008,
+        "gpl_compatible": true,
+        "id": 39,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          151,
+          166,
+          127,
+          126,
+          136,
+          211,
+          181,
+          178,
+          184,
+          187,
+          190,
+          202,
+          205,
+          139,
+          208,
+          162,
+          213,
+          226,
+          227
+        ],
+        "name": "syscall__accept4",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 129,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "9e8d95088c3af1ad",
+        "type": "raw_tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 24178,
+        "bytes_memlock": 40960,
+        "bytes_xlated": 37176,
+        "gpl_compatible": true,
+        "id": 40,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          166,
+          127,
+          124,
+          136,
+          169,
+          126,
+          143,
+          211,
+          181,
+          178,
+          184,
+          187,
+          190,
+          202,
+          205,
+          139,
+          208,
+          158,
+          227,
+          160,
+          159,
+          193,
+          199,
+          196,
+          162,
+          213,
+          226
+        ],
+        "name": "trace_security_file_open",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 130,
+            "pid": 370
+          },
+          {
+            "fd": 238,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "run_cnt": 342,
+        "run_time_ns": 495554,
+        "tag": "7a873174133fd57d",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 10141,
+        "bytes_memlock": 16384,
+        "bytes_xlated": 15480,
+        "gpl_compatible": true,
+        "id": 41,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          166,
+          127,
+          124,
+          136,
+          169,
+          126,
+          143,
+          211,
+          181,
+          178,
+          184,
+          187,
+          190,
+          202,
+          205,
+          139,
+          208,
+          162,
+          213,
+          226,
+          227
+        ],
+        "name": "trace_security_socket_connect",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 131,
+            "pid": 370
+          },
+          {
+            "fd": 236,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "171401cd110c2ef4",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 958,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 1568,
+        "gpl_compatible": true,
+        "id": 42,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          166,
+          158,
+          214,
+          142,
+          226,
+          227
+        ],
+        "name": "send_bin",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 132,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "a40d527c33b17ea3",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 958,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 1568,
+        "gpl_compatible": true,
+        "id": 43,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          166,
+          158,
+          214,
+          144,
+          226,
+          227
+        ],
+        "name": "send_bin_tp",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 133,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "10da11746d3d68ac",
+        "type": "raw_tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 29024,
+        "bytes_memlock": 53248,
+        "bytes_xlated": 50928,
+        "gpl_compatible": true,
+        "id": 44,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          151,
+          166,
+          127,
+          124,
+          136,
+          169,
+          126,
+          143,
+          181,
+          178,
+          184,
+          187,
+          190,
+          202,
+          205,
+          139,
+          208,
+          171,
+          153,
+          158,
+          227,
+          168,
+          212,
+          155,
+          152,
+          172,
+          142,
+          226
+        ],
+        "name": "trace_ret_vfs_write_tail",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 134,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "a5fac3cec8e2286a",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 29480,
+        "bytes_memlock": 53248,
+        "bytes_xlated": 51616,
+        "gpl_compatible": true,
+        "id": 45,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          151,
+          166,
+          127,
+          124,
+          136,
+          169,
+          126,
+          143,
+          181,
+          178,
+          184,
+          187,
+          190,
+          202,
+          205,
+          139,
+          208,
+          171,
+          153,
+          158,
+          227,
+          168,
+          212,
+          155,
+          152,
+          172,
+          142,
+          226
+        ],
+        "name": "trace_ret_vfs_writev_tail",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 135,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "a592451c829db61f",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 29024,
+        "bytes_memlock": 53248,
+        "bytes_xlated": 50928,
+        "gpl_compatible": true,
+        "id": 49,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          151,
+          166,
+          127,
+          124,
+          136,
+          169,
+          126,
+          143,
+          181,
+          178,
+          184,
+          187,
+          190,
+          202,
+          205,
+          139,
+          208,
+          171,
+          153,
+          158,
+          227,
+          168,
+          212,
+          155,
+          152,
+          172,
+          142,
+          226
+        ],
+        "name": "trace_ret_kernel_write_tail",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 136,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "69cab7cc3ec06fa8",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 17015,
+        "bytes_memlock": 32768,
+        "bytes_xlated": 29688,
+        "gpl_compatible": true,
+        "id": 50,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          151,
+          166,
+          127,
+          124,
+          136,
+          169,
+          126,
+          143,
+          171,
+          154,
+          158,
+          227,
+          168,
+          212,
+          155,
+          152,
+          172,
+          142,
+          226
+        ],
+        "name": "trace_ret_vfs_read_tail",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 137,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "7029961e5f56b7fa",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 17854,
+        "bytes_memlock": 32768,
+        "bytes_xlated": 30776,
+        "gpl_compatible": true,
+        "id": 51,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          151,
+          166,
+          127,
+          124,
+          136,
+          169,
+          126,
+          143,
+          171,
+          154,
+          158,
+          227,
+          168,
+          212,
+          155,
+          152,
+          172,
+          142,
+          226
+        ],
+        "name": "trace_ret_vfs_readv_tail",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 138,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "8af85111146d7dad",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 630,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 1000,
+        "gpl_compatible": true,
+        "id": 52,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          166,
+          127,
+          126,
+          136,
+          144,
+          226,
+          227
+        ],
+        "name": "syscall__init_module",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 139,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "df6cfaca1eeae34a",
+        "type": "raw_tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 19502,
+        "bytes_memlock": 32768,
+        "bytes_xlated": 30440,
+        "gpl_compatible": true,
+        "id": 53,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          166,
+          127,
+          124,
+          136,
+          169,
+          126,
+          143,
+          211,
+          158,
+          227,
+          181,
+          178,
+          184,
+          187,
+          190,
+          202,
+          205,
+          139,
+          208,
+          162,
+          213,
+          226
+        ],
+        "name": "trace_load_elf_phdrs",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 140,
+            "pid": 370
+          },
+          {
+            "fd": 247,
+            "pid": 370
+          },
+          {
+            "fd": 249,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "run_cnt": 2,
+        "run_time_ns": 6249,
+        "tag": "abe0ae0e1ca4e8d6",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 12931,
+        "bytes_memlock": 20480,
+        "bytes_xlated": 20224,
+        "gpl_compatible": true,
+        "id": 54,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          166,
+          127,
+          126,
+          136,
+          158,
+          227,
+          162,
+          213,
+          226
+        ],
+        "name": "process_execute_failed_tail",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 141,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "c1bc0b67c1fe3a27",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 14899,
+        "bytes_memlock": 40960,
+        "bytes_xlated": 24096,
+        "gpl_compatible": true,
+        "id": 55,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          150,
+          124,
+          223,
+          166,
+          127,
+          136,
+          169,
+          126,
+          143,
+          211,
+          181,
+          178,
+          184,
+          187,
+          190,
+          202,
+          205,
+          139,
+          208,
+          228,
+          168,
+          212,
+          224,
+          161,
+          227,
+          162,
+          213,
+          226
+        ],
+        "name": "syscall_checker",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 142,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "fe6ea551be0a546f",
+        "type": "kprobe",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 948,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 1608,
+        "gpl_compatible": true,
+        "id": 56,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          127,
+          167,
+          143,
+          215,
+          226,
+          227
+        ],
+        "name": "cgroup_mkdir_signal",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 143,
+            "pid": 370
+          },
+          {
+            "fd": 241,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "3494307a71d3070d",
+        "type": "raw_tracepoint",
+        "uid": 0
+      },
+      {
+        "btf_id": 36,
+        "bytes_jited": 930,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 1568,
+        "gpl_compatible": true,
+        "id": 57,
+        "jited": true,
+        "loaded_at": 1774641670,
+        "map_ids": [
+          127,
+          167,
+          143,
+          215,
+          226,
+          227
+        ],
+        "name": "cgroup_rmdir_signal",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 144,
+            "pid": 370
+          },
+          {
+            "fd": 242,
+            "pid": 370
+          }
+        ],
+        "owner_pids": [
+          370
+        ],
+        "pids": [
+          {
+            "comm": "tracee",
+            "pid": 370
+          }
+        ],
+        "tag": "372a8a1e1facf515",
+        "type": "raw_tracepoint",
+        "uid": 0
+      }
+    ]
+  },
+  "output_hint_json": "e2e/results/tracee_authoritative_20260327.json",
+  "output_hint_md": "e2e/results/tracee-e2e-real.md",
+  "output_hint_report_md": "docs/tmp/bpftrace-real-e2e-report.md",
+  "run_type": "tracee",
+  "selected_rejit_passes": [
+    "dce"
+  ],
+  "smoke": false,
+  "started_at": "2026-03-27T20:01:05.525331+00:00",
+  "status": "completed",
+  "suite": "e2e"
+}

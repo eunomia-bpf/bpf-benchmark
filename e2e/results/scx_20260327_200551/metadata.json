@@ -1,0 +1,2860 @@
+{
+  "artifact_kind": "result_run",
+  "artifact_version": 1,
+  "case": "scx",
+  "completed_at": "2026-03-27T20:06:18.416370+00:00",
+  "details_dir": "details",
+  "generated_at": "2026-03-27T20:06:18.416372+00:00",
+  "last_updated_at": "2026-03-27T20:06:18.416370+00:00",
+  "optimization_summary": {
+    "baseline": {
+      "summary": {
+        "agent_cpu_total_pct": {
+          "count": 3,
+          "max": 0.3999872328075149,
+          "mean": 0.2666589255673941,
+          "median": 0.199997248437856,
+          "min": 0.1999922954568115
+        },
+        "context_switches_per_sec": {
+          "count": 3,
+          "max": 984427.0733159283,
+          "mean": 328412.4772938883,
+          "median": 416.39717753122295,
+          "min": 393.9613882052237
+        },
+        "latency_ms_p50": {
+          "count": 2,
+          "max": 155.5,
+          "mean": 77.865,
+          "median": 77.865,
+          "min": 0.23
+        },
+        "latency_ms_p95": {
+          "count": 2,
+          "max": 178.84999999999997,
+          "mean": 89.53999999999998,
+          "median": 89.53999999999998,
+          "min": 0.23
+        },
+        "system_cpu_busy_pct": {
+          "count": 3,
+          "max": 92.39371241692162,
+          "mean": 44.73882799744159,
+          "median": 20.91750841750841,
+          "min": 20.905263157894737
+        },
+        "throughput": {
+          "count": 3,
+          "max": 17697.76,
+          "mean": 9746.33422144105,
+          "median": 11535.26,
+          "min": 5.98266432315179
+        }
+      },
+      "workloads": [
+        {
+          "agent_cpu": {
+            "sys_pct": 0.199997248437856,
+            "total_pct": 0.199997248437856,
+            "user_pct": 0.0
+          },
+          "command": [
+            "/bin/hackbench",
+            "-g",
+            "4",
+            "-l",
+            "1000"
+          ],
+          "context_switches_per_sec": 984427.0733159283,
+          "context_switches_total": 4936398,
+          "duration_s": 5.014488257999972,
+          "iterations": 30,
+          "kind": "hackbench",
+          "latency_ms_p50": 155.5,
+          "latency_ms_p95": 178.84999999999997,
+          "metric": "runs/s",
+          "name": "hackbench",
+          "ops_per_sec": 5.98266432315179,
+          "ops_total": 30.0,
+          "processes_started": 4836,
+          "stderr_tail": "",
+          "stdout_tail": "Time: 0.161\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.158\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.151\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.151\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.158\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.151\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.175\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.155\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.112\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.171\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.151\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.175\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.161\nRunning in process mode with 4 groups using 40 file descriptors each (== 160 tasks)\nEach sender will pass 1000 messages of 100 bytes\nTime: 0.164",
+          "system_cpu": {
+            "busy_pct": 92.39371241692162
+          }
+        },
+        {
+          "agent_cpu": {
+            "sys_pct": 0.0,
+            "total_pct": 0.1999922954568115,
+            "user_pct": 0.1999922954568115
+          },
+          "command": [
+            "/bin/stress-ng",
+            "--cpu",
+            "4",
+            "--timeout",
+            "5s",
+            "--metrics-brief"
+          ],
+          "context_switches_per_sec": 416.39717753122295,
+          "context_switches_total": 2099,
+          "duration_s": 5.040860296999995,
+          "iterations": null,
+          "kind": "stress_ng_cpu",
+          "latency_ms_p50": null,
+          "latency_ms_p95": null,
+          "metric": "bogo-ops/s",
+          "name": "stress-ng-cpu",
+          "ops_per_sec": 11535.26,
+          "ops_total": 57684.0,
+          "processes_started": 7,
+          "stderr_tail": "",
+          "stdout_tail": "stress-ng: info:  [31554] setting to a 5 secs run per stressor\nstress-ng: info:  [31554] dispatching hogs: 4 cpu\nstress-ng: info:  [31554] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [31554] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [31554]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [31554] cpu               57684      5.00     19.98      0.00     11535.26        2886.81\nstress-ng: info:  [31554] skipped: 0\nstress-ng: info:  [31554] passed: 4: cpu (4)\nstress-ng: info:  [31554] failed: 0\nstress-ng: info:  [31554] metrics untrustworthy: 0\nstress-ng: info:  [31554] successful run completed in 5.00 secs",
+          "system_cpu": {
+            "busy_pct": 20.91750841750841
+          }
+        },
+        {
+          "agent_cpu": {
+            "sys_pct": 0.19999361640375746,
+            "total_pct": 0.3999872328075149,
+            "user_pct": 0.19999361640375746
+          },
+          "command": [
+            "/bin/sysbench",
+            "cpu",
+            "--threads=4",
+            "--time=5",
+            "run"
+          ],
+          "context_switches_per_sec": 393.9613882052237,
+          "context_switches_total": 1989,
+          "duration_s": 5.048718122000025,
+          "iterations": null,
+          "kind": "sysbench_cpu",
+          "latency_ms_p50": 0.23,
+          "latency_ms_p95": 0.23,
+          "metric": "events/s",
+          "name": "sysbench-cpu",
+          "ops_per_sec": 17697.76,
+          "ops_total": 88521.0,
+          "processes_started": 7,
+          "stderr_tail": "",
+          "stdout_tail": "sysbench 1.0.20 (using system LuaJIT 2.1.0-beta3)\nRunning the test with following options:\nNumber of threads: 4\nInitializing random number generator from current time\nPrime numbers limit: 10000\nInitializing worker threads...\nThreads started!\nCPU speed:\n    events per second: 17697.76\nGeneral statistics:\n    total time:                          5.0003s\n    total number of events:              88521\nLatency (ms):\n         min:                                    0.13\n         avg:                                    0.23\n         max:                                    1.67\n         95th percentile:                        0.23\n         sum:                                19990.96\nThreads fairness:\n    events (avg/stddev):           22130.2500/78.82\n    execution time (avg/stddev):   4.9977/0.00",
+          "system_cpu": {
+            "busy_pct": 20.905263157894737
+          }
+        }
+      ]
+    },
+    "comparison": {
+      "comparable": false,
+      "reason": "post-ReJIT measurements are unavailable"
+    },
+    "duration_s": 5,
+    "generated_at": "2026-03-27T20:06:18.405719+00:00",
+    "host": {
+      "git_sha": "unknown",
+      "hostname": "virtme-ng",
+      "kernel": "7.0.0-rc2+",
+      "platform": "Linux-7.0.0-rc2+-x86_64-with-glibc2.39",
+      "python": "3.12.3"
+    },
+    "limitations": [
+      "Raw `bpftool struct_ops register` returned success but did not leave sched_ext enabled, so the standalone bpftool path is not a usable end-to-end loader here.",
+      "bpftool does not expose per-program run_cnt/run_time_ns for these struct_ops programs on this kernel, so BPF runtime deltas are unavailable."
+    ],
+    "mode": "scx_rusty_loader",
+    "post_rejit": null,
+    "preflight": {
+      "available_workloads": [
+        "hackbench",
+        "stress-ng-cpu",
+        "sysbench-cpu"
+      ],
+      "bpftool_register_probe": {
+        "after_ops": [],
+        "after_state": "disabled",
+        "attempted": true,
+        "before_state": "disabled",
+        "bpftool": "/usr/local/sbin/bpftool",
+        "returncode": 0,
+        "stderr_tail": "libbpf: struct_ops rusty: member sub_attach not found in kernel, skipping it as it's set to zero\nlibbpf: struct_ops rusty: member sub_detach not found in kernel, skipping it as it's set to zero\nlibbpf: struct_ops rusty: member sub_cgroup_id not found in kernel, skipping it as it's set to zero\nRegistered sched_ext_ops rusty map id 956 link id 105",
+        "stdout_tail": "",
+        "struct_ops_program_count_after": 13,
+        "usable": false
+      },
+      "loader_error": null,
+      "runtime_counters_available": false,
+      "state_before": "disabled"
+    },
+    "rejit_result": {
+      "applied": false,
+      "counts": {
+        "applied_sites": 0,
+        "total_sites": 0
+      },
+      "error": "",
+      "exit_code": 0,
+      "output": "{\"attempts\":[{\"attempt\":0,\"debug\":{\"pass_traces\":[{\"changed\":false,\"pass_name\":\"dce\"}]},\"disabled_passes\":[],\"result\":\"no_change\"}],\"changed\":false,\"passes\":[{\"changed\":false,\"diagnostics\":[],\"insn_delta\":0,\"insns_after\":733,\"insns_before\":733,\"pass_name\":\"dce\",\"sites_applied\":0,\"sites_skipped\":0,\"skip_reasons\":{}}],\"passes_applied\":[],\"prog_id\":834,\"program\":{\"final_insn_count\":733,\"insn_delta\":0,\"orig_insn_count\":733,\"prog_id\":834,\"prog_name\":\"rusty_select_cp\",\"prog_type\":27},\"status\":\"ok\",\"summary\":{\"applied\":false,\"final_disabled_passes\":[],\"passes_changed\":0,\"passes_executed\":1,\"program_changed\":false,\"total_sites_applied\":0,\"verifier_retries\":0},\"timings_ns\":{\"pipeline_run_ns\":1677307,\"rejit_syscall_ns\":0,\"total_ns\":13641679}}\n{\"attempts\":[{\"attempt\":0,\"debug\":{\"pass_traces\":[{\"changed\":false,\"pass_name\":\"dce\"}]},\"disabled_passes\":[],\"result\":\"no_change\"}],\"changed\":false,\"passes\":[{\"changed\":false,\"diagnostics\":[],\"insn_delta\":0,\"insns_after\":2194,\"insns_before\":2194,\"pass_name\":\"dce\",\"sites_applied\":0,\"sites_skipped\":0,\"skip_reasons\":{}}],\"passes_applied\":[],\"prog_id\":836,\"program\":{\"final_insn_count\":2194,\"insn_delta\":0,\"orig_insn_count\":2194,\"prog_id\":836,\"prog_name\":\"rusty_enqueue\",\"prog_type\":27},\"status\":\"ok\",\"summary\":{\"applied\":false,\"final_disabled_passes\":[],\"passes_changed\":0,\"passes_executed\":1,\"program_changed\":false,\"total_sites_applied\":0,\"verifier_retries\":0},\"timings_ns\":{\"pipeline_run_ns\":279984,\"rejit_syscall_ns\":0,\"total_ns\":570942853}}\n{\"attempts\":[{\"attempt\":0,\"debug\":{\"pass_traces\":[{\"changed\":false,\"pass_name\":\"dce\"}]},\"disabled_passes\":[],\"result\":\"no_change\"}],\"changed\":false,\"passes\":[{\"changed\":false,\"diagnostics\":[],\"insn_delta\":0,\"insns_after\":273,\"insns_before\":273,\"pass_name\":\"dce\",\"sites_applied\":0,\"sites_skipped\":0,\"skip_reasons\":{}}],\"passes_applied\":[],\"prog_id\":837,\"program\":{\"final_insn_count\":273,\"insn_delta\":0,\"orig_insn_count\":273,\"prog_id\":837,\"prog_name\":\"rusty_dispatch\",\"prog_type\":27},\"status\":\"ok\",\"summary\":{\"applied\":false,\"final_disabled_passes\":[],\"passes_changed\":0,\"passes_executed\":1,\"program_changed\":false,\"total_sites_applied\":0,\"verifier_retries\":0},\"timings_ns\":{\"pipeline_run_ns\":46903,\"rejit_syscall_ns\":0,\"total_ns\":4722670}}\n{\"attempts\":[{\"attempt\":0,\"debug\":{\"pass_traces\":[{\"changed\":false,\"pass_name\":\"dce\"}]},\"disabled_passes\":[],\"result\":\"no_change\"}],\"changed\":false,\"passes\":[{\"changed\":false,\"diagnostics\":[],\"insn_delta\":0,\"insns_after\":611,\"insns_before\":611,\"pass_name\":\"dce\",\"sites_applied\":0,\"sites_skipped\":0,\"skip_reasons\":{}}],\"passes_applied\":[],\"prog_id\":838,\"program\":{\"final_insn_count\":611,\"insn_delta\":0,\"orig_insn_count\":611,\"prog_id\":838,\"prog_name\":\"rusty_runnable\",\"prog_type\":27},\"status\":\"ok\",\"summary\":{\"applied\":false,\"final_disabled_passes\":[],\"passes_changed\":0,\"passes_executed\":1,\"program_changed\":false,\"total_sites_applied\":0,\"verifier_retries\":0},\"timings_ns\":{\"pipeline_run_ns\":115758,\"rejit_syscall_ns\":0,\"total_ns\":15813710}}\n{\"attempts\":[{\"attempt\":0,\"debug\":{\"pass_traces\":[{\"changed\":false,\"pass_name\":\"dce\"}]},\"disabled_passes\":[],\"result\":\"no_change\"}],\"changed\":false,\"passes\":[{\"changed\":false,\"diagnostics\":[],\"insn_delta\":0,\"insns_after\":115,\"insns_before\":115,\"pass_name\":\"dce\",\"sites_applied\":0,\"sites_skipped\":0,\"skip_reasons\":{}}],\"passes_applied\":[],\"prog_id\":839,\"program\":{\"final_insn_count\":115,\"insn_delta\":0,\"orig_insn_count\":115,\"prog_id\":839,\"prog_name\":\"rusty_running\",\"prog_type\":27},\"status\":\"ok\",\"summary\":{\"applied\":false,\"final_disabled_passes\":[],\"passes_changed\":0,\"passes_executed\":1,\"program_changed\":false,\"total_sites_applied\":0,\"verifier_retries\":0},\"timings_ns\":{\"pipeline_run_ns\":30229,\"rejit_syscall_ns\":0,\"total_ns\":2853207}}\n{\"attempts\":[{\"attempt\":0,\"debug\":{\"pass_traces\":[{\"changed\":false,\"pass_name\":\"dce\"}]},\"disabled_passes\":[],\"result\":\"no_change\"}],\"changed\":false,\"passes\":[{\"changed\":false,\"diagnostics\":[],\"insn_delta\":0,\"insns_after\":223,\"insns_before\":223,\"pass_name\":\"dce\",\"sites_applied\":0,\"sites_skipped\":0,\"skip_reasons\":{}}],\"passes_applied\":[],\"prog_id\":840,\"program\":{\"final_insn_count\":223,\"ins\n...[truncated]",
+      "per_program": {
+        "834": {
+          "applied": false,
+          "counts": {
+            "applied_sites": 0,
+            "total_sites": 0
+          },
+          "debug_result": {
+            "attempts": [
+              {
+                "attempt": 0,
+                "debug": {
+                  "pass_traces": [
+                    {
+                      "changed": false,
+                      "pass_name": "dce"
+                    }
+                  ]
+                },
+                "disabled_passes": [],
+                "result": "no_change"
+              }
+            ],
+            "changed": false,
+            "passes": [
+              {
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 733,
+                "insns_before": 733,
+                "pass_name": "dce",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {}
+              }
+            ],
+            "passes_applied": [],
+            "prog_id": 834,
+            "program": {
+              "final_insn_count": 733,
+              "insn_delta": 0,
+              "orig_insn_count": 733,
+              "prog_id": 834,
+              "prog_name": "rusty_select_cp",
+              "prog_type": 27
+            },
+            "status": "ok",
+            "summary": {
+              "applied": false,
+              "final_disabled_passes": [],
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_retries": 0
+            },
+            "timings_ns": {
+              "pipeline_run_ns": 1677307,
+              "rejit_syscall_ns": 0,
+              "total_ns": 13641679
+            }
+          },
+          "error": "",
+          "exit_code": 0,
+          "inlined_map_entries": [],
+          "kernel_prog_name": "rusty_select_cp",
+          "output": "{\"attempts\":[{\"attempt\":0,\"debug\":{\"pass_traces\":[{\"changed\":false,\"pass_name\":\"dce\"}]},\"disabled_passes\":[],\"result\":\"no_change\"}],\"changed\":false,\"passes\":[{\"changed\":false,\"diagnostics\":[],\"insn_delta\":0,\"insns_after\":733,\"insns_before\":733,\"pass_name\":\"dce\",\"sites_applied\":0,\"sites_skipped\":0,\"skip_reasons\":{}}],\"passes_applied\":[],\"prog_id\":834,\"program\":{\"final_insn_count\":733,\"insn_delta\":0,\"orig_insn_count\":733,\"prog_id\":834,\"prog_name\":\"rusty_select_cp\",\"prog_type\":27},\"status\":\"ok\",\"summary\":{\"applied\":false,\"final_disabled_passes\":[],\"passes_changed\":0,\"passes_executed\":1,\"program_changed\":false,\"total_sites_applied\":0,\"verifier_retries\":0},\"timings_ns\":{\"pipeline_run_ns\":1677307,\"rejit_syscall_ns\":0,\"total_ns\":13641679}}",
+          "summary": {
+            "applied": false,
+            "final_disabled_passes": [],
+            "passes_changed": 0,
+            "passes_executed": 1,
+            "program_changed": false,
+            "total_sites_applied": 0,
+            "verifier_retries": 0
+          }
+        },
+        "836": {
+          "applied": false,
+          "counts": {
+            "applied_sites": 0,
+            "total_sites": 0
+          },
+          "debug_result": {
+            "attempts": [
+              {
+                "attempt": 0,
+                "debug": {
+                  "pass_traces": [
+                    {
+                      "changed": false,
+                      "pass_name": "dce"
+                    }
+                  ]
+                },
+                "disabled_passes": [],
+                "result": "no_change"
+              }
+            ],
+            "changed": false,
+            "passes": [
+              {
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 2194,
+                "insns_before": 2194,
+                "pass_name": "dce",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {}
+              }
+            ],
+            "passes_applied": [],
+            "prog_id": 836,
+            "program": {
+              "final_insn_count": 2194,
+              "insn_delta": 0,
+              "orig_insn_count": 2194,
+              "prog_id": 836,
+              "prog_name": "rusty_enqueue",
+              "prog_type": 27
+            },
+            "status": "ok",
+            "summary": {
+              "applied": false,
+              "final_disabled_passes": [],
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_retries": 0
+            },
+            "timings_ns": {
+              "pipeline_run_ns": 279984,
+              "rejit_syscall_ns": 0,
+              "total_ns": 570942853
+            }
+          },
+          "error": "",
+          "exit_code": 0,
+          "inlined_map_entries": [],
+          "kernel_prog_name": "rusty_enqueue",
+          "output": "{\"attempts\":[{\"attempt\":0,\"debug\":{\"pass_traces\":[{\"changed\":false,\"pass_name\":\"dce\"}]},\"disabled_passes\":[],\"result\":\"no_change\"}],\"changed\":false,\"passes\":[{\"changed\":false,\"diagnostics\":[],\"insn_delta\":0,\"insns_after\":2194,\"insns_before\":2194,\"pass_name\":\"dce\",\"sites_applied\":0,\"sites_skipped\":0,\"skip_reasons\":{}}],\"passes_applied\":[],\"prog_id\":836,\"program\":{\"final_insn_count\":2194,\"insn_delta\":0,\"orig_insn_count\":2194,\"prog_id\":836,\"prog_name\":\"rusty_enqueue\",\"prog_type\":27},\"status\":\"ok\",\"summary\":{\"applied\":false,\"final_disabled_passes\":[],\"passes_changed\":0,\"passes_executed\":1,\"program_changed\":false,\"total_sites_applied\":0,\"verifier_retries\":0},\"timings_ns\":{\"pipeline_run_ns\":279984,\"rejit_syscall_ns\":0,\"total_ns\":570942853}}",
+          "summary": {
+            "applied": false,
+            "final_disabled_passes": [],
+            "passes_changed": 0,
+            "passes_executed": 1,
+            "program_changed": false,
+            "total_sites_applied": 0,
+            "verifier_retries": 0
+          }
+        },
+        "837": {
+          "applied": false,
+          "counts": {
+            "applied_sites": 0,
+            "total_sites": 0
+          },
+          "debug_result": {
+            "attempts": [
+              {
+                "attempt": 0,
+                "debug": {
+                  "pass_traces": [
+                    {
+                      "changed": false,
+                      "pass_name": "dce"
+                    }
+                  ]
+                },
+                "disabled_passes": [],
+                "result": "no_change"
+              }
+            ],
+            "changed": false,
+            "passes": [
+              {
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 273,
+                "insns_before": 273,
+                "pass_name": "dce",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {}
+              }
+            ],
+            "passes_applied": [],
+            "prog_id": 837,
+            "program": {
+              "final_insn_count": 273,
+              "insn_delta": 0,
+              "orig_insn_count": 273,
+              "prog_id": 837,
+              "prog_name": "rusty_dispatch",
+              "prog_type": 27
+            },
+            "status": "ok",
+            "summary": {
+              "applied": false,
+              "final_disabled_passes": [],
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_retries": 0
+            },
+            "timings_ns": {
+              "pipeline_run_ns": 46903,
+              "rejit_syscall_ns": 0,
+              "total_ns": 4722670
+            }
+          },
+          "error": "",
+          "exit_code": 0,
+          "inlined_map_entries": [],
+          "kernel_prog_name": "rusty_dispatch",
+          "output": "{\"attempts\":[{\"attempt\":0,\"debug\":{\"pass_traces\":[{\"changed\":false,\"pass_name\":\"dce\"}]},\"disabled_passes\":[],\"result\":\"no_change\"}],\"changed\":false,\"passes\":[{\"changed\":false,\"diagnostics\":[],\"insn_delta\":0,\"insns_after\":273,\"insns_before\":273,\"pass_name\":\"dce\",\"sites_applied\":0,\"sites_skipped\":0,\"skip_reasons\":{}}],\"passes_applied\":[],\"prog_id\":837,\"program\":{\"final_insn_count\":273,\"insn_delta\":0,\"orig_insn_count\":273,\"prog_id\":837,\"prog_name\":\"rusty_dispatch\",\"prog_type\":27},\"status\":\"ok\",\"summary\":{\"applied\":false,\"final_disabled_passes\":[],\"passes_changed\":0,\"passes_executed\":1,\"program_changed\":false,\"total_sites_applied\":0,\"verifier_retries\":0},\"timings_ns\":{\"pipeline_run_ns\":46903,\"rejit_syscall_ns\":0,\"total_ns\":4722670}}",
+          "summary": {
+            "applied": false,
+            "final_disabled_passes": [],
+            "passes_changed": 0,
+            "passes_executed": 1,
+            "program_changed": false,
+            "total_sites_applied": 0,
+            "verifier_retries": 0
+          }
+        },
+        "838": {
+          "applied": false,
+          "counts": {
+            "applied_sites": 0,
+            "total_sites": 0
+          },
+          "debug_result": {
+            "attempts": [
+              {
+                "attempt": 0,
+                "debug": {
+                  "pass_traces": [
+                    {
+                      "changed": false,
+                      "pass_name": "dce"
+                    }
+                  ]
+                },
+                "disabled_passes": [],
+                "result": "no_change"
+              }
+            ],
+            "changed": false,
+            "passes": [
+              {
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 611,
+                "insns_before": 611,
+                "pass_name": "dce",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {}
+              }
+            ],
+            "passes_applied": [],
+            "prog_id": 838,
+            "program": {
+              "final_insn_count": 611,
+              "insn_delta": 0,
+              "orig_insn_count": 611,
+              "prog_id": 838,
+              "prog_name": "rusty_runnable",
+              "prog_type": 27
+            },
+            "status": "ok",
+            "summary": {
+              "applied": false,
+              "final_disabled_passes": [],
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_retries": 0
+            },
+            "timings_ns": {
+              "pipeline_run_ns": 115758,
+              "rejit_syscall_ns": 0,
+              "total_ns": 15813710
+            }
+          },
+          "error": "",
+          "exit_code": 0,
+          "inlined_map_entries": [],
+          "kernel_prog_name": "rusty_runnable",
+          "output": "{\"attempts\":[{\"attempt\":0,\"debug\":{\"pass_traces\":[{\"changed\":false,\"pass_name\":\"dce\"}]},\"disabled_passes\":[],\"result\":\"no_change\"}],\"changed\":false,\"passes\":[{\"changed\":false,\"diagnostics\":[],\"insn_delta\":0,\"insns_after\":611,\"insns_before\":611,\"pass_name\":\"dce\",\"sites_applied\":0,\"sites_skipped\":0,\"skip_reasons\":{}}],\"passes_applied\":[],\"prog_id\":838,\"program\":{\"final_insn_count\":611,\"insn_delta\":0,\"orig_insn_count\":611,\"prog_id\":838,\"prog_name\":\"rusty_runnable\",\"prog_type\":27},\"status\":\"ok\",\"summary\":{\"applied\":false,\"final_disabled_passes\":[],\"passes_changed\":0,\"passes_executed\":1,\"program_changed\":false,\"total_sites_applied\":0,\"verifier_retries\":0},\"timings_ns\":{\"pipeline_run_ns\":115758,\"rejit_syscall_ns\":0,\"total_ns\":15813710}}",
+          "summary": {
+            "applied": false,
+            "final_disabled_passes": [],
+            "passes_changed": 0,
+            "passes_executed": 1,
+            "program_changed": false,
+            "total_sites_applied": 0,
+            "verifier_retries": 0
+          }
+        },
+        "839": {
+          "applied": false,
+          "counts": {
+            "applied_sites": 0,
+            "total_sites": 0
+          },
+          "debug_result": {
+            "attempts": [
+              {
+                "attempt": 0,
+                "debug": {
+                  "pass_traces": [
+                    {
+                      "changed": false,
+                      "pass_name": "dce"
+                    }
+                  ]
+                },
+                "disabled_passes": [],
+                "result": "no_change"
+              }
+            ],
+            "changed": false,
+            "passes": [
+              {
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 115,
+                "insns_before": 115,
+                "pass_name": "dce",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {}
+              }
+            ],
+            "passes_applied": [],
+            "prog_id": 839,
+            "program": {
+              "final_insn_count": 115,
+              "insn_delta": 0,
+              "orig_insn_count": 115,
+              "prog_id": 839,
+              "prog_name": "rusty_running",
+              "prog_type": 27
+            },
+            "status": "ok",
+            "summary": {
+              "applied": false,
+              "final_disabled_passes": [],
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_retries": 0
+            },
+            "timings_ns": {
+              "pipeline_run_ns": 30229,
+              "rejit_syscall_ns": 0,
+              "total_ns": 2853207
+            }
+          },
+          "error": "",
+          "exit_code": 0,
+          "inlined_map_entries": [],
+          "kernel_prog_name": "rusty_running",
+          "output": "{\"attempts\":[{\"attempt\":0,\"debug\":{\"pass_traces\":[{\"changed\":false,\"pass_name\":\"dce\"}]},\"disabled_passes\":[],\"result\":\"no_change\"}],\"changed\":false,\"passes\":[{\"changed\":false,\"diagnostics\":[],\"insn_delta\":0,\"insns_after\":115,\"insns_before\":115,\"pass_name\":\"dce\",\"sites_applied\":0,\"sites_skipped\":0,\"skip_reasons\":{}}],\"passes_applied\":[],\"prog_id\":839,\"program\":{\"final_insn_count\":115,\"insn_delta\":0,\"orig_insn_count\":115,\"prog_id\":839,\"prog_name\":\"rusty_running\",\"prog_type\":27},\"status\":\"ok\",\"summary\":{\"applied\":false,\"final_disabled_passes\":[],\"passes_changed\":0,\"passes_executed\":1,\"program_changed\":false,\"total_sites_applied\":0,\"verifier_retries\":0},\"timings_ns\":{\"pipeline_run_ns\":30229,\"rejit_syscall_ns\":0,\"total_ns\":2853207}}",
+          "summary": {
+            "applied": false,
+            "final_disabled_passes": [],
+            "passes_changed": 0,
+            "passes_executed": 1,
+            "program_changed": false,
+            "total_sites_applied": 0,
+            "verifier_retries": 0
+          }
+        },
+        "840": {
+          "applied": false,
+          "counts": {
+            "applied_sites": 0,
+            "total_sites": 0
+          },
+          "debug_result": {
+            "attempts": [
+              {
+                "attempt": 0,
+                "debug": {
+                  "pass_traces": [
+                    {
+                      "changed": false,
+                      "pass_name": "dce"
+                    }
+                  ]
+                },
+                "disabled_passes": [],
+                "result": "no_change"
+              }
+            ],
+            "changed": false,
+            "passes": [
+              {
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 223,
+                "insns_before": 223,
+                "pass_name": "dce",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {}
+              }
+            ],
+            "passes_applied": [],
+            "prog_id": 840,
+            "program": {
+              "final_insn_count": 223,
+              "insn_delta": 0,
+              "orig_insn_count": 223,
+              "prog_id": 840,
+              "prog_name": "rusty_stopping",
+              "prog_type": 27
+            },
+            "status": "ok",
+            "summary": {
+              "applied": false,
+              "final_disabled_passes": [],
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_retries": 0
+            },
+            "timings_ns": {
+              "pipeline_run_ns": 277340,
+              "rejit_syscall_ns": 0,
+              "total_ns": 346537
+            }
+          },
+          "error": "",
+          "exit_code": 0,
+          "inlined_map_entries": [],
+          "kernel_prog_name": "rusty_stopping",
+          "output": "{\"attempts\":[{\"attempt\":0,\"debug\":{\"pass_traces\":[{\"changed\":false,\"pass_name\":\"dce\"}]},\"disabled_passes\":[],\"result\":\"no_change\"}],\"changed\":false,\"passes\":[{\"changed\":false,\"diagnostics\":[],\"insn_delta\":0,\"insns_after\":223,\"insns_before\":223,\"pass_name\":\"dce\",\"sites_applied\":0,\"sites_skipped\":0,\"skip_reasons\":{}}],\"passes_applied\":[],\"prog_id\":840,\"program\":{\"final_insn_count\":223,\"insn_delta\":0,\"orig_insn_count\":223,\"prog_id\":840,\"prog_name\":\"rusty_stopping\",\"prog_type\":27},\"status\":\"ok\",\"summary\":{\"applied\":false,\"final_disabled_passes\":[],\"passes_changed\":0,\"passes_executed\":1,\"program_changed\":false,\"total_sites_applied\":0,\"verifier_retries\":0},\"timings_ns\":{\"pipeline_run_ns\":277340,\"rejit_syscall_ns\":0,\"total_ns\":346537}}",
+          "summary": {
+            "applied": false,
+            "final_disabled_passes": [],
+            "passes_changed": 0,
+            "passes_executed": 1,
+            "program_changed": false,
+            "total_sites_applied": 0,
+            "verifier_retries": 0
+          }
+        },
+        "841": {
+          "applied": false,
+          "counts": {
+            "applied_sites": 0,
+            "total_sites": 0
+          },
+          "debug_result": {
+            "attempts": [
+              {
+                "attempt": 0,
+                "debug": {
+                  "pass_traces": [
+                    {
+                      "changed": false,
+                      "pass_name": "dce"
+                    }
+                  ]
+                },
+                "disabled_passes": [],
+                "result": "no_change"
+              }
+            ],
+            "changed": false,
+            "passes": [
+              {
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 603,
+                "insns_before": 603,
+                "pass_name": "dce",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {}
+              }
+            ],
+            "passes_applied": [],
+            "prog_id": 841,
+            "program": {
+              "final_insn_count": 603,
+              "insn_delta": 0,
+              "orig_insn_count": 603,
+              "prog_id": 841,
+              "prog_name": "rusty_quiescent",
+              "prog_type": 27
+            },
+            "status": "ok",
+            "summary": {
+              "applied": false,
+              "final_disabled_passes": [],
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_retries": 0
+            },
+            "timings_ns": {
+              "pipeline_run_ns": 104796,
+              "rejit_syscall_ns": 0,
+              "total_ns": 8788007
+            }
+          },
+          "error": "",
+          "exit_code": 0,
+          "inlined_map_entries": [],
+          "kernel_prog_name": "rusty_quiescent",
+          "output": "{\"attempts\":[{\"attempt\":0,\"debug\":{\"pass_traces\":[{\"changed\":false,\"pass_name\":\"dce\"}]},\"disabled_passes\":[],\"result\":\"no_change\"}],\"changed\":false,\"passes\":[{\"changed\":false,\"diagnostics\":[],\"insn_delta\":0,\"insns_after\":603,\"insns_before\":603,\"pass_name\":\"dce\",\"sites_applied\":0,\"sites_skipped\":0,\"skip_reasons\":{}}],\"passes_applied\":[],\"prog_id\":841,\"program\":{\"final_insn_count\":603,\"insn_delta\":0,\"orig_insn_count\":603,\"prog_id\":841,\"prog_name\":\"rusty_quiescent\",\"prog_type\":27},\"status\":\"ok\",\"summary\":{\"applied\":false,\"final_disabled_passes\":[],\"passes_changed\":0,\"passes_executed\":1,\"program_changed\":false,\"total_sites_applied\":0,\"verifier_retries\":0},\"timings_ns\":{\"pipeline_run_ns\":104796,\"rejit_syscall_ns\":0,\"total_ns\":8788007}}",
+          "summary": {
+            "applied": false,
+            "final_disabled_passes": [],
+            "passes_changed": 0,
+            "passes_executed": 1,
+            "program_changed": false,
+            "total_sites_applied": 0,
+            "verifier_retries": 0
+          }
+        },
+        "842": {
+          "applied": false,
+          "counts": {
+            "applied_sites": 0,
+            "total_sites": 0
+          },
+          "debug_result": {
+            "attempts": [
+              {
+                "attempt": 0,
+                "debug": {
+                  "pass_traces": [
+                    {
+                      "changed": false,
+                      "pass_name": "dce"
+                    }
+                  ]
+                },
+                "disabled_passes": [],
+                "result": "no_change"
+              }
+            ],
+            "changed": false,
+            "passes": [
+              {
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 68,
+                "insns_before": 68,
+                "pass_name": "dce",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {}
+              }
+            ],
+            "passes_applied": [],
+            "prog_id": 842,
+            "program": {
+              "final_insn_count": 68,
+              "insn_delta": 0,
+              "orig_insn_count": 68,
+              "prog_id": 842,
+              "prog_name": "rusty_set_weigh",
+              "prog_type": 27
+            },
+            "status": "ok",
+            "summary": {
+              "applied": false,
+              "final_disabled_passes": [],
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_retries": 0
+            },
+            "timings_ns": {
+              "pipeline_run_ns": 24316,
+              "rejit_syscall_ns": 0,
+              "total_ns": 47767
+            }
+          },
+          "error": "",
+          "exit_code": 0,
+          "inlined_map_entries": [],
+          "kernel_prog_name": "rusty_set_weigh",
+          "output": "{\"attempts\":[{\"attempt\":0,\"debug\":{\"pass_traces\":[{\"changed\":false,\"pass_name\":\"dce\"}]},\"disabled_passes\":[],\"result\":\"no_change\"}],\"changed\":false,\"passes\":[{\"changed\":false,\"diagnostics\":[],\"insn_delta\":0,\"insns_after\":68,\"insns_before\":68,\"pass_name\":\"dce\",\"sites_applied\":0,\"sites_skipped\":0,\"skip_reasons\":{}}],\"passes_applied\":[],\"prog_id\":842,\"program\":{\"final_insn_count\":68,\"insn_delta\":0,\"orig_insn_count\":68,\"prog_id\":842,\"prog_name\":\"rusty_set_weigh\",\"prog_type\":27},\"status\":\"ok\",\"summary\":{\"applied\":false,\"final_disabled_passes\":[],\"passes_changed\":0,\"passes_executed\":1,\"program_changed\":false,\"total_sites_applied\":0,\"verifier_retries\":0},\"timings_ns\":{\"pipeline_run_ns\":24316,\"rejit_syscall_ns\":0,\"total_ns\":47767}}",
+          "summary": {
+            "applied": false,
+            "final_disabled_passes": [],
+            "passes_changed": 0,
+            "passes_executed": 1,
+            "program_changed": false,
+            "total_sites_applied": 0,
+            "verifier_retries": 0
+          }
+        },
+        "843": {
+          "applied": false,
+          "counts": {
+            "applied_sites": 0,
+            "total_sites": 0
+          },
+          "debug_result": {
+            "attempts": [
+              {
+                "attempt": 0,
+                "debug": {
+                  "pass_traces": [
+                    {
+                      "changed": false,
+                      "pass_name": "dce"
+                    }
+                  ]
+                },
+                "disabled_passes": [],
+                "result": "no_change"
+              }
+            ],
+            "changed": false,
+            "passes": [
+              {
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 2093,
+                "insns_before": 2093,
+                "pass_name": "dce",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {}
+              }
+            ],
+            "passes_applied": [],
+            "prog_id": 843,
+            "program": {
+              "final_insn_count": 2093,
+              "insn_delta": 0,
+              "orig_insn_count": 2093,
+              "prog_id": 843,
+              "prog_name": "rusty_set_cpuma",
+              "prog_type": 27
+            },
+            "status": "ok",
+            "summary": {
+              "applied": false,
+              "final_disabled_passes": [],
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_retries": 0
+            },
+            "timings_ns": {
+              "pipeline_run_ns": 342164,
+              "rejit_syscall_ns": 0,
+              "total_ns": 40081092
+            }
+          },
+          "error": "",
+          "exit_code": 0,
+          "inlined_map_entries": [],
+          "kernel_prog_name": "rusty_set_cpuma",
+          "output": "{\"attempts\":[{\"attempt\":0,\"debug\":{\"pass_traces\":[{\"changed\":false,\"pass_name\":\"dce\"}]},\"disabled_passes\":[],\"result\":\"no_change\"}],\"changed\":false,\"passes\":[{\"changed\":false,\"diagnostics\":[],\"insn_delta\":0,\"insns_after\":2093,\"insns_before\":2093,\"pass_name\":\"dce\",\"sites_applied\":0,\"sites_skipped\":0,\"skip_reasons\":{}}],\"passes_applied\":[],\"prog_id\":843,\"program\":{\"final_insn_count\":2093,\"insn_delta\":0,\"orig_insn_count\":2093,\"prog_id\":843,\"prog_name\":\"rusty_set_cpuma\",\"prog_type\":27},\"status\":\"ok\",\"summary\":{\"applied\":false,\"final_disabled_passes\":[],\"passes_changed\":0,\"passes_executed\":1,\"program_changed\":false,\"total_sites_applied\":0,\"verifier_retries\":0},\"timings_ns\":{\"pipeline_run_ns\":342164,\"rejit_syscall_ns\":0,\"total_ns\":40081092}}",
+          "summary": {
+            "applied": false,
+            "final_disabled_passes": [],
+            "passes_changed": 0,
+            "passes_executed": 1,
+            "program_changed": false,
+            "total_sites_applied": 0,
+            "verifier_retries": 0
+          }
+        },
+        "844": {
+          "applied": false,
+          "counts": {
+            "applied_sites": 0,
+            "total_sites": 0
+          },
+          "debug_result": {
+            "attempts": [
+              {
+                "attempt": 0,
+                "debug": {
+                  "pass_traces": [
+                    {
+                      "changed": false,
+                      "pass_name": "dce"
+                    }
+                  ]
+                },
+                "disabled_passes": [],
+                "result": "no_change"
+              }
+            ],
+            "changed": false,
+            "passes": [
+              {
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 2847,
+                "insns_before": 2847,
+                "pass_name": "dce",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {}
+              }
+            ],
+            "passes_applied": [],
+            "prog_id": 844,
+            "program": {
+              "final_insn_count": 2847,
+              "insn_delta": 0,
+              "orig_insn_count": 2847,
+              "prog_id": 844,
+              "prog_name": "rusty_init_task",
+              "prog_type": 27
+            },
+            "status": "ok",
+            "summary": {
+              "applied": false,
+              "final_disabled_passes": [],
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_retries": 0
+            },
+            "timings_ns": {
+              "pipeline_run_ns": 351257,
+              "rejit_syscall_ns": 0,
+              "total_ns": 512857681
+            }
+          },
+          "error": "",
+          "exit_code": 0,
+          "inlined_map_entries": [],
+          "kernel_prog_name": "rusty_init_task",
+          "output": "{\"attempts\":[{\"attempt\":0,\"debug\":{\"pass_traces\":[{\"changed\":false,\"pass_name\":\"dce\"}]},\"disabled_passes\":[],\"result\":\"no_change\"}],\"changed\":false,\"passes\":[{\"changed\":false,\"diagnostics\":[],\"insn_delta\":0,\"insns_after\":2847,\"insns_before\":2847,\"pass_name\":\"dce\",\"sites_applied\":0,\"sites_skipped\":0,\"skip_reasons\":{}}],\"passes_applied\":[],\"prog_id\":844,\"program\":{\"final_insn_count\":2847,\"insn_delta\":0,\"orig_insn_count\":2847,\"prog_id\":844,\"prog_name\":\"rusty_init_task\",\"prog_type\":27},\"status\":\"ok\",\"summary\":{\"applied\":false,\"final_disabled_passes\":[],\"passes_changed\":0,\"passes_executed\":1,\"program_changed\":false,\"total_sites_applied\":0,\"verifier_retries\":0},\"timings_ns\":{\"pipeline_run_ns\":351257,\"rejit_syscall_ns\":0,\"total_ns\":512857681}}",
+          "summary": {
+            "applied": false,
+            "final_disabled_passes": [],
+            "passes_changed": 0,
+            "passes_executed": 1,
+            "program_changed": false,
+            "total_sites_applied": 0,
+            "verifier_retries": 0
+          }
+        },
+        "845": {
+          "applied": false,
+          "counts": {
+            "applied_sites": 0,
+            "total_sites": 0
+          },
+          "debug_result": {
+            "attempts": [
+              {
+                "attempt": 0,
+                "debug": {
+                  "pass_traces": [
+                    {
+                      "changed": false,
+                      "pass_name": "dce"
+                    }
+                  ]
+                },
+                "disabled_passes": [],
+                "result": "no_change"
+              }
+            ],
+            "changed": false,
+            "passes": [
+              {
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 276,
+                "insns_before": 276,
+                "pass_name": "dce",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {}
+              }
+            ],
+            "passes_applied": [],
+            "prog_id": 845,
+            "program": {
+              "final_insn_count": 276,
+              "insn_delta": 0,
+              "orig_insn_count": 276,
+              "prog_id": 845,
+              "prog_name": "rusty_exit_task",
+              "prog_type": 27
+            },
+            "status": "ok",
+            "summary": {
+              "applied": false,
+              "final_disabled_passes": [],
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_retries": 0
+            },
+            "timings_ns": {
+              "pipeline_run_ns": 43447,
+              "rejit_syscall_ns": 0,
+              "total_ns": 4347106
+            }
+          },
+          "error": "",
+          "exit_code": 0,
+          "inlined_map_entries": [],
+          "kernel_prog_name": "rusty_exit_task",
+          "output": "{\"attempts\":[{\"attempt\":0,\"debug\":{\"pass_traces\":[{\"changed\":false,\"pass_name\":\"dce\"}]},\"disabled_passes\":[],\"result\":\"no_change\"}],\"changed\":false,\"passes\":[{\"changed\":false,\"diagnostics\":[],\"insn_delta\":0,\"insns_after\":276,\"insns_before\":276,\"pass_name\":\"dce\",\"sites_applied\":0,\"sites_skipped\":0,\"skip_reasons\":{}}],\"passes_applied\":[],\"prog_id\":845,\"program\":{\"final_insn_count\":276,\"insn_delta\":0,\"orig_insn_count\":276,\"prog_id\":845,\"prog_name\":\"rusty_exit_task\",\"prog_type\":27},\"status\":\"ok\",\"summary\":{\"applied\":false,\"final_disabled_passes\":[],\"passes_changed\":0,\"passes_executed\":1,\"program_changed\":false,\"total_sites_applied\":0,\"verifier_retries\":0},\"timings_ns\":{\"pipeline_run_ns\":43447,\"rejit_syscall_ns\":0,\"total_ns\":4347106}}",
+          "summary": {
+            "applied": false,
+            "final_disabled_passes": [],
+            "passes_changed": 0,
+            "passes_executed": 1,
+            "program_changed": false,
+            "total_sites_applied": 0,
+            "verifier_retries": 0
+          }
+        },
+        "846": {
+          "applied": false,
+          "counts": {
+            "applied_sites": 0,
+            "total_sites": 0
+          },
+          "debug_result": {
+            "attempts": [
+              {
+                "attempt": 0,
+                "debug": {
+                  "pass_traces": [
+                    {
+                      "changed": false,
+                      "pass_name": "dce"
+                    }
+                  ]
+                },
+                "disabled_passes": [],
+                "result": "no_change"
+              }
+            ],
+            "changed": false,
+            "passes": [
+              {
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 1547,
+                "insns_before": 1547,
+                "pass_name": "dce",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {}
+              }
+            ],
+            "passes_applied": [],
+            "prog_id": 846,
+            "program": {
+              "final_insn_count": 1547,
+              "insn_delta": 0,
+              "orig_insn_count": 1547,
+              "prog_id": 846,
+              "prog_name": "rusty_init",
+              "prog_type": 27
+            },
+            "status": "ok",
+            "summary": {
+              "applied": false,
+              "final_disabled_passes": [],
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_retries": 0
+            },
+            "timings_ns": {
+              "pipeline_run_ns": 354151,
+              "rejit_syscall_ns": 0,
+              "total_ns": 4618736303
+            }
+          },
+          "error": "",
+          "exit_code": 0,
+          "inlined_map_entries": [],
+          "kernel_prog_name": "rusty_init",
+          "output": "{\"attempts\":[{\"attempt\":0,\"debug\":{\"pass_traces\":[{\"changed\":false,\"pass_name\":\"dce\"}]},\"disabled_passes\":[],\"result\":\"no_change\"}],\"changed\":false,\"passes\":[{\"changed\":false,\"diagnostics\":[],\"insn_delta\":0,\"insns_after\":1547,\"insns_before\":1547,\"pass_name\":\"dce\",\"sites_applied\":0,\"sites_skipped\":0,\"skip_reasons\":{}}],\"passes_applied\":[],\"prog_id\":846,\"program\":{\"final_insn_count\":1547,\"insn_delta\":0,\"orig_insn_count\":1547,\"prog_id\":846,\"prog_name\":\"rusty_init\",\"prog_type\":27},\"status\":\"ok\",\"summary\":{\"applied\":false,\"final_disabled_passes\":[],\"passes_changed\":0,\"passes_executed\":1,\"program_changed\":false,\"total_sites_applied\":0,\"verifier_retries\":0},\"timings_ns\":{\"pipeline_run_ns\":354151,\"rejit_syscall_ns\":0,\"total_ns\":4618736303}}",
+          "summary": {
+            "applied": false,
+            "final_disabled_passes": [],
+            "passes_changed": 0,
+            "passes_executed": 1,
+            "program_changed": false,
+            "total_sites_applied": 0,
+            "verifier_retries": 0
+          }
+        },
+        "847": {
+          "applied": false,
+          "counts": {
+            "applied_sites": 0,
+            "total_sites": 0
+          },
+          "debug_result": {
+            "attempts": [
+              {
+                "attempt": 0,
+                "debug": {
+                  "pass_traces": [
+                    {
+                      "changed": false,
+                      "pass_name": "dce"
+                    }
+                  ]
+                },
+                "disabled_passes": [],
+                "result": "no_change"
+              }
+            ],
+            "changed": false,
+            "passes": [
+              {
+                "changed": false,
+                "diagnostics": [],
+                "insn_delta": 0,
+                "insns_after": 30,
+                "insns_before": 30,
+                "pass_name": "dce",
+                "sites_applied": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {}
+              }
+            ],
+            "passes_applied": [],
+            "prog_id": 847,
+            "program": {
+              "final_insn_count": 30,
+              "insn_delta": 0,
+              "orig_insn_count": 30,
+              "prog_id": 847,
+              "prog_name": "rusty_exit",
+              "prog_type": 27
+            },
+            "status": "ok",
+            "summary": {
+              "applied": false,
+              "final_disabled_passes": [],
+              "passes_changed": 0,
+              "passes_executed": 1,
+              "program_changed": false,
+              "total_sites_applied": 0,
+              "verifier_retries": 0
+            },
+            "timings_ns": {
+              "pipeline_run_ns": 96035,
+              "rejit_syscall_ns": 0,
+              "total_ns": 152858
+            }
+          },
+          "error": "",
+          "exit_code": 0,
+          "inlined_map_entries": [],
+          "kernel_prog_name": "rusty_exit",
+          "output": "{\"attempts\":[{\"attempt\":0,\"debug\":{\"pass_traces\":[{\"changed\":false,\"pass_name\":\"dce\"}]},\"disabled_passes\":[],\"result\":\"no_change\"}],\"changed\":false,\"passes\":[{\"changed\":false,\"diagnostics\":[],\"insn_delta\":0,\"insns_after\":30,\"insns_before\":30,\"pass_name\":\"dce\",\"sites_applied\":0,\"sites_skipped\":0,\"skip_reasons\":{}}],\"passes_applied\":[],\"prog_id\":847,\"program\":{\"final_insn_count\":30,\"insn_delta\":0,\"orig_insn_count\":30,\"prog_id\":847,\"prog_name\":\"rusty_exit\",\"prog_type\":27},\"status\":\"ok\",\"summary\":{\"applied\":false,\"final_disabled_passes\":[],\"passes_changed\":0,\"passes_executed\":1,\"program_changed\":false,\"total_sites_applied\":0,\"verifier_retries\":0},\"timings_ns\":{\"pipeline_run_ns\":96035,\"rejit_syscall_ns\":0,\"total_ns\":152858}}",
+          "summary": {
+            "applied": false,
+            "final_disabled_passes": [],
+            "passes_changed": 0,
+            "passes_executed": 1,
+            "program_changed": false,
+            "total_sites_applied": 0,
+            "verifier_retries": 0
+          }
+        }
+      }
+    },
+    "scan_results": {
+      "834": {
+        "counts": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 3,
+          "dce_sites": 15,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 7,
+          "rotate_sites": 0,
+          "total_sites": 25,
+          "wide_sites": 0
+        },
+        "enumerate_record": {
+          "counts": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 3,
+            "dce_sites": 15,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "map_inline_sites": 7,
+            "rotate_sites": 0,
+            "total_sites": 25,
+            "wide_sites": 0
+          },
+          "insn_count": 733,
+          "name": "rusty_select_cp",
+          "prog_id": 834,
+          "prog_type": 27,
+          "site_summary": "map_inline=7 const_prop=3 dce=15",
+          "sites": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 3,
+            "dce_sites": 15,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "map_inline_sites": 7,
+            "rotate_sites": 0,
+            "total_sites": 25,
+            "wide_sites": 0
+          },
+          "total_sites": 25,
+          "type": 27
+        },
+        "error": "",
+        "sites": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 3,
+          "dce_sites": 15,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 7,
+          "rotate_sites": 0,
+          "total_sites": 25,
+          "wide_sites": 0
+        }
+      },
+      "836": {
+        "counts": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 51,
+          "dce_sites": 707,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 30,
+          "rotate_sites": 0,
+          "total_sites": 788,
+          "wide_sites": 0
+        },
+        "enumerate_record": {
+          "counts": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 51,
+            "dce_sites": 707,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "map_inline_sites": 30,
+            "rotate_sites": 0,
+            "total_sites": 788,
+            "wide_sites": 0
+          },
+          "insn_count": 2194,
+          "name": "rusty_enqueue",
+          "prog_id": 836,
+          "prog_type": 27,
+          "site_summary": "map_inline=30 const_prop=51 dce=707",
+          "sites": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 51,
+            "dce_sites": 707,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "map_inline_sites": 30,
+            "rotate_sites": 0,
+            "total_sites": 788,
+            "wide_sites": 0
+          },
+          "total_sites": 788,
+          "type": 27
+        },
+        "error": "",
+        "sites": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 51,
+          "dce_sites": 707,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 30,
+          "rotate_sites": 0,
+          "total_sites": 788,
+          "wide_sites": 0
+        }
+      },
+      "837": {
+        "counts": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 8,
+          "dce_sites": 102,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 8,
+          "rotate_sites": 0,
+          "total_sites": 118,
+          "wide_sites": 0
+        },
+        "enumerate_record": {
+          "counts": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 8,
+            "dce_sites": 102,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "map_inline_sites": 8,
+            "rotate_sites": 0,
+            "total_sites": 118,
+            "wide_sites": 0
+          },
+          "insn_count": 273,
+          "name": "rusty_dispatch",
+          "prog_id": 837,
+          "prog_type": 27,
+          "site_summary": "map_inline=8 const_prop=8 dce=102",
+          "sites": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 8,
+            "dce_sites": 102,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "map_inline_sites": 8,
+            "rotate_sites": 0,
+            "total_sites": 118,
+            "wide_sites": 0
+          },
+          "total_sites": 118,
+          "type": 27
+        },
+        "error": "",
+        "sites": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 8,
+          "dce_sites": 102,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 8,
+          "rotate_sites": 0,
+          "total_sites": 118,
+          "wide_sites": 0
+        }
+      },
+      "838": {
+        "counts": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 15,
+          "dce_sites": 169,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 8,
+          "rotate_sites": 0,
+          "total_sites": 192,
+          "wide_sites": 0
+        },
+        "enumerate_record": {
+          "counts": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 15,
+            "dce_sites": 169,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "map_inline_sites": 8,
+            "rotate_sites": 0,
+            "total_sites": 192,
+            "wide_sites": 0
+          },
+          "insn_count": 611,
+          "name": "rusty_runnable",
+          "prog_id": 838,
+          "prog_type": 27,
+          "site_summary": "map_inline=8 const_prop=15 dce=169",
+          "sites": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 15,
+            "dce_sites": 169,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "map_inline_sites": 8,
+            "rotate_sites": 0,
+            "total_sites": 192,
+            "wide_sites": 0
+          },
+          "total_sites": 192,
+          "type": 27
+        },
+        "error": "",
+        "sites": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 15,
+          "dce_sites": 169,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 8,
+          "rotate_sites": 0,
+          "total_sites": 192,
+          "wide_sites": 0
+        }
+      },
+      "839": {
+        "counts": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 3,
+          "dce_sites": 1,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 1,
+          "rotate_sites": 0,
+          "total_sites": 5,
+          "wide_sites": 0
+        },
+        "enumerate_record": {
+          "counts": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 3,
+            "dce_sites": 1,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "map_inline_sites": 1,
+            "rotate_sites": 0,
+            "total_sites": 5,
+            "wide_sites": 0
+          },
+          "insn_count": 115,
+          "name": "rusty_running",
+          "prog_id": 839,
+          "prog_type": 27,
+          "site_summary": "map_inline=1 const_prop=3 dce=1",
+          "sites": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 3,
+            "dce_sites": 1,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "map_inline_sites": 1,
+            "rotate_sites": 0,
+            "total_sites": 5,
+            "wide_sites": 0
+          },
+          "total_sites": 5,
+          "type": 27
+        },
+        "error": "",
+        "sites": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 3,
+          "dce_sites": 1,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 1,
+          "rotate_sites": 0,
+          "total_sites": 5,
+          "wide_sites": 0
+        }
+      },
+      "840": {
+        "counts": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 1,
+          "dce_sites": 1,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 1,
+          "rotate_sites": 0,
+          "total_sites": 3,
+          "wide_sites": 0
+        },
+        "enumerate_record": {
+          "counts": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 1,
+            "dce_sites": 1,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "map_inline_sites": 1,
+            "rotate_sites": 0,
+            "total_sites": 3,
+            "wide_sites": 0
+          },
+          "insn_count": 223,
+          "name": "rusty_stopping",
+          "prog_id": 840,
+          "prog_type": 27,
+          "site_summary": "map_inline=1 const_prop=1 dce=1",
+          "sites": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 1,
+            "dce_sites": 1,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "map_inline_sites": 1,
+            "rotate_sites": 0,
+            "total_sites": 3,
+            "wide_sites": 0
+          },
+          "total_sites": 3,
+          "type": 27
+        },
+        "error": "",
+        "sites": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 1,
+          "dce_sites": 1,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 1,
+          "rotate_sites": 0,
+          "total_sites": 3,
+          "wide_sites": 0
+        }
+      },
+      "841": {
+        "counts": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 15,
+          "dce_sites": 169,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 8,
+          "rotate_sites": 0,
+          "total_sites": 192,
+          "wide_sites": 0
+        },
+        "enumerate_record": {
+          "counts": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 15,
+            "dce_sites": 169,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "map_inline_sites": 8,
+            "rotate_sites": 0,
+            "total_sites": 192,
+            "wide_sites": 0
+          },
+          "insn_count": 603,
+          "name": "rusty_quiescent",
+          "prog_id": 841,
+          "prog_type": 27,
+          "site_summary": "map_inline=8 const_prop=15 dce=169",
+          "sites": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 15,
+            "dce_sites": 169,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "map_inline_sites": 8,
+            "rotate_sites": 0,
+            "total_sites": 192,
+            "wide_sites": 0
+          },
+          "total_sites": 192,
+          "type": 27
+        },
+        "error": "",
+        "sites": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 15,
+          "dce_sites": 169,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 8,
+          "rotate_sites": 0,
+          "total_sites": 192,
+          "wide_sites": 0
+        }
+      },
+      "842": {
+        "counts": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 1,
+          "dce_sites": 20,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 1,
+          "rotate_sites": 0,
+          "total_sites": 22,
+          "wide_sites": 0
+        },
+        "enumerate_record": {
+          "counts": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 1,
+            "dce_sites": 20,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "map_inline_sites": 1,
+            "rotate_sites": 0,
+            "total_sites": 22,
+            "wide_sites": 0
+          },
+          "insn_count": 68,
+          "name": "rusty_set_weigh",
+          "prog_id": 842,
+          "prog_type": 27,
+          "site_summary": "map_inline=1 const_prop=1 dce=20",
+          "sites": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 1,
+            "dce_sites": 20,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "map_inline_sites": 1,
+            "rotate_sites": 0,
+            "total_sites": 22,
+            "wide_sites": 0
+          },
+          "total_sites": 22,
+          "type": 27
+        },
+        "error": "",
+        "sites": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 1,
+          "dce_sites": 20,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 1,
+          "rotate_sites": 0,
+          "total_sites": 22,
+          "wide_sites": 0
+        }
+      },
+      "843": {
+        "counts": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 53,
+          "dce_sites": 892,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 33,
+          "rotate_sites": 0,
+          "total_sites": 978,
+          "wide_sites": 0
+        },
+        "enumerate_record": {
+          "counts": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 53,
+            "dce_sites": 892,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "map_inline_sites": 33,
+            "rotate_sites": 0,
+            "total_sites": 978,
+            "wide_sites": 0
+          },
+          "insn_count": 2093,
+          "name": "rusty_set_cpuma",
+          "prog_id": 843,
+          "prog_type": 27,
+          "site_summary": "map_inline=33 const_prop=51 dce=892 const_prop=2",
+          "sites": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 53,
+            "dce_sites": 892,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "map_inline_sites": 33,
+            "rotate_sites": 0,
+            "total_sites": 978,
+            "wide_sites": 0
+          },
+          "total_sites": 978,
+          "type": 27
+        },
+        "error": "",
+        "sites": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 53,
+          "dce_sites": 892,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 33,
+          "rotate_sites": 0,
+          "total_sites": 978,
+          "wide_sites": 0
+        }
+      },
+      "844": {
+        "counts": {
+          "bitfield_sites": 2,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 57,
+          "dce_sites": 902,
+          "endian_sites": 0,
+          "extract_sites": 2,
+          "lea_sites": 0,
+          "map_inline_sites": 34,
+          "rotate_sites": 0,
+          "total_sites": 995,
+          "wide_sites": 0
+        },
+        "enumerate_record": {
+          "counts": {
+            "bitfield_sites": 2,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 57,
+            "dce_sites": 902,
+            "endian_sites": 0,
+            "extract_sites": 2,
+            "lea_sites": 0,
+            "map_inline_sites": 34,
+            "rotate_sites": 0,
+            "total_sites": 995,
+            "wide_sites": 0
+          },
+          "insn_count": 2847,
+          "name": "rusty_init_task",
+          "prog_id": 844,
+          "prog_type": 27,
+          "site_summary": "map_inline=34 const_prop=55 dce=902 const_prop=2 bulk_memory=1 extract=2",
+          "sites": {
+            "bitfield_sites": 2,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 57,
+            "dce_sites": 902,
+            "endian_sites": 0,
+            "extract_sites": 2,
+            "lea_sites": 0,
+            "map_inline_sites": 34,
+            "rotate_sites": 0,
+            "total_sites": 995,
+            "wide_sites": 0
+          },
+          "total_sites": 995,
+          "type": 27
+        },
+        "error": "",
+        "sites": {
+          "bitfield_sites": 2,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 57,
+          "dce_sites": 902,
+          "endian_sites": 0,
+          "extract_sites": 2,
+          "lea_sites": 0,
+          "map_inline_sites": 34,
+          "rotate_sites": 0,
+          "total_sites": 995,
+          "wide_sites": 0
+        }
+      },
+      "845": {
+        "counts": {
+          "bitfield_sites": 2,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 3,
+          "dce_sites": 0,
+          "endian_sites": 0,
+          "extract_sites": 2,
+          "lea_sites": 0,
+          "map_inline_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 5,
+          "wide_sites": 0
+        },
+        "enumerate_record": {
+          "counts": {
+            "bitfield_sites": 2,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 3,
+            "dce_sites": 0,
+            "endian_sites": 0,
+            "extract_sites": 2,
+            "lea_sites": 0,
+            "map_inline_sites": 0,
+            "rotate_sites": 0,
+            "total_sites": 5,
+            "wide_sites": 0
+          },
+          "insn_count": 276,
+          "name": "rusty_exit_task",
+          "prog_id": 845,
+          "prog_type": 27,
+          "site_summary": "const_prop=3 extract=2",
+          "sites": {
+            "bitfield_sites": 2,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 3,
+            "dce_sites": 0,
+            "endian_sites": 0,
+            "extract_sites": 2,
+            "lea_sites": 0,
+            "map_inline_sites": 0,
+            "rotate_sites": 0,
+            "total_sites": 5,
+            "wide_sites": 0
+          },
+          "total_sites": 5,
+          "type": 27
+        },
+        "error": "",
+        "sites": {
+          "bitfield_sites": 2,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 3,
+          "dce_sites": 0,
+          "endian_sites": 0,
+          "extract_sites": 2,
+          "lea_sites": 0,
+          "map_inline_sites": 0,
+          "rotate_sites": 0,
+          "total_sites": 5,
+          "wide_sites": 0
+        }
+      },
+      "846": {
+        "counts": {
+          "bitfield_sites": 2,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 4,
+          "dce_sites": 2,
+          "endian_sites": 0,
+          "extract_sites": 2,
+          "lea_sites": 0,
+          "map_inline_sites": 11,
+          "rotate_sites": 0,
+          "total_sites": 19,
+          "wide_sites": 0
+        },
+        "enumerate_record": {
+          "counts": {
+            "bitfield_sites": 2,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 4,
+            "dce_sites": 2,
+            "endian_sites": 0,
+            "extract_sites": 2,
+            "lea_sites": 0,
+            "map_inline_sites": 11,
+            "rotate_sites": 0,
+            "total_sites": 19,
+            "wide_sites": 0
+          },
+          "insn_count": 1547,
+          "name": "rusty_init",
+          "prog_id": 846,
+          "prog_type": 27,
+          "site_summary": "map_inline=11 const_prop=4 dce=2 extract=2",
+          "sites": {
+            "bitfield_sites": 2,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 4,
+            "dce_sites": 2,
+            "endian_sites": 0,
+            "extract_sites": 2,
+            "lea_sites": 0,
+            "map_inline_sites": 11,
+            "rotate_sites": 0,
+            "total_sites": 19,
+            "wide_sites": 0
+          },
+          "total_sites": 19,
+          "type": 27
+        },
+        "error": "",
+        "sites": {
+          "bitfield_sites": 2,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 4,
+          "dce_sites": 2,
+          "endian_sites": 0,
+          "extract_sites": 2,
+          "lea_sites": 0,
+          "map_inline_sites": 11,
+          "rotate_sites": 0,
+          "total_sites": 19,
+          "wide_sites": 0
+        }
+      },
+      "847": {
+        "counts": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 1,
+          "dce_sites": 1,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 1,
+          "rotate_sites": 0,
+          "total_sites": 3,
+          "wide_sites": 0
+        },
+        "enumerate_record": {
+          "counts": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 1,
+            "dce_sites": 1,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "map_inline_sites": 1,
+            "rotate_sites": 0,
+            "total_sites": 3,
+            "wide_sites": 0
+          },
+          "insn_count": 30,
+          "name": "rusty_exit",
+          "prog_id": 847,
+          "prog_type": 27,
+          "site_summary": "map_inline=1 const_prop=1 dce=1",
+          "sites": {
+            "bitfield_sites": 0,
+            "branch_flip_sites": 0,
+            "cmov_sites": 0,
+            "const_prop_sites": 1,
+            "dce_sites": 1,
+            "endian_sites": 0,
+            "extract_sites": 0,
+            "lea_sites": 0,
+            "map_inline_sites": 1,
+            "rotate_sites": 0,
+            "total_sites": 3,
+            "wide_sites": 0
+          },
+          "total_sites": 3,
+          "type": 27
+        },
+        "error": "",
+        "sites": {
+          "bitfield_sites": 0,
+          "branch_flip_sites": 0,
+          "cmov_sites": 0,
+          "const_prop_sites": 1,
+          "dce_sites": 1,
+          "endian_sites": 0,
+          "extract_sites": 0,
+          "lea_sites": 0,
+          "map_inline_sites": 1,
+          "rotate_sites": 0,
+          "total_sites": 3,
+          "wide_sites": 0
+        }
+      }
+    },
+    "scan_summary": {
+      "scanned_programs": 13,
+      "site_bearing_programs": 13,
+      "site_totals": {
+        "cmov_sites": 0,
+        "lea_sites": 0,
+        "rotate_sites": 0,
+        "total_sites": 3345,
+        "wide_sites": 0
+      }
+    },
+    "scheduler_binary": "/home/yunwei37/workspace/bpf-benchmark/runner/repos/scx/target/release/scx_rusty",
+    "scheduler_object": "/home/yunwei37/workspace/bpf-benchmark/corpus/build/scx/scx_rusty_main.bpf.o",
+    "scheduler_ops": [
+      "rusty_1.1.0_x86_64_unknown_linux_gnu"
+    ],
+    "scheduler_output": {
+      "stderr_tail": [
+        "13:05:55 \u001b[0m\u001b[34m[INFO] \u001b[0mRunning scx_rusty (build ID: 1.1.0 x86_64-unknown-linux-gnu)",
+        "13:05:55 \u001b[0m\u001b[34m[INFO] \u001b[0mNODE[00] mask= 7ffff",
+        "13:05:55 \u001b[0m\u001b[34m[INFO] \u001b[0m DOM[00] mask= 7ffff",
+        "13:05:55 \u001b[0m\u001b[34m[INFO] \u001b[0mlibbpf: struct_ops rusty: member sub_attach not found in kernel, skipping it as it's set to zero",
+        "",
+        "13:05:55 \u001b[0m\u001b[34m[INFO] \u001b[0mlibbpf: struct_ops rusty: member sub_detach not found in kernel, skipping it as it's set to zero",
+        "",
+        "13:05:55 \u001b[0m\u001b[34m[INFO] \u001b[0mlibbpf: struct_ops rusty: member sub_cgroup_id not found in kernel, skipping it as it's set to zero",
+        "",
+        "13:05:55 \u001b[0m\u001b[33m[WARN] \u001b[0mlibbpf: map 'rusty': BPF map skeleton link is uninitialized",
+        "",
+        "13:05:55 \u001b[0m\u001b[34m[INFO] \u001b[0mRusty scheduler started! Run `scx_rusty --monitor` for metrics."
+      ],
+      "stdout_tail": [
+        "slice=20000us",
+        "direct_greedy_cpus=7ffff",
+        "  kick_greedy_cpus=7ffff",
+        "  NODE[00] load=128.84 imbal=  +0.00 delta=  +0.00",
+        "   DOM[00] load=128.84 imbal=  +0.00 delta=  +0.00",
+        "###### Fri, 27 Mar 2026 13:06:03 -0700, load balance @ -1880.5ms ######",
+        "cpu=  21.06 load=  128.84 mig=0 task_err=0 time_used= 1.0ms",
+        "tot=     44 sync_prev_idle= 2.27 wsync= 9.09",
+        "prev_idle=56.82 greedy_idle= 0.00 pin= 0.00",
+        "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+        "dsq=31.82 greedy_local= 0.00 greedy_xnuma= 0.00",
+        "kick_greedy= 0.00 rep= 0.00",
+        "dl_clamp=29.55 dl_preset= 2.27",
+        "slice=20000us",
+        "direct_greedy_cpus=7ffff",
+        "  kick_greedy_cpus=7ffff",
+        "  NODE[00] load=128.84 imbal=  +0.00 delta=  +0.00",
+        "   DOM[00] load=128.84 imbal=  +0.00 delta=  +0.00",
+        "###### Fri, 27 Mar 2026 13:06:04 -0700, load balance @  -881.0ms ######",
+        "cpu=  21.06 load=   35.24 mig=0 task_err=0 time_used= 2.4ms",
+        "tot=     46 sync_prev_idle= 2.17 wsync= 8.70",
+        "prev_idle=58.70 greedy_idle= 0.00 pin= 0.00",
+        "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+        "dsq=30.43 greedy_local= 0.00 greedy_xnuma= 0.00",
+        "kick_greedy= 0.00 rep= 0.00",
+        "dl_clamp=30.43 dl_preset= 0.00",
+        "slice=20000us",
+        "direct_greedy_cpus=7ffff",
+        "  kick_greedy_cpus=7ffff",
+        "  NODE[00] load= 35.24 imbal=  +0.00 delta=  +0.00",
+        "   DOM[00] load= 35.24 imbal=  +0.00 delta=  +0.00",
+        "###### Fri, 27 Mar 2026 13:06:05 -0700, load balance @ -1882.8ms ######",
+        "cpu=  21.07 load=   35.24 mig=0 task_err=0 time_used= 0.6ms",
+        "tot=     43 sync_prev_idle= 2.33 wsync= 9.30",
+        "prev_idle=51.16 greedy_idle= 0.00 pin= 0.00",
+        "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+        "dsq=37.21 greedy_local= 0.00 greedy_xnuma= 0.00",
+        "kick_greedy= 2.33 rep= 0.00",
+        "dl_clamp=37.21 dl_preset= 0.00",
+        "slice=20000us",
+        "direct_greedy_cpus=7ffff",
+        "  kick_greedy_cpus=7ffff",
+        "  NODE[00] load= 35.24 imbal=  +0.00 delta=  +0.00",
+        "   DOM[00] load= 35.24 imbal=  +0.00 delta=  +0.00",
+        "###### Fri, 27 Mar 2026 13:06:06 -0700, load balance @  -886.8ms ######",
+        "cpu=  20.17 load=   11.85 mig=0 task_err=0 time_used= 0.8ms",
+        "tot=    815 sync_prev_idle= 0.98 wsync= 0.49",
+        "prev_idle=93.25 greedy_idle= 0.00 pin= 0.00",
+        "dir= 0.98 dir_greedy= 0.00 dir_greedy_far= 0.00",
+        "dsq= 4.29 greedy_local= 0.00 greedy_xnuma= 0.00",
+        "kick_greedy= 0.12 rep= 0.00",
+        "dl_clamp= 3.44 dl_preset= 0.86",
+        "slice=20000us",
+        "direct_greedy_cpus=7ffff",
+        "  kick_greedy_cpus=7ffff",
+        "  NODE[00] load= 11.85 imbal=  +0.00 delta=  +0.00",
+        "   DOM[00] load= 11.85 imbal=  +0.00 delta=  +0.00",
+        "###### Fri, 27 Mar 2026 13:06:07 -0700, load balance @ -1889.2ms ######",
+        "cpu=  21.06 load=   11.85 mig=0 task_err=0 time_used= 0.7ms",
+        "tot=     44 sync_prev_idle= 0.00 wsync=11.36",
+        "prev_idle=52.27 greedy_idle= 0.00 pin= 0.00",
+        "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+        "dsq=36.36 greedy_local= 0.00 greedy_xnuma= 0.00",
+        "kick_greedy= 0.00 rep= 0.00",
+        "dl_clamp=34.09 dl_preset= 2.27",
+        "slice=20000us",
+        "direct_greedy_cpus=7ffff",
+        "  kick_greedy_cpus=7ffff",
+        "  NODE[00] load= 11.85 imbal=  +0.00 delta=  +0.00",
+        "   DOM[00] load= 11.85 imbal=  +0.00 delta=  +0.00",
+        "###### Fri, 27 Mar 2026 13:06:08 -0700, load balance @  -891.1ms ######",
+        "cpu=  21.10 load=    5.97 mig=0 task_err=0 time_used= 0.9ms",
+        "tot=     37 sync_prev_idle= 0.00 wsync=13.51",
+        "prev_idle=54.05 greedy_idle= 0.00 pin= 0.00",
+        "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+        "dsq=32.43 greedy_local= 0.00 greedy_xnuma= 0.00",
+        "kick_greedy= 2.70 rep= 0.00",
+        "dl_clamp=32.43 dl_preset= 0.00",
+        "slice=20000us",
+        "direct_greedy_cpus=7ffff",
+        "  kick_greedy_cpus=7ffff",
+        "  NODE[00] load=  5.97 imbal=  +0.00 delta=  +0.00",
+        "   DOM[00] load=  5.97 imbal=  +0.00 delta=  +0.00",
+        "###### Fri, 27 Mar 2026 13:06:09 -0700, load balance @ -1892.9ms ######",
+        "cpu=  21.02 load=    5.97 mig=0 task_err=0 time_used= 0.8ms",
+        "tot=     41 sync_prev_idle= 0.00 wsync=12.20",
+        "prev_idle=48.78 greedy_idle= 0.00 pin= 0.00",
+        "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+        "dsq=39.02 greedy_local= 0.00 greedy_xnuma= 0.00",
+        "kick_greedy= 2.44 rep= 0.00",
+        "dl_clamp=36.59 dl_preset= 2.44",
+        "slice=20000us",
+        "direct_greedy_cpus=7ffff",
+        "  kick_greedy_cpus=7ffff",
+        "  NODE[00] load=  5.97 imbal=  +0.00 delta=  +0.00",
+        "   DOM[00] load=  5.97 imbal=  +0.00 delta=  +0.00",
+        "###### Fri, 27 Mar 2026 13:06:10 -0700, load balance @  -894.8ms ######",
+        "cpu=  21.07 load=    4.52 mig=0 task_err=0 time_used= 1.0ms",
+        "tot=     41 sync_prev_idle= 0.00 wsync=12.20",
+        "prev_idle=53.66 greedy_idle= 0.00 pin= 0.00",
+        "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+        "dsq=34.15 greedy_local= 0.00 greedy_xnuma= 0.00",
+        "kick_greedy= 2.44 rep= 0.00",
+        "dl_clamp=34.15 dl_preset= 0.00",
+        "slice=20000us",
+        "direct_greedy_cpus=7ffff",
+        "  kick_greedy_cpus=7ffff",
+        "  NODE[00] load=  4.52 imbal=  +0.00 delta=  +0.00",
+        "   DOM[00] load=  4.52 imbal=  +0.00 delta=  +0.00",
+        "###### Fri, 27 Mar 2026 13:06:11 -0700, load balance @ -1896.7ms ######",
+        "cpu=  15.50 load=    4.52 mig=0 task_err=0 time_used= 0.9ms",
+        "tot=   1326 sync_prev_idle= 1.51 wsync= 0.38",
+        "prev_idle=94.34 greedy_idle= 0.00 pin= 0.00",
+        "dir= 0.15 dir_greedy= 0.00 dir_greedy_far= 0.00",
+        "dsq= 3.62 greedy_local= 0.00 greedy_xnuma= 0.00",
+        "kick_greedy= 0.08 rep= 0.00",
+        "dl_clamp= 3.24 dl_preset= 0.38",
+        "slice=20000us",
+        "direct_greedy_cpus=7ffff",
+        "  kick_greedy_cpus=7ffff",
+        "  NODE[00] load=  4.52 imbal=  +0.00 delta=  +0.00",
+        "   DOM[00] load=  4.52 imbal=  +0.00 delta=  +0.00",
+        "###### Fri, 27 Mar 2026 13:06:12 -0700, load balance @  -898.7ms ######",
+        "cpu=   1.58 load=    3.51 mig=0 task_err=0 time_used= 1.2ms",
+        "tot=   4429 sync_prev_idle= 0.23 wsync= 0.11",
+        "prev_idle=99.03 greedy_idle= 0.00 pin= 0.00",
+        "dir= 0.02 dir_greedy= 0.00 dir_greedy_far= 0.00",
+        "dsq= 0.61 greedy_local= 0.00 greedy_xnuma= 0.00",
+        "kick_greedy= 0.00 rep= 0.00",
+        "dl_clamp= 0.50 dl_preset= 0.11",
+        "slice=20000us",
+        "direct_greedy_cpus=7ffff",
+        "  kick_greedy_cpus=7ffff",
+        "  NODE[00] load=  3.51 imbal=  +0.00 delta=  +0.00",
+        "   DOM[00] load=  3.51 imbal=  +0.00 delta=  +0.00",
+        "###### Fri, 27 Mar 2026 13:06:13 -0700, load balance @ -1900.3ms ######",
+        "cpu=   1.37 load=    3.51 mig=0 task_err=0 time_used= 0.9ms",
+        "tot=   4423 sync_prev_idle= 0.18 wsync= 0.11",
+        "prev_idle=98.82 greedy_idle= 0.00 pin= 0.00",
+        "dir= 0.02 dir_greedy= 0.00 dir_greedy_far= 0.00",
+        "dsq= 0.86 greedy_local= 0.00 greedy_xnuma= 0.00",
+        "kick_greedy= 0.02 rep= 0.00",
+        "dl_clamp= 0.72 dl_preset= 0.14",
+        "slice=20000us",
+        "direct_greedy_cpus=7ffff",
+        "  kick_greedy_cpus=7ffff",
+        "  NODE[00] load=  3.51 imbal=  +0.00 delta=  +0.00",
+        "   DOM[00] load=  3.51 imbal=  +0.00 delta=  +0.00",
+        "###### Fri, 27 Mar 2026 13:06:14 -0700, load balance @  -901.9ms ######",
+        "cpu=   4.57 load=    1.11 mig=0 task_err=0 time_used= 1.4ms",
+        "tot=    127 sync_prev_idle= 1.57 wsync= 3.94",
+        "prev_idle=24.41 greedy_idle= 0.00 pin= 0.00",
+        "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+        "dsq=70.08 greedy_local= 0.00 greedy_xnuma= 0.00",
+        "kick_greedy= 0.00 rep= 0.00",
+        "dl_clamp=37.80 dl_preset=33.07",
+        "slice=20000us",
+        "direct_greedy_cpus=7ffff",
+        "  kick_greedy_cpus=7ffff",
+        "  NODE[00] load=  1.11 imbal=  +0.00 delta=  +0.00",
+        "   DOM[00] load=  1.11 imbal=  +0.00 delta=  +0.00",
+        "###### Fri, 27 Mar 2026 13:06:15 -0700, load balance @ -1903.6ms ######",
+        "cpu=   5.30 load=    1.11 mig=0 task_err=0 time_used= 1.1ms",
+        "tot=    124 sync_prev_idle= 0.00 wsync= 4.03",
+        "prev_idle=16.13 greedy_idle= 0.00 pin= 0.00",
+        "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+        "dsq=79.84 greedy_local= 0.00 greedy_xnuma= 0.00",
+        "kick_greedy= 0.81 rep= 0.00",
+        "dl_clamp=41.94 dl_preset=37.90",
+        "slice=20000us",
+        "direct_greedy_cpus=7ffff",
+        "  kick_greedy_cpus=7ffff",
+        "  NODE[00] load=  1.11 imbal=  +0.00 delta=  +0.00",
+        "   DOM[00] load=  1.11 imbal=  +0.00 delta=  +0.00",
+        "###### Fri, 27 Mar 2026 13:06:16 -0700, load balance @  -905.1ms ######",
+        "cpu=   5.26 load=    1.70 mig=0 task_err=0 time_used= 0.8ms",
+        "tot=    131 sync_prev_idle= 0.00 wsync= 3.82",
+        "prev_idle=17.56 greedy_idle= 0.00 pin= 0.00",
+        "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+        "dsq=78.63 greedy_local= 0.00 greedy_xnuma= 0.00",
+        "kick_greedy= 0.76 rep= 0.00",
+        "dl_clamp=41.98 dl_preset=36.64",
+        "slice=20000us",
+        "direct_greedy_cpus=7ffff",
+        "  kick_greedy_cpus=7ffff",
+        "  NODE[00] load=  1.70 imbal=  +0.00 delta=  +0.00",
+        "   DOM[00] load=  1.70 imbal=  +0.00 delta=  +0.00",
+        "###### Fri, 27 Mar 2026 13:06:17 -0700, load balance @ -1906.7ms ######",
+        "cpu=   5.25 load=    1.70 mig=0 task_err=0 time_used= 1.1ms",
+        "tot=    127 sync_prev_idle= 0.00 wsync= 3.94",
+        "prev_idle=16.54 greedy_idle= 0.00 pin= 0.00",
+        "dir= 0.00 dir_greedy= 0.00 dir_greedy_far= 0.00",
+        "dsq=79.53 greedy_local= 0.00 greedy_xnuma= 0.00",
+        "kick_greedy= 1.57 rep= 0.00",
+        "dl_clamp=41.73 dl_preset=37.80",
+        "slice=20000us",
+        "direct_greedy_cpus=7ffff",
+        "  kick_greedy_cpus=7ffff",
+        "  NODE[00] load=  1.70 imbal=  +0.00 delta=  +0.00",
+        "   DOM[00] load=  1.70 imbal=  +0.00 delta=  +0.00"
+      ]
+    },
+    "scheduler_programs": [
+      {
+        "btf_id": 1293,
+        "bytes_jited": 3072,
+        "bytes_memlock": 8192,
+        "bytes_xlated": 6624,
+        "gpl_compatible": true,
+        "id": 834,
+        "jited": true,
+        "loaded_at": 1774641955,
+        "map_ids": [
+          972,
+          973,
+          963,
+          975,
+          968,
+          974,
+          967,
+          970,
+          977,
+          969,
+          965
+        ],
+        "name": "rusty_select_cpu",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 33,
+            "pid": 26681
+          }
+        ],
+        "owner_pids": [
+          26681
+        ],
+        "pids": [
+          {
+            "comm": "scx_rusty",
+            "pid": 26681
+          }
+        ],
+        "tag": "4c96a99e64f5877a",
+        "type": "struct_ops",
+        "uid": 0
+      },
+      {
+        "btf_id": 1293,
+        "bytes_jited": 1045,
+        "bytes_memlock": 20480,
+        "bytes_xlated": 13064,
+        "gpl_compatible": true,
+        "id": 836,
+        "jited": true,
+        "loaded_at": 1774641955,
+        "map_ids": [
+          968,
+          973,
+          972,
+          975,
+          974,
+          967,
+          970,
+          977,
+          969,
+          963,
+          966
+        ],
+        "name": "rusty_enqueue",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 34,
+            "pid": 26681
+          }
+        ],
+        "owner_pids": [
+          26681
+        ],
+        "pids": [
+          {
+            "comm": "scx_rusty",
+            "pid": 26681
+          }
+        ],
+        "tag": "d851115037e32b70",
+        "type": "struct_ops",
+        "uid": 0
+      },
+      {
+        "btf_id": 1293,
+        "bytes_jited": 725,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 1336,
+        "gpl_compatible": true,
+        "id": 837,
+        "jited": true,
+        "loaded_at": 1774641955,
+        "map_ids": [
+          973,
+          972,
+          974,
+          968,
+          977
+        ],
+        "name": "rusty_dispatch",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 35,
+            "pid": 26681
+          }
+        ],
+        "owner_pids": [
+          26681
+        ],
+        "pids": [
+          {
+            "comm": "scx_rusty",
+            "pid": 26681
+          }
+        ],
+        "tag": "654514df3354b047",
+        "type": "struct_ops",
+        "uid": 0
+      },
+      {
+        "btf_id": 1293,
+        "bytes_jited": 312,
+        "bytes_memlock": 8192,
+        "bytes_xlated": 3656,
+        "gpl_compatible": true,
+        "id": 838,
+        "jited": true,
+        "loaded_at": 1774641955,
+        "map_ids": [
+          974,
+          973,
+          970,
+          972,
+          977,
+          969,
+          966
+        ],
+        "name": "rusty_runnable",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 36,
+            "pid": 26681
+          }
+        ],
+        "owner_pids": [
+          26681
+        ],
+        "pids": [
+          {
+            "comm": "scx_rusty",
+            "pid": 26681
+          }
+        ],
+        "tag": "e59d0457a654aed0",
+        "type": "struct_ops",
+        "uid": 0
+      },
+      {
+        "btf_id": 1293,
+        "bytes_jited": 464,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 952,
+        "gpl_compatible": true,
+        "id": 839,
+        "jited": true,
+        "loaded_at": 1774641955,
+        "map_ids": [
+          974,
+          973,
+          963,
+          970,
+          972,
+          977,
+          969
+        ],
+        "name": "rusty_running",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 37,
+            "pid": 26681
+          }
+        ],
+        "owner_pids": [
+          26681
+        ],
+        "pids": [
+          {
+            "comm": "scx_rusty",
+            "pid": 26681
+          }
+        ],
+        "tag": "853f3c7066dc2072",
+        "type": "struct_ops",
+        "uid": 0
+      },
+      {
+        "btf_id": 1293,
+        "bytes_jited": 278,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 1840,
+        "gpl_compatible": true,
+        "id": 840,
+        "jited": true,
+        "loaded_at": 1774641955,
+        "map_ids": [
+          973,
+          974,
+          970,
+          972,
+          977,
+          969
+        ],
+        "name": "rusty_stopping",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 38,
+            "pid": 26681
+          }
+        ],
+        "owner_pids": [
+          26681
+        ],
+        "pids": [
+          {
+            "comm": "scx_rusty",
+            "pid": 26681
+          }
+        ],
+        "tag": "c2aafcd76f2394f5",
+        "type": "struct_ops",
+        "uid": 0
+      },
+      {
+        "btf_id": 1293,
+        "bytes_jited": 260,
+        "bytes_memlock": 8192,
+        "bytes_xlated": 3808,
+        "gpl_compatible": true,
+        "id": 841,
+        "jited": true,
+        "loaded_at": 1774641955,
+        "map_ids": [
+          974,
+          973,
+          970,
+          972,
+          977,
+          969,
+          966
+        ],
+        "name": "rusty_quiescent",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 39,
+            "pid": 26681
+          }
+        ],
+        "owner_pids": [
+          26681
+        ],
+        "pids": [
+          {
+            "comm": "scx_rusty",
+            "pid": 26681
+          }
+        ],
+        "tag": "0100a95134fe6090",
+        "type": "struct_ops",
+        "uid": 0
+      },
+      {
+        "btf_id": 1293,
+        "bytes_jited": 124,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 392,
+        "gpl_compatible": true,
+        "id": 842,
+        "jited": true,
+        "loaded_at": 1774641955,
+        "map_ids": [
+          974,
+          973,
+          970,
+          972,
+          977,
+          969
+        ],
+        "name": "rusty_set_weight",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 40,
+            "pid": 26681
+          }
+        ],
+        "owner_pids": [
+          26681
+        ],
+        "pids": [
+          {
+            "comm": "scx_rusty",
+            "pid": 26681
+          }
+        ],
+        "tag": "15a6b2e6856c57b3",
+        "type": "struct_ops",
+        "uid": 0
+      },
+      {
+        "btf_id": 1293,
+        "bytes_jited": 165,
+        "bytes_memlock": 20480,
+        "bytes_xlated": 10360,
+        "gpl_compatible": true,
+        "id": 843,
+        "jited": true,
+        "loaded_at": 1774641955,
+        "map_ids": [
+          974,
+          975,
+          970,
+          972,
+          973,
+          977,
+          969,
+          967,
+          963,
+          966
+        ],
+        "name": "rusty_set_cpumask",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 41,
+            "pid": 26681
+          }
+        ],
+        "owner_pids": [
+          26681
+        ],
+        "pids": [
+          {
+            "comm": "scx_rusty",
+            "pid": 26681
+          }
+        ],
+        "tag": "30f43986166c90c6",
+        "type": "struct_ops",
+        "uid": 0
+      },
+      {
+        "btf_id": 1293,
+        "bytes_jited": 537,
+        "bytes_memlock": 24576,
+        "bytes_xlated": 8848,
+        "gpl_compatible": true,
+        "id": 844,
+        "jited": true,
+        "loaded_at": 1774641955,
+        "map_ids": [
+          973,
+          967,
+          974,
+          970,
+          972,
+          978,
+          969,
+          977,
+          963,
+          966
+        ],
+        "name": "rusty_init_task",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 42,
+            "pid": 26681
+          }
+        ],
+        "owner_pids": [
+          26681
+        ],
+        "pids": [
+          {
+            "comm": "scx_rusty",
+            "pid": 26681
+          }
+        ],
+        "tag": "a7aacdb8954046d8",
+        "type": "struct_ops",
+        "uid": 0
+      },
+      {
+        "btf_id": 1293,
+        "bytes_jited": 166,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 2792,
+        "gpl_compatible": true,
+        "id": 845,
+        "jited": true,
+        "loaded_at": 1774641955,
+        "map_ids": [
+          967,
+          968,
+          970,
+          972,
+          973,
+          977,
+          969,
+          978,
+          974
+        ],
+        "name": "rusty_exit_task",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 43,
+            "pid": 26681
+          }
+        ],
+        "owner_pids": [
+          26681
+        ],
+        "pids": [
+          {
+            "comm": "scx_rusty",
+            "pid": 26681
+          }
+        ],
+        "tag": "2e094dc6db7ba56e",
+        "type": "struct_ops",
+        "uid": 0
+      },
+      {
+        "btf_id": 1293,
+        "bytes_jited": 600,
+        "bytes_memlock": 16384,
+        "bytes_xlated": 12816,
+        "gpl_compatible": true,
+        "id": 846,
+        "jited": true,
+        "loaded_at": 1774641955,
+        "map_ids": [
+          975,
+          974,
+          973,
+          969,
+          978,
+          972,
+          977,
+          965,
+          964,
+          963
+        ],
+        "name": "rusty_init",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 44,
+            "pid": 26681
+          }
+        ],
+        "owner_pids": [
+          26681
+        ],
+        "pids": [
+          {
+            "comm": "scx_rusty",
+            "pid": 26681
+          }
+        ],
+        "tag": "64252b59bff2efac",
+        "type": "struct_ops",
+        "uid": 0
+      },
+      {
+        "btf_id": 1293,
+        "bytes_jited": 164,
+        "bytes_memlock": 4096,
+        "bytes_xlated": 240,
+        "gpl_compatible": true,
+        "id": 847,
+        "jited": true,
+        "loaded_at": 1774641955,
+        "map_ids": [
+          974,
+          973,
+          976,
+          977
+        ],
+        "name": "rusty_exit",
+        "orphaned": false,
+        "owner_fds": [
+          {
+            "fd": 45,
+            "pid": 26681
+          }
+        ],
+        "owner_pids": [
+          26681
+        ],
+        "pids": [
+          {
+            "comm": "scx_rusty",
+            "pid": 26681
+          }
+        ],
+        "tag": "11ab5b228921e73d",
+        "type": "struct_ops",
+        "uid": 0
+      }
+    ],
+    "smoke": false
+  },
+  "output_hint_json": "e2e/results/scx_authoritative_20260327.json",
+  "output_hint_md": "e2e/results/scx-e2e.md",
+  "output_hint_report_md": "docs/tmp/bpftrace-real-e2e-report.md",
+  "run_type": "scx",
+  "selected_rejit_passes": [
+    "dce"
+  ],
+  "smoke": false,
+  "started_at": "2026-03-27T20:05:51.949395+00:00",
+  "status": "completed",
+  "suite": "e2e"
+}

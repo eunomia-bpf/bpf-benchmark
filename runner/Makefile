@@ -32,6 +32,7 @@ BENCH ?=
 STATIC_VERIFY_ARGS ?=
 FUZZ_ROUNDS ?= 1000
 VM_COMMAND ?= /bin/bash
+E2E_ARGS ?=
 
 BZIMAGE_PATH := $(if $(filter /%,$(BZIMAGE)),$(BZIMAGE),$(REPO_ROOT)/$(BZIMAGE))
 DAEMON_PATH := $(if $(filter /%,$(DAEMON)),$(DAEMON),$(REPO_ROOT)/$(DAEMON))
@@ -336,7 +337,7 @@ vm-e2e: e2e-prep e2e-tracee-setup e2e-tetragon-setup micro_exec daemon-binary ke
 		$(VM_CPU_FLAG) \
 		$(VM_MEM_FLAG) \
 		--timeout "$(VM_E2E_TIMEOUT)" \
-		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) python3 "$(REPO_ROOT)/e2e/run.py" all'
+		--command 'cd "$(REPO_ROOT)" && $(VM_INIT) python3 "$(REPO_ROOT)/e2e/run.py" all $(E2E_ARGS)'
 
 vm-all:
 	$(MAKE) vm-test TARGET="$(TARGET)"

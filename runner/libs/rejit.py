@@ -26,7 +26,17 @@ _PASS_TO_SITE_FIELD = {
     "wide_mem": "wide_sites",
 }
 _DEFAULT_REJIT_ENABLED_PASSES = ("map_inline", "const_prop", "dce")
+_BENCH_PASSES_ENV = "BPFREJIT_BENCH_PASSES"
 _DEFAULT_APPLY_TIMEOUT_SECONDS = 120.0
+
+
+def _parse_enabled_passes(raw: str | None) -> list[str]:
+    text = str(raw or "").strip()
+    if not text:
+        return []
+    if text.lower() in {"default", "benchmark-default"}:
+        return list(_DEFAULT_REJIT_ENABLED_PASSES)
+    return [token.strip() for token in text.split(",") if token.strip()]
 
 def _zero_site_counts() -> dict[str, int]:
     return {
@@ -108,6 +118,9 @@ def _daemon_command(
 
 
 def benchmark_rejit_enabled_passes() -> list[str]:
+    configured = _parse_enabled_passes(os.environ.get(_BENCH_PASSES_ENV))
+    if configured:
+        return configured
     return list(_DEFAULT_REJIT_ENABLED_PASSES)
 
 
@@ -330,7 +343,59 @@ def _apply_result_from_response(
     }
 
 
-def _start_daemon_server(daemon_binary: Path | str) -> tuple[subprocess.Popen[str], Path, str]:
+def _socket_error_result(
+    prog_id: int,
+    detail: str,
+    *,
+    daemon_proc: subprocess.Popen[str] | None = None,
+    stdout_path: Path | None = None,
+    stderr_path: Path | None = None,
+) -> dict[str, object]:
+    notes: list[str] = [detail]
+    if daemon_proc is not None:
+        returncode = daemon_proc.poll()
+        notes.append(
+            f"daemon serve rc={returncode}" if returncode is not None else "daemon serve still running"
+        )
+
+    log_tail = _daemon_log_tail(stdout_path, stderr_path)
+    if log_tail:
+        notes.append(f"daemon log tail:\n{log_tail}")
+
+    message = "\n".join(notes)
+    return {
+        "applied": False,
+        "output": log_tail,
+        "exit_code": 1,
+        "debug_result": {},
+        "kernel_prog_name": "",
+        "inlined_map_entries": [],
+        "summary": {},
+        "counts": {
+            "total_sites": 0,
+            "applied_sites": 0,
+        },
+        "error": message,
+    }
+
+
+def _daemon_log_tail(stdout_path: Path | None, stderr_path: Path | None) -> str:
+    fragments: list[str] = []
+    for path in (stderr_path, stdout_path):
+        if path is None:
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        if text.strip():
+            fragments.append(text)
+    return tail_text("\n".join(fragments), max_lines=80, max_chars=8000)
+
+
+def _start_daemon_server(
+    daemon_binary: Path | str,
+) -> tuple[subprocess.Popen[str], Path, str, Path, Path]:
     socket_dir = tempfile.mkdtemp(prefix="bpfrejit-daemon-")
     socket_path = Path(socket_dir) / "daemon.sock"
     stdout_path = Path(socket_dir) / "daemon.stdout.log"
@@ -348,24 +413,14 @@ def _start_daemon_server(daemon_binary: Path | str) -> tuple[subprocess.Popen[st
         stdout_handle.close()
         stderr_handle.close()
 
-    def log_tail() -> str:
-        fragments: list[str] = []
-        for path in (stderr_path, stdout_path):
-            try:
-                text = path.read_text(encoding="utf-8", errors="replace")
-            except OSError:
-                continue
-            if text.strip():
-                fragments.append(text)
-        return tail_text("\n".join(fragments), max_lines=80, max_chars=8000)
-
     deadline = time.monotonic() + 5.0
     while time.monotonic() < deadline:
         if socket_path.exists():
-            return proc, socket_path, socket_dir
+            return proc, socket_path, socket_dir, stdout_path, stderr_path
         if proc.poll() is not None:
             raise RuntimeError(
-                f"daemon serve exited early (rc={proc.returncode}): {log_tail()}"
+                f"daemon serve exited early (rc={proc.returncode}): "
+                f"{_daemon_log_tail(stdout_path, stderr_path)}"
             )
         time.sleep(0.05)
     proc.terminate()
@@ -374,7 +429,9 @@ def _start_daemon_server(daemon_binary: Path | str) -> tuple[subprocess.Popen[st
     except subprocess.TimeoutExpired:
         proc.kill()
         proc.wait(timeout=1)
-    raise RuntimeError(f"timed out waiting for daemon socket: {log_tail()}")
+    raise RuntimeError(
+        f"timed out waiting for daemon socket: {_daemon_log_tail(stdout_path, stderr_path)}"
+    )
 
 
 def _stop_daemon_server(proc: subprocess.Popen[str], socket_path: Path, socket_dir: str) -> None:
@@ -393,6 +450,9 @@ def _apply_one_via_socket(
     prog_id: int,
     enabled_passes: Sequence[str],
     *,
+    daemon_proc: subprocess.Popen[str] | None = None,
+    stdout_path: Path | None = None,
+    stderr_path: Path | None = None,
     timeout_seconds: float = _DEFAULT_APPLY_TIMEOUT_SECONDS,
 ) -> dict[str, object]:
     payload: dict[str, object] = {
@@ -405,10 +465,10 @@ def _apply_one_via_socket(
     request = json.dumps(payload) + "\n"
     with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
         client.settimeout(timeout_seconds)
-        client.connect(str(socket_path))
-        client.sendall(request.encode())
-        chunks: list[bytes] = []
         try:
+            client.connect(str(socket_path))
+            client.sendall(request.encode())
+            chunks: list[bytes] = []
             while True:
                 chunk = client.recv(4096)
                 if not chunk:
@@ -417,26 +477,48 @@ def _apply_one_via_socket(
                 if b"\n" in chunk:
                     break
         except socket.timeout:
-            return {
-                "applied": False,
-                "output": "",
-                "exit_code": 124,
-                "debug_result": {},
-                "kernel_prog_name": "",
-                "inlined_map_entries": [],
-                "summary": {},
-                "counts": {
-                    "total_sites": 0,
-                    "applied_sites": 0,
-                },
-                "error": f"socket optimize timed out after {timeout_seconds:.0f}s for prog {prog_id}",
-            }
+            return _socket_error_result(
+                prog_id,
+                f"socket optimize timed out after {timeout_seconds:.0f}s for prog {prog_id}",
+                daemon_proc=daemon_proc,
+                stdout_path=stdout_path,
+                stderr_path=stderr_path,
+            )
+        except OSError as exc:
+            return _socket_error_result(
+                prog_id,
+                f"socket optimize failed for prog {prog_id}: {exc}",
+                daemon_proc=daemon_proc,
+                stdout_path=stdout_path,
+                stderr_path=stderr_path,
+            )
     line = b"".join(chunks).decode(errors="replace").strip()
     if not line:
-        raise RuntimeError("empty response from daemon socket")
-    response = json.loads(line)
+        return _socket_error_result(
+            prog_id,
+            f"daemon socket returned an empty response for prog {prog_id}",
+            daemon_proc=daemon_proc,
+            stdout_path=stdout_path,
+            stderr_path=stderr_path,
+        )
+    try:
+        response = json.loads(line)
+    except json.JSONDecodeError as exc:
+        return _socket_error_result(
+            prog_id,
+            f"daemon socket returned invalid JSON for prog {prog_id}: {exc}: {line[:400]}",
+            daemon_proc=daemon_proc,
+            stdout_path=stdout_path,
+            stderr_path=stderr_path,
+        )
     if not isinstance(response, Mapping):
-        raise RuntimeError("daemon socket returned non-object JSON")
+        return _socket_error_result(
+            prog_id,
+            f"daemon socket returned non-object JSON for prog {prog_id}: {line[:400]}",
+            daemon_proc=daemon_proc,
+            stdout_path=stdout_path,
+            stderr_path=stderr_path,
+        )
     if str(response.get("status") or "") != "ok":
         return _apply_result_from_response(response, output=line, exit_code=1)
     return _apply_result_from_response(response, output=line, exit_code=0)
@@ -460,9 +542,17 @@ def apply_daemon_rejit(
         daemon_proc = None
         daemon_socket_path = None
         daemon_socket_dir = None
+        daemon_stdout_path = None
+        daemon_stderr_path = None
 
         if enabled_passes:
-            daemon_proc, daemon_socket_path, daemon_socket_dir = _start_daemon_server(daemon_binary)
+            (
+                daemon_proc,
+                daemon_socket_path,
+                daemon_socket_dir,
+                daemon_stdout_path,
+                daemon_stderr_path,
+            ) = _start_daemon_server(daemon_binary)
 
         try:
             for prog_id in [int(value) for value in prog_ids if int(value) > 0]:
@@ -472,6 +562,9 @@ def apply_daemon_rejit(
                         daemon_socket_path,
                         prog_id,
                         enabled_passes,
+                        daemon_proc=daemon_proc,
+                        stdout_path=daemon_stdout_path,
+                        stderr_path=daemon_stderr_path,
                     )
                 else:
                     result = _apply_one(daemon_binary, prog_id)

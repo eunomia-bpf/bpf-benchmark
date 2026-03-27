@@ -40,6 +40,7 @@ from runner.libs.metrics import (  # noqa: E402
 from runner.libs.rejit import apply_daemon_rejit, benchmark_rejit_enabled_passes, scan_programs  # noqa: E402
 from runner.libs.workload import (  # noqa: E402
     WorkloadResult,
+    run_dd_read_load,
     run_exec_storm,
     run_file_io,
     run_network_load,
@@ -324,10 +325,12 @@ def _format_launch_failure(command: Sequence[str], proc: subprocess.Popen[str] |
 def select_tracee_programs(
     live_programs: Sequence[Mapping[str, object]],
     config: Mapping[str, object],
+    *,
+    config_key: str = "target_programs",
 ) -> list[dict[str, object]]:
     requested_names = [
         str(name).strip()
-        for name in (config.get("target_programs") or [])
+        for name in (config.get(config_key) or [])
         if str(name).strip()
     ]
     if not requested_names:
@@ -348,6 +351,8 @@ def select_tracee_programs(
 
 def run_workload(spec: Mapping[str, object], duration_s: int) -> WorkloadResult:
     kind = str(spec.get("kind", spec.get("name", "")))
+    if kind == "read":
+        return run_dd_read_load(duration_s)
     if kind == "exec_storm":
         return run_exec_storm(duration_s, int(spec.get("rate", 4) or 4))
     if kind == "file_io":
@@ -496,6 +501,37 @@ def aggregate_programs(phase: Mapping[str, object]) -> dict[str, dict[str, objec
     return aggregated
 
 
+def summarize_program_activity(
+    phase: Mapping[str, object],
+    prog_ids: Sequence[int],
+) -> dict[str, object]:
+    aggregated = aggregate_programs(phase)
+    rows: list[dict[str, object]] = []
+    total_run_cnt = 0
+    total_run_time_ns = 0
+    for prog_id in [int(value) for value in prog_ids if int(value) > 0]:
+        record = aggregated.get(str(prog_id), {})
+        run_cnt = int(record.get("run_cnt_delta", 0) or 0)
+        run_time_ns = int(record.get("run_time_ns_delta", 0) or 0)
+        total_run_cnt += run_cnt
+        total_run_time_ns += run_time_ns
+        rows.append(
+            {
+                "id": prog_id,
+                "name": str(record.get("name") or f"id-{prog_id}"),
+                "run_cnt_delta": run_cnt,
+                "run_time_ns_delta": run_time_ns,
+                "avg_ns_per_run": (run_time_ns / run_cnt) if run_cnt > 0 else None,
+            }
+        )
+    return {
+        "programs": rows,
+        "total_run_cnt": total_run_cnt,
+        "total_run_time_ns": total_run_time_ns,
+        "avg_ns_per_run": (total_run_time_ns / total_run_cnt) if total_run_cnt > 0 else None,
+    }
+
+
 def compare_phases(baseline: Mapping[str, object], post: Mapping[str, object] | None) -> dict[str, object]:
     if not post:
         return {"comparable": False, "reason": "rejit did not apply successfully"}
@@ -548,6 +584,7 @@ def compare_phases(baseline: Mapping[str, object], post: Mapping[str, object] | 
 
 
 def build_markdown(payload: Mapping[str, object]) -> str:
+    preflight = payload.get("preflight")
     lines = [
         "# Tracee Real End-to-End Benchmark",
         "",
@@ -579,6 +616,23 @@ def build_markdown(payload: Mapping[str, object]) -> str:
                 lines.append(f"- {limitation}")
         lines.append("")
         return "\n".join(lines)
+
+    if isinstance(preflight, Mapping):
+        lines.extend(["## Preflight", ""])
+        activity = preflight.get("program_activity") if isinstance(preflight.get("program_activity"), Mapping) else {}
+        for workload in preflight.get("workloads") or []:
+            details = [
+                f"events/s={workload.get('events_per_sec')}",
+                f"bpf_avg_ns={((workload.get('bpf') or {}).get('summary', {}).get('avg_ns_per_run'))}",
+            ]
+            target_activity = activity.get("target_programs") if isinstance(activity, Mapping) else None
+            if isinstance(target_activity, Mapping):
+                details.append(f"target_runs={target_activity.get('total_run_cnt')}")
+            apply_activity = activity.get("apply_programs") if isinstance(activity, Mapping) else None
+            if isinstance(apply_activity, Mapping) and target_activity != apply_activity:
+                details.append(f"apply_runs={apply_activity.get('total_run_cnt')}")
+            lines.append(f"- {workload['name']}: " + ", ".join(details))
+        lines.append("")
 
     lines.extend(["## Baseline", ""])
     baseline = payload["baseline"]
@@ -658,6 +712,7 @@ def skip_payload(
     smoke: bool,
     reason: str,
     limitations: Sequence[str],
+    preflight: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -671,6 +726,7 @@ def skip_payload(
         "setup": dict(setup_result),
         "host": host_metadata(),
         "config": dict(config),
+        "preflight": None if preflight is None else dict(preflight),
         "baseline": None,
         "scan_results": {},
         "rejit_result": None,
@@ -686,6 +742,8 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
     duration_s = int(args.duration or config.get("measurement_duration_s") or 60)
     if args.smoke and not args.duration:
         duration_s = int(config.get("smoke_duration_s") or 10)
+    preflight_duration_s = int(config.get("preflight_duration_s") or 0)
+    require_program_activity = bool(config.get("require_program_activity", False))
 
     daemon_binary = Path(args.daemon).resolve()
     ensure_artifacts(daemon_binary)
@@ -721,6 +779,7 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
     workloads = list(config.get("workloads") or [])
     events = list(config.get("events") or [])
     commands = build_tracee_commands(tracee_binary, events, args.tracee_extra_arg or [])
+    preflight: dict[str, object] | None = None
 
     try:
         map_capture: dict[str, object] | None = None
@@ -728,6 +787,61 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
             with TraceeAgentSession(commands, load_timeout=int(args.load_timeout)) as session:
                 selected_programs = select_tracee_programs(session.programs, config)
                 prog_ids = [int(program["id"]) for program in selected_programs]
+                apply_programs = select_tracee_programs(session.programs, config, config_key="apply_programs")
+                if config.get("apply_programs"):
+                    apply_prog_ids = [int(program["id"]) for program in apply_programs]
+                else:
+                    apply_programs = [dict(program) for program in selected_programs]
+                    apply_prog_ids = list(prog_ids)
+                if preflight_duration_s > 0 and workloads:
+                    preflight_prog_ids = sorted(set(prog_ids) | set(apply_prog_ids))
+                    preflight = run_phase(
+                        workloads[:1],
+                        preflight_duration_s,
+                        preflight_prog_ids,
+                        prog_fds=session.program_fds,
+                        agent_pid=session.pid,
+                        collector=session.collector,
+                    )
+                    preflight["program_activity"] = {
+                        "target_programs": summarize_program_activity(preflight, prog_ids),
+                        "apply_programs": summarize_program_activity(preflight, apply_prog_ids),
+                    }
+                    if require_program_activity:
+                        target_run_cnt = int(
+                            ((preflight.get("program_activity") or {}).get("target_programs") or {}).get("total_run_cnt", 0) or 0
+                        )
+                        apply_run_cnt = int(
+                            ((preflight.get("program_activity") or {}).get("apply_programs") or {}).get("total_run_cnt", 0) or 0
+                        )
+                        if target_run_cnt <= 0:
+                            limitations.append(
+                                "Configured Tracee events/workload did not execute the selected target programs during preflight."
+                            )
+                            return skip_payload(
+                                config=config,
+                                duration_s=duration_s,
+                                tracee_binary=tracee_binary,
+                                setup_result=setup_result,
+                                smoke=bool(args.smoke),
+                                reason="preflight observed zero target-program executions; skipping invalid runtime measurement",
+                                limitations=limitations,
+                                preflight=preflight,
+                            )
+                        if config.get("apply_programs") and apply_run_cnt <= 0:
+                            limitations.append(
+                                "Configured Tracee events/workload did not execute the configured apply programs during preflight."
+                            )
+                            return skip_payload(
+                                config=config,
+                                duration_s=duration_s,
+                                tracee_binary=tracee_binary,
+                                setup_result=setup_result,
+                                smoke=bool(args.smoke),
+                                reason="preflight observed zero apply-program executions; skipping invalid optimization benchmark",
+                                limitations=limitations,
+                                preflight=preflight,
+                            )
                 baseline = run_phase(
                     workloads,
                     duration_s,
@@ -738,7 +852,7 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                 )
                 if args.capture_maps:
                     capture_plan = build_map_capture_specs(
-                        selected_programs,
+                        apply_programs,
                         repo_name="tracee",
                         object_paths=sorted((ROOT_DIR / "corpus" / "build" / "tracee").glob("*.bpf.o")),
                         runner_binary=Path(args.runner).resolve(),
@@ -756,13 +870,13 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
                         optimize_results={},
                     )
                 scan_results = scan_programs(
-                    prog_ids,
+                    apply_prog_ids,
                     daemon_binary,
                     prog_fds=session.program_fds,
                 )
                 rejit_result = apply_daemon_rejit(
                     daemon_binary,
-                    prog_ids,
+                    apply_prog_ids,
                     enabled_passes=benchmark_rejit_enabled_passes(),
                 )
                 if rejit_result["applied"]:
@@ -797,9 +911,11 @@ def run_tracee_case(args: argparse.Namespace) -> dict[str, object]:
         "tracee_launch_command": commands,
         "tracee_programs": session.programs,
         "selected_tracee_programs": selected_programs,
+        "apply_tracee_programs": apply_programs,
         "setup": setup_result,
         "host": host_metadata(),
         "config": dict(config),
+        "preflight": preflight,
         "baseline": baseline,
         "scan_results": {str(key): value for key, value in scan_results.items()},
         "rejit_result": rejit_result,
